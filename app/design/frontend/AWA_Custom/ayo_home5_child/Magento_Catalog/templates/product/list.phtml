@@ -12,12 +12,21 @@ use Magento\Framework\App\Action\Action;
 /**
  * Product list template
  *
- * @var $block \Magento\Catalog\Block\Product\ListProduct
+ * @var \Magento\Catalog\Block\Product\ListProduct $block
  */
 ?>
 <?php
 $_productCollection = $block->getLoadedProductCollection();
 $_helper = $this->helper('Magento\Catalog\Helper\Output');
+$b2bHelper = $this->helper('GrupoAwamotos\B2B\Helper\Data');
+$b2bCanAddToCart = $b2bHelper->canAddToCart();
+$b2bGateState = $block->escapeHtmlAttr($b2bHelper->getPriceGateState());
+$b2bGateHeadline = $block->escapeHtml($b2bHelper->getPriceGateHeadline());
+$b2bGateDescription = $block->escapeHtml($b2bHelper->getPriceGateDescription());
+$b2bPrimaryUrl = $block->escapeUrl($b2bHelper->getPriceGatePrimaryUrl());
+$b2bPrimaryLabel = $block->escapeHtml($b2bHelper->getPriceGatePrimaryLabel());
+$b2bSecondaryUrl = $block->escapeUrl($b2bHelper->getPriceGateSecondaryUrl());
+$b2bSecondaryLabel = $block->escapeHtml($b2bHelper->getPriceGateSecondaryLabel());
 ?>
 <?php if (!$_productCollection->count()): ?>
     <div class="message info empty"><div><?php echo $block->escapeHtml(__('We can\'t find products matching the selection.')); ?></div></div>
@@ -138,7 +147,17 @@ $_helper = $this->helper('Magento\Catalog\Helper\Output');
 						</div>
 						<div class="product-info-cart">
 							<div class="actions-primary addcart-link">
-								<?php if ($_product->isSaleable()): ?>
+								<?php if (!$b2bCanAddToCart): ?>
+									<div class="awa-b2b-gate-card awa-b2b-gate-card--compact" data-awa-gate-state="<?= $b2bGateState ?>">
+										<span class="awa-b2b-gate-card__badge"><?= $block->escapeHtml(__('Acesso comercial')) ?></span>
+										<div class="awa-b2b-gate-card__title"><?= $b2bGateHeadline ?></div>
+										<div class="awa-b2b-gate-card__description"><?= $b2bGateDescription ?></div>
+										<div class="awa-b2b-gate-card__actions">
+											<a class="awa-b2b-gate-card__action" href="<?= $b2bPrimaryUrl ?>"><?= $b2bPrimaryLabel ?></a>
+											<a class="awa-b2b-gate-card__action awa-b2b-gate-card__action--secondary" href="<?= $b2bSecondaryUrl ?>"><?= $b2bSecondaryLabel ?></a>
+										</div>
+									</div>
+								<?php elseif ($_product->isSaleable()): ?>
 									<?php $postParams = $block->getAddToCartPostParams($_product); ?>
 									<form data-role="tocart-form" action="<?php echo $block->escapeUrl($postParams['action']); ?>" method="post">
 										<input type="hidden" name="product" value="<?php echo $block->escapeHtmlAttr($postParams['data']['product']); ?>">
@@ -190,9 +209,9 @@ $_helper = $this->helper('Magento\Catalog\Helper\Output');
 								<?php echo $_helper->productAttribute($_product, $_product->getName(), 'name'); ?>
 							</a>
 						</h3>
-						<div class="awa-b2b-sku" style="font-size: 11px; color: #64748b; margin-bottom: 6px; font-weight: 500;">
-							<span class="label" style="text-transform: uppercase; margin-right: 2px; color: #9ca3af;">Cod:</span>
-							<span class="value" style="font-family: monospace; color: #475569; letter-spacing: 0.5px;"><?php echo $block->escapeHtml($_product->getSku()); ?></span>
+							<div class="awa-b2b-sku">
+								<span class="awa-b2b-sku__label">Cod:</span>
+								<span class="awa-b2b-sku__value"><?php echo $block->escapeHtml($_product->getSku()); ?></span>
 						</div>
 						<div class="product-rating">
 							<?php echo $block->getReviewsSummaryHtml($_product, $templateType, true); ?>
@@ -250,9 +269,9 @@ $_helper = $this->helper('Magento\Catalog\Helper\Output');
 								<?php echo $_helper->productAttribute($_product, $_product->getName(), 'name'); ?>
 							</a>
 						</h3>
-						<div class="awa-b2b-sku" style="font-size: 11px; color: #64748b; margin-bottom: 8px; font-weight: 500;">
-							<span class="label" style="text-transform: uppercase; margin-right: 2px; color: #9ca3af;">Cod:</span>
-							<span class="value" style="font-family: monospace; color: #475569; letter-spacing: 0.5px;"><?php echo $block->escapeHtml($_product->getSku()); ?></span>
+<div class="awa-b2b-sku">
+								<span class="awa-b2b-sku__label">Cod:</span>
+								<span class="awa-b2b-sku__value"><?php echo $block->escapeHtml($_product->getSku()); ?></span>
 						</div>
 
 						<div class="product-rating">
@@ -266,7 +285,17 @@ $_helper = $this->helper('Magento\Catalog\Helper\Output');
 						</div>
 						<div class="product-info-cart">
 							<div class="actions-primary">
-								<?php if ($_product->isSaleable()): ?>
+								<?php if (!$b2bCanAddToCart): ?>
+									<div class="awa-b2b-gate-card awa-b2b-gate-card--compact" data-awa-gate-state="<?= $b2bGateState ?>">
+										<span class="awa-b2b-gate-card__badge"><?= $block->escapeHtml(__('Conta B2B')) ?></span>
+										<div class="awa-b2b-gate-card__title"><?= $b2bGateHeadline ?></div>
+										<div class="awa-b2b-gate-card__description"><?= $b2bGateDescription ?></div>
+										<div class="awa-b2b-gate-card__actions">
+											<a class="awa-b2b-gate-card__action" href="<?= $b2bPrimaryUrl ?>"><?= $b2bPrimaryLabel ?></a>
+											<a class="awa-b2b-gate-card__action awa-b2b-gate-card__action--secondary" href="<?= $b2bSecondaryUrl ?>"><?= $b2bSecondaryLabel ?></a>
+										</div>
+									</div>
+								<?php elseif ($_product->isSaleable()): ?>
 									<?php $postParams = $block->getAddToCartPostParams($_product); ?>
 									<form data-role="tocart-form" action="<?php echo $block->escapeUrl($postParams['action']); ?>" method="post">
 										<input type="hidden" name="product" value="<?php echo $block->escapeHtmlAttr($postParams['data']['product']); ?>">
