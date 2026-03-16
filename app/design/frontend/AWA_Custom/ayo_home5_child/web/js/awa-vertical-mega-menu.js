@@ -495,6 +495,7 @@ define(['jquery'], function ($) {
             if (!isDesktop()) { return; }
 
             positionPanel($trigger.length ? $trigger : $nav, $panel);
+            $('body').removeClass('background_shadow background_shadow_show shadow_bkg_show');
 
             /* Force grid regardless of any inline display:block from parent JS */
             $panel.css('display', 'grid');
@@ -582,9 +583,16 @@ define(['jquery'], function ($) {
             clearTimeout(openTimer);
             leaveTimer = window.setTimeout(function () {
                 if (isDesktop()) {
+                    var navEl = $nav.get(0);
+                    var panelNode = $panel.get(0);
+
+                    if ((navEl && navEl.matches(':hover')) || (panelNode && panelNode.matches(':hover'))) {
+                        return;
+                    }
+
                     closePanel();
                     $panel.removeClass('menu-open');
-                    $('body').removeClass('background_shadow_show shadow_bkg_show');
+                    $('body').removeClass('background_shadow background_shadow_show shadow_bkg_show');
                 }
             }, 180);
         }
@@ -605,7 +613,7 @@ define(['jquery'], function ($) {
             if (Math.abs(currentY - openScrollY) > 50) {
                 closePanel();
                 $panel.removeClass('menu-open');
-                $('body').removeClass('background_shadow_show shadow_bkg_show');
+                $('body').removeClass('background_shadow background_shadow_show shadow_bkg_show');
             }
         });
 
@@ -613,7 +621,7 @@ define(['jquery'], function ($) {
         $overlay.on('click' + NS, function () {
             closePanel();
             $panel.removeClass('menu-open');
-            $('body').removeClass('background_shadow_show shadow_bkg_show');
+            $('body').removeClass('background_shadow background_shadow_show shadow_bkg_show');
         });
 
         /* ---- Escape key -------------------------------------------- */

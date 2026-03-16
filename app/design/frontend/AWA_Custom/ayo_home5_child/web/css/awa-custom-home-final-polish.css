@@ -5,16 +5,16 @@
 
 body.cms-homepage_ayo_home5 {
     --awa-home-final-surface: #fff;
-    --awa-home-final-border: #dbe4ee;
-    --awa-home-final-shadow: 0 8px 24px rgb(15 23 42 / 5%);
-    --awa-home-final-shadow-hover: 0 12px 32px rgb(15 23 42 / 9%);
-    --awa-home-final-radius: 16px;
-    --awa-home-final-gap: clamp(16px, 2.4vw, 28px);
+    --awa-home-final-border: #e5e5e5;
+    --awa-home-final-shadow: 0 8px 24px rgb(15 23 42 / 6%);
+    --awa-home-final-shadow-hover: 0 12px 32px rgb(15 23 42 / 10%);
+    --awa-home-final-radius: 10px;
+    --awa-home-final-gap: var(--awa-section-gap, clamp(16px, 2.4vw, 28px));
     --awa-home-transition: 280ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 body.cms-homepage_ayo_home5 .page-wrapper .page-main.container > .columns > .column.main {
-    max-width: 1170px;
+    max-width: var(--awa-container-max);
 }
 
 body.cms-homepage_ayo_home5 .page-wrapper .top-home-content,
@@ -35,7 +35,7 @@ body.cms-homepage_ayo_home5 .page-wrapper .awa-home-section + .awa-home-section 
 
 body.cms-homepage_ayo_home5 .page-wrapper .top-home-content .container,
 body.cms-homepage_ayo_home5 .page-wrapper .awa-home-section .container {
-    max-width: 1170px;
+    max-width: var(--awa-container-max);
 }
 
 body.cms-homepage_ayo_home5 .page-wrapper .top-home-content .ayo-home5-heading,
@@ -139,34 +139,16 @@ body.cms-homepage_ayo_home5 .page-wrapper .header .header-nav .menu_primary .nav
         overflow: visible !important;
     }
 
-    body.cms-homepage_ayo_home5 .page-wrapper .header-control.header-nav .menu_left_home1 .verticalmenu.side-verticalmenu {
+    body.cms-homepage_ayo_home5 .page-wrapper .header-control.header-nav .menu_left_home1 .verticalmenu.side-verticalmenu:not(.navigation--mueller) {
         border-radius: 12px;
         overflow: visible !important;
         padding-bottom: 8px;
         z-index: 1201;
     }
 
-    body.cms-homepage_ayo_home5 .page-wrapper .header-control.header-nav .menu_left_home1 .verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown {
-        display: none !important;
-        position: absolute;
-        inset-inline: 0;
-        top: calc(100% + 8px);
+    body.cms-homepage_ayo_home5 .page-wrapper .header-control.header-nav .menu_left_home1 .verticalmenu.side-verticalmenu:not(.navigation--mueller) > ul.togge-menu.list-category-dropdown {
         margin: 0 !important;
-        max-height: min(420px, calc(100vh - 240px));
-        overflow: hidden auto !important;
-        overscroll-behavior: contain;
-        border: 1px solid #dbe4ee;
-        border-radius: 12px;
-        background: #fff;
-        box-shadow: 0 20px 34px rgb(15 23 42 / 14%);
-        z-index: 1300;
         pointer-events: auto;
-    }
-
-    body.cms-homepage_ayo_home5 .page-wrapper .header-control.header-nav .menu_left_home1 .verticalmenu.side-verticalmenu > .title-category-dropdown.active + ul.togge-menu.list-category-dropdown,
-    body.cms-homepage_ayo_home5 .page-wrapper .header-control.header-nav .menu_left_home1 .verticalmenu.side-verticalmenu:hover > ul.togge-menu.list-category-dropdown,
-    body.cms-homepage_ayo_home5 .page-wrapper .header-control.header-nav .menu_left_home1 .verticalmenu.side-verticalmenu:focus-within > ul.togge-menu.list-category-dropdown {
-        display: block !important;
     }
 
     body.cms-homepage_ayo_home5 .page-wrapper .header-control.header-nav .box_language {
@@ -177,6 +159,21 @@ body.cms-homepage_ayo_home5 .page-wrapper .header .header-nav .menu_primary .nav
         width: auto !important;
         max-width: none !important;
         flex: 1 1 auto !important;
+    }
+
+    /* Desktop: only show category panel when JS explicitly opened it.
+       Avoid opening on plain :hover, which creates a ghost blank panel. */
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .menu_left_home1 .verticalmenu.side-verticalmenu:not(.navigation--mueller) > ul.togge-menu.list-category-dropdown.menu-open,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .menu_left_home1 .verticalmenu.side-verticalmenu:not(.navigation--mueller) > ul.togge-menu.list-category-dropdown.vmm-open {
+        display: grid !important;
+    }
+}
+
+@media (width <= 991px) {
+    /* Mobile: show menu panel when JS toggles menu-open/vmm-open after title click. */
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5).nav-open .page-wrapper .menu_left_home1 .verticalmenu.side-verticalmenu:not(.navigation--mueller) > ul.togge-menu.list-category-dropdown.menu-open,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5).nav-open .page-wrapper .menu_left_home1 .verticalmenu.side-verticalmenu:not(.navigation--mueller) > ul.togge-menu.list-category-dropdown.vmm-open {
+        display: block !important;
     }
 }
 
@@ -198,8 +195,8 @@ body.cms-homepage_ayo_home5 .page-wrapper .column.main > .aw-home-faq {
 
 body.cms-homepage_ayo_home5 .page-wrapper .column.main > .benefits-bar {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 12px;
+    grid-template-columns: var(--awa-grid-product-cols);
+    gap: var(--awa-gap-md);
     padding: 14px;
     border: 1px solid var(--awa-home-final-border);
     border-radius: var(--awa-home-final-radius);
@@ -211,9 +208,9 @@ body.cms-homepage_ayo_home5 .page-wrapper .column.main > .benefits-bar .benefits
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: var(--awa-gap-md);
     min-height: 44px;
-    padding: 10px 14px;
+    padding: var(--awa-gap-md) 14px;
     border-radius: 12px;
     background: #fff;
     border: 1px solid #e6edf5;
@@ -323,7 +320,7 @@ body.cms-homepage_ayo_home5 .page-wrapper .product-item .b2b-login-to-see-price 
 
 @media (width <= 991px) {
     body.cms-homepage_ayo_home5 .page-wrapper .header .top-search {
-        gap: 8px;
+        gap: var(--awa-gap-sm);
     }
 
     body.cms-homepage_ayo_home5 .page-wrapper .column.main > .benefits-bar {
@@ -352,8 +349,8 @@ body.cms-homepage_ayo_home5 .page-wrapper .product-item .b2b-login-to-see-price 
 
     body.cms-homepage_ayo_home5 .page-wrapper .column.main > .benefits-bar {
         grid-template-columns: 1fr;
-        gap: 8px;
-        padding: 8px;
+        gap: var(--awa-gap-sm);
+        padding: var(--awa-gap-sm);
     }
 
     body.cms-homepage_ayo_home5 .page-wrapper .column.main > .benefits-bar .benefits-bar__item {
@@ -389,7 +386,7 @@ body.cms-homepage_ayo_home5 .awa-banners-grid {
     display: grid !important;
     grid-template-columns: 1fr 1fr 1fr;
     grid-template-rows: 1fr 1fr;
-    gap: clamp(15px, 2vw, 24px) !important;
+    gap: clamp(var(--awa-gap-lg), 2vw, var(--awa-gap-xl)) !important;
 }
 
 body.cms-homepage_ayo_home5 .awa-banners-grid figure,
@@ -429,15 +426,17 @@ body.cms-homepage_ayo_home5 .awa-banners-grid .awa-banner-square {
     grid-row: 2 / 3;
 }
 
-@media (max-width: 991px) {
+@media (width <= 991px) {
     body.cms-homepage_ayo_home5 .awa-banners-grid {
         grid-template-columns: 1fr 1fr !important;
         grid-template-rows: auto auto auto !important;
     }
+
     body.cms-homepage_ayo_home5 .awa-banners-grid .awa-banner-tall {
         grid-column: 1 / 3;
         grid-row: 1 / 2;
     }
+
     body.cms-homepage_ayo_home5 .awa-banners-grid .awa-banner-wide {
         grid-column: 1 / 3;
         grid-row: 2 / 3;

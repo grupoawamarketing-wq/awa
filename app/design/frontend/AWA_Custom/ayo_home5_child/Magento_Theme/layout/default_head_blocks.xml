@@ -2,12 +2,20 @@
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <head>
-        <!-- B2B Performance: Preconnect to critical third-party origins -->
-        <!-- Note: Magento layout XSD does not support <link> with href for preconnect.
-             These hints are handled via a custom head block or meta tags instead.
-             Commenting out to prevent XML validation errors. -->
-        <!-- <link rel="preconnect" src="https://fonts.googleapis.com" /> -->
-        <!-- <link rel="preconnect" src="https://fonts.gstatic.com" /> -->
+        <!--
+            AWA CSS Bundle System (consolidado em 2026-03-16)
+            Reduz ~30 CSS individuais para 4 bundles + themes5.css
+            Originais preservados em web/css/_originals/
+        -->
+
+        <!-- Remove parent's individual CSS (agora servidos via bundles) -->
+        <remove src="css/awa-core.css"/>
+        <remove src="css/awa-layout.css"/>
+        <remove src="css/awa-components.css"/>
+        <remove src="css/awa-consistency.css"/>
+        <remove src="css/awa-consistency-ui.css"/>
+        <remove src="css/awa-fixes.css"/>
+        <remove src="css/awa-grid-unified.css"/>
         <remove src="css/awa-round2-brand-bridge.css"/>
         <remove src="css/awa-round2-header-minicart.css"/>
         <remove src="css/awa-round3-footer-trust.css"/>
@@ -16,56 +24,28 @@
         <remove src="css/awa-round6-b2b-gate-refine.css"/>
         <remove src="css/awa-round7-auth-refine.css"/>
         <remove src="css/awa-round8-plp-search-cart-refine.css"/>
-        <!-- Remove parent's premium-finish.css; replaced by awa-custom-global-polish.css -->
         <remove src="css/awa-premium-finish.css"/>
+
+        <!-- Remove external Google Fonts (now self-hosted) -->
+        <remove src="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&amp;display=swap"/>
+
+        <!-- Theme base (compiled LESS — keep as-is) -->
         <css src="css/themes5.css"/>
-        <css src="css/awa-core.css"/>
-        <css src="css/awa-layout.css"/>
-        <css src="css/awa-components.css"/>
-        <css src="css/awa-consistency.css"/>
-        <css src="css/awa-consistency-ui.css"/>
-        <!-- R35: awa-consistency-home5.css movido para cms_index_index.xml (homepage-only).
-             todas as regras ja sao scopadas via :is(body.cms-index-index, body.cms-home, ...)
-             entao carrega-lo globalmente desperdicava ~18 kb de parse em paginas nao-homepage. -->
-        <css src="css/awa-fixes.css"/>
-        <css src="css/awa-grid-unified.css"/>
-        <!-- AWA Round2 (dual-write hotfix): brand bridge + header/minicart visual fixes -->
-        <css src="css/awa-custom-brand-bridge.css"/>
-        <css src="css/awa-custom-header-minicart.css"/>
-        <!-- AWA Round3: footer trust/payments refinement -->
-        <css src="css/awa-custom-footer-trust.css"/>
-        <!-- AWA Round4: global brand consistency (CTA/links/prices/focus + checkout/cart polish) -->
-        <css src="css/awa-custom-global-brand.css"/>
-        <!-- AWA Round5: popup/floating-nav/fixed-actions UX refinements -->
-        <css src="css/awa-custom-ux-refine.css"/>
-        <!-- AWA Round6: B2B login gate + AjaxSuite popup close refinement -->
-        <css src="css/awa-custom-b2b-gate-refine.css"/>
-        <!-- AWA Round7: auth pages (login/register) conversion + a11y visual polish -->
-        <css src="css/awa-custom-auth-refine.css"/>
-        <!-- AWA Round8: PLP/search/cart visual + UX refinement -->
-        <css src="css/awa-custom-plp-search-cart-refine.css"/>
-        <!-- AWA Global Polish: breadcrumbs, customer account, messages, CMS, data tables -->
-        <css src="css/awa-custom-global-polish.css"/>
-        <!-- AWA Phase 3: B2B features (WhatsApp FAB, breadcrumbs, login) -->
-        <css src="css/awa-b2b-phase3.css"/>
-        <!-- AWA Phase 4: Advanced B2B (sticky header, quote modal, mobile nav, toolbar) -->
-        <css src="css/awa-b2b-phase4.css"/>
-        <!-- AWA Phase 5: UI/UX Pro Max (Lexend, Source Sans 3, micro-interactions, Trust badges) -->
-        <css src="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;family=Source+Sans+3:wght@300;400;500;600;700&amp;display=swap" src_type="url" />
-        <css src="css/awa-ui-ux-pro-max.css"/>
-        <!-- AWA Phase 6: Conversion & SEO Hardening -->
-        <css src="css/awa-phase6-conversion.css"/>
-        <!-- AWA Phase 7: Header, Search & Navigation (Mueller/Motorola) -->
-        <css src="css/awa-phase7-header-nav.css"/>
-        <!-- AWA Phase 8: Refinamento B2B Enterprise -->
-        <css src="css/awa-phase8-b2b-enterprise.css"/>
-        <!-- AWA Phase 9: Vertical Mega Menu — 3-column panel (Mueller/Amazon) -->
-        <css src="css/awa-vertical-mega-menu.css"/>
-        <!-- AWA Onda 2: PLP List View and Quick Order Header -->
-        <css src="css/awa-b2b-onda2.css"/>
-        <!-- AWA Grid Spacing Fix: Resolve gap/spacing conflicts across PLP, Homepage, OWL carousels -->
-        <css src="css/awa-grid-spacing-fix.css"/>
+
+        <!-- Design tokens (fonte canônica de variáveis CSS — carregar PRIMEIRO) -->
+        <css src="css/awa-design-tokens.css"/>
+
+        <!-- Bundle 1/3: Foundation (core + layout + components + consistency + fixes + grid) -->
+        <css src="css/awa-bundle-core.css"/>
+        <!-- Bundle 2/3: Custom rounds (brand-bridge through global-polish) -->
+        <css src="css/awa-bundle-custom.css"/>
+        <!-- Bundle 3/3: Phases & features (B2B phases 3-8 + menus + design system) -->
+        <css src="css/awa-bundle-phases.css"/>
+
+        <!-- Self-hosted fonts (Lexend + Source Sans 3, replacing Google Fonts link) -->
+        <css src="css/awa-fonts-extra.css"/>
     </head>
+
     <body>
         <referenceBlock name="awa.round2.header.minicart.js" remove="true"/>
 
@@ -98,8 +78,9 @@
                    template="Magento_Theme::html/awa-quote-modal.phtml"
                    after="awa.whatsapp.fab"/>
         </referenceContainer>
-        <!-- AWA Phase 4: Sticky Header JS -->
+
         <referenceContainer name="before.body.end">
+            <!-- AWA Phase 4: Sticky Header JS -->
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.sticky.header.js"
                    template="Magento_Theme::html/awa-sticky-header-loader.phtml"/>

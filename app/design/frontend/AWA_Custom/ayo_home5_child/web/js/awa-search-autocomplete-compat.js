@@ -451,6 +451,12 @@ define([
             return;
         }
 
+        // Mirasvit autocomplete is the primary provider in this storefront.
+        // Skip compat bootstrap entirely when its placeholder/template is present.
+        if (document.getElementById('searchAutocompletePlaceholder') !== null) {
+            return;
+        }
+
         function flushSync() {
             scheduled = false;
             attachPanelObserver();

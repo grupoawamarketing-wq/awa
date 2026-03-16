@@ -156,8 +156,17 @@
             actions: form.querySelector('.actions'),
             button: form.querySelector('.action.search, button[type="submit"]'),
             panel: scope.querySelector('#search_autocomplete'),
-            resultsRoot: scope.querySelector('.searchsuite-autocomplete')
+            resultsRoot: scope.querySelector('.mst-searchautocomplete__autocomplete, .searchsuite-autocomplete')
         };
+    }
+
+    function isMirasvitAutocompleteAvailable(scope) {
+        var context = scope || document;
+
+        return !!(
+            document.getElementById('searchAutocompletePlaceholder') ||
+            context.querySelector('.mst-searchautocomplete__autocomplete')
+        );
     }
 
     function getRequireFn() {
@@ -175,6 +184,11 @@
     function ensureSearchCompatBridge() {
         var requireFn = getRequireFn();
         var searchUi = getSearchUi();
+
+        if (isMirasvitAutocompleteAvailable(searchUi ? searchUi.scope : document)) {
+            searchCompatLoaded = true;
+            return;
+        }
 
         if (!requireFn || !searchUi || !searchUi.form || searchCompatLoaded || searchCompatLoading) {
             return;
@@ -1034,9 +1048,11 @@
         var navContainer = document.querySelector('.header-control.header-nav-global.cms_home_1 > .container');
         var navRow = document.querySelector('.header-control.header-nav-global.cms_home_1 > .container > .row');
         var menuColumn = document.querySelector('.header-control.header-nav-global.cms_home_1 .menu_left_home1');
+        var menuNav = document.querySelector('.header-control.header-nav-global.cms_home_1 .menu_left_home1 .navigation.verticalmenu.side-verticalmenu');
         var list = document.querySelector('.header-control.header-nav-global.cms_home_1 .menu_left_home1 .list-category-dropdown');
         var promo = document.querySelector('.header-control.header-nav-global.cms_home_1 .menu_left_home1 .list-category-dropdown > .vertical-bg-img');
         var expandLink = document.querySelector('.header-control.header-nav-global.cms_home_1 .menu_left_home1 .list-category-dropdown > .expand-category-link');
+        var isMuellerMenu = !!(menuNav && menuNav.classList.contains('navigation--mueller'));
 
         if (!isHome || !isDesktop) {
             return;
@@ -1048,16 +1064,20 @@
         setImportantStyle(navContainer, 'min-height', '0');
         setImportantStyle(navRow, 'height', 'auto');
         setImportantStyle(navRow, 'min-height', '0');
-        setImportantStyle(menuColumn, 'max-height', 'min(360px, calc(100vh - 260px))');
-        setImportantStyle(menuColumn, 'overflow', 'hidden');
-        setImportantStyle(list, 'max-height', 'min(300px, calc(100vh - 320px))');
-        setImportantStyle(list, 'overflow-x', 'hidden');
-        setImportantStyle(list, 'overflow-y', 'auto');
+        setImportantStyle(menuColumn, 'max-height', 'none');
+        setImportantStyle(menuColumn, 'overflow', 'visible');
+
+        if (!isMuellerMenu) {
+            setImportantStyle(list, 'max-height', 'none');
+            setImportantStyle(list, 'overflow-x', 'visible');
+            setImportantStyle(list, 'overflow-y', 'visible');
+        }
+
         setImportantStyle(promo, 'display', 'none');
-        setImportantStyle(expandLink, 'position', 'sticky');
-        setImportantStyle(expandLink, 'inset-block-end', '0');
-        setImportantStyle(expandLink, 'background', '#fff');
-        setImportantStyle(expandLink, 'z-index', '3');
+        setImportantStyle(expandLink, 'position', 'static');
+        setImportantStyle(expandLink, 'inset-block-end', 'auto');
+        setImportantStyle(expandLink, 'background', 'transparent');
+        setImportantStyle(expandLink, 'z-index', 'auto');
     }
 
     function syncMobilePlpFilterToggle() {

@@ -1,0 +1,73 @@
+<?php
+declare(strict_types=1);
+
+/**
+ * Child-theme minicart override.
+ * - Preserve AWA visual markup
+ * - Remove ObjectManager usage
+ * - Harden JSON/static URLs against control characters
+ *
+ * @var $block \Magento\Checkout\Block\Cart\Sidebar
+ */
+
+$sanitizeUrl = static function (?string $value): string {
+    $sanitized = (string) $value;
+    $sanitized = preg_replace('/[\x00-\x1F\x7F]+/u', '', $sanitized);
+
+    return $sanitized ?? '';
+};
+
+$serializedCheckoutConfig = method_exists($block, 'getSerializedConfig')
+    ? (string) $block->getSerializedConfig()
+    : (string) json_encode($block->getConfig(), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+$blockLoaderUrl = $sanitizeUrl($block->getViewFileUrl('images/loader-1.gif'));
+?>
+
+<div data-block="minicart" class="minicart-wrapper">
+    <a class="showcart header-mini-cart" href="<?= $block->escapeUrl($block->getShoppingCartUrl()) ?>"
+       data-bind="scope: 'minicart_content'">
+        <span class="counter qty empty"
+              data-bind="css: { empty: !!getCartParam('summary_count') == false }, blockLoader: isLoading">
+            <span class="total-mini-cart-item">
+            <!-- ko if: getCartParam('summary_count') -->
+                <!-- ko text: getCartParam('summary_count') --><!-- /ko -->
+            <!-- /ko -->
+            <!-- ko if: !getCartParam('summary_count') -->
+                0
+            <!-- /ko -->
+            </span>
+        </span>
+    </a>
+    <?php if ($block->getIsNeedToDisplaySideBar()): ?>
+        <div class="block block-minicart empty"
+             data-role="dropdownDialog"
+             data-mage-init='{"dropdownDialog":{
+                "appendTo":"[data-block=minicart]",
+                "triggerTarget":".showcart",
+                "timeout":"2000",
+                "closeOnMouseLeave":true,
+                "closeOnEscape":true,
+                "triggerClass":"active",
+                "parentClass":"active",
+                "buttons":[]}}'>
+            <div id="minicart-content-wrapper" data-bind="scope: 'minicart_content'">
+                <!-- ko template: getTemplate() --><!-- /ko -->
+            </div>
+            <?= $block->getChildHtml('minicart.addons') ?>
+        </div>
+    <?php endif ?>
+    <script>
+        window.checkout = <?= /* @noEscape */ $serializedCheckoutConfig ?>;
+    </script>
+    <script type="text/x-magento-init">
+    {
+        "[data-block='minicart']": {
+            "Magento_Ui/js/core/app": <?= /* @noEscape */ $block->getJsLayout() ?>
+        },
+        "*": {
+            "Magento_Ui/js/block-loader": "<?= $block->escapeJs($block->escapeUrl($blockLoaderUrl)) ?>"
+        }
+    }
+    </script>
+</div>

@@ -1,0 +1,26 @@
+<?php
+declare(strict_types=1);
+
+/**
+ * Ensure Mueller menu override is injected at the end of head.additional,
+ * after Rokanthemes ThemeOption custom_default.css.
+ */
+
+$request = $block->getRequest();
+$fullActionName = $request ? (string) $request->getFullActionName() : '';
+$pathInfo = $request ? (string) ($request->getOriginalPathInfo() ?: $request->getPathInfo()) : '';
+$pathSlug = trim($pathInfo, '/');
+$isHomeRoute = $fullActionName === 'cms_index_index' || $pathSlug === '';
+$isDemoStagePreview = $fullActionName === 'cms_page_view'
+    && in_array($pathSlug, ['homepage_ayo_home5_stage', 'homepage_ayo_home5_demo_stage'], true);
+?>
+<link rel="stylesheet"
+      type="text/css"
+      media="all"
+      href="<?= $block->escapeUrl($block->getViewFileUrl('css/awa-menu-mueller-global.css')) ?>" />
+<?php if ($isHomeRoute || $isDemoStagePreview): ?>
+<link rel="stylesheet"
+      type="text/css"
+      media="all"
+      href="<?= $block->escapeUrl($block->getViewFileUrl('css/awa-menu-mueller-home.css')) ?>" />
+<?php endif; ?>

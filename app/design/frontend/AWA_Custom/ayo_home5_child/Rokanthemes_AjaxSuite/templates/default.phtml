@@ -1,0 +1,61 @@
+<?php
+declare(strict_types=1);
+
+/**
+ * AjaxSuite JS bootstrap override.
+ * - Avoid ObjectManager in template
+ * - Ensure window.logoUrl is JSON-safe (no control chars/newlines)
+ *
+ * @var \Rokanthemes\AjaxSuite\Block\Js $block
+ */
+
+$sanitize = static function (?string $value): string {
+    $sanitized = (string) $value;
+    $sanitized = preg_replace('/[\x00-\x1F\x7F]+/u', '', $sanitized);
+
+    return $sanitized ?? '';
+};
+
+$logoConfig = (string) $block->getConfigValue('ajaxsuite/ajaxwishlist/wishlist_logo_pupup_login');
+$logoLink = '';
+
+if ($logoConfig !== '') {
+    $mediaBaseUrl = $block->getUrl('', ['_type' => \Magento\Framework\UrlInterface::URL_TYPE_MEDIA]);
+    $logoPath = \Rokanthemes\AjaxSuite\Model\Config\Logo::UPLOAD_DIR . '/' . ltrim($logoConfig, '/');
+    $logoLink = $mediaBaseUrl . $logoPath;
+} else {
+    $logoLink = (string) $block->getLogoSrc();
+}
+
+$logoLink = $sanitize($logoLink);
+?>
+<script>
+    window.logoUrl = <?= /* @noEscape */ json_encode($logoLink, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+</script>
+<?php if ($block->getSettingStatus()): ?>
+<?php
+$ajaxSuiteConfig = [
+    '*' => [
+        'rokanthemes/ajaxsuite' => [
+            'loginUrl' => $block->getUrl('customer/account/login'),
+            'customerId' => (string) $block->getCustomerId(),
+            'ajaxCart' => [
+                'enabled' => (bool) $block->getSettingStatus('ajaxcart'),
+                'actionAfterSuccess' => (string) $block->getModuleConfigValue('ajaxcart/success_action'),
+            ],
+            'ajaxWishList' => [
+                'enabled' => (bool) $block->getSettingStatus('ajaxwishlist'),
+                'WishlistUrl' => $block->getUrl('ajaxsuite/wishlist/add'),
+            ],
+            'ajaxCompare' => [
+                'enabled' => (bool) $block->getSettingStatus('ajaxcompare'),
+                'CompareUrl' => $block->getUrl('ajaxsuite/compare/add'),
+            ],
+        ],
+    ],
+];
+?>
+<script type="text/x-magento-init">
+<?= /* @noEscape */ json_encode($ajaxSuiteConfig, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>
+</script>
+<?php endif; ?>

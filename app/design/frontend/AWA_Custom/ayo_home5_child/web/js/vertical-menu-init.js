@@ -94,6 +94,7 @@ define([
         var safeUid = ($nav.attr('id') || $title.attr('aria-controls') || 'avm-' + Math.random().toString(36).slice(2))
                           .replace(/[^a-zA-Z0-9_-]/g, '');
         var overlaySelector   = (config && config.overlaySelector) || '.shadow_bkg_show';
+        var overlaySelectorAll = overlaySelector + ', .shadow_bkg_show, .shadow_bkg, .vmm-overlay';
         var desktopBreakpoint = parseInt(config && config.desktopBreakpoint, 10) || 992;
         var limitItemShow     = parseInt($list.attr('data-limit-show'), 10)
                                 || parseInt(config && config.limitShow, 10) || 0;
@@ -140,6 +141,16 @@ define([
             return isDesktop() && isHomeContext();
         }
 
+        function disableLegacyOverlay() {
+            $(overlaySelectorAll).css({
+                display: 'none',
+                opacity: 0,
+                visibility: 'hidden',
+                pointerEvents: 'none'
+            });
+            $('body').removeClass('background_shadow background_shadow_show shadow_bkg_show');
+        }
+
         /* ============================================================ */
         /*  Open / Close                                                */
         /* ============================================================ */
@@ -151,7 +162,7 @@ define([
             if (isDesktop()) {
                 /* Clear stale inline display from mobile fadeOut()/hide() after viewport switch. */
                 $list.stop(true, true).removeAttr('style').show();
-                $('body').removeClass('background_shadow_show');
+                disableLegacyOverlay();
             } else {
                 $list.stop(true, true).fadeIn(200);
                 $('body').addClass('background_shadow_show');
@@ -164,6 +175,7 @@ define([
 
             if (isDesktop()) {
                 $list.stop(true, true).hide();
+                disableLegacyOverlay();
             } else {
                 $list.stop(true, true).fadeOut(200);
             }
@@ -342,7 +354,7 @@ define([
                     $title.removeClass('active').attr('aria-expanded', 'false');
                 }
 
-                $('body').removeClass('background_shadow_show');
+                disableLegacyOverlay();
             } else {
                 /* Entering mobile → collapse */
                 $list.removeClass('menu-open').hide();
@@ -400,6 +412,7 @@ define([
         /* ---- desktop hover/focus (Home 5 default behavior) ---------- */
         $nav.on('mouseenter' + NS, function () {
             if (isDesktop()) {
+                disableLegacyOverlay();
                 openMenu();
             }
         });
@@ -426,6 +439,7 @@ define([
 
         $nav.on('focusin' + NS, function () {
             if (isDesktop()) {
+                disableLegacyOverlay();
                 openMenu();
             }
         });
@@ -658,6 +672,7 @@ define([
         if (rokanActive) {
             bindRokanMobileBridgeHandlers();
         }
+        disableLegacyOverlay();
         syncOnResize();
         fixSectionAriaHidden();
     };

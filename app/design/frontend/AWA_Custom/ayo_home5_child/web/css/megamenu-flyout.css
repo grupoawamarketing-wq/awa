@@ -1,0 +1,158 @@
+/* ============================================================
+   AWA MENU FLYOUT (Rokanthemes VerticalMenu)
+   Purpose:
+   - Keep desktop menu in classic flyout mode
+   - Avoid giant fixed panel/overlay artifacts
+   - Preserve mobile click accordion behavior
+   ============================================================ */
+
+/* Anti-clipping chain */
+body .page-wrapper .header-control.header-nav,
+body .page-wrapper .header-control.header-nav-global,
+body .page-wrapper .header-control.header-nav-global > .container,
+body .page-wrapper .header-control.header-nav-global > .container > .row,
+body .page-wrapper .menu_left_home1,
+body .page-wrapper .menu_left_home1 > .sections.nav-sections.category-dropdown,
+body .page-wrapper .menu_left_home1 .section-items.nav-sections.category-dropdown-items,
+body .page-wrapper .menu_left_home1 .section-item-content.nav-sections.category-dropdown-item-content,
+body .page-wrapper .menu_left_home1 .navigation.verticalmenu.side-verticalmenu:not(.navigation--mueller),
+body .page-wrapper .menu_left_home1 .navigation.verticalmenu.side-verticalmenu:not(.navigation--mueller) > ul.togge-menu.list-category-dropdown,
+body .page-wrapper .menu_left_home1 .navigation.verticalmenu.side-verticalmenu:not(.navigation--mueller) > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0 {
+    overflow: visible !important;
+}
+
+/* Sidebar ancestors that can clip flyouts */
+.sidebar-main,
+.sidebar.sidebar-main,
+.column.left,
+.page-layout-2columns-left .column.main + .sidebar {
+    overflow: visible !important;
+}
+
+@media (width >= 992px) {
+    /* Keep trigger above menu list */
+    .navigation.verticalmenu.side-verticalmenu:not(.navigation--mueller) {
+        position: relative !important;
+        z-index: 10010 !important;
+    }
+
+    /* Keep menu list in flow controlled by existing theme/JS logic */
+    .navigation.verticalmenu.side-verticalmenu:not(.navigation--mueller) > ul.togge-menu.list-category-dropdown {
+        overflow: visible !important;
+        max-height: none !important;
+        z-index: 10020 !important;
+    }
+
+    /* Level 1 parent must be relative for flyout anchoring */
+    .navigation.verticalmenu.side-verticalmenu:not(.navigation--mueller) > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0 {
+        position: relative !important;
+    }
+
+    /* Level 2 flyout anchor */
+    .navigation.verticalmenu.side-verticalmenu:not(.navigation--mueller) > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0 > .level0.submenu,
+    .navigation.verticalmenu.side-verticalmenu:not(.navigation--mueller) > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0 > .vmm-empty-submenu,
+    .navigation.verticalmenu.side-verticalmenu:not(.navigation--mueller) > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0 > .cat-mega-menu {
+        position: absolute !important;
+        left: 100% !important;
+        top: 0 !important;
+        z-index: 10021 !important;
+        transform: none !important;
+        width: min(760px, calc(100vw - 340px)) !important;
+        min-width: 360px !important;
+        max-width: 760px !important;
+        background: #fff !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+    }
+
+    .navigation.verticalmenu.side-verticalmenu:not(.navigation--mueller) > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0:hover > .level0.submenu,
+    .navigation.verticalmenu.side-verticalmenu:not(.navigation--mueller) > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0:hover > .vmm-empty-submenu,
+    .navigation.verticalmenu.side-verticalmenu:not(.navigation--mueller) > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0:hover > .cat-mega-menu {
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    /* Level 3 must remain in normal flow, no extra flyout */
+    .navigation.verticalmenu.side-verticalmenu:not(.navigation--mueller) > ul.togge-menu.list-category-dropdown .level0.submenu .subchildmenu .subchildmenu {
+        position: static !important;
+        left: auto !important;
+        top: auto !important;
+        inset: auto !important;
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        transform: none !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        box-shadow: none !important;
+        border: 0 !important;
+        padding-left: 12px;
+    }
+
+    /* Disable dim overlays in desktop menu hover */
+    .vmm-overlay,
+    #vmm-overlay,
+    .shadow_bkg_show,
+    .shadow_bkg {
+        display: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+        background: transparent !important;
+    }
+
+    body.background_shadow .shadow_bkg,
+    body.background_shadow_show .shadow_bkg_show,
+    body.background_shadow .shadow_bkg_show,
+    body.background_shadow_show .shadow_bkg {
+        display: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+        background: transparent !important;
+    }
+
+    body.background_shadow::before,
+    body.background_shadow_show::before,
+    body.background_shadow .navigation.verticalmenu.side-verticalmenu:not(.navigation--mueller) > ul::after,
+    body.background_shadow_show .navigation.verticalmenu.side-verticalmenu:not(.navigation--mueller) > ul::after {
+        content: none !important;
+        display: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+    }
+
+    body.background_shadow,
+    body.background_shadow_show {
+        overflow: visible !important;
+    }
+
+    /* Hide VMM-only decorative blocks if stale markup remains */
+    .vmm-category-header,
+    .vmm-view-all-item,
+    .vmm-empty-state {
+        display: none !important;
+    }
+}
+
+@media (width <= 991px) {
+    /* Mobile keeps accordion/click behavior */
+    .vmm-overlay,
+    .shadow_bkg_show,
+    .shadow_bkg {
+        display: none !important;
+    }
+
+    .navigation.verticalmenu.side-verticalmenu:not(.navigation--mueller) > ul.togge-menu.list-category-dropdown {
+        overflow: visible !important;
+    }
+}
+
+@media print {
+    .navigation.verticalmenu,
+    .menu_left_home1 {
+        display: none !important;
+    }
+}

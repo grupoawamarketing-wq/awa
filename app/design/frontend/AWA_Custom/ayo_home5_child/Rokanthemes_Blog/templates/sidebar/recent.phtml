@@ -1,0 +1,60 @@
+<?php
+/**
+ * Child-theme override for recent blog sidebar.
+ * Adds safe thumbnail fallback to avoid requests to /media/ (403)
+ * when thumbnailimage is empty.
+ *
+ * @var \Rokanthemes\Blog\Block\Sidebar\Recent $block
+ */
+?>
+<?php $_postCollection = $block->getPostCollection(); ?>
+<?php if ($_postCollection->count()) { ?>
+<?php
+    $placeholderUrl = $block->getViewFileUrl('Magento_Catalog::images/product/placeholder/thumbnail.jpg');
+    $mediaFolder = rtrim((string) $block->getMediaFolder(), '/');
+?>
+<div class="sidebar-left sidebar-post">
+    <div class="widget widget-post-tab" data-bind="scope: 'recemt-posts'">
+        <div class="title-post-tab">
+            <ul>
+                <li><a href="#"><?= $block->escapeHtml(__('Recent')) ?></a></li>
+            </ul>
+        </div>
+        <div class="tab-content">
+            <div class="tab-pane fade in active" role="tabpanel">
+                <ul class="list-post-tab">
+                    <?php foreach ($_postCollection as $_post) { ?>
+                        <?php
+                            $postUrl = (string) $_post->getPostUrl();
+                            $postTitle = (string) $_post->getTitle();
+                            $thumbImage = trim((string) $_post->getThumbnailimage());
+                            $thumbUrl = $placeholderUrl;
+                            if ($thumbImage !== '') {
+                                $thumbUrl = $mediaFolder . '/' . ltrim($thumbImage, '/');
+                            }
+                        ?>
+                        <li>
+                            <div class="zoom-image-thumb">
+                                <a title="<?= $block->escapeHtmlAttr($postTitle) ?>" href="<?= $block->escapeUrl($postUrl) ?>">
+                                    <img src="<?= $block->escapeUrl($thumbUrl) ?>"
+                                         alt="<?= $block->escapeHtmlAttr($postTitle) ?>"
+                                         loading="lazy"
+                                         onerror="this.onerror=null;this.src='<?= $block->escapeJs($placeholderUrl) ?>';">
+                                </a>
+                            </div>
+                            <div class="post-tab-info">
+                                <h3>
+                                    <a href="<?= $block->escapeUrl($postUrl) ?>">
+                                        <?= $block->escapeHtml($postTitle) ?>
+                                    </a>
+                                </h3>
+                                <span><?= $block->escapeHtml(date('F d Y', strtotime((string) $_post->getPublishTime()))) ?></span>
+                            </div>
+                        </li>
+                    <?php } ?>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<?php } ?>
