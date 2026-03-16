@@ -1,0 +1,43 @@
+<?php
+declare(strict_types=1);
+
+/**
+ * AWA — Carregamento diferido de CSS de interação (não-bloqueante de render).
+ *
+ * Estes 5 arquivos são necessários apenas após interação do usuário:
+ *  - mage/calendar.css     → datepicker (formulários com data)
+ *  - jquery/uppy/…css      → file uploader (upload de imagens)
+ *  - chosen.css            → dropdowns Chosen.js (filtros)
+ *  - jquery.fancybox.css   → lightbox (galerias de imagem)
+ *  - rokan_quickview.css   → modal QuickView (visualização rápida)
+ *
+ * Estratégia: rel="preload" as="style" + onload="this.rel='stylesheet'"
+ * O browser faz o download em paralelo (não bloqueia render) e aplica
+ * o CSS assim que disponível — geralmente antes da primeira interação.
+ *
+ * <noscript> garante carregamento bloqueante como fallback sem JS.
+ *
+ * Removidos do head via <remove> em default_head_blocks.xml (2026-03-16).
+ */
+
+$calendarUrl     = $block->escapeUrl($block->getViewFileUrl('mage/calendar.css'));
+$uppyUrl         = $block->escapeUrl($block->getViewFileUrl('jquery/uppy/dist/uppy-custom.css'));
+$chosenUrl       = $block->escapeUrl($block->getViewFileUrl('Rokanthemes_RokanBase::css/chosen.css'));
+$fancyboxUrl     = $block->escapeUrl($block->getViewFileUrl('Rokanthemes_RokanBase::css/jquery.fancybox.css'));
+$quickviewUrl    = $block->escapeUrl($block->getViewFileUrl('Rokanthemes_QuickView::css/rokan_quickview.css'));
+
+$deferredFiles = [
+    $calendarUrl,
+    $uppyUrl,
+    $chosenUrl,
+    $fancyboxUrl,
+    $quickviewUrl,
+];
+?>
+<?php foreach ($deferredFiles as $cssUrl): ?>
+<link rel="preload"
+      as="style"
+      onload="this.onload=null;this.rel='stylesheet'"
+      href="<?= $cssUrl /* already escaped */ ?>"/>
+<noscript><link rel="stylesheet" href="<?= $cssUrl ?>"/></noscript>
+<?php endforeach; ?>
