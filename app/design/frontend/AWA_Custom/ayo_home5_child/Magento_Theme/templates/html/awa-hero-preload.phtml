@@ -1,0 +1,40 @@
+<?php
+declare(strict_types=1);
+
+/**
+ * AWA — Preload da imagem hero (LCP) da homepage.
+ *
+ * Carregado APENAS na homepage via cms_index_index.xml (head.additional).
+ *
+ * Estratégia: rel="preload" as="image" fetchpriority="high" com imagesrcset
+ * responsivo → browser prioriza download da imagem correta antes de parsear
+ * o OWL Carousel (que usa data-src lazy-load), resolvendo o LCP delay.
+ *
+ * IMPORTANTE: Atualizar os paths se os slides da homepage forem alterados no admin.
+ * Slides configurados em: Admin → Rokanthemes → Slide Banner.
+ * --
+ * Desktop (≥768px): slider_005_1.jpg   — 1920px × 760px  ~592KB
+ * Mobile  (<768px):  slider_005_mobile.jpg — 768px × ~380px ~181KB
+ */
+
+/** @var \Magento\Framework\View\Element\Template $block */
+
+// Constrói a URL base de media a partir da URL da loja
+// (evita hardcode do domínio para portabilidade entre envs)
+$baseUrl   = rtrim((string) $block->getUrl('', ['_nosid' => true, '_secure' => true]), '/');
+$mediaPath = '/media/slidebanner/s/l/';
+
+$desktopSrc = $block->escapeUrl($baseUrl . $mediaPath . 'slider_005_1.jpg');
+$mobileSrc  = $block->escapeUrl($baseUrl . $mediaPath . 'slider_005_mobile.jpg');
+?>
+<!--
+    AWA Hero LCP Preload — homepage only
+    imagesrcset: o browser baixa a versão mobile em telas <768px (economia ~63%)
+    fetchpriority=high: sinal explícito para o browser priorizar vs outros recursos
+-->
+<link rel="preload"
+      as="image"
+      fetchpriority="high"
+      imagesrcset="<?= $mobileSrc ?> 768w, <?= $desktopSrc ?> 1920w"
+      imagesizes="100vw"
+      href="<?= $desktopSrc ?>"/>
