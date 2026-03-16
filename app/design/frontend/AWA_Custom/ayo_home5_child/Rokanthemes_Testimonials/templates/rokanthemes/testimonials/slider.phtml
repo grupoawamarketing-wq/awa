@@ -1,0 +1,72 @@
+<?php
+$helperData = $this->helper('Rokanthemes\Testimonials\Helper\Data');
+$helperImage = $this->helper('Rokanthemes\Testimonials\Helper\Image');
+
+if (!$helperData->isEnabled()) {
+    return false;
+}
+
+$_testimonialsCollection = $block->getTestimonials();
+$title = $block->getTitle();
+$imgWidth = $helperData->getImgRizeWidth();
+$imgHeight = $helperData->getImgRizeHeight();
+$allTestimonialsUrl = $block->getUrl('testimonials');
+?>
+<?php if ($_testimonialsCollection->count()): ?>
+<div class="box-bottom-home2 box-testimo">
+    <h2><?= $block->escapeHtml(__($title)) ?></h2>
+    <div class="testimo-slider slider-home2">
+        <div class="wrap-item">
+            <?php foreach ($_testimonialsCollection as $_testimonial): ?>
+                <?php
+                $authorName = trim((string) $_testimonial->getName());
+                $authorJob = trim((string) $_testimonial->getJob());
+                $avatarAlt = $authorName !== '' ? $authorName : (string) __('Cliente AWA Motos');
+                $avatarUrl = $helperImage->resize($_testimonial->getAvatar(), $imgWidth, $imgHeight, true);
+                ?>
+                <div class="item-testimo">
+                    <div class="author-testimo">
+                        <div class="author-test-link">
+                            <a href="<?= $block->escapeUrl($allTestimonialsUrl) ?>" aria-label="<?= $block->escapeHtmlAttr($avatarAlt) ?>">
+                                <img
+                                    src="<?= $block->escapeUrl($avatarUrl) ?>"
+                                    alt="<?= $block->escapeHtmlAttr($avatarAlt) ?>"
+                                    loading="lazy"
+                                />
+                            </a>
+                        </div>
+                    </div>
+                    <div class="info-testimonial">
+                        <div class="desc">
+                            <?= $_testimonial->getTestimonial(); ?>
+                        </div>
+                        <div class="author-test-info">
+                            <h3><a href="<?= $block->escapeUrl($allTestimonialsUrl) ?>"><?= $block->escapeHtml($authorName) ?></a></h3>
+                            <span><?= $block->escapeHtml($authorJob) ?></span>
+                        </div>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+    <a href="<?= $block->escapeUrl($allTestimonialsUrl) ?>" class="viewall"><?= $block->escapeHtml(__('View All')) ?></a>
+</div>
+<script type="text/x-magento-init">
+{
+    ".testimo-slider .wrap-item": {
+        "js/rokanthemes-owl-element-init": {
+            "lazyLoad": true,
+            "items": 1,
+            "itemsCustom": [[0, 1], [480, 1], [768, 1], [992, 1], [1200, 1]],
+            "pagination": true,
+            "navigation": false,
+            "navigationText": ["<i class='fa fa-angle-left'></i>", "<i class='fa fa-angle-right'></i>"]
+        }
+    }
+}
+</script>
+<?php else: ?>
+<div class="box-bottom-home2 box-testimo">
+    <span><?= $block->escapeHtml(__('Testimonial records not available.')) ?></span>
+</div>
+<?php endif; ?>
