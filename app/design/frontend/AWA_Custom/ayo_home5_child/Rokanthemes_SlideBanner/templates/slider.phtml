@@ -18,12 +18,13 @@ if ($banners = $block->getBannerCollection()):
     $sliderId = $block->getSliderId();
     $settings = $slider->getSliderSetting();
     $owlConfig = [
-        'singleItem' => true,
-        'autoHeight' => true,
-        'lazyLoad' => true,
-        'touchDrag' => true,
-        'mouseDrag' => true,
-        'transitionStyle' => 'fade',
+        'singleItem'       => true,
+        'autoHeight'       => true,
+        // 'lazyLoad' => true removido: conflita com loading="lazy" nativo do browser.
+        // O 1º slide usa loading="eager"+fetchpriority="high" via $isFirst (LCP fix).
+        'touchDrag'        => true,
+        'mouseDrag'        => true,
+        'transitionStyle'  => 'fade',
     ];
     $booleanKeys = ['autoPlay', 'navigation', 'stopOnHover', 'pagination', 'scrollPerPage'];
 
@@ -79,12 +80,19 @@ if ($banners = $block->getBannerCollection()):
 ?>
 <div class="wrapper_slider hidden-xs slider_<?php echo (int) $sliderId; ?>">
     <div class="owl">
-        <?php foreach ($banners as $banner) { if ($banner->getSlideStatus() == '2') { continue; } ?>
+        <?php
+        // LCP Fix: $slideIndexDesktop controla qual slide é o primeiro (eager + fetchpriority)
+        $slideIndexDesktop = 0;
+        foreach ($banners as $banner) {
+            if ($banner->getSlideStatus() == '2') { continue; }
+            $slideIndexDesktop++;
+            $isFirst = ($slideIndexDesktop === 1);
+        ?>
             <div class="banner_item">
                 <div class="banner_item_bg">
                     <?php
                     $slideAlt = $banner->getSlideText() ?: ($banner->getSlideTitle() ?: '');
-                    $html = $block->getImageElement($banner->getSlideImage(), $slideAlt);
+                    $html = $block->getImageElement($banner->getSlideImage(), $slideAlt, $isFirst);
                     $link = $resolveSlideLink($banner->getSlideLink());
                     if ($link !== '') {
                         $html = '<a href="' . $block->escapeUrl($link) . '">' . $html . '</a>';
@@ -99,17 +107,24 @@ if ($banners = $block->getBannerCollection()):
                     ?>
                 </div>
             </div>
-        <?php } ?>
+        <?php } // end foreach desktop ?>
     </div>
 </div>
 <div class="wrapper_slider visible-xs slider_<?php echo (int) $sliderId; ?>_mobile">
     <div class="owl">
-        <?php foreach ($banners as $banner) { if ($banner->getSlideStatus() == '2') { continue; } ?>
+        <?php
+        // LCP Fix: mesmo padrão para o slider mobile
+        $slideIndexMobile = 0;
+        foreach ($banners as $banner) {
+            if ($banner->getSlideStatus() == '2') { continue; }
+            $slideIndexMobile++;
+            $isFirstMobile = ($slideIndexMobile === 1);
+        ?>
             <div class="banner_item">
                 <div class="banner_item_bg">
                     <?php
                     $slideAlt = $banner->getSlideText() ?: ($banner->getSlideTitle() ?: '');
-                    $html = $block->getImageElementMobile($banner->getSlideImageMobile(), $slideAlt);
+                    $html = $block->getImageElementMobile($banner->getSlideImageMobile(), $slideAlt, $isFirstMobile);
                     $link = $resolveSlideLink($banner->getSlideLink());
                     if ($link !== '') {
                         $html = '<a href="' . $block->escapeUrl($link) . '">' . $html . '</a>';
@@ -124,7 +139,7 @@ if ($banners = $block->getBannerCollection()):
                     ?>
                 </div>
             </div>
-        <?php } ?>
+        <?php } // end foreach mobile ?>
     </div>
 </div>
 <script>

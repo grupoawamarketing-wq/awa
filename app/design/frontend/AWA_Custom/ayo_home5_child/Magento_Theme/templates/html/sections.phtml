@@ -1,0 +1,59 @@
+<?php
+/**
+ * AWA_Custom/ayo_home5_child — Override de Magento_Theme::html/sections.phtml
+ *
+ * Correção de acessibilidade WCAG 2.1 (nível AA):
+ *   – SC 4.1.2: O <a> de switch de seção (ex: menu.vertical) ficava vazio
+ *     quando o bloco filho não fornecia um argumento 'title'.
+ *   – Fix: aria-label derivado do alias do bloco quando $label está ausente.
+ *
+ * Template original: vendor/magento/module-theme/view/frontend/templates/html/sections.phtml
+ * Única mudança: adição de aria-label no <a> quando $label é vazio.
+ *
+ * @see \Magento\Theme\Block\Html\Sections
+ */
+declare(strict_types=1);
+
+$group    = $block->getGroupName();
+$groupCss = $block->getGroupCss();
+?>
+<?php if ($detailedInfoGroup = $block->getGroupChildNames($group)): ?>
+    <div class="sections <?= $block->escapeHtmlAttr($groupCss) ?>">
+        <?php $layout = $block->getLayout(); ?>
+        <div class="section-items <?= $block->escapeHtmlAttr($groupCss) ?>-items"
+             data-mage-init='{"tabs":{"openedState":"active"}}'>
+            <?php foreach ($detailedInfoGroup as $name): ?>
+                <?php
+                    $html = $layout->renderElement($name);
+                    if (!($html !== null && trim($html)) && ($block->getUseForce() != true)) {
+                        continue;
+                    }
+                    $alias = $layout->getElementAlias($name);
+                    $label = $block->getChildData($alias, 'title');
+
+                    // WCAG 4.1.2: gera aria-label a partir do alias quando o label está vazio
+                    // Ex: 'menu.vertical' → 'Menu Vertical' | 'main.menu' → 'Main Menu'
+                    $ariaLabel = trim((string) $label);
+                    if ($ariaLabel === '') {
+                        $humanAlias = ucwords(str_replace(['.', '-', '_'], ' ', (string) $alias));
+                        $ariaLabel  = (string) __($humanAlias);
+                    }
+                ?>
+                <div class="section-item-title <?= $block->escapeHtmlAttr($groupCss) ?>-item-title"
+                     data-role="collapsible">
+                    <a class="<?= $block->escapeHtmlAttr($groupCss) ?>-item-switch"
+                       data-toggle="switch"
+                       href="#<?= $block->escapeHtmlAttr($alias) ?>"
+                       aria-label="<?= $block->escapeHtmlAttr($ariaLabel) ?>">
+                        <?= /* @noEscape */ $label ?>
+                    </a>
+                </div>
+                <div class="section-item-content <?= $block->escapeHtmlAttr($groupCss) ?>-item-content"
+                     id="<?= $block->escapeHtmlAttr($alias) ?>"
+                     data-role="content">
+                    <?= /* @noEscape */ $html ?>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+<?php endif; ?>
