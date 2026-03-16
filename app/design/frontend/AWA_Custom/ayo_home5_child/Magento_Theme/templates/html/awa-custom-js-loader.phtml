@@ -54,15 +54,68 @@ $compatBootstrapConfig = [
     'load_b2b_checkout_compat_js' => $loadB2bCheckoutCompatJs,
     'load_home_category_compat_js' => $loadHomeCategoryCompatJs,
 ];
+
+$renderIdleScriptLoader = static function (string $scriptUrl, int $timeout = 2000): string {
+    $encodedUrl = json_encode($scriptUrl, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
+    $encodedTimeout = json_encode($timeout);
+
+    return <<<HTML
+<script>
+(function (w, d) {
+    var src = {$encodedUrl};
+    var timeout = {$encodedTimeout};
+    var done = false;
+    var events = ['pointerdown', 'touchstart', 'keydown', 'mouseover', 'scroll'];
+
+    function cleanup() {
+        events.forEach(function (eventName) {
+            w.removeEventListener(eventName, trigger, true);
+        });
+    }
+
+    function appendScript() {
+        if (d.querySelector('script[data-awa-lazy-src="' + src + '"]')) {
+            return;
+        }
+
+        var script = d.createElement('script');
+        script.src = src;
+        script.defer = true;
+        script.setAttribute('data-awa-lazy-src', src);
+        (d.body || d.documentElement).appendChild(script);
+    }
+
+    function trigger() {
+        if (done) {
+            return;
+        }
+        done = true;
+        cleanup();
+        appendScript();
+    }
+
+    events.forEach(function (eventName) {
+        w.addEventListener(eventName, trigger, { passive: true, capture: true, once: true });
+    });
+
+    if ('requestIdleCallback' in w) {
+        w.requestIdleCallback(trigger, { timeout: timeout });
+    } else {
+        w.setTimeout(trigger, timeout);
+    }
+})(window, document);
+</script>
+HTML;
+};
 ?>
 <?php if ($loadHeaderJs): ?>
-<script src="<?= $block->escapeUrl($block->getViewFileUrl('js/awa-header-minicart-ui.js')) ?>" defer></script>
+<?= /* @noEscape */ $renderIdleScriptLoader($block->escapeUrl($block->getViewFileUrl('js/awa-header-minicart-ui.js')), 1800) ?>
 <?php endif; ?>
 <?php if ($loadHomeOwlTabsJs): ?>
 <script src="<?= $block->escapeUrl($block->getViewFileUrl('js/awa-home-owl-tabs-ui.js')) ?>" defer></script>
 <?php endif; ?>
 <?php if ($loadFooterUxJs): ?>
-<script src="<?= $block->escapeUrl($block->getViewFileUrl('js/awa-footer-ux.js')) ?>" defer></script>
+<?= /* @noEscape */ $renderIdleScriptLoader($block->escapeUrl($block->getViewFileUrl('js/awa-footer-ux.js')), 2200) ?>
 <?php endif; ?>
 <?php if ($loadPdpStickyCtaJs): ?>
 <script src="<?= $block->escapeUrl($block->getViewFileUrl('js/awa-pdp-sticky-cta.js')) ?>" defer></script>
