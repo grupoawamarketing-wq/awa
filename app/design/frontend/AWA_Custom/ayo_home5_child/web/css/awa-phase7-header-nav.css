@@ -28,16 +28,16 @@
     display: flex;
     align-items: stretch;
     width: 100%;
-    border: 2px solid var(--primary-color, #b73337);
+    border: 1px solid #cbd5e1;
     border-radius: 6px;
     overflow: hidden;
     background: #fff;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .block-search .form.minisearch:focus-within {
-    border-color: #8b1a1e;
-    box-shadow: 0 0 0 3px rgb(183 51 55 / 12%);
+    border-color: var(--primary-color, #b73337);
+    box-shadow: 0 0 0 3px rgb(183 51 55 / 15%);
 }
 
 .block-search .field.search {
@@ -120,7 +120,7 @@
 }
 
 .block-search .field.search .control input#search::placeholder {
-    color: #94a3b8;
+    color: #64748b; /* QA: Melhor contraste WCAG ao invés de #94a3b8 */
     font-weight: 400;
 }
 
@@ -147,6 +147,11 @@
     background: #8b1a1e;
 }
 
+.block-search .actions .action.search:focus-visible {
+    outline: 2px solid #8b1a1e;
+    outline-offset: 2px;
+}
+
 .block-search .actions .action.search span {
     font-size: 18px;
 }
@@ -156,8 +161,24 @@
     border: 1px solid #e2e8f0;
     border-top: none;
     border-radius: 0 0 6px 6px;
-    box-shadow: 0 8px 24px rgb(0 0 0 / 8%);
+    box-shadow: 0 10px 25px -5px rgb(0 0 0 / 15%);
     z-index: 1060;
+    overflow: hidden; /* Ensure hover effects don't spill */
+}
+
+#search_autocomplete .qs-option-name {
+    font-size: 13px;
+    color: #475569;
+}
+
+#search_autocomplete ul li {
+    padding: 8px 12px;
+    transition: background-color 0.2s ease;
+}
+
+#search_autocomplete ul li:hover,
+#search_autocomplete ul li.selected {
+    background-color: #f8fafc; /* Subtle highlight */
 }
 
 /* ============================================================
@@ -278,4 +299,123 @@
         padding: 0 14px;
         min-height: 40px;
     }
+}
+
+/* ============================================================
+   5. HEADER POLISH (Top Bar & Sticky Glassmorphism)
+   ============================================================ */
+
+/* Top Bar Refinements */
+body .page-wrapper .header-container .top-header {
+    background: #f8fafc; /* var(--awa-gray-50) equivalent */
+    border-bottom: 1px solid #e2e8f0;
+}
+
+body .page-wrapper .header-container .top-header a,
+body .page-wrapper .header-container .top-header .top-info {
+    color: #475569;
+    transition: color 0.2s ease;
+}
+
+body .page-wrapper .header-container .top-header a:hover {
+    color: var(--primary-color, #b73337);
+}
+
+/* Flexbox enhancements for utility links */
+.top-bar-right .top-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+/* Hide heavy borders in top bar */
+.top-account > li {
+    border-left: none !important;
+}
+
+/* Navegação Principal - Efeito Hover suave */
+.header-nav-global .megamenu .level0 > a {
+    position: relative;
+    transition: color 0.3s ease;
+}
+
+.header-nav-global .megamenu .level0 > a::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 10px;
+    right: 10px;
+    height: 2px;
+    background: var(--primary-color, #b73337);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+    transform-origin: center;
+}
+
+.header-nav-global .megamenu .level0:hover > a::after,
+.header-nav-global .megamenu .level0.active > a::after,
+.header-nav-global .megamenu .level0 > a:focus-visible::after {
+    transform: scaleX(1);
+}
+
+.header-nav-global .megamenu .level0 > a:focus-visible {
+    outline: none;
+    color: var(--primary-color, #b73337);
+}
+
+/* ============================================================
+   6. STICKY HEADER - GLASSMORPHISM
+   ============================================================ */
+
+@media (min-width: 992px) {
+    .header-wrapper-sticky.is-sticky .container-header-sticky {
+        background-color: rgba(255, 255, 255, 0.94) !important;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+        border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+        transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    @supports not (backdrop-filter: blur(8px)) {
+        .header-wrapper-sticky.is-sticky .container-header-sticky {
+            background-color: #ffffff !important;
+        }
+    }
+}
+
+/* Logo Focus Accessibility */
+.header-main .logo:focus-visible {
+    outline: 2px solid var(--primary-color, #b73337);
+    outline-offset: 4px;
+    border-radius: 4px;
+}
+
+/* Mobile Nav Toggle Accessibilty */
+.action.nav-toggle:focus-visible {
+    outline: 2px solid var(--primary-color, #b73337);
+    outline-offset: 4px;
+    border-radius: 4px;
+}
+
+/* Language / Currency Switcher Polish */
+.header-container .top-header .switcher-trigger {
+    transition: color 0.2s ease;
+}
+.header-container .top-header .switcher-trigger:focus-visible {
+    outline: 2px solid var(--primary-color, #b73337);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+.header-container .top-header .switcher-dropdown {
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    border-radius: 6px;
+}
+
+/* Choose Category Select Focus */
+#choose_category:focus-visible {
+    outline: none;
+    box-shadow: inset 0 0 0 2px var(--primary-color, #b73337);
+    border-radius: 6px 0 0 6px;
 }
