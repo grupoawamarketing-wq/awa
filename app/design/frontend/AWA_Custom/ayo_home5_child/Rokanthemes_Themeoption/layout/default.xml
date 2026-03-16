@@ -1,6 +1,10 @@
 <?xml version="1.0"?>
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="1column"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <!-- AWA QA Fix: remove bpopup do <head> (bloqueante) — reinjetado via defer em before.body.end -->
+        <remove src="Rokanthemes_Themeoption::js/jquery.bpopup.min.js"/>
+    </head>
     <body>
         <referenceContainer name="head.additional">
             <block class="Magento\Framework\View\Element\Template"
@@ -142,5 +146,13 @@
         </referenceContainer>
 
         <!-- wishlist e compare sidebar restaurados — fidelidade ao demo ayo home5 -->
+
+        <referenceContainer name="before.body.end">
+            <!-- AWA QA Fix: bpopup reinjetado com defer — elimina script bloqueante do <head> -->
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.bpopup.defer"
+                   template="Magento_Theme::html/awa-bpopup-defer.phtml"
+                   before="-"/>
+        </referenceContainer>
     </body>
 </page>

@@ -1,0 +1,20 @@
+<?php
+/**
+ * AWA QA Fix: jquery.bpopup.min.js — carregado com defer (antes era bloqueante no <head>)
+ *
+ * Estratégia: remove o <script> original via layout XML <remove> e reinjecta aqui no
+ * before.body.end com o atributo defer — o browser faz o download em paralelo com o HTML
+ * e executa após o parsing, sem bloquear renderização.
+ *
+ * Segurança: bpopup só é chamado via jQuery após DOM ready (newsletter popup com timer),
+ * portanto defer é equivalente a DOMContentLoaded — seguro.
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ */
+declare(strict_types=1);
+
+$bpopupUrl = $block->escapeUrl(
+    $block->getViewFileUrl('Rokanthemes_Themeoption::js/jquery.bpopup.min.js')
+);
+?>
+<script defer src="<?= /* @noEscape */ $bpopupUrl ?>"></script>

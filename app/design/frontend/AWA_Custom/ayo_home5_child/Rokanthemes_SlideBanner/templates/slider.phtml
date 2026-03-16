@@ -91,7 +91,9 @@ if ($banners = $block->getBannerCollection()):
             <div class="banner_item">
                 <div class="banner_item_bg">
                     <?php
-                    $slideAlt = $banner->getSlideText() ?: ($banner->getSlideTitle() ?: '');
+                    // WCAG 1.1.1: sanitiza alt — rejeita valores só-pontuação (ex: ".") → fallback title
+                    $_rawAlt = strip_tags((string)($banner->getSlideText() ?: ''));
+                    $slideAlt = (trim($_rawAlt, ". \t\n\r") !== '') ? $_rawAlt : ((string)($banner->getSlideTitle() ?: ''));
                     $html = $block->getImageElement($banner->getSlideImage(), $slideAlt, $isFirst);
                     $link = $resolveSlideLink($banner->getSlideLink());
                     if ($link !== '') {
@@ -123,7 +125,9 @@ if ($banners = $block->getBannerCollection()):
             <div class="banner_item">
                 <div class="banner_item_bg">
                     <?php
-                    $slideAlt = $banner->getSlideText() ?: ($banner->getSlideTitle() ?: '');
+                    // WCAG 1.1.1: sanitiza alt — rejeita valores só-pontuação (ex: ".") → fallback title
+                    $_rawAlt = strip_tags((string)($banner->getSlideText() ?: ''));
+                    $slideAlt = (trim($_rawAlt, ". \t\n\r") !== '') ? $_rawAlt : ((string)($banner->getSlideTitle() ?: ''));
                     $html = $block->getImageElementMobile($banner->getSlideImageMobile(), $slideAlt, $isFirstMobile);
                     $link = $resolveSlideLink($banner->getSlideLink());
                     if ($link !== '') {
