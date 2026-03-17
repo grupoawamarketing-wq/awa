@@ -6,13 +6,19 @@
 ?>
 
 <?php
-/** @var \Magento\Catalog\Pricing\Render\PriceBox $block */
+/** @var \Magento\Catalog\Pricing\Render\FinalPriceBox $block */
 /** @var \Magento\Framework\View\Helper\SecureHtmlRenderer $secureRenderer */
 /** @var \Magento\Framework\Locale\LocaleFormatter $localeFormatter*/
 /** @var \Magento\Catalog\Pricing\Price\TierPrice $tierPriceModel */
 $tierPriceModel = $block->getPrice();
+if (!$tierPriceModel instanceof \Magento\Catalog\Pricing\Price\TierPrice) {
+    return;
+}
 $tierPrices = $tierPriceModel->getTierPriceList();
-$msrpShowOnGesture = $block->getPriceType('msrp_price')->isShowPriceOnGesture();
+/** @var \Magento\Msrp\Pricing\Price\MsrpPrice $msrpPrice */
+$msrpPrice = $block->getPriceType('msrp_price');
+$msrpShowOnGesture = $msrpPrice->isShowPriceOnGesture();
+/** @var \Magento\Catalog\Model\Product $product */
 $product = $block->getSaleableItem();
 ?>
 <?php if (count($tierPrices)): ?>
@@ -99,7 +105,7 @@ $product = $block->getSaleableItem();
                                 </td>
                             <?php else: ?>
                                 <td>
-                                    <div class="awa-tier-price-amount" style="display: inline-block;">
+                                    <div class="awa-tier-price-amount">
                                         <?= /* @noEscape */ $priceAmountBlock ?>
                                     </div>
                                 </td>
@@ -111,7 +117,7 @@ $product = $block->getSaleableItem();
                                         <?= $block->escapeHtml(__('%1% Off', $localeFormatter->formatNumber($savePercent))) ?>
                                     </span>
                                 <?php else: ?>
-                                    <span style="color: #94a3b8;">-</span>
+                                    <span class="awa-tier-save-placeholder">-</span>
                                 <?php endif; ?>
                             </td>
                         </tr>

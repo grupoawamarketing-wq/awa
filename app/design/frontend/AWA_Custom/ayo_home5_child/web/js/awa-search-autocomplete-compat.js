@@ -64,6 +64,10 @@ define([
         return !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length);
     }
 
+    function isB2bRestrictedMode() {
+        return !!(document.body && document.body.classList.contains('b2b-restricted-mode'));
+    }
+
     function applyTitles($root) {
         $root.find('a[href]').each(function () {
             var $a = $(this);
@@ -181,6 +185,7 @@ define([
 
     function extractProductItems(productRaw) {
         var products = [];
+        var hidePrices = isB2bRestrictedMode();
 
         $.each(productRaw || [], function (_, item) {
             if (!item || typeof item !== 'object') {
@@ -191,7 +196,7 @@ define([
                 name: $.trim(item.name || ''),
                 url: $.trim(item.url || '#'),
                 image: $.trim(item.image || ''),
-                priceText: $.trim(toText(item.price || ''))
+                priceText: hidePrices ? '' : $.trim(toText(item.price || ''))
             });
         });
 

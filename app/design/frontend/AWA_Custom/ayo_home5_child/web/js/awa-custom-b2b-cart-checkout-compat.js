@@ -46,6 +46,51 @@ define([
         });
     }
 
+    function getCheckoutB2bConfig() {
+        var config = window.checkoutConfig || {};
+
+        return {
+            pricesHidden: !!config.b2bPricesHidden,
+            message: $.trim(config.b2bPriceMessage || '')
+        };
+    }
+
+    function decorateCheckoutPriceGate() {
+        var data = getCheckoutB2bConfig();
+        var $summary = $('#opc-sidebar, .opc-sidebar, .opc-block-summary').first();
+        var $shipping = $summary.find('.shipping-information, .opc-block-shipping-information').first();
+        var $target = $shipping.length ? $shipping : $summary.children().first();
+        var message = data.message || 'A liberacao das condicoes comerciais acontece apos a aprovacao da conta empresarial.';
+
+        if (!$summary.length) {
+            return;
+        }
+
+        if (!data.pricesHidden) {
+            $summary.find('.awa-b2b-checkout-gate').remove();
+            $summary.removeClass('awa-b2b-checkout-restricted');
+            return;
+        }
+
+        $summary.addClass('awa-b2b-checkout-restricted');
+
+        if (!$summary.find('.awa-b2b-checkout-gate').length) {
+            $('<section class="awa-b2b-checkout-gate" data-awa-component="b2b-checkout-gate" aria-live="polite">'
+                + '<span class="awa-b2b-checkout-gate__badge">Portal comercial B2B</span>'
+                + '<h3 class="awa-b2b-checkout-gate__title">Resumo comercial protegido</h3>'
+                + '<p class="awa-b2b-checkout-gate__text"></p>'
+                + '<p class="awa-b2b-checkout-gate__note">Finalize a aprovacao da conta para visualizar valores, frete e totais negociados.</p>'
+                + '</section>').insertBefore($target);
+        }
+
+        $summary.find('.awa-b2b-checkout-gate__text').text(message);
+
+        $summary.find('.totals, .grand.totals, .opc-block-summary .items-in-cart, .opc-block-summary .minicart-items').each(function () {
+            var $el = $(this);
+            $el.attr('data-b2b-summary-hidden', 'true');
+        });
+    }
+
     function decorateCart() {
         var $body = $(document.body);
         var $summary = $('.cart-summary');
@@ -207,6 +252,7 @@ define([
             }
         });
 
+        decorateCheckoutPriceGate();
         decoratePoNumber();
         decorateTerms();
     }

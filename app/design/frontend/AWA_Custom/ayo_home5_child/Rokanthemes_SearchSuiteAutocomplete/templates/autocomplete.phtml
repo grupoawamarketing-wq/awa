@@ -25,7 +25,11 @@ $searchSuiteUrl = $block->getSearchUrl();
             <?php if ($block->enableSearchByCat()): ?>
                 <div class="field-by-cat-search" data-awa-search-category="true">
                     <label class="awa-sr-only" for="choose_category"><?= $block->escapeHtml(__('Categoria')) ?></label>
-                    <select name="cat" id="choose_category" aria-label="<?= $block->escapeHtmlAttr(__('Categoria')) ?>">
+                    <select name="cat"
+                            id="choose_category"
+                            data-awa-search-category-select="true"
+                            aria-label="<?= $block->escapeHtmlAttr(__('Categoria')) ?>"
+                            title="<?= $block->escapeHtmlAttr(__('Categoria')) ?>">
                         <option value=""><?= $block->escapeHtml(__('Todas as categorias')) ?></option>
                         <?php foreach ($block->getCategories() as $category): ?>
                             <option value="<?= $block->escapeHtmlAttr($category->getId()) ?>"
@@ -43,9 +47,12 @@ $searchSuiteUrl = $block->getSearchUrl();
                 <label class="label" for="search" id="awa-search-label" data-role="minisearch-label">
                     <span><?= $block->escapeHtml(__('Buscar')) ?></span>
                 </label>
+                <span id="awa-search-help" class="awa-sr-only">
+                    <?= $block->escapeHtml(__('Digite ao menos 2 caracteres para ver sugestoes e use as setas para navegar nos resultados.')) ?>
+                </span>
                 <div class="control" data-awa-search-control="true">
                     <input id="search"
-                           data-awa-search-input="true"
+                            data-awa-search-input="true"
                            data-mage-init='{"quickSearch":{
                                "formSelector":"#search_mini_form",
                                "url":"<?= $block->escapeUrl($block->getUrl('search/ajax/suggest')) ?>",
@@ -58,12 +65,13 @@ $searchSuiteUrl = $block->getSearchUrl();
                            class="input-text"
                            minlength="2"
                            maxlength="<?= (int) $searchHelper->getMaxQueryLength() ?>"
-                           role="combobox"
-                           aria-labelledby="awa-search-label"
-                           aria-label="<?= $block->escapeHtmlAttr(__('Buscar')) ?>"
-                           aria-autocomplete="both"
-                           aria-expanded="false"
-                           aria-haspopup="listbox"
+                            role="combobox"
+                            aria-labelledby="awa-search-label"
+                            aria-label="<?= $block->escapeHtmlAttr(__('Buscar')) ?>"
+                            aria-describedby="awa-search-help"
+                            aria-autocomplete="both"
+                            aria-expanded="false"
+                            aria-haspopup="listbox"
                            aria-controls="search_autocomplete"
                            autocomplete="off"
                            autocapitalize="off"

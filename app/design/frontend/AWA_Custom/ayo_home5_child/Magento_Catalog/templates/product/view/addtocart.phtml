@@ -4,10 +4,19 @@
  * See COPYING.txt for license details.
  */
 
-/** @var $block \Magento\Catalog\Block\Product\View */
+/** @var \Magento\Catalog\Block\Product\View $block */
 ?>
 <?php $_product = $block->getProduct(); ?>
 <?php $buttonTitle = __('Add to Cart'); ?>
+<?php $b2bHelper = $this->helper('GrupoAwamotos\B2B\Helper\Data'); ?>
+<?php $b2bCanAddToCart = $b2bHelper->canAddToCart(); ?>
+<?php $b2bGateState = $block->escapeHtmlAttr($b2bHelper->getPriceGateState()); ?>
+<?php $b2bGateHeadline = $block->escapeHtml($b2bHelper->getPriceGateHeadline()); ?>
+<?php $b2bGateDescription = $block->escapeHtml($b2bHelper->getPriceGateDescription()); ?>
+<?php $b2bPrimaryUrl = $block->escapeUrl($b2bHelper->getPriceGatePrimaryUrl()); ?>
+<?php $b2bPrimaryLabel = $block->escapeHtml($b2bHelper->getPriceGatePrimaryLabel()); ?>
+<?php $b2bSecondaryUrl = $block->escapeUrl($b2bHelper->getPriceGateSecondaryUrl()); ?>
+<?php $b2bSecondaryLabel = $block->escapeHtml($b2bHelper->getPriceGateSecondaryLabel()); ?>
 
 <?php /* =========================================================
          B2B TECHNICAL SUMMARY & SECONDARY ACTIONS
@@ -47,7 +56,17 @@
     </div>
 </div>
 
-<?php if ($_product->isSaleable()) :?>
+<?php if (!$b2bCanAddToCart) : ?>
+<div class="awa-b2b-gate-card awa-b2b-pdp-gate" data-awa-gate-state="<?= $b2bGateState ?>">
+    <span class="awa-b2b-gate-card__badge"><?= $block->escapeHtml(__('Conta B2B')) ?></span>
+    <div class="awa-b2b-gate-card__title"><?= /* @noEscape */ $b2bGateHeadline ?></div>
+    <div class="awa-b2b-gate-card__description"><?= /* @noEscape */ $b2bGateDescription ?></div>
+    <div class="awa-b2b-gate-card__actions">
+        <a class="awa-b2b-gate-card__action" href="<?= $b2bPrimaryUrl ?>"><?= $b2bPrimaryLabel ?></a>
+        <a class="awa-b2b-gate-card__action awa-b2b-gate-card__action--secondary" href="<?= $b2bSecondaryUrl ?>"><?= $b2bSecondaryLabel ?></a>
+    </div>
+</div>
+<?php elseif ($_product->isSaleable()) :?>
 <div class="box-tocart">
     <div class="fieldset">
         <?php if ($block->shouldRenderQuantity()) :?>

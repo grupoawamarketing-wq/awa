@@ -592,6 +592,10 @@
         var searchInput = searchUi ? searchUi.input : null;
         var searchPanel = searchUi ? searchUi.panel : null;
         var minicartTrigger = document.querySelector('.header .top-search .minicart-wrapper .action.showcart');
+        var minicartWrapper = document.querySelector('.header .top-search .minicart-wrapper');
+        var isRestricted = !!(document.body && document.body.classList.contains('b2b-restricted-mode'));
+        var restrictedTitle = 'Abrir carrinho - resumo comercial protegido';
+        var defaultTitle = 'Abrir carrinho';
 
         if (searchButton && !searchButton.getAttribute('aria-label')) {
             searchButton.setAttribute('aria-label', searchButton.getAttribute('title') || 'Buscar');
@@ -611,12 +615,14 @@
             }
         }
 
-        if (minicartTrigger && !minicartTrigger.getAttribute('title')) {
-            minicartTrigger.setAttribute('title', 'Abrir carrinho');
+        if (minicartWrapper) {
+            minicartWrapper.classList.toggle('awa-b2b-minicart-restricted', isRestricted);
         }
 
-        if (minicartTrigger && !minicartTrigger.getAttribute('aria-label')) {
-            minicartTrigger.setAttribute('aria-label', minicartTrigger.getAttribute('title') || 'Abrir carrinho');
+        if (minicartTrigger) {
+            minicartTrigger.setAttribute('title', isRestricted ? restrictedTitle : defaultTitle);
+            minicartTrigger.setAttribute('aria-label', isRestricted ? restrictedTitle : defaultTitle);
+            minicartTrigger.setAttribute('data-b2b-cart-state', isRestricted ? 'restricted' : 'default');
         }
     }
 
