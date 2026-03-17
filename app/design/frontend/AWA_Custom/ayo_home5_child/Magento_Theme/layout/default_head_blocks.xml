@@ -83,20 +83,31 @@
             Reduz 5 requests bloqueantes → 1. Homepage remove via cms_index_index.xml.
         -->
         <css src="css/awa-bundle-site.css"/>
-        <!-- Final color layer: enforce canonical AWA palette tokens/accents -->
-        <css src="css/awa-brand-lock.css"/>
-        <!-- Strict final lock: maps legacy UI colors to canonical AWA palette -->
-        <css src="css/awa-brand-lock-strict.css"/>
-        <!-- Safe QA layer: isolated accessibility/focus/motion refinements -->
-        <css src="css/awa-qa-accessibility-safe.css"/>
-        <css src="css/awa-b2b-gate-enterprise.css"/>
-        <css src="css/awa-typography-best-practices.css"/>
+        <!--
+            Cosmetic/decorative layers (2026-03-17):
+            Moved to non-render-blocking preload via awa-deferred-cosmetic-css.phtml
+            Saves ~33 KiB from critical rendering path (5 fewer blocking CSS)
+            Loaded via head.additional → download in parallel, apply after FCP
+        -->
+        <remove src="css/awa-brand-lock.css"/>
+        <remove src="css/awa-brand-lock-strict.css"/>
+        <remove src="css/awa-qa-accessibility-safe.css"/>
+        <remove src="css/awa-b2b-gate-enterprise.css"/>
+        <remove src="css/awa-typography-best-practices.css"/>
     </head>
 
     <body>
         <referenceBlock name="awa.round2.header.minicart.js" remove="true"/>
         <!-- Bloco desativado: 5 CSS individuais migrados para awa-bundle-site.css (2026-03-16) -->
         <referenceBlock name="awa.post.themeoption.css" remove="true"/>
+
+        <!-- Cosmetic CSS loaded non-blocking via preload+onload (2026-03-17) -->
+        <referenceBlock name="head.additional">
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.deferred.cosmetic.css"
+                   template="Magento_Theme::html/awa-deferred-cosmetic-css.phtml"
+                   after="awa.deferred.interaction.css"/>
+        </referenceBlock>
 
         <referenceContainer name="before.body.end">
             <block class="Magento\Framework\View\Element\Template"

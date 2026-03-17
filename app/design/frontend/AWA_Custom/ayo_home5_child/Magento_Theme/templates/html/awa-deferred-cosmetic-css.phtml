@@ -1,0 +1,38 @@
+<?php
+declare(strict_types=1);
+
+/**
+ * AWA — Carregamento diferido de CSS cosmético/decorativo (não-bloqueante).
+ *
+ * Estas camadas CSS são refinamentos visuais que NÃO afetam o
+ * layout above-the-fold nem metricas de CLS:
+ *  - awa-brand-lock.css            → enforcement de cores AWA
+ *  - awa-brand-lock-strict.css     → mapeamento estrito de palette
+ *  - awa-qa-accessibility-safe.css → focus outlines, prefers-reduced-motion
+ *  - awa-b2b-gate-enterprise.css   → modal B2B (opacity:0 por padrão)
+ *  - awa-typography-best-practices → refinamentos tipográficos
+ *
+ * Estratégia: rel="preload" as="style" + onload → download em paralelo,
+ * aplica CSS assim que disponível (tipicamente <100ms após FCP).
+ *
+ * Removidos do <head> via <remove> em default_head_blocks.xml.
+ * Adicionados aqui em head.additional (não bloqueia render).
+ */
+
+/** @var \Magento\Framework\View\Element\Template $block */
+
+$deferredFiles = [
+    $block->getViewFileUrl('css/awa-brand-lock.css'),
+    $block->getViewFileUrl('css/awa-brand-lock-strict.css'),
+    $block->getViewFileUrl('css/awa-qa-accessibility-safe.css'),
+    $block->getViewFileUrl('css/awa-b2b-gate-enterprise.css'),
+    $block->getViewFileUrl('css/awa-typography-best-practices.css'),
+];
+?>
+<?php foreach ($deferredFiles as $cssUrl): ?>
+<link rel="preload"
+      as="style"
+      onload="this.onload=null;this.rel='stylesheet'"
+      href="<?= $block->escapeUrl($cssUrl) ?>"/>
+<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($cssUrl) ?>"/></noscript>
+<?php endforeach; ?>
