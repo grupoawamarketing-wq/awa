@@ -61,19 +61,22 @@ if ($firstBanner):
   "itemListElement": [
     <?php
     $schemaIndex = 0;
+    $validItems = 0;
     foreach ($banners as $banner):
         if ($banner->getSlideStatus() == '2') { continue; }
         $schemaIndex++;
         $itemName = trim(strip_tags($banner->getSlideTitle() ?: $banner->getSlideText() ?: ''));
         $itemUrl = $banner->getSlideLink() ?: '';
-        if ($itemName):
+        if ($itemName && $itemName !== '.'):
+            if ($validItems > 0) echo ',';
+            $validItems++;
     ?>
     {
       "@type": "ListItem",
       "position": <?php echo $schemaIndex; ?>,
       "name": "<?php echo $block->escapeHtml($itemName); ?>"<?php if ($itemUrl): ?>,
       "url": "<?php echo $block->escapeUrl($itemUrl); ?>"<?php endif; ?>
-    }<?php if ($schemaIndex < $totalSlides): ?>,<?php endif; ?>
+    }
     <?php endif; endforeach; ?>
   ]
 }
