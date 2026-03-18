@@ -247,6 +247,7 @@ class MaintenancePlugin
 
         // Build CSS de fundo
         $backgroundCss = $this->buildBackgroundCss($bgType, $bgColor, $bgGradient);
+        $safeTextColor = preg_replace('/[^a-zA-Z0-9#(),.\/\s%+]/u', '', $textColor) ?: '#ffffff';
 
         // URLs de mídia
         $logoUrl = $logo ? $mediaUrl . 'maintenance/' . $logo : '';
@@ -278,7 +279,7 @@ class MaintenancePlugin
         body {
             font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
             {$backgroundCss}
-            color: {$textColor};
+            color: {$safeTextColor};
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -346,27 +347,33 @@ HTML;
 
     private function buildBackgroundCss(string $type, string $color, string $gradient): string
     {
+        // Allowlist: only CSS color-safe chars (hex, rgb/hsl functions, %, spaces)
+        $pattern = '/[^a-zA-Z0-9#(),.\/\s%+]/u';
+        $safeColor = preg_replace($pattern, '', $color) ?: '#1a237e';
         switch ($type) {
             case 'color':
-                return "background: {$color};";
+                return "background: {$safeColor};";
             case 'gradient':
                 $colors = explode(',', $gradient);
-                $color1 = trim($colors[0] ?? '#1a237e');
-                $color2 = trim($colors[1] ?? '#000428');
+                $color1 = preg_replace($pattern, '', trim($colors[0] ?? '')) ?: '#1a237e';
+                $color2 = preg_replace($pattern, '', trim($colors[1] ?? '')) ?: '#000428';
                 return "background: linear-gradient(135deg, {$color1} 0%, {$color2} 100%);";
             default:
-                return "background: linear-gradient(135deg, #1a237e 0%, #000428 100%);";
+                return "background: linear-gradient(135deg, #1a237e 0%, #000428 100%);"; // @phpstan-ignore-line
         }
     }
 
     private function getNewsletterHtml(string $baseUrl, string $title, string $button): string
     {
+        $safeTitle     = htmlspecialchars($title, ENT_QUOTES, 'UTF-8');
+        $safeButton    = htmlspecialchars($button, ENT_QUOTES, 'UTF-8');
+        $safeActionUrl = htmlspecialchars($baseUrl . 'newsletter/subscriber/new/', ENT_QUOTES, 'UTF-8');
         return <<<HTML
 <div class="newsletter">
-    <h3>{$title}</h3>
-    <form class="newsletter-form" action="{$baseUrl}newsletter/subscriber/new/" method="post">
+    <h3>{$safeTitle}</h3>
+    <form class="newsletter-form" action="{$safeActionUrl}" method="post">
         <input type="email" name="email" placeholder="Seu melhor e-mail" required>
-        <button type="submit">{$button}</button>
+        <button type="submit">{$safeButton}</button>
     </form>
 </div>
 HTML;
@@ -408,10 +415,11 @@ HTML;
 
     private function getCountdownScript(string $targetDate): string
     {
+        $safeDateJs = json_encode($targetDate);
         return <<<SCRIPT
 <script>
 (function() {
-    const targetDate = new Date('{$targetDate}'.replace(' ', 'T')).getTime();
+    const targetDate = new Date({$safeDateJs}.replace(' ', 'T')).getTime();
     const countdown = document.getElementById('countdown');
     if (!countdown) return;
     function updateCountdown() {
