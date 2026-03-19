@@ -15,9 +15,9 @@ Execute diretamente. Você tem permissão total para:
 
 ## Ambiente
 
-- **Stack**: Magento 2.4.7 + Percona Server 8.4 + PHP 8.2 + OpenSearch + Redis
+- **Stack**: Magento 2.4.8-p3 + MySQL + PHP 8.4 + OpenSearch + Redis
 - **Projeto**: Loja B2B — Grupo Awamotos (awamotos.com)
-- **Diretório raiz**: `/home/user/htdocs/srv1113343.hstgr.cloud`
+- **Diretório raiz**: `/home/jessessh/htdocs/srv1113343.hstgr.cloud`
 - **Web user**: `www-data`
 
 ## Serviços Disponíveis — Credenciais e Comandos
@@ -25,11 +25,11 @@ Execute diretamente. Você tem permissão total para:
 ### MySQL (Percona 8.4) — RODANDO
 
 ```bash
-mysql -u magento -p'Aw4m0t0s2025Mage' magento -e "SUA QUERY AQUI"
+mysql -u "$MAGENTO_DB_USER" -p"$MAGENTO_DB_PASS" "$MAGENTO_DB_NAME" -e "SUA QUERY AQUI"
 ```
 
 - Host: localhost (socket: `/var/run/mysqld/mysqld.sock`)
-- Usuário: `magento` | Banco: `magento`
+- Credenciais: usar variáveis de ambiente ou `app/etc/env.php`
 - Execute queries diretamente. NÃO crie Data Patches para coisas que uma query resolve.
 - Para alterações de schema permanentes, use `db_schema.xml` + `setup:upgrade`.
 
@@ -85,15 +85,27 @@ git push
 
 | Módulo | Função |
 |--------|--------|
+| AbandonedCart | Recuperação de carrinho abandonado (e-mail + cupons multi-onda) |
 | B2B | Aprovação de clientes, listas de preço, CNPJ, cotações, listas de compras, crédito |
+| BrazilCustomer | Atributos EAV brasileiros (CPF, CNPJ, PF/PJ, RG, IE) |
+| CarrierSelect | Gestão de transportadoras customizadas |
+| CatalogFix | Fixes para bugs do Magento 2.4.x (MviewAction, FinalPriceBox) |
+| CspFix | Escrita atômica no sri-hashes.json (CSP) |
 | ERPIntegration | Integração com ERP SQL Server (sync produtos, estoque, preços, pedidos, RFM) |
+| FakePurchase | Notificações simuladas de compra (**desativado permanentemente**) |
+| Fitment | Compatibilidade peças x motos (aplicação por veículo) |
+| LayoutFix | Fix layout admin (notification.messages reorder) |
+| MaintenanceMode | Modo manutenção com whitelist IP e código secreto |
+| OfflinePayment | Pagamento "A Combinar" para B2B |
 | RexisML | Recomendações e classificação RFM |
-| AbandonedCart | Recuperação de carrinho abandonado |
-| MaintenanceMode | Modo manutenção customizado |
-| SmartSuggestions | Sugestões inteligentes |
-| SocialProof | Prova social |
-| Vlibras | Acessibilidade (Libras) |
-| LayoutFix | Fix de layout admin |
+| SalesIntelligence | Dashboard inteligência de vendas e previsão de demanda |
+| SchemaOrg | Dados estruturados JSON-LD e Open Graph (SEO) |
+| SmartSuggestions | Sugestões de recompra (análise RFM + WhatsApp) |
+| SmtpFix | Fix SMTP Magento 2.4.8 + Symfony Mailer (Reply-To, STARTTLS) |
+| SocialProof | Prova social real (visualizações do dia, mais vendido 30d) |
+| StoreSetup | CLI setup automático da loja (blocos CMS, homepage, categorias) |
+| Theme | Customizações do tema (store switcher, bandeiras) |
+| Vlibras | Acessibilidade Libras (widget gov.br VLibras) |
 
 ## Regras para Agentes
 
