@@ -6,41 +6,41 @@
 -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
-    
+
     <!-- Customer Approval Service -->
     <preference for="GrupoAwamotos\B2B\Api\CustomerApprovalInterface"
                 type="GrupoAwamotos\B2B\Model\CustomerApproval"/>
-    
+
     <!-- Quote Request Repository -->
     <preference for="GrupoAwamotos\B2B\Api\QuoteRequestRepositoryInterface"
                 type="GrupoAwamotos\B2B\Model\QuoteRequestRepository"/>
-    
+
     <!-- Price Visibility Service -->
     <preference for="GrupoAwamotos\B2B\Api\PriceVisibilityInterface"
                 type="GrupoAwamotos\B2B\Model\PriceVisibility"/>
-    
+
     <!--
         Plugins de ocultação de preço/carrinho/checkout movidos para etc/frontend/di.xml.
         Esses plugins dependem de CustomerSession e só fazem sentido no escopo frontend.
         Veja: grupoawamotos_b2b_hide_price, hide_final_price, hide_cart_totals,
               hide_cart_item_price, hide_minicart_price, hide_checkout_price
     -->
-    
+
     <!-- Customer Session Proxy para performance -->
     <type name="GrupoAwamotos\B2B\Model\PriceVisibility">
         <arguments>
             <argument name="customerSession" xsi:type="object">Magento\Customer\Model\Session\Proxy</argument>
         </arguments>
     </type>
-    
+
     <type name="GrupoAwamotos\B2B\Plugin\HidePricePlugin">
         <arguments>
             <argument name="customerSession" xsi:type="object">Magento\Customer\Model\Session\Proxy</argument>
         </arguments>
     </type>
-    
+
     <!-- Plugin grupoawamotos_b2b_group_price movido para etc/frontend/di.xml (depende de CustomerSession) -->
-    
+
     <type name="GrupoAwamotos\B2B\Plugin\GroupPricePlugin">
         <arguments>
             <argument name="customerSession" xsi:type="object">Magento\Customer\Model\Session\Proxy</argument>
@@ -53,7 +53,7 @@
             <argument name="customerSession" xsi:type="object">Magento\Customer\Model\Session\Proxy</argument>
         </arguments>
     </type>
-    
+
     <!-- CNPJ Validator Helper -->
     <type name="GrupoAwamotos\B2B\Helper\CnpjValidator">
         <arguments>
@@ -68,7 +68,7 @@
     </type>
 
     <!-- Plugin AdminOrder\Create movido para etc/adminhtml/di.xml (escopo correto) -->
-    
+
     <!-- B2B Catálogo Restrito - Filtro de Produtos (plugin movido para etc/frontend/di.xml) -->
     <type name="GrupoAwamotos\B2B\Plugin\Catalog\RestrictedProductCollectionPlugin">
         <arguments>
@@ -77,42 +77,42 @@
             <argument name="logger" xsi:type="object">Psr\Log\LoggerInterface</argument>
         </arguments>
     </type>
-    
+
     <!-- Plugin grupoawamotos_b2b_restricted_product_view movido para etc/frontend/di.xml (depende de CustomerSession) -->
-    
+
     <type name="GrupoAwamotos\B2B\Plugin\Catalog\RestrictedProductViewPlugin">
         <arguments>
             <argument name="customerSession" xsi:type="object">Magento\Customer\Model\Session\Proxy</argument>
         </arguments>
     </type>
-    
+
     <!-- B2B Shipping Rate Enhancement Plugin -->
     <type name="Magento\Shipping\Model\Rate\Result">
         <plugin name="grupoawamotos_b2b_shipping_rate"
                 type="GrupoAwamotos\B2B\Plugin\Checkout\ShippingRateResultPlugin"
                 sortOrder="10"/>
     </type>
-    
+
     <type name="GrupoAwamotos\B2B\Plugin\Checkout\ShippingRateResultPlugin">
         <arguments>
             <argument name="customerSession" xsi:type="object">Magento\Customer\Model\Session\Proxy</argument>
         </arguments>
     </type>
-    
+
     <!-- B2B Shopping List Service -->
     <type name="GrupoAwamotos\B2B\Model\ShoppingListService">
         <arguments>
             <argument name="customerSession" xsi:type="object">Magento\Customer\Model\Session\Proxy</argument>
         </arguments>
     </type>
-    
+
     <!-- B2B Carrier Service -->
     <type name="GrupoAwamotos\B2B\Model\CarrierService">
         <arguments>
             <argument name="customerSession" xsi:type="object">Magento\Customer\Model\Session\Proxy</argument>
         </arguments>
     </type>
-    
+
     <!-- ERP Integration Service -->
     <type name="GrupoAwamotos\B2B\Model\ErpIntegration">
         <arguments>
@@ -156,6 +156,7 @@
                 <item name="b2bWhatsAppTest" xsi:type="object">GrupoAwamotos\B2B\Console\Command\TestWhatsAppCommand</item>
                 <item name="b2bCnpjCacheClear" xsi:type="object">GrupoAwamotos\B2B\Console\Command\ClearCnpjCacheCommand</item>
                 <item name="b2bProvisionErpCustomers" xsi:type="object">GrupoAwamotos\B2B\Console\Command\ProvisionErpCustomersCommand</item>
+                <item name="b2bApproveErpLinkedPending" xsi:type="object">GrupoAwamotos\B2B\Console\Command\ApproveErpLinkedPendingCommand</item>
             </argument>
         </arguments>
     </type>
@@ -195,7 +196,7 @@
             <argument name="attendantManager" xsi:type="object">GrupoAwamotos\B2B\Model\Attendant\AttendantManager</argument>
         </arguments>
     </type>
-    
+
     <!-- Data Provider Collections para Grid B2B (precisa estar no global, não adminhtml) -->
     <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
         <arguments>
@@ -208,15 +209,15 @@
             </argument>
         </arguments>
     </type>
-    
-    <virtualType name="GrupoAwamotos\B2B\Model\ResourceModel\Carrier\Grid\Collection" 
+
+    <virtualType name="GrupoAwamotos\B2B\Model\ResourceModel\Carrier\Grid\Collection"
                  type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
         <arguments>
             <argument name="mainTable" xsi:type="string">grupoawamotos_b2b_carrier</argument>
             <argument name="resourceModel" xsi:type="string">GrupoAwamotos\B2B\Model\ResourceModel\Carrier</argument>
         </arguments>
     </virtualType>
-    
+
     <virtualType name="GrupoAwamotos\B2B\Model\ResourceModel\OrderApproval\Grid\Collection"
                  type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
         <arguments>

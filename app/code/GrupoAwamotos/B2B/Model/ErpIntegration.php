@@ -46,8 +46,12 @@ class ErpIntegration
         }
 
         try {
-            $cleanCnpj = preg_replace('/\D/', '', $cnpj);
-            return $this->customerSync->getErpCustomerByTaxvat($cleanCnpj);
+            $cleanCnpj = $this->normalizeCnpj($cnpj);
+            if ($cleanCnpj === '') {
+                return null;
+            }
+
+            return $this->customerSync->getErpCustomerByCnpj($cleanCnpj);
         } catch (\Exception $e) {
             $this->logger->error('[B2B-ERP] Error finding customer by CNPJ: ' . $e->getMessage());
             return null;
@@ -113,9 +117,7 @@ class ErpIntegration
 
         try {
             $customer = $this->customerRepository->getById($customerId);
-            $cnpj = $this->getCustomerAttribute($customer, 'b2b_cnpj')
-                ?? $this->getCustomerAttribute($customer, 'cnpj')
-                ?? $customer->getTaxvat();
+            $cnpj = $this->resolveCustomerCnpj($customer);
 
             if (empty($cnpj)) {
                 $result['message'] = 'Customer has no CNPJ';
@@ -309,5 +311,28 @@ class ErpIntegration
     {
         $attribute = $customer->getCustomAttribute($attributeCode);
         return $attribute ? (string) $attribute->getValue() : null;
+    }
+
+    private function resolveCustomerCnpj(CustomerInterface $customer): string
+    {
+        foreach ([
+            $this->getCustomerAttribute($customer, 'b2b_cnpj'),
+            $this->getCustomerAttribute($customer, 'cnpj'),
+            $customer->getTaxvat(),
+        ] as $value) {
+            $cnpj = $this->normalizeCnpj((string) $value);
+            if ($cnpj !== '') {
+                return $cnpj;
+            }
+        }
+
+        return '';
+    }
+
+    private function normalizeCnpj(string $value): string
+    {
+        $digits = preg_replace('/\D+/', '', $value) ?? '';
+
+        return strlen($digits) === 14 ? $digits : '';
     }
 }

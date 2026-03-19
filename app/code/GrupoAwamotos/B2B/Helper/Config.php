@@ -14,7 +14,7 @@ class Config extends AbstractHelper
 {
     const XML_PATH_ENABLED = 'grupoawamotos_b2b/general/enabled';
     const XML_PATH_B2B_MODE = 'grupoawamotos_b2b/general/b2b_mode';
-    
+
     // Price Visibility
     const XML_PATH_HIDE_PRICE_GUESTS = 'grupoawamotos_b2b/price_visibility/hide_price_guests';
     const XML_PATH_HIDE_ADD_TO_CART_GUESTS = 'grupoawamotos_b2b/price_visibility/hide_add_to_cart_guests';
@@ -26,31 +26,32 @@ class Config extends AbstractHelper
     // Customer Approval
     const XML_PATH_REQUIRE_APPROVAL = 'grupoawamotos_b2b/customer_approval/require_approval';
     const XML_PATH_AUTO_APPROVE_GROUPS = 'grupoawamotos_b2b/customer_approval/auto_approve_groups';
+    const XML_PATH_AUTO_APPROVE_IF_FOUND_IN_ERP = 'grupoawamotos_b2b/customer_approval/auto_approve_if_found_in_erp';
     const XML_PATH_PENDING_MESSAGE = 'grupoawamotos_b2b/customer_approval/pending_message';
     const XML_PATH_SEND_APPROVAL_EMAIL = 'grupoawamotos_b2b/customer_approval/send_approval_email';
     const XML_PATH_NOTIFY_ADMIN = 'grupoawamotos_b2b/customer_approval/notify_admin_new_customer';
     const XML_PATH_ADMIN_EMAIL = 'grupoawamotos_b2b/customer_approval/admin_email';
-    
+
     // Minimum Qty
     const XML_PATH_MIN_QTY_ENABLED = 'grupoawamotos_b2b/minimum_qty/enabled';
     const XML_PATH_GLOBAL_MIN_QTY = 'grupoawamotos_b2b/minimum_qty/global_min_qty';
     const XML_PATH_MIN_ORDER_AMOUNT = 'grupoawamotos_b2b/minimum_qty/min_order_amount';
     const XML_PATH_MIN_ORDER_MESSAGE = 'grupoawamotos_b2b/minimum_qty/min_order_message';
-    
+
     // Quote Request
     const XML_PATH_QUOTE_ENABLED = 'grupoawamotos_b2b/quote_request/enabled';
     const XML_PATH_QUOTE_BUTTON = 'grupoawamotos_b2b/quote_request/show_button';
     const XML_PATH_QUOTE_ALLOW_GUESTS = 'grupoawamotos_b2b/quote_request/allow_guests';
     const XML_PATH_QUOTE_EXPIRY_DAYS = 'grupoawamotos_b2b/quote_request/expiry_days';
     const XML_PATH_QUOTE_NOTIFY_CUSTOMER = 'grupoawamotos_b2b/quote_request/notify_customer';
-    
+
     // Customer Groups
     const XML_PATH_WHOLESALE_GROUP = 'grupoawamotos_b2b/customer_groups/wholesale_group';
     const XML_PATH_WHOLESALE_DISCOUNT = 'grupoawamotos_b2b/customer_groups/wholesale_discount';
     const XML_PATH_VIP_GROUP = 'grupoawamotos_b2b/customer_groups/vip_group';
     const XML_PATH_VIP_DISCOUNT = 'grupoawamotos_b2b/customer_groups/vip_discount';
     const XML_PATH_DEFAULT_B2B_GROUP = 'grupoawamotos_b2b/customer_groups/default_b2b_group';
-    
+
     // CNAE Profiling
     const XML_PATH_CNAE_ENABLED = 'grupoawamotos_b2b/cnae_profiling/enabled';
     const XML_PATH_CNAE_AUTO_APPROVE_DIRECT = 'grupoawamotos_b2b/cnae_profiling/auto_approve_direct';
@@ -66,7 +67,7 @@ class Config extends AbstractHelper
             $storeId
         );
     }
-    
+
     /**
      * Get B2B mode (strict or mixed)
      */
@@ -78,7 +79,7 @@ class Config extends AbstractHelper
             $storeId
         );
     }
-    
+
     /**
      * Check if strict B2B mode
      */
@@ -86,7 +87,7 @@ class Config extends AbstractHelper
     {
         return $this->getB2BMode($storeId) === 'strict';
     }
-    
+
     /**
      * Check if should hide prices for guests
      */
@@ -98,7 +99,7 @@ class Config extends AbstractHelper
             $storeId
         );
     }
-    
+
     /**
      * Check if should hide add to cart for guests
      */
@@ -110,7 +111,7 @@ class Config extends AbstractHelper
             $storeId
         );
     }
-    
+
     /**
      * Get login message for guests
      */
@@ -122,7 +123,7 @@ class Config extends AbstractHelper
             $storeId
         );
     }
-    
+
     /**
      * Check if pending customers can see prices
      */
@@ -134,7 +135,7 @@ class Config extends AbstractHelper
             $storeId
         );
     }
-    
+
     /**
      * Check if should hide prices for approved customers without ERP code
      */
@@ -170,7 +171,7 @@ class Config extends AbstractHelper
             $storeId
         );
     }
-    
+
     /**
      * Get auto approve groups
      */
@@ -181,14 +182,26 @@ class Config extends AbstractHelper
             ScopeInterface::SCOPE_STORE,
             $storeId
         );
-        
+
         if (empty($value)) {
             return [];
         }
-        
+
         return array_map('intval', explode(',', $value));
     }
-    
+
+            /**
+             * Check if customers found in ERP should be auto-approved
+             */
+            public function autoApproveIfFoundInErp($storeId = null): bool
+            {
+                return $this->isEnabled($storeId) && $this->scopeConfig->isSetFlag(
+                    self::XML_PATH_AUTO_APPROVE_IF_FOUND_IN_ERP,
+                    ScopeInterface::SCOPE_STORE,
+                    $storeId
+                );
+            }
+
     /**
      * Get pending message
      */
@@ -200,7 +213,7 @@ class Config extends AbstractHelper
             $storeId
         );
     }
-    
+
     /**
      * Check if should send approval email
      */
@@ -212,7 +225,7 @@ class Config extends AbstractHelper
             $storeId
         );
     }
-    
+
     /**
      * Check if should notify admin
      */
@@ -224,7 +237,7 @@ class Config extends AbstractHelper
             $storeId
         );
     }
-    
+
     /**
      * Get admin email for notifications
      */
@@ -236,7 +249,7 @@ class Config extends AbstractHelper
             $storeId
         );
     }
-    
+
     /**
      * Check if minimum qty is enabled
      */
@@ -248,7 +261,7 @@ class Config extends AbstractHelper
             $storeId
         );
     }
-    
+
     /**
      * Get global minimum qty
      */
@@ -260,7 +273,7 @@ class Config extends AbstractHelper
             $storeId
         );
     }
-    
+
     /**
      * Get minimum order amount
      */
@@ -272,7 +285,7 @@ class Config extends AbstractHelper
             $storeId
         );
     }
-    
+
     /**
      * Get minimum order message
      */
@@ -283,14 +296,14 @@ class Config extends AbstractHelper
             ScopeInterface::SCOPE_STORE,
             $storeId
         );
-        
+
         return str_replace(
             '{{min_amount}}',
             number_format($this->getMinOrderAmount($storeId), 2, ',', '.'),
             $message
         );
     }
-    
+
     /**
      * Check if quote request is enabled
      */
@@ -302,7 +315,7 @@ class Config extends AbstractHelper
             $storeId
         );
     }
-    
+
     /**
      * Get quote button position
      */
@@ -314,7 +327,7 @@ class Config extends AbstractHelper
             $storeId
         );
     }
-    
+
     /**
      * Check if guests can request quotes
      */
@@ -326,7 +339,7 @@ class Config extends AbstractHelper
             $storeId
         );
     }
-    
+
     /**
      * Get quote expiry days
      */
@@ -338,7 +351,7 @@ class Config extends AbstractHelper
             $storeId
         );
     }
-    
+
     /**
      * Get wholesale group ID
      */
@@ -350,7 +363,7 @@ class Config extends AbstractHelper
             $storeId
         );
     }
-    
+
     /**
      * Get wholesale discount percentage
      */
@@ -362,7 +375,7 @@ class Config extends AbstractHelper
             $storeId
         );
     }
-    
+
     /**
      * Get VIP group ID
      */
@@ -374,7 +387,7 @@ class Config extends AbstractHelper
             $storeId
         );
     }
-    
+
     /**
      * Get VIP discount percentage
      */
@@ -386,7 +399,7 @@ class Config extends AbstractHelper
             $storeId
         );
     }
-    
+
     /**
      * Get default B2B group ID for new approved customers
      */

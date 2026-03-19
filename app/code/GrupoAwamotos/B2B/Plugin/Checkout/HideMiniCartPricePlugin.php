@@ -11,18 +11,14 @@ namespace GrupoAwamotos\B2B\Plugin\Checkout;
 
 use GrupoAwamotos\B2B\Api\PriceVisibilityInterface;
 use Magento\Checkout\CustomerData\Cart;
+use Magento\Framework\Escaper;
 
 class HideMiniCartPricePlugin
 {
-    /**
-     * @var PriceVisibilityInterface
-     */
-    private $priceVisibility;
-
     public function __construct(
-        PriceVisibilityInterface $priceVisibility
+        private readonly PriceVisibilityInterface $priceVisibility,
+        private readonly Escaper $escaper
     ) {
-        $this->priceVisibility = $priceVisibility;
     }
 
     /**
@@ -46,14 +42,14 @@ class HideMiniCartPricePlugin
             $result['subtotalAmount'] = 0;
         }
         if (isset($result['subtotal'])) {
-            $result['subtotal'] = '<span class="b2b-price-hidden">' . $messageText . '</span>';
+            $result['subtotal'] = $this->renderMiniPriceGate($messageText, true);
         }
 
         // Hide per-item prices
         if (isset($result['items']) && is_array($result['items'])) {
             foreach ($result['items'] as &$item) {
                 if (isset($item['product_price'])) {
-                    $item['product_price'] = '<span class="b2b-price-hidden">' . $messageText . '</span>';
+                    $item['product_price'] = $this->renderMiniPriceGate($messageText, false);
                 }
                 if (isset($item['product_price_value'])) {
                     $item['product_price_value'] = 0;
@@ -69,5 +65,23 @@ class HideMiniCartPricePlugin
         $result['b2b_prices_hidden'] = true;
 
         return $result;
+    }
+
+    private function renderMiniPriceGate(string $messageText, bool $isSubtotal): string
+    {
+        $surface = $isSubtotal ? 'minicart-subtotal' : 'minicart-item';
+        $label = $isSubtotal ? __('Subtotal restrito') : __('Preco sob aprovacao');
+
+        return '<span class="b2b-price-hidden awa-b2b-mini-price-gate'
+            . ($isSubtotal ? ' awa-b2b-mini-price-gate--subtotal' : '')
+            . '" data-b2b-price-surface="' . $this->escaper->escapeHtmlAttr($surface) . '"'
+            . ' title="' . $this->escaper->escapeHtmlAttr($messageText) . '">'
+            . '<span class="awa-b2b-mini-price-gate__label">'
+            . $this->escaper->escapeHtml($label)
+            . '</span>'
+            . '<span class="awa-b2b-mini-price-gate__text">'
+            . $this->escaper->escapeHtml($messageText)
+            . '</span>'
+            . '</span>';
     }
 }

@@ -6,6 +6,7 @@ namespace GrupoAwamotos\B2B\Plugin\Customer;
 use GrupoAwamotos\B2B\Helper\CnpjValidator;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Api\Data\CustomerInterface;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Exception\InputException;
 use Magento\Customer\Model\ResourceModel\Customer\CollectionFactory as CustomerCollectionFactory;
 
@@ -13,14 +14,17 @@ class ValidateCnpjOnSavePlugin
 {
     private CnpjValidator $cnpjValidator;
     private CustomerCollectionFactory $customerCollectionFactory;
+    private CustomerRepositoryInterface $customerRepository;
 
     public function __construct(
         CnpjValidator $cnpjValidator,
-        CustomerCollectionFactory $customerCollectionFactory
+        CustomerCollectionFactory $customerCollectionFactory,
+        CustomerRepositoryInterface $customerRepository
     )
     {
         $this->cnpjValidator = $cnpjValidator;
         $this->customerCollectionFactory = $customerCollectionFactory;
+        $this->customerRepository = $customerRepository;
     }
 
     public function beforeSave(
@@ -40,7 +44,9 @@ class ValidateCnpjOnSavePlugin
         }
 
         $formattedCnpj = $this->cnpjValidator->format($rawCnpj);
-        $this->assertCnpjIsUnique($customer, $rawCnpj, $formattedCnpj);
+        if ($this->shouldValidateUniqueness($customer, $formattedCnpj)) {
+            $this->assertCnpjIsUnique($customer, $rawCnpj, $formattedCnpj);
+        }
 
         $customer->setCustomAttribute('b2b_cnpj', $formattedCnpj);
 
@@ -165,5 +171,24 @@ class ValidateCnpjOnSavePlugin
         }
 
         return substr($localPart, 0, 1) . str_repeat('*', max(2, strlen($localPart) - 1)) . '@' . $domain;
+    }
+
+    private function shouldValidateUniqueness(CustomerInterface $customer, string $formattedCnpj): bool
+    {
+        $customerId = (int) ($customer->getId() ?: 0);
+        if ($customerId <= 0) {
+            return true;
+        }
+
+        try {
+            $persistedCustomer = $this->customerRepository->getById($customerId);
+        } catch (NoSuchEntityException) {
+            return true;
+        }
+
+        $persistedCnpj = $this->clean($this->extractCnpj($persistedCustomer));
+        $incomingCnpj = $this->clean($formattedCnpj);
+
+        return $persistedCnpj !== $incomingCnpj;
     }
 }

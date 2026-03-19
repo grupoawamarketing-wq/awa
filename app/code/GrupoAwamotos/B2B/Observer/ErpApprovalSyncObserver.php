@@ -38,7 +38,7 @@ class ErpApprovalSyncObserver implements ObserverInterface
     public function execute(Observer $observer): void
     {
         $customerId = $observer->getEvent()->getCustomerId();
-        $newGroupId = $observer->getEvent()->getNewGroupId();
+        $newGroupId = $this->normalizeGroupId($observer->getEvent()->getNewGroupId());
 
         if (!$customerId) {
             $this->logger->warning('ErpApprovalSyncObserver: No customer ID provided');
@@ -92,22 +92,36 @@ class ErpApprovalSyncObserver implements ObserverInterface
     }
 
     /**
-     * Get customer CNPJ from custom attribute
+     * Resolve customer CNPJ from B2B/BrazilCustomer attributes and only accept 14-digit documents.
      */
     private function getCustomerCnpj($customer): ?string
     {
-        $cnpjAttribute = $customer->getCustomAttribute('cnpj');
-        if ($cnpjAttribute) {
-            return $cnpjAttribute->getValue();
-        }
-
-        // Try taxvat as fallback
-        $taxvat = $customer->getTaxvat();
-        if ($taxvat && strlen(preg_replace('/\D/', '', $taxvat)) === 14) {
-            return $taxvat;
+        foreach ([
+            $this->getCustomerAttributeValue($customer, 'b2b_cnpj'),
+            $this->getCustomerAttributeValue($customer, 'cnpj'),
+            (string) $customer->getTaxvat(),
+        ] as $value) {
+            $cnpj = $this->normalizeCnpj((string) $value);
+            if ($cnpj !== null) {
+                return $cnpj;
+            }
         }
 
         return null;
+    }
+
+    private function getCustomerAttributeValue($customer, string $attributeCode): ?string
+    {
+        $attribute = $customer->getCustomAttribute($attributeCode);
+
+        return $attribute ? (string) $attribute->getValue() : null;
+    }
+
+    private function normalizeCnpj(string $value): ?string
+    {
+        $digits = preg_replace('/\D+/', '', $value) ?? '';
+
+        return strlen($digits) === 14 ? $digits : null;
     }
 
     /**
@@ -148,6 +162,26 @@ class ErpApprovalSyncObserver implements ObserverInterface
         ];
 
         return $groupMapping[$groupId] ?? 'ATACADO';
+    }
+
+    /**
+     * Normalize event payload values to the expected nullable int type.
+     */
+    private function normalizeGroupId(mixed $groupId): ?int
+    {
+        if ($groupId === null || $groupId === '') {
+            return null;
+        }
+
+        if (is_int($groupId)) {
+            return $groupId;
+        }
+
+        if (is_string($groupId) && ctype_digit($groupId)) {
+            return (int) $groupId;
+        }
+
+        return null;
     }
 
     /**

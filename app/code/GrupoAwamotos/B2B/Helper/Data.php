@@ -6,6 +6,7 @@ declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Helper;
 
+use GrupoAwamotos\B2B\Api\PriceVisibilityInterface;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Customer\Api\CustomerRepositoryInterface;
@@ -55,6 +56,11 @@ class Data extends AbstractHelper
     private $b2bConfig;
 
     /**
+     * @var PriceVisibilityInterface
+     */
+    private $priceVisibility;
+
+    /**
      * @var array|null
      */
     private $b2bGroupsCache = null;
@@ -63,11 +69,13 @@ class Data extends AbstractHelper
         Context $context,
         CustomerSession $customerSession,
         CustomerRepositoryInterface $customerRepository,
-        B2BConfig $b2bConfig
+        B2BConfig $b2bConfig,
+        PriceVisibilityInterface $priceVisibility
     ) {
         $this->customerSession = $customerSession;
         $this->customerRepository = $customerRepository;
         $this->b2bConfig = $b2bConfig;
+        $this->priceVisibility = $priceVisibility;
         parent::__construct($context);
     }
 
@@ -258,6 +266,109 @@ class Data extends AbstractHelper
         }
 
         return true;
+    }
+
+    public function canViewPrices(): bool
+    {
+        return $this->priceVisibility->canViewPrices();
+    }
+
+    public function canAddToCart(): bool
+    {
+        return $this->priceVisibility->canAddToCart();
+    }
+
+    public function isGuestCustomer(): bool
+    {
+        return !$this->customerSession->isLoggedIn();
+    }
+
+    public function isPendingErpSetup(): bool
+    {
+        return $this->customerSession->isLoggedIn() && $this->priceVisibility->isApprovedPendingErp();
+    }
+
+    public function isPendingApproval(): bool
+    {
+        return $this->customerSession->isLoggedIn()
+            && !$this->priceVisibility->isCustomerApproved()
+            && !$this->isPendingErpSetup();
+    }
+
+    public function getPriceGateState(): string
+    {
+        if ($this->canViewPrices() && $this->canAddToCart()) {
+            return 'approved';
+        }
+
+        if ($this->isGuestCustomer()) {
+            return 'guest';
+        }
+
+        if ($this->isPendingErpSetup()) {
+            return 'erp-pending';
+        }
+
+        if ($this->isPendingApproval()) {
+            return 'approval-pending';
+        }
+
+        return 'restricted';
+    }
+
+    public function getPriceGateHeadline(): string
+    {
+        return match ($this->getPriceGateState()) {
+            'guest' => 'Acesso comercial exclusivo para clientes B2B aprovados',
+            'erp-pending' => 'Tabela comercial em configuração',
+            'approval-pending' => 'Cadastro empresarial em análise',
+            'restricted' => 'Acesso comercial temporariamente indisponível',
+            default => 'Condições comerciais liberadas',
+        };
+    }
+
+    public function getPriceGateDescription(): string
+    {
+        $message = trim(strip_tags($this->priceVisibility->getPriceReplacementMessage()));
+
+        return match ($this->getPriceGateState()) {
+            'guest' => 'Entre com sua conta empresarial ou solicite cadastro B2B para consultar preços, condições e comprar com atendimento comercial dedicado.',
+            'erp-pending' => $message !== '' ? $message : 'Sua empresa já foi aprovada. Estamos finalizando a vinculação da tabela comercial no ERP.',
+            'approval-pending' => $message !== '' ? $message : 'Assim que sua análise cadastral for concluída, os preços e a compra online serão liberados.',
+            'restricted' => $message !== '' ? $message : 'Entre em contato com nossa equipe comercial para regularizar o acesso da sua conta.',
+            default => 'Sua conta possui acesso às condições comerciais negociadas.',
+        };
+    }
+
+    public function getPriceGatePrimaryLabel(): string
+    {
+        return match ($this->getPriceGateState()) {
+            'guest' => 'Entrar na conta',
+            'erp-pending', 'approval-pending', 'restricted' => 'Acompanhar minha conta',
+            default => 'Minha conta',
+        };
+    }
+
+    public function getPriceGatePrimaryUrl(): string
+    {
+        return $this->isGuestCustomer()
+            ? $this->_getUrl('customer/account/login')
+            : $this->_getUrl('customer/account');
+    }
+
+    public function getPriceGateSecondaryLabel(): string
+    {
+        return match ($this->getPriceGateState()) {
+            'guest' => 'Solicitar cadastro B2B',
+            default => 'Falar com consultor',
+        };
+    }
+
+    public function getPriceGateSecondaryUrl(): string
+    {
+        return $this->isGuestCustomer()
+            ? $this->_getUrl('b2b/register')
+            : $this->_getUrl('contact');
     }
 
     /**

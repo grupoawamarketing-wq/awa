@@ -104,22 +104,36 @@ class ErpRegistrationCheckObserver implements ObserverInterface
     }
 
     /**
-     * Get customer CNPJ from custom attribute
+     * Resolve customer CNPJ from B2B/BrazilCustomer attributes and only accept 14-digit documents.
      */
     private function getCustomerCnpj($customer): ?string
     {
-        $cnpjAttribute = $customer->getCustomAttribute('cnpj');
-        if ($cnpjAttribute) {
-            return $cnpjAttribute->getValue();
-        }
-
-        // Try taxvat as fallback
-        $taxvat = $customer->getTaxvat();
-        if ($taxvat && strlen(preg_replace('/\D/', '', $taxvat)) === 14) {
-            return $taxvat;
+        foreach ([
+            $this->getCustomerAttributeValue($customer, 'b2b_cnpj'),
+            $this->getCustomerAttributeValue($customer, 'cnpj'),
+            (string) $customer->getTaxvat(),
+        ] as $value) {
+            $cnpj = $this->normalizeCnpj((string) $value);
+            if ($cnpj !== null) {
+                return $cnpj;
+            }
         }
 
         return null;
+    }
+
+    private function getCustomerAttributeValue($customer, string $attributeCode): ?string
+    {
+        $attribute = $customer->getCustomAttribute($attributeCode);
+
+        return $attribute ? (string) $attribute->getValue() : null;
+    }
+
+    private function normalizeCnpj(string $value): ?string
+    {
+        $digits = preg_replace('/\D+/', '', $value) ?? '';
+
+        return strlen($digits) === 14 ? $digits : null;
     }
 
     /**

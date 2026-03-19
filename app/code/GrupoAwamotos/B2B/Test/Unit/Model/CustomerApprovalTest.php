@@ -11,6 +11,7 @@ use Magento\Customer\Api\Data\CustomerInterface;
 use Magento\Framework\Api\AttributeInterface;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Adapter\AdapterInterface;
+use Magento\Framework\App\State;
 use Magento\Framework\Event\Manager as EventManager;
 use Magento\Framework\Mail\Template\TransportBuilder;
 use Magento\Framework\Mail\TransportInterface;
@@ -35,6 +36,7 @@ class CustomerApprovalTest extends TestCase
     private DateTime&MockObject $dateTime;
     private LoggerInterface&MockObject $logger;
     private EventManager&MockObject $eventManager;
+    private State&MockObject $appState;
 
     protected function setUp(): void
     {
@@ -46,6 +48,7 @@ class CustomerApprovalTest extends TestCase
         $this->dateTime = $this->createMock(DateTime::class);
         $this->logger = $this->createMock(LoggerInterface::class);
         $this->eventManager = $this->createMock(EventManager::class);
+        $this->appState = $this->createMock(State::class);
 
         // Default: mock ResourceConnection to prevent errors in logAction
         $connection = $this->createMock(AdapterInterface::class);
@@ -60,7 +63,8 @@ class CustomerApprovalTest extends TestCase
             $this->storeManager,
             $this->dateTime,
             $this->logger,
-            $this->eventManager
+            $this->eventManager,
+            $this->appState
         );
     }
 

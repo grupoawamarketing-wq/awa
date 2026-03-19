@@ -61,7 +61,12 @@ class CompanyService
             $company = $this->createCompany($cnpj, $customer, $customerId);
         }
 
-        $this->ensureUserInCompany($company->getId(), $customerId, Company::ROLE_ADMIN);
+        $companyId = $this->normalizeEntityId($company->getId());
+        if ($companyId === null) {
+            throw new LocalizedException(__('Nao foi possivel identificar a empresa vinculada ao cliente.'));
+        }
+
+        $this->ensureUserInCompany($companyId, $customerId, Company::ROLE_ADMIN);
         return $company;
     }
 
@@ -200,5 +205,18 @@ class CompanyService
     {
         $attr = $customer->getCustomAttribute($code);
         return $attr ? $attr->getValue() : null;
+    }
+
+    private function normalizeEntityId(mixed $entityId): ?int
+    {
+        if (is_int($entityId)) {
+            return $entityId;
+        }
+
+        if (is_string($entityId) && ctype_digit($entityId)) {
+            return (int) $entityId;
+        }
+
+        return null;
     }
 }

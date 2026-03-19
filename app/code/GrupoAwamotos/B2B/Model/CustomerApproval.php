@@ -11,7 +11,9 @@ use GrupoAwamotos\B2B\Helper\Config;
 use GrupoAwamotos\B2B\Model\Customer\Attribute\Source\ApprovalStatus;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Api\Data\CustomerInterface;
+use Magento\Framework\App\Area;
 use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\App\State;
 use Magento\Framework\Event\ManagerInterface as EventManager;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
@@ -62,6 +64,11 @@ class CustomerApproval implements CustomerApprovalInterface
      */
     private $eventManager;
 
+    /**
+     * @var State
+     */
+    private $appState;
+
     public function __construct(
         CustomerRepositoryInterface $customerRepository,
         Config $config,
@@ -70,7 +77,8 @@ class CustomerApproval implements CustomerApprovalInterface
         StoreManagerInterface $storeManager,
         DateTime $dateTime,
         LoggerInterface $logger,
-        EventManager $eventManager
+        EventManager $eventManager,
+        State $appState
     ) {
         $this->customerRepository = $customerRepository;
         $this->config = $config;
@@ -80,6 +88,7 @@ class CustomerApproval implements CustomerApprovalInterface
         $this->dateTime = $dateTime;
         $this->logger = $logger;
         $this->eventManager = $eventManager;
+        $this->appState = $appState;
     }
 
     /**
@@ -91,9 +100,9 @@ class CustomerApproval implements CustomerApprovalInterface
             $customer = $this->customerRepository->getById($customerId);
             $customer->setCustomAttribute('b2b_approval_status', ApprovalStatus::STATUS_PENDING);
             $this->customerRepository->save($customer);
-            
+
             $this->logAction($customerId, 'registered', null, ApprovalStatus::STATUS_PENDING, null, null);
-            
+
             return true;
         } catch (\Exception $e) {
             $this->logger->error('B2B setCustomerPending error: ' . $e->getMessage());
@@ -109,16 +118,16 @@ class CustomerApproval implements CustomerApprovalInterface
         try {
             $customer = $this->customerRepository->getById($customerId);
             $oldStatus = $this->getCustomerAttributeValue($customer, 'b2b_approval_status');
-            
+
             $customer->setCustomAttribute('b2b_approval_status', ApprovalStatus::STATUS_APPROVED);
             $customer->setCustomAttribute('b2b_approved_at', $this->dateTime->gmtDate());
-            
+
             // Atribuir grupo B2B padrão se configurado
             $defaultGroup = $this->config->getDefaultB2BGroupId();
             if ($defaultGroup > 0 && $customer->getGroupId() == 1) { // Se está no grupo General
                 $customer->setGroupId($defaultGroup);
             }
-            
+
             $this->customerRepository->save($customer);
 
             $this->logAction($customerId, 'approved', $oldStatus, ApprovalStatus::STATUS_APPROVED, $adminUserId, $comment);
@@ -154,17 +163,17 @@ class CustomerApproval implements CustomerApprovalInterface
         try {
             $customer = $this->customerRepository->getById($customerId);
             $oldStatus = $this->getCustomerAttributeValue($customer, 'b2b_approval_status');
-            
+
             $customer->setCustomAttribute('b2b_approval_status', ApprovalStatus::STATUS_REJECTED);
             $this->customerRepository->save($customer);
-            
+
             $this->logAction($customerId, 'rejected', $oldStatus, ApprovalStatus::STATUS_REJECTED, $adminUserId, $reason);
-            
+
             // Enviar email de rejeição
             $this->sendRejectionEmail($customerId, $reason);
-            
+
             $this->logger->info(sprintf('B2B: Cliente #%d rejeitado. Motivo: %s', $customerId, $reason ?? 'N/A'));
-            
+
             return true;
         } catch (\Exception $e) {
             $this->logger->error('B2B rejectCustomer error: ' . $e->getMessage());
@@ -180,14 +189,14 @@ class CustomerApproval implements CustomerApprovalInterface
         try {
             $customer = $this->customerRepository->getById($customerId);
             $oldStatus = $this->getCustomerAttributeValue($customer, 'b2b_approval_status');
-            
+
             $customer->setCustomAttribute('b2b_approval_status', ApprovalStatus::STATUS_SUSPENDED);
             $this->customerRepository->save($customer);
-            
+
             $this->logAction($customerId, 'suspended', $oldStatus, ApprovalStatus::STATUS_SUSPENDED, $adminUserId, $reason);
-            
+
             $this->logger->info(sprintf('B2B: Cliente #%d suspenso. Motivo: %s', $customerId, $reason ?? 'N/A'));
-            
+
             return true;
         } catch (\Exception $e) {
             $this->logger->error('B2B suspendCustomer error: ' . $e->getMessage());
@@ -214,12 +223,12 @@ class CustomerApproval implements CustomerApprovalInterface
     public function isApproved(int $customerId): bool
     {
         $status = $this->getApprovalStatus($customerId);
-        
+
         // Se não tem status, considerar aprovado (compatibilidade com clientes antigos)
         if ($status === null) {
             return true;
         }
-        
+
         return $status === ApprovalStatus::STATUS_APPROVED;
     }
 
@@ -229,19 +238,21 @@ class CustomerApproval implements CustomerApprovalInterface
     public function notifyAdminNewCustomer(int $customerId): bool
     {
         try {
+            $this->ensureAreaCode(Area::AREA_ADMINHTML);
+
             $customer = $this->customerRepository->getById($customerId);
             $adminEmail = $this->config->getAdminEmail();
-            
+
             if (empty($adminEmail)) {
                 return false;
             }
-            
+
             $store = $this->storeManager->getStore();
-            
+
             $cnpj = $this->getCustomerAttributeValue($customer, 'b2b_cnpj') ?? 'N/A';
             $razaoSocial = $this->getCustomerAttributeValue($customer, 'b2b_razao_social') ?? 'N/A';
             $phone = $this->getCustomerAttributeValue($customer, 'b2b_phone') ?? 'N/A';
-            
+
             $transport = $this->transportBuilder
                 ->setTemplateIdentifier('grupoawamotos_b2b_admin_new_customer')
                 ->setTemplateOptions([
@@ -261,9 +272,9 @@ class CustomerApproval implements CustomerApprovalInterface
                 ->setFromByScope('general')
                 ->addTo($adminEmail)
                 ->getTransport();
-            
+
             $transport->sendMessage();
-            
+
             return true;
         } catch (\Exception $e) {
             $this->logger->error('B2B notifyAdminNewCustomer error: ' . $e->getMessage());
@@ -277,9 +288,11 @@ class CustomerApproval implements CustomerApprovalInterface
     public function sendApprovalEmail(int $customerId): bool
     {
         try {
+            $this->ensureAreaCode(Area::AREA_FRONTEND);
+
             $customer = $this->customerRepository->getById($customerId);
             $store = $this->storeManager->getStore($customer->getStoreId());
-            
+
             $transport = $this->transportBuilder
                 ->setTemplateIdentifier('grupoawamotos_b2b_customer_approved')
                 ->setTemplateOptions([
@@ -296,9 +309,9 @@ class CustomerApproval implements CustomerApprovalInterface
                 ->setFromByScope('general')
                 ->addTo($customer->getEmail(), $customer->getFirstname() . ' ' . $customer->getLastname())
                 ->getTransport();
-            
+
             $transport->sendMessage();
-            
+
             return true;
         } catch (\Exception $e) {
             $this->logger->error('B2B sendApprovalEmail error: ' . $e->getMessage());
@@ -312,9 +325,11 @@ class CustomerApproval implements CustomerApprovalInterface
     public function sendRejectionEmail(int $customerId, ?string $reason = null): bool
     {
         try {
+            $this->ensureAreaCode(Area::AREA_FRONTEND);
+
             $customer = $this->customerRepository->getById($customerId);
             $store = $this->storeManager->getStore($customer->getStoreId());
-            
+
             $transport = $this->transportBuilder
                 ->setTemplateIdentifier('grupoawamotos_b2b_customer_rejected')
                 ->setTemplateOptions([
@@ -331,16 +346,25 @@ class CustomerApproval implements CustomerApprovalInterface
                 ->setFromByScope('general')
                 ->addTo($customer->getEmail(), $customer->getFirstname() . ' ' . $customer->getLastname())
                 ->getTransport();
-            
+
             $transport->sendMessage();
-            
+
             return true;
         } catch (\Exception $e) {
             $this->logger->error('B2B sendRejectionEmail error: ' . $e->getMessage());
             return false;
         }
     }
-    
+
+    private function ensureAreaCode(string $areaCode): void
+    {
+        try {
+            $this->appState->getAreaCode();
+        } catch (LocalizedException) {
+            $this->appState->setAreaCode($areaCode);
+        }
+    }
+
     /**
      * Log approval action
      *
@@ -363,7 +387,7 @@ class CustomerApproval implements CustomerApprovalInterface
         try {
             $connection = $this->resourceConnection->getConnection();
             $tableName = $this->resourceConnection->getTableName('grupoawamotos_b2b_customer_approval_log');
-            
+
             $connection->insert($tableName, [
                 'customer_id' => $customerId,
                 'action' => $action,
@@ -377,7 +401,7 @@ class CustomerApproval implements CustomerApprovalInterface
             $this->logger->error('B2B logAction error: ' . $e->getMessage());
         }
     }
-    
+
     /**
      * Get customer attribute value
      *
