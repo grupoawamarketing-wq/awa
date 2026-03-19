@@ -11,8 +11,10 @@ use GrupoAwamotos\B2B\Api\PriceVisibilityInterface;
 use GrupoAwamotos\B2B\Helper\Config;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Customer\Model\Session as CustomerSession;
+use Magento\Framework\App\Request\Http;
 use Magento\Framework\Controller\Result\RedirectFactory;
 use Magento\Framework\Message\ManagerInterface;
+use Magento\Framework\UrlInterface;
 use Rokanthemes\OnePageCheckout\Controller\Index\Index;
 
 class BlockExpressCheckoutPlugin
@@ -47,13 +49,25 @@ class BlockExpressCheckoutPlugin
      */
     private $checkoutSession;
 
+    /**
+     * @var Http
+     */
+    private $request;
+
+    /**
+     * @var UrlInterface
+     */
+    private $urlBuilder;
+
     public function __construct(
         PriceVisibilityInterface $priceVisibility,
         Config $config,
         RedirectFactory $redirectFactory,
         ManagerInterface $messageManager,
         CustomerSession $customerSession,
-        CheckoutSession $checkoutSession
+        CheckoutSession $checkoutSession,
+        Http $request,
+        UrlInterface $urlBuilder
     ) {
         $this->priceVisibility = $priceVisibility;
         $this->config = $config;
@@ -61,6 +75,8 @@ class BlockExpressCheckoutPlugin
         $this->messageManager = $messageManager;
         $this->customerSession = $customerSession;
         $this->checkoutSession = $checkoutSession;
+        $this->request = $request;
+        $this->urlBuilder = $urlBuilder;
     }
 
     /**
@@ -87,15 +103,22 @@ class BlockExpressCheckoutPlugin
 
             if (!$this->customerSession->isLoggedIn()) {
                 $this->messageManager->addNoticeMessage(
-                    __('Faça login para finalizar sua compra.')
+                    __('Faça login no portal B2B para finalizar sua compra.')
                 );
-                return $redirect->setPath('customer/account/login');
+                return $redirect->setPath('b2b/account/login', $this->getLoginRedirectParams());
             }
 
-            $this->messageManager->addWarningMessage(
-                __('Sua conta está pendente de aprovação. Você não pode finalizar compras até que sua conta seja aprovada.')
-            );
-            return $redirect->setPath('checkout/cart');
+            if ($this->priceVisibility->isApprovedPendingErp()) {
+                $this->messageManager->addWarningMessage(
+                    __('Sua tabela de preços ainda está sendo vinculada ao ERP. Finalize esse ajuste com o time comercial antes de concluir pedidos.')
+                );
+            } else {
+                $this->messageManager->addWarningMessage(
+                    __('Sua conta está pendente de aprovação. Você não pode finalizar compras até que sua conta seja aprovada.')
+                );
+            }
+
+            return $redirect->setPath('b2b/account/dashboard');
         }
 
         // Verificar valor mínimo do pedido
@@ -120,5 +143,25 @@ class BlockExpressCheckoutPlugin
         }
 
         return $proceed();
+    }
+
+    /**
+     * Preserve the storefront route when OnePageCheckout is interrupted by strict B2B login.
+     *
+     * @return array<string, string>
+     */
+    private function getLoginRedirectParams(): array
+    {
+        $referer = (string) $this->request->getServer('HTTP_REFERER');
+        if ($referer === '') {
+            return [];
+        }
+
+        $baseUrl = $this->urlBuilder->getBaseUrl();
+        if ($baseUrl === '' || !str_starts_with($referer, $baseUrl)) {
+            return [];
+        }
+
+        return ['referer' => base64_encode($referer)];
     }
 }

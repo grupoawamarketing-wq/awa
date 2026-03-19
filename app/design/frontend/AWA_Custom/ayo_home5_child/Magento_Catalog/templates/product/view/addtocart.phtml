@@ -26,16 +26,36 @@
         <tbody>
             <tr>
                 <td><?= $block->escapeHtml(__('SKU')) ?></td>
-                <td><?= $block->escapeHtml($_product->getSku()) ?></td>
+                <td class="awa-copy-wrap"
+                    data-mage-init='{"js/awa-copy-control": {"messages": {"copy": "Copiar", "copied": "Copiado!"}}}'>
+                    <span data-awa-role="copy-source"><?= $block->escapeHtml($_product->getSku()) ?></span>
+                    <button type="button" class="awa-copy-btn" data-awa-role="copy-trigger"
+                            aria-label="<?= $block->escapeHtmlAttr(__('Copiar SKU')) ?>">
+                        <span data-awa-role="copy-label"><?= $block->escapeHtml(__('Copiar')) ?></span>
+                    </button>
+                </td>
             </tr>
+            <?php $_ean = $_product->getData('ean'); ?>
+            <?php if ($_ean): ?>
             <tr>
                 <td><?= $block->escapeHtml(__('Código de Barras (EAN)')) ?></td>
-                <td><?= $block->escapeHtml($_product->getData('ean') ?: 'N/A') ?></td>
+                <td class="awa-copy-wrap"
+                    data-mage-init='{"js/awa-copy-control": {"messages": {"copy": "Copiar", "copied": "Copiado!"}}}'>
+                    <span data-awa-role="copy-source"><?= $block->escapeHtml($_ean) ?></span>
+                    <button type="button" class="awa-copy-btn" data-awa-role="copy-trigger"
+                            aria-label="<?= $block->escapeHtmlAttr(__('Copiar EAN')) ?>">
+                        <span data-awa-role="copy-label"><?= $block->escapeHtml(__('Copiar')) ?></span>
+                    </button>
+                </td>
             </tr>
+            <?php endif; ?>
+            <?php $_masterBox = $_product->getData('master_box_qty'); ?>
+            <?php if ($_masterBox): ?>
             <tr>
                 <td><?= $block->escapeHtml(__('Master Box')) ?></td>
-                <td><?= $block->escapeHtml($_product->getData('master_box_qty') ?: 'N/A') ?></td>
+                <td><?= $block->escapeHtml($_masterBox) ?></td>
             </tr>
+            <?php endif; ?>
         </tbody>
     </table>
 
@@ -67,12 +87,46 @@
     </div>
 </div>
 <?php elseif ($_product->isSaleable()) :?>
+<?php
+    /* Stock level indicator */
+    $_stockItem = null;
+    try {
+        $_stockItem = $_product->getExtensionAttributes()
+            ? $_product->getExtensionAttributes()->getStockItem()
+            : null;
+    } catch (\Throwable $_e) { /* silent */ }
+    $_stockQty = $_stockItem ? (int)$_stockItem->getQty() : null;
+?>
+<?php if ($_stockQty !== null && $_stockQty > 0): ?>
+<?php
+    if ($_stockQty <= 3) {
+        $_stockClass = 'awa-stock-level--critical';
+        $_stockMsg   = __('%1 unidade restante', $_stockQty);
+        if ($_stockQty > 1) { $_stockMsg = __('%1 unidades restantes', $_stockQty); }
+    } elseif ($_stockQty <= 10) {
+        $_stockClass = 'awa-stock-level--low';
+        $_stockMsg   = __('Apenas %1 em estoque', $_stockQty);
+    } else {
+        $_stockClass = 'awa-stock-level--ok';
+        $_stockMsg   = __('Em estoque');
+    }
+?>
+<div class="awa-stock-level <?= $block->escapeHtmlAttr($_stockClass) ?>">
+    <span class="awa-stock-level__dot" aria-hidden="true"></span>
+    <?= $block->escapeHtml($_stockMsg) ?>
+</div>
+<?php endif; ?>
 <div class="box-tocart">
     <div class="fieldset">
         <?php if ($block->shouldRenderQuantity()) :?>
-        <div class="awa-catalog-qty-box field qty">
+        <div class="awa-catalog-qty-box field qty"
+             data-mage-init='{"js/awa-qty-control": {}}'>
             <label class="label awa-sr-only" for="qty"><span><?= $block->escapeHtml(__('Qty')) ?></span></label>
-            <div class="control">
+            <div class="control awa-qty-stepper">
+                <button type="button" class="awa-qty-btn"
+                        data-awa-role="qty-trigger"
+                        data-awa-direction="decrement"
+                        aria-label="<?= $block->escapeHtmlAttr(__('Diminuir quantidade')) ?>">−</button>
                 <input type="number"
                        name="qty"
                        id="qty"
@@ -80,8 +134,13 @@
                        value="<?= $block->getProductDefaultQty() * 1 ?>"
                        title="<?= $block->escapeHtmlAttr(__('Qty')) ?>"
                        class="input-text qty"
+                       data-awa-role="qty-input"
                        data-validate="<?= $block->escapeHtml(json_encode($block->getQuantityValidators())) ?>"
                        />
+                <button type="button" class="awa-qty-btn"
+                        data-awa-role="qty-trigger"
+                        data-awa-direction="increment"
+                        aria-label="<?= $block->escapeHtmlAttr(__('Aumentar quantidade')) ?>">+</button>
             </div>
         </div>
         <?php endif; ?>

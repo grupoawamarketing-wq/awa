@@ -111,8 +111,7 @@ class SyncOrdersCommand extends Command
             $order = reset($orders);
 
             $output->writeln("Cliente:    " . ($order->getCustomerEmail() ?: 'Convidado'));
-            $customerDocument = preg_replace('/\D+/', '', (string) ($order->getCustomerTaxvat() ?: '')) ?: '';
-            $output->writeln("CNPJ:       " . (strlen($customerDocument) === 14 ? $order->getCustomerTaxvat() : 'Não informado'));
+            $output->writeln("CPF/CNPJ:   " . ($order->getCustomerTaxvat() ?: 'Não informado'));
             $output->writeln("Valor:      R$ " . number_format((float) $order->getGrandTotal(), 2, ',', '.'));
             $output->writeln("Status:     " . $order->getStatus());
             $output->writeln("Itens:      " . count($order->getItems()));
@@ -187,16 +186,14 @@ class SyncOrdersCommand extends Command
             }
 
             $table = new Table($output);
-            $table->setHeaders(['Pedido', 'Data', 'Cliente', 'CNPJ', 'Valor', 'Status']);
+            $table->setHeaders(['Pedido', 'Data', 'Cliente', 'CPF/CNPJ', 'Valor', 'Status']);
 
             foreach ($orders as $order) {
                 $table->addRow([
                     $order->getIncrementId(),
                     $order->getCreatedAt(),
                     substr($order->getCustomerEmail() ?: 'Convidado', 0, 25),
-                    strlen((string) preg_replace('/\D+/', '', (string) ($order->getCustomerTaxvat() ?: ''))) === 14
-                        ? $order->getCustomerTaxvat()
-                        : '-',
+                    $order->getCustomerTaxvat() ?: '-',
                     'R$ ' . number_format((float) $order->getGrandTotal(), 2, ',', '.'),
                     $order->getStatus(),
                 ]);

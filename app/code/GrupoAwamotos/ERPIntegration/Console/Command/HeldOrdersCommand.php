@@ -19,7 +19,7 @@ use Symfony\Component\Console\Helper\Table;
  *
  * Actions:
  *  --action=list        List held orders with reason and customer details (default)
- *  --action=resolve     Try to resolve erp_code for held orders via CNPJ lookup
+ *  --action=resolve     Try to resolve erp_code for held orders via CPF/CNPJ lookup
  *  --action=generate-sql Generate SQL for GR_INTEGRACAOVALIDADOR registration
  */
 class HeldOrdersCommand extends Command
@@ -87,14 +87,14 @@ class HeldOrdersCommand extends Command
         $output->writeln('');
 
         $table = new Table($output);
-        $table->setHeaders(['Pedido', 'Status', 'Cliente', 'CNPJ', 'ERP Code', 'Motivo', 'Data']);
+        $table->setHeaders(['Pedido', 'Status', 'Cliente', 'CPF/CNPJ', 'ERP Code', 'Motivo', 'Data']);
 
         foreach ($orders as $orderInfo) {
             $table->addRow([
                 $orderInfo['increment_id'],
                 $orderInfo['status'],
                 $orderInfo['customer_name'],
-                $orderInfo['cnpj_masked'],
+                $orderInfo['taxvat_masked'],
                 $orderInfo['erp_code'] ?: '<fg=red>NENHUM</>',
                 $orderInfo['reason'],
                 $orderInfo['created_at'],
@@ -114,7 +114,7 @@ class HeldOrdersCommand extends Command
         ));
 
         if ($withoutCode > 0) {
-            $output->writeln('<comment>Dica: Execute "erp:orders:held --action=resolve" para tentar vincular por CNPJ</comment>');
+            $output->writeln('<comment>Dica: Execute "erp:orders:held --action=resolve" para tentar vincular por CPF/CNPJ</comment>');
         }
         if ($withCode > 0) {
             $output->writeln('<comment>Dica: Execute "erp:orders:held --action=generate-sql" para gerar SQL de registro no Sectra</comment>');
@@ -124,7 +124,7 @@ class HeldOrdersCommand extends Command
     }
 
     /**
-    * Try to resolve ERP codes for held orders via CNPJ lookup.
+     * Try to resolve ERP codes for held orders via CPF/CNPJ lookup.
      */
     private function resolveHeldOrders(OutputInterface $output, int $limit): int
     {
@@ -140,7 +140,7 @@ class HeldOrdersCommand extends Command
         $resolved = 0;
         $alreadyLinked = 0;
         $notFound = 0;
-        $noCnpj = 0;
+        $noTaxvat = 0;
         $errors = 0;
 
         foreach ($orders as $orderInfo) {
@@ -163,21 +163,22 @@ class HeldOrdersCommand extends Command
                 continue;
             }
 
-            if (empty($orderInfo['cnpj'])) {
-                $noCnpj++;
-                $output->writeln(sprintf('  [SKIP] #%s — cliente sem CNPJ', $incrementId));
+            // No taxvat, cannot lookup
+            if (empty($orderInfo['taxvat'])) {
+                $noTaxvat++;
+                $output->writeln(sprintf('  [SKIP] #%s — cliente sem CPF/CNPJ', $incrementId));
                 continue;
             }
 
             try {
-                $erpCustomer = $this->customerSync->getErpCustomerByCnpj($orderInfo['cnpj']);
+                $erpCustomer = $this->customerSync->getErpCustomerByTaxvat($orderInfo['taxvat']);
 
                 if (!$erpCustomer || empty($erpCustomer['CODIGO'])) {
                     $notFound++;
                     $output->writeln(sprintf(
-                        '  [MISS] #%s — CNPJ %s não encontrado no ERP',
+                        '  [MISS] #%s — CPF/CNPJ %s não encontrado no ERP',
                         $incrementId,
-                        $orderInfo['cnpj_masked']
+                        $orderInfo['taxvat_masked']
                     ));
                     continue;
                 }
@@ -208,11 +209,11 @@ class HeldOrdersCommand extends Command
 
         $output->writeln('');
         $output->writeln(sprintf(
-            '<info>Resultado: %d vinculados, %d já tinham código, %d não encontrados no ERP, %d sem CNPJ, %d erros</info>',
+            '<info>Resultado: %d vinculados, %d já tinham código, %d não encontrados no ERP, %d sem CPF/CNPJ, %d erros</info>',
             $resolved,
             $alreadyLinked,
             $notFound,
-            $noCnpj,
+            $noTaxvat,
             $errors
         ));
 
@@ -241,7 +242,7 @@ class HeldOrdersCommand extends Command
         $erpCodes = array_unique($erpCodes);
 
         if (empty($erpCodes)) {
-            $output->writeln('<comment>Nenhum pedido retido tem erp_code. Execute "--action=resolve" primeiro para vincular por CNPJ.</comment>');
+            $output->writeln('<comment>Nenhum pedido retido tem erp_code. Execute "--action=resolve" primeiro para vincular por CPF/CNPJ.</comment>');
             return Command::SUCCESS;
         }
 
@@ -276,7 +277,7 @@ class HeldOrdersCommand extends Command
      *
      * @return array<int, array{
      *   increment_id: string, status: string, customer_id: int,
-    *   customer_name: string, cnpj: string, cnpj_masked: string,
+     *   customer_name: string, taxvat: string, taxvat_masked: string,
      *   erp_code: string, reason: string, created_at: string,
      *   order_entity_id: int
      * }>
@@ -312,11 +313,14 @@ class HeldOrdersCommand extends Command
                 $reason = 'Não registrado no Sectra';
             }
 
-            $customer = null;
-            if ($customerId) {
+            // Get taxvat
+            $taxvat = (string) ($order->getCustomerTaxvat() ?: '');
+            if (empty($taxvat) && $customerId) {
                 try {
                     $customer = $this->customerRepository->getById($customerId);
+                    $taxvat = (string) ($customer->getTaxvat() ?: '');
 
+                    // Also check if customer now has erp_code
                     if (empty($erpCode)) {
                         $attr = $customer->getCustomAttribute('erp_code');
                         if ($attr && $attr->getValue() && is_numeric($attr->getValue()) && (int) $attr->getValue() > 0) {
@@ -325,13 +329,20 @@ class HeldOrdersCommand extends Command
                         }
                     }
                 } catch (\Exception $e) {
-                    $customer = null;
+                    // Customer may not exist
                 }
             }
 
-            $cnpj = $this->extractCnpj($order, $customer);
-            if (empty($cnpj) && empty($erpCode)) {
-                $reason = 'Cliente sem CNPJ';
+            $taxvatMasked = '';
+            if (!empty($taxvat)) {
+                $clean = preg_replace('/[^0-9]/', '', $taxvat);
+                if (strlen($clean) === 11) {
+                    $taxvatMasked = substr($clean, 0, 3) . '.***.***-' . substr($clean, -2);
+                } elseif (strlen($clean) === 14) {
+                    $taxvatMasked = substr($clean, 0, 4) . '****/****-' . substr($clean, -2);
+                } else {
+                    $taxvatMasked = substr($clean, 0, 4) . '***';
+                }
             }
 
             $result[] = [
@@ -339,8 +350,8 @@ class HeldOrdersCommand extends Command
                 'status' => $order->getStatus(),
                 'customer_id' => $customerId,
                 'customer_name' => trim(($order->getCustomerFirstname() ?? '') . ' ' . ($order->getCustomerLastname() ?? '')),
-                'cnpj' => $cnpj,
-                'cnpj_masked' => $this->maskCnpj($cnpj),
+                'taxvat' => $taxvat,
+                'taxvat_masked' => $taxvatMasked ?: 'N/A',
                 'erp_code' => $erpCode ?: '',
                 'reason' => $reason,
                 'created_at' => $order->getCreatedAt(),
@@ -364,53 +375,12 @@ class HeldOrdersCommand extends Command
             if ($order && $order->getId()) {
                 $order->setData('customer_erp_code', (string) $erpCode);
                 $order->addCommentToStatusHistory(
-                    __('[ERP CLI] Código ERP %1 vinculado manualmente via erp:orders:held --action=resolve por CNPJ', $erpCode)
+                    __('[ERP CLI] Código ERP %1 vinculado manualmente via erp:orders:held --action=resolve', $erpCode)
                 );
                 $order->save();
             }
         } catch (\Exception $e) {
             // Non-critical, log and continue
         }
-    }
-
-    private function extractCnpj($order, ?\Magento\Customer\Api\Data\CustomerInterface $customer): string
-    {
-        $cnpj = $this->normalizeCnpj((string) ($order->getData('b2b_cnpj') ?? ''));
-        if ($cnpj !== '') {
-            return $cnpj;
-        }
-
-        $cnpj = $this->normalizeCnpj((string) ($order->getCustomerTaxvat() ?? ''));
-        if ($cnpj !== '') {
-            return $cnpj;
-        }
-
-        if ($customer) {
-            $attr = $customer->getCustomAttribute('b2b_cnpj');
-            $cnpj = $this->normalizeCnpj((string) ($attr ? $attr->getValue() : ''));
-            if ($cnpj !== '') {
-                return $cnpj;
-            }
-
-            return $this->normalizeCnpj((string) ($customer->getTaxvat() ?? ''));
-        }
-
-        return '';
-    }
-
-    private function normalizeCnpj(string $value): string
-    {
-        $digits = preg_replace('/\D+/', '', $value) ?? '';
-
-        return strlen($digits) === 14 ? $digits : '';
-    }
-
-    private function maskCnpj(string $cnpj): string
-    {
-        if ($cnpj === '') {
-            return 'N/A';
-        }
-
-        return substr($cnpj, 0, 4) . '****/****-' . substr($cnpj, -2);
     }
 }

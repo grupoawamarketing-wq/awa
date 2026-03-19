@@ -1,6 +1,8 @@
 <!--
 /**
  * B2B Credit Payment Method Template
+ * Includes payment terms, credit info summary, credit validation, and loading states
+ * P2-4.4: Loading states for place order
  */
 -->
 <div class="payment-method" data-bind="css: {'_active': (getCode() == isChecked())}">
@@ -18,39 +20,85 @@
     <div class="payment-method-content" data-bind="css: {'_active': (getCode() == isChecked())}">
         <div class="payment-method-billing-address">
             <!-- ko foreach: $parent.getRegion('billingAdditional') -->
-            <!-- ko; if: hasmultipleterms() -->
-            <div class="b2b-payment-terms">
-                <label class="label" for="b2b-payment-term" data-bind="i18n: 'Condi\u00e7\u00e3o de Pagamento:'"></label>
-                <select id="b2b-payment-term" name="payment_term" class="select"
+            <!-- ko template: getTemplate() --><!-- /ko -->
+            <!-- /ko -->
+        </div>
+
+        <!-- Terms: select (multiple) or single display -->
+        <!-- ko if: hasMultipleTerms() -->
+        <div class="field b2b-payment-terms--select">
+            <label class="label" for="b2b-payment-term">
+                <span data-bind="i18n: 'Condição de Pagamento'"></span>
+            </label>
+            <div class="control">
+                <select id="b2b-payment-term"
+                        name="payment_term"
+                        class="select"
                         data-bind="options: getPaymentTerms(),
-                                   optionsValue: 'value',
                                    optionsText: 'label',
+                                   optionsValue: 'value',
                                    value: selectedPaymentTerm">
                 </select>
             </div>
-            <!-- /ko -->
-            <!-- ko; ifnot: hasmultipleterms() -->
-            <!-- ko; if: getpaymentterms().length === 1 -->
-            <div class="b2b-payment-terms b2b-payment-terms--single">
-                <span class="label" data-bind="i18n: 'Condi\u00e7\u00e3o de Pagamento:'"></span>
-                <strong data-bind="text: getPaymentTerms()[0].label"></strong>
+        </div>
+        <!-- /ko -->
+
+        <!-- Credit info: sufficient (green) -->
+        <!-- ko if: isCreditSufficient() -->
+        <div class="b2b-credit-remaining" role="status">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" aria-hidden="true">
+                <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span>
+                <span data-bind="i18n: 'Crédito restante após este pedido:'"></span>
+                <strong data-bind="text: remainingCreditFormatted()"></strong>
+            </span>
+        </div>
+        <!-- /ko -->
+
+        <!-- Credit info: insufficient (red alert) -->
+        <!-- ko ifnot: isCreditSufficient() -->
+        <div class="b2b-credit-insufficient" role="alert">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <div>
+                <strong data-bind="i18n: 'Crédito insuficiente para este pedido'"></strong>
+                <p>
+                    <span data-bind="i18n: 'Faltam'"></span>
+                    <strong data-bind="text: creditDeficitFormatted()"></strong>
+                    <span data-bind="i18n: 'de crédito. Entre em contato com nosso comercial ou escolha outra forma de pagamento.'"></span>
+                </p>
             </div>
-            <!-- /ko -->
-            <!-- /ko -->        </div>
+        </div>
         <!-- /ko -->
 
         <div class="checkout-agreements-block">
-            <!-- ko; foreach: $parent.getRegion('before-place-order') -->
-                <!-- ko; template: getTemplate() --><!-- /ko -->
+            <!-- ko foreach: $parent.getRegion('before-place-order') -->
+            <!-- ko template: getTemplate() --><!-- /ko -->
             <!-- /ko -->
         </div>
 
         <div class="actions-toolbar">
             <div class="primary">
-                <button class="action primary checkout"
+                <button class="action primary checkout b2b-place-order-btn"
                         type="submit"
-                        data-bind="click: placeOrder, attr: {title: $t('Confirmar Pedido')}, enable: (getCode() == isChecked()), css: {disabled: !isPlaceOrderActionAllowed()}">
+                        data-bind="click: placeOrder,
+                                   attr: {title: $t('Confirmar Pedido')},
+                                   enable: (getCode() == isChecked()),
+                                   css: {
+                                       disabled: !isPlaceOrderActionAllowed(),
+                                       'b2b-loading': isPlaceOrderInProgress()
+                                   }">
+                    <!-- ko ifnot: isPlaceOrderInProgress() -->
                     <span data-bind="i18n: 'Confirmar Pedido'"></span>
+                    <!-- /ko -->
+                    <!-- ko if: isPlaceOrderInProgress() -->
+                    <span class="b2b-spinner" aria-hidden="true"></span>
+                    <span data-bind="i18n: 'Processando...'"></span>
+                    <!-- /ko -->
                 </button>
             </div>
         </div>

@@ -91,14 +91,14 @@ class AddToCart implements HttpPostActionInterface
                 return $result->setData(['success' => false, 'message' => __('Por favor, faça login.')]);
             }
             $redirect = $this->redirectFactory->create();
-            return $redirect->setPath('customer/account/login');
+            return $redirect->setPath('b2b/account/login');
         }
 
         $listId = (int)$this->request->getParam('id');
 
         try {
             $result = $this->shoppingListService->addToCart($listId);
-            
+
             if ($result['added'] > 0) {
                 $message = __('%1 produto(s) adicionado(s) ao carrinho.', $result['added']);
                 $this->messageManager->addSuccessMessage($message);

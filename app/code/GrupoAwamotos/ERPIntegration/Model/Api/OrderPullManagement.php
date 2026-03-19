@@ -8,7 +8,6 @@ use GrupoAwamotos\ERPIntegration\Api\ConnectionInterface;
 use GrupoAwamotos\ERPIntegration\Helper\Data as Helper;
 use GrupoAwamotos\ERPIntegration\Model\CustomerSync;
 use GrupoAwamotos\ERPIntegration\Model\B2BClientRegistration;
-use GrupoAwamotos\ERPIntegration\Model\CnpjResolver;
 use GrupoAwamotos\ERPIntegration\Model\ResourceModel\SyncLog as SyncLogResource;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
@@ -31,7 +30,6 @@ class OrderPullManagement implements OrderPullInterface
     private SyncLogResource $syncLogResource;
     private CustomerRepositoryInterface $customerRepository;
     private RegionFactory $regionFactory;
-    private CnpjResolver $cnpjResolver;
     private LoggerInterface $logger;
 
     public function __construct(
@@ -45,7 +43,6 @@ class OrderPullManagement implements OrderPullInterface
         SyncLogResource $syncLogResource,
         CustomerRepositoryInterface $customerRepository,
         RegionFactory $regionFactory,
-        CnpjResolver $cnpjResolver,
         LoggerInterface $logger
     ) {
         $this->connection = $connection;
@@ -58,7 +55,6 @@ class OrderPullManagement implements OrderPullInterface
         $this->syncLogResource = $syncLogResource;
         $this->customerRepository = $customerRepository;
         $this->regionFactory = $regionFactory;
-        $this->cnpjResolver = $cnpjResolver;
         $this->logger = $logger;
     }
 
@@ -71,42 +67,51 @@ class OrderPullManagement implements OrderPullInterface
         $orders = [];
         $held = [];
         $hasWriteAccess = $this->b2bRegistration->hasWriteAccess();
-        $requiresSectraRegistration = $this->helper->requiresSectraClientRegistration();
 
         foreach ($allOrders as $order) {
             try {
                 $erpClientCode = $this->resolveErpClientCode($order);
-                $customerName = trim(($order->getCustomerFirstname() ?? '') . ' ' . ($order->getCustomerLastname() ?? ''));
 
                 // Orders without any ERP client code are truly unresolvable — hold them
                 if ($erpClientCode <= 0) {
                     $held[] = [
                         'increment_id' => $order->getIncrementId(),
                         'erp_code' => 0,
-                        'customer' => $customerName,
+                        'customer' => trim(($order->getCustomerFirstname() ?? '') . ' ' . ($order->getCustomerLastname() ?? '')),
                         'reason' => 'Cliente sem erp_code no Magento',
                     ];
                     continue;
                 }
 
-                $registrationState = $this->resolveClientRegistrationState(
-                    $erpClientCode,
-                    $order->getIncrementId(),
-                    $hasWriteAccess,
-                    $requiresSectraRegistration
-                );
-
-                if (!$registrationState['registered']) {
-                    $held[] = [
-                        'increment_id' => $order->getIncrementId(),
-                        'erp_code' => $erpClientCode,
-                        'customer' => $customerName,
-                        'reason' => $registrationState['reason'],
-                    ];
-                    continue;
+                // Try auto-registration when write connection is available
+                if (!$this->b2bRegistration->isClientRegistered($erpClientCode)) {
+                    if ($hasWriteAccess) {
+                        $registered = $this->b2bRegistration->registerClient($erpClientCode);
+                        if (!$registered) {
+                            // Write available but registration failed — hold and warn
+                            $held[] = [
+                                'increment_id' => $order->getIncrementId(),
+                                'erp_code' => $erpClientCode,
+                                'customer' => trim(($order->getCustomerFirstname() ?? '') . ' ' . ($order->getCustomerLastname() ?? '')),
+                                'reason' => 'Falha ao registrar cliente no GR_INTEGRACAOVALIDADOR. Verificar logs.',
+                            ];
+                            $this->logger->warning('[ERP API] Order held - auto-registration failed', [
+                                'increment_id' => $order->getIncrementId(),
+                                'erp_code' => $erpClientCode,
+                            ]);
+                            continue;
+                        }
+                    } else {
+                        // No write access — include order with warning flag so operator can see it.
+                        // Sectra will validate GR_INTEGRACAOVALIDADOR on its side; do not hide data here.
+                        $this->logger->info('[ERP API] Order included with unregistered client (no write access)', [
+                            'increment_id' => $order->getIncrementId(),
+                            'erp_code' => $erpClientCode,
+                        ]);
+                    }
                 }
 
-                $orders[] = $this->buildOrderPayload($order, true);
+                $orders[] = $this->buildOrderPayload($order);
                 if (count($orders) >= $limit) {
                     break;
                 }
@@ -130,8 +135,6 @@ class OrderPullManagement implements OrderPullInterface
             'total_count' => count($orders),
             'held_count' => count($held),
             'held_orders' => $held,
-            'import_mode' => $this->helper->getOrderImportMode(),
-            'requires_sectra_registration' => $requiresSectraRegistration,
             'timestamp' => date('c'),
         ]];
     }
@@ -143,7 +146,7 @@ class OrderPullManagement implements OrderPullInterface
         $order = $this->findOrderByIncrementId($incrementId);
 
         // Wrap in indexed array so Magento's ServiceOutputProcessor preserves keys
-        return [$this->buildOrderPayload($order, $this->isClientRegisteredForPayload($order))];
+        return [$this->buildOrderPayload($order)];
     }
 
     public function acknowledgeOrder(
@@ -261,7 +264,6 @@ class OrderPullManagement implements OrderPullInterface
         $this->logger->info('[ERP API] getHeldOrders called', ['limit' => $limit]);
 
         $allOrders = $this->fetchUnsyncedOrders($limit * 3, null);
-        $requiresSectraRegistration = $this->helper->requiresSectraClientRegistration();
 
         $held = [];
         foreach ($allOrders as $order) {
@@ -277,7 +279,7 @@ class OrderPullManagement implements OrderPullInterface
                     continue;
                 }
 
-                if ($requiresSectraRegistration && !$this->b2bRegistration->isClientRegistered($erpClientCode)) {
+                if (!$this->b2bRegistration->isClientRegistered($erpClientCode)) {
                     $held[] = $this->buildHeldOrderPayload(
                         $order,
                         $erpClientCode,
@@ -295,12 +297,9 @@ class OrderPullManagement implements OrderPullInterface
             'orders' => $held,
             'total_held' => count($held),
             'write_connection_available' => $hasWriteAccess,
-            'import_mode' => $this->helper->getOrderImportMode(),
-            'resolution' => $requiresSectraRegistration
-                ? ($hasWriteAccess
-                    ? 'Auto-registro habilitado. Clientes serao registrados automaticamente na proxima chamada de getPendingOrders.'
-                    : 'Configurar credenciais de escrita em Stores > Config > GrupoAwamotos > ERP Integration > Conexao de Escrita, ou executar SQL no Sectra.')
-                : 'Modo OpenCart bridge ativo. Pedidos so ficam retidos aqui se faltarem vinculos ERP basicos, como customer_erp_code.',
+            'resolution' => $hasWriteAccess
+                ? 'Auto-registro habilitado. Clientes serao registrados automaticamente na proxima chamada de getPendingOrders.'
+                : 'Configurar credenciais de escrita em Stores > Config > GrupoAwamotos > ERP Integration > Conexao de Escrita, ou executar SQL no Sectra.',
             'timestamp' => date('c'),
         ]];
     }
@@ -392,14 +391,20 @@ class OrderPullManagement implements OrderPullInterface
         }
     }
 
-    private function buildOrderPayload(OrderInterface $order, bool $clientRegistered): array
+    private function buildOrderPayload(OrderInterface $order): array
     {
         // Resolve ERP client code
         $erpClientCode = $this->resolveErpClientCode($order);
-        $cnpj = $this->extractOrderCnpj($order);
 
         // Fetch customer commercial data from ERP
         $erpCustomerData = $this->getErpCustomerOrderData($erpClientCode);
+
+        // Check and auto-register client in Sectra B2B integration
+        $clientRegistered = $this->b2bRegistration->isClientRegistered($erpClientCode);
+        if (!$clientRegistered) {
+            // Attempt auto-registration if write connection is available
+            $clientRegistered = $this->b2bRegistration->registerClient($erpClientCode);
+        }
 
         // Build items
         $items = $this->buildItemsPayload($order);
@@ -424,8 +429,7 @@ class OrderPullManagement implements OrderPullInterface
             // Customer
             'customer' => [
                 'erp_code' => $erpClientCode,
-                'cnpj' => $cnpj,
-                'taxvat' => $cnpj,
+                'taxvat' => $order->getCustomerTaxvat() ?? '',
                 'name' => trim(($order->getCustomerFirstname() ?? '') . ' ' . ($order->getCustomerLastname() ?? '')),
                 'email' => $order->getCustomerEmail() ?? '',
                 'registered_in_b2b' => $clientRegistered,
@@ -496,83 +500,6 @@ class OrderPullManagement implements OrderPullInterface
         return $items;
     }
 
-    /**
-     * @return array{registered: bool, reason: string}
-     */
-    private function resolveClientRegistrationState(
-        int $erpClientCode,
-        string $incrementId,
-        bool $hasWriteAccess,
-        bool $requiresSectraRegistration
-    ): array
-    {
-        if (!$requiresSectraRegistration) {
-            return [
-                'registered' => true,
-                'reason' => '',
-            ];
-        }
-
-        if ($this->b2bRegistration->isClientRegistered($erpClientCode)) {
-            return [
-                'registered' => true,
-                'reason' => '',
-            ];
-        }
-
-        if (!$hasWriteAccess) {
-            $this->logger->info('[ERP API] Order held - client not registered and write access unavailable', [
-                'increment_id' => $incrementId,
-                'erp_code' => $erpClientCode,
-            ]);
-
-            return [
-                'registered' => false,
-                'reason' => 'Cliente nao registrado no GR_INTEGRACAOVALIDADOR do Sectra e sem conexao de escrita para auto-registro.',
-            ];
-        }
-
-        if ($this->b2bRegistration->registerClient($erpClientCode)) {
-            return [
-                'registered' => true,
-                'reason' => '',
-            ];
-        }
-
-        $this->logger->warning('[ERP API] Order held - auto-registration failed', [
-            'increment_id' => $incrementId,
-            'erp_code' => $erpClientCode,
-        ]);
-
-        return [
-            'registered' => false,
-            'reason' => 'Falha ao registrar cliente no GR_INTEGRACAOVALIDADOR. Verificar logs.',
-        ];
-    }
-
-    private function isClientRegisteredForPayload(OrderInterface $order): bool
-    {
-        $erpClientCode = $this->resolveErpClientCode($order);
-        if ($erpClientCode <= 0) {
-            return false;
-        }
-
-        if (!$this->helper->requiresSectraClientRegistration()) {
-            return true;
-        }
-
-        try {
-            return $this->b2bRegistration->isClientRegistered($erpClientCode);
-        } catch (\Exception $e) {
-            $this->logger->warning('[ERP API] Failed to verify Sectra registration for payload: ' . $e->getMessage(), [
-                'increment_id' => $order->getIncrementId(),
-                'erp_code' => $erpClientCode,
-            ]);
-
-            return false;
-        }
-    }
-
     private function resolveErpClientCode(OrderInterface $order): int
     {
         // 0. Check if already stamped on the order (set by OrderPlaceAfter observer)
@@ -581,10 +508,10 @@ class OrderPullManagement implements OrderPullInterface
             return (int) $stamped;
         }
 
-        // 1. Lookup by CNPJ in ERP directly
-        $cnpj = $this->extractOrderCnpj($order);
-        if ($cnpj) {
-            $erpCustomer = $this->customerSync->getErpCustomerByCnpj($cnpj);
+        // 1. Lookup by taxvat (CPF/CNPJ) in ERP directly
+        $taxvat = $order->getCustomerTaxvat();
+        if ($taxvat) {
+            $erpCustomer = $this->customerSync->getErpCustomerByTaxvat($taxvat);
             if ($erpCustomer) {
                 return (int) $erpCustomer['CODIGO'];
             }
@@ -622,47 +549,10 @@ class OrderPullManagement implements OrderPullInterface
         $this->logger->error('[ERP API] Could not resolve ERP client code for order', [
             'increment_id' => $order->getIncrementId(),
             'customer_id' => $customerId,
-            'cnpj' => $cnpj,
+            'taxvat' => $taxvat,
         ]);
 
         return 0;
-    }
-
-    private function extractOrderCnpj(OrderInterface $order): string
-    {
-        $customerId = (int) $order->getCustomerId();
-
-        $cnpj = $this->cnpjResolver->normalize((string) ($order->getData('b2b_cnpj') ?? ''));
-        if ($cnpj !== '') {
-            return $cnpj;
-        }
-
-        $cnpj = $this->cnpjResolver->normalize((string) ($order->getCustomerTaxvat() ?? ''));
-        if ($cnpj !== '') {
-            return $cnpj;
-        }
-
-        if ($customerId <= 0) {
-            return '';
-        }
-
-        try {
-            $customer = $this->customerRepository->getById($customerId);
-            $attr = $customer->getCustomAttribute('b2b_cnpj');
-            $cnpj = $this->cnpjResolver->normalize((string) ($attr ? $attr->getValue() : ''));
-            if ($cnpj !== '') {
-                return $cnpj;
-            }
-
-            return $this->cnpjResolver->normalize((string) ($customer->getTaxvat() ?? ''));
-        } catch (\Exception $e) {
-            $this->logger->warning('[ERP API] Failed to load customer CNPJ: ' . $e->getMessage(), [
-                'increment_id' => $order->getIncrementId(),
-                'customer_id' => $customerId,
-            ]);
-
-            return '';
-        }
     }
 
     private function getErpCustomerOrderData(int $erpClientCode): array

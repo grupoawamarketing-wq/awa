@@ -423,6 +423,8 @@ try {
         'awa-custom-auth-refine.css',
         'awa-custom-plp-search-cart-refine.css',
         'awa-custom-home-owl-tabs.css',
+        'awa-04-components.css',
+        'awa-05-pages.css',
     ];
     $orderIndexByBasename = [];
     foreach ($cssLinks as $idx => $url) {

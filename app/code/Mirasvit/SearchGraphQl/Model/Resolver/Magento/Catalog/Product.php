@@ -66,7 +66,7 @@ class Product implements ResolverInterface
         $this->suggester     = $suggester;
     }
 
-    public function resolve(Field $field, $context, ResolveInfo $info, array $value = null, array $args = null)
+    public function resolve(Field $field, $context, ResolveInfo $info, ?array $value = null, ?array $args = null)
     {
         foreach ($this->defaultParams as $parameter => $defaultValue) {
             if (!isset($args[$parameter])) {

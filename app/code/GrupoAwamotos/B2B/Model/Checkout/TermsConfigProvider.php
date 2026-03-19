@@ -9,7 +9,6 @@ declare(strict_types=1);
 namespace GrupoAwamotos\B2B\Model\Checkout;
 
 use Magento\Checkout\Model\ConfigProviderInterface;
-use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Store\Model\ScopeInterface;
 
@@ -18,14 +17,11 @@ class TermsConfigProvider implements ConfigProviderInterface
     private const XML_PATH_PREFIX = 'grupoawamotos_b2b/checkout/';
 
     private ScopeConfigInterface $scopeConfig;
-    private CustomerSession $customerSession;
 
     public function __construct(
-        ScopeConfigInterface $scopeConfig,
-        CustomerSession $customerSession
+        ScopeConfigInterface $scopeConfig
     ) {
         $this->scopeConfig = $scopeConfig;
-        $this->customerSession = $customerSession;
     }
 
     /**
@@ -35,19 +31,10 @@ class TermsConfigProvider implements ConfigProviderInterface
      */
     public function getConfig(): array
     {
-        // Only provide config for logged-in customers
-        if (!$this->customerSession->isLoggedIn()) {
-            return [];
-        }
-
-        if (!$this->isTermsEnabled()) {
-            return [];
-        }
-
         return [
             'b2bCheckout' => [
                 'terms' => [
-                    'enabled' => true,
+                    'enabled' => $this->isTermsEnabled(),
                     'checkboxText' => $this->getConfigValue('terms_checkbox_text')
                         ?: 'Li e aceito os Termos de Venda B2B',
                     'content' => $this->getConfigValue('terms_content') ?: '',

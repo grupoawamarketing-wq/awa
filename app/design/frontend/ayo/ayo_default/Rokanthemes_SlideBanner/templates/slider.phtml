@@ -1,94 +1,24 @@
 <?php
 /**
  * AWA Motos - Slideshow Template
- * Refatorado para usar um componente de UI Magento 2 e data-mage-init.
- * A lógica de inicialização e acessibilidade foi movida para o JS.
+ * Atualizado com acessibilidade, performance e <picture> responsivo
+ * Eliminado HTML duplicado desktop/mobile: usa <picture><source> + <img>
  */
 
 // @codingStandardsIgnoreFile
-/** @var \Rokanthemes\SlideBanner\Block\Slider|\Magento\Framework\View\Element\Template $block */
 if ($banners = $block->getBannerCollection()):
     $slider = $block->getSlider();
     $sliderId = $block->getSliderId();
     $sliderSettings = $slider->getSliderSetting();
     $totalSlides = is_countable($banners) ? count($banners) : 0;
-
-    // Prepara a configuração do slider para o componente JS
-    $sliderConfig = [
-        'lazyLoad' => true,
-        'singleItem' => true,
-    ];
-    foreach ($sliderSettings as $key => $value) {
-        if (in_array($key, ['autoPlay', 'navigation', 'stopOnHover', 'pagination', 'scrollPerPage'])) {
-            $sliderConfig[$key] = (bool)$value;
-        } else {
-            $sliderConfig[$key] = $value;
-        }
-    }
-    $mageInitConfig = [
-        'rokanthemes/slideBanner' => [
-            'sliderConfig' => $sliderConfig,
-            'totalSlides' => $totalSlides
-        ]
-    ];
 ?>
 
-<?php
-// Preload hint para a primeira imagem (melhora LCP)
-$firstBanner = null;
-foreach ($banners as $b) {
-    if ($b->getSlideStatus() != '2') {
-        $firstBanner = $b;
-        break;
-    }
-}
-if ($firstBanner):
-    $firstImgSrc = $firstBanner->getSlideImageMobile() ?: $firstBanner->getSlideImage();
-    if ($firstImgSrc):
-        $mediaUrl = $block->getUrl('media');
-        $preloadUrl = rtrim($mediaUrl, '/') . '/' . ltrim($firstImgSrc, '/');
-?>
-<link rel="preload" as="image" href="<?php echo $block->escapeUrl($preloadUrl); ?>" fetchpriority="high" />
-<?php endif; endif; ?>
-
-<!-- Schema.org ItemList para SEO de carrosséis -->
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "ItemList",
-  "name": "<?php echo $block->escapeHtml($slider->getSliderTitle() ?: __('Destaques')); ?>",
-  "numberOfItems": <?php echo $totalSlides; ?>,
-  "itemListElement": [
-    <?php
-    $schemaIndex = 0;
-    $validItems = 0;
-    foreach ($banners as $banner):
-        if ($banner->getSlideStatus() == '2') { continue; }
-        $schemaIndex++;
-        $itemName = trim(strip_tags($banner->getSlideTitle() ?: $banner->getSlideText() ?: ''));
-        $itemUrl = $banner->getSlideLink() ?: '';
-        if ($itemName && $itemName !== '.'):
-            if ($validItems > 0) echo ',';
-            $validItems++;
-    ?>
-    {
-      "@type": "ListItem",
-      "position": <?php echo $schemaIndex; ?>,
-      "name": "<?php echo $block->escapeHtml($itemName); ?>"<?php if ($itemUrl): ?>,
-      "url": "<?php echo $block->escapeUrl($itemUrl); ?>"<?php endif; ?>
-    }
-    <?php endif; endforeach; ?>
-  ]
-}
-</script>
-
-<!-- Slider refatorado para usar componente UI via data-mage-init -->
+<!-- Slider unificado com <picture> responsivo -->
 <div class="wrapper_slider slider_<?php echo $sliderId; ?>"
      role="region"
      aria-label="<?php echo $block->escapeHtml(__('Apresentação de slides promocional')); ?>"
      aria-roledescription="carousel"
-     aria-live="off"
-     data-mage-init='<?php echo json_encode($mageInitConfig, JSON_HEX_APOS | JSON_HEX_QUOT); ?>'>
+     aria-live="off">
     <div class="owl" role="list">
         <?php
         $slideIndex = 0;
@@ -102,23 +32,111 @@ if ($firstBanner):
                 $isFirst = ($slideIndex === 1);
                 $desktopSrc = $banner->getSlideImage();
                 $mobileSrc = $banner->getSlideImageMobile();
-                $pictureHtml = $block->getPictureElement($desktopSrc, $mobileSrc, $slideAlt, $isFirst, true);
+                $html = $block->getPictureElement($desktopSrc, $mobileSrc, $slideAlt, $isFirst);
                 if ($link = $banner->getSlideLink()) {
-                    $pictureHtml = '<a href="' . $block->escapeUrl($link) . '" title="' . $block->escapeHtml($slideAlt) . '">' . $pictureHtml . '</a>';
+                    $html = '<a href="' . $block->escapeUrl($link) . '" title="' . $block->escapeHtml($slideAlt) . '">' . $html . '</a>';
                 }
-                echo $pictureHtml;
+                echo $html;
             ?>
         </div>
         <?php endforeach; ?>
     </div>
-    <div class="slide-controls">
-        <button type="button" class="play-pause-button" aria-label="<?php echo __('Pausar slides'); ?>">
-            <span class="icon-pause" aria-hidden="true"></span>
-            <span class="icon-play" aria-hidden="true" style="display:none;"></span>
-        </button>
-        <div class="progress-bar-container" aria-hidden="true">
-            <div class="progress-bar"></div>
-        </div>
-    </div>
 </div>
+
+<script>
+    require([
+        'jquery',
+        'mage/mage',
+        'rokanthemes/owl'
+    ], function ($) {
+        'use strict';
+
+        var sliderConfig = {
+            lazyLoad: true,
+            singleItem: true,
+            <?php
+            $settings = [];
+            foreach ($sliderSettings as $key => $value) {
+                if (in_array($key, array('autoPlay', 'navigation', 'stopOnHover', 'pagination', 'scrollPerPage'))) {
+                    $value = $value == 0 ? 'false' : 'true';
+                }
+                $settings[] = $key . ': ' . $value;
+            }
+            echo implode(',', $settings);
+            ?>
+        };
+
+        // Respeitar preferências do usuário (reduce motion)
+        try {
+            if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                if (Object.prototype.hasOwnProperty.call(sliderConfig, 'autoPlay')) {
+                    sliderConfig.autoPlay = false;
+                }
+                if (Object.prototype.hasOwnProperty.call(sliderConfig, 'autoplay')) {
+                    sliderConfig.autoplay = false;
+                }
+            }
+        } catch (e) {}
+
+        function enhanceOwlA11y($root) {
+            var $owl = $root.find('.owl');
+            if (!$owl.length || typeof $owl.owlCarousel !== 'function') {
+                return;
+            }
+
+            function applyState() {
+                var $items = $owl.find('.owl-item');
+                if (!$items.length) {
+                    return;
+                }
+
+                $items.each(function () {
+                    var $item = $(this);
+                    var isActive = $item.hasClass('active');
+                    $item.attr('aria-hidden', isActive ? 'false' : 'true');
+
+                    var $links = $item.find('a, button');
+                    if ($links.length) {
+                        $links.attr('tabindex', isActive ? '0' : '-1');
+                    }
+                });
+
+                var $prev = $root.find('.owl-prev');
+                var $next = $root.find('.owl-next');
+                $prev.attr({'aria-label': '<?php echo __('Slide anterior') ?>', 'role': 'button', 'tabindex': '0'});
+                $next.attr({'aria-label': '<?php echo __('Próximo slide') ?>', 'role': 'button', 'tabindex': '0'});
+
+                $root.find('.owl-pagination')
+                    .attr({'role': 'tablist', 'aria-label': '<?php echo __('Indicadores de slides') ?>'});
+
+                var $pages = $root.find('.owl-page');
+                $pages.each(function (index) {
+                    var $page = $(this);
+                    var isSelected = $page.hasClass('active');
+                    $page.attr({
+                        'role': 'tab',
+                        'aria-label': '<?php echo __('Ir para slide') ?> ' + (index + 1),
+                        'aria-selected': isSelected ? 'true' : 'false',
+                        'tabindex': isSelected ? '0' : '-1'
+                    });
+                });
+            }
+
+            $owl.on('initialized.owl.carousel refreshed.owl.carousel changed.owl.carousel', function () {
+                applyState();
+            });
+
+            $root.on('keydown', '.owl-prev, .owl-next, .owl-page', function (ev) {
+                if (ev.key === 'Enter' || ev.key === ' ') {
+                    ev.preventDefault();
+                    $(this).trigger('click');
+                }
+            });
+        }
+
+        var $sliderRoot = $(".slider_<?php echo $sliderId; ?>");
+        $sliderRoot.find('.owl').owlCarousel(sliderConfig);
+        enhanceOwlA11y($sliderRoot);
+    });
+</script>
 <?php endif; ?>

@@ -147,7 +147,7 @@ php bin/magento erp:sync-stock [--sku=SKU]
 **Métodos principais:**
 ```php
 // Buscar cliente por CNPJ
-getErpCustomerByCnpj(string $cnpj): ?array
+getErpCustomerByTaxvat(string $cnpj): ?array
 
 // Obter código ERP de um cliente Magento
 getErpCodeByCustomerId(int $customerId): ?int
@@ -746,7 +746,7 @@ FN_SUBGRUPO
 
 ```php
 // Quando cliente B2B é aprovado
-1. Busca CNPJ no ERP (CustomerSync::getErpCustomerByCnpj)
+1. Busca CNPJ no ERP (CustomerSync::getErpCustomerByTaxvat)
 2. Se encontrado → Link automático
 3. Sincroniza limite de crédito
 4. Importa endereços

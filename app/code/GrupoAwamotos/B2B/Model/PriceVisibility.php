@@ -14,7 +14,6 @@ use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Framework\UrlInterface;
 use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
 
 class PriceVisibility implements PriceVisibilityInterface
 {
@@ -74,7 +73,7 @@ class PriceVisibility implements PriceVisibilityInterface
         $this->customerRepository = $customerRepository;
         $this->urlBuilder = $urlBuilder;
         $this->syncLogResource = $syncLogResource;
-        $this->logger = $logger ?? new NullLogger();
+        $this->logger = $logger ?? new \Psr\Log\NullLogger();
     }
 
     /**
@@ -97,10 +96,10 @@ class PriceVisibility implements PriceVisibilityInterface
             // Usar repository para garantir que custom attributes EAV sejam carregados
             $approvalStatus = $this->getCustomerApprovalStatus();
 
-            // Se aprovação é obrigatória, status vazio não pode expor preço.
+            // Se não há status definido, considerar como aprovado (compatibilidade)
             if (empty($approvalStatus)) {
-                $this->canViewPricesCache = !$this->config->requireApproval();
-                return $this->canViewPricesCache;
+                $this->canViewPricesCache = true;
+                return true;
             }
 
             // Cliente aprovado — verificar se tem código ERP
@@ -199,15 +198,7 @@ class PriceVisibility implements PriceVisibilityInterface
                 if (!empty($pendingMsg)) {
                     return $pendingMsg;
                 }
-                return 'Seu cadastro empresarial está pendente de aprovação. Após a análise, os preços e condições comerciais serão liberados.';
-            }
-
-            if (empty($approvalStatus) && $this->config->requireApproval()) {
-                $pendingMsg = $this->config->getPendingMessage();
-                if (!empty($pendingMsg)) {
-                    return $pendingMsg;
-                }
-                return 'Seu cadastro empresarial ainda não foi aprovado. Assim que a análise for concluída, sua tabela comercial será liberada.';
+                return 'Sua conta está pendente de aprovação.';
             }
         }
 
@@ -218,8 +209,12 @@ class PriceVisibility implements PriceVisibilityInterface
         }
 
         // Substituir placeholders
-        $loginUrl = $this->urlBuilder->getUrl('customer/account/login');
-        $registerUrl = $this->urlBuilder->getUrl('customer/account/create');
+        $loginUrl = $this->config->isStrictB2B()
+            ? $this->urlBuilder->getUrl('b2b/account/login')
+            : $this->urlBuilder->getUrl('customer/account/login');
+        $registerUrl = $this->config->isEnabled()
+            ? $this->urlBuilder->getUrl('b2b/register')
+            : $this->urlBuilder->getUrl('customer/account/create');
 
         $message = str_replace(
             ['{{login_url}}', '{{register_url}}'],
@@ -246,9 +241,9 @@ class PriceVisibility implements PriceVisibilityInterface
             $approvalStatusAttr = $customer->getCustomAttribute('b2b_approval_status');
             $approvalStatus = $approvalStatusAttr ? $approvalStatusAttr->getValue() : null;
 
-            // Quando a aprovação é obrigatória, ausência de status não concede acesso.
+            // Se não há status definido, considerar como aprovado (compatibilidade)
             if (empty($approvalStatus)) {
-                return !$this->config->requireApproval();
+                return true;
             }
 
             return $approvalStatus === ApprovalStatus::STATUS_APPROVED;

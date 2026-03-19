@@ -1,7 +1,8 @@
 define([
     'jquery',
+    'mage/url',
     'mage/validation'
-], function ($) {
+], function ($, urlBuilder) {
     'use strict';
 
     return function (config, element) {
@@ -11,6 +12,8 @@ define([
         var cnpjValidateUrl = options.cnpjValidateUrl || '';
         var loginUrl = options.loginUrl || '';
         var sendingLabel = options.sendingLabel || 'Enviando cadastro...';
+        var leadStorageKey = options.leadStorageKey || 'b2b_register_lead_fired';
+        var leadEventName = options.leadEventName || 'Lead';
 
         var cnpjTimer = null;
         var lastCnpj = '';
@@ -23,6 +26,7 @@ define([
         var lastBenefitsCompactMode = null;
         var lastSectionsCompactMode = null;
         var progressSyncScheduled = false;
+        var leadTriggered = false;
 
         if (!$form.length) {
             return;
@@ -37,6 +41,58 @@ define([
 
         function $field(selector) {
             return $form.find(selector);
+        }
+
+        function hasLeadBeenTracked() {
+            try {
+                return window.sessionStorage.getItem(leadStorageKey) === '1';
+            } catch (error) {
+                return false;
+            }
+        }
+
+        function markLeadTracked() {
+            try {
+                window.sessionStorage.setItem(leadStorageKey, '1');
+            } catch (error) {
+                // Browsers with restricted storage should not break the flow.
+            }
+        }
+
+        function trackLeadStart() {
+            if (leadTriggered || hasLeadBeenTracked()) {
+                return;
+            }
+
+            var eventId = 'lead-b2b-' + Date.now();
+
+            if (typeof window.fbq === 'function') {
+                window.fbq('track', leadEventName, {
+                    lead_type: 'b2b_cnpj',
+                    person_type: 'pj',
+                    funnel_stage: 'start',
+                    register_channel: 'b2b_register_form'
+                }, {eventID: eventId});
+            }
+
+            var formKey = window.FORM_KEY || '';
+
+            if (formKey) {
+                $.ajax({
+                    url: urlBuilder.build('b2b/ajax/trackLead'),
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        event_id: eventId,
+                        funnel_stage: 'start',
+                        register_channel: 'b2b_register_form',
+                        form_key: formKey
+                    }
+                });
+            }
+
+            leadTriggered = true;
+            markLeadTracked();
         }
 
         function updateRegisterPasswordToggleButton($toggle, isVisible) {
@@ -928,6 +984,8 @@ define([
             var $input = $(this);
             var digits;
 
+            trackLeadStart();
+
             $input.val(maskCnpj($input.val() || ''));
             digits = ($input.val() || '').replace(/\D/g, '');
 
@@ -948,6 +1006,7 @@ define([
 
         $field('#phone').on('input', function () {
             var $input = $(this);
+            trackLeadStart();
             $input.val(maskPhone($input.val() || ''));
         });
 
@@ -957,6 +1016,8 @@ define([
         });
 
         $field('#email').on('input blur', function () {
+            trackLeadStart();
+
             if (erpEmailMasked) {
                 showErpEmailAlert();
             }
@@ -965,6 +1026,9 @@ define([
         });
 
         $field('#password, #password_confirmation').on('input blur', updateEmailCheckAlert);
+
+        $field('#razao_social, #nome_fantasia, #inscricao_estadual, #firstname, #lastname')
+            .on('input blur', trackLeadStart);
 
         $form.on('input change blur', 'input, select, textarea', function () {
             updateProgressCompletionState();

@@ -8,7 +8,6 @@ use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Customer\Model\Session as CustomerSession;
 use GrupoAwamotos\ERPIntegration\Model\PurchaseHistory;
 use GrupoAwamotos\ERPIntegration\Model\ProductSuggestion;
-use GrupoAwamotos\ERPIntegration\Model\CnpjResolver;
 use GrupoAwamotos\ERPIntegration\Helper\Data as Helper;
 use Magento\Framework\App\RequestInterface;
 
@@ -21,7 +20,6 @@ class Suggestions implements HttpGetActionInterface
     private CustomerSession $customerSession;
     private PurchaseHistory $purchaseHistory;
     private ProductSuggestion $productSuggestion;
-    private CnpjResolver $cnpjResolver;
     private Helper $helper;
     private RequestInterface $request;
 
@@ -30,7 +28,6 @@ class Suggestions implements HttpGetActionInterface
         CustomerSession $customerSession,
         PurchaseHistory $purchaseHistory,
         ProductSuggestion $productSuggestion,
-        CnpjResolver $cnpjResolver,
         Helper $helper,
         RequestInterface $request
     ) {
@@ -38,7 +35,6 @@ class Suggestions implements HttpGetActionInterface
         $this->customerSession = $customerSession;
         $this->purchaseHistory = $purchaseHistory;
         $this->productSuggestion = $productSuggestion;
-        $this->cnpjResolver = $cnpjResolver;
         $this->helper = $helper;
         $this->request = $request;
     }
@@ -65,7 +61,7 @@ class Suggestions implements HttpGetActionInterface
 
         // Get customer CNPJ
         $customer = $this->customerSession->getCustomer();
-        $cnpj = $this->resolveCustomerCnpj($customer);
+        $cnpj = $customer->getData('b2b_cnpj') ?: $customer->getTaxvat();
 
         if (empty($cnpj)) {
             return $result->setData([
@@ -127,13 +123,5 @@ class Suggestions implements HttpGetActionInterface
         }
 
         return $result->setData($data);
-    }
-
-    private function resolveCustomerCnpj(object $customer): string
-    {
-        return $this->cnpjResolver->resolveFromValues(
-            (string) $customer->getData('b2b_cnpj'),
-            (string) $customer->getTaxvat()
-        );
     }
 }

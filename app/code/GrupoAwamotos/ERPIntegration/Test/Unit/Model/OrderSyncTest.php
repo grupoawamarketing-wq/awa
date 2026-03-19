@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace GrupoAwamotos\ERPIntegration\Test\Unit\Model;
 
 use GrupoAwamotos\ERPIntegration\Model\OrderSync;
-use GrupoAwamotos\ERPIntegration\Model\CnpjResolver;
 use GrupoAwamotos\ERPIntegration\Model\CustomerSync;
 use GrupoAwamotos\ERPIntegration\Api\ConnectionInterface;
 use GrupoAwamotos\ERPIntegration\Helper\Data as Helper;
@@ -15,6 +14,7 @@ use Magento\Sales\Api\Data\OrderItemInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Api\ShipmentRepositoryInterface;
 use Magento\Sales\Model\Order;
+use Magento\Sales\Model\Order\Shipment\TrackFactory;
 use Magento\Sales\Model\Convert\Order as OrderConverter;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\DB\Transaction;
@@ -31,10 +31,10 @@ class OrderSyncTest extends TestCase
     private CustomerSync|MockObject $customerSync;
     private OrderRepositoryInterface|MockObject $orderRepository;
     private ShipmentRepositoryInterface|MockObject $shipmentRepository;
+    private TrackFactory|MockObject $trackFactory;
     private OrderConverter|MockObject $orderConverter;
     private SearchCriteriaBuilder|MockObject $searchCriteriaBuilder;
     private Transaction|MockObject $transaction;
-    private CnpjResolver $cnpjResolver;
     private LoggerInterface|MockObject $logger;
 
     protected function setUp(): void
@@ -45,10 +45,10 @@ class OrderSyncTest extends TestCase
         $this->customerSync = $this->createMock(CustomerSync::class);
         $this->orderRepository = $this->createMock(OrderRepositoryInterface::class);
         $this->shipmentRepository = $this->createMock(ShipmentRepositoryInterface::class);
+        $this->trackFactory = $this->createMock(TrackFactory::class);
         $this->orderConverter = $this->createMock(OrderConverter::class);
         $this->searchCriteriaBuilder = $this->createMock(SearchCriteriaBuilder::class);
         $this->transaction = $this->createMock(Transaction::class);
-        $this->cnpjResolver = new CnpjResolver();
         $this->logger = $this->createMock(LoggerInterface::class);
 
         $this->orderSync = new OrderSync(
@@ -58,10 +58,10 @@ class OrderSyncTest extends TestCase
             $this->customerSync,
             $this->orderRepository,
             $this->shipmentRepository,
+            $this->trackFactory,
             $this->orderConverter,
             $this->searchCriteriaBuilder,
             $this->transaction,
-            $this->cnpjResolver,
             $this->logger
         );
     }
@@ -71,14 +71,14 @@ class OrderSyncTest extends TestCase
     public function testSendOrderRejectsOrderWithoutErpCustomer(): void
     {
         $order = $this->createOrderMock([
-            'taxvat' => '12345678000190',
+            'taxvat' => '12345678901',
             'customer_id' => 123,
             'increment_id' => '100000001',
             'entity_id' => 1,
         ]);
 
         // No ERP customer found
-        $this->customerSync->method('getErpCustomerByCnpj')->willReturn(null);
+        $this->customerSync->method('getErpCustomerByTaxvat')->willReturn(null);
         $this->syncLogResource->method('getErpCodeByMagentoId')->willReturn(null);
 
         // Should log the rejection
@@ -98,28 +98,10 @@ class OrderSyncTest extends TestCase
         $this->assertStringContainsString('Cliente não encontrado', $result['message']);
     }
 
-    public function testSendOrderRejectsCpfOnlyOrderWithoutTryingErpLookup(): void
-    {
-        $order = $this->createOrderMock([
-            'taxvat' => '12345678901',
-            'customer_id' => 123,
-            'increment_id' => '100000010',
-            'entity_id' => 10,
-        ]);
-
-        $this->customerSync->expects($this->never())->method('getErpCustomerByCnpj');
-        $this->syncLogResource->method('getErpCodeByMagentoId')->willReturn(null);
-
-        $result = $this->orderSync->sendOrder($order);
-
-        $this->assertFalse($result['success']);
-        $this->assertStringContainsString('CNPJ: não informado', $result['message']);
-    }
-
     public function testSendOrderSuccessWithTransaction(): void
     {
         $order = $this->createOrderMock([
-            'taxvat' => '12345678000190',
+            'taxvat' => '12345678901',
             'customer_id' => 123,
             'increment_id' => '100000001',
             'entity_id' => 1,
@@ -140,11 +122,10 @@ class OrderSyncTest extends TestCase
         $order->method('getItems')->willReturn([$orderItem]);
 
         // ERP customer found
-        $this->customerSync->method('getErpCustomerByCnpj')
+        $this->customerSync->method('getErpCustomerByTaxvat')
             ->willReturn(['CODIGO' => 999]);
 
         $this->helper->method('getStockFilial')->willReturn(1);
-        $this->syncLogResource->method('getErpCodeByMagentoId')->willReturn(null);
 
         // Transaction should be started
         $this->connection->expects($this->once())->method('beginTransaction');
@@ -169,77 +150,10 @@ class OrderSyncTest extends TestCase
         $this->assertEquals(1, $result['items_synced']);
     }
 
-    public function testSendOrderReturnsExistingErpOrderWithoutReexport(): void
-    {
-        $order = $this->createOrderMock([
-            'taxvat' => '12345678000190',
-            'customer_id' => 123,
-            'increment_id' => '100000777',
-            'entity_id' => 77,
-        ]);
-
-        $this->syncLogResource->expects($this->once())
-            ->method('getErpCodeByMagentoId')
-            ->with('order', 77)
-            ->willReturn('9876');
-
-        $this->connection->expects($this->never())->method('beginTransaction');
-        $this->connection->expects($this->never())->method('execute');
-
-        $result = $this->orderSync->sendOrder($order);
-
-        $this->assertTrue($result['success']);
-        $this->assertSame(9876, $result['erp_order_id']);
-        $this->assertStringContainsString('já sincronizado', $result['message']);
-    }
-
-    public function testSendOrderKeepsSuccessWhenPostCommitPersistenceFails(): void
-    {
-        $order = $this->createOrderMock([
-            'taxvat' => '12345678000190',
-            'customer_id' => 123,
-            'increment_id' => '100000003',
-            'entity_id' => 3,
-            'subtotal' => 100.00,
-            'discount_amount' => -10.00,
-            'grand_total' => 95.00,
-            'shipping_amount' => 5.00,
-        ]);
-
-        $orderItem = $this->createMock(OrderItemInterface::class);
-        $orderItem->method('getParentItemId')->willReturn(null);
-        $orderItem->method('getQtyOrdered')->willReturn(1.0);
-        $orderItem->method('getSku')->willReturn('TEST-SKU');
-        $orderItem->method('getPrice')->willReturn(95.00);
-        $orderItem->method('getRowTotal')->willReturn(95.00);
-        $orderItem->method('getDiscountAmount')->willReturn(0.00);
-        $order->method('getItems')->willReturn([$orderItem]);
-
-        $this->syncLogResource->method('getErpCodeByMagentoId')->willReturn(null);
-        $this->customerSync->method('getErpCustomerByCnpj')->willReturn(['CODIGO' => 999]);
-        $this->helper->method('getStockFilial')->willReturn(1);
-        $this->connection->method('fetchOne')->willReturn(['new_id' => 2222]);
-        $this->connection->expects($this->once())->method('beginTransaction');
-        $this->connection->expects($this->once())->method('commit');
-        $this->connection->expects($this->never())->method('rollback');
-        $this->connection->expects($this->exactly(2))->method('execute');
-
-        $this->syncLogResource->expects($this->once())
-            ->method('setEntityMap')
-            ->willThrowException(new \RuntimeException('db local indisponivel'));
-
-        $this->syncLogResource->expects($this->never())->method('addLog');
-
-        $result = $this->orderSync->sendOrder($order);
-
-        $this->assertTrue($result['success']);
-        $this->assertSame(2222, $result['erp_order_id']);
-    }
-
     public function testSendOrderRollsBackOnError(): void
     {
         $order = $this->createOrderMock([
-            'taxvat' => '12345678000190',
+            'taxvat' => '12345678901',
             'customer_id' => 123,
             'increment_id' => '100000001',
             'entity_id' => 1,
@@ -252,11 +166,10 @@ class OrderSyncTest extends TestCase
         $order->method('getItems')->willReturn([$orderItem]);
 
         // ERP customer found
-        $this->customerSync->method('getErpCustomerByCnpj')
+        $this->customerSync->method('getErpCustomerByTaxvat')
             ->willReturn(['CODIGO' => 999]);
 
         $this->helper->method('getStockFilial')->willReturn(1);
-        $this->syncLogResource->method('getErpCodeByMagentoId')->willReturn(null);
 
         // Transaction starts
         $this->connection->expects($this->once())->method('beginTransaction');
@@ -281,7 +194,7 @@ class OrderSyncTest extends TestCase
     public function testSendOrderSkipsChildItems(): void
     {
         $order = $this->createOrderMock([
-            'taxvat' => '12345678000190',
+            'taxvat' => '12345678901',
             'customer_id' => 123,
             'increment_id' => '100000001',
             'entity_id' => 1,
@@ -303,11 +216,10 @@ class OrderSyncTest extends TestCase
 
         $order->method('getItems')->willReturn([$parentItem, $childItem]);
 
-        $this->customerSync->method('getErpCustomerByCnpj')
+        $this->customerSync->method('getErpCustomerByTaxvat')
             ->willReturn(['CODIGO' => 999]);
 
         $this->helper->method('getStockFilial')->willReturn(1);
-        $this->syncLogResource->method('getErpCodeByMagentoId')->willReturn(null);
 
         $this->connection->method('fetchOne')
             ->willReturn(['new_id' => 12345]);
@@ -327,7 +239,7 @@ class OrderSyncTest extends TestCase
     public function testSendOrderRejectsEmptyOrder(): void
     {
         $order = $this->createOrderMock([
-            'taxvat' => '12345678000190',
+            'taxvat' => '12345678901',
             'customer_id' => 123,
             'increment_id' => '100000001',
             'entity_id' => 1,
@@ -336,9 +248,8 @@ class OrderSyncTest extends TestCase
         // No items
         $order->method('getItems')->willReturn([]);
 
-        $this->customerSync->method('getErpCustomerByCnpj')
+        $this->customerSync->method('getErpCustomerByTaxvat')
             ->willReturn(['CODIGO' => 999]);
-        $this->syncLogResource->method('getErpCodeByMagentoId')->willReturn(null);
 
         $result = $this->orderSync->sendOrder($order);
 
@@ -349,14 +260,14 @@ class OrderSyncTest extends TestCase
     public function testSendOrderIncludesExecutionTime(): void
     {
         $order = $this->createOrderMock([
-            'taxvat' => '12345678000190',
+            'taxvat' => '12345678901',
             'customer_id' => 123,
             'increment_id' => '100000001',
             'entity_id' => 1,
         ]);
 
         // No ERP customer - quick rejection
-        $this->customerSync->method('getErpCustomerByCnpj')->willReturn(null);
+        $this->customerSync->method('getErpCustomerByTaxvat')->willReturn(null);
         $this->syncLogResource->method('getErpCodeByMagentoId')->willReturn(null);
 
         $result = $this->orderSync->sendOrder($order);
@@ -432,7 +343,6 @@ class OrderSyncTest extends TestCase
             'NFNUMERO' => '12345',
             'NFCHAVE' => str_repeat('1', 44),
             'CODRASTREIO' => 'BR123456789',
-            'TRANSPORTADORA_NOME' => '',
         ];
 
         $this->connection->method('fetchOne')
@@ -514,11 +424,7 @@ class OrderSyncTest extends TestCase
         $this->orderConverter->method('toShipment')->willReturn($shipment);
 
         $track = $this->createMock(\Magento\Sales\Model\Order\Shipment\Track::class);
-        $trackCollection = $this->createMock(\Magento\Framework\Data\Collection::class);
-        $trackCollection->method('getNewEmptyItem')->willReturn($track);
-        $shipment->method('getTracksCollection')->willReturn($trackCollection);
-        $shipment->method('addTrack')->with($track)->willReturnSelf();
-        $shipment->method('register')->willReturnSelf();
+        $this->trackFactory->method('create')->willReturn($track);
 
         $this->transaction->method('addObject')->willReturnSelf();
 
@@ -722,9 +628,6 @@ class OrderSyncTest extends TestCase
         $order = $this->createMock(Order::class);
 
         $order->method('getCustomerTaxvat')->willReturn($data['taxvat'] ?? null);
-        $order->method('getData')->willReturnCallback(
-            static fn (string $key) => $data[$key] ?? null
-        );
         $order->method('getCustomerId')->willReturn($data['customer_id'] ?? null);
         $order->method('getIncrementId')->willReturn($data['increment_id'] ?? '000000001');
         $order->method('getEntityId')->willReturn($data['entity_id'] ?? 1);

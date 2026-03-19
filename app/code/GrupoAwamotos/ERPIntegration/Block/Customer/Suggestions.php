@@ -9,7 +9,6 @@ use Magento\Customer\Model\Session as CustomerSession;
 use GrupoAwamotos\ERPIntegration\Model\PurchaseHistory;
 use GrupoAwamotos\ERPIntegration\Model\ProductSuggestion;
 use GrupoAwamotos\ERPIntegration\Model\Cart\SuggestedCart;
-use GrupoAwamotos\ERPIntegration\Model\CnpjResolver;
 use GrupoAwamotos\ERPIntegration\Model\Rfm\Calculator as RfmCalculator;
 use GrupoAwamotos\ERPIntegration\Model\ResourceModel\SyncLog as SyncLogResource;
 use GrupoAwamotos\ERPIntegration\Model\CustomerPriceProvider;
@@ -28,7 +27,6 @@ class Suggestions extends Template
     private PurchaseHistory $purchaseHistory;
     private ProductSuggestion $productSuggestion;
     private SuggestedCart $suggestedCart;
-    private CnpjResolver $cnpjResolver;
     private RfmCalculator $rfmCalculator;
     private SyncLogResource $syncLogResource;
     private CustomerPriceProvider $customerPriceProvider;
@@ -42,7 +40,6 @@ class Suggestions extends Template
         PurchaseHistory $purchaseHistory,
         ProductSuggestion $productSuggestion,
         SuggestedCart $suggestedCart,
-        CnpjResolver $cnpjResolver,
         RfmCalculator $rfmCalculator,
         SyncLogResource $syncLogResource,
         CustomerPriceProvider $customerPriceProvider,
@@ -54,7 +51,6 @@ class Suggestions extends Template
         $this->purchaseHistory = $purchaseHistory;
         $this->productSuggestion = $productSuggestion;
         $this->suggestedCart = $suggestedCart;
-        $this->cnpjResolver = $cnpjResolver;
         $this->rfmCalculator = $rfmCalculator;
         $this->syncLogResource = $syncLogResource;
         $this->customerPriceProvider = $customerPriceProvider;
@@ -102,21 +98,16 @@ class Suggestions extends Template
         }
 
         // 2. Fallback: resolve via CNPJ
-        $cnpj = $this->resolveCustomerCnpj($customer);
+        $cnpj = $customer->getData('b2b_cnpj');
+        if (empty($cnpj)) {
+            $cnpj = $customer->getTaxvat();
+        }
 
         if (!empty($cnpj)) {
             $this->erpCustomerCode = $this->purchaseHistory->getCustomerCodeByCnpj($cnpj);
         }
 
         return $this->erpCustomerCode;
-    }
-
-    private function resolveCustomerCnpj(object $customer): string
-    {
-        return $this->cnpjResolver->resolveFromValues(
-            (string) $customer->getData('b2b_cnpj'),
-            (string) $customer->getTaxvat()
-        );
     }
 
     /**

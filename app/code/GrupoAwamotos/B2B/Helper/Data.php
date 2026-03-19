@@ -268,109 +268,6 @@ class Data extends AbstractHelper
         return true;
     }
 
-    public function canViewPrices(): bool
-    {
-        return $this->priceVisibility->canViewPrices();
-    }
-
-    public function canAddToCart(): bool
-    {
-        return $this->priceVisibility->canAddToCart();
-    }
-
-    public function isGuestCustomer(): bool
-    {
-        return !$this->customerSession->isLoggedIn();
-    }
-
-    public function isPendingErpSetup(): bool
-    {
-        return $this->customerSession->isLoggedIn() && $this->priceVisibility->isApprovedPendingErp();
-    }
-
-    public function isPendingApproval(): bool
-    {
-        return $this->customerSession->isLoggedIn()
-            && !$this->priceVisibility->isCustomerApproved()
-            && !$this->isPendingErpSetup();
-    }
-
-    public function getPriceGateState(): string
-    {
-        if ($this->canViewPrices() && $this->canAddToCart()) {
-            return 'approved';
-        }
-
-        if ($this->isGuestCustomer()) {
-            return 'guest';
-        }
-
-        if ($this->isPendingErpSetup()) {
-            return 'erp-pending';
-        }
-
-        if ($this->isPendingApproval()) {
-            return 'approval-pending';
-        }
-
-        return 'restricted';
-    }
-
-    public function getPriceGateHeadline(): string
-    {
-        return match ($this->getPriceGateState()) {
-            'guest' => 'Acesso comercial exclusivo para clientes B2B aprovados',
-            'erp-pending' => 'Tabela comercial em configuração',
-            'approval-pending' => 'Cadastro empresarial em análise',
-            'restricted' => 'Acesso comercial temporariamente indisponível',
-            default => 'Condições comerciais liberadas',
-        };
-    }
-
-    public function getPriceGateDescription(): string
-    {
-        $message = trim(strip_tags($this->priceVisibility->getPriceReplacementMessage()));
-
-        return match ($this->getPriceGateState()) {
-            'guest' => 'Entre com sua conta empresarial ou solicite cadastro B2B para consultar preços, condições e comprar com atendimento comercial dedicado.',
-            'erp-pending' => $message !== '' ? $message : 'Sua empresa já foi aprovada. Estamos finalizando a vinculação da tabela comercial no ERP.',
-            'approval-pending' => $message !== '' ? $message : 'Assim que sua análise cadastral for concluída, os preços e a compra online serão liberados.',
-            'restricted' => $message !== '' ? $message : 'Entre em contato com nossa equipe comercial para regularizar o acesso da sua conta.',
-            default => 'Sua conta possui acesso às condições comerciais negociadas.',
-        };
-    }
-
-    public function getPriceGatePrimaryLabel(): string
-    {
-        return match ($this->getPriceGateState()) {
-            'guest' => 'Entrar na conta',
-            'erp-pending', 'approval-pending', 'restricted' => 'Acompanhar minha conta',
-            default => 'Minha conta',
-        };
-    }
-
-    public function getPriceGatePrimaryUrl(): string
-    {
-        return $this->isGuestCustomer()
-            ? $this->_getUrl('customer/account/login')
-            : $this->_getUrl('customer/account');
-    }
-
-    public function getPriceGateSecondaryLabel(): string
-    {
-        return match ($this->getPriceGateState()) {
-            'guest' => 'Solicitar cadastro B2B',
-            default => 'Falar com consultor',
-        };
-    }
-
-    public function getPriceGateSecondaryUrl(): string
-    {
-        return $this->isGuestCustomer()
-            ? $this->_getUrl('b2b/register')
-            : $this->_getUrl('contact');
-    }
-
     /**
      * Get current customer B2B group
      *
@@ -504,5 +401,161 @@ class Data extends AbstractHelper
         ];
 
         return $mapping[$code] ?? null;
+    }
+
+    /**
+     * Check if the current visitor can view prices.
+     */
+    public function canViewPrices(): bool
+    {
+        return $this->priceVisibility->canViewPrices();
+    }
+
+    /**
+     * Check if the current visitor can add items to cart.
+     */
+    public function canAddToCart(): bool
+    {
+        return $this->priceVisibility->canAddToCart();
+    }
+
+    /**
+     * Return a compact state used by the B2B gate UI.
+     */
+    public function getPriceGateState(): string
+    {
+        if ($this->canAddToCart()) {
+            return 'open';
+        }
+
+        if (!$this->customerSession->isLoggedIn()) {
+            return 'guest';
+        }
+
+        if ($this->priceVisibility->isApprovedPendingErp()) {
+            return 'erp_pending';
+        }
+
+        return match ($this->getApprovalStatus()) {
+            'rejected' => 'rejected',
+            'suspended' => 'suspended',
+            default => 'pending',
+        };
+    }
+
+    /**
+     * Headline shown in gated product cards.
+     */
+    public function getPriceGateHeadline(): string
+    {
+        return match ($this->getPriceGateState()) {
+            'guest' => 'Entre para comprar com condicoes B2B',
+            'erp_pending' => 'Sua tabela de precos esta sendo liberada',
+            'rejected' => 'Seu cadastro precisa de revisao',
+            'suspended' => 'Seu acesso comercial esta suspenso',
+            'pending' => 'Cadastro em analise comercial',
+            default => 'Acesso comercial liberado',
+        };
+    }
+
+    /**
+     * Supporting description shown in gated product cards.
+     */
+    public function getPriceGateDescription(): string
+    {
+        $fallback = match ($this->getPriceGateState()) {
+            'guest' => 'Solicite seu cadastro ou entre na conta da sua empresa para consultar precos e comprar no atacado.',
+            'erp_pending' => 'Sua empresa ja foi aprovada e nossa equipe esta concluindo a tabela comercial no ERP.',
+            'rejected' => 'Fale com a equipe comercial para revisar os dados da sua empresa e liberar o acesso novamente.',
+            'suspended' => 'Seu acesso comercial esta pausado. Nossa equipe pode orientar os proximos passos.',
+            'pending' => 'Estamos validando os dados da sua empresa para liberar condicoes comerciais e compra recorrente.',
+            default => 'Acesso comercial liberado.',
+        };
+
+        return $this->sanitizeGateMessage(
+            $this->priceVisibility->getPriceReplacementMessage(),
+            $fallback
+        );
+    }
+
+    /**
+     * Primary CTA URL used by gated product cards.
+     */
+    public function getPriceGatePrimaryUrl(): string
+    {
+        return match ($this->getPriceGateState()) {
+            'guest' => $this->_getUrl('b2b/register'),
+            default => $this->_getUrl('b2b/account/dashboard'),
+        };
+    }
+
+    /**
+     * Primary CTA label used by gated product cards.
+     */
+    public function getPriceGatePrimaryLabel(): string
+    {
+        return match ($this->getPriceGateState()) {
+            'guest' => 'Solicitar cadastro B2B',
+            'erp_pending' => 'Acompanhar minha conta',
+            'rejected' => 'Minha conta',
+            'suspended' => 'Minha conta',
+            'pending' => 'Ver status do cadastro',
+            default => 'Minha conta',
+        };
+    }
+
+    /**
+     * Secondary CTA URL used by gated product cards.
+     */
+    public function getPriceGateSecondaryUrl(): string
+    {
+        return match ($this->getPriceGateState()) {
+            'guest' => $this->_getUrl('b2b/account/login'),
+            default => $this->_getUrl('contact'),
+        };
+    }
+
+    /**
+     * Secondary CTA label used by gated product cards.
+     */
+    public function getPriceGateSecondaryLabel(): string
+    {
+        return match ($this->getPriceGateState()) {
+            'guest' => 'Ja tenho conta',
+            default => 'Falar com vendas',
+        };
+    }
+
+    /**
+     * Load the current approval status from the repository when possible.
+     */
+    private function getApprovalStatus(): ?string
+    {
+        if (!$this->customerSession->isLoggedIn()) {
+            return null;
+        }
+
+        try {
+            $customer = $this->customerRepository->getById((int) $this->customerSession->getCustomerId());
+            $attribute = $customer->getCustomAttribute('b2b_approval_status');
+
+            if ($attribute === null || $attribute->getValue() === null || $attribute->getValue() === '') {
+                return null;
+            }
+
+            return (string) $attribute->getValue();
+        } catch (\Throwable $exception) {
+            return null;
+        }
+    }
+
+    /**
+     * Normalize configured messages for card output.
+     */
+    private function sanitizeGateMessage(string $message, string $fallback): string
+    {
+        $normalized = preg_replace('/\s+/u', ' ', trim(strip_tags($message))) ?: '';
+
+        return $normalized !== '' ? $normalized : $fallback;
     }
 }

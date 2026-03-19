@@ -130,3 +130,29 @@ HTML;
 }
 </script>
 <?php endif; ?>
+<script type="text/x-magento-init">
+{
+    "*": {
+        "js/awa-scroll-reveal": {},
+        "js/awa-toast": {},
+        "js/awa-messages-interceptor": {},
+        "js/awa-keyboard-shortcuts": {},
+        "js/awa-compare": {}
+    }
+}
+</script>
+<script>
+/* Service Worker registration (2026-03-19) */
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/sw.js', { scope: '/' })
+            .then(function(reg) {
+                /* Send version bump so active SW clears old bundle caches */
+                if (reg.active) {
+                    reg.active.postMessage({ type: 'SKIP_WAITING' });
+                }
+            })
+            .catch(function() {});
+    });
+}
+</script>

@@ -77,11 +77,11 @@ class View implements HttpGetActionInterface
     {
         if (!$this->customerSession->isLoggedIn()) {
             $redirect = $this->redirectFactory->create();
-            return $redirect->setPath('customer/account/login');
+            return $redirect->setPath('b2b/account/login');
         }
 
         $listId = (int)$this->request->getParam('id');
-        
+
         if (!$listId) {
             $this->messageManager->addErrorMessage(__('Lista não especificada.'));
             $redirect = $this->redirectFactory->create();
@@ -98,7 +98,7 @@ class View implements HttpGetActionInterface
 
         $page = $this->pageFactory->create();
         $page->getConfig()->getTitle()->set($list->getName());
-        
+
         return $page;
     }
 }

@@ -10,6 +10,7 @@
 
 $isGuest = $block->isGuest();
 $isPending = $block->isPendingApproval();
+$isStrictB2B = $block->isStrictB2B();
 $loginUrl = $escaper->escapeUrl($block->getLoginUrl());
 $registerUrl = $escaper->escapeUrl($block->getRegisterUrl());
 $b2bRegisterUrl = $escaper->escapeUrl($block->getB2bRegisterUrl());
@@ -20,38 +21,34 @@ $pendingMessage = $escaper->escapeHtml($block->getPendingMessage());
 $mode = $isGuest ? 'guest' : 'pending';
 ?>
 
-<?php /* CSS em GrupoAwamotos_B2B::css/login-to-cart.css */ ?>
+<?php /* CSS em GrupoAwamotos_B2B::css/product/login-to-cart.css */ ?>
 
 <?php if ($isGuest): ?>
 <!-- Modal de Login para Comprar (Visitante) -->
 <div class="b2b-login-modal-overlay" id="b2b-login-modal" aria-hidden="true">
     <div class="b2b-login-modal" role="dialog" aria-modal="true" aria-labelledby="b2b-login-title" aria-describedby="b2b-login-desc" tabindex="-1">
         <div class="b2b-login-modal-header">
-            <span class="b2b-login-modal-eyebrow"><?= $escaper->escapeHtml(__('Portal Comercial B2B')) ?></span>
-            <button type="button" class="b2b-login-modal-close" data-b2b-login-close aria-label="Fechar">&times;</button>
-            <h3 id="b2b-login-title">Acesse sua condi&ccedil;&atilde;o comercial</h3>
-            <p id="b2b-login-desc">Entre na conta empresarial aprovada para consultar pre&ccedil;os, estoque e comprar com atendimento especializado.</p>
+            <button type="button" class="b2b-login-modal-close" data-b2b-login-close aria-label="<?= $escaper->escapeHtmlAttr(__('Fechar')) ?>">&times;</button>
+            <h3 id="b2b-login-title"><?= $escaper->escapeHtml($isStrictB2B ? __('Portal de Compra Empresarial') : __('Faça login para comprar')) ?></h3>
+            <p id="b2b-login-desc"><?= $escaper->escapeHtml($isStrictB2B ? __('Cadastre sua empresa ou faça login para visualizar preços e comprar no atacado.') : __('Crie sua conta e aproveite nossas ofertas!')) ?></p>
         </div>
         <div class="b2b-login-modal-body">
-            <div class="b2b-login-benefits" aria-label="<?= $escaper->escapeHtmlAttr(__('Vantagens da conta empresarial')) ?>">
-                <span class="b2b-login-benefit"><?= $escaper->escapeHtml(__('Precos por tabela')) ?></span>
-                <span class="b2b-login-benefit"><?= $escaper->escapeHtml(__('Reposicao rapida')) ?></span>
-                <span class="b2b-login-benefit"><?= $escaper->escapeHtml(__('Atendimento comercial')) ?></span>
-            </div>
             <div class="b2b-login-options">
+                <?php if (!$isStrictB2B): ?>
                 <a href="<?= $registerUrl ?>" class="b2b-login-option">
-                    <span class="b2b-login-option-title">Cadastro Pessoa F&iacute;sica</span>
-                    <span class="b2b-login-option-desc">Para compras pessoais - r&aacute;pido e f&aacute;cil</span>
+                    <span class="b2b-login-option-title"><?= $escaper->escapeHtml(__('Cadastro Pessoa Física')) ?></span>
+                    <span class="b2b-login-option-desc"><?= $escaper->escapeHtml(__('Para compras pessoais - rápido e fácil')) ?></span>
                 </a>
+                <?php endif; ?>
 
                 <a href="<?= $b2bRegisterUrl ?>" class="b2b-login-option b2b-primary">
-                    <span class="b2b-login-option-title">Cadastro Empresarial (B2B)</span>
-                    <span class="b2b-login-option-desc">Revendedores e empresas - descontos especiais!</span>
+                    <span class="b2b-login-option-title"><?= $escaper->escapeHtml(__('Cadastro Empresarial (B2B)')) ?></span>
+                    <span class="b2b-login-option-desc"><?= $escaper->escapeHtml($isStrictB2B ? __('Para empresas, oficinas e revendas com CNPJ e condições especiais.') : __('Revendedores e empresas - descontos especiais!')) ?></span>
                 </a>
             </div>
 
             <div class="b2b-login-already">
-                J&aacute; tem conta? <a href="<?= $loginUrl ?>">Fazer login</a>
+                <?= $escaper->escapeHtml(__('Já tem conta?')) ?> <a href="<?= $loginUrl ?>"><?= $escaper->escapeHtml(__('Fazer login')) ?></a>
             </div>
         </div>
     </div>
@@ -67,10 +64,10 @@ $mode = $isGuest ? 'guest' : 'pending';
             <polyline points="12 6 12 12 16 14"></polyline>
         </svg>
         <div class="b2b-pending-text">
-            <strong>Conta empresarial pendente de aprova&ccedil;&atilde;o</strong>
+            <strong><?= $escaper->escapeHtml(__('Conta pendente de aprovação')) ?></strong>
             <span><?= $pendingMessage ?></span>
         </div>
-        <a href="<?= $accountUrl ?>" class="b2b-pending-account-link">Minha Conta</a>
+        <a href="<?= $accountUrl ?>" class="b2b-pending-account-link"><?= $escaper->escapeHtml(__('Minha Conta')) ?></a>
     </div>
 </div>
 <?php endif; ?>

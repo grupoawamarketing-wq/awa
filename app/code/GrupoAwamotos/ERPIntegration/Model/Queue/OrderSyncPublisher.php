@@ -18,24 +18,22 @@ use Psr\Log\LoggerInterface;
 class OrderSyncPublisher
 {
     private const TOPIC_ORDER_SYNC = 'erp.order.sync';
+    private const TOPIC_ORDER_RETRY = 'erp.order.sync.retry';
     private const MAX_RETRIES = 5;
 
     private PublisherInterface $publisher;
     private OrderSyncMessageInterfaceFactory $messageFactory;
-    private OrderRetryScheduler $orderRetryScheduler;
     private SyncLogResource $syncLogResource;
     private LoggerInterface $logger;
 
     public function __construct(
         PublisherInterface $publisher,
         OrderSyncMessageInterfaceFactory $messageFactory,
-        OrderRetryScheduler $orderRetryScheduler,
         SyncLogResource $syncLogResource,
         LoggerInterface $logger
     ) {
         $this->publisher = $publisher;
         $this->messageFactory = $messageFactory;
-        $this->orderRetryScheduler = $orderRetryScheduler;
         $this->syncLogResource = $syncLogResource;
         $this->logger = $logger;
     }
@@ -81,15 +79,7 @@ class OrderSyncPublisher
      */
     public function publishForRetry(OrderSyncMessageInterface $originalMessage, string $error): bool
     {
-        return $this->scheduleRetry($originalMessage, $error);
-    }
-
-    public function scheduleRetry(
-        OrderSyncMessageInterface $originalMessage,
-        string $error,
-        ?int $forcedRetryCount = null
-    ): bool {
-        $retryCount = $forcedRetryCount ?? ($originalMessage->getRetryCount() + 1);
+        $retryCount = $originalMessage->getRetryCount() + 1;
 
         if ($retryCount > self::MAX_RETRIES) {
             $this->logger->error('[ERP Queue] Order exceeded max retry attempts', [
@@ -118,19 +108,32 @@ class OrderSyncPublisher
         }
 
         try {
-            $nextAttemptAt = $this->orderRetryScheduler->schedule($originalMessage, $retryCount, $error);
+            /** @var OrderSyncMessageInterface $retryMessage */
+            $retryMessage = $this->messageFactory->create();
+            $retryMessage->setOrderId($originalMessage->getOrderId());
+            $retryMessage->setIncrementId($originalMessage->getIncrementId());
+            $retryMessage->setRetryCount($retryCount);
+            $retryMessage->setQueuedAt(date('Y-m-d H:i:s'));
+            $retryMessage->setLastError($error);
+
+            $this->publisher->publish(self::TOPIC_ORDER_RETRY, $retryMessage);
+
+            $this->logger->info('[ERP Queue] Order published to retry queue', [
+                'order_id' => $originalMessage->getOrderId(),
+                'increment_id' => $originalMessage->getIncrementId(),
+                'retry_count' => $retryCount,
+            ]);
 
             // Log retry event
             $this->syncLogResource->addLog(
                 'order',
                 'queue',
-                'retry_scheduled',
+                'retry_queued',
                 sprintf(
-                    'Pedido %s reagendado para retry (tentativa %d/%d) em %s. Erro: %s',
+                    'Pedido %s reenfileirado (tentativa %d/%d). Erro: %s',
                     $originalMessage->getIncrementId(),
                     $retryCount,
                     self::MAX_RETRIES,
-                    $nextAttemptAt,
                     substr($error, 0, 100)
                 ),
                 null,

@@ -33,7 +33,19 @@ class Themeconfig extends \Magento\Framework\App\Helper\AbstractHelper
     
     public function getThemeOption()
     {
-        return $this->getBaseMediaUrl(). $this->cssFolder . 'custom_' . $this->_storeManager->getStore()->getCode() . '.css?v='.strtotime('now');
+        $storeCode = (string) $this->_storeManager->getStore()->getCode();
+        $fileName = 'custom_' . $storeCode . '.css';
+        $absolutePath = $this->cssDir . $fileName;
+        $version = 1;
+
+        if (is_file($absolutePath)) {
+            $mtime = filemtime($absolutePath);
+            if (is_int($mtime) && $mtime > 0) {
+                $version = $mtime;
+            }
+        }
+
+        return $this->getBaseMediaUrl() . $this->cssFolder . $fileName . '?v=' . $version;
     }
     public function isEnableFakeOrder()
     {

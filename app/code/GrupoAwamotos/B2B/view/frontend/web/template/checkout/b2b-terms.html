@@ -13,12 +13,13 @@
                    id="b2b-terms-checkbox"
                    name="b2b_terms_accepted"
                    class="checkbox"
-                   data-bind="checked: isAccepted" />
+                   aria-required="true"
+                   data-bind="checked: isAccepted, attr: {'aria-checked': isAccepted() ? 'true' : 'false'}" />
             <label class="label" for="b2b-terms-checkbox">
                 <span data-bind="text: getCheckboxLabel()"></span>
                 <!-- ko if: hasTermsContent() -->
                 <a href="#" class="b2b-terms-link"
-                   data-bind="click: openTermsModal"
+                   data-bind="click: function () { openTermsModal(); return false; }"
                    title="Ver termos completos">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="10"></circle>
@@ -43,9 +44,9 @@
     <!-- Modal de Termos -->
     <!-- ko if: isModalOpen() -->
     <div class="b2b-terms-modal-overlay" data-bind="click: closeTermsModal">
-        <div class="b2b-terms-modal" data-bind="click: function() {}, clickBubble: false">
+        <div class="b2b-terms-modal" role="dialog" aria-modal="true" aria-labelledby="b2b-terms-modal-title" data-bind="click: function() {}, clickBubble: false">
             <div class="b2b-terms-modal-header">
-                <h3>Termos e Condições de Venda B2B</h3>
+                <h3 id="b2b-terms-modal-title">termos e condições de venda b2b</h3>
                 <button type="button" class="b2b-terms-modal-close"
                         data-bind="click: closeTermsModal"
                         title="Fechar">
@@ -60,248 +61,15 @@
             <div class="b2b-terms-modal-footer">
                 <button type="button" class="action secondary"
                         data-bind="click: closeTermsModal">
-                    <span>Fechar</span>
+                    <span>fechar</span>
                 </button>
                 <button type="button" class="action primary"
                         data-bind="click: acceptTerms, visible: !isAccepted()">
-                    <span>Li e Aceito os Termos</span>
+                    <span>li e aceito os termos</span>
                 </button>
             </div>
         </div>
     </div>
     <!-- /ko -->
 </div>
-
-<style>
-    .b2b-terms-container {
-        margin-bottom: 20px;
-        padding: 15px 20px;
-        background: linear-gradient(135deg, #fef3c7 0%, #fef9c3 100%);
-        border-radius: var(--awa-radius-md, 8px);
-        border: 1px solid #fbbf24;
-    }
-
-    .b2b-terms-wrapper {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        flex-wrap: wrap;
-        gap: 12px;
-    }
-
-    .b2b-terms-field.choice {
-        display: flex;
-        align-items: flex-start;
-        gap: 10px;
-        margin: 0;
-    }
-
-    .b2b-terms-field .checkbox {
-        width: 18px;
-        height: 18px;
-        margin-top: 2px;
-        accent-color: var(--awa-primary, #d00);
-        cursor: pointer;
-    }
-
-    .b2b-terms-field .label {
-        display: flex;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 8px;
-        font-weight: 500;
-        color: var(--awa-text-primary, #333);
-        cursor: pointer;
-        margin: 0;
-    }
-
-    .b2b-terms-link {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        color: var(--awa-primary, #d00);
-        font-size: 0.9em;
-        text-decoration: none;
-        transition: color 0.2s;
-    }
-
-    .b2b-terms-link:hover {
-        color: var(--awa-primary-dark, #b91c1c);
-        text-decoration: underline;
-    }
-
-    .b2b-terms-status {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        color: #16a34a;
-        font-size: 0.9em;
-        font-weight: 500;
-    }
-
-    /* Modal Styles */
-    .b2b-terms-modal-overlay {
-        position: fixed;
-        inset: 0;
-        background: rgb(0 0 0 / 60%);
-        z-index: 9999;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 20px;
-        animation: fadeIn 0.2s ease;
-    }
-
-    .b2b-terms-modal {
-        background: #fff;
-        border-radius: 12px;
-        max-width: 700px;
-        width: 100%;
-        max-height: 80vh;
-        display: flex;
-        flex-direction: column;
-        animation: slideUp 0.3s ease;
-    }
-
-    .b2b-terms-modal-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 20px 24px;
-        border-bottom: 1px solid var(--awa-border-light, #e5e7eb);
-    }
-
-    .b2b-terms-modal-header h3 {
-        margin: 0;
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: var(--awa-text-primary, #333);
-    }
-
-    .b2b-terms-modal-close {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 36px;
-        height: 36px;
-        border: none;
-        background: transparent;
-        color: var(--awa-text-secondary, #666);
-        border-radius: 50%;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-
-    .b2b-terms-modal-close:hover {
-        background: var(--awa-bg-light, #f3f4f6);
-        color: var(--awa-text-primary, #333);
-    }
-
-    .b2b-terms-modal-content {
-        flex: 1;
-        overflow-y: auto;
-        padding: 24px;
-        font-size: 0.95rem;
-        line-height: 1.7;
-        color: var(--awa-text-secondary, #4b5563);
-    }
-
-    .b2b-terms-modal-content h4 {
-        margin: 16px 0 8px;
-        font-weight: 600;
-        color: var(--awa-text-primary, #333);
-    }
-
-    .b2b-terms-modal-content p {
-        margin: 0 0 12px;
-    }
-
-    .b2b-terms-modal-content ul {
-        margin: 0 0 12px;
-        padding-left: 20px;
-    }
-
-    .b2b-terms-modal-footer {
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-        gap: 12px;
-        padding: 16px 24px;
-        border-top: 1px solid var(--awa-border-light, #e5e7eb);
-        background: var(--awa-bg-light, #f9fafb);
-        border-radius: 0 0 12px 12px;
-    }
-
-    .b2b-terms-modal-footer .action.primary {
-        background: var(--awa-primary, #d00);
-        color: #fff;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 6px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: background 0.2s;
-    }
-
-    .b2b-terms-modal-footer .action.primary:hover {
-        background: var(--awa-primary-dark, #b91c1c);
-    }
-
-    .b2b-terms-modal-footer .action.secondary {
-        background: transparent;
-        color: var(--awa-text-secondary, #666);
-        border: 1px solid var(--awa-border-light, #d1d5db);
-        padding: 10px 20px;
-        border-radius: 6px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-
-    .b2b-terms-modal-footer .action.secondary:hover {
-        background: var(--awa-bg-light, #f3f4f6);
-        border-color: var(--awa-text-secondary, #9ca3af);
-    }
-
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-
-    @keyframes slideUp {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    @media (width <= 640px) {
-        .b2b-terms-modal {
-            max-height: 90vh;
-        }
-
-        .b2b-terms-modal-header {
-            padding: 16px;
-        }
-
-        .b2b-terms-modal-content {
-            padding: 16px;
-        }
-
-        .b2b-terms-modal-footer {
-            flex-direction: column;
-            padding: 16px;
-        }
-
-        .b2b-terms-modal-footer .action {
-            width: 100%;
-            text-align: center;
-        }
-    }
-</style>
 <!-- /ko -->

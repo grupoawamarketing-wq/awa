@@ -8,10 +8,11 @@ namespace GrupoAwamotos\B2B\Controller\Account;
 
 use Magento\Framework\App\Action\HttpGetActionInterface;
 use Magento\Framework\App\RequestInterface;
+use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\Controller\Result\RedirectFactory;
+use Magento\Framework\UrlInterface;
 use Magento\Framework\View\Result\PageFactory;
 use Magento\Customer\Model\Session as CustomerSession;
-use Magento\Store\Model\StoreManagerInterface;
 
 class Login implements HttpGetActionInterface
 {
@@ -19,27 +20,27 @@ class Login implements HttpGetActionInterface
     private CustomerSession $customerSession;
     private RedirectFactory $redirectFactory;
     private RequestInterface $request;
-    private ?StoreManagerInterface $storeManager;
+    private UrlInterface $urlBuilder;
 
     public function __construct(
         PageFactory $resultPageFactory,
         CustomerSession $customerSession,
         RedirectFactory $redirectFactory,
         RequestInterface $request,
-        ?StoreManagerInterface $storeManager = null
+        UrlInterface $urlBuilder
     ) {
         $this->resultPageFactory = $resultPageFactory;
         $this->customerSession = $customerSession;
         $this->redirectFactory = $redirectFactory;
         $this->request = $request;
-        $this->storeManager = $storeManager;
+        $this->urlBuilder = $urlBuilder;
     }
 
-    public function execute()
+    public function execute(): ResultInterface
     {
         if ($this->customerSession->isLoggedIn()) {
             $redirect = $this->redirectFactory->create();
-            return $redirect->setPath('customer/account');
+            return $redirect->setPath('b2b/account/dashboard');
         }
 
         // Captura referer para redirect pós-login (com proteção contra open redirect)
@@ -67,14 +68,7 @@ class Login implements HttpGetActionInterface
         }
 
         $urlHost = parse_url($url, PHP_URL_HOST);
-        if ($this->storeManager === null) {
-            return false;
-        }
-
-        $storeHost = parse_url(
-            $this->storeManager->getStore()->getBaseUrl(),
-            PHP_URL_HOST
-        );
+        $storeHost = parse_url($this->urlBuilder->getBaseUrl(), PHP_URL_HOST);
 
         return $urlHost !== null && $storeHost !== null
             && strcasecmp($urlHost, $storeHost) === 0;

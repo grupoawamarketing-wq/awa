@@ -8,8 +8,6 @@ use Magento\Framework\Event\Observer;
 use GrupoAwamotos\ERPIntegration\Helper\Data as Helper;
 use GrupoAwamotos\ERPIntegration\Model\ResourceModel\SyncLog as SyncLogResource;
 use GrupoAwamotos\ERPIntegration\Api\CustomerSyncInterface;
-use GrupoAwamotos\ERPIntegration\Model\CnpjResolver;
-use GrupoAwamotos\ERPIntegration\Model\OpenCartBridgeCustomerSync;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Psr\Log\LoggerInterface;
 
@@ -23,7 +21,7 @@ use Psr\Log\LoggerInterface;
  * Resolution order for erp_code:
  *  1. Customer attribute 'erp_code' (primary)
  *  2. entity_map table (fallback)
- *  3. ERP lookup by CNPJ em FN_FORNECEDORES (auto-link)
+ *  3. ERP lookup by CPF/CNPJ in FN_FORNECEDORES (auto-link)
  */
 class OrderPlaceAfter implements ObserverInterface
 {
@@ -31,8 +29,6 @@ class OrderPlaceAfter implements ObserverInterface
     private SyncLogResource $syncLogResource;
     private CustomerRepositoryInterface $customerRepository;
     private CustomerSyncInterface $customerSync;
-    private CnpjResolver $cnpjResolver;
-    private OpenCartBridgeCustomerSync $openCartBridgeCustomerSync;
     private LoggerInterface $logger;
 
     public function __construct(
@@ -40,16 +36,12 @@ class OrderPlaceAfter implements ObserverInterface
         SyncLogResource $syncLogResource,
         CustomerRepositoryInterface $customerRepository,
         CustomerSyncInterface $customerSync,
-        CnpjResolver $cnpjResolver,
-        OpenCartBridgeCustomerSync $openCartBridgeCustomerSync,
         LoggerInterface $logger
     ) {
         $this->helper = $helper;
         $this->syncLogResource = $syncLogResource;
         $this->customerRepository = $customerRepository;
         $this->customerSync = $customerSync;
-        $this->cnpjResolver = $cnpjResolver;
-        $this->openCartBridgeCustomerSync = $openCartBridgeCustomerSync;
         $this->logger = $logger;
     }
 
@@ -71,21 +63,15 @@ class OrderPlaceAfter implements ObserverInterface
                 $order->setData('customer_erp_code', (string) $erpCode);
             }
 
-            if ($this->helper->isOpenCartBridgeMode()) {
-                $this->openCartBridgeCustomerSync->syncByOrder($order);
-            }
-
-            // Log that order is available for ERP import
-            $importMode = $this->helper->isOpenCartBridgeMode() ? 'OpenCart Bridge' : 'API Pull';
+            // Log that order is available for ERP pull
             $this->syncLogResource->addLog(
                 'order_pull',
                 'export',
                 'pending',
                 sprintf(
-                    'Pedido %s disponível para ERP via %s. Cliente: %s (ERP: %s)',
+                    'Pedido %s disponível para ERP via API Pull. Cliente: %s (ERP: %s)',
                     $order->getIncrementId(),
-                    $importMode,
-                    $this->extractOrderCnpj($order, null) ?: $order->getCustomerEmail(),
+                    $order->getCustomerTaxvat() ?: $order->getCustomerEmail(),
                     $erpCode ?: 'N/A'
                 ),
                 null,
@@ -93,14 +79,13 @@ class OrderPlaceAfter implements ObserverInterface
             );
 
             $order->addCommentToStatusHistory(
-                __('Pedido disponível para sincronização com ERP via %1. Código ERP cliente: %2', $importMode, $erpCode ?: 'N/A')
+                __('Pedido disponível para sincronização com ERP via API. Código ERP cliente: %1', $erpCode ?: 'N/A')
             );
 
-            $this->logger->info('[ERP] Order available for ERP import', [
+            $this->logger->info('[ERP] Order available for ERP pull', [
                 'order_id' => $order->getEntityId(),
                 'increment_id' => $order->getIncrementId(),
                 'customer_erp_code' => $erpCode,
-                'import_mode' => $this->helper->getOrderImportMode(),
             ]);
         } catch (\Exception $e) {
             // Never fail the order placement due to ERP logging issues
@@ -114,7 +99,7 @@ class OrderPlaceAfter implements ObserverInterface
      * Resolve ERP code with 3-tier resolution:
      *  1. Customer attribute 'erp_code' (primary - instant)
      *  2. entity_map table (fallback - local DB)
-    *  3. ERP lookup by CNPJ em FN_FORNECEDORES (auto-link, persists for future)
+     *  3. ERP lookup by CPF/CNPJ in FN_FORNECEDORES (auto-link, persists for future)
      */
     private function resolveCustomerErpCode($order): ?int
     {
@@ -141,27 +126,34 @@ class OrderPlaceAfter implements ObserverInterface
             return (int) $erpCode;
         }
 
-        // Auto-link: lookup by CNPJ in ERP (read-only)
-        return $this->autoLinkByCnpj($order, (int) $customerId, $customer);
+        // Auto-link: lookup by CPF/CNPJ in ERP (read-only)
+        return $this->autoLinkByTaxvat($order, (int) $customerId, $customer);
     }
 
     /**
-     * Attempt to resolve and persist erp_code by looking up CNPJ in Sectra.
+     * Attempt to resolve and persist erp_code by looking up CPF/CNPJ in Sectra.
      * This is a read-only operation on the ERP side — only Magento data is updated.
      */
-    private function autoLinkByCnpj($order, int $customerId, ?\Magento\Customer\Api\Data\CustomerInterface $customer): ?int
+    private function autoLinkByTaxvat($order, int $customerId, ?\Magento\Customer\Api\Data\CustomerInterface $customer): ?int
     {
-        $cnpj = $this->extractOrderCnpj($order, $customer);
-        if ($cnpj === '') {
+        $taxvat = $order->getCustomerTaxvat();
+        if (empty($taxvat)) {
+            // Try from customer entity if not on order
+            if ($customer) {
+                $taxvat = $customer->getTaxvat();
+            }
+        }
+
+        if (empty($taxvat)) {
             return null;
         }
 
         try {
-            $erpCustomer = $this->customerSync->getErpCustomerByCnpj($cnpj);
+            $erpCustomer = $this->customerSync->getErpCustomerByTaxvat($taxvat);
             if (!$erpCustomer || empty($erpCustomer['CODIGO'])) {
-                $this->logger->info('[ERP] Auto-link: CNPJ not found in ERP', [
+                $this->logger->info('[ERP] Auto-link: CPF/CNPJ not found in ERP', [
                     'customer_id' => $customerId,
-                    'cnpj' => substr($cnpj, 0, 4) . '***',
+                    'taxvat' => substr($taxvat, 0, 6) . '***',
                 ]);
                 return null;
             }
@@ -171,7 +163,7 @@ class OrderPlaceAfter implements ObserverInterface
             // Persist the link for future orders (saves both entity_map + customer attribute)
             $linked = $this->customerSync->linkMagentoToErp($customerId, $erpCode);
             if ($linked) {
-                $this->logger->info('[ERP] Auto-linked customer by CNPJ', [
+                $this->logger->info('[ERP] Auto-linked customer by CPF/CNPJ', [
                     'customer_id' => $customerId,
                     'erp_code' => $erpCode,
                     'razao' => $erpCustomer['RAZAO'] ?? '',
@@ -180,35 +172,10 @@ class OrderPlaceAfter implements ObserverInterface
 
             return $erpCode;
         } catch (\Exception $e) {
-            $this->logger->warning('[ERP] Auto-link by CNPJ failed: ' . $e->getMessage(), [
+            $this->logger->warning('[ERP] Auto-link by taxvat failed: ' . $e->getMessage(), [
                 'customer_id' => $customerId,
             ]);
             return null;
         }
-    }
-
-    private function extractOrderCnpj($order, ?\Magento\Customer\Api\Data\CustomerInterface $customer): string
-    {
-        $cnpj = $this->cnpjResolver->normalize((string) ($order->getData('b2b_cnpj') ?? ''));
-        if ($cnpj !== '') {
-            return $cnpj;
-        }
-
-        $cnpj = $this->cnpjResolver->normalize((string) ($order->getCustomerTaxvat() ?? ''));
-        if ($cnpj !== '') {
-            return $cnpj;
-        }
-
-        if ($customer) {
-            $attr = $customer->getCustomAttribute('b2b_cnpj');
-            $cnpj = $this->cnpjResolver->normalize((string) ($attr ? $attr->getValue() : ''));
-            if ($cnpj !== '') {
-                return $cnpj;
-            }
-
-            return $this->cnpjResolver->normalize((string) ($customer->getTaxvat() ?? ''));
-        }
-
-        return '';
     }
 }

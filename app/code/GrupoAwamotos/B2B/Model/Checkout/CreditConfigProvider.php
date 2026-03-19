@@ -11,6 +11,10 @@ use Magento\Store\Model\ScopeInterface;
 
 /**
  * Config provider for B2B Credit payment method
+ *
+ * @deprecated Use \GrupoAwamotos\B2B\Model\Payment\CreditConfigProvider instead.
+ * This provider is kept for backward compatibility but returns an empty config.
+ * @see \GrupoAwamotos\B2B\Model\Payment\CreditConfigProvider
  */
 class CreditConfigProvider implements ConfigProviderInterface
 {
@@ -43,27 +47,12 @@ class CreditConfigProvider implements ConfigProviderInterface
 
     /**
      * @inheritDoc
+     *
+     * @deprecated Returns empty array. Use Payment\CreditConfigProvider.
      */
     public function getConfig(): array
     {
-        if (!$this->isEnabled()) {
-            return [];
-        }
-
-        $customerCredit = $this->getCustomerCreditInfo();
-
-        return [
-            'payment' => [
-                'b2b_credit' => [
-                    'enabled' => true,
-                    'credit_limit' => $customerCredit['limit'] ?? 0.0,
-                    'credit_available' => $customerCredit['available'] ?? 0.0,
-                    'credit_used' => $customerCredit['used'] ?? 0.0,
-                    'allow_partial' => $this->isAllowPartial(),
-                    'auto_debit' => $this->isAutoDebit(),
-                ]
-            ]
-        ];
+        return [];
     }
 
     /**

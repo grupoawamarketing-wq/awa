@@ -27,6 +27,7 @@ use GrupoAwamotos\B2B\Helper\CnpjValidator;
 use GrupoAwamotos\B2B\Helper\Data as B2BHelper;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Data\Form\FormKey\Validator as FormKeyValidator;
+use Magento\Framework\Event\ManagerInterface as EventManagerInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Store\Model\ScopeInterface;
 use Psr\Log\LoggerInterface;
@@ -128,6 +129,11 @@ class Save implements HttpPostActionInterface
      */
     private $formKeyValidator;
 
+    /**
+     * @var EventManagerInterface
+     */
+    private $eventManager;
+
     public function __construct(
         RequestInterface $request,
         RedirectFactory $resultRedirectFactory,
@@ -147,7 +153,8 @@ class Save implements HttpPostActionInterface
         AddressInterfaceFactory $addressFactory,
         RegionInterfaceFactory $regionFactory,
         RegionCollectionFactory $regionCollectionFactory,
-        FormKeyValidator $formKeyValidator
+        FormKeyValidator $formKeyValidator,
+        EventManagerInterface $eventManager
     ) {
         $this->request = $request;
         $this->resultRedirectFactory = $resultRedirectFactory;
@@ -168,6 +175,7 @@ class Save implements HttpPostActionInterface
         $this->regionFactory = $regionFactory;
         $this->regionCollectionFactory = $regionCollectionFactory;
         $this->formKeyValidator = $formKeyValidator;
+        $this->eventManager = $eventManager;
     }
 
     /**
@@ -261,6 +269,19 @@ class Save implements HttpPostActionInterface
 
             // Enviar email de confirmação ao cliente
             $this->sendConfirmationEmail($savedCustomer, $data);
+
+            // Evento técnico para tracking de aquisição B2B (consumido por módulos de analytics)
+            $this->eventManager->dispatch('grupoawamotos_b2b_registration_submitted', [
+                'customer' => $savedCustomer,
+                'registration_context' => [
+                    'lead_type' => 'b2b_cnpj',
+                    'person_type' => 'pj',
+                    'approval_status' => 'pending',
+                    'customer_group_id' => (int) $savedCustomer->getGroupId(),
+                    'cnpj_validated' => true,
+                    'register_channel' => 'b2b_register_form'
+                ]
+            ]);
 
             // Nota: notificação ao admin é feita pelo CustomerRegisterObserver/CustomerRegistrationNotification
             // para evitar notificações duplicadas
@@ -411,11 +432,11 @@ class Save implements HttpPostActionInterface
      * @param array $data
      * @return void
      */
-    private function sendConfirmationEmail($customer, array $data): void
+    private function sendConfirmationEmail(\Magento\Customer\Api\Data\CustomerInterface $customer, array $data): void
     {
         try {
             $store = $this->storeManager->getStore();
-            
+
             $transport = $this->transportBuilder
                 ->setTemplateIdentifier('grupoawamotos_b2b_registration_confirmation')
                 ->setTemplateOptions([

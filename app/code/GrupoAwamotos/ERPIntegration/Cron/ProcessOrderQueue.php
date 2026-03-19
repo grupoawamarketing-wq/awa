@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace GrupoAwamotos\ERPIntegration\Cron;
 
 use GrupoAwamotos\ERPIntegration\Model\Queue\OrderSyncConsumer;
-use GrupoAwamotos\ERPIntegration\Model\Queue\OrderRetryScheduler;
 use GrupoAwamotos\ERPIntegration\Api\Data\OrderSyncMessageInterfaceFactory;
 use GrupoAwamotos\ERPIntegration\Helper\Data as Helper;
 use Magento\Framework\App\ResourceConnection;
@@ -21,7 +20,6 @@ class ProcessOrderQueue
 {
     private const MAX_MESSAGES_PER_RUN = 50;
     private const RETRY_MAX_MESSAGES = 20;
-    private const LEGACY_RETRY_MAX_MESSAGES = 20;
     private const QUEUE_NAME = 'erp.order.sync.queue';
     private const RETRY_QUEUE_NAME = 'erp.order.sync.retry.queue';
 
@@ -29,7 +27,6 @@ class ProcessOrderQueue
      * @var OrderSyncConsumer
      */
     private OrderSyncConsumer $consumer;
-    private OrderRetryScheduler $orderRetryScheduler;
 
     /**
      * @var Helper
@@ -58,8 +55,7 @@ class ProcessOrderQueue
 
     /**
      * @param OrderSyncConsumer $consumer
-    * @param OrderRetryScheduler $orderRetryScheduler
-    * @param Helper $helper
+     * @param Helper $helper
      * @param ResourceConnection $resourceConnection
      * @param SerializerInterface $serializer
      * @param OrderSyncMessageInterfaceFactory $messageFactory
@@ -67,7 +63,6 @@ class ProcessOrderQueue
      */
     public function __construct(
         OrderSyncConsumer $consumer,
-        OrderRetryScheduler $orderRetryScheduler,
         Helper $helper,
         ResourceConnection $resourceConnection,
         SerializerInterface $serializer,
@@ -75,7 +70,6 @@ class ProcessOrderQueue
         LoggerInterface $logger
     ) {
         $this->consumer = $consumer;
-        $this->orderRetryScheduler = $orderRetryScheduler;
         $this->helper = $helper;
         $this->resourceConnection = $resourceConnection;
         $this->serializer = $serializer;
@@ -98,7 +92,6 @@ class ProcessOrderQueue
 
         $processedMain = 0;
         $processedRetry = 0;
-        $migratedLegacyRetry = 0;
         $errors = 0;
 
         try {
@@ -110,14 +103,8 @@ class ProcessOrderQueue
         }
 
         try {
-            $processedRetry = $this->processScheduledRetries(self::RETRY_MAX_MESSAGES);
-        } catch (\Exception $e) {
-            $this->logger->error('[ERP Cron] Error processing scheduled retries: ' . $e->getMessage());
-            $errors++;
-        }
-
-        try {
-            $migratedLegacyRetry = $this->processQueue(self::RETRY_QUEUE_NAME, self::LEGACY_RETRY_MAX_MESSAGES, true);
+            // Process retry queue with lower priority
+            $processedRetry = $this->processQueue(self::RETRY_QUEUE_NAME, self::RETRY_MAX_MESSAGES, true);
         } catch (\Exception $e) {
             $this->logger->error('[ERP Cron] Error processing retry queue: ' . $e->getMessage());
             $errors++;
@@ -125,31 +112,9 @@ class ProcessOrderQueue
 
         $this->logger->info('[ERP Cron] Order queue processing completed', [
             'main_processed' => $processedMain,
-            'scheduled_retry_processed' => $processedRetry,
-            'legacy_retry_migrated' => $migratedLegacyRetry,
+            'retry_processed' => $processedRetry,
             'errors' => $errors,
         ]);
-    }
-
-    private function processScheduledRetries(int $maxMessages): int
-    {
-        $retries = $this->orderRetryScheduler->getDueRetries($maxMessages);
-        $processed = 0;
-
-        foreach ($retries as $retryData) {
-            $message = $this->messageFactory->create();
-            $message->setOrderId((int) $retryData['order_id']);
-            $message->setIncrementId((string) $retryData['increment_id']);
-            $message->setRetryCount((int) $retryData['retry_count']);
-            $message->setQueuedAt((string) $retryData['created_at']);
-            $message->setLastError($retryData['last_error'] ?? null);
-
-            $this->consumer->process($message);
-            $this->orderRetryScheduler->deleteRetry((int) $retryData['retry_id']);
-            $processed++;
-        }
-
-        return $processed;
     }
 
     /**

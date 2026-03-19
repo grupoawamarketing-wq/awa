@@ -56,12 +56,12 @@ class History implements HttpGetActionInterface
         if (!$this->customerSession->isLoggedIn()) {
             $redirect = $this->redirectFactory->create();
             $this->messageManager->addNoticeMessage(__('Faça login para ver suas cotações.'));
-            return $redirect->setPath('customer/account/login');
+            return $redirect->setPath('b2b/account/login');
         }
-        
+
         $page = $this->pageFactory->create();
         $page->getConfig()->getTitle()->set(__('Minhas Cotações'));
-        
+
         return $page;
     }
 }

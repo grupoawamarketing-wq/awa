@@ -101,12 +101,7 @@ define([
         var NS = '.awaVM-' + safeUid;
 
         /* ---- guard: never double-init ------------------------------ */
-        if (
-            !$nav.length
-            || $nav.data('awaVMInit')
-            || $nav.data('awaMuellerMenuInit')
-            || $nav.hasClass('navigation--mueller')
-        ) {
+        if (!$nav.length || $nav.data('awaVMInit')) {
             return;
         }
 
@@ -129,18 +124,33 @@ define([
             return mql ? mql.matches : window.innerWidth >= desktopBreakpoint;
         }
 
+        function isHomeContext() {
+            var body = document.body;
+            if (!body) {
+                return false;
+            }
+
+            return body.classList.contains('cms-index-index')
+                || body.classList.contains('cms-home')
+                || body.classList.contains('cms-homepage_ayo_home5')
+                || body.classList.contains('cms-homepage_ayo_home5_demo_stage');
+        }
+
+        function keepDesktopMenuExpanded() {
+            return isDesktop() && isHomeContext();
+        }
+
         /* ============================================================ */
         /*  Open / Close                                                */
         /* ============================================================ */
 
         function openMenu() {
-            $list.addClass('menu-open vmm-open');
+            $list.addClass('menu-open');
             $title.addClass('active').attr('aria-expanded', 'true');
 
             if (isDesktop()) {
-                /* Use CSS class .vmm-open (display:grid!important) instead of inline show()
-                   to avoid conflict with the :hover display:none!important override rule. */
-                $list.stop(true, true).removeAttr('style');
+                /* Clear stale inline display from mobile fadeOut()/hide() after viewport switch. */
+                $list.stop(true, true).removeAttr('style').show();
                 $('body').removeClass('background_shadow_show');
             } else {
                 $list.stop(true, true).fadeIn(200);
@@ -149,12 +159,11 @@ define([
         }
 
         function closeMenu() {
-            $list.removeClass('menu-open vmm-open');
+            $list.removeClass('menu-open');
             $title.removeClass('active').attr('aria-expanded', 'false');
 
             if (isDesktop()) {
-                /* Remove .vmm-open so CSS default display:none takes over — no inline style conflict. */
-                $list.stop(true, true).removeAttr('style');
+                $list.stop(true, true).hide();
             } else {
                 $list.stop(true, true).fadeOut(200);
             }
@@ -318,21 +327,25 @@ define([
                     resetParentItemState($(this), false);
                 });
 
-                /* Re-sync list visibility to current state via CSS classes (not inline style). */
+                /* Re-sync list visibility to current state */
                 $list.stop(true, true).removeAttr('style');
 
+                if (keepDesktopMenuExpanded()) {
+                    $list.addClass('menu-open');
+                }
+
                 if (isOpen()) {
-                    $list.addClass('vmm-open');
+                    $list.show();
                     $title.addClass('active').attr('aria-expanded', 'true');
                 } else {
-                    $list.removeClass('vmm-open');
+                    $list.hide();
                     $title.removeClass('active').attr('aria-expanded', 'false');
                 }
 
                 $('body').removeClass('background_shadow_show');
             } else {
-                /* Entering mobile → collapse — remove vmm-open to avoid stale desktop CSS class */
-                $list.removeClass('menu-open vmm-open').stop(true, true).hide();
+                /* Entering mobile → collapse */
+                $list.removeClass('menu-open').hide();
                 $title.removeClass('active').attr('aria-expanded', 'false');
                 $('body').removeClass('background_shadow_show');
             }
@@ -345,6 +358,17 @@ define([
         /* ---- title click (main toggle) ----------------------------- */
         $title.on('click' + NS, function (e) {
             e.preventDefault();
+
+            if (isDesktop()) {
+                if (keepDesktopMenuExpanded()) {
+                    openMenu();
+                    return;
+                }
+
+                isOpen() ? closeMenu() : openMenu();
+                return;
+            }
+
             isOpen() ? closeMenu() : openMenu();
         });
 
@@ -392,6 +416,11 @@ define([
                 return;
             }
 
+            if (keepDesktopMenuExpanded()) {
+                openMenu();
+                return;
+            }
+
             closeMenu();
         });
 
@@ -414,6 +443,11 @@ define([
                     return;
                 }
 
+                if (keepDesktopMenuExpanded()) {
+                    openMenu();
+                    return;
+                }
+
                 closeMenu();
             }, 0);
         });
@@ -424,6 +458,11 @@ define([
             }
 
             if (!isDesktop() && !isOpen()) {
+                return;
+            }
+
+            if (keepDesktopMenuExpanded()) {
+                openMenu();
                 return;
             }
 

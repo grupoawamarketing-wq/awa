@@ -53,7 +53,7 @@ class SetRecurring implements HttpPostActionInterface
         }
 
         if (!$this->customerSession->isLoggedIn()) {
-            return $redirect->setPath('customer/account/login');
+            return $redirect->setPath('b2b/account/login');
         }
 
         $listId = (int) $this->request->getParam('id');

@@ -11,7 +11,7 @@ use GrupoAwamotos\B2B\Api\PriceVisibilityInterface;
 use GrupoAwamotos\B2B\Helper\Config;
 use Magento\Checkout\Controller\Cart\Add;
 use Magento\Customer\Model\Session as CustomerSession;
-use Magento\Framework\App\RequestInterface;
+use Magento\Framework\App\Request\Http;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Controller\Result\RedirectFactory;
 use Magento\Framework\Message\ManagerInterface;
@@ -55,7 +55,7 @@ class BlockCartAddPlugin
     private $customerSession;
 
     /**
-     * @var RequestInterface
+    * @var Http
      */
     private $request;
 
@@ -67,7 +67,7 @@ class BlockCartAddPlugin
         ManagerInterface $messageManager,
         UrlInterface $urlBuilder,
         CustomerSession $customerSession,
-        RequestInterface $request
+        Http $request
     ) {
         $this->priceVisibility = $priceVisibility;
         $this->config = $config;
@@ -99,8 +99,8 @@ class BlockCartAddPlugin
                 || str_contains((string) $this->request->getHeader('Accept'), 'application/json');
 
             if (!$this->customerSession->isLoggedIn()) {
-                $message = (string) __('Faça login ou cadastre-se para adicionar produtos ao carrinho.');
-                $url = $this->urlBuilder->getUrl('b2b/account/login');
+                $message = (string) __('Faça login no portal B2B ou cadastre sua empresa para adicionar produtos ao carrinho.');
+                $url = $this->urlBuilder->getUrl('b2b/account/login', $this->getLoginRedirectParams());
 
                 if ($isAjax) {
                     return $this->jsonFactory->create()->setData([
@@ -111,7 +111,7 @@ class BlockCartAddPlugin
                 }
 
                 $this->messageManager->addNoticeMessage($message);
-                return $this->redirectFactory->create()->setPath('b2b/account/login');
+                return $this->redirectFactory->create()->setPath('b2b/account/login', $this->getLoginRedirectParams());
             }
 
             // Cliente logado mas bloqueado — distinguir motivo
@@ -120,7 +120,7 @@ class BlockCartAddPlugin
             } else {
                 $message = (string) __('Sua conta está pendente de aprovação. Você receberá um e-mail assim que for aprovada.');
             }
-            $url = $this->urlBuilder->getUrl('customer/account');
+            $url = $this->urlBuilder->getUrl('b2b/account/dashboard');
 
             if ($isAjax) {
                 return $this->jsonFactory->create()->setData([
@@ -131,9 +131,29 @@ class BlockCartAddPlugin
             }
 
             $this->messageManager->addWarningMessage($message);
-            return $this->redirectFactory->create()->setPath('customer/account');
+            return $this->redirectFactory->create()->setPath('b2b/account/dashboard');
         }
 
         return $proceed();
+    }
+
+    /**
+     * Preserve the current storefront page when redirecting guests to B2B login.
+     *
+     * @return array<string, string>
+     */
+    private function getLoginRedirectParams(): array
+    {
+        $referer = (string) $this->request->getServer('HTTP_REFERER');
+        if ($referer === '') {
+            return [];
+        }
+
+        $baseUrl = $this->urlBuilder->getBaseUrl();
+        if ($baseUrl === '' || !str_starts_with($referer, $baseUrl)) {
+            return [];
+        }
+
+        return ['referer' => base64_encode($referer)];
     }
 }

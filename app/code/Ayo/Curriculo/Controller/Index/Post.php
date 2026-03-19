@@ -16,12 +16,11 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\File\Mime;
 use Magento\Framework\File\UploaderFactory;
 use Magento\Framework\Filesystem;
-use Magento\Framework\Mail\EmailMessageInterface;
+use Magento\Framework\Mail\EmailMessageInterfaceFactory;
 use Magento\Framework\Mail\Template\TransportBuilder;
 use Magento\Framework\Mail\Template\FactoryInterface as TemplateFactoryInterface;
 use Magento\Framework\Mail\Template\SenderResolverInterface;
 use Magento\Framework\Mail\TransportInterfaceFactory;
-use Magento\Framework\ObjectManagerInterface;
 use Magento\Framework\Translate\Inline\StateInterface;
 use Magento\Framework\Validator\EmailAddress;
 use Magento\Framework\Validator\Url as UrlValidator;
@@ -129,9 +128,9 @@ class Post extends Action implements HttpPostActionInterface
     private $transportFactory;
 
     /**
-     * @var ObjectManagerInterface
+     * @var EmailMessageInterfaceFactory
      */
-    private $objectManager;
+    private $emailMessageFactory;
 
     public function __construct(
         Context $context,
@@ -141,7 +140,7 @@ class Post extends Action implements HttpPostActionInterface
         TemplateFactoryInterface $templateFactory,
         SenderResolverInterface $senderResolver,
         TransportInterfaceFactory $transportFactory,
-        ObjectManagerInterface $objectManager,
+        EmailMessageInterfaceFactory $emailMessageFactory,
         DataPersistorInterface $dataPersistor,
         StateInterface $inlineTranslation,
         StoreManagerInterface $storeManager,
@@ -160,7 +159,7 @@ class Post extends Action implements HttpPostActionInterface
         $this->templateFactory = $templateFactory;
         $this->senderResolver = $senderResolver;
         $this->transportFactory = $transportFactory;
-        $this->objectManager = $objectManager;
+        $this->emailMessageFactory = $emailMessageFactory;
         $this->dataPersistor = $dataPersistor;
         $this->inlineTranslation = $inlineTranslation;
         $this->storeManager = $storeManager;
@@ -517,8 +516,8 @@ class Post extends Action implements HttpPostActionInterface
                 }, $copyTo);
             }
 
-            /** @var EmailMessageInterface $message */
-            $message = $this->objectManager->create(EmailMessageInterface::class, $messageData);
+            /** @var \Magento\Framework\Mail\EmailMessageInterface $message */
+            $message = $this->emailMessageFactory->create($messageData);
             $transport = $this->transportFactory->create(['message' => $message]);
             $transport->sendMessage();
         } catch (\Throwable $e) {

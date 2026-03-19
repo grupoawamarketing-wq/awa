@@ -43,12 +43,43 @@ class BlockGuestPlaceOrderPlugin
         PaymentInterface $paymentMethod,
         ?AddressInterface $billingAddress = null
     ): array {
+        $this->assertGuestCheckoutAllowed();
+
+        return [$cartId, $email, $paymentMethod, $billingAddress];
+    }
+
+    /**
+     * Before savePaymentInformation - block guests before progressing through checkout APIs in strict B2B.
+     *
+     * @param GuestPaymentInformationManagementInterface $subject
+     * @param string $cartId
+     * @param string $email
+     * @param PaymentInterface $paymentMethod
+     * @param AddressInterface|null $billingAddress
+     * @return array
+     * @throws CouldNotSaveException
+     */
+    public function beforeSavePaymentInformation(
+        GuestPaymentInformationManagementInterface $subject,
+        $cartId,
+        $email,
+        PaymentInterface $paymentMethod,
+        ?AddressInterface $billingAddress = null
+    ): array {
+        $this->assertGuestCheckoutAllowed();
+
+        return [$cartId, $email, $paymentMethod, $billingAddress];
+    }
+
+    /**
+     * @throws CouldNotSaveException
+     */
+    private function assertGuestCheckoutAllowed(): void
+    {
         if ($this->config->isEnabled() && $this->config->isStrictB2B()) {
             throw new CouldNotSaveException(
                 __('Esta loja opera exclusivamente no modo B2B. Cadastre-se como empresa para realizar compras.')
             );
         }
-
-        return [$cartId, $email, $paymentMethod, $billingAddress];
     }
 }

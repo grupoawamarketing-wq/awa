@@ -20,12 +20,14 @@ class SeedCarriersCommand extends Command
 
     /**
      * @param CarrierService $carrierService
+     * @param string|null $name
      */
     public function __construct(
-        CarrierService $carrierService
+        CarrierService $carrierService,
+        ?string $name = null
     ) {
         $this->carrierService = $carrierService;
-        parent::__construct();
+        parent::__construct($name);
     }
 
     /**
@@ -46,7 +48,7 @@ class SeedCarriersCommand extends Command
 
         try {
             $carriers = $this->carrierService->seedDefaultCarriers();
-            
+
             $output->writeln('<info>Transportadoras cadastradas com sucesso:</info>');
             foreach ($carriers as $carrier) {
                 $output->writeln(sprintf(

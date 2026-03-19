@@ -470,6 +470,12 @@ try {
         'web/js/awa-custom-b2b-cart-checkout-compat.js',
         'web/js/awa-custom-home-category-compat.js',
         'web/js/awa-custom-compat-bootstrap.js',
+        'web/css/awa-01-tokens.css',
+        'web/css/awa-02-base.css',
+        'web/css/awa-03-layout.css',
+        'web/css/awa-04-components.css',
+        'web/css/awa-05-pages.css',
+        'web/css/awa-06-responsive.css',
     ];
     foreach ($expectedCustomOverrides as $relative) {
         $childPath = $root . '/app/design/frontend/AWA_Custom/ayo_home5_child/' . $relative;

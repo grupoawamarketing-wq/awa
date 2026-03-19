@@ -18,7 +18,9 @@ use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\RedirectFactory;
 use Magento\Framework\Data\Form\FormKey\Validator as FormKeyValidator;
 use Magento\Framework\DataObject;
+use Magento\Framework\Event\ManagerInterface as EventManagerInterface;
 use Magento\Framework\Message\ManagerInterface;
+use Magento\Store\Model\StoreManagerInterface;
 use Psr\Log\LoggerInterface;
 
 class Accept implements HttpPostActionInterface
@@ -32,6 +34,8 @@ class Accept implements HttpPostActionInterface
     private FormKeyValidator $formKeyValidator;
     private ManagerInterface $messageManager;
     private LoggerInterface $logger;
+    private EventManagerInterface $eventManager;
+    private StoreManagerInterface $storeManager;
 
     public function __construct(
         RequestInterface $request,
@@ -42,7 +46,9 @@ class Accept implements HttpPostActionInterface
         Cart $cart,
         FormKeyValidator $formKeyValidator,
         ManagerInterface $messageManager,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        EventManagerInterface $eventManager,
+        StoreManagerInterface $storeManager
     ) {
         $this->request = $request;
         $this->redirectFactory = $redirectFactory;
@@ -53,6 +59,8 @@ class Accept implements HttpPostActionInterface
         $this->formKeyValidator = $formKeyValidator;
         $this->messageManager = $messageManager;
         $this->logger = $logger;
+        $this->eventManager = $eventManager;
+        $this->storeManager = $storeManager;
     }
 
     public function execute()
@@ -69,7 +77,7 @@ class Accept implements HttpPostActionInterface
             // Verify customer is logged in
             if (!$this->customerSession->isLoggedIn()) {
                 $this->messageManager->addErrorMessage(__('Faça login para aceitar a cotação.'));
-                return $redirect->setPath('customer/account/login');
+                return $redirect->setPath('b2b/account/login');
             }
 
             $requestId = (int) $this->request->getParam('id');
@@ -80,6 +88,7 @@ class Accept implements HttpPostActionInterface
 
             // Load quote request
             $quoteRequest = $this->quoteRequestRepository->getById($requestId);
+            $previousStatus = $quoteRequest->getStatus();
 
             // Verify ownership
             $customerId = (int) $this->customerSession->getCustomerId();
@@ -94,7 +103,8 @@ class Accept implements HttpPostActionInterface
                 return $redirect->setPath('b2b/quote/view', ['id' => $requestId]);
             }
 
-            if ($quoteRequest->isExpired()) {
+            $expiresAt = $quoteRequest->getExpiresAt();
+            if (is_string($expiresAt) && $expiresAt !== '' && strtotime($expiresAt) < time()) {
                 $this->messageManager->addErrorMessage(__('Esta cotação expirou. Solicite uma nova cotação.'));
                 return $redirect->setPath('b2b/quote/view', ['id' => $requestId]);
             }
@@ -161,8 +171,17 @@ class Accept implements HttpPostActionInterface
 
             // Update B2B quote request status
             $quoteRequest->setStatus(QuoteRequestInterface::STATUS_ACCEPTED);
-            $quoteRequest->setData('quote_id', (int) $magentoQuote->getId());
+            $quoteRequest->setQuoteId((int) $magentoQuote->getId());
             $this->quoteRequestRepository->save($quoteRequest);
+
+            $this->eventManager->dispatch('grupoawamotos_b2b_quote_accepted', [
+                'quote_request' => $quoteRequest,
+                'previous_status' => $previousStatus,
+                'lifecycle_event' => 'accepted',
+                'store_id' => (int) $this->storeManager->getStore()->getId(),
+                'quote_items' => $items,
+                'customer_id' => $customerId,
+            ]);
 
             // Success message
             $msg = __('Cotação #%1 aceita! Seu carrinho foi atualizado com os preços cotados.', $requestId);

@@ -80,7 +80,7 @@ class Facet
      * Facet constructor.
      * @param ConnectionInterface|null $connection
      */
-    public function __construct(ConnectionInterface $connection = null)
+    public function __construct(?ConnectionInterface $connection = null)
     {
         $this->connection = $connection;
     }
@@ -93,7 +93,7 @@ class Facet
      *
      * @return Facet
      */
-    public static function create(ConnectionInterface $connection = null)
+    public static function create(?ConnectionInterface $connection = null)
     {
         return new Facet($connection);
     }
@@ -115,7 +115,7 @@ class Facet
      * @param ConnectionInterface $connection
      * @return Facet
      */
-    public function setConnection(ConnectionInterface $connection = null)
+    public function setConnection(?ConnectionInterface $connection = null)
     {
         $this->connection = $connection;
 

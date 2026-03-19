@@ -94,7 +94,7 @@ class Searcher
      *
      * @return $this
      */
-    public function joinMatches($collection, string $field = 'e.entity_id', array $args = [], \Zend_Db_Expr $orderExpr = null)
+    public function joinMatches($collection, string $field = 'e.entity_id', array $args = [], ?\Zend_Db_Expr $orderExpr = null)
     {
         $queryResponse = $this->getQueryResponse($args);
 

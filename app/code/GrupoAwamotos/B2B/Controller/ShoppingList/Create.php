@@ -8,9 +8,9 @@ namespace GrupoAwamotos\B2B\Controller\ShoppingList;
 
 use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Customer\Model\Session as CustomerSession;
+use Magento\Framework\App\Request\Http;
 use Magento\Framework\Controller\Result\RedirectFactory;
 use Magento\Framework\Controller\Result\JsonFactory;
-use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Data\Form\FormKey\Validator as FormKeyValidator;
 use Magento\Framework\Message\ManagerInterface;
 use GrupoAwamotos\B2B\Model\ShoppingListService;
@@ -33,7 +33,7 @@ class Create implements HttpPostActionInterface
     private $jsonFactory;
 
     /**
-     * @var RequestInterface
+    * @var Http
      */
     private $request;
 
@@ -56,7 +56,7 @@ class Create implements HttpPostActionInterface
         CustomerSession $customerSession,
         RedirectFactory $redirectFactory,
         JsonFactory $jsonFactory,
-        RequestInterface $request,
+        Http $request,
         FormKeyValidator $formKeyValidator,
         ManagerInterface $messageManager,
         ShoppingListService $shoppingListService
@@ -91,7 +91,7 @@ class Create implements HttpPostActionInterface
                 return $result->setData(['success' => false, 'message' => __('Por favor, faça login.')]);
             }
             $redirect = $this->redirectFactory->create();
-            return $redirect->setPath('customer/account/login');
+            return $redirect->setPath('b2b/account/login');
         }
 
         $name = trim($this->request->getParam('name', ''));

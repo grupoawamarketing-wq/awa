@@ -51,12 +51,12 @@ class Index implements HttpGetActionInterface
     {
         if (!$this->customerSession->isLoggedIn()) {
             $redirect = $this->redirectFactory->create();
-            return $redirect->setPath('customer/account/login');
+            return $redirect->setPath('b2b/account/login');
         }
 
         $page = $this->pageFactory->create();
         $page->getConfig()->getTitle()->set(__('Minhas Listas de Compras'));
-        
+
         return $page;
     }
 }

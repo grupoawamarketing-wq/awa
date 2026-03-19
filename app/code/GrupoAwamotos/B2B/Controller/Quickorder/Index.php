@@ -54,7 +54,7 @@ class Index implements HttpGetActionInterface
                 __('Faça login para acessar o Pedido Rápido.')
             );
             $redirect = $this->redirectFactory->create();
-            return $redirect->setPath('customer/account/login');
+            return $redirect->setPath('b2b/account/login');
         }
 
         $resultPage = $this->resultPageFactory->create();

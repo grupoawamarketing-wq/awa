@@ -13,6 +13,7 @@ use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 use Magento\Framework\Mail\Template\TransportBuilder;
 use Magento\Framework\App\Action\HttpPostActionInterface;
+use Magento\Framework\Event\ManagerInterface as EventManagerInterface;
 use Magento\Store\Model\StoreManagerInterface;
 
 class Save extends Action implements HttpPostActionInterface
@@ -39,17 +40,24 @@ class Save extends Action implements HttpPostActionInterface
      */
     private $storeManager;
 
+    /**
+     * @var EventManagerInterface
+     */
+    private $eventManager;
+
     public function __construct(
         Context $context,
         QuoteRequestRepositoryInterface $quoteRequestRepository,
         Config $config,
         TransportBuilder $transportBuilder,
-        StoreManagerInterface $storeManager
+        StoreManagerInterface $storeManager,
+        EventManagerInterface $eventManager
     ) {
         $this->quoteRequestRepository = $quoteRequestRepository;
         $this->config = $config;
         $this->transportBuilder = $transportBuilder;
         $this->storeManager = $storeManager;
+        $this->eventManager = $eventManager;
         parent::__construct($context);
     }
 
@@ -61,70 +69,87 @@ class Save extends Action implements HttpPostActionInterface
     public function execute()
     {
         $redirect = $this->resultRedirectFactory->create();
-        
+
         $requestId = (int) $this->getRequest()->getParam('request_id');
         $quotedTotal = (float) $this->getRequest()->getParam('quoted_total');
         $adminNotes = $this->getRequest()->getParam('admin_notes');
         $action = $this->getRequest()->getParam('action'); // 'approve' ou 'reject'
         $expiryDays = (int) $this->getRequest()->getParam('expiry_days', 7);
-        
+
         if (!$requestId) {
             $this->messageManager->addErrorMessage(__('ID da cotação não informado.'));
             return $redirect->setPath('*/*/');
         }
-        
+
         try {
             $quoteRequest = $this->quoteRequestRepository->getById($requestId);
-            
+            $previousStatus = $quoteRequest->getStatus();
+            $storeId = (int) $this->storeManager->getStore()->getId();
+
             if ($action === 'reject') {
                 // Rejeitar cotação
                 $quoteRequest->setStatus(QuoteRequestInterface::STATUS_REJECTED);
                 $quoteRequest->setAdminNotes($adminNotes);
-                
+
                 $this->quoteRequestRepository->save($quoteRequest);
-                
+
+                $this->eventManager->dispatch('grupoawamotos_b2b_quote_merchant_rejected', [
+                    'quote_request' => $quoteRequest,
+                    'previous_status' => $previousStatus,
+                    'lifecycle_event' => 'merchant_rejected',
+                    'store_id' => $storeId,
+                ]);
+
                 // Enviar email de rejeição
                 $this->sendRejectionEmail($quoteRequest, $adminNotes);
-                
+
                 $this->messageManager->addSuccessMessage(
                     __('Cotação #%1 foi rejeitada.', $requestId)
                 );
-                
+
             } else {
                 // Aprovar/Responder cotação
                 if ($quotedTotal <= 0) {
                     $this->messageManager->addErrorMessage(__('Informe um valor válido para a cotação.'));
                     return $redirect->setPath('*/*/respond', ['id' => $requestId]);
                 }
-                
+
                 $quoteRequest->setStatus(QuoteRequestInterface::STATUS_QUOTED);
                 $quoteRequest->setQuotedTotal($quotedTotal);
                 $quoteRequest->setAdminNotes($adminNotes);
-                
+
                 // Definir validade
                 $expiresAt = date('Y-m-d H:i:s', strtotime("+{$expiryDays} days"));
                 $quoteRequest->setExpiresAt($expiresAt);
-                
+
                 $this->quoteRequestRepository->save($quoteRequest);
-                
+
+                $this->eventManager->dispatch('grupoawamotos_b2b_quote_responded', [
+                    'quote_request' => $quoteRequest,
+                    'previous_status' => $previousStatus,
+                    'lifecycle_event' => 'quoted',
+                    'store_id' => $storeId,
+                    'quoted_total' => $quotedTotal,
+                ]);
+
                 // Enviar email com orçamento
                 $this->sendQuoteEmail($quoteRequest);
-                
+
                 $this->messageManager->addSuccessMessage(
-                    __('Cotação #%1 respondida com sucesso! Valor: R$ %2', 
-                        $requestId, 
+                    __('Cotação #%1 respondida com sucesso! Valor: R$ %2',
+                        $requestId,
                         number_format($quotedTotal, 2, ',', '.')
                     )
                 );
             }
-            
+
         } catch (\Exception $e) {
             $this->messageManager->addErrorMessage(
                 __('Erro ao processar cotação: %1', $e->getMessage())
             );
             return $redirect->setPath('*/*/respond', ['id' => $requestId]);
         }
-        
+
         return $redirect->setPath('*/*/');
     }
 
@@ -138,7 +163,7 @@ class Save extends Action implements HttpPostActionInterface
     {
         try {
             $store = $this->storeManager->getStore();
-            
+
             $transport = $this->transportBuilder
                 ->setTemplateIdentifier('grupoawamotos_b2b_quote_response')
                 ->setTemplateOptions([
@@ -157,9 +182,9 @@ class Save extends Action implements HttpPostActionInterface
                 ->setFromByScope('general')
                 ->addTo($quoteRequest->getCustomerEmail(), $quoteRequest->getCustomerName())
                 ->getTransport();
-            
+
             $transport->sendMessage();
-            
+
         } catch (\Exception $e) {
             // Log mas não interrompe o fluxo
             $this->messageManager->addWarningMessage(
@@ -179,7 +204,7 @@ class Save extends Action implements HttpPostActionInterface
     {
         try {
             $store = $this->storeManager->getStore();
-            
+
             $transport = $this->transportBuilder
                 ->setTemplateIdentifier('grupoawamotos_b2b_quote_rejected')
                 ->setTemplateOptions([
@@ -196,9 +221,9 @@ class Save extends Action implements HttpPostActionInterface
                 ->setFromByScope('general')
                 ->addTo($quoteRequest->getCustomerEmail(), $quoteRequest->getCustomerName())
                 ->getTransport();
-            
+
             $transport->sendMessage();
-            
+
         } catch (\Exception $e) {
             $this->messageManager->addWarningMessage(
                 __('Cotação rejeitada, mas houve erro ao enviar e-mail.')

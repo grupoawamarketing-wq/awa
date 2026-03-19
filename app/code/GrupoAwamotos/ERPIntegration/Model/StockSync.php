@@ -165,7 +165,6 @@ class StockSync implements StockSyncInterface
             $this->saveToCache($cacheKeys['positive'], $cacheKeys['negative'], $result, $sku);
             return $result;
         } catch (\Exception $e) {
-                try { $this->connection->rollback(); } catch (\Exception $rbEx) { $this->logger->error("[ERP] Rollback error: " . $rbEx->getMessage()); }
             $this->logger->error('[ERP] Stock query error for SKU ' . $sku . ': ' . $e->getMessage());
         }
 
@@ -359,7 +358,6 @@ class StockSync implements StockSyncInterface
 
             $this->logger->info('[ERP] Stock sync completed', $result);
         } catch (\Exception $e) {
-                try { $this->connection->rollback(); } catch (\Exception $rbEx) { $this->logger->error("[ERP] Rollback error: " . $rbEx->getMessage()); }
             $result = $this->finalizeSyncResult($result, $startTime);
             $this->logger->error('[ERP] Stock sync failed', [
                 'error' => $e->getMessage(),
@@ -484,9 +482,7 @@ class StockSync implements StockSyncInterface
         ]);
 
         foreach ($rows as $row) {
-                $this->connection->beginTransaction();
             $syncResult = $this->syncSingleStock($row);
-                $this->connection->commit();
             $result = $this->updateResultCounter($result, $syncResult);
         }
 
@@ -531,9 +527,7 @@ class StockSync implements StockSyncInterface
         foreach ($rows as $row) {
             // For multi-branch, we use QTDE_TOTAL which is already aggregated
             $row['QTDE'] = $row['QTDE_TOTAL'];
-                $this->connection->beginTransaction();
             $syncResult = $this->syncSingleStock($row);
-                $this->connection->commit();
             $result = $this->updateResultCounter($result, $syncResult);
         }
 
@@ -578,7 +572,6 @@ class StockSync implements StockSyncInterface
             $result['status'] = $this->syncValidatedStock($targetSku, $validationResult);
             return $result;
         } catch (\Exception $e) {
-                try { $this->connection->rollback(); } catch (\Exception $rbEx) { $this->logger->error("[ERP] Rollback error: " . $rbEx->getMessage()); }
             $this->logger->error('[ERP] Stock sync error', ['sku' => $sku, 'error' => $e->getMessage()]);
             $result['status'] = 'error';
             return $result;
@@ -731,7 +724,6 @@ class StockSync implements StockSyncInterface
 
             return true;
         } catch (\Exception $e) {
-                try { $this->connection->rollback(); } catch (\Exception $rbEx) { $this->logger->error("[ERP] Rollback error: " . $rbEx->getMessage()); }
             $this->logger->error('[ERP] Single stock sync error', [
                 'sku' => $sku,
                 'error' => $e->getMessage(),
@@ -796,7 +788,6 @@ class StockSync implements StockSyncInterface
 
             return $this->connection->query($sql);
         } catch (\Exception $e) {
-                try { $this->connection->rollback(); } catch (\Exception $rbEx) { $this->logger->error("[ERP] Rollback error: " . $rbEx->getMessage()); }
             $this->logger->error('[ERP] Get branches error: ' . $e->getMessage());
             return [];
         }

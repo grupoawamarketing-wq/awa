@@ -149,7 +149,7 @@ abstract class AbstractIndex extends DataObject implements InstanceInterface
         return array_search($attributeCode, $attributes);
     }
 
-    public function reindexAll(int $storeId = null): InstanceInterface
+    public function reindexAll(?int $storeId = null): InstanceInterface
     {
         $index = $this->getIndex();
 

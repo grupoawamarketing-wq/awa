@@ -31,7 +31,7 @@ class ForgotPassword implements HttpGetActionInterface
     {
         if ($this->customerSession->isLoggedIn()) {
             $redirect = $this->redirectFactory->create();
-            return $redirect->setPath('customer/account');
+            return $redirect->setPath('b2b/account/dashboard');
         }
 
         $resultPage = $this->resultPageFactory->create();

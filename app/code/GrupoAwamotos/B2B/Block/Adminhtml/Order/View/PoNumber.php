@@ -10,8 +10,9 @@ use Magento\Framework\Registry;
 use Magento\Sales\Api\Data\OrderInterface;
 
 /**
- * Block to display PO Number in admin order view
+ * Block to display B2B checkout metadata in admin order view
  * P0-1: Purchase Order Number
+ * P2-4.2: Order Notes
  */
 class PoNumber extends Template
 {
@@ -71,12 +72,48 @@ class PoNumber extends Template
     }
 
     /**
+     * Get Order Notes from order
+     *
+     * @return string|null
+     */
+    public function getOrderNotes(): ?string
+    {
+        $order = $this->getOrder();
+        if ($order === null) {
+            return null;
+        }
+
+        return $order->getData('b2b_order_notes') ?: null;
+    }
+
+    /**
+     * Check if Order Notes exists
+     *
+     * @return bool
+     */
+    public function hasOrderNotes(): bool
+    {
+        $orderNotes = $this->getOrderNotes();
+        return $orderNotes !== null && trim($orderNotes) !== '';
+    }
+
+    /**
+     * Check if there is any B2B checkout metadata in current order
+     *
+     * @return bool
+     */
+    public function hasCheckoutMetadata(): bool
+    {
+        return $this->hasPoNumber() || $this->hasOrderNotes();
+    }
+
+    /**
      * Get block title
      *
      * @return string
      */
     public function getTitle(): string
     {
-        return (string)__('Pedido de Compra (PO)');
+        return (string) __('Metadados B2B do Checkout');
     }
 }

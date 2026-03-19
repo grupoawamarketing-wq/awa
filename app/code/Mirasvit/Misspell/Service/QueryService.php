@@ -102,7 +102,7 @@ class QueryService
             ->getUrl('*/*/*');
     }
 
-    public function getFallbackUrl(string $from, string $to): string 
+    public function getFallbackUrl(string $from, string $to): string
     {
         return $this->urlFactory->create()
             ->addQueryParams(['q' => $to, 'f' => $from, '_q' => $this->getOriginalQuery() ])
@@ -144,7 +144,7 @@ class QueryService
         return $results;
     }
 
-    public function getNumResults(string $query = null): int
+    public function getNumResults(?string $query = null): int
     {
         if ($query === null) {
             if ($this->query->getNumResults() === null) {

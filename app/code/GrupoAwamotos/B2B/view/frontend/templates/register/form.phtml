@@ -8,7 +8,7 @@ $validateCnpjUrl = $block->escapeUrl($block->getUrl('b2b/register/validateCnpj')
 $termsUrl = $block->escapeUrl($block->getUrl('terms'));
 $privacyPolicyUrl = $block->escapeUrl($block->getUrl('privacy-policy-cookie-restriction-mode'));
 ?>
-<div class="b2b-login-page b2b-register-shell">
+<div id="b2b-register-shell" class="b2b-login-page b2b-register-shell">
     <div class="b2b-login-logo">
         <a href="<?= $escaper->escapeUrl($block->getHomeUrl()) ?>">
             <img src="<?= $escaper->escapeUrl($block->getLogoSrc()) ?>"
@@ -429,8 +429,10 @@ $privacyPolicyUrl = $block->escapeUrl($block->getUrl('privacy-policy-cookie-rest
     </div>
 
     <div class="b2b-login-footer">
-        <a href="https://wa.me/5516997367588?text=Ol%C3%A1%2C%20preciso%20de%20ajuda%20para%20cadastro%20B2B"
+          <a href="https://wa.me/5516997367588?text=Ol%C3%A1%2C%20preciso%20de%20ajuda%20para%20cadastro%20B2B"
            class="b2b-login-whatsapp"
+              data-b2b-contact-track="register_help_whatsapp"
+              data-b2b-contact-channel="whatsapp"
            target="_blank"
            rel="noopener noreferrer">
             Precisa de ajuda? Fale conosco pelo <strong>WhatsApp</strong>
@@ -442,12 +444,22 @@ $privacyPolicyUrl = $block->escapeUrl($block->getUrl('privacy-policy-cookie-rest
 
 <script type="text/x-magento-init">
 {
+    "#b2b-register-shell": {
+        "GrupoAwamotos_B2B/js/contact-tracker": {
+            "eventName": "Contact",
+            "storagePrefix": "b2b_register_contact_fired_",
+            "funnelStage": "consideration",
+            "touchpoint": "b2b_register"
+        }
+    },
     "#b2b-register-form": {
         "validation": {},
         "GrupoAwamotos_B2B/js/register-form": {
             "cnpjValidateUrl": "<?= $block->escapeJs($validateCnpjUrl) ?>",
             "loginUrl": "<?= $block->escapeJs($block->getLoginUrl()) ?>",
-            "sendingLabel": "<?= $block->escapeJs((string) __('Enviando cadastro...')) ?>"
+            "sendingLabel": "<?= $block->escapeJs((string) __('Enviando cadastro...')) ?>",
+            "leadStorageKey": "b2b_register_lead_fired",
+            "leadEventName": "Lead"
         }
     }
 }

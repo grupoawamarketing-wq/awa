@@ -6,12 +6,12 @@ declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Controller\Quote;
 
-use GrupoAwamotos\B2B\Model\QuoteRequestFactory;
-use GrupoAwamotos\B2B\Model\ResourceModel\QuoteRequest as QuoteRequestResource;
+use GrupoAwamotos\B2B\Api\QuoteRequestRepositoryInterface;
 use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Framework\App\Action\HttpGetActionInterface;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\RedirectFactory;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Message\ManagerInterface;
 use Magento\Framework\View\Result\PageFactory;
 
@@ -22,8 +22,7 @@ class View implements HttpGetActionInterface
     private RedirectFactory $redirectFactory;
     private ManagerInterface $messageManager;
     private RequestInterface $request;
-    private QuoteRequestFactory $quoteRequestFactory;
-    private QuoteRequestResource $quoteRequestResource;
+    private QuoteRequestRepositoryInterface $quoteRequestRepository;
 
     public function __construct(
         PageFactory $pageFactory,
@@ -31,16 +30,14 @@ class View implements HttpGetActionInterface
         RedirectFactory $redirectFactory,
         ManagerInterface $messageManager,
         RequestInterface $request,
-        QuoteRequestFactory $quoteRequestFactory,
-        QuoteRequestResource $quoteRequestResource
+        QuoteRequestRepositoryInterface $quoteRequestRepository
     ) {
         $this->pageFactory = $pageFactory;
         $this->customerSession = $customerSession;
         $this->redirectFactory = $redirectFactory;
         $this->messageManager = $messageManager;
         $this->request = $request;
-        $this->quoteRequestFactory = $quoteRequestFactory;
-        $this->quoteRequestResource = $quoteRequestResource;
+        $this->quoteRequestRepository = $quoteRequestRepository;
     }
 
     public function execute()
@@ -48,7 +45,7 @@ class View implements HttpGetActionInterface
         if (!$this->customerSession->isLoggedIn()) {
             $this->messageManager->addNoticeMessage(__('Faça login para ver suas cotações.'));
             $redirect = $this->redirectFactory->create();
-            return $redirect->setPath('customer/account/login');
+            return $redirect->setPath('b2b/account/login');
         }
 
         $requestId = (int) $this->request->getParam('id');
@@ -58,10 +55,9 @@ class View implements HttpGetActionInterface
             return $redirect->setPath('b2b/quote/history');
         }
 
-        $quoteRequest = $this->quoteRequestFactory->create();
-        $this->quoteRequestResource->load($quoteRequest, $requestId);
-
-        if (!$quoteRequest->getRequestId()) {
+        try {
+            $quoteRequest = $this->quoteRequestRepository->getById($requestId);
+        } catch (NoSuchEntityException $e) {
             $this->messageManager->addErrorMessage(__('Cotação não encontrada.'));
             $redirect = $this->redirectFactory->create();
             return $redirect->setPath('b2b/quote/history');

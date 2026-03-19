@@ -51,7 +51,7 @@ class SearchResult implements ResolverInterface
         $this->suggester       = $suggester;
     }
 
-    public function resolve(Field $field, $context, ResolveInfo $info, array $value = null, array $args = null)
+    public function resolve(Field $field, $context, ResolveInfo $info, ?array $value = null, ?array $args = null)
     {
         if (!isset($args['query'])) {
             throw new GraphQlInputException(__('Query should be specified'));

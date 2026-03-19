@@ -68,7 +68,7 @@ class Indexer
         return $this->indexScopeResolver->resolve($this->instance->getIndexName(), [$dimension]);
     }
 
-    public function reindexAll(int $storeId = null): bool
+    public function reindexAll(?int $storeId = null): bool
     {
         $instance = $this->getInstance();
 

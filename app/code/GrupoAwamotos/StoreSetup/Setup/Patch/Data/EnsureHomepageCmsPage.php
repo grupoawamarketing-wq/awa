@@ -86,28 +86,17 @@ class EnsureHomepageCmsPage implements DataPatchInterface
     }
 
     /**
-     * Conteúdo complementar da homepage (blocos AWA exclusivos).
+     * Conteúdo provisionado da homepage.
      *
-     * O conteúdo principal é renderizado pelo layout do tema ayo_home5
-     * via top-home.phtml (Canal A). Aqui incluímos apenas as seções AWA
-     * que não duplicam o Canal A: Schema.org, benefícios, selos e FAQ.
+     * O conteúdo principal já é renderizado integralmente pelo layout
+     * do tema ayo_home5 via top-home.phtml. Mantemos o conteúdo CMS
+     * vazio para evitar que futuras reprovisões reintroduzam seções
+     * legadas duplicadas na home.
      */
     private function getPageContent(): string
     {
         return <<<'HTML'
-<div class="ayo-home5-wrapper">
-    {{block class="Magento\Cms\Block\Block" block_id="home_schema_org"}}
-    {{block class="Magento\Cms\Block\Block" block_id="home_benefits_bar"}}
-    {{block class="Magento\Cms\Block\Block" block_id="home_security_seals"}}
-
-    <section class="ayo-home5-section ayo-home5-section--trust-badges">
-        {{block class="Magento\Cms\Block\Block" block_id="trust_badges_homepage"}}
-    </section>
-
-    <section class="ayo-home5-section container ayo-home5-section--faq">
-        {{block class="Magento\Cms\Block\Block" block_id="home_faq_quick"}}
-    </section>
-</div>
+<!-- Homepage renderizada pelo layout do tema: Magento_Cms::top-home.phtml -->
 HTML;
     }
 }

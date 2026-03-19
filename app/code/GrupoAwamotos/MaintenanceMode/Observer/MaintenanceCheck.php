@@ -235,7 +235,6 @@ class MaintenanceCheck implements ObserverInterface
 
         // Build CSS de fundo
         $backgroundCss = $this->buildBackgroundCss($bgType, $bgColor, $bgGradient, $bgImage, $mediaUrl);
-        $safeTextColor = preg_replace('/[^a-zA-Z0-9#(),.\/\s%+]/u', '', $textColor) ?: '#ffffff';
 
         // URLs de mídia
         $logoUrl = $logo ? $mediaUrl . 'maintenance/' . $logo : '';
@@ -270,7 +269,7 @@ class MaintenanceCheck implements ObserverInterface
         body {
             font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
             {$backgroundCss}
-            color: {$safeTextColor};
+            color: {$textColor};
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -484,28 +483,24 @@ HTML;
 
     private function buildBackgroundCss(string $type, string $color, string $gradient, ?string $image, string $mediaUrl): string
     {
-        // Allowlist: only CSS color-safe chars (hex, rgb/hsl functions, %, spaces)
-        $pattern = '/[^a-zA-Z0-9#(),.\/\s%+]/u';
-        $safeColor = preg_replace($pattern, '', $color) ?: '#1a237e';
         switch ($type) {
             case 'color':
-                return "background: {$safeColor};";
+                return "background: {$color};";
             case 'gradient':
                 $colors = explode(',', $gradient);
-                $color1 = preg_replace($pattern, '', trim($colors[0] ?? '')) ?: '#1a237e';
-                $color2 = preg_replace($pattern, '', trim($colors[1] ?? '')) ?: '#000428';
+                $color1 = trim($colors[0] ?? '#1a237e');
+                $color2 = trim($colors[1] ?? '#000428');
                 return "background: linear-gradient(135deg, {$color1} 0%, {$color2} 100%);";
             case 'image':
                 if ($image) {
-                    $safeImageName = rawurlencode(basename($image));
-                    $imageUrl = $mediaUrl . 'maintenance/' . $safeImageName;
-                    return "background: url('" . str_replace("'", "\\'", $imageUrl) . "') center/cover no-repeat fixed; background-color: #000;";
+                    $imageUrl = $mediaUrl . 'maintenance/' . $image;
+                    return "background: url('{$imageUrl}') center/cover no-repeat fixed; background-color: #000;";
                 }
                 return "background: #000;";
             case 'video':
                 return "background: #000;";
             default:
-                return "background: linear-gradient(135deg, #1a237e 0%, #000428 100%);"; // @phpstan-ignore-line
+                return "background: linear-gradient(135deg, #1a237e 0%, #000428 100%);";
         }
     }
 
@@ -525,17 +520,13 @@ HTML;
 
     private function getNewsletterHtml(string $baseUrl, string $title, string $button, string $successMsg): string
     {
-        $actionUrl       = $baseUrl . 'maintenance/newsletter/subscribe';
-        $safeTitle       = htmlspecialchars($title, ENT_QUOTES, 'UTF-8');
-        $safeButton      = htmlspecialchars($button, ENT_QUOTES, 'UTF-8');
-        $safeActionUrlJs = json_encode($actionUrl);
-        $safeSuccessMsgJs = json_encode('✅ ' . $successMsg);
+        $actionUrl = $baseUrl . 'maintenance/newsletter/subscribe';
         return <<<HTML
 <div class="newsletter">
-    <h3>{$safeTitle}</h3>
+    <h3>{$title}</h3>
     <form class="newsletter-form" id="maintenance-newsletter">
         <input type="email" name="email" id="newsletter-email" placeholder="Seu melhor e-mail" required>
-        <button type="submit" id="newsletter-btn">{$safeButton}</button>
+        <button type="submit" id="newsletter-btn">{$button}</button>
     </form>
     <div class="newsletter-message" id="newsletter-msg"></div>
 </div>
@@ -551,14 +542,14 @@ document.getElementById('maintenance-newsletter').addEventListener('submit', fun
     msg.className = 'newsletter-message';
     msg.style.display = 'none';
 
-    fetch({$safeActionUrlJs}, {
+    fetch('{$actionUrl}', {
         method: 'POST',
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: 'email=' + encodeURIComponent(email)
     })
     .then(r => r.json())
     .then(data => {
-        msg.textContent = data.message || (data.success ? {$safeSuccessMsgJs} : '❌ Erro ao cadastrar.');
+        msg.textContent = data.message || (data.success ? '✅ {$successMsg}' : '❌ Erro ao cadastrar.');
         msg.className = 'newsletter-message ' + (data.success ? 'success' : 'error');
         msg.style.display = 'block';
         if (data.success) document.getElementById('newsletter-email').value = '';
@@ -672,11 +663,10 @@ HTML;
 
     private function getCountdownScript(string $targetDate): string
     {
-        $safeDateJs = json_encode($targetDate);
         return <<<SCRIPT
 <script>
 (function() {
-    const targetDate = new Date({$safeDateJs}.replace(' ', 'T')).getTime();
+    const targetDate = new Date('{$targetDate}'.replace(' ', 'T')).getTime();
     const countdown = document.getElementById('countdown');
     if (!countdown) return;
 

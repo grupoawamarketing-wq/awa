@@ -20,4 +20,16 @@
                 type="GrupoAwamotos\CatalogFix\Plugin\PositionSortUnmappedPlugin"
                 sortOrder="10"/>
     </type>
+
+    <!-- Fix: suppress "Broken reference" INFO log for product.info.media/product.info.main.
+         The vendor container defines before="product.info.main" which creates a sort
+         instruction in ScheduledStructure::elementsToSort. The Ayo theme moves both
+         elements to different containers via <move> (a separate scheduledMoves list),
+         but the original sort instruction is never cleared, causing the broken reference
+         log in developer mode. The actual layout renders correctly. -->
+    <type name="Magento\Framework\View\Layout\ScheduledStructure">
+        <plugin name="grupoawamotos_catalogfix_suppress_media_sort_broken_ref"
+                type="GrupoAwamotos\CatalogFix\Plugin\ScheduledStructureSortPlugin"
+                sortOrder="10"/>
+    </type>
 </config>

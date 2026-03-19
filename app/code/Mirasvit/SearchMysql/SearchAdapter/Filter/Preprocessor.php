@@ -58,9 +58,9 @@ class Preprocessor
         ScopeResolverInterface $scopeResolver,
         Config $config,
         ResourceConnection $resource,
-        ScopeConfigInterface $scopeConfig = null,
-        AliasResolver $aliasResolver = null,
-        Session $customerSession = null
+        ?ScopeConfigInterface $scopeConfig = null,
+        ?AliasResolver $aliasResolver = null,
+        ?Session $customerSession = null
     ) {
         $this->conditionManager = $conditionManager;
         $this->scopeResolver    = $scopeResolver;
@@ -226,4 +226,3 @@ class Preprocessor
         return $resultQuery;
     }
 }
-

@@ -61,7 +61,7 @@ class Index extends AbstractIndex
     /**
      * @SuppressWarnings(PHPMD)
      */
-    public function getIndexableDocuments(int $storeId,array $entityIds = null,int $lastEntityId = null,int $limit = 100): array
+    public function getIndexableDocuments(int $storeId, ?array $entityIds = null, ?int $lastEntityId = null, int $limit = 100): array
     {
         /** @var \Mirasvit\Brand\Model\ResourceModel\BrandPage\CollectionFactory $brandCollection */
         $brandCollectionFactory = ObjectManager::getInstance()

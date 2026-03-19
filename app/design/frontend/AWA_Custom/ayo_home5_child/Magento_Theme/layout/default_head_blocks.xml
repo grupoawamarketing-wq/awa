@@ -35,6 +35,8 @@
         -->
         <!-- b2b-marketing.css: modal B2B (opacity:0/visibility:hidden por padrão) → seguro deferir -->
         <remove src="GrupoAwamotos_B2B::css/b2b-marketing.css"/>
+        <!-- suggestion.css: B2B marketing widget — 37KB, carregado via preload+onload (não-bloqueante) -->
+        <remove src="GrupoAwamotos_B2B::css/marketing/suggestion.css"/>
         <remove src="mage/calendar.css"/>
         <remove src="jquery/uppy/dist/uppy-custom.css"/>
         <!-- We must allow rokan_quickview, fancybox, and chosen to load so Rokan modules don't break -->
@@ -68,10 +70,7 @@
         <css src="css/awa-bundle-custom.css"/>
         <!-- Bundle 3/3: Phases & features (B2B phases 3-8 + menus + design system) -->
         <css src="css/awa-bundle-phases.css"/>
-        <!-- Mueller Vertical Menu: override layer for mueller variant (all pages) -->
-        <css src="css/awa-menu-mueller-global.css"/>
-        <!-- Mueller Vertical Menu: homepage-specific overrides (scoped via body class) -->
-        <css src="css/awa-menu-mueller-home.css"/>
+        <!-- Mueller Vertical Menu: merged into awa-bundle-refinements (2026-03-19 → -1 request) -->
 
         <!--
             Bundle Tail: fonts-extra + modules (3 módulos) + rokanthemes-overrides (merged 2026-03-16)
@@ -88,31 +87,17 @@
             Reduz 5 requests bloqueantes → 1. Homepage remove via cms_index_index.xml.
         -->
         <css src="css/awa-bundle-site.css"/>
-        <!-- Home carousels B2B: section headers, card refinements, footer payments -->
-        <css src="css/awa-b2b-home-refinements.css"/>
         <!--
-            Design System v2 (2026-03-18): tokens unificados, botões, inputs, tipografia.
-            Carregado por último para sobrescrever inconsistências sem !important.
+            Bundle Refinements: 15 CSS layers consolidados em 1 request (2026-03-19)
+            Substitui: awa-b2b-home-refinements + awa-design-system-v2 + awa-ux-components-v2
+            + awa-carousel-ui-v3 + awa-search-forms-v4 + awa-polish-alto-nivel-v5
+            + awa-rokanthemes-final-v6 + awa-custom-footer-dark-gradient
+            + phases 10–16 (visual-audit → quick-order)
+            Economia: 14 requests bloqueantes eliminados.
         -->
-        <css src="css/awa-design-system-v2.css"/>
-        <!-- UX Components v2 (2026-03-18): PLP mobile grid, PDP tabela, category grid, nav, ritmo -->
-        <!-- Carousel UI v3 (2026-03-18): Rokanthemes section headers, product/category tabs, OWL global,
-             brand carousel, benefits bar, hero slider controls, featured/new products, testimonials -->
-        <css src="css/awa-ux-components-v2.css"/>
-        <css src="css/awa-carousel-ui-v3.css"/>
-        <!-- Search and Forms v4 (2026-03-18): autocomplete color tokens, form validation
-             mage-error, checkout progress/summary, auth pages, search results. -->
-        <css src="css/awa-search-forms-v4.css"/>
-        <!-- Polish Alto Nivel v5 (2026-03-18): Fotorama gallery, PDP tabs, cart table,
-             mobile nav, loading spinner, back-to-top, B2B dashboard, reviews, CMS/404. -->
-        <css src="css/awa-polish-alto-nivel-v5.css"/>
-        <!-- Rokanthemes Final v6 (2026-03-18): ThemeOption variable bridge, vela footer,
-             SuperDeals module, fixed-right sidebar, newsletter popup, mobile submenu toggle. -->
-        <css src="css/awa-rokanthemes-final-v6.css"/>
-        <!-- Footer: brand carousel, payment, security seals, dark gradient overrides -->
-        <css src="css/awa-custom-footer-dark-gradient.css"/>
-        <!-- Phase 10 Refinements: skip nav, search btn, button colors, fixed-right, brands -->
-        <css src="css/awa-phase10-refinements.css"/>
+        <css src="css/awa-bundle-refinements.css"/>
+        <!-- Phase 17: Print stylesheet — media="print" = 0 bytes on critical path (browser defers) -->
+        <css src="css/awa-phase17-print.css" media="print"/>
         <!--
             Cosmetic/decorative layers (2026-03-17):
             Moved to non-render-blocking preload via awa-deferred-cosmetic-css.phtml
@@ -161,12 +146,22 @@
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.whatsapp.fab"
                    template="Magento_Theme::html/awa-whatsapp-fab.phtml"
-                   after="-"/>
+                   cacheable="false"
+                   after="-">
+                <arguments>
+                    <argument name="contact_info" xsi:type="object">GrupoAwamotos\Theme\ViewModel\ContactInfo</argument>
+                </arguments>
+            </block>
             <!-- AWA Phase 4: Quick Quote Modal -->
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.quote.modal"
                    template="Magento_Theme::html/awa-quote-modal.phtml"
-                   after="awa.whatsapp.fab"/>
+                   cacheable="false"
+                   after="awa.whatsapp.fab">
+                <arguments>
+                    <argument name="contact_info" xsi:type="object">GrupoAwamotos\Theme\ViewModel\ContactInfo</argument>
+                </arguments>
+            </block>
         </referenceContainer>
 
         <referenceContainer name="before.body.end">

@@ -80,7 +80,7 @@ class TransportBuilder extends \Magento\Framework\Mail\Template\TransportBuilder
         TransportInterfaceFactory $mailTransportFactory,
         ProductMetadataInterface $productMetadata,
         Manager $moduleManager,
-        MessageInterfaceFactory $messageFactory = null,
+        ?MessageInterfaceFactory $messageFactory = null,
         $emailMessageInterfaceFactory = null,
         $mimeMessageInterfaceFactory = null,
         $mimePartInterfaceFactory = null,

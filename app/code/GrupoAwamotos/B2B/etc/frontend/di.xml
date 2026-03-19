@@ -7,49 +7,42 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
 
-    <!-- plugin para redirecionar dashboard padrão para b2b dashboard -->
     <type name="Magento\Customer\Controller\Account\Index">
         <plugin name="grupoawamotos_b2b_redirect_dashboard"
                 type="GrupoAwamotos\B2B\Plugin\Customer\Account\DashboardRedirectPlugin"
                 sortOrder="10"/>
     </type>
 
-    <!-- plugin para redirecionar login padrão para b2b (strict mode) -->
     <type name="Magento\Customer\Controller\Account\Login">
         <plugin name="grupoawamotos_b2b_redirect_login"
                 type="GrupoAwamotos\B2B\Plugin\Customer\Account\LoginRedirectPlugin"
                 sortOrder="10"/>
     </type>
 
-    <!-- plugin para redirecionar esqueci senha para b2b (strict mode) -->
     <type name="Magento\Customer\Controller\Account\ForgotPassword">
         <plugin name="grupoawamotos_b2b_redirect_forgot_password"
                 type="GrupoAwamotos\B2B\Plugin\Customer\Account\ForgotPasswordRedirectPlugin"
                 sortOrder="10"/>
     </type>
 
-    <!-- plugin para redirecionar registro padrão para b2b (strict mode) -->
     <type name="Magento\Customer\Controller\Account\Create">
         <plugin name="grupoawamotos_b2b_redirect_create"
                 type="GrupoAwamotos\B2B\Plugin\Customer\Account\CreateRedirect"
                 sortOrder="10"/>
     </type>
 
-    <!-- plugin para bloquear criação de conta padrão (strict mode) -->
     <type name="Magento\Customer\Controller\Account\CreatePost">
         <plugin name="grupoawamotos_b2b_redirect_create_post"
                 type="GrupoAwamotos\B2B\Plugin\Customer\Account\CreatePostRedirect"
                 sortOrder="10"/>
     </type>
 
-    <!-- plugin para redirecionar links de registro para b2b -->
     <type name="Magento\Customer\Block\Account\Customer">
         <plugin name="grupoawamotos_b2b_customer_link"
                 type="GrupoAwamotos\B2B\Plugin\Customer\Block\Account\CustomerLink"
                 sortOrder="10"/>
     </type>
 
-    <!-- session proxy para blockcheckoutplugin (evitar instanciar sessions em contexto errado) -->
     <type name="GrupoAwamotos\B2B\Plugin\BlockCheckoutPlugin">
         <arguments>
             <argument name="customerSession" xsi:type="object">Magento\Customer\Model\Session\Proxy</argument>
@@ -57,14 +50,12 @@
         </arguments>
     </type>
 
-    <!-- session proxy para restrictedproductviewplugin -->
     <type name="GrupoAwamotos\B2B\Plugin\Catalog\RestrictedProductViewPlugin">
         <arguments>
             <argument name="customerSession" xsi:type="object">Magento\Customer\Model\Session\Proxy</argument>
         </arguments>
     </type>
 
-    <!-- session proxy para login/claim controllers -->
     <type name="GrupoAwamotos\B2B\Controller\Account\Login">
         <arguments>
             <argument name="customerSession" xsi:type="object">Magento\Customer\Model\Session\Proxy</argument>
@@ -83,56 +74,48 @@
         </arguments>
     </type>
 
-    <!-- session proxy + erp dependencies for grouppriceplugin -->
     <type name="GrupoAwamotos\B2B\Plugin\GroupPricePlugin">
         <arguments>
             <argument name="customerSession" xsi:type="object">Magento\Customer\Model\Session\Proxy</argument>
         </arguments>
     </type>
 
-    <!-- plugin para aplicar preços B2B dinâmicos por cliente -->
     <type name="Magento\Catalog\Model\Product">
         <plugin name="grupoawamotos_b2b_group_price"
                 type="GrupoAwamotos\B2B\Plugin\GroupPricePlugin"
                 sortOrder="10"/>
     </type>
 
-    <!-- plugin para ocultar preço para usuários não autorizados -->
     <type name="Magento\Catalog\Block\Product\AbstractProduct">
         <plugin name="grupoawamotos_b2b_hide_price"
                 type="GrupoAwamotos\B2B\Plugin\HidePricePlugin"
                 sortOrder="10"/>
     </type>
 
-    <!-- plugin para ocultar final price box para usuários não autorizados -->
     <type name="Magento\Catalog\Pricing\Render\FinalPriceBox">
         <plugin name="grupoawamotos_b2b_hide_final_price"
                 type="GrupoAwamotos\B2B\Plugin\HideFinalPricePlugin"
                 sortOrder="10"/>
     </type>
 
-    <!-- session proxy para blockcartaddplugin -->
     <type name="GrupoAwamotos\B2B\Plugin\BlockCartAddPlugin">
         <arguments>
             <argument name="customerSession" xsi:type="object">Magento\Customer\Model\Session\Proxy</argument>
         </arguments>
     </type>
 
-    <!-- plugin para bloquear add to cart para usuários não aprovados -->
     <type name="Magento\Checkout\Controller\Cart\Add">
         <plugin name="grupoawamotos_b2b_block_cart_add"
                 type="GrupoAwamotos\B2B\Plugin\BlockCartAddPlugin"
                 sortOrder="10"/>
     </type>
 
-    <!-- plugin para bloquear acesso ao checkout para usuários não aprovados -->
     <type name="Magento\Checkout\Controller\Index\Index">
         <plugin name="grupoawamotos_b2b_block_checkout"
                 type="GrupoAwamotos\B2B\Plugin\BlockCheckoutPlugin"
                 sortOrder="10"/>
     </type>
 
-    <!-- plugin para bloquear Rokanthemes OnePageCheckout (disabled se módulo não existe) -->
     <type name="Rokanthemes\OnePageCheckout\Controller\Index\Index">
         <plugin name="grupoawamotos_b2b_block_express_checkout"
                 type="GrupoAwamotos\B2B\Plugin\BlockExpressCheckoutPlugin"
@@ -140,70 +123,54 @@
                 disabled="true"/>
     </type>
 
-    <!-- plugin para bloquear visualização de produtos restritos -->
     <type name="Magento\Catalog\Controller\Product\View">
         <plugin name="grupoawamotos_b2b_restricted_product_view"
                 type="GrupoAwamotos\B2B\Plugin\Catalog\RestrictedProductViewPlugin"
                 sortOrder="10"/>
     </type>
 
-    <!-- B2B Catálogo Restrito - Filtro de Produtos (depende de CustomerSession, escopo frontend) -->
     <type name="Magento\Catalog\Model\ResourceModel\Product\Collection">
         <plugin name="grupoawamotos_b2b_restricted_catalog"
                 type="GrupoAwamotos\B2B\Plugin\Catalog\RestrictedProductCollectionPlugin"
                 sortOrder="100"/>
     </type>
 
-    <!-- session proxy para logintocart block -->
     <type name="GrupoAwamotos\B2B\Block\LoginToCart">
         <arguments>
             <argument name="customerSession" xsi:type="object">Magento\Customer\Model\Session\Proxy</argument>
         </arguments>
     </type>
 
-    <!-- plugin para permitir login com cnpj (resolve cnpj → email) -->
     <type name="Magento\Customer\Api\AccountManagementInterface">
         <plugin name="grupoawamotos_b2b_resolve_cnpj_login"
                 type="GrupoAwamotos\B2B\Plugin\Customer\ResolveCnpjLoginPlugin"
                 sortOrder="5"/>
     </type>
 
-    <!-- plugin para ocultar preços no mini-cart (sidebar) -->
     <type name="Magento\Checkout\CustomerData\Cart">
         <plugin name="grupoawamotos_b2b_hide_minicart_price"
                 type="GrupoAwamotos\B2B\Plugin\Checkout\HideMiniCartPricePlugin"
                 sortOrder="10"/>
     </type>
 
-    <!-- plugin para ocultar preços nos itens da página do carrinho -->
     <type name="Magento\Checkout\Block\Cart\Item\Renderer">
         <plugin name="grupoawamotos_b2b_hide_cart_item_price"
                 type="GrupoAwamotos\B2B\Plugin\Checkout\HideCartItemPricePlugin"
                 sortOrder="10"/>
     </type>
 
-    <!-- plugin para ocultar preços na config do checkout (knockoutjs) -->
     <type name="Magento\Checkout\Model\DefaultConfigProvider">
         <plugin name="grupoawamotos_b2b_hide_checkout_price"
                 type="GrupoAwamotos\B2B\Plugin\Checkout\HideCheckoutPricePlugin"
                 sortOrder="100"/>
     </type>
 
-    <!-- plugin para alinhar autocomplete da Mirasvit com a regra B2B de preço/compra -->
-    <type name="Mirasvit\SearchAutocomplete\Block\Injection">
-        <plugin name="grupoawamotos_b2b_restrict_search_autocomplete"
-                type="GrupoAwamotos\B2B\Plugin\SearchAutocomplete\RestrictInjectionConfigPlugin"
-                sortOrder="10"/>
-    </type>
-
-    <!-- plugin para ocultar totais do carrinho via api -->
     <type name="Magento\Quote\Model\Cart\CartTotalRepository">
         <plugin name="grupoawamotos_b2b_hide_cart_totals"
                 type="GrupoAwamotos\B2B\Plugin\Checkout\HideCartTotalsPlugin"
                 sortOrder="10"/>
     </type>
 
-    <!-- session proxy para quote accept/reject controllers -->
     <type name="GrupoAwamotos\B2B\Controller\Quote\Accept">
         <arguments>
             <argument name="customerSession" xsi:type="object">Magento\Customer\Model\Session\Proxy</argument>
@@ -216,18 +183,22 @@
         </arguments>
     </type>
 
-    <!-- session proxy para shoppinglist setrecurring controller -->
     <type name="GrupoAwamotos\B2B\Controller\ShoppingList\SetRecurring">
         <arguments>
             <argument name="customerSession" xsi:type="object">Magento\Customer\Model\Session\Proxy</argument>
         </arguments>
     </type>
 
-    <!-- Http Context: vary fpc by customer's ERP price list -->
     <type name="Magento\Framework\App\Http\Context">
         <plugin name="grupoawamotos_b2b_price_list_context"
                 type="GrupoAwamotos\B2B\Plugin\CustomerPriceListContextPlugin"
                 sortOrder="20"/>
+    </type>
+
+    <type name="Magento\Framework\App\FrontControllerInterface">
+        <plugin name="grupoawamotos_b2b_http_context"
+                type="GrupoAwamotos\B2B\Plugin\App\HttpContextPlugin"
+                sortOrder="15"/>
     </type>
 
     <type name="GrupoAwamotos\B2B\Plugin\CustomerPriceListContextPlugin">
@@ -236,18 +207,40 @@
         </arguments>
     </type>
 
-    <!-- P0-1: plugin para salvar po number no checkout -->
+    <type name="GrupoAwamotos\B2B\Plugin\App\HttpContextPlugin">
+        <arguments>
+            <argument name="customerSession" xsi:type="object">Magento\Customer\Model\Session\Proxy</argument>
+        </arguments>
+    </type>
+
+    <type name="Magento\Shipping\Model\Rate\Result">
+        <plugin name="grupoawamotos_b2b_shipping_rate"
+                type="GrupoAwamotos\B2B\Plugin\Checkout\ShippingRateResultPlugin"
+                sortOrder="10"/>
+    </type>
+
+    <type name="GrupoAwamotos\B2B\Plugin\Checkout\ShippingRateResultPlugin">
+        <arguments>
+            <argument name="customerSession" xsi:type="object">Magento\Customer\Model\Session\Proxy</argument>
+        </arguments>
+    </type>
+
     <type name="Magento\Checkout\Api\PaymentInformationManagementInterface">
         <plugin name="grupoawamotos_b2b_save_po_number"
                 type="GrupoAwamotos\B2B\Plugin\Checkout\SavePoNumberPlugin"
                 sortOrder="20"/>
+        <plugin name="grupoawamotos_b2b_save_order_notes"
+                type="GrupoAwamotos\B2B\Plugin\Checkout\SaveOrderNotesPlugin"
+                sortOrder="30"/>
     </type>
 
-    <!-- P0-1: plugin para guest checkout também -->
     <type name="Magento\Checkout\Api\GuestPaymentInformationManagementInterface">
         <plugin name="grupoawamotos_b2b_save_po_number_guest"
                 type="GrupoAwamotos\B2B\Plugin\Checkout\SavePoNumberGuestPlugin"
                 sortOrder="20"/>
+        <plugin name="grupoawamotos_b2b_save_order_notes_guest"
+                type="GrupoAwamotos\B2B\Plugin\Checkout\SaveOrderNotesGuestPlugin"
+                sortOrder="30"/>
     </type>
 
 </config>

@@ -7,10 +7,9 @@
 define([
     'uiComponent',
     'ko',
-    'jquery',
     'Magento_Customer/js/model/customer',
     'GrupoAwamotos_B2B/js/model/checkout/po-number-storage'
-], function (Component, ko, $, customer, poNumberStorage) {
+], function (Component, ko, customer, poNumberStorage) {
     'use strict';
 
     return Component.extend({
@@ -28,11 +27,12 @@ define([
 
             // Reuse shared storage observable to survive checkout component re-renders.
             this.poNumber = poNumberStorage.poNumberObservable;
+            var config = (window.checkoutConfig || {}).b2bCheckout || {};
+            var poNumberConfig = config.poNumber || {};
+            var isEnabled = poNumberConfig.enabled === true;
 
-            // Check if B2B customer - show only for logged in customers with company
             this.isVisible = ko.computed(function () {
-                // Sempre mostrar para clientes logados
-                return customer.isLoggedIn();
+                return customer.isLoggedIn() && isEnabled;
             }, this);
 
             return this;

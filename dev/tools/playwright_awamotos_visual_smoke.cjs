@@ -1251,7 +1251,13 @@ async function runDesktopFlow(browser, opts, outputDir) {
       const searchShots = await captureScreens(page, screenshotDir, 'desktop-search', false);
       await withNodeTimeout(waitForPageStable(page, opts.timeoutMs), 7000, null);
       const health = await basicVisualHealth(page);
-      const resultsVisible = await visible(page, ['.search.results', '.products-grid', '.products.list.items']);
+      const resultsVisible = await visible(page, [
+        '.search.results',
+        '.products-grid',
+        '.products.list.items',
+        '.mst-search__index',
+        '.mst-search__list',
+      ]);
       const emptyVisible = await visible(page, ['.message.notice', '.message.info', '.search.results .message']);
       const searchInputVisible = await visible(page, ['#search', 'input[name="q"]']);
       const searchStalled = healthProbeStalled(health);

@@ -73,16 +73,16 @@ class PromoBlock extends Template
         if (!$this->b2bHelper->isEnabled()) {
             return false;
         }
-        
+
         // Show for guests
         if (!$this->customerSession->isLoggedIn()) {
             return true;
         }
-        
+
         // Don't show for B2B customers (they're already registered)
         $customerGroupId = (int) $this->customerSession->getCustomerGroupId();
         $b2bGroups = $this->b2bHelper->getB2BGroupIds();
-        
+
         return !in_array($customerGroupId, $b2bGroups);
     }
 
@@ -109,6 +109,10 @@ class PromoBlock extends Template
      */
     public function getLoginUrl(): string
     {
+        if ($this->b2bHelper->getMode() === 'strict') {
+            return $this->getUrl('b2b/account/login');
+        }
+
         return $this->getUrl('customer/account/login');
     }
 

@@ -1,12 +1,15 @@
 <?php
+declare(strict_types=1);
+
 namespace Awa\RealTimeDashboard\Model;
 
 use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\DB\Adapter\AdapterInterface;
 
 class DashboardDataProvider
 {
-    protected $resource;
-    protected $connection;
+    private ResourceConnection $resource;
+    private AdapterInterface $connection;
 
     public function __construct(ResourceConnection $resource)
     {
@@ -14,7 +17,7 @@ class DashboardDataProvider
         $this->connection = $resource->getConnection();
     }
 
-    public function getData()
+    public function getData(): array
     {
         return [
             'summary'          => $this->getSummary(),
@@ -29,7 +32,7 @@ class DashboardDataProvider
         ];
     }
 
-    protected function getSummary()
+    protected function getSummary(): array
     {
         $visitorTable = $this->resource->getTableName('customer_visitor');
         $eventTable = $this->resource->getTableName('report_event');
@@ -101,7 +104,7 @@ class DashboardDataProvider
         ];
     }
 
-    protected function getRecentVisitors()
+    protected function getRecentVisitors(): array
     {
         $visitorTable = $this->resource->getTableName('customer_visitor');
         $customerTable = $this->resource->getTableName('customer_entity');
@@ -116,30 +119,33 @@ class DashboardDataProvider
         );
     }
 
-    protected function getViewedProducts()
+    protected function getViewedProducts(): array
     {
-        $reportTable = $this->resource->getTableName('report_viewed_product_index');
+        $reportTable  = $this->resource->getTableName('report_viewed_product_index');
         $varcharTable = $this->resource->getTableName('catalog_product_entity_varchar');
-        $eavTable = $this->resource->getTableName('eav_attribute');
+        $eavTable     = $this->resource->getTableName('eav_attribute');
+
+        // Pre-fetch attribute_id once — evita subquery correlacionada por linha
+        $nameAttrId = (int) $this->connection->fetchOne(
+            "SELECT attribute_id FROM {$eavTable}
+             WHERE attribute_code = 'name' AND entity_type_id = 4 LIMIT 1"
+        );
 
         return $this->connection->fetchAll(
             "SELECT rv.visitor_id, rv.customer_id, rv.product_id, rv.added_at,
                     cpev.value AS product_name
              FROM {$reportTable} rv
              LEFT JOIN {$varcharTable} cpev ON rv.product_id = cpev.entity_id
-                AND cpev.attribute_id = (
-                    SELECT attribute_id FROM {$eavTable}
-                    WHERE attribute_code = 'name' AND entity_type_id = 4 LIMIT 1
-                )
+                AND cpev.attribute_id = {$nameAttrId}
                 AND cpev.store_id = 0
              ORDER BY rv.added_at DESC
              LIMIT 20"
         );
     }
 
-    protected function getActiveCarts()
+    protected function getActiveCarts(): array
     {
-        $quoteTable = $this->resource->getTableName('quote');
+        $quoteTable     = $this->resource->getTableName('quote');
         $quoteItemTable = $this->resource->getTableName('quote_item');
 
         $carts = $this->connection->fetchAll(
@@ -152,20 +158,32 @@ class DashboardDataProvider
              LIMIT 15"
         );
 
+        if (empty($carts)) {
+            return $carts;
+        }
+
+        // Busca todos os itens em uma única query (elimina N+1)
+        $cartIds    = implode(',', array_map('intval', array_column($carts, 'entity_id')));
+        $allItems   = $this->connection->fetchAll(
+            "SELECT qi.quote_id, qi.name, qi.sku, qi.qty, qi.price, qi.row_total
+             FROM {$quoteItemTable} qi
+             WHERE qi.quote_id IN ({$cartIds}) AND qi.parent_item_id IS NULL"
+        );
+
+        // Agrupa itens por quote_id em PHP
+        $itemsByCart = [];
+        foreach ($allItems as $item) {
+            $itemsByCart[(int)$item['quote_id']][] = $item;
+        }
+
         foreach ($carts as &$cart) {
-            $cart['items'] = $this->connection->fetchAll(
-                "SELECT qi.name, qi.sku, qi.qty, qi.price, qi.row_total
-                 FROM {$quoteItemTable} qi
-                 WHERE qi.quote_id = ? AND qi.parent_item_id IS NULL
-                 LIMIT 5",
-                [(int) $cart['entity_id']]
-            );
+            $cart['items'] = array_slice($itemsByCart[(int)$cart['entity_id']] ?? [], 0, 5);
         }
 
         return $carts;
     }
 
-    protected function getRecentSearches()
+    protected function getRecentSearches(): array
     {
         $searchTable = $this->resource->getTableName('search_query');
 
@@ -177,7 +195,7 @@ class DashboardDataProvider
         );
     }
 
-    protected function getRecentOrders()
+    protected function getRecentOrders(): array
     {
         $orderTable = $this->resource->getTableName('sales_order');
 
@@ -191,12 +209,18 @@ class DashboardDataProvider
         );
     }
 
-    protected function getEventsTimeline()
+    protected function getEventsTimeline(): array
     {
-        $eventTable = $this->resource->getTableName('report_event');
+        $eventTable     = $this->resource->getTableName('report_event');
         $eventTypeTable = $this->resource->getTableName('report_event_types');
-        $varcharTable = $this->resource->getTableName('catalog_product_entity_varchar');
-        $eavTable = $this->resource->getTableName('eav_attribute');
+        $varcharTable   = $this->resource->getTableName('catalog_product_entity_varchar');
+        $eavTable       = $this->resource->getTableName('eav_attribute');
+
+        // Pre-fetch attribute_id once — evita subquery correlacionada por linha
+        $nameAttrId = (int) $this->connection->fetchOne(
+            "SELECT attribute_id FROM {$eavTable}
+             WHERE attribute_code = 'name' AND entity_type_id = 4 LIMIT 1"
+        );
 
         return $this->connection->fetchAll(
             "SELECT re.event_id, ret.event_name, re.logged_at, re.object_id,
@@ -204,17 +228,14 @@ class DashboardDataProvider
              FROM {$eventTable} re
              LEFT JOIN {$eventTypeTable} ret ON re.event_type_id = ret.event_type_id
              LEFT JOIN {$varcharTable} cpev ON re.object_id = cpev.entity_id
-                AND cpev.attribute_id = (
-                    SELECT attribute_id FROM {$eavTable}
-                    WHERE attribute_code = 'name' AND entity_type_id = 4 LIMIT 1
-                )
+                AND cpev.attribute_id = {$nameAttrId}
                 AND cpev.store_id = 0
              ORDER BY re.logged_at DESC
              LIMIT 30"
         );
     }
 
-    protected function getHourlyVisitors()
+    protected function getHourlyVisitors(): array
     {
         $visitorTable = $this->resource->getTableName('customer_visitor');
 

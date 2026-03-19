@@ -43,10 +43,10 @@ define([
             // Modal state
             this.isModalOpen = ko.observable(false);
 
-            // Show only for logged in customers with terms enabled and content
+            // Show only for logged in customers when terms feature is enabled.
+            // Terms content is optional; the link is rendered conditionally in template.
             this.isVisible = ko.computed(function () {
-                var hasTerms = termsConfig.enabled && this.termsContent;
-                return customer.isLoggedIn() && hasTerms;
+                return customer.isLoggedIn() && termsConfig.enabled === true;
             }, this);
 
             // Register validator only if terms are enabled

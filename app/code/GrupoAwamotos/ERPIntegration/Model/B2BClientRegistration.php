@@ -44,6 +44,7 @@ class B2BClientRegistration
 
     /**
      * Check if a client is registered in Sectra B2B integration
+     * with the correct INTEGRACAOORIGEM (OpenCardB2B - Cadastro de Cliente).
      */
     public function isClientRegistered(int $erpClientCode): bool
     {
@@ -54,8 +55,8 @@ class B2BClientRegistration
         try {
             $result = $this->readConnection->fetchOne(
                 "SELECT CHAVE FROM GR_INTEGRACAOVALIDADOR
-                 WHERE CHAVE = :code",
-                [':code' => (string) $erpClientCode]
+                 WHERE CHAVE = :code AND INTEGRACAOORIGEM = :origem",
+                [':code' => (string) $erpClientCode, ':origem' => self::ORIGEM_CLIENTE]
             );
             return $result !== null;
         } catch (\Exception $e) {

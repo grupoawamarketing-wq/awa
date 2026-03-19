@@ -23,14 +23,6 @@ interface CustomerSyncInterface
     public function getErpCustomerByTaxvat(string $taxvat): ?array;
 
     /**
-     * Busca cliente no ERP exclusivamente pelo CNPJ
-     *
-     * @param string $cnpj CNPJ com ou sem formatação
-     * @return array|null Dados do cliente ou null se não encontrado
-     */
-    public function getErpCustomerByCnpj(string $cnpj): ?array;
-
-    /**
      * Busca cliente no ERP pelo código interno
      *
      * @param int $code Código do cliente no ERP

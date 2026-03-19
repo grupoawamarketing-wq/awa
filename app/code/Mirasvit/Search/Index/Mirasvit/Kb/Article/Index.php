@@ -67,7 +67,7 @@ class Index extends AbstractIndex
         return $collection;
     }
 
-    public function getIndexableDocuments(int $storeId, array $entityIds = null, int $lastEntityId = null, int $limit = 100): array
+    public function getIndexableDocuments(int $storeId, ?array $entityIds = null, ?int $lastEntityId = null, int $limit = 100): array
     {
         $collectionFactory = $this->context->getObjectManager()
             ->create('Mirasvit\Kb\Model\ResourceModel\Article\CollectionFactory');

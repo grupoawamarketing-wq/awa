@@ -81,7 +81,7 @@ class Index extends AbstractIndex
     /**
      * {@inheritdoc}
      */
-    public function getIndexableDocuments(int $storeId, array $entityIds = null, int $lastEntityId = null, int  $limit = 100): array
+    public function getIndexableDocuments(int $storeId, ?array $entityIds = null, ?int $lastEntityId = null, int  $limit = 100): array
     {
         $websiteId         = $this->context->getStoreManager()->getStore($storeId)->getWebsiteId();
         $collectionFactory = $this->context->getObjectManager()

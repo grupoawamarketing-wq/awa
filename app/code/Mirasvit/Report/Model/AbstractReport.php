@@ -399,7 +399,7 @@ abstract class AbstractReport extends AbstractSimpleObject implements ReportInte
         return $this->_get(self::SHARE_IDENTIFIER) ?: null;
     }
 
-    public function setShareIdentifier(string $value = null): ReportInterface
+    public function setShareIdentifier(?string $value = null): ReportInterface
     {
        return $this->setData(self::SHARE_IDENTIFIER, $value);
     }
@@ -409,7 +409,7 @@ abstract class AbstractReport extends AbstractSimpleObject implements ReportInte
         return $this->_get(self::REPORT_IDENTIFIER) ?: null;
     }
 
-    public function setReportIdentifier(string $value = null): ReportInterface
+    public function setReportIdentifier(?string $value = null): ReportInterface
     {
         return $this->setData(self::REPORT_IDENTIFIER, $value);
     }

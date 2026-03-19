@@ -52,10 +52,10 @@ class ExclusionStrategy
         ResourceConnection $resourceConnection,
         StoreManagerInterface $storeManager,
         AliasResolver $aliasResolver,
-        TableResolver $tableResolver = null,
-        DimensionFactory $dimensionFactory = null,
-        IndexScopeResolverInterface $priceTableResolver = null,
-        Context $httpContext = null
+        ?TableResolver $tableResolver = null,
+        ?DimensionFactory $dimensionFactory = null,
+        ?IndexScopeResolverInterface $priceTableResolver = null,
+        ?Context $httpContext = null
     ) {
         $this->resourceConnection = $resourceConnection;
         $this->storeManager       = $storeManager;

@@ -109,35 +109,6 @@ class CustomerSync implements CustomerSyncInterface
         }
     }
 
-    public function getErpCustomerByCnpj(string $cnpj): ?array
-    {
-        $cleanCnpj = preg_replace('/[^0-9]/', '', $cnpj);
-        if (strlen($cleanCnpj) !== 14) {
-            return null;
-        }
-
-        try {
-            $sql = "SELECT f.CODIGO, f.RAZAO, f.FANTASIA, f.CGC, f.CPF,
-                           f.ENDERECO, f.NUMERO, f.BAIRRO, f.CIDADE, f.CEP, f.UF,
-                           f.CONDPAGTO, f.FATORPRECO, f.CKPESSOA, f.TRANSPPREF,
-                           REPLACE(REPLACE(REPLACE(tp.CGC, '.', ''), '/', ''), '-', '') AS TRANSPPREF_CNPJ,
-                           tp.RAZAO AS TRANSPPREF_NOME,
-                           c.EMAIL, c.FONE1, c.FONECEL, c.NOME AS CONTATO_NOME
-                    FROM FN_FORNECEDORES f
-                    LEFT JOIN FN_CONTATO c ON c.FORNECEDOR = f.CODIGO AND c.PRINCIPAL = 'S'
-                    LEFT JOIN FN_FORNECEDORES tp ON tp.CODIGO = f.TRANSPPREF AND tp.CKTRANSPORTADOR = 'S'
-                    WHERE f.CKCLIENTE = 'S'
-                      AND REPLACE(REPLACE(REPLACE(f.CGC, '.', ''), '/', ''), '-', '') = :cnpj";
-
-            return $this->connection->fetchOne($sql, [
-                ':cnpj' => $cleanCnpj,
-            ]);
-        } catch (\Exception $e) {
-            $this->logger->error('[ERP] Customer CNPJ lookup error: ' . $e->getMessage());
-            return null;
-        }
-    }
-
     public function getErpCustomerByCode(int $code): ?array
     {
         try {
@@ -433,6 +404,14 @@ class CustomerSync implements CustomerSyncInterface
             $this->logger->error('[ERP] Credit lookup error: ' . $e->getMessage());
             return null;
         }
+    }
+
+    /**
+     * Get customer by CNPJ/CPF
+     */
+    public function getErpCustomerByCnpj(string $cnpj): ?array
+    {
+        return $this->getErpCustomerByTaxvat($cnpj);
     }
 
     /**

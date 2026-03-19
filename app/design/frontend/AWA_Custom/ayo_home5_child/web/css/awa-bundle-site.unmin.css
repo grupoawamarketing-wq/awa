@@ -4017,29 +4017,6 @@ body.cms-home .page-wrapper .block_notification a:focus-visible {
     outline: none;
 }
 
-:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page-main.container {
-    padding-top: clamp(14px, 2vw, 24px);
-    padding-bottom: clamp(24px, 3vw, 38px);
-}
-
-:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page-main.container > .columns {
-    margin: 0;
-}
-
-:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page-main.container > .columns > .column.main {
-    width: 100%;
-    max-width: var(--awa-container-max);
-    margin-inline: auto;
-}
-
-:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page-main.container > .columns > .column.main > .benefits-bar,
-:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page-main.container > .columns > .column.main > .section,
-:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page-main.container > .columns > .column.main > .trust-badges-homepage,
-:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page-main.container > .columns > .column.main > .aw-home-faq {
-    scroll-margin-top: 110px;
-}
-
-/* Footer card styling moved to awa-custom-footer-light-perfect.css (global) */
 
 @media (width <= 1199px) {
     :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header .wp-header {
@@ -4062,10 +4039,6 @@ body.cms-home .page-wrapper .block_notification a:focus-visible {
             #f7f7f7;
     }
 
-    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page-main.container {
-        padding-top: 12px;
-        padding-bottom: 24px;
-    }
 }
 
 @media (width <= 767px) {
@@ -4075,11 +4048,6 @@ body.cms-home .page-wrapper .block_notification a:focus-visible {
 
     :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header-content {
         box-shadow: 0 6px 16px rgb(15 23 42 / 4%);
-    }
-
-    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page-main.container {
-        padding-top: 10px;
-        padding-bottom: 20px;
     }
 
     :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .fixed-bottom .mobile-bottom-link {
@@ -4098,5 +4066,625 @@ body.cms-home .page-wrapper .block_notification a:focus-visible {
         gap: 2px;
         font-size: 11px;
         line-height: 1.2;
+    }
+}
+
+/* ===========================================================
+   AWA Phase 21 — UX Polish: Tables, Iframes, Modal Slide-Up
+   2026-03-19
+   =========================================================== */
+
+/* Tabelas de conta/pedidos — overflow horizontal em mobile */
+@media (width <= 767px) {
+    :is(body.account, body.sales-order-history, body.sales-order-view,
+        body.customer-account-index, body.customer-order-view)
+        .page-wrapper .table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+    }
+
+    :is(body.account, body.sales-order-history, body.sales-order-view,
+        body.customer-account-index, body.customer-order-view)
+        .page-wrapper .orders-history {
+        display: block;
+        overflow-x: auto;
+    }
+}
+
+/* Iframes / vídeos responsivos em pages CMS */
+body.cms-page-view .page-wrapper .column.main iframe,
+body.cms-page-view .page-wrapper .std iframe,
+body.cms-page-view .page-wrapper .column.main video,
+body.cms-page-view .page-wrapper .std video {
+    max-width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+}
+
+/* Modal bottom-sheet slide-up em mobile */
+@keyframes awa-modal-slide-up {
+    from {
+        opacity: 0.7;
+        transform: translateY(28px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (width <= 767px) {
+    body .page-wrapper .modal-popup .modal-inner-wrap {
+        animation: awa-modal-slide-up 0.28s cubic-bezier(0.4, 0, 0.2, 1) both;
+    }
+}
+
+@media (width <= 767px) and (prefers-reduced-motion: reduce) {
+    body .page-wrapper .modal-popup .modal-inner-wrap {
+        animation: none;
+    }
+}
+
+/* ===========================================================
+   AWA Phase 22 — Header Layout Rescue + Nav-Toggle Fix
+   2026-03-19
+   =========================================================== */
+
+/* Desktop/Tablet: header grid layout */
+@media (width >= 768px) {
+    body .page-wrapper .header .wp-header {
+        display: grid;
+        grid-template-columns: minmax(120px, 200px) minmax(0, 1fr);
+        align-items: center;
+        column-gap: var(--awa-gap-lg, 16px);
+    }
+
+    body .page-wrapper .header .top-search {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 44px;
+        align-items: center;
+        gap: var(--awa-gap-sm, 8px);
+    }
+
+    body .page-wrapper .header .top-search > .minicart-wrapper,
+    body .page-wrapper .header .top-search > .shadowcart {
+        width: 44px;
+        min-width: 44px;
+        justify-self: end;
+    }
+
+    body .page-wrapper .header .top-search > .block-search {
+        min-width: 0;
+    }
+}
+
+/* Mobile: coluna única e fix crítico do nav-toggle */
+@media (width <= 767px) {
+    body .page-wrapper .header .wp-header {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        row-gap: var(--awa-gap-sm, 8px);
+    }
+
+    body .page-wrapper .header .wp-header > .top-search {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) 44px !important;
+        align-items: center !important;
+        gap: var(--awa-gap-sm, 8px) !important;
+        width: 100% !important;
+    }
+
+    body .page-wrapper .header .top-search > .minicart-wrapper,
+    body .page-wrapper .header .top-search > .shadowcart {
+        width: 44px !important;
+        min-width: 44px !important;
+    }
+
+    /* CRÍTICO: Reativar nav-toggle nas páginas internas (oculto nas linhas 668 e 891) */
+    body:not(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper .header-control .action.nav-toggle,
+    body:not(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper .header-control .nav-toggle,
+    :is(body.catalog-category-view, body.catalogsearch-result-index) .page-wrapper .header-control .action.nav-toggle,
+    :is(body.catalog-category-view, body.catalogsearch-result-index) .page-wrapper .header-control .nav-toggle {
+        display: inline-flex !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+        opacity: 1 !important;
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--awa-gray-200, #e5e5e5);
+        border-radius: var(--awa-radius-sm, 6px);
+        background: transparent;
+        color: var(--awa-red, #b73337);
+        flex-shrink: 0;
+    }
+}
+
+/* ==========================================================================
+   AWA Mobile & Desktop Usability Improvements — 2026-03
+   Aplica-se a todas as páginas não-homepage (homepage usa awa-bundle-home-custom)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Toggle Nav Footer Button — alinhamento visual com links do bottom nav
+   O <button class="toggle-nav-footer"> não tem estilo explícito fora do
+   focus-visible. Sem reset, browsers emitem aparência de sistema (border,
+   background, padding) tornando-o visualmente inconsistente com os <a>.
+   -------------------------------------------------------------------------- */
+@media (width <= 767px) {
+    .fixed-bottom .mobile-bottom-link > li > button.toggle-nav-footer {
+        /* Reset padrões do navegador */
+        appearance: none;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-family: inherit;
+
+        /* Alinha com o estilo dos <a> (awa-bundle-phases + awa-bundle-custom) */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 3px;
+        padding: 8px 4px;
+        font-size: 10px;
+        font-weight: 600;
+        color: #666;
+        text-decoration: none;
+        transition: color 0.15s, background-color 0.3s ease;
+        width: 100%;
+        text-align: center;
+        min-height: 44px; /* WCAG 2.5.5: touch target mínimo */
+        border-radius: 10px;
+        line-height: 1;
+    }
+
+    .fixed-bottom .mobile-bottom-link > li > button.toggle-nav-footer .icon {
+        font-size: 20px;
+        transition: color 0.3s ease;
+    }
+
+    .fixed-bottom .mobile-bottom-link > li > button.toggle-nav-footer:hover,
+    .fixed-bottom .mobile-bottom-link > li > button.toggle-nav-footer[aria-expanded="true"] {
+        color: var(--primary-color, #b73337);
+        background: rgb(183 51 55 / 8%);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .fixed-bottom .mobile-bottom-link > li > button.toggle-nav-footer {
+            transition: none;
+        }
+
+        .fixed-bottom .mobile-bottom-link > li > button.toggle-nav-footer .icon {
+            transition: none;
+        }
+    }
+}
+
+/* --------------------------------------------------------------------------
+   2. Safe-Area-Inset-Bottom — Barra inferior mobile em todas as páginas
+   iOS/Android com entalhe (notch) ou barra de gesto precisam de padding-bottom
+   na barra fixa. O bundle-home-custom cobre a homepage; aqui cobre o restante.
+   -------------------------------------------------------------------------- */
+@media (width <= 767px) {
+    /* Barra de navegação inferior: respeitar zona de gesto do dispositivo */
+    .fixed-bottom {
+        padding-bottom: env(safe-area-inset-bottom, 0);
+    }
+
+    /* Footer: acomodar bottom nav + safe area sem duplicação */
+    body .page-wrapper .page-footer {
+        padding-bottom: max(55px, calc(55px + env(safe-area-inset-bottom, 0)));
+    }
+}
+
+/* --------------------------------------------------------------------------
+   3. Indicador de Página Ativa no Bottom Nav (CSS-only via body classes)
+   Magento aplica classes no <body> conforme a rota atual. Mapeando para as
+   posições dos <li> do bottom nav (nth-child 1=Home, 2=Menu, 3=Conta, 4=Carrinho)
+   obtemos um indicador de estado ativo sem JavaScript adicional.
+   -------------------------------------------------------------------------- */
+@media (width <= 767px) {
+    /* Indicador: linha superior no item ativo */
+    .fixed-bottom .mobile-bottom-link > li {
+        position: relative;
+    }
+
+    .fixed-bottom .mobile-bottom-link > li > a::before,
+    .fixed-bottom .mobile-bottom-link > li > button.toggle-nav-footer::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%) scaleX(0);
+        width: 24px;
+        height: 3px;
+        background: var(--primary-color, #b73337);
+        border-radius: 0 0 3px 3px;
+        transition: transform 0.2s ease;
+    }
+
+    /* Home page: primeiro item ativo */
+    body.cms-index-index .fixed-bottom .mobile-bottom-link > li:first-child > a,
+    body.cms-home .fixed-bottom .mobile-bottom-link > li:first-child > a {
+        color: var(--primary-color, #b73337);
+    }
+
+    body.cms-index-index .fixed-bottom .mobile-bottom-link > li:first-child > a::before,
+    body.cms-home .fixed-bottom .mobile-bottom-link > li:first-child > a::before {
+        transform: translateX(-50%) scaleX(1);
+    }
+
+    /* Conta: terceiro item ativo em páginas de conta */
+    body.customer-account-index .fixed-bottom .mobile-bottom-link > li:nth-child(3) > a,
+    body.customer-account-login .fixed-bottom .mobile-bottom-link > li:nth-child(3) > a,
+    body.customer-account-create .fixed-bottom .mobile-bottom-link > li:nth-child(3) > a,
+    body.customer-account-edit .fixed-bottom .mobile-bottom-link > li:nth-child(3) > a,
+    body.customer-account .fixed-bottom .mobile-bottom-link > li:nth-child(3) > a {
+        color: var(--primary-color, #b73337);
+    }
+
+    body.customer-account-index .fixed-bottom .mobile-bottom-link > li:nth-child(3) > a::before,
+    body.customer-account-login .fixed-bottom .mobile-bottom-link > li:nth-child(3) > a::before,
+    body.customer-account-create .fixed-bottom .mobile-bottom-link > li:nth-child(3) > a::before,
+    body.customer-account-edit .fixed-bottom .mobile-bottom-link > li:nth-child(3) > a::before,
+    body.customer-account .fixed-bottom .mobile-bottom-link > li:nth-child(3) > a::before {
+        transform: translateX(-50%) scaleX(1);
+    }
+
+    /* Carrinho: quarto item ativo */
+    body.checkout-cart-index .fixed-bottom .mobile-bottom-link > li:nth-child(4) > a {
+        color: var(--primary-color, #b73337);
+    }
+
+    body.checkout-cart-index .fixed-bottom .mobile-bottom-link > li:nth-child(4) > a::before {
+        transform: translateX(-50%) scaleX(1);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .fixed-bottom .mobile-bottom-link > li > a::before,
+        .fixed-bottom .mobile-bottom-link > li > button.toggle-nav-footer::before {
+            transition: none;
+        }
+    }
+}
+
+/* --------------------------------------------------------------------------
+   4. Tabelas de Atributos/Fitment em Mobile — overflow scroll horizontal
+   Tabelas de compatibilidade (fitment) e atributos de produto transbordam
+   em telas estreitas. Tornar scroll horizontal para leitura completa.
+   -------------------------------------------------------------------------- */
+@media (width <= 767px) {
+    .product-attributes > .additional-attributes,
+    .data.additional .additional-attributes,
+    .product.attribute.overview table,
+    .additional-attributes-wrapper table,
+    .product-info-main table {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        max-width: 100%;
+        border-radius: var(--awa-radius-sm, 4px);
+    }
+
+    .product-attributes > .additional-attributes td,
+    .product-attributes > .additional-attributes th,
+    .additional-attributes-wrapper table td,
+    .additional-attributes-wrapper table th {
+        white-space: normal;
+        min-width: 100px;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   5. Desktop: Product Card — indicador de foco para acessibilidade via teclado
+   focus-within no card garante que usuários de teclado e leitores de tela
+   tenham indicação clara de qual card está em foco durante navegação por tab.
+   -------------------------------------------------------------------------- */
+@media (width >= 768px) {
+    .products-grid .product-item {
+        border-radius: var(--awa-radius-md, 8px);
+    }
+
+    .products-grid .product-item:focus-within {
+        outline: 2px solid var(--primary-color, #b73337);
+        outline-offset: 2px;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   6. Mobile: Font-size inputs forms — previne zoom automático do iOS
+   iOS Safari faz zoom quando inputs têm font-size < 16px.
+   O core bundle cobre alguns campos mas não todos os contextos de formulário.
+   Regra sanitária global para campos de formulário em mobile.
+   -------------------------------------------------------------------------- */
+@media (width <= 767px) {
+    .page-wrapper input:not([type="submit"], [type="button"], [type="checkbox"], [type="radio"], [type="range"]),
+    .page-wrapper textarea,
+    .page-wrapper select {
+        font-size: max(16px, 1em);
+    }
+}
+
+/* ==========================================================================
+   AWA Mobile & Desktop Usability Improvements — Phase 21 (2026-03-19)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   7. Scroll Suave + scroll-padding-top para header fixo
+   awa-consistency-ui.css (parent) foi removido via <remove> em default_head_blocks.xml.
+   awa-bundle-brand.css (parent) tinha scroll-behavior e scroll-padding-top.
+   O header fixo mede ~84px desktop / ~68px tablet / ~56px mobile.
+   Sem scroll-padding-top, links âncora saltam sob o header fixo escondendo
+   o início do conteúdo alvo.
+   -------------------------------------------------------------------------- */
+html {
+    scroll-behavior: smooth;
+
+    /* header AWA fixo: 84px desktop, 68px tablet, 56px mobile */
+    scroll-padding-top: 84px;
+}
+
+@media (width <= 991px) {
+    html {
+        scroll-padding-top: 68px;
+    }
+}
+
+@media (width <= 767px) {
+    html {
+        scroll-padding-top: 56px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   8. Overscroll-behavior: contain em containers de scroll
+   awa-consistency-ui.css do tema pai foi removido; estas regras evitam que
+   o scroll "vaze" para o body quando o usuário chega ao final do dropdown
+   de busca, minicart, sidebar ou modal.
+   RFF-22 pattern: thin scrollbar + overscroll contain.
+   -------------------------------------------------------------------------- */
+body .page-wrapper .modal-popup .modal-content,
+body .page-wrapper .modal-slide .modal-content,
+body .page-wrapper .modal-popup .modal-inner-wrap,
+body .page-wrapper .modal-slide .modal-inner-wrap,
+body .page-wrapper .sidebar-main,
+body .page-wrapper .minicart-items-wrapper,
+body .page-wrapper .block-search .search-autocomplete,
+body .page-wrapper .searchsuite-autocomplete {
+    overscroll-behavior: contain;
+}
+
+/* Thin scrollbar para elementos de scroll internos (não-body) */
+body .page-wrapper .minicart-items-wrapper,
+body .page-wrapper .filter-options,
+body .page-wrapper .block-collapsible-nav,
+body .page-wrapper .searchsuite-autocomplete {
+    scrollbar-width: thin;
+    scrollbar-color: #d9d9d9 transparent;
+}
+
+/* --------------------------------------------------------------------------
+   9. Account/Orders — tabelas de dados em mobile
+   body.account .data.table são tabelas de pedidos, endereços, etc.
+   O wrapper tem overflow-x:auto no awa-components.css do pai (removido),
+   mas o table element em si pode não ter display:block, causando overflow.
+   -------------------------------------------------------------------------- */
+@media (width <= 767px) {
+    body.account .data.table,
+    body.sales-order-view .data.table,
+    body.sales-order-history .data.table,
+    body.customer-address-index .data.table {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        width: 100%;
+    }
+
+    body.account .table-wrapper,
+    body.sales-order-view .table-wrapper,
+    body.sales-order-history .table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   10. CMS Pages — iframes e vídeos responsivos
+   Embeds de YouTube e outros iframes em blocos CMS transbordam em mobile.
+   Wrapper + aspect-ratio garante proporção 16:9 sem overflow.
+   Escopo específico para .cms-page-view e .cms-no-route (404) para não
+   afetar iframes de pagamento/mapa em outras páginas.
+   -------------------------------------------------------------------------- */
+body.cms-page-view .page-main iframe,
+body.cms-no-route .page-main iframe,
+body.cms-page-view .page-main video,
+body.cms-no-route .page-main video {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Wrapper de embed YouTube: aspect-ratio moderno */
+body.cms-page-view .video-embed,
+body.cms-page-view .yt-embed,
+body.cms-page-view [class*="video-wrapper"] {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: var(--awa-radius-md, 8px);
+}
+
+body.cms-page-view .video-embed iframe,
+body.cms-page-view .yt-embed iframe,
+body.cms-page-view [class*="video-wrapper"] iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+/* --------------------------------------------------------------------------
+   11. Modal popup — bottom-sheet em mobile
+   Modais têm margin: 5px por padrão do Magento em xs, cortando nos cantos.
+   Bottom-sheet com border-radius superior e max-height melhora UX em mobile.
+   Escopo explícito apenas para modal-popup (não slide-out nav).
+   -------------------------------------------------------------------------- */
+@media (width <= 767px) {
+    body .page-wrapper .modal-popup .modal-inner-wrap {
+        border-radius: 16px 16px 0 0;
+        margin: auto 0 0;
+        max-height: 92vh;
+        max-width: 100%;
+        width: 100%;
+    }
+
+    /* Animação de entrada: slide up ao invés de fade */
+    body .page-wrapper .modal-popup._show .modal-inner-wrap {
+        animation: awa-modal-slide-up 0.25s ease forwards;
+    }
+
+    @keyframes awa-modal-slide-up {
+        from {
+            transform: translateY(30px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        body .page-wrapper .modal-popup._show .modal-inner-wrap {
+            animation: none;
+        }
+    }
+}
+
+/* ==========================================================================
+   AWA Header Rescue — Phase 22 (2026-03-19)
+   Corrige conflitos de cascata no header entre bundles (site/custom/home)
+   e restaura o toggle de navegação em mobile para páginas internas.
+   ========================================================================== */
+
+/* Desktop/tablet: garante coluna de logo + faixa de busca estável */
+@media (width >= 768px) {
+    body .page-wrapper .header .wp-header {
+        display: grid;
+        grid-template-columns: minmax(120px, 200px) minmax(0, 1fr);
+        align-items: center;
+        column-gap: var(--awa-gap-lg, 16px);
+    }
+
+    body .page-wrapper .header .wp-header > [class*='col-']:first-child {
+        min-width: 0;
+        max-width: 200px;
+    }
+
+    body .page-wrapper .header .wp-header > .top-search {
+        min-width: 0;
+        width: 100%;
+    }
+
+    body .page-wrapper .header .top-search {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 44px;
+        align-items: center;
+        gap: var(--awa-gap-sm, 8px);
+    }
+
+    body .page-wrapper .header .top-search > .block-search {
+        min-width: 0;
+        width: 100%;
+    }
+
+    body .page-wrapper .header .top-search > .mini-cart-wrapper {
+        width: 44px;
+        min-width: 44px;
+        max-width: 44px;
+    }
+}
+
+/* Mobile: mantém logo legível, barra de busca inteira e cart alinhado */
+@media (width <= 767px) {
+    body .page-wrapper .header .wp-header {
+        display: grid;
+        grid-template-columns: 1fr;
+        row-gap: var(--awa-gap-sm, 8px);
+    }
+
+    body .page-wrapper .header .wp-header > [class*='col-']:first-child {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 44px;
+    }
+
+    body .page-wrapper .header .wp-header > [class*='col-']:first-child .logo img {
+        max-height: 52px !important;
+        width: auto !important;
+    }
+
+    body .page-wrapper .header .wp-header > .top-search {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) 44px !important;
+        align-items: center !important;
+        gap: var(--awa-gap-sm, 8px) !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+    }
+
+    body .page-wrapper .header .top-search > .block-search {
+        min-width: 0;
+        width: 100%;
+    }
+
+    body .page-wrapper .header .top-search > .mini-cart-wrapper,
+    body .page-wrapper .header .top-search > .mini-cart-wrapper .mini-carts,
+    body .page-wrapper .header .top-search > .mini-cart-wrapper .minicart-wrapper,
+    body .page-wrapper .header .top-search > .mini-cart-wrapper .action.showcart {
+        width: 44px !important;
+        min-width: 44px !important;
+        max-width: 44px !important;
+        height: 44px !important;
+    }
+
+    /* Hotfix crítico: reativa menu toggle em páginas internas no mobile */
+    body:not(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper .header-control .action.nav-toggle,
+    body:not(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper .header-control .nav-toggle,
+    :is(body.catalog-category-view, body.catalogsearch-result-index) .page-wrapper .header-control .action.nav-toggle,
+    :is(body.catalog-category-view, body.catalogsearch-result-index) .page-wrapper .header-control .nav-toggle {
+        display: inline-flex !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 44px !important;
+        min-width: 44px !important;
+        height: 44px !important;
+        border-radius: 10px;
+        border: 1px solid var(--awa-hc-border, #e5e5e5);
+        background: #fff;
+        color: var(--primary-color, #b73337);
+        position: static !important;
+        inset: auto !important;
+        margin: 0 !important;
+        float: none !important;
+        clear: none !important;
+        transform: none !important;
+        z-index: 3;
     }
 }

@@ -5,12 +5,20 @@ declare(strict_types=1);
  * AWA B2B — WhatsApp Floating Button.
  *
  * @var \Magento\Framework\View\Element\Template $block
+ * @var \GrupoAwamotos\Theme\ViewModel\ContactInfo $contactInfo
  */
-$whatsappNumber = '5516997367588'; // Formato internacional sem + e sem espaços
-$whatsappMessage = rawurlencode('Olá! Gostaria de informações sobre peças para moto.');
+$contactInfo = $block->getData('contact_info');
+
+if (!$contactInfo instanceof \GrupoAwamotos\Theme\ViewModel\ContactInfo
+    || !$contactInfo->shouldShowWhatsAppButton()
+) {
+    return;
+}
+
+$whatsappUrl = $contactInfo->getWhatsAppUrl();
 ?>
 <div class="awa-whatsapp-fab" id="awa-whatsapp-btn">
-    <a href="https://wa.me/<?= $block->escapeHtmlAttr($whatsappNumber) ?>?text=<?= $block->escapeHtmlAttr($whatsappMessage) ?>"
+    <a href="<?= $block->escapeUrl($whatsappUrl) ?>"
         target="_blank"
         rel="noopener noreferrer"
         class="awa-whatsapp-fab__link"

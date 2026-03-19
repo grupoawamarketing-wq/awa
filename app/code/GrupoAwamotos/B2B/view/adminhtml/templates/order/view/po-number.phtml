@@ -1,18 +1,20 @@
 <?php
 /**
- * Template to display PO Number in admin order view
+ * Template to display B2B checkout metadata in admin order view
  * P0-1: Purchase Order Number
+ * P2-4.2: Order Notes
  *
  * @var \GrupoAwamotos\B2B\Block\Adminhtml\Order\View\PoNumber $block
  */
 
 declare(strict_types=1);
 
-if (!$block->hasPoNumber()) {
+if (!$block->hasCheckoutMetadata()) {
     return;
 }
 
 $poNumber = $block->escapeHtml($block->getPoNumber());
+$orderNotes = $block->getOrderNotes();
 ?>
 
 <div class="admin__page-section-item b2b-po-number-section">
@@ -22,40 +24,23 @@ $poNumber = $block->escapeHtml($block->getPoNumber());
     <div class="admin__page-section-item-content">
         <table class="admin__table-secondary">
             <tbody>
-                <tr>
-                    <th><?= $block->escapeHtml(__('Número do PO')) ?>:</th>
-                    <td>
-                        <span class="b2b-po-number-value">
-                            <strong><?= $poNumber ?></strong>
-                        </span>
-                    </td>
-                </tr>
+                <?php if ($block->hasPoNumber()): ?>
+                    <tr>
+                        <th><?= $block->escapeHtml(__('Número do PO')) ?>:</th>
+                        <td>
+                            <span class="b2b-po-number-value">
+                                <strong><?= $poNumber ?></strong>
+                            </span>
+                        </td>
+                    </tr>
+                <?php endif; ?>
+                <?php if ($block->hasOrderNotes()): ?>
+                    <tr>
+                        <th><?= $block->escapeHtml(__('Observações do Pedido')) ?>:</th>
+                        <td><?= nl2br($block->escapeHtml((string) $orderNotes)) ?></td>
+                    </tr>
+                <?php endif; ?>
             </tbody>
         </table>
     </div>
 </div>
-
-<style>
-    .b2b-po-number-section {
-        margin-top: 15px;
-        border-top: 1px solid #e3e3e3;
-        padding-top: 15px;
-    }
-
-    .b2b-po-number-section .title {
-        color: #303030;
-        font-size: 1.4rem;
-        font-weight: 600;
-    }
-
-    .b2b-po-number-value {
-        display: inline-flex;
-        align-items: center;
-        padding: 4px 10px;
-        background: #f5f5f5;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        font-family: monospace;
-        font-size: 1.3rem;
-    }
-</style>

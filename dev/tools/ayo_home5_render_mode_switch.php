@@ -317,6 +317,9 @@ function demoSuppressionsHeadSnippet(): string
         <remove src="GrupoAwamotos_B2B::css/b2b-header.css"/>
         <remove src="GrupoAwamotos_B2B::css/header-status-panel.css"/>
         <remove src="GrupoAwamotos_B2B::css/login-to-cart.css"/>
+        <!-- Consolidated CSS (Phase 2) -->
+        <remove src="css/awa-04-components.css"/>
+        <remove src="css/awa-05-pages.css"/>
     XML;
 }
 

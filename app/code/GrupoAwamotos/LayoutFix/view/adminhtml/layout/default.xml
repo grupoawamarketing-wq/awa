@@ -2,25 +2,24 @@
 <!--
 /**
  * GrupoAwamotos LayoutFix
- * Keeps notification.messages aligned with 'user' container in admin header
- * to prevent "Broken reference" reorder errors in admin.
+ *
+ * Fix 1: notification.messages broken reference
+ * Clears the module-level "before=user" ordering from notification.messages
+ * so the theme can safely move both blocks to header.inner.right without
+ * a "Broken reference" reorder warning.
+ *
+ * Fix 2: mst.feature-request broken reference
+ * Mirasvit Core tries to add mst.feature-request to page.main.container
+ * which does not exist in adminhtml. Remove the block to suppress the warning.
  */
 -->
-<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <body>
-        <!--
-            Neutraliza o bloco original do Magento_AdminNotification (before="user")
-            e recria sem ordering cruzado com "user". Alguns contextos/admin themes não
-            posicionam "user" no mesmo parent do notification.messages e isso gera
-            "Broken reference ... tries to reorder itself towards user".
-        -->
-        <referenceBlock name="notification.messages" remove="true"/>
-        <referenceContainer name="header.inner.right">
-            <block class="Magento\AdminNotification\Block\ToolbarEntry"
-                   name="notification.messages"
-                   after="-"
-                   aclResource="Magento_AdminNotification::show_toolbar"
-                   template="Magento_AdminNotification::toolbar_entry.phtml"/>
-        </referenceContainer>
+        <!-- Fix 1: clear before="user" ordering so theme can freely move notification.messages -->
+        <move element="notification.messages" destination="header" before="-"/>
+
+        <!-- Fix 2: remove Mirasvit feature-request widget (page.main.container does not exist in adminhtml) -->
+        <referenceBlock name="mst.feature-request" remove="true"/>
     </body>
 </page>

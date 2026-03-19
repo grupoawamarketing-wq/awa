@@ -181,7 +181,7 @@ class Index extends AbstractIndex
         return $collection;
     }
 
-    public function getIndexableDocuments(int $storeId, array $entityIds = null, int $lastEntityId = null, int $limit = 100): array
+    public function getIndexableDocuments(int $storeId, ?array $entityIds = null, ?int $lastEntityId = null, int $limit = 100): array
     {
         return [];
     }
@@ -189,7 +189,7 @@ class Index extends AbstractIndex
     /**
      * {@inheritdoc}
      */
-    public function reindexAll(int $storeId = null): InstanceInterface
+    public function reindexAll(?int $storeId = null): InstanceInterface
     {
         $configData = [
             'fieldsets'  => [],

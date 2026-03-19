@@ -2280,23 +2280,11 @@ HTML;
 
     private function getHomepageContent(): string
     {
-        // Canal A (top-home.phtml via layout) já renderiza: slider, block_top,
-        // banner_mid, hot-deal, product tabs, notification e grids de intenção.
-        // Aqui incluímos APENAS seções exclusivas AWA que não duplicam o Canal A.
+        // O layout do tema ayo_home5 já renderiza toda a homepage via
+        // top-home.phtml. Mantemos o conteúdo CMS vazio para não reativar
+        // blocos estruturais legados em futuras reprovisões.
         return <<<'HTML'
-<div class="ayo-home5-wrapper">
-    {{block class="Magento\Cms\Block\Block" block_id="home_schema_org"}}
-    {{block class="Magento\Cms\Block\Block" block_id="home_benefits_bar"}}
-    {{block class="Magento\Cms\Block\Block" block_id="home_security_seals"}}
-
-    <section class="ayo-home5-section ayo-home5-section--trust-badges">
-        {{block class="Magento\Cms\Block\Block" block_id="trust_badges_homepage"}}
-    </section>
-
-    <section class="ayo-home5-section container ayo-home5-section--faq">
-        {{block class="Magento\Cms\Block\Block" block_id="home_faq_quick"}}
-    </section>
-</div>
+<!-- Homepage renderizada pelo layout do tema: Magento_Cms::top-home.phtml -->
 HTML;
     }
 

@@ -16,6 +16,7 @@ use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Controller\Result\RedirectFactory;
 use Magento\Framework\Data\Form\FormKey\Validator as FormKeyValidator;
+use Magento\Framework\Event\ManagerInterface as EventManagerInterface;
 use Magento\Framework\Message\ManagerInterface;
 use Psr\Log\LoggerInterface;
 
@@ -76,6 +77,11 @@ class Submit implements HttpPostActionInterface
      */
     private $customerRepository;
 
+    /**
+     * @var EventManagerInterface
+     */
+    private $eventManager;
+
     public function __construct(
         RequestInterface $request,
         JsonFactory $jsonFactory,
@@ -87,7 +93,8 @@ class Submit implements HttpPostActionInterface
         FormKeyValidator $formKeyValidator,
         ManagerInterface $messageManager,
         LoggerInterface $logger,
-        CustomerRepositoryInterface $customerRepository
+        CustomerRepositoryInterface $customerRepository,
+        EventManagerInterface $eventManager
     ) {
         $this->request = $request;
         $this->jsonFactory = $jsonFactory;
@@ -100,6 +107,7 @@ class Submit implements HttpPostActionInterface
         $this->messageManager = $messageManager;
         $this->logger = $logger;
         $this->customerRepository = $customerRepository;
+        $this->eventManager = $eventManager;
     }
 
     /**
@@ -110,26 +118,26 @@ class Submit implements HttpPostActionInterface
     public function execute()
     {
         $isAjax = $this->request->isAjax();
-        
+
         try {
             // Validar form key
             if (!$this->formKeyValidator->validate($this->request)) {
                 throw new \Exception('Formulário inválido. Por favor, tente novamente.');
             }
-            
+
             // Verificar se o módulo está habilitado
             if (!$this->config->isQuoteEnabled()) {
                 throw new \Exception('O sistema de cotação não está disponível no momento.');
             }
-            
+
             // Verificar se visitantes podem solicitar cotação
             if (!$this->customerSession->isLoggedIn() && !$this->config->allowGuestsQuote()) {
                 throw new \Exception('Faça login para solicitar uma cotação.');
             }
-            
+
             // Obter dados do formulário
             $postData = $this->request->getPostValue();
-            
+
             $customerData = [
                 'email' => $postData['email'] ?? '',
                 'name' => $postData['name'] ?? '',
@@ -137,7 +145,7 @@ class Submit implements HttpPostActionInterface
                 'cnpj' => $postData['cnpj'] ?? null,
                 'phone' => $postData['phone'] ?? null,
             ];
-            
+
             // Preencher dados do cliente logado (via repository para EAV attributes)
             if ($this->customerSession->isLoggedIn()) {
                 $customer = $this->customerRepository->getById($this->customerSession->getCustomerId());
@@ -158,31 +166,42 @@ class Submit implements HttpPostActionInterface
                     $customerData['phone'] = $phoneAttr->getValue();
                 }
             }
-            
+
             // Validar dados obrigatórios
             if (empty($customerData['email']) || empty($customerData['name'])) {
                 throw new \Exception('Por favor, preencha todos os campos obrigatórios.');
             }
-            
+
             // Validar email
             if (!filter_var($customerData['email'], FILTER_VALIDATE_EMAIL)) {
                 throw new \Exception('Por favor, informe um e-mail válido.');
             }
-            
+
             // Criar solicitação de cotação
             $customerId = $this->customerSession->isLoggedIn() ? (int) $this->customerSession->getCustomerId() : null;
             $message = $postData['message'] ?? null;
-            
+
             $quoteRequest = $this->quoteRequestRepository->createFromCart($customerId, $customerData, $message);
-            
+
+            $quote = $this->checkoutSession->getQuote();
+            $this->eventManager->dispatch('grupoawamotos_b2b_quote_requested', [
+                'quote_request' => $quoteRequest,
+                'customer_id' => $customerId,
+                'customer_data' => $customerData,
+                'quote_items' => $quoteRequest->getItems(),
+                'quote_estimated_value' => $quote ? (float) $quote->getGrandTotal() : 0.0,
+                'quote_message' => $message,
+                'store_id' => $quote ? (int) $quote->getStoreId() : null,
+            ]);
+
             // Limpar carrinho após solicitação (opcional)
             // $this->checkoutSession->clearQuote();
-            
+
             $successMessage = __(
                 'Sua solicitação de cotação #%1 foi enviada com sucesso! Entraremos em contato em breve.',
                 $quoteRequest->getRequestId()
             );
-            
+
             if ($isAjax) {
                 $json = $this->jsonFactory->create();
                 return $json->setData([
@@ -191,14 +210,14 @@ class Submit implements HttpPostActionInterface
                     'request_id' => $quoteRequest->getRequestId(),
                 ]);
             }
-            
+
             $this->messageManager->addSuccessMessage($successMessage);
             $redirect = $this->redirectFactory->create();
             return $redirect->setPath('b2b/quote/history');
-            
+
         } catch (\Exception $e) {
             $this->logger->error('B2B Quote Submit error: ' . $e->getMessage());
-            
+
             if ($isAjax) {
                 $json = $this->jsonFactory->create();
                 return $json->setData([
@@ -206,7 +225,7 @@ class Submit implements HttpPostActionInterface
                     'message' => $e->getMessage(),
                 ]);
             }
-            
+
             $this->messageManager->addErrorMessage($e->getMessage());
             $redirect = $this->redirectFactory->create();
             return $redirect->setPath('b2b/quote');

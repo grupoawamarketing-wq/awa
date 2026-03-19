@@ -9,6 +9,8 @@ use GrupoAwamotos\ERPIntegration\Model\ResourceModel\SyncLog as SyncLogResource;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Framework\App\Http\Context as HttpContext;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 
 /**
  * Adds the customer's ERP price list code to the HTTP context.
@@ -28,19 +30,22 @@ class CustomerPriceListContextPlugin
     private SyncLogResource $syncLogResource;
     private CustomerPriceProvider $customerPriceProvider;
     private CustomerRepositoryInterface $customerRepository;
+    private LoggerInterface $logger;
 
     public function __construct(
         CustomerSession $customerSession,
         Config $config,
         SyncLogResource $syncLogResource,
         CustomerPriceProvider $customerPriceProvider,
-        CustomerRepositoryInterface $customerRepository
+        CustomerRepositoryInterface $customerRepository,
+        ?LoggerInterface $logger = null
     ) {
         $this->customerSession = $customerSession;
         $this->config = $config;
         $this->syncLogResource = $syncLogResource;
         $this->customerPriceProvider = $customerPriceProvider;
         $this->customerRepository = $customerRepository;
+        $this->logger = $logger ?? new NullLogger();
     }
 
     /**
@@ -99,6 +104,10 @@ class CustomerPriceListContextPlugin
 
             return ($erpCode !== null && is_numeric($erpCode)) ? (int) $erpCode : null;
         } catch (\Exception $e) {
+            $this->logger->warning('[B2B] Failed to resolve ERP code for HTTP context variation', [
+                'customer_id' => $customerId,
+                'exception' => $e->getMessage(),
+            ]);
             return null;
         }
     }

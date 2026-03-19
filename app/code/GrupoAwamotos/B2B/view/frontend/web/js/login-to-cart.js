@@ -20,12 +20,9 @@ define([
 
     function createLoginButton(options) {
         var btn = document.createElement('button');
-        var buttonText = (options && options.text) ? options.text : 'Entrar para Comprar';
         btn.type = 'button';
         btn.className = 'b2b-login-to-buy-btn' + (options && options.variantClass ? (' ' + options.variantClass) : '');
-        btn.innerHTML = (options && options.html) ? options.html : buttonText;
-        btn.setAttribute('data-b2b-enterprise-cta', 'true');
-        btn.setAttribute('aria-label', buttonText);
+        btn.innerHTML = (options && options.html) ? options.html : (options && options.text ? options.text : 'Entrar para Comprar');
         if (options && options.disabled) {
             btn.disabled = true;
             btn.classList.add('b2b--disabled');
@@ -233,8 +230,6 @@ define([
             document.body.classList.add('b2b-restricted-mode');
 
             var iconSvg = isGuestMode ? PDP_ICON_SVG : PENDING_ICON_SVG;
-            var pdpLabel = (config && config.pdpButtonText) ? config.pdpButtonText : 'Entrar para Comprar';
-            var listingLabel = (config && config.listingButtonText) ? config.listingButtonText : 'Entrar para Comprar';
 
             // PDP (product detail page)
             var productAddForm = document.querySelector('.product-add-form');
@@ -245,8 +240,7 @@ define([
                     addToCartBtn.style.display = 'none';
 
                     var pdpBtn = createLoginButton({
-                        html: iconSvg + ' ' + pdpLabel,
-                        text: pdpLabel,
+                        html: iconSvg + ' ' + ((config && config.pdpButtonText) ? config.pdpButtonText : 'Entrar para Comprar'),
                         disabled: isPendingMode
                     });
                     pdpBtn.setAttribute('data-b2b-injected', '1');
@@ -271,7 +265,7 @@ define([
                     addBtn.style.display = 'none';
 
                     var listingBtn = createLoginButton({
-                        text: listingLabel,
+                        text: (config && config.listingButtonText) ? config.listingButtonText : 'Entrar para Comprar',
                         variantClass: 'b2b--listing',
                         disabled: isPendingMode
                     });

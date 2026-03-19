@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Meta\Conversion\Observer;
 
+use GrupoAwamotos\B2B\Helper\Data as B2BHelper;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Sales\Model\Order;
 use Meta\BusinessExtension\Api\SystemConfigInterface;
 use Meta\BusinessExtension\Helper\GraphAPIAdapter;
+use Meta\Conversion\Helper\B2BSignalBuilder;
 use Meta\Conversion\Helper\UserDataBuilder;
 use Psr\Log\LoggerInterface;
 
@@ -24,6 +26,8 @@ class Purchase implements ObserverInterface
         private readonly GraphAPIAdapter $graphApi,
         private readonly \Magento\Checkout\Model\Session $checkoutSession,
         private readonly LoggerInterface $logger,
+        private readonly B2BHelper $b2bHelper,
+        private readonly B2BSignalBuilder $b2bSignalBuilder,
         private readonly ?UserDataBuilder $userDataBuilder = null
     ) {
     }
@@ -113,6 +117,23 @@ class Purchase implements ObserverInterface
                     'order_id' => $order->getIncrementId()
                 ]
             ];
+
+            if ($this->isB2BOrder($order)) {
+                $event['custom_data'] = array_merge(
+                    $this->b2bSignalBuilder->build([
+                        'lead_type' => 'b2b_purchase',
+                        'person_type' => $this->resolveOrderPersonType($order),
+                        'approval_status' => 'approved',
+                        'customer_group_id' => (int) $order->getCustomerGroupId(),
+                        'register_channel' => 'checkout'
+                    ]),
+                    $event['custom_data'],
+                    [
+                        'funnel_stage' => 'purchase',
+                        'business_order' => true
+                    ]
+                );
+            }
             if ($eventSourceUrl !== null) {
                 $event['event_source_url'] = $eventSourceUrl;
             }
@@ -136,5 +157,29 @@ class Purchase implements ObserverInterface
                 'error' => $e->getMessage()
             ]);
         }
+    }
+
+    private function isB2BOrder(Order $order): bool
+    {
+        $customerGroupId = (int) $order->getCustomerGroupId();
+        if ($customerGroupId > 0 && $this->b2bHelper->isB2BGroup($customerGroupId)) {
+            return true;
+        }
+
+        $company = trim((string) ($order->getBillingAddress()?->getCompany() ?: ''));
+        if ($company !== '') {
+            return true;
+        }
+
+        $taxvat = preg_replace('/\D+/', '', (string) ($order->getCustomerTaxvat() ?: ''));
+
+        return is_string($taxvat) && strlen($taxvat) === 14;
+    }
+
+    private function resolveOrderPersonType(Order $order): string
+    {
+        $taxvat = preg_replace('/\D+/', '', (string) ($order->getCustomerTaxvat() ?: ''));
+
+        return is_string($taxvat) && strlen($taxvat) === 11 ? 'pf' : 'pj';
     }
 }

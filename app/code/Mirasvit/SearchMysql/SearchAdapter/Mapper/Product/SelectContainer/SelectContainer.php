@@ -46,7 +46,7 @@ class SelectContainer
         bool $isFullTextSearchRequired,
         bool $isShowOutOfStockEnabled,
         string $usedIndex,
-        FilterInterface $visibilityFilter = null
+        ?FilterInterface $visibilityFilter = null
     ) {
         $this->nonCustomAttributesFilters = $nonCustomAttributesFilters;
         $this->customAttributesFilters    = $customAttributesFilters;

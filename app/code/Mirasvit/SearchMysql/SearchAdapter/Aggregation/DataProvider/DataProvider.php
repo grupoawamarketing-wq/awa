@@ -59,8 +59,8 @@ class DataProvider
         Config $eavConfig,
         ResourceConnection $resource,
         ScopeResolverInterface $scopeResolver,
-        SelectBuilderForAttribute $selectBuilderForAttribute = null,
-        Manager $eventManager = null
+        ?SelectBuilderForAttribute $selectBuilderForAttribute = null,
+        ?Manager $eventManager = null
     ) {
         $this->eavConfig                 = $eavConfig;
         $this->connection                = $resource->getConnection();

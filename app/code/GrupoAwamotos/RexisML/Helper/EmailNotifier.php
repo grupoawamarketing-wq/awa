@@ -6,6 +6,7 @@ use Magento\Framework\App\Helper\Context;
 use Magento\Framework\Mail\Template\TransportBuilder;
 use Magento\Framework\Translate\Inline\StateInterface;
 use Magento\Store\Model\StoreManagerInterface;
+use Magento\Store\Model\App\Emulation;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Framework\App\ResourceConnection;
@@ -16,6 +17,7 @@ class EmailNotifier extends AbstractHelper
     protected $transportBuilder;
     protected $inlineTranslation;
     protected $storeManager;
+    protected $emulation;
     protected $customerRepository;
     protected $productRepository;
     protected $resource;
@@ -26,6 +28,7 @@ class EmailNotifier extends AbstractHelper
         TransportBuilder $transportBuilder,
         StateInterface $inlineTranslation,
         StoreManagerInterface $storeManager,
+        Emulation $emulation,
         CustomerRepositoryInterface $customerRepository,
         ProductRepositoryInterface $productRepository,
         ResourceConnection $resource,
@@ -35,6 +38,7 @@ class EmailNotifier extends AbstractHelper
         $this->transportBuilder = $transportBuilder;
         $this->inlineTranslation = $inlineTranslation;
         $this->storeManager = $storeManager;
+        $this->emulation = $emulation;
         $this->customerRepository = $customerRepository;
         $this->productRepository = $productRepository;
         $this->resource = $resource;
@@ -131,24 +135,38 @@ class EmailNotifier extends AbstractHelper
                 'total_value' => number_format($totalValue, 2, ',', '.'),
                 'alert_date' => date('d/m/Y H:i'),
                 'type_label' => $type === 'churn' ? 'Churn (Reativacao)' : 'Cross-sell',
-                'count' => count($opportunities),
+                'count' => (string) count($opportunities),
             ];
 
-            $transport = $this->transportBuilder
-                ->setTemplateIdentifier($templateId)
-                ->setTemplateOptions([
-                    'area' => \Magento\Framework\App\Area::AREA_FRONTEND,
-                    'store' => $this->storeManager->getStore()->getId()
-                ])
-                ->setTemplateVars($templateVars)
-                ->setFromByScope([
-                    'email' => 'noreply@grupoawamotos.com.br',
-                    'name' => 'REXIS ML - Sistema de Recomendacoes'
-                ])
-                ->addTo(explode(',', $emailTo))
-                ->getTransport();
+            // In cron context the area is adminhtml; emulate frontend store 1 so the
+            // email template (area="frontend") and its subject are resolved correctly.
+            $storeId = (int) $this->storeManager->getStore()->getId() ?: 1;
 
-            $transport->sendMessage();
+            $this->emulation->startEnvironmentEmulation(
+                $storeId,
+                \Magento\Framework\App\Area::AREA_FRONTEND,
+                true
+            );
+
+            try {
+                $transport = $this->transportBuilder
+                    ->setTemplateIdentifier($templateId)
+                    ->setTemplateOptions([
+                        'area' => \Magento\Framework\App\Area::AREA_FRONTEND,
+                        'store' => $storeId
+                    ])
+                    ->setTemplateVars($templateVars)
+                    ->setFromByScope([
+                        'email' => 'noreply@grupoawamotos.com.br',
+                        'name' => 'REXIS ML - Sistema de Recomendacoes'
+                    ])
+                    ->addTo(explode(',', $emailTo))
+                    ->getTransport();
+
+                $transport->sendMessage();
+            } finally {
+                $this->emulation->stopEnvironmentEmulation();
+            }
             $this->inlineTranslation->resume();
 
             $this->logger->info(sprintf(

@@ -75,17 +75,17 @@ class Index implements HttpGetActionInterface
             $this->messageManager->addNoticeMessage(__('O sistema de cotação não está disponível no momento.'));
             return $redirect->setPath('/');
         }
-        
+
         // Verificar se visitantes podem solicitar cotação
         if (!$this->customerSession->isLoggedIn() && !$this->config->allowGuestsQuote()) {
             $redirect = $this->redirectFactory->create();
             $this->messageManager->addNoticeMessage(__('Faça login para solicitar uma cotação.'));
-            return $redirect->setPath('customer/account/login');
+            return $redirect->setPath('b2b/account/login');
         }
-        
+
         $page = $this->pageFactory->create();
         $page->getConfig()->getTitle()->set(__('Solicitar Cotação'));
-        
+
         return $page;
     }
 }

@@ -1,7 +1,8 @@
 <?php
 /**
- * Observer para copiar PO Number do Quote para Order
+ * Observer para copiar metadados B2B do Quote para Order
  * P0-1: Purchase Order Number
+ * P2-4.2: Order Notes
  */
 declare(strict_types=1);
 
@@ -22,7 +23,7 @@ class CopyPoNumberToOrder implements ObserverInterface
 
     /**
      * Event: sales_model_service_quote_submit_before
-     * Copia b2b_po_number do quote para o order antes de salvar
+     * Copia b2b_po_number e b2b_order_notes do quote para o order antes de salvar
      */
     public function execute(Observer $observer): void
     {
@@ -34,17 +35,27 @@ class CopyPoNumberToOrder implements ObserverInterface
             $order = $observer->getEvent()->getOrder();
 
             $poNumber = $quote->getData('b2b_po_number');
+            $orderNotes = $quote->getData('b2b_order_notes');
+            $copiedFields = [];
 
             if (!empty($poNumber)) {
                 $order->setData('b2b_po_number', $poNumber);
+                $copiedFields[] = 'b2b_po_number';
+            }
 
-                $this->logger->info('[B2B] PO Number copiado para order', [
+            if (!empty($orderNotes)) {
+                $order->setData('b2b_order_notes', (string) $orderNotes);
+                $copiedFields[] = 'b2b_order_notes';
+            }
+
+            if (!empty($copiedFields)) {
+                $this->logger->info('[B2B] Metadados copiados do quote para order', [
                     'order_increment_id' => $order->getIncrementId(),
-                    'po_number' => $poNumber
+                    'copied_fields' => $copiedFields,
                 ]);
             }
         } catch (\Exception $e) {
-            $this->logger->error('[B2B] Erro ao copiar PO Number para order: ' . $e->getMessage());
+            $this->logger->error('[B2B] Erro ao copiar metadados B2B para order: ' . $e->getMessage());
         }
     }
 }

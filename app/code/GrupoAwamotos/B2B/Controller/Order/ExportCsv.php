@@ -8,6 +8,7 @@ use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Framework\App\Action\HttpGetActionInterface;
 use Magento\Framework\App\Response\Http\FileFactory;
 use Magento\Framework\App\ResponseInterface;
+use Magento\Framework\Controller\Result\Redirect;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\Exception\LocalizedException;
@@ -50,8 +51,9 @@ class ExportCsv implements HttpGetActionInterface
     public function execute()
     {
         if (!$this->customerSession->isLoggedIn()) {
+            /** @var Redirect $redirect */
             $redirect = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
-            $redirect->setPath('customer/account/login');
+            $redirect->setPath('b2b/account/login');
             return $redirect;
         }
 
@@ -72,6 +74,7 @@ class ExportCsv implements HttpGetActionInterface
             );
         } catch (LocalizedException $e) {
             $this->logger->error('B2B CSV Export error: ' . $e->getMessage());
+            /** @var Redirect $redirect */
             $redirect = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
             $redirect->setPath('sales/order/history');
             return $redirect;
@@ -87,7 +90,7 @@ class ExportCsv implements HttpGetActionInterface
     private function generateCsv(int $customerId): string
     {
         $collection = $this->orderCollectionFactory->create();
-        $collection->addFieldToFilter('customer_id', $customerId)
+        $collection->addFieldToFilter('customer_id', ['eq' => $customerId])
             ->addAttributeToSort('created_at', 'DESC')
             ->setPageSize(500); // Limit to last 500 orders
 
@@ -108,6 +111,7 @@ class ExportCsv implements HttpGetActionInterface
             'Forma Pagamento',
             'Transportadora',
             'PO Number',
+            'Observações do Pedido',
             'Itens',
         ], ';');
 
@@ -132,6 +136,7 @@ class ExportCsv implements HttpGetActionInterface
                 $order->getPayment()?->getMethodInstance()?->getTitle() ?? '',
                 $order->getShippingDescription() ?? '',
                 $order->getData('b2b_po_number') ?? '',
+                $this->normalizeCsvText((string) ($order->getData('b2b_order_notes') ?? '')),
                 implode(' | ', $items),
             ], ';');
         }
@@ -152,5 +157,16 @@ class ExportCsv implements HttpGetActionInterface
     private function formatPrice(float $price): string
     {
         return number_format($price, 2, ',', '.');
+    }
+
+    /**
+     * Normalize multiline/untrusted text to keep CSV row stable.
+     *
+     * @param string $value
+     * @return string
+     */
+    private function normalizeCsvText(string $value): string
+    {
+        return trim((string) preg_replace('/\s+/u', ' ', $value));
     }
 }

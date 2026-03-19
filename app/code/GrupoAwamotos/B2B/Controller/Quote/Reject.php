@@ -15,7 +15,9 @@ use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\RedirectFactory;
 use Magento\Framework\Data\Form\FormKey\Validator as FormKeyValidator;
+use Magento\Framework\Event\ManagerInterface as EventManagerInterface;
 use Magento\Framework\Message\ManagerInterface;
+use Magento\Store\Model\StoreManagerInterface;
 use Psr\Log\LoggerInterface;
 
 class Reject implements HttpPostActionInterface
@@ -27,6 +29,8 @@ class Reject implements HttpPostActionInterface
     private FormKeyValidator $formKeyValidator;
     private ManagerInterface $messageManager;
     private LoggerInterface $logger;
+    private EventManagerInterface $eventManager;
+    private StoreManagerInterface $storeManager;
 
     public function __construct(
         RequestInterface $request,
@@ -35,7 +39,9 @@ class Reject implements HttpPostActionInterface
         QuoteRequestRepositoryInterface $quoteRequestRepository,
         FormKeyValidator $formKeyValidator,
         ManagerInterface $messageManager,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        EventManagerInterface $eventManager,
+        StoreManagerInterface $storeManager
     ) {
         $this->request = $request;
         $this->redirectFactory = $redirectFactory;
@@ -44,6 +50,8 @@ class Reject implements HttpPostActionInterface
         $this->formKeyValidator = $formKeyValidator;
         $this->messageManager = $messageManager;
         $this->logger = $logger;
+        $this->eventManager = $eventManager;
+        $this->storeManager = $storeManager;
     }
 
     public function execute()
@@ -60,7 +68,7 @@ class Reject implements HttpPostActionInterface
             // Verify customer is logged in
             if (!$this->customerSession->isLoggedIn()) {
                 $this->messageManager->addErrorMessage(__('Faça login para gerenciar suas cotações.'));
-                return $redirect->setPath('customer/account/login');
+                return $redirect->setPath('b2b/account/login');
             }
 
             $requestId = (int) $this->request->getParam('id');
@@ -71,6 +79,7 @@ class Reject implements HttpPostActionInterface
 
             // Load quote request
             $quoteRequest = $this->quoteRequestRepository->getById($requestId);
+            $previousStatus = $quoteRequest->getStatus();
 
             // Verify ownership
             $customerId = (int) $this->customerSession->getCustomerId();
@@ -88,6 +97,14 @@ class Reject implements HttpPostActionInterface
             // Update status to rejected
             $quoteRequest->setStatus(QuoteRequestInterface::STATUS_REJECTED);
             $this->quoteRequestRepository->save($quoteRequest);
+
+            $this->eventManager->dispatch('grupoawamotos_b2b_quote_customer_rejected', [
+                'quote_request' => $quoteRequest,
+                'previous_status' => $previousStatus,
+                'lifecycle_event' => 'customer_rejected',
+                'store_id' => (int) $this->storeManager->getStore()->getId(),
+                'customer_id' => $customerId,
+            ]);
 
             $this->messageManager->addSuccessMessage(
                 __('Cotação #%1 foi recusada.', $requestId)

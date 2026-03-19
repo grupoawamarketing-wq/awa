@@ -11,9 +11,7 @@ use GrupoAwamotos\B2B\Helper\Config;
 use GrupoAwamotos\B2B\Model\Customer\Attribute\Source\ApprovalStatus;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Api\Data\CustomerInterface;
-use Magento\Framework\App\Area;
 use Magento\Framework\App\ResourceConnection;
-use Magento\Framework\App\State;
 use Magento\Framework\Event\ManagerInterface as EventManager;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
@@ -64,11 +62,6 @@ class CustomerApproval implements CustomerApprovalInterface
      */
     private $eventManager;
 
-    /**
-     * @var State
-     */
-    private $appState;
-
     public function __construct(
         CustomerRepositoryInterface $customerRepository,
         Config $config,
@@ -77,8 +70,7 @@ class CustomerApproval implements CustomerApprovalInterface
         StoreManagerInterface $storeManager,
         DateTime $dateTime,
         LoggerInterface $logger,
-        EventManager $eventManager,
-        State $appState
+        EventManager $eventManager
     ) {
         $this->customerRepository = $customerRepository;
         $this->config = $config;
@@ -88,7 +80,6 @@ class CustomerApproval implements CustomerApprovalInterface
         $this->dateTime = $dateTime;
         $this->logger = $logger;
         $this->eventManager = $eventManager;
-        $this->appState = $appState;
     }
 
     /**
@@ -169,6 +160,14 @@ class CustomerApproval implements CustomerApprovalInterface
 
             $this->logAction($customerId, 'rejected', $oldStatus, ApprovalStatus::STATUS_REJECTED, $adminUserId, $reason);
 
+            $this->eventManager->dispatch('grupoawamotos_b2b_customer_rejected', [
+                'customer_id' => $customerId,
+                'customer' => $customer,
+                'old_status' => $oldStatus,
+                'reason' => $reason,
+                'admin_user_id' => $adminUserId,
+            ]);
+
             // Enviar email de rejeição
             $this->sendRejectionEmail($customerId, $reason);
 
@@ -238,8 +237,6 @@ class CustomerApproval implements CustomerApprovalInterface
     public function notifyAdminNewCustomer(int $customerId): bool
     {
         try {
-            $this->ensureAreaCode(Area::AREA_ADMINHTML);
-
             $customer = $this->customerRepository->getById($customerId);
             $adminEmail = $this->config->getAdminEmail();
 
@@ -247,6 +244,7 @@ class CustomerApproval implements CustomerApprovalInterface
                 return false;
             }
 
+            /** @var \Magento\Store\Model\Store $store */
             $store = $this->storeManager->getStore();
 
             $cnpj = $this->getCustomerAttributeValue($customer, 'b2b_cnpj') ?? 'N/A';
@@ -288,9 +286,8 @@ class CustomerApproval implements CustomerApprovalInterface
     public function sendApprovalEmail(int $customerId): bool
     {
         try {
-            $this->ensureAreaCode(Area::AREA_FRONTEND);
-
             $customer = $this->customerRepository->getById($customerId);
+            /** @var \Magento\Store\Model\Store $store */
             $store = $this->storeManager->getStore($customer->getStoreId());
 
             $transport = $this->transportBuilder
@@ -304,7 +301,7 @@ class CustomerApproval implements CustomerApprovalInterface
                     'customer_name' => $customer->getFirstname(),
                     'store_name' => $store->getName(),
                     'store_url' => $store->getBaseUrl(),
-                    'login_url' => $store->getBaseUrl() . 'customer/account/login',
+                    'login_url' => $store->getBaseUrl() . 'b2b/account/login',
                 ])
                 ->setFromByScope('general')
                 ->addTo($customer->getEmail(), $customer->getFirstname() . ' ' . $customer->getLastname())
@@ -325,9 +322,8 @@ class CustomerApproval implements CustomerApprovalInterface
     public function sendRejectionEmail(int $customerId, ?string $reason = null): bool
     {
         try {
-            $this->ensureAreaCode(Area::AREA_FRONTEND);
-
             $customer = $this->customerRepository->getById($customerId);
+            /** @var \Magento\Store\Model\Store $store */
             $store = $this->storeManager->getStore($customer->getStoreId());
 
             $transport = $this->transportBuilder
@@ -353,15 +349,6 @@ class CustomerApproval implements CustomerApprovalInterface
         } catch (\Exception $e) {
             $this->logger->error('B2B sendRejectionEmail error: ' . $e->getMessage());
             return false;
-        }
-    }
-
-    private function ensureAreaCode(string $areaCode): void
-    {
-        try {
-            $this->appState->getAreaCode();
-        } catch (LocalizedException) {
-            $this->appState->setAreaCode($areaCode);
         }
     }
 

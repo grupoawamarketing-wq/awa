@@ -161,7 +161,7 @@ class QueryService
         return self::$cache[$identifier];
     }
 
-    private function addTerms(array &$to, array $terms, string $wildcard = null): void
+    private function addTerms(array &$to, array $terms, ?string $wildcard = null): void
     {
         $exceptions = $this->configProvider->getWildcardExceptions();
         if ($wildcard == null) {

@@ -102,7 +102,7 @@ class Index extends AbstractIndex
         return $collection;
     }
 
-    public function getIndexableDocuments(int $storeId, array $entityIds = null, int $lastEntityId = null, int $limit = 100): array
+    public function getIndexableDocuments(int $storeId, ?array $entityIds = null, ?int $lastEntityId = null, int $limit = 100): array
     {
         $collection = new Collection(new EntityFactory($this->context->getObjectManager()));
 

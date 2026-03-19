@@ -55,8 +55,6 @@
         translateTexts: true,  // TEMPORÁRIO — remover ao instalar pt_BR pack
         hideMagentoCode: true,
         deduplicateMenu: true, // Workaround: AYO pode gerar itens duplicados no menu horizontal
-        whatsappNumber: '5516997367588', /* R11-03: centralizado */
-        whatsappMessage: 'Olá! Vim pelo site AWA Motos e gostaria de mais informações.',
         // Layout — lidos via CSS custom properties quando disponíveis
         containerWidth: 1200,
         breakpoints: {
@@ -176,87 +174,6 @@
 
         if (fixed > 0) {
             log('Legacy offer links normalized: ' + fixed);
-        }
-    }
-
-    // ===========================================
-    // 0C. PREVENÇÃO DE SALTO EM LINKS href="#"
-    // Em vários módulos Ayo, anchors de ação usam href="#".
-    // Isso causa scroll para o topo quando não há preventDefault.
-    // Este hardening preserva os handlers existentes (não bloqueia propagação).
-    // ===========================================
-    function preventHashAnchorJump(roots) {
-        var searchRoots = roots && roots.length
-            ? roots
-            : [getPageWrapper()];
-
-        var bound = 0;
-
-        searchRoots.forEach(function (root) {
-            if (!root || !root.querySelectorAll) return;
-
-            root.querySelectorAll('a[href="#"]:not([data-awa-allow-hash])').forEach(function (anchor) {
-                if (anchor.dataset.awaHashGuard === '1') {
-                    return;
-                }
-
-                anchor.dataset.awaHashGuard = '1';
-
-                anchor.addEventListener('click', function (event) {
-                    event.preventDefault();
-                });
-
-                anchor.addEventListener('keydown', function (event) {
-                    if (event.key === 'Enter' || event.key === ' ') {
-                        event.preventDefault();
-                    }
-                });
-
-                bound++;
-            });
-        });
-
-        if (bound > 0) {
-            log('Hash anchor jump prevented on ' + bound + ' elements');
-        }
-    }
-
-    // ===========================================
-    // 0D. HARDENING TARGET _BLANK
-    // Garante rel="noopener noreferrer" em links com target="_blank".
-    // ===========================================
-    function hardenExternalBlankLinks(roots) {
-        var searchRoots = roots && roots.length
-            ? roots
-            : [getPageWrapper()];
-
-        var updated = 0;
-
-        searchRoots.forEach(function (root) {
-            if (!root || !root.querySelectorAll) return;
-
-            root.querySelectorAll('a[target="_blank"]').forEach(function (anchor) {
-                var rel = (anchor.getAttribute('rel') || '').toLowerCase();
-                var tokens = rel ? rel.split(/\s+/).filter(Boolean) : [];
-                var hasNoopener = tokens.indexOf('noopener') !== -1;
-                var hasNoreferrer = tokens.indexOf('noreferrer') !== -1;
-
-                if (!hasNoopener) {
-                    tokens.push('noopener');
-                }
-                if (!hasNoreferrer) {
-                    tokens.push('noreferrer');
-                }
-
-                if (!hasNoopener || !hasNoreferrer) {
-                    anchor.setAttribute('rel', tokens.join(' ').trim());
-                    updated++;
-                }
-            });
-        });
-
-        if (updated > 0) {
-            log('Hardened target=_blank links: ' + updated);
         }
     }
 
@@ -687,47 +604,9 @@
     }
 
     // ===========================================
-    // 6. WHATSAPP FLUTUANTE
+    // 6. STICKY HEADER SPACER
     // ===========================================
-    function initWhatsAppButton() {
-        var existingBtn = document.querySelector('.awa-whatsapp-float');
-        if (existingBtn) {
-            if (!existingBtn.getAttribute('aria-label')) {
-                existingBtn.setAttribute('aria-label', 'Contato via WhatsApp');
-            }
-
-            if ((existingBtn.getAttribute('target') || '').toLowerCase() === '_blank') {
-                var relValue = (existingBtn.getAttribute('rel') || '').toLowerCase();
-                var hasNoopener = relValue.indexOf('noopener') !== -1;
-                var hasNoreferrer = relValue.indexOf('noreferrer') !== -1;
-
-                if (!hasNoopener || !hasNoreferrer) {
-                    existingBtn.setAttribute('rel', 'noopener noreferrer');
-                }
-            }
-
-            return;
-        }
-
-        var whatsappNumber = AWA_CONFIG.whatsappNumber; /* R11-03: de AWA_CONFIG */
-        var whatsappMessage = encodeURIComponent(AWA_CONFIG.whatsappMessage);
-
-        var btn = document.createElement('a');
-        btn.className = 'awa-whatsapp-float';
-        btn.href = 'https://wa.me/' + whatsappNumber + '?text=' + whatsappMessage;
-        btn.target = '_blank';
-        btn.rel = 'noopener noreferrer';
-        btn.setAttribute('aria-label', 'Contato via WhatsApp');
-        btn.innerHTML = '<svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>';
-        // Estilos geridos por CSS (.awa-whatsapp-float em awa-core.css)
-        // Hover gerido por CSS (:hover) — sem mouseenter/mouseleave
-
-        document.body.appendChild(btn);
-        log('WhatsApp button initialized');
-    }
-
-    // ===========================================
-    // 7. STICKY HEADER SPACER
+    // 6. STICKY HEADER SPACER
     // ===========================================
     /* R11-09: lógica DRY com função extraída */
     function initStickyHeaderSpacer() {
@@ -1160,100 +1039,6 @@
                 root.querySelectorAll(pair[0]).forEach(function (img) {
                     img.alt = pair[1];
                 });
-            });
-        });
-    }
-
-    // ===========================================
-    // R16-10: ICON-ONLY LINK A11Y
-    // Define aria-label/title para links utilitários sem texto visível.
-    // ===========================================
-    function fixIconOnlyLinkLabels(roots) {
-        var searchRoots = roots && roots.length
-            ? roots
-            : [getPageWrapper()];
-
-        function inferLabel(anchor) {
-            var href = (anchor.getAttribute('href') || '').toLowerCase();
-            var className = (anchor.className || '').toLowerCase();
-            var parentClassName = (anchor.parentElement && anchor.parentElement.className
-                ? anchor.parentElement.className
-                : '').toLowerCase();
-            var id = (anchor.id || '').toLowerCase();
-
-            if (className.indexOf('towishlist') !== -1 || className.indexOf('wishlist') !== -1 || parentClassName.indexOf('wishlist') !== -1 || href.indexOf('/wishlist/') !== -1) {
-                return 'Adicionar à lista de desejos';
-            }
-
-            if (className.indexOf('tocompare') !== -1 || className.indexOf('compare') !== -1 || parentClassName.indexOf('compare') !== -1 || href.indexOf('/catalog/product_compare/') !== -1) {
-                return 'Comparar produto';
-            }
-
-            if (className.indexOf('quickview-link') !== -1 || className.indexOf('quickview') !== -1) {
-                return 'Visualização rápida';
-            }
-
-            if (className.indexOf('toggle-nav-footer') !== -1 || className.indexOf('nav-toggle') !== -1) {
-                return 'Abrir menu';
-            }
-
-            if (className.indexOf('showcart') !== -1 || className.indexOf('minicart') !== -1 || parentClassName.indexOf('minicart') !== -1 || href.indexOf('/checkout/cart') !== -1) {
-                return 'Abrir carrinho';
-            }
-
-            if (id === 'back-top' || className.indexOf('back-top') !== -1) {
-                return 'Voltar ao topo';
-            }
-
-            if (href.indexOf('/customer/account/logout') !== -1 || href.indexOf('/customer/account/logoutsuccess') !== -1) {
-                return 'Sair';
-            }
-
-            if (href.indexOf('/customer/account/login') !== -1) {
-                return 'Entrar';
-            }
-
-            if (href.indexOf('/customer/account') !== -1) {
-                return 'Minha conta';
-            }
-
-            return '';
-        }
-
-        searchRoots.forEach(function (root) {
-            if (!root || !root.querySelectorAll) return;
-
-            root.querySelectorAll('a[href], .fixed-bottom a, .fixed-right a, .top-account a, .minicart-wrapper a').forEach(function (anchor) {
-                if (!anchor || anchor.tagName !== 'A') return;
-
-                var visibleText = (anchor.textContent || '').replace(/\s+/g, ' ').trim();
-                var titleAttr = (anchor.getAttribute('title') || '').trim();
-                var ariaLabel = (anchor.getAttribute('aria-label') || '').trim();
-                var iconOnly = visibleText.length === 0;
-
-                if (ariaLabel) {
-                    return;
-                }
-
-                if (!iconOnly && visibleText.length > 1) {
-                    if (!titleAttr) {
-                        anchor.setAttribute('title', visibleText);
-                    }
-                    return;
-                }
-
-                var inferred = inferLabel(anchor);
-
-                if (!inferred && titleAttr) {
-                    inferred = titleAttr;
-                }
-
-                if (inferred) {
-                    anchor.setAttribute('aria-label', inferred);
-                    if (!titleAttr) {
-                        anchor.setAttribute('title', inferred);
-                    }
-                }
             });
         });
     }
@@ -3010,14 +2795,11 @@
         safeRun(translateTexts, 'translateTexts');
         safeRun(hideMagentoCode, 'hideMagentoCode');
         safeRun(normalizeLegacyOfferLinks, 'normalizeLegacyOfferLinks');
-        safeRun(preventHashAnchorJump, 'preventHashAnchorJump');
-        safeRun(hardenExternalBlankLinks, 'hardenExternalBlankLinks');
         safeRun(sanitizeCorruptedInstitutionalHeadings, 'sanitizeCorruptedInstitutionalHeadings');
         safeRun(addInputMasks, 'addInputMasks');
 
         // UI elements
         safeRun(initBackToTop, 'initBackToTop');
-        safeRun(initWhatsAppButton, 'initWhatsAppButton');
         safeRun(initStickyHeaderSpacer, 'initStickyHeaderSpacer');
         safeRun(initMobileNavClose, 'initMobileNavClose');
 
@@ -3028,7 +2810,6 @@
         }
         safeRun(fixVerticalMenuToggles, 'fixVerticalMenuToggles');
         safeRun(fixSocialShareAlts, 'fixSocialShareAlts');
-        safeRun(fixIconOnlyLinkLabels, 'fixIconOnlyLinkLabels');
         safeRun(hideEmptyImages, 'hideEmptyImages');
         safeRun(initProductImageCacheFallback, 'initProductImageCacheFallback');
         safeRun(fixNavToggleLabel, 'fixNavToggleLabel');
@@ -3344,11 +3125,8 @@
                     if (isFullPass || hasLinks || hasSearch || hasProducts || hasFooterOrSidebar) {
                         safeRun(function () { translateTexts(nodes); }, 'translateTexts');
                         safeRun(function () { normalizeLegacyOfferLinks(nodes); }, 'normalizeLegacyOfferLinks');
-                        safeRun(function () { preventHashAnchorJump(nodes); }, 'preventHashAnchorJump');
-                        safeRun(function () { hardenExternalBlankLinks(nodes); }, 'hardenExternalBlankLinks');
                         safeRun(function () { sanitizeCorruptedInstitutionalHeadings(nodes); }, 'sanitizeCorruptedInstitutionalHeadings');
                         safeRun(function () { hideMagentoCode(nodes); }, 'hideMagentoCode');
-                        safeRun(function () { fixIconOnlyLinkLabels(nodes); }, 'fixIconOnlyLinkLabels');
                     }
 
                     if (isFullPass || hasProducts) {
@@ -3451,11 +3229,8 @@
 
                 safeRun(function () { translateTexts(deferredNodes); }, 'translateTexts.visibilityDeferred');
                 safeRun(function () { normalizeLegacyOfferLinks(deferredNodes); }, 'normalizeLegacyOfferLinks.visibilityDeferred');
-                safeRun(function () { preventHashAnchorJump(deferredNodes); }, 'preventHashAnchorJump.visibilityDeferred');
-                safeRun(function () { hardenExternalBlankLinks(deferredNodes); }, 'hardenExternalBlankLinks.visibilityDeferred');
                 safeRun(function () { sanitizeCorruptedInstitutionalHeadings(deferredNodes); }, 'sanitizeCorruptedInstitutionalHeadings.visibilityDeferred');
                 safeRun(function () { hideMagentoCode(deferredNodes); }, 'hideMagentoCode.visibilityDeferred');
-                safeRun(function () { fixIconOnlyLinkLabels(deferredNodes); }, 'fixIconOnlyLinkLabels.visibilityDeferred');
                 safeRun(function () { fixPrices(deferredNodes); }, 'fixPrices.visibilityDeferred');
                 safeRun(function () { addInputMasks(deferredNodes); }, 'addInputMasks.visibilityDeferred');
                 safeRun(function () { fixReviewCount(deferredNodes); }, 'fixReviewCount.visibilityDeferred');

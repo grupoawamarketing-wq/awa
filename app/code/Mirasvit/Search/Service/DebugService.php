@@ -32,7 +32,7 @@ class DebugService
         $this->httpRequest = $httpRequest;
     }
 
-    public static function log(?string $message, string $key = null): void
+    public static function log(?string $message, ?string $key = null): void
     {
         self::$log[] = [$key => $message];
     }

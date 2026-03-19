@@ -7,8 +7,9 @@ declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Plugin\Checkout;
 
-use GrupoAwamotos\B2B\Api\PriceVisibilityInterface;
 use GrupoAwamotos\B2B\Helper\Config;
+use GrupoAwamotos\B2B\Model\CheckoutAccessValidator;
+use GrupoAwamotos\B2B\Model\CreditService;
 use GrupoAwamotos\ERPIntegration\Model\ResourceModel\SyncLog as SyncLogResource;
 use Magento\Checkout\Api\PaymentInformationManagementInterface;
 use Magento\Customer\Api\CustomerRepositoryInterface;
@@ -21,11 +22,6 @@ use Psr\Log\LoggerInterface;
 
 class BlockPlaceOrderPlugin
 {
-    /**
-     * @var PriceVisibilityInterface
-     */
-    private $priceVisibility;
-
     /**
      * @var Config
      */
@@ -52,25 +48,37 @@ class BlockPlaceOrderPlugin
     private $syncLogResource;
 
     /**
+     * @var CreditService
+     */
+    private $creditService;
+
+    /**
      * @var LoggerInterface
      */
     private $logger;
 
+    /**
+     * @var CheckoutAccessValidator
+     */
+    private $checkoutAccessValidator;
+
     public function __construct(
-        PriceVisibilityInterface $priceVisibility,
         Config $config,
         CartRepositoryInterface $cartRepository,
         CustomerSession $customerSession,
         CustomerRepositoryInterface $customerRepository,
         SyncLogResource $syncLogResource,
+        CreditService $creditService,
+        CheckoutAccessValidator $checkoutAccessValidator,
         ?LoggerInterface $logger = null
     ) {
-        $this->priceVisibility = $priceVisibility;
         $this->config = $config;
         $this->cartRepository = $cartRepository;
         $this->customerSession = $customerSession;
         $this->customerRepository = $customerRepository;
         $this->syncLogResource = $syncLogResource;
+        $this->creditService = $creditService;
+        $this->checkoutAccessValidator = $checkoutAccessValidator;
         $this->logger = $logger;
     }
 
@@ -90,19 +98,67 @@ class BlockPlaceOrderPlugin
         PaymentInterface $paymentMethod,
         ?AddressInterface $billingAddress = null
     ): array {
+        $this->validateCheckoutAccess((int) $cartId, $paymentMethod);
+
+        return [$cartId, $paymentMethod, $billingAddress];
+    }
+
+    /**
+     * Before savePaymentInformation - block unauthorized API checkout progression as early as possible.
+     *
+     * @param PaymentInformationManagementInterface $subject
+     * @param int $cartId
+     * @param PaymentInterface $paymentMethod
+     * @param AddressInterface|null $billingAddress
+     * @return array
+     * @throws CouldNotSaveException
+     */
+    public function beforeSavePaymentInformation(
+        PaymentInformationManagementInterface $subject,
+        $cartId,
+        PaymentInterface $paymentMethod,
+        ?AddressInterface $billingAddress = null
+    ): array {
+        $this->validateCheckoutAccess((int) $cartId, $paymentMethod);
+
+        return [$cartId, $paymentMethod, $billingAddress];
+    }
+
+    /**
+     * Validate whether the current customer can continue through checkout APIs.
+     *
+     * @throws CouldNotSaveException
+     */
+    private function validateCheckoutAccess(int $cartId, PaymentInterface $paymentMethod): void
+    {
         if (!$this->config->isEnabled()) {
-            return [$cartId, $paymentMethod, $billingAddress];
+            return;
         }
 
-        if (!$this->priceVisibility->canAddToCart()) {
+        /** @var \Magento\Quote\Model\Quote $quote */
+        $quote = $this->cartRepository->getActive($cartId);
+        $customerId = (int) $quote->getCustomerId();
+
+        if ($customerId <= 0 && $this->customerSession->isLoggedIn()) {
+            $customerId = (int) $this->customerSession->getCustomerId();
+        }
+
+        $customerState = $this->checkoutAccessValidator->resolveCustomerState($customerId);
+
+        if ($customerState !== CheckoutAccessValidator::STATE_APPROVED) {
+            if ($customerState === CheckoutAccessValidator::STATE_PENDING_ERP) {
+                throw new CouldNotSaveException(
+                    __('Seu cadastro ainda não está vinculado ao sistema ERP. Entre em contato com o departamento comercial para liberar seus pedidos.')
+                );
+            }
+
             throw new CouldNotSaveException(
                 __('Sua conta precisa ser aprovada antes de realizar compras. Por favor, aguarde a aprovação.')
             );
         }
 
         // Validate ERP customer code exists (required for ERP order sync)
-        if ($this->customerSession->isLoggedIn()) {
-            $customerId = (int) $this->customerSession->getCustomerId();
+        if ($customerId > 0) {
             $erpCode = $this->getCustomerErpCode($customerId);
             if (!$erpCode) {
                 throw new CouldNotSaveException(
@@ -111,12 +167,30 @@ class BlockPlaceOrderPlugin
             }
         }
 
+        // Validate B2B credit sufficiency when paying with b2b_credit
+        if ($customerId > 0 && $paymentMethod->getMethod() === 'b2b_credit') {
+            try {
+                $grandTotal = (float) $quote->getBaseGrandTotal();
+
+                if (!$this->creditService->hasSufficientCredit($customerId, $grandTotal)) {
+                    throw new CouldNotSaveException(
+                        __('Crédito B2B insuficiente para este pedido. Verifique seu limite disponível ou escolha outra forma de pagamento.')
+                    );
+                }
+            } catch (CouldNotSaveException $e) {
+                throw $e;
+            } catch (\Exception $e) {
+                if ($this->logger) {
+                    $this->logger->error('[B2B] Credit check failed: ' . $e->getMessage(), ['exception' => $e]);
+                }
+            }
+        }
+
         // Enforce minimum order amount
         if ($this->config->isMinQtyEnabled()) {
             $minAmount = $this->config->getMinOrderAmount();
             if ($minAmount > 0) {
                 try {
-                    $quote = $this->cartRepository->getActive($cartId);
                     $subtotal = (float) $quote->getBaseSubtotal();
 
                     if ($subtotal < $minAmount) {
@@ -134,8 +208,6 @@ class BlockPlaceOrderPlugin
                 }
             }
         }
-
-        return [$cartId, $paymentMethod, $billingAddress];
     }
 
     /**

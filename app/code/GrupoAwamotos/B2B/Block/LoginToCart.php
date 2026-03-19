@@ -143,6 +143,10 @@ class LoginToCart extends Template
      */
     public function getLoginUrl(): string
     {
+        if ($this->config->isStrictB2B()) {
+            return $this->getUrl('b2b/account/login');
+        }
+
         return $this->getUrl('customer/account/login');
     }
 
@@ -153,7 +157,19 @@ class LoginToCart extends Template
      */
     public function getRegisterUrl(): string
     {
+        if ($this->config->isStrictB2B()) {
+            return $this->getUrl('b2b/register');
+        }
+
         return $this->getUrl('customer/account/create');
+    }
+
+    /**
+     * Check if store is operating in strict B2B mode.
+     */
+    public function isStrictB2B(): bool
+    {
+        return $this->config->isStrictB2B();
     }
 
     /**
@@ -173,6 +189,6 @@ class LoginToCart extends Template
      */
     public function getAccountUrl(): string
     {
-        return $this->getUrl('customer/account');
+        return $this->getUrl('b2b/account/dashboard');
     }
 }

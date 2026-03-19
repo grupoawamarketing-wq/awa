@@ -79,13 +79,26 @@ class StatusPanel extends Template
      */
     public function getCustomerData(): array
     {
-        $customer = $this->customerSession->getCustomer();
+        $customer = null;
+        $customerId = (int) $this->customerSession->getCustomerId();
         $customerGroupId = (int) $this->customerSession->getCustomerGroupId();
 
+        if ($customerId > 0) {
+            try {
+                $customer = $this->customerRepository->getById($customerId);
+            } catch (\Exception $e) {
+                $customer = null;
+            }
+        }
+
+        $firstName = $customer ? (string) $customer->getFirstname() : '';
+        $lastName = $customer ? (string) $customer->getLastname() : '';
+        $fullName = trim($firstName . ' ' . $lastName);
+
         return [
-            'first_name' => $customer ? $customer->getFirstname() : '',
-            'full_name' => $customer ? $customer->getName() : '',
-            'email' => $customer ? $customer->getEmail() : '',
+            'first_name' => $firstName,
+            'full_name' => $fullName,
+            'email' => $customer ? (string) $customer->getEmail() : '',
             'company' => $this->getCompanyName(),
             'group_id' => $customerGroupId,
             'group_name' => $this->getGroupName($customerGroupId),
@@ -241,7 +254,7 @@ class StatusPanel extends Template
                 'icon' => 'calculator',
             ],
             [
-                'url' => $this->getUrl('b2b/lists'),
+                'url' => $this->getUrl('b2b/shoppinglist'),
                 'label' => __('Listas de Compras'),
                 'icon' => 'list-ul',
             ],

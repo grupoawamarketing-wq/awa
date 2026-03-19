@@ -37,6 +37,7 @@ $faqQuickHtml = $renderCmsBlock('home_faq_quick');
 $productTabBlock = $layout->createBlock('Rokanthemes\ProductTab\Block\Producttab');
 $productTabHtml = '';
 if ($productTabBlock) {
+	$productTabBlock->setTemplate('Rokanthemes_ProductTab::producttab.phtml');
 	$productTabHtml = trim((string)$productTabBlock->toHtml());
 }
 
@@ -82,13 +83,21 @@ if ($hotDealBlock) {
 
 /** @var \Rokanthemes\BestsellerProduct\Block\Bestseller|null */
 $bestsellerBlock = $layout->createBlock('Rokanthemes\BestsellerProduct\Block\Bestseller');
+if ($bestsellerBlock) {
+	$bestsellerBlock->setTemplate('Rokanthemes_BestsellerProduct::bestseller.phtml');
+}
 $bestsellerHtml  = $bestsellerBlock ? trim((string)$bestsellerBlock->toHtml()) : '';
 
 /** @var \Rokanthemes\Newproduct\Block\Newproduct|null */
 $newproductBlock = $layout->createBlock('Rokanthemes\Newproduct\Block\Newproduct');
 $newproductHtml  = $newproductBlock ? trim((string)$newproductBlock->toHtml()) : '';
 
-/* Category carousels — Bauletos(45), Retrovisores(41), Bagageiros(67) */
+/* Category carousels — subcategory IDs for multi-tab layout per Rokanthemes CategoryTab widget.
+ * Passing subcategory IDs (not parent) gives one tab per subcategory in the leftBlock panel.
+ * Bauletos (45)     → subcats: 34L(46), 41L(75), Acessórios(76), 29L(77)
+ * Retrovisores (41) → subcats with products: Original(42), Pr.Haste(50), Cromados(51), Mini(79), Esportivos(81), Arrow(89)
+ * Bagageiros (67)   → no subcategories, use parent directly
+ */
 $makeCatCarousel = static function (string $catId, string $identify) use ($layout): string {
 	/** @var \Rokanthemes\Categorytab\Block\CateWidget|null $b */
 	$b = $layout->createBlock('Rokanthemes\Categorytab\Block\CateWidget');
@@ -98,8 +107,8 @@ $makeCatCarousel = static function (string $catId, string $identify) use ($layou
 	return trim((string)$b->setTemplate('Rokanthemes_Categorytab::categorytab/grid-original.phtml')->toHtml());
 };
 
-$bauletosHtml     = $makeCatCarousel('45', 'home-bauletos');
-$retrovisoresHtml = $makeCatCarousel('41', 'home-retrovisores');
+$bauletosHtml     = $makeCatCarousel('46,75,76,77', 'home-bauletos');
+$retrovisoresHtml = $makeCatCarousel('42,50,51,79,81,89', 'home-retrovisores');
 $bagageirosHtml   = $makeCatCarousel('67', 'home-bagageiros');
 
 /* Phase 9: "Busque por Categorias" — B2B Enterprise Category Carousel */
