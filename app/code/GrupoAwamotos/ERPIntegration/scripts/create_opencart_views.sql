@@ -464,31 +464,27 @@ CREATE TABLE IF NOT EXISTS oc_pre_registration (
 --     Mapeamentos:
 --     - customer_id: usa oc_customer_id_map para resolver ID antigo do OpenCart
 --       Se não encontrar, fallback para customer_id + 200000
+--     - customer_group_id/custom_field/store_id: reaproveita os dados materializados em oc_customer
 --     - zone_id: join por NOME do estado (não por region_id) com COLLATE fix
---     - custom_field: CNPJ sem formatação no key "6"
---     - customer_group_id: fixo 2 (PJ)
 --     - Filtro: apenas pedidos com customer_id e state IN (new, pending_payment, processing)
+--       e clientes bridge realmente elegíveis ao fluxo B2B (group 2 com CNPJ preenchido)
 -- ---------------------------------------------------------------
 CREATE OR REPLACE VIEW oc_order AS
 SELECT
     so.entity_id + 200000 AS order_id,
     0 AS invoice_no,
     'MAG-' AS invoice_prefix,
-    so.store_id AS store_id,
+    COALESCE(bridge_customer.store_id, 0) AS store_id,
     'AWA MOTOS' AS store_name,
     'https://awamotos.com.br/' AS store_url,
     COALESCE(m.old_oc_customer_id, so.customer_id + 200000) AS customer_id,
-    2 AS customer_group_id,
+    bridge_customer.customer_group_id AS customer_group_id,
     COALESCE(so.customer_firstname, '') AS firstname,
     COALESCE(so.customer_lastname, '') AS lastname,
     COALESCE(so.customer_email, '') AS email,
     COALESCE(ba.telephone, '') AS telephone,
     '' AS fax,
-    CONCAT(
-        '{"6":"',
-        REPLACE(REPLACE(REPLACE(REPLACE(COALESCE(so.customer_taxvat, ''), '.', ''), '/', ''), '-', ''), ' ', ''),
-        '","2":"","3":"","1":""}'
-    ) AS custom_field,
+    COALESCE(bridge_customer.custom_field, '{"6":"","2":"","3":"","1":""}') AS custom_field,
     COALESCE(ba.firstname, so.customer_firstname, '') AS payment_firstname,
     COALESCE(ba.lastname, so.customer_lastname, '') AS payment_lastname,
     COALESCE(ba.company, '') AS payment_company,
@@ -544,8 +540,11 @@ LEFT JOIN sales_order_payment sop ON sop.parent_id = so.entity_id
 LEFT JOIN oc_zone bz ON bz.name COLLATE utf8mb4_0900_ai_ci = ba.region AND bz.country_id = 30
 LEFT JOIN oc_zone sz ON sz.name COLLATE utf8mb4_0900_ai_ci = sa.region AND sz.country_id = 30
 LEFT JOIN oc_customer_id_map m ON m.magento_customer_id = so.customer_id
+INNER JOIN oc_customer bridge_customer ON bridge_customer.customer_id = COALESCE(m.old_oc_customer_id, so.customer_id + 200000)
 WHERE so.customer_id IS NOT NULL
   AND so.state IN ('new', 'pending_payment', 'processing')
+    AND bridge_customer.customer_group_id = 2
+    AND JSON_UNQUOTE(JSON_EXTRACT(bridge_customer.custom_field, '$."6"')) <> ''
   AND NOT EXISTS (SELECT 1 FROM oc_order_imported oi WHERE oi.order_id = so.entity_id + 200000);
 
 -- ---------------------------------------------------------------
@@ -574,7 +573,8 @@ LEFT JOIN oc_product_id_map pm ON pm.magento_sku = TRIM(soi.sku)
 WHERE soi.parent_item_id IS NULL
   AND soi.qty_ordered > 0
   AND so.customer_id IS NOT NULL
-  AND so.state IN ('new', 'pending_payment', 'processing');
+    AND so.state IN ('new', 'pending_payment', 'processing')
+    AND EXISTS (SELECT 1 FROM oc_order oo WHERE oo.order_id = so.entity_id + 200000);
 
 -- ---------------------------------------------------------------
 -- 17. VIEW: oc_order_total (totais: subtotal + frete + total)
@@ -589,6 +589,7 @@ SELECT
     1 AS sort_order
 FROM sales_order so
 WHERE so.customer_id IS NOT NULL AND so.state IN ('new', 'pending_payment', 'processing')
+    AND EXISTS (SELECT 1 FROM oc_order oo WHERE oo.order_id = so.entity_id + 200000)
 UNION ALL
 SELECT
     (so.entity_id + 200000) * 10 + 2,
@@ -599,7 +600,8 @@ SELECT
     3
 FROM sales_order so
 WHERE so.customer_id IS NOT NULL AND so.state IN ('new', 'pending_payment', 'processing')
-AND so.shipping_amount > 0
+    AND EXISTS (SELECT 1 FROM oc_order oo WHERE oo.order_id = so.entity_id + 200000)
+    AND so.shipping_amount > 0
 UNION ALL
 SELECT
     (so.entity_id + 200000) * 10 + 3,
@@ -609,7 +611,8 @@ SELECT
     CAST(so.grand_total AS DECIMAL(15,4)),
     9
 FROM sales_order so
-WHERE so.customer_id IS NOT NULL AND so.state IN ('new', 'pending_payment', 'processing');
+WHERE so.customer_id IS NOT NULL AND so.state IN ('new', 'pending_payment', 'processing')
+    AND EXISTS (SELECT 1 FROM oc_order oo WHERE oo.order_id = so.entity_id + 200000);
 
 -- ---------------------------------------------------------------
 -- 18. VIEW: oc_customer (clientes Magento → formato OpenCart)

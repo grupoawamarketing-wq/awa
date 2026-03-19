@@ -3,8 +3,11 @@ declare(strict_types=1);
 
 namespace GrupoAwamotos\ERPIntegration\Cron;
 
+use GrupoAwamotos\B2B\Helper\Data as B2BHelper;
+use GrupoAwamotos\B2B\Model\Customer\Attribute\Source\ApprovalStatus;
 use GrupoAwamotos\ERPIntegration\Api\CustomerSyncInterface;
 use GrupoAwamotos\ERPIntegration\Helper\Data as Helper;
+use GrupoAwamotos\ERPIntegration\Model\CnpjResolver;
 use GrupoAwamotos\ERPIntegration\Model\ResourceModel\SyncLog as SyncLogResource;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Model\ResourceModel\Customer\CollectionFactory;
@@ -12,11 +15,12 @@ use Magento\Framework\App\State as AppState;
 use Psr\Log\LoggerInterface;
 
 /**
- * Cron: Preventive auto-link of Magento customers to ERP by CPF/CNPJ.
+ * Cron: Preventive auto-link of Magento B2B customers to ERP by CNPJ.
  *
- * Finds customers that have a taxvat (CPF/CNPJ) but no erp_code attribute,
- * looks them up in Sectra's FN_FORNECEDORES (read-only) and persists the
- * mapping in entity_map + customer attribute for future order placement.
+ * Finds customers that have a valid CNPJ in b2b_cnpj/taxvat but no erp_code
+ * attribute, looks them up in Sectra's FN_FORNECEDORES (read-only) and
+ * persists the mapping in entity_map + customer attribute for future order
+ * placement.
  *
  * Schedule: every 3 hours (0 * /3 * * *)
  * Batch: 200 customers per execution
@@ -29,6 +33,8 @@ class ResolveCustomerErpCodes
     private CollectionFactory $customerCollectionFactory;
     private CustomerRepositoryInterface $customerRepository;
     private SyncLogResource $syncLogResource;
+    private B2BHelper $b2bHelper;
+    private CnpjResolver $cnpjResolver;
     private Helper $helper;
     private LoggerInterface $logger;
     private AppState $appState;
@@ -38,6 +44,8 @@ class ResolveCustomerErpCodes
         CollectionFactory $customerCollectionFactory,
         CustomerRepositoryInterface $customerRepository,
         SyncLogResource $syncLogResource,
+        B2BHelper $b2bHelper,
+        CnpjResolver $cnpjResolver,
         Helper $helper,
         LoggerInterface $logger,
         AppState $appState
@@ -46,6 +54,8 @@ class ResolveCustomerErpCodes
         $this->customerCollectionFactory = $customerCollectionFactory;
         $this->customerRepository = $customerRepository;
         $this->syncLogResource = $syncLogResource;
+        $this->b2bHelper = $b2bHelper;
+        $this->cnpjResolver = $cnpjResolver;
         $this->helper = $helper;
         $this->logger = $logger;
         $this->appState = $appState;
@@ -63,7 +73,7 @@ class ResolveCustomerErpCodes
             // Area already set
         }
 
-        $this->logger->info('[ERP Cron] Starting customer ERP code resolution (auto-link by CPF/CNPJ)');
+        $this->logger->info('[ERP Cron] Starting customer ERP code resolution (auto-link by CNPJ)');
 
         $customers = $this->getCustomersWithoutErpCode();
         $total = count($customers);
@@ -79,10 +89,10 @@ class ResolveCustomerErpCodes
 
         foreach ($customers as $customerData) {
             $customerId = (int) $customerData['entity_id'];
-            $taxvat = (string) $customerData['taxvat'];
+            $cnpj = (string) $customerData['cnpj'];
 
             try {
-                $erpCustomer = $this->customerSync->getErpCustomerByTaxvat($taxvat);
+                $erpCustomer = $this->customerSync->getErpCustomerByCnpj($cnpj);
 
                 if (!$erpCustomer || empty($erpCustomer['CODIGO'])) {
                     $notFound++;
@@ -122,7 +132,7 @@ class ResolveCustomerErpCodes
             'sync',
             $errors > 0 ? 'partial' : 'success',
             sprintf(
-                'Auto-link por CPF/CNPJ: %d processados, %d vinculados, %d não encontrados, %d erros',
+                'Auto-link por CNPJ: %d processados, %d vinculados, %d não encontrados, %d erros',
                 $total,
                 $linked,
                 $notFound,
@@ -132,17 +142,23 @@ class ResolveCustomerErpCodes
     }
 
     /**
-     * Find customers that have taxvat filled but no erp_code attribute.
+     * Find customers that have a valid CNPJ but no erp_code attribute.
      * Uses raw collection to avoid loading full customer objects.
      *
-     * @return array<int, array{entity_id: int, taxvat: string}>
+     * @return array<int, array{entity_id: int, cnpj: string}>
      */
     private function getCustomersWithoutErpCode(): array
     {
         $collection = $this->customerCollectionFactory->create();
-        $collection->addAttributeToSelect(['taxvat', 'erp_code']);
-        $collection->addAttributeToFilter('taxvat', ['notnull' => true]);
-        $collection->addAttributeToFilter('taxvat', ['neq' => '']);
+        $collection->addAttributeToSelect(['b2b_cnpj', 'taxvat', 'erp_code', 'b2b_approval_status']);
+        $collection->addAttributeToFilter(
+            [
+                ['attribute' => 'b2b_cnpj', 'notnull' => true],
+                ['attribute' => 'taxvat', 'notnull' => true],
+            ]
+        );
+        $collection->addAttributeToFilter('b2b_approval_status', ['eq' => ApprovalStatus::STATUS_APPROVED]);
+        $collection->addFieldToFilter('group_id', ['in' => $this->getEligibleB2BGroupIds()]);
 
         // Filter: erp_code is null or empty or zero
         $collection->addAttributeToFilter(
@@ -158,15 +174,42 @@ class ResolveCustomerErpCodes
 
         $result = [];
         foreach ($collection as $customer) {
-            $taxvat = trim((string) $customer->getData('taxvat'));
-            if (strlen($taxvat) >= 11) { // CPF=11, CNPJ=14
+            $cnpj = $this->cnpjResolver->resolveFromValues(
+                (string) $customer->getData('b2b_cnpj'),
+                (string) $customer->getData('taxvat')
+            );
+            if ($cnpj !== '') {
                 $result[] = [
                     'entity_id' => (int) $customer->getId(),
-                    'taxvat' => $taxvat,
+                    'cnpj' => $cnpj,
                 ];
             }
         }
 
         return $result;
+    }
+
+    /**
+     * @return int[]
+     */
+    private function getEligibleB2BGroupIds(): array
+    {
+        $groupIds = [
+            $this->b2bHelper->getGroupIdByCode('b2b_atacado'),
+            $this->b2bHelper->getGroupIdByCode('b2b_vip'),
+            $this->b2bHelper->getGroupIdByCode('b2b_revendedor'),
+        ];
+
+        $groupIds = array_values(array_unique(array_filter($groupIds, static fn ($groupId): bool => is_int($groupId) && $groupId > 0)));
+
+        if ($groupIds !== []) {
+            return $groupIds;
+        }
+
+        return [
+            B2BHelper::GROUP_B2B_ATACADO,
+            B2BHelper::GROUP_B2B_VIP,
+            B2BHelper::GROUP_B2B_REVENDEDOR,
+        ];
     }
 }

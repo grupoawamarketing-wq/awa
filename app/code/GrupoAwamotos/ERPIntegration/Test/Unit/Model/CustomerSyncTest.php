@@ -149,6 +149,35 @@ class CustomerSyncTest extends TestCase
         $this->assertNotNull($result);
     }
 
+    public function testGetErpCustomerByCnpjUsesOnlyCgcLookup(): void
+    {
+        $expectedData = [
+            'CODIGO' => 321,
+            'CGC' => '12.345.678/0001-90',
+        ];
+
+        $this->connection->expects($this->once())
+            ->method('fetchOne')
+            ->with(
+                $this->stringContains('f.CGC'),
+                [':cnpj' => '12345678000190']
+            )
+            ->willReturn($expectedData);
+
+        $result = $this->customerSync->getErpCustomerByCnpj('12.345.678/0001-90');
+
+        $this->assertSame($expectedData, $result);
+    }
+
+    public function testGetErpCustomerByCnpjRejectsCpfLikeDocument(): void
+    {
+        $this->connection->expects($this->never())->method('fetchOne');
+
+        $result = $this->customerSync->getErpCustomerByCnpj('123.456.789-01');
+
+        $this->assertNull($result);
+    }
+
     // ========== getErpCustomerByCode Tests ==========
 
     public function testGetErpCustomerByCodeReturnsData(): void
@@ -242,6 +271,38 @@ class CustomerSyncTest extends TestCase
         $this->assertArrayHasKey('created', $result);
         $this->assertArrayHasKey('updated', $result);
         $this->assertArrayHasKey('errors', $result);
+    }
+
+    public function testSyncAllDoesNotAttemptRollbackOnPerCustomerFailure(): void
+    {
+        $this->helper->method('isCustomerSyncEnabled')->willReturn(true);
+
+        $this->connection->method('fetchOne')
+            ->willReturnCallback(function ($sql) {
+                if (strpos($sql, 'COUNT') !== false) {
+                    return ['total' => 1];
+                }
+
+                return null;
+            });
+        $this->connection->method('query')
+            ->willReturn([
+                [
+                    'CODIGO' => 9,
+                    'EMAIL' => 'erro@test.com',
+                    'RAZAO' => 'Cliente Erro',
+                    'CKPESSOA' => 'F',
+                ],
+            ]);
+
+        $this->customerValidator->method('validate')
+            ->willThrowException(new \RuntimeException('falha de validacao'));
+
+        $this->connection->expects($this->never())->method('rollback');
+
+        $result = $this->customerSync->syncAll();
+
+        $this->assertSame(1, $result['errors']);
     }
 
     public function testSyncAllSkipsCustomersWithoutEmailChange(): void

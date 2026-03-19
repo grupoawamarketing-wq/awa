@@ -6,6 +6,7 @@ namespace GrupoAwamotos\ERPIntegration\Model;
 use GrupoAwamotos\ERPIntegration\Api\OrderSyncInterface;
 use GrupoAwamotos\ERPIntegration\Api\ConnectionInterface;
 use GrupoAwamotos\ERPIntegration\Helper\Data as Helper;
+use GrupoAwamotos\ERPIntegration\Model\CnpjResolver;
 use GrupoAwamotos\ERPIntegration\Model\ResourceModel\SyncLog as SyncLogResource;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
@@ -42,6 +43,7 @@ class OrderSync implements OrderSyncInterface
     private OrderConverter $orderConverter;
     private SearchCriteriaBuilder $searchCriteriaBuilder;
     private Transaction $transaction;
+    private CnpjResolver $cnpjResolver;
     private LoggerInterface $logger;
 
     public function __construct(
@@ -54,6 +56,7 @@ class OrderSync implements OrderSyncInterface
         OrderConverter $orderConverter,
         SearchCriteriaBuilder $searchCriteriaBuilder,
         Transaction $transaction,
+        CnpjResolver $cnpjResolver,
         LoggerInterface $logger
     ) {
         $this->connection = $connection;
@@ -65,6 +68,7 @@ class OrderSync implements OrderSyncInterface
         $this->orderConverter = $orderConverter;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->transaction = $transaction;
+        $this->cnpjResolver = $cnpjResolver;
         $this->logger = $logger;
     }
 
@@ -81,19 +85,37 @@ class OrderSync implements OrderSyncInterface
         ];
 
         try {
+            $existingErpOrderId = $this->getErpOrderIdByMagentoId((int) $order->getEntityId());
+            if ($existingErpOrderId !== null) {
+                $result['success'] = true;
+                $result['erp_order_id'] = $existingErpOrderId;
+                $result['message'] = sprintf(
+                    'Pedido já sincronizado anteriormente com o ERP. ID ERP: %d',
+                    $existingErpOrderId
+                );
+                $result['execution_time'] = round((microtime(true) - $startTime) * 1000, 2);
+
+                $this->logger->info('[ERP] Order already synced, skipping duplicate export', [
+                    'order_id' => $order->getIncrementId(),
+                    'erp_order_id' => $existingErpOrderId,
+                ]);
+
+                return $result;
+            }
+
             $erpClientCode = $this->resolveErpClientCode($order);
 
             if ($erpClientCode === 0 && !self::ALLOW_GUEST_ORDERS) {
-                $taxvat = $order->getCustomerTaxvat() ?: 'não informado';
+                $cnpj = $this->extractOrderCnpj($order);
                 $result['message'] = sprintf(
-                    'Cliente não encontrado no ERP. CPF/CNPJ: %s. ' .
+                    'Cliente não encontrado no ERP. CNPJ: %s. ' .
                     'Cadastre o cliente no ERP antes de sincronizar o pedido.',
-                    $taxvat
+                    $cnpj !== '' ? $cnpj : 'não informado'
                 );
 
                 $this->logger->warning('[ERP] Order rejected - customer not found', [
                     'order_id' => $order->getIncrementId(),
-                    'customer_taxvat' => $taxvat,
+                    'customer_cnpj' => $cnpj !== '' ? $cnpj : null,
                     'customer_id' => $order->getCustomerId(),
                 ]);
 
@@ -157,20 +179,7 @@ class OrderSync implements OrderSyncInterface
                     'client_code' => $erpClientCode,
                 ]);
 
-                $this->syncLogResource->addLog(
-                    'order',
-                    'export',
-                    'success',
-                    $result['message'],
-                    (string) $erpOrderId,
-                    (int) $order->getEntityId()
-                );
-
-                $this->syncLogResource->setEntityMap(
-                    'order',
-                    (string) $erpOrderId,
-                    (int) $order->getEntityId()
-                );
+                $this->finalizeSuccessfulSync((int) $order->getEntityId(), $erpOrderId, $result['message']);
             } catch (\Exception $e) {
                 try {
                     $this->connection->rollback();
@@ -239,6 +248,32 @@ class OrderSync implements OrderSyncInterface
         $result['execution_time'] = round((microtime(true) - $startTime) * 1000, 2);
 
         return $result;
+    }
+
+    private function finalizeSuccessfulSync(int $magentoOrderId, int $erpOrderId, string $message): void
+    {
+        try {
+            $this->syncLogResource->setEntityMap(
+                'order',
+                (string) $erpOrderId,
+                $magentoOrderId
+            );
+
+            $this->syncLogResource->addLog(
+                'order',
+                'export',
+                'success',
+                $message,
+                (string) $erpOrderId,
+                $magentoOrderId
+            );
+        } catch (\Exception $e) {
+            $this->logger->error('[ERP] Order exported but post-commit persistence failed', [
+                'magento_order_id' => $magentoOrderId,
+                'erp_order_id' => $erpOrderId,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     public function syncOrderStatuses(): array
@@ -784,14 +819,6 @@ class OrderSync implements OrderSyncInterface
 
     private function resolveErpClientCode(OrderInterface $order): int
     {
-        $taxvat = $order->getCustomerTaxvat();
-        if ($taxvat) {
-            $erpCustomer = $this->customerSync->getErpCustomerByTaxvat($taxvat);
-            if ($erpCustomer) {
-                return (int) $erpCustomer['CODIGO'];
-            }
-        }
-
         if ($order->getCustomerId()) {
             $erpCode = $this->syncLogResource->getErpCodeByMagentoId('customer', (int) $order->getCustomerId());
             if ($erpCode) {
@@ -799,7 +826,27 @@ class OrderSync implements OrderSyncInterface
             }
         }
 
+        $cnpj = $this->extractOrderCnpj($order);
+        if ($cnpj !== '') {
+            $erpCustomer = $this->customerSync->getErpCustomerByCnpj($cnpj);
+            if ($erpCustomer) {
+                return (int) $erpCustomer['CODIGO'];
+            }
+        }
+
         return self::GUEST_CLIENT_CODE;
+    }
+
+    private function extractOrderCnpj(OrderInterface $order): string
+    {
+        if ($order instanceof Order) {
+            $cnpj = $this->cnpjResolver->normalize((string) $order->getData('b2b_cnpj'));
+            if ($cnpj !== '') {
+                return $cnpj;
+            }
+        }
+
+        return $this->cnpjResolver->normalize((string) ($order->getCustomerTaxvat() ?? ''));
     }
 
     private function getValidOrderItems(OrderInterface $order): array

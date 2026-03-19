@@ -15,15 +15,9 @@ use Psr\Log\LoggerInterface;
  * Consumer for Order Sync Queue Messages
  *
  * Processes orders from the queue and sends them to the ERP.
- * Includes retry logic with exponential backoff.
  */
 class OrderSyncConsumer
 {
-    /**
-     * Base delay for retry backoff (in seconds)
-     */
-    private const RETRY_BASE_DELAY = 30;
-
     private OrderSyncInterface $orderSync;
     private OrderSyncPublisher $publisher;
     private OrderRepositoryInterface $orderRepository;
@@ -150,51 +144,24 @@ class OrderSyncConsumer
     }
 
     /**
-     * Process order sync message from retry queue
-     * Includes exponential backoff delay
+     * Process order sync message from retry queue.
+     *
+     * Legacy retry messages are migrated to the local schedule so workers never
+     * block waiting for backoff to expire.
      */
     public function processRetry(OrderSyncMessageInterface $message): void
     {
-        $orderId = $message->getOrderId();
-        $incrementId = $message->getIncrementId();
-        $retryCount = $message->getRetryCount();
-
-        $this->logger->info('[ERP Queue Consumer] Processing retry', [
-            'order_id' => $orderId,
-            'increment_id' => $incrementId,
-            'retry_count' => $retryCount,
+        $this->logger->info('[ERP Queue Consumer] Migrating legacy retry message to scheduled retry', [
+            'order_id' => $message->getOrderId(),
+            'increment_id' => $message->getIncrementId(),
+            'retry_count' => $message->getRetryCount(),
             'last_error' => $message->getLastError(),
         ]);
 
-        // Calculate backoff delay: base * 2^(retryCount-1)
-        $delaySeconds = self::RETRY_BASE_DELAY * (2 ** ($retryCount - 1));
-        $delaySeconds = min($delaySeconds, 3600); // Cap at 1 hour
-
-        // Check if enough time has passed since queuing
-        $queuedAt = strtotime($message->getQueuedAt());
-        $elapsedSeconds = time() - $queuedAt;
-
-        if ($elapsedSeconds < $delaySeconds) {
-            // Not enough time has passed, sleep for remaining time
-            $sleepTime = min($delaySeconds - $elapsedSeconds, 60); // Max 60 second sleep
-            $this->logger->info('[ERP Queue Consumer] Waiting for backoff delay', [
-                'order_id' => $orderId,
-                'delay_seconds' => $delaySeconds,
-                'elapsed_seconds' => $elapsedSeconds,
-                'sleeping_for' => $sleepTime,
-            ]);
-            sleep($sleepTime);
-        }
-
-        // Process like normal
-        $this->process($message);
-    }
-
-    /**
-     * Get estimated delay for a retry count
-     */
-    public function getRetryDelay(int $retryCount): int
-    {
-        return min(self::RETRY_BASE_DELAY * (2 ** ($retryCount - 1)), 3600);
+        $this->publisher->scheduleRetry(
+            $message,
+            $message->getLastError() ?? 'Retry legado migrado da fila para agenda local.',
+            max(1, $message->getRetryCount())
+        );
     }
 }

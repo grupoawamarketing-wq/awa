@@ -5,23 +5,18 @@ namespace GrupoAwamotos\ERPIntegration\Cron;
 
 use GrupoAwamotos\ERPIntegration\Api\CustomerSyncInterface;
 use GrupoAwamotos\ERPIntegration\Helper\Data as Helper;
+use GrupoAwamotos\ERPIntegration\Model\CnpjResolver;
 use GrupoAwamotos\ERPIntegration\Model\ResourceModel\SyncLog as SyncLogResource;
 use Magento\Customer\Api\CustomerRepositoryInterface;
-use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollectionFactory;
+use Magento\Customer\Api\Data\CustomerInterface;
+use Magento\Framework\App\Area;
 use Magento\Framework\App\State as AppState;
+use Magento\Sales\Model\Order;
+use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollectionFactory;
 use Psr\Log\LoggerInterface;
 
 /**
- * Cron: Retry resolution of ERP codes for orders with unlinked customers.
- *
- * Finds orders in 'pending' or 'processing' status where customer_erp_code is
- * null/empty/zero, then attempts to resolve erp_code via CPF/CNPJ lookup in
- * Sectra (read-only) and stamps it on the order + customer attribute.
- *
- * This ensures that when Sectra calls getPendingOrders() next time, these orders
- * will pass the erp_code check and appear in the "orders" list instead of "held".
- *
- * Schedule: every 30 minutes
+ * Cron: tenta resolver pedidos retidos por ausência de vínculo ERP.
  */
 class RetryHeldOrders
 {
@@ -31,6 +26,7 @@ class RetryHeldOrders
     private OrderCollectionFactory $orderCollectionFactory;
     private CustomerRepositoryInterface $customerRepository;
     private SyncLogResource $syncLogResource;
+    private CnpjResolver $cnpjResolver;
     private Helper $helper;
     private LoggerInterface $logger;
     private AppState $appState;
@@ -40,6 +36,7 @@ class RetryHeldOrders
         OrderCollectionFactory $orderCollectionFactory,
         CustomerRepositoryInterface $customerRepository,
         SyncLogResource $syncLogResource,
+        CnpjResolver $cnpjResolver,
         Helper $helper,
         LoggerInterface $logger,
         AppState $appState
@@ -48,6 +45,7 @@ class RetryHeldOrders
         $this->orderCollectionFactory = $orderCollectionFactory;
         $this->customerRepository = $customerRepository;
         $this->syncLogResource = $syncLogResource;
+        $this->cnpjResolver = $cnpjResolver;
         $this->helper = $helper;
         $this->logger = $logger;
         $this->appState = $appState;
@@ -60,12 +58,10 @@ class RetryHeldOrders
         }
 
         try {
-            $this->appState->setAreaCode(\Magento\Framework\App\Area::AREA_ADMINHTML);
-        } catch (\Exception $e) {
-            // Area already set
+            $this->appState->setAreaCode(Area::AREA_ADMINHTML);
+        } catch (\Exception $exception) {
+            unset($exception);
         }
-
-        $this->logger->info('[ERP Cron] Starting held orders retry (ERP code resolution)');
 
         $orders = $this->getOrdersWithoutErpCode();
         $total = count($orders);
@@ -80,60 +76,19 @@ class RetryHeldOrders
         $errors = 0;
 
         foreach ($orders as $order) {
-            $incrementId = $order->getIncrementId();
-            $customerId = (int) $order->getCustomerId();
-
-            if (!$customerId) {
-                $unresolvable++;
-                continue;
-            }
-
             try {
-                // Step 1: Check if customer now has erp_code (may have been linked by other cron)
-                $erpCode = $this->getResolvedErpCode($customerId);
-
-                // Step 2: If not, try lookup by CPF/CNPJ
-                if (!$erpCode) {
-                    $taxvat = $order->getCustomerTaxvat();
-                    if (empty($taxvat)) {
-                        try {
-                            $customer = $this->customerRepository->getById($customerId);
-                            $taxvat = $customer->getTaxvat();
-                        } catch (\Exception $e) {
-                            // Customer may have been deleted
-                        }
-                    }
-
-                    if (!empty($taxvat)) {
-                        $erpCustomer = $this->customerSync->getErpCustomerByTaxvat($taxvat);
-                        if ($erpCustomer && !empty($erpCustomer['CODIGO'])) {
-                            $erpCode = (int) $erpCustomer['CODIGO'];
-                            $this->customerSync->linkMagentoToErp($customerId, $erpCode);
-                        }
-                    }
-                }
-
-                // Step 3: Stamp erp_code on order if resolved
-                if ($erpCode) {
-                    $order->setData('customer_erp_code', (string) $erpCode);
-                    $order->addCommentToStatusHistory(
-                        __('[ERP Auto] Código ERP %1 vinculado automaticamente por CPF/CNPJ', $erpCode)
-                    );
-                    $order->save();
-
+                if ($this->resolveOrder($order)) {
                     $resolved++;
-                    $this->logger->info('[ERP Cron] Resolved held order', [
-                        'increment_id' => $incrementId,
-                        'customer_id' => $customerId,
-                        'erp_code' => $erpCode,
-                    ]);
-                } else {
-                    $unresolvable++;
+                    continue;
                 }
-            } catch (\Exception $e) {
+
+                $unresolvable++;
+            } catch (\Exception $exception) {
                 $errors++;
-                $this->logger->warning('[ERP Cron] Failed to resolve held order ' . $incrementId, [
-                    'error' => $e->getMessage(),
+                $this->logger->warning('[ERP Cron] Failed to resolve held order', [
+                    'increment_id' => $order->getIncrementId(),
+                    'order_id' => (int) $order->getEntityId(),
+                    'error' => $exception->getMessage(),
                 ]);
             }
         }
@@ -145,11 +100,11 @@ class RetryHeldOrders
             'errors' => $errors,
         ]);
 
-        if ($resolved > 0) {
+        if ($resolved > 0 || $errors > 0) {
             $this->syncLogResource->addLog(
                 'order_held_retry',
                 'sync',
-                'success',
+                $errors > 0 ? 'partial' : 'success',
                 sprintf(
                     'Retry pedidos retidos: %d resolvidos de %d total (%d sem resolução, %d erros)',
                     $resolved,
@@ -162,54 +117,119 @@ class RetryHeldOrders
     }
 
     /**
-     * Get orders in active statuses that don't have an ERP code stamped.
-     *
-     * Usa getSelect()->where() em vez do addFieldToFilter() com arrays aninhados para
-     * evitar o TypeError "Cannot access offset of type array in isset or empty" no PHP 8.4.
-     *
-     * @return \Magento\Sales\Model\Order[]
+     * @return Order[]
      */
     private function getOrdersWithoutErpCode(): array
     {
         $collection = $this->orderCollectionFactory->create();
         $collection->addFieldToFilter('status', ['in' => ['pending', 'processing', 'new']]);
         $collection->addFieldToFilter('customer_id', ['notnull' => true]);
-
-        // OR: customer_erp_code IS NULL, empty string, or '0'
-        // Usando where() direto para evitar TypeError do PHP 8.4 com addFieldToFilter nested arrays
         $collection->getSelect()->where(
             'main_table.customer_erp_code IS NULL'
             . ' OR main_table.customer_erp_code = \'\''
             . ' OR main_table.customer_erp_code = \'0\''
         );
         $collection->setPageSize(self::BATCH_SIZE);
-        $collection->setOrder('created_at', 'ASC'); // Oldest first
+        $collection->setOrder('created_at', 'ASC');
 
         return $collection->getItems();
     }
 
-    /**
-     * Check if customer already has erp_code (attribute or entity_map).
-     */
+    private function resolveOrder(Order $order): bool
+    {
+        $customerId = (int) $order->getCustomerId();
+        if ($customerId <= 0) {
+            return false;
+        }
+
+        $erpCode = $this->getResolvedErpCode($customerId);
+        if (!$erpCode) {
+            $customer = $this->getCustomer($customerId);
+            $cnpj = $this->extractCnpj($order, $customer);
+
+            if ($cnpj === '') {
+                return false;
+            }
+
+            $erpCustomer = $this->customerSync->getErpCustomerByCnpj($cnpj);
+            if (!$erpCustomer || empty($erpCustomer['CODIGO'])) {
+                return false;
+            }
+
+            $erpCode = (int) $erpCustomer['CODIGO'];
+            if ($erpCode <= 0) {
+                return false;
+            }
+
+            $this->customerSync->linkMagentoToErp($customerId, $erpCode);
+        }
+
+        $order->setData('customer_erp_code', (string) $erpCode);
+        $order->addCommentToStatusHistory(
+            __('[ERP Auto] Código ERP %1 vinculado automaticamente por CNPJ', $erpCode)
+        );
+        $order->save();
+
+        $this->logger->info('[ERP Cron] Resolved held order', [
+            'increment_id' => $order->getIncrementId(),
+            'customer_id' => $customerId,
+            'erp_code' => $erpCode,
+        ]);
+
+        return true;
+    }
+
     private function getResolvedErpCode(int $customerId): ?int
     {
-        // Check entity_map
         $erpCode = $this->syncLogResource->getErpCodeByMagentoId('customer', $customerId);
-        if ($erpCode && is_numeric($erpCode) && (int) $erpCode > 0) {
+        if ($erpCode !== null && is_numeric($erpCode) && (int) $erpCode > 0) {
             return (int) $erpCode;
         }
 
-        // Check customer attribute
-        try {
-            $customer = $this->customerRepository->getById($customerId);
-            $attr = $customer->getCustomAttribute('erp_code');
-            if ($attr && $attr->getValue() && is_numeric($attr->getValue()) && (int) $attr->getValue() > 0) {
-                return (int) $attr->getValue();
-            }
-        } catch (\Exception $e) {
-            // Customer may not exist
+        $customer = $this->getCustomer($customerId);
+        if ($customer === null) {
+            return null;
+        }
+
+        $attribute = $customer->getCustomAttribute('erp_code');
+        if ($attribute && is_numeric((string) $attribute->getValue()) && (int) $attribute->getValue() > 0) {
+            return (int) $attribute->getValue();
         }
 
         return null;
+    }
+
+    private function getCustomer(int $customerId): ?CustomerInterface
+    {
+        try {
+            return $this->customerRepository->getById($customerId);
+        } catch (\Exception $exception) {
+            return null;
+        }
+    }
+
+    private function extractCnpj(Order $order, ?CustomerInterface $customer): string
+    {
+        $cnpj = $this->cnpjResolver->normalize((string) ($order->getData('b2b_cnpj') ?? ''));
+        if ($cnpj !== '') {
+            return $cnpj;
+        }
+
+        $cnpj = $this->cnpjResolver->normalize((string) ($order->getCustomerTaxvat() ?? ''));
+        if ($cnpj !== '') {
+            return $cnpj;
+        }
+
+        if ($customer === null) {
+            return '';
+        }
+
+        $attribute = $customer->getCustomAttribute('b2b_cnpj');
+        $cnpj = $this->cnpjResolver->normalize((string) ($attribute ? $attribute->getValue() : ''));
+        if ($cnpj !== '') {
+            return $cnpj;
+        }
+
+        return $this->cnpjResolver->normalize((string) ($customer->getTaxvat() ?? ''));
     }
 }

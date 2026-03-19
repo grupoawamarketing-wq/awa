@@ -339,6 +339,28 @@ class Data extends AbstractHelper
         );
     }
 
+    public function getOrderImportMode(): string
+    {
+        $mode = (string) ($this->scopeConfig->getValue(
+            self::XML_PREFIX . 'sync_orders/import_mode',
+            ScopeInterface::SCOPE_STORE
+        ) ?: 'opencart_bridge');
+
+        return in_array($mode, ['opencart_bridge', 'api_pull'], true)
+            ? $mode
+            : 'opencart_bridge';
+    }
+
+    public function isOpenCartBridgeMode(): bool
+    {
+        return $this->getOrderImportMode() === 'opencart_bridge';
+    }
+
+    public function requiresSectraClientRegistration(): bool
+    {
+        return !$this->isOpenCartBridgeMode();
+    }
+
     public function sendOrderOnPlace(): bool
     {
         return $this->scopeConfig->isSetFlag(

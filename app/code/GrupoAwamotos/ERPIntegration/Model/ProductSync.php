@@ -82,8 +82,11 @@ class ProductSync implements ProductSyncInterface
 
         $result = $this->connection->fetchOne($sql, []);
 
-        // fetchOne() returns a scalar (first column of first row)
-        return $result ? (int) $result : 0;
+        if (is_array($result)) {
+            return (int) ($result['total'] ?? 0);
+        }
+
+        return $result !== null ? (int) $result : 0;
     }
 
     public function getErpProducts(int $limit = 0, int $offset = 0): array
@@ -259,7 +262,9 @@ class ProductSync implements ProductSyncInterface
                     ]);
                 }
 
+                $this->connection->beginTransaction();
                 $syncResult = $this->syncSingleProduct($erpProduct, $websiteIds, $validationResult);
+                $this->connection->commit();
 
                 switch ($syncResult) {
                     case 'created':
@@ -275,6 +280,7 @@ class ProductSync implements ProductSyncInterface
                         break;
                 }
             } catch (\Exception $e) {
+                try { $this->connection->rollback(); } catch (\Exception $rbEx) { $this->logger->error("[ERP] Rollback error: " . $rbEx->getMessage()); }
                 $batchResult['errors']++;
                 $this->logger->error('[ERP] Product sync error', [
                     'sku' => $erpProduct['CODIGO'] ?? '?',

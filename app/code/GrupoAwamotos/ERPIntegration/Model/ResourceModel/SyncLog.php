@@ -59,41 +59,20 @@ class SyncLog extends AbstractDb
 
         $connection = $this->getConnection();
         $now = (new \DateTime())->format('Y-m-d H:i:s');
+        $table = $connection->getTableName('grupoawamotos_erp_entity_map');
 
-        // Check if exact mapping already exists
-        $existing = $connection->fetchOne(
-            $connection->select()
-                ->from('grupoawamotos_erp_entity_map', 'map_id')
-                ->where('entity_type = ?', $entityType)
-                ->where('erp_code = ?', $erpCode)
+        // Atomic upsert — avoids race condition between SELECT + INSERT/UPDATE
+        $connection->insertOnDuplicate(
+            $table,
+            [
+                'entity_type' => $entityType,
+                'erp_code' => $erpCode,
+                'magento_entity_id' => $magentoEntityId,
+                'last_sync_at' => $now,
+                'sync_hash' => $syncHash,
+            ],
+            ['magento_entity_id', 'last_sync_at', 'sync_hash']
         );
-
-        if ($existing) {
-            // Update existing mapping
-            $connection->update(
-                'grupoawamotos_erp_entity_map',
-                [
-                    'magento_entity_id' => $magentoEntityId,
-                    'last_sync_at' => $now,
-                    'sync_hash' => $syncHash,
-                ],
-                [
-                    'entity_type = ?' => $entityType,
-                    'erp_code = ?' => $erpCode,
-                ]
-            );
-        } else {
-            $connection->insert(
-                'grupoawamotos_erp_entity_map',
-                [
-                    'entity_type' => $entityType,
-                    'erp_code' => $erpCode,
-                    'magento_entity_id' => $magentoEntityId,
-                    'last_sync_at' => $now,
-                    'sync_hash' => $syncHash,
-                ]
-            );
-        }
     }
 
     public function getErpCodeByMagentoId(string $entityType, int $magentoEntityId): ?string

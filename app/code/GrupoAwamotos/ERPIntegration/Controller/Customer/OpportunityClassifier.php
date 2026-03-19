@@ -9,6 +9,7 @@ use Magento\Customer\Model\Session as CustomerSession;
 use GrupoAwamotos\ERPIntegration\Model\PurchaseHistory;
 use GrupoAwamotos\ERPIntegration\Model\ProductSuggestion;
 use GrupoAwamotos\ERPIntegration\Model\Opportunity\Classifier;
+use GrupoAwamotos\ERPIntegration\Model\CnpjResolver;
 use GrupoAwamotos\ERPIntegration\Helper\Data as Helper;
 use Magento\Framework\App\RequestInterface;
 
@@ -22,6 +23,7 @@ class OpportunityClassifier implements HttpGetActionInterface
     private PurchaseHistory $purchaseHistory;
     private ProductSuggestion $productSuggestion;
     private Classifier $classifier;
+    private CnpjResolver $cnpjResolver;
     private Helper $helper;
     private RequestInterface $request;
 
@@ -31,6 +33,7 @@ class OpportunityClassifier implements HttpGetActionInterface
         PurchaseHistory $purchaseHistory,
         ProductSuggestion $productSuggestion,
         Classifier $classifier,
+        CnpjResolver $cnpjResolver,
         Helper $helper,
         RequestInterface $request
     ) {
@@ -39,6 +42,7 @@ class OpportunityClassifier implements HttpGetActionInterface
         $this->purchaseHistory = $purchaseHistory;
         $this->productSuggestion = $productSuggestion;
         $this->classifier = $classifier;
+        $this->cnpjResolver = $cnpjResolver;
         $this->helper = $helper;
         $this->request = $request;
     }
@@ -62,7 +66,7 @@ class OpportunityClassifier implements HttpGetActionInterface
         }
 
         $customer = $this->customerSession->getCustomer();
-        $cnpj = $customer->getData('b2b_cnpj') ?: $customer->getTaxvat();
+        $cnpj = $this->resolveCustomerCnpj($customer);
 
         if (empty($cnpj)) {
             return $result->setData([
@@ -126,5 +130,13 @@ class OpportunityClassifier implements HttpGetActionInterface
             'opportunity_type' => $opportunityType,
             'type_labels' => Classifier::TYPES,
         ]);
+    }
+
+    private function resolveCustomerCnpj(object $customer): string
+    {
+        return $this->cnpjResolver->resolveFromValues(
+            (string) $customer->getData('b2b_cnpj'),
+            (string) $customer->getTaxvat()
+        );
     }
 }
