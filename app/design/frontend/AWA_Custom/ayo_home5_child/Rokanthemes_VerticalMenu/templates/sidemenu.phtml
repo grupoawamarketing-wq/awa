@@ -35,11 +35,15 @@ if (!empty($_config['general']['enable'])):
     <ul id="<?= $block->escapeHtmlAttr($menuId) ?>"
         class="togge-menu list-category-dropdown navigation__list navigation__list--level0 todasascategorias"
         data-level="0"
-        data-limit-show="<?= $limitShow ?>">
+        data-limit-show="<?= (int)$limitShow ?>">
         <?= /** @noEscape */ $_menu ?>
         <?php
             $_bgBlock  = $block->getLayout()->createBlock(\Magento\Cms\Block\Block::class);
-            $_bgImages = $_bgBlock ? trim($_bgBlock->setBlockId('vertical_background_images')->toHtml()) : '';
+            $_bgImages = '';
+
+            if ($_bgBlock instanceof \Magento\Cms\Block\Block) {
+                $_bgImages = trim($_bgBlock->setBlockId('vertical_background_images')->toHtml());
+            }
         ?>
         <?php if ($_bgImages !== ''): ?>
         <li class="vertical-bg-img"><?= /** @noEscape */ $_bgImages ?></li>
@@ -62,12 +66,13 @@ if (!empty($_config['general']['enable'])):
 
 <script type="text/x-magento-init">
 {
-    "[data-role='awa-vertical-menu']": {
+    ".navigation.verticalmenu.side-verticalmenu.navigation--mueller[data-role='awa-vertical-menu']": {
         "js/awa-vertical-menu-mueller": {
             "desktopBreakpoint": 992,
             "openModeDesktop": "hover",
             "openModeMobile": "click",
             "disableOverlay": true,
+            "keepOpenOnHomeDesktop": false,
             "limitShow": <?= (int)$limitShow ?>
         }
     }

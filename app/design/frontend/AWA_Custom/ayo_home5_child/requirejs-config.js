@@ -11,6 +11,8 @@ var config = {
         }
     },
     paths: {
-        'rokanthemes/timecircles': 'js/rokanthemes/timecircles'
+        'rokanthemes/timecircles': 'js/rokanthemes/timecircles',
+        // Restore Owl Carousel explicitly for Rokanthemes modules that hardcode the path
+        'rokanthemes/owl': 'Rokanthemes_Themeoption/js/owl.carousel'
     }
 };

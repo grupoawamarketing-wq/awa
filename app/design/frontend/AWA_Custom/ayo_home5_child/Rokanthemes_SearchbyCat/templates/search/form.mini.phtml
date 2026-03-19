@@ -8,70 +8,80 @@
 // @codingStandardsIgnoreFile
 ?>
 <?php
-/** @var $block \Rokanthemes\SearchbyCat\Block\Form */
-/** @var $helper \Magento\Search\Helper\Data */
-$helper = $this->helper('Magento\Search\Helper\Data');
+/** @var \Rokanthemes\SearchbyCat\Block\Form $block */
+/** @var \Rokanthemes\SearchbyCat\Block\Form $this */
+/** @var \Magento\Search\Helper\Data $searchHelper */
+$searchHelper = $this->helper(\Magento\Search\Helper\Data::class);
 $searchDelay = 500;
-$searchSuiteUrl = $block->getUrl('rokanthemes_searchsuiteautocomplete/ajax/index');
+$searchSuiteUrl = $this->getUrl('rokanthemes_searchsuiteautocomplete/ajax/index');
 ?>
-<div class="block block-search" role="search" aria-label="<?php echo $block->escapeHtmlAttr(__('Busca de produtos')) ?>">
+<div class="block block-search" role="search" aria-label="<?php echo $this->escapeHtmlAttr(__('Busca de produtos')) ?>">
     <!-- AWAMOTOS_SEARCHBAR_V2 -->
     <div class="block-content">
-        <form class="form minisearch search-content cat-search" id="search_mini_form" action="<?php echo $block->escapeUrl($helper->getResultUrl()) ?>" method="get">
+        <form class="form minisearch search-content cat-search" id="search_mini_form" action="<?php echo $this->escapeUrl($searchHelper->getResultUrl()) ?>" method="get">
             <div class="field-by-cat-search">
-                <select name="cat" id="choose_category" aria-label="<?php echo $block->escapeHtmlAttr(__('Filtrar por categoria')) ?>">
-                    <option value=""><?php echo $block->escapeHtml(__('Todas as Categorias')) ?></option>
-                    <?php $categories = $block->getCategories();
+                <select name="cat" id="choose_category" aria-label="<?php echo $this->escapeHtmlAttr(__('Filtrar por categoria')) ?>">
+                    <option value=""><?php echo $this->escapeHtml(__('Todas as Categorias')) ?></option>
+                    <?php $categories = $this->getCategories();
                     foreach ($categories as $cat): ?>
-                    <option value="<?php echo (int)$cat->getId() ?>"<?php echo (isset($_GET['cat']) && $_GET['cat'] == $cat->getId()) ? ' selected="selected"' : '' ?>><?php echo $block->escapeHtml($cat->getName()) ?></option>
+                    <option value="<?php echo (int)$cat->getId() ?>"<?php echo (isset($_GET['cat']) && $_GET['cat'] == $cat->getId()) ? ' selected="selected"' : '' ?>><?php echo $this->escapeHtml($cat->getName()) ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
             <div class="field search">
-                <label class="label" for="search" data-role="minisearch-label">
-                    <span><?php echo $block->escapeHtml(__('Buscar')) ?></span>
+                <label class="label" for="search" id="awa-search-label" data-role="minisearch-label">
+                    <span><?php echo $this->escapeHtml(__('Buscar')) ?></span>
                 </label>
+                <span id="awa-search-help" class="awa-sr-only">
+                    <?php echo $this->escapeHtml(__('Digite ao menos 2 caracteres para ver sugestões e use as setas para navegar nos resultados.')) ?>
+                </span>
                 <div class="control">
                     <input id="search"
                            data-mage-init='{"quickSearch":{
                                "formSelector":"#search_mini_form",
-                               "url":"<?php echo $block->escapeUrl($block->getUrl('search/ajax/suggest')) ?>",
+                               "url":"<?php echo $this->escapeUrl($this->getUrl('search/ajax/suggest')) ?>",
                                "destinationSelector":"#search_autocomplete"}
                            }'
                            type="search"
-                           name="<?php echo $block->escapeHtmlAttr($helper->getQueryParamName()) ?>"
-                           value="<?php echo $block->escapeHtmlAttr($helper->getEscapedQueryText()) ?>"
-                           placeholder="<?php echo $block->escapeHtmlAttr(__('Busque por SKU, Código EAN ou Nome da Peça...')) ?>"
+                           name="<?php echo $this->escapeHtmlAttr($searchHelper->getQueryParamName()) ?>"
+                           value="<?php echo $this->escapeHtmlAttr($searchHelper->getEscapedQueryText()) ?>"
+                           placeholder="<?php echo $this->escapeHtmlAttr(__('Busque por SKU, Código EAN ou Nome da Peça...')) ?>"
                            class="input-text"
-                           maxlength="<?php echo (int)$helper->getMaxQueryLength() ?>"
+                           maxlength="<?php echo (int)$searchHelper->getMaxQueryLength() ?>"
                            role="combobox"
-                           aria-label="<?php echo $block->escapeHtmlAttr(__('Buscar')) ?>"
+                           aria-labelledby="awa-search-label"
+                           aria-label="<?php echo $this->escapeHtmlAttr(__('Buscar')) ?>"
+                           aria-describedby="awa-search-help"
                            aria-autocomplete="both"
                            aria-expanded="false"
+                           aria-haspopup="listbox"
                            aria-controls="search_autocomplete"
                            autocomplete="off"
                            autocapitalize="off"
                            autocorrect="off"
                            spellcheck="false" />
-                    <div id="search_autocomplete" class="search-autocomplete searchsuite-autocomplete" aria-label="<?php echo $block->escapeHtmlAttr(__('Sugestões de busca')) ?>"></div>
+                    <div id="search_autocomplete" class="search-autocomplete searchsuite-autocomplete" aria-label="<?php echo $this->escapeHtmlAttr(__('Sugestões de busca')) ?>"></div>
                     <div data-bind="scope: 'searchsuiteautocomplete_form'">
                         <!-- ko template: getTemplate() --><!-- /ko -->
                     </div>
-                    <?php echo $block->getChildHtml() ?>
+                    <?php echo $this->getChildHtml() ?>
                 </div>
             </div>
             <div class="actions">
                 <button type="submit"
-                        title="<?php echo $block->escapeHtml(__('Buscar')) ?>"
+                        title="<?php echo $this->escapeHtml(__('Buscar')) ?>"
+                        aria-label="<?php echo $this->escapeHtmlAttr(__('Buscar produtos')) ?>"
                         class="action search">
-                    <span><?php echo $block->escapeHtml(__('Buscar')) ?></span>
+                    <span><?php echo $this->escapeHtml(__('Buscar')) ?></span>
                 </button>
             </div>
         </form>
     </div>
 </div>
-<script type="text/javascript">
-    require(['jquery', 'rokanthemes/choose'], function ($) {
-        $("#choose_category").chosen();
-    });
+<script type="text/x-magento-init">
+{
+    "#choose_category": {
+        "js/awa-search-category-chosen": {}
+    }
+}
 </script>

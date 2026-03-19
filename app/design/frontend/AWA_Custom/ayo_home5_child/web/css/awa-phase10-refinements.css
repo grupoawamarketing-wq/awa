@@ -1,0 +1,542 @@
+/**
+ * AWA Phase 10 — Visual Refinements (2026-03-18)
+ *
+ * Fixes identified from screenshot review:
+ *  1. Search button disproportionate (too tall/large circle)
+ *  2. "Skip navigation" text visible over logo
+ *  3. Buttons with red bg + black text (should be white)
+ *  4. Fixed-right icons misaligned
+ *  5. Brand carousel OWL not showing logos
+ *  6. Footer newsletter + brand section polish
+ *  7. Global color enforcement using AWA palette tokens
+ *
+ * Brand Identity Tokens (reference):
+ *   Primary:       #b73337
+ *   Primary Hover:  #8e2629
+ *   Text:          #333333
+ *   Button Text:   #FFFFFF
+ */
+
+/* =============================================================
+   0. ENSURE TOKENS ARE AVAILABLE (fallback for pages missing v2)
+   ============================================================= */
+
+:root {
+  --awa-red: #b73337;
+  --awa-red-dark: #8e2629;
+  --awa-red-light: rgba(183, 51, 55, 0.08);
+  --awa-text: #333333;
+  --awa-text-muted: #6b7280;
+  --awa-bg: #ffffff;
+  --awa-border: #e5e7eb;
+  --r-sm: 8px;
+  --r-full: 9999px;
+  --t-fast: 150ms ease;
+  --t-base: 250ms ease;
+  --touch: 44px;
+}
+
+/* =============================================================
+   1. SKIP NAVIGATION — Hidden off-screen, only visible on :focus
+   ============================================================= */
+
+.action.skip,
+.awa-skip-link,
+.vmm-skip-nav,
+a.action.skip.nav,
+a.action.skip.content {
+  position: absolute !important;
+  left: -9999px !important;
+  top: auto !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap !important;
+  z-index: 10000;
+}
+
+.action.skip:focus,
+.action.skip:focus-visible,
+.awa-skip-link:focus,
+.awa-skip-link:focus-visible,
+.vmm-skip-nav:focus,
+.vmm-skip-nav:focus-visible {
+  position: fixed !important;
+  left: 16px !important;
+  top: 16px !important;
+  width: auto !important;
+  height: auto !important;
+  overflow: visible !important;
+  clip: auto !important;
+  clip-path: none !important;
+  z-index: 99999 !important;
+  padding: 12px 24px;
+  background: var(--awa-red);
+  color: #fff !important;
+  font-size: 14px;
+  font-weight: 700;
+  border-radius: var(--r-sm);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  text-decoration: none;
+}
+
+/* =============================================================
+   2. SEARCH BUTTON — Proportional, matches input height exactly
+   ============================================================= */
+
+body .page-wrapper .header .top-search .block-search .action.search {
+  width: 48px !important;
+  min-width: 48px !important;
+  max-width: 48px !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  max-height: 44px !important;
+  flex: 0 0 48px !important;
+  border-radius: 0 10px 10px 0;
+  background: var(--awa-red) !important;
+  border: 2px solid var(--awa-red) !important;
+  border-left: 0 !important;
+  color: #fff !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+body .page-wrapper .header .top-search .block-search .action.search:hover {
+  background: var(--awa-red-dark) !important;
+  border-color: var(--awa-red-dark) !important;
+  color: #fff !important;
+}
+
+/* Match the search input height */
+body .page-wrapper .header .top-search .block-search input#search {
+  height: 44px !important;
+  min-height: 44px !important;
+  max-height: 44px !important;
+  border-radius: 10px 0 0 10px;
+  border: 2px solid var(--awa-border);
+  border-right: 0;
+  padding: 0 16px;
+  font-size: 14px;
+}
+
+body .page-wrapper .header .top-search .block-search input#search:focus {
+  border-color: var(--awa-red);
+  box-shadow: 0 0 0 3px rgba(183, 51, 55, 0.12);
+}
+
+/* Ensure the search form container doesn't overflow */
+body .page-wrapper .header .top-search .block-search .control {
+  display: flex;
+  align-items: center;
+  max-height: 44px;
+}
+
+/* =============================================================
+   3. BUTTONS — Enforce white text on red background globally
+   ============================================================= */
+
+/* Force color: #fff on ALL primary/red buttons regardless of specificity */
+body .page-wrapper .action.primary,
+body .page-wrapper .action.tocart,
+body .page-wrapper .btn-cart,
+body .page-wrapper .b2b-primary-btn,
+body .page-wrapper .awa-btn-primary,
+body .page-wrapper button.action.primary,
+body .page-wrapper .action.subscribe.primary,
+body .page-wrapper .action.action-update,
+body .page-wrapper .b2b-login-to-see-price + .action,
+body .page-wrapper [class*="btn"][style*="background"][style*="b73337"],
+body .page-wrapper [style*="background-color: #b73337"],
+body .page-wrapper [style*="background:#b73337"],
+body .page-wrapper [style*="background: #b73337"] {
+  color: #fff !important;
+}
+
+/* Hover state also white text */
+body .page-wrapper .action.primary:hover,
+body .page-wrapper .action.tocart:hover,
+body .page-wrapper .btn-cart:hover,
+body .page-wrapper button.action.primary:hover,
+body .page-wrapper .action.subscribe.primary:hover {
+  color: #fff !important;
+  background: var(--awa-red-dark) !important;
+}
+
+/* Active/pressed state */
+body .page-wrapper .action.primary:active,
+body .page-wrapper button.action.primary:active {
+  color: #fff !important;
+  background: #7a2023 !important;
+}
+
+/* CMS block buttons inline-styled with red bg */
+body .page-wrapper a[style*="background"][style*="b73337"],
+body .page-wrapper a[style*="background"][style*="B73337"] {
+  color: #fff !important;
+}
+
+/* =============================================================
+   4. FIXED-RIGHT SIDEBAR — Proper alignment & sizing
+   ============================================================= */
+
+.fixed-right {
+  position: fixed !important;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 999;
+}
+
+.fixed-right > ul,
+.fixed-right > .fixed-right-ul,
+ul.fixed-right-ul {
+  list-style: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+.fixed-right ul li {
+  margin: 0 !important;
+  padding: 0 !important;
+  list-style: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.fixed-right ul li > a,
+.fixed-right ul li.scroll-top {
+  width: 42px !important;
+  height: 42px !important;
+  min-width: 42px !important;
+  min-height: 42px !important;
+  border-radius: 50% !important;
+  background: #fff !important;
+  border: 1.5px solid var(--awa-border) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: var(--awa-text-muted) !important;
+  text-decoration: none !important;
+  cursor: pointer;
+  transition: all var(--t-fast) !important;
+}
+
+.fixed-right ul li > a:hover,
+.fixed-right ul li.scroll-top:hover {
+  background: var(--awa-red) !important;
+  border-color: var(--awa-red) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 12px rgba(183, 51, 55, 0.3) !important;
+  transform: scale(1.08);
+}
+
+.fixed-right ul li > a em,
+.fixed-right ul li > a i,
+.fixed-right ul li.scroll-top em {
+  font-size: 16px !important;
+  line-height: 1 !important;
+  text-align: center;
+}
+
+/* Hide text labels inside fixed-right, keep only icons */
+.fixed-right ul li > a > span:not(.fa):not(.icon),
+.fixed-right ul li > a > font {
+  display: none !important;
+}
+
+/* =============================================================
+   5. BRAND CAROUSEL — Ensure visibility when OWL fails
+   ============================================================= */
+
+/* Section wrapper */
+.awa-footer-brands {
+  padding: 32px 0;
+  background: #fafafa;
+  border-top: 1px solid #f0f0f0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* Brand widget title */
+.awa-footer-brands .brand-widget .block-title {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.awa-footer-brands .brand-widget .block-title strong {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--awa-text-muted);
+}
+
+/* When OWL carousel initializes */
+.awa-footer-brands .brandowl-play .owl-wrapper-outer {
+  overflow: hidden;
+}
+
+/* Fallback: when OWL hasn't initialized, show logos in a flex row */
+.awa-footer-brands .brandowl-play > ul:not(.owl-loaded) {
+  display: flex !important;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.awa-footer-brands .brandowl-play > ul:not(.owl-loaded) > li {
+  flex: 0 0 auto;
+}
+
+/* Brand item styling */
+.awa-footer-brands .brand-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  transition: opacity var(--t-fast);
+}
+
+.awa-footer-brands .brand-item img {
+  max-height: 40px;
+  max-width: 100px;
+  width: auto;
+  height: auto;
+  filter: grayscale(100%) opacity(0.5);
+  transition: filter var(--t-base);
+  object-fit: contain;
+}
+
+.awa-footer-brands .brand-item:hover img {
+  filter: grayscale(0%) opacity(1);
+}
+
+/* OWL navigation for brand carousel */
+.awa-footer-brands .owl-left,
+.awa-footer-brands .owl-right,
+.awa-footer-brands .owl-prev,
+.awa-footer-brands .owl-next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid var(--awa-border);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0;
+  color: var(--awa-text-muted);
+  cursor: pointer;
+  transition: all var(--t-fast);
+  z-index: 10;
+}
+
+.awa-footer-brands .owl-left,
+.awa-footer-brands .owl-prev { left: -18px; }
+.awa-footer-brands .owl-right,
+.awa-footer-brands .owl-next { right: -18px; }
+
+.awa-footer-brands .owl-left:hover,
+.awa-footer-brands .owl-right:hover,
+.awa-footer-brands .owl-prev:hover,
+.awa-footer-brands .owl-next:hover {
+  background: var(--awa-red);
+  border-color: var(--awa-red);
+  color: #fff;
+}
+
+/* Hide raw text of Prev/Next */
+.awa-footer-brands .brandowl-play > a.owl-left,
+.awa-footer-brands .brandowl-play > a.owl-right {
+  font-size: 0;
+  text-indent: -9999px;
+  overflow: hidden;
+}
+
+/* Brand container relative for nav positioning */
+.awa-footer-brands .brandowl-play {
+  position: relative;
+}
+
+/* =============================================================
+   6. NEWSLETTER SECTION — Clean up spacing
+   ============================================================= */
+
+.velaNewsletterFooter {
+  background: #1a1a1a !important;
+}
+
+.velaNewsletterFooter .action.subscribe.primary {
+  background: var(--awa-red) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: var(--r-sm) !important;
+  font-weight: 600 !important;
+  min-height: var(--touch) !important;
+  padding: 0 24px !important;
+}
+
+.velaNewsletterFooter .action.subscribe.primary:hover {
+  background: var(--awa-red-dark) !important;
+  color: #fff !important;
+}
+
+.velaNewsletterFooter input[type="email"] {
+  min-height: var(--touch) !important;
+  border-radius: var(--r-sm) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #fff !important;
+  padding: 0 16px !important;
+  font-size: 14px !important;
+}
+
+.velaNewsletterFooter input[type="email"]::placeholder {
+  color: rgba(255, 255, 255, 0.4) !important;
+}
+
+/* =============================================================
+   7. FOOTER LINKS — AWA palette enforcement
+   ============================================================= */
+
+/* Column titles */
+.page_footer .velaFooterMenu .velaFooterTitle {
+  color: var(--awa-text) !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1.2px !important;
+}
+
+/* Link colors */
+.page_footer .velaFooterLinks li a {
+  color: #555 !important;
+  font-size: 13px !important;
+  transition: color var(--t-fast) !important;
+}
+
+.page_footer .velaFooterLinks li a:hover {
+  color: var(--awa-red) !important;
+  text-decoration: none !important;
+}
+
+/* B2B section highlight */
+.page_footer .velaFooterMenu .velaFooterTitle[style*="b73337"] {
+  color: var(--awa-red) !important;
+}
+
+/* =============================================================
+   8. FOOTER BOTTOM — Copyright & legal area
+   ============================================================= */
+
+.footer-bottom {
+  background: #fff !important;
+}
+
+.footer-bottom-inner {
+  border-top: 1px solid #f0f0f0 !important;
+  padding: 24px 0 !important;
+}
+
+/* Payment & security panels */
+.awa-footer-pay-sec {
+  background: #f7f8f9;
+  border-radius: var(--r-sm);
+  padding: 20px;
+}
+
+/* =============================================================
+   9. GLOBAL LINK COLOR — AWA red on hover
+   ============================================================= */
+
+body .page-wrapper a:not([class]):hover,
+body .page-wrapper .page_footer a:hover {
+  color: var(--awa-red);
+}
+
+/* =============================================================
+   10. MOBILE RESPONSIVE REFINEMENTS
+   ============================================================= */
+
+@media (max-width: 767px) {
+
+  /* Search button smaller on mobile */
+  body .page-wrapper .header .top-search .block-search .action.search {
+    width: 42px !important;
+    min-width: 42px !important;
+    max-width: 42px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    flex: 0 0 42px !important;
+  }
+
+  body .page-wrapper .header .top-search .block-search input#search {
+    height: 40px !important;
+    min-height: 40px !important;
+    max-height: 40px !important;
+  }
+
+  /* Fixed-right smaller on mobile */
+  .fixed-right {
+    right: 8px;
+    bottom: 72px;
+    top: auto;
+    transform: none;
+  }
+
+  .fixed-right ul li > a,
+  .fixed-right ul li.scroll-top {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+  }
+
+  .fixed-right ul li > a em,
+  .fixed-right ul li.scroll-top em {
+    font-size: 14px !important;
+  }
+
+  /* Brand section mobile */
+  .awa-footer-brands {
+    padding: 20px 0;
+  }
+
+  .awa-footer-brands .brand-item img {
+    max-height: 30px;
+    max-width: 80px;
+  }
+
+  /* Footer columns stack on mobile */
+  .page_footer .velaFooterMenu .velaContent {
+    display: none;
+  }
+
+  .page_footer .velaFooterMenu .velaFooterTitle.active + .velaContent {
+    display: block;
+  }
+}
+
+@media (max-width: 480px) {
+  .fixed-right {
+    right: 6px;
+    gap: 6px;
+  }
+}

@@ -1,1 +1,375 @@
-define(["jquery"],function(t){"use strict";var a="__awaHomeCategoryCompatObserver",e=!1;function o(){var t=document.body;return!!t&&(t.classList.contains("cms-index-index")||t.classList.contains("cms-home")||t.classList.contains("catalog-category-view")||t.classList.contains("catalogsearch-result-index"))}function r(t){return!(!t||!(t.offsetWidth||t.offsetHeight||t.getClientRects().length))}function i(t,a){t.length&&a&&(t.attr("title")||t.attr("title",a),t.attr("aria-label")||t.attr("aria-label",a))}function n(a){return t.trim(String(a||"").replace(/\s+/g," "))}function s(){var a,e,s,c,d,u,h;o()&&((s=t(".navigation.verticalmenu.side-verticalmenu")).length&&(s.attr("data-awa-component",s.attr("data-awa-component")||"vertical-menu"),e=(a=s.find(".togge-menu").first()).hasClass("menu-open")||r(a.get(0)),s.toggleClass("is-open",!!e),s.find(".ui-menu-item.parent, .ui-menu-item.level0.parent").each(function(){var a,e=t(this),o=e.children("a").first(),s=e.children(".open-children-toggle").first(),l=e.children(".submenu, .subchildmenu, ul.level0").first(),c=n(o.text())||"Submenu",d=e.hasClass("_active")||e.hasClass("active")||l.length&&(l.hasClass("opened")||r(l.get(0)));e.toggleClass("is-open",!!d).attr("data-awa-parent-item","true"),s.length&&(!(a=l.attr("id"))&&l.length&&(a="awa-vm-panel-"+Math.random().toString(36).slice(2,9),l.attr("id",a)),s.attr({role:"button",tabindex:s.attr("tabindex")||"0","aria-expanded":d?"true":"false"}),a&&s.attr("aria-controls",a),i(s,(d?"Recolher ":"Expandir ")+c)),l.length&&l.attr("aria-hidden",d?"false":"true"),o.length&&i(o,c)}),t(".shadow_bkg_show").attr("aria-hidden",t("body").hasClass("background_shadow_show")?"false":"true"),r(a.get(0))||t("body").removeClass("awa-vertical-menu-open background_shadow_show")),t(".navigation.custommenu.main-nav").each(function(){var a=t(this);a.attr("data-awa-component",a.attr("data-awa-component")||"main-nav"),a.find("a[href]").each(function(){var a=t(this),e=n(a.text());!e&&a.find("i.fa").length&&(e="Link de navegação"),i(a,e)}),a.find(".open-children-toggle").each(function(){var a=t(this),e=a.closest("li"),o=n(e.children("a").first().text())||"Submenu",s=e.children(".submenu, .groupmenu, .subchildmenu").first(),l=e.hasClass("active")||e.hasClass("_active")||s.length&&r(s.get(0));a.attr("aria-expanded",l?"true":"false"),i(a,(l?"Recolher ":"Expandir ")+o)})}),c=t("#search_mini_form, form.form.minisearch").first(),d=c.find('#search, #search-input-autocomplate, input[name="q"]').first(),u=t("#search_autocomplete, .searchsuite-autocomplete").first(),h=u.length&&r(u.get(0)),c.length&&(c.attr("data-awa-component",c.attr("data-awa-component")||"search-form").toggleClass("is-open",!!h),d.length&&(i(d,d.attr("placeholder")||"Buscar produtos"),d.attr("aria-expanded",h?"true":"false")),c.find(".action.search").each(function(){i(t(this),"Pesquisar")}),u.length&&(u.attr("aria-hidden",h?"false":"true"),u.find("a[href]").each(function(){var a=t(this);i(a,n(a.text()))}))),function(){var a=window.matchMedia&&window.matchMedia("(max-width: 767px)").matches,e=document.body&&(document.body.classList.contains("catalog-category-view")||document.body.classList.contains("catalogsearch-result-index"));if(t(".toolbar.toolbar-products").each(function(){var a=t(this);a.attr("data-awa-component",a.attr("data-awa-component")||"plp-toolbar")}),t(".toolbar-products .modes-mode, .toolbar-products .sorter-action, .toolbar-products .pages-item a, .toolbar-products .pages-item strong").each(function(){var a=t(this),e=n(a.text());e||(a.hasClass("mode-grid")?e="Visualização em grade":a.hasClass("mode-list")?e="Visualização em lista":a.closest(".pages-item").length&&(e="Página")),i(a,e)}),t(".filter-options-item").each(function(){var a,e=t(this),o=e.children(".filter-options-title").first(),s=e.children(".filter-options-content").first(),l=e.hasClass("active")||s.length&&r(s.get(0)),c=n(o.text());o.length&&(e.attr("data-awa-component","filter-group"),o.attr({role:"button",tabindex:o.attr("tabindex")||"0","aria-expanded":l?"true":"false"}),i(o,(l?"Recolher filtro ":"Expandir filtro ")+(c||"Filtro")),s.length&&((a=s.attr("id"))||(a="awa-filter-content-"+Math.random().toString(36).slice(2,9),s.attr("id",a)),o.attr("aria-controls",a)))}),t(".filter-options-title").off("keydown.awaFilterA11y").on("keydown.awaFilterA11y",function(a){"Enter"!==a.key&&" "!==a.key||(a.preventDefault(),t(this).trigger("click"))}),e){var o=t("body"),s=t("#layered-ajax-filter-block, .block.filter").first(),c=t(".shop-tab-select .toolbar.toolbar-products").first(),d=c.find(".modes .modes-label").first();if(s.length&&c.length&&d.length){d.attr({role:"button",tabindex:"0","data-awa-filter-toggle":"true"}),a&&!o.attr("data-awa-filter-init")?o.attr("data-awa-filter-init","true").addClass("awa-plp-filters-collapsed"):a||o.removeClass("awa-plp-filters-collapsed"),d.off("keydown.awaFilterToggle").on("keydown.awaFilterToggle",function(a){"Enter"!==a.key&&" "!==a.key||(a.preventDefault(),t(this).trigger("click"))}),t(document).off("click.awaFilterToggle",'.toolbar .modes .modes-label[data-awa-filter-toggle="true"]').on("click.awaFilterToggle",'.toolbar .modes .modes-label[data-awa-filter-toggle="true"]',function(t){a&&(t.preventDefault(),o.toggleClass("awa-plp-filters-collapsed"),l())});var u=a&&o.hasClass("awa-plp-filters-collapsed"),h=u?"Mostrar Filtros":"Ocultar Filtros";d.text(h).attr("aria-expanded",u?"false":"true"),s.attr("aria-hidden",u?"true":"false")}}}(),t(".products-grid .product-item-info, .products-grid .item-product").each(function(){var a=t(this),e=a.find(".product-item-name a").first(),o=n(e.text());a.attr("data-awa-component",a.attr("data-awa-component")||"product-card"),o&&i(e,o),a.find(".actions-primary .action, .product-item-actions .action").each(function(){var a=t(this),e=n(a.text())||o;a.hasClass("tocart")?i(a,o?"Comprar "+o:"Comprar produto"):a.hasClass("towishlist")?i(a,o?"Adicionar "+o+" aos favoritos":"Adicionar aos favoritos"):a.hasClass("tocompare")?i(a,o?"Comparar "+o:"Comparar produto"):i(a,e)})}),t(".owl-prev, .owl-next").each(function(){var a=t(this),e=a.hasClass("owl-prev");i(a,e?"Ver itens anteriores":"Ver próximos itens"),a.attr("aria-disabled",a.hasClass("disabled")?"true":"false")}),t(".owl-controls .owl-buttons div").each(function(){var a=t(this),e=a.hasClass("owl-prev");(e||a.hasClass("owl-next"))&&i(a,e?"Ver itens anteriores":"Ver próximos itens")}))}function l(){function t(){e=!1,s()}e||(e=!0,"function"!=typeof window.requestAnimationFrame?window.setTimeout(t,0):window.requestAnimationFrame(t))}return function(){if(o()&&(s(),window.MutationObserver&&!window[a])){if(window[a]=new window.MutationObserver(function(){l()}),!document.body)return;window[a].observe(document.body,{childList:!0,subtree:!0})}}});
+/* global define, window, document */
+define(['jquery'], function ($) {
+    'use strict';
+
+    /* ----------------------------------------------------------------
+     * AWA Home/Category Compat JS
+     * Applies ARIA/accessibility attributes to Rokanthemes components.
+     * Runs on: homepage, catalog-category-view, catalogsearch-result-index
+     * ---------------------------------------------------------------- */
+
+    var OBSERVER_KEY   = '__awaHomeCategoryCompatObserver';
+    var SCHEDULED_KEY  = '__awaHomeCategoryCompatScheduled';
+    var MAX_OBS_FIRES  = 12;     /* disconnect after N relevant mutations */
+    var obsFireCount   = 0;
+
+    /* Selectors that constitute "relevant" DOM additions worth re-running for */
+    var RELEVANT_SELECTORS = [
+        '.navigation.verticalmenu',
+        '.togge-menu',
+        '.navigation.custommenu',
+        '.open-children-toggle',
+        '.filter-options-item',
+        '.toolbar-products',
+        '.products-grid',
+        '.owl-prev', '.owl-next',
+        '.owl-controls'
+    ];
+
+    function isRelevantPage() {
+        var b = document.body;
+        return !!(b && (
+            b.classList.contains('cms-index-index') ||
+            b.classList.contains('cms-home') ||
+            b.classList.contains('catalog-category-view') ||
+            b.classList.contains('catalogsearch-result-index')
+        ));
+    }
+
+    function isVisible(el) {
+        return !!(el && (el.offsetWidth || el.offsetHeight || el.getClientRects().length));
+    }
+
+    function setLabel($el, label) {
+        if ($el.length && label) {
+            if (!$el.attr('title'))     { $el.attr('title', label); }
+            if (!$el.attr('aria-label')) { $el.attr('aria-label', label); }
+        }
+    }
+
+    function trimText(val) {
+        return $.trim(String(val || '').replace(/\s+/g, ' '));
+    }
+
+    /* ---- Vertical Menu ---- */
+    function applyVerticalMenuA11y() {
+        var $nav = $('.navigation.verticalmenu.side-verticalmenu').not('.navigation--mueller');
+        if (!$nav.length) { return; }
+
+        $nav.attr('data-awa-component', $nav.attr('data-awa-component') || 'vertical-menu');
+
+        var $panel = $nav.find('.togge-menu').first();
+        var isOpen = $panel.hasClass('menu-open') || isVisible($panel.get(0));
+        $nav.toggleClass('is-open', !!isOpen);
+
+        $nav.find('.ui-menu-item.parent, .ui-menu-item.level0.parent').each(function () {
+            var $li      = $(this);
+            var $link    = $li.children('a').first();
+            var $toggle  = $li.children('.open-children-toggle').first();
+            var $submenu = $li.children('.submenu, .subchildmenu, ul.level0').first();
+            var label    = trimText($link.text()) || 'Submenu';
+            var open     = $li.hasClass('_active') || $li.hasClass('active') ||
+                           ($submenu.length && ($submenu.hasClass('opened') || isVisible($submenu.get(0))));
+
+            $li.toggleClass('is-open', !!open).attr('data-awa-parent-item', 'true');
+
+            if ($toggle.length) {
+                var panelId = $submenu.attr('id');
+                if (!panelId && $submenu.length) {
+                    panelId = 'awa-vm-panel-' + Math.random().toString(36).slice(2, 9);
+                    $submenu.attr('id', panelId);
+                }
+                $toggle.attr({
+                    role:           'button',
+                    tabindex:       $toggle.attr('tabindex') || '0',
+                    'aria-expanded': open ? 'true' : 'false'
+                });
+                if (panelId) { $toggle.attr('aria-controls', panelId); }
+                setLabel($toggle, (open ? 'Recolher ' : 'Expandir ') + label);
+            }
+
+            if ($submenu.length) { $submenu.attr('aria-hidden', open ? 'false' : 'true'); }
+            if ($link.length)    { setLabel($link, label); }
+        });
+
+        $('.shadow_bkg_show').attr('aria-hidden',
+            $('body').hasClass('background_shadow_show') ? 'false' : 'true');
+
+        if (!isVisible($panel.get(0))) {
+            $('body').removeClass('awa-vertical-menu-open background_shadow_show');
+        }
+    }
+
+    /* ---- Custom (Horizontal) Menu ---- */
+    function applyCustomMenuA11y() {
+        $('.navigation.custommenu.main-nav').each(function () {
+            var $nav = $(this);
+            $nav.attr('data-awa-component', $nav.attr('data-awa-component') || 'main-nav');
+
+            $nav.find('a[href]').each(function () {
+                var $a    = $(this);
+                var label = trimText($a.text());
+                if (!label && $a.find('i.fa').length) { label = 'Link de navegação'; }
+                setLabel($a, label);
+            });
+
+            $nav.find('.open-children-toggle').each(function () {
+                var $t       = $(this);
+                var $li      = $t.closest('li');
+                var label    = trimText($li.children('a').first().text()) || 'Submenu';
+                var $sub     = $li.children('.submenu, .groupmenu, .subchildmenu').first();
+                var expanded = $li.hasClass('active') || $li.hasClass('_active') ||
+                               ($sub.length && isVisible($sub.get(0)));
+                $t.attr('aria-expanded', expanded ? 'true' : 'false');
+                setLabel($t, (expanded ? 'Recolher ' : 'Expandir ') + label);
+            });
+        });
+    }
+
+    /* ---- Search Form ---- */
+    function applySearchA11y() {
+        var $form = $('#search_mini_form, form.form.minisearch').first();
+        if (!$form.length) { return; }
+
+        var $input = $form.find('#search, #search-input-autocomplate, input[name="q"]').first();
+        var $autocomplete = $('#search_autocomplete, .searchsuite-autocomplete').first();
+        var acVisible = $autocomplete.length && isVisible($autocomplete.get(0));
+
+        $form.attr('data-awa-component', $form.attr('data-awa-component') || 'search-form')
+             .toggleClass('is-open', !!acVisible);
+
+        if ($input.length) {
+            setLabel($input, $input.attr('placeholder') || 'Buscar produtos');
+            $input.attr('aria-expanded', acVisible ? 'true' : 'false');
+        }
+
+        $form.find('.action.search').each(function () { setLabel($(this), 'Pesquisar'); });
+
+        if ($autocomplete.length) {
+            $autocomplete.attr('aria-hidden', acVisible ? 'false' : 'true');
+            $autocomplete.find('a[href]').each(function () {
+                var $a = $(this); setLabel($a, trimText($a.text()));
+            });
+        }
+    }
+
+    /* ---- PLP / Filters ---- */
+    function applyPlpA11y() {
+        var isMobile = window.matchMedia && window.matchMedia('(max-width: 767px)').matches;
+        var isCategoryOrSearch = document.body &&
+            (document.body.classList.contains('catalog-category-view') ||
+             document.body.classList.contains('catalogsearch-result-index'));
+
+        $('.toolbar.toolbar-products').each(function () {
+            $(this).attr('data-awa-component', $(this).attr('data-awa-component') || 'plp-toolbar');
+        });
+
+        /* Layered filter groups */
+        $('.filter-options-item').each(function () {
+            var $item    = $(this);
+            var $title   = $item.children('.filter-options-title').first();
+            var $content = $item.children('.filter-options-content').first();
+            var expanded = $item.hasClass('active') || ($content.length && isVisible($content.get(0)));
+            var label    = trimText($title.text());
+
+            if (!$title.length) { return; }
+            $item.attr('data-awa-component', 'filter-group');
+            $title.attr({
+                role:           'button',
+                tabindex:       $title.attr('tabindex') || '0',
+                'aria-expanded': expanded ? 'true' : 'false'
+            });
+            setLabel($title, (expanded ? 'Recolher filtro ' : 'Expandir filtro ') + (label || 'Filtro'));
+
+            if ($content.length) {
+                var cid = $content.attr('id');
+                if (!cid) {
+                    cid = 'awa-filter-content-' + Math.random().toString(36).slice(2, 9);
+                    $content.attr('id', cid);
+                }
+                $title.attr('aria-controls', cid);
+            }
+        });
+
+        $title_keydown_bind:
+        $('.filter-options-title').off('keydown.awaFilterA11y').on('keydown.awaFilterA11y', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                $(this).trigger('click');
+            }
+        });
+
+        /* Mobile filter toggle */
+        if (isCategoryOrSearch) {
+            var $body    = $('body');
+            var $filter  = $('#layered-ajax-filter-block, .block.filter').first();
+            var $toolbar = $('.shop-tab-select .toolbar.toolbar-products').first();
+            var $label   = $toolbar.find('.modes .modes-label').first();
+
+            if ($filter.length && $toolbar.length && $label.length) {
+                $label.attr({ role: 'button', tabindex: '0', 'data-awa-filter-toggle': 'true' });
+
+                if (isMobile && !$body.attr('data-awa-filter-init')) {
+                    $body.attr('data-awa-filter-init', 'true').addClass('awa-plp-filters-collapsed');
+                } else if (!isMobile) {
+                    $body.removeClass('awa-plp-filters-collapsed');
+                }
+
+                $label.off('keydown.awaFilterToggle').on('keydown.awaFilterToggle', function (e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        $(this).trigger('click');
+                    }
+                });
+
+                $(document)
+                    .off('click.awaFilterToggle', '.toolbar .modes .modes-label[data-awa-filter-toggle="true"]')
+                    .on('click.awaFilterToggle', '.toolbar .modes .modes-label[data-awa-filter-toggle="true"]', function (e) {
+                        if (isMobile) {
+                            e.preventDefault();
+                            $body.toggleClass('awa-plp-filters-collapsed');
+                            updateFilterLabel();
+                        }
+                    });
+
+                updateFilterLabel();
+            }
+        }
+
+        function updateFilterLabel() {
+            var $body  = $('body');
+            var $label = $('.shop-tab-select .toolbar.toolbar-products').find('.modes .modes-label').first();
+            var $filter = $('#layered-ajax-filter-block, .block.filter').first();
+            if (!$label.length) { return; }
+            var isMob    = window.matchMedia && window.matchMedia('(max-width: 767px)').matches;
+            var collapsed = isMob && $body.hasClass('awa-plp-filters-collapsed');
+            $label.text(collapsed ? 'Mostrar Filtros' : 'Ocultar Filtros')
+                  .attr('aria-expanded', collapsed ? 'false' : 'true');
+            if ($filter.length) {
+                $filter.attr('aria-hidden', collapsed ? 'true' : 'false');
+            }
+        }
+    }
+
+    /* ---- Product Cards ---- */
+    function applyProductCardA11y() {
+        $('.products-grid .product-item-info, .products-grid .item-product').each(function () {
+            var $card  = $(this);
+            var $name  = $card.find('.product-item-name a').first();
+            var label  = trimText($name.text());
+
+            $card.attr('data-awa-component', $card.attr('data-awa-component') || 'product-card');
+            if (label) { setLabel($name, label); }
+
+            $card.find('.actions-primary .action, .product-item-actions .action').each(function () {
+                var $btn  = $(this);
+                var bText = trimText($btn.text()) || label;
+                if ($btn.hasClass('tocart'))     { setLabel($btn, label ? 'Comprar ' + label : 'Comprar produto'); }
+                else if ($btn.hasClass('towishlist')) { setLabel($btn, label ? 'Adicionar ' + label + ' aos favoritos' : 'Adicionar aos favoritos'); }
+                else if ($btn.hasClass('tocompare'))  { setLabel($btn, label ? 'Comparar ' + label : 'Comparar produto'); }
+                else                                  { setLabel($btn, bText); }
+            });
+        });
+    }
+
+    /* ---- OWL Nav Controls ---- */
+    function applyOwlA11y() {
+        $('.owl-prev, .owl-next').each(function () {
+            var $b = $(this);
+            var isPrev = $b.hasClass('owl-prev');
+            setLabel($b, isPrev ? 'Ver itens anteriores' : 'Ver próximos itens');
+            $b.attr('aria-disabled', $b.hasClass('disabled') ? 'true' : 'false');
+        });
+        $('.owl-controls .owl-buttons div').each(function () {
+            var $b = $(this);
+            var isPrev = $b.hasClass('owl-prev');
+            if (isPrev || $b.hasClass('owl-next')) {
+                setLabel($b, isPrev ? 'Ver itens anteriores' : 'Ver próximos itens');
+            }
+        });
+    }
+
+    /* ---- Master run ---- */
+    function runAll() {
+        if (!isRelevantPage()) { return; }
+        applyVerticalMenuA11y();
+        applyCustomMenuA11y();
+        applySearchA11y();
+        applyPlpA11y();
+        applyProductCardA11y();
+        applyOwlA11y();
+    }
+
+    /* ---- Debounced scheduler (rAF guard) ---- */
+    function schedule() {
+        if (window[SCHEDULED_KEY]) { return; }
+        window[SCHEDULED_KEY] = true;
+        var run = function () {
+            window[SCHEDULED_KEY] = false;
+            runAll();
+        };
+        if (typeof window.requestAnimationFrame === 'function') {
+            window.requestAnimationFrame(run);
+        } else {
+            window.setTimeout(run, 0);
+        }
+    }
+
+    /* ---- MutationObserver — only fires for RELEVANT node additions ---- */
+    function hasRelevantNode(mutations) {
+        var i, j, node, $node;
+        for (i = 0; i < mutations.length; i++) {
+            var added = mutations[i].addedNodes;
+            for (j = 0; j < added.length; j++) {
+                node = added[j];
+                if (node.nodeType !== 1) { continue; }       /* element nodes only */
+                /* Skip OWL internal clones — they are never relevant */
+                if (node.classList &&
+                    (node.classList.contains('owl-item') ||
+                     node.classList.contains('owl-wrapper') ||
+                     node.classList.contains('owl-wrapper-outer'))) {
+                    continue;
+                }
+                $node = $(node);
+                for (var k = 0; k < RELEVANT_SELECTORS.length; k++) {
+                    if ($node.is(RELEVANT_SELECTORS[k]) || $node.find(RELEVANT_SELECTORS[k]).length) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    function setupObserver() {
+        if (!window.MutationObserver || window[OBSERVER_KEY]) { return; }
+        if (!document.body) { return; }
+
+        window[OBSERVER_KEY] = new window.MutationObserver(function (mutations) {
+            if (!hasRelevantNode(mutations)) { return; }
+            obsFireCount++;
+            if (obsFireCount > MAX_OBS_FIRES) {
+                /* Site is stable — no more significant DOM additions expected */
+                window[OBSERVER_KEY].disconnect();
+                return;
+            }
+            schedule();
+        });
+
+        window[OBSERVER_KEY].observe(document.body, { childList: true, subtree: true });
+    }
+
+    /* ---- Entry point (called by awa-custom-compat-bootstrap.js) ---- */
+    return function () {
+        if (!isRelevantPage()) { return; }
+
+        /* Initial run */
+        runAll();
+
+        /* Retry after 600 ms to catch widgets that initialize lazily */
+        window.setTimeout(runAll, 600);
+
+        /* Observer for dynamic content (AJAX navigation, lazy blocks) */
+        setupObserver();
+    };
+});

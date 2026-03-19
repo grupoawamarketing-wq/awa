@@ -1,0 +1,354 @@
+:root {
+    --awa-font-body: "Rubik", "Helvetica Neue", "Arial", sans-serif;
+    --awa-font-heading: "Rubik", "Helvetica Neue", "Arial", sans-serif;
+    --awa-font-price: "Rubik", "Helvetica Neue", "Arial", sans-serif;
+    --awa-font-mono: "SFMono-Regular", "Consolas", "Liberation Mono", "Menlo", monospace;
+    --awa-body-line-height: 1.6;
+    --awa-heading-line-height: 1.25;
+}
+
+html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizelegibility;
+}
+
+body,
+button,
+input,
+select,
+textarea,
+.page-wrapper,
+.page-header,
+.page-footer,
+.action,
+.product-item-link,
+.product.name a,
+.block,
+.toolbar,
+.fieldset,
+.table-wrapper,
+.modal-inner-wrap {
+    font-family: var(--awa-font-body);
+    line-height: var(--awa-body-line-height);
+    font-kerning: normal;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.page-title,
+.product-item-name,
+.product.name,
+.block-title,
+.section-title,
+.opc-block-summary > .title,
+.checkout-payment-method .payment-method-title,
+.action.primary,
+.button,
+button.action.tocart,
+.b2b-login-to-buy-btn,
+.awa-b2b-gate-card__title,
+.awa-b2b-checkout-gate__title {
+    font-family: var(--awa-font-heading);
+    line-height: var(--awa-heading-line-height);
+    letter-spacing: 0.01em;
+}
+
+input,
+select,
+textarea,
+button {
+    font-size: inherit;
+}
+
+code,
+pre,
+kbd,
+samp {
+    font-family: var(--awa-font-mono);
+}
+
+.price,
+.special-price .price,
+.old-price .price,
+.counter.qty,
+.qty,
+.amount,
+.totals,
+.grand.totals,
+.minicart-price,
+.price-wrapper {
+    font-family: var(--awa-font-price);
+    font-variant-numeric: tabular-nums;
+}
+
+.product-item-link,
+.product.name a,
+.action,
+.nav-sections a,
+.header.links a,
+.footer a {
+    text-decoration-thickness: 0.08em;
+    text-underline-offset: 0.12em;
+}
+
+@media (width <= 767px) {
+    body,
+    button,
+    input,
+    select,
+    textarea {
+        line-height: 1.55;
+    }
+}
+
+/* ============================================================
+   AWA — GLOBAL UI POLISH 2025
+   Scrollbar, Toolbar Select, Account Nav, Tabelas, Empty States,
+   Forms não-B2B, Minicart, Impressão.
+   ESCOPO: Último CSS global. Exclui .b2b-auth-shell,
+   .b2b-account-login e .b2b-register-index (estilos B2B completos
+   vivem em GrupoAwamotos_B2B, não devem ser sobrepostos).
+   ============================================================ */
+
+/* -----------------------------------------------------------
+   1. SCROLLBAR SLIM — webkit + Firefox
+   Aparência moderna, discreta, sem alterar usabilidade.
+----------------------------------------------------------- */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--awa-gray-300, #d9d9d9) transparent;
+}
+
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: var(--awa-gray-300, #d9d9d9);
+    border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: var(--awa-gray-400, #bdbdbd);
+}
+
+/* -----------------------------------------------------------
+   2. TOOLBAR SELECT — Classificar por / Por página
+   Custom arrow, altura uniforme com os inputs de busca.
+----------------------------------------------------------- */
+body .page-wrapper .toolbar-products .sorter-options,
+body .page-wrapper .toolbar-products .limiter-options {
+    height: 38px;
+    padding: 0 36px 0 10px;
+    border: 1px solid var(--awa-gray-300, #e5e5e5);
+    border-radius: 6px;
+    background-color: var(--awa-white, #fff);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    appearance: none;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--awa-gray-700, #555);
+    line-height: 38px;
+    transition: border-color 180ms ease;
+}
+
+body .page-wrapper .toolbar-products .sorter-options:hover,
+body .page-wrapper .toolbar-products .limiter-options:hover {
+    border-color: var(--awa-gray-500, #aaa);
+}
+
+body .page-wrapper .toolbar-products .sorter-options:focus-visible,
+body .page-wrapper .toolbar-products .limiter-options:focus-visible {
+    outline: 2px solid var(--awa-red, #b73337);
+    outline-offset: 2px;
+    border-color: var(--awa-red, #b73337);
+}
+
+/* -----------------------------------------------------------
+   4. TABELAS DE DADOS — Zebra + hover suave
+   Pedidos, histórico, comparação de produtos.
+----------------------------------------------------------- */
+body .page-wrapper .table-wrapper .data.table tbody tr:nth-child(even) {
+    background-color: var(--awa-gray-50, #fafafa);
+}
+
+body .page-wrapper .table-wrapper .data.table tbody tr:hover {
+    background-color: #fdf3f3;
+}
+
+body .page-wrapper .table-wrapper .data.table .col.id a,
+body .page-wrapper .table-wrapper .data.table .col.actions a {
+    color: var(--awa-red, #b73337);
+    font-weight: 500;
+}
+
+body .page-wrapper .table-wrapper .data.table .col.id a:hover,
+body .page-wrapper .table-wrapper .data.table .col.actions a:hover {
+    color: var(--awa-red-dark, #8e2629);
+    text-decoration: underline;
+}
+
+/* -----------------------------------------------------------
+   5. EMPTY STATES — Carrinho vazio + Sem resultados
+   Layout centralizado com CTA clara para o usuário.
+----------------------------------------------------------- */
+
+/* Carrinho vazio */
+body.checkout-cart-index .page-wrapper .cart-empty {
+    text-align: center;
+    padding: 64px 24px;
+}
+
+body.checkout-cart-index .page-wrapper .cart-empty p {
+    color: var(--awa-gray-500, #888);
+    font-size: 16px;
+    margin-bottom: 24px;
+}
+
+body.checkout-cart-index .page-wrapper .cart-empty .continue {
+    display: inline-block;
+    padding: 12px 28px;
+    background: var(--awa-red, #b73337);
+    color: #fff;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 200ms ease;
+}
+
+body.checkout-cart-index .page-wrapper .cart-empty .continue:hover {
+    background: var(--awa-red-dark, #8e2629);
+}
+
+/* Sem resultados de busca */
+body.catalogsearch-result-index .page-wrapper .search.results .message.notice {
+    text-align: center;
+    padding: 56px 24px;
+    color: var(--awa-gray-600, #555);
+    font-size: 15px;
+}
+
+body.catalogsearch-result-index .page-wrapper .search.results .message.notice strong {
+    display: block;
+    font-size: 18px;
+    color: var(--awa-dark, #333);
+    margin-bottom: 8px;
+}
+
+/* Categoria vazia */
+body.catalog-category-view .page-wrapper .message.info.empty {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--awa-gray-500, #888);
+}
+
+/* -----------------------------------------------------------
+   6. FORMS NÃO-B2B — Newsletter + Contato + Esqueci Senha
+   Padroniza border-radius e botão primário. Compatível com
+   min-height:42px já definido em awa-bundle-core.css.
+   Excluído de contextos B2B para evitar sobreposição.
+----------------------------------------------------------- */
+body:not(.b2b-auth-shell, .b2b-account-login, .b2b-register-index)
+    .page-wrapper .block.newsletter .control input[type="email"] {
+    border-radius: 8px 0 0 8px;
+    border-right: 0;
+}
+
+body:not(.b2b-auth-shell, .b2b-account-login, .b2b-register-index)
+    .page-wrapper .block.newsletter .actions .action.subscribe {
+    height: 42px;
+    border-radius: 0 8px 8px 0;
+    background: var(--awa-red, #b73337);
+    border-color: var(--awa-red, #b73337);
+    color: #fff;
+    font-weight: 600;
+    transition: background 200ms ease;
+}
+
+body:not(.b2b-auth-shell, .b2b-account-login, .b2b-register-index)
+    .page-wrapper .block.newsletter .actions .action.subscribe:hover {
+    background: var(--awa-red-dark, #8e2629);
+    border-color: var(--awa-red-dark, #8e2629);
+}
+
+body.contact-index-index .page-wrapper .fieldset .field .control input,
+body.contact-index-index .page-wrapper .fieldset .field .control select,
+body.contact-index-index .page-wrapper .fieldset .field .control textarea {
+    border-radius: 8px;
+}
+
+body.contact-index-index .page-wrapper .fieldset .field label.label,
+body:not(.b2b-auth-shell) .page-wrapper .form.password.forget .field label.label {
+    display: block;
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--awa-gray-700, #555);
+    margin-bottom: 4px;
+}
+
+body:not(.b2b-auth-shell) .page-wrapper .form.password.forget .fieldset .field .control input {
+    border-radius: 8px;
+}
+
+/* -----------------------------------------------------------
+   7. MINICART DROPDOWN — Scrollbar slim interna
+   Evita scrollbar espessa dentro do product-list do minicart.
+----------------------------------------------------------- */
+body .page-wrapper .minicart-items-wrapper {
+    scrollbar-width: thin;
+    scrollbar-color: var(--awa-gray-300, #d9d9d9) transparent;
+}
+
+body .page-wrapper .minicart-items-wrapper::-webkit-scrollbar {
+    width: 4px;
+}
+
+body .page-wrapper .minicart-items-wrapper::-webkit-scrollbar-thumb {
+    background-color: var(--awa-gray-300, #d9d9d9);
+    border-radius: 999px;
+}
+
+/* -----------------------------------------------------------
+   8. PRODUTO SEM IMAGEM — Placeholder visual
+   Fundo neutro quando produto não tem foto cadastrada.
+----------------------------------------------------------- */
+body .page-wrapper .product-image-container .product-image-photo[src=""],
+body .page-wrapper .product-image-container .product-image-photo:not([src]) {
+    background: var(--awa-gray-100, #f5f5f5);
+    display: block;
+}
+
+/* -----------------------------------------------------------
+   9. IMPRESSÃO — Limpeza para impressão de pedidos
+   Remove elementos de navegação, mantém conteúdo.
+----------------------------------------------------------- */
+@media print {
+    .page-header,
+    .page-footer,
+    .nav-sections,
+    .sidebar,
+    .actions-toolbar .action.back,
+    .breadcrumbs {
+        display: none !important;
+    }
+
+    body .page-wrapper .column.main {
+        width: 100% !important;
+    }
+
+    body .page-wrapper .table-wrapper .data.table {
+        font-size: 11px;
+    }
+}

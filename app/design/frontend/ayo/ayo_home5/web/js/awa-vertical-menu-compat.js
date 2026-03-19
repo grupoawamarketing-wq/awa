@@ -72,7 +72,11 @@ define([
         var $nav = $(element);
         var observer;
 
-        if (!$nav.length || $nav.data('awaVMCompatInit')) {
+        if (
+            !$nav.length
+            || $nav.data('awaVMCompatInit')
+            || $nav.hasClass('navigation--mueller')
+        ) {
             return;
         }
 

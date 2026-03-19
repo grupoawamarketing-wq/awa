@@ -51,39 +51,42 @@ if ($firstBanner):
 <link rel="preload" as="image" href="<?php echo $block->escapeUrl($preloadUrl); ?>" fetchpriority="high" />
 <?php endif; endif; ?>
 
+<?php
+// Build Schema.org ItemList as PHP array + json_encode (prevents JSON injection via banner titles/urls)
+$sliderTitle = (string)($slider->getSliderTitle() ?: __('Destaques'));
+$schemaItems = [];
+$schemaPos = 0;
+foreach ($banners as $schemaBanner) {
+    if ($schemaBanner->getSlideStatus() == '2') { continue; }
+    $schemaPos++;
+    $schemaItemName = trim(strip_tags((string)($schemaBanner->getSlideTitle() ?: $schemaBanner->getSlideText() ?: '')));
+    if ($schemaItemName && $schemaItemName !== '.') {
+        $schemaItem = [
+            '@type'    => 'ListItem',
+            'position' => $schemaPos,
+            'name'     => $schemaItemName,
+        ];
+        if ($schemaBanner->getSlideLink()) {
+            $schemaItem['url'] = $schemaBanner->getSlideLink();
+        }
+        $schemaItems[] = $schemaItem;
+    }
+}
+$jsonLdSchema = [
+    '@context'        => 'https://schema.org',
+    '@type'           => 'ItemList',
+    'name'            => $sliderTitle,
+    'numberOfItems'   => $totalSlides,
+    'itemListElement' => $schemaItems,
+];
+?>
 <!-- Schema.org ItemList para SEO de carrosséis -->
 <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "ItemList",
-  "name": "<?php echo $block->escapeHtml($slider->getSliderTitle() ?: __('Destaques')); ?>",
-  "numberOfItems": <?php echo $totalSlides; ?>,
-  "itemListElement": [
-    <?php
-    $schemaIndex = 0;
-    $validItems = 0;
-    foreach ($banners as $banner):
-        if ($banner->getSlideStatus() == '2') { continue; }
-        $schemaIndex++;
-        $itemName = trim(strip_tags($banner->getSlideTitle() ?: $banner->getSlideText() ?: ''));
-        $itemUrl = $banner->getSlideLink() ?: '';
-        if ($itemName && $itemName !== '.'):
-            if ($validItems > 0) echo ',';
-            $validItems++;
-    ?>
-    {
-      "@type": "ListItem",
-      "position": <?php echo $schemaIndex; ?>,
-      "name": "<?php echo $block->escapeHtml($itemName); ?>"<?php if ($itemUrl): ?>,
-      "url": "<?php echo $block->escapeUrl($itemUrl); ?>"<?php endif; ?>
-    }
-    <?php endif; endforeach; ?>
-  ]
-}
+<?= /* @noEscape */ json_encode($jsonLdSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) ?>
 </script>
 
 <!-- Slider refatorado para usar componente UI via data-mage-init -->
-<div class="wrapper_slider slider_<?php echo $sliderId; ?>"
+<div class="wrapper_slider slider_<?php echo $block->escapeHtmlAttr((string)$sliderId); ?>"
      role="region"
      aria-label="<?php echo $block->escapeHtml(__('Apresentação de slides promocional')); ?>"
      aria-roledescription="carousel"
@@ -106,13 +109,13 @@ if ($firstBanner):
                 if ($link = $banner->getSlideLink()) {
                     $pictureHtml = '<a href="' . $block->escapeUrl($link) . '" title="' . $block->escapeHtml($slideAlt) . '">' . $pictureHtml . '</a>';
                 }
-                echo $pictureHtml;
+                echo /* @noEscape */ $pictureHtml;
             ?>
         </div>
         <?php endforeach; ?>
     </div>
     <div class="slide-controls">
-        <button type="button" class="play-pause-button" aria-label="<?php echo __('Pausar slides'); ?>">
+        <button type="button" class="play-pause-button" aria-label="<?php echo $block->escapeHtml(__('Pausar slides')); ?>">
             <span class="icon-pause" aria-hidden="true"></span>
             <span class="icon-play icon-play--hidden" aria-hidden="true"></span>
         </button>

@@ -180,6 +180,87 @@
     }
 
     // ===========================================
+    // 0C. PREVENÇÃO DE SALTO EM LINKS href="#"
+    // Em vários módulos Ayo, anchors de ação usam href="#".
+    // Isso causa scroll para o topo quando não há preventDefault.
+    // Este hardening preserva os handlers existentes (não bloqueia propagação).
+    // ===========================================
+    function preventHashAnchorJump(roots) {
+        var searchRoots = roots && roots.length
+            ? roots
+            : [getPageWrapper()];
+
+        var bound = 0;
+
+        searchRoots.forEach(function (root) {
+            if (!root || !root.querySelectorAll) return;
+
+            root.querySelectorAll('a[href="#"]:not([data-awa-allow-hash])').forEach(function (anchor) {
+                if (anchor.dataset.awaHashGuard === '1') {
+                    return;
+                }
+
+                anchor.dataset.awaHashGuard = '1';
+
+                anchor.addEventListener('click', function (event) {
+                    event.preventDefault();
+                });
+
+                anchor.addEventListener('keydown', function (event) {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                    }
+                });
+
+                bound++;
+            });
+        });
+
+        if (bound > 0) {
+            log('Hash anchor jump prevented on ' + bound + ' elements');
+        }
+    }
+
+    // ===========================================
+    // 0D. HARDENING TARGET _BLANK
+    // Garante rel="noopener noreferrer" em links com target="_blank".
+    // ===========================================
+    function hardenExternalBlankLinks(roots) {
+        var searchRoots = roots && roots.length
+            ? roots
+            : [getPageWrapper()];
+
+        var updated = 0;
+
+        searchRoots.forEach(function (root) {
+            if (!root || !root.querySelectorAll) return;
+
+            root.querySelectorAll('a[target="_blank"]').forEach(function (anchor) {
+                var rel = (anchor.getAttribute('rel') || '').toLowerCase();
+                var tokens = rel ? rel.split(/\s+/).filter(Boolean) : [];
+                var hasNoopener = tokens.indexOf('noopener') !== -1;
+                var hasNoreferrer = tokens.indexOf('noreferrer') !== -1;
+
+                if (!hasNoopener) {
+                    tokens.push('noopener');
+                }
+                if (!hasNoreferrer) {
+                    tokens.push('noreferrer');
+                }
+
+                if (!hasNoopener || !hasNoreferrer) {
+                    anchor.setAttribute('rel', tokens.join(' ').trim());
+                    updated++;
+                }
+            });
+        });
+
+        if (updated > 0) {
+            log('Hardened target=_blank links: ' + updated);
+        }
+    }
+
+    // ===========================================
     // 0B. SANEAMENTO DE HEADING CORROMPIDO (LGPD/CMS)
     // Remove prefixos "????" exibidos em alguns títulos institucionais
     // ===========================================
@@ -1079,6 +1160,100 @@
                 root.querySelectorAll(pair[0]).forEach(function (img) {
                     img.alt = pair[1];
                 });
+            });
+        });
+    }
+
+    // ===========================================
+    // R16-10: ICON-ONLY LINK A11Y
+    // Define aria-label/title para links utilitários sem texto visível.
+    // ===========================================
+    function fixIconOnlyLinkLabels(roots) {
+        var searchRoots = roots && roots.length
+            ? roots
+            : [getPageWrapper()];
+
+        function inferLabel(anchor) {
+            var href = (anchor.getAttribute('href') || '').toLowerCase();
+            var className = (anchor.className || '').toLowerCase();
+            var parentClassName = (anchor.parentElement && anchor.parentElement.className
+                ? anchor.parentElement.className
+                : '').toLowerCase();
+            var id = (anchor.id || '').toLowerCase();
+
+            if (className.indexOf('towishlist') !== -1 || className.indexOf('wishlist') !== -1 || parentClassName.indexOf('wishlist') !== -1 || href.indexOf('/wishlist/') !== -1) {
+                return 'Adicionar à lista de desejos';
+            }
+
+            if (className.indexOf('tocompare') !== -1 || className.indexOf('compare') !== -1 || parentClassName.indexOf('compare') !== -1 || href.indexOf('/catalog/product_compare/') !== -1) {
+                return 'Comparar produto';
+            }
+
+            if (className.indexOf('quickview-link') !== -1 || className.indexOf('quickview') !== -1) {
+                return 'Visualização rápida';
+            }
+
+            if (className.indexOf('toggle-nav-footer') !== -1 || className.indexOf('nav-toggle') !== -1) {
+                return 'Abrir menu';
+            }
+
+            if (className.indexOf('showcart') !== -1 || className.indexOf('minicart') !== -1 || parentClassName.indexOf('minicart') !== -1 || href.indexOf('/checkout/cart') !== -1) {
+                return 'Abrir carrinho';
+            }
+
+            if (id === 'back-top' || className.indexOf('back-top') !== -1) {
+                return 'Voltar ao topo';
+            }
+
+            if (href.indexOf('/customer/account/logout') !== -1 || href.indexOf('/customer/account/logoutsuccess') !== -1) {
+                return 'Sair';
+            }
+
+            if (href.indexOf('/customer/account/login') !== -1) {
+                return 'Entrar';
+            }
+
+            if (href.indexOf('/customer/account') !== -1) {
+                return 'Minha conta';
+            }
+
+            return '';
+        }
+
+        searchRoots.forEach(function (root) {
+            if (!root || !root.querySelectorAll) return;
+
+            root.querySelectorAll('a[href], .fixed-bottom a, .fixed-right a, .top-account a, .minicart-wrapper a').forEach(function (anchor) {
+                if (!anchor || anchor.tagName !== 'A') return;
+
+                var visibleText = (anchor.textContent || '').replace(/\s+/g, ' ').trim();
+                var titleAttr = (anchor.getAttribute('title') || '').trim();
+                var ariaLabel = (anchor.getAttribute('aria-label') || '').trim();
+                var iconOnly = visibleText.length === 0;
+
+                if (ariaLabel) {
+                    return;
+                }
+
+                if (!iconOnly && visibleText.length > 1) {
+                    if (!titleAttr) {
+                        anchor.setAttribute('title', visibleText);
+                    }
+                    return;
+                }
+
+                var inferred = inferLabel(anchor);
+
+                if (!inferred && titleAttr) {
+                    inferred = titleAttr;
+                }
+
+                if (inferred) {
+                    anchor.setAttribute('aria-label', inferred);
+                    if (!titleAttr) {
+                        anchor.setAttribute('title', inferred);
+                    }
+                }
             });
         });
     }
@@ -2835,6 +3010,8 @@
         safeRun(translateTexts, 'translateTexts');
         safeRun(hideMagentoCode, 'hideMagentoCode');
         safeRun(normalizeLegacyOfferLinks, 'normalizeLegacyOfferLinks');
+        safeRun(preventHashAnchorJump, 'preventHashAnchorJump');
+        safeRun(hardenExternalBlankLinks, 'hardenExternalBlankLinks');
         safeRun(sanitizeCorruptedInstitutionalHeadings, 'sanitizeCorruptedInstitutionalHeadings');
         safeRun(addInputMasks, 'addInputMasks');
 
@@ -2851,6 +3028,7 @@
         }
         safeRun(fixVerticalMenuToggles, 'fixVerticalMenuToggles');
         safeRun(fixSocialShareAlts, 'fixSocialShareAlts');
+        safeRun(fixIconOnlyLinkLabels, 'fixIconOnlyLinkLabels');
         safeRun(hideEmptyImages, 'hideEmptyImages');
         safeRun(initProductImageCacheFallback, 'initProductImageCacheFallback');
         safeRun(fixNavToggleLabel, 'fixNavToggleLabel');
@@ -3166,8 +3344,11 @@
                     if (isFullPass || hasLinks || hasSearch || hasProducts || hasFooterOrSidebar) {
                         safeRun(function () { translateTexts(nodes); }, 'translateTexts');
                         safeRun(function () { normalizeLegacyOfferLinks(nodes); }, 'normalizeLegacyOfferLinks');
+                        safeRun(function () { preventHashAnchorJump(nodes); }, 'preventHashAnchorJump');
+                        safeRun(function () { hardenExternalBlankLinks(nodes); }, 'hardenExternalBlankLinks');
                         safeRun(function () { sanitizeCorruptedInstitutionalHeadings(nodes); }, 'sanitizeCorruptedInstitutionalHeadings');
                         safeRun(function () { hideMagentoCode(nodes); }, 'hideMagentoCode');
+                        safeRun(function () { fixIconOnlyLinkLabels(nodes); }, 'fixIconOnlyLinkLabels');
                     }
 
                     if (isFullPass || hasProducts) {
@@ -3270,8 +3451,11 @@
 
                 safeRun(function () { translateTexts(deferredNodes); }, 'translateTexts.visibilityDeferred');
                 safeRun(function () { normalizeLegacyOfferLinks(deferredNodes); }, 'normalizeLegacyOfferLinks.visibilityDeferred');
+                safeRun(function () { preventHashAnchorJump(deferredNodes); }, 'preventHashAnchorJump.visibilityDeferred');
+                safeRun(function () { hardenExternalBlankLinks(deferredNodes); }, 'hardenExternalBlankLinks.visibilityDeferred');
                 safeRun(function () { sanitizeCorruptedInstitutionalHeadings(deferredNodes); }, 'sanitizeCorruptedInstitutionalHeadings.visibilityDeferred');
                 safeRun(function () { hideMagentoCode(deferredNodes); }, 'hideMagentoCode.visibilityDeferred');
+                safeRun(function () { fixIconOnlyLinkLabels(deferredNodes); }, 'fixIconOnlyLinkLabels.visibilityDeferred');
                 safeRun(function () { fixPrices(deferredNodes); }, 'fixPrices.visibilityDeferred');
                 safeRun(function () { addInputMasks(deferredNodes); }, 'addInputMasks.visibilityDeferred');
                 safeRun(function () { fixReviewCount(deferredNodes); }, 'fixReviewCount.visibilityDeferred');

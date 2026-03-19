@@ -237,6 +237,10 @@ define([
         var carouselSelector = config.carouselSelector;
         var owlConfig = config.owl || {};
         var baseOptions;
+        var mediaQueryList = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+        var shouldReduceMotion = !!(mediaQueryList && mediaQueryList.matches);
+        var autoplayGuardCarousels = [];
+        var autoplayVisibilityBound = false;
         var manager = {
             ensureIn: function () {}
         };
@@ -247,7 +251,7 @@ define([
 
         baseOptions = {
             lazyLoad: resolveBoolean(owlConfig.lazyLoad, true),
-            autoPlay: resolveBoolean(owlConfig.autoPlay, false),
+            autoPlay: shouldReduceMotion ? false : resolveBoolean(owlConfig.autoPlay, false),
             navigation: resolveBoolean(owlConfig.navigation, false),
             pagination: resolveBoolean(owlConfig.pagination, false),
             stopOnHover: resolveBoolean(owlConfig.stopOnHover, true),
@@ -261,12 +265,262 @@ define([
             paginationSpeed: parseInt(owlConfig.paginationSpeed, 10) || 500,
             rewindSpeed: parseInt(owlConfig.rewindSpeed, 10) || 500,
             afterAction: function () {
+                var $carousel = this.$elem && this.$elem.length ? this.$elem : $();
+
                 if (this.$owlItems && this.$owlItems.length) {
                     this.$owlItems.removeClass('first-active');
                     this.$owlItems.eq(this.currentItem).addClass('first-active');
                 }
+
+                if ($carousel.length) {
+                    syncFocusableState($carousel);
+                }
             }
         };
+
+        function syncFocusableState($carousel) {
+            var focusableSelector = 'a, button, input, select, textarea, [tabindex]';
+
+            if (!$carousel || !$carousel.length) {
+                return;
+            }
+
+            $carousel.find('.owl-item').each(function () {
+                var $item = $(this);
+                var isActive = $item.hasClass('active') || $item.hasClass('center') || $item.hasClass('first-active');
+
+                $item.attr('aria-hidden', isActive ? 'false' : 'true');
+
+                $item.find(focusableSelector).each(function () {
+                    var $el = $(this);
+                    var originalTabindex = $el.data('awaOrigTabindex');
+
+                    if (isActive) {
+                        if (originalTabindex === '__none__') {
+                            $el.removeAttr('tabindex');
+                            $el.removeData('awaOrigTabindex');
+                            return;
+                        }
+
+                        if (originalTabindex !== undefined) {
+                            $el.attr('tabindex', originalTabindex);
+                            $el.removeData('awaOrigTabindex');
+                        }
+                        return;
+                    }
+
+                    if (originalTabindex === undefined) {
+                        $el.data('awaOrigTabindex', $el.attr('tabindex') !== undefined ? $el.attr('tabindex') : '__none__');
+                    }
+
+                    $el.attr('tabindex', '-1');
+                });
+            });
+        }
+
+        function setAutoplayState($carousel, shouldPlay) {
+            var owl;
+
+            if (!$carousel || !$carousel.length) {
+                return;
+            }
+
+            owl = $carousel.data('owlCarousel');
+            if (!owl) {
+                return;
+            }
+
+            if (shouldPlay) {
+                if (typeof owl.play === 'function') {
+                    owl.play();
+                    return;
+                }
+
+                $carousel.trigger('owl.play', 5000);
+                return;
+            }
+
+            if (typeof owl.stop === 'function') {
+                owl.stop();
+                return;
+            }
+
+            $carousel.trigger('owl.stop');
+        }
+
+        function moveCarousel($carousel, direction) {
+            var owl;
+
+            if (!$carousel || !$carousel.length) {
+                return;
+            }
+
+            owl = $carousel.data('owlCarousel');
+
+            if (owl) {
+                if (direction === 'next') {
+                    if (typeof owl.next === 'function') {
+                        owl.next();
+                        return;
+                    }
+                    $carousel.trigger('owl.next');
+                    return;
+                }
+
+                if (typeof owl.prev === 'function') {
+                    owl.prev();
+                    return;
+                }
+
+                $carousel.trigger('owl.prev');
+                return;
+            }
+
+            $carousel.trigger(direction === 'next' ? 'next.owl.carousel' : 'prev.owl.carousel');
+        }
+
+        function moveCarouselToEdge($carousel, toEnd) {
+            var owl;
+            var targetIndex;
+
+            if (!$carousel || !$carousel.length) {
+                return;
+            }
+
+            owl = $carousel.data('owlCarousel');
+            if (!owl) {
+                $carousel.trigger('to.owl.carousel', [toEnd ? 9999 : 0, 250]);
+                return;
+            }
+
+            if (typeof owl.goTo !== 'function') {
+                return;
+            }
+
+            if (!toEnd) {
+                owl.goTo(0);
+                return;
+            }
+
+            targetIndex = typeof owl.maximumItem === 'number'
+                ? owl.maximumItem
+                : (typeof owl.itemsAmount === 'number' ? Math.max(0, owl.itemsAmount - 1) : 0);
+
+            owl.goTo(targetIndex);
+        }
+
+        function bindKeyboardCarouselNavigation($carousel) {
+            var keyHandler;
+
+            if (!$carousel || !$carousel.length || $carousel.data('awaKeyboardNavBound')) {
+                return;
+            }
+
+            $carousel.data('awaKeyboardNavBound', 1);
+
+            if ($carousel.attr('tabindex') === undefined) {
+                $carousel.attr('tabindex', '0');
+                $carousel.data('awaKeyboardNavTabindexAdded', 1);
+            }
+
+            keyHandler = function (event) {
+                var key = event.which || event.keyCode;
+                var tagName = event.target && event.target.tagName ? event.target.tagName.toLowerCase() : '';
+
+                if (tagName === 'input' || tagName === 'textarea' || tagName === 'select') {
+                    return;
+                }
+
+                if (key === 37) {
+                    event.preventDefault();
+                    moveCarousel($carousel, 'prev');
+                    return;
+                }
+
+                if (key === 39) {
+                    event.preventDefault();
+                    moveCarousel($carousel, 'next');
+                    return;
+                }
+
+                if (key === 36) {
+                    event.preventDefault();
+                    moveCarouselToEdge($carousel, false);
+                    return;
+                }
+
+                if (key === 35) {
+                    event.preventDefault();
+                    moveCarouselToEdge($carousel, true);
+                }
+            };
+
+            $carousel.on('keydown.awaOwlKeyboardNav', keyHandler);
+
+            $carousel.on('remove.awaOwlKeyboardNav', function () {
+                $carousel.off('.awaOwlKeyboardNav');
+                if ($carousel.data('awaKeyboardNavTabindexAdded')) {
+                    $carousel.removeAttr('tabindex');
+                    $carousel.removeData('awaKeyboardNavTabindexAdded');
+                }
+            });
+        }
+
+        function bindAutoplayGuard($carousel) {
+            var pauseEvents;
+            var resumeEvents;
+
+            function syncAllByVisibility() {
+                autoplayGuardCarousels = autoplayGuardCarousels.filter(function ($entry) {
+                    return $entry && $entry.length && document.documentElement.contains($entry.get(0));
+                });
+
+                autoplayGuardCarousels.forEach(function ($entry) {
+                    setAutoplayState($entry, !document.hidden);
+                });
+            }
+
+            if (!$carousel || !$carousel.length || $carousel.data('awaAutoplayGuardBound')) {
+                return;
+            }
+
+            $carousel.data('awaAutoplayGuardBound', 1);
+
+            if (!baseOptions.autoPlay) {
+                return;
+            }
+
+            pauseEvents = 'mouseenter.awaOwlAutoplayGuard focusin.awaOwlAutoplayGuard touchstart.awaOwlAutoplayGuard';
+            resumeEvents = 'mouseleave.awaOwlAutoplayGuard focusout.awaOwlAutoplayGuard touchend.awaOwlAutoplayGuard';
+
+            if ($.inArray($carousel, autoplayGuardCarousels) === -1) {
+                autoplayGuardCarousels.push($carousel);
+            }
+
+            if (!autoplayVisibilityBound) {
+                document.addEventListener('visibilitychange', syncAllByVisibility);
+                autoplayVisibilityBound = true;
+            }
+
+            $carousel.on(pauseEvents, function () {
+                setAutoplayState($carousel, false);
+            });
+
+            $carousel.on(resumeEvents, function () {
+                if (!document.hidden) {
+                    setAutoplayState($carousel, true);
+                }
+            });
+
+            $carousel.on('remove.awaOwlAutoplayGuard', function () {
+                autoplayGuardCarousels = autoplayGuardCarousels.filter(function ($entry) {
+                    return !$entry || !$entry.length || $entry.get(0) !== $carousel.get(0);
+                });
+                $carousel.off('.awaOwlAutoplayGuard');
+            });
+
+            syncAllByVisibility();
+        }
 
         function reinitCarousel($carousel) {
             var owl = $carousel.data('owlCarousel');
@@ -275,12 +529,20 @@ define([
                 return;
             }
 
+            $carousel.addClass('owl-loaded');
+
             if (typeof owl.reinit === 'function') {
                 owl.reinit(baseOptions);
+                bindAutoplayGuard($carousel);
+                bindKeyboardCarouselNavigation($carousel);
+                syncFocusableState($carousel);
                 return;
             }
 
             $carousel.trigger('owl.update');
+            bindAutoplayGuard($carousel);
+            bindKeyboardCarouselNavigation($carousel);
+            syncFocusableState($carousel);
         }
 
         function ensureIn($container) {
@@ -307,6 +569,10 @@ define([
                 $carousel.data('awaTabCarouselInit', 1);
                 try {
                     $carousel.owlCarousel(baseOptions);
+                    $carousel.addClass('owl-loaded');
+                    bindAutoplayGuard($carousel);
+                    bindKeyboardCarouselNavigation($carousel);
+                    syncFocusableState($carousel);
                 } catch (error) {
                     $carousel.removeData('awaTabCarouselInit');
                 }

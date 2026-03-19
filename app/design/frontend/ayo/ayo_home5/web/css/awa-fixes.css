@@ -2126,26 +2126,22 @@ body .page-wrapper .owl-carousel {
     align-items: stretch;
 }
 
-:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .owl-carousel .owl-stage-outer,
-:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .owl-carousel .owl-wrapper-outer {
-    margin-left: calc(var(--awa-owl-item-gutter) / -2);
-    margin-right: calc(var(--awa-owl-item-gutter) / -2);
-}
+/* R32: margens negativas removidas do wrapper-outer — técnica incompatível com OWL v1 + float.
+   OWL v1 JS calcula itemWidth = $elem.width() / numItems e só injeta style="width:Xpx" nos
+   .owl-item (sem margin-right). Com width:100% explícito no wrapper-outer (awa-grid-unified §4),
+   margin-left:-X expande apenas à esquerda e a borda direita fica Xpx aquém do pai, causando
+   clip assimétrico pelo overflow:hidden. O padding nos .owl-item já cria os espaços visuais:
+   16px entre cards adjacentes (8px+8px) e 8px nas bordas externas — sem precisar de compensação. */
 
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .owl-carousel .owl-item {
     clear: none !important;
+    margin-right: 0 !important; /* R32: substitui seletor [style*="margin-right"] — OWL v1 não injeta margin-right inline */
     padding-left: calc(var(--awa-owl-item-gutter) / 2);
     padding-right: calc(var(--awa-owl-item-gutter) / 2);
 
     /* R26: removidos float/flex/min-width/box-sizing — já definidos em
        awa-components.css ~L700 e awa-grid-unified.css §4.
-       Só padding (gutter) e clear são exclusivos deste bloco. */
-}
-
-/* Evita espaçamento duplo quando OWL injeta margin inline */
-:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .owl-carousel .owl-item[style*="margin-right"],
-:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .owl-carousel .owl-item[style*="margin-right:"] {
-    margin-right: 0 !important;
+       Só padding (gutter), clear e margin-right são exclusivos deste bloco. */
 }
 
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .owl-carousel .owl-item > * {

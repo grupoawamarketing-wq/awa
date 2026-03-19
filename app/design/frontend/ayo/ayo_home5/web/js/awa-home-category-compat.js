@@ -4,7 +4,21 @@ define([
     'use strict';
 
     var OBS_KEY = '__awaHomeCategoryCompatObserver';
-    var scheduled = false;
+    var SCHEDULED_KEY = '__awaHomeCategoryCompatScheduled';
+    var MAX_OBS_FIRES = 12;
+    var obsFireCount = 0;
+    var RELEVANT_SELECTORS = [
+        '.navigation.verticalmenu',
+        '.togge-menu',
+        '.navigation.custommenu',
+        '.open-children-toggle',
+        '.filter-options-item',
+        '.toolbar-products',
+        '.products-grid',
+        '.owl-prev',
+        '.owl-next',
+        '.owl-controls'
+    ];
 
     function inScope() {
         var body = document.body;
@@ -42,7 +56,7 @@ define([
     }
 
     function syncVerticalMenu() {
-        var $nav = $('.navigation.verticalmenu.side-verticalmenu');
+        var $nav = $('.navigation.verticalmenu.side-verticalmenu').not('.navigation--mueller');
         var $list;
         var open;
 
@@ -336,14 +350,14 @@ define([
     }
 
     function scheduleDecorate() {
-        if (scheduled) {
+        if (window[SCHEDULED_KEY]) {
             return;
         }
 
-        scheduled = true;
+        window[SCHEDULED_KEY] = true;
 
         function flush() {
-            scheduled = false;
+            window[SCHEDULED_KEY] = false;
             decorate();
         }
 
@@ -355,15 +369,66 @@ define([
         window.setTimeout(flush, 0);
     }
 
+    function hasRelevantMutation(mutations) {
+        var i;
+        var j;
+        var k;
+        var node;
+        var added;
+        var $node;
+
+        for (i = 0; i < mutations.length; i++) {
+            added = mutations[i].addedNodes || [];
+
+            for (j = 0; j < added.length; j++) {
+                node = added[j];
+
+                if (!node || node.nodeType !== 1) {
+                    continue;
+                }
+
+                if (node.classList && (
+                    node.classList.contains('owl-item') ||
+                    node.classList.contains('owl-wrapper') ||
+                    node.classList.contains('owl-wrapper-outer')
+                )) {
+                    continue;
+                }
+
+                $node = $(node);
+
+                for (k = 0; k < RELEVANT_SELECTORS.length; k++) {
+                    if ($node.is(RELEVANT_SELECTORS[k]) || $node.find(RELEVANT_SELECTORS[k]).length) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
     return function initAwaHomeCategoryCompat() {
         if (!inScope()) {
             return;
         }
 
         decorate();
+        window.setTimeout(decorate, 600);
 
         if (window.MutationObserver && !window[OBS_KEY]) {
-            window[OBS_KEY] = new window.MutationObserver(function () {
+            window[OBS_KEY] = new window.MutationObserver(function (mutations) {
+                if (!hasRelevantMutation(mutations)) {
+                    return;
+                }
+
+                obsFireCount += 1;
+
+                if (obsFireCount > MAX_OBS_FIRES) {
+                    window[OBS_KEY].disconnect();
+                    return;
+                }
+
                 scheduleDecorate();
             });
 

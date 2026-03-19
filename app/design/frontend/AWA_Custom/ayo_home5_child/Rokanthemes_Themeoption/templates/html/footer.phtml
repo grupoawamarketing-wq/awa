@@ -1,12 +1,20 @@
 <?php
 /** @var Rokanthemes\Themeoption\Block\Themeoption $block */
+// @todo [deprecated] $this->helper() — corrigir via Plugin em GrupoAwamotos sobre Rokanthemes\Themeoption\Block\Themeoption
 $helper = $this->helper('Rokanthemes\RokanBase\Helper\Data');
 $enableMenu = $helper->getConfigData('themeoption/footer/footer_menu_mobile');
 $footerPaymentLegacy = trim((string) $this->getChildHtml('footer_payment'));
 $storeHost = (string) parse_url((string) $block->getBaseUrl(), PHP_URL_HOST);
-$storeHost = $storeHost !== '' ? $storeHost : 'awamotos.com';
-$safeBrowsingUrl = 'https://transparencyreport.google.com/safe-browsing/search?url=' . rawurlencode($storeHost);
-$sslLabsUrl = 'https://www.ssllabs.com/ssltest/analyze.html?d=' . rawurlencode($storeHost);
+$showSecuritySeals = $storeHost !== '';
+$safeBrowsingUrl = $showSecuritySeals
+    ? 'https://transparencyreport.google.com/safe-browsing/search?url=' . rawurlencode($storeHost)
+    : '#';
+$sslLabsUrl = $showSecuritySeals
+    ? 'https://www.ssllabs.com/ssltest/analyze.html?d=' . rawurlencode($storeHost)
+    : '#';
+$mediaUrl = rtrim((string) $block->getBaseUrl(), '/') . '/media';
+
+$brandHtml = trim((string) $this->getChildHtml('footer_brand_list'));
 ?>
 <div class="page_footer awa-footer--dark" role="contentinfo">
     <svg class="awa-footer-sprite" xmlns="http://www.w3.org/2000/svg" width="0" height="0" aria-hidden="true" focusable="false">
@@ -78,6 +86,13 @@ $sslLabsUrl = 'https://www.ssllabs.com/ssltest/analyze.html?d=' . rawurlencode($
             </div>
         </div>
     </section>
+    <?php if ($brandHtml !== ''): ?>
+    <section class="awa-footer-brands" aria-label="<?= $escaper->escapeHtmlAttr(__('Marcas que trabalhamos')) ?>">
+        <div class="container">
+            <?= /* @noEscape */ $brandHtml ?>
+        </div>
+    </section>
+    <?php endif; ?>
     <div id="footer" class="footer-container layout2 footer">
         <?= $this->getChildHtml('footer_static5') ?>
     </div>
@@ -89,75 +104,74 @@ $sslLabsUrl = 'https://www.ssllabs.com/ssltest/analyze.html?d=' . rawurlencode($
                         <?= $this->getChildHtml('copyright') ?>
                     </div>
                     <div class="col-md-6 col-sm-6 col-xs-12">
-                        <section class="awa-footer-payments-security" aria-labelledby="awa-footer-payments-title">
-                            <div class="awa-footer-payments-security__grid">
-                                <div class="awa-footer-payments-security__panel">
-                                    <h5 id="awa-footer-payments-title" class="awa-footer-panel-title">
-                                        <?= $escaper->escapeHtml(__('Pagamento & Segurança')) ?>
-                                    </h5>
-                                    <div class="awa-footer-panel-section">
-                                        <p class="awa-footer-panel-label"><?= $escaper->escapeHtml(__('Pagamentos Prioritários')) ?></p>
-                                        <div class="awa-payment-chip-list" role="list" aria-label="<?= $escaper->escapeHtmlAttr(__('Pagamentos prioritários')) ?>">
-                                            <span class="awa-payment-chip awa-payment-chip--priority" role="listitem">
-                                                <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#awa-icon-pix"/></svg>
-                                                <span>PIX</span>
-                                            </span>
-                                            <span class="awa-payment-chip awa-payment-chip--priority" role="listitem">
-                                                <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#awa-icon-boleto"/></svg>
-                                                <span><?= $escaper->escapeHtml(__('Boleto')) ?></span>
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div class="awa-footer-panel-section">
-                                        <p class="awa-footer-panel-label"><?= $escaper->escapeHtml(__('Outras Formas de Pagamento')) ?></p>
-                                        <div class="awa-payment-chip-list" role="list" aria-label="<?= $escaper->escapeHtmlAttr(__('Outros meios de pagamento')) ?>">
-                                            <span class="awa-payment-chip" role="listitem">
-                                                <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#awa-icon-card"/></svg>
-                                                <span><?= $escaper->escapeHtml(__('Cartão')) ?></span>
-                                            </span>
-                                            <span class="awa-payment-chip" role="listitem">
-                                                <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#awa-icon-card"/></svg>
-                                                <span><?= $escaper->escapeHtml(__('Parcelamento')) ?></span>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="awa-footer-payments-security__panel">
-                                    <h5 class="awa-footer-panel-title"><?= $escaper->escapeHtml(__('Selos de Segurança')) ?></h5>
-                                    <div class="awa-security-badge-list">
-                                        <a class="awa-security-badge"
-                                           href="<?= $escaper->escapeUrl($safeBrowsingUrl) ?>"
-                                           target="_blank"
-                                           rel="noopener noreferrer"
-                                           title="<?= $escaper->escapeHtmlAttr(__('Verificar reputação no Google Transparency Report')) ?>"
-                                           aria-label="<?= $escaper->escapeHtmlAttr(__('Abrir verificação Google Safe Browsing para %1', $storeHost)) ?>">
-                                            <span class="awa-security-badge__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#awa-icon-google"/></svg></span>
-                                            <span class="awa-security-badge__copy">
-                                                <strong>Google Safe</strong>
-                                                <small><?= $escaper->escapeHtml(__('Transparência / Navegação Segura')) ?></small>
-                                            </span>
-                                        </a>
-                                        <a class="awa-security-badge"
-                                           href="<?= $escaper->escapeUrl($sslLabsUrl) ?>"
-                                           target="_blank"
-                                           rel="noopener noreferrer"
-                                           title="<?= $escaper->escapeHtmlAttr(__('Verificar configuração SSL no SSL Labs')) ?>"
-                                           aria-label="<?= $escaper->escapeHtmlAttr(__('Abrir análise SSL de %1 no SSL Labs', $storeHost)) ?>">
-                                            <span class="awa-security-badge__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#awa-icon-lock"/></svg></span>
-                                            <span class="awa-security-badge__copy">
-                                                <strong>SSL</strong>
-                                                <small><?= $escaper->escapeHtml(__('Conexão criptografada ativa')) ?></small>
-                                            </span>
-                                        </a>
-                                    </div>
-                                </div>
+                        <section class="awa-footer-pay-sec" aria-label="<?= $escaper->escapeHtmlAttr(__('Pagamentos e Segurança')) ?>">
+
+                            <?php /* ── Formas de pagamento ── */ ?>
+                            <p class="awa-footer-pay-sec__label"><?= $escaper->escapeHtml(__('Formas de pagamento')) ?></p>
+                            <div class="awa-footer-pay-logos" role="list" aria-label="<?= $escaper->escapeHtmlAttr(__('Formas de pagamento aceitas')) ?>">
+                                <picture class="awa-pay-logo" role="listitem">
+                                    <source srcset="<?= $escaper->escapeUrl($mediaUrl . '/wysiwyg/payment/pix.webp') ?>" type="image/webp">
+                                    <img src="<?= $escaper->escapeUrl($mediaUrl . '/wysiwyg/payment/pix.png') ?>"
+                                         alt="PIX" width="46" height="28" loading="lazy" decoding="async">
+                                </picture>
+                                <picture class="awa-pay-logo" role="listitem">
+                                    <source srcset="<?= $escaper->escapeUrl($mediaUrl . '/wysiwyg/payment/boleto.webp') ?>" type="image/webp">
+                                    <img src="<?= $escaper->escapeUrl($mediaUrl . '/wysiwyg/payment/boleto.png') ?>"
+                                         alt="Boleto Bancário" width="46" height="28" loading="lazy" decoding="async">
+                                </picture>
+                                <picture class="awa-pay-logo" role="listitem">
+                                    <source srcset="<?= $escaper->escapeUrl($mediaUrl . '/wysiwyg/payment/visa.webp') ?>" type="image/webp">
+                                    <img src="<?= $escaper->escapeUrl($mediaUrl . '/wysiwyg/payment/visa.png') ?>"
+                                         alt="Visa" width="46" height="28" loading="lazy" decoding="async">
+                                </picture>
+                                <picture class="awa-pay-logo" role="listitem">
+                                    <source srcset="<?= $escaper->escapeUrl($mediaUrl . '/wysiwyg/payment/mastercard.webp') ?>" type="image/webp">
+                                    <img src="<?= $escaper->escapeUrl($mediaUrl . '/wysiwyg/payment/mastercard.png') ?>"
+                                         alt="Mastercard" width="46" height="28" loading="lazy" decoding="async">
+                                </picture>
+                                <?php foreach ([
+                                    ['cartao-1.png', 'Elo'],
+                                    ['cartao-2.png', 'Hipercard'],
+                                    ['cartao-3.png', 'American Express'],
+                                    ['cartao-4.png', 'Diners Club'],
+                                ] as [$img, $name]): ?>
+                                <picture class="awa-pay-logo" role="listitem">
+                                    <img src="<?= $escaper->escapeUrl($mediaUrl . '/import/catalog/selos/' . $img) ?>"
+                                         alt="<?= $escaper->escapeHtmlAttr($name) ?>" width="36" height="24"
+                                         loading="lazy" decoding="async">
+                                </picture>
+                                <?php endforeach; ?>
                             </div>
+
+                            <?php if ($showSecuritySeals): ?>
+                            <?php /* ── Selos de segurança ── */ ?>
+                            <p class="awa-footer-pay-sec__label awa-footer-pay-sec__label--mt"><?= $escaper->escapeHtml(__('Site seguro')) ?></p>
+                            <div class="awa-footer-sec-seals" role="list" aria-label="<?= $escaper->escapeHtmlAttr(__('Selos de segurança')) ?>">
+                                <a class="awa-seal"
+                                   href="<?= $escaper->escapeUrl($safeBrowsingUrl) ?>"
+                                   target="_blank" rel="noopener noreferrer"
+                                   title="<?= $escaper->escapeHtmlAttr(__('Google Safe Browsing — Verificar reputação')) ?>"
+                                   role="listitem">
+                                    <img src="<?= $escaper->escapeUrl($mediaUrl . '/import/catalog/selos/google-seguro.png') ?>"
+                                         alt="Google Safe Browsing" width="90" height="32" loading="lazy" decoding="async">
+                                </a>
+                                <a class="awa-seal"
+                                   href="<?= $escaper->escapeUrl($sslLabsUrl) ?>"
+                                   target="_blank" rel="noopener noreferrer"
+                                   title="<?= $escaper->escapeHtmlAttr(__('SSL — Conexão criptografada')) ?>"
+                                   role="listitem">
+                                    <img src="<?= $escaper->escapeUrl($mediaUrl . '/import/catalog/selos/security.png') ?>"
+                                         alt="SSL Seguro" width="72" height="32" loading="lazy" decoding="async">
+                                </a>
+                                <span class="awa-seal awa-seal--static" role="listitem" aria-label="<?= $escaper->escapeHtmlAttr(__('Compra Segura')) ?>">
+                                    <img src="<?= $escaper->escapeUrl($mediaUrl . '/import/catalog/selos/compra-segura.png') ?>"
+                                         alt="<?= $escaper->escapeHtmlAttr(__('Compra Segura')) ?>" width="72" height="32"
+                                         loading="lazy" decoding="async">
+                                </span>
+                            </div>
+                            <?php endif; ?>
+
                         </section>
-                        <?php if ($footerPaymentLegacy !== ''): ?>
-                            <div class="awa-footer-payment-legacy" hidden aria-hidden="true">
-                                <?= /* @noEscape */ $footerPaymentLegacy ?>
-                            </div>
-                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -169,7 +183,7 @@ $sslLabsUrl = 'https://www.ssllabs.com/ssltest/analyze.html?d=' . rawurlencode($
 </div>
 <div class="shadow_bkg" role="presentation"></div>
 <div class="shadow_bkg_show" role="presentation"></div>
-<a id="back-top" class="hidden-xs" href="#" role="button" aria-label="<?= $escaper->escapeHtmlAttr(__('Voltar ao topo')) ?>">
+<a id="back-top" class="hidden-xs" href="#" role="button" aria-label="<?= $escaper->escapeHtmlAttr(__('Voltar ao topo')) ?>" title="<?= $escaper->escapeHtmlAttr(__('Voltar ao topo')) ?>">
     <i class="fa fa-angle-up" aria-hidden="true"></i>
 </a>
 
@@ -177,10 +191,10 @@ $sslLabsUrl = 'https://www.ssllabs.com/ssltest/analyze.html?d=' . rawurlencode($
 <nav class="fixed-bottom hidden-sm hidden-md hidden-lg" role="navigation" aria-label="<?= $escaper->escapeHtmlAttr(__('Navegação Móvel')) ?>">
     <div class="link-on-bottom">
         <ul class="mobile-bottom-link flex-layout space-between list-unstyled">
-            <li><a href="<?= $escaper->escapeUrl($this->getUrl('')) ?>" aria-label="<?= $escaper->escapeHtmlAttr(__('Home')) ?>"><span class="icon icon-chrome" aria-hidden="true"></span><?= $escaper->escapeHtml(__('Home')) ?></a></li>
-            <li><a href="#" class="toggle-nav-footer" role="button" aria-haspopup="true" aria-expanded="false" aria-label="<?= $escaper->escapeHtmlAttr(__('Abrir menu')) ?>"><span class="icon icon-menu" aria-hidden="true"></span><?= $escaper->escapeHtml(__('Menu')) ?></a></li>
-            <li><a href="<?= $escaper->escapeUrl($this->getUrl('customer/account/')) ?>" aria-label="<?= $escaper->escapeHtmlAttr(__('Minha Conta')) ?>"><span class="icon icon-users" aria-hidden="true"></span><?= $escaper->escapeHtml(__('Conta')) ?></a></li>
-            <li><a href="<?= $escaper->escapeUrl($this->getUrl('checkout/cart/')) ?>" aria-label="<?= $escaper->escapeHtmlAttr(__('Carrinho de Compras')) ?>"><span class="icon icon-shopping-cart" aria-hidden="true"></span><?= $escaper->escapeHtml(__('Carrinho')) ?></a></li>
+            <li><a href="<?= $escaper->escapeUrl($this->getUrl('')) ?>" aria-label="<?= $escaper->escapeHtmlAttr(__('Home')) ?>" title="<?= $escaper->escapeHtmlAttr(__('Home')) ?>"><span class="icon icon-chrome" aria-hidden="true"></span><?= $escaper->escapeHtml(__('Home')) ?></a></li>
+            <li><button type="button" class="toggle-nav-footer" aria-haspopup="true" aria-expanded="false" aria-label="<?= $escaper->escapeHtmlAttr(__('Abrir menu')) ?>" title="<?= $escaper->escapeHtmlAttr(__('Abrir menu')) ?>"><span class="icon icon-menu" aria-hidden="true"></span><?= $escaper->escapeHtml(__('Menu')) ?></button></li>
+            <li><a href="<?= $escaper->escapeUrl($this->getUrl('customer/account/')) ?>" aria-label="<?= $escaper->escapeHtmlAttr(__('Minha Conta')) ?>" title="<?= $escaper->escapeHtmlAttr(__('Minha Conta')) ?>"><span class="icon icon-users" aria-hidden="true"></span><?= $escaper->escapeHtml(__('Conta')) ?></a></li>
+            <li><a href="<?= $escaper->escapeUrl($this->getUrl('checkout/cart/')) ?>" aria-label="<?= $escaper->escapeHtmlAttr(__('Carrinho de Compras')) ?>" title="<?= $escaper->escapeHtmlAttr(__('Carrinho de Compras')) ?>"><span class="icon icon-shopping-cart" aria-hidden="true"></span><?= $escaper->escapeHtml(__('Carrinho')) ?></a></li>
         </ul>
     </div>
 </nav>
