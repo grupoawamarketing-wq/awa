@@ -325,7 +325,7 @@ class CalculatorTest extends TestCase
         $this->loggerMock
             ->expects($this->once())
             ->method('error')
-            ->with($this->stringContains('RFM Calculation Error'));
+            ->with($this->stringContains('Error delegating to ERP Calculator'));
 
         $result = $this->subject->calculateAll();
 

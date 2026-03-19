@@ -16,10 +16,25 @@
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <body>
-        <!-- Fix 1: clear before="user" ordering so theme can freely move notification.messages -->
-        <move element="notification.messages" destination="header" before="-"/>
+        <!--
+            Garante parent consistente para ordering de notification.messages after="user".
+            Em alguns contextos o bloco "user" fica em "header" e causa Broken reference.
+        -->
+        <move element="user" destination="header.inner.right" before="-"/>
 
-        <!-- Fix 2: remove Mirasvit feature-request widget (page.main.container does not exist in adminhtml) -->
-        <referenceBlock name="mst.feature-request" remove="true"/>
+        <!--
+            Neutraliza o bloco original do Magento_AdminNotification (before="user")
+            e recria sem ordering cruzado com "user". Alguns contextos/admin themes não
+            posicionam "user" no mesmo parent do notification.messages e isso gera
+            "Broken reference ... tries to reorder itself towards user".
+        -->
+        <referenceBlock name="notification.messages" remove="true"/>
+        <referenceContainer name="header.inner.right">
+            <block class="Magento\AdminNotification\Block\ToolbarEntry"
+                   name="notification.messages"
+                   after="-"
+                   aclResource="Magento_AdminNotification::show_toolbar"
+                   template="Magento_AdminNotification::toolbar_entry.phtml"/>
+        </referenceContainer>
     </body>
 </page>

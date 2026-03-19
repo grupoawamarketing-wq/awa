@@ -486,7 +486,7 @@ df -h >> var/log/health_check.log
 
 # 5. Database Size
 echo "Database Size:" >> var/log/health_check.log
-mysql -u magento -p'Aw4m0t0s2025Mage' -D magento -e "SELECT table_schema AS 'Database', ROUND(SUM(data_length + index_length) / 1024 / 1024, 2) AS 'Size (MB)' FROM information_schema.TABLES WHERE table_schema = 'magento'" >> var/log/health_check.log
+mysql -u "$MAGENTO_DB_USER" -p"$MAGENTO_DB_PASS" -D "$MAGENTO_DB_NAME" -e "SELECT table_schema AS 'Database', ROUND(SUM(data_length + index_length) / 1024 / 1024, 2) AS 'Size (MB)' FROM information_schema.TABLES WHERE table_schema = 'magento'" >> var/log/health_check.log
 
 echo "===================================" >> var/log/health_check.log
 echo "" >> var/log/health_check.log
@@ -494,7 +494,7 @@ echo "" >> var/log/health_check.log
 
 **Adicionar ao cron:**
 ```bash
-0 8 * * * /home/user/htdocs/srv1113343.hstgr.cloud/scripts/health_check.sh
+0 8 * * * /home/jessessh/htdocs/srv1113343.hstgr.cloud/scripts/health_check.sh
 ```
 
 ### **4. New Relic / APM (Recomendado para Produção)**
@@ -534,9 +534,9 @@ echo "" >> var/log/health_check.log
 
 BACKUP_DIR="/backup/magento/database"
 DATE=$(date +%Y%m%d_%H%M%S)
-DB_NAME="magento"
-DB_USER="magento"
-DB_PASS="Aw4m0t0s2025Mage"
+DB_NAME="${MAGENTO_DB_NAME}"
+DB_USER="${MAGENTO_DB_USER}"
+DB_PASS="${MAGENTO_DB_PASS}"
 
 mkdir -p $BACKUP_DIR
 
@@ -556,7 +556,7 @@ echo "Backup criado: magento_$DATE.sql.gz"
 
 BACKUP_DIR="/backup/magento/media"
 DATE=$(date +%Y%m%d)
-SOURCE_DIR="/home/user/htdocs/srv1113343.hstgr.cloud/pub/media"
+SOURCE_DIR="/home/jessessh/htdocs/srv1113343.hstgr.cloud/pub/media"
 
 mkdir -p $BACKUP_DIR
 
@@ -574,20 +574,20 @@ echo "Media backup: latest"
 **Cron para backups:**
 ```bash
 # Database: diariamente às 2h
-0 2 * * * /home/user/htdocs/srv1113343.hstgr.cloud/scripts/backup_database.sh
+0 2 * * * /home/jessessh/htdocs/srv1113343.hstgr.cloud/scripts/backup_database.sh
 
 # Media: diariamente às 3h
-0 3 * * * /home/user/htdocs/srv1113343.hstgr.cloud/scripts/backup_media.sh
+0 3 * * * /home/jessessh/htdocs/srv1113343.hstgr.cloud/scripts/backup_media.sh
 ```
 
 ### **3. Restore Procedure**
 
 ```bash
 # Restore Database
-gunzip < /backup/magento/database/magento_20260217_020000.sql.gz | mysql -u magento -p'Aw4m0t0s2025Mage' magento
+gunzip < /backup/magento/database/magento_YYYYMMDD_HHMMSS.sql.gz | mysql -u "$MAGENTO_DB_USER" -p"$MAGENTO_DB_PASS" "$MAGENTO_DB_NAME"
 
 # Restore Media
-rsync -av /backup/magento/media/latest/ /home/user/htdocs/srv1113343.hstgr.cloud/pub/media/
+rsync -av /backup/magento/media/latest/ /home/jessessh/htdocs/srv1113343.hstgr.cloud/pub/media/
 
 # Depois do restore:
 php bin/magento cache:flush

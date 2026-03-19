@@ -9,23 +9,35 @@ namespace GrupoAwamotos\RexisML\Model;
 use GrupoAwamotos\RexisML\Api\RecommendationRepositoryInterface;
 use GrupoAwamotos\RexisML\Api\Data\MetricsInterface;
 use GrupoAwamotos\RexisML\Model\Data\Metrics;
-use GrupoAwamotos\RexisML\Model\ResourceModel\DatasetRecomendacao\CollectionFactory as RecomendacaoCollectionFactory;
-use GrupoAwamotos\RexisML\Model\ResourceModel\NetworkRules\CollectionFactory as NetworkCollectionFactory;
-use GrupoAwamotos\RexisML\Model\ResourceModel\CustomerClassification\CollectionFactory as RfmCollectionFactory;
-use GrupoAwamotos\RexisML\Model\ResourceModel\MetricasConversao\CollectionFactory as MetricasCollectionFactory;
 use GrupoAwamotos\RexisML\Model\MetricasConversaoFactory;
+use GrupoAwamotos\RexisML\Model\ResourceModel\CustomerClassification\CollectionFactory as CustomerClassificationCollectionFactory;
+use GrupoAwamotos\RexisML\Model\ResourceModel\MetricasConversao\CollectionFactory as MetricasConversaoCollectionFactory;
+use GrupoAwamotos\RexisML\Model\ResourceModel\NetworkRules\CollectionFactory as NetworkRulesCollectionFactory;
+use GrupoAwamotos\RexisML\Model\ResourceModel\Recomendacao\CollectionFactory as RecomendacaoCollectionFactory;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Psr\Log\LoggerInterface;
 
 class RecommendationRepository implements RecommendationRepositoryInterface
 {
+    /** Magento DI auto-generated factory */
+    protected RecomendacaoCollectionFactory $recomendacaoCollectionFactory;
+    /** Magento DI auto-generated factory */
+    protected NetworkRulesCollectionFactory $networkCollectionFactory;
+    /** Magento DI auto-generated factory */
+    protected CustomerClassificationCollectionFactory $rfmCollectionFactory;
+    /** Magento DI auto-generated factory */
+    protected MetricasConversaoCollectionFactory $metricasCollectionFactory;
+    /** Magento DI auto-generated factory */
+    protected MetricasConversaoFactory $metricasFactory;
+    protected LoggerInterface $logger;
+
     public function __construct(
-        private readonly RecomendacaoCollectionFactory $recomendacaoCollectionFactory,
-        private readonly NetworkCollectionFactory $networkCollectionFactory,
-        private readonly RfmCollectionFactory $rfmCollectionFactory,
-        private readonly MetricasCollectionFactory $metricasCollectionFactory,
-        private readonly MetricasConversaoFactory $metricasFactory,
-        private readonly LoggerInterface $logger
+        RecomendacaoCollectionFactory $recomendacaoCollectionFactory,
+        NetworkRulesCollectionFactory $networkCollectionFactory,
+        CustomerClassificationCollectionFactory $rfmCollectionFactory,
+        MetricasConversaoCollectionFactory $metricasCollectionFactory,
+        MetricasConversaoFactory $metricasFactory,
+        LoggerInterface $logger
     ) {
     }
 

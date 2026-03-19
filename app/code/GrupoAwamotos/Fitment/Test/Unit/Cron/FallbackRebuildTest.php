@@ -19,18 +19,17 @@ class FallbackRebuildTest extends TestCase
     protected function setUp(): void
     {
         $this->logger = $this->createMock(LoggerInterface::class);
-        $this->cron = new FallbackRebuild($this->logger);
+        $this->cron = new FallbackRebuild($this->logger, '/tmp/__nonexistent_fallback_rebuild_test__.php');
     }
 
     /**
-     * Scripts exist in workspace but exec() fails (no DB in sandbox).
-     * The cron logs an error with 'falhou' when exit code != 0.
+     * When script path does not exist, execute() logs "Script não encontrado".
      */
     public function testExecuteLogsErrorWhenScriptFails(): void
     {
         $this->logger->expects($this->once())
             ->method('error')
-            ->with($this->stringContains('Fallback rebuild falhou'));
+            ->with($this->stringContains('Script não encontrado'));
 
         $this->cron->execute();
     }
