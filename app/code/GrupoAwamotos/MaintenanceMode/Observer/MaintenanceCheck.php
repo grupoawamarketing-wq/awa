@@ -236,6 +236,7 @@ class MaintenanceCheck implements ObserverInterface
         // Build CSS de fundo
         $backgroundCss = $this->buildBackgroundCss($bgType, $bgColor, $bgGradient, $bgImage, $mediaUrl);
         $safeTextColor = preg_replace('/[^a-zA-Z0-9#(),.\/\s%+]/u', '', $textColor) ?: '#ffffff';
+        $safeCustomCss = strip_tags($customCss);
 
         // URLs de mídia
         $logoUrl = $logo ? $mediaUrl . 'maintenance/' . $logo : '';
@@ -453,7 +454,7 @@ class MaintenanceCheck implements ObserverInterface
             .newsletter-form input[type="email"] { min-width: 100%; }
             .secret-form input[type="text"] { min-width: 100%; }
         }
-        {$customCss}
+        {$safeCustomCss}
     </style>
 </head>
 <body>

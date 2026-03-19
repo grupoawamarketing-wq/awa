@@ -3,6 +3,7 @@ namespace GrupoAwamotos\RexisML\Helper;
 
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
+use Magento\Framework\App\State as AppState;
 use Magento\Framework\Mail\Template\TransportBuilder;
 use Magento\Framework\Translate\Inline\StateInterface;
 use Magento\Store\Model\StoreManagerInterface;
@@ -20,6 +21,7 @@ class EmailNotifier extends AbstractHelper
     protected $productRepository;
     protected $resource;
     protected $logger;
+    protected $appState;
 
     public function __construct(
         Context $context,
@@ -29,7 +31,8 @@ class EmailNotifier extends AbstractHelper
         CustomerRepositoryInterface $customerRepository,
         ProductRepositoryInterface $productRepository,
         ResourceConnection $resource,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        AppState $appState
     ) {
         parent::__construct($context);
         $this->transportBuilder = $transportBuilder;
@@ -39,6 +42,7 @@ class EmailNotifier extends AbstractHelper
         $this->productRepository = $productRepository;
         $this->resource = $resource;
         $this->logger = $logger;
+        $this->appState = $appState;
     }
 
     /**
@@ -72,6 +76,20 @@ class EmailNotifier extends AbstractHelper
             return false;
         }
 
+        // Emulate frontend area for cron context — required for template resolution
+        return $this->appState->emulateAreaCode(
+            \Magento\Framework\App\Area::AREA_FRONTEND,
+            function () use ($rows, $templateId, $type) {
+                return $this->doSendAlert($rows, $templateId, $type);
+            }
+        );
+    }
+
+    /**
+     * Internal email sending logic, must run within frontend area context
+     */
+    private function doSendAlert(array $rows, string $templateId, string $type): bool
+    {
         try {
             $this->inlineTranslation->suspend();
 
@@ -134,11 +152,13 @@ class EmailNotifier extends AbstractHelper
                 'count' => count($opportunities),
             ];
 
+            $storeId = (int) $this->storeManager->getDefaultStoreView()->getId();
+
             $transport = $this->transportBuilder
                 ->setTemplateIdentifier($templateId)
                 ->setTemplateOptions([
                     'area' => \Magento\Framework\App\Area::AREA_FRONTEND,
-                    'store' => $this->storeManager->getStore()->getId()
+                    'store' => $storeId
                 ])
                 ->setTemplateVars($templateVars)
                 ->setFromByScope([

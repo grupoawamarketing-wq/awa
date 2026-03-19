@@ -248,6 +248,7 @@ class MaintenancePlugin
         // Build CSS de fundo
         $backgroundCss = $this->buildBackgroundCss($bgType, $bgColor, $bgGradient);
         $safeTextColor = preg_replace('/[^a-zA-Z0-9#(),.\/\s%+]/u', '', $textColor) ?: '#ffffff';
+        $safeCustomCss = strip_tags($customCss);
 
         // URLs de mídia
         $logoUrl = $logo ? $mediaUrl . 'maintenance/' . $logo : '';
@@ -318,7 +319,7 @@ class MaintenancePlugin
         .access-form button { padding: 10px 24px; background: rgba(255,255,255,0.2); color: inherit; border: 1px solid rgba(255,255,255,0.3); border-radius: 50px; font-size: 0.9rem; cursor: pointer; transition: all 0.3s; }
         .access-form button:hover { background: rgba(255,255,255,0.3); }
         @media (max-width: 600px) { .content h1 { font-size: 1.8rem; } .countdown-value { font-size: 2rem; } }
-        {$customCss}
+        {$safeCustomCss}
     </style>
 </head>
 <body>

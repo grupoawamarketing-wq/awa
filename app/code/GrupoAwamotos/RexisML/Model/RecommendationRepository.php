@@ -9,29 +9,34 @@ namespace GrupoAwamotos\RexisML\Model;
 use GrupoAwamotos\RexisML\Api\RecommendationRepositoryInterface;
 use GrupoAwamotos\RexisML\Api\Data\MetricsInterface;
 use GrupoAwamotos\RexisML\Model\Data\Metrics;
+use GrupoAwamotos\RexisML\Model\MetricasConversaoFactory;
+use GrupoAwamotos\RexisML\Model\ResourceModel\CustomerClassification\CollectionFactory as CustomerClassificationCollectionFactory;
+use GrupoAwamotos\RexisML\Model\ResourceModel\MetricasConversao\CollectionFactory as MetricasConversaoCollectionFactory;
+use GrupoAwamotos\RexisML\Model\ResourceModel\NetworkRules\CollectionFactory as NetworkRulesCollectionFactory;
+use GrupoAwamotos\RexisML\Model\ResourceModel\Recomendacao\CollectionFactory as RecomendacaoCollectionFactory;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Psr\Log\LoggerInterface;
 
 class RecommendationRepository implements RecommendationRepositoryInterface
 {
     /** Magento DI auto-generated factory */
-    protected object $recomendacaoCollectionFactory;
+    protected RecomendacaoCollectionFactory $recomendacaoCollectionFactory;
     /** Magento DI auto-generated factory */
-    protected object $networkCollectionFactory;
+    protected NetworkRulesCollectionFactory $networkCollectionFactory;
     /** Magento DI auto-generated factory */
-    protected object $rfmCollectionFactory;
+    protected CustomerClassificationCollectionFactory $rfmCollectionFactory;
     /** Magento DI auto-generated factory */
-    protected object $metricasCollectionFactory;
+    protected MetricasConversaoCollectionFactory $metricasCollectionFactory;
     /** Magento DI auto-generated factory */
-    protected object $metricasFactory;
+    protected MetricasConversaoFactory $metricasFactory;
     protected LoggerInterface $logger;
 
     public function __construct(
-        object $recomendacaoCollectionFactory,
-        object $networkCollectionFactory,
-        object $rfmCollectionFactory,
-        object $metricasCollectionFactory,
-        object $metricasFactory,
+        RecomendacaoCollectionFactory $recomendacaoCollectionFactory,
+        NetworkRulesCollectionFactory $networkCollectionFactory,
+        CustomerClassificationCollectionFactory $rfmCollectionFactory,
+        MetricasConversaoCollectionFactory $metricasCollectionFactory,
+        MetricasConversaoFactory $metricasFactory,
         LoggerInterface $logger
     ) {
         $this->recomendacaoCollectionFactory = $recomendacaoCollectionFactory;

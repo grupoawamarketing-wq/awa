@@ -66,6 +66,160 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
     }
 
     /**
+     * Render submenu level 1 with Mueller-compatible semantic classes.
+     *
+     * @param mixed $category
+     * @param mixed $categoryModel
+     * @param array $children
+     */
+    private function getMuellerLevelOneItemsHtml(
+        $category,
+        $categoryModel,
+        array $children,
+        int $maxLevel,
+        int $columnWidth,
+        string $menuType,
+        int $columns
+    ): string {
+        $html = '';
+
+        if ($maxLevel > 0 && $maxLevel - 1 < 1) {
+            return $html;
+        }
+
+        $columnClass = '';
+        if (($menuType === 'fullwidth' || $menuType === 'staticwidth') && $columns > 0) {
+            $safeColumns = $this->sanitizeClassToken((string)$columns);
+            $safeColumnWidth = $this->clampGridColumns($columnWidth);
+            $columnClass = 'col-sm-' . $safeColumnWidth . ' mega-columns columns' . $safeColumns;
+        }
+
+        $listClass = 'subchildmenu navigation__inner-list navigation__inner-list--level1';
+        if ($columnClass !== '') {
+            $listClass .= ' ' . $columnClass;
+        }
+
+        $categoryName = $this->escapeHtml($category->getName());
+        $categoryNameAttr = $this->escapeHtmlAttr($category->getName());
+        $categoryUrl = $this->escapeUrl($this->_categoryHelper->getCategoryUrl($category));
+
+        $html .= '<ul class="' . $this->escapeHtmlAttr(trim($listClass)) . '" data-level="1">';
+        $html .= '<li class="navigation__inner-item navigation__inner-item--level1 subcategory-title col-1">';
+        $html .= '<span>' . $categoryName . '</span>';
+        $html .= '</li>';
+
+        foreach ($children as $child) {
+            $childModel = $this->getCategoryModel($child->getId());
+            $hideItem = (bool)$childModel->getData('vc_menu_hide_item');
+
+            if ($hideItem) {
+                continue;
+            }
+
+            $subChildren = $this->getActiveChildCategories($child);
+            $hasChildren = count($subChildren) > 0;
+
+            $urlToken = $this->sanitizeClassToken((string)$child->getUrlKey());
+            $classParts = [
+                'ui-menu-item',
+                'level1',
+                'navigation',
+                'navigation__inner-item',
+                'navigation__inner-item--level1',
+                'subcategory-second-level',
+                'col-1',
+                'parent-ul-cat-mega-menu'
+            ];
+
+            if ($urlToken !== '') {
+                $classParts[] = $urlToken;
+            }
+
+            if ($hasChildren) {
+                $classParts[] = 'parent';
+                $classParts[] = 'navigation__inner-item--parent';
+                $classParts[] = 'position-anchor';
+            }
+
+            $vcMenuCatLabel = (string)$childModel->getData('vc_menu_cat_label');
+            $vcMenuFontIcon = (string)$childModel->getData('vc_menu_font_icon');
+            $menuToken = 'menu-' . (int)$child->getId();
+            $childName = $this->escapeHtml($child->getName());
+            $childUrl = $this->escapeUrl($this->_categoryHelper->getCategoryUrl($child));
+
+            $html .= '<li class="' . $this->escapeHtmlAttr(implode(' ', array_values(array_unique($classParts)))) . '"'
+                . ' data-level="1"'
+                . ' data-menu="' . $this->escapeHtmlAttr($menuToken) . '"'
+                . ($hasChildren ? ' aria-haspopup="true" aria-expanded="false"' : '')
+                . '>';
+
+            if ($hasChildren) {
+                $html .= '<div class="open-children-toggle navigation__toggle" role="button" tabindex="0" aria-label="Expandir subcategorias" aria-expanded="false"></div>';
+            }
+
+            $html .= '<a class="navigation__inner-link title-cat-mega-menu"'
+                . ' href="' . $childUrl . '"'
+                . ' data-menu="' . $this->escapeHtmlAttr($menuToken) . '"'
+                . ($hasChildren ? ' aria-haspopup="true" aria-expanded="false"' : '')
+                . '>';
+
+            $iconClass = $this->sanitizeClassList($vcMenuFontIcon);
+            if ($iconClass !== '') {
+                $html .= '<em class="' . $this->escapeHtmlAttr('menu-thumb-icon ' . $iconClass) . '"></em>';
+            }
+
+            $html .= '<span>' . $childName;
+
+            if ($vcMenuCatLabel !== '' && isset($this->_verticalmenuConfig['cat_labels'][$vcMenuCatLabel])) {
+                $labelKey = $this->sanitizeClassToken($vcMenuCatLabel);
+                $labelText = $this->escapeHtml((string)$this->_verticalmenuConfig['cat_labels'][$vcMenuCatLabel]);
+                $html .= '<span class="cat-label cat-label-' . $this->escapeHtmlAttr($labelKey) . '">' . $labelText . '</span>';
+            }
+
+            $html .= '</span>';
+            $html .= '</a>';
+
+            if ($hasChildren) {
+                $html .= $this->getSubmenuItemsHtml($subChildren, 2, $maxLevel, $columnWidth, $menuType);
+            }
+
+            $html .= '</li>';
+        }
+
+        $categoryImage = (string)$categoryModel->getData('image');
+        if ($categoryImage !== '') {
+            try {
+                $categoryImageUrl = (string)$categoryModel->getImageUrl('image');
+            } catch (\Exception $e) {
+                $store = $this->_storeManager->getStore();
+                $mediaUrl = '';
+                if (is_object($store) && method_exists($store, 'getBaseUrl')) {
+                    $mediaUrl = (string)call_user_func([$store, 'getBaseUrl'], UrlInterface::URL_TYPE_MEDIA);
+                }
+                $categoryImageUrl = $mediaUrl . 'catalog/category/' . ltrim($categoryImage, '/');
+            }
+
+            if ($categoryImageUrl !== '') {
+                $html .= '<li class="navigation__inner-item navigation__inner-item--level1 imagem img-subcategory col-2">';
+                $html .= '<a href="' . $categoryUrl . '" class="navigation__inner-link">';
+                $html .= '<img loading="lazy" src="' . $this->escapeUrl($categoryImageUrl) . '" alt="' . $categoryNameAttr . '" />';
+                $html .= '</a>';
+                $html .= '</li>';
+            }
+        }
+
+        $html .= '<li class="navigation__inner-item navigation__inner-item--all navigation__inner-item--level1 hb-strong-title">';
+        $html .= '<a href="' . $categoryUrl . '" class="navigation__inner-link">';
+        $html .= $this->escapeHtml(__('Ver tudo'));
+        $html .= '</a>';
+        $html .= '</li>';
+
+        $html .= '</ul>';
+
+        return $html;
+    }
+
+    /**
      * @inheritDoc
      */
     public function getSubmenuItemsHtml($children, $level = 1, $max_level = 0, $column_width = 12, $menu_type = 'fullwidth', $columns = null)
@@ -83,7 +237,12 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
                 $column_class .= 'mega-columns columns' . $columnsSafe;
             }
 
-            $html = '<ul class="subchildmenu ' . $this->escapeHtmlAttr(trim($column_class)) . '">';
+            $listClasses = 'subchildmenu navigation__inner-list navigation__inner-list--level' . (int)$level;
+            if (trim($column_class) !== '') {
+                $listClasses .= ' ' . trim($column_class);
+            }
+
+            $html = '<ul class="' . $this->escapeHtmlAttr(trim($listClasses)) . '" data-level="' . (int)$level . '">';
 
             foreach ($children as $child) {
                 $cat_model = $this->getCategoryModel($child->getId());
@@ -98,16 +257,25 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
 
                 $vc_menu_cat_label = (string)$cat_model->getData('vc_menu_cat_label');
                 $vc_menu_font_icon = (string)$cat_model->getData('vc_menu_font_icon');
+                $childId = (int)$child->getId();
+                $menuToken = 'menu-' . $childId;
 
                 $item_class = 'level' . (int)$level . ' ';
-                if (count($sub_children) > 0) {
-                    $item_class .= 'parent ';
+                $item_class .= 'navigation__inner-item navigation__inner-item--level' . (int)$level . ' ';
+                if ((int)$level === 2) {
+                    $item_class .= 'subcategory-second-level col-1 ';
                 }
 
-                $a_class = '';
+                $hasChildren = count($sub_children) > 0;
+                if ($hasChildren) {
+                    $item_class .= 'parent navigation__inner-item--parent position-anchor ';
+                }
+
+                $linkClasses = ['navigation__inner-link'];
                 if ($level == 1 && ($menu_type == 'fullwidth' || $menu_type == 'staticwidth')) {
-                    $a_class = ' class="title-cat-mega-menu"';
+                    $linkClasses[] = 'title-cat-mega-menu';
                     $item_class .= 'parent-ul-cat-mega-menu';
+                    $item_class .= 'subcategory-second-level col-1 ';
                 }
 
                 /* --- Phase C: product count + category image as data attrs --- */
@@ -141,17 +309,27 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
                     }
                 }
 
-                $html .= '<li class="ui-menu-item ' . $this->escapeHtmlAttr(trim($item_class)) . '"' . $dataAttrs . '>';
+                $html .= '<li class="ui-menu-item ' . $this->escapeHtmlAttr(trim($item_class)) . '"'
+                    . $dataAttrs
+                    . ' data-level="' . (int)$level . '"'
+                    . ' data-menu="' . $this->escapeHtmlAttr($menuToken) . '"'
+                    . ($hasChildren ? ' aria-haspopup="true" aria-expanded="false"' : '')
+                    . '>';
 
-                if (count($sub_children) > 0) {
-                    $html .= '<div class="open-children-toggle"></div>';
+                if ($hasChildren) {
+                    $html .= '<div class="open-children-toggle navigation__toggle" role="button" tabindex="0" aria-label="Expandir subcategorias" aria-expanded="false"></div>';
                 }
 
                 $childUrl = $this->escapeUrl($this->_categoryHelper->getCategoryUrl($child));
                 $childName = $this->escapeHtml($child->getName());
                 $childNameAttr = $this->escapeHtmlAttr($child->getName());
+                $linkClassAttr = ' class="' . $this->escapeHtmlAttr(implode(' ', $linkClasses)) . '"';
 
-                $html .= '<a' . $a_class . ' href="' . $childUrl . '">';
+                $html .= '<a' . $linkClassAttr
+                    . ' href="' . $childUrl . '"'
+                    . ' data-menu="' . $this->escapeHtmlAttr($menuToken) . '"'
+                    . ($hasChildren ? ' aria-haspopup="true" aria-expanded="false"' : '')
+                    . '>';
 
                 $iconClass = $this->sanitizeClassList($vc_menu_font_icon);
                 if ($iconClass !== '') {
@@ -230,7 +408,12 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
                 $custom_style = ' style="width: ' . $this->escapeHtmlAttr($size) . ';"';
             }
 
-            $item_class = 'level0 ' . $this->sanitizeClassToken($menu_type) . ' ';
+            $categoryToken = $this->sanitizeClassToken((string)$category->getUrlKey());
+            $item_class = 'level0 navigation__item navigation__item--level0 category category-tree position-anchor subcategory-first-level '
+                . $this->sanitizeClassToken($menu_type) . ' ';
+            if ($categoryToken !== '') {
+                $item_class .= $categoryToken . ' ';
+            }
 
             $menu_top_content = (string)$cat_model->getData('vc_menu_block_top_content');
             $menu_left_content = (string)$cat_model->getData('vc_menu_block_left_content');
@@ -255,21 +438,30 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
             $hasMegaContent = ($menu_type === 'fullwidth' || $menu_type === 'staticwidth')
                 && ($menu_top_content !== '' || $menu_left_content !== '' || $menu_right_content !== '' || $menu_bottom_content !== '');
 
-            if (count($children) > 0 || $hasMegaContent) {
-                $item_class .= 'parent ';
+            $hasChildren = count($children) > 0 || $hasMegaContent;
+            if ($hasChildren) {
+                $item_class .= 'parent navigation__item--parent ';
             }
+            $menuToken = 'menu-' . (int)$category->getId();
 
             $categoryUrl = $this->escapeUrl($this->_categoryHelper->getCategoryUrl($category));
             $categoryName = $this->escapeHtml($category->getName());
             $categoryNameAttr = $this->escapeHtmlAttr($category->getName());
 
-            $html .= '<li class="ui-menu-item ' . $this->escapeHtmlAttr(trim($item_class . $floatType)) . '">';
+            $html .= '<li class="ui-menu-item ' . $this->escapeHtmlAttr(trim($item_class . $floatType)) . '"'
+                . ' data-level="0"'
+                . ' data-menu="' . $this->escapeHtmlAttr($menuToken) . '"'
+                . ($hasChildren ? ' aria-haspopup="true" aria-expanded="false"' : '')
+                . '>';
 
-            if (count($children) > 0) {
-                $html .= '<div class="open-children-toggle"></div>';
+            if ($hasChildren) {
+                $html .= '<div class="open-children-toggle navigation__toggle" role="button" tabindex="0" aria-label="Expandir subcategorias" aria-expanded="false"></div>';
             }
 
-            $html .= '<a href="' . $categoryUrl . '" class="level-top">';
+            $html .= '<a href="' . $categoryUrl . '" class="level-top navigation__link"'
+                . ' data-menu="' . $this->escapeHtmlAttr($menuToken) . '"'
+                . ($hasChildren ? ' aria-haspopup="true" aria-expanded="false"' : '')
+                . '>';
 
             $vc_menu_icon_img = $this->_helper->getVerticalIconimageUrl($cat_model);
             if ($vc_menu_icon_img) {
@@ -294,8 +486,11 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
 
             $html .= '</a>';
 
-            if (count($children) > 0 || $hasMegaContent) {
-                $html .= '<div class="level0 submenu"' . $custom_style . '>';
+            if ($hasChildren) {
+                $html .= '<div class="level0 submenu navigation__submenu navigation__inner-list navigation__inner-list--level1"'
+                    . $custom_style
+                    . ' data-level="1"'
+                    . ' data-parent-menu="' . $this->escapeHtmlAttr($menuToken) . '">';
 
                 if (($menu_type === 'fullwidth' || $menu_type === 'staticwidth') && $menu_top_content !== '') {
                     $html .= '<div class="menu-top-block">' . $this->getBlockContent($menu_top_content) . '</div>';
@@ -312,7 +507,15 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
                         $html .= '<div class="menu-left-block col-sm-' . $menu_left_width . '">' . $this->getBlockContent($menu_left_content) . '</div>';
                     }
 
-                    $html .= $this->getSubmenuItemsHtml($children, 1, (int)$max_level, $centerWidth, $menu_type, $vc_menu_cat_columns);
+                    $html .= $this->getMuellerLevelOneItemsHtml(
+                        $category,
+                        $cat_model,
+                        $children,
+                        (int)$max_level,
+                        $centerWidth,
+                        $menu_type,
+                        (int)$vc_menu_cat_columns
+                    );
 
                     if (($menu_type === 'fullwidth' || $menu_type === 'staticwidth') && $menu_right_content !== '' && $menu_right_width > 0) {
                         $html .= '<div class="menu-right-block col-sm-' . $menu_right_width . '">' . $this->getBlockContent($menu_right_content) . '</div>';
@@ -323,26 +526,6 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
 
                 if (($menu_type === 'fullwidth' || $menu_type === 'staticwidth') && $menu_bottom_content !== '') {
                     $html .= '<div class="menu-bottom-block">' . $this->getBlockContent($menu_bottom_content) . '</div>';
-                } elseif (($menu_type === 'fullwidth' || $menu_type === 'staticwidth') && count($children) > 0) {
-                    $catImage = (string)$cat_model->getData('image');
-                    if ($catImage !== '') {
-                        try {
-                            $catImageUrl = (string)$cat_model->getImageUrl('image');
-                        } catch (\Exception $e) {
-                            $store = $this->_storeManager->getStore();
-                            $mediaUrl = '';
-                            if (is_object($store) && method_exists($store, 'getBaseUrl')) {
-                                $mediaUrl = (string)call_user_func([$store, 'getBaseUrl'], UrlInterface::URL_TYPE_MEDIA);
-                            }
-
-                            $catImageUrl = $mediaUrl . 'catalog/category/' . ltrim($catImage, '/');
-                        }
-
-                        $html .= '<div class="menu-bottom-block menu-bottom-block-auto">';
-                        $html .= '<a href="' . $categoryUrl . '" class="menu-category-banner">';
-                        $html .= '<img loading="lazy" src="' . $this->escapeUrl($catImageUrl) . '" alt="' . $categoryNameAttr . '" />';
-                        $html .= '</a></div>';
-                    }
                 }
 
                 $html .= '</div>';

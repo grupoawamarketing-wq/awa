@@ -15,15 +15,17 @@ use Psr\Log\LoggerInterface;
 class FallbackDelta
 {
     private LoggerInterface $logger;
+    private string $scriptPath;
 
-    public function __construct(LoggerInterface $logger)
+    public function __construct(LoggerInterface $logger, ?string $scriptPath = null)
     {
         $this->logger = $logger;
+        $this->scriptPath = $scriptPath ?? BP . '/scripts/fallback_search_delta.php';
     }
 
     public function execute(): void
     {
-        $script = BP . '/scripts/fallback_search_delta.php';
+        $script = $this->scriptPath;
 
         if (!file_exists($script)) {
             $this->logger->error('[Fitment] Script não encontrado: ' . $script);
