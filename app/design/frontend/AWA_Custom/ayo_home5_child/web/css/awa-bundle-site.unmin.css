@@ -4688,3 +4688,143 @@ body.cms-page-view [class*="video-wrapper"] iframe {
         z-index: 3;
     }
 }
+
+/* ==========================================================================
+   AWA Phase 23 — PLP Card Polish + color-mix() Tokens + Filter Chips
+   2026-03-19
+   Equaliza alturas de cards em grade de produtos (flex column), melhora
+   filtros ativos com chip visual e ativa tokens derivados via color-mix().
+   ========================================================================== */
+
+/* ─── 23a. color-mix() tokens derivados (progressive enhancement) ─── */
+@supports (color: color-mix(in srgb, red, blue)) {
+    :root {
+        --awa-red-dark:        color-mix(in srgb, var(--awa-red, #b73337), black 30%);
+        --awa-red-light:       color-mix(in srgb, var(--awa-red, #b73337) 16%, transparent);
+        --awa-red-extra-light: color-mix(in srgb, var(--awa-red, #b73337) 8%, transparent);
+        --awa-shadow-focus:    0 0 0 3px color-mix(in srgb, var(--awa-red, #b73337) 22%, transparent);
+    }
+}
+
+/* ─── 23b. PLP Cards — equilíbrio de altura (flex column, @supports subgrid pendente) ─── */
+body .page-wrapper .products-grid .product-item-info {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+body .page-wrapper .products-grid .product-item-details {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+body .page-wrapper .products-grid .product-item-name {
+    flex: 1;
+}
+
+body .page-wrapper .products-grid .price-box {
+    margin-top: auto;
+}
+
+body .page-wrapper .products-grid .product-item-actions {
+    margin-top: var(--awa-space-2, 8px);
+}
+
+/* ─── 23c. Toolbar PLP — mobile responsivo ─── */
+@media (width <= 767px) {
+    body .page-wrapper .toolbar.toolbar-products {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: var(--awa-space-2, 8px) var(--awa-space-3, 12px);
+    }
+
+    body .page-wrapper .toolbar.toolbar-products .toolbar-sorter {
+        flex: 1;
+        min-width: 0;
+    }
+
+    /* Visually-hidden via clip-path (mantém acessibilidade para screen readers) */
+    body .page-wrapper .toolbar.toolbar-products .toolbar-sorter .sorter-label {
+        clip: rect(0 0 0 0);
+        clip-path: inset(50%);
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        white-space: nowrap;
+        position: absolute;
+    }
+
+    body .page-wrapper .toolbar.toolbar-products .sorter-options {
+        width: 100%;
+        min-height: 40px;
+        padding: var(--awa-space-2, 8px) var(--awa-space-3, 12px);
+        border: 1px solid var(--awa-gray-200, #e5e5e5);
+        border-radius: var(--awa-radius-sm, 6px);
+        background: #fff;
+        font-size: var(--awa-text-sm, 14px);
+        color: var(--text-color, #333);
+        cursor: pointer;
+    }
+}
+
+/* ─── 23d. Active Filter Chips — destaque visual com chip pill ─── */
+body .page-wrapper .filter-current .filter-current-subtitle {
+    font-size: var(--awa-text-xs, 12px);
+    font-weight: var(--awa-weight-semibold, 600);
+    color: var(--awa-gray-600, #525252);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 var(--awa-space-2, 8px);
+}
+
+body .page-wrapper .filter-current .items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--awa-space-2, 8px);
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--awa-space-3, 12px);
+}
+
+body .page-wrapper .filter-current .item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--awa-space-1, 4px);
+    padding: 3px 8px 3px 12px;
+    background: rgb(183 51 55 / 6%);
+    border: 1px solid rgb(183 51 55 / 25%);
+    border-radius: 999px;
+    font-size: var(--awa-text-sm, 14px);
+    color: var(--awa-dark, #1a1a1a);
+    line-height: var(--awa-leading-tight, 1.1);
+}
+
+body .page-wrapper .filter-current .item .remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 999px;
+    background: rgb(183 51 55 / 12%);
+    color: var(--primary-color, #b73337);
+    font-size: 10px;
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+    flex-shrink: 0;
+}
+
+body .page-wrapper .filter-current .item .remove:hover,
+body .page-wrapper .filter-current .item .remove:focus-visible {
+    background: var(--primary-color, #b73337);
+    color: #fff;
+    outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body .page-wrapper .filter-current .item .remove {
+        transition: none;
+    }
+}
