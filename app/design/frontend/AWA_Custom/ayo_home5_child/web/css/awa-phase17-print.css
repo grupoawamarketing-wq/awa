@@ -1,0 +1,368 @@
+/**
+ * AWA Phase 17 — Print Stylesheet (2026-03-19)
+ *
+ * Provides clean print output for Product Detail Pages.
+ * B2B buyers use printed product sheets for procurement & comparison.
+ *
+ * Scoped to .catalog-product-view body class where possible.
+ * Uses @media print to avoid any impact on screen rendering.
+ */
+
+@media print {
+    /* ==========================================================================
+       GLOBAL PRINT RESETS
+       ========================================================================== */
+
+    *,
+    *::before,
+    *::after {
+        box-shadow: none !important;
+        text-shadow: none !important;
+        animation: none !important;
+        transition: none !important;
+    }
+
+    @page {
+        margin: 1.5cm 1.8cm;
+        size: A4 portrait;
+    }
+
+    html {
+        font-size: 11pt;
+    }
+
+    body {
+        color: #000;
+        background: #fff;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    a {
+        text-decoration: none;
+        color: inherit;
+    }
+
+    /* ==========================================================================
+       HIDE NON-PRINTABLE ELEMENTS
+       ========================================================================== */
+
+    /* Navigation & menus */
+    .header.content,
+    .header.panel,
+    .nav-sections,
+    .nav-toggle,
+    .navigation,
+    .verticalmenu,
+    .vertical-navigation,
+    .page-footer,
+    .footer-container,
+    .vela-footer,
+    .rk-footer,
+
+    /* Sidebars & widgets */
+    .sidebar,
+    .sidebar-main,
+    .sidebar-additional,
+    .fixed-right,
+    .fixed-left,
+
+    /* Interactive UI */
+    .box-tocart,
+    .block-search,
+    .breadcrumbs,
+    .product-social-links,
+    .actions-toolbar,
+    .block.related,
+    .block.crosssell,
+    .block.upsell,
+    .widget.block,
+    .related-products,
+
+    /* AWA Custom blocks */
+    #awa-quick-order-trigger,
+    .awa-pdp-sticky-cta,
+    .awa-whatsapp-fab,
+    #awa-toast-container,
+    .awa-back-to-top,
+    .awa-quote-modal,
+    .awa-scroll-reveal,
+    .awa-trust-badges,
+
+    /* Rokanthemes */
+    .rk-slideshow,
+    .velaSearchTop,
+
+    /* Magento boilerplate */
+    .page-messages,
+    .messages,
+    .message,
+    .cookie-status-message,
+
+    /* B2B secondary actions (PDF button, Criar Tabela) */
+    .awa-b2b-secondary-actions,
+
+    /* Back-to-top, sticky elements */
+    [class*="sticky"],
+    [class*="floating"],
+    [class*="fixed"] {
+        display: none !important;
+    }
+
+    /* ==========================================================================
+       PAGE LAYOUT
+       ========================================================================== */
+
+    .page-wrapper,
+    .page-main,
+    .columns,
+    .column.main {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        float: none !important;
+    }
+
+    /* ==========================================================================
+       PRINT HEADER (store name + print date)
+       ========================================================================== */
+
+    .catalog-product-view .page-main::before {
+        content: "Awamotos — " attr(data-print-date) "  |  awamotos.com";
+        display: block;
+        font-size: 8pt;
+        color: #666;
+        border-bottom: 1pt solid #ccc;
+        padding-bottom: 6pt;
+        margin-bottom: 12pt;
+        letter-spacing: 0.02em;
+    }
+
+    /* ==========================================================================
+       PRODUCT LAYOUT: IMAGE LEFT — INFO RIGHT
+       ========================================================================== */
+
+    .catalog-product-view .product-info-main,
+    .catalog-product-view .product.media {
+        display: block;
+        width: auto;
+        float: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .catalog-product-view .product.media {
+        float: left;
+        width: 38%;
+        margin-right: 4%;
+    }
+
+    .catalog-product-view .product-info-main {
+        float: left;
+        width: 58%;
+    }
+
+    .catalog-product-view .column.main::after {
+        content: "";
+        display: table;
+        clear: both;
+    }
+
+    /* ==========================================================================
+       PRODUCT IMAGE
+       ========================================================================== */
+
+    .catalog-product-view .fotorama,
+    .catalog-product-view .fotorama__stage,
+    .catalog-product-view .gallery-placeholder {
+        max-width: 100%;
+        page-break-inside: avoid;
+    }
+
+    .catalog-product-view .fotorama__nav,
+    .catalog-product-view .fotorama__arr,
+    .catalog-product-view .fotorama__fullscreen-icon {
+        display: none !important;
+    }
+
+    .catalog-product-view .fotorama__img {
+        max-width: 100%;
+        height: auto;
+    }
+
+    /* ==========================================================================
+       PRODUCT TITLE & PRICE
+       ========================================================================== */
+
+    .catalog-product-view .page-title {
+        font-size: 16pt;
+        font-weight: bold;
+        margin: 0 0 6pt;
+        line-height: 1.3;
+        page-break-after: avoid;
+    }
+
+    .catalog-product-view .price-box {
+        font-size: 14pt;
+        font-weight: bold;
+        margin: 6pt 0 8pt;
+        color: #000;
+    }
+
+    .catalog-product-view .price-box .price {
+        font-size: 16pt;
+        color: #8e2629;
+    }
+
+    .catalog-product-view .price-label {
+        font-size: 9pt;
+        font-weight: normal;
+        color: #555;
+    }
+
+    /* ==========================================================================
+       SKU / EAN / TECHNICAL SUMMARY TABLE
+       ========================================================================== */
+
+    .awa-b2b-pdp-technical-summary {
+        margin: 8pt 0;
+        page-break-inside: avoid;
+    }
+
+    .awa-b2b-pdp-technical-summary table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 9pt;
+    }
+
+    .awa-b2b-pdp-technical-summary td {
+        padding: 4pt 6pt;
+        border: 0.5pt solid #ccc;
+        vertical-align: middle;
+    }
+
+    .awa-b2b-pdp-technical-summary td:first-child {
+        font-weight: bold;
+        width: 35%;
+        background: #f5f5f5;
+        color: #333;
+    }
+
+    /* Copy buttons — hide in print */
+    .awa-copy-btn {
+        display: none !important;
+    }
+
+    /* ==========================================================================
+       PRODUCT DESCRIPTION & ATTRIBUTES
+       ========================================================================== */
+
+    .catalog-product-view .product.info.detailed,
+    .catalog-product-view .product.attribute.description {
+        clear: both;
+        padding-top: 12pt;
+        page-break-before: auto;
+    }
+
+    .catalog-product-view .product.attribute.description .value {
+        font-size: 9.5pt;
+        line-height: 1.5;
+        color: #222;
+    }
+
+    /* Attributes table (specs) */
+    .catalog-product-view .product.info.detailed .data.item.content {
+        display: block !important;
+    }
+
+    .catalog-product-view .data.item.title {
+        font-size: 11pt;
+        font-weight: bold;
+        border-bottom: 1pt solid #ccc;
+        padding: 6pt 0 3pt;
+        margin-top: 10pt;
+        page-break-after: avoid;
+    }
+
+    .catalog-product-view .product.attributes .table-wrapper table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 9pt;
+        margin-top: 6pt;
+    }
+
+    .catalog-product-view .product.attributes table th,
+    .catalog-product-view .product.attributes table td {
+        padding: 3pt 6pt;
+        border: 0.5pt solid #ddd;
+        text-align: left;
+        vertical-align: top;
+    }
+
+    .catalog-product-view .product.attributes table th {
+        background: #f5f5f5;
+        font-weight: bold;
+        width: 35%;
+    }
+
+    /* ==========================================================================
+       STOCK INDICATOR (simplified for print)
+       ========================================================================== */
+
+    .awa-stock-level {
+        font-size: 9pt;
+        font-weight: bold;
+        margin: 4pt 0;
+    }
+
+    .awa-stock-level__dot {
+        display: none;
+    }
+
+    .awa-stock-level--ok::before    { content: "✓ "; color: #15803d; }
+    .awa-stock-level--low::before   { content: "⚠ "; color: #d97706; }
+    .awa-stock-level--critical::before { content: "! "; color: #b73337; }
+
+    /* ==========================================================================
+       FOOTER (print-specific)
+       ========================================================================== */
+
+    .catalog-product-view .column.main::after {
+        display: block;
+        content: "";
+        border-top: 0.5pt solid #ccc;
+        margin-top: 16pt;
+        padding-top: 6pt;
+    }
+
+    /* Page URL at bottom of each page */
+    .catalog-product-view .product-info-main::after {
+        content: "URL: " attr(data-product-url, "") "  |  Impresso em " attr(data-print-date, "");
+        display: block;
+        font-size: 7pt;
+        color: #888;
+        margin-top: 8pt;
+        border-top: 0.5pt solid #eee;
+        padding-top: 4pt;
+    }
+
+    /* ==========================================================================
+       PAGE BREAKS
+       ========================================================================== */
+
+    .catalog-product-view .product.info.detailed {
+        page-break-before: auto;
+    }
+
+    .catalog-product-view .product.attributes .data.table {
+        page-break-inside: avoid;
+    }
+
+    h2, h3, .data.item.title {
+        page-break-after: avoid;
+    }
+
+    img {
+        page-break-inside: avoid;
+    }
+}

@@ -1,0 +1,703 @@
+/**
+ * AWA Phase 11 — Visual Audit Consolidation (2026-03-19)
+ *
+ * Resolves 8 critical CSS conflicts found by audit of 95 CSS files:
+ *   1. Input heights: 42/44/48px → unified 44px (46px search)
+ *   2. Button border-radius: 4/8/12/999px → unified scale
+ *   3. Fixed-right: 4 competing layers → 1 canonical
+ *   4. Search focus ring missing → added
+ *   5. Bundle !important (331x) → override via specificity
+ *   6. Brand carousel: 3 grayscale filters → 1 unified
+ *   7. Footer mobile: columns don't stack → fixed
+ *   8. Button text color: black on red → always white
+ *
+ * Brand Identity:
+ *   Primary: #b73337 | Hover: #8e2629 | Text: #333 | Button text: #fff
+ *
+ * Loads LAST in cascade (after phase10) to win specificity naturally.
+ */
+
+/* =============================================================
+   S1. DESIGN TOKENS — Canonical values for this consolidation
+   ============================================================= */
+
+:root {
+  --awa-input-h: 44px;
+  --awa-search-h: 46px;
+  --awa-btn-radius: 8px;
+  --awa-input-radius: 8px;
+  --awa-search-radius: 10px;
+  --awa-focus-ring: 0 0 0 3px rgb(183 51 55 / 15%);
+}
+
+/* =============================================================
+   S2. INPUTS — Unified height & radius (fixes 42/44/48px war)
+   ============================================================= */
+
+body .page-wrapper input[type="text"],
+body .page-wrapper input[type="email"],
+body .page-wrapper input[type="password"],
+body .page-wrapper input[type="tel"],
+body .page-wrapper input[type="number"],
+body .page-wrapper input[type="url"],
+body .page-wrapper input[type="search"],
+body .page-wrapper select,
+body .page-wrapper textarea,
+body .page-wrapper .input-text {
+  height: var(--awa-input-h);
+  min-height: var(--awa-input-h);
+  border: 1.5px solid var(--awa-border, #e5e7eb);
+  border-radius: var(--awa-input-radius);
+  padding: 0 14px;
+  font-size: 14px;
+  font-family: var(--awa-font, inherit);
+  color: var(--awa-text, #333);
+  background: #fff;
+  transition: border-color 200ms ease, box-shadow 200ms ease;
+  box-sizing: border-box;
+}
+
+body .page-wrapper textarea {
+  height: auto;
+  min-height: 100px;
+  padding: 12px 14px;
+}
+
+body .page-wrapper input:focus,
+body .page-wrapper select:focus,
+body .page-wrapper textarea:focus,
+body .page-wrapper .input-text:focus {
+  border-color: var(--awa-red, #b73337);
+  box-shadow: var(--awa-focus-ring);
+  outline: none;
+}
+
+body .page-wrapper input::placeholder {
+  color: #999;
+  font-size: 13px;
+}
+
+/* Validation error state */
+body .page-wrapper input.mage-error,
+body .page-wrapper select.mage-error,
+body .page-wrapper textarea.mage-error {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgb(220 38 38 / 10%);
+}
+
+/* =============================================================
+   S3. BUTTONS — White text enforcement + unified radius
+   ============================================================= */
+
+body .page-wrapper .action.primary,
+body .page-wrapper .action.tocart,
+body .page-wrapper .btn-cart,
+body .page-wrapper .b2b-primary-btn,
+body .page-wrapper .awa-btn-primary,
+body .page-wrapper button.action.primary,
+body .page-wrapper .action.subscribe.primary,
+body .page-wrapper .checkout-methods-items .action.primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: var(--awa-input-h);
+  padding: 0 20px;
+  background: var(--awa-red, #b73337) !important;
+  color: #fff !important;
+  border: none;
+  border-radius: var(--awa-btn-radius);
+  font-family: var(--awa-font, inherit);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 200ms ease, box-shadow 200ms ease, transform 150ms ease;
+}
+
+body .page-wrapper .action.primary:hover,
+body .page-wrapper .action.tocart:hover,
+body .page-wrapper .btn-cart:hover,
+body .page-wrapper button.action.primary:hover,
+body .page-wrapper .action.subscribe.primary:hover {
+  background: var(--awa-red-dark, #8e2629) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 12px rgb(183 51 55 / 25%);
+  transform: translateY(-1px);
+}
+
+body .page-wrapper .action.primary:active,
+body .page-wrapper button.action.primary:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+body .page-wrapper .action.primary:focus-visible,
+body .page-wrapper button.action.primary:focus-visible {
+  outline: 2px solid var(--awa-red, #b73337);
+  outline-offset: 2px;
+}
+
+body .page-wrapper .action.primary:disabled,
+body .page-wrapper .action.primary[disabled] {
+  background: #d1d5db !important;
+  color: #9ca3af !important;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Secondary buttons */
+body .page-wrapper .action.secondary,
+body .page-wrapper .btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--awa-input-h);
+  padding: 0 20px;
+  background: #fff;
+  color: var(--awa-text, #333);
+  border: 1.5px solid var(--awa-border, #e5e7eb);
+  border-radius: var(--awa-btn-radius);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 200ms ease;
+}
+
+body .page-wrapper .action.secondary:hover,
+body .page-wrapper .btn-secondary:hover {
+  border-color: var(--awa-red, #b73337);
+  color: var(--awa-red, #b73337);
+  background: rgb(183 51 55 / 4%);
+}
+
+/* Inline-styled red buttons from CMS blocks */
+body .page-wrapper a[style*="b73337"],
+body .page-wrapper button[style*="b73337"],
+body .page-wrapper a[style*="B73337"],
+body .page-wrapper button[style*="B73337"] {
+  color: #fff !important;
+}
+
+/* =============================================================
+   S4. SEARCH FORM — Consolidated (replaces 3 conflicting layers)
+   ============================================================= */
+
+body .page-wrapper .header .top-search .block-search .control {
+  display: flex;
+  align-items: stretch;
+}
+
+body .page-wrapper .header .top-search .block-search input#search {
+  flex: 1 1 auto;
+  height: var(--awa-search-h) !important;
+  min-height: var(--awa-search-h) !important;
+  max-height: var(--awa-search-h) !important;
+  border: 2px solid var(--awa-border, #e5e7eb);
+  border-right: 0;
+  border-radius: var(--awa-search-radius) 0 0 var(--awa-search-radius);
+  padding: 0 16px;
+  font-size: 14px;
+  background: #fff;
+  color: var(--awa-text, #333);
+  transition: border-color 200ms ease, box-shadow 200ms ease;
+}
+
+body .page-wrapper .header .top-search .block-search input#search:focus {
+  border-color: var(--awa-red, #b73337);
+  box-shadow: -3px 0 0 0 rgb(183 51 55 / 10%), 0 0 0 3px rgb(183 51 55 / 8%);
+  outline: none;
+}
+
+body .page-wrapper .header .top-search .block-search .action.search {
+  flex: 0 0 var(--awa-search-h);
+  width: var(--awa-search-h) !important;
+  min-width: var(--awa-search-h) !important;
+  max-width: var(--awa-search-h) !important;
+  height: var(--awa-search-h) !important;
+  min-height: var(--awa-search-h) !important;
+  max-height: var(--awa-search-h) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  margin: 0;
+  background: var(--awa-red, #b73337) !important;
+  border: 2px solid var(--awa-red, #b73337) !important;
+  border-left: 0 !important;
+  border-radius: 0 var(--awa-search-radius) var(--awa-search-radius) 0;
+  color: #fff !important;
+  cursor: pointer;
+  transition: background 200ms ease, border-color 200ms ease;
+}
+
+body .page-wrapper .header .top-search .block-search .action.search:hover {
+  background: var(--awa-red-dark, #8e2629) !important;
+  border-color: var(--awa-red-dark, #8e2629) !important;
+}
+
+body .page-wrapper .header .top-search .block-search .action.search:focus-visible {
+  outline: 2px solid var(--awa-red, #b73337);
+  outline-offset: 2px;
+}
+
+/* Hide button text, keep icon */
+body .page-wrapper .header .top-search .block-search .action.search > span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* =============================================================
+   S5. FIXED-RIGHT SIDEBAR — Single canonical layer
+        (replaces 4 competing CSS layers)
+   ============================================================= */
+
+body .page-wrapper .fixed-right {
+  position: fixed;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 999;
+}
+
+body .page-wrapper .fixed-right > ul,
+body .page-wrapper .fixed-right > .fixed-right-ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+body .page-wrapper .fixed-right ul li {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+body .page-wrapper .fixed-right ul li > a,
+body .page-wrapper .fixed-right ul li.scroll-top {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid var(--awa-border, #e5e7eb);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 6%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--awa-text-muted, #6b7280);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 200ms ease;
+  position: relative;
+  overflow: hidden;
+}
+
+body .page-wrapper .fixed-right ul li > a:hover,
+body .page-wrapper .fixed-right ul li.scroll-top:hover {
+  background: var(--awa-red, #b73337);
+  border-color: var(--awa-red, #b73337);
+  color: #fff;
+  box-shadow: 0 4px 14px rgb(183 51 55 / 30%);
+  transform: scale(1.05);
+}
+
+body .page-wrapper .fixed-right ul li > a:focus-visible {
+  outline: 2px solid var(--awa-red, #b73337);
+  outline-offset: 2px;
+}
+
+body .page-wrapper .fixed-right ul li > a em,
+body .page-wrapper .fixed-right ul li > a i,
+body .page-wrapper .fixed-right ul li.scroll-top em {
+  font-size: 15px;
+  line-height: 1;
+}
+
+/* Hide text inside fixed-right links (keep only icons) */
+body .page-wrapper .fixed-right ul li > a > span:not(.fa, .icon),
+body .page-wrapper .fixed-right ul li > a > font,
+body .page-wrapper .fixed-right ul li > a > text {
+  display: none;
+}
+
+/* =============================================================
+   S6. BRAND CAROUSEL — Unified filter + OWL fallback
+   ============================================================= */
+
+/* Section wrapper */
+body .page-wrapper .awa-footer-brands {
+  padding: 28px 0;
+  background: #fafafa;
+  border-top: 1px solid #f0f0f0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* Title */
+body .page-wrapper .awa-footer-brands .brand-widget .block-title {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+body .page-wrapper .awa-footer-brands .brand-widget .block-title strong {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--awa-text-muted, #6b7280);
+}
+
+/* Container positioning */
+body .page-wrapper .awa-footer-brands .brandowl-play {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Fallback: flex row when OWL doesn't initialize */
+body .page-wrapper .awa-footer-brands .brandowl-play > ul:not(.owl-loaded) {
+  display: flex !important;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  padding: 0 40px;
+  margin: 0;
+  list-style: none;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+body .page-wrapper .awa-footer-brands .brandowl-play > ul:not(.owl-loaded)::-webkit-scrollbar {
+  display: none;
+}
+
+body .page-wrapper .awa-footer-brands .brandowl-play > ul:not(.owl-loaded) > li {
+  flex: 0 0 auto;
+  scroll-snap-align: center;
+}
+
+/* Brand logo images — single unified filter (replaces 3 conflicting rules) */
+body .page-wrapper .awa-footer-brands .brand-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+}
+
+body .page-wrapper .awa-footer-brands .brand-item img {
+  max-height: 36px;
+  max-width: 90px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  filter: grayscale(80%) opacity(0.55);
+  transition: filter 300ms ease;
+}
+
+body .page-wrapper .awa-footer-brands .brand-item:hover img {
+  filter: grayscale(0%) opacity(1);
+}
+
+/* Hide "Anterior" / "Próximo" text nav when OWL not loaded */
+body .page-wrapper .awa-footer-brands .brandowl-play > a.owl-left,
+body .page-wrapper .awa-footer-brands .brandowl-play > a.owl-right,
+body .page-wrapper .awa-footer-brands .brandowl-play > a[href="#"] {
+  position: absolute;
+  width: 0;
+  height: 0;
+  padding: 0;
+  margin: 0;
+  font-size: 0;
+  overflow: hidden;
+  visibility: hidden;
+}
+
+/* =============================================================
+   S7. FOOTER — Responsive mobile stacking
+   ============================================================= */
+
+/* Footer link columns */
+body .page-wrapper .page_footer .velaFooterTitle,
+body .page-wrapper .footer-container .velaFooterTitle {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--awa-text, #333);
+  border: none;
+  background: none;
+  padding: 0;
+  margin-bottom: 16px;
+  cursor: default;
+}
+
+body .page-wrapper .page_footer .velaFooterLinks li a,
+body .page-wrapper .footer-container .velaFooterLinks li a {
+  font-size: 13px;
+  color: #666;
+  text-decoration: none;
+  transition: color 200ms ease;
+  line-height: 1.8;
+}
+
+body .page-wrapper .page_footer .velaFooterLinks li a:hover,
+body .page-wrapper .footer-container .velaFooterLinks li a:hover {
+  color: var(--awa-red, #b73337);
+}
+
+/* Newsletter section */
+body .page-wrapper .velaNewsletterFooter {
+  background: #1a1a1a;
+}
+
+body .page-wrapper .velaNewsletterFooter .action.subscribe.primary {
+  background: var(--awa-red, #b73337) !important;
+  color: #fff !important;
+  border: none;
+  border-radius: var(--awa-btn-radius);
+  font-weight: 600;
+  min-height: var(--awa-input-h);
+  padding: 0 24px;
+  white-space: nowrap;
+}
+
+body .page-wrapper .velaNewsletterFooter input[type="email"] {
+  min-height: var(--awa-input-h);
+  border-radius: var(--awa-input-radius);
+  border: 1px solid rgb(255 255 255 / 20%);
+  background: rgb(255 255 255 / 8%);
+  color: #fff;
+  padding: 0 16px;
+  font-size: 14px;
+}
+
+body .page-wrapper .velaNewsletterFooter input[type="email"]::placeholder {
+  color: rgb(255 255 255 / 40%);
+}
+
+body .page-wrapper .velaNewsletterFooter input[type="email"]:focus {
+  border-color: var(--awa-red, #b73337);
+  box-shadow: 0 0 0 3px rgb(183 51 55 / 20%);
+}
+
+/* Footer bottom */
+body .page-wrapper .footer-bottom {
+  background: #fff;
+}
+
+body .page-wrapper .footer-bottom-inner {
+  border-top: 1px solid #f0f0f0;
+  padding: 20px 0;
+}
+
+/* Payment/security section in footer */
+body .page-wrapper .awa-footer-pay-sec {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+body .page-wrapper .awa-footer-pay-logos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+body .page-wrapper .awa-footer-pay-sec__label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--awa-text-muted, #6b7280);
+  margin: 0 0 6px;
+}
+
+body .page-wrapper .awa-pay-logo img,
+body .page-wrapper .awa-seal img {
+  border-radius: 4px;
+  border: 1px solid #f0f0f0;
+  padding: 2px 4px;
+  background: #fff;
+}
+
+/* =============================================================
+   S8. LINKS & TYPOGRAPHY — Global consistency
+   ============================================================= */
+
+body .page-wrapper a:not([class*="action"], [class*="btn"]):hover {
+  color: var(--awa-red, #b73337);
+}
+
+body .page-wrapper .product-item-name a,
+body .page-wrapper .product-item-link {
+  color: var(--awa-text, #333);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+body .page-wrapper .product-item-name a:hover,
+body .page-wrapper .product-item-link:hover {
+  color: var(--awa-red, #b73337);
+}
+
+/* Breadcrumbs */
+body .page-wrapper .breadcrumbs a {
+  color: var(--awa-text-muted, #6b7280);
+  font-size: 12px;
+}
+
+body .page-wrapper .breadcrumbs a:hover {
+  color: var(--awa-red, #b73337);
+}
+
+/* =============================================================
+   S9. RESPONSIVE — Mobile (≤767px)
+   ============================================================= */
+
+@media (width <= 767px) {
+  /* Search bar compact */
+  body .page-wrapper .header .top-search .block-search input#search {
+    height: 40px !important;
+    min-height: 40px !important;
+    max-height: 40px !important;
+    font-size: 13px;
+  }
+
+  body .page-wrapper .header .top-search .block-search .action.search {
+    width: 40px !important;
+    min-width: 40px !important;
+    max-width: 40px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    max-height: 40px !important;
+    flex: 0 0 40px !important;
+  }
+  /* Fixed-right compact + repositioned above mobile nav */
+  body .page-wrapper .fixed-right {
+    right: 8px;
+    bottom: 72px;
+    top: auto;
+    transform: none;
+  }
+
+  body .page-wrapper .fixed-right ul li > a,
+  body .page-wrapper .fixed-right ul li.scroll-top {
+    width: 36px;
+    height: 36px;
+  }
+
+  body .page-wrapper .fixed-right ul li > a em,
+  body .page-wrapper .fixed-right ul li.scroll-top em {
+    font-size: 13px;
+  }
+  /* Footer columns stack */
+  body .page-wrapper .footer-container .row,
+  body .page-wrapper .footer-container .rowFlex {
+    flex-direction: column;
+  }
+
+  body .page-wrapper .footer-container .col-xs-12 {
+    width: 100%;
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+  /* Footer menu collapsible */
+  body .page-wrapper .velaFooterMenu .velaFooterTitle {
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    margin-bottom: 0;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  body .page-wrapper .velaFooterMenu .velaFooterTitle::after {
+    content: '+';
+    font-size: 18px;
+    font-weight: 400;
+    color: #999;
+    transition: transform 200ms ease;
+  }
+
+  body .page-wrapper .velaFooterMenu .velaFooterTitle.active::after {
+    content: '−';
+  }
+  /* Trust bar 2 columns on mobile */
+  body .page-wrapper .awa-footer-trust-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  /* Newsletter stacks */
+  body .page-wrapper .velaNewsletterFooter .velaNewsletterInner,
+  body .page-wrapper .velaNewsletterFooter > .container > div {
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+  }
+  /* Brand section compact */
+  body .page-wrapper .awa-footer-brands {
+    padding: 20px 0;
+  }
+
+  body .page-wrapper .awa-footer-brands .brand-item img {
+    max-height: 28px;
+    max-width: 72px;
+  }
+  /* Payment section stacks */
+  body .page-wrapper .footer-bottom .row {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  body .page-wrapper .footer-bottom .col-md-6,
+  body .page-wrapper .footer-bottom .col-sm-6 {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+/* Ultra-small mobile */
+@media (width <= 480px) {
+  body .page-wrapper .awa-footer-trust-grid {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  body .page-wrapper .fixed-right {
+    right: 6px;
+    gap: 6px;
+  }
+
+  body .page-wrapper .awa-footer-brands .brandowl-play > ul:not(.owl-loaded) {
+    gap: 16px;
+    padding: 0 16px;
+  }
+}
+
+/* =============================================================
+   S10. DUPLICATE HEADING FIX
+   Sections wrapped in AWA section-header already have an h2.
+   Hide the internal Rokanthemes rokan-product-heading to avoid
+   two headings in the same section (Mais Vendidos, Lançamentos).
+   ============================================================= */
+
+body .page-wrapper .awa-carousel-section .rokan-bestseller .rokan-product-heading,
+body .page-wrapper .awa-carousel-section .rokan-newproduct .rokan-product-heading {
+  display: none;
+}

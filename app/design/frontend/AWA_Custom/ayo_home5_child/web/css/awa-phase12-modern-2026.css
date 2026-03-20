@@ -1,0 +1,1167 @@
+/**
+ * AWA Phase 12 — Modern 2026 Visual Upgrade
+ * Grupo Awamotos — B2B Motorcycle Parts
+ *
+ * Best practices applied:
+ *   - CSS-only scroll reveal animations (@keyframes + .awa-reveal)
+ *   - Glassmorphism cards (backdrop-filter)
+ *   - Responsive typography via clamp()
+ *   - CSS Grid native product grids (replaces Bootstrap col-*)
+ *   - Premium hover micro-interactions
+ *   - Skeleton pulse loading placeholders
+ *   - content-visibility for below-fold performance
+ *   - Dark mode preparation (prefers-color-scheme)
+ *   - prefers-reduced-motion respected throughout
+ *
+ * Magento 2 / Ayo Theme compatible — uses high specificity
+ * selectors (body .page-wrapper) to override theme defaults.
+ */
+
+/* =============================================================
+   1. SCROLL REVEAL ANIMATIONS
+   Driven by IntersectionObserver adding .awa-revealed class.
+   CSS-only: elements hidden until JS adds the class.
+   ============================================================= */
+
+@keyframes awaFadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes awaFadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes awaSlideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Hidden state — applied by JS, revealed by IntersectionObserver */
+.awa-reveal {
+  opacity: 0;
+  will-change: opacity, transform;
+}
+
+.awa-reveal.awa-revealed {
+  animation: awaFadeInUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.awa-reveal--scale.awa-revealed {
+  animation-name: awaFadeInScale;
+}
+
+.awa-reveal--left.awa-revealed {
+  animation-name: awaSlideInLeft;
+}
+
+/* Stagger children (product grids, trust bar items) */
+.awa-reveal-stagger.awa-revealed > * {
+  opacity: 0;
+  animation: awaFadeInUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.awa-reveal-stagger.awa-revealed > *:nth-child(1) { animation-delay: 0.05s; }
+.awa-reveal-stagger.awa-revealed > *:nth-child(2) { animation-delay: 0.1s; }
+.awa-reveal-stagger.awa-revealed > *:nth-child(3) { animation-delay: 0.15s; }
+.awa-reveal-stagger.awa-revealed > *:nth-child(4) { animation-delay: 0.2s; }
+.awa-reveal-stagger.awa-revealed > *:nth-child(5) { animation-delay: 0.25s; }
+.awa-reveal-stagger.awa-revealed > *:nth-child(6) { animation-delay: 0.3s; }
+.awa-reveal-stagger.awa-revealed > *:nth-child(7) { animation-delay: 0.35s; }
+.awa-reveal-stagger.awa-revealed > *:nth-child(8) { animation-delay: 0.4s; }
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .awa-reveal,
+  .awa-reveal.awa-revealed,
+  .awa-reveal--scale.awa-revealed,
+  .awa-reveal--left.awa-revealed,
+  .awa-reveal-stagger.awa-revealed > * {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* =============================================================
+   2. GLASSMORPHISM CARDS
+   Modern frosted-glass effect for elevated UI components.
+   ============================================================= */
+
+/* Generic glass utility */
+.awa-glass {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(12px) saturate(1.4);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+/* Product cards — Rokanthemes Ayo structure:
+   .item-product.product-item > .content-item-product > .product-thumb + .product-info
+   Applies to: newproduct, bestseller, categorytab, superdeals carousels */
+
+body .page-wrapper .item-product,
+body .page-wrapper .product-item {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.25s ease;
+}
+
+body .page-wrapper .item-product:hover,
+body .page-wrapper .product-item:hover {
+  transform: translateY(-6px);
+  box-shadow:
+    0 8px 30px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.04);
+  border-color: rgba(183, 51, 55, 0.15);
+}
+
+/* Product image area */
+body .page-wrapper .product-thumb {
+  border-radius: 12px 12px 0 0;
+  overflow: hidden;
+  position: relative;
+}
+
+body .page-wrapper .product-image-photo {
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  width: 100%;
+  height: auto;
+}
+
+body .page-wrapper .item-product:hover .product-image-photo,
+body .page-wrapper .product-item:hover .product-image-photo {
+  transform: scale(1.04);
+}
+
+/* Second image (hover swap) — smooth */
+body .page-wrapper .product-thumb .second-thumb {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+body .page-wrapper .item-product:hover .product-thumb .second-thumb {
+  opacity: 1;
+}
+
+/* Quick action buttons overlay */
+body .page-wrapper .item-product .actions-secondary {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  z-index: 2;
+}
+
+body .page-wrapper .item-product:hover .actions-secondary {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+body .page-wrapper .item-product .actions-secondary a {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--awa-text-muted, #666);
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+
+body .page-wrapper .item-product .actions-secondary a:hover {
+  background: var(--awa-red, #b73337);
+  border-color: var(--awa-red, #b73337);
+  color: #fff;
+}
+
+/* Product info section */
+body .page-wrapper .item-product .product-info {
+  padding: 12px 14px 16px;
+}
+
+/* Product name */
+body .page-wrapper .product-info .product-name,
+body .page-wrapper .product-item-name {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-bottom: 6px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+body .page-wrapper .product-info .product-name a,
+body .page-wrapper .product-item-name a {
+  color: var(--awa-text, #222);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+body .page-wrapper .product-info .product-name a:hover,
+body .page-wrapper .product-item-name a:hover {
+  color: var(--awa-red, #b73337);
+}
+
+/* Rating stars */
+body .page-wrapper .product-rating {
+  margin-bottom: 8px;
+}
+
+/* B2B login-to-see-price badge */
+body .page-wrapper .b2b-login-to-see-price {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  background: var(--awa-red-light, rgba(183, 51, 55, 0.06));
+  color: var(--awa-red, #b73337);
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 6px;
+  border: 1px solid rgba(183, 51, 55, 0.12);
+}
+
+/* Sold progress bar */
+body .page-wrapper .ruler-sold {
+  height: 4px;
+  background: #f0f0f0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+body .page-wrapper .ruler-sold-count {
+  height: 100%;
+  background: linear-gradient(90deg, var(--awa-red, #b73337), #e74c3c);
+  border-radius: 4px;
+  transition: width 0.6s ease;
+}
+
+body .page-wrapper .count-sold {
+  font-size: 10px;
+  color: var(--awa-text-muted, #999);
+  margin-top: 3px;
+}
+
+/* Add-to-cart button on card */
+body .page-wrapper .item-product .btn-add-to-cart,
+body .page-wrapper .item-product .action.tocart {
+  width: 100%;
+  border-radius: 0 0 12px 12px;
+  min-height: 40px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Product badges (New, Sale, Discount) */
+body .page-wrapper .icon-product,
+body .page-wrapper .icon-new,
+body .page-wrapper .icon-sale {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: var(--awa-red, #b73337);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(183, 51, 55, 0.3);
+}
+
+body .page-wrapper .hot-onsale {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  background: #16a34a;
+  color: #fff;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+/* Trust bar items — glass on light bg */
+body .page-wrapper .awa-footer-trust-item {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+  padding: 20px 16px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+body .page-wrapper .awa-footer-trust-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+}
+
+/* Section headers — modern */
+body .page-wrapper .awa-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--awa-red, #b73337);
+}
+
+body .page-wrapper .awa-section-header__title {
+  font-size: clamp(18px, 2.5vw, 26px);
+  font-weight: 700;
+  color: var(--awa-text, #222);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+body .page-wrapper .awa-section-header__eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--awa-red, #b73337);
+  display: block;
+  margin-bottom: 4px;
+}
+
+body .page-wrapper .awa-section-header__link {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--awa-red, #b73337);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  transition: gap 0.2s ease;
+}
+
+body .page-wrapper .awa-section-header__link:hover {
+  gap: 8px;
+}
+
+/* =============================================================
+   3. RESPONSIVE TYPOGRAPHY — clamp() scale
+   No breakpoints needed. Fluid sizing from mobile to desktop.
+   ============================================================= */
+
+body .page-wrapper h1,
+body .page-wrapper .page-title span {
+  font-size: clamp(22px, 4vw, 36px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+body .page-wrapper h2 {
+  font-size: clamp(18px, 3vw, 28px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+body .page-wrapper h3 {
+  font-size: clamp(16px, 2.5vw, 22px);
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+body .page-wrapper h4 {
+  font-size: clamp(14px, 2vw, 18px);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+body .page-wrapper p,
+body .page-wrapper .product-item-description {
+  font-size: clamp(13px, 1.6vw, 15px);
+  line-height: 1.65;
+  color: var(--awa-text-muted, #555);
+}
+
+/* =============================================================
+   4. CSS GRID — Modern product grids
+   Replaces Bootstrap col-* with native CSS Grid auto-fill.
+   ============================================================= */
+
+/* Product listing grid — PLP and homepage carousels */
+body .page-wrapper .products-grid .product-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Category carousel grid */
+body .page-wrapper .awa-category-carousel__track {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(140px, 1fr);
+  gap: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 4px;
+}
+
+body .page-wrapper .awa-category-carousel__track::-webkit-scrollbar {
+  display: none;
+}
+
+body .page-wrapper .awa-category-carousel__item {
+  scroll-snap-align: start;
+}
+
+/* Footer columns — CSS Grid instead of Bootstrap */
+body .page-wrapper .footer-container .row,
+body .page-wrapper .footer-container .rowFlex {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 32px;
+}
+
+/* Trust bar grid */
+body .page-wrapper .awa-footer-trust-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+@media (width <= 991px) {
+  body .page-wrapper .awa-footer-trust-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (width <= 480px) {
+  body .page-wrapper .awa-footer-trust-grid {
+    grid-template-columns: 1fr;
+  }
+
+  body .page-wrapper .products-grid .product-items {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+}
+
+/* =============================================================
+   5. PREMIUM HOVER MICRO-INTERACTIONS
+   Subtle, purposeful motion that conveys quality.
+   ============================================================= */
+
+/* Button lift on hover */
+body .page-wrapper .action.primary:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 4px 14px rgba(183, 51, 55, 0.3),
+    0 2px 6px rgba(183, 51, 55, 0.15);
+}
+
+body .page-wrapper .action.primary:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(183, 51, 55, 0.2);
+  transition-duration: 0.1s;
+}
+
+/* Link arrow nudge */
+body .page-wrapper a[class*="link"]:hover svg,
+body .page-wrapper .awa-section-header__link:hover svg {
+  transform: translateX(3px);
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Image zoom on product cards (already in section 2, complemented here) */
+body .page-wrapper .product-thumb:hover img,
+body .page-wrapper .product-image-wrapper:hover img {
+  transform: scale(1.05);
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Badge pulse on new/sale */
+body .page-wrapper .icon-new,
+body .page-wrapper .icon-sale,
+body .page-wrapper .icon-product {
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 3px 8px;
+}
+
+/* Social icon hover scale */
+body .page-wrapper nav[aria-label*="sociais"] a:hover,
+body .page-wrapper nav[aria-label*="social"] a:hover {
+  transform: scale(1.12);
+  transition: transform 0.2s ease;
+}
+
+/* =============================================================
+   6. SKELETON PULSE LOADING
+   CSS-only placeholder while content loads.
+   ============================================================= */
+
+@keyframes awaPulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+.awa-skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: awaPulse 1.5s ease-in-out infinite;
+  border-radius: 8px;
+  color: transparent !important;
+  pointer-events: none;
+  user-select: none;
+}
+
+.awa-skeleton--text {
+  height: 14px;
+  width: 80%;
+  margin-bottom: 8px;
+}
+
+.awa-skeleton--image {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 12px;
+}
+
+.awa-skeleton--button {
+  height: 44px;
+  width: 140px;
+  border-radius: 8px;
+}
+
+/* =============================================================
+   7. CONTENT-VISIBILITY — Below-fold performance
+   Sections not visible on initial load render on demand.
+   ============================================================= */
+
+body .page-wrapper .top-home-content--trust-and-offers,
+body .page-wrapper .top-home-content--bestsellers,
+body .page-wrapper .top-home-content--product-tabs,
+body .page-wrapper .top-home-content--blog,
+body .page-wrapper .top-home-content--testimonials,
+body .page-wrapper .top-home-content--trust-close,
+body .page-wrapper .awa-footer-brands,
+body .page-wrapper .awa-footer-trust-bar {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 400px;
+}
+
+/* =============================================================
+   8. DARK MODE PREPARATION
+   Variables ready for prefers-color-scheme: dark.
+   Does NOT force dark — only activates for users who prefer it.
+   ============================================================= */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --awa-bg: #0f1115;
+    --awa-bg-alt: #1a1d24;
+    --awa-bg-card: #1e2128;
+    --awa-text: #e4e6eb;
+    --awa-text-muted: #9ca3af;
+    --awa-border: #2d3139;
+    --awa-border-md: #3d4350;
+  }
+
+  /* Apply dark to specific sections only (not full page yet) */
+  body .page-wrapper .page_footer {
+    background: var(--awa-bg) !important;
+    color: var(--awa-text);
+  }
+
+  body .page-wrapper .page_footer .velaFooterTitle {
+    color: var(--awa-text) !important;
+  }
+
+  body .page-wrapper .page_footer .velaFooterLinks a {
+    color: var(--awa-text-muted) !important;
+  }
+
+  body .page-wrapper .page_footer .velaFooterLinks a:hover {
+    color: #fff !important;
+  }
+
+  body .page-wrapper .awa-footer-trust-item {
+    background: var(--awa-bg-card);
+    border-color: var(--awa-border);
+  }
+
+  body .page-wrapper .footer-bottom {
+    background: var(--awa-bg-alt) !important;
+    border-top-color: var(--awa-border) !important;
+  }
+}
+
+/* =============================================================
+   9. GLOBAL POLISH — Small details that elevate quality
+   ============================================================= */
+
+/* Smooth scrolling (respects reduced-motion) */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Selection color */
+::selection {
+  background: rgba(183, 51, 55, 0.15);
+  color: var(--awa-text, #222);
+}
+
+/* Focus-visible global ring */
+body .page-wrapper :focus-visible {
+  outline: 2px solid var(--awa-red, #b73337);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Scrollbar styling (webkit browsers) */
+body::-webkit-scrollbar {
+  width: 10px;
+}
+
+body::-webkit-scrollbar-track {
+  background: #f5f5f5;
+}
+
+body::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 5px;
+  border: 2px solid #f5f5f5;
+}
+
+body::-webkit-scrollbar-thumb:hover {
+  background: var(--awa-red, #b73337);
+}
+
+/* Image rendering optimization */
+body .page-wrapper img {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+/* Smooth image loading (no flash) */
+body .page-wrapper img[loading="lazy"] {
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+/* Container max-width consistency */
+body .page-wrapper .container {
+  max-width: 1200px;
+  margin-inline: auto;
+  padding-inline: 16px;
+}
+
+/* =============================================================
+   10. RESPONSIVE REFINEMENTS — Mobile 2026
+   ============================================================= */
+
+@media (width <= 767px) {
+
+  /* Typography tighter on mobile */
+  body .page-wrapper h1,
+  body .page-wrapper .page-title span {
+    letter-spacing: -0.02em;
+  }
+
+  /* Product grid 2 columns on mobile */
+  body .page-wrapper .products-grid .product-items {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  /* Product card compact */
+  body .page-wrapper .product-item {
+    border-radius: 10px;
+  }
+
+  body .page-wrapper .product-item .product-item-details {
+    padding: 8px 10px 12px;
+  }
+
+  body .page-wrapper .product-item-name {
+    font-size: 12px;
+  }
+
+  /* Footer stacks */
+  body .page-wrapper .footer-container .row,
+  body .page-wrapper .footer-container .rowFlex {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  /* Section headers compact */
+  body .page-wrapper .awa-section-header {
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+  }
+
+  /* Disable hover effects on touch (no sticky hover) */
+  body .page-wrapper .product-item:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* Action buttons full width on mobile */
+  body .page-wrapper .action.primary.tocart,
+  body .page-wrapper .action.tocart {
+    width: 100%;
+  }
+}
+
+/* Ultra-small (iPhone SE, etc) */
+@media (width <= 380px) {
+  body .page-wrapper .products-grid .product-items {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+
+  body .page-wrapper .product-item .product-item-details {
+    padding: 6px 8px 10px;
+  }
+
+  body .page-wrapper .product-item-name {
+    font-size: 11px;
+  }
+}
+
+/* =============================================================
+   11. HEADER — Modern refinements
+   Top bar, logo area, search, minicart alignment.
+   ============================================================= */
+
+/* Top utility bar */
+body .page-wrapper .top-header {
+  font-size: 12px;
+  letter-spacing: 0.02em;
+}
+
+body .page-wrapper .top-header a {
+  transition: color 0.2s ease;
+}
+
+body .page-wrapper .top-header a:hover {
+  color: var(--awa-red, #b73337);
+}
+
+/* Main header content — vertical centering */
+body .page-wrapper .header-content {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+/* Logo area */
+body .page-wrapper .header .logo img {
+  max-height: 56px;
+  width: auto;
+  transition: opacity 0.2s ease;
+}
+
+/* Search form — refined for 2026 */
+body .page-wrapper .header .top-search {
+  flex: 1;
+  max-width: 600px;
+}
+
+body .page-wrapper .header .top-search .block-search .control {
+  display: flex;
+  align-items: stretch;
+  border-radius: var(--awa-search-radius, 10px);
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.3s ease;
+}
+
+body .page-wrapper .header .top-search .block-search .control:focus-within {
+  box-shadow: 0 2px 16px rgba(183, 51, 55, 0.12);
+}
+
+/* Minicart badge refinement */
+body .page-wrapper .minicart-wrapper .counter.qty {
+  background: var(--awa-red, #b73337);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+/* Navigation menu items — modern touch */
+body .page-wrapper .nav-sections .navigation > ul > li > a {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  padding: 12px 16px;
+  transition: color 0.2s ease, background 0.2s ease;
+  border-radius: 8px 8px 0 0;
+}
+
+body .page-wrapper .nav-sections .navigation > ul > li > a:hover,
+body .page-wrapper .nav-sections .navigation > ul > li.active > a {
+  color: var(--awa-red, #b73337);
+  background: rgba(183, 51, 55, 0.04);
+}
+
+/* =============================================================
+   12. PDP — Product Detail Page refinements
+   Gallery, info, tabs, B2B gate, reviews.
+   ============================================================= */
+
+/* Breadcrumbs modern style */
+body .page-wrapper .breadcrumbs {
+  padding: 12px 0;
+  font-size: 12px;
+}
+
+body .page-wrapper .breadcrumbs li {
+  display: inline-flex;
+  align-items: center;
+}
+
+body .page-wrapper .breadcrumbs li::after {
+  margin: 0 8px;
+  opacity: 0.3;
+}
+
+body .page-wrapper .breadcrumbs a {
+  color: var(--awa-text-muted, #6b7280);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+body .page-wrapper .breadcrumbs a:hover {
+  color: var(--awa-red, #b73337);
+}
+
+body .page-wrapper .breadcrumbs .item:last-child strong {
+  color: var(--awa-text, #333);
+  font-weight: 600;
+}
+
+/* PDP product title */
+body .page-wrapper .product-info-main .page-title-wrapper h1 {
+  font-size: clamp(20px, 3.5vw, 30px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--awa-text, #222);
+  margin-bottom: 8px;
+}
+
+/* PDP price area */
+body .page-wrapper .product-info-main .price-box .price {
+  font-size: clamp(22px, 4vw, 32px);
+  font-weight: 800;
+  color: var(--awa-text, #222);
+}
+
+body .page-wrapper .product-info-main .old-price .price {
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--awa-text-muted, #999);
+  text-decoration: line-through;
+}
+
+/* PDP SKU */
+body .page-wrapper .product-info-stock-sku {
+  font-size: 12px;
+  color: var(--awa-text-muted, #6b7280);
+  margin-bottom: 16px;
+}
+
+/* PDP Fotorama gallery container */
+body .page-wrapper .product.media {
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fafafa;
+}
+
+/* PDP Add-to-cart area */
+body .page-wrapper .product-info-main .box-tocart {
+  margin: 20px 0;
+  padding: 20px;
+  background: #fafafa;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+body .page-wrapper .product-info-main .box-tocart .action.tocart {
+  min-height: 52px;
+  font-size: 15px;
+  font-weight: 700;
+  border-radius: 10px;
+  padding: 0 32px;
+}
+
+/* PDP Quantity input */
+body .page-wrapper .product-info-main .input-text.qty {
+  width: 64px;
+  height: 48px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 700;
+  border-radius: 10px;
+  border: 2px solid var(--awa-border, #e5e7eb);
+}
+
+body .page-wrapper .product-info-main .input-text.qty:focus {
+  border-color: var(--awa-red, #b73337);
+}
+
+/* PDP Product tabs */
+body .page-wrapper .product.info.detailed {
+  margin-top: 32px;
+}
+
+body .page-wrapper .product.info.detailed .data.item.title {
+  border: none;
+}
+
+body .page-wrapper .product.info.detailed .data.item.title a {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--awa-text, #333);
+  padding: 12px 20px;
+  border-radius: 8px 8px 0 0;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+body .page-wrapper .product.info.detailed .data.item.title a:hover {
+  color: var(--awa-red, #b73337);
+  background: rgba(183, 51, 55, 0.03);
+}
+
+body .page-wrapper .product.info.detailed .data.item.title.active a {
+  color: var(--awa-red, #b73337);
+  border-bottom: 2px solid var(--awa-red, #b73337);
+}
+
+body .page-wrapper .product.info.detailed .data.item.content {
+  padding: 24px 20px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--awa-text, #444);
+  border-radius: 0 0 12px 12px;
+}
+
+/* PDP Reviews section */
+body .page-wrapper .review-list .review-item {
+  padding: 20px;
+  margin-bottom: 16px;
+  background: #fafafa;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+/* PDP Social share buttons */
+body .page-wrapper .product-social-links a {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f5f5;
+  color: var(--awa-text-muted, #666);
+  transition: all 0.2s ease;
+}
+
+body .page-wrapper .product-social-links a:hover {
+  background: var(--awa-red, #b73337);
+  color: #fff;
+}
+
+/* =============================================================
+   13. PLP — Category page refinements
+   ============================================================= */
+
+/* Toolbar (sorter + pager) */
+body .page-wrapper .toolbar-products {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  margin-bottom: 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+body .page-wrapper .toolbar-products select {
+  height: 38px;
+  border-radius: 8px;
+  padding: 0 32px 0 12px;
+  font-size: 13px;
+  border: 1px solid var(--awa-border, #e5e7eb);
+}
+
+/* Filter options */
+body .page-wrapper .filter-options-item {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 12px 0;
+}
+
+body .page-wrapper .filter-options-title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--awa-text, #333);
+}
+
+body .page-wrapper .filter-options-content a {
+  font-size: 13px;
+  color: var(--awa-text-muted, #666);
+  padding: 4px 0;
+  display: block;
+  transition: color 0.15s ease;
+}
+
+body .page-wrapper .filter-options-content a:hover {
+  color: var(--awa-red, #b73337);
+}
+
+/* Pagination modern */
+body .page-wrapper .pages .items {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+body .page-wrapper .pages .item a,
+body .page-wrapper .pages .item strong {
+  min-width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+body .page-wrapper .pages .item a {
+  color: var(--awa-text, #333);
+  background: #f5f5f5;
+}
+
+body .page-wrapper .pages .item a:hover {
+  background: var(--awa-red, #b73337);
+  color: #fff;
+}
+
+body .page-wrapper .pages .item.current strong {
+  background: var(--awa-red, #b73337);
+  color: #fff;
+}
+
+/* =============================================================
+   14. CART PAGE refinements
+   ============================================================= */
+
+body .page-wrapper .cart-container {
+  gap: 24px;
+}
+
+body .page-wrapper .cart.table-wrapper {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+body .page-wrapper .cart.table-wrapper th {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--awa-text-muted, #666);
+  background: #fafafa;
+  padding: 12px 16px;
+}
+
+body .page-wrapper .cart.table-wrapper td {
+  padding: 16px;
+  vertical-align: middle;
+}
+
+body .page-wrapper .cart-summary {
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 24px;
+  background: #fafafa;
+}
+
+body .page-wrapper .cart-summary .checkout-methods-items .action.primary {
+  width: 100%;
+  min-height: 52px;
+  font-size: 16px;
+  border-radius: 10px;
+}

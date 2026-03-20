@@ -1,0 +1,518 @@
+/**
+ * AWA Phase 13 — UX Elite (2026-03-19)
+ * Qty stepper, copy-to-clipboard, empty state,
+ * stock badges, PDP technical summary refinements.
+ */
+
+/* ==========================================================================
+   S1 — QTY STEPPER (+/- buttons)
+   ========================================================================== */
+
+.awa-qty-stepper {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    width: fit-content;
+}
+
+.awa-qty-stepper .awa-qty-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 44px;
+    background: var(--awa-bg-alt, #f5f5f5);
+    border: 1px solid var(--awa-border, #ddd);
+    color: var(--awa-text, #333);
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+    user-select: none;
+    padding: 0;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.awa-qty-stepper .awa-qty-btn:first-child {
+    border-radius: var(--awa-input-radius, 6px) 0 0 var(--awa-input-radius, 6px);
+    border-right: none;
+}
+
+.awa-qty-stepper .awa-qty-btn:last-child {
+    border-radius: 0 var(--awa-input-radius, 6px) var(--awa-input-radius, 6px) 0;
+    border-left: none;
+}
+
+.awa-qty-stepper .awa-qty-btn:hover {
+    background: var(--awa-red, #b73337);
+    border-color: var(--awa-red, #b73337);
+    color: #fff;
+}
+
+.awa-qty-stepper .awa-qty-btn:active {
+    background: var(--awa-red-dark, #961e22);
+    border-color: var(--awa-red-dark, #961e22);
+    transform: scale(0.96);
+}
+
+.awa-qty-stepper .awa-qty-btn:focus-visible {
+    outline: 2px solid var(--awa-red, #b73337);
+    outline-offset: 1px;
+    z-index: 1;
+}
+
+.awa-qty-stepper input[type="number"].qty,
+.awa-qty-stepper input[data-awa-role="qty-input"] {
+    width: 54px;
+    height: 44px;
+    text-align: center;
+    border-radius: 0 !important;
+    border-left: 1px solid var(--awa-border, #ddd);
+    border-right: 1px solid var(--awa-border, #ddd);
+    border-top: 1px solid var(--awa-border, #ddd);
+    border-bottom: 1px solid var(--awa-border, #ddd);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--awa-text, #333);
+    background: #fff;
+    padding: 0 4px;
+    margin: 0;
+    -moz-appearance: textfield;
+}
+
+.awa-qty-stepper input[type="number"].qty::-webkit-inner-spin-button,
+.awa-qty-stepper input[type="number"].qty::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.awa-qty-stepper input[type="number"].qty:focus {
+    outline: none;
+    border-color: var(--awa-red, #b73337);
+    box-shadow: inset 0 0 0 1px var(--awa-red, #b73337);
+    z-index: 1;
+    position: relative;
+}
+
+/* Mobile: compact stepper */
+@media (width <= 480px) {
+    .awa-qty-stepper .awa-qty-btn {
+        width: 32px;
+        height: 40px;
+        font-size: 16px;
+    }
+
+    .awa-qty-stepper input[type="number"].qty {
+        width: 46px;
+        height: 40px;
+    }
+}
+
+/* ==========================================================================
+   S2 — COPY CONTROL (copy-to-clipboard)
+   ========================================================================== */
+
+.awa-copy-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.awa-copy-wrap [data-awa-role="copy-source"] {
+    font-family: 'Courier New', monospace;
+    font-size: 12.5px;
+    color: var(--awa-text, #333);
+    letter-spacing: 0.02em;
+}
+
+.awa-copy-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border: 1px solid var(--awa-border, #ddd);
+    border-radius: 4px;
+    background: transparent;
+    color: var(--awa-text-muted, #888);
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    line-height: 1.4;
+    transition: all 0.15s;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.awa-copy-btn::before {
+    content: '';
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Crect x='9' y='9' width='13' height='13' rx='2'/%3E%3Cpath d='M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-size: contain;
+    flex-shrink: 0;
+}
+
+.awa-copy-btn:hover {
+    border-color: var(--awa-red, #b73337);
+    color: var(--awa-red, #b73337);
+    background: rgba(183, 51, 55, 0.04);
+}
+
+.awa-copy-btn:hover::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b73337' stroke-width='2'%3E%3Crect x='9' y='9' width='13' height='13' rx='2'/%3E%3Cpath d='M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1'/%3E%3C/svg%3E");
+}
+
+.awa-copy-btn[data-state="copied"] {
+    border-color: #22a05a;
+    color: #22a05a;
+    background: rgba(34, 160, 90, 0.06);
+}
+
+.awa-copy-btn[data-state="copied"]::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2322a05a' stroke-width='2.5'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+}
+
+.awa-copy-btn:focus-visible {
+    outline: 2px solid var(--awa-red, #b73337);
+    outline-offset: 2px;
+}
+
+/* ==========================================================================
+   S3 — PDP TECHNICAL SUMMARY TABLE
+   ========================================================================== */
+
+.awa-b2b-pdp-technical-summary table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.awa-b2b-pdp-technical-summary table tr {
+    border-bottom: 1px solid var(--awa-border, #eee);
+}
+
+.awa-b2b-pdp-technical-summary table tr:last-child {
+    border-bottom: none;
+}
+
+.awa-b2b-pdp-technical-summary table td:first-child {
+    font-weight: 600;
+    color: var(--awa-text-muted, #666);
+    width: 44%;
+    padding: 7px 12px 7px 0;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.awa-b2b-pdp-technical-summary table td:last-child {
+    padding: 7px 0;
+    vertical-align: middle;
+    color: var(--awa-text, #333);
+}
+
+/* ==========================================================================
+   S4 — STOCK BADGES (pill badges, visually prominent)
+   ========================================================================== */
+
+.awa-stock-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px 3px 8px;
+    border-radius: 20px;
+    font-size: 11.5px;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.awa-stock-badge::before {
+    content: '';
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.awa-stock-badge--in {
+    background: rgba(34, 160, 90, 0.1);
+    color: #1a7d44;
+    border: 1px solid rgba(34, 160, 90, 0.25);
+}
+
+.awa-stock-badge--in::before {
+    background: #22a05a;
+}
+
+.awa-stock-badge--out {
+    background: rgba(183, 51, 55, 0.08);
+    color: var(--awa-red, #b73337);
+    border: 1px solid rgba(183, 51, 55, 0.2);
+}
+
+.awa-stock-badge--out::before {
+    background: var(--awa-red, #b73337);
+}
+
+/* PLP: show badge above add-to-cart area */
+.product-info-cart .awa-stock-badge {
+    margin-bottom: 6px;
+}
+
+/* PLP: product card — out-of-stock items visually dimmed */
+.item-product.is-out-of-stock .product-thumb {
+    opacity: 0.72;
+}
+
+.item-product.is-out-of-stock .product-thumb-link {
+    pointer-events: none;
+}
+
+/* ==========================================================================
+   S5 — EMPTY STATE (PLP "no products found")
+   ========================================================================== */
+
+.awa-empty-plp {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 64px 24px 72px;
+    gap: 16px;
+}
+
+.awa-empty-plp__icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--awa-bg-alt, #f5f5f5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-bottom: 4px;
+}
+
+.awa-empty-plp__icon svg {
+    width: 36px;
+    height: 36px;
+    color: var(--awa-text-muted, #aaa);
+}
+
+.awa-empty-plp__title {
+    font-size: clamp(17px, 2.5vw, 22px);
+    font-weight: 700;
+    color: var(--awa-text, #333);
+    margin: 0;
+    line-height: 1.3;
+}
+
+.awa-empty-plp__desc {
+    font-size: 14px;
+    color: var(--awa-text-muted, #888);
+    max-width: 360px;
+    margin: 0;
+    line-height: 1.6;
+}
+
+.awa-empty-plp__actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 8px;
+}
+
+.awa-empty-plp__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 11px 24px;
+    border-radius: var(--awa-btn-radius, 8px);
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.18s;
+    cursor: pointer;
+}
+
+.awa-empty-plp__btn--primary {
+    background: var(--awa-red, #b73337);
+    color: #fff;
+    border: 2px solid var(--awa-red, #b73337);
+}
+
+.awa-empty-plp__btn--primary:hover {
+    background: var(--awa-red-dark, #961e22);
+    border-color: var(--awa-red-dark, #961e22);
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(183, 51, 55, 0.25);
+}
+
+.awa-empty-plp__btn--secondary {
+    background: transparent;
+    color: var(--awa-text, #333);
+    border: 2px solid var(--awa-border, #ddd);
+}
+
+.awa-empty-plp__btn--secondary:hover {
+    border-color: var(--awa-red, #b73337);
+    color: var(--awa-red, #b73337);
+    transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   S6 — B2B GATE CARD REFINEMENTS
+   ========================================================================== */
+
+/* Compact gate card: use horizontal layout when space allows */
+.awa-b2b-gate-card--compact .awa-b2b-gate-card__actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.awa-b2b-gate-card--compact .awa-b2b-gate-card__action {
+    font-size: 12px;
+    padding: 7px 12px;
+}
+
+/* PDP gate: add trust indicator */
+.awa-b2b-pdp-gate .awa-b2b-gate-card__description::after {
+    content: ' Mais de 2.500 revendedoras ativas.';
+    font-weight: 600;
+    color: var(--awa-text, #444);
+}
+
+/* ==========================================================================
+   S7 — PLP CARD INTERACTION POLISH
+   ========================================================================== */
+
+/* Smooth card border highlight on hover */
+.item-product {
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.item-product:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    transform: translateY(-3px);
+    z-index: 2;
+    position: relative;
+}
+
+/* Quick view button reveal */
+.item-product .quickview-link {
+    opacity: 0;
+    transform: scale(0.88);
+    transition: opacity 0.18s, transform 0.18s;
+}
+
+.item-product:hover .quickview-link {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* SKU label highlight on card hover */
+.item-product:hover .awa-b2b-sku__value {
+    color: var(--awa-red, #b73337);
+    transition: color 0.15s;
+}
+
+/* ==========================================================================
+   S8 — SECONDARY ACTIONS (Baixar PDF, Criar Tabela)
+   ========================================================================== */
+
+.awa-b2b-secondary-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.awa-b2b-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--awa-border, #ddd);
+    background: #fff;
+    color: var(--awa-text, #555);
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-decoration: none;
+    line-height: 1.4;
+}
+
+.awa-b2b-action-btn:hover:not(:disabled) {
+    border-color: var(--awa-red, #b73337);
+    color: var(--awa-red, #b73337);
+    background: rgba(183, 51, 55, 0.04);
+}
+
+.awa-b2b-action-btn:disabled {
+    opacity: 0.44;
+    cursor: not-allowed;
+}
+
+/* PDF icon */
+.awa-b2b-action-btn[href$=".pdf"]::before,
+a.awa-b2b-action-btn::before {
+    content: '';
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z'/%3E%3Cpolyline points='14 2 14 8 20 8'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-size: contain;
+    flex-shrink: 0;
+}
+
+/* ==========================================================================
+   S9 — RESPONSIVE (mobile)
+   ========================================================================== */
+
+@media (width <= 767px) {
+    .awa-empty-plp {
+        padding: 48px 16px 56px;
+    }
+
+    .awa-empty-plp__icon {
+        width: 64px;
+        height: 64px;
+    }
+
+    .awa-empty-plp__icon svg {
+        width: 28px;
+        height: 28px;
+    }
+
+    .awa-copy-wrap {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .awa-b2b-secondary-actions {
+        gap: 6px;
+    }
+
+    .awa-b2b-action-btn {
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+
+    /* In mobile list: card hover effects off (touch devices) */
+    .item-product:hover {
+        box-shadow: none;
+        transform: none;
+    }
+}

@@ -1,0 +1,415 @@
+/**
+ * AWA Phase 14 — Interactions (2026-03-19)
+ * Buscas recentes, toast notifications, atalho de teclado,
+ * indicador de estoque no PDP.
+ */
+
+/* ==========================================================================
+   S1 — RECENT SEARCHES DROPDOWN
+   ========================================================================== */
+
+.awa-recent-searches {
+    padding: 8px 0 4px;
+    background: #fff;
+    border-radius: 0 0 10px 10px;
+}
+
+.awa-recent-searches__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 14px 8px;
+    border-bottom: 1px solid var(--awa-border, #eee);
+}
+
+.awa-recent-searches__title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--awa-text-muted, #999);
+}
+
+.awa-recent-searches__clear {
+    font-size: 11.5px;
+    color: var(--awa-text-muted, #aaa);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.15s;
+    line-height: 1;
+}
+
+.awa-recent-searches__clear:hover {
+    color: var(--awa-red, #b73337);
+}
+
+.awa-recent-searches__list {
+    list-style: none;
+    margin: 0;
+    padding: 4px 0;
+}
+
+.awa-recent-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 10px;
+    transition: background 0.12s;
+}
+
+.awa-recent-item:hover {
+    background: var(--awa-bg-alt, #f7f7f7);
+}
+
+.awa-recent-item__icon {
+    flex-shrink: 0;
+    width: 14px;
+    height: 14px;
+    color: var(--awa-text-muted, #bbb);
+}
+
+.awa-recent-item__query {
+    flex: 1;
+    text-align: left;
+    background: none;
+    border: none;
+    padding: 9px 4px;
+    font-size: 13.5px;
+    color: var(--awa-text, #333);
+    cursor: pointer;
+    line-height: 1.3;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.awa-recent-item__query:hover {
+    color: var(--awa-red, #b73337);
+}
+
+.awa-recent-item__remove {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: var(--awa-text-muted, #ccc);
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 50%;
+    padding: 0;
+    transition: background 0.12s, color 0.12s;
+    line-height: 1;
+}
+
+.awa-recent-item__remove:hover {
+    background: rgba(183, 51, 55, 0.1);
+    color: var(--awa-red, #b73337);
+}
+
+/* keyboard shortcut hint in search placeholder area */
+.block-search .awa-search-hint {
+    position: absolute;
+    right: 52px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 11px;
+    color: var(--awa-text-muted, #bbb);
+    pointer-events: none;
+    display: none; /* shown via JS when input empty and unfocused */
+}
+
+@media (width <= 767px) {
+    .awa-recent-searches__header {
+        padding: 4px 12px 8px;
+    }
+
+    .awa-recent-item {
+        padding: 0 8px;
+    }
+}
+
+/* ==========================================================================
+   S2 — TOAST NOTIFICATION SYSTEM
+   ========================================================================== */
+
+.awa-toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 10px;
+    pointer-events: none;
+    max-width: min(360px, calc(100vw - 32px));
+}
+
+.awa-toast {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 13px 14px 13px 16px;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow:
+        0 4px 16px rgba(0, 0, 0, 0.12),
+        0 1px 4px rgba(0, 0, 0, 0.06),
+        0 0 0 1px rgba(0, 0, 0, 0.04);
+    pointer-events: auto;
+    opacity: 0;
+    transform: translateX(20px) translateY(6px);
+    transition: opacity 0.24s ease, transform 0.24s ease;
+    will-change: transform, opacity;
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.awa-toast--visible {
+    opacity: 1;
+    transform: translateX(0) translateY(0);
+}
+
+.awa-toast--out {
+    opacity: 0;
+    transform: translateX(16px);
+    transition: opacity 0.28s ease, transform 0.28s ease;
+}
+
+/* type colors — left border accent */
+.awa-toast--success {
+    border-left: 3px solid #22a05a;
+}
+
+.awa-toast--error {
+    border-left: 3px solid var(--awa-red, #b73337);
+}
+
+.awa-toast--warning {
+    border-left: 3px solid #f59e0b;
+}
+
+.awa-toast--info {
+    border-left: 3px solid #3b82f6;
+}
+
+/* icon */
+.awa-toast__icon {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    margin-top: 1px;
+}
+
+.awa-toast__icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.awa-toast--success .awa-toast__icon { color: #22a05a; }
+.awa-toast--error   .awa-toast__icon { color: var(--awa-red, #b73337); }
+.awa-toast--warning .awa-toast__icon { color: #d97706; }
+.awa-toast--info    .awa-toast__icon { color: #3b82f6; }
+
+/* body */
+.awa-toast__body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.awa-toast__message {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--awa-text, #222);
+    line-height: 1.4;
+}
+
+.awa-toast__action {
+    display: inline-block;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--awa-red, #b73337);
+    text-decoration: none;
+    line-height: 1;
+    transition: opacity 0.15s;
+}
+
+.awa-toast__action:hover {
+    opacity: 0.8;
+    text-decoration: underline;
+}
+
+/* close button */
+.awa-toast__close {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--awa-text-muted, #bbb);
+    padding: 0;
+    border-radius: 4px;
+    transition: color 0.15s, background 0.15s;
+    margin-top: 0;
+    margin-left: 2px;
+}
+
+.awa-toast__close:hover {
+    color: var(--awa-text, #555);
+    background: var(--awa-bg-alt, #f0f0f0);
+}
+
+.awa-toast__close svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* mobile: full width from bottom */
+@media (width <= 480px) {
+    .awa-toast-container {
+        bottom: 0;
+        right: 0;
+        left: 0;
+        max-width: 100%;
+        gap: 0;
+        border-radius: 0;
+    }
+
+    .awa-toast {
+        border-radius: 0;
+        border-top: 1px solid var(--awa-border, #eee);
+        border-left-width: 4px;
+    }
+}
+
+/* ==========================================================================
+   S3 — SEARCH KEYBOARD SHORTCUT BADGE
+   ========================================================================== */
+
+/* Visual hint "/ para buscar" alongside search input */
+.awa-search-kbd-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 10.5px;
+    color: var(--awa-text-muted, #bbb);
+    pointer-events: none;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.awa-search-kbd-hint kbd {
+    display: inline-block;
+    padding: 1px 5px;
+    border: 1px solid var(--awa-border, #ddd);
+    border-radius: 4px;
+    background: var(--awa-bg-alt, #f5f5f5);
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    color: var(--awa-text-muted, #999);
+    line-height: 1.4;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.08);
+}
+
+/* Position inside search control on desktop */
+@media (width >= 768px) {
+    .field.search .control {
+        position: relative;
+    }
+
+    .awa-search-kbd-hint {
+        position: absolute;
+        right: 56px; /* clear of search button */
+        top: 50%;
+        transform: translateY(-50%);
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+
+    .field.search:not(:focus-within) .awa-search-kbd-hint {
+        opacity: 1;
+    }
+}
+
+@media (width <= 767px) {
+    .awa-search-kbd-hint {
+        display: none;
+    }
+}
+
+/* ==========================================================================
+   S4 — PDP STOCK INDICATOR
+   ========================================================================== */
+
+.awa-stock-level {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    margin: 8px 0 4px;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+.awa-stock-level--ok {
+    background: rgba(34, 160, 90, 0.08);
+    color: #1a7d44;
+    border: 1px solid rgba(34, 160, 90, 0.2);
+}
+
+.awa-stock-level--low {
+    background: rgba(245, 158, 11, 0.08);
+    color: #92400e;
+    border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+.awa-stock-level--critical {
+    background: rgba(183, 51, 55, 0.08);
+    color: var(--awa-red, #b73337);
+    border: 1px solid rgba(183, 51, 55, 0.2);
+}
+
+.awa-stock-level__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    animation: awaPulseStock 2s ease-in-out infinite;
+}
+
+.awa-stock-level--ok       .awa-stock-level__dot { background: #22a05a; }
+.awa-stock-level--low      .awa-stock-level__dot { background: #f59e0b; }
+.awa-stock-level--critical .awa-stock-level__dot { background: var(--awa-red, #b73337); }
+
+@keyframes awaPulseStock {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.4; }
+}
+
+/* ==========================================================================
+   S5 — SEARCH PANEL SHADOW REFINEMENT
+   (garante sombra consistente quando o painel recente aparece)
+   ========================================================================== */
+
+.awa-search-autocomplete-panel:not([hidden]) {
+    box-shadow:
+        0 8px 24px rgba(0, 0, 0, 0.1),
+        0 2px 8px rgba(0, 0, 0, 0.06);
+}
