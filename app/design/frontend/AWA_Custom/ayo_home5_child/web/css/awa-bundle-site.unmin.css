@@ -5380,3 +5380,129 @@ body.catalogsearch-result-index .page-wrapper .column.main > ul li::before {
         transition: none;
     }
 }
+
+/* ==========================================================================
+   AWA Phase 26 — Skip Links, Gallery Skeleton, Footer Accordion Chevron
+   2026-03-20
+   Cobre 3 lacunas reais sem cobertura específica:
+   a) Skip links de acessibilidade (visível apenas no foco via teclado)
+   b) Skeleton/shimmer para galeria de produto em carregamento (previne CLS)
+   c) Chevron no botão do accordion do footer (aria-expanded state)
+   ========================================================================== */
+
+/* ─── 26a. Skip Links — acessibilidade por teclado ─── */
+
+/* .awa-skip-link (custom) e .action.skip (Magento nativo) */
+body .awa-skip-link,
+body .action.skip {
+    position: absolute;
+    top: -100%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    padding: 10px 24px;
+    background: var(--primary-color, #b73337);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 0 0 10px 10px;
+    white-space: nowrap;
+    box-shadow: 0 4px 16px rgb(183 51 55 / 28%);
+    transition: top 0.15s ease;
+}
+
+body .awa-skip-link:focus,
+body .action.skip:focus {
+    top: 0;
+    outline: none;
+}
+
+/* ─── 26b. Gallery Placeholder — skeleton de carregamento ─── */
+
+/* Container: reserva espaço antes do JS injetar a galeria (evita CLS) */
+body.catalog-product-view .page-wrapper .product.media {
+    min-height: 300px;
+}
+
+body.catalog-product-view .page-wrapper .gallery-placeholder._block-content-loading {
+    background: linear-gradient(
+        90deg,
+        var(--awa-gray-100, #f5f5f5) 0%,
+        var(--awa-gray-50, #fafafa) 50%,
+        var(--awa-gray-100, #f5f5f5) 100%
+    );
+    background-size: 200% 100%;
+    animation: awa-skeleton-shimmer 1.4s ease-in-out infinite;
+    border-radius: var(--awa-radius-md, 10px);
+    min-height: 280px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@keyframes awa-skeleton-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* A imagem placeholder: opacidade reduzida durante carregamento */
+body.catalog-product-view .page-wrapper .gallery-placeholder._block-content-loading
+    .gallery-placeholder__image {
+    opacity: 0.45;
+    border-radius: var(--awa-radius-sm, 6px);
+    max-width: 160px;
+    margin: auto;
+    display: block;
+}
+
+/* Após carregamento: galeria totalmente visível */
+body.catalog-product-view .page-wrapper .gallery-placeholder:not(._block-content-loading) {
+    animation: none;
+    background: transparent;
+    min-height: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.catalog-product-view .page-wrapper
+        .gallery-placeholder._block-content-loading {
+        animation: none;
+        background: var(--awa-gray-100, #f5f5f5);
+    }
+}
+
+/* ─── 26c. Footer Accordion — chevron indicator ─── */
+
+/* O Rokanthemes JS converte .velaFooterTitle em <button aria-expanded> no mobile.
+   Adicionamos chevron via ::after e giramos quando open.
+   Seletor de alta especificidade para superar inline styles do CMS block. */
+body .page-wrapper .page_footer .velaBlock button.velaFooterTitle,
+body .page-wrapper .page_footer .velaFooterMenu button.velaFooterTitle {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--awa-gap-sm, 6px);
+    width: 100%;
+}
+
+body .page-wrapper .page_footer .velaBlock button.velaFooterTitle::after,
+body .page-wrapper .page_footer .velaFooterMenu button.velaFooterTitle::after {
+    content: "";
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat center / contain;
+    transition: transform 0.22s ease;
+}
+
+body .page-wrapper .page_footer .velaBlock button.velaFooterTitle[aria-expanded="true"]::after,
+body .page-wrapper .page_footer .velaFooterMenu button.velaFooterTitle[aria-expanded="true"]::after {
+    transform: rotate(-180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body .page-wrapper .page_footer .velaBlock button.velaFooterTitle::after,
+    body .page-wrapper .page_footer .velaFooterMenu button.velaFooterTitle::after {
+        transition: none;
+    }
+}
