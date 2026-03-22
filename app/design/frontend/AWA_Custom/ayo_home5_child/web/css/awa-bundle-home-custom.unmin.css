@@ -1,5 +1,7 @@
-/* AWA MOTOS — awa-bundle-home-custom.css — Homepage-only — 2026-03-20
+/* AWA MOTOS — awa-bundle-home-custom.css — Homepage-only — 2026-03-22
    CONSOLIDADO: removidas 3.158 linhas duplicadas do site bundle.
+   2026-03-22: Consolidação estrutural — slider safe-bleed, container min(),
+              section padding clamp(), grid unificado, anti-overflow reforçado.
    Seções mantidas: consistency-home5, OWL carousel fix, owl-tabs, home-final-polish.
    Seções removidas (já presentes em awa-bundle-site.css):
    - awa-custom-post-themeoption-overrides.css (1.310 linhas)
@@ -83,15 +85,18 @@
     height: 100%;
 }
 
+/* CONSOLIDAÇÃO ETAPA 4: Container global unificado — min(100% - 2 × pad, 1280px)
+   Usa clamp() para padding responsivo: 12px@320→16px@768→20px@1280.
+   Elimina necessidade de overrides em breakpoints menores. */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .awa-home-section > .container,
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .top-home-content > .container,
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .tab_product > .container,
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .block_notification > .container {
-    width: 100%;
-    max-width: var(--awa-container);
-    margin-left: auto;
-    margin-right: auto;
-    padding-left: var(--awa-space-5); /* BP-20: era 20px */
-    padding-right: var(--awa-space-5); /* BP-20: era 20px */
+    --awa-section-pad: clamp(12px, 2vw + 4px, 20px);
+
+    width: min(100% - var(--awa-section-pad) * 2, var(--awa-container, 1280px));
+    margin-inline: auto;
+    padding-inline: 0;
     box-sizing: border-box;
 }
 
@@ -234,24 +239,9 @@
     padding-left: 0;
 }
 
-/* ProductTab fallback sem Owl: evita card único gigante (usa :not(.owl-loaded) pois Rokanthemes NÃO usa .owl-carousel) */
-:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .list-tab-product .product-tab-slider.tab_content .productTabContent:not(.owl-loaded) {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--awa-space-4);
-    width: 100%;
-    min-width: 0;
-}
-
-:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .list-tab-product .product-tab-slider.tab_content .productTabContent:not(.owl-loaded) .product_row {
-    display: contents;
-}
-
-:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .list-tab-product .product-tab-slider.tab_content .productTabContent:not(.owl-loaded) .item-product-parent {
-    min-width: 0;
-    width: auto;
-    float: none;
-}
+/* ProductTab fallback sem Owl — REMOVIDO 2026-03-20
+   Regra antiga (3 cols base) conflitava com GRID-07 (2→3→4 cols).
+   Agora unificado em GRID-07 no final do arquivo (seção ETAPA FINAL). */
 
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .hot-deal .hot-deal-slide .product_row {
     height: 100%;
@@ -268,14 +258,14 @@
     margin-top: var(--awa-page-section-gap);
 }
 
+/* CONSOLIDAÇÃO ETAPA 3: Above-fold container — mesma lógica min(). */
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .top-home-content--above-fold {
+    --awa-section-pad: clamp(12px, 2vw + 4px, 20px);
+
     display: block;
-    width: 100%;
-    max-width: var(--awa-container);
-    margin-left: auto;
-    margin-right: auto;
-    padding-left: var(--awa-space-5); /* BP-20: era 20px */
-    padding-right: var(--awa-space-5); /* BP-20: era 20px */
+    width: min(100% - var(--awa-section-pad) * 2, var(--awa-container, 1280px));
+    margin-inline: auto;
+    padding-inline: 0;
     box-sizing: border-box;
     align-items: start;
 }
@@ -285,15 +275,19 @@
     min-width: 0;
 }
 
-/* AF-07: Hero slider full-bleed (viewport width) mantendo o wrapper da seção estável.
-   A seção acima-da-dobra pode conter outros módulos (quick-nav/CTA); então o full-width
-   é aplicado apenas ao bloco de slider. */
+/* CONSOLIDAÇÃO ETAPA 2+3: Hero slider full-bleed SAFE — sem overflow por scrollbar.
+   Usa 100% + negative margin calc (relativo ao container pai) em vez de 100vw.
+   O container pai (.top-home-content--above-fold) já tem width: min(100% - pad*2, 1280px),
+   então o slider expande para a viewport real sem ultrapassar. */
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .top-home-content--above-fold > .banner-slider,
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .top-home-content--above-fold > .banner-slider.banner-slider2 {
     width: 100vw;
+    width: 100dvw; /* modern: exclui scrollbar em mobile/desktop */
     max-width: none;
     margin-left: calc(50% - 50vw);
+    margin-left: calc(50% - 50dvw);
     margin-right: calc(50% - 50vw);
+    margin-right: calc(50% - 50dvw);
     padding-left: 0;
     padding-right: 0;
 }
@@ -421,9 +415,7 @@
         min-height: 4.2em;
     }
 
-    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .ayo-home5-wrapper {
-        padding-inline: var(--awa-space-3-75); /* BP-50: era 15px */
-    }
+    /* CONSOLIDAÇÃO: padding do .ayo-home5-wrapper agora via min() + clamp() no base */
 
     :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .top-home-content--trust-and-offers .hot-deal.top-home-content__trust-offers-deals .hot-deal-tab-slider.hot-deal-tab-slider-customcss .countdown_block {
         position: static;
@@ -449,9 +441,7 @@
         justify-content: center;
     }
 
-    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .awa-home-section {
-        padding-block: 28px;
-    }
+    /* CONSOLIDAÇÃO: padding-block de .awa-home-section agora via clamp() no base */
 
     :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .awa-trust-badges-wrap .trust-badges-grid {
         grid-template-columns: 1fr;
@@ -496,24 +486,13 @@
         row-gap: var(--awa-space-4);
     }
 
-    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .list-tab-product .product-tab-slider.tab_content .productTabContent:not(.owl-loaded) {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
+    /* ProductTab fallback ≤991px — REMOVIDO: agora em GRID-07 */
 
     :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .categorytab-container .leftBlock .tabs {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .top-home-content > .container,
-    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .block_notification > .container {
-        padding-left: var(--awa-space-3-75); /* BP-50: era 15px */
-        padding-right: var(--awa-space-3-75); /* BP-50: era 15px */
-    }
-
-    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .top-home-content--above-fold {
-        padding-left: var(--awa-space-3-75); /* BP-50: era 15px */
-        padding-right: var(--awa-space-3-75); /* BP-50: era 15px */
-    }
+    /* CONSOLIDAÇÃO: padding de .container e .above-fold agora via clamp() no base — overrides removidos */
 
     :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .top-home-content--above-fold .awa-mobile-quick-nav {
         margin-left: calc(var(--awa-space-3-75) * -1); /* BP-50: era -15px */
@@ -568,9 +547,7 @@
         gap: var(--awa-space-3);
     }
 
-    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .awa-home-section {
-        padding-block: 36px;
-    }
+    /* CONSOLIDAÇÃO: padding-block de .awa-home-section agora via clamp() no base */
 
     :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .awa-intent-heading h2 {
         font-size: 1.3rem;
@@ -812,10 +789,7 @@
 }
 
 @media (width <= 680px) {
-    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .list-tab-product .product-tab-slider.tab_content .productTabContent:not(.owl-loaded) {
-        grid-template-columns: 1fr;
-        gap: var(--awa-space-4); /* BP-17: era 16px */
-    }
+    /* ProductTab fallback ≤680px — REMOVIDO: agora em GRID-07 */
 
     :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .categorytab-container .leftBlock .tabs {
         grid-template-columns: 1fr;
@@ -853,13 +827,7 @@
         display: block;
     }
 
-    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .ayo-home5-wrapper {
-        padding-inline: var(--awa-space-3); /* BP-21: era 12px */
-    }
-
-    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .awa-home-section {
-        padding-block: var(--awa-space-5); /* BP-21: era 20px */
-    }
+    /* CONSOLIDAÇÃO: padding do .ayo-home5-wrapper agora via min() + clamp() no base */
 
     :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .awa-home-section--compact {
         padding-block: 10px;
@@ -867,16 +835,7 @@
 }
 
 @media (width <= 390px) {
-    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .top-home-content > .container,
-    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .block_notification > .container {
-        padding-left: var(--awa-space-3); /* BP-20: era 12px */
-        padding-right: var(--awa-space-3); /* BP-20: era 12px */
-    }
-
-    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .top-home-content--above-fold {
-        padding-left: var(--awa-space-3); /* BP-20: era 12px */
-        padding-right: var(--awa-space-3); /* BP-20: era 12px */
-    }
+    /* CONSOLIDAÇÃO: padding de .container e .above-fold agora via clamp() no base */
 
     :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .top-home-content--above-fold .awa-mobile-quick-nav {
         margin-left: -12px;
@@ -917,16 +876,7 @@
 }
 
 @media (width <= 320px) {
-    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .top-home-content > .container,
-    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .block_notification > .container {
-        padding-left: var(--awa-space-2-5); /* BP-50: era 10px */
-        padding-right: var(--awa-space-2-5); /* BP-50: era 10px */
-    }
-
-    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .top-home-content--above-fold {
-        padding-left: var(--awa-space-2-5); /* BP-50: era 10px */
-        padding-right: var(--awa-space-2-5); /* BP-50: era 10px */
-    }
+    /* CONSOLIDAÇÃO: padding de .container e .above-fold agora via clamp() no base */
 
     :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .top-home-content--above-fold .awa-mobile-quick-nav {
         margin-left: calc(var(--awa-space-2-5) * -1); /* BP-50: era -10px */
@@ -1049,11 +999,12 @@
    AF-07: ayo-home5 CMS wrapper — seções do
    Canal B (trust-badges, FAQ). Grid responsivo.
 =========================================== */
+
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .ayo-home5-wrapper {
-    max-width: var(--awa-container);
+    width: min(100% - clamp(12px, 2vw + 4px, 20px) * 2, var(--awa-container, 1280px));
     margin-inline: auto;
     margin-top: var(--awa-space-6); /* R19/R24: margin centralizado aqui (antes em FIX-24) */
-    padding-inline: var(--awa-space-5); /* BP-21: era 20px */
+    padding-inline: 0;
     box-sizing: border-box;
 }
 
@@ -1174,9 +1125,10 @@
    Espaçamento, dividers, ritmo alternado e seção Trust/FAQ
 =========================================== */
 
-/* --- Espaçamento vertical entre seções --- */
+/* --- Espaçamento vertical entre seções ---
+   CONSOLIDAÇÃO ETAPA 4: padding-block unificado com clamp() — escala de 28px a 48px */
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .awa-home-section {
-    padding-block: var(--awa-space-9); /* BP-21: era 48px */
+    padding-block: clamp(28px, 2vw + 16px, 48px);
     position: relative;
 }
 
@@ -1924,7 +1876,10 @@
 
 /* Owl controls in tabs — homepage visual overrides
    (base arrow/dot structure is in awa-bundle-core.css canonical OWL section)
-   Selectors are element-agnostic (.owl-prev/.owl-next) to cover div AND button */
+   Selectors are element-agnostic (.owl-prev/.owl-next) to cover div AND button
+
+   ⚠ DORMANT: GRID-05e (ETAPA FINAL) esconde nav/dots com display:none !important.
+   Estas regras de estilo ficam preservadas caso o override GRID seja revertido. */
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper :is(.list-tab-product, .tab_product) .owl-carousel .owl-nav > .owl-prev,
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper :is(.list-tab-product, .tab_product) .owl-carousel .owl-nav > .owl-next {
     background: var(--bg-white);
@@ -2418,9 +2373,9 @@ body.cms-homepage_ayo_home5 .page-wrapper .column.main > .benefits-bar .benefits
     min-height: 44px;
     padding: var(--awa-gap-md) 14px;
     border-radius: var(--awa-radius);
-    background: #fff;
+    background: var(--awa-bg-surface);
     border: 1px solid var(--awa-gray-200);
-    color: #666;
+    color: var(--awa-gray-500);
     font-weight: 600;
     line-height: 1.35;
     text-align: center;
@@ -2772,67 +2727,352 @@ body.cms-homepage_ayo_home5 .top-home-content--b2b-promo .ayo-home5-heading {
 }
 
 /* ==========================================================================
-   AWA Header Rescue — Homepage (Phase 22)
-   Restrito a tablet; desktop usa flex do core bundle.
+   ETAPA FINAL — HOMEPAGE LAYOUT SYSTEM CONSOLIDATION
+   2026-03-20 — Grid padrão, overflow, cards, seções.
+
+   OBJETIVO: padronizar TODOS os blocos de produto da homepage
+   em um sistema consistente de grid, sem recriar componentes.
+
+   PRINCÍPIOS:
+   1. Reaproveitar máximo do que já existe (cards, containers, seções)
+   2. Forçar CSS Grid nos carrosséis OWL de produto (homepage only)
+   3. Overflow containment global
+   4. Responsive: 2 cols → 3 cols → 4 cols
    ========================================================================== */
 
-@media (width >= 768px) and (width <= 991px) {
-    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header .wp-header {
-        display: grid;
-        grid-template-columns: minmax(120px, 200px) minmax(0, 1fr);
-        align-items: center;
-        column-gap: var(--awa-gap-lg, 16px);
-    }
+/* ==========================================================================
+   GRID-01: OVERFLOW CONTAINMENT GLOBAL
+   Previne scroll horizontal causado por OWL, banners ou wrappers legados.
+   ========================================================================== */
 
-    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header .wp-header > [class*='col-']:first-child {
-        min-width: 0;
-        max-width: 200px;
-    }
+/* Clip no .page-wrapper (largura = viewport) em vez de no .ayo-home5-wrapper.
+   - clip ≠ scroll container: não quebra sticky header
+   - o banner com width:100vw não escapa o .page-wrapper (mesmo tamanho), apenas
+     previne o overflow de 15-17px causado pela barra de rolagem no Windows. */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper {
+    overflow-x: clip;
+}
 
-    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header .top-search {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) 44px;
-        align-items: center;
-        gap: var(--awa-gap-sm, 8px);
+/* Wrapper livre para permitir full-bleed do hero via negative-margin.
+   Cada seção filha contém seu próprio overflow (ver regra abaixo). */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .ayo-home5-wrapper {
+    overflow-x: visible;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .top-home-content {
+    overflow: hidden;
+}
+
+/* Exceção: seção above-fold precisa de overflow visible para o slider full-bleed */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .top-home-content--above-fold {
+    overflow: visible;
+}
+
+/* ==========================================================================\n   GRID-02: CONTAINER — CONSOLIDADO no topo do arquivo via min() + clamp().\n   Regras duplicadas removidas (Etapa 4/8).\n   ========================================================================== */
+
+/* ==========================================================================
+   GRID-03: SECTION SPACING — CONSOLIDADO via clamp() na regra base acima.
+   Breakpoints individuais removidos (agora redundantes com clamp(28px, 2vw + 16px, 48px)).
+   ========================================================================== */
+
+/* ==========================================================================
+   GRID-04: SECTION TITLE — headings de vitrine unificados
+   Mapeia todos os padrões existentes de heading para estilo consistente.
+   ========================================================================== */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .awa-home-section :is(.group-title1, .rokan-product-heading, .ayo-home5-heading, .awa-intent-heading) h2 {
+    margin-bottom: 16px;
+    font-size: clamp(1.25rem, 1rem + 0.8vw, 1.7rem);
+    font-weight: var(--awa-weight-bold, 700);
+    line-height: var(--awa-leading-compact, 1.2);
+    color: var(--awa-heading, #333);
+}
+
+/* ==========================================================================
+   GRID-05: PRODUCT GRID — substituição de OWL por CSS Grid na homepage
+   Override da estrutura OWL (.owl-stage-outer > .owl-stage > .owl-item)
+   para exibir produtos em grid responsivo padrão.
+
+   !important JUSTIFICADO: OWL JS aplica inline styles (width, transform)
+   que só podem ser sobrescritos com !important.
+
+   Seletores-alvo (consolidados):
+   - .productTabContent.owl-loaded (ProductTab vitrines)
+   - .category_tab_slider.owl-loaded (CategoryTab carousel)
+   - .rokan-bestseller .owl.owl-loaded (Bestseller carousel)
+   - .rokan-newproduct .owl.owl-loaded (Newproduct carousel)
+   - .cat_home2.owl-loaded (CategoryTab grid-original)
+   ========================================================================== */
+
+/* 05a: Container OWL — remover clipping e scroll */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+    :is(.productTabContent, .category_tab_slider, .cat_home2).owl-loaded .owl-stage-outer,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+    :is(.rokan-bestseller, .rokan-newproduct) .owl.owl-loaded .owl-stage-outer {
+    overflow: visible !important;
+    height: auto !important;
+}
+
+/* 05b: Stage OWL → CSS Grid */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+    :is(.productTabContent, .category_tab_slider, .cat_home2).owl-loaded .owl-stage,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+    :is(.rokan-bestseller, .rokan-newproduct) .owl.owl-loaded .owl-stage {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    transform: none !important;
+    width: auto !important;
+    transition: none !important;
+    padding: 0 !important;
+}
+
+@media (width >= 768px) {
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+        :is(.productTabContent, .category_tab_slider, .cat_home2).owl-loaded .owl-stage,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+        :is(.rokan-bestseller, .rokan-newproduct) .owl.owl-loaded .owl-stage {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
     }
 }
 
+@media (width >= 1024px) {
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+        :is(.productTabContent, .category_tab_slider, .cat_home2).owl-loaded .owl-stage,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+        :is(.rokan-bestseller, .rokan-newproduct) .owl.owl-loaded .owl-stage {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+/* 05c: Items OWL — resetar largura fixa e float */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+    :is(.productTabContent, .category_tab_slider, .cat_home2).owl-loaded .owl-item,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+    :is(.rokan-bestseller, .rokan-newproduct) .owl.owl-loaded .owl-item {
+    width: auto !important;
+    float: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    min-width: 0;
+}
+
+/* 05d: Limitar itens visíveis a 8 (2 linhas × 4 cols no desktop) */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+    :is(.productTabContent, .category_tab_slider, .cat_home2).owl-loaded .owl-item:nth-child(n+9),
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+    :is(.rokan-bestseller, .rokan-newproduct) .owl.owl-loaded .owl-item:nth-child(n+9) {
+    display: none;
+}
+
+/* Mobile: limitar a 4 itens (2 linhas × 2 cols) */
 @media (width <= 767px) {
-    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header .wp-header {
-        display: grid;
-        grid-template-columns: 1fr;
-        row-gap: var(--awa-gap-sm, 8px);
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+        :is(.productTabContent, .category_tab_slider, .cat_home2).owl-loaded .owl-item:nth-child(n+5),
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+        :is(.rokan-bestseller, .rokan-newproduct) .owl.owl-loaded .owl-item:nth-child(n+5) {
+        display: none;
     }
+}
 
-    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header .wp-header > [class*='col-']:first-child {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 44px;
+/* Tablet: limitar a 6 itens (2 linhas × 3 cols) */
+@media (width >= 768px) and (width <= 1023px) {
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+        :is(.productTabContent, .category_tab_slider, .cat_home2).owl-loaded .owl-item:nth-child(n+7),
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+        :is(.rokan-bestseller, .rokan-newproduct) .owl.owl-loaded .owl-item:nth-child(n+7) {
+        display: none;
     }
+}
 
-    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header .wp-header > [class*='col-']:first-child .logo img {
-        max-height: 52px !important;
-        width: auto !important;
-    }
+/* 05e: Esconder navegação OWL (arrows + dots) — grid não precisa */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+    :is(.productTabContent, .category_tab_slider, .cat_home2).owl-loaded > .owl-nav,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+    :is(.productTabContent, .category_tab_slider, .cat_home2).owl-loaded > .owl-dots,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+    :is(.rokan-bestseller, .rokan-newproduct) .owl.owl-loaded > .owl-nav,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+    :is(.rokan-bestseller, .rokan-newproduct) .owl.owl-loaded > .owl-dots {
+    display: none !important;
+}
 
-    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header .wp-header > .top-search {
-        display: grid !important;
-        grid-template-columns: minmax(0, 1fr) 44px;
-        align-items: center;
-        gap: var(--awa-gap-sm, 8px);
-        width: 100% !important;
-        min-width: 0 !important;
-        margin: 0 !important;
-    }
+/* 05f: Bestseller/Newproduct wrappers — transparentes ao grid */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+    :is(.rokan-bestseller, .rokan-newproduct) .owl.owl-loaded .owl-item > :is(.bestsellerslider-item, .newproductslider-item) {
+    display: contents;
+}
 
-    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header .top-search > .mini-cart-wrapper,
-    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header .top-search > .mini-cart-wrapper .mini-carts,
-    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header .top-search > .mini-cart-wrapper .minicart-wrapper,
-    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header .top-search > .mini-cart-wrapper .action.showcart {
-        width: 44px !important;
-        min-width: 44px !important;
-        max-width: 44px !important;
-        height: 44px !important;
+/* ==========================================================================
+   GRID-06: PRODUCT CARD — garantia de alinhamento (reforço do core)
+   Estes seletores são scoped à homepage para não conflitar com o core.
+   ========================================================================== */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+    :is(.productTabContent, .category_tab_slider, .cat_home2) .owl-item > *,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+    :is(.rokan-bestseller, .rokan-newproduct) .owl-item > * {
+    height: 100%;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+    :is(.productTabContent, .category_tab_slider, .cat_home2) .item-product,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+    :is(.productTabContent, .category_tab_slider, .cat_home2) .product-item,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+    :is(.rokan-bestseller, .rokan-newproduct) .product-item {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    height: 100%;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+    :is(.productTabContent, .category_tab_slider, .cat_home2) :is(.product-info-cart, .actions-primary, .product-item-actions),
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+    :is(.rokan-bestseller, .rokan-newproduct) :is(.product-info-cart, .actions-primary, .product-item-actions) {
+    margin-top: auto;
+}
+
+/* ==========================================================================
+   GRID-07: NÃO-OWL FALLBACK (reforço)
+   Manter o fallback grid para quando OWL não carrega — mesmo padrão.
+   ========================================================================== */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+    :is(.productTabContent, .category_tab_slider, .cat_home2):not(.owl-loaded) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+@media (width >= 768px) {
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+        :is(.productTabContent, .category_tab_slider, .cat_home2):not(.owl-loaded) {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
     }
+}
+
+@media (width >= 1024px) {
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+        :is(.productTabContent, .category_tab_slider, .cat_home2):not(.owl-loaded) {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+    :is(.productTabContent, .category_tab_slider, .cat_home2):not(.owl-loaded) .product_row {
+    display: contents;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+    :is(.productTabContent, .category_tab_slider, .cat_home2):not(.owl-loaded) :is(.item-product-parent, .item) {
+    min-width: 0;
+    width: auto;
+    float: none;
+}
+
+/* ==========================================================================
+   GRID-08: NATIVE GRID (.awa-products-grid)
+   Para child overrides que substituem OWL por grid nativo em bestseller/newproduct.
+   Classe usada diretamente no template PHTML — sem dependência do OWL.
+   ========================================================================== */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .awa-products-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+@media (width >= 768px) {
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .awa-products-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+    }
+}
+
+@media (width >= 1024px) {
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .awa-products-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .awa-products-grid > .awa-products-grid__item {
+    min-width: 0;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .awa-products-grid > .awa-products-grid__item > .product-item {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-width: 0;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .awa-products-grid .product-info-cart {
+    margin-top: auto;
+}
+
+@media (width <= 480px) {
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .awa-products-grid .btn-add-to-cart {
+        font-size: 11px !important;
+        padding: 6px 8px;
+        white-space: normal;
+        line-height: 1.3;
+        min-height: 36px !important;
+        text-align: center;
+    }
+}
+
+/* ==========================================================================
+   GRID-09: SECTION HEADER UNIFICADO (.awa-section-header)
+   Header de seção com eyebrow + title + link "Ver todos" alinhado à direita.
+   ========================================================================== */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .awa-section-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .awa-section-header__left {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .awa-section-header__eyebrow {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--primary-color, #b73337);
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .awa-section-header__title {
+    font-size: clamp(1.25rem, 1rem + 0.8vw, 1.7rem);
+    font-weight: var(--awa-weight-bold, 700);
+    line-height: var(--awa-leading-compact, 1.2);
+    color: var(--awa-heading, #333);
+    margin: 0;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .awa-section-header__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--primary-color, #b73337);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color 0.2s;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .awa-section-header__link:hover {
+    color: var(--primary-hover, #8e2629);
+    text-decoration: underline;
 }
