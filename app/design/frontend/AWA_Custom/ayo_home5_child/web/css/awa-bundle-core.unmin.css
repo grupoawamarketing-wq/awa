@@ -380,6 +380,41 @@
         --primary-hover: var(--awa-red-dark);
         --awa-brand-primary: var(--awa-red);
         --awa-brand-hover: var(--awa-red-dark);
+
+        /* ═══════════════════════════════════════════════════
+           BRIDGE SEMÂNTICO — Nomes genéricos → tokens canônicos
+           Permite uso intuitivo: var(--color-primary) em vez de var(--awa-red).
+           Não substitui os canônicos — apenas aponta para eles.
+           ═══════════════════════════════════════════════════ */
+
+        /* Cores semânticas */
+        --color-primary: var(--awa-red);
+        --color-primary-hover: var(--awa-red-dark);
+        --color-primary-light: var(--awa-red-light);
+        --color-text: var(--awa-dark);
+        --color-text-muted: var(--awa-gray-500);
+        --color-border: var(--awa-gray-200);
+        --color-bg: var(--awa-gray-50);
+        --color-surface: var(--awa-bg-surface);
+        --color-success: var(--awa-success);
+        --color-warning: var(--awa-warning);
+        --color-danger: var(--awa-danger);
+        --color-info: var(--awa-info);
+
+        /* Layout */
+        --container-max: var(--awa-container);
+        --container-pad: var(--awa-container-padding);
+        --section-gap: var(--awa-section-gap);
+        --section-gap-sm: var(--awa-section-gap-sm);
+        --grid-gap: var(--awa-grid-gap);
+
+        /* Breakpoints (constantes — não se alteram em runtime,
+           mas documentam a escala oficial para media queries) */
+        --bp-sm: 576px;
+        --bp-md: 768px;
+        --bp-lg: 992px;
+        --bp-xl: 1200px;
+        --bp-2xl: 1440px;
     }
 
     /* ===========================================
@@ -430,6 +465,12 @@
     *::before,
     *::after {
         box-sizing: border-box;
+    }
+
+    /* DS-IMG: Reset global de imagens — previne overflow e mantém proporção */
+    img {
+        max-width: 100%;
+        height: auto;
     }
 
     /* Desabilitar smooth scroll em checkout — conflita com OPC step anchors */
@@ -569,6 +610,37 @@
         max-width: 100%;
         isolation: isolate;
         /* BP-33: cada seção é um stacking context independente */
+    }
+
+    /* ===========================================
+   SECTION UTILITIES — Espaçamento vertical padronizado
+   Uso: <section class="awa-section"> em templates PHTML
+   Variantes: .awa-section--sm (compacto), .awa-section--flush (zero)
+=========================================== */
+    body .page-wrapper .awa-section {
+        padding-block: var(--awa-section-gap);
+    }
+
+    body .page-wrapper .awa-section--sm {
+        padding-block: var(--awa-section-gap-sm);
+    }
+
+    body .page-wrapper .awa-section--flush {
+        padding-block: 0;
+    }
+
+    body .page-wrapper .awa-section-title {
+        font-size: clamp(var(--awa-text-xl), 1.5vw + 14px, var(--awa-text-3xl));
+        font-weight: var(--awa-weight-bold);
+        line-height: var(--awa-leading-cozy);
+        margin-block-end: var(--awa-space-6);
+        text-wrap: balance;
+    }
+
+    body .page-wrapper .awa-section-subtitle {
+        font-size: var(--awa-text-md);
+        color: var(--awa-gray-500);
+        margin-block-end: var(--awa-space-5);
     }
 
     /* ===========================================
@@ -4774,6 +4846,150 @@ body .page-wrapper .owl-carousel .product-item {
 }
 
 /* ============================================================
+   SWIPER AWA OVERRIDES — CAROUSEL ENGINE (2026-XX)
+   ────────────────────────────────────────────────────────────
+   Styles for Swiper-based carousels (ProductTab, CategoryTab,
+   BestsellerProduct, Newproduct, Superdeals).
+   Overrides swiper-bundle.min.css defaults to match AWA brand.
+   ============================================================ */
+
+/* Container */
+body .page-wrapper .swiper {
+    position: relative;
+    overflow: hidden;
+}
+
+/* Slides: equal-height flex */
+body .page-wrapper .swiper .swiper-slide {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    box-sizing: border-box;
+}
+
+body .page-wrapper .swiper .swiper-slide .item-product,
+body .page-wrapper .swiper .swiper-slide .item-product-parent {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    width: 100%;
+}
+
+/* product-item inside swiper-slide (bestseller/newproduct) */
+body .page-wrapper .swiper .swiper-slide > .product-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    height: 100%;
+}
+
+/* Navigation arrows */
+body .page-wrapper .swiper .swiper-button-prev,
+body .page-wrapper .swiper .swiper-button-next {
+    width: 36px;
+    height: 36px;
+    background: var(--awa-surface, #fff);
+    border: 1px solid var(--awa-border, #e2e8f0);
+    border-radius: 50%;
+    color: var(--awa-text-primary, #1e293b);
+    transition: background .2s, border-color .2s, color .2s;
+    top: 50%;
+    margin-top: -18px;
+    z-index: 10;
+}
+
+body .page-wrapper .swiper .swiper-button-prev:hover,
+body .page-wrapper .swiper .swiper-button-next:hover {
+    background: var(--awa-accent, #E63946);
+    border-color: var(--awa-accent, #E63946);
+    color: #fff;
+}
+
+body .page-wrapper .swiper .swiper-button-prev::after,
+body .page-wrapper .swiper .swiper-button-next::after {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+body .page-wrapper .swiper .swiper-button-prev {
+    left: -4px;
+}
+body .page-wrapper .swiper .swiper-button-next {
+    right: -4px;
+}
+
+/* Pagination dots */
+body .page-wrapper .swiper .swiper-pagination-bullet {
+    width: 8px;
+    height: 8px;
+    background: var(--awa-border, #cbd5e1);
+    opacity: 1;
+    transition: background .2s, transform .2s;
+}
+
+body .page-wrapper .swiper .swiper-pagination-bullet-active {
+    background: var(--awa-accent, #E63946);
+    transform: scale(1.25);
+}
+
+/* ProductTab specific: 2 products per slide stacked */
+body .page-wrapper .list-tab-product .swiper .swiper-slide.product_row {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* CategoryTab specific: 1 product per slide */
+body .page-wrapper .categorytab-container .swiper .swiper-slide.product_row {
+    padding: 0 4px;
+}
+
+/* BestsellerProduct / Newproduct: single product per slide */
+body .page-wrapper .rokan-bestseller .products-swiper,
+body .page-wrapper .rokan-newproduct .products-swiper {
+    padding: 0 12px;
+}
+
+body .page-wrapper .rokan-bestseller .swiper-slide,
+body .page-wrapper .rokan-newproduct .swiper-slide {
+    padding: 0 4px;
+}
+
+/* Superdeals hot-deal-slide */
+body .page-wrapper .hot-deal-tab-slider .hot-deal-slide {
+    width: 100%;
+}
+
+body .page-wrapper .hot-deal-tab-slider .swiper-slide.product_row {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    padding: 0 4px;
+}
+
+/* Mobile: push arrows below carousel */
+@media (width <= 768px) {
+    body .page-wrapper .swiper .swiper-button-prev,
+    body .page-wrapper .swiper .swiper-button-next {
+        width: 30px;
+        height: 30px;
+        margin-top: -15px;
+    }
+    body .page-wrapper .swiper .swiper-button-prev::after,
+    body .page-wrapper .swiper .swiper-button-next::after {
+        font-size: 12px;
+    }
+
+    /* On mobile, push arrows outside the padding zone on bestseller/newproduct */
+    body .page-wrapper .rokan-bestseller .products-swiper,
+    body .page-wrapper .rokan-newproduct .products-swiper {
+        padding: 0;
+    }
+}
+
+/* ============================================================
    STRUCTURAL CONTAINMENT SYSTEM — CANONICAL (2026-03-20)
    ────────────────────────────────────────────────────────────
    Global rules that prevent overflow and ensure width stability.
@@ -4793,6 +5009,9 @@ body .page-wrapper :is(
     .owl-carousel .owl-stage-outer,
     .owl-carousel .owl-stage,
     .owl-carousel .owl-item,
+    .swiper,
+    .swiper .swiper-wrapper,
+    .swiper .swiper-slide,
     .item-product,
     .product-item,
     .product-item-info,
@@ -6571,6 +6790,7 @@ body .page-wrapper .trust-badge-item span {
    a respeitar --awa-container, alinhando com o demo Ayo.
 =========================================== */
 body .page-wrapper .container:not(.slider-container):not(.banner-container):not(.products):not(.product-grid) {
+    width: auto;
     max-width: var(--awa-container);
     margin-left: auto;
     margin-right: auto;
