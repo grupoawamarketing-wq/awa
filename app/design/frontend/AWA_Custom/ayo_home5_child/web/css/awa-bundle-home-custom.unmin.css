@@ -87,7 +87,9 @@
 
 /* CONSOLIDAÇÃO ETAPA 4: Container global unificado — min(100% - 2 × pad, 1280px)
    Usa clamp() para padding responsivo: 12px@320→16px@768→20px@1280.
-   Elimina necessidade de overrides em breakpoints menores. */
+   Elimina necessidade de overrides em breakpoints menores.
+   FIX: padding-inline: 0 !important para prevalecer sobre phases L5288 que aplica
+   --awa-container-pad !important — evita double-inset (width subtraction + padding). */
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .awa-home-section > .container,
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .top-home-content > .container,
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .tab_product > .container,
@@ -96,7 +98,7 @@
 
     width: min(100% - var(--awa-section-pad) * 2, var(--awa-container, 1280px));
     margin-inline: auto;
-    padding-inline: 0;
+    padding-inline: 0 !important;
     box-sizing: border-box;
 }
 
@@ -270,8 +272,9 @@
     height: 100%;
 }
 
+/* FIX: unificar gap entre .top-home-content para --awa-section-gap (canônico do phases) */
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .top-home-content + .top-home-content {
-    margin-top: var(--awa-page-section-gap);
+    margin-top: var(--awa-section-gap, clamp(16px, 2.4vw, 28px));
 }
 
 /* CONSOLIDAÇÃO ETAPA 3: Above-fold container — mesma lógica min(). */
@@ -1019,13 +1022,13 @@
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .ayo-home5-wrapper {
     width: min(100% - clamp(12px, 2vw + 4px, 20px) * 2, var(--awa-container, 1280px));
     margin-inline: auto;
-    margin-top: var(--awa-space-6); /* R19/R24: margin centralizado aqui (antes em FIX-24) */
+    margin-top: var(--awa-section-gap, clamp(16px, 2.4vw, 28px)); /* FIX: unificado com --awa-section-gap */
     padding-inline: 0;
     box-sizing: border-box;
 }
 
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .ayo-home5-wrapper .ayo-home5-section {
-    margin-bottom: var(--awa-space-6);
+    margin-bottom: var(--awa-section-gap, clamp(16px, 2.4vw, 28px)); /* FIX: era --awa-space-6 fixo (24px) */
 }
 
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .ayo-home5-wrapper .ayo-home5-section:last-child {
@@ -2004,7 +2007,7 @@ body.cms-homepage_ayo_home5 {
 }
 
 body.cms-homepage_ayo_home5 .page-wrapper .page-main.container > .columns > .column.main {
-    max-width: var(--awa-container-max);
+    max-width: var(--awa-container, 1280px);
 }
 
 body.cms-homepage_ayo_home5 .page-wrapper .top-home-content,
@@ -2034,17 +2037,18 @@ body.cms-homepage_ayo_home5 .page-wrapper .the_blog {
     display: none;
 }
 
+/* FIX: consolidar em --awa-section-gap — era clamp(18px,2vw,30px) divergente */
 body.cms-homepage_ayo_home5 .page-wrapper .top-home-content--product-tabs,
 body.cms-homepage_ayo_home5 .page-wrapper .top-home-content--bestsellers,
 body.cms-homepage_ayo_home5 .page-wrapper .top-home-content--popular-categories,
 body.cms-homepage_ayo_home5 .page-wrapper .top-home-content--featured-categories,
 body.cms-homepage_ayo_home5 .page-wrapper .top-home-content--launches {
-    margin-top: clamp(18px, 2vw, 30px);
+    margin-top: var(--awa-section-gap, clamp(16px, 2.4vw, 28px));
 }
 
+/* FIX: unificar padding de container para --awa-container-pad (canônico do phases: 16px) */
 body.cms-homepage_ayo_home5 .page-wrapper .top-home-content .container {
-    padding-left: clamp(14px, 2vw, 24px);
-    padding-right: clamp(14px, 2vw, 24px);
+    padding-inline: var(--awa-container-pad, 16px);
 }
 
 body.cms-homepage_ayo_home5 .page-wrapper .item-product .product-info,
@@ -2212,7 +2216,7 @@ body .page-wrapper .item-product .b2b-login-to-see-price a {
 
 body.cms-homepage_ayo_home5 .page-wrapper .top-home-content .container,
 body.cms-homepage_ayo_home5 .page-wrapper .awa-home-section .container {
-    max-width: var(--awa-container-max);
+    max-width: var(--awa-container, 1280px);
 }
 
 body.cms-homepage_ayo_home5 .page-wrapper .top-home-content .ayo-home5-heading,
@@ -2514,10 +2518,11 @@ body.cms-homepage_ayo_home5 .page-wrapper .product-item .b2b-login-to-see-price 
         padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px));
     }
 
+    /* FIX: mobile section gap — usar clamp proporcional (antes 10px fixo) */
     body.cms-homepage_ayo_home5 .page-wrapper .top-home-content,
     body.cms-homepage_ayo_home5 .page-wrapper .awa-home-section,
     body.cms-homepage_ayo_home5 .page-wrapper .column.main > :is(.benefits-bar, .section, .trust-badges-homepage, .aw-home-faq) {
-        margin-top: var(--awa-space-2-5) ;
+        margin-top: clamp(12px, 2vw, 20px);
     }
 
     body.cms-homepage_ayo_home5 .page-wrapper .column.main > .section .security-seals {
@@ -2819,12 +2824,13 @@ body.cms-homepage_ayo_home5 .top-home-content--b2b-promo .ayo-home5-heading {
    - .cat_home2.owl-loaded (CategoryTab grid-original)
    ========================================================================== */
 
-/* 05a: Container OWL — remover clipping e scroll */
+/* 05a: Container OWL — hidden (não visible!) para impedir overflow lateral.
+   overflow:visible causava scroll horizontal quando OWL recalcula stage width. */
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
     :is(.productTabContent, .category_tab_slider, .cat_home2).owl-loaded .owl-stage-outer,
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
     :is(.rokan-bestseller, .rokan-newproduct) .owl.owl-loaded .owl-stage-outer {
-    overflow: visible !important;
+    overflow: hidden !important;
     height: auto !important;
 }
 
