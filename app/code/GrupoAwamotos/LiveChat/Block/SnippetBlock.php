@@ -188,6 +188,12 @@ class SnippetBlock extends \LiveChat\LiveChat\Block\SnippetBlock
     private function getProductAttributeText(ProductInterface $product, array $attributeCodes): ?string
     {
         foreach ($attributeCodes as $attributeCode) {
+            if (!$product instanceof \Magento\Catalog\Model\Product
+                || $product->getResource()->getAttribute($attributeCode) === false
+            ) {
+                continue;
+            }
+
             $text = $product->getAttributeText($attributeCode);
 
             if (is_array($text)) {
