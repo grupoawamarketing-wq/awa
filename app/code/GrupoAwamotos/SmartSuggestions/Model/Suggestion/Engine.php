@@ -307,43 +307,104 @@ class Engine implements SuggestionEngineInterface
             // Get customers with high RFM scores who are due for repurchase
             $rfmCustomers = $this->rfmCalculator->calculateAll();
 
-            $opportunities = [];
-            foreach ($rfmCustomers as $customer) {
-                // Focus on Champions, Loyal, and Potential Loyalists
-                if (!in_array($customer['segment'], ['Champions', 'Loyal', 'Potential Loyalist', 'Need Attention'])) {
-                    continue;
-                }
+            // Filter to target segments first
+            $targetSegments = ['Champions', 'Loyal', 'Potential Loyalist', 'Need Attention'];
+            $candidates = array_filter(
+                $rfmCustomers,
+                fn($c) => in_array($c['segment'], $targetSegments, true)
+            );
 
-                // Calculate expected purchase cycle
-                $avgCycle = $this->getCustomerPurchaseCycle($customer['customer_id']);
+            if (empty($candidates)) {
+                return [];
+            }
+
+            // Batch-fetch purchase cycles for ALL candidates in a single query (eliminates N individual queries)
+            $candidateIds = array_column($candidates, 'customer_id');
+            $purchaseCycles = $this->getBatchPurchaseCycles($candidateIds);
+
+            // Pre-filter by cycle ratio and score WITHOUT hitting ERP per-customer
+            $preScored = [];
+            foreach ($candidates as $customer) {
+                $avgCycle = $purchaseCycles[$customer['customer_id']] ?? 30;
 
                 if ($avgCycle > 0 && $customer['recency_days'] >= $avgCycle * 0.8) {
-                    $cartSuggestion = $this->generateCartSuggestion($customer['customer_id']);
-
-                    $opportunities[] = [
-                        'customer_id' => $customer['customer_id'],
-                        'customer_name' => $customer['trade_name'] ?: $customer['customer_name'],
-                        'segment' => $customer['segment'],
-                        'rfm_score' => $customer['rfm_score'],
-                        'days_since_purchase' => $customer['recency_days'],
-                        'avg_cycle_days' => $avgCycle,
-                        'overdue_ratio' => round($customer['recency_days'] / $avgCycle, 2),
-                        'estimated_cart_value' => $cartSuggestion['cart_summary']['total_value'] ?? 0,
-                        'historical_value' => $customer['monetary'],
-                        'priority_score' => $this->calculatePriorityScore($customer, $avgCycle)
+                    $preScored[] = [
+                        'customer' => $customer,
+                        'avg_cycle' => $avgCycle,
+                        'priority_score' => $this->calculatePriorityScore($customer, $avgCycle),
                     ];
                 }
             }
 
-            // Sort by priority score
-            usort($opportunities, fn($a, $b) => $b['priority_score'] <=> $a['priority_score']);
+            // Sort by priority and take only top N — THEN generate full cart suggestions
+            usort($preScored, fn($a, $b) => $b['priority_score'] <=> $a['priority_score']);
+            $topCandidates = array_slice($preScored, 0, $limit);
 
-            return array_slice($opportunities, 0, $limit);
+            $opportunities = [];
+            foreach ($topCandidates as $entry) {
+                $customer = $entry['customer'];
+                $avgCycle = $entry['avg_cycle'];
+                $cartSuggestion = $this->generateCartSuggestion($customer['customer_id']);
+
+                $opportunities[] = [
+                    'customer_id' => $customer['customer_id'],
+                    'customer_name' => $customer['trade_name'] ?: $customer['customer_name'],
+                    'segment' => $customer['segment'],
+                    'rfm_score' => $customer['rfm_score'],
+                    'days_since_purchase' => $customer['recency_days'],
+                    'avg_cycle_days' => $avgCycle,
+                    'overdue_ratio' => round($customer['recency_days'] / $avgCycle, 2),
+                    'estimated_cart_value' => $cartSuggestion['cart_summary']['total_value'] ?? 0,
+                    'historical_value' => $customer['monetary'],
+                    'priority_score' => $entry['priority_score'],
+                ];
+            }
+
+            return $opportunities;
 
         } catch (\Exception $e) {
             $this->logger->error('Top Opportunities Error: ' . $e->getMessage());
             return [];
         }
+    }
+
+    /**
+     * Batch-fetch purchase cycles for multiple customers in a single ERP query.
+     *
+     * @param int[] $customerIds
+     * @return array<int, int> customerId => avgCycleDays
+     */
+    private function getBatchPurchaseCycles(array $customerIds): array
+    {
+        if (empty($customerIds)) {
+            return [];
+        }
+
+        $cycles = [];
+        foreach (array_chunk($customerIds, 500) as $chunk) {
+            $placeholders = implode(',', array_fill(0, count($chunk), '?'));
+            $sql = "
+                SELECT
+                    p.CLIENTE as customer_id,
+                    CASE
+                        WHEN COUNT(DISTINCT p.CODIGO) > 1 THEN
+                            DATEDIFF(DAY, MIN(p.DTPEDIDO), MAX(p.DTPEDIDO)) / (COUNT(DISTINCT p.CODIGO) - 1)
+                        ELSE 30
+                    END as avg_cycle
+                FROM VE_PEDIDO p
+                WHERE p.CLIENTE IN ({$placeholders})
+                  AND p.STATUS NOT IN ('C', 'X')
+                  AND p.DTPEDIDO >= DATEADD(YEAR, -2, GETDATE())
+                GROUP BY p.CLIENTE
+            ";
+
+            $results = $this->connection->query($sql, $chunk);
+            foreach ($results as $row) {
+                $cycles[(int)$row['customer_id']] = (int)$row['avg_cycle'];
+            }
+        }
+
+        return $cycles;
     }
 
     /**

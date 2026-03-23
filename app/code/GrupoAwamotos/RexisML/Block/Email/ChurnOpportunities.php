@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Block para renderizar oportunidades de churn em emails
  */

@@ -96,7 +96,7 @@ class FilteredHistoryData extends Action implements HttpGetActionInterface
             $this->logger->error('[ERP Admin] Filtered history error: ' . $e->getMessage());
             return $result->setData([
                 'success' => false,
-                'message' => 'Erro ao carregar histórico: ' . $e->getMessage()
+                'message' => 'Erro ao carregar histórico. Tente novamente ou verifique os logs.'
             ]);
         }
     }

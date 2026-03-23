@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 namespace GrupoAwamotos\RexisML\Helper;
 
 use GrupoAwamotos\ERPIntegration\Model\WhatsApp\ZApiClient;

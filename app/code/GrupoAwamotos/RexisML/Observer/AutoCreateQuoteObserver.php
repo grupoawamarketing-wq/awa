@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Observer para criar automaticamente cotacoes para oportunidades de Cross-sell
  * Dispara quando um pedido e concluido (sales_order_place_after)

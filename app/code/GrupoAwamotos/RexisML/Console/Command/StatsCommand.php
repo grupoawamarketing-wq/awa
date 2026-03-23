@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Comando CLI para exibir estatisticas do REXIS ML
  */

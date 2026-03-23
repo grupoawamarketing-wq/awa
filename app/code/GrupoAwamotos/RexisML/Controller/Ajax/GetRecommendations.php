@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * AJAX Controller para buscar recomendações em tempo real
  * Resolve ERP code do cliente antes de filtrar recomendações

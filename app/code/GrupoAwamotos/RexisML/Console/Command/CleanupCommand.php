@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Comando CLI para limpeza de dados antigos do REXIS ML
  */

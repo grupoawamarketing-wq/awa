@@ -40,6 +40,11 @@ class AddCollectionSocialProofObserver implements ObserverInterface
             return;
         }
 
+        // Cap to avoid unbounded IN clause on very large collections
+        if (count($productIds) > 500) {
+            $productIds = array_slice($productIds, 0, 500);
+        }
+
         try {
             $connection = $this->resourceConnection->getConnection();
             $today = date('Y-m-d');

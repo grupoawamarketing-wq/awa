@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 namespace GrupoAwamotos\RexisML\Console\Command;
 
 use GrupoAwamotos\RexisML\Model\DataPipeline\ErpDataCollector;
