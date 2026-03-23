@@ -943,3 +943,39 @@ body .page-wrapper .submenu a {
     content-visibility: auto;
     contain-intrinsic-size: auto 60px;
 }
+
+/* =============================================================================
+   PERFORMANCE: Anti-FOUC para Carrosséis (Fase 3.6)
+   Antes do JS do Owl/Swiper inicializar, todos os slides ficam empilhados.
+   Estas regras escondem slides extras e estabilizam o layout pré-init.
+   Após init, o JS adiciona .owl-carousel e estas regras deixam de aplicar.
+   ============================================================================= */
+
+/* Hero slider: esconde slides 2+ antes do Owl init → previne CLS */
+.wrapper_slider > .owl:not(.owl-carousel) > .banner_item:not(:first-child) {
+    display: none;
+}
+
+/* Owl wrapper: esconde conteúdo pré-init (Owl mostra via JS display:block) */
+.wrapper_slider > .owl:not(.owl-carousel) {
+    overflow: hidden;
+}
+
+/* Produto carrosséis (ProductTab, Bestseller, Newproduct):
+   Esconder itens extras antes do Owl init para prevenir stack vertical */
+.list-tab-product .owl:not(.owl-carousel) > .item-product:nth-child(n+5),
+.home-bestseller .owl:not(.owl-carousel) > .item-product:nth-child(n+5),
+.home-new-product .owl:not(.owl-carousel) > .item-product:nth-child(n+5) {
+    display: none;
+}
+
+/* Aspect ratio estável para o container do hero enquanto Owl não init */
+.wrapper_slider > .owl:not(.owl-carousel) > .banner_item:first-child {
+    aspect-ratio: 1920 / 600;
+}
+
+@media (width <= 767px) {
+    .wrapper_slider > .owl:not(.owl-carousel) > .banner_item:first-child {
+        aspect-ratio: 768 / 400;
+    }
+}
