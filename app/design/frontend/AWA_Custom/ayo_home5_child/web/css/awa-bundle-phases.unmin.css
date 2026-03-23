@@ -787,52 +787,90 @@ h1, h2, h3, h4, h5, h6,
 
 /* ============================================================
    4. Trust & Authority Badges (PDP)
+   3 colunas iguais em desktop, coluna única em mobile.
    ============================================================ */
 .awa-trust-badges {
-    display: flex;
-    flex-direction: column;
-    gap: var(--awa-gap-md);
-    margin-top: var(--awa-space-6) ;
-    padding: var(--awa-space-4) ;
-    background: var(--awa-gray-50); /* Tailwind slate-50 */
-    border: 1px solid var(--awa-gray-200); /* Tailwind slate-200 */
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--awa-space-3);
+    margin-top: var(--awa-space-6);
+    padding: var(--awa-space-4);
+    background: var(--awa-gray-50);
+    border: 1px solid var(--awa-gray-200);
     border-radius: var(--awa-radius-sm);
 }
 
 .awa-trust-badge {
     display: flex;
+    flex-direction: row;
     align-items: center;
-    gap: var(--awa-gap-md);
+    gap: var(--awa-space-3);
+    padding: var(--awa-space-3) var(--awa-space-3);
+    background: var(--awa-bg-surface, #fff);
+    border-radius: var(--awa-radius-sm);
+    border: 1px solid var(--awa-gray-100, #f1f5f9);
+}
+
+/* Separador vertical entre badges (não após o último) */
+.awa-trust-badge:not(:last-child) {
+    border-right: none;
+    border-radius: var(--awa-radius-sm) 0 0 var(--awa-radius-sm);
+}
+.awa-trust-badge:not(:first-child):not(:last-child) {
+    border-radius: 0;
+}
+.awa-trust-badge:last-child {
+    border-radius: 0 var(--awa-radius-sm) var(--awa-radius-sm) 0;
 }
 
 .awa-trust-badge__icon {
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
-    background: var(--awa-bg-surface, #fff);
+    width: 34px;
+    height: 34px;
+    background: var(--awa-gray-50, #f8fafc);
     border-radius: 50%;
     color: var(--primary-color, #b73337);
-    box-shadow: 0 2px 4px rgb(0 0 0 / 5%);
+    box-shadow: 0 1px 3px rgb(0 0 0 / 8%);
 }
 
 .awa-trust-badge__text {
     display: flex;
     flex-direction: column;
+    min-width: 0;
 }
 
 .awa-trust-badge__text strong {
     font-size: var(--awa-text-sm);
     font-weight: var(--awa-weight-bold);
-    color: var(--awa-gray-700); /* Tailwind slate-900 */
+    color: var(--awa-gray-700);
     line-height: var(--awa-leading-compact);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .awa-trust-badge__text span {
     font-size: var(--awa-text-xs);
-    color: var(--awa-gray-500); /* Tailwind slate-500 */
+    color: var(--awa-gray-500);
     line-height: var(--awa-leading-normal);
+}
+
+/* Mobile (≤480px): 1 coluna */
+@media (width <= 480px) {
+    .awa-trust-badges {
+        grid-template-columns: 1fr;
+        gap: var(--awa-space-2);
+    }
+    .awa-trust-badge,
+    .awa-trust-badge:not(:last-child),
+    .awa-trust-badge:not(:first-child):not(:last-child),
+    .awa-trust-badge:last-child {
+        border-radius: var(--awa-radius-sm);
+        border: 1px solid var(--awa-gray-100, #f1f5f9);
+    }
 }
 
 /* Reduce motion accessibility — scoped to AWA components only */
@@ -5828,7 +5866,7 @@ body.rokanthemes-onepagecheckout .fieldset {
 .page_footer #footer.footer-container.layout2,
 .page_footer #footer.footer-container.footer,
 .page_footer .footer-bottom {
-    background-color: var(--awa-bg-surface) !important;
+    background-color: var(--awa-bg-surface);
 }
 
 .page_footer .footer-bottom-inner {
