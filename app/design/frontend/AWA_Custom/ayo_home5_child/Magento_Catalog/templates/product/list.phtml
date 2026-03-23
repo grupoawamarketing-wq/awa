@@ -129,6 +129,11 @@ $b2bSecondaryLabel = $block->escapeHtml($b2bHelper->getPriceGateSecondaryLabel()
 								$productImageThumb = $block->getImage($_product, 'category_page_grid-1');
 								$productThumbHtml = $productImageThumb->toHtml();
 								$productThumbHtml = str_replace('<img ', '<img onerror="' . $block->escapeHtmlAttr($imgOnError) . '" ', $productThumbHtml);
+								// Hover thumbnails are never above-the-fold — always lazy
+								$productThumbHtml = str_replace('loading="eager"', 'loading="lazy"', $productThumbHtml);
+								if (strpos($productThumbHtml, 'loading=') === false) {
+								    $productThumbHtml = str_replace('<img ', '<img loading="lazy" ', $productThumbHtml);
+								}
 								?>
 								<span class="first-thumb">
 									<?php /* @noEscape */ echo $mainImgHtml; ?>
@@ -281,6 +286,10 @@ $b2bSecondaryLabel = $block->escapeHtml($b2bHelper->getPriceGateSecondaryLabel()
 									$productImageHtml = str_replace('<img ', '<img onerror="' . $block->escapeHtmlAttr($imgOnError) . '" ', $productImageHtml);
 									$productImageThumbHtml = $productImageThumb->toHtml();
 									$productImageThumbHtml = str_replace('<img ', '<img onerror="' . $block->escapeHtmlAttr($imgOnError) . '" ', $productImageThumbHtml);
+									// List view hover thumbnails — always lazy
+									if (strpos($productImageThumbHtml, 'loading=') === false) {
+									    $productImageThumbHtml = str_replace('<img ', '<img loading="lazy" ', $productImageThumbHtml);
+									}
 								?>
 								<span class="first-thumb">
 									<?php /* @noEscape */ echo $productImageHtml; ?>
