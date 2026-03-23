@@ -3,13 +3,18 @@
  * @var \Magento\Framework\View\Element\Template $block
  * @var \Magento\Framework\Escaper $escaper
  */
+
+use GrupoAwamotos\Theme\ViewModel\ContactInfo;
+
 $viewModel = $block->getData('view_model');
+$contactInfo = $block->getData('contact_view_model');
 $isStickyEnabled = $viewModel ? $viewModel->isStickyHeaderEnabled() : false;
 $stickyLogoUrl = $viewModel ? $viewModel->getStickyLogoUrl() : '';
 $stickyLogoSrc = $stickyLogoUrl !== '' ? $stickyLogoUrl : $block->getViewFileUrl('images/logo_sticky.png');
 $headerExperimentEnabled = $viewModel ? $viewModel->isHeaderExperimentEnabled() : false;
 $headerExperimentRollout = $viewModel ? $viewModel->getHeaderExperimentRolloutPercentage() : 0;
 $headerExperimentSeed = $viewModel ? $viewModel->getHeaderExperimentSeed() : 'home5_header_v1';
+$legacyHeaderContactHtml = trim((string) $block->getChildHtml('hotline_header'));
 ?>
 <header role="banner" class="awa-site-header awa-header-professional" data-awa-component="site-header" data-awa-variant="ayo-home5" data-awa-header-exp-enabled="<?= $headerExperimentEnabled ? '1' : '0' ?>" data-awa-header-exp-rollout="<?= (int) $headerExperimentRollout ?>" data-awa-header-exp-seed="<?= $escaper->escapeHtmlAttr($headerExperimentSeed) ?>">
 <div id="header" class="header-container awa-site-header__shell" data-awa-header-shell="true">
@@ -44,19 +49,55 @@ $headerExperimentSeed = $viewModel ? $viewModel->getHeaderExperimentSeed() : 'ho
 					<div class="container">
 						<div class="row">
 							<div class="wp-header awa-main-header__inner" data-awa-header-row="brand-search">
-								<div class="col-md-2 col-sm-2 col-xs-12 awa-header-brand">
+								<div class="col-md-3 col-sm-3 col-xs-12 awa-header-brand" data-awa-header-col="brand">
 									<?php echo $block->getChildHtml("logo"); ?>
 								</div>
-								<div class="col-md-10 col-sm-10 col-xs-12 top-search awa-header-actions" data-awa-header-search-row="true">
+								<div class="col-md-6 col-sm-6 col-xs-12 top-search awa-header-search-col" data-awa-header-search-row="true" data-awa-header-col="search">
 									<div class="awa-search-wrapper" role="search" aria-label="<?= $escaper->escapeHtmlAttr(__('Pesquisa de Produtos')) ?>">
 										<?php echo $block->getChildHtml('topSearch'); ?>
 									</div>
+								</div>
+								<div class="col-md-3 col-sm-3 hidden-xs awa-header-right-col" data-awa-header-col="right">
 									<div class="awa-header-contact-slot hidden-xs hidden-sm" data-awa-header-contact="true">
 										<div class="awa-b2b-trust-badges" data-awa-deferred-badges="true" aria-hidden="true">
 											<span class="trust-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--awa-color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg> Compra Segura</span>
 											<span class="trust-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--awa-color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> SSL 256 bits</span>
 										</div>
-										<?php echo $block->getChildHtml('hotline_header'); ?>
+										<?php if ($contactInfo instanceof ContactInfo && $contactInfo->hasAnyContact()): ?>
+											<div class="awa-header-contact-links" aria-label="<?= $escaper->escapeHtmlAttr(__('Atendimento Comercial')) ?>">
+												<span class="awa-header-contact-links__label"><?= $escaper->escapeHtml(__('Atendimento B2B')) ?></span>
+												<div class="awa-header-contact-links__items">
+													<?php if ($contactInfo->hasWhatsApp()): ?>
+														<a class="awa-header-contact-links__item awa-header-contact-links__item--whatsapp"
+														   href="<?= $escaper->escapeUrl($contactInfo->getWhatsAppUrl()) ?>"
+														   target="_blank"
+														   rel="noopener noreferrer"
+														   aria-label="<?= $escaper->escapeHtmlAttr(__('Falar no WhatsApp comercial')) ?>">
+															<span class="awa-header-contact-links__icon" aria-hidden="true"><i class="fa fa-whatsapp"></i></span>
+															<span class="awa-header-contact-links__text"><?= $escaper->escapeHtml(__('WhatsApp')) ?></span>
+														</a>
+													<?php endif; ?>
+													<?php if ($contactInfo->hasPhone()): ?>
+														<a class="awa-header-contact-links__item"
+														   href="<?= $escaper->escapeUrl($contactInfo->getPhoneUrl()) ?>"
+														   aria-label="<?= $escaper->escapeHtmlAttr(__('Ligar para %1', $contactInfo->getPhone())) ?>">
+															<span class="awa-header-contact-links__icon" aria-hidden="true"><i class="fa fa-phone"></i></span>
+															<span class="awa-header-contact-links__text"><?= $escaper->escapeHtml($contactInfo->getPhone()) ?></span>
+														</a>
+													<?php endif; ?>
+													<?php if ($contactInfo->hasEmail()): ?>
+														<a class="awa-header-contact-links__item"
+														   href="<?= $escaper->escapeUrl($contactInfo->getEmailUrl()) ?>"
+														   aria-label="<?= $escaper->escapeHtmlAttr(__('Enviar e-mail para %1', $contactInfo->getEmail())) ?>">
+															<span class="awa-header-contact-links__icon" aria-hidden="true"><i class="fa fa-envelope-o"></i></span>
+															<span class="awa-header-contact-links__text"><?= $escaper->escapeHtml(__('E-mail')) ?></span>
+														</a>
+													<?php endif; ?>
+												</div>
+											</div>
+										<?php elseif ($legacyHeaderContactHtml !== ''): ?>
+											<?= /* @noEscape */ $legacyHeaderContactHtml ?>
+										<?php endif; ?>
 									</div>
 									<div class="mini-cart-wrapper shadowcart awa-header-minicart" role="region" aria-label="<?= $escaper->escapeHtmlAttr(__('Carrinho de Compras')) ?>">
 										<div class="mini-carts">

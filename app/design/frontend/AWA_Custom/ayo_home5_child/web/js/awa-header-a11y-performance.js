@@ -9,6 +9,15 @@
     var raf = window.requestAnimationFrame || function (cb) { return window.setTimeout(cb, 16); };
     var supportsPassive = false;
 
+    function pushDataLayer(eventName, payload) {
+        if (!window.dataLayer || !Array.isArray(window.dataLayer)) {
+            return;
+        }
+        var eventPayload = payload || {};
+        eventPayload.event = eventName;
+        window.dataLayer.push(eventPayload);
+    }
+
     try {
         var optionsProbe = Object.defineProperty({}, 'passive', {
             get: function () {
@@ -83,14 +92,12 @@
             header.classList.remove('awa-header-exp-b');
         }
 
-        if (window.dataLayer && Array.isArray(window.dataLayer)) {
-            window.dataLayer.push({
-                event: 'awa_header_experiment_exposure',
-                experiment_name: 'header_progressive',
-                experiment_variant: variant,
-                experiment_rollout: rollout
-            });
-        }
+        pushDataLayer('awa_header_experiment_exposure', {
+            experiment_name: 'header_progressive',
+            experiment_seed: seed,
+            experiment_variant: variant,
+            experiment_rollout: rollout
+        });
 
         return { enabled: enabled, rollout: rollout, seed: seed, variant: variant };
     }
@@ -113,6 +120,11 @@
                 }
             }
             raf(setNavState);
+
+            pushDataLayer('awa_header_nav_toggle_click', {
+                experiment_name: 'header_progressive',
+                experiment_variant: experiment ? experiment.variant : 'A'
+            });
         });
 
         addListener(document, 'keyup', function (event) {
@@ -206,8 +218,20 @@
         }, { passive: true });
 
         addListener(input, 'focus', function () {
+            pushDataLayer('awa_header_search_focus', {
+                experiment_name: 'header_progressive'
+            });
             raf(syncExpanded);
         }, { passive: true });
+
+        var form = root.querySelector('[data-awa-search-form="true"]');
+        if (form) {
+            addListener(form, 'submit', function () {
+                pushDataLayer('awa_header_search_submit', {
+                    experiment_name: 'header_progressive'
+                });
+            });
+        }
 
         addListener(document, 'click', function (event) {
             if (!root.contains(event.target)) {
@@ -274,5 +298,19 @@
         wireNavA11y(experiment);
         wireSearchA11y();
         wireDeferredBadges();
+
+        addListener(document, 'click', function (event) {
+            if (!event.target || !event.target.closest) {
+                return;
+            }
+            var showcart = event.target.closest('.minicart-wrapper .showcart');
+            if (!showcart) {
+                return;
+            }
+            pushDataLayer('awa_header_minicart_click', {
+                experiment_name: 'header_progressive',
+                experiment_variant: experiment ? experiment.variant : 'A'
+            });
+        }, { capture: true });
     });
 })();
