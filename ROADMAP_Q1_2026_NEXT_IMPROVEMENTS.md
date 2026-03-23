@@ -1,8 +1,8 @@
 # 📋 AWA Motos Q1 2026 — Roadmap & Status Consolidado
 
-**Data**: March 23, 2026  
-**Projeto**: AWA Motos (Magento 2.4.7 B2B)  
-**Versão**: Post SF-001/OF-001/AF-001/MF-001 Sprint  
+**Data**: March 23, 2026
+**Projeto**: AWA Motos (Magento 2.4.7 B2B)
+**Versão**: Post SF-001/OF-001/AF-001/MF-001 Sprint
 
 ---
 
@@ -14,7 +14,7 @@
 - **AF-001**: Accessibility (WCAG AA) ✅
 - **MF-001**: Mobile-First Responsive ✅
 
-**Resultado**: -15% parse time, -18% FCP, 100% WCAG AA, 100% mobile touch targets  
+**Resultado**: -15% parse time, -18% FCP, 100% WCAG AA, 100% mobile touch targets
 **Verificação**: Todos 4 bundles carregando em produção (https://awamotos.com/) ✅
 
 ---
@@ -22,15 +22,15 @@
 ## 📊 Trabalho Pendente (WIP - Work in Progress)
 
 ### 1️⃣ **LiveChat Module** (NEW)
-**Status**: ⏳ In Progress  
-**Complexidade**: 🟢 Baixa  
+**Status**: ⏳ In Progress
+**Complexidade**: 🟢 Baixa
 **Arquivos**:
 - `app/code/GrupoAwamotos/LiveChat/view/frontend/layout/default.xml`
 - `app/code/GrupoAwamotos/LiveChat/view/frontend/templates/snippetblock.phtml`
 
-**O que é**: Integração de widget de chat em tempo real (atendimento customer-facing)  
-**Por quê**: Melhorar experiência de suporte B2B  
-**Estimado**: 2-3 horas  
+**O que é**: Integração de widget de chat em tempo real (atendimento customer-facing)
+**Por quê**: Melhorar experiência de suporte B2B
+**Estimado**: 2-3 horas
 
 **Próximos passos**:
 1. Revisar di.xml do módulo (dependencies)
@@ -40,15 +40,15 @@
 ---
 
 ### 2️⃣ **B2B Checkout Validators** (NEW)
-**Status**: ❓ Untracked (novos arquivos)  
-**Complexidade**: 🔴 Alta  
+**Status**: ❓ Untracked (novos arquivos)
+**Complexidade**: 🔴 Alta
 **Arquivos**:
 - `app/code/GrupoAwamotos/B2B/Model/Checkout/CompanyDataConfigProvider.php`
 - `app/code/GrupoAwamotos/B2B/Model/CheckoutAccessValidator.php`
 
-**O que é**: Validação de checkout com regras B2B (aprovação de empresa, limite de crédito, etc.)  
-**Por quê**: Enforce business rules no checkout  
-**Estimado**: 4-6 horas  
+**O que é**: Validação de checkout com regras B2B (aprovação de empresa, limite de crédito, etc.)
+**Por quê**: Enforce business rules no checkout
+**Estimado**: 4-6 horas
 
 **Próximos passos**:
 1. Ler instruções de services-api
@@ -60,17 +60,17 @@
 ---
 
 ### 3️⃣ **Footer Refinements**
-**Status**: ⏳ In Progress  
-**Complexidade**: 🟡 Média  
+**Status**: ⏳ In Progress
+**Complexidade**: 🟡 Média
 **Arquivos**:
 - `Rokanthemes_Themeoption/layout/default.xml`
 - `Rokanthemes_Themeoption/templates/html/footer.phtml`
 - `Rokanthemes_Themeoption/templates/html/footer/footer-static5.phtml`
 - `Rokanthemes_Themeoption/templates/html/header.phtml`
 
-**O que é**: Restruturação de footer com melhor UX (links, trust signals, dark mode)  
-**Por quê**: Footer é critical touchpoint de conversion + trust  
-**Estimado**: 3-4 horas  
+**O que é**: Restruturação de footer com melhor UX (links, trust signals, dark mode)
+**Por quê**: Footer é critical touchpoint de conversion + trust
+**Estimado**: 3-4 horas
 
 **Próximos passos**:
 1. Revisar design requirements
@@ -81,8 +81,8 @@
 ---
 
 ### 4️⃣ **CSS Bundles Consolidation**
-**Status**: ⏳ Needs Review  
-**Complexidade**: 🟡 Média  
+**Status**: ⏳ Needs Review
+**Complexidade**: 🟡 Média
 **Arquivos com mudanças**:
 - `awa-bundle-core.css.br`
 - `awa-bundle-home-custom.css`
@@ -92,9 +92,9 @@
 - `awa-bundle-refinements.css`
 - `awa-polish-sweep.css`
 
-**O que é**: Review bundling strategy, eliminar duplicação, otimizar load order  
-**Por quê**: Atualmente temos muitos bundles pequenos, podemos consolidar  
-**Estimado**: 2-3 horas de análise + 4-5 horas de refatoração  
+**O que é**: Review bundling strategy, eliminar duplicação, otimizar load order
+**Por quê**: Atualmente temos muitos bundles pequenos, podemos consolidar
+**Estimado**: 2-3 horas de análise + 4-5 horas de refatoração
 
 **Próximos passos**:
 1. Analisar tamanhos de bundles
@@ -187,4 +187,3 @@ Por fase:
 - Footer + CSS are lower risk → can be parallel-tracked
 
 **Next conversation**: Choose priority, load relevant SKILL.md, and implement.
-
