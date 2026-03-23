@@ -7,6 +7,15 @@
 
 $viewModel = $block->getData('view_model');
 $enableMenu = $viewModel ? $viewModel->isMobileMenuEnabled() : false;
+$footerExpEnabled = $viewModel instanceof \GrupoAwamotos\Theme\ViewModel\FooterData
+    ? (int) $viewModel->isFooterExperimentEnabled()
+    : 0;
+$footerExpRollout = $viewModel instanceof \GrupoAwamotos\Theme\ViewModel\FooterData
+    ? $viewModel->getFooterExperimentRolloutPercentage()
+    : 0;
+$footerExpSeed = $viewModel instanceof \GrupoAwamotos\Theme\ViewModel\FooterData
+    ? $viewModel->getFooterExperimentSeed()
+    : 'home5_footer_v1';
 
 $footerTagsHtml = trim((string) $block->getChildHtml('footer-tags'));
 $copyrightHtml = trim((string) $block->getChildHtml('copyright'));
@@ -22,7 +31,11 @@ $mediaUrl = rtrim((string) $block->getBaseUrl(), '/') . '/media';
 
 $brandHtml = trim((string) $block->getChildHtml('footer_brand_list'));
 ?>
-<div class="page_footer awa-footer--dark" role="contentinfo">
+<div class="page_footer awa-footer--dark"
+    role="contentinfo"
+    data-awa-footer-exp-enabled="<?= $escaper->escapeHtmlAttr((string) $footerExpEnabled) ?>"
+    data-awa-footer-exp-rollout="<?= $escaper->escapeHtmlAttr((string) $footerExpRollout) ?>"
+    data-awa-footer-exp-seed="<?= $escaper->escapeHtmlAttr($footerExpSeed) ?>">
     <svg class="awa-footer-sprite" xmlns="http://www.w3.org/2000/svg" width="0" height="0" aria-hidden="true" focusable="false">
         <symbol id="awa-icon-truck" viewBox="0 0 24 24">
             <path d="M3 6h11v9H3zM14 9h3.5l2.5 3V15h-6zM7.5 18.5a1.5 1.5 0 1 0 0-.01zm10 0a1.5 1.5 0 1 0 0-.01z" fill="currentColor"/>
@@ -223,6 +236,48 @@ $brandHtml = trim((string) $block->getChildHtml('footer_brand_list'));
     </div>
 </nav>
 <?php } ?>
+
+<script>
+(function () {
+    'use strict';
+
+    var footer = document.querySelector('.page_footer');
+    if (!footer) {
+        return;
+    }
+
+    var enabled = parseInt(footer.getAttribute('data-awa-footer-exp-enabled') || '0', 10);
+    var rollout = parseInt(footer.getAttribute('data-awa-footer-exp-rollout') || '0', 10);
+    var seed = footer.getAttribute('data-awa-footer-exp-seed') || 'home5_footer_v1';
+
+    if (!enabled || rollout <= 0) {
+        footer.setAttribute('data-awa-footer-exp-variant', 'control');
+        return;
+    }
+
+    var visitorKey = 'awa_footer_exp_visitor_id';
+    var visitorId = localStorage.getItem(visitorKey);
+    if (!visitorId) {
+        visitorId = String(Date.now()) + '_' + String(Math.random()).slice(2);
+        localStorage.setItem(visitorKey, visitorId);
+    }
+
+    var input = seed + '|' + visitorId;
+    var hash = 0;
+    for (var i = 0; i < input.length; i += 1) {
+        hash = ((hash << 5) - hash) + input.charCodeAt(i);
+        hash |= 0;
+    }
+
+    var bucket = Math.abs(hash % 100);
+    var variant = bucket < rollout ? 'treatment' : 'control';
+
+    footer.setAttribute('data-awa-footer-exp-variant', variant);
+    if (variant === 'treatment') {
+        footer.classList.add('awa-footer-exp-b');
+    }
+}());
+</script>
 
 <script>
 window.addEventListener('load', function() {

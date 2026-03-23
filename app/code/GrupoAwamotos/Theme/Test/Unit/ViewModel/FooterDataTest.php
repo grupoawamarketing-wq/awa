@@ -12,7 +12,7 @@ use Magento\Store\Model\ScopeInterface;
 class FooterDataTest extends TestCase
 {
     private FooterData $viewModel;
-    
+
     /** @var ScopeConfigInterface|MockObject */
     private $scopeConfigMock;
 
@@ -59,10 +59,13 @@ class FooterDataTest extends TestCase
     {
         $this->scopeConfigMock->expects($this->exactly(2))
             ->method('getValue')
-            ->willReturnMap([
-                ['grupoawamotos_theme/contact/phone', ScopeInterface::SCOPE_STORE, null],
-                ['general/store_information/phone', ScopeInterface::SCOPE_STORE, '(16) 3333-2222'],
-            ]);
+            ->willReturnCallback(static function (string $path): string {
+                return match ($path) {
+                    'grupoawamotos_theme/contact/phone' => '',
+                    'general/store_information/phone' => '(16) 3333-2222',
+                    default => '',
+                };
+            });
 
         $this->assertSame('(16) 3333-2222', $this->viewModel->getPhone());
     }
@@ -81,12 +84,14 @@ class FooterDataTest extends TestCase
 
     public function testGetPhoneUrlNormalizesDigitsAndAddsPlusPrefix(): void
     {
-        $this->scopeConfigMock->expects($this->exactly(2))
+        $this->scopeConfigMock->expects($this->once())
             ->method('getValue')
-            ->willReturnMap([
-                ['grupoawamotos_theme/contact/phone', ScopeInterface::SCOPE_STORE, '(16) 99736-7588'],
-                ['general/store_information/phone', ScopeInterface::SCOPE_STORE, null],
-            ]);
+            ->willReturnCallback(static function (string $path): string {
+                return match ($path) {
+                    'grupoawamotos_theme/contact/phone' => '(16) 99736-7588',
+                    default => '',
+                };
+            });
 
         $this->assertSame('tel:+16997367588', $this->viewModel->getPhoneUrl());
     }
@@ -115,11 +120,14 @@ class FooterDataTest extends TestCase
     {
         $this->scopeConfigMock->expects($this->exactly(3))
             ->method('getValue')
-            ->willReturnMap([
-                ['general/store_information/street_line1', ScopeInterface::SCOPE_STORE, 'Rua A, 123'],
-                ['general/store_information/city', ScopeInterface::SCOPE_STORE, 'Araraquara-SP'],
-                ['general/store_information/postcode', ScopeInterface::SCOPE_STORE, '14800-000'],
-            ]);
+            ->willReturnCallback(static function (string $path): string {
+                return match ($path) {
+                    'general/store_information/street_line1' => 'Rua A, 123',
+                    'general/store_information/city' => 'Araraquara-SP',
+                    'general/store_information/postcode' => '14800-000',
+                    default => '',
+                };
+            });
 
         $this->assertSame('Rua A, 123 - Araraquara-SP - CEP: 14800-000', $this->viewModel->getFormattedAddress());
     }
@@ -148,10 +156,7 @@ class FooterDataTest extends TestCase
     {
         $this->scopeConfigMock->expects($this->exactly(2))
             ->method('getValue')
-            ->willReturnMap([
-                ['grupoawamotos_theme/footer_experiment/rollout_percentage', ScopeInterface::SCOPE_STORE, '150'],
-                ['grupoawamotos_theme/footer_experiment/rollout_percentage', ScopeInterface::SCOPE_STORE, '-10'],
-            ]);
+            ->willReturnOnConsecutiveCalls('150', '-10');
 
         $this->assertSame(100, $this->viewModel->getFooterExperimentRolloutPercentage());
         $this->assertSame(0, $this->viewModel->getFooterExperimentRolloutPercentage());
