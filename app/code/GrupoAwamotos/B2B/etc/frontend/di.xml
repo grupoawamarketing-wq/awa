@@ -226,6 +226,12 @@
     </type>
 
     <type name="Magento\Checkout\Api\PaymentInformationManagementInterface">
+        <plugin name="grupoawamotos_b2b_validate_delivery_date"
+                type="GrupoAwamotos\B2B\Plugin\Checkout\DeliveryDateValidatorPlugin"
+                sortOrder="15"/>
+        <plugin name="grupoawamotos_b2b_validate_order_notes"
+                type="GrupoAwamotos\B2B\Plugin\Checkout\OrderNotesValidatorPlugin"
+                sortOrder="16"/>
         <plugin name="grupoawamotos_b2b_save_po_number"
                 type="GrupoAwamotos\B2B\Plugin\Checkout\SavePoNumberPlugin"
                 sortOrder="20"/>
@@ -235,12 +241,56 @@
     </type>
 
     <type name="Magento\Checkout\Api\GuestPaymentInformationManagementInterface">
+        <plugin name="grupoawamotos_b2b_validate_delivery_date_guest"
+                type="GrupoAwamotos\B2B\Plugin\Checkout\DeliveryDateValidatorPlugin"
+                sortOrder="15"/>
+        <plugin name="grupoawamotos_b2b_validate_order_notes_guest"
+                type="GrupoAwamotos\B2B\Plugin\Checkout\OrderNotesValidatorPlugin"
+                sortOrder="16"/>
         <plugin name="grupoawamotos_b2b_save_po_number_guest"
                 type="GrupoAwamotos\B2B\Plugin\Checkout\SavePoNumberGuestPlugin"
                 sortOrder="20"/>
         <plugin name="grupoawamotos_b2b_save_order_notes_guest"
                 type="GrupoAwamotos\B2B\Plugin\Checkout\SaveOrderNotesGuestPlugin"
                 sortOrder="30"/>
+    </type>
+
+    <!-- B2B Checkout ConfigProviders registration -->
+    <type name="GrupoAwamotos\B2B\Model\Checkout\CompanyDataConfigProvider">
+        <arguments>
+            <argument name="customerSession" xsi:type="object">Magento\Customer\Model\Session\Proxy</argument>
+        </arguments>
+    </type>
+
+    <type name="GrupoAwamotos\B2B\Model\Checkout\TermsConfigProvider">
+        <arguments>
+            <argument name="scopeConfig" xsi:type="object">Magento\Framework\App\Config\ScopeConfigInterface</argument>
+        </arguments>
+    </type>
+
+    <!-- B2B Checkout Validation Service -->
+    <type name="GrupoAwamotos\B2B\Model\Checkout\B2BCheckoutValidationService">
+        <arguments>
+            <argument name="config" xsi:type="object">GrupoAwamotos\B2B\Helper\Config</argument>
+            <argument name="logger" xsi:type="object">Psr\Log\LoggerInterface</argument>
+        </arguments>
+    </type>
+
+    <!-- B2B Checkout Validators -->
+    <type name="GrupoAwamotos\B2B\Plugin\Checkout\DeliveryDateValidatorPlugin">
+        <arguments>
+            <argument name="validationService" xsi:type="object">GrupoAwamotos\B2B\Model\Checkout\B2BCheckoutValidationService</argument>
+            <argument name="cartRepository" xsi:type="object">Magento\Quote\Api\CartRepositoryInterface</argument>
+            <argument name="logger" xsi:type="object">Psr\Log\LoggerInterface</argument>
+        </arguments>
+    </type>
+
+    <type name="GrupoAwamotos\B2B\Plugin\Checkout\OrderNotesValidatorPlugin">
+        <arguments>
+            <argument name="validationService" xsi:type="object">GrupoAwamotos\B2B\Model\Checkout\B2BCheckoutValidationService</argument>
+            <argument name="cartRepository" xsi:type="object">Magento\Quote\Api\CartRepositoryInterface</argument>
+            <argument name="logger" xsi:type="object">Psr\Log\LoggerInterface</argument>
+        </arguments>
     </type>
 
 </config>
