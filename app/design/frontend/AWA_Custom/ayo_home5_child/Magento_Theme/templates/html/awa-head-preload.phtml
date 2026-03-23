@@ -1,0 +1,66 @@
+<?php
+declare(strict_types=1);
+
+/**
+ * AWA — DNS Prefetch + CSS/Font Preload + Async CSS Bundles
+ *
+ * Estes elementos NÃO podem ficar no layout XML porque o schema do Magento
+ * (page_configuration.xsd) não suporta:
+ *  - <link href="..."> (só aceita src)
+ *  - <css onload="..."> (atributo não permitido)
+ *  - <noscript> (elemento não esperado em <head>)
+ *
+ * Adicionado em head.additional via default_head_blocks.xml.
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ */
+
+// === DNS Prefetch (economiza 20-120ms latência DNS) ===
+$dnsPrefetch = [
+    '//www.googletagmanager.com',
+    '//www.google-analytics.com',
+    '//connect.facebook.net',
+];
+
+// === CSS Preload ===
+// awa-bundle-core, awa-bundle-refinements, awa-visual-fixes-critical:
+// já carregados como <link rel="stylesheet"> bloqueante via default_head_blocks.xml
+// → preload redundante removido (browser já descobre imediatamente).
+$cssPreloads = [];
+
+// === Font Preload (previne FOIT/FOUT) ===
+$fontPreloads = [
+    ['url' => $block->getViewFileUrl('fonts/rubik/rubik-400.woff2'), 'priority' => 'high'],
+    ['url' => $block->getViewFileUrl('fonts/rubik/rubik-600.woff2'), 'priority' => ''],
+];
+
+// === Async CSS Bundles (defer via media="print" + onload — não bloqueiam render) ===
+$asyncBundles = [
+    $block->getViewFileUrl('css/swiper-bundle.min.css'),
+    $block->getViewFileUrl('css/awa-animate-theme.css'),
+    $block->getViewFileUrl('css/awa-bundle-custom.css'),
+    $block->getViewFileUrl('css/awa-bundle-phases.css'),
+    $block->getViewFileUrl('css/awa-bundle-tail.css'),
+    $block->getViewFileUrl('css/awa-bundle-site.css'),
+];
+?>
+<!-- AWA Head Preload — DNS Prefetch -->
+<?php foreach ($dnsPrefetch as $domain): ?>
+<link rel="dns-prefetch" href="<?= $block->escapeUrl($domain) ?>"/>
+<?php endforeach; ?>
+<!-- AWA Head Preload — CSS Critical -->
+<?php foreach ($cssPreloads as $item): ?>
+<link rel="preload" href="<?= $block->escapeUrl($item['url']) ?>" as="style"<?= $item['priority'] ? ' fetchpriority="' . $block->escapeHtmlAttr($item['priority']) . '"' : '' ?>/>
+<?php endforeach; ?>
+<!-- AWA Head Preload — Fonts (Rubik) -->
+<?php foreach ($fontPreloads as $item): ?>
+<link rel="preload" href="<?= $block->escapeUrl($item['url']) ?>" as="font" type="font/woff2" crossorigin="anonymous"<?= $item['priority'] ? ' fetchpriority="' . $block->escapeHtmlAttr($item['priority']) . '"' : '' ?>/>
+<?php endforeach; ?>
+<!-- AWA Async CSS Bundles — media="print" swap (non-render-blocking) -->
+<?php foreach ($asyncBundles as $cssUrl): ?>
+<link rel="stylesheet"
+      href="<?= $block->escapeUrl($cssUrl) ?>"
+      media="print"
+      onload="this.media='all'"/>
+<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($cssUrl) ?>"/></noscript>
+<?php endforeach; ?>
