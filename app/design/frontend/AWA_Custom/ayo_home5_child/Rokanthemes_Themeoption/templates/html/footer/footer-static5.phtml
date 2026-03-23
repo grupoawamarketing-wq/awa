@@ -6,6 +6,7 @@
  *
  * @var \Magento\Framework\View\Element\Template $block
  * @var \Magento\Framework\Escaper $escaper
+ * @var \GrupoAwamotos\Theme\ViewModel\FooterData|null $footerData
  */
 declare(strict_types=1);
 
@@ -16,6 +17,82 @@ $isStrictB2b = $isB2bEnabled && $b2bConfig->isStrictB2B();
 $accountUrl = $isStrictB2b ? $block->getUrl('b2b/account/login') : $block->getUrl('customer/account');
 $accountLabel = $isStrictB2b ? 'Acesse Sua Conta' : 'Crie Sua Conta';
 $registerUrl = $isB2bEnabled ? $block->getUrl('b2b/register') : $block->getUrl('customer/account/create');
+$footerData = $block->getData('view_model');
+
+$storeName = $footerData instanceof \GrupoAwamotos\Theme\ViewModel\FooterData
+    ? $footerData->getStoreName()
+    : 'AWA Motos';
+
+$addressLabel = $footerData instanceof \GrupoAwamotos\Theme\ViewModel\FooterData
+    ? $footerData->getFormattedAddress()
+    : 'Rua Castro Alves, 1234 - Araraquara-SP';
+
+$phoneLabel = $footerData instanceof \GrupoAwamotos\Theme\ViewModel\FooterData
+    ? $footerData->getPhone()
+    : '(16) 3322-0000';
+
+$phoneUrl = $footerData instanceof \GrupoAwamotos\Theme\ViewModel\FooterData
+    ? $footerData->getPhoneUrl()
+    : 'tel:+551633220000';
+
+$whatsAppLabel = $footerData instanceof \GrupoAwamotos\Theme\ViewModel\FooterData
+    ? $footerData->getWhatsApp()
+    : '(16) 99736-7588';
+
+$whatsAppUrl = $footerData instanceof \GrupoAwamotos\Theme\ViewModel\FooterData
+    ? $footerData->getWhatsAppUrl()
+    : 'https://wa.me/5516997367588';
+
+$emailLabel = $footerData instanceof \GrupoAwamotos\Theme\ViewModel\FooterData
+    ? $footerData->getEmail()
+    : 'contato@awamotos.com.br';
+
+$emailUrl = $footerData instanceof \GrupoAwamotos\Theme\ViewModel\FooterData
+    ? $footerData->getEmailUrl()
+    : 'mailto:contato@awamotos.com.br';
+
+$instagramUrl = $footerData instanceof \GrupoAwamotos\Theme\ViewModel\FooterData
+    ? $footerData->getInstagramUrl()
+    : 'https://www.instagram.com/awamotos';
+
+$facebookUrl = $footerData instanceof \GrupoAwamotos\Theme\ViewModel\FooterData
+    ? $footerData->getFacebookUrl()
+    : 'https://www.facebook.com/awamotos';
+
+$youtubeUrl = $footerData instanceof \GrupoAwamotos\Theme\ViewModel\FooterData
+    ? $footerData->getYoutubeUrl()
+    : 'https://www.youtube.com/@awamotos';
+
+$socialLinks = [
+    [
+        'url' => $instagramUrl,
+        'class' => 'instagram',
+        'icon' => 'fa-instagram',
+        'label' => (string) __('Instagram'),
+        'aria' => (string) __('AWA Motos no Instagram'),
+    ],
+    [
+        'url' => $facebookUrl,
+        'class' => 'facebook',
+        'icon' => 'fa-facebook',
+        'label' => (string) __('Facebook'),
+        'aria' => (string) __('AWA Motos no Facebook'),
+    ],
+    [
+        'url' => $youtubeUrl,
+        'class' => 'youtube',
+        'icon' => 'fa-youtube',
+        'label' => (string) __('YouTube'),
+        'aria' => (string) __('AWA Motos no YouTube'),
+    ],
+    [
+        'url' => $whatsAppUrl,
+        'class' => 'whatsapp',
+        'icon' => 'fa-whatsapp',
+        'label' => (string) __('WhatsApp'),
+        'aria' => (string) __('AWA Motos no WhatsApp'),
+    ],
+];
 ?>
 <div class="footer-static velaBlock" role="contentinfo">
     <div class="container">
@@ -24,26 +101,37 @@ $registerUrl = $isB2bEnabled ? $block->getUrl('b2b/register') : $block->getUrl('
             <!-- Coluna 1: Sobre a Empresa -->
             <div class="col-lg-3 col-md-6 col-sm-12">
                 <div class="vela-content footer-about">
-                    <h4 class="velaFooterTitle">AWA Motos</h4>
+                    <h4 class="velaFooterTitle"><?= $escaper->escapeHtml($storeName) ?></h4>
                     <div class="velaContent">
-                        <p>Distribuidora de peças e acessórios para motos em Araraquara-SP.
-                           Atendemos atacado e varejo com qualidade e preço justo desde 2010.</p>
+                        <p><?= $escaper->escapeHtml(__('Distribuidora de peças e acessórios para motos em Araraquara-SP. Atendemos atacado e varejo com qualidade e preço justo desde 2010.')) ?></p>
                         <div class="footer-contact-list">
                             <div class="contact-item d-flex">
                                 <i class="fa fa-map-marker" aria-hidden="true"></i>
-                                <span>Rua Castro Alves, 1234&nbsp;&mdash; Centro, Araraquara-SP</span>
+                                <span><?= $escaper->escapeHtml($addressLabel) ?></span>
                             </div>
                             <div class="contact-item d-flex">
                                 <i class="fa fa-phone" aria-hidden="true"></i>
-                                <a href="tel:+551633220000">(16) 3322-0000</a>
+                                <?php if ($phoneUrl !== ''): ?>
+                                    <a href="<?= $escaper->escapeUrl($phoneUrl) ?>"><?= $escaper->escapeHtml($phoneLabel) ?></a>
+                                <?php else: ?>
+                                    <span class="contact-value"><?= $escaper->escapeHtml($phoneLabel) ?></span>
+                                <?php endif; ?>
                             </div>
                             <div class="contact-item d-flex">
                                 <i class="fa fa-whatsapp" aria-hidden="true"></i>
-                                <a href="https://wa.me/5516997367588" target="_blank" rel="noopener noreferrer">(16) 99736-7588</a>
+                                <?php if ($whatsAppUrl !== ''): ?>
+                                    <a href="<?= $escaper->escapeUrl($whatsAppUrl) ?>" target="_blank" rel="noopener noreferrer"><?= $escaper->escapeHtml($whatsAppLabel) ?></a>
+                                <?php else: ?>
+                                    <span class="contact-value"><?= $escaper->escapeHtml($whatsAppLabel) ?></span>
+                                <?php endif; ?>
                             </div>
                             <div class="contact-item d-flex">
                                 <i class="fa fa-envelope" aria-hidden="true"></i>
-                                <a href="mailto:contato@awamotos.com.br">contato@awamotos.com.br</a>
+                                <?php if ($emailUrl !== ''): ?>
+                                    <a href="<?= $escaper->escapeUrl($emailUrl) ?>"><?= $escaper->escapeHtml($emailLabel) ?></a>
+                                <?php else: ?>
+                                    <span class="contact-value"><?= $escaper->escapeHtml($emailLabel) ?></span>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -53,16 +141,16 @@ $registerUrl = $isB2bEnabled ? $block->getUrl('b2b/register') : $block->getUrl('
             <!-- Coluna 2: Links Rápidos -->
             <div class="col-lg-3 col-md-6 col-sm-12">
                 <div class="vela-content">
-                    <h4 class="velaFooterTitle">Links Rápidos</h4>
+                    <h4 class="velaFooterTitle"><?= $escaper->escapeHtml(__('Links Rápidos')) ?></h4>
                     <div class="velaContent">
                         <ul class="footer-links" role="list">
-                            <li><a href="/about-us">Sobre Nós</a></li>
-                            <li><a href="/blog">Blog</a></li>
-                            <li><a href="/brands">Nossas Marcas</a></li>
-                            <li><a href="/store-locator">Nossa Loja</a></li>
-                            <li><a href="/faq">Perguntas Frequentes</a></li>
+                            <li><a href="<?= $escaper->escapeUrl($block->getUrl('about-us')) ?>"><?= $escaper->escapeHtml(__('Sobre Nós')) ?></a></li>
+                            <li><a href="<?= $escaper->escapeUrl($block->getUrl('blog')) ?>"><?= $escaper->escapeHtml(__('Blog')) ?></a></li>
+                            <li><a href="<?= $escaper->escapeUrl($block->getUrl('brands')) ?>"><?= $escaper->escapeHtml(__('Nossas Marcas')) ?></a></li>
+                            <li><a href="<?= $escaper->escapeUrl($block->getUrl('store-locator')) ?>"><?= $escaper->escapeHtml(__('Nossa Loja')) ?></a></li>
+                            <li><a href="<?= $escaper->escapeUrl($block->getUrl('faq')) ?>"><?= $escaper->escapeHtml(__('Perguntas Frequentes')) ?></a></li>
                             <li><a href="<?= $escaper->escapeUrl($accountUrl) ?>"><?= $escaper->escapeHtml(__($accountLabel)) ?></a></li>
-                            <li><a href="<?= $escaper->escapeUrl($registerUrl) ?>">Cadastro B2B</a></li>
+                            <li><a href="<?= $escaper->escapeUrl($registerUrl) ?>"><?= $escaper->escapeHtml(__('Cadastro B2B')) ?></a></li>
                         </ul>
                     </div>
                 </div>
@@ -71,15 +159,15 @@ $registerUrl = $isB2bEnabled ? $block->getUrl('b2b/register') : $block->getUrl('
             <!-- Coluna 3: Políticas e Ajuda -->
             <div class="col-lg-3 col-md-6 col-sm-12">
                 <div class="vela-content">
-                    <h4 class="velaFooterTitle">Políticas e Ajuda</h4>
+                    <h4 class="velaFooterTitle"><?= $escaper->escapeHtml(__('Políticas e Ajuda')) ?></h4>
                     <div class="velaContent">
                         <ul class="footer-links" role="list">
-                            <li><a href="/termos-e-condicoes">Termos e Condições</a></li>
-                            <li><a href="/politica-de-privacidade">Política de Privacidade</a></li>
-                            <li><a href="/shipping">Política de Envio</a></li>
-                            <li><a href="/returns">Trocas e Devoluções</a></li>
-                            <li><a href="/warranty">Garantia</a></li>
-                            <li><a href="/customer-service">Atendimento ao Cliente</a></li>
+                            <li><a href="<?= $escaper->escapeUrl($block->getUrl('termos-e-condicoes')) ?>"><?= $escaper->escapeHtml(__('Termos e Condições')) ?></a></li>
+                            <li><a href="<?= $escaper->escapeUrl($block->getUrl('politica-de-privacidade')) ?>"><?= $escaper->escapeHtml(__('Política de Privacidade')) ?></a></li>
+                            <li><a href="<?= $escaper->escapeUrl($block->getUrl('shipping')) ?>"><?= $escaper->escapeHtml(__('Política de Envio')) ?></a></li>
+                            <li><a href="<?= $escaper->escapeUrl($block->getUrl('returns')) ?>"><?= $escaper->escapeHtml(__('Trocas e Devoluções')) ?></a></li>
+                            <li><a href="<?= $escaper->escapeUrl($block->getUrl('warranty')) ?>"><?= $escaper->escapeHtml(__('Garantia')) ?></a></li>
+                            <li><a href="<?= $escaper->escapeUrl($block->getUrl('customer-service')) ?>"><?= $escaper->escapeHtml(__('Atendimento ao Cliente')) ?></a></li>
                         </ul>
                     </div>
                 </div>
@@ -88,36 +176,27 @@ $registerUrl = $isB2bEnabled ? $block->getUrl('b2b/register') : $block->getUrl('
             <!-- Coluna 4: Horário de Atendimento + Redes Sociais (inlined do CMS block social_block) -->
             <div class="col-lg-3 col-md-6 col-sm-12">
                 <div class="vela-content">
-                    <h4 class="velaFooterTitle">Horário de Atendimento</h4>
+                    <h4 class="velaFooterTitle"><?= $escaper->escapeHtml(__('Horário de Atendimento')) ?></h4>
                     <div class="velaContent">
                         <ul class="footer-hours" role="list">
-                            <li><strong>Seg&ndash;Sex:</strong> 08h às 18h</li>
-                            <li><strong>Sábado:</strong> 08h às 12h</li>
-                            <li><strong>Domingo:</strong> Fechado</li>
+                            <li><strong><?= $escaper->escapeHtml(__('Seg-Sex:')) ?></strong> <?= $escaper->escapeHtml(__('08h às 18h')) ?></li>
+                            <li><strong><?= $escaper->escapeHtml(__('Sábado:')) ?></strong> <?= $escaper->escapeHtml(__('08h às 12h')) ?></li>
+                            <li><strong><?= $escaper->escapeHtml(__('Domingo:')) ?></strong> <?= $escaper->escapeHtml(__('Fechado')) ?></li>
                         </ul>
                         <div class="footer-social-section">
-                            <h5>Siga-nos:</h5>
-                            <div class="social-links" aria-label="Redes sociais da AWA Motos">
-                                <a href="https://www.instagram.com/awamotos"
-                                   target="_blank" rel="noopener noreferrer" class="instagram"
-                                   aria-label="AWA Motos no Instagram">
-                                    <i class="fa fa-instagram" aria-hidden="true"></i> Instagram
-                                </a>
-                                <a href="https://www.facebook.com/awamotos"
-                                   target="_blank" rel="noopener noreferrer" class="facebook"
-                                   aria-label="AWA Motos no Facebook">
-                                    <i class="fa fa-facebook" aria-hidden="true"></i> Facebook
-                                </a>
-                                <a href="https://www.youtube.com/@awamotos"
-                                   target="_blank" rel="noopener noreferrer" class="youtube"
-                                   aria-label="AWA Motos no YouTube">
-                                    <i class="fa fa-youtube" aria-hidden="true"></i> YouTube
-                                </a>
-                                <a href="https://wa.me/5516997367588"
-                                   target="_blank" rel="noopener noreferrer" class="whatsapp"
-                                   aria-label="AWA Motos no WhatsApp">
-                                    <i class="fa fa-whatsapp" aria-hidden="true"></i> WhatsApp
-                                </a>
+                            <h5><?= $escaper->escapeHtml(__('Siga-nos:')) ?></h5>
+                            <div class="social-links" aria-label="<?= $escaper->escapeHtmlAttr(__('Redes sociais da AWA Motos')) ?>">
+                                <?php foreach ($socialLinks as $socialLink): ?>
+                                    <?php if ($socialLink['url'] === '') {
+                                        continue;
+                                    } ?>
+                                    <a href="<?= $escaper->escapeUrl($socialLink['url']) ?>"
+                                       target="_blank" rel="noopener noreferrer" class="<?= $escaper->escapeHtmlAttr($socialLink['class']) ?>"
+                                       aria-label="<?= $escaper->escapeHtmlAttr($socialLink['aria']) ?>">
+                                        <i class="fa <?= $escaper->escapeHtmlAttr($socialLink['icon']) ?>" aria-hidden="true"></i>
+                                        <?= $escaper->escapeHtml($socialLink['label']) ?>
+                                    </a>
+                                <?php endforeach; ?>
                             </div>
                         </div>
                     </div>

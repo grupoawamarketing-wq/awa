@@ -1,14 +1,15 @@
 <?php
-/** 
+/**
  * AWA Custom Footer Template
- * @var Rokanthemes\Themeoption\Block\Themeoption $block 
+ * @var Rokanthemes\Themeoption\Block\Themeoption $block
  * @var \Magento\Framework\Escaper $escaper
  */
 
 $viewModel = $block->getData('view_model');
 $enableMenu = $viewModel ? $viewModel->isMobileMenuEnabled() : false;
 
-$footerPaymentLegacy = trim((string) $block->getChildHtml('footer_payment'));
+$footerTagsHtml = trim((string) $block->getChildHtml('footer-tags'));
+$copyrightHtml = trim((string) $block->getChildHtml('copyright'));
 $storeHost = (string) parse_url((string) $block->getBaseUrl(), PHP_URL_HOST);
 $showSecuritySeals = $storeHost !== '';
 $safeBrowsingUrl = $showSecuritySeals
@@ -98,15 +99,33 @@ $brandHtml = trim((string) $block->getChildHtml('footer_brand_list'));
         </div>
     </section>
     <?php endif; ?>
+    <?php if ($footerTagsHtml !== ''): ?>
+    <section class="awa-footer-tags" aria-label="<?= $escaper->escapeHtmlAttr(__('Categorias Populares')) ?>">
+        <div class="container">
+            <div class="awa-footer-tags__inner">
+                <p class="awa-footer-tags__label"><?= $escaper->escapeHtml(__('Categorias Populares:')) ?></p>
+                <div class="awa-footer-tags__cloud">
+                    <?= /* @noEscape */ $footerTagsHtml ?>
+                </div>
+            </div>
+        </div>
+    </section>
+    <?php endif; ?>
     <div id="footer" class="footer-container layout2 footer">
-        <?= $block->getChildHtml('footer_static5') ?>
+        <?= /* @noEscape */ $block->getChildHtml('footer_static5') ?>
     </div>
     <div class="footer-bottom">
         <div class="container">
             <div class="footer-bottom-inner">
                 <div class="row">
                     <div class="col-md-6 col-sm-6 col-xs-12">
-                        <?= $block->getChildHtml('copyright') ?>
+                        <?php if ($copyrightHtml !== ''): ?>
+                            <?= /* @noEscape */ $copyrightHtml ?>
+                        <?php else: ?>
+                            <p class="awa-footer-copyright-fallback">
+                                <?= $escaper->escapeHtml(__('Copyright %1 AWA Motos. Todos os direitos reservados.', date('Y'))) ?>
+                            </p>
+                        <?php endif; ?>
                     </div>
                     <div class="col-md-6 col-sm-6 col-xs-12">
                         <section class="awa-footer-pay-sec" aria-label="<?= $escaper->escapeHtmlAttr(__('Pagamentos e Segurança')) ?>">
@@ -214,6 +233,7 @@ window.addEventListener('load', function() {
             'rokanthemes/owl'
         ], function ($) {
             'use strict';
+            var mobileBreakpoint = 768;
 
             var sliderFooterBrands = $(".footer_brand_list_slider");
             if(sliderFooterBrands.length > 0) {
@@ -239,14 +259,39 @@ window.addEventListener('load', function() {
                     }
                 });
             }
-            
-            // Ativa o toggle dos blocos do footer no mobile sem bloquear o render inicial
-            if ($(".footer-container").length) {
-                $(".footer-container .footer-block-title").on("click", function() {
-                    if ($(window).width() < 768) {
-                        $(this).toggleClass("active");
-                        $(this).next(".footer-block-content").slideToggle();
+
+            // Ativa o toggle dos blocos do footer no mobile sem bloquear o render inicial.
+            var $footerTitles = $('.footer-container .velaFooterTitle, .footer-container .footer-block-title');
+            $footerTitles.each(function () {
+                var $title = $(this);
+                $title.attr('role', 'button').attr('tabindex', '0').attr('aria-expanded', 'false');
+            });
+
+            if ($footerTitles.length) {
+                $footerTitles.off('click.awaFooterToggle keydown.awaFooterToggle');
+                $footerTitles.on('click.awaFooterToggle', function() {
+                    if ($(window).width() >= mobileBreakpoint) {
+                        return;
                     }
+
+                    var $title = $(this);
+                    var $content = $title.next('.velaContent, .footer-block-content');
+                    if (!$content.length) {
+                        return;
+                    }
+
+                    var isExpanded = $title.attr('aria-expanded') === 'true';
+                    $title.toggleClass('active', !isExpanded).attr('aria-expanded', String(!isExpanded));
+                    $content.stop(true, true).slideToggle(180);
+                });
+
+                $footerTitles.on('keydown.awaFooterToggle', function(event) {
+                    if (event.key !== 'Enter' && event.key !== ' ') {
+                        return;
+                    }
+
+                    event.preventDefault();
+                    $(this).trigger('click.awaFooterToggle');
                 });
             }
         });
