@@ -101,4 +101,49 @@ class FooterExperimentTest extends TestCase
 
         $this->assertSame(['variant' => 'control', 'active' => false, 'seed' => 'home5_footer_guest'], $this->subject->getPayload());
     }
+
+    public function testGetPayloadMemoizesConfigurationAndDecisionForSameStore(): void
+    {
+        $this->scopeConfig->expects($this->once())
+            ->method('isSetFlag')
+            ->with('grupoawamotos_theme/footer_experiment/enabled', ScopeInterface::SCOPE_STORE, null)
+            ->willReturn(true);
+
+        $this->scopeConfig->expects($this->exactly(2))
+            ->method('getValue')
+            ->willReturnMap([
+                ['grupoawamotos_theme/footer_experiment/rollout_percentage', ScopeInterface::SCOPE_STORE, null, '35'],
+                ['grupoawamotos_theme/footer_experiment/variant_seed', ScopeInterface::SCOPE_STORE, null, 'home5_footer_cached'],
+            ]);
+
+        $this->customerSession->method('getCustomerId')->willReturn(12);
+
+        $this->decider->expects($this->once())
+            ->method('normalizeRolloutPercentage')
+            ->with(35)
+            ->willReturn(35);
+
+        $this->decider->expects($this->once())
+            ->method('normalizeVariantSeed')
+            ->with('home5_footer_cached')
+            ->willReturn('home5_footer_cached');
+
+        $this->decider->expects($this->once())
+            ->method('getDefaultVariantCode')
+            ->willReturn('treatment');
+
+        $this->decider->expects($this->once())
+            ->method('decide')
+            ->with('customer:12', 'home5_footer_cached', true, 35, 'treatment')
+            ->willReturn([
+                'variant' => 'treatment',
+                'active' => true,
+                'seed' => 'home5_footer_cached',
+            ]);
+
+        $first = $this->subject->getPayload();
+        $second = $this->subject->getPayload();
+
+        $this->assertSame($first, $second);
+    }
 }

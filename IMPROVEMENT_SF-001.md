@@ -351,3 +351,53 @@ Deployment:
 - Improvement is guarded by existing experiment framework; no forced behavior change on control group.
 - Tests were expanded to prevent accidental de-scoping of treatment-only optimization.
 - Rollout can proceed progressively with immediate fallback path.
+
+---
+
+## Progress Update — 2026-03-23 (Safe Optimization: Request Memoization)
+
+### Scope implemented in this cycle
+- Added request-level memoization to footer experiment helper to remove redundant configuration reads and repeated decider execution in the same request/store context.
+- No public API changed and no control/treatment decision rules were modified.
+
+### Files changed
+- `app/code/GrupoAwamotos/Theme/Helper/FooterExperiment.php`
+    - Added in-memory caches per store for:
+        - `enabled`
+        - `rollout_percentage`
+        - `variant_seed`
+        - final `payload`
+- `app/code/GrupoAwamotos/Theme/Test/Unit/Helper/FooterExperimentTest.php`
+    - Added regression test proving repeated `getPayload()` calls reuse cached decision/config.
+- `app/code/GrupoAwamotos/Theme/Test/Integration/Helper/FooterExperimentTest.php`
+    - Added repeated-call stability assertion for payload contract.
+
+### Before vs after metrics (same request, same store)
+- `getPayload()` first call:
+    - Before: 1 experiment decision + 3 config reads
+    - After: 1 experiment decision + 3 config reads
+- `getPayload()` second call:
+    - Before: 1 additional decision + 3 additional config reads
+    - After: 0 additional decision + 0 additional config reads
+- Net reduction for repeated call path:
+    - Decision executions: `-100%` on repeated call
+    - Config reads: `-100%` on repeated call
+
+### Safety and rollout
+- Behavior-preserving optimization only; experiment gating remains unchanged.
+- Can be rolled out immediately because it does not alter bucket/variant logic.
+- Existing incremental rollout ladder remains valid: `0 -> 10 -> 25 -> 50 -> 75 -> 100`.
+
+### Validation evidence
+- PHPUnit targeted suite:
+    - `11 tests`, `23 assertions`, `1 skipped`, status `OK`
+- PHP lint:
+    - No syntax errors in all modified PHP files.
+- Logs:
+    - No new exception entries tied to this change set.
+
+### Reversibility
+- Fast rollback option:
+    - Revert only this helper/test commit.
+- Runtime safety:
+    - No database migration or schema change involved.

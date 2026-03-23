@@ -32,5 +32,8 @@ class FooterExperimentTest extends TestCase
         $this->assertSame('footer_progressive_rollout', $payload['experiment']);
         $this->assertSame('control', $payload['control_variant']);
         $this->assertSame('control', $payload['variant']);
+
+        $payloadAgain = $helper->getPayload();
+        $this->assertSame($payload, $payloadAgain);
     }
 }
