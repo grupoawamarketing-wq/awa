@@ -12,7 +12,7 @@ declare(strict_types=1);
  *  - awa-b2b-gate-enterprise.css   → modal B2B (opacity:0 por padrão)
  *  - awa-typography-best-practices → refinamentos tipográficos
  *
- * Estratégia: rel="preload" as="style" + onload → download em paralelo,
+ * Estratégia: media="print" + onload="this.media='all'" → download não-bloqueante,
  * aplica CSS assim que disponível (tipicamente <100ms após FCP).
  *
  * Removidos do <head> via <remove> em default_head_blocks.xml.
@@ -38,9 +38,9 @@ if (in_array('cms_index_index', $block->getLayout()->getUpdate()->getHandles(), 
 }
 ?>
 <?php foreach ($deferredFiles as $cssUrl): ?>
-<link rel="preload"
-      as="style"
-      onload="this.onload=null;this.rel='stylesheet'"
-      href="<?= $block->escapeUrl($cssUrl) ?>"/>
+<link rel="stylesheet"
+      href="<?= $block->escapeUrl($cssUrl) ?>"
+      media="print"
+      onload="this.media='all'"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($cssUrl) ?>"/></noscript>
 <?php endforeach; ?>

@@ -13,6 +13,13 @@ var config = {
     paths: {
         'rokanthemes/timecircles': 'js/rokanthemes/timecircles',
         // Restore Owl Carousel explicitly for Rokanthemes modules that hardcode the path
-        'rokanthemes/owl': 'Rokanthemes_Themeoption/js/owl.carousel'
+        'rokanthemes/owl': 'Rokanthemes_Themeoption/js/owl.carousel',
+        // Swiper 11 — UMD bundle for carousel migration
+        'swiper': 'js/swiper-bundle.min'
+    },
+    shim: {
+        'swiper': {
+            exports: 'Swiper'
+        }
     }
 };

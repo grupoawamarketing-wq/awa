@@ -1,6 +1,7 @@
 <?php
 /**
  * Header search form override (Magento_Search) - AWA Home5 child
+ * Integrates SearchSuiteAutocomplete with UX/UI and Accessibility Improvements
  *
  * @var \Magento\Framework\View\Element\Template $block
  */
@@ -9,19 +10,19 @@
 /** @var \Magento\Search\Helper\Data $searchHelper */
 $searchHelper = $this->helper('Magento\Search\Helper\Data');
 ?>
-<div class="block block-search"
+<div class="block block-search awa-professional-search"
      role="search"
-     aria-label="<?php echo $block->escapeHtmlAttr(__('Busca de produtos')) ?>"
-     data-awa-component="search-autocomplete"
-     data-awa-variant="mirasvit-search"
-     data-mage-init='{"js/awa-search-recent": {"maxItems": 5}}'>
+     data-awa-search-root="true"
+     aria-busy="false"
+     aria-label="<?php echo $block->escapeHtmlAttr(__('Busca de produtos')) ?>">
     <div class="block-content">
         <form class="form minisearch search-content"
               id="search_mini_form"
               data-awa-search-form="true"
               action="<?php echo $block->escapeUrl($searchHelper->getResultUrl()) ?>"
               method="get">
-            <div class="field search">
+
+            <div class="field search awa-search-input-wrapper">
                 <label class="label" for="search" id="awa-search-label" data-role="minisearch-label">
                     <span><?php echo $block->escapeHtml(__('Buscar')); ?></span>
                 </label>
@@ -29,16 +30,18 @@ $searchHelper = $this->helper('Magento\Search\Helper\Data');
                     <?php echo $block->escapeHtml(__('Digite ao menos 2 caracteres para ver sugestões e use as setas para navegar nos resultados.')) ?>
                 </span>
                 <div class="control" data-awa-search-control="true">
-                    <span class="awa-search-kbd-hint" aria-hidden="true">
-                        <kbd>/</kbd><?php echo $block->escapeHtml(__('para buscar')); ?>
-                    </span>
                     <input id="search"
                            data-awa-search-input="true"
+                           data-mage-init='{"quickSearch":{
+                               "formSelector":"#search_mini_form",
+                               "url":"<?php echo $block->escapeUrl($block->getUrl('search/ajax/suggest')) ?>",
+                               "destinationSelector":"#search_autocomplete"}
+                           }'
                            type="search"
                            name="<?php echo $block->escapeHtmlAttr($searchHelper->getQueryParamName()) ?>"
                            value="<?php echo $block->escapeHtmlAttr($searchHelper->getEscapedQueryText()) ?>"
                            placeholder="<?php echo $block->escapeHtmlAttr(__('Busca por SKU, EAN ou Nome...')); ?>"
-                           class="input-text"
+                           class="input-text awa-search-input"
                            minlength="2"
                            maxlength="<?php echo (int) $searchHelper->getMaxQueryLength(); ?>"
                            role="combobox"
@@ -53,24 +56,30 @@ $searchHelper = $this->helper('Magento\Search\Helper\Data');
                            autocapitalize="off"
                            autocorrect="off"
                            spellcheck="false" />
+
+                    <!-- Feedback visual de carregamento -->
+                    <div class="awa-search-spinner" aria-hidden="true"></div>
+
                     <div id="search_autocomplete"
-                         class="search-autocomplete awa-search-autocomplete-panel"
+                         class="search-autocomplete searchsuite-autocomplete"
                          data-role="search-autocomplete"
                          data-awa-search-panel="true"
                          hidden
                          role="listbox"
                          aria-hidden="true"
                          aria-label="<?php echo $block->escapeHtmlAttr(__('Sugestões de busca')) ?>"></div>
+                    <span class="awa-sr-only" data-awa-search-status="true" aria-live="polite" aria-atomic="true"></span>
                     <?php echo $block->getChildHtml() ?>
                 </div>
             </div>
-            <div class="actions" data-awa-search-actions="true">
+            <div class="actions awa-search-action-wrapper">
                 <button type="submit"
                         title="<?php echo $block->escapeHtmlAttr(__('Buscar')) ?>"
                         aria-label="<?php echo $block->escapeHtmlAttr(__('Buscar produtos')) ?>"
-                        class="action search"
-                        data-awa-search-submit="true">
-                    <span><?php echo $block->escapeHtml(__('Buscar')); ?></span>
+                        class="action search awa-search-btn">
+                    <!-- SVG Lupa Magnética -->
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <span class="awa-sr-only"><?php echo $block->escapeHtml(__('Buscar')); ?></span>
                 </button>
             </div>
         </form>

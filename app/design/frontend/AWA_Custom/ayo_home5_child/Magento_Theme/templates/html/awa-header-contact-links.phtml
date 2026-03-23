@@ -1,0 +1,42 @@
+<?php
+declare(strict_types=1);
+
+/**
+ * @var \Magento\Framework\View\Element\Template $block
+ * @var \GrupoAwamotos\Theme\ViewModel\ContactInfo $contactInfo
+ */
+$contactInfo = $block->getData('view_model');
+?>
+<?php if ($contactInfo instanceof \GrupoAwamotos\Theme\ViewModel\ContactInfo && $contactInfo->hasAnyContact()): ?>
+<div class="awa-header-contact-links" aria-label="<?= $block->escapeHtmlAttr(__('Atendimento Comercial')) ?>">
+    <span class="awa-header-contact-links__label"><?= $block->escapeHtml(__('Atendimento B2B')) ?></span>
+    <div class="awa-header-contact-links__items">
+        <?php if ($contactInfo->hasWhatsApp()): ?>
+            <a class="awa-header-contact-links__item awa-header-contact-links__item--whatsapp"
+               href="<?= $block->escapeUrl($contactInfo->getWhatsAppUrl()) ?>"
+               target="_blank"
+               rel="noopener noreferrer"
+               aria-label="<?= $block->escapeHtmlAttr(__('Falar no WhatsApp comercial')) ?>">
+                <span class="awa-header-contact-links__icon" aria-hidden="true"><i class="fa fa-whatsapp"></i></span>
+                <span class="awa-header-contact-links__text"><?= $block->escapeHtml(__('WhatsApp')) ?></span>
+            </a>
+        <?php endif; ?>
+        <?php if ($contactInfo->hasPhone()): ?>
+            <a class="awa-header-contact-links__item"
+               href="<?= $block->escapeUrl($contactInfo->getPhoneUrl()) ?>"
+               aria-label="<?= $block->escapeHtmlAttr(__('Ligar para %1', $contactInfo->getPhone())) ?>">
+                <span class="awa-header-contact-links__icon" aria-hidden="true"><i class="fa fa-phone"></i></span>
+                <span class="awa-header-contact-links__text"><?= $block->escapeHtml($contactInfo->getPhone()) ?></span>
+            </a>
+        <?php endif; ?>
+        <?php if ($contactInfo->hasEmail()): ?>
+            <a class="awa-header-contact-links__item"
+               href="<?= $block->escapeUrl($contactInfo->getEmailUrl()) ?>"
+               aria-label="<?= $block->escapeHtmlAttr(__('Enviar e-mail para %1', $contactInfo->getEmail())) ?>">
+                <span class="awa-header-contact-links__icon" aria-hidden="true"><i class="fa fa-envelope-o"></i></span>
+                <span class="awa-header-contact-links__text"><?= $block->escapeHtml(__('E-mail')) ?></span>
+            </a>
+        <?php endif; ?>
+    </div>
+</div>
+<?php endif; ?>

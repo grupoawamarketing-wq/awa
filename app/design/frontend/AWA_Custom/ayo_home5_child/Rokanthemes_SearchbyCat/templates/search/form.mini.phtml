@@ -1,56 +1,52 @@
 <?php
 /**
- * Copyright © 2015 Magento. All rights reserved.
- * See COPYING.txt for license details.
- * Override: SearchbyCat + SearchSuiteAutocomplete com fotos de produtos
+ * AWA Custom Search Form Override
+ * Integrates SearchbyCat + SearchSuiteAutocomplete with UX/UI and Accessibility Improvements
  */
-
-// @codingStandardsIgnoreFile
-?>
-<?php
 /** @var \Rokanthemes\SearchbyCat\Block\Form $block */
-/** @var \Rokanthemes\SearchbyCat\Block\Form $this */
 /** @var \Magento\Search\Helper\Data $searchHelper */
 $searchHelper = $this->helper(\Magento\Search\Helper\Data::class);
-$searchDelay = 500;
-$searchSuiteUrl = $this->getUrl('rokanthemes_searchsuiteautocomplete/ajax/index');
 ?>
-<div class="block block-search" role="search" aria-label="<?php echo $this->escapeHtmlAttr(__('Busca de produtos')) ?>">
-    <!-- AWAMOTOS_SEARCHBAR_V2 -->
+<div class="block block-search awa-professional-search" role="search" aria-label="<?php echo $block->escapeHtmlAttr(__('Busca de produtos')) ?>">
     <div class="block-content">
-        <form class="form minisearch search-content cat-search" id="search_mini_form" action="<?php echo $this->escapeUrl($searchHelper->getResultUrl()) ?>" method="get">
-            <div class="field-by-cat-search">
-                <select name="cat" id="choose_category" aria-label="<?php echo $this->escapeHtmlAttr(__('Filtrar por categoria')) ?>">
-                    <option value=""><?php echo $this->escapeHtml(__('Todas as Categorias')) ?></option>
-                    <?php $categories = $this->getCategories();
+        <form class="form minisearch search-content cat-search" id="search_mini_form" action="<?php echo $block->escapeUrl($searchHelper->getResultUrl()) ?>" method="get">
+            
+            <div class="field-by-cat-search awa-search-category-wrapper">
+                <label for="choose_category" class="awa-sr-only"><?php echo $block->escapeHtml(__('Filtrar por categoria')) ?></label>
+                <select name="cat" id="choose_category" class="awa-search-category-select" aria-label="<?php echo $block->escapeHtmlAttr(__('Filtrar por categoria')) ?>">
+                    <option value=""><?php echo $block->escapeHtml(__('Todas as Categorias')) ?></option>
+                    <?php $categories = $block->getCategories();
                     foreach ($categories as $cat): ?>
-                    <option value="<?php echo (int)$cat->getId() ?>"<?php echo (isset($_GET['cat']) && $_GET['cat'] == $cat->getId()) ? ' selected="selected"' : '' ?>><?php echo $this->escapeHtml($cat->getName()) ?></option>
+                    <option value="<?php echo (int)$cat->getId() ?>"<?php echo (isset($_GET['cat']) && $_GET['cat'] == $cat->getId()) ? ' selected="selected"' : '' ?>><?php echo $block->escapeHtml($cat->getName()) ?></option>
                     <?php endforeach; ?>
                 </select>
+                <!-- SVG chevron para customizar o select -->
+                <svg class="awa-select-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
             </div>
-            <div class="field search">
+
+            <div class="field search awa-search-input-wrapper">
                 <label class="label" for="search" id="awa-search-label" data-role="minisearch-label">
-                    <span><?php echo $this->escapeHtml(__('Buscar')) ?></span>
+                    <span><?php echo $block->escapeHtml(__('Buscar')) ?></span>
                 </label>
                 <span id="awa-search-help" class="awa-sr-only">
-                    <?php echo $this->escapeHtml(__('Digite ao menos 2 caracteres para ver sugestões e use as setas para navegar nos resultados.')) ?>
+                    <?php echo $block->escapeHtml(__('Digite ao menos 2 caracteres para ver sugestões e use as setas para navegar nos resultados.')) ?>
                 </span>
                 <div class="control">
                     <input id="search"
                            data-mage-init='{"quickSearch":{
                                "formSelector":"#search_mini_form",
-                               "url":"<?php echo $this->escapeUrl($this->getUrl('search/ajax/suggest')) ?>",
+                               "url":"<?php echo $block->escapeUrl($block->getUrl('search/ajax/suggest')) ?>",
                                "destinationSelector":"#search_autocomplete"}
                            }'
                            type="search"
-                           name="<?php echo $this->escapeHtmlAttr($searchHelper->getQueryParamName()) ?>"
-                           value="<?php echo $this->escapeHtmlAttr($searchHelper->getEscapedQueryText()) ?>"
-                           placeholder="<?php echo $this->escapeHtmlAttr(__('Busque por SKU, Código EAN ou Nome da Peça...')) ?>"
-                           class="input-text"
+                           name="<?php echo $block->escapeHtmlAttr($searchHelper->getQueryParamName()) ?>"
+                           value="<?php echo $block->escapeHtmlAttr($searchHelper->getEscapedQueryText()) ?>"
+                           placeholder="<?php echo $block->escapeHtmlAttr(__('Busque por SKU, EAN ou Nome...')) ?>"
+                           class="input-text awa-search-input"
                            maxlength="<?php echo (int)$searchHelper->getMaxQueryLength() ?>"
                            role="combobox"
                            aria-labelledby="awa-search-label"
-                           aria-label="<?php echo $this->escapeHtmlAttr(__('Buscar')) ?>"
+                           aria-label="<?php echo $block->escapeHtmlAttr(__('Buscar')) ?>"
                            aria-describedby="awa-search-help"
                            aria-autocomplete="both"
                            aria-expanded="false"
@@ -60,19 +56,26 @@ $searchSuiteUrl = $this->getUrl('rokanthemes_searchsuiteautocomplete/ajax/index'
                            autocapitalize="off"
                            autocorrect="off"
                            spellcheck="false" />
-                    <div id="search_autocomplete" class="search-autocomplete searchsuite-autocomplete" aria-label="<?php echo $this->escapeHtmlAttr(__('Sugestões de busca')) ?>"></div>
+                    
+                    <!-- Feedback visual de carregamento -->
+                    <div class="awa-search-spinner" aria-hidden="true"></div>
+
+                    <div id="search_autocomplete" class="search-autocomplete searchsuite-autocomplete" aria-label="<?php echo $block->escapeHtmlAttr(__('Sugestões de busca')) ?>"></div>
                     <div data-bind="scope: 'searchsuiteautocomplete_form'">
                         <!-- ko template: getTemplate() --><!-- /ko -->
                     </div>
-                    <?php echo $this->getChildHtml() ?>
+                    <?php echo $block->getChildHtml() ?>
                 </div>
             </div>
-            <div class="actions">
+
+            <div class="actions awa-search-action-wrapper">
                 <button type="submit"
-                        title="<?php echo $this->escapeHtml(__('Buscar')) ?>"
-                        aria-label="<?php echo $this->escapeHtmlAttr(__('Buscar produtos')) ?>"
-                        class="action search">
-                    <span><?php echo $this->escapeHtml(__('Buscar')) ?></span>
+                        title="<?php echo $block->escapeHtmlAttr(__('Buscar')) ?>"
+                        aria-label="<?php echo $block->escapeHtmlAttr(__('Executar busca')) ?>"
+                        class="action search awa-search-btn">
+                    <!-- SVG Lupa Magnética -->
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <span class="awa-sr-only"><?php echo $block->escapeHtml(__('Buscar')) ?></span>
                 </button>
             </div>
         </form>

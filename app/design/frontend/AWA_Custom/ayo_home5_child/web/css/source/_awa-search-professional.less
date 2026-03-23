@@ -1,0 +1,252 @@
+/*
+ * AWA Professional Search Bar Styles
+ * Foco em UX, estados visuais (focus/hover) e responsividade
+ */
+
+ .awa-professional-search {
+    width: 100%;
+    position: relative;
+    z-index: 100;
+
+    .awa-sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border-width: 0;
+    }
+
+    form.search-content {
+        display: flex !important;
+        align-items: stretch !important;
+        background: var(--awa-color-bg);
+        border: 2px solid var(--awa-color-border);
+        border-radius: var(--awa-radius-md, 8px);
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        height: 52px; /* Aumentado a altura para dar mais destaque */
+        position: relative;
+        overflow: hidden;
+        margin: 0;
+        padding: 0;
+        width: 100%; /* Garante que o form ocupe 100% do wrapper */
+
+        /* Estado de Focus (Falso Focus no contêiner pai) */
+        &:focus-within {
+            border-color: var(--awa-color-primary, #b73337);
+            box-shadow: 0 0 0 4px rgba(183, 51, 55, 0.12);
+        }
+
+        /* 1. Categoria Dropdown (Esquerda) */
+        .awa-search-category-wrapper {
+            position: relative;
+            flex: 0 0 auto;
+            border-right: 1px solid var(--awa-color-border, #e5e5e5);
+            background: var(--awa-color-bg-soft, #f9f9f9);
+            display: flex;
+            align-items: center;
+            margin: 0;
+            padding: 0;
+            width: auto;
+
+            .awa-search-category-select {
+                appearance: none;
+                -webkit-appearance: none;
+                background: transparent;
+                border: none;
+                padding: 0 35px 0 16px;
+                height: 100%;
+                color: var(--awa-color-text-secondary, #666);
+                font-weight: 500;
+                font-size: 14px;
+                cursor: pointer;
+                outline: none;
+                box-shadow: none;
+                margin: 0;
+                min-height: auto;
+
+                &:focus-visible {
+                    color: var(--awa-color-text-primary, #333);
+                }
+            }
+
+            .awa-select-icon {
+                position: absolute;
+                right: 12px;
+                pointer-events: none;
+                color: var(--awa-color-text-secondary, #666);
+            }
+        }
+
+        /* 2. Input de Texto (Centro) */
+        .awa-search-input-wrapper {
+            flex: 1 1 auto;
+            position: relative;
+            margin: 0;
+            padding: 0;
+            width: auto;
+
+            label {
+                display: none;
+            }
+
+            .control {
+                height: 100%;
+                margin: 0;
+                padding: 0;
+                
+                /* Garante que o input preencha todo o espaço do control */
+                display: flex;
+                align-items: center;
+            }
+
+            .awa-search-input {
+                width: 100%;
+                height: 100%;
+                border: none !important;
+                background: transparent !important;
+                padding: 0 16px;
+                font-size: 16px; /* Aumentado a fonte para melhor legibilidade */
+                color: var(--awa-color-text-primary, #333);
+                outline: none;
+                box-shadow: none !important;
+                margin: 0;
+                border-radius: 0;
+                line-height: normal; /* Evita que o texto fique cortado ou desalinhado verticalmente */
+
+                &::placeholder {
+                    color: var(--awa-color-text-secondary, #999);
+                    opacity: 0.7;
+                    line-height: normal;
+                }
+
+                /* Remove ícone de 'X' nativo do webkit para busca */
+                &::-webkit-search-decoration,
+                &::-webkit-search-cancel-button,
+                &::-webkit-search-results-button,
+                &::-webkit-search-results-decoration {
+                    display: none;
+                }
+            }
+
+            /* Feedback Visual de Carregamento (Spinner) */
+            .awa-search-spinner {
+                position: absolute;
+                right: 12px;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 18px;
+                height: 18px;
+                border: 2px solid rgba(183, 51, 55, 0.2);
+                border-top-color: var(--awa-color-primary, #b73337);
+                border-radius: 50%;
+                animation: awa-spin 0.8s linear infinite;
+                opacity: 0;
+                visibility: hidden;
+                transition: opacity 0.2s;
+            }
+        }
+
+        /* 3. Botão de Busca (Direita) */
+        .awa-search-action-wrapper {
+            flex: 0 0 auto;
+            margin: 0;
+            padding: 0;
+
+            .awa-search-btn {
+                background: transparent !important; /* Força transparência contra regras globais do tema */
+                border: none !important;
+                height: 100%;
+                padding: 0 16px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: var(--awa-color-primary, #b73337) !important; /* Usa a cor primária para o ícone */
+                cursor: pointer;
+                transition: all 0.2s ease;
+                outline: none;
+                margin: 0;
+                min-width: auto;
+                border-radius: 0;
+
+                /* Oculta qualquer pseudo-elemento de ícone que o tema pai possa estar injetando (ex: ::before) */
+                &::before, &::after {
+                    display: none !important;
+                    content: none !important;
+                }
+
+                &:hover, &:focus-visible {
+                    color: var(--awa-color-primary-dark, #8e2629) !important;
+                    background: var(--awa-color-bg-soft, #f9f9f9) !important;
+                }
+
+                svg {
+                    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+                }
+
+                &:active svg {
+                    transform: scale(0.9);
+                }
+            }
+        }
+    }
+
+    /* Estado de carregamento AJAX ativo (controlado via JS) */
+    &.is-searching {
+        .awa-search-spinner {
+            opacity: 1;
+            visibility: visible;
+        }
+        .awa-search-btn {
+            opacity: 0;
+            visibility: hidden;
+        }
+    }
+
+    &[aria-busy='true'] {
+        .awa-search-spinner {
+            opacity: 1;
+            visibility: visible;
+        }
+    }
+
+    /* Ajustes Mobile */
+    @media (max-width: 767px) {
+        .search-content {
+            height: 44px; /* Ligeiramente menor em mobile */
+
+            .awa-search-category-wrapper {
+                display: none; /* Esconde seletor de categorias para otimizar espaço */
+            }
+
+            .awa-search-input-wrapper {
+                .awa-search-input {
+                    font-size: 16px; /* Evita zoom automático no iOS */
+                    padding: 0 12px;
+                }
+            }
+
+            .awa-search-action-wrapper {
+                .awa-search-btn {
+                    padding: 0 12px;
+                }
+            }
+        }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .awa-professional-search form.search-content,
+    .awa-professional-search .awa-search-btn,
+    .awa-professional-search .awa-search-input-wrapper .awa-search-spinner {
+        transition: none;
+        animation: none;
+    }
+}
+
+@keyframes awa-spin {
+    to { transform: translateY(-50%) rotate(360deg); }
+}

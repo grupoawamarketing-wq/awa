@@ -1,9 +1,14 @@
 <?php
-/** @var Rokanthemes\Themeoption\Block\Themeoption $block */
-// @todo [deprecated] $this->helper() — corrigir via Plugin em GrupoAwamotos sobre Rokanthemes\Themeoption\Block\Themeoption
-$helper = $this->helper('Rokanthemes\RokanBase\Helper\Data');
-$enableMenu = $helper->getConfigData('themeoption/footer/footer_menu_mobile');
-$footerPaymentLegacy = trim((string) $this->getChildHtml('footer_payment'));
+/** 
+ * AWA Custom Footer Template
+ * @var Rokanthemes\Themeoption\Block\Themeoption $block 
+ * @var \Magento\Framework\Escaper $escaper
+ */
+
+$viewModel = $block->getData('view_model');
+$enableMenu = $viewModel ? $viewModel->isMobileMenuEnabled() : false;
+
+$footerPaymentLegacy = trim((string) $block->getChildHtml('footer_payment'));
 $storeHost = (string) parse_url((string) $block->getBaseUrl(), PHP_URL_HOST);
 $showSecuritySeals = $storeHost !== '';
 $safeBrowsingUrl = $showSecuritySeals
@@ -14,7 +19,7 @@ $sslLabsUrl = $showSecuritySeals
     : '#';
 $mediaUrl = rtrim((string) $block->getBaseUrl(), '/') . '/media';
 
-$brandHtml = trim((string) $this->getChildHtml('footer_brand_list'));
+$brandHtml = trim((string) $block->getChildHtml('footer_brand_list'));
 ?>
 <div class="page_footer awa-footer--dark" role="contentinfo">
     <svg class="awa-footer-sprite" xmlns="http://www.w3.org/2000/svg" width="0" height="0" aria-hidden="true" focusable="false">
@@ -94,14 +99,14 @@ $brandHtml = trim((string) $this->getChildHtml('footer_brand_list'));
     </section>
     <?php endif; ?>
     <div id="footer" class="footer-container layout2 footer">
-        <?= $this->getChildHtml('footer_static5') ?>
+        <?= $block->getChildHtml('footer_static5') ?>
     </div>
     <div class="footer-bottom">
         <div class="container">
             <div class="footer-bottom-inner">
                 <div class="row">
                     <div class="col-md-6 col-sm-6 col-xs-12">
-                        <?= $this->getChildHtml('copyright') ?>
+                        <?= $block->getChildHtml('copyright') ?>
                     </div>
                     <div class="col-md-6 col-sm-6 col-xs-12">
                         <section class="awa-footer-pay-sec" aria-label="<?= $escaper->escapeHtmlAttr(__('Pagamentos e Segurança')) ?>">
@@ -179,7 +184,7 @@ $brandHtml = trim((string) $this->getChildHtml('footer_brand_list'));
     </div>
 </div>
 <div class="fixed-right" role="complementary" aria-label="<?= $escaper->escapeHtmlAttr(__('Links Rápidos')) ?>">
-    <?= $this->getChildHtml('fixed_right') ?>
+    <?= $block->getChildHtml('fixed_right') ?>
 </div>
 <div class="shadow_bkg" role="presentation"></div>
 <div class="shadow_bkg_show" role="presentation"></div>
@@ -191,35 +196,61 @@ $brandHtml = trim((string) $this->getChildHtml('footer_brand_list'));
 <nav class="fixed-bottom hidden-sm hidden-md hidden-lg" role="navigation" aria-label="<?= $escaper->escapeHtmlAttr(__('Navegação Móvel')) ?>">
     <div class="link-on-bottom">
         <ul class="mobile-bottom-link flex-layout space-between list-unstyled">
-            <li><a href="<?= $escaper->escapeUrl($this->getUrl('')) ?>" aria-label="<?= $escaper->escapeHtmlAttr(__('Home')) ?>" title="<?= $escaper->escapeHtmlAttr(__('Home')) ?>"><span class="icon icon-chrome" aria-hidden="true"></span><?= $escaper->escapeHtml(__('Home')) ?></a></li>
+            <li><a href="<?= $escaper->escapeUrl($block->getUrl('')) ?>" aria-label="<?= $escaper->escapeHtmlAttr(__('Home')) ?>" title="<?= $escaper->escapeHtmlAttr(__('Home')) ?>"><span class="icon icon-chrome" aria-hidden="true"></span><?= $escaper->escapeHtml(__('Home')) ?></a></li>
             <li><button type="button" class="toggle-nav-footer" aria-haspopup="true" aria-expanded="false" aria-label="<?= $escaper->escapeHtmlAttr(__('Abrir menu')) ?>" title="<?= $escaper->escapeHtmlAttr(__('Abrir menu')) ?>"><span class="icon icon-menu" aria-hidden="true"></span><?= $escaper->escapeHtml(__('Menu')) ?></button></li>
-            <li><a href="<?= $escaper->escapeUrl($this->getUrl('customer/account/')) ?>" aria-label="<?= $escaper->escapeHtmlAttr(__('Minha Conta')) ?>" title="<?= $escaper->escapeHtmlAttr(__('Minha Conta')) ?>"><span class="icon icon-users" aria-hidden="true"></span><?= $escaper->escapeHtml(__('Conta')) ?></a></li>
-            <li><a href="<?= $escaper->escapeUrl($this->getUrl('checkout/cart/')) ?>" aria-label="<?= $escaper->escapeHtmlAttr(__('Carrinho de Compras')) ?>" title="<?= $escaper->escapeHtmlAttr(__('Carrinho de Compras')) ?>"><span class="icon icon-shopping-cart" aria-hidden="true"></span><?= $escaper->escapeHtml(__('Carrinho')) ?></a></li>
+            <li><a href="<?= $escaper->escapeUrl($block->getUrl('customer/account/')) ?>" aria-label="<?= $escaper->escapeHtmlAttr(__('Minha Conta')) ?>" title="<?= $escaper->escapeHtmlAttr(__('Minha Conta')) ?>"><span class="icon icon-users" aria-hidden="true"></span><?= $escaper->escapeHtml(__('Conta')) ?></a></li>
+            <li><a href="<?= $escaper->escapeUrl($block->getUrl('checkout/cart/')) ?>" aria-label="<?= $escaper->escapeHtmlAttr(__('Carrinho de Compras')) ?>" title="<?= $escaper->escapeHtmlAttr(__('Carrinho de Compras')) ?>"><span class="icon icon-shopping-cart" aria-hidden="true"></span><?= $escaper->escapeHtml(__('Carrinho')) ?></a></li>
         </ul>
     </div>
 </nav>
 <?php } ?>
 
-<script type="text/x-magento-init">
-{
-    ".block-content.brandowl-play >ul": {
-        "js/rokanthemes-owl-element-init": {
-            "lazyLoad": true,
-            "items": 7,
-            "itemsDesktop": [1366, 5],
-            "itemsDesktopSmall": [991, 3],
-            "itemsTablet": [767, 2],
-            "itemsMobile": [479, 1],
-            "navigation": true
-        }
-    }
-}
+<script>
+window.addEventListener('load', function() {
+    setTimeout(function() {
+        require([
+            'jquery',
+            'mage/mage',
+            'rokanthemes/owl'
+        ], function ($) {
+            'use strict';
+
+            var sliderFooterBrands = $(".footer_brand_list_slider");
+            if(sliderFooterBrands.length > 0) {
+                sliderFooterBrands.owlCarousel({
+                    items: 6,
+                    loop: true,
+                    margin: 0,
+                    nav: true,
+                    dots: false,
+                    autoplay: true,
+                    autoplayTimeout: 3000,
+                    autoplayHoverPause: true,
+                    navText: [
+                        '<i class="fa fa-angle-left"></i>',
+                        '<i class="fa fa-angle-right"></i>'
+                    ],
+                    responsive: {
+                        0: { items: 2 },
+                        480: { items: 3 },
+                        768: { items: 4 },
+                        992: { items: 5 },
+                        1200: { items: 6 }
+                    }
+                });
+            }
+            
+            // Ativa o toggle dos blocos do footer no mobile sem bloquear o render inicial
+            if ($(".footer-container").length) {
+                $(".footer-container .footer-block-title").on("click", function() {
+                    if ($(window).width() < 768) {
+                        $(this).toggleClass("active");
+                        $(this).next(".footer-block-content").slideToggle();
+                    }
+                });
+            }
+        });
+    }, 1500); // 1.5s de atraso (defer real) para economizar recursos de main thread
+});
 </script>
-<script type="text/x-magento-init">
-{
-    "*": {
-        "Rokanthemes_Themeoption/js/footer-mobile": {}
-    }
-}
-</script>
-<?= $this->getChildHtml('organization_schema') ?>
+<?= $block->getChildHtml('organization_schema') ?>

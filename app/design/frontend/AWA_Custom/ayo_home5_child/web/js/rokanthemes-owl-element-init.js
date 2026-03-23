@@ -6,8 +6,7 @@ define([
 ], function ($) {
     'use strict';
 
-    var INT_KEYS  = ['items', 'slideSpeed', 'paginationSpeed', 'rewindSpeed'];
-    var BOOL_KEYS = ['lazyLoad', 'navigation', 'pagination', 'autoPlay', 'stopOnHover', 'scrollPerPage'];
+    var V1_RESPONSIVE_KEYS = ['itemsDesktop', 'itemsDesktopSmall', 'itemsTablet', 'itemsMobile'];
 
     function resolveBoolean(value, fallback) {
         if (value === undefined || value === null || value === '') {
@@ -19,26 +18,84 @@ define([
         return !!value;
     }
 
+    /**
+     * Convert OWL v1 options to v2 format.
+     */
+    function convertToV2(opts) {
+        var v2 = {};
+        var responsive = {};
+        var hasV1Responsive = false;
+        var mobileItems, tabletItems, desktopSmallItems, desktopItems;
+        var i;
+
+        for (i = 0; i < V1_RESPONSIVE_KEYS.length; i++) {
+            if (opts[V1_RESPONSIVE_KEYS[i]] !== undefined) {
+                hasV1Responsive = true;
+                break;
+            }
+        }
+
+        desktopItems = parseInt(opts.items, 10) || 3;
+
+        if (hasV1Responsive) {
+            mobileItems = 1;
+            tabletItems = 2;
+            desktopSmallItems = 3;
+
+            if (opts.itemsMobile && opts.itemsMobile[1]) {
+                mobileItems = parseInt(opts.itemsMobile[1], 10) || 1;
+            }
+            if (opts.itemsTablet && opts.itemsTablet[1]) {
+                tabletItems = parseInt(opts.itemsTablet[1], 10) || 2;
+            }
+            if (opts.itemsDesktopSmall && opts.itemsDesktopSmall[1]) {
+                desktopSmallItems = parseInt(opts.itemsDesktopSmall[1], 10) || 3;
+            }
+            if (opts.itemsDesktop && opts.itemsDesktop[1]) {
+                desktopItems = parseInt(opts.itemsDesktop[1], 10) || desktopItems;
+            }
+
+            responsive[0] = { items: mobileItems };
+            responsive[opts.itemsMobile && opts.itemsMobile[0] ? opts.itemsMobile[0] : 680] = { items: mobileItems };
+            responsive[opts.itemsTablet && opts.itemsTablet[0] ? opts.itemsTablet[0] : 991] = { items: tabletItems };
+            responsive[opts.itemsDesktopSmall && opts.itemsDesktopSmall[0] ? opts.itemsDesktopSmall[0] : 1199] = { items: desktopSmallItems };
+            responsive[opts.itemsDesktop && opts.itemsDesktop[0] ? opts.itemsDesktop[0] : 1366] = { items: desktopItems };
+
+            v2.responsive = responsive;
+        } else if (opts.responsive && Object.keys(opts.responsive).length > 0) {
+            v2.responsive = opts.responsive;
+        } else {
+            /* Auto-generate responsive breakpoints from items count */
+            mobileItems = Math.max(1, Math.min(desktopItems, 1));
+            tabletItems = Math.max(1, Math.min(desktopItems, 2));
+            desktopSmallItems = Math.max(1, Math.min(desktopItems, 3));
+
+            responsive[0] = { items: mobileItems };
+            responsive[480] = { items: Math.max(1, Math.min(desktopItems, 2)) };
+            responsive[768] = { items: tabletItems };
+            responsive[992] = { items: desktopSmallItems };
+            responsive[1200] = { items: desktopItems };
+
+            v2.responsive = responsive;
+        }
+
+        v2.items = desktopItems;
+        v2.nav = resolveBoolean(opts.navigation, false);
+        v2.navText = ['<span aria-label="Anterior">&#8249;</span>', '<span aria-label="Próximo">&#8250;</span>'];
+        v2.dots = resolveBoolean(opts.pagination, false);
+        v2.autoplay = resolveBoolean(opts.autoPlay, false);
+        v2.autoplayHoverPause = resolveBoolean(opts.stopOnHover, true);
+        v2.slideBy = resolveBoolean(opts.scrollPerPage, true) ? 'page' : 1;
+        v2.smartSpeed = parseInt(opts.slideSpeed, 10) || 250;
+        v2.lazyLoad = resolveBoolean(opts.lazyLoad, false);
+        v2.loop = resolveBoolean(opts.loop, false);
+        v2.margin = parseInt(opts.margin, 10) || 0;
+
+        return v2;
+    }
+
     function normalizeOptions(rawOptions) {
-        var options = rawOptions || {};
-        var i, key, v;
-
-        for (i = 0; i < INT_KEYS.length; i++) {
-            key = INT_KEYS[i];
-            if (options[key] !== undefined) {
-                v = parseInt(options[key], 10);
-                options[key] = v || options[key];
-            }
-        }
-
-        for (i = 0; i < BOOL_KEYS.length; i++) {
-            key = BOOL_KEYS[i];
-            if (options[key] !== undefined) {
-                options[key] = resolveBoolean(options[key], options[key]);
-            }
-        }
-
-        return options;
+        return convertToV2(rawOptions || {});
     }
 
     function initWhenReady($el, options, attemptsLeft) {
@@ -52,6 +109,10 @@ define([
             try {
                 $el.owlCarousel(options);
                 $el.addClass('owl-loaded');
+                /* Add .owl-carousel after init for unified CSS targeting */
+                if (!$el.hasClass('owl-carousel')) {
+                    $el.addClass('owl-carousel');
+                }
             } catch (e) {
                 $el.removeData('awaOwlElementInit');
             }
@@ -107,7 +168,7 @@ define([
             return;
         }
 
-        if ($el.data('owlCarousel') || $el.hasClass('owl-loaded') || $el.data('awaOwlElementInit')) {
+        if ($el.data('owl.carousel') || $el.data('owlCarousel') || $el.hasClass('owl-loaded') || $el.data('awaOwlElementInit')) {
             return;
         }
 

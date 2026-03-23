@@ -11,8 +11,8 @@ declare(strict_types=1);
  *  - jquery.fancybox.css   → lightbox (galerias de imagem)
  *  - rokan_quickview.css   → modal QuickView (visualização rápida)
  *
- * Estratégia: rel="preload" as="style" + onload="this.rel='stylesheet'"
- * O browser faz o download em paralelo (não bloqueia render) e aplica
+ * Estratégia: media="print" + onload="this.media='all'"
+ * O browser faz o download sem bloquear render e aplica
  * o CSS assim que disponível — geralmente antes da primeira interação.
  *
  * <noscript> garante carregamento bloqueante como fallback sem JS.
@@ -37,9 +37,9 @@ $deferredFiles = [
 ];
 ?>
 <?php foreach ($deferredFiles as $cssUrl): ?>
-<link rel="preload"
-      as="style"
-      onload="this.onload=null;this.rel='stylesheet'"
-      href="<?= $block->escapeUrl($cssUrl) ?>"/>
+<link rel="stylesheet"
+      href="<?= $block->escapeUrl($cssUrl) ?>"
+      media="print"
+      onload="this.media='all'"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($cssUrl) ?>"/></noscript>
 <?php endforeach; ?>
