@@ -22,24 +22,36 @@ Implementar evolucao segura e incremental no rodape do tema ativo, preservando a
   - `data-awa-footer-exp-variant = control|treatment`
   - classe `awa-footer-exp-b` para treatment
 
+1. Hardening de resiliencia no experimento:
+
+- Variante `control` agora e definida no proprio HTML como estado inicial seguro.
+- O script passou a tratar indisponibilidade de `localStorage` com fallback deterministico por device fingerprint leve (userAgent + resolucao).
+- Resultado: o experimento continua funcional em ambientes com storage bloqueado (modo privado/restrito).
+
+1. Tratamento visual incremental para variante B:
+
+- Regras CSS aplicadas somente em `.page_footer.awa-footer-exp-b`.
+- Ajustes discretos de contraste em trust items e links sociais para comparacao A/B sem impacto estrutural.
+
 1. Protecao automatizada contra regressao:
 
 - Expansao do teste unitario `FooterDataTest` para cobrir cenarios de fallback, normalizacao e seed/rollout.
 - Novo teste de contrato `FooterExperimentContractTest` para validar:
   - Presenca de atributos de experimento no template.
   - Estrutura de configuracao exigida em `system.xml` e `config.xml`.
+  - Presenca de variante inicial `control` e bloco `try/catch` para fallback de storage.
 
 ## Metricas Antes x Depois
 
 ### Qualidade
 
 - Antes: cobertura limitada no `FooterDataTest`.
-- Depois: suite com 16 testes e 44 assertions em verde.
+- Depois: suite com 16 testes e 48 assertions em verde.
 
 ### Risco Operacional
 
 - Antes: sem sinalizacao de variante no DOM para rollout controlado.
-- Depois: dados de rollout/seed/variante expostos no DOM com fallback para `control`.
+- Depois: dados de rollout/seed/variante expostos no DOM, com variante inicial segura e resiliencia para ambiente sem `localStorage`.
 
 ## Deploy Incremental Recomendado
 
@@ -63,4 +75,4 @@ Implementar evolucao segura e incremental no rodape do tema ativo, preservando a
 
 - Lint PHP: OK
 - PHPUnit: OK (`FooterDataTest` + `FooterExperimentContractTest`)
-- Resultado: `OK (16 tests, 44 assertions)`
+- Resultado: `OK (16 tests, 48 assertions)`

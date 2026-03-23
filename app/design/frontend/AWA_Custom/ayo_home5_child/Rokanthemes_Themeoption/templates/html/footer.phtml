@@ -35,7 +35,8 @@ $brandHtml = trim((string) $block->getChildHtml('footer_brand_list'));
     role="contentinfo"
     data-awa-footer-exp-enabled="<?= $escaper->escapeHtmlAttr((string) $footerExpEnabled) ?>"
     data-awa-footer-exp-rollout="<?= $escaper->escapeHtmlAttr((string) $footerExpRollout) ?>"
-    data-awa-footer-exp-seed="<?= $escaper->escapeHtmlAttr($footerExpSeed) ?>">
+    data-awa-footer-exp-seed="<?= $escaper->escapeHtmlAttr($footerExpSeed) ?>"
+    data-awa-footer-exp-variant="control">
     <svg class="awa-footer-sprite" xmlns="http://www.w3.org/2000/svg" width="0" height="0" aria-hidden="true" focusable="false">
         <symbol id="awa-icon-truck" viewBox="0 0 24 24">
             <path d="M3 6h11v9H3zM14 9h3.5l2.5 3V15h-6zM7.5 18.5a1.5 1.5 0 1 0 0-.01zm10 0a1.5 1.5 0 1 0 0-.01z" fill="currentColor"/>
@@ -256,10 +257,16 @@ $brandHtml = trim((string) $block->getChildHtml('footer_brand_list'));
     }
 
     var visitorKey = 'awa_footer_exp_visitor_id';
-    var visitorId = localStorage.getItem(visitorKey);
-    if (!visitorId) {
-        visitorId = String(Date.now()) + '_' + String(Math.random()).slice(2);
-        localStorage.setItem(visitorKey, visitorId);
+    var visitorId = '';
+    try {
+        visitorId = localStorage.getItem(visitorKey) || '';
+        if (!visitorId) {
+            visitorId = String(Date.now()) + '_' + String(Math.random()).slice(2);
+            localStorage.setItem(visitorKey, visitorId);
+        }
+    } catch (error) {
+        // Fallback para ambientes com storage bloqueado (modo privado/restrito).
+        visitorId = (navigator.userAgent || 'ua') + '|' + String(screen.width || 0) + 'x' + String(screen.height || 0);
     }
 
     var input = seed + '|' + visitorId;

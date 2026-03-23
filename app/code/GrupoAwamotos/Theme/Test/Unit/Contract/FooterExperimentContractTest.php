@@ -53,5 +53,9 @@ class FooterExperimentContractTest extends TestCase
         $this->assertStringContainsString('data-awa-footer-exp-enabled', $contents);
         $this->assertStringContainsString('data-awa-footer-exp-rollout', $contents);
         $this->assertStringContainsString('data-awa-footer-exp-seed', $contents);
+        $this->assertStringContainsString('data-awa-footer-exp-variant="control"', $contents);
+        $this->assertStringContainsString('try {', $contents);
+        $this->assertStringContainsString('localStorage.getItem', $contents);
+        $this->assertStringContainsString('catch (error)', $contents);
     }
 }
