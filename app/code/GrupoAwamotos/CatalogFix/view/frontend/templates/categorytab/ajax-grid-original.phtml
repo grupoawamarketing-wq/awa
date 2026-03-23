@@ -1,0 +1,107 @@
+<?php
+/** @var \GrupoAwamotos\CatalogFix\Block\Categorytab\AjaxProducts $block */
+use Magento\Framework\App\Action\Action;
+
+$products = $block->getProducts()->getItems();
+$rows = (int) ($block->getData('rows') ?: 1);
+$image = 'category_image_primary_small';
+$templateType = \Magento\Catalog\Block\Product\ReviewRendererInterface::DEFAULT_VIEW;
+$postDataHelper = $this->helper('Magento\Framework\Data\Helper\PostHelper');
+$priceHelper = $this->helper('Rokanthemes\Themeoption\Helper\Data');
+$newLabelHelper = $this->helper('Rokanthemes\RokanBase\Helper\Newlabel');
+
+$i = 0;
+foreach ($products as $_item) {
+    $productImage = $block->getImage($_item, $image);
+?>
+<?php if ($i++ % $rows == 0) { ?> <div class="product_row"> <?php } ?>
+    <div class="item-product">
+        <div class="product-thumb">
+            <a href="<?php echo $_item->getProductUrl(); ?>" class="product-thumb-link">
+                <?php $productImageThumb = $block->getImage($_item, 'category_image_second_small'); ?>
+                <span class="first-thumb">
+                    <?php echo $productImage->toHtml(); ?>
+                </span>
+                <?php if ($_item->getTypeId() === 'simple'): ?>
+                    <span class="second-thumb">
+                        <?php echo $productImageThumb->toHtml(); ?>
+                    </span>
+                <?php endif; ?>
+            </a>
+            <div class="hot-onsale">
+                <?php if ($_item->getFinalPrice() < $_item->getPrice()): ?>
+                    <span class="onsale">
+                        <span class="sale-bg"></span>
+                        <span class="sale-text">
+                            <?php
+                            $price = (float) $_item->getPrice();
+                            $finalPrice = (float) $_item->getFinalPrice();
+                            if ($price > 0 && $finalPrice < $price) {
+                                $pec = (($price - $finalPrice) / $price) * 100;
+                                echo '<label>-' . round($pec) . '%</label>';
+                            }
+                            ?>
+                        </span>
+                    </span>
+                <?php endif; ?>
+                <?php if ($newLabelHelper->isProductNew($_item)): ?>
+                    <div class="onsale new-lable">
+                        <?php echo __('New'); ?>
+                    </div>
+                <?php endif; ?>
+            </div>
+            <div class="actions-secondary">
+                <ul class="product-extra-link add-to-links">
+                    <li class="quickview-product">
+                        <a class="quickview-link" data-role="quickview-button"
+                           data-id="<?php echo $_item->getId(); ?>" href="#"
+                           data-href="<?php echo $block->getUrl('quickview/product/quickview/id/' . $_item->getId()); ?>"
+                           title="<?php echo $block->escapeHtmlAttr(__('Quick view')); ?>">
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div class="product-info-cart">
+                <div class="actions-primary addcart-link">
+                    <?php if ($_item->isSaleable()): ?>
+                        <?php
+                        $postData = $postDataHelper->getPostData(
+                            $block->getAddToCartUrl($_item),
+                            ['product' => $_item->getEntityId()]
+                        );
+                        ?>
+                        <button class="action tocart btn-add-to-cart"
+                                data-post='<?php echo $postData; ?>'
+                                type="button"
+                                title="<?php echo $block->escapeHtmlAttr(__('Add to Cart')); ?>">
+                            <span><?php echo $block->escapeHtml(__('Add to Cart')); ?></span>
+                        </button>
+                    <?php else: ?>
+                        <?php if ($_item->getIsSalable()): ?>
+                            <div class="stock available"><span><?php echo __('In stock'); ?></span></div>
+                        <?php else: ?>
+                            <div class="stock unavailable"><span><?php echo __('Out of stock'); ?></span></div>
+                        <?php endif; ?>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <div class="product-info">
+                <h3 class="product-name">
+                    <a title="<?php echo $block->escapeHtmlAttr($_item->getName()); ?>"
+                       href="<?php echo $_item->getProductUrl(); ?>"
+                       class="product-item-link">
+                        <?php echo $block->escapeHtml($_item->getName()); ?>
+                    </a>
+                </h3>
+                <div class="awa-b2b-sku" style="font-size: 11px; color: #64748b; margin-bottom: 6px; font-weight: 500;">
+                    <span class="label" style="text-transform: uppercase; margin-right: 2px; color: #9ca3af;">Cod:</span>
+                    <span class="value" style="font-family: monospace; color: #475569; letter-spacing: 0.5px;"><?php echo $block->escapeHtml($_item->getSku()); ?></span>
+                </div>
+                <div class="info-price">
+                    <?php echo $priceHelper->getPriceDisplayCustom($block->getProductPrice($_item)); ?>
+                </div>
+            </div>
+        </div>
+    </div>
+<?php if ($i % $rows == 0 || $i == count($products)) { ?> </div> <?php } ?>
+<?php } ?>

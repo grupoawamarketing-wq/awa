@@ -1,0 +1,60 @@
+<?php
+/** @var \GrupoAwamotos\CatalogFix\Block\Categorytab\AjaxProducts $block */
+$products = $block->getProducts()->getItems();
+$rows = (int) ($block->getData('rows') ?: 1);
+$image = 'new_products_content_widget_grid';
+$templateType = \Magento\Catalog\Block\Product\ReviewRendererInterface::DEFAULT_VIEW;
+$postDataHelper = $this->helper('Magento\Framework\Data\Helper\PostHelper');
+$priceHelper = $this->helper('Rokanthemes\Themeoption\Helper\Data');
+
+$i = 0;
+foreach ($products as $_item) {
+    $productImage = $block->getImage($_item, $image);
+?>
+<?php if ($i++ % $rows == 0) { ?> <div class="product_row"> <?php } ?>
+    <div class="item">
+        <div class="item-inner">
+            <div class="image-container">
+                <a href="<?php echo $block->getProductUrl($_item); ?>" class="product-item-photo">
+                    <?php echo $productImage->toHtml(); ?>
+                </a>
+                <div class="actions">
+                    <div class="actions-primary">
+                        <?php if ($_item->isSaleable()): ?>
+                            <?php
+                            $postData = $postDataHelper->getPostData(
+                                $block->getAddToCartUrl($_item),
+                                ['product' => $_item->getEntityId()]
+                            );
+                            ?>
+                            <button class="action tocart"
+                                    data-post='<?php echo $postData; ?>'
+                                    type="button" title="<?php echo $block->escapeHtmlAttr(__('Add to Cart')); ?>">
+                                <span><?php echo $block->escapeHtml(__('Add to Cart')); ?></span>
+                            </button>
+                        <?php else: ?>
+                            <?php if ($_item->getIsSalable()): ?>
+                                <div class="stock available"><span><?php echo __('In stock'); ?></span></div>
+                            <?php else: ?>
+                                <div class="stock unavailable"><span><?php echo __('Out of stock'); ?></span></div>
+                            <?php endif; ?>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+            <div class="des">
+                <div class="product-name">
+                    <strong class="product-item-name">
+                        <a title="<?php echo $block->escapeHtmlAttr($_item->getName()); ?>"
+                           href="<?php echo $block->getProductUrl($_item); ?>"
+                           class="product-item-link">
+                            <?php echo $block->escapeHtml($_item->getName()); ?>
+                        </a>
+                    </strong>
+                </div>
+                <?php echo $priceHelper->getPriceDisplayCustom($block->getProductPrice($_item)); ?>
+            </div>
+        </div>
+    </div>
+<?php if ($i % $rows == 0 || $i == count($products)) { ?> </div> <?php } ?>
+<?php } ?>
