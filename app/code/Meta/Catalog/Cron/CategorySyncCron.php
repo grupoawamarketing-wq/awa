@@ -68,9 +68,9 @@ class CategorySyncCron
                 }
 
                 $categories[] = [
-                    'id' => 'cat_' . $categoryId,
                     'name' => $name,
-                    'url' => $url
+                    'categorization_criteria' => 'CATEGORY',
+                    'criteria_value' => $name
                 ];
             }
 
@@ -83,6 +83,16 @@ class CategorySyncCron
                             JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
                         )
                     ], $storeId);
+
+                    if ($this->isPermissionDenied($result)) {
+                        $this->logger->info('[Meta Cron] Category sync skipped: app has no permission for /categories', [
+                            'store_id' => $storeId,
+                            'batch_index' => $index + 1,
+                            'http_status' => $result['http_status'] ?? null,
+                            'error' => $result['error'] ?? null
+                        ]);
+                        break;
+                    }
 
                     if (isset($result['error'])) {
                         $this->logger->warning('[Meta Cron] Category batch API error', [
@@ -131,5 +141,18 @@ class CategorySyncCron
         }
 
         return null;
+    }
+
+    /**
+     * @param array<string, mixed> $result
+     */
+    private function isPermissionDenied(array $result): bool
+    {
+        $error = $result['error'] ?? null;
+        if (!is_array($error)) {
+            return false;
+        }
+
+        return (int) ($error['code'] ?? 0) === 10;
     }
 }

@@ -23,6 +23,7 @@ class FBEHelper
     private const RETRYABLE_HTTP_CODES = [429, 500, 502, 503, 504];
     private const DEFAULT_ERROR_MESSAGE = 'Meta Graph API request failed';
     private const META_CATALOG_RATE_LIMIT_CODE = 80014;
+    private const META_PERMISSION_DENIED_CODE = 10;
     private const CATALOG_RATE_LIMIT_COOLDOWN_MS = 60000;
     private const COOLDOWN_SKIP_LOG_INTERVAL_MS = 5000;
 
@@ -272,8 +273,9 @@ class FBEHelper
         int $attempt
     ): void {
         $error = isset($decoded['error']) && is_array($decoded['error']) ? $decoded['error'] : [];
+        $errorCode = isset($error['code']) ? (int) $error['code'] : null;
 
-        $this->logger->error('[Meta FBE] API Error', [
+        $logContext = [
             'method' => $method,
             'endpoint' => $endpoint,
             'store_id' => $storeId,
@@ -284,7 +286,23 @@ class FBEHelper
             'code' => $error['code'] ?? null,
             'error_subcode' => $error['error_subcode'] ?? null,
             'fbtrace_id' => $error['fbtrace_id'] ?? null
-        ]);
+        ];
+
+        if ($this->shouldDemoteApiFailure($endpoint, $errorCode)) {
+            $this->logger->warning('[Meta FBE] API Warning', $logContext);
+            return;
+        }
+
+        $this->logger->error('[Meta FBE] API Error', $logContext);
+    }
+
+    private function shouldDemoteApiFailure(string $endpoint, ?int $errorCode): bool
+    {
+        if ($errorCode !== self::META_PERMISSION_DENIED_CODE) {
+            return false;
+        }
+
+        return (bool) preg_match('#^\d+/categories$#', trim($endpoint, '/'));
     }
 
     private function sleepBeforeRetry(int $attempt, int $httpStatus): void

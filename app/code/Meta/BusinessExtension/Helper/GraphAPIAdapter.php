@@ -162,7 +162,7 @@ class GraphAPIAdapter
             return ['error' => 'Failed to encode events payload', 'http_status' => 0];
         }
 
-        $this->logger->info('[Meta CAPI] Sending events', $logContext);
+        $this->logger->debug('[Meta CAPI] Sending events', $logContext);
 
         return $this->fbeHelper->apiPost($pixelId . '/events', ['data' => $encodedEvents], $storeId);
     }

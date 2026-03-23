@@ -20,6 +20,7 @@ class OrderSync implements OrderSyncInterface
 {
     private const ALLOW_GUEST_ORDERS = false;
     private const GUEST_CLIENT_CODE = 0;
+    private const OPTIONAL_COLUMNS_CACHE_FILE = 'erp_ve_pedido_optional_columns.json';
 
     /**
      * Mapeamento de status ERP -> Magento
@@ -339,9 +340,24 @@ class OrderSync implements OrderSyncInterface
             'TRANSPORTADORA', 'CODRASTREIO'
         ];
 
+        if ($availableOptionalColumns === null) {
+            $cachedColumns = $this->loadCachedOptionalColumns($optionalColumns);
+            if ($cachedColumns !== null) {
+                $availableOptionalColumns = $cachedColumns;
+            }
+        }
+
         // Se já detectamos as colunas disponíveis, ir direto à query segura
         if ($availableOptionalColumns !== null) {
-            return $this->executeStatusQuery($baseColumns, $availableOptionalColumns, $erpOrderId, $optionalColumns);
+            try {
+                return $this->executeStatusQuery($baseColumns, $availableOptionalColumns, $erpOrderId, $optionalColumns);
+            } catch (\Exception $e) {
+                if (!$this->isMissingColumnException($e, $optionalColumns)) {
+                    throw $e;
+                }
+                $availableOptionalColumns = null;
+                $this->clearCachedOptionalColumns();
+            }
         }
 
         // Primeira execução: tentar com TODAS as colunas opcionais
@@ -358,6 +374,7 @@ class OrderSync implements OrderSyncInterface
 
                 // Sucesso — cachear colunas disponíveis
                 $availableOptionalColumns = $columnsToTry;
+                $this->saveCachedOptionalColumns($availableOptionalColumns);
 
                 if ($result) {
                     // Definir colunas faltantes como null no resultado
@@ -390,6 +407,7 @@ class OrderSync implements OrderSyncInterface
                 // Se não sobrou nenhuma coluna opcional, usar apenas as base
                 if (empty($columnsToTry)) {
                     $availableOptionalColumns = [];
+                    $this->saveCachedOptionalColumns($availableOptionalColumns);
                     break;
                 }
             }
@@ -428,6 +446,95 @@ class OrderSync implements OrderSyncInterface
         }
 
         return $result;
+    }
+
+    /**
+     * @param string[] $allOptionalColumns
+     * @return string[]|null
+     */
+    private function loadCachedOptionalColumns(array $allOptionalColumns): ?array
+    {
+        $file = $this->getOptionalColumnsCacheFilePath();
+        if (!is_file($file) || !is_readable($file)) {
+            return null;
+        }
+
+        $raw = @file_get_contents($file);
+        if ($raw === false) {
+            return null;
+        }
+
+        $decoded = json_decode($raw, true);
+        if (!is_array($decoded)) {
+            return null;
+        }
+
+        $allowedLookup = array_flip($allOptionalColumns);
+        $columns = [];
+        foreach ($decoded as $column) {
+            if (!is_string($column)) {
+                continue;
+            }
+            if (isset($allowedLookup[$column])) {
+                $columns[] = $column;
+            }
+        }
+
+        return array_values(array_unique($columns));
+    }
+
+    /**
+     * @param string[] $columns
+     */
+    private function saveCachedOptionalColumns(array $columns): void
+    {
+        $file = $this->getOptionalColumnsCacheFilePath();
+        $dir = dirname($file);
+
+        if (!is_dir($dir) && !@mkdir($dir, 0777, true) && !is_dir($dir)) {
+            return;
+        }
+
+        $payload = json_encode(array_values($columns));
+        if ($payload === false) {
+            return;
+        }
+
+        @file_put_contents($file, $payload, LOCK_EX);
+        @chmod($file, 0666);
+    }
+
+    private function clearCachedOptionalColumns(): void
+    {
+        $file = $this->getOptionalColumnsCacheFilePath();
+        if (is_file($file)) {
+            @unlink($file);
+        }
+    }
+
+    private function getOptionalColumnsCacheFilePath(): string
+    {
+        $basePath = defined('BP') ? BP : sys_get_temp_dir();
+        return rtrim($basePath, '/') . '/var/locks/' . self::OPTIONAL_COLUMNS_CACHE_FILE;
+    }
+
+    /**
+     * @param string[] $optionalColumns
+     */
+    private function isMissingColumnException(\Throwable $exception, array $optionalColumns): bool
+    {
+        $message = $exception->getMessage();
+        if (stripos($message, 'invalid column') !== false) {
+            return true;
+        }
+
+        foreach ($optionalColumns as $column) {
+            if (stripos($message, $column) !== false) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

@@ -26,11 +26,13 @@ class B2BClientRegistration
 
     /** OpenCardB2B - Cadastro de Cliente Endereço */
     private const ORIGEM_ENDERECO = 'FEB11981-5319-49EB-9F1E-4BA02BD22B90';
-
+    private const WARNING_COOLDOWN_SECONDS = 21600;
     private ConnectionInterface $readConnection;
     private Helper $helper;
     private LoggerInterface $logger;
     private ?\PDO $writeConnection = null;
+    private bool $writePermissionChecked = false;
+    private bool $writePermissionGranted = true;
 
     public function __construct(
         ConnectionInterface $readConnection,
@@ -140,6 +142,17 @@ class B2BClientRegistration
             $this->logger->info("[B2B Registration] Client $erpClientCode registered successfully");
             return true;
         } catch (\Exception $e) {
+            if ($this->isInsertPermissionDeniedError($e)) {
+                $this->writePermissionChecked = true;
+                $this->writePermissionGranted = false;
+                $this->writeConnection = null;
+                $this->logger->warning(
+                    '[B2B Registration] INSERT permission denied on GR_INTEGRACAOVALIDADOR. '
+                    . 'Automatic registration disabled for current process.'
+                );
+                return false;
+            }
+
             $this->logger->error('[B2B Registration] Failed to register client ' . $erpClientCode . ': ' . $e->getMessage());
             return false;
         }
@@ -237,6 +250,10 @@ class B2BClientRegistration
      */
     private function getWriteConnection(): ?\PDO
     {
+        if ($this->writePermissionChecked && !$this->writePermissionGranted) {
+            return null;
+        }
+
         if ($this->writeConnection !== null) {
             return $this->writeConnection;
         }
@@ -264,11 +281,111 @@ class B2BClientRegistration
             ]);
             $this->writeConnection->exec('USE ' . $database);
 
+            if (!$this->validateWritePermission($this->writeConnection)) {
+                $this->writeConnection = null;
+                return null;
+            }
+
             $this->logger->info('[B2B Registration] Write connection established');
             return $this->writeConnection;
         } catch (\Exception $e) {
             $this->logger->error('[B2B Registration] Write connection failed: ' . $e->getMessage());
             return null;
+        }
+    }
+
+    /**
+     * Validate INSERT permission on Sectra validator table.
+     */
+    private function validateWritePermission(\PDO $pdo): bool
+    {
+        if ($this->writePermissionChecked) {
+            return $this->writePermissionGranted;
+        }
+
+        $this->writePermissionChecked = true;
+
+        try {
+            $stmt = $pdo->query(
+                "SELECT COUNT(*) FROM fn_my_permissions('dbo.GR_INTEGRACAOVALIDADOR', 'OBJECT') "
+                . "WHERE permission_name = 'INSERT'"
+            );
+            $canInsert = (int) $stmt->fetchColumn();
+
+            $this->writePermissionGranted = $canInsert > 0;
+
+            if (!$this->writePermissionGranted) {
+                if ($this->shouldLogWarningWithCooldown('b2b_insert_permission')) {
+                    $this->logger->warning(
+                        '[B2B Registration] Write user has no INSERT permission on dbo.GR_INTEGRACAOVALIDADOR.'
+                    );
+                }
+            }
+        } catch (\Exception $e) {
+            // Keep flow resilient when permission metadata cannot be queried.
+            $this->writePermissionGranted = true;
+            if ($this->shouldLogWarningWithCooldown('b2b_insert_permission_check_error')) {
+                $this->logger->warning(
+                    '[B2B Registration] Could not verify INSERT permission: ' . $e->getMessage()
+                );
+            }
+        }
+
+        return $this->writePermissionGranted;
+    }
+
+    /**
+     * Detect SQL Server INSERT permission denial.
+     */
+    private function isInsertPermissionDeniedError(\Throwable $exception): bool
+    {
+        return stripos($exception->getMessage(), 'INSERT permission was denied') !== false;
+    }
+
+    /**
+     * Limit repetitive warnings across cron runs.
+     */
+    private function shouldLogWarningWithCooldown(string $key): bool
+    {
+        $basePath = defined('BP') ? BP : sys_get_temp_dir();
+        $lockDir = rtrim($basePath, '/') . '/var/locks';
+
+        if (!is_dir($lockDir) && !@mkdir($lockDir, 0777, true) && !is_dir($lockDir)) {
+            return true;
+        }
+
+        $file = $lockDir . '/erp_warn_' . preg_replace('/[^a-z0-9_]+/i', '_', $key) . '.lock';
+        $handle = @fopen($file, 'c+');
+
+        if ($handle === false) {
+            return true;
+        }
+
+        @chmod($file, 0666);
+
+        if (!flock($handle, LOCK_EX)) {
+            fclose($handle);
+            return true;
+        }
+
+        try {
+            rewind($handle);
+            $last = (int) trim((string) stream_get_contents($handle));
+            $now = time();
+
+            if ($last > 0 && ($now - $last) < self::WARNING_COOLDOWN_SECONDS) {
+                return false;
+            }
+
+            ftruncate($handle, 0);
+            rewind($handle);
+            fwrite($handle, (string) $now);
+            fflush($handle);
+
+            return true;
+        } finally {
+            flock($handle, LOCK_UN);
+            fclose($handle);
         }
     }
 }

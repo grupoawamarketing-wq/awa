@@ -20,6 +20,8 @@ class StockSync implements StockSyncInterface
     private const CACHE_PREFIX = 'erp_stock_';
     private const CACHE_NEGATIVE_PREFIX = 'erp_stock_neg_';
     private const BATCH_SIZE = 1000;
+    private const ANOMALY_SAMPLE_LIMIT = 15;
+    private const ANOMALY_WARNING_COOLDOWN_SECONDS = 21600;
 
     private ConnectionInterface $connection;
     private Helper $helper;
@@ -31,6 +33,8 @@ class StockSync implements StockSyncInterface
     private LoggerInterface $logger;
     private ResourceConnection $resourceConnection;
     private ?array $existingSkuCache = null;
+    /** @var array<int, array{sku: string, change_percent: float|int|null, previous_qty: float|int|null, new_qty: float|int|null}> */
+    private array $anomalySamples = [];
 
     public function __construct(
         ConnectionInterface $connection,
@@ -303,7 +307,7 @@ class StockSync implements StockSyncInterface
             $this->cache->remove($singleNegativeKey);
         }
 
-        $this->logger->debug('[ERP] Stock cache invalidated for SKU: ' . $sku);
+        // Intentionally no per-SKU log here to avoid debug log flooding during bulk sync.
     }
 
     public function invalidateAllCache(): void
@@ -349,16 +353,19 @@ class StockSync implements StockSyncInterface
         $startTime = microtime(true);
         $result = $this->initializeSyncResult();
         $this->existingSkuCache = null; // Reset cache for fresh data
+        $this->anomalySamples = [];
 
         try {
             $filiais = $this->helper->getStockFiliais();
             $result = $this->runBranchSync($filiais, $result);
             $result = $this->finalizeSyncResult($result, $startTime);
+            $this->logAnomalySummary($result);
             $this->logSyncSummary($filiais, $result);
 
             $this->logger->info('[ERP] Stock sync completed', $result);
         } catch (\Exception $e) {
             $result = $this->finalizeSyncResult($result, $startTime);
+            $this->logAnomalySummary($result);
             $this->logger->error('[ERP] Stock sync failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -610,14 +617,92 @@ class StockSync implements StockSyncInterface
             return false;
         }
 
-        $this->logger->warning('[ERP] Stock anomaly detected', [
-            'sku' => $sku,
-            'change_percent' => $validationResult->getField('anomaly_percent_change'),
-            'previous_qty' => $validationResult->getField('previous_quantity'),
-            'new_qty' => $validationResult->getField('quantity'),
-        ]);
+        if (count($this->anomalySamples) < self::ANOMALY_SAMPLE_LIMIT) {
+            $this->anomalySamples[] = [
+                'sku' => $sku,
+                'change_percent' => $validationResult->getField('anomaly_percent_change'),
+                'previous_qty' => $validationResult->getField('previous_quantity'),
+                'new_qty' => $validationResult->getField('quantity'),
+            ];
+        }
 
         return true;
+    }
+
+    /**
+     * Logs one consolidated anomaly warning per sync execution.
+     */
+    private function logAnomalySummary(array $result): void
+    {
+        $total = (int) ($result['anomalies_detected'] ?? 0);
+        if ($total <= 0) {
+            return;
+        }
+
+        $sampleCount = count($this->anomalySamples);
+        $context = [
+            'anomalies_detected' => $total,
+            'sample_count' => $sampleCount,
+            'sample_limit' => self::ANOMALY_SAMPLE_LIMIT,
+            'samples' => $this->anomalySamples,
+        ];
+
+        if ($total > $sampleCount) {
+            $context['suppressed_count'] = $total - $sampleCount;
+        }
+
+        if (!$this->shouldLogAnomalyWarning()) {
+            return;
+        }
+
+        $this->logger->warning('[ERP] Stock anomalies detected during sync', $context);
+    }
+
+    /**
+     * Limit repetitive anomaly warnings across cron runs.
+     */
+    private function shouldLogAnomalyWarning(): bool
+    {
+        $basePath = defined('BP') ? BP : sys_get_temp_dir();
+        $lockDir = rtrim($basePath, '/') . '/var/locks';
+
+        if (!is_dir($lockDir) && !@mkdir($lockDir, 0777, true) && !is_dir($lockDir)) {
+            return true;
+        }
+
+        $file = $lockDir . '/erp_warn_stock_anomalies.lock';
+        $handle = @fopen($file, 'c+');
+
+        if ($handle === false) {
+            return true;
+        }
+
+        @chmod($file, 0666);
+
+        if (!flock($handle, LOCK_EX)) {
+            fclose($handle);
+            return true;
+        }
+
+        try {
+            rewind($handle);
+            $last = (int) trim((string) stream_get_contents($handle));
+            $now = time();
+
+            if ($last > 0 && ($now - $last) < self::ANOMALY_WARNING_COOLDOWN_SECONDS) {
+                return false;
+            }
+
+            ftruncate($handle, 0);
+            rewind($handle);
+            fwrite($handle, (string) $now);
+            fflush($handle);
+
+            return true;
+        } finally {
+            flock($handle, LOCK_UN);
+            fclose($handle);
+        }
     }
 
     /**

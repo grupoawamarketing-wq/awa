@@ -571,7 +571,10 @@ class CustomerSync implements CustomerSyncInterface
         $fonecel = $erpData['FONECEL'] ?? '';
         if (!empty($fonecel) || !empty($whatsapp)) {
             $phone = $whatsapp ?: $fonecel;
-            $customer->setCustomAttribute('celular', $this->formatPhone($phone));
+            $formattedPhone = $this->formatPhone($phone);
+            if ($formattedPhone !== '') {
+                $customer->setCustomAttribute('celular', $formattedPhone);
+            }
         }
 
         // Transportadora preferencial do ERP
@@ -604,10 +607,12 @@ class CustomerSync implements CustomerSyncInterface
         $phone = $erpData['WHATSAPP'] ?? $erpData['FONECEL'] ?? '';
         if ($phone) {
             $formattedPhone = $this->formatPhone($phone);
-            $existingPhone = $customer->getCustomAttribute('celular');
-            if (!$existingPhone || $existingPhone->getValue() !== $formattedPhone) {
-                $customer->setCustomAttribute('celular', $formattedPhone);
-                $updated = true;
+            if ($formattedPhone !== '') {
+                $existingPhone = $customer->getCustomAttribute('celular');
+                if (!$existingPhone || $existingPhone->getValue() !== $formattedPhone) {
+                    $customer->setCustomAttribute('celular', $formattedPhone);
+                    $updated = true;
+                }
             }
         }
 
@@ -820,7 +825,10 @@ class CustomerSync implements CustomerSyncInterface
 
     private function formatPhone(string $phone): string
     {
-        $clean = preg_replace('/[^0-9]/', '', $phone);
+        $clean = preg_replace('/[^0-9]/', '', $phone) ?? '';
+        if ($clean === '') {
+            return '';
+        }
 
         // Remove prefixo internacional 55
         if (strlen($clean) >= 12 && str_starts_with($clean, '55')) {
@@ -833,7 +841,7 @@ class CustomerSync implements CustomerSyncInterface
             return sprintf('(%s) %s-%s', substr($clean, 0, 2), substr($clean, 2, 4), substr($clean, 6));
         }
 
-        return $clean ?: $phone;
+        return $clean;
     }
 
     private function formatCep(string $cep): string
