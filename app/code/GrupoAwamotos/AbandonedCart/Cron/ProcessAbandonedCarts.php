@@ -7,6 +7,7 @@ use GrupoAwamotos\AbandonedCart\Api\AbandonedCartRepositoryInterface;
 use GrupoAwamotos\AbandonedCart\Api\Data\AbandonedCartInterface;
 use GrupoAwamotos\AbandonedCart\Api\Data\AbandonedCartInterfaceFactory;
 use GrupoAwamotos\AbandonedCart\Helper\Data as Helper;
+use Magento\Framework\App\ResourceConnection;
 use Magento\Quote\Model\ResourceModel\Quote\CollectionFactory as QuoteCollectionFactory;
 use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollectionFactory;
 use Psr\Log\LoggerInterface;
@@ -18,6 +19,7 @@ class ProcessAbandonedCarts
     private OrderCollectionFactory $orderCollectionFactory;
     private AbandonedCartRepositoryInterface $abandonedCartRepository;
     private AbandonedCartInterfaceFactory $abandonedCartFactory;
+    private ResourceConnection $resource;
     private LoggerInterface $logger;
 
     public function __construct(
@@ -26,6 +28,7 @@ class ProcessAbandonedCarts
         OrderCollectionFactory $orderCollectionFactory,
         AbandonedCartRepositoryInterface $abandonedCartRepository,
         AbandonedCartInterfaceFactory $abandonedCartFactory,
+        ResourceConnection $resource,
         LoggerInterface $logger
     ) {
         $this->helper = $helper;
@@ -33,6 +36,7 @@ class ProcessAbandonedCarts
         $this->orderCollectionFactory = $orderCollectionFactory;
         $this->abandonedCartRepository = $abandonedCartRepository;
         $this->abandonedCartFactory = $abandonedCartFactory;
+        $this->resource = $resource;
         $this->logger = $logger;
     }
 
@@ -65,14 +69,27 @@ class ProcessAbandonedCarts
             ->addFieldToFilter('updated_at', ['gteq' => $maxAge])
             ->setPageSize(500);
 
+        // Load collection once so we can batch-check existing records
+        $collection->load();
+
+        if (!$collection->count()) {
+            return;
+        }
+
+        // Pre-load all existing abandoned cart quote_ids in a SINGLE query
+        // This eliminates the N+1 pattern (one getByQuoteId() per quote)
+        $quoteIds = array_map('intval', $collection->getColumnValues('entity_id'));
+        $existingIds = $this->loadExistingQuoteIds($quoteIds);
+
         $processed = 0;
         $skipped = 0;
 
         foreach ($collection as $quote) {
             try {
-                // Verificar se já existe registro
-                $existing = $this->abandonedCartRepository->getByQuoteId((int) $quote->getId());
-                if ($existing) {
+                $quoteId = (int) $quote->getId();
+
+                // O(1) set lookup — replaces individual getByQuoteId() DB call
+                if (isset($existingIds[$quoteId])) {
                     $skipped++;
                     continue;
                 }
@@ -93,7 +110,7 @@ class ProcessAbandonedCarts
 
                 // Criar registro
                 $abandonedCart = $this->abandonedCartFactory->create();
-                $abandonedCart->setQuoteId((int) $quote->getId())
+                $abandonedCart->setQuoteId($quoteId)
                     ->setCustomerId($quote->getCustomerId() ? (int) $quote->getCustomerId() : null)
                     ->setCustomerEmail($quote->getCustomerEmail())
                     ->setCustomerName($this->getCustomerName($quote))
@@ -124,22 +141,82 @@ class ProcessAbandonedCarts
 
     private function checkRecoveredCarts(): void
     {
-        // Buscar pedidos recentes e marcar carrinhos como recuperados
+        // Buscar pedidos recentes — limitado a 500 e somente coluna necessária
         $recentOrders = $this->orderCollectionFactory->create();
-        $recentOrders->addFieldToFilter('created_at', ['gteq' => date('Y-m-d H:i:s', strtotime('-24 hours'))]);
+        $recentOrders
+            ->addFieldToSelect(['quote_id'])
+            ->addFieldToFilter('created_at', ['gteq' => date('Y-m-d H:i:s', strtotime('-24 hours'))])
+            ->setPageSize(500);
 
-        $recovered = 0;
-
+        $quoteIds = [];
         foreach ($recentOrders as $order) {
             $quoteId = (int) $order->getQuoteId();
-            if ($quoteId && $this->abandonedCartRepository->markAsRecovered($quoteId)) {
-                $recovered++;
+            if ($quoteId > 0) {
+                $quoteIds[] = $quoteId;
             }
         }
+
+        if (empty($quoteIds)) {
+            return;
+        }
+
+        // Single batch UPDATE instead of N individual markAsRecovered() calls
+        $recovered = $this->batchMarkRecovered($quoteIds);
 
         if ($recovered > 0) {
             $this->logger->info(sprintf('[AbandonedCart] Marked %d carts as recovered', $recovered));
         }
+    }
+
+    /**
+     * Pre-load existing abandoned cart quote IDs as a hash-set for O(1) lookup.
+     *
+     * @param int[] $quoteIds
+     * @return array<int, true>
+     */
+    private function loadExistingQuoteIds(array $quoteIds): array
+    {
+        if (empty($quoteIds)) {
+            return [];
+        }
+
+        $connection = $this->resource->getConnection();
+        $table = $this->resource->getTableName('grupoawamotos_abandoned_cart');
+
+        $select = $connection->select()
+            ->from($table, ['quote_id'])
+            ->where('quote_id IN (?)', $quoteIds);
+
+        $rows = $connection->fetchCol($select);
+
+        return array_fill_keys(array_map('intval', $rows), true);
+    }
+
+    /**
+     * Batch-mark abandoned carts as recovered using a single UPDATE statement.
+     * Replaces N individual markAsRecovered() calls (each with SELECT + UPDATE).
+     *
+     * @param int[] $quoteIds
+     * @return int Number of rows updated
+     */
+    private function batchMarkRecovered(array $quoteIds): int
+    {
+        $connection = $this->resource->getConnection();
+        $table = $this->resource->getTableName('grupoawamotos_abandoned_cart');
+
+        return (int) $connection->update(
+            $table,
+            [
+                'recovered'    => 1,
+                'recovered_at' => date('Y-m-d H:i:s'),
+                'status'       => AbandonedCartInterface::STATUS_RECOVERED,
+                'updated_at'   => date('Y-m-d H:i:s'),
+            ],
+            [
+                'quote_id IN (?)' => $quoteIds,
+                'recovered = ?'   => 0,
+            ]
+        );
     }
 
     private function getCustomerName($quote): string

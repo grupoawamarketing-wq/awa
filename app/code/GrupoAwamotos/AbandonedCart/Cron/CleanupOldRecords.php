@@ -3,19 +3,19 @@ declare(strict_types=1);
 
 namespace GrupoAwamotos\AbandonedCart\Cron;
 
-use GrupoAwamotos\AbandonedCart\Model\ResourceModel\AbandonedCart\CollectionFactory;
+use Magento\Framework\App\ResourceConnection;
 use Psr\Log\LoggerInterface;
 
 class CleanupOldRecords
 {
-    private CollectionFactory $collectionFactory;
+    private ResourceConnection $resource;
     private LoggerInterface $logger;
 
     public function __construct(
-        CollectionFactory $collectionFactory,
+        ResourceConnection $resource,
         LoggerInterface $logger
     ) {
-        $this->collectionFactory = $collectionFactory;
+        $this->resource = $resource;
         $this->logger = $logger;
     }
 
@@ -26,15 +26,13 @@ class CleanupOldRecords
         // Remover registros mais antigos que 90 dias
         $cutoffDate = date('Y-m-d H:i:s', strtotime('-90 days'));
 
-        $collection = $this->collectionFactory->create();
-        $collection->addFieldToFilter('created_at', ['lteq' => $cutoffDate]);
+        $connection = $this->resource->getConnection();
+        $table = $this->resource->getTableName('grupoawamotos_abandoned_cart');
 
-        $count = $collection->getSize();
+        // Single bulk DELETE — replaces O(N) individual item->delete() calls
+        $count = $connection->delete($table, ['created_at <= ?' => $cutoffDate]);
 
         if ($count > 0) {
-            foreach ($collection as $item) {
-                $item->delete();
-            }
             $this->logger->info(sprintf('[AbandonedCart] Cleaned up %d old records', $count));
         }
     }

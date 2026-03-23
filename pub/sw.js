@@ -12,7 +12,7 @@
  * @author AWA Motos Dev Team
  */
 
-const SW_VERSION = '2.2.0';
+const SW_VERSION = '3.0.0';
 const CACHE_STATIC = 'awamotos-static-v3';
 const CACHE_IMAGES = 'awamotos-images-v3';
 const CACHE_PAGES = 'awamotos-pages-v3';
