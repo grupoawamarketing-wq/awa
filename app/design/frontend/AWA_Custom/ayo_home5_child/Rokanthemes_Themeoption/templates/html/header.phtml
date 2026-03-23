@@ -1,151 +1,118 @@
 <?php
-/**
- * @var \Magento\Framework\View\Element\Template $block
- * @var \Magento\Framework\Escaper $escaper
- */
+/** @var \Rokanthemes\Themeoption\Block\Themeoption $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$headerExperimentPayload = [
+    'enabled' => false,
+    'rollout_percentage' => 0,
+    'bucket' => 0,
+    'seed' => 'guest:anonymous',
+    'variant' => 'control',
+    'is_active' => false,
+];
 
-use GrupoAwamotos\Theme\ViewModel\ContactInfo;
+try {
+    $headerExperimentHelper = $this->helper('GrupoAwamotos\Theme\Helper\HeaderExperiment');
+    $resolvedPayload = $headerExperimentHelper->getPayload();
 
-$viewModel = $block->getData('view_model');
-$contactInfo = $block->getData('contact_view_model');
-$isStickyEnabled = $viewModel ? $viewModel->isStickyHeaderEnabled() : false;
-$stickyLogoUrl = $viewModel ? $viewModel->getStickyLogoUrl() : '';
-$stickyLogoSrc = $stickyLogoUrl !== '' ? $stickyLogoUrl : $block->getViewFileUrl('images/logo_sticky.png');
-$headerExperimentEnabled = $viewModel ? $viewModel->isHeaderExperimentEnabled() : false;
-$headerExperimentRollout = $viewModel ? $viewModel->getHeaderExperimentRolloutPercentage() : 0;
-$headerExperimentSeed = $viewModel ? $viewModel->getHeaderExperimentSeed() : 'home5_header_v1';
-$legacyHeaderContactHtml = trim((string) $block->getChildHtml('hotline_header'));
+    if (is_array($resolvedPayload)) {
+        $headerExperimentPayload = array_merge($headerExperimentPayload, $resolvedPayload);
+    }
+} catch (\Throwable $exception) {
+    // Mantem o header funcional mesmo se o rollout estiver indisponivel.
+}
+
+$headerExperimentVariant = (string) ($headerExperimentPayload['variant'] ?? 'control');
+$headerExperimentRollout = (int) ($headerExperimentPayload['rollout_percentage'] ?? 0);
+$headerExperimentBucket = (int) ($headerExperimentPayload['bucket'] ?? 0);
+$headerExperimentSeed = (string) ($headerExperimentPayload['seed'] ?? 'guest:anonymous');
+$headerExperimentEnabled = !empty($headerExperimentPayload['enabled']);
+$headerExperimentActive = !empty($headerExperimentPayload['is_active']);
+$headerExperimentStateClass = $headerExperimentActive ? ' awa-header-exp-active' : ' awa-header-exp-control';
+$headerExperimentVariantClass = ' awa-header-exp--' . preg_replace('/[^a-z0-9_-]+/i', '-', strtolower($headerExperimentVariant));
 ?>
-<header role="banner" class="awa-site-header awa-header-professional" data-awa-component="site-header" data-awa-variant="ayo-home5" data-awa-header-exp-enabled="<?= $headerExperimentEnabled ? '1' : '0' ?>" data-awa-header-exp-rollout="<?= (int) $headerExperimentRollout ?>" data-awa-header-exp-seed="<?= $escaper->escapeHtmlAttr($headerExperimentSeed) ?>">
-<div id="header" class="header-container awa-site-header__shell" data-awa-header-shell="true">
+<header role="banner"
+        class="awa-site-header awa-header-professional<?= $escaper->escapeHtmlAttr($headerExperimentStateClass . $headerExperimentVariantClass) ?>"
+        data-awa-component="site-header"
+        data-awa-variant="ayo-home5"
+        data-awa-header-exp-enabled="<?= $headerExperimentEnabled ? 'true' : 'false' ?>"
+        data-awa-header-exp-rollout="<?= $escaper->escapeHtmlAttr((string) $headerExperimentRollout) ?>"
+        data-awa-header-exp-bucket="<?= $escaper->escapeHtmlAttr((string) $headerExperimentBucket) ?>"
+        data-awa-header-exp-seed="<?= $escaper->escapeHtmlAttr($headerExperimentSeed) ?>"
+        data-awa-header-exp-variant="<?= $escaper->escapeHtmlAttr($headerExperimentVariant) ?>"
+        data-awa-header-exp-active="<?= $headerExperimentActive ? 'true' : 'false' ?>">
+<div id="header" class="header-container" data-awa-header-shell="true">
 	<div class="header-content" data-awa-header-content="true">
-		<!-- Top Utility Bar -->
-		<div class="top-header awa-utility-bar" data-awa-header-utility="true">
+		<div class="top-header" data-awa-header-utility="true">
 			<div class="container">
-				<div class="row awa-utility-bar__inner">
-					<div class="col-md-6 col-lg-6 hidden-xs hidden-sm awa-header-utility__left">
+				<div class="row">
+					<div class="col-md-6 col-lg-6 hidden-xs hidden-sm">
 						<div class="top-bar-left" data-awa-header-utility-left="true">
-							<?php echo $block->getChildHtml('top-left-static'); ?>
+							<?php echo $this->getChildHtml('top-left-static'); ?>
 						</div>
 					</div>
-					<div class="col-xs-12 col-md-6 col-lg-6 awa-header-utility__right">
+					<div class="col-xs-12 col-md-6 col-lg-6">
 						<div class="top-bar-right" data-awa-header-utility-right="true">
 							<div class="top-info" data-awa-header-account-group="true">
-								<?= $block->getChildHtml('awaB2bModeBadge') ?>
-								<nav class="top-account has-child" data-awa-top-account="true" aria-label="<?= $escaper->escapeHtmlAttr(__('Conta e Configurações')) ?>">
-									<?php echo $block->getChildHtml("top.links"); ?>
-								</nav>
+								<?= $this->getChildHtml('awaB2bModeBadge') ?>
+								<div class="top-account has-child" data-awa-top-account="true">
+									<?php echo $this->getChildHtml("top.links"); ?>
+								</div>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
-
-		<!-- Main Header -->
-		<div class="header awa-main-header" data-awa-header-main="true">
+		<div class="header" data-awa-header-main="true">
 			<div class="header_main">
 				<div class="header-main">
 					<div class="container">
 						<div class="row">
-							<div class="wp-header awa-main-header__inner" data-awa-header-row="brand-search">
-								<div class="col-md-3 col-sm-3 col-xs-12 awa-header-brand" data-awa-header-col="brand">
-									<?php echo $block->getChildHtml("logo"); ?>
+							<div class="wp-header" data-awa-header-row="brand-search">
+								<div class="col-md-2 col-sm-2 col-xs-12">
+									<?php echo $this->getChildHtml("logo"); ?>
 								</div>
-								<div class="col-md-6 col-sm-6 col-xs-12 top-search awa-header-search-col" data-awa-header-search-row="true" data-awa-header-col="search">
-									<div class="awa-search-wrapper" role="search" aria-label="<?= $escaper->escapeHtmlAttr(__('Pesquisa de Produtos')) ?>">
-										<?php echo $block->getChildHtml('topSearch'); ?>
-									</div>
-								</div>
-								<div class="col-md-3 col-sm-3 hidden-xs awa-header-right-col" data-awa-header-col="right">
-									<div class="awa-header-contact-slot hidden-xs hidden-sm" data-awa-header-contact="true">
-										<div class="awa-b2b-trust-badges" data-awa-deferred-badges="true" aria-hidden="true">
-											<span class="trust-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--awa-color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg> Compra Segura</span>
-											<span class="trust-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--awa-color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> SSL 256 bits</span>
-										</div>
-										<?php if ($contactInfo instanceof ContactInfo && $contactInfo->hasAnyContact()): ?>
-											<div class="awa-header-contact-links" aria-label="<?= $escaper->escapeHtmlAttr(__('Atendimento Comercial')) ?>">
-												<span class="awa-header-contact-links__label"><?= $escaper->escapeHtml(__('Atendimento B2B')) ?></span>
-												<div class="awa-header-contact-links__items">
-													<?php if ($contactInfo->hasWhatsApp()): ?>
-														<a class="awa-header-contact-links__item awa-header-contact-links__item--whatsapp"
-														   href="<?= $escaper->escapeUrl($contactInfo->getWhatsAppUrl()) ?>"
-														   target="_blank"
-														   rel="noopener noreferrer"
-														   aria-label="<?= $escaper->escapeHtmlAttr(__('Falar no WhatsApp comercial')) ?>">
-															<span class="awa-header-contact-links__icon" aria-hidden="true"><i class="fa fa-whatsapp"></i></span>
-															<span class="awa-header-contact-links__text"><?= $escaper->escapeHtml(__('WhatsApp')) ?></span>
-														</a>
-													<?php endif; ?>
-													<?php if ($contactInfo->hasPhone()): ?>
-														<a class="awa-header-contact-links__item"
-														   href="<?= $escaper->escapeUrl($contactInfo->getPhoneUrl()) ?>"
-														   aria-label="<?= $escaper->escapeHtmlAttr(__('Ligar para %1', $contactInfo->getPhone())) ?>">
-															<span class="awa-header-contact-links__icon" aria-hidden="true"><i class="fa fa-phone"></i></span>
-															<span class="awa-header-contact-links__text"><?= $escaper->escapeHtml($contactInfo->getPhone()) ?></span>
-														</a>
-													<?php endif; ?>
-													<?php if ($contactInfo->hasEmail()): ?>
-														<a class="awa-header-contact-links__item"
-														   href="<?= $escaper->escapeUrl($contactInfo->getEmailUrl()) ?>"
-														   aria-label="<?= $escaper->escapeHtmlAttr(__('Enviar e-mail para %1', $contactInfo->getEmail())) ?>">
-															<span class="awa-header-contact-links__icon" aria-hidden="true"><i class="fa fa-envelope-o"></i></span>
-															<span class="awa-header-contact-links__text"><?= $escaper->escapeHtml(__('E-mail')) ?></span>
-														</a>
-													<?php endif; ?>
-												</div>
-											</div>
-										<?php elseif ($legacyHeaderContactHtml !== ''): ?>
-											<?= /* @noEscape */ $legacyHeaderContactHtml ?>
-										<?php endif; ?>
-									</div>
-									<div class="mini-cart-wrapper shadowcart awa-header-minicart" role="region" aria-label="<?= $escaper->escapeHtmlAttr(__('Carrinho de Compras')) ?>">
+								<div class="col-md-10 col-sm-10 col-xs-12 top-search" data-awa-header-search-row="true">
+									<?php echo $this->getChildHtml('topSearch'); ?>
+									<div class="mini-cart-wrapper shadowcart">
 										<div class="mini-carts">
-											<?php echo $block->getChildHtml("minicart");?>
+											<?php echo $this->getChildHtml("minicart"); ?>
 										</div>
 									</div>
+									<?php echo $this->getChildHtml('hotline_header'); ?>
 								</div>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
-		</div>
-
-		<!-- Navigation Bar -->
-		<div class="header-control header-nav header-nav-global cms_home_1 awa-nav-bar" data-awa-header-nav="true">
-			<div class="container">
-				<div class="row awa-nav-bar__inner">
-					<button data-action="toggle-nav" class="action nav-toggle" data-awa-nav-toggle="true" aria-label="<?= $escaper->escapeHtmlAttr(__('Abrir Menu Mobile')) ?>" aria-expanded="false" aria-controls="awa-primary-navigation">
-						<span><?= $escaper->escapeHtml(__('Menu')) ?></span>
-					</button>
-
-					<div class="col-lg-3 col-md-3 col-sm-3 col-xs-6 menu_left_home1 awa-header-categories">
-						<nav class="awa-nav-categories" aria-label="<?= $escaper->escapeHtmlAttr(__('Menu de Categorias')) ?>">
-							<?php /* menu.vertical is rendered inside top.navigation.sections via sections.phtml */ ?>
-							<?= $block->getChildHtml('top.navigation.sections') ?>
-						</nav>
-					</div>
-
-					<div class="col-lg-7 col-md-7 col-sm-9 menu_primary hidden-xs awa-header-primary-nav" data-awa-main-nav-shell="true" id="awa-primary-navigation">
-						<div class="header-wrapper-sticky<?php echo (!$isStickyEnabled) ? '' : ' enabled-header-sticky'; ?>">
-							<div class="container-header-sticky">
-								<div class="logo-sticky">
-									<a href="<?php echo $escaper->escapeUrl($block->getUrl(''));?>" title="<?php echo $escaper->escapeHtmlAttr(__('Página Inicial'));?>">
-										<img src="<?php echo $escaper->escapeUrl($stickyLogoSrc);?>" alt="<?php echo $escaper->escapeHtmlAttr(__('Logo Awamotos'));?>" width="180" height="40" loading="lazy" decoding="async"/>
-									</a>
+			<div class="header-control header-nav header-nav-global cms_home_1" data-awa-header-nav="true">
+				<div class="container">
+					<div class="row">
+						<span data-action="toggle-nav" class="action nav-toggle" data-awa-nav-toggle="true"><span><?= $escaper->escapeHtml(__('Toggle Nav')) ?></span></span>
+						<div class="col-lg-2 col-md-3 col-sm-2 col-xs-6 menu_left_home1">
+							<nav class="awa-nav-categories" aria-label="<?= $escaper->escapeHtmlAttr(__('Menu de categorias')) ?>">
+								<?php /* menu.vertical is rendered inside top.navigation.sections via sections.phtml */ ?>
+								<?= $this->getChildHtml('top.navigation.sections') ?>
+							</nav>
+						</div>
+						<div class="col-lg-7 col-md-7 col-sm-10 menu_primary hidden-xs" data-awa-main-nav-shell="true">
+							<div class="header-wrapper-sticky<?php echo (!$this->helper('Rokanthemes\Themeoption\Helper\Themeconfig')->isEnableStickyHeader()) ? '' : ' enabled-header-sticky'; ?>">
+								<div class="container-header-sticky">
+									<div class="col-sticky-logo">
+										<div class="logo-sticky"><a href="<?php echo $this->escapeUrl($this->getUrl('')); ?>" title="<?php echo $this->escapeHtmlAttr(__('Logo')); ?>"><img src="<?php echo ($this->helper('Rokanthemes\Themeoption\Helper\Themeconfig')->getStickyLogoHeader() != '') ? $this->escapeUrl($this->helper('Rokanthemes\Themeoption\Helper\Themeconfig')->getStickyLogoHeader()) : $this->escapeUrl($this->getViewFileUrl('images/logo_sticky.png')); ?>" alt="<?php echo $this->escapeHtmlAttr(__('Logo')); ?>" width="180" height="40" loading="lazy"/></a></div>
+										<nav class="top-menu top-menu-sticky" aria-label="<?= $escaper->escapeHtmlAttr(__('Menu principal')) ?>">
+											<?php echo $this->getChildHtml("custom.topnav"); ?>
+										</nav>
+									</div>
 								</div>
-								<nav class="top-menu top-menu-sticky" aria-label="<?= $escaper->escapeHtmlAttr(__('Menu de Navegação Principal')) ?>">
-									<?php echo $block->getChildHtml("custom.topnav"); ?>
-								</nav>
 							</div>
 						</div>
-					</div>
-
-					<div class="col-lg-2 col-md-2 hidden-sm hidden-xs box_language awa-header-locale">
-						<div class="top-header-locale" role="group" aria-label="<?= $escaper->escapeHtmlAttr(__('Preferências de Região')) ?>">
-							<?php echo $block->getChildHtml("store_language"); ?>
-							<?php echo $block->getChildHtml("currency"); ?>
+						<div class="col-lg-2 col-md-2 hidden-sm hidden-xs box_language">
+							<div class="top-header">
+								<?php echo $this->getChildHtml("store_language"); ?>
+								<?php echo $this->getChildHtml("currency"); ?>
+							</div>
 						</div>
 					</div>
 				</div>
