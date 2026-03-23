@@ -118,3 +118,47 @@ Os agents e prompts são genéricos o suficiente para funcionar em qualquer proj
 - Custom agents aparecem no dropdown de agents
 
 Criado por Claude para Jess @ AWA Motos — Fevereiro 2026
+
+---
+
+## Atualizações Técnicas — Header Ayo Home5 (2026-03-23)
+
+- Refatoração de semântica no header com landmarks e atributos ARIA para navegação, busca e minicart.
+- Padronização do comportamento responsivo do menu hamburger com fallback em JavaScript e sincronização de `aria-expanded`.
+- Otimização de performance no minicart com inicialização deferida em arquivo dedicado para reduzir trabalho no carregamento inicial.
+- Melhoria de busca com `aria-busy`, painel de sugestões com status em `aria-live` e estado visual controlado para digitação/autocomplete.
+- Lazy loading de elementos não críticos do header via loader em idle (`requestIdleCallback` com fallback).
+- Reforço de compatibilidade cross-browser com detecção de suporte a listeners passivos e fallback para assinatura tradicional.
+- Ajustes visuais com transições suaves e respeito a `prefers-reduced-motion`.
+- Cobertura de testes unitários ampliada no `HeaderData` para cenários de normalização de paths e falhas seguras.
+
+### Arquivos alterados nesta rodada
+
+- `app/design/frontend/AWA_Custom/ayo_home5_child/Rokanthemes_Themeoption/templates/html/header.phtml`
+- `app/design/frontend/AWA_Custom/ayo_home5_child/Magento_Search/templates/form.mini.phtml`
+- `app/design/frontend/AWA_Custom/ayo_home5_child/Magento_Checkout/templates/cart/minicart.phtml`
+- `app/design/frontend/AWA_Custom/ayo_home5_child/Magento_Theme/templates/html/awa-custom-js-loader.phtml`
+- `app/design/frontend/AWA_Custom/ayo_home5_child/web/js/awa-header-a11y-performance.js`
+- `app/design/frontend/AWA_Custom/ayo_home5_child/web/js/awa-minicart-defer-init.js`
+- `app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_awa-header-professional.less`
+- `app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_awa-search-professional.less`
+- `app/code/GrupoAwamotos/Theme/ViewModel/HeaderData.php`
+- `app/code/GrupoAwamotos/Theme/Test/Unit/ViewModel/HeaderDataTest.php`
+
+### Validação executada
+
+- `php -l` nos templates e classes alteradas.
+- `node --check` nos arquivos JS novos/refatorados.
+- `make ayo-child-js-check`.
+- `phpunit` para testes unitários de `HeaderData` e `FooterData`.
+- `bin/magento cache:flush` após alterações.
+
+### Rollout incremental, A/B e reversão
+
+- Configuração adicionada em `Stores > Configuration > AWA Motos > Tema & Contato > Header Experimentação`.
+- Feature flag: `grupoawamotos_theme/header_experiment/enabled`.
+- Percentual de rollout: `grupoawamotos_theme/header_experiment/rollout_percentage`.
+- Seed de variação: `grupoawamotos_theme/header_experiment/variant_seed`.
+- Variação persistida por visitante via `localStorage` com bucket fixo (A/B estável).
+- Exposição enviada para `dataLayer` com evento `awa_header_experiment_exposure`.
+- Reversão imediata: definir `enabled=0` ou `rollout_percentage=0` e limpar cache.

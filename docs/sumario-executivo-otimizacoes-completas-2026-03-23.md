@@ -1,8 +1,8 @@
 # Sumário Executivo — Otimizações de Performance CSS Completas
 
-**Data:** 2026-03-23  
-**Sessão:** Otimização contínua de performance frontend  
-**Tempo Total:** ~2 horas (125 minutos)  
+**Data:** 2026-03-23
+**Sessão:** Otimização contínua de performance frontend
+**Tempo Total:** ~2 horas (125 minutos)
 **Status:** ✅ 3 fases implementadas, testáveis e documentadas
 
 ---
@@ -130,7 +130,7 @@ Implementar otimizações de performance CSS para melhorar Core Web Vitals (FCP,
    <link rel="preload" href="css/awa-bundle-core.css" as="style"/>
    <link rel="preload" href="css/awa-bundle-refinements.css" as="style"/>
    <link rel="preload" href="css/awa-visual-fixes-critical.css" as="style"/>
-   
+
    <!-- Fonts Críticas (Rubik) -->
    <link rel="preload" href="fonts/rubik/rubik-400.woff2" as="font" type="font/woff2" crossorigin="anonymous"/>
    <link rel="preload" href="fonts/rubik/rubik-600.woff2" as="font" type="font/woff2" crossorigin="anonymous"/>
@@ -156,8 +156,8 @@ Implementar otimizações de performance CSS para melhorar Core Web Vitals (FCP,
 
 ### Novo Arquivo: awa-visual-fixes-critical-optimized.css
 
-**Propósito:** Versão com especificidade reduzida usando `:where()`  
-**Tamanho:** 7.3KB (vs 15KB original)  
+**Propósito:** Versão com especificidade reduzida usando `:where()`
+**Tamanho:** 7.3KB (vs 15KB original)
 **Status:** Referência para futuro deployment
 
 ---
@@ -212,7 +212,7 @@ Implementar otimizações de performance CSS para melhorar Core Web Vitals (FCP,
 - `awa-visual-fixes-critical-optimized.css` (novo)
 - 5 documentos `.md` (novos)
 
-**Linhas adicionadas:** ~2000 (código + documentação)  
+**Linhas adicionadas:** ~2000 (código + documentação)
 **Cache limpo:** 3x (layout + full_page)
 
 ---
@@ -362,8 +362,8 @@ lighthouse https://awamotos.com/ --only-categories=performance --preset=mobile -
 - LCP: 2.5s → **1.75s** (-30% adicional)
 - Lighthouse: +15-18 pontos
 
-**Esforço:** 6-8 horas  
-**Complexidade:** Alta  
+**Esforço:** 6-8 horas
+**Complexidade:** Alta
 **ROI:** ⭐⭐⭐⭐⭐ (máximo impacto)
 
 **Ferramentas:**
@@ -381,21 +381,21 @@ lighthouse https://awamotos.com/ --only-categories=performance --preset=mobile -
 1. **Brotli Compression** (requer acesso root)
    - Ganho: -20% vs gzip (100KB → 80KB)
    - Complexidade: Média (nginx config)
-   
+
 2. **HTTP/2 Server Push**
    - Push CSS/fonts antes de request
    - Ganho: -50ms latência
-   
+
 3. **Lazy Load Icon Fonts**
    - FontAwesome, Glyphicons diferidos
    - Ganho: -30KB critical path
-   
+
 4. **Consolidar Media Queries**
    - PostCSS + css-mqpacker
    - Ganho: -5% a -8% tamanho
 
-**Esforço:** 2-4 horas cada  
-**Complexidade:** Média  
+**Esforço:** 2-4 horas cada
+**Complexidade:** Média
 **ROI:** ⭐⭐⭐ (incremental)
 
 ---
@@ -423,18 +423,18 @@ lighthouse https://awamotos.com/ --only-categories=performance --preset=mobile -
 
 ### ROI
 
-**Esforço:** 2 horas  
-**Impacto:** FCP -25%, experiência visual drasticamente melhorada  
+**Esforço:** 2 horas
+**Impacto:** FCP -25%, experiência visual drasticamente melhorada
 **Avaliação:** ⭐⭐⭐⭐⭐ (Excepcional)
 
 ### Decisão Recomendada
 
-✅ **Validar com Lighthouse → Se OK, finalizar**  
+✅ **Validar com Lighthouse → Se OK, finalizar**
 ✅ **Se quiser ir além: Fase 3 (Critical CSS Inline) → FCP target 0.90s**
 
 ---
 
-**Autor:** GitHub Copilot (Claude Sonnet 4.5)  
-**Data:** 2026-03-23  
-**Status:** ✅ 3 fases concluídas, documentadas, testáveis  
+**Autor:** GitHub Copilot (Claude Sonnet 4.5)
+**Data:** 2026-03-23
+**Status:** ✅ 3 fases concluídas, documentadas, testáveis
 **Próximo:** Validação Lighthouse ou Fase 3 (Critical CSS)

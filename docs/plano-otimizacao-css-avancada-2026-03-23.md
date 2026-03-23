@@ -1,7 +1,7 @@
 # Plano de Otimização CSS Avançada — AWA Motos
 
-**Data:** 2026-03-23  
-**Objetivo:** Reduzir tamanho total de CSS e melhorar performance de carregamento  
+**Data:** 2026-03-23
+**Objetivo:** Reduzir tamanho total de CSS e melhorar performance de carregamento
 **Status:** Fase 1 ✅ | Fase 2 ✅ | Fase 3 ⏳ | Fase 4 ⏳
 
 ---
@@ -47,8 +47,8 @@
 | awa-bundle-plp | 52KB | PLP only | Baixo |
 | **awa-visual-fixes-critical** | **15KB** | **Todas as páginas** | **Crítico** |
 
-**Total Homepage:** ~1.3MB CSS minificado (antes de gzip)  
-**Total com gzip:** ~260KB (20% do original)  
+**Total Homepage:** ~1.3MB CSS minificado (antes de gzip)
+**Total com gzip:** ~260KB (20% do original)
 **Total Brotli (se ativo):** ~190KB (15% do original)
 
 ---
@@ -57,7 +57,7 @@
 
 ### 1️⃣ Especificidade Excessiva (Quick Win)
 
-**Problema:** Padrão repetitivo `body .page-wrapper .elemento`  
+**Problema:** Padrão repetitivo `body .page-wrapper .elemento`
 **Solução:** Usar `:where()` para especificidade zero
 
 **Antes:**
@@ -83,7 +83,7 @@ body .page-wrapper .button.primary {
 
 ### 2️⃣ Critical CSS Inline (Maior Impacto)
 
-**Problema:** 1.3MB de CSS bloqueante no início  
+**Problema:** 1.3MB de CSS bloqueante no início
 **Solução:** Extrair CSS above-the-fold e inlinear no `<head>`
 
 **Estratégia:**
@@ -102,7 +102,7 @@ body .page-wrapper .button.primary {
 
 ### 3️⃣ PurgeCSS (Médio Impacto)
 
-**Problema:** CSS não utilizado em todos os bundles  
+**Problema:** CSS não utilizado em todos os bundles
 **Solução:** Remover seletores não usados
 
 **Exemplo:**
@@ -117,7 +117,7 @@ body .page-wrapper .button.primary {
 
 ### 4️⃣ Lazy Load de Bundles Específicos (Alto Impacto)
 
-**Problema:** Bundles PDP/Search/PLP carregam em todas as páginas  
+**Problema:** Bundles PDP/Search/PLP carregam em todas as páginas
 **Solução:** Carregar apenas quando necessário
 
 **Implementação:**
@@ -134,7 +134,7 @@ body .page-wrapper .button.primary {
 
 ### 5️⃣ Merge de Bundles Menores (Quick Win)
 
-**Problema:** Múltiplos bundles pequenos = múltiplos requests  
+**Problema:** Múltiplos bundles pequenos = múltiplos requests
 **Solução:** Merge em um único bundle
 
 **Candidatos:**
@@ -150,7 +150,7 @@ body .page-wrapper .button.primary {
 
 ### 6️⃣ Brotli Compression (Se Não Ativo)
 
-**Problema:** Gzip é bom, mas Brotli é 20% melhor  
+**Problema:** Gzip é bom, mas Brotli é 20% melhor
 **Solução:** Ativar compressão Brotli no Nginx
 
 **Ganho:**
@@ -161,7 +161,7 @@ body .page-wrapper .button.primary {
 
 ### 7️⃣ HTTP/2 Server Push (Avançado)
 
-**Problema:** Browser descobre CSS depois de parsear HTML  
+**Problema:** Browser descobre CSS depois de parsear HTML
 **Solução:** Push CSS antes de ser requisitado
 
 **Ganho:**
@@ -172,7 +172,7 @@ body .page-wrapper .button.primary {
 
 ### 8️⃣ CSS Variables Consolidation (Pequeno Ganho)
 
-**Problema:** Valores repetidos inline  
+**Problema:** Valores repetidos inline
 **Solução:** Converter para variáveis
 
 **Antes:**
@@ -335,6 +335,6 @@ brotli -c awa-bundle-core.css | wc -c
 
 ---
 
-**Autor:** GitHub Copilot (Claude Sonnet 4.5)  
-**Data:** 2026-03-23  
+**Autor:** GitHub Copilot (Claude Sonnet 4.5)
+**Data:** 2026-03-23
 **Status:** 📋 Plano pronto, aguardando aprovação para implementar
