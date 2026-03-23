@@ -284,11 +284,11 @@ class MetaFunnel extends Template
                     SUM(CASE WHEN action = 'approved' THEN 1 ELSE 0 END) AS approved,
                     SUM(CASE WHEN action = 'rejected' THEN 1 ELSE 0 END) AS rejected
                 FROM {$logTable}
-                WHERE created_at >= DATE_SUB(NOW(), INTERVAL {$days} DAY)
+                WHERE created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)
                 GROUP BY DATE(created_at)
                 ORDER BY day ASC";
 
-        $rows = $conn->fetchAll($sql);
+        $rows = $conn->fetchAll($sql, [(int)$days]);
         $indexed = [];
         foreach ($rows as $row) {
             $indexed[(string) $row['day']] = [

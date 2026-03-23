@@ -19,6 +19,7 @@ use Magento\Framework\Data\Form\FormKey\Validator as FormKeyValidator;
 use Magento\Framework\Event\ManagerInterface as EventManagerInterface;
 use Magento\Framework\Message\ManagerInterface;
 use Psr\Log\LoggerInterface;
+use Magento\Framework\Exception\LocalizedException;
 
 class Submit implements HttpPostActionInterface
 {
@@ -215,7 +216,7 @@ class Submit implements HttpPostActionInterface
             $redirect = $this->redirectFactory->create();
             return $redirect->setPath('b2b/quote/history');
 
-        } catch (\Exception $e) {
+        } catch (LocalizedException $e) {
             $this->logger->error('B2B Quote Submit error: ' . $e->getMessage());
 
             if ($isAjax) {
@@ -227,6 +228,20 @@ class Submit implements HttpPostActionInterface
             }
 
             $this->messageManager->addErrorMessage($e->getMessage());
+            $redirect = $this->redirectFactory->create();
+            return $redirect->setPath('b2b/quote');
+        } catch (\Exception $e) {
+            $this->logger->error('B2B Quote Submit error', ['exception' => $e]);
+
+            if ($isAjax) {
+                $json = $this->jsonFactory->create();
+                return $json->setData([
+                    'success' => false,
+                    'message' => __('Ocorreu um erro inesperado ao enviar a cotação.'),
+                ]);
+            }
+
+            $this->messageManager->addErrorMessage(__('Ocorreu um erro inesperado ao enviar a cotação.'));
             $redirect = $this->redirectFactory->create();
             return $redirect->setPath('b2b/quote');
         }

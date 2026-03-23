@@ -217,10 +217,10 @@ class PurchaseHistory
                 INNER JOIN VE_PEDIDO p ON i.PEDIDO = p.CODIGO
                 WHERE p.CLIENTE = ?
                 AND p.STATUS NOT IN ('C', 'X')
-                AND p.DTPEDIDO >= DATEADD(day, -" . (int)$days . ", GETDATE())
+                AND p.DTPEDIDO >= DATEADD(day, -?, GETDATE())
                 GROUP BY i.MATERIAL, i.DESCRICAO
                 ORDER BY MAX(p.DTPEDIDO) DESC
-            ", [$customerCode]);
+            ", [$customerCode, (int)$days]);
         } catch (\Exception $e) {
             $this->logger->error('[ERP] Error getting recent products: ' . $e->getMessage());
             return [];
@@ -283,10 +283,10 @@ class PurchaseHistory
                 INNER JOIN VE_PEDIDOITENS i ON p.CODIGO = i.PEDIDO
                 WHERE p.CLIENTE = ?
                   AND p.STATUS NOT IN ('C', 'X')
-                  AND p.DTPEDIDO >= DATEADD(MONTH, -{$safeMonths}, GETDATE())
+                  AND p.DTPEDIDO >= DATEADD(MONTH, -?, GETDATE())
                 GROUP BY FORMAT(p.DTPEDIDO, 'yyyy-MM')
                 ORDER BY FORMAT(p.DTPEDIDO, 'yyyy-MM') ASC
-            ", [$customerCode]);
+            ", [$customerCode, $safeMonths]);
         } catch (\Exception $e) {
             $this->logger->error('[ERP] Error getting monthly trend: ' . $e->getMessage());
             return [];

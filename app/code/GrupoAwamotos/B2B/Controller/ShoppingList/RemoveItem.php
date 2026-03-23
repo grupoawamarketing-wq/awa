@@ -14,6 +14,8 @@ use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Data\Form\FormKey\Validator as FormKeyValidator;
 use Magento\Framework\Message\ManagerInterface;
 use GrupoAwamotos\B2B\Model\ShoppingListService;
+use Magento\Framework\Exception\LocalizedException;
+use Psr\Log\LoggerInterface;
 
 class RemoveItem implements HttpPostActionInterface
 {
@@ -53,12 +55,18 @@ class RemoveItem implements HttpPostActionInterface
     private $shoppingListService;
 
     /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
      * @param CustomerSession $customerSession
      * @param RedirectFactory $redirectFactory
      * @param JsonFactory $jsonFactory
     * @param Http $request
      * @param ManagerInterface $messageManager
      * @param ShoppingListService $shoppingListService
+     * @param LoggerInterface $logger
      */
     public function __construct(
         CustomerSession $customerSession,
@@ -67,7 +75,8 @@ class RemoveItem implements HttpPostActionInterface
         Http $request,
         FormKeyValidator $formKeyValidator,
         ManagerInterface $messageManager,
-        ShoppingListService $shoppingListService
+        ShoppingListService $shoppingListService,
+        LoggerInterface $logger
     ) {
         $this->customerSession = $customerSession;
         $this->redirectFactory = $redirectFactory;
@@ -76,6 +85,7 @@ class RemoveItem implements HttpPostActionInterface
         $this->formKeyValidator = $formKeyValidator;
         $this->messageManager = $messageManager;
         $this->shoppingListService = $shoppingListService;
+        $this->logger = $logger;
     }
 
     /**
@@ -116,13 +126,22 @@ class RemoveItem implements HttpPostActionInterface
 
             $this->messageManager->addSuccessMessage($message);
 
-        } catch (\Exception $e) {
+        } catch (LocalizedException $e) {
             if ($this->request->isAjax()) {
                 $result = $this->jsonFactory->create();
                 return $result->setData(['success' => false, 'message' => $e->getMessage()]);
             }
 
             $this->messageManager->addErrorMessage($e->getMessage());
+        } catch (\Exception $e) {
+            $this->logger->error('B2B RemoveItem error', ['exception' => $e]);
+
+            if ($this->request->isAjax()) {
+                $result = $this->jsonFactory->create();
+                return $result->setData(['success' => false, 'message' => __('Ocorreu um erro inesperado. Tente novamente.')]);
+            }
+
+            $this->messageManager->addErrorMessage(__('Ocorreu um erro inesperado. Tente novamente.'));
         }
 
         $redirect = $this->redirectFactory->create();

@@ -11,6 +11,8 @@ use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
+use Magento\Framework\Exception\LocalizedException;
+use Psr\Log\LoggerInterface;
 
 class Adjust extends Action implements HttpPostActionInterface
 {
@@ -26,13 +28,20 @@ class Adjust extends Action implements HttpPostActionInterface
      */
     private JsonFactory $jsonFactory;
 
+    /**
+     * @var LoggerInterface
+     */
+    private LoggerInterface $logger;
+
     public function __construct(
         Context $context,
         CreditService $creditService,
-        JsonFactory $jsonFactory
+        JsonFactory $jsonFactory,
+        LoggerInterface $logger
     ) {
         $this->creditService = $creditService;
         $this->jsonFactory = $jsonFactory;
+        $this->logger = $logger;
         parent::__construct($context);
     }
 
@@ -100,8 +109,11 @@ class Adjust extends Action implements HttpPostActionInterface
                 'credit_used' => (float)$creditLimit->getUsedCredit(),
                 'credit_available' => max(0.0, (float)$creditLimit->getAvailableCredit())
             ]);
-        } catch (\Throwable $e) {
+        } catch (LocalizedException $e) {
             return $result->setData(['success' => false, 'message' => $e->getMessage()]);
+        } catch (\Throwable $e) {
+            $this->logger->error('B2B Credit Adjust error', ['exception' => $e]);
+            return $result->setData(['success' => false, 'message' => __('Erro inesperado ao ajustar crédito.')]);
         }
     }
 }

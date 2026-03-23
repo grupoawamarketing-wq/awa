@@ -14,6 +14,8 @@ use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Data\Form\FormKey\Validator as FormKeyValidator;
 use Magento\Framework\Message\ManagerInterface;
 use GrupoAwamotos\B2B\Model\ShoppingListService;
+use Magento\Framework\Exception\LocalizedException;
+use Psr\Log\LoggerInterface;
 
 class AddToCart implements HttpPostActionInterface
 {
@@ -52,6 +54,11 @@ class AddToCart implements HttpPostActionInterface
      */
     private $shoppingListService;
 
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
     public function __construct(
         CustomerSession $customerSession,
         RedirectFactory $redirectFactory,
@@ -59,7 +66,8 @@ class AddToCart implements HttpPostActionInterface
         RequestInterface $request,
         FormKeyValidator $formKeyValidator,
         ManagerInterface $messageManager,
-        ShoppingListService $shoppingListService
+        ShoppingListService $shoppingListService,
+        LoggerInterface $logger
     ) {
         $this->customerSession = $customerSession;
         $this->redirectFactory = $redirectFactory;
@@ -68,6 +76,7 @@ class AddToCart implements HttpPostActionInterface
         $this->formKeyValidator = $formKeyValidator;
         $this->messageManager = $messageManager;
         $this->shoppingListService = $shoppingListService;
+        $this->logger = $logger;
     }
 
     /**
@@ -124,13 +133,24 @@ class AddToCart implements HttpPostActionInterface
             $redirect = $this->redirectFactory->create();
             return $redirect->setPath('checkout/cart');
 
-        } catch (\Exception $e) {
+        } catch (LocalizedException $e) {
             if ($this->request->isAjax()) {
                 $jsonResult = $this->jsonFactory->create();
                 return $jsonResult->setData(['success' => false, 'message' => $e->getMessage()]);
             }
 
             $this->messageManager->addErrorMessage($e->getMessage());
+            $redirect = $this->redirectFactory->create();
+            return $redirect->setPath('b2b/shoppinglist/view', ['id' => $listId]);
+        } catch (\Exception $e) {
+            $this->logger->error('B2B AddToCart error', ['exception' => $e]);
+
+            if ($this->request->isAjax()) {
+                $jsonResult = $this->jsonFactory->create();
+                return $jsonResult->setData(['success' => false, 'message' => __('Ocorreu um erro inesperado. Tente novamente.')]);
+            }
+
+            $this->messageManager->addErrorMessage(__('Ocorreu um erro inesperado. Tente novamente.'));
             $redirect = $this->redirectFactory->create();
             return $redirect->setPath('b2b/shoppinglist/view', ['id' => $listId]);
         }
