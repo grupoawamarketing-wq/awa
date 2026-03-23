@@ -10,6 +10,7 @@
   window.__lc.integration_name = "magento";
   window.__lc.product_name = "livechat";
   window.__lc.license = <?= (int)$block->getLicenseId() ?>;
+  window.__lc.asyncInit = true;
   if (livechat_visitor_data) {
     window.__lc.visitor = livechat_visitor_data;
   }
@@ -138,6 +139,24 @@
     <?php endif; ?>
 
   <?php endif; ?>
+
+  /* Defer SDK download to idle/first-interaction — saves ~300KB from initial load (2026-03-23) */
+  (function(w) {
+      var evts = ['pointerdown','touchstart','keydown','mouseover','scroll'];
+      var done = false;
+      function go() {
+          if (done) return;
+          done = true;
+          evts.forEach(function(e) { w.removeEventListener(e, go, true); });
+          if (w.LiveChatWidget) w.LiveChatWidget.init();
+      }
+      evts.forEach(function(e) { w.addEventListener(e, go, {passive:true, capture:true, once:true}); });
+      if ('requestIdleCallback' in w) {
+          w.requestIdleCallback(go, {timeout: 4000});
+      } else {
+          w.setTimeout(go, 4000);
+      }
+  })(window);
 </script>
 <?php else: ?>
 <script>

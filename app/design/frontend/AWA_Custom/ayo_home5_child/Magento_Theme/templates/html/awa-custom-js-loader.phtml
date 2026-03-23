@@ -46,7 +46,7 @@ if ($isCmsHomeRoute || $isDemoStagePreview) {
     $loadSearchCompatJs = false;
     $loadB2bCheckoutCompatJs = false;
     // We NEED Category Compat JS (tab-carousel-init) on the Homepage for Rokanthemes modules to work!
-    $loadHomeCategoryCompatJs = true; 
+    $loadHomeCategoryCompatJs = true;
 }
 
 $shouldLoadCompatBootstrap = $loadSearchCompatJs || $loadB2bCheckoutCompatJs || $loadHomeCategoryCompatJs;
@@ -142,17 +142,21 @@ HTML;
 }
 </script>
 <script>
-/* Service Worker registration (2026-03-19) */
+/* Service Worker registration — idle callback para zero impacto em TTI (2026-03-23) */
 if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
+    var _swReg = function() {
         navigator.serviceWorker.register('/sw.js', { scope: '/' })
             .then(function(reg) {
-                /* Send version bump so active SW clears old bundle caches */
                 if (reg.active) {
                     reg.active.postMessage({ type: 'SKIP_WAITING' });
                 }
             })
             .catch(function() {});
-    });
+    };
+    if ('requestIdleCallback' in window) {
+        requestIdleCallback(_swReg, { timeout: 5000 });
+    } else {
+        window.addEventListener('load', _swReg);
+    }
 }
 </script>

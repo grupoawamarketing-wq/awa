@@ -3,8 +3,46 @@ declare(strict_types=1);
 
 /**
  * Safe loader for isolated QA accessibility refinements.
+ * Deferred to idle/first-interaction for zero TTI impact (2026-03-23).
  *
  * @var \Magento\Framework\View\Element\Template $block
  */
+$qaJsUrl = $block->escapeUrl($block->getViewFileUrl('js/awa-qa-accessibility-safe.js'));
 ?>
-<script src="<?= $block->escapeUrl($block->getViewFileUrl('js/awa-qa-accessibility-safe.js')) ?>" defer></script>
+<script>
+(function (w, d) {
+    var src = <?= /* @noEscape */ json_encode($qaJsUrl, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;
+    var done = false;
+    var events = ['pointerdown', 'touchstart', 'keydown', 'mouseover', 'scroll'];
+
+    function cleanup() {
+        events.forEach(function (e) { w.removeEventListener(e, trigger, true); });
+    }
+
+    function appendScript() {
+        if (d.querySelector('script[data-awa-lazy-src="' + src + '"]')) return;
+        var s = d.createElement('script');
+        s.src = src;
+        s.defer = true;
+        s.setAttribute('data-awa-lazy-src', src);
+        (d.body || d.documentElement).appendChild(s);
+    }
+
+    function trigger() {
+        if (done) return;
+        done = true;
+        cleanup();
+        appendScript();
+    }
+
+    events.forEach(function (e) {
+        w.addEventListener(e, trigger, { passive: true, capture: true, once: true });
+    });
+
+    if ('requestIdleCallback' in w) {
+        w.requestIdleCallback(trigger, { timeout: 3000 });
+    } else {
+        w.setTimeout(trigger, 3000);
+    }
+})(window, document);
+</script>
