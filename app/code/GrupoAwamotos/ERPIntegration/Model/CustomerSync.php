@@ -672,7 +672,7 @@ class CustomerSync implements CustomerSyncInterface
             ];
             $address->setStreet(array_filter($street));
 
-            $address->setCity(trim($erpData['CIDADE']));
+            $address->setCity($this->sanitizeCity(trim($erpData['CIDADE'])));
             $address->setPostcode($this->formatCep($erpData['CEP'] ?? ''));
             $address->setCountryId('BR');
 
@@ -686,7 +686,7 @@ class CustomerSync implements CustomerSyncInterface
 
             // Telefone
             $phone = $erpData['FONE1'] ?? $erpData['FONECEL'] ?? '';
-            $address->setTelephone($this->formatPhone($phone) ?: '(00) 0000-0000');
+            $address->setTelephone($this->formatPhone($phone) ?: '00000000000');
 
             // Define como padrão
             $address->setIsDefaultBilling(true);
@@ -823,8 +823,28 @@ class CustomerSync implements CustomerSyncInterface
         return preg_replace('/[^0-9]/', '', $taxvat);
     }
 
+    /**
+     * Sanitize city name to pass Magento's City validator.
+     * Pattern allowed: Unicode letters, marks, spaces, hyphens, apostrophes.
+     * Digits and most special chars are stripped.
+     */
+    private function sanitizeCity(string $city): string
+    {
+        // Strip chars not in Magento's City validator pattern: \p{L}\p{M}\s\-'
+        $city = preg_replace('/[^\p{L}\p{M}\s\-\']/u', ' ', $city);
+        // Collapse multiple spaces
+        $city = preg_replace('/\s+/', ' ', $city ?? '');
+        $city = trim($city ?? '');
+        return $city !== '' ? mb_substr($city, 0, 100) : 'Cidade';
+    }
+
     private function formatPhone(string $phone): string
     {
+        // ERP sometimes stores two numbers separated by '/' — use only the first
+        if (str_contains($phone, '/')) {
+            $phone = trim(explode('/', $phone)[0]);
+        }
+
         $clean = preg_replace('/[^0-9]/', '', $phone) ?? '';
         if ($clean === '') {
             return '';
@@ -833,6 +853,11 @@ class CustomerSync implements CustomerSyncInterface
         // Remove prefixo internacional 55
         if (strlen($clean) >= 12 && str_starts_with($clean, '55')) {
             $clean = substr($clean, 2);
+        }
+
+        // Truncate to max 11 digits to satisfy Magento's phone length validator
+        if (strlen($clean) > 11) {
+            $clean = substr($clean, 0, 11);
         }
 
         if (strlen($clean) === 11) {
