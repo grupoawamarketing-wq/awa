@@ -161,4 +161,9 @@ Criado por Claude para Jess @ AWA Motos — Fevereiro 2026
 - Seed de variação: `grupoawamotos_theme/header_experiment/variant_seed`.
 - Variação persistida por visitante via `localStorage` com bucket fixo (A/B estável).
 - Exposição enviada para `dataLayer` com evento `awa_header_experiment_exposure`.
+- Eventos adicionais para instrumentação de conversão:
+  - `awa_header_nav_toggle_click`
+  - `awa_header_search_focus`
+  - `awa_header_search_submit`
+  - `awa_header_minicart_click`
 - Reversão imediata: definir `enabled=0` ou `rollout_percentage=0` e limpar cache.
