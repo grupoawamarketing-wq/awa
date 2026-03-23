@@ -240,8 +240,25 @@ class ProcessAbandonedCartsTest extends TestCase
     /** @param int[] $quoteIds */
     private function buildQuoteCollectionMock(array $quoteIds): QuoteCollection&MockObject
     {
-        $quotes = array_map(function (int $id): Quote&MockObject {
-            $quote = $this->createMock(Quote::class);
+        // In PHPUnit 10+:
+        // - addMethods() configures @method annotation magic methods (not declared in class)
+        // - onlyMethods() must explicitly list declared methods we want to mock
+        $magicMethods = [
+            'getGrandTotal',
+            'getCustomerEmail',
+            'getCustomerId',
+            'getCustomerFirstname',
+            'getCustomerLastname',
+        ];
+        $declaredMethods = ['getId', 'getStoreId', 'getItemsCount', 'getUpdatedAt'];
+
+        $quotes = array_map(function (int $id) use ($magicMethods, $declaredMethods): Quote&MockObject {
+            /** @var Quote&MockObject $quote */
+            $quote = $this->getMockBuilder(Quote::class)
+                ->disableOriginalConstructor()
+                ->addMethods($magicMethods)
+                ->onlyMethods($declaredMethods)
+                ->getMock();
             $quote->method('getId')->willReturn($id);
             $quote->method('getStoreId')->willReturn(1);
             $quote->method('getGrandTotal')->willReturn(200.0);

@@ -81,7 +81,30 @@ class GenerateSuggestions
 
                     $generated++;
 
-                    // Save to history
+                    $autoSend = $this->config->isAutoSendWhatsappEnabled()
+                        && $this->config->isWhatsappEnabled();
+                    $phone = $autoSend ? ($suggestion['customer']['phone'] ?? null) : null;
+
+                    $status = 'generated';
+                    $sentAt = null;
+                    $whatsappMessageId = null;
+                    $errorMessage = null;
+
+                    // Attempt WhatsApp send before first save to avoid double-write
+                    if ($autoSend && $phone) {
+                        $result = $this->whatsappSender->sendSuggestion($phone, $suggestion);
+                        if ($result['success']) {
+                            $sent++;
+                            $status = 'sent';
+                            $sentAt = date('Y-m-d H:i:s');
+                            $whatsappMessageId = $result['message_id'] ?? null;
+                        } else {
+                            $status = 'send_failed';
+                            $errorMessage = $result['message'];
+                        }
+                    }
+
+                    // Single save with final status
                     $history = $this->historyFactory->create();
                     $history->setData([
                         'customer_id' => $opportunity['customer_id'],
@@ -89,31 +112,13 @@ class GenerateSuggestions
                         'suggestion_data' => json_encode($suggestion),
                         'total_value' => $suggestion['cart_summary']['total_value'] ?? 0,
                         'products_count' => $suggestion['cart_summary']['total_products'] ?? 0,
-                        'status' => 'generated',
-                        'created_at' => date('Y-m-d H:i:s')
+                        'status' => $status,
+                        'sent_at' => $sentAt,
+                        'whatsapp_message_id' => $whatsappMessageId,
+                        'error_message' => $errorMessage,
+                        'created_at' => date('Y-m-d H:i:s'),
                     ]);
                     $this->historyResource->save($history);
-
-                    // Auto-send via WhatsApp if enabled
-                    if ($this->config->isAutoSendWhatsappEnabled() && $this->config->isWhatsappEnabled()) {
-                        $phone = $suggestion['customer']['phone'] ?? null;
-
-                        if ($phone) {
-                            $result = $this->whatsappSender->sendSuggestion($phone, $suggestion);
-
-                            if ($result['success']) {
-                                $sent++;
-                                $history->setData('status', 'sent');
-                                $history->setData('sent_at', date('Y-m-d H:i:s'));
-                                $history->setData('whatsapp_message_id', $result['message_id'] ?? null);
-                            } else {
-                                $history->setData('status', 'send_failed');
-                                $history->setData('error_message', $result['message']);
-                            }
-
-                            $this->historyResource->save($history);
-                        }
-                    }
 
                 } catch (\Exception $e) {
                     $this->logger->error('SmartSuggestions: Error processing customer', [

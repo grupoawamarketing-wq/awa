@@ -29,6 +29,11 @@ class Dashboard extends Template
     private SalesProjection $salesProjection;
     private RfmCalculator $rfmCalculator;
 
+    /** @var array<string, mixed>|null */
+    private ?array $memoProjection = null;
+    /** @var array<string, mixed>|null */
+    private ?array $memoPipeline = null;
+
     public function __construct(
         Context $context,
         DemandForecast $demandForecast,
@@ -219,7 +224,7 @@ class Dashboard extends Template
 
     public function getPipeline(): array
     {
-        return $this->revenuePipeline->getPipelineMetrics(30);
+        return $this->memoPipeline ??= $this->revenuePipeline->getPipelineMetrics(30);
     }
 
     public function getGrowth(): array
@@ -239,9 +244,12 @@ class Dashboard extends Template
 
     public function getSalesProjection(): array
     {
+        if ($this->memoProjection !== null) {
+            return $this->memoProjection;
+        }
         try {
             $raw = $this->salesProjection->getCurrentMonthProjection();
-            return [
+            $this->memoProjection = [
                 'actual' => $raw['actual_sales'] ?? 0,
                 'target' => $raw['target'] ?? 0,
                 'projected' => $raw['projected_total'] ?? $raw['realistic'] ?? 0,
@@ -257,7 +265,7 @@ class Dashboard extends Template
                 'alert_level' => $raw['alert_level'] ?? 'normal',
             ];
         } catch (\Exception $e) {
-            return [
+            $this->memoProjection = [
                 'actual' => 0,
                 'target' => 0,
                 'projected' => 0,
@@ -267,6 +275,7 @@ class Dashboard extends Template
                 'will_hit_target' => false,
             ];
         }
+        return $this->memoProjection;
     }
 
     /**
