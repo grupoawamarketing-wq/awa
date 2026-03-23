@@ -12,6 +12,7 @@ use Magento\Framework\Data\Form\FormKey\Validator as FormKeyValidator;
 use GrupoAwamotos\B2B\Model\OrderApprovalService;
 use GrupoAwamotos\B2B\Model\CompanyService;
 use GrupoAwamotos\B2B\Model\Company;
+use Magento\Framework\Exception\LocalizedException;
 
 class Action implements HttpPostActionInterface
 {
@@ -73,8 +74,11 @@ class Action implements HttpPostActionInterface
             }
 
             return $result->setData(['success' => false, 'message' => __('Ação inválida.')]);
-        } catch (\Exception $e) {
+        } catch (LocalizedException $e) {
             return $result->setData(['success' => false, 'message' => $e->getMessage()]);
+        } catch (\Exception $e) {
+            $this->logger->error('[B2B Approval] Action failed', ['exception' => $e]);
+            return $result->setData(['success' => false, 'message' => __('Erro ao processar aprovação.')]);
         }
     }
 }

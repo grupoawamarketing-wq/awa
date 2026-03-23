@@ -8,6 +8,7 @@ use Magento\Backend\App\Action\Context;
 use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
 use GrupoAwamotos\ERPIntegration\Model\CircuitBreaker;
+use Psr\Log\LoggerInterface;
 
 class ResetCircuit extends Action implements HttpPostActionInterface
 {
@@ -15,15 +16,18 @@ class ResetCircuit extends Action implements HttpPostActionInterface
 
     private JsonFactory $jsonFactory;
     private CircuitBreaker $circuitBreaker;
+    private LoggerInterface $logger;
 
     public function __construct(
         Context $context,
         JsonFactory $jsonFactory,
-        CircuitBreaker $circuitBreaker
+        CircuitBreaker $circuitBreaker,
+        LoggerInterface $logger
     ) {
         parent::__construct($context);
         $this->jsonFactory = $jsonFactory;
         $this->circuitBreaker = $circuitBreaker;
+        $this->logger = $logger;
     }
 
     public function execute()
@@ -39,9 +43,10 @@ class ResetCircuit extends Action implements HttpPostActionInterface
                 'stats' => $this->circuitBreaker->getStats(),
             ]);
         } catch (\Exception $e) {
+            $this->logger->error('[ERP] Circuit breaker reset failed', ['exception' => $e]);
             return $result->setData([
                 'success' => false,
-                'message' => $e->getMessage(),
+                'message' => __('Erro ao resetar Circuit Breaker. Verifique os logs.'),
             ]);
         }
     }

@@ -11,6 +11,7 @@ use Magento\Backend\App\Action\Context;
 use Magento\Framework\Controller\Result\JsonFactory;
 use GrupoAwamotos\B2B\Model\Attendant\AttendantManager;
 use Magento\Framework\App\Action\HttpPostActionInterface;
+use Magento\Framework\Exception\LocalizedException;
 
 class Save extends Action implements HttpPostActionInterface
 {
@@ -51,10 +52,16 @@ class Save extends Action implements HttpPostActionInterface
                 'attendant_id' => $attendantId
             ]);
 
-        } catch (\Exception $e) {
+        } catch (LocalizedException $e) {
             return $result->setData([
                 'success' => false,
                 'message' => $e->getMessage()
+            ]);
+        } catch (\Exception $e) {
+            $this->logger->error('[B2B Admin] Attendant save failed', ['exception' => $e]);
+            return $result->setData([
+                'success' => false,
+                'message' => __('Erro ao salvar atendente.')
             ]);
         }
     }

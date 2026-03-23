@@ -11,6 +11,7 @@ use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 use Magento\Backend\Model\Auth\Session as AuthSession;
 use Magento\Framework\App\Action\HttpPostActionInterface;
+use Magento\Framework\Exception\LocalizedException;
 
 class ProcessAction extends Action implements HttpPostActionInterface
 {
@@ -65,8 +66,11 @@ class ProcessAction extends Action implements HttpPostActionInterface
                 $this->approvalService->reject($approvalId, $adminId, $reason);
                 $this->messageManager->addSuccessMessage(__('Pedido rejeitado.'));
             }
-        } catch (\Exception $e) {
+        } catch (LocalizedException $e) {
             $this->messageManager->addErrorMessage($e->getMessage());
+        } catch (\Exception $e) {
+            $this->logger->error('[B2B Admin] Approval action failed', ['exception' => $e]);
+            $this->messageManager->addErrorMessage(__('Erro ao processar aprovação.'));
         }
 
         return $redirect;

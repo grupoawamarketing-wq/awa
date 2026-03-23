@@ -14,6 +14,7 @@ use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Data\Form\FormKey\Validator as FormKeyValidator;
 use Magento\Framework\Message\ManagerInterface;
 use GrupoAwamotos\B2B\Model\ShoppingListService;
+use Magento\Framework\Exception\LocalizedException;
 
 class AddItem implements HttpPostActionInterface
 {
@@ -115,13 +116,22 @@ class AddItem implements HttpPostActionInterface
             $redirect = $this->redirectFactory->create();
             return $redirect->setPath('b2b/shoppinglist/view', ['id' => $listId]);
 
-        } catch (\Exception $e) {
+        } catch (LocalizedException $e) {
             if ($this->request->isAjax()) {
                 $result = $this->jsonFactory->create();
                 return $result->setData(['success' => false, 'message' => $e->getMessage()]);
             }
-
             $this->messageManager->addErrorMessage($e->getMessage());
+            $redirect = $this->redirectFactory->create();
+            return $redirect->setRefererUrl();
+        } catch (\Exception $e) {
+            $this->logger->error('[B2B ShoppingList] AddItem failed', ['exception' => $e]);
+            $safeMsg = __('Erro ao adicionar produto à lista.');
+            if ($this->request->isAjax()) {
+                $result = $this->jsonFactory->create();
+                return $result->setData(['success' => false, 'message' => $safeMsg]);
+            }
+            $this->messageManager->addErrorMessage($safeMsg);
             $redirect = $this->redirectFactory->create();
             return $redirect->setRefererUrl();
         }

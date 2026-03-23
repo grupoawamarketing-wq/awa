@@ -11,6 +11,7 @@ use GrupoAwamotos\ERPIntegration\Api\ConnectionInterface;
 use GrupoAwamotos\ERPIntegration\Model\CircuitBreaker;
 use GrupoAwamotos\ERPIntegration\Model\ResourceModel\SyncLog;
 use GrupoAwamotos\ERPIntegration\Helper\Data as Helper;
+use Psr\Log\LoggerInterface;
 
 class Status extends Action implements HttpGetActionInterface
 {
@@ -21,6 +22,7 @@ class Status extends Action implements HttpGetActionInterface
     private CircuitBreaker $circuitBreaker;
     private SyncLog $syncLogResource;
     private Helper $helper;
+    private LoggerInterface $logger;
 
     public function __construct(
         Context $context,
@@ -28,7 +30,8 @@ class Status extends Action implements HttpGetActionInterface
         ConnectionInterface $connection,
         CircuitBreaker $circuitBreaker,
         SyncLog $syncLogResource,
-        Helper $helper
+        Helper $helper,
+        LoggerInterface $logger
     ) {
         parent::__construct($context);
         $this->jsonFactory = $jsonFactory;
@@ -36,6 +39,7 @@ class Status extends Action implements HttpGetActionInterface
         $this->circuitBreaker = $circuitBreaker;
         $this->syncLogResource = $syncLogResource;
         $this->helper = $helper;
+        $this->logger = $logger;
     }
 
     public function execute()
@@ -57,9 +61,10 @@ class Status extends Action implements HttpGetActionInterface
                 'recent_errors' => $recentErrors,
             ]);
         } catch (\Exception $e) {
+            $this->logger->error('[ERP Dashboard] Status fetch failed', ['exception' => $e]);
             return $result->setData([
                 'success' => false,
-                'message' => $e->getMessage(),
+                'message' => __('Erro ao carregar status do ERP. Verifique os logs.'),
             ]);
         }
     }
@@ -80,9 +85,10 @@ class Status extends Action implements HttpGetActionInterface
                 'message' => $testResult['error'] ?? null,
             ];
         } catch (\Exception $e) {
+            $this->logger->warning('[ERP Dashboard] Connection test failed', ['error' => $e->getMessage()]);
             return [
                 'connected' => false,
-                'message' => $e->getMessage(),
+                'message' => __('Falha na conex\u00e3o com o ERP.'),
             ];
         }
     }

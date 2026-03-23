@@ -14,6 +14,7 @@ use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Data\Form\FormKey\Validator as FormKeyValidator;
 use Magento\Framework\Message\ManagerInterface;
 use GrupoAwamotos\B2B\Model\ShoppingListService;
+use Magento\Framework\Exception\LocalizedException;
 
 class Delete implements HttpPostActionInterface
 {
@@ -115,13 +116,20 @@ class Delete implements HttpPostActionInterface
 
             $this->messageManager->addSuccessMessage($message);
 
-        } catch (\Exception $e) {
+        } catch (LocalizedException $e) {
             if ($this->request->isAjax()) {
                 $result = $this->jsonFactory->create();
                 return $result->setData(['success' => false, 'message' => $e->getMessage()]);
             }
-
             $this->messageManager->addErrorMessage($e->getMessage());
+        } catch (\Exception $e) {
+            $this->logger->error('[B2B ShoppingList] Delete failed', ['exception' => $e]);
+            $safeMsg = __('Erro ao excluir a lista.');
+            if ($this->request->isAjax()) {
+                $result = $this->jsonFactory->create();
+                return $result->setData(['success' => false, 'message' => $safeMsg]);
+            }
+            $this->messageManager->addErrorMessage($safeMsg);
         }
 
         $redirect = $this->redirectFactory->create();
