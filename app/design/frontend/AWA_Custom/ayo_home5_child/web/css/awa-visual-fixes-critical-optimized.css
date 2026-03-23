@@ -1,0 +1,215 @@
+/* =============================================================================
+ * AWA Visual Fixes — Versão Otimizada com Especificidade Reduzida
+ * Data: 2026-03-23
+ * Otimização: Uso de :where() para especificidade 0, facilita overrides
+ *
+ * IMPORTANTE: Este é um arquivo de demonstração/referência.
+ * Não substitui o atual sem testes extensivos.
+ * ============================================================================= */
+
+/* =============================================================================
+   REDUÇÃO DE ESPECIFICIDADE COM :where()
+   
+   Antes: body .page-wrapper .elemento (0,2,0 - difícil sobrescrever)
+   Depois: :where(body .page-wrapper) .elemento (0,1,0 - fácil sobrescrever)
+   
+   Benefícios:
+   - Overrides mais simples (sem !important)
+   - Cascade mais previsível
+   - Manutenção facilitada
+   ============================================================================= */
+
+/* PROBLEMA 1: Spacing Inconsistente */
+:where(body .page-wrapper) .block-search .control,
+:where(body .page-wrapper) .minicart-wrapper,
+:where(body .page-wrapper) .header-actions {
+    padding: var(--awa-space-3) var(--awa-space-4);
+}
+
+:where(body .page-wrapper) .page-main > .columns,
+:where(body .page-wrapper) .page-main > .widget,
+:where(body .page-wrapper) .page-main > section {
+    margin-bottom: var(--awa-section-gap);
+}
+
+@media (width <= 767px) {
+    :where(body .page-wrapper) .page-main > .columns,
+    :where(body .page-wrapper) .page-main > .widget,
+    :where(body .page-wrapper) .page-main > section {
+        margin-bottom: var(--awa-section-gap-sm);
+    }
+}
+
+:where(body .page-wrapper) .products-grid,
+:where(body .page-wrapper) .product-items {
+    gap: var(--awa-grid-gap);
+}
+
+:where(body .page-wrapper) .container:not(.slider-container, .banner-container) {
+    padding-inline: var(--awa-container-pad);
+}
+
+/* PROBLEMA 2: Alinhamento Vertical */
+:where(body .page-wrapper) .header .logo {
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+:where(body .page-wrapper) .header-actions .action,
+:where(body .page-wrapper) .header .top-account > li > a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--awa-touch-target);
+    padding: var(--awa-space-2) var(--awa-space-3);
+}
+
+:where(body .page-wrapper) .block-search {
+    display: flex;
+    align-items: center;
+}
+
+:where(body .page-wrapper) .block-search .field.search {
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+}
+
+/* PROBLEMA 3: Botões com Estilos Conflitantes */
+:where(body .page-wrapper) button.action.primary,
+:where(body .page-wrapper) .action.primary,
+:where(body .page-wrapper) button.action.tocart,
+:where(body .page-wrapper) .tocart {
+    border-radius: var(--awa-radius-md);
+    min-height: var(--awa-btn-height);
+    padding: var(--awa-space-3) var(--awa-space-5);
+}
+
+:where(body .page-wrapper) button.action.secondary,
+:where(body .page-wrapper) .action.secondary {
+    border-radius: var(--awa-radius-md);
+    min-height: var(--awa-btn-height);
+    padding: var(--awa-space-3) var(--awa-space-5);
+}
+
+/* Cor de texto em botões primários - mantém !important por ser override de inline style */
+:where(body .page-wrapper) button.action.primary,
+:where(body .page-wrapper) .action.primary,
+:where(body .page-wrapper) button.action.tocart {
+    color: var(--awa-text-on-primary) !important;
+    background: var(--awa-red);
+    border-color: var(--awa-red);
+}
+
+:where(body .page-wrapper) button.action.primary:hover,
+:where(body .page-wrapper) .action.primary:hover,
+:where(body .page-wrapper) button.action.tocart:hover {
+    background: var(--awa-red-dark);
+    border-color: var(--awa-red-dark);
+    color: var(--awa-text-on-primary) !important;
+}
+
+:where(body .page-wrapper) button.action.primary:focus-visible,
+:where(body .page-wrapper) .action.primary:focus-visible,
+:where(body .page-wrapper) button.action.secondary:focus-visible,
+:where(body .page-wrapper) .action.secondary:focus-visible {
+    outline: none;
+    box-shadow: var(--awa-shadow-focus-ring);
+}
+
+/* PROBLEMA 4: Formulários */
+:where(body .page-wrapper) input[type="text"],
+:where(body .page-wrapper) input[type="email"],
+:where(body .page-wrapper) input[type="password"],
+:where(body .page-wrapper) input[type="tel"],
+:where(body .page-wrapper) input[type="number"],
+:where(body .page-wrapper) input[type="url"],
+:where(body .page-wrapper) select,
+:where(body .page-wrapper) .input-text {
+    height: var(--awa-input-height);
+    min-height: var(--awa-input-height);
+    padding: var(--awa-space-3) var(--awa-space-4);
+    border-radius: var(--awa-radius-md);
+    border: 1.5px solid var(--awa-gray-200);
+    font-size: var(--awa-text-base);
+}
+
+:where(body .page-wrapper) textarea {
+    padding: var(--awa-space-3) var(--awa-space-4);
+    border-radius: var(--awa-radius-md);
+    border: 1.5px solid var(--awa-gray-200);
+    min-height: 120px;
+}
+
+:where(body .page-wrapper) input[type="text"]:focus,
+:where(body .page-wrapper) input[type="email"]:focus,
+:where(body .page-wrapper) input[type="password"]:focus,
+:where(body .page-wrapper) input[type="tel"]:focus,
+:where(body .page-wrapper) input[type="number"]:focus,
+:where(body .page-wrapper) select:focus,
+:where(body .page-wrapper) textarea:focus {
+    outline: none;
+    border-color: var(--awa-red);
+    box-shadow: var(--awa-shadow-focus-ring);
+}
+
+:where(body .page-wrapper) .field .label {
+    display: block;
+    margin-bottom: var(--awa-space-2);
+    font-size: var(--awa-text-sm);
+    font-weight: var(--awa-weight-semibold);
+    color: var(--awa-dark);
+}
+
+/* PROBLEMA 5: Cards de Produto */
+:where(body .page-wrapper) .product-item-info {
+    padding: var(--awa-space-4);
+    border-radius: var(--awa-radius-md);
+    border: 1px solid var(--awa-gray-200);
+    background: var(--awa-bg-surface);
+    transition: transform var(--awa-transition-fast), box-shadow var(--awa-transition-fast);
+}
+
+:where(body .page-wrapper) .product-item-info .product-item-details {
+    display: flex;
+    flex-direction: column;
+    gap: var(--awa-space-2);
+    margin-top: var(--awa-space-3);
+}
+
+:where(body .page-wrapper) .product-item-info .product-image-container {
+    border-radius: var(--awa-radius-md) var(--awa-radius-md) 0 0;
+    overflow: hidden;
+    margin: calc(var(--awa-space-4) * -1) calc(var(--awa-space-4) * -1) 0;
+}
+
+:where(body .page-wrapper) .product-item-info .actions-primary {
+    margin-top: var(--awa-space-3);
+}
+
+:where(body .page-wrapper) .product-item-info .action.tocart {
+    width: 100%;
+    justify-content: center;
+}
+
+:where(body .page-wrapper) .product-item-info:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--awa-shadow-hover);
+}
+
+/* =============================================================================
+   OBSERVAÇÕES PARA IMPLEMENTAÇÃO FUTURA
+   
+   1. Este arquivo usa :where() para todas as regras não-críticas
+   2. Mantém !important APENAS onde necessário (override de inline styles)
+   3. Especificidade reduzida facilita manutenção e testes A/B
+   4. Compatibilidade: :where() suportado em todos os browsers modernos (2020+)
+   5. Para implementar: testar extensivamente antes de substituir atual
+   
+   TESTE RECOMENDADO:
+   - Carregar em staging
+   - Validar todas as páginas
+   - Confirmar que overrides funcionam
+   - Comparar tamanho minificado (deve ser similar ou menor)
+   ============================================================================= */
