@@ -15,6 +15,8 @@ use GrupoAwamotos\B2B\Model\ResourceModel\CreditLimit\Collection as CreditCollec
 use GrupoAwamotos\B2B\Model\ResourceModel\CreditTransaction\CollectionFactory as TxnCollectionFactory;
 use GrupoAwamotos\B2B\Model\ResourceModel\CreditTransaction\Collection as TxnCollection;
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\DB\Adapter\AdapterInterface;
+use Magento\Framework\DB\Select;
 use Magento\Framework\Exception\LocalizedException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -34,6 +36,8 @@ class CreditServiceTest extends TestCase
     private TxnCollectionFactory&MockObject $txnCollectionFactory;
     private ScopeConfigInterface&MockObject $scopeConfig;
     private LoggerInterface&MockObject $logger;
+    /** @var AdapterInterface&MockObject */
+    private AdapterInterface $dbConnection;
 
     protected function setUp(): void
     {
@@ -45,6 +49,27 @@ class CreditServiceTest extends TestCase
         $this->txnCollectionFactory = $this->createMock(TxnCollectionFactory::class);
         $this->scopeConfig = $this->createMock(ScopeConfigInterface::class);
         $this->logger = $this->createMock(LoggerInterface::class);
+
+        // CreditService uses $this->creditResource->getConnection() for
+        // atomic transactions and bulk UPDATE queries — mock the DB adapter.
+        $this->dbConnection = $this->createMock(AdapterInterface::class);
+        $this->dbConnection->method('beginTransaction')->willReturn(true);
+        $this->dbConnection->method('commit')->willReturn(true);
+        $this->dbConnection->method('rollBack')->willReturn(true);
+        $this->dbConnection->method('update')->willReturn(1);
+        $this->dbConnection->method('quote')->willReturnCallback(
+            static fn(mixed $v): string => "'" . addslashes((string) $v) . "'"
+        );
+
+        // charge() calls select()->from()->where()->forUpdate() then fetchRow()
+        $select = $this->createMock(Select::class);
+        $select->method('from')->willReturnSelf();
+        $select->method('where')->willReturnSelf();
+        $select->method('forUpdate')->willReturnSelf();
+        $this->dbConnection->method('select')->willReturn($select);
+
+        $this->creditResource->method('getConnection')->willReturn($this->dbConnection);
+        $this->creditResource->method('getMainTable')->willReturn('grupoawamotos_b2b_credit_limit');
 
         $this->service = new CreditService(
             $this->creditFactory,
@@ -189,24 +214,39 @@ class CreditServiceTest extends TestCase
     }
 
     // ====================================================================
-    // charge
+    // charge — implementation uses raw DB transaction (select+update)
+    // no model setUsedCredit() is called
     // ====================================================================
+
+    /**
+     * Make fetchRow() return a DB row for the charge() SELECT … FOR UPDATE.
+     * @param array{entity_id: int, credit_limit: float, used_credit: float} $row
+     */
+    private function mockChargeRow(array $row): void
+    {
+        $this->dbConnection->method('fetchRow')->willReturn($row);
+    }
 
     public function testChargeDebitsCreditSuccessfully(): void
     {
-        $credit = $this->mockCreditLookup(1, 5000.0, 0.0);
-        $credit->expects($this->once())->method('setUsedCredit')->with(1500.0)->willReturnSelf();
-
+        $this->mockChargeRow(['entity_id' => 1, 'credit_limit' => 5000.0, 'used_credit' => 0.0]);
+        $this->mockCreditLookup(1, 5000.0, 1500.0); // post-charge read for log
         $this->mockTxnFactory();
-        $this->creditResource->expects($this->once())->method('save');
-        $this->txnResource->expects($this->once())->method('save');
+
+        $this->dbConnection->expects($this->once())->method('beginTransaction');
+        $this->dbConnection->expects($this->once())->method('commit');
+        $this->dbConnection->expects($this->atLeastOnce())->method('update');
 
         $this->service->charge(42, 1500.0, 1001);
     }
 
     public function testChargeThrowsOnInsufficientCredit(): void
     {
-        $this->mockCreditLookup(1, 5000.0, 4800.0); // available = 200
+        // available = 5000 - 4800 = 200, requesting 500
+        $this->mockChargeRow(['entity_id' => 1, 'credit_limit' => 5000.0, 'used_credit' => 4800.0]);
+
+        $this->dbConnection->expects($this->once())->method('beginTransaction');
+        $this->dbConnection->expects($this->once())->method('rollBack');
 
         $this->expectException(LocalizedException::class);
         $this->service->charge(42, 500.0, 1001);
@@ -214,19 +254,20 @@ class CreditServiceTest extends TestCase
 
     public function testChargeSucceedsWithExactAvailableCredit(): void
     {
-        $credit = $this->mockCreditLookup(1, 5000.0, 4000.0); // available = 1000
-        $credit->expects($this->once())->method('setUsedCredit')->with(5000.0)->willReturnSelf();
-
+        // available = 5000 - 4000 = 1000, requesting exactly 1000
+        $this->mockChargeRow(['entity_id' => 1, 'credit_limit' => 5000.0, 'used_credit' => 4000.0]);
+        $this->mockCreditLookup(1, 5000.0, 5000.0); // post-charge read
         $this->mockTxnFactory();
+
+        $this->dbConnection->expects($this->once())->method('commit');
 
         $this->service->charge(42, 1000.0, 1001);
     }
 
     public function testChargeLogsTransaction(): void
     {
-        $credit = $this->mockCreditLookup(1, 5000.0, 0.0);
-        $credit->method('setUsedCredit')->willReturnSelf();
-
+        $this->mockChargeRow(['entity_id' => 1, 'credit_limit' => 5000.0, 'used_credit' => 0.0]);
+        $this->mockCreditLookup(1, 5000.0, 1500.0);
         $this->mockTxnFactory();
 
         $this->logger->expects($this->once())
@@ -237,61 +278,62 @@ class CreditServiceTest extends TestCase
     }
 
     // ====================================================================
-    // refund
+    // refund — implementation uses atomic UPDATE GREATEST(0, used_credit-x)
+    // no model setUsedCredit() is called; connection->update() handles it
     // ====================================================================
 
     public function testRefundReducesUsedCredit(): void
     {
-        $credit = $this->mockCreditLookup(1, 5000.0, 3000.0);
-        $credit->expects($this->once())->method('setUsedCredit')->with(2000.0)->willReturnSelf();
-
+        $this->mockCreditLookup(1, 5000.0, 2000.0); // post-refund read for log
         $this->mockTxnFactory();
-        $this->creditResource->expects($this->once())->method('save');
-        $this->txnResource->expects($this->once())->method('save');
+
+        // Exactly one UPDATE to apply the GREATEST expression
+        $this->dbConnection->expects($this->once())->method('update');
 
         $this->service->refund(42, 1000.0, 1001);
     }
 
     public function testRefundDoesNotGoNegative(): void
     {
-        $credit = $this->mockCreditLookup(1, 5000.0, 500.0);
-        $credit->expects($this->once())->method('setUsedCredit')->with(0.0)->willReturnSelf();
-
+        $this->mockCreditLookup(1, 5000.0, 0.0);
         $this->mockTxnFactory();
+
+        // GREATEST(0, …) in SQL handles clamping — still calls update once
+        $this->dbConnection->expects($this->once())->method('update');
 
         $this->service->refund(42, 2000.0, 1001);
     }
 
     public function testRefundFullAmount(): void
     {
-        $credit = $this->mockCreditLookup(1, 5000.0, 3000.0);
-        $credit->expects($this->once())->method('setUsedCredit')->with(0.0)->willReturnSelf();
-
+        $this->mockCreditLookup(1, 5000.0, 0.0);
         $this->mockTxnFactory();
+
+        $this->dbConnection->expects($this->once())->method('update');
 
         $this->service->refund(42, 3000.0, 1001);
     }
 
     // ====================================================================
-    // recordPayment
+    // recordPayment — same pattern as refund: atomic UPDATE GREATEST, no setUsedCredit()
     // ====================================================================
 
     public function testRecordPaymentReducesUsedCredit(): void
     {
-        $credit = $this->mockCreditLookup(1, 5000.0, 3000.0);
-        $credit->expects($this->once())->method('setUsedCredit')->with(2000.0)->willReturnSelf();
-
+        $this->mockCreditLookup(1, 5000.0, 2000.0); // post-payment read for log
         $this->mockTxnFactory();
+
+        $this->dbConnection->expects($this->once())->method('update');
 
         $this->service->recordPayment(42, 1000.0, 1, 'Boleto pago');
     }
 
     public function testRecordPaymentDoesNotGoNegative(): void
     {
-        $credit = $this->mockCreditLookup(1, 5000.0, 500.0);
-        $credit->expects($this->once())->method('setUsedCredit')->with(0.0)->willReturnSelf();
-
+        $this->mockCreditLookup(1, 5000.0, 0.0);
         $this->mockTxnFactory();
+
+        $this->dbConnection->expects($this->once())->method('update');
 
         $this->service->recordPayment(42, 1000.0, 1, 'Pagamento excedente');
     }

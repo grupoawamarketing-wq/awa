@@ -1,165 +1,216 @@
 <?php
 /**
- * @var $block \GrupoAwamotos\LiveChat\Block\SnippetBlock
+ * @var \GrupoAwamotos\LiveChat\Block\SnippetBlock $block
  */
+
+use GrupoAwamotos\LiveChat\ViewModel\ChatContext;
+
+$viewModel = $block->getData('livechat_context_view_model');
+$pageVariablesJson = '[]';
+
+if ($viewModel instanceof ChatContext) {
+    $pageVariablesJson = $viewModel->getPageVariablesJson();
+}
+
+$additionalCustomVariablesJson = $block->getAdditionalCustomVariablesJson();
 ?>
 <?php if (null !== $block->getLicenseId()): ?>
 <script src="<?= $block->escapeUrl($block->getUrl('livechat/getvisitor')) ?>"></script>
 <script>
-  window.__lc = window.__lc || {};
-  window.__lc.integration_name = "magento";
-  window.__lc.product_name = "livechat";
-  window.__lc.license = <?= (int)$block->getLicenseId() ?>;
-  window.__lc.asyncInit = true;
-  if (livechat_visitor_data) {
-    window.__lc.visitor = livechat_visitor_data;
+    window.__lc = window.__lc || {};
+    window.__lc.integration_name = 'magento';
+    window.__lc.product_name = 'livechat';
+    window.__lc.license = <?= (int) $block->getLicenseId() ?>;
+    window.__lc.asyncInit = true;
+
+    if (typeof livechat_visitor_data !== 'undefined' && livechat_visitor_data) {
+        window.__lc.visitor = livechat_visitor_data;
+    }
+
+    var awaLiveChatPageVariables = <?= /* @noEscape */ $pageVariablesJson ?>;
+    var awaLiveChatAdditionalVariables = <?= /* @noEscape */ $additionalCustomVariablesJson ?>;
+
+    window.__lc.params = (window.__lc.params || []).concat(awaLiveChatPageVariables);
+
+    (function (n, t, c) {
+        function i(args) {
+            return e._h ? e._h.apply(null, args) : e._q.push(args);
+        }
+
+        var e = {
+            _q: [],
+            _h: null,
+            _v: '2.0',
+            on: function () {
+                i(['on', c.call(arguments)]);
+            },
+            once: function () {
+                i(['once', c.call(arguments)]);
+            },
+            off: function () {
+                i(['off', c.call(arguments)]);
+            },
+            get: function () {
+                if (!e._h) {
+                    throw new Error('[LiveChatWidget] You cannot use getters before load.');
+                }
+
+                return i(['get', c.call(arguments)]);
+            },
+            call: function () {
+                i(['call', c.call(arguments)]);
+            },
+            init: function () {
+                var script = t.createElement('script');
+                script.async = true;
+                script.type = 'text/javascript';
+                script.src = 'https://cdn.livechatinc.com/tracking.js';
+                t.head.appendChild(script);
+            }
+        };
+
+        if (!n.__lc.asyncInit) {
+            e.init();
+        }
+
+        n.LiveChatWidget = n.LiveChatWidget || e;
+    }(window, document, [].slice));
+
+  var LC_API = window.LC_API = window.LC_API || {};
+
+  function awaMergeCustomVariables(runtimeVariables) {
+    var mergedVariables = {}
+;
+    [].concat(awaLiveChatPageVariables || [], awaLiveChatAdditionalVariables || [], runtimeVariables || []).forEach(function (variable) {
+      if (!variable || !variable.name || variable.value === undefined || variable.value === null || variable.value === '') {
+        return;
+      }
+
+      mergedVariables[String(variable.name)] = {
+        name: String(variable.name),
+        value: String(variable.value)
+      };
+    });
+
+    return Object.keys(mergedVariables).map(function (key) {
+      return mergedVariables[key];
+    });
   }
 
-  ;(function (n, t, c) {
-    function i(n) {
-      return e._h ? e._h.apply(null, n) : e._q.push(n)
+  function awaApplyCustomVariables(dynamicVariables) {
+    var mergedVariables = awaMergeCustomVariables(Array.isArray(dynamicVariables) ? dynamicVariables : []);
+
+        if (mergedVariables.length > 0) {
+            LC_API.set_custom_variables(mergedVariables);
+        }
     }
-    var e = {
-      _q: [],
-      _h: null,
-      _v: "2.0",
-      on: function () {
-        i(["on", c.call(arguments)])
-      },
-      once: function () {
-        i(["once", c.call(arguments)])
-      },
-      off: function () {
-        i(["off", c.call(arguments)])
-      },
-      get: function () {
-        if (!e._h) throw new Error("[LiveChatWidget] You can't use getters before load.");
-        return i(["get", c.call(arguments)])
-      },
-      call: function () {
-        i(["call", c.call(arguments)])
-      },
-      init: function () {
-        var n = t.createElement("script");
-        n.async = !0;
-        n.type = "text/javascript";
-        n.src = "https://cdn.livechatinc.com/tracking.js";
-        t.head.appendChild(n)
-      }
-    };
-    !n.__lc.asyncInit && e.init();
-    n.LiveChatWidget = n.LiveChatWidget || e
-  }(window, document, [].slice))
 
-  <?php if ($block->isCartSet() || $block->hasAdditionalCustomVariables()): ?>
-    var LC_API = LC_API || {};
-    var awaLiveChatCustomVariables = <?= /* @noEscape */ $block->getAdditionalCustomVariablesJson() ?>;
+  <?php if ($block->isCartSet()): ?>
+    function awaSyncCartVariables() {
+        var xhttp = new XMLHttpRequest();
 
-    LC_API.on_after_load = function() {
-        applyCustomVariables([]);
-
-        <?php if ($block->isCartSet()): ?>
-        require(['Magento_Customer/js/customer-data'], function (customerData) {
-            var cart = customerData.get('cart');
-            var count = cart().summary_count;
-
-            if (localStorage) {
-              var storageCount = localStorage.getItem('lcCount');
-              if (parseInt(storageCount, 10) !== count) {
-                getCart();
-              }
-              localStorage.setItem('lcCount', count);
-            } else {
-              getCart();
+        xhttp.onreadystatechange = function () {
+            if (this.readyState !== 4 || this.status !== 200) {
+                return;
             }
 
-            cart.subscribe(function () {
-                if (cart().summary_count !== count) {
-                    count = cart().summary_count;
-                    getCart();
-                    if (localStorage) {
-                      localStorage.setItem('lcCount', cart().summary_count);
-                    }
-                }
-            });
-        });
-        <?php endif; ?>
-    }
-
-    function mergeCustomVariables(runtimeVariables) {
-      var variables = [].concat(runtimeVariables || [], awaLiveChatCustomVariables || []);
-      var uniqueVariables = {};
-
-      variables.forEach(function (variable) {
-        if (!variable || !variable.name || variable.value === undefined || variable.value === null || variable.value === '') {
-          return;
-        }
-
-        uniqueVariables[variable.name] = {
-          name: String(variable.name),
-          value: String(variable.value)
-        };
-      });
-
-      return Object.keys(uniqueVariables).map(function (key) {
-        return uniqueVariables[key];
-      });
-    }
-
-    function applyCustomVariables(runtimeVariables) {
-      var customVariables = mergeCustomVariables(runtimeVariables);
-
-      if (customVariables.length <= 0) {
-        customVariables = [{"name":"Cart", "value":"customer's cart is empty"}];
-      }
-
-      LC_API.set_custom_variables(customVariables);
-    }
-
-    <?php if ($block->isCartSet()): ?>
-    function getCart() {
-      var xhttp = new XMLHttpRequest();
-      xhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
             try {
-              applyCustomVariables(JSON.parse(this.responseText));
+                awaApplyCustomVariables(JSON.parse(this.responseText));
             } catch (error) {
-              applyCustomVariables([]);
+                awaApplyCustomVariables([]);
             }
-        }
-      };
-      xhttp.open(
-        "GET",
-        "<?= $block->escapeUrl($block->getUrl('livechat/getcart')) ?>" +
-        "?success=<?= $block->escapeUrl($block->isOrderPlacedPage()) ?>",
-        true
-      );
-      xhttp.send();
+        };
+
+        xhttp.open(
+            'GET',
+          '<?= $block->escapeUrl($block->getUrl('livechat/getcart', ['success' => (int) $block->isOrderPlacedPage()])) ?>',
+            true
+        );
+        xhttp.send();
     }
-    <?php endif; ?>
+      <?php endif; ?>
 
-  <?php endif; ?>
+    (function () {
+        var previousAfterLoad = LC_API.on_after_load;
 
-  /* Defer SDK download to idle/first-interaction — saves ~300KB from initial load (2026-03-23) */
-  (function(w) {
-      var evts = ['pointerdown','touchstart','keydown','mouseover','scroll'];
-      var done = false;
-      function go() {
-          if (done) return;
-          done = true;
-          evts.forEach(function(e) { w.removeEventListener(e, go, true); });
-          if (w.LiveChatWidget) w.LiveChatWidget.init();
-      }
-      evts.forEach(function(e) { w.addEventListener(e, go, {passive:true, capture:true, once:true}); });
-      if ('requestIdleCallback' in w) {
-          w.requestIdleCallback(go, {timeout: 4000});
-      } else {
-          w.setTimeout(go, 4000);
-      }
-  })(window);
+        LC_API.on_after_load = function () {
+            if (typeof previousAfterLoad === 'function') {
+                previousAfterLoad();
+            }
+
+            awaApplyCustomVariables([]);
+
+            <?php if ($block->isCartSet()): ?>
+            awaSyncCartVariables();
+            require(['Magento_Customer/js/customer-data'], function (customerData) {
+                var cart = customerData.get('cart');
+              var previousCount = cart().summary_count;
+
+              try {
+                var storageCount = window.localStorage ? window.localStorage.getItem('lcCount') : null;
+
+                if (parseInt(storageCount, 10) !== previousCount) {
+                  awaSyncCartVariables();
+                }
+
+                if (window.localStorage) {
+                  window.localStorage.setItem('lcCount', previousCount);
+                }
+              } catch (error) {
+                awaSyncCartVariables();
+              }
+
+                cart.subscribe(function () {
+                    if (cart().summary_count !== previousCount) {
+                        previousCount = cart().summary_count;
+                        awaSyncCartVariables();
+
+                  try {
+                    if (window.localStorage) {
+                      window.localStorage.setItem('lcCount', previousCount);
+                    }
+                  } catch (error) {
+                    // No-op: storage is an optimization only.
+                  }
+                    }
+                });
+            });
+            <?php endif; ?>
+        };
+    }());
+
+        (function (w) {
+          var events = ['pointerdown', 'touchstart', 'keydown', 'mouseover', 'scroll'];
+          var initialized = false;
+
+          function initWidget() {
+            if (initialized) {
+              return;
+            }
+
+            initialized = true;
+            events.forEach(function (eventName) {
+              w.removeEventListener(eventName, initWidget, true);
+            });
+
+            if (w.LiveChatWidget) {
+              w.LiveChatWidget.init();
+            }
+          }
+
+          events.forEach(function (eventName) {
+            w.addEventListener(eventName, initWidget, {passive: true, capture: true, once: true});
+          });
+
+          if ('requestIdleCallback' in w) {
+            w.requestIdleCallback(initWidget, {timeout: 4000});
+          } else {
+            w.setTimeout(initWidget, 4000);
+          }
+        }(window));
 </script>
 <?php else: ?>
 <script>
-  console.log('Please go to "Stores => Settings => Configuration" and configure your LiveChat account.');
+    console.log('Please go to "Stores => Settings => Configuration" and configure your LiveChat account.');
 </script>
 <?php endif; ?>

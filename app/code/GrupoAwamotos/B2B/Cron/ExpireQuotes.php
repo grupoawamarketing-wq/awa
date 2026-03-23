@@ -8,22 +8,29 @@ namespace GrupoAwamotos\B2B\Cron;
 
 use GrupoAwamotos\B2B\Model\ResourceModel\QuoteRequest\CollectionFactory;
 use GrupoAwamotos\B2B\Helper\Config;
+use Magento\Framework\App\ResourceConnection;
 use Psr\Log\LoggerInterface;
 
 class ExpireQuotes
 {
+    private const TABLE = 'grupoawamotos_b2b_quote_request';
+    private const ACTIVE_STATUSES = ['pending', 'processing', 'quoted'];
+
     private CollectionFactory $collectionFactory;
     private Config $config;
     private LoggerInterface $logger;
+    private ResourceConnection $resource;
 
     public function __construct(
         CollectionFactory $collectionFactory,
         Config $config,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        ResourceConnection $resource
     ) {
         $this->collectionFactory = $collectionFactory;
         $this->config = $config;
         $this->logger = $logger;
+        $this->resource = $resource;
     }
 
     public function execute(): void
@@ -33,52 +40,34 @@ class ExpireQuotes
         }
 
         $now = date('Y-m-d H:i:s');
-
-        // Expirar cotações com expires_at no passado
-        $collection = $this->collectionFactory->create();
-        $collection->addFieldToFilter('status', ['in' => ['pending', 'processing', 'quoted']])
-            ->addFieldToFilter('expires_at', ['notnull' => true])
-            ->addFieldToFilter('expires_at', ['lt' => $now]);
-
+        $connection = $this->resource->getConnection();
+        $table = $connection->getTableName(self::TABLE);
         $count = 0;
-        foreach ($collection as $quote) {
-            try {
-                $quote->setStatus('expired');
-                $quote->save();
-                $count++;
-            } catch (\Exception $e) {
-                $this->logger->error(
-                    'B2B Quote Expiry Error: ' . $e->getMessage(),
-                    ['quote_id' => $quote->getId()]
-                );
-            }
-        }
 
-        // Expirar cotações sem expires_at mas com dias configurados
+        // Batch UPDATE: cotações com expires_at no passado
+        $count += (int) $connection->update(
+            $table,
+            ['status' => 'expired'],
+            [
+                'status IN (?)' => self::ACTIVE_STATUSES,
+                'expires_at IS NOT NULL',
+                'expires_at < ?' => $now,
+            ]
+        );
+
+        // Batch UPDATE: cotações sem expires_at mas com prazo configurado
         $expiryDays = $this->config->getQuoteExpiryDays();
         if ($expiryDays > 0) {
             $cutoffDate = date('Y-m-d H:i:s', strtotime("-{$expiryDays} days"));
-
-            $collection = $this->collectionFactory->create();
-            $collection->addFieldToFilter('status', ['in' => ['pending', 'processing', 'quoted']])
-                ->addFieldToFilter(
-                    ['expires_at'],
-                    [['null' => true]]
-                )
-                ->addFieldToFilter('created_at', ['lt' => $cutoffDate]);
-
-            foreach ($collection as $quote) {
-                try {
-                    $quote->setStatus('expired');
-                    $quote->save();
-                    $count++;
-                } catch (\Exception $e) {
-                    $this->logger->error(
-                        'B2B Quote Expiry Error: ' . $e->getMessage(),
-                        ['quote_id' => $quote->getId()]
-                    );
-                }
-            }
+            $count += (int) $connection->update(
+                $table,
+                ['status' => 'expired'],
+                [
+                    'status IN (?)' => self::ACTIVE_STATUSES,
+                    'expires_at IS NULL',
+                    'created_at < ?' => $cutoffDate,
+                ]
+            );
         }
 
         if ($count > 0) {
