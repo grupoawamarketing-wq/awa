@@ -140,15 +140,18 @@ class ProductSchema extends Template
             ];
         }
 
-        // Ratings e reviews
+        // Ratings e reviews — dados reais via getRatingSummary() (carregado com o produto)
         try {
             $reviewSummary = $product->getRatingSummary();
-            if ($reviewSummary) {
-                // Apenas assumindo dados válidos
+            if ($reviewSummary && (int) $reviewSummary->getReviewsCount() > 0) {
+                $ratingPercent = (float) $reviewSummary->getRatingSummary(); // escala 0–100
+                $ratingValue = round($ratingPercent / 20, 1); // converte para escala 0–5
                 $schema['aggregateRating'] = [
                     '@type' => 'AggregateRating',
-                    'ratingValue' => '5.0', // Fallback mockup
-                    'reviewCount' => '1',
+                    'ratingValue' => number_format($ratingValue, 1),
+                    'reviewCount' => (int) $reviewSummary->getReviewsCount(),
+                    'bestRating' => '5',
+                    'worstRating' => '1',
                 ];
             }
         } catch (\Exception $e) {

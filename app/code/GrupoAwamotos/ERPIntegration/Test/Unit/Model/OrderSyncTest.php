@@ -58,7 +58,6 @@ class OrderSyncTest extends TestCase
             $this->customerSync,
             $this->orderRepository,
             $this->shipmentRepository,
-            $this->trackFactory,
             $this->orderConverter,
             $this->searchCriteriaBuilder,
             $this->transaction,
@@ -343,6 +342,7 @@ class OrderSyncTest extends TestCase
             'NFNUMERO' => '12345',
             'NFCHAVE' => str_repeat('1', 44),
             'CODRASTREIO' => 'BR123456789',
+            'TRANSPORTADORA_NOME' => '', // added by getErpOrderStatus() when TRANSPORTADORA is absent
         ];
 
         $this->connection->method('fetchOne')
@@ -423,8 +423,13 @@ class OrderSyncTest extends TestCase
         $shipment = $this->createMock(\Magento\Sales\Model\Order\Shipment::class);
         $this->orderConverter->method('toShipment')->willReturn($shipment);
 
+        $tracksCollection = $this->getMockBuilder(\stdClass::class)
+            ->addMethods(['getNewEmptyItem'])
+            ->getMock();
         $track = $this->createMock(\Magento\Sales\Model\Order\Shipment\Track::class);
-        $this->trackFactory->method('create')->willReturn($track);
+        $tracksCollection->method('getNewEmptyItem')->willReturn($track);
+        $shipment->method('getTracksCollection')->willReturn($tracksCollection);
+        $shipment->method('addTrack')->willReturnSelf();
 
         $this->transaction->method('addObject')->willReturnSelf();
 
