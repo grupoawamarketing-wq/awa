@@ -26,7 +26,11 @@ class FooterExperimentTest extends TestCase
         $this->assertArrayHasKey('seed', $payload);
         $this->assertArrayHasKey('bucket', $payload);
         $this->assertArrayHasKey('is_active', $payload);
+        $this->assertArrayHasKey('experiment', $payload);
+        $this->assertArrayHasKey('control_variant', $payload);
         $this->assertSame('home5_footer_v1', $payload['seed']);
+        $this->assertSame('footer_progressive_rollout', $payload['experiment']);
+        $this->assertSame('control', $payload['control_variant']);
         $this->assertSame('control', $payload['variant']);
     }
 }

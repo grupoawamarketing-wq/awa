@@ -1,9 +1,9 @@
 # SF-001: Core Variables Extraction — Implementation Plan
 
-**Phase**: Segmentation Fixes (SF)  
-**Branch**: improvement/SF-001-core-variables  
-**Status**: 🟡 In Progress  
-**Created**: 2026-03-23  
+**Phase**: Segmentation Fixes (SF)
+**Branch**: improvement/SF-001-core-variables
+**Status**: 🟡 In Progress
+**Created**: 2026-03-23
 **Target**: -13% CSS size, -7% LCP
 
 ---
@@ -11,9 +11,9 @@
 ## 📊 Analysis Summary
 
 ### Current State (Before SF-001)
-- **File**: `awa-bundle-core.unmin.css`  
+- **File**: `awa-bundle-core.unmin.css`
 - **Size**: 551KB unminified, 369KB minified, 35KB brotli
-- **Lines**: 16,082 total  
+- **Lines**: 16,082 total
 - **Content**: Design tokens (variables) + reset + base typography + components
 
 ### Variables Section Found
@@ -117,7 +117,7 @@ php bin/magento cache:clean full_page
     <!-- Bundle 1/3: Foundation (vendor libs + core styles now without variables) -->
     <css src="css/awa-bundle-vendor-libs.css"/>
     <css src="css/awa-bundle-core.css"/>
-    
+
     <!-- Rest of CSS loads...  -->
 ```
 
@@ -132,7 +132,7 @@ php bin/magento cache:clean full_page
 | awa-core-variables | (none) | 8-10KB | new |
 | Total CSS | 1.8MB | 1.76MB | -2.3% |
 
-### Performance Impact (Target)  
+### Performance Impact (Target)
 | Metric | Current | Target | Gain |
 |---|---|---|---|
 | FCP | 2.5s | 2.3s | -8% |
@@ -296,7 +296,58 @@ Deployment:
 
 ---
 
-**Status**: READY TO IMPLEMENT  
-**Branch**: improvement/SF-001-core-variables  
-**Git HEAD**: d5cbf4f8  
+**Status**: READY TO IMPLEMENT
+**Branch**: improvement/SF-001-core-variables
+**Git HEAD**: d5cbf4f8
 
+---
+
+## Progress Update — 2026-03-23 (Progressive Safe Rollout)
+
+### Scope implemented in this cycle
+- Added a progressive performance optimization for footer rendering, scoped to A/B treatment variant only.
+- Control variant remains untouched to preserve exact production baseline and instant rollback path.
+
+### Feature flag / A-B safety model used
+- Existing experiment: `footer_progressive_rollout`
+- Gating selector: `.page_footer.awa-footer-exp--treatment`
+- Control selector remains default (`control`) with no new optimization rules.
+
+### Change details
+- File changed: `app/design/frontend/AWA_Custom/ayo_home5_child/web/css/awa-bundle-refinements.unmin.css`
+    - Added treatment-only rules:
+        - `content-visibility: auto;`
+        - `contain-intrinsic-size: auto 220px;`
+        - Mobile tuning (`<=767px`): `contain-intrinsic-size: auto 160px;`
+- Contract test reinforced:
+    - `app/code/GrupoAwamotos/Theme/Test/Unit/Contract/FooterExperimentContractTest.php`
+    - Verifies treatment-scoped CSS selectors and perf declarations.
+- Integration test expanded:
+    - `app/code/GrupoAwamotos/Theme/Test/Integration/Helper/FooterExperimentTest.php`
+    - Validates payload telemetry keys (`experiment`, `control_variant`).
+
+### Metrics (before vs after)
+- `awa-bundle-refinements` literal metric-lines:
+    - Before previous hardening rounds: `251`
+    - After latest hardening rounds: `242`
+    - Delta: `-9` lines (`-3.6%`)
+- Runtime safety:
+    - Static content deploy (`pt_BR`) successful.
+    - No new errors observed in `var/log/system.log` / `var/log/exception.log` for this cycle.
+
+### Incremental deployment plan (already aligned)
+1. Keep experiment disabled globally (`enabled=0`) for baseline verification.
+2. Enable experiment with `rollout_percentage=10` for canary.
+3. Increase to `25` → `50` → `75` → `100` based on metrics and logs.
+4. If anomaly detected, set rollout to `0` (or disable) for immediate fallback to control.
+
+### Reversibility / rollback
+- Functional rollback (no code deploy):
+    - Set footer experiment rollout to `0` or disable experiment in admin config.
+- Code rollback (if needed):
+    - Revert the commit that introduced treatment-only optimization and redeploy static assets.
+
+### Team communication log (handoff-ready)
+- Improvement is guarded by existing experiment framework; no forced behavior change on control group.
+- Tests were expanded to prevent accidental de-scoping of treatment-only optimization.
+- Rollout can proceed progressively with immediate fallback path.
