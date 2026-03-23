@@ -18,6 +18,27 @@
         window.dataLayer.push(eventPayload);
     }
 
+    function pushHeaderTelemetry(eventName, experiment, payload) {
+        var basePayload = {
+            experiment_name: 'header_progressive',
+            experiment_variant: experiment ? experiment.variant : 'A'
+        };
+        var extraPayload = payload || {};
+        var key;
+
+        for (key in extraPayload) {
+            if (Object.prototype.hasOwnProperty.call(extraPayload, key)) {
+                basePayload[key] = extraPayload[key];
+            }
+        }
+
+        pushDataLayer(eventName, basePayload);
+    }
+
+    function normalizeText(value) {
+        return String(value || '').replace(/\s+/g, ' ').trim();
+    }
+
     try {
         var optionsProbe = Object.defineProperty({}, 'passive', {
             get: function () {
@@ -87,10 +108,8 @@
             header.classList.remove('awa-header-exp-b');
         }
 
-        pushDataLayer('awa_header_experiment_exposure', {
-            experiment_name: 'header_progressive',
+        pushHeaderTelemetry('awa_header_experiment_exposure', { variant: variant }, {
             experiment_seed: seed,
-            experiment_variant: variant,
             experiment_rollout: rollout,
             experiment_bucket: bucket,
             experiment_variant_code: variantCode
@@ -240,10 +259,7 @@
             raf(setNavState);
             raf(syncDrawerState);
 
-            pushDataLayer('awa_header_nav_toggle_click', {
-                experiment_name: 'header_progressive',
-                experiment_variant: experiment ? experiment.variant : 'A'
-            });
+            pushHeaderTelemetry('awa_header_nav_toggle_click', experiment);
         });
 
         addListener(document, 'keydown', function (event) {
@@ -411,6 +427,63 @@
         syncExpanded();
     }
 
+    function wireHeaderClickTelemetry(experiment) {
+        var root = document.querySelector('[data-awa-component="site-header"]');
+        var stickyClass = 'awa-header-sticky';
+        var stickyTrackedState = null;
+
+        if (!root) {
+            return;
+        }
+
+        addListener(document, 'click', function (event) {
+            if (!event.target || !event.target.closest) {
+                return;
+            }
+
+            var accountLink = event.target.closest('.top-account a, [data-awa-top-account="true"] a');
+            if (accountLink) {
+                pushHeaderTelemetry('awa_header_account_click', experiment, {
+                    link_text: normalizeText(accountLink.textContent || accountLink.getAttribute('aria-label') || accountLink.getAttribute('title')),
+                    link_href: accountLink.getAttribute('href') || ''
+                });
+                return;
+            }
+
+            var categoryLink = event.target.closest('.menu_left_home1 .navigation.verticalmenu a, .menu_left_home1 .title-category-dropdown');
+            if (categoryLink) {
+                pushHeaderTelemetry('awa_header_category_click', experiment, {
+                    link_text: normalizeText(categoryLink.textContent || categoryLink.getAttribute('aria-label') || categoryLink.getAttribute('title')),
+                    link_href: categoryLink.getAttribute('href') || ''
+                });
+            }
+        }, { capture: true });
+
+        function syncStickyTelemetry() {
+            var isSticky = root.classList.contains(stickyClass) || document.body.classList.contains(stickyClass);
+
+            if (stickyTrackedState === isSticky) {
+                return;
+            }
+
+            stickyTrackedState = isSticky;
+            pushHeaderTelemetry('awa_header_sticky_state', experiment, {
+                sticky_active: isSticky ? 1 : 0
+            });
+        }
+
+        syncStickyTelemetry();
+        addListener(window, 'scroll', syncStickyTelemetry, { passive: true });
+        addListener(window, 'resize', syncStickyTelemetry, { passive: true });
+
+        if (window.MutationObserver) {
+            new MutationObserver(syncStickyTelemetry).observe(root, {
+                attributes: true,
+                attributeFilter: ['class']
+            });
+        }
+    }
+
     function wireDeferredBadges() {
         var badges = document.querySelector('[data-awa-deferred-badges="true"]');
         if (!badges) {
@@ -444,6 +517,7 @@
         wireNavA11y(experiment);
         wireSearchA11y();
         wireDeferredBadges();
+        wireHeaderClickTelemetry(experiment);
 
         addListener(document, 'click', function (event) {
             if (!event.target || !event.target.closest) {
@@ -453,10 +527,7 @@
             if (!showcart) {
                 return;
             }
-            pushDataLayer('awa_header_minicart_click', {
-                experiment_name: 'header_progressive',
-                experiment_variant: experiment ? experiment.variant : 'A'
-            });
+            pushHeaderTelemetry('awa_header_minicart_click', experiment);
         }, { capture: true });
     });
 })();

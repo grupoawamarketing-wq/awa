@@ -441,3 +441,82 @@ Deployment:
 - Safe to deploy incrementally; no schema/config migration required.
 - Rollback path:
     - Revert this change-set commit only.
+
+---
+
+## Progress Update — 2026-03-23 (CSS Tail Final Pass: Spacing + Typography + Duplicate Cleanup)
+
+### Scope implemented in this cycle
+- Final low-risk pass on `awa-bundle-tail.unmin.css` focused on:
+    - Spacing tokenization with fallback for fixed px values.
+    - Typography tokenization for letter-spacing and fixed line-height values.
+    - Removal of an explicit duplicated `.fancybox-close` declaration block.
+- Kept rendering parity by using `var(..., <legacy-px>)` fallbacks.
+
+### Files changed
+- `app/design/frontend/AWA_Custom/ayo_home5_child/web/css/awa-bundle-tail.unmin.css`
+- `app/design/frontend/AWA_Custom/ayo_home5_child/web/css/awa-bundle-tail.css` (regenerated)
+
+### Before vs after metrics (targeted literals)
+- Tracked legacy literals in targeted rules:
+    - `padding: 0 50px`
+    - `margin-bottom: 55px`
+    - `height: 45px` / `line-height: 45px`
+    - `line-height: 39px` / `line-height: 38px`
+    - `padding: 2px 8px` / `padding: 2px 6px`
+    - `padding: 10px 42px 10px 14px`
+    - `gap: 15px`
+    - `margin: 0 auto 40px`
+    - `margin-left: -15px` / `margin-right: -15px`
+- Result after patch:
+    - `0` occurrences for all tracked exact legacy declarations.
+
+### Validation evidence
+- Asset build:
+    - `cleancss` regeneration completed successfully.
+- Runtime sync:
+    - Updated minified CSS copied to `pub/static`.
+- Cache:
+    - `cache:clean full_page block_html` completed.
+- Full static deploy:
+    - `setup:static-content:deploy pt_BR -f` completed successfully.
+- Logs:
+    - No new exception entries associated with this cycle.
+
+### Reversibility
+- Runtime rollback:
+    - Restore previous bundle via git revert of this commit.
+- Functional safety:
+    - No markup/JS/schema changes, CSS-only with fallback-preserving declarations.
+
+---
+
+## Progress Update — 2026-03-23 (Header Telemetry Expansion)
+
+### Scope implemented in this cycle
+- Expanded progressive header telemetry in existing JS pipeline (no new loader entrypoint).
+- Kept implementation read-only from UX perspective (tracking-only, no layout change).
+
+### File changed
+- `app/design/frontend/AWA_Custom/ayo_home5_child/web/js/awa-header-a11y-performance.js`
+
+### Events added
+- `awa_header_account_click`
+- `awa_header_category_click`
+- `awa_header_sticky_state`
+
+### Existing events normalized
+- `awa_header_experiment_exposure`
+- `awa_header_nav_toggle_click`
+- `awa_header_minicart_click`
+
+### Data quality improvements
+- Unified payload via `pushHeaderTelemetry(...)` helper.
+- Added normalized text extraction for clicked links (`link_text`) and `link_href`.
+
+### Safety and rollout
+- Works within existing experiment payload (`header_progressive_rollout`).
+- No schema/backend coupling; event-only extension.
+
+### Reversibility
+- Revert single JS change if any analytics anomaly is detected.
