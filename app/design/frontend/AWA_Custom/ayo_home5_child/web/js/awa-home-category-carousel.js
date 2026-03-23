@@ -18,6 +18,15 @@ define([], function () {
 
         const mobileBreakpoint = config.mobileBreakpoint || 768;
 
+        function prefersReducedMotion() {
+            return window.matchMedia &&
+                window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        }
+
+        function scrollBehavior() {
+            return prefersReducedMotion() ? 'auto' : 'smooth';
+        }
+
         function isMobile() {
             return window.matchMedia(`(max-width: ${mobileBreakpoint}px)`).matches;
         }
@@ -60,7 +69,7 @@ define([], function () {
         if (prev) {
             prev.addEventListener('click', () => {
                 if (!isMobile()) {
-                    track.scrollBy({left: -getScrollAmount(), behavior: 'smooth'});
+                    track.scrollBy({left: -getScrollAmount(), behavior: scrollBehavior()});
                 }
             });
         }
@@ -68,7 +77,7 @@ define([], function () {
         if (next) {
             next.addEventListener('click', () => {
                 if (!isMobile()) {
-                    track.scrollBy({left: getScrollAmount(), behavior: 'smooth'});
+                    track.scrollBy({left: getScrollAmount(), behavior: scrollBehavior()});
                 }
             });
         }
@@ -132,7 +141,7 @@ define([], function () {
                 dot.dataset.page = i;
                 dot.addEventListener('click', ((page) => {
                     return () => {
-                        track.scrollTo({left: page * trackW, behavior: 'smooth'});
+                        track.scrollTo({left: page * trackW, behavior: scrollBehavior()});
                     };
                 })(i));
                 dotsWrap.appendChild(dot);
@@ -166,12 +175,12 @@ define([], function () {
             }
 
             if (e.key === 'ArrowRight') {
-                track.scrollBy({left: getScrollAmount(), behavior: 'smooth'});
+                track.scrollBy({left: getScrollAmount(), behavior: scrollBehavior()});
                 e.preventDefault();
             }
 
             if (e.key === 'ArrowLeft') {
-                track.scrollBy({left: -getScrollAmount(), behavior: 'smooth'});
+                track.scrollBy({left: -getScrollAmount(), behavior: scrollBehavior()});
                 e.preventDefault();
             }
         });
@@ -191,7 +200,7 @@ define([], function () {
         }, {passive: true});
 
         /* --- Staggered entrance animation --- */
-        if ('IntersectionObserver' in window) {
+        if ('IntersectionObserver' in window && !prefersReducedMotion()) {
             const animItems = track.querySelectorAll('.awa-category-carousel__item');
 
             animItems.forEach((el) => {

@@ -224,7 +224,8 @@ define([
                 var active = document.querySelector('#searchsuite-autocomplete .awa-ac-nav-active');
 
                 if (active && typeof active.scrollIntoView === 'function') {
-                    active.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                    var rm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                    active.scrollIntoView({ block: 'nearest', behavior: rm ? 'auto' : 'smooth' });
                 }
             }, 20);
         },

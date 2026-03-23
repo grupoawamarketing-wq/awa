@@ -24,7 +24,9 @@ define([], function () {
         window.addEventListener('scroll', toggle, {passive: true});
 
         element.addEventListener('click', () => {
-            window.scrollTo({top: 0, behavior: 'smooth'});
+            const prefersReducedMotion = window.matchMedia &&
+                window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            window.scrollTo({top: 0, behavior: prefersReducedMotion ? 'auto' : 'smooth'});
         });
 
         toggle();
