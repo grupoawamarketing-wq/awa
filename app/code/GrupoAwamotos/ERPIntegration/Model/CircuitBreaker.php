@@ -6,6 +6,7 @@ namespace GrupoAwamotos\ERPIntegration\Model;
 use Magento\Framework\App\CacheInterface;
 use Magento\Framework\Phrase;
 use Psr\Log\LoggerInterface;
+use GrupoAwamotos\ERPIntegration\Helper\Data as Helper;
 
 /**
  * Circuit Breaker Pattern Implementation
@@ -18,41 +19,28 @@ use Psr\Log\LoggerInterface;
  * - HALF_OPEN: Testing if service recovered
  *
  * Configuration:
- * - Failure threshold: 5 consecutive failures → OPEN
- * - Open timeout: 60s before trying HALF_OPEN
- * - Success threshold: 3 consecutive successes → CLOSED
+ * - Thresholds are configurable via Admin (Stores > Config > ERP Integration > Circuit Breaker)
+ * - Defaults: 5 failures → OPEN, 60s timeout → HALF_OPEN, 3 successes → CLOSED
  */
 class CircuitBreaker
 {
     private const CACHE_PREFIX = 'erp_circuit_breaker_';
     private const CACHE_LIFETIME = 3600; // 1 hour
 
-    /**
-     * Number of failures before opening circuit
-     */
-    private const FAILURE_THRESHOLD = 5;
-
-    /**
-     * Seconds to wait before trying half-open
-     */
-    private const OPEN_TIMEOUT = 60;
-
-    /**
-     * Number of successes in half-open before closing
-     */
-    private const SUCCESS_THRESHOLD = 3;
-
     private CacheInterface $cache;
     private LoggerInterface $logger;
+    private Helper $helper;
     private string $serviceName;
 
     public function __construct(
         CacheInterface $cache,
         LoggerInterface $logger,
+        Helper $helper,
         string $serviceName = 'erp_connection'
     ) {
         $this->cache = $cache;
         $this->logger = $logger;
+        $this->helper = $helper;
         $this->serviceName = $serviceName;
     }
 
@@ -93,7 +81,7 @@ class CircuitBreaker
         if ($state === CircuitBreakerState::HALF_OPEN) {
             $successCount = $this->incrementSuccessCount();
 
-            if ($successCount >= self::SUCCESS_THRESHOLD) {
+            if ($successCount >= $this->helper->getCircuitBreakerSuccessThreshold()) {
                 $this->transitionToClosed();
                 $this->logger->info('[ERP CircuitBreaker] Circuit closed after successful recovery', [
                     'service' => $this->serviceName,
@@ -126,19 +114,19 @@ class CircuitBreaker
         if ($state === CircuitBreakerState::CLOSED) {
             $failureCount = $this->incrementFailureCount();
 
-            if ($failureCount >= self::FAILURE_THRESHOLD) {
+            if ($failureCount >= $this->helper->getCircuitBreakerFailureThreshold()) {
                 $this->transitionToOpen();
                 $this->logger->error('[ERP CircuitBreaker] Circuit opened due to repeated failures', [
                     'service' => $this->serviceName,
                     'failure_count' => $failureCount,
-                    'threshold' => self::FAILURE_THRESHOLD,
+                    'threshold' => $this->helper->getCircuitBreakerFailureThreshold(),
                     'last_error' => $exception ? $exception->getMessage() : 'Unknown error',
                 ]);
             } else {
                 $this->logger->warning('[ERP CircuitBreaker] Failure recorded', [
                     'service' => $this->serviceName,
                     'failure_count' => $failureCount,
-                    'threshold' => self::FAILURE_THRESHOLD,
+                    'threshold' => $this->helper->getCircuitBreakerFailureThreshold(),
                     'error' => $exception ? $exception->getMessage() : 'Unknown error',
                 ]);
             }
@@ -167,9 +155,9 @@ class CircuitBreaker
             'success_count' => $data['success_count'] ?? 0,
             'last_failure_time' => $data['last_failure_time'] ?? null,
             'opened_at' => $data['opened_at'] ?? null,
-            'failure_threshold' => self::FAILURE_THRESHOLD,
-            'success_threshold' => self::SUCCESS_THRESHOLD,
-            'open_timeout' => self::OPEN_TIMEOUT,
+            'failure_threshold' => $this->helper->getCircuitBreakerFailureThreshold(),
+            'success_threshold' => $this->helper->getCircuitBreakerSuccessThreshold(),
+            'open_timeout' => $this->helper->getCircuitBreakerOpenTimeout(),
             'time_until_half_open' => $this->getTimeUntilHalfOpen(),
         ];
     }

@@ -61,6 +61,18 @@ class FooterExperimentContractTest extends TestCase
         $this->assertStringContainsString('"js/awa-footer-interactions"', $contents);
     }
 
+    public function testFooterTemplateKeepsExperimentLogicOutOfInlineScripts(): void
+    {
+        $footerPath = $this->getProjectRoot() . '/app/design/frontend/AWA_Custom/ayo_home5_child/Rokanthemes_Themeoption/templates/html/footer.phtml';
+        $this->assertFileExists($footerPath);
+        $contents = (string) file_get_contents($footerPath);
+
+        $this->assertNotSame('', $contents);
+        $this->assertStringContainsString('<script type="text/x-magento-init">', $contents);
+        $this->assertStringNotContainsString('localStorage', $contents);
+        $this->assertDoesNotMatchRegularExpression('/<script(?![^>]*type="text\/x-magento-init")/i', $contents);
+    }
+
     public function testFooterExperimentHelperExists(): void
     {
         $helperPath = $this->getModuleRoot() . '/Helper/FooterExperiment.php';

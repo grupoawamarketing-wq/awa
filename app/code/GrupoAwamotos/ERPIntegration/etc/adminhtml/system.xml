@@ -113,6 +113,46 @@
                 </field>
             </group>
 
+            <!-- Circuit Breaker Configuration -->
+            <group id="circuit_breaker" translate="label comment" sortOrder="12"
+                   showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Circuit Breaker (Proteção Anti-Falha)</label>
+                <comment><![CDATA[<strong>Padrão Circuit Breaker:</strong> Previne cascata de falhas bloqueando requisições a serviços indisponíveis.
+                <br><strong>Estados:</strong> CLOSED (normal) → OPEN (bloqueado) → HALF_OPEN (testando) → CLOSED.
+                <br><em>Thresholds configuráveis permitem ajustar sensibilidade para seu ambiente.</em>]]></comment>
+                <depends>
+                    <field id="grupoawamotos_erp/connection/enabled">1</field>
+                </depends>
+
+                <field id="failure_threshold" translate="label comment" type="text" sortOrder="10"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Failures até OPEN</label>
+                    <comment><![CDATA[Número de falhas consecutivas antes de abrir o circuito. <strong>Padrão: 5</strong>]]></comment>
+                    <validate>required-entry validate-digits validate-digits-range digits-range-1-20</validate>
+                    <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
+                </field>
+
+                <field id="open_timeout" translate="label comment" type="text" sortOrder="20"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Timeout OPEN (segundos)</label>
+                    <comment><![CDATA[Segundos de espera antes de testar HALF_OPEN. <strong>Padrão: 60</strong>]]></comment>
+                    <validate>required-entry validate-digits validate-digits-range digits-range-10-600</validate>
+                </field>
+
+                <field id="success_threshold" translate="label comment" type="text" sortOrder="30"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Sucessos até CLOSED</label>
+                    <comment><![CDATA[Sucessos consecutivos em HALF_OPEN para fechar o circuito. <strong>Padrão: 3</strong>]]></comment>
+                    <validate>required-entry validate-digits validate-digits-range digits-range-1-10</validate>
+                </field>
+
+                <field id="reset_circuit" translate="label" type="button" sortOrder="40"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Reset Manual do Circuito</label>
+                    <frontend_model>GrupoAwamotos\ERPIntegration\Block\Adminhtml\System\Config\ResetCircuitButton</frontend_model>
+                </field>
+            </group>
+
             <!-- Write Connection (for B2B client registration) -->
             <group id="write_connection" translate="label" sortOrder="15"
                    showInDefault="1" showInWebsite="0" showInStore="0">

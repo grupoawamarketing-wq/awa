@@ -971,4 +971,30 @@ class Data extends AbstractHelper
         );
         return $value ? $this->encryptor->decrypt($value) : '';
     }
+
+    // ==================== Circuit Breaker Configuration ====================
+
+    public function getCircuitBreakerFailureThreshold(): int
+    {
+        return (int) ($this->scopeConfig->getValue(
+            self::XML_PREFIX . 'circuit_breaker/failure_threshold',
+            ScopeInterface::SCOPE_STORE
+        ) ?: 5);
+    }
+
+    public function getCircuitBreakerOpenTimeout(): int
+    {
+        return (int) ($this->scopeConfig->getValue(
+            self::XML_PREFIX . 'circuit_breaker/open_timeout',
+            ScopeInterface::SCOPE_STORE
+        ) ?: 60);
+    }
+
+    public function getCircuitBreakerSuccessThreshold(): int
+    {
+        return (int) ($this->scopeConfig->getValue(
+            self::XML_PREFIX . 'circuit_breaker/success_threshold',
+            ScopeInterface::SCOPE_STORE
+        ) ?: 3);
+    }
 }
