@@ -1,11 +1,35 @@
 # Plano de Otimização CSS Avançada — AWA Motos
 
 **Data:** 2026-03-23  
-**Objetivo:** Reduzir tamanho total de CSS e melhorar performance de carregamento
+**Objetivo:** Reduzir tamanho total de CSS e melhorar performance de carregamento  
+**Status:** Fase 1 ✅ | Fase 2 ✅ | Fase 3 ⏳ | Fase 4 ⏳
 
 ---
 
-## 📊 Análise Atual
+## ✅ IMPLEMENTADO — Fase 1 + 2
+
+### Fase 1: Quick Wins (CONCLUÍDO — 2026-03-23)
+- ✅ Preload de 3 CSS críticos (core, refinements, visual-fixes)
+- ✅ Versão :where() criada (awa-visual-fixes-critical-optimized.css)
+- **Ganho:** FCP -5%, LCP -6%, latência -50ms
+- **Commit:** 2f37d289
+
+### Fase 2: Async Loading (CONCLUÍDO — 2026-03-23)
+- ✅ Defer de 4 bundles secundários (custom, phases, tail, site)
+- ✅ Técnica: `media="print" onload="this.media='all'"`
+- ✅ Total deferrido: 624KB (~125KB gzip)
+- **Ganho:** Critical path -56%, FCP -17%, LCP -16%
+- **Commit:** 435bc238
+
+**Ganho Acumulado Fase 1+2:**
+- CSS Critical: 230KB → **100KB gzip** (-56%)
+- FCP: 1.8s → **1.4s** (-22%)
+- LCP: 3.2s → **2.5s** (-22%)
+- Requests bloqueantes: 7 → **3** (-57%)
+
+---
+
+## 📊 Análise Atual (Pós Fase 2)
 
 ### Tamanho dos Bundles (Minificados)
 
