@@ -401,3 +401,43 @@ Deployment:
     - Revert only this helper/test commit.
 - Runtime safety:
     - No database migration or schema change involved.
+
+---
+
+## Progress Update — 2026-03-23 (Safe Optimization: Header Request Memoization)
+
+### Scope implemented in this cycle
+- Implemented request-level memoization in header experiment helper to eliminate repeated configuration reads and repeated decider execution in the same request/store context.
+- Maintained full behavioral parity for control/treatment assignment.
+
+### Files changed
+- `app/code/GrupoAwamotos/Theme/Helper/HeaderExperiment.php`
+    - Added cache maps per store for `enabled`, `rollout_percentage`, `variant_seed`, and final `payload`.
+- `app/code/GrupoAwamotos/Theme/Test/Unit/Helper/HeaderExperimentTest.php`
+    - Added memoization regression test for repeated `getPayload()` calls.
+- `app/code/GrupoAwamotos/Theme/Test/Integration/Helper/HeaderExperimentTest.php`
+    - Added payload stability assertion and telemetry key checks (`experiment`, `control_variant`).
+
+### Before vs after metrics (same request, same store)
+- `getPayload()` first call:
+    - Before: 1 decision + 3 config reads
+    - After: 1 decision + 3 config reads
+- `getPayload()` repeated call:
+    - Before: +1 decision +3 config reads
+    - After: +0 decision +0 config reads
+- Net repeated-call gain:
+    - Decision executions reduced by `100%`
+    - Config reads reduced by `100%`
+
+### Validation evidence
+- PHPUnit targeted suite (Header):
+    - `11 tests`, `23 assertions`, `1 skipped`, status `OK`
+- PHP lint:
+    - No syntax errors in all modified files.
+- Logs:
+    - No new exception entries associated with the change.
+
+### Deployment and rollback
+- Safe to deploy incrementally; no schema/config migration required.
+- Rollback path:
+    - Revert this change-set commit only.
