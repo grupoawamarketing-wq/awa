@@ -3,9 +3,25 @@
         xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
     <preference for="LiveChat\LiveChat\Block\SnippetBlock"
                 type="GrupoAwamotos\LiveChat\Block\SnippetBlock"/>
+
+    <!-- Explicit DI for CustomerContextBuilder to avoid auto-wiring conflicts -->
+    <type name="GrupoAwamotos\LiveChat\Model\Chat\CustomerContextBuilder">
+        <arguments>
+            <argument name="customerSession" xsi:type="object">Magento\Customer\Model\Session</argument>
+            <argument name="b2bHelper" xsi:type="object">GrupoAwamotos\B2B\Helper\Data</argument>
+            <argument name="groupRepository" xsi:type="object">Magento\Customer\Api\GroupRepositoryInterface</argument>
+            <argument name="approvalStatusSource" xsi:type="object">GrupoAwamotos\B2B\Model\Customer\Attribute\Source\ApprovalStatus</argument>
+        </arguments>
+    </type>
+
+    <!-- Plugin registration with explicit CustomerContextBuilder dependency -->
     <type name="LiveChat\LiveChat\Controller\GetCart\Index">
         <plugin name="grupoawamotos_livechat_customer_context"
                 type="GrupoAwamotos\LiveChat\Plugin\LiveChat\Controller\GetCart\CustomerContextPlugin"
                 sortOrder="10"/>
     </type>
+
+    <!-- Explicit ViewModels declarations for clarity -->
+    <type name="GrupoAwamotos\LiveChat\ViewModel\ChatContext" />
+    <type name="GrupoAwamotos\LiveChat\ViewModel\WidgetBootstrapConfig" />
 </config>

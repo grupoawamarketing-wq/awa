@@ -6,6 +6,7 @@ namespace GrupoAwamotos\LiveChat\Block;
 use GrupoAwamotos\Fitment\Model\ResourceModel\Application\CollectionFactory as ApplicationCollectionFactory;
 use LiveChat\LiveChat\Helper\Data as LiveChatDataHelper;
 use Magento\Catalog\Api\Data\ProductInterface;
+use Magento\Framework\App\Request\Http as RequestInterface;
 use Magento\Framework\Registry;
 use Magento\Framework\View\Element\Template\Context;
 
@@ -16,6 +17,7 @@ class SnippetBlock extends \LiveChat\LiveChat\Block\SnippetBlock
 
     private Registry $registry;
     private ApplicationCollectionFactory $applicationCollectionFactory;
+    private RequestInterface $request;
 
     /**
      * @var array<int, array{name: string, value: string}>|null
@@ -27,11 +29,13 @@ class SnippetBlock extends \LiveChat\LiveChat\Block\SnippetBlock
         LiveChatDataHelper $dataHelper,
         Registry $registry,
         ApplicationCollectionFactory $applicationCollectionFactory,
+        RequestInterface $request,
         array $data = []
     ) {
         parent::__construct($context, $dataHelper, $data);
         $this->registry = $registry;
         $this->applicationCollectionFactory = $applicationCollectionFactory;
+        $this->request = $request;
     }
 
     public function hasAdditionalCustomVariables(): bool
@@ -58,13 +62,7 @@ class SnippetBlock extends \LiveChat\LiveChat\Block\SnippetBlock
             return $this->additionalCustomVariables;
         }
 
-        $variables = [];
-
-        foreach ($this->getPageContextVariables() as $variable) {
-            $variables[] = $variable;
-        }
-
-        $this->additionalCustomVariables = $variables;
+        $this->additionalCustomVariables = $this->getPageContextVariables();
 
         return $this->additionalCustomVariables;
     }
@@ -72,13 +70,10 @@ class SnippetBlock extends \LiveChat\LiveChat\Block\SnippetBlock
     /**
      * @return array<int, array{name: string, value: string}>
      */
-    /**
-     * @return array<int, array{name: string, value: string}>
-     */
     private function getPageContextVariables(): array
     {
         $variables = [];
-        $fullActionName = $this->getRequest()->getFullActionName();
+        $fullActionName = $this->request->getFullActionName();
 
         $this->appendVariable($variables, 'Tipo de pagina', $this->getPageTypeLabel($fullActionName));
 
@@ -97,7 +92,7 @@ class SnippetBlock extends \LiveChat\LiveChat\Block\SnippetBlock
             $this->appendVariable($variables, 'Categoria atual', (string) $category->getName());
         }
 
-        $searchQuery = trim((string) $this->getRequest()->getParam('q', ''));
+        $searchQuery = trim((string) $this->request->getParam('q', ''));
         if ($searchQuery !== '') {
             $this->appendVariable($variables, 'Busca atual', $searchQuery);
         }
