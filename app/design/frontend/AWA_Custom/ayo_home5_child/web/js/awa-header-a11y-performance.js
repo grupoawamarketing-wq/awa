@@ -61,31 +61,26 @@
     function getExperimentConfig() {
         var header = document.querySelector('[data-awa-component="site-header"]');
         if (!header) {
-            return { enabled: false, rollout: 0, seed: 'home5_header_v1', variant: 'A' };
+            return { enabled: false, rollout: 0, seed: 'home5_header_v1', bucket: 0, active: false, variant: 'A', variantCode: 'control' };
         }
 
         var enabled = header.getAttribute('data-awa-header-exp-enabled') === '1';
         var rollout = parseInt(header.getAttribute('data-awa-header-exp-rollout') || '0', 10);
         var seed = header.getAttribute('data-awa-header-exp-seed') || 'home5_header_v1';
+        var bucket = parseInt(header.getAttribute('data-awa-header-exp-bucket') || '0', 10);
+        var active = header.getAttribute('data-awa-header-exp-active') === '1';
+        var variantCode = header.getAttribute('data-awa-header-exp-variant') || (active ? 'v2' : 'control');
         if (isNaN(rollout)) {
             rollout = 0;
         }
-        rollout = Math.max(0, Math.min(100, rollout));
-        var storageKey = 'awa_header_exp_' + seed;
-        var bucket = null;
-
-        try {
-            bucket = window.localStorage.getItem(storageKey);
-            if (bucket === null) {
-                bucket = String(Math.floor(Math.random() * 100));
-                window.localStorage.setItem(storageKey, bucket);
-            }
-        } catch (e) {
-            bucket = String(Math.floor(Math.random() * 100));
+        if (isNaN(bucket)) {
+            bucket = 0;
         }
+        rollout = Math.max(0, Math.min(100, rollout));
+        bucket = Math.max(0, Math.min(99, bucket));
 
-        var variant = enabled && parseInt(bucket, 10) < rollout ? 'B' : 'A';
-        header.setAttribute('data-awa-header-exp-variant', variant);
+        var variant = enabled && active ? 'B' : 'A';
+        header.setAttribute('data-awa-header-exp-group', variant);
         if (variant === 'B') {
             header.classList.add('awa-header-exp-b');
         } else {
@@ -96,30 +91,154 @@
             experiment_name: 'header_progressive',
             experiment_seed: seed,
             experiment_variant: variant,
-            experiment_rollout: rollout
+            experiment_rollout: rollout,
+            experiment_bucket: bucket,
+            experiment_variant_code: variantCode
         });
 
-        return { enabled: enabled, rollout: rollout, seed: seed, variant: variant };
+        return {
+            enabled: enabled,
+            rollout: rollout,
+            seed: seed,
+            bucket: bucket,
+            active: active,
+            variant: variant,
+            variantCode: variantCode
+        };
     }
 
     function wireNavA11y(experiment) {
         var toggle = document.querySelector('[data-awa-nav-toggle="true"]');
         var navShell = document.getElementById('awa-primary-navigation');
         var useEnhancedDrawer = !!experiment && experiment.variant === 'B';
+        var overlay = null;
+        var lastFocusedElement = null;
+        var focusableSelector = [
+            'a[href]',
+            'button:not([disabled])',
+            'textarea:not([disabled])',
+            'input:not([disabled]):not([type="hidden"])',
+            'select:not([disabled])',
+            '[tabindex]:not([tabindex="-1"])'
+        ].join(',');
+
+        function isDrawerOpen() {
+            return useEnhancedDrawer && document.body.classList.contains('nav-before-open');
+        }
+
+        function getFocusableItems() {
+            if (!navShell) {
+                return [];
+            }
+            return Array.prototype.slice.call(navShell.querySelectorAll(focusableSelector)).filter(function (item) {
+                return item.offsetParent !== null;
+            });
+        }
+
+        function ensureOverlay() {
+            if (overlay) {
+                return overlay;
+            }
+            overlay = document.querySelector('.awa-mobile-drawer-overlay');
+            if (overlay) {
+                return overlay;
+            }
+
+            overlay = document.createElement('button');
+            overlay.type = 'button';
+            overlay.className = 'awa-mobile-drawer-overlay';
+            overlay.setAttribute('aria-label', 'Fechar menu');
+            overlay.setAttribute('aria-hidden', 'true');
+            overlay.setAttribute('tabindex', '-1');
+            document.body.appendChild(overlay);
+            return overlay;
+        }
+
+        function syncDrawerState() {
+            if (!useEnhancedDrawer || !navShell) {
+                return;
+            }
+
+            var open = isDrawerOpen();
+            var drawerOverlay = ensureOverlay();
+
+            navShell.setAttribute('aria-hidden', open ? 'false' : 'true');
+            toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+
+            if (open) {
+                document.body.classList.add('awa-mobile-drawer-open');
+                drawerOverlay.classList.add('is-active');
+                drawerOverlay.setAttribute('aria-hidden', 'false');
+                drawerOverlay.removeAttribute('tabindex');
+                return;
+            }
+
+            document.body.classList.remove('awa-mobile-drawer-open');
+            drawerOverlay.classList.remove('is-active');
+            drawerOverlay.setAttribute('aria-hidden', 'true');
+            drawerOverlay.setAttribute('tabindex', '-1');
+        }
+
+        function openDrawer() {
+            if (!useEnhancedDrawer || !navShell) {
+                return;
+            }
+
+            lastFocusedElement = document.activeElement;
+            document.body.classList.add('nav-before-open');
+            navShell.classList.add('is-awa-mobile-open');
+            syncDrawerState();
+
+            raf(function () {
+                var focusables = getFocusableItems();
+                if (focusables.length) {
+                    focusables[0].focus();
+                }
+            });
+        }
+
+        function closeDrawer() {
+            if (!useEnhancedDrawer || !navShell) {
+                return;
+            }
+
+            document.body.classList.remove('nav-before-open');
+            navShell.classList.remove('is-awa-mobile-open');
+            syncDrawerState();
+
+            if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
+                lastFocusedElement.focus();
+            } else {
+                toggle.focus();
+            }
+            lastFocusedElement = null;
+        }
+
         if (!toggle) {
             return;
         }
 
-        setNavState();
+        if (useEnhancedDrawer && navShell) {
+            navShell.setAttribute('role', 'dialog');
+            navShell.setAttribute('aria-modal', 'true');
+            navShell.setAttribute('aria-hidden', 'true');
+            ensureOverlay();
+        }
 
-        addListener(toggle, 'click', function () {
-            if (useEnhancedDrawer && !document.body.classList.contains('nav-open') && !document.body.classList.contains('nav-before-open')) {
-                document.body.classList.toggle('nav-before-open');
-                if (navShell && navShell.classList) {
-                    navShell.classList.toggle('is-awa-mobile-open');
+        setNavState();
+        syncDrawerState();
+
+        addListener(toggle, 'click', function (event) {
+            if (useEnhancedDrawer && navShell) {
+                event.preventDefault();
+                if (isDrawerOpen()) {
+                    closeDrawer();
+                } else {
+                    openDrawer();
                 }
             }
             raf(setNavState);
+            raf(syncDrawerState);
 
             pushDataLayer('awa_header_nav_toggle_click', {
                 experiment_name: 'header_progressive',
@@ -127,15 +246,35 @@
             });
         });
 
-        addListener(document, 'keyup', function (event) {
+        addListener(document, 'keydown', function (event) {
+            if (!useEnhancedDrawer || !navShell || !isDrawerOpen()) {
+                return;
+            }
+
             if (event.key === 'Escape') {
-                if (useEnhancedDrawer && document.body.classList.contains('nav-before-open')) {
-                    document.body.classList.remove('nav-before-open');
-                }
-                if (useEnhancedDrawer && navShell && navShell.classList) {
-                    navShell.classList.remove('is-awa-mobile-open');
-                }
+                closeDrawer();
                 raf(setNavState);
+                return;
+            }
+
+            if (event.key === 'Tab') {
+                var focusables = getFocusableItems();
+                if (!focusables.length) {
+                    event.preventDefault();
+                    return;
+                }
+
+                var first = focusables[0];
+                var last = focusables[focusables.length - 1];
+                var active = document.activeElement;
+
+                if (event.shiftKey && active === first) {
+                    event.preventDefault();
+                    last.focus();
+                } else if (!event.shiftKey && active === last) {
+                    event.preventDefault();
+                    first.focus();
+                }
             }
         }, { capture: true });
 
@@ -143,17 +282,24 @@
             if (!useEnhancedDrawer || !navShell || !document.body.classList.contains('nav-before-open')) {
                 return;
             }
+
+            if (overlay && event.target === overlay) {
+                closeDrawer();
+                raf(setNavState);
+                return;
+            }
+
             if (toggle.contains(event.target) || navShell.contains(event.target)) {
                 return;
             }
-            document.body.classList.remove('nav-before-open');
-            navShell.classList.remove('is-awa-mobile-open');
+            closeDrawer();
             raf(setNavState);
         }, { capture: true });
 
         if (window.MutationObserver) {
             var bodyObserver = new MutationObserver(function () {
                 setNavState();
+                syncDrawerState();
             });
             bodyObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
         }

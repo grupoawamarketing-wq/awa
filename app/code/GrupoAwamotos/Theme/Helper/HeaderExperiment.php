@@ -14,7 +14,7 @@ class HeaderExperiment extends AbstractHelper
 {
     private const XML_PATH_ENABLED = 'grupoawamotos_theme/header_experiment/enabled';
     private const XML_PATH_ROLLOUT_PERCENTAGE = 'grupoawamotos_theme/header_experiment/rollout_percentage';
-    private const XML_PATH_VARIANT_CODE = 'grupoawamotos_theme/header_experiment/variant_code';
+    private const XML_PATH_VARIANT_SEED = 'grupoawamotos_theme/header_experiment/variant_seed';
 
     public function __construct(
         Context $context,
@@ -47,13 +47,18 @@ class HeaderExperiment extends AbstractHelper
 
     public function getVariantCode(?int $storeId = null): string
     {
+        return $this->decider->getDefaultVariantCode();
+    }
+
+    public function getVariantSeed(?int $storeId = null): string
+    {
         $value = (string) $this->scopeConfig->getValue(
-            self::XML_PATH_VARIANT_CODE,
+            self::XML_PATH_VARIANT_SEED,
             ScopeInterface::SCOPE_STORE,
             $storeId
         );
 
-        return $this->decider->normalizeVariantCode($value);
+        return $this->decider->normalizeVariantSeed($value);
     }
 
     /**
@@ -63,6 +68,7 @@ class HeaderExperiment extends AbstractHelper
     {
         return $this->decider->decide(
             $this->resolveVisitorSeed(),
+            $this->getVariantSeed($storeId),
             $this->isEnabled($storeId),
             $this->getRolloutPercentage($storeId),
             $this->getVariantCode($storeId)

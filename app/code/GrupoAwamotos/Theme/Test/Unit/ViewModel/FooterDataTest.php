@@ -162,6 +162,16 @@ class FooterDataTest extends TestCase
         $this->assertSame(0, $this->viewModel->getFooterExperimentRolloutPercentage());
     }
 
+    public function testGetFooterExperimentRolloutPercentageReturnsValidConfiguredValue(): void
+    {
+        $this->scopeConfigMock->expects($this->once())
+            ->method('getValue')
+            ->with('grupoawamotos_theme/footer_experiment/rollout_percentage', ScopeInterface::SCOPE_STORE)
+            ->willReturn('42');
+
+        $this->assertSame(42, $this->viewModel->getFooterExperimentRolloutPercentage());
+    }
+
     public function testGetFooterExperimentSeedFallsBackWhenEmpty(): void
     {
         $this->scopeConfigMock->expects($this->once())

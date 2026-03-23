@@ -3,25 +3,25 @@ declare(strict_types=1);
 
 namespace GrupoAwamotos\Theme\Test\Unit\Model;
 
-use GrupoAwamotos\Theme\Model\HeaderExperimentDecider;
+use GrupoAwamotos\Theme\Model\FooterExperimentDecider;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \GrupoAwamotos\Theme\Model\HeaderExperimentDecider
+ * @covers \GrupoAwamotos\Theme\Model\FooterExperimentDecider
  */
-class HeaderExperimentDeciderTest extends TestCase
+class FooterExperimentDeciderTest extends TestCase
 {
-    private HeaderExperimentDecider $subject;
+    private FooterExperimentDecider $subject;
 
     protected function setUp(): void
     {
-        $this->subject = new HeaderExperimentDecider();
+        $this->subject = new FooterExperimentDecider();
     }
 
     public function testCalculateBucketIsDeterministic(): void
     {
-        $first = $this->subject->calculateBucket('session:abc123');
-        $second = $this->subject->calculateBucket('session:abc123');
+        $first = $this->subject->calculateBucket('session:footer-123');
+        $second = $this->subject->calculateBucket('session:footer-123');
 
         $this->assertSame($first, $second);
         $this->assertGreaterThanOrEqual(0, $first);
@@ -30,26 +30,26 @@ class HeaderExperimentDeciderTest extends TestCase
 
     public function testDecideReturnsControlWhenExperimentIsDisabled(): void
     {
-        $result = $this->subject->decide('customer:42', 'home5_header_v1', false, 100, 'v2');
+        $result = $this->subject->decide('customer:42', 'home5_footer_v1', false, 100, 'treatment');
 
         $this->assertFalse($result['active']);
         $this->assertSame('control', $result['variant']);
-        $this->assertSame('home5_header_v1', $result['seed']);
+        $this->assertSame('home5_footer_v1', $result['seed']);
     }
 
     public function testDecideActivatesVariantWhenBucketIsInsideRollout(): void
     {
-        $bucket = $this->subject->calculateBucket('home5_header_v1|customer:42');
+        $bucket = $this->subject->calculateBucket('home5_footer_v1|customer:42');
         $rollout = min(100, $bucket + 1);
-        $result = $this->subject->decide('customer:42', 'home5_header_v1', true, $rollout, 'compact-topbar');
+        $result = $this->subject->decide('customer:42', 'home5_footer_v1', true, $rollout, 'trust-bar-v2');
 
         $this->assertTrue($result['active']);
-        $this->assertSame('compact-topbar', $result['variant']);
+        $this->assertSame('trust-bar-v2', $result['variant']);
     }
 
     public function testNormalizeVariantCodeFallsBackToDefault(): void
     {
-        $this->assertSame('v2', $this->subject->normalizeVariantCode('@@@'));
+        $this->assertSame('treatment', $this->subject->normalizeVariantCode('@@@'));
     }
 
     public function testNormalizeRolloutPercentageClampsOutsideBounds(): void
@@ -60,6 +60,6 @@ class HeaderExperimentDeciderTest extends TestCase
 
     public function testNormalizeVariantSeedFallsBackToDefault(): void
     {
-        $this->assertSame('home5_header_v1', $this->subject->normalizeVariantSeed('@@@'));
+        $this->assertSame('home5_footer_v1', $this->subject->normalizeVariantSeed('@@@'));
     }
 }

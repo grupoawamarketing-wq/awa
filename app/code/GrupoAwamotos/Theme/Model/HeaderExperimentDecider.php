@@ -7,23 +7,33 @@ class HeaderExperimentDecider
 {
     private const CONTROL_VARIANT = 'control';
     private const DEFAULT_VARIANT = 'v2';
+    private const DEFAULT_VARIANT_SEED = 'home5_header_v1';
     private const EXPERIMENT_CODE = 'header_progressive_rollout';
 
     /**
      * @return array<string, int|string|bool>
      */
-    public function decide(string $visitorSeed, bool $enabled, int $rolloutPercentage, string $variantCode): array
+    public function decide(
+        string $visitorSeed,
+        string $variantSeed,
+        bool $enabled,
+        int $rolloutPercentage,
+        string $variantCode
+    ): array
     {
+        $normalizedSeed = $this->normalizeVariantSeed($variantSeed);
         $normalizedRollout = $this->normalizeRolloutPercentage($rolloutPercentage);
         $normalizedVariant = $this->normalizeVariantCode($variantCode);
-        $bucket = $this->calculateBucket($visitorSeed);
+        $bucket = $this->calculateBucket($normalizedSeed . '|' . $visitorSeed);
         $active = $enabled && $normalizedRollout > 0 && $bucket < $normalizedRollout;
 
         return [
             'experiment' => self::EXPERIMENT_CODE,
             'enabled' => $enabled,
             'active' => $active,
+            'is_active' => $active,
             'bucket' => $bucket,
+            'seed' => $normalizedSeed,
             'rollout_percentage' => $normalizedRollout,
             'variant' => $active ? $normalizedVariant : self::CONTROL_VARIANT,
             'control_variant' => self::CONTROL_VARIANT,
@@ -50,5 +60,19 @@ class HeaderExperimentDecider
         $normalized = trim($normalized, '-_');
 
         return $normalized !== '' ? $normalized : self::DEFAULT_VARIANT;
+    }
+
+    public function normalizeVariantSeed(string $variantSeed): string
+    {
+        $normalized = strtolower(trim($variantSeed));
+        $normalized = preg_replace('/[^a-z0-9_-]+/', '-', $normalized) ?: '';
+        $normalized = trim($normalized, '-_');
+
+        return $normalized !== '' ? $normalized : self::DEFAULT_VARIANT_SEED;
+    }
+
+    public function getDefaultVariantCode(): string
+    {
+        return self::DEFAULT_VARIANT;
     }
 }

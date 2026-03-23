@@ -8,19 +8,26 @@
  *   – Fix: aria-label derivado do alias do bloco quando $label está ausente.
  *
  * Template original: vendor/magento/module-theme/view/frontend/templates/html/sections.phtml
- * Única mudança: adição de aria-label no <a> quando $label é vazio.
+ * Mudanças do override:
+ *   – aria-label no <a> quando $label é vazio.
+ *   – shell de navegação estável para o experimento progressivo do header.
  *
  * @see \Magento\Theme\Block\Html\Sections
  */
 declare(strict_types=1);
 
-$group    = $block->getGroupName();
+$group = $block->getGroupName();
 $groupCss = $block->getGroupCss();
+$sectionItemsId = 'awa-primary-navigation';
+$sectionItemsClass = trim($groupCss . '-items awa-header-primary-nav');
 ?>
 <?php if ($detailedInfoGroup = $block->getGroupChildNames($group)): ?>
     <div class="sections <?= $block->escapeHtmlAttr($groupCss) ?>">
         <?php $layout = $block->getLayout(); ?>
-        <div class="section-items <?= $block->escapeHtmlAttr($groupCss) ?>-items"
+        <div id="<?= $block->escapeHtmlAttr($sectionItemsId) ?>"
+             class="section-items <?= $block->escapeHtmlAttr($sectionItemsClass) ?>"
+             data-awa-nav-shell="true"
+             aria-label="<?= $block->escapeHtmlAttr(__('Navegacao principal')) ?>"
              data-mage-init='{"tabs":{"openedState":"active"}}'>
             <?php foreach ($detailedInfoGroup as $name): ?>
                 <?php
@@ -31,12 +38,11 @@ $groupCss = $block->getGroupCss();
                     $alias = $layout->getElementAlias($name);
                     $label = $block->getChildData($alias, 'title');
 
-                    // WCAG 4.1.2: gera aria-label a partir do alias quando o label está vazio
-                    // Ex: 'menu.vertical' → 'Menu Vertical' | 'main.menu' → 'Main Menu'
+                    // WCAG 4.1.2: gera aria-label a partir do alias quando o label está vazio.
                     $ariaLabel = trim((string) $label);
                     if ($ariaLabel === '') {
                         $humanAlias = ucwords(str_replace(['.', '-', '_'], ' ', (string) $alias));
-                        $ariaLabel  = (string) __($humanAlias);
+                        $ariaLabel = (string) __($humanAlias);
                     }
                 ?>
                 <div class="section-item-title <?= $block->escapeHtmlAttr($groupCss) ?>-item-title"

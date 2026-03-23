@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace GrupoAwamotos\Theme\Test\Unit\Helper;
 
-use GrupoAwamotos\Theme\Helper\HeaderExperiment;
-use GrupoAwamotos\Theme\Model\HeaderExperimentDecider;
+use GrupoAwamotos\Theme\Helper\FooterExperiment;
+use GrupoAwamotos\Theme\Model\FooterExperimentDecider;
 use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\Helper\Context;
@@ -14,27 +14,27 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \GrupoAwamotos\Theme\Helper\HeaderExperiment
+ * @covers \GrupoAwamotos\Theme\Helper\FooterExperiment
  */
-class HeaderExperimentTest extends TestCase
+class FooterExperimentTest extends TestCase
 {
-    private HeaderExperiment $subject;
+    private FooterExperiment $subject;
     private ScopeConfigInterface&MockObject $scopeConfig;
     private CustomerSession&MockObject $customerSession;
     private SessionManagerInterface&MockObject $sessionManager;
-    private HeaderExperimentDecider&MockObject $decider;
+    private FooterExperimentDecider&MockObject $decider;
 
     protected function setUp(): void
     {
         $this->scopeConfig = $this->createMock(ScopeConfigInterface::class);
         $this->customerSession = $this->createMock(CustomerSession::class);
         $this->sessionManager = $this->createMock(SessionManagerInterface::class);
-        $this->decider = $this->createMock(HeaderExperimentDecider::class);
+        $this->decider = $this->createMock(FooterExperimentDecider::class);
 
         $context = $this->createMock(Context::class);
         $context->method('getScopeConfig')->willReturn($this->scopeConfig);
 
-        $this->subject = new HeaderExperiment(
+        $this->subject = new FooterExperiment(
             $context,
             $this->customerSession,
             $this->sessionManager,
@@ -47,7 +47,7 @@ class HeaderExperimentTest extends TestCase
         $this->scopeConfig->expects($this->once())
             ->method('getValue')
             ->with(
-                'grupoawamotos_theme/header_experiment/rollout_percentage',
+                'grupoawamotos_theme/footer_experiment/rollout_percentage',
                 ScopeInterface::SCOPE_STORE,
                 null
             )
@@ -65,40 +65,40 @@ class HeaderExperimentTest extends TestCase
     {
         $this->scopeConfig->method('isSetFlag')->willReturn(true);
         $this->scopeConfig->method('getValue')->willReturnMap([
-            ['grupoawamotos_theme/header_experiment/rollout_percentage', ScopeInterface::SCOPE_STORE, null, '15'],
-            ['grupoawamotos_theme/header_experiment/variant_seed', ScopeInterface::SCOPE_STORE, null, 'home5_header_v2'],
+            ['grupoawamotos_theme/footer_experiment/rollout_percentage', ScopeInterface::SCOPE_STORE, null, '15'],
+            ['grupoawamotos_theme/footer_experiment/variant_seed', ScopeInterface::SCOPE_STORE, null, 'home5_footer_v2'],
         ]);
 
         $this->customerSession->method('getCustomerId')->willReturn(88);
         $this->decider->method('normalizeRolloutPercentage')->willReturn(15);
-        $this->decider->method('normalizeVariantSeed')->willReturn('home5_header_v2');
-        $this->decider->method('getDefaultVariantCode')->willReturn('v2');
+        $this->decider->method('normalizeVariantSeed')->willReturn('home5_footer_v2');
+        $this->decider->method('getDefaultVariantCode')->willReturn('treatment');
         $this->decider->expects($this->once())
             ->method('decide')
-            ->with('customer:88', 'home5_header_v2', true, 15, 'v2')
-            ->willReturn(['variant' => 'v2', 'active' => true, 'seed' => 'home5_header_v2']);
+            ->with('customer:88', 'home5_footer_v2', true, 15, 'treatment')
+            ->willReturn(['variant' => 'treatment', 'active' => true, 'seed' => 'home5_footer_v2']);
 
-        $this->assertSame(['variant' => 'v2', 'active' => true, 'seed' => 'home5_header_v2'], $this->subject->getPayload());
+        $this->assertSame(['variant' => 'treatment', 'active' => true, 'seed' => 'home5_footer_v2'], $this->subject->getPayload());
     }
 
     public function testGetPayloadFallsBackToSessionSeedForGuests(): void
     {
         $this->scopeConfig->method('isSetFlag')->willReturn(false);
         $this->scopeConfig->method('getValue')->willReturnMap([
-            ['grupoawamotos_theme/header_experiment/rollout_percentage', ScopeInterface::SCOPE_STORE, null, '0'],
-            ['grupoawamotos_theme/header_experiment/variant_seed', ScopeInterface::SCOPE_STORE, null, 'home5_header_guest'],
+            ['grupoawamotos_theme/footer_experiment/rollout_percentage', ScopeInterface::SCOPE_STORE, null, '0'],
+            ['grupoawamotos_theme/footer_experiment/variant_seed', ScopeInterface::SCOPE_STORE, null, 'home5_footer_guest'],
         ]);
 
         $this->customerSession->method('getCustomerId')->willReturn(null);
         $this->sessionManager->method('getSessionId')->willReturn('sess-123');
         $this->decider->method('normalizeRolloutPercentage')->willReturn(0);
-        $this->decider->method('normalizeVariantSeed')->willReturn('home5_header_guest');
-        $this->decider->method('getDefaultVariantCode')->willReturn('v2');
+        $this->decider->method('normalizeVariantSeed')->willReturn('home5_footer_guest');
+        $this->decider->method('getDefaultVariantCode')->willReturn('treatment');
         $this->decider->expects($this->once())
             ->method('decide')
-            ->with('session:sess-123', 'home5_header_guest', false, 0, 'v2')
-            ->willReturn(['variant' => 'control', 'active' => false, 'seed' => 'home5_header_guest']);
+            ->with('session:sess-123', 'home5_footer_guest', false, 0, 'treatment')
+            ->willReturn(['variant' => 'control', 'active' => false, 'seed' => 'home5_footer_guest']);
 
-        $this->assertSame(['variant' => 'control', 'active' => false, 'seed' => 'home5_header_guest'], $this->subject->getPayload());
+        $this->assertSame(['variant' => 'control', 'active' => false, 'seed' => 'home5_footer_guest'], $this->subject->getPayload());
     }
 }

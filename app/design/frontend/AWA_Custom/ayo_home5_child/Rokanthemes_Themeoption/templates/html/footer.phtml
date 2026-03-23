@@ -7,15 +7,34 @@
 
 $viewModel = $block->getData('view_model');
 $enableMenu = $viewModel ? $viewModel->isMobileMenuEnabled() : false;
-$footerExpEnabled = $viewModel instanceof \GrupoAwamotos\Theme\ViewModel\FooterData
-    ? (int) $viewModel->isFooterExperimentEnabled()
-    : 0;
-$footerExpRollout = $viewModel instanceof \GrupoAwamotos\Theme\ViewModel\FooterData
-    ? $viewModel->getFooterExperimentRolloutPercentage()
-    : 0;
-$footerExpSeed = $viewModel instanceof \GrupoAwamotos\Theme\ViewModel\FooterData
-    ? $viewModel->getFooterExperimentSeed()
-    : 'home5_footer_v1';
+$footerExperimentPayload = [
+    'enabled' => false,
+    'rollout_percentage' => 0,
+    'bucket' => 0,
+    'seed' => 'guest:anonymous',
+    'variant' => 'control',
+    'is_active' => false,
+];
+
+try {
+    $footerExperimentHelper = $this->helper('GrupoAwamotos\Theme\Helper\FooterExperiment');
+    $resolvedPayload = $footerExperimentHelper->getPayload();
+
+    if (is_array($resolvedPayload)) {
+        $footerExperimentPayload = array_merge($footerExperimentPayload, $resolvedPayload);
+    }
+} catch (\Throwable $exception) {
+    // Mantem o footer funcional mesmo se o rollout estiver indisponivel.
+}
+
+$footerExpVariant = (string) ($footerExperimentPayload['variant'] ?? 'control');
+$footerExpRollout = (int) ($footerExperimentPayload['rollout_percentage'] ?? 0);
+$footerExpBucket = (int) ($footerExperimentPayload['bucket'] ?? 0);
+$footerExpSeed = (string) ($footerExperimentPayload['seed'] ?? 'guest:anonymous');
+$footerExpEnabled = !empty($footerExperimentPayload['enabled']);
+$footerExpActive = !empty($footerExperimentPayload['is_active']);
+$footerExpStateClass = $footerExpActive ? ' awa-footer-exp-active' : ' awa-footer-exp-control';
+$footerExpVariantClass = ' awa-footer-exp--' . preg_replace('/[^a-z0-9_-]+/i', '-', strtolower($footerExpVariant));
 
 $footerTagsHtml = trim((string) $block->getChildHtml('footer-tags'));
 $copyrightHtml = trim((string) $block->getChildHtml('copyright'));
@@ -31,12 +50,14 @@ $mediaUrl = rtrim((string) $block->getBaseUrl(), '/') . '/media';
 
 $brandHtml = trim((string) $block->getChildHtml('footer_brand_list'));
 ?>
-<div class="page_footer awa-footer--dark"
+<div class="page_footer awa-footer--dark<?= $escaper->escapeHtmlAttr($footerExpStateClass . $footerExpVariantClass) ?>"
     role="contentinfo"
-    data-awa-footer-exp-enabled="<?= $escaper->escapeHtmlAttr((string) $footerExpEnabled) ?>"
+    data-awa-footer-exp-enabled="<?= $footerExpEnabled ? '1' : '0' ?>"
     data-awa-footer-exp-rollout="<?= $escaper->escapeHtmlAttr((string) $footerExpRollout) ?>"
+    data-awa-footer-exp-bucket="<?= $escaper->escapeHtmlAttr((string) $footerExpBucket) ?>"
     data-awa-footer-exp-seed="<?= $escaper->escapeHtmlAttr($footerExpSeed) ?>"
-    data-awa-footer-exp-variant="control">
+    data-awa-footer-exp-variant="<?= $escaper->escapeHtmlAttr($footerExpVariant) ?>"
+    data-awa-footer-exp-active="<?= $footerExpActive ? '1' : '0' ?>">
     <svg class="awa-footer-sprite" xmlns="http://www.w3.org/2000/svg" width="0" height="0" aria-hidden="true" focusable="false">
         <symbol id="awa-icon-truck" viewBox="0 0 24 24">
             <path d="M3 6h11v9H3zM14 9h3.5l2.5 3V15h-6zM7.5 18.5a1.5 1.5 0 1 0 0-.01zm10 0a1.5 1.5 0 1 0 0-.01z" fill="currentColor"/>
@@ -238,126 +259,16 @@ $brandHtml = trim((string) $block->getChildHtml('footer_brand_list'));
 </nav>
 <?php } ?>
 
-<script>
-(function () {
-    'use strict';
-
-    var footer = document.querySelector('.page_footer');
-    if (!footer) {
-        return;
-    }
-
-    var enabled = parseInt(footer.getAttribute('data-awa-footer-exp-enabled') || '0', 10);
-    var rollout = parseInt(footer.getAttribute('data-awa-footer-exp-rollout') || '0', 10);
-    var seed = footer.getAttribute('data-awa-footer-exp-seed') || 'home5_footer_v1';
-
-    if (!enabled || rollout <= 0) {
-        footer.setAttribute('data-awa-footer-exp-variant', 'control');
-        return;
-    }
-
-    var visitorKey = 'awa_footer_exp_visitor_id';
-    var visitorId = '';
-    try {
-        visitorId = localStorage.getItem(visitorKey) || '';
-        if (!visitorId) {
-            visitorId = String(Date.now()) + '_' + String(Math.random()).slice(2);
-            localStorage.setItem(visitorKey, visitorId);
+<script type="text/x-magento-init">
+{
+    ".page_footer": {
+        "js/awa-footer-interactions": {
+            "mobileBreakpoint": 768,
+            "titleSelector": ".footer-container .velaFooterTitle, .footer-container .footer-block-title",
+            "panelSelector": ".velaContent, .footer-block-content",
+            "sliderSelector": ".footer_brand_list_slider"
         }
-    } catch (error) {
-        // Fallback para ambientes com storage bloqueado (modo privado/restrito).
-        visitorId = (navigator.userAgent || 'ua') + '|' + String(screen.width || 0) + 'x' + String(screen.height || 0);
     }
-
-    var input = seed + '|' + visitorId;
-    var hash = 0;
-    for (var i = 0; i < input.length; i += 1) {
-        hash = ((hash << 5) - hash) + input.charCodeAt(i);
-        hash |= 0;
-    }
-
-    var bucket = Math.abs(hash % 100);
-    var variant = bucket < rollout ? 'treatment' : 'control';
-
-    footer.setAttribute('data-awa-footer-exp-variant', variant);
-    if (variant === 'treatment') {
-        footer.classList.add('awa-footer-exp-b');
-    }
-}());
-</script>
-
-<script>
-window.addEventListener('load', function() {
-    setTimeout(function() {
-        require([
-            'jquery',
-            'mage/mage',
-            'rokanthemes/owl'
-        ], function ($) {
-            'use strict';
-            var mobileBreakpoint = 768;
-
-            var sliderFooterBrands = $(".footer_brand_list_slider");
-            if(sliderFooterBrands.length > 0) {
-                sliderFooterBrands.owlCarousel({
-                    items: 6,
-                    loop: true,
-                    margin: 0,
-                    nav: true,
-                    dots: false,
-                    autoplay: true,
-                    autoplayTimeout: 3000,
-                    autoplayHoverPause: true,
-                    navText: [
-                        '<i class="fa fa-angle-left"></i>',
-                        '<i class="fa fa-angle-right"></i>'
-                    ],
-                    responsive: {
-                        0: { items: 2 },
-                        480: { items: 3 },
-                        768: { items: 4 },
-                        992: { items: 5 },
-                        1200: { items: 6 }
-                    }
-                });
-            }
-
-            // Ativa o toggle dos blocos do footer no mobile sem bloquear o render inicial.
-            var $footerTitles = $('.footer-container .velaFooterTitle, .footer-container .footer-block-title');
-            $footerTitles.each(function () {
-                var $title = $(this);
-                $title.attr('role', 'button').attr('tabindex', '0').attr('aria-expanded', 'false');
-            });
-
-            if ($footerTitles.length) {
-                $footerTitles.off('click.awaFooterToggle keydown.awaFooterToggle');
-                $footerTitles.on('click.awaFooterToggle', function() {
-                    if ($(window).width() >= mobileBreakpoint) {
-                        return;
-                    }
-
-                    var $title = $(this);
-                    var $content = $title.next('.velaContent, .footer-block-content');
-                    if (!$content.length) {
-                        return;
-                    }
-
-                    var isExpanded = $title.attr('aria-expanded') === 'true';
-                    $title.toggleClass('active', !isExpanded).attr('aria-expanded', String(!isExpanded));
-                    $content.stop(true, true).slideToggle(180);
-                });
-
-                $footerTitles.on('keydown.awaFooterToggle', function(event) {
-                    if (event.key !== 'Enter' && event.key !== ' ') {
-                        return;
-                    }
-
-                    event.preventDefault();
-                    $(this).trigger('click.awaFooterToggle');
-                });
-            }
-        });
-    }, 1500); // 1.5s de atraso (defer real) para economizar recursos de main thread
-});
+}
 </script>
 <?= $block->getChildHtml('organization_schema') ?>

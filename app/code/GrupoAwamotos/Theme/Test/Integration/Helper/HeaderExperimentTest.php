@@ -9,16 +9,19 @@ use PHPUnit\Framework\TestCase;
 
 class HeaderExperimentTest extends TestCase
 {
-    public function testDefaultConfigurationKeepsExperimentDisabled(): void
+    public function testDefaultConfigurationIsLoadedIntoPayload(): void
     {
         /** @var HeaderExperiment $helper */
         $helper = Bootstrap::getObjectManager()->get(HeaderExperiment::class);
         $payload = $helper->getPayload();
 
-        $this->assertFalse($helper->isEnabled());
-        $this->assertSame(0, $helper->getRolloutPercentage());
+        $this->assertTrue($helper->isEnabled());
+        $this->assertSame(35, $helper->getRolloutPercentage());
         $this->assertSame('v2', $helper->getVariantCode());
-        $this->assertSame('control', $payload['variant']);
-        $this->assertFalse($payload['active']);
+        $this->assertSame('home5_header_v1', $helper->getVariantSeed());
+        $this->assertArrayHasKey('seed', $payload);
+        $this->assertArrayHasKey('bucket', $payload);
+        $this->assertArrayHasKey('is_active', $payload);
+        $this->assertSame('home5_header_v1', $payload['seed']);
     }
 }

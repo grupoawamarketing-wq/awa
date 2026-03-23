@@ -54,4 +54,16 @@ class HeaderExperimentContractTest extends TestCase
         $this->assertStringContainsString('data-awa-header-exp-rollout', $contents);
         $this->assertStringContainsString('data-awa-header-exp-seed', $contents);
     }
+
+    public function testSectionsTemplateExposesNavigationShellContract(): void
+    {
+        $sectionsPath = $this->getProjectRoot() . '/app/design/frontend/AWA_Custom/ayo_home5_child/Magento_Theme/templates/html/sections.phtml';
+        $this->assertFileExists($sectionsPath);
+        $contents = (string) file_get_contents($sectionsPath);
+
+        $this->assertNotSame('', $contents);
+        $this->assertStringContainsString("'awa-primary-navigation'", $contents);
+        $this->assertStringContainsString('awa-header-primary-nav', $contents);
+        $this->assertStringContainsString('data-awa-nav-shell="true"', $contents);
+    }
 }
