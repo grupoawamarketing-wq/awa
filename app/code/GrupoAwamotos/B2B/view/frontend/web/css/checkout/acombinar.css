@@ -1,0 +1,71 @@
+/**
+ * GrupoAwamotos_B2B
+ * Checkout ACombinar + shipping table mobile accessibility.
+ *
+ * Operational notes:
+ * - Keep <thead> in DOM (sr-only pattern) to preserve table semantics for screen readers.
+ * - On mobile cards, use data-th labels from Magento checkout cells.
+ */
+
+/* P1-2: ACombinar visual guardrails (desktop + mobile) */
+body.checkout-index-index .payment-method .acombinar-info,
+body.rokanthemes-onepagecheckout .payment-method .acombinar-info {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+body.checkout-index-index .payment-method .acombinar-message,
+body.checkout-index-index .payment-method .acombinar-message p,
+body.checkout-index-index .payment-method .acombinar-message li,
+body.rokanthemes-onepagecheckout .payment-method .acombinar-message,
+body.rokanthemes-onepagecheckout .payment-method .acombinar-message p,
+body.rokanthemes-onepagecheckout .payment-method .acombinar-message li {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: normal;
+}
+
+@media (width <= 767px) {
+    body.checkout-index-index .payment-method .acombinar-info,
+    body.rokanthemes-onepagecheckout .payment-method .acombinar-info {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    body.checkout-index-index .payment-method .acombinar-info .acombinar-icon,
+    body.rokanthemes-onepagecheckout .payment-method .acombinar-info .acombinar-icon {
+        margin-inline: auto;
+    }
+}
+
+/* P1-3: Shipping table thead mobile accessible */
+@media (width <= 767px) {
+    body.checkout-index-index .checkout-shipping-method .table-checkout-shipping-method thead,
+    body.rokanthemes-onepagecheckout .checkout-shipping-method .table-checkout-shipping-method thead {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        clip-path: inset(50%);
+        white-space: nowrap;
+        border: 0;
+    }
+
+    body.checkout-index-index .checkout-shipping-method .table-checkout-shipping-method tbody td[data-th]::before,
+    body.rokanthemes-onepagecheckout .checkout-shipping-method .table-checkout-shipping-method tbody td[data-th]::before {
+        content: attr(data-th) ': ';
+        display: inline;
+        font-weight: 700;
+        color: var(--awa-text-primary, #333333);
+    }
+
+    body.checkout-index-index .checkout-shipping-method .table-checkout-shipping-method tbody td.col-method:first-child[data-th]::before,
+    body.rokanthemes-onepagecheckout .checkout-shipping-method .table-checkout-shipping-method tbody td.col-method:first-child[data-th]::before {
+        content: '';
+    }
+}
