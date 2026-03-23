@@ -2,10 +2,12 @@
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <head>
-        <!-- DNS Prefetch para domínios externos (analytics/tracking) — economiza 20-120ms latência DNS -->
-        <link rel="dns-prefetch" href="//www.googletagmanager.com"/>
-        <link rel="dns-prefetch" href="//www.google-analytics.com"/>
-        <link rel="dns-prefetch" href="//connect.facebook.net"/>
+        <!--
+            DNS Prefetch + CSS/Font Preload + Async CSS Bundles
+            Movidos para PHTML template (awa-head-preload.phtml) porque o schema
+            page_configuration.xsd não suporta <link href>, <css onload>, <noscript>.
+            Registrado em head.additional (body section) abaixo.
+        -->
 
         <!--
             AWA CSS Bundle System (consolidado em 2026-03-16)
@@ -70,34 +72,15 @@
         <remove src="css/awa-fonts-rubik.css"/>
 
         <!-- Bundle Rokanthemes vendor libs + AWA Design Tokens (merged 2026-03-16) -->
-        <!-- (Bootstrap + Font Awesome + Owl + Animations + icons + CSS vars) -->
+        <!-- (Bootstrap + Font Awesome + Owl + icons + CSS vars — animations deferred) -->
         <css src="css/awa-bundle-vendor-libs.css"/>
 
-        <!-- Swiper 11 — engine de carrossel (substitui Owl em ProductTab/CategoryTab)
-             Carregado async: NÃO é above-the-fold (usado apenas em carrosséis mid/below-page)
-             18KB deferido do critical rendering path -->
-        <css src="css/swiper-bundle.min.css" media="print" onload="this.media='all'; this.onload=null;"/>
-        <noscript>
-            <link rel="stylesheet" type="text/css" href="css/swiper-bundle.min.css"/>
-        </noscript>
+        <!-- Swiper 11 + Animate.css: carregados async via awa-head-preload.phtml -->
 
         <!-- Theme base (compiled LESS — keep as-is) -->
         <css src="css/themes5.css"/>
 
-        <!-- =================================================================
-             CRITICAL RESOURCE PRELOAD — Carrega em paralelo para FCP otimizado
-             Browser descobre recursos antes de parsear <link>/<style> tags
-             fetchpriority="high" aumenta prioridade de download
-             ================================================================= -->
-
-        <!-- CSS Crítico -->
-        <link rel="preload" href="css/awa-bundle-core.css" as="style" fetchpriority="high"/>
-        <link rel="preload" href="css/awa-bundle-refinements.css" as="style"/>
-        <link rel="preload" href="css/awa-visual-fixes-critical.css" as="style"/>
-
-        <!-- Fonts Críticas (Rubik) — Previne FOIT/FOUT -->
-        <link rel="preload" href="fonts/rubik/rubik-400.woff2" as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="high"/>
-        <link rel="preload" href="fonts/rubik/rubik-600.woff2" as="font" type="font/woff2" crossorigin="anonymous"/>
+        <!-- Preloads (CSS + Fonts) movidos para awa-head-preload.phtml -->
 
         <!-- Bundle 1/3: Foundation (core + layout + components + consistency + fixes + grid) -->
         <css src="css/awa-bundle-core.css"/>
@@ -107,16 +90,7 @@
              Técnica: media="print" onload="this.media='all'" + noscript fallback
              Economia: -226KB fora do critical rendering path
              ================================================================= -->
-        <!-- Bundle 2/3: Custom rounds (brand-bridge through global-polish) — 128KB, defer -->
-        <css src="css/awa-bundle-custom.css" media="print" onload="this.media='all'; this.onload=null;"/>
-        <noscript>
-            <link rel="stylesheet" type="text/css" href="css/awa-bundle-custom.css"/>
-        </noscript>
-        <!-- Bundle 3/3: Phases & features (B2B phases 3-8 + menus + design system) — 192KB, defer -->
-        <css src="css/awa-bundle-phases.css" media="print" onload="this.media='all'; this.onload=null;"/>
-        <noscript>
-            <link rel="stylesheet" type="text/css" href="css/awa-bundle-phases.css"/>
-        </noscript>
+        <!-- Bundle 2/3 + 3/3: carregados async via awa-head-preload.phtml -->
         <!-- Mueller Vertical Menu: merged into awa-bundle-refinements (2026-03-19 → -1 request) -->
 
         <!--
@@ -129,19 +103,13 @@
         <remove src="Rokanthemes_Themeoption::css/loader.css"/>
         <remove src="Rokanthemes_Brand::css/styles.css"/>
         <remove src="GrupoAwamotos_RexisML::css/rexis-recommendations.css"/>
-        <css src="css/awa-bundle-tail.css" media="print" onload="this.media='all'; this.onload=null;"/>
-        <noscript>
-            <link rel="stylesheet" type="text/css" href="css/awa-bundle-tail.css"/>
-        </noscript>
+        <!-- awa-bundle-tail: carregado async via awa-head-preload.phtml -->
         <!--
             Bundle Site: 5 CSS de awa-post-themeoption-head-css.phtml consolidados (2026-03-16)
             Reduz 5 requests bloqueantes → 1. Homepage remove via cms_index_index.xml.
             221KB — defer (não é crítico para FCP)
         -->
-        <css src="css/awa-bundle-site.css" media="print" onload="this.media='all'; this.onload=null;"/>
-        <noscript>
-            <link rel="stylesheet" type="text/css" href="css/awa-bundle-site.css"/>
-        </noscript>
+        <!-- awa-bundle-site: carregado async via awa-head-preload.phtml -->
         <!--
             Bundle Refinements: 15 CSS layers consolidados em 1 request (2026-03-19)
             Substitui: awa-b2b-home-refinements + awa-design-system-v2 + awa-ux-components-v2
@@ -151,7 +119,7 @@
             Economia: 14 requests bloqueantes eliminados.
         -->
         <css src="css/awa-bundle-refinements.css"/>
-        <!-- Visual Fixes Critical: 15 correções prioritárias (spacing, alinhamento, botões, forms, cards) -->
+        <!-- Visual Fixes Critical + Polish Final: correções visuais + acabamento profissional B2B -->
         <css src="css/awa-visual-fixes-critical.css"/>
         <!-- Phase 17: Print stylesheet — media="print" = 0 bytes on critical path (browser defers) -->
         <css src="css/awa-phase17-print.css" media="print"/>
@@ -172,6 +140,14 @@
         <referenceBlock name="awa.round2.header.minicart.js" remove="true"/>
         <!-- Bloco desativado: 5 CSS individuais migrados para awa-bundle-site.css (2026-03-16) -->
         <referenceBlock name="awa.post.themeoption.css" remove="true"/>
+
+        <!-- AWA Head Preload: dns-prefetch + CSS preload + font preload + async bundles -->
+        <referenceBlock name="head.additional">
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.head.preload"
+                   template="Magento_Theme::html/awa-head-preload.phtml"
+                   before="-"/>
+        </referenceBlock>
 
         <!-- Cosmetic CSS loaded non-blocking via preload+onload (2026-03-17) -->
         <referenceBlock name="head.additional">
