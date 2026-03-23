@@ -1,0 +1,166 @@
+<?php
+/**
+ * New Product Grid — AWA Child Override
+ *
+ * Substitui OWL carousel por CSS Grid nativo (.awa-products-grid).
+ * Adiciona SKU display, hover swap, ARIA, btn-add-to-cart — consistente com producttab.phtml.
+ *
+ * @var \Rokanthemes\Newproduct\Block\Newproduct $block
+ */
+declare(strict_types=1);
+
+use Magento\Framework\App\Action\Action;
+
+if (!$this->getConfig('enabled')) {
+    return;
+}
+
+$_productCollection = $this->getProducts();
+$_helper = $this->helper('Magento\Catalog\Helper\Output');
+$image = 'category_page_grid';
+$templateType = \Magento\Catalog\Block\Product\ReviewRendererInterface::SHORT_VIEW;
+?>
+<div class="rokan-newproduct">
+    <?php if (!$_productCollection->getSize()): ?>
+        <p class="note-msg"><?php echo $block->escapeHtml(__('There are no products matching the selection.')); ?></p>
+    <?php else: ?>
+        <div class="swiper products-swiper products-swiper--newproduct">
+            <div class="swiper-wrapper">
+                <?php $i = 0; foreach ($_productCollection as $_product): if ($i >= 8) { break; } ?>
+                <div class="swiper-slide">
+                <div class="product-item">
+                    <?php
+                    $productImage = $block->getImage($_product, $image);
+                    $productImageThumb = $block->getImage($_product, 'category_image_second_small');
+                    ?>
+                    <div class="product-thumb">
+                        <a href="<?php echo $block->escapeUrl($_product->getProductUrl()); ?>"
+                           class="product-thumb-link product photo product-item-photo"
+                           aria-label="<?php echo $block->escapeHtmlAttr($_product->getName()); ?>"
+                           tabindex="-1">
+                            <span class="first-thumb">
+                                <?php /* Carousel images always below-fold — lazy load */
+                                $_imgHtml = $productImage->toHtml();
+                                $_imgHtml = str_replace('loading="eager"', 'loading="lazy"', $_imgHtml);
+                                if (strpos($_imgHtml, 'loading=') === false) {
+                                    $_imgHtml = str_replace('<img ', '<img loading="lazy" decoding="async" ', $_imgHtml);
+                                }
+                                echo $_imgHtml; ?>
+                            </span>
+                            <?php if ($_product->getTypeID() === 'simple'): ?>
+                            <span class="second-thumb">
+                                <?php $_thumbHtml = $productImageThumb->toHtml();
+                                if (strpos($_thumbHtml, 'loading=') === false) {
+                                    $_thumbHtml = str_replace('<img ', '<img loading="lazy" decoding="async" ', $_thumbHtml);
+                                }
+                                echo $_thumbHtml; ?>
+                            </span>
+                            <?php endif; ?>
+                        </a>
+                        <div class="hot-onsale">
+                            <?php if ($_product->getFinalPrice() < $_product->getPrice()): ?>
+                                <span class="onsale">
+                                    <span class="sale-bg"></span>
+                                    <span class="sale-text"><?php echo $block->escapeHtml(__('Sale')); ?></span>
+                                </span>
+                            <?php else: ?>
+                                <?php $helper = $this->helper('Rokanthemes\RokanBase\Helper\Newlabel'); ?>
+                                <?php if ($helper->isProductNew($_product)): ?>
+                                    <div class="onsale new-lable"><?php echo $block->escapeHtml(__('New')); ?></div>
+                                <?php endif; ?>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
+                    <div class="product-info">
+                        <h3 class="product-name">
+                            <a title="<?php echo $block->escapeHtmlAttr($_product->getName()); ?>"
+                               href="<?php echo $block->escapeUrl($_product->getProductUrl()); ?>"
+                               class="product-item-link">
+                                <?php echo $block->escapeHtml($_product->getName()); ?>
+                            </a>
+                        </h3>
+
+                        <div class="awa-b2b-sku">
+                            <span class="awa-b2b-sku__label"><?php echo $block->escapeHtml(__('Cod:')); ?></span>
+                            <span class="awa-b2b-sku__value"><?php echo $block->escapeHtml($_product->getSku()); ?></span>
+                        </div>
+
+                        <?php if ($this->getConfig('show_price')): ?>
+                            <?php /* @noEscape */ echo $this->helper('Rokanthemes\Themeoption\Helper\Data')->getPriceDisplayCustom($block->getProductPrice($_product)); ?>
+                        <?php endif; ?>
+
+                        <div class="product-info-cart">
+                            <?php if ($this->getConfig('addtocart')): ?>
+                            <div class="actions-primary addcart-link">
+                                <?php if ($_product->isSaleable()): ?>
+                                    <?php $postDataHelper = $this->helper('Magento\Framework\Data\Helper\PostHelper'); ?>
+                                    <?php
+                                    $postData = $postDataHelper->getPostData(
+                                        $block->getAddToCartUrl($_product),
+                                        ['product' => $_product->getEntityId()]
+                                    );
+                                    $postParams = json_decode($postData, true);
+                                    ?>
+                                    <form data-role="tocart-form"
+                                          action="<?php echo $block->escapeUrl($postParams['action']); ?>"
+                                          method="post">
+                                        <input type="hidden" name="product"
+                                               value="<?php echo $block->escapeHtmlAttr((string) $postParams['data']['product']); ?>">
+                                        <input type="hidden"
+                                               name="<?php echo $block->escapeHtmlAttr(Action::PARAM_NAME_URL_ENCODED); ?>"
+                                               value="<?php echo $block->escapeHtmlAttr($postParams['data'][Action::PARAM_NAME_URL_ENCODED]); ?>">
+                                        <?php echo $block->getBlockHtml('formkey'); ?>
+                                        <button type="submit"
+                                                title="<?php echo $block->escapeHtmlAttr(__('Add to Cart')); ?>"
+                                                class="btn-add-to-cart action tocart primary">
+                                            <span><?php echo $block->escapeHtml(__('Add to Cart')); ?></span>
+                                        </button>
+                                    </form>
+                                <?php else: ?>
+                                    <?php if ($_product->getIsSalable()): ?>
+                                        <div class="stock available"><span><?php echo $block->escapeHtml(__('In stock')); ?></span></div>
+                                    <?php else: ?>
+                                        <div class="stock unavailable"><span><?php echo $block->escapeHtml(__('Out of stock')); ?></span></div>
+                                    <?php endif; ?>
+                                <?php endif; ?>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+                </div>
+                <?php $i++; endforeach; ?>
+            </div>
+            <div class="swiper-button-prev"></div>
+            <div class="swiper-button-next"></div>
+        </div>
+        <?php if (!$block->isRedirectToCartEnabled()): ?>
+        <script type="text/x-magento-init">
+        {
+            "[data-role=tocart-form], .form.map.checkout": {
+                "catalogAddToCart": {}
+            }
+        }
+        </script>
+        <?php endif; ?>
+        <script type="text/x-magento-init">
+        {
+            ".rokan-newproduct": {
+                "js/products-swiper-init": {
+                    "carouselSelector": ".products-swiper--newproduct",
+                    "owl": {
+                        "items": 4,
+                        "itemsDesktop": [1366, 4],
+                        "itemsDesktopSmall": [980, 3],
+                        "itemsTablet": [768, 2],
+                        "itemsMobile": [479, 1],
+                        "navigation": true,
+                        "pagination": false
+                    }
+                }
+            }
+        }
+        </script>
+    <?php endif; ?>
+</div>

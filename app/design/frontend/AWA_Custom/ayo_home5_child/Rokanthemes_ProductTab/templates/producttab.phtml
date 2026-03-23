@@ -47,27 +47,38 @@ use Magento\Framework\App\Action\Action;
 			foreach($tab_contents as $tab) {
 			?>
 			 <div id="tab_<?php echo $block->escapeHtmlAttr($tab['id']);?>" class="product-tab-slider tab_content <?php echo $block->escapeHtmlAttr($tab['class']); ?>" role="tabpanel" aria-labelledby="tab_<?php echo $block->escapeHtmlAttr($tab['id']);?>">
-			 	<div class="productTabContent">
+			 	<div class="swiper productTabContent">
+				<div class="swiper-wrapper">
 				<?php
 					$i=0;
 					$productItems =  $tab['productInfo'];
 					foreach($productItems as $_item) {
 							$productImage = $block->getImage($_item, $image);
 							$productImageThumb = $block->getImage($_item, 'category_page_grid-1');
-					?>
-						<?php if($i++%$rows==0) { ?> <div class="product_row"> <?php } ?>
+				?>
+						<?php if($i++%$rows==0) { ?> <div class="swiper-slide product_row"> <?php } ?>
 						<div class="item-product-parent">
 							<div class="item-product listview">
 								<div class="product-thumb">
 									<a href="<?php echo $block->escapeUrl($_item->getProductUrl()); ?>" class="product-thumb-link" aria-label="<?php echo $block->escapeHtmlAttr($_item->getName()); ?>">
 										<?php $productImageThumb = $block->getImage($_item, 'category_image_second_small');?>
 										<span class="first-thumb">
-											<?php echo $productImage->toHtml(); ?>
+										<?php /* Carousel images always below-fold — lazy load */
+										$_imgHtml = $productImage->toHtml();
+										$_imgHtml = str_replace('loading="eager"', 'loading="lazy"', $_imgHtml);
+										if (strpos($_imgHtml, 'loading=') === false) {
+										    $_imgHtml = str_replace('<img ', '<img loading="lazy" decoding="async" ', $_imgHtml);
+										}
+										echo $_imgHtml; ?>
 										</span>
 										<?php $productType = $_item->getTypeID();
 										if($productType == "simple"): ?>
 											<span class="second-thumb">
-												<?php echo $productImageThumb->toHtml(); ?>
+											<?php $_thumbHtml = $productImageThumb->toHtml();
+											if (strpos($_thumbHtml, 'loading=') === false) {
+											    $_thumbHtml = str_replace('<img ', '<img loading="lazy" decoding="async" ', $_thumbHtml);
+											}
+											echo $_thumbHtml; ?>
 											</span>
 				                		<?php endif; ?>
 									</a>
@@ -149,6 +160,8 @@ use Magento\Framework\App\Action\Action;
 					}
 					?>
 				</div>
+				<div class="swiper-button-prev"></div>
+				<div class="swiper-button-next"></div>
 			 </div>
 			<?php
 			}
@@ -162,7 +175,7 @@ use Magento\Framework\App\Action\Action;
 		"catalogAddToCart": {}
 	},
 	".list-tab-product": {
-		"js/tab-carousel-init": {
+		"js/tab-swiper-init": {
 			"tabsSelector": "ul.tabs li",
 			"contentSelector": ".tab_content",
 			"carouselSelector": ".productTabContent",
