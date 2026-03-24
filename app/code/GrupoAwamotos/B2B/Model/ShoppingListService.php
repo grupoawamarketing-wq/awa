@@ -125,7 +125,7 @@ class ShoppingListService
             $customerId = (int)$this->customerSession->getCustomerId();
         }
 
-        if (!$customerId) {
+        if ($customerId === 0) {
             throw new LocalizedException(__('Cliente não autenticado.'));
         }
 
@@ -161,7 +161,7 @@ class ShoppingListService
         $list = $this->listFactory->create();
         $this->listResource->load($list, $listId);
 
-        if (!$list->getId()) {
+        if ($list->getId() === null) {
             throw new NoSuchEntityException(__('Lista não encontrada.'));
         }
 
@@ -256,7 +256,7 @@ class ShoppingListService
             ->addFieldToFilter('product_id', $productId)
             ->getFirstItem();
 
-        if ($existingItem->getId()) {
+        if ($existingItem->getId() !== null) {
             // Update quantity
             $newQty = (float)$existingItem->getQty() + $qty;
             $existingItem->setQty($newQty);
@@ -271,7 +271,7 @@ class ShoppingListService
             'product_id' => $productId,
             'sku' => $product->getSku(),
             'qty' => $qty,
-            'options' => !empty($options) ? json_encode($options) : null
+            'options' => count($options) > 0 ? json_encode($options) : null
         ]);
 
         $this->itemResource->save($item);
@@ -297,7 +297,7 @@ class ShoppingListService
         $item = $this->itemFactory->create();
         $this->itemResource->load($item, $itemId);
 
-        if (!$item->getId()) {
+        if ($item->getId() === null) {
             throw new NoSuchEntityException(__('Item não encontrado.'));
         }
 
@@ -332,7 +332,7 @@ class ShoppingListService
         $item = $this->itemFactory->create();
         $this->itemResource->load($item, $itemId);
 
-        if (!$item->getId()) {
+        if ($item->getId() === null) {
             throw new NoSuchEntityException(__('Item não encontrado.'));
         }
 
@@ -366,13 +366,13 @@ class ShoppingListService
         foreach ($items as $item) {
             try {
                 $product = $this->productRepository->getById($item->getProductId());
-                
+
                 $options = $item->getOptions();
                 $request = new \Magento\Framework\DataObject([
                     'qty' => $item->getQty()
                 ]);
 
-                if ($options) {
+                if ($options !== null && $options !== '') {
                     $decodedOptions = json_decode($options, true);
                     if (is_array($decodedOptions)) {
                         $request->addData($decodedOptions);
@@ -412,7 +412,7 @@ class ShoppingListService
         $quote = $this->cart->getQuote();
         $items = $quote->getAllVisibleItems();
 
-        if (empty($items)) {
+        if (count($items) === 0) {
             throw new LocalizedException(__('O carrinho está vazio.'));
         }
 
