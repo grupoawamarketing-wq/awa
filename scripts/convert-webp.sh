@@ -48,10 +48,6 @@ echo ""
 
 # Contar totais
 total=0
-skip=0
-convert=0
-error=0
-saved=0
 
 convert_to_webp() {
     local src="$1"

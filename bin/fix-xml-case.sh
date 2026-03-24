@@ -40,7 +40,6 @@ CORRUPTION_PATTERN='nonamespaceschemalocation|<referenceblock |<\/referenceblock
 
 fix_file() {
     local file="$1"
-    local changed=false
 
     # Skip if file doesn't exist or is not XML
     [[ ! -f "$file" ]] && return 0
