@@ -836,7 +836,7 @@ class Post extends Action implements HttpPostActionInterface
     {
         try {
             $storeId = (int)$this->storeManager->getStore()->getId();
-            
+
             $submission = $this->submissionFactory->create();
             $specialtiesJson = $this->formatSpecialties($data['specialties'] ?? []);
 
@@ -867,7 +867,7 @@ class Post extends Action implements HttpPostActionInterface
                 'status' => 'pending',
                 'store_id' => $storeId,
             ]);
-            
+
             $submission->save();
         } catch (\Exception $e) {
             $this->logger->error('Failed to save curriculum submission', ['exception' => $e]);
@@ -892,14 +892,14 @@ class Post extends Action implements HttpPostActionInterface
     private function sendConfirmationEmail(array $data, string $trackingCode): void
     {
         $storeId = (int)$this->storeManager->getStore()->getId();
-        
+
         // Check if confirmation email is enabled
         $sendConfirmation = $this->scopeConfig->isSetFlag(
             self::XML_PATH_SEND_CONFIRMATION,
             ScopeInterface::SCOPE_STORE,
             $storeId
         );
-        
+
         if (!$sendConfirmation) {
             return;
         }
