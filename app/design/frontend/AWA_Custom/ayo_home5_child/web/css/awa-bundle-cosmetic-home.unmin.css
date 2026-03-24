@@ -1405,3 +1405,190 @@
     .page-wrapper .header .top-search > .hoteline_header .whatsapp-hotline > i {
     color: #b73337 !important;
 }
+
+/* ─────────────────────────────────────────────────────────────
+   FIX: Benefits bar — layout flex quebrado (SVG 1440×1440px)
+   Causa: algum arquivo CSS posterior reseta display para block.
+   Este bloco restaura o layout correto com prioridade máxima.
+   ───────────────────────────────────────────────────────────── */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .page-wrapper .awa-benefits-container {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 0 !important;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .page-wrapper .awa-benefit-item {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    flex: 1 !important;
+    gap: 12px !important;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .page-wrapper .awa-benefit-icon {
+    width: 28px !important;
+    height: 28px !important;
+    flex-shrink: 0 !important;
+    min-width: 28px !important;
+    min-height: 28px !important;
+    max-width: 28px !important;
+    max-height: 28px !important;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   FIX: Header cart link — 988×1011px → 44×44px no desktop
+   Causa: .awa-header-primary-row tem display:contents, tornando
+   .awa-header-cart-link um grid item direto de .wp-header sem
+   restrição de tamanho no desktop (regras de 44px estão só em
+   @media ≤991px E usam seletor .wp-header > filho-direto que
+   não funciona com display:contents na hierarquia DOM/CSS).
+   ───────────────────────────────────────────────────────────── */
+@media (width >= 992px) {
+    body .page-wrapper .awa-site-header .header .awa-header-primary-row > .awa-header-cart-link {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 44px !important;
+        min-width: 44px !important;
+        max-width: 44px !important;
+        height: 44px !important;
+        min-height: 44px !important;
+        max-height: 44px !important;
+        overflow: hidden !important;
+        flex-shrink: 0 !important;
+        justify-self: end !important;
+        align-self: center !important;
+        position: relative !important;
+        z-index: 8 !important;
+    }
+
+    body .page-wrapper .awa-site-header .header .awa-header-primary-row > .awa-header-cart-link .awa-header-cart-link-icon {
+        width: 18px !important;
+        height: 18px !important;
+        min-width: 18px !important;
+        min-height: 18px !important;
+        flex-shrink: 0 !important;
+        display: block !important;
+        stroke: currentColor !important;
+        fill: none !important;
+    }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   FIX: Homepage desktop header — 3-column grid with explicit
+   placement.
+   Causa: awa-bundle-site.css line 6892 sets display:grid with
+   2 columns (specificity 0,4,1 → wins over homepage flex rule
+   at line 3999 by source order). With display:contents on
+   .awa-header-primary-row, there are 4 grid items in 2 cols:
+     R1C1=brand (ok) → R1C2=cart-link (44px in 988px col)
+     R2C1=top-search (172px — too narrow!) → R2C2=minicart
+   Fix: 3-column grid, explicit grid-column placement, hide
+   duplicate cart-link (minicart already has its own showcart).
+   ───────────────────────────────────────────────────────────── */
+@media (width >= 992px) {
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+        .page-wrapper .awa-site-header .header .wp-header {
+        display: grid !important;
+        grid-template-columns: clamp(144px, 12vw, 180px) minmax(0, 1fr) auto !important;
+        grid-template-rows: auto !important;
+        align-items: center !important;
+        gap: clamp(14px, 1.6vw, 24px) !important;
+    }
+
+    /* Brand-cell → col 1 */
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+        .page-wrapper .awa-site-header .header .wp-header .awa-header-brand-cell {
+        grid-column: 1 !important;
+        grid-row: 1 !important;
+        width: auto !important;
+        max-width: none !important;
+        padding: 0 !important;
+    }
+
+    /* Fix brand-desktop collapse (was 0×0) */
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+        .page-wrapper .awa-site-header .awa-header-brand-desktop {
+        display: flex !important;
+        align-items: center;
+        width: 100%;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+        .page-wrapper .awa-site-header .awa-header-brand-desktop .logo,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+        .page-wrapper .awa-site-header .awa-header-brand-desktop .logo a {
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: flex-start;
+        width: 100%;
+        margin: 0;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+        .page-wrapper .awa-site-header .awa-header-brand-desktop .logo img {
+        max-height: 60px;
+        max-width: min(172px, 100%);
+        width: auto;
+        height: auto;
+    }
+
+    /* Search → col 2 */
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+        .page-wrapper .awa-site-header .header .wp-header > .top-search {
+        grid-column: 2 !important;
+        grid-row: 1 !important;
+    }
+
+    /* Cart-link → hidden at desktop (minicart .showcart provides cart icon) */
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+        .page-wrapper .awa-site-header .header .awa-header-primary-row > .awa-header-cart-link {
+        display: none !important;
+    }
+
+    /* Mini-cart wrapper → col 3 */
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+        .page-wrapper .awa-site-header .header .wp-header > .awa-header-cart {
+        grid-column: 3 !important;
+        grid-row: 1 !important;
+        width: auto !important;
+    }
+
+    /* Hide fallback link "Abrir carrinho" (text-only, redundant with showcart icon) */
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+        .page-wrapper .awa-site-header .awa-header-cart-fallback {
+        display: none !important;
+    }
+}
+
+/* ---- FIX: Trust-and-offers section phantom height ----
+   content-visibility: auto causes unstable heights when section is
+   off-screen (browser caches last-known height via contain-intrinsic-size).
+   This section is above the fold on most viewports — force visible rendering.
+*/
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .page-wrapper .top-home-content--trust-and-offers {
+    content-visibility: visible !important;
+    contain-intrinsic-size: unset !important;
+}
+
+/* Trust-offers grid: collapse empty "banners/deals" row when hot-deal is hidden */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .page-wrapper .top-home-content--trust-and-offers
+    .top-home-content__trust-offers-grid {
+    grid-template-rows: auto 0 !important;
+}
+
+/* Trust-offers: PageBuilder wraps benefits in a bare <div>.
+   Assign it to the "benefits" named grid-area so it participates
+   in the template instead of being auto-placed into an implicit row. */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .page-wrapper .top-home-content--trust-and-offers
+    .top-home-content__trust-offers-grid > div:first-child {
+    grid-area: benefits;
+}
