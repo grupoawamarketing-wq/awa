@@ -4,45 +4,39 @@
  * GrupoAwamotos LayoutFix
  *
  * Fix 1: notification.messages broken reference
- * Clears the module-level "before=user" ordering from notification.messages
- * so the theme can safely move both blocks to header.inner.right without
- * a "Broken reference" reorder warning.
+ * Magento_AdminNotification declara notification.messages com before="user" em header.
+ * O tema admin (theme-adminhtml-backend) move ambos para header.inner.right,
+ * gerando "Broken reference ... tries to reorder itself towards user" porque as
+ * diretivas before="user" e after="user" conflitam no mesmo container.
+ * Solução: remover e recriar notification.messages sem ordering cruzado.
  *
  * Fix 2: mst.feature-request broken reference
- * Mirasvit Core tries to add mst.feature-request to page.main.container
- * which does not exist in adminhtml. Remove the block to suppress the warning.
+ * Mirasvit Core tenta adicionar mst.feature-request a page.main.container,
+ * que não existe em alguns contextos admin (ex: admin-popup, admin-empty).
+ * Solução: remover o bloco para suprimir o warning.
  */
 -->
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <body>
         <!--
-            Garante container de destino para o bloco "user" em contexts admin
-            onde o layout não define header.inner.right.
-        -->
-        <referenceContainer name="header">
-            <container name="header.inner.right" as="header_inner_right_compat" after="header.inner.left"/>
-        </referenceContainer>
-
-        <!--
-            Garante parent consistente para ordering de notification.messages after="user".
-            Em alguns contextos o bloco "user" fica em "header" e causa Broken reference.
-        -->
-        <move element="user" destination="header.inner.right" before="-"/>
-
-        <!--
-            Neutraliza o bloco original do Magento_AdminNotification (before="user")
-            e recria sem ordering cruzado com "user". Alguns contextos/admin themes não
-            posicionam "user" no mesmo parent do notification.messages e isso gera
-            "Broken reference ... tries to reorder itself towards user".
+            Fix 1: Remove notification.messages (declarado com before="user") e recria
+            em header.inner.right sem ordering conflitante. O tema admin já garante
+            que header.inner.right existe e que user está nele.
         -->
         <referenceBlock name="notification.messages" remove="true"/>
         <referenceContainer name="header.inner.right">
             <block class="Magento\AdminNotification\Block\ToolbarEntry"
                    name="notification.messages"
-                   after="-"
+                   after="user"
                    aclResource="Magento_AdminNotification::show_toolbar"
                    template="Magento_AdminNotification::toolbar_entry.phtml"/>
         </referenceContainer>
+
+        <!--
+            Fix 2: Remove mst.feature-request quando page.main.container não existe.
+            O bloco é recriado normalmente pelo Mirasvit nas páginas que têm o container.
+        -->
+        <referenceBlock name="mst.feature-request" remove="true"/>
     </body>
 </page>

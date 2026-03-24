@@ -56,6 +56,8 @@ class Connection implements ConnectionInterface
         64,      // Host is down
         121,     // Semaphore timeout
         258,     // Wait operation timed out
+        20002,   // FreeTDS: Adaptive Server connection failed (transient overload)
+        20009,   // FreeTDS: Unable to connect (momentary unavailability)
     ];
 
     private Helper $helper;
@@ -305,6 +307,9 @@ class Connection implements ConnectionInterface
             'temporarily unavailable',
             'deadlock',
             'lock request time out',
+            'adaptive server connection failed',
+            'unable to connect',
+            'server unavailable',
         ];
 
         foreach ($transientPatterns as $pattern) {
