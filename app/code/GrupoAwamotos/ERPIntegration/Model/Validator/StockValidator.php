@@ -35,6 +35,14 @@ class StockValidator
      */
     private const ANOMALY_MIN_CURRENT_QTY = 10;
 
+    /**
+     * Minimum absolute increase to flag as anomaly (for positive stock changes).
+     * Increases below this threshold are considered routine restocking and are
+     * NOT flagged, even if the percentage change exceeds ANOMALY_THRESHOLD_PERCENT.
+     * Decreases are always flagged when percentage threshold is exceeded.
+     */
+    private const ANOMALY_MIN_ABSOLUTE_INCREASE = 200;
+
     private StockRegistryInterface $stockRegistry;
     private LoggerInterface $logger;
 
@@ -166,8 +174,15 @@ class StockValidator
             $change = $newQty - $currentQty;
             $percentChange = ($change / $currentQty) * 100;
 
-            // Detect anomaly: >90% change in either direction
-            if (abs($percentChange) > self::ANOMALY_THRESHOLD_PERCENT) {
+            // Detect anomaly based on direction:
+            // - Decreases: flag when >ANOMALY_THRESHOLD_PERCENT (data errors, theft)
+            // - Increases: flag only when >ANOMALY_THRESHOLD_PERCENT AND absolute
+            //   delta > ANOMALY_MIN_ABSOLUTE_INCREASE to avoid noise from routine
+            //   bulk restocking operations
+            $isAnomalous = abs($percentChange) > self::ANOMALY_THRESHOLD_PERCENT
+                && ($change < 0 || abs($change) >= self::ANOMALY_MIN_ABSOLUTE_INCREASE);
+
+            if ($isAnomalous) {
                 $direction = $change > 0 ? 'aumento' : 'redução';
                 $result->addWarning(
                     sprintf(
