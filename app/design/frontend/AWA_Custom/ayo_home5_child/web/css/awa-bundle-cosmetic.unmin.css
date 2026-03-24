@@ -1228,14 +1228,14 @@ body.awa-ds {
     color: var(--awa-color-text-primary, #333);
 }
 
-body.awa-ds h1, 
+body.awa-ds h1,
 body.awa-ds .page-title {
     line-height: var(--awa-line-height-tight, 1.2);
     letter-spacing: -0.02em;
     font-weight: 700;
 }
 
-body.awa-ds h2, body.awa-ds h3, 
+body.awa-ds h2, body.awa-ds h3,
 body.awa-ds .block-title strong {
     line-height: var(--awa-line-height-compact, 1.3);
     letter-spacing: -0.01em;
@@ -1353,7 +1353,7 @@ body.awa-ds p {
 
 /* Align Trust Badges injected below Cart */
 .product-info-main .awa-trust-badges {
-    margin-top: 0; 
+    margin-top: 0;
     box-shadow: 0 4px 12px rgba(0,0,0,0.03);
     border: 1px dashed #cbd5e1; /* Subtle dash to contrast with solid cart outline */
     background: #ffffff;
@@ -1530,7 +1530,7 @@ input[type="radio"]:hover {
 /* Category Tab and Product Sliders Constraint */
 .category-tab-container,
 .rokan-product-slider {
-    min-height: 400px; 
+    min-height: 400px;
     contain: layout paint;
 }
 
@@ -1703,4 +1703,172 @@ input[type="radio"]:hover {
 /* Soften Product Grid internal borders on Homepage */
 .cms-index-index .product-item-info {
     border-color: #f1f5f9 !important; /* Extremely soft grid line */
+}
+
+/* ============================================================
+   Header Fixes — Round12 (via awa-bundle-cosmetic)
+   ============================================================ */
+
+/* Fix H1: Remove .control padding de awa-visual-fixes-critical.css
+   Causa: body .page-wrapper .block-search .control { padding: 12px 16px }
+   Efeito: input 12px abaixo do botão + gap horizontal de 16px */
+body .page-wrapper .block-search .field.search .control {
+    padding: 0 !important;
+}
+
+/* Fix H2: WhatsApp hotline number truncation
+   Causa principal: awa-bundle-core.unmin.css ~L8894
+   .hotline-number { overflow: hidden; text-overflow: ellipsis; }
+   + .hotline-wrap { min-width: 0 } + flex shrink na hoteline_header */
+body .page-wrapper .header .top-search > .hoteline_header {
+    flex-shrink: 0 !important;
+}
+body .page-wrapper .header .top-search > .hoteline_header .hotline-wrap {
+    overflow: visible !important;
+    min-width: max-content !important;
+}
+body .page-wrapper .header .top-search > .hoteline_header .hotline-number {
+    overflow: visible !important;
+    text-overflow: clip !important;
+    white-space: nowrap !important;
+}
+
+/* ============================================================
+   Header & Menu Improvements — Round13
+   Targets: reduce header from 308px → ~200px, improve nav UX
+   ============================================================ */
+
+/* --- M1: Top bar compaction (80px → ~48px) --- */
+/* Right column account buttons drive 71px height - compact them */
+body .page-wrapper .top-header .top-account ul.header.links {
+    gap: 6px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+body .page-wrapper .top-header .top-account ul.header.links > li {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+body .page-wrapper .top-header .top-account ul.header.links > li > a {
+    padding: 4px 10px !important;
+    font-size: 11.5px !important;
+    line-height: 1.3 !important;
+    min-height: 28px !important;
+}
+body .page-wrapper .top-header .top-bar-right,
+body .page-wrapper .top-header .top-info {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    margin: 0 !important;
+}
+body .page-wrapper .top-header .container {
+    padding-top: 5px !important;
+    padding-bottom: 5px !important;
+}
+
+/* --- M2: Header main compaction (142px → ~108px) --- */
+body .page-wrapper .header_main {
+    padding-top: 12px !important;
+    padding-bottom: 10px !important;
+}
+
+/* --- M3: Nav bar compaction (84px → ~52px) --- */
+body .page-wrapper .header-control.header-nav-global > .container > .row {
+    min-height: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+/* Remove excess height from sticky wrapper inside menu_primary */
+body .page-wrapper .header-control.header-nav-global .menu_primary .header-wrapper-sticky {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+}
+/* Also target the custommenu nav wrapper */
+body .page-wrapper .header-control.header-nav-global .menu_primary .navigation.custommenu {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+body .page-wrapper .header-control.header-nav-global .menu_primary .main-nav {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+/* Ensure nav bar row aligns items tightly */
+body .page-wrapper .header-control.header-nav-global {
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+}
+/* Match "Todas as categorias" button height with nav items */
+body .page-wrapper .header-control .menu_left_home1 {
+    display: flex !important;
+    align-items: center !important;
+}
+
+/* --- M4: Horizontal nav improvements --- */
+/* Larger, bolder nav items */
+body .page-wrapper .header-nav .navigation.custommenu .main-nav-list > li > a {
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.02em !important;
+    padding: 10px 18px !important;
+    border-radius: 6px !important;
+    transition: background 0.15s ease, color 0.15s ease !important;
+}
+/* Align nav list vertically */
+body .page-wrapper .header-nav .navigation.custommenu .main-nav-list {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+
+/* --- M5: Vertical menu — ensure dropdown opens on hover (desktop) --- */
+@media (min-width: 992px) {
+    /* The "Todas as categorias" button — keep it properly sized */
+    body .page-wrapper .header-control .menu_left_home1 h2.our_categories.title-category-dropdown,
+    body .page-wrapper .header-control .menu_left_home1 .our_categories.title-category-dropdown {
+        height: 44px !important;
+        font-size: 13px !important;
+        padding: 0 16px !important;
+        border-radius: 6px !important;
+        cursor: pointer !important;
+    }
+    /* Show vertical menu list on hover */
+    body .page-wrapper .menu_left_home1:hover .togge-menu.list-category-dropdown,
+    body .page-wrapper .menu_left_home1:focus-within .togge-menu.list-category-dropdown {
+        display: block !important;
+        position: absolute !important;
+        top: 100% !important;
+        left: 0 !important;
+        z-index: 10000 !important;
+        width: 290px !important;
+        max-height: 70vh !important;
+        overflow-y: auto !important;
+        background: #fff !important;
+        border: 1px solid var(--awa-brand-border, #e5e5e5) !important;
+        border-top: none !important;
+        border-radius: 0 0 8px 8px !important;
+        box-shadow: 0 8px 24px rgb(0 0 0 / 12%) !important;
+    }
+    /* Position the menu_left_home1 as relative for dropdown positioning */
+    body .page-wrapper .header-control .menu_left_home1 {
+        position: relative !important;
+    }
+    /* Ensure category items in dropdown are visible */
+    body .page-wrapper .menu_left_home1:hover .togge-menu.list-category-dropdown > li.ui-menu-item.level0 {
+        display: block !important;
+        height: auto !important;
+        min-height: 0 !important;
+    }
+    body .page-wrapper .menu_left_home1:hover .togge-menu.list-category-dropdown > li.ui-menu-item.level0 > a.level-top {
+        display: flex !important;
+        padding: 10px 16px !important;
+        font-size: 14px !important;
+        color: var(--awa-brand-text, #333) !important;
+        border-bottom: 1px solid var(--awa-brand-border, #e5e5e5) !important;
+    }
+    body .page-wrapper .menu_left_home1:hover .togge-menu.list-category-dropdown > li.ui-menu-item.level0 > a.level-top:hover {
+        color: var(--awa-brand-primary, #b73337) !important;
+        background: var(--awa-brand-bg-soft, #f7f7f7) !important;
+    }
 }

@@ -14237,12 +14237,19 @@ body .page-wrapper .page_footer.awa-footer-exp--treatment .awa-footer-brands {
       display: none !important;
     }
 
+    /* header-control: colapsado (block + height:0 + overflow:hidden) em vez de display:none.
+       display:none remove da render tree — filhos com position:fixed (drawer mobile) não renderizam.
+       Com block + height:0, o container é invisível mas o drawer funciona. */
     body .page-wrapper .header-control.header-nav,
     body .page-wrapper .header-control.header-nav-global {
-      margin-top: 6px;
-      min-height: 44px !important;
+      display: block !important;
+      min-height: 0 !important;
+      height: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      border: 0 !important;
+      overflow: hidden !important;
       background: transparent !important;
-      border-top: 1px solid var(--awa-gray-200, #e5e7eb);
       border-bottom: none !important;
     }
 
@@ -14250,57 +14257,28 @@ body .page-wrapper .page_footer.awa-footer-exp--treatment .awa-footer-brands {
     body .page-wrapper .header-control.header-nav-global > .container,
     body .page-wrapper .header-control.header-nav > .container > .row,
     body .page-wrapper .header-control.header-nav-global > .container > .row {
-      width: 100% !important;
-      max-width: 100% !important;
-      min-height: 44px !important;
-      margin-left: 0 !important;
-      margin-right: 0 !important;
-      display: flex !important;
-      align-items: center;
-      justify-content: flex-start;
-      flex-wrap: nowrap;
-      gap: 0;
+      display: block !important;
+      min-height: 0 !important;
+      height: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow: hidden !important;
     }
 
-    body .page-wrapper .header-control.header-nav .menu_left_home1,
+    /* Itens que NUNCA aparecem no mobile (drawer não precisa deles) */
     body .page-wrapper .header-control.header-nav .menu_primary,
     body .page-wrapper .header-control.header-nav .box_language,
-    body .page-wrapper .header-control.header-nav .sections.nav-sections.category-dropdown,
-    body .page-wrapper .header-control.header-nav .navigation.verticalmenu.side-verticalmenu:not(.navigation--mueller),
-    body .page-wrapper .header-control.header-nav-global .menu_left_home1,
     body .page-wrapper .header-control.header-nav-global .menu_primary,
-    body .page-wrapper .header-control.header-nav-global .box_language,
-    body .page-wrapper .header-control.header-nav-global .sections.nav-sections.category-dropdown,
-    body .page-wrapper .header-control.header-nav-global .navigation.verticalmenu.side-verticalmenu:not(.navigation--mueller) {
+    body .page-wrapper .header-control.header-nav-global .box_language {
       display: none !important;
     }
 
+    /* nav-toggle dentro de header-control é redundante — o hamburger vive em .awa-header-mobile-toggle */
     body .page-wrapper .header-control.header-nav .nav-toggle,
     body .page-wrapper .header-control.header-nav .action.nav-toggle,
     body .page-wrapper .header-control.header-nav-global .nav-toggle,
     body .page-wrapper .header-control.header-nav-global .action.nav-toggle {
-      display: inline-flex !important;
-      align-items: center;
-      justify-content: center;
-      position: relative !important;
-      inset: auto !important;
-      top: auto !important;
-      left: auto !important;
-      float: none !important;
-      clear: none !important;
-      transform: none !important;
-      margin: 0 !important;
-      width: 42px !important;
-      min-width: 42px !important;
-      height: 42px !important;
-      border: 1px solid rgb(183 51 55 / 18%) !important;
-      border-radius: 14px !important;
-      background: var(--awa-bg-surface, #fff) !important;
-      color: var(--primary-color, #b73337) !important;
-      box-shadow: none !important;
-      visibility: visible !important;
-      opacity: 1 !important;
-      z-index: 4 !important;
+      display: none !important;
     }
 
     body .page-wrapper .header-control.header-nav .nav-toggle::before,
@@ -14309,6 +14287,39 @@ body .page-wrapper .page_footer.awa-footer-exp--treatment .awa-footer-brands {
     body .page-wrapper .header-control.header-nav-global .action.nav-toggle::before {
       font-size: 22px !important;
       line-height: 1 !important;
+    }
+
+    /* ======================== NAV DRAWER OVERRIDES ========================
+       awa-bundle-site.css esconde .menu_left_home1 com display:none!important
+       em múltiplos seletores (spec até 0,4,1). As regras de drawer do
+       awa-bundle-phases.css (.nav-open .menu_left_home1, spec 0,2,0) perdem
+       na especificidade. Precisamos de overrides com spec > 0,4,1 para
+       que o drawer mobile funcione quando nav-open está ativo.
+       =================================================================== */
+
+    /* Override site.css (0,2,2): body .page-wrapper .awa-site-header .menu_left_home1
+       Override site.css (0,4,1): body:not(...) .page-wrapper .header-control .menu_left_home1
+       Nosso override: html.nav-open body .page-wrapper .awa-site-header .header-control .menu_left_home1 → (0,5,2) */
+    html.nav-open body .page-wrapper .awa-site-header .header-control .menu_left_home1,
+    .nav-open body .page-wrapper .awa-site-header .header-control .menu_left_home1,
+    html.nav-open body .page-wrapper .awa-site-header .menu_left_home1,
+    .nav-open body .page-wrapper .awa-site-header .menu_left_home1 {
+      display: block !important;
+    }
+
+    /* .nav-sections e .verticalmenu dentro do drawer */
+    html.nav-open body .page-wrapper .awa-site-header .header-control .sections.nav-sections.category-dropdown,
+    .nav-open body .page-wrapper .awa-site-header .header-control .sections.nav-sections.category-dropdown,
+    html.nav-open body .page-wrapper .awa-site-header .sections.nav-sections.category-dropdown,
+    .nav-open body .page-wrapper .awa-site-header .sections.nav-sections.category-dropdown {
+      display: block !important;
+    }
+
+    html.nav-open body .page-wrapper .awa-site-header .header-control .navigation.verticalmenu.side-verticalmenu:not(.navigation--mueller),
+    .nav-open body .page-wrapper .awa-site-header .header-control .navigation.verticalmenu.side-verticalmenu:not(.navigation--mueller),
+    html.nav-open body .page-wrapper .awa-site-header .navigation.verticalmenu.side-verticalmenu:not(.navigation--mueller),
+    .nav-open body .page-wrapper .awa-site-header .navigation.verticalmenu.side-verticalmenu:not(.navigation--mueller) {
+      display: block !important;
     }
   }
 
