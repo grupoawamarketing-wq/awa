@@ -6,6 +6,7 @@ namespace GrupoAwamotos\ERPIntegration\Model\Api;
 use GrupoAwamotos\ERPIntegration\Api\CustomerPullInterface;
 use GrupoAwamotos\ERPIntegration\Api\ConnectionInterface;
 use GrupoAwamotos\ERPIntegration\Model\B2BClientRegistration;
+use Magento\Framework\App\CacheInterface;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Psr\Log\LoggerInterface;
@@ -13,21 +14,27 @@ use Psr\Log\LoggerInterface;
 class CustomerPullManagement implements CustomerPullInterface
 {
     private const ERP_CODE_ATTR_ID = 198;
+    private const REGISTERED_CACHE_KEY = 'erp_sectra_registered_b2b_codes';
+    private const REGISTERED_CACHE_TTL = 300; // 5 minutes
+    private const ORIGEM_CLIENTE = '7D4C6FBD-62CF-427F-A0ED-3C06602F05D7';
 
     private ConnectionInterface $connection;
     private B2BClientRegistration $b2bRegistration;
     private ResourceConnection $resourceConnection;
+    private CacheInterface $cache;
     private LoggerInterface $logger;
 
     public function __construct(
         ConnectionInterface $connection,
         B2BClientRegistration $b2bRegistration,
         ResourceConnection $resourceConnection,
+        CacheInterface $cache,
         LoggerInterface $logger
     ) {
         $this->connection = $connection;
         $this->b2bRegistration = $b2bRegistration;
         $this->resourceConnection = $resourceConnection;
+        $this->cache = $cache;
         $this->logger = $logger;
     }
 
@@ -74,34 +81,101 @@ class CustomerPullManagement implements CustomerPullInterface
 
         $db = $this->resourceConnection->getConnection();
 
-        // Get all Magento customers with ERP codes
+        // Get all Magento ERP codes (fast MySQL query)
+        $allErpCodes = $db->fetchCol(
+            "SELECT DISTINCT CAST(cev.value AS UNSIGNED) AS erp_int
+             FROM customer_entity_varchar cev
+             WHERE cev.attribute_id = ? AND cev.value REGEXP '^[0-9]+$' AND CAST(cev.value AS UNSIGNED) > 0
+             ORDER BY erp_int",
+            [self::ERP_CODE_ATTR_ID]
+        );
+
+        if (empty($allErpCodes)) {
+            return [[
+                'customers' => [],
+                'total_unregistered' => 0,
+                'timestamp' => date('c'),
+            ]];
+        }
+
+        // Load registered set from cache (avoids repeated slow SQL Server queries)
+        $registeredSet = $this->getRegisteredCodesFromCache();
+
+        // Find unregistered codes
+        $unregisteredCodes = array_filter(
+            $allErpCodes,
+            fn($code) => !isset($registeredSet[(string) (int) $code])
+        );
+
+        if (empty($unregisteredCodes)) {
+            return [[
+                'customers' => [],
+                'total_unregistered' => 0,
+                'timestamp' => date('c'),
+            ]];
+        }
+
+        // Fetch customer data for unregistered codes (limited)
+        $limitedCodes = array_slice(array_values($unregisteredCodes), 0, $limit);
+        $csvCodes = implode(',', array_map('intval', $limitedCodes));
         $customers = $db->fetchAll(
             "SELECT ce.entity_id, ce.email, ce.firstname, ce.lastname, ce.group_id, ce.created_at,
                     cev.value AS erp_code
              FROM customer_entity ce
              JOIN customer_entity_varchar cev ON ce.entity_id = cev.entity_id AND cev.attribute_id = ?
-             WHERE cev.value IS NOT NULL AND cev.value != '' AND cev.value REGEXP '^[0-9]+$'
-             ORDER BY CAST(cev.value AS UNSIGNED)",
+             WHERE CAST(cev.value AS UNSIGNED) IN ($csvCodes)",
             [self::ERP_CODE_ATTR_ID]
         );
 
-        $unregistered = [];
+        $result = [];
         foreach ($customers as $c) {
-            if (count($unregistered) >= $limit) {
-                break;
-            }
-
-            $erpCode = (int) $c['erp_code'];
-            if (!$this->b2bRegistration->isClientRegistered($erpCode)) {
-                $unregistered[] = $this->buildCustomerPayload($c, true);
-            }
+            $result[] = $this->buildCustomerPayload($c, true);
         }
 
         return [[
-            'customers' => $unregistered,
-            'total_unregistered' => count($unregistered),
+            'customers' => $result,
+            'total_unregistered' => count($unregisteredCodes),
             'timestamp' => date('c'),
         ]];
+    }
+
+    /**
+     * Fetch registered ERP codes from Sectra with Redis cache (TTL 5 min).
+     *
+     * @return array<string, bool> Map of (string) erpCode => true
+     */
+    private function getRegisteredCodesFromCache(): array
+    {
+        $cached = $this->cache->load(self::REGISTERED_CACHE_KEY);
+        if ($cached !== false) {
+            $decoded = json_decode($cached, true);
+            if (is_array($decoded)) {
+                return $decoded;
+            }
+        }
+
+        // Cache miss — query SQL Server once and cache the result
+        try {
+            $rows = $this->connection->query(
+                "SELECT CHAVE FROM GR_INTEGRACAOVALIDADOR WHERE INTEGRACAOORIGEM = '" . self::ORIGEM_CLIENTE . "'"
+            );
+            $registeredSet = [];
+            foreach ($rows as $r) {
+                $registeredSet[(string) $r['CHAVE']] = true;
+            }
+        } catch (\Exception $e) {
+            $this->logger->error('[ERP API] Failed to fetch registered clients from Sectra: ' . $e->getMessage());
+            return [];
+        }
+
+        $this->cache->save(
+            json_encode($registeredSet),
+            self::REGISTERED_CACHE_KEY,
+            ['erp_integration'],
+            self::REGISTERED_CACHE_TTL
+        );
+
+        return $registeredSet;
     }
 
     public function getCustomerByErpCode(int $erpCode): array

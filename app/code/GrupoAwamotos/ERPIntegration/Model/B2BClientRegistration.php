@@ -86,7 +86,7 @@ class B2BClientRegistration
 
         $pdo = $this->getWriteConnection();
         if (!$pdo) {
-            $this->logger->warning('[B2B Registration] Write connection not available');
+            $this->logger->info('[B2B Registration] Write connection not available — skipping auto-registration for client ' . $erpClientCode);
             return false;
         }
 

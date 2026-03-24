@@ -401,8 +401,8 @@ class OrderPullManagement implements OrderPullInterface
 
         // Check and auto-register client in Sectra B2B integration
         $clientRegistered = $this->b2bRegistration->isClientRegistered($erpClientCode);
-        if (!$clientRegistered) {
-            // Attempt auto-registration if write connection is available
+        if (!$clientRegistered && $this->b2bRegistration->hasWriteAccess()) {
+            // Attempt auto-registration only when write connection is available
             $clientRegistered = $this->b2bRegistration->registerClient($erpClientCode);
         }
 

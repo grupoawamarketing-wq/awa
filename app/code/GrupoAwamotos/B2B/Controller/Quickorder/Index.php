@@ -49,16 +49,8 @@ class Index implements HttpGetActionInterface
 
     public function execute()
     {
-        if (!$this->customerSession->isLoggedIn()) {
-            $this->messageManager->addNoticeMessage(
-                __('Faça login para acessar o Pedido Rápido.')
-            );
-            $redirect = $this->redirectFactory->create();
-            return $redirect->setPath('b2b/account/login');
-        }
-
-        $resultPage = $this->resultPageFactory->create();
-        $resultPage->getConfig()->getTitle()->set(__('Pedido Rápido - B2B'));
-        return $resultPage;
+        // Pedido Rápido desativado
+        $redirect = $this->redirectFactory->create();
+        return $redirect->setPath('customer/account');
     }
 }
