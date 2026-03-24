@@ -1738,6 +1738,18 @@ body .page-wrapper .header .top-search > .hoteline_header .hotline-number {
    Targets: reduce header from 308px → ~200px, improve nav UX
    ============================================================ */
 
+/* --- M0: Header wrapper padding reduction --- */
+/* Reduce .header-content internal padding (was 12px each) */
+#header .header-content {
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+}
+/* Reduce div.header padding that creates gap between top-bar and header_main (was 8px each) */
+#header .header-content > .header {
+    padding-top: 2px !important;
+    padding-bottom: 2px !important;
+}
+
 /* --- M1: Top bar compaction (80px → ~48px) --- */
 /* Use #header for specificity to override vendor styles */
 #header .top-header .top-account ul.header.links {
@@ -1770,10 +1782,17 @@ body .page-wrapper .header .top-search > .hoteline_header .hotline-number {
     padding-bottom: 5px !important;
 }
 
-/* --- M2: Header main compaction (142px → ~108px) --- */
+/* --- M2: Header main compaction (142px → ~84px) --- */
 body .page-wrapper .header_main {
-    padding-top: 12px !important;
-    padding-bottom: 10px !important;
+    padding-top: 8px !important;
+    padding-bottom: 6px !important;
+}
+/* Fix explicit 100px height in .wp-header (set by themes.css) — let content determine height */
+#header .header_main .wp-header,
+#header .header-main .wp-header {
+    height: auto !important;
+    min-height: 0 !important;
+    grid-template-rows: auto !important;
 }
 
 /* --- M3: Nav bar compaction (84px → ~52px) --- */
@@ -1797,6 +1816,14 @@ body .page-wrapper .header_main {
 #header .header-control.header-nav-global .menu_primary .main-nav {
     padding-top: 0 !important;
     padding-bottom: 0 !important;
+}
+/* CRITICAL: Remove padding from .top-menu.top-menu-sticky (root cause of nav bar inflation) */
+#header .header-control .menu_primary .top-menu.top-menu-sticky {
+    padding: 0 !important;
+}
+#header .header-control .menu_primary .container-header-sticky {
+    min-height: 0 !important;
+    padding: 0 !important;
 }
 /* Ensure nav bar row aligns items tightly */
 #header .header-control.header-nav-global {
