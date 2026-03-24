@@ -198,12 +198,12 @@ class SalesProjection implements ForecastServiceInterface
                 FROM VE_PEDIDO p
                 INNER JOIN VE_PEDIDOITENS i ON p.CODIGO = i.PEDIDO
                 WHERE p.STATUS NOT IN ('C', 'X')
-                  AND p.DTPEDIDO >= DATEADD(DAY, ?, GETDATE())
+                  AND p.DTPEDIDO >= DATEADD(DAY, -{$days}, GETDATE())
                 GROUP BY CONVERT(VARCHAR(10), p.DTPEDIDO, 120)
                 ORDER BY date ASC
             ";
 
-            $results = $this->connection->query($sql, [-(int)$days]);
+            $results = $this->connection->query($sql);
 
             $data = [
                 'dates' => [],

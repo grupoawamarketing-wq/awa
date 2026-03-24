@@ -217,7 +217,7 @@ class PurchaseHistory
                 INNER JOIN VE_PEDIDO p ON i.PEDIDO = p.CODIGO
                 WHERE p.CLIENTE = ?
                 AND p.STATUS NOT IN ('C', 'X')
-                AND p.DTPEDIDO >= DATEADD(day, ?, GETDATE())
+                AND p.DTPEDIDO >= DATEADD(day, CAST(? AS INT), GETDATE())
                 GROUP BY i.MATERIAL, i.DESCRICAO
                 ORDER BY MAX(p.DTPEDIDO) DESC
             ", [$customerCode, -(int)$days]);
@@ -283,7 +283,7 @@ class PurchaseHistory
                 INNER JOIN VE_PEDIDOITENS i ON p.CODIGO = i.PEDIDO
                 WHERE p.CLIENTE = ?
                   AND p.STATUS NOT IN ('C', 'X')
-                  AND p.DTPEDIDO >= DATEADD(MONTH, ?, GETDATE())
+                  AND p.DTPEDIDO >= DATEADD(MONTH, CAST(? AS INT), GETDATE())
                 GROUP BY FORMAT(p.DTPEDIDO, 'yyyy-MM')
                 ORDER BY FORMAT(p.DTPEDIDO, 'yyyy-MM') ASC
             ", [$customerCode, -$safeMonths]);
@@ -328,8 +328,7 @@ class PurchaseHistory
         $havingClauses = [];
 
         if ($periodDays > 0) {
-            $whereClauses[] = 'p.DTPEDIDO >= DATEADD(day, ?, GETDATE())';
-            $params[] = -$periodDays;
+            $whereClauses[] = "p.DTPEDIDO >= DATEADD(day, -{$periodDays}, GETDATE())";
         }
 
         if ($minFreq > 0) {
