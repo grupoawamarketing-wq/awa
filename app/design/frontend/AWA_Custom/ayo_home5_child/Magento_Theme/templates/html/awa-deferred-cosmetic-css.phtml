@@ -4,37 +4,30 @@ declare(strict_types=1);
 /**
  * AWA — Carregamento diferido de CSS cosmético/decorativo (não-bloqueante).
  *
- * Estas camadas CSS são refinamentos visuais que NÃO afetam o
- * layout above-the-fold nem metricas de CLS:
- *  - awa-brand-lock.css            → enforcement de cores AWA
- *  - awa-brand-lock-strict.css     → mapeamento estrito de palette
- *  - awa-qa-accessibility-safe.css → focus outlines, prefers-reduced-motion
- *  - awa-b2b-gate-enterprise.css   → modal B2B (opacity:0 por padrão)
- *  - awa-typography-best-practices → refinamentos tipográficos
+ * Consolidado em 2 bundles (2026-03-24, CSS Bundles Consolidation):
+ *  - awa-bundle-cosmetic.css      → 6 arquivos globais consolidados (6 requests → 1)
+ *      (brand-lock, brand-lock-strict, qa-accessibility-safe,
+ *       b2b-gate-enterprise, typography-best-practices, ui-ux-polish-2026)
+ *  - awa-bundle-cosmetic-home.css → 2 arquivos homepage consolidados (2 requests → 1)
+ *      (home-safe-refine, brand-lock-strict-home)
  *
  * Estratégia: media="print" + onload="this.media='all'" → download não-bloqueante,
  * aplica CSS assim que disponível (tipicamente <100ms após FCP).
  *
- * Removidos do <head> via <remove> em default_head_blocks.xml.
- * Adicionados aqui em head.additional (não bloqueia render).
+ * Fontes individuais preservadas em web/css/ para manutenção.
+ * Para atualizar: edite as fontes, recompile os bundles (cat + cleancss -O 1).
  */
 
 /** @var \Magento\Framework\View\Element\Template $block */
 
+// 1 request em vez de 6: economiza 5 round-trips para CSS não-crítico
 $deferredFiles = [
-    $block->getViewFileUrl('css/awa-brand-lock.css'),
-    $block->getViewFileUrl('css/awa-brand-lock-strict.css'),
-    $block->getViewFileUrl('css/awa-qa-accessibility-safe.css'),
-    $block->getViewFileUrl('css/awa-b2b-gate-enterprise.css'),
-    $block->getViewFileUrl('css/awa-typography-best-practices.css'),
-    $block->getViewFileUrl('css/awa-ui-ux-polish-2026.css'),
+    $block->getViewFileUrl('css/awa-bundle-cosmetic.css'),
 ];
 
-// Homepage-only additive layers: safe-refine + brand-lock-strict-home
-// Deferred same as global cosmetics — carregados apenas na homepage (handle cms_index_index)
+// Homepage-only: 1 request em vez de 2 (home-safe-refine + brand-lock-strict-home)
 if (in_array('cms_index_index', $block->getLayout()->getUpdate()->getHandles(), true)) {
-    $deferredFiles[] = $block->getViewFileUrl('css/awa-home-safe-refine.css');
-    $deferredFiles[] = $block->getViewFileUrl('css/awa-brand-lock-strict-home.css');
+    $deferredFiles[] = $block->getViewFileUrl('css/awa-bundle-cosmetic-home.css');
 }
 ?>
 <?php foreach ($deferredFiles as $cssUrl): ?>
