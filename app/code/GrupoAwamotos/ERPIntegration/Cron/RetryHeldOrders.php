@@ -7,6 +7,7 @@ use GrupoAwamotos\ERPIntegration\Api\CustomerSyncInterface;
 use GrupoAwamotos\ERPIntegration\Helper\Data as Helper;
 use GrupoAwamotos\ERPIntegration\Model\ResourceModel\SyncLog as SyncLogResource;
 use Magento\Customer\Api\CustomerRepositoryInterface;
+use Magento\Framework\App\ResourceConnection;
 use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollectionFactory;
 use Magento\Framework\App\State as AppState;
 use Psr\Log\LoggerInterface;
@@ -27,10 +28,19 @@ class RetryHeldOrders
 {
     private const BATCH_SIZE = 50;
 
+    /**
+     * After this many failed attempts, stop retrying and silence the log noise.
+     * 10 retries × 30-min schedule = ~5 hours before giving up.
+     */
+    private const MAX_RETRIES = 10;
+
+    private const RETRY_TABLE = 'grupoawamotos_erp_order_retry';
+
     private CustomerSyncInterface $customerSync;
     private OrderCollectionFactory $orderCollectionFactory;
     private CustomerRepositoryInterface $customerRepository;
     private SyncLogResource $syncLogResource;
+    private ResourceConnection $resourceConnection;
     private Helper $helper;
     private LoggerInterface $logger;
     private AppState $appState;
@@ -40,6 +50,7 @@ class RetryHeldOrders
         OrderCollectionFactory $orderCollectionFactory,
         CustomerRepositoryInterface $customerRepository,
         SyncLogResource $syncLogResource,
+        ResourceConnection $resourceConnection,
         Helper $helper,
         LoggerInterface $logger,
         AppState $appState
@@ -48,6 +59,7 @@ class RetryHeldOrders
         $this->orderCollectionFactory = $orderCollectionFactory;
         $this->customerRepository = $customerRepository;
         $this->syncLogResource = $syncLogResource;
+        $this->resourceConnection = $resourceConnection;
         $this->helper = $helper;
         $this->logger = $logger;
         $this->appState = $appState;
@@ -77,14 +89,28 @@ class RetryHeldOrders
 
         $resolved = 0;
         $unresolvable = 0;
+        $skipped = 0;
         $errors = 0;
 
         foreach ($orders as $order) {
             $incrementId = $order->getIncrementId();
+            $orderId = (int) $order->getEntityId();
             $customerId = (int) $order->getCustomerId();
 
             if (!$customerId) {
-                $unresolvable++;
+                $this->incrementRetryCount($orderId, $incrementId, 'No customer_id on order');
+                if ($this->getRetryCount($orderId) >= self::MAX_RETRIES) {
+                    $skipped++;
+                } else {
+                    $unresolvable++;
+                }
+                continue;
+            }
+
+            // Skip orders that have exhausted retries — avoid perpetual log noise
+            $retryCount = $this->getRetryCount($orderId);
+            if ($retryCount >= self::MAX_RETRIES) {
+                $skipped++;
                 continue;
             }
 
@@ -121,6 +147,7 @@ class RetryHeldOrders
                     );
                     $order->save();
 
+                    $this->clearRetryCount($orderId);
                     $resolved++;
                     $this->logger->info('[ERP Cron] Resolved held order', [
                         'increment_id' => $incrementId,
@@ -128,7 +155,17 @@ class RetryHeldOrders
                         'erp_code' => $erpCode,
                     ]);
                 } else {
-                    $unresolvable++;
+                    $this->incrementRetryCount($orderId, $incrementId, 'CPF/CNPJ not found in ERP');
+                    $newCount = $this->getRetryCount($orderId);
+                    if ($newCount >= self::MAX_RETRIES) {
+                        $this->logger->warning('[ERP Cron] Order exceeded max retries — will no longer be retried', [
+                            'increment_id' => $incrementId,
+                            'retry_count' => $newCount,
+                        ]);
+                        $skipped++;
+                    } else {
+                        $unresolvable++;
+                    }
                 }
             } catch (\Exception $e) {
                 $errors++;
@@ -142,6 +179,7 @@ class RetryHeldOrders
             'total' => $total,
             'resolved' => $resolved,
             'unresolvable' => $unresolvable,
+            'skipped_max_retries' => $skipped,
             'errors' => $errors,
         ]);
 
@@ -159,6 +197,34 @@ class RetryHeldOrders
                 )
             );
         }
+    }
+
+    private function getRetryCount(int $orderId): int
+    {
+        $connection = $this->resourceConnection->getConnection();
+        $select = $connection->select()
+            ->from(self::RETRY_TABLE, ['retry_count'])
+            ->where('order_id = ?', $orderId);
+        $count = $connection->fetchOne($select);
+        return $count !== false ? (int) $count : 0;
+    }
+
+    private function incrementRetryCount(int $orderId, string $incrementId, string $error): void
+    {
+        $connection = $this->resourceConnection->getConnection();
+        $table = $connection->getTableName(self::RETRY_TABLE);
+        $connection->query(
+            'INSERT INTO `' . $table . '` (order_id, increment_id, retry_count, last_error, next_attempt_at, created_at, updated_at)'
+            . ' VALUES (?, ?, 1, ?, NOW(), NOW(), NOW())'
+            . ' ON DUPLICATE KEY UPDATE retry_count = retry_count + 1, last_error = VALUES(last_error), updated_at = NOW()',
+            [$orderId, $incrementId, $error]
+        );
+    }
+
+    private function clearRetryCount(int $orderId): void
+    {
+        $connection = $this->resourceConnection->getConnection();
+        $connection->delete(self::RETRY_TABLE, ['order_id = ?' => $orderId]);
     }
 
     /**

@@ -7,6 +7,7 @@ use GrupoAwamotos\ERPIntegration\Api\CustomerSyncInterface;
 use GrupoAwamotos\ERPIntegration\Model\B2BClientRegistration;
 use GrupoAwamotos\ERPIntegration\Model\ResourceModel\SyncLog as SyncLogResource;
 use Magento\Customer\Api\CustomerRepositoryInterface;
+use Magento\Framework\App\ResourceConnection;
 use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollectionFactory;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -29,13 +30,15 @@ class HeldOrdersCommand extends Command
     private CustomerSyncInterface $customerSync;
     private B2BClientRegistration $b2bRegistration;
     private SyncLogResource $syncLogResource;
+    private ResourceConnection $resourceConnection;
 
     public function __construct(
         OrderCollectionFactory $orderCollectionFactory,
         CustomerRepositoryInterface $customerRepository,
         CustomerSyncInterface $customerSync,
         B2BClientRegistration $b2bRegistration,
-        SyncLogResource $syncLogResource
+        SyncLogResource $syncLogResource,
+        ResourceConnection $resourceConnection
     ) {
         parent::__construct();
         $this->orderCollectionFactory = $orderCollectionFactory;
@@ -43,13 +46,14 @@ class HeldOrdersCommand extends Command
         $this->customerSync = $customerSync;
         $this->b2bRegistration = $b2bRegistration;
         $this->syncLogResource = $syncLogResource;
+        $this->resourceConnection = $resourceConnection;
     }
 
     protected function configure(): void
     {
         $this->setName('erp:orders:held')
             ->setDescription('Gerencia pedidos retidos por falta de vinculação ERP (erp_code ou GR_INTEGRACAOVALIDADOR)')
-            ->addOption('action', 'a', InputOption::VALUE_OPTIONAL, 'Ação: list, resolve, generate-sql', 'list')
+            ->addOption('action', 'a', InputOption::VALUE_OPTIONAL, 'Ação: list, resolve, generate-sql, unacknowledged', 'list')
             ->addOption('limit', 'l', InputOption::VALUE_OPTIONAL, 'Limite de pedidos a processar', '100');
     }
 
@@ -65,8 +69,10 @@ class HeldOrdersCommand extends Command
                 return $this->resolveHeldOrders($output, $limit);
             case 'generate-sql':
                 return $this->generateSql($output, $limit);
+            case 'unacknowledged':
+                return $this->listUnacknowledgedOrders($output, $limit);
             default:
-                $output->writeln(sprintf('<error>Ação desconhecida: %s. Use: list, resolve, generate-sql</error>', $action));
+                $output->writeln(sprintf('<error>Ação desconhecida: %s. Use: list, resolve, generate-sql, unacknowledged</error>', $action));
                 return Command::FAILURE;
         }
     }
@@ -268,6 +274,97 @@ class HeldOrdersCommand extends Command
         $output->writeln('');
         $output->writeln(sprintf('<info>SQL salvo em: %s</info>', $filePath));
         $output->writeln('<comment>Envie este arquivo para o DBA do Sectra para execução manual.</comment>');
+
+        return Command::SUCCESS;
+    }
+
+    /**
+     * List orders that are in active state and have erp_code, but were never
+     * acknowledged by the ERP via POST /V1/erp/orders/{id}/ack.
+     * These are orders the ERP fetched (or should fetch) but never confirmed receipt.
+     */
+    private function listUnacknowledgedOrders(OutputInterface $output, int $limit): int
+    {
+        $connection = $this->resourceConnection->getConnection();
+
+        $syncedIds = $connection->fetchCol(
+            $connection->select()
+                ->from('grupoawamotos_erp_entity_map', ['magento_entity_id'])
+                ->where('entity_type = ?', 'order')
+        );
+        $syncedIds = array_map('intval', $syncedIds);
+
+        $collection = $this->orderCollectionFactory->create();
+        $collection->addFieldToFilter('state', ['in' => ['new', 'pending_payment', 'processing']]);
+        $collection->addFieldToFilter('customer_id', ['notnull' => true]);
+        $collection->getSelect()->where(
+            'main_table.customer_erp_code IS NOT NULL'
+            . ' AND main_table.customer_erp_code != \'\''
+            . ' AND main_table.customer_erp_code != \'0\''
+        );
+        $collection->setPageSize($limit);
+        $collection->setOrder('created_at', 'ASC');
+
+        $orders = [];
+        foreach ($collection as $order) {
+            if (!in_array((int) $order->getEntityId(), $syncedIds, true)) {
+                $orders[] = $order;
+            }
+        }
+
+        if (empty($orders)) {
+            $output->writeln('<info>Todos os pedidos com erp_code foram reconhecidos pelo ERP.</info>');
+            return Command::SUCCESS;
+        }
+
+        $now = new \DateTime();
+        $output->writeln(sprintf(
+            '<comment>%d pedido(s) com erp_code aguardando ACK do ERP (nunca confirmados via POST /V1/erp/orders/{id}/ack):</comment>',
+            count($orders)
+        ));
+        $output->writeln('');
+
+        $table = new Table($output);
+        $table->setHeaders(['Pedido', 'Status/Estado', 'ERP Code', 'Cliente', 'Total', 'Data', 'Dias Preso']);
+
+        foreach ($orders as $order) {
+            $created = new \DateTime($order->getCreatedAt());
+            $daysDiff = (int) $now->diff($created)->days;
+
+            $table->addRow([
+                $order->getIncrementId(),
+                $order->getStatus() . '/' . $order->getState(),
+                $order->getData('customer_erp_code'),
+                trim(($order->getCustomerFirstname() ?? '') . ' ' . ($order->getCustomerLastname() ?? '')),
+                'R$ ' . number_format((float) $order->getGrandTotal(), 2, ',', '.'),
+                $order->getCreatedAt(),
+                $daysDiff > 7 ? sprintf('<fg=red>%dd</>', $daysDiff) : sprintf('%dd', $daysDiff),
+            ]);
+        }
+
+        $table->render();
+
+        $output->writeln('');
+        $output->writeln('<comment>Diagnóstico:</comment>');
+        $output->writeln('  • Estes pedidos estão disponíveis em GET /V1/erp/orders/pending');
+        $output->writeln('  • O ERP (Sectra) precisa chamar POST /V1/erp/orders/{incrementId}/ack para confirmá-los');
+        $output->writeln('  • Último acesso registrado ao endpoint: verificar var/log/debug.log.bak.20260315');
+        $output->writeln('  • Se o ERP não está chamando o endpoint, verificar integração no lado Sectra');
+        $output->writeln('');
+        $output->writeln('<comment>Para marcar manualmente (somente se ERP confirmou fora do sistema):</comment>');
+        foreach ($orders as $order) {
+            $output->writeln(sprintf(
+                '  curl -s -X POST "https://awamotos.com.br/rest/V1/erp/orders/%s/ack" \\',
+                $order->getIncrementId()
+            ));
+            $output->writeln(
+                '    -H "Authorization: Bearer <TOKEN>" -H "Content-Type: application/json" \\'
+            );
+            $output->writeln(
+                '    -d \'{"erpOrderId":"MANUAL-' . $order->getIncrementId() . '"}\''
+            );
+            $output->writeln('');
+        }
 
         return Command::SUCCESS;
     }
