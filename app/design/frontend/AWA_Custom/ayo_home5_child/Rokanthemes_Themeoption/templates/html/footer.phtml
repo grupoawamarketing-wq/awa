@@ -35,6 +35,30 @@ $footerExpEnabled = !empty($footerExperimentPayload['enabled']);
 $footerExpActive = !empty($footerExperimentPayload['is_active']);
 $footerExpStateClass = $footerExpActive ? ' awa-footer-exp-active' : ' awa-footer-exp-control';
 $footerExpVariantClass = ' awa-footer-exp--' . preg_replace('/[^a-z0-9_-]+/i', '-', strtolower($footerExpVariant));
+$showFooterQuickActions = $footerExpActive && $footerExpVariant === 'treatment';
+
+$footerQuickActions = [
+    [
+        'href' => $block->getUrl('customer/account/'),
+        'title' => (string) __('Minha Conta'),
+        'description' => (string) __('Acompanhe pedidos e histórico'),
+    ],
+    [
+        'href' => $block->getUrl('customer/account/create/'),
+        'title' => (string) __('Criar Cadastro'),
+        'description' => (string) __('Comece suas compras com agilidade'),
+    ],
+    [
+        'href' => $block->getUrl('checkout/cart/'),
+        'title' => (string) __('Ver Carrinho'),
+        'description' => (string) __('Revise itens e feche o pedido'),
+    ],
+    [
+        'href' => $block->getUrl('contact/'),
+        'title' => (string) __('Fale Conosco'),
+        'description' => (string) __('Atendimento comercial e suporte'),
+    ],
+];
 
 $footerTagsHtml = trim((string) $block->getChildHtml('footer-tags'));
 $copyrightHtml = trim((string) $block->getChildHtml('copyright'));
@@ -127,6 +151,22 @@ $brandHtml = trim((string) $block->getChildHtml('footer_brand_list'));
             </div>
         </div>
     </section>
+    <?php if ($showFooterQuickActions): ?>
+    <nav class="awa-footer-quick-actions" aria-label="<?= $escaper->escapeHtmlAttr(__('Atalhos rápidos do rodapé')) ?>">
+        <div class="container">
+            <div class="awa-footer-quick-actions__inner">
+                <?php foreach ($footerQuickActions as $footerQuickAction): ?>
+                    <a class="awa-footer-quick-actions__link"
+                       href="<?= $escaper->escapeUrl((string) $footerQuickAction['href']) ?>"
+                       aria-label="<?= $escaper->escapeHtmlAttr((string) $footerQuickAction['title']) ?>">
+                        <strong><?= $escaper->escapeHtml((string) $footerQuickAction['title']) ?></strong>
+                        <span><?= $escaper->escapeHtml((string) $footerQuickAction['description']) ?></span>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </nav>
+    <?php endif; ?>
     <?php if ($brandHtml !== ''): ?>
     <section class="awa-footer-brands" aria-label="<?= $escaper->escapeHtmlAttr(__('Marcas que trabalhamos')) ?>">
         <div class="container">
@@ -242,9 +282,7 @@ $brandHtml = trim((string) $block->getChildHtml('footer_brand_list'));
 </div>
 <div class="shadow_bkg" role="presentation"></div>
 <div class="shadow_bkg_show" role="presentation"></div>
-<a id="back-top" class="hidden-xs" href="#" role="button" aria-label="<?= $escaper->escapeHtmlAttr(__('Voltar ao topo')) ?>" title="<?= $escaper->escapeHtmlAttr(__('Voltar ao topo')) ?>">
-    <i class="fa fa-angle-up" aria-hidden="true"></i>
-</a>
+<?php /* P0-01: Legacy back-to-top removido — o canônico é <button#awa-back-to-top> via layout XML (awa.back.to.top block) */ ?>
 
 <?php if ($enableMenu) { ?>
 <nav class="fixed-bottom hidden-sm hidden-md hidden-lg" role="navigation" aria-label="<?= $escaper->escapeHtmlAttr(__('Navegação Móvel')) ?>">

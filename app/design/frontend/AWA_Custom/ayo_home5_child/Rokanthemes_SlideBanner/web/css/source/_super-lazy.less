@@ -48,23 +48,23 @@
     // Controles de Play/Pause e barra de progresso
     .slide-controls {
         position: absolute;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
+        bottom: 16px;
+        right: 16px;
+        left: auto;
+        transform: none;
         z-index: 100;
         display: flex;
         align-items: center;
-        // WCAG AA: Contraste mínimo 4.5:1 - background mais escuro
-        background: rgba(0, 0, 0, 0.75);
+        background: rgba(0, 0, 0, 0.40);
         border-radius: 20px;
-        padding: 8px 12px;
+        padding: 6px 10px;
         backdrop-filter: blur(4px);
-        // Shadow para garantir legibilidade em qualquer background
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 
         @media (max-width: 767px) {
             bottom: 10px;
-            padding: 6px 10px;
+            right: 10px;
+            padding: 5px 8px;
         }
     }
 
@@ -159,23 +159,19 @@
             transition: all 0.3s ease;
             padding: 0;
 
-            // WCAG: Área de toque mínima 44x44px no mobile
+            // WCAG: Área de toque mínima 44x44px no mobile via pseudo-elemento
+            // O dot permanece 10px visualmente; o ::after expande a área de clique
             @media (max-width: 767px) {
-                min-width: 44px;
-                min-height: 44px;
-                width: 10px;
-                height: 10px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
+                position: relative;
 
-                &::before {
+                &::after {
                     content: '';
-                    width: 10px;
-                    height: 10px;
-                    background: inherit;
-                    border: inherit;
-                    border-radius: 50%;
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    width: 44px;
+                    height: 44px;
                 }
             }
 
@@ -203,7 +199,7 @@
     // Fallback para navegadores sem suporte a backdrop-filter
     @supports not (backdrop-filter: blur(4px)) {
         .slide-controls {
-            background: rgba(0, 0, 0, 0.85);
+            background: rgba(0, 0, 0, 0.60);
         }
     }
 }
