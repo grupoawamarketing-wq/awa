@@ -242,35 +242,48 @@ class Post extends Action implements HttpPostActionInterface
     }
 
     /**
+     * Validate all form data and file upload.
+     *
      * @param array $data
      * @param array|null $fileInfo
-     * @return array
+     * @return array{0: array, 1: array}
      */
     private function validate(array $data, $fileInfo): array
+    {
+        [$personalErrors, $personalFieldErrors] = $this->validatePersonalInfo($data);
+        [$optionalErrors, $optionalFieldErrors] = $this->validateOptionalFields($data);
+        [$fileErrors, $fileFieldErrors] = $this->validateFile($fileInfo);
+
+        return [
+            array_merge($personalErrors, $optionalErrors, $fileErrors),
+            array_merge($personalFieldErrors, $optionalFieldErrors, $fileFieldErrors),
+        ];
+    }
+
+    /**
+     * Validate required personal info fields: name, email, phone.
+     *
+     * @param array $data
+     * @return array{0: array, 1: array}
+     */
+    private function validatePersonalInfo(array $data): array
     {
         $errors = [];
         $fieldErrors = [];
 
         $name = $this->sanitizeText($data['name'] ?? '');
-        $email = $this->sanitizeText($data['email'] ?? '');
-        $phone = $this->sanitizeText($data['phone'] ?? '');
-        $cep = $this->sanitizeText($data['cep'] ?? '');
-        $cpf = $this->sanitizeText($data['cpf'] ?? '');
-        $cnpj = $this->sanitizeText($data['cnpj'] ?? '');
-        $workArea = $this->sanitizeText($data['work_area'] ?? '');
-        $linkedin = $this->normalizeUrl($this->sanitizeText($data['linkedin'] ?? ''));
-        $portfolio = $this->normalizeUrl($this->sanitizeText($data['portfolio'] ?? ''));
-
         if ($name === '') {
             $errors[] = __('Informe seu nome.');
             $fieldErrors['name'] = __('Informe seu nome.');
         }
 
+        $email = $this->sanitizeText($data['email'] ?? '');
         if ($email === '' || !$this->emailValidator->isValid($email)) {
             $errors[] = __('Informe um email válido.');
             $fieldErrors['email'] = __('Informe um email válido.');
         }
 
+        $phone = $this->sanitizeText($data['phone'] ?? '');
         if ($phone === '') {
             $errors[] = __('Informe seu telefone.');
             $fieldErrors['phone'] = __('Informe seu telefone.');
@@ -282,6 +295,21 @@ class Post extends Action implements HttpPostActionInterface
             }
         }
 
+        return [$errors, $fieldErrors];
+    }
+
+    /**
+     * Validate optional and enumerated fields: CEP, CPF, CNPJ, URLs, work area, consent.
+     *
+     * @param array $data
+     * @return array{0: array, 1: array}
+     */
+    private function validateOptionalFields(array $data): array
+    {
+        $errors = [];
+        $fieldErrors = [];
+
+        $cep = $this->sanitizeText($data['cep'] ?? '');
         if ($cep !== '') {
             $cepDigits = preg_replace('/\\D+/', '', $cep);
             if (strlen($cepDigits) !== 8) {
@@ -290,26 +318,31 @@ class Post extends Action implements HttpPostActionInterface
             }
         }
 
+        $cpf = $this->sanitizeText($data['cpf'] ?? '');
         if ($cpf !== '' && !$this->isValidCpf($cpf)) {
             $errors[] = __('CPF inválido.');
             $fieldErrors['cpf'] = __('CPF inválido.');
         }
 
+        $cnpj = $this->sanitizeText($data['cnpj'] ?? '');
         if ($cnpj !== '' && !$this->isValidCnpj($cnpj)) {
             $errors[] = __('CNPJ inválido.');
             $fieldErrors['cnpj'] = __('CNPJ inválido.');
         }
 
+        $linkedin = $this->normalizeUrl($this->sanitizeText($data['linkedin'] ?? ''));
         if ($linkedin !== '' && !$this->urlValidator->isValid($linkedin, ['http', 'https'])) {
             $errors[] = __('Informe um link do LinkedIn válido.');
             $fieldErrors['linkedin'] = __('Informe um link do LinkedIn válido.');
         }
 
+        $portfolio = $this->normalizeUrl($this->sanitizeText($data['portfolio'] ?? ''));
         if ($portfolio !== '' && !$this->urlValidator->isValid($portfolio, ['http', 'https'])) {
             $errors[] = __('Informe um link de portfólio válido.');
             $fieldErrors['portfolio'] = __('Informe um link de portfólio válido.');
         }
 
+        $workArea = $this->sanitizeText($data['work_area'] ?? '');
         if ($workArea === '') {
             $errors[] = __('Selecione a área de interesse.');
             $fieldErrors['work_area'] = __('Selecione a área de interesse.');
@@ -320,10 +353,22 @@ class Post extends Action implements HttpPostActionInterface
             $fieldErrors['consent'] = __('É necessário aceitar o consentimento.');
         }
 
+        return [$errors, $fieldErrors];
+    }
+
+    /**
+     * Validate file upload: presence, error code, size, extension and content.
+     *
+     * @param array|null $fileInfo
+     * @return array{0: array, 1: array}
+     */
+    private function validateFile($fileInfo): array
+    {
+        $errors = [];
+        $fieldErrors = [];
+
         if (empty($fileInfo) || !isset($fileInfo['error'])) {
-            $errors[] = __('Envie seu currículo.');
-            $fieldErrors['cv_file'] = __('Envie seu currículo.');
-            return [$errors, $fieldErrors];
+            return [[__('Envie seu currículo.')], ['cv_file' => __('Envie seu currículo.')]];
         }
 
         if ((int)$fileInfo['error'] === UPLOAD_ERR_NO_FILE) {
@@ -346,17 +391,38 @@ class Post extends Action implements HttpPostActionInterface
             $fieldErrors['cv_file'] = __('Formato de arquivo inválido. Envie PDF, DOC ou DOCX.');
         }
 
-        if (!empty($fileInfo['tmp_name']) && is_uploaded_file($fileInfo['tmp_name'])) {
-            $mimeType = (string)$this->mime->getMimeType($fileInfo['tmp_name']);
-            if ($mimeType !== '' && !in_array($mimeType, self::ALLOWED_MIME_TYPES, true)) {
-                $errors[] = __('Formato de arquivo inválido.');
-                $fieldErrors['cv_file'] = __('Formato de arquivo inválido.');
-            }
+        [$contentErrors, $contentFieldErrors] = $this->validateFileContent($fileInfo, $extension);
+        $errors = array_merge($errors, $contentErrors);
+        $fieldErrors = array_merge($fieldErrors, $contentFieldErrors);
 
-            if ($extension !== '' && !$this->isFileSignatureValid($fileInfo['tmp_name'], $extension)) {
-                $errors[] = __('O conteúdo do arquivo não corresponde ao formato informado.');
-                $fieldErrors['cv_file'] = __('O conteúdo do arquivo não corresponde ao formato informado.');
-            }
+        return [$errors, $fieldErrors];
+    }
+
+    /**
+     * Validate uploaded file MIME type and binary signature.
+     *
+     * @param array $fileInfo
+     * @param string $extension
+     * @return array{0: array, 1: array}
+     */
+    private function validateFileContent(array $fileInfo, string $extension): array
+    {
+        $errors = [];
+        $fieldErrors = [];
+
+        if (empty($fileInfo['tmp_name']) || !is_uploaded_file($fileInfo['tmp_name'])) {
+            return [$errors, $fieldErrors];
+        }
+
+        $mimeType = (string)$this->mime->getMimeType($fileInfo['tmp_name']);
+        if ($mimeType !== '' && !in_array($mimeType, self::ALLOWED_MIME_TYPES, true)) {
+            $errors[] = __('Formato de arquivo inválido.');
+            $fieldErrors['cv_file'] = __('Formato de arquivo inválido.');
+        }
+
+        if ($extension !== '' && !$this->isFileSignatureValid($fileInfo['tmp_name'], $extension)) {
+            $errors[] = __('O conteúdo do arquivo não corresponde ao formato informado.');
+            $fieldErrors['cv_file'] = __('O conteúdo do arquivo não corresponde ao formato informado.');
         }
 
         return [$errors, $fieldErrors];
