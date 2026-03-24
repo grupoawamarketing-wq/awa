@@ -1411,7 +1411,8 @@ body .page-wrapper .page_footer.awa-footer--dark .border-top-container {
 body .page-wrapper .page_footer.awa-footer--dark #footer.footer-container,
 body .page-wrapper .page_footer.awa-footer--dark #footer.footer-container.layout2,
 body .page-wrapper .page_footer.awa-footer--dark #footer.footer-container.footer {
-    background: transparent !important;
+    /* bg gerenciado na seção de fix abaixo (garante cobertura fora do box de gradient) */
+    background: transparent;
 }
 
 /* ---------- 3. Trust Bar ---------- */
@@ -3990,12 +3991,33 @@ body.catalog-product-view .awa-b2b-pdp-sku .awa-b2b-sku__value {
     margin-top: 0 !important;
 }
 
-/* ── FOOTER DARK: corrige clipping das colunas de navegação ──────────────
-   O tema Rokanthemes e awa-grid-spacing-fix.css definem overflow:hidden em
-   .page_footer (para containment de floats), mas isso corta o .footer-static
-   que está dentro do dark footer. Esta regra garante visibilidade das colunas.
+/* ── FOOTER DARK: corrige clipping e background das colunas de navegação ────
+   1. overflow:visible garante que os filhos que excedem o box de 401px sejam
+      renderizados (evita clipping do Rokanthemes _footer.less).
+   2. flex-shrink:0 impede que o flex-item seja comprimido pelo page-wrapper.
+   3. O elemento .page_footer.awa-footer--dark tem height calculado pelo flex
+      como ~401px (espaço restante da viewport). O gradient só cobre esse box.
+      Para garantir background em .awa-footer-brands, #footer.footer-container
+      e .footer-bottom (que ficam fora do box), damos bg explícito a cada um.
    ─────────────────────────────────────────────────────────────────────────── */
 body .page-wrapper .page_footer.awa-footer--dark {
     overflow: visible !important;
     height: auto !important;
+    flex-shrink: 0 !important;
+}
+
+/* Garantir bg escuro nos elementos que ficam fora do box de gradient */
+body .page-wrapper .page_footer.awa-footer--dark .awa-footer-brands,
+body .page-wrapper .page_footer.awa-footer--dark .awa-footer-tags {
+    background: var(--awa-ft-grad-to, #b73337) !important;
+}
+
+body .page-wrapper .page_footer.awa-footer--dark #footer.footer-container,
+body .page-wrapper .page_footer.awa-footer--dark #footer.footer-container.layout2,
+body .page-wrapper .page_footer.awa-footer--dark #footer.footer-container.footer {
+    background: linear-gradient(180deg, var(--awa-ft-grad-from, #8e2629) 0%, var(--awa-ft-grad-to, #b73337) 100%) !important;
+}
+
+body .page-wrapper .page_footer.awa-footer--dark .footer-bottom {
+    background: color-mix(in srgb, var(--awa-ft-grad-to, #b73337) 70%, #000 30%) !important;
 }
