@@ -1,7 +1,6 @@
 <?php
 /**
  * Header search form override (Magento_Search) - AWA Home5 child
- * Integrates SearchSuiteAutocomplete with UX/UI and Accessibility Improvements
  *
  * @var \Magento\Framework\View\Element\Template $block
  */
@@ -9,45 +8,47 @@
 // @codingStandardsIgnoreFile
 /** @var \Magento\Search\Helper\Data $searchHelper */
 $searchHelper = $this->helper('Magento\Search\Helper\Data');
+$searchSuiteUrl = $block->getUrl('rokanthemes_searchsuiteautocomplete/ajax/index');
+$searchQueryText = (string) $searchHelper->getEscapedQueryText();
+$searchFormClass = 'form minisearch search-content is-ready';
+
+if ($searchQueryText === '') {
+    $searchFormClass .= ' is-empty';
+}
 ?>
-<div class="block block-search awa-professional-search"
+<div class="block block-search"
      role="search"
-     data-awa-search-root="true"
-     aria-busy="false"
-     aria-label="<?php echo $block->escapeHtmlAttr(__('Busca de produtos')) ?>">
+     aria-label="<?php echo $block->escapeHtmlAttr(__('Busca de produtos')) ?>"
+     data-awa-component="search-autocomplete"
+     data-awa-variant="magento-search">
     <div class="block-content">
-        <form class="form minisearch search-content"
+        <form class="<?php echo $block->escapeHtmlAttr($searchFormClass) ?>"
               id="search_mini_form"
               data-awa-search-form="true"
               action="<?php echo $block->escapeUrl($searchHelper->getResultUrl()) ?>"
               method="get">
-
-            <div class="field search awa-search-input-wrapper">
+            <div class="field search">
                 <label class="label" for="search" id="awa-search-label" data-role="minisearch-label">
                     <span><?php echo $block->escapeHtml(__('Buscar')); ?></span>
                 </label>
-                <span id="awa-search-help" class="awa-sr-only">
-                    <?php echo $block->escapeHtml(__('Digite ao menos 2 caracteres para ver sugestões e use as setas para navegar nos resultados.')) ?>
-                </span>
                 <div class="control" data-awa-search-control="true">
                     <input id="search"
                            data-awa-search-input="true"
                            data-mage-init='{"quickSearch":{
                                "formSelector":"#search_mini_form",
-                               "url":"<?php echo $block->escapeUrl($block->getUrl('search/ajax/suggest')) ?>",
+                               "url":"<?php echo $block->escapeUrl($block->getUrl('search/ajax/suggest')); ?>",
                                "destinationSelector":"#search_autocomplete"}
                            }'
                            type="search"
                            name="<?php echo $block->escapeHtmlAttr($searchHelper->getQueryParamName()) ?>"
-                           value="<?php echo $block->escapeHtmlAttr($searchHelper->getEscapedQueryText()) ?>"
-                           placeholder="<?php echo $block->escapeHtmlAttr(__('Buscar por nome, codigo, SKU ou aplicacao')); ?>"
-                           class="input-text awa-search-input"
+                           value="<?php echo $block->escapeHtmlAttr($searchQueryText) ?>"
+                           placeholder="<?php echo $block->escapeHtmlAttr(__('Buscar peças, capacetes, acessórios...')); ?>"
+                           class="input-text"
                            minlength="2"
                            maxlength="<?php echo (int) $searchHelper->getMaxQueryLength(); ?>"
                            role="combobox"
                            aria-labelledby="awa-search-label"
                            aria-label="<?php echo $block->escapeHtmlAttr(__('Buscar')) ?>"
-                           aria-describedby="awa-search-help"
                            aria-autocomplete="both"
                            aria-expanded="false"
                            aria-haspopup="listbox"
@@ -56,32 +57,39 @@ $searchHelper = $this->helper('Magento\Search\Helper\Data');
                            autocapitalize="off"
                            autocorrect="off"
                            spellcheck="false" />
-
-                    <!-- Feedback visual de carregamento -->
-                    <div class="awa-search-spinner" aria-hidden="true"></div>
-
                     <div id="search_autocomplete"
                          class="search-autocomplete searchsuite-autocomplete"
                          data-role="search-autocomplete"
                          data-awa-search-panel="true"
-                         hidden
                          role="listbox"
                          aria-hidden="true"
                          aria-label="<?php echo $block->escapeHtmlAttr(__('Sugestões de busca')) ?>"></div>
-                    <span class="awa-sr-only" data-awa-search-status="true" aria-live="polite" aria-atomic="true"></span>
                     <?php echo $block->getChildHtml() ?>
                 </div>
             </div>
-            <div class="actions awa-search-action-wrapper">
+            <div class="actions" data-awa-search-actions="true">
                 <button type="submit"
                         title="<?php echo $block->escapeHtmlAttr(__('Buscar')) ?>"
                         aria-label="<?php echo $block->escapeHtmlAttr(__('Buscar produtos')) ?>"
-                        class="action search awa-search-btn">
-                    <!-- SVG Lupa Magnética -->
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    <span class="awa-sr-only"><?php echo $block->escapeHtml(__('Buscar')); ?></span>
+                        class="action search"
+                        data-awa-search-submit="true">
+                    <span><?php echo $block->escapeHtml(__('Buscar')); ?></span>
                 </button>
             </div>
         </form>
     </div>
 </div>
+<script type="text/x-magento-init">
+{
+    "#search_mini_form": {
+        "js/awa-search-autocomplete-compat": {
+            "inputSelector": "#search",
+            "panelSelector": "#search_autocomplete",
+            "resultsRootSelector": ".searchsuite-autocomplete",
+            "fallbackEndpoint": "<?php echo $block->escapeUrl($searchSuiteUrl) ?>",
+            "searchResultUrl": "<?php echo $block->escapeUrl($searchHelper->getResultUrl()) ?>",
+            "minQueryLength": 2
+        }
+    }
+}
+</script>
