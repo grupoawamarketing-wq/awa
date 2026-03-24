@@ -5,6 +5,7 @@ namespace Rokanthemes\AjaxSuite\Controller\Wishlist;
 
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Catalog\Api\ProductRepositoryInterface;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\View\LayoutFactory;
 
 class Add extends \Magento\Framework\App\Action\Action
@@ -12,6 +13,12 @@ class Add extends \Magento\Framework\App\Action\Action
 
     protected $resultPageFactory;
     protected $jsonHelper;
+    protected $logger;
+    protected $_customerSession;
+    protected $wishlistProvider;
+    protected $productRepository;
+    protected $layoutFactory;
+    protected $_coreRegistry;
 
     /**
      * Constructor

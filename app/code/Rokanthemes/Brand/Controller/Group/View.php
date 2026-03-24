@@ -23,10 +23,16 @@ namespace Rokanthemes\Brand\Controller\Group;
 use Magento\Customer\Controller\AccountInterface;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\View\Result\PageFactory;
 
 class View extends \Magento\Framework\App\Action\Action
 {
+
+    /**
+     * @var \Magento\Framework\View\Result\PageFactory
+     */
+    private $resultPageFactory;
 
     /**
      * @var \Magento\Framework\App\RequestInterface
