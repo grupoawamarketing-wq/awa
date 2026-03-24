@@ -222,6 +222,7 @@ class GrowthAnalyzer
      */
     private function calculateMonthlyTrend(int $months): array
     {
+        $offset = -(int) $months;
         $sql = "SELECT
                     YEAR(DTPEDIDO) AS yr,
                     MONTH(DTPEDIDO) AS mo,
@@ -229,12 +230,12 @@ class GrowthAnalyzer
                     COUNT(*) AS order_count,
                     COUNT(DISTINCT CLIENTE) AS customer_count
                 FROM VE_PEDIDO
-                WHERE DTPEDIDO >= DATEADD(month, ?, GETDATE())
+                WHERE DTPEDIDO >= DATEADD(month, CAST({$offset} AS INT), GETDATE())
                   AND STATUS NOT IN ('C', 'D')
                 GROUP BY YEAR(DTPEDIDO), MONTH(DTPEDIDO)
                 ORDER BY YEAR(DTPEDIDO), MONTH(DTPEDIDO)";
 
-        $rows = $this->connection->query($sql, [-(int) $months]);
+        $rows = $this->connection->query($sql);
         $trend = [];
         $prevRevenue = null;
 

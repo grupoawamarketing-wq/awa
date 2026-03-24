@@ -874,6 +874,13 @@ class CustomerSync implements CustomerSyncInterface
             return '';
         }
 
+        // Rejeita domínios de rótulo único (ex: user@email sem TLD)
+        // que passam filter_var mas são rejeitados pelo validador Laminas/Magento
+        $atPos = strrpos($email, '@');
+        if ($atPos === false || !str_contains(substr($email, $atPos + 1), '.')) {
+            return '';
+        }
+
         return $email;
     }
 
@@ -889,6 +896,8 @@ class CustomerSync implements CustomerSyncInterface
      */
     private function sanitizeCity(string $city): string
     {
+        // Normalize double quotes to apostrophe (e.g. D"OESTE → D'OESTE)
+        $city = str_replace('"', "'", $city);
         // Strip chars not in Magento's City validator pattern: \p{L}\p{M}\s\-'
         $city = preg_replace('/[^\p{L}\p{M}\s\-\']/u', ' ', $city);
         // Collapse multiple spaces
