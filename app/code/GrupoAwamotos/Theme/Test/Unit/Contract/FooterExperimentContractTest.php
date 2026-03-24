@@ -73,6 +73,62 @@ class FooterExperimentContractTest extends TestCase
         $this->assertDoesNotMatchRegularExpression('/<script(?![^>]*type="text\/x-magento-init")/i', $contents);
     }
 
+    public function testFooterTemplateDefinesTreatmentQuickActions(): void
+    {
+        $footerPath = $this->getProjectRoot() . '/app/design/frontend/AWA_Custom/ayo_home5_child/Rokanthemes_Themeoption/templates/html/footer.phtml';
+        $this->assertFileExists($footerPath);
+        $contents = (string) file_get_contents($footerPath);
+
+        $this->assertNotSame('', $contents);
+        $this->assertStringContainsString('$showFooterQuickActions = $footerExpActive && $footerExpVariant === \'treatment\';', $contents);
+        $this->assertStringContainsString("'customer/account/create/'", $contents);
+        $this->assertStringContainsString("'contact/'", $contents);
+        $this->assertStringContainsString('class="awa-footer-quick-actions"', $contents);
+        $this->assertStringContainsString('class="awa-footer-quick-actions__link"', $contents);
+    }
+
+    public function testFooterInteractionsScriptUsesLazySliderInitialization(): void
+    {
+        $scriptPath = $this->getProjectRoot() . '/app/design/frontend/AWA_Custom/ayo_home5_child/web/js/awa-footer-interactions.js';
+        $this->assertFileExists($scriptPath);
+        $contents = (string) file_get_contents($scriptPath);
+
+        $this->assertNotSame('', $contents);
+        $this->assertStringContainsString('function scheduleBrandSliderInit()', $contents);
+        $this->assertStringContainsString('function scheduleResizeSync()', $contents);
+        $this->assertStringContainsString('window.IntersectionObserver', $contents);
+        $this->assertStringContainsString('window.requestIdleCallback', $contents);
+        $this->assertStringContainsString("autoplay: !prefersReducedMotion()", $contents);
+        $this->assertStringContainsString("data-awa-footer-slider-ready", $contents);
+    }
+
+    public function testFooterTreatmentCssUsesProgressiveContentVisibility(): void
+    {
+        $cssPath = $this->getProjectRoot() . '/app/design/frontend/AWA_Custom/ayo_home5_child/web/css/awa-bundle-custom.unmin.css';
+        $this->assertFileExists($cssPath);
+        $contents = (string) file_get_contents($cssPath);
+
+        $this->assertNotSame('', $contents);
+        $this->assertStringContainsString('@supports (content-visibility: auto)', $contents);
+        $this->assertStringContainsString('.page_footer.awa-footer-exp--treatment .awa-footer-brands', $contents);
+        $this->assertStringContainsString('.page_footer.awa-footer-exp--treatment .awa-footer-tags', $contents);
+        $this->assertStringContainsString('.page_footer.awa-footer-exp--treatment .footer-bottom', $contents);
+        $this->assertStringContainsString('contain-intrinsic-size: 1px 280px;', $contents);
+    }
+
+    public function testFooterTreatmentCssStylesQuickActionsRail(): void
+    {
+        $cssPath = $this->getProjectRoot() . '/app/design/frontend/AWA_Custom/ayo_home5_child/web/css/awa-bundle-custom.unmin.css';
+        $this->assertFileExists($cssPath);
+        $contents = (string) file_get_contents($cssPath);
+
+        $this->assertNotSame('', $contents);
+        $this->assertStringContainsString('.page_footer.awa-footer-exp--treatment .awa-footer-quick-actions', $contents);
+        $this->assertStringContainsString('.page_footer.awa-footer-exp--treatment .awa-footer-quick-actions__inner', $contents);
+        $this->assertStringContainsString('.page_footer.awa-footer-exp--treatment .awa-footer-quick-actions__link', $contents);
+        $this->assertStringContainsString('grid-template-columns: repeat(4, minmax(0, 1fr));', $contents);
+    }
+
     public function testFooterExperimentHelperExists(): void
     {
         $helperPath = $this->getModuleRoot() . '/Helper/FooterExperiment.php';
