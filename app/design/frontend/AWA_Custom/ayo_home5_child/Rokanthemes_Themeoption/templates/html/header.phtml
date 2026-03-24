@@ -31,6 +31,22 @@ $headerExperimentEnabled = !empty($headerExperimentPayload['enabled']);
 $headerExperimentActive = !empty($headerExperimentPayload['is_active']);
 $headerExperimentStateClass = $headerExperimentActive ? ' awa-header-exp-active' : ' awa-header-exp-control';
 $headerExperimentVariantClass = ' awa-header-exp--' . preg_replace('/[^a-z0-9_-]+/i', '-', strtolower($headerExperimentVariant));
+
+$logoChildBlock = $block->getChildBlock('logo');
+$mobileLogoUrl = $block->getUrl('');
+$mobileLogoSrc = '';
+$mobileLogoAlt = (string) __('AWA Motos');
+$mobileLogoTitle = $mobileLogoAlt;
+$mobileLogoWidth = 170;
+$mobileLogoHeight = 55;
+
+if ($logoChildBlock instanceof \Magento\Theme\Block\Html\Header\Logo) {
+	$mobileLogoSrc = (string) $logoChildBlock->getLogoSrc();
+	$mobileLogoAlt = (string) $logoChildBlock->getLogoAlt();
+	$mobileLogoTitle = (string) ($logoChildBlock->getThemeName() ?: $logoChildBlock->getLogoAlt());
+	$mobileLogoWidth = (int) ($logoChildBlock->getLogoWidth() ?: $mobileLogoWidth);
+	$mobileLogoHeight = (int) ($logoChildBlock->getLogoHeight() ?: $mobileLogoHeight);
+}
 ?>
 <header role="banner"
         class="awa-site-header awa-header-professional<?= $escaper->escapeHtmlAttr($headerExperimentStateClass . $headerExperimentVariantClass) ?>"
@@ -45,6 +61,11 @@ $headerExperimentVariantClass = ' awa-header-exp--' . preg_replace('/[^a-z0-9_-]
 <style>
 body .awa-site-header .header .awa-header-primary-row {
 	display: contents;
+}
+
+body .awa-site-header .header .awa-header-mobile-logo,
+body .awa-site-header .header .awa-header-mobile-logo-fallback {
+	display: none;
 }
 
 @media (max-width: 991px) {
@@ -151,6 +172,37 @@ body .awa-site-header .header .awa-header-primary-row {
 		padding: 0 !important;
 		margin: 0 !important;
 		overflow: hidden !important;
+	}
+
+	body .awa-site-header .header .awa-header-primary-row > .awa-header-brand-cell > .awa-header-brand-desktop {
+		display: none !important;
+	}
+
+	body .awa-site-header .header .awa-header-mobile-logo,
+	body .awa-site-header .header .awa-header-mobile-logo-fallback {
+		display: inline-flex !important;
+		align-items: center !important;
+		justify-content: center !important;
+		width: auto !important;
+		max-width: 100% !important;
+		margin: 0 auto !important;
+		position: static !important;
+		float: none !important;
+		transform: none !important;
+		text-decoration: none !important;
+		visibility: visible !important;
+		opacity: 1 !important;
+	}
+
+	body .awa-site-header .header .awa-header-mobile-logo__image {
+		display: block !important;
+		width: auto !important;
+		height: auto !important;
+		max-width: min(136px, 100%) !important;
+		max-height: 38px !important;
+		margin: 0 !important;
+		visibility: visible !important;
+		opacity: 1 !important;
 	}
 
 	body .awa-site-header .header .awa-header-primary-row > .awa-header-brand-cell .logo,
@@ -362,7 +414,24 @@ body .awa-site-header .header .awa-header-primary-row {
 											<div class="awa-header-primary-row" data-awa-header-primary-row="true">
 												<span data-action="toggle-nav" class="action nav-toggle awa-header-mobile-toggle" data-awa-nav-toggle="true"><span><?= $escaper->escapeHtml(__('Toggle Nav')) ?></span></span>
 												<div class="col-md-2 col-sm-2 col-xs-12 awa-header-brand-cell" data-awa-header-brand="true">
-													<?= /* @noEscape */ $this->getChildHtml('logo') ?>
+													<div class="awa-header-brand-desktop" data-awa-header-brand-desktop="true">
+														<?= /* @noEscape */ $this->getChildHtml('logo') ?>
+													</div>
+													<?php if ($mobileLogoSrc !== ''): ?>
+														<a class="awa-header-mobile-logo" href="<?= $escaper->escapeUrl($mobileLogoUrl) ?>" title="<?= $escaper->escapeHtmlAttr($mobileLogoTitle) ?>" aria-label="<?= $escaper->escapeHtmlAttr($mobileLogoAlt) ?>">
+															<img class="awa-header-mobile-logo__image"
+																src="<?= $escaper->escapeUrl($mobileLogoSrc) ?>"
+																alt="<?= $escaper->escapeHtmlAttr($mobileLogoAlt) ?>"
+																width="<?= $escaper->escapeHtmlAttr((string) $mobileLogoWidth) ?>"
+																height="<?= $escaper->escapeHtmlAttr((string) $mobileLogoHeight) ?>"
+																loading="eager"
+																fetchpriority="high" />
+														</a>
+													<?php else: ?>
+														<div class="awa-header-mobile-logo-fallback">
+															<?= /* @noEscape */ $this->getChildHtml('logo') ?>
+														</div>
+													<?php endif; ?>
 												</div>
 												<a class="awa-header-cart-link" href="<?= $escaper->escapeUrl($block->getUrl('checkout/cart')) ?>" aria-label="<?= $escaper->escapeHtmlAttr(__('Abrir carrinho')) ?>"><svg class="awa-header-cart-link-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="20" r="1"></circle><circle cx="18" cy="20" r="1"></circle><path d="M3.5 4h2l2.2 10.2a1 1 0 0 0 1 .8h8.6a1 1 0 0 0 1-.8L20 7H7.1"></path></svg><span><?= $escaper->escapeHtml(__('Abrir carrinho')) ?></span></a>
 											</div>
