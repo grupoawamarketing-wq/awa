@@ -4,25 +4,43 @@
  * GrupoAwamotos LayoutFix
  *
  * Fix 1: notification.messages broken reference
- * Magento_AdminNotification declara notification.messages com before="user" em header.
- * O tema admin (theme-adminhtml-backend) move ambos para header.inner.right,
- * gerando "Broken reference ... tries to reorder itself towards user" porque as
- * diretivas before="user" e after="user" conflitam no mesmo container.
- * Solução: remover e recriar notification.messages sem ordering cruzado.
+ * Magento_AdminNotification declara notification.messages com before="user" em
+ * header. O tema admin move ambos para header.inner.right, mas o constraint
+ * before="user" é avaliado quando user ainda está em "header" (diferente parent),
+ * gerando "Broken reference ... tries to reorder itself towards user".
+ *
+ * Solução: garantir header.inner.right, mover user para lá primeiro, depois
+ * remover e recriar notification.messages sem ordering conflitante.
+ * Este módulo (GrupoAwamotos_*) processa antes de Magento_AdminNotification
+ * e do tema admin por ordenação alfabética — a ordem de execução é crítica.
  *
  * Fix 2: mst.feature-request broken reference
  * Mirasvit Core tenta adicionar mst.feature-request a page.main.container,
- * que não existe em alguns contextos admin (ex: admin-popup, admin-empty).
- * Solução: remover o bloco para suprimir o warning.
+ * que não existe em contextos admin sem page layout (popup, empty).
+ * Solução: remover o bloco para suprimir o warning nesses contextos.
  */
 -->
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <body>
         <!--
-            Fix 1: Remove notification.messages (declarado com before="user") e recria
-            em header.inner.right sem ordering conflitante. O tema admin já garante
-            que header.inner.right existe e que user está nele.
+            Fix 1 — Passo 1: Garantir que header.inner.right existe antes do
+            Magento_AdminNotification processar o before="user" de notification.messages.
+        -->
+        <referenceContainer name="header">
+            <container name="header.inner.right" as="header_inner_right_compat" after="header.inner.left"/>
+        </referenceContainer>
+
+        <!--
+            Fix 1 — Passo 2: Mover "user" para header.inner.right antes que
+            notification.messages seja declarado com before="user". Assim quando
+            o constraint for avaliado, ambos estarão no mesmo parent.
+        -->
+        <move element="user" destination="header.inner.right" before="-"/>
+
+        <!--
+            Fix 1 — Passo 3: Remover notification.messages (declarado com before="user"
+            pelo Magento_AdminNotification) e recriar sem ordering cruzado.
         -->
         <referenceBlock name="notification.messages" remove="true"/>
         <referenceContainer name="header.inner.right">
@@ -34,8 +52,9 @@
         </referenceContainer>
 
         <!--
-            Fix 2: Remove mst.feature-request quando page.main.container não existe.
-            O bloco é recriado normalmente pelo Mirasvit nas páginas que têm o container.
+            Fix 2: Mirasvit Core adiciona mst.feature-request a page.main.container,
+            que não existe em admin-popup e outros layouts sem esse container.
+            Remover suprime o broken reference nesses contextos.
         -->
         <referenceBlock name="mst.feature-request" remove="true"/>
     </body>
