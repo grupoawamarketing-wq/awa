@@ -60,7 +60,7 @@
 ---
 
 ### 3️⃣ **Footer Refinements**
-**Status**: ⏳ In Progress
+**Status**: ✅ Complete
 **Complexidade**: 🟡 Média
 **Arquivos**:
 - `Rokanthemes_Themeoption/layout/default.xml`
