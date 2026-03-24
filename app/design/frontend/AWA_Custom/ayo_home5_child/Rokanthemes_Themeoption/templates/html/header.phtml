@@ -43,6 +43,10 @@ $headerExperimentVariantClass = ' awa-header-exp--' . preg_replace('/[^a-z0-9_-]
         data-awa-header-exp-variant="<?= $escaper->escapeHtmlAttr($headerExperimentVariant) ?>"
         data-awa-header-exp-active="<?= $headerExperimentActive ? '1' : '0' ?>">
 <style>
+body .awa-site-header .header .awa-header-primary-row {
+	display: contents;
+}
+
 @media (max-width: 991px) {
 	body:not(.b2b-auth-shell):not(.b2b-register-index) .awa-site-header [data-awa-header-utility='true'],
 	body:not(.b2b-auth-shell):not(.b2b-register-index) .awa-site-header .top-header,
@@ -60,19 +64,27 @@ $headerExperimentVariantClass = ' awa-header-exp--' . preg_replace('/[^a-z0-9_-]
 	}
 
 	body .awa-site-header .header .wp-header {
-		display: grid !important;
-		grid-template-columns: 44px minmax(0, 1fr) 44px !important;
-		grid-template-areas: 'nav logo cart' 'search search search' !important;
-		align-items: center !important;
-		column-gap: 12px !important;
-		row-gap: 10px !important;
+		display: block !important;
 		position: relative !important;
 		width: 100% !important;
 		max-width: 100% !important;
 		min-width: 0 !important;
 	}
 
-	body .awa-site-header .header .wp-header > .awa-header-mobile-toggle {
+	body .awa-site-header .header .awa-header-primary-row {
+		display: grid !important;
+		grid-template-columns: 44px minmax(0, 1fr) 44px !important;
+		grid-template-areas: 'nav brand cart' !important;
+		align-items: center !important;
+		column-gap: 12px !important;
+		width: 100% !important;
+		max-width: 100% !important;
+		min-width: 0 !important;
+		margin: 0 0 10px !important;
+	}
+
+	body .awa-site-header .header .awa-header-primary-row > .awa-header-mobile-toggle {
+		order: 1 !important;
 		grid-area: nav !important;
 		display: inline-flex !important;
 		align-items: center !important;
@@ -88,34 +100,74 @@ $headerExperimentVariantClass = ' awa-header-exp--' . preg_replace('/[^a-z0-9_-]
 		z-index: 7 !important;
 	}
 
-	body .awa-site-header .header .wp-header > [class*='col-']:first-of-type {
-		grid-area: logo !important;
+	body .awa-site-header .header .awa-header-primary-row > .awa-header-cart-link {
+		grid-area: cart !important;
+		display: inline-flex !important;
+		align-items: center !important;
+		justify-content: center !important;
+		width: 44px !important;
+		min-width: 44px !important;
+		height: 44px !important;
+		min-height: 44px !important;
+		border: 1px solid rgb(183 51 55 / 18%) !important;
+		border-radius: 14px !important;
+		background: #fff7f7 !important;
+		box-shadow: 0 8px 20px rgb(15 23 42 / 8%) !important;
+		color: var(--primary-color, #b73337) !important;
+		text-decoration: none !important;
+		position: relative !important;
+		z-index: 8 !important;
+	}
+
+	body .awa-site-header .header .awa-header-primary-row > .awa-header-cart-link .awa-header-cart-link-icon {
+		width: 18px !important;
+		height: 18px !important;
+		display: block !important;
+		stroke: currentColor !important;
+		fill: none !important;
+	}
+
+	body .awa-site-header .header .awa-header-primary-row > .awa-header-cart-link > span {
+		position: absolute !important;
+		width: 1px !important;
+		height: 1px !important;
+		padding: 0 !important;
+		margin: -1px !important;
+		overflow: hidden !important;
+		clip: rect(0 0 0 0) !important;
+		clip-path: inset(50%) !important;
+		white-space: nowrap !important;
+		border: 0 !important;
+	}
+
+	body .awa-site-header .header .awa-header-primary-row > [class*='col-']:first-of-type {
 		display: flex !important;
+		grid-area: brand !important;
 		align-items: center !important;
 		justify-content: center !important;
 		width: 100% !important;
 		max-width: 100% !important;
 		min-width: 0 !important;
-		padding: 0 56px !important;
+		padding: 0 !important;
 		margin: 0 !important;
+		overflow: hidden !important;
 	}
 
-	body .awa-site-header .header .wp-header > [class*='col-']:first-of-type .logo,
-	body .awa-site-header .header .wp-header > [class*='col-']:first-of-type .logo a {
+	body .awa-site-header .header .awa-header-primary-row > [class*='col-']:first-of-type .logo,
+	body .awa-site-header .header .awa-header-primary-row > [class*='col-']:first-of-type .logo a {
 		display: inline-flex !important;
 		align-items: center !important;
 		justify-content: center !important;
 		margin: 0 auto !important;
 	}
 
-	body .awa-site-header .header .wp-header > [class*='col-']:first-of-type .logo img {
+	body .awa-site-header .header .awa-header-primary-row > [class*='col-']:first-of-type .logo img {
 		max-height: 38px !important;
-		max-width: min(136px, 100%) !important;
+		max-width: min(124px, 100%) !important;
 		width: auto !important;
 	}
 
 	body .awa-site-header .header .wp-header > .top-search {
-		grid-area: search !important;
 		display: block !important;
 		width: 100% !important;
 		max-width: 100% !important;
@@ -124,7 +176,10 @@ $headerExperimentVariantClass = ' awa-header-exp--' . preg_replace('/[^a-z0-9_-]
 		margin: 0 !important;
 	}
 
-	body .awa-site-header .header .wp-header > .awa-header-cart,
+	body .awa-site-header .header .wp-header > .awa-header-cart {
+		display: none !important;
+	}
+
 	body .awa-site-header .header .wp-header > .awa-header-cart .mini-carts,
 	body .awa-site-header .header .wp-header > .awa-header-cart .minicart-wrapper,
 	body .awa-site-header .header .wp-header > .awa-header-cart .showcart.header-mini-cart {
@@ -293,10 +348,13 @@ $headerExperimentVariantClass = ' awa-header-exp--' . preg_replace('/[^a-z0-9_-]
 					<div class="container">
 						<div class="row">
 							<div class="wp-header" data-awa-header-row="brand-search">
-								<span data-action="toggle-nav" class="action nav-toggle awa-header-mobile-toggle" data-awa-nav-toggle="true"><span><?= $escaper->escapeHtml(__('Toggle Nav')) ?></span></span>
-								<div class="col-md-2 col-sm-2 col-xs-12">
-									<?= /* @noEscape */ $this->getChildHtml('logo') ?>
-								</div>
+											<div class="awa-header-primary-row" data-awa-header-primary-row="true">
+												<span data-action="toggle-nav" class="action nav-toggle awa-header-mobile-toggle" data-awa-nav-toggle="true"><span><?= $escaper->escapeHtml(__('Toggle Nav')) ?></span></span>
+												<div class="col-md-2 col-sm-2 col-xs-12">
+													<?= /* @noEscape */ $this->getChildHtml('logo') ?>
+												</div>
+												<a class="awa-header-cart-link" href="<?= $escaper->escapeUrl($block->getUrl('checkout/cart')) ?>" aria-label="<?= $escaper->escapeHtmlAttr(__('Abrir carrinho')) ?>"><svg class="awa-header-cart-link-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="20" r="1"></circle><circle cx="18" cy="20" r="1"></circle><path d="M3.5 4h2l2.2 10.2a1 1 0 0 0 1 .8h8.6a1 1 0 0 0 1-.8L20 7H7.1"></path></svg><span><?= $escaper->escapeHtml(__('Abrir carrinho')) ?></span></a>
+											</div>
 								<div class="col-md-10 col-sm-10 col-xs-12 top-search" data-awa-header-search-row="true">
 									<?= /* @noEscape */ $this->getChildHtml('topSearch') ?>
 									<?= /* @noEscape */ $this->getChildHtml('hotline_header') ?>
