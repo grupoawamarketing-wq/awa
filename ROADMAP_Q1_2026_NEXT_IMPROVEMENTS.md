@@ -22,7 +22,7 @@
 ## 📊 Trabalho Pendente (WIP - Work in Progress)
 
 ### 1️⃣ **LiveChat Module** (NEW)
-**Status**: ⏳ In Progress
+**Status**: ✅ Complete (commits 8482d0f9, 72116380)
 **Complexidade**: 🟢 Baixa
 **Arquivos**:
 - `app/code/GrupoAwamotos/LiveChat/view/frontend/layout/default.xml`
@@ -40,7 +40,7 @@
 ---
 
 ### 2️⃣ **B2B Checkout Validators** (NEW)
-**Status**: ❓ Untracked (novos arquivos)
+**Status**: ✅ Complete (commits 9d5d1475, 0e9ac835)
 **Complexidade**: 🔴 Alta
 **Arquivos**:
 - `app/code/GrupoAwamotos/B2B/Model/Checkout/CompanyDataConfigProvider.php`
@@ -81,26 +81,20 @@
 ---
 
 ### 4️⃣ **CSS Bundles Consolidation**
-**Status**: ⏳ Needs Review
+**Status**: ✅ Partial — Deferred cosmetic consolidated (2026-03-24)
 **Complexidade**: 🟡 Média
-**Arquivos com mudanças**:
-- `awa-bundle-core.css.br`
-- `awa-bundle-home-custom.css`
-- `awa-bundle-optimization-of001.unmin.css`
-- `awa-bundle-pdp.css`
-- `awa-bundle-phases.css`
-- `awa-bundle-refinements.css`
-- `awa-polish-sweep.css`
+**Concluído**:
+- Deferred cosmetic CSS: 6 requests → `awa-bundle-cosmetic.css` (1 request, -5 HTTP requests)
+- Homepage deferred: 2 requests → `awa-bundle-cosmetic-home.css` (1 request, -1 HTTP request)
+- Total: 8 deferred CSS requests → 2 (economiza 6 round-trips por página)
+
+**Arquivos pendentes de revisão**:
+- `awa-bundle-phases.css` — contém grid-spacing-fix não recompilado após fix overflow (sem impacto visual pois !important override está em awa-bundle-custom.css)
+- `awa-polish-sweep.css` (22KB sync) — candidato para mover para async preload
 
 **O que é**: Review bundling strategy, eliminar duplicação, otimizar load order
 **Por quê**: Atualmente temos muitos bundles pequenos, podemos consolidar
-**Estimado**: 2-3 horas de análise + 4-5 horas de refatoração
-
-**Próximos passos**:
-1. Analisar tamanhos de bundles
-2. Identificar sobreposição de seletores
-3. Consolidar bundles redundantes
-4. Validar que nenhum seletor quebrou
+**Estimado**: Parte principal concluída; remanescente: 1-2h
 
 ---
 
