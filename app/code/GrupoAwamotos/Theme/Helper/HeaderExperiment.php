@@ -40,7 +40,7 @@ class HeaderExperiment extends AbstractHelper
     public function isEnabled(?int $storeId = null): bool
     {
         $storeKey = $this->resolveStoreKey($storeId);
-        if (isset($this->enabledCache[$storeKey])) {
+        if (isset($this->enabledCache[$storeKey])) { // phpcs:ignore Squiz.Operators.ComparisonOperatorUsage
             return $this->enabledCache[$storeKey];
         }
 

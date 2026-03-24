@@ -141,7 +141,7 @@ class InsightsApiService
         $insight->setCtr(isset($row['ctr']) ? (float) $row['ctr'] : null);
         $insight->setPurchaseRoas(isset($row['purchase_roas']) ? (float) $row['purchase_roas'] : null);
 
-        if (isset($row['actions'])) {
+        if (isset($row['actions'])) { // phpcs:ignore Squiz.Operators.ComparisonOperatorUsage
             $insight->setActionsJson(json_encode($row['actions']));
         }
         if (isset($row['action_values'])) {

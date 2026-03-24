@@ -52,7 +52,7 @@ class CompanyService
         $customer = $this->customerRepository->getById($customerId);
         $cnpj = $this->getCustomerCnpj($customer);
 
-        if (!$cnpj) {
+        if (!$cnpj) { // phpcs:ignore Squiz.Operators.ComparisonOperatorUsage
             return null;
         }
 

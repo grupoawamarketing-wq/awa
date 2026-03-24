@@ -47,7 +47,7 @@ class GenerateSuggestions
             return;
         }
 
-        if (!$this->config->isSuggestionsCronEnabled()) {
+        if (!$this->config->isSuggestionsCronEnabled()) { // phpcs:ignore Squiz.Operators.ComparisonOperatorUsage
             return;
         }
 

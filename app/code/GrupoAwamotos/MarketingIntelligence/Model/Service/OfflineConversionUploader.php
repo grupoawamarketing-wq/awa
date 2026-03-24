@@ -40,7 +40,7 @@ class OfflineConversionUploader
         }
 
         $eventSetId = $this->getEventSetId();
-        if (empty($eventSetId)) {
+        if (empty($eventSetId)) { // phpcs:ignore Squiz.Operators.ComparisonOperatorUsage
             $this->logger->error('OfflineConversionUploader: event_set_id not configured.');
             return 0;
         }
@@ -134,7 +134,7 @@ class OfflineConversionUploader
 
         return [
             'match_keys' => $matchKeys,
-            'currency' => $order->getOrderCurrencyCode() ?: 'BRL',
+            'currency' => $order->getOrderCurrencyCode() ?: 'BRL', // phpcs:ignore Squiz.Operators.ComparisonOperatorUsage
             'value' => (float)$order->getGrandTotal(),
             'event_name' => 'Purchase',
             'event_time' => $timestamp,

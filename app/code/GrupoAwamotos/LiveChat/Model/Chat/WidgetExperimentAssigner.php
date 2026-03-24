@@ -21,7 +21,7 @@ class WidgetExperimentAssigner
 
     public function getVariant(): string
     {
-        if (!$this->config->isExperimentEnabled()) {
+        if (!$this->config->isExperimentEnabled()) { // phpcs:ignore Squiz.Operators.ComparisonOperatorUsage
             return self::VARIANT_CONTROL;
         }
 

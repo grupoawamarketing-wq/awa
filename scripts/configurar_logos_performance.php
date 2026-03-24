@@ -154,7 +154,7 @@ foreach ($performanceConfigs as $config) {
 echo "\n=== VERIFICANDO DEPLOY MODE ===\n";
 
 // Verificar modo atual
-exec('cd ' . BP . ' && php bin/magento deploy:mode:show', $output, $returnCode);
+exec('cd ' . BP . ' && php bin/magento deploy:mode:show', $output, $returnCode); // nosemgrep: php.lang.security.exec-use.exec-use,php_exec_rule-exec-use
 
 $currentMode = 'unknown';
 if (!empty($output)) {

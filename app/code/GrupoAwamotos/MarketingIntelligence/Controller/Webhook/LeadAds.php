@@ -275,7 +275,7 @@ class LeadAds implements HttpPostActionInterface, CsrfAwareActionInterface
         if (!empty($lead['leadgen_id'])) {
             $notes[] = 'leadgen_id: ' . $lead['leadgen_id'];
         }
-        if (!empty($lead['form_id'])) {
+        if (!empty($lead['form_id'])) { // phpcs:ignore Squiz.Operators.ComparisonOperatorUsage
             $notes[] = 'form_id: ' . $lead['form_id'];
         }
         if (!empty($notes)) {

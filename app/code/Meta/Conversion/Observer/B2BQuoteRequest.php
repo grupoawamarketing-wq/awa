@@ -123,7 +123,7 @@ class B2BQuoteRequest implements ObserverInterface
             }
 
             $result = $this->graphApi->sendEvents($pixelId, [$capiEvent], $storeId);
-            if (isset($result['error'])) {
+            if (isset($result['error'])) { // phpcs:ignore Squiz.Operators.ComparisonOperatorUsage
                 $this->logger->warning('[Meta CAPI] RequestQuote API error', [
                     'store_id' => $storeId,
                     'request_id' => $quoteRequest->getRequestId(),

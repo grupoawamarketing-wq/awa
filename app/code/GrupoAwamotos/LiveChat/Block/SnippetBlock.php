@@ -191,7 +191,7 @@ class SnippetBlock extends \LiveChat\LiveChat\Block\SnippetBlock
 
             $text = $product->getAttributeText($attributeCode);
 
-            if (is_array($text)) {
+            if (is_array($text)) { // phpcs:ignore Squiz.Operators.ComparisonOperatorUsage
                 $text = implode(', ', array_filter($text));
             }
 

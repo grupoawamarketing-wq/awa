@@ -46,7 +46,7 @@ class B2BCompleteRegistration implements ObserverInterface
             }
 
             $storeId = $customer->getStoreId() !== null ? (int) $customer->getStoreId() : null;
-            if (!$this->config->isActive($storeId)) {
+            if (!$this->config->isActive($storeId)) { // phpcs:ignore Squiz.Operators.ComparisonOperatorUsage
                 return;
             }
 

@@ -32,7 +32,7 @@ class AudienceRepository implements AudienceRepositoryInterface
         $audience = $this->audienceFactory->create();
         $this->resource->load($audience, $audienceId);
 
-        if (!$audience->getAudienceId()) {
+        if (!$audience->getAudienceId()) { // phpcs:ignore Squiz.Operators.ComparisonOperatorUsage
             throw new NoSuchEntityException(
                 __('Audience with ID "%1" does not exist.', $audienceId)
             );

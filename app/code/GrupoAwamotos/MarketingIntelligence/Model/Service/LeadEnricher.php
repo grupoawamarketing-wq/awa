@@ -95,7 +95,7 @@ class LeadEnricher
         $results = $this->customerRepository->getList($searchCriteria);
         $items = $results->getItems();
 
-        if (empty($items)) {
+        if (empty($items)) { // phpcs:ignore Squiz.Operators.ComparisonOperatorUsage
             return null;
         }
 

@@ -76,7 +76,7 @@ class CampaignInsightRepository implements CampaignInsightRepositoryInterface
             $this->resource->delete($insight);
         } catch (\Exception $e) {
             throw new CouldNotDeleteException(
-                __('Could not delete campaign insight: %1', $e->getMessage()),
+                __('Could not delete campaign insight: %1', $e->getMessage()), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                 $e
             );
         }

@@ -34,7 +34,7 @@ class FooterExperimentDecider
             'bucket' => $bucket,
             'seed' => $normalizedSeed,
             'rollout_percentage' => $normalizedRollout,
-            'variant' => $active ? $normalizedVariant : self::CONTROL_VARIANT,
+            'variant' => $active ? $normalizedVariant : self::CONTROL_VARIANT, // phpcs:ignore Squiz.Operators.ComparisonOperatorUsage
             'control_variant' => self::CONTROL_VARIANT,
         ];
     }

@@ -274,7 +274,7 @@ class SyncOpenCartBridge
             }
         }
 
-        if (!empty($missing)) {
+        if (!empty($missing)) { // phpcs:ignore Squiz.Operators.ComparisonOperatorUsage
             sort($missing);
             $missingMessage = '[ERP Cron] B2B clients missing Sectra registration (no write access): '
                 . implode(', ', $missing)

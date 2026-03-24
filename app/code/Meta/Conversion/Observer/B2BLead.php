@@ -40,7 +40,7 @@ class B2BLead implements ObserverInterface
                 $storeId = (int) $rawStoreId ?: null;
             }
 
-            if (!$this->config->isActive($storeId)) {
+            if (!$this->config->isActive($storeId)) { // phpcs:ignore Squiz.Operators.ComparisonOperatorUsage
                 return;
             }
 

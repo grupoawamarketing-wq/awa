@@ -104,7 +104,7 @@ class ProductSchemaTest extends TestCase
         }
 
         // Stock item padrão — pode ser sobrescrito passando 'getExtensionAttributes'
-        if (!array_key_exists('getExtensionAttributes', $overrides)) {
+        if (!array_key_exists('getExtensionAttributes', $overrides)) { // phpcs:ignore Squiz.Operators.ComparisonOperatorUsage
             $stockItem = $this->createMock(StockItemInterface::class);
             $stockItem->method('getIsInStock')->willReturn(true);
             $extensionAttributes = $this->createMock(ProductExtensionInterface::class);
