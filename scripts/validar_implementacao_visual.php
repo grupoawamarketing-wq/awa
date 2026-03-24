@@ -3,14 +3,14 @@
 /**
  * Script de Validação Visual - AYO Magento 2.4.8-p3
  * Grupo Awamotos
- * 
+ *
  * Verifica a implementação das 5 fases visuais:
  * - Fase 1: Padronização de Cores
  * - Fase 2: Responsividade Mobile
  * - Fase 3: Performance & Assets
  * - Fase 4: UX & Animações
  * - Fase 5: Acessibilidade
- * 
+ *
  * Uso: php scripts/validar_implementacao_visual.php
  */
 
@@ -36,13 +36,13 @@ class VisualValidator
     public function run()
     {
         $this->printHeader();
-        
+
         $this->validatePhase1Colors();
         $this->validatePhase2Responsiveness();
         $this->validatePhase3Performance();
         $this->validatePhase4Animations();
         $this->validatePhase5Accessibility();
-        
+
         $this->printSummary();
     }
 
@@ -59,7 +59,7 @@ class VisualValidator
     // =========================================================================
     // FASE 1: PADRONIZAÇÃO DE CORES
     // =========================================================================
-    
+
     private function validatePhase1Colors()
     {
         echo "═══════════════════════════════════════════════════════════════\n";
@@ -67,7 +67,7 @@ class VisualValidator
         echo "═══════════════════════════════════════════════════════════════\n\n";
 
         $extendLess = $this->projectRoot . '/app/design/frontend/ayo/ayo_default/web/css/source/_extend.less';
-        
+
         if (!file_exists($extendLess)) {
             $this->addResult('Fase 1', 'Arquivo _extend.less', false, 'Arquivo não encontrado');
             return;
@@ -122,7 +122,7 @@ class VisualValidator
     // =========================================================================
     // FASE 2: RESPONSIVIDADE MOBILE
     // =========================================================================
-    
+
     private function validatePhase2Responsiveness()
     {
         echo "═══════════════════════════════════════════════════════════════\n";
@@ -189,7 +189,7 @@ class VisualValidator
     // =========================================================================
     // FASE 3: PERFORMANCE & ASSETS
     // =========================================================================
-    
+
     private function validatePhase3Performance()
     {
         echo "═══════════════════════════════════════════════════════════════\n";
@@ -215,7 +215,7 @@ class VisualValidator
             // Usar find recursivo para CSS
             $cssOutput = shell_exec("find $staticDir -name '*.css' 2>/dev/null | wc -l");
             $cssCount = (int) trim($cssOutput);
-            
+
             // Usar find recursivo para JS
             $jsOutput = shell_exec("find $staticDir -name '*.js' 2>/dev/null | wc -l"); // nosemgrep: php.lang.security.exec-use.exec-use,php_exec_rule-exec-use
             $jsCount = (int) trim($jsOutput);
@@ -261,7 +261,7 @@ class VisualValidator
     // =========================================================================
     // FASE 4: UX & ANIMAÇÕES
     // =========================================================================
-    
+
     private function validatePhase4Animations()
     {
         echo "═══════════════════════════════════════════════════════════════\n";
@@ -336,7 +336,7 @@ class VisualValidator
     // =========================================================================
     // FASE 5: ACESSIBILIDADE
     // =========================================================================
-    
+
     private function validatePhase5Accessibility()
     {
         echo "═══════════════════════════════════════════════════════════════\n";
@@ -448,8 +448,8 @@ class VisualValidator
 
     private function printSummary()
     {
-        $percentage = ($this->totalTests > 0) 
-            ? round(($this->totalScore / $this->totalTests) * 100, 1) 
+        $percentage = ($this->totalTests > 0)
+            ? round(($this->totalScore / $this->totalTests) * 100, 1)
             : 0;
 
         echo "═══════════════════════════════════════════════════════════════\n";

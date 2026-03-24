@@ -1,7 +1,7 @@
 <?php
 /**
  * Script para configurar logos via core_config_data e verificar performance
- * 
+ *
  * Execução:
  * php scripts/configurar_logos_performance.php
  */
@@ -115,7 +115,7 @@ $performanceConfigs = [
         'value' => '0',
         'label' => 'JS Bundling: Desabilitado (melhor para HTTP/2)',
     ],
-    
+
     // Merge
     [
         'path' => 'dev/css/merge_css_files',
@@ -127,7 +127,7 @@ $performanceConfigs = [
         'value' => '0',
         'label' => 'Merge JS: Desabilitado (HTTP/2)',
     ],
-    
+
     // Cache
     [
         'path' => 'dev/static/sign',
@@ -178,7 +178,7 @@ if (strpos(strtolower($currentMode), 'developer') !== false) {
 }
 
 echo "\n=== RESUMO ===\n";
-echo "✅ Configurações salvas: $savedCount/" . 
+echo "✅ Configurações salvas: $savedCount/" .
     (count($designConfigs) + count($stickyConfigs) + count($performanceConfigs)) . "\n";
 echo "✅ Logo Principal: pub/media/logo/logo.svg\n";
 echo "✅ Sticky Logo: pub/media/logo/sticky-logo.svg\n";
