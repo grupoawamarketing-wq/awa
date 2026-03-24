@@ -261,7 +261,12 @@ class CustomerSync implements CustomerSyncInterface
 
             return $this->createNewCustomer($erpData, $websiteId);
         } catch (\Exception $e) {
-            $this->logger->error('[ERP] Create/update customer failed: ' . $e->getMessage());
+            $this->logger->error('[ERP] Create/update customer failed: ' . $e->getMessage(), [
+                'erp_code' => $erpCode,
+                'email'    => $email,
+                'cidade'   => $erpData['CIDADE'] ?? '',
+                'fone'     => $erpData['FONE1'] ?? $erpData['FONECEL'] ?? '',
+            ]);
             return null;
         }
     }
@@ -643,10 +648,64 @@ class CustomerSync implements CustomerSyncInterface
         }
 
         if ($updated) {
+            $this->sanitizeDefaultBillingAddress((int)$customer->getId());
             return $this->customerRepository->save($customer);
         }
 
         return $customer;
+    }
+
+    /**
+     * Sanitize city and telephone on the default billing address.
+     * Prevents Magento's City/Telephone validators from rejecting an existing
+     * customer re-save due to stale address data imported before sanitisation
+     * was in place.
+     */
+    private function sanitizeDefaultBillingAddress(int $customerId): void
+    {
+        try {
+            $customer = $this->customerRepository->getById($customerId);
+            $defaultBillingId = $customer->getDefaultBilling();
+            if ($defaultBillingId === null) {
+                return;
+            }
+
+            $address = $this->addressRepository->getById((int)$defaultBillingId);
+            $dirty   = false;
+
+            $currentCity = (string)$address->getCity();
+            $cleanCity   = $this->sanitizeCity($currentCity);
+            if ($cleanCity !== $currentCity) {
+                $address->setCity($cleanCity);
+                $dirty = true;
+            }
+
+            $currentPhone = (string)$address->getTelephone();
+            $cleanPhone   = $this->formatPhone($currentPhone) ?: '00000000000';
+            if ($cleanPhone !== $currentPhone) {
+                $address->setTelephone($cleanPhone);
+                $dirty = true;
+            }
+
+            if ($dirty) {
+                $this->addressRepository->save($address);
+                $this->logger->info(sprintf(
+                    '[ERP] Sanitised default billing address for customer %d (city: "%s"→"%s", phone: "%s"→"%s")',
+                    $customerId,
+                    $currentCity,
+                    $cleanCity,
+                    $currentPhone,
+                    $cleanPhone
+                ));
+            }
+        } catch (\Exception $e) {
+            // Non-critical — log and continue
+            $this->logger->warning(sprintf(
+                '[ERP] Could not sanitise billing address for customer %d: %s',
+                $customerId,
+                $e->getMessage()
+            ));
+        }
     }
 
     private function createPrimaryAddress(int $customerId, array $erpData): void
