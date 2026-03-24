@@ -81,16 +81,13 @@
 ---
 
 ### 4️⃣ **CSS Bundles Consolidation**
-**Status**: ✅ Partial — Deferred cosmetic consolidated (2026-03-24)
+**Status**: ✅ Complete (commits e21bd89d, f980d41d, e este)
 **Complexidade**: 🟡 Média
 **Concluído**:
-- Deferred cosmetic CSS: 6 requests → `awa-bundle-cosmetic.css` (1 request, -5 HTTP requests)
-- Homepage deferred: 2 requests → `awa-bundle-cosmetic-home.css` (1 request, -1 HTTP request)
-- Total: 8 deferred CSS requests → 2 (economiza 6 round-trips por página)
-
-**Arquivos pendentes de revisão**:
-- `awa-bundle-phases.css` — contém grid-spacing-fix não recompilado após fix overflow (sem impacto visual pois !important override está em awa-bundle-custom.css)
-- `awa-polish-sweep.css` (22KB sync) — candidato para mover para async preload
+- Deferred cosmetic CSS: 8 requests → 2 bundles (`awa-bundle-cosmetic.css` + `awa-bundle-cosmetic-home.css`) — -6 HTTP requests/página
+- `awa-bundle-phases.css`: removido `.page_footer { overflow: hidden }` (2026-03-24) — rule era dead code, superseded por `!important` em awa-bundle-custom.css
+- `awa-polish-sweep.css` (22KB sync): analisado — **mantido como sync** (é fonte canônica de botões/cards/tipografia; mover para async causaria FOUC)
+- Total: 8 deferred CSS requests → 2; dead code removido; codebase limpo
 
 **O que é**: Review bundling strategy, eliminar duplicação, otimizar load order
 **Por quê**: Atualmente temos muitos bundles pequenos, podemos consolidar
