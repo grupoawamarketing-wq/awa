@@ -52,6 +52,7 @@ class ProductSyncTest extends TestCase
 
         // Setup common mocks
         $this->helper->method('getStockFilial')->willReturn(1);
+        $this->helper->method('getDefaultPriceList')->willReturn(24);
         $this->helper->method('filterComercializa')->willReturn(true);
 
         $store = $this->createMock(StoreInterface::class);
@@ -108,7 +109,8 @@ class ProductSyncTest extends TestCase
                 }),
                 $this->callback(function ($params) {
                     return isset($params[':filial1']) && $params[':filial1'] === 1
-                        && isset($params[':filial2']) && $params[':filial2'] === 1;
+                        && isset($params[':filial2']) && $params[':filial2'] === 1
+                        && isset($params[':priceList']) && $params[':priceList'] === 24;
                 })
             )
             ->willReturn($expectedProducts);
@@ -294,6 +296,43 @@ class ProductSyncTest extends TestCase
         $this->assertEquals(0, $result['updated']);
     }
 
+    public function testSyncAllUsesBaseSkuPriceFallback(): void
+    {
+        $this->connection->method('fetchOne')
+            ->willReturn(['total' => 1]);
+
+        $erpProduct = [
+            'CODIGO' => '576 ASS',
+            'DESCRICAO' => 'Variant Product',
+            'CCKATIVO' => 'S',
+            'VLRVENDA' => null,
+        ];
+
+        $this->connection->method('query')
+            ->willReturnOnConsecutiveCalls(
+                [$erpProduct],
+                [['CODIGO' => '576', 'VLRVENDA' => 19.62]]
+            );
+
+        $this->syncLogResource->method('getEntityMapHash')->willReturn(null);
+
+        $this->productRepository->method('get')
+            ->willThrowException(new NoSuchEntityException(__('Not found')));
+
+        $newProduct = $this->createMock(Product::class);
+        $newProduct->method('getId')->willReturn(101);
+        $newProduct->expects($this->once())->method('setSku')->with('576 ASS');
+        $newProduct->expects($this->once())->method('setPrice')->with(19.62);
+
+        $this->productFactory->method('create')->willReturn($newProduct);
+        $this->productRepository->expects($this->once())->method('save')->with($newProduct);
+
+        $result = $this->productSync->syncAll();
+
+        $this->assertEquals(1, $result['created']);
+        $this->assertEquals(0, $result['validation_failed']);
+    }
+
     public function testSyncAllUpdatesExistingProduct(): void
     {
         $this->connection->method('fetchOne')
@@ -381,8 +420,24 @@ class ProductSyncTest extends TestCase
 
     public function testSyncBySkuReturnsTrueWhenFound(): void
     {
-        $this->connection->method('fetchOne')
-            ->willReturn(['CODIGO' => 'TEST-SKU', 'DESCRICAO' => 'Test Product']);
+        $erpProduct = [
+            'CODIGO' => 'TEST-SKU',
+            'DESCRICAO' => 'Test Product',
+            'CCKATIVO' => 'S',
+            'VLRVENDA' => 100.00,
+        ];
+
+        $this->connection->method('fetchOne')->willReturn($erpProduct);
+        $this->syncLogResource->method('getEntityMapHash')->willReturn(null);
+
+        $this->productRepository->method('get')
+            ->willThrowException(new NoSuchEntityException(__('Not found')));
+
+        $newProduct = $this->createMock(Product::class);
+        $newProduct->method('getId')->willReturn(10);
+        $newProduct->expects($this->once())->method('setSku')->with('TEST-SKU');
+        $this->productFactory->method('create')->willReturn($newProduct);
+        $this->productRepository->expects($this->once())->method('save')->with($newProduct);
 
         $result = $this->productSync->syncBySku('TEST-SKU');
 

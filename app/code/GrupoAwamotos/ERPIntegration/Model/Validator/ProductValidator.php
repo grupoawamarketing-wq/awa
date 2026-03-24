@@ -90,6 +90,7 @@ class ProductValidator
     private function validateSku(array $data): ValidationResult
     {
         $sku = trim($data['CODIGO'] ?? '');
+        $result = new ValidationResult();
 
         if (empty($sku)) {
             return ValidationResult::failure(['SKU (CODIGO) é obrigatório']);
@@ -101,12 +102,18 @@ class ProductValidator
             ]);
         }
 
-        // Check for invalid characters
-        if (preg_match('/[<>"\']/', $sku)) {
-            return ValidationResult::failure(['SKU contém caracteres inválidos']);
+        $normalizedSku = $this->normalizeSku($sku);
+
+        if ($normalizedSku === '') {
+            return ValidationResult::failure(['SKU ficou vazio após normalização']);
         }
 
-        return ValidationResult::success(['sku' => $sku]);
+        if ($normalizedSku !== $sku) {
+            $result->addWarning(sprintf('SKU normalizado de "%s" para "%s"', $sku, $normalizedSku));
+        }
+
+        $result->setField('sku', $normalizedSku);
+        return $result;
     }
 
     /**
@@ -216,6 +223,14 @@ class ProductValidator
         }
 
         return $result;
+    }
+
+    private function normalizeSku(string $sku): string
+    {
+        $normalizedSku = preg_replace('/[<>"\']+/', '', $sku);
+        $normalizedSku = preg_replace('/\s+/', ' ', (string) $normalizedSku);
+
+        return trim((string) $normalizedSku);
     }
 
     /**

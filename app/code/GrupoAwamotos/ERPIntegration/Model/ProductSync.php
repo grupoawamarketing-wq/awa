@@ -87,15 +87,19 @@ class ProductSync implements ProductSyncInterface
 
     public function getErpProducts(int $limit = 0, int $offset = 0): array
     {
+        $priceList = $this->helper->getDefaultPriceList();
         $sql = "SELECT m.CODIGO, m.DESCRICAO, m.COMPLEMENTO, m.CODINTERNO,
                        m.NCM, m.CPESO, m.VPESO, m.DIMENSOES, m.UNDVENDA,
                        m.CKCOMERCIALIZA, m.CCKATIVO, m.VCKATIVO, m.TPMATERIAL,
                        m.GRUPOCOMERCIAL, m.EDITDATE,
                        c.VLRCUSTO, c.MARGEMSUG,
-                       p.VLRVENDA
+                       p.VLRVDSUG as VLRVENDA
                 FROM MT_MATERIAL m
                 LEFT JOIN MT_MATERIALCUSTO c ON c.MATERIAL = m.CODIGO AND c.FILIAL = :filial1
-                LEFT JOIN MT_COMPOSICAOPRECO p ON p.MATERIAL = m.CODIGO AND p.FILIAL = :filial2
+                LEFT JOIN MT_MATERIALLISTA p
+                    ON p.MATERIAL = m.CODIGO
+                    AND p.FILIAL = :filial2
+                    AND p.FATORPRECO = :priceList
                 WHERE m.CCKATIVO = 'S'";
 
         if ($this->helper->filterComercializa()) {
@@ -112,9 +116,12 @@ class ProductSync implements ProductSyncInterface
         $params = [
             ':filial1' => $this->helper->getStockFilial(),
             ':filial2' => $this->helper->getStockFilial(),
+            ':priceList' => $priceList,
         ];
 
-        return $this->connection->query($sql, $params);
+        return $this->applyBaseSkuPriceFallback(
+            $this->connection->query($sql, $params)
+        );
     }
 
     public function syncAll(): array
@@ -525,6 +532,120 @@ class ProductSync implements ProductSyncInterface
     }
 
     /**
+     * @param array<int, array<string, mixed>> $erpProducts
+     * @return array<int, array<string, mixed>>
+     */
+    private function applyBaseSkuPriceFallback(array $erpProducts): array
+    {
+        if (empty($erpProducts)) {
+            return $erpProducts;
+        }
+
+        $baseSkuByIndex = [];
+
+        foreach ($erpProducts as $index => $erpProduct) {
+            $price = (float) ($erpProduct['VLRVENDA'] ?? 0);
+            if ($price > 0) {
+                continue;
+            }
+
+            $sku = trim((string) ($erpProduct['CODIGO'] ?? ''));
+            $baseSku = $this->getBaseSku($sku);
+            if ($sku === '' || $baseSku === $sku) {
+                continue;
+            }
+
+            $baseSkuByIndex[$index] = $baseSku;
+        }
+
+        if (empty($baseSkuByIndex)) {
+            return $erpProducts;
+        }
+
+        $baseSkuPriceMap = $this->getBaseSkuPriceMap(array_values(array_unique($baseSkuByIndex)));
+
+        foreach ($baseSkuByIndex as $index => $baseSku) {
+            if (!isset($baseSkuPriceMap[$baseSku])) {
+                continue;
+            }
+
+            $erpProducts[$index]['VLRVENDA'] = $baseSkuPriceMap[$baseSku];
+        }
+
+        return $erpProducts;
+    }
+
+    /**
+     * @param string[] $baseSkus
+     * @return array<string, float>
+     */
+    private function getBaseSkuPriceMap(array $baseSkus): array
+    {
+        if (empty($baseSkus)) {
+            return [];
+        }
+
+        $placeholders = [];
+        $params = [
+            $this->helper->getDefaultPriceList(),
+            $this->helper->getStockFilial(),
+        ];
+
+        foreach ($baseSkus as $baseSku) {
+            $placeholders[] = '?';
+            $params[] = $baseSku;
+        }
+
+        $sql = "SELECT MATERIAL as CODIGO, VLRVDSUG as VLRVENDA
+                FROM MT_MATERIALLISTA
+                WHERE FATORPRECO = ?
+                  AND FILIAL = ?
+                  AND MATERIAL IN (" . implode(',', $placeholders) . ")
+                  AND VLRVDSUG > 0";
+
+        try {
+            $rows = $this->connection->query($sql, $params) ?? [];
+        } catch (\Exception $e) {
+            $this->logger->warning('[ERP] Base SKU price fallback query failed', [
+                'error' => $e->getMessage(),
+                'base_skus' => $baseSkus,
+            ]);
+            return [];
+        }
+
+        $priceMap = [];
+        foreach ($rows as $row) {
+            $sku = trim((string) ($row['CODIGO'] ?? ''));
+            if ($sku === '') {
+                continue;
+            }
+
+            $priceMap[$sku] = (float) ($row['VLRVENDA'] ?? 0);
+        }
+
+        return $priceMap;
+    }
+
+    private function getBaseSku(string $sku): string
+    {
+        $sku = trim($sku);
+
+        if (str_contains($sku, ' ')) {
+            return trim(explode(' ', $sku)[0]);
+        }
+
+        if (preg_match('/^(\d{3,})\.\d+$/', $sku, $match)) {
+            return $match[1];
+        }
+
+        if (preg_match('/^(\d{3,})[A-Z]{2,3}$/i', $sku, $match)) {
+            return $match[1];
+        }
+
+        return $sku;
+    }
+
+    /**
      * Get default attribute set ID
      */
     private function getDefaultAttributeSetId(): int
@@ -593,23 +714,60 @@ class ProductSync implements ProductSyncInterface
     public function syncBySku(string $sku): bool
     {
         try {
+            try {
+                $this->appState->setAreaCode(\Magento\Framework\App\Area::AREA_ADMINHTML);
+            } catch (\Magento\Framework\Exception\LocalizedException $e) {
+                // Area code already set, ignore
+            }
+
             $sql = "SELECT m.CODIGO, m.DESCRICAO, m.COMPLEMENTO, m.CODINTERNO,
                            m.NCM, m.CPESO, m.VPESO, m.DIMENSOES, m.UNDVENDA,
-                           m.CKCOMERCIALIZA, m.CCKATIVO,
+                           m.CKCOMERCIALIZA, m.CCKATIVO, m.VCKATIVO, m.TPMATERIAL,
+                           m.GRUPOCOMERCIAL, m.EDITDATE,
                            c.VLRCUSTO, c.MARGEMSUG,
-                           p.VLRVENDA
+                           p.VLRVDSUG as VLRVENDA
                     FROM MT_MATERIAL m
                     LEFT JOIN MT_MATERIALCUSTO c ON c.MATERIAL = m.CODIGO AND c.FILIAL = :filial1
-                    LEFT JOIN MT_COMPOSICAOPRECO p ON p.MATERIAL = m.CODIGO AND p.FILIAL = :filial2
+                    LEFT JOIN MT_MATERIALLISTA p
+                        ON p.MATERIAL = m.CODIGO
+                        AND p.FILIAL = :filial2
+                        AND p.FATORPRECO = :priceList
                     WHERE m.CODIGO = :sku";
 
             $row = $this->connection->fetchOne($sql, [
                 ':filial1' => $this->helper->getStockFilial(),
                 ':filial2' => $this->helper->getStockFilial(),
+                ':priceList' => $this->helper->getDefaultPriceList(),
                 ':sku' => $sku,
             ]);
 
-            return $row !== null;
+            if ($row === null) {
+                return false;
+            }
+
+            $row = $this->applyBaseSkuPriceFallback([$row])[0] ?? $row;
+
+            $validationResult = $this->productValidator->validate($row);
+
+            if (!$validationResult->isValid()) {
+                $this->logger->warning('[ERP] Product validation failed', [
+                    'sku' => $row['CODIGO'] ?? $sku,
+                    'errors' => $validationResult->getErrors(),
+                ]);
+                return false;
+            }
+
+            if ($validationResult->hasWarnings()) {
+                $this->logger->info('[ERP] Product validation warnings', [
+                    'sku' => $row['CODIGO'] ?? $sku,
+                    'warnings' => $validationResult->getWarnings(),
+                ]);
+            }
+
+            $websiteIds = [$this->storeManager->getDefaultStoreView()->getWebsiteId()];
+            $result = $this->syncSingleProduct($row, $websiteIds, $validationResult);
+
+            return in_array($result, ['created', 'updated', 'skipped'], true);
         } catch (\Exception $e) {
             $this->logger->error('[ERP] Single product sync error: ' . $e->getMessage());
             return false;

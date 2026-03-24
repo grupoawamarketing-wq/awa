@@ -16,7 +16,7 @@ interface ProductSyncInterface
      * Sync a single product by SKU
      *
      * @param string $sku
-     * @return bool True if product exists in ERP
+     * @return bool True if product was found in ERP and processed successfully
      */
     public function syncBySku(string $sku): bool;
 

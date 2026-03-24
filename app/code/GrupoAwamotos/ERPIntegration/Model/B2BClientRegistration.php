@@ -264,9 +264,20 @@ class B2BClientRegistration
 
         $writeUser = $this->helper->getWriteUsername();
         $writePass = $this->helper->getWritePassword();
+        $readUser = $this->helper->getUsername();
 
         if (empty($writeUser)) {
             return null;
+        }
+
+        if ($this->isSameSqlServerUser($writeUser, $readUser)
+            && $this->shouldLogWarningWithCooldown('b2b_write_user_matches_read')
+        ) {
+            $this->logger->warning(
+                '[B2B Registration] Write connection is using the same SQL Server user as the read connection. '
+                . 'If this user does not have INSERT on GR_INTEGRACAOVALIDADOR, disable write_connection or '
+                . 'configure a dedicated write-enabled user.'
+            );
         }
 
         try {
@@ -340,6 +351,18 @@ class B2BClientRegistration
     private function isInsertPermissionDeniedError(\Throwable $exception): bool
     {
         return stripos($exception->getMessage(), 'INSERT permission was denied') !== false;
+    }
+
+    private function isSameSqlServerUser(string $leftUser, string $rightUser): bool
+    {
+        $leftUser = trim($leftUser);
+        $rightUser = trim($rightUser);
+
+        if ($leftUser === '' || $rightUser === '') {
+            return false;
+        }
+
+        return strcasecmp($leftUser, $rightUser) === 0;
     }
 
     /**
