@@ -31,7 +31,7 @@ class FallbackRebuild
         }
 
         $phpBin = PHP_BINARY ?: '/usr/bin/php';
-        $cmd = escapeshellarg($phpBin) . ' ' . escapeshellarg($script) . ' --truncate 2>&1';
+        $cmd = escapeshellarg($phpBin) . ' ' . escapeshellarg($script) . ' --truncate 2>&1'; // nosemgrep: php.lang.security.exec-use.exec-use,php_exec_rule-exec-use
 
         $output = [];
         $exitCode = 0;

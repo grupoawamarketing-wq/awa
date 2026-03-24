@@ -55,7 +55,7 @@ class FooterExperimentDecider
     public function normalizeVariantCode(string $variantCode): string
     {
         $normalized = strtolower(trim($variantCode));
-        $normalized = preg_replace('/[^a-z0-9_-]+/', '-', $normalized) ?: '';
+        $normalized = preg_replace('/[^a-z0-9_-]+/', '-', $normalized) ?? '';
         $normalized = trim($normalized, '-_');
 
         return $normalized !== '' ? $normalized : self::DEFAULT_VARIANT;
@@ -64,7 +64,7 @@ class FooterExperimentDecider
     public function normalizeVariantSeed(string $variantSeed): string
     {
         $normalized = strtolower(trim($variantSeed));
-        $normalized = preg_replace('/[^a-z0-9_-]+/', '-', $normalized) ?: '';
+        $normalized = preg_replace('/[^a-z0-9_-]+/', '-', $normalized) ?? '';
         $normalized = trim($normalized, '-_');
 
         return $normalized !== '' ? $normalized : self::DEFAULT_VARIANT_SEED;
