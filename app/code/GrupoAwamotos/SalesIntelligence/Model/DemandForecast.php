@@ -136,14 +136,14 @@ class DemandForecast
                 INNER JOIN VE_PEDIDO P ON P.CODIGO = I.PEDIDO
                 INNER JOIN MT_MATERIAL M ON M.CODIGO = I.MATERIAL
                 LEFT JOIN MT_GRUPOCOMERCIAL GC ON GC.CODIGO = M.GRUPOCOMERCIAL
-                WHERE P.DTPEDIDO >= DATEADD(month, -?, GETDATE())
+                WHERE P.DTPEDIDO >= DATEADD(month, ?, GETDATE())
                   AND P.STATUS NOT IN ('C', 'D')
                   AND I.QTDE > 0
                 GROUP BY I.MATERIAL, M.DESCRICAO, GC.DESCRICAO,
                          MONTH(P.DTPEDIDO), YEAR(P.DTPEDIDO)
                 ORDER BY I.MATERIAL, YEAR(P.DTPEDIDO), MONTH(P.DTPEDIDO)";
 
-        return $this->connection->query($sql, [(int) $monthsBack]);
+        return $this->connection->query($sql, [-(int) $monthsBack]);
     }
 
     /**

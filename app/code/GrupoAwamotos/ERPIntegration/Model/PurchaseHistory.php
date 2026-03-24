@@ -217,10 +217,10 @@ class PurchaseHistory
                 INNER JOIN VE_PEDIDO p ON i.PEDIDO = p.CODIGO
                 WHERE p.CLIENTE = ?
                 AND p.STATUS NOT IN ('C', 'X')
-                AND p.DTPEDIDO >= DATEADD(day, -?, GETDATE())
+                AND p.DTPEDIDO >= DATEADD(day, ?, GETDATE())
                 GROUP BY i.MATERIAL, i.DESCRICAO
                 ORDER BY MAX(p.DTPEDIDO) DESC
-            ", [$customerCode, (int)$days]);
+            ", [$customerCode, -(int)$days]);
         } catch (\Exception $e) {
             $this->logger->error('[ERP] Error getting recent products: ' . $e->getMessage());
             return [];
@@ -283,10 +283,10 @@ class PurchaseHistory
                 INNER JOIN VE_PEDIDOITENS i ON p.CODIGO = i.PEDIDO
                 WHERE p.CLIENTE = ?
                   AND p.STATUS NOT IN ('C', 'X')
-                  AND p.DTPEDIDO >= DATEADD(MONTH, -?, GETDATE())
+                  AND p.DTPEDIDO >= DATEADD(MONTH, ?, GETDATE())
                 GROUP BY FORMAT(p.DTPEDIDO, 'yyyy-MM')
                 ORDER BY FORMAT(p.DTPEDIDO, 'yyyy-MM') ASC
-            ", [$customerCode, $safeMonths]);
+            ", [$customerCode, -$safeMonths]);
         } catch (\Exception $e) {
             $this->logger->error('[ERP] Error getting monthly trend: ' . $e->getMessage());
             return [];
@@ -328,8 +328,8 @@ class PurchaseHistory
         $havingClauses = [];
 
         if ($periodDays > 0) {
-            $whereClauses[] = 'p.DTPEDIDO >= DATEADD(day, -?, GETDATE())';
-            $params[] = $periodDays;
+            $whereClauses[] = 'p.DTPEDIDO >= DATEADD(day, ?, GETDATE())';
+            $params[] = -$periodDays;
         }
 
         if ($minFreq > 0) {

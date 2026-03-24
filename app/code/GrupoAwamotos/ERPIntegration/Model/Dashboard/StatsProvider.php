@@ -87,8 +87,8 @@ class StatsProvider implements DashboardStatsProviderInterface
             FROM VE_PEDIDO p
             INNER JOIN VE_PEDIDOITENS i ON p.CODIGO = i.PEDIDO
             WHERE p.STATUS NOT IN ('C', 'X')
-            AND p.DTPEDIDO >= DATEADD(day, -?, GETDATE())
-        ", [$days]);
+            AND p.DTPEDIDO >= DATEADD(day, ?, GETDATE())
+        ", [-$days]);
 
         return [
             'pedidos_30_dias' => (int)($row['pedidos_30_dias'] ?? 0),
@@ -142,10 +142,10 @@ class StatsProvider implements DashboardStatsProviderInterface
             FROM VE_PEDIDOITENS i
             INNER JOIN VE_PEDIDO p ON i.PEDIDO = p.CODIGO
             WHERE p.STATUS NOT IN ('C', 'X')
-            AND p.DTPEDIDO >= DATEADD(day, -?, GETDATE())
+            AND p.DTPEDIDO >= DATEADD(day, ?, GETDATE())
             GROUP BY i.MATERIAL, i.DESCRICAO
             ORDER BY SUM(i.QTDE) DESC
-        ", [$days]);
+        ", [-$days]);
     }
 
     /**
