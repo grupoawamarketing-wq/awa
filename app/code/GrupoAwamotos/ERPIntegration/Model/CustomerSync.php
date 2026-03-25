@@ -235,7 +235,10 @@ class CustomerSync implements CustomerSyncInterface
     {
         $email = $this->normalizeEmail($erpData['EMAIL'] ?? '');
         if (empty($email)) {
-            $this->logger->warning('[ERP] Cannot create customer without email');
+            $this->logger->warning('[ERP] Cannot create customer without email', [
+                'raw_email' => $erpData['EMAIL'] ?? 'N/A',
+                'erp_code'  => $erpData['CODIGO'] ?? 0,
+            ]);
             return null;
         }
 
@@ -260,6 +263,12 @@ class CustomerSync implements CustomerSyncInterface
             }
 
             return $this->createNewCustomer($erpData, $websiteId);
+        } catch (\Magento\Framework\Validator\ValidatorException $e) {
+            $this->logger->warning('[ERP] Customer validation failed: ' . $e->getMessage(), [
+                'erp_code' => $erpCode,
+                'email'    => $email,
+            ]);
+            return null;
         } catch (\Exception $e) {
             $this->logger->error('[ERP] Create/update customer failed: ' . $e->getMessage(), [
                 'erp_code' => $erpCode,
