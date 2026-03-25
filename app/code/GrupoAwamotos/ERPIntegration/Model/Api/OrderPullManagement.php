@@ -159,6 +159,23 @@ class OrderPullManagement implements OrderPullInterface
             'erp_order_id' => $erpOrderId,
         ]);
 
+        // Validate that erpOrderId is a numeric VE_PEDIDO.CODIGO
+        if (!ctype_digit($erpOrderId) || (int) $erpOrderId <= 0) {
+            $this->logger->error('[ERP API] acknowledgeOrder rejected: erpOrderId must be a positive integer', [
+                'increment_id' => $incrementId,
+                'erp_order_id' => $erpOrderId,
+            ]);
+            return [[
+                'success' => false,
+                'message' => sprintf(
+                    'erpOrderId must be a positive integer (VE_PEDIDO.CODIGO). Received: "%s"',
+                    $erpOrderId
+                ),
+                'increment_id' => $incrementId,
+                'erp_order_id' => $erpOrderId,
+            ]];
+        }
+
         $order = $this->findOrderByIncrementId($incrementId);
 
         // Store ERP mapping

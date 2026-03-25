@@ -7,6 +7,7 @@ use GrupoAwamotos\ERPIntegration\Model\OrderSync;
 use GrupoAwamotos\ERPIntegration\Helper\Data as Helper;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
+use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\App\State as AppState;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -21,13 +22,15 @@ class SyncOrdersCommand extends Command
     private OrderRepositoryInterface $orderRepository;
     private SearchCriteriaBuilder $searchCriteriaBuilder;
     private AppState $appState;
+    private ResourceConnection $resourceConnection;
 
     public function __construct(
         OrderSync $orderSync,
         Helper $helper,
         OrderRepositoryInterface $orderRepository,
         SearchCriteriaBuilder $searchCriteriaBuilder,
-        AppState $appState
+        AppState $appState,
+        ResourceConnection $resourceConnection
     ) {
         parent::__construct();
         $this->orderSync = $orderSync;
@@ -35,6 +38,7 @@ class SyncOrdersCommand extends Command
         $this->orderRepository = $orderRepository;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->appState = $appState;
+        $this->resourceConnection = $resourceConnection;
     }
 
     protected function configure(): void
@@ -172,13 +176,27 @@ class SyncOrdersCommand extends Command
         $output->writeln('');
 
         try {
-            // Busca pedidos que não têm mapeamento ERP
+            // IDs de pedidos já confirmados pelo ERP (via acknowledgeOrder)
+            $conn = $this->resourceConnection->getConnection();
+            $syncedIds = $conn->fetchCol(
+                $conn->select()
+                    ->from('grupoawamotos_erp_entity_map', ['magento_entity_id'])
+                    ->where('entity_type = ?', 'order')
+                    ->where("erp_code REGEXP '^[0-9]+$'")
+            );
+            $syncedIds = array_map('intval', $syncedIds);
+
             $searchCriteria = $this->searchCriteriaBuilder
                 ->addFilter('state', ['new', 'processing'], 'in')
-                ->setPageSize($limit)
+                ->setPageSize($limit * 3) // fetch extra to allow filtering
                 ->create();
 
-            $orders = $this->orderRepository->getList($searchCriteria)->getItems();
+            $allOrders = $this->orderRepository->getList($searchCriteria)->getItems();
+
+            // Filter out already-synced orders
+            $orders = array_filter($allOrders, function ($o) use ($syncedIds) {
+                return !in_array((int) $o->getEntityId(), $syncedIds, true);
+            });
 
             if (empty($orders)) {
                 $output->writeln('<comment>Nenhum pedido pendente encontrado.</comment>');
@@ -186,9 +204,9 @@ class SyncOrdersCommand extends Command
             }
 
             $table = new Table($output);
-            $table->setHeaders(['Pedido', 'Data', 'Cliente', 'CPF/CNPJ', 'Valor', 'Status']);
+            $table->setHeaders(['Pedido', 'Data', 'Cliente', 'CPF/CNPJ', 'Valor', 'Status', 'ERP?']);
 
-            foreach ($orders as $order) {
+            foreach (array_slice($orders, 0, $limit) as $order) {
                 $table->addRow([
                     $order->getIncrementId(),
                     $order->getCreatedAt(),
@@ -196,6 +214,7 @@ class SyncOrdersCommand extends Command
                     $order->getCustomerTaxvat() ?: '-',
                     'R$ ' . number_format((float) $order->getGrandTotal(), 2, ',', '.'),
                     $order->getStatus(),
+                    'Pendente',
                 ]);
             }
 

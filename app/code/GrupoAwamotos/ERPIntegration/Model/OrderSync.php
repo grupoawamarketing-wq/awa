@@ -1042,11 +1042,14 @@ class OrderSync implements OrderSyncInterface
     {
         try {
             // Busca mapeamentos de pedidos que não estão completos/cancelados no Magento
+            // Filtra apenas erp_codes numéricos (evita entradas TEST-... ou outras inválidas)
             $sql = "SELECT em.erp_code, em.magento_entity_id
                     FROM grupoawamotos_erp_entity_map em
                     INNER JOIN sales_order so ON so.entity_id = em.magento_entity_id
                     WHERE em.entity_type = 'order'
                       AND so.state NOT IN ('complete', 'canceled', 'closed')
+                      AND em.erp_code REGEXP '^[0-9]+$'
+                      AND CAST(em.erp_code AS UNSIGNED) > 0
                     ORDER BY em.last_sync_at ASC
                     LIMIT 100";
 
