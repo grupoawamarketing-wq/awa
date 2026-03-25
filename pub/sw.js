@@ -8,14 +8,14 @@
  * - API/Dynamic: Network First com fallback cache
  * - Navigation: Network First com fallback para offline.html
  *
- * @version 2.1.0
+ * @version 2.2.0
  * @author AWA Motos Dev Team
  */
 
-const SW_VERSION = '3.0.0';
-const CACHE_STATIC = 'awamotos-static-v3';
-const CACHE_IMAGES = 'awamotos-images-v3';
-const CACHE_PAGES = 'awamotos-pages-v3';
+const SW_VERSION = '3.1.0';
+const CACHE_STATIC = 'awamotos-static-v4';
+const CACHE_IMAGES = 'awamotos-images-v4';
+const CACHE_PAGES = 'awamotos-pages-v4';
 
 // Assets críticos para funcionar offline
 const PRECACHE_ASSETS = [
