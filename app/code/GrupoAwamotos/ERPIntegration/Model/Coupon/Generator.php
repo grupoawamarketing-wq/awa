@@ -6,7 +6,7 @@ namespace GrupoAwamotos\ERPIntegration\Model\Coupon;
 use GrupoAwamotos\ERPIntegration\Helper\Data as Helper;
 use Magento\SalesRule\Api\RuleRepositoryInterface;
 use Magento\SalesRule\Api\CouponRepositoryInterface;
-use Magento\SalesRule\Api\Data\RuleInterfaceFactory;
+use Magento\SalesRule\Model\RuleFactory;
 use Magento\SalesRule\Api\Data\CouponInterfaceFactory;
 use Magento\SalesRule\Model\Coupon;
 use Magento\Customer\Api\CustomerRepositoryInterface;
@@ -27,7 +27,7 @@ class Generator
     private Helper $helper;
     private RuleRepositoryInterface $ruleRepository;
     private CouponRepositoryInterface $couponRepository;
-    private RuleInterfaceFactory $ruleFactory;
+    private RuleFactory $ruleFactory;
     private CouponInterfaceFactory $couponFactory;
     private CustomerRepositoryInterface $customerRepository;
     private StoreManagerInterface $storeManager;
@@ -50,7 +50,7 @@ class Generator
         Helper $helper,
         RuleRepositoryInterface $ruleRepository,
         CouponRepositoryInterface $couponRepository,
-        RuleInterfaceFactory $ruleFactory,
+        RuleFactory $ruleFactory,
         CouponInterfaceFactory $couponFactory,
         CustomerRepositoryInterface $customerRepository,
         StoreManagerInterface $storeManager,
@@ -203,7 +203,7 @@ class Generator
         int $discountPercent,
         string $expirationDate,
         string $segment
-    ): \Magento\SalesRule\Api\Data\RuleInterface {
+    ): \Magento\SalesRule\Model\Rule {
         $websiteIds = [];
         foreach ($this->storeManager->getWebsites() as $website) {
             $websiteIds[] = $website->getId();
