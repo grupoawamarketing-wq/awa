@@ -238,6 +238,7 @@ class Generator
             ->setUsesPerCustomer(1)
             ->setUsesPerCoupon(1)
             ->setCouponType(\Magento\SalesRule\Model\Rule::COUPON_TYPE_SPECIFIC)
+            ->setUseAutoGeneration(true)
             ->setSimpleAction(\Magento\SalesRule\Model\Rule::BY_PERCENT_ACTION)
             ->setDiscountAmount($discountPercent)
             ->setDiscountStep(0)
