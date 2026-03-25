@@ -19,7 +19,14 @@ use Psr\Log\LoggerInterface;
  *  - Auto-mapping new B2B customers to oc_customer_id_map (entity_id+200000)
  *  - Auto-confirming new B2B customers in oc_customer_b2b_confirmed
  *  - Syncing oc_customer TABLE with Magento customer data (for Sectra reads/writes)
+ *  - Syncing oc_pre_registration so Sectra "Importar Clientes Prospect" finds new customers
  *  - Recovery of oc_customer_b2b_confirmed after Sectra's periodic TRUNCATE
+ *
+ * custom_field JSON structure (confirmed by Sectra):
+ *   "6" = CNPJ (digits only)
+ *   "2" = CPF  (digits only, empty for PJ)
+ *   "3" = IE   (empty — not collected in Magento registration form)
+ *   "1" = Razão Social / company name
  *
  * Schedule: every 5 minutes (via crontab.xml)
  */
@@ -30,6 +37,10 @@ class SyncOpenCartBridge
 
     /** @var int[] B2B customer group IDs */
     private const B2B_GROUP_IDS = [4, 5, 6, 7];
+
+    // EAV attribute IDs (customer entity) — confirmed stable on this installation
+    private const ATTR_B2B_CNPJ          = 143;
+    private const ATTR_B2B_RAZAO_SOCIAL  = 144;
     private const WARNING_COOLDOWN_SECONDS = 21600;
     private const SQL_EXPORT_DIR = '/var/log';
     private const SQL_EXPORT_PREFIX = 'erp_register_clients_auto_';
@@ -52,14 +63,16 @@ class SyncOpenCartBridge
             $mapped = $this->syncCustomerIdMap();
             $confirmed = $this->syncB2bConfirmed();
             $synced = $this->syncCustomerTable();
+            $preReg = $this->syncPreRegistration();
             $recovered = $this->recoverAfterTruncate();
             $registered = $this->registerPendingOrderClients();
 
-            if ($mapped > 0 || $confirmed > 0 || $synced > 0 || $recovered > 0 || $registered > 0) {
+            if ($mapped > 0 || $confirmed > 0 || $synced > 0 || $preReg > 0 || $recovered > 0 || $registered > 0) {
                 $this->logger->info('[ERP Cron] OpenCart bridge sync completed', [
                     'new_mappings' => $mapped,
                     'new_confirmations' => $confirmed,
                     'customer_table_synced' => $synced,
+                    'pre_registration_synced' => $preReg,
                     'truncate_recovery' => $recovered,
                     'b2b_registrations' => $registered,
                 ]);
@@ -179,8 +192,21 @@ class SyncOpenCartBridge
                 0 AS address_id,
                 CONCAT(
                     '{\"6\":\"',
-                    REPLACE(REPLACE(REPLACE(REPLACE(COALESCE(ce.taxvat, ''), '.', ''), '/', ''), '-', ''), ' ', ''),
-                    '\",\"2\":\"\",\"3\":\"\",\"1\":\"\"}'
+                    REPLACE(REPLACE(REPLACE(REPLACE(
+                        COALESCE(
+                            (SELECT value FROM customer_entity_varchar
+                             WHERE entity_id = ce.entity_id AND attribute_id = :attr_cnpj LIMIT 1),
+                            ce.taxvat, ''
+                        ), '.', ''), '/', ''), '-', ''), ' ', ''),
+                    '\",\"2\":\"\",\"3\":\"\",\"1\":\"',
+                    REPLACE(
+                        CONCAT(COALESCE(
+                            (SELECT value FROM customer_entity_varchar
+                             WHERE entity_id = ce.entity_id AND attribute_id = :attr_razao LIMIT 1),
+                            CONCAT(COALESCE(ce.firstname,''), ' ', COALESCE(ce.lastname,''))
+                        ), ''),
+                    '\"', '\\\"'),
+                    '\"}'
                 ) AS custom_field,
                 '' AS ip,
                 1 AS status,
@@ -206,7 +232,102 @@ class SyncOpenCartBridge
                 customer_group_id = VALUES(customer_group_id)
         ";
 
-        $stmt = $connection->query($sql);
+        $stmt = $connection->query($sql, [
+            'attr_cnpj'  => self::ATTR_B2B_CNPJ,
+            'attr_razao' => self::ATTR_B2B_RAZAO_SOCIAL,
+        ]);
+
+        return (int) $stmt->rowCount();
+    }
+
+    /**
+     * Sync B2B customers to oc_pre_registration so Sectra's
+     * "Importar Clientes Prospect" can discover new Magento customers.
+     *
+     * Sectra reads:
+     *   SELECT customer_id, firstname, lastname, email, telephone,
+     *          CAST(custom_field AS CHAR(1000)) AS lkcustomfield
+     *   FROM oc_pre_registration
+     *   WHERE customer_id NOT IN (CLIENTESPRE)
+     *
+     * custom_field keys (per Sectra spec):
+     *   "6" = CNPJ (digits only)   "2" = CPF (empty for PJ)
+     *   "3" = IE   (empty — not collected)   "1" = Razão Social
+     */
+    private function syncPreRegistration(): int
+    {
+        $connection = $this->resourceConnection->getConnection();
+        $groupIds   = implode(',', self::B2B_GROUP_IDS);
+
+        $sql = "
+            INSERT INTO oc_pre_registration (
+                customer_id, customer_group_id, store_id, language_id,
+                firstname, lastname, email, telephone, fax,
+                password, salt, cart, wishlist, newsletter, address_id,
+                custom_field, ip, status, safe, token, code, date_added
+            )
+            SELECT
+                map.old_oc_customer_id AS customer_id,
+                2 AS customer_group_id,
+                ce.store_id,
+                2 AS language_id,
+                COALESCE(ce.firstname, '') AS firstname,
+                COALESCE(ce.lastname, '')  AS lastname,
+                COALESCE(ce.email, '')     AS email,
+                COALESCE(
+                    REPLACE(REPLACE(REPLACE(REPLACE(ca.telephone,'(',''),')',''),'-',''),' ',''),
+                    ''
+                ) AS telephone,
+                '' AS fax,
+                '' AS password,
+                '' AS salt,
+                NULL AS cart,
+                NULL AS wishlist,
+                0  AS newsletter,
+                0  AS address_id,
+                CONCAT(
+                    '{\"6\":\"',
+                    REPLACE(REPLACE(REPLACE(REPLACE(
+                        COALESCE(
+                            (SELECT value FROM customer_entity_varchar
+                             WHERE entity_id = ce.entity_id AND attribute_id = :attr_cnpj LIMIT 1),
+                            ce.taxvat, ''
+                        ), '.',''),'/',''),'-',''),' ',''),
+                    '\",\"2\":\"\",\"3\":\"\",\"1\":\"',
+                    REPLACE(
+                        COALESCE(
+                            (SELECT value FROM customer_entity_varchar
+                             WHERE entity_id = ce.entity_id AND attribute_id = :attr_razao LIMIT 1),
+                            CONCAT(COALESCE(ce.firstname,''), ' ', COALESCE(ce.lastname,''))
+                        ),
+                    '\"', '\\\"'),
+                    '\"}'
+                ) AS custom_field,
+                '' AS ip,
+                1  AS status,
+                1  AS safe,
+                '' AS token,
+                '' AS code,
+                ce.created_at AS date_added
+            FROM oc_customer_id_map map
+            INNER JOIN customer_entity ce ON ce.entity_id = map.magento_customer_id
+            LEFT JOIN customer_address_entity ca ON ca.parent_id = ce.entity_id
+                AND ca.entity_id = (
+                    SELECT MIN(ca2.entity_id)
+                    FROM customer_address_entity ca2
+                    WHERE ca2.parent_id = ce.entity_id
+                )
+            WHERE map.magento_customer_id IS NOT NULL
+              AND ce.group_id IN ({$groupIds})
+              AND map.old_oc_customer_id NOT IN (
+                  SELECT customer_id FROM oc_pre_registration
+              )
+        ";
+
+        $stmt = $connection->query($sql, [
+            'attr_cnpj'  => self::ATTR_B2B_CNPJ,
+            'attr_razao' => self::ATTR_B2B_RAZAO_SOCIAL,
+        ]);
 
         return (int) $stmt->rowCount();
     }
