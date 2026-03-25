@@ -350,6 +350,11 @@ class Data extends AbstractHelper
         $pendingId = $this->getPendingGroupId();
         if ($pendingId && !in_array($pendingId, $groups)) $groups[] = $pendingId;
 
+        // Always include B2B Revendedor group (group 6) — not exposed in admin config but always B2B
+        if (!in_array(self::GROUP_B2B_REVENDEDOR, $groups)) {
+            $groups[] = self::GROUP_B2B_REVENDEDOR;
+        }
+
         // Fallback to hardcoded if no config set
         if (empty($groups)) {
             $groups = [

@@ -61,7 +61,7 @@ class CompanyService
             $company = $this->createCompany($cnpj, $customer, $customerId);
         }
 
-        $this->ensureUserInCompany($company->getId(), $customerId, Company::ROLE_ADMIN);
+        $this->ensureUserInCompany((int)$company->getId(), $customerId, Company::ROLE_ADMIN);
         return $company;
     }
 
