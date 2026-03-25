@@ -912,6 +912,8 @@ body:not(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper .he
     :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header-control.header-nav-global.cms_home_1 > .container > .row {
         height: auto !important;
         min-height: 0 !important;
+        /* Bug C fix: evitar que overflow:hidden (do colapso mobile ≤991px) clipe o dropdown no tablet */
+        overflow: visible !important;
     }
 
     :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header-control.header-nav-global.cms_home_1 .menu_left_home1 {
@@ -2404,7 +2406,7 @@ body.checkout-cart-index .cart-empty {
 
 body.checkout-cart-index .cart-empty::before {
     content: '';
-    display: block;
+    display: none;
     width: 44px;
     height: 44px;
     margin: 0 auto 12px;
@@ -4021,6 +4023,16 @@ body.cms-home .page-wrapper .block_notification a:focus-visible {
     background: var(--awa-bg-surface, #fff);
     border-top: 1px solid color-mix(in srgb, var(--awa-hc-border) 86%, white);
     border-bottom: 1px solid color-mix(in srgb, var(--awa-hc-border) 86%, white);
+    /* Bug B fix: garantir padding vertical para a barra não colapsar ao tamanho do conteúdo */
+    padding-block: 7px;
+}
+
+/* Bug B fix: alinhar menu_left_home1 + menu_primary horizontalmente (floats Bootstrap → flex) */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header-control.header-nav-global.cms_home_1 > .container > .row {
+    display: flex;
+    align-items: stretch;
+    flex-wrap: nowrap;
+    gap: var(--awa-space-4);
 }
 
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header-control.header-nav-global.cms_home_1 .navigation.custommenu.main-nav .main-nav-list {
@@ -5133,7 +5145,7 @@ body.checkout-cart-index .page-wrapper .cart-empty {
 
 body.checkout-cart-index .page-wrapper .cart-empty::before {
     content: "";
-    display: block;
+    display: none;
     width: 72px;
     height: 72px;
     background:
