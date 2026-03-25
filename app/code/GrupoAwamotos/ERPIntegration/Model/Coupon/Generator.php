@@ -52,7 +52,8 @@ class Generator
         Helper $helper,
         RuleRepositoryInterface $ruleRepository,
         CouponRepositoryInterface $couponRepository,
-        RuleFactory $ruleFactory,
+        RuleInterfaceFactory $ruleFactory,
+        ConditionInterfaceFactory $conditionFactory,
         CouponInterfaceFactory $couponFactory,
         CustomerRepositoryInterface $customerRepository,
         StoreManagerInterface $storeManager,
@@ -62,6 +63,7 @@ class Generator
         $this->ruleRepository = $ruleRepository;
         $this->couponRepository = $couponRepository;
         $this->ruleFactory = $ruleFactory;
+        $this->conditionFactory = $conditionFactory;
         $this->couponFactory = $couponFactory;
         $this->customerRepository = $customerRepository;
         $this->storeManager = $storeManager;
@@ -112,7 +114,7 @@ class Generator
             );
 
             // Create the coupon
-            $coupon = $this->createCoupon($rule->getRuleId(), $couponCode);
+            $coupon = $this->createCoupon((int) $rule->getRuleId(), $couponCode);
 
             $this->logger->info(sprintf(
                 '[ERP Coupon] Generated coupon %s for customer %s (segment: %s, discount: %d%%)',
@@ -131,7 +133,7 @@ class Generator
                 'customer_email' => $customerEmail,
                 'customer_name' => $customerName,
                 'segment' => $segment,
-                'rule_id' => $rule->getRuleId(),
+                'rule_id' => (int) $rule->getRuleId(),
             ];
 
         } catch (\Exception $e) {
@@ -197,7 +199,11 @@ class Generator
     }
 
     /**
-     * Create a sales rule for the coupon
+     * Create a sales rule for the coupon using the API layer (RuleInterface).
+     *
+     * In Magento 2.4.8 Model\Rule no longer implements RuleInterface, so
+     * RuleRepository::save() requires a proper Data\Rule (API DTO).
+     * Conditions are built via ConditionInterface objects instead of serialized JSON.
      */
     private function createSalesRule(
         string $customerEmail,
@@ -205,13 +211,11 @@ class Generator
         int $discountPercent,
         string $expirationDate,
         string $segment
-    ): \Magento\SalesRule\Model\Rule {
+    ): \Magento\SalesRule\Api\Data\RuleInterface {
         $websiteIds = [];
         foreach ($this->storeManager->getWebsites() as $website) {
-            $websiteIds[] = $website->getId();
+            $websiteIds[] = (int) $website->getId();
         }
-
-        $customerGroupIds = $this->getAllCustomerGroupIds();
 
         $rule = $this->ruleFactory->create();
 
@@ -219,7 +223,7 @@ class Generator
             ->setDescription("Cupom de re-engajamento para {$customerName} - Segmento: {$segment}")
             ->setIsActive(true)
             ->setWebsiteIds($websiteIds)
-            ->setCustomerGroupIds($customerGroupIds)
+            ->setCustomerGroupIds($this->getAllCustomerGroupIds())
             ->setUsesPerCustomer(1)
             ->setUsesPerCoupon(1)
             ->setCouponType(\Magento\SalesRule\Model\Rule::COUPON_TYPE_SPECIFIC)
@@ -231,29 +235,22 @@ class Generator
             ->setToDate($expirationDate)
             ->setSortOrder(100);
 
-        // Set conditions (minimum order amount if configured)
+        // Build minimum order amount condition via ConditionInterface (API-safe)
         $minOrderAmount = $this->helper->getCouponMinOrderAmount();
         if ($minOrderAmount > 0) {
-            $conditions = [
-                'type' => \Magento\SalesRule\Model\Rule\Condition\Combine::class,
-                'attribute' => null,
-                'operator' => null,
-                'value' => '1',
-                'is_value_processed' => null,
-                'aggregator' => 'all',
-                'conditions' => [
-                    [
-                        'type' => \Magento\SalesRule\Model\Rule\Condition\Address::class,
-                        'attribute' => 'base_subtotal',
-                        'operator' => '>=',
-                        'value' => $minOrderAmount,
-                        'is_value_processed' => false,
-                    ]
-                ]
-            ];
-            // setConditionsSerialized() is a @method annotation only — use setData() directly
-            // to avoid "Call to undefined method" on PHP 8.4 when the magic __call isn't available
-            $rule->setData('conditions_serialized', json_encode($conditions));
+            $subtotalCondition = $this->conditionFactory->create();
+            $subtotalCondition->setConditionType(\Magento\SalesRule\Model\Rule\Condition\Address::class)
+                ->setAttributeName('base_subtotal')
+                ->setOperator('>=')
+                ->setValue((string) $minOrderAmount);
+
+            $rootCondition = $this->conditionFactory->create();
+            $rootCondition->setConditionType(\Magento\SalesRule\Model\Rule\Condition\Combine::class)
+                ->setAggregatorType('all')
+                ->setValue('1')
+                ->setConditions([$subtotalCondition]);
+
+            $rule->setCondition($rootCondition);
         }
 
         return $this->ruleRepository->save($rule);
@@ -270,7 +267,7 @@ class Generator
             ->setCode($couponCode)
             ->setUsageLimit(1)
             ->setUsagePerCustomer(1)
-            ->setType(Coupon::TYPE_GENERATED)
+            ->setType(Coupon::TYPE_MANUAL)  // manual: code is provided, not auto-generated by Magento
             ->setIsPrimary(true);
 
         return $this->couponRepository->save($coupon);
