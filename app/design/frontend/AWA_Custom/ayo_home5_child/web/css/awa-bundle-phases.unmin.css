@@ -2385,9 +2385,11 @@ nav.navigation.verticalmenu:not(.navigation--mueller) .our_categories.title-cate
 .navigation.verticalmenu:not(.navigation--mueller) h2.our_categories.title-category-dropdown {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: var(--awa-gap-md);
-    padding: 0 var(--awa-space-5);
-    height: 48px;
+    padding: 0 var(--awa-space-4) 0 var(--awa-space-4-5);
+    min-height: 48px;
+    height: auto;
     line-height: var(--awa-leading-none);
     background: linear-gradient(180deg, var(--awa-red) 0%, var(--awa-red) 50%, var(--awa-red-dark) 100%) !important;
     color: var(--awa-white, #fff) !important;
@@ -2459,7 +2461,7 @@ nav.navigation.verticalmenu:not(.navigation--mueller) .our_categories.title-cate
     overflow: visible;
 
     /* Panel height */
-    min-height: 360px;
+    min-height: 0;
     max-height: 78vh;
 }
 
@@ -2468,6 +2470,7 @@ nav.navigation.verticalmenu:not(.navigation--mueller) .our_categories.title-cate
     display: grid !important;
     grid-template-columns: 240px 1fr;
     grid-auto-rows: auto;
+    align-items: start;
     overflow: auto hidden;
     animation: vmm-panel-in 0.28s cubic-bezier(0.22, 0.61, 0.36, 1) both;
 }
@@ -2522,7 +2525,7 @@ nav.navigation.verticalmenu:not(.navigation--mueller) .our_categories.title-cate
     display: flex;
     align-items: center;
     gap: var(--awa-gap-md);
-    padding: var(--awa-space-3) var(--awa-space-4) var(--awa-space-3) var(--awa-space-5);
+    padding: var(--awa-space-3) var(--awa-space-3) var(--awa-space-3) var(--awa-space-5);
     font-family: var(--awa-font-body, 'Source Sans 3', sans-serif);
     font-size: var(--awa-text-base);
     font-weight: var(--awa-weight-medium);
@@ -3072,6 +3075,7 @@ nav.navigation.verticalmenu:not(.navigation--mueller) .our_categories.title-cate
    ============================================================ */
 .navigation.verticalmenu:not(.navigation--mueller) .cat-label {
     display: inline-block;
+    margin-left: var(--awa-space-2);
     padding: 1px 5px;
     font-size: var(--awa-text-3xs);
     font-weight: var(--awa-weight-bold);
@@ -3558,6 +3562,45 @@ nav.navigation.verticalmenu:not(.navigation--mueller) .our_categories.title-cate
         inset: 0;
         background: rgb(0 0 0 / 50%);
         z-index: var(--awa-z-nav-overlay);
+    }
+}
+
+/* ============================================================
+   15. MUELLER MODE — Active state & visual overrides
+   Applied when .navigation--mueller IS present (desktop, JS active).
+   Sections 2-5 use :not(.navigation--mueller) for the no-JS fallback;
+   these rules ensure the Mueller mode has the same visual quality.
+   ============================================================ */
+@media (width >= 992px) {
+    /* 15a. Active category row: red left border + red text */
+    .navigation.verticalmenu.navigation--mueller .togge-menu > li.ui-menu-item.level0.vmm-active > a.level-top,
+    .navigation.verticalmenu.navigation--mueller .togge-menu > li.ui-menu-item.level0.awa-mueller-open > a.level-top {
+        color: var(--awa-red) !important;
+        background: var(--awa-gray-50) !important;
+        font-weight: var(--awa-weight-semibold);
+        text-decoration: none;
+        box-shadow: inset 3px 0 0 0 var(--awa-red) !important;
+        padding-left: 22px !important;
+    }
+
+    /* 15b. Arrow chevron on active row */
+    .navigation.verticalmenu.navigation--mueller .togge-menu > li.ui-menu-item.level0.vmm-active > a.level-top::after,
+    .navigation.verticalmenu.navigation--mueller .togge-menu > li.ui-menu-item.level0.awa-mueller-open > a.level-top::after {
+        border-color: var(--awa-red) !important;
+        transform: rotate(-45deg) translateX(2px) !important;
+    }
+
+    /* 15c. Icon color: active + hover */
+    .navigation.verticalmenu.navigation--mueller .togge-menu > li.ui-menu-item.level0.vmm-active > a.level-top .vmm-cat-icon,
+    .navigation.verticalmenu.navigation--mueller .togge-menu > li.ui-menu-item.level0.awa-mueller-open > a.level-top .vmm-cat-icon,
+    .navigation.verticalmenu.navigation--mueller .togge-menu > li.ui-menu-item.level0:hover > a.level-top .vmm-cat-icon {
+        color: var(--awa-red) !important;
+        transform: scale(1.08);
+    }
+
+    /* 15d. Hide open-children-toggle accordion buttons on desktop in Mueller mode */
+    .navigation.verticalmenu.navigation--mueller .togge-menu > li.ui-menu-item.level0 > .open-children-toggle {
+        display: none !important;
     }
 }
 
@@ -4500,7 +4543,10 @@ body .page-wrapper .wrapper.grid .item-product {
 
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
     .top-home-content--above-fold .banner-slider2 {
-    min-height: clamp(200px, 30vw, 460px) !important;
+    /* aspect-ratio matches banner image (1920×470) — prevents layout shift  */
+    /* while loading but avoids the gray gap mobile had with min-height:200px */
+    min-height: 0 !important;
+    aspect-ratio: 1920 / 470;
     overflow: hidden;
     background: var(--awa-gray-150, #f2f2f2) !important;
     border-radius: var(--awa-radius-lg) !important;
@@ -4508,7 +4554,7 @@ body .page-wrapper .wrapper.grid .item-product {
 
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
     .top-home-content--above-fold .banner-slider2 .wrapper_slider {
-    min-height: inherit !important;
+    min-height: 0 !important;
 }
 
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
@@ -5821,6 +5867,53 @@ body.rokanthemes-onepagecheckout .fieldset {
 .page_footer .footer-bottom-inner {
     padding-top: var(--awa-space-3) !important;
     padding-bottom: var(--awa-space-3) !important;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   ProductTab: limitar altura da imagem para 1 coluna compacta
+   Resolve: card 573px → ~430px na seção "Os Principais"
+   ────────────────────────────────────────────────────────────── */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .page-wrapper .list-tab-product .product-tab-slider .item-product .product-thumb {
+    max-height: 240px !important;
+    overflow: hidden !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .page-wrapper .list-tab-product .product-tab-slider .item-product .product-thumb img,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .page-wrapper .list-tab-product .product-tab-slider .item-product .product-thumb .product-image-photo {
+    width: auto !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: 240px !important;
+    object-fit: contain !important;
+    margin: 0 auto !important;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   ProductTab: reduzir margin-top excessivo (themes.css: 86px → computed 105px)
+   O tema reserva espaço para heading + tab-buttons absolutamente posicionados,
+   mas no nosso layout eles são estáticos → margem desperdiçada.
+   ────────────────────────────────────────────────────────────── */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .page-wrapper .list-tab-product.common-tab-system-fixed {
+    margin-top: 10px !important;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   CategoryTab sidebars: limitar altura p/ evitar seções excessivas
+   Retrovisores (12 tabs → 386px) vs Bauletos (8 tabs → 254px)
+   Limitar sidebar a ~260px com scroll como teto uniforme.
+   ────────────────────────────────────────────────────────────── */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .page-wrapper .categorytab-container .leftBlock .cat_posion {
+    max-height: 260px !important;
+    overflow-y: auto !important;
+    scrollbar-width: thin;
 }
 
 .page_footer .footer-bottom-inner .row {
