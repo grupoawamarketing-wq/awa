@@ -8,6 +8,7 @@ use Ayo\Curriculo\Model\SubmissionFactory;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\Action\HttpPostActionInterface;
+use Magento\Framework\App\CacheInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\App\Request\DataPersistorInterface;
@@ -16,6 +17,7 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\File\Mime;
 use Magento\Framework\File\UploaderFactory;
 use Magento\Framework\Filesystem;
+use Magento\Framework\HTTP\PhpEnvironment\RemoteAddress;
 use Magento\Framework\Mail\EmailMessageInterfaceFactory;
 use Magento\Framework\Mail\Template\TransportBuilder;
 use Magento\Framework\Mail\Template\FactoryInterface as TemplateFactoryInterface;
@@ -46,6 +48,11 @@ class Post extends Action implements HttpPostActionInterface
         'application/msword',
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
     ];
+
+    private const RATE_LIMIT_ATTEMPTS = 10;
+    private const RATE_LIMIT_WINDOW_SECONDS = 1800;
+    private const RATE_LIMIT_BLOCK_SECONDS = 3600;
+    private const CACHE_KEY_PREFIX = 'ayo_curriculo_post_';
 
     /**
      * @var FormKeyValidator
@@ -132,6 +139,16 @@ class Post extends Action implements HttpPostActionInterface
      */
     private $emailMessageFactory;
 
+    /**
+     * @var CacheInterface
+     */
+    private $cache;
+
+    /**
+     * @var RemoteAddress
+     */
+    private $remoteAddress;
+
     public function __construct(
         Context $context,
         FormKeyValidator $formKeyValidator,
@@ -150,7 +167,9 @@ class Post extends Action implements HttpPostActionInterface
         UrlValidator $urlValidator,
         LoggerInterface $logger,
         Mime $mime,
-        SubmissionFactory $submissionFactory
+        SubmissionFactory $submissionFactory,
+        CacheInterface $cache,
+        RemoteAddress $remoteAddress
     ) {
         parent::__construct($context);
         $this->formKeyValidator = $formKeyValidator;
@@ -170,6 +189,8 @@ class Post extends Action implements HttpPostActionInterface
         $this->logger = $logger;
         $this->mime = $mime;
         $this->submissionFactory = $submissionFactory;
+        $this->cache = $cache;
+        $this->remoteAddress = $remoteAddress;
     }
 
     public function execute()
@@ -200,9 +221,15 @@ class Post extends Action implements HttpPostActionInterface
             return $resultRedirect->setPath('*/*/');
         }
 
+        if ($this->isRateLimited()) {
+            $this->messageManager->addErrorMessage(__('Muitas tentativas. Aguarde alguns minutos e tente novamente.'));
+            return $resultRedirect->setPath('*/*/');
+        }
+
         $fileInfo = $request->getFiles('cv_file');
         [$errors, $fieldErrors] = $this->validate($data, $fileInfo);
         if (!empty($errors)) {
+            $this->registerAttempt();
             $this->dataPersistor->set('ayo_curriculo', $this->getPersistData($data));
             if (!empty($fieldErrors)) {
                 $this->dataPersistor->set('ayo_curriculo_errors', $fieldErrors);
@@ -951,5 +978,60 @@ class Post extends Action implements HttpPostActionInterface
         } finally {
             $this->inlineTranslation->resume();
         }
+    }
+
+    private function getClientIp(): string
+    {
+        $ip = (string)$this->remoteAddress->getRemoteAddress();
+        return trim($ip) !== '' ? trim($ip) : 'unknown';
+    }
+
+    private function getCacheKeyAttempts(): string
+    {
+        return self::CACHE_KEY_PREFIX . 'attempts_' . sha1($this->getClientIp());
+    }
+
+    private function getCacheKeyBlock(): string
+    {
+        return self::CACHE_KEY_PREFIX . 'block_' . sha1($this->getClientIp());
+    }
+
+    private function isRateLimited(): bool
+    {
+        $block = $this->cache->load($this->getCacheKeyBlock());
+        return $block !== false && $block !== '';
+    }
+
+    private function registerAttempt(): void
+    {
+        if ($this->isRateLimited()) {
+            return;
+        }
+
+        $key = $this->getCacheKeyAttempts();
+        $raw = $this->cache->load($key);
+        $now = time();
+
+        $payload = ['ts' => $now, 'count' => 1];
+
+        if (is_string($raw) && $raw !== '') {
+            $decoded = json_decode($raw, true);
+            if (is_array($decoded) && isset($decoded['ts'], $decoded['count'])) {
+                $ts = (int)$decoded['ts'];
+                $count = (int)$decoded['count'];
+                if (($now - $ts) <= self::RATE_LIMIT_WINDOW_SECONDS) {
+                    $payload['ts'] = $ts;
+                    $payload['count'] = $count + 1;
+                }
+            }
+        }
+
+        if ($payload['count'] >= self::RATE_LIMIT_ATTEMPTS) {
+            $this->cache->save('1', $this->getCacheKeyBlock(), [], self::RATE_LIMIT_BLOCK_SECONDS);
+            $this->cache->save('', $key, [], 1);
+            return;
+        }
+
+        $this->cache->save(json_encode($payload), $key, [], self::RATE_LIMIT_WINDOW_SECONDS);
     }
 }

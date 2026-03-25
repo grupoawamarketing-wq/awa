@@ -143,18 +143,30 @@ if (!$submission->getId()) {
         <h3><?= $block->escapeHtml(__('Status da Candidatura')) ?></h3>
         <form method="post" action="<?= $block->escapeUrl($block->getSaveStatusUrl()) ?>" class="status-form">
             <?= $block->getBlockHtml('formkey') ?>
-            <span class="curriculo-status-badge <?= $block->escapeHtmlAttr($submission->getData('status')) ?>">
-                <?= $block->escapeHtml($block->getStatusLabel($submission->getData('status') ?: 'pending')) ?>
-            </span>
-            <select name="status">
-                <?php foreach ($block->getStatusOptions() as $option): ?>
-                    <option value="<?= $block->escapeHtmlAttr($option['value']) ?>" 
-                            <?= $option['value'] === $submission->getData('status') ? 'selected' : '' ?>>
-                        <?= $block->escapeHtml($option['label']) ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
-            <button type="submit" class="action-default"><?= $block->escapeHtml(__('Atualizar Status')) ?></button>
+            <div style="display: flex; align-items: flex-start; gap: 12px; flex-wrap: wrap;">
+                <span class="curriculo-status-badge <?= $block->escapeHtmlAttr($submission->getData('status')) ?>">
+                    <?= $block->escapeHtml($block->getStatusLabel($submission->getData('status') ?: 'pending')) ?>
+                </span>
+                <select name="status" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                    <?php foreach ($block->getStatusOptions() as $option): ?>
+                        <option value="<?= $block->escapeHtmlAttr($option['value']) ?>"
+                                <?= $option['value'] === $submission->getData('status') ? 'selected' : '' ?>>
+                            <?= $block->escapeHtml($option['label']) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <button type="submit" class="action-default"><?= $block->escapeHtml(__('Atualizar Status')) ?></button>
+            </div>
+            <div style="margin-top: 14px;">
+                <label for="admin_notes" style="display: block; font-size: 13px; color: #666; margin-bottom: 6px; font-weight: 600;">
+                    <?= $block->escapeHtml(__('Adicionar nota interna (opcional)')) ?>
+                </label>
+                <textarea name="notes" id="admin_notes"
+                          rows="3"
+                          maxlength="1000"
+                          placeholder="<?= $block->escapeHtmlAttr(__('Escreva uma observação sobre esta candidatura...')) ?>"
+                          style="width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; resize: vertical; font-family: inherit;"></textarea>
+            </div>
         </form>
     </div>
 
@@ -286,7 +298,7 @@ if (!$submission->getId()) {
                 <?= $block->escapeHtml($submission->getData('file_name') ?: 'Não disponível') ?>
                 <?php if ($submission->getData('file_path')): ?>
                     <a href="<?= $block->escapeUrl($block->getDownloadUrl()) ?>" class="action-secondary" style="margin-left: 10px; padding: 5px 10px; font-size: 12px;">
-                        <?= $block->escapeHtml(__('⬇ Baixar')) ?>
+                        <?= $block->escapeHtml(__('Baixar')) ?>
                     </a>
                 <?php endif; ?>
             </div>
@@ -296,6 +308,16 @@ if (!$submission->getId()) {
             <div class="value"><?= $block->escapeHtml($submission->getData('created_at')) ?></div>
         </div>
     </div>
+
+    <?php $notesValue = trim((string)$submission->getData('notes')); ?>
+    <?php if ($notesValue !== ''): ?>
+    <div class="curriculo-section">
+        <h3><?= $block->escapeHtml(__('Notas Internas (RH)')) ?></h3>
+        <div class="curriculo-message" style="white-space: pre-wrap; background: #fffde7; border-left: 4px solid #f9a825; padding: 15px; border-radius: 0 6px 6px 0;">
+            <?= $block->escapeHtml($notesValue) ?>
+        </div>
+    </div>
+    <?php endif; ?>
 
     <div class="curriculo-actions">
         <a href="<?= $block->escapeUrl($block->getBackUrl()) ?>" class="action-default">
