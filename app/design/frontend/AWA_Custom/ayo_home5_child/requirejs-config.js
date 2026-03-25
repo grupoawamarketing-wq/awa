@@ -10,6 +10,16 @@ var config = {
             awaCustomCompatBootstrap: 'js/awa-custom-compat-bootstrap'
         }
     },
+    config: {
+        mixins: {
+            // Fix para "Failed to load template" error no minicart e outros componentes.
+            // Adiciona retry logic ao renderer de templates Knockout para recuperar
+            // de falhas transitórias de rede que seriam cacheadas permanentemente.
+            'Magento_Ui/js/lib/knockout/template/renderer': {
+                'Magento_Ui/js/lib/knockout/template/renderer-retry-mixin': true
+            }
+        }
+    },
     paths: {
         'rokanthemes/timecircles': 'js/rokanthemes/timecircles',
         // Restore Owl Carousel explicitly for Rokanthemes modules that hardcode the path
