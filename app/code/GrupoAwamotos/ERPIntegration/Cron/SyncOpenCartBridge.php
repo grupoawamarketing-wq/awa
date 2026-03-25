@@ -319,9 +319,12 @@ class SyncOpenCartBridge
                 )
             WHERE map.magento_customer_id IS NOT NULL
               AND ce.group_id IN ({$groupIds})
-              AND map.old_oc_customer_id NOT IN (
-                  SELECT customer_id FROM oc_pre_registration
-              )
+            ON DUPLICATE KEY UPDATE
+                firstname    = VALUES(firstname),
+                lastname     = VALUES(lastname),
+                email        = VALUES(email),
+                telephone    = VALUES(telephone),
+                custom_field = VALUES(custom_field)
         ";
 
         $stmt = $connection->query($sql, [

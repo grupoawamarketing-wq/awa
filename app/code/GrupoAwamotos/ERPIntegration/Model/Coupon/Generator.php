@@ -6,7 +6,8 @@ namespace GrupoAwamotos\ERPIntegration\Model\Coupon;
 use GrupoAwamotos\ERPIntegration\Helper\Data as Helper;
 use Magento\SalesRule\Api\RuleRepositoryInterface;
 use Magento\SalesRule\Api\CouponRepositoryInterface;
-use Magento\SalesRule\Model\RuleFactory;
+use Magento\SalesRule\Api\Data\RuleInterfaceFactory;
+use Magento\SalesRule\Api\Data\ConditionInterfaceFactory;
 use Magento\SalesRule\Api\Data\CouponInterfaceFactory;
 use Magento\SalesRule\Model\Coupon;
 use Magento\Customer\Api\CustomerRepositoryInterface;
@@ -27,7 +28,8 @@ class Generator
     private Helper $helper;
     private RuleRepositoryInterface $ruleRepository;
     private CouponRepositoryInterface $couponRepository;
-    private RuleFactory $ruleFactory;
+    private RuleInterfaceFactory $ruleFactory;
+    private ConditionInterfaceFactory $conditionFactory;
     private CouponInterfaceFactory $couponFactory;
     private CustomerRepositoryInterface $customerRepository;
     private StoreManagerInterface $storeManager;
@@ -249,7 +251,9 @@ class Generator
                     ]
                 ]
             ];
-            $rule->setConditionsSerialized(json_encode($conditions));
+            // setConditionsSerialized() is a @method annotation only — use setData() directly
+            // to avoid "Call to undefined method" on PHP 8.4 when the magic __call isn't available
+            $rule->setData('conditions_serialized', json_encode($conditions));
         }
 
         return $this->ruleRepository->save($rule);
