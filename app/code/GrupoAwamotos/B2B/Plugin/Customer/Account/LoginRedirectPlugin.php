@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin to redirect standard Magento login page to B2B login
- * When B2B mode is set to "strict"
+ * Redirects /customer/account/login → /b2b/account/login when B2B module is enabled
  */
 declare(strict_types=1);
 
@@ -34,7 +34,11 @@ class LoginRedirectPlugin
     }
 
     /**
-     * Redirect to B2B login page if strict mode is enabled
+     * Redirect to B2B login page when B2B module is enabled (both strict and mixed modes)
+     *
+     * @param Login $subject
+     * @param callable $proceed
+     * @return \Magento\Framework\Controller\ResultInterface
      */
     public function aroundExecute(Login $subject, callable $proceed)
     {
@@ -43,12 +47,7 @@ class LoginRedirectPlugin
             ScopeInterface::SCOPE_STORE
         );
 
-        $b2bMode = $this->scopeConfig->getValue(
-            'grupoawamotos_b2b/general/b2b_mode',
-            ScopeInterface::SCOPE_STORE
-        );
-
-        if ($isEnabled && $b2bMode === 'strict') {
+        if ($isEnabled) {
             $resultRedirect = $this->resultRedirectFactory->create();
 
             // Preserve referer parameter for post-login redirect
