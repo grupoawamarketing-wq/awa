@@ -12,6 +12,7 @@ use Magento\SalesRule\Api\Data\CouponInterfaceFactory;
 use Magento\SalesRule\Model\Coupon;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Store\Model\StoreManagerInterface;
+use Magento\Framework\App\State;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -33,6 +34,7 @@ class Generator
     private CouponInterfaceFactory $couponFactory;
     private CustomerRepositoryInterface $customerRepository;
     private StoreManagerInterface $storeManager;
+    private State $state;
     private LoggerInterface $logger;
 
     /**
@@ -57,6 +59,7 @@ class Generator
         CouponInterfaceFactory $couponFactory,
         CustomerRepositoryInterface $customerRepository,
         StoreManagerInterface $storeManager,
+        State $state,
         LoggerInterface $logger
     ) {
         $this->helper = $helper;
@@ -67,6 +70,7 @@ class Generator
         $this->couponFactory = $couponFactory;
         $this->customerRepository = $customerRepository;
         $this->storeManager = $storeManager;
+        $this->state = $state;
         $this->logger = $logger;
     }
 
@@ -90,6 +94,13 @@ class Generator
         }
 
         try {
+            // Ensure area code is set (fix: Area code is not set error)
+            try {
+                $this->state->setAreaCode(\Magento\Framework\App\Area::AREA_FRONTEND);
+            } catch (\Magento\Framework\Exception\LocalizedException $e) {
+                // Area already set, continue
+            }
+
             // Get customer
             $customer = $this->customerRepository->getById($customerId);
             $customerEmail = $customer->getEmail();
