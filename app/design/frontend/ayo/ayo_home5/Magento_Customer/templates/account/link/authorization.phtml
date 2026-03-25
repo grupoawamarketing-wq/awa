@@ -1,0 +1,55 @@
+<?php
+/**
+ * Authorization link - B2B override with customer name (FPC-compatible)
+ *
+ * Guests: link to /b2b/account/login
+ * Logged in: shows "Olá, [Name]" (via JS section) + "Sair" link
+ *
+ * @var $block \Magento\Customer\Block\Account\AuthorizationLink
+ */
+
+$dataPostParam = '';
+$icon = '<i class="fa fa-unlock-alt"></i>';
+$customHref = '';
+
+if ($block->isLoggedIn()) {
+    $dataPostParam = sprintf(" data-post='%s'", $block->getPostParams());
+    $icon = '<i class="fa fa-sign-in"></i>';
+} else {
+    $customHref = ' href="' . $block->escapeUrl($block->getUrl('b2b/account/login')) . '"';
+}
+?>
+<?php if ($block->isLoggedIn()): ?>
+<li class="greet welcome b2b-welcome-name" data-bind="scope: 'customer'">
+    <!-- ko if: customer().firstname -->
+    <span class="logged-in" data-bind="text: customer().firstname"></span>
+    <!-- /ko -->
+</li>
+<li class="authorization-link" data-label="<?= $block->escapeHtml(__('or')) ?>">
+    <a title="<?= $block->escapeHtml($block->getLabel()) ?>"
+       <?= $block->getLinkAttributes() ?><?= $dataPostParam ?>>
+        <?= $icon ?>
+        <?= $block->escapeHtml($block->getLabel()) ?>
+    </a>
+</li>
+<script type="text/x-magento-init">
+{
+    "*": {
+        "Magento_Ui/js/core/app": {
+            "components": {
+                "customer": {
+                    "component": "Magento_Customer/js/view/customer"
+                }
+            }
+        }
+    }
+}
+</script>
+<?php else: ?>
+<li class="authorization-link" data-label="<?= $block->escapeHtml(__('or')) ?>">
+    <a title="<?= $block->escapeHtml(__('Entrar')) ?>"<?= $customHref ?>>
+        <?= $icon ?>
+        <?= $block->escapeHtml(__('Entrar')) ?>
+    </a>
+</li>
+<?php endif; ?>
