@@ -454,11 +454,11 @@ class Data extends AbstractHelper
     public function getPriceGateHeadline(): string
     {
         return match ($this->getPriceGateState()) {
-            'guest' => 'Entre para comprar com condicoes B2B',
-            'erp_pending' => 'Sua tabela de precos esta sendo liberada',
-            'rejected' => 'Seu cadastro precisa de revisao',
-            'suspended' => 'Seu acesso comercial esta suspenso',
-            'pending' => 'Cadastro em analise comercial',
+            'guest' => 'Entre para comprar com condições B2B',
+            'erp_pending' => 'Sua tabela de preços está sendo liberada',
+            'rejected' => 'Seu cadastro precisa de revisão',
+            'suspended' => 'Seu acesso comercial está suspenso',
+            'pending' => 'Cadastro em análise comercial',
             default => 'Acesso comercial liberado',
         };
     }
@@ -469,11 +469,11 @@ class Data extends AbstractHelper
     public function getPriceGateDescription(): string
     {
         $fallback = match ($this->getPriceGateState()) {
-            'guest' => 'Solicite seu cadastro ou entre na conta da sua empresa para consultar precos e comprar no atacado.',
-            'erp_pending' => 'Sua empresa ja foi aprovada e nossa equipe esta concluindo a tabela comercial no ERP.',
+            'guest' => 'Solicite seu cadastro ou entre na conta da sua empresa para consultar preços e comprar no atacado.',
+            'erp_pending' => 'Sua empresa já foi aprovada e nossa equipe está concluindo a tabela comercial no ERP.',
             'rejected' => 'Fale com a equipe comercial para revisar os dados da sua empresa e liberar o acesso novamente.',
-            'suspended' => 'Seu acesso comercial esta pausado. Nossa equipe pode orientar os proximos passos.',
-            'pending' => 'Estamos validando os dados da sua empresa para liberar condicoes comerciais e compra recorrente.',
+            'suspended' => 'Seu acesso comercial está pausado. Nossa equipe pode orientar os próximos passos.',
+            'pending' => 'Estamos validando os dados da sua empresa para liberar condições comerciais e compra recorrente.',
             default => 'Acesso comercial liberado.',
         };
 
@@ -526,7 +526,7 @@ class Data extends AbstractHelper
     public function getPriceGateSecondaryLabel(): string
     {
         return match ($this->getPriceGateState()) {
-            'guest' => 'Ja tenho conta',
+            'guest' => 'Já tenho conta',
             default => 'Falar com vendas',
         };
     }
