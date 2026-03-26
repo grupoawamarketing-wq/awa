@@ -1,8 +1,8 @@
 # TIER 2 Optimization Plan — Advanced Performance
 
-**Project:** AWA Motos — Next Phase of Optimization  
-**Timeline:** Apr 1-30, 2026 (Estimated)  
-**Priority:** HIGH (follows TIER 1 completion)  
+**Project:** AWA Motos — Next Phase of Optimization
+**Timeline:** Apr 1-30, 2026 (Estimated)
+**Priority:** HIGH (follows TIER 1 completion)
 **Status:** 📋 PLANNED (not yet started)
 
 ---
@@ -555,7 +555,7 @@ FCP (First Contentful Paint):
 
 LCP (Largest Contentful Paint):
   Target improvement:   Similar to FCP (-300-500ms)
-  
+
 CLS (Cumulative Layout Shift):
   Expected:             No change (already optimized)
 
@@ -596,14 +596,13 @@ Week 8:  RUM metrics analysis + optimization tweaks
 
 ## 📎 REFERENCE
 
-**TIER 1 Status:** ✅ COMPLETE (TIER1_COMPLETION_REPORT.md)  
-**Project Baseline:** TIER1_STATUS_CURRENT.md  
-**Previous Improvements:** IMPROVEMENT_PLAN_2026Q1.md  
+**TIER 1 Status:** ✅ COMPLETE (TIER1_COMPLETION_REPORT.md)
+**Project Baseline:** TIER1_STATUS_CURRENT.md
+**Previous Improvements:** IMPROVEMENT_PLAN_2026Q1.md
 **Architecture Docs:** docs/theme-ayo.md
 
 ---
 
-**Plan Created:** 26 Mar 2026  
-**Next Review:** 02 Apr 2026 (after TIER 1 production)  
+**Plan Created:** 26 Mar 2026
+**Next Review:** 02 Apr 2026 (after TIER 1 production)
 **Owner:** AWA Performance Team
-
