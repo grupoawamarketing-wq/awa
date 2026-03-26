@@ -47,6 +47,10 @@ if ($logoChildBlock instanceof \Magento\Theme\Block\Html\Header\Logo) {
 	$mobileLogoWidth = (int) ($logoChildBlock->getLogoWidth() ?: $mobileLogoWidth);
 	$mobileLogoHeight = (int) ($logoChildBlock->getLogoHeight() ?: $mobileLogoHeight);
 }
+
+$headerContactLinksHtml = trim((string) $this->getChildHtml('headerContactLinks'));
+$headerHotlineHtml = trim((string) $this->getChildHtml('hotline_header'));
+$hasHeaderContactSlot = $headerContactLinksHtml !== '' || $headerHotlineHtml !== '';
 ?>
 <header role="banner"
         class="awa-site-header awa-header-professional<?= $escaper->escapeHtmlAttr($headerExperimentStateClass . $headerExperimentVariantClass) ?>"
@@ -610,15 +614,20 @@ body .page-wrapper .awa-site-header .header .awa-header-cart-link-icon {
 												</div>
 												<a class="awa-header-cart-link" href="<?= $escaper->escapeUrl($block->getUrl('checkout/cart')) ?>" aria-label="<?= $escaper->escapeHtmlAttr(__('Abrir carrinho')) ?>"><svg class="awa-header-cart-link-icon" viewBox="0 0 24 24" aria-hidden="true" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1"></circle><circle cx="18" cy="20" r="1"></circle><path d="M3.5 4h2l2.2 10.2a1 1 0 0 0 1 .8h8.6a1 1 0 0 0 1-.8L20 7H7.1"></path></svg><span><?= $escaper->escapeHtml(__('Abrir carrinho')) ?></span></a>
 											</div>
-								<div class="col-md-10 col-sm-10 col-xs-12 top-search" data-awa-header-search-row="true">
+								<div class="col-md-10 col-sm-10 col-xs-12 top-search awa-header-actions" data-awa-header-search-row="true">
 									<?= /* @noEscape */ $this->getChildHtml('topSearch') ?>
-									<?= /* @noEscape */ $this->getChildHtml('hotline_header') ?>
-								</div>
-								<div class="awa-header-cart mini-cart-wrapper shadowcart" data-awa-header-cart="true">
+									<div class="awa-header-cart mini-cart-wrapper shadowcart awa-header-minicart" data-awa-header-cart="true">
 									<a class="awa-header-cart-fallback" href="<?= $escaper->escapeUrl($block->getUrl('checkout/cart')) ?>" aria-label="<?= $escaper->escapeHtmlAttr(__('Abrir carrinho')) ?>"><span><?= $escaper->escapeHtml(__('Abrir carrinho')) ?></span></a>
 									<div class="mini-carts">
 										<?= /* @noEscape */ $this->getChildHtml('minicart') ?>
 									</div>
+								</div>
+									<?php if ($hasHeaderContactSlot): ?>
+										<div class="awa-header-contact-slot" data-awa-header-contact="true">
+											<?= /* @noEscape */ $headerContactLinksHtml ?>
+											<?= /* @noEscape */ $headerHotlineHtml ?>
+										</div>
+									<?php endif; ?>
 								</div>
 							</div>
 						</div>
