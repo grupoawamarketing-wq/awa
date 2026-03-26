@@ -237,7 +237,16 @@ class CustomerSync implements CustomerSyncInterface
         if (empty($email)) {
             $this->logger->warning('[ERP] Cannot create customer without email', [
                 'raw_email' => $erpData['EMAIL'] ?? 'N/A',
-                'erp_code'  => $erpData['CODIGO'] ?? 0,
+                'erp_code' => $erpData['CODIGO'] ?? 0,
+            ]);
+            return null;
+        }
+
+        // Additional email validation - reject if it looks like invalid format
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $this->logger->warning('[ERP] Invalid email format detected', [
+                'email' => $email,
+                'erp_code' => $erpData['CODIGO'] ?? 0,
             ]);
             return null;
         }
