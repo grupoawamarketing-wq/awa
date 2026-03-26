@@ -8,7 +8,7 @@ interface ProductSyncInterface
     /**
      * Sync all products from ERP to Magento
      *
-     * @return array Result with 'created', 'updated', 'errors', 'skipped', 'batches_processed', 'total_products', 'execution_time'
+     * @return array Result with 'created', 'updated', 'deactivated', 'errors', 'skipped', 'batches_processed', 'total_products', 'execution_time'
      */
     public function syncAll(): array;
 

@@ -17,6 +17,8 @@ use Magento\Store\Model\StoreManagerInterface;
 use Magento\Store\Api\Data\StoreInterface;
 use Magento\Catalog\Api\CategoryLinkManagementInterface;
 use Magento\Framework\App\State as AppState;
+use Magento\Framework\DB\Adapter\AdapterInterface;
+use Magento\Framework\DB\Select;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
@@ -35,6 +37,8 @@ class ProductSyncTest extends TestCase
     private LoggerInterface|MockObject $logger;
     private AppState|MockObject $appState;
     private CategoryLinkManagementInterface|MockObject $categoryLinkManagement;
+    private AdapterInterface|MockObject $dbConnection;
+    private Select|MockObject $dbSelect;
 
     protected function setUp(): void
     {
@@ -48,6 +52,8 @@ class ProductSyncTest extends TestCase
         $this->logger = $this->createMock(LoggerInterface::class);
         $this->appState = $this->createMock(AppState::class);
         $this->categoryLinkManagement = $this->createMock(CategoryLinkManagementInterface::class);
+        $this->dbConnection = $this->createMock(AdapterInterface::class);
+        $this->dbSelect = $this->createMock(Select::class);
         $this->productValidator->method('validate')->willReturn(ValidationResult::success());
 
         // Setup common mocks
@@ -58,6 +64,11 @@ class ProductSyncTest extends TestCase
         $store = $this->createMock(StoreInterface::class);
         $store->method('getWebsiteId')->willReturn(1);
         $this->storeManager->method('getDefaultStoreView')->willReturn($store);
+        $this->dbSelect->method('from')->willReturnSelf();
+        $this->dbSelect->method('where')->willReturnSelf();
+        $this->dbConnection->method('select')->willReturn($this->dbSelect);
+        $this->dbConnection->method('fetchPairs')->willReturn([]);
+        $this->syncLogResource->method('getConnection')->willReturn($this->dbConnection);
 
         $this->productSync = new ProductSync(
             $this->connection,
@@ -246,12 +257,18 @@ class ProductSyncTest extends TestCase
         $this->syncLogResource->method('getEntityMapHash')
             ->with('product', 'SKU-001')
             ->willReturn($expectedHash);
+        $existingProduct = $this->createMock(Product::class);
+        $existingProduct->method('getStatus')->willReturn(Product\Attribute\Source\Status::STATUS_ENABLED);
+        $this->productRepository->method('get')
+            ->with('SKU-001')
+            ->willReturn($existingProduct);
 
         $result = $this->productSync->syncAll();
 
         // Product should be skipped since hash matches
         $this->assertEquals(1, $result['skipped']);
         $this->assertEquals(0, $result['updated']);
+        $this->assertEquals(0, $result['deactivated']);
     }
 
     public function testSyncAllCreatesNewProduct(): void
@@ -408,14 +425,58 @@ class ProductSyncTest extends TestCase
         $this->connection->method('fetchOne')
             ->willReturn(['total' => 0]);
 
-        $this->logger->expects($this->once())
+        $this->logger->expects($this->atLeastOnce())
             ->method('info')
-            ->with($this->stringContains('No products to sync'));
+            ->with($this->callback(function (string $message): bool {
+                return str_contains($message, 'No products to sync')
+                    || str_contains($message, 'Product sync completed');
+            }));
 
         $result = $this->productSync->syncAll();
 
         $this->assertEquals(0, $result['total_products']);
         $this->assertEquals(0, $result['batches_processed']);
+        $this->assertArrayHasKey('deactivated', $result);
+    }
+
+    public function testSyncAllReactivatesMappedProductWhenHashMatchesButMagentoIsDisabled(): void
+    {
+        $this->connection->method('fetchOne')
+            ->willReturn(['total' => 1]);
+
+        $erpProduct = [
+            'CODIGO' => 'REACTIVATE-SKU',
+            'DESCRICAO' => 'Reactivated Product',
+            'CCKATIVO' => 'S',
+            'VLRVENDA' => 90.00,
+        ];
+
+        $this->connection->method('query')->willReturn([$erpProduct]);
+        $this->syncLogResource->method('getEntityMapHash')
+            ->with('product', 'REACTIVATE-SKU')
+            ->willReturn(md5(json_encode($erpProduct)));
+
+        $existingProduct = $this->createMock(Product::class);
+        $existingProduct->method('getId')->willReturn(77);
+        $existingProduct->method('getStatus')->willReturn(Product\Attribute\Source\Status::STATUS_DISABLED);
+        $existingProduct->expects($this->once())
+            ->method('setStatus')
+            ->with(Product\Attribute\Source\Status::STATUS_ENABLED);
+        $existingProduct->expects($this->once())->method('setName')->with('Reactivated Product');
+        $existingProduct->expects($this->once())->method('setPrice')->with(90.00);
+
+        $this->productRepository->method('get')
+            ->with('REACTIVATE-SKU')
+            ->willReturn($existingProduct);
+        $this->productRepository->expects($this->once())
+            ->method('save')
+            ->with($existingProduct);
+
+        $result = $this->productSync->syncAll();
+
+        $this->assertEquals(1, $result['updated']);
+        $this->assertEquals(0, $result['skipped']);
+        $this->assertEquals(0, $result['deactivated']);
     }
 
     public function testSyncBySkuReturnsTrueWhenFound(): void

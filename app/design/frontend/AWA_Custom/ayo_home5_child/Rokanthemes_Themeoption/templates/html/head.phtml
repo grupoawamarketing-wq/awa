@@ -1,6 +1,7 @@
 <?php
-/** @var \Rokanthemes\Themeoption\Block\Themeoption $block */
-	$data = $block->getConfig('themeoption');
+    /** @var mixed $themeOptionBlock */
+    $themeOptionBlock = $block;
+    $data = $themeOptionBlock->getConfig();
     $_helper = $this->helper('Rokanthemes\Themeoption\Helper\Themeconfig');
 ?>
 <?php
@@ -8,17 +9,13 @@
     $font_sizes = "%3A300%2C400%2C500%2C600%2C700";
 ?>
 <?php if (isset($data['font']['custom']) && $data['font']['custom'] && $data['font']['font_family'] == 'google'): ?>
-    <!-- Google Fonts removido por otimização de performance (AWA_Custom) -->
+<link rel="stylesheet" media="all" href='//fonts.googleapis.com/css?family=<?php echo str_replace(' ', '+', $data['font']['google_font_family']).$font_sizes; echo $charSubset; ?>&display=swap' type='text/css' />
 <?php else: ?>
-    <!-- Fallback Open Sans removido por otimização de performance (AWA_Custom) -->
+<link href="//fonts.googleapis.com/css?family=Open+Sans:400,300,700&display=swap" media="all" rel='stylesheet' type='text/css'/>
 <?php endif;?>
 <!-- ===== Resource Hints (AWA_Custom) ===== -->
 <!-- DNS prefetch movido para default_head_blocks.xml (mais leve que preconnect) -->
-<!-- Preload: fonte body auto-hospedada para LCP/CLS (Source Sans 3 regular) -->
-<!-- Rubik 400/600 já preloaded em default_head_blocks.xml — não duplicar -->
-<!-- Source Sans 3 600 (semibold) carrega via @font-face em awa-bundle-tail.css — não crítico -->
-<link rel="preload" as="font" type="font/woff2" crossorigin
-      href="<?= $this->escapeUrl($this->getViewFileUrl('fonts/source-sans-3/source-sans-3-400.woff2')) ?>"/>
+<!-- A família global volta a ser controlada pelo Theme Options do Rokanthemes. -->
 <!-- ===== Fim Resource Hints ===== -->
 <!-- ===== CSS de Interação — carregamento não-bloqueante (AWA_Custom 2026-03-16) ===== -->
 <!-- b2b-marketing.css: único aqui (não está no awa-deferred-interaction-css.phtml)           -->

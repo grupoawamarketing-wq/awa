@@ -130,6 +130,7 @@ class ProductSync implements ProductSyncInterface
         $result = [
             'created' => 0,
             'updated' => 0,
+            'deactivated' => 0,
             'errors' => 0,
             'skipped' => 0,
             'validation_failed' => 0,
@@ -137,6 +138,7 @@ class ProductSync implements ProductSyncInterface
             'total_products' => 0,
             'execution_time' => 0,
         ];
+        $activeErpCodes = [];
 
         // Set area code for CLI execution
         try {
@@ -152,51 +154,54 @@ class ProductSync implements ProductSyncInterface
 
             if ($totalCount === 0) {
                 $this->logger->info('[ERP] No products to sync from ERP');
-                return $result;
-            }
-
-            $this->logger->info('[ERP] Starting product sync', [
-                'total_products' => $totalCount,
-                'batch_size' => self::BATCH_SIZE,
-                'estimated_batches' => ceil($totalCount / self::BATCH_SIZE),
-            ]);
-
-            $websiteIds = [$this->storeManager->getDefaultStoreView()->getWebsiteId()];
-            $offset = 0;
-
-            // Process in batches
-            while ($offset < $totalCount) {
-                // Check memory usage before processing batch
-                $this->checkMemoryUsage();
-
-                $batchStartTime = microtime(true);
-                $batchResult = $this->processBatch($offset, self::BATCH_SIZE, $websiteIds);
-
-                $result['created'] += $batchResult['created'];
-                $result['updated'] += $batchResult['updated'];
-                $result['errors'] += $batchResult['errors'];
-                $result['skipped'] += $batchResult['skipped'];
-                $result['validation_failed'] += $batchResult['validation_failed'] ?? 0;
-                $result['batches_processed']++;
-
-                $batchTime = round((microtime(true) - $batchStartTime) * 1000, 2);
-
-                $this->logger->info('[ERP] Batch processed', [
-                    'batch_number' => $result['batches_processed'],
-                    'offset' => $offset,
-                    'batch_created' => $batchResult['created'],
-                    'batch_updated' => $batchResult['updated'],
-                    'batch_errors' => $batchResult['errors'],
-                    'batch_time_ms' => $batchTime,
-                    'progress' => round(min(100, (($offset + self::BATCH_SIZE) / $totalCount) * 100), 1) . '%',
+            } else {
+                $this->logger->info('[ERP] Starting product sync', [
+                    'total_products' => $totalCount,
+                    'batch_size' => self::BATCH_SIZE,
+                    'estimated_batches' => ceil($totalCount / self::BATCH_SIZE),
                 ]);
 
-                $offset += self::BATCH_SIZE;
+                $websiteIds = [$this->storeManager->getDefaultStoreView()->getWebsiteId()];
+                $offset = 0;
 
-                // Clear entity manager to free memory
-                $this->clearEntityCache();
+                // Process in batches
+                while ($offset < $totalCount) {
+                    // Check memory usage before processing batch
+                    $this->checkMemoryUsage();
+
+                    $batchStartTime = microtime(true);
+                    $batchResult = $this->processBatch($offset, self::BATCH_SIZE, $websiteIds);
+
+                    $result['created'] += $batchResult['created'];
+                    $result['updated'] += $batchResult['updated'];
+                    $result['errors'] += $batchResult['errors'];
+                    $result['skipped'] += $batchResult['skipped'];
+                    $result['validation_failed'] += $batchResult['validation_failed'] ?? 0;
+                    $result['batches_processed']++;
+                    $activeErpCodes = array_merge($activeErpCodes, $batchResult['active_erp_codes'] ?? []);
+
+                    $batchTime = round((microtime(true) - $batchStartTime) * 1000, 2);
+
+                    $this->logger->info('[ERP] Batch processed', [
+                        'batch_number' => $result['batches_processed'],
+                        'offset' => $offset,
+                        'batch_created' => $batchResult['created'],
+                        'batch_updated' => $batchResult['updated'],
+                        'batch_errors' => $batchResult['errors'],
+                        'batch_time_ms' => $batchTime,
+                        'progress' => round(min(100, (($offset + self::BATCH_SIZE) / $totalCount) * 100), 1) . '%',
+                    ]);
+
+                    $offset += self::BATCH_SIZE;
+
+                    // Clear entity manager to free memory
+                    $this->clearEntityCache();
+                }
             }
 
+            $result['deactivated'] = $this->deactivateMissingProducts(
+                array_values(array_unique($activeErpCodes))
+            );
             $result['execution_time'] = round((microtime(true) - $startTime) * 1000, 2);
 
             $this->syncLogResource->addLog(
@@ -204,9 +209,10 @@ class ProductSync implements ProductSyncInterface
                 'import',
                 $result['errors'] > 0 ? 'partial' : 'success',
                 sprintf(
-                    'Criados: %d, Atualizados: %d, Erros: %d, Ignorados: %d | Batches: %d | Tempo: %dms',
+                    'Criados: %d, Atualizados: %d, Desativados: %d, Erros: %d, Ignorados: %d | Batches: %d | Tempo: %dms',
                     $result['created'],
                     $result['updated'],
+                    $result['deactivated'],
                     $result['errors'],
                     $result['skipped'],
                     $result['batches_processed'],
@@ -214,7 +220,7 @@ class ProductSync implements ProductSyncInterface
                 ),
                 null,
                 null,
-                $result['created'] + $result['updated']
+                $result['created'] + $result['updated'] + $result['deactivated']
             );
 
             $this->logger->info('[ERP] Product sync completed', $result);
@@ -239,11 +245,23 @@ class ProductSync implements ProductSyncInterface
      */
     private function processBatch(int $offset, int $limit, array $websiteIds): array
     {
-        $batchResult = ['created' => 0, 'updated' => 0, 'errors' => 0, 'skipped' => 0, 'validation_failed' => 0];
+        $batchResult = [
+            'created' => 0,
+            'updated' => 0,
+            'errors' => 0,
+            'skipped' => 0,
+            'validation_failed' => 0,
+            'active_erp_codes' => [],
+        ];
 
         $erpProducts = $this->getErpProducts($limit, $offset);
 
         foreach ($erpProducts as $erpProduct) {
+            $sku = trim((string) ($erpProduct['CODIGO'] ?? ''));
+            if ($sku !== '') {
+                $batchResult['active_erp_codes'][] = $sku;
+            }
+
             try {
                 // Validate product data before sync
                 $validationResult = $this->productValidator->validate($erpProduct);
@@ -319,11 +337,15 @@ class ProductSync implements ProductSyncInterface
             return 'skipped';
         }
 
+        $isActive = $validationResult
+            ? $validationResult->getField('is_active', ($erpProduct['CCKATIVO'] ?? 'N') === 'S')
+            : ($erpProduct['CCKATIVO'] ?? 'N') === 'S';
+
         // Check if data has changed using hash
         $dataHash = md5(json_encode($erpProduct));
         $existingHash = $this->syncLogResource->getEntityMapHash('product', $sku);
 
-        if ($existingHash === $dataHash) {
+        if ($existingHash === $dataHash && $this->canSkipUnchangedProduct($sku, $isActive)) {
             // Data hasn't changed, skip update
             return 'skipped';
         }
@@ -370,11 +392,6 @@ class ProductSync implements ProductSyncInterface
         if ($weight > 0) {
             $product->setWeight($weight);
         }
-
-        // Use validated status if available
-        $isActive = $validationResult
-            ? $validationResult->getField('is_active', ($erpProduct['CCKATIVO'] ?? 'N') === 'S')
-            : ($erpProduct['CCKATIVO'] ?? 'N') === 'S';
 
         $product->setStatus($isActive ? Status::STATUS_ENABLED : Status::STATUS_DISABLED);
 
@@ -709,6 +726,82 @@ class ProductSync implements ProductSyncInterface
     {
         // Force garbage collection
         gc_collect_cycles();
+    }
+
+    private function canSkipUnchangedProduct(string $sku, bool $isActive): bool
+    {
+        try {
+            $product = $this->productRepository->get($sku);
+        } catch (\Magento\Framework\Exception\NoSuchEntityException $e) {
+            return false;
+        } catch (\Exception $e) {
+            $this->logger->warning('[ERP] Unable to verify unchanged product state', [
+                'sku' => $sku,
+                'error' => $e->getMessage(),
+            ]);
+            return false;
+        }
+
+        $expectedStatus = $isActive ? Status::STATUS_ENABLED : Status::STATUS_DISABLED;
+        return (int) $product->getStatus() === $expectedStatus;
+    }
+
+    /**
+     * Disable mapped Magento products that are no longer part of the current ERP scope.
+     *
+     * @param string[] $activeErpCodes
+     */
+    private function deactivateMissingProducts(array $activeErpCodes): int
+    {
+        $deactivated = 0;
+        $activeCodeMap = array_fill_keys($activeErpCodes, true);
+
+        $connection = $this->syncLogResource->getConnection();
+        $select = $connection->select()
+            ->from('grupoawamotos_erp_entity_map', ['erp_code', 'magento_entity_id'])
+            ->where('entity_type = ?', 'product');
+
+        $allMapped = $connection->fetchPairs($select);
+
+        foreach ($allMapped as $erpCode => $magentoId) {
+            $erpCode = trim((string) $erpCode);
+            if (isset($activeCodeMap[$erpCode])) {
+                continue;
+            }
+
+            try {
+                $product = $this->productRepository->getById((int) $magentoId);
+                if ((int) $product->getStatus() === Status::STATUS_DISABLED) {
+                    continue;
+                }
+
+                $product->setStatus(Status::STATUS_DISABLED);
+                $this->productRepository->save($product);
+                $deactivated++;
+
+                $this->logger->info('[ERP] Product deactivated (missing from current ERP scope)', [
+                    'erp_code' => $erpCode,
+                    'magento_id' => (int) $magentoId,
+                    'sku' => $product->getSku(),
+                ]);
+            } catch (\Magento\Framework\Exception\NoSuchEntityException $e) {
+                // Product was removed manually from Magento.
+            } catch (\Exception $e) {
+                $this->logger->warning('[ERP] Failed to deactivate missing product', [
+                    'erp_code' => $erpCode,
+                    'magento_id' => (int) $magentoId,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        if ($deactivated > 0) {
+            $this->logger->info('[ERP] Missing mapped products were disabled', [
+                'deactivated' => $deactivated,
+            ]);
+        }
+
+        return $deactivated;
     }
 
     public function syncBySku(string $sku): bool

@@ -142,6 +142,7 @@ class SyncProductsCommand extends Command
         $output->writeln('');
         $output->writeln("  Criados:     <info>{$result['created']}</info>");
         $output->writeln("  Atualizados: <info>{$result['updated']}</info>");
+        $output->writeln("  Desativados: <comment>{$result['deactivated']}</comment>");
         $output->writeln("  Ignorados:   <comment>{$result['skipped']}</comment>");
         $output->writeln("  Erros:       " . ($result['errors'] > 0 ? "<error>{$result['errors']}</error>" : "0"));
         $output->writeln("  Batches:     {$result['batches_processed']}");

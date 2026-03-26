@@ -28,11 +28,9 @@ $dnsPrefetch = [
 // → preload redundante removido (browser já descobre imediatamente).
 $cssPreloads = [];
 
-// === Font Preload (previne FOIT/FOUT) ===
-$fontPreloads = [
-    ['url' => $block->getViewFileUrl('fonts/rubik/rubik-400.woff2'), 'priority' => 'high'],
-    ['url' => $block->getViewFileUrl('fonts/rubik/rubik-600.woff2'), 'priority' => ''],
-];
+// === Font Preload ===
+// A tipografia base volta a ser controlada pelo Theme Options do Rokanthemes.
+$fontPreloads = [];
 
 // === Async CSS Bundles (defer via media="print" + onload — não bloqueiam render) ===
 $asyncBundles = [
@@ -42,6 +40,9 @@ $asyncBundles = [
     $block->getViewFileUrl('css/awa-bundle-phases.css'),
     $block->getViewFileUrl('css/awa-bundle-tail.css'),
     $block->getViewFileUrl('css/awa-bundle-site.css'),
+    // Moved from render-blocking <css> to async (2026-03-26) — saves ~70KB from critical path
+    $block->getViewFileUrl('css/awa-visual-fixes-critical.css'),
+    $block->getViewFileUrl('css/awa-polish-sweep.css'),
 ];
 ?>
 <!-- AWA Head Preload — DNS Prefetch -->
@@ -52,7 +53,7 @@ $asyncBundles = [
 <?php foreach ($cssPreloads as $item): ?>
 <link rel="preload" href="<?= $block->escapeUrl($item['url']) ?>" as="style"<?= $item['priority'] ? ' fetchpriority="' . $block->escapeHtmlAttr($item['priority']) . '"' : '' ?>/>
 <?php endforeach; ?>
-<!-- AWA Head Preload — Fonts (Rubik) -->
+<!-- AWA Head Preload — Fonts -->
 <?php foreach ($fontPreloads as $item): ?>
 <link rel="preload" href="<?= $block->escapeUrl($item['url']) ?>" as="font" type="font/woff2" crossorigin="anonymous"<?= $item['priority'] ? ' fetchpriority="' . $block->escapeHtmlAttr($item['priority']) . '"' : '' ?>/>
 <?php endforeach; ?>
