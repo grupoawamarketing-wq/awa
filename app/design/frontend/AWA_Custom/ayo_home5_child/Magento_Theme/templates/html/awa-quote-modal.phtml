@@ -61,7 +61,19 @@ $formAction = $block->escapeUrl($block->getUrl('contact/index/post'));
             </button>
         </div>
         <form class="awa-quote-modal__form" action="<?= /* @noEscape */ $formAction ?>" method="post">
-            <?= /* @noEscape */ $block->getBlockHtml('formkey') ?>
+            <input name="form_key" type="hidden" id="awa-quote-form-key" value=""/>
+            <script>/* inject CSRF form_key on client (block é cacheable; form_key vem do window.FORM_KEY global do Magento) */
+            (function () {
+                var el = document.getElementById('awa-quote-form-key');
+                if (!el) { return; }
+                if (typeof window.FORM_KEY !== 'undefined') {
+                    el.value = window.FORM_KEY;
+                } else {
+                    document.addEventListener('DOMContentLoaded', function () {
+                        if (typeof window.FORM_KEY !== 'undefined') { el.value = window.FORM_KEY; }
+                    });
+                }
+            }());</script>
             <div class="awa-quote-modal__field">
                 <label for="awa-quote-name"><?= $block->escapeHtml(__('Nome / Razao Social')) ?></label>
                 <input type="text" id="awa-quote-name" name="name" required data-awa-quote-autofocus="true"
