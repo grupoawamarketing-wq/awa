@@ -36,6 +36,7 @@ class ImageSyncTest extends TestCase
     private LoggerInterface|MockObject $logger;
     private ProductAttributeMediaGalleryEntryInterfaceFactory|MockObject $galleryEntryFactory;
     private ImageContentInterfaceFactory|MockObject $imageContentFactory;
+    private ?string $tempImageDir = null;
 
     protected function setUp(): void
     {
@@ -85,6 +86,25 @@ class ImageSyncTest extends TestCase
             $this->galleryEntryFactory,
             $this->imageContentFactory
         );
+    }
+
+    protected function tearDown(): void
+    {
+        if ($this->tempImageDir && is_dir($this->tempImageDir)) {
+            $files = scandir($this->tempImageDir) ?: [];
+            foreach ($files as $file) {
+                if ($file === '.' || $file === '..') {
+                    continue;
+                }
+
+                @unlink($this->tempImageDir . DIRECTORY_SEPARATOR . $file);
+            }
+
+            @rmdir($this->tempImageDir);
+        }
+
+        $this->tempImageDir = null;
+        parent::tearDown();
     }
 
     // ========== syncAll Tests ==========
@@ -153,6 +173,149 @@ class ImageSyncTest extends TestCase
 
         $this->assertArrayHasKey('execution_time', $result);
         $this->assertIsFloat($result['execution_time']);
+    }
+
+    public function testSyncAllAutoModeMergesTableAndFolderCandidates(): void
+    {
+        $this->tempImageDir = sys_get_temp_dir() . '/erp_image_sync_' . uniqid('', true);
+        mkdir($this->tempImageDir, 0777, true);
+        file_put_contents($this->tempImageDir . '/SKU-002.jpg', 'folder-image');
+        file_put_contents($this->tempImageDir . '/SKU-003.jpg', 'folder-image');
+
+        $helper = $this->createMock(Helper::class);
+        $helper->method('isImageSyncEnabled')->willReturn(true);
+        $helper->method('getImageSource')->willReturn('auto');
+        $helper->method('getImageBasePath')->willReturn($this->tempImageDir);
+        $helper->method('getImageBaseUrl')->willReturn('');
+
+        $imageSync = new ImageSync(
+            $this->connection,
+            $helper,
+            $this->productRepository,
+            $this->galleryProcessor,
+            $this->mediaGalleryManagement,
+            $this->filesystem,
+            $this->ioFile,
+            $this->syncLogResource,
+            $this->logger,
+            $this->galleryEntryFactory,
+            $this->imageContentFactory
+        );
+
+        $this->connection->method('query')
+            ->willReturnCallback(function (string $sql) {
+                if (strpos($sql, 'FROM PR_MEDIDAIMAGEM') !== false) {
+                    return [
+                        ['CODIGO' => 'SKU-001'],
+                        ['CODIGO' => 'SKU-002'],
+                    ];
+                }
+
+                if (strpos($sql, 'FROM GR_DOCUMENTOS') !== false) {
+                    return [];
+                }
+
+                if (strpos($sql, 'FROM MT_MATERIAL WHERE CODINTERNO') !== false) {
+                    return [];
+                }
+
+                return [];
+            });
+
+        $this->productRepository->method('get')
+            ->willThrowException(new NoSuchEntityException(__('Not found')));
+
+        $result = $imageSync->syncAll();
+
+        $this->assertSame(3, $result['total']);
+        $this->assertSame(3, $result['skipped']);
+        $this->assertSame(0, $result['synced']);
+    }
+
+    public function testSyncAllAutoModePreservesDottedSkuFromFolder(): void
+    {
+        $this->tempImageDir = sys_get_temp_dir() . '/erp_image_sync_' . uniqid('', true);
+        mkdir($this->tempImageDir, 0777, true);
+        file_put_contents($this->tempImageDir . '/0045.01.jpg', 'folder-image');
+
+        $helper = $this->createMock(Helper::class);
+        $helper->method('isImageSyncEnabled')->willReturn(true);
+        $helper->method('getImageSource')->willReturn('auto');
+        $helper->method('getImageBasePath')->willReturn($this->tempImageDir);
+        $helper->method('getImageBaseUrl')->willReturn('');
+
+        $imageSync = new ImageSync(
+            $this->connection,
+            $helper,
+            $this->productRepository,
+            $this->galleryProcessor,
+            $this->mediaGalleryManagement,
+            $this->filesystem,
+            $this->ioFile,
+            $this->syncLogResource,
+            $this->logger,
+            $this->galleryEntryFactory,
+            $this->imageContentFactory
+        );
+
+        $this->connection->method('query')
+            ->willReturn([]);
+
+        $this->productRepository->expects($this->once())
+            ->method('get')
+            ->with('0045.01', false, 0)
+            ->willThrowException(new NoSuchEntityException(__('Not found')));
+
+        $result = $imageSync->syncAll();
+
+        $this->assertSame(1, $result['total']);
+        $this->assertSame(1, $result['skipped']);
+    }
+
+    public function testSyncAllAutoModeMapsCodInternoFilenameToSku(): void
+    {
+        $this->tempImageDir = sys_get_temp_dir() . '/erp_image_sync_' . uniqid('', true);
+        mkdir($this->tempImageDir, 0777, true);
+        file_put_contents($this->tempImageDir . '/68050003.jpg', 'folder-image');
+
+        $helper = $this->createMock(Helper::class);
+        $helper->method('isImageSyncEnabled')->willReturn(true);
+        $helper->method('getImageSource')->willReturn('auto');
+        $helper->method('getImageBasePath')->willReturn($this->tempImageDir);
+        $helper->method('getImageBaseUrl')->willReturn('');
+
+        $imageSync = new ImageSync(
+            $this->connection,
+            $helper,
+            $this->productRepository,
+            $this->galleryProcessor,
+            $this->mediaGalleryManagement,
+            $this->filesystem,
+            $this->ioFile,
+            $this->syncLogResource,
+            $this->logger,
+            $this->galleryEntryFactory,
+            $this->imageContentFactory
+        );
+
+        $this->connection->method('query')
+            ->willReturnCallback(function (string $sql) {
+                if (strpos($sql, 'CAST(CODINTERNO AS VARCHAR(50)) = :cod_interno') !== false) {
+                    return [['CODIGO' => '0070']];
+                }
+
+                return [];
+            });
+
+        $this->productRepository->expects($this->once())
+            ->method('get')
+            ->with('0070', false, 0)
+            ->willThrowException(new NoSuchEntityException(__('Not found')));
+
+        $result = $imageSync->syncAll();
+
+        $this->assertSame(1, $result['total']);
+        $this->assertSame(1, $result['skipped']);
     }
 
     // ========== syncBySku Tests ==========
@@ -320,6 +483,36 @@ class ImageSyncTest extends TestCase
         $this->assertIsArray($result);
     }
 
+    public function testGetErpImagesFromFolderDoesNotMatchPartialSkuPrefix(): void
+    {
+        $this->tempImageDir = sys_get_temp_dir() . '/erp_image_sync_' . uniqid('', true);
+        mkdir($this->tempImageDir, 0777, true);
+        file_put_contents($this->tempImageDir . '/0045.01.jpg', 'folder-image');
+
+        $helper = $this->createMock(Helper::class);
+        $helper->method('isImageSyncEnabled')->willReturn(true);
+        $helper->method('getImageSource')->willReturn('folder');
+        $helper->method('getImageBasePath')->willReturn($this->tempImageDir);
+        $helper->method('getImageBaseUrl')->willReturn('');
+
+        $imageSync = new ImageSync(
+            $this->connection,
+            $helper,
+            $this->productRepository,
+            $this->galleryProcessor,
+            $this->mediaGalleryManagement,
+            $this->filesystem,
+            $this->ioFile,
+            $this->syncLogResource,
+            $this->logger,
+            $this->galleryEntryFactory,
+            $this->imageContentFactory
+        );
+
+        $this->assertSame([], $imageSync->getErpImages('0045'));
+        $this->assertCount(1, $imageSync->getErpImages('0045.01'));
+    }
+
     // ========== cleanOrphanImages Tests ==========
 
     public function testCleanOrphanImagesNotImplemented(): void
@@ -347,17 +540,21 @@ class ImageSyncTest extends TestCase
 
     public function testGetPendingCountReturnsNumber(): void
     {
-        $this->connection->method('fetchOne')
-            ->willReturn(['total' => 150]);
+        $this->connection->method('query')
+            ->willReturn([
+                ['CODIGO' => 'SKU-001'],
+                ['CODIGO' => 'SKU-002'],
+                ['CODIGO' => 'SKU-003'],
+            ]);
 
         $result = $this->imageSync->getPendingCount();
 
-        $this->assertEquals(150, $result);
+        $this->assertEquals(3, $result);
     }
 
     public function testGetPendingCountReturnsZeroOnError(): void
     {
-        $this->connection->method('fetchOne')
+        $this->connection->method('query')
             ->willThrowException(new \Exception('Query failed'));
 
         $result = $this->imageSync->getPendingCount();

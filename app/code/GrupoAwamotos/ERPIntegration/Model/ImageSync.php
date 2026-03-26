@@ -522,25 +522,7 @@ class ImageSync implements ImageSyncInterface
     public function getPendingCount(): int
     {
         try {
-            // Try PR_MEDIDAIMAGEM first (proper product image table)
-            $sql = "SELECT COUNT(*) as total
-                    FROM PR_MEDIDAIMAGEM
-                    WHERE IMAGEM IS NOT NULL";
-            $result = $this->connection->fetchOne($sql);
-            $count = (int) ($result['total'] ?? 0);
-
-            if ($count === 0) {
-                // Fallback: count material docs with image extensions in GR_DOCUMENTOS
-                $sql = "SELECT COUNT(DISTINCT d.CHAVE) as total
-                        FROM GR_DOCUMENTOS d
-                        WHERE d.TPCHAVE = 'MA'
-                          AND d.EXTENSAO IN ('jpg','jpeg','png','gif','webp','JPG','JPEG','PNG')
-                          AND d.DOCUMENTO IS NOT NULL";
-                $result = $this->connection->fetchOne($sql);
-                $count = (int) ($result['total'] ?? 0);
-            }
-
-            return $count;
+            return \count($this->getProductsWithImages());
         } catch (\Exception $e) {
             return 0;
         }
@@ -550,11 +532,53 @@ class ImageSync implements ImageSyncInterface
 
     /**
      * Get products that have images in ERP.
-     * Tries PR_MEDIDAIMAGEM first, then GR_DOCUMENTOS (material images), then folder.
+     * Respects the configured source and, in auto mode, merges table and folder candidates.
      */
     private function getProductsWithImages(): array
     {
-        // 1. Try PR_MEDIDAIMAGEM (proper product image table)
+        $imageSource = $this->helper->getImageSource();
+
+        if ($imageSource === 'table') {
+            return $this->getProductsFromTables();
+        }
+
+        if ($imageSource === 'folder') {
+            return $this->getProductsFromFolder();
+        }
+
+        if ($imageSource === 'url') {
+            // URL mode still needs a candidate SKU list; keep using ERP-backed product lists.
+            return $this->getProductsFromTables();
+        }
+
+        $tableProducts = $this->getProductsFromTables();
+        $folderProducts = $this->getProductsFromFolder();
+        $mergedProducts = $this->mergeProductRows($tableProducts, $folderProducts);
+
+        if (!empty($folderProducts) && \count($mergedProducts) > \count($tableProducts)) {
+            $this->logger->info(sprintf(
+                '[ERP] Auto image sync merged %d table products with %d folder products (%d unique)',
+                \count($tableProducts),
+                \count($folderProducts),
+                \count($mergedProducts)
+            ));
+        }
+
+        if (empty($mergedProducts)) {
+            $this->logger->debug('[ERP] No image candidates found in configured sources');
+        }
+
+        return $mergedProducts;
+    }
+
+    /**
+     * Get products that have images in ERP tables.
+     * Merges PR_MEDIDAIMAGEM and GR_DOCUMENTOS candidates instead of stopping at the first hit.
+     */
+    private function getProductsFromTables(): array
+    {
+        $products = [];
+
         try {
             $sql = "SELECT DISTINCT CODIGO
                     FROM PR_MEDIDAIMAGEM
@@ -562,13 +586,12 @@ class ImageSync implements ImageSyncInterface
                     ORDER BY CODIGO";
             $rows = $this->connection->query($sql);
             if (!empty($rows)) {
-                return $rows;
+                $products = $this->mergeProductRows($products, $rows);
             }
         } catch (\Exception $e) {
             $this->logger->debug('[ERP] PR_MEDIDAIMAGEM not available: ' . $e->getMessage());
         }
 
-        // 2. Fallback: GR_DOCUMENTOS with TPCHAVE='MA' and image extensions
         try {
             $sql = "SELECT DISTINCT d.CHAVE AS CODIGO
                     FROM GR_DOCUMENTOS d
@@ -579,15 +602,34 @@ class ImageSync implements ImageSyncInterface
             $rows = $this->connection->query($sql);
             if (!empty($rows)) {
                 $this->logger->info(sprintf('[ERP] Found %d products with images in GR_DOCUMENTOS', \count($rows)));
-                return $rows;
+                $products = $this->mergeProductRows($products, $rows);
             }
         } catch (\Exception $e) {
             $this->logger->debug('[ERP] GR_DOCUMENTOS fallback failed: ' . $e->getMessage());
         }
 
-        // 3. Final fallback: folder-based approach
-        $this->logger->debug('[ERP] No image tables with data, trying folder source');
-        return $this->getProductsFromFolder();
+        return $products;
+    }
+
+    /**
+     * Merge product candidate rows by CODIGO, preserving the first occurrence order.
+     */
+    private function mergeProductRows(array ...$sources): array
+    {
+        $products = [];
+
+        foreach ($sources as $rows) {
+            foreach ($rows as $row) {
+                $sku = trim((string) ($row['CODIGO'] ?? ''));
+                if ($sku === '' || isset($products[$sku])) {
+                    continue;
+                }
+
+                $products[$sku] = ['CODIGO' => $sku];
+            }
+        }
+
+        return array_values($products);
     }
 
     /**
@@ -716,45 +758,37 @@ class ImageSync implements ImageSyncInterface
     private function getImagesFromFolder(string $sku): array
     {
         $basePath = $this->helper->getImageBasePath();
-        if (empty($basePath)) {
+        if (empty($basePath) || !is_dir($basePath)) {
             return [];
         }
 
-        // Build patterns: first try SKU, then CODINTERNO from ERP
-        $patterns = [
-            $basePath . DIRECTORY_SEPARATOR . $sku . '.*',
-            $basePath . DIRECTORY_SEPARATOR . $sku . '_*.*',
-            $basePath . DIRECTORY_SEPARATOR . strtolower($sku) . '.*',
-            $basePath . DIRECTORY_SEPARATOR . strtoupper($sku) . '.*',
-        ];
+        $identifiers = [$sku];
 
-        // Also try CODINTERNO (the ERP internal code for this material)
         $codInterno = $this->getCodInternoForSku($sku);
         if ($codInterno) {
-            $patterns[] = $basePath . DIRECTORY_SEPARATOR . $codInterno . '.*';
-            $patterns[] = $basePath . DIRECTORY_SEPARATOR . $codInterno . '_*.*';
+            $identifiers[] = $codInterno;
         }
 
-        $images = [];
-        foreach ($patterns as $pattern) {
-            $files = glob($pattern);
-            if ($files) {
-                foreach ($files as $index => $file) {
-                    $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
-                    if (in_array($ext, self::SUPPORTED_EXTENSIONS)) {
-                        $images[] = [
-                            'path' => $file,
-                            'label' => '',
-                            'position' => $index,
-                            'is_main' => $index === 0,
-                        ];
-                    }
-                }
-                break; // Stop on first matching pattern
+        foreach ($identifiers as $identifier) {
+            $files = $this->findFolderFilesByIdentifier($basePath, $identifier);
+            if (empty($files)) {
+                continue;
             }
+
+            $images = [];
+            foreach ($files as $index => $file) {
+                $images[] = [
+                    'path' => $file,
+                    'label' => '',
+                    'position' => $index,
+                    'is_main' => $index === 0,
+                ];
+            }
+
+            return $images;
         }
 
-        return $images;
+        return [];
     }
 
     /**
@@ -762,6 +796,7 @@ class ImageSync implements ImageSyncInterface
      * Cached per-request to avoid repeated ERP queries.
      */
     private array $codInternoCache = [];
+    private array $skuByCodInternoCache = [];
 
     private function getCodInternoForSku(string $sku): ?string
     {
@@ -780,6 +815,71 @@ class ImageSync implements ImageSyncInterface
         }
 
         return $this->codInternoCache[$sku];
+    }
+
+    private function getSkuByCodInterno(string $codInterno): ?string
+    {
+        if (array_key_exists($codInterno, $this->skuByCodInternoCache)) {
+            return $this->skuByCodInternoCache[$codInterno];
+        }
+
+        try {
+            $rows = $this->connection->query(
+                "SELECT TOP 1 CODIGO
+                 FROM MT_MATERIAL
+                 WHERE CAST(CODINTERNO AS VARCHAR(50)) = :cod_interno",
+                [':cod_interno' => $codInterno]
+            );
+            $this->skuByCodInternoCache[$codInterno] = !empty($rows) ? (string) $rows[0]['CODIGO'] : null;
+        } catch (\Exception $e) {
+            $this->skuByCodInternoCache[$codInterno] = null;
+        }
+
+        return $this->skuByCodInternoCache[$codInterno];
+    }
+
+    /**
+     * Find folder images that match an identifier exactly or with Magento gallery suffixes.
+     *
+     * Accepted formats:
+     * - IDENTIFIER.jpg
+     * - IDENTIFIER_1.jpg
+     * - IDENTIFIER_2.png
+     */
+    private function findFolderFilesByIdentifier(string $basePath, string $identifier): array
+    {
+        $files = scandir($basePath);
+        if ($files === false) {
+            return [];
+        }
+
+        $quotedIdentifier = preg_quote($identifier, '/');
+        $matches = [];
+
+        foreach ($files as $file) {
+            if ($file === '.' || $file === '..') {
+                continue;
+            }
+
+            $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+            if (!in_array($ext, self::SUPPORTED_EXTENSIONS, true)) {
+                continue;
+            }
+
+            $filename = pathinfo($file, PATHINFO_FILENAME);
+            if (
+                strcasecmp($filename, $identifier) !== 0
+                && !preg_match('/^' . $quotedIdentifier . '_\d+$/i', $filename)
+            ) {
+                continue;
+            }
+
+            $matches[] = $basePath . DIRECTORY_SEPARATOR . $file;
+        }
+
+        natsort($matches);
+
+        return array_values($matches);
     }
 
     /**
@@ -822,19 +922,6 @@ class ImageSync implements ImageSyncInterface
             return [];
         }
 
-        // Build CODINTERNO→SKU reverse map from ERP
-        $codInternoToSku = [];
-        try {
-            $rows = $this->connection->query(
-                "SELECT CODIGO, CODINTERNO FROM MT_MATERIAL WHERE CODINTERNO IS NOT NULL AND CODINTERNO != 0"
-            );
-            foreach ($rows as $row) {
-                $codInternoToSku[(string) $row['CODINTERNO']] = $row['CODIGO'];
-            }
-        } catch (\Exception $e) {
-            // ERP unavailable — only SKU-named files will work
-        }
-
         $products = [];
         $files = scandir($basePath);
 
@@ -845,14 +932,15 @@ class ImageSync implements ImageSyncInterface
 
             $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
             if (in_array($ext, self::SUPPORTED_EXTENSIONS)) {
-                // Extract identifier from filename (before first underscore or dot)
-                $identifier = preg_replace('/[_.].*$/', '', $file);
+                // Preserve dots inside the SKU and only strip the gallery suffix convention (_1, _2, ...)
+                $identifier = pathinfo($file, PATHINFO_FILENAME);
+                $identifier = preg_replace('/_\d+$/', '', $identifier);
                 if (!$identifier) {
                     continue;
                 }
 
                 // Resolve to SKU: could be a direct SKU or a CODINTERNO
-                $sku = $codInternoToSku[$identifier] ?? $identifier;
+                $sku = $this->getSkuByCodInterno($identifier) ?? $identifier;
 
                 if (!isset($products[$sku])) {
                     $products[$sku] = ['CODIGO' => $sku];

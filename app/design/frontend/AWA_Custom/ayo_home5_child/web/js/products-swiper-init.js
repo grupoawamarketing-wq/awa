@@ -15,9 +15,8 @@
  *   }
  */
 define([
-    'jquery',
-    'swiper'
-], function ($, Swiper) {
+    'jquery'
+], function ($) {
     'use strict';
 
     function buildSwiperOptions(cfg) {
@@ -74,6 +73,21 @@ define([
         };
     }
 
+    function initSwiper($el, owlCfg) {
+        if ($el.data('awaSwiperInit')) { return; }
+        $el.data('awaSwiperInit', 1);
+
+        require(['swiper'], function (Swiper) {
+            if (window.requestAnimationFrame) {
+                window.requestAnimationFrame(function () {
+                    new Swiper($el[0], buildSwiperOptions(owlCfg));
+                });
+            } else {
+                new Swiper($el[0], buildSwiperOptions(owlCfg));
+            }
+        });
+    }
+
     return function (config, element) {
         var $scope = $(element),
             cfg = config || {},
@@ -87,14 +101,20 @@ define([
             return;
         }
 
-        $el.data('awaSwiperInit', 1);
-
-        if (window.requestAnimationFrame) {
-            window.requestAnimationFrame(function () {
-                new Swiper($el[0], buildSwiperOptions(owlCfg));
-            });
+        /* Defer Swiper init until element enters viewport (or fallback) */
+        if ('IntersectionObserver' in window) {
+            var observer = new IntersectionObserver(function (entries) {
+                for (var i = 0; i < entries.length; i++) {
+                    if (entries[i].isIntersecting) {
+                        observer.disconnect();
+                        initSwiper($el, owlCfg);
+                        break;
+                    }
+                }
+            }, { rootMargin: '400px 0px' });
+            observer.observe($el[0]);
         } else {
-            new Swiper($el[0], buildSwiperOptions(owlCfg));
+            initSwiper($el, owlCfg);
         }
     };
 });

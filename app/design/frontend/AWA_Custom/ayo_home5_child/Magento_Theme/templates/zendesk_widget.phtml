@@ -1,3 +1,27 @@
-<!-- Start of awamotos Zendesk Widget script -->
-<script id="ze-snippet" src="https://static.zdassets.com/ekr/snippet.js?key=9a5d615a-79c6-413a-966f-0a0f288c61d4"></script>
-<!-- End of awamotos Zendesk Widget script -->
+<!-- AWA: Zendesk Widget — deferred loading via requestIdleCallback (perf: TBT reduction) -->
+<script>
+(function(w,d){
+    var done=false;
+    function load(){
+        if(done)return;
+        done=true;
+        var s=d.createElement('script');
+        s.id='ze-snippet';
+        s.src='https://static.zdassets.com/ekr/snippet.js?key=9a5d615a-79c6-413a-966f-0a0f288c61d4';
+        s.defer=true;
+        d.body.appendChild(s);
+    }
+    var events=['pointerdown','touchstart','scroll','mouseover'];
+    events.forEach(function(e){
+        w.addEventListener(e,function h(){
+            events.forEach(function(ev){w.removeEventListener(ev,h,true);});
+            load();
+        },{passive:true,capture:true,once:true});
+    });
+    if('requestIdleCallback' in w){
+        w.requestIdleCallback(load,{timeout:4000});
+    } else {
+        w.setTimeout(load,4000);
+    }
+})(window,document);
+</script>

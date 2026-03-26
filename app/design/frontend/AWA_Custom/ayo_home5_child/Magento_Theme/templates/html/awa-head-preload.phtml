@@ -32,6 +32,11 @@ $cssPreloads = [];
 // A tipografia base volta a ser controlada pelo Theme Options do Rokanthemes.
 $fontPreloads = [];
 
+// === JS Preload (early fetch for modules loaded later by RequireJS) ===
+$jsPreloads = [
+    $block->getViewFileUrl('js/swiper-bundle.min.js'), // 151KB — used by 8 carousels, discovered late by RequireJS
+];
+
 // === Async CSS Bundles (defer via media="print" + onload — não bloqueiam render) ===
 $asyncBundles = [
     $block->getViewFileUrl('css/swiper-bundle.min.css'),
@@ -56,6 +61,10 @@ $asyncBundles = [
 <!-- AWA Head Preload — Fonts -->
 <?php foreach ($fontPreloads as $item): ?>
 <link rel="preload" href="<?= $block->escapeUrl($item['url']) ?>" as="font" type="font/woff2" crossorigin="anonymous"<?= $item['priority'] ? ' fetchpriority="' . $block->escapeHtmlAttr($item['priority']) . '"' : '' ?>/>
+<?php endforeach; ?>
+<!-- AWA Head Preload — JS (early fetch for RequireJS discovered modules) -->
+<?php foreach ($jsPreloads as $jsUrl): ?>
+<link rel="preload" href="<?= $block->escapeUrl($jsUrl) ?>" as="script"/>
 <?php endforeach; ?>
 <!-- AWA Async CSS Bundles — media="print" swap (non-render-blocking) -->
 <?php foreach ($asyncBundles as $cssUrl): ?>
