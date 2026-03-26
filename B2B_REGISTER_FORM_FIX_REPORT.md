@@ -1,7 +1,7 @@
 # B2B Register Form Layout — Investigação & Solução Completa
 
-**Data:** 26 de março de 2026  
-**Commit:** `89e36f3b`  
+**Data:** 26 de março de 2026
+**Commit:** `89e36f3b`
 **Status:** ✅ **RESOLVIDO E DEPLOYADO**
 
 ---
@@ -14,8 +14,8 @@ A página de cadastro B2B (`https://awamotos.com/pt_br/b2b/register`) **não est
 - `awa-search-forms-v4.css` (melhorias de formulários)
 
 ### Sintomas Reportados
-❌ Formulário de cadastro não estava de "de acordo com as melhorias"  
-❌ Layout dos forms não mostrava o design refinado esperado  
+❌ Formulário de cadastro não estava de "de acordo com as melhorias"
+❌ Layout dos forms não mostrava o design refinado esperado
 ❌ Inputs e labels não refletiam os padrões de UX melhorados
 
 ---
@@ -38,9 +38,9 @@ Havia um **conflito de especificidade CSS não resolvido**:
 
 ```
 Timeline de carregamento:
-1. Theme layout (b2b_auth_shell.xml theme) 
+1. Theme layout (b2b_auth_shell.xml theme)
    └─ awa-bundle-auth.css: .b2b-register-page .b2b-register-form .field .input-text { ... }
-   
+
 2. Module layout (b2b_register_index.xml module)
    └─ register.css: html body .page-wrapper .b2b-register-page .field .input-text { ... }
                     ↑ MAIS ESPECÍFICO — SOBRESCREVE!
@@ -91,7 +91,7 @@ Timeline de carregamento:
 **Efeito:** Carregado APÓS o module layout, sobrescreve register.css com match de specificity.
 
 #### 2️⃣ CSS Override - Form Improvements
-**Caminho:** `app/design/frontend/AWA_Custom/ayo_home5_child/web/css/b2b/register-override.css`  
+**Caminho:** `app/design/frontend/AWA_Custom/ayo_home5_child/web/css/b2b/register-override.css`
 **Tamanho:** 7.3 KB (minificado: 4.2 KB)
 
 **Conteúdo:**
@@ -292,6 +292,6 @@ Interactions:
 
 ---
 
-**Fim da investigação e solução**  
-Commit: `89e36f3b`  
+**Fim da investigação e solução**
+Commit: `89e36f3b`
 Data: 26 Mar 2026, 14:35 UTC
