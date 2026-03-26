@@ -12,9 +12,10 @@
  * Limita a 2 re-tentativas por template para evitar loops infinitos.
  */
 define([
+    'require',
     'Magento_Ui/js/lib/knockout/template/loader',
     'jquery'
-], function (loader, $) {
+], function (require, loader, $) {
     'use strict';
 
     /** Contador de re-tentativas por template path */
@@ -25,6 +26,54 @@ define([
 
     /** Delay (ms) antes de cada re-tentativa */
     var RETRY_DELAY_MS = 300;
+
+    /**
+     * Limpa o modulo RequireJS do template para permitir uma carga realmente nova.
+     *
+     * @param {String} tmplPath
+     */
+    function resetTemplateModule(tmplPath) {
+        var formattedPath = loader.formatPath(tmplPath);
+        var requireInstance = typeof requirejs !== 'undefined' ? requirejs : require;
+
+        if (typeof requireInstance.undef === 'function') {
+            requireInstance.undef(formattedPath);
+        }
+    }
+
+    /**
+     * Executa as re-tentativas dentro da mesma promise, evitando que o source
+     * do Knockout fique preso em estado vazio depois da primeira falha.
+     *
+     * @param {String} tmplPath
+     * @param {Object} renderer
+     * @param {jQuery.Deferred} deferred
+     */
+    function retryFreshLoad(tmplPath, renderer, deferred) {
+        var attempts = retryAttempts[tmplPath] || 0;
+
+        if (attempts >= MAX_RETRIES) {
+            deferred.reject();
+
+            return;
+        }
+
+        retryAttempts[tmplPath] = attempts + 1;
+
+        window.setTimeout(function () {
+            resetTemplateModule(tmplPath);
+
+            loader.loadTemplate(tmplPath)
+                .then(renderer.parseTemplate)
+                .done(function (result) {
+                    retryAttempts[tmplPath] = 0;
+                    deferred.resolve(result);
+                })
+                .fail(function () {
+                    retryFreshLoad(tmplPath, renderer, deferred);
+                });
+        }, RETRY_DELAY_MS);
+    }
 
     return function (renderer) {
         var originalRender = renderer.render.bind(renderer);
@@ -41,33 +90,11 @@ define([
             var originalPromise = originalRender(tmplPath);
             var deferred = $.Deferred();
 
-            originalPromise.then(function (result) {
+            originalPromise.done(function (result) {
                 retryAttempts[tmplPath] = 0;
                 deferred.resolve(result);
             }).fail(function () {
-                var attempts = retryAttempts[tmplPath] || 0;
-
-                if (attempts >= MAX_RETRIES) {
-                    // Esgotou as re-tentativas — propaga a falha
-                    deferred.reject();
-                    return;
-                }
-
-                retryAttempts[tmplPath] = attempts + 1;
-
-                // Re-tentativa direta: bypass do cache do renderer
-                setTimeout(function () {
-                    loader.loadTemplate(tmplPath)
-                        .then(renderer.parseTemplate)
-                        .then(function (result) {
-                            deferred.resolve(result);
-                        })
-                        .fail(function () {
-                            // Outra falha — incrementar e tentar novamente recursivamente
-                            // (será tratado na próxima chamada a makeTemplateSource)
-                            deferred.reject();
-                        });
-                }, RETRY_DELAY_MS);
+                retryFreshLoad(tmplPath, renderer, deferred);
             });
 
             return deferred.promise();

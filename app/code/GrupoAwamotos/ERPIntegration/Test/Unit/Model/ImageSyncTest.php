@@ -536,6 +536,86 @@ class ImageSyncTest extends TestCase
         );
     }
 
+    public function testCleanOrphanImagesCastsProductIdFromConnection(): void
+    {
+        $helper = $this->createMock(Helper::class);
+        $helper->method('isOrphanCleanupEnabled')->willReturn(true);
+        $helper->method('isOrphanCleanupDryRun')->willReturn(true);
+        $helper->method('shouldKeepManualImages')->willReturn(true);
+        $helper->method('getImageSource')->willReturn('auto');
+        $helper->method('getImageBasePath')->willReturn('/mnt/erp/images');
+        $helper->method('getImageBaseUrl')->willReturn('');
+
+        $select = new class {
+            public function from(array $from, array $columns = []): self
+            {
+                return $this;
+            }
+
+            public function join(array $name, string $cond, array $cols = []): self
+            {
+                return $this;
+            }
+
+            public function group(string $spec): self
+            {
+                return $this;
+            }
+        };
+
+        $connection = new class ($select) {
+            private object $select;
+
+            public function __construct(object $select)
+            {
+                $this->select = $select;
+            }
+
+            public function getTableName(string $tableName): string
+            {
+                return $tableName;
+            }
+
+            public function select(): object
+            {
+                return $this->select;
+            }
+
+            public function fetchAll(object $select): array
+            {
+                return [['product_id' => '123', 'sku' => 'SKU-123']];
+            }
+        };
+
+        $this->syncLogResource->method('getConnection')->willReturn($connection);
+
+        $this->productRepository->expects($this->once())
+            ->method('getById')
+            ->with(123)
+            ->willThrowException(new NoSuchEntityException(__('Not found')));
+
+        $imageSync = new ImageSync(
+            $this->connection,
+            $helper,
+            $this->productRepository,
+            $this->galleryProcessor,
+            $this->mediaGalleryManagement,
+            $this->filesystem,
+            $this->ioFile,
+            $this->syncLogResource,
+            $this->logger,
+            $this->galleryEntryFactory,
+            $this->imageContentFactory
+        );
+
+        $result = $imageSync->cleanOrphanImages();
+
+        $this->assertSame(1, $result['products_checked']);
+        $this->assertSame(0, $result['errors']);
+        $this->assertSame(0, $result['removed']);
+        $this->assertTrue($result['dry_run']);
+    }
+
     // ========== getPendingCount Tests ==========
 
     public function testGetPendingCountReturnsNumber(): void

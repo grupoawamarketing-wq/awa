@@ -317,7 +317,7 @@ class ImageSync implements ImageSyncInterface
                 try {
                     $orphansRemoved = $this->cleanOrphansForProduct(
                         $productData['sku'],
-                        $productData['product_id'],
+                        (int) $productData['product_id'],
                         $isDryRun,
                         $keepManual,
                         $result['orphans_found']
