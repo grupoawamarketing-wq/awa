@@ -296,7 +296,7 @@ class CircuitBreaker
             return true;
         }
 
-        return (time() - $openedAt) >= self::OPEN_TIMEOUT;
+        return (time() - $openedAt) >= $this->helper->getCircuitBreakerOpenTimeout();
     }
 
     private function getTimeUntilHalfOpen(): int
@@ -309,7 +309,7 @@ class CircuitBreaker
 
         $openedAt = $data['opened_at'] ?? 0;
         $elapsed = time() - $openedAt;
-        $remaining = self::OPEN_TIMEOUT - $elapsed;
+        $remaining = $this->helper->getCircuitBreakerOpenTimeout() - $elapsed;
 
         return max(0, $remaining);
     }
