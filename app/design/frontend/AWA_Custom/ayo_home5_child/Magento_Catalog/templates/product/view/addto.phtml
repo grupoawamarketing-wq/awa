@@ -1,0 +1,35 @@
+<?php
+/**
+ * Copyright © 2015 Magento. All rights reserved.
+ * See COPYING.txt for license details.
+ *
+ * AWA Motos child theme override — ayo_home5_child
+ * Fix PDP-I18N-01: Translate title attributes for wishlist/compare buttons
+ */
+
+// @codingStandardsIgnoreFile
+
+/** @var $block \Magento\Catalog\Block\Product\View*/
+?>
+<?php
+$_product = $block->getProduct();
+$_wishlistSubmitParams = $this->helper('Magento\Wishlist\Helper\Data')->getAddParams($_product);
+$compareHelper = $this->helper('Magento\Catalog\Helper\Product\Compare');
+?>
+
+<?php if ($this->helper('Magento\Wishlist\Helper\Data')->isAllow()) : ?>
+	<a href="#" title="<?= $block->escapeHtmlAttr(__('Add To Wishlist')) ?>"
+		class="action towishlist wishlist-link"
+		data-post='<?php /* @escapeNotVerified */ echo $_wishlistSubmitParams; ?>'
+		data-action="add-to-wishlist"><i class="fa fa-heart"></i></a>
+<?php endif; ?>
+<a href="#" title="<?= $block->escapeHtmlAttr(__('Add To Compare')) ?>" data-post='<?php /* @escapeNotVerified */ echo $compareHelper->getPostDataParams($_product);?>'
+	data-role="add-to-links"
+	class="action tocompare compare-link"><i class="fa fa-retweet"></i></a>
+<script type="text/x-magento-init">
+    {
+        "body": {
+            "addToWishlist": <?php /* @escapeNotVerified */ echo $this->helper('Magento\Framework\Json\Helper\Data')->jsonEncode($block->getWishlistOptions())?>
+        }
+    }
+</script>
