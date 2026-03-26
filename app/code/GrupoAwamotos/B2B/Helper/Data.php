@@ -301,29 +301,16 @@ class Data extends AbstractHelper
     }
 
     /**
-     * Get discount percentage for customer group (reads from admin config)
+     * Get discount percentage for customer group.
+     * Pricing is managed exclusively by the ERP (GroupPricePlugin).
+     * No group-based discounts are applied.
      *
      * @param int $groupId
      * @return float
      */
     public function getGroupDiscount(int $groupId): float
     {
-        $wholesaleId = $this->b2bConfig->getWholesaleGroupId() ?: self::GROUP_B2B_ATACADO;
-        $vipId = $this->b2bConfig->getVipGroupId() ?: self::GROUP_B2B_VIP;
-        $pendingId = $this->getPendingGroupId();
-
-        if ($groupId === $wholesaleId) {
-            return $this->b2bConfig->getWholesaleDiscount() ?: 15.0;
-        }
-        if ($groupId === $vipId) {
-            return $this->b2bConfig->getVipDiscount() ?: 20.0;
-        }
-        if ($groupId === $pendingId) {
-            return 0.0;
-        }
-
-        // Revendedor or other B2B groups: fallback 10%
-        return in_array($groupId, $this->getB2BGroupIds()) ? 10.0 : 0.0;
+        return 0.0;
     }
 
     /**
