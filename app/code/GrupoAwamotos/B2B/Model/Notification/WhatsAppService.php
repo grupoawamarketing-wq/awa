@@ -18,6 +18,7 @@ class WhatsAppService
     private const CONFIG_PATH_PROVIDER = 'grupoawamotos_b2b/whatsapp/provider';
     private const CONFIG_PATH_API_URL = 'grupoawamotos_b2b/whatsapp/api_url';
     private const CONFIG_PATH_API_KEY = 'grupoawamotos_b2b/whatsapp/api_key';
+    private const CONFIG_PATH_CLIENT_TOKEN = 'grupoawamotos_b2b/whatsapp/client_token';
     private const CONFIG_PATH_INSTANCE_ID = 'grupoawamotos_b2b/whatsapp/instance_id';
     private const CONFIG_PATH_DEFAULT_NUMBER = 'grupoawamotos_b2b/whatsapp/default_number';
 
@@ -218,9 +219,12 @@ class WhatsAppService
         // Formato correto da Z-API: /instances/{instanceId}/token/{token}/send-text
         $url = rtrim($apiUrl, '/') . "/instances/{$instanceId}/token/{$apiKey}/send-text";
 
-        $this->curl->setHeaders([
-            'Content-Type' => 'application/json'
-        ]);
+        $headers = ['Content-Type' => 'application/json'];
+        $clientToken = $this->getConfigValue(self::CONFIG_PATH_CLIENT_TOKEN);
+        if ($clientToken) {
+            $headers['Client-Token'] = $clientToken;
+        }
+        $this->curl->setHeaders($headers);
 
         // Z-API espera o campo 'phone' com código do país
         $payload = json_encode([
