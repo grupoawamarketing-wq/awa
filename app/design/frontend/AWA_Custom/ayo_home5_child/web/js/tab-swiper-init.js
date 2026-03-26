@@ -15,9 +15,8 @@
  *   }
  */
 define([
-    'jquery',
-    'swiper'
-], function ($, Swiper) {
+    'jquery'
+], function ($) {
     'use strict';
 
     /* ─── Utilities ─── */
@@ -269,7 +268,17 @@ define([
         var carouselSel = config.carouselSelector,
             owlCfg = config.owl || config.swiper || {},
             baseOpts = buildSwiperOptions(owlCfg),
-            instances = {};
+            instances = {},
+            SwiperClass = null,
+            pendingContainers = [];
+
+        function loadSwiper(callback) {
+            if (SwiperClass) { callback(); return; }
+            require(['swiper'], function (Swiper) {
+                SwiperClass = Swiper;
+                callback();
+            });
+        }
 
         function destroyIn($container) {
             if (!$container || !$container.length) { return; }
@@ -284,7 +293,7 @@ define([
             });
         }
 
-        function ensureIn($container) {
+        function createSwiper($container) {
             if (!$container || !$container.length || !carouselSel) { return; }
 
             $container.find(carouselSel).each(function () {
@@ -297,7 +306,6 @@ define([
                 key = $el.data('awaSwiperKey');
 
                 if (key && instances[key]) {
-                    /* Already initialized — just update on tab switch */
                     instances[key].update();
                     return;
                 }
@@ -309,10 +317,27 @@ define([
                 $el.data('awaSwiperKey', key);
 
                 try {
-                    instance = new Swiper(el, baseOpts);
+                    instance = new SwiperClass(el, baseOpts);
                     instances[key] = instance;
                 } catch (e) {
                     $el.removeData('awaSwiperInit');
+                }
+            });
+        }
+
+        function ensureIn($container) {
+            if (!$container || !$container.length || !carouselSel) { return; }
+
+            if (SwiperClass) {
+                createSwiper($container);
+                return;
+            }
+
+            pendingContainers.push($container);
+            loadSwiper(function () {
+                var pending = pendingContainers.splice(0);
+                for (var i = 0; i < pending.length; i++) {
+                    createSwiper(pending[i]);
                 }
             });
         }
@@ -326,62 +351,83 @@ define([
     /* ─── Main entry ─── */
 
     return function (config, element) {
-        var $scope = $(element),
-            currentConfig = config || {},
-            carouselSel = currentConfig.carouselSelector,
-            tabsSel = currentConfig.tabsSelector || 'ul.tabs li',
-            contentSel = currentConfig.contentSelector || '.tab_content',
-            swiperMgr = initSwiperManager(currentConfig),
-            visibilityTimer = null;
+        var $scope = $(element);
 
-        function ensureActiveCarousel() {
-            var $activeTab = $scope.find(tabsSel + '.active').first(),
-                $panel = findPanel($scope, tabsSel, contentSel, $activeTab);
+        if (!$scope.length) { return; }
 
-            raf(function () {
-                if (!$scope.is(':visible') || ($panel.length && !$panel.is(':visible'))) {
-                    if (!visibilityTimer) {
-                        visibilityTimer = setTimeout(function () {
-                            visibilityTimer = null;
-                            ensureActiveCarousel();
-                        }, 120);
+        function bootstrap() {
+            var currentConfig = config || {},
+                carouselSel = currentConfig.carouselSelector,
+                tabsSel = currentConfig.tabsSelector || 'ul.tabs li',
+                contentSel = currentConfig.contentSelector || '.tab_content',
+                swiperMgr = initSwiperManager(currentConfig),
+                visibilityTimer = null;
+
+            function ensureActiveCarousel() {
+                var $activeTab = $scope.find(tabsSel + '.active').first(),
+                    $panel = findPanel($scope, tabsSel, contentSel, $activeTab);
+
+                raf(function () {
+                    if (!$scope.is(':visible') || ($panel.length && !$panel.is(':visible'))) {
+                        if (!visibilityTimer) {
+                            visibilityTimer = setTimeout(function () {
+                                visibilityTimer = null;
+                                ensureActiveCarousel();
+                            }, 120);
+                        }
+                        return;
                     }
-                    return;
-                }
-                swiperMgr.ensureIn($panel.length ? $panel : $scope);
+                    swiperMgr.ensureIn($panel.length ? $panel : $scope);
+                });
+            }
+
+            initTabs($scope, currentConfig, function ($panel) {
+                raf(function () {
+                    if (!$panel || !$panel.length) {
+                        swiperMgr.ensureIn($scope);
+                        return;
+                    }
+
+                    var $lazyCarousel = carouselSel
+                        ? $panel.find(carouselSel + '[data-lazy-url]')
+                        : $panel.find('[data-lazy-url]');
+
+                    if ($lazyCarousel.length) {
+                        loadLazyTab($lazyCarousel, function () {
+                            swiperMgr.ensureIn($panel);
+                        });
+                        return;
+                    }
+
+                    swiperMgr.ensureIn($panel);
+                });
             });
+
+            /* Resize handler */
+            var resizeNs = '.awaSwiperResize-' + Math.random().toString(36).slice(2, 9);
+
+            $(window).off(resizeNs).on('resize' + resizeNs, debounce(function () {
+                ensureActiveCarousel();
+            }, 200));
+
+            /* Initial carousel for active tab */
+            ensureActiveCarousel();
         }
 
-        initTabs($scope, currentConfig, function ($panel) {
-            raf(function () {
-                if (!$panel || !$panel.length) {
-                    swiperMgr.ensureIn($scope);
-                    return;
+        /* Defer entire tab+swiper init until element enters viewport */
+        if ('IntersectionObserver' in window) {
+            var observer = new IntersectionObserver(function (entries) {
+                for (var i = 0; i < entries.length; i++) {
+                    if (entries[i].isIntersecting) {
+                        observer.disconnect();
+                        bootstrap();
+                        break;
+                    }
                 }
-
-                var $lazyCarousel = carouselSel
-                    ? $panel.find(carouselSel + '[data-lazy-url]')
-                    : $panel.find('[data-lazy-url]');
-
-                if ($lazyCarousel.length) {
-                    loadLazyTab($lazyCarousel, function () {
-                        swiperMgr.ensureIn($panel);
-                    });
-                    return;
-                }
-
-                swiperMgr.ensureIn($panel);
-            });
-        });
-
-        /* Resize handler */
-        var resizeNs = '.awaSwiperResize-' + Math.random().toString(36).slice(2, 9);
-
-        $(window).off(resizeNs).on('resize' + resizeNs, debounce(function () {
-            ensureActiveCarousel();
-        }, 200));
-
-        /* Initial carousel for active tab */
-        ensureActiveCarousel();
+            }, { rootMargin: '400px 0px' });
+            observer.observe($scope[0]);
+        } else {
+            bootstrap();
+        }
     };
 });
