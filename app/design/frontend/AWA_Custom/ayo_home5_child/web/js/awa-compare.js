@@ -17,6 +17,34 @@ define(['jquery', 'mage/url'], function ($, urlBuilder) {
     var MODAL_ID    = 'awa-compare-modal';
     var isInitialized = false;
 
+    function shouldDisableCompareUi() {
+        var body = document.body;
+        if (!body) {
+            return false;
+        }
+
+        return body.classList.contains('b2b-register-index') ||
+            body.classList.contains('b2b-auth-shell') ||
+            body.classList.contains('b2b-account-login') ||
+            body.classList.contains('b2b-account-forgotpassword') ||
+            body.classList.contains('b2b-account-claim') ||
+            body.classList.contains('customer-account-login') ||
+            body.classList.contains('customer-account-create');
+    }
+
+    function removeCompareUiArtifacts() {
+        var bar = document.getElementById(BAR_ID);
+        var modal = document.getElementById(MODAL_ID);
+
+        if (bar && bar.parentNode) {
+            bar.parentNode.removeChild(bar);
+        }
+
+        if (modal && modal.parentNode) {
+            modal.parentNode.removeChild(modal);
+        }
+    }
+
     /* ---- Attributes to compare ---- */
     var COMPARE_ATTRS = [
         { code: 'price',            label: 'Preço',           type: 'price' },
@@ -324,7 +352,18 @@ define(['jquery', 'mage/url'], function ($, urlBuilder) {
         if (isInitialized) {
             return;
         }
+
+        if (!document.body) {
+            document.addEventListener('DOMContentLoaded', init, { once: true });
+            return;
+        }
+
         isInitialized = true;
+
+        if (shouldDisableCompareUi()) {
+            removeCompareUiArtifacts();
+            return;
+        }
 
         /* Bind all existing compare buttons */
         document.querySelectorAll('[data-compare-add]').forEach(function (btn) {
