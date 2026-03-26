@@ -1,5 +1,5 @@
-/** AWA Service Worker v2.0.0 — Stale-While-Revalidate Strategy (2026-03-23) */
-const CACHE_VERSION = 'awa-v20260323';
+/** AWA Service Worker v2.1.0 — Stale-While-Revalidate Strategy (2026-03-26) */
+const CACHE_VERSION = 'awa-v20260326';
 const FONT_CACHE = 'awa-fonts-v1';
 
 /* Patterns to cache with stale-while-revalidate */
