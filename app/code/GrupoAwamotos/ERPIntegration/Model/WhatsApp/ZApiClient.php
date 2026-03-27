@@ -21,10 +21,16 @@ use Psr\Log\LoggerInterface;
 class ZApiClient
 {
     private const API_BASE_URL = 'https://api.z-api.io/instances';
+    private const WARNING_COOLDOWN_SECONDS = 21600;
+    private const LOCK_DIR = '/var/locks';
+    private const MISSING_CLIENT_TOKEN_LOCK = 'zapi_missing_client_token.lock';
+    private const MISSING_CLIENT_TOKEN_MESSAGE =
+        'Client Token required by this Z-API instance. Configure grupoawamotos_erp/whatsapp/zapi_client_token or ENV ZAPI_CLIENT_TOKEN.';
 
     private Helper $helper;
     private Curl $curl;
     private LoggerInterface $logger;
+    private ?string $lastErrorMessage = null;
 
     public function __construct(
         Helper $helper,
@@ -459,7 +465,7 @@ class ZApiClient
             return [
                 'success' => false,
                 'connected' => false,
-                'message' => 'Could not retrieve status',
+                'message' => $this->lastErrorMessage ?? 'Could not retrieve status',
             ];
 
         } catch (\Exception $e) {
@@ -577,6 +583,14 @@ class ZApiClient
      */
     private function sendRequest(string $endpoint, array $payload = [], string $method = 'POST'): ?array
     {
+        $this->lastErrorMessage = null;
+
+        if ($this->shouldSkipRequestForKnownMissingClientToken()) {
+            $this->lastErrorMessage = self::MISSING_CLIENT_TOKEN_MESSAGE;
+            $this->logMissingClientTokenWarning($endpoint);
+            return null;
+        }
+
         $url = $this->getApiUrl($endpoint);
 
         // Add Client-Token header if configured
@@ -611,6 +625,15 @@ class ZApiClient
             }
 
             $errorMessage = $responseData['message'] ?? $responseData['error'] ?? 'Unknown error';
+            $this->lastErrorMessage = $errorMessage;
+
+            if ($this->isMissingClientTokenError($errorMessage)) {
+                $this->rememberMissingClientTokenRequirement();
+                $this->lastErrorMessage = self::MISSING_CLIENT_TOKEN_MESSAGE;
+                $this->logMissingClientTokenWarning($endpoint);
+                return null;
+            }
+
             $this->logger->error(sprintf(
                 '[Z-API] Error (%d) on %s: %s',
                 $httpCode,
@@ -621,6 +644,7 @@ class ZApiClient
             return null;
 
         } catch (\Exception $e) {
+            $this->lastErrorMessage = $e->getMessage();
             $this->logger->error('[Z-API] Request error: ' . $e->getMessage());
             return null;
         }
@@ -699,5 +723,144 @@ class ZApiClient
     public function isReengagementEnabled(): bool
     {
         return $this->isConfigured() && $this->helper->isWhatsAppReengagementEnabled();
+    }
+
+    private function isMissingClientTokenError(string $errorMessage): bool
+    {
+        return stripos($errorMessage, 'client-token') !== false
+            && stripos($errorMessage, 'not configured') !== false;
+    }
+
+    private function shouldSkipRequestForKnownMissingClientToken(): bool
+    {
+        if ($this->helper->getZApiClientToken() !== '') {
+            return false;
+        }
+
+        $state = $this->readMissingClientTokenState();
+        if ($state === null) {
+            return false;
+        }
+
+        return $state['fingerprint'] === $this->buildMissingClientTokenFingerprint()
+            && (time() - $state['timestamp']) < self::WARNING_COOLDOWN_SECONDS;
+    }
+
+    private function rememberMissingClientTokenRequirement(): void
+    {
+        $filePath = $this->getLockFilePath(self::MISSING_CLIENT_TOKEN_LOCK);
+        if ($filePath === null) {
+            return;
+        }
+
+        @file_put_contents(
+            $filePath,
+            time() . '|' . $this->buildMissingClientTokenFingerprint(),
+            LOCK_EX
+        );
+        @chmod($filePath, 0664);
+    }
+
+    /**
+     * @return array{timestamp: int, fingerprint: string}|null
+     */
+    private function readMissingClientTokenState(): ?array
+    {
+        $filePath = $this->getLockFilePath(self::MISSING_CLIENT_TOKEN_LOCK);
+        if ($filePath === null || !is_file($filePath)) {
+            return null;
+        }
+
+        $raw = trim((string) @file_get_contents($filePath));
+        if ($raw === '') {
+            return null;
+        }
+
+        [$timestampRaw, $fingerprint] = array_pad(explode('|', $raw, 2), 2, '');
+        $timestamp = (int) $timestampRaw;
+
+        if ($timestamp <= 0 || $fingerprint === '') {
+            return null;
+        }
+
+        return [
+            'timestamp' => $timestamp,
+            'fingerprint' => $fingerprint,
+        ];
+    }
+
+    private function buildMissingClientTokenFingerprint(): string
+    {
+        return md5(implode('|', [
+            (string) (int) $this->helper->isWhatsAppEnabled(),
+            $this->helper->getZApiInstanceId(),
+            $this->helper->getZApiToken(),
+            $this->helper->getZApiClientToken(),
+        ]));
+    }
+
+    private function logMissingClientTokenWarning(string $endpoint): void
+    {
+        if (!$this->shouldLogWarningWithCooldown('zapi_missing_client_token')) {
+            return;
+        }
+
+        $this->logger->warning('[Z-API] ' . self::MISSING_CLIENT_TOKEN_MESSAGE, [
+            'endpoint' => $endpoint,
+            'config_path' => 'grupoawamotos_erp/whatsapp/zapi_client_token',
+            'env_var' => 'ZAPI_CLIENT_TOKEN',
+        ]);
+    }
+
+    private function getLockFilePath(string $filename): ?string
+    {
+        $basePath = defined('BP') ? BP : sys_get_temp_dir();
+        $lockDir = rtrim($basePath, '/') . self::LOCK_DIR;
+
+        if (!is_dir($lockDir) && !@mkdir($lockDir, 0775, true) && !is_dir($lockDir)) {
+            return null;
+        }
+
+        return $lockDir . '/' . $filename;
+    }
+
+    private function shouldLogWarningWithCooldown(string $key): bool
+    {
+        $filePath = $this->getLockFilePath('zapi_warn_' . preg_replace('/[^a-z0-9_]+/i', '_', $key) . '.lock');
+        if ($filePath === null) {
+            return true;
+        }
+
+        $handle = @fopen($filePath, 'c+');
+        if ($handle === false) {
+            return true;
+        }
+
+        @chmod($filePath, 0664);
+
+        if (!flock($handle, LOCK_EX)) {
+            fclose($handle);
+            return true;
+        }
+
+        try {
+            rewind($handle);
+            $last = (int) trim((string) stream_get_contents($handle));
+            $now = time();
+
+            if ($last > 0 && ($now - $last) < self::WARNING_COOLDOWN_SECONDS) {
+                return false;
+            }
+
+            ftruncate($handle, 0);
+            rewind($handle);
+            fwrite($handle, (string) $now);
+            fflush($handle);
+
+            return true;
+        } finally {
+            flock($handle, LOCK_UN);
+            fclose($handle);
+        }
     }
 }
