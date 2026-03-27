@@ -67,7 +67,7 @@ class ContactInfo implements ArgumentInterface
 
     public function getWhatsAppDigits(): string
     {
-        return $this->normalizePhone($this->getWhatsAppNumber());
+        return $this->normalizePhoneForDial($this->getWhatsAppNumber());
     }
 
     public function getWhatsAppUrl(): string
@@ -94,10 +94,17 @@ class ContactInfo implements ArgumentInterface
 
     public function getPhone(): string
     {
-        return (string) $this->scopeConfig->getValue(
-            self::XML_PATH_PHONE,
-            ScopeInterface::SCOPE_STORE
-        );
+        $phone = trim($this->getPhoneRaw());
+
+        if ($phone === '') {
+            return '';
+        }
+
+        if ((bool) preg_match('/\D+/', $phone)) {
+            return $phone;
+        }
+
+        return $this->formatPhoneForDisplay($phone);
     }
 
     public function hasPhone(): bool
@@ -107,22 +114,19 @@ class ContactInfo implements ArgumentInterface
 
     public function getPhoneDigits(): string
     {
-        return $this->normalizePhone($this->getPhone());
+        return $this->normalizePhone($this->getPhoneRaw());
     }
 
     public function getPhoneUrl(): string
     {
-        $digits = $this->getPhoneDigits();
+        $digits = $this->normalizePhoneForDial($this->getPhoneRaw());
 
         return $digits !== '' ? 'tel:+' . $digits : '';
     }
 
     public function getEmail(): string
     {
-        return (string) $this->scopeConfig->getValue(
-            self::XML_PATH_EMAIL,
-            ScopeInterface::SCOPE_STORE
-        );
+        return $this->normalizeEmail($this->getEmailRaw());
     }
 
     public function hasEmail(): bool
@@ -145,6 +149,83 @@ class ContactInfo implements ArgumentInterface
     private function normalizePhone(string $value): string
     {
         return (string) preg_replace('/\D+/', '', $value);
+    }
+
+    private function normalizePhoneForDial(string $value): string
+    {
+        $digits = $this->normalizePhone($value);
+
+        if ($digits === '') {
+            return '';
+        }
+
+        if (str_starts_with($digits, '55')) {
+            return $digits;
+        }
+
+        if (strlen($digits) === 10 || strlen($digits) === 11) {
+            return '55' . $digits;
+        }
+
+        return $digits;
+    }
+
+    private function formatPhoneForDisplay(string $value): string
+    {
+        $digits = $this->normalizePhone($value);
+
+        if (str_starts_with($digits, '55') && strlen($digits) === 12) {
+            $digits = substr($digits, 2);
+        }
+
+        if (str_starts_with($digits, '55') && strlen($digits) === 13) {
+            $digits = substr($digits, 2);
+        }
+
+        if (strlen($digits) === 11) {
+            return sprintf('(%s) %s-%s', substr($digits, 0, 2), substr($digits, 2, 5), substr($digits, 7, 4));
+        }
+
+        if (strlen($digits) === 10) {
+            return sprintf('(%s) %s-%s', substr($digits, 0, 2), substr($digits, 2, 4), substr($digits, 6, 4));
+        }
+
+        return $value;
+    }
+
+    private function normalizeEmail(string $value): string
+    {
+        $email = trim(strtolower($value));
+
+        if ($email === '') {
+            return '';
+        }
+
+        if ((bool) preg_match('/^[^@\s]+@grupoawamotos\.com\.br$/i', $email)) {
+            $email = (string) preg_replace('/@grupoawamotos\.com\.br$/i', '@awamotos.com.br', $email);
+        }
+
+        if ((bool) preg_match('/^[^@\s]+@awamotos\.com(?:\.br)*/i', $email)) {
+            $email = (string) preg_replace('/@awamotos\.com(?:\.br)*/i', '@awamotos.com.br', $email);
+        }
+
+        return filter_var($email, FILTER_VALIDATE_EMAIL) ? $email : '';
+    }
+
+    private function getPhoneRaw(): string
+    {
+        return (string) $this->scopeConfig->getValue(
+            self::XML_PATH_PHONE,
+            ScopeInterface::SCOPE_STORE
+        );
+    }
+
+    private function getEmailRaw(): string
+    {
+        return (string) $this->scopeConfig->getValue(
+            self::XML_PATH_EMAIL,
+            ScopeInterface::SCOPE_STORE
+        );
     }
 
     public function isQuoteFabEnabled(): bool
