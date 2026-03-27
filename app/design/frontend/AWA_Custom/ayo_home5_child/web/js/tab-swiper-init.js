@@ -233,10 +233,10 @@ define([
         return {
             slidesPerView: mobileItems,
             spaceBetween: parseInt(cfg.margin, 10) || 16,
-            navigation: {
+            navigation: cfg.navigation !== false ? {
                 nextEl: '.swiper-button-next',
                 prevEl: '.swiper-button-prev'
-            },
+            } : false,
             pagination: cfg.pagination ? {
                 el: '.swiper-pagination',
                 clickable: true
@@ -250,7 +250,7 @@ define([
             watchOverflow: true,
             slidesPerGroup: cfg.scrollPerPage ? undefined : 1,
             breakpoints: {
-                480: { slidesPerView: Math.max(mobileItems, 2), spaceBetween: 12 },
+                480: { slidesPerView: Math.min(Math.max(mobileItems, 2), items), spaceBetween: 12 },
                 768: { slidesPerView: tabletItems, spaceBetween: 16 },
                 992: { slidesPerView: desktopSmallItems, spaceBetween: 16 },
                 1200: { slidesPerView: desktopItems, spaceBetween: 20 }

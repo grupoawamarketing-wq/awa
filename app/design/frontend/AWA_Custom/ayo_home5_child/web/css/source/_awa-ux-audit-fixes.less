@@ -1,0 +1,811 @@
+/* 
+ * AWA UX/UI Audit Fixes 
+ * Targets specific visual bugs identified via MCP audit
+ */
+
+/* 1. Global Vignette Effect (P1)
+ * Remove strange inner blue shadow around the page wrapper on all breakpoints 
+ */
+body.awa-ds,
+body.awa-ds .page-wrapper,
+body.awa-ds .page-main,
+body.awa-ds .page-wrapper::before,
+body.awa-ds .page-wrapper::after,
+body::before,
+body::after {
+    box-shadow: none !important;
+}
+
+/* 2. Floating Chat Widget (P0)
+ * The chat widget "Olá. Precisa de ajuda?" blocks the screen heavily on mobile.
+ * We apply a scale and target common third-party chat widget wrappers containing span texts.
+ */
+@media (max-width: 768px) {
+    div[id*="zapi"], 
+    div[id*="jivo"], 
+    div[class*="whatsapp"], 
+    div[class*="chat-widget"] {
+        max-width: 60px !important;
+        transform: scale(0.85);
+        transform-origin: bottom right;
+        margin-bottom: 20px;
+    }
+    
+    div[class*="whatsapp"] span, 
+    div[class*="chat-widget"] span,
+    div[id*="zapi"] span {
+        display: none !important;
+    }
+
+    /* Target third-party iframe (like JivoChat/Zendesk) */
+    iframe#launcher,
+    iframe[title*="mensagens"] {
+        max-width: 65px !important;
+        overflow: hidden !important;
+        border-radius: 50% !important;
+        transform-origin: right bottom;
+    }
+}
+
+/* 3. Banner Slider Dots on Mobile (P0)
+ * Swiper pagination inherits a large mobile nav background. We reset it.
+ */
+@media (max-width: 768px) {
+    body.awa-ds .rokanthemes-slide .swiper-pagination,
+    body.awa-ds .swiper-pagination {
+        background: transparent !important;
+        border: none !important;
+        padding: 10px 0 !important;
+        width: 100% !important;
+        bottom: 5px !important;
+    }
+}
+
+/* 4. Header Break at 1024px Tablet (P0)
+ * The header compresses and elements overlap. We allow wrap and adjust margins.
+ */
+@media (min-width: 768px) and (max-width: 1200px) {
+    body.awa-ds .awa-main-header .awa-main-header__inner {
+        flex-wrap: wrap !important;
+        justify-content: space-between !important;
+    }
+    
+    body.awa-ds .awa-main-header .awa-header-search-col {
+        order: 3;
+        flex: 1 1 100% !important;
+        margin-top: 15px;
+        max-width: 100% !important;
+    }
+}
+
+/* 5. Product Card Boundaries and Button Alignment (P2)
+ * Improve contrast and alignment so products don't blend with background.
+ */
+body.awa-ds .item-product,
+body.awa-ds .product-item-info {
+    border: 1px solid rgba(0, 0, 0, 0.06) !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+}
+
+body.awa-ds .product-item-details {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+body.awa-ds .product-item-inner,
+body.awa-ds .price-box,
+body.awa-ds .login-for-price {
+    margin-top: auto;
+}
+
+/* Fix product swiper arrows overlapping */
+body.awa-ds .swiper-button-next,
+body.awa-ds .swiper-button-prev,
+body.awa-ds .owl-next,
+body.awa-ds .owl-prev {
+    background-color: rgba(255, 255, 255, 0.8) !important;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* 6. B2B Dashboard — Sidebar Navigation Refinement
+ * Force inactive links to gray (overriding AYO default red)
+ * Force active/current link to have red left border
+ */
+body.account .sidebar-main .block-collapsible-nav .nav.item a {
+    color: #4b5563 !important;
+    font-weight: 500 !important;
+    font-size: 14px !important;
+    padding: 12px 20px !important;
+    border-left: 3px solid transparent !important;
+    text-decoration: none !important;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+body.account .sidebar-main .block-collapsible-nav .nav.item a:hover {
+    background: rgba(183, 51, 55, 0.04) !important;
+    color: #b73337 !important;
+    border-left-color: rgba(183, 51, 55, 0.25) !important;
+    text-decoration: none !important;
+}
+
+body.account .sidebar-main .block-collapsible-nav .nav.item.current a,
+body.account .sidebar-main .block-collapsible-nav .nav.item.current > strong {
+    background: rgba(183, 51, 55, 0.06) !important;
+    color: #b73337 !important;
+    font-weight: 600 !important;
+    border-left-color: #b73337 !important;
+}
+
+/* =================================================================
+   PLP & PDP — UI/UX Audit Fixes
+   ================================================================= */
+
+/* 7. Product Listing Page (PLP) Vitrine Refinements
+ * Suavizar tipografia CAIXA ALTA agressiva e adicionar bordas estilo cartão.
+ */
+body.catalog-category-view .product-item-link,
+body.catalogsearch-result-index .product-item-link,
+.products-grid .product-item-link {
+    text-transform: capitalize !important;
+    font-weight: 500 !important;
+    line-height: 1.4 !important;
+    letter-spacing: -0.01em !important;
+}
+
+body.catalog-category-view .product-item-info,
+body.catalogsearch-result-index .product-item-info,
+.products-grid .product-item-info {
+    border: 1px solid #f3f4f6 !important;
+    border-radius: 12px !important;
+    transition: all 0.25s ease !important;
+    padding-bottom: 12px !important; 
+}
+body.catalog-category-view .product-item-info:hover,
+body.catalogsearch-result-index .product-item-info:hover,
+.products-grid .product-item-info:hover {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
+    border-color: #e5e7eb !important;
+    transform: translateY(-2px);
+}
+
+/* 8. PDP: Spec Sheet (Product Attributes)
+ * Convert raw red/gray Magento table to clean zebrastripe attributes
+ */
+.product-info-main table.data.table.additional-attributes {
+    border-collapse: collapse !important;
+    width: 100% !important;
+    border: none !important;
+    margin-bottom: 24px !important;
+}
+.product-info-main table.data.table.additional-attributes tr {
+    background: transparent !important;
+    border-bottom: 1px solid #e5e7eb !important;
+}
+.product-info-main table.data.table.additional-attributes th {
+    padding: 10px 0 !important;
+    font-weight: 600 !important;
+    color: #4b5563 !important;
+    border: none !important;
+    background: transparent !important;
+    width: 40% !important;
+}
+.product-info-main table.data.table.additional-attributes td {
+    padding: 10px 0 !important;
+    color: #1f2937 !important;
+    border: none !important;
+    font-weight: 500 !important;
+}
+
+/* 9. PDP: Stock Status Pill Badge */
+.product-info-main .stock.available {
+    display: inline-flex !important;
+    align-items: center !important;
+    background-color: #dcfce7 !important;
+    color: #166534 !important;
+    padding: 4px 12px !important;
+    border-radius: 9999px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    margin-bottom: 15px !important;
+}
+.product-info-main .stock.available::before {
+    content: '' !important;
+    display: inline-block !important;
+    width: 6px !important;
+    height: 6px !important;
+    background-color: #16a34a !important;
+    border-radius: 50% !important;
+    margin-right: 6px !important;
+    box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.2) !important;
+}
+
+/* 10. PDP: Buy Box Harmonization */
+/* Bring quantity and add-to-cart on the same aesthetic baseline */
+.product-info-main .box-tocart {
+    margin: 24px 0 !important;
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 12px !important;
+    padding: 20px !important;
+}
+.product-info-main .box-tocart .fieldset {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    margin: 0 !important;
+}
+.product-info-main .box-tocart .field.qty {
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    background: #fff !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 8px !important;
+    height: 48px !important;
+    overflow: hidden !important;
+}
+.product-info-main .box-tocart .field.qty .control {
+    display: flex !important;
+    align-items: center !important;
+    height: 100% !important;
+}
+.product-info-main .box-tocart .qty {
+    width: 60px !important;
+    height: 100% !important;
+    border: none !important;
+    text-align: center !important;
+    font-weight: 600 !important;
+    color: #1e293b !important;
+    padding: 0 !important;
+    background: transparent !important;
+}
+
+/* Add to cart button */
+.product-info-main .box-tocart .actions {
+    flex-grow: 1 !important;
+}
+.product-info-main .box-tocart .action.tocart {
+    width: 100% !important;
+    height: 48px !important;
+    border-radius: 8px !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    background: #b73337 !important;
+    border: none !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 4px 6px -1px rgba(183, 51, 55, 0.2) !important;
+}
+.product-info-main .box-tocart .action.tocart:hover {
+    background: #8e2629 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 8px -1px rgba(183, 51, 55, 0.3) !important;
+}
+
+/* 11. PDP: Secondary Actions Grid (B2B Tools) */
+.product-info-main .product-social-links,
+.product-info-main .b2b-pdp-actions {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 12px !important;
+    margin-top: 16px !important;
+}
+/* Replace full width list buttons with proper sized grid items */
+.product-info-main .action.towishlist,
+.product-info-main .action.tocompare,
+.product-info-main .b2b-btn,
+.product-info-main .btn-cotacao,
+.product-info-main .btn-imprimir {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    height: 44px !important;
+    border-radius: 8px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+    background: #fff !important;
+    color: #475569 !important;
+    border: 1px solid #cbd5e1 !important;
+    transition: all 0.2s ease !important;
+    margin: 0 !important;
+    padding: 0 16px !important;
+}
+.product-info-main .action.towishlist:hover,
+.product-info-main .action.tocompare:hover,
+.product-info-main .b2b-btn:hover,
+.product-info-main .btn-cotacao:hover,
+.product-info-main .btn-imprimir:hover {
+    background: #f8fafc !important;
+    border-color: #94a3b8 !important;
+    color: #1e293b !important;
+    text-decoration: none !important;
+}
+
+.product-info-main .product-addto-links .action.towishlist {
+    grid-column: 1 / -1 !important;
+}
+
+/* 12. PDP: Features Cards (Compra Segura, Entrega Rápida) */
+.product-info-main .widget-features,
+.product-info-main .custom-features-block {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 12px !important;
+    margin-top: 24px !important;
+    background: #fff !important;
+    border: 1px solid #f1f5f9 !important;
+    padding: 16px !important;
+    border-radius: 12px !important;
+}
+.product-info-main .custom-features-block .feature-item {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    padding: 8px !important;
+    background: transparent !important;
+    border: none !important;
+}
+.product-info-main .custom-features-block .feature-item i,
+.product-info-main .custom-features-block .feature-item svg {
+    font-size: 20px !important;
+    color: #6366f1 !important;
+    margin-bottom: 8px !important;
+}
+.product-info-main .custom-features-block .feature-title {
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    color: #1e293b !important;
+    margin-bottom: 2px !important;
+}
+.product-info-main .custom-features-block .feature-desc {
+    font-size: 10px !important;
+    color: #64748b !important;
+}
+
+/* 13. PDP: Tabs Modernization */
+.product.data.items {
+    margin-top: 48px !important;
+}
+.product.data.items > .item.title {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+}
+.product.data.items > .item.title > .switch {
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 2px solid transparent !important;
+    color: #64748b !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    padding: 12px 24px !important;
+    text-transform: none !important;
+    transition: all 0.2s ease !important;
+}
+.product.data.items > .item.title.active > .switch {
+    color: #b73337 !important;
+    border-bottom: 2px solid #b73337 !important;
+}
+.product.data.items > .item.content {
+    background: #fff !important;
+    border: none !important;
+    border-top: 1px solid #e2e8f0 !important;
+    padding: 32px 0 0 0 !important;
+    margin-top: -1px !important;
+    box-shadow: none !important;
+}
+
+/* =================================================================
+   CART & CHECKOUT — UI/UX Audit Fixes
+   ================================================================= */
+
+/* 14. Cart Table Structural Cleanup */
+.cart.table-wrapper .cart.item {
+    border: none !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+}
+.cart.table-wrapper .data.table tbody td,
+.cart.table-wrapper .data.table thead th {
+    border-left: none !important;
+    border-right: none !important;
+    border-top: none !important;
+}
+.cart.table-wrapper .data.table thead {
+    background: transparent !important;
+    border-bottom: 2px solid #cbd5e1 !important;
+}
+.cart.table-wrapper .data.table thead th {
+    font-size: 11px !important;
+    text-transform: uppercase !important;
+    font-weight: 700 !important;
+    color: #475569 !important;
+    letter-spacing: 0.5px !important;
+}
+
+/* 15. Cart Quantity Horizontal Alignment */
+.checkout-cart-index .cart.item .field.qty {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+.checkout-cart-index .cart.item .control.qty {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 6px !important;
+    overflow: hidden !important;
+    background: #fff !important;
+    width: auto !important;
+}
+.checkout-cart-index .cart.item .control.qty .qty-decrease,
+.checkout-cart-index .cart.item .control.qty .qty-increase {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 32px !important;
+    height: 38px !important;
+    background: #f1f5f9 !important;
+    border: none !important;
+    color: #475569 !important;
+    cursor: pointer !important;
+    font-size: 16px !important;
+}
+.checkout-cart-index .cart.item .control.qty .input-text.qty {
+    width: 44px !important;
+    height: 38px !important;
+    text-align: center !important;
+    border-left: 1px solid #cbd5e1 !important;
+    border-right: 1px solid #cbd5e1 !important;
+    border-top: none !important;
+    border-bottom: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    font-weight: 600 !important;
+    color: #1e293b !important;
+}
+/* For standard AYO vertical placement overrides */
+.checkout-cart-index .cart.item .control.qty > div,
+.checkout-cart-index .cart.item .control.qty > a {
+    position: static !important;
+    margin: 0 !important;
+}
+
+/* 16. Cart Item Actions Simplification */
+.checkout-cart-index .cart.item .actions-toolbar .action {
+    background: transparent !important;
+    color: #94a3b8 !important;
+    border: none !important;
+    box-shadow: none !important;
+    width: auto !important;
+    height: auto !important;
+    padding: 8px !important;
+    transition: color 0.2s ease !important;
+}
+.checkout-cart-index .cart.item .actions-toolbar .action:before {
+    font-size: 18px !important;
+}
+.checkout-cart-index .cart.item .actions-toolbar .action:hover {
+    color: #b73337 !important;
+    background: transparent !important;
+}
+
+/* 17. Cart Summary Block Elevation */
+.cart-summary {
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 12px !important;
+    padding: 24px !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
+}
+.cart-summary .summary.title {
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    color: #1e293b !important;
+    margin-bottom: 24px !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    padding-bottom: 12px !important;
+}
+
+/* 18. One Step Checkout Flat Design Unification */
+/* Transform generic outlined cards into crisp modern boxes */
+.opc-wrapper .step-title, 
+.opc-wrapper .checkout-shipping-address,
+.opc-wrapper .checkout-shipping-method,
+.opc-wrapper .checkout-payment-method {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 12px !important;
+    padding: 20px !important;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+    margin-bottom: 20px !important;
+}
+
+/* Order Summary Box alignment */
+.opc-block-summary {
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 12px !important;
+    padding: 24px !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Highlight Selected Address / Shipping / Payment */
+.opc-wrapper .shipping-address-item.selected-item,
+.opc-wrapper .payment-method._active {
+    border-color: #b73337 !important;
+    box-shadow: 0 0 0 1px #b73337, 0 4px 6px -1px rgba(183, 51, 55, 0.1) !important;
+    background-color: #fffafb !important;
+}
+.opc-wrapper .shipping-address-item {
+    border-radius: 8px !important;
+    border: 1px solid #e2e8f0 !important;
+    transition: all 0.2s ease !important;
+}
+
+/* Refine warning colors so it doesn't look like an error */
+.message.error,
+.message-error {
+    background: #fffbeb !important;
+    color: #92400e !important;
+    border-left: 4px solid #f59e0b !important;
+    border-radius: 0 8px 8px 0 !important;
+}
+
+/* Complete Order Button Harmony */
+.action.primary.checkout,
+.actions-toolbar .action.primary {
+    background: #b73337 !important;
+    border-radius: 8px !important;
+    height: 54px !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    border: none !important;
+    box-shadow: 0 4px 6px -1px rgba(183, 51, 55, 0.25) !important;
+    transition: all 0.2s ease !important;
+}
+.action.primary.checkout:hover,
+.actions-toolbar .action.primary:hover {
+    background: #8e2629 !important;
+    box-shadow: 0 6px 8px -1px rgba(183, 51, 55, 0.4) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* =================================================================
+   HEADER & VERTICAL MENU — UI/UX SaaS Refinements
+   ================================================================= */
+
+/* 19. Search Bar Cleanup */
+.block-search input[type="text"] {
+    border-radius: 8px 0 0 8px !important;
+    box-shadow: none !important; /* Remove red/pink glow */
+    border: 1px solid #e2e8f0 !important;
+    padding: 0 16px !important;
+    font-size: 14px !important;
+}
+.block-search input[type="text"]:focus {
+    border-color: #b73337 !important;
+}
+.block-search .action.search {
+    border-radius: 0 8px 8px 0 !important;
+    box-shadow: none !important;
+    border: 1px solid #b73337 !important;
+}
+
+/* 20. B2B Contact Block Harmonization */
+/* Targeting custom static blocks in Ayo header usually holding WhatsApp */
+.header.content .custom-block,
+.header.content .header-contact-block {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 12px !important;
+}
+.header.content .custom-block p {
+    margin: 0 !important;
+    font-size: 12px !important;
+    color: #475569 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+}
+.header.content .custom-block a {
+    color: #1e293b !important;
+    font-weight: 600 !important;
+    text-decoration: none !important;
+}
+.header.content .custom-block a:hover {
+    color: #b73337 !important;
+}
+
+/* 21. Vertical Menu (Todas as Categorias Dropdown) */
+.cms-index-index .navigation.verticalmenu,
+.vertical-menu-content {
+    background-color: #ffffff !important;
+    border-radius: 0 0 12px 12px !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1) !important;
+    border: 1px solid #e2e8f0 !important;
+    border-top: none !important;
+    padding: 8px 0 !important;
+}
+.vertical-menu-content li.level0 {
+    border-bottom: 1px solid #f1f5f9 !important;
+}
+.vertical-menu-content li.level0:last-child {
+    border-bottom: none !important;
+}
+.vertical-menu-content li.level0 > a {
+    padding: 12px 20px !important;
+    color: #475569 !important;
+    font-weight: 500 !important;
+    transition: all 0.2s ease !important;
+    background: transparent !important;
+}
+.vertical-menu-content li.level0:hover > a {
+    color: #1e293b !important;
+    background-color: #f8fafc !important;
+    padding-left: 24px !important;
+    font-weight: 600 !important;
+}
+/* Parent Button "Todas as categorias" */
+.btn-vertical-menu,
+.vertical-menu-heading,
+.block-verticalmenu .title {
+    border-radius: 8px 8px 0 0 !important;
+    box-shadow: none !important;
+    background: #b73337 !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    border: none !important;
+}
+
+/* 22. Header Top Utilities (Minha Conta / Sair) */
+.header.panel > .header.links > li {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+.header.panel > .header.links > li > a {
+    font-size: 12px !important;
+    color: #475569 !important;
+    font-weight: 600 !important;
+    transition: color 0.2s ease !important;
+}
+.header.panel > .header.links > li > a:hover {
+    color: #b73337 !important;
+    text-decoration: none !important;
+}
+
+/* 23. Horizontal Menu Typography */
+.navigation > ul > li > a {
+    font-weight: 600 !important;
+    color: #334155 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    transition: color 0.2s ease !important;
+}
+.navigation > ul > li:hover > a {
+    color: #b73337 !important;
+}
+
+/* =================================================================
+   MINICART DROPDOWN — Critical Fixes
+   ================================================================= */
+
+/* 24. Minicart Container & Panel */
+.block-minicart {
+    background: #ffffff !important;
+    border-radius: 12px !important;
+    box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.18) !important;
+    border: 1px solid #e2e8f0 !important;
+    padding: 24px !important;
+    width: 380px !important; /* give it proper width */
+}
+
+/* 25. Broken "Círculos Vazios" (Viewcart actions) */
+/* Reset AYO border-radius 50% and sizes on viewcart action buttons */
+.block-minicart .action.viewcart {
+    border-radius: 6px !important;
+    width: auto !important;
+    height: auto !important;
+    margin: 8px auto !important;
+    padding: 10px 16px !important;
+    display: inline-flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    background: transparent !important;
+    color: #475569 !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    text-transform: none !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+.block-minicart .action.viewcart:hover {
+    color: #b73337 !important;
+    text-decoration: underline !important;
+}
+/* Force text back if it was hidden via text-indent or color */
+.block-minicart .action.viewcart > span {
+    display: inline-block !important;
+    text-indent: 0 !important;
+    font-size: 14px !important;
+    color: inherit !important;
+}
+
+/* 26. Close Button Fix (X) */
+.block-minicart #btn-minicart-close {
+    width: 32px !important;
+    height: 32px !important;
+    background: #f1f5f9 !important;
+    border-radius: 50% !important;
+    position: absolute !important;
+    top: 12px !important;
+    right: 12px !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    color: #475569 !important;
+    border: none !important;
+}
+.block-minicart #btn-minicart-close:before {
+    font-size: 20px !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+}
+.block-minicart #btn-minicart-close:hover {
+    background: #e2e8f0 !important;
+    color: #1e293b !important;
+}
+
+/* 27. Primary Checkout Button Harmony */
+.block-minicart .action.primary.checkout {
+    background: #b73337 !important;
+    border-radius: 8px !important;
+    height: 54px !important;
+    width: 100% !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    box-shadow: 0 4px 6px -1px rgba(183, 51, 55, 0.25) !important;
+    margin-top: 16px !important;
+}
+
+/* 28. Subtotal Block */
+.block-minicart .subtotal {
+    margin: 16px 0 !important;
+    padding-top: 16px !important;
+    border-top: 1px solid #e2e8f0 !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+}
+.block-minicart .subtotal .label {
+    font-weight: 500 !important;
+    color: #475569 !important;
+}
+.block-minicart .subtotal .price-container .price {
+    font-weight: 700 !important;
+    color: #1e293b !important;
+    font-size: 18px !important;
+}
+
+/* Ensure empty/loading state doesn't look weird */
+.block-minicart .empty {
+    font-size: 14px !important;
+    color: #64748b !important;
+    text-align: center !important;
+    padding: 24px 0 !important;
+}

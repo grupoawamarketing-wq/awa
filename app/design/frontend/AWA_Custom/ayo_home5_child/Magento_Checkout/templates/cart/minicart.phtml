@@ -7,7 +7,7 @@ declare(strict_types=1);
  * - Remove ObjectManager usage
  * - Harden JSON/static URLs against control characters
  *
- * @var $block \Magento\Checkout\Block\Cart\Sidebar
+ * @var \Magento\Checkout\Block\Cart\Sidebar $block
  */
 
 $sanitizeUrl = static function (?string $value): string {
@@ -154,7 +154,32 @@ $blockLoaderUrl = $sanitizeUrl($block->getViewFileUrl('images/loader-1.gif'));
         </div>
     <?php endif ?>
     <script>
-        window.checkout = <?= /* @noEscape */ $serializedCheckoutConfig ?>;
+        (function () {
+            var minicartConfig = <?= /* @noEscape */ $serializedCheckoutConfig ?> || {};
+            var fallbackCheckoutConfig = Object.assign({
+                storeCode: '',
+                quoteData: {
+                    entity_id: null,
+                    is_virtual: 0,
+                    is_persistent: 0
+                },
+                quoteItemData: [],
+                totalsData: {
+                    items: [],
+                    subtotal: 0,
+                    total_segments: []
+                },
+                priceFormat: minicartConfig.priceFormat || {},
+                basePriceFormat: minicartConfig.basePriceFormat || minicartConfig.priceFormat || {}
+            }, minicartConfig);
+
+            window.checkout = minicartConfig;
+            window.checkoutConfig = Object.assign(
+                {},
+                fallbackCheckoutConfig,
+                window.checkoutConfig || {}
+            );
+        }());
     </script>
     <script type="text/x-magento-init">
     {

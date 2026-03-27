@@ -1877,6 +1877,88 @@ body.rokanthemes-onepagecheckout {
     --awa-cc-transition: 280ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* ==========================================================
+   PURCHASE FLOW HEADER — cart route only
+   Keep the storefront header brand/search utilities, but remove
+   the noisy top strip and full navigation while the user is in cart.
+   ========================================================== */
+
+body.checkout-cart-index .page-wrapper .awa-site-header .top-header,
+body.checkout-cart-index .page-wrapper .awa-site-header .header-control.header-nav {
+    display: none !important;
+}
+
+body.checkout-cart-index .page-wrapper .awa-site-header .header,
+body.checkout-cart-index .page-wrapper .awa-site-header .header_main,
+body.checkout-cart-index .page-wrapper .awa-site-header .header-main {
+    padding: 0 !important;
+    margin: 0 !important;
+    min-height: auto !important;
+}
+
+body.checkout-cart-index .page-wrapper .awa-site-header .header .wp-header {
+    display: grid !important;
+    grid-template-columns: minmax(140px, 220px) minmax(0, 1fr) auto;
+    align-items: center !important;
+    column-gap: clamp(12px, 2vw, 24px) !important;
+    padding: 12px 0 14px !important;
+    min-height: auto !important;
+    height: auto !important;
+}
+
+body.checkout-cart-index .page-wrapper .awa-site-header .header .wp-header .awa-header-brand-cell,
+body.checkout-cart-index .page-wrapper .awa-site-header .header .wp-header > .top-search,
+body.checkout-cart-index .page-wrapper .awa-site-header .header .wp-header .awa-header-contact-slot {
+    min-width: 0 !important;
+}
+
+body.checkout-cart-index .page-wrapper .awa-site-header .header .wp-header > .top-search {
+    width: auto !important;
+    max-width: none !important;
+}
+
+body.checkout-cart-index .header-container {
+    border-bottom: 1px solid var(--awa-cc-border) !important;
+    box-shadow: 0 1px 3px rgb(15 23 42 / 4%) !important;
+}
+
+@media (width <= 991px) {
+    body.checkout-cart-index .page-wrapper .awa-site-header .header .wp-header {
+        grid-template-columns: minmax(0, 1fr);
+        justify-items: center;
+        row-gap: 12px;
+    }
+
+    body.checkout-cart-index .page-wrapper .awa-site-header .header .wp-header .awa-header-primary-row {
+        display: contents !important;
+    }
+
+    body.checkout-cart-index .page-wrapper .awa-site-header .header .wp-header .nav-toggle,
+    body.checkout-cart-index .page-wrapper .awa-site-header .header .wp-header .mini-cart-wrapper,
+    body.checkout-cart-index .page-wrapper .awa-site-header .header .wp-header .awa-header-cart-link {
+        display: none !important;
+    }
+
+    body.checkout-cart-index .page-wrapper .awa-site-header .header .wp-header .awa-header-brand-cell {
+        width: fit-content !important;
+        max-width: none !important;
+    }
+
+    body.checkout-cart-index .page-wrapper .awa-site-header .header .wp-header .awa-header-contact-slot {
+        display: none !important;
+    }
+
+    body.checkout-cart-index .page-wrapper .awa-site-header .header .wp-header > .top-search {
+        width: min(100%, 320px) !important;
+        justify-self: stretch;
+    }
+
+    body.checkout-cart-index .page-wrapper .awa-site-header .header .wp-header > .top-search > .block-search,
+    body.checkout-cart-index .page-wrapper .awa-site-header .header .wp-header > .top-search .control {
+        width: 100% !important;
+    }
+}
+
 body.checkout-cart-index .page-wrapper .page-main,
 body.checkout-index-index .page-wrapper .page-main,
 body.rokanthemes-onepagecheckout .page-wrapper .page-main {
@@ -5419,6 +5501,13 @@ body .page-wrapper .awa-site-header .awa-header-actions {
     min-width: 0;
 }
 
+/* Prevent legacy refinements (.header .top-search { max-width:600px; flex:1; }) from compressing AWA header actions */
+body .page-wrapper .awa-site-header .header .top-search.awa-header-actions,
+body .page-wrapper .awa-site-header .awa-header-actions {
+    max-width: none !important;
+    flex: 0 1 auto !important;
+}
+
 body .page-wrapper .awa-site-header .awa-header-actions > .block-search {
     min-width: 0;
 }
@@ -5517,7 +5606,11 @@ body .page-wrapper .awa-site-header .awa-header-contact-slot {
     justify-self: end;
 }
 
-body .page-wrapper .awa-site-header .awa-header-contact-slot .hoteline_header,
+/* On non-checkout pages, avoid duplicated contact cards in header */
+body:not(.rokanthemes-onepagecheckout) .page-wrapper .awa-site-header .awa-header-contact-slot .hoteline_header {
+    display: none !important;
+}
+
 body .page-wrapper .awa-site-header .awa-header-contact-slot .whatsapp-hotline {
     display: inline-flex;
     align-items: center;
@@ -5700,6 +5793,14 @@ body .page-wrapper .awa-site-header .awa-header-actions > .block-search .action.
     body .page-wrapper .awa-site-header .awa-header-actions {
         grid-template-columns: minmax(0, 2.35fr) 52px minmax(126px, 0.42fr);
     }
+
+    body .page-wrapper .awa-site-header .awa-header-contact-slot .hotline-label {
+        display: none;
+    }
+
+    body .page-wrapper .awa-site-header .awa-header-contact-slot .hotline-wrap {
+        gap: var(--awa-gap-1-5, var(--awa-space-1-5));
+    }
 }
 
 @media (max-width: 1199px) {
@@ -5725,6 +5826,22 @@ body .page-wrapper .awa-site-header .awa-header-actions > .block-search .action.
     body .page-wrapper .awa-site-header .awa-header-actions {
         width: auto !important;
         float: none !important;
+    }
+
+    body .page-wrapper .awa-site-header .awa-header-actions {
+        grid-template-columns: minmax(0, 2.2fr) 52px minmax(132px, 0.52fr);
+        align-items: center;
+        gap: var(--awa-gap-2-5, var(--awa-space-2-5));
+    }
+
+    body .page-wrapper .awa-site-header .awa-header-contact-slot {
+        grid-column: auto;
+        justify-self: end;
+        align-self: center;
+    }
+
+    body .page-wrapper .awa-site-header .awa-search-kbd-hint {
+        display: none;
     }
 }
 

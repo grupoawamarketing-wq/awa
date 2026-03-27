@@ -127,19 +127,36 @@ define([
         }
 
         /* Defer until element enters viewport */
+        var initDone = false;
+
+        function safeDoInit() {
+            if (initDone) { return; }
+            initDone = true;
+            doInit();
+        }
+
         if ('IntersectionObserver' in window) {
             var observer = new IntersectionObserver(function (entries) {
                 for (var i = 0; i < entries.length; i++) {
                     if (entries[i].isIntersecting) {
                         observer.disconnect();
-                        doInit();
+                        safeDoInit();
                         break;
                     }
                 }
             }, { rootMargin: '400px 0px' });
             observer.observe($scope[0]);
+
+            /* Fallback: if IO never fires within 8s (e.g. element was
+               hidden during observe), initialize anyway */
+            setTimeout(function () {
+                if (!initDone && $scope[0].offsetWidth > 0) {
+                    observer.disconnect();
+                    safeDoInit();
+                }
+            }, 8000);
         } else {
-            doInit();
+            safeDoInit();
         }
     };
 });
