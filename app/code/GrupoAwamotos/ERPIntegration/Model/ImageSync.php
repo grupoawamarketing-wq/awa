@@ -7,6 +7,7 @@ use GrupoAwamotos\ERPIntegration\Api\ImageSyncInterface;
 use GrupoAwamotos\ERPIntegration\Api\ConnectionInterface;
 use GrupoAwamotos\ERPIntegration\Helper\Data as Helper;
 use GrupoAwamotos\ERPIntegration\Model\ResourceModel\SyncLog as SyncLogResource;
+use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Api\Data\ProductAttributeMediaGalleryEntryInterfaceFactory;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Catalog\Model\Product\Gallery\Processor as GalleryProcessor;
@@ -39,6 +40,9 @@ class ImageSync implements ImageSyncInterface
 
     private ?string $mediaPath = null;
     private ?string $tmpPath = null;
+    private bool $isBatchSyncRunning = false;
+    private array $missingMagentoCandidates = [];
+    private array $resolvedMagentoCandidates = [];
 
     public function __construct(
         ConnectionInterface $connection,
@@ -82,6 +86,7 @@ class ImageSync implements ImageSyncInterface
         }
 
         $startTime = microtime(true);
+        $this->startBatchDiagnostics();
 
         try {
             $products = $this->getProductsWithImages();
@@ -144,6 +149,9 @@ class ImageSync implements ImageSyncInterface
         } catch (\Exception $e) {
             $this->logger->error('[ERP] Image sync failed: ' . $e->getMessage());
             $this->syncLogResource->addLog('image', 'import', 'error', $e->getMessage());
+        } finally {
+            $this->flushBatchDiagnostics();
+            $this->resetBatchDiagnostics();
         }
 
         return $result;
@@ -151,15 +159,21 @@ class ImageSync implements ImageSyncInterface
 
     public function syncBySku(string $sku): bool
     {
+        $requestedSku = trim($sku);
+
         try {
-            // Load product in global scope (store_id=0) so save applies to all stores
-            $product = $this->productRepository->get($sku, false, 0);
+            ['product' => $product, 'sku' => $productSku] = $this->loadProductForImageSync($requestedSku);
         } catch (NoSuchEntityException $e) {
-            $this->logger->debug('[ERP] Product not found in Magento for image sync: ' . $sku);
+            $this->recordMissingMagentoCandidate($requestedSku);
+
+            if (!$this->isBatchSyncRunning) {
+                $this->logger->debug('[ERP] Product not found in Magento for image sync: ' . $requestedSku);
+            }
+
             return false;
         }
 
-        $erpImages = $this->getErpImages($sku);
+        $erpImages = $this->getErpImagesForSync($requestedSku, $productSku);
 
         if (empty($erpImages)) {
             return false; // No images in source
@@ -175,13 +189,13 @@ class ImageSync implements ImageSyncInterface
                     continue;
                 }
 
-                $tmpFile = $this->downloadImageToTmp($imagePath, $sku, $index);
+                $tmpFile = $this->downloadImageToTmp($imagePath, $productSku, $index);
                 if (!$tmpFile) {
                     continue;
                 }
 
                 $imageHash = md5_file($tmpFile);
-                $storedHash = $this->getStoredImageHash($sku, $index);
+                $storedHash = $this->getStoredImageHash($productSku, $index);
 
                 if ($storedHash === $imageHash) {
                     // Image hasn't changed — skip
@@ -208,7 +222,9 @@ class ImageSync implements ImageSyncInterface
             } catch (\Exception $e) {
                 $this->logger->warning(sprintf(
                     '[ERP] Failed to prepare image %d for SKU %s: %s',
-                    $index, $sku, $e->getMessage()
+                    $index,
+                    $productSku,
+                    $e->getMessage()
                 ));
             }
         }
@@ -221,7 +237,7 @@ class ImageSync implements ImageSyncInterface
         // Phase 2: Remove existing images if replace mode is active
         // Only done AFTER confirming we have new images to add
         if ($this->helper->shouldReplaceImages()) {
-            $this->removeAllProductImages($product, $sku);
+            $this->removeAllProductImages($product, $productSku);
             $this->productRepository->save($product);
         }
 
@@ -237,12 +253,14 @@ class ImageSync implements ImageSyncInterface
                     $pending['index']
                 );
 
-                $this->saveImageHash($sku, $pending['index'], $pending['hash'], null);
+                $this->saveImageHash($productSku, $pending['index'], $pending['hash'], null);
                 $imagesAdded++;
             } catch (\Exception $e) {
                 $this->logger->warning(sprintf(
                     '[ERP] Failed to sync image %d for SKU %s: %s',
-                    $pending['index'], $sku, $e->getMessage()
+                    $pending['index'],
+                    $productSku,
+                    $e->getMessage()
                 ));
                 // Clean up tmp file on failure
                 @unlink($pending['tmpFile']);
@@ -250,7 +268,7 @@ class ImageSync implements ImageSyncInterface
         }
 
         if ($imagesAdded > 0) {
-            $this->logger->info(sprintf('[ERP] Added %d images to product %s', $imagesAdded, $sku));
+            $this->logger->info(sprintf('[ERP] Added %d images to product %s', $imagesAdded, $productSku));
             return true;
         }
 
@@ -798,6 +816,151 @@ class ImageSync implements ImageSyncInterface
     private array $codInternoCache = [];
     private array $skuByCodInternoCache = [];
 
+    private function startBatchDiagnostics(): void
+    {
+        $this->isBatchSyncRunning = true;
+        $this->missingMagentoCandidates = [];
+        $this->resolvedMagentoCandidates = [];
+    }
+
+    private function resetBatchDiagnostics(): void
+    {
+        $this->isBatchSyncRunning = false;
+        $this->missingMagentoCandidates = [];
+        $this->resolvedMagentoCandidates = [];
+    }
+
+    private function flushBatchDiagnostics(): void
+    {
+        if (!empty($this->resolvedMagentoCandidates)) {
+            $this->logger->info(sprintf(
+                '[ERP] Resolved %d ERP image identifiers to Magento SKUs: %s',
+                count($this->resolvedMagentoCandidates),
+                $this->summarizeIdentifierPairs($this->resolvedMagentoCandidates)
+            ));
+        }
+
+        if (!empty($this->missingMagentoCandidates)) {
+            $this->logger->warning(sprintf(
+                '[ERP] Skipping %d image candidates missing in Magento: %s',
+                count($this->missingMagentoCandidates),
+                $this->summarizeIdentifiers(array_keys($this->missingMagentoCandidates))
+            ));
+        }
+    }
+
+    private function recordMissingMagentoCandidate(string $identifier): void
+    {
+        $identifier = trim($identifier);
+        if ($identifier === '') {
+            return;
+        }
+
+        $this->missingMagentoCandidates[$identifier] = true;
+    }
+
+    private function recordResolvedMagentoCandidate(string $requestedIdentifier, string $resolvedSku): void
+    {
+        $requestedIdentifier = trim($requestedIdentifier);
+        $resolvedSku = trim($resolvedSku);
+
+        if ($requestedIdentifier === '' || $resolvedSku === '' || $requestedIdentifier === $resolvedSku) {
+            return;
+        }
+
+        $this->resolvedMagentoCandidates[$requestedIdentifier] = $resolvedSku;
+    }
+
+    private function summarizeIdentifiers(array $identifiers, int $limit = 10): string
+    {
+        $identifiers = array_values(array_unique(array_filter(array_map('trim', $identifiers))));
+        if (empty($identifiers)) {
+            return '[none]';
+        }
+
+        $visible = array_slice($identifiers, 0, $limit);
+        $summary = implode(', ', $visible);
+        $remaining = count($identifiers) - count($visible);
+
+        if ($remaining > 0) {
+            $summary .= sprintf(' (+%d more)', $remaining);
+        }
+
+        return $summary;
+    }
+
+    private function summarizeIdentifierPairs(array $pairs, int $limit = 10): string
+    {
+        $summary = [];
+        foreach (array_slice($pairs, 0, $limit, true) as $requestedIdentifier => $resolvedSku) {
+            $summary[] = $requestedIdentifier . '->' . $resolvedSku;
+        }
+
+        $remaining = count($pairs) - count($summary);
+        if ($remaining > 0) {
+            $summary[] = sprintf('+%d more', $remaining);
+        }
+
+        return implode(', ', $summary);
+    }
+
+    /**
+     * Load the target Magento product for an ERP image identifier.
+     *
+     * @return array{product: ProductInterface, sku: string}
+     * @throws NoSuchEntityException
+     */
+    private function loadProductForImageSync(string $identifier): array
+    {
+        try {
+            return [
+                'product' => $this->productRepository->get($identifier, false, 0),
+                'sku' => $identifier,
+            ];
+        } catch (NoSuchEntityException $exception) {
+            $resolvedSku = $this->getSkuByCodInterno($identifier);
+            if ($resolvedSku !== null && $resolvedSku !== $identifier) {
+                $product = $this->productRepository->get($resolvedSku, false, 0);
+                $this->recordResolvedMagentoCandidate($identifier, $resolvedSku);
+
+                return [
+                    'product' => $product,
+                    'sku' => $resolvedSku,
+                ];
+            }
+
+            throw $exception;
+        }
+    }
+
+    private function getErpImagesForSync(string $requestedIdentifier, string $productSku): array
+    {
+        foreach ($this->buildImageLookupIdentifiers($requestedIdentifier, $productSku) as $imageIdentifier) {
+            $images = $this->getErpImages($imageIdentifier);
+            if (!empty($images)) {
+                return $images;
+            }
+        }
+
+        return [];
+    }
+
+    private function buildImageLookupIdentifiers(string $requestedIdentifier, string $productSku): array
+    {
+        $identifiers = [];
+
+        foreach ([$requestedIdentifier, $productSku, $this->getCodInternoForSku($productSku)] as $candidate) {
+            $candidate = trim((string) $candidate);
+            if ($candidate === '' || in_array($candidate, $identifiers, true)) {
+                continue;
+            }
+
+            $identifiers[] = $candidate;
+        }
+
+        return $identifiers;
+    }
+
     private function getCodInternoForSku(string $sku): ?string
     {
         if (array_key_exists($sku, $this->codInternoCache)) {
@@ -809,7 +972,7 @@ class ImageSync implements ImageSyncInterface
                 "SELECT CODINTERNO FROM MT_MATERIAL WHERE CODIGO = :sku AND CODINTERNO IS NOT NULL AND CODINTERNO != 0",
                 [':sku' => $sku]
             );
-            $this->codInternoCache[$sku] = !empty($rows) ? (string) $rows[0]['CODINTERNO'] : null;
+            $this->codInternoCache[$sku] = $this->getFirstRowStringValue($rows, 'CODINTERNO');
         } catch (\Exception $e) {
             $this->codInternoCache[$sku] = null;
         }
@@ -830,12 +993,23 @@ class ImageSync implements ImageSyncInterface
                  WHERE CAST(CODINTERNO AS VARCHAR(50)) = :cod_interno",
                 [':cod_interno' => $codInterno]
             );
-            $this->skuByCodInternoCache[$codInterno] = !empty($rows) ? (string) $rows[0]['CODIGO'] : null;
+            $this->skuByCodInternoCache[$codInterno] = $this->getFirstRowStringValue($rows, 'CODIGO');
         } catch (\Exception $e) {
             $this->skuByCodInternoCache[$codInterno] = null;
         }
 
         return $this->skuByCodInternoCache[$codInterno];
+    }
+
+    private function getFirstRowStringValue(array $rows, string $column): ?string
+    {
+        if (empty($rows) || !isset($rows[0]) || !array_key_exists($column, $rows[0])) {
+            return null;
+        }
+
+        $value = trim((string) $rows[0][$column]);
+
+        return $value !== '' ? $value : null;
     }
 
     /**

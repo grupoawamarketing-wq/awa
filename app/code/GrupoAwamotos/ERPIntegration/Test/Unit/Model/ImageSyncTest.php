@@ -348,6 +348,81 @@ class ImageSyncTest extends TestCase
         $this->assertFalse($result);
     }
 
+    public function testSyncBySkuResolvesCodInternoToMagentoSkuAndKeepsOriginalImageIdentifier(): void
+    {
+        $product = $this->createMock(ProductInterface::class);
+        $productLookups = [];
+        $tableIdentifiers = [];
+
+        $this->productRepository->method('get')
+            ->willReturnCallback(function (string $sku) use ($product, &$productLookups) {
+                $productLookups[] = $sku;
+
+                if ($sku === '68050003') {
+                    throw new NoSuchEntityException(__('Product not found'));
+                }
+
+                if ($sku === '0070') {
+                    return $product;
+                }
+
+                throw new NoSuchEntityException(__('Product not found'));
+            });
+
+        $this->connection->method('query')
+            ->willReturnCallback(function (string $sql, array $bind = []) use (&$tableIdentifiers) {
+                if (strpos($sql, 'CAST(CODINTERNO AS VARCHAR(50)) = :cod_interno') !== false) {
+                    return [['CODIGO' => '0070']];
+                }
+
+                if (strpos($sql, 'FROM MT_MATERIAL WHERE CODIGO = :sku') !== false) {
+                    return [['CODINTERNO' => '68050003']];
+                }
+
+                if (strpos($sql, 'FROM PR_MEDIDAIMAGEM') !== false) {
+                    $tableIdentifiers[] = $bind[':sku'] ?? '';
+
+                    return ($bind[':sku'] ?? '') === '68050003'
+                        ? [['IMAGEM' => '/path/image1.jpg']]
+                        : [];
+                }
+
+                if (strpos($sql, 'FROM GR_DOCUMENTOS') !== false) {
+                    return [];
+                }
+
+                return [];
+            });
+
+        $result = $this->imageSync->syncBySku('68050003');
+
+        $this->assertFalse($result);
+        $this->assertSame(['68050003', '0070'], $productLookups);
+        $this->assertContains('68050003', $tableIdentifiers);
+    }
+
+    public function testSyncAllAggregatesMissingMagentoCandidatesIntoSingleWarning(): void
+    {
+        $this->connection->method('query')
+            ->willReturn([
+                ['CODIGO' => 'MISSING-1'],
+                ['CODIGO' => 'MISSING-2'],
+            ]);
+
+        $this->productRepository->method('get')
+            ->willThrowException(new NoSuchEntityException(__('Not found')));
+
+        $this->logger->expects($this->once())
+            ->method('warning')
+            ->with($this->stringContains('Skipping 2 image candidates missing in Magento'));
+
+        $result = $this->imageSync->syncAll();
+
+        $this->assertSame(2, $result['total']);
+        $this->assertSame(2, $result['skipped']);
+        $this->assertSame(0, $result['synced']);
+    }
+
     // ========== getErpImages Tests ==========
 
     public function testGetErpImagesFromTableSource(): void

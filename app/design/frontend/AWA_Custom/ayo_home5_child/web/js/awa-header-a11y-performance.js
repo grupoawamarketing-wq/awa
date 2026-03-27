@@ -321,18 +321,76 @@
         }
     }
 
+    function findSearchRoot() {
+        return document.querySelector('[data-awa-search-root="true"]') ||
+            document.querySelector('.block-search[data-awa-component="search-autocomplete"]') ||
+            document.querySelector('.top-search .block-search') ||
+            document.querySelector('.block-search');
+    }
+
+    function ensureSearchStatus(root, input) {
+        if (!root) {
+            return null;
+        }
+
+        var status = root.querySelector('[data-awa-search-status="true"]');
+        var describedBy;
+
+        if (!status) {
+            status = document.createElement('span');
+            status.className = 'awa-sr-only';
+            status.setAttribute('data-awa-search-status', 'true');
+            status.setAttribute('aria-live', 'polite');
+            status.setAttribute('aria-atomic', 'true');
+            status.id = 'awa-search-status';
+
+            (root.querySelector('.block-content') || root).appendChild(status);
+        } else if (!status.id) {
+            status.id = 'awa-search-status';
+        }
+
+        if (input) {
+            describedBy = normalizeText(input.getAttribute('aria-describedby'))
+                .split(' ')
+                .filter(Boolean);
+
+            if (describedBy.indexOf(status.id) === -1) {
+                describedBy.push(status.id);
+                input.setAttribute('aria-describedby', describedBy.join(' '));
+            }
+        }
+
+        return status;
+    }
+
     function wireSearchA11y() {
-        var root = document.querySelector('[data-awa-search-root="true"]');
+        var root = findSearchRoot();
         if (!root) {
             return;
         }
 
-        var input = root.querySelector('[data-awa-search-input="true"]');
-        var panel = root.querySelector('[data-awa-search-panel="true"]');
-        var status = root.querySelector('[data-awa-search-status="true"]');
+        root.setAttribute('data-awa-search-root', 'true');
+
+        var input = root.querySelector('[data-awa-search-input="true"], #search, input[name="q"]');
+        var panel = root.querySelector('[data-awa-search-panel="true"], #search_autocomplete, .searchsuite-autocomplete, .mst-searchautocomplete__autocomplete');
+        var status = ensureSearchStatus(root, input);
 
         if (!input || !panel) {
             return;
+        }
+
+        panel.setAttribute('data-awa-search-panel', 'true');
+        if (!panel.id) {
+            panel.id = 'search_autocomplete';
+        }
+        if (!input.getAttribute('aria-controls')) {
+            input.setAttribute('aria-controls', panel.id);
+        }
+        if (!panel.getAttribute('role')) {
+            panel.setAttribute('role', 'listbox');
+        }
+        if (!panel.getAttribute('aria-label')) {
+            panel.setAttribute('aria-label', 'Sugestões de busca');
         }
 
         var debounceTimer;
@@ -346,13 +404,20 @@
             var hidden = panel.hasAttribute('hidden') || panel.getAttribute('aria-hidden') === 'true';
             var hasItems = getSuggestionCount() > 0;
             var expanded = !hidden && hasItems;
+            var query = normalizeText(input.value || '');
             input.setAttribute('aria-expanded', expanded ? 'true' : 'false');
             panel.setAttribute('aria-hidden', expanded ? 'false' : 'true');
             if (!expanded && !panel.hasAttribute('hidden')) {
                 panel.setAttribute('hidden', '');
             }
             if (status) {
-                status.textContent = expanded ? String(getSuggestionCount()) + ' sugestões disponíveis' : '';
+                if (expanded) {
+                    status.textContent = String(getSuggestionCount()) + ' sugestões disponíveis';
+                } else if (query.length >= 2) {
+                    status.textContent = 'Nenhuma sugestão encontrada';
+                } else {
+                    status.textContent = '';
+                }
             }
             root.setAttribute('aria-busy', 'false');
             root.classList.remove('is-searching');
@@ -361,6 +426,9 @@
         function markSearching() {
             root.setAttribute('aria-busy', 'true');
             root.classList.add('is-searching');
+            if (status) {
+                status.textContent = 'Buscando sugestões...';
+            }
             if (busyTimer) {
                 window.clearTimeout(busyTimer);
             }
