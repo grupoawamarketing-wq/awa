@@ -13867,6 +13867,224 @@ body .page-wrapper .hot-deal-slide.owl-carousel > .item:nth-child(n+5) {
 }
 
 /* ============================================================
+   §2c — SWIPER PRÉ-INIT: CATEGORYTAB (templates migrados de Owl→Swiper)
+   Antes do tab-swiper-init.js inicializar, .swiper-wrapper e .swiper-slide
+   existem no HTML mas Swiper não aplicou display:flex ainda.
+   :not(.swiper-initialized) garante que as regras removem automaticamente
+   após a init, sem conflito com o CSS interno do Swiper.
+   ============================================================ */
+
+/* Container: cortar overflow antes da init */
+body .page-wrapper .cat_home.swiper:not(.swiper-initialized),
+body .page-wrapper .cat_home1.swiper:not(.swiper-initialized),
+body .page-wrapper .cat_home2.swiper:not(.swiper-initialized),
+body .page-wrapper .category_tab_slider.swiper:not(.swiper-initialized) {
+    overflow: hidden;
+}
+
+/* Wrapper horizontal antes da init */
+body .page-wrapper .cat_home.swiper:not(.swiper-initialized) .swiper-wrapper,
+body .page-wrapper .cat_home1.swiper:not(.swiper-initialized) .swiper-wrapper,
+body .page-wrapper .cat_home2.swiper:not(.swiper-initialized) .swiper-wrapper,
+body .page-wrapper .category_tab_slider.swiper:not(.swiper-initialized) .swiper-wrapper {
+    display: flex;
+    flex-wrap: nowrap;
+}
+
+/* Slides com largura responsiva — desktop: 4 por linha */
+body .page-wrapper .cat_home.swiper:not(.swiper-initialized) .swiper-slide.product_row,
+body .page-wrapper .cat_home1.swiper:not(.swiper-initialized) .swiper-slide.product_row,
+body .page-wrapper .cat_home2.swiper:not(.swiper-initialized) .swiper-slide.product_row,
+body .page-wrapper .category_tab_slider.swiper:not(.swiper-initialized) .swiper-slide.product_row {
+    flex: 0 0 25%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+/* Ocultar excedentes antes da init: máximo 4 visíveis */
+body .page-wrapper .cat_home.swiper:not(.swiper-initialized) .swiper-slide.product_row:nth-child(n+5),
+body .page-wrapper .cat_home1.swiper:not(.swiper-initialized) .swiper-slide.product_row:nth-child(n+5),
+body .page-wrapper .cat_home2.swiper:not(.swiper-initialized) .swiper-slide.product_row:nth-child(n+5),
+body .page-wrapper .category_tab_slider.swiper:not(.swiper-initialized) .swiper-slide.product_row:nth-child(n+5) {
+    display: none;
+}
+
+@media (max-width: 1199px) {
+    body .page-wrapper .cat_home.swiper:not(.swiper-initialized) .swiper-slide.product_row,
+    body .page-wrapper .cat_home1.swiper:not(.swiper-initialized) .swiper-slide.product_row,
+    body .page-wrapper .cat_home2.swiper:not(.swiper-initialized) .swiper-slide.product_row,
+    body .page-wrapper .category_tab_slider.swiper:not(.swiper-initialized) .swiper-slide.product_row {
+        flex-basis: 33.3333%;
+    }
+
+    body .page-wrapper .cat_home.swiper:not(.swiper-initialized) .swiper-slide.product_row:nth-child(n+4),
+    body .page-wrapper .cat_home1.swiper:not(.swiper-initialized) .swiper-slide.product_row:nth-child(n+4),
+    body .page-wrapper .cat_home2.swiper:not(.swiper-initialized) .swiper-slide.product_row:nth-child(n+4),
+    body .page-wrapper .category_tab_slider.swiper:not(.swiper-initialized) .swiper-slide.product_row:nth-child(n+4) {
+        display: none;
+    }
+}
+
+@media (max-width: 991px) {
+    body .page-wrapper .cat_home.swiper:not(.swiper-initialized) .swiper-slide.product_row,
+    body .page-wrapper .cat_home1.swiper:not(.swiper-initialized) .swiper-slide.product_row,
+    body .page-wrapper .cat_home2.swiper:not(.swiper-initialized) .swiper-slide.product_row,
+    body .page-wrapper .category_tab_slider.swiper:not(.swiper-initialized) .swiper-slide.product_row {
+        flex-basis: 50%;
+    }
+
+    body .page-wrapper .cat_home.swiper:not(.swiper-initialized) .swiper-slide.product_row:nth-child(n+3),
+    body .page-wrapper .cat_home1.swiper:not(.swiper-initialized) .swiper-slide.product_row:nth-child(n+3),
+    body .page-wrapper .cat_home2.swiper:not(.swiper-initialized) .swiper-slide.product_row:nth-child(n+3),
+    body .page-wrapper .category_tab_slider.swiper:not(.swiper-initialized) .swiper-slide.product_row:nth-child(n+3) {
+        display: none;
+    }
+}
+
+@media (max-width: 680px) {
+    body .page-wrapper .cat_home.swiper:not(.swiper-initialized) .swiper-slide.product_row,
+    body .page-wrapper .cat_home1.swiper:not(.swiper-initialized) .swiper-slide.product_row,
+    body .page-wrapper .cat_home2.swiper:not(.swiper-initialized) .swiper-slide.product_row,
+    body .page-wrapper .category_tab_slider.swiper:not(.swiper-initialized) .swiper-slide.product_row {
+        flex-basis: 100%;
+    }
+
+    body .page-wrapper .cat_home.swiper:not(.swiper-initialized) .swiper-slide.product_row:nth-child(n+2),
+    body .page-wrapper .cat_home1.swiper:not(.swiper-initialized) .swiper-slide.product_row:nth-child(n+2),
+    body .page-wrapper .cat_home2.swiper:not(.swiper-initialized) .swiper-slide.product_row:nth-child(n+2),
+    body .page-wrapper .category_tab_slider.swiper:not(.swiper-initialized) .swiper-slide.product_row:nth-child(n+2) {
+        display: none;
+    }
+}
+
+/* ============================================================
+   §2d — SWIPER PRÉ-INIT: CARROSSÉIS DE PRODUTO
+   (featured / onsale / toprate / bestseller / newproduct / mostviewed)
+   Evita FOUC antes do Swiper inicializar.
+   Scoped em :not(.swiper-initialized) — removido automaticamente após init.
+   Padrão: 4 cols | ≤980px: 3 | ≤768px: 2 | ≤479px: 1
+   ============================================================ */
+
+/* Layout flex base (equivalente ao overflow: hidden do Owl) */
+body .page-wrapper .awa-featured-swiper:not(.swiper-initialized),
+body .page-wrapper .awa-onsale-swiper:not(.swiper-initialized),
+body .page-wrapper .awa-toprate-swiper:not(.swiper-initialized),
+body .page-wrapper .products-swiper--bestseller:not(.swiper-initialized),
+body .page-wrapper .products-swiper--newproduct:not(.swiper-initialized),
+body .page-wrapper .products-swiper--mostviewed:not(.swiper-initialized) {
+    overflow: hidden;
+}
+
+body .page-wrapper .awa-featured-swiper:not(.swiper-initialized) .swiper-wrapper,
+body .page-wrapper .awa-onsale-swiper:not(.swiper-initialized) .swiper-wrapper,
+body .page-wrapper .awa-toprate-swiper:not(.swiper-initialized) .swiper-wrapper,
+body .page-wrapper .products-swiper--bestseller:not(.swiper-initialized) .swiper-wrapper,
+body .page-wrapper .products-swiper--newproduct:not(.swiper-initialized) .swiper-wrapper,
+body .page-wrapper .products-swiper--mostviewed:not(.swiper-initialized) .swiper-wrapper {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 0;
+}
+
+/* Desktop padrão: 4 slides visíveis */
+body .page-wrapper .awa-featured-swiper:not(.swiper-initialized) .swiper-slide,
+body .page-wrapper .awa-onsale-swiper:not(.swiper-initialized) .swiper-slide,
+body .page-wrapper .awa-toprate-swiper:not(.swiper-initialized) .swiper-slide,
+body .page-wrapper .products-swiper--bestseller:not(.swiper-initialized) .swiper-slide,
+body .page-wrapper .products-swiper--newproduct:not(.swiper-initialized) .swiper-slide,
+body .page-wrapper .products-swiper--mostviewed:not(.swiper-initialized) .swiper-slide {
+    flex: 0 0 25%;
+    min-width: 0;
+}
+
+/* Ocultar slides além dos 4 visíveis */
+body .page-wrapper .awa-featured-swiper:not(.swiper-initialized) .swiper-slide:nth-child(n+5),
+body .page-wrapper .awa-onsale-swiper:not(.swiper-initialized) .swiper-slide:nth-child(n+5),
+body .page-wrapper .awa-toprate-swiper:not(.swiper-initialized) .swiper-slide:nth-child(n+5),
+body .page-wrapper .products-swiper--bestseller:not(.swiper-initialized) .swiper-slide:nth-child(n+5),
+body .page-wrapper .products-swiper--newproduct:not(.swiper-initialized) .swiper-slide:nth-child(n+5),
+body .page-wrapper .products-swiper--mostviewed:not(.swiper-initialized) .swiper-slide:nth-child(n+5) {
+    display: none;
+}
+
+@media (max-width: 980px) {
+    body .page-wrapper .awa-featured-swiper:not(.swiper-initialized) .swiper-slide,
+    body .page-wrapper .awa-onsale-swiper:not(.swiper-initialized) .swiper-slide,
+    body .page-wrapper .awa-toprate-swiper:not(.swiper-initialized) .swiper-slide,
+    body .page-wrapper .products-swiper--bestseller:not(.swiper-initialized) .swiper-slide,
+    body .page-wrapper .products-swiper--newproduct:not(.swiper-initialized) .swiper-slide,
+    body .page-wrapper .products-swiper--mostviewed:not(.swiper-initialized) .swiper-slide {
+        flex: 0 0 33.33%;
+    }
+
+    body .page-wrapper .awa-featured-swiper:not(.swiper-initialized) .swiper-slide:nth-child(n+4),
+    body .page-wrapper .awa-onsale-swiper:not(.swiper-initialized) .swiper-slide:nth-child(n+4),
+    body .page-wrapper .awa-toprate-swiper:not(.swiper-initialized) .swiper-slide:nth-child(n+4),
+    body .page-wrapper .products-swiper--bestseller:not(.swiper-initialized) .swiper-slide:nth-child(n+4),
+    body .page-wrapper .products-swiper--newproduct:not(.swiper-initialized) .swiper-slide:nth-child(n+4),
+    body .page-wrapper .products-swiper--mostviewed:not(.swiper-initialized) .swiper-slide:nth-child(n+4) {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    body .page-wrapper .awa-featured-swiper:not(.swiper-initialized) .swiper-slide,
+    body .page-wrapper .awa-onsale-swiper:not(.swiper-initialized) .swiper-slide,
+    body .page-wrapper .awa-toprate-swiper:not(.swiper-initialized) .swiper-slide,
+    body .page-wrapper .products-swiper--bestseller:not(.swiper-initialized) .swiper-slide,
+    body .page-wrapper .products-swiper--newproduct:not(.swiper-initialized) .swiper-slide,
+    body .page-wrapper .products-swiper--mostviewed:not(.swiper-initialized) .swiper-slide {
+        flex: 0 0 50%;
+    }
+
+    body .page-wrapper .awa-featured-swiper:not(.swiper-initialized) .swiper-slide:nth-child(n+3),
+    body .page-wrapper .awa-onsale-swiper:not(.swiper-initialized) .swiper-slide:nth-child(n+3),
+    body .page-wrapper .awa-toprate-swiper:not(.swiper-initialized) .swiper-slide:nth-child(n+3),
+    body .page-wrapper .products-swiper--bestseller:not(.swiper-initialized) .swiper-slide:nth-child(n+3),
+    body .page-wrapper .products-swiper--newproduct:not(.swiper-initialized) .swiper-slide:nth-child(n+3),
+    body .page-wrapper .products-swiper--mostviewed:not(.swiper-initialized) .swiper-slide:nth-child(n+3) {
+        display: none;
+    }
+}
+
+@media (max-width: 479px) {
+    body .page-wrapper .awa-featured-swiper:not(.swiper-initialized) .swiper-slide,
+    body .page-wrapper .awa-onsale-swiper:not(.swiper-initialized) .swiper-slide,
+    body .page-wrapper .awa-toprate-swiper:not(.swiper-initialized) .swiper-slide,
+    body .page-wrapper .products-swiper--bestseller:not(.swiper-initialized) .swiper-slide,
+    body .page-wrapper .products-swiper--newproduct:not(.swiper-initialized) .swiper-slide,
+    body .page-wrapper .products-swiper--mostviewed:not(.swiper-initialized) .swiper-slide {
+        flex: 0 0 100%;
+    }
+
+    body .page-wrapper .awa-featured-swiper:not(.swiper-initialized) .swiper-slide:nth-child(n+2),
+    body .page-wrapper .awa-onsale-swiper:not(.swiper-initialized) .swiper-slide:nth-child(n+2),
+    body .page-wrapper .awa-toprate-swiper:not(.swiper-initialized) .swiper-slide:nth-child(n+2),
+    body .page-wrapper .products-swiper--bestseller:not(.swiper-initialized) .swiper-slide:nth-child(n+2),
+    body .page-wrapper .products-swiper--newproduct:not(.swiper-initialized) .swiper-slide:nth-child(n+2),
+    body .page-wrapper .products-swiper--mostviewed:not(.swiper-initialized) .swiper-slide:nth-child(n+2) {
+        display: none;
+    }
+}
+
+/* Testimonials: sempre 1 item */
+body .page-wrapper .awa-testimo-swiper:not(.swiper-initialized) {
+    overflow: hidden;
+}
+body .page-wrapper .awa-testimo-swiper:not(.swiper-initialized) .swiper-wrapper {
+    display: flex;
+    flex-wrap: nowrap;
+}
+body .page-wrapper .awa-testimo-swiper:not(.swiper-initialized) .swiper-slide {
+    flex: 0 0 100%;
+    min-width: 0;
+}
+body .page-wrapper .awa-testimo-swiper:not(.swiper-initialized) .swiper-slide:nth-child(n+2) {
+    display: none;
+}
+
+
+/* ============================================================
    §3 — CARDS DENTRO DE OWL (pós-init)
    Quando OWL inicializou, cada .owl-item contém um slide.
    Garantir que os cards dentro de cada slide tenham height 100%,
@@ -14231,6 +14449,105 @@ body .page-wrapper [class*="rokan-"] .row > ul {
     padding: 0;
     margin: 0;
     list-style: none;
+}
+
+/* ============================================================
+   §15 — GLOBAL PAGE SHELL FOUNDATION
+   Unifica a malha externa das páginas internas para reduzir
+   conflito entre Bootstrap, Rokanthemes e grid AWA.
+   ============================================================ */
+:root {
+    --awa-shell-gap: clamp(var(--awa-space-5), 2vw, var(--awa-space-8));
+    --awa-shell-sidebar: clamp(248px, 22vw, 320px);
+    --awa-shell-checkout-sidebar: clamp(320px, 28vw, 388px);
+}
+
+body .page-wrapper .page-main > .columns,
+body .page-wrapper .page-main.container > .columns,
+body .page-wrapper .page-main > .columns > *,
+body .page-wrapper .page-main.container > .columns > *,
+body .page-wrapper .checkout-container > *,
+body .page-wrapper .checkout-container .opc-wrapper,
+body .page-wrapper .checkout-container .opc-sidebar {
+    min-width: 0;
+}
+
+body .page-wrapper .page-main > .columns,
+body .page-wrapper .page-main.container > .columns {
+    align-items: start;
+}
+
+@media (width >= 992px) {
+    body.page-layout-2columns-left .page-wrapper .page-main > .columns,
+    body.page-layout-2columns-left .page-wrapper .columns.layout.layout-2-col {
+        display: grid;
+        grid-template-columns: minmax(248px, var(--awa-shell-sidebar)) minmax(0, 1fr);
+        gap: var(--awa-shell-gap);
+        align-items: start;
+    }
+
+    body.page-layout-2columns-right .page-wrapper .page-main > .columns,
+    body.page-layout-2columns-right .page-wrapper .columns.layout.layout-2-col {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(248px, var(--awa-shell-sidebar));
+        gap: var(--awa-shell-gap);
+        align-items: start;
+    }
+
+    body.page-layout-2columns-left .page-wrapper :is(.page-main > .columns, .columns.layout.layout-2-col) > :is(.sidebar-main, .sidebar-main-1, [class*="col-sm-3"], [class*="col-md-3"]),
+    body.page-layout-2columns-left .page-wrapper :is(.page-main > .columns, .columns.layout.layout-2-col) > :is(.col-main, .column.main, [class*="col-sm-9"], [class*="col-md-9"]),
+    body.page-layout-2columns-right .page-wrapper :is(.page-main > .columns, .columns.layout.layout-2-col) > :is(.sidebar-main, .sidebar-main-1, [class*="col-sm-3"], [class*="col-md-3"]),
+    body.page-layout-2columns-right .page-wrapper :is(.page-main > .columns, .columns.layout.layout-2-col) > :is(.col-main, .column.main, [class*="col-sm-9"], [class*="col-md-9"]) {
+        float: none;
+        width: auto;
+        max-width: none;
+        min-width: 0;
+        margin: 0;
+    }
+
+    body.checkout-index-index .page-wrapper .checkout-container,
+    body.rokanthemes-onepagecheckout .page-wrapper .checkout-container,
+    body.rokanthemes-onepagecheckout-index-index .page-wrapper .checkout-container {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(320px, var(--awa-shell-checkout-sidebar));
+        gap: var(--awa-shell-gap);
+        align-items: start;
+    }
+
+    body.checkout-index-index .page-wrapper .checkout-container .opc-wrapper,
+    body.checkout-index-index .page-wrapper .checkout-container .opc-sidebar,
+    body.rokanthemes-onepagecheckout .page-wrapper .checkout-container .opc-wrapper,
+    body.rokanthemes-onepagecheckout .page-wrapper .checkout-container .opc-sidebar,
+    body.rokanthemes-onepagecheckout .page-wrapper .checkout-container #opc-sidebar,
+    body.rokanthemes-onepagecheckout-index-index .page-wrapper .checkout-container .opc-wrapper,
+    body.rokanthemes-onepagecheckout-index-index .page-wrapper .checkout-container .opc-sidebar,
+    body.rokanthemes-onepagecheckout-index-index .page-wrapper .checkout-container #opc-sidebar {
+        float: none;
+        width: auto;
+        max-width: none;
+        margin: 0;
+    }
+
+    body.checkout-index-index .page-wrapper .checkout-container .opc-sidebar,
+    body.rokanthemes-onepagecheckout .page-wrapper .checkout-container .opc-sidebar,
+    body.rokanthemes-onepagecheckout .page-wrapper .checkout-container #opc-sidebar,
+    body.rokanthemes-onepagecheckout-index-index .page-wrapper .checkout-container .opc-sidebar,
+    body.rokanthemes-onepagecheckout-index-index .page-wrapper .checkout-container #opc-sidebar {
+        align-self: start;
+        position: sticky;
+        top: calc(var(--awa-header-height, 0px) + var(--awa-space-5));
+    }
+}
+
+@media (width < 992px) {
+    body.page-layout-2columns-left .page-wrapper .page-main > .columns,
+    body.page-layout-2columns-left .page-wrapper .columns.layout.layout-2-col,
+    body.page-layout-2columns-right .page-wrapper .page-main > .columns,
+    body.page-layout-2columns-right .page-wrapper .columns.layout.layout-2-col {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: var(--awa-space-5);
+    }
 }
 
 }
