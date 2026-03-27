@@ -3020,11 +3020,74 @@ body.cms-homepage_ayo_home5 .top-home-content--b2b-promo .ayo-home5-heading {
     display: contents;
 }
 
+/* GRID-07b: dissolve .swiper-wrapper so grid sees through to product items */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+    :is(.productTabContent, .category_tab_slider, .cat_home2):not(.owl-loaded, .swiper-initialized) > .swiper-wrapper {
+    display: contents;
+}
+
+/* GRID-07c: hide swiper nav/pagination when fallback grid is active */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+    :is(.productTabContent, .category_tab_slider, .cat_home2):not(.owl-loaded, .swiper-initialized) > .swiper-button-prev,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+    :is(.productTabContent, .category_tab_slider, .cat_home2):not(.owl-loaded, .swiper-initialized) > .swiper-button-next,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+    :is(.productTabContent, .category_tab_slider, .cat_home2):not(.owl-loaded, .swiper-initialized) > .swiper-pagination {
+    display: none;
+}
+
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
     :is(.productTabContent, .category_tab_slider, .cat_home2):not(.owl-loaded, .swiper-initialized) :is(.item-product-parent, .item) {
     min-width: 0;
     width: auto;
     float: none;
+}
+
+/* ==========================================================================
+   GRID-07d: PRE-INIT FALLBACK — .products-swiper (Mais Vendidos / Lançamentos)
+   Antes do Swiper inicializar (lazy IO), os slides empilham a 100% width
+   causando layout de 1700px+. Este fallback constrange cada slide a ~20%
+   da largura (5 por linha no desktop) usando o flex do próprio Swiper CSS.
+   Quando Swiper inicializa, a classe .swiper-initialized invalida estas regras.
+   ========================================================================== */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+    .products-swiper:not(.swiper-initialized) {
+    overflow: hidden;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+    .products-swiper:not(.swiper-initialized) > .swiper-wrapper {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: var(--awa-gap-md, 12px);
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+    .products-swiper:not(.swiper-initialized) > .swiper-wrapper > .swiper-slide {
+    flex: 0 0 calc(50% - 6px);
+    min-width: 0;
+}
+
+@media (min-width: 768px) {
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+        .products-swiper:not(.swiper-initialized) > .swiper-wrapper > .swiper-slide {
+        flex: 0 0 calc(33.333% - 8px);
+    }
+}
+
+@media (min-width: 1024px) {
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+        .products-swiper:not(.swiper-initialized) > .swiper-wrapper > .swiper-slide {
+        flex: 0 0 calc(20% - 10px);
+    }
+}
+
+/* Hide nav buttons before init */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+    .products-swiper:not(.swiper-initialized) > .swiper-button-prev,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+    .products-swiper:not(.swiper-initialized) > .swiper-button-next {
+    display: none;
 }
 
 /* ==========================================================================
@@ -3332,7 +3395,9 @@ body.cms-homepage_ayo_home5 .top-home-content--b2b-promo .ayo-home5-heading {
 
 /* --------------------------------------------------------------------------
    R09: SECTION HEADING — Refinamento de headings Rokanthemes
-   Unificar margem, tamanho e peso entre rokan-product-heading de seções diferentes
+   Unificar margem, tamanho e peso entre rokan-product-heading de seções diferentes.
+   P1-2026-03-27: font-size alinhado com GRID-04 (clamp canônico 1.25rem → 1.7rem).
+   Era: clamp(1.125rem, 0.9rem+0.7vw, 1.5rem) → 18-24px (mobile onderstava o GRID-04).
    -------------------------------------------------------------------------- */
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
     .top-home-content :is(.rokan-product-heading, .ayo-home5-heading) {
@@ -3342,9 +3407,9 @@ body.cms-homepage_ayo_home5 .top-home-content--b2b-promo .ayo-home5-heading {
 
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
     .top-home-content :is(.rokan-product-heading, .ayo-home5-heading) h2 {
-    font-size: clamp(1.125rem, 0.9rem + 0.7vw, 1.5rem);
+    font-size: clamp(1.25rem, 1rem + 0.8vw, 1.7rem);
     font-weight: 700;
-    line-height: 1.25;
+    line-height: var(--awa-leading-compact, 1.2);
     color: var(--awa-heading, var(--awa-dark, #1e293b));
     margin: 0;
     letter-spacing: -0.01em;
@@ -3483,31 +3548,26 @@ body.cms-homepage_ayo_home5 .top-home-content--b2b-promo .ayo-home5-heading {
         padding-bottom: var(--awa-space-1-5, 6px);
     }
 
-    /* Tab pills: touch-friendly com scroll horizontal */
+    /* Tab pills: wrap em mobile para todas as abas visíveis (MOBILE-FIX-01)
+       Antes: scroll horizontal com scrollbar hidden → 4ª aba invisível.
+       Agora: flex-wrap para 2×2, todas visíveis. */
     :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
         .list-tab-product ul.tabs,
     :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
         .tab_product ul.tabs {
-        overflow-x: auto;
-        overflow-y: hidden;
-        flex-wrap: nowrap;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
+        flex-wrap: wrap;
+        overflow-x: visible;
+        gap: var(--awa-space-2, 8px);
+        justify-content: center;
         padding-bottom: var(--awa-space-1, 4px);
-    }
-
-    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
-        .list-tab-product ul.tabs::-webkit-scrollbar,
-    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
-        .tab_product ul.tabs::-webkit-scrollbar {
-        display: none;
     }
 
     :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
         .list-tab-product ul.tabs li,
     :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
         .tab_product ul.tabs li {
-        flex-shrink: 0;
+        flex: 0 1 auto;
+        min-width: 0;
     }
 
     /* Section separator: mais sutil em mobile */
@@ -3784,10 +3844,10 @@ body.cms-homepage_ayo_home5 .top-home-content--b2b-promo .ayo-home5-heading {
     padding: 48px 0 56px !important;
 }
 
-/* Título da seção — P1-01 fix: unificar H2 (era 26px, agora mesma escala que awa-section-header__title) */
+/* Título da seção — P1-01 fix: unificar H2 (1.5rem = 21px @ 14px root, alinhado com awa-polish-sweep) */
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
     .page-wrapper .top-home-content--category-carousel .awa-category-carousel__header h2 {
-    font-size: clamp(1.2rem, 1rem + 0.6vw, 1.55rem) !important;
+    font-size: clamp(1.25rem, 1rem + 0.6vw, 1.5rem) !important;
     font-weight: 700 !important;
     color: var(--awa-gray-800, #1a1a1a) !important;
     letter-spacing: -0.01em !important;
@@ -4030,19 +4090,19 @@ body.cms-homepage_ayo_home5 .top-home-content--b2b-promo .ayo-home5-heading {
 /* 1 — Título branco no cabeçalho das seções escuras */
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
     .page-wrapper .awa-carousel-section--category .awa-section-header__title {
-    color: rgba(255, 255, 255, 0.95) !important;
+    color: rgb(255 255 255 / 95%) !important;
 }
 
 /* 2 — Link "Ver categoria completa" com estilo legível no fundo escuro */
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
     .page-wrapper .awa-carousel-section--category .awa-section-header__link {
-    background: rgba(255, 255, 255, 0.10) !important;
-    color: rgba(255, 255, 255, 0.88) !important;
+    background: rgb(255 255 255 / 10%) !important;
+    color: rgb(255 255 255 / 88%) !important;
     border-radius: 20px !important;
 }
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
     .page-wrapper .awa-carousel-section--category .awa-section-header__link:hover {
-    background: rgba(255, 255, 255, 0.18) !important;
+    background: rgb(255 255 255 / 18%) !important;
     color: #fff !important;
 }
 
@@ -4087,14 +4147,14 @@ body.cms-homepage_ayo_home5 .top-home-content--b2b-promo .ayo-home5-heading {
 
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
     .page-wrapper .awa-carousel-section--category .awa-section-header {
-    border-bottom-color: rgba(255, 255, 255, 0.15) !important;
+    border-bottom-color: rgb(255 255 255 / 15%) !important;
     margin-bottom: 12px !important;
 }
 
 /* 7 — Eyebrow nas seções escuras: cor branca semi-transparente */
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
     .page-wrapper .awa-carousel-section--category .awa-section-header__eyebrow {
-    color: rgba(255, 255, 255, 0.55) !important;
+    color: rgb(255 255 255 / 55%) !important;
 }
 
 
@@ -4145,7 +4205,7 @@ body.cms-homepage_ayo_home5 .top-home-content--b2b-promo .ayo-home5-heading {
 
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
     .page-wrapper .top-home-content--category-carousel .awa-category-carousel__header h2 {
-    font-size: clamp(1.2rem, 1rem + 0.6vw, 1.55rem);
+    font-size: clamp(1.25rem, 1rem + 0.6vw, 1.5rem);
     letter-spacing: -0.01em;
 }
 
@@ -4431,7 +4491,7 @@ body.cms-homepage_ayo_home5 .top-home-content--b2b-promo .ayo-home5-heading {
 
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
     .page-wrapper .top-home-content--featured-categories .ayo-home5-heading h2 {
-    font-size: clamp(1.2rem, 1rem + 0.6vw, 1.55rem);
+    font-size: clamp(1.25rem, 1rem + 0.6vw, 1.5rem);
     font-weight: 700;
     letter-spacing: -0.01em;
     color: var(--awa-gray-800, #1a1a1a);
@@ -4741,7 +4801,7 @@ body.cms-homepage_ayo_home5 .top-home-content--b2b-promo .ayo-home5-heading {
 /* OWL dots in dark sections — lighter inactive */
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
     .page-wrapper .awa-carousel-section--category .owl-dot span {
-    background: rgba(255, 255, 255, 0.25) !important;
+    background: rgb(255 255 255 / 25%) !important;
 }
 
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
@@ -4754,9 +4814,9 @@ body.cms-homepage_ayo_home5 .top-home-content--b2b-promo .ayo-home5-heading {
     .page-wrapper .awa-carousel-section--category .owl-nav .owl-prev,
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
     .page-wrapper .awa-carousel-section--category .owl-nav .owl-next {
-    background: rgba(255, 255, 255, 0.1) !important;
-    border-color: rgba(255, 255, 255, 0.18) !important;
-    color: rgba(255, 255, 255, 0.7) !important;
+    background: rgb(255 255 255 / 10%) !important;
+    border-color: rgb(255 255 255 / 18%) !important;
+    color: rgb(255 255 255 / 70%) !important;
     box-shadow: none !important;
 }
 
@@ -4780,7 +4840,7 @@ body.cms-homepage_ayo_home5 .top-home-content--b2b-promo .ayo-home5-heading {
 /* block_cat container (product grid area) — subtle dark surface */
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
     .page-wrapper .awa-carousel-section--category .block_cat {
-    background: rgba(255, 255, 255, 0.03);
+    background: rgb(255 255 255 / 3%);
     border-radius: 12px;
     padding: 12px;
 }
@@ -4815,10 +4875,10 @@ body.cms-homepage_ayo_home5 .top-home-content--b2b-promo .ayo-home5-heading {
 }
 
 
-/* -- REFINE-06: "Compre por Categoria" heading — P1-01 fix: escala unificada -- */
+/* -- REFINE-06: "Compre por Categoria" heading — P1-01 fix: escala unificada (1.5rem = 21px) -- */
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
     .page-wrapper .top-home-content--featured-categories .ayo-home5-heading h2 {
-    font-size: clamp(1.2rem, 1rem + 0.6vw, 1.55rem) !important;
+    font-size: clamp(1.25rem, 1rem + 0.6vw, 1.5rem) !important;
     font-weight: 700 !important;
     letter-spacing: -0.01em !important;
 }
@@ -5518,4 +5578,27 @@ input[type="email"].input-text:focus,
 
 .b2b-login-form button[type="submit"]:active {
     transform: scale(0.98);
+}
+
+/* ============================================================
+   SWIPER OVERFLOW FIX
+   Previne slides vazando fora do container quando Swiper ativo
+   ============================================================ */
+.swiper.productTabContent,
+.swiper.hot-deal-slide {
+    overflow: hidden;
+}
+
+/* ============================================================
+   MOBILE-FIX-02  –  Hot-deal countdown placeholder hide
+   TimeCircles is a stub module; the .countdown_block renders
+   as an empty pinkish area. Hide it on all viewports.
+   Must match the high-specificity selector from line ~1089.
+   ============================================================ */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .page-wrapper .top-home-content--trust-and-offers
+    .hot-deal.top-home-content__trust-offers-deals
+    .hot-deal-tab-slider.hot-deal-tab-slider-customcss
+    .countdown_block {
+    display: none !important;
 }
