@@ -8165,3 +8165,478 @@ body .page-wrapper .awa-sticky-atc-bar {
         min-height: calc(var(--awa-text-sm, 13px) * var(--awa-leading-normal, 1.5) * 2);
     }
 }
+
+/* ==========================================================================
+   AWA Phase 26 — Breadcrumbs, Footer Mobile, Product Reviews, Print
+   2026-03-27
+   Quatro áreas sem cobertura no bundle:
+   (1) Breadcrumbs: estilo uniforme + scroll horizontal silencioso em mobile.
+   (2) Footer mobile: touch targets 44px, separadores, social links.
+   (3) Product reviews: lista de avaliações + formulário + inline rating stars.
+   (4) Print: ocultar UI desnecessária, formatar ficha de produto (B2B).
+   Seletores com .page-wrapper scope para compatibilidade com Rokanthemes.
+   ========================================================================== */
+
+/* ── 1. BREADCRUMBS ─────────────────────────────────────────────────────────
+   Template: Magento_Theme/templates/html/breadcrumbs.phtml (customizado AWA)
+   .breadcrumbs > ul.items > li.item (home|category|product)
+   Desktop: linha única, separador › via ::after em todos menos o último.
+   Mobile (<768px): scroll horizontal silencioso para caminhos longos.
+   ─────────────────────────────────────────────────────────────────────────── */
+body .page-wrapper .breadcrumbs {
+    padding: 8px 0 12px;
+    font-size: 12px;
+    color: var(--awa-gray-500, #737373);
+}
+
+body .page-wrapper .breadcrumbs .items {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    white-space: nowrap;
+}
+
+body .page-wrapper .breadcrumbs .items::-webkit-scrollbar {
+    display: none;
+}
+
+body .page-wrapper .breadcrumbs .items .item {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+/* Separator › between breadcrumb items (not after the last) */
+body .page-wrapper .breadcrumbs .items .item:not(:last-child)::after {
+    content: '›';
+    display: inline-block;
+    margin: 0 6px;
+    color: var(--awa-gray-300, #d4d4d4);
+    font-weight: 400;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+body .page-wrapper .breadcrumbs .items .item a {
+    color: var(--awa-gray-500, #737373);
+    text-decoration: none;
+    transition: color 0.15s ease;
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+    vertical-align: bottom;
+}
+
+body .page-wrapper .breadcrumbs .items .item a:hover,
+body .page-wrapper .breadcrumbs .items .item a:focus-visible {
+    color: var(--primary-color, #b73337);
+    text-decoration: underline;
+}
+
+/* Last item (current page): bold, dark, truncated */
+body .page-wrapper .breadcrumbs .items .item strong[aria-current="page"] {
+    font-weight: 600;
+    color: var(--awa-gray-700, #404040);
+    max-width: 240px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+    vertical-align: bottom;
+}
+
+@media (width <= 767px) {
+    body .page-wrapper .breadcrumbs {
+        padding: 6px 0 10px;
+        font-size: 11px;
+    }
+
+    body .page-wrapper .breadcrumbs .items .item a {
+        max-width: 120px;
+    }
+
+    body .page-wrapper .breadcrumbs .items .item strong[aria-current="page"] {
+        max-width: 160px;
+    }
+}
+
+/* ── 2. FOOTER MOBILE ───────────────────────────────────────────────────────
+   Template: Rokanthemes_Themeoption/templates/html/footer/footer-static5.phtml
+   Bootstrap grid: .col-lg-3.col-md-6.col-sm-12 — 4 colunas em desktop.
+   Em mobile (< 576px) as colunas empilham via Bootstrap col-sm-12.
+   Adicionar: separadores visuais, touch targets 44px nos links e redes sociais.
+   ─────────────────────────────────────────────────────────────────────────── */
+body .page-wrapper .footer-static .velaFooterTitle {
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 12px;
+    line-height: 1.3;
+}
+
+body .page-wrapper .footer-static .footer-links {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+body .page-wrapper .footer-static .footer-links li {
+    border-bottom: 1px solid rgb(255 255 255 / 6%);
+}
+
+body .page-wrapper .footer-static .footer-links li a {
+    display: flex;
+    align-items: center;
+    min-height: 36px;
+    padding: 4px 0;
+    text-decoration: none;
+    transition: color 0.15s ease, padding-left 0.15s ease;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+body .page-wrapper .footer-static .footer-links li a:hover,
+body .page-wrapper .footer-static .footer-links li a:focus-visible {
+    padding-left: 6px;
+    color: var(--primary-color, #b73337);
+}
+
+/* Contact list */
+body .page-wrapper .footer-static .footer-contact-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+body .page-wrapper .footer-static .footer-contact-list .contact-item {
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+body .page-wrapper .footer-static .footer-contact-list .contact-item i {
+    flex-shrink: 0;
+    margin-top: 2px;
+    opacity: 0.7;
+    width: 14px;
+    text-align: center;
+}
+
+body .page-wrapper .footer-static .footer-contact-list .contact-item a {
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
+
+body .page-wrapper .footer-static .footer-contact-list .contact-item a:hover {
+    color: var(--primary-color, #b73337);
+}
+
+/* Hours list */
+body .page-wrapper .footer-static .footer-hours {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+/* Social links */
+body .page-wrapper .footer-static .footer-social-section h5 {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin: 16px 0 8px;
+    opacity: 0.8;
+}
+
+body .page-wrapper .footer-static .footer-social-section .social-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+body .page-wrapper .footer-static .footer-social-section .social-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 36px;
+    padding: 4px 10px;
+    border-radius: var(--awa-radius-sm, 6px);
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.15s ease, color 0.15s ease;
+    background: rgb(255 255 255 / 7%);
+}
+
+body .page-wrapper .footer-static .footer-social-section .social-links a:hover,
+body .page-wrapper .footer-static .footer-social-section .social-links a:focus-visible {
+    background: rgb(255 255 255 / 14%);
+    color: var(--primary-color, #b73337);
+}
+
+body .page-wrapper .footer-static .footer-social-section .social-links a.whatsapp:hover {
+    background: rgb(37 211 102 / 15%);
+    color: #25d366;
+}
+
+/* Mobile: border between stacked columns */
+@media (width <= 767px) {
+    body .page-wrapper .footer-static .vela-content {
+        border-top: 1px solid rgb(255 255 255 / 8%);
+        padding-top: 16px;
+        margin-top: 16px;
+    }
+
+    body .page-wrapper .footer-static .col-sm-12:first-child .vela-content {
+        border-top: none;
+        padding-top: 0;
+        margin-top: 0;
+    }
+
+    body .page-wrapper .footer-static .footer-links li a {
+        min-height: 44px;
+        padding: 8px 0;
+        font-size: 14px;
+    }
+
+    body .page-wrapper .footer-static .footer-social-section .social-links a {
+        min-height: 44px;
+        padding: 8px 14px;
+    }
+}
+
+/* ── 3. PRODUCT REVIEWS ─────────────────────────────────────────────────────
+   Magento native review list + review write form.
+   .product-reviews-summary → inline no PDP, abaixo do título.
+   .block.review-list → lista na aba "Avaliações".
+   .block.review-add → formulário de nova avaliação.
+   Stars usam webfont icon; cor via color property no ::before pseudo.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* Inline summary (PDP, abaixo do h1) */
+body .page-wrapper .product-reviews-summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 4px 0 8px;
+    flex-wrap: wrap;
+}
+
+body .page-wrapper .product-reviews-summary .rating-result::before {
+    color: var(--awa-gray-200, #e5e5e5);
+}
+
+body .page-wrapper .product-reviews-summary .rating-result > span::before {
+    color: #f59e0b;
+}
+
+body .page-wrapper .product-reviews-summary .reviews-actions a,
+body .page-wrapper .product-reviews-summary .action.add {
+    font-size: 12px;
+    color: var(--awa-gray-500, #737373);
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
+
+body .page-wrapper .product-reviews-summary .reviews-actions a:hover,
+body .page-wrapper .product-reviews-summary .action.add:hover {
+    color: var(--primary-color, #b73337);
+    text-decoration: underline;
+}
+
+/* Review list */
+body .page-wrapper .block.review-list .block-title strong {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--awa-gray-800, #262626);
+}
+
+body .page-wrapper .review-items {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 16px;
+}
+
+body .page-wrapper .review-item {
+    border: 1px solid var(--awa-gray-100, #f5f5f5);
+    border-radius: var(--awa-radius-md, 10px);
+    padding: 16px 20px;
+    background: var(--awa-bg-surface, #fff);
+}
+
+body .page-wrapper .review-item .review-title {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--awa-gray-800, #262626);
+    margin-bottom: 4px;
+}
+
+body .page-wrapper .review-item .review-date {
+    font-size: 11px;
+    color: var(--awa-gray-400, #a3a3a3);
+    margin-bottom: 10px;
+    display: block;
+}
+
+body .page-wrapper .review-item .review-content {
+    font-size: 13px;
+    color: var(--awa-gray-700, #404040);
+    line-height: 1.6;
+    margin-top: 8px;
+}
+
+body .page-wrapper .review-item .rating-result::before {
+    color: var(--awa-gray-200, #e5e5e5);
+}
+
+body .page-wrapper .review-item .rating-result > span::before {
+    color: #f59e0b;
+}
+
+/* Review form */
+body .page-wrapper .block.review-add .block-title strong {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--awa-gray-800, #262626);
+}
+
+body .page-wrapper .review-form .legend {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--awa-gray-700, #404040);
+}
+
+/* Star rating table: allow horizontal scroll on narrow screens */
+body .page-wrapper .review-form .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 16px;
+}
+
+body .page-wrapper .review-form .rating-stars .rating-star {
+    cursor: pointer;
+    transition: color 0.1s ease;
+}
+
+@media (width <= 767px) {
+    body .page-wrapper .review-item {
+        padding: 12px 14px;
+    }
+
+    body .page-wrapper .review-items {
+        gap: 12px;
+    }
+}
+
+/* ── 4. PRINT STYLES ────────────────────────────────────────────────────────
+   Oculta UI de navegação/carrinho/footer para impressão limpa.
+   Formata ficha de produto: título, preço, SKU, galeria, descrição.
+   Uso principal: clientes B2B imprimindo fichas de produto para cotação.
+   ─────────────────────────────────────────────────────────────────────────── */
+@media print {
+    .page-header .header-top,
+    .page-header .panel.header,
+    .page-header .sticky-header,
+    .navigation,
+    .nav-sections,
+    .breadcrumbs,
+    .block.related,
+    .block.upsell,
+    .block.crosssell,
+    .awa-pdp-sticky-cta,
+    .awa-sticky-atc-bar,
+    .awa-filter-toggle,
+    .awa-compare-bar,
+    .back-to-top,
+    .page-footer,
+    .footer-static,
+    .footer-bottom,
+    .footer-social-section,
+    .wishlist.action,
+    .action.tocompare,
+    .towishlist,
+    .product-addto-links,
+    [data-block="minicart"],
+    .cart-container aside,
+    .product-social-links {
+        display: none !important;
+    }
+
+    body,
+    .page-wrapper,
+    .page-main,
+    .product-info-main {
+        background: #fff !important;
+        color: #000 !important;
+    }
+
+    body.catalog-product-view .product-info-main .page-title {
+        font-size: 18pt;
+        font-weight: bold;
+        color: #000;
+        margin-bottom: 8pt;
+    }
+
+    body.catalog-product-view .product-info-main .price-box .price {
+        font-size: 16pt;
+        font-weight: bold;
+        color: #b73337;
+    }
+
+    body.catalog-product-view .product-attribute.sku .value {
+        font-size: 10pt;
+        color: #555;
+    }
+
+    body.catalog-product-view .fotorama__wrap {
+        break-inside: avoid;
+    }
+
+    body.catalog-product-view .fotorama__nav {
+        display: none !important;
+    }
+
+    body.catalog-product-view .fotorama__stage {
+        max-width: 6in;
+        height: auto !important;
+    }
+
+    /* Description tab always fully visible when printing */
+    body.catalog-product-view .product.info.detailed .data.item.content {
+        display: block !important;
+        overflow: visible !important;
+        height: auto !important;
+    }
+
+    body.catalog-product-view .product.info.detailed .description {
+        font-size: 10pt;
+        line-height: 1.5;
+        color: #000;
+        page-break-inside: avoid;
+    }
+
+    body.catalog-product-view .page-title-wrapper,
+    body.catalog-product-view .product-info-price {
+        break-inside: avoid;
+    }
+}
