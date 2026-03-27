@@ -6,6 +6,45 @@
     }
     window.__awaMinicartDeferInit = true;
 
+    function bindCheckoutFallback() {
+        if (window.__awaMinicartCheckoutFallbackBound) {
+            return;
+        }
+
+        window.__awaMinicartCheckoutFallbackBound = true;
+
+        document.addEventListener('click', function (event) {
+            var button = event.target && event.target.closest
+                ? event.target.closest('#top-cart-btn-checkout')
+                : null;
+            var minicart = window.jQuery
+                ? window.jQuery('[data-block="minicart"]')
+                : null;
+            var dropdown = window.jQuery
+                ? window.jQuery('[data-role="dropdownDialog"]')
+                : null;
+            var checkoutUrl = window.checkout && typeof window.checkout.checkoutUrl === 'string'
+                ? window.checkout.checkoutUrl
+                : '';
+
+            if (!button || !checkoutUrl || (minicart && minicart.data('mageSidebar'))) {
+                return;
+            }
+
+            event.preventDefault();
+            if (typeof event.stopImmediatePropagation === 'function') {
+                event.stopImmediatePropagation();
+            }
+            event.stopPropagation();
+
+            if (dropdown && dropdown.length && dropdown.data('mageDropdownDialog')) {
+                dropdown.dropdownDialog('close');
+            }
+
+            window.location.assign(checkoutUrl);
+        }, true);
+    }
+
     function updateExpandedState() {
         var trigger = document.querySelector('.minicart-wrapper .showcart');
         var dropdown = document.querySelector('.minicart-wrapper [data-role="dropdownDialog"]');
@@ -26,6 +65,7 @@
 
         window.require(['jquery', 'dropdownDialog'], function ($) {
             var minicartDropdown = $('[data-role="dropdownDialog"]');
+
             if (!minicartDropdown.length || minicartDropdown.data('mageDropdownDialog')) {
                 updateExpandedState();
                 return;
@@ -50,6 +90,7 @@
     }
 
     function boot() {
+        bindCheckoutFallback();
         window.setTimeout(initDropdown, 900);
     }
 
