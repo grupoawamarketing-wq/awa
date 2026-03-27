@@ -352,7 +352,7 @@ HTML;
       <ul>
         <li><strong>Telefone:</strong> {{config path="general/store_information/phone"}}</li>
         <li><strong>WhatsApp:</strong> <a href="https://wa.me/5516997367588" target="_blank" rel="noopener">(16) 99736-7588</a></li>
-        <li><strong>E-mail:</strong> <a href="mailto:contato@awamotos.com">contato@awamotos.com</a></li>
+        <li><strong>E-mail:</strong> <a href="mailto:contato@awamotos.com.br">contato@awamotos.com.br</a></li>
       </ul>
     </div>
   </div>
@@ -438,13 +438,13 @@ HTML;
   <h1>Política de Privacidade e Cookies</h1>
 
   <div class="awa-summary">
-    <p><strong>Resumo:</strong> Coletamos seus dados cadastrais e de navegação para processar pedidos, melhorar sua experiência e cumprir obrigações legais. Você tem direito de acessar, corrigir e excluir seus dados a qualquer momento. Nosso canal de privacidade é <a href="mailto:privacidade@awamotos.com">privacidade@awamotos.com</a>.</p>
+    <p><strong>Resumo:</strong> Coletamos seus dados cadastrais e de navegação para processar pedidos, melhorar sua experiência e cumprir obrigações legais. Você tem direito de acessar, corrigir e excluir seus dados a qualquer momento. Nosso canal de privacidade é <a href="mailto:privacidade@awamotos.com.br">privacidade@awamotos.com.br</a>.</p>
     <ul>
       <li><strong>O que coletamos:</strong> nome, CPF/CNPJ, e-mail, telefone, endereço, dados de navegação (cookies, IP) e histórico de compras.</li>
       <li><strong>Por quê:</strong> processar pedidos, emitir notas fiscais, entregar produtos, prestar suporte e melhorar o site.</li>
       <li><strong>Base legal:</strong> execução de contrato, obrigação legal, legítimo interesse e consentimento (Art. 7º LGPD).</li>
       <li><strong>Seus direitos:</strong> acesso, correção, exclusão, portabilidade, revogação do consentimento.</li>
-      <li><strong>Contato:</strong> <a href="mailto:privacidade@awamotos.com">privacidade@awamotos.com</a> (prazo de até 15 dias úteis).</li>
+      <li><strong>Contato:</strong> <a href="mailto:privacidade@awamotos.com.br">privacidade@awamotos.com.br</a> (prazo de até 15 dias úteis).</li>
     </ul>
   </div>
 
@@ -582,7 +582,7 @@ HTML;
   <h2>9. Como exercer seus direitos</h2>
   <p>Para exercer qualquer um dos direitos acima:</p>
   <ul>
-    <li><strong>E-mail do Encarregado (DPO):</strong> <a href="mailto:privacidade@awamotos.com">privacidade@awamotos.com</a></li>
+    <li><strong>E-mail do Encarregado (DPO):</strong> <a href="mailto:privacidade@awamotos.com.br">privacidade@awamotos.com.br</a></li>
     <li><strong>Formulário de contato:</strong> <a href="{{store url='contact'}}">Fale Conosco</a> (selecione o assunto "Privacidade / LGPD")</li>
     <li><strong>Prazo de resposta:</strong> até 15 dias úteis a partir da confirmação da sua identidade.</li>
   </ul>
@@ -647,7 +647,7 @@ HTML;
     </div>
     <div class="awa-card">
       <h3>E-mail</h3>
-      <p><a href="mailto:contato@awamotos.com"><strong>contato@awamotos.com</strong></a></p>
+      <p><a href="mailto:contato@awamotos.com.br"><strong>contato@awamotos.com.br</strong></a></p>
       <p>Respondemos em até 1 dia útil.</p>
     </div>
     <div class="awa-card">
@@ -671,7 +671,7 @@ HTML;
   <div class="awa-b2b">
     <p>Se você é <strong>revendedor, oficina ou distribuidor</strong>, temos um canal dedicado:</p>
     <ul>
-      <li><strong>E-mail B2B:</strong> <a href="mailto:atacado@grupoawamotos.com.br">atacado@grupoawamotos.com.br</a></li>
+      <li><strong>E-mail B2B:</strong> <a href="mailto:atacado@awamotos.com.br">atacado@awamotos.com.br</a></li>
       <li><strong>WhatsApp Comercial:</strong> <a href="https://wa.me/5516997367588" target="_blank" rel="noopener">(16) 99736-7588</a></li>
       <li><strong>Cotação personalizada:</strong> <a href="{{store url='b2b/quote/index'}}">Solicitar cotação</a></li>
     </ul>
@@ -707,7 +707,7 @@ HTML;
     "@type": "Organization",
     "name": "Grupo Awamotos",
     "telephone": "+55-16-3301-1890",
-    "email": "contato@awamotos.com",
+    "email": "contato@awamotos.com.br",
     "contactPoint": {
       "@type": "ContactPoint",
       "telephone": "+55-16-3301-1890",
@@ -732,7 +732,7 @@ HTML;
             '@type'    => 'FAQPage',
             'mainEntity' => [
                 $this->faqItem('Como acompanho meu pedido?', 'Acesse "Minha Conta" e vá em "Meus Pedidos". Se comprou como visitante, use a página Rastrear Pedido informando e-mail e número do pedido.'),
-                $this->faqItem('Posso alterar ou cancelar um pedido depois de confirmado?', 'Sim, desde que o pedido ainda não tenha sido faturado ou despachado. Entre em contato pelo WhatsApp (16) 99736-7588 ou e-mail contato@awamotos.com o mais rápido possível.'),
+                $this->faqItem('Posso alterar ou cancelar um pedido depois de confirmado?', 'Sim, desde que o pedido ainda não tenha sido faturado ou despachado. Entre em contato pelo WhatsApp (16) 99736-7588 ou e-mail contato@awamotos.com.br o mais rápido possível.'),
                 $this->faqItem('Quais formas de pagamento são aceitas?', 'Aceitamos Pix (3% de desconto), boleto bancário, cartão de crédito (até 6x sem juros) e cartão de débito. As opções disponíveis aparecem no checkout.'),
                 $this->faqItem('O pagamento por Pix é seguro?', 'Sim. O Pix é regulamentado pelo Banco Central e nosso QR Code é gerado pelo gateway de pagamento com chave vinculada ao CNPJ da empresa.'),
                 $this->faqItem('Qual o prazo de entrega?', 'Depende da região e da modalidade escolhida. PAC: 5 a 15 dias úteis. SEDEX: 1 a 5 dias úteis. Retirada na loja: após confirmação do pagamento. Consulte a página Frete e Entrega para detalhes.'),
@@ -763,7 +763,7 @@ HTML;
     </div>
     <div class="awa-faq-item">
       <h3>Posso alterar ou cancelar um pedido depois de confirmado?</h3>
-      <p>Sim, desde que o pedido ainda não tenha sido faturado ou despachado. Entre em contato pelo <a href="https://wa.me/5516997367588" target="_blank" rel="noopener">WhatsApp (16) 99736-7588</a> ou e-mail <a href="mailto:contato@awamotos.com">contato@awamotos.com</a> o mais rápido possível.</p>
+      <p>Sim, desde que o pedido ainda não tenha sido faturado ou despachado. Entre em contato pelo <a href="https://wa.me/5516997367588" target="_blank" rel="noopener">WhatsApp (16) 99736-7588</a> ou e-mail <a href="mailto:contato@awamotos.com.br">contato@awamotos.com.br</a> o mais rápido possível.</p>
     </div>
     <div class="awa-faq-item">
       <h3>Como escolho a peça certa para minha moto?</h3>
@@ -844,7 +844,7 @@ HTML;
     </div>
     <div class="awa-faq-item">
       <h3>Como solicito uma cotação personalizada?</h3>
-      <p>Use o <a href="{{store url='b2b/quote/index'}}">formulário de cotação</a> ou envie sua lista de peças para <a href="mailto:atacado@grupoawamotos.com.br">atacado@grupoawamotos.com.br</a>. Respondemos em até 1 dia útil.</p>
+      <p>Use o <a href="{{store url='b2b/quote/index'}}">formulário de cotação</a> ou envie sua lista de peças para <a href="mailto:atacado@awamotos.com.br">atacado@awamotos.com.br</a>. Respondemos em até 1 dia útil.</p>
     </div>
   </div>
 
@@ -1260,7 +1260,7 @@ HTML;
     </div>
     <div class="awa-contact-channel">
       <strong>E-mail</strong>
-      <a href="mailto:contato@awamotos.com">contato@awamotos.com</a>
+      <a href="mailto:contato@awamotos.com.br">contato@awamotos.com.br</a>
     </div>
   </div>
   <p><small>Horário de atendimento: {{config path="general/store_information/hours"}}. E-mails e formulários enviados fora do expediente serão respondidos no próximo dia útil.</small></p>
@@ -1276,7 +1276,7 @@ HTML;
     "@type": "Organization",
     "name": "Grupo Awamotos",
     "telephone": "+55-16-3301-1890",
-    "email": "contato@awamotos.com"
+    "email": "contato@awamotos.com.br"
   }
 }
 </script>

@@ -366,7 +366,7 @@ HTML;
   <p>Estamos aqui para ajudar você antes, durante e depois da compra.</p>
   <ul>
     <li><strong>Telefone:</strong> (11) 4002-8922</li>
-    <li><strong>E-mail:</strong> <a href="mailto:suporte@grupoawamotos.com.br">suporte@grupoawamotos.com.br</a></li>
+    <li><strong>E-mail:</strong> <a href="mailto:suporte@awamotos.com.br">suporte@awamotos.com.br</a></li>
     <li><strong>Horário:</strong> {{config path="general/store_information/hours"}}</li>
   </ul>
   <p>Se preferir, use a página de <a href="{{store url='contact'}}">Contato</a>.</p>
@@ -516,7 +516,7 @@ HTML;
   <p>Nossa equipe B2B está à disposição para atender você:</p>
   <ul>
     <li><strong>WhatsApp Comercial:</strong> (11) 99999-8888</li>
-    <li><strong>E-mail:</strong> <a href="mailto:atacado@grupoawamotos.com.br">atacado@grupoawamotos.com.br</a></li>
+    <li><strong>E-mail:</strong> <a href="mailto:atacado@awamotos.com.br">atacado@awamotos.com.br</a></li>
     <li><strong>Horário:</strong> Segunda a sexta, das 8h às 18h</li>
   </ul>
 </div>
@@ -583,7 +583,7 @@ HTML;
   <h2>📧 Como exercer seus direitos?</h2>
   <p>Para exercer qualquer um dos direitos acima, entre em contato conosco:</p>
   <ul>
-    <li><strong>E-mail do DPO:</strong> <a href="mailto:privacidade@awamotos.com">privacidade@awamotos.com</a></li>
+    <li><strong>E-mail do DPO:</strong> <a href="mailto:privacidade@awamotos.com.br">privacidade@awamotos.com.br</a></li>
     <li><strong>Formulário:</strong> <a href="{{store url='contact'}}">Página de Contato</a> (selecione "LGPD/Privacidade")</li>
     <li><strong>Prazo de resposta:</strong> Até 15 dias úteis</li>
   </ul>
@@ -667,7 +667,7 @@ HTML;
   <p>Fica eleito o foro da comarca de {{config path="general/store_information/city"}} para dirimir quaisquer controvérsias.</p>
 
   <h2>11. Contato</h2>
-  <p>Dúvidas sobre estes termos? Entre em contato pelo <a href="{{store url='contact'}}">formulário de contato</a> ou e-mail <a href="mailto:contato@awamotos.com">contato@awamotos.com</a>.</p>
+  <p>Dúvidas sobre estes termos? Entre em contato pelo <a href="{{store url='contact'}}">formulário de contato</a> ou e-mail <a href="mailto:contato@awamotos.com.br">contato@awamotos.com.br</a>.</p>
 </div>
 HTML;
     }
@@ -1560,7 +1560,7 @@ HTML;
 <div class="head-contact">
     <span>Atendimento: <a href="https://wa.me/5516997367588" target="_blank" rel="noopener">(16) 99736-7588</a></span>
     <span class="separator">•</span>
-    <span><a href="mailto:contato@awamotos.com">contato@awamotos.com</a></span>
+    <span><a href="mailto:contato@awamotos.com.br">contato@awamotos.com.br</a></span>
 </div>
 HTML;
     }
@@ -1614,7 +1614,7 @@ HTML;
     <div class="email">
         <i class="fa fa-envelope-o" aria-hidden="true"></i>
         <span class="label">E-mail</span>
-        <a href="mailto:contato@awamotos.com">contato@awamotos.com</a>
+        <a href="mailto:contato@awamotos.com.br">contato@awamotos.com.br</a>
     </div>
 </div>
 HTML;
@@ -1686,7 +1686,7 @@ HTML;
             <div class="velaContent velaContentSupport">
                 <div class="support-mail">
                     <label>Dúvidas?</label>
-                    <strong><a href="mailto:contato@awamotos.com">contato@awamotos.com</a></strong>
+                    <strong><a href="mailto:contato@awamotos.com.br">contato@awamotos.com.br</a></strong>
                 </div>
             </div>
         </div>
@@ -1761,7 +1761,7 @@ HTML;
                     </div>
                     <div class="contacinfo-address contactinfo-item">
                         <label>E-mail</label>
-                        <a href="mailto:contato@awamotos.com">contato@awamotos.com</a>
+                        <a href="mailto:contato@awamotos.com.br">contato@awamotos.com.br</a>
                     </div>
                     <div class="contacinfo-address contactinfo-item">
                         <label>Endereço</label>
@@ -1871,7 +1871,7 @@ HTML;
                     </div>
                     <div class="b2b-contact-item">
                         <span class="b2b-contact-label">E-mail:</span>
-                        <a href="mailto:atacado@awamotos.com" class="b2b-contact-value">atacado@awamotos.com</a>
+                        <a href="mailto:atacado@awamotos.com.br" class="b2b-contact-value">atacado@awamotos.com.br</a>
                     </div>
                     <div class="b2b-contact-hours">
                         <strong>Atendimento B2B:</strong> Seg-Sex 8h às 18h | Sáb 8h às 12h
