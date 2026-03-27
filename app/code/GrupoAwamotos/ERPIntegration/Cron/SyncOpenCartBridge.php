@@ -44,6 +44,8 @@ class SyncOpenCartBridge
     private const WARNING_COOLDOWN_SECONDS = 21600;
     private const SQL_EXPORT_DIR = '/var/log';
     private const SQL_EXPORT_PREFIX = 'erp_register_clients_auto_';
+    private const SQL_EXPORT_LATEST = 'erp_register_clients_pending_latest.sql';
+    private const GENERATE_SQL_COMMAND = 'bin/magento erp:client:register --generate-sql';
 
     public function __construct(
         private readonly ResourceConnection $resourceConnection,
@@ -399,16 +401,20 @@ class SyncOpenCartBridge
 
         if (!empty($missing)) { // phpcs:ignore Squiz.Operators.ComparisonOperatorUsage
             sort($missing);
+            $cliCommand = $this->buildGenerateSqlCommand($missing);
             $missingMessage = '[ERP Cron] B2B clients missing Sectra registration (no write access): '
                 . implode(', ', $missing)
-                . ' — run generateRegistrationSQL() or enable write connection';
+                . ' — execute "' . $cliCommand . '" or enable write connection';
 
             $payloadHash = md5(implode(',', $missing));
             if ($this->shouldLogWarningWithCooldown('b2b_missing_clients', $payloadHash)) {
-                $context = [];
-                $sqlExportFile = $this->exportMissingClientsSql($missing);
-                if ($sqlExportFile !== null) {
-                    $context['sql_export_file'] = $sqlExportFile;
+                $context = [
+                    'cli_command' => $cliCommand,
+                ];
+                $sqlExportFiles = $this->exportMissingClientsSql($missing);
+                if ($sqlExportFiles !== null) {
+                    $context['sql_export_file'] = $sqlExportFiles['timestamped'];
+                    $context['sql_export_latest_file'] = $sqlExportFiles['latest'];
                 }
                 $this->logger->warning($missingMessage, $context);
             }
@@ -421,8 +427,9 @@ class SyncOpenCartBridge
      * Export SQL with pending B2B registrations to help DBA/manual recovery.
      *
      * @param int[] $missingCodes
+     * @return array{timestamped: string, latest: string}|null
      */
-    private function exportMissingClientsSql(array $missingCodes): ?string
+    private function exportMissingClientsSql(array $missingCodes): ?array
     {
         $basePath = defined('BP') ? BP : sys_get_temp_dir();
         $exportDir = rtrim($basePath, '/') . self::SQL_EXPORT_DIR;
@@ -434,18 +441,42 @@ class SyncOpenCartBridge
         try {
             $sql = $this->b2bRegistration->generateRegistrationSQL($missingCodes);
             $filename = self::SQL_EXPORT_PREFIX . gmdate('Ymd_His') . '.sql';
-            $absolutePath = $exportDir . '/' . $filename;
+            $timestampedPath = $exportDir . '/' . $filename;
+            $latestPath = $exportDir . '/' . self::SQL_EXPORT_LATEST;
 
-            if (@file_put_contents($absolutePath, $sql, LOCK_EX) === false) {
+            if (!$this->writeSqlExportFile($timestampedPath, $sql)) {
                 return null;
             }
 
-            @chmod($absolutePath, 0664);
-            return $absolutePath;
+            $this->writeSqlExportFile($latestPath, $sql);
+
+            return [
+                'timestamped' => $timestampedPath,
+                'latest' => $latestPath,
+            ];
         } catch (\Throwable $e) {
             $this->logger->warning('[ERP Cron] Could not export B2B registration SQL: ' . $e->getMessage());
             return null;
         }
+    }
+
+    /**
+     * @param int[] $missingCodes
+     */
+    private function buildGenerateSqlCommand(array $missingCodes): string
+    {
+        return self::GENERATE_SQL_COMMAND . ' ' . implode(',', $missingCodes);
+    }
+
+    private function writeSqlExportFile(string $absolutePath, string $sql): bool
+    {
+        if (@file_put_contents($absolutePath, $sql, LOCK_EX) === false) {
+            return false;
+        }
+
+        @chmod($absolutePath, 0664);
+
+        return true;
     }
 
     /**

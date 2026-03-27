@@ -91,11 +91,7 @@ class B2BClientRegistration
         }
 
         try {
-            $validadorHash = strtoupper(md5(json_encode([
-                'CODIGO' => $erpClientCode,
-                'source' => 'magento_b2b',
-                'ts' => date('Y-m-d'),
-            ])));
+            $validadorHash = $this->getClientValidatorHash($erpClientCode);
 
             // 1. Register client
             $stmt = $pdo->prepare(
@@ -111,12 +107,7 @@ class B2BClientRegistration
             ]);
 
             // 2. Register address
-            $enderecoHash = strtoupper(md5(json_encode([
-                'CODIGO' => $erpClientCode,
-                'ENDERECO' => 1,
-                'source' => 'magento_b2b',
-                'ts' => date('Y-m-d'),
-            ])));
+            $enderecoHash = $this->getAddressValidatorHash($erpClientCode);
 
             // Get next CHAVEEXTERNA for address
             $stmtMax = $pdo->prepare(
@@ -222,8 +213,8 @@ class B2BClientRegistration
 
         foreach ($unregistered as $c) {
             $code = $c['erp_code'];
-            $hash = strtoupper(md5(json_encode(['CODIGO' => $code, 'source' => 'magento_b2b'])));
-            $hashEnd = strtoupper(md5(json_encode(['CODIGO' => $code, 'ENDERECO' => 1, 'source' => 'magento_b2b'])));
+            $hash = $this->getClientValidatorHash($code);
+            $hashEnd = $this->getAddressValidatorHash($code);
 
             $sql .= "-- Cliente: " . $c['razao'] . " (CNPJ: " . $c['cgc'] . ")\n";
             $sql .= "INSERT INTO GR_INTEGRACAOVALIDADOR (INTEGRACAOORIGEM, CHAVE, VALIDADOR, CHAVEEXTERNA, DTSINCRONIZACAO)\n";
@@ -235,6 +226,29 @@ class B2BClientRegistration
 
         $sql .= "COMMIT;\n";
         return $sql;
+    }
+
+    /**
+     * Build the Sectra validator hash for a B2B client.
+     */
+    public function getClientValidatorHash(int $erpClientCode): string
+    {
+        return $this->buildValidatorHash([
+            'CODIGO' => $erpClientCode,
+            'source' => 'magento_b2b',
+        ]);
+    }
+
+    /**
+     * Build the Sectra validator hash for the default B2B address.
+     */
+    public function getAddressValidatorHash(int $erpClientCode): string
+    {
+        return $this->buildValidatorHash([
+            'CODIGO' => $erpClientCode,
+            'ENDERECO' => 1,
+            'source' => 'magento_b2b',
+        ]);
     }
 
     /**
@@ -363,6 +377,14 @@ class B2BClientRegistration
         }
 
         return strcasecmp($leftUser, $rightUser) === 0;
+    }
+
+    /**
+     * @param array<string, int|string> $payload
+     */
+    private function buildValidatorHash(array $payload): string
+    {
+        return strtoupper(md5((string) json_encode($payload)));
     }
 
     /**

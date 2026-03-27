@@ -128,7 +128,7 @@ class WhatsAppStatusCommand extends Command
 
         $output->writeln(sprintf(
             '  Client Token: %s',
-            $clientToken ? $this->maskString($clientToken) : '<comment>Nao configurado (opcional)</comment>'
+            $clientToken ? $this->maskString($clientToken) : '<comment>Nao configurado (algumas instancias exigem)</comment>'
         ));
 
         $output->writeln(sprintf(

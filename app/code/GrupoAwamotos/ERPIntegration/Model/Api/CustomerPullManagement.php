@@ -254,8 +254,8 @@ class CustomerPullManagement implements CustomerPullInterface
         $sql .= "BEGIN TRANSACTION;\n";
 
         foreach ($unregistered as $code) {
-            $h1 = strtoupper(md5(json_encode(['CODIGO' => (int) $code, 'source' => 'magento_b2b'])));
-            $h2 = strtoupper(md5(json_encode(['CODIGO' => (int) $code, 'ENDERECO' => 1, 'source' => 'magento_b2b'])));
+            $h1 = $this->b2bRegistration->getClientValidatorHash((int) $code);
+            $h2 = $this->b2bRegistration->getAddressValidatorHash((int) $code);
 
             $sql .= "INSERT INTO GR_INTEGRACAOVALIDADOR(INTEGRACAOORIGEM,CHAVE,VALIDADOR,CHAVEEXTERNA,DTSINCRONIZACAO)";
             $sql .= "VALUES('$origemCliente','$code','$h1','$code',GETDATE());\n";

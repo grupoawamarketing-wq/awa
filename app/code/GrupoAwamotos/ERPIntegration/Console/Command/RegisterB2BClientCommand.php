@@ -15,6 +15,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class RegisterB2BClientCommand extends Command
 {
+    private const COMMAND_NAME = 'erp:client:register';
+    private const COMMAND_ALIAS = 'erp:b2b:register';
+
     private B2BClientRegistration $b2bRegistration;
     private SyncLogResource $syncLogResource;
     private OrderRepositoryInterface $orderRepository;
@@ -35,7 +38,8 @@ class RegisterB2BClientCommand extends Command
 
     protected function configure(): void
     {
-        $this->setName('erp:client:register')
+        $this->setName(self::COMMAND_NAME)
+            ->setAliases([self::COMMAND_ALIAS])
             ->setDescription('Registra clientes B2B no validador Sectra (GR_INTEGRACAOVALIDADOR)')
             ->addArgument('erp_codes', InputArgument::OPTIONAL, 'Codigos ERP separados por virgula (ex: 2541,699)')
             ->addOption('pending', 'p', InputOption::VALUE_NONE, 'Registrar clientes de todos os pedidos pendentes')
@@ -100,10 +104,16 @@ class RegisterB2BClientCommand extends Command
         }
 
         $output->writeln('');
-        $output->writeln('<comment>Para registrar: bin/magento erp:client:register ' .
-            implode(',', array_column($unregistered, 'erp_code')) . '</comment>');
-        $output->writeln('<comment>Para gerar SQL: bin/magento erp:client:register --generate-sql ' .
-            implode(',', array_column($unregistered, 'erp_code')) . '</comment>');
+        $output->writeln(sprintf(
+            '<comment>Para registrar: bin/magento %s %s</comment>',
+            self::COMMAND_NAME,
+            implode(',', array_column($unregistered, 'erp_code'))
+        ));
+        $output->writeln(sprintf(
+            '<comment>Para gerar SQL: bin/magento %s --generate-sql %s</comment>',
+            self::COMMAND_NAME,
+            implode(',', array_column($unregistered, 'erp_code'))
+        ));
 
         return Command::FAILURE;
     }
@@ -123,8 +133,11 @@ class RegisterB2BClientCommand extends Command
             $output->writeln('  Admin > Stores > Configuration > ERP Integration > Conexao de Escrita');
             $output->writeln('');
             $output->writeln('<comment>Ou use --generate-sql para gerar SQL e executar manualmente:</comment>');
-            $output->writeln('  bin/magento erp:client:register --generate-sql ' .
-                implode(',', $erpCodes));
+            $output->writeln(sprintf(
+                '  bin/magento %s --generate-sql %s',
+                self::COMMAND_NAME,
+                implode(',', $erpCodes)
+            ));
 
             // Fallback: generate SQL
             $output->writeln('');

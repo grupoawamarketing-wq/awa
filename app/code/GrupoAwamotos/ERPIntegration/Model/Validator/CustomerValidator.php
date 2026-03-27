@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace GrupoAwamotos\ERPIntegration\Model\Validator;
 
+use GrupoAwamotos\ERPIntegration\Model\EmailSanitizer;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -22,10 +23,14 @@ class CustomerValidator
         'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'
     ];
 
+    private EmailSanitizer $emailSanitizer;
     private LoggerInterface $logger;
 
-    public function __construct(LoggerInterface $logger)
-    {
+    public function __construct(
+        EmailSanitizer $emailSanitizer,
+        LoggerInterface $logger
+    ) {
+        $this->emailSanitizer = $emailSanitizer;
         $this->logger = $logger;
     }
 
@@ -112,18 +117,17 @@ class CustomerValidator
      */
     private function validateEmail(array $data): ValidationResult
     {
-        $email = trim($data['EMAIL'] ?? '');
+        $rawEmail = (string) ($data['EMAIL'] ?? '');
+        $email = $this->emailSanitizer->normalize($rawEmail);
+        $rawSummary = $this->emailSanitizer->summarizeRaw($rawEmail);
 
         if (empty($email)) {
-            return ValidationResult::failure(['Email é obrigatório']);
-        }
+            if ($rawSummary === '[vazio]') {
+                return ValidationResult::failure(['Email é obrigatório']);
+            }
 
-        $email = strtolower($email);
-
-        // Basic format validation
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return ValidationResult::failure([
-                sprintf('Email inválido: %s', $email)
+                sprintf('Email inválido: %s', $rawSummary)
             ]);
         }
 
@@ -132,6 +136,14 @@ class CustomerValidator
         $domain = $parts[1] ?? '';
 
         $result = ValidationResult::success(['email' => $email]);
+
+        if ($this->shouldWarnAboutEmailNormalization($rawEmail, $email)) {
+            $result->addWarning(sprintf(
+                'Email normalizado de %s para %s',
+                $rawSummary,
+                $email
+            ));
+        }
 
         // Check for common typos in popular domains
         $typoMap = [
@@ -153,6 +165,15 @@ class CustomerValidator
         }
 
         return $result;
+    }
+
+    private function shouldWarnAboutEmailNormalization(string $rawEmail, string $normalizedEmail): bool
+    {
+        $baseline = html_entity_decode($rawEmail, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $baseline = trim($baseline, " \t\n\r\0\x0B'\"<>");
+        $baseline = strtolower($baseline);
+
+        return $baseline !== $normalizedEmail;
     }
 
     /**

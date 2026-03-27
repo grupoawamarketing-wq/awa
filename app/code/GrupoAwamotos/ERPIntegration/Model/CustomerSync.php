@@ -39,6 +39,7 @@ class CustomerSync implements CustomerSyncInterface
     private StoreManagerInterface $storeManager;
     private SyncLogResource $syncLogResource;
     private CustomerValidator $customerValidator;
+    private EmailSanitizer $emailSanitizer;
     private LoggerInterface $logger;
     private Random $random;
     private EncryptorInterface $encryptor;
@@ -59,6 +60,7 @@ class CustomerSync implements CustomerSyncInterface
         StoreManagerInterface $storeManager,
         SyncLogResource $syncLogResource,
         CustomerValidator $customerValidator,
+        EmailSanitizer $emailSanitizer,
         LoggerInterface $logger,
         Random $random,
         EncryptorInterface $encryptor,
@@ -75,6 +77,7 @@ class CustomerSync implements CustomerSyncInterface
         $this->storeManager = $storeManager;
         $this->syncLogResource = $syncLogResource;
         $this->customerValidator = $customerValidator;
+        $this->emailSanitizer = $emailSanitizer;
         $this->logger = $logger;
         $this->random = $random;
         $this->encryptor = $encryptor;
@@ -233,10 +236,11 @@ class CustomerSync implements CustomerSyncInterface
 
     public function createOrUpdateCustomer(array $erpData, bool $createIfNotExists = true): ?CustomerInterface
     {
-        $email = $this->normalizeEmail($erpData['EMAIL'] ?? '');
+        $rawEmail = (string) ($erpData['EMAIL'] ?? '');
+        $email = $this->normalizeEmail($rawEmail);
         if (empty($email)) {
-            $this->logger->warning('[ERP] Cannot create customer without email', [
-                'raw_email' => $erpData['EMAIL'] ?? 'N/A',
+            $this->logger->warning('[ERP] Cannot create customer with invalid email', [
+                'raw_email' => $this->emailSanitizer->summarizeRaw($rawEmail),
                 'erp_code' => $erpData['CODIGO'] ?? 0,
             ]);
             return null;
@@ -885,21 +889,7 @@ class CustomerSync implements CustomerSyncInterface
 
     private function normalizeEmail(string $email): string
     {
-        $email = strtolower(trim($email));
-
-        // Validação básica
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            return '';
-        }
-
-        // Rejeita domínios de rótulo único (ex: user@email sem TLD)
-        // que passam filter_var mas são rejeitados pelo validador Laminas/Magento
-        $atPos = strrpos($email, '@');
-        if ($atPos === false || !str_contains(substr($email, $atPos + 1), '.')) {
-            return '';
-        }
-
-        return $email;
+        return $this->emailSanitizer->normalize($email);
     }
 
     private function cleanTaxvat(string $taxvat): string
