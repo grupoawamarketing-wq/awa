@@ -131,6 +131,11 @@ body .page-wrapper .awa-site-header .header .awa-header-cart-link-icon {
 		width: 100% !important;
 		max-width: 100% !important;
 	}
+
+	/* Cart-link: apenas visível no mobile — no desktop o minicart cuida do ícone */
+	body .page-wrapper .awa-site-header .header .awa-header-cart-link {
+		display: none !important;
+	}
 }
 
 @media (max-width: 991px) {
@@ -343,7 +348,7 @@ body .page-wrapper .awa-site-header .header .awa-header-cart-link-icon {
 		fill: none !important;
 	}
 
-	body .page-wrapper .awa-site-header .header .awa-header-cart-link > span {
+	body .page-wrapper .awa-site-header .header .awa-header-cart-link > span:not(.awa-cart-link-badge) {
 		position: absolute !important;
 		width: 1px !important;
 		height: 1px !important;
@@ -354,6 +359,31 @@ body .page-wrapper .awa-site-header .header .awa-header-cart-link-icon {
 		clip-path: inset(50%) !important;
 		white-space: nowrap !important;
 		border: 0 !important;
+	}
+
+	/* Cart-link: badge contador (contagem sincronizada via JS com o minicart oculto) */
+	body .page-wrapper .awa-site-header .header .awa-header-cart-link {
+		overflow: visible !important;
+	}
+	body .page-wrapper .awa-site-header .header .awa-header-cart-link .awa-cart-link-badge {
+		position: absolute !important;
+		top: -7px !important;
+		right: -7px !important;
+		min-width: 18px !important;
+		height: 18px !important;
+		padding-inline: 4px !important;
+		background: var(--primary-color, #b73337) !important;
+		color: #fff !important;
+		font-size: 10px !important;
+		font-weight: 700 !important;
+		font-family: inherit !important;
+		border-radius: 999px !important;
+		line-height: 1 !important;
+		box-shadow: 0 2px 4px rgb(0 0 0 / 25%) !important;
+		border: 1.5px solid #fff !important;
+		z-index: 10 !important;
+		pointer-events: none !important;
+		letter-spacing: 0 !important;
 	}
 
 	/* === SEARCH BAR (full-width second row) === */
@@ -714,9 +744,11 @@ body .page-wrapper .awa-site-header .header .awa-header-cart-link-icon {
 						<div class="top-bar-right" data-awa-header-utility-right="true">
 							<div class="top-info" data-awa-header-account-group="true">
 								<?= /* @noEscape */ $this->getChildHtml('awaB2bModeBadge') ?>
-								<div class="top-account has-child" data-awa-top-account="true">
+								<nav class="top-account has-child"
+									 data-awa-top-account="true"
+									 aria-label="<?= $escaper->escapeHtmlAttr(__('Atalhos da conta')) ?>">
 									<?= /* @noEscape */ $this->getChildHtml('top.links') ?>
-								</div>
+								</nav>
 							</div>
 						</div>
 					</div>
@@ -751,7 +783,7 @@ body .page-wrapper .awa-site-header .header .awa-header-cart-link-icon {
 														</div>
 													<?php endif; ?>
 												</div>
-												<a class="awa-header-cart-link" href="<?= $escaper->escapeUrl($block->getUrl('checkout/cart')) ?>" aria-label="<?= $escaper->escapeHtmlAttr(__('Abrir carrinho')) ?>"><svg class="awa-header-cart-link-icon" viewBox="0 0 24 24" aria-hidden="true" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1"></circle><circle cx="18" cy="20" r="1"></circle><path d="M3.5 4h2l2.2 10.2a1 1 0 0 0 1 .8h8.6a1 1 0 0 0 1-.8L20 7H7.1"></path></svg><span><?= $escaper->escapeHtml(__('Abrir carrinho')) ?></span></a>
+												<a class="awa-header-cart-link" href="<?= $escaper->escapeUrl($block->getUrl('checkout/cart')) ?>" aria-label="<?= $escaper->escapeHtmlAttr(__('Abrir carrinho')) ?>"><svg class="awa-header-cart-link-icon" viewBox="0 0 24 24" aria-hidden="true" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1"></circle><circle cx="18" cy="20" r="1"></circle><path d="M3.5 4h2l2.2 10.2a1 1 0 0 0 1 .8h8.6a1 1 0 0 0 1-.8L20 7H7.1"></path></svg><span class="awa-cart-link-badge" aria-hidden="true" style="display:none"></span><span><?= $escaper->escapeHtml(__('Abrir carrinho')) ?></span></a>
 											</div>
 								<div class="col-md-10 col-sm-10 col-xs-12 top-search awa-header-actions" data-awa-header-search-row="true">
 									<?= /* @noEscape */ $this->getChildHtml('topSearch') ?>
@@ -806,5 +838,45 @@ body .page-wrapper .awa-site-header .header .awa-header-cart-link-icon {
 		</div>
 	</div>
 </div>
+<script>
+(function () {
+	'use strict';
+	if (window.__awaMobileCartBadge) { return; }
+	window.__awaMobileCartBadge = true;
+	function syncBadge() {
+		var badge = document.querySelector('.awa-header-cart-link .awa-cart-link-badge');
+		if (!badge) { return; }
+		var counter = document.querySelector('.awa-header-minicart .counter.qty');
+		if (!counter) { badge.style.display = 'none'; return; }
+		var isEmpty = counter.classList.contains('empty');
+		if (isEmpty) { badge.style.display = 'none'; return; }
+		var el = counter.querySelector('.total-mini-cart-item');
+		var n = el ? (parseInt((el.textContent || '').replace(/\D/g, ''), 10) || 0) : 0;
+		if (n > 0) {
+			badge.textContent = n > 99 ? '99+' : String(n);
+			badge.style.display = 'inline-flex';
+			badge.style.alignItems = 'center';
+			badge.style.justifyContent = 'center';
+		} else {
+			badge.style.display = 'none';
+		}
+	}
+	function boot() {
+		syncBadge();
+		var counter = document.querySelector('.awa-header-minicart .counter.qty');
+		if (counter && window.MutationObserver) {
+			new MutationObserver(syncBadge).observe(counter, {
+				childList: true, subtree: true, characterData: true,
+				attributes: true, attributeFilter: ['class']
+			});
+		}
+	}
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', boot, { once: true });
+	} else {
+		boot();
+	}
+}());
+</script>
 </header>
 <?php endif; ?>
