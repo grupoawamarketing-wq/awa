@@ -134,6 +134,8 @@ class SyncOpenCartBridge
         $connection = $this->resourceConnection->getConnection();
         $groupIds = implode(',', self::B2B_GROUP_IDS);
 
+        // INSERT IGNORE + PRIMARY KEY on customer_id already prevents duplicates.
+        // NOT IN (SELECT ...) subquery was O(n²) against 8k+ rows — removed.
         $sql = "
             INSERT IGNORE INTO oc_customer_b2b_confirmed (customer_id, synced_at)
             SELECT
@@ -142,9 +144,6 @@ class SyncOpenCartBridge
             FROM oc_customer_id_map map
             INNER JOIN customer_entity ce ON ce.entity_id = map.magento_customer_id
             WHERE ce.group_id IN ({$groupIds})
-              AND map.old_oc_customer_id NOT IN (
-                  SELECT customer_id FROM oc_customer_b2b_confirmed
-              )
         ";
 
         $stmt = $connection->query($sql);
@@ -479,10 +478,8 @@ class SyncOpenCartBridge
               AND NOT EXISTS (
                   SELECT 1 FROM oc_order_imported oi WHERE oi.order_id = so.entity_id
               )
-              AND map.old_oc_customer_id NOT IN (
-                  SELECT customer_id FROM oc_customer_b2b_confirmed
-              )
         ";
+        // NOT IN (SELECT ...) removed — INSERT IGNORE + PK handles uniqueness.
 
         $stmt = $connection->query($sql);
 
