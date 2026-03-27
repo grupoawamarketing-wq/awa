@@ -28,6 +28,7 @@ class TransactionalEmailConfigSynchronizer
         'trans_email/ident_custom2/email' => 'atacado@awamotos.com.br',
         'trans_email/ident_storepickup/name' => 'AWA Motos Retirada',
         'trans_email/ident_storepickup/email' => 'contato@awamotos.com.br',
+        'grupoawamotos_theme/contact/email' => 'contato@awamotos.com.br',
     ];
 
     public function __construct(
