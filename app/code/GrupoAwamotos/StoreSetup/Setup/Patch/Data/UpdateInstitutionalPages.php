@@ -673,7 +673,7 @@ HTML;
     <ul>
       <li><strong>E-mail B2B:</strong> <a href="mailto:atacado@grupoawamotos.com.br">atacado@grupoawamotos.com.br</a></li>
       <li><strong>WhatsApp Comercial:</strong> <a href="https://wa.me/5516997367588" target="_blank" rel="noopener">(16) 99736-7588</a></li>
-      <li><strong>Cotação personalizada:</strong> <a href="{{store url='b2b/quote/request'}}">Solicitar cotação</a></li>
+      <li><strong>Cotação personalizada:</strong> <a href="{{store url='b2b/quote/index'}}">Solicitar cotação</a></li>
     </ul>
     <p><a href="{{store url='atacado/condicoes'}}">Conheça as condições de atacado</a></p>
   </div>
@@ -844,7 +844,7 @@ HTML;
     </div>
     <div class="awa-faq-item">
       <h3>Como solicito uma cotação personalizada?</h3>
-      <p>Use o <a href="{{store url='b2b/quote/request'}}">formulário de cotação</a> ou envie sua lista de peças para <a href="mailto:atacado@grupoawamotos.com.br">atacado@grupoawamotos.com.br</a>. Respondemos em até 1 dia útil.</p>
+      <p>Use o <a href="{{store url='b2b/quote/index'}}">formulário de cotação</a> ou envie sua lista de peças para <a href="mailto:atacado@grupoawamotos.com.br">atacado@grupoawamotos.com.br</a>. Respondemos em até 1 dia útil.</p>
     </div>
   </div>
 

@@ -297,7 +297,7 @@ HTML;
                             <li><a href="/store-locator">Nossa Loja</a></li>
                             <li><a href="/faq">Perguntas Frequentes</a></li>
                             <li><a href="/customer/account/create">Crie Sua Conta</a></li>
-                            <li><a href="/b2b/account/register">Cadastro B2B</a></li>
+                            <li><a href="/b2b/register">Cadastro B2B</a></li>
                         </ul>
                     </div>
                 </div>
@@ -612,7 +612,7 @@ HTML;
             </div>
             <div class="col-md-6 col-sm-12">
                 <div class="promo-banner promo-banner-right">
-                    <a href="/b2b/account/register" title="Cadastro B2B — Atacado">
+                    <a href="/b2b/register" title="Cadastro B2B — Atacado">
                         <div class="promo-content">
                             <h3 class="promo-title">Compra B2B</h3>
                             <p class="promo-desc">Preços de atacado para lojistas e oficinas</p>

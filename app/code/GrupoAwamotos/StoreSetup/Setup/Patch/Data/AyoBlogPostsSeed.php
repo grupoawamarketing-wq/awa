@@ -251,7 +251,7 @@ HTML;
 
     <h2>Como se cadastrar</h2>
     <ol>
-        <li>Acesse a página de <a href="/b2b/account/register">Cadastro B2B</a></li>
+        <li>Acesse a página de <a href="/b2b/register">Cadastro B2B</a></li>
         <li>Preencha os dados da empresa (CNPJ, Razão Social, Inscrição Estadual)</li>
         <li>Informe seus dados de contato</li>
         <li>Envie para análise — aprovação em até 24h úteis</li>
@@ -267,7 +267,7 @@ HTML;
         <li>Empresas de motoboy e entregas</li>
     </ul>
 
-    <p><strong>Cadastre-se agora e comece a economizar!</strong> <a href="/b2b/account/register">Clique aqui para se cadastrar</a>.</p>
+    <p><strong>Cadastre-se agora e comece a economizar!</strong> <a href="/b2b/register">Clique aqui para se cadastrar</a>.</p>
 </div>
 HTML;
     }

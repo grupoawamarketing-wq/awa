@@ -134,8 +134,8 @@ class AyoSeedContent implements DataPatchInterface
                 'slide_type'      => 2,
                 'slide_status'    => 1,
                 'slide_position'  => 2,
-                'slide_text'      => '<div class="slide-content slide-2"><div class="slide-text-wrap"><h2 class="slide-title">Atacado para Lojistas e Oficinas</h2><p class="slide-desc">Cadastre-se no programa B2B e tenha precos especiais</p><a href="/b2b/account/register" class="slide-btn btn btn-primary">Cadastro B2B</a></div></div>',
-                'slide_link'      => '/b2b/account/register',
+                'slide_text'      => '<div class="slide-content slide-2"><div class="slide-text-wrap"><h2 class="slide-title">Atacado para Lojistas e Oficinas</h2><p class="slide-desc">Cadastre-se no programa B2B e tenha precos especiais</p><a href="/b2b/register" class="slide-btn btn btn-primary">Cadastro B2B</a></div></div>',
+                'slide_link'      => '/b2b/register',
             ],
             [
                 'slider_id'       => $sliderId,

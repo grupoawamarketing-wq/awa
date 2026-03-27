@@ -104,7 +104,7 @@ class AyoSeedContentV2 implements DataPatchInterface
                 'slide_status'   => 1,
                 'slide_position' => 2,
                 'slide_text'     => '<div class="slide-content slide-2"><h2>Atacado para Lojistas e Oficinas</h2><p>Cadastre-se no programa B2B e tenha condicoes especiais.</p></div>',
-                'slide_link'     => '/b2b/account/register',
+                'slide_link'     => '/b2b/register',
             ],
             [
                 'slider_id'      => $sliderId,
