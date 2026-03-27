@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace GrupoAwamotos\Fitment\Cron;
 
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Process\Process;
 
 /**
  * Cron job para reconstrução completa do índice FULLTEXT fallback (diário 03:15).
@@ -31,13 +32,12 @@ class FallbackRebuild
         }
 
         $phpBin = PHP_BINARY ?: '/usr/bin/php';
-        $cmd = escapeshellarg($phpBin) . ' ' . escapeshellarg($script) . ' --truncate 2>&1'; // nosemgrep: php.lang.security.exec-use.exec-use,php_exec_rule-exec-use
+        $process = new Process([$phpBin, $script, '--truncate']);
+        $process->setTimeout(300);
+        $process->run();
 
-        $output = [];
-        $exitCode = 0;
-        exec($cmd, $output, $exitCode);
-
-        $outputStr = implode("\n", $output);
+        $outputStr = trim($process->getOutput() . $process->getErrorOutput());
+        $exitCode = $process->getExitCode();
 
         if ($exitCode !== 0) {
             $this->logger->error(

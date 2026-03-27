@@ -4,13 +4,14 @@ declare(strict_types=1);
 namespace GrupoAwamotos\Fitment\Cron;
 
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Process\Process;
 
 /**
  * Cron job para atualização incremental do índice FULLTEXT fallback.
  *
  * NOTA: O script standalone (scripts/fallback_search_delta.php) chama exit(),
  * o que mataria o processo do cron scheduler do Magento.  Por isso executamos
- * como sub-processo isolado via exec().
+ * como sub-processo isolado via Process.
  */
 class FallbackDelta
 {
@@ -33,13 +34,12 @@ class FallbackDelta
         }
 
         $phpBin = PHP_BINARY ?: '/usr/bin/php';
-        $cmd = escapeshellarg($phpBin) . ' ' . escapeshellarg($script) . ' 2>&1'; // nosemgrep: php.lang.security.exec-use.exec-use,php_exec_rule-exec-use
+        $process = new Process([$phpBin, $script]);
+        $process->setTimeout(120);
+        $process->run();
 
-        $output = [];
-        $exitCode = 0;
-        exec($cmd, $output, $exitCode);
-
-        $outputStr = implode("\n", $output);
+        $outputStr = trim($process->getOutput() . $process->getErrorOutput());
+        $exitCode = $process->getExitCode();
 
         if ($exitCode !== 0) {
             $this->logger->error(

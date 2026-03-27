@@ -99,22 +99,52 @@ class Data extends AbstractHelper
 
     public function getDatabase(): string
     {
+        $database = '';
+
         if ($this->useEnvCredentials()) {
             $envDb = $this->getEnvValue(self::ENV_DATABASE);
             if ($envDb) {
-                return $envDb;
+                $database = $envDb;
             }
         }
 
-        $deployDb = $this->getDeploymentConfigValue('erp/database');
-        if ($deployDb) {
-            return $deployDb;
+        if ($database === '') {
+            $deployDb = $this->getDeploymentConfigValue('erp/database');
+            if ($deployDb) {
+                $database = $deployDb;
+            }
         }
 
-        return (string) $this->scopeConfig->getValue(
-            self::XML_PREFIX . 'connection/database',
-            ScopeInterface::SCOPE_STORE
-        );
+        if ($database === '') {
+            $database = (string) $this->scopeConfig->getValue(
+                self::XML_PREFIX . 'connection/database',
+                ScopeInterface::SCOPE_STORE
+            );
+        }
+
+        return $this->sanitizeDatabaseName($database);
+    }
+
+    /**
+     * Sanitize database name to prevent SQL injection in USE statements.
+     *
+     * Only allows alphanumeric characters, underscores, hyphens, and dots.
+     *
+     * @throws \InvalidArgumentException if the database name contains invalid characters
+     */
+    private function sanitizeDatabaseName(string $database): string
+    {
+        if ($database === '') {
+            return '';
+        }
+
+        if (!preg_match('/^[a-zA-Z0-9_.\-]+$/', $database)) {
+            throw new \InvalidArgumentException(
+                'Invalid ERP database name. Only alphanumeric, underscore, hyphen, and dot characters are allowed.'
+            );
+        }
+
+        return $database;
     }
 
     public function getUsername(): string

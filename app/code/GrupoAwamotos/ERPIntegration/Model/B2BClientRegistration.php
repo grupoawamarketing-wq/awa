@@ -290,7 +290,7 @@ class B2BClientRegistration
                 \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
                 \PDO::ATTR_TIMEOUT => 15,
             ]);
-            $this->writeConnection->exec('USE ' . $database);
+            $this->writeConnection->exec('USE [' . str_replace(']', ']]', $database) . ']');
 
             if (!$this->validateWritePermission($this->writeConnection)) {
                 $this->writeConnection = null;
