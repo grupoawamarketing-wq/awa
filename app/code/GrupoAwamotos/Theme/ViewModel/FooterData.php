@@ -66,17 +66,17 @@ class FooterData implements ArgumentInterface
         $contactPhone = $this->getConfigValue(self::XML_PATH_CONTACT_PHONE, '');
 
         if ($contactPhone !== '') {
-            return $contactPhone;
+            return $this->formatPhoneForDisplay($contactPhone);
         }
 
         $storePhone = $this->getConfigValue(self::XML_PATH_STORE_PHONE, '');
 
-        return $storePhone !== '' ? $storePhone : self::DEFAULT_PHONE;
+        return $storePhone !== '' ? $this->formatPhoneForDisplay($storePhone) : self::DEFAULT_PHONE;
     }
 
     public function getPhoneUrl(): string
     {
-        $digits = $this->normalizePhone($this->getPhone());
+        $digits = $this->normalizePhoneForDial($this->getPhoneRaw());
 
         return $digits !== '' ? 'tel:+' . $digits : '';
     }
@@ -90,7 +90,7 @@ class FooterData implements ArgumentInterface
 
     public function getWhatsAppUrl(): string
     {
-        $digits = $this->normalizePhone($this->getWhatsApp());
+        $digits = $this->normalizePhoneForDial($this->getWhatsApp());
 
         return $digits !== '' ? 'https://wa.me/' . $digits : '';
     }
@@ -99,7 +99,7 @@ class FooterData implements ArgumentInterface
     {
         $email = $this->getConfigValue(self::XML_PATH_CONTACT_EMAIL, '');
 
-        return $email !== '' ? $email : self::DEFAULT_EMAIL;
+        return $this->normalizeEmail($email !== '' ? $email : self::DEFAULT_EMAIL);
     }
 
     public function getEmailUrl(): string
@@ -189,6 +189,89 @@ class FooterData implements ArgumentInterface
     private function normalizePhone(string $value): string
     {
         return (string) preg_replace('/\D+/', '', $value);
+    }
+
+    private function normalizePhoneForDial(string $value): string
+    {
+        $digits = $this->normalizePhone($value);
+
+        if ($digits === '') {
+            return '';
+        }
+
+        if (str_starts_with($digits, '55')) {
+            return $digits;
+        }
+
+        if (strlen($digits) === 10 || strlen($digits) === 11) {
+            return '55' . $digits;
+        }
+
+        return $digits;
+    }
+
+    private function formatPhoneForDisplay(string $value): string
+    {
+        $phone = trim($value);
+
+        if ($phone === '') {
+            return '';
+        }
+
+        if ((bool) preg_match('/\D+/', $phone)) {
+            return $phone;
+        }
+
+        $digits = $this->normalizePhone($phone);
+
+        if (str_starts_with($digits, '55') && strlen($digits) === 12) {
+            $digits = substr($digits, 2);
+        }
+
+        if (str_starts_with($digits, '55') && strlen($digits) === 13) {
+            $digits = substr($digits, 2);
+        }
+
+        if (strlen($digits) === 11) {
+            return sprintf('(%s) %s-%s', substr($digits, 0, 2), substr($digits, 2, 5), substr($digits, 7, 4));
+        }
+
+        if (strlen($digits) === 10) {
+            return sprintf('(%s) %s-%s', substr($digits, 0, 2), substr($digits, 2, 4), substr($digits, 6, 4));
+        }
+
+        return $phone;
+    }
+
+    private function normalizeEmail(string $value): string
+    {
+        $email = trim(strtolower($value));
+
+        if ($email === '') {
+            return '';
+        }
+
+        if ((bool) preg_match('/^[^@\s]+@grupoawamotos\.com\.br$/i', $email)) {
+            $email = (string) preg_replace('/@grupoawamotos\.com\.br$/i', '@awamotos.com.br', $email);
+        }
+
+        if ((bool) preg_match('/^[^@\s]+@awamotos\.com(?:\.br)*/i', $email)) {
+            $email = (string) preg_replace('/@awamotos\.com(?:\.br)*/i', '@awamotos.com.br', $email);
+        }
+
+        return filter_var($email, FILTER_VALIDATE_EMAIL) ? $email : self::DEFAULT_EMAIL;
+    }
+
+    private function getPhoneRaw(): string
+    {
+        $contactPhone = $this->getConfigValue(self::XML_PATH_CONTACT_PHONE, '');
+        if ($contactPhone !== '') {
+            return $contactPhone;
+        }
+
+        $storePhone = $this->getConfigValue(self::XML_PATH_STORE_PHONE, '');
+
+        return $storePhone !== '' ? $storePhone : self::DEFAULT_PHONE;
     }
 
     private function getConfigValue(string $path, string $default): string

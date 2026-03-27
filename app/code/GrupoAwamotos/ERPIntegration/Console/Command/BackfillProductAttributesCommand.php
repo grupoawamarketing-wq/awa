@@ -5,6 +5,9 @@ namespace GrupoAwamotos\ERPIntegration\Console\Command;
 
 use GrupoAwamotos\ERPIntegration\Helper\Data as Helper;
 use GrupoAwamotos\ERPIntegration\Model\ProductAttributeBackfill;
+use Magento\Framework\App\Area;
+use Magento\Framework\App\State;
+use Magento\Framework\Exception\LocalizedException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -14,14 +17,17 @@ class BackfillProductAttributesCommand extends Command
 {
     private ProductAttributeBackfill $productAttributeBackfill;
     private Helper $helper;
+    private State $appState;
 
     public function __construct(
         ProductAttributeBackfill $productAttributeBackfill,
-        Helper $helper
+        Helper $helper,
+        State $appState
     ) {
         parent::__construct();
         $this->productAttributeBackfill = $productAttributeBackfill;
         $this->helper = $helper;
+        $this->appState = $appState;
     }
 
     protected function configure(): void
@@ -34,6 +40,8 @@ class BackfillProductAttributesCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $this->initializeAreaCode();
+
         if (!$this->helper->isEnabled()) {
             $output->writeln('<error>Integracao ERP esta desabilitada.</error>');
             return Command::FAILURE;
@@ -63,5 +71,16 @@ class BackfillProductAttributesCommand extends Command
         ));
 
         return $result['errors'] > 0 ? Command::FAILURE : Command::SUCCESS;
+    }
+
+    private function initializeAreaCode(): void
+    {
+        try {
+            $this->appState->getAreaCode();
+            return;
+        } catch (LocalizedException) {
+        }
+
+        $this->appState->setAreaCode(Area::AREA_ADMINHTML);
     }
 }
