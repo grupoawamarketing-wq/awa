@@ -1,0 +1,44 @@
+<?php
+/**
+ * Link de autenticação do header — override AWA
+ *
+ * @var $block \Magento\Customer\Block\Account\AuthorizationLink
+ */
+declare(strict_types=1);
+
+$isLoggedIn = (bool) $block->isLoggedIn();
+$dataPostParam = '';
+$hrefAttribute = '';
+$title = $isLoggedIn ? (string) __('Sair') : (string) __('Entrar');
+$ariaLabel = $isLoggedIn
+    ? (string) __('Sair da conta')
+    : (string) __('Entrar na área do cliente B2B');
+$iconClass = $isLoggedIn ? 'fa-sign-out' : 'fa-unlock-alt';
+
+if ($isLoggedIn) {
+    $dataPostParam = sprintf(" data-post='%s'", $block->getPostParams());
+} else {
+    $hrefAttribute = ' href="' . $block->escapeUrl($block->getUrl('b2b/account/login')) . '"';
+}
+?>
+<li class="authorization-link awa-top-link-auth-item"
+    data-label="<?= $block->escapeHtmlAttr(__('ou')) ?>"
+    data-awa-auth-state="<?= $block->escapeHtmlAttr($isLoggedIn ? 'customer' : 'guest') ?>">
+    <?php if ($isLoggedIn): ?>
+        <a title="<?= $block->escapeHtmlAttr($title) ?>"
+           aria-label="<?= $block->escapeHtmlAttr($ariaLabel) ?>"
+           data-awa-auth-link="true"
+           <?= /* @noEscape */ $block->getLinkAttributes() ?><?= /* @noEscape */ $dataPostParam ?>>
+            <i class="fa <?= $block->escapeHtmlAttr($iconClass) ?>" aria-hidden="true"></i>
+            <?= $block->escapeHtml($title) ?>
+        </a>
+    <?php else: ?>
+        <a title="<?= $block->escapeHtmlAttr($title) ?>"
+           aria-label="<?= $block->escapeHtmlAttr($ariaLabel) ?>"
+           data-awa-auth-link="true"
+           rel="nofollow"<?= /* @noEscape */ $hrefAttribute ?>>
+            <i class="fa <?= $block->escapeHtmlAttr($iconClass) ?>" aria-hidden="true"></i>
+            <?= $block->escapeHtml($title) ?>
+        </a>
+    <?php endif; ?>
+</li>
