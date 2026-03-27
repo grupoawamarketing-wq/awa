@@ -73,9 +73,16 @@ echo ""
 
 if [[ "$PUB_ONLY" == true ]]; then
     echo "[pub/static] Comprimindo CSS/JS em pub/static..."
-    find "$PUB_STATIC" \( -name '*.css' -o -name '*.js' \) -size "+${MIN_SIZE}c" -not -name '*.br' -not -name '*.gz' | while read -r f; do
-        # Só comprimir se é arquivo real (não symlink) OU se o .br não existe
-        if [[ ! -f "${f}.br" ]] || [[ "$f" -nt "${f}.br" ]]; then
+    # Busca todos os .js e .css (excluindo os próprios archivos comprimidos)
+    # e recomprime se: .br não existe OU .js é mais novo que .br OU .js é mais novo que .gz
+    find "$PUB_STATIC" \( -name '*.css' -o -name '*.js' \) -size "+${MIN_SIZE}c" \
+         -not -name '*.min.js.br' -not -name '*.min.js.gz' \
+         -not -name '*.css.br' -not -name '*.css.gz' \
+         -not -name '*.js.br' -not -name '*.js.gz' | while read -r f; do
+        [[ -L "$f" ]] && continue  # pular symlinks
+        # Recomprimir se: compressed não existe OU o .js/.css é mais novo que o compressed
+        if [[ ! -f "${f}.br" ]] || [[ ! -f "${f}.gz" ]] || \
+           [[ "$f" -nt "${f}.br" ]] || [[ "$f" -nt "${f}.gz" ]]; then
             compress_file "$f"
         fi
     done
@@ -83,37 +90,37 @@ if [[ "$PUB_ONLY" == true ]]; then
     exit 0
 fi
 
-echo "[1/4] Comprimindo CSS bundles..."
-for f in "$THEME_CSS"/*.css; do
-    [[ -f "$f" ]] || continue
-    [[ "$f" == *.unmin.css ]] && continue
-    compress_file "$f"
+# NOTA: O modo padrão (sem --pub-only) era usado para comprimir no diretório fonte
+# e criar symlinks em pub/static. Isso causava mismatches de SRI quando os .js
+# eram atualizados sem regenerar os .gz.
+# SOLUÇÃO: Sempre use --pub-only APÓS setup:static-content:deploy.
+echo "AVISO: Modo padrão redirecionando para --pub-only (compressão direto em pub/static)."
+echo "Os arquivos fonte em app/design/ NÃO devem conter .gz/.br."
+echo ""
+
+echo "[1/3] Comprimindo JS em pub/static..."
+find "$PUB_STATIC/js" -name '*.js' -size "+${MIN_SIZE}c" \
+     -not -name '*.js.br' -not -name '*.js.gz' 2>/dev/null | while read -r f; do
+    [[ -L "$f" ]] && continue
+    if [[ ! -f "${f}.br" ]] || [[ ! -f "${f}.gz" ]] || \
+       [[ "$f" -nt "${f}.br" ]] || [[ "$f" -nt "${f}.gz" ]]; then
+        compress_file "$f"
+    fi
 done
 
 echo ""
-echo "[2/4] Comprimindo JS..."
-for f in "$THEME_JS"/*.js; do
-    [[ -f "$f" ]] || continue
-    sz=$(wc -c < "$f")
-    [[ $sz -lt $MIN_SIZE ]] && continue
-    compress_file "$f"
+echo "[2/3] Comprimindo CSS em pub/static..."
+find "$PUB_STATIC/css" -name '*.css' -size "+${MIN_SIZE}c" \
+     -not -name '*.css.br' -not -name '*.css.gz' 2>/dev/null | while read -r f; do
+    [[ -L "$f" ]] && continue
+    if [[ ! -f "${f}.br" ]] || [[ ! -f "${f}.gz" ]] || \
+       [[ "$f" -nt "${f}.br" ]] || [[ "$f" -nt "${f}.gz" ]]; then
+        compress_file "$f"
+    fi
 done
 
 echo ""
-echo "[3/4] Comprimindo SVG fonts..."
-for f in "$THEME_FONTS"/*.svg 2>/dev/null; do
-    [[ -f "$f" ]] || continue
-    compress_file "$f"
-done
-
-echo ""
-echo "[4/4] Criando symlinks em pub/static..."
-CSS_USER="$USER_PATH/app/design/frontend/AWA_Custom/ayo_home5_child/web/css"
-JS_USER="$USER_PATH/app/design/frontend/AWA_Custom/ayo_home5_child/web/js"
-
-create_pub_symlinks "$THEME_CSS" "$PUB_STATIC/css" "$CSS_USER"
-create_pub_symlinks "$THEME_JS" "$PUB_STATIC/js" "$JS_USER"
-
+echo "[3/3] Concluído."
 echo ""
 echo "=== Pré-compressão concluída ==="
 echo "Nginx serve automaticamente via brotli_static on / gzip_static on"

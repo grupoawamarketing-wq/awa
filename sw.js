@@ -1,6 +1,8 @@
-/** AWA Service Worker v2.1.0 — Stale-While-Revalidate Strategy (2026-03-26) */
-const CACHE_VERSION = 'awa-v20260326';
+/** AWA Service Worker v2.2.0 — Multi-strategy Cache (2026-03-27) */
+const CACHE_VERSION = 'awa-v20260327';
 const FONT_CACHE = 'awa-fonts-v1';
+const IMAGE_CACHE = 'awa-images-v1';
+const IMAGE_CACHE_MAX = 300; // max entries
 
 /* Patterns to cache with stale-while-revalidate */
 const CACHEABLE_PATTERNS = [
@@ -8,6 +10,8 @@ const CACHEABLE_PATTERNS = [
   /\/css\/awa-visual-fixes-critical\.css$/,
   /\/css\/swiper-bundle\.min\.css$/,
   /\/css\/themes5\.css$/,
+  /\/js\/awa-bundle\.min\.js$/,
+  /\/js\/swiper-bundle\.min\.js$/,
   /\/fonts\/rubik\/rubik-\d{3}\.woff2$/
 ];
 
@@ -15,6 +19,21 @@ const CACHEABLE_PATTERNS = [
 const FONT_PATTERNS = [
   /\.woff2$/
 ];
+
+/* Product image cache: cache-first with LRU eviction */
+const IMAGE_PATTERNS = [
+  /\/media\/catalog\/product\/cache\/.+\.(jpe?g|png|webp)$/,
+  /\/media\/catalog\/product\/.+\.(jpe?g|png|webp)$/
+];
+
+/** LRU eviction: keep cache under IMAGE_CACHE_MAX entries */
+async function trimImageCache(cache) {
+  const keys = await cache.keys();
+  if (keys.length > IMAGE_CACHE_MAX) {
+    const toDelete = keys.slice(0, keys.length - IMAGE_CACHE_MAX);
+    await Promise.all(toDelete.map((k) => cache.delete(k)));
+  }
+}
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
@@ -25,7 +44,7 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((names) =>
       Promise.all(
         names
-          .filter((name) => name !== CACHE_VERSION && name !== FONT_CACHE)
+          .filter((name) => name !== CACHE_VERSION && name !== FONT_CACHE && name !== IMAGE_CACHE)
           .map((name) => caches.delete(name))
       )
     ).then(() => self.clients.claim())
@@ -51,7 +70,26 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  /* CSS bundles: stale-while-revalidate (serve cached, update in background) */
+  /* Product images: cache-first with LRU eviction */
+  if (IMAGE_PATTERNS.some((re) => re.test(url))) {
+    event.respondWith(
+      caches.open(IMAGE_CACHE).then((cache) =>
+        cache.match(event.request).then((cached) => {
+          if (cached) return cached;
+          return fetch(event.request).then((response) => {
+            if (response.ok) {
+              cache.put(event.request, response.clone());
+              trimImageCache(cache);
+            }
+            return response;
+          }).catch(() => cached || Response.error());
+        })
+      )
+    );
+    return;
+  }
+
+  /* CSS/JS bundles: stale-while-revalidate (serve cached, update in background) */
   if (CACHEABLE_PATTERNS.some((re) => re.test(url))) {
     event.respondWith(
       caches.open(CACHE_VERSION).then((cache) =>

@@ -246,7 +246,7 @@ php bin/magento queue:consumers:start erp.order.sync.consumer
 **comandos; CLI:**
 ```bash
 # Ver status
-php bin/magento;
+php bin/magento
 **Arquivo:** `model/rfm/calculator.php`;
 **Segmentos:**
 - **Champions** - Melhores clientes
@@ -528,19 +528,19 @@ return [
 ### Diagnóstico e Status
 ```bash
 # Status geral do ERP
-php bin/magento; whatsapp:status
+php bin/magento whatsapp:status
 
 # Enviar mensagem de teste
-php bin/magento; whatsapp:test --phone=5511999999999
+php bin/magento whatsapp:test --phone=5511999999999
 ```
 
 ### Manutenção
 ```bash
 # Limpar logs antigos
-php bin/magento; erp:sync-logs [--limit=50]
+php bin/magento erp:sync-logs [--limit=50]
 
 # Processar fila de pedidos manualmente
-php bin/magento; queue:consumers:start erp.order.sync.consumer
+php bin/magento queue:consumers:start erp.order.sync.consumer
 ```
 
 ---
@@ -1050,8 +1050,8 @@ tail -f var/log/debug.log | grep -i erp
 php bin/magento erp:diagnose
 
 # Limpar tudo e recompilar
-php bin/magento; cache:flush
-php bin/magento; setup:di:compile
+php bin/magento cache:flush
+php bin/magento setup:di:compile
 php bin/magento setup:static-content:deploy -f
 
 # Reindexar
