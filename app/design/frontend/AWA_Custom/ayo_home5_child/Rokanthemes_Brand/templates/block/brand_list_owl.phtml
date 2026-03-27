@@ -67,9 +67,9 @@ foreach ($_brandCollection as $_brand) {
 	<div class="pretext-html"><?php echo /* @noEscape */ $pretext ?></div>
 	<?php } ?>
 	<div class="block-content brandowl-play" id="awa-brand-carousel-<?php echo $this->escapeHtmlAttr($blockId) ?>">
-		<ul id="rokanthemes-carousel<?php echo $this->escapeHtmlAttr($blockId) ?>" class="owl-carousel" data-rtl="<?php echo $rtl?"true":"false" ?>" data-loop="<?php echo $loop?"true":"false" ?>" data-nav="false" data-dot="<?php echo $dots?"true":"false" ?>" data-autoplay="<?php echo $autoplay?"true":"false" ?>" data-autoplay-timeout="<?php echo $autoplay_timeout ?>" data-pauonhover="<?php echo $autoplay_pauseonhover?"true":"false" ?>" data-mobile-items="<?php echo (int)$mobile_items ?>" data-tablet-small-items="<?php echo (int)$tablet_small_items ?>" data-tablet-items="<?php echo (int)$tablet_items ?>" data-portrait-items="<?php echo (int)$portrait_items ?>" data-large-items="<?php echo (int)$default_items ?>" data-large-max-items="<?php echo (int)$large_items ?>" >
+	<div class="swiper awa-brand-swiper"><div class="swiper-wrapper">
 			<?php foreach ($_collection as $_brandCollection) { ?>
-			<li class="item-load item">
+			<div class="swiper-slide item-load item">
 				<?php foreach ($_brandCollection as $_brand) { ?>
 				<div class="brand-item">
 					<div class="brand-image"><a href="<?php echo $this->escapeUrl($_brand->getUrl()); ?>" title="<?php echo $this->escapeHtmlAttr($_brand->getName()); ?>"><img src="<?php echo $this->escapeUrl($_brand->getThumbnailUrl()); ?>" alt="<?php echo $this->escapeHtmlAttr($_brand->getName()); ?>" loading="lazy" decoding="async" width="120" height="60"/></a></div>
@@ -78,23 +78,26 @@ foreach ($_brandCollection as $_brand) {
 					<?php } ?>
 				</div>
 				<?php } ?>
-			</li>
+			</div>
 			<?php } ?>
-		</ul>
+		</div><!-- .swiper-wrapper -->
 		<?php if($nav){ ?>
-		<a href="#" class="owl-left"><?php echo /* @noEscape */ ($nav_prev ? $nav_prev : 'Prev'); ?></a>
-		<a href="#" class="owl-right"><?php echo /* @noEscape */ ($nav_next ? $nav_next : 'Next'); ?></a>
+		<div class="swiper-button-prev" aria-label="<?= $block->escapeHtmlAttr(__('Anterior')) ?>"></div>
+		<div class="swiper-button-next" aria-label="<?= $block->escapeHtmlAttr(__('Próximo')) ?>"></div>
 		<?php } ?>
+		<?php if($dots){ ?>
+		<div class="swiper-pagination"></div>
+		<?php } ?>
+	</div><!-- .awa-brand-swiper -->
 	</div>
 </div>
 <?php } ?>
 <script type="text/x-magento-init">
 {
 	"#awa-brand-carousel-<?php echo $this->escapeJs($blockId) ?>": {
-		"js/rokanthemes-owl-element-init": {
-			"carouselSelector": "#rokanthemes-carousel<?php echo $this->escapeJs($blockId) ?>",
+		"js/tab-swiper-init": {
+			"carouselSelector": ".awa-brand-swiper",
 			"owl": {
-				"lazyLoad": true,
 				"items": <?php echo (int)($default_items ?: 7) ?>,
 				"itemsDesktop": [1366, <?php echo (int)($large_items ?: 5) ?>],
 				"itemsDesktopSmall": [991, <?php echo (int)($portrait_items ?: 4) ?>],

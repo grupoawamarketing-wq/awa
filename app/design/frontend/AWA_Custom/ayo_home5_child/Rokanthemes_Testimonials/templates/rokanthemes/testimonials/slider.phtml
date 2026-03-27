@@ -16,15 +16,16 @@ $allTestimonialsUrl = $block->getUrl('testimonials');
 <div class="box-bottom-home2 box-testimo">
     <h2><?= $block->escapeHtml(__($title)) ?></h2>
     <div class="testimo-slider slider-home2">
-        <div class="wrap-item">
-            <?php foreach ($_testimonialsCollection as $_testimonial): ?>
-                <?php
-                $authorName = trim((string) $_testimonial->getName());
-                $authorJob = trim((string) $_testimonial->getJob());
-                $avatarAlt = $authorName !== '' ? $authorName : (string) __('Cliente AWA Motos');
-                $avatarUrl = $helperImage->resize($_testimonial->getAvatar(), $imgWidth, $imgHeight, true);
-                ?>
-                <div class="item-testimo">
+        <div class="swiper awa-testimo-swiper">
+            <div class="swiper-wrapper wrap-item">
+                <?php foreach ($_testimonialsCollection as $_testimonial): ?>
+                    <?php
+                    $authorName = trim((string) $_testimonial->getName());
+                    $authorJob = trim((string) $_testimonial->getJob());
+                    $avatarAlt = $authorName !== '' ? $authorName : (string) __('Cliente AWA Motos');
+                    $avatarUrl = $helperImage->resize($_testimonial->getAvatar(), $imgWidth, $imgHeight, true);
+                    ?>
+                    <div class="swiper-slide item-testimo">
                     <div class="author-testimo">
                         <div class="author-test-link">
                             <a href="<?= $block->escapeUrl($allTestimonialsUrl) ?>" aria-label="<?= $block->escapeHtmlAttr($avatarAlt) ?>">
@@ -48,22 +49,24 @@ $allTestimonialsUrl = $block->getUrl('testimonials');
                             <span><?= $block->escapeHtml($authorJob) ?></span>
                         </div>
                     </div>
-                </div>
-            <?php endforeach; ?>
-        </div>
+                    </div><!-- .swiper-slide.item-testimo -->
+                <?php endforeach; ?>
+            </div><!-- .swiper-wrapper -->
+            <div class="swiper-pagination"></div>
+        </div><!-- .awa-testimo-swiper -->
     </div>
     <a href="<?= $block->escapeUrl($allTestimonialsUrl) ?>" class="viewall"><?= $block->escapeHtml(__('View All')) ?></a>
 </div>
 <script type="text/x-magento-init">
 {
-    ".testimo-slider .wrap-item": {
-        "js/rokanthemes-owl-element-init": {
-            "lazyLoad": true,
-            "items": 1,
-            "itemsCustom": [[0, 1], [480, 1], [768, 1], [992, 1], [1200, 1]],
-            "pagination": true,
-            "navigation": false,
-            "navigationText": ["<i class='fa fa-angle-left'></i>", "<i class='fa fa-angle-right'></i>"]
+    ".testimo-slider": {
+        "js/tab-swiper-init": {
+            "carouselSelector": ".awa-testimo-swiper",
+            "owl": {
+                "items": 1,
+                "navigation": false,
+                "pagination": true
+            }
         }
     }
 }

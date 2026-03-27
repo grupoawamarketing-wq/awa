@@ -46,11 +46,12 @@
 		<div class="rokan-product-heading rokan-onsale-heading">
 			<h2><?php echo $block->escapeHtml(__($title)) ?></h2>
 		</div>
-		<div class="owl-container">
+		<div class="swiper-container">
 			<div class="block-content">
-				<div class="owl">
+				<div class="swiper awa-blog-swiper">
+					<div class="swiper-wrapper">
 					<?php foreach ($_postCollection as $_post) { ?>
-						<div class="item">
+						<div class="swiper-slide item">
 							<div class="product-item">
 								<div class="blog-image">
 									<a href="<?php echo $block->escapeUrl($_post->getPostUrl()) ?>">
@@ -74,9 +75,17 @@
 									</div>
 								</div>
 							</div>
-						</div>
+						</div><!-- .swiper-slide.item -->
 					<?php } ?>
-				</div>
+					</div><!-- .swiper-wrapper -->
+					<?php if($show_next_back === 'true'){ ?>
+					<div class="swiper-button-prev" aria-label="<?= $block->escapeHtmlAttr(__('Anterior')) ?>"></div>
+					<div class="swiper-button-next" aria-label="<?= $block->escapeHtmlAttr(__('Próximo')) ?>"></div>
+					<?php } ?>
+					<?php if($show_navigation_control === 'true'){ ?>
+					<div class="swiper-pagination"></div>
+					<?php } ?>
+				</div><!-- .awa-blog-swiper -->
 			</div>
 		</div>
     </div>
@@ -85,22 +94,19 @@
 <?php /* CONVERSÃO AMD: Inline script → text/x-magento-init para performance e CSP compliance */ ?>
 <script type="text/x-magento-init">
 {
-    ".block-recent-posts .owl": {
-        "js/rokanthemes-owl-element-init": {
-            "lazyLoad": true,
-            "items": <?php echo (int)$default; ?>,
-            "itemsDesktop": [1199, <?php echo (int)$desktop; ?>],
-            "itemsDesktopSmall": [980, <?php echo (int)$desktop_small; ?>],
-            "itemsTablet": [768, <?php echo (int)$tablet; ?>],
-            "itemsMobile": [479, <?php echo (int)$mobile; ?>],
-            "slideSpeed": <?php echo (int)$pagination; ?>,
-            "paginationSpeed": <?php echo (int)$pagination; ?>,
-            "rewindSpeed": <?php echo (int)$pagination; ?>,
-            "addClassActive": true,
-            "navigation": <?php echo $show_next_back; ?>,
-            "stopOnHover": true,
-            "pagination": <?php echo $show_navigation_control; ?>,
-            "scrollPerPage": true
+    ".block-recent-posts": {
+        "js/tab-swiper-init": {
+            "carouselSelector": ".awa-blog-swiper",
+            "owl": {
+                "items": <?php echo (int)$default; ?>,
+                "itemsDesktop": [1199, <?php echo (int)$desktop; ?>],
+                "itemsDesktopSmall": [980, <?php echo (int)$desktop_small; ?>],
+                "itemsTablet": [768, <?php echo (int)$tablet; ?>],
+                "itemsMobile": [479, <?php echo (int)$mobile; ?>],
+                "navigation": <?php echo $show_next_back; ?>,
+                "pagination": <?php echo $show_navigation_control; ?>,
+                "scrollPerPage": true
+            }
         }
     }
 }

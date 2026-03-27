@@ -58,14 +58,15 @@
         <div id="tab<?php echo trim($cate_id) . '-' . $identifyClass; ?>" class="tab_content_<?php echo $identifyClass; ?>">
         <div class="owl-container">
             <?php if ($tabIndex === 0): ?>
-            <div class="category_tab_slider owl-carousel">
+            <div class="category_tab_slider swiper">
+                <div class="swiper-wrapper">
                 <?php
                 $newItems = $block->getProductCate($cate_id)->getItems();
                 $i = 0;
                 foreach ($newItems as $_item) {
                     $productImage = $block->getImage($_item, $image);
                 ?>
-                <?php if ($i++ % $rows == 0) { ?> <div class="product_row"> <?php } ?>
+                <?php if ($i++ % $rows == 0) { ?> <div class="swiper-slide product_row"> <?php } ?>
                     <div class="item">
                         <div class="item-inner">
                             <div class="image-container">
@@ -134,6 +135,9 @@
                 <?php
                 }
                 ?>
+                </div>
+                <div class="swiper-button-prev" aria-label="<?php echo $block->escapeHtmlAttr(__('Previous')); ?>"></div>
+                <div class="swiper-button-next" aria-label="<?php echo $block->escapeHtmlAttr(__('Next')); ?>"></div>
             </div>
             <?php else:
                 $lazyUrl = $block->getUrl('catalogfix/categorytab/load', [
@@ -145,7 +149,10 @@
                     ]
                 ]);
             ?>
-            <div class="category_tab_slider owl-carousel" data-lazy-url="<?php echo $block->escapeUrl($lazyUrl); ?>">
+            <div class="category_tab_slider swiper" data-lazy-url="<?php echo $block->escapeUrl($lazyUrl); ?>">
+                <div class="swiper-wrapper"></div>
+                <div class="swiper-button-prev" aria-label="<?php echo $block->escapeHtmlAttr(__('Previous')); ?>"></div>
+                <div class="swiper-button-next" aria-label="<?php echo $block->escapeHtmlAttr(__('Next')); ?>"></div>
             </div>
             <?php endif; ?>
         </div>
@@ -162,7 +169,7 @@
 <script type="text/x-magento-init">
 {
     ".awa-cat-tabs-<?php echo $block->escapeJsQuote($identifyClass); ?>": {
-        "js/tab-carousel-init": {
+        "js/tab-swiper-init": {
             "tabsSelector": "ul.tabs-<?php echo $block->escapeJsQuote($identifyClass); ?> li",
             "contentSelector": ".tab_content_<?php echo $block->escapeJsQuote($identifyClass); ?>",
             "carouselSelector": ".category_tab_slider",
