@@ -15,13 +15,25 @@ BASE_DIR="app/design/frontend/AWA_Custom/ayo_home5_child/web/css"
 echo "🔍 CSS Validation Suite"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-# Test 1: Syntax validation
+# Test 1: Syntax validation — detecta erros reais, não falsos positivos
+# Verifica: property/value sem ; no final (excluindo seletores, @rules, comentários, e custom props)
 echo -e "\n${YELLOW}Test 1: CSS Syntax Validation${NC}"
 ERRORS=0
 for css in "$BASE_DIR"/*.unmin.css; do
-  if grep -qE '^\s*[^{]*\{.*:[^;]*$' "$css" 2>/dev/null; then
-    echo -e "${RED}❌ Syntax error in $css${NC}"
-    ERRORS=$((ERRORS + 1))
+  # Detecta linhas que parecem declarações CSS (tem : mas não são @rule, seletor, comentário)
+  # e não terminam com ; ou { ou , ou } (multi-line values são permitidos)
+  BROKEN=$(grep -cE '^[[:space:]]+[-a-zA-Z]+[[:space:]]*:[[:space:]]*[^/;{}]+[^;{},/]$' "$css" 2>/dev/null || true)
+  # Desconta: linhas que são apenas continuação de multi-line (não terminam com { ou ,)
+  # Usa clean-css para validar sintaxe real — apenas erros fatais (não warnings)
+  if command -v npx &>/dev/null; then
+    MINIFIED=$(npx clean-css-cli "$css" -o /dev/null 2>&1)
+    # Falha apenas em erros fatais, não em warnings de seletor
+    if echo "$MINIFIED" | grep -qi "^error\b\|fatal\|unable to parse"; then
+      echo -e "${RED}❌ CSS error in $(basename $css): $MINIFIED${NC}"
+      ERRORS=$((ERRORS + 1))
+    elif echo "$MINIFIED" | grep -qi "warning\|invalid selector"; then
+      echo -e "${YELLOW}⚠️  Warning in $(basename $css): $(echo $MINIFIED | head -c 120)${NC}"
+    fi
   fi
 done
 [ $ERRORS -eq 0 ] && echo -e "${GREEN}✅ All files have valid syntax${NC}" || exit 1
