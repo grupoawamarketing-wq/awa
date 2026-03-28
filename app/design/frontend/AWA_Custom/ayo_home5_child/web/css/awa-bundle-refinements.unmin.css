@@ -14695,3 +14695,107 @@ body.account .sidebar-main .block-collapsible-nav .nav.item.current > strong {
         transition: none;
     }
 }
+
+/* ==========================================================================
+   AWA Collapsible Header — Hide on scroll-down / Show on scroll-up
+   ========================================================================== */
+
+/* --- Transition for the header shell when sticky --- */
+body .page-wrapper .awa-site-header__shell.awa-header-sticky {
+    transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.32s ease;
+}
+
+/* --- Hidden state: slide up out of view --- */
+body .page-wrapper .awa-site-header__shell.awa-header-sticky.awa-header--hidden {
+    transform: translateY(-100%);
+    box-shadow: none;
+    pointer-events: none;
+}
+
+/* --- Visible state: slide back into view --- */
+body .page-wrapper .awa-site-header__shell.awa-header-sticky:not(.awa-header--hidden) {
+    transform: translateY(0);
+}
+
+/* --- Also handle the Rokanthemes sticky bar (menu bar that goes fixed separately) --- */
+body .page-wrapper .header-wrapper-sticky.enabled-header-sticky {
+    transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.32s ease,
+                background 0.3s ease,
+                backdrop-filter 0.3s ease;
+}
+
+body.awa-header--hidden .page-wrapper .header-wrapper-sticky.enabled-header-sticky {
+    transform: translateY(-100%);
+    box-shadow: none;
+    pointer-events: none;
+}
+
+body:not(.awa-header--hidden) .page-wrapper .header-wrapper-sticky.enabled-header-sticky {
+    transform: translateY(0);
+}
+
+/* --- Condensed header refinements (logo + menu compress) --- */
+@media (min-width: 992px) {
+    /* Logo smoothly resizes */
+    body .page-wrapper .awa-site-header .header_main .logo img {
+        transition: max-height 0.28s ease;
+    }
+
+    body.awa-header-condensed .page-wrapper .awa-site-header .header_main .logo img {
+        max-height: 38px;
+    }
+
+    /* Main header row reduces padding */
+    body .page-wrapper .awa-site-header .header_main {
+        transition: padding 0.28s ease;
+    }
+
+    body.awa-header-condensed .page-wrapper .awa-site-header .header_main {
+        padding-block: clamp(6px, 0.8vw, 10px);
+    }
+
+    /* Top bar hides smoothly in condensed */
+    body .page-wrapper .awa-site-header .top-header {
+        transition: max-height 0.28s ease, opacity 0.2s ease, padding 0.28s ease;
+        max-height: 60px;
+        overflow: hidden;
+    }
+
+    body.awa-header-condensed .page-wrapper .awa-site-header .top-header {
+        max-height: 0;
+        opacity: 0;
+        padding-block: 0;
+        border-bottom: 0;
+    }
+
+    /* Nav bar menu links compress */
+    body.awa-header-condensed .page-wrapper .awa-site-header .header-control.header-nav {
+        border-top-width: 0;
+    }
+}
+
+/* --- Mobile: no hide-on-scroll (keep header always visible) --- */
+@media (max-width: 991px) {
+    body .page-wrapper .awa-site-header__shell.awa-header-sticky.awa-header--hidden {
+        transform: none;
+        pointer-events: auto;
+    }
+
+    body.awa-header--hidden .page-wrapper .header-wrapper-sticky.enabled-header-sticky {
+        transform: none;
+        pointer-events: auto;
+    }
+}
+
+/* --- Reduced motion: no slide animation --- */
+@media (prefers-reduced-motion: reduce) {
+    body .page-wrapper .awa-site-header__shell.awa-header-sticky,
+    body .page-wrapper .header-wrapper-sticky.enabled-header-sticky,
+    body .page-wrapper .awa-site-header .header_main,
+    body .page-wrapper .awa-site-header .header_main .logo img,
+    body .page-wrapper .awa-site-header .top-header {
+        transition: none !important;
+    }
+}
