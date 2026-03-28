@@ -1,0 +1,24 @@
+<?php
+/**
+ * AWA PDP B2B Pro — JS loader (deferred)
+ * Loads awa-pdp-b2b-pro.js after page idle
+ */
+declare(strict_types=1);
+$jsUrl = $block->getViewFileUrl('js/awa-pdp-b2b-pro.js');
+?>
+<script>
+(function() {
+    'use strict';
+    function loadPdpPro() {
+        var s = document.createElement('script');
+        s.src = <?= /* @noEscape */ json_encode($jsUrl) ?>;
+        s.defer = true;
+        document.body.appendChild(s);
+    }
+    if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadPdpPro, { timeout: 3000 });
+    } else {
+        setTimeout(loadPdpPro, 1500);
+    }
+})();
+</script>

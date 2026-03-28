@@ -1,0 +1,118 @@
+<?php
+/**
+ * AWA PDP B2B Pro — Sidebar
+ * Promo, chat, share, similar products
+ *
+ * @var \Magento\Catalog\Block\Product\View $block
+ */
+declare(strict_types=1);
+
+$_product = $block->getProduct();
+if (!$_product) {
+    return;
+}
+
+$productName = $block->escapeHtml($_product->getName());
+$productSku = $block->escapeHtml($_product->getSku());
+$productUrl = $block->escapeUrl($_product->getProductUrl());
+
+$whatsappMsg = rawurlencode(sprintf(
+    "Olá, tenho interesse no produto: %s (SKU: %s) — %s",
+    $_product->getName(),
+    $_product->getSku(),
+    $_product->getProductUrl()
+));
+$whatsappUrl = 'https://wa.me/5516997367588?text=' . $whatsappMsg;
+
+/* Related products (up to 3) — via collection, no ObjectManager */
+$relatedCollection = $_product->getRelatedProductCollection()
+    ->addAttributeToSelect(['name', 'thumbnail', 'url_key', 'status', 'visibility'])
+    ->addStoreFilter()
+    ->setPageSize(3);
+$imageHelper = $this->helper(\Magento\Catalog\Helper\Image::class);
+?>
+
+<aside class="awa-pdp-sidebar" aria-label="<?= $block->escapeHtmlAttr(__('Informações complementares do produto')) ?>">
+
+    <!-- Promo Card -->
+    <div class="awa-pdp-sidebar__card awa-pdp-promo">
+        <div class="awa-pdp-promo__icon" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+        </div>
+        <div class="awa-pdp-promo__title"><?= $block->escapeHtml(__('Compre 5+ e ganhe 10% desc')) ?></div>
+        <div class="awa-pdp-promo__text"><?= $block->escapeHtml(__('Desconto progressivo para atacado. Quanto mais você compra, mais economiza.')) ?></div>
+    </div>
+
+    <!-- Chat Button -->
+    <div class="awa-pdp-sidebar__card">
+        <a href="<?= $block->escapeUrl($whatsappUrl) ?>"
+           class="awa-pdp-chat-btn"
+           target="_blank"
+           rel="noopener"
+           aria-label="<?= $block->escapeHtmlAttr(__('Falar com vendedor via WhatsApp')) ?>">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492l4.637-1.467A11.944 11.944 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818c-2.168 0-4.174-.7-5.808-1.888l-.416-.312-2.752.87.912-2.678-.342-.455A9.774 9.774 0 0 1 2.182 12c0-5.422 4.396-9.818 9.818-9.818S21.818 6.578 21.818 12 17.422 21.818 12 21.818z"/></svg>
+            <?= $block->escapeHtml(__('Falar com vendedor')) ?>
+        </a>
+    </div>
+
+    <!-- Share Buttons -->
+    <div class="awa-pdp-sidebar__card">
+        <div class="awa-pdp-info-card__label"><?= $block->escapeHtml(__('Compartilhar')) ?></div>
+        <div class="awa-pdp-share">
+            <a href="https://wa.me/?text=<?= $block->escapeUrl(rawurlencode($_product->getName() . ' — ' . $_product->getProductUrl())) ?>"
+               class="awa-pdp-share__btn"
+               target="_blank"
+               rel="noopener"
+               data-awa-share="whatsapp"
+               aria-label="<?= $block->escapeHtmlAttr(__('Compartilhar via WhatsApp')) ?>">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
+                <?= $block->escapeHtml(__('WhatsApp')) ?>
+            </a>
+            <a href="mailto:?subject=<?= $block->escapeUrl(rawurlencode($_product->getName())) ?>&body=<?= $block->escapeUrl(rawurlencode($_product->getProductUrl())) ?>"
+               class="awa-pdp-share__btn"
+               data-awa-share="email"
+               aria-label="<?= $block->escapeHtmlAttr(__('Compartilhar por Email')) ?>">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                <?= $block->escapeHtml(__('Email')) ?>
+            </a>
+            <button type="button"
+                    class="awa-pdp-share__btn"
+                    data-awa-share="copy"
+                    aria-label="<?= $block->escapeHtmlAttr(__('Copiar link')) ?>">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                <?= $block->escapeHtml(__('Link')) ?>
+            </button>
+        </div>
+    </div>
+
+    <!-- Similar Products (up to 3 related) -->
+    <?php if ($relatedCollection->getSize() > 0): ?>
+    <div class="awa-pdp-sidebar__card">
+        <div class="awa-pdp-info-card__label"><?= $block->escapeHtml(__('Produtos similares')) ?></div>
+        <div class="awa-pdp-similar-grid">
+            <?php foreach ($relatedCollection as $_relatedProduct): ?>
+                <?php if (!$_relatedProduct->isSaleable()) { continue; } ?>
+                <?php
+                    $relatedImgUrl = $imageHelper->init($_relatedProduct, 'product_thumbnail_image')
+                        ->setImageFile($_relatedProduct->getThumbnail())
+                        ->resize(112, 112)
+                        ->getUrl();
+                ?>
+                <a href="<?= $block->escapeUrl($_relatedProduct->getProductUrl()) ?>"
+                   class="awa-pdp-similar-card"
+                   title="<?= $block->escapeHtmlAttr($_relatedProduct->getName()) ?>">
+                    <img class="awa-pdp-similar-card__img"
+                         src="<?= $block->escapeUrl($relatedImgUrl) ?>"
+                         alt="<?= $block->escapeHtmlAttr($_relatedProduct->getName()) ?>"
+                         loading="lazy"
+                         width="56"
+                         height="56" />
+                    <div>
+                        <div class="awa-pdp-similar-card__name"><?= $block->escapeHtml($_relatedProduct->getName()) ?></div>
+                    </div>
+                </a>
+            <?php endforeach; ?>
+        </div>
+    </div>
+    <?php endif; ?>
+</aside>
