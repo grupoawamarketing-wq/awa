@@ -16,6 +16,7 @@
 		var topHeader = header.querySelector('.top-header');
 		var stickyClass = 'awa-header-sticky';
 		var hiddenClass = 'awa-header--hidden';
+		var condensedClass = 'awa-header-condensed';
 		var threshold = 80;
 		var hideThreshold = 200;
 		var scrollDelta = 8;
@@ -47,6 +48,7 @@
 				header.classList.remove(stickyClass);
 				header.classList.remove(hiddenClass);
 				document.body.classList.remove(hiddenClass);
+				document.body.classList.remove(condensedClass);
 			}
 
 			if (document.body.style.paddingTop !== '') {
@@ -79,6 +81,7 @@
 			if (scrollTop > threshold && !isSticky) {
 				cachedHeight = header.offsetHeight;
 				header.classList.add(stickyClass);
+				document.body.classList.add(condensedClass);
 				document.body.style.paddingTop = cachedHeight + 'px';
 				isSticky = true;
 			} else if (scrollTop <= threshold && isSticky) {
