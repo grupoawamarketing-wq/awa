@@ -100,10 +100,6 @@ class ContactInfo implements ArgumentInterface
             return '';
         }
 
-        if ((bool) preg_match('/\D+/', $phone)) {
-            return $phone;
-        }
-
         return $this->formatPhoneForDisplay($phone);
     }
 

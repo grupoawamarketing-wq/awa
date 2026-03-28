@@ -93,7 +93,7 @@ class FooterDataTest extends TestCase
                 };
             });
 
-        $this->assertSame('tel:+16997367588', $this->viewModel->getPhoneUrl());
+        $this->assertSame('tel:+5516997367588', $this->viewModel->getPhoneUrl());
     }
 
     public function testGetWhatsAppUrlUsesNormalizedNumber(): void
