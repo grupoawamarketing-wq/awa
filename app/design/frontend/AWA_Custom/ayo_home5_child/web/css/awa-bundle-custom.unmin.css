@@ -4285,3 +4285,39 @@ body .page-wrapper .header .awa-header-contact-slot .awa-header-contact-links__i
     font-size: 13px;
     line-height: 1;
 }
+
+/* ==========================================================================
+   Round23 — Super Ofertas: expande para largura total quando banner_mid_home5
+   não está configurado (CMS block ausente → .top-home-content__trust-offers-banner
+   nunca é renderizado → hot-deal ocupa apenas a coluna direita).
+   
+   A regra em awa-bundle-home-custom.css define `grid-area: deals` com seletor
+   de alta especificidade (0-7-1). Este override usa o mesmo seletor base +
+   :not(:has(...)) para superar a especificidade e remover o grid-area nomeado.
+   ========================================================================== */
+@media (min-width: 992px) {
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .page-wrapper
+    .top-home-content--trust-and-offers
+    > .container.top-home-content__trust-offers-grid:not(:has(> .banner_mid_1.top-home-content__trust-offers-banner))
+    > .hot-deal.top-home-content__trust-offers-deals {
+        grid-area: auto;
+        grid-column: 1 / -1;
+    }
+}
+
+/* ==========================================================================
+   Round23 — Breadcrumb PDP: remove truncamento com ellipsis no item de produto
+   (vem do Rokanthemes base — overrideado aqui para o tema filho)
+   ========================================================================== */
+@media (min-width: 992px) {
+    .breadcrumbs .items .item.product > strong,
+    .breadcrumbs .items .item:last-child > strong,
+    .breadcrumbs .items .item.product > a,
+    .breadcrumbs .items .item:last-child > a {
+        white-space: normal;
+        overflow: visible;
+        text-overflow: unset;
+        max-width: none;
+    }
+}
