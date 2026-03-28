@@ -552,47 +552,6 @@
         }
     }
 
-    function wireSearchHints() {
-        var input = document.querySelector('[data-awa-search-input="true"], #search');
-        if (!input) {
-            return;
-        }
-
-        var chips = document.querySelectorAll('.awa-search-chip[data-term]');
-        if (!chips.length) {
-            return;
-        }
-
-        var form = input.closest('[data-awa-search-form="true"], #search_mini_form, .minisearch');
-
-        chips.forEach(function (chip) {
-            addListener(chip, 'click', function (event) {
-                event.preventDefault();
-                var term = chip.getAttribute('data-term');
-                if (!term) {
-                    return;
-                }
-                input.value = term;
-                input.focus();
-                pushDataLayer('awa_search_chip_click', { search_term: term });
-                if (form) {
-                    var submitEvent = new Event('submit', { bubbles: true, cancelable: true });
-                    form.dispatchEvent(submitEvent);
-                    if (!submitEvent.defaultPrevented) {
-                        form.submit();
-                    }
-                }
-            });
-
-            addListener(chip, 'keydown', function (event) {
-                if (event.key === 'Enter' || event.key === ' ') {
-                    event.preventDefault();
-                    chip.click();
-                }
-            });
-        });
-    }
-
     function wireDeferredBadges() {
         var badges = document.querySelector('[data-awa-deferred-badges="true"]');
         if (!badges) {
@@ -851,7 +810,6 @@
         var experiment = getExperimentConfig();
         wireNavA11y(experiment);
         wireSearchA11y();
-        wireSearchHints();
         wireDeferredBadges();
         wireHeaderClickTelemetry(experiment);
         guardHomeMobileHeaderCollapse();
