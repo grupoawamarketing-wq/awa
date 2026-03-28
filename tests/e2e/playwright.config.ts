@@ -123,5 +123,21 @@ export default defineConfig({
         viewport: { width: 1280, height: 720 },
       },
     },
+
+    /* ── MOBILE ─────────────────────────────────────────────── */
+    {
+      name: 'mobile-375',
+      use: {
+        ...devices['iPhone SE'],
+        viewport: { width: 375, height: 667 },
+      },
+    },
+    {
+      name: 'mobile-390',
+      use: {
+        ...devices['iPhone 14'],
+        viewport: { width: 390, height: 844 },
+      },
+    },
   ],
 });
