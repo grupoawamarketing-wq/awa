@@ -580,12 +580,263 @@
         observer.observe(badges);
     }
 
+    function setImportantStyle(element, property, value) {
+        if (!element) {
+            return;
+        }
+
+        element.style.setProperty(property, value, 'important');
+    }
+
+    function clearStyleProperties(element, properties) {
+        if (!element || !Array.isArray(properties)) {
+            return;
+        }
+
+        properties.forEach(function (property) {
+            element.style.removeProperty(property);
+        });
+    }
+
+    function isHomeHeaderPage() {
+        var body = document.body;
+
+        return !!body && (
+            body.classList.contains('cms-index-index')
+            || body.classList.contains('cms-home')
+            || body.classList.contains('cms-homepage_ayo_home5')
+        );
+    }
+
+    function isMobileHeaderViewport() {
+        return !!window.matchMedia && window.matchMedia('(max-width: 991px)').matches;
+    }
+
+    function isNavDrawerOpen() {
+        return document.documentElement.classList.contains('nav-open')
+            || document.body.classList.contains('nav-open')
+            || document.body.classList.contains('nav-before-open');
+    }
+
+    function collapseHomeSearchLayout() {
+        var topSearch = document.querySelector('.header .top-search');
+        var nestedCart = topSearch
+            ? topSearch.querySelector(':scope > .mini-cart-wrapper, :scope > .shadowcart')
+            : null;
+        var blockSearch = topSearch
+            ? topSearch.querySelector(':scope > .block-search')
+            : null;
+
+        if (!topSearch || !isHomeHeaderPage() || !isMobileHeaderViewport()) {
+            return;
+        }
+
+        setImportantStyle(topSearch, 'display', 'block');
+        setImportantStyle(topSearch, 'grid-template-columns', 'minmax(0, 1fr)');
+        setImportantStyle(topSearch, 'grid-template-areas', '"search"');
+        setImportantStyle(topSearch, 'grid-template-rows', 'auto');
+        setImportantStyle(topSearch, 'gap', '0');
+        setImportantStyle(topSearch, 'min-height', '0');
+
+        if (blockSearch) {
+            setImportantStyle(blockSearch, 'grid-area', 'search');
+            setImportantStyle(blockSearch, 'grid-column', '1');
+            setImportantStyle(blockSearch, 'width', '100%');
+            setImportantStyle(blockSearch, 'max-width', '100%');
+            setImportantStyle(blockSearch, 'min-width', '0');
+        }
+
+        if (nestedCart) {
+            setImportantStyle(nestedCart, 'display', 'none');
+            setImportantStyle(nestedCart, 'width', '0');
+            setImportantStyle(nestedCart, 'min-width', '0');
+            setImportantStyle(nestedCart, 'max-width', '0');
+            setImportantStyle(nestedCart, 'height', '0');
+            setImportantStyle(nestedCart, 'min-height', '0');
+            setImportantStyle(nestedCart, 'margin', '0');
+            setImportantStyle(nestedCart, 'padding', '0');
+            setImportantStyle(nestedCart, 'overflow', 'hidden');
+            setImportantStyle(nestedCart, 'visibility', 'hidden');
+            setImportantStyle(nestedCart, 'opacity', '0');
+            setImportantStyle(nestedCart, 'pointer-events', 'none');
+        }
+    }
+
+    function resetHomeHeaderCollapseGuard() {
+        var topSearch = document.querySelector('.header .top-search');
+        var nestedCart = topSearch
+            ? topSearch.querySelector(':scope > .mini-cart-wrapper, :scope > .shadowcart')
+            : null;
+        var blockSearch = topSearch
+            ? topSearch.querySelector(':scope > .block-search')
+            : null;
+        var nav = document.querySelector('.header-control.header-nav-global.cms_home_1');
+        var container = nav ? nav.querySelector(':scope > .container') : null;
+        var row = container ? container.querySelector(':scope > .row') : null;
+        var menu = nav ? nav.querySelector('.menu_left_home1') : null;
+        var dropdown = menu ? menu.querySelector('.list-category-dropdown') : null;
+
+        clearStyleProperties(topSearch, [
+            'display',
+            'grid-template-columns',
+            'grid-template-areas',
+            'grid-template-rows',
+            'gap',
+            'min-height'
+        ]);
+
+        clearStyleProperties(blockSearch, [
+            'grid-area',
+            'grid-column',
+            'width',
+            'max-width',
+            'min-width'
+        ]);
+
+        clearStyleProperties(nestedCart, [
+            'display',
+            'width',
+            'min-width',
+            'max-width',
+            'height',
+            'min-height',
+            'margin',
+            'padding',
+            'overflow',
+            'visibility',
+            'opacity',
+            'pointer-events'
+        ]);
+
+        [nav, container, row].forEach(function (element) {
+            clearStyleProperties(element, [
+                'height',
+                'min-height',
+                'margin-top',
+                'margin-bottom',
+                'padding-top',
+                'padding-bottom',
+                'border',
+                'overflow'
+            ]);
+        });
+
+        clearStyleProperties(menu, [
+            'display',
+            'height',
+            'min-height',
+            'margin',
+            'padding',
+            'overflow',
+            'visibility',
+            'opacity',
+            'pointer-events',
+            'max-height'
+        ]);
+
+        clearStyleProperties(dropdown, [
+            'max-height',
+            'overflow'
+        ]);
+    }
+
+    function guardHomeMobileHeaderCollapse() {
+        var nav = document.querySelector('.header-control.header-nav-global.cms_home_1');
+        var container = nav ? nav.querySelector(':scope > .container') : null;
+        var row = container ? container.querySelector(':scope > .row') : null;
+        var menu = nav ? nav.querySelector('.menu_left_home1') : null;
+        var dropdown = menu ? menu.querySelector('.list-category-dropdown') : null;
+
+        if (!isHomeHeaderPage()) {
+            return;
+        }
+
+        if (!isMobileHeaderViewport()) {
+            resetHomeHeaderCollapseGuard();
+            return;
+        }
+
+        collapseHomeSearchLayout();
+
+        if (!nav || !container || !row || !menu) {
+            return;
+        }
+
+        if (isNavDrawerOpen()) {
+            setImportantStyle(menu, 'display', 'block');
+            setImportantStyle(menu, 'height', 'auto');
+            setImportantStyle(menu, 'min-height', '0');
+            setImportantStyle(menu, 'overflow', 'visible');
+            setImportantStyle(menu, 'visibility', 'visible');
+            setImportantStyle(menu, 'opacity', '1');
+            setImportantStyle(menu, 'pointer-events', 'auto');
+
+            if (dropdown) {
+                setImportantStyle(dropdown, 'max-height', 'none');
+                setImportantStyle(dropdown, 'overflow', 'visible');
+            }
+
+            return;
+        }
+
+        [nav, container, row].forEach(function (element) {
+            setImportantStyle(element, 'height', '0');
+            setImportantStyle(element, 'min-height', '0');
+            setImportantStyle(element, 'margin-top', '0');
+            setImportantStyle(element, 'margin-bottom', '0');
+            setImportantStyle(element, 'padding-top', '0');
+            setImportantStyle(element, 'padding-bottom', '0');
+            setImportantStyle(element, 'border', '0');
+            setImportantStyle(element, 'overflow', 'hidden');
+        });
+
+        setImportantStyle(menu, 'display', 'none');
+        setImportantStyle(menu, 'height', '0');
+        setImportantStyle(menu, 'min-height', '0');
+        setImportantStyle(menu, 'margin', '0');
+        setImportantStyle(menu, 'padding', '0');
+        setImportantStyle(menu, 'overflow', 'hidden');
+        setImportantStyle(menu, 'visibility', 'hidden');
+        setImportantStyle(menu, 'opacity', '0');
+        setImportantStyle(menu, 'pointer-events', 'none');
+
+        if (dropdown) {
+            setImportantStyle(dropdown, 'max-height', '0');
+            setImportantStyle(dropdown, 'overflow', 'hidden');
+        }
+    }
+
     onReady(function () {
         var experiment = getExperimentConfig();
         wireNavA11y(experiment);
         wireSearchA11y();
         wireDeferredBadges();
         wireHeaderClickTelemetry(experiment);
+        guardHomeMobileHeaderCollapse();
+
+        addListener(window, 'resize', function () {
+            raf(guardHomeMobileHeaderCollapse);
+        }, { passive: true });
+
+        addListener(document, 'click', function () {
+            raf(guardHomeMobileHeaderCollapse);
+        }, { capture: true });
+
+        if (window.MutationObserver) {
+            new MutationObserver(function () {
+                raf(guardHomeMobileHeaderCollapse);
+            }).observe(document.documentElement, {
+                attributes: true,
+                attributeFilter: ['class']
+            });
+
+            new MutationObserver(function () {
+                raf(guardHomeMobileHeaderCollapse);
+            }).observe(document.body, {
+                attributes: true,
+                attributeFilter: ['class']
+            });
+        }
 
         addListener(document, 'click', function (event) {
             if (!event.target || !event.target.closest) {
