@@ -48,9 +48,12 @@ $asyncBundles = [
     // Moved from render-blocking <css> to async (2026-03-26) — saves ~70KB from critical path
     $block->getViewFileUrl('css/awa-visual-fixes-critical.css'),
     $block->getViewFileUrl('css/awa-polish-sweep.css'),
-    // T2.4 (2026-03-28): -299KB do critical path — AOF styles now in awa-critical-fold.css
-    $block->getViewFileUrl('css/awa-bundle-refinements.css'),
 ];
+
+// Refinements bundle stays async, but is rendered explicitly below because
+// it contains foundational UI behavior/styles for compare bar, floating tools,
+// and several layout polish layers used across the storefront.
+$refinementsBundleUrl = $block->getViewFileUrl('css/awa-bundle-refinements.css');
 ?>
 <!-- AWA Head Preload — DNS Prefetch -->
 <?php foreach ($dnsPrefetch as $domain): ?>
@@ -76,3 +79,10 @@ $asyncBundles = [
       onload="this.media='all'"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($cssUrl) ?>"/></noscript>
 <?php endforeach; ?>
+<!-- T2.4 (2026-03-28): -299KB do critical path — AOF styles now in awa-critical-fold.css -->
+<link rel="stylesheet"
+    href="<?= $block->escapeUrl($refinementsBundleUrl) ?>"
+    media="print"
+    data-awa-refinements="1"
+    onload="this.media='all'"/>
+<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($refinementsBundleUrl) ?>"/></noscript>
