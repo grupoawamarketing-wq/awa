@@ -2,41 +2,82 @@
 declare(strict_types=1);
 
 /**
+ * Header account prompt — ícone de usuário + login/cadastro (guest) ou "Minha conta" (logado).
+ * Login state is resolved client-side via customer-data sections (FPC-compatible).
+ *
  * @var \Magento\Framework\View\Element\Template $block
- * @var \GrupoAwamotos\Theme\ViewModel\ContactInfo $contactInfo
  */
-$contactInfo = $block->getData('view_model');
+
+/** @var \GrupoAwamotos\B2B\Helper\Config $b2bConfig */
+$b2bConfig = $this->helper(\GrupoAwamotos\B2B\Helper\Config::class);
+$isB2bEnabled = $b2bConfig->isEnabled();
+$isStrictB2b  = $isB2bEnabled && $b2bConfig->isStrictB2B();
+
+$loginUrl    = $isStrictB2b
+    ? $block->getUrl('b2b/account/login')
+    : $block->getUrl('customer/account/login');
+$registerUrl = $isB2bEnabled
+    ? $block->getUrl('b2b/register')
+    : $block->getUrl('customer/account/create');
+$accountUrl  = $block->getUrl('customer/account');
 ?>
-<?php if ($contactInfo instanceof \GrupoAwamotos\Theme\ViewModel\ContactInfo && $contactInfo->hasAnyContact()): ?>
-<nav class="awa-header-contact-links" aria-label="<?= $block->escapeHtmlAttr(__('Atendimento Comercial')) ?>">
-    <span class="awa-header-contact-links__label"><?= $block->escapeHtml(__('Atendimento B2B')) ?></span>
-    <div class="awa-header-contact-links__items">
-        <?php if ($contactInfo->hasWhatsApp()): ?>
-            <a class="awa-header-contact-links__item awa-header-contact-links__item--whatsapp"
-               href="<?= $block->escapeUrl($contactInfo->getWhatsAppUrl()) ?>"
-               target="_blank"
-               rel="noopener noreferrer"
-               aria-label="<?= $block->escapeHtmlAttr(__('Falar no WhatsApp comercial')) ?>">
-                <span class="awa-header-contact-links__icon" aria-hidden="true"><i class="fa fa-whatsapp"></i></span>
-                <span class="awa-header-contact-links__text"><?= $block->escapeHtml(__('WhatsApp')) ?></span>
-            </a>
-        <?php endif; ?>
-        <?php if ($contactInfo->hasPhone()): ?>
-            <a class="awa-header-contact-links__item"
-               href="<?= $block->escapeUrl($contactInfo->getPhoneUrl()) ?>"
-               aria-label="<?= $block->escapeHtmlAttr(__('Ligar para %1', $contactInfo->getPhone())) ?>">
-                <span class="awa-header-contact-links__icon" aria-hidden="true"><i class="fa fa-phone"></i></span>
-                <span class="awa-header-contact-links__text"><?= $block->escapeHtml($contactInfo->getPhone()) ?></span>
-            </a>
-        <?php endif; ?>
-        <?php if ($contactInfo->hasEmail()): ?>
-            <a class="awa-header-contact-links__item"
-               href="<?= $block->escapeUrl($contactInfo->getEmailUrl()) ?>"
-               aria-label="<?= $block->escapeHtmlAttr(__('Enviar e-mail para %1', $contactInfo->getEmail())) ?>">
-                <span class="awa-header-contact-links__icon" aria-hidden="true"><i class="fa fa-envelope-o"></i></span>
-                <span class="awa-header-contact-links__text"><?= $block->escapeHtml(__('E-mail')) ?></span>
-            </a>
-        <?php endif; ?>
-    </div>
-</nav>
-<?php endif; ?>
+<div class="awa-header-contact-links awa-header-account-prompt"
+     data-awa-auth-state="guest"
+     aria-label="<?= $block->escapeHtmlAttr(__('Área do cliente')) ?>">
+    <span class="awa-header-account-prompt__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor"
+             stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+        </svg>
+    </span>
+    <span class="awa-header-account-prompt__text">
+        <?php /* Guest state (default, FPC-cached) */ ?>
+        <span class="awa-header-account-prompt__guest">
+            <span class="awa-header-account-prompt__line1"><?= $block->escapeHtml(__('Para ver os preços faça o')) ?></span>
+            <span class="awa-header-account-prompt__line2">
+                <a class="awa-header-account-prompt__link"
+                   href="<?= $block->escapeUrl($loginUrl) ?>"
+                   rel="nofollow"
+                   title="<?= $block->escapeHtmlAttr(__('Entrar na sua conta')) ?>">
+                    <?= $block->escapeHtml(__('Login')) ?>
+                </a>
+                <span class="awa-header-account-prompt__separator"><?= $block->escapeHtml(__('ou')) ?></span>
+                <a class="awa-header-account-prompt__link awa-header-account-prompt__link--register"
+                   href="<?= $block->escapeUrl($registerUrl) ?>"
+                   rel="nofollow"
+                   title="<?= $block->escapeHtmlAttr(__('Criar uma conta')) ?>">
+                    <?= $block->escapeHtml(__('cadastre-se')) ?>
+                </a>
+            </span>
+        </span>
+        <?php /* Logged-in state (hidden by default, shown via customer-data JS) */ ?>
+        <span class="awa-header-account-prompt__customer" style="display:none">
+            <span class="awa-header-account-prompt__line1"><?= $block->escapeHtml(__('Olá, bem-vindo(a)!')) ?></span>
+            <span class="awa-header-account-prompt__line2">
+                <a class="awa-header-account-prompt__link"
+                   href="<?= $block->escapeUrl($accountUrl) ?>"
+                   title="<?= $block->escapeHtmlAttr(__('Acessar minha conta')) ?>">
+                    <?= $block->escapeHtml(__('Minha conta')) ?>
+                </a>
+            </span>
+        </span>
+    </span>
+</div>
+<script>
+require(['Magento_Customer/js/customer-data'], function (customerData) {
+    var customer = customerData.get('customer');
+    function toggle(data) {
+        var el = document.querySelector('.awa-header-account-prompt');
+        if (!el) return;
+        var isLoggedIn = !!(data && data.firstname);
+        el.setAttribute('data-awa-auth-state', isLoggedIn ? 'customer' : 'guest');
+        var guest = el.querySelector('.awa-header-account-prompt__guest');
+        var cust  = el.querySelector('.awa-header-account-prompt__customer');
+        if (guest) guest.style.display = isLoggedIn ? 'none' : '';
+        if (cust)  cust.style.display  = isLoggedIn ? '' : 'none';
+    }
+    customer.subscribe(toggle);
+    toggle(customer());
+});
+</script>
