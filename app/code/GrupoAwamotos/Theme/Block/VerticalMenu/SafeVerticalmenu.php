@@ -333,7 +333,7 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
 
                 $iconClass = $this->sanitizeClassList($vc_menu_font_icon);
                 if ($iconClass !== '') {
-                    $html .= '<em class="' . $this->escapeHtmlAttr('menu-thumb-icon awa-mueller-icon awa-mueller-icon--font ' . $iconClass) . '"></em>';
+                    $html .= '<em class="' . $this->escapeHtmlAttr('menu-thumb-icon ' . $iconClass) . '"></em>';
                 }
 
                 $html .= '<span class="navigation__label">' . $childName;
@@ -467,12 +467,12 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
             if ($vc_menu_icon_img) {
                 $iconImgUrl = (string)$cat_model->getImageUrl('vc_menu_icon_img');
                 if ($iconImgUrl !== '') {
-                    $html .= '<img class="menu-thumb-icon awa-mueller-icon awa-mueller-icon--image" src="' . $this->escapeUrl($iconImgUrl) . '" alt="' . $categoryNameAttr . '" loading="lazy"/>';
+                    $html .= '<img class="menu-thumb-icon" src="' . $this->escapeUrl($iconImgUrl) . '" alt="' . $categoryNameAttr . '" loading="lazy"/>';
                 }
             } else {
                 $iconClass = $this->sanitizeClassList($vc_menu_font_icon);
                 if ($iconClass !== '') {
-                    $html .= '<em class="' . $this->escapeHtmlAttr('menu-thumb-icon awa-mueller-icon awa-mueller-icon--font ' . $iconClass) . '"></em>';
+                    $html .= '<em class="' . $this->escapeHtmlAttr('menu-thumb-icon ' . $iconClass) . '"></em>';
                 }
             }
 

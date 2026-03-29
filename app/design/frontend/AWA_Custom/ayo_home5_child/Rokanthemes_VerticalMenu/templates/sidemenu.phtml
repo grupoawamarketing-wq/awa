@@ -2,9 +2,7 @@
 declare(strict_types=1);
 
 /**
- * AWA Motos child-theme override — full AWA implementation.
- * Idêntico ao ayo/ayo_home5 para garantir data-role="awa-vertical-menu"
- * e a inicialização correta via js/vertical-menu-init (x-magento-init).
+ * AWA Motos child-theme override using the standard Ayo vertical menu init.
  *
  * @var \Rokanthemes\VerticalMenu\Block\Verticalmenu $block
  */
@@ -16,11 +14,12 @@ if (!empty($_config['general']['enable'])):
     $limitShow = (int)($_config['general']['limit_show'] ?? 0);
     $menuId    = 'awa-vertical-menu-' . uniqid('', false);
     $_menu     = $block->getVerticalMenuHtml();
-?><!-- Skip navigation link for keyboard/screen reader users -->
+?>
+<!-- Skip navigation link for keyboard/screen reader users -->
 <a class="vmm-skip-nav" href="#maincontent">
     <?= $block->escapeHtml(__('Ir para o conteúdo principal')) ?>
 </a>
-<nav class="navigation verticalmenu side-verticalmenu navigation--mueller"
+<nav class="navigation verticalmenu side-verticalmenu"
      aria-label="<?= $block->escapeHtmlAttr(__('Categorias de Produtos')) ?>"
      data-role="awa-vertical-menu">
     <h2 class="our_categories title-category-dropdown"
@@ -33,8 +32,7 @@ if (!empty($_config['general']['enable'])):
         <span><?= $block->escapeHtml(__('Todas as categorias')) ?></span>
     </h2>
     <ul id="<?= $block->escapeHtmlAttr($menuId) ?>"
-        class="togge-menu list-category-dropdown navigation__list navigation__list--level0 todasascategorias"
-        data-level="0"
+        class="togge-menu list-category-dropdown"
         data-limit-show="<?= (int)$limitShow ?>">
         <?= /** @noEscape */ $_menu ?>
         <?php
@@ -66,13 +64,9 @@ if (!empty($_config['general']['enable'])):
 
 <script type="text/x-magento-init">
 {
-    ".navigation.verticalmenu.side-verticalmenu.navigation--mueller[data-role='awa-vertical-menu']": {
-        "js/awa-vertical-menu-mueller": {
+    "[data-role='awa-vertical-menu']": {
+        "js/vertical-menu-init": {
             "desktopBreakpoint": 992,
-            "openModeDesktop": "hover",
-            "openModeMobile": "click",
-            "disableOverlay": true,
-            "keepOpenOnHomeDesktop": false,
             "limitShow": <?= (int)$limitShow ?>
         }
     }

@@ -53,7 +53,7 @@ define(['jquery'], function ($) {
 
     /* ---- Vertical Menu ---- */
     function applyVerticalMenuA11y() {
-        var $nav = $('.navigation.verticalmenu.side-verticalmenu').not('.navigation--mueller');
+        var $nav = $('.navigation.verticalmenu.side-verticalmenu');
         if (!$nav.length) { return; }
 
         $nav.attr('data-awa-component', $nav.attr('data-awa-component') || 'vertical-menu');
