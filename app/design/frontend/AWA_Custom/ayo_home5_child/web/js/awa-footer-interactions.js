@@ -152,17 +152,20 @@ define([
             $('.fixed-right .fixed-right-ul .scroll-top').each(function () {
                 var $element = $(this);
 
-                $element.attr({
-                    role: 'button',
-                    tabindex: '0'
-                });
+                // Only add role="button" if no <button> child exists (e.g. inserted via CMS block or awa-footer-ux.js)
+                if (!$element.find('button').length) {
+                    $element.attr({
+                        role: 'button',
+                        tabindex: '0'
+                    });
 
-                if (!$element.attr('aria-label')) {
-                    $element.attr('aria-label', 'Voltar ao topo');
-                }
+                    if (!$element.attr('aria-label')) {
+                        $element.attr('aria-label', 'Voltar ao topo');
+                    }
 
-                if (!$element.attr('title')) {
-                    $element.attr('title', 'Voltar ao topo');
+                    if (!$element.attr('title')) {
+                        $element.attr('title', 'Voltar ao topo');
+                    }
                 }
             });
         }
