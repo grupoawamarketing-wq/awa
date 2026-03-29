@@ -33,8 +33,14 @@ class StockSync implements StockSyncInterface
     private LoggerInterface $logger;
     private ResourceConnection $resourceConnection;
     private ?array $existingSkuCache = null;
+    private ?array $skuByInternalCodeCache = null;
+    private ?int $erpInternalCodeAttributeId = null;
+    private bool $erpInternalCodeAttributeIdLoaded = false;
     /** @var array<int, array{sku: string, change_percent: float|int|null, previous_qty: float|int|null, new_qty: float|int|null}> */
     private array $anomalySamples = [];
+    /** @var array<int, array{erp_identifier: string, target_sku: string}> */
+    private array $internalCodeResolutionSamples = [];
+    private int $resolvedByInternalCodeCount = 0;
 
     public function __construct(
         ConnectionInterface $connection,
@@ -353,19 +359,24 @@ class StockSync implements StockSyncInterface
         $startTime = microtime(true);
         $result = $this->initializeSyncResult();
         $this->existingSkuCache = null; // Reset cache for fresh data
+        $this->skuByInternalCodeCache = null;
         $this->anomalySamples = [];
+        $this->internalCodeResolutionSamples = [];
+        $this->resolvedByInternalCodeCount = 0;
 
         try {
             $filiais = $this->helper->getStockFiliais();
             $result = $this->runBranchSync($filiais, $result);
             $result = $this->finalizeSyncResult($result, $startTime);
             $this->logAnomalySummary($result);
+            $this->logInternalCodeResolutionSummary();
             $this->logSyncSummary($filiais, $result);
 
             $this->logger->info('[ERP] Stock sync completed', $result);
         } catch (\Exception $e) {
             $result = $this->finalizeSyncResult($result, $startTime);
             $this->logAnomalySummary($result);
+            $this->logInternalCodeResolutionSummary();
             $this->logger->error('[ERP] Stock sync failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -564,16 +575,10 @@ class StockSync implements StockSyncInterface
 
             $result['anomaly'] = $this->checkAndLogAnomaly($validationResult, $sku);
 
-            // Try exact SKU first, then base-SKU fallback
-            $targetSku = $sku;
-            if (!$this->productExists($sku)) {
-                $baseSku = $this->getBaseSku($sku);
-                if ($baseSku !== $sku && $this->productExists($baseSku)) {
-                    $targetSku = $baseSku;
-                } else {
-                    $result['status'] = 'not_found';
-                    return $result;
-                }
+            $targetSku = $this->resolveMagentoSku($sku);
+            if ($targetSku === null) {
+                $result['status'] = 'not_found';
+                return $result;
             }
 
             $result['status'] = $this->syncValidatedStock($targetSku, $validationResult);
@@ -658,6 +663,25 @@ class StockSync implements StockSyncInterface
         $this->logger->warning('[ERP] Stock anomalies detected during sync', $context);
     }
 
+    private function logInternalCodeResolutionSummary(): void
+    {
+        if ($this->resolvedByInternalCodeCount <= 0) {
+            return;
+        }
+
+        $context = [
+            'resolved_count' => $this->resolvedByInternalCodeCount,
+            'sample_count' => count($this->internalCodeResolutionSamples),
+            'samples' => $this->internalCodeResolutionSamples,
+        ];
+
+        if ($this->resolvedByInternalCodeCount > count($this->internalCodeResolutionSamples)) {
+            $context['suppressed_count'] = $this->resolvedByInternalCodeCount - count($this->internalCodeResolutionSamples);
+        }
+
+        $this->logger->info('[ERP] Stock sync resolved ERP internal codes to Magento SKUs', $context);
+    }
+
     /**
      * Limit repetitive anomaly warnings across cron runs.
      */
@@ -723,10 +747,121 @@ class StockSync implements StockSyncInterface
     private function loadExistingSkus(): void
     {
         $conn = $this->resourceConnection->getConnection();
-        $table = $this->resourceConnection->getTableName('catalog_product_entity');
-        $skus = $conn->fetchCol("SELECT sku FROM {$table}");
+        $productTable = $this->resourceConnection->getTableName('catalog_product_entity');
+        $skus = $conn->fetchCol("SELECT sku FROM {$productTable}");
         $this->existingSkuCache = array_flip($skus);
-        $this->logger->info('[ERP] Pre-loaded SKU cache', ['total_skus' => count($this->existingSkuCache)]);
+        $this->skuByInternalCodeCache = [];
+
+        $attributeId = $this->getErpInternalCodeAttributeId();
+        if ($attributeId !== null) {
+            $varcharTable = $this->resourceConnection->getTableName('catalog_product_entity_varchar');
+            $rows = $conn->fetchAll(
+                "SELECT cpe.sku, value_table.value AS erp_internal_code
+                 FROM {$productTable} cpe
+                 INNER JOIN {$varcharTable} value_table
+                    ON value_table.entity_id = cpe.entity_id
+                    AND value_table.attribute_id = :attribute_id
+                    AND value_table.store_id = 0
+                 WHERE value_table.value IS NOT NULL
+                   AND TRIM(value_table.value) != ''",
+                [':attribute_id' => $attributeId]
+            );
+
+            foreach ($rows as $row) {
+                $sku = trim((string) ($row['sku'] ?? ''));
+                $internalCode = trim((string) ($row['erp_internal_code'] ?? ''));
+
+                if ($sku === '' || $internalCode === '' || isset($this->skuByInternalCodeCache[$internalCode])) {
+                    continue;
+                }
+
+                $this->skuByInternalCodeCache[$internalCode] = $sku;
+            }
+        }
+
+        $this->logger->info('[ERP] Pre-loaded SKU cache', [
+            'total_skus' => count($this->existingSkuCache),
+            'internal_code_mappings' => count($this->skuByInternalCodeCache),
+        ]);
+    }
+
+    private function resolveMagentoSku(string $erpIdentifier): ?string
+    {
+        $erpIdentifier = trim($erpIdentifier);
+        if ($erpIdentifier === '') {
+            return null;
+        }
+
+        if ($this->productExists($erpIdentifier)) {
+            return $erpIdentifier;
+        }
+
+        $baseSku = $this->getBaseSku($erpIdentifier);
+        if ($baseSku !== $erpIdentifier && $this->productExists($baseSku)) {
+            return $baseSku;
+        }
+
+        $resolvedSku = $this->getSkuByInternalCode($erpIdentifier);
+        if ($resolvedSku !== null && $this->productExists($resolvedSku)) {
+            $this->recordInternalCodeResolution($erpIdentifier, $resolvedSku);
+            return $resolvedSku;
+        }
+
+        return null;
+    }
+
+    private function getSkuByInternalCode(string $internalCode): ?string
+    {
+        if ($this->skuByInternalCodeCache === null) {
+            $this->loadExistingSkus();
+        }
+
+        return $this->skuByInternalCodeCache[$internalCode] ?? null;
+    }
+
+    private function recordInternalCodeResolution(string $erpIdentifier, string $targetSku): void
+    {
+        $this->resolvedByInternalCodeCount++;
+
+        if (count($this->internalCodeResolutionSamples) >= self::ANOMALY_SAMPLE_LIMIT) {
+            return;
+        }
+
+        $this->internalCodeResolutionSamples[] = [
+            'erp_identifier' => $erpIdentifier,
+            'target_sku' => $targetSku,
+        ];
+    }
+
+    private function getErpInternalCodeAttributeId(): ?int
+    {
+        if ($this->erpInternalCodeAttributeIdLoaded) {
+            return $this->erpInternalCodeAttributeId;
+        }
+
+        $conn = $this->resourceConnection->getConnection();
+        $eavAttributeTable = $this->resourceConnection->getTableName('eav_attribute');
+        $entityTypeTable = $this->resourceConnection->getTableName('eav_entity_type');
+
+        $attributeId = $conn->fetchOne(
+            "SELECT ea.attribute_id
+             FROM {$eavAttributeTable} ea
+             INNER JOIN {$entityTypeTable} eet ON eet.entity_type_id = ea.entity_type_id
+             WHERE ea.attribute_code = :attribute_code
+               AND eet.entity_type_code = :entity_type_code
+             LIMIT 1",
+            [
+                ':attribute_code' => 'erp_internal_code',
+                ':entity_type_code' => 'catalog_product',
+            ]
+        );
+
+        $this->erpInternalCodeAttributeId = $attributeId !== false && $attributeId !== null
+            ? (int) $attributeId
+            : null;
+        $this->erpInternalCodeAttributeIdLoaded = true;
+
+        return $this->erpInternalCodeAttributeId;
     }
 
     /**
@@ -784,10 +919,16 @@ class StockSync implements StockSyncInterface
                 return false;
             }
 
-            try {
-                $this->productRepository->get($sku);
-            } catch (NoSuchEntityException $e) {
+            $targetSku = $this->resolveMagentoSku($sku);
+            if ($targetSku === null) {
                 $this->logger->warning('[ERP] Product not found in Magento for stock sync: ' . $sku);
+                return false;
+            }
+
+            try {
+                $this->productRepository->get($targetSku);
+            } catch (NoSuchEntityException $e) {
+                $this->logger->warning('[ERP] Product not found in Magento for stock sync: ' . $targetSku);
                 return false;
             }
 
@@ -796,13 +937,14 @@ class StockSync implements StockSyncInterface
                 $qty = 0;
             }
 
-            $stockItem = $this->stockRegistry->getStockItemBySku($sku);
+            $stockItem = $this->stockRegistry->getStockItemBySku($targetSku);
             $stockItem->setQty($qty);
             $stockItem->setIsInStock($qty > 0);
-            $this->stockRegistry->updateStockItemBySku($sku, $stockItem);
+            $this->stockRegistry->updateStockItemBySku($targetSku, $stockItem);
 
             $this->logger->info('[ERP] Stock synced for SKU', [
-                'sku' => $sku,
+                'sku' => $targetSku,
+                'requested_identifier' => $sku,
                 'qty' => $qty,
                 'branches' => $stockData['branches'] ?? [],
             ]);

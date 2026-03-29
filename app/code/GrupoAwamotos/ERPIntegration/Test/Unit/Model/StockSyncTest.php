@@ -48,6 +48,8 @@ class StockSyncTest extends TestCase
         $dbAdapter = $this->createMock(\Magento\Framework\DB\Adapter\AdapterInterface::class);
         // Return common test SKUs as existing in catalog_product_entity
         $dbAdapter->method('fetchCol')->willReturn(['SKU-001', 'SKU-002']);
+        $dbAdapter->method('fetchAll')->willReturn([]);
+        $dbAdapter->method('fetchOne')->willReturn(null);
         $this->resourceConnection->method('getConnection')->willReturn($dbAdapter);
         $this->resourceConnection->method('getTableName')
             ->willReturnArgument(0);
@@ -456,6 +458,50 @@ class StockSyncTest extends TestCase
         $this->assertEquals(1, $result['updated']);
     }
 
+    public function testSyncAllResolvesErpInternalCodeToMagentoSku(): void
+    {
+        $resourceConn = $this->createMock(ResourceConnection::class);
+        $dbAdapter = $this->createMock(\Magento\Framework\DB\Adapter\AdapterInterface::class);
+        $dbAdapter->method('fetchCol')->willReturn(['SKU-001']);
+        $dbAdapter->method('fetchOne')->willReturn(206);
+        $dbAdapter->method('fetchAll')->willReturn([
+            ['sku' => 'SKU-001', 'erp_internal_code' => 'INT-001'],
+        ]);
+        $resourceConn->method('getConnection')->willReturn($dbAdapter);
+        $resourceConn->method('getTableName')->willReturnArgument(0);
+
+        $stockSync = new StockSync(
+            $this->connection,
+            $this->helper,
+            $this->productRepository,
+            $this->stockRegistry,
+            $this->syncLogResource,
+            $this->stockValidator,
+            $this->cache,
+            $this->logger,
+            $resourceConn
+        );
+
+        $this->connection->method('query')->willReturn([
+            ['MATERIAL' => 'INT-001', 'QTDE' => 10.0, 'VLRMEDIA' => 25.00],
+        ]);
+
+        $stockItem = $this->createMock(StockItemInterface::class);
+        $stockItem->method('getQty')->willReturn(5.0);
+        $stockItem->expects($this->once())->method('setQty')->with(10.0);
+        $stockItem->expects($this->once())->method('setIsInStock')->with(true);
+
+        $this->stockRegistry->expects($this->once())
+            ->method('getStockItemBySku')
+            ->with('SKU-001')
+            ->willReturn($stockItem);
+
+        $result = $stockSync->syncAll();
+
+        $this->assertEquals(1, $result['updated']);
+        $this->assertEquals(0, $result['not_found']);
+    }
+
     public function testSyncAllSkipsEmptySku(): void
     {
         $erpData = [
@@ -521,7 +567,7 @@ class StockSyncTest extends TestCase
         $stockItem = $this->createMock(StockItemInterface::class);
         $this->stockRegistry->method('getStockItemBySku')->willReturn($stockItem);
 
-        $result = $this->stockSync->syncBySku('TEST-SKU');
+        $result = $this->stockSync->syncBySku('SKU-001');
 
         $this->assertTrue($result);
     }
@@ -548,6 +594,60 @@ class StockSyncTest extends TestCase
         $result = $this->stockSync->syncBySku('ERP-ONLY-SKU');
 
         $this->assertFalse($result);
+    }
+
+    public function testSyncBySkuResolvesErpInternalCodeToMagentoSku(): void
+    {
+        $resourceConn = $this->createMock(ResourceConnection::class);
+        $dbAdapter = $this->createMock(\Magento\Framework\DB\Adapter\AdapterInterface::class);
+        $dbAdapter->method('fetchCol')->willReturn(['SKU-001']);
+        $dbAdapter->method('fetchOne')
+            ->willReturnCallback(function (string $sql) {
+                if (strpos($sql, 'SELECT ea.attribute_id') !== false) {
+                    return 206;
+                }
+
+                return ['QTDE' => 10.0, 'VLRMEDIA' => 25.00, 'DATA' => '2024-01-20'];
+            });
+        $dbAdapter->method('fetchAll')->willReturn([
+            ['sku' => 'SKU-001', 'erp_internal_code' => 'INT-001'],
+        ]);
+        $resourceConn->method('getConnection')->willReturn($dbAdapter);
+        $resourceConn->method('getTableName')->willReturnArgument(0);
+
+        $stockSync = new StockSync(
+            $this->connection,
+            $this->helper,
+            $this->productRepository,
+            $this->stockRegistry,
+            $this->syncLogResource,
+            $this->stockValidator,
+            $this->cache,
+            $this->logger,
+            $resourceConn
+        );
+
+        $this->cache->method('load')->willReturn(false);
+        $this->connection->method('fetchOne')
+            ->willReturn(['QTDE' => 10.0, 'VLRMEDIA' => 25.00, 'DATA' => '2024-01-20']);
+
+        $this->productRepository->expects($this->once())
+            ->method('get')
+            ->with('SKU-001')
+            ->willReturn($this->createMock(\Magento\Catalog\Api\Data\ProductInterface::class));
+
+        $stockItem = $this->createMock(StockItemInterface::class);
+        $this->stockRegistry->expects($this->once())
+            ->method('getStockItemBySku')
+            ->with('SKU-001')
+            ->willReturn($stockItem);
+        $this->stockRegistry->expects($this->once())
+            ->method('updateStockItemBySku')
+            ->with('SKU-001', $stockItem);
+
+        $result = $stockSync->syncBySku('INT-001');
+
+        $this->assertTrue($result);
     }
 
     // ========== getStockBreakdownBySku Tests ==========
