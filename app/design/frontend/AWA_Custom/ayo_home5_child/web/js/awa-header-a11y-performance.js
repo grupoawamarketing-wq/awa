@@ -69,11 +69,22 @@
         callback();
     }
 
+    function ensureToggleRole(el) {
+        if (!el) { return; }
+        if (!el.getAttribute('role')) {
+            el.setAttribute('role', 'button');
+        }
+        if (!el.getAttribute('tabindex')) {
+            el.setAttribute('tabindex', '0');
+        }
+    }
+
     function setNavState() {
         var toggle = document.querySelector('[data-awa-nav-toggle="true"]');
         if (!toggle) {
             return;
         }
+        ensureToggleRole(toggle);
         var body = document.body;
         var expanded = body.classList.contains('nav-open') || body.classList.contains('nav-before-open');
         toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
@@ -129,6 +140,9 @@
     function wireNavA11y(experiment) {
         var toggle = document.querySelector('[data-awa-nav-toggle="true"]');
         var navShell = document.getElementById('awa-primary-navigation');
+        if (toggle) {
+            ensureToggleRole(toggle);
+        }
         var useEnhancedDrawer = !!experiment && experiment.variant === 'B';
         var overlay = null;
         var lastFocusedElement = null;
