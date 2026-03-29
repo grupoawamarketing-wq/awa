@@ -1,5 +1,5 @@
-/** AWA Service Worker v2.2.0 — Multi-strategy Cache (2026-03-27) */
-const CACHE_VERSION = 'awa-v20260327';
+/** AWA Service Worker v2.3.0 — Multi-strategy Cache (2026-03-29) */
+const CACHE_VERSION = 'awa-v20260329';
 const FONT_CACHE = 'awa-fonts-v1';
 const IMAGE_CACHE = 'awa-images-v1';
 const IMAGE_CACHE_MAX = 300; // max entries
@@ -8,6 +8,8 @@ const IMAGE_CACHE_MAX = 300; // max entries
 const CACHEABLE_PATTERNS = [
   /\/css\/awa-bundle-[\w-]+\.css$/,
   /\/css\/awa-visual-fixes-critical\.css$/,
+  /\/css\/awa-polish-sweep\.css$/,
+  /\/css\/awa-pdp-b2b-pro\.css$/,
   /\/css\/swiper-bundle\.min\.css$/,
   /\/css\/themes5\.css$/,
   /\/js\/awa-bundle\.min\.js$/,
