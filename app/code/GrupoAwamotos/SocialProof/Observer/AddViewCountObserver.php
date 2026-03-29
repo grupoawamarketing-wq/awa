@@ -13,8 +13,8 @@ use Psr\Log\LoggerInterface;
  * Adiciona dados REAIS de prova social ao produto.
  *
  * Fontes:
- *   - report_viewed_product_aggregated_daily (visualizações)
- *   - sales_bestsellers_aggregated_daily (mais vendidos)
+ *   - report_viewed_product_index (visualizações do dia — sem depender de cron)
+ *   - sales_order_item + sales_order (mais vendidos — sem depender de cron de agregação)
  *
  * Conformidade com CDC Art. 37 — somente dados reais, sem simulação.
  */
@@ -23,7 +23,7 @@ class AddViewCountObserver implements ObserverInterface
     private const CACHE_PREFIX = 'socialproof_';
     private const CACHE_LIFETIME = 900; // 15 minutos
     private const BESTSELLER_DAYS = 30;
-    private const BESTSELLER_MIN_QTY = 5;
+    private const BESTSELLER_MIN_QTY = 2; // threshold realista para volume B2B
 
     private ResourceConnection $resourceConnection;
     private CacheInterface $cache;
@@ -62,24 +62,28 @@ class AddViewCountObserver implements ObserverInterface
             $connection = $this->resourceConnection->getConnection();
             $today = date('Y-m-d');
 
-            // Visualizações hoje
-            $viewsTable = $this->resourceConnection->getTableName('report_viewed_product_aggregated_daily');
+            // Visualizações hoje — lê de report_viewed_product_index (tempo real)
+            // report_viewed_product_aggregated_daily depende de cron de agregação que pode não rodar diariamente
+            $viewsTable = $this->resourceConnection->getTableName('report_viewed_product_index');
             $viewsToday = (int) $connection->fetchOne(
                 $connection->select()
-                    ->from($viewsTable, ['views_num' => 'SUM(views_num)'])
+                    ->from($viewsTable, ['cnt' => 'COUNT(*)'])
                     ->where('product_id = ?', $productId)
-                    ->where('period = ?', $today)
+                    ->where('DATE(added_at) = ?', $today)
             );
 
-            // Mais vendido (últimos 30 dias)
-            $bestsellersTable = $this->resourceConnection->getTableName('sales_bestsellers_aggregated_daily');
+            // Mais vendido (últimos 30 dias) — lê de sales_order_item diretamente
+            // sales_bestsellers_aggregated_daily depende de cron de agregação
+            $orderItemTable = $this->resourceConnection->getTableName('sales_order_item');
+            $orderTable = $this->resourceConnection->getTableName('sales_order');
             $periodStart = date('Y-m-d', strtotime('-' . self::BESTSELLER_DAYS . ' days'));
             $totalQty = (int) $connection->fetchOne(
                 $connection->select()
-                    ->from($bestsellersTable, ['total_qty' => 'SUM(qty_ordered)'])
-                    ->where('product_id = ?', $productId)
-                    ->where('period >= ?', $periodStart)
-                    ->where('period <= ?', $today)
+                    ->from(['soi' => $orderItemTable], ['total_qty' => 'SUM(soi.qty_ordered)'])
+                    ->join(['so' => $orderTable], 'soi.order_id = so.entity_id', [])
+                    ->where('soi.product_id = ?', $productId)
+                    ->where('so.status IN (?)', ['processing', 'complete'])
+                    ->where('DATE(so.created_at) >= ?', $periodStart)
             );
             $isBestSeller = $totalQty >= self::BESTSELLER_MIN_QTY;
 
