@@ -66,13 +66,13 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
     }
 
     /**
-     * Render submenu level 1 with Mueller-compatible semantic classes.
+     * Render submenu level 1 with the custom semantic classes used by the AWA menu.
      *
      * @param mixed $category
      * @param mixed $categoryModel
      * @param array $children
      */
-    private function getMuellerLevelOneItemsHtml(
+    private function getLevelOneItemsHtml(
         $category,
         $categoryModel,
         array $children,
@@ -507,7 +507,7 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
                         $html .= '<div class="menu-left-block col-sm-' . $menu_left_width . '">' . $this->getBlockContent($menu_left_content) . '</div>';
                     }
 
-                    $html .= $this->getMuellerLevelOneItemsHtml(
+                    $html .= $this->getLevelOneItemsHtml(
                         $category,
                         $cat_model,
                         $children,

@@ -2,7 +2,7 @@
  * AWA — Shared Category Icons Module
  *
  * Provides SVG icon paths, keyword→icon resolution, and SVG builder
- * for vertical mega menus (VMM and Mueller variants).
+ * for the AWA vertical mega menu variants.
  *
  * @module js/awa-category-icons
  */
@@ -147,7 +147,7 @@ define([], function () {
         star:
             '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
 
-        /* Alias: Mueller uses 'package' as fallback (same SVG as 'cube') */
+        /* Legacy alias: 'package' reuses the same SVG as 'cube'. */
         package:
             '<path d="M21 16V8l-9-5-9 5v8l9 5z"/>' +
             '<path d="M3.3 7 12 12l8.7-5"/><line x1="12" y1="22" x2="12" y2="12"/>'
