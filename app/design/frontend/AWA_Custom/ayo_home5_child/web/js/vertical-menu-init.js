@@ -104,14 +104,58 @@ define([
             return window.innerWidth >= desktopBreakpoint;
         }
 
+        function setDesktopMenuVisibility(isVisible) {
+            if (!$toggleMenu.length) {
+                return;
+            }
+
+            $toggleMenu.each(function () {
+                var style = this.style;
+
+                style.setProperty('display', isVisible ? 'block' : 'none', 'important');
+
+                if (isVisible) {
+                    style.setProperty('visibility', 'visible', 'important');
+                    style.setProperty('opacity', '1', 'important');
+                    style.setProperty('pointer-events', 'auto', 'important');
+                    style.setProperty('transform', 'none', 'important');
+                    style.setProperty('overflow', 'visible', 'important');
+                    return;
+                }
+
+                style.removeProperty('visibility');
+                style.removeProperty('opacity');
+                style.removeProperty('pointer-events');
+                style.removeProperty('transform');
+            });
+        }
+
+        function clearDesktopMenuVisibility() {
+            if (!$toggleMenu.length) {
+                return;
+            }
+
+            $toggleMenu.each(function () {
+                var style = this.style;
+
+                style.removeProperty('display');
+                style.removeProperty('visibility');
+                style.removeProperty('opacity');
+                style.removeProperty('pointer-events');
+                style.removeProperty('transform');
+            });
+        }
+
         function openMenu(withOverlay) {
             if (isDesktopViewport()) {
-                $toggleMenu.addClass('menu-open').stop(true, true).show();
+                $toggleMenu.addClass('menu-open').stop(true, true);
+                setDesktopMenuVisibility(true);
                 $title.addClass('active').attr('aria-expanded', 'true');
                 $('body').removeClass('background_shadow_show');
                 return;
             }
 
+            clearDesktopMenuVisibility();
             $toggleMenu.addClass('menu-open').stop(true, true).fadeIn(200);
             $title.addClass('active').attr('aria-expanded', 'true');
             $('body').toggleClass('background_shadow_show', !!withOverlay);
@@ -119,12 +163,14 @@ define([
 
         function closeMenu() {
             if (isDesktopViewport()) {
-                $toggleMenu.removeClass('menu-open').stop(true, true).hide();
+                $toggleMenu.removeClass('menu-open').stop(true, true);
+                setDesktopMenuVisibility(false);
                 $title.removeClass('active').attr('aria-expanded', 'false');
                 $('body').removeClass('background_shadow_show');
                 return;
             }
 
+            clearDesktopMenuVisibility();
             $toggleMenu.removeClass('menu-open').stop(true, true).fadeOut(200);
             $title.removeClass('active').attr('aria-expanded', 'false');
             $('body').removeClass('background_shadow_show');
@@ -281,13 +327,13 @@ define([
                     resetParentItemState($(this), false);
                 });
 
-                $toggleMenu.stop(true, true).removeAttr('style');
+                $toggleMenu.stop(true, true);
 
                 if (isMenuOpenState()) {
-                    $toggleMenu.show();
+                    setDesktopMenuVisibility(true);
                     $title.addClass('active').attr('aria-expanded', 'true');
                 } else {
-                    $toggleMenu.hide();
+                    setDesktopMenuVisibility(false);
                     $title.removeClass('active').attr('aria-expanded', 'false');
                 }
 
@@ -295,6 +341,7 @@ define([
                 return;
             }
 
+            clearDesktopMenuVisibility();
             $toggleMenu.removeClass('menu-open').hide();
             $title.removeClass('active').attr('aria-expanded', 'false');
             $('body').removeClass('background_shadow_show');
@@ -453,12 +500,6 @@ define([
             }
         });
 
-        $nav.on('mouseenter' + eventNamespace, function () {
-            if (isDesktopViewport()) {
-                openMenu(false);
-            }
-        });
-
         $nav.on('mouseleave' + eventNamespace, function () {
             var root = $nav.get(0);
             var active = document.activeElement;
@@ -472,12 +513,6 @@ define([
             }
 
             closeMenu();
-        });
-
-        $nav.on('focusin' + eventNamespace, function () {
-            if (isDesktopViewport()) {
-                openMenu(false);
-            }
         });
 
         $nav.on('focusout' + eventNamespace, function () {
