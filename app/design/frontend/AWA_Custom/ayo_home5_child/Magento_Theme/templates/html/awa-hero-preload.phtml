@@ -24,17 +24,22 @@ declare(strict_types=1);
 $baseUrl   = rtrim((string) $block->getUrl('', ['_nosid' => true, '_secure' => true]), '/');
 $mediaPath = '/media/slidebanner/s/l/';
 
-$desktopSrc = $block->escapeUrl($baseUrl . $mediaPath . 'slider_005_1.jpg');
-$mobileSrc  = $block->escapeUrl($baseUrl . $mediaPath . 'slider_005_mobile.jpg');
+$desktopWebp = $block->escapeUrl($baseUrl . $mediaPath . 'slider_005_1.webp');
+$mobileWebp  = $block->escapeUrl($baseUrl . $mediaPath . 'slider_005_mobile.webp');
+$desktopSrc  = $block->escapeUrl($baseUrl . $mediaPath . 'slider_005_1.jpg');
+$mobileSrc   = $block->escapeUrl($baseUrl . $mediaPath . 'slider_005_mobile.jpg');
 ?>
 <!--
     AWA Hero LCP Preload — homepage only
-    imagesrcset: o browser baixa a versão mobile em telas <768px (economia ~63%)
-    fetchpriority=high: sinal explícito para o browser priorizar vs outros recursos
+    type="image/webp": apenas browsers com suporte a WebP farão este preload (~97% dos usuários).
+    Browsers sem WebP ignoram este link e carregarão o JPEG via <picture><img src="...jpg">.
+    imagesrcset: o browser baixa a versão mobile em telas <768px
+    fetchpriority=high: sinal explícito para o browser priorizar o LCP vs outros recursos
 -->
 <link rel="preload"
       as="image"
+      type="image/webp"
       fetchpriority="high"
-      imagesrcset="<?= /* @noEscape */ $mobileSrc ?> 768w, <?= /* @noEscape */ $desktopSrc ?> 1920w"
+      imagesrcset="<?= /* @noEscape */ $mobileWebp ?> 768w, <?= /* @noEscape */ $desktopWebp ?> 1920w"
       imagesizes="100vw"
-      href="<?= /* @noEscape */ $desktopSrc ?>"/>
+      href="<?= /* @noEscape */ $desktopWebp ?>"/>

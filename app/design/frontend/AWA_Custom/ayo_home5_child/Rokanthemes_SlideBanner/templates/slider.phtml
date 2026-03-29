@@ -45,10 +45,14 @@ foreach ($banners as $b) {
 if ($firstBanner):
     $firstImgSrc = $firstBanner->getSlideImageMobile() ?: $firstBanner->getSlideImage();
     if ($firstImgSrc):
-        $mediaUrl = $block->getUrl('media');
-        $preloadUrl = rtrim($mediaUrl, '/') . '/' . ltrim($firstImgSrc, '/');
+        $firstMediaUrl  = rtrim($block->getUrl('media'), '/');
+        $firstWebpSrc   = (string) preg_replace('/\.(jpg|jpeg|png)$/i', '.webp', $firstImgSrc);
+        $hasFirstWebp   = file_exists(BP . '/pub/media/' . ltrim($firstWebpSrc, '/'));
+        $preloadSrc     = $hasFirstWebp ? $firstWebpSrc : $firstImgSrc;
+        $preloadType    = $hasFirstWebp ? ' type="image/webp"' : '';
+        $preloadUrl     = $block->escapeUrl($firstMediaUrl . '/' . ltrim($preloadSrc, '/'));
 ?>
-<link rel="preload" as="image" href="<?php echo $block->escapeUrl($preloadUrl); ?>" fetchpriority="high" />
+<link rel="preload" as="image"<?= /* @noEscape */ $preloadType ?> href="<?= /* @noEscape */ $preloadUrl ?>" fetchpriority="high" />
 <?php endif; endif; ?>
 
 <?php
@@ -94,6 +98,66 @@ $jsonLdSchema = [
      data-mage-init='<?php echo json_encode($mageInitConfig, JSON_HEX_APOS | JSON_HEX_QUOT); ?>'>
     <div class="owl" role="group" aria-roledescription="slides">
         <?php
+        $sliderMediaUrl = rtrim($block->getUrl('media'), '/');
+        $sliderMediaDir = BP . '/pub/media/';
+
+        /**
+         * Gera <picture> responsivo com suporte a WebP + fallback JPEG.
+         * Usa file_exists para evitar <source> com WebP inexistente.
+         */
+        $renderPicture = static function (
+            string $desktopSrc,
+            ?string $mobileSrc,
+            string $altText,
+            bool $isFirst
+        ) use ($block, $sliderMediaUrl, $sliderMediaDir): string {
+            $alt      = $block->escapeHtmlAttr($altText);
+            $loading  = $isFirst ? 'eager' : 'lazy';
+            $priority = $isFirst ? ' fetchpriority="high"' : '';
+            $mSrc     = $mobileSrc ?: $desktopSrc;
+
+            $dUrl = $sliderMediaUrl . '/' . ltrim($desktopSrc, '/');
+            $mUrl = $sliderMediaUrl . '/' . ltrim($mSrc, '/');
+
+            $dWebp    = (string) preg_replace('/\.(jpg|jpeg|png)$/i', '.webp', $desktopSrc);
+            $mWebp    = (string) preg_replace('/\.(jpg|jpeg|png)$/i', '.webp', $mSrc);
+            $dWebpUrl = file_exists($sliderMediaDir . ltrim($dWebp, '/'))
+                ? $sliderMediaUrl . '/' . ltrim($dWebp, '/')
+                : '';
+            $mWebpUrl = file_exists($sliderMediaDir . ltrim($mWebp, '/'))
+                ? $sliderMediaUrl . '/' . ltrim($mWebp, '/')
+                : '';
+
+            $html = '<picture>';
+            // WebP sources — um elemento para ambas as resoluções se forem a mesma imagem
+            if ($dWebpUrl === $mWebpUrl && $dWebpUrl) {
+                $html .= '<source type="image/webp" srcset="' . $block->escapeUrl($dWebpUrl) . '" />';
+            } else {
+                if ($dWebpUrl) {
+                    $html .= '<source type="image/webp" media="(min-width: 768px)" srcset="'
+                        . $block->escapeUrl($dWebpUrl) . '" width="1920" height="600" />';
+                }
+                if ($mWebpUrl) {
+                    $html .= '<source type="image/webp" srcset="'
+                        . $block->escapeUrl($mWebpUrl) . '" width="768" height="400" />';
+                }
+            }
+            // JPEG desktop source (apenas quando há imagem mobile distinta)
+            if ($dUrl !== $mUrl) {
+                $html .= '<source media="(min-width: 768px)" srcset="'
+                    . $block->escapeUrl($dUrl) . '" width="1920" height="600" />';
+            }
+            // Fallback <img> (mobile JPEG ou única imagem)
+            $html .= '<img src="' . $block->escapeUrl($mUrl) . '"'
+                . ' alt="' . $alt . '"'
+                . ' loading="' . $loading . '"'
+                . ' decoding="async"'
+                . ' width="768" height="400"'
+                . $priority . ' />';
+            $html .= '</picture>';
+            return $html;
+        };
+
         $slideIndex = 0;
         foreach ($banners as $banner):
             if ($banner->getSlideStatus() == '2') { continue; }
@@ -105,7 +169,7 @@ $jsonLdSchema = [
                 $isFirst = ($slideIndex === 1);
                 $desktopSrc = $banner->getSlideImage();
                 $mobileSrc = $banner->getSlideImageMobile();
-                $pictureHtml = $block->getPictureElement($desktopSrc, $mobileSrc, $slideAlt, $isFirst, true);
+                $pictureHtml = $renderPicture($desktopSrc, $mobileSrc, (string)$slideAlt, $isFirst);
                 if ($link = $banner->getSlideLink()) {
                     $pictureHtml = '<a href="' . $block->escapeUrl($link) . '" title="' . $block->escapeHtml($slideAlt) . '">' . $pictureHtml . '</a>';
                 }
