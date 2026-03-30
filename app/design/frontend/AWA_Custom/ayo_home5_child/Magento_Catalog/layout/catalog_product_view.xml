@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<page layout="2columns-left" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <head>
         <remove src="css/awa-round3-pdp-conversion.css"/>
@@ -8,78 +8,66 @@
         <!--
             PDP CSS optimization (2026-03-19): awa-bundle-pdp replaces 3 CSS requests:
             pdp-conversion + pdp-final-polish + awa-bundle-inner-pages (4 files)
-            Total: 6 requests → 1. awa-bundle-site removed (homepage/category only).
+            Total: 6 requests → 1. awa-bundle-site removed (homepage/categoria only).
             awa-custom-page-home-category-premium.css excluído: homepage/categoria only.
         -->
         <css src="css/awa-bundle-pdp.css"/>
         <!-- AWA PDP B2B Pro Redesign (2026-03-28) -->
         <css src="css/awa-pdp-b2b-pro.css"/>
+        <css src="css/awa-pdp-clean-refinement.css"/>
+        <remove src="GrupoAwamotos_Fitment::css/fitment-application.css"/>
+        <!-- awa-home-vertical-menu-shell-fix.css: somente homepage (todos seletores usam body.cms-index-index) -->
+        <remove src="css/awa-home-vertical-menu-shell-fix.css"/>
         <!-- awa-custom-page-home-category-premium.css: excluído no PDP (homepage/categoria only) -->
     </head>
     <body>
-        <!-- page.main.title positioning handled by ayo_default:
-             move to box.inner1 before="-", junto com product.info.price.
-             Override aqui causava broken reference (parents diferentes). -->
+        <!-- PDP básico: manter apenas foto, título, preço, comprar e descrição -->
+        <referenceBlock name="breadcrumbs" remove="true"/>
+        <referenceBlock name="product.info.sku" remove="true"/>
+        <referenceBlock name="product.info.stock.sku" remove="true"/>
+        <referenceBlock name="product.info.review" remove="true"/>
+        <referenceBlock name="product.info.overview" remove="true"/>
+        <!-- product.info.price RESTAURADO: preço é renderizado pelo mecanismo padrão do Magento
+             (Knockout.js). Removê-lo causava ausência total do preço (desktop e mobile).  -->
+        <referenceBlock name="product.info.addto" remove="true"/>
+        <referenceBlock name="product.info.mailto" remove="true"/>
+        <referenceBlock name="product.info.social" remove="true"/>
+        <referenceBlock name="product.info.extrahint" remove="true"/>
 
-        <!-- wishlist e compare restaurados — fidelidade ao demo ayo home5 -->
-        <referenceBlock name="awa.round3.pdp.sticky.cta.js" remove="true"/>
-        <referenceContainer name="before.body.end">
-            <block class="Magento\Framework\View\Element\Template"
-                   name="awa.custom.pdp.sticky.cta.js"
-                   template="Magento_Theme::html/awa-custom-js-loader.phtml">
-                <arguments>
-                    <argument name="load_header_js" xsi:type="boolean">false</argument>
-                    <argument name="load_home_owl_tabs_js" xsi:type="boolean">false</argument>
-                    <argument name="load_footer_ux_js" xsi:type="boolean">false</argument>
-                    <argument name="load_pdp_sticky_cta_js" xsi:type="boolean">true</argument>
-                </arguments>
-            </block>
-        </referenceContainer>
+        <referenceBlock name="product.attributes" remove="true"/>
+        <referenceBlock name="product.attributes.above.fold" remove="true"/>
+        <referenceBlock name="reviews.tab" remove="true"/>
+        <referenceBlock name="product.review.form" remove="true"/>
 
-        <!-- AWA Phase 5: Prominent B2B SKU on PDP -->
-        <referenceContainer name="product.info.main">
-            <block class="Magento\Catalog\Block\Product\View"
-                   name="awa.b2b.pdp.sku"
-                   template="Magento_Catalog::product/view/b2b_sku.phtml"
-                   after="-" />
+        <referenceBlock name="catalog.product.related" remove="true"/>
+        <referenceBlock name="product.info.related" remove="true"/>
+        <referenceBlock name="product.info.upsell" remove="true"/>
 
-            <!-- Hide the default Magento SKU to prevent duplication -->
-            <referenceBlock name="product.info.sku" remove="true" />
-
-            <!-- AWA Phase 6: Move Tech Specs Above Fold -->
-            <block class="Magento\Catalog\Block\Product\View\Attributes"
-                   name="product.attributes.above.fold"
-                   template="Magento_Catalog::product/view/attributes.phtml"
-                   after="product.info.price" />
-        </referenceContainer>
-
-        <!-- Hide original attributes tab -->
-        <referenceBlock name="product.attributes" remove="true" />
-
-        <!-- Hide default Magento collapsible tabs (replaced by awa-pdp-tabs) -->
-        <referenceBlock name="product.info.description" remove="true" />
+        <!-- Esconde tabs padrão do Magento; descrição será exibida no bloco simplificado -->
+        <referenceBlock name="product.info.description" remove="true"/>
         <referenceBlock name="product.info.details">
             <arguments>
                 <argument name="css_class" xsi:type="string">awa-hidden-default-tabs</argument>
             </arguments>
         </referenceBlock>
 
-        <!-- AWA Phase 4: Product JSON-LD Schema.org -->
+        <!-- Mantém JSON-LD para SEO -->
         <referenceContainer name="content">
             <block class="Magento\Catalog\Block\Product\View"
                    name="awa.product.jsonld"
                    template="Magento_Catalog::product/view/awa-product-jsonld.phtml"
                    after="-"/>
         </referenceContainer>
-        <!-- AWA Phase 5: UI/UX Pro Max - Trust & Authority Badges under Add to Cart -->
-        <referenceContainer name="product.info.extrahint">
-            <block class="Magento\Framework\View\Element\Template"
-                   name="awa.trust.badges"
-                   template="Magento_Theme::html/awa-trust-badges.phtml"
-                   after="-"/>
-        </referenceContainer>
 
-        <!-- AWA PDP B2B Pro: Content Tabs (Description, Specs, Reviews, Info) -->
+        <!-- Mantém preload da imagem principal para LCP -->
+        <referenceBlock name="head.additional">
+            <block class="Magento\Catalog\Block\Product\View\Gallery"
+                   name="awa.pdp.lcp.preload"
+                   template="Magento_Catalog::product/view/awa-pdp-lcp-preload.phtml"
+                   before="-"/>
+        </referenceBlock>
+
+        <!-- Bloco de descrição simplificado -->
         <referenceContainer name="content">
             <block class="Magento\Catalog\Block\Product\View"
                    name="awa.pdp.b2b.tabs"
@@ -87,20 +75,7 @@
                    after="catalog.product.view"/>
         </referenceContainer>
 
-        <!-- AWA PDP B2B Pro: Sidebar (Promo, Chat, Share, Similar) -->
-        <referenceContainer name="content">
-            <block class="Magento\Catalog\Block\Product\View"
-                   name="awa.pdp.b2b.sidebar"
-                   template="Magento_Catalog::product/view/awa-pdp-sidebar.phtml"
-                   after="awa.pdp.b2b.tabs"/>
-        </referenceContainer>
-
-        <!-- AWA PDP B2B Pro: JS -->
-        <referenceContainer name="before.body.end">
-            <block class="Magento\Framework\View\Element\Template"
-                   name="awa.pdp.b2b.pro.js"
-                   template="Magento_Catalog::product/view/awa-pdp-b2b-pro-js.phtml"
-                   after="-"/>
-        </referenceContainer>
+        <referenceBlock name="awa.pdp.b2b.sidebar" remove="true"/>
+        <referenceBlock name="product.fitment.applications" remove="true"/>
     </body>
 </page>

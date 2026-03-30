@@ -1,0 +1,59 @@
+<?php
+/**
+ * AWA — Product Gallery (Override)
+ * Adiciona fetchpriority="high" + loading="eager" + alt correto na imagem LCP.
+ *
+ * @var \Magento\Catalog\Block\Product\View\Gallery $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+declare(strict_types=1);
+
+$images = $block->getGalleryImages()->getItems();
+$mainImage = current(array_filter($images, function ($img) use ($block) {
+    return $block->isMainImage($img);
+}));
+
+if (!empty($images) && empty($mainImage)) {
+    $mainImage = $block->getGalleryImages()->getFirstItem();
+}
+
+$helper = $block->getData('imageHelper');
+$mainImageData = $mainImage ?
+    $mainImage->getData('medium_image_url') :
+    $helper->getDefaultPlaceholderUrl('image');
+$imageWidth  = $block->getImageAttribute('product_page_image_medium', 'width');
+$imageHeight = $block->getImageAttribute('product_page_image_medium', 'height');
+
+// Alt descritivo usando o nome do produto para SEO e acessibilidade
+$productName = $block->getProduct() ? $block->getProduct()->getName() : '';
+$altText     = $productName ?: __('Imagem principal do produto');
+?>
+
+<div class="gallery-placeholder _block-content-loading" data-gallery-role="gallery-placeholder">
+    <img
+        alt="<?= $escaper->escapeHtmlAttr($altText) ?>"
+        class="gallery-placeholder__image"
+        src="<?= /* @noEscape */ $mainImageData ?>"
+        fetchpriority="high"
+        loading="eager"
+        decoding="async"
+        <?= $imageWidth  ? 'width="'  . $escaper->escapeHtmlAttr($imageWidth)  . '"' : '' ?>
+        <?= $imageHeight ? 'height="' . $escaper->escapeHtmlAttr($imageHeight) . '"' : '' ?>
+    />
+    <link itemprop="image" href="<?= /* @noEscape */ $mainImageData ?>">
+</div>
+<?php // phpcs:ignore Magento2.Legacy.PhtmlTemplate ?>
+<script type="text/x-magento-init">
+    {
+        "[data-gallery-role=gallery-placeholder]": {
+            "mage/gallery/gallery": {
+                "mixins":["magnifier/magnify"],
+                "magnifierOpts": <?= /* @noEscape */ $block->getMagnifier() ?>,
+                "data": <?= /* @noEscape */ $block->getGalleryImagesJson() ?>,
+                "options": <?= /* @noEscape */ $block->getGalleryOptions()->getOptionsJson() ?>,
+                "fullscreen": <?= /* @noEscape */ $block->getGalleryOptions()->getFSOptionsJson() ?>,
+                 "breakpoints": <?= /* @noEscape */ $block->getBreakpoints() ?>
+            }
+        }
+    }
+</script>
