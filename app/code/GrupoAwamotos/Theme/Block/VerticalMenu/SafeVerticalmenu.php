@@ -562,7 +562,7 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
             if ($vc_menu_icon_img) {
                 $iconImgUrl = (string)$cat_model->getImageUrl('vc_menu_icon_img');
                 if ($iconImgUrl !== '') {
-                    $html .= '<img class="menu-thumb-icon" src="' . $this->escapeUrl($iconImgUrl) . '" alt="" role="presentation" width="40" height="40" loading="lazy"/>';
+                    $html .= '<img class="menu-thumb-icon" src="' . $this->escapeUrl($iconImgUrl) . '" alt="" role="presentation" width="20" height="20" loading="lazy"/>';
                 }
             } else {
                 $iconClass = $this->sanitizeClassList($vc_menu_font_icon);
