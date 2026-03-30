@@ -213,14 +213,17 @@ body .page-wrapper .awa-site-header .header .awa-header-cart-link-icon {
 		cursor: pointer !important;
 	}
 
-	/* Hamburger icon ☰ via ::before */
+	/* Hamburger icon: rendered as inline SVG in the button element */
 	body .page-wrapper .awa-site-header .header .awa-header-mobile-toggle::before {
-		content: "\2630" !important;
-		font-size: 18px !important;
-		line-height: 1 !important;
-		color: currentColor !important;
+		content: none !important;
+		display: none !important;
+	}
+	body .page-wrapper .awa-site-header .header .awa-hamburger-icon {
 		display: block !important;
-		font-family: inherit !important;
+		flex-shrink: 0 !important;
+		width: 20px !important;
+		height: 20px !important;
+		pointer-events: none !important;
 	}
 
 	/* Visually-hide the text span inside toggle (SR-accessible) */
@@ -763,7 +766,7 @@ body .page-wrapper .awa-site-header .header .awa-header-cart-link-icon {
 						<div class="row">
 							<div class="wp-header" data-awa-header-row="brand-search">
 											<div class="awa-header-primary-row" data-awa-header-primary-row="true">
-												<span role="button" tabindex="0" aria-label="<?= $escaper->escapeHtmlAttr(__('Abrir menu de navegação')) ?>" data-action="toggle-nav" class="action nav-toggle awa-header-mobile-toggle" data-awa-nav-toggle="true"><span><?= $escaper->escapeHtml(__('Toggle Nav')) ?></span></span>
+												<span role="button" tabindex="0" aria-label="<?= $escaper->escapeHtmlAttr(__('Abrir menu de navegação')) ?>" aria-expanded="false" data-action="toggle-nav" class="action nav-toggle awa-header-mobile-toggle" data-awa-nav-toggle="true"><svg class="awa-hamburger-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg><span><?= $escaper->escapeHtml(__('Toggle Nav')) ?></span></span>
 												<div class="col-md-2 col-sm-2 col-xs-12 awa-header-brand-cell" data-awa-header-brand="true">
 													<div class="awa-header-brand-desktop" data-awa-header-brand-desktop="true">
 														<?= /* @noEscape */ $this->getChildHtml('logo') ?>
@@ -842,6 +845,39 @@ body .page-wrapper .awa-site-header .header .awa-header-cart-link-icon {
 <script>
 (function () {
 	'use strict';
+
+	/* ── Pre-initialize cart badge from localStorage to avoid flash ── */
+	(function () {
+		try {
+			var cache = JSON.parse(localStorage.getItem('mage-cache-storage') || '{}');
+			var count = Number((cache['cart'] || {}).summary_count || 0);
+			if (count > 0) {
+				var b = document.querySelector('.awa-header-cart-link .awa-cart-link-badge');
+				if (b) {
+					b.textContent = count > 99 ? '99+' : String(count);
+					b.style.cssText = 'display:inline-flex;align-items:center;justify-content:center';
+				}
+			}
+		} catch (e) { /* localStorage not available */ }
+	}());
+
+	/* ── aria-expanded sync for hamburger (body.nav-open toggled by Magento menu.js) ── */
+	(function () {
+		function syncNavAria() {
+			var toggle = document.querySelector('.awa-header-mobile-toggle[data-awa-nav-toggle="true"]');
+			if (!toggle) { return; }
+			toggle.setAttribute('aria-expanded', document.body.classList.contains('nav-open') ? 'true' : 'false');
+		}
+		if (window.MutationObserver) {
+			new MutationObserver(syncNavAria).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+		}
+		if (document.readyState === 'loading') {
+			document.addEventListener('DOMContentLoaded', syncNavAria, { once: true });
+		} else {
+			syncNavAria();
+		}
+	}());
+
 	if (window.__awaMobileCartBadge) { return; }
 	window.__awaMobileCartBadge = true;
 	function syncBadge() {
