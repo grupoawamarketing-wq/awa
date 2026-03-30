@@ -30,15 +30,24 @@ class SearchAutocompleteProductPlugin
      *
      * @param InstantProvider $subject
      * @param array $result       Return value of map()
-     * @param array $documentData Original first arg
-     * @param int $storeId        Original second arg
+     * @param mixed ...$args      Original method arguments (documentData, storeId)
      * @return array
      */
-    public function afterMap(InstantProvider $subject, array $result, array $documentData, int $storeId): array
+    public function afterMap(InstantProvider $subject, array $result, mixed ...$args): array
     {
         $entityIds = array_keys($result);
         if (empty($entityIds)) {
             return $result;
+        }
+
+        // Magento interceptor spreads original map() args: (array $documentData, int $storeId)
+        // Defensive: handle both (documentData, storeId) and (storeId) patterns
+        $storeId = 0;
+        foreach ($args as $arg) {
+            if (is_int($arg)) {
+                $storeId = $arg;
+                break;
+            }
         }
 
         try {
@@ -62,15 +71,19 @@ class SearchAutocompleteProductPlugin
      *
      * @param InstantProvider $subject
      * @param array $result
-     * @param int $storeId
-     * @param int $limit
-     * @param int $page
+     * @param mixed ...$args Original method arguments (storeId, limit, page)
      * @return array
      */
-    public function afterGetItems(InstantProvider $subject, array $result, int $storeId, int $limit, int $page = 1): array
+    public function afterGetItems(InstantProvider $subject, array $result, mixed ...$args): array
     {
         if (empty($result)) {
             return $result;
+        }
+
+        // Extract storeId from original args: getItems(int $storeId, int $limit, int $page)
+        $storeId = 0;
+        if (isset($args[0]) && is_int($args[0])) {
+            $storeId = $args[0];
         }
 
         $skus = [];

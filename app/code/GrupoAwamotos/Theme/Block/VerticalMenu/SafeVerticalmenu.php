@@ -66,6 +66,101 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
     }
 
     /**
+     * Remove a single wrapping list container from CMS block output.
+     */
+    private function normalizeCustomBlockContent(string $content): string
+    {
+        $content = trim($content);
+
+        if ($content === '') {
+            return '';
+        }
+
+        if (preg_match('/^<ul\b[^>]*>(.*)<\/ul>$/is', $content, $matches) === 1) {
+            $content = trim((string)($matches[1] ?? ''));
+        }
+
+        return $content;
+    }
+
+    /**
+     * Determine whether a filtered CMS block still contains meaningful output.
+     */
+    private function hasRenderableCustomBlockContent(string $content): bool
+    {
+        if ($content === '') {
+            return false;
+        }
+
+        $textContent = html_entity_decode(strip_tags($content), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $textContent = trim((string)preg_replace('/\s+/u', ' ', $textContent));
+
+        if ($textContent !== '') {
+            return true;
+        }
+
+        if (preg_match('/<a\b[^>]*href\s*=|<(?:img|picture|video|iframe|svg|canvas)\b|<source\b[^>]*(?:src|srcset)\s*=/i', $content) === 1) {
+            return true;
+        }
+
+        return preg_match(
+            '/class\s*=\s*("|\")[^"\']*(?:^|\s)(?:block|cms-block)(?:\s|$)[^"\']*\1/i',
+            $content
+        ) === 1;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getCustomBlockHtml($type = 'after')
+    {
+        $html = '';
+        $blockIds = (string)($this->_verticalmenuConfig['custom_links']['staticblock_' . $type] ?? '');
+
+        if ($blockIds === '') {
+            return $html;
+        }
+
+        $ids = explode(',', preg_replace('/\s+/', '', $blockIds) ?? '');
+        $storeId = (int)$this->_storeManager->getStore()->getId();
+
+        foreach ($ids as $blockId) {
+            if ($blockId === '') {
+                continue;
+            }
+
+            $block = $this->_blockFactory->create();
+            $block->setStoreId($storeId)->load($blockId);
+
+            if (!$block || !(bool)$block->getId()) {
+                continue;
+            }
+
+            $blockContent = trim((string)$block->getContent());
+            if ($blockContent === '') {
+                continue;
+            }
+
+            $content = (string)$this->_filterProvider->getBlockFilter()
+                ->setStoreId($storeId)
+                ->filter($blockContent);
+            $content = $this->normalizeCustomBlockContent($content);
+
+            if (!$this->hasRenderableCustomBlockContent($content)) {
+                continue;
+            }
+
+            if (preg_match('/<li\b/i', $content) !== 1) {
+                $content = '<li class="vertical-menu-custom-block">' . $content . '</li>';
+            }
+
+            $html .= $content;
+        }
+
+        return $html;
+    }
+
+    /**
      * Render submenu level 1 with the custom semantic classes used by the AWA menu.
      *
      * @param mixed $category
@@ -173,7 +268,7 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
             if ($vcMenuCatLabel !== '' && isset($this->_verticalmenuConfig['cat_labels'][$vcMenuCatLabel])) {
                 $labelKey = $this->sanitizeClassToken($vcMenuCatLabel);
                 $labelText = $this->escapeHtml((string)$this->_verticalmenuConfig['cat_labels'][$vcMenuCatLabel]);
-                $html .= '<span class="cat-label cat-label-' . $this->escapeHtmlAttr($labelKey) . '">' . $labelText . '</span>';
+                $html .= '<span class="cat-label cat-label-' . $this->escapeHtmlAttr($labelKey) . '" aria-hidden="true">' . $labelText . '</span>';
             }
 
             $html .= '</span>';
@@ -341,7 +436,7 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
                 if ($vc_menu_cat_label !== '' && isset($this->_verticalmenuConfig['cat_labels'][$vc_menu_cat_label])) {
                     $labelKey = $this->sanitizeClassToken($vc_menu_cat_label);
                     $labelText = $this->escapeHtml((string)$this->_verticalmenuConfig['cat_labels'][$vc_menu_cat_label]);
-                    $html .= '<span class="cat-label cat-label-' . $this->escapeHtmlAttr($labelKey) . '">' . $labelText . '</span>';
+                    $html .= '<span class="cat-label cat-label-' . $this->escapeHtmlAttr($labelKey) . '" aria-hidden="true">' . $labelText . '</span>';
                 }
 
                 $html .= '</span></a>';
@@ -467,7 +562,7 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
             if ($vc_menu_icon_img) {
                 $iconImgUrl = (string)$cat_model->getImageUrl('vc_menu_icon_img');
                 if ($iconImgUrl !== '') {
-                    $html .= '<img class="menu-thumb-icon" src="' . $this->escapeUrl($iconImgUrl) . '" alt="' . $categoryNameAttr . '" loading="lazy"/>';
+                    $html .= '<img class="menu-thumb-icon" src="' . $this->escapeUrl($iconImgUrl) . '" alt="" role="presentation" width="40" height="40" loading="lazy"/>';
                 }
             } else {
                 $iconClass = $this->sanitizeClassList($vc_menu_font_icon);
@@ -481,7 +576,7 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
             if ($vc_menu_cat_label !== '' && isset($this->_verticalmenuConfig['cat_labels'][$vc_menu_cat_label])) {
                 $labelKey = $this->sanitizeClassToken($vc_menu_cat_label);
                 $labelText = $this->escapeHtml((string)$this->_verticalmenuConfig['cat_labels'][$vc_menu_cat_label]);
-                $html .= '<span class="cat-label cat-label-' . $this->escapeHtmlAttr($labelKey) . '">' . $labelText . '</span>';
+                $html .= '<span class="cat-label cat-label-' . $this->escapeHtmlAttr($labelKey) . '" aria-hidden="true">' . $labelText . '</span>';
             }
 
             $html .= '</a>';
