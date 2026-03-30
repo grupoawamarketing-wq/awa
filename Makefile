@@ -9,13 +9,13 @@ MAGENTO ?= ./bin/magento-www
 
 .PHONY: help
 help: ## Mostra esta ajuda
-	@echo "Targets disponíveis:" 
+	@echo "Targets disponíveis:"
 	@grep -E '^[a-zA-Z0-9_.-]+:.*## ' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*## "}; {printf "  %-28s %s\n", $$1, $$2}'
 	@echo ""
-	@echo "Variáveis:" 
-	@echo "  LOCALE=$(LOCALE)" 
-	@echo "  JOBS=$(JOBS)" 
-	@echo "  BASE_URL=$(BASE_URL)" 
+	@echo "Variáveis:"
+	@echo "  LOCALE=$(LOCALE)"
+	@echo "  JOBS=$(JOBS)"
+	@echo "  BASE_URL=$(BASE_URL)"
 	@echo "  AYO_PDP_PATH=$(AYO_PDP_PATH)"
 
 .PHONY: smoke-frontend
@@ -221,6 +221,10 @@ mode-prod: ## Alterar para production
 logs: ## Tail de logs (system + exception)
 	@./scripts/logs_tail.sh
 
+.PHONY: log-observability-audit
+log-observability-audit: ## Auditoria consolidada de logs com alertas e relatórios
+	@php ./dev/tools/log_observability_audit.php --write-report ./LOG_OBSERVABILITY_REPORT_2026-03-29.md --write-json ./LOG_OBSERVABILITY_REPORT_2026-03-29.json
+
 .PHONY: security-audit
 security-audit: ## Auditoria rápida de segurança (não destrutiva)
 	@./scripts/security_audit.sh
@@ -257,6 +261,14 @@ permissions-dry: ## Mostra as ações de permissões (dry-run)
 .PHONY: permissions
 permissions: ## Aplica reset de permissões (requer privilégios para chown)
 	@./scripts/permissions_reset.sh --apply
+
+.PHONY: permissions-awa-dry
+permissions-awa-dry: ## Mostra as ações de ACL/setgid colaborativo para o tema AWA (dry-run)
+	@./scripts/permissions_reset.sh --awa-theme-only
+
+.PHONY: permissions-awa
+permissions-awa: ## Aplica ACL/setgid colaborativo para o tema AWA
+	@./scripts/permissions_reset.sh --apply --awa-theme-only
 
 .PHONY: permissions-harden
 permissions-harden: ## Remove permissões world-writable (o+w) (dry-run)

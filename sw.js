@@ -1,5 +1,5 @@
-/** AWA Service Worker v2.3.0 — Multi-strategy Cache (2026-03-29) */
-const CACHE_VERSION = 'awa-v20260329';
+/** AWA Service Worker v2.4.0 — Multi-strategy Cache (2026-03-29) */
+const CACHE_VERSION = 'awa-v20260329-2';
 const FONT_CACHE = 'awa-fonts-v1';
 const IMAGE_CACHE = 'awa-images-v1';
 const IMAGE_CACHE_MAX = 300; // max entries
@@ -55,6 +55,16 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   const url = event.request.url;
+
+  /* Skip admin, checkout, customer, and API routes entirely — never intercept */
+  if (/\/(admin_|admin\/|checkout|customer\/|rest\/|graphql)/.test(url)) {
+    return;
+  }
+
+  /* Skip non-GET requests */
+  if (event.request.method !== 'GET') {
+    return;
+  }
 
   /* Fonts: cache-first (immutable content, long TTL) */
   if (FONT_PATTERNS.some((re) => re.test(url))) {

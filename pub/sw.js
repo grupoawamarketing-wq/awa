@@ -1,259 +1,121 @@
-/**
- * AWA Motos Service Worker v2.1.0
- *
- * Estratégias de Cache:
- * - Shell: Cache First (HTML base, manifest)
- * - Static: Stale-While-Revalidate (CSS, JS, fonts)
- * - Images: Cache First com fallback (imagens de produtos)
- * - API/Dynamic: Network First com fallback cache
- * - Navigation: Network First com fallback para offline.html
- *
- * @version 2.2.0
- * @author AWA Motos Dev Team
- */
+/** AWA Service Worker v2.4.0 — Multi-strategy Cache (2026-03-29) */
+const CACHE_VERSION = 'awa-v20260329-2';
+const FONT_CACHE = 'awa-fonts-v1';
+const IMAGE_CACHE = 'awa-images-v1';
+const IMAGE_CACHE_MAX = 300; // max entries
 
-const SW_VERSION = '3.1.0';
-const CACHE_STATIC = 'awamotos-static-v4';
-const CACHE_IMAGES = 'awamotos-images-v4';
-const CACHE_PAGES = 'awamotos-pages-v4';
-
-// Assets críticos para funcionar offline
-const PRECACHE_ASSETS = [
-    '/',
-    '/offline.html',
-    '/manifest.json'
+/* Patterns to cache with stale-while-revalidate */
+const CACHEABLE_PATTERNS = [
+  /\/css\/awa-bundle-[\w-]+\.css$/,
+  /\/css\/awa-visual-fixes-critical\.css$/,
+  /\/css\/awa-polish-sweep\.css$/,
+  /\/css\/awa-pdp-b2b-pro\.css$/,
+  /\/css\/swiper-bundle\.min\.css$/,
+  /\/css\/themes5\.css$/,
+  /\/js\/awa-bundle\.min\.js$/,
+  /\/js\/swiper-bundle\.min\.js$/,
+  /\/fonts\/rubik\/rubik-\d{3}\.woff2$/
 ];
 
-// Padrões para identificar tipos de request
-const STATIC_EXTENSIONS = /\.(css|js|woff2?|ttf|eot)$/i;
-const IMAGE_EXTENSIONS = /\.(jpe?g|png|gif|webp|avif|svg|ico)$/i;
-const ADMIN_PATTERN = /\/(admin|checkout|customer\/account)/i;
+/* Patterns for font caching (immutable — cache-first, long TTL) */
+const FONT_PATTERNS = [
+  /\.woff2$/
+];
 
-/**
- * Install Event - Precache assets críticos
- */
+/* Product image cache: cache-first with LRU eviction */
+const IMAGE_PATTERNS = [
+  /\/media\/catalog\/product\/cache\/.+\.(jpe?g|png|webp)$/,
+  /\/media\/catalog\/product\/.+\.(jpe?g|png|webp)$/
+];
+
+/** LRU eviction: keep cache under IMAGE_CACHE_MAX entries */
+async function trimImageCache(cache) {
+  const keys = await cache.keys();
+  if (keys.length > IMAGE_CACHE_MAX) {
+    const toDelete = keys.slice(0, keys.length - IMAGE_CACHE_MAX);
+    await Promise.all(toDelete.map((k) => cache.delete(k)));
+  }
+}
+
 self.addEventListener('install', (event) => {
-    console.log(`[SW ${SW_VERSION}] Installing...`);
-
-    event.waitUntil(
-        caches.open(CACHE_STATIC)
-            .then((cache) => {
-                // Cache com tolerância a falhas
-                return Promise.allSettled(
-                    PRECACHE_ASSETS.map(url =>
-                        cache.add(url).catch(err => {
-                            console.warn(`[SW] Failed to cache: ${url}`, err);
-                        })
-                    )
-                );
-            })
-            .then(() => {
-                console.log(`[SW ${SW_VERSION}] Precache complete`);
-                return self.skipWaiting();
-            })
-    );
+  self.skipWaiting();
 });
 
-/**
- * Activate Event - Limpar caches antigos
- */
 self.addEventListener('activate', (event) => {
-    console.log(`[SW ${SW_VERSION}] Activating...`);
-
-    const currentCaches = [CACHE_STATIC, CACHE_IMAGES, CACHE_PAGES];
-
-    event.waitUntil(
-        caches.keys()
-            .then((cacheNames) => {
-                return Promise.all(
-                    cacheNames
-                        .filter(name => !currentCaches.includes(name))
-                        .map(name => {
-                            console.log(`[SW] Deleting old cache: ${name}`);
-                            return caches.delete(name);
-                        })
-                );
-            })
-            .then(() => {
-                console.log(`[SW ${SW_VERSION}] Claiming clients`);
-                return self.clients.claim();
-            })
-    );
+  event.waitUntil(
+    caches.keys().then((names) =>
+      Promise.all(
+        names
+          .filter((name) => name !== CACHE_VERSION && name !== FONT_CACHE && name !== IMAGE_CACHE)
+          .map((name) => caches.delete(name))
+      )
+    ).then(() => self.clients.claim())
+  );
 });
 
-/**
- * Fetch Event - Roteamento de estratégias
- */
 self.addEventListener('fetch', (event) => {
-    const { request } = event;
-    const url = new URL(request.url);
+  const url = event.request.url;
 
-    // Ignorar non-GET e cross-origin
-    if (request.method !== 'GET') return;
-    if (url.origin !== self.location.origin) return;
+  /* Skip admin, checkout, customer, and API routes entirely — never intercept */
+  if (/\/(admin_|admin\/|checkout|customer\/|rest\/|graphql)/.test(url)) {
+    return;
+  }
 
-    // Ignorar rotas sensíveis (admin, checkout, account)
-    if (ADMIN_PATTERN.test(url.pathname)) return;
+  /* Skip non-GET requests */
+  if (event.request.method !== 'GET') {
+    return;
+  }
 
-    // Ignorar API requests
-    if (url.pathname.startsWith('/rest/') || url.pathname.startsWith('/graphql')) return;
-
-    // Roteamento por tipo de asset
-    if (STATIC_EXTENSIONS.test(url.pathname)) {
-        event.respondWith(staleWhileRevalidate(request, CACHE_STATIC));
-    } else if (IMAGE_EXTENSIONS.test(url.pathname)) {
-        event.respondWith(cacheFirstWithFallback(request, CACHE_IMAGES));
-    } else if (request.mode === 'navigate') {
-        event.respondWith(networkFirstWithOffline(request));
-    }
-});
-
-/**
- * Stale-While-Revalidate Strategy
- * Retorna cache imediatamente e atualiza em background
- */
-async function staleWhileRevalidate(request, cacheName) {
-    const cache = await caches.open(cacheName);
-    const cachedResponse = await cache.match(request);
-
-    // Fetch em background
-    const fetchPromise = fetch(request)
-        .then((networkResponse) => {
-            if (networkResponse && networkResponse.ok) {
-                cache.put(request, networkResponse.clone());
-            }
-            return networkResponse;
+  /* Fonts: cache-first (immutable content, long TTL) */
+  if (FONT_PATTERNS.some((re) => re.test(url))) {
+    event.respondWith(
+      caches.open(FONT_CACHE).then((cache) =>
+        cache.match(event.request).then((cached) => {
+          if (cached) return cached;
+          return fetch(event.request).then((response) => {
+            if (response.ok) cache.put(event.request, response.clone());
+            return response;
+          });
         })
-        .catch(() => cachedResponse);
+      )
+    );
+    return;
+  }
 
-    return cachedResponse || fetchPromise;
-}
-
-/**
- * Cache First Strategy
- * Para imagens - prioriza cache, fallback para network
- */
-async function cacheFirstWithFallback(request, cacheName) {
-    const cache = await caches.open(cacheName);
-    const cachedResponse = await cache.match(request);
-
-    if (cachedResponse) {
-        return cachedResponse;
-    }
-
-    const tryFallbackOriginal = async () => {
-        const url = new URL(request.url);
-
-        // Magento: /media/catalog/product/cache/<hash>/<resto>
-        // Fallback: /media/catalog/product/<resto>
-        const cachePrefixRe = /^\/media\/catalog\/product\/cache\/[^/]+\//i;
-        if (!cachePrefixRe.test(url.pathname)) {
-            return null;
-        }
-
-        url.pathname = url.pathname.replace(cachePrefixRe, '/media/catalog/product/');
-
-        try {
-            const fallbackResponse = await fetch(url.toString(), {
-                // Imagens geralmente não precisam de headers customizados.
-                // Mantemos credenciais same-origin para não quebrar setups com cookies.
-                credentials: 'same-origin'
-            });
-
-            if (fallbackResponse && fallbackResponse.ok) {
-                // Cachear a resposta sob a URL original (a do cache) para evitar repetição do 404.
-                cache.put(request, fallbackResponse.clone());
-                return fallbackResponse;
+  /* Product images: cache-first with LRU eviction */
+  if (IMAGE_PATTERNS.some((re) => re.test(url))) {
+    event.respondWith(
+      caches.open(IMAGE_CACHE).then((cache) =>
+        cache.match(event.request).then((cached) => {
+          if (cached) return cached;
+          return fetch(event.request).then((response) => {
+            if (response.ok) {
+              cache.put(event.request, response.clone());
+              trimImageCache(cache);
             }
-        } catch (_) {
-            // Ignorar e cair no 404 final.
-        }
+            return response;
+          }).catch(() => cached || Response.error());
+        })
+      )
+    );
+    return;
+  }
 
-        return null;
-    };
+  /* CSS/JS bundles: stale-while-revalidate (serve cached, update in background) */
+  if (CACHEABLE_PATTERNS.some((re) => re.test(url))) {
+    event.respondWith(
+      caches.open(CACHE_VERSION).then((cache) =>
+        cache.match(event.request).then((cached) => {
+          const networkFetch = fetch(event.request).then((response) => {
+            if (response.ok) cache.put(event.request, response.clone());
+            return response;
+          });
+          return cached || networkFetch;
+        })
+      )
+    );
+    return;
+  }
 
-    try {
-        const networkResponse = await fetch(request);
-        if (networkResponse && networkResponse.ok) {
-            cache.put(request, networkResponse.clone());
-            return networkResponse;
-        }
-
-        // Se veio 404 (ou outro erro) em thumb cacheada, tenta original.
-        const fallback = await tryFallbackOriginal();
-        if (fallback) {
-            return fallback;
-        }
-
-        return networkResponse;
-    } catch (error) {
-        const fallback = await tryFallbackOriginal();
-        if (fallback) {
-            return fallback;
-        }
-
-        return new Response('', { status: 404 });
-    }
-}
-
-/**
- * Network First with Offline Fallback
- * Para navegação - tenta rede primeiro, fallback offline.html
- */
-async function networkFirstWithOffline(request) {
-    const cache = await caches.open(CACHE_PAGES);
-
-    try {
-        const networkResponse = await fetch(request);
-
-        // Cache páginas navegáveis bem-sucedidas
-        if (networkResponse && networkResponse.ok) {
-            const responseToCache = networkResponse.clone();
-            cache.put(request, responseToCache);
-        }
-
-        return networkResponse;
-    } catch (error) {
-        // Tentar cache primeiro
-        const cachedResponse = await cache.match(request);
-        if (cachedResponse) {
-            return cachedResponse;
-        }
-
-        // Fallback para página offline
-        const offlinePage = await caches.match('/offline.html');
-        if (offlinePage) {
-            return offlinePage;
-        }
-
-        // Último recurso: resposta de erro básica
-        return new Response(
-            '<html><body><h1>Sem conexão</h1><p>Verifique sua internet e tente novamente.</p></body></html>',
-            {
-                headers: { 'Content-Type': 'text/html' },
-                status: 503
-            }
-        );
-    }
-}
-
-/**
- * Message Event - Comunicação com a página
- */
-self.addEventListener('message', (event) => {
-    if (event.data && event.data.type === 'SKIP_WAITING') {
-        self.skipWaiting();
-    }
-
-    if (event.data && event.data.type === 'GET_VERSION') {
-        event.ports[0].postMessage({ version: SW_VERSION });
-    }
-
-    if (event.data && event.data.type === 'CLEAR_CACHE') {
-        caches.keys().then((names) => {
-            Promise.all(names.map(name => caches.delete(name)));
-        });
-    }
+  /* Everything else: network-only (no caching) */
 });
-
-console.log(`[SW ${SW_VERSION}] Loaded`);
