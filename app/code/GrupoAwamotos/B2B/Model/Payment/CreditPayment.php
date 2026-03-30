@@ -141,7 +141,7 @@ class CreditPayment extends AbstractMethod
         }
 
         $customerGroupId = (int)$quote->getCustomerGroupId();
-        if (!$this->b2bHelper->isB2BGroup($customerGroupId) || $customerGroupId === B2BHelper::GROUP_B2B_PENDENTE) {
+        if (!$this->b2bHelper->isB2BGroup($customerGroupId) || $customerGroupId === $this->b2bHelper->getPendingGroupId()) {
             return false;
         }
 

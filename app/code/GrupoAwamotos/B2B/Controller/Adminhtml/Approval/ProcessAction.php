@@ -12,6 +12,7 @@ use Magento\Backend\App\Action\Context;
 use Magento\Backend\Model\Auth\Session as AuthSession;
 use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\Exception\LocalizedException;
+use Psr\Log\LoggerInterface;
 
 class ProcessAction extends Action implements HttpPostActionInterface
 {
@@ -27,13 +28,20 @@ class ProcessAction extends Action implements HttpPostActionInterface
      */
     private AuthSession $authSession;
 
+    /**
+     * @var LoggerInterface
+     */
+    private LoggerInterface $logger;
+
     public function __construct(
         Context $context,
         OrderApprovalService $approvalService,
-        AuthSession $authSession
+        AuthSession $authSession,
+        LoggerInterface $logger
     ) {
         $this->approvalService = $approvalService;
         $this->authSession = $authSession;
+        $this->logger = $logger;
         parent::__construct($context);
     }
 

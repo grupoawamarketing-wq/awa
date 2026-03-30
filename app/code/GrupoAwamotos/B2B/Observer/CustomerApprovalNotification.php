@@ -11,24 +11,24 @@ use Magento\Framework\Event\Observer;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Customer\Api\CustomerRepositoryInterface;
-use GrupoAwamotos\B2B\Model\Notification\WhatsAppService;
+use GrupoAwamotos\B2B\Model\Notification\WhatsAppPublisher;
 use Psr\Log\LoggerInterface;
 
 class CustomerApprovalNotification implements ObserverInterface
 {
     private ScopeConfigInterface $scopeConfig;
-    private WhatsAppService $whatsAppService;
+    private WhatsAppPublisher $whatsAppPublisher;
     private CustomerRepositoryInterface $customerRepository;
     private LoggerInterface $logger;
 
     public function __construct(
         ScopeConfigInterface $scopeConfig,
-        WhatsAppService $whatsAppService,
+        WhatsAppPublisher $whatsAppPublisher,
         CustomerRepositoryInterface $customerRepository,
         LoggerInterface $logger
     ) {
         $this->scopeConfig = $scopeConfig;
-        $this->whatsAppService = $whatsAppService;
+        $this->whatsAppPublisher = $whatsAppPublisher;
         $this->customerRepository = $customerRepository;
         $this->logger = $logger;
     }
@@ -67,7 +67,7 @@ class CustomerApprovalNotification implements ObserverInterface
                 'phone' => $phone
             ];
 
-            $this->whatsAppService->notifyCustomerApproval($customerData);
+            $this->whatsAppPublisher->publish('customer_approved', $customerData);
 
         } catch (\Exception $e) {
             $this->logger->error('B2B Approval WhatsApp Notification Error: ' . $e->getMessage());

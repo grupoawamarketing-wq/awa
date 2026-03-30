@@ -24,6 +24,12 @@ use GrupoAwamotos\B2B\Model\ResourceModel\ShoppingList\CollectionFactory as Shop
 class Dashboard extends Template
 {
     /**
+     * Cached customer instance — avoids repeated customerRepository->getById() calls per request
+     *
+     * @var \Magento\Customer\Api\Data\CustomerInterface|false|null
+     */
+    private $cachedCustomer = null;
+    /**
      * @var CustomerSession
      */
     private $customerSession;
@@ -121,15 +127,22 @@ class Dashboard extends Template
      */
     public function getCustomer()
     {
-        $customerId = $this->customerSession->getCustomerId();
-        if ($customerId) {
-            try {
-                return $this->customerRepository->getById($customerId);
-            } catch (\Exception $e) {
-                return null;
+        if ($this->cachedCustomer === null) {
+            $customerId = $this->customerSession->getCustomerId();
+            if ($customerId) {
+                try {
+                    $this->cachedCustomer = $this->customerRepository->getById($customerId);
+                } catch (\Exception $e) {
+                    $this->_logger->error('[B2B Dashboard] Failed to load customer: ' . $e->getMessage(), [
+                        'customer_id' => $customerId,
+                    ]);
+                    $this->cachedCustomer = false;
+                }
+            } else {
+                $this->cachedCustomer = false;
             }
         }
-        return null;
+        return $this->cachedCustomer ?: null;
     }
 
     /**
@@ -439,6 +452,7 @@ class Dashboard extends Template
         try {
             return $this->attendantManager->getCustomerAttendant((int)$customerId);
         } catch (\Exception $e) {
+            $this->_logger->warning('[B2B Dashboard] getAttendantInfo error: ' . $e->getMessage());
             return null;
         }
     }

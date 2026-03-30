@@ -337,9 +337,10 @@ class Data extends AbstractHelper
         $pendingId = $this->getPendingGroupId();
         if ($pendingId && !in_array($pendingId, $groups)) $groups[] = $pendingId;
 
-        // Always include B2B Revendedor group (group 6) — not exposed in admin config but always B2B
-        if (!in_array(self::GROUP_B2B_REVENDEDOR, $groups)) {
-            $groups[] = self::GROUP_B2B_REVENDEDOR;
+        // Always include B2B Revendedor group
+        $revendedorId = $this->b2bConfig->getRevendedorGroupId() ?: self::GROUP_B2B_REVENDEDOR;
+        if (!in_array($revendedorId, $groups)) {
+            $groups[] = $revendedorId;
         }
 
         // Fallback to hardcoded if no config set
@@ -363,7 +364,7 @@ class Data extends AbstractHelper
      */
     public function getPendingGroupId(): int
     {
-        return self::GROUP_B2B_PENDENTE;
+        return $this->b2bConfig->getPendingGroupId() ?: self::GROUP_B2B_PENDENTE;
     }
 
     /**
@@ -388,8 +389,8 @@ class Data extends AbstractHelper
         $mapping = [
             'b2b_atacado' => $this->b2bConfig->getWholesaleGroupId() ?: self::GROUP_B2B_ATACADO,
             'b2b_vip' => $this->b2bConfig->getVipGroupId() ?: self::GROUP_B2B_VIP,
-            'b2b_revendedor' => self::GROUP_B2B_REVENDEDOR,
-            'b2b_pendente' => self::GROUP_B2B_PENDENTE,
+            'b2b_revendedor' => $this->b2bConfig->getRevendedorGroupId() ?: self::GROUP_B2B_REVENDEDOR,
+            'b2b_pendente' => $this->b2bConfig->getPendingGroupId() ?: self::GROUP_B2B_PENDENTE,
         ];
 
         return $mapping[$code] ?? null;

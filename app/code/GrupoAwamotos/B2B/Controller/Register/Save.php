@@ -24,6 +24,7 @@ use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Framework\Math\Random;
 use Magento\Framework\Mail\Template\TransportBuilder;
 use GrupoAwamotos\B2B\Helper\CnpjValidator;
+use GrupoAwamotos\B2B\Helper\Config as B2BConfig;
 use GrupoAwamotos\B2B\Helper\Data as B2BHelper;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Data\Form\FormKey\Validator as FormKeyValidator;
@@ -134,6 +135,11 @@ class Save implements HttpPostActionInterface
      */
     private $eventManager;
 
+    /**
+     * @var B2BConfig
+     */
+    private B2BConfig $b2bConfig;
+
     public function __construct(
         RequestInterface $request,
         RedirectFactory $resultRedirectFactory,
@@ -154,7 +160,8 @@ class Save implements HttpPostActionInterface
         RegionInterfaceFactory $regionFactory,
         RegionCollectionFactory $regionCollectionFactory,
         FormKeyValidator $formKeyValidator,
-        EventManagerInterface $eventManager
+        EventManagerInterface $eventManager,
+        B2BConfig $b2bConfig
     ) {
         $this->request = $request;
         $this->resultRedirectFactory = $resultRedirectFactory;
@@ -176,6 +183,7 @@ class Save implements HttpPostActionInterface
         $this->regionCollectionFactory = $regionCollectionFactory;
         $this->formKeyValidator = $formKeyValidator;
         $this->eventManager = $eventManager;
+        $this->b2bConfig = $b2bConfig;
     }
 
     /**
@@ -243,7 +251,7 @@ class Save implements HttpPostActionInterface
             $customer->setEmail($data['email']);
             $customer->setFirstname($data['firstname']);
             $customer->setLastname($data['lastname']);
-            $customer->setGroupId(B2BHelper::GROUP_B2B_PENDENTE);
+            $customer->setGroupId($this->b2bConfig->getPendingGroupId() ?: B2BHelper::GROUP_B2B_PENDENTE);
             $customer->setStoreId($this->storeManager->getStore()->getId());
             $customer->setWebsiteId($this->storeManager->getStore()->getWebsiteId());
 

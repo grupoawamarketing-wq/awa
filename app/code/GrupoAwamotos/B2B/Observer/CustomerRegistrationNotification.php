@@ -10,27 +10,31 @@ use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Store\Model\ScopeInterface;
-use GrupoAwamotos\B2B\Model\Notification\WhatsAppService;
+use GrupoAwamotos\B2B\Model\Notification\WhatsAppPublisher;
 use GrupoAwamotos\B2B\Model\Attendant\AttendantManager;
+use GrupoAwamotos\B2B\Helper\Config as B2BConfig;
 use Psr\Log\LoggerInterface;
 
 class CustomerRegistrationNotification implements ObserverInterface
 {
     private ScopeConfigInterface $scopeConfig;
-    private WhatsAppService $whatsAppService;
+    private WhatsAppPublisher $whatsAppPublisher;
     private AttendantManager $attendantManager;
     private LoggerInterface $logger;
+    private B2BConfig $b2bConfig;
 
     public function __construct(
         ScopeConfigInterface $scopeConfig,
-        WhatsAppService $whatsAppService,
+        WhatsAppPublisher $whatsAppPublisher,
         AttendantManager $attendantManager,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        B2BConfig $b2bConfig
     ) {
         $this->scopeConfig = $scopeConfig;
-        $this->whatsAppService = $whatsAppService;
+        $this->whatsAppPublisher = $whatsAppPublisher;
         $this->attendantManager = $attendantManager;
         $this->logger = $logger;
+        $this->b2bConfig = $b2bConfig;
     }
 
     public function execute(Observer $observer): void
@@ -39,8 +43,9 @@ class CustomerRegistrationNotification implements ObserverInterface
             $customer = $observer->getEvent()->getCustomer();
             $data = $observer->getEvent()->getData();
 
-            // Verifica se é cliente B2B (grupo 7 = pendente)
-            if ($customer->getGroupId() != 7) {
+            // Verifica se é cliente B2B pendente
+            $pendingGroupId = $this->b2bConfig->getPendingGroupId();
+            if ($customer->getGroupId() != $pendingGroupId) {
                 return;
             }
 
@@ -67,7 +72,7 @@ class CustomerRegistrationNotification implements ObserverInterface
 
             // Notificação via WhatsApp para equipe
             if ($this->isWhatsAppNotificationEnabled('notify_new_registration')) {
-                $this->whatsAppService->notifyNewB2BRegistration($customerData);
+                $this->whatsAppPublisher->publish('new_registration', $customerData);
             }
 
         } catch (\Exception $e) {
@@ -113,6 +118,6 @@ class CustomerRegistrationNotification implements ObserverInterface
             "📱 *Telefone:* {$customerData['phone']}\n\n" .
             "Este cliente foi atribuído a você para atendimento.";
 
-        $this->whatsAppService->sendText($attendant['whatsapp'], $message);
+        $this->whatsAppPublisher->publishText($attendant['whatsapp'], $message);
     }
 }

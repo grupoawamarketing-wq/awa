@@ -50,6 +50,8 @@ class Config extends AbstractHelper
     const XML_PATH_VIP_GROUP = 'grupoawamotos_b2b/customer_groups/vip_group';
     const XML_PATH_VIP_DISCOUNT = 'grupoawamotos_b2b/customer_groups/vip_discount';
     const XML_PATH_DEFAULT_B2B_GROUP = 'grupoawamotos_b2b/customer_groups/default_b2b_group';
+    const XML_PATH_REVENDEDOR_GROUP = 'grupoawamotos_b2b/customer_groups/revendedor_group';
+    const XML_PATH_PENDING_GROUP = 'grupoawamotos_b2b/customer_groups/pending_group';
 
     // CNAE Profiling
     const XML_PATH_CNAE_ENABLED = 'grupoawamotos_b2b/cnae_profiling/enabled';
@@ -402,6 +404,30 @@ class Config extends AbstractHelper
     {
         return (int) $this->scopeConfig->getValue(
             self::XML_PATH_DEFAULT_B2B_GROUP,
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+    }
+
+    /**
+     * Get Revendedor group ID
+     */
+    public function getRevendedorGroupId($storeId = null): int
+    {
+        return (int) $this->scopeConfig->getValue(
+            self::XML_PATH_REVENDEDOR_GROUP,
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+    }
+
+    /**
+     * Get Pending group ID
+     */
+    public function getPendingGroupId($storeId = null): int
+    {
+        return (int) $this->scopeConfig->getValue(
+            self::XML_PATH_PENDING_GROUP,
             ScopeInterface::SCOPE_STORE,
             $storeId
         );

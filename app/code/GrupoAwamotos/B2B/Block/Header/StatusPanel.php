@@ -151,7 +151,7 @@ class StatusPanel extends Template
     {
         $wholesaleId = $this->b2bConfig->getWholesaleGroupId() ?: B2BHelper::GROUP_B2B_ATACADO;
         $vipId = $this->b2bConfig->getVipGroupId() ?: B2BHelper::GROUP_B2B_VIP;
-        $pendingId = B2BHelper::GROUP_B2B_PENDENTE;
+        $pendingId = $this->b2bConfig->getPendingGroupId() ?: B2BHelper::GROUP_B2B_PENDENTE;
 
         if ($groupId === $wholesaleId) {
             return ['color' => '#2563eb', 'icon' => 'building', 'label' => 'Atacado'];

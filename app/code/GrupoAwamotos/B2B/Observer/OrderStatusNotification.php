@@ -13,7 +13,7 @@ use Magento\Framework\App\Area;
 use Magento\Framework\App\State;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Customer\Api\CustomerRepositoryInterface;
-use GrupoAwamotos\B2B\Model\Notification\WhatsAppService;
+use GrupoAwamotos\B2B\Model\Notification\WhatsAppPublisher;
 use GrupoAwamotos\B2B\Helper\Data as B2BHelper;
 use Psr\Log\LoggerInterface;
 
@@ -21,7 +21,7 @@ class OrderStatusNotification implements ObserverInterface
 {
     private ScopeConfigInterface $scopeConfig;
     private State $appState;
-    private WhatsAppService $whatsAppService;
+    private WhatsAppPublisher $whatsAppPublisher;
     private CustomerRepositoryInterface $customerRepository;
     private B2BHelper $b2bHelper;
     private LoggerInterface $logger;
@@ -30,14 +30,14 @@ class OrderStatusNotification implements ObserverInterface
     public function __construct(
         ScopeConfigInterface $scopeConfig,
         State $appState,
-        WhatsAppService $whatsAppService,
+        WhatsAppPublisher $whatsAppPublisher,
         CustomerRepositoryInterface $customerRepository,
         B2BHelper $b2bHelper,
         LoggerInterface $logger
     ) {
         $this->scopeConfig = $scopeConfig;
         $this->appState = $appState;
-        $this->whatsAppService = $whatsAppService;
+        $this->whatsAppPublisher = $whatsAppPublisher;
         $this->customerRepository = $customerRepository;
         $this->b2bHelper = $b2bHelper;
         $this->logger = $logger;
@@ -104,7 +104,7 @@ class OrderStatusNotification implements ObserverInterface
                 'customer_phone' => $phone
             ];
 
-            $this->whatsAppService->notifyOrderStatusUpdate($orderData);
+            $this->whatsAppPublisher->publish('order_status', $orderData);
 
         } catch (\Exception $e) {
             $this->logger->error('B2B Order Status Notification Error: ' . $e->getMessage());

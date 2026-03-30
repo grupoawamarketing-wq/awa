@@ -17,12 +17,23 @@ class CheckoutAccessValidator
     public const STATE_SUSPENDED = ApprovalStatus::STATUS_SUSPENDED;
     public const STATE_PENDING_ERP = 'pending_erp';
 
+    /** @var array<int, \Magento\Customer\Api\Data\CustomerInterface> */
+    private array $customerCache = [];
+
     public function __construct(
         private readonly Config $config,
         private readonly CustomerRepositoryInterface $customerRepository,
         private readonly SyncLogResource $syncLogResource,
         private readonly LoggerInterface $logger
     ) {
+    }
+
+    private function getCustomer(int $customerId): \Magento\Customer\Api\Data\CustomerInterface
+    {
+        if (!isset($this->customerCache[$customerId])) {
+            $this->customerCache[$customerId] = $this->customerRepository->getById($customerId);
+        }
+        return $this->customerCache[$customerId];
     }
 
     public function resolveCustomerState(int $customerId): string
@@ -32,7 +43,7 @@ class CheckoutAccessValidator
         }
 
         try {
-            $customer = $this->customerRepository->getById($customerId);
+            $customer = $this->getCustomer($customerId);
             $approvalStatusAttr = $customer->getCustomAttribute('b2b_approval_status');
             $approvalStatus = $approvalStatusAttr ? (string) $approvalStatusAttr->getValue() : '';
 
@@ -58,7 +69,7 @@ class CheckoutAccessValidator
     private function getCustomerErpCode(int $customerId): ?int
     {
         try {
-            $customer = $this->customerRepository->getById($customerId);
+            $customer = $this->getCustomer($customerId);
             $attribute = $customer->getCustomAttribute('erp_code');
             $erpCode = ($attribute && $attribute->getValue()) ? $attribute->getValue() : null;
 

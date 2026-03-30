@@ -11,27 +11,27 @@ use Magento\Framework\Event\Observer;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Customer\Api\CustomerRepositoryInterface;
-use GrupoAwamotos\B2B\Model\Notification\WhatsAppService;
+use GrupoAwamotos\B2B\Model\Notification\WhatsAppPublisher;
 use GrupoAwamotos\B2B\Model\Attendant\AttendantManager;
 use Psr\Log\LoggerInterface;
 
 class QuoteNotification implements ObserverInterface
 {
     private ScopeConfigInterface $scopeConfig;
-    private WhatsAppService $whatsAppService;
+    private WhatsAppPublisher $whatsAppPublisher;
     private AttendantManager $attendantManager;
     private CustomerRepositoryInterface $customerRepository;
     private LoggerInterface $logger;
 
     public function __construct(
         ScopeConfigInterface $scopeConfig,
-        WhatsAppService $whatsAppService,
+        WhatsAppPublisher $whatsAppPublisher,
         AttendantManager $attendantManager,
         CustomerRepositoryInterface $customerRepository,
         LoggerInterface $logger
     ) {
         $this->scopeConfig = $scopeConfig;
-        $this->whatsAppService = $whatsAppService;
+        $this->whatsAppPublisher = $whatsAppPublisher;
         $this->attendantManager = $attendantManager;
         $this->customerRepository = $customerRepository;
         $this->logger = $logger;
@@ -65,7 +65,7 @@ class QuoteNotification implements ObserverInterface
 
         // Notifica equipe via WhatsApp
         if ($this->isWhatsAppNotificationEnabled('notify_new_quote')) {
-            $this->whatsAppService->notifyNewQuote($quoteData);
+            $this->whatsAppPublisher->publish('new_quote', $quoteData);
         }
 
         // Notifica atendente responsável
@@ -91,7 +91,7 @@ class QuoteNotification implements ObserverInterface
 
         // Notifica cliente via WhatsApp
         if ($this->isWhatsAppNotificationEnabled('notify_quote_response') && !empty($quoteData['customer_phone'])) {
-            $this->whatsAppService->notifyQuoteResponse($quoteData);
+            $this->whatsAppPublisher->publish('quote_response', $quoteData);
         }
     }
 
@@ -176,6 +176,6 @@ class QuoteNotification implements ObserverInterface
             "💰 *Valor estimado:* {$quoteData['estimated_total']}\n\n" .
             "Responda pelo painel admin.";
 
-        $this->whatsAppService->sendText($attendant['whatsapp'], $message);
+        $this->whatsAppPublisher->publishText($attendant['whatsapp'], $message);
     }
 }

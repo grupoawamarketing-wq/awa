@@ -11,7 +11,7 @@ use Magento\Framework\Event\Observer;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Customer\Api\CustomerRepositoryInterface;
-use GrupoAwamotos\B2B\Model\Notification\WhatsAppService;
+use GrupoAwamotos\B2B\Model\Notification\WhatsAppPublisher;
 use GrupoAwamotos\B2B\Model\Attendant\AttendantManager;
 use GrupoAwamotos\B2B\Helper\Data as B2BHelper;
 use Psr\Log\LoggerInterface;
@@ -19,7 +19,7 @@ use Psr\Log\LoggerInterface;
 class OrderNotification implements ObserverInterface
 {
     private ScopeConfigInterface $scopeConfig;
-    private WhatsAppService $whatsAppService;
+    private WhatsAppPublisher $whatsAppPublisher;
     private AttendantManager $attendantManager;
     private CustomerRepositoryInterface $customerRepository;
     private B2BHelper $b2bHelper;
@@ -27,14 +27,14 @@ class OrderNotification implements ObserverInterface
 
     public function __construct(
         ScopeConfigInterface $scopeConfig,
-        WhatsAppService $whatsAppService,
+        WhatsAppPublisher $whatsAppPublisher,
         AttendantManager $attendantManager,
         CustomerRepositoryInterface $customerRepository,
         B2BHelper $b2bHelper,
         LoggerInterface $logger
     ) {
         $this->scopeConfig = $scopeConfig;
-        $this->whatsAppService = $whatsAppService;
+        $this->whatsAppPublisher = $whatsAppPublisher;
         $this->attendantManager = $attendantManager;
         $this->customerRepository = $customerRepository;
         $this->b2bHelper = $b2bHelper;
@@ -81,7 +81,7 @@ class OrderNotification implements ObserverInterface
 
             // Notifica equipe via WhatsApp
             if ($this->isWhatsAppNotificationEnabled('notify_new_order')) {
-                $this->whatsAppService->notifyNewOrder($orderData);
+                $this->whatsAppPublisher->publish('new_order', $orderData);
             }
 
             // Notifica atendente responsável
@@ -158,6 +158,6 @@ class OrderNotification implements ObserverInterface
             "📦 *Itens:* {$orderData['items_count']}\n\n" .
             "Acompanhe no painel admin.";
 
-        $this->whatsAppService->sendText($attendant['whatsapp'], $message);
+        $this->whatsAppPublisher->publishText($attendant['whatsapp'], $message);
     }
 }
