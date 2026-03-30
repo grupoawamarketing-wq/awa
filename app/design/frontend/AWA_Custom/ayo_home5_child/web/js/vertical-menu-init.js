@@ -500,6 +500,14 @@ define([
             }
         });
 
+        $nav.on('mouseenter' + eventNamespace, function () {
+            if (!isDesktopViewport()) {
+                return;
+            }
+
+            openMenu(false);
+        });
+
         $nav.on('mouseleave' + eventNamespace, function () {
             var root = $nav.get(0);
             var active = document.activeElement;
