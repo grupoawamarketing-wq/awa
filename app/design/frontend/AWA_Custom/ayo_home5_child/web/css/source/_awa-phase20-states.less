@@ -1,0 +1,332 @@
+/* ==========================================================================
+   AWA Phase 20 — Semantic States, Focus System & Feedback Components
+   Data: 2026-03-30
+
+   Escopo:
+   - Skip-to-content (acessibilidade teclado)
+   - Sistema global de focus rings (WCAG 2.4.11)
+   - Form validation states (success / error / warning)
+   - Flash messages modernizadas (success, error, warning, info)
+   - Skeleton loader refinements
+   ========================================================================== */
+
+@import (once) '_awa-variables';
+
+/* ==========================================================================
+   1. SKIP-TO-CONTENT — Acessibilidade teclado (WCAG 2.4.1)
+   ========================================================================== */
+
+.awa-skip-link {
+    position: absolute;
+    top: -100%;
+    left: 0;
+    z-index: 9999;
+    padding: @awa-space-2 @awa-space-4;
+    background: @awa-color-primary;
+    color: @awa-color-white;
+    font-weight: @awa-weight-semibold;
+    font-size: @awa-text-sm;
+    border-radius: 0 0 @awa-radius-sm @awa-radius-sm;
+    text-decoration: none;
+    transition: top 0ms; // instantâneo — sem delay ao receber foco
+}
+
+.awa-skip-link:focus-visible {
+    top: 0;
+    outline: none;
+}
+
+/* ==========================================================================
+   2. FOCUS RING SYSTEM — Global (WCAG 2.4.11 / 2.4.12)
+   ========================================================================== */
+
+/*
+ * Baseline: reseta o foco padrão do browser apenas onde substituímos por
+ * focus-visible (progressivo — não remove foco de elementos que ainda não
+ * têm override aqui).
+ */
+body.awa-ds :focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* Foco visível global: offset + anel primário */
+body.awa-ds :focus-visible {
+    outline: 2px solid @awa-color-primary;
+    outline-offset: @awa-focus-ring-offset;
+    border-radius: @awa-radius-2xs;
+}
+
+/* Botões primários: anel em volta da borda */
+body.awa-ds :is(.action.primary, button.action.primary):focus-visible,
+body.awa-ds .awa-ds-btn--primary:focus-visible {
+    outline: 2px solid @awa-color-primary;
+    outline-offset: @awa-focus-ring-offset;
+    box-shadow: @awa-focus-ring;
+}
+
+/* Botões secundários/ghost */
+body.awa-ds :is(.action.secondary, button.action.secondary):focus-visible,
+body.awa-ds .awa-ds-btn--secondary:focus-visible {
+    outline: 2px solid @awa-color-primary;
+    outline-offset: @awa-focus-ring-offset;
+}
+
+/* Links em foco — underline explícito + anel */
+body.awa-ds a:focus-visible {
+    outline: 2px solid @awa-color-primary;
+    outline-offset: 1px;
+    border-radius: @awa-radius-2xs;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+}
+
+/* Inputs/selects/textareas em foco — borda colorida + anel de sombra */
+body.awa-ds :is(input, select, textarea):focus-visible,
+body.awa-ds .awa-ds-form-control:focus-visible {
+    outline: none;
+    border-color: @awa-color-primary !important;
+    box-shadow: 0 0 0 3px fade(@awa-color-primary, 18%) !important;
+}
+
+/* Checkboxes e radios — anel sem outline padrão */
+body.awa-ds :is(input[type='checkbox'], input[type='radio']):focus-visible {
+    outline: 2px solid @awa-color-primary;
+    outline-offset: @awa-focus-ring-offset;
+    border-radius: 2px;
+}
+
+/* ==========================================================================
+   3. FORM VALIDATION STATES — Feedback visual de validação
+   ========================================================================== */
+
+/* --- Container de campo com estado de erro --- */
+.field.error > .control :is(input, select, textarea),
+.field._error > .control :is(input, select, textarea),
+.mage-error ~ :is(input, select, textarea),
+.validation-failed {
+    border-color: @awa-color-error !important;
+    box-shadow: 0 0 0 3px fade(@awa-color-error, 12%) !important;
+    background: fade(@awa-color-error, 4%) !important;
+}
+
+/* Mensagem de erro inline */
+.field-error,
+.mage-error,
+div.mage-error[generated],
+.awa-field-error {
+    display: flex;
+    align-items: center;
+    gap: @awa-space-1;
+    margin-top: @awa-space-1;
+    font-size: @awa-text-xs;
+    font-weight: @awa-weight-medium;
+    color: @awa-color-error-text;
+    line-height: @awa-line-height-compact;
+
+    &::before {
+        content: '';
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        flex-shrink: 0;
+        background-color: @awa-color-error;
+        border-radius: 50%;
+        // X usando clip-path (sem font-icon)
+        mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='white' d='M4.293 4.293a1 1 0 011.414 0L8 6.586l2.293-2.293a1 1 0 011.414 1.414L9.414 8l2.293 2.293a1 1 0 01-1.414 1.414L8 9.414l-2.293 2.293a1 1 0 01-1.414-1.414L6.586 8 4.293 5.707a1 1 0 010-1.414z'/%3E%3C/svg%3E");
+        -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='white' d='M4.293 4.293a1 1 0 011.414 0L8 6.586l2.293-2.293a1 1 0 011.414 1.414L9.414 8l2.293 2.293a1 1 0 01-1.414 1.414L8 9.414l-2.293 2.293a1 1 0 01-1.414-1.414L6.586 8 4.293 5.707a1 1 0 010-1.414z'/%3E%3C/svg%3E");
+        mask-size: contain;
+        -webkit-mask-size: contain;
+        mask-repeat: no-repeat;
+        -webkit-mask-repeat: no-repeat;
+    }
+}
+
+/* --- Container de campo com estado de sucesso (após validação ok) --- */
+.field.success > .control :is(input, select, textarea),
+.field._success > .control :is(input, select, textarea) {
+    border-color: @awa-color-success !important;
+    box-shadow: 0 0 0 3px fade(@awa-color-success, 12%) !important;
+}
+
+/* ==========================================================================
+   4. FLASH MESSAGES — Sistema modernizado (success, error, warning, info)
+   ========================================================================== */
+
+/*
+ * Base: reseta estilos fragmentados do Magento/Ayo.
+ * Todos os tipos herdam desta base e sobrescrevem apenas cor.
+ */
+.messages .message,
+.page.messages .message,
+.message-success,
+.message-error,
+.message-warning,
+.message-notice,
+.awa-message {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: @awa-space-3 !important;
+    padding: @awa-space-3 @awa-space-4 !important;
+    border-radius: @awa-radius-sm !important;
+    border: 1px solid transparent !important;
+    border-left-width: 4px !important;
+    font-size: @awa-text-sm !important;
+    line-height: @awa-line-height-relaxed !important;
+    margin-bottom: @awa-space-3 !important;
+    box-shadow: none !important;
+
+    // Ícone (::before genérico — cada tipo sobrescreve conteúdo)
+    &::before {
+        display: none !important; // Magento usa ::before com ícone glifo; ocultamos
+    }
+
+    > *:first-child {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+}
+
+/* SUCCESS */
+.messages .message-success,
+.page.messages .message-success,
+.message.success,
+.awa-message--success {
+    background: @awa-color-success-light !important;
+    border-color: @awa-color-success !important;
+    color: @awa-color-success-text !important;
+
+    a { color: @awa-color-success-text !important; font-weight: @awa-weight-semibold; }
+}
+
+/* ERROR */
+.messages .message-error,
+.page.messages .message-error,
+.message.error,
+.awa-message--error {
+    background: fade(@awa-color-error, 6%) !important;
+    border-color: @awa-color-error !important;
+    color: @awa-color-error-text !important;
+
+    a { color: @awa-color-error-text !important; font-weight: @awa-weight-semibold; }
+}
+
+/* WARNING */
+.messages .message-warning,
+.page.messages .message-warning,
+.message.warning,
+.awa-message--warning {
+    background: @awa-color-warning-light !important;
+    border-color: @awa-color-warning !important;
+    color: @awa-color-warning-text !important;
+
+    a { color: @awa-color-warning-text !important; font-weight: @awa-weight-semibold; }
+}
+
+/* NOTICE / INFO */
+.messages .message-notice,
+.page.messages .message-notice,
+.message.notice,
+.message.info,
+.awa-message--info {
+    background: @awa-color-info-light !important;
+    border-color: @awa-color-info !important;
+    color: @awa-color-info-text !important;
+
+    a { color: @awa-color-info-text !important; font-weight: @awa-weight-semibold; }
+}
+
+/* ==========================================================================
+   5. FORM LABELS — Melhorias tipográficas
+   ========================================================================== */
+
+body.awa-ds label,
+body.awa-ds .label,
+body.awa-ds .field > .label {
+    display: block;
+    font-size: @awa-text-sm;
+    font-weight: @awa-weight-medium;
+    color: @awa-neutral-700;
+    margin-bottom: @awa-space-1;
+    line-height: @awa-line-height-compact;
+}
+
+/* Asterisco de campo obrigatório */
+body.awa-ds label > .required,
+body.awa-ds label > em,
+body.awa-ds .label > span._required {
+    color: @awa-color-error;
+    margin-left: 2px;
+    font-style: normal;
+}
+
+/* ==========================================================================
+   6. REQUIRED MOTION SUPPORT — Reduz animações (WCAG 2.3.3)
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    body.awa-ds *,
+    body.awa-ds *::before,
+    body.awa-ds *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* ==========================================================================
+   7. SKELETON LOADER — Refinamento visual
+   ========================================================================== */
+
+.awa-skeleton {
+    display: block;
+    background: linear-gradient(
+        90deg,
+        @awa-neutral-100 25%,
+        @awa-neutral-50 50%,
+        @awa-neutral-100 75%
+    );
+    background-size: 200% 100%;
+    border-radius: @awa-radius-xs;
+    animation: awa-skeleton-shimmer 1.4s ease infinite;
+
+    @media (prefers-reduced-motion: reduce) {
+        animation: none;
+        background: @awa-neutral-100;
+    }
+}
+
+@keyframes awa-skeleton-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.awa-skeleton--text  { height: @awa-text-sm;   width: 60%; }
+.awa-skeleton--title { height: @awa-text-xl;    width: 40%; }
+.awa-skeleton--image { height: 200px; width: 100%; border-radius: @awa-radius-md; }
+.awa-skeleton--btn   { height: @awa-control-height; width: 120px; border-radius: @awa-radius-sm; }
+
+/* ==========================================================================
+   8. LINK UNDERLINES — Legibilidade (WCAG 1.4.1)
+   ========================================================================== */
+
+/*
+ * Links dentro de blocos de texto (body copy) devem ser distinguíveis
+ * por mais do que só cor. Adicionamos underline visible.
+ */
+body.awa-ds p a,
+body.awa-ds li a,
+body.awa-ds td a,
+body.awa-ds .cms-content a,
+body.awa-ds .block-cms-link a {
+    text-decoration: underline;
+    text-decoration-color: fade(@awa-color-primary, 40%);
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+    transition: text-decoration-color @awa-transition;
+
+    &:hover {
+        text-decoration-color: @awa-color-primary;
+        text-decoration-thickness: 2px;
+    }
+}
