@@ -18,15 +18,25 @@ use Magento\Framework\App\Action\Action;
 <?php
 $_productCollection = $block->getLoadedProductCollection();
 $_helper = $this->helper('Magento\Catalog\Helper\Output');
-$b2bHelper = $this->helper('GrupoAwamotos\B2B\Helper\Data');
-$b2bCanAddToCart = $b2bHelper->canAddToCart();
-$b2bGateState = $block->escapeHtmlAttr($b2bHelper->getPriceGateState());
-$b2bGateHeadline = $block->escapeHtml($b2bHelper->getPriceGateHeadline());
-$b2bGateDescription = $block->escapeHtml($b2bHelper->getPriceGateDescription());
-$b2bPrimaryUrl = $block->escapeUrl($b2bHelper->getPriceGatePrimaryUrl());
-$b2bPrimaryLabel = $block->escapeHtml($b2bHelper->getPriceGatePrimaryLabel());
-$b2bSecondaryUrl = $block->escapeUrl($b2bHelper->getPriceGateSecondaryUrl());
-$b2bSecondaryLabel = $block->escapeHtml($b2bHelper->getPriceGateSecondaryLabel());
+$_b2bActive = \Magento\Framework\App\ObjectManager::getInstance()
+    ->get(\Magento\Framework\Module\Manager::class)
+    ->isEnabled('GrupoAwamotos_B2B');
+if ($_b2bActive) {
+    $b2bHelper = $this->helper('GrupoAwamotos\B2B\Helper\Data');
+    $b2bCanAddToCart = $b2bHelper->canAddToCart();
+    $b2bGateState = $block->escapeHtmlAttr($b2bHelper->getPriceGateState());
+    $b2bGateHeadline = $block->escapeHtml($b2bHelper->getPriceGateHeadline());
+    $b2bGateDescription = $block->escapeHtml($b2bHelper->getPriceGateDescription());
+	$b2bPrimaryUrl = $block->escapeUrl($b2bHelper->getPriceGatePrimaryUrl());
+	$b2bPrimaryLabel = $block->escapeHtml($b2bHelper->getPriceGatePrimaryLabel());
+	$b2bSecondaryUrl = $block->escapeUrl($b2bHelper->getPriceGateSecondaryUrl());
+	$b2bSecondaryLabel = $block->escapeHtml($b2bHelper->getPriceGateSecondaryLabel());
+} else {
+    $b2bHelper = null; $b2bCanAddToCart = true; $b2bGateState = '';
+    $b2bGateHeadline = ''; $b2bGateDescription = '';
+	$b2bPrimaryUrl = ''; $b2bPrimaryLabel = '';
+	$b2bSecondaryUrl = ''; $b2bSecondaryLabel = '';
+}
 ?>
 <?php if (!$_productCollection->count()): ?>
     <div class="awa-empty-plp">
