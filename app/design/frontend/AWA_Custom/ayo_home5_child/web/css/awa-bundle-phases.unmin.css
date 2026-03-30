@@ -4297,10 +4297,12 @@ body .page-wrapper .menu_left_home1 .navigation.verticalmenu.side-verticalmenu >
 }
 
 /* ==========================================================================
-   5. B2B PLP GRID VIEW (Responsive Columns)
-   Corrigindo layout de 1 coluna lateral e forçando grid dinâmico
-   ========================================================================== */
-.products-grid .product-grid {
+    5. B2B PLP GRID VIEW (Responsive Columns)
+    Corrigindo layout de 1 coluna lateral e forçando grid dinâmico
+    Escopo restrito a PLP/Search para não vazar estrutura global.
+    ========================================================================== */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+     .products-grid .product-grid {
     display: grid !important;
 
     /* Unificado com token padrão: auto-fit colapsa colunas vazias (vs auto-fill que mantém) */
@@ -4311,12 +4313,15 @@ body .page-wrapper .menu_left_home1 .navigation.verticalmenu.side-verticalmenu >
     list-style: none;
 }
 
-.products-grid .product-grid::before,
-.products-grid .product-grid::after {
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .products-grid .product-grid::before,
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .products-grid .product-grid::after {
     display: none !important; /* Desabilita os pseudo-elementos clearfix do row do bootstrap */
 }
 
-.products-grid .item-product {
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .products-grid .item-product {
     /* width/margin !important: override dos defaults fixos do Magento/Rokanthemes */
     width: 100% !important;
     margin: 0 !important;
@@ -4327,13 +4332,15 @@ body .page-wrapper .menu_left_home1 .navigation.verticalmenu.side-verticalmenu >
     /* display, flex-direction, height, background, border, transition: cobertos pelo core */
 }
 
-.products-grid .item-product:hover {
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .products-grid .item-product:hover {
     box-shadow: 0 4px 15px rgb(0 0 0 / 5%);
     border-color: var(--awa-gray-200); /* mantém borda estável no hover (vs gray-300 do core) */
 }
 
 /* Estilo interno do card de produto no Modo Grid */
-.products-grid .item-product .product-thumb {
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .products-grid .item-product .product-thumb {
     padding: var(--awa-space-3-75);
     display: flex;
     align-items: center;
@@ -4341,37 +4348,43 @@ body .page-wrapper .menu_left_home1 .navigation.verticalmenu.side-verticalmenu >
     border-bottom: 1px solid var(--awa-gray-50);
 }
 
-.products-grid .item-product .product-info {
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .products-grid .item-product .product-info {
     padding: var(--awa-space-5) !important;
     display: flex;
     flex-direction: column;
     flex: 1;
 }
 
-.products-grid .item-product .product-name a {
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .products-grid .item-product .product-name a {
     font-size: var(--awa-text-base-plus);
     font-weight: var(--awa-weight-semibold);
     color: var(--awa-gray-700);
     text-transform: uppercase;
 }
 
-.products-grid .item-product .info-price .price {
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .products-grid .item-product .info-price .price {
     font-size: var(--awa-text-lg);
     font-weight: var(--awa-weight-bold);
     color: var(--awa-red);
 }
 
-.products-grid .item-product .product-info-cart {
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .products-grid .item-product .product-info-cart {
     margin-top: auto;
     padding-top: var(--awa-space-3-75);
     border-top: 1px dashed var(--awa-gray-200);
 }
 
-.products-grid .item-product .actions-primary {
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .products-grid .item-product .actions-primary {
     width: 100%;
 }
 
-.products-grid .item-product .actions-primary .action.tocart {
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .products-grid .item-product .actions-primary .action.tocart {
     width: 100%;
     border-radius: var(--awa-radius-xs);
     font-weight: var(--awa-weight-semibold);
@@ -4382,18 +4395,21 @@ body .page-wrapper .menu_left_home1 .navigation.verticalmenu.side-verticalmenu >
 }
 
 /* Ajustes da Qty Box para o Grid View (Empilhado) */
-.products-grid .awa-catalog-qty-box {
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .products-grid .awa-catalog-qty-box {
     display: block;
     margin: 0 0 var(--awa-space-2-5);
     width: 100%;
 }
 
-.products-grid .awa-catalog-qty-box .input-text.qty {
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .products-grid .awa-catalog-qty-box .input-text.qty {
     width: 100%;
 }
 
 /* Esconder QTY temporariamente do grid se ficar muito poluído (Padrão de Catálogo B2B) */
-.products-grid .awa-catalog-qty-box {
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .products-grid .awa-catalog-qty-box {
     display: none;
 }
 
@@ -5268,7 +5284,7 @@ body .page-wrapper .wrapper.grid .item-product {
 :root {
     /* Container */
     --awa-container-max: var(--awa-container);
-    --awa-container-pad: var(--awa-container-padding);
+    --awa-container-padding: var(--awa-container-padding);
 
     /* Section spacing (responsive) */
     --awa-section-gap: clamp(16px, 2.4vw, 28px);
@@ -5724,23 +5740,10 @@ body.rokanthemes-onepagecheckout .fieldset {
 
 /* ═══════════════════════════════════════════════════════════════
    8. GENERIC PRODUCT CARD GRID — all pages
-   ═══════════════════════════════════════════════════════════════ */
-
-/* Ensure all product grids follow the same logic */
-.products-grid .product-items {
-    display: grid !important;
-    grid-template-columns: var(--awa-grid-product-cols);
-    gap: var(--awa-grid-product-gap);
-    list-style: none;
-    padding: 0 !important;
-}
-
-.products-grid .product-items > .product-item {
-    margin: 0 !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-    width: auto !important;
-}
+   ═══════════════════════════════════════════════════════════════
+   Regra estrutural global removida deste bundle.
+   Fonte canônica: awa-bundle-core.unmin.css (camada síncrona).
+*/
 
 
 /* ═══════════════════════════════════════════════════════════════
@@ -5828,10 +5831,6 @@ body.rokanthemes-onepagecheckout .fieldset {
         max-width: 200px !important;
     }
 
-    /* Generic product grid: 2 cols */
-    .products-grid .product-items {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
 }
 
 /* ---- Small Mobile (≤479px) ---- */
@@ -5851,10 +5850,6 @@ body.rokanthemes-onepagecheckout .fieldset {
         grid-template-columns: 1fr;
     }
 
-    /* Generic product grid: 1 col */
-    .products-grid .product-items {
-        grid-template-columns: 1fr;
-    }
 }
 
 

@@ -23,6 +23,15 @@
     --awa-safe-search-shadow-focus: 0 0 0 4px rgb(183 51 55 / 12%);
     --awa-safe-focus-ring: 0 0 0 3px rgb(183 51 55 / 22%);
     --awa-safe-focus-ring-strong: 0 0 0 4px rgb(183 51 55 / 28%);
+    --awa-safe-search-gap-outer: clamp(14px, 1.4vw, 18px);
+    --awa-safe-search-gap-inner: var(--awa-space-1, 4px);
+    --awa-safe-search-gap-icon: var(--awa-space-2, 8px);
+    --awa-safe-search-shell-radius: 18px;
+    --awa-safe-search-shell-height: 54px;
+    --awa-safe-search-control-height: 46px;
+    --awa-safe-search-input-pad-start: var(--awa-space-4, 16px);
+    --awa-safe-search-input-pad-end: var(--awa-space-3, 12px);
+    --awa-safe-search-button-size: 46px;
 }
 
 /* Header utility bar: less visual noise, better hierarchy */
@@ -79,14 +88,20 @@
 
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
     .page-wrapper .header .top-search {
-    gap: var(--awa-gap-md, 12px) !important;
+    gap: var(--awa-safe-search-gap-outer) !important;
 }
 
 /* Search: refined look without changing behavior */
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
     .page-wrapper .header .top-search .block-search .form.minisearch {
+    display: flex;
+    align-items: center;
+    gap: var(--awa-safe-search-gap-inner);
+    min-height: var(--awa-safe-search-shell-height);
+    padding: var(--awa-safe-search-gap-inner);
+    padding-inline-end: var(--awa-safe-search-gap-icon);
     border: 1px solid var(--awa-safe-search-border) !important;
-    border-radius: var(--awa-radius-md, 10px) !important;
+    border-radius: var(--awa-safe-search-shell-radius) !important;
     box-shadow: var(--awa-safe-search-shadow);
 }
 
@@ -105,9 +120,9 @@
 
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
     .page-wrapper .header .top-search .block-search .field.search .control input#search {
-    min-height: 46px;
+    min-height: var(--awa-safe-search-control-height);
     font-size: var(--awa-text-base-plus, 15px);
-    padding-inline: 18px;
+    padding-inline: var(--awa-safe-search-input-pad-start) var(--awa-safe-search-input-pad-end);
 }
 
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
@@ -116,9 +131,22 @@
 }
 
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .page-wrapper .header .top-search .block-search .actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding-inline-start: var(--awa-safe-search-gap-inner);
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
     .page-wrapper .header .top-search .block-search .actions .action.search {
-    min-height: 46px;
-    padding-inline: 19px;
+    width: var(--awa-safe-search-button-size);
+    min-width: var(--awa-safe-search-button-size);
+    height: var(--awa-safe-search-button-size);
+    min-height: var(--awa-safe-search-button-size);
+    padding: 0;
+    border-radius: var(--awa-radius-sm, 12px);
 }
 
 /* QA: explicit focus visibility for keyboard navigation */
@@ -293,6 +321,14 @@
 
 @media (max-width: 991px) {
     :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+        .page-wrapper {
+        --awa-safe-search-gap-outer: var(--awa-space-3, 12px);
+        --awa-safe-search-shell-height: 52px;
+        --awa-safe-search-button-size: 44px;
+        --awa-safe-search-control-height: 44px;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
         .page-wrapper .top-account ul.header.links > li > a {
         padding: 5px var(--awa-space-2-5, 10px);
         font-size: var(--awa-text-2xs, 11px);
@@ -305,6 +341,18 @@
 }
 
 @media (max-width: 767px) {
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+        .page-wrapper {
+        --awa-safe-search-gap-outer: var(--awa-space-2, 8px);
+        --awa-safe-search-gap-icon: var(--awa-space-1, 4px);
+        --awa-safe-search-shell-radius: 16px;
+        --awa-safe-search-shell-height: 48px;
+        --awa-safe-search-control-height: 44px;
+        --awa-safe-search-input-pad-start: var(--awa-space-3, 12px);
+        --awa-safe-search-input-pad-end: var(--awa-space-2, 8px);
+        --awa-safe-search-button-size: 44px;
+    }
+
     :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
         .page-wrapper .top-header {
         border-bottom-color: var(--awa-safe-chip-border, #e5e5e5);
@@ -319,15 +367,18 @@
 
     :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
         .page-wrapper .header .top-search .block-search .field.search .control input#search {
-        min-height: 44px;
+        min-height: var(--awa-safe-search-control-height);
         font-size: var(--awa-text-sm, 13px);
-        padding-inline: var(--awa-space-3, 12px);
+        padding-inline: var(--awa-safe-search-input-pad-start) var(--awa-safe-search-input-pad-end);
     }
 
     :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
         .page-wrapper .header .top-search .block-search .actions .action.search {
-        min-height: 44px;
-        padding-inline: 14px;
+        width: var(--awa-safe-search-button-size);
+        min-width: var(--awa-safe-search-button-size);
+        height: var(--awa-safe-search-button-size);
+        min-height: var(--awa-safe-search-button-size);
+        padding: 0;
     }
 
     :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)

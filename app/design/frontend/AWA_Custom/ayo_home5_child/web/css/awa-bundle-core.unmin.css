@@ -497,7 +497,9 @@ body .page-wrapper .verticalmenu .category-dropdown {
 
 body .page-wrapper .verticalmenu .category-dropdown li {
     padding: 0;
-    border-bottom: 1px solid rgb(0 0 0 / 5%);
+    border-bottom: 1px solid rgb(0 0 0 / 8%); /* R2026-A: 5%→8% — separadores mais legíveis */
+    border-inline-start: 3px solid transparent;
+    transition: border-color var(--awa-transition-fast);
 }
 
 body .page-wrapper .verticalmenu.side-verticalmenu li.level0 {
@@ -505,18 +507,30 @@ body .page-wrapper .verticalmenu.side-verticalmenu li.level0 {
     position: relative;
 }
 
+/* R2026-B: hierarquia tipográfica — nível 0 com mais peso visual */
+body .page-wrapper .verticalmenu.side-verticalmenu li.level0 > a {
+    font-weight: var(--awa-weight-semibold);
+    font-size: var(--awa-text-base); /* 14px no lugar de text-sm (13px) */
+    color: var(--awa-gray-700);
+}
+
 body .page-wrapper .verticalmenu .category-dropdown li a {
     display: block;
     padding: var(--awa-space-3) var(--awa-space-4);
     font-size: var(--awa-text-sm);
     color: var(--awa-dark);
-    transition: background var(--awa-transition-fast), color var(--awa-transition-fast), transform var(--awa-transition-fast); /* R14: transform substituiu padding-left (composite-only) */
+    transition: background var(--awa-transition-fast), color var(--awa-transition-fast), padding var(--awa-transition-fast); /* R14: padding substitui transform (layout shift controlado) */
 }
 
 body .page-wrapper .verticalmenu .category-dropdown li a:hover {
     background: var(--awa-red-extra-light); /* R14: token */
     color: var(--awa-red-dark);
-    transform: translateX(5px); /* R14: composite-only, era padding-left (layout) */
+    padding-inline-start: calc(var(--awa-space-4) + 3px);
+}
+
+/* Border indicator no li pai */
+body .page-wrapper .verticalmenu .category-dropdown li:hover {
+    border-inline-start-color: var(--awa-red);
 }
 
 body .page-wrapper .verticalmenu .open-children-toggle {
@@ -527,11 +541,21 @@ body .page-wrapper .verticalmenu .open-children-toggle {
     justify-content: center;
     cursor: pointer;
     flex-shrink: 0;
+    /* R2026-C: feedback visual no toggle */
+    color: var(--awa-gray-430);
+    border-radius: var(--awa-radius-xs);
+    transition: color var(--awa-transition-fast), background var(--awa-transition-fast);
+}
+
+body .page-wrapper .verticalmenu .open-children-toggle:hover {
+    color: var(--awa-red);
+    background: var(--awa-red-extra-light);
 }
 
 body .page-wrapper .verticalmenu .category-dropdown .submenu {
-    background: var(--awa-bg-surface); /* BP-12 */
+    background: var(--awa-gray-50); /* R2026-D: #f7f7f7 — profundidade visual, diferencia do nível 0 */
     border-left: 3px solid var(--awa-red);
+    padding-inline-start: var(--awa-space-1); /* R2026-D: respira o border-left vermelho */
 }
 
 /* Chevron expand/collapse */
@@ -540,7 +564,7 @@ body .page-wrapper h2.title-category-dropdown::after {
     content: '\f078';
     font-family: FontAwesome, sans-serif;
     font-size: var(--awa-text-xs);
-    transition: transform var(--awa-transition); /* R12-03 */
+    transition: transform var(--awa-transition-fast); /* R12-03: era --awa-transition (circular) */
     margin-left: auto;
 }
 
@@ -2694,9 +2718,9 @@ body .page-wrapper .item-product .sku {
     display: none;
 }
 
-body .page-wrapper .item-product .weee,
+body .page-wrapper .item-product .weee:not(.price-container),
 body .page-wrapper .item-product [data-label="Excl. Tax"],
-body .page-wrapper .item-deal-product .weee {
+body .page-wrapper .item-deal-product .weee:not(.price-container) {
     display: none;
 }
 
@@ -3124,8 +3148,8 @@ body .page-wrapper .swiper .swiper-button-next {
 
 body .page-wrapper .swiper .swiper-button-prev:hover,
 body .page-wrapper .swiper .swiper-button-next:hover {
-    background: var(--awa-accent, #E63946);
-    border-color: var(--awa-accent, #E63946);
+    background: var(--awa-accent, #b73337);
+    border-color: var(--awa-accent, #b73337);
     color: var(--awa-white, #fff);
 }
 
@@ -3152,7 +3176,7 @@ body .page-wrapper .swiper .swiper-pagination-bullet {
 }
 
 body .page-wrapper .swiper .swiper-pagination-bullet-active {
-    background: var(--awa-accent, #E63946);
+    background: var(--awa-accent, #b73337);
     transform: scale(1.25);
 }
 
@@ -14552,6 +14576,30 @@ body .page-wrapper .page-main.container > .columns {
         grid-template-columns: 1fr;
         gap: var(--awa-space-5);
     }
+}
+
+/* ==========================================================================
+   Fix: Ayo themes5.css compila @titlefont/@bdf como 'Poppins' (não carregada).
+   Override sincronizado com Google Font Montserrat (configurado no Themeoption).
+   Carrega APÓS themes5.css na cascata — mesma especificidade, source order vence.
+   ========================================================================== */
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Montserrat', sans-serif;
+}
+
+.sidebar-shop .widget .widget-title,
+.filter-content .filter-options .filter-options-title,
+#layered_ajax_price_text,
+.price-box {
+    font-family: 'Montserrat', sans-serif;
+}
+
+.product-item-name .product-item-link,
+.products-grid .product-item-link,
+body.catalog-category-view .product-item-link,
+body.catalogsearch-result-index .product-item-link {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600 !important;
 }
 
 }
