@@ -358,7 +358,7 @@
     border: 2px solid rgb(183 51 55 / 15%);
     border-radius: var(--pdp-radius-lg);
     padding: 20px 24px;
-    margin-bottom: 20px;
+    margin-bottom: 0;
     box-shadow: 0 4px 16px rgb(183 51 55 / 8%);
     position: relative;
 }
@@ -440,7 +440,7 @@
     border: 2px solid var(--pdp-border);
     border-radius: var(--pdp-radius-lg);
     padding: 24px;
-    margin-top: 16px;
+    margin-top: 0;
     box-shadow: var(--pdp-shadow);
 }
 
@@ -1993,7 +1993,7 @@
 
 @media (min-width: 1280px) {
     .catalog-product-view .product-view {
-        padding: 32px 24px 56px;
+        padding: 32px 24px 24px;
     }
 }
 
@@ -2216,7 +2216,8 @@
 
 @media (max-width: 767px) {
     .catalog-product-view .product-view {
-        padding: 16px 12px 108px;
+        /* Reduzido de 108px. Sticky CTA bar = 80px bottom:52px. 76px garantia sem overlap. */
+        padding: 16px 12px 76px;
     }
 
     .catalog-product-view .main-detail > .row {
@@ -2368,4 +2369,36 @@
 .catalog-product-view .awa-b2b-secondary-ctas-container,
 .catalog-product-view .awa-pdp-b2b-secondary-section {
     margin-top: 12px;
+}
+
+/* ============================================================
+   AWA PDP — Spacing Refinements (2026-03-30)
+   Elimina double-spacing causado por margin nos filhos do grid
+   e reduz gap excessivo no final do product-view mobile/desktop.
+   product-info-main usa display:grid;gap:14-16px — os filhos
+   não devem ter margin-top/bottom extras.
+   ============================================================ */
+
+/* Override margin-bottom externo no product-info-main
+   (themes.css/styles-m.css define ~50px; nosso grid já provê espaço) */
+.catalog-product-view .product-info-main {
+    margin-bottom: 0 !important;
+}
+
+/* Override margin-top externo no priceInfo (themes.css define margin-top: 20px)
+   produto-info-main usa grid;gap:14px — não precisa de margin-top extra no primeiro item */
+.catalog-product-view .product-info-main .product-info-price {
+    margin-top: 0;
+}
+
+/* Override margin externo no box-tocart (themes.css define margin: 24px 0px) */
+.catalog-product-view .product-info-main .box-tocart {
+    margin: 0;
+}
+
+/* Tablet 992–1279px: reduz o padding-bottom (não há sticky bar) */
+@media (min-width: 992px) and (max-width: 1279px) {
+    .catalog-product-view .product-view {
+        padding-bottom: 24px;
+    }
 }
