@@ -560,31 +560,36 @@ class StockSync implements StockSyncInterface
     private function syncSingleStock(array $row): array
     {
         $result = ['status' => 'skipped', 'anomaly' => false];
-        $sku = trim($row['MATERIAL'] ?? '');
+        $erpIdentifier = trim($row['MATERIAL'] ?? '');
 
-        if (empty($sku)) {
+        if (empty($erpIdentifier)) {
             return $result;
         }
 
         try {
-            $validationResult = $this->validateStockData($row, $sku);
+            $targetSku = $this->resolveMagentoSku($erpIdentifier);
+            $validationResult = $this->validateStockData($row, $targetSku ?? $erpIdentifier);
             if ($validationResult === null) {
                 $result['status'] = 'validation_failed';
                 return $result;
             }
 
-            $result['anomaly'] = $this->checkAndLogAnomaly($validationResult, $sku);
-
-            $targetSku = $this->resolveMagentoSku($sku);
             if ($targetSku === null) {
                 $result['status'] = 'not_found';
                 return $result;
             }
 
+            $resolutionType = $this->determineSkuResolutionType($erpIdentifier, $targetSku);
+            $result['anomaly'] = $this->checkAndLogAnomaly(
+                $validationResult,
+                $erpIdentifier,
+                $targetSku,
+                $resolutionType
+            );
             $result['status'] = $this->syncValidatedStock($targetSku, $validationResult);
             return $result;
         } catch (\Exception $e) {
-            $this->logger->error('[ERP] Stock sync error', ['sku' => $sku, 'error' => $e->getMessage()]);
+            $this->logger->error('[ERP] Stock sync error', ['sku' => $erpIdentifier, 'error' => $e->getMessage()]);
             $result['status'] = 'error';
             return $result;
         }
@@ -616,18 +621,35 @@ class StockSync implements StockSyncInterface
     /**
      * Check for anomalies and log if detected
      */
-    private function checkAndLogAnomaly(object $validationResult, string $sku): bool
+    private function checkAndLogAnomaly(
+        object $validationResult,
+        string $erpIdentifier,
+        string $targetSku,
+        string $resolutionType
+    ): bool
     {
+        if ($validationResult->getField('quantity_original') !== null || $resolutionType === 'base_sku') {
+            return false;
+        }
+
+        $anomalyResult = $this->stockValidator->detectAnomaly(
+            $targetSku,
+            (float) $validationResult->getField('quantity', 0)
+        );
+        $validationResult->merge($anomalyResult);
+
         if (!$validationResult->getField('anomaly_detected', false)) {
             return false;
         }
 
         if (count($this->anomalySamples) < self::ANOMALY_SAMPLE_LIMIT) {
             $this->anomalySamples[] = [
-                'sku' => $sku,
+                'requested_identifier' => $erpIdentifier,
+                'target_sku' => $targetSku,
                 'change_percent' => $validationResult->getField('anomaly_percent_change'),
                 'previous_qty' => $validationResult->getField('previous_quantity'),
                 'new_qty' => $validationResult->getField('quantity'),
+                'resolution_type' => $resolutionType,
             ];
         }
 
@@ -831,6 +853,23 @@ class StockSync implements StockSyncInterface
             'erp_identifier' => $erpIdentifier,
             'target_sku' => $targetSku,
         ];
+    }
+
+    private function determineSkuResolutionType(string $erpIdentifier, string $targetSku): string
+    {
+        if ($erpIdentifier === $targetSku) {
+            return 'direct';
+        }
+
+        if ($this->getBaseSku($erpIdentifier) === $targetSku) {
+            return 'base_sku';
+        }
+
+        if ($this->getSkuByInternalCode($erpIdentifier) === $targetSku) {
+            return 'internal_code';
+        }
+
+        return 'fallback';
     }
 
     private function getErpInternalCodeAttributeId(): ?int

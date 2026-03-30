@@ -650,6 +650,124 @@ class StockSyncTest extends TestCase
         $this->assertTrue($result);
     }
 
+    public function testSyncAllUsesResolvedSkuForAnomalyDetection(): void
+    {
+        $resourceConn = $this->createMock(ResourceConnection::class);
+        $dbAdapter = $this->createMock(\Magento\Framework\DB\Adapter\AdapterInterface::class);
+        $dbAdapter->method('fetchCol')->willReturn(['SKU-001']);
+        $dbAdapter->method('fetchAll')->willReturn([
+            ['sku' => 'SKU-001', 'erp_internal_code' => 'INT-001'],
+        ]);
+        $dbAdapter->method('fetchOne')->willReturn(123);
+        $resourceConn->method('getConnection')->willReturn($dbAdapter);
+        $resourceConn->method('getTableName')->willReturnArgument(0);
+
+        $stockValidator = $this->createMock(StockValidator::class);
+        $stockValidator->expects($this->once())
+            ->method('validate')
+            ->with(['MATERIAL' => 'INT-001', 'QTDE' => 350.0], 'SKU-001')
+            ->willReturn(ValidationResult::success([
+                'sku' => 'SKU-001',
+                'quantity' => 350.0,
+            ]));
+        $stockValidator->expects($this->once())
+            ->method('detectAnomaly')
+            ->with('SKU-001', 350.0)
+            ->willReturn(ValidationResult::success());
+
+        $cache = $this->createMock(CacheInterface::class);
+        $cache->expects($this->never())->method('save');
+
+        $stockItem = $this->createMock(StockItemInterface::class);
+        $stockItem->method('getQty')->willReturn(100.0);
+
+        $this->connection->expects($this->once())
+            ->method('query')
+            ->willReturn([
+                ['MATERIAL' => 'INT-001', 'QTDE' => 350.0],
+            ]);
+
+        $this->stockRegistry->expects($this->once())
+            ->method('getStockItemBySku')
+            ->with('SKU-001')
+            ->willReturn($stockItem);
+        $this->stockRegistry->expects($this->once())
+            ->method('updateStockItemBySku')
+            ->with('SKU-001', $stockItem);
+
+        $stockSync = new StockSync(
+            $this->connection,
+            $this->helper,
+            $this->productRepository,
+            $this->stockRegistry,
+            $this->syncLogResource,
+            $stockValidator,
+            $cache,
+            $this->logger,
+            $resourceConn
+        );
+
+        $result = $stockSync->syncAll();
+
+        $this->assertSame(1, $result['updated']);
+        $this->assertSame(0, $result['anomalies_detected']);
+    }
+
+    public function testSyncAllSkipsAnomalyDetectionForBaseSkuResolution(): void
+    {
+        $resourceConn = $this->createMock(ResourceConnection::class);
+        $dbAdapter = $this->createMock(\Magento\Framework\DB\Adapter\AdapterInterface::class);
+        $dbAdapter->method('fetchCol')->willReturn(['SKU-001']);
+        $dbAdapter->method('fetchAll')->willReturn([]);
+        $dbAdapter->method('fetchOne')->willReturn(null);
+        $resourceConn->method('getConnection')->willReturn($dbAdapter);
+        $resourceConn->method('getTableName')->willReturnArgument(0);
+
+        $stockValidator = $this->createMock(StockValidator::class);
+        $stockValidator->expects($this->once())
+            ->method('validate')
+            ->with(['MATERIAL' => 'SKU-001 AZUL', 'QTDE' => 15.0], 'SKU-001')
+            ->willReturn(ValidationResult::success([
+                'sku' => 'SKU-001',
+                'quantity' => 15.0,
+            ]));
+        $stockValidator->expects($this->never())->method('detectAnomaly');
+
+        $this->connection->expects($this->once())
+            ->method('query')
+            ->willReturn([
+                ['MATERIAL' => 'SKU-001 AZUL', 'QTDE' => 15.0],
+            ]);
+
+        $stockItem = $this->createMock(StockItemInterface::class);
+        $stockItem->method('getQty')->willReturn(12.0);
+
+        $this->stockRegistry->expects($this->once())
+            ->method('getStockItemBySku')
+            ->with('SKU-001')
+            ->willReturn($stockItem);
+        $this->stockRegistry->expects($this->once())
+            ->method('updateStockItemBySku')
+            ->with('SKU-001', $stockItem);
+
+        $stockSync = new StockSync(
+            $this->connection,
+            $this->helper,
+            $this->productRepository,
+            $this->stockRegistry,
+            $this->syncLogResource,
+            $stockValidator,
+            $this->cache,
+            $this->logger,
+            $resourceConn
+        );
+
+        $result = $stockSync->syncAll();
+
+        $this->assertSame(1, $result['updated']);
+        $this->assertSame(0, $result['anomalies_detected']);
+    }
+
     // ========== getStockBreakdownBySku Tests ==========
 
     public function testGetStockBreakdownBySkuSingleBranch(): void

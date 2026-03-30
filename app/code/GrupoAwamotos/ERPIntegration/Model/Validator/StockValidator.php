@@ -10,7 +10,6 @@ use Psr\Log\LoggerInterface;
  * Stock Data Validator
  *
  * Validates stock data from ERP before updating Magento inventory.
- * Includes anomaly detection for suspicious stock changes.
  */
 class StockValidator
 {
@@ -33,15 +32,12 @@ class StockValidator
      * Minimum current quantity for anomaly detection
      * (avoid false positives when current stock is very low)
      */
-    private const ANOMALY_MIN_CURRENT_QTY = 10;
+    private const ANOMALY_MIN_CURRENT_QTY = 100;
 
     /**
-     * Minimum absolute increase to flag as anomaly (for positive stock changes).
-     * Increases below this threshold are considered routine restocking and are
-     * NOT flagged, even if the percentage change exceeds ANOMALY_THRESHOLD_PERCENT.
-     * Decreases are always flagged when percentage threshold is exceeded.
+     * Minimum absolute decrease to flag as anomaly.
      */
-    private const ANOMALY_MIN_ABSOLUTE_INCREASE = 200;
+    private const ANOMALY_MIN_ABSOLUTE_DECREASE = 200;
 
     private StockRegistryInterface $stockRegistry;
     private LoggerInterface $logger;
@@ -74,12 +70,6 @@ class StockValidator
         // Validate quantity
         $qtyResult = $this->validateQuantity($stockData);
         $result->merge($qtyResult);
-
-        // Check for anomalies if SKU is provided
-        if ($validatedSku && $result->isValid()) {
-            $anomalyResult = $this->detectAnomaly($validatedSku, $result->getField('quantity', 0));
-            $result->merge($anomalyResult);
-        }
 
         // Keep per-item logs focused on true validation problems.
         // Anomaly warnings are consolidated by StockSync.
@@ -157,13 +147,17 @@ class StockValidator
     /**
      * Detect stock anomalies (sudden large changes)
      */
-    private function detectAnomaly(string $sku, float $newQty): ValidationResult
+    public function detectAnomaly(string $sku, float $newQty, ?float $baselineQty = null): ValidationResult
     {
         $result = new ValidationResult();
 
         try {
-            $stockItem = $this->stockRegistry->getStockItemBySku($sku);
-            $currentQty = (float) $stockItem->getQty();
+            $currentQty = $baselineQty;
+
+            if ($currentQty === null) {
+                $stockItem = $this->stockRegistry->getStockItemBySku($sku);
+                $currentQty = (float) $stockItem->getQty();
+            }
 
             // Skip anomaly detection for low current stock
             if ($currentQty < self::ANOMALY_MIN_CURRENT_QTY) {
@@ -174,13 +168,8 @@ class StockValidator
             $change = $newQty - $currentQty;
             $percentChange = ($change / $currentQty) * 100;
 
-            // Detect anomaly based on direction:
-            // - Decreases: flag when >ANOMALY_THRESHOLD_PERCENT (data errors, theft)
-            // - Increases: flag only when >ANOMALY_THRESHOLD_PERCENT AND absolute
-            //   delta > ANOMALY_MIN_ABSOLUTE_INCREASE to avoid noise from routine
-            //   bulk restocking operations
-            $isAnomalous = abs($percentChange) > self::ANOMALY_THRESHOLD_PERCENT
-                && ($change < 0 || abs($change) >= self::ANOMALY_MIN_ABSOLUTE_INCREASE);
+            $isAnomalous = $change <= -self::ANOMALY_MIN_ABSOLUTE_DECREASE
+                && abs($percentChange) > self::ANOMALY_THRESHOLD_PERCENT;
 
             if ($isAnomalous) {
                 $direction = $change > 0 ? 'aumento' : 'redução';
