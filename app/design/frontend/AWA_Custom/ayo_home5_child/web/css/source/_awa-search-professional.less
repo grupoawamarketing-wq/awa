@@ -1,11 +1,11 @@
 /*
- * AWA Professional Search Bar Styles
- * Foco em UX, estados visuais (focus/hover) e responsividade
+ * AWA Professional Search Bar — Modern B2B Redesign
+ * Tokens: @awa-* de _awa-variables.less (importado via _variables.less)
  */
 
-
 @import (once) '_awa-variables';
- .awa-professional-search {
+
+.awa-professional-search {
     width: 100%;
     position: relative;
     z-index: 100;
@@ -14,6 +14,7 @@
         margin: 0;
     }
 
+    // ── Screen-reader only utility ────────────────────────────────────────
     .awa-sr-only {
         position: absolute;
         width: 1px;
@@ -26,50 +27,52 @@
         border-width: 0;
     }
 
-    form.search-content {
+    // ── Search Form Container ─────────────────────────────────────────────
+    form.search-content,
+    form.minisearch {
         display: flex !important;
-        align-items: stretch !important;
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.94));
-        border: 1px solid rgba(148, 163, 184, 0.28);
-        border-radius: 18px;
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        min-height: 56px;
+        align-items: center !important;
+        background: #fff;
+        border: 1.5px solid @awa-color-border;
+        border-radius: @awa-radius-full; // pill shape
+        transition: border-color 200ms ease, box-shadow 200ms ease;
+        min-height: 52px;
         position: relative;
         overflow: visible;
         margin: 0;
         padding: 4px;
-        width: 100%; /* Garante que o form ocupe 100% do wrapper */
-        box-shadow: 0 16px 36px rgba(15, 23, 42, 0.08);
+        width: 100%;
+        box-shadow: 0 4px 16px fade(@awa-neutral-900, 6%);
 
-        /* Estado de Focus (Falso Focus no contêiner pai) */
         &:focus-within {
-            border-color: fade(@awa-color-primary, 42%);
-            box-shadow: 0 0 0 4px fade(@awa-color-primary, 8%), 0 18px 40px fade(@awa-color-primary, 12%);
+            border-color: @awa-color-primary;
+            box-shadow: 0 0 0 3px fade(@awa-color-primary, 10%), 0 4px 20px fade(@awa-color-primary, 10%);
         }
 
-        /* 1. Categoria Dropdown (Esquerda) */
-        .awa-search-category-wrapper {
+        // ── Category Dropdown (left) ──────────────────────────────────────
+        .awa-search-category-wrapper,
+        .field-by-cat-search {
             position: relative;
             flex: 0 0 auto;
-            border-right: 1px solid var(--awa-color-border, #e5e5e5);
-            background: var(--awa-color-bg-soft, #f9f9f9);
+            border-right: 1px solid @awa-color-border;
+            background: @awa-color-bg-soft;
             display: flex;
             align-items: center;
             margin: 0;
             padding: 0;
-            width: auto;
-            border-radius: 14px;
+            border-radius: @awa-radius-full 0 0 @awa-radius-full;
+            min-height: 44px;
 
             .awa-search-category-select {
                 appearance: none;
                 -webkit-appearance: none;
                 background: transparent;
                 border: none;
-                padding: 0 38px 0 16px;
+                padding: 0 36px 0 16px;
                 height: 100%;
                 color: var(--awa-color-text-secondary, #666);
-                font-weight: 500;
-                font-size: 14px;
+                font-weight: @awa-weight-medium;
+                font-size: @awa-text-sm;
                 cursor: pointer;
                 outline: none;
                 box-shadow: none;
@@ -77,20 +80,21 @@
                 min-height: auto;
 
                 &:focus-visible {
-                    color: var(--awa-color-text-primary, #333);
+                    color: var(--awa-color-text-primary);
                 }
             }
 
             .awa-select-icon {
                 position: absolute;
-                right: 12px;
+                right: 10px;
                 pointer-events: none;
                 color: var(--awa-color-text-secondary, #666);
             }
         }
 
-        /* 2. Input de Texto (Centro) */
-        .awa-search-input-wrapper {
+        // ── Text Input (center) ───────────────────────────────────────────
+        .awa-search-input-wrapper,
+        .field.search {
             flex: 1 1 auto;
             position: relative;
             margin: 0;
@@ -106,167 +110,174 @@
                 height: 100%;
                 margin: 0;
                 padding: 0;
-
-                /* Garante que o input preencha todo o espaço do control */
                 display: flex;
                 align-items: center;
                 width: 100%;
+                position: relative;
             }
 
-            .awa-search-input {
+            input.awa-search-input,
+            input.input-text {
                 width: 100%;
-                height: 100%;
+                height: 44px;
                 border: none !important;
                 background: transparent !important;
-                padding: 0 18px;
-                font-size: 15px;
-                font-weight: 500;
+                padding: 0 16px;
+                font-size: @awa-text-sm;
+                font-weight: @awa-weight-normal;
                 color: var(--awa-color-text-primary, #333);
-                outline: none;
+                outline: none !important;
                 box-shadow: none !important;
                 margin: 0;
                 border-radius: 0;
-                line-height: normal; /* Evita que o texto fique cortado ou desalinhado verticalmente */
+                line-height: normal;
 
                 &::placeholder {
-                    color: var(--awa-color-text-secondary, #999);
-                    opacity: 0.82;
-                    line-height: normal;
+                    color: @awa-neutral-400;
+                    opacity: 1;
                 }
 
-                /* Remove ícone de 'X' nativo do webkit para busca */
                 &::-webkit-search-decoration,
                 &::-webkit-search-cancel-button,
                 &::-webkit-search-results-button,
                 &::-webkit-search-results-decoration {
                     display: none;
+                    -webkit-appearance: none;
                 }
             }
 
-            /* Feedback Visual de Carregamento (Spinner) */
+            // Loading spinner
             .awa-search-spinner {
                 position: absolute;
                 right: 12px;
                 top: 50%;
                 transform: translateY(-50%);
-                width: 18px;
-                height: 18px;
+                width: 16px;
+                height: 16px;
                 border: 2px solid fade(@awa-color-primary, 20%);
-                border-top-color: var(--awa-color-primary);
+                border-top-color: @awa-color-primary;
                 border-radius: 50%;
-                animation: awa-spin 0.8s linear infinite;
+                animation: awa-spin 0.7s linear infinite;
                 opacity: 0;
                 visibility: hidden;
-                transition: opacity 0.2s;
+                transition: opacity 150ms;
             }
         }
 
-        /* 3. Botão de Busca (Direita) */
-        .awa-search-action-wrapper {
+        // ── Search Button (right) ─────────────────────────────────────────
+        .awa-search-action-wrapper,
+        .actions {
             flex: 0 0 auto;
             margin: 0;
             padding: 0;
 
-            .awa-search-btn {
-                background: linear-gradient(135deg, var(--awa-color-primary), var(--awa-color-primary-dark)) !important;
+            button.awa-search-btn,
+            button.action.search {
+                background: @awa-color-primary !important;
                 border: none !important;
-                min-width: 122px;
-                height: 48px;
-                padding: 0 18px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: #fff !important;
+                width: 44px;
+                height: 44px;
+                min-width: 44px;
+                padding: 0 !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                color: @awa-color-button-text !important;
                 cursor: pointer;
-                transition: all 0.2s ease;
+                transition: background-color 180ms ease, box-shadow 180ms ease, transform 150ms ease;
                 outline: none;
                 margin: 0;
-                min-width: auto;
-                border-radius: 14px;
-                box-shadow: 0 12px 24px fade(@awa-color-primary, 22%);
-                font-size: 14px;
-                font-weight: 700;
-                letter-spacing: 0.01em;
+                border-radius: @awa-radius-full;
+                box-shadow: 0 4px 12px fade(@awa-color-primary, 28%);
 
-                /* Oculta qualquer pseudo-elemento de ícone que o tema pai possa estar injetando (ex: ::before) */
-                &::before, &::after {
+                // suppress theme ::before icon injections
+                &::before,
+                &::after {
                     display: none !important;
                     content: none !important;
                 }
 
-                &:hover, &:focus-visible {
-                    color: #fff !important;
-                    background: linear-gradient(135deg, #c63c40, #96292c) !important;
-                    box-shadow: 0 14px 28px fade(@awa-color-primary, 28%);
-                    transform: translateY(-1px);
+                svg {
+                    display: block !important;
+                    width: 18px !important;
+                    height: 18px !important;
+                    stroke: @awa-color-button-text !important;
+                    flex-shrink: 0 !important;
+                    pointer-events: none;
                 }
 
-                span {
-                    display: inline-flex;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 8px;
+                span:not(.awa-sr-only) {
+                    display: none; // icon-only button; text is sr-only
+                }
+
+                &:hover,
+                &:focus-visible {
+                    background: @awa-color-primary-dark !important;
+                    box-shadow: 0 6px 18px fade(@awa-color-primary, 36%);
+                    transform: translateY(-1px);
+                    color: @awa-color-button-text !important;
                 }
 
                 &:active {
                     transform: translateY(0);
+                    box-shadow: 0 2px 8px fade(@awa-color-primary, 20%);
+                }
+
+                &:focus-visible {
+                    outline: 2px solid @awa-color-primary-dark;
+                    outline-offset: 2px;
                 }
             }
         }
     }
 
-    /* Estado de carregamento AJAX ativo (controlado via JS) */
-    &.is-searching {
-        .awa-search-spinner {
-            opacity: 1;
-            visibility: visible;
-        }
-        .awa-search-btn {
-            opacity: 0;
-            visibility: hidden;
-        }
-    }
-
+    // ── Loading state ─────────────────────────────────────────────────────
+    &.is-searching,
     &[aria-busy='true'] {
         .awa-search-spinner {
-            opacity: 1;
-            visibility: visible;
+            opacity: 1 !important;
+            visibility: visible !important;
         }
     }
 
-    /* Ajustes Mobile */
-    @media (max-width: 767px) {
-        .search-content {
+    // ── Search meta helper copy ───────────────────────────────────────────
+    .awa-search-meta,
+    .awa-search-helper-copy {
+        display: none; // visually hidden; kept for a11y ref
+    }
+}
+
+// ── Mobile ────────────────────────────────────────────────────────────────
+@media (max-width: @awa-breakpoint-sm) {
+    .awa-professional-search {
+        form.search-content,
+        form.minisearch {
             min-height: 48px;
 
-            .awa-search-category-wrapper {
-                display: none; /* Esconde seletor de categorias para otimizar espaço */
+            .awa-search-category-wrapper,
+            .field-by-cat-search {
+                display: none; // save space on mobile
             }
 
-            .awa-search-input-wrapper {
-                .awa-search-input {
-                    font-size: 16px; /* Evita zoom automático no iOS */
-                    padding: 0 12px;
-                }
-            }
-
-            .awa-search-action-wrapper {
-                .awa-search-btn {
-                    min-width: 104px;
-                    height: 40px;
-                    padding: 0 14px;
-                }
+            input.awa-search-input,
+            input.input-text {
+                font-size: 16px; // prevent iOS auto-zoom
+                padding: 0 12px;
             }
         }
     }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .awa-professional-search form.search-content,
-    .awa-professional-search .awa-search-btn,
-    .awa-professional-search .awa-search-input-wrapper .awa-search-spinner {
-        transition: none;
-        animation: none;
+    .awa-professional-search {
+        form.search-content,
+        form.minisearch,
+        .awa-search-btn,
+        button.action.search,
+        .awa-search-spinner {
+            transition: none;
+            animation: none;
+        }
     }
 }
 

@@ -388,15 +388,21 @@
             gap: 12px;
             flex: 0 0 auto; /* Não permite que o carrinho diminua */
 
+            // Label is now a <span class="awa-minicart-label"> in header.phtml (i18n-safe)
             &::before {
-                content: 'Cotação / Carrinho';
+                content: none;
+                display: none;
+            }
+
+            .awa-minicart-label {
                 font-size: 12px;
-                font-weight: 700;
+                font-weight: @awa-weight-bold;
                 color: var(--awa-color-text-secondary, #666);
                 text-transform: uppercase;
                 letter-spacing: 0.5px;
                 text-align: right;
                 display: block;
+                white-space: nowrap;
             }
 
             .action.showcart {
@@ -827,12 +833,76 @@
     }
 }
 
+/* ── CTA "Solicitar Orçamento" — utility bar left slot ──────────────────────
+   Scope: .top-bar-left (actual HTML class in header.phtml).
+   NOTE: .awa-utility-bar is not on the rendered element — scoped here to match DOM.
+   ─────────────────────────────────────────────────────────────────────────── */
+.awa-site-header.awa-header-professional .top-bar-left .awa-header-quote-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 24px;
+    padding: 0 @awa-space-3;
+    background: @awa-color-primary;
+    color: @awa-color-button-text !important;
+    font-size: 11px;
+    font-weight: @awa-weight-semibold;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border-radius: @awa-radius-full;
+    white-space: nowrap;
+    text-decoration: none !important;
+    transition: background-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+    box-shadow: 0 2px 8px fade(@awa-color-primary, 30%);
+
+    &:hover,
+    &:focus-visible {
+        background: @awa-color-primary-dark !important;
+        color: @awa-color-button-text !important;
+        box-shadow: 0 4px 14px fade(@awa-color-primary, 40%);
+        transform: translateY(-1px);
+        text-decoration: none !important;
+    }
+
+    &:focus-visible {
+        outline: 2px solid @awa-color-primary-dark;
+        outline-offset: 2px;
+    }
+}
+
 /* ── Sticky header smooth transition ── */
 .awa-site-header.awa-header-professional .header-wrapper-sticky {
     transition: box-shadow 220ms ease, padding-top 220ms ease, padding-bottom 220ms ease;
 }
 .awa-site-header.awa-header-professional .header-wrapper-sticky.awa-header-condensed {
     box-shadow: 0 4px 16px rgba(15, 23, 42, 0.10);
+}
+
+/* ── Condensed header state (applied via awa-header-sticky.js on scroll > 60px) ── */
+.awa-site-header.awa-header-professional.awa-header-condensed {
+    // Subtle separator shadow to lift header from content
+    box-shadow: 0 2px 12px fade(@awa-neutral-900, 8%);
+
+    .awa-main-header {
+        padding-top: @awa-space-2;
+        padding-bottom: @awa-space-2;
+
+        .awa-header-brand .logo img {
+            max-height: 44px;
+            transition: max-height 200ms ease;
+        }
+    }
+
+    // Hide B2B trust badges when condensed to recover vertical space
+    .awa-b2b-trust-badges {
+        display: none !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .awa-site-header.awa-header-professional.awa-header-condensed .awa-main-header .awa-header-brand .logo img {
+        transition: none;
+    }
 }
 
 /* ── Hamburger SVG icon ── */

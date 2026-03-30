@@ -1,225 +1,279 @@
 /*
- * AWA Professional Search Autocomplete Panel
- * Estilos para a janela suspensa de sugestões e produtos
+ * AWA Search Autocomplete Panel — Modern B2B Redesign
+ * Alvo: #search_autocomplete.searchsuite-autocomplete (injetado pelo SearchSuite)
+ * Seletores com alta especificidade para bater os estilos do tema pai.
  */
 
- .searchsuite-autocomplete {
+@import (once) '_awa-variables';
+
+// ── Panel container ───────────────────────────────────────────────────────
+#search_autocomplete.searchsuite-autocomplete,
+.search-autocomplete.searchsuite-autocomplete {
     position: absolute;
-    top: ~"calc(100% + 8px)";
+    top: ~"calc(100% + 10px)";
     left: 0;
+    right: 0;
     width: 100%;
-    background: var(--awa-color-bg);
-    border: 1px solid var(--awa-color-border);
-    border-radius: var(--awa-radius-md);
-    box-shadow: var(--awa-shadow-card);
+    background: #fff;
+    border: 1px solid @awa-color-border;
+    border-radius: @awa-radius-lg;
+    box-shadow: 0 16px 40px fade(@awa-neutral-900, 12%), 0 4px 12px fade(@awa-neutral-900, 6%);
     z-index: 999;
     max-height: 70vh;
     overflow-y: auto;
+    // Animate in
     opacity: 0;
     visibility: hidden;
-    transform: translateY(-10px);
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateY(-6px);
+    transition: opacity 180ms ease, transform 180ms ease, visibility 180ms ease;
 
-    &.is-open, &.active {
+    &.is-open,
+    &.active,
+    &._active {
         opacity: 1;
         visibility: visible;
         transform: translateY(0);
     }
 
-    /* Scrollbar customizada */
-    &::-webkit-scrollbar {
-        width: 6px;
-    }
-    &::-webkit-scrollbar-track {
-        background: var(--awa-color-bg-soft);
-        border-radius: 4px;
-    }
-    &::-webkit-scrollbar-thumb {
-        background: var(--awa-color-border);
-        border-radius: 4px;
-        &:hover { background: #ccc; }
-    }
+    // Custom scrollbar
+    &::-webkit-scrollbar { width: 5px; }
+    &::-webkit-scrollbar-track { background: @awa-color-bg-soft; border-radius: 4px; }
+    &::-webkit-scrollbar-thumb { background: @awa-color-border; border-radius: 4px; }
 
-    /* Grid layout para Termos x Produtos */
+    // ── Layout wrapper ────────────────────────────────────────────────────
     .autocomplete-wrapper {
         display: flex;
         flex-wrap: wrap;
 
-        @media (max-width: 767px) {
+        @media (max-width: @awa-breakpoint-sm) {
             flex-direction: column;
         }
     }
 
-    /* Termos Sugeridos / Populares */
-    .suggest {
+    // ── Section title shared (Popular Suggestions / Products) ─────────────
+    .suggest .title,
+    .product .title,
+    .popular_search_term > .title,
+    [class*='suggest'] > .title {
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        font-size: 10px !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.08em !important;
+        color: @awa-neutral-400 !important;
+        font-weight: @awa-weight-bold !important;
+        margin: 0 0 @awa-space-3 0 !important;
+        padding: 0 !important;
+        border: none !important;
+        background: transparent !important;
+
+        // Decorative line after label
+        &::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: @awa-color-border;
+        }
+    }
+
+    // ── Suggest / Popular terms panel ─────────────────────────────────────
+    .suggest,
+    .popular_search_term,
+    [class*='suggest-wrap'] {
         flex: 1;
-        min-width: 250px;
-        padding: var(--awa-space-4);
-        border-right: 1px solid var(--awa-color-border);
+        min-width: 220px;
+        padding: @awa-space-4 !important;
+        border-right: 1px solid @awa-color-border;
 
-        @media (max-width: 767px) {
+        @media (max-width: @awa-breakpoint-sm) {
             border-right: none;
-            border-bottom: 1px solid var(--awa-color-border);
+            border-bottom: 1px solid @awa-color-border;
         }
 
-        .title {
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--awa-color-text-secondary);
-            font-weight: 600;
-            margin-bottom: var(--awa-space-3);
+        ul,
+        .items {
+            list-style: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            display: flex !important;
+            flex-wrap: wrap !important;
+            gap: @awa-gap-sm !important;
         }
 
-        ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px; /* Espaçamento entre as tags de sugestão */
+        li,
+        .item {
+            margin: 0 !important;
+        }
 
-            li {
-                margin: 0;
+        // ── Suggestion pill ───────────────────────────────────────────────
+        li a,
+        .item a,
+        a.qs-option-search-term {
+            display: inline-flex !important;
+            align-items: center !important;
+            padding: 6px 14px !important;
+            font-size: 12px !important;
+            font-weight: @awa-weight-semibold !important;
+            color: @awa-color-text-primary !important;
+            background: @awa-color-bg-soft !important;
+            border: 1px solid @awa-color-border !important;
+            border-radius: @awa-radius-full !important;
+            text-transform: none !important; // override parent theme uppercase
+            letter-spacing: 0.01em !important;
+            text-decoration: none !important;
+            transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease, box-shadow 150ms ease !important;
+            white-space: nowrap !important;
+            line-height: 1.2 !important;
 
-                a {
-                    display: inline-flex;
-                    align-items: center;
-                    padding: 6px 12px;
-                    color: var(--awa-color-text-primary);
-                    background: var(--awa-color-bg-soft); /* Fundo sutil para parecer uma tag */
-                    border: 1px solid var(--awa-color-border);
-                    border-radius: 16px; /* Bordas arredondadas estilo pílula */
-                    transition: all 0.2s ease;
-                    font-size: 13px;
-                    font-weight: 500;
-                    text-transform: none; /* Remove o uppercase excessivo */
+            // Highlighted match
+            .awa-ac-highlight,
+            strong,
+            b {
+                font-weight: @awa-weight-bold;
+                color: @awa-color-primary;
+                background: none;
+            }
 
-                    &:hover, &:focus-visible, &.awa-ac-nav-active {
-                        background: var(--awa-color-primary);
-                        border-color: var(--awa-color-primary);
-                        color: #fff;
-                        text-decoration: none;
-                    }
+            &:hover,
+            &:focus-visible,
+            &.awa-ac-nav-active,
+            &.selected {
+                background: @awa-color-primary !important;
+                border-color: @awa-color-primary !important;
+                color: @awa-color-button-text !important;
+                text-decoration: none !important;
+                box-shadow: 0 4px 12px fade(@awa-color-primary, 24%) !important;
 
-                    .awa-ac-highlight {
-                        background: transparent;
-                        color: inherit;
-                        font-weight: 700;
-                        padding: 0;
-                    }
+                .awa-ac-highlight,
+                strong,
+                b {
+                    color: @awa-color-button-text;
                 }
             }
         }
     }
 
-    /* Produtos Sugeridos */
-    .product {
+    // ── Products panel ────────────────────────────────────────────────────
+    .product,
+    [class*='product-wrap'] {
         flex: 2;
-        min-width: 300px;
-        padding: var(--awa-space-4);
+        min-width: 280px;
+        padding: @awa-space-4 !important;
 
-        .title {
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--awa-color-text-secondary);
-            font-weight: 600;
-            margin-bottom: var(--awa-space-3);
+        ul,
+        .items {
+            list-style: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
         }
 
-        ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
+        li,
+        .item {
+            margin-bottom: @awa-space-2 !important;
 
-            li {
-                margin-bottom: var(--awa-space-2);
+            &:last-child { margin-bottom: 0 !important; }
+        }
 
-                a {
-                    display: flex;
-                    align-items: center;
-                    gap: var(--awa-space-3);
-                    padding: 8px;
-                    border-radius: 8px;
-                    transition: background 0.15s, transform 0.15s;
-                    border: 1px solid transparent;
+        li a,
+        .item a {
+            display: flex !important;
+            align-items: center !important;
+            gap: @awa-space-3 !important;
+            padding: @awa-space-2 @awa-space-3 !important;
+            border-radius: @awa-radius-sm !important;
+            border: 1px solid transparent !important;
+            text-decoration: none !important;
+            transition: background 150ms ease, border-color 150ms ease !important;
+            background: transparent !important;
+            color: @awa-color-text-primary !important;
 
-                    &:hover, &:focus-visible, &.awa-ac-nav-active {
-                        background: var(--awa-color-bg);
-                        border-color: var(--awa-color-border);
-                        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-                        text-decoration: none;
-                        transform: translateY(-1px);
-                    }
+            &:hover,
+            &:focus-visible,
+            &.awa-ac-nav-active {
+                background: @awa-color-bg-soft !important;
+                border-color: @awa-color-border !important;
+                text-decoration: none !important;
+            }
 
-                    .qs-option-image {
-                        flex: 0 0 50px;
-                        height: 50px;
-                        border-radius: 4px;
-                        overflow: hidden;
-                        border: 1px solid var(--awa-color-border);
+            .qs-option-image {
+                flex: 0 0 48px;
+                width: 48px;
+                height: 48px;
+                border-radius: @awa-radius-xs;
+                overflow: hidden;
+                border: 1px solid @awa-color-border;
+                background: @awa-color-bg-soft;
 
-                        img {
-                            width: 100%;
-                            height: 100%;
-                            object-fit: contain;
-                        }
-                    }
+                img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: contain;
+                    display: block;
+                }
+            }
 
-                    .qs-option-info {
-                        flex: 1;
-                        min-width: 0;
+            .qs-option-info {
+                flex: 1;
+                min-width: 0;
 
-                        .qs-option-title {
-                            font-size: 13px;
-                            color: var(--awa-color-text-primary);
-                            font-weight: 500;
-                            line-height: 1.3;
-                            margin-bottom: 4px;
-                            display: -webkit-box;
-                            -webkit-line-clamp: 2;
-                            -webkit-box-orient: vertical;
-                            overflow: hidden;
+                .qs-option-name,
+                .qs-option-title {
+                    font-size: 13px !important;
+                    font-weight: @awa-weight-medium !important;
+                    color: @awa-color-text-primary !important;
+                    line-height: 1.3 !important;
+                    margin-bottom: 4px !important;
+                    display: -webkit-box !important;
+                    -webkit-line-clamp: 2 !important;
+                    -webkit-box-orient: vertical !important;
+                    overflow: hidden !important;
+                    text-transform: none !important;
 
-                            .awa-ac-highlight {
-                                color: var(--awa-color-primary);
-                                font-weight: 700;
-                            }
-                        }
+                    .awa-ac-highlight,
+                    strong { color: @awa-color-primary; font-weight: @awa-weight-bold; }
+                }
 
-                        .qs-option-price {
-                            font-size: 14px;
-                            font-weight: 700;
-                            color: var(--awa-color-primary);
-                        }
-                    }
+                .qs-option-price,
+                .price {
+                    font-size: 13px !important;
+                    font-weight: @awa-weight-bold !important;
+                    color: @awa-color-primary !important;
                 }
             }
         }
     }
 
-    /* A11y: Reduzir movimento para usuários que preferem */
+    // ── "Ver todos os resultados" footer link ─────────────────────────────
+    .see-all,
+    .view-all,
+    .all-results {
+        display: block !important;
+        text-align: center !important;
+        padding: @awa-space-3 @awa-space-4 !important;
+        border-top: 1px solid @awa-color-border !important;
+        font-size: 13px !important;
+        font-weight: @awa-weight-semibold !important;
+        color: @awa-color-primary !important;
+        text-decoration: none !important;
+        transition: background 150ms ease !important;
+
+        &:hover,
+        &:focus-visible {
+            background: @awa-color-bg-soft !important;
+            text-decoration: none !important;
+        }
+    }
+
     @media (prefers-reduced-motion: reduce) {
         & {
-            transition: none;
-            transform: none;
+            transition: none !important;
+            transform: none !important;
+            &.is-open, &.active, &._active { transform: none !important; }
         }
-
-        &.is-open, &.active {
-            transform: none;
-        }
-
-        .suggest ul li a {
-            transition: none;
-        }
-
-        .product ul li a {
-            transition: none;
-
-            &:hover, &:focus-visible, &.awa-ac-nav-active {
-                transform: none;
-            }
+        .suggest li a,
+        .product li a {
+            transition: none !important;
         }
     }
 }

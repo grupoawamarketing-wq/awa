@@ -25,7 +25,9 @@ var config = {
         'js/owl-carousel-init': 'js/owl-carousel-init.min',
         'js/vertical-menu-init': 'js/vertical-menu-init.min',
         'js/megamenu-mobile': 'js/megamenu-mobile.min',
-        'js/jquery-andself-compat': 'js/jquery-andself-compat.min'
+        'js/jquery-andself-compat': 'js/jquery-andself-compat.min',
+        // Sticky header — non-minified until terser build step is added
+        'awa-header-sticky': 'js/awa-header-sticky'
     },
     shim: {
         'swiper': {
