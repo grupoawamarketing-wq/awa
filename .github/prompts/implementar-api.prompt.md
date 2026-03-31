@@ -3,6 +3,8 @@ description: "Implementa integração completa com API externa — service, tipo
 agent: "agent"
 tools:
   - codebase
+  - edit
+  - execute
   - changes
   - fetch
   - problems

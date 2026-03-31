@@ -3,6 +3,8 @@ description: "Lead Product Designer (UX/UI) especializado em E-commerce Enterpri
 agent: "agent"
 tools:
   - codebase
+  - edit
+  - execute
   - changes
   - problems
 ---

@@ -3,6 +3,8 @@ description: "Cria um CRUD completo no Magento 2 — db_schema, Model, Repositor
 agent: "agent"
 tools:
   - codebase
+  - edit
+  - execute
   - changes
   - problems
 

@@ -3,6 +3,8 @@ description: "AWA Design System — Fase 10: Login, Cadastro e Conta do Cliente"
 agent: "agent"
 tools:
   - codebase
+  - edit
+  - execute
   - changes
 
 ---

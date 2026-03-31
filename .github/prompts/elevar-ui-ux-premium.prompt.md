@@ -3,6 +3,8 @@ description: "Audita o storefront Magento 2, propõe melhorias premium de UI/UX 
 agent: "agent"
 tools:
   - codebase
+  - edit
+  - execute
   - changes
   - problems
 

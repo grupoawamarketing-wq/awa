@@ -3,6 +3,8 @@ description: "AWA Design System — Fase 7: Rodapé Profissional"
 agent: "agent"
 tools:
   - codebase
+  - edit
+  - execute
   - changes
 
 ---

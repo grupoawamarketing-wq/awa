@@ -3,6 +3,8 @@ description: "AWA Design System — Fase 9: Checkout Profissional"
 agent: "agent"
 tools:
   - codebase
+  - edit
+  - execute
   - changes
 
 ---

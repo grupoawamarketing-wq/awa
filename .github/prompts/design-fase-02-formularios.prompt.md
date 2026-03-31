@@ -3,6 +3,8 @@ description: "AWA Design System — Fase 2: Sistema de Formulários Global"
 agent: "agent"
 tools:
   - codebase
+  - edit
+  - execute
   - changes
 
 ---

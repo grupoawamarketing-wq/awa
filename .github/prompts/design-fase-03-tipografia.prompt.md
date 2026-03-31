@@ -3,6 +3,8 @@ description: "AWA Design System — Fase 3: Tipografia e Hierarquia Global"
 agent: "agent"
 tools:
   - codebase
+  - edit
+  - execute
   - changes
 
 ---

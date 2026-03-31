@@ -3,6 +3,8 @@ description: "AWA Design System — Fase 1: Sistema de Botões Global"
 agent: "agent"
 tools:
   - codebase
+  - edit
+  - execute
   - changes
 
 ---

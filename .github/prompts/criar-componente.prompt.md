@@ -3,6 +3,8 @@ description: "Cria um módulo Magento 2 completo com Block, Template, Layout, JS
 agent: "agent"
 tools:
   - codebase
+  - edit
+  - execute
   - changes
   - problems
 

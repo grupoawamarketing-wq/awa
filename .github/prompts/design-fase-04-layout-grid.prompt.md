@@ -3,6 +3,8 @@ description: "AWA Design System — Fase 4: Container, Grid e Espaçamentos"
 agent: "agent"
 tools:
   - codebase
+  - edit
+  - execute
   - changes
 
 ---

@@ -3,6 +3,8 @@ description: "AWA Design System — Fase 5: Cards de Produto (PLP)"
 agent: "agent"
 tools:
   - codebase
+  - edit
+  - execute
   - changes
 
 ---

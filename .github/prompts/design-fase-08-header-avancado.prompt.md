@@ -3,6 +3,8 @@ description: "AWA Design System — Fase 8: Header Avançado (Complemento)"
 agent: "agent"
 tools:
   - codebase
+  - edit
+  - execute
   - changes
 
 ---

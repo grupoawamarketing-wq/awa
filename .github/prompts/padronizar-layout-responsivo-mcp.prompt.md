@@ -3,6 +3,8 @@ description: "Usa MCP/browser para auditar o storefront da AWA Motos, padronizar
 agent: "agent"
 tools:
   - codebase
+  - edit
+  - execute
   - changes
   - problems
 

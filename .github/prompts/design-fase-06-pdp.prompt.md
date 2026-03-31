@@ -3,6 +3,8 @@ description: "AWA Design System — Fase 6: Página de Produto (PDP)"
 agent: "agent"
 tools:
   - codebase
+  - edit
+  - execute
   - changes
 
 ---

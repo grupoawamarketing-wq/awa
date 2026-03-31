@@ -3,6 +3,8 @@ description: "Diagnostica e corrige bug no Magento 2 — logs, stack trace, caus
 agent: "agent"
 tools:
   - codebase
+  - edit
+  - execute
   - changes
   - problems
   - usages
