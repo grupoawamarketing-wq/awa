@@ -117,6 +117,7 @@ body .page-wrapper .awa-site-header .header .awa-header-cart-link-icon {
 	/* Cart route on desktop: keep the header focused on logo + search. */
 	body.checkout-cart-index .awa-site-header .top-header,
 	body.checkout-cart-index .awa-site-header .header-control,
+	body.checkout-cart-index .awa-site-header .awa-header-right-col,
 	body.checkout-cart-index .awa-site-header .awa-header-contact-slot,
 	body.checkout-cart-index .awa-site-header .awa-header-minicart {
 		display: none !important;
@@ -509,11 +510,8 @@ body .page-wrapper .awa-site-header .header .awa-header-cart-link-icon {
 		border: 0 !important;
 	}
 
-	/* Hide minicart overflow from search and old cart wrapper */
-	body .page-wrapper .awa-site-header .header .wp-header[data-awa-header-row] > .top-search > .mini-cart-wrapper,
-	body .page-wrapper .awa-site-header .header .wp-header[data-awa-header-row] > .top-search > .shadowcart,
-	body .page-wrapper .awa-site-header .header .wp-header[data-awa-header-row] > .top-search > .hoteline_header,
-	body .page-wrapper .awa-site-header .header .wp-header[data-awa-header-row] > .awa-header-cart {
+	/* Hide right-col on mobile (minicart + contact-slot now in .awa-header-right-col sibling) */
+	body .page-wrapper .awa-site-header .header .wp-header[data-awa-header-row] > .awa-header-right-col {
 		display: none !important;
 	}
 
@@ -555,9 +553,7 @@ body .page-wrapper .awa-site-header .header .awa-header-cart-link-icon {
 		max-width: 100% !important;
 	}
 
-	body.checkout-cart-index .page-wrapper .awa-site-header .header .wp-header[data-awa-header-row] > .top-search > .mini-cart-wrapper,
-	body.checkout-cart-index .page-wrapper .awa-site-header .header .wp-header[data-awa-header-row] > .top-search > .shadowcart,
-	body.checkout-cart-index .page-wrapper .awa-site-header .header .wp-header[data-awa-header-row] > .top-search > .awa-header-minicart {
+	body.checkout-cart-index .page-wrapper .awa-site-header .header .wp-header[data-awa-header-row] > .awa-header-right-col {
 		display: none !important;
 	}
 }
@@ -708,9 +704,7 @@ body .page-wrapper .awa-site-header .header .awa-header-cart-link-icon {
 				max-width: 100% !important;
 			}
 
-			body.checkout-cart-index .page-wrapper .awa-site-header .header .wp-header[data-awa-header-row] > .top-search > .mini-cart-wrapper,
-			body.checkout-cart-index .page-wrapper .awa-site-header .header .wp-header[data-awa-header-row] > .top-search > .shadowcart,
-			body.checkout-cart-index .page-wrapper .awa-site-header .header .wp-header[data-awa-header-row] > .top-search > .awa-header-minicart {
+			body.checkout-cart-index .page-wrapper .awa-site-header .header .wp-header[data-awa-header-row] > .awa-header-right-col {
 				display: none !important;
 			}
 		}
@@ -736,43 +730,38 @@ body .page-wrapper .awa-site-header .header .awa-header-cart-link-icon {
 <?php else: ?>
 <div id="header" class="header-container" data-awa-header-shell="true">
 	<div class="header-content" data-awa-header-content="true">
-		<div class="top-header" data-awa-header-utility="true">
+		<div class="top-header awa-utility-bar" data-awa-header-utility="true">
 			<div class="container">
-				<div class="row">
-					<div class="col-md-6 col-lg-6 hidden-xs hidden-sm">
-						<div class="top-bar-left" data-awa-header-utility-left="true">
-							<?= /* @noEscape */ $this->getChildHtml('top-left-static') ?>
-							<a class="awa-header-quote-cta"
-							   href="<?= $escaper->escapeUrl($block->getUrl('cotacao')) ?>"
-							   aria-label="<?= $escaper->escapeHtmlAttr(__('Solicitar orçamento para empresas')) ?>">
-								<?= $escaper->escapeHtml(__('Solicitar Orçamento')) ?>
-							</a>
-						</div>
+				<div class="awa-utility-bar__inner">
+					<div class="top-bar-left" data-awa-header-utility-left="true">
+						<?= /* @noEscape */ $this->getChildHtml('top-left-static') ?>
+						<a class="awa-header-quote-cta"
+						   href="<?= $escaper->escapeUrl($block->getUrl('cotacao')) ?>"
+						   aria-label="<?= $escaper->escapeHtmlAttr(__('Solicitar orçamento para empresas')) ?>">
+							<?= $escaper->escapeHtml(__('Solicitar Orçamento')) ?>
+						</a>
 					</div>
-					<div class="col-xs-12 col-md-6 col-lg-6">
-						<div class="top-bar-right" data-awa-header-utility-right="true">
-							<div class="top-info" data-awa-header-account-group="true">
-								<?= /* @noEscape */ $this->getChildHtml('awaB2bModeBadge') ?>
-								<nav class="top-account has-child"
-									 data-awa-top-account="true"
-									 aria-label="<?= $escaper->escapeHtmlAttr(__('Atalhos da conta')) ?>">
-									<?= /* @noEscape */ $this->getChildHtml('top.links') ?>
-								</nav>
-							</div>
+					<div class="top-bar-right" data-awa-header-utility-right="true">
+						<div class="top-info" data-awa-header-account-group="true">
+							<?= /* @noEscape */ $this->getChildHtml('awaB2bModeBadge') ?>
+							<nav class="top-account has-child"
+								 data-awa-top-account="true"
+								 aria-label="<?= $escaper->escapeHtmlAttr(__('Atalhos da conta')) ?>">
+								<?= /* @noEscape */ $this->getChildHtml('top.links') ?>
+							</nav>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
-		<div class="header" data-awa-header-main="true">
-			<div class="header_main">
+		<div class="header awa-main-header" data-awa-header-main="true">
+			<div class="header_main awa-main-header-inner-wrap">
 				<div class="header-main">
 					<div class="container">
-						<div class="row">
-							<div class="wp-header" data-awa-header-row="brand-search">
+						<div class="awa-main-header__inner wp-header" data-awa-header-row="brand-search">
 											<div class="awa-header-primary-row" data-awa-header-primary-row="true">
 												<span role="button" tabindex="0" aria-label="<?= $escaper->escapeHtmlAttr(__('Abrir menu de navegação')) ?>" aria-expanded="false" data-action="toggle-nav" class="action nav-toggle awa-header-mobile-toggle" data-awa-nav-toggle="true"><svg class="awa-hamburger-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg><span><?= $escaper->escapeHtml(__('Toggle Nav')) ?></span></span>
-												<div class="col-md-2 col-sm-2 col-xs-12 awa-header-brand-cell" data-awa-header-brand="true">
+												<div class="col-md-2 col-sm-2 col-xs-12 awa-header-brand awa-header-brand-cell" data-awa-header-brand="true">
 													<div class="awa-header-brand-desktop" data-awa-header-brand-desktop="true">
 														<?= /* @noEscape */ $this->getChildHtml('logo') ?>
 													</div>
@@ -794,15 +783,17 @@ body .page-wrapper .awa-site-header .header .awa-header-cart-link-icon {
 												</div>
 												<a class="awa-header-cart-link" href="<?= $escaper->escapeUrl($block->getUrl('checkout/cart')) ?>" aria-label="<?= $escaper->escapeHtmlAttr(__('Abrir carrinho')) ?>"><svg class="awa-header-cart-link-icon" viewBox="0 0 24 24" aria-hidden="true" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1"></circle><circle cx="18" cy="20" r="1"></circle><path d="M3.5 4h2l2.2 10.2a1 1 0 0 0 1 .8h8.6a1 1 0 0 0 1-.8L20 7H7.1"></path></svg><span class="awa-cart-link-badge" aria-hidden="true" style="display:none"></span><span><?= $escaper->escapeHtml(__('Abrir carrinho')) ?></span></a>
 											</div>
-								<div class="col-md-10 col-sm-10 col-xs-12 top-search awa-header-actions" data-awa-header-search-row="true">
+								<div class="awa-header-search-col top-search awa-header-actions" data-awa-header-search-row="true">
 									<?= /* @noEscape */ $this->getChildHtml('topSearch') ?>
-									<div class="awa-header-cart mini-cart-wrapper shadowcart awa-header-minicart" data-awa-header-cart="true">
-									<span class="awa-minicart-label" aria-hidden="true"><?= $escaper->escapeHtml(__('Cotação / Carrinho')) ?></span>
-									<a class="awa-header-cart-fallback" href="<?= $escaper->escapeUrl($block->getUrl('checkout/cart')) ?>" aria-label="<?= $escaper->escapeHtmlAttr(__('Abrir carrinho')) ?>"><span><?= $escaper->escapeHtml(__('Abrir carrinho')) ?></span></a>
-									<div class="mini-carts">
-										<?= /* @noEscape */ $this->getChildHtml('minicart') ?>
-									</div>
 								</div>
+								<div class="awa-header-right-col" data-awa-header-right="true">
+									<div class="awa-header-cart mini-cart-wrapper shadowcart awa-header-minicart" data-awa-header-cart="true">
+										<span class="awa-minicart-label" aria-hidden="true"><?= $escaper->escapeHtml(__('Cotação / Carrinho')) ?></span>
+										<a class="awa-header-cart-fallback" href="<?= $escaper->escapeUrl($block->getUrl('checkout/cart')) ?>" aria-label="<?= $escaper->escapeHtmlAttr(__('Abrir carrinho')) ?>"><span><?= $escaper->escapeHtml(__('Abrir carrinho')) ?></span></a>
+										<div class="mini-carts">
+											<?= /* @noEscape */ $this->getChildHtml('minicart') ?>
+										</div>
+									</div>
 									<?php if ($hasHeaderContactSlot): ?>
 										<div class="awa-header-contact-slot" data-awa-header-contact="true">
 											<?= /* @noEscape */ $headerContactLinksHtml ?>
@@ -815,16 +806,16 @@ body .page-wrapper .awa-site-header .header .awa-header-cart-link-icon {
 					</div>
 				</div>
 			</div>
-			<div class="header-control header-nav header-nav-global cms_home_1" data-awa-header-nav="true">
+			<div class="header-control header-nav header-nav-global cms_home_1 awa-nav-bar" data-awa-header-nav="true">
 				<div class="container">
-					<div class="row">
-						<div class="col-lg-2 col-md-3 col-sm-2 col-xs-6 menu_left_home1">
+					<div class="awa-nav-bar__inner">
+						<div class="awa-header-categories menu_left_home1">
 							<nav class="awa-nav-categories" aria-label="<?= $escaper->escapeHtmlAttr(__('Menu de categorias')) ?>">
 								<?php /* menu.vertical is rendered inside top.navigation.sections via sections.phtml */ ?>
 								<?= /* @noEscape */ $this->getChildHtml('top.navigation.sections') ?>
 							</nav>
 						</div>
-						<div class="col-lg-7 col-md-7 col-sm-10 menu_primary hidden-xs" data-awa-main-nav-shell="true">
+						<div class="awa-header-primary-nav menu_primary" id="awa-primary-navigation" data-awa-main-nav-shell="true">
 							<div class="header-wrapper-sticky<?php echo (!$this->helper('Rokanthemes\Themeoption\Helper\Themeconfig')->isEnableStickyHeader()) ? '' : ' enabled-header-sticky'; ?>">
 								<div class="container-header-sticky">
 									<div class="col-sticky-logo">
@@ -836,8 +827,8 @@ body .page-wrapper .awa-site-header .header .awa-header-cart-link-icon {
 								</div>
 							</div>
 						</div>
-						<div class="col-lg-2 col-md-2 hidden-sm hidden-xs box_language">
-							<div class="top-header">
+						<div class="awa-header-locale">
+							<div class="top-header-locale">
 								<?= /* @noEscape */ $this->getChildHtml('store_language') ?>
 								<?= /* @noEscape */ $this->getChildHtml('currency') ?>
 							</div>
@@ -875,10 +866,17 @@ require(['awa-header-sticky'], function (initStickyHeader) {
 
 	/* ── aria-expanded sync for hamburger (body.nav-open toggled by Magento menu.js) ── */
 	(function () {
-		function syncNavAria() {
+	function syncNavAria() {
+			var isOpen = document.body.classList.contains('nav-open');
 			var toggle = document.querySelector('.awa-header-mobile-toggle[data-awa-nav-toggle="true"]');
-			if (!toggle) { return; }
-			toggle.setAttribute('aria-expanded', document.body.classList.contains('nav-open') ? 'true' : 'false');
+			if (toggle) {
+				toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+			}
+			/* BUG-3 fix: sync is-awa-mobile-open on #awa-primary-navigation */
+			var primaryNav = document.getElementById('awa-primary-navigation');
+			if (primaryNav) {
+				primaryNav.classList.toggle('is-awa-mobile-open', isOpen);
+			}
 		}
 		if (window.MutationObserver) {
 			new MutationObserver(syncNavAria).observe(document.body, { attributes: true, attributeFilter: ['class'] });
