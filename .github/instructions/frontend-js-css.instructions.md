@@ -1,5 +1,5 @@
 ---
-applyTo: "**/view/frontend/web/js/**/*.js,**/view/adminhtml/web/js/**/*.js,**/view/**/web/css/**/*.css,**/view/**/web/css/**/*.less"
+applyTo: "**/view/frontend/web/js/**/*.js,**/view/adminhtml/web/js/**/*.js,**/view/**/web/css/**/*.css,**/view/**/web/css/**/*.less,**/AWA_Custom/ayo_home5_child/web/css/**/*.css,**/AWA_Custom/ayo_home5_child/web/css/**/*.less"
 ---
 
 # Regras para Frontend JS e Estilos (Magento 2)
@@ -134,3 +134,22 @@ var config = {
 - `console.log` em produção
 - CSS que sobrescreve estilos globais do tema sem namespace
 - LESS com nesting acima de 3 níveis
+
+---
+
+## Deploy Obrigatório — Tema AWA_Custom/ayo_home5_child
+
+Após editar qualquer arquivo CSS/LESS do tema filho, o deploy é **obrigatório** (sem ele o browser usa o cache da versão anterior):
+
+```bash
+# CSS ou LESS alterado
+sudo -u www-data php bin/magento setup:static-content:deploy pt_BR -f --theme AWA_Custom/ayo_home5_child
+sudo -u www-data php bin/magento cache:flush
+
+# Apenas .phtml alterado (sem CSS)
+sudo -u www-data php bin/magento cache:clean block_html full_page
+```
+
+> Bundles editáveis: `awa-bundle-core.unmin.css`, `awa-bundle-custom.unmin.css`, `awa-bundle-site.unmin.css`, `awa-bundle-phases.unmin.css`
+> Tokens: `awa-core-variables.unmin.css` — usar sempre `var(--awa-red)`, nunca hex hardcoded.
+> Detalhes completos → skill `design-system`
