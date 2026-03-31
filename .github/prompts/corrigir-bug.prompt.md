@@ -1,21 +1,19 @@
 ---
 description: "Diagnostica e corrige bug no Magento 2 — logs, stack trace, causa raiz, fix mínimo"
-mode: agent
+agent: "agent"
 tools:
   - codebase
-  - terminal
+  - changes
   - problems
   - usages
 ---
-
 Diagnostique e corrija o bug descrito no Magento 2.
-
 ## Workflow OBRIGATÓRIO:
 
 1. **Verifique logs** — `tail -100 var/log/system.log` e `var/log/exception.log`
+  - changes
 2. **Leia o stack trace** — Analise do fim para o início
-3. **Localize** — Encontre o arquivo e linha do problema
-4. **Verifique DI** — Confira `di.xml`, `module.xml`, preferências  
+4. **Verifique DI** — Confira `di.xml`, `module.xml`, preferências
 5. **Analise dependências** — Use `#usages` para ver quem chama esse código
 6. **Identifique a causa raiz** — Não o sintoma, a CAUSA
 7. **Corrija** — Aplique o fix MÍNIMO necessário

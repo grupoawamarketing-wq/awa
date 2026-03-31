@@ -1,9 +1,10 @@
 ---
 description: "AWA Design System — Fase 2: Sistema de Formulários Global"
-mode: agent
+agent: "agent"
 tools:
   - codebase
-  - terminal
+  - changes
+
 ---
 
 > Skill carregada automaticamente: `design-system` (bundles, tokens, BEM header, deploy).

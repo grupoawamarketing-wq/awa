@@ -1,20 +1,18 @@
 ---
 description: "Refatora código Magento 2 — melhora legibilidade, DI, tipagem, performance"
-mode: agent
+agent: "agent"
 tools:
   - codebase
-  - terminal
+  - changes
   - problems
   - usages
 ---
-
 Refatore o código Magento 2 especificado mantendo a mesma funcionalidade.
-
 ## Workflow:
 
 1. **Leia o código** — Entenda completamente o que ele faz
+  - changes
 2. **Verifique DI** — Leia `di.xml` e `module.xml` do módulo
-3. **Identifique usos** — Use `#usages` ou `grep` para ver onde é usado
 4. **Verifique sintaxe ANTES** — `php -l` nos arquivos
 5. **Refatore** — Aplique as melhorias
 6. **Verifique DEPOIS** — `php -l`, cache clean, verificar logs

@@ -1,9 +1,10 @@
 ---
 description: "AWA Design System — Fase 3: Tipografia e Hierarquia Global"
-mode: agent
+agent: "agent"
 tools:
   - codebase
-  - terminal
+  - changes
+
 ---
 
 > Skill carregada automaticamente: `design-system` (bundles, tokens, BEM header, deploy).

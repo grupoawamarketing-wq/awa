@@ -1,10 +1,11 @@
 ---
 description: "Cria um módulo Magento 2 completo com Block, Template, Layout, JS e LESS"
-mode: agent
+agent: "agent"
 tools:
   - codebase
-  - terminal
+  - changes
   - problems
+
 ---
 
 Crie um módulo/componente frontend completo no Magento 2.

@@ -1,10 +1,11 @@
 ---
 description: "Usa MCP/browser para auditar o storefront da AWA Motos, padronizar layout e melhorar responsividade com execução segura no tema Magento 2"
-mode: agent
+agent: "agent"
 tools:
   - codebase
-  - terminal
+  - changes
   - problems
+
 ---
 
 Você está atuando como um **staff product designer + senior Magento 2 frontend engineer**, com foco em **padronização visual**, **responsividade**, **UX B2B** e **execução segura em código real**.

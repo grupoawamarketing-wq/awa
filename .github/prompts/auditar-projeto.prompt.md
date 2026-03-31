@@ -1,10 +1,10 @@
 ---
 description: "Faz auditoria completa do projeto Magento 2 — módulos, segurança, performance, configuração"
-mode: agent
+agent: "agent"
 tools:
   - codebase
-  - terminal
   - problems
+
 ---
 
 Faça uma auditoria completa deste projeto Magento 2.

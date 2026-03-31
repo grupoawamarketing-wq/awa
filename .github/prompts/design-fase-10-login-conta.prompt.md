@@ -1,9 +1,10 @@
 ---
 description: "AWA Design System — Fase 10: Login, Cadastro e Conta do Cliente"
-mode: agent
+agent: "agent"
 tools:
   - codebase
-  - terminal
+  - changes
+
 ---
 
 > Skill carregada automaticamente: `design-system` (bundles, tokens, BEM header, deploy).

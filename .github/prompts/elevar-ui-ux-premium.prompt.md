@@ -1,10 +1,11 @@
 ---
 description: "Audita o storefront Magento 2, propõe melhorias premium de UI/UX B2B e implementa mudanças seguras no tema filho"
-mode: agent
+agent: "agent"
 tools:
   - codebase
-  - terminal
+  - changes
   - problems
+
 ---
 
 Você está atuando como um **principal product designer + senior frontend engineer** especializado em **Magento 2**, **B2B** e **UX premium** para e-commerce brasileiro.

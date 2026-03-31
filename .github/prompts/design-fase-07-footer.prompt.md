@@ -1,9 +1,10 @@
 ---
 description: "AWA Design System — Fase 7: Rodapé Profissional"
-mode: agent
+agent: "agent"
 tools:
   - codebase
-  - terminal
+  - changes
+
 ---
 
 > Skill carregada automaticamente: `design-system` (bundles, tokens, BEM header, deploy).

@@ -1,10 +1,11 @@
 ---
 description: "Cria um CRUD completo no Magento 2 — db_schema, Model, Repository, API, Controller, Block, Grid Admin"
-mode: agent
+agent: "agent"
 tools:
   - codebase
-  - terminal
+  - changes
   - problems
+
 ---
 
 Crie um CRUD completo no Magento 2 para a entidade especificada.

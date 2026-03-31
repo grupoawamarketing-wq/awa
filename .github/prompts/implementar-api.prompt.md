@@ -1,20 +1,18 @@
 ---
 description: "Implementa integração completa com API externa — service, tipos, error handling, retry (Magento 2)"
-mode: agent
+agent: "agent"
 tools:
   - codebase
-  - terminal
+  - changes
   - fetch
   - problems
 ---
-
 Implemente uma integração REAL e COMPLETA com a API especificada no Magento 2.
-
 ## Checklist obrigatório:
 
 1. **Pesquise a API** — Use #fetch para ler a documentação se tiver URL
+  - changes
 2. **Crie a Service Interface** — Em `Api/` com métodos tipados
-3. **Crie o Model/Service** — Em `Model/` com:
    - `\Magento\Framework\HTTP\Client\Curl` ou `GuzzleHttp\Client` via DI
    - Configurações via `system.xml` (URL, API key, timeout)
    - Métodos tipados para cada endpoint
