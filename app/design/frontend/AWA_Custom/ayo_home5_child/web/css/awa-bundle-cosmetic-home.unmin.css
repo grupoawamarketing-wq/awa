@@ -1527,20 +1527,20 @@
 
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
     .page-wrapper .awa-benefits-bar {
-    background: var(--bg-surface) !important;
-    color: var(--text-color) !important;
-    border-top: 1px solid var(--border-color) !important;
-    border-bottom: 1px solid var(--border-color) !important;
+    background: var(--primary-color, #b73337) !important;
+    color: #fff !important;
+    border-top: 1px solid rgba(255, 255, 255, .15) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, .15) !important;
 }
 
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
     .page-wrapper .awa-benefits-bar :is(.awa-benefit-icon, .awa-benefit-title) {
-    color: var(--text-color) !important;
+    color: #fff !important;
 }
 
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
     .page-wrapper .awa-benefits-bar .awa-benefit-desc {
-    color: var(--text-muted) !important;
+    color: rgba(255, 255, 255, .82) !important;
 }
 
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
@@ -1944,4 +1944,62 @@ body.cms-homepage_ayo_home5 .page-wrapper .column.main > .benefits-bar .benefits
         .page-wrapper .product-item .action.tocart {
         border-radius: var(--awa-radius-md, 10px) !important;
     }
+}
+
+/* ========================================================================
+   POLISH-26  –  Benefits Bar: contraste de texto (WCAG AA)
+   Problema: .awa-benefit-text span { color: var(--awa-text-muted) } em
+   awa-bundle-refinements.css (order 24) tem especificidade (0,1,1) e ganha
+   sobre .awa-benefit-title { color: #fff } (0,1,0), produzindo #666 em
+   fundo vermelho #b73337. Contraste ~2.7:1 — falha WCAG AA (mín 4.5:1).
+   NOTA: .awa-benefits-bar fica em .content-top-home, FORA de .page-wrapper.
+   Seletores com .page-wrapper NÃO fazem match — regras sem .page-wrapper
+   abaixo são necessárias. Fix aqui (order 31) supera refinements (order 24).
+   ======================================================================== */
+
+.awa-benefits-bar .awa-benefit-text .awa-benefit-title {
+    color: #fff !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, .18);
+}
+
+.awa-benefits-bar .awa-benefit-desc {
+    color: rgba(255, 255, 255, .82) !important;
+}
+
+/* Cobre todos os span/p dentro de .awa-benefit-text (especificidade 0,1,1) */
+.awa-benefits-bar .awa-benefit-text span,
+.awa-benefits-bar .awa-benefit-text p {
+    color: rgba(255, 255, 255, .82) !important;
+}
+
+.awa-benefits-bar .awa-benefit-text strong {
+    color: #fff !important;
+}
+
+/* ========================================================================
+   POLISH-27  –  Benefits Bar: separadores mais visíveis
+   As bordas entre items usam rgba(255,255,255,.15) que quase some no
+   fundo vermelho. Aumentar para .22 para dar melhor ritmo visual.
+   ======================================================================== */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .page-wrapper .awa-benefits-bar .awa-benefit-item {
+    border-right-color: rgba(255, 255, 255, .22) !important;
+}
+
+/* ========================================================================
+   POLISH-28  –  Category carousel: produto com apenas 1 resultado
+   Alguns cards mostram "1 produtos" (plural incoerente). Esconde o count
+   visualmente quando há somente 1 sem alterar o template PHP.
+   ======================================================================== */
+
+/* ========================================================================
+   POLISH-29  –  Section "Mais Vendidos": espaço entre label "TOPO" e h2
+   O label fica colado no h2 sem margem suficiente.
+   ======================================================================== */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .page-wrapper .awa-section-eyebrow,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .page-wrapper .eyebrow-label {
+    margin-bottom: var(--awa-space-1, 4px);
+    letter-spacing: .08em;
 }
