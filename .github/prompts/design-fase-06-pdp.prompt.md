@@ -4,7 +4,6 @@ mode: agent
 tools:
   - codebase
   - terminal
-  - file
 ---
 
 > Skill carregada automaticamente: `design-system` (bundles, tokens, BEM header, deploy).

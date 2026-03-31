@@ -4,7 +4,6 @@ mode: agent
 tools:
   - codebase
   - terminal
-  - file
   - problems
   - usages
 ---

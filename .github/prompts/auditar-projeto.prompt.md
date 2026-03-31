@@ -5,7 +5,6 @@ tools:
   - codebase
   - terminal
   - problems
-  - findInWorkspace
 ---
 
 Faça uma auditoria completa deste projeto Magento 2.

@@ -4,10 +4,8 @@ mode: agent
 tools:
   - codebase
   - terminal
-  - file
   - problems
   - usages
-  - findInWorkspace
 ---
 
 Diagnostique e corrija o bug descrito no Magento 2.

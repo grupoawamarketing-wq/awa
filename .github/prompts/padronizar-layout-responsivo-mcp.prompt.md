@@ -4,9 +4,7 @@ mode: agent
 tools:
   - codebase
   - terminal
-  - file
   - problems
-  - findInWorkspace
 ---
 
 Você está atuando como um **staff product designer + senior Magento 2 frontend engineer**, com foco em **padronização visual**, **responsividade**, **UX B2B** e **execução segura em código real**.
