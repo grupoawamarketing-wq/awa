@@ -461,6 +461,7 @@ class Connection implements ConnectionInterface
         $options = [
             \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
             \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
+            \PDO::ATTR_TIMEOUT => 30,
         ];
 
         // Driver-specific options
@@ -471,6 +472,11 @@ class Connection implements ConnectionInterface
 
             if (defined('PDO::SQLSRV_ATTR_FETCHES_NUMERIC_TYPE')) {
                 $options[(int) constant('PDO::SQLSRV_ATTR_FETCHES_NUMERIC_TYPE')] = true;
+            }
+
+            // Limit query execution to 60s to prevent runaway queries from hanging cron
+            if (defined('PDO::SQLSRV_ATTR_QUERY_TIMEOUT')) {
+                $options[(int) constant('PDO::SQLSRV_ATTR_QUERY_TIMEOUT')] = 60;
             }
         }
 

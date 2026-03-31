@@ -41,6 +41,9 @@ class WarmCache
             return;
         }
 
+        // Prevent runaway execution — ERP queries can hang under load
+        set_time_limit(180);
+
         $start = microtime(true);
         $this->logger->info('[SalesIntelligence] Cache warming started.');
 
