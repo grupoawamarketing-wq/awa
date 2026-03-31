@@ -3,6 +3,7 @@ description: "Faz auditoria completa do projeto Magento 2 — módulos, seguran�
 agent: "agent"
 tools:
   - codebase
+  - changes
   - problems
 
 ---

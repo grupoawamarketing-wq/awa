@@ -11,7 +11,6 @@ Diagnostique e corrija o bug descrito no Magento 2.
 ## Workflow OBRIGATÓRIO:
 
 1. **Verifique logs** — `tail -100 var/log/system.log` e `var/log/exception.log`
-  - changes
 2. **Leia o stack trace** — Analise do fim para o início
 4. **Verifique DI** — Confira `di.xml`, `module.xml`, preferências
 5. **Analise dependências** — Use `#usages` para ver quem chama esse código

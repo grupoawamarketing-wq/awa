@@ -11,7 +11,6 @@ Refatore o código Magento 2 especificado mantendo a mesma funcionalidade.
 ## Workflow:
 
 1. **Leia o código** — Entenda completamente o que ele faz
-  - changes
 2. **Verifique DI** — Leia `di.xml` e `module.xml` do módulo
 4. **Verifique sintaxe ANTES** — `php -l` nos arquivos
 5. **Refatore** — Aplique as melhorias

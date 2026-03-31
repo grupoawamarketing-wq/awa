@@ -11,7 +11,6 @@ Implemente uma integração REAL e COMPLETA com a API especificada no Magento 2.
 ## Checklist obrigatório:
 
 1. **Pesquise a API** — Use #fetch para ler a documentação se tiver URL
-  - changes
 2. **Crie a Service Interface** — Em `Api/` com métodos tipados
    - `\Magento\Framework\HTTP\Client\Curl` ou `GuzzleHttp\Client` via DI
    - Configurações via `system.xml` (URL, API key, timeout)
