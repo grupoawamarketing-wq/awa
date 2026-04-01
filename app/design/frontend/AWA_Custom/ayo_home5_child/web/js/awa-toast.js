@@ -47,6 +47,40 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
         info:    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
     };
 
+    /* ---- XSS-safe helpers ---- */
+
+    /**
+     * Escape HTML special characters before inserting into innerHTML.
+     * Converts & < > " ' to their named entities.
+     *
+     * @param {string} str
+     * @returns {string}
+     */
+    function escHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    /**
+     * Validate a URL to prevent javascript: / data: XSS vectors.
+     * Only allows http(s) URLs and absolute-path or relative URLs.
+     *
+     * @param {string} url
+     * @returns {string} safe URL or '#' if invalid
+     */
+    function safeUrl(url) {
+        var s = String(url || '').trim();
+        /* allow relative paths and http(s) absolute URLs only */
+        if (/^(https?:\/\/|\/)/i.test(s)) {
+            return s;
+        }
+        return '#';
+    }
+
     /* ---- dismiss ---- */
 
     function dismiss(toast, timer) {
@@ -81,13 +115,13 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
         toast.setAttribute('aria-atomic', 'true');
 
         var actionHtml = action
-            ? '<a href="' + action.url + '" class="awa-toast__action">' + action.label + '</a>'
+            ? '<a href="' + escHtml(safeUrl(action.url)) + '" class="awa-toast__action">' + escHtml(action.label) + '</a>'
             : '';
 
         toast.innerHTML =
             '<span class="awa-toast__icon" aria-hidden="true">' + icon + '</span>' +
             '<span class="awa-toast__body">' +
-                '<span class="awa-toast__message">' + message + '</span>' +
+                '<span class="awa-toast__message">' + escHtml(message) + '</span>' +
                 actionHtml +
             '</span>' +
             '<button type="button" class="awa-toast__close" aria-label="Fechar notificação">' +
