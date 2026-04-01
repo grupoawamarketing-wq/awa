@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<ruleset name="AWA Motos — Magento 2 Coding Standard">
+    <description>PHP_CodeSniffer ruleset for AWA Motos Magento 2 project</description>
+
+    <!-- Scan only custom modules -->
+    <file>app/code/GrupoAwamotos</file>
+    <file>app/code/Awa</file>
+    <file>app/code/Ayo</file>
+
+    <!-- Exclude third-party, generated, and vendor directories -->
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+    <exclude-pattern>*/generated/*</exclude-pattern>
+    <exclude-pattern>*/pub/*</exclude-pattern>
+    <exclude-pattern>*/var/*</exclude-pattern>
+    <exclude-pattern>*/Rokanthemes/*</exclude-pattern>
+
+    <!-- Base: PSR-12 (compatible with Magento 2 conventions) -->
+    <rule ref="PSR12"/>
+
+    <!--
+        DISABLED: Squiz.Operators.ComparisonOperatorUsage
+        This rule requires `=== TRUE` / `=== FALSE` for all boolean checks,
+        e.g. banning: if ($x), if (!$x), if (empty($x))
+        This conflicts with Magento 2 coding standards and standard PHP idioms.
+        Removing it eliminates ~99% of false-positive issues in the Codacy report.
+    -->
+    <rule ref="Squiz.Operators.ComparisonOperatorUsage">
+        <severity>0</severity>
+    </rule>
+
+    <!--
+        DISABLED: WordPress_Security_EscapeOutput
+        This rule is WordPress-specific and flags Magento's __() translation
+        helper as XSS risk. It is a false positive in Magento context.
+    -->
+    <rule ref="WordPress.Security.EscapeOutput">
+        <severity>0</severity>
+    </rule>
+
+    <!--
+        Downgrade MEQP1 file_get_contents warning level for test files.
+        file_get_contents() is legitimate in unit tests for reading fixtures.
+    -->
+    <rule ref="MEQP1.Security.DiscouragedFunction">
+        <exclude-pattern>*/Test/*</exclude-pattern>
+        <exclude-pattern>*/tests/*</exclude-pattern>
+    </rule>
+
+</ruleset>
