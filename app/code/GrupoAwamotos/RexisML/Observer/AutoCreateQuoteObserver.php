@@ -1,9 +1,12 @@
 <?php
+
 declare(strict_types=1);
+
 /**
  * Observer para criar automaticamente cotacoes para oportunidades de Cross-sell
  * Dispara quando um pedido e concluido (sales_order_place_after)
  */
+
 namespace GrupoAwamotos\RexisML\Observer;
 
 use Magento\Framework\Event\Observer;
@@ -114,7 +117,6 @@ class AutoCreateQuoteObserver implements ObserverInterface
                     $addedProducts
                 ));
             }
-
         } catch (\Exception $e) {
             $this->logger->error('[RexisML AutoQuote] ' . $e->getMessage());
         }

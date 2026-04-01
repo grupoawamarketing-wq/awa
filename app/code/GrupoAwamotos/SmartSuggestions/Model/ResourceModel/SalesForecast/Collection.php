@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\SmartSuggestions\Model\ResourceModel\SalesForecast;
@@ -89,7 +90,7 @@ class Collection extends AbstractCollection
     {
         $this->getSelect()->reset(\Zend_Db_Select::COLUMNS)
             ->columns(['total' => 'SUM(predicted_revenue)']);
-        
+
         return (float) $this->getConnection()->fetchOne($this->getSelect());
     }
 
@@ -100,7 +101,7 @@ class Collection extends AbstractCollection
     {
         $this->getSelect()->reset(\Zend_Db_Select::COLUMNS)
             ->columns(['avg_confidence' => 'AVG(confidence_level)']);
-        
+
         return (float) $this->getConnection()->fetchOne($this->getSelect());
     }
 }

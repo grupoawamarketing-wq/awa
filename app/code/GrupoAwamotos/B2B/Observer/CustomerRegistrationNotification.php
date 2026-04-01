@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Observer para notificar sobre novos cadastros B2B
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Observer;
@@ -74,7 +76,6 @@ class CustomerRegistrationNotification implements ObserverInterface
             if ($this->isWhatsAppNotificationEnabled('notify_new_registration')) {
                 $this->whatsAppPublisher->publish('new_registration', $customerData);
             }
-
         } catch (\Exception $e) {
             $this->logger->error('B2B Registration Notification Error: ' . $e->getMessage());
         }

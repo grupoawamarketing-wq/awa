@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\SmartSuggestions\Model\Suggestion;
@@ -73,7 +74,6 @@ class Engine implements SuggestionEngineInterface
                 ],
                 'generated_at' => date('Y-m-d H:i:s')
             ];
-
         } catch (\Exception $e) {
             $this->logger->error('Cart Suggestion Error: ' . $e->getMessage());
             return ['error' => $e->getMessage()];
@@ -147,7 +147,6 @@ class Engine implements SuggestionEngineInterface
             }
 
             return $suggestions;
-
         } catch (\Exception $e) {
             $this->logger->error('Repurchase Suggestions Error: ' . $e->getMessage());
             return [];
@@ -211,7 +210,6 @@ class Engine implements SuggestionEngineInterface
             }
 
             return $suggestions;
-
         } catch (\Exception $e) {
             $this->logger->error('Cross-Sell Suggestions Error: ' . $e->getMessage());
             return [];
@@ -291,7 +289,6 @@ class Engine implements SuggestionEngineInterface
             }
 
             return $suggestions;
-
         } catch (\Exception $e) {
             $this->logger->error('Similar Customers Suggestions Error: ' . $e->getMessage());
             return [];
@@ -361,7 +358,6 @@ class Engine implements SuggestionEngineInterface
             }
 
             return $opportunities;
-
         } catch (\Exception $e) {
             $this->logger->error('Top Opportunities Error: ' . $e->getMessage());
             return [];

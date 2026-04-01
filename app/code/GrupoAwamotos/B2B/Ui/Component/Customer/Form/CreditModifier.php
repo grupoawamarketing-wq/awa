@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Modifier to load B2B credit data into customer edit form
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Ui\Component\Customer\Form;

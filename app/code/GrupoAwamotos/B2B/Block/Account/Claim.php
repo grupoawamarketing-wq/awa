@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Block para página de claim de conta
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Block\Account;

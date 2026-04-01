@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Collection de Transportadoras
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\CarrierSelect\Model\ResourceModel\Carrier;

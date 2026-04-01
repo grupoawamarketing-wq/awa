@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Data Patch para inserir transportadoras iniciais
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\CarrierSelect\Setup\Patch\Data;

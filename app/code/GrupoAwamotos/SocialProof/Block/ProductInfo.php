@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\SocialProof\Block;
@@ -29,7 +30,7 @@ class ProductInfo extends Template
 
     /**
      * Retorna o produto atual
-     * 
+     *
      * @return \Magento\Catalog\Model\Product|null
      */
     public function getProduct()
@@ -39,7 +40,7 @@ class ProductInfo extends Template
 
     /**
      * Retorna número de visualizações hoje
-     * 
+     *
      * @return int
      */
     public function getViewsToday()
@@ -50,7 +51,7 @@ class ProductInfo extends Template
 
     /**
      * Verifica se produto é mais vendido
-     * 
+     *
      * @return bool
      */
     public function isBestSeller()
@@ -61,7 +62,7 @@ class ProductInfo extends Template
 
     /**
      * Verifica se estoque está baixo (urgência)
-     * 
+     *
      * @return bool
      */
     public function isLowStock()
@@ -83,7 +84,7 @@ class ProductInfo extends Template
 
     /**
      * Retorna quantidade em estoque
-     * 
+     *
      * @return int
      */
     public function getStockQty()

@@ -1,8 +1,10 @@
 <?php
+
 /**
  * Instalador de Atributos de Cliente Brasileiros
  * CPF, CNPJ, RG, Inscrição Estadual
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\BrazilCustomer\Setup\Patch\Data;
@@ -52,12 +54,12 @@ class AddBrazilianCustomerAttributes implements DataPatchInterface, PatchReverta
     public function apply()
     {
         $this->moduleDataSetup->startSetup();
-        
+
         $customerSetup = $this->customerSetupFactory->create(['setup' => $this->moduleDataSetup]);
-        
+
         $customerEntity = $customerSetup->getEavConfig()->getEntityType(Customer::ENTITY);
         $attributeSetId = $customerEntity->getDefaultAttributeSetId();
-        
+
         $attributeSet = $this->attributeSetFactory->create();
         $attributeGroupId = $attributeSet->getDefaultGroupId($attributeSetId);
 
@@ -188,10 +190,10 @@ class AddBrazilianCustomerAttributes implements DataPatchInterface, PatchReverta
 
         // Configurar atributos para serem visíveis em formulários
         $attributes = ['person_type', 'cpf', 'rg', 'cnpj', 'ie', 'company_name', 'trade_name'];
-        
+
         foreach ($attributes as $attributeCode) {
             $attribute = $customerSetup->getEavConfig()->getAttribute(Customer::ENTITY, $attributeCode);
-            
+
             $attribute->addData([
                 'attribute_set_id' => $attributeSetId,
                 'attribute_group_id' => $attributeGroupId,
@@ -202,7 +204,7 @@ class AddBrazilianCustomerAttributes implements DataPatchInterface, PatchReverta
                     'checkout_register',
                 ],
             ]);
-            
+
             $attribute->save();
         }
 
@@ -217,11 +219,11 @@ class AddBrazilianCustomerAttributes implements DataPatchInterface, PatchReverta
     public function revert()
     {
         $this->moduleDataSetup->startSetup();
-        
+
         $customerSetup = $this->customerSetupFactory->create(['setup' => $this->moduleDataSetup]);
-        
+
         $attributes = ['person_type', 'cpf', 'rg', 'cnpj', 'ie', 'company_name', 'trade_name'];
-        
+
         foreach ($attributes as $attributeCode) {
             $customerSetup->removeAttribute(Customer::ENTITY, $attributeCode);
         }

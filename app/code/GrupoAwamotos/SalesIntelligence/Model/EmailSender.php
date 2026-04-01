@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\SalesIntelligence\Model;
@@ -79,7 +80,9 @@ class EmailSender
                 'recommendations' => $recommendations,
                 'total_impact' => number_format(
                     array_sum(array_column($alerts, 'impact')),
-                    2, ',', '.'
+                    2,
+                    ',',
+                    '.'
                 ),
                 'report_date' => date('d/m/Y H:i'),
                 'dashboard_url' => $this->backendUrl->getUrl('salesintelligence/dashboard'),

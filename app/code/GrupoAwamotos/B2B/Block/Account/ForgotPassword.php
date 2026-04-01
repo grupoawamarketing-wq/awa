@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Block para pagina de recuperacao de senha B2B
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Block\Account;

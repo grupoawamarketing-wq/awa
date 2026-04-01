@@ -208,7 +208,7 @@ class AyoSeedContent implements DataPatchInterface
             [
                 'name'       => 'Carlos Silva',
                 'email'      => 'carlos.silva@email.com',
-                'testimonial'=> 'Excelente loja! Comprei um bagageiro para minha CG 160 e chegou rapido, bem embalado. Qualidade top! Ja e minha segunda compra e recomendo.',
+                'testimonial' => 'Excelente loja! Comprei um bagageiro para minha CG 160 e chegou rapido, bem embalado. Qualidade top! Ja e minha segunda compra e recomendo.',
                 'rating'     => 5,
                 'job'        => 'Motoboy - Sao Paulo',
                 'position'   => 1,
@@ -217,7 +217,7 @@ class AyoSeedContent implements DataPatchInterface
             [
                 'name'       => 'Ana Pereira',
                 'email'      => 'ana.pereira@email.com',
-                'testimonial'=> 'Atendimento incrivel pelo WhatsApp! Tive duvida sobre compatibilidade do retrovisor com minha Fazer 250 e me ajudaram na hora.',
+                'testimonial' => 'Atendimento incrivel pelo WhatsApp! Tive duvida sobre compatibilidade do retrovisor com minha Fazer 250 e me ajudaram na hora.',
                 'rating'     => 5,
                 'job'        => 'Motociclista - Campinas',
                 'position'   => 2,
@@ -226,7 +226,7 @@ class AyoSeedContent implements DataPatchInterface
             [
                 'name'       => 'Roberto Mendes',
                 'email'      => 'roberto.mendes@email.com',
-                'testimonial'=> 'Sou dono de oficina e compro no atacado da AWA. Precos competitivos e entrega pontual. O programa B2B facilita muito.',
+                'testimonial' => 'Sou dono de oficina e compro no atacado da AWA. Precos competitivos e entrega pontual. O programa B2B facilita muito.',
                 'rating'     => 5,
                 'job'        => 'Proprietario de Oficina - Ribeirao Preto',
                 'position'   => 3,
@@ -235,7 +235,7 @@ class AyoSeedContent implements DataPatchInterface
             [
                 'name'       => 'Fernanda Costa',
                 'email'      => 'fernanda.costa@email.com',
-                'testimonial'=> 'Comprei o bau 45L para minha Bros 160 e superou as expectativas. Acabamento de qualidade e instalacao simples.',
+                'testimonial' => 'Comprei o bau 45L para minha Bros 160 e superou as expectativas. Acabamento de qualidade e instalacao simples.',
                 'rating'     => 5,
                 'job'        => 'Viajante - Belo Horizonte',
                 'position'   => 4,
@@ -244,7 +244,7 @@ class AyoSeedContent implements DataPatchInterface
             [
                 'name'       => 'Marcos Oliveira',
                 'email'      => 'marcos.oliveira@email.com',
-                'testimonial'=> 'Melhor loja de pecas para motos que ja comprei online. Site facil de navegar e busca por modelo funciona muito bem.',
+                'testimonial' => 'Melhor loja de pecas para motos que ja comprei online. Site facil de navegar e busca por modelo funciona muito bem.',
                 'rating'     => 4,
                 'job'        => 'Entregador - Araraquara',
                 'position'   => 5,
@@ -253,7 +253,7 @@ class AyoSeedContent implements DataPatchInterface
             [
                 'name'       => 'Luciana Ramos',
                 'email'      => 'luciana.ramos@email.com',
-                'testimonial'=> 'Precisava de pecas para minha XRE 300 com urgencia. Fiz o pedido e em 3 dias uteis ja tinha tudo em casa. Nota 10!',
+                'testimonial' => 'Precisava de pecas para minha XRE 300 com urgencia. Fiz o pedido e em 3 dias uteis ja tinha tudo em casa. Nota 10!',
                 'rating'     => 5,
                 'job'        => 'Motociclista - Curitiba',
                 'position'   => 6,

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\ERPIntegration\Model;
@@ -284,7 +285,8 @@ class B2BClientRegistration
             return null;
         }
 
-        if ($this->isSameSqlServerUser($writeUser, $readUser)
+        if (
+            $this->isSameSqlServerUser($writeUser, $readUser)
             && $this->shouldLogWarningWithCooldown('b2b_write_user_matches_read')
         ) {
             $this->logger->warning(

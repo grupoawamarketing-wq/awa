@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\Fitment\Test\Unit\Plugin;
@@ -93,6 +94,88 @@ class SearchAutocompleteProductPluginTest extends TestCase
         $this->assertSame('', $result[1]['fitment']);
         $this->assertSame(5, $collection->getStoreId());
         $this->assertSame(['sku', ['in' => ['ABC123', 'SEM-FITMENT']]], $collection->getAttributeFilters()[0]);
+    }
+
+    public function testAfterMapCreatesInstantPayloadWhenMissing(): void
+    {
+        $product = $this->createProduct([
+            'entity_id' => 15,
+            'marca_moto' => 'Honda',
+            'modelo_moto' => 'Bros 160',
+            'ano_moto' => '2025',
+        ]);
+
+        $collection = new SearchAutocompleteProductPluginTestCollection([$product]);
+
+        $this->collectionFactory->expects($this->once())
+            ->method('create')
+            ->willReturn($collection);
+
+        $result = $this->plugin->afterMap(
+            $this->instantProvider,
+            [
+                15 => ['name' => 'Produto sem instant'],
+            ],
+            [15 => ['name' => 'Produto sem instant']],
+            2
+        );
+
+        $this->assertSame('Honda · Bros 160 · 2025', $result[15]['_instant']['fitment']);
+    }
+
+    public function testAfterGetItemsSkipsCollectionWhenFitmentAlreadyExists(): void
+    {
+        $this->collectionFactory->expects($this->never())
+            ->method('create');
+
+        $result = $this->plugin->afterGetItems(
+            $this->instantProvider,
+            [
+                ['sku' => 'ABC123', 'name' => 'Produto 1', 'fitment' => 'Honda · CG 160 · 2024'],
+                ['sku' => 'XYZ999', 'name' => 'Produto 2', 'fitment' => 'Yamaha · Fazer 250 · 2025'],
+            ],
+            1,
+            10,
+            1
+        );
+
+        $this->assertSame('Honda · CG 160 · 2024', $result[0]['fitment']);
+        $this->assertSame('Yamaha · Fazer 250 · 2025', $result[1]['fitment']);
+    }
+
+    public function testAfterGetItemsDeduplicatesSkusAndPreservesExistingFitment(): void
+    {
+        $product = $this->getMockBuilder(\Magento\Catalog\Model\Product::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getSku', 'getData'])
+            ->getMock();
+        $product->method('getSku')->willReturn('ABC123');
+        $product->method('getData')->willReturnMap([
+            ['marca_moto', 'Honda'],
+            ['modelo_moto', 'CG 160'],
+            ['ano_moto', '2024'],
+        ]);
+
+        $collection = new SearchAutocompleteProductPluginTestCollection([$product]);
+
+        $this->collectionFactory->expects($this->once())
+            ->method('create')
+            ->willReturn($collection);
+
+        $result = $this->plugin->afterGetItems(
+            $this->instantProvider,
+            [
+                ['sku' => 'ABC123', 'name' => 'Produto 1', 'fitment' => ''],
+                ['sku' => 'ABC123', 'name' => 'Produto 2', 'fitment' => 'Custom Fitment'],
+            ],
+            4,
+            10,
+            1
+        );
+
+        $this->assertSame(['sku', ['in' => ['ABC123']]], $collection->getAttributeFilters()[0]);
+        $this->assertSame('', $result[0]['fitment']);
+        $this->assertSame('Custom Fitment', $result[1]['fitment']);
     }
 
     private function createProduct(array $data): \Magento\Catalog\Model\Product

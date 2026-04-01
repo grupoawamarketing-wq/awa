@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Submit Quote Request Controller
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Controller\Quote;
@@ -215,7 +217,6 @@ class Submit implements HttpPostActionInterface
             $this->messageManager->addSuccessMessage($successMessage);
             $redirect = $this->redirectFactory->create();
             return $redirect->setPath('b2b/quote/history');
-
         } catch (LocalizedException $e) {
             $this->logger->error('B2B Quote Submit error: ' . $e->getMessage());
 

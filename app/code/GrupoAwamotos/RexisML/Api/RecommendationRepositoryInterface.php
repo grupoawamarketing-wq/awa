@@ -1,9 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
 /**
  * Interface para API de Recomendações REXIS ML
  */
+
 namespace GrupoAwamotos\RexisML\Api;
 
 interface RecommendationRepositoryInterface

@@ -1,6 +1,9 @@
 <?php
+
 declare(strict_types=1);
+
 namespace GrupoAwamotos\FakePurchase\ViewModel;
+
 use Magento\Framework\View\Element\Block\ArgumentInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Store\Model\ScopeInterface;

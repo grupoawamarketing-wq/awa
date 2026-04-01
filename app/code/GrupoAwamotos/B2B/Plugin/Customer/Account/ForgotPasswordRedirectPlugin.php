@@ -1,8 +1,10 @@
 <?php
+
 /**
  * Plugin to redirect standard Magento forgot-password page to B2B version
  * When B2B mode is set to "strict"
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Plugin\Customer\Account;

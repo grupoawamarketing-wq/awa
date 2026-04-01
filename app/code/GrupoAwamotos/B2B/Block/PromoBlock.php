@@ -1,7 +1,9 @@
 <?php
+
 /**
  * B2B Promotional Block - Shows B2B registration banner for guests
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Block;

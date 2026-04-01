@@ -1,8 +1,10 @@
 <?php
+
 /**
  * GrupoAwamotos_MaintenanceMode
  * Secret code validation controller
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\MaintenanceMode\Controller\Access;
@@ -150,7 +152,6 @@ class Validate implements HttpPostActionInterface
                     'message' => __('Acesso concedido! Redirecionando...'),
                     'redirect' => '/'
                 ]);
-
             } catch (\Exception $e) {
                 $this->logger->error('MaintenanceMode Cookie Error: ' . $e->getMessage());
                 return $resultJson->setData([

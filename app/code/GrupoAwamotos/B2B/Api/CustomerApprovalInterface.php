@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Customer Approval Interface
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Api;
@@ -15,7 +17,7 @@ interface CustomerApprovalInterface
      * @return bool
      */
     public function setCustomerPending(int $customerId): bool;
-    
+
     /**
      * Approve customer
      *
@@ -25,7 +27,7 @@ interface CustomerApprovalInterface
      * @return bool
      */
     public function approveCustomer(int $customerId, ?int $adminUserId = null, ?string $comment = null): bool;
-    
+
     /**
      * Reject customer
      *
@@ -35,7 +37,7 @@ interface CustomerApprovalInterface
      * @return bool
      */
     public function rejectCustomer(int $customerId, ?int $adminUserId = null, ?string $reason = null): bool;
-    
+
     /**
      * Suspend customer
      *
@@ -45,7 +47,7 @@ interface CustomerApprovalInterface
      * @return bool
      */
     public function suspendCustomer(int $customerId, ?int $adminUserId = null, ?string $reason = null): bool;
-    
+
     /**
      * Get customer approval status
      *
@@ -53,7 +55,7 @@ interface CustomerApprovalInterface
      * @return string|null
      */
     public function getApprovalStatus(int $customerId): ?string;
-    
+
     /**
      * Check if customer is approved
      *
@@ -61,7 +63,7 @@ interface CustomerApprovalInterface
      * @return bool
      */
     public function isApproved(int $customerId): bool;
-    
+
     /**
      * Notify admin about new customer registration
      *
@@ -69,7 +71,7 @@ interface CustomerApprovalInterface
      * @return bool
      */
     public function notifyAdminNewCustomer(int $customerId): bool;
-    
+
     /**
      * Send approval notification to customer
      *
@@ -77,7 +79,7 @@ interface CustomerApprovalInterface
      * @return bool
      */
     public function sendApprovalEmail(int $customerId): bool;
-    
+
     /**
      * Send rejection notification to customer
      *

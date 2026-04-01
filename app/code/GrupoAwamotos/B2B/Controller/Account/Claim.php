@@ -1,8 +1,10 @@
 <?php
+
 /**
  * Controller para página de claim de conta (GET)
  * Para clientes que já compraram offline e precisam de acesso online
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Controller\Account;

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\Fitment\Block;
@@ -21,7 +22,9 @@ class Form extends Template
         $values = [];
         foreach ($collection as $p) {
             $v = trim((string)$p->getData($attribute));
-            if ($v !== '' && !in_array($v, $values, true)) { $values[] = $v; }
+            if ($v !== '' && !in_array($v, $values, true)) {
+                $values[] = $v;
+            }
         }
         sort($values);
         return $values;

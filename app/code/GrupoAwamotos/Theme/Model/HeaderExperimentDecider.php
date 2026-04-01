@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\Theme\Model;
@@ -19,8 +20,7 @@ class HeaderExperimentDecider
         bool $enabled,
         int $rolloutPercentage,
         string $variantCode
-    ): array
-    {
+    ): array {
         $normalizedSeed = $this->normalizeVariantSeed($variantSeed);
         $normalizedRollout = $this->normalizeRolloutPercentage($rolloutPercentage);
         $normalizedVariant = $this->normalizeVariantCode($variantCode);

@@ -1,8 +1,10 @@
 <?php
+
 /**
  * GrupoAwamotos OfflinePayment
  * Método de pagamento "A Combinar"
  */
+
 declare(strict_types=1);
 
 use Magento\Framework\Component\ComponentRegistrar;

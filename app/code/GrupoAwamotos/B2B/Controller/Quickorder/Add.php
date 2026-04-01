@@ -1,8 +1,10 @@
 <?php
+
 /**
  * Quick Order Add to Cart Controller
  * Processes multiple SKUs and adds to cart
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Controller\Quickorder;

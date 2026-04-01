@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Shopping List Index Controller
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Controller\ShoppingList;

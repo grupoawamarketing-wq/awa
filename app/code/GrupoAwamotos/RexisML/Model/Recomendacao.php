@@ -1,9 +1,12 @@
 <?php
+
 declare(strict_types=1);
+
 /**
  * Model de Recomendação
  * Representa um registro da tabela rexis_dataset_recomendacao
  */
+
 namespace GrupoAwamotos\RexisML\Model;
 
 use Magento\Framework\Model\AbstractModel;

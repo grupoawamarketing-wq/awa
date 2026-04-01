@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\SmartSuggestions\Controller\Adminhtml\Suggestions;
@@ -120,7 +121,6 @@ class Send extends Action implements HttpPostActionInterface
                     'message' => 'Falha ao enviar: ' . $sendResult['message']
                 ]);
             }
-
         } catch (\Exception $e) {
             return $result->setData([
                 'success' => false,

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\ERPIntegration\Cron;
@@ -60,7 +61,6 @@ class UpdateRfmAnalysis
             // Log at-risk customers count
             $atRisk = $this->rfmCalculator->getAtRiskCustomers(100);
             $this->logger->info('[ERP Cron] At-risk customers identified: ' . count($atRisk));
-
         } catch (\Exception $e) {
             $this->logger->error('[ERP Cron] Error updating RFM analysis: ' . $e->getMessage());
         }

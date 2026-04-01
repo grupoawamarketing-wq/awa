@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\SmartSuggestions\Cron;
@@ -55,7 +56,7 @@ class CalculateRfm
             if (!empty($results)) {
                 $cacheEntries = [];
                 $now = date('Y-m-d H:i:s');
-                
+
                 foreach ($results as $customer) {
                     $customerName = trim((string)($customer['customer_name'] ?? ''));
                     if ($customerName === '') {
@@ -102,7 +103,6 @@ class CalculateRfm
             }
 
             $this->logger->info('SmartSuggestions: RFM Segment Distribution', $segments);
-
         } catch (\Exception $e) {
             $this->logger->error('SmartSuggestions: RFM calculation cron failed', [
                 'error' => $e->getMessage(),

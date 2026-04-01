@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Quote Actions Column
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Ui\Component\Listing\Column;
@@ -52,9 +54,9 @@ class QuoteActions extends Column
                             'label' => __('Ver'),
                         ],
                     ];
-                    
+
                     $status = $item['status'] ?? '';
-                    
+
                     if (in_array($status, ['pending', 'processing'])) {
                         $item[$this->getData('name')]['respond'] = [
                             'href' => $this->urlBuilder->getUrl(

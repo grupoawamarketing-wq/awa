@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\Fitment\Helper;
@@ -27,12 +28,16 @@ class Config extends AbstractHelper
     public function getSynonymGroups(?int $storeId = null): array
     {
         $raw = (string)$this->scopeConfig->getValue(self::XML_PATH_SYNONYMS, ScopeInterface::SCOPE_STORE, $storeId);
-        if (trim($raw) === '') { return []; }
+        if (trim($raw) === '') {
+            return [];
+        }
         $lines = preg_split('/\r?\n/', trim($raw));
         $groups = [];
         foreach ($lines as $line) {
-            $parts = array_filter(array_map(fn($p)=>trim(strtolower($p)), explode(',', $line)), fn($p)=>$p!=='');
-            if (count($parts) > 1) { $groups[] = array_unique($parts); }
+            $parts = array_filter(array_map(fn($p)=>trim(strtolower($p)), explode(',', $line)), fn($p)=>$p !== '');
+            if (count($parts) > 1) {
+                $groups[] = array_unique($parts);
+            }
         }
         return $groups;
     }

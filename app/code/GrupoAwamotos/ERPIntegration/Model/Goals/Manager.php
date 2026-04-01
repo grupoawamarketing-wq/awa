@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\ERPIntegration\Model\Goals;
@@ -75,7 +76,6 @@ class Manager
             $this->cache->clean(['erp_goals']);
 
             return true;
-
         } catch (\Exception $e) {
             $this->logger->error('[ERP Goals] Error saving goal: ' . $e->getMessage());
             throw $e;
@@ -97,7 +97,6 @@ class Manager
             );
 
             return $result ?: null;
-
         } catch (\Exception $e) {
             // Table might not exist yet
             return null;
@@ -188,7 +187,6 @@ class Manager
             $this->cache->save(json_encode($result), $cacheKey, ['erp_goals'], self::CACHE_TTL);
 
             return $result;
-
         } catch (\Exception $e) {
             $this->logger->error('[ERP Goals] Error getting monthly goals: ' . $e->getMessage());
             return [];
@@ -297,7 +295,6 @@ class Manager
             $result['by_seller'] = $this->getSalesBySeller($periodStart, $periodEnd, $filters);
 
             return $result;
-
         } catch (\Exception $e) {
             $this->logger->error('[ERP Goals] Error getting goals data: ' . $e->getMessage());
             return [];
@@ -344,7 +341,6 @@ class Manager
                     ['code' => 'lost', 'name' => 'Perdidos'],
                 ],
             ];
-
         } catch (\Exception $e) {
             $this->logger->error('[ERP Goals] Error getting filters: ' . $e->getMessage());
             return [
@@ -395,7 +391,6 @@ class Manager
             }
 
             return $result;
-
         } catch (\Exception $e) {
             $this->logger->error('[ERP Goals] Error getting yearly summary: ' . $e->getMessage());
             return [];
@@ -440,7 +435,6 @@ class Manager
                     'progress' => $quarterlyTarget > 0 ? round(($actual / $quarterlyTarget) * 100, 1) : 0,
                 ];
             }, $quarters);
-
         } catch (\Exception $e) {
             $this->logger->error('[ERP Goals] Error getting quarterly data: ' . $e->getMessage());
             return [];
@@ -471,7 +465,6 @@ class Manager
             }
 
             return $result;
-
         } catch (\Exception $e) {
             return [];
         }
@@ -506,7 +499,6 @@ class Manager
                     'value' => (float)$row['total_value'],
                 ];
             }, $sales);
-
         } catch (\Exception $e) {
             return [];
         }
@@ -542,7 +534,6 @@ class Manager
                     'value' => (float)$row['total_value'],
                 ];
             }, $sales);
-
         } catch (\Exception $e) {
             return [];
         }
@@ -565,7 +556,6 @@ class Manager
             }
 
             return $result;
-
         } catch (\Exception $e) {
             return [];
         }
@@ -606,9 +596,15 @@ class Manager
             return $progress >= 100 ? 'achieved' : 'missed';
         }
 
-        if ($progress >= 100) return 'achieved';
-        if ($progress >= 80) return 'on_track';
-        if ($progress >= 60) return 'attention';
+        if ($progress >= 100) {
+            return 'achieved';
+        }
+        if ($progress >= 80) {
+            return 'on_track';
+        }
+        if ($progress >= 60) {
+            return 'attention';
+        }
         return 'critical';
     }
 

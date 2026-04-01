@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Quote Request DataProvider
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Ui\DataProvider;

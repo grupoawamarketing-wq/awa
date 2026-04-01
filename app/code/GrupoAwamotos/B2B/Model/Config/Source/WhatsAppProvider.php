@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Source model para provedores de WhatsApp
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Model\Config\Source;

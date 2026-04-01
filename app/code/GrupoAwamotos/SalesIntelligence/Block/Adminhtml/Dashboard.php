@@ -1,10 +1,12 @@
 <?php
+
 /**
  * Sales Intelligence Dashboard Block
  *
  * Aggregates data from all intelligence models and provides
  * a composite Health Score for the business.
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\SalesIntelligence\Block\Adminhtml;

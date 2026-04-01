@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\AbandonedCart\Cron;
@@ -122,7 +123,6 @@ class ProcessAbandonedCarts
 
                 $this->abandonedCartRepository->save($abandonedCart);
                 $processed++;
-
             } catch (\Exception $e) {
                 $this->logger->error(sprintf(
                     '[AbandonedCart] Error processing quote %d: %s',

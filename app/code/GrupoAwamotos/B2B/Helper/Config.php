@@ -1,7 +1,9 @@
 <?php
+
 /**
  * B2B Helper - Central configuration access
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Helper;

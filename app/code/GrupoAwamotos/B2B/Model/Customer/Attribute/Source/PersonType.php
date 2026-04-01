@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Person Type Source Model (PF/PJ)
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Model\Customer\Attribute\Source;
@@ -12,7 +14,7 @@ class PersonType extends AbstractSource
 {
     const TYPE_PJ = 'pj';
     const TYPE_PF = 'pf';
-    
+
     /**
      * Get all options
      *
@@ -29,7 +31,7 @@ class PersonType extends AbstractSource
         }
         return $this->_options;
     }
-    
+
     /**
      * Get option text by value
      *
@@ -45,7 +47,7 @@ class PersonType extends AbstractSource
         }
         return false;
     }
-    
+
     /**
      * Check if is company (PJ)
      *

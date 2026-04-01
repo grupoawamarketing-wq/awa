@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\ERPIntegration\Model\Coupon;
@@ -146,7 +147,6 @@ class Generator
                 'segment' => $segment,
                 'rule_id' => (int) $rule->getRuleId(),
             ];
-
         } catch (\Exception $e) {
             $this->logger->error('[ERP Coupon] Error generating coupon: ' . $e->getMessage());
             return null;
@@ -306,7 +306,6 @@ class Generator
 
             $this->logger->info('[ERP Coupon] Coupon invalidated: ' . $couponCode);
             return true;
-
         } catch (\Exception $e) {
             $this->logger->error('[ERP Coupon] Error invalidating coupon: ' . $e->getMessage());
             return false;

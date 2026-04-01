@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\ERPIntegration\Model\WhatsApp;
@@ -273,7 +274,6 @@ class Client
             ));
 
             return null;
-
         } catch (\Exception $e) {
             $this->logger->error('[WhatsApp] Request error: ' . $e->getMessage());
             return null;
@@ -367,7 +367,6 @@ class Client
                 'success' => false,
                 'message' => $response['error']['message'] ?? 'Unknown error',
             ];
-
         } catch (\Exception $e) {
             return [
                 'success' => false,

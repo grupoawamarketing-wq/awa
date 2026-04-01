@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Quote Request Repository Interface
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Api;
@@ -18,7 +20,7 @@ interface QuoteRequestRepositoryInterface
      * @return QuoteRequestInterface
      */
     public function save(QuoteRequestInterface $quoteRequest): QuoteRequestInterface;
-    
+
     /**
      * Get quote request by ID
      *
@@ -26,7 +28,7 @@ interface QuoteRequestRepositoryInterface
      * @return QuoteRequestInterface
      */
     public function getById(int $requestId): QuoteRequestInterface;
-    
+
     /**
      * Get quote requests list
      *
@@ -34,7 +36,7 @@ interface QuoteRequestRepositoryInterface
      * @return \GrupoAwamotos\B2B\Api\Data\QuoteRequestSearchResultsInterface
      */
     public function getList(SearchCriteriaInterface $searchCriteria);
-    
+
     /**
      * Delete quote request
      *
@@ -42,7 +44,7 @@ interface QuoteRequestRepositoryInterface
      * @return bool
      */
     public function delete(QuoteRequestInterface $quoteRequest): bool;
-    
+
     /**
      * Delete quote request by ID
      *
@@ -50,7 +52,7 @@ interface QuoteRequestRepositoryInterface
      * @return bool
      */
     public function deleteById(int $requestId): bool;
-    
+
     /**
      * Create quote request from cart
      *
@@ -60,7 +62,7 @@ interface QuoteRequestRepositoryInterface
      * @return QuoteRequestInterface
      */
     public function createFromCart(?int $customerId, array $customerData, ?string $message = null): QuoteRequestInterface;
-    
+
     /**
      * Update quote request status
      *
@@ -70,7 +72,7 @@ interface QuoteRequestRepositoryInterface
      * @return QuoteRequestInterface
      */
     public function updateStatus(int $requestId, string $status, ?string $adminNotes = null): QuoteRequestInterface;
-    
+
     /**
      * Set quoted prices for items
      *
@@ -80,7 +82,7 @@ interface QuoteRequestRepositoryInterface
      * @return QuoteRequestInterface
      */
     public function setQuotedPrices(int $requestId, array $itemPrices, ?float $quotedTotal = null): QuoteRequestInterface;
-    
+
     /**
      * Convert quote request to Magento quote/order
      *

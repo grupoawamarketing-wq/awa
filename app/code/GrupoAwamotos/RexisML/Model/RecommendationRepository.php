@@ -1,9 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
 /**
  * Implementação do Repositório de Recomendações
  */
+
 namespace GrupoAwamotos\RexisML\Model;
 
 use GrupoAwamotos\RexisML\Api\RecommendationRepositoryInterface;

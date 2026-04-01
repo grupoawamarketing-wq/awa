@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Controller para formulário de cadastro B2B
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Controller\Register;

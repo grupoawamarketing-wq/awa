@@ -1,8 +1,10 @@
 <?php
+
 /**
  * Plugin to redirect customer registration page to B2B registration
  * When B2B mode is set to "strict"
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Plugin\Customer\Account;

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\ERPIntegration\Observer;
@@ -103,7 +104,6 @@ class ShipmentSaveAfter implements ObserverInterface
                     sprintf('WhatsApp (Z-API): Notificacao de envio enviada. Rastreio: %s', $trackingCode ?? 'N/A')
                 );
             }
-
         } catch (\Exception $e) {
             $this->logger->error(sprintf(
                 '[Z-API Order] Error sending shipment notification: %s',

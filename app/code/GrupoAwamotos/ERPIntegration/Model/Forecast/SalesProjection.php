@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\ERPIntegration\Model\Forecast;
@@ -118,7 +119,6 @@ class SalesProjection
             $this->cache->save(json_encode($result), $cacheKey, [], self::CACHE_TTL);
 
             return $result;
-
         } catch (\Exception $e) {
             $this->logger->error('[ERP Forecast] Error projecting: ' . $e->getMessage());
             return ['error' => $e->getMessage()];
@@ -163,7 +163,6 @@ class SalesProjection
                 'range_max' => round($projection * 1.15, 2),
                 'confidence_level' => 0.70,
             ];
-
         } catch (\Exception $e) {
             $this->logger->error('[ERP Forecast] Error projecting next month: ' . $e->getMessage());
             return [];
@@ -242,7 +241,6 @@ class SalesProjection
             }
 
             return $result;
-
         } catch (\Exception $e) {
             $this->logger->error('[ERP Forecast] Error getting daily chart: ' . $e->getMessage());
             return [];
@@ -278,7 +276,6 @@ class SalesProjection
                     'value' => (float)$row['value'],
                 ];
             }, $sales);
-
         } catch (\Exception $e) {
             $this->logger->error('[ERP Forecast] Error getting monthly sales: ' . $e->getMessage());
             return [];
@@ -300,7 +297,6 @@ class SalesProjection
             ", [$yearMonth]);
 
             return (float)($result['total'] ?? 0);
-
         } catch (\Exception $e) {
             return 0;
         }
@@ -354,7 +350,6 @@ class SalesProjection
             }
 
             return $weights;
-
         } catch (\Exception $e) {
             return [1 => 1, 2 => 1, 3 => 1, 4 => 1, 5 => 1, 6 => 0.5, 7 => 0.3];
         }
@@ -705,7 +700,6 @@ class SalesProjection
                     'change_value' => round($ytdCurrent - $ytdPrevious, 2),
                 ],
             ];
-
         } catch (\Exception $e) {
             $this->logger->error('[ERP Forecast] Error getting monthly comparison: ' . $e->getMessage());
             return [];

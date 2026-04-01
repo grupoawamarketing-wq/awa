@@ -1,8 +1,10 @@
 <?php
+
 /**
  * Block order placement for non-approved logged-in customers and enforce minimum order amount.
  * Intercepts the REST/GraphQL payment+placeOrder endpoint.
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Plugin\Checkout;

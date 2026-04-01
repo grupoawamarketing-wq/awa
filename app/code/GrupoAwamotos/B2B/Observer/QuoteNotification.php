@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Observer para notificar sobre cotações B2B
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Observer;
@@ -53,7 +55,6 @@ class QuoteNotification implements ObserverInterface
             } elseif (strpos($eventType, 'response') !== false || strpos($eventType, 'replied') !== false) {
                 $this->handleQuoteResponse($quote);
             }
-
         } catch (\Exception $e) {
             $this->logger->error('B2B Quote Notification Error: ' . $e->getMessage());
         }

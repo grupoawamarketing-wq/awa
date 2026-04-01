@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\SmartSuggestions\Model\Forecast;
@@ -122,7 +123,6 @@ class SalesProjection implements ForecastServiceInterface
                     'percentage' => round($trend * 100, 1)
                 ]
             ];
-
         } catch (\Exception $e) {
             $this->logger->error('Forecast Error: ' . $e->getMessage());
             return $this->getEmptyProjection();
@@ -177,7 +177,6 @@ class SalesProjection implements ForecastServiceInterface
                         : 0
                 ]
             ];
-
         } catch (\Exception $e) {
             $this->logger->error('Next Month Forecast Error: ' . $e->getMessage());
             return [];
@@ -248,7 +247,6 @@ class SalesProjection implements ForecastServiceInterface
             ];
 
             return $data;
-
         } catch (\Exception $e) {
             $this->logger->error('Daily Trend Error: ' . $e->getMessage());
             return [];
@@ -295,7 +293,6 @@ class SalesProjection implements ForecastServiceInterface
             }
 
             return $data;
-
         } catch (\Exception $e) {
             $this->logger->error('Monthly Comparison Error: ' . $e->getMessage());
             return [];
@@ -360,7 +357,6 @@ class SalesProjection implements ForecastServiceInterface
             }
 
             return $weights;
-
         } catch (\Exception $e) {
             return array_fill(1, 7, 1.0);
         }
@@ -392,7 +388,6 @@ class SalesProjection implements ForecastServiceInterface
             }
 
             return 0;
-
         } catch (\Exception $e) {
             return 0;
         }

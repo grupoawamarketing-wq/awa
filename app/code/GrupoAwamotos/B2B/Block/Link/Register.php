@@ -1,7 +1,9 @@
 <?php
+
 /**
  * B2B Register Link Block - Only shows for guests
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Block\Link;
@@ -50,7 +52,7 @@ class Register extends Current implements SortLinkInterface
         if ($this->customerSession->isLoggedIn()) {
             return '';
         }
-        
+
         return parent::_toHtml();
     }
 }

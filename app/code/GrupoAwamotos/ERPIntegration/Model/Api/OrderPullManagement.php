@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\ERPIntegration\Model\Api;
@@ -187,10 +188,12 @@ class OrderPullManagement implements OrderPullInterface
 
         // Update order status to 'processing' if still pending/new
         $currentState = $order->getState();
-        if (in_array($currentState, [
+        if (
+            in_array($currentState, [
             \Magento\Sales\Model\Order::STATE_NEW,
             \Magento\Sales\Model\Order::STATE_PENDING_PAYMENT
-        ], true)) {
+            ], true)
+        ) {
             $order->setState(\Magento\Sales\Model\Order::STATE_PROCESSING);
             $order->setStatus('processing');
         }
@@ -642,5 +645,4 @@ class OrderPullManagement implements OrderPullInterface
         }
         return $street[2] ?? $street[1] ?? '';
     }
-
 }

@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Controller para processar cadastro B2B
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Controller\Register;
@@ -302,7 +304,6 @@ class Save implements HttpPostActionInterface
             $this->customerSession->setCustomerDataAsLoggedIn($savedCustomer);
 
             return $resultRedirect->setPath('b2b/account/dashboard');
-
         } catch (LocalizedException $e) {
             $this->messageManager->addErrorMessage($e->getMessage());
             return $resultRedirect->setPath('*/*/');
@@ -580,5 +581,4 @@ class Save implements HttpPostActionInterface
 
         return $classes >= 3;
     }
-
 }

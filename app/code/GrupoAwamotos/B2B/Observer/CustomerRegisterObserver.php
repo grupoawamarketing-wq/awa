@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Observer for new customer registration - set as pending
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Observer;
@@ -67,21 +69,21 @@ class CustomerRegisterObserver implements ObserverInterface
         if (!$this->config->isEnabled() || !$this->config->requireApproval()) {
             return;
         }
-        
+
         try {
             /** @var \Magento\Customer\Model\Customer $customer */
             $customer = $observer->getEvent()->getCustomer();
-            
+
             if (!$customer || !$customer->getId()) {
                 return;
             }
-            
+
             $customerId = (int) $customer->getId();
             $groupId = (int) $customer->getGroupId();
-            
+
             // Verificar se grupo tem aprovação automática
             $autoApproveGroups = $this->config->getAutoApproveGroups();
-            
+
             if (in_array($groupId, $autoApproveGroups)) {
                 // Aprovação automática
                 $this->customerApproval->approveCustomer(
@@ -91,28 +93,27 @@ class CustomerRegisterObserver implements ObserverInterface
                 );
                 return;
             }
-            
+
             // Definir como pendente
             $this->customerApproval->setCustomerPending($customerId);
-            
+
             // Notificar administrador
             if ($this->config->notifyAdmin()) {
                 $this->customerApproval->notifyAdminNewCustomer($customerId);
             }
-            
+
             // Adicionar mensagem para o cliente
             $pendingMessage = $this->config->getPendingMessage();
             if (!empty($pendingMessage)) {
                 $this->messageManager->addSuccessMessage($pendingMessage);
             }
-            
+
             $this->logger->info(
                 sprintf(
                     'B2B: Novo cliente #%d registrado como pendente de aprovação',
                     $customerId
                 )
             );
-            
         } catch (\Exception $e) {
             $this->logger->error(
                 'B2B CustomerRegisterObserver error: ' . $e->getMessage(),

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\SmartSuggestions\Model\ResourceModel;
@@ -27,12 +28,12 @@ class RfmCache extends AbstractDb
         $select = $connection->select()
             ->from($this->getMainTable())
             ->where('erp_customer_id = ?', $erpCustomerId);
-        
+
         $data = $connection->fetchRow($select);
         if ($data) {
             $object->setData($data);
         }
-        
+
         return $this;
     }
 

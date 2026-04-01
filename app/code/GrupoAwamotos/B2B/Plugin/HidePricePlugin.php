@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Plugin to hide prices for non-logged users
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Plugin;
@@ -25,11 +27,11 @@ class HidePricePlugin
     public function afterGetProductPrice(AbstractProduct $subject, string $result): string
     {
         if (!$this->priceVisibility->canViewPrices()) {
-            return '<div class="b2b-login-to-see-price">' 
-                . $this->priceVisibility->getPriceReplacementMessage() 
+            return '<div class="b2b-login-to-see-price">'
+                . $this->priceVisibility->getPriceReplacementMessage()
                 . '</div>';
         }
-        
+
         return $result;
     }
 }

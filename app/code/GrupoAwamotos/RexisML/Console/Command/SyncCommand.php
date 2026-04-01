@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace GrupoAwamotos\RexisML\Console\Command;
 
 use GrupoAwamotos\RexisML\Model\DataPipeline\ErpDataCollector;
@@ -111,11 +113,14 @@ class SyncCommand extends Command
             $duration = round(microtime(true) - $startTime, 2);
             $output->writeln(sprintf(
                 '<info>Sincronizacao concluida em %ss! RFM=%d | Churn=%d | Regras=%d | Cross-sell=%d</info>',
-                $duration, $rfmCount, $churnCount, $crossCount, $xsRecCount
+                $duration,
+                $rfmCount,
+                $churnCount,
+                $crossCount,
+                $xsRecCount
             ));
 
             return Command::SUCCESS;
-
         } catch (\Exception $e) {
             $output->writeln('<error>Erro: ' . $e->getMessage() . '</error>');
             $output->writeln('<comment>Verifique as configuracoes de conexao ERP em:</comment>');

@@ -1167,6 +1167,7 @@ define([
         }, 100);
 
         initStepSectionAccordionMarkup();
+        $stepSections.css('display', '');
         initRegisterPasswordToggles();
         setActiveProgressStep(1);
         syncBenefitsDisclosure();

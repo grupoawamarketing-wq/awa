@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Quote Status Source Model
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Model\Config\Source;

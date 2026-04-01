@@ -1,9 +1,12 @@
 <?php
+
 declare(strict_types=1);
+
 /**
  * AJAX Controller para buscar recomendações em tempo real
  * Resolve ERP code do cliente antes de filtrar recomendações
  */
+
 namespace GrupoAwamotos\RexisML\Controller\Ajax;
 
 use Magento\Framework\App\Action\Action;
@@ -128,7 +131,6 @@ class GetRecommendations extends Action
                 'recommendations' => $recommendations,
                 'total' => count($recommendations)
             ]);
-
         } catch (\Exception $e) {
             $this->logger->error('[RexisML] GetRecommendations error: ' . $e->getMessage());
             return $result->setData([

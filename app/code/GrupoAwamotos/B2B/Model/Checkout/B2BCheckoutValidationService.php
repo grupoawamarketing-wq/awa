@@ -1,4 +1,5 @@
 <?php
+
 /**
  * B2B Checkout Validation Service
  *
@@ -9,6 +10,7 @@
  *
  * P2-4.2: Centralized validation service to reduce plugin scatter
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Model\Checkout;

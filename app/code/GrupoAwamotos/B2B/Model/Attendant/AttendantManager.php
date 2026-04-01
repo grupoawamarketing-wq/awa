@@ -1,8 +1,10 @@
 <?php
+
 /**
  * Gerenciador de Atendentes B2B
  * Sistema de distribuição e gestão de clientes por atendente
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Model\Attendant;

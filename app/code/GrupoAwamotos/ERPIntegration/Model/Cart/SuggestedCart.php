@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\ERPIntegration\Model\Cart;
@@ -151,7 +152,6 @@ class SuggestedCart
             $this->cache->save(json_encode($result), $cacheKey, [], self::CACHE_TTL);
 
             return $result;
-
         } catch (\Exception $e) {
             $this->logger->error('[ERP Cart] Error building cart: ' . $e->getMessage());
             return ['error' => $e->getMessage()];
@@ -198,7 +198,6 @@ class SuggestedCart
             ", [$customerCode]);
 
             return $this->enrichAndFilterItems($items, 'reorder');
-
         } catch (\Exception $e) {
             $this->logger->error('[ERP Cart] Error getting reorder items: ' . $e->getMessage());
             return [];
@@ -253,7 +252,6 @@ class SuggestedCart
             ", array_merge($skus, [$customerCode], $skus));
 
             return $this->enrichAndFilterItems($items, 'cross_sell');
-
         } catch (\Exception $e) {
             $this->logger->error('[ERP Cart] Error getting cross-sell items: ' . $e->getMessage());
             return [];
@@ -325,7 +323,6 @@ class SuggestedCart
             ", array_merge([$customerCode, $customerCode, $customerCode], $excludeSkus));
 
             return $this->enrichAndFilterItems($items, 'similar_customers');
-
         } catch (\Exception $e) {
             $this->logger->error('[ERP Cart] Error getting similar customer items: ' . $e->getMessage());
             return [];
@@ -378,7 +375,6 @@ class SuggestedCart
             ", array_merge([$customerCode], $excludeSkus, [$minDays]));
 
             return $this->enrichAndFilterItems($items, 'dormant');
-
         } catch (\Exception $e) {
             $this->logger->error('[ERP Cart] Error getting dormant items: ' . $e->getMessage());
             return [];
@@ -434,7 +430,6 @@ class SuggestedCart
                 'days_since_last' => (int)($stats['days_since_last'] ?? 0),
                 'avg_order_frequency' => round((float)($stats['avg_order_frequency'] ?? 30), 0),
             ];
-
         } catch (\Exception $e) {
             return [];
         }
@@ -476,7 +471,6 @@ class SuggestedCart
                     'qty' => $stockItem->getQty(),
                 ];
             }
-
         } catch (\Exception $e) {
             $this->logger->warning('[ERP Cart] Could not enrich items: ' . $e->getMessage());
             $productsBySku = [];

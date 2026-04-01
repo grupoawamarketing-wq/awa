@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Admin Order Approval Action Controller (Approve/Reject)
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Controller\Adminhtml\Approval;

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Plugin para aplicar preco B2B dinamico por cliente
  *
@@ -10,6 +11,7 @@
  * Quando o ERP define preco, special_price e catalog rules sao neutralizados
  * para evitar precos conflitantes na PDP.
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Plugin;

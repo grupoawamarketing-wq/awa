@@ -1,8 +1,10 @@
 <?php
+
 /**
  * Shipping Rate Result Plugin
  * Adds B2B carrier information to shipping rates in checkout
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Plugin\Checkout;
@@ -62,11 +64,11 @@ class ShippingRateResultPlugin
 
         foreach ($result as $rate) {
             $carrierCode = $rate->getCarrier();
-            
+
             // Check if we have enhanced info for this carrier
             if (isset($b2bCarriers[$carrierCode])) {
                 $carrierInfo = $b2bCarriers[$carrierCode];
-                
+
                 // Add delivery time if not already present
                 if ($carrierInfo['delivery_time']) {
                     $currentMethod = $rate->getMethodTitle();

@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Source model: opções de transportadoras ativas (CarrierSelect)
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\CarrierSelect\Model\Customer\Attribute\Source;

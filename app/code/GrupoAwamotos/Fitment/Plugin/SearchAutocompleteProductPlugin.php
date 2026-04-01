@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\Fitment\Plugin;
@@ -16,6 +17,11 @@ use Psr\Log\LoggerInterface;
  */
 class SearchAutocompleteProductPlugin
 {
+    /**
+     * @var string[]
+     */
+    private const FITMENT_ATTRIBUTES = ['marca_moto', 'modelo_moto', 'ano_moto'];
+
     public function __construct(
         private readonly CollectionFactory $productCollectionFactory,
         private readonly LoggerInterface $logger,
@@ -35,28 +41,22 @@ class SearchAutocompleteProductPlugin
      */
     public function afterMap(InstantProvider $subject, array $result, mixed ...$args): array
     {
-        $entityIds = array_keys($result);
+        $entityIds = $this->extractEntityIds($result);
         if (empty($entityIds)) {
             return $result;
         }
 
-        // Magento interceptor spreads original map() args: (array $documentData, int $storeId)
-        // Defensive: handle both (documentData, storeId) and (storeId) patterns
-        $storeId = 0;
-        foreach ($args as $arg) {
-            if (is_int($arg)) {
-                $storeId = $arg;
-                break;
-            }
-        }
+        $storeId = $this->extractStoreId($args);
 
         try {
             $fitmentMap = $this->loadFitmentMap($entityIds, $storeId);
 
             foreach ($result as $productId => &$data) {
-                if (isset($data['_instant'])) {
-                    $data['_instant']['fitment'] = $fitmentMap[(int)$productId] ?? '';
+                if (!isset($data['_instant']) || !is_array($data['_instant'])) {
+                    $data['_instant'] = [];
                 }
+
+                $data['_instant']['fitment'] = $fitmentMap[(int)$productId] ?? '';
             }
             unset($data);
         } catch (\Throwable $e) {
@@ -80,18 +80,12 @@ class SearchAutocompleteProductPlugin
             return $result;
         }
 
-        // Extract storeId from original args: getItems(int $storeId, int $limit, int $page)
-        $storeId = 0;
-        if (isset($args[0]) && is_int($args[0])) {
-            $storeId = $args[0];
+        if (!$this->hasItemsMissingFitment($result)) {
+            return $result;
         }
 
-        $skus = [];
-        foreach ($result as $item) {
-            if (!empty($item['sku'])) {
-                $skus[] = $item['sku'];
-            }
-        }
+        $storeId = $this->extractStoreId($args);
+        $skus = $this->extractSkus($result);
 
         if (empty($skus)) {
             return $result;
@@ -100,20 +94,28 @@ class SearchAutocompleteProductPlugin
         try {
             $collection = $this->productCollectionFactory->create();
             $collection->addAttributeToFilter('sku', ['in' => $skus])
-                ->addAttributeToSelect(['marca_moto', 'modelo_moto', 'ano_moto'])
+                ->addAttributeToSelect(self::FITMENT_ATTRIBUTES)
                 ->addStoreFilter($storeId);
 
             $fitmentBySku = [];
             foreach ($collection as $product) {
                 $label = $this->buildFitmentLabel($product);
                 if ($label !== '') {
-                    $fitmentBySku[$product->getSku()] = $label;
+                    $fitmentBySku[(string)$product->getSku()] = $label;
                 }
             }
 
             foreach ($result as &$item) {
-                $sku = $item['sku'] ?? '';
-                $item['fitment'] = $fitmentBySku[$sku] ?? '';
+                $sku = isset($item['sku']) ? trim((string)$item['sku']) : '';
+                if ($sku === '') {
+                    $item['fitment'] = $item['fitment'] ?? '';
+                    continue;
+                }
+
+                $existingFitment = isset($item['fitment']) ? trim((string)$item['fitment']) : '';
+                $item['fitment'] = $existingFitment !== ''
+                    ? $existingFitment
+                    : ($fitmentBySku[$sku] ?? '');
             }
             unset($item);
         } catch (\Throwable $e) {
@@ -134,7 +136,7 @@ class SearchAutocompleteProductPlugin
     {
         $collection = $this->productCollectionFactory->create();
         $collection->addAttributeToFilter('entity_id', ['in' => $entityIds])
-            ->addAttributeToSelect(['marca_moto', 'modelo_moto', 'ano_moto'])
+            ->addAttributeToSelect(self::FITMENT_ATTRIBUTES)
             ->addStoreFilter($storeId);
 
         $map = [];
@@ -163,5 +165,76 @@ class SearchAutocompleteProductPlugin
         $parts = array_filter([$marca, $modelo, $ano], fn(string $v) => $v !== '');
 
         return implode(' · ', $parts);
+    }
+
+    /**
+     * @param array<int|string, mixed> $result
+     * @return int[]
+     */
+    private function extractEntityIds(array $result): array
+    {
+        $entityIds = [];
+
+        foreach (array_keys($result) as $productId) {
+            if (is_numeric($productId)) {
+                $entityIds[] = (int)$productId;
+            }
+        }
+
+        return array_values(array_unique(array_filter($entityIds, static fn(int $productId): bool => $productId > 0)));
+    }
+
+    /**
+     * @param mixed[] $args
+     */
+    private function extractStoreId(array $args): int
+    {
+        foreach ($args as $arg) {
+            if (is_int($arg)) {
+                return $arg;
+            }
+        }
+
+        return 0;
+    }
+
+    /**
+     * @param array<int, array<string, mixed>> $items
+     * @return string[]
+     */
+    private function extractSkus(array $items): array
+    {
+        $skus = [];
+
+        foreach ($items as $item) {
+            if (!is_array($item) || !isset($item['sku'])) {
+                continue;
+            }
+
+            $sku = trim((string)$item['sku']);
+            if ($sku !== '') {
+                $skus[] = $sku;
+            }
+        }
+
+        return array_values(array_unique($skus));
+    }
+
+    /**
+     * @param array<int, array<string, mixed>> $items
+     */
+    private function hasItemsMissingFitment(array $items): bool
+    {
+        foreach ($items as $item) {
+            if (!is_array($item)) {
+                continue;
+            }
+
+            if (!isset($item['fitment']) || trim((string)$item['fitment']) === '') {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

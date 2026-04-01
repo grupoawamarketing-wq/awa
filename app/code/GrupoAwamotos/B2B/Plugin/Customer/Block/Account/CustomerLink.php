@@ -1,8 +1,10 @@
 <?php
+
 /**
  * Plugin to hide standard customer registration link in header
  * When B2B mode is set to "strict"
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Plugin\Customer\Block\Account;

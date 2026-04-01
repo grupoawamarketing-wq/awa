@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Observer para notificar sobre mudanças de status de pedido
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Observer;
@@ -105,7 +107,6 @@ class OrderStatusNotification implements ObserverInterface
             ];
 
             $this->whatsAppPublisher->publish('order_status', $orderData);
-
         } catch (\Exception $e) {
             $this->logger->error('B2B Order Status Notification Error: ' . $e->getMessage());
         }

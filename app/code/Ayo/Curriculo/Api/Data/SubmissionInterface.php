@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ayo\Curriculo\Api\Data;
@@ -44,31 +45,31 @@ interface SubmissionInterface
 
     public function getEntityId(): ?int;
     public function setEntityId(int $entityId): self;
-    
+
     public function getTrackingCode(): ?string;
     public function setTrackingCode(string $trackingCode): self;
-    
+
     public function getName(): ?string;
     public function setName(string $name): self;
-    
+
     public function getEmail(): ?string;
     public function setEmail(string $email): self;
-    
+
     public function getPhone(): ?string;
     public function setPhone(?string $phone): self;
-    
+
     public function getPosition(): ?string;
     public function setPosition(?string $position): self;
-    
+
     public function getStatus(): ?string;
     public function setStatus(string $status): self;
-    
+
     public function getFilePath(): ?string;
     public function setFilePath(?string $filePath): self;
-    
+
     public function getFileName(): ?string;
     public function setFileName(?string $fileName): self;
-    
+
     public function getCreatedAt(): ?string;
     public function setCreatedAt(string $createdAt): self;
 }

@@ -46,4 +46,47 @@
         <exclude-pattern>*/tests/*</exclude-pattern>
     </rule>
 
+    <!--
+        DISABLED: PSR2.Methods.MethodDeclaration (underscore prefix)
+        Magento 2 uses `protected function _construct()` as a second-stage
+        initializer in AbstractModel. It is a valid framework pattern,
+        not a visibility-indication anti-pattern.
+    -->
+    <rule ref="PSR2.Methods.MethodDeclaration">
+        <severity>0</severity>
+    </rule>
+
+    <!--
+        DISABLED: PSR2.Classes.PropertyDeclaration (underscore prefix)
+        Older Magento 2 modules use protected `$_varName` properties
+        (a legacy framework convention). Renaming these would require
+        widespread refactoring and break parent-class compatibility.
+    -->
+    <rule ref="PSR2.Classes.PropertyDeclaration">
+        <severity>0</severity>
+    </rule>
+
+    <!--
+        ADJUSTED: Generic.Files.LineLength
+        Default limit is 80 (warning) / 100 (error). Increased to 150/200
+        because Magento 2 translation strings (__('...')) and
+        complex DI constructor signatures routinely exceed 120 chars.
+    -->
+    <rule ref="Generic.Files.LineLength">
+        <properties>
+            <property name="lineLimit" value="150"/>
+            <property name="absoluteLineLimit" value="200"/>
+        </properties>
+    </rule>
+
+    <!--
+        DISABLED: PSR12.Properties.ConstantVisibility
+        Many Magento 2 modules declare constants without explicit visibility
+        (e.g. `const ROUTE = 'something'`). PHP defaults these to public
+        visibility, so this is functionally correct; the warning is noise.
+    -->
+    <rule ref="PSR12.Properties.ConstantVisibility">
+        <severity>0</severity>
+    </rule>
+
 </ruleset>

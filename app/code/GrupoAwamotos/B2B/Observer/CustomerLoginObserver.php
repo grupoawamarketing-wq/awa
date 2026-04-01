@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Observer for customer login - check approval status
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Observer;
@@ -51,7 +53,7 @@ class CustomerLoginObserver implements ObserverInterface
         if (!$this->config->isEnabled()) {
             return;
         }
-        
+
         /** @var \Magento\Customer\Model\Customer $customer */
         $customer = $observer->getEvent()->getCustomer();
 
@@ -67,12 +69,12 @@ class CustomerLoginObserver implements ObserverInterface
         } catch (\Exception $e) {
             return;
         }
-        
+
         // Se não tem status, considerar aprovado (compatibilidade)
         if (empty($approvalStatus)) {
             return;
         }
-        
+
         $whatsAppUrl = 'https://wa.me/5516997367588';
 
         switch ($approvalStatus) {

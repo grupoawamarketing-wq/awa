@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\ERPIntegration\Cron;
@@ -77,7 +78,6 @@ class UpdateForecasts
             }
 
             $this->logger->info('[ERP Cron] Forecast update completed.');
-
         } catch (\Exception $e) {
             $this->logger->error('[ERP Cron] Error updating forecasts: ' . $e->getMessage());
         }

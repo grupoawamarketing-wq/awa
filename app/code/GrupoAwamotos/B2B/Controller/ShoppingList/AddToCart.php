@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Add Shopping List to Cart Controller
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Controller\ShoppingList;
@@ -132,7 +134,6 @@ class AddToCart implements HttpPostActionInterface
 
             $redirect = $this->redirectFactory->create();
             return $redirect->setPath('checkout/cart');
-
         } catch (LocalizedException $e) {
             if ($this->request->isAjax()) {
                 $jsonResult = $this->jsonFactory->create();

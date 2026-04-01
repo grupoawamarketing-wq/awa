@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Plugin to hide prices in the checkout configuration data.
  *
@@ -6,6 +7,7 @@
  * to the checkout KnockoutJS application. This plugin strips those values
  * for non-authorized users so prices never reach the browser.
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Plugin\Checkout;

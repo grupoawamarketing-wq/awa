@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\ERPIntegration\Observer;
@@ -112,7 +113,6 @@ class OrderStatusChange implements ObserverInterface
                     sprintf('WhatsApp (Z-API): Notificacao de status "%s" enviada.', $status)
                 );
             }
-
         } catch (\Exception $e) {
             $this->logger->error(sprintf(
                 '[Z-API Order] Error sending notification for order %s: %s',

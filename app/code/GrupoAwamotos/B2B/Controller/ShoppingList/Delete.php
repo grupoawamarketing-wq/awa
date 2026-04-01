@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Delete Shopping List Controller
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Controller\ShoppingList;
@@ -115,7 +117,6 @@ class Delete implements HttpPostActionInterface
             }
 
             $this->messageManager->addSuccessMessage($message);
-
         } catch (LocalizedException $e) {
             if ($this->request->isAjax()) {
                 $result = $this->jsonFactory->create();

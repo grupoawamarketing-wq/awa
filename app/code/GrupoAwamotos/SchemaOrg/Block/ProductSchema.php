@@ -1,8 +1,10 @@
 <?php
+
 /**
  * Product Schema.org Block
  * Gera markup JSON-LD para páginas de produto
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\SchemaOrg\Block;

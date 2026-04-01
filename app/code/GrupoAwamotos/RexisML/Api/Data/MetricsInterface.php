@@ -1,8 +1,11 @@
 <?php
+
 declare(strict_types=1);
+
 /**
  * Interface de dados para Métricas
  */
+
 namespace GrupoAwamotos\RexisML\Api\Data;
 
 interface MetricsInterface

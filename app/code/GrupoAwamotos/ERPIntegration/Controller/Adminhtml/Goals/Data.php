@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\ERPIntegration\Controller\Adminhtml\Goals;
@@ -49,7 +50,6 @@ class Data extends Action implements HttpGetActionInterface
                 'success' => true,
                 'data' => $data
             ]);
-
         } catch (\Exception $e) {
             return $result->setData([
                 'success' => false,

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ayo\Curriculo\Controller\Adminhtml\Submission;
@@ -44,7 +45,7 @@ class Download extends Action
     public function execute()
     {
         $id = (int)$this->getRequest()->getParam('id');
-        
+
         if (!$id) {
             $this->messageManager->addErrorMessage(__('Candidatura não encontrada.'));
             return $this->resultRedirectFactory->create()->setPath('*/*/');
@@ -52,7 +53,7 @@ class Download extends Action
 
         $submission = $this->submissionFactory->create();
         $submission->load($id);
-        
+
         if (!$submission->getId()) {
             $this->messageManager->addErrorMessage(__('Candidatura não encontrada.'));
             return $this->resultRedirectFactory->create()->setPath('*/*/');
@@ -60,7 +61,7 @@ class Download extends Action
 
         $filePath = $submission->getData('file_path');
         $fileName = $submission->getData('file_name') ?: basename($filePath);
-        
+
         if (!$filePath) {
             $this->messageManager->addErrorMessage(__('Arquivo não encontrado.'));
             return $this->resultRedirectFactory->create()->setPath('*/*/');
@@ -68,14 +69,14 @@ class Download extends Action
 
         $varDirectory = $this->filesystem->getDirectoryRead(DirectoryList::VAR_DIR);
         $absolutePath = $varDirectory->getAbsolutePath($filePath);
-        
+
         if (!file_exists($absolutePath)) {
             $this->messageManager->addErrorMessage(__('Arquivo não encontrado no servidor.'));
             return $this->resultRedirectFactory->create()->setPath('*/*/');
         }
 
         $content = file_get_contents($absolutePath);
-        
+
         return $this->fileFactory->create(
             $fileName,
             $content,

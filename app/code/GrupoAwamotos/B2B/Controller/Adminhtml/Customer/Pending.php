@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Admin Customer Pending List Controller
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Controller\Adminhtml\Customer;
@@ -38,7 +40,7 @@ class Pending extends Action implements HttpGetActionInterface
         $page = $this->pageFactory->create();
         $page->setActiveMenu('GrupoAwamotos_B2B::customer_approval');
         $page->getConfig()->getTitle()->prepend(__('Clientes B2B Pendentes de Aprovação'));
-        
+
         return $page;
     }
 }

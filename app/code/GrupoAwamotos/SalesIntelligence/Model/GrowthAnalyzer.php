@@ -1,10 +1,12 @@
 <?php
+
 /**
  * Growth Analyzer Model
  *
  * Decomposes revenue growth into components: new customers, returning customer
  * growth, and churn loss. Provides revenue waterfall and monthly trend data.
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\SalesIntelligence\Model;

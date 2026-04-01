@@ -1,7 +1,9 @@
 <?php
+
 /**
  * B2B Dashboard Link Block - Only shows for B2B customers
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Block\Link;
@@ -57,15 +59,15 @@ class Dashboard extends Current implements SortLinkInterface
         if (!$this->customerSession->isLoggedIn()) {
             return '';
         }
-        
+
         // Check if customer is in B2B group
         $customerGroupId = (int) $this->customerSession->getCustomerGroupId();
         $b2bGroups = $this->b2bHelper->getB2BGroupIds();
-        
+
         if (!in_array($customerGroupId, $b2bGroups)) {
             return '';
         }
-        
+
         return parent::_toHtml();
     }
 }

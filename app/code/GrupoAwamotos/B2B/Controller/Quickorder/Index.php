@@ -1,8 +1,10 @@
 <?php
+
 /**
  * Quick Order Controller
  * Allows B2B customers to add multiple products by SKU
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Controller\Quickorder;

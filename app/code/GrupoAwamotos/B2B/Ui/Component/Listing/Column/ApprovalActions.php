@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Actions Column for Order Approval Admin Grid
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Ui\Component\Listing\Column;

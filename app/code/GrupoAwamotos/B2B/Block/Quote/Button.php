@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Quote Button Block
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Block\Quote;
@@ -59,10 +61,10 @@ class Button extends Template
         if (!$this->config->isQuoteEnabled()) {
             return false;
         }
-        
+
         $position = $this->config->getQuoteButtonPosition();
         $context = $this->getData('context') ?: 'cart';
-        
+
         switch ($position) {
             case 'cart':
                 return $context === 'cart';

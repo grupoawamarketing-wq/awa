@@ -1,8 +1,10 @@
 <?php
+
 /**
  * Block guest order placement in strict B2B mode.
  * Intercepts the guest REST/GraphQL payment+placeOrder endpoint.
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Plugin\Checkout;

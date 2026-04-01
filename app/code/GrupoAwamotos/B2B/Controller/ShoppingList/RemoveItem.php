@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Remove Item from Shopping List Controller
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Controller\ShoppingList;
@@ -125,7 +127,6 @@ class RemoveItem implements HttpPostActionInterface
             }
 
             $this->messageManager->addSuccessMessage($message);
-
         } catch (LocalizedException $e) {
             if ($this->request->isAjax()) {
                 $result = $this->jsonFactory->create();

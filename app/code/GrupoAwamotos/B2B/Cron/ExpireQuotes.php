@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Cron job para expirar cotações vencidas automaticamente
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Cron;

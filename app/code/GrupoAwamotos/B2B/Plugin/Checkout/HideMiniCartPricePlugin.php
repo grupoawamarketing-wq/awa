@@ -1,10 +1,12 @@
 <?php
+
 /**
  * Plugin to hide prices in mini-cart sidebar for non-authorized users.
  *
  * The mini-cart fetches data via customer-data sections (AJAX).
  * This plugin intercepts the section data to strip/replace price values.
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Plugin\Checkout;

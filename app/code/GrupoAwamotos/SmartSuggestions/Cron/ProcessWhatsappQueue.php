@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\SmartSuggestions\Cron;
@@ -144,7 +145,6 @@ class ProcessWhatsappQueue
 
                     // Small delay between messages to avoid rate limiting
                     usleep(200000); // 200ms
-
                 } catch (\Exception $e) {
                     $failed++;
                     $this->logger->error('SmartSuggestions: Error processing message', [
@@ -170,7 +170,6 @@ class ProcessWhatsappQueue
             if (rand(1, 16) === 1) {
                 $this->cleanupOldMessages();
             }
-
         } catch (\Exception $e) {
             $this->logger->error('SmartSuggestions: WhatsApp queue processing failed', [
                 'error' => $e->getMessage(),

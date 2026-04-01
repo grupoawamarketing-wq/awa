@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Controller para salvar resposta da cotação
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Controller\Adminhtml\Quote;
@@ -106,7 +108,6 @@ class Save extends Action implements HttpPostActionInterface
                 $this->messageManager->addSuccessMessage(
                     __('Cotação #%1 foi rejeitada.', $requestId)
                 );
-
             } else {
                 // Aprovar/Responder cotação
                 if ($quotedTotal <= 0) {
@@ -136,13 +137,13 @@ class Save extends Action implements HttpPostActionInterface
                 $this->sendQuoteEmail($quoteRequest);
 
                 $this->messageManager->addSuccessMessage(
-                    __('Cotação #%1 respondida com sucesso! Valor: R$ %2',
+                    __(
+                        'Cotação #%1 respondida com sucesso! Valor: R$ %2',
                         $requestId,
                         number_format($quotedTotal, 2, ',', '.')
                     )
                 );
             }
-
         } catch (\Exception $e) {
             $this->messageManager->addErrorMessage(
                 __('Erro ao processar cotação: %1', $e->getMessage())
@@ -184,7 +185,6 @@ class Save extends Action implements HttpPostActionInterface
                 ->getTransport();
 
             $transport->sendMessage();
-
         } catch (\Exception $e) {
             // Log mas não interrompe o fluxo
             $this->messageManager->addWarningMessage(
@@ -223,7 +223,6 @@ class Save extends Action implements HttpPostActionInterface
                 ->getTransport();
 
             $transport->sendMessage();
-
         } catch (\Exception $e) {
             $this->messageManager->addWarningMessage(
                 __('Cotação rejeitada, mas houve erro ao enviar e-mail.')

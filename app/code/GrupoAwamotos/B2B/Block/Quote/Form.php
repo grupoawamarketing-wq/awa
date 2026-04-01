@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Quote Form Block
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Block\Quote;

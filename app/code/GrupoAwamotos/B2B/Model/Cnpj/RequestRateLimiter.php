@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Model\Cnpj;
@@ -129,4 +130,3 @@ class RequestRateLimiter
         return self::CACHE_KEY_PREFIX . sha1($normalized);
     }
 }
-

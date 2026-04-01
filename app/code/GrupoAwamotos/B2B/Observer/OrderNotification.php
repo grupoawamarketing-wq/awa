@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Observer para notificar sobre pedidos B2B
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Observer;
@@ -88,7 +90,6 @@ class OrderNotification implements ObserverInterface
             if ($this->isAttendantNotificationEnabled('notify_attendant_new_order')) {
                 $this->notifyCustomerAttendant((int) $customer->getId(), $orderData);
             }
-
         } catch (\Exception $e) {
             $this->logger->error('B2B Order Notification Error: ' . $e->getMessage());
         }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Observer;
@@ -80,7 +81,6 @@ class ErpApprovalSyncObserver implements ObserverInterface
 
             // Sync credit limit from ERP if available
             $this->syncCreditLimit($customer);
-
         } catch (\Exception $e) {
             $this->logger->error(sprintf(
                 'ErpApprovalSyncObserver: Error syncing customer %d to ERP - %s',

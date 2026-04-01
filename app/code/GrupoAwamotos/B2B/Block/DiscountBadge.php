@@ -1,8 +1,10 @@
 <?php
+
 /**
  * B2B Discount Badge Block
  * Shows discount indicator for logged-in B2B customers
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Block;
@@ -50,15 +52,15 @@ class DiscountBadge extends Template
         if (!$this->b2bHelper->isEnabled()) {
             return false;
         }
-        
+
         if (!$this->customerSession->isLoggedIn()) {
             return false;
         }
-        
+
         // Only show for B2B customers
         $customerGroupId = (int) $this->customerSession->getCustomerGroupId();
         $b2bGroups = $this->b2bHelper->getB2BGroupIds();
-        
+
         return in_array($customerGroupId, $b2bGroups);
     }
 

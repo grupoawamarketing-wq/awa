@@ -1,7 +1,9 @@
 <?php
+
 /**
  * My Quote Requests Controller
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Controller\Quote;

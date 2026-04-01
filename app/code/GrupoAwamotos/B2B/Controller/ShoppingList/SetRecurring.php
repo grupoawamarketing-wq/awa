@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Set Shopping List Recurring Controller
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Controller\ShoppingList;
@@ -92,7 +94,6 @@ class SetRecurring implements HttpPostActionInterface
             }
 
             return $redirect->setPath('b2b/shoppinglist/view', ['id' => $listId]);
-
         } catch (\Exception $e) {
             $this->logger->error('[B2B SetRecurring] Error: ' . $e->getMessage());
             $this->messageManager->addErrorMessage(

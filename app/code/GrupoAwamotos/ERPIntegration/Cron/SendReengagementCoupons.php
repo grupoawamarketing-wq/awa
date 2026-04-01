@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\ERPIntegration\Cron;
@@ -127,7 +128,6 @@ class SendReengagementCoupons
 
                     // Small delay to prevent email server overload
                     usleep(500000); // 0.5 seconds
-
                 } catch (\Exception $e) {
                     $errorCount++;
                     $this->logger->error(sprintf(
@@ -142,7 +142,6 @@ class SendReengagementCoupons
                 $sentCount,
                 $errorCount
             ));
-
         } catch (\Exception $e) {
             $this->logger->error('[ERP Cron] Re-engagement campaign error: ' . $e->getMessage());
         }
@@ -205,7 +204,6 @@ class SendReengagementCoupons
             }
 
             return $products;
-
         } catch (\Exception $e) {
             return [];
         }

@@ -1,7 +1,9 @@
 <?php
+
 /**
  * B2B Mode Source Model
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Model\Config\Source;
@@ -12,7 +14,7 @@ class B2BMode implements OptionSourceInterface
 {
     const MODE_STRICT = 'strict';
     const MODE_MIXED = 'mixed';
-    
+
     /**
      * Get options
      *
@@ -25,7 +27,7 @@ class B2BMode implements OptionSourceInterface
             ['value' => self::MODE_MIXED, 'label' => __('Misto (B2B + B2C)')],
         ];
     }
-    
+
     /**
      * Get options as key => value
      *

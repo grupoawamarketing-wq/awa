@@ -1,9 +1,12 @@
 <?php
+
 declare(strict_types=1);
+
 /**
  * Block do Dashboard REXIS ML
  * Fornece dados para KPIs, graficos e tabelas
  */
+
 namespace GrupoAwamotos\RexisML\Block\Adminhtml;
 
 use Magento\Backend\Block\Template;

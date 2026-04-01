@@ -1,8 +1,11 @@
 <?php
+
 declare(strict_types=1);
+
 /**
  * Interface de dados para Cross-sell (Market Basket Analysis)
  */
+
 namespace GrupoAwamotos\RexisML\Api\Data;
 
 interface CrosssellInterface

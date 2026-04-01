@@ -1,8 +1,11 @@
 <?php
+
 declare(strict_types=1);
+
 /**
  * Comando CLI para testar envio de WhatsApp
  */
+
 namespace GrupoAwamotos\RexisML\Console\Command;
 
 use Symfony\Component\Console\Command\Command;

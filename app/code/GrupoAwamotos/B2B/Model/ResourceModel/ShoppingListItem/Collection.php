@@ -1,7 +1,9 @@
 <?php
+
 /**
  * B2B Shopping List Item Collection
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Model\ResourceModel\ShoppingListItem;

@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Block para Dashboard B2B do cliente
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Block\Account;

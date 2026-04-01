@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ayo\Curriculo\Controller\Adminhtml\Submission;
@@ -35,7 +36,7 @@ class View extends Action
     public function execute()
     {
         $id = (int)$this->getRequest()->getParam('id');
-        
+
         if (!$id) {
             $this->messageManager->addErrorMessage(__('Candidatura não encontrada.'));
             return $this->resultRedirectFactory->create()->setPath('*/*/');
@@ -43,7 +44,7 @@ class View extends Action
 
         $submission = $this->submissionFactory->create();
         $submission->load($id);
-        
+
         if (!$submission->getId()) {
             $this->messageManager->addErrorMessage(__('Candidatura não encontrada.'));
             return $this->resultRedirectFactory->create()->setPath('*/*/');
@@ -52,7 +53,7 @@ class View extends Action
         $resultPage = $this->resultPageFactory->create();
         $resultPage->setActiveMenu('Ayo_Curriculo::submission');
         $resultPage->getConfig()->getTitle()->prepend(__('Candidatura #%1', $submission->getTrackingCode()));
-        
+
         return $resultPage;
     }
 }

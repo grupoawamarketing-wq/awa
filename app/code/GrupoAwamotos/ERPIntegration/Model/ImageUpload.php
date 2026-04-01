@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\ERPIntegration\Model;
@@ -96,7 +97,11 @@ class ImageUpload implements ImageUploadInterface
 
             $this->logger->info(sprintf(
                 '[ERP API] Image uploaded for SKU %s: %s (%sKB, %s) synced=%s',
-                $sku, $filename, $sizeKb, $dims, $synced ? 'yes' : 'no'
+                $sku,
+                $filename,
+                $sizeKb,
+                $dims,
+                $synced ? 'yes' : 'no'
             ));
 
             return [

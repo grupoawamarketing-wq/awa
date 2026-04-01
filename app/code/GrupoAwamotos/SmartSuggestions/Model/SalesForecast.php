@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\SmartSuggestions\Model;
@@ -8,7 +9,7 @@ use GrupoAwamotos\SmartSuggestions\Model\ResourceModel\SalesForecast as SalesFor
 
 /**
  * Sales Forecast Model
- * 
+ *
  * Stores historical and projected sales data for forecasting
  */
 class SalesForecast extends AbstractModel

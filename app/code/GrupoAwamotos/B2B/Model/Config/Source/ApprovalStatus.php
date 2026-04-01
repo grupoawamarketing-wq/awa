@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Order Approval Status Options for Admin Grid
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Model\Config\Source;

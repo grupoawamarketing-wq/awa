@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\ERPIntegration\Test\Unit\Model;
@@ -57,7 +58,7 @@ class ConnectionTest extends TestCase
     public function testGetConnectionThrowsExceptionWhenNoDrivers(): void
     {
         // Create a connection instance that will have no drivers
-        $connection = new class($this->helper, $this->logger, $this->circuitBreaker) extends Connection {
+        $connection = new class ($this->helper, $this->logger, $this->circuitBreaker) extends Connection {
             public function getAvailableDrivers(): array
             {
                 return [];
@@ -78,7 +79,7 @@ class ConnectionTest extends TestCase
     public function testTestConnectionReturnsFailureWhenNoDrivers(): void
     {
         // Create a connection instance with no drivers
-        $connection = new class($this->helper, $this->logger, $this->circuitBreaker) extends Connection {
+        $connection = new class ($this->helper, $this->logger, $this->circuitBreaker) extends Connection {
             public function getAvailableDrivers(): array
             {
                 return [];

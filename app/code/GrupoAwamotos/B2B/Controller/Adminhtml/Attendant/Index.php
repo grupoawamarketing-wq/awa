@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Controller Admin para listagem de atendentes
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Controller\Adminhtml\Attendant;

@@ -1,10 +1,12 @@
 <?php
+
 /**
  * Cron Job: Process Recurring Shopping Lists
  *
  * Creates shopping carts for customers with due recurring lists.
  * The customer then proceeds to checkout on their next login.
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Cron;

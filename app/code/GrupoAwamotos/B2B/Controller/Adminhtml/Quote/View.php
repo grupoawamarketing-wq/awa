@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Admin Quote Request View Controller
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Controller\Adminhtml\Quote;
@@ -44,23 +46,22 @@ class View extends Action implements HttpGetActionInterface
     public function execute()
     {
         $requestId = (int) $this->getRequest()->getParam('id');
-        
+
         if (!$requestId) {
             $this->messageManager->addErrorMessage(__('ID da cotação não informado.'));
             return $this->resultRedirectFactory->create()->setPath('*/*/');
         }
-        
+
         try {
             $quoteRequest = $this->quoteRequestRepository->getById($requestId);
-            
+
             $resultPage = $this->resultPageFactory->create();
             $resultPage->setActiveMenu('GrupoAwamotos_B2B::quotes');
             $resultPage->getConfig()->getTitle()->prepend(
                 __('Cotação #%1', $quoteRequest->getRequestId())
             );
-            
+
             return $resultPage;
-            
         } catch (\Exception $e) {
             $this->messageManager->addErrorMessage(__('Cotação não encontrada.'));
             return $this->resultRedirectFactory->create()->setPath('*/*/');

@@ -1,7 +1,9 @@
 <?php
+
 /**
  * B2B Restricted Catalog Plugin - Filter products by customer group
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Plugin\Catalog;

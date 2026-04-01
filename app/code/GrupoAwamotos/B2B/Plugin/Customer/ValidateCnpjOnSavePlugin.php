@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Plugin\Customer;
@@ -17,8 +18,7 @@ class ValidateCnpjOnSavePlugin
     public function __construct(
         CnpjValidator $cnpjValidator,
         CustomerCollectionFactory $customerCollectionFactory
-    )
-    {
+    ) {
         $this->cnpjValidator = $cnpjValidator;
         $this->customerCollectionFactory = $customerCollectionFactory;
     }

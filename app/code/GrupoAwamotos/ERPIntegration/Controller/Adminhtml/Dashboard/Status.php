@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\ERPIntegration\Controller\Adminhtml\Dashboard;
@@ -115,7 +116,7 @@ class Status extends Action implements HttpGetActionInterface
 
     private function isSyncEnabled(string $entityType): bool
     {
-        return match($entityType) {
+        return match ($entityType) {
             'product' => $this->helper->isProductSyncEnabled(),
             'stock' => $this->helper->isStockSyncEnabled(),
             'customer' => $this->helper->isCustomerSyncEnabled(),

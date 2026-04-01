@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\ERPIntegration\Controller\Cart;
@@ -101,7 +102,6 @@ class AddBySku implements HttpPostActionInterface
                     'qty' => $qty
                 ]
             ]);
-
         } catch (\Magento\Framework\Exception\NoSuchEntityException $e) {
             return $result->setData([
                 'success' => false,

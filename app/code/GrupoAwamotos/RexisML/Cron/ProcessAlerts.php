@@ -1,9 +1,12 @@
 <?php
+
 declare(strict_types=1);
+
 /**
  * Cron para processar alertas automaticos de Churn e Cross-sell
  * Executa diariamente as 9h (configurado em crontab.xml)
  */
+
 namespace GrupoAwamotos\RexisML\Cron;
 
 use GrupoAwamotos\RexisML\Helper\EmailNotifier;
@@ -109,7 +112,6 @@ class ProcessAlerts
             }
 
             $this->logger->info('[RexisML] Processamento de alertas concluido');
-
         } catch (\Exception $e) {
             $this->logger->error('[RexisML] Erro ao processar alertas: ' . $e->getMessage());
         }

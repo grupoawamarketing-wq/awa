@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace GrupoAwamotos\RexisML\Model\Config\Backend;
 
 use Magento\Framework\App\Config\Value;

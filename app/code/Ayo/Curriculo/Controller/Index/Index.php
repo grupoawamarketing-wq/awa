@@ -1,4 +1,5 @@
 <?php
+
 namespace Ayo\Curriculo\Controller\Index;
 
 use Magento\Framework\App\Action\Action;

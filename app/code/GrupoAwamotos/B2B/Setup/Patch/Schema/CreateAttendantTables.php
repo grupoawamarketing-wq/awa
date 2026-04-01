@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Cria tabelas para gestão de atendentes B2B
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Setup\Patch\Schema;

@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Helper para validação de CNPJ via API ReceitaWS
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Helper;
@@ -62,43 +64,43 @@ class CnpjValidator extends AbstractHelper
     public function validateLocal(string $cnpj): bool
     {
         $cnpj = $this->clean($cnpj);
-        
+
         // Verifica se tem 14 dígitos
         if (strlen($cnpj) !== 14) {
             return false;
         }
-        
+
         // Verifica se todos os dígitos são iguais
         if (preg_match('/^(\d)\1{13}$/', $cnpj)) {
             return false;
         }
-        
+
         // Validação do primeiro dígito verificador
         $soma = 0;
         $multiplicadores1 = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
-        
+
         for ($i = 0; $i < 12; $i++) {
             $soma += (int) $cnpj[$i] * $multiplicadores1[$i];
         }
-        
+
         $resto = $soma % 11;
         $digito1 = $resto < 2 ? 0 : 11 - $resto;
-        
+
         if ((int) $cnpj[12] !== $digito1) {
             return false;
         }
-        
+
         // Validação do segundo dígito verificador
         $soma = 0;
         $multiplicadores2 = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
-        
+
         for ($i = 0; $i < 13; $i++) {
             $soma += (int) $cnpj[$i] * $multiplicadores2[$i];
         }
-        
+
         $resto = $soma % 11;
         $digito2 = $resto < 2 ? 0 : 11 - $resto;
-        
+
         return (int) $cnpj[13] === $digito2;
     }
 
@@ -114,7 +116,7 @@ class CnpjValidator extends AbstractHelper
         if (!$this->validateLocal($cnpj)) {
             return null;
         }
-        
+
         $cnpjClean = $this->clean($cnpj);
 
         if (!$this->isLookupEnabled()) {
@@ -136,26 +138,27 @@ class CnpjValidator extends AbstractHelper
                 return $cachedPayload;
             }
         }
-        
+
         try {
             $this->curl->setOption(CURLOPT_TIMEOUT, $this->getLookupTimeout());
             $this->curl->setOption(CURLOPT_SSL_VERIFYPEER, true);
             $this->curl->setHeaders([
                 'Accept' => 'application/json'
             ]);
-            
+
             $endpoint = rtrim($this->getLookupApiUrl(), '/') . '/' . $cnpjClean;
             $this->curl->get($endpoint);
-            
+
             $response = (string) $this->curl->getBody();
             $data = json_decode($response, true);
-            
+
             if (!is_array($data) || (isset($data['status']) && strtoupper((string) $data['status']) === 'ERROR')) {
                 $this->audit('api_not_found_or_error', $cnpjClean);
                 return null;
             }
-            
-            if ($this->isRequireActiveStatusEnabled()
+
+            if (
+                $this->isRequireActiveStatusEnabled()
                 && isset($data['situacao'])
                 && strtoupper((string) $data['situacao']) !== 'ATIVA'
             ) {
@@ -187,7 +190,7 @@ class CnpjValidator extends AbstractHelper
                     return $invalidPayload;
                 }
             }
-            
+
             $payload = [
                 'valid' => true,
                 'source' => 'api',
@@ -215,7 +218,6 @@ class CnpjValidator extends AbstractHelper
             $this->audit('api_success', $cnpjClean);
 
             return $payload;
-            
         } catch (\Throwable $exception) {
             $this->_logger->error(
                 sprintf(
@@ -252,11 +254,11 @@ class CnpjValidator extends AbstractHelper
     public function format(string $cnpj): string
     {
         $cnpj = $this->clean($cnpj);
-        
+
         if (strlen($cnpj) !== 14) {
             return $cnpj;
         }
-        
+
         return sprintf(
             '%s.%s.%s/%s-%s',
             substr($cnpj, 0, 2),

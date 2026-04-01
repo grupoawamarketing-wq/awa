@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Controller para Dashboard B2B do cliente
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Controller\Account;
@@ -42,7 +44,7 @@ class Dashboard extends AbstractAccount
     {
         $resultPage = $this->resultPageFactory->create();
         $resultPage->getConfig()->getTitle()->set(__('Minha Conta B2B'));
-        
+
         return $resultPage;
     }
 }

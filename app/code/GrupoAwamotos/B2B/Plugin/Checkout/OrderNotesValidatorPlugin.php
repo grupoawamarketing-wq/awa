@@ -1,10 +1,12 @@
 <?php
+
 /**
  * Validate and save order notes from checkout
  *
  * Intercepts payment information save to validate order notes constraints.
  * P2-4.4: Validates order notes before order placement
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Plugin\Checkout;

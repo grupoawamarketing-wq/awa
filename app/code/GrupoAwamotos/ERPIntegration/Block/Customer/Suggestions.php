@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\ERPIntegration\Block\Customer;
@@ -266,7 +267,7 @@ class Suggestions extends Template
      */
     public function getStatusLabel(string $status): string
     {
-        return match($status) {
+        return match ($status) {
             'F' => 'Faturado',
             'E' => 'Entregue',
             'V' => 'Em Separação',
@@ -284,7 +285,7 @@ class Suggestions extends Template
      */
     public function getStatusClass(string $status): string
     {
-        return match($status) {
+        return match ($status) {
             'F', 'E' => 'status-success',
             'A', 'V', 'L' => 'status-info',
             'P' => 'status-warning',
@@ -342,7 +343,7 @@ class Suggestions extends Template
      */
     public function getSectionIcon(string $type): string
     {
-        return match($type) {
+        return match ($type) {
             'reorder' => '🔄',
             'cross_sell' => '🔗',
             'similar_customers' => '👥',
@@ -356,7 +357,7 @@ class Suggestions extends Template
      */
     public function getReorderStatusLabel(string $status): string
     {
-        return match($status) {
+        return match ($status) {
             'overdue' => 'Hora de Repor!',
             'due_soon' => 'Em Breve',
             'on_track' => 'OK',
@@ -369,7 +370,7 @@ class Suggestions extends Template
      */
     public function getReorderStatusClass(string $status): string
     {
-        return match($status) {
+        return match ($status) {
             'overdue' => 'reorder-overdue',
             'due_soon' => 'reorder-soon',
             'on_track' => 'reorder-ok',

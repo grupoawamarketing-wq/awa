@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\SmartSuggestions\Model;
@@ -8,7 +9,7 @@ use GrupoAwamotos\SmartSuggestions\Model\ResourceModel\RfmCache as RfmCacheResou
 
 /**
  * RFM Cache Model
- * 
+ *
  * Stores cached RFM scores for improved performance
  */
 class RfmCache extends AbstractModel
@@ -190,7 +191,7 @@ class RfmCache extends AbstractModel
         if (!$updatedAt) {
             return true;
         }
-        
+
         $expirationTime = strtotime($updatedAt) + ($maxAgeHours * 3600);
         return time() > $expirationTime;
     }

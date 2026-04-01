@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\SmartSuggestions\Controller\Adminhtml\Export;
@@ -99,7 +100,6 @@ class History extends Action implements HttpGetActionInterface
                 DirectoryList::VAR_DIR,
                 'text/csv'
             );
-
         } catch (\Exception $e) {
             $this->messageManager->addErrorMessage(__('Error exporting history: %1', $e->getMessage()));
             return $this->_redirect('*/history/index');

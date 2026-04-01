@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Seed B2B Carriers Command
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Console\Command;

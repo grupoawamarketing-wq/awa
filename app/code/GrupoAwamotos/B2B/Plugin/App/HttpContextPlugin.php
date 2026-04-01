@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Plugin to add B2B approval status to HTTP Context for FPC cache variation.
  *
@@ -10,6 +11,7 @@
  * By adding b2b_approval_status to the HTTP context, the FPC generates
  * separate cache entries per approval status.
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Plugin\App;

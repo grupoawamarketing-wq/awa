@@ -1,8 +1,10 @@
 <?php
+
 /**
  * B2B Shopping List Service
  * Manages shopping lists and their items
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Model;

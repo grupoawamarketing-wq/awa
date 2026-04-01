@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\ERPIntegration\Model;
@@ -167,7 +168,11 @@ class Connection implements ConnectionInterface
                     $this->circuitBreaker->recordSuccess();
                     $this->logger->info(sprintf(
                         '[ERP] Connected to SQL Server using %s driver: %s:%d/%s (attempts: %d)',
-                        $driver, $host, $port, $database, $this->connectionAttempts
+                        $driver,
+                        $host,
+                        $port,
+                        $database,
+                        $this->connectionAttempts
                     ));
                     return $this->connection;
                 }
@@ -262,7 +267,10 @@ class Connection implements ConnectionInterface
                 if (!$this->isTransientError($e) || $attempt === self::MAX_RETRIES) {
                     $this->logger->warning(sprintf(
                         '[ERP] Failed to connect with %s driver (attempt %d/%d): %s',
-                        $driver, $attempt, self::MAX_RETRIES, $e->getMessage()
+                        $driver,
+                        $attempt,
+                        self::MAX_RETRIES,
+                        $e->getMessage()
                     ));
                     break;
                 }
@@ -272,7 +280,10 @@ class Connection implements ConnectionInterface
 
                 $this->logger->info(sprintf(
                     '[ERP] Connection attempt %d/%d failed with transient error, retrying in %dms: %s',
-                    $attempt, self::MAX_RETRIES, $delay, $e->getMessage()
+                    $attempt,
+                    self::MAX_RETRIES,
+                    $delay,
+                    $e->getMessage()
                 ));
 
                 // Wait before retry
@@ -394,7 +405,9 @@ class Connection implements ConnectionInterface
                 // Microsoft SQL Server Driver for PHP
                 $dsn = sprintf(
                     'sqlsrv:Server=%s,%d;Database=%s;TrustServerCertificate=1;Encrypt=0',
-                    $host, $port, $database
+                    $host,
+                    $port,
+                    $database
                 );
                 break;
 
@@ -402,7 +415,9 @@ class Connection implements ConnectionInterface
                 // FreeTDS (dblib) — include dbname in DSN and version 7.4 for modern SQL Server
                 $dsn = sprintf(
                     'dblib:host=%s:%d;dbname=%s;version=7.4;charset=UTF-8',
-                    $host, $port, $database
+                    $host,
+                    $port,
+                    $database
                 );
                 break;
 
@@ -411,7 +426,10 @@ class Connection implements ConnectionInterface
                 $odbcDriver = $this->getOdbcDriverName();
                 $dsn = sprintf(
                     'odbc:Driver={%s};Server=%s,%d;Database=%s;TrustServerCertificate=yes;',
-                    $odbcDriver, $host, $port, $database
+                    $odbcDriver,
+                    $host,
+                    $port,
+                    $database
                 );
                 break;
 
@@ -751,7 +769,11 @@ class Connection implements ConnectionInterface
 
                 $this->logger->warning(sprintf(
                     '[ERP] %s failed (attempt %d/%d), retrying in %dms: %s',
-                    $operationType, $attempt, self::MAX_RETRIES, $delay, $e->getMessage()
+                    $operationType,
+                    $attempt,
+                    self::MAX_RETRIES,
+                    $delay,
+                    $e->getMessage()
                 ));
 
                 usleep($delay * 1000);

@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Admin Seed Carriers Controller
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Controller\Adminhtml\Carrier;
@@ -42,7 +44,7 @@ class Seed extends Action implements HttpPostActionInterface
     {
         try {
             $carriers = $this->carrierService->seedDefaultCarriers();
-            
+
             if (count($carriers) > 0) {
                 $this->messageManager->addSuccessMessage(
                     __('%1 transportadora(s) cadastrada(s) com sucesso.', count($carriers))

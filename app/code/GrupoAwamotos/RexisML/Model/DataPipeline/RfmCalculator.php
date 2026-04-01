@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\RexisML\Model\DataPipeline;
@@ -167,23 +168,47 @@ class RfmCalculator
 
     private function quintileScore(float $value, array $quintiles): int
     {
-        if ($value <= $quintiles[0]) return 1;
-        if ($value <= $quintiles[1]) return 2;
-        if ($value <= $quintiles[2]) return 3;
-        if ($value <= $quintiles[3]) return 4;
+        if ($value <= $quintiles[0]) {
+            return 1;
+        }
+        if ($value <= $quintiles[1]) {
+            return 2;
+        }
+        if ($value <= $quintiles[2]) {
+            return 3;
+        }
+        if ($value <= $quintiles[3]) {
+            return 4;
+        }
         return 5;
     }
 
     private function determineSegment(int $r, int $f, int $m): string
     {
-        if ($r >= 4 && $f >= 4 && $m >= 4) return 'Champions';
-        if ($r >= 3 && $f >= 3 && $m >= 3) return 'Loyal';
-        if ($r >= 4 && $f <= 2) return 'Novos Clientes';
-        if ($r <= 2 && $f >= 4 && $m >= 4) return 'Não Pode Perder';
-        if ($r <= 2 && $f >= 3) return 'Em Risco';
-        if ($r >= 3 && $f <= 2 && $m <= 3) return 'Potencial';
-        if ($r <= 2 && $f <= 2) return 'Hibernando';
-        if ($r <= 1 && $f <= 1) return 'Perdido';
+        if ($r >= 4 && $f >= 4 && $m >= 4) {
+            return 'Champions';
+        }
+        if ($r >= 3 && $f >= 3 && $m >= 3) {
+            return 'Loyal';
+        }
+        if ($r >= 4 && $f <= 2) {
+            return 'Novos Clientes';
+        }
+        if ($r <= 2 && $f >= 4 && $m >= 4) {
+            return 'Não Pode Perder';
+        }
+        if ($r <= 2 && $f >= 3) {
+            return 'Em Risco';
+        }
+        if ($r >= 3 && $f <= 2 && $m <= 3) {
+            return 'Potencial';
+        }
+        if ($r <= 2 && $f <= 2) {
+            return 'Hibernando';
+        }
+        if ($r <= 1 && $f <= 1) {
+            return 'Perdido';
+        }
         return 'Atenção Necessária';
     }
 }

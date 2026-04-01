@@ -1,9 +1,11 @@
 <?php
+
 /**
  * Observer para copiar metadados B2B do Quote para Order
  * P0-1: Purchase Order Number
  * P2-4.2: Order Notes
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Observer;

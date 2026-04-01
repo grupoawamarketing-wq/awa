@@ -1,7 +1,9 @@
 <?php
+
 /**
  * B2B Register Button Widget
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Block\Widget;
@@ -73,14 +75,14 @@ class RegisterButton extends Template implements BlockInterface
         if (!$this->b2bHelper->isEnabled()) {
             return false;
         }
-        
+
         if (!$this->customerSession->isLoggedIn()) {
             return true;
         }
-        
+
         $customerGroupId = (int) $this->customerSession->getCustomerGroupId();
         $b2bGroups = $this->b2bHelper->getB2BGroupIds();
-        
+
         return !in_array($customerGroupId, $b2bGroups);
     }
 

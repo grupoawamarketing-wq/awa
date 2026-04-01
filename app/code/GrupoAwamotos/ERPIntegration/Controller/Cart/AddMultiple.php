@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\ERPIntegration\Controller\Cart;
@@ -123,7 +124,6 @@ class AddMultiple implements HttpPostActionInterface
                         'price' => (float) $product->getFinalPrice()
                     ];
                     $totalQty += $qty;
-
                 } catch (\Magento\Framework\Exception\NoSuchEntityException $e) {
                     $failedProducts[] = [
                         'sku' => $sku,
@@ -164,7 +164,6 @@ class AddMultiple implements HttpPostActionInterface
                     'cart_subtotal' => $this->cart->getQuote()->getSubtotal()
                 ]
             ]);
-
         } catch (\Exception $e) {
             $this->logger->error('[ERP Cart] Error in bulk add: ' . $e->getMessage());
 

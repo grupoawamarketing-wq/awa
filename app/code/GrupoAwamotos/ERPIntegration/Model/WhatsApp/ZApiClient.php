@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\ERPIntegration\Model\WhatsApp;
@@ -467,7 +468,6 @@ class ZApiClient
                 'connected' => false,
                 'message' => $this->lastErrorMessage ?? 'Could not retrieve status',
             ];
-
         } catch (\Exception $e) {
             return [
                 'success' => false,
@@ -642,7 +642,6 @@ class ZApiClient
             ));
 
             return null;
-
         } catch (\Exception $e) {
             $this->lastErrorMessage = $e->getMessage();
             $this->logger->error('[Z-API] Request error: ' . $e->getMessage());

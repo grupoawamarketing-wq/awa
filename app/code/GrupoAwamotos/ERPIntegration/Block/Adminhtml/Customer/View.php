@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\ERPIntegration\Block\Adminhtml\Customer;
@@ -135,7 +136,7 @@ class View extends Template
      */
     public function getStatusLabel(string $status): string
     {
-        return match($status) {
+        return match ($status) {
             'F' => 'Faturado',
             'E' => 'Entregue',
             'V' => 'Em Separação',
@@ -156,7 +157,7 @@ class View extends Template
      */
     public function getStatusClass(string $status): string
     {
-        return match($status) {
+        return match ($status) {
             'F', 'E' => 'success',
             'V', 'S', 'L' => 'info',
             'A', 'W' => 'warning',

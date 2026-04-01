@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\SmartSuggestions\Model;
@@ -8,7 +9,7 @@ use GrupoAwamotos\SmartSuggestions\Model\ResourceModel\WhatsappQueue as Whatsapp
 
 /**
  * WhatsApp Queue Model
- * 
+ *
  * Manages queued WhatsApp messages for batch processing
  */
 class WhatsappQueue extends AbstractModel
@@ -59,7 +60,7 @@ class WhatsappQueue extends AbstractModel
         } elseif (strlen($normalized) === 10 || strlen($normalized) === 11) {
             $normalized = '55' . $normalized;
         }
-        
+
         return $this->setData('phone_number', $normalized);
     }
 
@@ -273,7 +274,7 @@ class WhatsappQueue extends AbstractModel
      */
     public function canRetry(int $maxRetries = 3): bool
     {
-        return $this->getStatus() === self::STATUS_FAILED 
+        return $this->getStatus() === self::STATUS_FAILED
             && $this->getRetryCount() < $maxRetries;
     }
 

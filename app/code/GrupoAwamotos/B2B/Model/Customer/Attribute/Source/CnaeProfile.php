@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Source model for CNAE Profile customer attribute
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Model\Customer\Attribute\Source;

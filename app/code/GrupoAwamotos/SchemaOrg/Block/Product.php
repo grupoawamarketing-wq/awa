@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Product Schema.org Block (DEPRECATED)
  * Gera JSON-LD para páginas de produto
@@ -7,6 +8,7 @@
  *             This class is not referenced by any layout XML and will be
  *             removed in a future release.
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\SchemaOrg\Block;
@@ -83,14 +85,14 @@ class Product extends Template
         // Ofertas
         $price = $product->getFinalPrice();
         $specialPrice = $product->getSpecialPrice();
-        
+
         $offer = [
             '@type' => 'Offer',
             'price' => number_format($price, 2, '.', ''),
             'priceCurrency' => $currency,
             'url' => $product->getProductUrl(),
-            'availability' => $product->isAvailable() 
-                ? 'https://schema.org/InStock' 
+            'availability' => $product->isAvailable()
+                ? 'https://schema.org/InStock'
                 : 'https://schema.org/OutOfStock',
         ];
 
@@ -106,7 +108,7 @@ class Product extends Template
         if ($ratingSummary && $ratingSummary->getRatingSummary()) {
             $reviewCount = $product->getReviewsCollection()->getSize();
             $ratingValue = ($ratingSummary->getRatingSummary() / 20); // Converter de 0-100 para 0-5
-            
+
             if ($reviewCount > 0) {
                 $schema['aggregateRating'] = [
                     '@type' => 'AggregateRating',
@@ -128,7 +130,7 @@ class Product extends Template
     {
         try {
             $imageUrl = $this->storeManager->getStore()
-                ->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA) 
+                ->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA)
                 . 'catalog/product' . $product->getImage();
             return $imageUrl;
         } catch (\Exception $e) {

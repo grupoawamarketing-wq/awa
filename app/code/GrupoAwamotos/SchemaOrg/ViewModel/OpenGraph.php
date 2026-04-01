@@ -1,10 +1,12 @@
 <?php
+
 /**
  * ViewModel para Open Graph Meta Tags.
  *
  * Substitui o uso direto de ObjectManager no template opengraph.phtml,
  * permitindo que o bloco seja cacheable=true e compatível com FPC.
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\SchemaOrg\ViewModel;

@@ -1,10 +1,12 @@
 <?php
+
 /**
  * Revenue Pipeline Model
  *
  * Analyzes B2B quote request pipeline: conversion rates, deal velocity,
  * expected revenue, and period-over-period comparison.
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\SalesIntelligence\Model;

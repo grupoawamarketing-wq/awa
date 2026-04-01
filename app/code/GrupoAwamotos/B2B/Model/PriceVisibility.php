@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Price Visibility Service
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Model;
@@ -184,7 +186,8 @@ class PriceVisibility implements PriceVisibilityInterface
             $approvalStatus = $this->getCustomerApprovalStatus();
 
             // Aprovado mas sem código ERP — tabela de preços em definição
-            if ($approvalStatus === ApprovalStatus::STATUS_APPROVED
+            if (
+                $approvalStatus === ApprovalStatus::STATUS_APPROVED
                 && $this->config->hidePriceForNoErp()
                 && $this->getCustomerErpCode() === null
             ) {

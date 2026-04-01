@@ -1,7 +1,9 @@
 <?php
+
 /**
  * B2B Order Approval Model
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Model;
@@ -14,7 +16,7 @@ class OrderApproval extends AbstractModel
     const STATUS_APPROVED = 'approved';
     const STATUS_REJECTED = 'rejected';
     const STATUS_CANCELLED = 'cancelled';
-    
+
     const LEVEL_BUYER = 1;      // Comprador
     const LEVEL_MANAGER = 2;    // Gerente
     const LEVEL_FINANCE = 3;    // Financeiro
@@ -68,11 +70,11 @@ class OrderApproval extends AbstractModel
     {
         $levels = array_keys(self::getLevels());
         $currentIndex = array_search($currentLevel, $levels);
-        
+
         if ($currentIndex !== false && isset($levels[$currentIndex + 1])) {
             return $levels[$currentIndex + 1];
         }
-        
+
         return null;
     }
 
@@ -83,7 +85,7 @@ class OrderApproval extends AbstractModel
      */
     public function isFullyApproved(): bool
     {
-        return $this->getData('status') === self::STATUS_APPROVED 
+        return $this->getData('status') === self::STATUS_APPROVED
             && $this->getData('current_level') >= $this->getData('required_level');
     }
 
@@ -98,7 +100,7 @@ class OrderApproval extends AbstractModel
         if ($this->getData('status') !== self::STATUS_PENDING) {
             return false;
         }
-        
+
         return $customerLevel >= $this->getData('current_level');
     }
 }

@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Comando CLI para testar conexão WhatsApp
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Console\Command;

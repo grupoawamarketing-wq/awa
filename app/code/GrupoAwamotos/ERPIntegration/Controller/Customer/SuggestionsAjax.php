@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\ERPIntegration\Controller\Customer;
@@ -51,7 +52,6 @@ class SuggestionsAjax implements HttpGetActionInterface
 
             $html = $block->toHtml();
             $result->setContents($html);
-
         } catch (\Exception $e) {
             $result->setContents('<div class="erp-error">Erro ao carregar sugestões</div>');
         }

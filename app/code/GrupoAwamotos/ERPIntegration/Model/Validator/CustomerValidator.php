@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\ERPIntegration\Model\Validator;
@@ -399,7 +400,8 @@ class CustomerValidator
         if (strlen($cpf) !== 11) {
             return $cpf;
         }
-        return sprintf('%s.%s.%s-%s',
+        return sprintf(
+            '%s.%s.%s-%s',
             substr($cpf, 0, 3),
             substr($cpf, 3, 3),
             substr($cpf, 6, 3),
@@ -416,7 +418,8 @@ class CustomerValidator
         if (strlen($cnpj) !== 14) {
             return $cnpj;
         }
-        return sprintf('%s.%s.%s/%s-%s',
+        return sprintf(
+            '%s.%s.%s/%s-%s',
             substr($cnpj, 0, 2),
             substr($cnpj, 2, 3),
             substr($cnpj, 5, 3),
@@ -444,13 +447,15 @@ class CustomerValidator
     {
         $phone = $this->cleanPhone($phone);
         if (strlen($phone) === 11) {
-            return sprintf('(%s) %s-%s',
+            return sprintf(
+                '(%s) %s-%s',
                 substr($phone, 0, 2),
                 substr($phone, 2, 5),
                 substr($phone, 7, 4)
             );
         } elseif (strlen($phone) === 10) {
-            return sprintf('(%s) %s-%s',
+            return sprintf(
+                '(%s) %s-%s',
                 substr($phone, 0, 2),
                 substr($phone, 2, 4),
                 substr($phone, 6, 4)

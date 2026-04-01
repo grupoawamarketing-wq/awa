@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\ERPIntegration\Controller\Cart;
@@ -135,7 +136,6 @@ class AddSuggested implements HttpPostActionInterface
                     ];
                     $totalQty += $qty;
                     $totalValue += $price * $qty;
-
                 } catch (\Magento\Framework\Exception\NoSuchEntityException $e) {
                     $failedProducts[] = [
                         'sku' => $sku,
@@ -179,7 +179,6 @@ class AddSuggested implements HttpPostActionInterface
                     'cart_items_count' => $this->cart->getQuote()->getItemsCount()
                 ]
             ]);
-
         } catch (\Exception $e) {
             $this->logger->error('[ERP Suggested Cart] Error: ' . $e->getMessage());
 

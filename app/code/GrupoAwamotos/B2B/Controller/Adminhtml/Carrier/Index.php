@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Admin Carrier Index Controller
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Controller\Adminhtml\Carrier;

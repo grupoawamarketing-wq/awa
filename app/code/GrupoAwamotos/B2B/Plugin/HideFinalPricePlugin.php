@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Plugin to hide final price box for non-logged users
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Plugin;
@@ -32,12 +34,12 @@ class HideFinalPricePlugin
     public function aroundToHtml(FinalPriceBox $subject, callable $proceed)
     {
         if (!$this->priceVisibility->canViewPrices()) {
-            return '<div class="b2b-login-to-see-price price-box">' 
-                . '<span class="price-label">' 
-                . $this->priceVisibility->getPriceReplacementMessage() 
+            return '<div class="b2b-login-to-see-price price-box">'
+                . '<span class="price-label">'
+                . $this->priceVisibility->getPriceReplacementMessage()
                 . '</span></div>';
         }
-        
+
         return $proceed();
     }
 }

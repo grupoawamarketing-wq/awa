@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Customer Approval Service
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Model;

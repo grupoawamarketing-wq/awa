@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Test for B2BCheckoutValidationService
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Model\Checkout;

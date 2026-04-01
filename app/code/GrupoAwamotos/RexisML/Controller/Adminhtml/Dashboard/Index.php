@@ -1,8 +1,11 @@
 <?php
+
 declare(strict_types=1);
+
 /**
  * Controller do Dashboard Admin
  */
+
 namespace GrupoAwamotos\RexisML\Controller\Adminhtml\Dashboard;
 
 use Magento\Backend\App\Action;

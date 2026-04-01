@@ -1,8 +1,10 @@
 <?php
+
 /**
  * Plugin para redirecionar o dashboard padrão do Magento para o dashboard B2B unificado.
  * Clientes B2B são redirecionados para /b2b/account/dashboard.
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Plugin\Customer\Account;

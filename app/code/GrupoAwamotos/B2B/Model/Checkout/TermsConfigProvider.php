@@ -1,9 +1,11 @@
 <?php
+
 /**
  * B2B Checkout Terms Config Provider
  *
  * Provides B2B terms and conditions configuration to checkout JS context.
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Model\Checkout;

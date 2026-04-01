@@ -1,8 +1,10 @@
 <?php
+
 /**
  * Controller para processar claim de conta (POST)
  * Busca cliente por email ou CNPJ e envia link de reset de senha
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Controller\Account;

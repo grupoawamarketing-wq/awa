@@ -1,8 +1,10 @@
 <?php
+
 /**
  * B2B Company Data Config Provider
  * P2-4.1: Provides company data (razão social, CNPJ, IE) for checkout auto-fill
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Model\Checkout;

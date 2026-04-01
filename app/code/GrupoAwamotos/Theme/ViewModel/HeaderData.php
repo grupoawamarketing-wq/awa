@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\Theme\ViewModel;
@@ -21,7 +22,8 @@ class HeaderData implements ArgumentInterface
     public function __construct(
         private ScopeConfigInterface $scopeConfig,
         private StoreManagerInterface $storeManager
-    ) {}
+    ) {
+    }
 
     /**
      * Check if sticky header is enabled in theme configuration.

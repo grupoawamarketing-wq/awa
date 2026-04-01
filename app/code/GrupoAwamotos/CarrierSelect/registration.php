@@ -1,8 +1,10 @@
 <?php
+
 /**
  * GrupoAwamotos CarrierSelect
  * Seleção de transportadora pelo cliente
  */
+
 declare(strict_types=1);
 
 use Magento\Framework\Component\ComponentRegistrar;

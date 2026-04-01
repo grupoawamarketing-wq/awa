@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Observer: classify new B2B customers by CNAE code on registration
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Observer;
@@ -111,7 +113,8 @@ class CnaeClassificationObserver implements ObserverInterface
             ));
 
             // Auto-approve direct-profile customers if configured
-            if ($profile === CnaeClassifier::PROFILE_DIRECT
+            if (
+                $profile === CnaeClassifier::PROFILE_DIRECT
                 && $this->cnaeClassifier->isAutoApproveDirectEnabled()
             ) {
                 $this->customerApproval->approveCustomer(

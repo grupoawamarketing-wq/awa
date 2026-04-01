@@ -1,4 +1,5 @@
 <?php
+
 /**
  * SchemaOrg Block — Fallback/Compatibility
  *
@@ -9,6 +10,7 @@
  *
  * @see \GrupoAwamotos\SchemaOrg\Block\ProductSchema
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\SchemaOrg\Block;

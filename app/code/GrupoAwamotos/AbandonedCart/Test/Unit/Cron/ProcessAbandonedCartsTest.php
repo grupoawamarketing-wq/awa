@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\AbandonedCart\Test\Unit\Cron;
@@ -95,8 +96,10 @@ class ProcessAbandonedCartsTest extends TestCase
 
         // AbandonedCart para salvar o quote 201
         $abandonedCart = $this->createMock(AbandonedCartInterface::class);
-        foreach (['setQuoteId','setCustomerId','setCustomerEmail','setCustomerName',
-                  'setStoreId','setCartValue','setItemsCount','setAbandonedAt','setStatus'] as $m) {
+        foreach (
+            ['setQuoteId','setCustomerId','setCustomerEmail','setCustomerName',
+                  'setStoreId','setCartValue','setItemsCount','setAbandonedAt','setStatus'] as $m
+        ) {
             $abandonedCart->method($m)->willReturnSelf();
         }
         $this->abandonedCartFactory->method('create')->willReturn($abandonedCart);

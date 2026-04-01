@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\ERPIntegration\Model\Alert;
@@ -115,7 +116,6 @@ class EmailSender
             ));
 
             return true;
-
         } catch (\Exception $e) {
             $this->logger->error('[ERP Alert] Error sending at-risk alert: ' . $e->getMessage());
             return false;
@@ -164,7 +164,6 @@ class EmailSender
             ));
 
             return true;
-
         } catch (\Exception $e) {
             $this->logger->error('[ERP Alert] Error sending re-engagement email: ' . $e->getMessage());
             return false;
@@ -248,7 +247,6 @@ class EmailSender
             $this->logger->info('[ERP Alert] Weekly RFM report sent.');
 
             return true;
-
         } catch (\Exception $e) {
             $this->logger->error('[ERP Alert] Error sending weekly RFM report: ' . $e->getMessage());
             return false;
@@ -313,7 +311,6 @@ class EmailSender
             ));
 
             return true;
-
         } catch (\Exception $e) {
             $this->logger->error('[ERP Alert] Error sending forecast alert: ' . $e->getMessage());
             return false;
@@ -350,7 +347,6 @@ class EmailSender
                 ->getTransport();
 
             $transport->sendMessage();
-
         } finally {
             $this->inlineTranslation->resume();
         }

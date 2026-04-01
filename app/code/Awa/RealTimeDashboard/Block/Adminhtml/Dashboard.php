@@ -1,4 +1,5 @@
 <?php
+
 namespace Awa\RealTimeDashboard\Block\Adminhtml;
 
 use Magento\Backend\Block\Template;

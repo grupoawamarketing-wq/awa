@@ -1,8 +1,10 @@
 <?php
+
 /**
  * GrupoAwamotos_MaintenanceMode - Observer de Verificação
  * Versão Premium Gratuita - Todas as funcionalidades
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\MaintenanceMode\Observer;

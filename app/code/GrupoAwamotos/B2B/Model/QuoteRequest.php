@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Quote Request Model
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Model;
@@ -179,7 +181,7 @@ class QuoteRequest extends AbstractModel implements QuoteRequestInterface
         if (empty($json)) {
             return [];
         }
-        
+
         try {
             return json_decode($json, true) ?: [];
         } catch (\Exception $e) {
@@ -309,7 +311,7 @@ class QuoteRequest extends AbstractModel implements QuoteRequestInterface
     {
         return $this->getData(self::UPDATED_AT);
     }
-    
+
     /**
      * Check if quote is expired
      *
@@ -321,10 +323,10 @@ class QuoteRequest extends AbstractModel implements QuoteRequestInterface
         if (empty($expiresAt)) {
             return false;
         }
-        
+
         return strtotime($expiresAt) < time();
     }
-    
+
     /**
      * Get status label
      *
@@ -341,7 +343,7 @@ class QuoteRequest extends AbstractModel implements QuoteRequestInterface
             self::STATUS_EXPIRED => __('Expirado'),
             self::STATUS_CONVERTED => __('Convertido em Pedido'),
         ];
-        
+
         return (string) ($labels[$this->getStatus()] ?? $this->getStatus());
     }
 }

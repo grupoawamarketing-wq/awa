@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\Theme\Block\VerticalMenu;
@@ -242,20 +243,27 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
             $childName = $this->escapeHtml($child->getName());
             $childUrl = $this->escapeUrl($this->_categoryHelper->getCategoryUrl($child));
 
+            $childSubmenuId = 'submenu-' . $menuToken;
+
             $html .= '<li class="' . $this->escapeHtmlAttr(implode(' ', array_values(array_unique($classParts)))) . '"'
                 . ' data-level="1"'
                 . ' data-menu="' . $this->escapeHtmlAttr($menuToken) . '"'
-                . ($hasChildren ? ' aria-haspopup="true" aria-expanded="false"' : '')
                 . '>';
 
             if ($hasChildren) {
-                $html .= '<div class="open-children-toggle navigation__toggle" role="button" tabindex="0" aria-label="Expandir subcategorias" aria-expanded="false"></div>';
+                $html .= '<div class="open-children-toggle navigation__toggle"'
+                    . ' role="button"'
+                    . ' tabindex="0"'
+                    . ' aria-label="' . $this->escapeHtmlAttr(__('Expandir subcategorias de ')) . $this->escapeHtmlAttr($child->getName()) . '"'
+                    . ' aria-expanded="false"'
+                    . ' aria-haspopup="true"'
+                    . ' aria-controls="' . $this->escapeHtmlAttr($childSubmenuId) . '"'
+                    . '></div>';
             }
 
             $html .= '<a class="navigation__inner-link title-cat-mega-menu"'
                 . ' href="' . $childUrl . '"'
                 . ' data-menu="' . $this->escapeHtmlAttr($menuToken) . '"'
-                . ($hasChildren ? ' aria-haspopup="true" aria-expanded="false"' : '')
                 . '>';
 
             $iconClass = $this->sanitizeClassList($vcMenuFontIcon);
@@ -337,7 +345,10 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
                 $listClasses .= ' ' . trim($column_class);
             }
 
-            $html = '<ul class="' . $this->escapeHtmlAttr(trim($listClasses)) . '" data-level="' . (int)$level . '">';
+            $submenuListId = ($parentMenuId !== 'root') ? 'submenu-menu-' . (int)$level . '-' . $this->escapeHtmlAttr($parentMenuId) : '';
+            $idAttr = $submenuListId !== '' ? ' id="submenu-' . $this->escapeHtmlAttr($parentMenuId) . '"' : '';
+
+            $html = '<ul' . $idAttr . ' class="' . $this->escapeHtmlAttr(trim($listClasses)) . '" data-level="' . (int)$level . '">';
 
             foreach ($children as $child) {
                 $cat_model = $this->getCategoryModel($child->getId());
@@ -404,15 +415,23 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
                     }
                 }
 
+                $submenuId = 'submenu-' . $menuToken;
+
                 $html .= '<li class="ui-menu-item ' . $this->escapeHtmlAttr(trim($item_class)) . '"'
                     . $dataAttrs
                     . ' data-level="' . (int)$level . '"'
                     . ' data-menu="' . $this->escapeHtmlAttr($menuToken) . '"'
-                    . ($hasChildren ? ' aria-haspopup="true" aria-expanded="false"' : '')
                     . '>';
 
                 if ($hasChildren) {
-                    $html .= '<div class="open-children-toggle navigation__toggle" role="button" tabindex="0" aria-label="Expandir subcategorias" aria-expanded="false"></div>';
+                    $html .= '<div class="open-children-toggle navigation__toggle"'
+                        . ' role="button"'
+                        . ' tabindex="0"'
+                        . ' aria-label="' . $this->escapeHtmlAttr(__('Expandir subcategorias de ')) . $this->escapeHtmlAttr($child->getName()) . '"'
+                        . ' aria-expanded="false"'
+                        . ' aria-haspopup="true"'
+                        . ' aria-controls="' . $this->escapeHtmlAttr($submenuId) . '"'
+                        . '></div>';
                 }
 
                 $childUrl = $this->escapeUrl($this->_categoryHelper->getCategoryUrl($child));
@@ -423,7 +442,6 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
                 $html .= '<a' . $linkClassAttr
                     . ' href="' . $childUrl . '"'
                     . ' data-menu="' . $this->escapeHtmlAttr($menuToken) . '"'
-                    . ($hasChildren ? ' aria-haspopup="true" aria-expanded="false"' : '')
                     . '>';
 
                 $iconClass = $this->sanitizeClassList($vc_menu_font_icon);
@@ -543,19 +561,26 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
             $categoryName = $this->escapeHtml($category->getName());
             $categoryNameAttr = $this->escapeHtmlAttr($category->getName());
 
+            $submenuId = 'submenu-' . $menuToken;
+
             $html .= '<li class="ui-menu-item ' . $this->escapeHtmlAttr(trim($item_class . $floatType)) . '"'
                 . ' data-level="0"'
                 . ' data-menu="' . $this->escapeHtmlAttr($menuToken) . '"'
-                . ($hasChildren ? ' aria-haspopup="true" aria-expanded="false"' : '')
                 . '>';
 
             if ($hasChildren) {
-                $html .= '<div class="open-children-toggle navigation__toggle" role="button" tabindex="0" aria-label="Expandir subcategorias" aria-expanded="false"></div>';
+                $html .= '<div class="open-children-toggle navigation__toggle"'
+                    . ' role="button"'
+                    . ' tabindex="0"'
+                    . ' aria-label="' . $this->escapeHtmlAttr(__('Expandir subcategorias de ')) . $categoryNameAttr . '"'
+                    . ' aria-expanded="false"'
+                    . ' aria-haspopup="true"'
+                    . ' aria-controls="' . $this->escapeHtmlAttr($submenuId) . '"'
+                    . '></div>';
             }
 
             $html .= '<a href="' . $categoryUrl . '" class="level-top navigation__link"'
                 . ' data-menu="' . $this->escapeHtmlAttr($menuToken) . '"'
-                . ($hasChildren ? ' aria-haspopup="true" aria-expanded="false"' : '')
                 . '>';
 
             $vc_menu_icon_img = $this->_helper->getVerticalIconimageUrl($cat_model);
@@ -582,10 +607,14 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
             $html .= '</a>';
 
             if ($hasChildren) {
-                $html .= '<div class="level0 submenu navigation__submenu navigation__inner-list navigation__inner-list--level1"'
+                $html .= '<div id="' . $this->escapeHtmlAttr($submenuId) . '"'
+                    . ' class="level0 submenu navigation__submenu navigation__inner-list navigation__inner-list--level1"'
                     . $custom_style
                     . ' data-level="1"'
-                    . ' data-parent-menu="' . $this->escapeHtmlAttr($menuToken) . '">';
+                    . ' data-parent-menu="' . $this->escapeHtmlAttr($menuToken) . '"'
+                    . ' role="region"'
+                    . ' aria-label="' . $categoryNameAttr . '"'
+                    . '>';
 
                 if (($menu_type === 'fullwidth' || $menu_type === 'staticwidth') && $menu_top_content !== '') {
                     $html .= '<div class="menu-top-block">' . $this->getBlockContent($menu_top_content) . '</div>';

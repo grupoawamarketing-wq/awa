@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Observer para notificar cliente sobre aprovação B2B via WhatsApp
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Observer;
@@ -68,7 +70,6 @@ class CustomerApprovalNotification implements ObserverInterface
             ];
 
             $this->whatsAppPublisher->publish('customer_approved', $customerData);
-
         } catch (\Exception $e) {
             $this->logger->error('B2B Approval WhatsApp Notification Error: ' . $e->getMessage());
         }

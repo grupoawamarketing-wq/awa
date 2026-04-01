@@ -1,10 +1,12 @@
 <?php
+
 /**
  * Validate and save delivery date from checkout
  *
  * Intercepts payment information save to validate delivery date format and constraints.
  * P2-4.3: Validates delivery date before order placement
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Plugin\Checkout;

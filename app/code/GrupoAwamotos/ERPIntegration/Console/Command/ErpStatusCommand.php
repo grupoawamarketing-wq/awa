@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\ERPIntegration\Console\Command;
@@ -208,7 +209,7 @@ class ErpStatusCommand extends Command
         // Circuit Breaker Status
         $output->writeln('<comment>── Circuit Breaker ──</comment>');
         $cb = $status['circuit_breaker'];
-        $stateIcon = match($cb['state']) {
+        $stateIcon = match ($cb['state']) {
             'CLOSED' => '<info>✓ Normal</info>',
             'OPEN' => '<error>✗ Bloqueado</error>',
             'HALF_OPEN' => '<comment>⚡ Testando</comment>',
@@ -244,7 +245,7 @@ class ErpStatusCommand extends Command
 
         foreach ($status['sync_stats'] as $type => $stat) {
             $lastSync = $stat['last_sync'] ? $this->formatRelativeTime($stat['last_sync']) : 'Nunca';
-            $statusIcon = match($stat['last_status']) {
+            $statusIcon = match ($stat['last_status']) {
                 'success' => '<info>OK</info>',
                 'error' => '<error>Erro</error>',
                 default => '<comment>-</comment>',

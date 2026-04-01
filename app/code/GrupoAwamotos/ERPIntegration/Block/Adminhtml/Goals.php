@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\ERPIntegration\Block\Adminhtml;
@@ -157,9 +158,15 @@ class Goals extends Template
      */
     public function getProgressClass(float $progress): string
     {
-        if ($progress >= 100) return 'success';
-        if ($progress >= 80) return 'warning';
-        if ($progress >= 60) return 'info';
+        if ($progress >= 100) {
+            return 'success';
+        }
+        if ($progress >= 80) {
+            return 'warning';
+        }
+        if ($progress >= 60) {
+            return 'info';
+        }
         return 'danger';
     }
 

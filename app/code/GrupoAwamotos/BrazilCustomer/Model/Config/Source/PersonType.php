@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Source Model para Tipo de Pessoa (PF/PJ)
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\BrazilCustomer\Model\Config\Source;

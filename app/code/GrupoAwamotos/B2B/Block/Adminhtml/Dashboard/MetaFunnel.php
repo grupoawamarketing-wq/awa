@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Block: Meta B2B Funnel Dashboard
  *
@@ -7,6 +8,7 @@
  * grupoawamotos_b2b_quote_request, grupoawamotos_b2b_company,
  * grupoawamotos_b2b_credit_limit.
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Block\Adminhtml\Dashboard;

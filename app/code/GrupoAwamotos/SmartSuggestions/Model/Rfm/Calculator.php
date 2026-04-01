@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\SmartSuggestions\Model\Rfm;
@@ -70,7 +71,6 @@ class Calculator implements RfmCalculatorInterface
 
             $this->cachedResults = $result;
             return $result;
-
         } catch (\Exception $e) {
             $this->logger->error('[SmartSuggestions RFM] Error delegating to ERP Calculator: ' . $e->getMessage());
             return [];

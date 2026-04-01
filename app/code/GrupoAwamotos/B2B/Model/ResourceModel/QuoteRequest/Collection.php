@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Quote Request Collection
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Model\ResourceModel\QuoteRequest;
@@ -16,7 +18,7 @@ class Collection extends AbstractCollection
      * @var string
      */
     protected $_idFieldName = 'request_id';
-    
+
     /**
      * @var string
      */
@@ -29,7 +31,7 @@ class Collection extends AbstractCollection
     {
         $this->_init(QuoteRequest::class, QuoteRequestResource::class);
     }
-    
+
     /**
      * Filter by customer ID
      *
@@ -40,7 +42,7 @@ class Collection extends AbstractCollection
     {
         return $this->addFieldToFilter('customer_id', $customerId);
     }
-    
+
     /**
      * Filter by status
      *
@@ -54,7 +56,7 @@ class Collection extends AbstractCollection
         }
         return $this->addFieldToFilter('status', $status);
     }
-    
+
     /**
      * Filter only active (not expired/rejected/converted)
      *

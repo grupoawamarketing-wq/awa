@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Credit Limit Resource Model
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Model\ResourceModel;

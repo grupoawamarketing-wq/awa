@@ -1,4 +1,5 @@
 <?php
+
 /**
  * GrupoAwamotos_CspFix
  *
@@ -9,6 +10,7 @@
  *
  * This plugin trims the loaded value before it reaches Version::readValue().
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\CspFix\Plugin\Deployment\Version\Storage;

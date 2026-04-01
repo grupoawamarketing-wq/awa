@@ -1,8 +1,11 @@
 <?php
+
 declare(strict_types=1);
+
 /**
  * Block para renderizar oportunidades de churn em emails
  */
+
 namespace GrupoAwamotos\RexisML\Block\Email;
 
 use Magento\Framework\View\Element\Template;

@@ -1,4 +1,5 @@
 <?php
+
 namespace Ayo\Curriculo\Block;
 
 use Magento\Framework\App\Config\ScopeConfigInterface;

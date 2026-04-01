@@ -1,7 +1,9 @@
 <?php
+
 /**
  * B2B Carrier Collection
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Model\ResourceModel\Carrier;

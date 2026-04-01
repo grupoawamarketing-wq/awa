@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Método de Pagamento "A Combinar"
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\OfflinePayment\Model\Payment;

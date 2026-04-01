@@ -1,9 +1,11 @@
 <?php
+
 /**
  * CLI Command: Provision ERP customers with password, b2b_cnpj and approval status
  *
  * Usage: bin/magento b2b:provision-erp-customers
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Console\Command;

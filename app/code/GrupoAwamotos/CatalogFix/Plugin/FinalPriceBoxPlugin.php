@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\CatalogFix\Plugin;
@@ -27,7 +28,7 @@ class FinalPriceBoxPlugin
         // Verificação preventiva ANTES de chamar o método original
         // para evitar Warning sendo convertido em Exception pelo ErrorHandler
         $map = $subject->getData('special_price_map');
-        
+
         if (is_array($map)) {
             // Estamos em modo listagem - verificar se a chave existe
             $saleableItem = $subject->getSaleableItem();
@@ -45,8 +46,10 @@ class FinalPriceBoxPlugin
             return (bool)$proceed();
         } catch (\Throwable $e) {
             // Fallback caso ainda ocorra algum erro
-            if (str_contains($e->getMessage(), 'Undefined array key') || 
-                str_contains($e->getMessage(), 'Undefined index')) {
+            if (
+                str_contains($e->getMessage(), 'Undefined array key') ||
+                str_contains($e->getMessage(), 'Undefined index')
+            ) {
                 return $this->calculateHasSpecialPrice($subject);
             }
             throw $e;
@@ -64,14 +67,14 @@ class FinalPriceBoxPlugin
         try {
             $regularPrice = $subject->getPriceType(Price\RegularPrice::PRICE_CODE);
             $finalPrice = $subject->getPriceType(Price\FinalPrice::PRICE_CODE);
-            
+
             if (!$regularPrice || !$finalPrice) {
                 return false;
             }
-            
+
             $displayRegularPrice = $regularPrice->getAmount()->getValue();
             $displayFinalPrice = $finalPrice->getAmount()->getValue();
-            
+
             return $displayFinalPrice < $displayRegularPrice;
         } catch (\Throwable $t) {
             // Em caso de qualquer erro, retorna false (sem preço especial)

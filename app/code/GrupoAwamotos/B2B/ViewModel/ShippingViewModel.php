@@ -1,8 +1,10 @@
 <?php
+
 /**
  * B2B Shipping Selector ViewModel
  * Provides carrier data for checkout
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\ViewModel;

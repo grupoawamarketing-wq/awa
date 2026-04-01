@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\ERPIntegration\Cron;
@@ -118,7 +119,6 @@ class SendWhatsAppReengagement
 
                     // Rate limiting: WhatsApp has limits on messages per second
                     usleep(1000000); // 1 second delay between messages
-
                 } catch (\Exception $e) {
                     $errorCount++;
                     $this->logger->error(sprintf(
@@ -133,7 +133,6 @@ class SendWhatsAppReengagement
                 $sentCount,
                 $errorCount
             ));
-
         } catch (\Exception $e) {
             $this->logger->error('[WhatsApp Cron] Campaign error: ' . $e->getMessage());
         }
@@ -170,7 +169,6 @@ class SendWhatsAppReengagement
                 if ($mobileAttr && $mobileAttr->getValue()) {
                     return $mobileAttr->getValue();
                 }
-
             } catch (\Exception $e) {
                 // Ignore
             }

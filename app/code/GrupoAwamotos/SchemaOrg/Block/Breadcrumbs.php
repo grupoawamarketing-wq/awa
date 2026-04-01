@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Breadcrumbs Schema.org Block
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\SchemaOrg\Block;
@@ -29,7 +31,7 @@ class Breadcrumbs extends Template
     public function getBreadcrumbsSchema()
     {
         $breadcrumbs = $this->catalogHelper->getBreadcrumbPath();
-        
+
         if (empty($breadcrumbs)) {
             return '';
         }

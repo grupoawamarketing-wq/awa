@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\SmartSuggestions\Cron;
@@ -119,7 +120,6 @@ class GenerateSuggestions
                         'created_at' => date('Y-m-d H:i:s'),
                     ]);
                     $this->historyResource->save($history);
-
                 } catch (\Exception $e) {
                     $this->logger->error('SmartSuggestions: Error processing customer', [
                         'customer_id' => $opportunity['customer_id'],
@@ -138,7 +138,6 @@ class GenerateSuggestions
                 $errors,
                 $duration
             ));
-
         } catch (\Exception $e) {
             $this->logger->error('SmartSuggestions: Suggestion generation cron failed', [
                 'error' => $e->getMessage(),

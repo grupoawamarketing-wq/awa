@@ -1,8 +1,10 @@
 <?php
+
 /**
  * Plugin to redirect standard customer registration to B2B registration
  * When B2B mode is set to "strict", all registrations must go through B2B flow
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Plugin\Customer\Account;

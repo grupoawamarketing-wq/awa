@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\Fitment\Setup\Patch\Data;
@@ -6,7 +7,7 @@ namespace GrupoAwamotos\Fitment\Setup\Patch\Data;
 use Magento\Eav\Setup\EavSetupFactory;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
-use Magento\Catalog\Model\Product; 
+use Magento\Catalog\Model\Product;
 
 class AddFitmentAttributes implements DataPatchInterface
 {
@@ -54,6 +55,12 @@ class AddFitmentAttributes implements DataPatchInterface
         ], $extra));
     }
 
-    public static function getDependencies(): array { return []; }
-    public function getAliases(): array { return []; }
+    public static function getDependencies(): array
+    {
+        return [];
+    }
+    public function getAliases(): array
+    {
+        return [];
+    }
 }

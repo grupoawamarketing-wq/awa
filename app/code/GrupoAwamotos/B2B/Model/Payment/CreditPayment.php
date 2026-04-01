@@ -1,10 +1,12 @@
 <?php
+
 /**
  * B2B Credit Payment Method
  *
  * Allows B2B customers with available credit to pay orders via faturamento (invoicing).
  * Debits the customer's credit limit upon order placement.
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Model\Payment;

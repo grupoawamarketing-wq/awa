@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Quote Request Data Interface
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Api\Data;
@@ -25,7 +27,7 @@ interface QuoteRequestInterface
     const EXPIRES_AT = 'expires_at';
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
-    
+
     // Status constants
     const STATUS_PENDING = 'pending';
     const STATUS_PROCESSING = 'processing';
@@ -34,14 +36,14 @@ interface QuoteRequestInterface
     const STATUS_REJECTED = 'rejected';
     const STATUS_EXPIRED = 'expired';
     const STATUS_CONVERTED = 'converted';
-    
+
     /**
      * Get request ID
      *
      * @return int|null
      */
     public function getRequestId(): ?int;
-    
+
     /**
      * Set request ID
      *
@@ -49,14 +51,14 @@ interface QuoteRequestInterface
      * @return $this
      */
     public function setRequestId(int $requestId);
-    
+
     /**
      * Get customer ID
      *
      * @return int|null
      */
     public function getCustomerId(): ?int;
-    
+
     /**
      * Set customer ID
      *
@@ -64,14 +66,14 @@ interface QuoteRequestInterface
      * @return $this
      */
     public function setCustomerId(?int $customerId);
-    
+
     /**
      * Get customer email
      *
      * @return string
      */
     public function getCustomerEmail(): string;
-    
+
     /**
      * Set customer email
      *
@@ -79,14 +81,14 @@ interface QuoteRequestInterface
      * @return $this
      */
     public function setCustomerEmail(string $email);
-    
+
     /**
      * Get customer name
      *
      * @return string
      */
     public function getCustomerName(): string;
-    
+
     /**
      * Set customer name
      *
@@ -94,14 +96,14 @@ interface QuoteRequestInterface
      * @return $this
      */
     public function setCustomerName(string $name);
-    
+
     /**
      * Get company name
      *
      * @return string|null
      */
     public function getCompanyName(): ?string;
-    
+
     /**
      * Set company name
      *
@@ -109,14 +111,14 @@ interface QuoteRequestInterface
      * @return $this
      */
     public function setCompanyName(?string $companyName);
-    
+
     /**
      * Get CNPJ
      *
      * @return string|null
      */
     public function getCnpj(): ?string;
-    
+
     /**
      * Set CNPJ
      *
@@ -124,14 +126,14 @@ interface QuoteRequestInterface
      * @return $this
      */
     public function setCnpj(?string $cnpj);
-    
+
     /**
      * Get phone
      *
      * @return string|null
      */
     public function getPhone(): ?string;
-    
+
     /**
      * Set phone
      *
@@ -139,14 +141,14 @@ interface QuoteRequestInterface
      * @return $this
      */
     public function setPhone(?string $phone);
-    
+
     /**
      * Get status
      *
      * @return string
      */
     public function getStatus(): string;
-    
+
     /**
      * Set status
      *
@@ -154,14 +156,14 @@ interface QuoteRequestInterface
      * @return $this
      */
     public function setStatus(string $status);
-    
+
     /**
      * Get items JSON
      *
      * @return string
      */
     public function getItemsJson(): string;
-    
+
     /**
      * Set items JSON
      *
@@ -169,14 +171,14 @@ interface QuoteRequestInterface
      * @return $this
      */
     public function setItemsJson(string $itemsJson);
-    
+
     /**
      * Get items as array
      *
      * @return array
      */
     public function getItems(): array;
-    
+
     /**
      * Set items from array
      *
@@ -184,14 +186,14 @@ interface QuoteRequestInterface
      * @return $this
      */
     public function setItems(array $items);
-    
+
     /**
      * Get message
      *
      * @return string|null
      */
     public function getMessage(): ?string;
-    
+
     /**
      * Set message
      *
@@ -199,14 +201,14 @@ interface QuoteRequestInterface
      * @return $this
      */
     public function setMessage(?string $message);
-    
+
     /**
      * Get admin notes
      *
      * @return string|null
      */
     public function getAdminNotes(): ?string;
-    
+
     /**
      * Set admin notes
      *
@@ -214,14 +216,14 @@ interface QuoteRequestInterface
      * @return $this
      */
     public function setAdminNotes(?string $adminNotes);
-    
+
     /**
      * Get quoted total
      *
      * @return float|null
      */
     public function getQuotedTotal(): ?float;
-    
+
     /**
      * Set quoted total
      *
@@ -229,14 +231,14 @@ interface QuoteRequestInterface
      * @return $this
      */
     public function setQuotedTotal(?float $quotedTotal);
-    
+
     /**
      * Get Magento quote ID
      *
      * @return int|null
      */
     public function getQuoteId(): ?int;
-    
+
     /**
      * Set Magento quote ID
      *
@@ -244,14 +246,14 @@ interface QuoteRequestInterface
      * @return $this
      */
     public function setQuoteId(?int $quoteId);
-    
+
     /**
      * Get order ID
      *
      * @return int|null
      */
     public function getOrderId(): ?int;
-    
+
     /**
      * Set order ID
      *
@@ -259,14 +261,14 @@ interface QuoteRequestInterface
      * @return $this
      */
     public function setOrderId(?int $orderId);
-    
+
     /**
      * Get expiration date
      *
      * @return string|null
      */
     public function getExpiresAt(): ?string;
-    
+
     /**
      * Set expiration date
      *
@@ -274,14 +276,14 @@ interface QuoteRequestInterface
      * @return $this
      */
     public function setExpiresAt(?string $expiresAt);
-    
+
     /**
      * Get created at
      *
      * @return string|null
      */
     public function getCreatedAt(): ?string;
-    
+
     /**
      * Get updated at
      *

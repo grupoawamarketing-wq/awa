@@ -1,7 +1,9 @@
 <?php
+
 /**
  * CNAE Classifier - classifies B2B customers by their economic activity code
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Model;

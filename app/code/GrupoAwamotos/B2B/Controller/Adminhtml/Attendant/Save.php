@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Controller Admin para salvar atendente
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Controller\Adminhtml\Attendant;
@@ -51,7 +53,6 @@ class Save extends Action implements HttpPostActionInterface
                 'message' => __('Atendente salvo com sucesso.'),
                 'attendant_id' => $attendantId
             ]);
-
         } catch (LocalizedException $e) {
             return $result->setData([
                 'success' => false,

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\RexisML\Observer;
@@ -85,7 +86,10 @@ class TrackConversionObserver implements ObserverInterface
 
                 $this->logger->info(sprintf(
                     '[RexisML] Conversion tracked: customer=%s (erp=%s), products=%d, value=%.2f',
-                    $customerId, $erpCode, $convertedCount, $convertedValue
+                    $customerId,
+                    $erpCode,
+                    $convertedCount,
+                    $convertedValue
                 ));
             }
         } catch (\Exception $e) {

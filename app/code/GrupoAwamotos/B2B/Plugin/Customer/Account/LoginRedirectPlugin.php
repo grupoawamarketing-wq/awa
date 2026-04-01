@@ -1,8 +1,10 @@
 <?php
+
 /**
  * Plugin to redirect standard Magento login page to B2B login
  * Redirects /customer/account/login → /b2b/account/login when B2B module is enabled
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Plugin\Customer\Account;

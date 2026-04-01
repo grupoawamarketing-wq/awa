@@ -1,7 +1,9 @@
 <?php
+
 /**
  * AJAX Controller para validação de CNPJ e consulta ReceitaWS + ERP
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Controller\Register;

@@ -1,8 +1,10 @@
 <?php
+
 /**
  * ERP Integration Service for B2B Module
  * Connects B2B customers with ERP system
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Model;

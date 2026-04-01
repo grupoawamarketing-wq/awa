@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\Theme\ViewModel;
@@ -50,13 +51,15 @@ class ContactInfo implements ArgumentInterface
 
         $moduleName = $this->request->getModuleName();
 
-        if ($moduleName === 'checkout'
+        if (
+            $moduleName === 'checkout'
             && $this->scopeConfig->isSetFlag(self::XML_PATH_WHATSAPP_HIDE_CHECKOUT, ScopeInterface::SCOPE_STORE)
         ) {
             return false;
         }
 
-        if ($moduleName === 'customer'
+        if (
+            $moduleName === 'customer'
             && $this->scopeConfig->isSetFlag(self::XML_PATH_WHATSAPP_HIDE_ACCOUNT, ScopeInterface::SCOPE_STORE)
         ) {
             return false;

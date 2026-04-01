@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\ERPIntegration\Controller\Adminhtml\Goals;
@@ -53,7 +54,6 @@ class Save extends Action implements HttpPostActionInterface
                 'success' => true,
                 'message' => 'Meta salva com sucesso!'
             ]);
-
         } catch (\Exception $e) {
             return $result->setData([
                 'success' => false,

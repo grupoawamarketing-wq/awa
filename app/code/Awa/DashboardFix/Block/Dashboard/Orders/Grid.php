@@ -1,8 +1,10 @@
 <?php
+
 /**
  * Fix: "Call to a member function getName() on null" when getBillingAddress() returns null
  * for orders in the admin dashboard "Last Orders" grid.
  */
+
 declare(strict_types=1);
 
 namespace Awa\DashboardFix\Block\Dashboard\Orders;

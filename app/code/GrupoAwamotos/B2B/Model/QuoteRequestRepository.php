@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Quote Request Repository
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Model;
@@ -119,7 +121,7 @@ class QuoteRequestRepository implements QuoteRequestRepositoryInterface
                 __('Não foi possível salvar a solicitação de cotação: %1', $e->getMessage())
             );
         }
-        
+
         return $quoteRequest;
     }
 
@@ -130,13 +132,13 @@ class QuoteRequestRepository implements QuoteRequestRepositoryInterface
     {
         $quoteRequest = $this->quoteRequestFactory->create();
         $this->resource->load($quoteRequest, $requestId);
-        
+
         if (!$quoteRequest->getRequestId()) {
             throw new NoSuchEntityException(
                 __('Solicitação de cotação com ID "%1" não encontrada.', $requestId)
             );
         }
-        
+
         return $quoteRequest;
     }
 
@@ -146,14 +148,14 @@ class QuoteRequestRepository implements QuoteRequestRepositoryInterface
     public function getList(SearchCriteriaInterface $searchCriteria)
     {
         $collection = $this->collectionFactory->create();
-        
+
         foreach ($searchCriteria->getFilterGroups() as $filterGroup) {
             foreach ($filterGroup->getFilters() as $filter) {
                 $condition = $filter->getConditionType() ?: 'eq';
                 $collection->addFieldToFilter($filter->getField(), [$condition => $filter->getValue()]);
             }
         }
-        
+
         $sortOrders = $searchCriteria->getSortOrders();
         if ($sortOrders) {
             foreach ($sortOrders as $sortOrder) {
@@ -163,15 +165,15 @@ class QuoteRequestRepository implements QuoteRequestRepositoryInterface
                 );
             }
         }
-        
+
         $collection->setCurPage($searchCriteria->getCurrentPage());
         $collection->setPageSize($searchCriteria->getPageSize());
-        
+
         $searchResults = $this->searchResultsFactory->create();
         $searchResults->setSearchCriteria($searchCriteria);
         $searchResults->setItems($collection->getItems());
         $searchResults->setTotalCount($collection->getSize());
-        
+
         return $searchResults;
     }
 
@@ -187,7 +189,7 @@ class QuoteRequestRepository implements QuoteRequestRepositoryInterface
                 __('Não foi possível deletar a solicitação de cotação: %1', $e->getMessage())
             );
         }
-        
+
         return true;
     }
 
@@ -206,11 +208,11 @@ class QuoteRequestRepository implements QuoteRequestRepositoryInterface
     {
         try {
             $quote = $this->checkoutSession->getQuote();
-            
+
             if (!$quote->hasItems()) {
                 throw new \Exception('O carrinho está vazio.');
             }
-            
+
             // Preparar itens
             $items = [];
             foreach ($quote->getAllVisibleItems() as $item) {
@@ -224,11 +226,11 @@ class QuoteRequestRepository implements QuoteRequestRepositoryInterface
                     'options' => $item->getProduct()->getTypeInstance()->getOrderOptions($item->getProduct()),
                 ];
             }
-            
+
             // Calcular expiração
             $expiryDays = $this->config->getQuoteExpiryDays();
             $expiresAt = $this->dateTime->gmtDate('Y-m-d H:i:s', strtotime("+{$expiryDays} days"));
-            
+
             // Criar solicitação
             $quoteRequest = $this->quoteRequestFactory->create();
             $quoteRequest->setCustomerId($customerId);
@@ -242,15 +244,14 @@ class QuoteRequestRepository implements QuoteRequestRepositoryInterface
             $quoteRequest->setMessage($message);
             $quoteRequest->setQuoteId($quote->getId());
             $quoteRequest->setExpiresAt($expiresAt);
-            
+
             $this->save($quoteRequest);
-            
+
             $this->logger->info(
                 sprintf('B2B: Nova solicitação de cotação #%d criada', $quoteRequest->getRequestId())
             );
-            
+
             return $quoteRequest;
-            
         } catch (\Exception $e) {
             $this->logger->error('B2B createFromCart error: ' . $e->getMessage());
             throw new CouldNotSaveException(__('Erro ao criar solicitação: %1', $e->getMessage()));
@@ -264,11 +265,11 @@ class QuoteRequestRepository implements QuoteRequestRepositoryInterface
     {
         $quoteRequest = $this->getById($requestId);
         $quoteRequest->setStatus($status);
-        
+
         if ($adminNotes !== null) {
             $quoteRequest->setAdminNotes($adminNotes);
         }
-        
+
         return $this->save($quoteRequest);
     }
 
@@ -279,17 +280,17 @@ class QuoteRequestRepository implements QuoteRequestRepositoryInterface
     {
         $quoteRequest = $this->getById($requestId);
         $items = $quoteRequest->getItems();
-        
+
         foreach ($items as &$item) {
             if (isset($itemPrices[$item['sku']])) {
                 $item['quoted_price'] = $itemPrices[$item['sku']];
             }
         }
-        
+
         $quoteRequest->setItems($items);
         $quoteRequest->setQuotedTotal($quotedTotal);
         $quoteRequest->setStatus(QuoteRequestInterface::STATUS_QUOTED);
-        
+
         return $this->save($quoteRequest);
     }
 
@@ -300,10 +301,12 @@ class QuoteRequestRepository implements QuoteRequestRepositoryInterface
     {
         $quoteRequest = $this->getById($requestId);
 
-        if (!in_array($quoteRequest->getStatus(), [
+        if (
+            !in_array($quoteRequest->getStatus(), [
             QuoteRequestInterface::STATUS_QUOTED,
             QuoteRequestInterface::STATUS_ACCEPTED
-        ])) {
+            ])
+        ) {
             throw new LocalizedException(
                 __('Apenas cotações respondidas ou aceitas podem ser convertidas em pedido.')
             );
@@ -367,12 +370,15 @@ class QuoteRequestRepository implements QuoteRequestRepositoryInterface
             $this->save($quoteRequest);
 
             $this->logger->info(
-                sprintf('B2B: Cotação #%d convertida em carrinho #%d para cliente #%d',
-                    $requestId, $cartId, $customerId)
+                sprintf(
+                    'B2B: Cotação #%d convertida em carrinho #%d para cliente #%d',
+                    $requestId,
+                    $cartId,
+                    $customerId
+                )
             );
 
             return (int) $cartId;
-
         } catch (LocalizedException $e) {
             throw $e;
         } catch (\Exception $e) {

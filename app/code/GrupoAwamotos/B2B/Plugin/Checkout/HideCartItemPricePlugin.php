@@ -1,10 +1,12 @@
 <?php
+
 /**
  * Plugin to hide product prices on the cart page for non-authorized users.
  *
  * Intercepts the cart item renderer so that individual item price HTML
  * is replaced with the B2B login message.
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Plugin\Checkout;

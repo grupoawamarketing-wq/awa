@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Admin Meta B2B Dashboard Controller
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Controller\Adminhtml\Dashboard;

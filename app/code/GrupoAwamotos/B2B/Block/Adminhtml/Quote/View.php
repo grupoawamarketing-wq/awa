@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Block para visualização de cotação no admin
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Block\Adminhtml\Quote;

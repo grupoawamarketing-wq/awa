@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Block para formulário de resposta de cotação
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Block\Adminhtml\Quote;
@@ -132,7 +134,7 @@ class Respond extends Template
             'expired' => __('Expirado'),
             'converted' => __('Convertido em Pedido'),
         ];
-        
+
         return (string) ($labels[$status] ?? $status);
     }
 

@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Resource Model da Transportadora
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\CarrierSelect\Model\ResourceModel;

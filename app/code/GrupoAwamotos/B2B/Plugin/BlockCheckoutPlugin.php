@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Plugin to block checkout for non-approved customers and enforce minimum order amount
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Plugin;

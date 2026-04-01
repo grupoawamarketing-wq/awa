@@ -1,8 +1,10 @@
 <?php
+
 /**
  * Plugin to block Rokanthemes OnePageCheckout for non-approved customers
  * and enforce minimum order amount.
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Plugin;

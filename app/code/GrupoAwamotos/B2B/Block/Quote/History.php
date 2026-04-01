@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Quote History Block
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Block\Quote;
@@ -51,7 +53,7 @@ class History extends Template
             $this->collection->addCustomerFilter((int) $this->customerSession->getCustomerId());
             $this->collection->setOrder('created_at', 'DESC');
         }
-        
+
         return $this->collection;
     }
 

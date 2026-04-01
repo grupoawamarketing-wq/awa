@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Admin Reject Customer Controller
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Controller\Adminhtml\Customer;
@@ -44,30 +46,29 @@ class Reject extends Action implements HttpPostActionInterface
     public function execute()
     {
         $redirect = $this->resultRedirectFactory->create();
-        
+
         $customerId = (int) $this->getRequest()->getParam('customer_id');
-        
+
         if (!$customerId) {
             $this->messageManager->addErrorMessage(__('ID do cliente não informado.'));
             return $redirect->setPath('*/*/pending');
         }
-        
+
         try {
             $adminUserId = $this->adminSession->getUser()->getId();
             $reason = $this->getRequest()->getParam('reason', 'Cadastro não aprovado.');
-            
+
             $this->customerApproval->rejectCustomer($customerId, (int) $adminUserId, $reason);
-            
+
             $this->messageManager->addSuccessMessage(
                 __('Cliente #%1 foi rejeitado.', $customerId)
             );
-            
         } catch (\Exception $e) {
             $this->messageManager->addErrorMessage(
                 __('Erro ao rejeitar cliente: %1', $e->getMessage())
             );
         }
-        
+
         return $redirect->setPath('*/*/pending');
     }
 }

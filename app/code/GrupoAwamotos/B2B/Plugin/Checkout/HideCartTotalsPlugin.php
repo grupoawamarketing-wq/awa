@@ -1,10 +1,12 @@
 <?php
+
 /**
  * Plugin to hide cart totals on the cart page for non-authorized users.
  *
  * Intercepts Magento\Quote\Model\Cart\CartTotalRepository to zero-out
  * totals returned via the REST/GraphQL API (used by KnockoutJS on cart page).
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Plugin\Checkout;

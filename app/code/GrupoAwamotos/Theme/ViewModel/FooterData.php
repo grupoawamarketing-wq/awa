@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\Theme\ViewModel;
@@ -39,7 +40,8 @@ class FooterData implements ArgumentInterface
 
     public function __construct(
         private ScopeConfigInterface $scopeConfig
-    ) {}
+    ) {
+    }
 
     /**
      * Check if the mobile footer menu is enabled in theme configuration.

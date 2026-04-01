@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Customer Pending Data Provider
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Ui\DataProvider;
@@ -54,7 +56,7 @@ class CustomerPendingDataProvider extends AbstractDataProvider
                 ['eq' => ApprovalStatus::STATUS_PENDING]
             );
         }
-        
+
         return $this->collection;
     }
 
@@ -68,9 +70,9 @@ class CustomerPendingDataProvider extends AbstractDataProvider
         if (!$this->getCollection()->isLoaded()) {
             $this->getCollection()->load();
         }
-        
+
         $items = $this->getCollection()->toArray();
-        
+
         return [
             'totalRecords' => $this->getCollection()->getSize(),
             'items' => array_values($items),

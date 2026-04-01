@@ -1,10 +1,12 @@
 <?php
+
 /**
  * Demand Forecast Model
  *
  * Per-product and per-category demand forecasting using weighted moving averages,
  * trend detection, and seasonality indices from ERP historical data.
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\SalesIntelligence\Model;

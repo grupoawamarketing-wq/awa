@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\RexisML\Model\DataPipeline;
@@ -89,7 +90,9 @@ class CrossSellGenerator
                     $a = $products[$i];
                     $b = $products[$j];
                     // Ensure consistent key ordering
-                    if ($a > $b) { [$a, $b] = [$b, $a]; }
+                    if ($a > $b) {
+                        [$a, $b] = [$b, $a];
+                    }
                     $key = "{$a}|{$b}";
                     $pairFreq[$key] = ($pairFreq[$key] ?? 0) + 1;
                 }

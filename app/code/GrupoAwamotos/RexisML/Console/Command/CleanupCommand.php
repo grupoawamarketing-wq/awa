@@ -1,8 +1,11 @@
 <?php
+
 declare(strict_types=1);
+
 /**
  * Comando CLI para limpeza de dados antigos do REXIS ML
  */
+
 namespace GrupoAwamotos\RexisML\Console\Command;
 
 use Symfony\Component\Console\Command\Command;
@@ -56,7 +59,8 @@ class CleanupCommand extends Command
         $countBefore = (int)$conn->fetchOne("SELECT COUNT(*) FROM {$t1}");
         $countOld = (int)$conn->fetchOne("SELECT COUNT(*) FROM {$t1} WHERE created_at < ?", [$cutoffDate]);
 
-        $output->writeln(sprintf('  rexis_dataset_recomendacao: %s total, %s antigos',
+        $output->writeln(sprintf(
+            '  rexis_dataset_recomendacao: %s total, %s antigos',
             number_format($countBefore, 0, ',', '.'),
             number_format($countOld, 0, ',', '.')
         ));
@@ -93,12 +97,14 @@ class CleanupCommand extends Command
         $output->writeln('');
         if ($dryRun) {
             $total = $countOld + $countMetrics + $countInactive;
-            $output->writeln(sprintf('<comment>[DRY-RUN] %s registros seriam excluidos. Use sem --dry-run para executar.</comment>',
+            $output->writeln(sprintf(
+                '<comment>[DRY-RUN] %s registros seriam excluidos. Use sem --dry-run para executar.</comment>',
                 number_format($total, 0, ',', '.')
             ));
         } else {
             $countAfter = (int)$conn->fetchOne("SELECT COUNT(*) FROM {$t1}");
-            $output->writeln(sprintf('<info>Limpeza concluida. Recomendacoes: %s -> %s</info>',
+            $output->writeln(sprintf(
+                '<info>Limpeza concluida. Recomendacoes: %s -> %s</info>',
                 number_format($countBefore, 0, ',', '.'),
                 number_format($countAfter, 0, ',', '.')
             ));

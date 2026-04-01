@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\ERPIntegration\Test\Unit\Model;
@@ -799,7 +800,8 @@ class ImageSyncTest extends TestCase
         // Setup: Products with images in ERP
         $this->connection->method('query')
             ->willReturnCallback(function ($sql) {
-                if (strpos($sql, 'DISTINCT CODIGO') !== false
+                if (
+                    strpos($sql, 'DISTINCT CODIGO') !== false
                     || strpos($sql, 'DISTINCT d.CHAVE') !== false
                 ) {
                     return [['CODIGO' => 'SKU-001']];

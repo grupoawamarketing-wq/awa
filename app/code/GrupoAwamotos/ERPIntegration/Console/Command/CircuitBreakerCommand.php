@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\ERPIntegration\Console\Command;
@@ -55,7 +56,7 @@ class CircuitBreakerCommand extends Command
 
         $stats = $this->circuitBreaker->getStats();
 
-        $stateLabel = match($stats['state']) {
+        $stateLabel = match ($stats['state']) {
             'CLOSED' => '<info>CLOSED (Normal)</info>',
             'OPEN' => '<error>OPEN (Bloqueado)</error>',
             'HALF_OPEN' => '<comment>HALF_OPEN (Testando)</comment>',

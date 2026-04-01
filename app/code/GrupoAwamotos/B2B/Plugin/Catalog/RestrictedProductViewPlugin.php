@@ -1,7 +1,9 @@
 <?php
+
 /**
  * B2B Restricted Product View Plugin - Block access to restricted products
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Plugin\Catalog;

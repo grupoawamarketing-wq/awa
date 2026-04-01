@@ -1,8 +1,10 @@
 <?php
+
 /**
  * B2B Carrier Service
  * Manages B2B-specific shipping carrier functionality
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Model;

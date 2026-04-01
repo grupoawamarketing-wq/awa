@@ -1,8 +1,10 @@
 <?php
+
 /**
  * GrupoAwamotos_MaintenanceMode
  * Newsletter subscription controller for maintenance/coming soon page
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\MaintenanceMode\Controller\Newsletter;
@@ -72,13 +74,13 @@ class Subscribe implements HttpPostActionInterface
     public function execute()
     {
         $resultJson = $this->resultJsonFactory->create();
-        
+
         // Check if newsletter is enabled for maintenance mode
         $newsletterEnabled = $this->scopeConfig->getValue(
             'grupoawamotos_maintenance/comingsoon/newsletter_enabled',
             ScopeInterface::SCOPE_STORE
         );
-        
+
         if (!$newsletterEnabled) {
             return $resultJson->setData([
                 'success' => false,
@@ -87,7 +89,7 @@ class Subscribe implements HttpPostActionInterface
         }
 
         $email = (string)$this->request->getParam('email');
-        
+
         // Validate email
         if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return $resultJson->setData([
@@ -99,27 +101,26 @@ class Subscribe implements HttpPostActionInterface
         try {
             // Create subscriber
             $subscriber = $this->subscriberFactory->create();
-            
+
             // Check if already subscribed
             $subscriber->loadByEmail($email);
-            
+
             if ($subscriber->getId() && $subscriber->getSubscriberStatus() == \Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED) {
                 return $resultJson->setData([
                     'success' => true,
                     'message' => __('Este e-mail já está inscrito na nossa newsletter!')
                 ]);
             }
-            
+
             // Subscribe the email
             $subscriber->subscribe($email);
-            
+
             $this->logger->info('MaintenanceMode: Newsletter subscription successful for ' . $email);
-            
+
             return $resultJson->setData([
                 'success' => true,
                 'message' => __('Obrigado! Você foi inscrito com sucesso. Avisaremos quando estivermos online!')
             ]);
-            
         } catch (LocalizedException $e) {
             $this->logger->error('MaintenanceMode Newsletter Error: ' . $e->getMessage());
             return $resultJson->setData([

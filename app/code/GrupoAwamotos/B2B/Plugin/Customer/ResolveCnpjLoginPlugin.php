@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Plugin que permite login com CNPJ — resolve CNPJ para o e-mail do cliente.
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Plugin\Customer;

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\SmartSuggestions\Model\ResourceModel;
@@ -63,10 +64,10 @@ class SalesForecast extends AbstractDb
         }
 
         $connection = $this->getConnection();
-        
+
         // Use insertOnDuplicate to handle updates for existing dates
         $updateColumns = ['predicted_revenue', 'predicted_orders', 'confidence_level', 'model_params', 'updated_at'];
-        
+
         return $connection->insertOnDuplicate(
             $this->getMainTable(),
             $forecasts,
@@ -97,7 +98,7 @@ class SalesForecast extends AbstractDb
             ->where('actual_revenue IS NOT NULL');
 
         $result = $connection->fetchRow($select);
-        
+
         return $result ?: [
             'total_forecasts' => 0,
             'avg_predicted' => 0,

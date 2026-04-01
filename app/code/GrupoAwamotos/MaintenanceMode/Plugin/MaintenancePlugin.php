@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\MaintenanceMode\Plugin;
@@ -395,10 +396,18 @@ HTML;
     private function getSocialHtml(?string $facebook, ?string $instagram, ?string $youtube, ?string $whatsapp): string
     {
         $links = '';
-        if ($whatsapp) $links .= '<a href="https://wa.me/' . htmlspecialchars($whatsapp) . '" title="WhatsApp" target="_blank">📱</a>';
-        if ($facebook) $links .= '<a href="' . htmlspecialchars($facebook) . '" title="Facebook" target="_blank">📘</a>';
-        if ($instagram) $links .= '<a href="' . htmlspecialchars($instagram) . '" title="Instagram" target="_blank">📷</a>';
-        if ($youtube) $links .= '<a href="' . htmlspecialchars($youtube) . '" title="YouTube" target="_blank">🎬</a>';
+        if ($whatsapp) {
+            $links .= '<a href="https://wa.me/' . htmlspecialchars($whatsapp) . '" title="WhatsApp" target="_blank">📱</a>';
+        }
+        if ($facebook) {
+            $links .= '<a href="' . htmlspecialchars($facebook) . '" title="Facebook" target="_blank">📘</a>';
+        }
+        if ($instagram) {
+            $links .= '<a href="' . htmlspecialchars($instagram) . '" title="Instagram" target="_blank">📷</a>';
+        }
+        if ($youtube) {
+            $links .= '<a href="' . htmlspecialchars($youtube) . '" title="YouTube" target="_blank">🎬</a>';
+        }
         return $links ? '<div class="social-links">' . $links . '</div>' : '';
     }
 
@@ -406,10 +415,18 @@ HTML;
     {
         $html = '<div class="contact-info"><p><strong>AWA Motos</strong> - Peças e Acessórios para Motos</p>';
         $contacts = [];
-        if ($phone) $contacts[] = '📞 ' . htmlspecialchars($phone);
-        if ($whatsapp) $contacts[] = '💬 ' . htmlspecialchars($whatsapp);
-        if ($email) $contacts[] = '✉️ <a href="mailto:' . htmlspecialchars($email) . '">' . htmlspecialchars($email) . '</a>';
-        if ($contacts) $html .= '<p>' . implode(' | ', $contacts) . '</p>';
+        if ($phone) {
+            $contacts[] = '📞 ' . htmlspecialchars($phone);
+        }
+        if ($whatsapp) {
+            $contacts[] = '💬 ' . htmlspecialchars($whatsapp);
+        }
+        if ($email) {
+            $contacts[] = '✉️ <a href="mailto:' . htmlspecialchars($email) . '">' . htmlspecialchars($email) . '</a>';
+        }
+        if ($contacts) {
+            $html .= '<p>' . implode(' | ', $contacts) . '</p>';
+        }
         return $html . '</div>';
     }
 

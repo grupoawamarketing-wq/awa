@@ -1,8 +1,10 @@
 <?php
+
 /**
  * Plugin para salvar Order Notes no Quote via guest checkout
  * P2-4.2: Order Notes
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Plugin\Checkout;

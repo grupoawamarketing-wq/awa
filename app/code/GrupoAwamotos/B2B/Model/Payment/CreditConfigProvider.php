@@ -1,9 +1,11 @@
 <?php
+
 /**
  * B2B Credit Payment Config Provider
  *
  * Provides credit balance info to the checkout JS context.
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Model\Payment;

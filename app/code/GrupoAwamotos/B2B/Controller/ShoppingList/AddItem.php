@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Add Item to Shopping List Controller
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Controller\ShoppingList;
@@ -115,7 +117,6 @@ class AddItem implements HttpPostActionInterface
             $this->messageManager->addSuccessMessage($message);
             $redirect = $this->redirectFactory->create();
             return $redirect->setPath('b2b/shoppinglist/view', ['id' => $listId]);
-
         } catch (LocalizedException $e) {
             if ($this->request->isAjax()) {
                 $result = $this->jsonFactory->create();

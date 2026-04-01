@@ -1,8 +1,11 @@
 <?php
+
 declare(strict_types=1);
+
 /**
  * Widget de Recomendações para CMS
  */
+
 namespace GrupoAwamotos\RexisML\Block\Widget;
 
 use Magento\Framework\View\Element\Template;

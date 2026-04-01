@@ -1,4 +1,5 @@
 <?php
+
 /**
  * GrupoAwamotos_CspFix
  *
@@ -6,6 +7,7 @@
  * - Evitar corrupsão do arquivo pub/static/{context}/sri-hashes.json por escrita não-atômica
  * - Evitar 500 em caso de leitura parcial (JSON inválido) retornando null (equivale a "sem dados")
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\CspFix\Plugin\Csp\SubresourceIntegrity\Storage;

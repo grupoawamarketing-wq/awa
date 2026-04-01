@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\ERPIntegration\Model\Rfm;
@@ -151,7 +152,6 @@ class Calculator
             $this->cache->save(json_encode($result), $cacheKey, ['erp_rfm'], self::CACHE_TTL);
 
             return $result;
-
         } catch (\Exception $e) {
             $this->logger->error('[ERP RFM] Error calculating RFM: ' . $e->getMessage());
             return [];
@@ -293,10 +293,18 @@ class Calculator
      */
     private function getQuintileScore(float $value, array $quintiles): int
     {
-        if ($value <= $quintiles[0]) return 1;
-        if ($value <= $quintiles[1]) return 2;
-        if ($value <= $quintiles[2]) return 3;
-        if ($value <= $quintiles[3]) return 4;
+        if ($value <= $quintiles[0]) {
+            return 1;
+        }
+        if ($value <= $quintiles[1]) {
+            return 2;
+        }
+        if ($value <= $quintiles[2]) {
+            return 3;
+        }
+        if ($value <= $quintiles[3]) {
+            return 4;
+        }
         return 5;
     }
 
@@ -364,7 +372,7 @@ class Calculator
      */
     private function getSegmentLabel(string $segment): string
     {
-        return match($segment) {
+        return match ($segment) {
             'champions' => 'Champions',
             'loyal' => 'Clientes Fiéis',
             'potential' => 'Potenciais Fiéis',
@@ -385,7 +393,7 @@ class Calculator
      */
     private function getSegmentColor(string $segment): string
     {
-        return match($segment) {
+        return match ($segment) {
             'champions' => '#00E396',      // Green
             'loyal' => '#008FFB',          // Blue
             'potential' => '#00D9E9',      // Cyan
@@ -406,7 +414,7 @@ class Calculator
      */
     private function getSuggestedAction(string $segment): string
     {
-        return match($segment) {
+        return match ($segment) {
             'champions' => 'Recompensar e engajar como embaixadores da marca',
             'loyal' => 'Oferecer upsell e programa de fidelidade',
             'potential' => 'Oferecer programa de fidelidade e incentivos',

@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Validador de CNPJ
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\BrazilCustomer\Model\Validator;
@@ -63,7 +65,7 @@ class Cnpj
     public function format(string $cnpj): string
     {
         $cnpj = preg_replace('/[^0-9]/', '', $cnpj);
-        
+
         if (strlen($cnpj) !== 14) {
             return $cnpj;
         }

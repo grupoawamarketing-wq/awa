@@ -1,17 +1,18 @@
 <?php
+
 declare(strict_types=1);
 
 /**
  * Copyright © GrupoAwamotos. All rights reserved.
  * Fix para compatibilidade do MagePal Gmail SMTP App com Symfony Mailer no Magento 2.4.8
- * 
+ *
  * Correções aplicadas:
  * 1. Reply-To: usa addMailboxListHeader() ao invés de addMailboxHeader()
  * 2. SSL/TLS: corrige lógica do EsmtpTransport para STARTTLS funcionar corretamente
  *
  * O problema original: O MagePal usa addMailboxHeader() para o header Reply-To, mas o Symfony Mailer
  * agora exige addMailboxListHeader() para esse header específico.
- * 
+ *
  * O segundo problema: A lógica do TLS está invertida - para porta 587 com STARTTLS,
  * o terceiro parâmetro do EsmtpTransport deve ser false.
  */
@@ -63,7 +64,7 @@ class Smtp extends \MagePal\GmailSmtpApp\Mail\Smtp
              * - "none" ou porta 25: sem criptografia (tls = false)
              */
             $useSsl = false;
-            
+
             if ($ssl === 'ssl' || $port === 465) {
                 // SSL direto na porta 465
                 $useSsl = true;
@@ -98,7 +99,6 @@ class Smtp extends \MagePal\GmailSmtpApp\Mail\Smtp
 
             $mailer = new Mailer($transport);
             $mailer->send($message);
-
         } catch (Exception $e) {
             throw new MailException(
                 new Phrase($e->getMessage()),

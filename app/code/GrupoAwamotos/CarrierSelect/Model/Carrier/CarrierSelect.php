@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Carrier Method - Seleção de Transportadora
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\CarrierSelect\Model\Carrier;

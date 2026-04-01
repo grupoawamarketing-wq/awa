@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\Fitment\Block\Fallback;
@@ -85,7 +86,9 @@ class Results extends Template
                 $collection->addAttributeToFilter('name', ['like' => '%' . $q . '%']);
                 $collection->load();
                 $ids = [];
-                foreach ($collection as $prod) { $ids[] = (int)$prod->getId(); }
+                foreach ($collection as $prod) {
+                    $ids[] = (int)$prod->getId();
+                }
             } else {
                 $collection->addAttributeToFilter('entity_id', ['in' => $ids]);
             }
@@ -107,11 +110,15 @@ class Results extends Template
             return [];
         }
         $raw = strtolower(trim($query));
-        if ($raw === '') { return []; }
+        if ($raw === '') {
+            return [];
+        }
         // Boolean mode tokens
-        $tokens = preg_split('/\s+/', preg_replace('/[^a-z0-9áàâãéêíóôõúç]/u',' ', $raw));
-        $tokens = array_filter($tokens, fn($t)=>strlen($t)>1);
-        if (!$tokens) { return []; }
+        $tokens = preg_split('/\s+/', preg_replace('/[^a-z0-9áàâãéêíóôõúç]/u', ' ', $raw));
+        $tokens = array_filter($tokens, fn($t)=>strlen($t) > 1);
+        if (!$tokens) {
+            return [];
+        }
         $boolean = implode(' ', array_map(fn($t)=>'+' . $t . '*', $tokens));
         $offset = ($page - 1) * $limit;
         $dirSql = $dir === 'desc' ? 'DESC' : 'ASC';

@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Controller para responder cotação no admin
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Controller\Adminhtml\Quote;
@@ -52,15 +54,15 @@ class Respond extends Action implements HttpGetActionInterface
     public function execute()
     {
         $requestId = (int) $this->getRequest()->getParam('id');
-        
+
         if (!$requestId) {
             $this->messageManager->addErrorMessage(__('ID da cotação não informado.'));
             return $this->resultRedirectFactory->create()->setPath('*/*/');
         }
-        
+
         try {
             $quoteRequest = $this->quoteRequestRepository->getById($requestId);
-            
+
             // Verificar se pode responder
             $status = $quoteRequest->getStatus();
             if (!in_array($status, ['pending', 'processing'])) {
@@ -68,15 +70,14 @@ class Respond extends Action implements HttpGetActionInterface
                     __('Esta cotação não pode ser respondida. Status atual: %1', $status)
                 );
             }
-            
+
             $resultPage = $this->resultPageFactory->create();
             $resultPage->setActiveMenu('GrupoAwamotos_B2B::quotes');
             $resultPage->getConfig()->getTitle()->prepend(
                 __('Responder Cotação #%1', $quoteRequest->getRequestId())
             );
-            
+
             return $resultPage;
-            
         } catch (\Exception $e) {
             $this->messageManager->addErrorMessage(__('Cotação não encontrada.'));
             return $this->resultRedirectFactory->create()->setPath('*/*/');

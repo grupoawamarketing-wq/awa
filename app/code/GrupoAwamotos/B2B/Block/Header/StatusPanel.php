@@ -1,8 +1,10 @@
 <?php
+
 /**
  * B2B Status Panel Block for Header
  * Professional B2B status indicator with dropdown panel
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Block\Header;

@@ -1,10 +1,12 @@
 <?php
+
 /**
  * Recommendation Engine
  *
  * Generates prioritized, actionable recommendations based on data from
  * DemandForecast, RevenuePipeline, GrowthAnalyzer, and RFM Calculator.
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\SalesIntelligence\Model;

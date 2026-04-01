@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace GrupoAwamotos\RexisML\Helper;
 
 use Magento\Framework\App\Helper\AbstractHelper;
@@ -202,11 +204,12 @@ class EmailNotifier extends AbstractHelper
 
             $this->logger->info(sprintf(
                 '[RexisML Email] %s alert sent with %d opportunities to %s',
-                ucfirst($type), count($opportunities), $emailTo
+                ucfirst($type),
+                count($opportunities),
+                $emailTo
             ));
 
             return true;
-
         } catch (\Exception $e) {
             $this->logger->error('[RexisML Email] Error sending ' . $type . ' alert: ' . $e->getMessage());
             $this->inlineTranslation->resume();

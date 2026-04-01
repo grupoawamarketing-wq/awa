@@ -1,7 +1,9 @@
 <?php
+
 /**
  * B2B Helper Data
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Helper;
@@ -329,13 +331,21 @@ class Data extends AbstractHelper
         $vipId = $this->b2bConfig->getVipGroupId();
         $defaultId = $this->b2bConfig->getDefaultB2BGroupId();
 
-        if ($wholesaleId) $groups[] = $wholesaleId;
-        if ($vipId) $groups[] = $vipId;
-        if ($defaultId && !in_array($defaultId, $groups)) $groups[] = $defaultId;
+        if ($wholesaleId) {
+            $groups[] = $wholesaleId;
+        }
+        if ($vipId) {
+            $groups[] = $vipId;
+        }
+        if ($defaultId && !in_array($defaultId, $groups)) {
+            $groups[] = $defaultId;
+        }
 
         // Always include pending group
         $pendingId = $this->getPendingGroupId();
-        if ($pendingId && !in_array($pendingId, $groups)) $groups[] = $pendingId;
+        if ($pendingId && !in_array($pendingId, $groups)) {
+            $groups[] = $pendingId;
+        }
 
         // Always include B2B Revendedor group
         $revendedorId = $this->b2bConfig->getRevendedorGroupId() ?: self::GROUP_B2B_REVENDEDOR;

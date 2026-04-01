@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Approval Status Source Model
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Model\Customer\Attribute\Source;
@@ -14,7 +16,7 @@ class ApprovalStatus extends AbstractSource
     const STATUS_APPROVED = 'approved';
     const STATUS_REJECTED = 'rejected';
     const STATUS_SUSPENDED = 'suspended';
-    
+
     /**
      * Get all options
      *
@@ -32,7 +34,7 @@ class ApprovalStatus extends AbstractSource
         }
         return $this->_options;
     }
-    
+
     /**
      * Get option text by value
      *
@@ -48,7 +50,7 @@ class ApprovalStatus extends AbstractSource
         }
         return false;
     }
-    
+
     /**
      * Check if status allows purchase
      *
@@ -59,7 +61,7 @@ class ApprovalStatus extends AbstractSource
     {
         return $status === self::STATUS_APPROVED;
     }
-    
+
     /**
      * Check if status allows viewing prices
      *
@@ -72,11 +74,11 @@ class ApprovalStatus extends AbstractSource
         if ($status === self::STATUS_APPROVED) {
             return true;
         }
-        
+
         if ($status === self::STATUS_PENDING && $showPricePending) {
             return true;
         }
-        
+
         return false;
     }
 }

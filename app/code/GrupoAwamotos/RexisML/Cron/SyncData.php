@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\RexisML\Cron;
@@ -56,7 +57,10 @@ class SyncData
 
             $this->logger->info(sprintf(
                 '[RexisML Cron] Sync complete: RFM=%d, Churn=%d, Rules=%d, CrossSell=%d',
-                $rfmCount, $churnCount, $crossCount, $xsRecCount
+                $rfmCount,
+                $churnCount,
+                $crossCount,
+                $xsRecCount
             ));
         } catch (\Exception $e) {
             $this->logger->error('[RexisML Cron] Sync failed: ' . $e->getMessage());

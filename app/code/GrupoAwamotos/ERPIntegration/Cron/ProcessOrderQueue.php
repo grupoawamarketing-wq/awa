@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\ERPIntegration\Cron;
@@ -186,7 +187,6 @@ class ProcessOrderQueue
                 // Mark as complete
                 $this->markMessageComplete($connection, $queueStatusTable, (int)$messageData['status_id']);
                 $processed++;
-
             } catch (\Exception $e) {
                 $this->logger->error('[ERP Cron] Error processing message', [
                     'message_id' => $messageData['id'],

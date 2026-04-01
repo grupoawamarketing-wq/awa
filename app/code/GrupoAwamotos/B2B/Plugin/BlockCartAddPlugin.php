@@ -1,8 +1,10 @@
 <?php
+
 /**
  * Plugin to block add to cart for non-approved users.
  * Handles both standard requests (redirect) and AJAX requests (JSON response).
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Plugin;

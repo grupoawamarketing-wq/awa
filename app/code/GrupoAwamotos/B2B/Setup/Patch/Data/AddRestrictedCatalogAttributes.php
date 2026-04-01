@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Add B2B Restricted Catalog Attributes
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Setup\Patch\Data;
@@ -39,7 +41,7 @@ class AddRestrictedCatalogAttributes implements DataPatchInterface
     public function apply()
     {
         $this->moduleDataSetup->startSetup();
-        
+
         /** @var EavSetup $eavSetup */
         $eavSetup = $this->eavSetupFactory->create(['setup' => $this->moduleDataSetup]);
 
@@ -162,7 +164,7 @@ class AddRestrictedCatalogAttributes implements DataPatchInterface
         }
 
         $this->moduleDataSetup->endSetup();
-        
+
         return $this;
     }
 

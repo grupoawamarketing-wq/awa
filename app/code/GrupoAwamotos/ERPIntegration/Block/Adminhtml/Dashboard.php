@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\ERPIntegration\Block\Adminhtml;
@@ -239,7 +240,7 @@ class Dashboard extends Template
      */
     public function getAlertClass(string $level): string
     {
-        return match($level) {
+        return match ($level) {
             'success' => 'message-success',
             'warning' => 'message-warning',
             'danger' => 'message-error',
@@ -327,7 +328,7 @@ class Dashboard extends Template
      */
     public function getCircuitBreakerStateLabel(string $state): string
     {
-        return match($state) {
+        return match ($state) {
             'CLOSED' => 'Normal',
             'OPEN' => 'Bloqueado',
             'HALF_OPEN' => 'Testando',
@@ -340,7 +341,7 @@ class Dashboard extends Template
      */
     public function getCircuitBreakerStateClass(string $state): string
     {
-        return match($state) {
+        return match ($state) {
             'CLOSED' => 'success',
             'OPEN' => 'danger',
             'HALF_OPEN' => 'warning',
@@ -396,7 +397,7 @@ class Dashboard extends Template
      */
     private function isSyncEnabled(string $entityType): bool
     {
-        return match($entityType) {
+        return match ($entityType) {
             'product' => $this->helper->isProductSyncEnabled(),
             'stock' => $this->helper->isStockSyncEnabled(),
             'customer' => $this->helper->isCustomerSyncEnabled(),
@@ -411,7 +412,7 @@ class Dashboard extends Template
      */
     private function getEntityTypeLabel(string $type): string
     {
-        return match($type) {
+        return match ($type) {
             'product' => 'Produtos',
             'stock' => 'Estoque',
             'customer' => 'Clientes',
@@ -426,7 +427,7 @@ class Dashboard extends Template
      */
     private function getEntityTypeIcon(string $type): string
     {
-        return match($type) {
+        return match ($type) {
             'product' => '📦',
             'stock' => '📊',
             'customer' => '👥',

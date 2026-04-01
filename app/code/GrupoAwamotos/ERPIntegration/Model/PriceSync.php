@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\ERPIntegration\Model;
@@ -198,8 +199,13 @@ class PriceSync implements PriceSyncInterface
                 'price',
                 'import',
                 'success',
-                sprintf('Preco atualizado SKU %s: R$ %.2f → R$ %.2f (Lista #%d)',
-                    $sku, $currentPrice, $price, $priceData['FATORPRECO'] ?? 0),
+                sprintf(
+                    'Preco atualizado SKU %s: R$ %.2f → R$ %.2f (Lista #%d)',
+                    $sku,
+                    $currentPrice,
+                    $price,
+                    $priceData['FATORPRECO'] ?? 0
+                ),
                 $sku,
                 null,
                 1
@@ -250,7 +256,8 @@ class PriceSync implements PriceSyncInterface
 
             $this->logger->info(sprintf(
                 '[ERP] Price sync starting: %d ERP prices from list #%d',
-                count($rows), $fatorPreco
+                count($rows),
+                $fatorPreco
             ));
 
             // 2. Build SKU → price map (including base-SKU variants)
@@ -333,7 +340,8 @@ class PriceSync implements PriceSyncInterface
                         $result['errors']++;
                         $this->logger->error(sprintf(
                             '[ERP] Price sync error SKU %s: %s',
-                            $sku, $e->getMessage()
+                            $sku,
+                            $e->getMessage()
                         ));
                     }
                 }
@@ -352,8 +360,11 @@ class PriceSync implements PriceSyncInterface
                 $result['errors'] > 0 ? 'error' : 'success',
                 sprintf(
                     'Lista #%d: Atualizados: %d, Erros: %d, Sem alteracao: %d, Sem preco ERP: %d',
-                    $fatorPreco, $result['updated'], $result['errors'],
-                    $result['skipped'], $result['not_found']
+                    $fatorPreco,
+                    $result['updated'],
+                    $result['errors'],
+                    $result['skipped'],
+                    $result['not_found']
                 ),
                 null,
                 null,

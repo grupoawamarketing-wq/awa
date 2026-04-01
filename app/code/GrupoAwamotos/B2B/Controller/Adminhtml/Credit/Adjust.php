@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Admin Credit Adjustment Controller
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Controller\Adminhtml\Credit;

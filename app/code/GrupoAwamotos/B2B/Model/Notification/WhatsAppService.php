@@ -1,8 +1,10 @@
 <?php
+
 /**
  * Serviço de notificações via WhatsApp
  * Suporta múltiplos providers: Z-API, Evolution API, Twilio, Meta Cloud API
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Model\Notification;

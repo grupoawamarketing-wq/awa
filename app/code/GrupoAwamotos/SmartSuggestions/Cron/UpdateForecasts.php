@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\SmartSuggestions\Cron;
@@ -62,7 +63,6 @@ class UpdateForecasts
                 'SmartSuggestions: Forecast update completed in %ss',
                 $duration
             ));
-
         } catch (\Exception $e) {
             $this->logger->error('SmartSuggestions: Forecast update failed', [
                 'error' => $e->getMessage(),
@@ -131,7 +131,6 @@ class UpdateForecasts
                 'SmartSuggestions: Updated %d daily forecast records',
                 count($records)
             ));
-
         } catch (\Exception $e) {
             $this->logger->error('SmartSuggestions: Daily forecast update failed', [
                 'error' => $e->getMessage()
@@ -202,7 +201,6 @@ class UpdateForecasts
             }
 
             $this->logger->info('SmartSuggestions: Updated monthly forecast records');
-
         } catch (\Exception $e) {
             $this->logger->error('SmartSuggestions: Monthly forecast update failed', [
                 'error' => $e->getMessage()
@@ -259,7 +257,6 @@ class UpdateForecasts
                     $count
                 ));
             }
-
         } catch (\Exception $e) {
             $this->logger->error('SmartSuggestions: Accuracy calculation failed', [
                 'error' => $e->getMessage()

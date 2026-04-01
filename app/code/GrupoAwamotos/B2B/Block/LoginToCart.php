@@ -1,8 +1,10 @@
 <?php
+
 /**
  * Block for B2B access restriction modals.
  * Shown to guests (login/register modal) AND to logged-in non-approved users (pending message).
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Block;

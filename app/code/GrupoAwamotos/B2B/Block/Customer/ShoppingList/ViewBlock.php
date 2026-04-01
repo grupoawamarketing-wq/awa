@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Shopping List View Block
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Block\Customer\ShoppingList;

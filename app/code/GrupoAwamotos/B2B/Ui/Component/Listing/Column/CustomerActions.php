@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Customer Actions Column for Admin Grid
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Ui\Component\Listing\Column;
@@ -73,7 +75,7 @@ class CustomerActions extends Column
                 }
             }
         }
-        
+
         return $dataSource;
     }
 }

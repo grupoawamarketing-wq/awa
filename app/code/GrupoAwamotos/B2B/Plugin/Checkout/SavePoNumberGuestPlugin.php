@@ -1,8 +1,10 @@
 <?php
+
 /**
  * Plugin para salvar PO Number no Quote via guest checkout
  * P0-1: Purchase Order Number
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Plugin\Checkout;

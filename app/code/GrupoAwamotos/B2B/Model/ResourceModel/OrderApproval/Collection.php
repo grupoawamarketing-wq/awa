@@ -1,7 +1,9 @@
 <?php
+
 /**
  * B2B Order Approval Collection
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Model\ResourceModel\OrderApproval;

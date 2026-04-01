@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Quote Button Position Source Model
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Model\Config\Source;
@@ -14,7 +16,7 @@ class QuoteButtonPosition implements OptionSourceInterface
     const POSITION_PRODUCT = 'product';
     const POSITION_CART = 'cart';
     const POSITION_BOTH = 'both';
-    
+
     /**
      * Get options
      *

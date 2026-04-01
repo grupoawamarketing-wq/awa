@@ -953,7 +953,6 @@ HTML;
                 $output->writeln(sprintf(' - Categoria criada: %s', $categoryData['name']));
             } catch (\Throwable $exception) {
                 $output->writeln(sprintf('<error>   ✗ Erro ao criar categoria %s: %s</error>', $categoryData['name'], $exception->getMessage()));
-
             }
         }
     }
@@ -1300,16 +1299,16 @@ HTML;
 HTML;
     }
 
-        private function homeBenefitsBarContent(): string
-        {
-                return <<<HTML
+    private function homeBenefitsBarContent(): string
+    {
+            return <<<HTML
 <div class="benefits-bar">
     <div class="benefits-bar__item"><img class="benefits-bar__icon" src="{{view url='images/icons/truck.svg'}}" alt="Envio"> Envio para todo o Brasil</div>
     <div class="benefits-bar__item"><img class="benefits-bar__icon" src="{{view url='images/icons/clock.svg'}}" alt="Prazos"> Prazos e valores no carrinho</div>
     <div class="benefits-bar__item"><img class="benefits-bar__icon" src="{{view url='images/icons/shield.svg'}}" alt="Suporte"> Ajuda para compatibilidade</div>
 </div>
 HTML;
-        }
+    }
 
     private function homeFaqQuickContent(): string
     {
@@ -1359,9 +1358,9 @@ HTML;
 HTML;
     }
 
-        private function homeHeroContent(): string
-        {
-                return <<<HTML
+    private function homeHeroContent(): string
+    {
+            return <<<HTML
 <section class="hero section">
     <div>
         <h1 class="hero__title">Peças e acessórios para sua moto</h1>
@@ -1384,14 +1383,14 @@ HTML;
     </div>
 </section>
 HTML;
-        }
+    }
 
-        private function homeFitmentSearchContent(): string
-        {
-            // Mantém a home idempotente e evita formulário "fake" (marca/modelo/ano sem enviar q).
-            // Reutiliza o conteúdo real do Fitment (configurável em Stores > Configuration > grupoawamotos_fitment).
-            return $this->homeFitmentContent();
-        }
+    private function homeFitmentSearchContent(): string
+    {
+        // Mantém a home idempotente e evita formulário "fake" (marca/modelo/ano sem enviar q).
+        // Reutiliza o conteúdo real do Fitment (configurável em Stores > Configuration > grupoawamotos_fitment).
+        return $this->homeFitmentContent();
+    }
 
     private function homeB2bInviteContent(): string
     {
@@ -1536,9 +1535,9 @@ HTML;
 HTML;
     }
 
-        private function homeSecuritySealsContent(): string
-        {
-                return <<<HTML
+    private function homeSecuritySealsContent(): string
+    {
+            return <<<HTML
 <div class="section">
     <div class="security-seals" aria-label="Selos de segurança e confiança">
         <img loading="lazy" src="{{view url='images/payment_methods.png'}}" alt="Formas de pagamento" width="280" height="40" />
@@ -1552,7 +1551,7 @@ HTML;
     </div>
 </div>
 HTML;
-        }
+    }
 
     private function headContactContent(): string
     {
@@ -2288,9 +2287,9 @@ HTML;
 HTML;
     }
 
-        private function homeCategoryNavVisualContent(): string
-        {
-                return <<<'HTML'
+    private function homeCategoryNavVisualContent(): string
+    {
+            return <<<'HTML'
 <div class="awa-category-nav">
     <nav class="awa-category-nav__nav" aria-label="Navegação visual por categorias">
         <ul class="awa-category-nav__grid" role="list">
@@ -2368,7 +2367,7 @@ HTML;
     </nav>
 </div>
 HTML;
-        }
+    }
 
 
 
@@ -2489,5 +2488,4 @@ HTML;
     {
         $output->writeln(' - Slider seeding skipped (manual restoration required if needed)');
     }
-
 }

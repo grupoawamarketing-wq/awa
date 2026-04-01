@@ -1,9 +1,12 @@
 <?php
+
 declare(strict_types=1);
+
 /**
  * Block para exibir recomendações personalizadas no frontend
  * Integrado com dados reais do pipeline ERP → RexisML
  */
+
 namespace GrupoAwamotos\RexisML\Block;
 
 use Magento\Framework\View\Element\Template;

@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Install Data: Create B2B Customer Attributes and Groups
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Setup\Patch\Data;
@@ -59,14 +61,14 @@ class CreateB2BCustomerAttributes implements DataPatchInterface, PatchRevertable
     public function apply()
     {
         $this->moduleDataSetup->startSetup();
-        
+
         $customerSetup = $this->customerSetupFactory->create(['setup' => $this->moduleDataSetup]);
         $customerEntity = $customerSetup->getEavConfig()->getEntityType(Customer::ENTITY);
         $attributeSetId = $customerEntity->getDefaultAttributeSetId();
-        
+
         $attributeSet = $this->attributeSetFactory->create();
         $attributeGroupId = $attributeSet->getDefaultGroupId($attributeSetId);
-        
+
         // Atributo: Status de Aprovação B2B
         $customerSetup->addAttribute(
             Customer::ENTITY,
@@ -88,7 +90,7 @@ class CreateB2BCustomerAttributes implements DataPatchInterface, PatchRevertable
                 'default' => 'pending',
             ]
         );
-        
+
         // Atributo: CNPJ
         $customerSetup->addAttribute(
             Customer::ENTITY,
@@ -109,7 +111,7 @@ class CreateB2BCustomerAttributes implements DataPatchInterface, PatchRevertable
                 'frontend_class' => 'validate-cnpj',
             ]
         );
-        
+
         // Atributo: Razão Social
         $customerSetup->addAttribute(
             Customer::ENTITY,
@@ -129,7 +131,7 @@ class CreateB2BCustomerAttributes implements DataPatchInterface, PatchRevertable
                 'is_searchable_in_grid' => false,
             ]
         );
-        
+
         // Atributo: Nome Fantasia
         $customerSetup->addAttribute(
             Customer::ENTITY,
@@ -147,7 +149,7 @@ class CreateB2BCustomerAttributes implements DataPatchInterface, PatchRevertable
                 'is_visible_in_grid' => false,
             ]
         );
-        
+
         // Atributo: Inscrição Estadual
         $customerSetup->addAttribute(
             Customer::ENTITY,
@@ -167,7 +169,7 @@ class CreateB2BCustomerAttributes implements DataPatchInterface, PatchRevertable
                 'is_searchable_in_grid' => false,
             ]
         );
-        
+
         // Atributo: Inscrição Municipal
         $customerSetup->addAttribute(
             Customer::ENTITY,
@@ -183,7 +185,7 @@ class CreateB2BCustomerAttributes implements DataPatchInterface, PatchRevertable
                 'system' => false,
             ]
         );
-        
+
         // Atributo: Telefone Comercial
         $customerSetup->addAttribute(
             Customer::ENTITY,
@@ -201,7 +203,7 @@ class CreateB2BCustomerAttributes implements DataPatchInterface, PatchRevertable
                 'is_visible_in_grid' => false,
             ]
         );
-        
+
         // Atributo: Tipo de Pessoa (PF/PJ)
         $customerSetup->addAttribute(
             Customer::ENTITY,
@@ -222,7 +224,7 @@ class CreateB2BCustomerAttributes implements DataPatchInterface, PatchRevertable
                 'default' => 'pj',
             ]
         );
-        
+
         // Atributo: Data de Aprovação
         $customerSetup->addAttribute(
             Customer::ENTITY,
@@ -241,7 +243,7 @@ class CreateB2BCustomerAttributes implements DataPatchInterface, PatchRevertable
                 'is_filterable_in_grid' => true,
             ]
         );
-        
+
         // Atributo: Limite de Crédito
         $customerSetup->addAttribute(
             Customer::ENTITY,
@@ -260,7 +262,7 @@ class CreateB2BCustomerAttributes implements DataPatchInterface, PatchRevertable
                 'frontend_class' => 'validate-number',
             ]
         );
-        
+
         // Atributo: Observações Internas
         $customerSetup->addAttribute(
             Customer::ENTITY,
@@ -276,7 +278,7 @@ class CreateB2BCustomerAttributes implements DataPatchInterface, PatchRevertable
                 'system' => false,
             ]
         );
-        
+
         // Configurar atributos para uso em formulários
         $attributes = [
             'b2b_approval_status',
@@ -291,10 +293,10 @@ class CreateB2BCustomerAttributes implements DataPatchInterface, PatchRevertable
             'b2b_credit_limit',
             'b2b_admin_notes',
         ];
-        
+
         foreach ($attributes as $attributeCode) {
             $attribute = $customerSetup->getEavConfig()->getAttribute(Customer::ENTITY, $attributeCode);
-            
+
             $attribute->addData([
                 'attribute_set_id' => $attributeSetId,
                 'attribute_group_id' => $attributeGroupId,
@@ -304,18 +306,18 @@ class CreateB2BCustomerAttributes implements DataPatchInterface, PatchRevertable
                     'customer_account_edit',
                 ],
             ]);
-            
+
             $attribute->save();
         }
-        
+
         // Criar grupos de clientes B2B se não existirem
         $this->createCustomerGroups();
-        
+
         $this->moduleDataSetup->endSetup();
-        
+
         return $this;
     }
-    
+
     /**
      * Create B2B customer groups
      */
@@ -327,21 +329,21 @@ class CreateB2BCustomerAttributes implements DataPatchInterface, PatchRevertable
             ['code' => 'B2B Revendedor', 'tax_class_id' => 3],
             ['code' => 'B2B Pendente', 'tax_class_id' => 3],
         ];
-        
+
         foreach ($groups as $groupData) {
             try {
                 // Verificar se grupo já existe
                 $searchCriteria = new \Magento\Framework\Api\SearchCriteria();
                 $existingGroups = $this->groupRepository->getList($searchCriteria)->getItems();
                 $exists = false;
-                
+
                 foreach ($existingGroups as $existingGroup) {
                     if ($existingGroup->getCode() === $groupData['code']) {
                         $exists = true;
                         break;
                     }
                 }
-                
+
                 if (!$exists) {
                     $group = $this->groupFactory->create();
                     $group->setCode($groupData['code']);
@@ -358,9 +360,9 @@ class CreateB2BCustomerAttributes implements DataPatchInterface, PatchRevertable
     public function revert()
     {
         $this->moduleDataSetup->startSetup();
-        
+
         $customerSetup = $this->customerSetupFactory->create(['setup' => $this->moduleDataSetup]);
-        
+
         $attributes = [
             'b2b_approval_status',
             'b2b_cnpj',
@@ -374,11 +376,11 @@ class CreateB2BCustomerAttributes implements DataPatchInterface, PatchRevertable
             'b2b_credit_limit',
             'b2b_admin_notes',
         ];
-        
+
         foreach ($attributes as $attributeCode) {
             $customerSetup->removeAttribute(Customer::ENTITY, $attributeCode);
         }
-        
+
         $this->moduleDataSetup->endSetup();
     }
 

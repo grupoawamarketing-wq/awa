@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ayo\Curriculo\Controller\Index;
@@ -74,7 +75,7 @@ class CheckStatus extends Action implements HttpPostActionInterface
 
         $trackingCode = strtoupper(trim((string)$request->getParam('tracking_code')));
         $trackingEmail = strtolower(trim((string)$request->getParam('tracking_email')));
-        
+
         if ($trackingCode === '') {
             return $result->setData([
                 'success' => false,
@@ -100,7 +101,7 @@ class CheckStatus extends Action implements HttpPostActionInterface
         $collection = $this->collectionFactory->create();
         $collection->addFieldToFilter('tracking_code', $trackingCode);
         $submission = $collection->getFirstItem();
-        
+
         if (!$submission->getId()) {
             $this->registerAttempt();
             return $result->setData([
@@ -129,7 +130,7 @@ class CheckStatus extends Action implements HttpPostActionInterface
                 $displayHint = trim(strip_tags($displayHint));
             }
         }
-        
+
         return $result->setData([
             'success' => true,
             'data' => [

@@ -1,9 +1,11 @@
 <?php
+
 /**
  * Accept Quote Request Controller
  *
  * Converts quoted items to Magento cart with custom prices and redirects to checkout.
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Controller\Quote;
@@ -199,7 +201,6 @@ class Accept implements HttpPostActionInterface
 
             // Redirect to checkout
             return $redirect->setPath('checkout');
-
         } catch (\Magento\Framework\Exception\NoSuchEntityException $e) {
             $this->messageManager->addErrorMessage(__('Cotação não encontrada.'));
             return $redirect->setPath('b2b/quote/history');

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\ERPIntegration\Model;
@@ -626,8 +627,7 @@ class StockSync implements StockSyncInterface
         string $erpIdentifier,
         string $targetSku,
         string $resolutionType
-    ): bool
-    {
+    ): bool {
         if ($validationResult->getField('quantity_original') !== null || $resolutionType === 'base_sku') {
             return false;
         }

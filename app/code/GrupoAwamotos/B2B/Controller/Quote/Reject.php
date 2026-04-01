@@ -1,9 +1,11 @@
 <?php
+
 /**
  * Reject Quote Request Controller
  *
  * Allows the customer to reject a quoted quote request.
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Controller\Quote;
@@ -117,7 +119,6 @@ class Reject implements HttpPostActionInterface
             ));
 
             return $redirect->setPath('b2b/quote/history');
-
         } catch (\Magento\Framework\Exception\NoSuchEntityException $e) {
             $this->messageManager->addErrorMessage(__('Cotação não encontrada.'));
             return $redirect->setPath('b2b/quote/history');

@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Controller para página de login B2B (estilo Forceline)
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Controller\Account;

@@ -1,8 +1,11 @@
 <?php
+
 declare(strict_types=1);
+
 /**
  * Comando CLI para exibir estatisticas do REXIS ML
  */
+
 namespace GrupoAwamotos\RexisML\Console\Command;
 
 use Symfony\Component\Console\Command\Command;
@@ -279,7 +282,9 @@ class StatsCommand extends Command
         $output->writeln('');
 
         $maxQtd = 0;
-        foreach ($rows as $r) { $maxQtd = max($maxQtd, (int)$r['qtd']); }
+        foreach ($rows as $r) {
+            $maxQtd = max($maxQtd, (int)$r['qtd']);
+        }
 
         foreach ($rows as $r) {
             $qtd = (int)$r['qtd'];

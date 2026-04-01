@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace GrupoAwamotos\RexisML\Helper;
 
 use GrupoAwamotos\ERPIntegration\Model\WhatsApp\ZApiClient;
@@ -75,7 +77,6 @@ class WhatsAppNotifier extends AbstractHelper
             }
 
             return $this->sendToRecipients($message);
-
         } catch (\Exception $e) {
             $this->logger->error('[RexisML WhatsApp] CrossSell: ' . $e->getMessage());
             return false;
@@ -130,7 +131,6 @@ class WhatsAppNotifier extends AbstractHelper
             $message .= "Acesse o painel REXIS ML para detalhes.";
 
             return $this->sendToRecipients($message);
-
         } catch (\Exception $e) {
             $this->logger->error('[RexisML WhatsApp] ChurnRecovery: ' . $e->getMessage());
             return false;
