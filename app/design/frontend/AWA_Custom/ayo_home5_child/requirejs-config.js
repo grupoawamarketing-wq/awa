@@ -1,8 +1,7 @@
 /**
  * AWA Custom child theme (Ayo Home5) RequireJS aliases.
  *
- * rokanthemes/timecircles: Rokanthemes_Superdeals está desabilitado.
- * Mapeando para nosso stub noop.
+ * rokanthemes/timecircles: real TimeCircles lib (via tema, shim jquery).
  */
 var config = {
     map: {
@@ -24,10 +23,11 @@ var config = {
         'js/superdeals-swiper-init': 'js/superdeals-swiper-init.min',
         'js/owl-carousel-init': 'js/owl-carousel-init.min',
         'js/vertical-menu-init': 'js/vertical-menu-init.min',
-        'js/megamenu-mobile': 'js/megamenu-mobile.min',
         'js/jquery-andself-compat': 'js/jquery-andself-compat.min',
         // Sticky header — non-minified until terser build step is added
-        'awa-header-sticky': 'js/awa-header-sticky'
+        'awa-header-sticky': 'js/awa-header-sticky',
+        // FASE E: Mobile menu focus trap (WCAG 2.4.3)
+        'awa-vertical-menu-focus-trap': 'js/awa-vertical-menu-focus-trap'
     },
     shim: {
         'swiper': {
