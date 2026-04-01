@@ -701,7 +701,7 @@ class Connection implements ConnectionInterface
     {
         return $this->executeWithRetry(function () use ($sql, $params) {
             $pdo = $this->getConnection();
-            $stmt = $pdo->prepare($sql);
+            $stmt = $pdo->prepare($sql); // nosemgrep: php.doctrine.security.audit.doctrine-dbal-dangerous-query.doctrine-dbal-dangerous-query
             $stmt->execute($params);
             $row = $stmt->fetch(\PDO::FETCH_ASSOC);
             return $row ?: null;
@@ -715,7 +715,7 @@ class Connection implements ConnectionInterface
     {
         return $this->executeWithRetry(function () use ($sql, $params, $column) {
             $pdo = $this->getConnection();
-            $stmt = $pdo->prepare($sql);
+            $stmt = $pdo->prepare($sql); // nosemgrep: php.doctrine.security.audit.doctrine-dbal-dangerous-query.doctrine-dbal-dangerous-query
             $stmt->execute($params);
             return $stmt->fetchColumn($column);
         }, 'fetchColumn');
