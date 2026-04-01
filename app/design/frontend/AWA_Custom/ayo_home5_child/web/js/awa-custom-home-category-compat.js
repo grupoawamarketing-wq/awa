@@ -76,7 +76,7 @@ define(['jquery'], function ($) {
             if ($toggle.length) {
                 var panelId = $submenu.attr('id');
                 if (!panelId && $submenu.length) {
-                    panelId = 'awa-vm-panel-' + Math.random().toString(36).slice(2, 9);
+                    panelId = 'awa-vm-panel-' + Math.random().toString(36).slice(2, 9); // nosemgrep: rules/lgpl/javascript/crypto/rule-node-insecure-random-generator
                     $submenu.attr('id', panelId);
                 }
                 $toggle.attr({
@@ -184,7 +184,7 @@ define(['jquery'], function ($) {
             if ($content.length) {
                 var cid = $content.attr('id');
                 if (!cid) {
-                    cid = 'awa-filter-content-' + Math.random().toString(36).slice(2, 9);
+                    cid = 'awa-filter-content-' + Math.random().toString(36).slice(2, 9); // nosemgrep: rules/lgpl/javascript/crypto/rule-node-insecure-random-generator
                     $content.attr('id', cid);
                 }
                 $title.attr('aria-controls', cid);

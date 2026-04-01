@@ -178,7 +178,7 @@ define([
             }
 
             var escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
-                regex = new RegExp('(' + escaped + ')', 'gi'),
+                regex = new RegExp('(' + escaped + ')', 'gi'), // nosemgrep: javascript/dos/rule-non-literal-regexp -- input is pre-escaped via replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
                 safeText = $('<span>').text(text).html();
 
             return safeText.replace(regex, '<mark class="awa-ac-highlight">$1</mark>');
