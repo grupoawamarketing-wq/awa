@@ -1,0 +1,80 @@
+<?php
+
+declare(strict_types=1);
+
+/** @var \Magento\Framework\View\Element\Template $block */
+/** @var \GrupoAwamotos\Chatwoot\ViewModel\ChatWidget $viewModel */
+$viewModel = $block->getData('view_model');
+
+if (!$viewModel->isEnabled()) {
+    return;
+}
+
+$baseUrl = $viewModel->getBaseUrl();
+$token = $viewModel->getWebsiteToken();
+$locale = $viewModel->getLocale();
+$position = $viewModel->getPosition();
+$customerData = $viewModel->getCustomerIdentifier();
+$b2bData = $viewModel->getB2bData();
+$widgetSettings = $viewModel->getWidgetSettings();
+$soundEnabled = $viewModel->isSoundEnabled();
+$pushEnabled = $viewModel->usePushNotifications();
+$identifierHash = $viewModel->getIdentifierHash();
+?>
+<script>
+    window.chatwootSettings = {
+        hideMessageBubble: false,
+        position: '<?= $block->escapeJs($position) ?>',
+        locale: '<?= $block->escapeJs($locale) ?>',
+        useBrowserLanguage: false,
+        darkMode: '<?= $block->escapeJs($widgetSettings['darkMode'] ?? 'auto') ?>',
+        showPopoutButton: <?= $widgetSettings['showPopoutButton'] ? 'true' : 'false' ?>,
+        <?php if (!empty($widgetSettings['widgetColor'])): ?>
+        widgetColor: '<?= $block->escapeJs($widgetSettings['widgetColor']) ?>',
+        <?php endif; ?>
+        type: 'standard'
+    };
+    (function(d,t) {
+        var BASE_URL="<?= $block->escapeUrl($baseUrl) ?>";
+        var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+        g.src=BASE_URL+"/packs/js/sdk.js";
+        g.defer = true;
+        g.async = true;
+        s.parentNode.insertBefore(g,s);
+        g.onload=function(){
+            window.chatwootSDK.run({
+                websiteToken: '<?= $block->escapeJs($token) ?>',
+                baseUrl: BASE_URL
+            });
+            window.addEventListener("chatwoot:ready", function(){
+                <?php if (!$soundEnabled): ?>
+                if (window.$chatwoot && typeof window.$chatwoot.toggleSoundNotification === 'function') {
+                    window.$chatwoot.toggleSoundNotification();
+                }
+                <?php endif; ?>
+
+                <?php if ($pushEnabled): ?>
+                if (window.$chatwoot && typeof window.$chatwoot.toggleBubbleVisibility === 'function') {
+                    try { Notification.requestPermission(); } catch(e) {}
+                }
+                <?php endif; ?>
+
+                <?php if (!empty($customerData)): ?>
+                window.$chatwoot.setUser('<?= $block->escapeJs($customerData['email'] ?? '') ?>', {
+                    email: '<?= $block->escapeJs($customerData['email'] ?? '') ?>',
+                    name: '<?= $block->escapeJs($customerData['name'] ?? '') ?>'<?php if (!empty($identifierHash)): ?>,
+                    identifier_hash: '<?= $block->escapeJs($identifierHash) ?>'<?php endif; ?><?php if (!empty($b2bData)): ?>,
+                    company_name: '<?= $block->escapeJs($b2bData['razao_social'] ?? '') ?>',
+                    phone_number: '<?= $block->escapeJs($b2bData['telefone'] ?? '') ?>',
+                    custom_attributes: {
+                        <?php foreach ($b2bData as $key => $value): ?>
+                        <?= $block->escapeJs($key) ?>: '<?= $block->escapeJs((string) $value) ?>',
+                        <?php endforeach; ?>
+                    }
+                    <?php endif; ?>
+                });
+                <?php endif; ?>
+            });
+        }
+    })(document,"script");
+</script>
