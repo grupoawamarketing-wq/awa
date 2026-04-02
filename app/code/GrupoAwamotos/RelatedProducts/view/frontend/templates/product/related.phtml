@@ -1,0 +1,106 @@
+<?php
+/**
+ * AWA PDP — Produtos Relacionados (mesma categoria)
+ * Preço visível somente para clientes B2B aprovados.
+ *
+ * @var \GrupoAwamotos\RelatedProducts\Block\Product\Related $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+declare(strict_types=1);
+
+$collection = $block->getRelatedCollection();
+if (!$collection || !$collection->getSize()) {
+    return;
+}
+
+$canShowPrice = $block->canShowPrice();
+$priceMessage = $escaper->escapeHtml($block->getPriceReplacementMessage());
+$imageType    = 'category_page_grid';
+?>
+
+<section class="awa-pdp-related" aria-labelledby="awa-pdp-related-heading">
+
+    <div class="rokan-product-heading rokan-featured-heading">
+        <h2 id="awa-pdp-related-heading">
+            <?= $escaper->escapeHtml(__('Produtos Relacionados')) ?>
+        </h2>
+    </div>
+
+    <div class="rokan-mostviewed">
+        <div class="swiper products-swiper products-swiper--related">
+            <div class="swiper-wrapper">
+                <?php foreach ($collection as $product): ?>
+                <div class="swiper-slide">
+                    <div class="product-item">
+
+                        <?php $productImage = $block->getImage($product, $imageType); ?>
+                        <div class="product-thumb">
+                            <a href="<?= $escaper->escapeUrl($product->getProductUrl()) ?>"
+                               class="product-thumb-link product photo product-item-photo"
+                               aria-label="<?= $escaper->escapeHtmlAttr($product->getName()) ?>"
+                               tabindex="-1">
+                                <span class="first-thumb">
+                                    <?php
+                                    $imgHtml = $productImage->toHtml();
+                                    $imgHtml = str_replace('loading="eager"', 'loading="lazy"', $imgHtml);
+                                    if (strpos($imgHtml, 'loading=') === false) {
+                                        $imgHtml = str_replace('<img ', '<img loading="lazy" decoding="async" ', $imgHtml);
+                                    }
+                                    echo $imgHtml;
+                                    ?>
+                                </span>
+                            </a>
+                        </div>
+
+                        <div class="product-info">
+                            <div class="product-name">
+                                <a class="product-item-link"
+                                   href="<?= $escaper->escapeUrl($product->getProductUrl()) ?>"
+                                   title="<?= $escaper->escapeHtmlAttr($product->getName()) ?>">
+                                    <?= $escaper->escapeHtml($product->getName()) ?>
+                                </a>
+                            </div>
+
+                            <?php if ($canShowPrice): ?>
+                            <div class="price-box">
+                                <?= /* @noEscape */ $block->getProductPrice($product) ?>
+                            </div>
+                            <?php else: ?>
+                            <div class="price-box price-box--hidden">
+                                <span class="awa-related-price-notice">
+                                    <?= $priceMessage ?>
+                                </span>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+            <div class="swiper-button-next"></div>
+            <div class="swiper-button-prev"></div>
+        </div>
+    </div>
+
+</section>
+
+<script type="text/x-magento-init">
+{
+    ".awa-pdp-related": {
+        "js/products-swiper-init": {
+            "carouselSelector": ".products-swiper--related",
+            "owl": {
+                "items": 4,
+                "itemsDesktop": [1366, 4],
+                "itemsDesktopSmall": [980, 3],
+                "itemsTablet": [768, 2],
+                "itemsMobile": [479, 1],
+                "navigation": true,
+                "pagination": false,
+                "margin": 16
+            }
+        }
+    }
+}
+</script>

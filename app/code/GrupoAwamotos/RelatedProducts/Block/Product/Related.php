@@ -1,0 +1,135 @@
+<?php
+
+/**
+ * Related Products Block
+ *
+ * Sugere produtos da mesma categoria ignorando relações manuais.
+ * Preços só são exibidos para clientes B2B aprovados (mesma regra do PDP principal).
+ */
+
+declare(strict_types=1);
+
+namespace GrupoAwamotos\RelatedProducts\Block\Product;
+
+use GrupoAwamotos\B2B\Api\PriceVisibilityInterface;
+use Magento\Catalog\Block\Product\AbstractProduct;
+use Magento\Catalog\Block\Product\Context;
+use Magento\Catalog\Model\Config as CatalogConfig;
+use Magento\Catalog\Model\Product\Visibility;
+use Magento\Catalog\Model\ResourceModel\Product\Collection;
+use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
+use Magento\Framework\Registry;
+
+class Related extends AbstractProduct
+{
+    private const MAX_ITEMS = 8;
+
+    /**
+     * @var CollectionFactory
+     */
+    private CollectionFactory $collectionFactory;
+
+    /**
+     * @var Registry
+     */
+    private Registry $registry;
+
+    /**
+     * @var PriceVisibilityInterface
+     */
+    private PriceVisibilityInterface $priceVisibility;
+
+    /**
+     * @var Visibility
+     */
+    private Visibility $catalogProductVisibility;
+
+    /**
+     * @var CatalogConfig
+     */
+    private CatalogConfig $catalogConfig;
+
+    /**
+     * @var Collection|null
+     */
+    private ?Collection $collection = null;
+
+    public function __construct(
+        Context $context,
+        CollectionFactory $collectionFactory,
+        Registry $registry,
+        PriceVisibilityInterface $priceVisibility,
+        Visibility $catalogProductVisibility,
+        CatalogConfig $catalogConfig,
+        array $data = []
+    ) {
+        parent::__construct($context, $data);
+        $this->collectionFactory = $collectionFactory;
+        $this->registry = $registry;
+        $this->priceVisibility = $priceVisibility;
+        $this->catalogProductVisibility = $catalogProductVisibility;
+        $this->catalogConfig = $catalogConfig;
+    }
+
+    /**
+     * Returns up to MAX_ITEMS products from the same categories as the current product.
+     *
+     * @return Collection
+     */
+    public function getRelatedCollection(): Collection
+    {
+        if ($this->collection !== null) {
+            return $this->collection;
+        }
+
+        $currentProduct = $this->registry->registry('current_product');
+        if (!$currentProduct) {
+            $this->collection = $this->collectionFactory->create()
+                ->addFieldToFilter('entity_id', ['null' => true]);
+            return $this->collection;
+        }
+
+        $categoryIds = $currentProduct->getCategoryIds();
+        if (empty($categoryIds)) {
+            $this->collection = $this->collectionFactory->create()
+                ->addFieldToFilter('entity_id', ['null' => true]);
+            return $this->collection;
+        }
+
+        $collection = $this->collectionFactory->create();
+        $collection->addAttributeToSelect($this->catalogConfig->getProductAttributes());
+        $collection->addMinimalPrice();
+        $collection->addFinalPrice();
+        $collection->addTaxPercents();
+        $collection->addCategoriesFilter(['in' => $categoryIds]);
+        $collection->addFieldToFilter('entity_id', ['neq' => $currentProduct->getId()]);
+        $collection->setVisibility($this->catalogProductVisibility->getVisibleInCatalogIds());
+        $collection->addWebsiteFilter();
+        $collection->setPageSize(self::MAX_ITEMS);
+        $collection->setOrder('updated_at', 'DESC');
+
+        $this->collection = $collection;
+        return $this->collection;
+    }
+
+    /**
+     * Returns true when the current customer is allowed to view prices.
+     * Delegates entirely to the B2B PriceVisibility service.
+     *
+     * @return bool
+     */
+    public function canShowPrice(): bool
+    {
+        return $this->priceVisibility->canViewPrices();
+    }
+
+    /**
+     * Returns the message to display in place of the price for non-approved customers.
+     *
+     * @return string
+     */
+    public function getPriceReplacementMessage(): string
+    {
+        return $this->priceVisibility->getPriceReplacementMessage();
+    }
+}
