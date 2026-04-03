@@ -100,50 +100,11 @@ body .page-wrapper .awa-site-header .header .awa-header-cart-link-icon {
 }
 
 @media (min-width: 992px) {
-	/* Contact slot: posicionar após search (order:1) e minicart (order:2) */
-	body .page-wrapper .awa-site-header .header .top-search > .awa-header-contact-slot {
-		order: 3 !important;
-		flex: 0 1 auto !important;
-		min-width: 0;
-		max-width: min(28vw, 300px);
-		display: flex !important;
-		flex-direction: column;
-		align-items: flex-end;
-		justify-content: center;
-		font-size: 13px;
-		line-height: 1.4;
-	}
-
-	/* Cart route on desktop: keep the header focused on logo + search. */
-	body.checkout-cart-index .awa-site-header .top-header,
-	body.checkout-cart-index .awa-site-header .header-control,
-	body.checkout-cart-index .awa-site-header .awa-header-right-col,
-	body.checkout-cart-index .awa-site-header .awa-header-contact-slot,
-	body.checkout-cart-index .awa-site-header .awa-header-minicart {
-		display: none !important;
-	}
-
-	body.checkout-cart-index .awa-site-header .header .wp-header[data-awa-header-row] {
-		align-items: center !important;
-	}
-
-	body.checkout-cart-index .awa-site-header .header .top-search {
-		display: block !important;
-		width: 100% !important;
-		max-width: 100% !important;
-	}
-
-	/* Cart-link: apenas visível no mobile — no desktop o minicart cuida do ícone */
-	body .page-wrapper .awa-site-header .header .awa-header-cart-link {
-		display: none !important;
-	}
+	/* P6: Regras de contact slot, checkout-cart e cart-link movidas para awa-bundle-core.unmin.css */
 }
 
 @media (max-width: 991px) {
-	/* === HIDE utility bars on mobile === */
-	body:not(.b2b-auth-shell):not(.b2b-register-index) .awa-site-header [data-awa-header-utility='true'],
-	body:not(.b2b-auth-shell):not(.b2b-register-index) .awa-site-header .top-header,
-	body:not(.b2b-auth-shell):not(.b2b-register-index) .awa-site-header .top-bar-left,
+	/* === HIDE panels & nav bar on mobile; keep utility bar visible (P5) === */
 	body:not(.b2b-auth-shell):not(.b2b-register-index) .awa-site-header .top-bar-right,
 	body:not(.b2b-auth-shell):not(.b2b-register-index) .awa-site-header .top-info,
 	body:not(.b2b-auth-shell):not(.b2b-register-index) .awa-site-header .top-account,
@@ -510,65 +471,7 @@ body .page-wrapper .awa-site-header .header .awa-header-cart-link-icon {
 		border: 0 !important;
 	}
 
-	/* === NAV DRAWER CLOSE BUTTON (mobile ≤991px) === */
-	.awa-nav-close {
-		position: absolute !important;
-		top: 12px !important;
-		right: 12px !important;
-		z-index: 120 !important;
-		display: flex !important;
-		align-items: center !important;
-		justify-content: center !important;
-		width: 36px !important;
-		height: 36px !important;
-		padding: 0 !important;
-		border: 1px solid var(--awa-gray-200, #e5e7eb) !important;
-		border-radius: 10px !important;
-		background: var(--awa-gray-50, #f9fafb) !important;
-		color: var(--awa-gray-700, #3f3f3f) !important;
-		cursor: pointer !important;
-		transition: background 0.2s ease, border-color 0.2s ease !important;
-		-webkit-appearance: none !important;
-		appearance: none !important;
-	}
-	.awa-nav-close:hover,
-	.awa-nav-close:active {
-		background: var(--awa-gray-100, #f3f4f6) !important;
-		border-color: var(--awa-gray-300, #d1d5db) !important;
-	}
-	.awa-nav-close:focus-visible {
-		outline: 2px solid var(--awa-red, #b73337) !important;
-		outline-offset: 2px !important;
-	}
-	.awa-nav-close svg {
-		pointer-events: none !important;
-		flex-shrink: 0 !important;
-	}
-
-	/* === NAV BACKDROP OVERLAY === */
-	.awa-nav-overlay {
-		position: fixed !important;
-		inset: 0 !important;
-		z-index: 99 !important;
-		background: rgba(0, 0, 0, 0.45) !important;
-		opacity: 0 !important;
-		visibility: hidden !important;
-		transition: opacity 0.25s ease, visibility 0.25s ease !important;
-		cursor: pointer !important;
-		-webkit-tap-highlight-color: transparent !important;
-	}
-	.awa-nav-overlay.is-visible {
-		opacity: 1 !important;
-		visibility: visible !important;
-	}
-
-	/* Hide close + overlay on desktop */
-	@media (min-width: 992px) {
-		.awa-nav-close,
-		.awa-nav-overlay {
-			display: none !important;
-		}
-	}
+	/* P6: Nav drawer close + overlay styles movidos para awa-bundle-core.unmin.css */
 
 	/* Hide right-col on mobile (minicart + contact-slot now in .awa-header-right-col sibling) */
 	body .page-wrapper .awa-site-header .header .wp-header[data-awa-header-row] > .awa-header-right-col {
@@ -795,6 +698,15 @@ body .page-wrapper .awa-site-header .header .awa-header-cart-link-icon {
 				<div class="awa-utility-bar__inner">
 					<div class="top-bar-left" data-awa-header-utility-left="true">
 						<?= /* @noEscape */ $this->getChildHtml('top-left-static') ?>
+						<?php /* MCP Dashboard — visible only when logged in (toggled by customer-data JS below) */ ?>
+						<a class="awa-mcp-dashboard-link"
+						   href="<?= $escaper->escapeUrl($block->getUrl('customer/account')) ?>"
+						   id="awa-mcp-dashboard-link"
+						   aria-label="<?= $escaper->escapeHtmlAttr(__('Acessar painel MCP — catálogos técnicos e pedidos')) ?>"
+						   title="<?= $escaper->escapeHtmlAttr(__('Painel MCP')) ?>">
+							<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+							<?= $escaper->escapeHtml(__('Painel MCP')) ?>
+						</a>
 						<a class="awa-header-quote-cta"
 						   href="<?= $escaper->escapeUrl($block->getUrl('cotacao')) ?>"
 						   aria-label="<?= $escaper->escapeHtmlAttr(__('Solicitar orçamento para empresas')) ?>">
@@ -824,6 +736,14 @@ body .page-wrapper .awa-site-header .header .awa-header-cart-link-icon {
 												<div class="col-md-2 col-sm-2 col-xs-12 awa-header-brand awa-header-brand-cell" data-awa-header-brand="true">
 													<div class="awa-header-brand-desktop" data-awa-header-brand-desktop="true">
 														<?= /* @noEscape */ $this->getChildHtml('logo') ?>
+														<?php /* AWA MCP system identity badge — wholesale portal identifier */ ?>
+														<span class="awa-mcp-system-badge"
+														      role="img"
+														      aria-label="<?= $escaper->escapeHtmlAttr(__('AWA MCP — Portal Atacado Profissional')) ?>"
+														      title="<?= $escaper->escapeHtmlAttr(__('MCP: Moto Componentes Peças — Portal B2B')) ?>">
+															<span class="awa-mcp-system-badge__dot" aria-hidden="true"></span>
+															AWA MCP
+														</span>
 													</div>
 													<?php if ($mobileLogoSrc !== ''): ?>
 														<a class="awa-header-mobile-logo" href="<?= $escaper->escapeUrl($mobileLogoUrl) ?>" title="<?= $escaper->escapeHtmlAttr($mobileLogoTitle) ?>" aria-label="<?= $escaper->escapeHtmlAttr($mobileLogoAlt) ?>">
@@ -904,6 +824,26 @@ require(['awa-header-sticky', 'awa-vertical-menu-focus-trap'], function (initSti
     'use strict';
     initStickyHeader();
     initFocusTrap();
+});
+</script>
+<script>
+/* MCP Dashboard link: show when customer is logged in (FPC-safe via customer-data sections) */
+require(['Magento_Customer/js/customer-data'], function (customerData) {
+    'use strict';
+    var link = document.getElementById('awa-mcp-dashboard-link');
+    if (!link) { return; }
+    customerData.get('customer').subscribe(function (data) {
+        if (data && data.firstname) {
+            link.classList.add('is-visible');
+        } else {
+            link.classList.remove('is-visible');
+        }
+    });
+    /* Initialise immediately with cached section data */
+    var initial = customerData.get('customer')();
+    if (initial && initial.firstname) {
+        link.classList.add('is-visible');
+    }
 });
 </script>
 <script>
