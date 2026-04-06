@@ -7,19 +7,24 @@
 declare(strict_types=1);
 
 $isLoggedIn = (bool) $block->isLoggedIn();
-$dataPostParam = '';
-$hrefAttribute = '';
 $title = $isLoggedIn ? (string) __('Sair') : (string) __('Entrar');
 $ariaLabel = $isLoggedIn
     ? (string) __('Sair da conta')
     : (string) __('Entrar na área do cliente B2B');
-$iconClass = $isLoggedIn ? 'fa-sign-out' : 'fa-unlock-alt';
+
+$dataPostParam = '';
+$hrefAttribute = '';
 
 if ($isLoggedIn) {
     $dataPostParam = sprintf(" data-post='%s'", $block->getPostParams());
 } else {
     $hrefAttribute = ' href="' . $block->escapeUrl($block->getUrl('b2b/account/login')) . '"';
 }
+
+/* Feather Icons — consistente com o restante do header */
+$loginSvg  = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>';
+$logoutSvg = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>';
+$iconSvg   = $isLoggedIn ? $logoutSvg : $loginSvg;
 ?>
 <li class="authorization-link awa-top-link-auth-item"
     data-label="<?= $block->escapeHtmlAttr(__('ou')) ?>"
@@ -29,7 +34,7 @@ if ($isLoggedIn) {
            aria-label="<?= $block->escapeHtmlAttr($ariaLabel) ?>"
            data-awa-auth-link="true"
            <?= /* @noEscape */ $block->getLinkAttributes() ?><?= /* @noEscape */ $dataPostParam ?>>
-            <i class="fa <?= $block->escapeHtmlAttr($iconClass) ?>" aria-hidden="true"></i>
+            <?= /* @noEscape */ $iconSvg ?>
             <?= $block->escapeHtml($title) ?>
         </a>
     <?php else: ?>
@@ -37,7 +42,7 @@ if ($isLoggedIn) {
            aria-label="<?= $block->escapeHtmlAttr($ariaLabel) ?>"
            data-awa-auth-link="true"
            rel="nofollow"<?= /* @noEscape */ $hrefAttribute ?>>
-            <i class="fa <?= $block->escapeHtmlAttr($iconClass) ?>" aria-hidden="true"></i>
+            <?= /* @noEscape */ $iconSvg ?>
             <?= $block->escapeHtml($title) ?>
         </a>
     <?php endif; ?>
