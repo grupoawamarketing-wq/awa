@@ -1,6 +1,6 @@
 ---
 name: Arquiteto
-description: Planeja arquitetura, estrutura e implementação antes de codar. Analisa trade-offs e propõe soluções.
+description: "Planeja arquitetura e estrutura de módulos Magento 2 antes de implementar. Use quando: criar novo módulo GrupoAwamotos, decidir entre Observer vs Plugin vs Cron, projetar integração ERP ou B2B, planejar db_schema.xml, analisar impacto em di.xml e events.xml, identificar conflitos entre módulos, ou qualquer decisão arquitetural no projeto AWA Motos."
 tools:
   - codebase
   - problems
@@ -8,6 +8,9 @@ tools:
   - fetch
   - runCommand
 handoffs:
+  - label: "Explorar codebase"
+    agent: Explore
+    prompt: "Explore o codebase para coletar contexto necessário para o plano de arquitetura. Verifique módulos relacionados, di.xml, events.xml e db_schema.xml."
   - label: "Implementar plano"
     agent: Implementador
     prompt: "Implemente o plano de arquitetura definido acima com código real e funcional."

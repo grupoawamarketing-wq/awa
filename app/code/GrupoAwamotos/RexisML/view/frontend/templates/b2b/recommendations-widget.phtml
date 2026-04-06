@@ -5,6 +5,8 @@
  *
  * @var $block \GrupoAwamotos\RexisML\Block\Recommendations
  */
+declare(strict_types=1);
+
 $recommendations = $block->getRecommendedProducts();
 if (empty($recommendations)) {
     return;
@@ -29,7 +31,7 @@ foreach ($recommendations as $item) {
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#667eea" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
                 </svg>
-                Recomendacoes IA
+                <?= $block->escapeHtml(__('Recomendações IA')) ?>
                 <span class="b2b-rexis-ai-badge">REXIS ML</span>
             </h3>
             <?php if ($rfm && isset($rfm['classificacao_cliente'])): ?>
@@ -46,7 +48,7 @@ foreach ($recommendations as $item) {
             <?php if ((int)$counts['churn'] > 0): ?>
             <div class="b2b-rexis-stat stat-churn">
                 <span class="stat-value"><?= (int)$counts['churn'] ?></span>
-                <span class="stat-label">Reativacao</span>
+                <span class="stat-label"><?= $block->escapeHtml(__('Reativação')) ?></span>
             </div>
             <?php endif; ?>
             <?php if ((int)$counts['crosssell'] > 0): ?>
@@ -91,8 +93,8 @@ foreach ($recommendations as $item) {
                             <?php $imgUrl = $block->getProductImageUrl($product); ?>
                             <?php if ($imgUrl): ?>
                                 <img src="<?= $block->escapeUrl($imgUrl) ?>"
-                                     alt="<?= $block->escapeHtml($product->getName()) ?>"
-                                     loading="lazy" width="120" height="120" />
+                                      alt="<?= $block->escapeHtmlAttr($product->getName()) ?>"
+                                      loading="lazy" decoding="async" width="120" height="120" />
                             <?php endif; ?>
                         </a>
                     </div>
@@ -106,7 +108,7 @@ foreach ($recommendations as $item) {
                         </div>
                         <?php if ($item['recencia'] > 0): ?>
                         <div class="b2b-card-recencia">
-                            Ha <?= (int)$item['recencia'] ?> dias sem comprar
+                            <?= $block->escapeHtml(__('Há %1 dias sem comprar', (int)$item['recencia'])) ?>
                         </div>
                         <?php endif; ?>
                     </div>
@@ -122,7 +124,7 @@ foreach ($recommendations as $item) {
                                        value="<?= $block->escapeHtmlAttr($value) ?>">
                             <?php endforeach; ?>
                             <button type="submit" class="b2b-rexis-btn b2b-rexis-btn-churn">
-                                Comprar Novamente
+                                <?= $block->escapeHtml(__('Comprar Novamente')) ?>
                             </button>
                         </form>
                         <?php endif; ?>
@@ -137,7 +139,7 @@ foreach ($recommendations as $item) {
     <div class="b2b-rexis-subsection">
         <h4 class="b2b-rexis-subtitle">
             <span class="subtitle-dot dot-crosssell"></span>
-            Voce tambem pode precisar (<?= count($crosssellItems) ?>)
+            <?= $block->escapeHtml(__('Você também pode precisar')) ?> (<?= count($crosssellItems) ?>)
         </h4>
         <div class="b2b-rexis-grid">
             <?php foreach ($crosssellItems as $item): ?>
@@ -160,8 +162,8 @@ foreach ($recommendations as $item) {
                             <?php $imgUrl = $block->getProductImageUrl($product); ?>
                             <?php if ($imgUrl): ?>
                                 <img src="<?= $block->escapeUrl($imgUrl) ?>"
-                                     alt="<?= $block->escapeHtml($product->getName()) ?>"
-                                     loading="lazy" width="120" height="120" />
+                                      alt="<?= $block->escapeHtmlAttr($product->getName()) ?>"
+                                      loading="lazy" decoding="async" width="120" height="120" />
                             <?php endif; ?>
                         </a>
                     </div>
@@ -175,7 +177,7 @@ foreach ($recommendations as $item) {
                         </div>
                         <?php if ($item['predicted_value'] > 0): ?>
                         <div class="b2b-card-predicted">
-                            Previsao: R$ <?= number_format($item['predicted_value'], 2, ',', '.') ?>
+                            <?= $block->escapeHtml(__('Previsão: R$ %1', number_format((float)$item['predicted_value'], 2, ',', '.'))) ?>
                         </div>
                         <?php endif; ?>
                     </div>
@@ -191,7 +193,7 @@ foreach ($recommendations as $item) {
                                        value="<?= $block->escapeHtmlAttr($value) ?>">
                             <?php endforeach; ?>
                             <button type="submit" class="b2b-rexis-btn b2b-rexis-btn-crosssell">
-                                Adicionar ao Carrinho
+                                <?= $block->escapeHtml(__('Adicionar ao Carrinho')) ?>
                             </button>
                         </form>
                         <?php endif; ?>
@@ -202,4 +204,3 @@ foreach ($recommendations as $item) {
     </div>
     <?php endif; ?>
 </div>
-

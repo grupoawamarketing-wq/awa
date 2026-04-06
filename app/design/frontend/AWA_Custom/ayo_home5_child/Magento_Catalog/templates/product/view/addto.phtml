@@ -1,33 +1,32 @@
 <?php
 /**
- * Copyright © 2015 Magento. All rights reserved.
- * See COPYING.txt for license details.
+ * PDP secondary links — child theme override (addto)
  *
- * AWA Motos child theme override — ayo_home5_child
- * Fix PDP-I18N-01: Translate title attributes for wishlist/compare buttons
+ * @var \Magento\Catalog\Block\Product\View $block
  */
+declare(strict_types=1);
 
-// @codingStandardsIgnoreFile
-
-/** @var $block \Magento\Catalog\Block\Product\View*/
-?>
-<?php
 $_product = $block->getProduct();
 $_wishlistSubmitParams = $this->helper('Magento\Wishlist\Helper\Data')->getAddParams($_product);
-$compareHelper = $this->helper('Magento\Catalog\Helper\Product\Compare');
+
+// Issue #24 — Hide wishlist for guests when B2B gate hides prices
+$_b2bActive = \Magento\Framework\App\ObjectManager::getInstance()
+    ->get(\Magento\Framework\Module\Manager::class)
+    ->isEnabled('GrupoAwamotos_B2B');
+$_b2bCanViewPrices = true;
+if ($_b2bActive) {
+    $_b2bCanViewPrices = $this->helper('GrupoAwamotos\B2B\Helper\Data')->canViewPrices();
+}
 ?>
 
-<?php if ($this->helper('Magento\Wishlist\Helper\Data')->isAllow()) : ?>
+<?php if ($_b2bCanViewPrices && $this->helper('Magento\Wishlist\Helper\Data')->isAllow()) : ?>
 	<a href="#" title="<?= $this->escapeHtmlAttr(__('Add To Wishlist')) ?>"
 		class="action towishlist wishlist-link"
 		data-post='<?php /* @escapeNotVerified */ echo $_wishlistSubmitParams; ?>'
 		data-action="add-to-wishlist"
 		aria-label="<?= $this->escapeHtmlAttr(__('Add To Wishlist')) ?>"><i class="fa fa-heart" aria-hidden="true"></i><span class="awa-pdp-social-label"><?= $this->escapeHtml(__('Favoritos')) ?></span></a>
 <?php endif; ?>
-<a href="#" title="<?= $this->escapeHtmlAttr(__('Add To Compare')) ?>" data-post='<?php /* @escapeNotVerified */ echo $compareHelper->getPostDataParams($_product);?>'
-	data-role="add-to-links"
-	class="action tocompare compare-link"
-	aria-label="<?= $this->escapeHtmlAttr(__('Add To Compare')) ?>"><i class="fa fa-retweet" aria-hidden="true"></i><span class="awa-pdp-social-label"><?= $this->escapeHtml(__('Comparar')) ?></span></a>
+<?php /* compare desativado */ ?>
 <script type="text/x-magento-init">
     {
         "body": {

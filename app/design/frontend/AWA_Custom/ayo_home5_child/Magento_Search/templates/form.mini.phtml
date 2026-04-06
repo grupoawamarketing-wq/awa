@@ -10,7 +10,7 @@ declare(strict_types=1);
 // @codingStandardsIgnoreFile
 /** @var \Magento\Search\Helper\Data $searchHelper */
 $searchHelper = $this->helper('Magento\Search\Helper\Data');
-$searchSuiteUrl = $block->getUrl('rokanthemes_searchsuiteautocomplete/ajax/index');
+$fallbackSuggestUrl = $block->getUrl('search/ajax/suggest');
 $searchQueryText = (string) $searchHelper->getEscapedQueryText();
 $searchFormClass = 'form minisearch search-content is-ready';
 
@@ -52,7 +52,7 @@ if ($searchQueryText === '') {
                            type="search"
                            name="<?php echo $block->escapeHtmlAttr($searchHelper->getQueryParamName()) ?>"
                            value="<?php echo $block->escapeHtmlAttr($searchQueryText) ?>"
-                           placeholder="<?php echo $block->escapeHtmlAttr(__('O que você procura hoje?')); ?>"
+                           placeholder="<?php echo $block->escapeHtmlAttr(__('Busque por nome, código ou modelo de moto...')); ?>"
                            class="input-text"
                            minlength="2"
                            maxlength="<?php echo (int) $searchHelper->getMaxQueryLength(); ?>"
@@ -64,7 +64,7 @@ if ($searchQueryText === '') {
                            aria-expanded="false"
                            aria-haspopup="listbox"
                            aria-controls="search_autocomplete"
-                           autocomplete="off"
+                           autocomplete="search"
                            autocapitalize="off"
                            autocorrect="off"
                            spellcheck="false" />
@@ -104,7 +104,7 @@ if ($searchQueryText === '') {
             "inputSelector": "#search",
             "panelSelector": "#search_autocomplete",
             "resultsRootSelector": ".searchsuite-autocomplete",
-            "fallbackEndpoint": "<?php echo $block->escapeUrl($searchSuiteUrl) ?>",
+            "fallbackEndpoint": "<?php echo $block->escapeUrl($fallbackSuggestUrl) ?>",
             "searchResultUrl": "<?php echo $block->escapeUrl($searchHelper->getResultUrl()) ?>",
             "minQueryLength": 2
         }

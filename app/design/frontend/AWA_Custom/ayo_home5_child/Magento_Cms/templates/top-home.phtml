@@ -13,12 +13,8 @@ $renderCmsBlock = static function (string $blockId) use ($layout): string {
 	return trim((string)$cmsBlock->toHtml());
 };
 
-/** @var \Rokanthemes\SlideBanner\Block\Slider|null $heroSliderBlock */
-$heroSliderBlock = $layout->createBlock('Rokanthemes\SlideBanner\Block\Slider');
-$heroSliderHtml = '';
-if ($heroSliderBlock) {
-	$heroSliderHtml = trim((string)$heroSliderBlock->setslider_id('homepageslider')->toHtml());
-}
+// Slider declarado via layout XML (Rokanthemes_SlideBanner::slider.phtml, slider_id=homepageslider)
+$heroSliderHtml = $block->getChildHtml('slider.main');
 
 $heroFallbackHtml = $renderCmsBlock('home_hero');
 $schemaOrgHtml = $renderCmsBlock('home_schema_org');
@@ -216,7 +212,7 @@ if ($benefitsHtml !== '' && strpos($benefitsHtml, 'velaServicesInner--home5') ==
 					</div>
 					<span class="awa-category-carousel__label"><?php echo $this->escapeHtml($cat['name']); ?></span>
 					<?php if (!empty($cat['count'])): ?>
-					<span class="awa-category-carousel__count"><?php echo (int) $cat['count']; ?> <?php echo $this->escapeHtml(__('produtos')); ?></span>
+					<span class="awa-category-carousel__count"><?php echo (int) $cat['count']; ?> <?php echo $this->escapeHtml(__((int) $cat['count'] === 1 ? 'produto' : 'produtos')); ?></span>
 					<?php endif; ?>
 				</a>
 				<?php endforeach; ?>
@@ -237,116 +233,6 @@ if ($benefitsHtml !== '' && strpos($benefitsHtml, 'velaServicesInner--home5') ==
 		</div>
 	</div>
 </section>
-<script>
-(function(){
-	var track = document.getElementById('awa-cat-carousel');
-	if (!track) return;
-	var prev = document.querySelector('.awa-category-carousel__prev');
-	var next = document.querySelector('.awa-category-carousel__next');
-	var dotsWrap = document.getElementById('awa-cat-dots');
-	var items = track.querySelectorAll('.awa-category-carousel__item');
-	if (!items.length) return;
-
-	/* --- Scroll helpers --- */
-	function getScrollAmount() {
-		var item = items[0];
-		if (!item) return 280;
-		var style = getComputedStyle(track);
-		var gap = parseInt(style.gap, 10) || 16;
-		return item.offsetWidth + gap;
-	}
-
-	if (prev) prev.addEventListener('click', function(){ track.scrollBy({left: -getScrollAmount(), behavior:'smooth'}); });
-	if (next) next.addEventListener('click', function(){ track.scrollBy({left: getScrollAmount(), behavior:'smooth'}); });
-
-	/* --- Touch swipe --- */
-	var startX = 0, startScrollLeft = 0, isDragging = false;
-	track.addEventListener('touchstart', function(e) {
-		startX = e.touches[0].pageX;
-		startScrollLeft = track.scrollLeft;
-		isDragging = true;
-	}, {passive: true});
-	track.addEventListener('touchmove', function(e) {
-		if (!isDragging) return;
-		var diff = e.touches[0].pageX - startX;
-		track.scrollLeft = startScrollLeft - diff;
-	}, {passive: true});
-	track.addEventListener('touchend', function() { isDragging = false; }, {passive: true});
-
-	/* --- Pagination dots (mobile only, built dynamically) --- */
-	function buildDots() {
-		if (!dotsWrap) return;
-		dotsWrap.innerHTML = '';
-		var trackW = track.offsetWidth;
-		var scrollW = track.scrollWidth;
-		if (scrollW <= trackW) { dotsWrap.style.display = 'none'; return; }
-		dotsWrap.style.display = '';
-		var pages = Math.ceil(scrollW / trackW);
-		for (var i = 0; i < pages; i++) {
-			var dot = document.createElement('button');
-			dot.className = 'awa-category-carousel__dot';
-			dot.type = 'button';
-			dot.setAttribute('aria-label', 'Ir para página ' + (i + 1) + ' de ' + pages);
-			dot.setAttribute('aria-pressed', i === 0 ? 'true' : 'false');
-			if (i === 0) dot.classList.add('active');
-			dot.dataset.page = i;
-			dot.addEventListener('click', (function(page) {
-				return function() { track.scrollTo({left: page * trackW, behavior: 'smooth'}); };
-			})(i));
-			dotsWrap.appendChild(dot);
-		}
-	}
-
-	function updateDots() {
-		if (!dotsWrap) return;
-		var dots = dotsWrap.querySelectorAll('.awa-category-carousel__dot');
-		if (!dots.length) return;
-		var trackW = track.offsetWidth;
-		var currentPage = Math.round(track.scrollLeft / trackW);
-		dots.forEach(function(d, idx) {
-			var isActive = idx === currentPage;
-			d.classList.toggle('active', isActive);
-			d.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-		});
-	}
-
-	/* --- Keyboard nav --- */
-	track.setAttribute('tabindex', '0');
-	track.addEventListener('keydown', function(e) {
-		if (e.key === 'ArrowRight') { track.scrollBy({left: getScrollAmount(), behavior:'smooth'}); e.preventDefault(); }
-		if (e.key === 'ArrowLeft') { track.scrollBy({left: -getScrollAmount(), behavior:'smooth'}); e.preventDefault(); }
-	});
-
-	track.addEventListener('scroll', updateDots, {passive: true});
-	buildDots();
-	var resizeTimer;
-	window.addEventListener('resize', function() {
-		clearTimeout(resizeTimer);
-		resizeTimer = setTimeout(buildDots, 200);
-	}, {passive: true});
-
-	/* --- Staggered entrance animation (IntersectionObserver) --- */
-	if ('IntersectionObserver' in window) {
-		var animItems = track.querySelectorAll('.awa-category-carousel__item');
-		animItems.forEach(function(el) { el.classList.add('awa-carousel-hidden'); });
-		var io = new IntersectionObserver(function(entries) {
-			entries.forEach(function(entry) {
-				if (entry.isIntersecting) {
-					var cards = entry.target.querySelectorAll('.awa-carousel-hidden');
-					cards.forEach(function(card, i) {
-						setTimeout(function() {
-							card.classList.remove('awa-carousel-hidden');
-							card.classList.add('awa-carousel-visible');
-						}, i * 80);
-					});
-					io.unobserve(entry.target);
-				}
-			});
-		}, {threshold: 0.15});
-		io.observe(track);
-	}
-})();
-</script>
 
 
 <!-- ①c Mais Vendidos -->

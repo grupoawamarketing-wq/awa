@@ -12,13 +12,13 @@ $_config = $_helper->getConfig('verticalmenu');
 
 if (!empty($_config['general']['enable'])):
     $limitShow = (int)($_config['general']['limit_show'] ?? 0);
-    $menuId    = 'awa-vertical-menu-categories';
+    $menuId    = 'awa-vertical-menu-' . uniqid('', false);
     $_menu     = $block->getVerticalMenuHtml();
 ?>
 <nav class="navigation verticalmenu side-verticalmenu"
      aria-label="<?= $block->escapeHtmlAttr(__('Categorias de Produtos')) ?>"
      data-role="awa-vertical-menu">
-    <h2 class="our_categories title-category-dropdown"
+    <div class="our_categories title-category-dropdown"
         data-role="awa-vertical-menu-trigger"
         aria-controls="<?= $block->escapeHtmlAttr($menuId) ?>"
         aria-expanded="false"
@@ -26,9 +26,9 @@ if (!empty($_config['general']['enable'])):
         tabindex="0">
         <span class="vm-icon"><i class="fa fa-bars" aria-hidden="true"></i></span>
         <span><?= $block->escapeHtml(__('Todas as categorias')) ?></span>
-    </h2>
+    </div>
     <ul id="<?= $block->escapeHtmlAttr($menuId) ?>"
-        class="togge-menu list-category-dropdown"
+        class="togge-menu list-category-dropdown navigation__list"
         data-limit-show="<?= (int)$limitShow ?>">
         <?= /** @noEscape */ $_menu ?>
         <?php
@@ -50,7 +50,7 @@ if (!empty($_config['general']['enable'])):
                aria-expanded="false"
                data-show-text="<?= $block->escapeHtmlAttr(__('Show More')) ?>"
                data-hide-text="<?= $block->escapeHtmlAttr(__('Show Less')) ?>">
-                <span><?= $block->escapeHtml(__('All Categories')) ?></span>
+                <span><?= $block->escapeHtml(__('Show More')) ?></span>
                 <i class="fa fa-angle-down vm-toggle-icon" aria-hidden="true"></i>
             </a>
         </li>
@@ -63,6 +63,7 @@ if (!empty($_config['general']['enable'])):
     "[data-role='awa-vertical-menu']": {
         "js/vertical-menu-init": {
             "desktopBreakpoint": 992,
+            "overlaySelector": ".shadow_bkg_show",
             "limitShow": <?= (int)$limitShow ?>
         }
     }

@@ -4,6 +4,8 @@
  *
  * @var $block \GrupoAwamotos\RexisML\Block\Widget\Recommendations
  */
+declare(strict_types=1);
+
 $recommendations = $block->getRecommendedProducts();
 
 if (empty($recommendations) && !$block->getShowForGuest()) {
@@ -16,8 +18,8 @@ $customClass = $block->getCustomClass();
 <div class="rexis-widget-simple <?= $block->escapeHtmlAttr($customClass) ?>">
     <?php if (empty($recommendations)): ?>
         <div class="rexis-login-prompt-simple">
-            <p>🔒 <?= __('Faça login para ver recomendações personalizadas.') ?>
-                <a href="<?= $block->escapeUrl($block->getUrl('customer/account/login')) ?>"><?= __('Login') ?></a>
+            <p>🔒 <?= $block->escapeHtml(__('Faça login para ver recomendações personalizadas.')) ?>
+                <a href="<?= $block->escapeUrl($block->getUrl('customer/account/login')) ?>"><?= $block->escapeHtml(__('Login')) ?></a>
             </p>
         </div>
     <?php else: ?>
@@ -38,11 +40,11 @@ $customClass = $block->getCustomClass();
                     <a href="<?= $block->escapeUrl($product->getProductUrl()) ?>" class="rexis-simple-link">
                         <img src="<?= $block->escapeUrl($block->getProductImageUrl($product)) ?>"
                              alt="<?= $block->escapeHtml($product->getName()) ?>"
-                             class="rexis-simple-img" loading="lazy" />
+                                class="rexis-simple-img" loading="lazy" decoding="async" width="50" height="50" />
                         <div class="rexis-simple-info">
                             <span class="rexis-simple-name"><?= $block->escapeHtml($product->getName()) ?></span>
                             <span class="rexis-simple-price">
-                                <?= $block->getLayout()->createBlock('Magento\Catalog\Pricing\Render')->render(
+                                <?= /* @noEscape */ $block->getLayout()->createBlock('Magento\Catalog\Pricing\Render')->render(
                                     'final_price', $product, ['zone' => 'item_list']
                                 ) ?>
                             </span>
@@ -56,4 +58,3 @@ $customClass = $block->getCustomClass();
         </ul>
     <?php endif; ?>
 </div>
-

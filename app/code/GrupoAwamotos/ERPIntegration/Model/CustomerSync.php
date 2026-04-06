@@ -256,6 +256,16 @@ class CustomerSync implements CustomerSyncInterface
             return null;
         }
 
+        // PHP's filter_var accepts single-char TLDs (e.g. .b) but Magento's Laminas
+        // validator rejects them, causing an Exception. Pre-validate TLD length (≥2 chars).
+        if (!preg_match('/\.[a-zA-Z]{2,}$/', $email)) {
+            $this->logger->warning('[ERP] Email with invalid TLD rejected', [
+                'email' => $email,
+                'erp_code' => $erpData['CODIGO'] ?? 0,
+            ]);
+            return null;
+        }
+
         $erpCode = (int)($erpData['CODIGO'] ?? 0);
         if ($erpCode === 0) {
             $this->logger->warning('[ERP] Cannot create customer without ERP code');
@@ -279,6 +289,13 @@ class CustomerSync implements CustomerSyncInterface
             return $this->createNewCustomer($erpData, $websiteId);
         } catch (\Magento\Framework\Validator\ValidatorException $e) {
             $this->logger->warning('[ERP] Customer validation failed: ' . $e->getMessage(), [
+                'erp_code' => $erpCode,
+                'email'    => $email,
+            ]);
+            return null;
+        } catch (\Magento\Framework\Exception\LocalizedException $e) {
+            // Email/dados inválidos vindos do ERP são problemas de qualidade de dados, não erros de sistema
+            $this->logger->warning('[ERP] Customer skipped — invalid data: ' . $e->getMessage(), [
                 'erp_code' => $erpCode,
                 'email'    => $email,
             ]);

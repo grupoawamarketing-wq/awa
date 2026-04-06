@@ -22,36 +22,55 @@ Arquivo universal de instruções reconhecido por múltiplos agents (Copilot, Cl
 ### .github/copilot-instructions.md
 Instruções globais específicas do Copilot. Define stack, padrões de código, naming, estrutura de pastas, e contexto de negócio.
 
-### .github/agents/ (5 Custom Agents)
+### .github/agents/ (6 Custom Agents)
 
 | Agent | Comando | Função |
 |-------|---------|--------|
+| **Awa** | `/agents` → Awa | Agente principal AWA Motos — Magento 2 especialista |
 | **Implementador** | `/agents` → Implementador | Implementa features completas com código real |
 | **Revisor** | `/agents` → Revisor | Revisa código sem modificar |
-| **Arquiteto** | `/agents` → Arquiteto | Planeja antes de implementar |
+| **Arquiteto** | `/agents` → Arquiteto | Planeja arquitetura antes de implementar |
 | **Debugger** | `/agents` → Debugger | Diagnostica causa raiz antes de corrigir |
-| **MercadoLivre** | `/agents` → MercadoLivre | Especialista em API e SEO do ML |
+| **Explore** | subagent read-only | Explora codebase sem modificar arquivos |
 
-### .github/instructions/ (4 Instruction Files)
+### .github/instructions/ (9 Instruction Files)
 
 | Arquivo | Aplica a | Função |
 |---------|----------|--------|
-| react-components | `*.tsx` | Regras para componentes React |
-| services-api | `services/**/*.ts` | Regras para services e APIs |
-| tests | `*.test.ts, *.spec.ts` | Regras para testes |
-| prisma-database | `*.prisma, prisma/**` | Regras para Prisma/DB |
+| codacy | `**` | Análise estática automática com Codacy CLI |
+| controllers | `**/Controller/**/*.php` | Regras para Controllers Magento |
+| frontend-js-css | `**/web/js/**`, `**/web/css/**` | Regras para JS (RequireJS/Knockout) e LESS |
+| layout-xml | `**/layout/**/*.xml` | Regras para Layout XMLs |
+| magento-database | `db_schema.xml`, `ResourceModel/**` | Declarative Schema e queries |
+| observers-plugins-cron | `Observer/`, `Plugin/`, `Cron/` | Event-driven e jobs |
+| phtml-templates | `**/*.phtml` | Templates — escape de XSS, Blocks |
+| services-api | `Model/`, `Api/`, `Helper/` | Service Contracts e Repository Pattern |
+| tests | `**/Test/**`, `**/tests/**` | PHPUnit para Magento 2 |
 
-### .github/prompts/ (7 Slash Commands)
+### .github/prompts/ (23 Slash Commands)
 
 | Comando | Função |
 |---------|--------|
+| `/criar-modulo` | Novo módulo GrupoAwamotos completo |
+| `/criar-crud` | CRUD completo (db_schema + Model + Repository + Admin Grid) |
+| `/implementar-cli` | Comando `bin/magento` em módulo existente |
 | `/implementar-api` | Integração completa com API externa |
-| `/criar-crud` | CRUD completo (DB + API + Service + Hook) |
-| `/criar-componente` | Componente React com testes |
-| `/refatorar` | Refatoração segura com testes |
+| `/depurar-erp` | Diagnóstico de problemas no módulo ERPIntegration |
 | `/corrigir-bug` | Debug com diagnóstico de causa raiz |
+| `/refatorar` | Refatoração segura |
 | `/auditar-projeto` | Auditoria completa do projeto |
-| `/otimizar-anuncio-ml` | Otimização de anúncio Mercado Livre |
+| `/criar-componente` | Componente Knockout.js/PHTML |
+| `/design-fase-01..10` | Design System AWA — fases de UI progressiva |
+| `/elevar-ui-ux-premium` | Elevação premium de UI/UX |
+| `/modernizar-layout-completo` | Modernização de layout |
+| `/ux-designer` | Consultoria UX para o projeto |
+
+### .github/skills/ (2 Skills)
+
+| Skill | Carregamento | Função |
+|-------|----------|--------|
+| `skilawa` | automático (descrição match) | Padrões AWA — criar módulo, Observer, Plugin, CLI, ERP, B2B |
+| `design-system` | automático (CSS/LESS/PHTML) | Design System AWA — tokens, BEM, deploy |
 
 ---
 
@@ -97,14 +116,12 @@ Para máxima autonomia, use o agent dentro de um **Dev Container**. Isso permite
 
 ## ⚠️ Personalização
 
-O `copilot-instructions.md` vem configurado para a stack React + TypeScript + Node.js. **Personalize** para cada projeto:
+O `copilot-instructions.md` e `AGENTS.md` estão configurados para Magento 2.4.8-p3 + PHP 8.4 + AWA Motos. Para adaptar a outro projeto:
 
-- Mude a stack se for diferente (Vue, Angular, Python, etc.)
-- Ajuste os comandos (npm → pnpm, yarn, etc.)
-- Adicione contexto específico do projeto
-- Ajuste a estrutura de pastas
-
-Os agents e prompts são genéricos o suficiente para funcionar em qualquer projeto TypeScript/React, mas personalize conforme necessário.
+- Altere o namespace (`GrupoAwamotos` → seu namespace)
+- Ajuste os comandos bin/magento conforme sua versão
+- Personalize o contexto de negócio em `copilot-instructions.md`
+- Os agents e prompts seguem padrões Magento 2 genéricos
 
 ---
 
@@ -117,7 +134,7 @@ Os agents e prompts são genéricos o suficiente para funcionar em qualquer proj
 - Prompts aparecem como slash commands no chat
 - Custom agents aparecem no dropdown de agents
 
-Criado por Claude para Jess @ AWA Motos — Fevereiro 2026
+Criado e evoluído por Jess @ AWA Motos — 2026
 
 ---
 

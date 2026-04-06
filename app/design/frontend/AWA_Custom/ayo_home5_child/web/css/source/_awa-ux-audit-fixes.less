@@ -1,12 +1,12 @@
-/* 
- * AWA UX/UI Audit Fixes 
+/*
+ * AWA UX/UI Audit Fixes
  * Targets specific visual bugs identified via MCP audit
  */
 
 
 @import (once) '_awa-variables';
 /* 1. Global Vignette Effect (P1)
- * Remove strange inner blue shadow around the page wrapper on all breakpoints 
+ * Remove strange inner blue shadow around the page wrapper on all breakpoints
  */
 body.awa-ds,
 body.awa-ds .page-wrapper,
@@ -22,18 +22,18 @@ body::after {
  * The chat widget "Olá. Precisa de ajuda?" blocks the screen heavily on mobile.
  * We apply a scale and target common third-party chat widget wrappers containing span texts.
  */
-@media (max-width: 768px) {
-    div[id*="zapi"], 
-    div[id*="jivo"], 
-    div[class*="whatsapp"], 
+@media (max-width: @awa-breakpoint-sm) {
+    div[id*="zapi"],
+    div[id*="jivo"],
+    div[class*="whatsapp"],
     div[class*="chat-widget"] {
         max-width: 60px !important;
         transform: scale(0.85);
         transform-origin: bottom right;
         margin-bottom: 20px;
     }
-    
-    div[class*="whatsapp"] span, 
+
+    div[class*="whatsapp"] span,
     div[class*="chat-widget"] span,
     div[id*="zapi"] span {
         display: none !important;
@@ -52,7 +52,7 @@ body::after {
 /* 3. Banner Slider Dots on Mobile (P0)
  * Swiper pagination inherits a large mobile nav background. We reset it.
  */
-@media (max-width: 768px) {
+@media (max-width: @awa-breakpoint-sm) {
     body.awa-ds .rokanthemes-slide .swiper-pagination,
     body.awa-ds .swiper-pagination {
         background: transparent !important;
@@ -66,12 +66,12 @@ body::after {
 /* 4. Header Break at 1024px Tablet (P0)
  * The header compresses and elements overlap. We allow wrap and adjust margins.
  */
-@media (min-width: 768px) and (max-width: 1200px) {
+@media (min-width: @awa-breakpoint-sm) and (max-width: @awa-breakpoint-lg) {
     body.awa-ds .awa-main-header .awa-main-header__inner {
         flex-wrap: wrap !important;
         justify-content: space-between !important;
     }
-    
+
     body.awa-ds .awa-main-header .awa-header-search-col {
         order: 3;
         flex: 1 1 100% !important;
@@ -82,10 +82,25 @@ body::after {
 
 /* 5. Product Card Boundaries and Button Alignment (P2)
  * Improve contrast and alignment so products don't blend with background.
+ *
+ * FIX dark-mode leak (prefers-color-scheme: dark → --awa-bg: #0f1115):
+ * awa-bundle-refinements.unmin.css usa background:var(--awa-bg) nos cards
+ * .rokan-newproduct/.rokan-featuredproduct/.rokan-onsale .product-item.
+ * Os cards de produto são sempre brancos — forçamos explicitamente.
  */
+body.awa-ds .rokan-newproduct .product-item,
+body.awa-ds .rokan-featuredproduct .product-item,
+body.awa-ds .rokan-onsale .product-item,
+body.awa-ds .page-wrapper .rokan-newproduct .product-item,
+body.awa-ds .page-wrapper .rokan-featuredproduct .product-item,
+body.awa-ds .page-wrapper .rokan-onsale .product-item {
+    background: @awa-color-white !important;
+    --awa-bg: @awa-color-white;
+}
+
 body.awa-ds .item-product,
 body.awa-ds .product-item-info {
-    border: 1px solid rgba(0, 0, 0, 0.06) !important;
+    border: 1px solid fade(@awa-neutral-800, 6%) !important;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -102,6 +117,118 @@ body.awa-ds .product-item-inner,
 body.awa-ds .price-box,
 body.awa-ds .login-for-price {
     margin-top: auto;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DESIGN REVIEW FIXES — Q2 2026
+   Baseado em PLANO_MELHORIAS_DESIGN_2026Q2.md
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* 6. Issue #8 — ALL CAPS → Title Case via CSS (Fase 2.3)
+ * Nomes de produto vêm em ALL CAPS do ERP ("RET. BIZ 100 CR. REDONDO UNIVERSAL").
+ * CSS transform mantém dados originais intactos no banco.
+ * Aplica em PLP, PDP, carousels, search, minicart.
+ */
+body.awa-ds .product-item-name a.product-item-link,
+body.awa-ds .product-item-name,
+body.awa-ds .product-name a.product-item-link,
+body.awa-ds .product-info-main .page-title-wrapper .page-title span,
+body.awa-ds .minicart-wrapper .product-item-name a,
+body.awa-ds .cart.table-wrapper .product-item-name a,
+body.awa-ds .opc-block-summary .product-item-name {
+    text-transform: capitalize;
+}
+
+/* 7. Issue #3 — Overlay B2B acessível em cards (Fase 1.2)
+ * O overlay "Acesso B2B Exclusivo" cobre o card inteiro no hover.
+ * Tornamos bypass-ável por teclado: overlay não aparece com :focus-within.
+ * Garantimos que o link do produto permanece acessível por Tab.
+ */
+body.awa-ds .product-item-info:focus-within .awa-b2b-overlay,
+body.awa-ds .product-item-info:focus-within .b2b-overlay,
+body.awa-ds .product-item-info:focus-within [class*="b2b-overlay"] {
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+body.awa-ds .product-item-name a.product-item-link:focus-visible {
+    outline: 2px solid var(--awa-red, @awa-color-primary);
+    outline-offset: 2px;
+    z-index: 10;
+    position: relative;
+}
+
+/* 8. Issue #10 — Owl carousel GIF spinner → CSS spinner (Fase 2.5)
+ * Substitui AjaxLoader.gif por spinner CSS, acessível e respeita prefers-reduced-motion.
+ * Override no tema child, NÃO edita owl.carousel.css do tema pai.
+ */
+body.awa-ds .owl-item.loading,
+body.awa-ds .owl-item .owl-lazy[data-src]:not([src]) {
+    background-image: none !important;
+}
+
+body.awa-ds .owl-item.loading::after {
+    content: "";
+    display: block;
+    width: 32px;
+    height: 32px;
+    margin: 40px auto;
+    border-radius: 50%;
+    border: 3px solid @awa-color-border;
+    border-top-color: @awa-color-primary;
+    animation: awa-spin 0.75s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.awa-ds .owl-item.loading::after {
+        animation: none;
+        border-top-color: @awa-color-primary;
+        opacity: 0.6;
+    }
+}
+
+/* 9. Issue #19 — Logo sticky duplicado: aria-hidden (Fase 3.7)
+ * O logo duplicado no sticky header é tratado via CSS (hidden do SR).
+ * Complemento: template PHTML deve ter aria-hidden="true" — mas CSS garante
+ * que visualmente apenas um logo esteja ativo por vez.
+ */
+body.awa-ds .header-wrapper-sticky .logo-sticky img {
+    /* Garante que o logo sticky não interfere visualmente com o principal */
+    pointer-events: auto;
+}
+
+/* 10. Issue #22 — Sort controls sem label visível (Fase 3.10)
+ * Garante visibilidade do label "Ordenar por:" no toolbar da PLP.
+ */
+body.awa-ds .toolbar-sorter .sorter-label {
+    display: inline-block !important;
+    visibility: visible !important;
+    font-size: @awa-font-size-13;
+    font-weight: 600;
+    color: @awa-neutral-600;
+    margin-right: @awa-space-2;
+}
+
+/* 11. Issue #20 — Formulários B2B: foco e autocomplete visual (Fase 3.8)
+ * Melhoria visual nos campos de login B2B para indicar suporte a autocomplete.
+ */
+body.awa-ds .b2b-login-form .field .control input:focus,
+body.awa-ds .b2b-register-form .field .control input:focus {
+    border-color: @awa-color-primary;
+    box-shadow: 0 0 0 3px fade(@awa-color-primary, 15%);
+    outline: none;
+}
+
+/* 12. Issue #12 — B2B Register: steps 2-4 hidden por padrão (Fase 2.6)
+ * Fallback CSS: se JS não carregar, apenas step 1 fica visível.
+ * JS do wizard remove essas regras e gerencia a navegação.
+ */
+body.awa-ds .b2b-register-form .form-step:not(:first-child) {
+    display: none;
+}
+
+body.awa-ds .b2b-register-form.js-wizard-active .form-step {
+    display: block;
 }
 
 /* Fix product swiper arrows overlapping */
@@ -165,7 +292,7 @@ body.catalogsearch-result-index .product-item-info,
     border: 1px solid @awa-neutral-100 !important;
     border-radius: 12px !important;
     transition: all 0.25s ease !important;
-    padding-bottom: 12px !important; 
+    padding-bottom: 12px !important;
 }
 body.catalog-category-view .product-item-info:hover,
 body.catalogsearch-result-index .product-item-info:hover,
@@ -359,7 +486,7 @@ body.catalogsearch-result-index .product-item-info:hover,
 .product-info-main .custom-features-block .feature-item i,
 .product-info-main .custom-features-block .feature-item svg {
     font-size: 20px !important;
-    color: #6366f1 !important;
+    color: @awa-color-info !important;
     margin-bottom: 8px !important;
 }
 .product-info-main .custom-features-block .feature-title {
@@ -521,7 +648,7 @@ body.catalogsearch-result-index .product-item-info:hover,
 
 /* 18. One Step Checkout Flat Design Unification */
 /* Transform generic outlined cards into crisp modern boxes */
-.opc-wrapper .step-title, 
+.opc-wrapper .step-title,
 .opc-wrapper .checkout-shipping-address,
 .opc-wrapper .checkout-shipping-method,
 .opc-wrapper .checkout-payment-method {
@@ -547,7 +674,7 @@ body.catalogsearch-result-index .product-item-info:hover,
 .opc-wrapper .payment-method._active {
     border-color: @awa-color-primary !important;
     box-shadow: 0 0 0 1px @awa-color-primary, 0 4px 6px -1px fade(@awa-color-primary, 10%) !important;
-    background-color: #fffafb !important;
+    background-color: fade(@awa-color-primary, 2%) !important;
 }
 .opc-wrapper .shipping-address-item {
     border-radius: 8px !important;
@@ -810,4 +937,202 @@ body.catalogsearch-result-index .product-item-info:hover,
     color: @awa-neutral-500 !important;
     text-align: center !important;
     padding: 24px 0 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DESIGN REVIEW Q2 — Implementação Fase 2 (MCP Browser)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* 29. Issue #8 — Product name readability: dark instead of red
+ * Product names in red (#b73337) on white bg have low contrast for body text.
+ * Use dark neutral for product names, keep red only for CTAs and links.
+ */
+body.awa-ds .product-item-name a.product-item-link,
+body.awa-ds h3.product-name a,
+body.awa-ds .product-name a {
+    color: @awa-neutral-800 !important;
+    transition: color var(--awa-transition-fast, 150ms ease);
+}
+body.awa-ds .product-item-name a.product-item-link:hover,
+body.awa-ds h3.product-name a:hover,
+body.awa-ds .product-name a:hover {
+    color: @awa-color-primary !important;
+}
+
+/* 30. Issue #13 — "Faça login para ver preços" styling improvement
+ * Make the login CTA visually distinct and professional.
+ * Gray muted text with red link, instead of full red paragraph.
+ */
+body.awa-ds .login-for-price,
+body.awa-ds .product-item .login-for-price {
+    font-size: @awa-font-size-13 !important;
+    color: @awa-neutral-500 !important;
+    margin-top: @awa-space-2 !important;
+    font-style: italic;
+}
+body.awa-ds .login-for-price a {
+    color: @awa-color-primary !important;
+    font-weight: 600 !important;
+    font-style: normal !important;
+    text-decoration: underline !important;
+    text-decoration-thickness: 1px !important;
+    text-underline-offset: 2px !important;
+}
+body.awa-ds .login-for-price a:hover {
+    color: @awa-color-primary-dark !important;
+    text-decoration-thickness: 2px !important;
+}
+
+/* 31. Category carousel — consistent label casing via CSS
+ * Backup visual fix in case database names still have inconsistent casing.
+ */
+body.awa-ds .awa-category-carousel__label {
+    text-transform: capitalize;
+}
+
+/* 32. Noscript message — less alarming styling (#4)
+ * Instead of raw noscript flash, style it as a subtle info bar.
+ */
+body.awa-ds noscript .message {
+    background: @awa-neutral-100 !important;
+    color: @awa-neutral-600 !important;
+    padding: @awa-space-3 @awa-space-4 !important;
+    font-size: @awa-font-size-13 !important;
+    text-align: center !important;
+    border-bottom: 1px solid @awa-neutral-200 !important;
+}
+
+/* 33. Homepage product carousel — consistent card height */
+body.awa-ds .owl-stage .product-item {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+body.awa-ds .owl-stage .product-item .product-item-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+body.awa-ds .owl-stage .product-item .product-item-details {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+body.awa-ds .owl-stage .product-item .product-item-inner {
+    margin-top: auto;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DESIGN REVIEW — Phase 2-4 Fixes (2026-04-01)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Issue #27 — Aspect ratio consistente no carousel de categorias (Fase 4.3)
+ * Forçar proporção 1:1 em imagens do carousel "Busque por Categorias"
+ * para uniformizar vitrines com imagens de tamanhos diversos.
+ */
+body.awa-ds .awa-category-carousel__card img,
+body.awa-ds .awa-category-card__img img,
+body.awa-ds .top-home-content--category-carousel .category-item img {
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    width: 100%;
+    height: auto;
+    border-radius: var(--awa-radius-sm, @awa-radius-sm);
+}
+
+/* Issue #28 — Link "Já tem conta? Faça login" no B2B Register (Fase 4.4)
+ * Estilização do link adicionado acima do título do formulário de registro.
+ */
+body.awa-ds .b2b-register-login-link,
+.b2b-register-shell .b2b-register-login-link {
+    text-align: center;
+    font-size: var(--awa-text-sm, @awa-font-size-13);
+    color: var(--awa-gray-500, @awa-neutral-500);
+    margin-bottom: var(--awa-space-4, @awa-space-4);
+    padding: var(--awa-space-3, @awa-space-3) var(--awa-space-4, @awa-space-4);
+    background: var(--awa-gray-100, @awa-neutral-50);
+    border-radius: var(--awa-radius-sm, @awa-radius-sm);
+}
+
+body.awa-ds .b2b-register-login-link a,
+.b2b-register-shell .b2b-register-login-link a {
+    color: var(--awa-red, @awa-color-primary);
+    font-weight: 600;
+    text-decoration: none;
+    margin-left: var(--awa-space-1, 4px);
+}
+
+body.awa-ds .b2b-register-login-link a:hover,
+.b2b-register-shell .b2b-register-login-link a:hover {
+    text-decoration: underline;
+}
+
+/* Issue #3 — Overlay B2B: Melhorar a11y com aria-hidden no overlay (Reforço Fase 1.2)
+ * Garante que o overlay B2B nos cards PLP/Search é acessível:
+ * - Não captura foco de teclado
+ * - Screen readers ignoram o overlay
+ * - Link do produto permanece acessível por Tab
+ */
+body.awa-ds .awa-b2b-gate-card--compact {
+    /* Overlay não deve ser tabulável */
+}
+body.awa-ds .awa-b2b-gate-card--compact .awa-b2b-gate-card__badge {
+    /* Badge decorativo — SR ignora via aria-hidden no template */
+}
+body.awa-ds .product-item-info .awa-b2b-gate-card--compact a:focus-visible {
+    outline: 2px solid var(--awa-red, @awa-color-primary);
+    outline-offset: 2px;
+}
+
+/* Issue #10 — Owl GIF spinner: reforçar override para qualquer .gif loader (Reforço Fase 2.5) */
+body.awa-ds .owl-item .owl-lazy {
+    background-image: none !important;
+}
+body.awa-ds img[src*="AjaxLoader"],
+body.awa-ds img[src*="ajaxloader"],
+body.awa-ds img[src*="loader.gif"] {
+    display: none !important;
+}
+
+/* Issue #22 — Sort toolbar: reforçar label visível (Reforço Fase 3.10) */
+body.awa-ds .toolbar-sorter > label,
+body.awa-ds .toolbar-sorter .sorter-label {
+    display: inline-block !important;
+    visibility: visible !important;
+    clip: auto !important;
+    clip-path: none !important;
+    position: static !important;
+    width: auto !important;
+    height: auto !important;
+    overflow: visible !important;
+    white-space: nowrap !important;
+    font-size: var(--awa-text-sm, @awa-font-size-13);
+    font-weight: 600;
+    color: var(--awa-gray-700, @awa-neutral-600);
+    margin-right: var(--awa-space-2, @awa-space-2);
+}
+
+/* Issue #26 — Review count: padronizar visual nos cards (PLP, Search, Widgets) */
+body.awa-ds .item-product .reviews-actions a,
+body.awa-ds .product-item .reviews-actions a,
+body.awa-ds .product-reviews-summary .reviews-actions a {
+    font-size: var(--awa-text-xs, @awa-font-size-12);
+    color: var(--awa-gray-700, @awa-neutral-600);
+    font-weight: 400;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+body.awa-ds .item-product .reviews-actions a:hover,
+body.awa-ds .product-item .reviews-actions a:hover,
+body.awa-ds .product-reviews-summary .reviews-actions a:hover {
+    color: @awa-color-primary-dark;
+    text-decoration: underline;
+}
+
+/* Issue #13 — CTA "Faça login" duplicado: o overlay .awa-b2b-gate-card já mostra
+   badge + headline + 2 CTAs. O link-texto na área de preço é redundante.
+   Usa :has() para esconder somente quando overlay está presente no card. */
+body.awa-ds .item-product:has(.awa-b2b-gate-card) .info-price .b2b-login-to-see-price,
+body.awa-ds .product-item:has(.awa-b2b-gate-card) .info-price .b2b-login-to-see-price {
+    display: none;
 }

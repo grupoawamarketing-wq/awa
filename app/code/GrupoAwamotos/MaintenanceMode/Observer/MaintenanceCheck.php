@@ -244,10 +244,16 @@ class MaintenanceCheck implements ObserverInterface
         $logoUrl = $logo ? $mediaUrl . 'maintenance/' . $logo : '';
 
         // Build HTML sections
+        $safeTitle = $this->escapeHtml($title);
+        $safeMessage = $this->sanitizeMessage($message);
+        $safeNewsletterTitle = $this->escapeHtml($newsletterTitle);
+        $safeNewsletterButton = $this->escapeHtml($newsletterButton);
+        $safeNewsletterSuccess = $this->escapeHtml($newsletterSuccess);
+
         $logoHtml = $logoUrl ? '<div class="logo"><img src="' . htmlspecialchars($logoUrl) . '" alt="AWA Motos"></div>' : '';
         $countdownHtml = ($showCountdown && $countdownDate) ? '<div id="countdown" class="countdown"></div>' : '';
         $countdownScript = ($showCountdown && $countdownDate) ? $this->getCountdownScript($countdownDate) : '';
-        $newsletterHtml = $showNewsletter ? $this->getNewsletterHtml($baseUrl, $newsletterTitle, $newsletterButton, $newsletterSuccess) : '';
+        $newsletterHtml = $showNewsletter ? $this->getNewsletterHtml($baseUrl, $safeNewsletterTitle, $safeNewsletterButton, $safeNewsletterSuccess, $newsletterButton, $newsletterSuccess) : '';
         $socialHtml = $showSocial ? $this->getSocialHtml($facebook, $instagram, $youtube, $whatsappSocial) : '';
         $contactHtml = $showContact ? $this->getContactHtml($phone, $whatsappContact, $email) : '';
         $videoHtml = ($bgType === 'video' && $bgVideo) ? $this->getVideoBackground($bgVideo) : '';
@@ -265,7 +271,7 @@ class MaintenanceCheck implements ObserverInterface
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
-    <title>{$title} | AWA Motos</title>
+    <title>{$safeTitle} | AWA Motos</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
@@ -464,7 +470,7 @@ class MaintenanceCheck implements ObserverInterface
     <div class="container">
         {$logoHtml}
         <div class="icon">{$icon}</div>
-        <div class="content">{$message}</div>
+        <div class="content">{$safeMessage}</div>
         {$countdownHtml}
         {$newsletterHtml}
         {$secretCodeHtml}
@@ -522,15 +528,18 @@ HTML;
         return '<div class="overlay"></div><video class="video-bg" autoplay muted loop playsinline><source src="' . htmlspecialchars($videoUrl) . '" type="video/mp4"></video>';
     }
 
-    private function getNewsletterHtml(string $baseUrl, string $title, string $button, string $successMsg): string
+    private function getNewsletterHtml(string $baseUrl, string $titleHtml, string $buttonHtml, string $successHtml, string $buttonRaw, string $successRaw): string
     {
         $actionUrl = $baseUrl . 'maintenance/newsletter/subscribe';
+        $actionUrlJs = json_encode($actionUrl, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?: '""';
+        $buttonJs = json_encode($buttonRaw, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?: '"Cadastrar"';
+        $successJs = json_encode($successRaw, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?: '""';
         return <<<HTML
 <div class="newsletter">
-    <h3>{$title}</h3>
+    <h3>{$titleHtml}</h3>
     <form class="newsletter-form" id="maintenance-newsletter">
         <input type="email" name="email" id="newsletter-email" placeholder="Seu melhor e-mail" required>
-        <button type="submit" id="newsletter-btn">{$button}</button>
+        <button type="submit" id="newsletter-btn">{$buttonHtml}</button>
     </form>
     <div class="newsletter-message" id="newsletter-msg"></div>
 </div>
@@ -546,14 +555,14 @@ document.getElementById('maintenance-newsletter').addEventListener('submit', fun
     msg.className = 'newsletter-message';
     msg.style.display = 'none';
 
-    fetch('{$actionUrl}', {
+    fetch({$actionUrlJs}, {
         method: 'POST',
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: 'email=' + encodeURIComponent(email)
     })
     .then(r => r.json())
     .then(data => {
-        msg.textContent = data.message || (data.success ? '✅ {$successMsg}' : '❌ Erro ao cadastrar.');
+        msg.textContent = data.message || (data.success ? '✅ ' + {$successJs} : '❌ Erro ao cadastrar.');
         msg.className = 'newsletter-message ' + (data.success ? 'success' : 'error');
         msg.style.display = 'block';
         if (data.success) document.getElementById('newsletter-email').value = '';
@@ -565,11 +574,23 @@ document.getElementById('maintenance-newsletter').addEventListener('submit', fun
     })
     .finally(() => {
         btn.disabled = false;
-        btn.textContent = '{$button}';
+        btn.textContent = {$buttonJs};
     });
 });
 </script>
 HTML;
+    }
+
+    private function escapeHtml(string $value): string
+    {
+        return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+    }
+
+    private function sanitizeMessage(?string $message): string
+    {
+        $message = strip_tags((string) $message);
+
+        return nl2br($this->escapeHtml($message));
     }
 
     private function getSecretCodeFormHtml(string $baseUrl): string

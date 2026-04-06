@@ -4,35 +4,25 @@ declare(strict_types=1);
 /**
  * AWA — Carregamento diferido de CSS de interação (não-bloqueante de render).
  *
- * Estes 5 arquivos são necessários apenas após interação do usuário:
+ * CSS Consolidation (2026-04 — Issue #5):
+ * 5 arquivos individuais mergeados em 1 bundle (awa-bundle-vendor-interaction.css):
  *  - mage/calendar.css     → datepicker (formulários com data)
  *  - jquery/uppy/…css      → file uploader (upload de imagens)
  *  - chosen.css            → dropdowns Chosen.js (filtros)
  *  - jquery.fancybox.css   → lightbox (galerias de imagem)
  *  - rokan_quickview.css   → modal QuickView (visualização rápida)
  *
+ * Economia: 5 requests → 1 request (-4 requests).
+ *
  * Estratégia: media="print" + onload="this.media='all'"
  * O browser faz o download sem bloquear render e aplica
  * o CSS assim que disponível — geralmente antes da primeira interação.
  *
  * <noscript> garante carregamento bloqueante como fallback sem JS.
- *
- * Removidos do head via <remove> em default_head_blocks.xml (2026-03-16).
  */
 
-$calendarUrl     = $block->getViewFileUrl('mage/calendar.css');
-$uppyUrl         = $block->getViewFileUrl('jquery/uppy/dist/uppy-custom.css');
-$chosenUrl       = $block->getViewFileUrl('Rokanthemes_RokanBase::css/chosen.css');
-$fancyboxUrl     = $block->getViewFileUrl('Rokanthemes_RokanBase::css/jquery.fancybox.css');
-$quickviewUrl    = $block->getViewFileUrl('Rokanthemes_QuickView::css/rokan_quickview.css');
-// suggestion.css removido: GrupoAwamotos_B2B desativado 2026-03-29
-
 $deferredFiles = [
-    $calendarUrl,
-    $uppyUrl,
-    $chosenUrl,
-    $fancyboxUrl,
-    $quickviewUrl,
+    $block->getViewFileUrl('css/awa-bundle-vendor-interaction.css'),
 ];
 ?>
 <?php foreach ($deferredFiles as $cssUrl): ?>

@@ -90,6 +90,39 @@ class ProductNameTitleCasePlugin
     }
 
     /**
+     * Transforma meta_title para Title Case quando ALL CAPS (PDP-001).
+     *
+     * O Magento usa getMetaTitle() para o <title> HTML do produto, com fallback para
+     * getName(). Se o ERP popula meta_title em ALL CAPS, o título da página fica em
+     * maiúsculas mesmo com o afterGetName() ativo.
+     *
+     * @param Product $subject
+     * @param string|null $result
+     * @return string|null
+     */
+    public function afterGetMetaTitle(Product $subject, ?string $result): ?string
+    {
+        if ($result === null || $result === '') {
+            return $result;
+        }
+
+        try {
+            $area = $this->appState->getAreaCode();
+            if ($area !== Area::AREA_FRONTEND) {
+                return $result;
+            }
+        } catch (\Exception) {
+            return $result;
+        }
+
+        if ($result !== mb_strtoupper($result, 'UTF-8')) {
+            return $result;
+        }
+
+        return $this->toTitleCase($result);
+    }
+
+    /**
      * Converte ALL CAPS para Title Case preservando abreviações.
      *
      * Regras:

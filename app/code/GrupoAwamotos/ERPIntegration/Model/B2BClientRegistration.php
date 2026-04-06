@@ -69,6 +69,36 @@ class B2BClientRegistration
     }
 
     /**
+     * Get all ERP client codes currently registered in Sectra validator.
+     *
+     * @return int[]
+     */
+    public function getRegisteredClientCodes(): array
+    {
+        try {
+            $rows = $this->readConnection->query(
+                "SELECT CHAVE FROM GR_INTEGRACAOVALIDADOR WHERE INTEGRACAOORIGEM = :origem",
+                [':origem' => self::ORIGEM_CLIENTE]
+            );
+
+            $codes = [];
+            foreach ($rows as $row) {
+                $code = (int) ($row['CHAVE'] ?? 0);
+                if ($code > 0) {
+                    $codes[$code] = true;
+                }
+            }
+
+            return array_map('intval', array_keys($codes));
+        } catch (\Exception $e) {
+            if ($this->shouldLogWarningWithCooldown('b2b_registered_codes_fetch')) {
+                $this->logger->warning('[B2B Registration] Failed to fetch registered client codes: ' . $e->getMessage());
+            }
+            return [];
+        }
+    }
+
+    /**
      * Register a client in Sectra B2B integration (GR_INTEGRACAOVALIDADOR)
      *
      * @return bool True if registered successfully, false otherwise

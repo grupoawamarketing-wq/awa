@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Customer Suggestions Template - Enhanced with Suggested Cart
  *
@@ -72,7 +74,7 @@ if (!empty($suggestedCart['sections'])) {
                 <span class="erp-summary-label">Pedidos</span>
             </div>
             <div class="erp-summary-item">
-                <span class="erp-summary-value"><?= $block->formatPrice((float)($summary['valor_total'] ?? 0)) ?></span>
+                <span class="erp-summary-value"><?= /* @noEscape */ $block->formatPrice((float)($summary['valor_total'] ?? 0)) ?></span>
                 <span class="erp-summary-label">Valor Total</span>
             </div>
             <div class="erp-summary-item">
@@ -80,7 +82,7 @@ if (!empty($suggestedCart['sections'])) {
                 <span class="erp-summary-label">Produtos Diferentes</span>
             </div>
             <div class="erp-summary-item">
-                <span class="erp-summary-value"><?= $block->formatErpDate($summary['ultima_compra'] ?? null) ?></span>
+                <span class="erp-summary-value"><?= /* @noEscape */ $block->formatErpDate($summary['ultima_compra'] ?? null) ?></span>
                 <span class="erp-summary-label">Última Compra</span>
             </div>
         </div>
@@ -202,7 +204,7 @@ if (!empty($suggestedCart['sections'])) {
             </div>
             <div class="erp-cart-summary-mini">
                 <span class="erp-cart-items"><?= (int)($suggestedCart['summary']['total_items'] ?? 0) ?> produtos</span>
-                <span class="erp-cart-total"><?= $block->formatPrice($suggestedCart['summary']['subtotal'] ?? 0) ?></span>
+                <span class="erp-cart-total"><?= /* @noEscape */ $block->formatPrice($suggestedCart['summary']['subtotal'] ?? 0) ?></span>
             </div>
         </div>
 
@@ -219,7 +221,7 @@ if (!empty($suggestedCart['sections'])) {
                         </div>
                     </div>
                     <div class="erp-section-subtotal">
-                        <?= $block->formatPrice($section['subtotal']) ?>
+                        <?= /* @noEscape */ $block->formatPrice($section['subtotal']) ?>
                     </div>
                 </div>
 
@@ -285,8 +287,8 @@ if (!empty($suggestedCart['sections'])) {
                                    data-original="<?= (int)$item['suggested_quantity'] ?>">
                         </div>
                         <div class="erp-item-price">
-                            <span class="erp-unit-price"><?= $block->formatPrice($item['unit_price']) ?></span>
-                            <span class="erp-line-total"><?= $block->formatPrice($item['line_total']) ?></span>
+                            <span class="erp-unit-price"><?= /* @noEscape */ $block->formatPrice($item['unit_price']) ?></span>
+                            <span class="erp-line-total"><?= /* @noEscape */ $block->formatPrice($item['line_total']) ?></span>
                         </div>
                         <div class="erp-item-actions">
                             <a href="<?= $block->escapeUrl($item['url'] ?? '#') ?>"
@@ -307,7 +309,7 @@ if (!empty($suggestedCart['sections'])) {
             <div class="erp-cart-totals">
                 <div class="erp-totals-row">
                     <span>Subtotal (<?= (int)$suggestedCart['summary']['total_items'] ?> itens)</span>
-                    <span class="erp-subtotal-value"><?= $block->formatPrice($suggestedCart['summary']['subtotal'] ?? 0) ?></span>
+                    <span class="erp-subtotal-value"><?= /* @noEscape */ $block->formatPrice($suggestedCart['summary']['subtotal'] ?? 0) ?></span>
                 </div>
                 <?php if (($suggestedCart['summary']['subtotal'] ?? 0) >= ($suggestedCart['summary']['free_shipping_threshold'] ?? 1500)): ?>
                 <div class="erp-totals-row erp-free-shipping">
@@ -316,12 +318,12 @@ if (!empty($suggestedCart['sections'])) {
                 </div>
                 <?php else: ?>
                 <div class="erp-totals-row erp-shipping-info">
-                    <span>Falta <?= $block->formatPrice(($suggestedCart['summary']['free_shipping_threshold'] ?? 1500) - ($suggestedCart['summary']['subtotal'] ?? 0)) ?> para frete grátis</span>
+                    <span>Falta <?= /* @noEscape */ $block->formatPrice(($suggestedCart['summary']['free_shipping_threshold'] ?? 1500) - ($suggestedCart['summary']['subtotal'] ?? 0)) ?> para frete grátis</span>
                 </div>
                 <?php endif; ?>
                 <div class="erp-totals-row erp-total-row">
                     <span>Total Estimado</span>
-                    <span class="erp-total-value"><?= $block->formatPrice(($suggestedCart['summary']['subtotal'] ?? 0) + ($suggestedCart['summary']['estimated_shipping'] ?? 0)) ?></span>
+                    <span class="erp-total-value"><?= /* @noEscape */ $block->formatPrice(($suggestedCart['summary']['subtotal'] ?? 0) + ($suggestedCart['summary']['estimated_shipping'] ?? 0)) ?></span>
                 </div>
             </div>
             <div class="erp-cart-actions">
@@ -364,14 +366,14 @@ if (!empty($suggestedCart['sections'])) {
                     <?php foreach ($lastOrders as $order): ?>
                     <tr>
                         <td><strong>#<?= $block->escapeHtml($order['pedido_id']) ?></strong></td>
-                        <td><?= $block->formatErpDate($order['data_pedido'] ?? null) ?></td>
+                        <td><?= /* @noEscape */ $block->formatErpDate($order['data_pedido'] ?? null) ?></td>
                         <td>
                             <span class="erp-status <?= $block->escapeHtmlAttr($block->getStatusClass($order['status'] ?? '')) ?>">
                                 <?= $block->escapeHtml($block->getStatusLabel($order['status'] ?? '')) ?>
                             </span>
                         </td>
                         <td><?= (int)($order['qtd_itens'] ?? 0) ?></td>
-                        <td><?= $block->formatPrice((float)($order['valor_total'] ?? 0)) ?></td>
+                        <td><?= /* @noEscape */ $block->formatPrice((float)($order['valor_total'] ?? 0)) ?></td>
                     </tr>
                     <?php endforeach; ?>
                 </tbody>

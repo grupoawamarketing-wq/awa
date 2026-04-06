@@ -104,6 +104,23 @@ define([
             return window.innerWidth >= desktopBreakpoint;
         }
 
+        function isHomeContext() {
+            var body = document.body;
+
+            if (!body) {
+                return false;
+            }
+
+            return body.classList.contains('cms-index-index') ||
+                body.classList.contains('cms-home') ||
+                body.classList.contains('cms-homepage_ayo_home5') ||
+                body.classList.contains('cms-homepage_ayo_home5_demo_stage');
+        }
+
+        function keepDesktopMenuExpanded() {
+            return isDesktopViewport() && isHomeContext();
+        }
+
         function setDesktopMenuVisibility(isVisible) {
             if (!$toggleMenu.length) {
                 return;
@@ -150,6 +167,7 @@ define([
             if (isDesktopViewport()) {
                 $toggleMenu.addClass('menu-open').stop(true, true);
                 setDesktopMenuVisibility(true);
+                $nav.addClass('awa-menu-expanded');
                 $title.addClass('active').attr('aria-expanded', 'true');
                 $('body').removeClass('background_shadow_show');
                 return;
@@ -165,6 +183,7 @@ define([
             if (isDesktopViewport()) {
                 $toggleMenu.removeClass('menu-open').stop(true, true);
                 setDesktopMenuVisibility(false);
+                $nav.removeClass('awa-menu-expanded');
                 $title.removeClass('active').attr('aria-expanded', 'false');
                 $('body').removeClass('background_shadow_show');
                 return;
@@ -186,11 +205,12 @@ define([
                 var $toggle = $item.children('.open-children-toggle');
 
                 if (!$toggle.length) {
-                    $item.append('<div class="open-children-toggle" role="button" aria-label="Expandir subcategorias" aria-expanded="false" tabindex="0" data-awa-vtoggle="1"></div>');
+                    $item.append('<div class="open-children-toggle navigation__toggle" role="button" aria-label="Expandir subcategorias" aria-expanded="false" tabindex="0" data-awa-vtoggle="1"></div>');
                     return;
                 }
 
                 $toggle
+                    .addClass('navigation__toggle')
                     .attr('role', 'button')
                     .attr('tabindex', '0')
                     .attr('aria-label', $toggle.attr('aria-label') || 'Expandir subcategorias')
@@ -329,11 +349,18 @@ define([
 
                 $toggleMenu.stop(true, true);
 
+                if (keepDesktopMenuExpanded()) {
+                    openMenu(false);
+                    return;
+                }
+
                 if (isMenuOpenState()) {
                     setDesktopMenuVisibility(true);
+                    $nav.addClass('awa-menu-expanded');
                     $title.addClass('active').attr('aria-expanded', 'true');
                 } else {
                     setDesktopMenuVisibility(false);
+                    $nav.removeClass('awa-menu-expanded');
                     $title.removeClass('active').attr('aria-expanded', 'false');
                 }
 
@@ -342,6 +369,7 @@ define([
             }
 
             clearDesktopMenuVisibility();
+            $nav.removeClass('awa-menu-expanded');
             $toggleMenu.removeClass('menu-open').hide();
             $title.removeClass('active').attr('aria-expanded', 'false');
             $('body').removeClass('background_shadow_show');
@@ -465,6 +493,11 @@ define([
         $title.on('click' + eventNamespace, function (event) {
             event.preventDefault();
 
+            if (keepDesktopMenuExpanded()) {
+                openMenu(false);
+                return;
+            }
+
             if (isMenuOpenState()) {
                 closeMenu();
                 return;
@@ -520,7 +553,20 @@ define([
                 return;
             }
 
+            if (keepDesktopMenuExpanded()) {
+                openMenu(false);
+                return;
+            }
+
             closeMenu();
+        });
+
+        $nav.on('focusin' + eventNamespace, function () {
+            if (!isDesktopViewport()) {
+                return;
+            }
+
+            openMenu(false);
         });
 
         $nav.on('focusout' + eventNamespace, function () {
@@ -536,6 +582,11 @@ define([
                     return;
                 }
 
+                if (keepDesktopMenuExpanded()) {
+                    openMenu(false);
+                    return;
+                }
+
                 closeMenu();
             }, 0);
         });
@@ -546,6 +597,11 @@ define([
             }
 
             if (!isDesktopViewport() && !isMenuOpenState()) {
+                return;
+            }
+
+            if (keepDesktopMenuExpanded()) {
+                openMenu(false);
                 return;
             }
 

@@ -13,7 +13,7 @@
 @import (once) '_z-index';
 
 /* AWA Professional Header — Tokenized Design System
-   
+
    Color tokens:
    - @awa-color-primary (#b73337) — brand red
    - @awa-color-primary-dark (#8e2629) — darker red
@@ -23,20 +23,20 @@
    - @awa-color-border (#e5e5e5) — dividers
    - @awa-color-bg-soft (#f7f7f7) — soft bg
    - @awa-neutral-* (scale) — grays
-   
+
    Spacing tokens:
    - @awa-space-* (4px to 64px rhythm)
    - @awa-gap-* (semantic gaps)
-   
+
    Radius tokens:
    - @awa-radius-* (4px to 9999px)
-   
+
    Z-index tokens:
    - @awa-z-dropdown (100) — select/autocomplete
    - @awa-z-sticky (200) — fixed header
    - @awa-z-modal (1000) — modals
    - @awa-z-alert (1100) — toasts
-   
+
    Focus/Accessibility:
    - @awa-focus-ring — WCAG AA ring
    - @awa-focus-ring-offset — space from element
@@ -47,7 +47,7 @@
     --awa-color-whatsapp: #1aa75b;
     --awa-color-whatsapp-dark: #128c4a;
     --awa-color-whatsapp-rgb: 37 211 102;
-    
+
     // ── Semantic aliases (map to canonical tokens) ──
     --awa-color-bg: var(--awa-color-white);
     --awa-color-text-secondary: @awa-neutral-600;
@@ -63,17 +63,20 @@
 
     /* 1. Utility Bar */
     .awa-utility-bar {
-        background: linear-gradient(180deg, @awa-color-bg-soft, @awa-color-white);
-        border-bottom: 1px solid fade(@awa-color-border, 90%);
+        background: var(--awa-bg-dark, #1a1a1a);
+        border-bottom: none;
         font-size: @awa-font-size-12;
-        font-weight: @awa-weight-medium;
-        color: @awa-neutral-600;
+        font-weight: @awa-weight-normal;
+        color: #cccccc;
 
         .awa-utility-bar__inner {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            min-height: @awa-space-9;
+            min-height: 36px;
+            height: 36px;
+            gap: @awa-space-3;
+            padding: 0;
         }
 
         .top-bar-left, .top-bar-right {
@@ -84,8 +87,95 @@
         }
 
         .top-bar-left {
+            flex: 1 1 auto;
             flex-wrap: wrap;
+            row-gap: @awa-space-1;
         }
+
+        .top-bar-right {
+            flex: 0 0 auto;
+            margin-left: auto;
+            white-space: nowrap;
+        }
+
+        // ── Balaroti-style contact links (dark bg) ──
+        .awa-topbar__contact-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #cccccc;
+            font-size: @awa-font-size-12;
+            font-weight: @awa-weight-normal;
+            text-decoration: none;
+            white-space: nowrap;
+            transition: color @awa-transition;
+
+            &:hover, &:focus-visible { color: #ffffff; text-decoration: none; }
+
+            &--whatsapp { color: #4dda85; }
+            &--whatsapp:hover, &--whatsapp:focus-visible { color: #80edb1; }
+
+            svg { flex-shrink: 0; stroke: currentColor; }
+        }
+
+        // ── Hours info (right side, dark bg) ──
+        .awa-topbar__hours-info {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            color: #999999;
+            font-size: @awa-font-size-12;
+            white-space: nowrap;
+            padding-right: @awa-space-3;
+            margin-right: @awa-space-1;
+            border-right: 1px solid #333333;
+
+            svg { flex-shrink: 0; stroke: currentColor; opacity: 0.7; }
+        }
+
+        // ── Account links on dark bg ──
+        .top-account ul.header.links > li > a,
+        .top-account ul.header.links > li > span {
+            background: transparent !important;
+            border-color: transparent !important;
+            box-shadow: none !important;
+            border-radius: 0 !important;
+            min-height: auto !important;
+            padding: 0 !important;
+            color: #cccccc !important;
+            font-size: @awa-font-size-12 !important;
+            font-weight: @awa-weight-normal !important;
+
+            &:hover, &:focus-visible {
+                background: transparent !important;
+                color: #ffffff !important;
+                text-decoration: underline !important;
+            }
+        }
+
+        // ── Hotline block on dark bg ──
+        .awa-topbar__hotline-wrap {
+            .whatsapp-hotline {
+                background: transparent !important;
+                border: none !important;
+                box-shadow: none !important;
+                min-height: auto !important;
+                padding: 0 !important;
+                color: #4dda85 !important;
+                font-size: @awa-font-size-12 !important;
+                gap: 6px !important;
+
+                &:hover { transform: none !important; color: #80edb1 !important; }
+                > i { color: #4dda85 !important; }
+            }
+            .hotline-label { display: none !important; }
+            .hotline-number { color: #4dda85 !important; font-size: @awa-font-size-12 !important; }
+        }
+
+        // ── Hidden legacy elements ──
+        .awa-topbar__trust-items--hidden,
+        .awa-topbar__contact-slot,
+        .awa-header-quote-cta { display: none !important; }
 
         .top-bar-left > * {
             display: inline-flex;
@@ -118,7 +208,7 @@
             &:hover {
                 color: @awa-color-primary;
             }
-            
+
             &:focus-visible {
                 color: @awa-color-primary;
                 outline: @awa-focus-ring;
@@ -176,9 +266,10 @@
 
     /* 2. Main Header (Logo, Search, Cart) */
     .awa-main-header {
-        padding: @awa-space-4 0;
+        padding: @awa-space-3 0; /* reduzido de space-4 (16px) → space-3 (12px) — header mais compacto */
         background-color: @awa-color-white;
-
+        border-bottom: 1px solid @awa-color-border;
+        min-height: 70px;
         .awa-main-header__inner {
             display: flex;
             align-items: center;
@@ -288,7 +379,7 @@
             .awa-header-contact-links__label {
                 display: block;
                 margin: 0;
-                color: var(--awa-color-text-secondary, #666666);
+                color: var(--awa-text-muted);
                 font-size: 12px;
                 font-weight: 700;
                 letter-spacing: 0.06em;
@@ -316,7 +407,7 @@
                 border-radius: 14px;
                 background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(247, 247, 247, 0.96));
                 box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
-                color: var(--awa-color-text-primary, #333333);
+                color: var(--awa-text);
                 font-size: 13px;
                 font-weight: 600;
                 line-height: 1;
@@ -371,7 +462,7 @@
                 border-radius: 14px;
                 background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(247, 247, 247, 0.96));
                 box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
-                color: var(--awa-color-text-primary, #333333);
+                color: var(--awa-text);
                 font-size: 13px;
                 font-weight: 600;
                 line-height: 1;
@@ -406,7 +497,7 @@
             }
 
             .hoteline_header .hotline-label {
-                color: var(--awa-color-text-secondary, #666666);
+                color: var(--awa-text-muted);
                 font-size: 12px;
                 font-weight: 700;
                 letter-spacing: 0.04em;
@@ -416,7 +507,7 @@
             }
 
             .hoteline_header .hotline-number {
-                color: var(--awa-color-text-primary, #333333);
+                color: var(--awa-text);
                 font-size: 13px;
                 font-weight: 700;
                 overflow: hidden;
@@ -578,8 +669,8 @@
         .awa-nav-bar__inner {
             display: flex !important;
             align-items: center !important;
-            min-height: @awa-space-9 !important;
-            height: @awa-space-9 !important;
+            min-height: 44px !important;
+            height: 44px !important;
             flex-wrap: nowrap;
             gap: @awa-gap-md;
         }
@@ -653,21 +744,21 @@
 
                             > a {
                             color: var(--awa-color-button-text, #fff) !important;
-                            font-weight: 600 !important;
-                            font-size: 14px !important;
-                            padding: 0 20px !important;
+                            font-weight: 500 !important;
+                            font-size: 13px !important;
+                            padding: 0 16px !important;
                             height: 100%;
                             display: flex;
                             align-items: center;
-                            text-transform: uppercase !important;
-                            letter-spacing: 0.5px;
-                            transition: background 0.2s, color 0.2s;
+                            text-transform: none !important;
+                            letter-spacing: normal;
+                            transition: background 0.15s ease, color 0.15s ease;
                             border: none !important;
                             border-radius: 0 !important;
                             background: transparent !important;
 
                             &:hover, &:focus-visible {
-                                background: rgba(0,0,0,0.1) !important;
+                                background: var(--awa-primary-hover, @awa-color-primary-dark) !important;
                                 text-decoration: none;
                             }
                         }
@@ -722,7 +813,7 @@
                     margin-top: 8px;
                     border: 1px solid rgba(229, 229, 229, 0.95);
                     border-radius: 14px;
-                    background: #fff;
+                    background: var(--awa-bg);
                     box-shadow: 0 16px 32px rgba(15, 23, 42, 0.12);
                     overflow: hidden;
                 }
@@ -730,7 +821,7 @@
                 .mage-dropdown-dialog a,
                 .dropdown.switcher-dropdown a,
                 .switcher-dropdown a {
-                    color: var(--awa-color-text-primary, #333333);
+                    color: var(--awa-text);
                 }
 
                 .mage-dropdown-dialog li,
@@ -793,7 +884,7 @@
         }
 
         .awa-main-header {
-            padding: var(--awa-space-3) 0;
+            padding: 10px 0; /* mobile: 10px (era 12px) — mais espaço acima do fold */
 
             .awa-main-header__inner {
                 display: flex;
@@ -878,9 +969,9 @@
     }
 }
 
-/* ── CTA "Solicitar Orçamento" — utility bar left slot ──────────────────────
+/* ── CTA "Solicitar Orçamento" — utility bar left slot (clean redesign) ────
    Scope: .top-bar-left (actual HTML class in header.phtml).
-   NOTE: .awa-utility-bar is not on the rendered element — scoped here to match DOM.
+   On white bg: outline style, subtle, not attention-grabbing.
    ─────────────────────────────────────────────────────────────────────────── */
 .awa-site-header.awa-header-professional .top-bar-left .awa-header-quote-cta {
     display: inline-flex;
@@ -888,29 +979,28 @@
     justify-content: center;
     min-height: 24px;
     padding: 0 @awa-space-3;
-    background: @awa-color-primary;
-    color: @awa-color-button-text !important;
-    font-size: 11px;
+    background: transparent;
+    color: @awa-color-primary !important;
+    font-size: @awa-font-size-11;
     font-weight: @awa-weight-semibold;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    border-radius: @awa-radius-full;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    border: 1px solid fade(@awa-color-primary, 30%);
+    border-radius: @awa-radius-sm;
     white-space: nowrap;
     text-decoration: none !important;
-    transition: background-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
-    box-shadow: 0 2px 8px fade(@awa-color-primary, 30%);
+    transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease;
 
     &:hover,
     &:focus-visible {
-        background: @awa-color-primary-dark !important;
-        color: @awa-color-button-text !important;
-        box-shadow: 0 4px 14px fade(@awa-color-primary, 40%);
-        transform: translateY(-1px);
+        background: fade(@awa-color-primary, 8%) !important;
+        border-color: @awa-color-primary !important;
+        color: @awa-color-primary-dark !important;
         text-decoration: none !important;
     }
 
     &:focus-visible {
-        outline: 2px solid @awa-color-primary-dark;
+        outline: 2px solid @awa-color-primary;
         outline-offset: 2px;
     }
 }
@@ -929,8 +1019,7 @@
     box-shadow: 0 2px 12px fade(@awa-neutral-900, 8%);
 
     .awa-main-header {
-        padding-top: @awa-space-2;
-        padding-bottom: @awa-space-2;
+        padding-block: @awa-space-2; /* simplificado para padding-block (equivalente a top+bottom: 8px) */
 
         .awa-header-brand .logo img {
             max-height: 44px;
@@ -974,5 +1063,574 @@
 
     .awa-site-header.awa-header-exp-b #awa-primary-navigation.awa-header-primary-nav.is-awa-mobile-open {
         transition: none;
+    }
+}
+
+/* ==========================================================================
+   AWA HEADER — ADVANCED REFINEMENTS
+   Adicionado em 2026-03-31
+
+   Refinamentos sem alterar comportamento existente:
+     6. Mega Menu Dropdown — animação de entrada + grid de colunas
+     7. Minicart Flyout — slide da direita, 380px, full-width CTA
+     8. Sticky Header — transição suave no .awa-main-header
+   ========================================================================== */
+
+/* ── 6. Mega Menu Dropdown — Entry animation + column grid ─────────────────
+   Funciona sobre o toggle display:block do Rokanthemes CustomMenu.
+   @keyframes no nível raiz para compatibilidade com compiladores LESS.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+@keyframes awa-dropdown-enter {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Dropdown: override box-shadow para spec exata + animação de entrada */
+body .page-wrapper .custommenu .level0 > .submenu,
+body .page-wrapper .custommenu .level0 > .groupmenu {
+    box-shadow: 0 16px 32px rgba(0, 0, 0, .12) !important;
+    border-radius: 0 0 8px 8px !important;
+}
+
+body .page-wrapper .navigation:not(.verticalmenu) > ul > li:hover > .submenu,
+body .page-wrapper .navigation:not(.verticalmenu) > ul > li:focus-within > .submenu,
+body .page-wrapper .custommenu > ul > li:hover > .submenu,
+body .page-wrapper .custommenu > ul > li:hover > .groupmenu,
+body .page-wrapper .custommenu > ul > li:focus-within > .submenu,
+body .page-wrapper .custommenu > ul > li:focus-within > .groupmenu {
+    animation: awa-dropdown-enter 180ms ease forwards;
+}
+
+/* Colunas: grid responsivo 3-4 colunas no groupmenu (mega menu) */
+body .page-wrapper .custommenu .level0 > .groupmenu {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: @awa-space-6;
+    padding: @awa-space-6 !important;
+}
+
+@media (min-width: 1200px) {
+    body .page-wrapper .custommenu .level0 > .groupmenu {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+/* Títulos de coluna em vermelho */
+body .page-wrapper .custommenu .groupmenu .aw-column-title,
+body .page-wrapper .custommenu .groupmenu .column-title,
+body .page-wrapper .custommenu .groupmenu .menu-group-title,
+body .page-wrapper .custommenu .groupmenu .group-title,
+body .page-wrapper .custommenu .submenu  .aw-column-title,
+body .page-wrapper .custommenu .submenu  .column-title,
+body .page-wrapper .custommenu .submenu  .menu-group-title {
+    color: @awa-color-primary !important;
+    font-size: 11px;
+    font-weight: @awa-weight-bold;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    margin-bottom: @awa-space-3 !important;
+    padding-bottom: @awa-space-2 !important;
+    border-bottom: 1px solid @awa-color-border;
+    display: block;
+}
+
+/* Imagem em destaque na última coluna (promo) */
+body .page-wrapper .custommenu .submenu  .mega-promo,
+body .page-wrapper .custommenu .groupmenu .mega-promo {
+    border-radius: @awa-radius-sm;
+    overflow: hidden;
+    position: relative;
+
+    a { display: block; }
+
+    img {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+        border-radius: @awa-radius-sm;
+        transition: transform 220ms ease;
+    }
+
+    &:hover img {
+        transform: scale(1.04);
+    }
+
+    .mega-promo__label {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        margin-top: @awa-space-2;
+        padding: 3px 10px;
+        background: @awa-color-primary;
+        color: @awa-color-button-text;
+        font-size: 10px;
+        font-weight: @awa-weight-bold;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        border-radius: @awa-radius-full;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body .page-wrapper .custommenu > ul > li:hover > .submenu,
+    body .page-wrapper .custommenu > ul > li:hover > .groupmenu {
+        animation: none;
+    }
+    body .page-wrapper .custommenu .groupmenu .mega-promo img {
+        transition: none;
+    }
+}
+
+/* ── 7. Minicart Flyout — Fixed, 380px, slide da direita ────────────────────
+   Substitui o dropdown absoluto padrão por um painel lateral fixo.
+   Ativação via .block-minicart._active (Magento dropdown widget).
+   ─────────────────────────────────────────────────────────────────────────── */
+
+@keyframes awa-minicart-slide-in {
+    from {
+        transform: translateX(100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+@keyframes awa-minicart-backdrop-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* Backdrop overlay (pseudo-element no minicart-wrapper quando ativo) */
+body .page-wrapper .minicart-wrapper .block-minicart::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background: rgba(15, 23, 42, .45);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 280ms ease;
+}
+
+body .page-wrapper .minicart-wrapper .block-minicart._active::before {
+    opacity: 1;
+    pointer-events: auto;
+    animation: awa-minicart-backdrop-in 280ms ease forwards;
+}
+
+/* O painel flyout */
+body .page-wrapper .minicart-wrapper .block-minicart._active {
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    left: auto !important;
+    width: ~"min(380px, 94vw)" !important;
+    max-width: ~"min(380px, 94vw)" !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    border-radius: 0 !important;
+    border-top: none !important;
+    border-right: none !important;
+    border-left: 1px solid @awa-color-border !important;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    box-shadow: -8px 0 32px rgba(15, 23, 42, .14) !important;
+    z-index: @awa-z-modal !important;
+    display: flex !important;
+    flex-direction: column;
+    animation: awa-minicart-slide-in 280ms cubic-bezier(.22, .61, .36, 1) forwards;
+    padding: 0 !important;
+}
+
+/* Header do flyout */
+body .page-wrapper .block-minicart._active .block-title {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: @awa-color-white;
+    border-bottom: 1px solid @awa-color-border;
+    padding: @awa-space-5 @awa-space-6 !important;
+    margin: 0 !important;
+    font-size: @awa-font-size-16;
+    font-weight: @awa-weight-bold;
+    text-transform: none !important;
+}
+
+/* Conteúdo scrollável */
+body .page-wrapper .block-minicart._active .block-content {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: @awa-space-4 @awa-space-6;
+}
+
+/* Item: imagem 64px */
+body .page-wrapper .block-minicart._active .product-image-container {
+    flex: 0 0 64px !important;
+    width: 64px !important;
+    height: 64px !important;
+}
+
+/* Footer sticky com subtotal + CTA */
+body .page-wrapper .block-minicart._active .items-total,
+body .page-wrapper .block-minicart._active .subtotal {
+    background: @awa-color-bg-soft;
+}
+
+body .page-wrapper .block-minicart._active .actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    background: @awa-color-white;
+    border-top: 1px solid @awa-color-border;
+    padding: @awa-space-4 @awa-space-6 ~"calc(var(--awa-space-4, 16px) + env(safe-area-inset-bottom))";
+    margin: 0;
+}
+
+body .page-wrapper .block-minicart._active .action.primary.checkout {
+    display: flex !important;
+    width: 100% !important;
+    justify-content: center !important;
+    align-items: center !important;
+    min-height: 52px !important;
+    font-size: @awa-font-size-15 !important;
+    font-weight: @awa-weight-bold !important;
+    border-radius: @awa-radius-md !important;
+    background: @awa-color-primary !important;
+    color: @awa-color-button-text !important;
+    box-shadow: 0 4px 16px fade(@awa-color-primary, 32%) !important;
+    transition: background-color 180ms ease, box-shadow 180ms ease, transform 120ms ease !important;
+}
+
+body .page-wrapper .block-minicart._active .action.primary.checkout:hover {
+    background: @awa-color-primary-dark !important;
+    box-shadow: 0 6px 20px fade(@awa-color-primary, 42%) !important;
+    transform: translateY(-1px) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body .page-wrapper .minicart-wrapper .block-minicart._active {
+        animation: none;
+    }
+    body .page-wrapper .minicart-wrapper .block-minicart._active .action.primary.checkout {
+        transition: none !important;
+    }
+}
+
+/* ── 8. Sticky Header — transição suave no .awa-main-header ─────────────────
+   Certifica que o padding animation ao condensar ocorre com ease smooth.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.awa-site-header.awa-header-professional .awa-main-header {
+    transition: padding-block 220ms ease; /* simplificado para padding-block */
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .awa-site-header.awa-header-professional .awa-main-header {
+        transition: none;
+    }
+}
+
+/* ==========================================================================
+   AWA HEADER — REFINEMENTS FASE 2  (2026-03-31)
+   Fixes + visual upgrades sobre a base existente.
+   ========================================================================== */
+
+/* ── FIX 1: Header-wrapper-sticky white-box leak ────────────────────────────
+   O .header-wrapper-sticky fica visível como caixa branca dentro da nav bar escura.
+   Corrige tornando-o transparente e escondendo seus filhos fora do estado sticky.
+   ─────────────────────────────────────────────────────────────────────────── */
+body .page-wrapper .awa-site-header .awa-nav-bar .header-wrapper-sticky {
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    min-height: 0 !important;
+    height: auto !important;
+}
+
+/* Oculta conteúdo do sticky wrapper quando NÃO é sticky — evita branco */
+body .page-wrapper .awa-site-header .awa-nav-bar .header-wrapper-sticky:not(.awa-header-condensed):not(.sticky-activated) .container-header-sticky {
+    display: none !important;
+}
+
+/* Quando sticky está ativado, mostra o conteúdo corretamente */
+body .page-wrapper .awa-site-header.awa-header-condensed .awa-nav-bar .header-wrapper-sticky .container-header-sticky {
+    display: flex !important;
+    align-items: center;
+    gap: @awa-gap-md;
+}
+
+/* ── FIX 2: Utility bar — clean/clear redesign ───────────────────────────────
+   O tema pai sobrescreve com seletor de alta especificidade.
+   Atualizado 2026-04-01: AWA red-dark → fundo branco limpo, texto neutro.
+   ─────────────────────────────────────────────────────────────────────────── */
+body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar,
+body .page-wrapper .awa-site-header.awa-header-professional .top-header.awa-utility-bar {
+    background: @awa-color-white !important;
+    border-bottom: 1px solid @awa-color-border !important;
+    color: @awa-neutral-600 !important;
+    font-size: @awa-font-size-11 !important;
+    font-weight: @awa-weight-medium !important;
+    line-height: 1.35;
+
+    .awa-utility-bar__inner {
+        min-height: 34px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: @awa-space-3;
+        padding-top: 2px;
+        padding-bottom: 2px;
+    }
+
+    .top-bar-left {
+        flex: 1 1 auto;
+        min-width: 0;
+        row-gap: @awa-space-1;
+    }
+
+    .top-bar-right {
+        flex: 0 0 auto;
+        margin-left: auto;
+        white-space: nowrap;
+    }
+
+    // Textos
+    p, span, strong {
+        color: @awa-neutral-500 !important;
+        margin: 0;
+    }
+
+    // Links normais na utility bar
+    a:not(.awa-header-quote-cta) {
+        color: @awa-neutral-500 !important;
+        text-decoration: none;
+        &:hover, &:focus-visible {
+            color: @awa-color-primary !important;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+    }
+
+    // Ícones FA — discretos
+    .topbar-info > i {
+        color: @awa-neutral-400 !important;
+        font-size: 10px;
+        opacity: 0.7;
+    }
+
+    // Separador clean entre itens
+    .separator {
+        color: @awa-color-border !important;
+        font-size: 8px;
+        user-select: none;
+    }
+
+    // Icones SVG inline
+    svg {
+        color: @awa-neutral-400 !important;
+        fill: currentColor;
+    }
+}
+
+@media (min-width: 1024px) and (max-width: 1279px) {
+    body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar .awa-utility-bar__inner {
+        gap: @awa-space-2;
+    }
+
+    body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar .top-bar-left {
+        gap: @awa-space-2 !important;
+    }
+}
+
+/* ── IMPROVEMENT 3: Nav bar — item hover com bottom-border indicator ─────────
+   Troca background escuro por underline AWA vermelho — mais B2B premium.
+   ─────────────────────────────────────────────────────────────────────────── */
+body .page-wrapper .awa-site-header.awa-header-professional .awa-nav-bar {
+    .awa-header-primary-nav .top-menu > ul > li {
+        position: relative;
+
+        &::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            right: 50%;
+            height: 2px;
+            background: @awa-color-white;
+            opacity: 0;
+            transition: left 180ms ease, right 180ms ease, opacity 180ms ease;
+        }
+
+        > a:hover,
+        > a:focus-visible,
+        &:hover > a,
+        &.active > a {
+            background: transparent !important;
+        }
+
+        &:hover::after,
+        &.active::after,
+        &:focus-within::after {
+            left: 12px;
+            right: 12px;
+            opacity: 1;
+        }
+    }
+}
+
+/* ── IMPROVEMENT 4: Conta / login area ──────────────────────────────────────
+   "Para ver os preços faça o Entrar ou cadastre-se" — layout mais polido.
+   ─────────────────────────────────────────────────────────────────────────── */
+body .page-wrapper .awa-site-header.awa-header-professional {
+    .awa-header-right-col .awa-header-contact-slot {
+        // Slot com conta/login
+        .customer-welcome,
+        .customer-name,
+        [data-block='customer-welcome'] {
+            display: flex;
+            align-items: center;
+            gap: @awa-gap-sm;
+        }
+    }
+
+    // Account icon + text wrapper (rendered by Magento top.links)
+    .top-account a.authorization-link,
+    .top-account a[href*='login'],
+    .top-account a[href*='account'] {
+        border-radius: @awa-radius-full !important;
+        border: 1px solid @awa-color-border !important;
+        background: @awa-color-bg-soft !important;
+        color: @awa-color-text-primary !important;
+        font-size: @awa-font-size-13 !important;
+        font-weight: @awa-weight-medium !important;
+        padding: 0 @awa-space-3 !important;
+        min-height: @awa-control-height-sm !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: @awa-gap-xs !important;
+        white-space: nowrap;
+        transition: background-color 150ms ease, border-color 150ms ease, box-shadow 150ms ease !important;
+
+        &:hover, &:focus-visible {
+            background: @awa-color-white !important;
+            border-color: fade(@awa-color-primary, 30%) !important;
+            color: @awa-color-primary !important;
+            box-shadow: 0 4px 12px fade(@awa-color-primary, 12%) !important;
+        }
+    }
+
+    // "Entrar" link na utility bar (top.links)
+    .top-account .header.links a {
+        min-height: @awa-control-height-sm !important;
+    }
+}
+
+/* ── IMPROVEMENT 5: Categories button — refinamento visual ───────────────────
+   Botão "Todas as categorias" fica mais limpo com ícone alinhado.
+   ─────────────────────────────────────────────────────────────────────────── */
+body .page-wrapper .awa-site-header.awa-header-professional .awa-nav-bar .awa-header-categories {
+    // Remove todo o background extra do wrapper
+    background: transparent !important;
+    padding: 0 !important;
+
+    .title-category-dropdown {
+        background: fade(@awa-color-white, 10%) !important;
+        border-right: 1px solid fade(@awa-color-white, 12%);
+        padding: 0 @awa-space-5 !important;
+        font-size: @awa-font-size-14 !important;
+        font-weight: @awa-weight-semibold !important;
+        letter-spacing: 0.02em;
+        transition: background-color 150ms ease !important;
+        border-radius: 0 !important;
+        height: 100%;
+
+        .icon-menu {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+
+        &:hover {
+            background: fade(@awa-color-white, 18%) !important;
+        }
+    }
+}
+
+/* ── IMPROVEMENT 6: Main header — sombra inferior mais premium ───────────────
+   Separador suave entre header e conteúdo.
+   ─────────────────────────────────────────────────────────────────────────── */
+body .page-wrapper .awa-site-header.awa-header-professional {
+    box-shadow: 0 1px 0 @awa-color-border, 0 4px 20px fade(@awa-neutral-900, 4%);
+}
+
+/* ── IMPROVEMENT 7: Account block right-side — "Para ver os preços" ──────────
+   The Rokanthemes block renders with specific DOM — ensure it looks polished.
+   ─────────────────────────────────────────────────────────────────────────── */
+body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
+    // Conta + minicart right column wrapper
+    .awa-header-right-col {
+        background: transparent;
+    }
+
+    // Bloco da conta Rokanthemes
+    .awa-header-right-col .top-account,
+    .awa-header-right-col .header-control-account {
+        display: flex;
+        align-items: center;
+        gap: @awa-gap-sm;
+        font-size: @awa-font-size-13;
+        color: @awa-neutral-600;
+        white-space: nowrap;
+
+        strong { font-weight: @awa-weight-semibold; }
+
+        a {
+            color: @awa-color-primary;
+            font-weight: @awa-weight-semibold;
+            transition: color 150ms ease;
+            &:hover { color: @awa-color-primary-dark; }
+        }
+
+        // Separador "ou"
+        span.delimiter {
+            color: @awa-neutral-400;
+        }
+    }
+}
+
+/* ── IMPROVEMENT 8: Utility bar — CTA "Solicitar Orçamento" (clean design) ──
+   Subtle outline on white bg. No longer needs dark-bg visibility fix.
+   ─────────────────────────────────────────────────────────────────────────── */
+body .page-wrapper .awa-site-header.awa-header-professional .top-bar-left .awa-header-quote-cta {
+    background: transparent !important;
+    color: @awa-color-primary !important;
+    border: 1px solid fade(@awa-color-primary, 30%) !important;
+    font-size: @awa-font-size-11 !important;
+
+    &:hover, &:focus-visible {
+        background: fade(@awa-color-primary, 8%) !important;
+        border-color: @awa-color-primary !important;
+        color: @awa-color-primary-dark !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body .page-wrapper .awa-site-header.awa-header-professional .awa-nav-bar .awa-header-primary-nav .top-menu > ul > li::after {
+        transition: none;
+    }
+    body .page-wrapper .awa-site-header.awa-header-professional .top-account a {
+        transition: none !important;
     }
 }

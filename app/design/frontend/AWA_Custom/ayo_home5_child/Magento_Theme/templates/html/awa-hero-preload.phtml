@@ -31,15 +31,21 @@ $mobileSrc   = $block->escapeUrl($baseUrl . $mediaPath . 'slider_005_mobile.jpg'
 ?>
 <!--
     AWA Hero LCP Preload — homepage only
-    type="image/webp": apenas browsers com suporte a WebP farão este preload (~97% dos usuários).
-    Browsers sem WebP ignoram este link e carregarão o JPEG via <picture><img src="...jpg">.
-    imagesrcset: o browser baixa a versão mobile em telas <768px
-    fetchpriority=high: sinal explícito para o browser priorizar o LCP vs outros recursos
+    Dois <link> separados por media query (em vez de imagesrcset + imagesizes) para
+    evitar o warning "preloaded but not used" causado por incompatibilidade de
+    descritores de largura entre o preload e os <source> do <picture> no slider.
+    type="image/webp": apenas browsers com suporte a WebP farão este preload (~97%).
+    fetchpriority=high: sinal explícito para o browser priorizar o LCP.
 -->
 <link rel="preload"
       as="image"
       type="image/webp"
       fetchpriority="high"
-      imagesrcset="<?= /* @noEscape */ $mobileWebp ?> 768w, <?= /* @noEscape */ $desktopWebp ?> 1920w"
-      imagesizes="100vw"
+      media="(min-width: 768px)"
       href="<?= /* @noEscape */ $desktopWebp ?>"/>
+<link rel="preload"
+      as="image"
+      type="image/webp"
+      fetchpriority="high"
+      media="(max-width: 767px)"
+      href="<?= /* @noEscape */ $mobileWebp ?>"/>

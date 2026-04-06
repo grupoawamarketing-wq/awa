@@ -1,8 +1,8 @@
 <?php
+declare(strict_types=1);
+
 /**
- * Template de Social Proof para página de produto
- * 
- * @var $block \GrupoAwamotos\SocialProof\Block\ProductInfo
+ * @var \GrupoAwamotos\SocialProof\Block\ProductInfo $block
  */
 $viewsToday = $block->getViewsToday();
 $isBestSeller = $block->isBestSeller();
@@ -12,31 +12,32 @@ $stockQty = $block->getStockQty();
 
 <?php if ($viewsToday > 0 || $isBestSeller || $isLowStock): ?>
 <div class="product-social-proof">
-    
+
     <?php if ($isBestSeller): ?>
     <div class="social-proof-badge badge-bestseller">
-        <i class="fa fa-fire"></i>
-        <strong>MAIS VENDIDO</strong>
+        <i class="fa fa-fire" aria-hidden="true"></i>
+        <strong><?= $block->escapeHtml(__('Mais Vendido')) ?></strong>
     </div>
     <?php endif; ?>
-    
+
     <?php if ($viewsToday > 0): ?>
     <div class="social-proof-item views-counter">
-        <i class="fa fa-eye"></i>
+        <i class="fa fa-eye" aria-hidden="true"></i>
         <span class="social-proof-text">
-            <strong><?= (int)$viewsToday ?></strong> pessoas visualizaram este produto hoje
+            <?= $block->escapeHtml(__('%1 pessoas visualizaram este produto hoje', (int)$viewsToday)) ?>
         </span>
     </div>
     <?php endif; ?>
-    
+
     <?php if ($isLowStock && $stockQty > 0): ?>
     <div class="social-proof-item stock-urgency">
-        <i class="fa fa-exclamation-triangle"></i>
+        <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
         <span class="social-proof-text urgency-text">
-            <strong>Últimas <?= (int)$stockQty ?> unidades</strong> em estoque
+            <strong><?= $block->escapeHtml(__('Últimas %1 unidades', (int)$stockQty)) ?></strong>
+            <?= $block->escapeHtml(__('em estoque')) ?>
         </span>
     </div>
     <?php endif; ?>
-    
+
 </div>
 <?php endif; ?>

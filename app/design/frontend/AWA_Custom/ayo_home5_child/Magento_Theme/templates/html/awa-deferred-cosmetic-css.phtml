@@ -4,28 +4,19 @@ declare(strict_types=1);
 /**
  * AWA — Carregamento diferido de CSS cosmético/decorativo (não-bloqueante).
  *
- * Consolidado em 2 bundles (2026-03-24, CSS Bundles Consolidation):
- *  - awa-bundle-cosmetic.css      → 6 arquivos globais consolidados (6 requests → 1)
- *      (brand-lock, brand-lock-strict, qa-accessibility-safe,
- *       b2b-gate-enterprise, typography-best-practices, ui-ux-polish-2026)
- *  - awa-bundle-cosmetic-home.css → 2 arquivos homepage consolidados (2 requests → 1)
- *      (home-safe-refine, brand-lock-strict-home)
- *
- * Estratégia: media="print" + onload="this.media='all'" → download não-bloqueante,
- * aplica CSS assim que disponível (tipicamente <100ms após FCP).
+ * CSS Consolidation (2026-04 — Issue #5):
+ * awa-bundle-cosmetic.css mergeado em awa-bundle-tail.css (carregado via awa-head-preload.phtml).
+ * Este template agora carrega APENAS o bundle homepage-only (awa-bundle-cosmetic-home.css),
+ * condicionalmente na cms_index_index.
  *
  * Fontes individuais preservadas em web/css/ para manutenção.
- * Para atualizar: edite as fontes, recompile os bundles (cat + cleancss -O 1).
  */
 
 /** @var \Magento\Framework\View\Element\Template $block */
 
-// 1 request em vez de 6: economiza 5 round-trips para CSS não-crítico
-$deferredFiles = [
-    $block->getViewFileUrl('css/awa-bundle-cosmetic.css'),
-];
+$deferredFiles = [];
 
-// Homepage-only: 1 request em vez de 2 (home-safe-refine + brand-lock-strict-home)
+// Homepage-only: home-safe-refine + brand-lock-strict-home
 if (in_array('cms_index_index', $block->getLayout()->getUpdate()->getHandles(), true)) {
     $deferredFiles[] = $block->getViewFileUrl('css/awa-bundle-cosmetic-home.css');
 }

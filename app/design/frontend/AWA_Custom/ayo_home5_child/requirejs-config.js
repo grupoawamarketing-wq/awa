@@ -22,7 +22,10 @@ var config = {
         'js/rokanthemes-owl-element-init': 'js/rokanthemes-owl-element-init.min',
         'js/superdeals-swiper-init': 'js/superdeals-swiper-init.min',
         'js/owl-carousel-init': 'js/owl-carousel-init.min',
-        'js/vertical-menu-init': 'js/vertical-menu-init.min',
+        // Home category carousel usa fonte não-minificada para manter paridade com a versão auditada.
+        'js/awa-home-category-carousel': 'js/awa-home-category-carousel',
+        // Hotfix Ayo VM: usar fonte para evitar descompasso com artefato minificado legado.
+        'js/vertical-menu-init': 'js/vertical-menu-init',
         'js/jquery-andself-compat': 'js/jquery-andself-compat.min',
         // Sticky header — non-minified until terser build step is added
         'awa-header-sticky': 'js/awa-header-sticky',

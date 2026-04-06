@@ -1,6 +1,6 @@
 ---
 name: skilawa
-description: Skill especializada em módulos AWA Motos (GrupoAwamotos) para Magento 2. Use ao criar, editar ou debugar módulos customizados, integrar ERP, configurar B2B, fitment de peças, ou customizar tema Ayo.
+description: "Skill especializada em módulos AWA Motos (GrupoAwamotos) para Magento 2. Use quando: criar novo módulo Magento, editar módulo existente, debugar módulo customizado, integrar com ERP via SQL Server, configurar sistema B2B (aprovação CNPJ, grupos Atacado/VIP/Revendedor, cotações), implementar fitment de peças por modelo de moto, customizar tema Ayo/Rokanthemes, criar Observer/Plugin/Cron, implementar CLI command, criar CRUD admin, criar Repository/Model/Api, configurar db_schema.xml, resolver erros de DI compile, ou qualquer tarefa que envolva app/code/GrupoAwamotos."
 ---
 
 # AWA Motos — Skill de Desenvolvimento Magento 2

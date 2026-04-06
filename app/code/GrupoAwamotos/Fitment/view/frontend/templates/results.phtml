@@ -1,17 +1,39 @@
-<?php /** @var $block \Magento\Framework\View\Element\Template */ ?>
+<?php
+/** @var $block \Magento\Framework\View\Element\Template */
+declare(strict_types=1);
+
+$viewDetailsLabel = __('Ver detalhes');
+$soldOutLabel = __('Produto esgotado');
+?>
 <div class="fitment-results">
     <h2><?= __('Resultados da Busca por Moto') ?></h2>
     <?php $collection = $block->getData('fitment_collection'); ?>
-    <?php if(!$collection || !$collection->getSize()): ?>
+    <?php if (!$collection || !$collection->getSize()): ?>
         <p><?= __('Nenhum produto encontrado com os critérios informados.') ?></p>
     <?php else: ?>
         <ul class="products-grid">
-            <?php foreach($collection as $product): ?>
+            <?php foreach ($collection as $product): ?>
+                <?php
+                $productUrl = $block->getUrl('catalog/product/view', ['id' => (int) $product->getId()]);
+                $finalPrice = (float) $product->getFinalPrice();
+                $formattedPrice = 'R$ ' . number_format($finalPrice, 2, ',', '.');
+                ?>
                 <li class="item">
-                    <a href="<?= $block->getUrl('catalog/product/view', ['id'=>$product->getId()]) ?>">
+                    <a href="<?= $block->escapeUrl($productUrl) ?>"
+                       title="<?= $block->escapeHtmlAttr($product->getName()) ?>">
                         <span class="name"><?= $block->escapeHtml($product->getName()) ?></span>
                     </a>
-                    <span class="price"><?= $block->escapeHtml($product->getFinalPrice()) ?></span>
+                    <span class="price"><?= $block->escapeHtml($formattedPrice) ?></span>
+                    <div class="product-actions">
+                        <a class="action primary" href="<?= $block->escapeUrl($productUrl) ?>">
+                            <span><?= $block->escapeHtml($viewDetailsLabel) ?></span>
+                        </a>
+                    </div>
+                    <?php if (!$product->isSaleable()): ?>
+                        <div class="stock unavailable" aria-live="polite">
+                            <span><?= $block->escapeHtml($soldOutLabel) ?></span>
+                        </div>
+                    <?php endif; ?>
                 </li>
             <?php endforeach; ?>
         </ul>

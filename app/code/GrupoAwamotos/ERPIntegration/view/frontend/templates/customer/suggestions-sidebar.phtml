@@ -4,6 +4,7 @@
  *
  * @var \GrupoAwamotos\ERPIntegration\Block\Customer\Suggestions $block
  */
+declare(strict_types=1);
 
 if (!$block->isEnabled() || !$block->isLoggedIn()) {
     return;
@@ -27,6 +28,9 @@ $items = array_slice($reorderItems, 0, 3);
 if (empty($items)) {
     return;
 }
+
+$addLabel = __('Adicionar');
+$viewAllLabel = __('Ver todas as sugestões');
 ?>
 
 <div class="erp-sidebar-suggestions" id="erp-sidebar-suggestions">
@@ -41,14 +45,15 @@ if (empty($items)) {
             </a>
             <button type="button"
                     class="erp-sidebar-add"
-                    data-sku="<?= $block->escapeHtmlAttr($item['sku']) ?>"
+                    data-sku="<?= $block->escapeHtmlAttr((string) ($item['sku'] ?? '')) ?>"
                     data-qty="<?= (int)$item['suggested_quantity'] ?>"
-                    title="Adicionar">+</button>
+                    title="<?= $block->escapeHtmlAttr($addLabel) ?>"
+                    aria-label="<?= $block->escapeHtmlAttr(__('Adicionar %1 ao carrinho', (string) ($item['name'] ?? 'produto'))) ?>">+</button>
         </li>
         <?php endforeach; ?>
     </ul>
     <a href="<?= $block->escapeUrl($block->getUrl('erpintegration/customer/suggestedcart')) ?>" class="erp-sidebar-more">
-        Ver todas as sugestões →
+        <?= $block->escapeHtml($viewAllLabel) ?> →
     </a>
 </div>
 <script type="text/x-magento-init">

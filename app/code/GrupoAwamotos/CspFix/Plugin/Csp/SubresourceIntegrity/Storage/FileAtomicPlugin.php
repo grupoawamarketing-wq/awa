@@ -37,38 +37,50 @@ class FileAtomicPlugin
      */
     public function aroundSave(Subject $subject, callable $proceed, string $data, ?string $context): bool
     {
+        $staticDir = $this->filesystem->getDirectoryWrite(DirectoryList::STATIC_VIEW);
+        $path      = $this->resolveFilePath($context);
+        $absBase   = rtrim($staticDir->getAbsolutePath(''), '/');
+        $tmpRel    = $path . '.tmp.' . bin2hex(random_bytes(6));
+        $absTmp    = $absBase . '/' . $tmpRel;
+        $absDest   = $absBase . '/' . $path;
+
         try {
-            $staticDir = $this->filesystem->getDirectoryWrite(DirectoryList::STATIC_VIEW);
-            $path = $this->resolveFilePath($context);
-
-            $tmp = $path . '.tmp.' . bin2hex(random_bytes(6));
-
             // Garante diretório do contexto (frontend/adminhtml) quando aplicável
             if ($context) {
                 $staticDir->create($context);
             }
 
-            // Escrever em arquivo temporário e renomear (operação atômica no mesmo filesystem)
-            $staticDir->writeFile($tmp, $data, 'w');
-            $staticDir->renameFile($tmp, $path);
+            // Escreve em arquivo temporário
+            $staticDir->writeFile($tmpRel, $data, 'w');
 
-            // Mantém permissões previsíveis (mesmo se falhar, não deve quebrar fluxo)
-            try {
-                $staticDir->changePermissions($path, 0664);
-            } catch (\Throwable $e) {
-                $this->logger->debug('[CspFix] Could not set permissions on ' . $path . ': ' . $e->getMessage());
+            // Rename atômico via PHP nativo — evita o chmod() interno do Magento
+            // que falha quando o processo não é dono do arquivo destino.
+            if (!$this->safeRename($absTmp, $absDest, $renameError)) {
+
+                // Fallback sem passar pelo Driver\File do Magento. Em cenários com
+                // owner/grupo corretos, sobrescrever o arquivo diretamente evita o
+                // chmod() interno que gerava FileSystemException no deploy.
+                if (!$this->safeWrite($absDest, $data, $writeError)) {
+                    throw new \RuntimeException(sprintf(
+                        '[CspFix] Falha ao persistir %s (rename: %s | write: %s)',
+                        $absDest,
+                        $renameError['message'] ?? 'unknown',
+                        $writeError['message'] ?? 'unknown'
+                    ));
+                }
+
+                $this->safeUnlink($absTmp);
             }
 
             return true;
         } catch (\Throwable $e) {
-            // Fallback total: volta ao comportamento original do Magento
-            $this->logger->critical($e);
-            try {
-                return (bool) $proceed($data, $context);
-            } catch (\Throwable $e2) {
-                $this->logger->critical($e2);
-                return false;
+            // Limpa o arquivo temporário se sobrou no disco
+            if (file_exists($absTmp)) {
+                $this->safeUnlink($absTmp);
             }
+
+            $this->logger->critical('[CspFix] Atomic write falhou: ' . $e->getMessage());
+            throw $e;
         }
     }
 
@@ -83,7 +95,7 @@ class FileAtomicPlugin
         try {
             $raw = $proceed($context);
         } catch (\Throwable $e) {
-            $this->logger->critical($e);
+            $this->logger->warning('[CspFix] Erro ao carregar sri-hashes.json: ' . $e->getMessage());
             return null;
         }
 
@@ -102,7 +114,7 @@ class FileAtomicPlugin
                 return $raw2;
             }
         } catch (\Throwable $e) {
-            $this->logger->critical($e);
+            $this->logger->warning('[CspFix] Retry de leitura do sri-hashes.json falhou: ' . $e->getMessage());
         }
 
         // Evita quebrar o frontend/admin por JSON inválido.
@@ -119,5 +131,49 @@ class FileAtomicPlugin
     private function resolveFilePath(?string $context): string
     {
         return ($context ? $context . DIRECTORY_SEPARATOR : '') . self::FILENAME;
+    }
+
+    private function safeRename(string $from, string $to, ?string &$errorMessage = null): bool
+    {
+        return $this->withFilesystemWarningCapture(
+            static fn (): bool => rename($from, $to),
+            $errorMessage
+        );
+    }
+
+    private function safeWrite(string $path, string $content, ?string &$errorMessage = null): bool
+    {
+        return $this->withFilesystemWarningCapture(
+            static fn (): bool => file_put_contents($path, $content, LOCK_EX) !== false,
+            $errorMessage
+        );
+    }
+
+    private function safeUnlink(string $path): void
+    {
+        $ignoreError = null;
+        $this->withFilesystemWarningCapture(
+            static fn (): bool => !file_exists($path) || unlink($path),
+            $ignoreError
+        );
+    }
+
+    private function withFilesystemWarningCapture(callable $callback, ?string &$errorMessage = null): bool
+    {
+        $lastError = null;
+        set_error_handler(static function (int $severity, string $message) use (&$lastError): bool {
+            $lastError = $message;
+            return true;
+        });
+
+        try {
+            $result = (bool) $callback();
+        } finally {
+            restore_error_handler();
+        }
+
+        $errorMessage = $lastError;
+
+        return $result;
     }
 }

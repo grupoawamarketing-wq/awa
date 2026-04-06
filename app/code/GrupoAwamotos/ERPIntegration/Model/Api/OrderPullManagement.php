@@ -32,6 +32,9 @@ class OrderPullManagement implements OrderPullInterface
     private CustomerRepositoryInterface $customerRepository;
     private RegionFactory $regionFactory;
     private LoggerInterface $logger;
+    /** @var array<int, bool> */
+    private array $clientRegistrationCache = [];
+    private ?bool $writeAccessCache = null;
 
     public function __construct(
         ConnectionInterface $connection,
@@ -67,7 +70,7 @@ class OrderPullManagement implements OrderPullInterface
 
         $orders = [];
         $held = [];
-        $hasWriteAccess = $this->b2bRegistration->hasWriteAccess();
+        $hasWriteAccess = $this->hasWriteAccess();
 
         foreach ($allOrders as $order) {
             try {
@@ -84,11 +87,13 @@ class OrderPullManagement implements OrderPullInterface
                     continue;
                 }
 
-                // Try auto-registration when write connection is available
-                if (!$this->b2bRegistration->isClientRegistered($erpClientCode)) {
+                // Guarantee only Sectra-validated clients are exposed as pending
+                $clientRegistered = $this->isClientRegisteredCached($erpClientCode);
+                if (!$clientRegistered) {
                     if ($hasWriteAccess) {
-                        $registered = $this->b2bRegistration->registerClient($erpClientCode);
-                        if (!$registered) {
+                        $clientRegistered = $this->registerClientCached($erpClientCode);
+                        $hasWriteAccess = $this->hasWriteAccess();
+                        if (!$clientRegistered) {
                             // Write available but registration failed — hold and warn
                             $held[] = [
                                 'increment_id' => $order->getIncrementId(),
@@ -103,16 +108,21 @@ class OrderPullManagement implements OrderPullInterface
                             continue;
                         }
                     } else {
-                        // No write access — include order with warning flag so operator can see it.
-                        // Sectra will validate GR_INTEGRACAOVALIDADOR on its side; do not hide data here.
-                        $this->logger->info('[ERP API] Order included with unregistered client (no write access)', [
+                        $held[] = [
+                            'increment_id' => $order->getIncrementId(),
+                            'erp_code' => $erpClientCode,
+                            'customer' => trim(($order->getCustomerFirstname() ?? '') . ' ' . ($order->getCustomerLastname() ?? '')),
+                            'reason' => 'Cliente nao registrado no GR_INTEGRACAOVALIDADOR e conexao de escrita desativada',
+                        ];
+                        $this->logger->info('[ERP API] Order held - unregistered client and no write access', [
                             'increment_id' => $order->getIncrementId(),
                             'erp_code' => $erpClientCode,
                         ]);
+                        continue;
                     }
                 }
 
-                $orders[] = $this->buildOrderPayload($order);
+                $orders[] = $this->buildOrderPayload($order, $clientRegistered);
                 if (count($orders) >= $limit) {
                     break;
                 }
@@ -299,7 +309,7 @@ class OrderPullManagement implements OrderPullInterface
                     continue;
                 }
 
-                if (!$this->b2bRegistration->isClientRegistered($erpClientCode)) {
+                if (!$this->isClientRegisteredCached($erpClientCode)) {
                     $held[] = $this->buildHeldOrderPayload(
                         $order,
                         $erpClientCode,
@@ -311,7 +321,7 @@ class OrderPullManagement implements OrderPullInterface
             }
         }
 
-        $hasWriteAccess = $this->b2bRegistration->hasWriteAccess();
+        $hasWriteAccess = $this->hasWriteAccess();
 
         return [[
             'orders' => $held,
@@ -411,7 +421,7 @@ class OrderPullManagement implements OrderPullInterface
         }
     }
 
-    private function buildOrderPayload(OrderInterface $order): array
+    private function buildOrderPayload(OrderInterface $order, ?bool $clientRegistered = null): array
     {
         // Resolve ERP client code
         $erpClientCode = $this->resolveErpClientCode($order);
@@ -420,10 +430,12 @@ class OrderPullManagement implements OrderPullInterface
         $erpCustomerData = $this->getErpCustomerOrderData($erpClientCode);
 
         // Check and auto-register client in Sectra B2B integration
-        $clientRegistered = $this->b2bRegistration->isClientRegistered($erpClientCode);
-        if (!$clientRegistered && $this->b2bRegistration->hasWriteAccess()) {
-            // Attempt auto-registration only when write connection is available
-            $clientRegistered = $this->b2bRegistration->registerClient($erpClientCode);
+        if ($clientRegistered === null) {
+            $clientRegistered = $this->isClientRegisteredCached($erpClientCode);
+            if (!$clientRegistered && $this->hasWriteAccess()) {
+                // Attempt auto-registration only when write connection is available
+                $clientRegistered = $this->registerClientCached($erpClientCode);
+            }
         }
 
         // Build items
@@ -644,5 +656,47 @@ class OrderPullManagement implements OrderPullInterface
             return '';
         }
         return $street[2] ?? $street[1] ?? '';
+    }
+
+    private function hasWriteAccess(): bool
+    {
+        if ($this->writeAccessCache === null) {
+            $this->writeAccessCache = $this->b2bRegistration->hasWriteAccess();
+        }
+
+        return $this->writeAccessCache;
+    }
+
+    private function isClientRegisteredCached(int $erpClientCode): bool
+    {
+        if ($erpClientCode <= 0) {
+            return false;
+        }
+
+        if (array_key_exists($erpClientCode, $this->clientRegistrationCache)) {
+            return $this->clientRegistrationCache[$erpClientCode];
+        }
+
+        $registered = $this->b2bRegistration->isClientRegistered($erpClientCode);
+        $this->clientRegistrationCache[$erpClientCode] = $registered;
+
+        return $registered;
+    }
+
+    private function registerClientCached(int $erpClientCode): bool
+    {
+        if ($erpClientCode <= 0 || !$this->hasWriteAccess()) {
+            return false;
+        }
+
+        $registered = $this->b2bRegistration->registerClient($erpClientCode);
+        $this->clientRegistrationCache[$erpClientCode] = $registered;
+
+        if (!$registered) {
+            // Refresh write access cache in case permission was revoked during INSERT attempt
+            $this->writeAccessCache = $this->b2bRegistration->hasWriteAccess();
+        }
+
+        return $registered;
     }
 }

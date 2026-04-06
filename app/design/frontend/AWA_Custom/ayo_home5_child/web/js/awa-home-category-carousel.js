@@ -6,120 +6,70 @@
 define([], function () {
     'use strict';
 
+    function prefersReducedMotion() {
+        return window.matchMedia &&
+            window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    }
+
+    function scrollBehavior() {
+        return prefersReducedMotion() ? 'auto' : 'smooth';
+    }
+
     return function (config, track) {
-        const prev = document.querySelector('.awa-category-carousel__prev');
-        const next = document.querySelector('.awa-category-carousel__next');
-        const dotsWrap = document.getElementById('awa-cat-dots');
-        const items = track.querySelectorAll('.awa-category-carousel__item');
+        var root;
+        var prev;
+        var next;
+        var dotsWrap;
+        var items;
+        var startX = 0;
+        var startScrollLeft = 0;
+        var isDragging = false;
+        var resizeTimer;
+
+        if (!track || track.dataset.awaCategoryCarouselInit === '1') {
+            return;
+        }
+
+        track.dataset.awaCategoryCarouselInit = '1';
+
+        root = track.closest('.top-home-content--category-carousel') || document;
+        prev = root.querySelector('.awa-category-carousel__prev');
+        next = root.querySelector('.awa-category-carousel__next');
+        dotsWrap = root.querySelector('#awa-cat-dots');
+        items = track.querySelectorAll('.awa-category-carousel__item');
 
         if (!items.length) {
             return;
         }
 
-        const mobileBreakpoint = config.mobileBreakpoint || 768;
-
-        function prefersReducedMotion() {
-            return window.matchMedia &&
-                window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        }
-
-        function scrollBehavior() {
-            return prefersReducedMotion() ? 'auto' : 'smooth';
-        }
-
-        function isMobile() {
-            return window.matchMedia(`(max-width: ${mobileBreakpoint}px)`).matches;
-        }
-
-        function syncControlVisibility() {
-            const mobile = isMobile();
-
-            track.setAttribute('tabindex', mobile ? '-1' : '0');
-
-            if (prev) {
-                prev.style.display = mobile ? 'none' : '';
-                prev.setAttribute('aria-hidden', mobile ? 'true' : 'false');
-            }
-
-            if (next) {
-                next.style.display = mobile ? 'none' : '';
-                next.setAttribute('aria-hidden', mobile ? 'true' : 'false');
-            }
-
-            if (dotsWrap) {
-                dotsWrap.style.display = mobile ? 'none' : '';
-                dotsWrap.setAttribute('aria-hidden', mobile ? 'true' : 'false');
-            }
-        }
-
         function getScrollAmount() {
-            const item = items[0];
+            var item = items[0];
+            var style;
+            var gap;
 
             if (!item) {
                 return 280;
             }
 
-            const style = getComputedStyle(track);
-            const gap = parseInt(style.gap, 10) || 16;
+            style = getComputedStyle(track);
+            gap = parseInt(style.gap, 10) || 16;
 
             return item.offsetWidth + gap;
         }
 
-        /* --- Nav buttons --- */
-        if (prev) {
-            prev.addEventListener('click', () => {
-                if (!isMobile()) {
-                    track.scrollBy({left: -getScrollAmount(), behavior: scrollBehavior()});
-                }
-            });
-        }
-
-        if (next) {
-            next.addEventListener('click', () => {
-                if (!isMobile()) {
-                    track.scrollBy({left: getScrollAmount(), behavior: scrollBehavior()});
-                }
-            });
-        }
-
-        /* --- Touch swipe --- */
-        let startX = 0;
-        let startScrollLeft = 0;
-        let isDragging = false;
-
-        track.addEventListener('touchstart', (e) => {
-            startX = e.touches[0].pageX;
-            startScrollLeft = track.scrollLeft;
-            isDragging = true;
-        }, {passive: true});
-
-        track.addEventListener('touchmove', (e) => {
-            if (!isDragging) {
-                return;
-            }
-
-            track.scrollLeft = startScrollLeft - (e.touches[0].pageX - startX);
-        }, {passive: true});
-
-        track.addEventListener('touchend', () => {
-            isDragging = false;
-        }, {passive: true});
-
-        /* --- Pagination dots --- */
         function buildDots() {
+            var trackW;
+            var scrollW;
+            var pages;
+            var i;
+
             if (!dotsWrap) {
                 return;
             }
 
-            if (isMobile()) {
-                dotsWrap.innerHTML = '';
-                dotsWrap.style.display = 'none';
-                return;
-            }
-
             dotsWrap.innerHTML = '';
-            const trackW = track.offsetWidth;
-            const scrollW = track.scrollWidth;
+            trackW = track.offsetWidth;
+            scrollW = track.scrollWidth;
 
             if (scrollW <= trackW) {
                 dotsWrap.style.display = 'none';
@@ -127,93 +77,121 @@ define([], function () {
             }
 
             dotsWrap.style.display = '';
-            const pages = Math.ceil(scrollW / trackW);
+            pages = Math.ceil(scrollW / trackW);
 
-            for (let i = 0; i < pages; i++) {
-                const dot = document.createElement('span');
+            for (i = 0; i < pages; i++) {
+                (function (pageIndex) {
+                    var dot = document.createElement('button');
+                    var isActive = pageIndex === 0;
 
-                dot.className = 'awa-category-carousel__dot';
+                    dot.className = 'awa-category-carousel__dot';
+                    dot.type = 'button';
+                    dot.setAttribute('aria-label', 'Ir para página ' + (pageIndex + 1) + ' de ' + pages);
+                    dot.setAttribute('aria-pressed', isActive ? 'true' : 'false');
 
-                if (i === 0) {
-                    dot.classList.add('active');
-                }
+                    if (isActive) {
+                        dot.classList.add('active');
+                    }
 
-                dot.dataset.page = i;
-                dot.addEventListener('click', ((page) => {
-                    return () => {
-                        track.scrollTo({left: page * trackW, behavior: scrollBehavior()});
-                    };
-                })(i));
-                dotsWrap.appendChild(dot);
+                    dot.addEventListener('click', function () {
+                        track.scrollTo({left: pageIndex * trackW, behavior: scrollBehavior()});
+                    });
+
+                    dotsWrap.appendChild(dot);
+                })(i);
             }
         }
 
         function updateDots() {
-            if (!dotsWrap || isMobile()) {
+            var dots;
+            var trackW;
+            var currentPage;
+
+            if (!dotsWrap) {
                 return;
             }
 
-            const dots = dotsWrap.querySelectorAll('.awa-category-carousel__dot');
-
+            dots = dotsWrap.querySelectorAll('.awa-category-carousel__dot');
             if (!dots.length) {
                 return;
             }
 
-            const trackW = track.offsetWidth;
-            let currentPage = Math.round(track.scrollLeft / trackW);
+            trackW = track.offsetWidth;
+            currentPage = Math.round(track.scrollLeft / trackW);
 
-            currentPage = Math.max(0, Math.min(currentPage, dots.length - 1));
-            dots.forEach((d, idx) => {
-                d.classList.toggle('active', idx === currentPage);
+            dots.forEach(function (dot, idx) {
+                var isActive = idx === currentPage;
+
+                dot.classList.toggle('active', isActive);
+                dot.setAttribute('aria-pressed', isActive ? 'true' : 'false');
             });
         }
 
-        /* --- Keyboard nav --- */
-        track.addEventListener('keydown', (e) => {
-            if (isMobile()) {
+        if (prev) {
+            prev.addEventListener('click', function () {
+                track.scrollBy({left: -getScrollAmount(), behavior: scrollBehavior()});
+            });
+        }
+
+        if (next) {
+            next.addEventListener('click', function () {
+                track.scrollBy({left: getScrollAmount(), behavior: scrollBehavior()});
+            });
+        }
+
+        track.addEventListener('touchstart', function (event) {
+            startX = event.touches[0].pageX;
+            startScrollLeft = track.scrollLeft;
+            isDragging = true;
+        }, {passive: true});
+
+        track.addEventListener('touchmove', function (event) {
+            if (!isDragging) {
                 return;
             }
 
-            if (e.key === 'ArrowRight') {
+            track.scrollLeft = startScrollLeft - (event.touches[0].pageX - startX);
+        }, {passive: true});
+
+        track.addEventListener('touchend', function () {
+            isDragging = false;
+        }, {passive: true});
+
+        track.setAttribute('tabindex', '0');
+        track.addEventListener('keydown', function (event) {
+            if (event.key === 'ArrowRight') {
                 track.scrollBy({left: getScrollAmount(), behavior: scrollBehavior()});
-                e.preventDefault();
+                event.preventDefault();
             }
 
-            if (e.key === 'ArrowLeft') {
+            if (event.key === 'ArrowLeft') {
                 track.scrollBy({left: -getScrollAmount(), behavior: scrollBehavior()});
-                e.preventDefault();
+                event.preventDefault();
             }
         });
 
         track.addEventListener('scroll', updateDots, {passive: true});
-        syncControlVisibility();
         buildDots();
 
-        let resizeTimer;
-
-        window.addEventListener('resize', () => {
+        window.addEventListener('resize', function () {
             clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(() => {
-                syncControlVisibility();
-                buildDots();
-            }, 200);
+            resizeTimer = setTimeout(buildDots, 200);
         }, {passive: true});
 
-        /* --- Staggered entrance animation --- */
         if ('IntersectionObserver' in window && !prefersReducedMotion()) {
-            const animItems = track.querySelectorAll('.awa-category-carousel__item');
+            var animItems = track.querySelectorAll('.awa-category-carousel__item');
 
-            animItems.forEach((el) => {
+            animItems.forEach(function (el) {
                 el.classList.add('awa-carousel-hidden');
             });
 
-            const io = new IntersectionObserver((entries) => {
-                entries.forEach((entry) => {
+            var io = new IntersectionObserver(function (entries) {
+                entries.forEach(function (entry) {
                     if (entry.isIntersecting) {
-                        const cards = entry.target.querySelectorAll('.awa-carousel-hidden');
+                        var cards = entry.target.querySelectorAll('.awa-carousel-hidden');
 
-                        cards.forEach((card, i) => {
-                            setTimeout(() => {
+                        cards.forEach(function (card, i) {
+                            setTimeout(function () {
                                 card.classList.remove('awa-carousel-hidden');
                                 card.classList.add('awa-carousel-visible');
                             }, i * 80);

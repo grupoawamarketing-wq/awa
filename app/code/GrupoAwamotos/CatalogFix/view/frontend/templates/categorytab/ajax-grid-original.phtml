@@ -1,5 +1,7 @@
 <?php
 /** @var \GrupoAwamotos\CatalogFix\Block\Categorytab\AjaxProducts $block */
+declare(strict_types=1);
+
 use Magento\Framework\App\Action\Action;
 
 $products = $block->getProducts()->getItems();
@@ -13,11 +15,12 @@ $newLabelHelper = $this->helper('Rokanthemes\RokanBase\Helper\Newlabel');
 $i = 0;
 foreach ($products as $_item) {
     $productImage = $block->getImage($_item, $image);
+    $productUrl = $_item->getProductUrl();
 ?>
 <?php if ($i++ % $rows == 0) { ?> <div class="product_row"> <?php } ?>
     <div class="item-product">
         <div class="product-thumb">
-            <a href="<?php echo $_item->getProductUrl(); ?>" class="product-thumb-link">
+            <a href="<?php echo $block->escapeUrl($productUrl); ?>" class="product-thumb-link" title="<?php echo $block->escapeHtmlAttr($_item->getName()); ?>">
                 <?php $productImageThumb = $block->getImage($_item, 'category_image_second_small'); ?>
                 <span class="first-thumb">
                     <?php echo $productImage->toHtml(); ?>
@@ -69,18 +72,38 @@ foreach ($products as $_item) {
                             $block->getAddToCartUrl($_item),
                             ['product' => $_item->getEntityId()]
                         );
+                        $postDataConfig = json_decode($postData, true);
                         ?>
-                        <button class="action tocart btn-add-to-cart"
-                                data-post='<?php echo $postData; ?>'
-                                type="button"
-                                title="<?php echo $block->escapeHtmlAttr(__('Add to Cart')); ?>">
-                            <span><?php echo $block->escapeHtml(__('Add to Cart')); ?></span>
-                        </button>
+                        <?php if (is_array($postDataConfig) && isset($postDataConfig['action'], $postDataConfig['data']) && is_array($postDataConfig['data'])): ?>
+                            <form data-role="tocart-form"
+                                  class="catalogfix-tocart-form"
+                                  action="<?php echo $block->escapeUrl((string) $postDataConfig['action']); ?>"
+                                  method="post">
+                                <?php foreach ($postDataConfig['data'] as $key => $value): ?>
+                                    <input type="hidden"
+                                           name="<?php echo $block->escapeHtmlAttr((string) $key); ?>"
+                                           value="<?php echo $block->escapeHtmlAttr((string) $value); ?>" />
+                                <?php endforeach; ?>
+                                <button class="action tocart btn-add-to-cart"
+                                        type="submit"
+                                        title="<?php echo $block->escapeHtmlAttr(__('Adicionar')); ?>">
+                                    <span><?php echo $block->escapeHtml(__('Adicionar')); ?></span>
+                                </button>
+                            </form>
+                        <?php else: ?>
+                            <button class="action tocart btn-add-to-cart disabled"
+                                    type="button"
+                                    disabled="disabled"
+                                    aria-disabled="true"
+                                    title="<?php echo $block->escapeHtmlAttr(__('Produto indisponível')); ?>">
+                                <span><?php echo $block->escapeHtml(__('Produto indisponível')); ?></span>
+                            </button>
+                        <?php endif; ?>
                     <?php else: ?>
                         <?php if ($_item->getIsSalable()): ?>
-                            <div class="stock available"><span><?php echo __('In stock'); ?></span></div>
+                            <div class="stock available"><span><?php echo __('Disponível'); ?></span></div>
                         <?php else: ?>
-                            <div class="stock unavailable"><span><?php echo __('Out of stock'); ?></span></div>
+                            <div class="stock unavailable"><span><?php echo __('Produto esgotado'); ?></span></div>
                         <?php endif; ?>
                     <?php endif; ?>
                 </div>
@@ -88,7 +111,7 @@ foreach ($products as $_item) {
             <div class="product-info">
                 <h3 class="product-name">
                     <a title="<?php echo $block->escapeHtmlAttr($_item->getName()); ?>"
-                       href="<?php echo $_item->getProductUrl(); ?>"
+                       href="<?php echo $block->escapeUrl($productUrl); ?>"
                        class="product-item-link">
                         <?php echo $block->escapeHtml($_item->getName()); ?>
                     </a>

@@ -9,6 +9,13 @@ tools:
   - problems
   - usages
   - runCommand
+handoffs:
+  - label: "Exploração profunda"
+    agent: Explore
+    prompt: "Explore o codebase em profundidade para identificar dependências, módulos relacionados, observers e plugins que podem ser afetados."
+  - label: "Revisão de código"
+    agent: Revisor
+    prompt: "Revise o código implementado focando em segurança, performance, tipagem e boas práticas Magento 2."
 ---
 
 # Awa — Agente Especialista AWA Motos / Magento 2

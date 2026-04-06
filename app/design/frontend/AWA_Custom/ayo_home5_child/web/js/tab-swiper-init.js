@@ -214,7 +214,12 @@ define([
             mobileItems = 1,
             tabletItems = Math.min(items, 2),
             desktopSmallItems = Math.min(items, 3),
-            desktopItems = items;
+            desktopItems = items,
+            desktopSpaceBetween = parseInt(cfg.desktopSpaceBetween, 10);
+
+        if (isNaN(desktopSpaceBetween)) {
+            desktopSpaceBetween = 20;
+        }
 
         /* Read Owl v1 keys for backward compatibility */
         if (cfg.itemsMobile && cfg.itemsMobile[1]) {
@@ -253,7 +258,7 @@ define([
                 480: { slidesPerView: Math.min(Math.max(mobileItems, 2), items), spaceBetween: 12 },
                 768: { slidesPerView: tabletItems, spaceBetween: 16 },
                 992: { slidesPerView: desktopSmallItems, spaceBetween: 16 },
-                1200: { slidesPerView: desktopItems, spaceBetween: 20 }
+                1200: { slidesPerView: desktopItems, spaceBetween: desktopSpaceBetween }
             },
             a11y: {
                 prevSlideMessage: 'Slide anterior',

@@ -762,7 +762,7 @@ body .page-wrapper h2.title-category-dropdown.active::after {
     body .page-wrapper .block-search input#search,
     body .page-wrapper .block-search input.input-text {
         padding: var(--awa-space-3) var(--awa-space-4);
-        font-size: var(--awa-text-base);
+        font-size: var(--awa-text-md); /* MOBILE-001: mín 16px previne iOS auto-zoom (era --awa-text-base=14px) */
     }
 
     body .page-wrapper .block-search .action.search,
@@ -1010,7 +1010,7 @@ body .page-wrapper .action.nav-toggle {
     body .page-wrapper .block-search input#search,
     body .page-wrapper .block-search input.input-text {
         padding: var(--awa-space-3);
-        font-size: var(--awa-text-sm);
+        font-size: var(--awa-text-md); /* MOBILE-001: mín 16px previne iOS auto-zoom (era --awa-text-sm=13px) */
     }
 
     body .page-wrapper .block-search .action.search,
@@ -1114,7 +1114,7 @@ body .page-wrapper .action.nav-toggle {
 @media (max-width: 375px) {
     body .page-wrapper .block-search form#search_mini_form,
     body .page-wrapper .block-search form.minisearch {
-        border-width: 1px;
+        border-width: var(--awa-ui-border-width-default);
         border-radius: var(--awa-radius-sm); /* R12-16 */
     }
 
@@ -1724,7 +1724,7 @@ body .page-wrapper .aw-footer-legal {
     padding: var(--awa-space-5) var(--awa-space-6);
     text-align: center;
     border-top: 1px solid rgb(255 255 255 / 10%);
-    box-shadow: inset 0 1px 0 rgb(255 255 255 / 4%);
+    box-shadow: none;
 }
 
 body .page-wrapper .aw-footer-legal .legal-info {
@@ -2125,15 +2125,74 @@ body .page-wrapper .page-footer .contacinfo-logo img {
    PRODUCT GRID — RESPONSIVO
    Cobre AMBAS classes: .item-product (AYO) e .product-item (Magento)
    ============================================================ */
+/* FASE 1 — BASELINE DE PADRONIZAÇÃO UI
+   Alias semânticos para grid/alinhamento/espaçamento/borda/radius.
+   Mantém os valores atuais, mas centraliza o contrato visual para fases seguintes. */
+/* FASE 2 — GRID E ALINHAMENTO ESTRUTURAL
+   Tokens para responsividade do grid PLP, alinhamento de headings e gaps de flex estruturais.
+   grid-template-columns: repeat(var(--awa-ui-plp-cols-XX, N), 1fr) */
+body .page-wrapper {
+    --awa-ui-grid-gap-standard: var(--awa-grid-gap);
+    --awa-ui-grid-gap-compact: var(--awa-grid-gap-sm);
+    --awa-ui-grid-gap-tight: var(--awa-grid-gap-xs);
+    --awa-ui-border-width-default: 1px;
+    --awa-ui-border-color-default: var(--awa-gray-200);
+    --awa-ui-border-color-strong: var(--awa-gray-300);
+    --awa-ui-radius-card: var(--awa-radius);
+    --awa-ui-radius-card-media: var(--awa-radius);
+    --awa-ui-radius-button: var(--awa-radius-sm);
+    --awa-ui-card-padding: var(--awa-space-4);
+    --awa-ui-card-padding-mobile: var(--awa-space-3);
+    --awa-ui-card-action-gap: var(--awa-space-3);
+    /* Fase 2: colunas do grid PLP por breakpoint */
+    --awa-ui-plp-cols-xl: 5;
+    --awa-ui-plp-cols-lg: 4;
+    --awa-ui-plp-cols-md: 3;
+    --awa-ui-plp-cols-sm: 2;
+    --awa-ui-plp-cols-xs: 1;
+    /* Fase 2: alinhamento de headings de seção */
+    --awa-ui-section-heading-align: left;
+    /* Fase 2: gaps semânticos para flex containers estruturais */
+    --awa-ui-flex-gap-xs: var(--awa-space-1);
+    --awa-ui-flex-gap-sm: var(--awa-space-2);
+    --awa-ui-flex-gap-md: var(--awa-space-3);
+    --awa-ui-flex-gap-lg: var(--awa-space-4);
+    /* Fase 3: espaçamentos semânticos de componentes */
+    --awa-ui-card-form-padding: var(--awa-space-10);
+    --awa-ui-section-header-padding: var(--awa-space-8) var(--awa-space-10) var(--awa-space-6);
+    --awa-ui-badge-padding: 2px var(--awa-space-2);
+    --awa-ui-badge-padding-lg: 2px var(--awa-space-3);
+    --awa-ui-footer-col-heading-mb: var(--awa-space-4);
+    /* Sombras — referência Balaroti: flat no repouso, elevação sutil no hover */
+    --awa-ui-shadow-card: none;                            /* flat at rest: borda sem shadow */
+    --awa-ui-shadow-card-hover: var(--awa-shadow);         /* 0 2px 8px / 8% — hover sutil */
+    --awa-ui-shadow-form: var(--awa-shadow-sm);            /* 0 1px 3px / 6% — containers/sidebar */
+    --awa-ui-shadow-dropdown: var(--awa-shadow-dropdown);  /* 0 6px 20px / 12% — menus/popovers */
+    --awa-ui-shadow-btn-hover: none;                       /* botões: color+transform, sem shadow */
+    --awa-ui-shadow-btn-active: none;
+    --awa-ui-shadow-overlay: var(--awa-shadow-lg);         /* 0 12px 40px / 15% — modais/drawer */
+    --awa-ui-shadow-inset: none;
+    /* Tokens de raio por componente — Fase 4 */
+    --awa-ui-radius-avatar: 50%;
+    --awa-ui-radius-tag: 10px;
+    --awa-ui-radius-input: 6px;
+    /* Tokens de espessura de borda — Fase 4 */
+    --awa-ui-border-width-medium: 2px;
+    /* Tokens de sombra direcional — Fase 8 (drawer/nav mobile) */
+    --awa-shadow-drawer: 4px 0 24px rgb(0 0 0 / 15%);
+    --awa-shadow-drawer-strong: 4px 0 20px rgb(0 0 0 / 25%);
+}
+
 body .page-wrapper .products-grid .product-items:not(.owl-carousel),
 body .page-wrapper .products.list .product-items:not(.owl-carousel),
 body .page-wrapper .widget-product-grid .product-items:not(.owl-carousel),
 body .page-wrapper .block-products-list .product-items:not(.owl-carousel) {
     display: grid;
-    gap: var(--awa-grid-gap);
+    gap: var(--awa-ui-grid-gap-standard, var(--awa-grid-gap));
     list-style: none;
     padding: 0;
     margin: 0;
+    align-items: stretch;
 }
 
 /* XL Desktop: 5 colunas ≥1400px (padrão AYO) */
@@ -2142,7 +2201,7 @@ body .page-wrapper .block-products-list .product-items:not(.owl-carousel) {
     body .page-wrapper .products.list .product-items:not(.owl-carousel),
     body .page-wrapper .widget-product-grid .product-items:not(.owl-carousel),
     body .page-wrapper .block-products-list .product-items:not(.owl-carousel) {
-        grid-template-columns: repeat(5, 1fr);
+        grid-template-columns: repeat(var(--awa-ui-plp-cols-xl, 5), 1fr);
     }
 }
 
@@ -2152,7 +2211,7 @@ body .page-wrapper .block-products-list .product-items:not(.owl-carousel) {
     body .page-wrapper .products.list .product-items:not(.owl-carousel),
     body .page-wrapper .widget-product-grid .product-items:not(.owl-carousel),
     body .page-wrapper .block-products-list .product-items:not(.owl-carousel) {
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(var(--awa-ui-plp-cols-lg, 4), 1fr);
     }
 }
 
@@ -2162,8 +2221,8 @@ body .page-wrapper .block-products-list .product-items:not(.owl-carousel) {
     body .page-wrapper .products.list .product-items:not(.owl-carousel),
     body .page-wrapper .widget-product-grid .product-items:not(.owl-carousel),
     body .page-wrapper .block-products-list .product-items:not(.owl-carousel) {
-        grid-template-columns: repeat(3, 1fr);
-        gap: var(--awa-grid-gap-sm);
+        grid-template-columns: repeat(var(--awa-ui-plp-cols-md, 3), 1fr);
+        gap: var(--awa-ui-grid-gap-compact, var(--awa-grid-gap-sm));
     }
 
     body .page-wrapper .page-products .toolbar-products {
@@ -2192,8 +2251,8 @@ body .page-wrapper .block-products-list .product-items:not(.owl-carousel) {
     body .page-wrapper .products.list .product-items:not(.owl-carousel),
     body .page-wrapper .widget-product-grid .product-items:not(.owl-carousel),
     body .page-wrapper .block-products-list .product-items:not(.owl-carousel) {
-        grid-template-columns: repeat(2, 1fr);
-        gap: var(--awa-grid-gap-sm);
+        grid-template-columns: repeat(var(--awa-ui-plp-cols-sm, 2), 1fr);
+        gap: var(--awa-ui-grid-gap-compact, var(--awa-grid-gap-sm));
     }
 }
 
@@ -2203,8 +2262,8 @@ body .page-wrapper .block-products-list .product-items:not(.owl-carousel) {
     body .page-wrapper .products.list .product-items:not(.owl-carousel),
     body .page-wrapper .widget-product-grid .product-items:not(.owl-carousel),
     body .page-wrapper .block-products-list .product-items:not(.owl-carousel) {
-        grid-template-columns: 1fr;
-        gap: var(--awa-grid-gap-xs);
+        grid-template-columns: repeat(var(--awa-ui-plp-cols-xs, 1), 1fr);
+        gap: var(--awa-ui-grid-gap-tight, var(--awa-grid-gap-xs));
     }
 
     body .page-wrapper .catalog-product-view .product-info-main .box-tocart {
@@ -2245,7 +2304,7 @@ body .page-wrapper .block-products-list .product-items:not(.owl-carousel) {
 
     body .page-wrapper .item-product .product-info,
     body .page-wrapper .product-item .product-item-details {
-        padding: var(--awa-space-3) var(--awa-space-3) var(--awa-space-4);
+        padding: var(--awa-ui-card-padding-mobile, var(--awa-space-3)) var(--awa-ui-card-padding-mobile, var(--awa-space-3)) var(--awa-ui-card-padding, var(--awa-space-4));
     }
 
     body .page-wrapper .item-product .product-name a,
@@ -2446,8 +2505,8 @@ body .page-wrapper .widget-product-grid {
 body .page-wrapper .item-product,
 body .page-wrapper .product-item {
     background: var(--awa-bg-surface); /* BP-12 */
-    border-radius: var(--awa-radius);
-    border: 1px solid var(--awa-gray-200);
+    border-radius: var(--awa-ui-radius-card, var(--awa-radius));
+    border: var(--awa-ui-border-width-default, 1px) solid var(--awa-ui-border-color-default, var(--awa-gray-200));
     overflow: visible;
     transition: transform var(--awa-transition),
                 box-shadow var(--awa-transition),
@@ -2476,9 +2535,9 @@ body .page-wrapper .product-item .product-item-info {
 
 body .page-wrapper .item-product:hover,
 body .page-wrapper .product-item:hover {
-    border-color: var(--awa-gray-300);
-    box-shadow: var(--awa-shadow-hover);
-    transform: translateY(-4px);
+    border-color: var(--awa-ui-border-color-strong, var(--awa-gray-300));
+    box-shadow: var(--awa-ui-shadow-card-hover, var(--awa-shadow)); /* Balaroti ref */
+    transform: translateY(-2px);
 }
 
 /* R11-13: desabilitar transform em reduced-motion */
@@ -2533,7 +2592,7 @@ body .page-wrapper .product-item-info {
 body .page-wrapper .item-product .product-thumb {
     position: relative;
     overflow: hidden;
-    border-radius: var(--awa-radius) var(--awa-radius) 0 0;
+    border-radius: var(--awa-ui-radius-card-media, var(--awa-radius)) var(--awa-ui-radius-card-media, var(--awa-radius)) 0 0;
     background: var(--awa-gray-100);
     aspect-ratio: 1 / 1;
 }
@@ -2558,7 +2617,7 @@ body .page-wrapper .product-item .product-image-container {
     aspect-ratio: 1 / 1;
     background: var(--awa-gray-100);
     overflow: hidden;
-    border-radius: var(--awa-radius) var(--awa-radius) 0 0;
+    border-radius: var(--awa-ui-radius-card-media, var(--awa-radius)) var(--awa-ui-radius-card-media, var(--awa-radius)) 0 0;
 }
 
 body .page-wrapper .product-item .product-image-photo {
@@ -2589,11 +2648,11 @@ body .page-wrapper .item-product .product-thumb img[src*="Indisponivel"] {
 
 /* Conteúdo */
 body .page-wrapper .item-product .product-info {
-    padding: var(--awa-space-4);
+    padding: var(--awa-ui-card-padding, var(--awa-space-4));
 }
 
 body .page-wrapper .product-item .product-item-details {
-    padding: var(--awa-space-4);
+    padding: var(--awa-ui-card-padding, var(--awa-space-4));
 }
 
 /* Título */
@@ -2744,7 +2803,7 @@ body .page-wrapper .item-product .product-thumb img[style*="width"] {
    ============================================================ */
 body .page-wrapper .item-product .product-info-cart {
     margin-top: auto;
-    padding-top: var(--awa-space-3);
+    padding-top: var(--awa-ui-card-action-gap, var(--awa-space-3));
 }
 
 body .page-wrapper .item-product .action.tocart,
@@ -2758,7 +2817,7 @@ body .page-wrapper .product-item .action.tocart {
     background: var(--awa-red);
     color: var(--awa-text-on-danger);
     border: none;
-    border-radius: var(--awa-radius-sm);
+    border-radius: var(--awa-ui-radius-button, var(--awa-radius-sm));
     font-size: var(--awa-text-sm);
     font-weight: var(--awa-weight-semibold);
     text-transform: uppercase;
@@ -2953,8 +3012,8 @@ body .page-wrapper .item-product .stock.unavailable {
    ============================================================ */
 body .page-wrapper .item-deal-product {
     background: var(--awa-bg-surface); /* BP-12 */
-    border-radius: var(--awa-radius);
-    border: 1px solid var(--awa-gray-200);
+    border-radius: var(--awa-ui-radius-card, var(--awa-radius));
+    border: var(--awa-ui-border-width-default, 1px) solid var(--awa-ui-border-color-default, var(--awa-gray-200));
     overflow: visible;
     transition: border-color var(--awa-transition), box-shadow var(--awa-transition); /* R13: era 'all' */
     position: relative;
@@ -2965,8 +3024,8 @@ body .page-wrapper .item-deal-product {
 }
 
 body .page-wrapper .item-deal-product:hover {
-    border-color: var(--awa-gray-300);
-    box-shadow: var(--awa-shadow-hover);
+    border-color: var(--awa-ui-border-color-strong, var(--awa-gray-300));
+    box-shadow: var(--awa-ui-shadow-card-hover, var(--awa-shadow)); /* Balaroti ref */
 }
 
 body .page-wrapper .item-deal-product .title-product a {
@@ -3464,7 +3523,7 @@ body .page-wrapper .owl-carousel .owl-right:hover {
     background: var(--awa-red-dark);
     color: var(--awa-text-on-danger);
     border-color: var(--awa-red-dark);
-    box-shadow: 0 4px 10px rgb(183 51 55 / 25%);
+    box-shadow: var(--awa-ui-shadow-btn-hover, none);
 }
 
 /* Disabled state */
@@ -3982,7 +4041,7 @@ body .page-wrapper .block.crosssell .block-title strong {
 
     /* Fotorama gallery mobile */
     body .page-wrapper .fotorama__thumb-border {
-        border-width: 2px;
+        border-width: var(--awa-ui-border-width-medium);
     }
 
     body .page-wrapper .gallery-placeholder {
@@ -6225,7 +6284,7 @@ body .page-wrapper :is(.item-product, .product-item, .blog-post-item, .the_blog 
 
 body .page-wrapper :is(.item-product, .product-item, .blog-post-item, .the_blog .post-item, .testimonials-home .item):focus-within {
     border-color: var(--awa-red);
-    box-shadow: 0 0 0 2px rgb(183 51 55 / 12%);
+    box-shadow: var(--awa-ui-shadow-btn-hover, none);
 }
 
 /* ===========================================
@@ -7335,7 +7394,7 @@ body .page-wrapper .modal-slide .modal-inner-wrap {
   --color-text: var(--awa-text-main);
 
   /* Link states */
-  --link-color: #b73337;
+  --link-color: var(--awa-red);
   --link-color-hover: #8e2629;
 }
 
@@ -12321,13 +12380,13 @@ body .page-wrapper .awa-whatsapp-float {
         border: 1px solid rgb(183 51 55 / 22%);
         border-radius: var(--awa-radius-md);
         background: var(--awa-bg-surface, #fff);
-        box-shadow: 0 1px 2px rgb(15 23 42 / 8%);
+        box-shadow: var(--awa-ui-shadow-dropdown, none);
     }
 
     body .page-wrapper .header .top-search > .mini-cart-wrapper .showcart:hover,
     body .page-wrapper .header .top-search > .mini-cart-wrapper .showcart:focus-visible {
         border-color: rgb(183 51 55 / 40%);
-        box-shadow: 0 4px 10px rgb(15 23 42 / 10%);
+        box-shadow: var(--awa-ui-shadow-dropdown, none);
     }
 
     /* Evita clipping do grid de benefícios por box model herdado */
@@ -13318,7 +13377,7 @@ header.page-header {
 
 /* Sombra leve para o header */
 .page-header {
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08) !important;
+  box-shadow: var(--awa-ui-shadow-card, none) !important;
 }
 
 /* Barra superior (se houver topbar de atendimento) */
@@ -14600,26 +14659,26 @@ body .page-wrapper .page-main.container > .columns {
 
 /* ==========================================================================
    Fix: Ayo themes5.css compila @titlefont/@bdf como 'Poppins' (não carregada).
-   Override sincronizado com Google Font Montserrat (configurado no Themeoption).
+   Override sincronizado com Google Font Open Sans (canonical AWA brand font).
    Carrega APÓS themes5.css na cascata — mesma especificidade, source order vence.
    ========================================================================== */
 h1, h2, h3, h4, h5, h6 {
-    font-family: 'Montserrat', sans-serif;
+    font-family: 'Open Sans', Arial, sans-serif;
 }
 
 .sidebar-shop .widget .widget-title,
 .filter-content .filter-options .filter-options-title,
 #layered_ajax_price_text,
 .price-box {
-    font-family: 'Montserrat', sans-serif;
+    font-family: 'Open Sans', Arial, sans-serif;
 }
 
 .product-item-name .product-item-link,
 .products-grid .product-item-link,
 body.catalog-category-view .product-item-link,
 body.catalogsearch-result-index .product-item-link {
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 600 !important;
+    font-family: 'Open Sans', Arial, sans-serif;
+    font-weight: var(--awa-weight-semibold) !important;
 }
 
 }
@@ -14659,15 +14718,18 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-nav-bar > .cont
 
 /* ── Utility Bar ─────────────────────────────────────────────────────────── */
 body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar {
-    background: var(--awa-white, #fff);
-    border-bottom: 1px solid var(--awa-color-border, #e5e5e5);
+    background: var(--awa-bg-dark, #1a1a1a);
+    border-bottom: none;
+    color: #cccccc;
+    font-size: 12px;
 }
 
 body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar__inner {
     display: flex !important;
     justify-content: space-between !important;
     align-items: center !important;
-    padding-block: 5px;
+    min-height: 36px;
+    height: 36px;
     padding: 0;
     margin: 0;
 }
@@ -14676,7 +14738,7 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar .to
 body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar .top-bar-right {
     display: flex !important;
     align-items: center !important;
-    gap: 12px !important;
+    gap: var(--awa-space-3) !important;
     float: none !important;
     width: auto !important;
     padding: 0 !important;
@@ -14690,7 +14752,8 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar .to
 /* ── Main Header ─────────────────────────────────────────────────────────── */
 body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
     background-color: var(--awa-white, #fff);
-    border-bottom: none;
+    border-bottom: 1px solid var(--awa-border, #e0e0e0);
+    min-height: 70px;
 }
 
 body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header .header-main {
@@ -14707,7 +14770,7 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header__in
     align-items: center !important;
     flex-wrap: nowrap !important;
     gap: var(--awa-space-4, 16px) !important;
-    padding-block: 14px !important;
+    padding-block: 10px !important;
     padding-inline: 0 !important;
     float: none !important;
     width: 100% !important;
@@ -14748,7 +14811,7 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-nav-bar {
 body .page-wrapper .awa-site-header.awa-header-professional .awa-nav-bar__inner {
     display: flex !important;
     align-items: stretch !important;
-    min-height: 48px !important;
+    min-height: 44px !important;
     float: none !important;
     width: 100% !important;
     gap: 0 !important;
@@ -14765,6 +14828,8 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-nav-bar .awa-he
 }
 
 /* Primary nav — grows to fill all available space */
+/* FIX-VERTICAL-MENU: overflow:visible permite que o dropdown do menu vertical
+   extrapole o contêiner sem ser cortado (overflow:hidden era o bug) */
 body .page-wrapper .awa-site-header.awa-header-professional .awa-nav-bar .awa-header-primary-nav {
     flex: 1 1 0 !important;
     display: flex !important;
@@ -14772,7 +14837,7 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-nav-bar .awa-he
     float: none !important;
     padding: 0 !important;
     min-width: 0 !important;
-    overflow: hidden;
+    overflow: visible;
 }
 
 body .page-wrapper .awa-site-header.awa-header-professional .awa-nav-bar .awa-header-primary-nav .header-wrapper-sticky {
@@ -14813,7 +14878,7 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-nav-bar .awa-he
 body .page-wrapper .awa-site-header.awa-header-professional .awa-nav-bar .awa-header-locale .top-header-locale {
     display: flex !important;
     align-items: center !important;
-    gap: 8px !important;
+    gap: var(--awa-space-2) !important;
 }
 
 /* Nav links — white text on red bar */
@@ -14826,13 +14891,13 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-nav-bar .top-me
 body .page-wrapper .awa-site-header.awa-header-professional .awa-nav-bar .navigation li.level0 > a,
 body .page-wrapper .awa-site-header.awa-header-professional .awa-nav-bar .top-menu > ul > li > a {
     color: var(--awa-white, #fff) !important;
-    font-weight: var(--awa-weight-semibold, 600) !important;
+    font-weight: 500 !important;
     font-size: var(--awa-text-sm, 13px) !important;
     text-transform: none !important;
     letter-spacing: normal;
     padding-inline: var(--awa-space-4, 16px) !important;
     padding-block: 0 !important;
-    height: 48px !important;
+    height: 44px !important;
     display: flex !important;
     align-items: center !important;
     transition: background var(--awa-transition-fast, 150ms ease) !important;
@@ -14843,7 +14908,7 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-nav-bar .top-me
 
 body .page-wrapper .awa-site-header.awa-header-professional .awa-nav-bar .navigation li.level0 > a:hover,
 body .page-wrapper .awa-site-header.awa-header-professional .awa-nav-bar .top-menu > ul > li > a:hover {
-    background: rgba(0, 0, 0, .12) !important;
+    background: var(--awa-primary-hover, #8e2629) !important;
     color: #fff !important;
     text-decoration: none !important;
 }
@@ -14874,7 +14939,7 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-nav-bar .top-me
     body .page-wrapper .awa-site-header.awa-header-professional .awa-header-quote-cta {
         font-size: var(--awa-text-xs, 11px) !important;
         padding: 4px 10px !important;
-        border-radius: 999px !important;
+        border-radius: var(--awa-radius-full) !important;
         background: var(--awa-red, #b73337) !important;
         color: var(--awa-white, #fff) !important;
         text-decoration: none !important;
@@ -14910,7 +14975,7 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-nav-bar .logo-s
         align-items: flex-end;
         justify-content: center;
         font-size: var(--awa-text-sm, 13px);
-        line-height: 1.4;
+        line-height: var(--awa-leading-normal);
     }
 
     /* Cart route on desktop: clean purchase flow */
@@ -14951,7 +15016,7 @@ body .page-wrapper .awa-nav-close {
     height: 36px !important;
     padding: 0 !important;
     border: 1px solid var(--awa-gray-200, #e5e7eb) !important;
-    border-radius: 10px !important;
+    border-radius: var(--awa-ui-radius-tag) !important;
     background: var(--awa-gray-50, #f9fafb) !important;
     color: var(--awa-gray-700, #3f3f3f) !important;
     cursor: pointer !important;
@@ -15001,6 +15066,157 @@ body .page-wrapper .awa-nav-overlay.is-visible {
     }
 }
 
+/* ── Balaroti Layer 2 — clean right col (cart icon only) ─────────────────── */
+
+/* Hide contact slot from main header right col (Layer 2 = cart only) */
+body .page-wrapper .awa-site-header.awa-header-professional .awa-header-right-col .awa-header-contact-slot {
+    display: none !important;
+}
+
+/* Hide minicart label "Cotação / Carrinho" (Layer 2 = icon + badge only) */
+body .page-wrapper .awa-site-header.awa-header-professional .awa-header-minicart .awa-minicart-label {
+    display: none !important;
+}
+
+/* ── Balaroti-style Utility Bar — dark bg component overrides ─────────────── */
+
+/* Phone / WhatsApp static contact links */
+body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar .awa-topbar__contact-link {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    color: #cccccc !important;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+    text-decoration: none !important;
+    white-space: nowrap !important;
+    transition: color 150ms ease !important;
+}
+body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar .awa-topbar__contact-link:hover,
+body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar .awa-topbar__contact-link:focus-visible {
+    color: #ffffff !important;
+    text-decoration: none !important;
+}
+body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar .awa-topbar__contact-link--whatsapp {
+    color: #4dda85 !important;
+}
+body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar .awa-topbar__contact-link--whatsapp:hover,
+body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar .awa-topbar__contact-link--whatsapp:focus-visible {
+    color: #80edb1 !important;
+}
+body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar .awa-topbar__contact-link svg {
+    flex-shrink: 0 !important;
+    stroke: currentColor !important;
+}
+
+/* Hotline wrap (WhatsApp block from admin) — override pill/card style for dark bg */
+body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar .awa-topbar__hotline-wrap .whatsapp-hotline,
+body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar .awa-topbar__hotline-wrap .hotline_header .whatsapp-hotline {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    min-height: auto !important;
+    padding: 0 !important;
+    color: #4dda85 !important;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+    gap: 6px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+}
+body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar .awa-topbar__hotline-wrap .whatsapp-hotline:hover {
+    transform: none !important;
+    color: #80edb1 !important;
+}
+body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar .awa-topbar__hotline-wrap .whatsapp-hotline > i {
+    color: #4dda85 !important;
+    font-size: 13px !important;
+    width: auto !important;
+}
+body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar .awa-topbar__hotline-wrap .hotline-label {
+    display: none !important;
+}
+body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar .awa-topbar__hotline-wrap .hotline-number {
+    color: #4dda85 !important;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+}
+
+/* Hours info (right side) */
+body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar .awa-topbar__hours-info {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+    color: #999999 !important;
+    font-size: 12px !important;
+    white-space: nowrap !important;
+    padding-right: 12px !important;
+    margin-right: 4px !important;
+    border-right: 1px solid #333333 !important;
+}
+body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar .awa-topbar__hours-info svg {
+    flex-shrink: 0 !important;
+    stroke: currentColor !important;
+    opacity: 0.7 !important;
+}
+
+/* Account links — override pill/card style for dark bg */
+body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar .top-account ul.header.links > li > a,
+body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar .top-account ul.header.links > li > span {
+    background: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    min-height: auto !important;
+    padding: 0 !important;
+    color: #cccccc !important;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+}
+body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar .top-account ul.header.links > li > a:hover,
+body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar .top-account ul.header.links > li > a:focus-visible {
+    background: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+    color: #ffffff !important;
+    text-decoration: underline !important;
+}
+
+/* MCP dashboard link — dark bg style */
+body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar .awa-mcp-dashboard-link {
+    color: #cccccc !important;
+    font-size: 12px !important;
+}
+body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar .awa-mcp-dashboard-link:hover {
+    color: #ffffff !important;
+}
+
+/* Legacy trust items — hidden in Balaroti layout (functionality preserved in DOM) */
+body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar .awa-topbar__trust-items--hidden,
+body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar .awa-topbar__contact-slot,
+body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar .awa-header-quote-cta {
+    display: none !important;
+}
+
+/* Mobile: utility bar on dark bg */
+@media (max-width: 991px) {
+    body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar {
+        background: var(--awa-bg-dark, #1a1a1a) !important;
+    }
+    body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar .awa-topbar__contact-link {
+        color: #bbb !important;
+    }
+    body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar .top-bar-left {
+        justify-content: flex-start !important;
+        gap: var(--awa-space-4, 16px) !important;
+    }
+    /* Hide hours on mobile (space constraint) */
+    body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar .awa-topbar__hours-info {
+        display: none !important;
+    }
+}
+
 /* ==========================================================================
    End AWA Professional Header Semantic CSS
    ========================================================================== */
@@ -15023,7 +15239,7 @@ body .page-wrapper .awa-nav-overlay.is-visible {
 /* Shadow + radius exatos conforme spec */
 body .page-wrapper .custommenu .level0 > .submenu,
 body .page-wrapper .custommenu .level0 > .groupmenu {
-    box-shadow: 0 16px 32px rgba(0, 0, 0, .12) !important;
+    box-shadow: var(--awa-ui-shadow-card, none) !important;
     border-radius: 0 0 8px 8px !important;
 }
 
@@ -15041,7 +15257,7 @@ body .page-wrapper .custommenu > ul > li:focus-within > .groupmenu {
 body .page-wrapper .custommenu .level0 > .groupmenu {
     display: grid !important;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 24px;
+    gap: var(--awa-space-6);
     padding: 24px !important;
 }
 
@@ -15060,8 +15276,8 @@ body .page-wrapper .custommenu .submenu  .aw-column-title,
 body .page-wrapper .custommenu .submenu  .column-title,
 body .page-wrapper .custommenu .submenu  .menu-group-title {
     color: var(--awa-red, #b73337) !important;
-    font-size: 11px;
-    font-weight: 700;
+    font-size: var(--awa-text-2xs);
+    font-weight: var(--awa-weight-bold);
     text-transform: uppercase;
     letter-spacing: .08em;
     margin-bottom: 12px !important;
@@ -15073,7 +15289,7 @@ body .page-wrapper .custommenu .submenu  .menu-group-title {
 /* Imagem promo na última coluna */
 body .page-wrapper .custommenu .submenu  .mega-promo,
 body .page-wrapper .custommenu .groupmenu .mega-promo {
-    border-radius: 8px;
+    border-radius: var(--awa-radius-sm);
     overflow: hidden;
     position: relative;
 }
@@ -15088,7 +15304,7 @@ body .page-wrapper .custommenu .groupmenu .mega-promo img {
     width: 100%;
     height: 120px;
     object-fit: cover;
-    border-radius: 8px;
+    border-radius: var(--awa-radius-sm);
     transition: transform 220ms ease;
 }
 
@@ -15101,16 +15317,16 @@ body .page-wrapper .custommenu .submenu  .mega-promo__label,
 body .page-wrapper .custommenu .groupmenu .mega-promo__label {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: var(--awa-space-1);
     margin-top: 8px;
     padding: 3px 10px;
     background: var(--awa-red, #b73337);
     color: #fff;
-    font-size: 10px;
-    font-weight: 700;
+    font-size: var(--awa-text-3xs);
+    font-weight: var(--awa-weight-bold);
     text-transform: uppercase;
     letter-spacing: .05em;
-    border-radius: 999px;
+    border-radius: var(--awa-radius-full);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -15165,7 +15381,7 @@ body .page-wrapper .minicart-wrapper .block-minicart._active {
     overflow-y: auto;
     overflow-x: hidden;
     overscroll-behavior: contain;
-    box-shadow: -8px 0 32px rgba(15, 23, 42, .14) !important;
+    box-shadow: var(--awa-ui-shadow-dropdown, none) !important;
     z-index: var(--awa-z-modal, 1000) !important;
     display: flex !important;
     flex-direction: column;
@@ -15182,8 +15398,8 @@ body .page-wrapper .block-minicart._active .block-title {
     border-bottom: 1px solid var(--awa-gray-200, #e5e7eb);
     padding: 20px 24px !important;
     margin: 0 !important;
-    font-size: 16px;
-    font-weight: 700;
+    font-size: var(--awa-text-md);
+    font-weight: var(--awa-weight-bold);
     text-transform: none !important;
 }
 
@@ -15220,19 +15436,19 @@ body .page-wrapper .block-minicart._active .action.primary.checkout {
     justify-content: center !important;
     align-items: center !important;
     min-height: 52px !important;
-    font-size: 15px !important;
-    font-weight: 700 !important;
-    border-radius: 12px !important;
+    font-size: var(--awa-text-base-plus) !important;
+    font-weight: var(--awa-weight-bold) !important;
+    border-radius: var(--awa-radius-md) !important;
     background: var(--awa-red, #b73337) !important;
     color: #fff !important;
-    box-shadow: 0 4px 16px rgba(183, 51, 55, .32) !important;
+    box-shadow: var(--awa-ui-shadow-btn-hover, none) !important;
     transition: background-color 180ms ease, box-shadow 180ms ease, transform 120ms ease !important;
     margin-top: 0 !important;
 }
 
 body .page-wrapper .block-minicart._active .action.primary.checkout:hover {
     background: var(--awa-red-dark, #8e2629) !important;
-    box-shadow: 0 6px 20px rgba(183, 51, 55, .42) !important;
+    box-shadow: var(--awa-ui-shadow-btn-hover, none) !important;
     transform: translateY(-1px) !important;
 }
 
@@ -15334,7 +15550,7 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
   align-items: center !important;
   background: linear-gradient(180deg, #ffffff 0%, rgba(248, 250, 252, 0.72) 100%);
   border: 1.5px solid #e5e5e5;
-  border-radius: 9999px;
+  border-radius: var(--awa-radius-full);
   transition: border-color 200ms ease, box-shadow 200ms ease, transform 180ms ease, background-color 180ms ease;
   min-height: 52px;
   position: relative;
@@ -15342,17 +15558,17 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
   margin: 0;
   padding: 4px;
   width: 100%;
-  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+  box-shadow: var(--awa-ui-shadow-dropdown, none);
 }
 .awa-professional-search form.search-content:focus-within,
 .awa-professional-search form.minisearch:focus-within {
-  border-color: #b73337;
+  border-color: var(--awa-red);
   box-shadow: 0 0 0 3px rgba(183, 51, 55, 0.1), 0 4px 20px rgba(183, 51, 55, 0.1);
 }
 .awa-professional-search form.search-content.is-open,
 .awa-professional-search form.minisearch.is-open {
   border-color: rgba(183, 51, 55, 0.44);
-  box-shadow: 0 0 0 4px rgba(183, 51, 55, 0.12), 0 18px 42px rgba(15, 23, 42, 0.14);
+  box-shadow: var(--awa-ui-shadow-dropdown, none);
   transform: translateY(-1px);
 }
 .awa-professional-search form.search-content .awa-search-category-wrapper,
@@ -15362,12 +15578,12 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
   position: relative;
   flex: 0 0 auto;
   border-right: 1px solid #e5e5e5;
-  background: #f7f7f7;
+  background: var(--awa-bg-surface);
   display: flex;
   align-items: center;
   margin: 0;
   padding: 0;
-  border-radius: 9999px 0 0 9999px;
+  border-radius: var(--awa-radius-full) 0 0 var(--awa-radius-full);
   min-height: 44px;
 }
 .awa-professional-search form.search-content .awa-search-category-wrapper .awa-search-category-select,
@@ -15381,8 +15597,8 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
   padding: 0 36px 0 16px;
   height: 100%;
   color: var(--awa-color-text-secondary, #666);
-  font-weight: 500;
-  font-size: 14px;
+  font-weight: var(--awa-weight-medium);
+  font-size: var(--awa-text-base);
   cursor: pointer;
   outline: none;
   box-shadow: none;
@@ -15446,8 +15662,8 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
   border: none !important;
   background: transparent !important;
   padding: 0 16px;
-  font-size: 14px;
-  font-weight: 400;
+  font-size: var(--awa-text-base);
+  font-weight: var(--awa-weight-normal);
   color: var(--awa-color-text-primary, #333);
   outline: none !important;
   box-shadow: none !important;
@@ -15512,8 +15728,8 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
   width: 16px;
   height: 16px;
   border: 2px solid rgba(183, 51, 55, 0.2);
-  border-top-color: #b73337;
-  border-radius: 50%;
+  border-top-color: var(--awa-red);
+  border-radius: var(--awa-ui-radius-avatar);
   animation: awa-spin 0.7s linear infinite;
   opacity: 0;
   visibility: hidden;
@@ -15535,7 +15751,7 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
 .awa-professional-search form.minisearch .awa-search-action-wrapper button.action.search,
 .awa-professional-search form.search-content .actions button.action.search,
 .awa-professional-search form.minisearch .actions button.action.search {
-  background: #b73337 !important;
+  background: var(--awa-red) !important;
   border: none !important;
   width: 44px;
   height: 44px;
@@ -15549,8 +15765,8 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
   transition: background-color 180ms ease, box-shadow 180ms ease, transform 150ms ease;
   outline: none;
   margin: 0;
-  border-radius: 9999px;
-  box-shadow: 0 4px 12px rgba(183, 51, 55, 0.28);
+  border-radius: var(--awa-radius-full);
+  box-shadow: var(--awa-ui-shadow-btn-hover, none);
 }
 .awa-professional-search form.search-content .awa-search-action-wrapper button.awa-search-btn::before,
 .awa-professional-search form.minisearch .awa-search-action-wrapper button.awa-search-btn::before,
@@ -15612,8 +15828,8 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
 .awa-professional-search form.minisearch .awa-search-action-wrapper button.action.search:focus-visible,
 .awa-professional-search form.search-content .actions button.action.search:focus-visible,
 .awa-professional-search form.minisearch .actions button.action.search:focus-visible {
-  background: #8e2629 !important;
-  box-shadow: 0 6px 18px rgba(183, 51, 55, 0.36);
+  background: var(--awa-red-dark) !important;
+  box-shadow: var(--awa-ui-shadow-btn-hover, none);
   transform: translateY(-1px);
   color: #ffffff !important;
 }
@@ -15626,7 +15842,7 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
 .awa-professional-search form.search-content .actions button.action.search:active,
 .awa-professional-search form.minisearch .actions button.action.search:active {
   transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(183, 51, 55, 0.2);
+  box-shadow: var(--awa-ui-shadow-btn-hover, none);
 }
 .awa-professional-search form.search-content .awa-search-action-wrapper button.awa-search-btn:focus-visible,
 .awa-professional-search form.minisearch .awa-search-action-wrapper button.awa-search-btn:focus-visible,
@@ -15636,15 +15852,15 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
 .awa-professional-search form.minisearch .awa-search-action-wrapper button.action.search:focus-visible,
 .awa-professional-search form.search-content .actions button.action.search:focus-visible,
 .awa-professional-search form.minisearch .actions button.action.search:focus-visible {
-  outline: 2px solid #8e2629;
+  outline: 2px solid var(--awa-primary-hover);
   outline-offset: 2px;
 }
 .awa-professional-search form.search-content.is-open button.awa-search-btn,
 .awa-professional-search form.minisearch.is-open button.awa-search-btn,
 .awa-professional-search form.search-content.is-open button.action.search,
 .awa-professional-search form.minisearch.is-open button.action.search {
-  background: #8e2629 !important;
-  box-shadow: 0 8px 20px rgba(183, 51, 55, 0.34);
+  background: var(--awa-red-dark) !important;
+  box-shadow: var(--awa-ui-shadow-btn-hover, none);
 }
 .awa-professional-search.is-searching .awa-search-spinner,
 .awa-professional-search[aria-busy='true'] .awa-search-spinner {
@@ -15670,7 +15886,7 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
   .awa-professional-search form.minisearch input.awa-search-input,
   .awa-professional-search form.search-content input.input-text,
   .awa-professional-search form.minisearch input.input-text {
-    font-size: 16px;
+    font-size: var(--awa-text-md);
     padding: 0 12px;
   }
 }
@@ -15710,8 +15926,8 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
   background: linear-gradient(180deg, #ffffff 0%, rgba(248, 250, 252, 0.96) 100%);
   border: 1px solid rgba(148, 163, 184, 0.32);
   border-top-color: rgba(183, 51, 55, 0.24) !important;
-  border-radius: 16px !important;
-  box-shadow: 0 24px 56px rgba(15, 23, 42, 0.14), 0 10px 28px rgba(15, 23, 42, 0.08);
+  border-radius: var(--awa-radius-lg) !important;
+  box-shadow: var(--awa-ui-shadow-dropdown, none);
   z-index: 100130 !important;
   text-align: left;
   overflow: hidden;
@@ -15733,7 +15949,7 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
 .search-autocomplete.searchsuite-autocomplete::-webkit-scrollbar-thumb {
   background: rgba(100, 116, 139, 0.32);
   border: 2px solid transparent;
-  border-radius: 9999px;
+  border-radius: var(--awa-radius-full);
   background-clip: padding-box;
 }
 #search_autocomplete.searchsuite-autocomplete,
@@ -15793,14 +16009,14 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
 .search-autocomplete.searchsuite-autocomplete [class*='suggest'] > .title {
   display: flex !important;
   align-items: center !important;
-  gap: 8px !important;
+  gap: var(--awa-space-2) !important;
   margin: 0 0 12px !important;
   padding: 0 !important;
   border: none !important;
   background: transparent !important;
   color: #64748b !important;
-  font-size: 11px !important;
-  font-weight: 700 !important;
+  font-size: var(--awa-text-2xs) !important;
+  font-weight: var(--awa-weight-bold) !important;
   letter-spacing: 0.14em !important;
   text-transform: uppercase !important;
 }
@@ -15827,7 +16043,7 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
 .search-autocomplete.searchsuite-autocomplete .popular_search_term .items {
   display: flex !important;
   flex-wrap: wrap !important;
-  gap: 8px !important;
+  gap: var(--awa-space-2) !important;
   margin: 0 !important;
   padding: 0 !important;
   list-style: none !important;
@@ -15855,11 +16071,11 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
   min-height: 32px;
   padding: 0 14px !important;
   border: 1px solid rgba(183, 51, 55, 0.14) !important;
-  border-radius: 9999px !important;
+  border-radius: var(--awa-radius-full) !important;
   background: linear-gradient(180deg, rgba(183, 51, 55, 0.1) 0%, rgba(183, 51, 55, 0.02) 100%) !important;
   color: #1e293b !important;
-  font-size: 12px !important;
-  font-weight: 600 !important;
+  font-size: var(--awa-text-xs) !important;
+  font-weight: var(--awa-weight-semibold) !important;
   letter-spacing: 0.01em !important;
   text-decoration: none !important;
   text-transform: none !important;
@@ -15889,8 +16105,8 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
 .search-autocomplete.searchsuite-autocomplete .popular_search_term a b,
 #search_autocomplete.searchsuite-autocomplete a.qs-option-search-term b,
 .search-autocomplete.searchsuite-autocomplete a.qs-option-search-term b {
-  color: #b73337;
-  font-weight: 700;
+  color: var(--awa-red);
+  font-weight: var(--awa-weight-bold);
 }
 #search_autocomplete.searchsuite-autocomplete .suggest li a:hover,
 .search-autocomplete.searchsuite-autocomplete .suggest li a:hover,
@@ -15924,10 +16140,10 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
 .search-autocomplete.searchsuite-autocomplete .popular_search_term a.selected,
 #search_autocomplete.searchsuite-autocomplete a.qs-option-search-term.selected,
 .search-autocomplete.searchsuite-autocomplete a.qs-option-search-term.selected {
-  background: #b73337 !important;
-  border-color: #b73337 !important;
+  background: var(--awa-red) !important;
+  border-color: var(--awa-red) !important;
   color: #ffffff !important;
-  box-shadow: 0 10px 20px rgba(183, 51, 55, 0.2);
+  box-shadow: var(--awa-ui-shadow-btn-hover, none);
 }
 #search_autocomplete.searchsuite-autocomplete .suggest li a:hover .awa-ac-highlight,
 .search-autocomplete.searchsuite-autocomplete .suggest li a:hover .awa-ac-highlight,
@@ -16051,11 +16267,11 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
 .search-autocomplete.searchsuite-autocomplete .product li {
   display: grid;
   grid-template-columns: 56px minmax(0, 1fr);
-  gap: 12px;
+  gap: var(--awa-space-3);
   align-items: center;
   padding: 8px 12px !important;
   border: 1px solid transparent;
-  border-radius: 10px;
+  border-radius: var(--awa-ui-radius-tag);
   transition: background-color 160ms ease, border-color 160ms ease, transform 160ms ease;
 }
 #search_autocomplete.searchsuite-autocomplete .product li:hover,
@@ -16073,7 +16289,7 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
   width: 56px;
   height: 56px;
   border: 1px solid rgba(148, 163, 184, 0.18);
-  border-radius: 8px;
+  border-radius: var(--awa-radius-sm);
   background: rgba(248, 250, 252, 0.92);
   overflow: hidden;
 }
@@ -16098,9 +16314,9 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
 .search-autocomplete.searchsuite-autocomplete .product .qs-option-name {
   margin: 0 0 4px !important;
   color: #1e293b !important;
-  font-size: 13px !important;
-  font-weight: 600 !important;
-  line-height: 1.35 !important;
+  font-size: var(--awa-text-sm) !important;
+  font-weight: var(--awa-weight-semibold) !important;
+  line-height: var(--awa-leading-cozy) !important;
   text-transform: none !important;
 }
 #search_autocomplete.searchsuite-autocomplete .product .qs-option-title a,
@@ -16114,9 +16330,9 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
 .search-autocomplete.searchsuite-autocomplete .product .qs-option-price,
 #search_autocomplete.searchsuite-autocomplete .product .price,
 .search-autocomplete.searchsuite-autocomplete .product .price {
-  color: #b73337 !important;
-  font-size: 13px !important;
-  font-weight: 700 !important;
+  color: var(--awa-red) !important;
+  font-size: var(--awa-text-sm) !important;
+  font-weight: var(--awa-weight-bold) !important;
 }
 #search_autocomplete.searchsuite-autocomplete .see-all,
 .search-autocomplete.searchsuite-autocomplete .see-all,
@@ -16140,9 +16356,9 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
   padding: 12px 16px !important;
   border-top: 1px solid rgba(148, 163, 184, 0.18) !important;
   background: rgba(248, 250, 252, 0.92);
-  color: #b73337 !important;
-  font-size: 13px !important;
-  font-weight: 600 !important;
+  color: var(--awa-red) !important;
+  font-size: var(--awa-text-sm) !important;
+  font-weight: var(--awa-weight-semibold) !important;
   text-align: center !important;
   text-decoration: none !important;
   transition: background-color 160ms ease, color 160ms ease;
@@ -16160,13 +16376,13 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
 #search_autocomplete.searchsuite-autocomplete .all-results:focus-visible,
 .search-autocomplete.searchsuite-autocomplete .all-results:focus-visible {
   background: rgba(183, 51, 55, 0.06) !important;
-  color: #8e2629 !important;
+  color: var(--awa-red-dark) !important;
 }
 #search_autocomplete.searchsuite-autocomplete .no-result,
 .search-autocomplete.searchsuite-autocomplete .no-result {
   padding: 20px !important;
   color: #475569;
-  font-size: 13px;
+  font-size: var(--awa-text-sm);
   text-align: center;
 }
 .mst-searchautocomplete__autocomplete {
@@ -16187,7 +16403,7 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
-  gap: 16px;
+  gap: var(--awa-space-4);
   padding: 16px;
   overflow-y: auto;
 }
@@ -16208,8 +16424,8 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
 .mst-searchautocomplete__autocomplete .spinner-item {
   width: 8px;
   height: 8px;
-  border-radius: 50%;
-  background: #b73337;
+  border-radius: var(--awa-ui-radius-avatar);
+  background: var(--awa-red);
   opacity: 0.22;
   animation: awa-search-spinner-pulse 1s infinite both;
 }
@@ -16229,19 +16445,19 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
   margin: 16px;
   padding: 20px;
   border: 1px dashed rgba(100, 116, 139, 0.28);
-  border-radius: 10px;
+  border-radius: var(--awa-ui-radius-tag);
   background: rgba(248, 250, 252, 0.9);
   color: #475569;
-  font-size: 13px;
+  font-size: var(--awa-text-sm);
   text-align: center;
 }
 .mst-searchautocomplete__autocomplete .mst-searchautocomplete__index {
   min-width: 0;
   flex: 1 1 250px;
   border: 1px solid rgba(148, 163, 184, 0.18);
-  border-radius: 10px;
+  border-radius: var(--awa-ui-radius-tag);
   background: rgba(255, 255, 255, 0.94);
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
+  box-shadow: var(--awa-ui-shadow-dropdown, none);
   overflow: hidden;
 }
 .mst-searchautocomplete__autocomplete .mst-searchautocomplete__index.popular,
@@ -16257,14 +16473,14 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
 .mst-searchautocomplete__autocomplete .mst-searchautocomplete__index-title {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--awa-space-2);
   margin: 0;
   padding: 12px 16px;
   border-bottom: 1px solid rgba(148, 163, 184, 0.18);
   background: linear-gradient(180deg, rgba(248, 250, 252, 0.9) 0%, rgba(248, 250, 252, 0.56) 100%);
   color: #475569;
-  font-size: 11px;
-  font-weight: 700;
+  font-size: var(--awa-text-2xs);
+  font-weight: var(--awa-weight-bold);
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
@@ -16278,10 +16494,10 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
   min-width: 28px;
   min-height: 28px;
   padding: 0 8px;
-  border-radius: 9999px;
+  border-radius: var(--awa-radius-full);
   background: rgba(183, 51, 55, 0.08);
-  color: #b73337;
-  font-size: 11px;
+  color: var(--awa-red);
+  font-size: var(--awa-text-2xs);
   letter-spacing: normal;
 }
 .mst-searchautocomplete__autocomplete ul {
@@ -16291,7 +16507,7 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
 }
 .mst-searchautocomplete__autocomplete .mst-searchautocomplete__highlight {
   padding: 0 2px;
-  border-radius: 4px;
+  border-radius: var(--awa-radius-xs);
   background: rgba(183, 51, 55, 0.12);
   color: inherit;
 }
@@ -16302,7 +16518,7 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
   display: grid;
   grid-template-areas: 'image meta store';
   grid-template-columns: 72px minmax(0, 1fr) auto;
-  gap: 12px;
+  gap: var(--awa-space-3);
   align-items: start;
   padding: 12px;
   border-top: 1px solid rgba(148, 163, 184, 0.18);
@@ -16328,7 +16544,7 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
   height: 72px;
   margin-right: 0;
   border: 1px solid rgba(148, 163, 184, 0.18);
-  border-radius: 8px;
+  border-radius: var(--awa-radius-sm);
   background: rgba(248, 250, 252, 0.92);
   overflow: hidden;
 }
@@ -16341,7 +16557,7 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
 .mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product .meta {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--awa-space-2);
   grid-area: meta;
   flex-grow: 0;
   min-width: 0;
@@ -16351,16 +16567,16 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
-  gap: 8px;
+  gap: var(--awa-space-2);
   margin: 0;
   min-width: 0;
 }
 .mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product .title > a {
   flex: 1 1 100%;
   color: #1e293b;
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1.4;
+  font-size: var(--awa-text-base);
+  font-weight: var(--awa-weight-semibold);
+  line-height: var(--awa-leading-normal);
   text-decoration: none;
   text-transform: none;
 }
@@ -16369,11 +16585,11 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
   align-items: center;
   min-height: 26px;
   padding: 0 10px;
-  border-radius: 9999px;
+  border-radius: var(--awa-radius-full);
   background: rgba(15, 23, 42, 0.04);
   color: #475569;
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--awa-text-2xs);
+  font-weight: var(--awa-weight-semibold);
   letter-spacing: 0.04em;
   white-space: nowrap;
 }
@@ -16384,12 +16600,12 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
   max-width: 100%;
   padding: 0 10px;
   border: 1px solid rgba(183, 51, 55, 0.14);
-  border-radius: 9999px;
+  border-radius: var(--awa-radius-full);
   background: rgba(183, 51, 55, 0.07);
-  color: #8e2629;
-  font-size: 11px;
-  font-weight: 600;
-  line-height: 1.25;
+  color: var(--awa-red-dark);
+  font-size: var(--awa-text-2xs);
+  font-weight: var(--awa-weight-semibold);
+  line-height: var(--awa-leading-snug);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -16399,8 +16615,8 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
   overflow: hidden;
   margin: 0;
   color: #64748b;
-  font-size: 12px;
-  line-height: 1.45;
+  font-size: var(--awa-text-xs);
+  line-height: var(--awa-leading-comfortable);
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
 }
@@ -16411,11 +16627,11 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
   min-height: 26px;
   width: max-content;
   padding: 0 10px;
-  border-radius: 9999px;
+  border-radius: var(--awa-radius-full);
   background: rgba(100, 116, 139, 0.1);
   color: #334155;
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--awa-text-2xs);
+  font-weight: var(--awa-weight-semibold);
 }
 .mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product .stock_status.inStock {
   background: rgba(22, 163, 74, 0.12);
@@ -16437,20 +16653,20 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
   min-height: 34px;
   padding: 0 14px;
   border: 1px solid rgba(183, 51, 55, 0.16);
-  border-radius: 9999px;
+  border-radius: var(--awa-radius-full);
   background: linear-gradient(180deg, rgba(183, 51, 55, 0.1) 0%, rgba(183, 51, 55, 0.02) 100%);
-  color: #b73337;
-  font-size: 12px;
-  font-weight: 600;
+  color: var(--awa-red);
+  font-size: var(--awa-text-xs);
+  font-weight: var(--awa-weight-semibold);
   text-decoration: none;
   transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
 }
 .mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product .to-cart a:hover,
 .mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product .to-cart a:focus-visible {
-  background: #b73337;
-  border-color: #b73337;
+  background: var(--awa-red);
+  border-color: var(--awa-red);
   color: #ffffff;
-  box-shadow: 0 10px 20px rgba(183, 51, 55, 0.2);
+  box-shadow: var(--awa-ui-shadow-btn-hover, none);
 }
 .mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product .store {
   display: flex;
@@ -16468,17 +16684,17 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
   display: inline-flex;
   align-items: center;
   justify-content: flex-end;
-  color: #b73337;
-  font-size: 15px;
-  font-weight: 700;
-  line-height: 1.2;
+  color: var(--awa-red);
+  font-size: var(--awa-text-base-plus);
+  font-weight: var(--awa-weight-bold);
+  line-height: var(--awa-leading-compact);
   margin-left: 0;
   white-space: nowrap;
 }
 .mst-searchautocomplete__autocomplete .mst-searchautocomplete__index.popular ul {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--awa-space-2);
   padding: 16px;
 }
 .mst-searchautocomplete__autocomplete .mst-searchautocomplete__index.popular .mst-searchautocomplete__item {
@@ -16490,18 +16706,18 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
   min-height: 32px;
   padding: 0 14px;
   border: 1px solid rgba(183, 51, 55, 0.14);
-  border-radius: 9999px;
+  border-radius: var(--awa-radius-full);
   background: linear-gradient(180deg, rgba(183, 51, 55, 0.1) 0%, rgba(183, 51, 55, 0.02) 100%);
   color: #1e293b;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--awa-text-xs);
+  font-weight: var(--awa-weight-semibold);
   text-decoration: none;
   transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
 }
 .mst-searchautocomplete__autocomplete .mst-searchautocomplete__index.popular a.title:hover,
 .mst-searchautocomplete__autocomplete .mst-searchautocomplete__index.popular a.title:focus-visible {
-  background: #b73337;
-  border-color: #b73337;
+  background: var(--awa-red);
+  border-color: var(--awa-red);
   color: #ffffff;
 }
 .mst-searchautocomplete__autocomplete .mst-searchautocomplete__index.magento_catalog_category .mst-searchautocomplete__item,
@@ -16521,7 +16737,7 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
 .mst-searchautocomplete__autocomplete .mst-searchautocomplete__index.magento_cms_page .mst-searchautocomplete__item:hover a.title,
 .mst-searchautocomplete__autocomplete .mst-searchautocomplete__index.magento_search_query .mst-searchautocomplete__item:hover a.title {
   background: rgba(183, 51, 55, 0.05);
-  color: #8e2629;
+  color: var(--awa-red-dark);
 }
 .mst-searchautocomplete__autocomplete .mst-searchautocomplete__index.magento_catalog_category a.title,
 .mst-searchautocomplete__autocomplete .mst-searchautocomplete__index.magento_cms_page a.title,
@@ -16529,12 +16745,12 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--awa-space-3);
   padding: 12px 16px;
   color: #334155;
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 1.45;
+  font-size: var(--awa-text-sm);
+  font-weight: var(--awa-weight-medium);
+  line-height: var(--awa-leading-comfortable);
   text-decoration: none;
   transition: background-color 160ms ease, color 160ms ease;
 }
@@ -16544,8 +16760,8 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
   content: '\203A';
   flex: 0 0 auto;
   color: #94a3b8;
-  font-size: 18px;
-  line-height: 1;
+  font-size: var(--awa-text-lg);
+  line-height: var(--awa-leading-none);
 }
 .mst-searchautocomplete__autocomplete .mst-searchautocomplete__show-all {
   padding: 0 16px 16px;
@@ -16557,20 +16773,20 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
   justify-content: center;
   min-height: 44px;
   border: 1px solid rgba(183, 51, 55, 0.16);
-  border-radius: 9999px;
+  border-radius: var(--awa-radius-full);
   background: linear-gradient(180deg, rgba(183, 51, 55, 0.1) 0%, rgba(183, 51, 55, 0.02) 100%);
-  color: #b73337;
-  font-size: 13px;
-  font-weight: 600;
+  color: var(--awa-red);
+  font-size: var(--awa-text-sm);
+  font-weight: var(--awa-weight-semibold);
   text-decoration: none;
   transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
 }
 .mst-searchautocomplete__autocomplete .mst-searchautocomplete__show-all a:hover,
 .mst-searchautocomplete__autocomplete .mst-searchautocomplete__show-all a:focus-visible {
-  background: #b73337;
-  border-color: #b73337;
+  background: var(--awa-red);
+  border-color: var(--awa-red);
   color: #ffffff;
-  box-shadow: 0 12px 24px rgba(183, 51, 55, 0.18);
+  box-shadow: var(--awa-ui-shadow-btn-hover, none);
 }
 @media (max-width: 959px) {
   .mst-searchautocomplete__autocomplete .mst-searchautocomplete__index.magento_catalog_product,
@@ -16595,7 +16811,7 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
   .search-autocomplete.searchsuite-autocomplete {
     top: calc(100% + 10px) !important;
     max-width: calc(100vw - 24px) !important;
-    border-radius: 10px !important;
+    border-radius: var(--awa-ui-radius-tag) !important;
   }
   #search_autocomplete.searchsuite-autocomplete,
   .search-autocomplete.searchsuite-autocomplete {
@@ -16625,7 +16841,7 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
   }
   .mst-searchautocomplete__autocomplete .mst-searchautocomplete__results {
     padding: 12px;
-    gap: 12px;
+    gap: var(--awa-space-3);
   }
   .mst-searchautocomplete__autocomplete .mst-searchautocomplete__spinner {
     right: 16px;
@@ -16639,11 +16855,11 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
     right: 12px;
     width: 36px;
     height: 36px;
-    border-radius: 50%;
+    border-radius: var(--awa-ui-radius-avatar);
     background: rgba(15, 23, 42, 0.06);
     color: #475569;
-    font-size: 22px;
-    line-height: 1;
+    font-size: var(--awa-text-xl-plus);
+    line-height: var(--awa-leading-none);
   }
   .mst-searchautocomplete__autocomplete .mst-searchautocomplete__index-title {
     padding-right: 40px;
@@ -16651,7 +16867,7 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
   .mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product {
     grid-template-areas: 'image meta' 'image store';
     grid-template-columns: 52px minmax(0, 1fr);
-    gap: 8px;
+    gap: var(--awa-space-2);
     padding: 8px;
   }
   .mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product .mst-product-image-wrapper {
@@ -16659,7 +16875,7 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
     height: 52px;
   }
   .mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product .title > a {
-    font-size: 13px;
+    font-size: var(--awa-text-sm);
   }
   .mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product .title .sku,
   .mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product .title .awa-ac-product-fitment,
@@ -16718,7 +16934,7 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
 .mst-searchautocomplete__autocomplete,
 #search_autocomplete.searchsuite-autocomplete,
 .search-autocomplete.searchsuite-autocomplete {
-  border-radius: 8px !important;
+  border-radius: var(--awa-radius-sm) !important;
   overflow: hidden;
 }
 #search_autocomplete.searchsuite-autocomplete .product .qs-option-image,
@@ -16737,8 +16953,8 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
 .search-autocomplete.searchsuite-autocomplete .view-all,
 #search_autocomplete.searchsuite-autocomplete .all-results,
 .search-autocomplete.searchsuite-autocomplete .all-results {
-  color: #b73337 !important;
-  font-weight: 600 !important;
+  color: var(--awa-red) !important;
+  font-weight: var(--awa-weight-semibold) !important;
 }
 #search_autocomplete.searchsuite-autocomplete .see-all:hover,
 .search-autocomplete.searchsuite-autocomplete .see-all:hover,
@@ -16752,9 +16968,8 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
 .search-autocomplete.searchsuite-autocomplete .view-all:focus-visible,
 #search_autocomplete.searchsuite-autocomplete .all-results:focus-visible,
 .search-autocomplete.searchsuite-autocomplete .all-results:focus-visible {
-  color: #8e2629 !important;
+  color: var(--awa-red-dark) !important;
 }
-]633;E;echo "";4ec2b223-32d6-4739-b514-d6119b9e9375]633;C
 /* ==========================================================================
    End AWA Advanced Search Refinements
    =========================================================================== */
@@ -17178,7 +17393,7 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header {
     body .page-wrapper .awa-b2b-register-form select {
         width: 100% !important;
         min-height: var(--awa-touch-target, 44px);
-        font-size: 16px; /* Prevent iOS zoom on focus */
+        font-size: var(--awa-text-md); /* Prevent iOS zoom on focus */
     }
 
     /* B2B landing page benefit cards: stack to 1 column */

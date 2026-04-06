@@ -2,6 +2,8 @@
 /** @var $block \Magento\Framework\View\Element\Template */
 /** @var $escaper \Magento\Framework\Escaper */
 /** @var $configProvider \Magento\Search\ViewModel\ConfigProvider */
+declare(strict_types=1);
+
 $configProvider = $block->getData('configProvider');
 /** @var $additionalSearchFormData \Magento\Search\ViewModel\AdditionalSearchFormData */
 $additionalSearchFormData = $block->getData('additionalSearchFormData');
@@ -9,9 +11,12 @@ $additionalSearchFormData = $block->getData('additionalSearchFormData');
 $helper = $configProvider ? $configProvider->getSearchHelperData() : null;
 $queryParam = $helper ? $helper->getQueryParamName() : 'q';
 $queryText = $helper ? $helper->getEscapedQueryText() : '';
+
+$searchLabel = __('Buscar');
+$placeholderLabel = __('Buscar em toda a loja...');
 ?>
 <div class="block block-search">
-    <div class="block block-title"><strong><?= $escaper->escapeHtml(__('Search')) ?></strong></div>
+    <div class="block block-title"><strong><?= $escaper->escapeHtml($searchLabel) ?></strong></div>
     <div class="block block-content">
         <form class="form minisearch" id="search_mini_form"
               action="<?= $escaper->escapeUrl($block->getUrl('fitment/fallback/index')) ?>" method="get">
@@ -23,14 +28,14 @@ $queryText = $helper ? $helper->getEscapedQueryText() : '';
             <?php endif; ?>
             <div class="field search">
                 <label class="label" for="search" data-role="minisearch-label">
-                    <span><?= $escaper->escapeHtml(__('Search')) ?></span>
+                    <span><?= $escaper->escapeHtml($searchLabel) ?></span>
                 </label>
                 <div class="control">
                     <input id="search"
                            type="text"
                            name="<?= $escaper->escapeHtmlAttr($queryParam) ?>"
                            value="<?= /* @noEscape */ $queryText ?>"
-                           placeholder="<?= $escaper->escapeHtmlAttr(__('Search entire store here...')) ?>"
+                           placeholder="<?= $escaper->escapeHtmlAttr($placeholderLabel) ?>"
                            class="input-text"
                            autocomplete="off"/>
                     <div id="search_autocomplete" class="search-autocomplete"></div>
@@ -39,11 +44,11 @@ $queryText = $helper ? $helper->getEscapedQueryText() : '';
             </div>
             <div class="actions">
                 <button type="submit"
-                        title="<?= $escaper->escapeHtml(__('Search')) ?>"
+                        title="<?= $escaper->escapeHtmlAttr($searchLabel) ?>"
                         class="action search"
-                        aria-label="Search"
+                        aria-label="<?= $escaper->escapeHtmlAttr($searchLabel) ?>"
                 >
-                    <span><?= $escaper->escapeHtml(__('Search')) ?></span>
+                    <span><?= $escaper->escapeHtml($searchLabel) ?></span>
                 </button>
             </div>
         </form>

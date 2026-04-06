@@ -5,7 +5,12 @@
  * @var \Magento\Framework\View\Element\Template $block
  * @var \GrupoAwamotos\ERPIntegration\Model\OrderHistory $orderHistory
  */
+declare(strict_types=1);
+
 $suggestions = $block->getData('suggestions') ?? [];
+
+$titleLabel = __('Produtos que você costuma comprar');
+$avgPriceLabel = __('Preço médio: R$ %1');
 
 if (empty($suggestions)) {
     return;
@@ -13,18 +18,19 @@ if (empty($suggestions)) {
 ?>
 <div class="erp-suggestions-container">
     <div class="block-title">
-        <strong><?= __('Produtos que voce costuma comprar') ?></strong>
+        <strong><?= $block->escapeHtml($titleLabel) ?></strong>
     </div>
     <div class="erp-suggestions-list">
         <?php foreach ($suggestions as $item): ?>
             <div class="erp-suggestion-item">
                 <div class="product-name">
-                    <a href="<?= $block->escapeUrl($block->getUrl('catalogsearch/result', ['q' => $item['sku']])) ?>">
-                        <?= $block->escapeHtml($item['name']) ?>
+                    <a href="<?= $block->escapeUrl($block->getUrl('catalogsearch/result', ['q' => (string) ($item['sku'] ?? '')])) ?>"
+                       title="<?= $block->escapeHtmlAttr((string) ($item['name'] ?? '')) ?>">
+                        <?= $block->escapeHtml((string) ($item['name'] ?? '')) ?>
                     </a>
                 </div>
                 <div class="product-info">
-                    <span class="sku"><?= $block->escapeHtml($item['sku']) ?></span>
+                    <span class="sku"><?= $block->escapeHtml((string) ($item['sku'] ?? '')) ?></span>
                     <?php if (!empty($item['total_orders'])): ?>
                         <span class="order-count">
                             <?= __('%1 pedidos anteriores', (int) $item['total_orders']) ?>
@@ -32,7 +38,7 @@ if (empty($suggestions)) {
                     <?php endif; ?>
                     <?php if (!empty($item['avg_price']) && (float) $item['avg_price'] > 0): ?>
                         <span class="avg-price">
-                            <?= __('Preco medio: R$ %1', number_format((float) $item['avg_price'], 2, ',', '.')) ?>
+                            <?= $block->escapeHtml(__($avgPriceLabel, number_format((float) $item['avg_price'], 2, ',', '.'))) ?>
                         </span>
                     <?php endif; ?>
                 </div>

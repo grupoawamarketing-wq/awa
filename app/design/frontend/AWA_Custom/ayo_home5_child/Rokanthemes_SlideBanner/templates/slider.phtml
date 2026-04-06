@@ -34,28 +34,6 @@ if ($banners = $block->getBannerCollection()):
 ?>
 
 <?php
-// Preload hint para a primeira imagem (melhora LCP)
-$firstBanner = null;
-foreach ($banners as $b) {
-    if ($b->getSlideStatus() != '2') {
-        $firstBanner = $b;
-        break;
-    }
-}
-if ($firstBanner):
-    $firstImgSrc = $firstBanner->getSlideImageMobile() ?: $firstBanner->getSlideImage();
-    if ($firstImgSrc):
-        $firstMediaUrl  = rtrim($block->getUrl('media'), '/');
-        $firstWebpSrc   = (string) preg_replace('/\.(jpg|jpeg|png)$/i', '.webp', $firstImgSrc);
-        $hasFirstWebp   = file_exists(BP . '/pub/media/' . ltrim($firstWebpSrc, '/'));
-        $preloadSrc     = $hasFirstWebp ? $firstWebpSrc : $firstImgSrc;
-        $preloadType    = $hasFirstWebp ? ' type="image/webp"' : '';
-        $preloadUrl     = $block->escapeUrl($firstMediaUrl . '/' . ltrim($preloadSrc, '/'));
-?>
-<link rel="preload" as="image"<?= /* @noEscape */ $preloadType ?> href="<?= /* @noEscape */ $preloadUrl ?>" fetchpriority="high" />
-<?php endif; endif; ?>
-
-<?php
 // Build Schema.org ItemList as PHP array + json_encode (prevents JSON injection via banner titles/urls)
 $sliderTitle = (string)($slider->getSliderTitle() ?: __('Destaques'));
 $schemaItems = [];
@@ -162,7 +140,15 @@ $jsonLdSchema = [
         foreach ($banners as $banner):
             if ($banner->getSlideStatus() == '2') { continue; }
             $slideIndex++;
-            $slideAlt = $banner->getSlideText() ?: ($banner->getSlideTitle() ?: __('Slide %1', $slideIndex));
+            $slideTextRaw = (string)$banner->getSlideText();
+            $slideTitleRaw = (string)$banner->getSlideTitle();
+            $slideAlt = trim(strip_tags($slideTextRaw));
+            if ($slideAlt === '') {
+                $slideAlt = trim(strip_tags($slideTitleRaw));
+            }
+            if ($slideAlt === '') {
+                $slideAlt = (string)__('Slide %1', $slideIndex);
+            }
         ?>
         <div class="banner_item" role="group" aria-roledescription="slide" aria-label="<?php echo $block->escapeHtml(__('Slide %1 de %2', $slideIndex, $totalSlides)); ?>">
             <?php
@@ -173,8 +159,33 @@ $jsonLdSchema = [
                 if ($link = $banner->getSlideLink()) {
                     $pictureHtml = '<a href="' . $block->escapeUrl($link) . '" title="' . $block->escapeHtml($slideAlt) . '">' . $pictureHtml . '</a>';
                 }
-                echo /* @noEscape */ $pictureHtml;
             ?>
+            <div class="banner_item_bg">
+                <?php echo /* @noEscape */ $pictureHtml; ?>
+            </div>
+            <?php
+            $cleanText  = trim(strip_tags($slideTextRaw));
+            $hasText    = ($cleanText !== '' && $cleanText !== '.');
+            $ctaLink    = $banner->getSlideLink(); // re-fetch to avoid scope issue
+            $showBanner = $hasText || $ctaLink !== '';
+            if ($showBanner): ?>
+            <div class="text-banner">
+                <?php if ($hasText): ?>
+                    <?php echo /* @noEscape */ $block->getContentText($slideTextRaw); ?>
+                <?php endif; ?>
+                <?php if ($ctaLink !== ''): ?>
+                <a href="<?php echo $block->escapeUrl($ctaLink); ?>"
+                   class="awa-slide-cta"
+                   aria-label="<?php echo $block->escapeHtmlAttr(__('Ver produtos')); ?>">
+                    <?= $block->escapeHtml(__('Ver Produtos')) ?>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                         viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                         aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+                </a>
+                <?php endif; ?>
+            </div>
+            <?php endif; ?>
         </div>
         <?php endforeach; ?>
     </div>

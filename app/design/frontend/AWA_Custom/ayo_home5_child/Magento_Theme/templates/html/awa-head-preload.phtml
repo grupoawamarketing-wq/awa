@@ -38,18 +38,18 @@ $fontPreloads = [];
 $jsPreloads = [];
 
 // === Async CSS Bundles (defer via media="print" + onload — não bloqueiam render) ===
+// CSS Consolidation (2026-04 — Issue #5):
+// - awa-animate-theme → merged into awa-bundle-phases
+// - awa-visual-fixes-critical → merged into awa-bundle-site
+// - awa-polish-sweep → merged into awa-bundle-refinements
+// - awa-bundle-accessibility-af001 → merged into awa-bundle-refinements
+// Total: 9 requests → 5 (-4 requests)
 $asyncBundles = [
     $block->getViewFileUrl('css/swiper-bundle.min.css'),
-    $block->getViewFileUrl('css/awa-animate-theme.css'),
     $block->getViewFileUrl('css/awa-bundle-custom.css'),
-    $block->getViewFileUrl('css/awa-bundle-phases.css'),
-    $block->getViewFileUrl('css/awa-bundle-tail.css'),
-    $block->getViewFileUrl('css/awa-bundle-site.css'),
-    // Moved from render-blocking <css> to async (2026-03-26) — saves ~70KB from critical path
-    $block->getViewFileUrl('css/awa-visual-fixes-critical.css'),
-    $block->getViewFileUrl('css/awa-polish-sweep.css'),
-    // Global accessibility fixes — AF-001 (2KB, async non-blocking)
-    $block->getViewFileUrl('css/awa-bundle-accessibility-af001.css'),
+    $block->getViewFileUrl('css/awa-bundle-phases.css'),       // + animate-theme
+    $block->getViewFileUrl('css/awa-bundle-tail.css'),          // + cosmetic (global)
+    $block->getViewFileUrl('css/awa-bundle-site.css'),          // + visual-fixes-critical
 ];
 
 // Refinements bundle stays async, but is rendered explicitly below because
@@ -63,10 +63,10 @@ $refinementsBundleUrl = $block->getViewFileUrl('css/awa-bundle-refinements.css')
      Mantém abaixo de 600 bytes. NÃO adicionar regras complexas aqui.
      ========================================================= -->
 <style>
-/* Anti-FOUC v1 — nav bar + benefits bar + top-header */
+/* Anti-FOUC v2 — nav bar + benefits bar + top-header */
 body .page-wrapper .nav-sections:not(.category-dropdown,.category-dropdown-items,.category-dropdown-item-content){background:#b73337}
 body .page-wrapper .awa-benefits-bar,.awa-benefits-bar{background:#b73337}
-body .page-wrapper .top-header{background:#fff;border-bottom:1px solid #e5e5e5}
+body .page-wrapper .top-header{background:#fafafa;border-top:2px solid #b73337;border-bottom:1px solid #e5e5e5}
 body .page-wrapper .header-content .top-header .header{background:#fff}
 </style>
 <!-- AWA Head Preload — DNS Prefetch -->

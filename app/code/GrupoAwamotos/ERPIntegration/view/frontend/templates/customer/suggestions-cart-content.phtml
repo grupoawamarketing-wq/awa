@@ -4,6 +4,7 @@
  *
  * @var \GrupoAwamotos\ERPIntegration\Block\Customer\Suggestions $block
  */
+declare(strict_types=1);
 
 if (!$block->isEnabled() || !$block->isLoggedIn()) {
     return;
@@ -16,8 +17,20 @@ if (!$customerCode) {
 
 $suggestedCart = $block->getSuggestedCart();
 
+$emptyLabel = __('Nenhuma sugestão disponível no momento.');
+$suggestionsTitle = __('Sugestões para Você');
+$viewFullCartLabel = __('Ver carrinho completo');
+$crossSellLabel = __('Comprado junto');
+$popularLabel = __('Popular');
+$addToCartLabel = __('Adicionar ao carrinho');
+$viewSuggestedCartLabel = __('Ver Carrinho Sugerido Completo');
+
 if (empty($suggestedCart['sections']) || isset($suggestedCart['error'])) {
-    echo '<div class="erp-cart-suggestions-widget" id="erp-cart-suggestions"><div class="erp-widget-empty">Nenhuma sugestão disponível no momento.</div></div>';
+    ?>
+    <div class="erp-cart-suggestions-widget" id="erp-cart-suggestions">
+        <div class="erp-widget-empty"><?= $block->escapeHtml($emptyLabel) ?></div>
+    </div>
+    <?php
     return;
 }
 
@@ -37,7 +50,11 @@ foreach ($suggestedCart['sections'] as $sectionKey => $section) {
 }
 
 if (empty($allItems)) {
-    echo '<div class="erp-cart-suggestions-widget" id="erp-cart-suggestions"><div class="erp-widget-empty">Nenhuma sugestão disponível no momento.</div></div>';
+    ?>
+    <div class="erp-cart-suggestions-widget" id="erp-cart-suggestions">
+        <div class="erp-widget-empty"><?= $block->escapeHtml($emptyLabel) ?></div>
+    </div>
+    <?php
     return;
 }
 ?>
@@ -46,20 +63,20 @@ if (empty($allItems)) {
     <div class="erp-widget-header">
         <h3 class="erp-widget-title">
             <span class="erp-icon">💡</span>
-            Sugestões para Você
+            <?= $block->escapeHtml($suggestionsTitle) ?>
         </h3>
         <a href="<?= $block->escapeUrl($block->getUrl('erpintegration/customer/suggestedcart')) ?>" class="erp-view-all">
-            Ver carrinho completo →
+            <?= $block->escapeHtml($viewFullCartLabel) ?> →
         </a>
     </div>
 
     <div class="erp-widget-items">
         <?php foreach ($allItems as $item): ?>
-        <div class="erp-widget-item" data-sku="<?= $block->escapeHtmlAttr($item['sku']) ?>">
+        <div class="erp-widget-item" data-sku="<?= $block->escapeHtmlAttr((string) ($item['sku'] ?? '')) ?>">
             <div class="erp-widget-item-info">
-                <span class="erp-widget-sku"><?= $block->escapeHtml($item['sku']) ?></span>
-                <a href="<?= $block->escapeUrl($item['url'] ?? '#') ?>" class="erp-widget-name" title="<?= $block->escapeHtmlAttr($item['name']) ?>">
-                    <?= $block->escapeHtml(mb_strimwidth($item['name'], 0, 50, '...')) ?>
+                <span class="erp-widget-sku"><?= $block->escapeHtml((string) ($item['sku'] ?? '')) ?></span>
+                <a href="<?= $block->escapeUrl($item['url'] ?? '#') ?>" class="erp-widget-name" title="<?= $block->escapeHtmlAttr((string) ($item['name'] ?? '')) ?>">
+                    <?= $block->escapeHtml(mb_strimwidth((string) ($item['name'] ?? ''), 0, 50, '...')) ?>
                 </a>
                 <div class="erp-widget-meta">
                     <?php if ($item['section'] === 'reorder' && !empty($item['metadata']['reorder_status'])): ?>
@@ -67,9 +84,9 @@ if (empty($allItems)) {
                             <?= $block->escapeHtml($block->getReorderStatusLabel($item['metadata']['reorder_status'])) ?>
                         </span>
                     <?php elseif ($item['section'] === 'cross_sell'): ?>
-                        <span class="erp-widget-badge erp-badge-cross">Comprado junto</span>
+                        <span class="erp-widget-badge erp-badge-cross"><?= $block->escapeHtml($crossSellLabel) ?></span>
                     <?php elseif ($item['section'] === 'similar_customers'): ?>
-                        <span class="erp-widget-badge erp-badge-similar">Popular</span>
+                        <span class="erp-widget-badge erp-badge-similar"><?= $block->escapeHtml($popularLabel) ?></span>
                     <?php endif; ?>
                 </div>
             </div>
@@ -79,9 +96,10 @@ if (empty($allItems)) {
             <div class="erp-widget-item-action">
                 <button type="button"
                         class="erp-widget-add-btn"
-                        data-sku="<?= $block->escapeHtmlAttr($item['sku']) ?>"
+                        data-sku="<?= $block->escapeHtmlAttr((string) ($item['sku'] ?? '')) ?>"
                         data-qty="<?= (int)$item['suggested_quantity'] ?>"
-                        title="Adicionar ao carrinho">
+                        title="<?= $block->escapeHtmlAttr($addToCartLabel) ?>"
+                        aria-label="<?= $block->escapeHtmlAttr(__('Adicionar %1 ao carrinho', (string) ($item['name'] ?? 'produto'))) ?>">
                     <span class="btn-text">+</span>
                     <span class="btn-loading" style="display:none;">...</span>
                 </button>
@@ -92,17 +110,19 @@ if (empty($allItems)) {
 
     <div class="erp-widget-footer">
         <a href="<?= $block->escapeUrl($block->getUrl('erpintegration/customer/suggestedcart')) ?>" class="erp-btn erp-btn-outline erp-btn-full">
-            Ver Carrinho Sugerido Completo (<?= (int)($suggestedCart['summary']['total_items'] ?? 0) ?> produtos)
+            <?= $block->escapeHtml($viewSuggestedCartLabel) ?> (<?= (int)($suggestedCart['summary']['total_items'] ?? 0) ?> <?= $block->escapeHtml(__('produtos')) ?>)
         </a>
     </div>
 </div>
 
-<script>
-require(['GrupoAwamotos_ERPIntegration/js/cart-suggestions'], function (initCartSuggestions) {
-    initCartSuggestions({
-        mode: 'main',
-        addBySkuUrl: '<?= $block->escapeJs($block->getUrl('erpintegration/cart/addBySku')) ?>',
-        reloadDelay: 1500
-    }, '#erp-cart-suggestions');
-});
+<script type="text/x-magento-init">
+{
+    "#erp-cart-suggestions": {
+        "GrupoAwamotos_ERPIntegration/js/cart-suggestions": {
+            "mode": "main",
+            "addBySkuUrl": "<?= $block->escapeJs($block->getUrl('erpintegration/cart/addBySku')) ?>",
+            "reloadDelay": 1500
+        }
+    }
+}
 </script>

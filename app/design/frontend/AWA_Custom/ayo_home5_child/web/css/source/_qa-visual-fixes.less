@@ -1,0 +1,474 @@
+// =============================================
+// AWA MOTOS — QA VISUAL AUDIT FIXES (2026-04-06)
+// Comprehensive fixes for all visual issues found
+// during automated QA audit
+// =============================================
+
+// ── ETAPA 2: HEADER FIXES ──────────────────────────────────────────────
+
+// 2.1 Hide "AWA MCP" / "Painel MCP" badge visible to public
+a[title="Painel MCP"],
+a[title*="MCP"],
+.page-header a[href*="customer/account"][title*="MCP"],
+.awa-site-header a[title*="MCP"],
+.header.content > a[title*="MCP"] {
+  display: none !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  pointer-events: none !important;
+}
+
+// 2.2 Fix navigation items stacking vertically (LANÇAMENTOS, CATÁLOGO)
+// These items appear outside the .top-menu container, causing them to stack
+body .page-wrapper .awa-site-header .awa-nav-bar {
+  .awa-header-primary-nav {
+    display: flex !important;
+    align-items: center !important;
+    flex-direction: row !important;
+
+    // The nav-sections may render secondary menu items as siblings to .top-menu
+    > ul,
+    > .section-item-content > ul {
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      list-style: none !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      height: 100% !important;
+
+      > li {
+        display: flex !important;
+        align-items: center !important;
+        height: 100% !important;
+
+        > a {
+          display: flex !important;
+          align-items: center !important;
+          height: 100% !important;
+          white-space: nowrap !important;
+          color: #fff !important;
+          font-weight: 500 !important;
+          font-size: 13px !important;
+          padding: 0 16px !important;
+          text-decoration: none !important;
+          transition: background 0.15s ease !important;
+          background: transparent !important;
+
+          &:hover,
+          &:focus-visible {
+            background: var(--awa-primary-hover) !important;
+          }
+        }
+      }
+    }
+  }
+
+  // Ensure nav-sections-items sits in row as well
+  .nav-sections-items,
+  .section-items {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    height: 100% !important;
+
+    > .section-item-content {
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      height: 100% !important;
+    }
+  }
+}
+
+// 2.3 Ensure search bar has proper dimensions
+body .page-wrapper .awa-site-header #search,
+body .page-wrapper .awa-site-header input#search,
+body .page-wrapper .awa-site-header .block-search input.input-text {
+  height: 44px !important;
+  border-radius: 8px !important;
+}
+
+body .page-wrapper .awa-site-header .block-search form,
+body .page-wrapper .awa-site-header #search_mini_form {
+  border-radius: 8px !important;
+}
+
+// 2.4 Nav background fix — ensure var(--awa-primary)
+.nav-sections,
+.awa-nav-bar {
+  background: var(--awa-primary) !important;
+}
+
+// 2.5 Logo max-height 48px
+.header.content .logo img,
+.awa-header-brand .logo img {
+  max-height: 48px !important;
+}
+
+// ── ETAPA 3: HOMEPAGE SECTION FIXES ────────────────────────────────────
+
+// 3.2 Hero slider — mark circular CTAs (cannot fix URLs via CSS but style them)
+// The "Ver Produtos" buttons point to / — this is a CMS issue
+// [BROKEN_CTA] — Registered in QA report
+
+// 3.3 Benefits bar — ensure 4 columns horizontal on desktop
+.block-static-block .box-benefit-home,
+.benefit-block,
+.cms-home .faixa-beneficios {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-around !important;
+  flex-wrap: nowrap !important;
+  border-top: 1px solid var(--awa-border) !important;
+  border-bottom: 1px solid var(--awa-border) !important;
+  padding: 16px 0 !important;
+
+  @media (max-width: 768px) {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+    flex-wrap: wrap !important;
+  }
+}
+
+// 3.5 "Mais Vendidos" grid — ensure 4 exact columns
+.bestseller-container .product-items,
+.featured-container .product-items,
+.onsale-container .product-items,
+.newproducts-container .product-items {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: var(--awa-gap-card, 16px) !important;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+// Product card height consistency
+.product-item {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.product-item .product-item-details {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 !important;
+}
+
+.product-item .price-box {
+  margin-top: auto !important;
+}
+
+// 3.7 Super Ofertas — hide "Sold: 0"
+.superdeals-container [data-sold="0"],
+.superdeals-container .sold-count:empty,
+.superdeals-container .progress-bar[data-sold="0"] {
+  display: none !important;
+}
+
+// Super Ofertas 5 cols on desktop
+.superdeals-container .product-items {
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  gap: var(--awa-gap-card, 16px) !important;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  @media (max-width: 600px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+// 3.8 Tabs "Os Principais" — active tab indicator
+.categorytab-container .tabs li.active a,
+.categorytab-container .tabs li.ui-tabs-active a,
+.producttab-container .tabs li.active a {
+  border-bottom: 2px solid var(--awa-primary, #b73337) !important;
+}
+
+// ── ETAPA 4: CATEGORY PAGE FIXES ───────────────────────────────────────
+
+// 4.1 Toolbar buttons
+.toolbar-products .modes-mode {
+  width: 36px !important;
+  height: 36px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+// 4.2 Sidebar filters
+.sidebar .filter-options-item {
+  border: 1px solid var(--awa-border, #e5e5e5) !important;
+  border-radius: var(--awa-radius-md, 8px) !important;
+  margin-bottom: 12px !important;
+  overflow: hidden !important;
+}
+
+// Checkboxes with brand color
+.sidebar .filter-options input[type="checkbox"] {
+  accent-color: var(--awa-primary, #b73337) !important;
+}
+
+// 4.3 Category page grid
+.category-products .products-grid .product-items,
+.catalog-category-view .products-grid .product-items {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 16px !important;
+
+  @media (max-width: 1200px) {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  @media (max-width: 960px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  @media (max-width: 640px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+// Category sidebar width
+.catalog-category-view .sidebar {
+  width: 260px !important;
+  flex: 0 0 260px !important;
+
+  @media (max-width: 960px) {
+    display: none !important;
+  }
+}
+
+// Pagination active button
+.pages .items .item.current .page,
+.pages .items .item.current a {
+  background: var(--awa-primary, #b73337) !important;
+  color: #fff !important;
+  border-color: var(--awa-primary, #b73337) !important;
+}
+
+// CTA button on category page
+.product-item .action.tocart,
+.product-item .action.primary {
+  background: var(--awa-primary, #b73337) !important;
+  height: 38px !important;
+  width: 100% !important;
+  border: none !important;
+  color: #fff !important;
+  border-radius: var(--awa-radius-md, 8px) !important;
+}
+
+// ── ETAPA 5: PRODUCT PAGE (PDP) FIXES ──────────────────────────────────
+
+// Breadcrumb links
+.breadcrumbs a {
+  color: var(--awa-primary, #b73337) !important;
+}
+
+// Product name
+.catalog-product-view .page-title-wrapper h1.page-title {
+  font-size: 22px !important;
+  font-weight: 700 !important;
+}
+
+// SKU
+.catalog-product-view .product.attribute.sku .value {
+  font-size: 12px !important;
+  color: var(--awa-text-light, #999) !important;
+}
+
+// Gallery — active thumbnail border
+.catalog-product-view .fotorama__thumb-border {
+  border: 2px solid var(--awa-primary, #b73337) !important;
+}
+
+// Price hierarchy
+.catalog-product-view .old-price .price {
+  text-decoration: line-through !important;
+  color: var(--awa-text-light, #999) !important;
+}
+
+.catalog-product-view .price-final_price .price,
+.catalog-product-view .special-price .price {
+  font-size: 24px !important;
+  font-weight: 700 !important;
+}
+
+// Buy button
+.catalog-product-view .box-tocart .action.tocart {
+  min-height: 48px !important;
+  background: var(--awa-primary, #b73337) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: var(--awa-radius-md, 8px) !important;
+  font-weight: 600 !important;
+  font-size: 16px !important;
+}
+
+// Description
+.catalog-product-view .product.attribute.description {
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+}
+
+// Related products grid
+.catalog-product-view .block.related .product-items,
+.catalog-product-view .block.upsell .product-items {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 16px !important;
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+// PDP mobile: gallery stacks above info
+@media (max-width: 768px) {
+  .catalog-product-view .product-info-main {
+    width: 100% !important;
+  }
+
+  .catalog-product-view .product.media {
+    width: 100% !important;
+    margin-bottom: 20px !important;
+  }
+}
+
+// ── ETAPA 6: FORMS AND STATES ──────────────────────────────────────────
+
+// 6.1 Login page — hide newsletter popup
+.b2b-account-login .modal-popup.newsletter-modal,
+.b2b-account-login .modals-wrapper .modal-popup {
+  display: none !important;
+}
+
+// Login inputs
+.b2b-account-login input[type="text"],
+.b2b-account-login input[type="email"],
+.b2b-account-login input[type="password"],
+.customer-account-login input[type="text"],
+.customer-account-login input[type="email"],
+.customer-account-login input[type="password"] {
+  height: 44px !important;
+  border: 1.5px solid var(--awa-border, #e5e5e5) !important;
+  border-radius: var(--awa-radius-md, 8px) !important;
+  padding: 0 16px !important;
+  font-size: 14px !important;
+  transition: border-color 0.2s ease !important;
+
+  &:focus {
+    border-color: var(--awa-primary, #b73337) !important;
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(183, 51, 55, 0.1) !important;
+  }
+}
+
+// Login button
+.b2b-account-login .action.login,
+.customer-account-login .action.login {
+  height: 46px !important;
+  background: var(--awa-primary, #b73337) !important;
+  color: #fff !important;
+  width: 100% !important;
+  border: none !important;
+  border-radius: var(--awa-radius-md, 8px) !important;
+  font-weight: 600 !important;
+  font-size: 16px !important;
+  cursor: pointer !important;
+
+  &:hover {
+    background: var(--awa-primary-hover, #8e2629) !important;
+  }
+}
+
+// Login page — 2 columns on desktop
+@media (min-width: 768px) {
+  .b2b-account-login .columns,
+  .customer-account-login .columns {
+    display: flex !important;
+    gap: 40px !important;
+
+    .column.main {
+      flex: 1 !important;
+    }
+
+    .sidebar {
+      flex: 1 !important;
+    }
+  }
+}
+
+// Login page — 1 column on mobile
+@media (max-width: 767px) {
+  .b2b-account-login .columns,
+  .customer-account-login .columns {
+    flex-direction: column !important;
+  }
+}
+
+// ── ETAPA 7: MOBILE OVERFLOW PREVENTION ─────────────────────────────────
+
+// Global overflow prevention
+html,
+body {
+  overflow-x: hidden !important;
+}
+
+// Ensure all wide elements don't overflow
+img,
+video,
+iframe,
+table,
+.owl-carousel {
+  max-width: 100% !important;
+}
+
+// Container overflow prevention
+.page-wrapper {
+  overflow-x: hidden !important;
+}
+
+@media (max-width: 480px) {
+  // Prevent hero slider overflow
+  .owl-carousel .owl-stage-outer,
+  .slide-banner-container {
+    overflow: hidden !important;
+  }
+
+  // Fix nav items on very small screens
+  .nav-sections {
+    overflow-x: hidden !important;
+  }
+}
+
+// ── ETAPA 8: CONSISTENCY ────────────────────────────────────────────────
+
+// Footer background consistency
+.page-footer {
+  background: var(--awa-bg-dark, #1a1a1a) !important;
+}
+
+// Footer responsive — 4 cols at 1440, 2 at 900, 1 at 480
+.footer.content {
+  @media (max-width: 900px) and (min-width: 481px) {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr !important;
+  }
+}

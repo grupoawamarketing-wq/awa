@@ -16,6 +16,8 @@ if (!$collection || !$collection->getSize()) {
 $canShowPrice = $block->canShowPrice();
 $priceMessage = $escaper->escapeHtml($block->getPriceReplacementMessage());
 $imageType    = 'category_page_grid';
+$addLabel     = $escaper->escapeHtml(__('Adicionar'));
+$soldOutLabel = $escaper->escapeHtml(__('Produto esgotado'));
 ?>
 
 <section class="awa-pdp-related" aria-labelledby="awa-pdp-related-heading">
@@ -72,14 +74,41 @@ $imageType    = 'category_page_grid';
                                 </span>
                             </div>
                             <?php endif; ?>
+
+                            <div class="product-actions">
+                                <?php if ($canShowPrice && $product->isSaleable()): ?>
+                                    <?php $postParams = $block->getAddToCartPostParams($product); ?>
+                                    <?php if (!empty($postParams['action']) && !empty($postParams['data']) && is_array($postParams['data'])): ?>
+                                    <form data-role="tocart-form"
+                                          class="related-tocart-form"
+                                          action="<?= $escaper->escapeUrl((string) $postParams['action']) ?>"
+                                          method="post">
+                                        <?php foreach ($postParams['data'] as $key => $value): ?>
+                                        <input type="hidden"
+                                               name="<?= $escaper->escapeHtmlAttr((string) $key) ?>"
+                                               value="<?= $escaper->escapeHtmlAttr((string) $value) ?>">
+                                        <?php endforeach; ?>
+                                        <button type="submit"
+                                                class="action tocart primary related-addtocart"
+                                                aria-label="<?= $escaper->escapeHtmlAttr(__('Adicionar %1 ao carrinho', $product->getName())) ?>">
+                                            <span><?= /* @noEscape */ $addLabel ?></span>
+                                        </button>
+                                    </form>
+                                    <?php endif; ?>
+                                <?php elseif ($canShowPrice): ?>
+                                    <div class="stock unavailable" aria-live="polite">
+                                        <span><?= /* @noEscape */ $soldOutLabel ?></span>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
                         </div>
 
                     </div>
                 </div>
                 <?php endforeach; ?>
             </div>
-            <div class="swiper-button-next"></div>
-            <div class="swiper-button-prev"></div>
+            <div class="swiper-button-next" aria-label="<?= $escaper->escapeHtmlAttr(__('Próximo')) ?>"></div>
+            <div class="swiper-button-prev" aria-label="<?= $escaper->escapeHtmlAttr(__('Anterior')) ?>"></div>
         </div>
     </div>
 

@@ -1,9 +1,16 @@
-<?php /** @var $block GrupoAwamotos\Fitment\Block\Fallback\Results */ ?>
+<?php
+/** @var $block GrupoAwamotos\Fitment\Block\Fallback\Results */
+declare(strict_types=1);
+
+$addToCartLabel = __('Adicionar');
+$viewDetailsLabel = __('Ver detalhes');
+$soldOutLabel = __('Produto esgotado');
+?>
 <div class="page-title-wrapper">
     <h1 class="page-title"><span class="base"><?= __('Resultados da busca') ?></span></h1>
 </div>
 <div class="page-products fallback-search-results">
-    <form class="fallback-search-form" action="<?= $block->getUrl('fitment/fallback/index') ?>" method="get" aria-label="Formulário de busca fallback">
+    <form class="fallback-search-form" action="<?= $block->escapeUrl($block->getUrl('fitment/fallback/index')) ?>" method="get" aria-label="Formulário de busca fallback">
         <input type="text" name="q" value="<?= $block->escapeHtml($block->getQuery()) ?>" placeholder="<?= __('Buscar produtos (fallback)') ?>" aria-label="Campo de busca" />
         <button type="submit" class="action primary" aria-label="<?= __('Buscar') ?>"><span><?= __('Buscar') ?></span></button>
         <div class="toolbar" role="toolbar" aria-label="Ferramentas de busca">
@@ -61,7 +68,7 @@
                     <a class="product photo product-item-photo" href="<?= $block->escapeUrl($product->getProductUrl()) ?>">
                         <?php $img = $block->getImageUrl($product, 'category_page_grid'); ?>
                         <?php if ($img): ?>
-                            <img src="<?= $block->escapeUrl($img) ?>" alt="<?= $block->escapeHtmlAttr($product->getName()) ?>" loading="lazy" />
+                            <img src="<?= $block->escapeUrl($img) ?>" alt="<?= $block->escapeHtmlAttr($product->getName()) ?>" loading="lazy" decoding="async" />
                         <?php endif; ?>
                     </a>
                     <div class="product details product-item-details">
@@ -80,20 +87,20 @@
                             <?php if ($product->isAvailable()): ?>
                                 <span class="availability in-stock"><span><?= __('Em estoque') ?></span></span>
                             <?php else: ?>
-                                <span class="availability out-of-stock"><span><?= __('Sem estoque') ?></span></span>
+                                <span class="availability out-of-stock"><span><?= $block->escapeHtml($soldOutLabel) ?></span></span>
                             <?php endif; ?>
                         </div>
                         <div class="product-item-actions">
                             <?php if ($product->isSaleable() && !$product->getTypeInstance()->hasRequiredOptions($product)): ?>
-                                <form data-role="tocart-form" action="<?= $block->getUrl('checkout/cart/add') ?>" method="post">
+                                <form data-role="tocart-form" action="<?= $block->escapeUrl($block->getUrl('checkout/cart/add')) ?>" method="post">
                                     <?= $block->getBlockHtml('formkey') ?>
                                     <input type="hidden" name="product" value="<?= (int)$product->getId() ?>" />
-                                    <button type="submit" title="<?= $block->escapeHtmlAttr(__('Add to Cart')) ?>" class="action tocart primary">
-                                        <span><?= __('Add to Cart') ?></span>
+                                    <button type="submit" title="<?= $block->escapeHtmlAttr($addToCartLabel) ?>" class="action tocart primary">
+                                        <span><?= $block->escapeHtml($addToCartLabel) ?></span>
                                     </button>
                                 </form>
                             <?php else: ?>
-                                <a class="action primary" href="<?= $block->escapeUrl($product->getProductUrl()) ?>"><span><?= __('View Details') ?></span></a>
+                                <a class="action primary" href="<?= $block->escapeUrl($product->getProductUrl()) ?>"><span><?= $block->escapeHtml($viewDetailsLabel) ?></span></a>
                             <?php endif; ?>
                             <!-- B2B: Wishlist e Compare removidos - desnecessários para autopeças B2B -->
                         </div>
