@@ -1,5 +1,5 @@
-/** AWA Service Worker v2.4.2 — Multi-strategy Cache (2026-04-02) */
-const CACHE_VERSION = 'awa-v20260402-2';
+/** AWA Service Worker v2.4.3 — Multi-strategy Cache (2026-04-05) */
+const CACHE_VERSION = 'awa-v20260405-1';
 const FONT_CACHE = 'awa-fonts-v1';
 const IMAGE_CACHE = 'awa-images-v1';
 const IMAGE_CACHE_MAX = 300; // max entries
@@ -78,7 +78,7 @@ self.addEventListener('fetch', (event) => {
           return fetch(event.request).then((response) => {
             if (response.ok) cache.put(event.request, response.clone());
             return response;
-          });
+          }).catch(() => cached || Response.error());
         })
       )
     );
@@ -124,7 +124,7 @@ self.addEventListener('fetch', (event) => {
           return fetch(event.request).then((response) => {
             if (response.ok) cache.put(event.request, response.clone());
             return response;
-          });
+          }).catch(() => cached || Response.error());
         })
       )
     );
