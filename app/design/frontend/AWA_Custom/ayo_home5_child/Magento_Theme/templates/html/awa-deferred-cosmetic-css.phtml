@@ -20,6 +20,10 @@ $deferredFiles = [];
 if (in_array('cms_index_index', $block->getLayout()->getUpdate()->getHandles(), true)) {
     $deferredFiles[] = $block->getViewFileUrl('css/awa-bundle-cosmetic-home.css');
 }
+
+// Visual audit v2: loads LAST to override all prior async bundles (cascade order)
+// Also loaded sync in default_head_blocks.xml for critical nav fixes.
+$deferredFiles[] = $block->getViewFileUrl('css/awa-visual-audit-v2.css');
 ?>
 <?php foreach ($deferredFiles as $cssUrl): ?>
 <link rel="stylesheet"
@@ -28,3 +32,23 @@ if (in_array('cms_index_index', $block->getLayout()->getUpdate()->getHandles(), 
       onload="this.media='all'"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($cssUrl) ?>"/></noscript>
 <?php endforeach; ?>
+<script>
+/* AWA-FIX-2026-04-06: Force dark backgrounds after all CSS/JS loads */
+(function(){
+  function awaDarkFix(){
+    var s='#1a1a1a';
+    document.querySelectorAll('.footer-container,.footer-container.layout2,#footer').forEach(function(el){
+      el.style.setProperty('background',s,'important');
+      el.style.setProperty('background-image','none','important');
+    });
+    document.querySelectorAll('.top-header,.top-header.awa-utility-bar,.panel.wrapper').forEach(function(el){
+      el.style.setProperty('background',s,'important');
+      el.style.setProperty('background-image','none','important');
+      el.style.setProperty('color','#ccc','important');
+    });
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',function(){setTimeout(awaDarkFix,1500);})}
+  else{setTimeout(awaDarkFix,1500);}
+  window.addEventListener('load',function(){setTimeout(awaDarkFix,500);});
+})();
+</script>

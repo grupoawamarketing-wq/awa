@@ -1,0 +1,110 @@
+<?php
+/**
+ * AWA PDP — Produtos que Você Também Pode Gostar
+ *
+ * Reutiliza a coleção de mais visualizados como seção de
+ * "produtos relacionados" no PDP. Título customizado para contexto de PDP.
+ *
+ * @var \Rokanthemes\MostviewedProduct\Block\Mostviewed $block
+ */
+declare(strict_types=1);
+
+use Magento\Framework\App\Action\Action;
+
+if (!$this->getConfig('enabled')) {
+    return;
+}
+
+$_productCollection = $this->getProducts();
+if (!$_productCollection || !$_productCollection->getSize()) {
+    return;
+}
+
+$_helper    = $this->helper('Magento\Catalog\Helper\Output');
+$image      = 'category_page_grid';
+$templateType = \Magento\Catalog\Block\Product\ReviewRendererInterface::SHORT_VIEW;
+?>
+
+<section class="awa-pdp-mostviewed" aria-labelledby="awa-pdp-mv-heading">
+
+    <div class="rokan-product-heading rokan-featured-heading">
+        <h2 id="awa-pdp-mv-heading">
+            <?= $block->escapeHtml(__('Você também pode se interessar')) ?>
+        </h2>
+    </div>
+
+    <div class="rokan-mostviewed">
+        <div class="swiper products-swiper products-swiper--mostviewed">
+            <div class="swiper-wrapper">
+                <?php $i = 0; foreach ($_productCollection as $_product): if ($i >= 8) { break; } ?>
+                <div class="swiper-slide">
+                <div class="product-item">
+                    <?php
+                    $productImage      = $block->getImage($_product, $image);
+                    $productImageThumb = $block->getImage($_product, 'category_image_second_small');
+                    ?>
+                    <div class="product-thumb">
+                        <a href="<?= $block->escapeUrl($_product->getProductUrl()) ?>"
+                           class="product-thumb-link product photo product-item-photo"
+                           aria-label="<?= $block->escapeHtmlAttr($_product->getName()) ?>"
+                           tabindex="-1">
+                            <span class="first-thumb">
+                                <?php
+                                $_imgHtml = $productImage->toHtml();
+                                $_imgHtml = str_replace('loading="eager"', 'loading="lazy"', $_imgHtml);
+                                if (strpos($_imgHtml, 'loading=') === false) {
+                                    $_imgHtml = str_replace('<img ', '<img loading="lazy" decoding="async" ', $_imgHtml);
+                                }
+                                echo $_imgHtml; ?>
+                            </span>
+                        </a>
+                    </div>
+
+                    <div class="product-info">
+                        <div class="product-name">
+                            <a class="product-item-link"
+                               href="<?= $block->escapeUrl($_product->getProductUrl()) ?>"
+                               title="<?= $block->escapeHtmlAttr($_product->getName()) ?>">
+                                <?= $block->escapeHtml($_product->getName()) ?>
+                            </a>
+                        </div>
+
+                        <?php if ($this->getConfig('show_price')): ?>
+                        <div class="price-box">
+                            <?= /* @noEscape */ $block->getProductPrice($_product) ?>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                </div>
+                <?php $i++; endforeach; ?>
+            </div>
+
+            <?php if ($this->getConfig('next_back')): ?>
+            <div class="swiper-button-prev" aria-label="<?= $block->escapeHtmlAttr(__('Anterior')) ?>"></div>
+            <div class="swiper-button-next" aria-label="<?= $block->escapeHtmlAttr(__('Próximo')) ?>"></div>
+            <?php endif; ?>
+        </div>
+    </div>
+
+</section>
+
+<script type="text/x-magento-init">
+{
+    ".awa-pdp-mostviewed": {
+        "js/products-swiper-init": {
+            "carouselSelector": ".products-swiper--mostviewed",
+            "owl": {
+                "items": 4,
+                "itemsDesktop": [1366, 4],
+                "itemsDesktopSmall": [980, 3],
+                "itemsTablet": [768, 2],
+                "itemsMobile": [479, 1],
+                "navigation": true,
+                "pagination": false,
+                "margin": 16
+            }
+        }
+    }
+}
+</script>

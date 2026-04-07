@@ -1,0 +1,95 @@
+<?php
+/**
+ * AWA PDP — Especificações Técnicas
+ *
+ * Exibe atributos visíveis no frontend em tabela estruturada.
+ * PDF (product_manual_pdf) renderizado como link de download separado.
+ *
+ * @var \Magento\Catalog\Block\Product\View\Attributes $block
+ */
+declare(strict_types=1);
+
+$_additional = $block->getAdditionalData();
+if (empty($_additional)) {
+    return;
+}
+
+$_product    = $block->getProduct();
+$_helper     = $this->helper(\Magento\Catalog\Helper\Output::class);
+
+// Separa PDF dos demais; descarta atributos sem valor real
+$pdfUrl    = '';
+$tableRows = [];
+foreach ($_additional as $_data) {
+    $rendered = (string) $_helper->productAttribute($_product, $_data['value'], $_data['code']);
+    $plain    = trim(strip_tags($rendered));
+    if ($plain === '' || $plain === '-' || $plain === 'N/A') {
+        continue;
+    }
+    if ($_data['code'] === 'product_manual_pdf') {
+        $pdfUrl = filter_var($plain, FILTER_VALIDATE_URL) ? $plain : '';
+        continue;
+    }
+    $tableRows[] = $_data;
+}
+
+if (empty($tableRows) && $pdfUrl === '') {
+    return;
+}
+?>
+
+<section class="awa-pdp-specs" aria-labelledby="awa-pdp-specs-heading">
+    <h2 class="awa-pdp-specs__heading" id="awa-pdp-specs-heading">
+        <?= $block->escapeHtml(__('Especificações Técnicas')) ?>
+    </h2>
+
+    <div class="awa-pdp-specs__body">
+
+        <?php if (!empty($tableRows)): ?>
+        <div class="additional-attributes-wrapper table-wrapper">
+            <table class="data table additional-attributes awa-b2b-zebra-table awa-pdp-specs__table"
+                   id="awa-product-attribute-specs-table">
+                <caption class="table-caption sr-only">
+                    <?= $block->escapeHtml(__('Especificações do produto')) ?>
+                </caption>
+                <tbody>
+                <?php foreach ($tableRows as $_data): ?>
+                    <tr>
+                        <th class="col label" scope="row">
+                            <?= $block->escapeHtml(__($_data['label'])) ?>
+                        </th>
+                        <td class="col data awa-pdp-specs__value"
+                            data-th="<?= $block->escapeHtmlAttr($_data['label']) ?>">
+                            <?= /* @noEscape */ $_helper->productAttribute($_product, $_data['value'], $_data['code']) ?>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+        <?php endif; ?>
+
+        <?php if ($pdfUrl !== ''): ?>
+        <div class="awa-pdp-specs__pdf">
+            <a href="<?= $block->escapeUrl($pdfUrl) ?>"
+               class="awa-pdp-specs__pdf-link"
+               target="_blank"
+               rel="noopener"
+               aria-label="<?= $block->escapeHtmlAttr(__('Baixar ficha técnica em PDF')) ?>">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                     viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                     aria-hidden="true">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                    <polyline points="10 9 9 9 8 9"/>
+                </svg>
+                <?= $block->escapeHtml(__('Ficha Técnica (PDF)')) ?>
+            </a>
+        </div>
+        <?php endif; ?>
+
+    </div>
+</section>

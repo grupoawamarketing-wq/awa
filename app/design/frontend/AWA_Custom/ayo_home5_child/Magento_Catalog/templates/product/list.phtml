@@ -116,10 +116,12 @@ if ($_b2bActive) {
                         $position = ' style="left:' . $productImage->getWidth() . 'px;'
                             . 'top:' . $productImage->getHeight() . 'px;"';
                     }
-	                    // Build responsive srcset and sizes
-	                    $srcset = $block->escapeUrl($productImage->getImageUrl()) . ' 700w, '
-	                            . $block->escapeUrl($productImageSm->getImageUrl()) . ' 350w';
-	                    $sizes = '(max-width: 767px) 45vw, (max-width: 991px) 30vw, 25vw';
+	                    // Build responsive srcset and sizes (sm=350w, md=480w, lg=700w)
+	                    $productImageMd = $block->getImage($_product, 'category_page_list');
+	                    $srcset = $block->escapeUrl($productImageSm->getImageUrl()) . ' 350w, '
+	                            . $block->escapeUrl($productImageMd->getImageUrl()) . ' 480w, '
+	                            . $block->escapeUrl($productImage->getImageUrl()) . ' 700w';
+	                    $sizes = '(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw';
 	                    $imgOnError = "this.onerror=null;this.removeAttribute('srcset');this.src=this.src.replace(/\\/cache\\/[^\\/]+\\//,'/');";
 
 	                    // Above-the-fold: eager load first 4, fetchpriority on first 2
@@ -178,68 +180,6 @@ if ($_b2bActive) {
 								</li>
 							</ul>
 						</div>
-						<div class="product-info-cart">
-							<div class="actions-primary addcart-link">
-								<?php if (!$b2bCanAddToCart): ?>
-<div class="awa-b2b-gate-card awa-b2b-gate-card--compact" data-awa-gate-state="<?= /* @noEscape */ $b2bGateState ?>" aria-hidden="true">
-									<span class="awa-b2b-gate-card__badge"><?= $block->escapeHtml(__('Acesso B2B Exclusivo')) ?></span>
-								<div class="awa-b2b-gate-card__title"><?= /* @noEscape */ $b2bGateHeadline ?></div>
-								<div class="awa-b2b-gate-card__description"><?= /* @noEscape */ $b2bGateDescription ?></div>
-									<div class="awa-b2b-gate-card__actions">
-										<a class="awa-b2b-gate-card__action" href="<?= /* @noEscape */ $b2bPrimaryUrl ?>" tabindex="-1"><?= /* @noEscape */ $b2bPrimaryLabel ?></a>
-										<a class="awa-b2b-gate-card__action awa-b2b-gate-card__action--secondary" href="<?= /* @noEscape */ $b2bSecondaryUrl ?>" tabindex="-1"><?= /* @noEscape */ $b2bSecondaryLabel ?></a>
-										</div>
-									</div>
-								<?php elseif ($_product->isSaleable()): ?>
-									<?php $postParams = $block->getAddToCartPostParams($_product); ?>
-									<form data-role="tocart-form" action="<?php echo $block->escapeUrl($postParams['action']); ?>" method="post">
-										<input type="hidden" name="product" value="<?php echo $block->escapeHtmlAttr($postParams['data']['product']); ?>">
-										<input type="hidden" name="<?php echo $block->escapeHtmlAttr(Action::PARAM_NAME_URL_ENCODED); ?>" value="<?php echo $block->escapeHtmlAttr($postParams['data'][Action::PARAM_NAME_URL_ENCODED]); ?>">
-										<?php echo $block->getBlockHtml('formkey')?>
-
-										<?php /* B2B QUANTITY BOX INJECTION */ ?>
-										<div class="awa-catalog-qty-box field qty"
-											 data-mage-init='{"js/awa-qty-control": {}}'>
-											<label class="label awa-sr-only" for="qty_<?php echo $_product->getId(); ?>"><span><?php echo __('Qty') ?></span></label>
-											<div class="control awa-qty-stepper">
-												<button type="button" class="awa-qty-btn"
-														data-awa-role="qty-trigger"
-														data-awa-direction="decrement"
-														aria-label="<?php echo $block->escapeHtmlAttr(__('Diminuir quantidade')) ?>">−</button>
-												<input type="number"
-													   name="qty"
-													   id="qty_<?php echo $_product->getId(); ?>"
-													   min="1"
-													   value="1"
-													   title="<?php echo __('Qty') ?>"
-													   class="input-text qty"
-													   data-awa-role="qty-input"
-													   data-validate="<?php echo $block->escapeHtml(json_encode($block->getQuantityValidators())) ?>"
-													   />
-												<button type="button" class="awa-qty-btn"
-														data-awa-role="qty-trigger"
-														data-awa-direction="increment"
-														aria-label="<?php echo $block->escapeHtmlAttr(__('Aumentar quantidade')) ?>">+</button>
-											</div>
-										</div>
-
-										<button type="submit"
-												title="<?php echo $block->escapeHtml(__('Add to Cart')); ?>"
-												aria-label="<?php echo $block->escapeHtml(__('Adicionar %1 ao Carrinho', $_product->getName())); ?>"
-												class="btn-add-to-cart action tocart addcart-link b2b-primary-btn">
-											 <span><?php echo $block->escapeHtml(__('Add to Cart')); ?></span>
-										</button>
-									</form>
-								<?php else: ?>
-									<?php if ($_product->getIsSalable()): ?>
-										<div class="stock available"><span><?php echo $block->escapeHtml(__('In stock')); ?></span></div>
-									<?php else: ?>
-										<div class="stock unavailable"><span><?php echo $block->escapeHtml(__('Out of stock')); ?></span></div>
-									<?php endif; ?>
-								<?php endif; ?>
-							</div>
-
-						</div>
                 	</div>
 						<div class="product-info">
 							<h3 class="product-name">
@@ -261,6 +201,30 @@ if ($_b2bActive) {
 						</div>
 						<div class="info-price">
 						<?php /* @noEscape */ echo $this->helper('Rokanthemes\Themeoption\Helper\Data')->getPriceDisplayCustom($block->getProductPrice($_product)); ?>
+						</div>
+						<div class="product-info-cart">
+							<div class="actions-primary addcart-link">
+								<?php if ($_product->isSaleable()): ?>
+								<?php $postParams = $block->getAddToCartPostParams($_product); ?>
+								<form data-role="tocart-form" action="<?php echo $block->escapeUrl($postParams['action']); ?>" method="post">
+									<input type="hidden" name="product" value="<?php echo $block->escapeHtmlAttr($postParams['data']['product']); ?>">
+									<input type="hidden" name="<?php echo $block->escapeHtmlAttr(Action::PARAM_NAME_URL_ENCODED); ?>" value="<?php echo $block->escapeHtmlAttr($postParams['data'][Action::PARAM_NAME_URL_ENCODED]); ?>">
+									<?php echo $block->getBlockHtml('formkey')?>
+									<button type="submit"
+									    title="<?php echo $block->escapeHtml(__('Add to Cart')); ?>"
+									    aria-label="<?php echo $block->escapeHtml(__('Adicionar %1 ao Carrinho', $_product->getName())); ?>"
+									    class="btn-add-to-cart action tocart addcart-link b2b-primary-btn">
+									    <span><?php echo $block->escapeHtml(__('Add to Cart')); ?></span>
+									</button>
+								</form>
+								<?php else: ?>
+								<?php if ($_product->getIsSalable()): ?>
+									<div class="stock available"><span><?php echo $block->escapeHtml(__('In stock')); ?></span></div>
+								<?php else: ?>
+									<div class="stock unavailable"><span><?php echo $block->escapeHtml(__('Out of stock')); ?></span></div>
+								<?php endif; ?>
+								<?php endif; ?>
+							</div>
 						</div>
 						<?php /* compare desativado */ ?>
 					</div>

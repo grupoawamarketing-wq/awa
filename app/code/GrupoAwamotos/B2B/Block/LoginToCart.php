@@ -17,7 +17,7 @@ use Magento\Framework\View\Element\Template\Context;
 
 class LoginToCart extends Template
 {
-    private const LOGIN_TO_CART_CSS_ASSET = 'GrupoAwamotos_B2B::css/login-to-cart.css';
+    private const LOGIN_TO_CART_CSS_ASSET = 'GrupoAwamotos_B2B::css/product/login-to-cart.css';
     private const LOGIN_TO_CART_CSS_ASSET_NAME = 'grupoawamotos_b2b_login_to_cart_css';
 
     /**

@@ -53,24 +53,26 @@ $bestsellerHtml  = $bestsellerBlock ? trim((string)$bestsellerBlock->toHtml()) :
 $newproductBlock = $layout->createBlock('Rokanthemes\Newproduct\Block\Newproduct');
 $newproductHtml  = $newproductBlock ? trim((string)$newproductBlock->toHtml()) : '';
 
-/* Category carousels — subcategory IDs for multi-tab layout per Rokanthemes CategoryTab widget.
- * Passing subcategory IDs (not parent) gives one tab per subcategory in the leftBlock panel.
- * Bauletos (45)     → subcats: 34L(46), 41L(75), Acessórios(76), 29L(77)
- * Retrovisores (41) → subcats ordered by count: Arrow(89,17), Cromados(51,13), Esportivos(81,3), Mini(79,2), Original(42,1), Pr.Haste(50,1)
- * Bagageiros (67)   → no subcategories, use parent directly
+/* Category carousels — Product Carousel (OWL) filtrado por categoria.
+ * Usa GrupoAwamotos\Theme\Block\CategoryProductCarousel (estende BestsellerProduct).
+ * category_ids: IDs de subcategoria separados por vírgula.
+ * Bauletos (45)     -> subcats: 34L(46), 41L(75), Acessorios(76), 29L(77)
+ * Retrovisores (41) -> subcats: Arrow(89), Cromados(51), Esportivos(81), Mini(79), Original(42), Pr.Haste(50)
+ * Bagageiros (67)   -> sem subcats, usa categoria pai
  */
-$makeCatCarousel = static function (string $catId, string $identify) use ($layout): string {
-	/** @var \Rokanthemes\Categorytab\Block\CateWidget|null $b */
-	$b = $layout->createBlock('Rokanthemes\Categorytab\Block\CateWidget');
-	if (!$b) return '';
-	$b->setData('category_id', $catId);
-	$b->setData('identify', $identify);
-	return trim((string)$b->setTemplate('Rokanthemes_Categorytab::categorytab/grid-original.phtml')->toHtml());
+$makeCatProductCarousel = static function (string $categoryIds) use ($layout): string {
+    /** @var \GrupoAwamotos\Theme\Block\CategoryProductCarousel|null $b */
+    $b = $layout->createBlock(\GrupoAwamotos\Theme\Block\CategoryProductCarousel::class);
+    if (!$b) return '';
+    $b->setData('category_ids', $categoryIds);
+    $b->setTemplate('Rokanthemes_BestsellerProduct::bestseller.phtml');
+    return trim((string)$b->toHtml());
 };
 
-$bauletosHtml     = $makeCatCarousel('46,75,76,77', 'home-bauletos');
-$retrovisoresHtml = $makeCatCarousel('89,51,81,79,42,50', 'home-retrovisores');
-$bagageirosHtml   = $makeCatCarousel('67', 'home-bagageiros');
+$bauletosHtml     = $makeCatProductCarousel('46,75,76,77');
+$retrovisoresHtml = $makeCatProductCarousel('89,51,81,79,42,50');
+$bagageirosHtml   = $makeCatProductCarousel('67');
+$guidoesHtml      = $makeCatProductCarousel('44,85,120');
 $carouselIconSize = 86;
 $buildCarouselImage = function (string $asset, string $alt) use ($carouselIconSize): string {
 	$webpAsset = str_replace('.png', '.webp', $asset);
@@ -290,18 +292,27 @@ if ($benefitsHtml !== '' && strpos($benefitsHtml, 'velaServicesInner--home5') ==
 
 
 
-<!-- ④b Product Tabs (Lançamentos, Mais Vendidos, Destaques, Promoções) -->
-<?php if ($productTabHtml !== ''): ?>
-<section class="top-home-content top-home-content--product-tabs awa-home-section ayo-home5-section" aria-label="<?php echo $this->escapeHtmlAttr(__('Vitrines de Produtos')); ?>">
-	<div class="container">
-		<?php echo /* @noEscape */ $productTabHtml; ?>
-	</div>
+<!-- ④b Carousel — Guidões -->
+<?php if ($guidoesHtml !== ''): ?>
+<section class="top-home-content awa-home-section awa-carousel-section ayo-home5-section" aria-label="<?= $escaper->escapeHtmlAttr(__('Guidões')) ?>">
+        <div class="container">
+                <header class="awa-section-header">
+                        <div class="awa-section-header__left">
+                                <span class="awa-section-header__eyebrow"><?= $escaper->escapeHtml(__('Categoria')) ?></span>
+                                <h2 class="awa-section-header__title"><?= $escaper->escapeHtml(__('Guidões')) ?></h2>
+                        </div>
+                        <a href="<?= $escaper->escapeUrl($this->getUrl('guidoes')) ?>" class="awa-section-header__link" aria-label="<?= $escaper->escapeHtmlAttr(__('Ver todos os Guidões')) ?>">
+                                <?= $escaper->escapeHtml(__('Ver todos')) ?> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+                        </a>
+                </header>
+                <?= /* @noEscape */ $guidoesHtml ?>
+        </div>
 </section>
 <?php endif; ?>
 
 <!-- ④c Carousel — Bauletos -->
 <?php if ($bauletosHtml !== ''): ?>
-<section class="top-home-content awa-home-section awa-carousel-section awa-carousel-section--category ayo-home5-section" aria-label="<?= $escaper->escapeHtmlAttr(__('Bauletos')) ?>">
+<section class="top-home-content awa-home-section awa-carousel-section ayo-home5-section" aria-label="<?= $escaper->escapeHtmlAttr(__('Bauletos')) ?>">
 	<div class="container">
 		<header class="awa-section-header">
 			<div class="awa-section-header__left">
@@ -309,7 +320,7 @@ if ($benefitsHtml !== '' && strpos($benefitsHtml, 'velaServicesInner--home5') ==
 				<h2 class="awa-section-header__title"><?= $escaper->escapeHtml(__('Bauletos')) ?></h2>
 			</div>
 			<a href="<?= $escaper->escapeUrl($this->getUrl('bauletos')) ?>" class="awa-section-header__link" aria-label="<?= $escaper->escapeHtmlAttr(__('Ver todos os Bauletos')) ?>">
-				<?= $escaper->escapeHtml(__('Ver categoria completa')) ?> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+				<?= $escaper->escapeHtml(__('Ver todos')) ?> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
 			</a>
 		</header>
 		<?= /* @noEscape */ $bauletosHtml ?>
@@ -319,7 +330,7 @@ if ($benefitsHtml !== '' && strpos($benefitsHtml, 'velaServicesInner--home5') ==
 
 <!-- ④d Carousel — Retrovisores -->
 <?php if ($retrovisoresHtml !== ''): ?>
-<section class="top-home-content awa-home-section awa-carousel-section awa-carousel-section--category ayo-home5-section" aria-label="<?= $escaper->escapeHtmlAttr(__('Retrovisores')) ?>">
+<section class="top-home-content awa-home-section awa-carousel-section ayo-home5-section" aria-label="<?= $escaper->escapeHtmlAttr(__('Retrovisores')) ?>">
 	<div class="container">
 		<header class="awa-section-header">
 			<div class="awa-section-header__left">
@@ -327,7 +338,7 @@ if ($benefitsHtml !== '' && strpos($benefitsHtml, 'velaServicesInner--home5') ==
 				<h2 class="awa-section-header__title"><?= $escaper->escapeHtml(__('Retrovisores')) ?></h2>
 			</div>
 			<a href="<?= $escaper->escapeUrl($this->getUrl('retrovisores')) ?>" class="awa-section-header__link" aria-label="<?= $escaper->escapeHtmlAttr(__('Ver todos os Retrovisores')) ?>">
-				<?= $escaper->escapeHtml(__('Ver categoria completa')) ?> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+				<?= $escaper->escapeHtml(__('Ver todos')) ?> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
 			</a>
 		</header>
 		<?= /* @noEscape */ $retrovisoresHtml ?>
@@ -337,7 +348,7 @@ if ($benefitsHtml !== '' && strpos($benefitsHtml, 'velaServicesInner--home5') ==
 
 <!-- ④e Carousel — Bagageiros -->
 <?php if ($bagageirosHtml !== ''): ?>
-<section class="top-home-content awa-home-section awa-carousel-section awa-carousel-section--category ayo-home5-section" aria-label="<?= $escaper->escapeHtmlAttr(__('Bagageiros')) ?>">
+<section class="top-home-content awa-home-section awa-carousel-section ayo-home5-section" aria-label="<?= $escaper->escapeHtmlAttr(__('Bagageiros')) ?>">
 	<div class="container">
 		<header class="awa-section-header">
 			<div class="awa-section-header__left">
@@ -345,7 +356,7 @@ if ($benefitsHtml !== '' && strpos($benefitsHtml, 'velaServicesInner--home5') ==
 				<h2 class="awa-section-header__title"><?= $escaper->escapeHtml(__('Bagageiros')) ?></h2>
 			</div>
 			<a href="<?= $escaper->escapeUrl($this->getUrl('bagageiros')) ?>" class="awa-section-header__link" aria-label="<?= $escaper->escapeHtmlAttr(__('Ver todos os Bagageiros')) ?>">
-				<?= $escaper->escapeHtml(__('Ver categoria completa')) ?> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+				<?= $escaper->escapeHtml(__('Ver todos')) ?> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
 			</a>
 		</header>
 		<?= /* @noEscape */ $bagageirosHtml ?>
@@ -362,18 +373,5 @@ if ($benefitsHtml !== '' && strpos($benefitsHtml, 'velaServicesInner--home5') ==
 </section>
 <?php endif; */ ?>
 
-<!-- ⑨ Coleções / Compre por Categoria -->
-<?php if ($featuredCategoriesHtml !== ''): ?>
-<section class="top-home-content top-home-content--featured-categories awa-home-section ayo-home5-section" aria-label="<?php echo $this->escapeHtmlAttr(__('Compre por categoria')); ?>">
-	<div class="container">
-		<header class="ayo-home5-heading">
-			<span class="ayo-home5-label"><?php echo $this->escapeHtml(__('Coleções')); ?></span>
-			<h2><?php echo $this->escapeHtml(__('Compre por categoria')); ?></h2>
-			<span class="ayo-home5-divider"></span>
-		</header>
-		<?php echo /* @noEscape */ $featuredCategoriesHtml; ?>
-	</div>
-</section>
-<?php endif; ?>
 
 </div>

@@ -1,0 +1,26 @@
+<?php
+/**
+ * A11Y-001 — Fix de acessibilidade: aria-label em links de produto sem texto.
+ * Widgets Rokanthemes (ProductTab, BestsellerProduct, etc.) geram anchors de imagem
+ * sem aria-label. Este script corrige todos ao carregar a página.
+ */
+?>
+<script>
+require(['domReady!'], function () {
+    'use strict';
+    var links = document.querySelectorAll(
+        '.product-item-photo, .product-thumb-link, a.product-item-photo'
+    );
+    links.forEach(function (link) {
+        if (link.getAttribute('aria-label') ||
+            link.getAttribute('aria-labelledby') ||
+            link.textContent.trim()) {
+            return;
+        }
+        var img = link.querySelector('img[alt]');
+        if (img && img.alt && img.alt.trim()) {
+            link.setAttribute('aria-label', img.alt.trim());
+        }
+    });
+});
+</script>
