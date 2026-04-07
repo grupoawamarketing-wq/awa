@@ -120,12 +120,10 @@ class SyncOpenCartBridge
                 ) AS old_cnpj,
                 ce.entity_id AS magento_customer_id
             FROM customer_entity ce
+            LEFT JOIN oc_customer_id_map existing_map
+                ON existing_map.magento_customer_id = ce.entity_id
             WHERE ce.group_id IN ({$groupIds})
-              AND ce.entity_id NOT IN (
-                  SELECT magento_customer_id
-                  FROM oc_customer_id_map
-                  WHERE magento_customer_id IS NOT NULL
-              )
+              AND existing_map.magento_customer_id IS NULL
             ON DUPLICATE KEY UPDATE
                 old_email = VALUES(old_email),
                 old_cnpj = VALUES(old_cnpj),
@@ -305,12 +303,12 @@ class SyncOpenCartBridge
                 ce.created_at AS date_added
             FROM oc_customer_id_map map
             INNER JOIN customer_entity ce ON ce.entity_id = map.magento_customer_id
-            LEFT JOIN customer_address_entity ca ON ca.parent_id = ce.entity_id
-                AND ca.entity_id = (
-                    SELECT MIN(ca2.entity_id)
-                    FROM customer_address_entity ca2
-                    WHERE ca2.parent_id = ce.entity_id
-                )
+            LEFT JOIN (
+                SELECT parent_id, MIN(entity_id) AS entity_id
+                FROM customer_address_entity
+                GROUP BY parent_id
+            ) first_addr ON first_addr.parent_id = ce.entity_id
+            LEFT JOIN customer_address_entity ca ON ca.entity_id = first_addr.entity_id
             WHERE map.magento_customer_id IS NOT NULL
             ON DUPLICATE KEY UPDATE
                 firstname = VALUES(firstname),
@@ -400,12 +398,12 @@ class SyncOpenCartBridge
                 ce.created_at AS date_added
             FROM oc_customer_id_map map
             INNER JOIN customer_entity ce ON ce.entity_id = map.magento_customer_id
-            LEFT JOIN customer_address_entity ca ON ca.parent_id = ce.entity_id
-                AND ca.entity_id = (
-                    SELECT MIN(ca2.entity_id)
-                    FROM customer_address_entity ca2
-                    WHERE ca2.parent_id = ce.entity_id
-                )
+            LEFT JOIN (
+                SELECT parent_id, MIN(entity_id) AS entity_id
+                FROM customer_address_entity
+                GROUP BY parent_id
+            ) first_addr ON first_addr.parent_id = ce.entity_id
+            LEFT JOIN customer_address_entity ca ON ca.entity_id = first_addr.entity_id
             WHERE map.magento_customer_id IS NOT NULL
               AND ce.group_id IN ({$groupIds})
             ON DUPLICATE KEY UPDATE
