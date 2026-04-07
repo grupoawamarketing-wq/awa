@@ -36,7 +36,9 @@ $templateType = \Magento\Catalog\Block\Product\ReviewRendererInterface::SHORT_VI
                 <div class="swiper-slide">
                 <div class="product-item item-product">
                     <?php
-                    $productImage = $block->getImage($_product, $image);
+                    $productImage = $block->getImage($_product, $image); // 700px
+                    $productImageSm = $block->getImage($_product, 'category_page_grid_sm'); // 350px
+                    $productImageMd = $block->getImage($_product, 'category_page_list'); // 480px
                     $productImageThumb = $block->getImage($_product, 'category_image_second_small');
                     ?>
                     <div class="product-thumb">
@@ -46,11 +48,17 @@ $templateType = \Magento\Catalog\Block\Product\ReviewRendererInterface::SHORT_VI
                            tabindex="-1">
                             <span class="first-thumb">
                                 <?php
+                                // Responsive srcset for mostviewed carousel cards
+                                $_mvSrcset = $block->escapeUrl($productImageSm->getImageUrl()) . ' 350w, '
+                                           . $block->escapeUrl($productImageMd->getImageUrl()) . ' 480w, '
+                                           . $block->escapeUrl($productImage->getImageUrl()) . ' 700w';
+                                $_mvSizes  = '(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw';
                                 $_imgHtml = $productImage->toHtml();
                                 $_imgHtml = str_replace('loading="eager"', 'loading="lazy"', $_imgHtml);
                                 if (strpos($_imgHtml, 'loading=') === false) {
                                     $_imgHtml = str_replace('<img ', '<img loading="lazy" decoding="async" ', $_imgHtml);
                                 }
+                                $_imgHtml = str_replace('<img ', '<img srcset="' . $_mvSrcset . '" sizes="' . $_mvSizes . '" ', $_imgHtml);
                                 echo $_imgHtml; ?>
                             </span>
                             <?php if ($_product->getTypeID() === 'simple'): ?>

@@ -4,9 +4,11 @@
  * rokanthemes/timecircles: real TimeCircles lib (via tema, shim jquery).
  */
 var config = {
+    deps: ['awaVerticalMenu'],
     map: {
         '*': {
-            awaCustomCompatBootstrap: 'js/awa-custom-compat-bootstrap'
+            awaCustomCompatBootstrap: 'js/awa-custom-compat-bootstrap',
+            'awaVerticalMenu': 'js/vertical-menu'
         }
     },
     paths: {

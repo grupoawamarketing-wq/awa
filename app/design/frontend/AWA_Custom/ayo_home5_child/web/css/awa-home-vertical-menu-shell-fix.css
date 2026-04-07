@@ -1,91 +1,348 @@
-@media (min-width: 992px) {
-    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
-    .page-wrapper .header-control.header-nav-global.cms_home_1 .menu_left_home1 {
-        position: relative !important;
-        z-index: var(--awa-z-above-overlay, 1200) !important;
-        background: transparent !important;
-        border-radius: 0 !important;
-        box-shadow: none !important;
-        overflow: visible !important;
-    }
+/* ==========================================================================
+ * AWA MOTOS — Vertical Menu White Theme Override v3
+ * Features: animation, badge, arrow for parents, active state, responsive
+ * ========================================================================== */
 
-    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
-    .page-wrapper .header-control.header-nav-global.cms_home_1 .menu_left_home1
-    .sections.nav-sections.category-dropdown,
-    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
-    .page-wrapper .header-control.header-nav-global.cms_home_1 .menu_left_home1
-    .section-item-content.category-dropdown-item-content,
-    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
-    .page-wrapper .header-control.header-nav-global.cms_home_1 .menu_left_home1
-    .navigation.verticalmenu.side-verticalmenu {
-        position: relative !important;
-        z-index: var(--awa-z-menu-container, 1006) !important;
-        min-height: 0 !important;
-        height: auto !important;
-        padding: 0 !important;
-        background: transparent !important;
-        border: 0 !important;
-        box-shadow: none !important;
-        overflow: visible !important;
-    }
+/* === Phase 1: CSS variable overrides === */
+body.cms-index-index .page-wrapper .navigation.verticalmenu.side-verticalmenu {
+    --awa-hc-surface-1: #ffffff;
+    --awa-bg-surface: #ffffff;
+    --awa-gray-50: #fafafa;
+    --awa-gray-200: var(--awa-border);
+    --awa-gray-300: #ccc;
+    --awa-gray-500: var(--awa-text-muted);
+    --awa-gray-700: var(--awa-text);
+    --awa-hc-border: var(--awa-border);
+    --awa-white: #ffffff;
+    --awa-gray-150: #f5f5f5;
+    --awa-brand-bg-soft: rgba(0,0,0,0.03);
+    --awa-menu-color-accent-bg: rgba(183,51,55,0.08);
+}
 
-    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
-    .page-wrapper .header-control.header-nav-global.cms_home_1 .menu_left_home1
-    .navigation.verticalmenu.side-verticalmenu > .title-category-dropdown {
-        display: flex !important;
-        align-items: center !important;
-        justify-content: space-between !important;
-        width: 100% !important;
-        min-width: 100% !important;
-        min-height: 46px !important;
-        margin: 0 !important;
-        padding: 0 16px !important;
-        background: var(--awa-red, #b73337) !important;
-        color: var(--awa-white, #fff) !important;
-        border-radius: 12px !important;
-        box-shadow: 0 10px 24px rgb(183 51 55 / 18%) !important;
+/* === Phase 2: Keyframe animation for open === */
+@keyframes awa-vml-open {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
     }
-
-    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
-    .page-wrapper .header-control.header-nav-global.cms_home_1 .menu_left_home1
-    .navigation.verticalmenu.side-verticalmenu > .title-category-dropdown .vm-icon,
-    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
-    .page-wrapper .header-control.header-nav-global.cms_home_1 .menu_left_home1
-    .navigation.verticalmenu.side-verticalmenu > .title-category-dropdown .vm-icon i,
-    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
-    .page-wrapper .header-control.header-nav-global.cms_home_1 .menu_left_home1
-    .navigation.verticalmenu.side-verticalmenu > .title-category-dropdown > span {
-        color: inherit !important;
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
+}
 
-    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
-    .page-wrapper .header-control.header-nav-global.cms_home_1 .menu_left_home1
-    .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown {
-        position: absolute !important;
-        top: calc(100% + 8px) !important;
-        left: 0 !important;
-        width: 100% !important;
-        max-width: 290px !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        background: var(--awa-white, #fff) !important;
-        border: 1px solid var(--awa-gray-200, #e5e5e5) !important;
-        border-radius: 0 0 12px 12px !important;
-        box-shadow: 0 20px 34px rgb(15 23 42 / 14%) !important;
-        overflow: visible !important;
-        z-index: var(--awa-z-submenu, 10000) !important;
+/* === Phase 3: Togge-menu container === */
+body.cms-index-index .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu,
+body.cms-index-index .page-wrapper .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown {
+    background: #ffffff !important;
+    border: 1px solid #e0e0e0 !important;
+    border-top: none !important;
+    border-radius: 0 0 10px 10px !important;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.10), 0 2px 8px rgba(0,0,0,0.05) !important;
+    animation: awa-vml-open 0.18s ease forwards !important;
+}
+
+/* === Phase 4: Category header — full width + alignment === */
+/* The catHeader lives inside .navigation.verticalmenu (flex row), so we need
+   flex + max-width override to beat the 232px max-width from bundle CSS */
+body.cms-index-index .page-wrapper .navigation.verticalmenu .our_categories.title-category-dropdown,
+body.cms-index-index .page-wrapper .our_categories.title-category-dropdown {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    flex: 1 1 100% !important;
+    box-sizing: border-box !important;
+    background: var(--awa-primary) !important;
+    color: #ffffff !important;
+    border-radius: 10px 10px 0 0 !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.5px !important;
+    padding: 13px 16px !important;
+    cursor: pointer !important;
+    transition: background 0.2s ease !important;
+    position: relative !important;
+}
+body.cms-index-index .page-wrapper .our_categories.title-category-dropdown:hover {
+    background: #a12d30 !important;
+}
+/* Hamburger icon color */
+body.cms-index-index .page-wrapper .our_categories.title-category-dropdown .awa-hamburger span,
+body.cms-index-index .page-wrapper .our_categories.title-category-dropdown svg {
+    fill: #ffffff !important;
+    stroke: #ffffff !important;
+    color: #ffffff !important;
+}
+
+/* === Phase 5: Level-0 items === */
+body.cms-index-index .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu > li.ui-menu-item.level0 {
+    border-bottom: 1px solid #f3f3f3 !important;
+    background: #ffffff !important;
+    transition: background 0.14s ease !important;
+    position: relative !important;
+}
+body.cms-index-index .page-wrapper .navigation.verticalmenu .togge-menu > li.level0:last-child,
+body.cms-index-index .page-wrapper .navigation.verticalmenu .togge-menu > li.expand-category-link:last-child {
+    border-bottom: none !important;
+}
+
+/* === Phase 6: Link text + indent on hover === */
+body.cms-index-index .page-wrapper .navigation.verticalmenu .togge-menu.list-category-dropdown > li.ui-menu-item.level0 > a.level-top {
+    color: #3a3a3a !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    padding: 10px 14px 10px 14px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    text-decoration: none !important;
+    transition: color 0.14s ease, padding-left 0.14s ease !important;
+    position: relative !important;
+}
+body.cms-index-index .page-wrapper .navigation.verticalmenu .togge-menu.list-category-dropdown > li.ui-menu-item.level0 > a.level-top:hover {
+    color: var(--awa-primary) !important;
+    padding-left: 18px !important;
+    background: #fafafa !important;
+}
+body.cms-index-index .page-wrapper .navigation.verticalmenu .togge-menu.list-category-dropdown > li.ui-menu-item.level0 > a.level-top:hover::before {
+    content: '' !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    width: 3px !important;
+    background: var(--awa-primary) !important;
+    border-radius: 0 2px 2px 0 !important;
+}
+
+/* Active / current */
+body.cms-index-index .page-wrapper .navigation.verticalmenu .togge-menu.list-category-dropdown > li.ui-menu-item.level0.vmm-active > a.level-top,
+body.cms-index-index .page-wrapper .navigation.verticalmenu .togge-menu.list-category-dropdown > li.ui-menu-item.level0._active > a.level-top,
+body.cms-index-index .page-wrapper .navigation.verticalmenu .togge-menu.list-category-dropdown > li.ui-menu-item.level0.awa-current-cat > a.level-top {
+    color: var(--awa-primary) !important;
+    font-weight: 600 !important;
+    background: rgba(183,51,55,0.04) !important;
+    padding-left: 18px !important;
+}
+body.cms-index-index .page-wrapper .navigation.verticalmenu .togge-menu.list-category-dropdown > li.ui-menu-item.level0.vmm-active > a.level-top::before,
+body.cms-index-index .page-wrapper .navigation.verticalmenu .togge-menu.list-category-dropdown > li.ui-menu-item.level0._active > a.level-top::before,
+body.cms-index-index .page-wrapper .navigation.verticalmenu .togge-menu.list-category-dropdown > li.ui-menu-item.level0.awa-current-cat > a.level-top::before {
+    content: '' !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    width: 3px !important;
+    background: var(--awa-primary) !important;
+    border-radius: 0 2px 2px 0 !important;
+}
+
+/* === Phase 7: Arrow for parent items (has submenu) === */
+body.cms-index-index .page-wrapper .navigation.verticalmenu .togge-menu > li.level0.parent.navigation__item--parent > a.level-top::after {
+    content: '' !important;
+    display: block !important;
+    width: 6px !important;
+    height: 6px !important;
+    border-right: 1.5px solid #ccc !important;
+    border-top: 1.5px solid #ccc !important;
+    transform: rotate(45deg) !important;
+    margin-left: auto !important;
+    flex-shrink: 0 !important;
+    transition: border-color 0.14s ease, transform 0.14s ease !important;
+}
+body.cms-index-index .page-wrapper .navigation.verticalmenu .togge-menu > li.level0.parent.navigation__item--parent > a.level-top:hover::after,
+body.cms-index-index .page-wrapper .navigation.verticalmenu .togge-menu > li.level0.parent._active > a.level-top::after {
+    border-color: var(--awa-primary) !important;
+    transform: rotate(135deg) !important;
+}
+
+/* === Phase 8: Native Rokanthemes badges (.cat-label) === */
+body.cms-index-index .page-wrapper .navigation.verticalmenu .cat-label {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    line-height: 1 !important;
+    padding: 2px 6px !important;
+    border-radius: 4px !important;
+    margin-left: auto !important;
+    margin-right: 4px !important;
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+}
+/* label1 = typically "Novo" (green) */
+body.cms-index-index .page-wrapper .navigation.verticalmenu .cat-label-label1 {
+    background: #22c55e !important;
+    color: #ffffff !important;
+}
+/* label2 = typically "Quente" (orange/red) */
+body.cms-index-index .page-wrapper .navigation.verticalmenu .cat-label-label2 {
+    background: #f97316 !important;
+    color: #ffffff !important;
+}
+/* label3 = typically "Hot" */
+body.cms-index-index .page-wrapper .navigation.verticalmenu .cat-label-label3 {
+    background: var(--awa-primary) !important;
+    color: #ffffff !important;
+}
+/* label4 = typically "Sale" (blue) */
+body.cms-index-index .page-wrapper .navigation.verticalmenu .cat-label-label4 {
+    background: #3b82f6 !important;
+    color: #ffffff !important;
+}
+
+/* === Phase 9: SVG icon styling + transitions === */
+body.cms-index-index .page-wrapper .navigation.verticalmenu .awa-vmenu-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 22px !important;
+    height: 22px !important;
+    flex-shrink: 0 !important;
+}
+body.cms-index-index .page-wrapper .navigation.verticalmenu .awa-vmenu-icon svg {
+    width: 17px !important;
+    height: 17px !important;
+    fill: none !important;
+    stroke: #aaa !important;
+    stroke-width: 1.8 !important;
+    stroke-linecap: round !important;
+    stroke-linejoin: round !important;
+    transition: stroke 0.14s ease, transform 0.18s ease !important;
+}
+body.cms-index-index .page-wrapper .navigation.verticalmenu li.level0:hover .awa-vmenu-icon svg {
+    stroke: var(--awa-primary) !important;
+    transform: scale(1.12) !important;
+}
+body.cms-index-index .page-wrapper .navigation.verticalmenu li.level0.vmm-active .awa-vmenu-icon svg,
+body.cms-index-index .page-wrapper .navigation.verticalmenu li.level0._active .awa-vmenu-icon svg,
+body.cms-index-index .page-wrapper .navigation.verticalmenu li.level0.awa-current-cat .awa-vmenu-icon svg {
+    stroke: var(--awa-primary) !important;
+}
+
+/* === Phase 10: Submenu panel === */
+body.cms-index-index .page-wrapper .navigation.verticalmenu .level0.submenu,
+body.cms-index-index .page-wrapper .navigation.verticalmenu .level0 > .level0.submenu {
+    background: #ffffff !important;
+    border: 1px solid #e0e0e0 !important;
+    box-shadow: 6px 4px 20px rgba(0,0,0,0.08) !important;
+    border-radius: 0 10px 10px 0 !important;
+    animation: awa-vml-open 0.16s ease forwards !important;
+}
+body.cms-index-index .page-wrapper .navigation.verticalmenu .level0.submenu .subchildmenu li a {
+    color: #555 !important;
+    font-size: 13px !important;
+    transition: color 0.12s ease, background 0.12s ease, padding-left 0.12s ease !important;
+}
+body.cms-index-index .page-wrapper .navigation.verticalmenu .level0.submenu .subchildmenu li a:hover {
+    color: var(--awa-primary) !important;
+    background: #fafafa !important;
+    padding-left: 6px !important;
+}
+
+/* === Phase 11: Scrollbar === */
+body.cms-index-index .page-wrapper .navigation.verticalmenu .togge-menu.list-category-dropdown::-webkit-scrollbar {
+    width: 4px;
+}
+body.cms-index-index .page-wrapper .navigation.verticalmenu .togge-menu.list-category-dropdown::-webkit-scrollbar-track {
+    background: transparent;
+}
+body.cms-index-index .page-wrapper .navigation.verticalmenu .togge-menu.list-category-dropdown::-webkit-scrollbar-thumb {
+    background: #ddd;
+    border-radius: 4px;
+}
+body.cms-index-index .page-wrapper .navigation.verticalmenu .togge-menu.list-category-dropdown::-webkit-scrollbar-thumb:hover {
+    background: #bbb;
+}
+
+/* === Phase 12: Expand "Ver mais" link === */
+body.cms-index-index .page-wrapper .navigation.verticalmenu .togge-menu > li.expand-category-link {
+    background: #ffffff !important;
+    border-top: 1px solid #f0f0f0 !important;
+    border-bottom: none !important;
+}
+body.cms-index-index .page-wrapper .navigation.verticalmenu .togge-menu > li.expand-category-link a,
+body.cms-index-index .page-wrapper .navigation.verticalmenu .togge-menu > li.expand-category-link .vm-toggle-categories {
+    color: var(--awa-primary) !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    padding: 10px 14px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    text-decoration: none !important;
+    transition: color 0.14s ease, background 0.14s ease !important;
+}
+body.cms-index-index .page-wrapper .navigation.verticalmenu .togge-menu > li.expand-category-link a:hover,
+body.cms-index-index .page-wrapper .navigation.verticalmenu .togge-menu > li.expand-category-link .vm-toggle-categories:hover {
+    color: #8a2528 !important;
+    background: #fff8f8 !important;
+}
+
+/* === Phase 13: Section label & divider === */
+body.cms-index-index .page-wrapper .navigation.verticalmenu .awa-vmenu__section-label {
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    color: #bbb !important;
+    padding: 8px 14px 2px !important;
+    background: #ffffff !important;
+    pointer-events: none !important;
+}
+body.cms-index-index .page-wrapper .navigation.verticalmenu .awa-vmenu__divider {
+    height: 1px !important;
+    background: #ebebeb !important;
+    margin: 3px 14px !important;
+    pointer-events: none !important;
+}
+
+/* === Phase 14: Z-index stacking fix === */
+body.cms-index-index .page-wrapper {
+    position: relative !important;
+    z-index: 9999 !important;
+    overflow: visible !important;
+}
+body.cms-index-index > .content-top-home {
+    position: relative;
+    z-index: 1 !important;
+}
+
+/* === Phase 15: Alignment — full width container === */
+body.cms-index-index .page-wrapper .menu_left_home1 {
+    width: 290px !important;
+    max-width: 290px !important;
+    min-width: 0 !important;
+    position: relative !important;
+}
+body.cms-index-index .page-wrapper .menu_left_home1 .navigation.verticalmenu.side-verticalmenu .togge-menu.list-category-dropdown {
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* === Phase 16: Highlight (Super Ofertas) === */
+body.cms-index-index .page-wrapper .navigation.verticalmenu li.level0.is-highlight > a.level-top {
+    font-weight: 600 !important;
+}
+body.cms-index-index .page-wrapper .navigation.verticalmenu li.level0.is-highlight .awa-vmenu-icon svg {
+    stroke: var(--awa-primary) !important;
+}
+
+/* === Phase 17: Responsive === */
+@media (max-width: 1280px) {
+    body.cms-index-index .page-wrapper .menu_left_home1 {
+        width: 260px !important;
+        max-width: 260px !important;
     }
-
-    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
-    .page-wrapper .header-control.header-nav-global.cms_home_1 .menu_left_home1
-    .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown.menu-open,
-    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
-    .page-wrapper .header-control.header-nav-global.cms_home_1 .menu_left_home1
-    .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown.vmm-open {
-        display: block !important;
-        opacity: 1 !important;
-        visibility: visible !important;
-        pointer-events: auto !important;
-        transform: none !important;
+}
+@media (max-width: 1024px) {
+    body.cms-index-index .page-wrapper .menu_left_home1 {
+        width: 240px !important;
+        max-width: 240px !important;
     }
 }

@@ -63,12 +63,18 @@ use Magento\Framework\App\Action\Action;
 									<a href="<?php echo $block->escapeUrl($_item->getProductUrl()); ?>" class="product-thumb-link" aria-label="<?php echo $block->escapeHtmlAttr($_item->getName()); ?>">
 										<?php $productImageThumb = $block->getImage($_item, 'category_image_second_small');?>
 										<span class="first-thumb">
-										<?php /* Carousel images always below-fold — lazy load */
+										<?php /* Carousel images always below-fold — lazy load + srcset */
+										$productImageLg = $block->getImage($_item, 'new_products_content_widget_grids'); // 480px
+										$_tabSrcset = $block->escapeUrl($productImage->getImageUrl()) . ' 360w, '
+										           . $block->escapeUrl($productImageLg->getImageUrl()) . ' 480w';
+										$_tabSizes  = '(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw';
 										$_imgHtml = $productImage->toHtml();
 										$_imgHtml = str_replace('loading="eager"', 'loading="lazy"', $_imgHtml);
 										if (strpos($_imgHtml, 'loading=') === false) {
 										    $_imgHtml = str_replace('<img ', '<img loading="lazy" decoding="async" ', $_imgHtml);
 										}
+										// Inject srcset and sizes for responsiveness
+										$_imgHtml = str_replace('<img ', '<img srcset="' . $_tabSrcset . '" sizes="' . $_tabSizes . '" ', $_imgHtml);
 										echo $_imgHtml; ?>
 										</span>
 										<?php $productType = $_item->getTypeID();
@@ -182,8 +188,8 @@ use Magento\Framework\App\Action\Action;
 			"owl": {
 				"lazyLoad": true,
 				"autoPlay": <?php echo ($auto) ? 'true' : 'false'; ?>,
-				"items": <?php echo (int)$items ?: 3; ?>,
-				"itemsDesktop": [1366, 3],
+				"items": <?php echo (int)$items ?: 5; ?>,
+				"itemsDesktop": [1366, 5],
 				"itemsDesktopSmall": [1199, 2],
 				"itemsTablet": [991, 2],
 				"itemsMobile": [680, 1],

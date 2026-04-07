@@ -569,3 +569,44 @@
         transition: none;
     }
 }
+
+
+/* ── GRID CARD: product-info-cart dentro de product-info (pós-refactor)
+   Alinha layout com carrosséis: imagem → nome → preço → botão
+   ─────────────────────────────────────────────────────────────────── */
+
+/* product-info se torna flex column para margin-top: auto funcionar no botão */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .wrapper.grid.products-grid
+    .item-product
+    > .product-info {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Empurra o botão para o fundo do card (alinhamento igual em todos os cards) */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .wrapper.grid.products-grid
+    .item-product
+    .product-info
+    > .product-info-cart {
+    margin-top: auto;
+    padding-top: 8px;
+    width: 100%;
+}
+
+/* Ocultar pill "Faça login" do info-price quando botão substituto já está
+   presente abaixo (evita CTA duplicado no grid card)                     */
+:is(body.catalog-category-view.b2b-restricted-mode,
+    body.catalogsearch-result-index.b2b-restricted-mode)
+    .wrapper.grid.products-grid
+    .item-product
+    .info-price
+    .b2b-login-to-see-price,
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .wrapper.grid.products-grid
+    .item-product:has(.b2b-login-to-buy-btn)
+    .info-price
+    .b2b-login-to-see-price {
+    display: none;
+}

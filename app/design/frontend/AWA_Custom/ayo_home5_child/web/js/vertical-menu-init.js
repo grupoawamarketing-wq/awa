@@ -117,8 +117,11 @@ define([
                 body.classList.contains('cms-homepage_ayo_home5_demo_stage');
         }
 
+        var hoverCloseTimer = null;
+        var HOVER_CLOSE_DELAY = 280;
+
         function keepDesktopMenuExpanded() {
-            return isDesktopViewport() && isHomeContext();
+            return false; // AWA: menu abre no hover, fecha ao sair
         }
 
         function setDesktopMenuVisibility(isVisible) {
@@ -170,6 +173,7 @@ define([
                 $nav.addClass('awa-menu-expanded');
                 $title.addClass('active').attr('aria-expanded', 'true');
                 $('body').removeClass('background_shadow_show');
+                $(document).trigger('awa:vmenu:open');
                 return;
             }
 
@@ -186,6 +190,7 @@ define([
                 $nav.removeClass('awa-menu-expanded');
                 $title.removeClass('active').attr('aria-expanded', 'false');
                 $('body').removeClass('background_shadow_show');
+                $(document).trigger('awa:vmenu:close');
                 return;
             }
 
@@ -538,18 +543,64 @@ define([
                 return;
             }
 
+            if (hoverCloseTimer) {
+                clearTimeout(hoverCloseTimer);
+                hoverCloseTimer = null;
+            }
+
             openMenu(false);
         });
 
-        $nav.on('mouseleave' + eventNamespace, function () {
-            var root = $nav.get(0);
-            var active = document.activeElement;
+        // Also bind on the menu_left_home1 parent so hovering the title opens
+        (function () {
+            var menuLeftParent = $nav.closest('.menu_left_home1').get(0);
+            if (menuLeftParent) {
+                menuLeftParent.addEventListener('mouseenter', function () {
+                    if (!isDesktopViewport()) {
+                        return;
+                    }
+                    if (hoverCloseTimer) {
+                        clearTimeout(hoverCloseTimer);
+                        hoverCloseTimer = null;
+                    }
+                    openMenu(false);
+                }, { passive: true });
 
+                menuLeftParent.addEventListener('mouseleave', function () {
+                    if (!isDesktopViewport()) {
+                        return;
+                    }
+                    if (hoverCloseTimer) {
+                        clearTimeout(hoverCloseTimer);
+                    }
+                    hoverCloseTimer = setTimeout(function () {
+                        hoverCloseTimer = null;
+                        var active = document.activeElement;
+                        if (active && menuLeftParent.contains(active)) {
+                            active.blur();
+                        }
+                        closeMenu();
+                    }, HOVER_CLOSE_DELAY);
+                }, { passive: true });
+            }
+        })();
+
+        // Native fallback — ensures hover works even without jQuery delegation
+        $nav.get(0).addEventListener('mouseenter', function () {
             if (!isDesktopViewport()) {
                 return;
             }
 
-            if (root && active && root.contains(active)) {
+            if (hoverCloseTimer) {
+                clearTimeout(hoverCloseTimer);
+                hoverCloseTimer = null;
+            }
+
+            openMenu(false);
+        }, { passive: true });
+
+        $nav.on('mouseleave' + eventNamespace, function () {
+            if (!isDesktopViewport()) {
                 return;
             }
 
@@ -558,7 +609,21 @@ define([
                 return;
             }
 
-            closeMenu();
+            if (hoverCloseTimer) {
+                clearTimeout(hoverCloseTimer);
+            }
+
+            hoverCloseTimer = setTimeout(function () {
+                hoverCloseTimer = null;
+
+                // Blur any focused element inside nav before closing
+                var active = document.activeElement;
+                if (active && $nav.get(0).contains(active)) {
+                    active.blur();
+                }
+
+                closeMenu();
+            }, HOVER_CLOSE_DELAY);
         });
 
         $nav.on('focusin' + eventNamespace, function () {
