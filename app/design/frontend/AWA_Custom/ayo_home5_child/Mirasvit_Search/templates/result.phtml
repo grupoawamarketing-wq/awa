@@ -1,0 +1,162 @@
+<?php
+/**
+ * Override: AWA_Custom/ayo_home5_child
+ * Adds ARIA tablist/tab roles and keyboard navigation to search result tabs (Issue #18)
+ *
+ * @var \Mirasvit\Search\Block\Result $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+
+use Mirasvit\Core\Service\CspService;
+
+$indexes            = $block->getIndexes();
+$tabsThreshold      = $block->getTabsThreshold();
+$lessThanMinIndexes = [];
+$tabsCnt            = 0;
+$totalCnt           = 0;
+$currentHtml        = $block->getCurrentContent();
+$currentHtml        = $block->getCurrentIndexSize() == 0 ? '' : $currentHtml;
+$productIndex       = false;
+$indexData          = [];
+$aggregations       = $block->getAggregationData();
+$nonce              = CspService::getNonce();
+$tabIndex           = 0;
+?>
+
+<?php if (!empty($aggregations)) : ?>
+    <div class="mst-search-in__wrapper">
+        <span class="mst-search-in__title"><?= $block->escapeHtml(__('Search In')) ?></span>
+        <?php foreach ($block->getAggregationData() as $data) : ?>
+            <a class="mst-search-in__item" href="<?= $block->escapeUrl($data['url']) ?>">
+                <span class="name"><?= $block->escapeHtml($data['name'], ['i']) ?></span>
+                <span class="count"><?= $block->escapeHtml($data['count']) ?></span>
+            </a>
+        <?php endforeach ?>
+    </div>
+<?php endif ?>
+
+<ul class="mst-search__result-tabs" role="tablist" aria-label="<?= $block->escapeHtmlAttr(__('Resultados da busca')) ?>">
+    <?php foreach ($indexes as $index):
+        if ($index->getIdentifier() == 'catalogsearch_fulltext') {
+            $productIndex = $index;
+        }
+
+        $collection                                 = $block->getSearchCollection($index);
+        $size                                       = $collection->getSize();
+        $indexData[$index->getIdentifier()]['size'] = $size;
+        $totalCnt                                   += $size;
+
+        if ($size == 0) {
+            continue;
+        }
+
+        if ($size < $tabsThreshold && $index->getIdentifier() != 'catalogsearch_fulltext') {
+            $lessThanMinIndexes[] = $index;
+            continue;
+        }
+
+        if (empty($currentHtml)) {
+            $currentHtml = $block->getContentBlock($index)->toHtml();
+        }
+
+        $tabsCnt++;
+        $isActive = ($index->getTitle() == $block->getCurrentIndex()->getTitle()
+            && $index->getStoreId() == $block->getCurrentIndex()->getStoreId());
+        $tabIndex++;
+        ?>
+        <li role="presentation">
+            <a role="tab"
+               aria-selected="<?= $isActive ? 'true' : 'false' ?>"
+               tabindex="<?= $isActive ? '0' : '-1' ?>"
+               class="<?= $isActive ? 'active' : '' ?>"
+               href="<?= $isActive ? '#' : $block->escapeUrl($block->getIndexUrl($index)) ?>"
+               id="mst-search-tab-<?= $block->escapeHtmlAttr($tabIndex) ?>">
+                <?= $block->escapeHtml(__($index->getTitle())) ?><?php if (!$isActive): ?> (<?= $block->escapeHtml($size) ?>)<?php endif ?>
+            </a>
+        </li>
+    <?php endforeach ?>
+</ul>
+
+<?php if ($tabsCnt <= 1): ?>
+    <style<?php if ($nonce): ?> nonce="<?= $block->escapeHtml($nonce) ?>"<?php endif; ?>>
+        .mst-search__result-tabs {
+            display: none
+        }
+    </style>
+<?php endif ?>
+
+<?php if ($tabsCnt > 1): ?>
+    <script<?php if ($nonce): ?> nonce="<?= $block->escapeHtml($nonce) ?>"<?php endif; ?> type="text/javascript">
+        require(['jquery'], function ($) {
+            'use strict';
+            var $tabs = $('.mst-search__result-tabs [role="tab"]');
+            if ($tabs.length < 2) return;
+            $tabs.on('keydown', function (e) {
+                var $current = $(this),
+                    idx = $tabs.index($current),
+                    $next;
+                if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    $next = $tabs.eq((idx + 1) % $tabs.length);
+                } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    $next = $tabs.eq((idx - 1 + $tabs.length) % $tabs.length);
+                } else if (e.key === 'Home') {
+                    e.preventDefault();
+                    $next = $tabs.first();
+                } else if (e.key === 'End') {
+                    e.preventDefault();
+                    $next = $tabs.last();
+                }
+                if ($next && $next.length) {
+                    $tabs.attr('tabindex', '-1');
+                    $next.attr('tabindex', '0').trigger('focus');
+                }
+            });
+        });
+    </script>
+<?php endif ?>
+
+<?php if ($block->getCurrentIndex()->getIdentifier() == 'catalogsearch_fulltext' &&
+    ($indexData['catalogsearch_fulltext']['size'] > 0 || !empty($lessThanMinIndexes))): ?>
+    <?php if (!empty($lessThanMinIndexes) && $block->getSearchCollection($block->getCurrentIndex())->getCurPage() == 1): ?>
+        <div>
+            <?php foreach ($lessThanMinIndexes as $index): ?>
+                <div class="mst-search__result-index">
+                    <div class="mst-search__result-index-title">
+                        <?= $block->escapeHtml(__($index->getTitle())) ?>
+                    </div>
+
+                    <?= $block->getContentBlock($index)->toHtml() ?>
+                </div>
+            <?php endforeach ?>
+        </div>
+    <?php endif ?>
+
+    <?php if ($block->getCurrentIndexSize() > 0 || $totalCnt == 0): ?>
+        <?= /* @noEscape */ $currentHtml ?>
+    <?php endif ?>
+<?php else : ?>
+    <?= /* @noEscape */ $currentHtml ?>
+<?php endif ?>
+
+<?php if ($totalCnt == 0): ?>
+    <?= $block->getContentBlock($productIndex)->toHtml(); ?>
+    <?= $block->getLayout()->getBlock("mst.search.no_results")->toHtml(); ?>
+<?php endif ?>
+
+<?php if ($block->getCurrentIndexSize() == 0 && $tabsCnt > 1): ?>
+    <div class="message notice">
+        <div><?= $block->escapeHtml(__('Please select other tab to see more results')) ?></div>
+    </div>
+<?php endif ?>
+
+<?php if ($block->isHighlightingEnabled()): ?>
+    <script<?php if ($nonce): ?> nonce="<?= $block->escapeHtml($nonce) ?>"<?php endif; ?> type="text/javascript">
+        require(['jquery', 'Mirasvit_Search/js/highlight'], function ($, highlight) {
+            let query = '<?= $escaper->escapeUrl($block->getRequest()->getParam('q'))?>';
+            highlight($('.search.results .product-item-link, .mst-search__index a, .mst-search__index .mst-search__index-content'),
+                query, 'mst-search__highlight');
+        });
+    </script>
+<?php endif; ?>

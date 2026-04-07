@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# ==========================================================================
+# deploy-static — Deploy de conteúdo estático + correção de ownership
+#
+# Problema: nginx tem `disable_symlinks if_not_owner from=/home/` e bloqueia
+# symlinks criados por www-data (uid 33) que apontam para arquivos de
+# jessessh (uid 1004). Este script corrige o ownership após o deploy.
+#
+# Uso:
+#   bin/deploy-static                          # pt_BR + en_US
+#   bin/deploy-static pt_BR                    # só pt_BR
+#   bin/deploy-static pt_BR en_US --jobs 4     # com flags extras
+# ==========================================================================
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT_DIR"
+
+LOCALES="${*:-pt_BR en_US}"
+
+echo "[deploy-static] Limpando pub/static/frontend..."
+sudo rm -rf pub/static/frontend pub/static/_cache pub/static/deployed_version.txt 2>/dev/null || true
+
+echo "[deploy-static] Deployando conteúdo estático: $LOCALES"
+sudo -u www-data php bin/magento setup:static-content:deploy $LOCALES -f
+
+echo "[deploy-static] Corrigindo ownership dos symlinks (jessessh:www-data)..."
+sudo find pub/static/frontend -type l -exec chown -h jessessh:www-data {} \;
+FIXED=$(sudo find pub/static/frontend -type l | wc -l)
+echo "[deploy-static] $FIXED symlinks corrigidos."
+
+echo "[deploy-static] Limpando cache..."
+sudo -u www-data php bin/magento cache:clean full_page block_html layout
+
+echo "[deploy-static] Concluido."
