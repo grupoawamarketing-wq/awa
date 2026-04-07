@@ -13,6 +13,7 @@ use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Encryption\EncryptorInterface;
+use Magento\Framework\HTTP\Client\Curl as MagentoCurl;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -27,6 +28,7 @@ class Respond implements HttpPostActionInterface, CsrfAwareActionInterface
     private const XML_PATH_BOT_API_URL = 'grupoawamotos_chatwoot/bot/api_url';
     private const XML_PATH_BOT_TOKEN = 'grupoawamotos_chatwoot/bot/api_token';
     private const XML_PATH_ADMIN_TOKEN = 'grupoawamotos_chatwoot/bot/admin_api_token';
+    private const XML_PATH_BOT_WEBHOOK_TOKEN = 'grupoawamotos_chatwoot/bot/secret_token';
 
     /** @var array<string, array{label: string, team_id: int, message: string}> */
     private const MENU_OPTIONS = [
@@ -76,7 +78,8 @@ class Respond implements HttpPostActionInterface, CsrfAwareActionInterface
         private readonly JsonFactory $jsonFactory,
         private readonly ScopeConfigInterface $scopeConfig,
         private readonly EncryptorInterface $encryptor,
-        private readonly LoggerInterface $logger
+        private readonly LoggerInterface $logger,
+        private readonly MagentoCurl $curlClient
     ) {
     }
 
@@ -94,6 +97,13 @@ class Respond implements HttpPostActionInterface, CsrfAwareActionInterface
     {
         $result = $this->jsonFactory->create();
         $rawBody = (string) $this->request->getContent();
+
+        if (!$this->validateSignature($rawBody)) {
+            $this->logger->warning('Chatwoot Bot: assinatura inválida', [
+                'ip' => $this->request->getClientIp(true),
+            ]);
+            return $result->setHttpResponseCode(403)->setData(['error' => 'Forbidden']);
+        }
 
         $payload = json_decode($rawBody, true);
         if (!is_array($payload)) {
@@ -268,6 +278,33 @@ class Respond implements HttpPostActionInterface, CsrfAwareActionInterface
         return null;
     }
 
+    private function validateSignature(string $body): bool
+    {
+        $secretToken = $this->getBotWebhookToken();
+        if ($secretToken === '') {
+            // Token não configurado — modo permissivo
+            return true;
+        }
+
+        $signatureHeader = (string) $this->request->getServer('HTTP_X_CHATWOOT_SIGNATURE', '');
+        if ($signatureHeader === '') {
+            return false;
+        }
+
+        $expected = 'sha256=' . hash_hmac('sha256', $body, $secretToken);
+
+        return hash_equals($expected, $signatureHeader);
+    }
+
+    private function getBotWebhookToken(): string
+    {
+        $value = (string) $this->scopeConfig->getValue(self::XML_PATH_BOT_WEBHOOK_TOKEN);
+        if ($value === '') {
+            return '';
+        }
+        return $this->encryptor->decrypt($value);
+    }
+
     /**
      * Envia uma mensagem na conversa via API do Chatwoot.
      */
@@ -340,7 +377,7 @@ class Respond implements HttpPostActionInterface, CsrfAwareActionInterface
     }
 
     /**
-     * Chamada genérica à API do Chatwoot via cURL nativo.
+     * Chamada genérica à API do Chatwoot via Magento HTTP Client.
      *
      * @param bool $useAdminToken Usar admin token em vez do bot token (para labels/assignments)
      * @return array<string, mixed>|null
@@ -364,30 +401,25 @@ class Respond implements HttpPostActionInterface, CsrfAwareActionInterface
 
         $url = "{$baseUrl}/api/v1/accounts/1/{$endpoint}";
 
-        $ch = curl_init($url);
-        curl_setopt_array($ch, [
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT        => 10,
-            CURLOPT_HTTPHEADER     => [
-                'Content-Type: application/json',
-                'api_access_token: ' . $token,
-            ],
-        ]);
+        try {
+            $this->curlClient->setHeaders([
+                'Content-Type'     => 'application/json',
+                'api_access_token' => $token,
+            ]);
+            $this->curlClient->setTimeout(10);
 
-        if ($method === 'POST') {
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-        }
+            if ($method === 'GET') {
+                $this->curlClient->get($url);
+            } else {
+                $this->curlClient->post($url, json_encode($data));
+            }
 
-        $responseBody = curl_exec($ch);
-        $status = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $curlError = curl_error($ch);
-        curl_close($ch);
-
-        if ($curlError !== '') {
-            $this->logger->error('Chatwoot Bot cURL error', [
+            $status = $this->curlClient->getStatus();
+            $responseBody = $this->curlClient->getBody();
+        } catch (\Exception $e) {
+            $this->logger->error('Chatwoot Bot HTTP error', [
                 'endpoint' => $endpoint,
-                'error'    => $curlError,
+                'error'    => $e->getMessage(),
             ]);
             return null;
         }

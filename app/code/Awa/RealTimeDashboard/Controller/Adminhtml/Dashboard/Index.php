@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Awa\RealTimeDashboard\Controller\Adminhtml\Dashboard;
 
 use Magento\Backend\App\Action;

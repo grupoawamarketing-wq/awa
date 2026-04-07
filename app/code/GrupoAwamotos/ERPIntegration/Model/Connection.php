@@ -404,7 +404,7 @@ class Connection implements ConnectionInterface
             case self::DRIVER_SQLSRV:
                 // Microsoft SQL Server Driver for PHP
                 $dsn = sprintf(
-                    'sqlsrv:Server=%s,%d;Database=%s;TrustServerCertificate=1;Encrypt=0',
+                    'sqlsrv:Server=%s,%d;Database=%s;TrustServerCertificate=1;Encrypt=1',
                     $host,
                     $port,
                     $database
@@ -425,7 +425,7 @@ class Connection implements ConnectionInterface
                 // ODBC Driver 17/18 for SQL Server
                 $odbcDriver = $this->getOdbcDriverName();
                 $dsn = sprintf(
-                    'odbc:Driver={%s};Server=%s,%d;Database=%s;TrustServerCertificate=yes;',
+                    'odbc:Driver={%s};Server=%s,%d;Database=%s;TrustServerCertificate=yes;Encrypt=yes;',
                     $odbcDriver,
                     $host,
                     $port,
