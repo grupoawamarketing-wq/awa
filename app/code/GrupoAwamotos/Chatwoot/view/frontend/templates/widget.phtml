@@ -16,10 +16,14 @@ $locale = $viewModel->getLocale();
 $position = $viewModel->getPosition();
 $customerData = $viewModel->getCustomerIdentifier();
 $b2bData = $viewModel->getB2bData();
+$erpData = $viewModel->getErpData();
 $widgetSettings = $viewModel->getWidgetSettings();
 $soundEnabled = $viewModel->isSoundEnabled();
 $pushEnabled = $viewModel->usePushNotifications();
 $identifierHash = $viewModel->getIdentifierHash();
+
+// Merge B2B + ERP como custom_attributes (ERP sobrescreve se houver conflito de chave)
+$customAttributes = array_merge($b2bData, $erpData);
 ?>
 <script>
     window.chatwootSettings = {
@@ -65,10 +69,10 @@ $identifierHash = $viewModel->getIdentifierHash();
                     name: '<?= $block->escapeJs($customerData['name'] ?? '') ?>'<?php if (!empty($identifierHash)): ?>,
                     identifier_hash: '<?= $block->escapeJs($identifierHash) ?>'<?php endif; ?><?php if (!empty($b2bData)): ?>,
                     company_name: '<?= $block->escapeJs($b2bData['razao_social'] ?? '') ?>',
-                    phone_number: '<?= $block->escapeJs($b2bData['telefone'] ?? '') ?>',
+                    phone_number: '<?= $block->escapeJs($b2bData['telefone'] ?? '') ?>'<?php endif; ?><?php if (!empty($customAttributes)): ?>,
                     custom_attributes: {
-                        <?php foreach ($b2bData as $key => $value): ?>
-                        <?= $block->escapeJs($key) ?>: '<?= $block->escapeJs((string) $value) ?>',
+                        <?php foreach ($customAttributes as $key => $value): ?>
+                        '<?= $block->escapeJs($key) ?>': '<?= $block->escapeJs((string) $value) ?>',
                         <?php endforeach; ?>
                     }
                     <?php endif; ?>

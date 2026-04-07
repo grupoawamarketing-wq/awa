@@ -9,6 +9,7 @@ use Magento\Customer\Api\GroupRepositoryInterface;
 use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Framework\View\Element\Block\ArgumentInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
@@ -21,6 +22,9 @@ class ChatWidget implements ArgumentInterface
     private const XML_APPEARANCE_PREFIX = 'grupoawamotos_chatwoot/appearance/';
     private const XML_NOTIFICATIONS_PREFIX = 'grupoawamotos_chatwoot/notifications/';
 
+    /** Máximo de pedidos ERP pendentes a exibir no chat */
+    private const ERP_PENDING_ORDERS_LIMIT = 3;
+
     public function __construct(
         private readonly ScopeConfigInterface $scopeConfig,
         private readonly CustomerSession $customerSession,
@@ -29,6 +33,7 @@ class ChatWidget implements ArgumentInterface
         private readonly OrderRepositoryInterface $orderRepository,
         private readonly SearchCriteriaBuilder $searchCriteriaBuilder,
         private readonly EncryptorInterface $encryptor,
+        private readonly ResourceConnection $resourceConnection,
         private readonly LoggerInterface $logger
     ) {
     }
@@ -272,6 +277,66 @@ class ChatWidget implements ArgumentInterface
             return $data;
         } catch (\Exception $e) {
             $this->logger->error('Chatwoot B2B data error', [
+                'error' => $e->getMessage(),
+            ]);
+            return [];
+        }
+    }
+
+    /**
+     * Dados do ERP Sectra do cliente logado.
+     * Inclui código ERP, pedidos pendentes e último pedido sincronizado.
+     *
+     * @return array<string, string>
+     */
+    public function getErpData(): array
+    {
+        if (!$this->isCustomerLoggedIn()) {
+            return [];
+        }
+
+        try {
+            $customerId = (int) $this->customerSession->getCustomerId();
+            $connection = $this->resourceConnection->getConnection();
+
+            // Código ERP e tipo do cliente na Sectra
+            $erpClient = $connection->fetchRow(
+                'SELECT erp_code, tipo_pessoa, cpf_cnpj FROM vw_sectra_clientes_b2b WHERE magento_customer_id = :cid LIMIT 1',
+                [':cid' => $customerId]
+            );
+
+            if (empty($erpClient) || empty($erpClient['erp_code'])) {
+                return [];
+            }
+
+            $data = [
+                'erp_codigo' => $erpClient['erp_code'],
+            ];
+
+            // Pedidos pendentes (em processamento no ERP)
+            $pending = $connection->fetchAll(
+                'SELECT pedido_web, estado, total, data_pedido
+                 FROM vw_sectra_pedidos_pendentes
+                 WHERE customer_id = :cid
+                 ORDER BY data_pedido DESC
+                 LIMIT :lim',
+                [':cid' => $customerId, ':lim' => self::ERP_PENDING_ORDERS_LIMIT]
+            );
+
+            if (!empty($pending)) {
+                $lines = [];
+                foreach ($pending as $p) {
+                    $date = (new \DateTime($p['data_pedido']))->format('d/m/Y');
+                    $total = 'R$ ' . number_format((float) $p['total'], 2, ',', '.');
+                    $lines[] = sprintf('%s — %s — %s (%s)', $p['pedido_web'], $total, $p['estado'], $date);
+                }
+                $data['pedidos_erp_pendentes'] = implode(' | ', $lines);
+            }
+
+            return $data;
+        } catch (\Exception $e) {
+            $this->logger->error('Chatwoot ERP data error', [
+                'customer_id' => $this->customerSession->getCustomerId(),
                 'error' => $e->getMessage(),
             ]);
             return [];
