@@ -28,6 +28,9 @@ use Magento\Framework\Mail\Template\TransportBuilder;
 use GrupoAwamotos\B2B\Helper\CnpjValidator;
 use GrupoAwamotos\B2B\Helper\Config as B2BConfig;
 use GrupoAwamotos\B2B\Helper\Data as B2BHelper;
+use GrupoAwamotos\B2B\Model\Cnpj\RequestRateLimiter;
+use Magento\Customer\Model\ResourceModel\Customer\CollectionFactory as CustomerCollectionFactory;
+use Magento\Framework\HTTP\PhpEnvironment\RemoteAddress;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Data\Form\FormKey\Validator as FormKeyValidator;
 use Magento\Framework\Event\ManagerInterface as EventManagerInterface;
@@ -142,6 +145,21 @@ class Save implements HttpPostActionInterface
      */
     private B2BConfig $b2bConfig;
 
+    /**
+     * @var RequestRateLimiter
+     */
+    private RequestRateLimiter $rateLimiter;
+
+    /**
+     * @var RemoteAddress
+     */
+    private RemoteAddress $remoteAddress;
+
+    /**
+     * @var CustomerCollectionFactory
+     */
+    private CustomerCollectionFactory $customerCollectionFactory;
+
     public function __construct(
         RequestInterface $request,
         RedirectFactory $resultRedirectFactory,
@@ -163,7 +181,10 @@ class Save implements HttpPostActionInterface
         RegionCollectionFactory $regionCollectionFactory,
         FormKeyValidator $formKeyValidator,
         EventManagerInterface $eventManager,
-        B2BConfig $b2bConfig
+        B2BConfig $b2bConfig,
+        RequestRateLimiter $rateLimiter,
+        RemoteAddress $remoteAddress,
+        CustomerCollectionFactory $customerCollectionFactory
     ) {
         $this->request = $request;
         $this->resultRedirectFactory = $resultRedirectFactory;
@@ -186,6 +207,9 @@ class Save implements HttpPostActionInterface
         $this->formKeyValidator = $formKeyValidator;
         $this->eventManager = $eventManager;
         $this->b2bConfig = $b2bConfig;
+        $this->rateLimiter = $rateLimiter;
+        $this->remoteAddress = $remoteAddress;
+        $this->customerCollectionFactory = $customerCollectionFactory;
     }
 
     /**
@@ -203,6 +227,36 @@ class Save implements HttpPostActionInterface
                 'user_agent' => $this->request->getServer('HTTP_USER_AGENT')
             ]);
             $this->messageManager->addErrorMessage(__('Formulário inválido. Tente novamente.'));
+            return $resultRedirect->setPath('*/*/');
+        }
+
+        // Honeypot: bots fill this invisible field, legitimate users don't
+        $honeypot = (string) $this->request->getParam('b2b_website', '');
+        if ($honeypot !== '') {
+            $this->logger->warning('[B2B] Honeypot triggered on registration', [
+                'ip' => $this->request->getServer('REMOTE_ADDR')
+            ]);
+            // Silent fail: fake success to avoid exposing the check
+            $this->messageManager->addSuccessMessage(
+                __('Cadastro realizado com sucesso! Seu acesso B2B será analisado e você receberá um e-mail em breve.')
+            );
+            return $resultRedirect->setPath('b2b/account/dashboard');
+        }
+
+        // Rate limiting: 5 registration attempts per hour per IP
+        $clientIp = (string) (
+            $this->remoteAddress->getRemoteAddress()
+            ?: $this->request->getServer('REMOTE_ADDR')
+            ?: 'unknown'
+        );
+        $rateLimit = $this->rateLimiter->consume('b2b_register_' . $clientIp);
+        if (!$rateLimit['allowed']) {
+            $retryAfter = (int) ($rateLimit['retry_after'] ?? 3600);
+            $this->logger->warning('[B2B] Rate limit reached on registration form', ['ip' => $clientIp]);
+            $this->messageManager->addErrorMessage(__(
+                'Muitas tentativas de cadastro em pouco tempo. Aguarde %1 minutos e tente novamente.',
+                (int) ceil($retryAfter / 60)
+            ));
             return $resultRedirect->setPath('*/*/');
         }
 
@@ -246,6 +300,23 @@ class Save implements HttpPostActionInterface
                 }
             } catch (\Magento\Framework\Exception\NoSuchEntityException $e) {
                 // Email não existe, pode continuar
+            }
+
+            // Verificar se CNPJ já está cadastrado
+            $formattedCnpj = $this->cnpjValidator->format($data['cnpj']);
+            $cnpjCollection = $this->customerCollectionFactory->create();
+            $cnpjCollection->addAttributeToFilter(
+                [
+                    ['attribute' => 'b2b_cnpj', 'eq' => $formattedCnpj],
+                    ['attribute' => 'b2b_cnpj', 'eq' => $data['cnpj']]
+                ]
+            );
+            $cnpjCollection->setPageSize(1);
+            if ($cnpjCollection->getFirstItem()->getId()) {
+                $this->messageManager->addErrorMessage(
+                    __('Este CNPJ já está vinculado a uma conta existente. Faça login ou use a opção de vinculação de conta.')
+                );
+                return $resultRedirect->setPath('*/*/');
             }
 
             // Criar cliente
@@ -399,8 +470,13 @@ class Save implements HttpPostActionInterface
             $errors[] = __('Cidade é obrigatória.');
         }
 
-        if ($uf === '' || strlen($uf) !== 2) {
-            $errors[] = __('UF é obrigatória e deve conter 2 caracteres.');
+        $validUfs = [
+            'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA',
+            'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN',
+            'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'
+        ];
+        if ($uf === '' || !in_array($uf, $validUfs, true)) {
+            $errors[] = __('UF inválida. Informe a sigla de um estado brasileiro (ex: SP, RJ, MG).');
         }
 
         if ($termsAccepted !== 1) {

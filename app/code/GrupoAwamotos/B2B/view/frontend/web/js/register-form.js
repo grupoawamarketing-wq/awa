@@ -497,7 +497,7 @@ define([
             if (stepIndex === 4) {
                 var password = String($field('#password').val() || '');
                 var confirm = String($field('#password_confirmation').val() || '');
-                return password.length >= 6 && confirm.length >= 6 && password === confirm;
+                return password.length >= 8 && confirm.length >= 8 && password === confirm;
             }
 
             return false;
@@ -751,7 +751,7 @@ define([
             var passwordConfirmation = $field('#password_confirmation').val() || '';
             var $alert = $field('#email-check-alert');
 
-            if (passwordConfirmation.length >= 6 && password === passwordConfirmation && isValidEmail(email)) {
+            if (passwordConfirmation.length >= 8 && password === passwordConfirmation && isValidEmail(email)) {
                 $alert.html(
                     '<div class="email-check-alert-box">' +
                         '<span class="email-check-alert-icon">&#9888;</span>' +
@@ -1166,9 +1166,38 @@ define([
             });
         }, 100);
 
+        function getPasswordStrength(password) {
+            var classes = 0;
+            if (/[a-z]/.test(password)) { classes++; }
+            if (/[A-Z]/.test(password)) { classes++; }
+            if (/[0-9]/.test(password)) { classes++; }
+            if (/[^a-zA-Z0-9]/.test(password)) { classes++; }
+            if (password.length === 0) { return ''; }
+            if (password.length < 8 || classes < 2) { return 'weak'; }
+            if (password.length < 12 || classes < 3) { return 'medium'; }
+            return 'strong';
+        }
+
+        function initPasswordStrengthMeter() {
+            var $meter = $field('#password-strength-meter');
+            var $label = $field('#password-strength-label');
+            if (!$meter.length) { return; }
+            var strengthLabels = { weak: 'Fraca', medium: 'M\u00e9dia', strong: 'Forte' };
+            $field('#password').on('input.strengthMeter', function () {
+                var strength = getPasswordStrength(String($(this).val() || ''));
+                $meter.removeClass('is-weak is-medium is-strong');
+                $label.text('');
+                if (strength) {
+                    $meter.addClass('is-' + strength);
+                    $label.text(strengthLabels[strength]);
+                }
+            });
+        }
+
         initStepSectionAccordionMarkup();
         $stepSections.css('display', '');
         initRegisterPasswordToggles();
+        initPasswordStrengthMeter();
         setActiveProgressStep(1);
         syncBenefitsDisclosure();
         syncStepSectionsDisclosure();
