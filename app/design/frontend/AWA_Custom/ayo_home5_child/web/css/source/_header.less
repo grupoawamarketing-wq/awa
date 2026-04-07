@@ -1,0 +1,282 @@
+// =============================================
+// AWA MOTOS — HEADER (3 CAMADAS — ESTILO BALAROTI)
+// Layer 1: Barra utilitária (escura)
+// Layer 2: Barra principal (logo + busca + carrinho)
+// Layer 3: Navegação (barra vermelha)
+// =============================================
+
+// === CAMADA 1: BARRA UTILITÁRIA (topo) ===
+.panel.wrapper {
+  background: var(--awa-bg-dark);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.panel.header {
+  max-width: var(--awa-container-max);
+  margin: 0 auto;
+  padding: 0 var(--awa-container-pad);
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  // Contato (esquerda)
+  .header-contact {
+    display: flex; align-items: center; gap: 16px;
+    font-size: var(--awa-font-xs); color: #aaa;
+    a { color: var(--awa-gray-430); &:hover { color: var(--awa-text-inverse); } }
+  }
+
+  // Links de conta (direita)
+  .header-links {
+    display: flex; align-items: center; gap: 12px;
+    font-size: var(--awa-font-xs);
+    a { color: var(--awa-gray-430); &:hover { color: var(--awa-text-inverse); } }
+    a + a::before { content: '|'; margin-right: 12px; color: var(--awa-text-muted); }
+  }
+
+  // Ocultar jargão "Painel MCP"
+  a[title="Painel MCP"],
+  [href*="customer/account"][title="Painel MCP"] {
+    display: none !important;
+  }
+}
+
+// Fix: hide duplicate/junk elements rendered by Magento
+.page-header .panel.header .header.links .greet.welcome,
+.page-header .panel.header .authorization-link + .authorization-link,
+a[href*="mcp"], [class*="mcp-panel"],
+a[title="Painel MCP"], a[title*="MCP"],
+[class*="mcp"], [id*="mcp"],
+.header.content .logo ~ a:not(.block-search):not(.minicart-wrapper):not(.authorization-link),
+.header.content > a[href*="customer/account"]:not(.authorization-link > a),
+.minicart-wrapper ~ .minicart-wrapper,
+[class*="phone"] ~ [class*="phone"],
+.panel.header .header.links > li:empty {
+  display: none !important;
+}
+
+// === CAMADA 2: BARRA PRINCIPAL (logo + busca + carrinho) ===
+.page-header {
+  background: var(--awa-bg);
+  border-bottom: 1px solid var(--awa-border);
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  box-shadow: var(--awa-shadow-sm);
+}
+
+.header.content {
+  max-width: var(--awa-container-max);
+  margin: 0 auto;
+  padding: 0 var(--awa-container-pad);
+  height: 72px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: var(--awa-bg);
+
+  // Logo — único, sem duplicata
+  .logo {
+    flex-shrink: 0;
+    img { max-height: 48px; width: auto; display: block; }
+  }
+  .logo + .logo,
+  .logo:nth-of-type(2) { display: none !important; }
+
+  // Busca — centro, flex:1
+  .block-search {
+    flex: 1;
+    max-width: 580px;
+    position: relative;
+
+    .block-content { position: relative; }
+
+    #search {
+      width: 100%;
+      height: 44px;
+      padding: 0 48px 0 16px;
+      border: 1.5px solid var(--awa-border-strong);
+      border-radius: var(--awa-radius-md);
+      font-size: var(--awa-font-sm);
+      color: var(--awa-text);
+      background: var(--awa-bg);
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      &:focus {
+        border-color: var(--awa-primary);
+        box-shadow: 0 0 0 3px var(--awa-primary-light);
+      }
+      &::placeholder { color: var(--awa-text-light); font-size: var(--awa-font-sm); }
+    }
+
+    .action.search {
+      position: absolute; right: 0; top: 0;
+      width: 44px; height: 44px;
+      background: none; border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--awa-text-muted);
+      transition: color 0.15s;
+      &:hover { color: var(--awa-primary); }
+      span { display: none; }
+    }
+  }
+
+  // Ações (carrinho + conta)
+  .header-actions-wrapper,
+  .minicart-wrapper,
+  .authorization-link {
+    flex-shrink: 0;
+  }
+
+  // Carrinho — ícone com badge
+  .minicart-wrapper {
+    .action.showcart {
+      position: relative;
+      width: 44px; height: 44px;
+      border: 1.5px solid var(--awa-border-strong);
+      border-radius: var(--awa-radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--awa-text);
+      background: var(--awa-bg);
+      cursor: pointer;
+      transition: all 0.15s;
+      &:hover { border-color: var(--awa-primary); color: var(--awa-primary); }
+      .text { display: none; }
+
+      .counter.qty {
+        position: absolute; top: -7px; right: -7px;
+        min-width: 18px; height: 18px;
+        background: var(--awa-primary); color: var(--awa-text-inverse);
+        border-radius: 9px; font-size: 10px; font-weight: 700;
+        display: flex; align-items: center; justify-content: center;
+        padding: 0 4px;
+        &.empty { display: none; }
+      }
+    }
+  }
+
+  // Ocultar carrinho duplicado
+  > a[href*="checkout/cart"]:not(.action.showcart) { display: none !important; }
+  .block-minicart + a[href*="checkout/cart"] { display: none !important; }
+
+  // Botão Entrar
+  .authorization-link a {
+    height: 38px; padding: 0 16px;
+    border: 1.5px solid var(--awa-primary);
+    border-radius: var(--awa-radius-sm);
+    color: var(--awa-primary); font-size: var(--awa-font-sm); font-weight: 600;
+    display: flex; align-items: center; white-space: nowrap;
+    transition: all 0.15s;
+    &:hover { background: var(--awa-primary); color: var(--awa-text-inverse); }
+  }
+}
+
+// === CAMADA 3: NAVEGAÇÃO (barra vermelha) ===
+.nav-sections { background: var(--awa-primary); }
+
+.nav-sections-item-content {
+  max-width: var(--awa-container-max);
+  margin: 0 auto;
+  padding: 0 var(--awa-container-pad);
+}
+
+.navigation {
+  display: flex; align-items: stretch;
+  list-style: none; margin: 0; padding: 0;
+
+  .level0 {
+    position: relative;
+    display: flex; align-items: stretch;
+
+    > a, > span {
+      display: flex; align-items: center;
+      padding: 0 16px; height: 44px;
+      font-size: var(--awa-font-sm); font-weight: 500; color: var(--awa-text-inverse);
+      text-decoration: none; white-space: nowrap;
+      transition: background 0.15s;
+      &:hover { background: var(--awa-primary-hover); }
+    }
+
+    &.active > a, &.current > a {
+      background: var(--awa-primary-hover); font-weight: 700;
+    }
+
+    &.parent > a::after {
+      content: '';
+      display: inline-block; width: 8px; height: 5px; margin-left: 5px;
+      background-image: url("data:image/svg+xml,%3Csvg width='8' height='5' viewBox='0 0 8 5' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0l4 5 4-5z' fill='rgba(255,255,255,0.7)'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-size: contain;
+    }
+
+    // Dropdown
+    .submenu {
+      display: none;
+      position: absolute; top: 100%; left: 0;
+      min-width: 220px;
+      background: var(--awa-bg);
+      border: 1px solid var(--awa-border);
+      border-top: 3px solid var(--awa-primary);
+      border-radius: 0 0 var(--awa-radius-md) var(--awa-radius-md);
+      box-shadow: var(--awa-shadow-md);
+      z-index: 300; padding: 6px 0;
+    }
+    &:hover .submenu { display: block; }
+
+    .submenu li a {
+      display: flex; align-items: center; gap: 8px;
+      padding: 9px 16px; font-size: var(--awa-font-sm);
+      color: var(--awa-text); transition: all 0.12s;
+      &:hover { background: var(--awa-primary-light); color: var(--awa-primary); }
+    }
+
+    .submenu .all-category a {
+      font-weight: 600; color: var(--awa-primary);
+      border-top: 1px solid var(--awa-border); margin-top: 4px;
+      &::after { content: ' →'; }
+    }
+  }
+}
+
+// Banner B2B para não-logados (abaixo da navbar)
+body.not-logged-in .awa-b2b-bar {
+  background: var(--awa-primary-light);
+  border-bottom: 1px solid rgba(183,51,55,0.2);
+  padding: 9px var(--awa-container-pad);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 10px; font-size: var(--awa-font-xs);
+
+  .b2b-bar-text { color: var(--awa-primary-hover); font-weight: 500; }
+
+  .b2b-bar-actions { display: flex; align-items: center; gap: 8px; }
+
+  .b2b-bar-btn {
+    height: 32px; padding: 0 14px;
+    background: var(--awa-primary); color: var(--awa-text-inverse);
+    border-radius: var(--awa-radius-sm); font-size: 11px; font-weight: 700;
+    text-decoration: none; display: flex; align-items: center;
+    transition: background 0.15s;
+    &:hover { background: var(--awa-primary-hover); }
+  }
+
+  .b2b-bar-link {
+    font-size: 11px; color: var(--awa-primary); font-weight: 600;
+    &:hover { text-decoration: underline; }
+  }
+}
+
+// Mobile responsivo
+@media (max-width: 768px) {
+  .header.content {
+    flex-wrap: wrap; height: auto; padding: 10px var(--awa-container-pad); gap: 10px;
+    .logo { order: 1; }
+    .minicart-wrapper { order: 2; margin-left: auto; }
+    .block-search { order: 3; width: 100%; max-width: 100%; }
+    .authorization-link { display: none; }
+  }
+  .panel.header .header-contact span:not(:first-child) { display: none; }
+}
+
+@media (max-width: 480px) {
+  .nav-sections { display: none; }
+}

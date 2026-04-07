@@ -1,0 +1,262 @@
+/*
+ * AWA Design System — Sistema de Formulários Global
+ * design-fase-02: Inputs, Labels, Select, Textarea, Validação, Estados.
+ * Tokens: @awa-* de _awa-variables.less
+ * WCAG 2.5.8: min-height 44px em todos os controles interativos
+ */
+
+@import (once) '_awa-variables';
+
+// ── Shared form-control mixin ─────────────────────────────────────────────
+.awa-form-control() {
+    display: block;
+    width: 100%;
+    min-height: @awa-control-height; // 44px
+    padding: 0 @awa-space-4;
+    font-size: @awa-font-size-14;
+    font-family: inherit;
+    font-weight: @awa-weight-normal;
+    color: @awa-color-text-primary;
+    background: @awa-color-white;
+    border: 1.5px solid @awa-color-border;
+    border-radius: @awa-radius-sm;
+    line-height: 1.2;
+    transition: border-color 200ms ease, box-shadow 200ms ease, background-color 200ms ease;
+    appearance: none;
+    -webkit-appearance: none;
+    box-sizing: border-box;
+
+    &::placeholder {
+        color: @awa-neutral-400;
+        opacity: 1;
+    }
+
+    &:hover:not(:focus):not(:disabled):not([disabled]) {
+        border-color: @awa-neutral-400;
+    }
+
+    &:focus,
+    &:focus-visible {
+        outline: none;
+        border-color: @awa-color-primary;
+        box-shadow: 0 0 0 3px fade(@awa-color-primary, 12%);
+        background: @awa-color-white;
+    }
+
+    &:disabled,
+    &[disabled] {
+        background: @awa-color-bg-soft;
+        border-color: @awa-color-border;
+        color: @awa-neutral-400;
+        cursor: not-allowed;
+        opacity: 0.65;
+    }
+}
+
+// ── Label mixin ───────────────────────────────────────────────────────────
+.awa-form-label() {
+    display: block;
+    font-size: @awa-font-size-12;
+    font-weight: @awa-weight-semibold;
+    color: @awa-neutral-600;
+    margin-bottom: @awa-space-1;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    line-height: @lh-normal;
+}
+
+// ==========================================================================
+// APLICAÇÃO GLOBAL — Seletores Magento
+// ==========================================================================
+
+// ── Inputs ────────────────────────────────────────────────────────────────
+body .page-wrapper .field input[type='text'],
+body .page-wrapper .field input[type='email'],
+body .page-wrapper .field input[type='tel'],
+body .page-wrapper .field input[type='password'],
+body .page-wrapper .field input[type='number'],
+body .page-wrapper .field input[type='search'],
+body .page-wrapper .field input[type='url'],
+body .page-wrapper .field input[type='date'],
+body .page-wrapper input.input-text,
+body .page-wrapper .control input[type='text'],
+body .page-wrapper .control input[type='email'],
+body .page-wrapper .control input[type='tel'],
+body .page-wrapper .control input[type='password'],
+body .page-wrapper .control input[type='number'],
+body .page-wrapper .awa-form-control {
+    .awa-form-control();
+}
+
+// ── Textarea ──────────────────────────────────────────────────────────────
+body .page-wrapper .field textarea,
+body .page-wrapper .control textarea,
+body .page-wrapper textarea.input-text {
+    .awa-form-control();
+    min-height: 100px;
+    padding-top: @awa-space-3;
+    padding-bottom: @awa-space-3;
+    resize: vertical;
+    line-height: @lh-relaxed;
+}
+
+// ── Select ────────────────────────────────────────────────────────────────
+body .page-wrapper .field select,
+body .page-wrapper .control select,
+body .page-wrapper select.select {
+    .awa-form-control();
+    padding-right: @awa-space-8; // espaço para a seta
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394a3b8' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right @awa-space-4 center;
+    background-size: 12px 8px;
+    cursor: pointer;
+}
+
+// ── Labels ────────────────────────────────────────────────────────────────
+body .page-wrapper .field .label,
+body .page-wrapper .field > label,
+body .page-wrapper .control label,
+body .page-wrapper .fieldset .legend,
+body .page-wrapper .awa-form-label {
+    .awa-form-label();
+}
+
+// ── Campo obrigatório — asterisco vermelho ────────────────────────────────
+body .page-wrapper .field.required .label::after,
+body .page-wrapper .field._required .label::after,
+body .page-wrapper .required label::after {
+    content: ' *';
+    color: @awa-color-primary;
+    font-weight: @awa-weight-bold;
+}
+
+// ── Field groups ──────────────────────────────────────────────────────────
+body .page-wrapper .fieldset {
+    border: none;
+    padding: 0;
+    margin: 0;
+}
+
+body .page-wrapper .fieldset .field,
+body .page-wrapper .form .field {
+    margin-bottom: @awa-space-5;
+
+    &:last-child { margin-bottom: 0; }
+}
+
+// ── Mensagens de erro — Magento nativo ───────────────────────────────────
+body .page-wrapper .mage-error,
+body .page-wrapper .field-error,
+body .page-wrapper div.mage-error,
+body .page-wrapper .message.error:not(.global-messages .message.error) {
+    display: flex !important;
+    align-items: flex-start;
+    gap: 4px;
+    margin-top: @awa-space-1;
+    font-size: @awa-font-size-12;
+    font-weight: @awa-weight-medium;
+    color: @awa-color-error-text;
+    line-height: @lh-normal;
+
+    &::before {
+        content: '⚠';
+        flex-shrink: 0;
+        font-size: 11px;
+        margin-top: 1px;
+    }
+}
+
+// ── Input em estado de erro ────────────────────────────────────────────────
+body .page-wrapper .field input[type='text'].mage-error,
+body .page-wrapper .field input[type='email'].mage-error,
+body .page-wrapper .field input[type='tel'].mage-error,
+body .page-wrapper .field input[type='password'].mage-error,
+body .page-wrapper .field input[type='number'].mage-error,
+body .page-wrapper .field select.mage-error,
+body .page-wrapper .field textarea.mage-error,
+body .page-wrapper input.input-text.mage-error {
+    border-color: @awa-color-error !important;
+    background: @awa-color-error-bg !important;
+    box-shadow: 0 0 0 3px fade(@awa-color-error, 8%) !important;
+
+    &:focus,
+    &:focus-visible {
+        border-color: @awa-color-error !important;
+        box-shadow: 0 0 0 3px fade(@awa-color-error, 14%) !important;
+    }
+}
+
+// ── Checkbox e Radio — styled modernos ───────────────────────────────────
+body .page-wrapper .field input[type='checkbox'],
+body .page-wrapper .field input[type='radio'] {
+    accent-color: @awa-color-primary;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+// ── Fieldset com título (legend) ──────────────────────────────────────────
+body .page-wrapper .fieldset .legend {
+    font-size: @awa-font-size-16;
+    font-weight: @awa-weight-bold;
+    color: @awa-color-text-primary;
+    margin-bottom: @awa-space-5;
+    padding-bottom: @awa-space-3;
+    border-bottom: 2px solid @awa-color-border;
+    letter-spacing: 0;
+    text-transform: none;
+    width: 100%;
+}
+
+// ── Formulários completos — espaçamento ──────────────────────────────────
+body .page-wrapper .form-create-account,
+body .page-wrapper .form-login,
+body .page-wrapper .form-address-edit,
+body .page-wrapper .form-edit-account,
+body .page-wrapper .form-newsletter-manage {
+    .fieldset + .fieldset {
+        margin-top: @awa-space-7;
+    }
+}
+
+// ── Linha dupla de campos side-by-side ───────────────────────────────────
+body .page-wrapper .fieldset .field.two-fields,
+body .page-wrapper .form .fields.two-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: @awa-space-4;
+
+    @media (max-width: @awa-breakpoint-xs) {
+        grid-template-columns: 1fr;
+    }
+}
+
+// ── Contador de caracteres (textarea) ────────────────────────────────────
+body .page-wrapper .awa-char-count {
+    display: block;
+    text-align: right;
+    font-size: @awa-font-size-12;
+    color: @awa-neutral-400;
+    margin-top: @awa-space-1;
+}
+
+// ── Responsive ────────────────────────────────────────────────────────────
+@media (max-width: @awa-breakpoint-sm) {
+    body .page-wrapper .field input[type='text'],
+    body .page-wrapper .field input[type='email'],
+    body .page-wrapper .field input[type='tel'],
+    body .page-wrapper .field input[type='password'],
+    body .page-wrapper .field select,
+    body .page-wrapper input.input-text {
+        font-size: 16px; // Previne auto-zoom no iOS
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body .page-wrapper .field input,
+    body .page-wrapper .field select,
+    body .page-wrapper .field textarea {
+        transition: none;
+    }
+}

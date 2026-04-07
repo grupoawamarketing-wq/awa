@@ -1,0 +1,376 @@
+/*
+ * AWA Design System — Container, Grid & Espaçamentos (design-fase-04)
+ * Fonte única de layout para todas as páginas AWA Motos.
+ *
+ * Filosofia:
+ *   - 1 container canônico: .container / .page-wrapper .page-main
+ *   - Grid 12 colunas via CSS Grid (sem Bootstrap dependency)
+ *   - Section wrappers com vertical rhythm padronizado
+ *   - Tokens: @awa-* de _awa-variables.less
+ */
+
+@import (once) '_awa-variables';
+
+// ── Tokens internos de layout ─────────────────────────────────────────────
+@awa-layout-col-gap:     @awa-space-4;   // 16px — gutter entre colunas
+@awa-layout-row-gap:     @awa-space-7;   // 32px — espaço entre linhas
+@awa-layout-section-y:   @awa-space-9;   // 48px — padding vertical de seção
+@awa-layout-section-y-sm: @awa-space-6;  // 24px — idem mobile
+
+// ── Container canônico ────────────────────────────────────────────────────
+// Aplica em todos os containers do site, unificando max-width e padding
+.awa-container,
+body .page-wrapper .container,
+body .page-wrapper .page-main,
+body .page-wrapper .columns,
+body .page-wrapper .page-main > .page-title-wrapper,
+body .page-wrapper .header-control > .container,
+body .page-wrapper [data-awa-header-nav="true"] > .container,
+body .page-wrapper .top-home-content > .container,
+body .page-wrapper .awa-home-section > .container,
+body .page-wrapper .awa-nav-bar > .container,
+body .page-wrapper .awa-utility-bar > .container,
+body .page-wrapper .awa-main-header > .container,
+body .page-wrapper .awa-site-header .container {
+    width: 100%;
+    max-width: @awa-container-max-width; // 1280px
+    margin-inline: auto;
+    padding-inline: @awa-space-5; // 20px lateral
+    box-sizing: border-box;
+}
+
+// Container estreito — login, checkout, formulários B2B
+.awa-container-narrow,
+body .page-wrapper .form-create-account,
+body .page-wrapper .form-login,
+body .page-wrapper .form-address-edit,
+body .page-wrapper .form-edit-account {
+    max-width: 560px;
+    margin-inline: auto;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+// Container médio — artigos, blog, contato
+.awa-container-md {
+    max-width: 768px;
+    margin-inline: auto;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+// ── Grid 12 colunas ────────────────────────────────────────────────────────
+// Uso: <div class="awa-grid"> <div class="awa-col-6"> ...
+// Aceita qualquer combinação que some 12
+
+.awa-grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: @awa-layout-col-gap;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.awa-grid--gap-sm { gap: @awa-space-2; }
+.awa-grid--gap-md { gap: @awa-space-4; }
+.awa-grid--gap-lg { gap: @awa-space-6; }
+.awa-grid--gap-xl { gap: @awa-space-7; }
+
+// Colunas 1–12
+.loop-columns(@n, @i: 1) when (@i =< @n) {
+    .awa-col-@{i}  { grid-column: span @i; }
+    .loop-columns(@n, (@i + 1));
+}
+.loop-columns(12);
+
+// Offset (início)
+.awa-col-offset-1  { grid-column-start: 2; }
+.awa-col-offset-2  { grid-column-start: 3; }
+.awa-col-offset-3  { grid-column-start: 4; }
+.awa-col-offset-4  { grid-column-start: 5; }
+
+// Full-width dentro de grid
+.awa-col-full { grid-column: 1 / -1; }
+
+// ── Layouts pré-definidos (atalhos semânticos) ─────────────────────────────
+
+// Sidebar + Conteúdo (padrão PLP / Conta)
+.awa-layout-sidebar {
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: @awa-space-7;
+    align-items: start;
+}
+
+// 2 colunas iguais
+.awa-layout-halves {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: @awa-space-6;
+}
+
+// 3 colunas iguais
+.awa-layout-thirds {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: @awa-space-5;
+}
+
+// 4 colunas — cards de produto
+.awa-layout-quarters {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: @awa-space-5;
+}
+
+// ── Magento Columns layout ─────────────────────────────────────────────────
+// Padroniza .columns com sidebar esquerda (padrão 2columns-left)
+body .page-wrapper .columns.page-layout-2columns-left,
+body .page-wrapper .page-layout-2columns-left > .columns {
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: @awa-space-7;
+    align-items: start;
+}
+
+body .page-wrapper .columns.page-layout-2columns-right,
+body .page-wrapper .page-layout-2columns-right > .columns {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 260px;
+    gap: @awa-space-7;
+    align-items: start;
+}
+
+body .page-wrapper .page-layout-1column > .columns {
+    display: block;
+}
+
+// Sidebar nativos Magento
+body .page-wrapper .sidebar.sidebar-main {
+    width: 100%;
+    min-width: 0;
+}
+
+body .page-wrapper .column.main {
+    min-width: 0;
+    width: 100%;
+}
+
+// ── Section wrappers ─────────────────────────────────────────────────────
+// Espaçamento vertical rítmico em todas as seções de conteúdo
+
+.awa-section,
+body .page-wrapper .awa-home-section,
+body .page-wrapper .top-home-content,
+body .page-wrapper .categorytab-container,
+body .page-wrapper .products-grid.grid,
+body .page-wrapper .catalog-category-view .column.main > .toolbar + .products,
+body .page-wrapper .searchresult-results-container {
+    padding-block: @awa-layout-section-y;
+}
+
+// Seção com fundo alternado
+.awa-section--alt {
+    background: @awa-color-bg-soft;
+}
+
+// Seção com fundo primário (chamada para ação)
+.awa-section--primary {
+    background: @awa-color-primary;
+    color: @awa-color-button-text;
+}
+
+// Seção sem padding topo (quando segue outra seção)
+.awa-section--flush-top { padding-top: 0 !important; }
+.awa-section--flush-bottom { padding-bottom: 0 !important; }
+
+// ── Stack vertical (componente de espaçamento) ────────────────────────────
+// Substitui margin ad-hoc entre elementos verticais
+
+.awa-stack > * + * { margin-top: @awa-space-4; }
+.awa-stack--xs > * + * { margin-top: @awa-space-1; }
+.awa-stack--sm > * + * { margin-top: @awa-space-2; }
+.awa-stack--md > * + * { margin-top: @awa-space-4; }
+.awa-stack--lg > * + * { margin-top: @awa-space-6; }
+.awa-stack--xl > * + * { margin-top: @awa-space-8; }
+
+// ── Inline / Cluster (itens em linha com wrap) ────────────────────────────
+.awa-cluster {
+    display: flex;
+    flex-wrap: wrap;
+    gap: @awa-space-3;
+    align-items: center;
+}
+
+.awa-cluster--sm { gap: @awa-space-2; }
+.awa-cluster--lg { gap: @awa-space-5; }
+
+// ── Utilitários de display ────────────────────────────────────────────────
+.awa-flex         { display: flex; }
+.awa-flex-col     { display: flex; flex-direction: column; }
+.awa-items-center { align-items: center; }
+.awa-items-start  { align-items: flex-start; }
+.awa-items-end    { align-items: flex-end; }
+.awa-justify-between { justify-content: space-between; }
+.awa-justify-center  { justify-content: center; }
+.awa-justify-end     { justify-content: flex-end; }
+.awa-gap-sm { gap: @awa-gap-sm; }
+.awa-gap-md { gap: @awa-gap-md; }
+.awa-gap-lg { gap: @awa-gap-lg; }
+.awa-gap-xl { gap: @awa-gap-xl; }
+
+// ── Largura / auto ────────────────────────────────────────────────────────
+.awa-w-full   { width: 100%; }
+.awa-w-auto   { width: auto; }
+.awa-min-w-0  { min-width: 0; } // previne overflow em grid/flex
+
+// ── Visibilidade responsiva ───────────────────────────────────────────────
+.awa-hide-mobile  { @media (max-width: @awa-breakpoint-sm)  { display: none !important; } }
+.awa-hide-tablet  { @media (max-width: @awa-breakpoint-md)  { display: none !important; } }
+.awa-hide-desktop { @media (min-width: @awa-breakpoint-md)  { display: none !important; } }
+.awa-show-mobile  { @media (min-width: @awa-breakpoint-sm + 1px) { display: none !important; } }
+
+// ── Responsividade: grid colapsa por breakpoint ───────────────────────────
+@media (max-width: @awa-breakpoint-lg) {
+    .awa-layout-quarters {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: @awa-breakpoint-md) {
+    // Grid 12col: colunas ≥7 viram full-width
+    .awa-col-7,  .awa-col-8,  .awa-col-9,
+    .awa-col-10, .awa-col-11, .awa-col-12 {
+        grid-column: 1 / -1;
+    }
+
+    // Layouts pré-definidos
+    .awa-layout-sidebar,
+    body .page-wrapper .columns.page-layout-2columns-left,
+    body .page-wrapper .page-layout-2columns-left > .columns,
+    body .page-wrapper .columns.page-layout-2columns-right,
+    body .page-wrapper .page-layout-2columns-right > .columns {
+        grid-template-columns: 1fr;
+    }
+
+    // Sidebar vai para baixo do conteúdo no mobile
+    body .page-wrapper .sidebar.sidebar-main {
+        order: 2;
+    }
+    body .page-wrapper .column.main {
+        order: 1;
+    }
+
+    .awa-layout-thirds {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .awa-layout-quarters {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .awa-layout-halves {
+        grid-template-columns: 1fr;
+    }
+
+    // Seções com menos padding
+    .awa-section,
+    body .page-wrapper .awa-home-section,
+    body .page-wrapper .top-home-content,
+    body .page-wrapper .categorytab-container {
+        padding-block: @awa-layout-section-y-sm;
+    }
+}
+
+@media (max-width: @awa-breakpoint-sm) {
+    // Container: padding lateral menor
+    .awa-container,
+    body .page-wrapper .container,
+    body .page-wrapper .page-main,
+    body .page-wrapper .columns,
+    body .page-wrapper .header-control > .container,
+    body .page-wrapper [data-awa-header-nav="true"] > .container,
+    body .page-wrapper .top-home-content > .container,
+    body .page-wrapper .awa-home-section > .container,
+    body .page-wrapper .awa-nav-bar > .container,
+    body .page-wrapper .awa-utility-bar > .container,
+    body .page-wrapper .awa-main-header > .container {
+        padding-inline: @awa-space-4; // 16px no mobile
+    }
+
+    // Grid: tudo vira 1 coluna
+    .awa-col-4, .awa-col-5, .awa-col-6 {
+        grid-column: 1 / -1;
+    }
+
+    .awa-layout-thirds,
+    .awa-layout-quarters {
+        grid-template-columns: 1fr;
+    }
+
+    // Grid menor gap no mobile
+    .awa-grid {
+        gap: @awa-space-3;
+    }
+}
+
+// ── Page-title padronizado ────────────────────────────────────────────────
+body .page-wrapper .page-title-wrapper .page-title {
+    font-size: @awa-font-size-24;
+    font-weight: @awa-weight-bold;
+    color: @awa-color-text-primary;
+    line-height: @lh-tight;
+    margin-bottom: @awa-space-5;
+    margin-top: 0;
+}
+
+body .page-wrapper .page-title-wrapper .page-title .base {
+    display: block;
+}
+
+@media (max-width: @awa-breakpoint-sm) {
+    body .page-wrapper .page-title-wrapper .page-title {
+        font-size: @awa-font-size-20;
+    }
+}
+
+// ── Separador visual ──────────────────────────────────────────────────────
+.awa-divider {
+    border: none;
+    border-top: 1px solid @awa-color-border;
+    margin-block: @awa-space-6;
+}
+
+.awa-divider--subtle {
+    border-top-color: fade(@awa-color-border, 50%);
+}
+
+// ── Aspect-ratio helpers ──────────────────────────────────────────────────
+.awa-ratio-16-9 { aspect-ratio: 16 / 9; overflow: hidden; }
+.awa-ratio-4-3  { aspect-ratio: 4 / 3;  overflow: hidden; }
+.awa-ratio-1-1  { aspect-ratio: 1 / 1;  overflow: hidden; }
+
+// ── Overflow helpers ──────────────────────────────────────────────────────
+.awa-overflow-hidden { overflow: hidden; }
+.awa-overflow-auto   { overflow: auto; }
+.awa-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// ── Carousel sections ─────────────────────────────────────────────────────
+.awa-carousel-section--category {
+    background: @awa-color-white;
+}
+
+// ── Sticky sidebar util ───────────────────────────────────────────────────
+.awa-sticky-top {
+    position: sticky;
+    top: 80px; // abaixo do header condensado
+    align-self: start;
+}
+
+@media (max-width: @awa-breakpoint-md) {
+    .awa-sticky-top { position: static; }
+}

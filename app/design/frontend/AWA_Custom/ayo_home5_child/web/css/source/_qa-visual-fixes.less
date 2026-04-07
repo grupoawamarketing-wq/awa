@@ -50,7 +50,7 @@ body .page-wrapper .awa-site-header .awa-nav-bar {
           align-items: center !important;
           height: 100% !important;
           white-space: nowrap !important;
-          color: #fff !important;
+          color: var(--awa-text-inverse) !important;
           font-weight: 500 !important;
           font-size: 13px !important;
           padding: 0 16px !important;
@@ -169,11 +169,23 @@ body .page-wrapper .awa-site-header #search_mini_form {
   margin-top: auto !important;
 }
 
-// 3.7 Super Ofertas — hide "Sold: 0"
-.superdeals-container [data-sold="0"],
-.superdeals-container .sold-count:empty,
-.superdeals-container .progress-bar[data-sold="0"] {
+// 3.7 Super Ofertas — hide ALL sold counters (Sold: 0/xxx)
+// EXACT classes from HTML source:
+// <div class="sold-by"> → <div class="product-sold"> → <div class="ruler-sold">
+//   <div class="ruler-sold-count"> + <div class="count-sold">Sold: 0/572</div>
+.sold-by,
+.product-sold,
+.ruler-sold,
+.ruler-sold-count,
+.count-sold {
   display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
 }
 
 // Super Ofertas 5 cols on desktop
@@ -256,7 +268,7 @@ body .page-wrapper .awa-site-header #search_mini_form {
 .pages .items .item.current .page,
 .pages .items .item.current a {
   background: var(--awa-primary, #b73337) !important;
-  color: #fff !important;
+  color: var(--awa-text-inverse) !important;
   border-color: var(--awa-primary, #b73337) !important;
 }
 
@@ -267,7 +279,7 @@ body .page-wrapper .awa-site-header #search_mini_form {
   height: 38px !important;
   width: 100% !important;
   border: none !important;
-  color: #fff !important;
+  color: var(--awa-text-inverse) !important;
   border-radius: var(--awa-radius-md, 8px) !important;
 }
 
@@ -311,7 +323,7 @@ body .page-wrapper .awa-site-header #search_mini_form {
 .catalog-product-view .box-tocart .action.tocart {
   min-height: 48px !important;
   background: var(--awa-primary, #b73337) !important;
-  color: #fff !important;
+  color: var(--awa-text-inverse) !important;
   border: none !important;
   border-radius: var(--awa-radius-md, 8px) !important;
   font-weight: 600 !important;
@@ -382,7 +394,7 @@ body .page-wrapper .awa-site-header #search_mini_form {
 .customer-account-login .action.login {
   height: 46px !important;
   background: var(--awa-primary, #b73337) !important;
-  color: #fff !important;
+  color: var(--awa-text-inverse) !important;
   width: 100% !important;
   border: none !important;
   border-radius: var(--awa-radius-md, 8px) !important;
@@ -471,4 +483,176 @@ table,
   @media (max-width: 480px) {
     grid-template-columns: 1fr !important;
   }
+}
+
+// ── ETAPA 7 EXTENDED: ADVANCED MOBILE OVERFLOW FIXES ────────────────────
+
+// The blue/glow border around page on mobile indicates overflow from
+// background elements, slider, and benefits section extending beyond viewport
+
+@media (max-width: 480px) {
+  // Root level containment
+  html {
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  body {
+    overflow-x: hidden !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    position: relative !important;
+  }
+
+  // Force all major containers to not exceed viewport
+  .page-wrapper,
+  .page-header,
+  .sections.nav-sections,
+  .page-main,
+  .page-footer,
+  .footer.content,
+  .header.content,
+  .columns {
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+  }
+
+  // Benefits strip — force wrap on small screens
+  .box-benefit-home,
+  .benefit-block,
+  .cms-home .faixa-beneficios,
+  [class*="benefit"] {
+    flex-wrap: wrap !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+  }
+
+  // Hero slider overflow prevention
+  .rev_slider_wrapper,
+  .rev_slider,
+  .slide-banner-container,
+  [class*="slider-container"],
+  [class*="hero-banner"],
+  .owl-carousel .owl-stage-outer {
+    max-width: 100vw !important;
+    overflow: hidden !important;
+  }
+
+  // Category carousel dots overflow
+  .owl-dots {
+    max-width: 100% !important;
+    overflow: hidden !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    display: flex !important;
+  }
+
+  .owl-dot {
+    width: 10px !important;
+    height: 10px !important;
+    margin: 2px !important;
+  }
+
+  // Product cards in carousel — prevent horizontal overflow
+  .owl-carousel .owl-stage {
+    padding-left: 0 !important;
+  }
+
+  // Right-side floating sidebar — contain within viewport
+  .fixed-sidebar,
+  .sidebar-fixed,
+  [class*="floating-sidebar"],
+  .sotop {
+    right: 0 !important;
+    max-width: 40px !important;
+  }
+
+  // Full-width tables that break layout
+  table {
+    width: 100% !important;
+    table-layout: fixed !important;
+    overflow-wrap: break-word !important;
+  }
+}
+
+// ── ETAPA 9: SEARCH RESULTS PAGE IMPROVEMENTS ──────────────────────────
+
+// Search results page should display a proper grid
+.catalogsearch-result-index {
+  .search.results {
+    width: 100% !important;
+
+    .product-items {
+      display: grid !important;
+      grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+      gap: 16px !important;
+
+      @media (max-width: 1024px) {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+      }
+
+      @media (max-width: 768px) {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      }
+    }
+  }
+
+  // Toolbar layout
+  .toolbar.toolbar-products {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+}
+
+// ── ADDITIONAL PDP FIXES ────────────────────────────────────────────────
+
+// PDP page layout improvement — image + info side by side
+@media (min-width: 768px) {
+  .catalog-product-view .product-info-main {
+    float: none !important;
+  }
+
+  .catalog-product-view .product.media {
+    float: none !important;
+  }
+
+  .catalog-product-view .columns .column.main {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 24px !important;
+  }
+}
+
+// WhatsApp button styling on PDP
+.catalog-product-view .whatsapp-link,
+.catalog-product-view a[href*="whatsapp"] {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  color: var(--awa-success, #2d7a3a) !important;
+  border: 1.5px solid var(--awa-success, #2d7a3a) !important;
+  border-radius: var(--awa-radius-md, 8px) !important;
+  padding: 10px 20px !important;
+  font-weight: 500 !important;
+  text-decoration: none !important;
+  transition: background 0.2s ease, color 0.2s ease !important;
+
+  &:hover {
+    background: var(--awa-success, #2d7a3a) !important;
+    color: var(--awa-text-inverse) !important;
+  }
+}
+
+// ── BODY BACKGROUND GLOW FIX ────────────────────────────────────────────
+// The blue glow around the page edges may come from a body/page background
+// Force it to be a clean white/surface color
+body {
+  background: var(--awa-bg-surface, #f7f7f7) !important;
+}
+
+.page-wrapper {
+  background: var(--awa-bg, #fff) !important;
 }

@@ -1,0 +1,198 @@
+// =============================================
+// AWA MOTOS — NAVEGAÇÃO HORIZONTAL (MODERN)
+// Menu principal com smooth dropdowns + megamenu
+// =============================================
+
+// Nav container — sutil separação
+// `data-awa-header-nav` é a âncora semântica nova do wrapper.
+// As classes Ayo legadas permanecem por compatibilidade, mas o child theme
+// passa a depender também do atributo para futuras simplificações.
+[data-awa-header-nav="true"],
+.awa-nav-bar,
+.nav-sections {
+  background: var(--awa-nav-bg);
+  border-bottom: 1px solid var(--awa-nav-divider);
+  box-shadow: var(--awa-nav-shadow);
+  position: relative;
+  z-index: calc(var(--awa-z-sticky) - 1);
+
+  .nav-sections-items {
+    max-width: var(--awa-container-max);
+    margin: 0 auto;
+    padding: 0 var(--awa-container-pad);
+  }
+}
+
+// Menu horizontal
+.navigation,
+.awa-main-nav {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  // Item nível 1
+  > li,
+  > .nav-item {
+    position: relative;
+
+    > a {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 14px;
+      min-height: 36px;
+      margin: 6px 2px;
+      font-size: var(--awa-font-size-sm);
+      font-weight: var(--awa-weight-semi);
+      color: var(--awa-nav-text);
+      text-decoration: none;
+      white-space: nowrap;
+      position: relative;
+      transition: background-color var(--awa-duration) var(--awa-ease), box-shadow var(--awa-duration-fast) var(--awa-ease), color var(--awa-duration-fast) var(--awa-ease);
+
+      // Underline animada removida, usando background
+      &:hover {
+        background: var(--awa-nav-link-bg-hover);
+        box-shadow: inset 0 0 0 1px var(--awa-nav-pill-border);
+        color: var(--awa-nav-text);
+      }
+    }
+
+    &.active > a,
+    &.current > a {
+      background: var(--awa-nav-link-bg-active);
+      box-shadow: inset 0 0 0 1px var(--awa-nav-pill-border);
+      color: var(--awa-nav-text);
+    }
+
+    // ---- Dropdown com smooth animation ----
+    .submenu,
+    ul.level0.submenu {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      min-width: 240px;
+      background: var(--awa-bg-elevated);
+      border: 1px solid var(--awa-border);
+      border-top: 2px solid var(--awa-primary);
+      border-radius: 0 0 var(--awa-radius-md) var(--awa-radius-md);
+      box-shadow: var(--awa-shadow-lg);
+      z-index: var(--awa-z-dropdown);
+      padding: var(--awa-space-xs) 0;
+      list-style: none;
+
+      // Smooth open/close
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(8px);
+      transition: opacity var(--awa-duration) var(--awa-ease),
+                  visibility var(--awa-duration) var(--awa-ease),
+                  transform var(--awa-duration) var(--awa-ease);
+
+      li {
+        a {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 10px 20px;
+          font-size: var(--awa-font-size-sm);
+          font-weight: var(--awa-weight-normal);
+          color: var(--awa-text);
+          text-decoration: none;
+          transition: background var(--awa-duration-fast) var(--awa-ease),
+                      color var(--awa-duration-fast) var(--awa-ease),
+                      padding-left var(--awa-duration) var(--awa-ease);
+
+          &:hover {
+            background: var(--awa-primary-subtle);
+            color: var(--awa-primary);
+            padding-left: 24px;
+          }
+        }
+
+        // Divider entre grupos
+        &.divider {
+          border-top: 1px solid var(--awa-border-subtle);
+          margin: var(--awa-space-xs) 0;
+        }
+      }
+    }
+
+    // Show on hover
+    &:hover > .submenu,
+    &:hover > ul.level0.submenu,
+    &:focus-within > .submenu,
+    &:focus-within > ul.level0.submenu {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+  }
+
+  // Botão "Todas as Categorias" (highlight)
+  > .nav-all-categories > a {
+    background: var(--awa-nav-pill-bg);
+    color: var(--awa-nav-text);
+    border: 1px solid var(--awa-nav-pill-border);
+    border-radius: var(--awa-radius-full);
+
+    &::after { display: none; }
+
+    &:hover {
+      background: var(--awa-nav-pill-bg-hover);
+      color: var(--awa-nav-text);
+    }
+  }
+}
+
+// ---- Mobile nav (vertical collapse) ----
+@media (max-width: 960px) {
+  [data-awa-header-nav="true"],
+  .awa-nav-bar,
+  .nav-sections {
+    .nav-sections-items { padding: 0; }
+  }
+
+  .navigation,
+  .awa-main-nav {
+    flex-direction: column;
+
+    > li > a,
+    > .nav-item > a {
+      padding: 14px var(--awa-container-pad);
+      border-bottom: 1px solid var(--awa-border-subtle);
+
+      &::after { display: none; }
+    }
+
+    > li .submenu,
+    > .nav-item ul.level0.submenu {
+      position: static;
+      opacity: 1;
+      visibility: visible;
+      transform: none;
+      box-shadow: none;
+      border: none;
+      border-top: none;
+      border-radius: 0;
+      background: var(--awa-bg-surface);
+
+      li a {
+        padding-left: 36px;
+        font-size: var(--awa-font-size-sm);
+      }
+    }
+  }
+}
+// Bridge entre wrapper legado do tema Ayo e shell AWA do header.
+body .page-wrapper .awa-site-header [data-awa-header-nav="true"] {
+  margin-bottom: 0;
+}
+
+body .page-wrapper .awa-site-header [data-awa-header-nav="true"] .menu_primary,
+body .page-wrapper .awa-site-header [data-awa-header-nav="true"] .awa-header-primary-nav {
+  min-width: 0;
+}

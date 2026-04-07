@@ -15,8 +15,8 @@
 /* AWA Professional Header — Tokenized Design System
 
    Color tokens:
-   - @awa-color-primary (#b73337) — brand red
-   - @awa-color-primary-dark (#8e2629) — darker red
+   - @awa-color-primary (var(--awa-primary)) — brand red
+   - @awa-color-primary-dark (var(--awa-primary-hover)) — darker red
    - @awa-color-text-primary (#333333) — main text
    - @awa-color-button-text (#ffffff) — white
    - @awa-color-white (#ffffff) — backgrounds
@@ -47,6 +47,9 @@
     --awa-color-whatsapp: #1aa75b;
     --awa-color-whatsapp-dark: #128c4a;
     --awa-color-whatsapp-rgb: 37 211 102;
+    --awa-color-whatsapp-bright: #4dda85;        // whatsapp on dark bg
+    --awa-color-whatsapp-bright-hover: #80edb1;  // whatsapp hover on dark bg
+    --awa-color-text-muted-on-dark: #cccccc;     // muted text on dark utility bar
 
     // ── Semantic aliases (map to canonical tokens) ──
     --awa-color-bg: var(--awa-color-white);
@@ -67,7 +70,7 @@
         border-bottom: none;
         font-size: @awa-font-size-12;
         font-weight: @awa-weight-normal;
-        color: #cccccc;
+        color: var(--awa-color-text-muted-on-dark);
 
         .awa-utility-bar__inner {
             display: flex;
@@ -103,17 +106,17 @@
             display: inline-flex;
             align-items: center;
             gap: @awa-gap-sm;
-            color: #cccccc;
+            color: var(--awa-color-text-muted-on-dark);
             font-size: @awa-font-size-12;
             font-weight: @awa-weight-normal;
             text-decoration: none;
             white-space: nowrap;
             transition: color @awa-transition;
 
-            &:hover, &:focus-visible { color: #ffffff; text-decoration: none; }
+            &:hover, &:focus-visible { color: var(--awa-text-on-dark); text-decoration: none; }
 
-            &--whatsapp { color: #4dda85; }
-            &--whatsapp:hover, &--whatsapp:focus-visible { color: #80edb1; }
+            &--whatsapp { color: var(--awa-color-whatsapp-bright); }
+            &--whatsapp:hover, &--whatsapp:focus-visible { color: var(--awa-color-whatsapp-bright-hover); }
 
             svg { flex-shrink: 0; stroke: currentColor; }
         }
@@ -123,7 +126,7 @@
             display: inline-flex;
             align-items: center;
             gap: @awa-gap-sm;
-            color: #999999;
+            color: var(--awa-text-light);
             font-size: @awa-font-size-12;
             white-space: nowrap;
             padding-right: @awa-space-4;
@@ -142,13 +145,13 @@
             border-radius: 0 !important;
             min-height: auto !important;
             padding: 0 !important;
-            color: #cccccc !important;
+            color: var(--awa-color-text-muted-on-dark) !important;
             font-size: @awa-font-size-12 !important;
             font-weight: @awa-weight-normal !important;
 
             &:hover, &:focus-visible {
                 background: transparent !important;
-                color: #ffffff !important;
+                color: var(--awa-text-on-dark) !important;
                 text-decoration: underline !important;
             }
         }
@@ -161,15 +164,15 @@
                 box-shadow: none !important;
                 min-height: auto !important;
                 padding: 0 !important;
-                color: #4dda85 !important;
+                color: var(--awa-color-whatsapp-bright) !important;
                 font-size: @awa-font-size-12 !important;
                 gap: 6px !important;
 
-                &:hover { transform: none !important; color: #80edb1 !important; }
-                > i { color: #4dda85 !important; }
+                &:hover { transform: none !important; color: var(--awa-color-whatsapp-bright-hover) !important; }
+                > i { color: var(--awa-color-whatsapp-bright) !important; }
             }
             .hotline-label { display: none !important; }
-            .hotline-number { color: #4dda85 !important; font-size: @awa-font-size-12 !important; }
+            .hotline-number { color: var(--awa-color-whatsapp-bright) !important; font-size: @awa-font-size-12 !important; }
         }
 
         // ── Hidden legacy elements ──
@@ -557,7 +560,7 @@
 
                 .counter.qty {
                     background: var(--awa-color-primary);
-                    color: #fff;
+                    color: var(--awa-text-on-dark);
                     font-size: 11px;
                     font-weight: 700;
                     border-radius: 10px;
@@ -661,9 +664,11 @@
 
     /* 3. Navigation Bar */
     .awa-nav-bar {
-        background-color: @awa-color-primary;
-        color: @awa-color-button-text;
+        background: linear-gradient(180deg, var(--awa-nav-bg) 0%, var(--awa-nav-bg-hover) 100%);
+        color: var(--awa-nav-text);
         z-index: @awa-z-sticky;
+        box-shadow: var(--awa-nav-shadow);
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
 
         .awa-nav-bar__inner {
             display: flex !important;
@@ -671,7 +676,7 @@
             min-height: 48px !important; /* 8px grid: 6×8 = 48 */
             height: 48px !important;
             flex-wrap: nowrap;
-            gap: @awa-gap-lg;
+            gap: @awa-gap-md;
         }
 
         /* Categories Button */
@@ -681,11 +686,12 @@
             display: flex;
             align-items: center;
             margin: 0 !important;
-            padding: 0 15px !important;
+            padding: 0 12px !important;
             background: transparent !important; /* Remove o background vermelho global */
-            color: var(--awa-color-button-text, #fff) !important;
+            color: var(--awa-nav-text) !important;
             cursor: pointer;
             position: relative;
+            border-inline-end: 1px solid var(--awa-nav-divider);
 
             /* Remove a pseudo-caixa vermelha que quebra o layout no print */
             &::before, &::after {
@@ -694,21 +700,27 @@
             }
 
             .title-category-dropdown {
-                background: var(--awa-color-primary-dark) !important; /* Move o background apenas para o botão clicável real */
-                color: #fff !important;
+                background: var(--awa-nav-pill-bg) !important;
+                color: var(--awa-nav-text) !important;
                 font-weight: 600;
                 font-size: 15px;
-                padding: 0 15px;
-                height: 100%;
-                display: flex;
+                padding: 0 18px;
+                min-height: 38px;
+                height: 38px;
+                display: inline-flex;
                 align-items: center;
                 gap: 8px;
-                border-radius: 0;
+                border-radius: var(--awa-radius-full) !important;
+                border: 1px solid var(--awa-nav-pill-border);
+                box-shadow: var(--awa-nav-pill-shadow);
                 cursor: pointer;
-                transition: background 0.2s ease;
+                transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 
-                &:hover {
-                    background: var(--awa-color-primary) !important;
+                &:hover,
+                &:focus-visible {
+                    background: var(--awa-nav-pill-bg-hover) !important;
+                    border-color: var(--awa-nav-pill-border-hover);
+                    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.16);
                 }
             }
         }
@@ -742,24 +754,34 @@
                         align-items: center;
 
                             > a {
-                            color: var(--awa-color-button-text, #fff) !important;
-                            font-weight: 500 !important;
+                            color: var(--awa-nav-text) !important;
+                            font-weight: 600 !important;
                             font-size: 13px !important;
-                            padding: 0 16px !important;
-                            height: 100%;
+                            padding: 0 14px !important;
+                            min-height: 36px;
+                            height: 36px;
                             display: flex;
                             align-items: center;
                             text-transform: none !important;
                             letter-spacing: normal;
-                            transition: background 0.15s ease, color 0.15s ease;
+                            transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
                             border: none !important;
-                            border-radius: 0 !important;
+                            border-radius: var(--awa-radius-full) !important;
                             background: transparent !important;
+                            margin: 0 2px;
 
                             &:hover, &:focus-visible {
-                                background: var(--awa-primary-hover, @awa-color-primary-dark) !important;
+                                background: var(--awa-nav-link-bg-hover) !important;
+                                box-shadow: inset 0 0 0 1px var(--awa-nav-pill-border);
                                 text-decoration: none;
+                                outline: none;
                             }
+                        }
+
+                        &.active > a,
+                        &.current > a {
+                            background: var(--awa-nav-link-bg-active) !important;
+                            box-shadow: inset 0 0 0 1px var(--awa-nav-pill-border);
                         }
                     }
                 }
@@ -788,10 +810,10 @@
                     justify-content: center;
                     min-height: 34px !important;
                     padding: 0 12px !important;
-                    border: 1px solid rgba(255, 255, 255, 0.2);
+                    border: 1px solid var(--awa-nav-pill-border);
                     border-radius: 999px !important;
-                    background: rgba(255, 255, 255, 0.08) !important;
-                    color: var(--awa-color-button-text) !important;
+                    background: var(--awa-nav-pill-bg) !important;
+                    color: var(--awa-nav-text) !important;
                     font-weight: 600;
                     font-size: 12px;
                     letter-spacing: 0.04em;
@@ -800,9 +822,9 @@
 
                     &:hover,
                     &:focus-visible {
-                        background: rgba(255, 255, 255, 0.14) !important;
-                        border-color: rgba(255, 255, 255, 0.32);
-                        box-shadow: 0 10px 22px rgba(15, 23, 42, 0.12);
+                        background: var(--awa-nav-pill-bg-hover) !important;
+                        border-color: var(--awa-nav-pill-border-hover);
+                        box-shadow: var(--awa-nav-pill-shadow);
                     }
                 }
 
@@ -953,7 +975,7 @@
             margin: 0 !important;
             padding: 16px 12px ~"calc(24px + env(safe-area-inset-bottom))" !important;
             padding-left: env(safe-area-inset-left, 12px);
-            background: #fff;
+            background: var(--awa-color-white);
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
             overscroll-behavior: contain;
@@ -1376,9 +1398,9 @@ body .page-wrapper .awa-site-header.awa-header-condensed .awa-nav-bar .header-wr
    ─────────────────────────────────────────────────────────────────────────── */
 body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar,
 body .page-wrapper .awa-site-header.awa-header-professional .top-header.awa-utility-bar {
-    background: @awa-color-white !important;
-    border-bottom: 1px solid @awa-color-border !important;
-    color: @awa-neutral-600 !important;
+    background: var(--awa-bg-dark) !important;
+    border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+    color: var(--awa-color-text-muted-on-dark) !important;
     font-size: @awa-font-size-11 !important;
     font-weight: @awa-weight-medium !important;
     line-height: 1.35;
@@ -1405,26 +1427,26 @@ body .page-wrapper .awa-site-header.awa-header-professional .top-header.awa-util
         white-space: nowrap;
     }
 
-    // Textos
+    // Textos — light on dark bg
     p, span, strong {
-        color: @awa-neutral-500 !important;
+        color: var(--awa-text-light) !important;
         margin: 0;
     }
 
-    // Links normais na utility bar
+    // Links na utility bar — light on dark bg
     a:not(.awa-header-quote-cta) {
-        color: @awa-neutral-500 !important;
+        color: var(--awa-color-text-muted-on-dark) !important;
         text-decoration: none;
         &:hover, &:focus-visible {
-            color: @awa-color-primary !important;
+            color: var(--awa-text-on-dark) !important;
             text-decoration: underline;
             text-underline-offset: 2px;
         }
     }
 
-    // Ícones FA — discretos
+    // Ícones FA — light on dark bg
     .topbar-info > i {
-        color: @awa-neutral-400 !important;
+        color: var(--awa-text-light) !important;
         font-size: 10px;
         opacity: 0.7;
     }
@@ -1463,11 +1485,11 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-nav-bar {
         &::after {
             content: '';
             position: absolute;
-            bottom: 0;
+            bottom: 4px;
             left: 50%;
             right: 50%;
             height: 2px;
-            background: @awa-color-white;
+            background: fade(@awa-color-white, 92%);
             opacity: 0;
             transition: left 180ms ease, right 180ms ease, opacity 180ms ease;
         }
@@ -1475,15 +1497,23 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-nav-bar {
         > a:hover,
         > a:focus-visible,
         &:hover > a,
-        &.active > a {
-            background: transparent !important;
+        &:focus-within > a {
+            background: var(--awa-nav-link-bg-hover) !important;
+            box-shadow: inset 0 0 0 1px var(--awa-nav-pill-border);
+        }
+
+        &.active > a,
+        &.current > a {
+            background: var(--awa-nav-link-bg-active) !important;
+            box-shadow: inset 0 0 0 1px var(--awa-nav-pill-border);
         }
 
         &:hover::after,
         &.active::after,
+        &.current::after,
         &:focus-within::after {
-            left: 12px;
-            right: 12px;
+            left: 14px;
+            right: 14px;
             opacity: 1;
         }
     }
@@ -1542,18 +1572,20 @@ body .page-wrapper .awa-site-header.awa-header-professional {
 body .page-wrapper .awa-site-header.awa-header-professional .awa-nav-bar .awa-header-categories {
     // Remove todo o background extra do wrapper
     background: transparent !important;
-    padding: 0 !important;
+    padding: 0 12px !important;
 
     .title-category-dropdown {
-        background: fade(@awa-color-white, 10%) !important;
-        border-right: 1px solid fade(@awa-color-white, 12%);
+        background: var(--awa-nav-pill-bg) !important;
+        border: 1px solid var(--awa-nav-pill-border) !important;
         padding: 0 @awa-space-5 !important;
         font-size: @awa-font-size-14 !important;
         font-weight: @awa-weight-semibold !important;
         letter-spacing: 0.02em;
-        transition: background-color 150ms ease !important;
-        border-radius: 0 !important;
-        height: 100%;
+        transition: background-color 150ms ease, border-color 150ms ease, box-shadow 150ms ease !important;
+        border-radius: var(--awa-radius-full) !important;
+        min-height: 38px;
+        height: 38px;
+        box-shadow: var(--awa-nav-pill-shadow);
 
         .icon-menu {
             width: 18px;
@@ -1561,8 +1593,11 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-nav-bar .awa-he
             flex-shrink: 0;
         }
 
-        &:hover {
-            background: fade(@awa-color-white, 18%) !important;
+        &:hover,
+        &:focus-visible {
+            background: var(--awa-nav-pill-bg-hover) !important;
+            border-color: var(--awa-nav-pill-border-hover) !important;
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.16);
         }
     }
 }

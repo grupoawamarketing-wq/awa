@@ -1,0 +1,169 @@
+// =============================================
+// AWA MOTOS — MESSAGES / NOTIFICATIONS (MODERN)
+// Toast-style alerts with auto-dismiss support
+// =============================================
+
+// Base message
+.message {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px var(--awa-space-lg);
+  border-radius: var(--awa-radius-md);
+  font-size: var(--awa-font-size-sm);
+  font-weight: var(--awa-weight-medium);
+  line-height: var(--awa-leading-normal);
+  border: 1px solid transparent;
+  margin-bottom: var(--awa-space-md);
+  position: relative;
+  animation: awa-msg-in var(--awa-duration-slow) var(--awa-ease-spring) both;
+
+  // Icon placeholder
+  &::before {
+    font-size: 18px;
+    line-height: 1;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  // Close button
+  .action.close,
+  .close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    opacity: 0.5;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--awa-radius-sm);
+    transition: opacity var(--awa-duration-fast) var(--awa-ease),
+                background var(--awa-duration-fast) var(--awa-ease);
+
+    &:hover {
+      opacity: 1;
+      background: rgba(0, 0, 0, 0.05);
+    }
+  }
+
+  // ---- Variants ----
+  &.success,
+  &.message-success {
+    background: var(--awa-success-bg);
+    border-color: rgba(45, 122, 58, 0.2);
+    color: var(--awa-msg-success-text);
+
+    &::before { content: '\2713'; color: var(--awa-success); }
+  }
+
+  &.error,
+  &.message-error {
+    background: var(--awa-error-bg);
+    border-color: rgba(211, 47, 47, 0.2);
+    color: var(--awa-msg-error-text);
+
+    &::before { content: '\2717'; color: var(--awa-error); }
+  }
+
+  &.warning,
+  &.message-warning {
+    background: var(--awa-warning-bg);
+    border-color: rgba(184, 122, 0, 0.2);
+    color: var(--awa-msg-warning-text);
+
+    &::before { content: '\26A0'; color: var(--awa-warning); }
+  }
+
+  &.info,
+  &.message-info,
+  &.notice,
+  &.message-notice {
+    background: var(--awa-info-bg);
+    border-color: rgba(25, 118, 210, 0.2);
+    color: var(--awa-msg-info-text);
+
+    &::before { content: '\2139'; color: var(--awa-info); }
+  }
+}
+
+// Messages container
+.messages {
+  max-width: var(--awa-container-max);
+  margin: var(--awa-space-md) auto;
+  padding: 0 var(--awa-container-pad);
+}
+
+// Page-level messages (top of page)
+.page.messages {
+  position: relative;
+  z-index: var(--awa-z-toast);
+}
+
+// Toast-style (fixed position)
+.message.awa-toast {
+  position: fixed;
+  bottom: var(--awa-space-lg);
+  right: var(--awa-space-lg);
+  z-index: var(--awa-z-toast);
+  max-width: 420px;
+  box-shadow: var(--awa-shadow-lg);
+  margin: 0;
+  animation: awa-toast-in var(--awa-duration-slow) var(--awa-ease-spring) both;
+
+  // Auto-dismiss indicator
+  &.auto-dismiss::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: currentColor;
+    opacity: 0.3;
+    border-radius: 0 0 var(--awa-radius-md) var(--awa-radius-md);
+    animation: awa-toast-progress 5s linear forwards;
+  }
+}
+
+// ---- Animations ----
+@keyframes awa-msg-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes awa-toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes awa-toast-progress {
+  from { width: 100%; }
+  to { width: 0%; }
+}
+
+// Mobile
+@media (max-width: 600px) {
+  .message.awa-toast {
+    right: var(--awa-space-md);
+    left: var(--awa-space-md);
+    bottom: var(--awa-space-md);
+    max-width: none;
+  }
+}

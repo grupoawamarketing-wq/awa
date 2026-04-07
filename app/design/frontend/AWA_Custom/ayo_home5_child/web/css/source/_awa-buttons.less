@@ -1,0 +1,293 @@
+/*
+ * AWA Design System — Sistema de Botões Global
+ * design-fase-01: Padroniza todos os botões do site em 4 variantes.
+ * Tokens: @awa-* de _awa-variables.less
+ * WCAG 2.5.8: min-height 44px (touch target)
+ */
+
+@import (once) '_awa-variables';
+
+// ── Mixins reutilizáveis ──────────────────────────────────────────────────
+.awa-btn-base() {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: @awa-gap-sm;
+    min-height: @awa-control-height; // 44px WCAG
+    padding: 0 @awa-space-6;
+    font-size: @awa-font-size-14;
+    font-weight: @awa-weight-semibold;
+    font-family: inherit;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    line-height: 1;
+    white-space: nowrap;
+    cursor: pointer;
+    text-decoration: none;
+    border: none;
+    border-radius: @awa-radius-sm;
+    transition: background-color 200ms ease, border-color 200ms ease,
+                color 200ms ease, box-shadow 200ms ease, transform 150ms ease;
+    user-select: none;
+    vertical-align: middle;
+    position: relative;
+    overflow: hidden;
+
+    // Prevent double-clicks
+    &:active { transform: translateY(1px); }
+}
+
+.awa-btn-focus-primary() {
+    &:focus-visible {
+        outline: 2px solid @awa-color-primary-dark;
+        outline-offset: @awa-focus-ring-offset;
+        box-shadow: @awa-focus-ring;
+    }
+}
+
+.awa-btn-disabled() {
+    &:disabled,
+    &[disabled],
+    &.disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+        pointer-events: none;
+        transform: none !important;
+        box-shadow: none !important;
+    }
+}
+
+// ── PRIMARY — ação principal (vermelho AWA) ───────────────────────────────
+.awa-btn-primary() {
+    .awa-btn-base();
+    background: @awa-color-primary;
+    color: @awa-color-button-text;
+    border: 1.5px solid @awa-color-primary;
+    box-shadow: 0 2px 8px fade(@awa-color-primary, 24%);
+
+    &:hover,
+    &:focus-visible {
+        background: @awa-color-primary-dark !important;
+        border-color: @awa-color-primary-dark !important;
+        color: @awa-color-button-text !important;
+        box-shadow: 0 6px 18px fade(@awa-color-primary, 36%);
+        transform: translateY(-1px);
+        text-decoration: none;
+    }
+
+    .awa-btn-focus-primary();
+    .awa-btn-disabled();
+}
+
+// ── SECONDARY — outline vermelho ──────────────────────────────────────────
+.awa-btn-secondary() {
+    .awa-btn-base();
+    background: transparent;
+    color: @awa-color-primary;
+    border: 1.5px solid @awa-color-primary;
+    box-shadow: none;
+
+    &:hover,
+    &:focus-visible {
+        background: @awa-color-primary !important;
+        color: @awa-color-button-text !important;
+        border-color: @awa-color-primary !important;
+        box-shadow: 0 4px 14px fade(@awa-color-primary, 28%);
+        transform: translateY(-1px);
+        text-decoration: none;
+    }
+
+    .awa-btn-focus-primary();
+    .awa-btn-disabled();
+}
+
+// ── GHOST — neutro, terciário ─────────────────────────────────────────────
+.awa-btn-ghost() {
+    .awa-btn-base();
+    background: transparent;
+    color: @awa-neutral-600;
+    border: 1px solid @awa-color-border;
+    box-shadow: none;
+
+    &:hover,
+    &:focus-visible {
+        border-color: @awa-color-primary !important;
+        color: @awa-color-primary !important;
+        background: fade(@awa-color-primary, 4%) !important;
+        transform: translateY(-1px);
+        text-decoration: none;
+    }
+
+    &:focus-visible {
+        outline: 2px solid @awa-color-primary;
+        outline-offset: @awa-focus-ring-offset;
+    }
+
+    .awa-btn-disabled();
+}
+
+// ── DANGER — ações destrutivas ────────────────────────────────────────────
+.awa-btn-danger() {
+    .awa-btn-base();
+    background: @awa-color-error;
+    color: @awa-color-button-text;
+    border: 1.5px solid @awa-color-error;
+    box-shadow: 0 2px 8px fade(@awa-color-error, 24%);
+
+    &:hover,
+    &:focus-visible {
+        background: @awa-color-error-text !important;
+        border-color: @awa-color-error-text !important;
+        color: @awa-color-button-text !important;
+        box-shadow: 0 6px 18px fade(@awa-color-error, 36%);
+        transform: translateY(-1px);
+        text-decoration: none;
+    }
+
+    .awa-btn-disabled();
+}
+
+// ── SMALL variant modifier ────────────────────────────────────────────────
+.awa-btn-sm() {
+    min-height: @awa-control-height-sm !important;
+    padding: 0 @awa-space-4 !important;
+    font-size: @awa-font-size-12 !important;
+}
+
+// ── LARGE variant modifier ────────────────────────────────────────────────
+.awa-btn-lg() {
+    min-height: @awa-control-height-lg !important;
+    padding: 0 @awa-space-8 !important;
+    font-size: @awa-font-size-16 !important;
+    border-radius: @awa-radius-md !important;
+}
+
+// ==========================================================================
+// APLICAÇÃO GLOBAL — Seletores Magento + Rokanthemes
+// Especificidade suficiente para bater o tema pai sem !important desnecessário
+// ==========================================================================
+
+// ── PRIMARY buttons ───────────────────────────────────────────────────────
+body .page-wrapper .action.primary,
+body .page-wrapper .action.tocart,
+body .page-wrapper .action.login,
+body .page-wrapper .action.checkout,
+body .page-wrapper .action.update,
+body .page-wrapper .btn-primary,
+body .page-wrapper .button.btn-cart,
+body .page-wrapper button.action-primary,
+body .page-wrapper .awa-btn-primary {
+    .awa-btn-primary();
+}
+
+// "Adicionar ao Carrinho" — destaque extra com ícone e ação de conversão
+body .page-wrapper .action.tocart,
+body .page-wrapper .btn-cart.action {
+    width: 100%;
+    max-width: 320px;
+    box-shadow: 0 4px 16px fade(@awa-color-primary, 32%);
+
+    &:hover {
+        box-shadow: 0 8px 24px fade(@awa-color-primary, 42%) !important;
+    }
+}
+
+// Submit buttons inside Magento forms
+body .page-wrapper .form-create-account button[type='submit'],
+body .page-wrapper .form-login button[type='submit'],
+body .page-wrapper .form-address-edit button[type='submit'],
+body .page-wrapper .form-edit-account button[type='submit'],
+body .page-wrapper .checkout-payment-method button[type='submit'],
+body .page-wrapper .payment-method-content button[type='submit'] {
+    .awa-btn-primary();
+    min-width: 160px;
+}
+
+// ── SECONDARY buttons ─────────────────────────────────────────────────────
+body .page-wrapper .action.secondary,
+body .page-wrapper .action.viewcart,
+body .page-wrapper .action.continue,
+body .page-wrapper .action.back,
+body .page-wrapper .btn-secondary,
+body .page-wrapper .awa-btn-secondary {
+    .awa-btn-secondary();
+}
+
+// "Ver Carrinho" na sidebar
+body .page-wrapper .action.viewcart {
+    width: 100%;
+    justify-content: center;
+}
+
+// ── GHOST buttons ─────────────────────────────────────────────────────────
+body .page-wrapper .action.delete,
+body .page-wrapper .action.edit,
+body .page-wrapper .action.towishlist,
+body .page-wrapper .action.tocompare,
+body .page-wrapper .btn-ghost,
+body .page-wrapper .awa-btn-ghost {
+    .awa-btn-ghost();
+    .awa-btn-sm();
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+// ── EXCEPTION: botões dentro da nav (ficam brancos no fundo vermelho) ──────
+body .page-wrapper .nav-sections .action,
+body .page-wrapper .header-control .action,
+body .page-wrapper .awa-nav-bar button,
+body .page-wrapper .awa-nav-bar .action {
+    background: transparent !important;
+    border: none !important;
+    color: @awa-color-button-text !important;
+    box-shadow: none !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    min-height: auto !important;
+    padding: 0 !important;
+    transform: none !important;
+}
+
+// ── Loading state (via JS — adicionar .is-loading ao botão) ──────────────
+body .page-wrapper .action.is-loading,
+body .page-wrapper .action._loading {
+    position: relative;
+    pointer-events: none;
+    color: transparent !important;
+
+    &::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 16px;
+        height: 16px;
+        margin: -8px 0 0 -8px;
+        border: 2px solid fade(@awa-color-button-text, 30%);
+        border-top-color: @awa-color-button-text;
+        border-radius: 50%;
+        animation: awa-btn-spin 0.65s linear infinite;
+    }
+}
+
+@keyframes awa-btn-spin {
+    to { transform: rotate(360deg); }
+}
+
+// ── Responsive ────────────────────────────────────────────────────────────
+@media (max-width: @awa-breakpoint-sm) {
+    body .page-wrapper .action.primary,
+    body .page-wrapper .action.tocart,
+    body .page-wrapper .action.checkout {
+        width: 100%;
+        max-width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body .page-wrapper .action {
+        transition: none !important;
+        transform: none !important;
+        animation: none !important;
+    }
+}

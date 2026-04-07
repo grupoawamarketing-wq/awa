@@ -1,0 +1,409 @@
+/* ==========================================================================
+   AWA Design System — Foundation Layer  (source/_design-system.less)
+
+   Camada de fundação do design system AWA Motos.
+   Importa _awa-variables.less e extende com:
+     1. Sistema de espaçamento base 8px (named scale)
+     2. Breakpoints padronizados + mixin respond-to
+     3. Tipografia fluida + mixin font-size
+     4. Cores base documentadas (sem alteração visual)
+     5. Container / grid padrão
+
+   USO:
+     @import '_design-system';
+     — OU —
+     já disponível via _variables.less se adicionada a import chain.
+
+   REGRA: Este arquivo é 100% não-destrutivo. Apenas define variáveis,
+   mapas e mixins para uso futuro. Nenhum seletor HTML é alterado.
+   ========================================================================== */
+
+@import (once) '_awa-variables';
+
+
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  1. SISTEMA DE ESPAÇAMENTO — BASE 8px                                  ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+//
+// Escala nomeada baseada em 8px como unidade atômica.
+// Complementa o @awa-space-* (base 4px) de _awa-variables.less.
+// Usar @ds-space-* para layout/componentes novos.
+//
+// Referência rápida:
+//   xs=8  sm=16  md=24  lg=32  xl=40  xxl=48  3xl=64  4xl=80
+
+@ds-space-xs:   8px;
+@ds-space-sm:  16px;
+@ds-space-md:  24px;
+@ds-space-lg:  32px;
+@ds-space-xl:  40px;
+@ds-space-xxl: 48px;
+@ds-space-3xl: 64px;
+@ds-space-4xl: 80px;
+
+// CSS custom properties (disponíveis no runtime)
+:root {
+    --ds-space-xs:   @ds-space-xs;
+    --ds-space-sm:   @ds-space-sm;
+    --ds-space-md:   @ds-space-md;
+    --ds-space-lg:   @ds-space-lg;
+    --ds-space-xl:   @ds-space-xl;
+    --ds-space-xxl:  @ds-space-xxl;
+    --ds-space-3xl:  @ds-space-3xl;
+    --ds-space-4xl:  @ds-space-4xl;
+}
+
+
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  2. BREAKPOINTS PADRONIZADOS                                            ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+//
+// Escala de breakpoints completa (xs → 4k).
+// Complementa @awa-breakpoint-* de _awa-variables.less.
+//
+// Uso via mixin:
+//   .my-class { .respond-to-md({ font-size: 18px; }); }
+
+@ds-bp-xs:   320px;
+@ds-bp-sm:   480px;
+@ds-bp-md:   768px;
+@ds-bp-lg:  1024px;
+@ds-bp-xl:  1280px;
+@ds-bp-xxl: 1920px;
+@ds-bp-4k:  2560px;
+
+// CSS custom properties para JS (matchMedia, etc.)
+:root {
+    --ds-bp-xs:   @ds-bp-xs;
+    --ds-bp-sm:   @ds-bp-sm;
+    --ds-bp-md:   @ds-bp-md;
+    --ds-bp-lg:   @ds-bp-lg;
+    --ds-bp-xl:   @ds-bp-xl;
+    --ds-bp-xxl:  @ds-bp-xxl;
+    --ds-bp-4k:   @ds-bp-4k;
+}
+
+// ── Mixins respond-to (min-width — mobile-first) ──────────────────────────
+//
+// LESS não suporta mapas como SCSS. Usamos mixins parametrizados.
+// Cada mixin aceita um ruleset como argumento.
+//
+// Exemplo de uso:
+//   .hero-title {
+//       font-size: 24px;
+//       .respond-to-md({
+//           font-size: 36px;
+//       });
+//       .respond-to-xl({
+//           font-size: 48px;
+//       });
+//   }
+
+.respond-to-xs(@rules) {
+    @media (min-width: @ds-bp-xs) { @rules(); }
+}
+.respond-to-sm(@rules) {
+    @media (min-width: @ds-bp-sm) { @rules(); }
+}
+.respond-to-md(@rules) {
+    @media (min-width: @ds-bp-md) { @rules(); }
+}
+.respond-to-lg(@rules) {
+    @media (min-width: @ds-bp-lg) { @rules(); }
+}
+.respond-to-xl(@rules) {
+    @media (min-width: @ds-bp-xl) { @rules(); }
+}
+.respond-to-xxl(@rules) {
+    @media (min-width: @ds-bp-xxl) { @rules(); }
+}
+.respond-to-4k(@rules) {
+    @media (min-width: @ds-bp-4k) { @rules(); }
+}
+
+// ── Max-width variants (desktop-first, para casos legados) ────────────────
+.respond-below-sm(@rules) {
+    @media (max-width: (@ds-bp-sm - 1)) { @rules(); }
+}
+.respond-below-md(@rules) {
+    @media (max-width: (@ds-bp-md - 1)) { @rules(); }
+}
+.respond-below-lg(@rules) {
+    @media (max-width: (@ds-bp-lg - 1)) { @rules(); }
+}
+.respond-below-xl(@rules) {
+    @media (max-width: (@ds-bp-xl - 1)) { @rules(); }
+}
+
+// ── Range variant (entre dois breakpoints) ────────────────────────────────
+//
+// Exemplo:
+//   .respond-between(@ds-bp-md, @ds-bp-lg, {
+//       .sidebar { display: none; }
+//   });
+.respond-between(@min, @max, @rules) {
+    @media (min-width: @min) and (max-width: (@max - 1)) { @rules(); }
+}
+
+
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  3. TIPOGRAFIA FLUIDA                                                   ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+//
+// Escala tipográfica com valores mobile e desktop.
+// Interpola linearmente via clamp() entre 320px (mobile) e 1280px (desktop).
+//
+// A função .fluid-type() gera o clamp() automaticamente.
+// Os mixins .font-size-* aplicam a escala completa.
+//
+// Referência de escalas:
+//   Nome     Mobile   Desktop
+//   xs       10px     12px
+//   sm       12px     14px
+//   base     14px     16px
+//   lg       16px     18px
+//   xl       18px     20px
+//   h6       16px     18px
+//   h5       18px     22px
+//   h4       20px     24px
+//   h3       24px     28px
+//   h2       28px     36px
+//   h1       32px     48px
+
+// ── Variáveis de escala tipográfica (mobile / desktop) ────────────────────
+@ds-font-xs-mobile:   10px;   @ds-font-xs-desktop:   12px;
+@ds-font-sm-mobile:   12px;   @ds-font-sm-desktop:   14px;
+@ds-font-base-mobile: 14px;   @ds-font-base-desktop: 16px;
+@ds-font-lg-mobile:   16px;   @ds-font-lg-desktop:   18px;
+@ds-font-xl-mobile:   18px;   @ds-font-xl-desktop:   20px;
+@ds-font-h6-mobile:   16px;   @ds-font-h6-desktop:   18px;
+@ds-font-h5-mobile:   18px;   @ds-font-h5-desktop:   22px;
+@ds-font-h4-mobile:   20px;   @ds-font-h4-desktop:   24px;
+@ds-font-h3-mobile:   24px;   @ds-font-h3-desktop:   28px;
+@ds-font-h2-mobile:   28px;   @ds-font-h2-desktop:   36px;
+@ds-font-h1-mobile:   32px;   @ds-font-h1-desktop:   48px;
+
+// CSS custom properties (desktop values — fallback estático)
+:root {
+    --ds-font-xs:   @ds-font-xs-desktop;
+    --ds-font-sm:   @ds-font-sm-desktop;
+    --ds-font-base: @ds-font-base-desktop;
+    --ds-font-lg:   @ds-font-lg-desktop;
+    --ds-font-xl:   @ds-font-xl-desktop;
+    --ds-font-h6:   @ds-font-h6-desktop;
+    --ds-font-h5:   @ds-font-h5-desktop;
+    --ds-font-h4:   @ds-font-h4-desktop;
+    --ds-font-h3:   @ds-font-h3-desktop;
+    --ds-font-h2:   @ds-font-h2-desktop;
+    --ds-font-h1:   @ds-font-h1-desktop;
+}
+
+// ── Mixin: fluid-type (clamp generator) ───────────────────────────────────
+//
+// Gera font-size: clamp(min, preferred, max) que interpola entre
+// viewport 320px (mobile) e 1280px (desktop).
+//
+// Uso:
+//   .my-title { .fluid-type(24px, 48px); }
+//
+// O cálculo preferred = min + (max - min) × ((100vw - 320px) / (1280 - 320))
+// simplificado para: clamp(min, calc(min + (max-min) * vw-ratio), max)
+.fluid-type(@min-size, @max-size) {
+    // Viewport range: 320px → 1280px = 960px
+    @slope: (unit(@max-size) - unit(@min-size)) / 960;
+    @intercept: unit(@min-size) - @slope * 320;
+    font-size: clamp(
+        @min-size,
+        ~"calc(@{intercept}px + @{slope} * 100vw)",
+        @max-size
+    );
+}
+
+// ── Mixins de escala tipográfica nomeados ──────────────────────────────────
+//
+// Exemplo:
+//   .product-title { .font-size-h3(); }
+//   .price-label   { .font-size-lg(); }
+
+.font-size-xs() {
+    .fluid-type(@ds-font-xs-mobile, @ds-font-xs-desktop);
+}
+.font-size-sm() {
+    .fluid-type(@ds-font-sm-mobile, @ds-font-sm-desktop);
+}
+.font-size-base() {
+    .fluid-type(@ds-font-base-mobile, @ds-font-base-desktop);
+}
+.font-size-lg() {
+    .fluid-type(@ds-font-lg-mobile, @ds-font-lg-desktop);
+}
+.font-size-xl() {
+    .fluid-type(@ds-font-xl-mobile, @ds-font-xl-desktop);
+}
+.font-size-h6() {
+    .fluid-type(@ds-font-h6-mobile, @ds-font-h6-desktop);
+    line-height: @lh-compact;
+}
+.font-size-h5() {
+    .fluid-type(@ds-font-h5-mobile, @ds-font-h5-desktop);
+    line-height: @lh-compact;
+}
+.font-size-h4() {
+    .fluid-type(@ds-font-h4-mobile, @ds-font-h4-desktop);
+    line-height: @lh-tight;
+}
+.font-size-h3() {
+    .fluid-type(@ds-font-h3-mobile, @ds-font-h3-desktop);
+    line-height: @lh-tight;
+}
+.font-size-h2() {
+    .fluid-type(@ds-font-h2-mobile, @ds-font-h2-desktop);
+    line-height: @lh-tight;
+}
+.font-size-h1() {
+    .fluid-type(@ds-font-h1-mobile, @ds-font-h1-desktop);
+    line-height: @lh-tight;
+}
+
+
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  4. CORES BASE — DOCUMENTAÇÃO (sem alteração visual)                    ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+//
+// Mapeamento de referência das cores do site para consulta rápida.
+// Valores autoritativos estão em _awa-variables.less.
+// Aqui apenas aliases semânticos para o design system.
+//
+// ── Primárias ──────────────────────────────────────────────────────────────
+//   @awa-color-primary       #b73337   Vermelho AWA (botões, links, CTAs)
+//   @awa-color-primary-dark  #8e2629   Hover da primária
+//
+// ── Texto ──────────────────────────────────────────────────────────────────
+//   @awa-color-text-primary  #333333   Texto principal (body)
+//   @awa-color-text-muted    #666666   Texto secundário
+//   @awa-color-text-light    #999999   Texto auxiliar / placeholder
+//   @awa-color-button-text   #ffffff   Texto sobre botão
+//
+// ── Superfícies ────────────────────────────────────────────────────────────
+//   @awa-color-white         #ffffff   Background principal
+//   @awa-color-bg-soft       #f7f7f7   Cards, alternância de seções
+//   @awa-color-border        #e5e5e5   Bordas padrão
+//
+// ── Neutras (Slate scale) ──────────────────────────────────────────────────
+//   @awa-neutral-50 → @awa-neutral-900  (9 steps, ver _awa-variables.less)
+//
+// ── Semânticas (feedback) ──────────────────────────────────────────────────
+//   @awa-color-success       #16a34a   Estado de sucesso
+//   @awa-color-warning       #d97706   Estado de alerta
+//   @awa-color-error         #b73337   Estado de erro (= primária)
+//   @awa-color-info          #2563eb   Estado informativo
+
+// Aliases de conveniência do design system (ponteiros para _awa-variables)
+@ds-color-brand:        @awa-color-primary;
+@ds-color-brand-hover:  @awa-color-primary-dark;
+@ds-color-text:         @awa-color-text-primary;
+@ds-color-text-muted:   @awa-color-text-muted;
+@ds-color-text-light:   @awa-color-text-light;
+@ds-color-surface:      @awa-color-white;
+@ds-color-surface-alt:  @awa-color-bg-soft;
+@ds-color-border:       @awa-color-border;
+
+
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  5. CONTAINER / GRID PADRÃO                                             ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+//
+// Define constantes de grid para referência.
+// Não gera CSS — apenas variáveis para uso em componentes.
+
+@ds-grid-max-width: 1440px;
+@ds-grid-columns:   12;
+@ds-grid-gutter:    24px;
+@ds-grid-half-gutter: (@ds-grid-gutter / 2);
+
+:root {
+    --ds-grid-max-width:  @ds-grid-max-width;
+    --ds-grid-columns:    @ds-grid-columns;
+    --ds-grid-gutter:     @ds-grid-gutter;
+    --ds-grid-half-gutter: @ds-grid-half-gutter;
+}
+
+// ── Mixin: container padrão ───────────────────────────────────────────────
+//
+// Exemplo:
+//   .page-wrapper { .ds-container(); }
+.ds-container() {
+    width: 100%;
+    max-width: @ds-grid-max-width;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: @ds-grid-gutter;
+    padding-right: @ds-grid-gutter;
+}
+
+// ── Mixin: row (grid flex) ────────────────────────────────────────────────
+.ds-row() {
+    display: flex;
+    flex-wrap: wrap;
+    margin-left: -@ds-grid-half-gutter;
+    margin-right: -@ds-grid-half-gutter;
+}
+
+// ── Mixin: column ─────────────────────────────────────────────────────────
+//
+// Exemplo:
+//   .sidebar { .ds-col(3); }   →  width: 25%
+//   .main    { .ds-col(9); }   →  width: 75%
+.ds-col(@span) {
+    flex: 0 0 percentage((@span / @ds-grid-columns));
+    max-width: percentage((@span / @ds-grid-columns));
+    padding-left: @ds-grid-half-gutter;
+    padding-right: @ds-grid-half-gutter;
+}
+
+
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  6. UTILITY MIXINS                                                      ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+
+// ── Visually hidden (acessibilidade — oculto mas lido por screen readers)
+.ds-visually-hidden() {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+// ── Truncate text (single line) ───────────────────────────────────────────
+.ds-truncate() {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// ── Line clamp (multi-line truncate) ──────────────────────────────────────
+//
+// Exemplo:
+//   .product-description { .ds-line-clamp(3); }
+.ds-line-clamp(@lines) {
+    display: -webkit-box;
+    -webkit-line-clamp: @lines;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+// ── Focus ring consistente (acessibilidade WCAG) ──────────────────────────
+.ds-focus-ring() {
+    outline: 2px solid @awa-color-primary;
+    outline-offset: @awa-focus-ring-offset;
+}
+
+// ── Transition rápida padronizada ─────────────────────────────────────────
+.ds-transition(@properties: all) {
+    transition: @properties @awa-transition;
+}

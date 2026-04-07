@@ -1,0 +1,123 @@
+// =============================================
+// AWA MOTOS — CAROUSEL PRODUCTS (MODERN)
+// Grid responsivo padronizado + scroll mode
+// Breakpoints: 1col(<480) 2col(480-1023) 3col(1024-1279) 4col(1280+)
+// =============================================
+
+.awa-product-carousel,
+.products-grid.widget-product-grid {
+
+  // Default grid mode (4 columns — desktop 1280+)
+  .product-items {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--awa-gap-card);
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  // Carousel mode (scroll-snap)
+  &.is-carousel .product-items {
+    display: flex;
+    gap: var(--awa-gap-card);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: var(--awa-space-sm);
+
+    scrollbar-width: none;
+    &::-webkit-scrollbar { display: none; }
+
+    > .product-item {
+      flex: 0 0 calc(25% - var(--awa-gap-card) * 3 / 4);
+      scroll-snap-align: start;
+    }
+  }
+
+  // Carousel controls
+  .carousel-controls {
+    position: relative;
+
+    .carousel-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 40px;
+      height: 40px;
+      border-radius: var(--awa-radius-full);
+      background: var(--awa-bg-elevated);
+      border: 1px solid var(--awa-border);
+      box-shadow: var(--awa-shadow-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: var(--awa-z-base);
+      color: var(--awa-text);
+      font-size: var(--awa-font-size-lg);
+      transition: all var(--awa-duration) var(--awa-ease);
+
+      &:hover {
+        background: var(--awa-primary);
+        color: var(--awa-text-inverse);
+        border-color: var(--awa-primary);
+        box-shadow: var(--awa-shadow-lg);
+      }
+
+      &.prev { left: -16px; }
+      &.next { right: -16px; }
+    }
+  }
+}
+
+// ---- Responsive grid columns (padronizado) ----
+
+// 3 colunas — small desktop (1024-1279)
+@media (max-width: 1279px) {
+  .awa-product-carousel .product-items,
+  .products-grid.widget-product-grid .product-items {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .awa-product-carousel.is-carousel .product-items > .product-item {
+    flex: 0 0 calc(33.333% - var(--awa-gap-card) * 2 / 3);
+  }
+}
+
+// 2 colunas — tablet (768-1023)
+@media (max-width: 1023px) {
+  .awa-product-carousel .product-items,
+  .products-grid.widget-product-grid .product-items {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .awa-product-carousel.is-carousel .product-items > .product-item {
+    flex: 0 0 calc(50% - var(--awa-gap-card) / 2);
+  }
+
+  .carousel-controls .carousel-arrow { display: none; }
+}
+
+// 2 colunas — mobile sm (480-767)
+@media (max-width: 767px) {
+  .awa-product-carousel .product-items,
+  .products-grid.widget-product-grid .product-items {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--awa-gap-card);
+  }
+}
+
+// 1 coluna — mobile xs (<480)
+@media (max-width: 479px) {
+  .awa-product-carousel .product-items,
+  .products-grid.widget-product-grid .product-items {
+    grid-template-columns: 1fr;
+    gap: var(--awa-gap-card);
+  }
+
+  .awa-product-carousel.is-carousel .product-items > .product-item {
+    flex: 0 0 100%;
+  }
+}
