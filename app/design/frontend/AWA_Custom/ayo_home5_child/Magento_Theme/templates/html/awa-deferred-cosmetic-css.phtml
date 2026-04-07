@@ -33,7 +33,7 @@ $deferredFiles[] = $block->getViewFileUrl('css/awa-visual-audit-v2.css');
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($cssUrl) ?>"/></noscript>
 <?php endforeach; ?>
 <script>
-/* AWA-FIX-2026-04-06: Force dark backgrounds after all CSS/JS loads */
+/* AWA-FIX-2026-04-07: Force backgrounds + header redesign overrides */
 (function(){
   function awaDarkFix(){
     var s='#1a1a1a';
@@ -42,13 +42,106 @@ $deferredFiles[] = $block->getViewFileUrl('css/awa-visual-audit-v2.css');
       el.style.setProperty('background-image','none','important');
     });
     document.querySelectorAll('.top-header,.top-header.awa-utility-bar,.panel.wrapper').forEach(function(el){
+      if(el.classList.contains('awa-b2b-promo-bar')){
+        el.style.setProperty('background','#C41230','important');
+        el.style.setProperty('background-image','none','important');
+        el.style.setProperty('color','#fff','important');
+        return;
+      }
+      if(el.classList.contains('awa-utility-bar-legacy')){
+        el.style.setProperty('display','none','important');
+        return;
+      }
       el.style.setProperty('background',s,'important');
       el.style.setProperty('background-image','none','important');
       el.style.setProperty('color','#ccc','important');
     });
   }
-  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',function(){setTimeout(awaDarkFix,1500);})}
-  else{setTimeout(awaDarkFix,1500);}
-  window.addEventListener('load',function(){setTimeout(awaDarkFix,500);});
+  function awaHeaderRedesignFix(){
+    /* Search form: flat rectangle + flex stretch */
+    document.querySelectorAll('form.minisearch,.form.minisearch').forEach(function(el){
+      el.style.setProperty('border-radius','4px','important');
+      el.style.setProperty('border','1px solid #d0d0d0','important');
+      el.style.setProperty('display','flex','important');
+      el.style.setProperty('align-items','stretch','important');
+      el.style.setProperty('flex-wrap','nowrap','important');
+      el.style.setProperty('height','44px','important');
+      el.style.setProperty('padding','0','important');
+      el.style.setProperty('gap','0','important');
+      el.style.setProperty('overflow','hidden','important');
+    });
+    /* Search input: remove internal border + radius */
+    document.querySelectorAll('form.minisearch #search,form.minisearch input.input-text').forEach(function(el){
+      el.style.setProperty('border','none','important');
+      el.style.setProperty('border-radius','0','important');
+      el.style.setProperty('background','transparent','important');
+      el.style.setProperty('box-shadow','none','important');
+      el.style.setProperty('height','100%','important');
+      el.style.setProperty('padding','0 16px','important');
+      el.style.setProperty('margin','0','important');
+      el.style.setProperty('flex','1 1 0%','important');
+    });
+    /* Search .actions wrapper: remove gap */
+    document.querySelectorAll('form.minisearch .actions,.form.minisearch .actions').forEach(function(el){
+      el.style.setProperty('padding','0','important');
+      el.style.setProperty('margin','0','important');
+      el.style.setProperty('border','none','important');
+      el.style.setProperty('display','flex','important');
+      el.style.setProperty('align-items','stretch','important');
+    });
+    /* Search button: RED #C41230, flush, no radius */
+    document.querySelectorAll('button.action.search,.awa-search-btn').forEach(function(el){
+      el.style.setProperty('background','#C41230','important');
+      el.style.setProperty('color','#fff','important');
+      el.style.setProperty('border','none','important');
+      el.style.setProperty('border-radius','0','important');
+      el.style.setProperty('width','48px','important');
+      el.style.setProperty('min-width','48px','important');
+      el.style.setProperty('height','100%','important');
+      el.style.setProperty('padding','0','important');
+      el.style.setProperty('margin','0','important');
+    });
+    document.querySelectorAll('button.action.search svg,.awa-search-btn svg').forEach(function(el){
+      el.style.setProperty('color','#fff','important');
+      el.style.setProperty('stroke','#fff','important');
+    });
+    /* Nav bar: gray background (override MCP red) */
+    document.querySelectorAll('.header-control.header-nav,.header-control.header-nav.awa-nav-bar').forEach(function(el){
+      el.style.setProperty('background','#f2f2f2','important');
+      el.style.setProperty('background-image','none','important');
+      el.style.setProperty('min-height','48px','important');
+      el.style.setProperty('display','flex','important');
+      el.style.setProperty('align-items','stretch','important');
+    });
+    /* Categories button: force #C41230 */
+    document.querySelectorAll('.our_categories,.our_categories.title-category-dropdown').forEach(function(el){
+      el.style.setProperty('background','#C41230','important');
+      el.style.setProperty('color','#fff','important');
+      el.style.setProperty('height','100%','important');
+      el.style.setProperty('overflow','hidden','important');
+    });
+    /* .verticalmenu + .section-items containers: transparent to fix gaps */
+    document.querySelectorAll('.navigation.verticalmenu,.nav-sections.category-dropdown,.awa-header-categories,.section-items,.section-items.nav-sections').forEach(function(el){
+      el.style.setProperty('background','transparent','important');
+      el.style.setProperty('height','100%','important');
+      el.style.setProperty('padding','0','important');
+      el.style.setProperty('margin','0','important');
+      el.style.setProperty('border','none','important');
+    });
+    /* Nav links: dark text + semibold */
+    document.querySelectorAll('.header-nav .menu_primary nav > ul > li > a,.header-nav .menu_primary .level0 > a,.awa-header-primary-nav a').forEach(function(el){
+      el.style.setProperty('color','#333','important');
+      el.style.setProperty('font-weight','600','important');
+    });
+    /* Hide nav-toggle + nav-close on desktop */
+    if(window.innerWidth >= 992){
+      document.querySelectorAll('.nav-toggle,.awa-header-mobile-toggle,button.awa-nav-close,.awa-nav-close').forEach(function(el){
+        el.style.setProperty('display','none','important');
+      });
+    }
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',function(){setTimeout(awaDarkFix,1500);setTimeout(awaHeaderRedesignFix,2000);});}
+  else{setTimeout(awaDarkFix,1500);setTimeout(awaHeaderRedesignFix,2000);}
+  window.addEventListener('load',function(){setTimeout(awaDarkFix,500);setTimeout(awaHeaderRedesignFix,800);});
 })();
 </script>

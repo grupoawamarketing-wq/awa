@@ -1,18 +1,561 @@
 // =============================================
-// AWA MOTOS — PRODUCT CARDS & CAROUSELS
-// Padroniza cards de produto nos carrosséis
-// Rokanthemes (newproduct, bestseller, producttab,
-// featured, mostviewed, onsale, toprate, categorytab)
-// e em widgets .products-grid da homepage.
+// AWA MOTOS — PRODUCT CARDS (UNIVERSAL)
+// =============================================
+// Padroniza o card em TODOS os contextos:
+//   • Homepage carrosséis (.rokan-newproduct, .rokan-bestseller, etc.)
+//   • Categoria (.catalog-category-view .products-grid)
+//   • Busca (.catalogsearch-result-index .products-grid)
+//   • Widgets (.block.widget .products-grid)
 //
-// Seletores baseados no HTML real dos templates:
-//   .item-product > .product-thumb + .product-info
-//   .rokan-newproduct, .rokan-bestseller, .list-tab-product
+// Seletores REAIS (confirmados em list.phtml do child theme):
+//   li.item-product  — card wrapper universal
+//   .product-thumb   — imagem
+//   .product-info    — corpo (nome, sku, preço, cta)
+//   .product-name    — h3 wrapper do nome
+//   .awa-b2b-sku     — código do produto
+//   .info-price      — área de preço
+//   .product-info-cart > .actions-primary — área CTA
+//   .btn-add-to-cart — botão primário
+//   .b2b-login-to-buy-btn — botão B2B (JS-injected)
+//   .hot-onsale      — container badges
 //
-// Tokens: _tokens.less (CSS custom props)
+// Grid REAL:
+//   div.wrapper.grid.products-grid > ul.product-grid
+//   (NÃO .product-items — esse seletor não existe no DOM)
+//
+// Design tokens: _tokens.less · _awa-variables.less
 // =============================================
 
-// === 0. SCOPE — aplica a todos os wrappers de carrossel Rokanthemes ===
+
+// === 1. SECTION HEADER ===
+// Títulos das seções de produtos (homepage + widgets)
+// Os carrosséis Rokanthemes usam .rokan-product-heading
+// Os widgets Magento usam .block-title
+// Estilo "barra lateral vermelha + flexbox space-between"
+
+.rokan-product-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding-left: 12px;
+  padding-bottom: 12px;
+  margin-bottom: 20px;
+  border-left: 3px solid var(--awa-primary);
+  border-bottom: 1px solid var(--awa-border);
+
+  h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--awa-text);
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  // Label acima do título (ex: "NOVO", "TOP")
+  .sup-title {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--awa-primary);
+    line-height: 1;
+    margin-bottom: 2px;
+  }
+
+  // Link "Ver todos"
+  a {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--awa-primary);
+    text-decoration: none;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: color 150ms ease;
+
+    &:hover {
+      color: var(--awa-primary-hover);
+      text-decoration: underline;
+    }
+  }
+}
+
+
+// === 2. TOOLBAR CATEGORIA ===
+// Refinamentos sobre _grid-listing.less
+// Seletor real: .toolbar.toolbar-products (Magento padrão)
+
+.toolbar.toolbar-products {
+  background: #fff;
+  border: 1px solid var(--awa-border);
+  border-radius: var(--awa-radius-md, 8px);
+  padding: 8px 14px;
+
+  .toolbar-amount .toolbar-number {
+    font-weight: 700;
+    color: var(--awa-text);
+  }
+
+  .sorter-options,
+  select#sorter {
+    border: 1px solid var(--awa-border);
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 12px;
+    color: var(--awa-text);
+    background: var(--awa-bg-surface, #fafafa);
+  }
+
+  .modes-mode {
+    &.active {
+      border-color: var(--awa-primary);
+      background: var(--awa-primary-light, #fef2f2);
+    }
+  }
+}
+
+
+// === 3. GRID RESPONSIVO ===
+// Aplica CSS Grid na ul.product-grid (categoria/busca)
+// Carrosséis (.swiper) NÃO são afetados — Swiper controla o layout
+//
+// Classe real da grid: ul.product-grid.container-products-switch
+// Wrapper: div.wrapper.grid.products-grid
+
+.products-grid > .product-grid,
+.products-grid > .container-products-switch,
+.products-grid > ul {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  @media (min-width: @awa-breakpoint-sm) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+// 5 colunas para telas largas — apenas categoria + busca
+.catalog-category-view,
+.catalogsearch-result-index {
+  .products-grid > .product-grid,
+  .products-grid > .container-products-switch,
+  .products-grid > ul {
+    @media (min-width: @awa-breakpoint-lg) {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+  }
+}
+
+// Exclusão: nunca aplicar grid dentro de carrossel
+.swiper .product-grid,
+.slick-slider .product-grid,
+.owl-carousel .product-grid {
+  display: flex !important;
+  grid-template-columns: unset !important;
+}
+
+
+// === 4. CARD CONTAINER ===
+// .item-product — universal em todos os contextos
+
+.item-product {
+  background: #fff;
+  border: 1px solid var(--awa-border);
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, .08);
+    border-color: #ddd;
+  }
+}
+
+
+// === 5. CARD IMAGEM ===
+// .product-thumb — wrapper da imagem (com hover swap)
+
+.item-product .product-thumb {
+  position: relative;
+  height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+  background: #fff;
+  overflow: hidden;
+  flex-shrink: 0;
+
+  .product-thumb-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
+  }
+
+  .first-thumb {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    transition: opacity 0.2s ease;
+
+    img {
+      max-width: 100%;
+      max-height: 128px;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      display: block;
+      transition: transform 0.25s ease;
+    }
+  }
+
+  // Hover: zoom sutil
+  &:hover .first-thumb img {
+    transform: scale(1.04);
+  }
+
+  // Segunda imagem (hover swap) — escondida por padrão
+  .second-thumb {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+
+    img {
+      max-width: 100%;
+      max-height: 128px;
+      object-fit: contain;
+    }
+  }
+
+  &:hover .second-thumb {
+    opacity: 1;
+  }
+
+  &:hover .first-thumb {
+    opacity: 0;
+  }
+}
+
+
+// === 6. BADGES ===
+// .hot-onsale — container de badges (Novo / Promoção)
+// Posicionado sobre a imagem
+
+.item-product .hot-onsale {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.item-product .onsale {
+  display: inline-flex;
+  align-items: center;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 7px;
+  border-radius: 4px;
+  line-height: 1.6;
+  background: #16a34a;
+  color: #fff;
+
+  .sale-bg { display: none; }
+
+  .sale-text {
+    font-size: inherit;
+    font-weight: inherit;
+    color: inherit;
+  }
+}
+
+// Badge NOVO
+.item-product .onsale.new-lable,
+.item-product .new-lable {
+  background: #2563eb;
+  color: #fff;
+}
+
+// Badge HOT / Destaque
+.item-product .onsale.featured-label {
+  background: var(--awa-primary);
+  color: #fff;
+}
+
+
+// === 7. CARD CORPO E CTA ===
+// .product-info — body do card (nome, sku, preço, botões)
+
+.item-product .product-info {
+  padding: 10px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+// SKU — hierarquia visual subordinada
+.item-product .awa-b2b-sku {
+  display: block;
+  font-size: 10px;
+  color: #bbb;
+  margin-bottom: 4px;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+
+  .awa-b2b-sku__label {
+    font-weight: 400;
+    color: inherit;
+  }
+
+  .awa-b2b-sku__value {
+    font-weight: 500;
+    color: var(--awa-text-muted, #888);
+  }
+}
+
+// Nome do produto — truncar em 2 linhas
+.item-product .product-name {
+  margin: 0 0 10px;
+
+  .product-item-link {
+    font-size: 12px;
+    font-weight: 500;
+    color: #222;
+    text-decoration: none;
+    line-height: 1.4;
+    min-height: 34px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    transition: color 0.15s ease;
+
+    &:hover {
+      color: var(--awa-primary);
+    }
+  }
+}
+
+// Rating (estrelas)
+.item-product .product-rating {
+  margin-bottom: 4px;
+
+  .rating-summary {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+}
+
+// Preço
+.item-product .info-price {
+  margin-bottom: 8px;
+
+  .price-box {
+    .price {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--awa-text);
+      line-height: 1.2;
+    }
+
+    .old-price .price {
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--awa-text-light, #999);
+      text-decoration: line-through;
+    }
+  }
+}
+
+// CTA — push to bottom
+.item-product .product-info-cart {
+  margin-top: auto;
+}
+
+// Botão "Adicionar ao Carrinho"
+.item-product .actions-primary {
+  .btn-add-to-cart,
+  .action.tocart {
+    display: block;
+    width: 100%;
+    background: var(--awa-primary);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+    padding: 9px 8px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    text-transform: none;
+    letter-spacing: 0;
+    line-height: 1.4;
+
+    &:hover {
+      background: var(--awa-primary-hover);
+    }
+
+    &:active {
+      background: var(--awa-primary-hover);
+    }
+
+    &:disabled {
+      background: var(--awa-border);
+      cursor: not-allowed;
+    }
+
+    span {
+      font-size: inherit;
+      color: inherit;
+    }
+  }
+}
+
+// Botão B2B — "Faça login para ver preços" (JS-injected)
+.item-product .b2b-login-to-buy-btn.b2b--listing {
+  display: block;
+  width: 100%;
+  background: var(--awa-primary);
+  color: #fff !important;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  padding: 9px 8px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  text-transform: none;
+  text-decoration: none;
+
+  &:hover {
+    background: var(--awa-primary-hover);
+  }
+}
+
+// Stock labels
+.item-product .stock {
+  font-size: 11px;
+  color: var(--awa-text-muted);
+  text-align: center;
+  padding: 6px 0;
+
+  &.available { color: var(--awa-success, #16a34a); }
+  &.unavailable { color: var(--awa-text-light, #999); }
+}
+
+
+// === 8. PAGINACAO ===
+// Refinamentos sobre _grid-listing.less
+
+.pages {
+  .items.pages-items {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    margin-top: 24px;
+    list-style: none;
+    padding: 0;
+  }
+
+  .item {
+    a,
+    strong.page {
+      width: 36px;
+      height: 36px;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      color: #444;
+      text-decoration: none;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    a:hover {
+      border-color: var(--awa-primary);
+      color: var(--awa-primary);
+    }
+  }
+
+  .item.current {
+    strong.page {
+      background: var(--awa-primary);
+      color: #fff;
+      border-color: var(--awa-primary);
+    }
+  }
+}
+
+
+// === 9. SIDEBAR FILTROS ===
+// Refinamentos sobre _filters.less
+
+.sidebar-main .filter-options-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111;
+  border-bottom: 1px solid var(--awa-border);
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+
+.sidebar-main .filter-options-content .item {
+  a {
+    font-size: 12px;
+    color: #555;
+    padding: 4px 0;
+    display: block;
+    text-decoration: none;
+
+    &:hover {
+      color: var(--awa-primary);
+    }
+  }
+
+  &.active a {
+    color: var(--awa-primary);
+    font-weight: 600;
+  }
+}
+
+
+// === 10. SWIPER NAV ARROWS ===
+// Setas de navegação dos carrosséis homepage
+
 .rokan-newproduct,
 .rokan-bestseller,
 .list-tab-product,
@@ -20,366 +563,16 @@
 .rokan-mostviewed,
 .rokan-onsale,
 .rokan-toprate,
-.categorytab-container,
-.block.widget.block-products-list {
-
-  // === 1. SECTION HEADER ===
-  .rokan-product-heading {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    padding-bottom: var(--awa-space-sm);
-    margin-bottom: var(--awa-section-header-mb, 20px);
-    border-bottom: 2px solid var(--awa-border);
-
-    h2 {
-      font-size: var(--awa-font-size-xl, 22px);
-      font-weight: 700;
-      color: var(--awa-text);
-      margin: 0;
-      padding-left: 12px;
-      border-left: 4px solid var(--awa-primary);
-      line-height: 1.2;
-
-      .sup-title {
-        font-size: var(--awa-font-size-sm, 13px);
-        font-weight: 500;
-        color: var(--awa-text-muted);
-      }
-    }
-
-    a {
-      font-size: var(--awa-font-size-xs, 11px);
-      font-weight: 600;
-      color: var(--awa-primary);
-      text-decoration: none;
-      white-space: nowrap;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
-
-      &:hover {
-        color: var(--awa-primary-hover);
-        text-decoration: underline;
-      }
-
-      &::after {
-        content: ' \2192';
-      }
-    }
-  }
-
-  // === 2. CARD CONTAINER ===
-  .item-product {
-    position: relative;
-    background: var(--awa-bg, #fff);
-    border: 1px solid var(--awa-border);
-    border-radius: var(--awa-card-radius, 8px);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    transition: box-shadow 200ms cubic-bezier(0.4, 0, 0.2, 1),
-                border-color 200ms cubic-bezier(0.4, 0, 0.2, 1);
-
-    &:hover {
-      box-shadow: var(--awa-card-shadow-hover, 0 8px 24px rgba(0, 0, 0, .12));
-      border-color: var(--awa-border-strong);
-    }
-  }
-
-  // === 3. IMAGEM — altura fixa, aspect-ratio ===
-  .product-thumb {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: var(--awa-card-img-h, 200px);
-    padding: var(--awa-card-pad-img, 16px);
-    background: var(--awa-bg-surface, #f7f7f7);
-    overflow: hidden;
-    flex-shrink: 0;
-
-    .product-thumb-link {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      height: 100%;
-      text-decoration: none;
-    }
-
-    .first-thumb img {
-      max-width: 100%;
-      max-height: 168px;
-      width: auto;
-      height: auto;
-      object-fit: contain;
-      display: block;
-      transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    // Hover zoom sutil na imagem
-    &:hover .first-thumb img {
-      transform: scale(1.05);
-    }
-
-    // Segunda imagem (hover swap) — escondida por padrão
-    .second-thumb {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: var(--awa-card-pad-img, 16px);
-      opacity: 0;
-      transition: opacity 200ms cubic-bezier(0.4, 0, 0.2, 1);
-
-      img {
-        max-width: 100%;
-        max-height: 168px;
-        object-fit: contain;
-      }
-    }
-
-    &:hover .second-thumb {
-      opacity: 1;
-    }
-
-    &:hover .first-thumb {
-      opacity: 0;
-    }
-  }
-
-  // === 4. BADGES (Novo / Promoção) ===
-  .hot-onsale {
-    position: absolute;
-    top: 8px;
-    left: 8px;
-    z-index: 2;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .onsale {
-    display: inline-flex;
-    align-items: center;
-    font-size: 9px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    padding: 2px 7px;
-    border-radius: 4px;
-    line-height: 1.6;
-    background: var(--awa-success, #2d7a3a);
-    color: #fff;
-
-    .sale-bg {
-      display: none;
-    }
-
-    .sale-text {
-      font-size: inherit;
-      font-weight: inherit;
-      color: inherit;
-    }
-  }
-
-  .onsale.new-lable,
-  .new-lable {
-    background: var(--awa-info, #1976d2);
-    color: #fff;
-    font-size: 9px;
-    font-weight: 700;
-    padding: 2px 7px;
-    border-radius: 4px;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    line-height: 1.6;
-    display: inline-flex;
-    align-items: center;
-  }
-
-  // === 5. CORPO DO CARD (.product-info) ===
-  .product-info {
-    padding: var(--awa-card-pad-body, 12px 14px);
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    gap: 0;
-  }
-
-  // === 6. SKU — hierarquia visual menor ===
-  .awa-b2b-sku {
-    display: block;
-    margin-bottom: 4px;
-    font-size: 10px;
-    color: var(--awa-text-light, #999);
-    line-height: 1.4;
-    letter-spacing: 0.02em;
-
-    .awa-b2b-sku__label {
-      font-weight: 400;
-      color: inherit;
-    }
-
-    .awa-b2b-sku__value {
-      font-weight: 500;
-      color: var(--awa-text-muted, #666);
-    }
-  }
-
-  // === 7. NOME DO PRODUTO — truncar em 2 linhas ===
-  .product-name {
-    margin: 0 0 8px;
-
-    .product-item-link {
-      font-size: @awa-font-size-12;
-      font-weight: 500;
-      color: var(--awa-text, #333);
-      text-decoration: none;
-      line-height: 1.35;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      min-height: calc(2 * 1.35em);
-      transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
-
-      &:hover {
-        color: var(--awa-primary);
-      }
-    }
-  }
-
-  // === 8. PREÇO (info-price) ===
-  .info-price {
-    margin-bottom: 8px;
-
-    .price-box {
-      .price {
-        font-size: 18px;
-        font-weight: 700;
-        color: var(--awa-text);
-        line-height: 1.2;
-      }
-
-      .old-price .price {
-        font-size: @awa-font-size-12;
-        font-weight: 400;
-        color: var(--awa-text-light);
-        text-decoration: line-through;
-      }
-    }
-  }
-
-  // === 9. CTA — botão "Add to Cart" / "Faça login" ===
-  .product-info-cart {
-    margin-top: auto;
-    padding-top: 8px;
-  }
-
-  .actions-primary {
-    .btn-add-to-cart,
-    .action.tocart {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      min-height: var(--awa-card-btn-h, 44px);
-      padding: 0 16px;
-      background: var(--awa-primary);
-      color: #fff;
-      font-size: @awa-font-size-12;
-      font-weight: 700;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background 150ms cubic-bezier(0.4, 0, 0.2, 1);
-      text-transform: none;
-      letter-spacing: 0;
-
-      &:hover {
-        background: var(--awa-primary-hover);
-      }
-
-      &:active {
-        background: var(--awa-primary-hover);
-      }
-
-      &:disabled {
-        background: var(--awa-border);
-        cursor: not-allowed;
-      }
-
-      span {
-        font-size: inherit;
-        color: inherit;
-      }
-    }
-  }
-
-  // B2B login button (injected by JS)
-  .b2b-login-to-buy-btn.b2b--listing {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    min-height: var(--awa-card-btn-h, 44px);
-    padding: 0 16px;
-    background: var(--awa-primary);
-    color: #fff !important;
-    font-size: @awa-font-size-12;
-    font-weight: 700;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background 150ms cubic-bezier(0.4, 0, 0.2, 1);
-    text-transform: none;
-
-    &:hover {
-      background: var(--awa-primary-hover);
-    }
-  }
-
-  // Stock labels
-  .stock {
-    font-size: @awa-font-size-11;
-    color: var(--awa-text-muted);
-    text-align: center;
-    padding: 8px 0;
-
-    &.available {
-      color: var(--awa-success);
-    }
-
-    &.unavailable {
-      color: var(--awa-text-light);
-    }
-  }
-
-  // === 10. RATING (estrelas) ===
-  .product-rating {
-    margin-bottom: 4px;
-
-    .rating-summary {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-  }
-
-  // === 11. SWIPER NAV ARROWS ===
+.categorytab-container {
   .swiper-button-prev,
   .swiper-button-next {
     width: 36px;
     height: 36px;
-    border: 1px solid var(--awa-border-strong, #ccc);
+    border: 1px solid #ccc;
     border-radius: 4px;
-    background: var(--awa-bg, #fff);
+    background: #fff;
     color: var(--awa-text);
-    transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 150ms ease;
 
     &::after {
       font-size: 14px;
@@ -391,22 +584,13 @@
       color: #fff;
     }
   }
+}
 
-} // fecha scope dos wrappers de carrossel
 
+// === 11. PRODUCTTAB TABS ===
+// Botões de abas para producttab widget
 
-// === 12. PRODUCTTAB — tabs wrapper ===
 .list-tab-product {
-
-  .rokan-product-heading h2 {
-    .sup-title {
-      font-size: var(--awa-font-size-sm, 13px);
-      font-weight: 500;
-      color: var(--awa-text-muted);
-    }
-  }
-
-  // Tab buttons
   .vc_tta-tabs-container .tabs {
     display: flex;
     gap: 8px;
@@ -417,14 +601,14 @@
 
     li {
       cursor: pointer;
-      font-size: @awa-font-size-13;
+      font-size: 13px;
       font-weight: 600;
       color: var(--awa-text-muted);
       padding: 4px 16px;
       border-radius: 9999px;
       border: 1px solid var(--awa-border);
-      background: var(--awa-bg);
-      transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+      background: var(--awa-bg, #fff);
+      transition: all 150ms ease;
 
       &:hover {
         color: var(--awa-primary);
@@ -437,87 +621,52 @@
         color: #fff;
         border-color: var(--awa-primary);
       }
-
-      .awa-tab-button {
-        all: unset;
-        cursor: pointer;
-        font: inherit;
-        color: inherit;
-      }
     }
   }
 
-  // Slides stacked (producttab rows)
   .item-product-parent {
     margin-bottom: 8px;
   }
 }
 
 
-// === 13. RESPONSIVE ===
-@media (max-width: @awa-breakpoint-sm) {
-  .rokan-newproduct,
-  .rokan-bestseller,
-  .list-tab-product,
-  .rokan-featured,
-  .rokan-mostviewed,
-  .rokan-onsale,
-  .rokan-toprate,
-  .categorytab-container {
+// === 12. RESPONSIVE (mobile-first) ===
 
-    .rokan-product-heading h2 {
-      font-size: 18px;
+@media (min-width: @awa-breakpoint-sm) {
+  // Imagem maior em telas médias+
+  .item-product .product-thumb {
+    height: 180px;
+
+    .first-thumb img,
+    .second-thumb img {
+      max-height: 148px;
     }
+  }
 
-    .product-thumb {
-      height: 160px;
-    }
-
-    .product-name .product-item-link {
-      font-size: @awa-font-size-11;
-    }
-
-    .swiper-button-prev,
-    .swiper-button-next {
-      width: 28px;
-      height: 28px;
-
-      &::after {
-        font-size: 12px;
-      }
-    }
+  .item-product .product-name .product-item-link {
+    font-size: 13px;
+    min-height: 36px;
   }
 }
 
-@media (max-width: @awa-breakpoint-xs) {
-  .rokan-newproduct,
-  .rokan-bestseller,
-  .list-tab-product,
-  .rokan-featured,
-  .rokan-mostviewed,
-  .rokan-onsale,
-  .rokan-toprate,
-  .categorytab-container {
+@media (min-width: @awa-breakpoint-md) {
+  .rokan-product-heading h2 {
+    font-size: 22px;
+  }
 
-    .product-thumb {
-      height: 140px;
-      padding: 8px;
-    }
+  .item-product .product-thumb {
+    height: 200px;
 
-    .product-info {
-      padding: 8px 10px 10px;
+    .first-thumb img,
+    .second-thumb img {
+      max-height: 168px;
     }
+  }
 
-    .product-name .product-item-link {
-      font-size: @awa-font-size-10;
-      min-height: calc(2 * 1.35em);
-    }
-
-    .actions-primary .btn-add-to-cart,
-    .actions-primary .action.tocart,
-    .b2b-login-to-buy-btn.b2b--listing {
-      min-height: 38px;
-      font-size: @awa-font-size-11;
-    }
+  // Botão um pouco mais alto em desktop
+  .item-product .actions-primary .btn-add-to-cart,
+  .item-product .actions-primary .action.tocart,
+  .item-product .b2b-login-to-buy-btn.b2b--listing {
+    padding: 10px 12px;
   }
 }

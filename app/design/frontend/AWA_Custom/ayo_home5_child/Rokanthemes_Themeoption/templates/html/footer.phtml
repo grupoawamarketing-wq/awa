@@ -72,9 +72,13 @@ $sslLabsUrl = $showSecuritySeals
     : '#';
 $mediaUrl = rtrim((string) $block->getBaseUrl(), '/') . '/media';
 
+$logoBlock = $block->getLayout() ? $block->getLayout()->getBlock('logo') : null;
+$logoSrc   = $logoBlock ? $logoBlock->getLogoSrc() : '';
+$logoAlt   = $logoBlock ? $logoBlock->getLogoAlt() : 'AWA Motos';
+
 $brandHtml = trim((string) $block->getChildHtml('footer_brand_list'));
 ?>
-<footer class="page_footer awa-footer--dark<?= $escaper->escapeHtmlAttr($footerExpStateClass . $footerExpVariantClass) ?>"
+<div class="page_footer awa-footer--dark<?= $escaper->escapeHtmlAttr($footerExpStateClass . $footerExpVariantClass) ?>"
     role="contentinfo"
     data-awa-footer-exp-enabled="<?= $footerExpEnabled ? '1' : '0' ?>"
     data-awa-footer-exp-rollout="<?= $escaper->escapeHtmlAttr((string) $footerExpRollout) ?>"
@@ -190,35 +194,69 @@ $brandHtml = trim((string) $block->getChildHtml('footer_brand_list'));
     <div id="footer" class="footer-container layout2 footer">
         <?= /* @noEscape */ $block->getChildHtml('footer_static5') ?>
     </div>
+    <!-- Categorias expandable -->
+    <section class="awa-footer-categories-expand" aria-label="<?= $escaper->escapeHtmlAttr(__('Categorias')) ?>">
+        <div class="container">
+            <div class="awa-footer-categories-expand__inner">
+                <button type="button"
+                        class="awa-footer-categories-expand__toggle"
+                        aria-expanded="false"
+                        aria-controls="awa-footer-categories-panel"
+                        data-awa-categories-toggle>
+                    <span><?= $escaper->escapeHtml(__('Categorias')) ?></span>
+                    <span class="awa-footer-categories-expand__icon" aria-hidden="true">&#8853;</span>
+                </button>
+                <div id="awa-footer-categories-panel"
+                     class="awa-footer-categories-expand__panel"
+                     aria-hidden="true"
+                     style="display:none;">
+                    <?php
+                    $categoriesBlock = $block->getLayout()
+                        ? $block->getLayout()->getBlock('catalog.topnav')
+                        : null;
+                    if ($categoriesBlock):
+                        echo $categoriesBlock->getHtml('level-top', 'awa-footer-categories-list');
+                    else:
+                    ?>
+                    <ul class="awa-footer-categories-list" role="list">
+                        <li><a href="<?= $escaper->escapeUrl($block->getUrl('bagageiros.html')) ?>">Bagageiros</a></li>
+                        <li><a href="<?= $escaper->escapeUrl($block->getUrl('cavaletes.html')) ?>">Cavaletes</a></li>
+                        <li><a href="<?= $escaper->escapeUrl($block->getUrl('guidoes.html')) ?>">Guidões</a></li>
+                        <li><a href="<?= $escaper->escapeUrl($block->getUrl('bauletos.html')) ?>">Bauletos</a></li>
+                        <li><a href="<?= $escaper->escapeUrl($block->getUrl('retrovisores.html')) ?>">Retrovisores</a></li>
+                        <li><a href="<?= $escaper->escapeUrl($block->getUrl('manetes.html')) ?>">Manetes</a></li>
+                        <li><a href="<?= $escaper->escapeUrl($block->getUrl('piscas.html')) ?>">Piscas</a></li>
+                        <li><a href="<?= $escaper->escapeUrl($block->getUrl('borrachas.html')) ?>">Borrachas</a></li>
+                    </ul>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Categorias expandable -->
     <div class="footer-bottom">
         <div class="container">
             <div class="footer-bottom-inner">
-                <div class="row">
-                    <div class="col-md-6 col-sm-6 col-xs-12">
-                        <?php if ($copyrightHtml !== ''): ?>
-                            <?= /* @noEscape */ $copyrightHtml ?>
-                        <?php else: ?>
-                            <p class="awa-footer-copyright-fallback">
-                                <?= $escaper->escapeHtml(__('Copyright %1 AWA Motos. Todos os direitos reservados.', date('Y'))) ?>
-                            </p>
-                        <?php endif; ?>
-                    </div>
-                    <div class="col-md-6 col-sm-6 col-xs-12">
-                        <section class="awa-footer-pay-sec" aria-label="<?= $escaper->escapeHtmlAttr(__('Pagamentos e Segurança')) ?>">
+                <div class="row awa-footer-bottom__row">
 
-                            <?php /* ── Formas de pagamento ── */ ?>
-                            <p class="awa-footer-pay-sec__label"><?= $escaper->escapeHtml(__('Formas de pagamento')) ?></p>
+                    <!-- Logo AWA Motos -->
+                    <div class="col-md-3 col-sm-12 col-xs-12 awa-footer-bottom__logo-col">
+                        <a href="<?= $escaper->escapeUrl($block->getUrl('')) ?>"
+                           title="<?= $escaper->escapeHtmlAttr($logoAlt) ?>"
+                           aria-label="<?= $escaper->escapeHtmlAttr($logoAlt) ?>">
+                            <img class="awa-footer-bottom__logo-img"
+                                 src="<?= $escaper->escapeUrl($mediaUrl . '/img/logo_rodape.png') ?>"
+                                 alt="<?= $escaper->escapeHtmlAttr($logoAlt) ?>"
+                                 width="142" height="81"
+                                 loading="lazy" decoding="async">
+                        </a>
+                    </div>
+
+                    <!-- Pague com -->
+                    <div class="col-md-5 col-sm-12 col-xs-12">
+                        <section class="awa-footer-pay-sec" aria-label="<?= $escaper->escapeHtmlAttr(__('Pagamentos')) ?>">
+                            <p class="awa-footer-pay-sec__label"><?= $escaper->escapeHtml(__('Pague com')) ?></p>
                             <div class="awa-footer-pay-logos" role="list" aria-label="<?= $escaper->escapeHtmlAttr(__('Formas de pagamento aceitas')) ?>">
-                                <picture class="awa-pay-logo" role="listitem">
-                                    <source srcset="<?= $escaper->escapeUrl($mediaUrl . '/wysiwyg/payment/pix.webp') ?>" type="image/webp">
-                                    <img src="<?= $escaper->escapeUrl($mediaUrl . '/wysiwyg/payment/pix.png') ?>"
-                                         alt="PIX" width="46" height="28" loading="lazy" decoding="async">
-                                </picture>
-                                <picture class="awa-pay-logo" role="listitem">
-                                    <source srcset="<?= $escaper->escapeUrl($mediaUrl . '/wysiwyg/payment/boleto.webp') ?>" type="image/webp">
-                                    <img src="<?= $escaper->escapeUrl($mediaUrl . '/wysiwyg/payment/boleto.png') ?>"
-                                         alt="Boleto Bancário" width="46" height="28" loading="lazy" decoding="async">
-                                </picture>
                                 <picture class="awa-pay-logo" role="listitem">
                                     <source srcset="<?= $escaper->escapeUrl($mediaUrl . '/wysiwyg/payment/visa.webp') ?>" type="image/webp">
                                     <img src="<?= $escaper->escapeUrl($mediaUrl . '/wysiwyg/payment/visa.png') ?>"
@@ -229,32 +267,38 @@ $brandHtml = trim((string) $block->getChildHtml('footer_brand_list'));
                                     <img src="<?= $escaper->escapeUrl($mediaUrl . '/wysiwyg/payment/mastercard.png') ?>"
                                          alt="Mastercard" width="46" height="28" loading="lazy" decoding="async">
                                 </picture>
-                                <?php foreach ([
-                                    ['cartao-1.png', 'Elo'],
-                                    ['cartao-2.png', 'Hipercard'],
-                                    ['cartao-3.png', 'American Express'],
-                                    ['cartao-4.png', 'Diners Club'],
-                                ] as [$img, $name]): ?>
                                 <picture class="awa-pay-logo" role="listitem">
-                                    <img src="<?= $escaper->escapeUrl($mediaUrl . '/import/catalog/selos/' . $img) ?>"
-                                         alt="<?= $escaper->escapeHtmlAttr($name) ?>" width="36" height="24"
-                                         loading="lazy" decoding="async">
+                                    <img src="<?= $escaper->escapeUrl($mediaUrl . '/import/catalog/selos/cartao-4.png') ?>"
+                                         alt="Diners Club" width="36" height="24" loading="lazy" decoding="async">
                                 </picture>
-                                <?php endforeach; ?>
+                                <picture class="awa-pay-logo" role="listitem">
+                                    <img src="<?= $escaper->escapeUrl($mediaUrl . '/import/catalog/selos/cartao-1.png') ?>"
+                                         alt="Elo" width="36" height="24" loading="lazy" decoding="async">
+                                </picture>
+                                <picture class="awa-pay-logo" role="listitem">
+                                    <img src="<?= $escaper->escapeUrl($mediaUrl . '/import/catalog/selos/cartao-3.png') ?>"
+                                         alt="American Express" width="36" height="24" loading="lazy" decoding="async">
+                                </picture>
+                                <picture class="awa-pay-logo" role="listitem">
+                                    <source srcset="<?= $escaper->escapeUrl($mediaUrl . '/wysiwyg/payment/boleto.webp') ?>" type="image/webp">
+                                    <img src="<?= $escaper->escapeUrl($mediaUrl . '/wysiwyg/payment/boleto.png') ?>"
+                                         alt="Boleto Bancário" width="46" height="28" loading="lazy" decoding="async">
+                                </picture>
+                                <picture class="awa-pay-logo" role="listitem">
+                                    <source srcset="<?= $escaper->escapeUrl($mediaUrl . '/wysiwyg/payment/pix.webp') ?>" type="image/webp">
+                                    <img src="<?= $escaper->escapeUrl($mediaUrl . '/wysiwyg/payment/pix.png') ?>"
+                                         alt="PIX" width="46" height="28" loading="lazy" decoding="async">
+                                </picture>
                             </div>
+                        </section>
+                    </div>
 
-                            <?php if ($showSecuritySeals): ?>
-                            <?php /* ── Selos de segurança ── */ ?>
-                            <p class="awa-footer-pay-sec__label awa-footer-pay-sec__label--mt"><?= $escaper->escapeHtml(__('Site seguro')) ?></p>
+                    <!-- Certificados e Segurança -->
+                    <?php if ($showSecuritySeals): ?>
+                    <div class="col-md-4 col-sm-12 col-xs-12">
+                        <section class="awa-footer-sec" aria-label="<?= $escaper->escapeHtmlAttr(__('Certificados e Segurança')) ?>">
+                            <p class="awa-footer-pay-sec__label"><?= $escaper->escapeHtml(__('Certificados e Segurança')) ?></p>
                             <div class="awa-footer-sec-seals" role="list" aria-label="<?= $escaper->escapeHtmlAttr(__('Selos de segurança')) ?>">
-                                <a class="awa-seal"
-                                   href="<?= $escaper->escapeUrl($safeBrowsingUrl) ?>"
-                                   target="_blank" rel="noopener noreferrer"
-                                   title="<?= $escaper->escapeHtmlAttr(__('Google Safe Browsing — Verificar reputação')) ?>"
-                                   role="listitem">
-                                    <img src="<?= $escaper->escapeUrl($mediaUrl . '/import/catalog/selos/google-seguro.png') ?>"
-                                         alt="Google Safe Browsing" width="90" height="32" loading="lazy" decoding="async">
-                                </a>
                                 <a class="awa-seal"
                                    href="<?= $escaper->escapeUrl($sslLabsUrl) ?>"
                                    target="_blank" rel="noopener noreferrer"
@@ -263,21 +307,55 @@ $brandHtml = trim((string) $block->getChildHtml('footer_brand_list'));
                                     <img src="<?= $escaper->escapeUrl($mediaUrl . '/import/catalog/selos/security.png') ?>"
                                          alt="SSL Seguro" width="72" height="32" loading="lazy" decoding="async">
                                 </a>
-                                <span class="awa-seal awa-seal--static" role="listitem" aria-label="<?= $escaper->escapeHtmlAttr(__('Compra Segura')) ?>">
-                                    <img src="<?= $escaper->escapeUrl($mediaUrl . '/import/catalog/selos/compra-segura.png') ?>"
-                                         alt="<?= $escaper->escapeHtmlAttr(__('Compra Segura')) ?>" width="72" height="32"
-                                         loading="lazy" decoding="async">
-                                </span>
+                                <a class="awa-seal"
+                                   href="<?= $escaper->escapeUrl($safeBrowsingUrl) ?>"
+                                   target="_blank" rel="noopener noreferrer"
+                                   title="<?= $escaper->escapeHtmlAttr(__('Google Safe Browsing — Verificar reputação')) ?>"
+                                   role="listitem">
+                                    <img src="<?= $escaper->escapeUrl($mediaUrl . '/import/catalog/selos/google-seguro.png') ?>"
+                                         alt="Google Safe Browsing" width="90" height="32" loading="lazy" decoding="async">
+                                </a>
                             </div>
-                            <?php endif; ?>
-
                         </section>
                     </div>
+                    <?php endif; ?>
+
+                </div>
+
+                <!-- Copyright -->
+                <div class="awa-footer-bottom__copyright">
+                    <p class="awa-footer-copyright__main">&copy; <?= $escaper->escapeHtml(date('Y')) ?> - Awa Motos</p>
+                    <p class="awa-footer-copyright__legal">
+                        Todos os direitos reservados &copy; <?= $escaper->escapeHtml(date('Y')) ?> - AWA Motos. - CNPJ 77.044.618/0001-88
+                    </p>
+                    <p class="awa-footer-copyright__disclaimer">
+                        Os preços e condições de pagamento são válidos para o dia de hoje e exclusivas via internet. Na divergência de preços fica válido o apresentado no carrinho. Ofertas válidas até o término de nossos estoques. Vendas sujeitas à análise, confirmação de dados e estoque. As imagens são ilustrativas e informações sobre os produtos são resumidas e sujeitas à alteração sem aviso prévio.
+                    </p>
                 </div>
             </div>
         </div>
     </div>
-</footer>
+    <!-- Desenvolvido por -->
+    <div class="awa-footer-devby">
+        <div class="container">
+            <div class="awa-footer-devby__inner">
+                <span class="awa-footer-devby__label">DESENVOLVIDO POR</span>
+                <a href="https://bluuconsulting.com.br"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   class="awa-footer-devby__link"
+                   aria-label="Bluu Consulting - Desenvolvimento do site"
+                   title="Bluu Consulting">
+                    <img src="<?= $escaper->escapeUrl($mediaUrl . '/img/logo_bluu.png') ?>"
+                         alt="Bluu Consulting"
+                         class="awa-footer-devby__logo"
+                         width="80" height="30"
+                         loading="lazy" decoding="async">
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="fixed-right" role="complementary" aria-label="<?= $escaper->escapeHtmlAttr(__('Links Rápidos')) ?>">
     <?= $block->getChildHtml('fixed_right') ?>
 </div>

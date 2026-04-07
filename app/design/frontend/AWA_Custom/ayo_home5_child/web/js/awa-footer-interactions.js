@@ -243,6 +243,35 @@ define([
             window.setTimeout(initBrandSlider, 250);
         }
 
+
+        // === Categorias Expand Toggle ===
+        function initCategoriesToggle() {
+            var $toggleBtn = $root.closest('.page_footer, .page-footer')
+                .find('[data-awa-categories-toggle]');
+            
+            if (!$toggleBtn.length) {
+                $toggleBtn = $('[data-awa-categories-toggle]');
+            }
+
+            $toggleBtn.each(function () {
+                var $btn = $(this);
+                var panelId = $btn.attr('aria-controls');
+                var $panel = panelId ? $('#' + panelId) : $btn.parent().find('.awa-footer-categories-expand__panel');
+
+                $btn.on('click.awaCategories', function () {
+                    var expanded = $btn.attr('aria-expanded') === 'true';
+                    $btn.attr('aria-expanded', String(!expanded));
+                    $panel.attr('aria-hidden', String(expanded));
+                    if (expanded) {
+                        $panel.slideUp(200);
+                    } else {
+                        $panel.slideDown(200);
+                    }
+                });
+            });
+        }
+
+        initCategoriesToggle();
         ensureFooterSectionAccessibility();
         bindFooterSections();
         syncFooterSections();
