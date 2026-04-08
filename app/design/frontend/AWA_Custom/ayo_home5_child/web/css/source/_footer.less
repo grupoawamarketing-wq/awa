@@ -1,244 +1,264 @@
-// =============================================
-// AWA MOTOS — FOOTER GRID ESTRUTURADO
-// Grid CSS com tokens do Design System
-// Sem alteração de HTML — apenas CSS
-// =============================================
+// =============================================================================
+// AWA MOTOS — FOOTER PIXEL-PERFECT
+// Referência visual: imagem de design (2026-04-07)
+// Estrutura: 4 colunas nav | Categorias strip | Bottom 3-col | Copyright | Devby
+// =============================================================================
 
 @import (once) '_design-system';
 
+// ── TOKENS LOCAIS ─────────────────────────────────────────────────────────────
+@ft-text-1:     #ffffff;
+@ft-text-2:     rgba(255, 255, 255, 0.75);
+@ft-text-3:     rgba(255, 255, 255, 0.50);
+@ft-border:     rgba(255, 255, 255, 0.15);
+@ft-border-hi:  rgba(255, 255, 255, 0.35);
+@ft-surface:    rgba(0, 0, 0, 0.10);
+@ft-transition: 0.2s ease;
 
-// ╔══════════════════════════════════════════════════════════════════════════╗
-// ║  1. FOOTER CONTAINER (wrapper principal)                                ║
-// ╚══════════════════════════════════════════════════════════════════════════╝
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 1. WRAPPER PRINCIPAL
+// ══════════════════════════════════════════════════════════════════════════════
 
 body .page-wrapper .page_footer {
-    padding-top: @ds-space-xxl;   // 48px
-    padding-bottom: @ds-space-lg; // 32px
-}
+    color: @ft-text-1;
+    padding-top: 0;
+    padding-bottom: 0;
 
+    // Remove any background do tema pai (o bundle de gradiente controla)
+    &::before, &::after { background: transparent !important; }
 
-// ╔══════════════════════════════════════════════════════════════════════════╗
-// ║  2. FOOTER GRID — 4 Colunas Principal                                  ║
-// ╚══════════════════════════════════════════════════════════════════════════╝
-//
-// O CMS block footer_static5 renderiza:
-//   #footer .container > .row > .col-md-3 (4x)
-// O .row tem display:flex inline; precisa de !important para grid.
-
-body .page-wrapper .page_footer #footer .container > .row {
-    display: grid !important;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    column-gap: @ds-space-lg;  // 32px
-    row-gap: @ds-space-md;     // 24px
-    flex-wrap: unset !important;
-}
-
-// Colunas: remover margem fixa do inline style e padronizar padding
-body .page-wrapper .page_footer #footer .container > .row > [class*="col-"] {
-    width: 100% !important;       // override Bootstrap grid widths
-    max-width: 100% !important;
-    flex: none !important;
-    padding-right: @ds-space-md;  // 24px
-    margin-bottom: 0 !important;  // override inline margin-bottom:40px
-
-    &:last-child {
-        padding-right: 0;
+    .container {
+        background: transparent;
     }
 }
 
 
-// ╔══════════════════════════════════════════════════════════════════════════╗
-// ║  3. TÍTULOS DAS SEÇÕES (velaFooterTitle)                                ║
-// ╚══════════════════════════════════════════════════════════════════════════╝
+// ══════════════════════════════════════════════════════════════════════════════
+// 2. SEÇÃO DE LINKS — GRID 4 COLUNAS (#footer CMS block)
+//    HTML: #footer .container > .row > .col-md-3 (×4)
+// ══════════════════════════════════════════════════════════════════════════════
 
-body .page-wrapper .page_footer .velaFooterTitle {
-    font-size: clamp(@ds-font-h6-mobile, 2vw, @ds-font-h6-desktop) !important;
-    font-weight: 600 !important;
-    margin-bottom: @ds-space-md !important; // 24px
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    line-height: 1.4;
+body .page-wrapper .page_footer #footer {
+    background: transparent !important;
+}
+
+body .page-wrapper .page_footer #footer .container {
+    padding-top: @ds-space-xxl;    // 48px
+    padding-bottom: @ds-space-lg;  // 32px
+}
+
+// Grid CSS (override Bootstrap row)
+body .page-wrapper .page_footer #footer .container > .row {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr);
+    column-gap: 32px;
+    row-gap: 32px;
+    align-items: flex-start;
+    flex-wrap: unset !important;
+}
+
+body .page-wrapper .page_footer #footer .container > .row > [class*="col-"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: none !important;
+    padding: 0 !important;
+    margin-bottom: 0 !important;
 }
 
 
-// ╔══════════════════════════════════════════════════════════════════════════╗
-// ║  4. LINKS DO FOOTER (.velaFooterLinks)                                  ║
-// ╚══════════════════════════════════════════════════════════════════════════╝
+// ══════════════════════════════════════════════════════════════════════════════
+// 3. TÍTULOS DAS COLUNAS
+//    Seletores Rokanthemes: .velaFooterTitle
+// ══════════════════════════════════════════════════════════════════════════════
 
-body .page-wrapper .page_footer .velaFooterLinks {
+body .page-wrapper .page_footer .velaFooterTitle,
+body .page-wrapper .page_footer .velaFooterTitle a {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: @ft-text-1 !important;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    line-height: 1.4;
+    margin-bottom: 20px !important;
+    display: block;
+    text-decoration: none !important;
+}
+
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 4. LINKS DAS COLUNAS
+//    Seletores Rokanthemes: .velaFooterLinks / .footer-links
+// ══════════════════════════════════════════════════════════════════════════════
+
+body .page-wrapper .page_footer .velaFooterLinks,
+body .page-wrapper .page_footer .footer-links,
+body .page-wrapper .page_footer ul.velaFooterLinks {
     margin: 0 !important;
     padding: 0 !important;
     list-style: none !important;
 }
 
-body .page-wrapper .page_footer .velaFooterLinks li {
-    margin-bottom: @ds-space-sm !important; // 16px
+body .page-wrapper .page_footer .velaFooterLinks li,
+body .page-wrapper .page_footer .footer-links li {
+    margin: 0 0 10px !important;
 
     &:last-child {
         margin-bottom: 0 !important;
     }
 }
 
-body .page-wrapper .page_footer .velaFooterLinks li a {
+body .page-wrapper .page_footer .velaFooterLinks li a,
+body .page-wrapper .page_footer .footer-links li a {
     display: block;
-    color: #333 !important;
+    color: @ft-text-2 !important;
     text-decoration: none !important;
-    font-size: clamp(@ds-font-sm-mobile, 1.5vw, @ds-font-sm-desktop);
+    font-size: 13px;
     line-height: 1.5;
-    transition: color 0.15s ease, padding-left 0.15s ease;
+    padding: 2px 0;
+    transition: color @ft-transition, opacity @ft-transition;
 
     &:hover,
     &:focus-visible {
-        color: #b73337 !important;
-        padding-left: 4px;
+        color: @ft-text-1 !important;
+        text-decoration: none !important;
+        outline: none;
     }
 }
 
 
-// ╔══════════════════════════════════════════════════════════════════════════╗
-// ║  5. COPYRIGHT / LEGAL (footer-bottom)                                   ║
-// ╚══════════════════════════════════════════════════════════════════════════╝
+// ══════════════════════════════════════════════════════════════════════════════
+// 5. COLUNA ATENDIMENTO — CONTATO, TELEFONE, SOCIAL
+// ══════════════════════════════════════════════════════════════════════════════
 
-body .page-wrapper .page_footer .footer-bottom {
-    margin-top: @ds-space-lg;       // 32px
+// Telefone / SAC rótulo
+body .page-wrapper .page_footer .footer-phone-label,
+body .page-wrapper .page_footer .vela-footer-contact-title {
+    font-size: 11px;
+    color: @ft-text-3;
+    line-height: 1.2;
+    margin: 0 0 4px;
+    display: block;
 }
 
-body .page-wrapper .page_footer .footer-bottom .footer-bottom-inner {
-    padding-top: @ds-space-lg !important;    // 32px
-    padding-bottom: @ds-space-lg !important; // 32px
-    border-top: 1px solid #ddd !important;
-    margin-top: 0;
+// Número grande
+body .page-wrapper .page_footer .footer-phone-number,
+body .page-wrapper .page_footer .vela-footer-phone {
+    font-size: 22px !important;
+    font-weight: 700;
+    color: @ft-text-1 !important;
+    line-height: 1.2;
+    margin: 0 0 @ds-space-sm; // 16px
+    display: block;
+    text-decoration: none !important;
 }
 
-body .page-wrapper .page_footer .footer-bottom .footer-bottom-inner > .row {
-    display: flex !important;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: @ds-space-md; // 24px
-    flex-wrap: wrap;
+// E-mail link
+body .page-wrapper .page_footer .footer-email a,
+body .page-wrapper .page_footer .vela-footer-email a {
+    color: @ft-text-2 !important;
+    font-size: 13px;
+    text-decoration: none !important;
+    transition: color @ft-transition;
+
+    &:hover {
+        color: @ft-text-1 !important;
+    }
 }
 
-
-// ╔══════════════════════════════════════════════════════════════════════════╗
-// ║  6. ÍCONES DE PAGAMENTO (.awa-footer-pay-logos)                         ║
-// ╚══════════════════════════════════════════════════════════════════════════╝
-
-body .page-wrapper .page_footer .awa-footer-pay-logos {
-    display: flex !important;
-    flex-wrap: wrap;
-    gap: @ds-space-sm; // 16px
+// Links de WhatsApp / Central de ajuda (com ícone)
+body .page-wrapper .page_footer .footer-contact-links a,
+body .page-wrapper .page_footer .vela-footer-contact-links a {
+    display: inline-flex;
     align-items: center;
-    margin-bottom: @ds-space-md; // 24px
+    gap: 8px;
+    color: @ft-text-2 !important;
+    font-size: 13px;
+    text-decoration: none !important;
+    padding: 6px 0;
+    transition: color @ft-transition;
+
+    &:hover { color: @ft-text-1 !important; }
+
+    .icon, i, svg {
+        width: 18px;
+        height: 18px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: @ft-border-hi;
+        flex-shrink: 0;
+    }
 }
 
-body .page-wrapper .page_footer .awa-footer-pay-logos img {
-    max-width: 60px;
-    height: auto;
+// "Siga a Awa Motos" label
+body .page-wrapper .page_footer .footer-social-label,
+body .page-wrapper .page_footer .footer-follow-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: @ft-text-1;
+    margin: @ds-space-sm 0 @ds-space-xs; // 16px top, 8px bottom
+    display: block;
+    text-transform: none;
 }
 
-
-// ╔══════════════════════════════════════════════════════════════════════════╗
-// ║  7. SELOS DE SEGURANÇA (.awa-footer-sec-seals)                          ║
-// ╚══════════════════════════════════════════════════════════════════════════╝
-
-body .page-wrapper .page_footer .awa-footer-sec-seals {
-    display: flex !important;
+// Ícones sociais — quadrados arredondados
+body .page-wrapper .page_footer .footer-social-section .social-links,
+body .page-wrapper .page_footer .vela-footer-social {
+    display: flex;
+    gap: 8px;
     flex-wrap: wrap;
-    gap: @ds-space-sm; // 16px
+    margin-top: @ds-space-xs; // 8px
+}
+
+body .page-wrapper .page_footer .footer-social-section .social-links a,
+body .page-wrapper .page_footer .vela-footer-social a {
+    display: inline-flex;
     align-items: center;
-}
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    min-height: 36px;
+    border-radius: 4px;
+    border: 1px solid @ft-border-hi;
+    color: @ft-text-1 !important;
+    text-decoration: none !important;
+    font-size: 15px;
+    transition: background @ft-transition, border-color @ft-transition;
 
-body .page-wrapper .page_footer .awa-footer-sec-seals img {
-    max-height: 32px;
-    width: auto;
-}
+    &:hover,
+    &:focus-visible {
+        background: rgba(255, 255, 255, 0.18);
+        border-color: @ft-text-1;
+        outline: none;
+    }
 
-
-// ╔══════════════════════════════════════════════════════════════════════════╗
-// ║  8. SEÇÃO LEGAL INLINE (dentro de #footer .container)                   ║
-// ╚══════════════════════════════════════════════════════════════════════════╝
-//
-// O bloco legal do CMS block está logo após o .row, com inline styles.
-// Seletor: #footer .container > div (último div após .row)
-
-body .page-wrapper .page_footer #footer .container > div[role="contentinfo"] {
-    padding-top: @ds-space-lg !important;    // 32px
-    border-top: 1px solid #ddd !important;
-    margin-top: @ds-space-lg !important;     // 32px
-}
-
-
-// ╔══════════════════════════════════════════════════════════════════════════╗
-// ║  9. NEWSLETTER BAR (.velaNewsletterFooter)                              ║
-// ╚══════════════════════════════════════════════════════════════════════════╝
-
-body .page-wrapper .page_footer .velaNewsletterFooter {
-    padding: @ds-space-xxl 0 !important; // 48px top/bottom
+    i, svg {
+        pointer-events: none;
+        width: 16px;
+        height: 16px;
+    }
 }
 
 
-// ╔══════════════════════════════════════════════════════════════════════════╗
-// ║  10. RESPONSIVO — MOBILE-FIRST                                          ║
-// ╚══════════════════════════════════════════════════════════════════════════╝
+// ══════════════════════════════════════════════════════════════════════════════
+// 6. FAIXA "CATEGORIAS" — EXPANDABLE ACCORDION
+// ══════════════════════════════════════════════════════════════════════════════
 
-// Mobile (< 768px)
-.respond-below-md({
-    body .page-wrapper .page_footer {
-        padding-top: @ds-space-lg;    // 32px
-        padding-bottom: @ds-space-md; // 24px
-    }
-
-    body .page-wrapper .page_footer #footer .container > .row {
-        grid-template-columns: 1fr;
-        row-gap: @ds-space-sm; // 16px
-    }
-
-    body .page-wrapper .page_footer #footer .container > .row > [class*="col-"] {
-        padding-right: 0;
-    }
-
-    body .page-wrapper .page_footer .footer-bottom .footer-bottom-inner > .row {
-        flex-direction: column;
-        gap: @ds-space-sm; // 16px
-    }
-
-    body .page-wrapper .page_footer #footer .container > div[role="contentinfo"] {
-        padding-top: @ds-space-md !important; // 24px
-        margin-top: @ds-space-md !important;  // 24px
-    }
-
-    // Legal flex column on mobile
-    body .page-wrapper .page_footer #footer .container > div[role="contentinfo"] > div {
-        flex-direction: column !important;
-        gap: @ds-space-sm !important; // 16px
-    }
-});
-
-// Tablet (768px — 1023px)
-.respond-between(@ds-bp-md, @ds-bp-lg, {
-    body .page-wrapper .page_footer #footer .container > .row {
-        grid-template-columns: repeat(2, 1fr);
-    }
-});
-
-// Desktop grande (1280px+)
-.respond-to-xl({
-    body .page-wrapper .page_footer #footer .container > .row {
-        grid-template-columns: repeat(4, 1fr);
-    }
-});
-
-// ═══════════════════════════════════════════════
-// Categorias Expandable Section
-// ═══════════════════════════════════════════════
 .awa-footer-categories-expand {
-    border-top: 1px solid rgba(255,255,255,0.15);
-    border-bottom: 1px solid rgba(255,255,255,0.15);
+    border-top: 1px solid @ft-border;
+    border-bottom: 1px solid @ft-border;
     padding: 0;
     margin: 0;
 
     &__inner {
+        display: flex;
+        align-items: center;
+        justify-content: center;
         text-align: center;
+
+        // Separadores laterais inline (via ::before/::after do toggle container)
     }
 
     &__toggle {
@@ -247,26 +267,30 @@ body .page-wrapper .page_footer .velaNewsletterFooter {
         gap: 8px;
         background: none;
         border: none;
-        color: rgba(255,255,255,0.85);
+        color: rgba(255, 255, 255, 0.85);
         font-size: 14px;
         font-weight: 600;
         letter-spacing: 0.5px;
         padding: 14px 24px;
         cursor: pointer;
-        transition: color 0.2s;
+        transition: color @ft-transition;
         text-transform: none;
+        white-space: nowrap;
 
         &:hover,
         &:focus-visible {
-            color: #fff;
-            outline: 2px solid rgba(255,255,255,0.4);
+            color: @ft-text-1;
+            outline: 2px solid rgba(255, 255, 255, 0.4);
             outline-offset: 2px;
         }
     }
 
     &__icon {
-        font-size: 16px;
+        font-size: 18px;
+        font-weight: 300;
+        line-height: 1;
         transition: transform 0.25s ease;
+        display: inline-block;
     }
 
     &__toggle[aria-expanded="true"] &__icon {
@@ -274,7 +298,7 @@ body .page-wrapper .page_footer .velaNewsletterFooter {
     }
 
     &__panel {
-        padding: 0 0 20px;
+        padding: 0 0 @ds-space-md; // 24px
 
         ul {
             display: flex;
@@ -285,14 +309,14 @@ body .page-wrapper .page_footer .velaNewsletterFooter {
             padding: 0;
             margin: 0;
 
-            a {
-                color: rgba(255,255,255,0.7);
+            li a {
+                color: @ft-text-2;
                 font-size: 13px;
                 text-decoration: none;
-                transition: color 0.2s;
+                transition: color @ft-transition;
 
                 &:hover {
-                    color: #fff;
+                    color: @ft-text-1;
                     text-decoration: underline;
                 }
             }
@@ -300,38 +324,194 @@ body .page-wrapper .page_footer .velaNewsletterFooter {
     }
 }
 
-// ═══════════════════════════════════════════════
-// Copyright Section (updated)
-// ═══════════════════════════════════════════════
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 7. FOOTER BOTTOM — 3 COLUNAS: Logo | Pague com | Certificados
+//    HTML: .footer-bottom > .container > .footer-bottom-inner > .row.awa-footer-bottom__row
+// ══════════════════════════════════════════════════════════════════════════════
+
+body .page-wrapper .page_footer .footer-bottom {
+    background: rgba(0, 0, 0, 0.20) !important;
+    border-top: 1px solid @ft-border !important;
+    padding: @ds-space-lg 0 !important; // 32px
+    margin-top: 0;
+}
+
+body .page-wrapper .page_footer .footer-bottom .footer-bottom-inner {
+    background: transparent !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    border-top: none !important;
+    margin-top: 0;
+}
+
+// O .row do Bootstrap é substituído pelo display:flex aqui
+body .page-wrapper .page_footer .footer-bottom .awa-footer-bottom__row {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: @ds-space-md; // 24px
+    flex-wrap: wrap;
+    background: transparent !important;
+}
+
+// Coluna do logo — tamanho fixo
+body .page-wrapper .page_footer .footer-bottom .awa-footer-bottom__logo-col {
+    flex: 0 0 auto;
+}
+
+.awa-footer-bottom__logo-img {
+    max-width: 142px;
+    height: auto;
+    display: block;
+    background: transparent !important;
+}
+
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 8. PAGUE COM — label + logos
+// ══════════════════════════════════════════════════════════════════════════════
+
+.awa-footer-pay-sec {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.awa-footer-pay-sec__label {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: @ft-text-2 !important;
+    margin: 0 0 4px;
+    display: block;
+}
+
+.awa-footer-pay-logos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+}
+
+// Card de bandeira de pagamento (fundo branco)
+.awa-pay-logo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.96) !important;
+    border-radius: 4px;
+    padding: 4px 8px;
+    min-height: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.20) !important;
+    transition: transform @ft-transition, box-shadow @ft-transition;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+
+    img {
+        max-height: 20px;
+        width: auto;
+        display: block;
+        vertical-align: middle;
+    }
+
+    &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+    }
+}
+
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 9. CERTIFICADOS E SEGURANÇA — selos SSL + Google
+// ══════════════════════════════════════════════════════════════════════════════
+
+.awa-footer-sec {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.awa-footer-sec-seals {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+// Cada selo (SVG inline)
+.awa-seal {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-radius: 4px;
+    padding: 6px 10px;
+    min-height: 38px;
+    border: 1px solid @ft-border !important;
+    text-decoration: none !important;
+    transition: background @ft-transition, border-color @ft-transition, transform @ft-transition;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
+
+    svg, img {
+        display: block;
+        max-height: 36px;
+        width: auto;
+    }
+
+    &:hover,
+    &:focus-visible {
+        background: rgba(255, 255, 255, 0.15) !important;
+        border-color: @ft-border-hi !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+        outline: 2px solid rgba(255, 255, 255, 0.3);
+        outline-offset: 2px;
+    }
+}
+
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 10. COPYRIGHT / TEXTO LEGAL
+// ══════════════════════════════════════════════════════════════════════════════
+
+.awa-footer-bottom__copyright {
+    border-top: 1px solid @ft-border;
+    padding-top: @ds-space-md;  // 24px
+    margin-top: @ds-space-sm;   // 16px
+}
+
 .awa-footer-copyright {
     &__main {
         font-size: 14px;
         font-weight: 600;
-        color: rgba(255,255,255,0.85);
-        margin: 0 0 8px;
+        color: rgba(255, 255, 255, 0.85);
+        margin: 0 0 6px;
     }
 
     &__legal {
         font-size: 12px;
-        color: rgba(255,255,255,0.6);
-        margin: 0 0 8px;
+        color: rgba(255, 255, 255, 0.60);
+        margin: 0 0 6px;
     }
 
     &__disclaimer {
         font-size: 11px;
-        color: rgba(255,255,255,0.45);
+        color: rgba(255, 255, 255, 0.45);
         line-height: 1.5;
         margin: 0;
         max-width: 960px;
     }
 }
 
-// ═══════════════════════════════════════════════
-// Desenvolvido por Bluu
-// ═══════════════════════════════════════════════
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 11. DESENVOLVIDO POR BLUU — barra escura no rodapé
+// ══════════════════════════════════════════════════════════════════════════════
+
 .awa-footer-devby {
     background: #111;
-    padding: 16px 0;
+    padding: @ds-space-sm 0; // 16px
 
     &__inner {
         display: flex;
@@ -342,7 +522,7 @@ body .page-wrapper .page_footer .velaNewsletterFooter {
 
     &__label {
         font-size: 10px;
-        color: rgba(255,255,255,0.45);
+        color: rgba(255, 255, 255, 0.45);
         letter-spacing: 1.5px;
         text-transform: uppercase;
         font-weight: 600;
@@ -351,15 +531,80 @@ body .page-wrapper .page_footer .velaNewsletterFooter {
     &__link {
         display: inline-flex;
         align-items: center;
-        transition: opacity 0.2s;
+        text-decoration: none !important;
+        transition: opacity @ft-transition;
 
-        &:hover {
-            opacity: 0.8;
-        }
+        &:hover { opacity: 0.8; }
     }
 
     &__logo {
         height: 24px;
         width: auto;
+        background: transparent !important;
+    }
+}
+
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 12. RESPONSIVO — MOBILE-FIRST
+// ══════════════════════════════════════════════════════════════════════════════
+
+// Tablet (768px – 991px): 2 colunas
+@media (min-width: 768px) and (max-width: 991px) {
+    body .page-wrapper .page_footer #footer .container > .row {
+        grid-template-columns: repeat(2, 1fr) !important;
+        row-gap: @ds-space-lg; // 32px
+    }
+
+    body .page-wrapper .page_footer .footer-bottom .awa-footer-bottom__row {
+        flex-wrap: wrap;
+    }
+}
+
+// Mobile (< 768px): layout empilhado
+@media (max-width: 767px) {
+    body .page-wrapper .page_footer #footer .container > .row {
+        grid-template-columns: 1fr 1fr !important;
+        row-gap: @ds-space-md; // 24px
+    }
+
+    body .page-wrapper .page_footer .footer-bottom .awa-footer-bottom__row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: @ds-space-md; // 24px
+    }
+
+    body .page-wrapper .page_footer .footer-bottom .awa-footer-bottom__logo-col {
+        width: 100%;
+    }
+
+    body .page-wrapper .page_footer .footer-bottom .col-sm-12 {
+        width: 100%;
+    }
+
+    .awa-footer-pay-logos {
+        gap: 4px;
+    }
+
+    .awa-footer-bottom__copyright {
+        padding-top: @ds-space-sm; // 16px
+    }
+}
+
+// Mobile pequeno (< 576px): 1 coluna de links
+@media (max-width: 575px) {
+    body .page-wrapper .page_footer #footer .container > .row {
+        grid-template-columns: 1fr !important;
+    }
+
+    .awa-footer-categories-expand__toggle {
+        padding: 12px 16px;
+    }
+}
+
+// Desktop grande (>= 1200px): garantir 4 colunas
+@media (min-width: 1200px) {
+    body .page-wrapper .page_footer #footer .container > .row {
+        grid-template-columns: repeat(4, 1fr) !important;
     }
 }
