@@ -61,7 +61,7 @@ class Form extends Template
 
     public function getPostUrl(): string
     {
-        return $this->getUrl('curriculo/index/post');
+        return $this->getUrl('trabalhe-conosco/index/post');
     }
 
     public function getFormKeyValue(): string

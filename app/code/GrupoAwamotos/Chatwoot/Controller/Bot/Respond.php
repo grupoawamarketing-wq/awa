@@ -130,32 +130,16 @@ class Respond implements HttpPostActionInterface, CsrfAwareActionInterface
         $event = $payload['event'] ?? '';
 
         switch ($event) {
-            case 'conversation_created':
-                $this->onConversationCreated($payload);
-                break;
-
             case 'message_created':
                 $this->onMessageCreated($payload);
                 break;
 
             default:
-                // Ignora outros eventos (conversation_updated, etc.)
+                // Ignora outros eventos (webwidget_triggered, conversation_opened, etc.)
+                // NOTA: o AgentBot do Chatwoot NÃO envia conversation_created.
+                // O menu de saudação é enviado no primeiro message_created do visitante.
                 break;
         }
-    }
-
-    private function onConversationCreated(array $payload): void
-    {
-        $conversationId = $payload['id'] ?? null;
-        if ($conversationId === null) {
-            return;
-        }
-
-        $this->sendMessage((int) $conversationId, self::GREETING_MESSAGE);
-
-        $this->logger->info('Chatwoot Bot: menu de triagem enviado', [
-            'conversation_id' => $conversationId,
-        ]);
     }
 
     private function onMessageCreated(array $payload): void
@@ -186,17 +170,9 @@ class Respond implements HttpPostActionInterface, CsrfAwareActionInterface
         $choice = $this->extractChoice($content);
 
         if ($choice === null) {
-            // Não entendeu — repete o menu
-            $this->sendMessage(
-                $conversationId,
-                "Não entendi sua escolha. 🤔\n\nPor favor, digite o **número** de 1 a 6:\n\n" .
-                "1️⃣ Comprar / Preços\n" .
-                "2️⃣ Rastrear pedido\n" .
-                "3️⃣ Compatibilidade\n" .
-                "4️⃣ Cliente B2B\n" .
-                "5️⃣ Troca / Devolução\n" .
-                "6️⃣ Falar com atendente"
-            );
+            // Mensagem não reconhecida: exibe o menu de saudação
+            // (cobre o primeiro contato e respostas inválidas)
+            $this->sendMessage($conversationId, self::GREETING_MESSAGE);
             return;
         }
 

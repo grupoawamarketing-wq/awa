@@ -26,6 +26,8 @@ class Index extends Action implements HttpGetActionInterface
 
     public function execute()
     {
-        return $this->resultPageFactory->create();
+        $resultPage = $this->resultPageFactory->create();
+        $resultPage->getConfig()->getTitle()->set(__('Trabalhe Conosco'));
+        return $resultPage;
     }
 }
