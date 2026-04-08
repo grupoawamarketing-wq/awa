@@ -153,11 +153,11 @@ define([
                     var stepComplete = stepsFilled[stepNum] >= stepsTotal[stepNum];
                     var stepStarted = stepsFilled[stepNum] > 0;
                     
-                    $step.removeClass('active in-progress complete');
+                    $step.removeClass('active in-progress complete').removeAttr('aria-current');
                     if (stepComplete) {
                         $step.addClass('complete');
                     } else if (stepStarted) {
-                        $step.addClass('in-progress');
+                        $step.addClass('in-progress').attr('aria-current', 'step');
                     }
                 }
             });

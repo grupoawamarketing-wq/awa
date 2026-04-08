@@ -2,20 +2,9 @@
    Carregado APOS awa-bundle-phases.css para sobrescrever variavel de grid
    e corrigir padding nested que esmaga imagens na grid de categoria */
 
-/* --- GRID VARIABLE OVERRIDE --- */
-:root {
-  --awa-grid-product-cols: repeat(4, minmax(0, 1fr)) !important;
-}
-@media (max-width: 1200px) {
-  :root {
-    --awa-grid-product-cols: repeat(3, minmax(0, 1fr)) !important;
-  }
-}
-@media (max-width: 768px) {
-  :root {
-    --awa-grid-product-cols: repeat(2, minmax(0, 1fr)) !important;
-  }
-}
+/* --- GRID VARIABLE OVERRIDE ---
+   Grid columns, breakpoints, and responsive rules are now centralized
+   in _grid-system.less. Do NOT re-define here. --- */
 
 /* --- FIX: Ayo Nested Padding Crushing Product Images ---
    Cadeia: .item-product (211px) > .product-thumb (pad 15) > .product-thumb-link (pad 16) > .first-thumb (117px)
@@ -78,27 +67,7 @@
 }
 
 /* --- FIX: Category 2-column layout (sidebar + main) ---
-   grid-template-columns: 260px 1fr aplicado via _category.less
-   mas auto-placement funciona errado com Bootstrap col-* widths.
-   Fix: colocar sidebar e main explicitamente nas colunas corretas. */
-
-.catalog-category-view .columns > div:first-child,
-.catalogsearch-result-index .columns > div:first-child {
-  grid-column: 1 !important;
-  grid-row: 1 !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  float: none !important;
-}
-
-.catalog-category-view .columns > .col-main,
-.catalogsearch-result-index .columns > .col-main {
-  grid-column: 2 !important;
-  grid-row: 1 !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  float: none !important;
-}
+   Sidebar/main grid placement → _grid-system.less */
 
 /* --- FIX: PDP Related Products images tiny --- */
 .block.related .product-item-photo,
@@ -158,25 +127,9 @@
       (4 classes, especificidade 0-4-0) — precisamos igualar ou superar
    ============================================================ */
 
-/* 1) Esconder .swiper-slide orfao que vazou para .columns */
-.catalog-product-view .columns > .swiper-slide {
-  display: none !important;
-}
+/* 1) Orphan .swiper-slide → _grid-system.less */
 
-/* 2) .column.main deve empilhar filhos verticalmente
-   Seletor com 4 classes para vencer styles-m.css:
-   .catalog-product-view .columns .column.main { display: flex !important } */
-.catalog-product-view .columns .column.main {
-  display: block !important;
-  width: 100% !important;
-  max-width: 100% !important;
-}
-
-/* 3) .product-view e .view-product usam largura total */
-.catalog-product-view .product-view {
-  display: block !important;
-  width: 100% !important;
-}
+/* 2) .column.main display:block and product-view → _grid-system.less */
 
 /* 4) Galeria e info devem dividir 50/50 */
 .catalog-product-view .main-detail > .row > .col-md-6 {
@@ -277,21 +230,10 @@ body.catalogsearch-result-index .item-product .info-price .b2b-login-to-see-pric
 }
 
 /* ================================================================
-   FIX: PDP mobile — gallery + info must stack vertically
-   Desktop: 50/50 columns. Mobile: 100% full-width stacked.
-   The desktop rule was applying globally, crushing mobile to 161px.
+   FIX: PDP mobile — gallery + info stacking → _grid-system.less
+   Only keep the image max-height fix.
    ================================================================ */
 @media (max-width: 767px) {
-  .catalog-product-view .main-detail > .row > .col-md-6 {
-    flex: 0 0 100% !important;
-    max-width: 100% !important;
-  }
-
-  .catalog-product-view .product.media {
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-
   .catalog-product-view .product.media img.product-image-photo {
     max-height: 320px !important;
   }
@@ -404,70 +346,11 @@ body.catalogsearch-result-index .item-product .info-price .b2b-login-to-see-pric
    - Breakpoints: 1200px (tablet), 768px (mobile)
    ================================================================ */
 
-/* ================================================================
-   1. TABLET: Kill ghost sidebar column when sidebar is hidden
-   At 768px-1024px, sidebar is display:none but .columns still
-   defines grid-template-columns: 260px 1fr, collapsing to 16px 672px.
-   Fix: switch to single column when sidebar is hidden.
-   ================================================================ */
-@media (max-width: 1024px) {
-  .catalog-category-view .columns,
-  .catalogsearch-result-index .columns {
-    grid-template-columns: 1fr !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-  }
+/* --- TABLET SIDEBAR ---
+   Sidebar hide/show on tablet → _grid-system.less */
 
-  .catalog-category-view .columns > div:first-child,
-  .catalogsearch-result-index .columns > div:first-child {
-    display: none !important;
-  }
-
-  .catalog-category-view .columns > .col-main,
-  .catalogsearch-result-index .columns > .col-main,
-  .catalog-category-view .column.main,
-  .catalogsearch-result-index .column.main {
-    grid-column: 1 !important;
-  }
-}
-
-/* ================================================================
-   2. PDP: Remove double-padding (.page-main 24px + .product-view 24px)
-   .page-main already provides the outer padding.
-   .product-view should not add its own padding.
-   ================================================================ */
-.catalog-product-view .product-view {
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-  max-width: 100% !important;
-}
-
-@media (max-width: 767px) {
-  .catalog-product-view .product-view {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-  }
-}
-
-/* ================================================================
-   3. PDP: Gallery columns — enforce 50/50 on desktop,
-   override the theme's flex: 1 1 0px with fixed percentages.
-   Also remove col-md-6 gutter padding to avoid content shrink.
-   ================================================================ */
-@media (min-width: 768px) {
-  .catalog-product-view .main-detail > .row {
-    display: flex !important;
-    flex-wrap: nowrap !important;
-    gap: 32px !important;
-  }
-
-  .catalog-product-view .main-detail > .row > .col-md-6 {
-    flex: 0 0 calc(50% - 16px) !important;
-    max-width: calc(50% - 16px) !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-  }
-}
+/* --- PDP GALLERY 50/50 ---
+   PDP gallery/info split → _grid-system.less */
 
 /* ================================================================
    4. Category/Search: Standardize .columns padding
@@ -479,27 +362,8 @@ body.catalogsearch-result-index .item-product .info-price .b2b-login-to-see-pric
   padding-right: 0 !important;
 }
 
-/* ================================================================
-   5. Standardize product grid responsive breakpoints
-   Align LESS and CSS-only to same breakpoint boundaries.
-   ================================================================ */
-@media (max-width: 1200px) and (min-width: 769px) {
-  .products-grid .product-items,
-  .products.list .product-items,
-  .products.grid .product-items,
-  .block.widget .product-items {
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-  }
-}
-
-@media (max-width: 768px) {
-  .products-grid .product-items,
-  .products.list .product-items,
-  .products.grid .product-items,
-  .block.widget .product-items {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  }
-}
+/* --- PRODUCT GRID RESPONSIVE ---
+   Product grid columns and responsive breakpoints → _grid-system.less */
 
 /* ================================================================
    6. PDP bottom sections: consistent full-width and no extra margin

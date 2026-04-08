@@ -1,0 +1,382 @@
+/* ==========================================================================
+   AWA MOTOS — _grid-system.less
+   Sistema de Grid Unificado — SINGLE SOURCE OF TRUTH
+   ========================================================================
+
+   Este arquivo centraliza TODAS as decisões de grid, colunas, breakpoints
+   e gaps para produto, sidebar, PDP e container.
+
+   REGRAS:
+   1. Breakpoints vêm de _awa-variables.less (@awa-breakpoint-*)
+   2. Nenhum outro .less ou .css deve definir grid-template-columns para
+      .product-items, .columns, ou .main-detail > .row
+   3. Para alterar colunas ou breakpoints: editar APENAS este arquivo
+   ========================================================================== */
+
+
+// ── 1. BREAKPOINTS ────────────────────────────────────────────────────────
+// Re-use canonical breakpoints from _awa-variables.less:
+//   @awa-breakpoint-xs:  480px
+//   @awa-breakpoint-sm:  768px
+//   @awa-breakpoint-md:  992px
+//   @awa-breakpoint-lg:  1200px
+// Add XXL for wide-screen 5-column grid:
+@awa-breakpoint-xxl: 1400px;
+
+
+// ── 2. PRODUCT GRID — Column Counts ──────────────────────────────────────
+// "no-sb" = pages WITHOUT sidebar (homepage, PDP related, blog)
+// "sb"    = pages WITH sidebar (category PLP, search results)
+
+@awa-grid-cols-xxl:     5;   // ≥1400px, no sidebar
+@awa-grid-cols-xxl-sb:  4;   // ≥1400px, with sidebar
+@awa-grid-cols-xl:      4;   // 1200–1399px, no sidebar
+@awa-grid-cols-xl-sb:   4;   // 1200–1399px, with sidebar
+@awa-grid-cols-lg:      4;   // 992–1199px, no sidebar
+@awa-grid-cols-lg-sb:   3;   // 992–1199px, with sidebar
+@awa-grid-cols-md:      3;   // 768–991px (sidebar hidden)
+@awa-grid-cols-sm:      2;   // 480–767px
+@awa-grid-cols-xs:      1;   // < 480px
+
+
+// ── 3. GAP ───────────────────────────────────────────────────────────────
+@awa-grid-gap-xl:  20px;   // ≥1200px
+@awa-grid-gap-lg:  16px;   // 992–1199px
+@awa-grid-gap-md:  16px;   // 768–991px
+@awa-grid-gap-sm:  12px;   // 480–767px
+@awa-grid-gap-xs:  10px;   // < 480px
+
+
+// ── 4. SIDEBAR ────────────────────────────────────────────────────────────
+@awa-sidebar-width:   260px;
+@awa-sidebar-gap:      24px;
+// Sidebar hides below @awa-breakpoint-md (992px)
+
+
+// ── 5. PDP GALLERY / INFO ─────────────────────────────────────────────────
+@awa-pdp-split-gap:  32px;
+// Gallery: 50% | Info: 50%  (stacks below @awa-breakpoint-md)
+
+
+// ── 6. SWIPER DEFAULTS (reference only — applied via JS) ─────────────────
+// Desktop ≥1200: 5 slides, Tablet 768-1199: 3, Mobile <768: 2
+// Gap: 16px
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// APPLICATION: Product Grid (Non-Carousel)
+// ════════════════════════════════════════════════════════════════════════════
+
+// Base: 4 columns (default for 992–1199px)
+.products-grid,
+.products.list,
+.products.grid {
+    .product-items:not(.owl-carousel):not(.swiper-wrapper) {
+        display: grid !important;
+        grid-template-columns: repeat(@awa-grid-cols-lg, minmax(0, 1fr)) !important;
+        gap: @awa-grid-gap-lg !important;
+        list-style: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        float: none !important;
+        width: 100% !important;
+        align-items: stretch;
+    }
+
+    // Neutralize legacy float/clear on items
+    .product-items > .product-item,
+    .product-items > li,
+    .product-items > .item-product {
+        clear: none !important;
+        float: none !important;
+        padding: 0 !important;
+        width: auto !important;
+        height: 100%;
+        min-width: 0;
+    }
+}
+
+// ── XXL: ≥1400px — 5 columns, no sidebar ──────────────────────────────────
+@media (min-width: @awa-breakpoint-xxl) {
+    .products-grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
+    .products.list .product-items:not(.owl-carousel):not(.swiper-wrapper),
+    .products.grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
+    .block.widget .product-items:not(.owl-carousel):not(.swiper-wrapper) {
+        grid-template-columns: repeat(@awa-grid-cols-xxl, minmax(0, 1fr)) !important;
+        gap: @awa-grid-gap-xl !important;
+    }
+}
+
+// ── XL: 1200–1399px — 4 columns ──────────────────────────────────────────
+@media (min-width: @awa-breakpoint-lg) and (max-width: (@awa-breakpoint-xxl - 1)) {
+    .products-grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
+    .products.list .product-items:not(.owl-carousel):not(.swiper-wrapper),
+    .products.grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
+    .block.widget .product-items:not(.owl-carousel):not(.swiper-wrapper) {
+        grid-template-columns: repeat(@awa-grid-cols-xl, minmax(0, 1fr)) !important;
+        gap: @awa-grid-gap-xl !important;
+    }
+}
+
+// ── LG: 992–1199px — 4 columns ──────────────────────────────────────────
+@media (min-width: @awa-breakpoint-md) and (max-width: (@awa-breakpoint-lg - 1)) {
+    .products-grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
+    .products.list .product-items:not(.owl-carousel):not(.swiper-wrapper),
+    .products.grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
+    .block.widget .product-items:not(.owl-carousel):not(.swiper-wrapper) {
+        grid-template-columns: repeat(@awa-grid-cols-lg, minmax(0, 1fr)) !important;
+        gap: @awa-grid-gap-lg !important;
+    }
+}
+
+// ── MD: 768–991px — 3 columns ────────────────────────────────────────────
+@media (min-width: @awa-breakpoint-sm) and (max-width: (@awa-breakpoint-md - 1)) {
+    .products-grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
+    .products.list .product-items:not(.owl-carousel):not(.swiper-wrapper),
+    .products.grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
+    .block.widget .product-items:not(.owl-carousel):not(.swiper-wrapper) {
+        grid-template-columns: repeat(@awa-grid-cols-md, minmax(0, 1fr)) !important;
+        gap: @awa-grid-gap-md !important;
+    }
+}
+
+// ── SM: 480–767px — 2 columns ────────────────────────────────────────────
+@media (min-width: @awa-breakpoint-xs) and (max-width: (@awa-breakpoint-sm - 1)) {
+    .products-grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
+    .products.list .product-items:not(.owl-carousel):not(.swiper-wrapper),
+    .products.grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
+    .block.widget .product-items:not(.owl-carousel):not(.swiper-wrapper) {
+        grid-template-columns: repeat(@awa-grid-cols-sm, minmax(0, 1fr)) !important;
+        gap: @awa-grid-gap-sm !important;
+    }
+}
+
+// ── XS: <480px — 1 column ────────────────────────────────────────────────
+@media (max-width: (@awa-breakpoint-xs - 1)) {
+    .products-grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
+    .products.list .product-items:not(.owl-carousel):not(.swiper-wrapper),
+    .products.grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
+    .block.widget .product-items:not(.owl-carousel):not(.swiper-wrapper) {
+        grid-template-columns: repeat(@awa-grid-cols-xs, minmax(0, 1fr)) !important;
+        gap: @awa-grid-gap-xs !important;
+    }
+}
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// APPLICATION: Sidebar pages — fewer columns on desktop
+// ════════════════════════════════════════════════════════════════════════════
+
+.page-layout-2columns-left,
+.catalog-category-view,
+.catalogsearch-result-index {
+
+    // ── XXL with sidebar: 4 cols instead of 5 ─────────────────────────────
+    @media (min-width: @awa-breakpoint-xxl) {
+        .products-grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
+        .products.grid .product-items:not(.owl-carousel):not(.swiper-wrapper) {
+            grid-template-columns: repeat(@awa-grid-cols-xxl-sb, minmax(0, 1fr)) !important;
+        }
+    }
+
+    // ── XL with sidebar: 4 cols ───────────────────────────────────────────
+    @media (min-width: @awa-breakpoint-lg) and (max-width: (@awa-breakpoint-xxl - 1)) {
+        .products-grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
+        .products.grid .product-items:not(.owl-carousel):not(.swiper-wrapper) {
+            grid-template-columns: repeat(@awa-grid-cols-xl-sb, minmax(0, 1fr)) !important;
+        }
+    }
+
+    // ── LG with sidebar: 3 cols ───────────────────────────────────────────
+    @media (min-width: @awa-breakpoint-md) and (max-width: (@awa-breakpoint-lg - 1)) {
+        .products-grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
+        .products.grid .product-items:not(.owl-carousel):not(.swiper-wrapper) {
+            grid-template-columns: repeat(@awa-grid-cols-lg-sb, minmax(0, 1fr)) !important;
+        }
+    }
+}
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// APPLICATION: Category Grid Variant Classes (Ayo theme switch 2–5 cols)
+// ════════════════════════════════════════════════════════════════════════════
+
+.category_page_grid_2 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+.category_page_grid_3 { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+.category_page_grid_4 { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+.category_page_grid_5 { grid-template-columns: repeat(5, minmax(0, 1fr)) !important; }
+
+// Mobile cap: max 2 cols regardless of grid variant
+@media (max-width: (@awa-breakpoint-sm - 1)) {
+    .category_page_grid_3,
+    .category_page_grid_4,
+    .category_page_grid_5 {
+        grid-template-columns: repeat(@awa-grid-cols-sm, minmax(0, 1fr)) !important;
+        gap: @awa-grid-gap-sm !important;
+    }
+}
+
+@media (max-width: (@awa-breakpoint-xs - 1)) {
+    .category_page_grid_2,
+    .category_page_grid_3,
+    .category_page_grid_4,
+    .category_page_grid_5 {
+        grid-template-columns: repeat(@awa-grid-cols-xs, minmax(0, 1fr)) !important;
+        gap: @awa-grid-gap-xs !important;
+    }
+}
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// APPLICATION: Sidebar Layout (2-column: sidebar + main)
+// ════════════════════════════════════════════════════════════════════════════
+
+// Desktop: sidebar visible
+@media (min-width: @awa-breakpoint-md) {
+    .catalog-category-view .columns,
+    .catalogsearch-result-index .columns {
+        display: grid !important;
+        grid-template-columns: @awa-sidebar-width minmax(0, 1fr) !important;
+        gap: @awa-sidebar-gap !important;
+        align-items: start;
+    }
+
+    // Ensure correct grid placement
+    .catalog-category-view .columns > div:first-child,
+    .catalogsearch-result-index .columns > div:first-child {
+        grid-column: 1 !important;
+        grid-row: 1 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        float: none !important;
+    }
+
+    .catalog-category-view .columns > .col-main,
+    .catalogsearch-result-index .columns > .col-main,
+    .catalog-category-view .column.main,
+    .catalogsearch-result-index .column.main {
+        grid-column: 2 !important;
+        grid-row: 1 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        float: none !important;
+    }
+}
+
+// Mobile/Tablet: sidebar hidden, single column
+@media (max-width: (@awa-breakpoint-md - 1)) {
+    .catalog-category-view .columns,
+    .catalogsearch-result-index .columns {
+        grid-template-columns: 1fr !important;
+    }
+
+    .catalog-category-view .columns > div:first-child,
+    .catalogsearch-result-index .columns > div:first-child {
+        display: none !important;
+    }
+
+    .catalog-category-view .columns > .col-main,
+    .catalogsearch-result-index .columns > .col-main,
+    .catalog-category-view .column.main,
+    .catalogsearch-result-index .column.main {
+        grid-column: 1 !important;
+    }
+}
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// APPLICATION: PDP Gallery / Info Split
+// ════════════════════════════════════════════════════════════════════════════
+
+// Desktop: 50/50 split
+@media (min-width: @awa-breakpoint-md) {
+    .catalog-product-view .main-detail > .row {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        gap: @awa-pdp-split-gap !important;
+    }
+
+    .catalog-product-view .main-detail > .row > .col-md-6:first-child {
+        flex: 0 0 calc(50% - (@awa-pdp-split-gap / 2)) !important;
+        max-width: calc(50% - (@awa-pdp-split-gap / 2)) !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    .catalog-product-view .main-detail > .row > .col-md-6:last-child {
+        flex: 0 0 calc(50% - (@awa-pdp-split-gap / 2)) !important;
+        max-width: calc(50% - (@awa-pdp-split-gap / 2)) !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+}
+
+// Mobile: stacked
+@media (max-width: (@awa-breakpoint-md - 1)) {
+    .catalog-product-view .main-detail > .row > .col-md-6 {
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
+    }
+
+    .catalog-product-view .product.media {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+}
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// APPLICATION: PDP Related / Upsell — Static Grid (Não-Carousel)
+// ════════════════════════════════════════════════════════════════════════════
+
+.catalog-product-view {
+    .block.related .product-items,
+    .block.upsell .product-items,
+    .block.crosssell .product-items {
+        display: grid;
+        grid-template-columns: repeat(@awa-grid-cols-lg, minmax(0, 1fr));
+        gap: @awa-grid-gap-lg;
+    }
+}
+
+@media (max-width: (@awa-breakpoint-md - 1)) {
+    .catalog-product-view {
+        .block.related .product-items,
+        .block.upsell .product-items {
+            grid-template-columns: repeat(@awa-grid-cols-md, minmax(0, 1fr));
+        }
+    }
+}
+
+@media (max-width: (@awa-breakpoint-sm - 1)) {
+    .catalog-product-view {
+        .block.related .product-items,
+        .block.upsell .product-items {
+            grid-template-columns: repeat(@awa-grid-cols-sm, minmax(0, 1fr));
+        }
+    }
+}
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// APPLICATION: PDP — Full-width column.main (prevent flex row layout)
+// ════════════════════════════════════════════════════════════════════════════
+
+.catalog-product-view .columns .column.main {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+.catalog-product-view .product-view {
+    display: block !important;
+    width: 100% !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    max-width: 100% !important;
+}
+
+// Hide orphan swiper-slide that leaks into .columns
+.catalog-product-view .columns > .swiper-slide {
+    display: none !important;
+}
