@@ -59,7 +59,19 @@ class CustomerPriceListContextPlugin
      */
     public function beforeGetVaryString(HttpContext $subject): void
     {
-        if (!$this->config->isEnabled() || !$this->customerSession->isLoggedIn()) {
+        if (!$this->config->isEnabled()) {
+            return;
+        }
+
+        // Guard: avoid session start for visitors without a session cookie.
+        // CustomerSession::isLoggedIn() triggers session_start() which creates a PHP session
+        // for every anonymous request, preventing PhpCookieDisabler from stripping PHPSESSID
+        // on FPC HIT responses, and adds Redis session overhead on every request.
+        if (($_COOKIE[session_name()] ?? null) === null) {
+            return;
+        }
+
+        if (!$this->customerSession->isLoggedIn()) {
             return;
         }
 

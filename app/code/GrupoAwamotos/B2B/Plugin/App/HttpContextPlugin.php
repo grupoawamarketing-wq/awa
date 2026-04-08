@@ -33,13 +33,31 @@ class HttpContextPlugin
     /**
      * Set B2B approval status in HTTP context before action dispatch.
      *
-    * @param object $subject
+     * IMPORTANT PERFORMANCE NOTE: This method must NOT start a PHP session for anonymous
+     * requests. Calling customerSession->isLoggedIn() starts the session, which:
+     * 1. Prevents the PhpCookieDisabler from removing PHPSESSID on FPC HIT responses
+     * 2. Adds Redis session overhead even when the Full Page Cache serves the HTML
+     *
+     * Guard: if there is no session cookie in the request, the user is definitively a guest —
+     * skip session start entirely and set the default context value directly.
+     *
+     * @param object $subject
      * @param RequestInterface $request
      * @return array|null
      */
     public function beforeDispatch(object $subject, RequestInterface $request): ?array
     {
         if (!$this->config->isEnabled()) {
+            return null;
+        }
+
+        // If there is no session cookie in the request, the visitor cannot be logged in.
+        // Avoid starting the PHP session (session_start) entirely for anonymous hits so
+        // that the FPC PhpCookieDisabler can strip PHPSESSID from cached responses.
+        // NOTE: use PHP's session_name() — do NOT call $this->customerSession->*() here
+        // because CustomerSession extends SessionManager whose constructor starts the session.
+        if ($request->getCookie(session_name()) === null) {
+            $this->httpContext->setValue('b2b_approval_status', 'guest', 'guest');
             return null;
         }
 

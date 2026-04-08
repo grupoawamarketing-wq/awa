@@ -87,11 +87,17 @@ class ResponsePlugin
         } elseif (in_array($this->request->getModuleName(), ['catalog', 'catalogsearch'])
             || in_array($this->request->getFullActionName(), ['cms_index_index', 'cms_page_view'])) {
             $logId = (int)$this->cookieManager->getCookie(self::COOKIE_NAME);
-            $this->logService->logClick($logId);
 
-            try {
-                $this->setLogCookie(0);
-            } catch (\Exception $e) {
+            // Only log and reset cookie when there is an actual search log to track (logId > 0).
+            // Setting the cookie unconditionally (even as 0) on every CMS/catalog page prevents
+            // the Full Page Cache from caching these pages, causing severe performance degradation.
+            if ($logId > 0) {
+                $this->logService->logClick($logId);
+
+                try {
+                    $this->setLogCookie(0);
+                } catch (\Exception $e) {
+                }
             }
         }
     }
