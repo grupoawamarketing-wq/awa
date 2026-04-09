@@ -1,0 +1,556 @@
+/**
+ * AWA Visual Audit v10 — B2B Login Shell, Quote View, Export
+ * ============================================================
+ * Criado: 2026-04-09  |  Ciclo 10 — ciclo final da auditoria B2B
+ *
+ * FASES:
+ *  1. B2B Login Shell    — .b2b-login-page (login, claim, forgot-password)
+ *     compartilhado por: login.phtml / claim.phtml / forgot-password.phtml
+ *  2. Quote View         — .b2b-quote-view (detalhe de cotação aprovada/rejeitada)
+ *  3. Export CSV Button  — .b2b-export-actions
+ */
+
+/* ═══════════════════════════════════════════════════════════════════
+   FASE 1 — B2B LOGIN SHELL  (.b2b-login-page)
+   Usado em: login, claim (ativar conta), forgot-password
+   ═══════════════════════════════════════════════════════════════════ */
+
+.b2b-login-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #f5f5f5;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 32px 16px 48px;
+}
+
+/* ── Logo area ── */
+.b2b-login-logo {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.b2b-login-logo img {
+    max-width: 160px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+/* ── Header accent bar ── */
+.b2b-login-header {
+    width: 100%;
+    max-width: 440px;
+    margin-bottom: 0;
+}
+
+.b2b-login-bar {
+    height: 3px;
+    background: linear-gradient(90deg, var(--awa-primary, #b73337), #e05458);
+    border-radius: 2px 2px 0 0;
+}
+
+/* ── Card ── */
+.b2b-login-card {
+    background: #fff;
+    border-radius: 0 0 var(--awa-radius-xl, 12px) var(--awa-radius-xl, 12px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    padding: 28px 28px 20px;
+    width: 100%;
+    max-width: 440px;
+}
+
+.b2b-login-title {
+    font-size: clamp(18px, 3vw, 22px);
+    font-weight: 800;
+    color: var(--awa-text, #1a1a1a);
+    margin: 0 0 6px;
+}
+
+.b2b-login-subtitle {
+    font-size: var(--awa-font-size-sm, 13px);
+    color: #666;
+    margin: 0 0 20px;
+    line-height: 1.5;
+}
+
+/* ── Form fields ── */
+.b2b-login-form { margin: 0; }
+
+.b2b-field {
+    margin-bottom: 16px;
+}
+
+.b2b-field-label {
+    display: block;
+    font-size: var(--awa-font-size-sm, 13px);
+    font-weight: 600;
+    color: var(--awa-text, #1a1a1a);
+    margin-bottom: 5px;
+}
+
+.b2b-field .input-text,
+.b2b-field input[type="text"],
+.b2b-field input[type="email"],
+.b2b-field input[type="password"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--awa-border, #e5e7eb);
+    border-radius: var(--awa-radius-md, 6px);
+    font-size: var(--awa-font-size-sm, 13px);
+    color: var(--awa-text, #1a1a1a);
+    background: #fff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.b2b-field .input-text:focus-visible,
+.b2b-field input:focus-visible {
+    outline: none;
+    border-color: var(--awa-primary, #b73337);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--awa-primary, #b73337) 15%, transparent);
+}
+
+.b2b-field-note {
+    font-size: 11px;
+    color: #888;
+    margin-top: 4px;
+    line-height: 1.4;
+}
+
+/* ── Password wrap with toggle ── */
+.b2b-password-wrap,
+.b2b-register-password-wrap {
+    position: relative;
+}
+
+.b2b-password-wrap .input-text,
+.b2b-password-wrap input[type="password"],
+.b2b-password-wrap input[type="text"] {
+    padding-right: 40px;
+}
+
+.b2b-password-toggle {
+    position: absolute;
+    right: 10px; top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #9ca3af;
+    font-size: 14px;
+    padding: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+}
+
+.b2b-password-toggle:hover { color: var(--awa-primary, #b73337); }
+
+.b2b-password-toggle:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--awa-primary, #b73337) 25%, transparent);
+    border-radius: 3px;
+}
+
+/* ── Forgot link ── */
+.b2b-login-forgot {
+    text-align: right;
+    margin-bottom: 14px;
+}
+
+.b2b-login-forgot a {
+    font-size: 11px;
+    color: #888;
+    text-decoration: underline;
+    transition: color 0.2s;
+}
+
+.b2b-login-forgot a:hover { color: var(--awa-primary, #b73337); }
+
+/* ── Submit button ── */
+.b2b-login-actions {
+    margin-bottom: 6px;
+}
+
+.b2b-btn-entrar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 12px 20px;
+    min-height: 48px;
+    background: var(--awa-primary, #b73337) !important;
+    border: none !important;
+    border-radius: var(--awa-radius-lg, 8px) !important;
+    color: #fff !important;
+    font-size: var(--awa-font-size-16, 16px) !important;
+    font-weight: 800 !important;
+    cursor: pointer;
+    transition: filter 0.2s;
+    letter-spacing: 0.01em;
+}
+
+.b2b-btn-entrar:hover { filter: brightness(1.08); }
+
+.b2b-btn-entrar:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    filter: none;
+}
+
+.b2b-btn-entrar:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--awa-primary, #b73337) 25%, transparent);
+}
+
+/* ── Divider ── */
+.b2b-login-divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 16px 0;
+    font-size: 11px;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.b2b-login-divider::before,
+.b2b-login-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--awa-border, #e5e7eb);
+}
+
+/* ── CTA links (register / claim) ── */
+.b2b-login-ctas {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.b2b-btn-register {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 11px 20px;
+    min-height: 44px;
+    background: color-mix(in srgb, var(--awa-primary, #b73337) 6%, white);
+    border: 1.5px solid color-mix(in srgb, var(--awa-primary, #b73337) 28%, white);
+    border-radius: var(--awa-radius-lg, 8px);
+    color: var(--awa-primary, #b73337);
+    font-size: var(--awa-font-size-sm, 13px);
+    font-weight: 700;
+    text-decoration: none;
+    text-align: center;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.b2b-btn-register:hover {
+    background: color-mix(in srgb, var(--awa-primary, #b73337) 12%, white);
+    border-color: var(--awa-primary, #b73337);
+    color: var(--awa-primary, #b73337);
+}
+
+.b2b-btn-claim {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 9px 20px;
+    min-height: 40px;
+    background: transparent;
+    border: 1px solid var(--awa-border, #e5e7eb);
+    border-radius: var(--awa-radius-lg, 8px);
+    color: #555;
+    font-size: var(--awa-font-size-sm, 13px);
+    font-weight: 600;
+    text-decoration: none;
+    text-align: center;
+    transition: border-color 0.2s, color 0.2s;
+}
+
+.b2b-btn-claim:hover {
+    border-color: var(--awa-primary, #b73337);
+    color: var(--awa-primary, #b73337);
+}
+
+/* ── Footer (WhatsApp + brand) ── */
+/* NOTE: b2b-login-footer + b2b-login-whatsapp já cobertos no v9.
+   Aqui apenas herdamos o posicionamento para a página de login. */
+.b2b-login-page .b2b-login-footer {
+    width: 100%;
+    max-width: 440px;
+    padding: 16px 0 0;
+    text-align: center;
+}
+
+/* ── "Já possuo conta" back link ── */
+.b2b-login-page .b2b-login-back {
+    font-size: var(--awa-font-size-sm, 13px);
+    color: #888;
+    margin: 8px 0;
+    text-align: center;
+}
+
+.b2b-login-page .b2b-login-back a {
+    color: var(--awa-primary, #b73337);
+    font-weight: 600;
+    text-decoration: underline;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   FASE 2 — QUOTE VIEW  (.b2b-quote-view)
+   ═══════════════════════════════════════════════════════════════════ */
+
+.b2b-quote-view .quote-view-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+}
+
+.quote-view-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.quote-view-title h1 {
+    font-size: var(--awa-font-size-xl, 20px);
+    font-weight: 800;
+    color: var(--awa-text, #1a1a1a);
+    margin: 0;
+}
+
+/* Status badge */
+.quote-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: var(--awa-radius-pill, 10px);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.quote-status.status-pending,
+.quote-status.status-aguardando { background: #fef9c3; color: #854d0e; }
+.quote-status.status-approved,
+.quote-status.status-aprovada   { background: #dcfce7; color: #15803d; }
+.quote-status.status-rejected,
+.quote-status.status-rejeitada  { background: #fee2e2; color: #b91c1c; }
+.quote-status.status-expired,
+.quote-status.status-expirada   { background: #f3f4f6; color: #6b7280; }
+.quote-status.status-converted  { background: #ede9fe; color: #6d28d9; }
+
+/* Info grid */
+.quote-view-info {
+    background: #fff;
+    border: 1px solid var(--awa-border, #e5e7eb);
+    border-radius: var(--awa-radius-lg, 8px);
+    padding: 18px;
+    margin-bottom: 18px;
+}
+
+.quote-view-info .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
+}
+
+.quote-view-info .info-item {
+    font-size: var(--awa-font-size-sm, 13px);
+}
+
+.quote-view-info .info-item.highlighted {
+    background: color-mix(in srgb, var(--awa-primary, #b73337) 5%, white);
+    border: 1px solid color-mix(in srgb, var(--awa-primary, #b73337) 20%, white);
+    border-radius: var(--awa-radius-sm, 4px);
+    padding: 8px 10px;
+}
+
+.quote-view-info .info-label {
+    display: block;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #888;
+    font-weight: 600;
+    margin-bottom: 3px;
+}
+
+.quote-view-info .info-value {
+    font-weight: 700;
+    color: var(--awa-text, #1a1a1a);
+}
+
+.quote-view-info .info-value.price {
+    font-size: var(--awa-font-size-16, 16px);
+    color: var(--awa-primary, #b73337);
+}
+
+.quote-view-info .info-value.expired { color: var(--awa-primary, #b73337); }
+
+.expired-badge {
+    display: inline-flex;
+    padding: 1px 6px;
+    background: #fee2e2;
+    color: #b91c1c;
+    border-radius: var(--awa-radius-pill, 10px);
+    font-size: 10px;
+    font-weight: 700;
+    margin-left: 4px;
+}
+
+/* Section wrapper */
+.quote-view-section {
+    background: #fff;
+    border: 1px solid var(--awa-border, #e5e7eb);
+    border-radius: var(--awa-radius-lg, 8px);
+    padding: 18px;
+    margin-bottom: 14px;
+}
+
+.quote-view-section h2 {
+    font-size: var(--awa-font-size-14, 14px);
+    font-weight: 700;
+    color: #555;
+    margin: 0 0 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.quote-message, .quote-admin-notes {
+    font-size: var(--awa-font-size-sm, 13px);
+    color: var(--awa-text, #1a1a1a);
+    line-height: 1.6;
+    white-space: pre-line;
+}
+
+/* Quote items table */
+.table-quote-items {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--awa-font-size-sm, 13px);
+}
+
+.table-quote-items thead tr {
+    background: #f8f9fa;
+    border-bottom: 2px solid var(--awa-border, #e5e7eb);
+}
+
+.table-quote-items thead th {
+    padding: 10px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: #555;
+    text-align: left;
+}
+
+.table-quote-items tbody tr {
+    border-bottom: 1px solid var(--awa-border, #e5e7eb);
+    transition: background .15s;
+}
+
+.table-quote-items tbody tr:hover { background: #f9fafb; }
+.table-quote-items td { padding: 10px 12px; vertical-align: middle; }
+
+/* Original vs Quoted price */
+.table-quote-items .original-price {
+    display: block;
+    font-size: 11px;
+    color: #9ca3af;
+    text-decoration: line-through;
+}
+
+.table-quote-items .quoted-price {
+    display: block;
+    font-weight: 700;
+    color: #15803d;
+}
+
+/* Totals footer */
+.table-quote-items .original-total,
+.table-quote-items .quoted-total {
+    background: #f8f9fa;
+    font-weight: 700;
+}
+
+.table-quote-items .quoted-total .price {
+    font-size: var(--awa-font-size-16, 16px);
+    color: var(--awa-primary, #b73337);
+}
+
+/* Decision section */
+.quote-decision-section { border-color: color-mix(in srgb, #22c55e 40%, white); background: #f0fdf4; }
+
+.decision-info {
+    font-size: var(--awa-font-size-sm, 13px);
+    color: #166534;
+    margin-bottom: 14px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   FASE 3 — CSV EXPORT BUTTON  (.b2b-export-actions)
+   ═══════════════════════════════════════════════════════════════════ */
+
+.b2b-export-actions {
+    display: inline-flex;
+    margin: 8px 0;
+}
+
+.b2b-export-csv-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    min-height: 38px;
+    background: transparent !important;
+    border: 1.5px solid var(--awa-border, #e5e7eb) !important;
+    border-radius: var(--awa-radius-md, 6px) !important;
+    color: #555 !important;
+    font-size: var(--awa-font-size-sm, 13px) !important;
+    font-weight: 600 !important;
+    text-decoration: none;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+
+.b2b-export-csv-btn:hover {
+    border-color: var(--awa-primary, #b73337) !important;
+    color: var(--awa-primary, #b73337) !important;
+    background: color-mix(in srgb, var(--awa-primary, #b73337) 4%, white) !important;
+}
+
+.b2b-export-csv-btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--awa-primary, #b73337) 15%, transparent);
+}
+
+.b2b-export-icon { display: flex; align-items: center; color: inherit; }
+
+/* ─── MOBILE ─── */
+@media (max-width: 768px) {
+    .b2b-login-page { padding: 20px 12px 40px; }
+    .b2b-login-logo img { max-width: 130px; }
+    .b2b-login-ctas { gap: 8px; }
+    .quote-view-header { flex-direction: column; align-items: flex-start; }
+    .quote-view-info .info-grid { grid-template-columns: 1fr 1fr; }
+    .table-quote-items thead { display: none; }
+    .table-quote-items tr { display: block; border-bottom: 2px solid var(--awa-border,#e5e7eb); padding: 10px 12px; }
+    .table-quote-items td { display: block; padding: 3px 0; border: none; }
+    .table-quote-items td[data-th]::before { content: attr(data-th) ": "; font-weight: 700; font-size: 11px; color: #888; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .b2b-btn-entrar, .b2b-btn-register, .b2b-btn-claim,
+    .csv-dropzone, .b2b-export-csv-btn { transition: none; }
+}
