@@ -163,6 +163,14 @@ body.catalog-product-view .awa-qty-stepper .input-text.qty:focus {
     border-color: var(--awa-primary, var(--awa-primary));
     outline: none;
 }
+body.catalog-product-view .awa-qty-stepper input#qty:focus-visible,
+body.catalog-product-view .awa-qty-stepper .input-text.qty:focus-visible {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--awa-primary, #b73337) 20%, transparent);
+}
+body.catalog-product-view .awa-qty-stepper input#qty:focus-visible,
+body.catalog-product-view .awa-qty-stepper .input-text.qty:focus-visible {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--awa-primary, #b73337) 20%, transparent);
+}
 
 /* Add to Cart button: modern, no uppercase
    Must override themes.css + custom_default.css generic button selectors */
@@ -697,4 +705,23 @@ body.catalog-product-view .block.upsell {
     body.catalog-product-view .fotorama__nav__frame {
         transition: none;
     }
+}
+
+/* ============================================================
+   Fix: Imagem do placeholder de galeria oculta após init do fotorama
+   O gallery.css (carregado via RequireJS) tem display:none para
+   .gallery-placeholder:not(._block-content-loading) .gallery-placeholder__image
+   mas como é carregado assincronamente, há uma janela em que o placeholder
+   e a galeria fotorama ficam visíveis simultaneamente.
+   Esta regra bundled resolve a duplicação de imagem no PDP.
+   ============================================================ */
+body.catalog-product-view .gallery-placeholder:not(._block-content-loading) .gallery-placeholder__image {
+    display: none !important;
+}
+/* Garante que o placeholder estático seja visível enquanto carrega */
+body.catalog-product-view .gallery-placeholder._block-content-loading .gallery-placeholder__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
 }
