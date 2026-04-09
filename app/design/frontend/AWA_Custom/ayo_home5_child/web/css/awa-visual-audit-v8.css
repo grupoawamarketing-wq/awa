@@ -1,0 +1,139 @@
+/**
+ * AWA Visual Audit v8 — B2B Account: Crédito, Empresa, Aprovações
+ * ===============================================================
+ * Criado: 2026-04-09  |  Ciclo 8 da auditoria visual autônoma
+ *
+ * FASES:
+ *  1. Credit Page      — .b2b-credit-page (limite, barra de uso, transações)
+ *  2. Company Page     — .b2b-company-page (dados cadastrais, usuários)
+ *  3. Approval Page    — .b2b-approval-page (aprovar/rejeitar pedidos)
+ *  4. Shared badges    — .badge--admin, .badge--approver, .role-badge, .status-dot
+ */
+
+/* ── Shared: section-header / badges (reutilizado em todas as páginas) ── */
+.b2b-section-header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid var(--awa-border,#e5e7eb)}
+.b2b-section-header h1{font-size:var(--awa-font-size-xl,20px);font-weight:800;color:var(--awa-text,#1a1a1a);margin:0}
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:var(--awa-radius-pill,10px);font-size:11px;font-weight:700;letter-spacing:.04em}
+.badge--admin{background:color-mix(in srgb,var(--awa-primary,#b73337) 10%,white);color:var(--awa-primary,#b73337);border:1px solid color-mix(in srgb,var(--awa-primary,#b73337) 25%,white)}
+.badge--approver{background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe}
+.role-badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:var(--awa-radius-pill,10px);font-size:11px;font-weight:700}
+.role-badge--admin{background:color-mix(in srgb,var(--awa-primary,#b73337) 10%,white);color:var(--awa-primary,#b73337)}
+.role-badge--viewer{background:#f3f4f6;color:#555}
+.role-badge--buyer{background:#eff6ff;color:#1e40af}
+.status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}
+.status-dot--active{background:#22c55e}
+.status-dot--inactive{background:#9ca3af}
+.count{font-size:.85em;color:#888;font-weight:400}
+
+/* ═══════════════════════════════════════════════════════════════════
+   FASE 1 — CREDIT PAGE
+   .b2b-credit-page
+   ═══════════════════════════════════════════════════════════════════ */
+
+.b2b-credit-page .credit-summary-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin-bottom:20px}
+.credit-card{background:#fff;border:1px solid var(--awa-border,#e5e7eb);border-radius:var(--awa-radius-lg,8px);padding:16px 18px;display:flex;flex-direction:column;gap:4px}
+.credit-card__label{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#888;font-weight:600}
+.credit-card__value{font-size:var(--awa-font-size-xl,20px);font-weight:800;color:var(--awa-text,#1a1a1a)}
+.credit-card--available .credit-card__value{color:#15803d}
+.credit-card--used .credit-card__value{color:var(--awa-primary,#b73337)}
+
+/* Usage bar */
+.credit-usage-bar{background:#fff;border:1px solid var(--awa-border,#e5e7eb);border-radius:var(--awa-radius-lg,8px);padding:16px 18px;margin-bottom:20px}
+.credit-usage-bar__label{display:flex;justify-content:space-between;font-size:var(--awa-font-size-sm,13px);font-weight:600;color:var(--awa-text,#1a1a1a);margin-bottom:8px}
+.credit-usage-bar__track{height:10px;background:#f3f4f6;border-radius:var(--awa-radius-pill,10px);overflow:hidden}
+.credit-usage-bar__fill{height:100%;border-radius:var(--awa-radius-pill,10px);background:var(--awa-primary,#b73337);transition:width .5s ease}
+.credit-usage-bar__fill--warning{background:#f59e0b}
+
+/* Transactions */
+.credit-transactions h2{font-size:var(--awa-font-size-16,16px);font-weight:700;color:var(--awa-text,#1a1a1a);margin:0 0 12px}
+.table-credit-transactions{width:100%;border-collapse:collapse;background:#fff;border-radius:var(--awa-radius-lg,8px);overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.table-credit-transactions thead tr{background:#f8f9fa;border-bottom:2px solid var(--awa-border,#e5e7eb)}
+.table-credit-transactions thead th{padding:10px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#555;text-align:left}
+.table-credit-transactions tbody tr{border-bottom:1px solid var(--awa-border,#e5e7eb);transition:background .15s}
+.table-credit-transactions tbody tr:last-child{border-bottom:none}
+.table-credit-transactions tbody tr:hover{background:#f9fafb}
+.table-credit-transactions td{padding:10px 12px;font-size:var(--awa-font-size-sm,13px);vertical-align:middle}
+.txn-type{display:inline-flex;align-items:center;padding:2px 8px;border-radius:var(--awa-radius-pill,10px);font-size:10px;font-weight:700}
+.txn-type--debit{background:#fee2e2;color:#b91c1c}
+.txn-type--credit{background:#dcfce7;color:#15803d}
+.txn-type--adjustment{background:#fef9c3;color:#854d0e}
+.txn-positive{color:#15803d;font-weight:600}
+.txn-negative{color:var(--awa-primary,#b73337);font-weight:600}
+.empty-message{color:#888;font-size:var(--awa-font-size-sm,13px);font-style:italic;padding:12px 0}
+
+/* ═══════════════════════════════════════════════════════════════════
+   FASE 2 — COMPANY PAGE
+   .b2b-company-page
+   ═══════════════════════════════════════════════════════════════════ */
+
+.company-info-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:20px}
+.company-info-card{background:#fff;border:1px solid var(--awa-border,#e5e7eb);border-radius:var(--awa-radius-lg,8px);padding:18px}
+.company-info-card h3{font-size:var(--awa-font-size-14,14px);font-weight:700;color:var(--awa-text,#1a1a1a);margin:0 0 12px;padding-bottom:10px;border-bottom:1px solid var(--awa-border,#e5e7eb)}
+.company-details{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:var(--awa-font-size-sm,13px)}
+.company-details dt{color:#888;font-weight:600;white-space:nowrap;align-self:baseline;padding:4px 0}
+.company-details dd{color:var(--awa-text,#1a1a1a);margin:0;padding:4px 0;word-break:break-word}
+.company-users-section{background:#fff;border:1px solid var(--awa-border,#e5e7eb);border-radius:var(--awa-radius-lg,8px);padding:18px}
+.company-users-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.company-users-header h2{font-size:var(--awa-font-size-14,14px);font-weight:700;color:var(--awa-text,#1a1a1a);margin:0}
+.btn-add-user{display:inline-flex;align-items:center;padding:7px 14px;background:color-mix(in srgb,var(--awa-primary,#b73337) 8%,white);border:1px solid color-mix(in srgb,var(--awa-primary,#b73337) 30%,white);border-radius:var(--awa-radius-md,6px);color:var(--awa-primary,#b73337);font-size:var(--awa-font-size-sm,13px);font-weight:600;cursor:pointer;transition:background .2s;white-space:nowrap}
+.btn-add-user:hover{background:color-mix(in srgb,var(--awa-primary,#b73337) 15%,white)}
+.add-user-form{background:#f8f9fa;border:1px solid var(--awa-border,#e5e7eb);border-radius:var(--awa-radius-md,6px);padding:14px;margin-bottom:14px}
+.add-user-form.hidden{display:none}
+.add-user-form .form-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.add-user-form .input-text,.add-user-form .select{flex:1;min-width:160px;padding:8px 10px;border:1px solid var(--awa-border,#e5e7eb);border-radius:var(--awa-radius-md,6px);font-size:var(--awa-font-size-sm,13px)}
+.add-user-form .input-text:focus-visible,.add-user-form .select:focus-visible{outline:none;border-color:var(--awa-primary,#b73337);box-shadow:0 0 0 3px color-mix(in srgb,var(--awa-primary,#b73337) 15%,transparent)}
+.add-user-form .btn-save{display:inline-flex;align-items:center;padding:8px 16px;background:var(--awa-primary,#b73337);color:#fff;border:none;border-radius:var(--awa-radius-md,6px);font-size:var(--awa-font-size-sm,13px);font-weight:700;cursor:pointer;white-space:nowrap;transition:filter .2s}
+.add-user-form .btn-save:hover{filter:brightness(1.08)}
+.add-user-form .form-note{font-size:11px;color:#888;margin:0}
+.table-company-users{width:100%;border-collapse:collapse;font-size:var(--awa-font-size-sm,13px)}
+.table-company-users thead tr{background:#f8f9fa;border-bottom:2px solid var(--awa-border,#e5e7eb)}
+.table-company-users thead th{padding:10px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#555;font-weight:700;text-align:left}
+.table-company-users tbody tr{border-bottom:1px solid var(--awa-border,#e5e7eb);transition:background .15s}
+.table-company-users tbody tr:last-child{border-bottom:none}
+.table-company-users tbody tr:hover{background:#f9fafb}
+.table-company-users td{padding:10px 12px;vertical-align:middle}
+.user-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.select-sm{padding:4px 8px;border:1px solid var(--awa-border,#e5e7eb);border-radius:var(--awa-radius-sm,4px);font-size:11px}
+.btn-remove-user{width:28px;height:28px;border:1px solid #fee2e2;background:transparent;color:#ef4444;border-radius:var(--awa-radius-sm,4px);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:background .2s}
+.btn-remove-user:hover{background:#fee2e2}
+
+/* ═══════════════════════════════════════════════════════════════════
+   FASE 3 — APPROVAL PAGE
+   .b2b-approval-page
+   ═══════════════════════════════════════════════════════════════════ */
+
+.b2b-approval-page .approval-section{margin-bottom:24px}
+.b2b-approval-page .approval-section h2{font-size:var(--awa-font-size-16,16px);font-weight:700;color:var(--awa-text,#1a1a1a);margin:0 0 12px;display:flex;align-items:center;gap:8px}
+.table-approvals,.table-my-approvals{width:100%;border-collapse:collapse;background:#fff;border-radius:var(--awa-radius-lg,8px);overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06);font-size:var(--awa-font-size-sm,13px)}
+.table-approvals thead tr,.table-my-approvals thead tr{background:#f8f9fa;border-bottom:2px solid var(--awa-border,#e5e7eb)}
+.table-approvals thead th,.table-my-approvals thead th{padding:10px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#555;text-align:left}
+.table-approvals tbody tr,.table-my-approvals tbody tr{border-bottom:1px solid var(--awa-border,#e5e7eb);transition:background .15s}
+.table-approvals tbody tr:last-child,.table-my-approvals tbody tr:last-child{border-bottom:none}
+.table-approvals tbody tr:hover,.table-my-approvals tbody tr:hover{background:#f9fafb}
+.table-approvals td,.table-my-approvals td{padding:10px 12px;vertical-align:middle}
+.approval-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn-approve{display:inline-flex;align-items:center;padding:6px 14px;min-height:32px;background:#22c55e;border:none;border-radius:var(--awa-radius-md,6px);color:#fff;font-size:11px;font-weight:700;cursor:pointer;transition:filter .2s;white-space:nowrap}
+.btn-approve:hover{filter:brightness(1.08)}
+.btn-reject{display:inline-flex;align-items:center;padding:6px 14px;min-height:32px;background:transparent;border:1.5px solid #ef4444;border-radius:var(--awa-radius-md,6px);color:#ef4444;font-size:11px;font-weight:700;cursor:pointer;transition:background .2s;white-space:nowrap}
+.btn-reject:hover{background:#fee2e2}
+/* approval status badges */
+.approval-status{display:inline-flex;align-items:center;padding:2px 8px;border-radius:var(--awa-radius-pill,10px);font-size:10px;font-weight:700}
+.approval-status--pending{background:#fef9c3;color:#854d0e}
+.approval-status--approved{background:#dcfce7;color:#15803d}
+.approval-status--rejected{background:#fee2e2;color:#b91c1c}
+.approval-status--cancelled{background:#f3f4f6;color:#6b7280}
+
+/* ─── MOBILE ─── */
+@media (max-width:768px){
+  .b2b-credit-page .credit-summary-cards{grid-template-columns:1fr 1fr}
+  .company-info-grid{grid-template-columns:1fr}
+  .table-credit-transactions thead,.table-company-users thead,.table-approvals thead,.table-my-approvals thead{display:none}
+  .table-credit-transactions tr,.table-company-users tr,.table-approvals tr,.table-my-approvals tr{display:block;border-bottom:2px solid var(--awa-border,#e5e7eb);padding:10px}
+  .table-credit-transactions td,.table-company-users td,.table-approvals td,.table-my-approvals td{display:block;padding:3px 0;border:none}
+  .table-credit-transactions td[data-th]::before,.table-company-users td[data-th]::before,.table-approvals td[data-th]::before,.table-my-approvals td[data-th]::before{content:attr(data-th) ": ";font-weight:700;font-size:11px;color:#888}
+  .approval-actions{flex-direction:column}
+  .btn-approve,.btn-reject{width:100%;justify-content:center}
+}
+@media (prefers-reduced-motion:reduce){
+  .credit-usage-bar__fill,.table-credit-transactions tbody tr,.table-approvals tbody tr{transition:none}
+}
