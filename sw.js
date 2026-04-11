@@ -1,5 +1,5 @@
 /** AWA Service Worker v2.4.0 — Multi-strategy Cache (2026-03-29) */
-const CACHE_VERSION = 'awa-v20260407-2';
+const CACHE_VERSION = 'awa-v20260408-4';
 const FONT_CACHE = 'awa-fonts-v1';
 const IMAGE_CACHE = 'awa-images-v1';
 const IMAGE_CACHE_MAX = 300; // max entries
