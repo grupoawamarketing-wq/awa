@@ -1,0 +1,594 @@
+// ============================================================================
+// AWA Motos — _account.less
+// Login, conta do cliente e páginas B2B
+//   body.customer-account-login
+//   body.customer-account-create
+//   body.customer-account-index    (dashboard)
+//   body.customer-account-*        (qualquer subpágina de conta)
+//   body.b2b-*                     (fluxos B2B customizados)
+//
+// Seletores do tema pai sobrescritos:
+//   .customer-account-* .page-main    background cinza → branco
+//   .login-container                  formulário de login + criar conta
+//   .block-customer-login             bloco de login
+//   .account .sidebar-main            navegação lateral da conta
+//   .account .account-nav             itens de navegação
+//
+// Restrições: zero PHP/HTML/XML. !important documentado inline.
+// ============================================================================
+
+@import (once) '_awa-variables';
+
+
+// ============================================================================
+// 1. FUNDO BRANCO
+// ============================================================================
+// !important: tema pai define background nos containers com especificidade alta
+
+body.customer-account-login,
+body.customer-account-create,
+body.customer-account-index,
+body.customer-account-edit,
+body.customer-account-forgotpassword,
+body[class*="customer-account-"],
+body[class*="b2b-"] {
+    background-color: #ffffff !important;
+
+    .page-wrapper,
+    .page-main,
+    .columns,
+    .column.main,
+    .sidebar,
+    .sidebar-main,
+    .sidebar-additional {
+        background-color: #ffffff !important;
+    }
+}
+
+
+// ============================================================================
+// 2. PÁGINA DE LOGIN
+// ============================================================================
+
+.customer-account-login {
+
+    .login-container {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 24px;
+
+        @media (min-width: 768px) {
+            grid-template-columns: 1fr 1fr;
+            align-items: start;
+        }
+    }
+
+    .block-customer-login,
+    .block-new-customer {
+        background: #ffffff;
+        border: 1px solid var(--awa-border, #e2e2e2);
+        border-radius: @awa-border-radius-lg;
+        padding: 28px;
+
+        .block-title {
+            font-size: 18px;
+            font-weight: @awa-weight-bold;
+            color: var(--awa-text, #333333);
+            margin: 0 0 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--awa-border, #e2e2e2);
+        }
+
+        .block-content {
+            .label {
+                display: block;
+                font-size: 13px;
+                font-weight: @awa-weight-semibold;
+                color: var(--awa-text, #333333);
+                margin-bottom: 4px;
+            }
+
+            .input-text {
+                width: 100%;
+                height: var(--form-input-height, 42px);
+                padding: 0 12px;
+                border: 1px solid var(--awa-border, #e2e2e2);
+                border-radius: 4px;
+                font-size: 14px;
+                color: var(--awa-text, #333333);
+                background: #ffffff;
+                transition: border-color @awa-transition;
+                margin-bottom: 16px;
+
+                &:focus {
+                    outline: none;
+                    border-color: var(--awa-primary, #b73337);
+                    box-shadow: 0 0 0 3px rgba(183, 51, 55, 0.08);
+                }
+            }
+
+            .actions-toolbar {
+                display: flex;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: 16px;
+                margin-top: 8px;
+            }
+        }
+    }
+
+    // Botão "Entrar"
+    .block-customer-login .action.login.primary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 46px;
+        padding: 12px 28px;
+        border-radius: 4px;
+        border: none;
+        background: var(--awa-primary, #b73337) !important;
+        color: #ffffff !important;
+        font-size: 15px !important;
+        font-weight: 700 !important;
+        cursor: pointer;
+        transition: background-color @awa-transition, box-shadow @awa-transition;
+        box-shadow: 0 3px 10px rgba(183, 51, 55, 0.2);
+
+        &:hover {
+            background: var(--awa-primary-dark, #8e2629) !important;
+            box-shadow: 0 5px 16px rgba(183, 51, 55, 0.25);
+        }
+    }
+
+    // Link "Esqueci minha senha"
+    .action.remind {
+        font-size: 13px;
+        color: var(--awa-text-muted, #666666);
+        text-decoration: underline;
+        text-underline-offset: 2px;
+
+        &:hover { color: var(--awa-primary, #b73337); }
+    }
+
+    // Bloco "Novo cliente"
+    .block-new-customer {
+        .block-content > p {
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--awa-text-muted, #666666);
+            margin-bottom: 20px;
+        }
+
+        .action.create.primary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 46px;
+            padding: 12px 28px;
+            border-radius: 4px;
+            border: 1.5px solid var(--awa-primary, #b73337);
+            background: transparent;
+            color: var(--awa-primary, #b73337);
+            font-size: 15px;
+            font-weight: @awa-weight-semibold;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background @awa-transition, color @awa-transition;
+
+            &:hover {
+                background: var(--awa-primary, #b73337);
+                color: #ffffff;
+            }
+        }
+    }
+}
+
+
+// ============================================================================
+// 3. CRIAÇÃO DE CONTA (formulário padrão Magento)
+// ============================================================================
+
+.customer-account-create {
+
+    .form.create.account {
+        max-width: 560px;
+
+        .fieldset {
+            margin-bottom: 24px;
+
+            .legend {
+                font-size: 16px;
+                font-weight: @awa-weight-bold;
+                color: var(--awa-text, #333333);
+                border-bottom: 1px solid var(--awa-border, #e2e2e2);
+                padding-bottom: 10px;
+                margin-bottom: 18px;
+                width: 100%;
+            }
+
+            .field {
+                margin-bottom: 16px;
+
+                .label {
+                    display: block;
+                    font-size: 13px;
+                    font-weight: @awa-weight-semibold;
+                    color: var(--awa-text, #333333);
+                    margin-bottom: 4px;
+                }
+
+                .input-text,
+                select {
+                    width: 100%;
+                    height: var(--form-input-height, 42px);
+                    padding: 0 12px;
+                    border: 1px solid var(--awa-border, #e2e2e2);
+                    border-radius: 4px;
+                    font-size: 14px;
+                    color: var(--awa-text, #333333);
+                    background: #ffffff;
+                    transition: border-color @awa-transition;
+
+                    &:focus {
+                        outline: none;
+                        border-color: var(--awa-primary, #b73337);
+                        box-shadow: 0 0 0 3px rgba(183, 51, 55, 0.08);
+                    }
+                }
+
+                .mage-error {
+                    font-size: 12px;
+                    color: var(--awa-primary, #b73337);
+                    margin-top: 4px;
+                }
+            }
+        }
+
+        .action.submit.primary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 48px;
+            padding: 12px 32px;
+            border-radius: 4px;
+            border: none;
+            background: var(--awa-primary, #b73337) !important;
+            color: #ffffff !important;
+            font-size: 15px !important;
+            font-weight: 700 !important;
+            cursor: pointer;
+            transition: background-color @awa-transition;
+
+            &:hover { background: var(--awa-primary-dark, #8e2629) !important; }
+        }
+    }
+}
+
+
+// ============================================================================
+// 4. DASHBOARD / NAVEGAÇÃO DA CONTA
+// ============================================================================
+
+.customer-account-index,
+body[class*="customer-account-"] {
+
+    // Título da página
+    .page-title-wrapper .page-title {
+        font-size: clamp(20px, 3vw, 26px);
+        font-weight: @awa-weight-bold;
+        color: var(--awa-text, #333333);
+        margin: 0 0 24px;
+    }
+
+    // Layout sidebar + conteúdo
+    .account .columns {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 24px;
+
+        @media (min-width: 768px) {
+            grid-template-columns: 220px 1fr;
+            align-items: start;
+        }
+    }
+}
+
+// Navegação lateral da conta
+.account {
+
+    .sidebar-main .block-collapsible-nav {
+        background: var(--awa-bg-soft, #f7f7f7);
+        border: 1px solid var(--awa-border, #e2e2e2);
+        border-radius: @awa-border-radius-lg;
+        overflow: hidden;
+
+        .block-collapsible-nav-title {
+            padding: 14px 16px;
+            font-size: 14px;
+            font-weight: @awa-weight-bold;
+            color: var(--awa-text, #333333);
+            background: var(--awa-bg-soft, #f7f7f7);
+            border-bottom: 1px solid var(--awa-border, #e2e2e2);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .nav.items {
+            list-style: none;
+            padding: 8px 0;
+            margin: 0;
+        }
+
+        .nav.item {
+            margin: 0;
+
+            a,
+            > strong {
+                display: block;
+                padding: 10px 16px;
+                font-size: 13px;
+                color: var(--awa-text, #333333);
+                text-decoration: none;
+                transition: background @awa-transition-fast, color @awa-transition-fast;
+
+                &:hover {
+                    background: rgba(183, 51, 55, 0.05);
+                    color: var(--awa-primary, #b73337);
+                }
+            }
+
+            &.current > a,
+            &.current > strong {
+                background: rgba(183, 51, 55, 0.08);
+                color: var(--awa-primary, #b73337);
+                font-weight: @awa-weight-semibold;
+                border-left: 3px solid var(--awa-primary, #b73337);
+                padding-left: 13px;
+            }
+        }
+    }
+}
+
+
+// ============================================================================
+// 5. BLOCOS DE INFORMAÇÃO DA CONTA (endereço, pedidos, etc.)
+// ============================================================================
+
+.account {
+
+    .block {
+        background: #ffffff;
+        border: 1px solid var(--awa-border, #e2e2e2);
+        border-radius: @awa-border-radius-lg;
+        padding: 20px 24px;
+        margin-bottom: 20px;
+
+        .block-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 0 0 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--awa-border, #e2e2e2);
+
+            > strong {
+                font-size: 15px;
+                font-weight: @awa-weight-bold;
+                color: var(--awa-text, #333333);
+            }
+
+            .action {
+                font-size: 12px;
+                color: var(--awa-primary, #b73337);
+                text-decoration: underline;
+                text-underline-offset: 2px;
+                font-weight: @awa-weight-medium;
+
+                &:hover { opacity: 0.8; }
+            }
+        }
+
+        .block-content {
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--awa-text, #333333);
+
+            address {
+                font-style: normal;
+                line-height: 1.6;
+            }
+        }
+    }
+
+    // Tabela de pedidos
+    .orders-history,
+    .table-order-items {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+
+        thead th {
+            padding: 10px 12px;
+            background: var(--awa-bg-soft, #f7f7f7);
+            border-bottom: 2px solid var(--awa-border, #e2e2e2);
+            font-weight: @awa-weight-bold;
+            color: var(--awa-text-muted, #666666);
+            text-align: left;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            font-size: 11px;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--awa-border, #e2e2e2);
+
+            &:last-child { border-bottom: none; }
+            &:hover td { background: var(--awa-bg-soft, #f7f7f7); }
+
+            td {
+                padding: 12px;
+                color: var(--awa-text, #333333);
+                vertical-align: middle;
+            }
+        }
+
+        // Status do pedido
+        .order-status {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            border-radius: @awa-border-radius-sm;
+            font-size: 11px;
+            font-weight: @awa-weight-bold;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background: rgba(183, 51, 55, 0.08);
+            color: var(--awa-primary, #b73337);
+        }
+
+        // Links de ação
+        .action.view,
+        .action.order {
+            font-size: 12px;
+            color: var(--awa-primary, #b73337);
+            text-decoration: underline;
+            text-underline-offset: 2px;
+            font-weight: @awa-weight-medium;
+
+            &:hover { opacity: 0.8; }
+        }
+    }
+}
+
+
+// ============================================================================
+// 6. MENSAGENS DE SISTEMA (sucesso, erro, info)
+// ============================================================================
+
+.customer-account-login,
+.customer-account-create,
+body[class*="customer-account-"],
+body[class*="b2b-"] {
+
+    .message.success,
+    .message-success {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 14px 16px;
+        background: rgba(34, 139, 34, 0.06);
+        border: 1px solid rgba(34, 139, 34, 0.3);
+        border-radius: 4px;
+        font-size: 14px;
+        color: #1e6b1e;
+        margin-bottom: 20px;
+    }
+
+    .message.error,
+    .message-error {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 14px 16px;
+        background: rgba(183, 51, 55, 0.06);
+        border: 1px solid rgba(183, 51, 55, 0.3);
+        border-radius: 4px;
+        font-size: 14px;
+        color: var(--awa-primary, #b73337);
+        margin-bottom: 20px;
+    }
+
+    .message.info,
+    .message-info,
+    .message.notice,
+    .message-notice {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 14px 16px;
+        background: #f0f6ff;
+        border: 1px solid #c0d8ff;
+        border-radius: 4px;
+        font-size: 14px;
+        color: #1a4c8c;
+        margin-bottom: 20px;
+    }
+}
+
+
+// ============================================================================
+// 7. SEÇÃO B2B — PÁGINAS CUSTOMIZADAS
+// ============================================================================
+
+body[class*="b2b-"] {
+
+    // Card B2B (cotação, aprovação, etc.)
+    .b2b-section,
+    .b2b-block {
+        background: #ffffff;
+        border: 1px solid var(--awa-border, #e2e2e2);
+        border-radius: @awa-border-radius-lg;
+        padding: 24px;
+        margin-bottom: 20px;
+
+        .b2b-section-title,
+        .b2b-block-title {
+            font-size: 16px;
+            font-weight: @awa-weight-bold;
+            color: var(--awa-text, #333333);
+            padding-left: 14px;
+            border-left: 4px solid var(--awa-primary, #b73337);
+            margin-bottom: 16px;
+        }
+    }
+
+    // Tabela de cotação
+    .b2b-quote-table,
+    .b2b-order-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+        margin-bottom: 20px;
+
+        thead th {
+            padding: 10px 12px;
+            background: var(--awa-bg-soft, #f7f7f7);
+            border-bottom: 2px solid var(--awa-border, #e2e2e2);
+            font-weight: @awa-weight-bold;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--awa-text-muted, #666666);
+            text-align: left;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--awa-border, #e2e2e2);
+
+            &:last-child { border-bottom: none; }
+
+            td {
+                padding: 12px;
+                color: var(--awa-text, #333333);
+                vertical-align: middle;
+            }
+        }
+    }
+}
+
+
+// ============================================================================
+// 8. ACESSIBILIDADE
+// ============================================================================
+
+@media (prefers-reduced-motion: reduce) {
+    .customer-account-login,
+    body[class*="customer-account-"],
+    body[class*="b2b-"] {
+        .action.login.primary,
+        .action.create.primary,
+        .action.submit.primary {
+            transition: none !important;
+        }
+    }
+}

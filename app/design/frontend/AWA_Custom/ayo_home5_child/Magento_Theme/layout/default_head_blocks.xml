@@ -92,68 +92,34 @@
         <!-- Bundle 1/3: Foundation (core + layout + components + consistency + fixes + grid) -->
         <css src="css/awa-bundle-core.css"/>
 
-        <!-- MCP Header Framework — High-Density B2B Interface overrides
-             Loaded sync (critical): top bar 30px, search pill, flat nav, MCP badge
-             Scoped with body .page-wrapper to maintain specificity contract -->
-        <css src="css/awa-bundle-mcp-header.css"/>
-
-        <!-- Header Classic Redesign: red B2B bar, white main header, gray nav bar
-             Matches target design image (2026-04 redesign) -->
+        <!-- MCP Header + Classic Redesign: carregamento sync (crítico para evitar FOUC no header) -->
+        <!-- REMOVED (2026-04-10): conflitos header. Estilos essenciais migrados p/ classic-redesign -->
+        <!-- <css src="css/awa-bundle-mcp-header.css"/> -->
         <css src="css/awa-header-classic-redesign.css"/>
+        <!-- merged into awa-bundle-refinements: <css src="css/awa-ux-improvements.css"/> -->
+        <!-- merged into awa-bundle-refinements: <css src="css/awa-layout-standardization.css"/> -->
 
-        <!-- Visual Audit v2 — 14 bug fixes (nav horizontal, benefits bar, login, PDP, PLP, cart)
-             Loaded sync: contains critical nav layout fix that must apply before first paint -->
-        <css src="css/awa-visual-audit-v2.css"/>
+        <!-- MCP Header + Classic Redesign: agora sync (não mais async) (2026-04-09) -->
+
+        <!-- Visual Audit Consolidated (v2–v12) — 2026-04-09
+             All visual audit CSS merged into single file to reduce 11 blocking requests to 0.
+             Loaded via deferred template (awa-deferred-cosmetic-css.phtml) for non-blocking delivery. -->
 
         <!-- AWA Global Modern Clean: sitewide "Compact Elegance" standardization (2026-04-07)
              Unifies button text-transform, backgrounds, cards, forms, pagination across all pages -->
-        <css src="css/awa-global-modern-clean.css"/>
 
 
         <!-- Vertical Menu Shell Fix: global styling for vertical menu (all pages).
              Seletores atualizados para body-only scope em 2026-04-08 (antes: body.cms-index-index).
              Garante estilização consistente do menu vertical em home + páginas internas. -->
-        <css src="css/awa-home-vertical-menu-shell-fix.css"/>
 
-        <!-- Visual Audit v3 — 2026-04-09
-             Focus ring system, active filters, cart CTA, PDP sticky bar,
-             product card hover overlay, loading state, breadcrumb polish. -->
-        <css src="css/awa-visual-audit-v3.css"/>
 
-        <!-- Visual Audit v4 — 2026-04-09
-             B2B dashboard, quote history table, reorder cards, ERP sections,
-             B2B status badges, PDP qty stepper focus-visible. -->
-        <css src="css/awa-visual-audit-v4.css"/>
 
-        <!-- Visual Audit v5 — 2026-04-09
-             Quote button (PDP), cart quote box, checkout success badge,
-             B2B header status panel + dropdown. -->
-        <css src="css/awa-visual-audit-v5.css"/>
 
-        <!-- Visual Audit v6 — 2026-04-09
-             B2B Shopping Lists (index grid, view table, recurring config). -->
-        <css src="css/awa-visual-audit-v6.css"/>
 
-        <!-- Visual Audit v7 — 2026-04-09
-             B2B Promo banner, compact banner, login CTA, PJ modal,
-             login-to-cart modal, customer price info, discount badge, register widget. -->
-        <css src="css/awa-visual-audit-v7.css"/>
 
-        <!-- Visual Audit v8 — 2026-04-09
-             B2B account pages: credit (limit bar + transactions),
-             company (users table), approval (approve/reject). -->
-        <css src="css/awa-visual-audit-v8.css"/>
 
-        <!-- Visual Audit v9 — 2026-04-09
-             B2B register form (multi-step + benefits + CNPJ lookup + password meter),
-             quote form layout, quick order CSV drop zone. -->
-        <css src="css/awa-visual-audit-v9.css"/>
 
-        <!-- Visual Audit v10 — 2026-04-09
-             B2B login shell (login/claim/forgot), quote view, CSV export btn. -->
-        <css src="css/awa-visual-audit-v10.css"/>
-        <css src="css/awa-visual-audit-v11.css"/>
-        <css src="css/awa-visual-audit-v12.css"/>
 
         <!-- =================================================================
              DEFERRED SECONDARY BUNDLES — Async Load (não-críticos)
@@ -251,6 +217,15 @@
                    name="awa.search.autocomplete.head.css"
                    template="Magento_Theme::html/awa-search-autocomplete-head-css.phtml"
                    after="awa.deferred.cosmetic.css"/>
+        </referenceBlock>
+
+        <!-- styles-l.css DEVE ser o ÚLTIMO stylesheet — após todos os bundles e deferred templates.
+             LESS compilado do child theme vence em cascata (mesmo specificity → último ganha). -->
+        <referenceBlock name="head.additional">
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.styles.l.last"
+                   template="Magento_Theme::html/awa-styles-l-last.phtml"
+                   after="awa.search.autocomplete.head.css"/>
         </referenceBlock>
 
         <referenceContainer name="before.body.end">

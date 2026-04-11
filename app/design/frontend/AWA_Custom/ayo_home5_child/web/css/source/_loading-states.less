@@ -1,0 +1,101 @@
+// ============================================================================
+// AWA Motos — Loading States
+// Skeleton shimmer para imagens lazy-loaded e estado .is-loading para
+// operações assíncronas (qty update, add-to-cart, etc.).
+// ============================================================================
+
+// ── Skeleton shimmer ─────────────────────────────────────────────────────────
+
+@keyframes awa-skeleton-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+// Wrapper da foto do produto exibe o shimmer enquanto a imagem não carrega.
+// Quando a <img> é renderizada (loading="lazy" resolvido), ela cobre o fundo.
+.product-item-photo {
+    background: linear-gradient(
+        90deg,
+        var(--awa-bg-soft, #f7f7f7) 25%,
+        #ececec 50%,
+        var(--awa-bg-soft, #f7f7f7) 75%
+    );
+    background-size: 200% 100%;
+    animation: awa-skeleton-shimmer 1.5s ease-in-out infinite;
+
+    // A imagem carregada cobre o gradiente — display:block garante o colapso
+    img {
+        display: block;
+        position: relative;  // sobe acima do background
+    }
+
+    // Quando loaded, cancela a animação para não desperdiçar GPU
+    &:has(img.loaded),
+    &.loaded {
+        animation: none;
+        background: transparent;
+    }
+}
+
+// Sem animação para quem preferir movimento reduzido
+@media (prefers-reduced-motion: reduce) {
+    .product-item-photo {
+        animation: none;
+        background: var(--awa-bg-soft, #f7f7f7);
+    }
+}
+
+// ── Estado .is-loading ───────────────────────────────────────────────────────
+// Usado via JS em operações assíncronas: add-to-cart, qty update, etc.
+// Bloqueia cliques e reduz opacidade para feedback visual imediato.
+
+.is-loading {
+    position: relative;
+    pointer-events: none !important; /* bloqueia interação durante requisição */
+    opacity: 0.65;
+    transition: opacity @awa-transition;
+
+    // Overlay semitransparente sobre o elemento
+    &::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: rgba(255, 255, 255, 0.45);
+        border-radius: inherit;
+        z-index: 1;
+    }
+}
+
+// Spinner embutido para botões com .is-loading
+button.is-loading,
+.action.is-loading {
+    color: transparent;  // esconde o texto original
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 16px;
+        height: 16px;
+        margin: -8px 0 0 -8px;
+        border: 2px solid rgba(255, 255, 255, 0.35);
+        border-top-color: #ffffff;
+        border-radius: 50%;
+        animation: awa-spin 0.6s linear infinite;
+        z-index: 2;
+    }
+}
+
+@keyframes awa-spin {
+    to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    button.is-loading::before,
+    .action.is-loading::before {
+        animation: none;
+        border: 2px solid rgba(255, 255, 255, 0.6);
+        border-top-color: transparent;
+    }
+}

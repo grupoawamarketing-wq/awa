@@ -4,16 +4,18 @@
 // =============================================
 
 // Reset completo do float legado do tema Ayo
-.products .product-items,
-.products-grid .product-items,
-.products.list .product-items {
+// :not(.owl-*) garante que o reset não quebre os carrosseis OwlCarousel do tema Rokanthemes
+.products .product-items:not(.owl-carousel):not(.owl-loaded),
+.products-grid .product-items:not(.owl-carousel):not(.owl-loaded),
+.products.list .product-items:not(.owl-carousel):not(.owl-loaded) {
   overflow: visible !important;
   &::before, &::after { display: none !important; content: none !important; }
 }
 
-.products .product-item,
-.products-grid .product-item,
-.products.list .product-item {
+// Itens dentro de carrosseis herdam largura/posição do JS do Owl — NÃO sobrescrever
+.products .product-item:not(.owl-item):not(.slick-slide),
+.products-grid .product-item:not(.owl-item):not(.slick-slide),
+.products.list .product-item:not(.owl-item):not(.slick-slide) {
   float: none !important; clear: none !important;
   width: 100% !important; max-width: none !important;
 }
@@ -33,8 +35,9 @@ a[title="Painel MCP"] { display: none !important; }
 .action.tocompare { display: none !important; }
 
 // Garantir que grid de homepage usa display:grid
-.block.widget.block-products-list .product-items,
-.block-new-products .product-items {
+// Exclui .owl-carousel/.owl-loaded para não quebrar carrosseis Rokanthemes (BestsellerProduct, Newproduct, etc.)
+.block.widget.block-products-list .product-items:not(.owl-carousel):not(.owl-loaded),
+.block-new-products .product-items:not(.owl-carousel):not(.owl-loaded) {
   display: grid !important;
   grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
 }
@@ -48,39 +51,41 @@ a[title="Painel MCP"] { display: none !important; }
 
 // Homepage widget grid responsivo (padronizado)
 @media (max-width: 1279px) {
-  .block.widget.block-products-list .product-items,
-  .block-new-products .product-items {
+  .block.widget.block-products-list .product-items:not(.owl-carousel):not(.owl-loaded),
+  .block-new-products .product-items:not(.owl-carousel):not(.owl-loaded) {
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   }
 }
 
 @media (max-width: 1023px) {
-  .block.widget.block-products-list .product-items,
-  .block-new-products .product-items {
+  .block.widget.block-products-list .product-items:not(.owl-carousel):not(.owl-loaded),
+  .block-new-products .product-items:not(.owl-carousel):not(.owl-loaded) {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
 }
 
 @media (max-width: 479px) {
-  .block.widget.block-products-list .product-items,
-  .block-new-products .product-items {
+  .block.widget.block-products-list .product-items:not(.owl-carousel):not(.owl-loaded),
+  .block-new-products .product-items:not(.owl-carousel):not(.owl-loaded) {
     grid-template-columns: 1fr !important;
   }
 }
+
 // =============================================
 // CRITICAL OVERRIDES — Vence tema Ayo + legacy + awa-bundle-custom.css
 // Usando seletores de ALTA ESPECIFICIDADE que correspondem ao HTML real
 // =============================================
 
-// ── Override CSS custom properties para footer gradient ──
+// ── Override CSS custom properties para footer (light theme) ──
 :root {
-  --awa-ft-grad-from: var(--awa-bg-dark) !important;
-  --awa-ft-grad-to: var(--awa-bg-dark) !important;
-  --awa-ft-text-1: var(--awa-color-text-muted-on-dark) !important;
+  --awa-ft-surface:    #f9fafb;
+  --awa-ft-surface-2:  #ffffff;
+  --awa-ft-text-1:     #333333;
+  --awa-ft-text-muted: #666666;
+  --awa-ft-border:     #e2e2e2;
 }
 
-// ── UTILITY BAR: DEVE ser escuro (#1a1a1a) ──
-// Seletor exato do _awa-header-professional.less (linha 1377)
+// ── UTILITY BAR: escuro (#1a1a1a) ──
 body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar,
 body .page-wrapper .awa-site-header.awa-header-professional .top-header.awa-utility-bar,
 body .page-wrapper .awa-site-header .awa-utility-bar,
@@ -91,7 +96,6 @@ body .page-wrapper .awa-site-header .awa-utility-bar,
   color: var(--awa-color-text-muted-on-dark) !important;
 }
 
-// Links/textos na utility bar escura
 body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar p,
 body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar span,
 body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar strong {
@@ -103,7 +107,6 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar a:n
   &:hover, &:focus-visible { color: var(--awa-text-on-dark) !important; }
 }
 
-// Account links na utility bar — reset para dark bg
 body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar .top-account ul.header.links > li > a,
 body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar .top-account ul.header.links > li > span {
   background: transparent !important;
@@ -116,7 +119,7 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar .to
   }
 }
 
-// ── PAGE HEADER: white + sticky ──
+// ── PAGE HEADER: branco + sticky ──
 .page-header {
   background: var(--awa-bg) !important;
   background-color: var(--awa-bg) !important;
@@ -125,7 +128,6 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar .to
   z-index: 200 !important;
 }
 
-// Header content — flex layout
 .header.content {
   display: flex !important;
   align-items: center !important;
@@ -133,13 +135,13 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar .to
   background: var(--awa-bg) !important;
 }
 
-// ── NAV BAR: red ──
+// ── NAV BAR: vermelho ──
 .nav-sections {
   background: var(--awa-primary) !important;
   background-color: var(--awa-primary) !important;
 }
 
-// ── BENEFITS BAR: white background, NOT red ──
+// ── BENEFITS BAR: fundo branco ──
 .awa-benefits-bar {
   background: var(--awa-bg) !important;
   background-color: var(--awa-bg) !important;
@@ -186,32 +188,56 @@ body .page-wrapper .awa-site-header.awa-header-professional .awa-utility-bar .to
   display: block !important;
 }
 
-// ── FOOTER: dark #1a1a1a, NOT red ──
-// Seletor com alta especificidade para vencer awa-bundle-custom.css
+// ── FOOTER: LIGHT THEME — vence todas as regras dark anteriores ──
+// !important: sobrescreve awa-bundle-custom.css + versões legacy de _footer.less
+// Light theme alinhado com awa-layout-standardization.css + _footer.less
 body .page-wrapper .page_footer.awa-footer--dark,
 body .page-wrapper .page_footer,
 body .page-wrapper .page-footer,
 .page-footer,
 .page_footer {
-  background: var(--awa-bg-dark) !important;
-  background-color: var(--awa-bg-dark) !important;
+  background: var(--awa-ft-surface, #f9fafb) !important;
+  background-color: var(--awa-ft-surface, #f9fafb) !important;
   background-image: none !important;
-  border-top: none !important;
-  color: var(--awa-color-text-muted-on-dark) !important;
+  border-top: 3px solid #b73337 !important;    // !important: legacy remove 'border-top: none'
+  color: var(--awa-ft-text-1, #333333) !important;
 }
 
-// Footer bottom bar
+// Containers internos Rokanthemes/Vela
+body .page-wrapper .page_footer .footer-container,
+body .page-wrapper .page_footer #footer,
+body .page-wrapper .page_footer .footer-container.layout2,
+body .page-wrapper .page_footer .footer-static,
+body .page-wrapper .page_footer .velaBlock {
+  background: var(--awa-ft-surface-2, #ffffff) !important;
+  background-color: var(--awa-ft-surface-2, #ffffff) !important;
+  background-image: none !important;
+  color: var(--awa-ft-text-1, #333333) !important;
+}
+
+// Barra inferior
 body .page-wrapper .page_footer .footer-bottom,
 body .page-wrapper .page-footer .footer-bottom,
 .footer-bottom,
 .copyright {
-  background: var(--awa-gray-950) !important;
-  background-color: var(--awa-gray-950) !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  color: var(--awa-ft-text-muted, #666666) !important;
+  border-top: 1px solid var(--awa-ft-border, #e2e2e2) !important;
 }
 
 // Footer content grid
 .footer.content {
   display: grid !important;
+}
+
+// ── TRUST SECTION ──
+body .page-wrapper .page_footer .awa-footer-trust,
+body .page-wrapper .page-footer .awa-footer-trust,
+.awa-footer-trust {
+  background: var(--awa-ft-surface, #f9fafb) !important;
+  border-top: 1px solid var(--awa-ft-border, #e2e2e2) !important;
+  color: var(--awa-ft-text-1, #333333) !important;
 }
 
 // ── BODY BACKGROUND ──
@@ -228,9 +254,28 @@ body,
   border-radius: var(--awa-radius-md) !important;
 }
 
-// ── TRUST CARDS below footer (Envio p/ Todo Brasil etc) ──
-body .page-wrapper .page_footer .awa-footer-trust,
-body .page-wrapper .page-footer .awa-footer-trust,
-.awa-footer-trust {
-  background: var(--awa-dark-800, #222222) !important;
+// ── MENSAGENS DE SISTEMA ──
+.message.success {
+  background: rgba(22, 163, 74, 0.08) !important;
+  border-color: rgba(22, 163, 74, 0.3) !important;
+  color: #166534 !important;
+}
+
+.message.error {
+  background: rgba(183, 51, 55, 0.08) !important;
+  border-color: rgba(183, 51, 55, 0.3) !important;
+  color: #8e2629 !important;
+}
+
+.message.warning {
+  background: rgba(217, 119, 6, 0.08) !important;
+  border-color: rgba(217, 119, 6, 0.3) !important;
+  color: #92400e !important;
+}
+
+.message.notice,
+.message.info {
+  background: rgba(37, 99, 235, 0.08) !important;
+  border-color: rgba(37, 99, 235, 0.3) !important;
+  color: #1e40af !important;
 }

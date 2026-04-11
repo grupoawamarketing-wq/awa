@@ -1,449 +1,70 @@
-// =============================================
-// AWA MOTOS — MENU VERTICAL v3 (Dark)
-// Targets: real Rokanthemes HTML selectors
-// =============================================
+// AWA Motos — Vertical Menu overrides
+@import (once) '_awa-variables';
 
-// Aliases locais
-@vm-bg:            @awa-color-white;
-@vm-header-bg:     @awa-color-primary;
-@vm-header-color:  #ffffff;
-@vm-item-color:    @awa-color-text-primary;
-@vm-item-hover:    @awa-color-primary;
-@vm-hover-bg:      #f8f8f8;
-@vm-open-bg:       @awa-color-bg-soft;
-@vm-active-bg:     rgba(183, 51, 55, 0.06);
-@vm-active-border: @awa-color-primary;
-@vm-active-color:  @awa-color-primary;
-@vm-icon-color:    @awa-color-text-light;
-@vm-icon-active:   @awa-color-primary-dark;
-@vm-sub-color:     @awa-color-text-muted;
-@vm-sub-hover:     @awa-color-text-primary;
-@vm-sub-active:    @awa-color-primary-dark;
-@vm-bullet:        #cccccc;
-@vm-bullet-hover:  @awa-color-text-light;
-@vm-bullet-active: @awa-color-primary;
-@vm-divider:       #eee;
-@vm-label-color:   @awa-color-text-light;
-@vm-highlight:     @awa-color-primary-dark;
-@vm-label-new-bg:    #1a7a2a;  // product label "green" (new/cat)
-@vm-sale-bg:         #2c2c2c;  // sale badge bg (dark)
-@vm-sale-color:      #cccccc;  // sale badge text
-@vm-mobile-bg:       #171717;  // mobile drawer dark bg
-@vm-scrollbar:       var(--awa-text);  // scrollbar thumb
 
-// ---- CSS VARIABLE OVERRIDES (beat awa-bundle-site / awa-bundle-phases) ----
-// These bundles use CSS custom properties with high specificity.
-// We override the vars at the nav scope so all downstream rules inherit dark values.
-body .page-wrapper .navigation.verticalmenu.side-verticalmenu {
-    --awa-hc-surface-1: @vm-bg;
-    --awa-bg-surface: @vm-bg;
-    --awa-gray-50: #fafafa;
-    --awa-gray-200: var(--awa-border);
-    --awa-gray-300: #ccc;
-    --awa-gray-500: @vm-item-color;
-    --awa-gray-700: @vm-item-hover;
-    --awa-hc-border: @vm-divider;
-    --awa-white: @vm-item-hover;
-    --awa-red: @vm-header-bg;
-    --awa-red-dark: #8a2528;
-}
+// Garante renderização correta de ícones Font Awesome (em.menu-thumb-icon)
+// e ajustes visuais complementares à documentação Ayo/Rokanthemes.
 
-// ---- PANEL — override awa-home-vertical-menu-shell-fix.css ----
-body .page-wrapper .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown {
-    background: @vm-bg !important;
-    border: 1px solid #2a2a2a !important;
-    border-top: none !important;
-    border-radius: 0 0 8px 8px !important;
-    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35) !important;
-    padding: 4px 0 8px !important;
-    min-width: 250px !important;
-}
-
-// ---- ITEMS — nível 0 ----
-.navigation.verticalmenu .level0 {
-    position: relative;
-    border-left: 3px solid transparent;
-    transition: border-color 0.12s;
-    margin: 0 !important;
-    padding: 0 !important;
-
-    // ---- LINK PRINCIPAL ----
-    > a.level-top,
-    > span.level-top {
-        display: flex !important;
-        align-items: center;
-        gap: 9px;
-        padding: 0 14px !important;
-        height: 44px;
-        font-size: 13px !important;
-        font-weight: 400 !important;
-        color: @vm-item-color !important;
-        text-decoration: none;
-        background: transparent !important;
-        transition: background 0.12s, color 0.12s;
-        white-space: nowrap;
-        overflow: hidden;
-        cursor: pointer;
-
-        &:hover,
-        &:focus {
-            background: @vm-hover-bg !important;
-            color: @vm-item-hover !important;
-
-            em.menu-thumb-icon {
-                color: rgba(255, 255, 255, 0.9) !important;
-                opacity: 0.9 !important;
-            }
-        }
-    }
-
-    // ---- ESTADO ABERTO (mobile: _active) ----
-    &._active > a.level-top {
-        background: @vm-open-bg !important;
-
-        .awa-vmenu-arrow { transform: rotate(180deg); }
-    }
-
-    // ---- ESTADO ATIVO (categoria atual) ----
-    &.active,
-    &.current {
-        border-left-color: @vm-active-border;
-
-        > a.level-top,
-        > span.level-top {
-            background: @vm-active-bg !important;
-            color: @vm-active-color !important;
-            font-weight: 500 !important;
-
-            em.menu-thumb-icon {
-                color: @vm-icon-active !important;
-                opacity: 1 !important;
-            }
-        }
-    }
-
-    // ---- HIGHLIGHT (Super Ofertas) ----
-    &.is-highlight {
-        border-left-color: transparent;
-
-        > a.level-top,
-        > span.level-top {
-            color: @vm-highlight !important;
-            font-weight: 500 !important;
-            background: transparent !important;
-
-            &:hover { background: rgba(183, 51, 55, 0.08) !important; }
-
-            em.menu-thumb-icon { color: @vm-highlight !important; opacity: 1 !important; }
-        }
-    }
-}
-
-// ---- ÍCONES FONT AWESOME ----
-.navigation.verticalmenu .level0 > a.level-top em.menu-thumb-icon {
-    font-size: 15px !important;
-    color: @vm-icon-color !important;
-    opacity: 1 !important;
-    width: 18px !important;
-    min-width: 18px;
-    text-align: center;
-    flex-shrink: 0;
-    transition: color 0.12s, opacity 0.12s;
-
-    // Imagens de thumbnail (alguns itens usam img ao invés de ícone)
-    &[src],
-    img {
-        width: 18px !important;
-        height: 18px !important;
-        object-fit: contain;
-        filter: brightness(0.7);
-    }
-}
-
-// Ícones SVG injetados pelo vertical-menu.js
-.navigation.verticalmenu .level0 .awa-vmenu-icon {
-    width: 18px;
-    min-width: 18px;
-    height: 18px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    opacity: 0.55;
-    transition: opacity 0.12s;
-
-    svg {
-        width: 16px;
-        height: 16px;
-        stroke: currentColor;
-        fill: none;
-        stroke-width: 1.7;
-        stroke-linecap: round;
-        stroke-linejoin: round;
-    }
-}
-
-.navigation.verticalmenu .level0:hover .awa-vmenu-icon,
-.navigation.verticalmenu .level0._active .awa-vmenu-icon { opacity: 0.9; }
-.navigation.verticalmenu .level0.active .awa-vmenu-icon,
-.navigation.verticalmenu .level0.is-highlight .awa-vmenu-icon { opacity: 1; svg { stroke: @vm-icon-active; } }
-
-// Texto do item
-.navigation.verticalmenu .level0 .awa-vmenu-text,
-.navigation.verticalmenu .level0 .navigation__label {
-    flex: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    line-height: 1;
-}
-
-// ---- SETA DE EXPANSÃO (toggle) ----
-.navigation.verticalmenu .open-children-toggle.navigation__toggle {
-    position: absolute !important;
-    right: 0;
-    top: 0;
-    width: 44px;
-    height: 44px;
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 2;
-    background: transparent; // não sobrepor o fundo do item
-
-    &::after {
-        content: '';
-        width: 10px;
-        height: 6px;
-        background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='rgba(255,255,255,0.45)' stroke-width='1.5' stroke-linecap='round' fill='none'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-size: contain;
-        transition: transform 0.2s ease, opacity 0.15s;
-    }
-
-    &[aria-expanded="true"]::after {
-        transform: rotate(180deg);
-        background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='rgba(255,255,255,0.7)' stroke-width='1.5' stroke-linecap='round' fill='none'/%3E%3C/svg%3E");
-    }
-}
-
-// Link precisa de padding-right para não sobrepor a seta
-.navigation.verticalmenu .level0.parent > a.level-top,
-.navigation.verticalmenu .level0.navigation__item--parent > a.level-top {
-    padding-right: 44px !important;
-}
-
-// ---- SVG ARROW injetado por JS ----
-.awa-vmenu-arrow {
-    width: 14px;
-    height: 14px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    margin-left: auto;
-    transition: transform 0.2s ease;
-
-    svg {
-        width: 10px;
-        height: 10px;
-        stroke: rgba(255,255,255,0.45);
-        fill: none;
-        stroke-width: 2;
-        stroke-linecap: round;
-    }
-}
-
-// ---- BADGES ----
-// cat-label (nativo Rokanthemes)
-.navigation.verticalmenu .level0 > a.level-top .cat-label {
-    font-size: 10px !important;
-    font-weight: 700 !important;
-    padding: 2px 7px !important;
-    border-radius: 10px !important;
-    line-height: 1.4 !important;
-    flex-shrink: 0;
-    white-space: nowrap;
-
-    &.cat-label-label1 { background: @vm-label-new-bg !important; color: var(--awa-text-inverse) !important; }
-    &.cat-label-label2 { background: var(--awa-primary) !important; color: var(--awa-text-inverse) !important; }
-    &.cat-label-label3 { background: var(--awa-primary) !important; color: var(--awa-text-inverse) !important; }
-}
-
-// awa-vmenu-badge (injetado por JS)
-.awa-vmenu-badge {
-    font-size: 10px;
-    font-weight: 700;
-    padding: 2px 7px;
-    border-radius: 10px;
-    line-height: 1.4;
-    flex-shrink: 0;
-    white-space: nowrap;
-
-    &--hot  { background: var(--awa-primary); color: var(--awa-text-on-dark); }
-    &--new  { background: @vm-label-new-bg; color: var(--awa-text-on-dark); }
-    &--sale { background: @vm-sale-bg; color: @vm-sale-color; }
-}
-
-// ---- SUBMENU / MEGAMENU ----
-.navigation.verticalmenu .level0 .submenu,
-.navigation.verticalmenu .level0 .subchildmenu {
-    background: @vm-mobile-bg !important;
-    border: none !important;
-    box-shadow: none !important;
-    padding: 2px 0 6px !important;
-}
-
-.navigation.verticalmenu .level0 .submenu a,
-.navigation.verticalmenu .level0 .subchildmenu a {
-    color: @vm-sub-color !important;
-    font-size: 12px !important;
-    padding: 7px 14px 7px 40px !important;
-    display: flex !important;
+// ── Ícone via Font Awesome (<em class="menu-thumb-icon fa fa-xxx">) ─────────
+.navigation.verticalmenu .togge-menu > li.ui-menu-item.level0 > a.level-top {
+    display: flex;
     align-items: center;
     gap: 8px;
-    text-decoration: none;
-    transition: color 0.1s, background 0.1s;
-    line-height: 1.35;
 
-    &::before {
-        content: '';
-        width: 5px;
-        height: 5px;
-        border-radius: 50%;
-        background: @vm-bullet;
-        flex-shrink: 0;
-        transition: background 0.1s;
-        display: inline-block;
-    }
-
-    &:hover {
-        color: @vm-sub-hover !important;
-        background: rgba(255, 255, 255, 0.03) !important;
-
-        &::before { background: @vm-bullet-hover; }
-    }
-}
-
-.navigation.verticalmenu .level0 .submenu li.active a,
-.navigation.verticalmenu .level0 .subchildmenu li.active a {
-    color: @vm-sub-active !important;
-    &::before { background: @vm-bullet-active; }
-}
-
-// Subcategory title bars inside megamenu
-.navigation.verticalmenu .submenu .subcategory-title,
-.navigation.verticalmenu .subchildmenu .subcategory-title {
-    span {
-        color: @vm-label-color !important;
-        font-size: 10px !important;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        font-weight: 700;
-    }
-}
-
-// "Ver tudo" link
-.navigation.verticalmenu .submenu .hb-strong-title a,
-.navigation.verticalmenu .subchildmenu .hb-strong-title a {
-    color: @vm-highlight !important;
-    font-weight: 600 !important;
-
-    &:hover { text-decoration: underline; }
-}
-
-// ---- DIVISORES E LABELS (JS-injetados) ----
-.navigation.verticalmenu .awa-vmenu__divider {
-    height: 1px;
-    background: @vm-divider;
-    margin: 5px 14px;
-}
-
-.navigation.verticalmenu .awa-vmenu__section-label {
-    font-size: 10px;
-    font-weight: 700;
-    color: @vm-label-color;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    padding: 8px 14px 4px;
-}
-
-// ---- PROMO AREA ("vertical-bg-img") ----
-.navigation.verticalmenu .vertical-bg-img,
-.navigation.verticalmenu .vertical-menu-promo {
-    background: @vm-mobile-bg !important;
-    border-top: 1px solid @vm-divider !important;
-    padding: 10px 14px !important;
-
-    img { border-radius: 4px; opacity: 0.8; }
-}
-
-// ---- HEADER TRIGGER — override shell-fix ----
-.navigation.verticalmenu.side-verticalmenu > .title-category-dropdown {
-    border-radius: 8px 8px 0 0 !important;  // flat bottom when panel open
-    box-shadow: none !important;
-    cursor: pointer;
-
-    &.active {
-        border-radius: 8px 8px 0 0 !important;
-        box-shadow: none !important;
-    }
-
-    // Ícone hamburger
-    .vm-icon,
-    .vm-icon i {
-        color: var(--awa-text-on-dark) !important;
-        font-size: 16px !important;
-    }
-
-    // Texto "Todas as categorias"
-    > span:last-child {
-        font-size: 14px !important;
-        font-weight: 700 !important;
-        letter-spacing: 0.01em;
-    }
-}
-
-// ---- RESPONSIVO ----
-@media (max-width: 1024px) {
-    .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown {
-        position: static !important;
-        max-width: 100% !important;
-        border-radius: 0 0 8px 8px !important;
-        max-height: 320px;
-        overflow-y: auto;
-        scrollbar-width: thin;
-        scrollbar-color: @vm-scrollbar transparent;
-
-        &::-webkit-scrollbar { width: 3px; }
-        &::-webkit-scrollbar-thumb { background: @vm-scrollbar; border-radius: 2px; }
-    }
-}
-
-@media (max-width: 768px) {
-    .awa-vmenu-mobile-trigger {
-        display: flex;
+    em.menu-thumb-icon {
+        display: inline-flex;
         align-items: center;
         justify-content: center;
-        gap: 8px;
-        width: 100%;
-        height: 42px;
-        background: var(--awa-primary);
-        color: var(--awa-text-inverse);
-        font-size: 13px;
-        font-weight: 700;
-        border: none;
-        border-radius: var(--awa-radius-sm);
-        cursor: pointer;
-        margin-bottom: 16px;
+        width: 18px;
+        height: 18px;
+        flex-shrink: 0;
+        font-size: 14px;
+        line-height: 1;
+        font-style: normal;
+        color: @awa-color-primary;
+        transition: color var(--awa-transition);
+    }
+
+    &:hover em.menu-thumb-icon {
+        color: @awa-color-primary-dark;
+    }
+
+    > span {
+        flex: 1;
     }
 }
 
-// ---- HARDCODED OVERRIDES (beat awa-bundle-site hardcoded border-bottom-color) ----
-body .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu > li,
-body .page-wrapper .navigation.verticalmenu.side-verticalmenu .ui-menu-item.level0 {
-    border-bottom-color: @vm-divider !important;
+// ── Category Labels (Novo / Quente / Oferta) ─────────────────────────────────
+.navigation.verticalmenu .togge-menu > li.ui-menu-item.level0 {
+    span.cat-label {
+        font-size: 9px;
+        font-weight: @awa-weight-bold;
+        padding: 2px 5px;
+        border-radius: @awa-border-radius-sm;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        margin-left: 4px;
+        vertical-align: middle;
+        white-space: nowrap;
+
+        &.cat-label-label1 {
+            background: #0cc485;
+            color: #fff;
+        }
+
+        &.cat-label-label2 {
+            background: #eb2771;
+            color: #fff;
+        }
+
+        &.cat-label-label3 {
+            background: #0ae3eb;
+            color: #fff;
+        }
+    }
 }
-body .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu > li:last-child {
-    border-bottom: none !important;
+
+// ── Hover: deslocar levemente para a direita (comportamento do tema pai) ──────
+.navigation.verticalmenu.side-verticalmenu > ul li.level0 > a.level-top:hover {
+    padding-left: 14px !important; // tema pai redefine padding-left via seletor de alta especificidade no hover
 }

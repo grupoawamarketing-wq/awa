@@ -388,6 +388,8 @@ define(['jquery', 'mage/url'], function ($, urlBuilder) {
             });
         });
         observer.observe(document.body, { childList: true, subtree: true });
+        // Disconnect on page unload to prevent memory leak (B5)
+        window.addEventListener('pagehide', function () { observer.disconnect(); }, { once: true });
 
         /* Render bar for items already in localStorage */
         renderBar();

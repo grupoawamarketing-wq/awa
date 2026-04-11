@@ -4,8 +4,11 @@
  * Repositório de regras CSS que sobrescrevem o register.css do módulo B2B.
  * Este arquivo é carregado APÓS register.css na cascata.
  *
- * Problema original: register.css tem specificity maior (html body .page-wrapper ...)
- * Solução: usar mesma specificity ou adicionar seletores com maior peso
+ * CORREÇÃO DE SELETOR (2026-04-09):
+ *   O seletor original `html body .page-wrapper .b2b-register-page` nunca
+ *   funcionava na página de cadastro porque ela usa page-layout-empty —
+ *   que NÃO renderiza .page-wrapper. Substituído por:
+ *   `body.b2b-register-index .b2b-register-page` (body-class sempre presente).
  *
  * Regras: melhorias de UX/UI alinhadas com awa-bundle-auth.css
  */
@@ -13,43 +16,36 @@
 /* =====================================================
    INPUT FIELDS — Melhorias de awa-bundle-auth
    ===================================================== */
-html body .page-wrapper .b2b-register-page .field .input-text,
-html body .page-wrapper .b2b-register-page .field input[type="text"],
-html body .page-wrapper .b2b-register-page .field input[type="email"],
-html body .page-wrapper .b2b-register-page .field input[type="tel"],
-html body .page-wrapper .b2b-register-page .field input[type="password"],
-html body .page-wrapper .b2b-register-page .field select {
-    /* Mantém padding da accessibility (12px 16px) */
+body.b2b-register-index .b2b-register-page .field .input-text,
+body.b2b-register-index .b2b-register-page .field input[type="text"],
+body.b2b-register-index .b2b-register-page .field input[type="email"],
+body.b2b-register-index .b2b-register-page .field input[type="tel"],
+body.b2b-register-index .b2b-register-page .field input[type="password"],
+body.b2b-register-index .b2b-register-page .field select {
     padding: 12px 16px !important;
-
-    /* Border melhorado — usar cores do auth system */
     border-color: var(--awa-auth-border-strong, #c7d2e1) !important;
     border-width: 1px !important;
     border-radius: 8px !important;
-
-    /* Tipografia clara */
     font-size: 15px !important;
     line-height: 1.5;
-    color: var(--awa-auth-text, #1f2937);
-
-    /* Transição suave */
+    color: var(--awa-auth-text, #333);
     transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
 
-html body .page-wrapper .b2b-register-page .field .input-text::placeholder,
-html body .page-wrapper .b2b-register-page .field input::placeholder {
-    color: #94a3b8;
+body.b2b-register-index .b2b-register-page .field .input-text::placeholder,
+body.b2b-register-index .b2b-register-page .field input::placeholder {
+    color: #aaa;
 }
 
 /* =====================================================
    FOCUS STATES — Alinhamento com awa-bundle-auth
    ===================================================== */
-html body .page-wrapper .b2b-register-page .field .input-text:focus,
-html body .page-wrapper .b2b-register-page .field .input-text:focus-visible,
-html body .page-wrapper .b2b-register-page .field input:focus,
-html body .page-wrapper .b2b-register-page .field input:focus-visible,
-html body .page-wrapper .b2b-register-page .field select:focus,
-html body .page-wrapper .b2b-register-page .field select:focus-visible {
+body.b2b-register-index .b2b-register-page .field .input-text:focus,
+body.b2b-register-index .b2b-register-page .field .input-text:focus-visible,
+body.b2b-register-index .b2b-register-page .field input:focus,
+body.b2b-register-index .b2b-register-page .field input:focus-visible,
+body.b2b-register-index .b2b-register-page .field select:focus,
+body.b2b-register-index .b2b-register-page .field select:focus-visible {
     border-color: var(--awa-auth-primary, #b73337) !important;
     box-shadow: 0 0 0 3px rgb(183 51 55 / 18%) !important;
     outline: none !important;
@@ -58,16 +54,16 @@ html body .page-wrapper .b2b-register-page .field select:focus-visible {
 /* =====================================================
    LABELS — Melhorias de tipografia
    ===================================================== */
-html body .page-wrapper .b2b-register-page .field .label {
+body.b2b-register-index .b2b-register-page .field .label {
     font-weight: 600;
     font-size: 14px;
-    color: var(--awa-auth-text, #1f2937);
+    color: var(--awa-auth-text, #333);
     margin-bottom: 8px;
     letter-spacing: -0.01em;
     text-align: start;
 }
 
-html body .page-wrapper .b2b-register-page .field.required > .label::after {
+body.b2b-register-index .b2b-register-page .field.required > .label::after {
     content: ' *';
     color: #dc2626;
     margin-left: 2px;
@@ -100,12 +96,12 @@ html body .page-wrapper .b2b-register-page .field.required > .label::after {
 /* =====================================================
    FORM SECTIONS — Focus/error states
    ===================================================== */
-html body .page-wrapper .b2b-register-page .form-section:focus-within {
+body.b2b-register-index .b2b-register-page .form-section:focus-within {
     border-color: var(--awa-auth-border-strong, #c7d2e1) !important;
     box-shadow: 0 0 0 3px rgb(183 51 55 / 8%), 0 8px 18px rgb(15 23 42 / 6%) !important;
 }
 
-html body .page-wrapper .b2b-register-page .form-section.has-errors {
+body.b2b-register-index .b2b-register-page .form-section.has-errors {
     border-color: #fecaca !important;
     box-shadow: 0 0 0 2px rgb(220 38 38 / 6%) !important;
 }
@@ -113,13 +109,13 @@ html body .page-wrapper .b2b-register-page .form-section.has-errors {
 /* =====================================================
    ERROR MESSAGES — Melhorias de acessibilidade
    ===================================================== */
-html body .page-wrapper .b2b-register-page .mage-error,
-html body .page-wrapper .b2b-register-page .field-error .input.mage-error {
+body.b2b-register-index .b2b-register-page .mage-error,
+body.b2b-register-index .b2b-register-page .field-error .input.mage-error {
     border-color: #dc2626 !important;
     box-shadow: 0 0 0 3px rgb(220 38 38 / 10%) !important;
 }
 
-html body .page-wrapper .b2b-register-page .mage-error {
+body.b2b-register-index .b2b-register-page .mage-error {
     color: #7f1d1d;
     font-size: 13px;
     margin-top: 6px;
@@ -128,7 +124,7 @@ html body .page-wrapper .b2b-register-page .mage-error {
 /* =====================================================
    BUTTON — Melhorias de estado
    ===================================================== */
-html body .page-wrapper .b2b-register-page .action.primary {
+body.b2b-register-index .b2b-register-page .action.primary {
     border-radius: 8px;
     font-weight: 600;
     letter-spacing: -0.01em;
@@ -136,12 +132,12 @@ html body .page-wrapper .b2b-register-page .action.primary {
     transition: all 0.2s ease;
 }
 
-html body .page-wrapper .b2b-register-page .action.primary:hover {
+body.b2b-register-index .b2b-register-page .action.primary:hover {
     transform: translateY(-1px);
     box-shadow: 0 8px 16px rgb(183 51 55 / 20%);
 }
 
-html body .page-wrapper .b2b-register-page .action.primary:focus-visible {
+body.b2b-register-index .b2b-register-page .action.primary:focus-visible {
     outline: 2px solid var(--awa-auth-primary, #b73337);
     outline-offset: 2px;
 }
@@ -179,24 +175,24 @@ html body .page-wrapper .b2b-register-page .action.primary:focus-visible {
         max-width: none;
     }
 
-    html body .page-wrapper .b2b-register-page .field .input-text,
-    html body .page-wrapper .b2b-register-page .field input,
-    html body .page-wrapper .b2b-register-page .field select {
+    body.b2b-register-index .b2b-register-page .field .input-text,
+    body.b2b-register-index .b2b-register-page .field input,
+    body.b2b-register-index .b2b-register-page .field select {
         padding: 11px 14px !important;
-        font-size: 16px !important; /* Disable iOS zoom on input focus */
+        font-size: 16px !important; /* Evita zoom automático no iOS */
     }
 
-    html body .page-wrapper .b2b-register-page .form-section {
+    body.b2b-register-index .b2b-register-page .form-section {
         padding: 16px 14px 14px;
     }
 }
 
 @media (max-width: 768px) {
-    html body .page-wrapper .b2b-register-page {
+    body.b2b-register-index .b2b-register-page {
         padding: 24px 16px;
     }
 
-    html body .page-wrapper .b2b-register-page .b2b-register-container {
+    body.b2b-register-index .b2b-register-page .b2b-register-container {
         padding: 28px;
     }
 }
@@ -207,7 +203,7 @@ html body .page-wrapper .b2b-register-page .action.primary:focus-visible {
 .b2b-register-page .field .note,
 .b2b-register-page .field-note {
     font-size: 12px;
-    color: var(--awa-auth-muted, #64748b);
+    color: var(--awa-auth-muted, #999);
     line-height: 1.5;
     margin-top: 6px;
 }
@@ -215,7 +211,7 @@ html body .page-wrapper .b2b-register-page .action.primary:focus-visible {
 /* =====================================================
    REQUIRED FIELD INDICATOR — Better visibility
    ===================================================== */
-html body .page-wrapper .b2b-register-page .field.required > .label span::after {
+body.b2b-register-index .b2b-register-page .field.required > .label span::after {
     content: ' *';
     color: #dc2626;
     font-weight: 700;
@@ -232,29 +228,53 @@ html body .page-wrapper .b2b-register-page .field.required > .label span::after 
    template de REGISTRO usa .b2b-login-page, quebrando o layout.
    Usa o ID #b2b-register-shell (especificidade máxima) para corrigir.
 */
+/* Overrides display:grid + justify-items:center from .b2b-login-page (auth CSS).
+   flex-direction:column keeps logo and form stacked vertically.
+   align-items:stretch allows children to fill the width. */
 #b2b-register-shell {
     display: flex !important;
-    flex-direction: column;
-    align-items: center;
-    justify-items: normal;
-    gap: 0;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0 !important;
+    padding-bottom: 40px;
+    background:
+        radial-gradient(circle at 8% -8%, rgb(183 51 55 / 8%), transparent 42%),
+        radial-gradient(circle at 92% 8%, rgb(142 38 41 / 6%), transparent 38%),
+        linear-gradient(180deg, #f7f8fa 0%, #eef1f5 100%) !important;
 }
 
+/* Fix logo: auth CSS constrains it to min(100%, 468px); make it full-width with a real max */
+#b2b-register-shell .b2b-login-logo {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+    padding: 24px 18px 18px !important;
+    text-align: center;
+    background: transparent !important;
+    border-bottom: 1px solid rgba(0,0,0,0.06) !important;
+}
+
+/* Shell content: full-width container, max-width handled by inner .b2b-register-page */
 #b2b-register-shell .b2b-register-shell-content {
     width: 100% !important;
-    max-width: 100vw !important;
+    max-width: 100% !important;
     min-width: 0;
+    box-sizing: border-box;
+}
+
+/* Enforce proper register-page width if module CSS loses cascade */
+body.b2b-register-index .b2b-register-page {
+    max-width: 860px !important;
+    margin: 0 auto !important;
+    padding: 30px 18px !important;
+    box-sizing: border-box;
+    width: 100% !important;
 }
 
 /* =====================================================
-   B2B REGISTER — OVERRIDE FINAL (carregado após register.css do módulo)
-   Issues #3 stepper, #5 botão, #6 checkbox
-   Usa mesma especificidade que register.css para garantir precedência
+   STEPPER — .is-active com cor AWA brand
    ===================================================== */
-
-/* --- 3. STEPPER — .is-active com cor AWA brand --- */
-body.b2b-register-index html body .page-wrapper .b2b-register-page .b2b-register-progress .progress-step.is-active,
-html body .page-wrapper body.b2b-register-index .b2b-register-page .b2b-register-progress .progress-step.is-active {
+body.b2b-register-index .b2b-register-page .b2b-register-progress .progress-step.is-active {
     border-color: rgba(183, 51, 55, 0.30);
     background: linear-gradient(180deg, #ffffff 0%, #fff1f2 100%);
     color: #8e2629;
@@ -262,20 +282,22 @@ html body .page-wrapper body.b2b-register-index .b2b-register-page .b2b-register
     box-shadow: 0 2px 10px rgba(183, 51, 55, 0.14);
 }
 
-html body .page-wrapper .b2b-register-page .b2b-register-progress .progress-step.is-active .progress-step__num {
-    background: #b73337 !important;
+body.b2b-register-index .b2b-register-page .b2b-register-progress .progress-step.is-active .progress-step__num {
+    background: var(--awa-red) !important;
     color: #ffffff !important;
     box-shadow: 0 2px 8px rgba(183, 51, 55, 0.38) !important;
 }
 
-/* --- 5. BOTÃO — padding 16px 32px, width 100%, brand primary --- */
-html body .page-wrapper .b2b-register-page .actions-toolbar .action.submit.primary,
-html body .page-wrapper .b2b-register-page .actions-toolbar .create-b2b-account {
+/* =====================================================
+   BOTÃO SUBMIT — padding 16px 32px, width 100%, brand primary
+   ===================================================== */
+body.b2b-register-index .b2b-register-page .actions-toolbar .action.submit.primary,
+body.b2b-register-index .b2b-register-page .actions-toolbar .create-b2b-account {
     width: 100% !important;
     padding: 16px 32px !important;
     font-weight: 600 !important;
     font-size: 16px !important;
-    background: #b73337 !important;
+    background: var(--awa-red) !important;
     color: #ffffff !important;
     border: none !important;
     border-radius: 10px !important;
@@ -284,22 +306,24 @@ html body .page-wrapper .b2b-register-page .actions-toolbar .create-b2b-account 
     transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
 }
 
-html body .page-wrapper .b2b-register-page .actions-toolbar .action.submit.primary:hover,
-html body .page-wrapper .b2b-register-page .actions-toolbar .create-b2b-account:hover {
+body.b2b-register-index .b2b-register-page .actions-toolbar .action.submit.primary:hover,
+body.b2b-register-index .b2b-register-page .actions-toolbar .create-b2b-account:hover {
     background: #8e2629 !important;
     box-shadow: 0 6px 18px rgba(183, 51, 55, 0.30) !important;
     transform: translateY(-1px);
 }
 
-/* --- 6. CHECKBOX — custom AWA brand style --- */
-html body .page-wrapper .b2b-register-page .terms-section .field.choice {
+/* =====================================================
+   CHECKBOX — custom AWA brand style
+   ===================================================== */
+body.b2b-register-index .b2b-register-page .terms-section .field.choice {
     background: #fafafa;
     border: 1px solid #e5e7eb;
     border-radius: 10px;
     padding: 16px;
 }
 
-html body .page-wrapper .b2b-register-page .terms-section input[type="checkbox"].checkbox {
+body.b2b-register-index .b2b-register-page .terms-section input[type="checkbox"].checkbox {
     appearance: none;
     -webkit-appearance: none;
     width: 20px !important;
@@ -317,12 +341,12 @@ html body .page-wrapper .b2b-register-page .terms-section input[type="checkbox"]
     vertical-align: top;
 }
 
-html body .page-wrapper .b2b-register-page .terms-section input[type="checkbox"].checkbox:checked {
-    background: #b73337;
-    border-color: #b73337;
+body.b2b-register-index .b2b-register-page .terms-section input[type="checkbox"].checkbox:checked {
+    background: var(--awa-red);
+    border-color: var(--awa-red);
 }
 
-html body .page-wrapper .b2b-register-page .terms-section input[type="checkbox"].checkbox:checked::after {
+body.b2b-register-index .b2b-register-page .terms-section input[type="checkbox"].checkbox:checked::after {
     content: "";
     display: block;
     position: absolute;
@@ -336,21 +360,153 @@ html body .page-wrapper .b2b-register-page .terms-section input[type="checkbox"]
     transform: rotate(45deg);
 }
 
-html body .page-wrapper .b2b-register-page .terms-section input[type="checkbox"].checkbox:focus-visible {
+body.b2b-register-index .b2b-register-page .terms-section input[type="checkbox"].checkbox:focus-visible {
     outline: none;
     box-shadow: 0 0 0 3px rgba(183, 51, 55, 0.20) !important;
-    border-color: #b73337;
+    border-color: var(--awa-red);
 }
 
-html body .page-wrapper .b2b-register-page .terms-section input[type="checkbox"].checkbox:hover:not(:checked) {
-    border-color: #b73337;
+body.b2b-register-index .b2b-register-page .terms-section input[type="checkbox"].checkbox:hover:not(:checked) {
+    border-color: var(--awa-red);
 }
 
 @media (max-width: 480px) {
-    html body .page-wrapper .b2b-register-page .actions-toolbar .action.submit.primary,
-    html body .page-wrapper .b2b-register-page .actions-toolbar .create-b2b-account {
+    body.b2b-register-index .b2b-register-page .actions-toolbar .action.submit.primary,
+    body.b2b-register-index .b2b-register-page .actions-toolbar .create-b2b-account {
         padding: 14px 24px !important;
         font-size: 15px !important;
         min-height: 50px;
     }
+}
+
+/* =====================================================
+   HONEYPOT FIX — impede overflow horizontal (#b2b_website)
+   O input honeypot herda width:100% !important de regras
+   globais (styles-m, awa-bundle-site). Este reset garante
+   que o campo fique completamente invisível e sem layout.
+   ===================================================== */
+.b2b-register-form .b2b-ht,
+.b2b-register-form #b2b_website,
+#b2b-register-form > .b2b-ht {
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+    height: 0 !important;
+    max-height: 0 !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
+    overflow: hidden !important;
+    position: absolute !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    clip: rect(0, 0, 0, 0) !important;
+    -webkit-appearance: none !important;
+}
+
+/* =====================================================
+   FORM CONTAINER — async CSS removes padding/border/shadow from container
+   ===================================================== */
+body.b2b-register-index #b2b-register-shell .b2b-register-container {
+    background: #fff !important;
+    border-radius: 16px !important;
+    border: 1px solid #e5e7eb !important;
+    box-shadow: 0 12px 32px rgb(15 23 42 / 8%) !important;
+    padding: 34px !important;
+    box-sizing: border-box;
+}
+
+/* FORM GRID — async CSS overrides display:grid with display:block, removes gap */
+body.b2b-register-index #b2b-register-shell .b2b-register-form {
+    display: grid !important;
+    gap: 18px !important;
+}
+
+/* FORM SECTIONS — async CSS (styles-l theme) strips border/bg/radius/padding */
+body.b2b-register-index #b2b-register-shell .b2b-register-page .form-section {
+    padding: 18px 18px 16px !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 12px !important;
+    background: linear-gradient(180deg, #fff 0%, #fcfcfd 100%) !important;
+    box-shadow: 0 1px 2px rgb(15 23 42 / 3%) !important;
+    margin-bottom: 0 !important;
+}
+
+body.b2b-register-index #b2b-register-shell .b2b-register-page .form-section:focus-within {
+    border-color: rgba(183, 51, 55, 0.35) !important;
+    box-shadow: 0 0 0 3px rgb(183 51 55 / 8%), 0 8px 18px rgb(15 23 42 / 6%) !important;
+}
+
+body.b2b-register-index #b2b-register-shell .b2b-register-page .form-section.has-errors {
+    border-color: #fecaca !important;
+    box-shadow: 0 0 0 2px rgb(220 38 38 / 6%) !important;
+}
+
+/* FORM SECTION BODY — ensure it's visible (not hidden by async CSS) */
+body.b2b-register-index #b2b-register-shell .b2b-register-page .form-section .form-section__body {
+    display: block !important;
+    margin-top: 16px;
+}
+
+/* =====================================================
+   BENEFITS GRID — async AWA CSS overrides display:grid to flex
+   ===================================================== */
+body.b2b-register-index .b2b-register-page .b2b-benefits {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+    gap: 18px;
+}
+
+/* =====================================================
+   FORM SECTION TOGGLE — reset AWA button red background
+   Async AWA CSS (awa-bundle-phases, styles-l) overrides
+   the module's transparent button with rgb(183,51,55).
+   ===================================================== */
+body.b2b-register-index .b2b-register-page .form-section .form-section__toggle {
+    background: transparent !important;
+    background-image: none !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    color: var(--awa-text-primary, #333) !important;
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    box-shadow: none !important;
+    width: 100% !important;
+    text-align: left !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    cursor: default !important;
+    min-height: auto !important;
+    line-height: 1.2 !important;
+}
+
+body.b2b-register-index .b2b-register-page .form-section .form-section__toggle::before {
+    content: attr(data-step-number) !important;
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 50% !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+    background: linear-gradient(135deg, var(--awa-primary, #b73337) 0%, #8e2629 100%) !important;
+    color: #fff !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    box-shadow: 0 4px 12px rgb(183 51 55 / 20%) !important;
+}
+
+body.b2b-register-index .b2b-register-page .form-section .form-section__toggle:hover {
+    background: transparent !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+body.b2b-register-index .b2b-register-page .form-section .form-section__toggle:focus-visible {
+    outline: 2px solid var(--awa-primary, #b73337) !important;
+    outline-offset: 2px;
+    box-shadow: none !important;
 }

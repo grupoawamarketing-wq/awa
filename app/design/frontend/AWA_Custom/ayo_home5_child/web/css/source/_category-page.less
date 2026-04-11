@@ -1,0 +1,454 @@
+// ============================================================================
+// AWA Motos — _category-page.less
+// Página de listagem de categoria (PLP) — body.catalog-category-view
+//
+// Seletores do tema pai sobrescritos:
+//   .catalog-category-view .page-main        background cinza → branco
+//   .catalog-category-view .toolbar          sort/filter bar
+//   .catalog-category-view .sidebar          navegação facetada (layered nav)
+//   .catalog-category-view .category-image   banner de categoria
+//   .breadcrumbs                             já gerenciado em _product-page.less
+//
+// Restrições: zero PHP/HTML/XML. !important documentado inline.
+// ============================================================================
+
+@import (once) '_awa-variables';
+
+
+// ============================================================================
+// 1. FUNDO BRANCO
+// ============================================================================
+// !important: tema pai define background nos containers com especificidade alta
+
+body.catalog-category-view {
+    background-color: #ffffff !important;
+
+    .page-wrapper,
+    .page-main,
+    .columns,
+    .column.main,
+    .sidebar,
+    .sidebar-main,
+    .sidebar-additional {
+        background-color: #ffffff !important;
+    }
+}
+
+
+// ============================================================================
+// 2. BANNER DE CATEGORIA
+// ============================================================================
+
+.catalog-category-view {
+
+    .category-image {
+        display: block;
+        overflow: hidden;
+        border-radius: @awa-border-radius-lg;
+        margin-bottom: 24px;
+
+        img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+    }
+
+    .category-description {
+        font-size: 14px;
+        line-height: 1.65;
+        color: var(--awa-text-muted, #666666);
+        margin-bottom: 24px;
+
+        p { margin: 0 0 12px; }
+        p:last-child { margin-bottom: 0; }
+    }
+
+    .page-title-wrapper {
+        margin-bottom: 8px;
+
+        .page-title {
+            font-size: clamp(20px, 3vw, 28px);
+            font-weight: @awa-weight-bold;
+            color: var(--awa-text, #333333);
+            line-height: 1.15;
+            margin: 0 0 4px;
+        }
+    }
+}
+
+
+// ============================================================================
+// 3. TOOLBAR — sort, limites por página, paginação
+// ============================================================================
+
+.catalog-category-view {
+
+    .toolbar.toolbar-products {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--awa-border, #e2e2e2);
+        margin-bottom: 20px;
+        background: transparent;
+
+        &.toolbar-bottom {
+            border-bottom: none;
+            border-top: 1px solid var(--awa-border, #e2e2e2);
+            margin-top: 20px;
+            margin-bottom: 0;
+        }
+    }
+
+    // Contador de resultados ("Items 1-16 of 48")
+    .toolbar-amount {
+        font-size: 13px;
+        color: var(--awa-text-muted, #666666);
+        margin: 0;
+        flex: 1 0 auto;
+    }
+
+    // Wrapper de sort + limiter
+    .toolbar-sorter,
+    .toolbar-limiter {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: var(--awa-text-muted, #666666);
+
+        label {
+            font-weight: @awa-weight-semibold;
+            white-space: nowrap;
+            color: var(--awa-text, #333333);
+        }
+
+        select {
+            height: 34px;
+            padding: 0 28px 0 10px;
+            border: 1px solid var(--awa-border, #e2e2e2);
+            border-radius: 4px;
+            background-color: #ffffff;
+            color: var(--awa-text, #333333);
+            font-size: 13px;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666666' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            transition: border-color @awa-transition;
+
+            &:focus {
+                outline: none;
+                border-color: var(--awa-primary, #b73337);
+            }
+        }
+    }
+
+    // Botões de ordenação (A-Z / Z-A)
+    .sorter-action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border: 1px solid var(--awa-border, #e2e2e2);
+        border-radius: 4px;
+        color: var(--awa-text-muted, #666666);
+        text-decoration: none;
+        transition: border-color @awa-transition, color @awa-transition;
+
+        &:hover {
+            border-color: var(--awa-primary, #b73337);
+            color: var(--awa-primary, #b73337);
+        }
+
+        &::before {
+            font-size: 14px;
+        }
+    }
+
+    // Modos de exibição (grid / list)
+    .modes {
+        display: flex;
+        gap: 4px;
+
+        .mode-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            border: 1px solid var(--awa-border, #e2e2e2);
+            border-radius: 4px;
+            color: var(--awa-text-muted, #666666);
+            text-decoration: none;
+            transition: background-color @awa-transition, border-color @awa-transition, color @awa-transition;
+
+            &:hover,
+            &.active {
+                background-color: var(--awa-primary, #b73337);
+                border-color: var(--awa-primary, #b73337);
+                color: #ffffff;
+            }
+        }
+    }
+}
+
+
+// ============================================================================
+// 4. PAGINAÇÃO
+// ============================================================================
+
+.catalog-category-view {
+
+    .pages {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        margin: 0;
+        padding: 0;
+
+        .pages-label { display: none; }
+
+        .items {
+            display: flex;
+            gap: 4px;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .item {
+            margin: 0;
+
+            .page {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                min-width: 34px;
+                height: 34px;
+                padding: 0 6px;
+                border: 1px solid var(--awa-border, #e2e2e2);
+                border-radius: 4px;
+                color: var(--awa-text, #333333);
+                font-size: 13px;
+                font-weight: @awa-weight-medium;
+                text-decoration: none;
+                transition: background-color @awa-transition, border-color @awa-transition, color @awa-transition;
+
+                &:hover {
+                    border-color: var(--awa-primary, #b73337);
+                    color: var(--awa-primary, #b73337);
+                }
+            }
+
+            &.current .page,
+            &.current strong {
+                min-width: 34px;
+                height: 34px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0 6px;
+                background-color: var(--awa-primary, #b73337);
+                border: 1px solid var(--awa-primary, #b73337);
+                border-radius: 4px;
+                color: #ffffff;
+                font-size: 13px;
+                font-weight: @awa-weight-bold;
+            }
+        }
+
+        .action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 34px;
+            height: 34px;
+            border: 1px solid var(--awa-border, #e2e2e2);
+            border-radius: 4px;
+            color: var(--awa-text-muted, #666666);
+            text-decoration: none;
+            font-size: 13px;
+            transition: border-color @awa-transition, color @awa-transition;
+
+            &:hover {
+                border-color: var(--awa-primary, #b73337);
+                color: var(--awa-primary, #b73337);
+            }
+        }
+    }
+}
+
+
+// ============================================================================
+// 5. NAVEGAÇÃO FACETADA (Layered Navigation / Sidebar)
+// ============================================================================
+
+.catalog-category-view {
+
+    .filter {
+        .filter-title {
+            display: none; // título "Filtrar por" — redundante em desktop
+        }
+
+        .filter-subtitle {
+            font-size: 13px;
+            font-weight: @awa-weight-bold;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--awa-text, #333333);
+            margin-bottom: 12px;
+        }
+    }
+
+    .filter-options {
+        border-top: 1px solid var(--awa-border, #e2e2e2);
+
+        .filter-options-item {
+            border-bottom: 1px solid var(--awa-border, #e2e2e2);
+        }
+
+        .filter-options-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            font-size: 13px;
+            font-weight: @awa-weight-semibold;
+            color: var(--awa-text, #333333);
+            cursor: pointer;
+            user-select: none;
+
+            &::after {
+                content: '';
+                display: inline-block;
+                width: 10px;
+                height: 10px;
+                border-right: 2px solid var(--awa-text-muted, #666666);
+                border-bottom: 2px solid var(--awa-text-muted, #666666);
+                transform: rotate(45deg) translateY(-3px);
+                transition: transform @awa-transition;
+                flex-shrink: 0;
+            }
+
+            &.active::after {
+                transform: rotate(-135deg) translateY(-3px);
+            }
+        }
+
+        .filter-options-content {
+            padding: 0 0 12px;
+
+            .item {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                padding: 4px 0;
+
+                a {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-size: 13px;
+                    color: var(--awa-text, #333333);
+                    text-decoration: none;
+                    transition: color @awa-transition;
+                    width: 100%;
+
+                    &:hover {
+                        color: var(--awa-primary, #b73337);
+                    }
+                }
+
+                .count {
+                    margin-left: auto;
+                    font-size: 11px;
+                    color: var(--awa-text-muted, #666666);
+
+                    &::before { content: '('; }
+                    &::after  { content: ')'; }
+                }
+            }
+        }
+    }
+
+    // Filtros ativos
+    .filter-current {
+        margin-bottom: 12px;
+
+        .filter-current-subtitle {
+            font-size: 12px;
+            font-weight: @awa-weight-semibold;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--awa-text-muted, #666666);
+            margin-bottom: 8px;
+        }
+
+        .items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .item {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            background: var(--awa-primary-subtle, rgba(183, 51, 55, 0.07));
+            border-radius: @awa-border-radius-sm;
+            font-size: 12px;
+            color: var(--awa-primary, #b73337);
+
+            .remove {
+                display: inline-flex;
+                align-items: center;
+                color: var(--awa-primary, #b73337);
+                font-size: 14px;
+                line-height: 1;
+                text-decoration: none;
+                margin-left: 2px;
+
+                &:hover { opacity: 0.7; }
+            }
+        }
+    }
+
+    // "Limpar todos" link
+    .filter-actions {
+        margin-bottom: 16px;
+
+        .filter-clear {
+            font-size: 12px;
+            color: var(--awa-primary, #b73337);
+            text-decoration: underline;
+            cursor: pointer;
+
+            &:hover { opacity: 0.8; }
+        }
+    }
+}
+
+
+// ============================================================================
+// 6. ACESSIBILIDADE
+// ============================================================================
+
+@media (prefers-reduced-motion: reduce) {
+    .catalog-category-view {
+        .toolbar .modes .mode-icon,
+        .pages .item .page,
+        .filter-options .filter-options-title::after {
+            transition: none !important;
+        }
+    }
+}

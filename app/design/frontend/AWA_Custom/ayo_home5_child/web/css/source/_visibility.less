@@ -1,0 +1,370 @@
+// ============================================================================
+// AWA Motos — _visibility.less
+// Sistema de visibilidade por perfil de usuário
+//
+// Magento adiciona classes ao <body> automaticamente:
+//   .customer-guest        → visitante anônimo (não cadastrado)
+//   .customer-logged-in    → qualquer cliente autenticado
+//
+// Classes AWA customizadas (injetadas via GrupoAwamotos_B2B observer):
+//   .awa-revendedor        → cliente logado com grupo B2B (revendedor atacadista)
+//   .awa-customer-retail   → cliente logado sem perfil revendedor (varejo)
+//
+// Regras:
+//   ANÔNIMO:     Vê layout limpo, sem preços. CTA convida a se cadastrar/logar.
+//   LOGADO:      Vê preços normais, conta, pedidos. Sem poluição B2B.
+//   REVENDEDOR:  Vê tudo + preços B2B, tabela por qtd, mínimo de pedido, NF B2B.
+//
+// Restrições: zero PHP/HTML/XML. !important documentado inline.
+// ============================================================================
+
+@import (once) '_awa-variables';
+
+
+// ============================================================================
+// 1. ELEMENTOS EXCLUSIVOS DE CADA PERFIL
+// ============================================================================
+// Estratégia: mostrar/ocultar por classe do body. Sem JS.
+
+// ── Mostrar apenas para anônimos ─────────────────────────────────────────────
+
+.awa-only-guest { display: none !important; }
+.customer-guest .awa-only-guest { display: revert !important; }
+
+// ── Mostrar apenas para logados (qualquer grupo) ──────────────────────────────
+
+.awa-only-logged { display: none !important; }
+.customer-logged-in .awa-only-logged { display: revert !important; }
+
+// ── Mostrar apenas para revendedores B2B ─────────────────────────────────────
+
+.awa-only-revendedor { display: none !important; }
+.awa-revendedor .awa-only-revendedor { display: revert !important; }
+
+// ── Ocultar para revendedores (varejo vs B2B) ─────────────────────────────────
+
+.awa-hide-revendedor { display: revert; }
+.awa-revendedor .awa-hide-revendedor { display: none !important; }
+
+
+// ============================================================================
+// 2. PERFIL ANÔNIMO — experiência limpa, convite ao cadastro
+// ============================================================================
+
+// Login CTAs no PLP/Busca: reduzir poluição visual
+// (114 botões "Faça login" é muito para uma PLP)
+.customer-guest {
+
+    // Botão de login no card: apenas outline, sem vermelho sólido no idle
+    .b2b-login-to-buy-btn {
+        border-color: var(--awa-border, #e2e2e2);
+        color: var(--awa-text-muted, #666666);
+        font-size: 12px;
+        min-height: 36px;
+        padding: 6px 12px;
+
+        &::before { display: none; } // sem ícone de pessoa — visual mais limpo
+
+        &:hover,
+        .product-item:hover & {
+            border-color: var(--awa-primary, #b73337);
+            background: var(--awa-primary, #b73337);
+            color: #ffffff;
+        }
+    }
+
+    // Preço mascarado: blur sutil em vez de placeholder R$ ●●●●
+    .b2b-login-to-see-price::before {
+        content: '—';
+        font-size: 22px;
+        font-weight: 300;
+        letter-spacing: 4px;
+        opacity: 0.3;
+        color: var(--awa-text-muted, #666666);
+    }
+
+    // Ocultar banners/blocos exclusivos de revendedor
+    .awa-revendedor-banner,
+    .awa-wholesale-table,
+    .awa-tier-price,
+    .tier.prices,
+    .block.tier-prices {
+        display: none !important;
+    }
+
+    // Faixa de convite ao cadastro (renderizada via awa-register-cta.phtml)
+    .awa-register-cta-bar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        padding: 10px 24px;
+        background: var(--awa-primary-subtle, rgba(183, 51, 55, 0.05));
+        border-bottom: 1px solid var(--awa-primary-15, rgba(183, 51, 55, 0.15));
+        font-size: 13px;
+        color: var(--awa-text, #333333);
+
+        strong { color: var(--awa-primary, #b73337); }
+
+        p { margin: 0; }
+
+        // Container dos dois botões (Entrar + Cadastrar empresa)
+        &__actions {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        // "Entrar" — ghost outline neutro
+        a:first-child {
+            display: inline-flex;
+            align-items: center;
+            height: 30px;
+            padding: 0 14px;
+            border-radius: 4px;
+            border: 1.5px solid var(--awa-border, #e2e2e2);
+            color: var(--awa-text, #333333);
+            font-size: 12px;
+            font-weight: @awa-weight-semibold;
+            text-decoration: none;
+            transition: border-color @awa-transition, color @awa-transition;
+
+            &:hover {
+                border-color: var(--awa-primary, #b73337);
+                color: var(--awa-primary, #b73337);
+            }
+        }
+
+        // "Cadastrar empresa" — outline primário
+        a:last-child {
+            display: inline-flex;
+            align-items: center;
+            height: 30px;
+            padding: 0 14px;
+            border-radius: 4px;
+            border: 1.5px solid var(--awa-primary, #b73337);
+            color: var(--awa-primary, #b73337);
+            font-size: 12px;
+            font-weight: @awa-weight-bold;
+            text-decoration: none;
+            transition: background @awa-transition, color @awa-transition;
+
+            &:hover {
+                background: var(--awa-primary, #b73337);
+                color: #ffffff;
+            }
+        }
+
+        @media (max-width: (@awa-breakpoint-md - 1)) {
+            flex-direction: column;
+            gap: 8px;
+            text-align: center;
+        }
+    }
+}
+
+
+// ============================================================================
+// 3. PERFIL LOGADO — experiência padrão (varejo / conta normal)
+// ============================================================================
+
+.customer-logged-in {
+
+    // Ocultar todos os prompts de login (preço + botão)
+    .b2b-login-to-see-price { display: none !important; }
+    .b2b-login-to-buy-btn   { display: none !important; }
+
+    // BUG 1 — Preços não aparecendo para logados
+    // O módulo B2B pode esconder .price-box globalmente para não-autenticados.
+    // !important: módulo GrupoAwamotos_B2B pode usar display:none com especificidade alta
+    .price-box,
+    .price-wrapper,
+    .price-container {
+        display: block !important;
+    }
+
+    // Garantir que o botão de add-to-cart aparece corretamente
+    .actions-primary .action.tocart {
+        display: inline-flex !important;
+    }
+
+    // Ocultar features B2B exclusivas (aparecem via .awa-revendedor abaixo)
+    .awa-revendedor-banner,
+    .awa-wholesale-table,
+    .awa-b2b-min-order,
+    .awa-b2b-payment-terms,
+    .awa-b2b-freight-table,
+    .tier.prices,
+    .block.tier-prices,
+    .price-tier_price {
+        display: none !important;
+    }
+
+    // Ocultar faixa de convite ao cadastro
+    .awa-register-cta-bar { display: none !important; }
+
+    // BUG 2 — Nome do cliente não aparece após login
+    // Header: nome do cliente visível, link de login oculto
+    .customer-welcome {
+        display: flex !important;
+        align-items: center;
+    }
+
+    // Ocultar link "Entrar" quando já autenticado
+    // !important: o tema pai exibe .authorization-link com display:list-item ou flex
+    .authorization-link { display: none !important; }
+}
+
+
+// ============================================================================
+// 4. PERFIL REVENDEDOR B2B — experiência completa B2B
+// ============================================================================
+
+.awa-revendedor {
+
+    // Restaurar visibilidade de features B2B
+    .awa-revendedor-banner {
+        display: flex !important;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 16px;
+        background: var(--awa-primary-10, rgba(183, 51, 55, 0.07));
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: @awa-weight-semibold;
+        color: var(--awa-primary, #b73337);
+
+        &::before {
+            content: '★';
+            font-size: 14px;
+        }
+    }
+
+    .awa-wholesale-table,
+    .awa-b2b-min-order,
+    .awa-b2b-payment-terms,
+    .awa-b2b-freight-table,
+    .tier.prices,
+    .block.tier-prices,
+    .price-tier_price {
+        display: revert !important;
+    }
+
+    // Tabela de preços por quantidade
+    .tier.prices,
+    .block.tier-prices {
+        margin: 12px 0;
+        padding: 12px 16px;
+        background: var(--awa-primary-subtle, rgba(183, 51, 55, 0.04));
+        border: 1px solid var(--awa-primary-15, rgba(183, 51, 55, 0.15));
+        border-radius: 4px;
+
+        .price-container .price {
+            font-weight: @awa-weight-bold;
+            color: var(--awa-primary, #b73337);
+        }
+
+        .item {
+            font-size: 13px;
+            color: var(--awa-text, #333333);
+            padding: 4px 0;
+
+            &:not(:last-child) {
+                border-bottom: 1px solid rgba(183, 51, 55, 0.1);
+            }
+        }
+    }
+
+    // Badge B2B no header
+    .customer-welcome::after {
+        content: 'B2B';
+        display: inline-flex;
+        align-items: center;
+        padding: 1px 6px;
+        background: var(--awa-primary, #b73337);
+        color: #ffffff;
+        font-size: 9px;
+        font-weight: @awa-weight-bold;
+        letter-spacing: 0.06em;
+        border-radius: @awa-border-radius-sm;
+        margin-left: 6px;
+        vertical-align: middle;
+    }
+
+    // Preço B2B com destaque especial na PDP
+    .catalog-product-view .product-info-main .price-box {
+
+        &::before {
+            content: 'Preço Revendedor';
+            display: block;
+            font-size: 11px;
+            font-weight: @awa-weight-bold;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--awa-primary, #b73337);
+            margin-bottom: 4px;
+        }
+    }
+
+    // Mínimo de pedido por produto
+    .awa-b2b-min-order {
+        display: flex !important;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: var(--awa-text-muted, #666666);
+        margin-top: 6px;
+
+        strong {
+            color: var(--awa-text, #333333);
+            font-weight: @awa-weight-semibold;
+        }
+
+        &::before {
+            content: '';
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23666666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cline x1='12' y1='8' x2='12' y2='12'/%3E%3Cline x1='12' y1='16' x2='12.01' y2='16'/%3E%3C/svg%3E");
+            background-size: contain;
+            background-repeat: no-repeat;
+            flex-shrink: 0;
+        }
+    }
+}
+
+
+// ============================================================================
+// 5. FORMULÁRIO DE CADASTRO — ocultar campos B2B para usuários normais
+// ============================================================================
+// CNPJ e IE são campos B2B — aparecem apenas no fluxo de cadastro de revendedor
+
+.customer-account-create:not(.awa-revendedor-register),
+.customer-account-edit:not(.awa-revendedor) {
+
+    // Campos fiscais B2B — visíveis apenas no fluxo de registro B2B
+    .field.taxvat,                   // campo CNPJ/CPF nativo do Magento
+    .field[data-attr="taxvat"],
+    [data-container="taxvat"],
+    .field-name-taxvat,
+    .awa-field-cnpj,
+    .awa-field-ie,                   // Inscrição Estadual
+    .awa-field-company-type,         // Tipo de empresa
+    .awa-b2b-register-fields {
+        display: none !important;
+    }
+}
+
+// Página específica de registro B2B — mostrar todos os campos
+.b2b-account-create,
+.awa-b2b-register {
+
+    .field.taxvat,
+    .awa-field-cnpj,
+    .awa-field-ie,
+    .awa-field-company-type,
+    .awa-b2b-register-fields {
+        display: block !important;
+    }
+}

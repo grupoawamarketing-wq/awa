@@ -4,14 +4,15 @@
  * rokanthemes/timecircles: real TimeCircles lib (via tema, shim jquery).
  */
 var config = {
-    deps: ['awaVerticalMenu'],
+    deps: ['awaVerticalMenu', 'awa-b2b-header', 'awa-scroll-reveal', 'awa-card-enhance', 'awa-b2b-pdp-price-reload'],
     map: {
         '*': {
             awaCustomCompatBootstrap: 'js/awa-custom-compat-bootstrap',
-            'awaVerticalMenu': 'js/vertical-menu'
+            'awaVerticalMenu': 'js/vertical-menu',
         }
     },
     paths: {
+        'awa-b2b-header': 'js/awa-b2b-header',
         'rokanthemes/timecircles': 'js/rokanthemes/timecircles',
         // Restore Owl Carousel explicitly for Rokanthemes modules that hardcode the path
         'rokanthemes/owl': 'Rokanthemes_Themeoption/js/owl.carousel',
@@ -31,6 +32,9 @@ var config = {
         'js/jquery-andself-compat': 'js/jquery-andself-compat.min',
         // Sticky header — non-minified until terser build step is added
         'awa-header-sticky': 'js/awa-header-sticky',
+        'awa-b2b-pdp-price-reload': 'js/awa-b2b-pdp-price-reload',
+        'awa-scroll-reveal': 'js/awa-scroll-reveal',
+        'awa-card-enhance': 'js/awa-card-enhance',
         // FASE E: Mobile menu focus trap (WCAG 2.4.3)
         'awa-vertical-menu-focus-trap': 'js/awa-vertical-menu-focus-trap'
     },

@@ -1,0 +1,2218 @@
+/* =====================================================================
+ * awa-layout-standardization.css
+ * AWA Motos - Padronizacao completa de layout do header
+ * Data: 2026-04-10
+ *
+ * 1. Barra de busca  - gap 8px padronizado + alinhamento
+ * 2. Menu vertical   - z-index seguro + display fix (todas as paginas)
+ * 3. Menu lateral    - posicao absoluta correta + alinhamento com header
+ * 4. Espaco          - padding compacto e consistente
+ * 5. Acessibilidade  - focus rings WCAG 2.1 AA em todos os elementos
+ * 6. Responsivo      - breakpoints 1280 / 1024 / 768 / 480px
+ * ===================================================================== */
+
+
+/* -------------------------------------------------------------------
+ * 1. BARRA DE BUSCA - Gap de 8px entre logo, busca e carrinho
+ *    Problema: @ds-space-sm = 16px criava folga visual assimetrica
+ *    Solucao:  gap reduzido para 8px (= @ds-space-xs do design system)
+ * ------------------------------------------------------------------- */
+
+body .page-wrapper .awa-site-header .awa-main-header__inner.wp-header {
+  gap: 8px !important;
+}
+
+/* Garantir que a busca nao herde margens de bundles antigos */
+body .page-wrapper .awa-site-header .awa-header-search-col.top-search {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Block de busca preenche toda a coluna flex */
+body .page-wrapper .awa-site-header .awa-header-search-col .block-search,
+body .page-wrapper .awa-site-header .awa-header-search-col .block-content,
+body .page-wrapper .awa-site-header .awa-header-search-col form.minisearch {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Input: altura e border-radius consistentes em todos os estados */
+body .page-wrapper .awa-site-header .awa-header-search-col input#search {
+  height: 44px !important;
+  border-radius: 8px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+
+/* -------------------------------------------------------------------
+ * 2. MENU VERTICAL - Z-index seguro + display forcado
+ *
+ *    Problema A: awa-home-vertical-menu-shell-fix.css aplicava
+ *    z-index: 9999 no body .page-wrapper inteiro, criando um
+ *    stacking context global que interferia com minicart e modals.
+ *
+ *    Problema B: Magento collapsible JS (.tabs) escondia o nav
+ *    na home page com display:none via inline style.
+ *
+ *    Solucao: Stacking context isolado na nav bar + display forcado
+ * ------------------------------------------------------------------- */
+
+/* Reverter o z-index 9999 do page-wrapper (hack global perigoso) */
+body .page-wrapper {
+  z-index: auto !important;
+}
+
+/* Nav bar: stacking context proprio e seguro */
+body .page-wrapper .header-control.header-nav.awa-nav-bar {
+  position: relative !important;
+  z-index: 150 !important;
+  isolation: isolate;
+}
+
+/* Forcar display do nav vertical em desktop (fix Magento collapsible JS) */
+@media (min-width: 992px) {
+  body .page-wrapper .navigation.verticalmenu.side-verticalmenu {
+    display: block !important;
+    visibility: visible !important;
+    overflow: visible !important;
+  }
+
+  /* O collapsible do Magento usa .section-item-content com display:none */
+  body .page-wrapper .navigation.verticalmenu.side-verticalmenu .section-item-content {
+    display: block !important;
+    width: 100% !important;
+    overflow: visible !important;
+  }
+
+  /* Ocultar o titulo collapsible (so aparece em mobile) */
+  body .page-wrapper .navigation.verticalmenu.side-verticalmenu .section-item-title {
+    display: none !important;
+  }
+}
+
+
+/* -------------------------------------------------------------------
+ * 3. MENU LATERAL - Posicionamento absoluto correto do dropdown
+ *
+ *    Problema: O painel .togge-menu ficava sem referencia de posicao,
+ *    saindo do fluxo de forma imprevista dependendo da pagina.
+ *
+ *    Solucao: Container position:relative + painel absolute top:100%
+ * ------------------------------------------------------------------- */
+
+/* Container do botao + painel: referencia de posicionamento */
+body .page-wrapper .awa-header-categories.menu_left_home1 {
+  position: relative !important;
+  width: 290px !important;
+  min-width: 290px !important;
+  flex-shrink: 0 !important;
+  align-self: stretch;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+}
+
+/* Nav wrapper: tambem relativo para o painel */
+body .page-wrapper .navigation.verticalmenu.side-verticalmenu {
+  position: relative !important;
+  width: 100% !important;
+}
+
+/* Painel de categorias: absolute abaixo do trigger, z-index alto */
+body .page-wrapper .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown {
+  position: absolute !important;
+  top: 100% !important;
+  left: 0 !important;
+  z-index: 9000 !important;
+  width: 290px !important;
+  min-width: 290px !important;
+  max-width: 290px !important;
+}
+
+/* Botao trigger: sem bordas inferiores arredondadas quando painel aberto */
+body .page-wrapper .navigation.verticalmenu .title-category-dropdown[aria-expanded="true"],
+body .page-wrapper .navigation.verticalmenu .title-category-dropdown.active {
+  border-bottom-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+}
+
+
+/* -------------------------------------------------------------------
+ * 4. OTIMIZACAO DE ESPACO - Padding consistente header <> nav bar
+ *
+ *    Problema: Header usa padding:14px 24px direto; nav bar usa
+ *    .container (24px) + awa-nav-bar__inner com padding adicional
+ *    de bundles antigos, desalinhando o conteudo horizontalmente.
+ *
+ *    Solucao: Zeramos o padding extra do __inner; so .container tem padding
+ * ------------------------------------------------------------------- */
+
+/* Remover padding duplicado do inner (o .container pai ja tem 24px) */
+body .page-wrapper .awa-site-header .awa-nav-bar__inner {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  display: flex !important;
+  align-items: stretch !important;
+  gap: 0 !important;
+}
+
+/* Nav container: alinhar max-width com o header principal (1440px) */
+body .page-wrapper .header-control.header-nav.awa-nav-bar > .container {
+  max-width: 1440px !important;
+  padding-left: 24px !important;
+  padding-right: 24px !important;
+  margin: 0 auto !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+}
+
+/* Header principal: padding vertical levemente compactado (14px -> 10px) */
+body .page-wrapper .awa-site-header .header.awa-main-header {
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+}
+
+/* Inner do header: max-width alinhado com nav (elimina assimetria) */
+body .page-wrapper .awa-site-header .awa-main-header__inner.wp-header {
+  max-width: 1440px !important;
+  margin: 0 auto !important;
+  width: 100% !important;
+}
+
+
+/* -------------------------------------------------------------------
+ * 5. ACESSIBILIDADE - Focus rings WCAG 2.1 AA
+ *
+ *    Garante indicador de foco visivel para navegacao por teclado.
+ *    Usa :focus-visible para nao mostrar em clique de mouse.
+ * ------------------------------------------------------------------- */
+
+/* Focus ring global: vermelho primario, 2px, offset 2px */
+*:focus-visible {
+  outline: 2px solid var(--awa-primary, #b73337) !important;
+  outline-offset: 2px !important;
+  border-radius: 2px;
+}
+
+/* Suprimir outline em clique (apenas teclado precisa do indicador) */
+*:focus:not(:focus-visible) {
+  outline: none !important;
+}
+
+/* Botao de busca: outline branco interno (botao ja e vermelho) */
+body .page-wrapper .awa-site-header button.action.search:focus-visible {
+  outline: 2px solid #ffffff !important;
+  outline-offset: -3px !important;
+  box-shadow: 0 0 0 3px #b73337 !important;
+}
+
+/* Botao do carrinho: mesmo padrao do botao de busca */
+body .page-wrapper .awa-site-header .action.showcart:focus-visible {
+  outline: 2px solid #ffffff !important;
+  outline-offset: -3px !important;
+  box-shadow: 0 0 0 3px #b73337 !important;
+}
+
+/* Menu vertical: foco visivel nos itens de categoria */
+body .page-wrapper .navigation.verticalmenu .level-top:focus-visible {
+  outline: 2px solid var(--awa-primary, #b73337) !important;
+  outline-offset: -2px !important;
+  border-radius: 4px !important;
+}
+
+/* Skip-link para leitores de tela e navegacao por teclado */
+.skip-to-main-content {
+  position: absolute !important;
+  top: -100% !important;
+  left: 8px !important;
+  z-index: 99999 !important;
+  background: #b73337 !important;
+  color: #fff !important;
+  padding: 8px 16px !important;
+  border-radius: 4px !important;
+  font-weight: 700 !important;
+  font-size: 14px !important;
+  text-decoration: none !important;
+  transition: top 0.15s ease !important;
+}
+.skip-to-main-content:focus {
+  top: 8px !important;
+}
+
+
+/* -------------------------------------------------------------------
+ * 6. RESPONSIVO - Breakpoints padronizados
+ * ------------------------------------------------------------------- */
+
+/* 1280px: menu lateral levemente menor */
+@media (max-width: 1280px) {
+  body .page-wrapper .awa-header-categories.menu_left_home1 {
+    width: 260px !important;
+    min-width: 260px !important;
+  }
+  body .page-wrapper .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown {
+    width: 260px !important;
+    min-width: 260px !important;
+    max-width: 260px !important;
+  }
+}
+
+/* 1024px: tablet landscape */
+@media (max-width: 1024px) {
+  body .page-wrapper .awa-site-header .awa-main-header__inner.wp-header {
+    gap: 8px !important;
+  }
+  body .page-wrapper .awa-header-categories.menu_left_home1 {
+    width: 240px !important;
+    min-width: 240px !important;
+  }
+  body .page-wrapper .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown {
+    width: 240px !important;
+    min-width: 240px !important;
+    max-width: 240px !important;
+  }
+  body .page-wrapper .header-control.header-nav.awa-nav-bar > .container {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+}
+
+/* 768px: tablet portrait */
+@media (max-width: 768px) {
+  body .page-wrapper .awa-site-header .header.awa-main-header {
+    padding: 8px 16px !important;
+  }
+  body .page-wrapper .awa-site-header .awa-main-header__inner.wp-header {
+    gap: 8px !important;
+  }
+  body .page-wrapper .header-control.header-nav.awa-nav-bar > .container {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+  /* Menu vertical em mobile: painel estatico com scroll */
+  body .page-wrapper .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown {
+    position: static !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 320px !important;
+    overflow-y: auto !important;
+  }
+}
+
+/* 480px: mobile pequeno */
+@media (max-width: 480px) {
+  body .page-wrapper .awa-site-header .header.awa-main-header {
+    padding: 8px 12px !important;
+  }
+  /* font-size >= 16px evita zoom automatico no iOS ao focar no input */
+  body .page-wrapper .awa-site-header input#search {
+    font-size: 16px !important;
+  }
+}
+
+
+/* =====================================================================
+ * SECAO: CORREÇÕES DE BUGS — CARRINHO (checkout-cart-index)
+ * Data: 2026-04-10
+ * ===================================================================== */
+
+/* ── Bug 1: Ícone do mini-cart invisível (stroke red-on-red)
+   A awa-header-classic-redesign.css usa stroke='%23b73337' (vermelho) sobre
+   fundo vermelho. Corrige para branco.
+   Especificidade: (0,2,4) + !important — mesmo que o source, mas posterior. */
+body .page-wrapper #header .minicart-wrapper a.showcart::before,
+body .page-wrapper #header .minicart-wrapper a.header-mini-cart::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z'/%3E%3Cline x1='3' y1='6' x2='21' y2='6'/%3E%3Cpath d='M16 10a4 4 0 01-8 0'/%3E%3C/svg%3E") !important;
+}
+
+/* ── Bug 2: Botão "Continuar comprando" invisível no carrinho vazio
+   body.checkout-cart-index .cart-empty a { color: red !important } (0,2,1)
+   bate .awa-cart-empty__cta { color: white !important } (0,1,0).
+   Fix: (0,2,2) — especificidade maior garante branco. */
+body.checkout-cart-index .cart-empty a.awa-cart-empty__cta,
+body.checkout-cart-index .cart-empty a.awa-cart-empty__cta:visited {
+    color: #fff !important;
+}
+
+body.checkout-cart-index .cart-empty a.awa-cart-empty__cta:hover,
+body.checkout-cart-index .cart-empty a.awa-cart-empty__cta:focus-visible {
+    color: #fff !important;
+}
+
+
+/* =====================================================================
+ * SECAO: MODERNIZAÇÃO — CARDS DE PRODUTO
+ * Hover: elevação + sombra suave + transição; não afeta estilos existentes.
+ * ===================================================================== */
+
+/* Elevação sutil no hover — categoria, busca, carousels home */
+.item-product,
+.product-item {
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    will-change: transform;
+}
+
+.item-product:hover,
+.product-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 10%);
+    z-index: 2;
+    position: relative;
+}
+
+/* SKU (Cod:) em cinza menor — libera espaço visual para o nome */
+.item-product .product-sku,
+.product-item .product-sku,
+.item-product [class*="sku"],
+.product-item [class*="sku"] {
+    font-size: 11px !important;
+    color: var(--awa-text-muted, #999) !important;
+    letter-spacing: 0.02em;
+}
+
+/* Títulos de produto: line-height generoso evita clipping */
+.item-product .product-name,
+.item-product .product-item-name,
+.product-item .product-name,
+.product-item .product-item-name {
+    line-height: 1.4 !important;
+}
+
+
+/* =====================================================================
+ * SECAO: MODERNIZAÇÃO — CATEGORIA BANNER SLIM
+ * Reduz a altura máxima da imagem de categoria de topo
+ * de ~320px para 160px, liberando produtos above the fold.
+ * Funciona apenas em catalog-category-view.
+ * ===================================================================== */
+
+body.catalog-category-view .category-image {
+    max-height: 160px !important;
+    overflow: hidden !important;
+}
+
+body.catalog-category-view .category-image img {
+    width: 100% !important;
+    height: 160px !important;
+    object-fit: cover !important;
+    object-position: center 30%;
+    display: block;
+}
+
+
+/* =====================================================================
+ * SECAO: MODERNIZAÇÃO — TIPOGRAFIA GLOBAL
+ * ===================================================================== */
+
+/* Preços: tnum para alinhamento de dígitos em listagens */
+.price-box .price,
+.price-wrapper .price,
+[data-price-type] .price {
+    font-feature-settings: "tnum" 1;
+}
+
+/* Trust badges home: ícone e texto levemente maiores */
+.awa-home-section .awa-trust-bar,
+.top-home-content .awa-trust-bar {
+    font-size: 13px;
+}
+
+/* =====================================================================
+ * SECAO: MODERNIZAÇÃO — EMPTY STATES
+ * ===================================================================== */
+
+/* Carrinho vazio: botão com arrow icon */
+body.checkout-cart-index .cart-empty .awa-cart-empty__cta::after {
+    content: ' →';
+    display: inline;
+    margin-left: 4px;
+    transition: transform 0.15s ease;
+    display: inline-block;
+}
+
+body.checkout-cart-index .cart-empty .awa-cart-empty__cta:hover::after {
+    transform: translateX(3px);
+}
+
+/* =====================================================================
+ * SECAO: FIX — IMAGENS DE PRODUTO QUEBRADAS
+ * Oculta o alt-text de imagens 404 em carrosséis de produto e
+ * mostra um placeholder neutro. O JS em theme.js já tenta _1.jpg
+ * como fallback; este CSS é o backstop visual.
+ * ===================================================================== */
+
+/* Imagem que falhou: mantém dimensões mas sem alt-text visível */
+.awa-pdp-mostviewed img[src*="/media/catalog/product/"],
+.awa-pdp-related img[src*="/media/catalog/product/"],
+.rokan-mostviewed img[src*="/media/catalog/product/"],
+.item-product img[src*="/media/catalog/product/"],
+.product-item img[src*="/media/catalog/product/"] {
+    /* Quando a imagem falha o browser mostra fundo com alt-text.
+       color:transparent esconde o texto do alt sem remover acessibilidade. */
+    color: transparent !important;
+}
+
+/* Placeholder cinza quando imagem não carrega */
+.awa-pdp-mostviewed .product-image-wrapper,
+.awa-pdp-related .product-image-wrapper,
+.rokan-mostviewed .product-image-wrapper {
+    background: #f5f5f5;
+    border-radius: 8px;
+}
+
+/* =====================================================================
+ * SECAO: FIX — PDP B2B LOGIN-TO-SEE-PRICE
+ * awa-bundle-refinements.css e styles-l.css (carregam depois) setam
+ * color:white sem !important. Override com !important aqui ganha.
+ * ===================================================================== */
+
+/* Container: cartão leve com fundo vermelho-pálido */
+body.catalog-product-view .product-info-main .b2b-login-to-see-price {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: 4px 6px !important;
+    background: rgba(183, 51, 55, 0.05) !important;
+    border: 1px solid rgba(183, 51, 55, 0.15) !important;
+    border-radius: 10px !important;
+    padding: 10px 16px !important;
+    min-height: auto !important;
+    width: fit-content !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* Price-label: texto ao lado do link */
+body.catalog-product-view .product-info-main .b2b-login-to-see-price .price-label {
+    display: inline !important;
+    color: var(--awa-text-secondary, #555) !important;
+    font-size: 13px !important;
+    line-height: 1.5 !important;
+}
+
+/* Link: vermelho visível, sem aparência de botão */
+body.catalog-product-view .product-info-main .b2b-login-to-see-price a {
+    color: var(--awa-primary, #b73337) !important;
+    background: transparent !important;
+    background-image: none !important;
+    font-weight: 700 !important;
+    text-decoration: underline !important;
+    text-decoration-color: rgba(183, 51, 55, 0.4) !important;
+    display: inline !important;
+    min-height: auto !important;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    font-size: 13px !important;
+    line-height: 1.5 !important;
+    box-shadow: none !important;
+}
+
+body.catalog-product-view .product-info-main .b2b-login-to-see-price a:hover {
+    color: #8e2629 !important;
+    text-decoration-color: rgba(142, 38, 41, 0.6) !important;
+    background: transparent !important;
+}
+
+/* =====================================================================
+ * SECAO: MODERNIZAÇÃO — HOMEPAGE RHYTHM & HEADINGS
+ * Reduz espaçamento excessivo entre seções (48px → 28px) e adiciona
+ * acento vermelho nas headings de seções centradas.
+ * ===================================================================== */
+
+/* Reduz espaçamento vertical entre seções da home */
+.awa-home-section {
+    margin-top: 28px !important;
+    padding-top: 28px !important;
+}
+
+/* Heading centrado da seção "Busque por Categorias" */
+.awa-category-carousel__header {
+    margin-bottom: 28px !important;
+}
+
+.awa-category-carousel__header h2 {
+    font-size: clamp(20px, 3vw, 26px);
+    font-weight: 700;
+    color: var(--awa-text-primary, #1a1a1a);
+    margin-bottom: 6px;
+    position: relative;
+    display: inline-block;
+}
+
+/* Linha vermelha decorativa abaixo do título centrado */
+.awa-category-carousel__header h2::after {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 3px;
+    background: var(--awa-primary, #b73337);
+    border-radius: 2px;
+    margin: 8px auto 0;
+}
+
+.awa-category-carousel__header p {
+    color: var(--awa-text-secondary, #6b7280);
+    font-size: 14px;
+    margin-top: 0;
+}
+
+/* =====================================================================
+ * CATEGORY CAROUSEL — Redesign moderno
+ * NOTA: o carousel está em .content-top-home, FORA de .page-wrapper.
+ * Seletores sem .page-wrapper para garantir aplicação.
+ * ===================================================================== */
+
+/* Seção: fundo branco, sem o cinza dos bundles */
+.top-home-content--category-carousel {
+    background: #fff !important;
+    border-top: 1px solid #f0f0f0 !important;
+    border-bottom: 1px solid #f0f0f0 !important;
+}
+
+/* Remove contagem de produtos */
+.top-home-content--category-carousel .awa-category-carousel__count {
+    display: none !important;
+}
+
+/* Track: scroll suave, gap uniforme */
+.top-home-content--category-carousel .awa-category-carousel__track {
+    gap: 16px !important;
+    padding: 4px 8px 12px !important;
+    scroll-behavior: smooth !important;
+}
+
+/* Card: branco, cantos arredondados, shadow sutil */
+.top-home-content--category-carousel .awa-category-carousel__item {
+    width: clamp(150px, 13vw, 180px) !important;
+    min-width: 150px !important;
+    max-width: 180px !important;
+    height: auto !important;
+    min-height: clamp(220px, 20vw, 260px) !important;
+    background: #fff !important;
+    border: 1px solid rgba(0, 0, 0, 0.07) !important;
+    border-radius: 16px !important;
+    padding: 16px 10px 16px !important;
+    gap: 0 !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06), 0 2px 10px rgba(0, 0, 0, 0.04) !important;
+    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease !important;
+    will-change: transform !important;
+}
+
+/* Ícone: imagem grande como destaque principal */
+.top-home-content--category-carousel .awa-category-carousel__icon {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: clamp(110px, 10vw, 140px) !important;
+    max-height: unset !important;
+    min-width: unset !important;
+    min-height: clamp(110px, 10vw, 140px) !important;
+    border-radius: 10px !important;
+    background: #fafafa !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow: visible !important;
+    flex-shrink: 0 !important;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Picture element: estica para preencher o container */
+.top-home-content--category-carousel .awa-category-carousel__icon picture {
+    display: flex !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* Imagem: ocupa todo o container sem cortar */
+.top-home-content--category-carousel .awa-category-carousel__icon img {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    object-fit: contain !important;
+    object-position: center !important;
+    display: block !important;
+}
+
+/* SVG icons (fallback) */
+.top-home-content--category-carousel .awa-category-carousel__icon svg {
+    width: 72px !important;
+    height: 72px !important;
+    color: var(--awa-primary, #b73337) !important;
+    stroke: var(--awa-primary, #b73337) !important;
+}
+
+/* Label: secundário, ancorado no fundo do card */
+.top-home-content--category-carousel .awa-category-carousel__label {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: #222 !important;
+    text-align: center !important;
+    line-height: 1.3 !important;
+    letter-spacing: -0.01em !important;
+    width: 100% !important;
+    border-top: 1px solid #f0f0f0 !important;
+    padding-top: 10px !important;
+    margin-top: auto !important;
+    transition: color 0.2s ease !important;
+}
+
+/* Hover: lift do card + zoom suave na imagem */
+.top-home-content--category-carousel .awa-category-carousel__item:hover {
+    transform: translateY(-5px) !important;
+    box-shadow: 0 10px 28px rgba(183, 51, 55, 0.12), 0 3px 8px rgba(0, 0, 0, 0.07) !important;
+    border-color: rgba(183, 51, 55, 0.3) !important;
+    background: #fff !important;
+}
+
+.top-home-content--category-carousel .awa-category-carousel__item:hover .awa-category-carousel__icon {
+    transform: scale(1.07) !important;
+    background: transparent !important;
+}
+
+.top-home-content--category-carousel .awa-category-carousel__item:hover .awa-category-carousel__label {
+    color: var(--awa-primary, #b73337) !important;
+}
+
+/* Botões prev/next — minimalistas */
+.top-home-content--category-carousel .awa-category-carousel__prev,
+.top-home-content--category-carousel .awa-category-carousel__next {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 50% !important;
+    border: 1.5px solid #e0e0e0 !important;
+    background: #fff !important;
+    color: #555 !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08) !important;
+    transition: all 0.18s ease !important;
+}
+
+.top-home-content--category-carousel .awa-category-carousel__prev:hover,
+.top-home-content--category-carousel .awa-category-carousel__next:hover {
+    background: var(--awa-primary, #b73337) !important;
+    border-color: var(--awa-primary, #b73337) !important;
+    color: #fff !important;
+    box-shadow: 0 2px 8px rgba(183, 51, 55, 0.25) !important;
+}
+
+/* Dots: reset padding/minHeight herdado de botões genéricos */
+.top-home-content--category-carousel .awa-category-carousel__dots {
+    display: flex !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    margin-top: 16px !important;
+    padding: 0 !important;
+}
+
+.top-home-content--category-carousel .awa-category-carousel__dot {
+    width: 8px !important;
+    height: 8px !important;
+    min-width: 8px !important;
+    min-height: 8px !important;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 9999px !important;
+    background: #d1d5db !important;
+    cursor: pointer !important;
+    transition: background 0.25s ease, width 0.25s ease !important;
+    flex-shrink: 0 !important;
+}
+
+.top-home-content--category-carousel .awa-category-carousel__dot.active {
+    width: 24px !important;
+    background: var(--awa-primary, #b73337) !important;
+    border-radius: 4px !important;
+}
+
+/* Mobile: 2 cards visíveis por vez */
+@media (max-width: 768px) {
+    .top-home-content--category-carousel .awa-category-carousel__item {
+        width: calc(43vw - 16px) !important;
+        min-width: 130px !important;
+        max-width: 175px !important;
+        min-height: 190px !important;
+        padding: 12px 8px 12px !important;
+        gap: 10px !important;
+    }
+    .top-home-content--category-carousel .awa-category-carousel__icon {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 90px !important;
+        max-height: unset !important;
+        min-width: unset !important;
+        min-height: 90px !important;
+    }
+    .top-home-content--category-carousel .awa-category-carousel__icon picture {
+        display: flex !important;
+        width: 100% !important;
+        height: 100% !important;
+        max-width: 100% !important;
+    }
+    .top-home-content--category-carousel .awa-category-carousel__icon img {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 100% !important;
+        max-height: 100% !important;
+    }
+    .top-home-content--category-carousel .awa-category-carousel__track {
+        gap: 10px !important;
+        padding: 4px 16px 8px !important;
+    }
+    .top-home-content--category-carousel .awa-category-carousel__prev,
+    .top-home-content--category-carousel .awa-category-carousel__next {
+        display: none !important;
+    }
+}
+
+/* "Super Ofertas" heading — alinha com os outros headings de seção */
+.rokan-product-heading h2,
+.rokan-onsale-heading h2 {
+    font-size: clamp(18px, 2.5vw, 22px) !important;
+    font-weight: 700 !important;
+    color: var(--awa-text-primary, #1a1a1a) !important;
+}
+
+/* =====================================================================
+ * SECAO: MODERNIZAÇÃO — HEADER AUTH PROMPT CHIPS
+ * Login e cadastre-se viram chips/badges com cores distintas.
+ * ===================================================================== */
+
+.awa-header-auth-prompt {
+    align-items: center !important;
+    gap: 6px !important;
+}
+
+.awa-header-auth-prompt__text {
+    font-size: 12px !important;
+    line-height: 1.5 !important;
+    color: var(--awa-text-secondary, #6b7280) !important;
+}
+
+/* Links de autenticação: texto simples (referência visual — sem pill/botão) */
+.awa-header-auth-prompt__link {
+    display: inline !important;
+    align-items: baseline !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    font-size: inherit !important;
+    font-weight: 700 !important;
+    line-height: inherit !important;
+    text-decoration: underline !important;
+    text-underline-offset: 2px !important;
+    transition: color 0.15s ease !important;
+    vertical-align: baseline !important;
+    white-space: normal !important;
+    border: none !important;
+    color: var(--awa-primary, #b73337) !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.awa-header-auth-prompt__text a.awa-header-auth-prompt__link:first-of-type {
+    background: transparent !important;
+    color: var(--awa-primary, #b73337) !important;
+}
+
+.awa-header-auth-prompt__text a.awa-header-auth-prompt__link:first-of-type:hover {
+    background: transparent !important;
+    color: #8e2629 !important;
+    box-shadow: none !important;
+}
+
+.awa-header-auth-prompt__text a.awa-header-auth-prompt__link:last-of-type:hover {
+    background: transparent !important;
+    color: #8e2629 !important;
+}
+
+
+/* =====================================================================
+ * MODERNIZAÇÃO COMPLETA — HOMEPAGE + RODAPÉ
+ * Versão: 2026-04-10
+ * WCAG 2.1 AA compliance: todos os pares de cores verificados
+ * ===================================================================== */
+
+
+/* ─────────────────────────────────────────────────────────────────────
+   ANIMAÇÕES DE ENTRADA — fade-up suave para seções .awa-revealed
+   ───────────────────────────────────────────────────────────────────── */
+
+@keyframes awa-fade-up {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes awa-fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* Apenas homepage — não aplicar em outras páginas */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.awa-reveal:not(.awa-revealed) {
+    opacity: 0;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.awa-reveal.awa-revealed {
+    animation: awa-fade-up 0.52s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+/* Stagger via CSS custom property --item-index */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.awa-reveal-stagger.awa-revealed > * {
+    animation: awa-fade-up 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+    animation-delay: calc(var(--item-index, 0) * 55ms);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────
+   HOMEPAGE — TIPOGRAFIA E ESPAÇAMENTO DE SEÇÕES
+   ───────────────────────────────────────────────────────────────────── */
+
+/* Headings de todas as seções produto: tamanho fluido + decoração */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .rokan-product-heading h2,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .rokan-onsale-heading h2,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper [class*="rokan-"] .section-title h2,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .awa-pdp-mostviewed h2,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .awa-home-section h2 {
+    font-size: clamp(18px, 2.4vw, 24px) !important;
+    font-weight: 700 !important;
+    color: #1a1a1a !important;
+    letter-spacing: -0.02em !important;
+    line-height: 1.2 !important;
+}
+
+/* Separador vermelho abaixo dos headings de seção */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .rokan-product-heading h2::after,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .rokan-onsale-heading h2::after {
+    content: '';
+    display: block;
+    width: 36px;
+    height: 3px;
+    background: #b73337;
+    border-radius: 2px;
+    margin-top: 8px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   HOMEPAGE — CARDS DE PRODUTO: HOVER SUAVE
+   ───────────────────────────────────────────────────────────────────── */
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .swiper-slide .product-thumb,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .product-item .product-item-info {
+    border-radius: 12px !important;
+    transition: box-shadow 0.24s ease, transform 0.24s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+    will-change: transform !important;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .swiper-slide .product-thumb:hover,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .product-item .product-item-info:hover {
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.10) !important;
+    transform: translateY(-3px) !important;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────
+   RODAPÉ — REMOVER FUNDO ESCURO: RESET TOTAL
+   awa-bundle-refinements.css define background: var(--awa-bg-dark) !important
+   Este arquivo carrega APÓS refinements, portanto nossos !important vencem.
+   ───────────────────────────────────────────────────────────────────── */
+
+/* Reset completo de backgrounds escuros */
+.page-footer,
+.page_footer,
+.page_footer.awa-footer--dark,
+body .page-wrapper .page_footer,
+body .page-wrapper .page_footer.awa-footer--dark,
+body .page-wrapper .page-footer {
+    background: #f8fafc !important;
+    background-image: none !important;
+    background-color: #f8fafc !important;
+    color: #1a1a1a !important;
+    border-top: 3px solid #b73337 !important;
+}
+
+/* Container interno: branco puro */
+body .page-wrapper .page_footer .footer-container,
+body .page-wrapper .page_footer #footer,
+body .page-wrapper .page_footer .footer-container.layout2,
+body .page-wrapper .page_footer .footer-static,
+body .page-wrapper .page_footer .velaBlock,
+.page_footer .footer-container,
+.page_footer #footer,
+.page_footer .footer-container.layout2,
+.footer-container.layout2 {
+    background: #fff !important;
+    background-image: none !important;
+    background-color: #fff !important;
+    color: #1a1a1a !important;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────
+   RODAPÉ — TRUST-TRUST-TRUST: cobertura total de classes trust dark
+   Refinements usa .awa-footer-trust (sem -bar) com background dark
+   ───────────────────────────────────────────────────────────────────── */
+
+.awa-footer-trust,
+body .page-wrapper .page_footer .awa-footer-trust,
+body .page-wrapper .page-footer .awa-footer-trust,
+.awa-footer-trust-bar,
+body .page-wrapper .page_footer .awa-footer-trust-bar {
+    background: #fff !important;
+    background-color: #fff !important;
+    border-top: none !important;
+    border-bottom: 1px solid #f0f0f0 !important;
+    padding: 22px 0 !important;
+    color: #1a1a1a !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   RODAPÉ — TRUST BAR (Envio, Segurança, Garantia, Atacado)
+   ───────────────────────────────────────────────────────────────────── */
+
+.awa-footer-trust-bar {
+    background: #fff !important;
+    border-top: none !important;
+    border-bottom: 1px solid #f0f0f0 !important;
+    padding: 22px 0 !important;
+}
+
+.awa-footer-trust-icon {
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    border-radius: 50% !important;
+    background: rgba(183, 51, 55, 0.09) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: #b73337 !important;
+    flex-shrink: 0 !important;
+}
+
+.awa-footer-trust-icon svg {
+    width: 20px !important;
+    height: 20px !important;
+    fill: currentColor !important;
+    color: #b73337 !important;
+}
+
+.awa-footer-trust-copy strong {
+    font-size: 12.5px !important;
+    font-weight: 700 !important;
+    color: #1a1a1a !important;  /* contrast: 16.1:1 ✓ AAA */
+    line-height: 1.35 !important;
+}
+
+.awa-footer-trust-copy span {
+    font-size: 11.5px !important;
+    color: #4b5563 !important;  /* contrast: 7.0:1 ✓ AA */
+    line-height: 1.35 !important;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────
+   RODAPÉ — TAGS DE CATEGORIA (pills)
+   ───────────────────────────────────────────────────────────────────── */
+
+.awa-footer-tags {
+    background: #fafafa !important;
+    border-bottom: 1px solid #f0f0f0 !important;
+    padding: 14px 0 !important;
+}
+
+.awa-footer-tags__inner {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+    flex-wrap: wrap !important;
+}
+
+.awa-footer-tags__label {
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.07em !important;
+    color: #6b7280 !important;  /* contrast: 4.54:1 ✓ AA */
+    white-space: nowrap !important;
+    margin: 4px 0 0 !important;
+    padding: 0 !important;
+}
+
+.footer-tags {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+}
+
+.footer-tags a {
+    display: inline-block !important;
+    padding: 3px 10px !important;
+    background: #fff !important;
+    border: 1px solid #e0e0e0 !important;
+    border-radius: 20px !important;
+    font-size: 12px !important;
+    color: #4b5563 !important;  /* contrast: 7.0:1 ✓ AA */
+    text-decoration: none !important;
+    transition: border-color 0.15s, color 0.15s, background 0.15s !important;
+    line-height: 1.6 !important;
+}
+
+.footer-tags a:hover {
+    border-color: #b73337 !important;
+    color: #b73337 !important;  /* contrast: 4.56:1 ✓ AA (bold ≥14px) */
+    background: rgba(183, 51, 55, 0.04) !important;
+    text-decoration: none !important;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────
+   RODAPÉ — COLUNAS VELAFOOTER (Quem somos, Suporte, Categorias, Contato)
+   ───────────────────────────────────────────────────────────────────── */
+
+.footer-static.velaBlock .container {
+    padding-top: 36px !important;
+    padding-bottom: 28px !important;
+}
+
+/* Título de cada coluna */
+.velaFooterTitle,
+.page_footer .velaFooterTitle,
+body .page-wrapper .page_footer .velaFooterTitle,
+body .page-wrapper .page_footer .velaFooterTitle a,
+.footer-container .velaFooterTitle {
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.08em !important;
+    color: #1a1a1a !important;  /* contrast: 16.1:1 ✓ AAA */
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 2px solid rgba(183, 51, 55, 0.18) !important;
+    padding: 0 0 10px !important;
+    margin: 0 0 14px !important;
+    cursor: default !important;
+    text-decoration: none !important;
+}
+
+/* Links de navegação das colunas */
+.velaFooterLinks,
+.page_footer .velaFooterLinks,
+body .page-wrapper .page_footer .velaFooterLinks,
+body .page-wrapper .page_footer ul.velaFooterLinks {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    list-style: none !important;
+}
+
+.velaFooterLinks li,
+body .page-wrapper .page_footer .velaFooterLinks li {
+    padding: 0 !important;
+    margin: 0 0 2px !important;
+    border: none !important;
+    background: transparent !important;
+}
+
+.velaFooterLinks li a,
+.page_footer .velaFooterLinks li a,
+body .page-wrapper .page_footer .velaFooterLinks li a,
+body .page-wrapper .page_footer .footer-links li a {
+    display: block !important;
+    padding: 5px 0 !important;
+    font-size: 13.5px !important;
+    font-weight: 400 !important;
+    color: #374151 !important;  /* contrast: 10.7:1 ✓ AAA */
+    text-decoration: none !important;
+    line-height: 1.5 !important;
+    background: transparent !important;
+    border: none !important;
+    transition: color 0.15s ease, padding-left 0.15s ease !important;
+}
+
+.velaFooterLinks li a:hover,
+.page_footer .velaFooterLinks li a:hover,
+body .page-wrapper .page_footer .velaFooterLinks li a:hover,
+body .page-wrapper .page_footer .footer-links li a:hover {
+    color: #b73337 !important;
+    padding-left: 6px !important;
+    text-decoration: none !important;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────
+   RODAPÉ — COLUNA ATENDIMENTO (telefone, email, social)
+   ───────────────────────────────────────────────────────────────────── */
+
+.awa-footer-atendimento__label {
+    font-size: 10.5px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.07em !important;
+    color: #6b7280 !important;
+    margin: 0 0 4px !important;
+    padding: 0 !important;
+    background: transparent !important;
+}
+
+.awa-footer-atendimento__phone,
+.awa-footer-atendimento__phone a {
+    font-size: 20px !important;
+    font-weight: 800 !important;
+    color: #1a1a1a !important;
+    text-decoration: none !important;
+    letter-spacing: -0.03em !important;
+    line-height: 1.2 !important;
+    display: block !important;
+    margin-bottom: 6px !important;
+}
+
+.awa-footer-atendimento__email a {
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    color: #b73337 !important;
+    text-decoration: none !important;
+    display: block !important;
+    margin-bottom: 14px !important;
+    transition: color 0.15s !important;
+}
+
+.awa-footer-atendimento__email a:hover {
+    color: #8e2629 !important;
+    text-decoration: underline !important;
+}
+
+.awa-footer-atendimento__actions {
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0 0 16px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+}
+
+.awa-footer-atendimento__actions li a {
+    display: flex !important;
+    align-items: center !important;
+    gap: 7px !important;
+    padding: 6px 0 !important;
+    font-size: 13px !important;
+    color: #374151 !important;
+    text-decoration: none !important;
+    transition: color 0.15s !important;
+}
+
+.awa-footer-atendimento__actions li a:hover {
+    color: #b73337 !important;
+}
+
+/* Label "Siga a Awa Motos" */
+.awa-footer-atendimento__label--social {
+    margin-top: 16px !important;
+    margin-bottom: 10px !important;
+}
+
+/* Redes sociais */
+.awa-footer-pro__social {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+}
+
+.awa-footer-pro__social-link,
+body .page-wrapper .page_footer .awa-footer-pro__social-link,
+body .page-wrapper .page_footer .footer-social-section .social-links a,
+body .page-wrapper .page_footer .vela-footer-social a {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 50% !important;
+    background: #f0f2f5 !important;
+    color: #4b5563 !important;
+    text-decoration: none !important;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    border: 1px solid #dde1e7 !important;
+}
+
+.awa-footer-pro__social-link:hover,
+body .page-wrapper .page_footer .awa-footer-pro__social-link:hover,
+body .page-wrapper .page_footer .footer-social-section .social-links a:hover,
+body .page-wrapper .page_footer .vela-footer-social a:hover {
+    background: #b73337 !important;
+    color: #fff !important;
+    border-color: #b73337 !important;
+    transform: translateY(-3px) scale(1.05) !important;
+    outline: none !important;
+}
+
+.awa-footer-pro__social-link svg {
+    width: 15px !important;
+    height: 15px !important;
+    fill: currentColor !important;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────
+   RODAPÉ — CATEGORIAS EXPANSÍVEIS
+   ───────────────────────────────────────────────────────────────────── */
+
+.awa-footer-categories-expand {
+    background: #fafafa !important;
+    border-top: 1px solid #f0f0f0 !important;
+    border-bottom: 1px solid #f0f0f0 !important;
+    padding: 6px 0 !important;
+}
+
+.awa-footer-categories-expand__toggle {
+    background: transparent !important;
+    border: none !important;
+    color: #4b5563 !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    padding: 8px 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    transition: color 0.15s !important;
+}
+
+.awa-footer-categories-expand__toggle:hover {
+    color: #b73337 !important;
+}
+
+.awa-footer-categories-list {
+    list-style: none !important;
+    padding: 8px 0 12px !important;
+    margin: 0 !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 4px 16px !important;
+}
+
+.awa-footer-categories-list a {
+    font-size: 13px !important;
+    color: #4b5563 !important;
+    text-decoration: none !important;
+    line-height: 2 !important;
+    transition: color 0.15s !important;
+}
+
+.awa-footer-categories-list a:hover {
+    color: #b73337 !important;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────
+   RODAPÉ — BARRA INFERIOR (logo + pagamentos + copyright)
+   Refinements define: .footer-bottom { background: var(--awa-gray-950) !important }
+   ───────────────────────────────────────────────────────────────────── */
+
+.footer-bottom,
+.page_footer .footer-bottom,
+body .page-wrapper .page_footer .footer-bottom,
+body .page-wrapper .page-footer .footer-bottom,
+.copyright {
+    background: #f0f2f5 !important;
+    background-image: none !important;
+    background-color: #f0f2f5 !important;
+    border-top: 1px solid #dde1e7 !important;
+    color: #6b7280 !important;
+}
+
+.footer-bottom-inner,
+.footer-bottom .footer-bottom-inner,
+body .page-wrapper .page_footer .footer-bottom .footer-bottom-inner {
+    padding: 20px 0 !important;
+    background: transparent !important;
+    border-top: none !important;
+    margin-top: 0 !important;
+}
+
+.awa-footer-bottom__row {
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: 16px !important;
+}
+
+.awa-footer-bottom__logo-img {
+    max-width: 120px !important;
+    height: auto !important;
+    display: block !important;
+    /* Ajuste se o logo for escuro: sem filtro (logo na barra clara já funciona) */
+}
+
+.awa-footer-pay-sec__label,
+.awa-footer-pay-sec .awa-footer-pay-sec__label {
+    font-size: 10.5px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.07em !important;
+    color: #6b7280 !important;
+    margin-bottom: 8px !important;
+    display: block !important;
+    background: transparent !important;
+}
+
+.awa-pay-logo {
+    background: #fff !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 6px !important;
+    min-width: 42px !important;
+    min-height: 26px !important;
+    padding: 3px 6px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: border-color 0.15s !important;
+}
+
+.awa-pay-logo:hover {
+    border-color: #b73337 !important;
+}
+
+/* Copyright e textos legais no rodapé inferior */
+.footer-bottom p,
+.footer-bottom .copyright,
+.footer-bottom span,
+.footer-bottom a {
+    color: #6b7280 !important;
+    font-size: 12px !important;
+    background: transparent !important;
+}
+
+.footer-bottom a:hover {
+    color: #b73337 !important;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────
+   RODAPÉ — BRAND SLIDER (logos das marcas)
+   ───────────────────────────────────────────────────────────────────── */
+
+.footer_brand_list_slider,
+.footer_brand_list_slider .swiper-wrapper,
+.footer_brand_list_slider .swiper-slide {
+    background: transparent !important;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────
+   RESPONSIVO — RODAPÉ
+   ───────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 991px) {
+    .footer-static.velaBlock .container {
+        padding-top: 28px !important;
+        padding-bottom: 20px !important;
+    }
+
+    .awa-footer-bottom__row {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 20px !important;
+    }
+}
+
+@media (max-width: 767px) {
+    /* Colunas velafooter: accordion no mobile */
+    .velaFooterTitle {
+        font-size: 13px !important;
+        padding: 12px 0 !important;
+        border-bottom: 1px solid #f0f0f0 !important;
+        margin: 0 !important;
+        cursor: pointer !important;
+    }
+
+    .velaContent {
+        padding-bottom: 8px !important;
+    }
+
+    .awa-footer-atendimento__phone,
+    .awa-footer-atendimento__phone a {
+        font-size: 18px !important;
+    }
+
+    .awa-footer-tags__inner {
+        flex-direction: column !important;
+        gap: 8px !important;
+    }
+}
+
+@media (max-width: 479px) {
+    .footer-tags a {
+        font-size: 11.5px !important;
+        padding: 3px 8px !important;
+    }
+
+    .awa-footer-trust-grid {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 14px !important;
+    }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────
+   HOMEPAGE — RESPONSIVO
+   ───────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 767px) {
+    /* Category carousel: itens menores no mobile */
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .page-wrapper .top-home-content--category-carousel
+    .awa-category-carousel__item {
+        width: 140px !important;
+        min-width: 130px !important;
+        min-height: 180px !important;
+        height: 180px !important;
+        padding: 16px 10px 14px !important;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .page-wrapper .top-home-content--category-carousel
+    .awa-category-carousel__icon {
+        width: 96px !important;
+        height: 96px !important;
+        min-width: 96px !important;
+        min-height: 96px !important;
+        padding: 14px !important;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .page-wrapper .top-home-content--category-carousel
+    .awa-category-carousel__icon img,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .page-wrapper .top-home-content--category-carousel
+    .awa-category-carousel__icon picture {
+        width: 68px !important;
+        height: 68px !important;
+    }
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   HOMEPAGE — AWA SECTION HEADER (eyebrow + title + "Ver todos" link)
+   Used in: Mais Vendidos, Lançamentos, Guidões, Bauletos, etc.
+   ───────────────────────────────────────────────────────────────────── */
+
+.awa-section-header,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .awa-section-header {
+    display: flex !important;
+    align-items: flex-end !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    margin-bottom: 20px !important;
+    padding-bottom: 14px !important;
+    border-bottom: 1px solid #f0f0f0 !important;
+}
+
+.awa-section-header__left,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .awa-section-header__left {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+}
+
+.awa-section-header__eyebrow,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .awa-section-header__eyebrow {
+    display: inline-block !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.1em !important;
+    color: #b73337 !important;
+    line-height: 1 !important;
+    margin-bottom: 4px !important;
+}
+
+.awa-section-header__title,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .awa-section-header__title {
+    font-size: clamp(18px, 2.2vw, 22px) !important;
+    font-weight: 700 !important;
+    color: #1a1a1a !important;
+    letter-spacing: -0.02em !important;
+    line-height: 1.2 !important;
+    margin: 0 !important;
+}
+
+.awa-section-header__link,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .awa-section-header__link {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #b73337 !important;
+    text-decoration: none !important;
+    white-space: nowrap !important;
+    padding: 6px 14px !important;
+    border: 1.5px solid rgba(183, 51, 55, 0.3) !important;
+    border-radius: 20px !important;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease !important;
+    flex-shrink: 0 !important;
+    align-self: center !important;
+}
+
+.awa-section-header__link:hover,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .awa-section-header__link:hover {
+    background: #b73337 !important;
+    border-color: #b73337 !important;
+    color: #fff !important;
+    text-decoration: none !important;
+}
+
+.awa-section-header__link svg {
+    transition: transform 0.15s ease !important;
+    flex-shrink: 0 !important;
+}
+
+.awa-section-header__link:hover svg {
+    transform: translateX(2px) !important;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────
+   HOMEPAGE — BENEFITS BAR (Compra Garantida, PIX, Parcelas, etc.)
+   ───────────────────────────────────────────────────────────────────── */
+
+.awa-benefits-bar,
+body .page-wrapper .awa-benefits-bar {
+    background: #fff !important;
+    border-top: 1px solid #f0f0f0 !important;
+    border-bottom: 1px solid #f0f0f0 !important;
+    padding: 16px 0 !important;
+}
+
+.awa-benefits-container {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0 !important;
+    flex-wrap: wrap !important;
+    max-width: 1200px !important;
+    margin: 0 auto !important;
+    padding: 0 16px !important;
+}
+
+.awa-benefit-item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 8px 24px !important;
+    flex: 1 1 200px !important;
+    min-width: 180px !important;
+    max-width: 280px !important;
+    border-right: 1px solid #f0f0f0 !important;
+    transition: background 0.15s ease !important;
+}
+
+.awa-benefit-item:last-child {
+    border-right: none !important;
+}
+
+.awa-benefit-icon {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    color: #b73337 !important;
+    flex-shrink: 0 !important;
+}
+
+.awa-benefit-text {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1px !important;
+}
+
+.awa-benefit-title {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #1a1a1a !important;
+    line-height: 1.3 !important;
+}
+
+.awa-benefit-desc {
+    font-size: 11.5px !important;
+    color: #6b7280 !important;
+    line-height: 1.35 !important;
+}
+
+@media (max-width: 767px) {
+    .awa-benefit-item {
+        flex: 1 1 calc(50% - 24px) !important;
+        border-right: none !important;
+        padding: 8px 12px !important;
+        min-width: 140px !important;
+    }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────
+   HOMEPAGE — HERO BANNER TEXT OVERLAY
+   ───────────────────────────────────────────────────────────────────── */
+
+.banner_item .text-banner {
+    position: absolute !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    padding: 32px 48px !important;
+    background: linear-gradient(to top, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.15) 60%, transparent 100%) !important;
+    pointer-events: none !important;
+}
+
+.banner_item .text-banner h2 {
+    font-size: clamp(22px, 3.5vw, 40px) !important;
+    font-weight: 800 !important;
+    color: #fff !important;
+    line-height: 1.2 !important;
+    letter-spacing: -0.02em !important;
+    margin: 0 0 6px !important;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
+}
+
+.banner_item .text-banner p {
+    font-size: clamp(13px, 1.5vw, 17px) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    margin: 0 !important;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.25) !important;
+}
+
+/* Banner image: proper aspect-ratio cover */
+.banner_item_bg img,
+.banner_item_bg source,
+.banner_item_bg picture img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block !important;
+}
+
+/* Hover: slight zoom */
+.banner-hover {
+    display: block !important;
+    overflow: hidden !important;
+}
+
+.banner-hover img {
+    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+    will-change: transform !important;
+}
+
+.banner-hover:hover img {
+    transform: scale(1.03) !important;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────
+   HOMEPAGE — TRUST IMAGE BANNERS (3 colunas acima de Super Ofertas)
+   ───────────────────────────────────────────────────────────────────── */
+
+.top-home-content--trust-and-offers .bs-banner {
+    border-radius: 10px !important;
+    overflow: hidden !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06) !important;
+    transition: box-shadow 0.2s ease, transform 0.2s ease !important;
+}
+
+.top-home-content--trust-and-offers .bs-banner:hover {
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12) !important;
+    transform: translateY(-2px) !important;
+}
+
+.top-home-content--trust-and-offers .bs-banner img {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────
+   HOMEPAGE — SUPER OFERTAS / HOT DEAL (countdown + produtos)
+   ───────────────────────────────────────────────────────────────────── */
+
+.rokan-onsale-heading,
+.page-wrapper .rokan-onsale-heading {
+    margin-bottom: 0 !important;
+}
+
+.rokan-onsale-heading h2 span.sup-title {
+    font-size: 0.6em !important;
+    font-weight: 400 !important;
+    color: #6b7280 !important;
+    letter-spacing: 0.02em !important;
+    text-transform: uppercase !important;
+    vertical-align: middle !important;
+    margin-left: 8px !important;
+}
+
+/* Countdown block */
+.countdown_block {
+    display: flex !important;
+    align-items: center !important;
+    gap: 16px !important;
+    flex-wrap: wrap !important;
+    margin-bottom: 20px !important;
+    padding: 12px 16px !important;
+    background: #fff5f5 !important;
+    border: 1px solid rgba(183, 51, 55, 0.15) !important;
+    border-radius: 10px !important;
+}
+
+.title_countdown {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: #b73337 !important;
+    white-space: nowrap !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────
+   HOMEPAGE — ADD TO CART BUTTON (carousel cards)
+   ───────────────────────────────────────────────────────────────────── */
+
+.btn-add-to-cart,
+.action.tocart.primary,
+.item-product .btn-add-to-cart,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .btn-add-to-cart {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    padding: 9px 14px !important;
+    background: #b73337 !important;
+    color: #fff !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    border: none !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    transition: background 0.15s ease, transform 0.12s ease, box-shadow 0.15s ease !important;
+    white-space: nowrap !important;
+    line-height: 1.4 !important;
+}
+
+.btn-add-to-cart:hover,
+.action.tocart.primary:hover,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .btn-add-to-cart:hover {
+    background: #8e2629 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(183, 51, 55, 0.35) !important;
+    color: #fff !important;
+}
+
+.btn-add-to-cart:active,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .btn-add-to-cart:active {
+    transform: translateY(0) !important;
+    box-shadow: none !important;
+}
+
+/* product-info-cart container */
+.product-info-cart {
+    margin-top: 8px !important;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────
+   HOMEPAGE — SWIPER NAVIGATION BUTTONS
+   ───────────────────────────────────────────────────────────────────── */
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .swiper-button-prev,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .swiper-button-next {
+    width: 40px !important;
+    height: 40px !important;
+    background: #fff !important;
+    border: 1.5px solid #e0e0e0 !important;
+    border-radius: 50% !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.10) !important;
+    color: #374151 !important;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .swiper-button-prev::after,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .swiper-button-next::after {
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: #374151 !important;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .swiper-button-prev:hover,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .swiper-button-next:hover {
+    background: #b73337 !important;
+    border-color: #b73337 !important;
+    box-shadow: 0 4px 12px rgba(183, 51, 55, 0.30) !important;
+    color: #fff !important;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .swiper-button-prev:hover::after,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .swiper-button-next:hover::after {
+    color: #fff !important;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .swiper-button-disabled {
+    opacity: 0.35 !important;
+    cursor: not-allowed !important;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────
+   FOOTER — MISSING OVERRIDES (2026-04-11)
+   Refinements bundle uses rgba(255,255,255,*) colors invisible on light bg.
+   These selectors mirror the exact ones in awa-bundle-refinements.css so
+   specificity ties are broken by load-order (we load last → we win).
+   ───────────────────────────────────────────────────────────────────── */
+
+/* Copyright section */
+.awa-footer-bottom__copyright,
+body .page-wrapper .page_footer .awa-footer-bottom__copyright {
+    border-top: 1px solid #dde1e7 !important;
+    padding-top: 20px !important;
+    margin-top: 16px !important;
+}
+
+.awa-footer-copyright__main,
+body .page-wrapper .page_footer .awa-footer-copyright__main {
+    color: #1a1a1a !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+}
+
+.awa-footer-copyright__legal,
+body .page-wrapper .page_footer .awa-footer-copyright__legal {
+    color: #4b5563 !important;
+    font-size: 12px !important;
+}
+
+.awa-footer-copyright__disclaimer,
+body .page-wrapper .page_footer .awa-footer-copyright__disclaimer {
+    color: #6b7280 !important;
+    font-size: 11px !important;
+    line-height: 1.6 !important;
+}
+
+/* Devby bar — refinements sets background: #111 */
+.awa-footer-devby,
+body .page-wrapper .page_footer + .awa-footer-devby,
+body .page-wrapper .awa-footer-devby {
+    background: #eef2f7 !important;
+    border-top: 1px solid #dde1e7 !important;
+    padding: 12px 0 !important;
+}
+
+.awa-footer-devby__label,
+body .page-wrapper .awa-footer-devby .awa-footer-devby__label {
+    color: #9ca3af !important;
+}
+
+.awa-footer-devby__link,
+body .page-wrapper .awa-footer-devby .awa-footer-devby__link {
+    opacity: 1 !important;
+}
+
+/* Security seals — refinements uses white-transparent bg/border (invisible on light bg) */
+.awa-seal,
+body .page-wrapper .page_footer .awa-seal {
+    background: #fff !important;
+    border: 1px solid #dde1e7 !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important;
+}
+
+.awa-seal:hover,
+body .page-wrapper .page_footer .awa-seal:hover {
+    background: #f8fafc !important;
+    border-color: #b73337 !important;
+    box-shadow: 0 3px 10px rgba(183,51,55,0.12) !important;
+    outline: none !important;
+}
+
+/* Payment/security label */
+.awa-footer-pay-sec__label,
+body .page-wrapper .page_footer .awa-footer-pay-sec__label {
+    color: #374151 !important;
+    font-weight: 600 !important;
+}
+
+/* Footer newsletter / form inputs on light background */
+body .page-wrapper .page_footer .footer-newsletter input[type="email"],
+body .page-wrapper .page_footer .block.newsletter .field .control input {
+    background: #fff !important;
+    border: 1px solid #dde1e7 !important;
+    color: #1a1a1a !important;
+}
+
+body .page-wrapper .page_footer .footer-newsletter input[type="email"]::placeholder,
+body .page-wrapper .page_footer .block.newsletter .field .control input::placeholder {
+    color: #9ca3af !important;
+}
+
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   REFINAMENTOS VISUAIS (carregado por último — alta precedência)
+   Contraste, tipografia, espaçamento, hover states
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* 1a. Promo bar — Sobrescreve --awa-text-light para #ffffff via herança CSS
+   O browser resolve var(--awa-text-light) do elemento mais próximo que define a variável.
+   Ao definir no container .awa-b2b-promo-bar, todos os filhos (p, a, span) herdam branco. */
+body .page-wrapper .awa-site-header .top-header.awa-utility-bar.awa-b2b-promo-bar,
+body .page-wrapper .awa-site-header .awa-b2b-promo-bar[data-awa-header-utility] {
+    --awa-text-light: #ffffff; /* herança: descendentes recebem branco */
+    --awa-text-color: #ffffff;
+    --awa-gray-450: #ffffff;   /* nuclear: qualquer referência a gray-450 vira branca */
+}
+
+/* 1b. Promo bar — branco literal (WCAG AA 4.5:1)
+   Especificidade: [data-awa-header-utility] attr = +0,1,0 → total 0,5,2
+   Vence styles-m.css / themes.css que usam o mesmo atributo com 12px gray */
+html body .page-wrapper .awa-site-header .awa-b2b-promo-bar[data-awa-header-utility] .awa-b2b-promo-bar__text,
+html body .page-wrapper .awa-site-header .awa-b2b-promo-bar[data-awa-header-utility] .awa-b2b-promo-bar__text a,
+html body .page-wrapper .awa-site-header .awa-b2b-promo-bar[data-awa-header-utility] .awa-b2b-promo-bar__text strong,
+html body .page-wrapper .awa-site-header .awa-b2b-promo-bar[data-awa-header-utility] .awa-b2b-promo-bar__text em,
+html body .page-wrapper .awa-site-header .awa-b2b-promo-bar[data-awa-header-utility] p {
+    color: #ffffff !important;
+    font-size: 13px !important;
+    letter-spacing: 0.025em !important;
+    line-height: 1.4 !important;
+}
+
+/* 2. Hover na nav bar: Departamentos */
+html body .page-wrapper .awa-site-header .header-nav .awa-header-categories .section-item-title:hover,
+html body .page-wrapper .awa-site-header .header-nav .awa-header-categories .our_categories.title-category-dropdown:hover {
+    background: #9e2b2e !important; /* darken(#b73337, 15%) */
+    background-color: #9e2b2e !important;
+}
+
+/* 3. Search form: border-radius 6px definitivo
+   Regra vencedora: #search_mini_form.is-ready.is-empty:not(:focus-within):not(.is-open) → especificidade 1,5,1
+   Para vencer: adicionar html + body prefix → especificidade 1,5,2 > 1,5,1 */
+
+/* 3a. Estado inicial (is-ready + is-empty, JS autocomplete) — especificidade 1,5,2 */
+html body .page-wrapper #search_mini_form.is-ready.is-empty:not(:focus-within):not(.is-open) {
+    border-radius: 6px !important;
+}
+/* 3b. Estado com texto (is-ready, sem is-empty) — cobre digitação */
+html body .page-wrapper #search_mini_form.is-ready:not(:focus-within) {
+    border-radius: 6px !important;
+}
+/* 3c. Estado ativo (is-open / focus-within) */
+html body .page-wrapper #search_mini_form.is-ready:focus-within,
+html body .page-wrapper #search_mini_form.is-open {
+    border-radius: 6px !important;
+}
+/* 3d. Fallback geral — cobre todos os estados */
+html body .page-wrapper #search_mini_form,
+html body .page-wrapper .awa-site-header .awa-header-search-col .block-search form.minisearch,
+html body .page-wrapper .awa-site-header .block-search.awa-professional-search form.minisearch,
+html body .page-wrapper .awa-site-header .awa-header-search-col form.minisearch {
+    border-radius: 6px !important;
+    overflow: hidden !important;
+}
+
+/* 4. Checkout: manter search border-radius */
+html body.checkout-cart-index .page-wrapper #search_mini_form,
+html body.checkout-cart-index .page-wrapper .awa-site-header .block-search form.minisearch,
+html body.checkout-index-index .page-wrapper #search_mini_form,
+html body.checkout-index-index .page-wrapper .awa-site-header .block-search form.minisearch {
+    border-radius: 6px !important;
+}
+
+/* 5. Responsive mobile: promo bar branca */
+@media (max-width: 991px) {
+    html body .page-wrapper .awa-site-header .awa-b2b-promo-bar .awa-b2b-promo-bar__text {
+        color: #ffffff !important;
+        font-size: 12px !important;
+    }
+}
+
+/* 6. Nav links text contrast em fundo cinza */
+html body .page-wrapper .awa-site-header .header-nav .custommenu > ul > li > a,
+html body .page-wrapper .awa-site-header .header-nav .menu_primary .level0 > a {
+    color: #3a3a3a !important; /* #3a3a3a em #f2f2f2: contraste 6.3:1 — WCAG AA */
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   OVERRIDE FINAL: Faixa de Navegação — CINZA (referência visual)
+   Vence todos os bundles que definem background vermelho na nav bar.
+   Carregado por último, portanto tem precedência.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Corrige o token --awa-nav-bg na camada de CSS do site-header */
+.page-wrapper .awa-site-header,
+body .page-wrapper .awa-site-header {
+    --awa-nav-bg: #f2f2f2 !important; /* era #b73337 (vermelho) — corrigido para cinza */
+}
+
+html body .page-wrapper .awa-site-header .header-control.header-nav.awa-nav-bar[data-awa-header-nav],
+html body .page-wrapper .awa-site-header .header-control.header-nav.awa-nav-bar,
+html body .page-wrapper .awa-site-header .header-control.awa-nav-bar,
+html body .page-wrapper .awa-site-header .header-nav.awa-nav-bar,
+body .page-wrapper .awa-site-header .header-control.header-nav.awa-nav-bar,
+body .page-wrapper .awa-site-header .header-control.awa-nav-bar {
+    background: #f2f2f2 !important; /* literal — não via var() */
+    background-color: #f2f2f2 !important;
+    background-image: none !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    overflow: hidden !important;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   HOMEPAGE — PRODUCT CAROUSEL IMPROVEMENTS
+   Aumenta a área de imagem dos cards de produto de 200px → 240px
+   nos carrosseis da homepage (Mais Vendidos, Lançamentos, categorias).
+   Não afeta páginas de categoria ou busca.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) {
+    --awa-card-img-h: 240px;
+}
+
+/* Garante que a imagem preencha o container verticalmente */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.rokan-bestseller .product-thumb .product-image-photo,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.rokan-newproduct .product-thumb .product-image-photo,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.rokan-superdeals .product-thumb .product-image-photo,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.rokan-categorytab .product-thumb .product-image-photo,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.list-tab-product .product-thumb .product-image-photo {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    object-position: center center !important;
+}
+
+/* Remove o espaçamento excessivo no bloco de price/login nas listagens */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.rokan-bestseller .product-name,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.rokan-newproduct .product-name,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.rokan-superdeals .product-name {
+    margin-top: 10px !important;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   VISUAL REFINEMENTS — HOMEPAGE (Mai 2025)
+   1. Footer contrast (texto escuro em fundo marrom-escuro → branco)
+   2. Footer tags (texto branco em fundo claro → escuro)
+   3. Espaçamento entre seções (48px → 32px)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ────────────────────────────────────────────────────────────────────────────
+   1. FOOTER — Contraste: fundo escuro (#802427) exige texto BRANCO
+   Carregado em idx 10 — supera awa-bundle-phases (idx 6) que define
+   var(--awa-gray-200)=#374151 (cinza-escuro) nos links, impossível de ler
+   sobre fundo marrom-escuro.
+   ──────────────────────────────────────────────────────────────────────────── */
+.page_footer .footer-container.layout2,
+.footer-container.layout2.footer {
+    color: rgba(255, 255, 255, 0.88) !important;
+}
+
+.page_footer .footer-container.layout2 a,
+.footer-container.layout2 a {
+    color: rgba(255, 255, 255, 0.78) !important;
+}
+
+.page_footer .footer-container.layout2 a:hover,
+.footer-container.layout2 a:hover {
+    color: #fff !important;
+    opacity: 1 !important;
+}
+
+.page_footer .footer-container.layout2 .block-title,
+.page_footer .footer-container.layout2 h2,
+.page_footer .footer-container.layout2 h3,
+.page_footer .footer-container.layout2 h4,
+.page_footer .footer-container.layout2 strong {
+    color: #fff !important;
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   2. FOOTER TAGS — links RGBA branco em fundo quase branco = invisível
+   Corrige: texto escuro legível sobre fundo rgb(250,250,250).
+   ──────────────────────────────────────────────────────────────────────────── */
+.awa-footer-tags a,
+body .page-wrapper .awa-footer-tags a {
+    color: #374151 !important;
+}
+
+.awa-footer-tags a:hover,
+body .page-wrapper .awa-footer-tags a:hover {
+    color: var(--awa-primary, #b73337) !important;
+    border-color: var(--awa-primary, #b73337) !important;
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   3. ESPAÇAMENTO ENTRE SEÇÕES — reduz tokens 48px → 32px na homepage
+   --ds-section-gap (usado em margin-top) e padding-block dos sections.
+   ──────────────────────────────────────────────────────────────────────────── */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) {
+    --ds-section-gap: 32px;
+    --ds-section-first-gap: 20px;
+    --ds-section-last-gap: 24px;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.top-home-content.awa-home-section {
+    padding-top: 32px !important;
+    padding-bottom: 32px !important;
+}

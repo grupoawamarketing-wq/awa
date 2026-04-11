@@ -1,0 +1,292 @@
+// ============================================================================
+// AWA Motos — _search-results.less
+// Página de resultados de busca — body.catalogsearch-result-index
+//
+// Seletores do tema pai sobrescritos:
+//   .catalogsearch-result-index .page-main      background cinza → branco
+//   .search.results .message.notice             estado vazio (sem resultados)
+//   .search-results-title                       cabeçalho "Resultados para X"
+//   .catalogsearch-result-index .toolbar        reutiliza padrão da PLP
+//
+// Restrições: zero PHP/HTML/XML. !important documentado inline.
+// ============================================================================
+
+@import (once) '_awa-variables';
+
+
+// ============================================================================
+// 1. FUNDO BRANCO
+// ============================================================================
+// !important: tema pai define background nos containers com especificidade alta
+
+body.catalogsearch-result-index {
+    background-color: #ffffff !important;
+
+    .page-wrapper,
+    .page-main,
+    .columns,
+    .column.main {
+        background-color: #ffffff !important;
+    }
+}
+
+
+// ============================================================================
+// 2. CABEÇALHO DE RESULTADOS
+// ============================================================================
+
+.catalogsearch-result-index {
+
+    .page-title-wrapper {
+        margin-bottom: 20px;
+
+        .page-title {
+            font-size: clamp(18px, 2.5vw, 26px);
+            font-weight: @awa-weight-bold;
+            color: var(--awa-text, #333333);
+            line-height: 1.2;
+            margin: 0 0 6px;
+
+            // Termo pesquisado destacado
+            span.base {
+                color: var(--awa-primary, #b73337);
+            }
+        }
+
+        // "X resultados encontrados para '...'"
+        .search.found {
+            font-size: 13px;
+            color: var(--awa-text-muted, #666666);
+            margin: 0;
+
+            strong { color: var(--awa-text, #333333); }
+        }
+    }
+}
+
+
+// ============================================================================
+// 3. ESTADO VAZIO — sem resultados
+// ============================================================================
+
+.catalogsearch-result-index {
+
+    .search.results {
+
+        .message.notice,
+        .message-notice,
+        .no-results-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            padding: 48px 24px;
+            text-align: center;
+            background: var(--awa-bg-soft, #f7f7f7);
+            border: 1px solid var(--awa-border, #e2e2e2);
+            border-radius: @awa-border-radius-lg;
+            margin: 0 0 32px;
+
+            // Ícone de lupa via pseudo-elemento
+            &::before {
+                content: '';
+                display: block;
+                width: 48px;
+                height: 48px;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24' fill='none' stroke='%23cccccc' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
+                background-repeat: no-repeat;
+                background-size: contain;
+                opacity: 0.7;
+            }
+
+            > div,
+            p {
+                font-size: 15px;
+                color: var(--awa-text-muted, #666666);
+                margin: 0;
+                line-height: 1.5;
+            }
+        }
+    }
+
+    // Sugestão de busca alternativa ("Tente buscar por...")
+    .search.results .block.related,
+    .search.results .block.products-related {
+        margin-top: 32px;
+
+        .block-title {
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--awa-border, #e2e2e2);
+
+            strong {
+                padding-left: 14px;
+                border-left: 4px solid var(--awa-primary, #b73337);
+                font-size: clamp(16px, 2vw, 20px);
+                font-weight: @awa-weight-bold;
+                color: var(--awa-text, #333333);
+            }
+        }
+    }
+}
+
+
+// ============================================================================
+// 4. TOOLBAR — reutiliza tokens da PLP, escopo narrowed para busca
+// ============================================================================
+
+.catalogsearch-result-index {
+
+    .toolbar.toolbar-products {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--awa-border, #e2e2e2);
+        margin-bottom: 20px;
+        background: transparent;
+
+        &.toolbar-bottom {
+            border-bottom: none;
+            border-top: 1px solid var(--awa-border, #e2e2e2);
+            margin-top: 20px;
+            margin-bottom: 0;
+        }
+    }
+
+    .toolbar-amount {
+        font-size: 13px;
+        color: var(--awa-text-muted, #666666);
+        margin: 0;
+        flex: 1 0 auto;
+    }
+
+    .toolbar-sorter,
+    .toolbar-limiter {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+
+        label {
+            font-weight: @awa-weight-semibold;
+            color: var(--awa-text, #333333);
+            white-space: nowrap;
+        }
+
+        select {
+            height: 34px;
+            padding: 0 28px 0 10px;
+            border: 1px solid var(--awa-border, #e2e2e2);
+            border-radius: 4px;
+            background-color: #ffffff;
+            color: var(--awa-text, #333333);
+            font-size: 13px;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666666' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            transition: border-color @awa-transition;
+
+            &:focus {
+                outline: none;
+                border-color: var(--awa-primary, #b73337);
+            }
+        }
+    }
+
+    // Paginação (mesma estrutura da PLP)
+    .pages {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+
+        .pages-label { display: none; }
+
+        .items {
+            display: flex;
+            gap: 4px;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .item {
+            margin: 0;
+
+            .page {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                min-width: 34px;
+                height: 34px;
+                padding: 0 6px;
+                border: 1px solid var(--awa-border, #e2e2e2);
+                border-radius: 4px;
+                color: var(--awa-text, #333333);
+                font-size: 13px;
+                font-weight: @awa-weight-medium;
+                text-decoration: none;
+                transition: border-color @awa-transition, color @awa-transition;
+
+                &:hover {
+                    border-color: var(--awa-primary, #b73337);
+                    color: var(--awa-primary, #b73337);
+                }
+            }
+
+            &.current .page,
+            &.current strong {
+                min-width: 34px;
+                height: 34px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0 6px;
+                background-color: var(--awa-primary, #b73337);
+                border: 1px solid var(--awa-primary, #b73337);
+                border-radius: 4px;
+                color: #ffffff;
+                font-size: 13px;
+                font-weight: @awa-weight-bold;
+            }
+        }
+
+        .action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 34px;
+            height: 34px;
+            border: 1px solid var(--awa-border, #e2e2e2);
+            border-radius: 4px;
+            color: var(--awa-text-muted, #666666);
+            text-decoration: none;
+            font-size: 13px;
+            transition: border-color @awa-transition, color @awa-transition;
+
+            &:hover {
+                border-color: var(--awa-primary, #b73337);
+                color: var(--awa-primary, #b73337);
+            }
+        }
+    }
+}
+
+
+// ============================================================================
+// 5. ACESSIBILIDADE
+// ============================================================================
+
+@media (prefers-reduced-motion: reduce) {
+    .catalogsearch-result-index {
+        .pages .item .page,
+        .toolbar-sorter select {
+            transition: none !important;
+        }
+    }
+}

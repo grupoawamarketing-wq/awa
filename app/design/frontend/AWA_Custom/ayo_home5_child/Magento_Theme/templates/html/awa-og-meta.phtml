@@ -1,8 +1,25 @@
 <?php
 /**
- * AWA B2B — Open Graph Meta Tags
- * Injeta OG tags para compartilhamento social (WhatsApp, Facebook, LinkedIn).
+ * AWA B2B — Open Graph Meta Tags (fallback)
+ *
+ * Gera OG tags genéricas APENAS em páginas que o SchemaOrg module NÃO cobre.
+ * PDP (catalog_product_view): SchemaOrg já injeta og:type=product, imagem, URL.
+ * Category pages: SchemaOrg já injeta og:type=website com dados da categoria.
+ *
+ * Este template é o fallback para CMS pages, checkout, account, etc.
  */
+declare(strict_types=1);
+
+// SchemaOrg module já cobre PDP e category — não duplicar
+$fullActionName = $block->getRequest()->getFullActionName();
+$coveredActions = [
+    'catalog_product_view',
+    'catalog_category_view',
+];
+if (in_array($fullActionName, $coveredActions, true)) {
+    return;
+}
+
 $pageTitleBlock = $block->getLayout()->getBlock('page.main.title');
 $rawTitle = $pageTitleBlock ? trim((string) $pageTitleBlock->getPageTitle()) : '';
 $title = $block->escapeHtml($rawTitle ?: 'AWA Motos | Peças e Acessórios para Motos');

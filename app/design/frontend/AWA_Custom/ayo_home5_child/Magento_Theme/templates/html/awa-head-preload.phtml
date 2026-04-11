@@ -50,8 +50,24 @@ $asyncBundles = [
     $block->getViewFileUrl('css/awa-bundle-phases.css'),       // + animate-theme
     $block->getViewFileUrl('css/awa-bundle-tail.css'),          // + cosmetic (global)
     $block->getViewFileUrl('css/awa-bundle-site.css'),          // + visual-fixes-critical
-    $block->getViewFileUrl('css/awa-improvements-grid.css'),    // grid 4-col override
+    // merged into awa-bundle-refinements: $block->getViewFileUrl('css/awa-improvements-grid.css'),    // grid 4-col override
+    // Moved from sync (2026-04-09): -666 KB render-blocking -> async
+    // merged into awa-bundle-refinements: $block->getViewFileUrl('css/awa-visual-audit-consolidated.css'),  // visual-audit v2-v12
+    // merged into awa-bundle-refinements: $block->getViewFileUrl('css/awa-global-modern-clean.css'),        // sitewide standardization
+    // merged into awa-bundle-refinements: $block->getViewFileUrl('css/awa-home-vertical-menu-shell-fix.css'), // vertical menu
+    // MCP Header + Classic Redesign: movidos para SYNC (default_head_blocks.xml)
+    // Removidos do async para evitar carregamento duplo (2026-04-09)
+    // merged into awa-bundle-refinements: $block->getViewFileUrl('css/awa-color-standardization.css'),     // color standardization + visual polish (last)
+    // merged into awa-bundle-refinements: $block->getViewFileUrl('css/awa-ux-improvements.css'),
+    // awa-layout-standardization.css removido daqui e carregado APÓS refinements
+    // para garantir que nossas overrides !important vençam o dark footer do refinements bundle
 ];
+
+// Homepage-only: owl-tabs + overrides + b2b-foundation + compat + premium + polish
+$homeBundleUrl = null;
+if (in_array('cms_index_index', $block->getLayout()->getUpdate()->getHandles(), true)) {
+    $homeBundleUrl = $block->getViewFileUrl('css/awa-bundle-home-custom.css');
+}
 
 // Refinements bundle stays async, but is rendered explicitly below because
 // it contains foundational UI behavior/styles for compare bar, floating tools,
@@ -64,16 +80,15 @@ $refinementsBundleUrl = $block->getViewFileUrl('css/awa-bundle-refinements.css')
      Mantém abaixo de 600 bytes. NÃO adicionar regras complexas aqui.
      ========================================================= -->
 <style>
-/* Anti-FOUC v5 — updated for header redesign 2026-04-07 */
-/* B2B promo bar = red, legacy utility bar = hidden, header = white, footer = red AWA */
+/* Anti-FOUC v7 — 2026-04-11 */
+/* Legacy utility bar = hidden, header = white, footer = white AWA */
 body .page-wrapper .nav-sections:not(.category-dropdown,.category-dropdown-items,.category-dropdown-item-content){background:#b73337}
 body .page-wrapper .awa-benefits-bar,.awa-benefits-bar{background:#fff !important;color:#333}
-body .page-wrapper .top-header.awa-b2b-promo-bar{background:#b73337 !important;background-image:none !important;color:#fff;border:none}
 body .page-wrapper .awa-utility-bar-legacy{display:none !important}
-body .page-wrapper .top-header:not(.awa-b2b-promo-bar),.panel.wrapper{background:#1a1a1a !important;background-image:none !important;color:#ccc;border:none}
+body .page-wrapper .panel.wrapper{background:#1a1a1a !important;background-image:none !important;color:#ccc;border:none}
 body .page-wrapper .header-content .top-header .header,.page-header,.header.content{background:#fff}
-body .page-wrapper .page_footer,.page-footer{background:#8e2629 !important;background-image:none !important;color:#d9d9d9}
-.page_footer .footer-container,.page_footer #footer,.page_footer .footer-container.layout2{background:#1a1a1a !important;background-image:none !important}
+body .page-wrapper .page_footer,.page-footer{background:#f9fafb !important;background-image:none !important;color:#333333;border-top:3px solid #b73337}
+.page_footer .footer-container,.page_footer #footer,.page_footer .footer-container.layout2{background:#fff !important;background-image:none !important;color:#333333}
 </style>
 <!-- AWA Head Preload — DNS Prefetch -->
 <?php foreach ($dnsPrefetch as $domain): ?>
@@ -106,3 +121,20 @@ body .page-wrapper .page_footer,.page-footer{background:#8e2629 !important;backg
     data-awa-refinements="1"
     onload="this.media='all'"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($refinementsBundleUrl) ?>"/></noscript>
+<!-- awa-layout-standardization carregado APÓS refinements — garante que footer light e
+     demais overrides !important vençam o dark-footer do refinements bundle (last-wins) -->
+<link rel="stylesheet"
+    href="<?= $block->escapeUrl($block->getViewFileUrl('css/awa-layout-standardization.css')) ?>"
+    media="print"
+    data-awa-layout-std="1"
+    onload="this.media='all'"/>
+<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($block->getViewFileUrl('css/awa-layout-standardization.css')) ?>"/></noscript>
+<?php if ($homeBundleUrl): ?>
+<link rel="stylesheet"
+      href="<?= $block->escapeUrl($homeBundleUrl) ?>"
+      media="print"
+      onload="this.media='all'"/>
+<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($homeBundleUrl) ?>"/></noscript>
+<?php endif; ?>
+
+<!-- styles-l.css carregado em awa.styles.l.last (after awa.search.autocomplete.head.css) -->

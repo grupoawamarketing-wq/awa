@@ -2,17 +2,21 @@
 // AWA MOTOS — B2B REGISTER PAGE ENHANCEMENTS
 // Arquivo: source/_b2b-register.less
 // Escopo:  body.b2b-register-index (rota b2b/register/)
-// Issues:  #1 footer, #2 labels, #3 stepper, #4 icones, #5 botao, #6 checkbox
+// Cascata: compilado em styles.css (antes de register-override.css)
+// Issues:  #1 footer, #2 labels, #3 stepper, #4 ícones, #5 botão, #6 checkbox
 // =============================================
 
-// Tokens locais (fallback para isolamento do layout=empty)
-@b2b-reg-primary:        #b73337;
-@b2b-reg-primary-dark:   #8e2629;
-@b2b-reg-primary-darker: #6d1d1f;
-@b2b-reg-white:          #ffffff;
-@b2b-reg-text:           #374151;
-@b2b-reg-muted:          #6b7280;
-@b2b-reg-border:         #e5e7eb;
+@import (once) '_awa-variables';
+
+// ── Aliases locais — mapeados para tokens globais ─────────────────────────────
+// Mantém compatibilidade com código abaixo sem duplicar valores.
+@b2b-reg-primary:        @awa-color-primary;       // #b73337
+@b2b-reg-primary-dark:   @awa-color-primary-dark;  // #8e2629
+@b2b-reg-primary-darker: #6d1d1f;                  // sem equivalente nos tokens — local
+@b2b-reg-white:          @awa-color-white;         // #ffffff
+@b2b-reg-text:           @awa-neutral-700;         // #374151
+@b2b-reg-muted:          @awa-neutral-500;         // #6b7280
+@b2b-reg-border:         @awa-neutral-200;         // #e5e7eb
 
 // =============================================
 // 1. FOOTER — Mini footer branded AWA
@@ -28,55 +32,61 @@ body.b2b-register-index {
         width: 100%;
         box-sizing: border-box;
         border-top: 3px solid rgba(255, 255, 255, 0.08);
+    }
 
-        .b2b-login-whatsapp {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            color: rgba(255, 255, 255, 0.88);
-            font-size: 14px;
-            font-weight: 500;
-            text-decoration: none;
-            padding: 10px 22px;
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            border-radius: 9999px;
-            background: rgba(255, 255, 255, 0.1);
-            transition: background 0.2s ease, color 0.2s ease;
-            margin-bottom: 20px;
+    .b2b-login-whatsapp {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: rgba(255, 255, 255, 0.88);
+        font-size: 14px;
+        font-weight: @awa-weight-medium;
+        text-decoration: none;
+        padding: 10px 22px;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        border-radius: 9999px;
+        background: rgba(255, 255, 255, 0.1);
+        transition: background var(--awa-transition), color var(--awa-transition);
+        margin-bottom: 20px;
 
-            &:hover {
-                background: rgba(255, 255, 255, 0.18);
-                color: @b2b-reg-white;
-            }
-
-            strong { font-weight: 700; color: #4ade80; }
-        }
-
-        .b2b-login-footer-brand {
-            font-size: 15px;
-            font-weight: 700;
+        &:hover {
+            background: rgba(255, 255, 255, 0.18);
             color: @b2b-reg-white;
-            margin: 0 0 6px;
-            letter-spacing: -0.01em;
         }
 
-        .b2b-login-footer-contact {
-            font-size: 13px;
-            color: rgba(255, 255, 255, 0.68);
-            margin: 0;
+        strong {
+            font-weight: @awa-weight-bold;
+            color: #4ade80;
         }
+    }
+
+    .b2b-login-footer-brand {
+        font-size: 15px;
+        font-weight: @awa-weight-bold;
+        color: @b2b-reg-white;
+        margin: 0 0 6px;
+        letter-spacing: -0.01em;
+    }
+
+    .b2b-login-footer-contact {
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.68);
+        margin: 0;
     }
 }
 
 // =============================================
 // 2. LABELS — Visibilidade garantida (WCAG 2.1 AA)
+//    Força display:block mesmo contra reset do tema Ayo
 // =============================================
 body.b2b-register-index {
     .b2b-register-page {
-        .field > .label {
+        .field > .label,
+        .field .label:not(.terms-label) {
             display: block !important;
             visibility: visible !important;
             opacity: 1 !important;
+            // Anula qualquer clip/position que oculte visualmente
             clip: auto !important;
             clip-path: none !important;
             position: static !important;
@@ -84,7 +94,8 @@ body.b2b-register-index {
             height: auto !important;
             overflow: visible !important;
             white-space: normal;
-            font-weight: 600;
+            // Tipografia
+            font-weight: @awa-weight-semibold;
             font-size: 14px;
             color: @b2b-reg-text;
             margin-bottom: 6px;
@@ -101,21 +112,23 @@ body.b2b-register-index {
 
 // =============================================
 // 3. STEPPER — Indicador visual de etapa ativa
+//    Fallback para --awa-primary com valor literal
 // =============================================
 body.b2b-register-index {
     .b2b-register-page {
         .b2b-register-progress {
             .progress-step {
+                // Estado padrão
                 font-size: 12px;
-                font-weight: 600;
+                font-weight: @awa-weight-semibold;
                 border: 2px solid @b2b-reg-border;
-                background: #fafafa;
+                background: var(--awa-bg-soft, #f7f7f7);
                 color: @b2b-reg-muted;
-                transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+                transition: border-color var(--awa-transition), background var(--awa-transition), color var(--awa-transition), box-shadow var(--awa-transition);
 
                 .progress-step__num {
                     background: #e5e7eb;
-                    color: @b2b-reg-text;
+                    color: #374151;
                     width: 24px;
                     height: 24px;
                     border-radius: 50%;
@@ -124,15 +137,16 @@ body.b2b-register-index {
                     justify-content: center;
                     flex-shrink: 0;
                     font-size: 11px;
-                    font-weight: 700;
-                    transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+                    font-weight: @awa-weight-bold;
+                    transition: background var(--awa-transition), color var(--awa-transition), box-shadow var(--awa-transition);
                 }
 
+                // Etapa ATIVA
                 &.is-active {
                     border-color: fade(@b2b-reg-primary, 30%);
                     background: linear-gradient(180deg, @b2b-reg-white 0%, #fff1f2 100%);
                     color: @b2b-reg-primary-dark;
-                    font-weight: 700;
+                    font-weight: @awa-weight-bold;
                     box-shadow: 0 2px 10px fade(@b2b-reg-primary, 14%);
 
                     .progress-step__num {
@@ -142,6 +156,7 @@ body.b2b-register-index {
                     }
                 }
 
+                // Etapa COMPLETA
                 &.is-complete {
                     border-color: #d1fae5;
                     background: #f0fdf4;
@@ -150,7 +165,7 @@ body.b2b-register-index {
                     .progress-step__num {
                         background: #10b981;
                         color: @b2b-reg-white;
-                        box-shadow: 0 2px 6px rgba(16, 185, 129, 0.4);
+                        box-shadow: 0 2px 6px fade(#10b981, 40%);
                     }
                 }
             }
@@ -159,7 +174,8 @@ body.b2b-register-index {
 }
 
 // =============================================
-// 4. ICONES DE VANTAGENS — SVG inline rendering
+// 4. ÍCONES DE VANTAGENS — SVG inline rendering
+//    Garante que os SVGs internos do benefit-icon renderizem
 // =============================================
 body.b2b-register-index {
     .b2b-register-page {
@@ -176,7 +192,7 @@ body.b2b-register-index {
                 background: @b2b-reg-white;
                 border: 1px solid @b2b-reg-border;
                 border-radius: 10px;
-                transition: border-color 0.2s ease, box-shadow 0.2s ease;
+                transition: border-color var(--awa-transition), box-shadow var(--awa-transition);
 
                 &:hover {
                     border-color: #d1d5db;
@@ -214,7 +230,7 @@ body.b2b-register-index {
 
                 strong {
                     font-size: 14px;
-                    font-weight: 600;
+                    font-weight: @awa-weight-semibold;
                     color: #1a1a2e;
                     line-height: 1.3;
                 }
@@ -230,8 +246,8 @@ body.b2b-register-index {
 }
 
 // =============================================
-// 5. BOTAO SUBMIT — Destaque visual AWA brand
-//    padding 16px 32px, width 100%, font-weight 600
+// 5. BOTÃO SUBMIT — Destaque visual AWA brand
+//    Padding 16px 32px, width 100%, font-weight 600
 // =============================================
 body.b2b-register-index {
     .b2b-register-page {
@@ -241,7 +257,7 @@ body.b2b-register-index {
                 display: block !important;
                 width: 100% !important;
                 padding: 16px 32px !important;
-                font-weight: 600 !important;
+                font-weight: @awa-weight-semibold !important;
                 font-size: 16px !important;
                 letter-spacing: -0.01em;
                 background: @b2b-reg-primary !important;
@@ -250,7 +266,7 @@ body.b2b-register-index {
                 border-radius: 10px !important;
                 cursor: pointer;
                 min-height: 54px;
-                transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+                transition: background @awa-transition, box-shadow @awa-transition, transform @awa-transition-fast;
                 text-align: center;
                 line-height: 1;
 
@@ -281,14 +297,16 @@ body.b2b-register-index {
                     justify-content: center;
 
                     &::after {
-                        content: "\2192";
+                        content: "\2192"; // →
                         font-size: 18px;
                         line-height: 1;
-                        transition: transform 0.2s ease;
+                        transition: transform var(--awa-transition);
                     }
                 }
 
-                &:hover span::after { transform: translateX(3px); }
+                &:hover span::after {
+                    transform: translateX(3px);
+                }
             }
         }
     }
@@ -296,6 +314,7 @@ body.b2b-register-index {
 
 // =============================================
 // 6. CHECKBOX — Custom brand style (WCAG 2.4.11)
+//    Substitui checkbox nativo pelo design AWA
 // =============================================
 body.b2b-register-index {
     .b2b-register-page {
@@ -305,12 +324,13 @@ body.b2b-register-index {
                 align-items: flex-start;
                 gap: 12px;
                 padding: 16px;
-                background: #fafafa;
+                background: var(--awa-bg-soft, #f7f7f7);
                 border: 1px solid @b2b-reg-border;
                 border-radius: 10px;
                 cursor: pointer;
             }
 
+            // Reset + custom checkbox
             input[type="checkbox"].checkbox {
                 appearance: none;
                 -webkit-appearance: none;
@@ -318,15 +338,15 @@ body.b2b-register-index {
                 min-width: 20px;
                 height: 20px !important;
                 margin: 0 !important;
-                margin-top: 1px !important;
                 flex-shrink: 0;
                 border: 2px solid #c7d2e1;
                 border-radius: 5px;
                 background: @b2b-reg-white;
                 cursor: pointer;
                 position: relative;
-                transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+                transition: border-color var(--awa-transition), background var(--awa-transition), box-shadow var(--awa-transition);
                 vertical-align: top;
+                margin-top: 1px !important;
 
                 &:checked {
                     background: @b2b-reg-primary;
@@ -353,7 +373,9 @@ body.b2b-register-index {
                     border-color: @b2b-reg-primary;
                 }
 
-                &:hover:not(:checked) { border-color: @b2b-reg-primary; }
+                &:hover:not(:checked) {
+                    border-color: @b2b-reg-primary;
+                }
             }
 
             .label {
@@ -362,14 +384,16 @@ body.b2b-register-index {
                 cursor: pointer;
                 line-height: 1.55;
                 margin: 0 !important;
-                font-weight: 400;
+                font-weight: @awa-weight-normal;
 
                 a {
                     color: @b2b-reg-primary !important;
-                    font-weight: 500;
+                    font-weight: @awa-weight-medium;
                     text-decoration: none;
 
-                    &:hover { text-decoration: underline; }
+                    &:hover {
+                        text-decoration: underline;
+                    }
                 }
             }
         }
@@ -377,7 +401,7 @@ body.b2b-register-index {
 }
 
 // =============================================
-// 7. RESPONSIVO — Mobile 375px
+// 7. RESPONSIVE — Mobile 375px
 // =============================================
 @media (max-width: 480px) {
     body.b2b-register-index {
@@ -389,15 +413,17 @@ body.b2b-register-index {
                 min-height: 50px;
             }
 
-            .b2b-register-progress .progress-step {
-                font-size: 11px;
-                padding: 6px 8px;
-                gap: 6px;
+            .b2b-register-progress {
+                .progress-step {
+                    font-size: 11px;
+                    padding: 6px 8px;
+                    gap: 6px;
 
-                .progress-step__num {
-                    width: 20px;
-                    height: 20px;
-                    font-size: 10px;
+                    .progress-step__num {
+                        width: 20px;
+                        height: 20px;
+                        font-size: 10px;
+                    }
                 }
             }
         }

@@ -1,0 +1,289 @@
+// ============================================================================
+// AWA Motos — _home.less
+// Estilos exclusivos da homepage (body.cms-index-index)
+//
+// Cobre:
+//   Layout hero / above-fold
+//   Seções de destaque (carrosséis, banners, lançamentos)
+//   Bloco de categorias principais
+//   Seção de vantagens / diferenciais AWA
+//
+// Restrições: zero PHP/HTML/XML. !important documentado inline.
+// ============================================================================
+
+@import (once) '_design-system';   // inclui _awa-variables + mixins fluid-type, ds-focus-ring
+
+
+// ============================================================================
+// 1. HERO / ABOVE-FOLD — container do slider principal
+// ============================================================================
+
+.cms-index-index {
+
+    // Zerar padding do container principal para que o slider sangre
+    .page-main,
+    .columns,
+    .column.main {
+        padding-top: 0;
+    }
+
+    // Remove margin-top que o tema pai pode adicionar ao primeiro bloco
+    .column.main > *:first-child {
+        margin-top: 0;
+    }
+}
+
+
+// ============================================================================
+// 2. SEÇÕES DA HOMEPAGE — espaçamento e fundo
+// ============================================================================
+
+.cms-index-index {
+
+    // Seção genérica do Content Builder Ayo
+    .ayo-section,
+    .cms-section {
+        padding: @ds-space-xxl 0;   // 48px
+
+        @media (max-width: (@awa-breakpoint-md - 1)) {
+            padding: @ds-space-lg 0;   // 32px
+        }
+    }
+
+    // Seção com fundo alternado (zebra)
+    .ayo-section--alt,
+    .cms-section--alt {
+        background: var(--awa-bg-soft, @awa-color-bg-soft);
+    }
+
+    // Seção com fundo escuro — contraste: texto obrigatoriamente claro
+    .ayo-section--dark,
+    .cms-section--dark {
+        background: var(--awa-color-dark, @awa-color-dark);
+        color: var(--awa-color-dark-text, @awa-color-dark-text);
+
+        .section-heading,
+        .ayo-section__title,
+        .cms-section__title {
+            color: @awa-color-white;
+        }
+
+        .section-subtitle,
+        .ayo-section__subtitle {
+            color: @awa-color-dark-text;
+        }
+    }
+
+    // Título de seção — nível h3 da hierarquia tipográfica
+    .section-heading,
+    .ayo-section__title,
+    .cms-section__title {
+        .font-size-h3();                          // clamp(24px … 28px) — hierarquia clara
+        font-weight: @awa-weight-bold;
+        line-height: @lh-tight;
+        color: var(--awa-text, @awa-color-text-primary);
+        margin-top: 0;
+        margin-bottom: @awa-space-2;              // 8px — separação mínima do subtítulo
+        text-align: center;
+    }
+
+    // Subtítulo de seção — nível base, claramente subordinado ao título
+    .section-subtitle,
+    .ayo-section__subtitle {
+        .font-size-base();                        // clamp(14px … 16px)
+        line-height: @lh-normal;                  // 1.5 — legibilidade ideal
+        color: var(--awa-text-muted, @awa-color-text-muted);
+        text-align: center;
+        margin-bottom: @ds-space-lg;              // 32px — espaço generoso antes do conteúdo
+    }
+}
+
+
+// ============================================================================
+// 3. GRID DE CATEGORIAS PRINCIPAIS
+// ============================================================================
+
+.cms-index-index {
+
+    .awa-categories-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: @awa-gap-lg;                         // 16px
+
+        @media (max-width: (@awa-breakpoint-lg - 1)) {  // < 992px
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        @media (max-width: (@awa-breakpoint-md - 1)) {  // < 768px
+            grid-template-columns: repeat(2, 1fr);
+            gap: @awa-gap-md;                     // 12px
+        }
+
+        @media (max-width: (@awa-breakpoint-xs - 1)) {  // < 480px
+            grid-template-columns: 1fr 1fr;
+            gap: @awa-gap-sm;                     // 8px
+        }
+    }
+
+    .awa-category-card {
+        position: relative;
+        border-radius: @awa-border-radius-lg;     // 8px — raio via token
+        overflow: hidden;
+        aspect-ratio: 4 / 3;                      // proporção 4:3 — melhor hierarquia visual
+        background: var(--awa-bg-soft, @awa-color-bg-soft);
+        text-decoration: none;
+        display: block;
+        transition: transform @awa-transition, box-shadow @awa-transition;
+
+        &:hover {
+            transform: translateY(-3px);
+            box-shadow: @awa-shadow-lg;
+
+            img { transform: scale(1.04); }
+        }
+
+        // Foco acessível (WCAG 2.1 AA) — visível apenas via teclado
+        &:focus-visible {
+            .ds-focus-ring();
+            outline-offset: @awa-focus-ring-offset;
+        }
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform @awa-transition-slow;
+        }
+
+        // Label com gradiente escuro → contraste garantido: branco sobre preto
+        &__label {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: @awa-space-3 @awa-space-4;   // 12px 16px — toque mais amplo
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.72) 0%, transparent 100%);
+            color: @awa-color-white;               // contraste explícito: branco sobre escuro
+            font-size: @awa-font-size-13;
+            font-weight: @awa-weight-semibold;
+            line-height: @lh-tight;
+            text-align: center;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            transition: none;
+            img { transition: none; }
+            &:hover { transform: none; }
+        }
+    }
+}
+
+
+// ============================================================================
+// 4. BLOCO DE DIFERENCIAIS / VANTAGENS
+// ============================================================================
+
+.cms-index-index {
+
+    .awa-benefits {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: @awa-gap-xl;                         // 24px
+        padding: @ds-space-xl 0;                  // 40px
+        border-top: 1px solid var(--awa-border, @awa-color-border);
+        border-bottom: 1px solid var(--awa-border, @awa-color-border);
+
+        @media (max-width: (@awa-breakpoint-lg - 1)) {  // < 992px
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        @media (max-width: (@awa-breakpoint-sm - 1)) {  // < 576px
+            grid-template-columns: 1fr 1fr;
+            gap: @awa-gap-lg;                     // 16px
+        }
+    }
+
+    .awa-benefit {
+        display: flex;
+        align-items: flex-start;
+        gap: @awa-gap-md;                         // 12px
+
+        &__icon {
+            width: @ds-space-xl;                  // 40px — via token de espaçamento
+            height: @ds-space-xl;                 // 40px
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--awa-primary-10, rgba(183, 51, 55, 0.06));
+            border-radius: @awa-border-radius;    // 4px
+            color: var(--awa-primary, @awa-color-primary);
+        }
+
+        &__title {
+            font-size: @awa-font-size-14;
+            font-weight: @awa-weight-semibold;
+            line-height: @lh-compact;             // 1.25 — títulos curtos
+            color: var(--awa-text, @awa-color-text-primary);
+            margin-bottom: @awa-space-1;          // 4px
+        }
+
+        &__desc {
+            font-size: @awa-font-size-12;
+            line-height: @lh-relaxed;             // 1.65
+            color: var(--awa-text-muted, @awa-color-text-muted);
+        }
+    }
+}
+
+
+// ============================================================================
+// 5. BLOCO DE MARCAS / LOGOS DE FABRICANTES
+// ============================================================================
+
+.cms-index-index {
+
+    .awa-brands {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: @awa-gap-2xl;                        // 32px
+        padding: @ds-space-lg 0;                  // 32px
+
+        @media (max-width: (@awa-breakpoint-md - 1)) {  // < 768px
+            gap: @awa-space-5;                    // 20px
+        }
+    }
+
+    .awa-brand-logo {
+        height: @ds-space-xl;                     // 40px — via token de espaçamento
+        width: auto;
+        object-fit: contain;
+        filter: grayscale(100%);
+        opacity: 0.6;
+        transition: filter @awa-transition, opacity @awa-transition;
+
+        &:hover {
+            filter: grayscale(0%);
+            opacity: 1;
+        }
+
+        @media (max-width: (@awa-breakpoint-md - 1)) {  // < 768px
+            height: @ds-space-lg;                 // 32px
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            transition: none;
+        }
+    }
+
+    // Foco acessível para logos-link (âncora envolvendo a imagem)
+    a:focus-visible > .awa-brand-logo,
+    a.awa-brand-link:focus-visible {
+        .ds-focus-ring();
+        outline-offset: @awa-focus-ring-offset;
+        border-radius: @awa-border-radius;        // 4px
+    }
+}

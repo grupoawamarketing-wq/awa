@@ -1,190 +1,429 @@
-// =============================================
-// AWA MOTOS — HOMEPAGE (seções, widgets, carrosseis)
-// =============================================
+// ============================================================================
+// AWA Motos — _homepage.less
+// Seções, widgets, carrosseis, benefícios da homepage
+//
+// Variáveis confirmadas no servidor:
+//   @awa-breakpoint-xs/sm/md/lg, @ds-bp-xl, @ds-space-*, @awa-gap-*
+//   @awa-font-size-10..20,24,32, @lh-*, @awa-weight-*, @awa-transition*
+//   @awa-color-*, @awa-border-radius*, @awa-focus-ring-*
+// ============================================================================
 
-// Cabeçalho padrão de seção (título + "Ver todos")
+// Fallbacks: variáveis do tema pai mescladas via @magento_import (styles-m.less context)
+@awa-breakpoint-xl: 1400px;
+
+@import (once) '_design-system';  // .ds-focus-ring(), @ds-space-*, @ds-bp-*
+
+
+// ============================================================================
+// 1. CABEÇALHO DE SEÇÃO — .awa-section-header
+// ============================================================================
+
 .awa-section-header {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: var(--awa-section-header-mb); padding-bottom: 12px;
-  border-bottom: 2px solid var(--awa-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--awa-section-header-mb, @ds-space-md);
+  padding-bottom: 12px;
+  border-bottom: 2px solid @awa-color-border;
 
-  // Wrapper esquerdo (eyebrow + título em coluna)
   &__left {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: @awa-gap-xs;
   }
 
-  // Legenda acima do título (ex: "Categoria", "Top", "Novo")
   &__eyebrow {
-    font-size: 10px;
-    font-weight: var(--awa-weight-bold);
+    font-size: @awa-font-size-10;
+    font-weight: @awa-weight-bold;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--awa-primary);
+    color: @awa-color-primary;
     line-height: 1;
   }
 
   .awa-section-title,
   &__title {
-    font-size: var(--awa-font-lg); font-weight: 700; color: var(--awa-text);
-    padding-left: 12px; border-left: 4px solid var(--awa-primary); margin: 0;
+    font-size: @awa-font-size-20;
+    font-weight: @awa-weight-bold;
+    line-height: @lh-tight;
+    color: @awa-color-text-primary;
+    padding-left: 12px;
+    border-left: 4px solid @awa-color-primary;
+    margin: 0;
   }
+
   .awa-section-link,
   &__link {
-    font-size: var(--awa-font-xs); color: var(--awa-primary);
-    font-weight: 600; text-decoration: none; white-space: nowrap;
-    display: inline-flex; align-items: center; gap: 4px;
-    &:hover { color: var(--awa-primary-hover); text-decoration: underline; }
-    &::after { content: ' →'; }
+    font-size: @awa-font-size-14;
+    color: @awa-color-primary;
+    font-weight: @awa-weight-semibold;
+    text-decoration: none;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: @awa-gap-xs;
+    transition: color @awa-transition;
+
+    &::after { content: ' \2192'; }  // →
+
+    &:hover,
+    &:focus { color: @awa-color-primary-dark; text-decoration: underline; }
+
+    &:focus-visible {
+      .ds-focus-ring();
+      outline-offset: @awa-focus-ring-offset;
+      border-radius: @awa-border-radius-sm;
+    }
   }
 }
 
-// Mesmo padrão aplicado às block-titles do Magento
+// Block-titles dos widgets Magento
 .block.widget.block-products-list .block-title,
 .block-new-products .block-title {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: var(--awa-section-header-mb); padding-bottom: 12px;
-  border-bottom: 2px solid var(--awa-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--awa-section-header-mb, @ds-space-md);
+  padding-bottom: 12px;
+  border-bottom: 2px solid @awa-color-border;
 
-  strong, span:first-child {
-    font-size: var(--awa-font-lg); font-weight: 700; color: var(--awa-text);
-    padding-left: 12px; border-left: 4px solid var(--awa-primary);
+  strong,
+  span:first-child {
+    font-size: @awa-font-size-20;
+    font-weight: @awa-weight-bold;
+    line-height: @lh-tight;
+    color: @awa-color-text-primary;
+    padding-left: 12px;
+    border-left: 4px solid @awa-color-primary;
   }
+
   a {
-    font-size: var(--awa-font-xs); color: var(--awa-primary); font-weight: 600;
-    &:hover { text-decoration: underline; }
-    &::after { content: ' →'; }
+    font-size: @awa-font-size-14;
+    color: @awa-color-primary;
+    font-weight: @awa-weight-semibold;
+    transition: color @awa-transition;
+
+    &::after { content: ' \2192'; }
+    &:hover { color: @awa-color-primary-dark; text-decoration: underline; }
+
+    &:focus-visible {
+      .ds-focus-ring();
+      outline-offset: @awa-focus-ring-offset;
+      border-radius: @awa-border-radius-sm;
+    }
   }
 }
 
-// Grid de widgets na homepage
-.block.widget.block-products-list .products-grid .product-items,
-.block-new-products .products-grid .product-items {
+
+// ============================================================================
+// 2. GRID DE WIDGETS — não quebra OwlCarousel/Slick
+// ============================================================================
+
+.block.widget.block-products-list .products-grid .product-items:not(.owl-carousel):not(.owl-loaded),
+.block-new-products .products-grid .product-items:not(.owl-carousel):not(.owl-loaded) {
   display: grid !important;
   grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-  gap: var(--awa-gap-card) !important;
-  list-style: none !important; padding: 0 !important; margin: 0 !important;
-}
-
-// Faixa de benefícios
-.awa-benefits {
-  display: flex; align-items: center; justify-content: space-around;
-  flex-wrap: wrap; gap: 16px;
-  padding: 16px var(--awa-container-pad);
-  border-top: 1px solid var(--awa-border);
-  border-bottom: 1px solid var(--awa-border);
-  background: var(--awa-bg);
-  margin-bottom: var(--awa-section-gap);
-
-  .benefit-item {
-    display: flex; align-items: center; gap: 10px;
-    flex: 1; min-width: 160px; max-width: 220px;
-
-    .benefit-icon {
-      width: 36px; height: 36px; border-radius: 50%;
-      background: var(--awa-primary-light);
-      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-      svg { width: 18px; height: 18px; stroke: var(--awa-primary); fill: none; stroke-width: 2; }
-    }
-
-    .benefit-title { font-size: var(--awa-font-sm); font-weight: 700; color: var(--awa-text); display: block; }
-    .benefit-sub { font-size: var(--awa-font-xs); color: var(--awa-text-muted); display: block; }
-  }
-
-  .benefit-item + .benefit-item {
-    border-left: 1px solid var(--awa-border); padding-left: 16px;
-  }
-}
-
-// Carrossel Slick
-.slick-slider {
-  .slick-prev, .slick-next {
-    position: absolute; top: 50%; transform: translateY(-50%); z-index: 10;
-    width: 36px; height: 36px;
-    border: 1px solid var(--awa-border-strong); border-radius: var(--awa-radius-sm);
-    background: var(--awa-bg); cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.15s; font-size: 0;
-    &:hover { background: var(--awa-primary); border-color: var(--awa-primary); }
-    &.slick-disabled { opacity: 0.3; cursor: not-allowed; }
-  }
-  .slick-prev { left: -46px; }
-  .slick-next { right: -46px; }
-
-  .slick-dots {
-    display: flex !important; justify-content: center; gap: 4px;
-    list-style: none; padding: 0; margin: 14px 0 0;
-    li { width: auto; height: auto; margin: 0;
-      button {
-        width: 8px; height: 8px; border-radius: 50%;
-        background: var(--awa-border-strong); border: none;
-        cursor: pointer; padding: 0; font-size: 0; transition: all 0.2s;
-      }
-      &.slick-active button {
-        background: var(--awa-primary); width: 20px; border-radius: 4px;
-      }
-    }
-  }
-
-  .slick-slide { padding: 0 8px; }
-  .slick-track { display: flex; align-items: stretch; }
-  .slick-slide > div { height: 100%; }
-  .slick-slide .product-item-info { height: 100%; }
-}
-
-// Owl Carousel
-.owl-carousel {
-  .owl-prev, .owl-next {
-    position: absolute; top: 50%; transform: translateY(-50%); z-index: 10;
-    width: 36px; height: 36px;
-    border: 1px solid var(--awa-border-strong); border-radius: var(--awa-radius-sm);
-    background: var(--awa-bg); cursor: pointer; display: flex;
-    align-items: center; justify-content: center; transition: all 0.15s; font-size: 0;
-    &:hover { background: var(--awa-primary); border-color: var(--awa-primary); }
-  }
-  .owl-prev { left: -46px; }
-  .owl-next { right: -46px; }
-  .owl-dots {
-    display: flex; justify-content: center; gap: 4px; margin-top: 14px;
-    .owl-dot span {
-      display: block; width: 8px; height: 8px; border-radius: 50%;
-      background: var(--awa-border-strong); cursor: pointer; transition: all 0.2s;
-    }
-    .owl-dot.active span { background: var(--awa-primary); width: 20px; border-radius: 4px; }
-  }
-  .owl-stage { display: flex; align-items: stretch; }
-  .owl-item { padding: 0 8px; }
-  .owl-item .product-item-info { height: 100%; }
+  gap: var(--awa-gap-card, @awa-gap-lg) !important;
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
 }
 
 @media (max-width: 1279px) {
-  .block.widget.block-products-list .products-grid .product-items,
-  .block-new-products .products-grid .product-items {
+  .block.widget.block-products-list .products-grid .product-items:not(.owl-carousel):not(.owl-loaded),
+  .block-new-products .products-grid .product-items:not(.owl-carousel):not(.owl-loaded) {
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   }
 }
 
-@media (max-width: 1023px) {
-  .block.widget.block-products-list .products-grid .product-items,
-  .block-new-products .products-grid .product-items {
+@media (max-width: (@awa-breakpoint-md - 1)) {  // < 992px
+  .block.widget.block-products-list .products-grid .product-items:not(.owl-carousel):not(.owl-loaded),
+  .block-new-products .products-grid .product-items:not(.owl-carousel):not(.owl-loaded) {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
 }
 
-@media (max-width: 479px) {
-  .block.widget.block-products-list .products-grid .product-items,
-  .block-new-products .products-grid .product-items {
+@media (max-width: (@awa-breakpoint-xs - 1)) {  // < 480px
+  .block.widget.block-products-list .products-grid .product-items:not(.owl-carousel):not(.owl-loaded),
+  .block-new-products .products-grid .product-items:not(.owl-carousel):not(.owl-loaded) {
     grid-template-columns: 1fr !important;
   }
 }
 
-@media (max-width: 767px) {
-  .slick-prev { left: -8px; }
-  .slick-next { right: -8px; }
-  .owl-prev { left: -8px; }
-  .owl-next { right: -8px; }
+
+// ============================================================================
+// 3. FAIXA DE BENEFÍCIOS — .awa-benefits
+// ============================================================================
+
+.awa-benefits {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: @awa-gap-lg;
+  padding: @ds-space-sm var(--awa-container-pad, 24px);
+  border-top: 1px solid @awa-color-border;
+  border-bottom: 1px solid @awa-color-border;
+  background: @awa-color-white;
+  margin-bottom: @ds-space-xxl;
+
+  .benefit-item {
+    display: flex;
+    align-items: center;
+    gap: @awa-gap-md;
+    flex: 1;
+    min-width: 160px;
+    max-width: 220px;
+
+    .benefit-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(183, 51, 55, 0.08);  // tint sutil — NÃO vermelho sólido
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+
+      svg {
+        width: 18px;
+        height: 18px;
+        stroke: @awa-color-primary;
+        fill: none;
+        stroke-width: 2;
+      }
+    }
+
+    .benefit-title {
+      font-size: @awa-font-size-14;
+      font-weight: @awa-weight-bold;
+      color: @awa-color-text-primary;
+      display: block;
+      line-height: @lh-compact;
+    }
+
+    .benefit-sub {
+      font-size: @awa-font-size-12;
+      color: @awa-color-text-muted;
+      display: block;
+      line-height: @lh-relaxed;
+    }
+  }
+
+  .benefit-item + .benefit-item {
+    border-left: 1px solid @awa-color-border;
+    padding-left: @awa-gap-lg;
+  }
+
+  @media (max-width: (@awa-breakpoint-sm - 1)) {  // < 768px
+    margin-bottom: @ds-space-lg;
+    .benefit-item + .benefit-item {
+      border-left: none;
+      padding-left: 0;
+    }
+  }
+}
 
 
-  .awa-benefits .benefit-item + .benefit-item { border-left: none; padding-left: 0; }
+// ============================================================================
+// 4. CARROSSEL SLICK
+// ============================================================================
+
+.slick-slider {
+
+  .slick-prev,
+  .slick-next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    width: 36px;
+    height: 36px;
+    border: 1px solid @awa-color-border;
+    border-radius: @awa-border-radius;
+    background: @awa-color-white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background @awa-transition, border-color @awa-transition, color @awa-transition;
+    font-size: 0;
+    color: @awa-color-text-primary;
+
+    &:hover {
+      background: @awa-color-primary;
+      border-color: @awa-color-primary;
+      color: @awa-color-white;
+    }
+
+    &:focus-visible {
+      .ds-focus-ring();
+      outline-offset: @awa-focus-ring-offset;
+    }
+
+    &.slick-disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+  }
+
+  .slick-prev { left: -46px; }
+  .slick-next { right: -46px; }
+
+  .slick-dots {
+    display: flex !important;
+    justify-content: center;
+    gap: @awa-gap-xs;
+    list-style: none;
+    padding: 0;
+    margin: 16px 0 0;
+
+    li {
+      width: auto;
+      height: auto;
+      margin: 0;
+
+      button {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: @awa-color-border;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+        font-size: 0;
+        transition: background @awa-transition, width @awa-transition, border-radius @awa-transition;
+      }
+
+      &.slick-active button {
+        background: @awa-color-primary;
+        width: 20px;
+        border-radius: @awa-border-radius;
+      }
+
+      button:focus-visible {
+        .ds-focus-ring();
+        outline-offset: @awa-focus-ring-offset;
+        border-radius: 50%;
+      }
+    }
+  }
+
+  .slick-slide      { padding: 0 @awa-gap-sm; }
+  .slick-track      { display: flex; align-items: stretch; }
+  .slick-slide > div { height: 100%; }
+  .slick-slide .product-item-info { height: 100%; }
+}
+
+
+// ============================================================================
+// 5. CARROSSEL OWL
+// ============================================================================
+
+.owl-carousel {
+
+  .owl-prev,
+  .owl-next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    width: 36px;
+    height: 36px;
+    border: 1px solid @awa-color-border;
+    border-radius: @awa-border-radius;
+    background: @awa-color-white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background @awa-transition, border-color @awa-transition, color @awa-transition;
+    font-size: 0;
+    color: @awa-color-text-primary;
+
+    &:hover {
+      background: @awa-color-primary;
+      border-color: @awa-color-primary;
+      color: @awa-color-white;
+    }
+
+    &:focus-visible {
+      .ds-focus-ring();
+      outline-offset: @awa-focus-ring-offset;
+    }
+  }
+
+  .owl-prev { left: -46px; }
+  .owl-next { right: -46px; }
+
+  .owl-dots {
+    display: flex;
+    justify-content: center;
+    gap: @awa-gap-xs;
+    margin-top: 16px;
+
+    .owl-dot {
+      span {
+        display: block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: @awa-color-border;
+        cursor: pointer;
+        transition: background @awa-transition, width @awa-transition, border-radius @awa-transition;
+      }
+
+      &.active span {
+        background: @awa-color-primary;
+        width: 20px;
+        border-radius: @awa-border-radius;
+      }
+    }
+  }
+
+  .owl-stage { display: flex; align-items: stretch; }
+  .owl-item  { padding: 0 @awa-gap-sm; }
+  .owl-item .product-item-info { height: 100%; }
+}
+
+
+// ============================================================================
+// 6. RESPONSIVO — arrows inset em telas estreitas
+// ============================================================================
+
+// Tablet intermediário: semi-sobrepostos nas bordas
+@media (max-width: (@awa-breakpoint-lg - 1)) and (min-width: @awa-breakpoint-sm) {
+  .slick-prev, .owl-prev { left: -20px; }
+  .slick-next, .owl-next { right: -20px; }
+}
+
+// Mobile: dentro do container
+@media (max-width: (@awa-breakpoint-sm - 1)) {
+  .slick-prev, .owl-prev { left: @awa-gap-sm; }
+  .slick-next, .owl-next { right: @awa-gap-sm; }
+
+  .awa-benefits .benefit-item + .benefit-item {
+    border-left: none;
+    padding-left: 0;
+  }
+}
+
+
+// ============================================================================
+// 7. ACESSIBILIDADE — prefers-reduced-motion
+// ============================================================================
+
+@media (prefers-reduced-motion: reduce) {
+
+  .slick-slider .slick-prev,
+  .slick-slider .slick-next,
+  .slick-slider .slick-dots li button,
+  .owl-carousel .owl-prev,
+  .owl-carousel .owl-next,
+  .owl-carousel .owl-dot span,
+  .awa-section-header .awa-section-link,
+  .awa-section-header__link {
+    transition: none !important;
+  }
 }

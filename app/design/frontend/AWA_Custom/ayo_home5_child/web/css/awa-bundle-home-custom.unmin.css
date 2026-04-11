@@ -308,19 +308,15 @@
     min-width: 0;
 }
 
-/* CONSOLIDAÇÃO ETAPA 2+3: Hero slider full-bleed SAFE — sem overflow por scrollbar.
-   Usa 100% + negative margin calc (relativo ao container pai) em vez de 100vw.
-    O container pai (.top-home-content--above-fold) já tem width: min(100% - pad*2, var(--awa-container)),
-   então o slider expande para a viewport real sem ultrapassar. */
+/* Hero slider full-bleed (100vw) conforme documentação do tema Ayo.
+   Técnica: escapa os dois containers centrados (.ayo-home5-wrapper + .top-home-content--above-fold)
+   via margin-left: calc(50% - 50vw). Safe: .page-wrapper tem overflow-x:clip. */
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .top-home-content--above-fold > .banner-slider,
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .top-home-content--above-fold > .banner-slider.banner-slider2 {
     width: 100vw;
-    width: 100dvw; /* modern: exclui scrollbar em mobile/desktop */
-    max-width: none;
+    max-width: 100vw;
     margin-left: calc(50% - 50vw);
-    margin-left: calc(50% - 50dvw);
-    margin-right: calc(50% - 50vw);
-    margin-right: calc(50% - 50dvw);
+    margin-right: 0;
     padding-left: 0;
     padding-right: 0;
 }
@@ -3239,9 +3235,9 @@ body.cms-homepage_ayo_home5 .top-home-content--b2b-promo .ayo-home5-heading {
     font-size: var(--awa-text-sm, 0.875rem);
     font-weight: var(--awa-weight-medium, 500);
     line-height: var(--awa-leading-normal, 1.4);
-    color: var(--awa-dark, #1e293b);
+    color: var(--awa-dark, #222);
     text-decoration: none;
-    transition: color 0.15s ease;
+    transition: color var(--awa-transition-fast);
     min-height: calc(2 * 1.4em);
 }
 
@@ -3269,7 +3265,7 @@ body.cms-homepage_ayo_home5 .top-home-content--b2b-promo .ayo-home5-heading {
     .price-box .price {
     font-size: var(--awa-text-lg, 1.125rem);
     font-weight: var(--awa-weight-bold);
-    color: var(--awa-dark, #1e293b);
+    color: var(--awa-dark, #222);
     line-height: var(--awa-leading-compact, 1.2);
 }
 
@@ -3317,7 +3313,7 @@ body.cms-homepage_ayo_home5 .top-home-content--b2b-promo .ayo-home5-heading {
     font-weight: var(--awa-weight-semibold);
     text-align: center;
     justify-content: center;
-    transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+    transition: background 0.2s ease, transform var(--awa-transition-fast), box-shadow 0.2s ease;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -3395,7 +3391,7 @@ body.cms-homepage_ayo_home5 .top-home-content--b2b-promo .ayo-home5-heading {
     font-size: clamp(1.25rem, 1rem + 0.8vw, 1.7rem);
     font-weight: var(--awa-weight-bold);
     line-height: var(--awa-leading-compact, 1.2);
-    color: var(--awa-heading, var(--awa-dark, #1e293b));
+    color: var(--awa-heading, var(--awa-dark, #222));
     margin: 0;
     letter-spacing: -0.01em;
 }
@@ -3428,7 +3424,7 @@ body.cms-homepage_ayo_home5 .top-home-content--b2b-promo .ayo-home5-heading {
     color: var(--primary-color, var(--awa-red, #b73337));
     text-decoration: none;
     white-space: nowrap;
-    transition: color 0.15s ease;
+    transition: color var(--awa-transition-fast);
     display: inline-flex;
     align-items: center;
     gap: var(--awa-space-1, 4px);
@@ -3438,7 +3434,7 @@ body.cms-homepage_ayo_home5 .top-home-content--b2b-promo .ayo-home5-heading {
     .top-home-content :is(.rokan-product-heading, .ayo-home5-heading) .viewall::after {
     content: '→';
     font-size: 0.75em;
-    transition: transform 0.15s ease;
+    transition: transform var(--awa-transition-fast);
 }
 
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
@@ -5271,7 +5267,7 @@ body.cms-homepage_ayo_home5 .top-home-content--b2b-promo .ayo-home5-heading {
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
     .page-wrapper .awa-compare-bar__clear {
     background: rgb(148 163 184 / 12%) !important;
-    color: var(--awa-slate, #64748b) !important;
+    color: var(--awa-slate, #999) !important;
 }
 
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
@@ -5285,16 +5281,16 @@ body.cms-homepage_ayo_home5 .top-home-content--b2b-promo .ayo-home5-heading {
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
     .page-wrapper .awa-compare-bar__cta:disabled {
     background: var(--awa-border-strong, #d9d9d9) !important;
-    color: var(--awa-slate, #64748b) !important;
+    color: var(--awa-slate, #999) !important;
 }
 
 @media (prefers-color-scheme: dark) {
     :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
         .page-wrapper {
-        --awa-bg: #fff;
+        --awa-bg: var(--awa-white);
         --awa-bg-alt: #f8fafc;
-        --awa-bg-card: #fff;
-        --awa-text: #1f2937;
+        --awa-bg-card: var(--awa-white);
+        --awa-text: var(--awa-gray-700);
         --awa-text-muted: #6b7280;
         --awa-border: #e5e7eb;
         --awa-border-md: #d1d5db;
@@ -6372,4 +6368,135 @@ input[type="email"].input-text:focus,
         .page-wrapper .awa-home-section + .awa-home-section {
         margin-top: var(--awa-space-4, 16px);
     }
+}
+
+/* =============================================================================
+   GRID-UNIFY-20260408: home product cards + fallbacks 5/3/2
+   Mantém wrappers de Owl/Swiper intactos e padroniza o miolo do card.
+   ============================================================================= */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) {
+    --awa-home-product-gap-mobile: var(--awa-space-3, 12px);
+    --awa-home-product-gap-tablet: var(--awa-space-4, 16px);
+    --awa-home-product-gap-desktop: var(--awa-space-5, 20px);
+    --awa-home-product-media-min: clamp(180px, 18vw, 248px);
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .products-grid .product-items {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--awa-home-product-gap-mobile);
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .products-grid .product-items {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: var(--awa-home-product-gap-tablet);
+    }
+}
+
+@media (min-width: 1200px) {
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .products-grid .product-items {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: var(--awa-home-product-gap-desktop);
+    }
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper :is(.productTabContent, .category_tab_slider, .cat_home2, .rokan-bestseller, .rokan-newproduct, .rokan-featuredproduct, .home-new-product, .home-bestseller):not(.owl-loaded, .swiper-initialized) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--awa-home-product-gap-mobile);
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper :is(.productTabContent, .category_tab_slider, .cat_home2, .rokan-bestseller, .rokan-newproduct, .rokan-featuredproduct, .home-new-product, .home-bestseller):not(.owl-loaded, .swiper-initialized) {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: var(--awa-home-product-gap-tablet);
+    }
+}
+
+@media (min-width: 1200px) {
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper :is(.productTabContent, .category_tab_slider, .cat_home2, .rokan-bestseller, .rokan-newproduct, .rokan-featuredproduct, .home-new-product, .home-bestseller):not(.owl-loaded, .swiper-initialized) {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: var(--awa-home-product-gap-desktop);
+    }
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper :is(.productTabContent, .category_tab_slider, .cat_home2, .rokan-bestseller, .rokan-newproduct, .rokan-featuredproduct, .home-new-product, .home-bestseller, .list-tab-product, .tab_product, .hot-deal, .categorytab-container) :is(.item-product, .product-item) {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    height: 100%;
+    border: 1px solid var(--awa-gray-200, #e5e5e5);
+    border-radius: var(--awa-radius-md, 12px);
+    background: var(--awa-white, #fff);
+    overflow: hidden;
+    transition: box-shadow var(--awa-transition-base, 200ms ease), border-color var(--awa-transition-base, 200ms ease), transform var(--awa-transition-base, 200ms ease);
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper :is(.productTabContent, .category_tab_slider, .cat_home2, .rokan-bestseller, .rokan-newproduct, .rokan-featuredproduct, .home-new-product, .home-bestseller, .list-tab-product, .tab_product, .hot-deal, .categorytab-container) :is(.item-product, .product-item):hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--primary-color, var(--awa-red, #b73337)) 16%, var(--awa-gray-200, #e5e5e5));
+    box-shadow: var(--awa-shadow-sm, 0 1px 3px rgb(0 0 0 / 10%));
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper :is(.productTabContent, .category_tab_slider, .cat_home2, .rokan-bestseller, .rokan-newproduct, .rokan-featuredproduct, .home-new-product, .home-bestseller, .list-tab-product, .tab_product, .hot-deal, .categorytab-container) :is(.item-product, .product-item) .product-thumb {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper :is(.productTabContent, .category_tab_slider, .cat_home2, .rokan-bestseller, .rokan-newproduct, .rokan-featuredproduct, .home-new-product, .home-bestseller, .list-tab-product, .tab_product, .hot-deal, .categorytab-container) :is(.item-product, .product-item) :is(.product-thumb > a, .product-thumb > a.product-thumb-link, .product-item-photo, .product-image-container) {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1 / 1;
+    min-height: var(--awa-home-product-media-min);
+    padding: clamp(12px, 1.2vw, 18px);
+    background: linear-gradient(180deg, rgb(248 250 252 / 96%), rgb(255 255 255));
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper :is(.productTabContent, .category_tab_slider, .cat_home2, .rokan-bestseller, .rokan-newproduct, .rokan-featuredproduct, .home-new-product, .home-bestseller, .list-tab-product, .tab_product, .hot-deal, .categorytab-container) :is(.item-product, .product-item) :is(.product-thumb > a img, .product-item-photo img, .product-image-photo) {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper :is(.productTabContent, .category_tab_slider, .cat_home2, .rokan-bestseller, .rokan-newproduct, .rokan-featuredproduct, .home-new-product, .home-bestseller, .list-tab-product, .tab_product, .hot-deal, .categorytab-container) :is(.item-product, .product-item) :is(.product-info, .product-item-details) {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-width: 0;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper :is(.productTabContent, .category_tab_slider, .cat_home2, .rokan-bestseller, .rokan-newproduct, .rokan-featuredproduct, .home-new-product, .home-bestseller, .list-tab-product, .tab_product, .hot-deal, .categorytab-container) :is(.item-product, .product-item) :is(.product-name, .product-item-name) {
+    margin: 0 0 var(--awa-space-2, 8px);
+    min-height: calc(13px * 1.45 * 2);
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper :is(.productTabContent, .category_tab_slider, .cat_home2, .rokan-bestseller, .rokan-newproduct, .rokan-featuredproduct, .home-new-product, .home-bestseller, .list-tab-product, .tab_product, .hot-deal, .categorytab-container) :is(.item-product, .product-item) :is(.product-name a, .product-item-link) {
+    font-size: var(--awa-text-sm, 13px) !important;
+    line-height: 1.45;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: calc(13px * 1.45 * 2);
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper :is(.productTabContent, .category_tab_slider, .cat_home2, .rokan-bestseller, .rokan-newproduct, .rokan-featuredproduct, .home-new-product, .home-bestseller, .list-tab-product, .tab_product, .hot-deal, .categorytab-container) :is(.item-product, .product-item) :is(.product-info-cart, .actions-primary, .product-item-actions) {
+    margin-top: auto;
+    min-height: 52px;
+    display: flex;
+    align-items: flex-end;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper :is(.productTabContent, .category_tab_slider, .cat_home2, .rokan-bestseller, .rokan-newproduct, .rokan-featuredproduct, .home-new-product, .home-bestseller, .list-tab-product, .tab_product, .hot-deal, .categorytab-container) :is(.item-product, .product-item) :is(.product-info-cart, .actions-primary, .product-item-actions) > * {
+    width: 100%;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper :is(.productTabContent, .category_tab_slider, .cat_home2, .rokan-bestseller, .rokan-newproduct, .rokan-featuredproduct, .home-new-product, .home-bestseller, .list-tab-product, .tab_product, .hot-deal, .categorytab-container) :is(.item-product, .product-item) :is(.btn-add-to-cart.action.tocart, .action.tocart, .b2b-login-to-buy-btn.b2b--listing, .b2b-login-to-see-price) {
+    width: 100%;
+    min-height: 48px;
+    border-radius: var(--awa-radius-md, 10px);
+    justify-content: center;
 }

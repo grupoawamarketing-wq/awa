@@ -71,12 +71,24 @@
 											<a href="<?php echo $block->escapeUrl($_item->getProductUrl()) ?>" class="product-thumb-link" aria-label="<?php echo $block->escapeHtmlAttr($_item->getName()); ?>">
 												<?php $productImageThumb = $block->getImage($_item, 'category_image_second_small');?>
 												<span class="first-thumb">
-													<?php echo $productImage->toHtml(); ?>
+													<?php
+														$_imgHtml = $productImage->toHtml();
+														if (strpos($_imgHtml, 'loading=') === false) {
+															$_imgHtml = str_replace('<img ', '<img loading=lazy decoding=async ', $_imgHtml);
+														}
+														echo $_imgHtml;
+													?>
 												</span>
 												<?php $productType = $_item->getTypeID();
 												if($productType == "simple"): ?>
 													<span class="second-thumb">
-														<?php echo $productImageThumb->toHtml(); ?>
+														<?php
+															$_thumbHtml = $productImageThumb->toHtml();
+															if (strpos($_thumbHtml, 'loading=') === false) {
+																$_thumbHtml = str_replace('<img ', '<img loading=lazy decoding=async ', $_thumbHtml);
+															}
+															echo $_thumbHtml;
+														?>
 													</span>
 			                					<?php endif; ?>
 											</a>

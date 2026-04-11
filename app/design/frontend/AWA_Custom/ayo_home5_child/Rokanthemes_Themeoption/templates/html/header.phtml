@@ -693,22 +693,6 @@ body .page-wrapper .awa-site-header .header .awa-header-cart-link-icon {
 <?php else: ?>
 <div id="header" class="header-container" data-awa-header-shell="true">
 	<div class="header-content" data-awa-header-content="true">
-		<!-- ═══ BARRA B2B PROMOCIONAL (vermelha) ═══ -->
-		<div class="top-header awa-utility-bar awa-b2b-promo-bar" data-awa-header-utility="true">
-			<div class="container">
-				<div class="awa-b2b-promo-bar__inner">
-					<p class="awa-b2b-promo-bar__text">
-						<em><?= $escaper->escapeHtml(__('Ambiente exclusivo')) ?></em>
-						<?= $escaper->escapeHtml(__('para vendas corporativas')) ?> |
-						<a href="<?= $escaper->escapeUrl($block->getUrl('b2b/register')) ?>" class="awa-b2b-promo-bar__cta">
-							<strong><?= $escaper->escapeHtml(__('Cadastre agora')) ?></strong>
-						</a>
-						<?= $escaper->escapeHtml(__('sua empresa e confira ofertas especiais para o seu CNPJ.')) ?>
-					</p>
-				</div>
-			</div>
-		</div>
-
 		<!-- ═══ UTILITY BAR ORIGINAL (oculta por padrão, mantida para funcionalidade) ═══ -->
 		<div class="awa-utility-bar-legacy" data-awa-header-utility-legacy="true" style="display:none !important">
 			<div class="container">
@@ -733,6 +717,15 @@ body .page-wrapper .awa-site-header .header .awa-header-cart-link-icon {
 						</div>
 					</div>
 				</div>
+			</div>
+		</div>
+		<!-- ═══ B2B PROMO BAR (faixa vermelha topo — referência visual) ═══ -->
+		<div class="top-header awa-utility-bar awa-b2b-promo-bar"
+			data-awa-header-utility="b2b-promo"
+			role="complementary"
+			aria-label="<?= $escaper->escapeHtmlAttr(__('Ambiente exclusivo para empresas')) ?>">
+			<div class="awa-b2b-promo-bar__inner">
+				<p class="awa-b2b-promo-bar__text"><?= $escaper->escapeHtml(__('Ambiente exclusivo para vendas corporativas')) ?> |&nbsp;<a href="<?= $escaper->escapeUrl($block->getUrl('b2b/register')) ?>" class="awa-b2b-promo-bar__cta"><strong><?= $escaper->escapeHtml(__('Cadastre agora')) ?></strong></a>&nbsp;<?= $escaper->escapeHtml(__('sua empresa e confira ofertas especiais para o seu CNPJ.')) ?></p>
 			</div>
 		</div>
 		<div class="header awa-main-header" data-awa-header-main="true">
@@ -778,7 +771,20 @@ body .page-wrapper .awa-site-header .header .awa-header-cart-link-icon {
 											<a href="<?= $escaper->escapeUrl($block->getUrl('b2b/register')) ?>" class="awa-header-auth-prompt__link"><?= $escaper->escapeHtml(__('cadastre-se')) ?></a>
 										</span>
 									</div>
-									<!-- ═══ Carrinho ═══ -->
+																						<script>
+									require(['Magento_Customer/js/customer-data'], function (customerData) {
+										var customer = customerData.get('customer');
+										function updateAuthPrompt(data) {
+											var el = document.querySelector('[data-awa-header-auth]');
+											if (!el) return;
+											// Hide when customer is logged in (fullname is set by customerData)
+											if (data && data.fullname) { el.style.setProperty('display', 'none', 'important'); } else { el.style.removeProperty('display'); }
+										}
+										updateAuthPrompt(customer());
+										customer.subscribe(updateAuthPrompt);
+									});
+								</script>
+								<!-- ═══ Carrinho ═══ -->
 									<div class="awa-header-cart mini-cart-wrapper shadowcart awa-header-minicart" data-awa-header-cart="true">
 										<a class="awa-header-cart-fallback" href="<?= $escaper->escapeUrl($block->getUrl('checkout/cart')) ?>" aria-label="<?= $escaper->escapeHtmlAttr(__('Abrir carrinho')) ?>"><span><?= $escaper->escapeHtml(__('Abrir carrinho')) ?></span></a>
 										<div class="mini-carts">

@@ -1,0 +1,297 @@
+// =============================================================================
+// AWA PDP UPGRADES — Melhorias visuais da página de produto
+// =============================================================================
+
+// =============================================================================
+// 1. GALERIA — Zoom hint + transição de imagem
+// =============================================================================
+
+.catalog-product-view {
+
+    .fotorama__stage {
+        cursor: zoom-in;
+
+        &:hover .fotorama__img {
+            transform: scale(1.07);
+            transition: transform 0.4s ease;
+        }
+
+        .fotorama__img {
+            transition: transform 0.4s ease;
+        }
+    }
+
+    // Hint "Ampliar" ao hover da galeria (desktop only)
+    @media (min-width: 768px) {
+        .fotorama__stage::after {
+            content: 'Clique para ampliar';
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.55);
+            color: #fff;
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .fotorama__stage:hover::after {
+            opacity: 1;
+        }
+    }
+
+    // Fullscreen: desativa zoom hint
+    .fotorama--fullscreen .fotorama__stage::after {
+        display: none;
+    }
+}
+
+// =============================================================================
+// 2. TRUST BAR — Hover lift nos itens
+// =============================================================================
+
+.awa-pdp-trust-bar {
+    .awa-pdp-trust-bar__item {
+        transition: transform 0.2s ease, color 0.2s ease;
+
+        &:hover {
+            transform: translateY(-2px);
+            color: var(--awa-primary, #b73337);
+        }
+    }
+}
+
+// =============================================================================
+// 3. ACCORDION — Descricao + Especificacoes
+// =============================================================================
+
+@keyframes awa-accordion-reveal {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+// Standalone details element variant (used in separate phtml templates)
+details.awa-pdp-accordion-item {
+    border-top: 1px solid var(--awa-border, #e5e5e5);
+    border-bottom: 1px solid var(--awa-border, #e5e5e5);
+    margin-top: -1px; // colapsa bordas adjacentes
+
+    summary {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 4px;
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--awa-text, #333);
+        cursor: pointer;
+        list-style: none;
+        user-select: none;
+
+        &::-webkit-details-marker { display: none; }
+
+        &::after {
+            content: '';
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+            background-image: ~"url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Cpath d=%22M8 3v10M3 8h10%22 stroke=%22%23333%22 stroke-width=%222%22 stroke-linecap=%22round%22/%3E%3C/svg%3E')";
+            background-repeat: no-repeat;
+            background-size: contain;
+            transition: transform 0.25s ease;
+        }
+    }
+
+    &[open] > summary::after {
+        transform: rotate(45deg);
+    }
+
+    .awa-accordion-body {
+        padding: 0 4px 20px;
+        animation: awa-accordion-reveal 0.25s ease;
+        font-size: 14px;
+        line-height: 1.7;
+        color: var(--awa-text-muted, #555);
+    }
+}
+
+.awa-pdp-accordion {
+    border-top: 1px solid var(--awa-border, #e5e5e5);
+
+    details {
+        border-bottom: 1px solid var(--awa-border, #e5e5e5);
+
+        summary {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 4px;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--awa-text, #333);
+            cursor: pointer;
+            list-style: none;
+            user-select: none;
+
+            &::-webkit-details-marker {
+                display: none;
+            }
+
+            // Icone +/-
+            &::after {
+                content: '';
+                display: inline-block;
+                width: 16px;
+                height: 16px;
+                position: relative;
+                flex-shrink: 0;
+                background-image: ~"url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Cpath d=%22M8 3v10M3 8h10%22 stroke=%22%23333%22 stroke-width=%222%22 stroke-linecap=%22round%22/%3E%3C/svg%3E')";
+                background-repeat: no-repeat;
+                background-size: contain;
+                transition: transform 0.25s ease;
+            }
+        }
+
+        &[open] > summary::after {
+            transform: rotate(45deg);
+        }
+
+        .awa-accordion-body {
+            padding: 0 4px 20px;
+            animation: awa-accordion-reveal 0.25s ease;
+            font-size: 14px;
+            line-height: 1.7;
+            color: var(--awa-text-muted, #555);
+        }
+    }
+}
+
+// =============================================================================
+// 6. SKU COPY BUTTON
+// =============================================================================
+
+.awa-sku-copy-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 8px;
+    padding: 2px 8px;
+    font-size: 11px;
+    color: var(--awa-text-muted, #777);
+    border: 1px solid var(--awa-border, #ddd);
+    border-radius: 4px;
+    background: transparent;
+    cursor: pointer;
+    vertical-align: middle;
+    transition: all 0.15s ease;
+
+    &:hover {
+        color: var(--awa-primary, #b73337);
+        border-color: var(--awa-primary, #b73337);
+        background: var(--awa-primary-10, rgba(183, 51, 55, 0.08));
+    }
+
+    &[data-copied] {
+        color: #2e7d32;
+        border-color: #4caf50;
+        background: rgba(76, 175, 80, 0.08);
+    }
+}
+
+.awa-sku-copy-feedback {
+    display: none;
+    font-size: 11px;
+    color: #2e7d32;
+    margin-left: 8px;
+    animation: awa-feedback-in 0.25s ease;
+
+    &.visible {
+        display: inline;
+    }
+}
+
+@keyframes awa-feedback-in {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+// =============================================================================
+// 8. STICKY BAR DESKTOP — mostrar thumb + info
+// =============================================================================
+
+@media (min-width: 768px) {
+    .awa-pdp-sticky-bar {
+        .awa-pdp-sticky-bar__thumb {
+            display: block;
+            width: 48px;
+            height: 48px;
+            object-fit: contain;
+        }
+
+        .awa-pdp-sticky-bar__info {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+    }
+}
+
+// =============================================================================
+// 9. RELACIONADOS — Tabs por marca
+// =============================================================================
+
+.awa-pdp-mv-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+
+    .awa-pdp-mv-tab {
+        padding: 6px 14px;
+        font-size: 13px;
+        border: 1px solid var(--awa-border, #ddd);
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        background: transparent;
+        color: var(--awa-text-muted, #666);
+
+        &:hover {
+            border-color: var(--awa-primary, #b73337);
+            color: var(--awa-primary, #b73337);
+        }
+
+        &.awa-active {
+            background: var(--awa-primary, #b73337);
+            border-color: var(--awa-primary, #b73337);
+            color: #fff;
+        }
+    }
+}
+
+[data-brand-hidden] {
+    display: none !important;
+}
+
+// prefers-reduced-motion
+@media (prefers-reduced-motion: reduce) {
+    .fotorama__stage .fotorama__img,
+    .fotorama__stage::after,
+    .awa-pdp-trust-bar__item,
+    .awa-pdp-accordion details summary::after,
+    .awa-pdp-accordion .awa-accordion-body {
+        transition: none !important;
+        animation: none !important;
+    }
+}

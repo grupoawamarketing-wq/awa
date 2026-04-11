@@ -1,0 +1,270 @@
+// ============================================================================
+// AWA Motos — _responsive-fixes.less
+// Correções de responsividade identificadas na auditoria (2026-04-07/10)
+//
+// Escopo: issues que não pertencem a nenhum arquivo page-specific.
+// Issues page-specific já foram corrigidos em seus arquivos LESS próprios.
+//
+// Restrições: zero PHP/HTML/XML. !important documentado inline.
+// ============================================================================
+
+@import (once) '_awa-variables';
+
+
+// ============================================================================
+// 1. IMAGENS — overflow e proporção em mobile
+// ============================================================================
+// Auditoria: imagens sem max-width: 100% saem do container em mobile (iOS/Android).
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+// Logos e imagens de marca: não distorcer
+.logo img,
+.logo svg {
+    max-width: 160px;
+    height: auto;
+
+    @media (max-width: (@awa-breakpoint-md - 1)) {
+        max-width: 120px;
+    }
+}
+
+
+// ============================================================================
+// 2. TABELAS — scroll horizontal em mobile
+// ============================================================================
+// Auditoria: tabelas de pedidos e specs cortam o conteúdo em mobile.
+
+.table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+
+    table {
+        min-width: 540px; // evita colapso de colunas em mobile
+    }
+}
+
+// Tabela de specs no PDP — não precisa de min-width tão grande
+.product.attribute.description table,
+.product-info-main table {
+    min-width: auto;
+}
+
+
+// ============================================================================
+// 3. BOTÕES — touch target mínimo 44px
+// ============================================================================
+// WCAG 2.5.5 / Material Design: área de toque mínima 44×44px.
+// Auditoria: botões de ação secundários tinham 28–32px em mobile.
+
+@media (max-width: (@awa-breakpoint-md - 1)) {
+
+    // Ações de produto no card
+    .product-item .actions-secondary a,
+    .product-item .action.towishlist,
+    .product-item .action.tocompare {
+        min-width: 44px;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    // Controles de paginação
+    .pages-items .page a {
+        min-width: 44px;
+        min-height: 44px;
+    }
+}
+
+
+// ============================================================================
+// 4. FORMULÁRIOS — inputs legíveis em iOS (previne zoom automático)
+// ============================================================================
+// iOS faz zoom automático em inputs com font-size < 16px.
+// !important: tema pai define font-size: 14px em inputs via seletor de alta
+// especificidade no bloco form-element-input.
+
+@media (max-width: (@awa-breakpoint-md - 1)) {
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="search"],
+    input[type="tel"],
+    input[type="number"],
+    input[type="url"],
+    select,
+    textarea {
+        font-size: 16px !important; // previne zoom automático do iOS em campos com font-size < 16px
+    }
+}
+
+
+// ============================================================================
+// 5. MODAL / OVERLAY — fundo sem scroll em mobile
+// ============================================================================
+// Auditoria: ao abrir modal (quick-view, filtros mobile) o body rola por trás.
+// Magento adiciona .modal-open ao body via JS — aproveitamos para travar scroll.
+
+body.modal-open {
+    overflow: hidden;
+
+    @media (max-width: (@awa-breakpoint-md - 1)) {
+        position: fixed; // iOS: overflow:hidden sozinho não trava scroll no Safari
+        width: 100%;
+    }
+}
+
+
+// ============================================================================
+// 6. MINI-CART DROPDOWN — não sai da tela em mobile
+// ============================================================================
+
+@media (max-width: (@awa-breakpoint-md - 1)) {
+
+    .minicart-wrapper .block-minicart {
+        right: 0 !important; // !important: tema pai posiciona via JS com style inline
+        left: auto !important;
+        width: 100vw !important;
+        max-width: 100vw;
+        border-radius: 0;
+    }
+}
+
+
+// ============================================================================
+// 7. MENSAGENS DE FEEDBACK — espaçamento móvel
+// ============================================================================
+
+@media (max-width: (@awa-breakpoint-md - 1)) {
+
+    .message,
+    .messages .message-success,
+    .messages .message-error,
+    .messages .message-notice,
+    .messages .message-warning {
+        margin: 8px 0;
+        padding: 10px 12px;
+        font-size: 13px;
+        border-radius: @awa-border-radius;
+    }
+}
+
+
+// ============================================================================
+// 8. BREADCRUMBS — truncar em mobile
+// ============================================================================
+
+@media (max-width: (@awa-breakpoint-md - 1)) {
+
+    .breadcrumbs .items {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow: hidden;
+        white-space: nowrap;
+
+        // Mostra apenas o último item (página atual) em mobile
+        .item {
+            display: none;
+
+            &:last-child {
+                display: block;
+                font-size: 12px;
+                color: var(--awa-text-muted, #666666);
+
+                // Separador visual indicando hierarquia
+                &::before {
+                    content: '← ';
+                    font-size: 11px;
+                }
+            }
+        }
+    }
+}
+
+
+// ============================================================================
+// 9. TOOLBAR (PLP / Busca) — layout compacto em mobile
+// ============================================================================
+
+@media (max-width: (@awa-breakpoint-md - 1)) {
+
+    .toolbar.toolbar-products {
+        flex-wrap: wrap;
+        gap: 8px;
+
+        // Limiter (itens por página) — ocultar em mobile (economia de espaço)
+        .toolbar-limiter {
+            display: none;
+        }
+
+        // Sorter — ocupa toda a linha
+        .toolbar-sorter {
+            flex: 1 1 auto;
+        }
+
+        // Modos de exibição (grid/list)
+        .modes {
+            flex-shrink: 0;
+        }
+    }
+}
+
+
+// ============================================================================
+// 10. STICKY FOOTER CTA — botão "Comprar" fixo em PDP mobile
+// ============================================================================
+// Em mobile, o botão "Adicionar ao Carrinho" fica oculto no scroll.
+// Este fix cria uma barra sticky com o botão de compra.
+// !important: posicionamento sobrepõe outros elementos fixos do tema pai.
+
+@media (max-width: (@awa-breakpoint-md - 1)) {
+
+    .catalog-product-view {
+
+        // Espaço para não sobrepor o botão sticky
+        .product-info-main {
+            padding-bottom: 72px; // altura da barra sticky + margem
+        }
+
+        .product-info-main .box-tocart {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 100; // !important não necessário — z-index direto funciona aqui
+            background: #ffffff;
+            border-top: 1px solid var(--awa-border, #e2e2e2);
+            padding: 10px 16px;
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
+
+            .fieldset {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin: 0;
+            }
+
+            // Input de quantidade — compacto
+            .field.qty {
+                flex-shrink: 0;
+                width: 80px;
+                margin: 0;
+            }
+
+            // Botão de compra — ocupa o restante da linha
+            .actions {
+                flex: 1;
+
+                .action.tocart {
+                    width: 100%;
+                    height: 46px;
+                }
+            }
+        }
+    }
+}

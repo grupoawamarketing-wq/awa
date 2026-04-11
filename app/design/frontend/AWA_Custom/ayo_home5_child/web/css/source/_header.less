@@ -1,282 +1,877 @@
-// =============================================
-// AWA MOTOS — HEADER (3 CAMADAS — ESTILO BALAROTI)
-// Layer 1: Barra utilitária (escura)
-// Layer 2: Barra principal (logo + busca + carrinho)
-// Layer 3: Navegação (barra vermelha)
-// =============================================
+// ============================================================================
+// AWA Motos — _header.less
+// Cabeçalho do site: utility bar, logo, busca, ícones de conta/carrinho
+//
+// Estrutura do tema Ayo:
+//   .panel.wrapper      → Barra utilitária superior (promoções, telefone)
+//   .header.content     → Logo + busca + ícones
+//   .page-header        → Container externo do header
+//   .awa-vmenu-sidebar  → Menu vertical de categorias (gerenciado em _vertical-menu.less)
+//
+// Restrições: zero PHP/HTML/XML. !important documentado inline.
+// ============================================================================
 
-// === CAMADA 1: BARRA UTILITÁRIA (topo) ===
+@import (once) '_awa-variables';
+@import (once) '_z-index';
+
+
+// ============================================================================
+// 1. UTILITY BAR — barra superior escura (promoções, contato)
+// ============================================================================
+
 .panel.wrapper {
-  background: var(--awa-bg-dark);
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+    background-color: #1a1a1a; // mantém escuro — identidade do tema Ayo
+    color: rgba(255, 255, 255, 0.85);
+
+    .panel.header {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+        gap: 0;
+        padding: 6px 0;
+        min-height: 36px;
+    }
+
+    // Links da barra utilitária (conta, ajuda, etc.)
+    a,
+    a:link,
+    a:visited {
+        color: rgba(255, 255, 255, 0.75);
+        font-size: 12px;
+        text-decoration: none;
+        transition: color @awa-transition;
+
+        &:hover {
+            color: #ffffff;
+        }
+    }
+
+    // Separadores entre links
+    .header.links {
+        display: flex;
+        align-items: center;
+        gap: 0;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+
+        li {
+            margin: 0;
+
+            &:not(:last-child) a::after {
+                content: '|';
+                margin: 0 10px;
+                color: rgba(255, 255, 255, 0.25);
+            }
+
+            a {
+                font-size: 12px;
+                padding: 4px 0;
+            }
+        }
+    }
 }
-.panel.header {
-  max-width: var(--awa-container-max);
-  margin: 0 auto;
-  padding: 0 var(--awa-container-pad);
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
 
-  // Contato (esquerda)
-  .header-contact {
-    display: flex; align-items: center; gap: 16px;
-    font-size: var(--awa-font-xs); color: #aaa;
-    a { color: var(--awa-gray-430); &:hover { color: var(--awa-text-inverse); } }
-  }
 
-  // Links de conta (direita)
-  .header-links {
-    display: flex; align-items: center; gap: 12px;
-    font-size: var(--awa-font-xs);
-    a { color: var(--awa-gray-430); &:hover { color: var(--awa-text-inverse); } }
-    a + a::before { content: '|'; margin-right: 12px; color: var(--awa-text-muted); }
-  }
+// ============================================================================
+// 2. HEADER PRINCIPAL — fundo branco, logo e ícones
+// ============================================================================
 
-  // Ocultar jargão "Painel MCP"
-  a[title="Painel MCP"],
-  [href*="customer/account"][title="Painel MCP"] {
-    display: none !important;
-  }
-}
-
-// Fix: hide duplicate/junk elements rendered by Magento
-.page-header .panel.header .header.links .greet.welcome,
-.page-header .panel.header .authorization-link + .authorization-link,
-a[href*="mcp"], [class*="mcp-panel"],
-a[title="Painel MCP"], a[title*="MCP"],
-[class*="mcp"], [id*="mcp"],
-.header.content .logo ~ a:not(.block-search):not(.minicart-wrapper):not(.authorization-link),
-.header.content > a[href*="customer/account"]:not(.authorization-link > a),
-.minicart-wrapper ~ .minicart-wrapper,
-[class*="phone"] ~ [class*="phone"],
-.panel.header .header.links > li:empty {
-  display: none !important;
-}
-
-// === CAMADA 2: BARRA PRINCIPAL (logo + busca + carrinho) ===
 .page-header {
-  background: var(--awa-bg);
-  border-bottom: 1px solid var(--awa-border);
-  position: sticky;
-  top: 0;
-  z-index: 200;
-  box-shadow: var(--awa-shadow-sm);
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--awa-border, #e2e2e2);
+    position: relative;
+    z-index: @z-header; // _z-index.less
+
+    .header.content {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding-top: 12px;
+        padding-bottom: 12px;
+        flex-wrap: nowrap;
+
+        @media (max-width: (@awa-breakpoint-md - 1)) {
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+    }
 }
 
-.header.content {
-  max-width: var(--awa-container-max);
-  margin: 0 auto;
-  padding: 0 var(--awa-container-pad);
-  height: 72px;
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  background: var(--awa-bg);
-
-  // Logo — único, sem duplicata
-  .logo {
+// Logo
+.logo {
     flex-shrink: 0;
-    img { max-height: 48px; width: auto; display: block; }
-  }
-  .logo + .logo,
-  .logo:nth-of-type(2) { display: none !important; }
+    margin: 0;
+    line-height: 1;
 
-  // Busca — centro, flex:1
-  .block-search {
-    flex: 1;
+    img {
+        display: block;
+        height: auto;
+        max-height: 52px;
+        width: auto;
+
+        @media (max-width: (@awa-breakpoint-md - 1)) {
+            max-height: 40px;
+        }
+    }
+}
+
+// BUG 4 — Logo duplo: tema pai renderiza dois elementos de logo
+// .awa-header-brand-desktop → visível apenas em desktop
+// .awa-header-mobile-logo  → visível apenas em mobile
+// Sem esta regra, ambos aparecem simultaneamente em desktop causando duplicação.
+.awa-header-brand-desktop {
+    display: block;
+
+    @media (max-width: (@awa-breakpoint-md - 1)) {
+        display: none !important; // !important: tema pai usa display:block inline em alguns breakpoints
+    }
+}
+
+.awa-header-mobile-logo {
+    display: none !important; // !important: tema pai pode forçar display via JS
+
+    @media (max-width: (@awa-breakpoint-md - 1)) {
+        display: block !important;
+    }
+}
+
+
+// ============================================================================
+// 3. BARRA DE BUSCA
+// ============================================================================
+
+.block-search {
+    flex: 1 1 auto;
     max-width: 580px;
-    position: relative;
+    margin: 0;
 
-    .block-content { position: relative; }
-
-    #search {
-      width: 100%;
-      height: 44px;
-      padding: 0 48px 0 16px;
-      border: 1.5px solid var(--awa-border-strong);
-      border-radius: var(--awa-radius-md);
-      font-size: var(--awa-font-sm);
-      color: var(--awa-text);
-      background: var(--awa-bg);
-      outline: none;
-      transition: border-color 0.15s, box-shadow 0.15s;
-      &:focus {
-        border-color: var(--awa-primary);
-        box-shadow: 0 0 0 3px var(--awa-primary-light);
-      }
-      &::placeholder { color: var(--awa-text-light); font-size: var(--awa-font-sm); }
+    @media (max-width: (@awa-breakpoint-md - 1)) {
+        order: 3;
+        max-width: 100%;
+        width: 100%;
+        flex: 1 1 100%;
     }
 
-    .action.search {
-      position: absolute; right: 0; top: 0;
-      width: 44px; height: 44px;
-      background: none; border: none; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      color: var(--awa-text-muted);
-      transition: color 0.15s;
-      &:hover { color: var(--awa-primary); }
-      span { display: none; }
+    .block-content {
+        margin: 0;
     }
-  }
 
-  // Ações (carrinho + conta)
-  .header-actions-wrapper,
-  .minicart-wrapper,
-  .authorization-link {
+    .form.minisearch {
+        display: flex;
+        align-items: stretch;
+        position: relative;
+    }
+
+    // Campo de input
+    .field.search {
+        flex: 1;
+        margin: 0;
+
+        .label {
+            clip: rect(0, 0, 0, 0);
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            overflow: hidden; // screen-reader only
+        }
+
+        .control {
+            border: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        input[type="text"],
+        #search {
+            width: 100%;
+            height: 44px;
+            padding: 0 16px;
+            border: 1.5px solid var(--awa-border, #e2e2e2);
+            border-right: none;
+            border-radius: 4px 0 0 4px;
+            background: #ffffff;
+            color: var(--awa-text, #333333);
+            font-size: 14px;
+            outline: none;
+            transition: border-color @awa-transition;
+
+            &::placeholder {
+                color: var(--awa-text-muted, #666666);
+            }
+
+            &:focus {
+                border-color: var(--awa-primary, #b73337);
+            }
+        }
+    }
+
+    // Botão buscar
+    .action.search,
+    .actions button[type="submit"],
+    .actions .action.search {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 46px;
+        height: 44px;
+        padding: 0;
+        border: 1.5px solid var(--awa-primary, #b73337);
+        border-left: none;
+        border-radius: 0 4px 4px 0;
+        background: var(--awa-primary, #b73337);
+        color: #ffffff;
+        cursor: pointer;
+        transition: background-color @awa-transition, border-color @awa-transition;
+        flex-shrink: 0;
+
+        &:hover {
+            background: var(--awa-primary-dark, #8e2629);
+            border-color: var(--awa-primary-dark, #8e2629);
+        }
+
+        // Ícone de lupa
+        &::before,
+        span { display: none; }
+
+        &::after {
+            content: '';
+            display: block;
+            width: 18px;
+            height: 18px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-size: contain;
+        }
+    }
+
+    // Autocomplete / suggestions
+    .search-autocomplete {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        z-index: @z-search-drop; // _z-index.less
+        background: #ffffff;
+        border: 1px solid var(--awa-border, #e2e2e2);
+        border-top: none;
+        border-radius: 0 0 4px 4px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+
+        dl {
+            margin: 0;
+            padding: 0;
+        }
+
+        dt,
+        .title {
+            padding: 8px 16px 4px;
+            font-size: 11px;
+            font-weight: @awa-weight-bold;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--awa-text-muted, #666666);
+            background: var(--awa-bg-soft, #f7f7f7);
+        }
+
+        dd {
+            margin: 0;
+        }
+
+        li {
+            list-style: none;
+        }
+
+        .item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: background @awa-transition-fast;
+
+            &:hover,
+            &[aria-selected="true"] {
+                background: rgba(183, 51, 55, 0.04);
+            }
+        }
+
+        .amount {
+            margin-left: auto;
+            font-size: 11px;
+            color: var(--awa-text-muted, #666666);
+        }
+    }
+}
+
+
+// ============================================================================
+// 4. ÍCONES DO HEADER (conta, wishlist, mini-cart)
+// ============================================================================
+
+.header.links,
+.header-icons,
+.block-minicart,
+.customer-welcome {
     flex-shrink: 0;
-  }
-
-  // Carrinho — ícone com badge
-  .minicart-wrapper {
-    .action.showcart {
-      position: relative;
-      width: 44px; height: 44px;
-      border: 1.5px solid var(--awa-border-strong);
-      border-radius: var(--awa-radius-sm);
-      display: flex; align-items: center; justify-content: center;
-      color: var(--awa-text);
-      background: var(--awa-bg);
-      cursor: pointer;
-      transition: all 0.15s;
-      &:hover { border-color: var(--awa-primary); color: var(--awa-primary); }
-      .text { display: none; }
-
-      .counter.qty {
-        position: absolute; top: -7px; right: -7px;
-        min-width: 18px; height: 18px;
-        background: var(--awa-primary); color: var(--awa-text-inverse);
-        border-radius: 9px; font-size: 10px; font-weight: 700;
-        display: flex; align-items: center; justify-content: center;
-        padding: 0 4px;
-        &.empty { display: none; }
-      }
-    }
-  }
-
-  // Ocultar carrinho duplicado
-  > a[href*="checkout/cart"]:not(.action.showcart) { display: none !important; }
-  .block-minicart + a[href*="checkout/cart"] { display: none !important; }
-
-  // Botão Entrar
-  .authorization-link a {
-    height: 38px; padding: 0 16px;
-    border: 1.5px solid var(--awa-primary);
-    border-radius: var(--awa-radius-sm);
-    color: var(--awa-primary); font-size: var(--awa-font-sm); font-weight: 600;
-    display: flex; align-items: center; white-space: nowrap;
-    transition: all 0.15s;
-    &:hover { background: var(--awa-primary); color: var(--awa-text-inverse); }
-  }
 }
 
-// === CAMADA 3: NAVEGAÇÃO (barra vermelha) ===
-.nav-sections { background: var(--awa-primary); }
-
-.nav-sections-item-content {
-  max-width: var(--awa-container-max);
-  margin: 0 auto;
-  padding: 0 var(--awa-container-pad);
-}
-
-.navigation {
-  display: flex; align-items: stretch;
-  list-style: none; margin: 0; padding: 0;
-
-  .level0 {
+// Ícones: conta e carrinho
+.minicart-wrapper,
+.header-account,
+.customer-welcome {
     position: relative;
-    display: flex; align-items: stretch;
 
-    > a, > span {
-      display: flex; align-items: center;
-      padding: 0 16px; height: 44px;
-      font-size: var(--awa-font-sm); font-weight: 500; color: var(--awa-text-inverse);
-      text-decoration: none; white-space: nowrap;
-      transition: background 0.15s;
-      &:hover { background: var(--awa-primary-hover); }
-    }
+    a.action,
+    button.action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        border: none;
+        border-radius: 50%;
+        background: transparent;
+        color: var(--awa-text, #333333);
+        cursor: pointer;
+        position: relative;
+        transition: background @awa-transition, color @awa-transition;
 
-    &.active > a, &.current > a {
-      background: var(--awa-primary-hover); font-weight: 700;
-    }
+        &:hover {
+            background: rgba(183, 51, 55, 0.07);
+            color: var(--awa-primary, #b73337);
+        }
 
-    &.parent > a::after {
-      content: '';
-      display: inline-block; width: 8px; height: 5px; margin-left: 5px;
-      background-image: url("data:image/svg+xml,%3Csvg width='8' height='5' viewBox='0 0 8 5' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0l4 5 4-5z' fill='rgba(255,255,255,0.7)'/%3E%3C/svg%3E");
-      background-repeat: no-repeat; background-size: contain;
+        svg, .icon {
+            width: 22px;
+            height: 22px;
+        }
     }
-
-    // Dropdown
-    .submenu {
-      display: none;
-      position: absolute; top: 100%; left: 0;
-      min-width: 220px;
-      background: var(--awa-bg);
-      border: 1px solid var(--awa-border);
-      border-top: 3px solid var(--awa-primary);
-      border-radius: 0 0 var(--awa-radius-md) var(--awa-radius-md);
-      box-shadow: var(--awa-shadow-md);
-      z-index: 300; padding: 6px 0;
-    }
-    &:hover .submenu { display: block; }
-
-    .submenu li a {
-      display: flex; align-items: center; gap: 8px;
-      padding: 9px 16px; font-size: var(--awa-font-sm);
-      color: var(--awa-text); transition: all 0.12s;
-      &:hover { background: var(--awa-primary-light); color: var(--awa-primary); }
-    }
-
-    .submenu .all-category a {
-      font-weight: 600; color: var(--awa-primary);
-      border-top: 1px solid var(--awa-border); margin-top: 4px;
-      &::after { content: ' →'; }
-    }
-  }
 }
 
-// Banner B2B para não-logados (abaixo da navbar)
-body.not-logged-in .awa-b2b-bar {
-  background: var(--awa-primary-light);
-  border-bottom: 1px solid rgba(183,51,55,0.2);
-  padding: 9px var(--awa-container-pad);
-  display: flex; align-items: center; justify-content: space-between;
-  flex-wrap: wrap; gap: 10px; font-size: var(--awa-font-xs);
+// ── Mini-cart: ícone de sacola vermelha preenchida ──
+// Especificidade deliberadamente igual à de awa-bundle-refinements.min.css (0-6-1 / 0-5-2)
+// styles-l.min.css carrega por último (order 13), então ganha pelo source order.
 
-  .b2b-bar-text { color: var(--awa-primary-hover); font-weight: 500; }
-
-  .b2b-bar-actions { display: flex; align-items: center; gap: 8px; }
-
-  .b2b-bar-btn {
-    height: 32px; padding: 0 14px;
-    background: var(--awa-primary); color: var(--awa-text-inverse);
-    border-radius: var(--awa-radius-sm); font-size: 11px; font-weight: 700;
-    text-decoration: none; display: flex; align-items: center;
-    transition: background 0.15s;
-    &:hover { background: var(--awa-primary-hover); }
-  }
-
-  .b2b-bar-link {
-    font-size: 11px; color: var(--awa-primary); font-weight: 600;
-    &:hover { text-decoration: underline; }
-  }
+// Override de visibility: a regra de _awa-cycle1-fixes usa #header (ID = especificidade 1-6-0)
+// Esta regra usa #header + .header-mini-cart = 1-6-1 > 1-6-0 → ganha mesmo com !important
+.page-wrapper #header.header-container[data-awa-header-shell="true"] .minicart-wrapper > a.showcart.header-mini-cart {
+    visibility: visible !important;
 }
 
-// Mobile responsivo
-@media (max-width: 768px) {
-  .header.content {
-    flex-wrap: wrap; height: auto; padding: 10px var(--awa-container-pad); gap: 10px;
-    .logo { order: 1; }
-    .minicart-wrapper { order: 2; margin-left: auto; }
-    .block-search { order: 3; width: 100%; max-width: 100%; }
-    .authorization-link { display: none; }
-  }
-  .panel.header .header-contact span:not(:first-child) { display: none; }
+body .page-wrapper .awa-site-header .awa-header-right-col .minicart-wrapper {
+
+    // Fallback de visibilidade (spec 0-6-1)
+    & > a.showcart,
+    & > .showcart.header-mini-cart {
+        visibility: visible !important;
+    }
+
+    // Selectors espelham exatamente os de awa-bundle-refinements → source order decide
+    a.showcart,
+    .showcart.header-mini-cart,
+    .action.showcart {
+        // Reverte botão pill dos cycles 4-6
+        background: transparent !important;
+        background-color: transparent !important;
+        padding: 0 !important;
+        border: none !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        color: transparent !important;
+        min-width: 0 !important;
+        width: auto !important;
+        font-size: 0 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        position: relative;
+        gap: 0 !important;
+        text-decoration: none !important;
+
+        // Suprime ícone font/text do tema pai
+        &::before {
+            display: none !important;
+            content: none !important;
+        }
+
+        // Sacola preenchida vermelha via SVG data-uri
+        &::after {
+            content: '' !important;
+            display: block !important;
+            width: 30px !important;
+            height: 30px !important;
+            flex-shrink: 0 !important;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23b73337'%3E%3Cpath d='M18 6h-2c0-2.21-1.79-4-4-4S8 3.79 8 6H6C4.9 6 4 6.9 4 8v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-8 4c0 .55-.45 1-1 1s-1-.45-1-1V8h2v2zm6 0c0 .55-.45 1-1 1s-1-.45-1-1V8h2v2zm-2-4H10c0-1.1.9-2 2-2s2 .9 2 2z'/%3E%3C/svg%3E") !important;
+            background-repeat: no-repeat !important;
+            background-size: contain !important;
+            background-position: center !important;
+        }
+
+        // Badge dot de contagem — posição bottom-right para replicar o dot da referência
+        .counter.qty {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            min-width: 10px !important;
+            height: 10px !important;
+            padding: 0 !important;
+            background: var(--awa-primary, #b73337) !important;
+            color: transparent !important;
+            font-size: 0 !important;
+            border-radius: 999px !important;
+            position: absolute !important;
+            bottom: 1px !important;
+            right: 1px !important;
+            top: auto !important;
+            left: auto !important;
+            border: 1.5px solid #ffffff !important;
+
+            &.empty { display: none !important; }
+        }
+    }
+
+    // Dropdown do mini-cart
+    .block-minicart {
+        position: absolute;
+        right: 0;
+        top: calc(100% + 8px);
+        width: 340px;
+        background: #ffffff;
+        border: 1px solid var(--awa-border, #e2e2e2);
+        border-radius: @awa-border-radius-lg;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+        z-index: @z-minicart; // _z-index.less
+        padding: 16px;
+
+        @media (max-width: (@awa-breakpoint-md - 1)) {
+            width: calc(100vw - 16px);
+            right: -8px;
+        }
+
+        .block-title {
+            font-size: 15px;
+            font-weight: @awa-weight-bold;
+            color: var(--awa-text, #333333);
+            padding-bottom: 12px;
+            margin-bottom: 12px;
+            border-bottom: 1px solid var(--awa-border, #e2e2e2);
+        }
+
+        // Itens no mini-cart
+        .product-item {
+            display: flex;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--awa-border, #e2e2e2);
+
+            &:last-child { border-bottom: none; }
+        }
+
+        .product-image-container {
+            width: 56px;
+            height: 56px;
+            flex-shrink: 0;
+            border: 1px solid var(--awa-border, #e2e2e2);
+            border-radius: 4px;
+            overflow: hidden;
+            background: #fff;
+
+            img {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+            }
+        }
+
+        .product-item-details {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .product-item-name {
+            font-size: 13px;
+            font-weight: @awa-weight-semibold;
+            color: var(--awa-text, #333333);
+            margin-bottom: 4px;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+
+            a {
+                color: inherit;
+                text-decoration: none;
+                &:hover { color: var(--awa-primary, #b73337); }
+            }
+        }
+
+        .price {
+            font-size: 14px;
+            font-weight: @awa-weight-bold;
+            color: var(--awa-primary, #b73337);
+        }
+
+        // Botões de ação do mini-cart
+        .actions {
+            margin-top: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+
+            .action.viewcart {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                height: 44px;
+                border: 1.5px solid var(--awa-primary, #b73337);
+                border-radius: 4px;
+                background: transparent;
+                color: var(--awa-primary, #b73337);
+                font-size: 14px;
+                font-weight: @awa-weight-semibold;
+                text-decoration: none;
+                transition: background @awa-transition, color @awa-transition;
+
+                &:hover {
+                    background: var(--awa-primary, #b73337);
+                    color: #ffffff;
+                }
+            }
+
+            .action.primary.checkout {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                height: 44px;
+                border-radius: 4px;
+                border: none;
+                background: var(--awa-primary, #b73337) !important; // sobrescreve gradiente do tema pai
+                color: #ffffff !important;
+                font-size: 14px;
+                font-weight: @awa-weight-bold;
+                text-decoration: none;
+                cursor: pointer;
+                transition: background-color @awa-transition;
+
+                &:hover {
+                    background: var(--awa-primary-dark, #8e2629) !important;
+                }
+            }
+        }
+
+        // Subtotal
+        .subtotal {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0 0;
+            font-size: 14px;
+
+            .label {
+                font-weight: @awa-weight-semibold;
+                color: var(--awa-text, #333333);
+            }
+
+            .price {
+                font-size: 16px;
+                font-weight: @awa-weight-bold;
+                color: var(--awa-primary, #b73337);
+            }
+        }
+    }
 }
 
-@media (max-width: 480px) {
-  .nav-sections { display: none; }
+
+// ============================================================================
+// 5. B2B MELHORIAS — contato, login pill, botão consultor
+// ============================================================================
+
+// --- 5A. Utility bar: espaço para contato à esquerda ---
+
+.panel.wrapper .panel.header {
+    justify-content: space-between; // era flex-end; abre espaço para .awa-b2b-contact
 }
+
+.awa-b2b-contact {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 12px;
+
+    a {
+        color: rgba(255, 255, 255, 0.80);
+        text-decoration: none;
+        transition: color @awa-transition;
+
+        &:hover { color: #ffffff; }
+    }
+
+    &__whatsapp {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+
+        svg {
+            width: 14px;
+            height: 14px;
+            flex-shrink: 0;
+            color: #25D366; // verde WhatsApp
+        }
+    }
+
+    &__sep {
+        color: rgba(255, 255, 255, 0.25);
+        user-select: none;
+    }
+
+    &__phone {
+        letter-spacing: 0.01em;
+    }
+
+    @media (max-width: 480px) {
+        display: none; // utility bar já oculta abaixo de 480px
+    }
+}
+
+
+// --- 5B. Login CTA — pill button para usuário não logado ---
+// O Ayo theme renderiza o link de login dentro de .header.links .authorization-link.
+// Estiliza como pill outline que anima para a cor primária no hover.
+
+.header.links .authorization-link > a,
+.header.content .authorization-link > a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 16px;
+    border: 1.5px solid var(--awa-border, #e2e2e2);
+    border-radius: 999px;
+    background: transparent;
+    font-size: 13px;
+    font-weight: @awa-weight-semibold;
+    color: var(--awa-text, #333333);
+    white-space: nowrap;
+    text-decoration: none;
+    transition: border-color @awa-transition, color @awa-transition;
+
+    &:hover {
+        border-color: var(--awa-primary, #b73337);
+        color: var(--awa-primary, #b73337);
+    }
+}
+
+
+// --- 5C. Botão "Fale com Consultor" no header.content ---
+
+.awa-header-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 16px;
+    background: var(--awa-primary, #b73337);
+    color: #ffffff;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: @awa-weight-semibold;
+    text-decoration: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: background-color @awa-transition;
+
+    svg {
+        width: 15px;
+        height: 15px;
+        flex-shrink: 0;
+    }
+
+    &:hover,
+    &:focus {
+        background: var(--awa-primary-dark, #8e2629);
+        color: #ffffff; // garante que o tema pai não sobrescreve a cor do texto
+    }
+
+    @media (max-width: (@awa-breakpoint-md - 1)) {
+        display: none; // espaço insuficiente em mobile — contato via WhatsApp flutuante
+    }
+}
+
+
+// ============================================================================
+// 6. HEADER STICKY — cola no topo após scroll
+// ============================================================================
+
+.page-header.sticky,
+.page-header._fixed,
+.page-header.is-sticky {
+    position: sticky; // !important: evita conflito com posição do tema pai
+    top: 0;
+    z-index: @z-header; // _z-index.less
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    animation: headerSlideDown 0.25s ease forwards;
+}
+
+@keyframes headerSlideDown {
+    from { transform: translateY(-100%); }
+    to   { transform: translateY(0); }
+}
+
+
+// ============================================================================
+// 7. MOBILE — layout compacto
+// ============================================================================
+
+@media (max-width: (@awa-breakpoint-md - 1)) {
+
+    .page-header .header.content {
+        padding-top: 8px;
+        padding-bottom: 8px;
+    }
+
+    // Utility bar: oculta em mobile muito pequeno
+    @media (max-width: 480px) {
+        .panel.wrapper {
+            display: none;
+        }
+    }
+
+    // Search: fica abaixo do logo em mobile
+    .block-search {
+        .field.search input {
+            height: 40px;
+            font-size: 13px;
+        }
+
+        .action.search,
+        .actions .action.search {
+            width: 40px;
+            height: 40px;
+        }
+    }
+}
+
+
+// ============================================================================
+// 8. FIXES DA AUDITORIA (2026-04-07) — portados de awa-visual-audit-v2.css
+// ============================================================================
+
+// BUG 6 — box-shadow do header ausente em Cat/PDP
+// Causa: tema pai limitava o shadow a `body.cms-index-index` via `:is()`
+// Fix: aplica shadow globalmente em todas as páginas
+// !important: seletor do tema pai usa :is() com especificidade 0-1-1 + outro
+//             seletor encadeado que vence sem !important em Cat/PDP
+.page-wrapper .header-content,
+.page-wrapper .header.content {
+    box-shadow: rgba(15, 23, 42, 0.05) 0px 8px 24px 0px !important; // tema pai aplica shadow apenas na home
+
+    @media (max-width: (@awa-breakpoint-md - 1)) {
+        box-shadow: rgba(15, 23, 42, 0.04) 0px 6px 16px 0px !important;
+    }
+}
+
+// BUG 8 — container "TODAS AS CATEGORIAS" (menu_left_home1) vazio em Cat/PDP
+// Causa: awa-bundle-tail.css força `display: flex !important` globalmente
+// Fix: oculta o container em páginas que não são home (ele fica vazio e cria
+//      um gap de 290px na navigation bar em desktop)
+@media (min-width: 992px) {
+
+    body:not(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) {
+
+        #header .header-control .awa-header-categories.menu_left_home1 {
+            display: none !important; // awa-bundle-tail.css força display:flex com esp.1-2-0 — sem !important perde
+            width: 0 !important;
+            max-width: 0 !important;
+            overflow: hidden !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+    }
+}
+
+
+// ============================================================================
+// 9. ACESSIBILIDADE
+// ============================================================================
+
+@media (prefers-reduced-motion: reduce) {
+    .page-header.sticky,
+    .page-header._fixed {
+        animation: none !important;
+    }
+
+    .minicart-wrapper a.action,
+    .minicart-wrapper button.action,
+    .block-search .action.search {
+        transition: none !important;
+    }
+}
+
+
+// ============================================================================
+// 10. HEADER LOGIN PROMPT — .hotline_header (CMS block redefinido para B2B)
+// ============================================================================
+// Renderizado via CMS block "hotline_header" com estrutura:
+//   .hotline_header.awa-only-guest > svg.hotline_header__icon + span.hotline_header__text
+//
+// Visibilidade por perfil:
+//   - Anônimo:  .awa-only-guest mostra via _visibility.less → display:revert
+//   - Logado:   .awa-only-guest oculta via _visibility.less → display:none !important
+//
+// Posição no DOM: dentro de .col-md-10.top-search, ao lado do mini-cart
+// ============================================================================
+
+.hotline_header {
+    display: inline-flex;
+    align-items: center;
+    gap: @awa-gap-sm;          // 8px
+    flex-shrink: 0;
+    padding: 2px 0;
+
+    // Ícone de conta / pessoa
+    .hotline_header__icon,
+    > svg {
+        width: 30px;
+        height: 30px;
+        flex-shrink: 0;
+        color: var(--awa-text-muted, @awa-color-text-muted);  // #666666
+        stroke: currentColor;
+        display: block;
+    }
+
+    // Texto do prompt
+    .hotline_header__text {
+        font-size: @awa-font-size-12;    // 12px
+        line-height: @lh-normal;         // 1.5
+        color: var(--awa-text-muted, @awa-color-text-muted);
+        white-space: nowrap;
+
+        // Links: Login e cadastre-se
+        a,
+        a:link,
+        a:visited {
+            font-weight: @awa-weight-bold;
+            color: var(--awa-primary, @awa-color-primary);
+            text-decoration: none;
+            transition: color @awa-transition;
+
+            &:hover {
+                color: var(--awa-primary-dark, @awa-color-primary-dark);
+                text-decoration: underline;
+                text-underline-offset: 2px;
+            }
+        }
+    }
+
+    // Ocultar em mobile (espaço insuficiente)
+    @media (max-width: (@awa-breakpoint-md - 1)) {
+        display: none;
+    }
+}
+
+// Segurança extra: ocultar quando logado (principal controle via .awa-only-guest)
+.customer-logged-in .hotline_header {
+    display: none !important;  // !important: _visibility.less usa !important — manter consistência
+}
+

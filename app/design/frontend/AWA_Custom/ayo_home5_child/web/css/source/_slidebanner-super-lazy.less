@@ -1,0 +1,164 @@
+// AWA Motos — Slide Banner Styles
+// OWL Carousel 2.x + estrutura Ayo Home5 (hidden-xs / visible-xs)
+
+// OWL v2 usa animateOut/animateIn com classe 'animated' (compat animate.css v3)
+// Bridge necessário pois o tema usa animate.css v4 (prefixo animate__)
+// NOTA: @keyframes no nível raiz — LESS.php não compila @keyframes aninhados em seletores
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to   { opacity: 0; }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.wrapper_slider .animated {
+    animation-duration: 0.7s;
+    animation-fill-mode: both;
+}
+
+.wrapper_slider .fadeOut {
+    animation-name: fadeOut;
+}
+
+.wrapper_slider .fadeIn {
+    animation-name: fadeIn;
+}
+
+.wrapper_slider {
+    // Transição suave nas imagens
+    img {
+        transition: filter 0.3s ease, transform 0.3s ease;
+    }
+
+    // Indicadores (dots) OWL v2 — .owl-dots/.owl-dot
+    .owl-dots {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 99;
+        display: flex;
+        gap: 8px;
+
+        @media (max-width: 767px) {
+            bottom: 12px;
+            gap: 6px;
+        }
+
+        .owl-dot {
+            width: 10px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 0;
+            outline: none;
+
+            // Área de toque mínima 44×44px no mobile (WCAG 2.5.5)
+            @media (max-width: 767px) {
+                position: relative;
+
+                &::after {
+                    content: '';
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    width: 44px;
+                    height: 44px;
+                }
+            }
+
+            &.active {
+                background: #fff;
+                border-color: #fff;
+                transform: scale(1.3);
+                box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+            }
+
+            &:hover,
+            &:focus {
+                background: rgba(255, 255, 255, 0.7);
+                border-color: #fff;
+            }
+
+            &:focus-visible {
+                outline: 2px solid rgba(255, 255, 255, 0.9);
+                outline-offset: 3px;
+            }
+
+            // OWL v2 envolve cada dot em <span>
+            span {
+                display: none;
+            }
+        }
+    }
+
+    // Respeitar preferência de animação reduzida (WCAG 2.3.3)
+    @media (prefers-reduced-motion: reduce) {
+        img,
+        .animated {
+            transition: none !important;
+            animation: none !important;
+        }
+    }
+}
+
+// Fix OWL v2: themes.css tem `.owl-carousel { display: none }` (v1 CSS)
+// mas sem `.owl-carousel.owl-loaded { display: block }`.
+// OWL v2 beta.3 usa a classe owl-loaded para mostrar o carousel.
+.owl-carousel.owl-loaded {
+    display: block;
+}
+
+// Sobrescrever posição das setas OWL para dentro do slider hero
+// (regra base tem left/right: -46px, mas wrapper tem overflow: hidden)
+.wrapper_slider .owl-carousel .owl-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 100%;
+    left: 0;
+    z-index: 100;
+    pointer-events: none;
+}
+
+.wrapper_slider .owl-carousel .owl-prev,
+.wrapper_slider .owl-carousel .owl-next {
+    pointer-events: all;
+    opacity: 0;
+    transition: opacity 0.2s ease, background 0.15s, left 0.2s, right 0.2s;
+}
+
+.wrapper_slider .owl-carousel .owl-prev {
+    left: 16px;
+}
+
+.wrapper_slider .owl-carousel .owl-next {
+    right: 16px;
+    left: auto;
+}
+
+.wrapper_slider:hover .owl-carousel .owl-prev,
+.wrapper_slider:hover .owl-carousel .owl-next {
+    opacity: 1;
+}
+
+.wrapper_slider .owl-carousel .owl-prev::before,
+.wrapper_slider .owl-carousel .owl-next::before {
+    font-family: "Font Awesome 5 Free", FontAwesome, sans-serif;
+    font-weight: 900;
+    font-size: 14px;
+    color: var(--awa-primary, #b91c1c);
+    content: "\f104";
+    line-height: 1;
+}
+
+.wrapper_slider .owl-carousel .owl-next::before {
+    content: "\f105";
+}

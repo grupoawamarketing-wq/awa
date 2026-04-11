@@ -1,0 +1,628 @@
+/**
+ * AWA Motos — Category Page Layout Fix
+ * Carregado via catalog_category_view.xml, order 1200 (após todos os bundles).
+ *
+ * Corrige os seguintes bugs identificados em 2025-04-09:
+ *  1. Imagem banner da categoria truncada em 200px por max-height do styles-m.css
+ *  2. Botão "Faça login para ver preços" com texto cortado (flex row sem wrap)
+ *  3. Toolbar inferior desalinhada por margin: 0 -15px do Bootstrap .row
+ *  4. li.item-product sem reset de width/margin/padding correto
+ */
+
+/* =============================================================================
+   1. BANNER DA CATEGORIA — fix max-height:200px (styles-m.css order 0)
+   awa-bundle-site.css (order 21) define height:clamp(180px,28vh,280px) !important
+   mas max-height sobrepõe height. Fix: anula max-height.
+   ============================================================================= */
+
+:is(body.catalog-category-view, body.catalogsearch-result-index) .category-image {
+    max-height: none !important;
+    height: clamp(240px, 30vh, 360px) !important;
+    overflow: hidden;
+    border-radius: var(--awa-radius-md, 8px);
+    margin-bottom: var(--awa-space-md, 16px);
+}
+
+:is(body.catalog-category-view, body.catalogsearch-result-index) .category-image img,
+:is(body.catalog-category-view, body.catalogsearch-result-index) .category-image .image {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center center !important;
+    display: block !important;
+}
+
+/* Em mobile: mantém banner oculto (padrão já definido no awa-bundle-category.css) */
+@media (max-width: 767px) {
+    :is(body.catalog-category-view, body.catalogsearch-result-index) .category-image {
+        display: none !important;
+    }
+}
+
+
+/* =============================================================================
+   2. BOTÃO "FAÇA LOGIN PARA VER PREÇOS" — texto cortado em cards de 212px
+   BUG: awa-global-modern-clean.css (order 24) define display:flex (row) sem wrap.
+   O <a> "Faça login" (com padding/min-height de awa-bundle-tail.css) + o texto
+   " para ver preços" não cabem lado a lado em 212px → cortado por overflow:hidden.
+   Fix: empilha verticalmente e remove estilo de botão autônomo do <a>.
+   ============================================================================= */
+
+/* Container: remove old full-red-block style, become a neutral wrapper */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .products-grid .item-product .info-price .b2b-login-to-see-price {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    min-height: auto !important;
+    width: 100% !important;
+    font-size: 11px !important;
+    font-weight: 400 !important;
+    color: var(--awa-text-muted, #888) !important;
+    text-align: center !important;
+    line-height: 1.4 !important;
+}
+
+/* "Faça login" <a> becomes an outlined CTA button */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .products-grid .item-product .info-price .b2b-login-to-see-price a {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    width: 100% !important;
+    min-height: auto !important;
+    padding: 7px 10px !important;
+    background: transparent !important;
+    color: var(--awa-primary, #b73337) !important;
+    border: 1.5px solid var(--awa-primary, #b73337) !important;
+    border-radius: 6px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    line-height: 1.3 !important;
+    text-decoration: none !important;
+    white-space: nowrap !important;
+    box-sizing: border-box !important;
+    transition: background 0.18s ease, color 0.18s ease !important;
+}
+
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .products-grid .item-product .info-price .b2b-login-to-see-price a:hover,
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .products-grid .item-product .info-price .b2b-login-to-see-price a:focus-visible {
+    background: var(--awa-primary, #b73337) !important;
+    color: #fff !important;
+}
+
+
+/* =============================================================================
+   3. TOOLBAR INFERIOR — margin: 0 -15px do Bootstrap .row causa 30px overflow
+   .product-content-right tem overflow-x:clip mas o conteúdo interno
+   da paginação fica levemente desalinhado.
+   ============================================================================= */
+
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .product-content-right > .row:last-child {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+/* Padroniza visual da toolbar inferior com a toolbar superior */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .toolbar-products.toolbar-bottom {
+    background: var(--awa-bg-surface, #fff);
+    border: 1px solid var(--awa-plp-border, var(--awa-border, #e5e5e5));
+    border-radius: var(--awa-radius-lg, 16px);
+    padding: 12px 14px;
+    margin-top: 16px;
+}
+
+
+/* =============================================================================
+   4. GRID DE PRODUTOS — CSS Grid multi-colunas restaurado
+   O bundle compilado (awa-bundle-refinements etc.) contém:
+     display: block !important; grid-template-columns: none !important;
+   que destrói o grid do tema pai. Restauramos aqui com maior especificidade.
+   ============================================================================= */
+
+/* 4a. UL container: forçar CSS Grid sobre o display:block do bundle
+   Usa .wrapper.grid.products-grid para igualar/superar especificidade do
+   selector concorrente: .wrapper.grid.products-grid .product-grid { display:block !important }
+*/
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .wrapper.grid.products-grid ul.row.product-grid,
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .wrapper.grid.products-grid ul.container-products-switch {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+    list-style: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    align-items: start !important;
+    align-content: start !important;
+}
+
+/* 4 colunas de 768 até 1199px */
+@media (min-width: 768px) and (max-width: 1199px) {
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+        .wrapper.grid.products-grid ul.row.product-grid,
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+        .wrapper.grid.products-grid ul.container-products-switch {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    }
+}
+
+/* 3 colunas de 576 até 767px */
+@media (min-width: 576px) and (max-width: 767px) {
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+        .wrapper.grid.products-grid ul.row.product-grid,
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+        .wrapper.grid.products-grid ul.container-products-switch {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 10px !important;
+    }
+}
+
+/* 2 colunas abaixo de 576px */
+@media (max-width: 575px) {
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+        .wrapper.grid.products-grid ul.row.product-grid,
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+        .wrapper.grid.products-grid ul.container-products-switch {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 8px !important;
+    }
+}
+
+/* 4b. LI item: ocupa célula completa do grid sem forçar width fixa */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .products-grid ul.product-grid > li.item-product,
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .products-grid ul.container-products-switch > li.item-product {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* card: overflow:hidden evita que .actions-secondary posicionada absolutamente
+   cause body scroll horizontal (+31px no último card) */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .products-grid .item-product {
+    overflow: hidden !important;
+}
+
+/* .actions-secondary é carregada via async (awa-bundle-cosmetic.css) com display:none.
+   Repete aqui em ordem 1200 para garantir que não fica visível antes do async carregar */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .products-grid .item-product .actions-secondary {
+    display: none !important;
+}
+
+
+/* =============================================================================
+   5. HOVER STATES — corrige transições sem regra :hover correspondente
+   BUG: .b2b-login-to-see-price tinha transition definida mas NENHUMA regra
+   :hover → transição completamente inerte.
+   BUG: .item-product:hover tinha box-shadow mas sem transform → sem "lift".
+   ============================================================================= */
+
+/* 5a. Botão "Faça login" redesenhado — transições no <a> */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .products-grid .item-product .info-price .b2b-login-to-see-price {
+    transition: none !important;
+}
+
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .products-grid .item-product .info-price .b2b-login-to-see-price:hover,
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .products-grid .item-product .info-price .b2b-login-to-see-price:active {
+    filter: none !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* 5b. Focus-visible ring para acessibilidade (WCAG 2.1 AA) */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .products-grid .item-product .info-price .b2b-login-to-see-price:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(183, 51, 55, 0.5);
+}
+
+/* 5c. Product card — lift transform + border darkening no hover */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .products-grid .item-product:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.10) !important;
+    /* --awa-border-strong (#cccccc) = borda levemente mais escura no hover — feedback sutil */
+    border-color: var(--awa-border-strong, #cccccc) !important;
+}
+
+/* Card base: transition inclui transform para suavizar o lift */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .products-grid .item-product {
+    transition: transform var(--awa-duration, 0.2s) var(--awa-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+                box-shadow var(--awa-duration, 0.2s) var(--awa-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+                border-color var(--awa-duration, 0.2s) var(--awa-ease, cubic-bezier(0.4, 0, 0.2, 1)) !important;
+    /* will-change apenas no hover — evita criar camada de composição permanente para cada card */
+}
+
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .products-grid .item-product:hover {
+    will-change: transform;
+}
+
+/* 5d. Botão "Adicionar ao Carrinho" no grid — normaliza hover
+   BUG: awa-bundle-refinements.css só tem transition:background → transform no hover snapava.
+   Fix: sobrescreve transition para incluir transform. */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .products-grid .item-product .actions-primary .action.tocart,
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .products-grid .item-product .actions-primary .btn-add-to-cart {
+    transition: background var(--awa-duration-fast, 0.15s) var(--awa-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+                transform var(--awa-duration-fast, 0.15s) var(--awa-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+                box-shadow var(--awa-duration-fast, 0.15s) var(--awa-ease, cubic-bezier(0.4, 0, 0.2, 1)) !important;
+}
+
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .products-grid .item-product .actions-primary .action.tocart:hover:not(:disabled),
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .products-grid .item-product .actions-primary .btn-add-to-cart:hover:not(:disabled) {
+    background: var(--awa-primary-hover, #8e2629) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(142, 38, 41, 0.4);
+    will-change: transform;
+}
+
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .products-grid .item-product .actions-primary .action.tocart:active:not(:disabled),
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .products-grid .item-product .actions-primary .btn-add-to-cart:active:not(:disabled) {
+    transform: translateY(1px);
+    box-shadow: none;
+}
+
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .products-grid .item-product .actions-primary .action.tocart:focus-visible,
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .products-grid .item-product .actions-primary .btn-add-to-cart:focus-visible {
+    outline: 2px solid var(--awa-primary, #b73337);
+    outline-offset: 3px;
+}
+
+
+/* =============================================================================
+   6. BLOCK-REORDER "Pedidos feitos recentemente" — Redesign
+   Decisão UX: MANTER — quick reorder é fluxo primário B2B (recompra frequente).
+   Problema: bloco sem nenhum estilo (background:none, border:none, padding:none).
+   Fix: card matching o visual language do filter sidebar (bg-surface + border).
+   ============================================================================= */
+
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .sidebar-additional1 .block-reorder {
+    background: #fff;
+    border: 1px solid var(--awa-border, #e5e5e5);
+    border-radius: var(--awa-radius-lg, 16px);
+    padding: 16px;
+    margin-top: 16px;
+}
+
+/* Título */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .block-reorder .block-title strong {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--awa-text, #333);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin: 0;
+}
+
+/* Ícone clock via pseudo-element (Unicode U+1F551) */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .block-reorder .block-title strong::before {
+    content: '';
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    background: var(--awa-primary, #b73337);
+    border-radius: 50%;
+    flex-shrink: 0;
+    opacity: 0.85;
+}
+
+/* Subtítulo "Últimos itens comprados" — redundante com o título */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .block-reorder .subtitle {
+    display: none;
+}
+
+/* Lista de produtos */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .block-reorder .product-items {
+    list-style: none !important;
+    margin: 12px 0 0 !important;
+    padding: 0 !important;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* Item individual */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .block-reorder .product-item {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+    padding: 8px 10px !important;
+    border-radius: 8px;
+    background: var(--awa-bg-surface, #f7f7f7);
+    border: 1px solid transparent;
+    transition: background 0.15s, border-color 0.15s;
+    margin: 0 !important;
+}
+
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .block-reorder .product-item:hover {
+    background: var(--awa-bg-alt-hover, #eeeeee);
+    border-color: var(--awa-border, #e5e5e5);
+}
+
+/* Campo do checkbox — alinha verticalmente */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .block-reorder .field.item.choice {
+    flex-shrink: 0;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Oculta label de texto "Adicionar ao Carrinho" — visualmente redundante */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .block-reorder .field.item.choice .label {
+    display: none !important;
+}
+
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .block-reorder .field.item.choice .control {
+    margin: 0 !important;
+}
+
+/* Checkbox customizado — substitui o nativo */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .block-reorder .checkbox {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 18px;
+    border: 2px solid var(--awa-border-strong, #ccc) !important;
+    border-radius: 4px !important;
+    background: #fff !important;
+    cursor: pointer;
+    position: relative;
+    margin: 1px 0 0 !important;
+    padding: 0 !important;
+    display: block !important;
+    transition: border-color 0.15s, background 0.15s !important;
+    box-shadow: none !important;
+}
+
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .block-reorder .checkbox:checked {
+    border-color: var(--awa-primary, #b73337) !important;
+    background: var(--awa-primary, #b73337) !important;
+}
+
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .block-reorder .checkbox:checked::after {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 1px;
+    width: 6px;
+    height: 10px;
+    border: 2px solid #fff;
+    border-top: none;
+    border-left: none;
+    transform: rotate(45deg);
+}
+
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .block-reorder .checkbox:hover:not(:disabled) {
+    border-color: var(--awa-primary, #b73337) !important;
+}
+
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .block-reorder .checkbox:focus-visible {
+    outline: 2px solid var(--awa-primary, #b73337) !important;
+    outline-offset: 2px;
+}
+
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .block-reorder .checkbox:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* Nome do produto */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .block-reorder .product-item-name {
+    font-size: 11px !important;
+    font-weight: 500;
+    line-height: 1.45;
+    flex: 1;
+    min-width: 0;
+}
+
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .block-reorder .product-item-link {
+    color: var(--awa-text, #333) !important;
+    text-decoration: none !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
+}
+
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .block-reorder .product-item-link:hover {
+    color: var(--awa-primary, #b73337) !important;
+    text-decoration: underline !important;
+    text-decoration-color: rgba(183, 51, 55, 0.5) !important;
+}
+
+/* Botão submit "Adicionar ao Carrinho" do reorder */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .block-reorder .actions-toolbar {
+    margin-top: 12px !important;
+}
+
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .block-reorder .actions-toolbar .action.tocart {
+    width: 100% !important;
+    display: block !important;
+    padding: 10px 12px !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    border-radius: var(--awa-radius-md, 8px) !important;
+    background: var(--awa-primary, #b73337) !important;
+    color: #fff !important;
+    border: none !important;
+    cursor: pointer;
+    text-align: center;
+    letter-spacing: 0.02em;
+    transition: background 0.15s, transform 0.1s, box-shadow 0.15s !important;
+}
+
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .block-reorder .actions-toolbar .action.tocart:hover:not(:disabled) {
+    background: var(--awa-primary-hover, #8e2629) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(142, 38, 41, 0.35);
+}
+
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .block-reorder .actions-toolbar .action.tocart:active:not(:disabled) {
+    transform: translateY(1px) !important;
+    box-shadow: none !important;
+}
+
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .block-reorder .actions-toolbar .action.tocart:focus-visible {
+    outline: 2px solid var(--awa-primary, #b73337) !important;
+    outline-offset: 3px;
+}
+
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .block-reorder .actions-toolbar .action.tocart:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* Mobile: bloco menor com top margin reduzida */
+@media (max-width: 767px) {
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+        .sidebar-additional1 .block-reorder {
+        margin-top: 12px;
+        padding: 14px;
+    }
+}
+
+
+/* =============================================================================
+   7. FILTER SIDEBAR — sticky em desktop + mobile collapse toggle
+   ============================================================================= */
+
+/* Sticky sidebar: fica visível enquanto o grid de produtos é rolado */
+@media (min-width: 992px) {
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+        #layered-ajax-filter-block,
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+        .sidebar.sidebar-main > .block.filter {
+        position: sticky !important;
+        top: 16px !important;
+        max-height: calc(100vh - 32px) !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        scrollbar-width: thin !important;
+        scrollbar-color: var(--awa-border-strong, #ccc) transparent !important;
+    }
+
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+        #layered-ajax-filter-block::-webkit-scrollbar,
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+        .sidebar.sidebar-main > .block.filter::-webkit-scrollbar {
+        width: 4px;
+    }
+}
+
+
+/* =============================================================================
+   8. CATEGORY PAGE — aproveitamento de espaço e melhorias de UX
+   ============================================================================= */
+
+/* Reduz gap entre toolbar e grid de produtos */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .shop-tab-select {
+    margin-bottom: 12px !important;
+}
+
+/* Toolbar inferior: menos espaço em mobile */
+@media (max-width: 767px) {
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+        .toolbar-products.toolbar-bottom {
+        margin-top: 12px !important;
+        padding: 10px 12px !important;
+    }
+
+    /* Product name: 2-line clamp em mobile para cards mais compactos */
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+        .products-grid .item-product .product-name {
+        min-height: 36px !important;
+    }
+}
+
+/* Pagination: alinha ao centro em mobile */
+@media (max-width: 767px) {
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+        .pages {
+        justify-content: center;
+        display: flex;
+    }
+}
+
+/* Category view header: remove top padding desnecessário */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .page-main {
+    padding-top: 12px !important;
+}
+
+/* Breadcrumb menos espaço em categoria */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .breadcrumbs {
+    margin-bottom: 8px !important;
+    padding-bottom: 0 !important;
+}
+
+/* =============================================================================
+   GLOBAL — awa-nav-close: ocultar em desktop (styles-l.css tem seletor errado)
+   ============================================================================= */
+@media (min-width: 992px) {
+    body .page-wrapper .awa-nav-close,
+    body .page-wrapper .awa-nav-overlay {
+        display: none !important;
+    }
+}

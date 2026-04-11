@@ -1,6 +1,9 @@
 <?php
 /**
- * AWA PDP — Bloco básico de descrição
+ * AWA PDP — Bloco de descrição com fallback inteligente
+ *
+ * Prioridade: description > short_description > atributos básicos (marca, modelo).
+ * Nunca exibe seção vazia — sempre mostra algo útil para o cliente.
  *
  * @var \Magento\Catalog\Block\Product\View $block
  */
@@ -15,20 +18,65 @@ $_helper = $this->helper(\Magento\Catalog\Helper\Output::class);
 $description = $_helper->productAttribute($_product, $_product->getDescription(), 'description');
 $shortDescription = $_helper->productAttribute($_product, $_product->getShortDescription(), 'short_description');
 
-$content = trim((string) $description) !== '' ? $description : $shortDescription;
+$content = '';
+$sectionTitle = __('Descrição');
+
+// 1. Descrição completa
+if (trim(strip_tags((string) $description)) !== '') {
+    $content = $description;
+// 2. Descrição curta
+} elseif (trim(strip_tags((string) $shortDescription)) !== '') {
+    $content = $shortDescription;
+// 3. Fallback: montar resumo com atributos do produto
+} else {
+    $name = $block->escapeHtml($_product->getName());
+    $sku  = $block->escapeHtml($_product->getSku());
+
+    $attrs = [];
+    foreach (['marca_moto', 'modelo_moto', 'ano_moto', 'material', 'cor'] as $code) {
+        try {
+            $attr = $_product->getResource()->getAttribute($code);
+            if ($attr && $attr->usesSource()) {
+                $val = $_product->getAttributeText($code);
+                if ($val && $val !== 'N/A' && $val !== '-') {
+                    $attrs[$code] = is_array($val) ? implode(', ', $val) : (string) $val;
+                }
+            }
+        } catch (\Throwable $e) {
+            continue;
+        }
+    }
+
+    if (!empty($attrs) || $name) {
+        $sectionTitle = __('Sobre este produto');
+        $lines = ['<p><strong>' . $name . '</strong></p>'];
+        if ($sku) {
+            $lines[] = '<p>Código do produto: <strong>' . $sku . '</strong></p>';
+        }
+        $labelMap = [
+            'marca_moto'  => 'Marca',
+            'modelo_moto' => 'Modelo',
+            'ano_moto'    => 'Ano',
+            'material'    => 'Material',
+            'cor'         => 'Cor',
+        ];
+        foreach ($attrs as $code => $val) {
+            $label = $labelMap[$code] ?? $code;
+            $lines[] = '<p>' . $block->escapeHtml($label) . ': <strong>' . $block->escapeHtml($val) . '</strong></p>';
+        }
+        $content = implode("\n", $lines);
+    }
+}
+
 if (trim(strip_tags((string) $content)) === '') {
     return;
 }
 ?>
 
-<div class="awa-pdp-tabs awa-pdp-basic-description" id="awa-pdp-basic-description">
-    <div class="awa-pdp-tabs__panel active"
-         role="region"
-         aria-label="<?= $block->escapeHtmlAttr(__('Descrição do produto')) ?>"
-         aria-hidden="false">
-        <h2 class="awa-pdp-basic-description__title"><?= $block->escapeHtml(__('Descrição')) ?></h2>
-        <div class="product attribute description awa-pdp-basic-description__content">
-            <?= /* @noEscape */ $content ?>
-        </div>
+<details class="awa-pdp-accordion-item" open>
+    <summary><?= $block->escapeHtml($sectionTitle) ?></summary>
+    <div class="awa-accordion-body product attribute description awa-pdp-basic-description__content"
+         role="region">
+        <?= /* @noEscape */ $content ?>
     </div>
-</div>
+</details>

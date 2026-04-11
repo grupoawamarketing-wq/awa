@@ -33,11 +33,23 @@ $templateType = \Magento\Catalog\Block\Product\ReviewRendererInterface::SHORT_VI
         </h2>
     </div>
 
+    <div class="awa-pdp-mv-tabs" id="awa-pdp-mv-tabs" role="tablist" aria-label="Filtrar por marca"></div>
+
     <div class="rokan-mostviewed">
         <div class="swiper products-swiper products-swiper--mostviewed">
             <div class="swiper-wrapper">
                 <?php $i = 0; foreach ($_productCollection as $_product): if ($i >= 8) { break; } ?>
-                <div class="swiper-slide">
+                <?php
+                    $_brand = '';
+                    try {
+                        $_brandAttr = $_product->getResource()->getAttribute('marca_moto');
+                        if ($_brandAttr && $_brandAttr->usesSource()) {
+                            $_brandVal = $_product->getAttributeText('marca_moto');
+                            $_brand = is_array($_brandVal) ? implode(',', $_brandVal) : (string) $_brandVal;
+                        }
+                    } catch (\Throwable $e) {}
+                ?>
+                <div class="swiper-slide" data-brand="<?= $block->escapeHtmlAttr($_brand) ?>">
                 <div class="product-item">
                     <?php
                     $productImage      = $block->getImage($_product, $image);
@@ -107,4 +119,49 @@ $templateType = \Magento\Catalog\Block\Product\ReviewRendererInterface::SHORT_VI
         }
     }
 }
+</script>
+
+<script>
+(function () {
+    var section = document.querySelector('.awa-pdp-mostviewed');
+    if (!section) { return; }
+    var slides = section.querySelectorAll('.swiper-slide[data-brand]');
+    var tabsEl = document.getElementById('awa-pdp-mv-tabs');
+    if (!slides.length || !tabsEl) { return; }
+    var brands = [];
+    slides.forEach(function (s) {
+        var b = (s.getAttribute('data-brand') || '').trim();
+        if (b && brands.indexOf(b) === -1) { brands.push(b); }
+    });
+    if (brands.length < 2) { tabsEl.style.display = 'none'; return; }
+    function makeTab(label, value) {
+        var btn = document.createElement('button');
+        btn.className = 'awa-pdp-mv-tab' + (value === '' ? ' awa-active' : '');
+        btn.type = 'button';
+        btn.textContent = label;
+        btn.setAttribute('data-filter', value);
+        btn.setAttribute('role', 'tab');
+        btn.setAttribute('aria-selected', value === '' ? 'true' : 'false');
+        btn.addEventListener('click', function () {
+            tabsEl.querySelectorAll('.awa-pdp-mv-tab').forEach(function (t) {
+                t.classList.remove('awa-active');
+                t.setAttribute('aria-selected', 'false');
+            });
+            btn.classList.add('awa-active');
+            btn.setAttribute('aria-selected', 'true');
+            var filter = btn.getAttribute('data-filter');
+            slides.forEach(function (s) {
+                var brand = (s.getAttribute('data-brand') || '').trim();
+                if (filter === '' || brand === filter) {
+                    s.removeAttribute('data-brand-hidden');
+                } else {
+                    s.setAttribute('data-brand-hidden', '');
+                }
+            });
+        });
+        return btn;
+    }
+    tabsEl.appendChild(makeTab('Todos', ''));
+    brands.forEach(function (b) { tabsEl.appendChild(makeTab(b, b)); });
+})();
 </script>

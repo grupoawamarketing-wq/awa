@@ -1,202 +1,244 @@
 <?php
 /**
- * AWA Motos - Slideshow Template
- * Refatorado para usar um componente de UI Magento 2 e data-mage-init.
- * A lógica de inicialização e acessibilidade foi movida para o JS.
+ * AWA Motos — Slide Banner Template
+ * API: Owl Carousel 2.0.x (Rokanthemes_Themeoption/js/owl.carousel)
+ * Estrutura: hidden-xs (desktop) / visible-xs (mobile) conforme tema Ayo Home5.
+ *
+ * @var \Rokanthemes\SlideBanner\Block\Slider $block
  */
 
 // @codingStandardsIgnoreFile
-/** @var \Rokanthemes\SlideBanner\Block\Slider $block */
 if ($banners = $block->getBannerCollection()):
-    $slider = $block->getSlider();
+    $slider   = $block->getSlider();
     $sliderId = $block->getSliderId();
-    $sliderSettings = $slider->getSliderSetting();
-    $totalSlides = is_countable($banners) ? count($banners) : 0;
+    $settings = $slider->getSliderSetting();
 
-    // Prepara a configuração do slider para o componente JS
-    $sliderConfig = [
-        'lazyLoad' => true,
-        'singleItem' => true,
+    /**
+     * Mapeamento DB settings (formato Rokanthemes legado) → OWL Carousel v2 API
+     *
+     * DB usa:     autoPlay (ms|1|0),  navigation (bool), pagination (bool),
+     *             stopOnHover (bool), slideSpeed (ms)
+     * OWL v2 usa: autoplay (bool), autoplayTimeout (ms), autoplayHoverPause,
+     *             nav, dots, smartSpeed, animateOut, animateIn
+     */
+    $s = static function (array $arr, string $key, $default = null) {
+        return array_key_exists($key, $arr) ? $arr[$key] : $default;
+    };
+
+    // autoPlay: 0=off | 1=on (5 s) | N>1 = N ms de intervalo
+    $rawAP           = (int) $s($settings, 'autoPlay', 0);
+    $autoplayEnabled = $rawAP !== 0;
+    $autoplayTimeout = $rawAP > 1 ? $rawAP : 5000;
+
+    // slideSpeed → smartSpeed (mínimo 50ms)
+    $smartSpeed = max(50, (int) $s($settings, 'slideSpeed', 500) ?: 500);
+
+    $owlConfig = [
+        'items'              => 1,
+        'loop'               => false,
+        'autoHeight'         => true,
+        'lazyLoad'           => false,
+        'touchDrag'          => true,
+        'mouseDrag'          => true,
+        'nav'                => (bool) (int) $s($settings, 'navigation', 1),
+        'dots'               => (bool) (int) $s($settings, 'pagination', 1),
+        'autoplay'           => $autoplayEnabled,
+        'autoplayTimeout'    => $autoplayTimeout,
+        'autoplayHoverPause' => (bool) (int) $s($settings, 'stopOnHover', 1),
+        'smartSpeed'         => $smartSpeed,
+        'animateOut'         => false,
+        'animateIn'          => false,
     ];
-    foreach ($sliderSettings as $key => $value) {
-        if (in_array($key, ['autoPlay', 'navigation', 'stopOnHover', 'pagination', 'scrollPerPage'])) {
-            $sliderConfig[$key] = (bool)$value;
-        } else {
-            $sliderConfig[$key] = $value;
+
+    // Resolução de links legados (ambiente de staging → produção)
+    $legacyHosts = ['srv1113343.hstgr.cloud', 'www.srv1113343.hstgr.cloud'];
+    $baseUrl     = rtrim((string) $block->getBaseUrl(), '/');
+    $baseHost    = (string) parse_url($baseUrl, PHP_URL_HOST);
+    $baseScheme  = (string) parse_url($baseUrl, PHP_URL_SCHEME);
+    $resolveLink = static function (?string $link) use ($legacyHosts, $baseHost, $baseScheme): string {
+        if (!is_string($link)) { return ''; }
+        $link = trim($link);
+        if ($link === '') { return ''; }
+        $parts    = parse_url($link);
+        if (!is_array($parts)) { return $link; }
+        $linkHost = isset($parts['host']) ? strtolower((string) $parts['host']) : '';
+        if ($linkHost === '' || !in_array($linkHost, $legacyHosts, true) || $baseHost === '' || $baseScheme === '') {
+            return $link;
         }
-    }
-    $mageInitConfig = [
-        'rokanthemes/slideBanner' => [
-            'sliderConfig' => $sliderConfig,
-            'totalSlides' => $totalSlides
-        ]
-    ];
+        $path     = isset($parts['path'])     ? (string) $parts['path']     : '/';
+        $path     = $path !== '' ? $path : '/';
+        $query    = isset($parts['query'])    ? ('?' . $parts['query'])    : '';
+        $fragment = isset($parts['fragment']) ? ('#' . $parts['fragment']) : '';
+        return $baseScheme . '://' . $baseHost . $path . $query . $fragment;
+    };
 ?>
-
-<?php
-// Build Schema.org ItemList as PHP array + json_encode (prevents JSON injection via banner titles/urls)
-$sliderTitle = (string)($slider->getSliderTitle() ?: __('Destaques'));
-$schemaItems = [];
-$schemaPos = 0;
-foreach ($banners as $schemaBanner) {
-    if ($schemaBanner->getSlideStatus() == '2') { continue; }
-    $schemaPos++;
-    $schemaItemName = trim(strip_tags((string)($schemaBanner->getSlideTitle() ?: $schemaBanner->getSlideText() ?: '')));
-    if ($schemaItemName && $schemaItemName !== '.') {
-        $schemaItem = [
-            '@type'    => 'ListItem',
-            'position' => $schemaPos,
-            'name'     => $schemaItemName,
-        ];
-        if ($schemaBanner->getSlideLink()) {
-            $schemaItem['url'] = $schemaBanner->getSlideLink();
-        }
-        $schemaItems[] = $schemaItem;
-    }
-}
-$jsonLdSchema = [
-    '@context'        => 'https://schema.org',
-    '@type'           => 'ItemList',
-    'name'            => $sliderTitle,
-    'numberOfItems'   => $totalSlides,
-    'itemListElement' => $schemaItems,
-];
-?>
-<!-- Schema.org ItemList para SEO de carrosséis -->
-<script type="application/ld+json">
-<?= /* @noEscape */ json_encode($jsonLdSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) ?>
-</script>
-
-<!-- Slider refatorado para usar componente UI via data-mage-init -->
-<div class="wrapper_slider slider_<?php echo $block->escapeHtmlAttr((string)$sliderId); ?>"
-     role="region"
-     aria-label="<?php echo $block->escapeHtml(__('Apresentação de slides promocional')); ?>"
-     aria-roledescription="carousel"
-     aria-live="off"
-     data-mage-init='<?php echo json_encode($mageInitConfig, JSON_HEX_APOS | JSON_HEX_QUOT); ?>'>
-    <div class="owl" role="group" aria-roledescription="slides">
-        <?php
-        $sliderMediaUrl = rtrim($block->getUrl('media'), '/');
-        $sliderMediaDir = BP . '/pub/media/';
-
-        /**
-         * Gera <picture> responsivo com suporte a WebP + fallback JPEG.
-         * Usa file_exists para evitar <source> com WebP inexistente.
-         */
-        $renderPicture = static function (
-            string $desktopSrc,
-            ?string $mobileSrc,
-            string $altText,
-            bool $isFirst
-        ) use ($block, $sliderMediaUrl, $sliderMediaDir): string {
-            $alt      = $block->escapeHtmlAttr($altText);
-            $loading  = $isFirst ? 'eager' : 'lazy';
-            $priority = $isFirst ? ' fetchpriority="high"' : '';
-            $mSrc     = $mobileSrc ?: $desktopSrc;
-
-            $dUrl = $sliderMediaUrl . '/' . ltrim($desktopSrc, '/');
-            $mUrl = $sliderMediaUrl . '/' . ltrim($mSrc, '/');
-
-            $dWebp    = (string) preg_replace('/\.(jpg|jpeg|png)$/i', '.webp', $desktopSrc);
-            $mWebp    = (string) preg_replace('/\.(jpg|jpeg|png)$/i', '.webp', $mSrc);
-            $dWebpUrl = file_exists($sliderMediaDir . ltrim($dWebp, '/'))
-                ? $sliderMediaUrl . '/' . ltrim($dWebp, '/')
-                : '';
-            $mWebpUrl = file_exists($sliderMediaDir . ltrim($mWebp, '/'))
-                ? $sliderMediaUrl . '/' . ltrim($mWebp, '/')
-                : '';
-
-            $html = '<picture>';
-            // WebP sources — um elemento para ambas as resoluções se forem a mesma imagem
-            if ($dWebpUrl === $mWebpUrl && $dWebpUrl) {
-                $html .= '<source type="image/webp" srcset="' . $block->escapeUrl($dWebpUrl) . '" />';
-            } else {
-                if ($dWebpUrl) {
-                    $html .= '<source type="image/webp" media="(min-width: 768px)" srcset="'
-                        . $block->escapeUrl($dWebpUrl) . '" width="1920" height="600" />';
-                }
-                if ($mWebpUrl) {
-                    $html .= '<source type="image/webp" srcset="'
-                        . $block->escapeUrl($mWebpUrl) . '" width="768" height="400" />';
-                }
-            }
-            // JPEG desktop source (apenas quando há imagem mobile distinta)
-            if ($dUrl !== $mUrl) {
-                $html .= '<source media="(min-width: 768px)" srcset="'
-                    . $block->escapeUrl($dUrl) . '" width="1920" height="600" />';
-            }
-            // Fallback <img> (mobile JPEG ou única imagem)
-            $html .= '<img src="' . $block->escapeUrl($mUrl) . '"'
-                . ' alt="' . $alt . '"'
-                . ' loading="' . $loading . '"'
-                . ' decoding="async"'
-                . ' width="768" height="400"'
-                . $priority . ' />';
-            $html .= '</picture>';
-            return $html;
-        };
-
-        $slideIndex = 0;
-        foreach ($banners as $banner):
-            if ($banner->getSlideStatus() == '2') { continue; }
-            $slideIndex++;
-            $slideTextRaw = (string)$banner->getSlideText();
-            $slideTitleRaw = (string)$banner->getSlideTitle();
-            $slideAlt = trim(strip_tags($slideTextRaw));
-            if ($slideAlt === '') {
-                $slideAlt = trim(strip_tags($slideTitleRaw));
-            }
-            if ($slideAlt === '') {
-                $slideAlt = (string)__('Slide %1', $slideIndex);
-            }
-        ?>
-        <div class="banner_item" role="group" aria-roledescription="slide" aria-label="<?php echo $block->escapeHtml(__('Slide %1 de %2', $slideIndex, $totalSlides)); ?>">
-            <?php
-                $isFirst = ($slideIndex === 1);
-                $desktopSrc = $banner->getSlideImage();
-                $mobileSrc = $banner->getSlideImageMobile();
-                $pictureHtml = $renderPicture($desktopSrc, $mobileSrc, (string)$slideAlt, $isFirst);
-                if ($link = $banner->getSlideLink()) {
-                    $pictureHtml = '<a href="' . $block->escapeUrl($link) . '" title="' . $block->escapeHtml($slideAlt) . '">' . $pictureHtml . '</a>';
-                }
-            ?>
-            <div class="banner_item_bg">
-                <?php echo /* @noEscape */ $pictureHtml; ?>
+<!-- Slider desktop (oculto no mobile via Bootstrap .hidden-xs) -->
+<div class="wrapper_slider hidden-xs slider_<?php echo (int) $sliderId; ?>">
+    <div class="owl owl-carousel">
+        <?php $slideIndex = 0; foreach ($banners as $banner): if ($banner->getSlideStatus() == '2') { continue; } $slideIndex++; $isFirst = ($slideIndex === 1); ?>
+            <div class="banner_item">
+                <div class="banner_item_bg">
+                    <?php
+                    $slideAlt = $banner->getSlideText() ?: ($banner->getSlideTitle() ?: '');
+                    $imgHtml  = $block->getImageElement($banner->getSlideImage(), $slideAlt, $isFirst);
+                    if ($isFirst && preg_match('/src="([^"]+)"/', $imgHtml, $_m)) {
+                        $_webp = preg_replace('/\.(jpg|jpeg|png)$/i', '.webp', $_m[1]);
+                        $imgHtml = '<picture>'
+                            . '<source type="image/webp" srcset="' . $block->escapeUrl($_webp) . '">'
+                            . $imgHtml
+                            . '</picture>';
+                    }
+                    $link     = $resolveLink($banner->getSlideLink());
+                    if ($link !== '') {
+                        $imgHtml = '<a href="' . $block->escapeUrl($link) . '">' . $imgHtml . '</a>';
+                    }
+                    echo $imgHtml;
+                    ?>
+                </div>
+                <div class="text-banner">
+                    <?php if ($text = $banner->getSlideText()): echo $block->getContentText($text); endif; ?>
+                </div>
             </div>
-            <?php
-            $cleanText  = trim(strip_tags($slideTextRaw));
-            $hasText    = ($cleanText !== '' && $cleanText !== '.');
-            $ctaLink    = $banner->getSlideLink(); // re-fetch to avoid scope issue
-            $showBanner = $hasText || $ctaLink !== '';
-            if ($showBanner): ?>
-            <div class="text-banner">
-                <?php if ($hasText): ?>
-                    <?php echo /* @noEscape */ $block->getContentText($slideTextRaw); ?>
-                <?php endif; ?>
-                <?php if ($ctaLink !== ''): ?>
-                <a href="<?php echo $block->escapeUrl($ctaLink); ?>"
-                   class="awa-slide-cta"
-                   aria-label="<?php echo $block->escapeHtmlAttr(__('Ver produtos')); ?>">
-                    <?= $block->escapeHtml(__('Ver Produtos')) ?>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
-                         viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                         stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
-                         aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
-                </a>
-                <?php endif; ?>
-            </div>
-            <?php endif; ?>
-        </div>
         <?php endforeach; ?>
     </div>
-    <div class="slide-controls">
-        <button type="button" class="play-pause-button" aria-label="<?php echo $block->escapeHtml(__('Pausar slides')); ?>">
-            <span class="icon-pause" aria-hidden="true"></span>
-            <span class="icon-play icon-play--hidden" aria-hidden="true"></span>
-        </button>
-        <div class="progress-bar-container" aria-hidden="true">
-            <div class="progress-bar"></div>
-        </div>
+</div>
+<!-- Slider mobile (visível apenas em xs via Bootstrap .visible-xs) -->
+<div class="wrapper_slider visible-xs slider_<?php echo (int) $sliderId; ?>_mobile">
+    <div class="owl owl-carousel">
+        <?php $slideIndex = 0; foreach ($banners as $banner): if ($banner->getSlideStatus() == '2') { continue; } $slideIndex++; $isFirst = ($slideIndex === 1); ?>
+            <div class="banner_item">
+                <div class="banner_item_bg">
+                    <?php
+                    $slideAlt = $banner->getSlideText() ?: ($banner->getSlideTitle() ?: '');
+                    $imgHtml  = $block->getImageElementMobile($banner->getSlideImageMobile(), $slideAlt, $isFirst);
+                    if ($isFirst && preg_match('/src="([^"]+)"/', $imgHtml, $_m)) {
+                        $_webp = preg_replace('/\.(jpg|jpeg|png)$/i', '.webp', $_m[1]);
+                        $imgHtml = '<picture>'
+                            . '<source type="image/webp" srcset="' . $block->escapeUrl($_webp) . '">'
+                            . $imgHtml
+                            . '</picture>';
+                    }
+                    $link     = $resolveLink($banner->getSlideLink());
+                    if ($link !== '') {
+                        $imgHtml = '<a href="' . $block->escapeUrl($link) . '">' . $imgHtml . '</a>';
+                    }
+                    echo $imgHtml;
+                    ?>
+                </div>
+                <div class="text-banner">
+                    <?php if ($text = $banner->getSlideText()): echo $block->getContentText($text); endif; ?>
+                </div>
+            </div>
+        <?php endforeach; ?>
     </div>
 </div>
+<script>
+    require([
+        'jquery',
+        'rokanthemes/owl'
+    ], function ($) {
+        'use strict';
+
+        var config = <?php echo json_encode($owlConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
+
+        // Respeitar preferências de animação reduzida (WCAG 2.1)
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            config.autoplay   = false;
+            config.animateOut = false;
+            config.animateIn  = false;
+        }
+
+        function doAnimations($slide) {
+            var animEndEv = 'webkitAnimationEnd animationend';
+            $slide.find('.text-banner [data-animation^="animated"]').each(function () {
+                var $el  = $(this);
+                var anim = $el.data('animation');
+                if (anim) {
+                    $el.addClass(anim).one(animEndEv, function () { $el.removeClass(anim); });
+                }
+            });
+        }
+
+        function scheduleRefresh($owl) {
+            var resizeTimer;
+
+            function refreshOwl() {
+                if ($owl.data('owl.carousel')) {
+                    $owl.trigger('refresh.owl.carousel');
+                }
+            }
+
+            // Recalcular após layout/CSS final da página, especialmente quando
+            // o hero usa full-bleed fora do grid padrão.
+            if (window.requestAnimationFrame) {
+                window.requestAnimationFrame(function () {
+                    window.requestAnimationFrame(refreshOwl);
+                });
+            } else {
+                window.setTimeout(refreshOwl, 60);
+            }
+
+            $(window).on('load', refreshOwl);
+            $(window).on('resize orientationchange', function () {
+                window.clearTimeout(resizeTimer);
+                resizeTimer = window.setTimeout(refreshOwl, 160);
+            });
+        }
+
+        function scheduleDesktopAutoplayFallback($owl) {
+            var autoplayTimerKey = 'awaHeroAutoplayTimer';
+            var timeout = Math.max(parseInt(config.autoplayTimeout, 10) || 5000, 1000);
+
+            if (!config.autoplay || !$owl.closest('.wrapper_slider.hidden-xs').length) {
+                return;
+            }
+
+            function restartAutoplay() {
+                var timerId = $owl.data(autoplayTimerKey);
+                if (timerId) {
+                    window.clearInterval(timerId);
+                }
+
+                timerId = window.setInterval(function () {
+                    if ($owl.data('owl.carousel')) {
+                        $owl.trigger('next.owl.carousel');
+                    }
+                }, timeout);
+
+                $owl.data(autoplayTimerKey, timerId);
+            }
+
+            restartAutoplay();
+
+            $owl.on('translated.owl.carousel refreshed.owl.carousel', restartAutoplay);
+            $(window).on('beforeunload', function () {
+                var timerId = $owl.data(autoplayTimerKey);
+                if (timerId) {
+                    window.clearInterval(timerId);
+                }
+            });
+        }
+
+        // OWL v2: anexar eventos ANTES de inicializar (initialized dispara no ctor)
+        function initOwl(selector) {
+            var $owl = $(selector);
+            if (!$owl.length) { return; }
+
+            $owl
+                .on('initialized.owl.carousel', function (e) {
+                    doAnimations($(e.target).find('.owl-item.active').first());
+                })
+                .on('translated.owl.carousel', function (e) {
+                    doAnimations($(e.target).find('.owl-item.active').first());
+                })
+                .owlCarousel(config);
+
+            scheduleRefresh($owl);
+            scheduleDesktopAutoplayFallback($owl);
+        }
+
+        initOwl('.slider_<?php echo (int) $sliderId; ?> .owl');
+        initOwl('.slider_<?php echo (int) $sliderId; ?>_mobile .owl');
+    });
+</script>
 <?php endif; ?>

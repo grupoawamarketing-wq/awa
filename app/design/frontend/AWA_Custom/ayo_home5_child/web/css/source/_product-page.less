@@ -1,0 +1,376 @@
+// ============================================================================
+// AWA Motos — _product-page.less
+// Página de detalhe do produto (PDP) — body.catalog-product-view
+//
+// Seletores do tema pai sobrescritos:
+//   .catalog-product-view .page-main        background cinza → branco
+//   .awa-pdp-related                        contexto de card não coberto pelo mixin
+//   .product-info-main .price-box           tamanho e cor do preço principal
+//   .product-info-main .action.primary      botão CTA da PDP
+//   .breadcrumbs                            tipografia e separador
+//   .product-social-links                   ícones de compartilhamento
+//
+// Restrições: zero PHP/HTML/XML. !important documentado inline.
+// ============================================================================
+
+@import (once) '_awa-variables';
+
+
+// ============================================================================
+// 1. FUNDO BRANCO — cancela herança cinza do tema pai na PDP
+// ============================================================================
+// !important: tema pai define background nos containers com especificidade alta
+// usando seletores como body.catalog-product-view .page-main ou inline styles
+
+body.catalog-product-view {
+    background-color: #ffffff !important;
+
+    .page-wrapper,
+    .page-main,
+    .columns,
+    .column.main {
+        background-color: #ffffff !important;
+    }
+
+    // Seções de produto (tabs, info complementar) — branco puro
+    .product.info.detailed,
+    .product-info-tabs,
+    .data.item.content,
+    .additional-attributes-wrapper {
+        background-color: #ffffff;
+    }
+}
+
+
+// ============================================================================
+// 2. CARD MIXIN — contextos específicos da PDP não cobertos pelo _product-card.less
+// ============================================================================
+// O tema Ayo usa .awa-pdp-related e .products-swiper--related para o carousel
+// de produtos relacionados na PDP — seletores diferentes de .block.related.
+
+.awa-pdp-related,
+.products-swiper--related,
+.catalog-product-view .block-related,
+.catalog-product-view .block-upsell {
+    .awa-card();
+    overflow: visible !important; // sobrescreve overflow:hidden do carousel Ayo
+}
+
+// Garante que o contexto acima carregue o mixin corretamente
+// (sem erro "mixin not found" — _product-card.less já define .awa-card())
+
+
+// ============================================================================
+// 3. BREADCRUMBS — tipografia e separador usando tokens
+// ============================================================================
+
+.breadcrumbs {
+    padding: 12px 0;
+    margin-bottom: 16px;
+
+    .items {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 4px;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .item {
+        display: inline-flex;
+        align-items: center;
+        font-size: 13px;
+        color: var(--awa-text-muted, #666666);
+        margin: 0;
+
+        // Separador via ::after no item (exceto o último)
+        &:not(:last-child)::after {
+            content: '/';
+            margin: 0 4px;
+            color: var(--awa-border, #e2e2e2);
+        }
+
+        a {
+            color: var(--awa-text-muted, #666666);
+            text-decoration: none;
+            transition: color var(--awa-transition);
+
+            &:hover {
+                color: var(--awa-primary, #b73337);
+            }
+        }
+
+        &.home a::before {
+            content: '⌂ ';
+            font-size: 12px;
+        }
+
+        &:last-child {
+            color: var(--awa-text, #333333);
+            font-weight: @awa-weight-medium;
+        }
+    }
+}
+
+
+// ============================================================================
+// 4. PREÇO PRINCIPAL DA PDP
+// ============================================================================
+// !important: tema pai define .product-info-main .price com font-size e cor
+// via seletor com alta especificidade.
+
+.catalog-product-view .product-info-main {
+
+    .price-box {
+        margin: 0 0 16px;
+
+        .price {
+            font-size: clamp(24px, 3vw, 32px) !important; // sobrescreve tamanho do tema pai
+            font-weight: 700 !important;
+            color: var(--awa-text, #222222) !important;
+            line-height: 1.1;
+        }
+
+        .special-price .price {
+            color: var(--awa-primary, #b73337) !important;
+        }
+
+        .old-price {
+            .price {
+                font-size: 16px !important;
+                font-weight: 400 !important;
+                color: var(--awa-text-muted, #666666) !important;
+                text-decoration: line-through;
+            }
+        }
+
+        // Badge "SEU PREÇO" inline com o preço (usuário logado)
+        .price-final_price::after {
+            content: 'SEU PREÇO';
+            display: inline-flex;
+            align-items: center;
+            margin-left: 8px;
+            padding: 3px 8px;
+            background: rgba(183, 51, 55, 0.08);
+            color: var(--awa-primary, #b73337);
+            font-size: 10px;
+            font-weight: @awa-weight-bold;
+            letter-spacing: 0.08em;
+            border-radius: @awa-border-radius-sm;
+            text-transform: uppercase;
+            vertical-align: middle;
+            line-height: 1.6;
+        }
+    }
+
+    // Preço mascarado para visitante anônimo
+    .b2b-login-to-see-price {
+        &::before {
+            font-size: clamp(22px, 3vw, 30px);
+            font-weight: @awa-weight-bold;
+            letter-spacing: 0.1em;
+            color: var(--awa-text, #333333);
+            opacity: 0.15;
+            user-select: none;
+            display: block;
+        }
+
+        &::after {
+            content: 'Faça login para ver o preço';
+            display: block;
+            font-size: 13px;
+            font-style: italic;
+            color: var(--awa-text-muted, #666666);
+            margin-top: 4px;
+        }
+
+        a { display: none; }
+    }
+}
+
+
+// ============================================================================
+// 5. BOTÃO CTA PRINCIPAL DA PDP
+// ============================================================================
+// !important: tema pai define gradiente e fonte diferente no .action.tocart
+// dentro da PDP via seletor altamente específico.
+
+.catalog-product-view .product-info-main {
+
+    .action.primary,
+    .action.tocart,
+    .box-tocart .action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 52px;
+        padding: 14px 32px;
+        border-radius: var(--card-cta-radius, 4px);
+        border: none;
+        background: var(--awa-primary, #b73337) !important; // sobrescreve gradiente do tema pai
+        color: #ffffff !important;
+        font-size: 16px !important;
+        font-weight: 700 !important;
+        line-height: 1.2;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background-color var(--awa-transition), box-shadow var(--awa-transition);
+        box-shadow: 0 4px 14px rgba(183, 51, 55, 0.25);
+
+        &:hover,
+        &:focus-visible {
+            background: var(--awa-primary-dark, #8e2629) !important;
+            box-shadow: 0 6px 20px rgba(183, 51, 55, 0.3);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--awa-primary, #b73337);
+            outline-offset: 2px;
+        }
+
+        &[disabled],
+        &.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+            box-shadow: none;
+        }
+    }
+
+    // Botão de login para visitante anônimo (PDP)
+    .b2b-login-to-buy-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 52px;
+        padding: 14px 32px;
+        border-radius: var(--card-cta-radius, 4px);
+        border: 1.5px solid var(--awa-primary, #b73337);
+        background: transparent;
+        color: var(--awa-primary, #b73337);
+        font-size: 15px;
+        font-weight: @awa-weight-semibold;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background var(--awa-transition), color var(--awa-transition);
+
+        &::before {
+            content: '';
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23b73337' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E")
+                center / contain no-repeat;
+        }
+
+        &:hover {
+            background: var(--awa-primary, #b73337);
+            color: #ffffff;
+
+            &::before {
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E");
+            }
+        }
+    }
+}
+
+
+// ============================================================================
+// 6. ABAS DE INFORMAÇÃO DO PRODUTO (Descrição, Especificações)
+// ============================================================================
+
+.catalog-product-view {
+
+    .product.info.detailed {
+        margin-top: 32px;
+        border-top: 1px solid var(--awa-border, #e2e2e2);
+        padding-top: 24px;
+    }
+
+    // Abas: título e conteúdo
+    .data.tabs.mage-tabs-horizontal,
+    .tabs-product-info {
+
+        .data.item.title {
+            a {
+                font-size: 14px;
+                font-weight: @awa-weight-semibold;
+                color: var(--awa-text-muted, #666666);
+                text-decoration: none;
+                padding: 10px 16px;
+                border-bottom: 2px solid transparent;
+                transition: color var(--awa-transition), border-color var(--awa-transition);
+
+                &:hover {
+                    color: var(--awa-primary, #b73337);
+                }
+            }
+
+            &.active a {
+                color: var(--awa-primary, #b73337);
+                border-bottom-color: var(--awa-primary, #b73337);
+            }
+        }
+
+        .data.item.content {
+            padding: 20px 0;
+            font-size: 14px;
+            line-height: 1.7;
+            color: var(--awa-text, #333333);
+        }
+    }
+}
+
+
+// ============================================================================
+// 7. CABEÇALHO DAS SEÇÕES DE PRODUTO RELACIONADO
+// ============================================================================
+
+.catalog-product-view {
+
+    .block-related,
+    .block-upsell,
+    .awa-pdp-related {
+
+        .block-title {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 12px;
+            padding-bottom: 14px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--awa-border, #e2e2e2);
+
+            &::after { display: none !important; } // cancela linha decorativa do tema pai
+
+            > strong,
+            > h2,
+            .title {
+                margin: 0;
+                padding-left: 14px;
+                border-left: 4px solid var(--awa-primary, #b73337);
+                color: var(--awa-text, #333333);
+                font-size: clamp(16px, 2vw, 20px);
+                font-weight: @awa-weight-bold;
+                line-height: 1.15;
+            }
+        }
+    }
+}
+
+
+// ============================================================================
+// 8. ACESSIBILIDADE
+// ============================================================================
+
+@media (prefers-reduced-motion: reduce) {
+    .catalog-product-view {
+        .product-info-main .action.primary,
+        .product-info-main .b2b-login-to-buy-btn {
+            transition: none !important;
+        }
+    }
+}

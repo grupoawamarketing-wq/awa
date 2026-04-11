@@ -1,308 +1,1097 @@
-// =============================================
-// AWA MOTOS — PRODUCT CARD (UNIFICADO v2)
-// Fonte única de verdade para estilos de card.
-// Padroniza: Mais Vendidos, Lançamentos, Categorias, Widgets, Listing.
-// =============================================
+// ============================================================================
+// AWA Motos — _product-card.less
+// FONTE ÚNICA DE VERDADE para o card de produto em todos os contextos.
+//
+// Substitui _awa-product-card.less. Importado via _extend.less no lugar dele.
+//
+// Contextos cobertos (card idêntico em todos):
+//   Homepage carousels (.rokan-bestseller / .rokan-newproduct)
+//   Listagem de categoria (.catalog-category-view)
+//   Resultados de busca (.catalogsearch-result-index)
+//   Página de produto — Relacionados e Upsell
+//   Conta B2B — Produtos Sugeridos
+//   Qualquer .products-grid
+//
+// Restrições:
+//   - Zero JS, zero PHP/HTML/XML
+//   - Apenas CSS + LESS, prefixo awa- em classes novas
+//   - !important documentado inline em cada uso
+//
+// Dependências: _awa-variables.less (via @import abaixo)
+// ============================================================================
 
-// ── Card container (li do Magento) ──
-.product-item {
-  float: none !important;
-  width: 100% !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  display: flex;
-  flex-direction: column;
-  position: relative;
+@import (once) '_awa-variables';
+
+
+// ============================================================================
+// 1. TOKENS DO CARD
+// ============================================================================
+
+:root {
+    // Layout
+    --card-radius:           4px;
+    --card-border-color:     var(--awa-border, #e2e2e2);
+    --card-bg:               #ffffff;
+    --card-padding:          6px;
+    --card-gap:              8px;
+    --card-shadow:           0 1px 3px rgba(0, 0, 0, 0.07);
+    --card-shadow-hover:     0 10px 28px rgba(0, 0, 0, 0.13);
+
+    // Foto
+    --card-photo-bg:         #ffffff;
+    --card-photo-radius:     4px;
+    --card-photo-min-h:      180px;     // fallback quando aspect-ratio não suportado
+
+    // Nome
+    --card-name-lines:       2;
+    --card-name-size:        14px;
+    --card-name-lh:          1.4;
+    --card-name-min-h:       calc(14px * 1.4 * 2 + 4px); // ~44px
+
+    // Código / SKU
+    --card-code-size:        11px;
+    --card-code-color:       var(--awa-text-muted, #666666);
+
+    // Preço
+    --card-price-size:       20px;
+    --card-price-area-min-h: 58px;      // garante mesma altura em Estado A e B
+
+    // CTA
+    --card-cta-h:            44px;
+    --card-cta-size:         14px;
+    --card-cta-radius:       4px;
+
+    // Grid de produto — controlado por breakpoint (CSS vars evitam duplicação)
+    --grid-cols:             2;    // mobile default
+    --grid-gap:              10px;
 }
 
-// ── Wrapper visual do card ──
-.product-item-info {
-  background: var(--awa-bg);
-  border-radius: var(--awa-card-radius);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  box-shadow: var(--awa-card-shadow);
-  transition: box-shadow var(--awa-duration) var(--awa-ease),
-              transform var(--awa-duration) var(--awa-ease);
 
-  &:hover {
-    box-shadow: var(--awa-card-shadow-hover);
-    transform: translateY(-2px);
-  }
+// ============================================================================
+// 2. FUNDO GLOBAL — branco puro em body e todos os wrappers
+// ============================================================================
+// !important: tema pai ayo_home5 define background-color acinzentado no body
+// e .page-wrapper via seletores com especificidade alta. Sem !important
+// o fundo cinza vaza em todos os contextos.
+
+body,
+.page-wrapper,
+.page-main,
+.columns,
+.column.main {
+    background-color: #ffffff !important; // sobrescreve cinza herdado do tema pai
 }
 
-// ── Área da imagem — aspect-ratio 1:1 ──
-.product-item-photo,
-.product-image-container {
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-  aspect-ratio: 1 / 1;
-  width: 100%;
-  height: auto !important;
-  background: var(--awa-bg-surface);
-  padding: var(--awa-space-sm);
-  overflow: hidden;
-  flex-shrink: 0;
-  text-decoration: none;
-
-  .product-image-wrapper {
-    padding-bottom: 0 !important;
-    height: 100% !important;
-    width: 100% !important;
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-  }
-
-  img.product-image-photo {
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: cover !important;
-    display: block !important;
-    transition: transform var(--awa-duration) var(--awa-ease);
-  }
-
-  &:hover img.product-image-photo {
-    transform: scale(1.05);
-  }
-}
-
-// ── Badges (desconto / novo) ──
-.price-badge-discount {
-  position: absolute;
-  top: var(--awa-space-sm);
-  right: var(--awa-space-sm);
-  background: var(--awa-primary);
-  color: var(--awa-text-inverse);
-  font-size: 11px;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: var(--awa-radius-sm);
-  z-index: 2;
-  line-height: 1.6;
-}
-
-.badge-new-item {
-  position: absolute;
-  top: var(--awa-space-sm);
-  left: var(--awa-space-sm);
-  background: var(--awa-primary);
-  color: var(--awa-text-inverse);
-  font-size: 10px;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: var(--awa-radius-sm);
-  z-index: 2;
-  line-height: 1.6;
-}
-
-// ── Detalhes do produto ──
-.product-item-details {
-  padding: var(--awa-card-pad);
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  gap: 0;
-}
-
-// ── SKU ──
-.product-item-sku {
-  font-size: 12px;
-  color: #666666;
-  margin: 0 0 var(--awa-space-md);
-  letter-spacing: 0.02em;
-  line-height: 1.4;
-}
-
-// ── Nome do produto — 2 linhas fixas ──
-.product-item-name {
-  margin: 0 0 var(--awa-space-md);
-
-  .product-item-link {
-    font-size: clamp(14px, 2vw, 16px);
-    font-weight: 500;
-    color: var(--awa-text);
-    text-decoration: none;
-    line-height: 1.4;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    min-height: calc(2 * 1.4em);
-    transition: color 0.15s;
-
-    &:hover {
-      color: var(--awa-primary);
+.cms-index-index {
+    .rokan-bestseller,
+    .rokan-newproduct,
+    .block-products-list,
+    .block-new-products,
+    .awa-carousel-section {
+        background-color: #ffffff;
     }
-  }
 }
 
-// ── Área de preço/CTA — sempre no fundo do card ──
-.product-item-inner {
-  margin-top: auto;
-  padding-top: var(--awa-space-md);
-  border-top: 1px solid var(--awa-border);
 
-  // Gate B2B (não logado)
-  .price-box {
-    font-size: 12px;
-    color: var(--awa-text-muted);
-    font-style: italic;
-    margin: 0 0 var(--awa-space-sm);
-  }
+// ============================================================================
+// 3. MIXIN DO CARD
+// ============================================================================
 
-  // Botão "Solicitar cadastro B2B"
-  a[href*="b2b/register"] {
+.awa-card() {
+
+    // ── 3a. Supressão de overlays do tema pai ("VER PRODUTO") ────────────────
+    // !important: o tema pai usa JS + CSS para mostrar esses overlays no hover.
+    // O display calculado tem especificidade alta; precisa de !important.
+
+    .product-btn-box,
+    .btn-show-detail,
+    .hot-wish,
+    .product-item-inner.actions-container,
+    .product-thumb ~ .product-item-inner,
+    .product-item-photo ~ .product-item-inner,
+    .product-item-photo .product-item-inner,
+    .product-thumb .product-item-actions,
+    .product-item-photo .product-item-actions {
+        display: none !important; // overlay "VER PRODUTO" do tema pai — suprimido
+    }
+
+
+    // ── 3b. Wrapper de informação do produto — overflow visible ──────────────
+    // !important: .product-item-info herdado tem overflow:hidden, o que corta
+    // a sombra do card no hover. Necessário visible para o lift funcionar.
+
+    .product-item-info {
+        overflow: visible !important;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+
+    // ── 3c. Container do card ─────────────────────────────────────────────────
+    //   Hover: sobe 3px (translateY) + sombra intensa.
+    //   will-change: prepara camada de composição GPU para transição suave.
+    //   overflow: visible garante que sombra e setas não sejam clipados.
+
+    .product-item {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+        border: 1px solid var(--card-border-color);
+        border-radius: var(--card-radius);
+        background: var(--card-bg);
+        padding: var(--card-padding);
+        box-shadow: var(--card-shadow);
+        transition: box-shadow @awa-transition, transform @awa-transition, border-color @awa-transition;
+        position: relative;
+        overflow: visible;
+        will-change: transform;
+
+        &:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--card-shadow-hover);
+            border-color: var(--awa-gray-400, #aaaaaa);
+        }
+
+        &:focus-within {
+            outline: 2px solid var(--awa-primary, #b73337);
+            outline-offset: 2px;
+        }
+    }
+
+
+    // ── 3d. Área da foto ──────────────────────────────────────────────────────
+    //   Fundo branco puro — sem cinza.
+    //   Background com ícone SVG inline: aparece como placeholder quando a
+    //   <img> falha no carregamento (o img com erro não cobre o container bg).
+    //   color: transparent na img oculta o texto alt; font-size:0 elimina
+    //   artefatos de texto em engines que ainda exibem o nome do arquivo.
+    //   Scale 1.05 no hover do card = zoom sutil na imagem sem reflow.
+
+    .product-item-photo,
+    .product.photo.product-item-photo,
+    .product-image-container,
+    .product-thumb-link {
+        display: block;
+        position: relative;
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        min-height: var(--card-photo-min-h); // fallback browsers sem aspect-ratio
+        margin-bottom: 10px;
+        border-radius: var(--card-photo-radius);
+        overflow: hidden;
+        // Branco + ícone de câmera: mostra quando imagem quebra / está ausente
+        background:
+            var(--card-photo-bg, #ffffff)
+            url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24' fill='none' stroke='%23d8d8d8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='18' height='18' rx='2'/%3E%3Ccircle cx='8.5' cy='8.5' r='1.5'/%3E%3Cpolyline points='21 15 16 10 5 21'/%3E%3C/svg%3E")
+            center / 40px no-repeat;
+
+        img,
+        .product-image-photo {
+            display: block;
+            position: absolute;
+            inset: 4%;          // padding interno reduzido — imagem maior (92%)
+            width: 92%;
+            height: 92%;
+            object-fit: contain;
+            color: transparent; // oculta texto alt quando imagem quebra
+            font-size: 0;       // elimina resquícios de texto alt em alguns browsers
+            transition: transform @awa-transition-slow;
+        }
+    }
+
+    // Zoom da imagem no hover do card
+    .product-item:hover {
+        .product-item-photo img,
+        .product-image-container img,
+        .product-image-photo {
+            transform: scale(1.05);
+        }
+    }
+
+
+    // ── 3e. Badge "NOVO" / "OFERTA" ───────────────────────────────────────────
+    //   Posição absoluta no canto superior esquerdo da área da foto.
+    //   z-index @z-card-overlay (3) garante que fica acima da imagem e do scale.
+
+    .hot-onsale,
+    .product-label {
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        z-index: @z-card-overlay; // _z-index.less
+        pointer-events: none;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        .onsale,
+        .new-lable,
+        .sale-text {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 22px;
+            padding: 2px 9px;
+            border-radius: @awa-border-radius-sm;
+            background: var(--awa-primary, #b73337);
+            color: #ffffff;
+            font-size: 10px;
+            font-weight: @awa-weight-bold;
+            letter-spacing: 0.06em;
+            line-height: 1;
+            text-transform: uppercase;
+            width: fit-content;
+        }
+
+        .sale-bg { display: none; } // visual redundante do tema pai
+    }
+
+
+    // ── 3f. Wrapper de detalhes — flex cresce para empurrar CTA à base ────────
+
+    .product-item-details,
+    .product-info {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        gap: var(--card-gap);
+        padding: 0 4px 4px;
+    }
+
+
+    // ── 3g. Nome do produto ───────────────────────────────────────────────────
+    //   line-clamp limita a 2 linhas; min-height garante alinhamento na grade
+    //   quando nomes têm comprimentos diferentes.
+
+    .product-item-name,
+    .product-name,
+    .product.name.product-item-name {
+        margin: 0;
+        min-height: var(--card-name-min-h);
+
+        a,
+        .product-item-link {
+            display: -webkit-box;
+            -webkit-line-clamp: var(--card-name-lines);
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            word-break: break-word;
+            color: var(--awa-text, #333333);
+            font-size: var(--card-name-size);
+            font-weight: @awa-weight-medium;
+            line-height: var(--card-name-lh);
+            text-decoration: none;
+            transition: color @awa-transition;
+
+            &:hover,
+            &:focus-visible {
+                color: var(--awa-primary, #b73337);
+                text-decoration: underline;
+            }
+
+            &:focus-visible {
+                outline: 2px solid var(--awa-primary, #b73337);
+                outline-offset: 2px;
+                border-radius: 2px;
+            }
+        }
+    }
+
+
+    // ── 3h. Código do produto (SKU) ───────────────────────────────────────────
+    //   Fonte monoespaçada diferencia o código de texto corrido visualmente.
+
+    .awa-b2b-sku,
+    .product-sku {
+        display: inline-flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 3px;
+        font-family: 'Roboto Mono', 'Courier New', monospace;
+        font-size: var(--card-code-size);
+        color: var(--card-code-color);
+        line-height: 1.3;
+
+        &__label {
+            font-weight: @awa-weight-bold;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        &__value {
+            color: var(--card-code-color);
+            font-weight: @awa-weight-normal;
+        }
+
+        &__unit {
+            color: var(--awa-primary, #b73337);
+            font-weight: @awa-weight-bold;
+            font-size: 10px;
+            text-transform: uppercase;
+            background: rgba(183, 51, 55, 0.07);
+            border-radius: 999px;
+            padding: 1px 5px;
+            margin-left: 2px;
+            line-height: 1.5;
+        }
+    }
+
+
+    // ── 3i. Status de estoque ─────────────────────────────────────────────────
+
+    .awa-stock-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 11px;
+        font-weight: @awa-weight-semibold;
+        line-height: 1;
+
+        &::before {
+            content: '';
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        &.awa-stock--in-stock {
+            color: var(--awa-success, #16a34a);
+            &::before { background: var(--awa-success, #16a34a); }
+        }
+
+        &.awa-stock--low-stock {
+            color: var(--awa-warning, #d97706);
+            &::before { background: var(--awa-warning, #d97706); }
+        }
+
+        &.awa-stock--out-of-stock {
+            color: var(--card-code-color);
+            &::before { background: var(--card-code-color); }
+        }
+    }
+
+
+    // ── 3j. Área de preço — espaço reservado (mesma altura em Estado A e B) ───
+    //   flex:1 + min-height garantem que o CTA sempre fique na base do card,
+    //   independente do conteúdo da área de preço.
+
+    .price-box,
+    .product-price,
+    .b2b-login-to-see-price {
+        min-height: var(--card-price-area-min-h);
+    }
+
+
+    // ── 3k. ESTADO B — Preço real (usuário logado) ────────────────────────────
+    //   Badge "SEU PREÇO" injetado via ::after sem alterar PHP.
+    //   Só aparece dentro dos contextos onde o mixin é aplicado (não vaza
+    //   para PDP, checkout, cart etc.).
+
+    .price-box,
+    .product-price {
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+
+        .price {
+            font-size: var(--card-price-size);
+            font-weight: @awa-weight-bold;
+            color: var(--awa-text, #222222);
+            line-height: 1.1;
+        }
+
+        .old-price .price {
+            font-size: 12px;
+            font-weight: @awa-weight-normal;
+            color: var(--card-code-color);
+            text-decoration: line-through;
+        }
+
+        .special-price .price {
+            color: var(--awa-primary, #b73337);
+        }
+
+        // Badge "SEU PREÇO" — criado puramente em CSS, sem PHP
+        .price-final_price::after {
+            content: 'SEU PREÇO';
+            display: inline-flex;
+            align-items: center;
+            margin-left: 6px;
+            padding: 2px 6px;
+            background: rgba(183, 51, 55, 0.08);
+            color: var(--awa-primary, #b73337);
+            font-size: 9px;
+            font-weight: @awa-weight-bold;
+            letter-spacing: 0.08em;
+            border-radius: @awa-border-radius-sm;
+            text-transform: uppercase;
+            vertical-align: middle;
+            line-height: 1.6;
+        }
+    }
+
+
+    // ── 3l. ESTADO A — Preço mascarado (visitante anônimo) ───────────────────
+    //   ::before injeta "R$ ●●●●" semi-opaco (preço bloqueado visual).
+    //   ::after injeta "Faça login para ver o preço" em itálico abaixo.
+    //   O link interno <a> é ocultado — redundante com o botão CTA abaixo.
+
+    .b2b-login-to-see-price {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        gap: 3px;
+        position: relative;
+
+        &::before {
+            content: 'R$ \25CF\25CF\25CF\25CF'; // ●●●● U+25CF
+            display: block;
+            font-size: var(--card-price-size);
+            font-weight: @awa-weight-bold;
+            letter-spacing: 0.1em;
+            color: var(--awa-text, #333333);
+            opacity: 0.15;
+            user-select: none;
+            line-height: 1.1;
+        }
+
+        &::after {
+            content: 'Faça login para ver o preço';
+            display: block;
+            font-size: 11px;
+            font-style: italic;
+            color: var(--card-code-color);
+            line-height: 1.3;
+        }
+
+        a {
+            display: none; // oculto — CTA abaixo substitui este link
+        }
+    }
+
+
+    // ── 3m. Wrapper do CTA — sempre na base do card ───────────────────────────
+
+    .product-info-cart {
+        margin-top: auto;
+        display: flex;
+        flex-direction: column;
+        padding-top: 4px;
+        width: 100%;
+
+        form[data-role="tocart-form"] {
+            display: flex;
+            width: 100%;
+        }
+    }
+
+    .actions-primary,
+    .product-item-actions,
+    .product-button {
+        margin-top: auto;
+        display: flex;
+        align-items: stretch;
+        width: 100%;
+    }
+
+    // ── 3m2. FORMULÁRIO DE PEDIDO (item.phtml) ────────────────────────────────
+    // .awa-order-form: reset de margins do <form>
+    // .awa-order-row: gerenciado por _awa-qty-control.less (global, não duplicar no mixin)
+
+    .awa-order-form {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+
+    // ── 3n. ESTADO B — Botão "Comprar" (logado) ──────────────────────────────
+    // !important em background e color: o tema pai define gradiente e cor
+    // em .action.tocart via seletor mais específico. Documentado.
+
+    .actions-primary .action,
+    .actions-primary .action.tocart,
+    .product-item-actions .action,
+    .product-button .action,
+    .product-button .tocart,
+    .btn-add-to-cart,
+    .action.primary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        min-height: var(--card-cta-h);
+        border-radius: var(--card-cta-radius);
+        border: none;
+        background: var(--awa-primary, #b73337) !important; // sobrescreve gradiente do tema pai
+        color: #ffffff !important;                           // sobrescreve cor do tema pai
+        font-size: var(--card-cta-size);
+        font-weight: @awa-weight-bold;
+        line-height: 1.2;
+        text-align: center;
+        text-decoration: none;
+        padding: 10px 16px;
+        cursor: pointer;
+        transition: background-color @awa-transition;
+        box-shadow: none;
+
+        span { display: block; }
+
+        &:hover,
+        &:focus-visible {
+            background: var(--awa-primary-dark, #8e2629) !important;
+            color: #ffffff !important;
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--awa-primary, #b73337);
+            outline-offset: 2px;
+        }
+
+        &[disabled],
+        &.disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+    }
+
+
+    // ── 3o. ESTADO A — Botão "Faça login para ver preços" (anônimo) ──────────
+    //   Outline vermelho, fundo transparente, ícone de pessoa via ::before.
+    //   No hover DO CARD (não só do botão) vira sólido: o card é o gatilho,
+    //   isso deixa a interação mais generosa sem exigir precisão no botão.
+
+    .b2b-login-to-buy-btn {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        width: 100%;
+        min-height: var(--card-cta-h);
+        border-radius: var(--card-cta-radius);
+        border: 1.5px solid var(--awa-primary, #b73337);
+        background: transparent;
+        color: var(--awa-primary, #b73337);
+        font-size: var(--card-cta-size);
+        font-weight: @awa-weight-semibold;
+        line-height: 1.2;
+        text-align: center;
+        text-decoration: none;
+        padding: 10px 16px;
+        cursor: pointer;
+        transition: background @awa-transition, color @awa-transition, border-color @awa-transition;
+
+        // Ícone de pessoa — SVG vermelho inline
+        &::before {
+            content: '';
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            flex-shrink: 0;
+            background:
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='%23b73337' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E")
+                center / contain no-repeat;
+            transition: background-image var(--awa-transition);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--awa-primary, #b73337);
+            outline-offset: 2px;
+        }
+    }
+
+    // Hover do CARD inteiro → botão de login vira sólido vermelho
+    .product-item:hover .b2b-login-to-buy-btn {
+        background: var(--awa-primary, #b73337);
+        color: #ffffff;
+        border-color: var(--awa-primary, #b73337);
+
+        &::before {
+            // Ícone de pessoa — SVG branco (substitui o vermelho)
+            background-image:
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E");
+        }
+    }
+
+
+    // ── 3p. Exclusão mútua login × add-to-cart ────────────────────────────────
+    //   Garante que apenas um botão apareça quando o módulo B2B está ativo.
+
+    .b2b-login-to-buy-btn {
+        ~ .actions-primary,
+        ~ form[data-role="tocart-form"],
+        ~ .btn-add-to-cart {
+            display: none;
+        }
+    }
+
+    .product-item-actions:has(.b2b-login-to-buy-btn) {
+        form[data-role="tocart-form"],
+        .actions-primary:not(:has(.b2b-login-to-buy-btn)) {
+            display: none;
+        }
+    }
+
+
+    // ── 3q. Produto indisponível ──────────────────────────────────────────────
+
+    .product-item.out-of-stock {
+        .product-item-photo,
+        .product-image-container {
+            opacity: 0.45;
+        }
+
+        .product-item-name a,
+        .product-item-name .product-item-link {
+            color: var(--card-code-color);
+        }
+    }
+
+} // fim .awa-card()
+
+
+// ============================================================================
+// 4. APLICAÇÃO DO MIXIN — TODOS OS CONTEXTOS
+// ============================================================================
+// Card idêntico em todos os contextos sem exceção.
+
+// Homepage: carrosséis Rokanthemes
+.rokan-bestseller,
+.rokan-newproduct { .awa-card(); }
+
+// Widgets de produto Magento (CMS blocks)
+.block-products-list,
+.block-new-products,
+.block.widget.block-products-list { .awa-card(); }
+
+// Listagem de categoria
+.catalog-category-view .products-grid { .awa-card(); }
+
+// Resultados de busca
+.catalogsearch-result-index .products-grid { .awa-card(); }
+
+// Página de produto: upsell "Você também pode se interessar"
+.catalog-product-view .block.upsell .products-grid,
+.catalog-product-view .block.upsell .products-list { .awa-card(); }
+
+// Página de produto: produtos relacionados
+.catalog-product-view .block.related .products-grid,
+.catalog-product-view .block.related .products-list { .awa-card(); }
+
+// Conta B2B: produtos sugeridos (widget padrão Magento)
+.customer-account-index .block.widget .products-grid,
+.customer-account .block.widget .products-grid { .awa-card(); }
+
+// Qualquer outra vitrine — fallback genérico
+.products-grid .product-items .product-item { .awa-card(); }
+
+
+// ============================================================================
+// 5. OVERFLOW VISIBLE — impede clipping de sombras no hover
+// ============================================================================
+// !important: tema pai define overflow:hidden em containers para evitar
+// scroll horizontal no carousel. Necessário visible para que:
+//   a) sombra do card não seja cortada no hover (translateY -3px)
+//   b) setas circulares do carousel não sejam clipadas
+
+.rokan-bestseller,
+.rokan-newproduct,
+.block-products-list,
+.block-new-products {
+    overflow: visible !important; // sobrescreve overflow:hidden do tema pai
+    position: relative;
+}
+
+.rokan-bestseller .products,
+.rokan-bestseller .product-items,
+.rokan-newproduct .products,
+.rokan-newproduct .product-items,
+.block-products-list .products,
+.block-products-list .product-items,
+.catalog-category-view .products-grid,
+.catalogsearch-result-index .products-grid {
+    overflow: visible !important; // idem — sombras e setas não cortadas
+}
+
+
+// ============================================================================
+// 6. CABEÇALHO DE SEÇÃO — padrão unificado
+// ============================================================================
+//   Layout: [| Título Bold]  ............  [Ver todos →]
+//   Barra vermelha via border-left no título (não ::after no container).
+//   Separador via border-bottom na linha de cabeçalho.
+//   Sem eyebrow/label auxiliar.
+
+.awa-section-header,
+.rokan-bestseller .block-title,
+.rokan-newproduct .block-title,
+.block-products-list .block-title,
+.block-new-products .block-title,
+.catalog-product-view .block.related .block-title,
+.catalog-product-view .block.upsell .block-title {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    min-height: var(--awa-card-btn-h);
-    padding: var(--awa-space-md) var(--awa-space-lg);
-    background: var(--awa-primary);
-    color: var(--awa-text-inverse) !important;
-    font-size: 12px;
-    font-weight: 700;
-    border-radius: var(--awa-radius-sm);
-    text-decoration: none;
-    transition: background 0.15s;
-    margin-bottom: var(--awa-space-xs);
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding-bottom: 14px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--awa-border, #e2e2e2);
 
-    &:hover {
-      background: var(--awa-primary-hover);
-    }
-  }
+    // Cancela ::after de linha decorativa do tema pai / _awa-product-card.less anterior
+    &::after { display: none !important; }
 
-  // Link "Já tenho conta"
-  a[href*="b2b/account/login"] {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    min-height: calc(var(--awa-card-btn-h) - 8px);
-    padding: var(--awa-space-sm) var(--awa-space-lg);
-    border: 1px solid var(--awa-primary);
-    color: var(--awa-primary);
-    font-size: 11px;
-    font-weight: 600;
-    border-radius: var(--awa-radius-sm);
-    text-decoration: none;
-    transition: all 0.15s;
-
-    &:hover {
-      background: var(--awa-primary);
-      color: var(--awa-text-inverse);
-    }
-  }
-
-  // Preço (logado)
-  .price-box .price-wrapper .price {
-    font-size: var(--awa-font-size-lg);
-    font-weight: 700;
-    color: var(--awa-text);
-    line-height: 1.2;
-  }
-
-  .old-price .price-wrapper .price {
-    font-size: 12px;
-    font-weight: 400;
-    color: var(--awa-text-light);
-    text-decoration: line-through;
-  }
-
-  // Botão Adicionar ao Carrinho (logado)
-  .action.tocart {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    min-height: var(--awa-card-btn-h);
-    padding: var(--awa-space-md) var(--awa-space-lg);
-    background: var(--awa-primary);
-    color: var(--awa-text-inverse);
-    font-size: 12px;
-    font-weight: 700;
-    border: none;
-    border-radius: var(--awa-radius-sm);
-    cursor: pointer;
-    transition: background var(--awa-duration-fast) var(--awa-ease);
-
-    &:hover {
-      background: var(--awa-primary-hover);
+    // Lado esquerdo: título com barra vermelha via border-left
+    > strong,
+    > .title,
+    > h1,
+    > h2,
+    .awa-section-header__title {
+        margin: 0;
+        padding-left: 14px;
+        border-left: 4px solid var(--awa-primary, #b73337);
+        color: var(--awa-text, #333333);
+        font-size: clamp(17px, 2vw, 22px);
+        font-weight: @awa-weight-bold;
+        line-height: 1.15;
     }
 
-    &:active {
-      background: var(--awa-primary-hover);
+    // Sem eyebrow/label auxiliar acima do título
+    .awa-section-header__eyebrow,
+    .block-title-text small,
+    .widget-title small {
+        display: none;
     }
 
-    &:disabled {
-      background: var(--awa-border);
-      cursor: not-allowed;
+    // Lado direito: link "Ver todos →"
+    > a,
+    .awa-section-header__link,
+    .action.view-all {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        color: var(--awa-primary, #b73337);
+        font-size: 13px;
+        font-weight: @awa-weight-semibold;
+        text-decoration: none;
+        white-space: nowrap;
+        flex-shrink: 0;
+        transition: opacity var(--awa-transition);
+
+        &::after {
+            content: '→';
+            font-size: 15px;
+            line-height: 1;
+        }
+
+        &:hover {
+            text-decoration: underline;
+            opacity: 0.85;
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--awa-primary, #b73337);
+            outline-offset: 2px;
+            border-radius: 2px;
+        }
     }
-  }
 }
 
-// ── Preço direto no .product-item-details (fallback) ──
-.product-item-details > .price-box {
-  margin-top: auto;
-  padding-top: var(--awa-space-md);
-  border-top: 1px solid var(--awa-border);
 
-  .old-price .price-wrapper .price {
-    font-size: 12px;
-    font-weight: 400;
-    color: var(--awa-text-light);
-    text-decoration: line-through;
-  }
+// ============================================================================
+// 7. SETAS DO CAROUSEL
+// ============================================================================
+//   Circulares, metade fora do container (translateX ±50%).
+//   Padding lateral nos contextos de carousel para abrir espaço às setas.
+//   overflow:visible já declarado na seção 5.
+//   Ocultas em mobile (max-width: 767px).
 
-  .special-price .price-wrapper .price,
-  .price-final_price .price-wrapper .price {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--awa-text);
-  }
-}
+.rokan-bestseller,
+.rokan-newproduct,
+.block-products-list,
+.block-new-products {
+    padding-left: 24px;
+    padding-right: 24px;
 
-// ── Botão direto no .product-item-details ──
-.product-item-details > .product-item-actions {
-  padding-top: var(--awa-space-sm);
+    .owl-nav button,
+    .owl-prev,
+    .owl-next,
+    .swiper-button-prev,
+    .swiper-button-next {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 1px solid var(--card-border-color);
+        background: #ffffff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.09);
+        color: var(--awa-text, #333333);
+        cursor: pointer;
+        transition: background @awa-transition, border-color @awa-transition,
+                    color @awa-transition, box-shadow @awa-transition;
+        flex-shrink: 0;
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: @z-carousel-nav; // _z-index.less
 
-  .action.tocart {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    min-height: var(--awa-card-btn-h);
-    padding: var(--awa-space-md) var(--awa-space-lg);
-    background: var(--awa-primary);
-    color: var(--awa-text-inverse);
-    font-size: 12px;
-    font-weight: 700;
-    border: none;
-    border-radius: var(--awa-radius-sm);
-    cursor: pointer;
-    transition: background var(--awa-duration-fast) var(--awa-ease);
+        &:hover,
+        &:focus-visible {
+            background: var(--awa-primary, #b73337);
+            border-color: var(--awa-primary, #b73337);
+            color: #ffffff;
+            box-shadow: 0 4px 16px rgba(183, 51, 55, 0.3);
+        }
 
-    &:hover {
-      background: var(--awa-primary-hover);
+        &:focus-visible {
+            outline: 2px solid var(--awa-primary, #b73337);
+            outline-offset: 2px;
+        }
+
+        &.disabled,
+        &.swiper-button-disabled {
+            opacity: 0.3;
+            cursor: default;
+            pointer-events: none;
+            box-shadow: none;
+        }
     }
 
-    &:active {
-      background: var(--awa-primary-hover);
+    // Seta esquerda: metade fora do container
+    .owl-prev,
+    .swiper-button-prev {
+        left: 0;
+        transform: translateY(-50%) translateX(-50%);
     }
-  }
+
+    // Seta direita: metade fora do container
+    .owl-next,
+    .swiper-button-next {
+        right: 0;
+        transform: translateY(-50%) translateX(50%);
+    }
+
+    // Força ícone branco no hover (para variantes com ícone SVG inline)
+    .owl-prev:hover svg,
+    .owl-next:hover svg,
+    .swiper-button-prev:hover svg,
+    .swiper-button-next:hover svg {
+        color: #ffffff;
+        stroke: #ffffff;
+    }
+
+    // Stage do carousel: overflow visible para sombras de card
+    .owl-stage-outer,
+    .swiper-wrapper {
+        overflow: visible;
+    }
 }
 
-// ── RESPONSIVE ──
-@media (max-width: 768px) {
-  .product-item-details {
-    padding: var(--awa-space-md);
-  }
 
-  .product-item-name .product-item-link {
-    min-height: calc(2 * 1.4em);
-  }
+// ============================================================================
+// 8. RESPONSIVIDADE
+// ============================================================================
+//
+// GRID UNIFICADO — --grid-cols e --grid-gap controlam todas as grades de produto.
+// Breakpoints:  mobile 2 cols → small tablet 3 → desktop 4 → large 5
+// A declaração display:grid está em 8a (abaixo) e é reutilizada por todos os
+// contextos (PLP, busca, relacionados, upsell) sem repetição.
+
+// ── Breakpoints do grid via CSS vars ─────────────────────────────────────────
+
+// Default: 2 colunas (mobile) — já declarado em :root na seção 1
+
+@media (min-width: 576px) {
+    :root { --grid-cols: 3; --grid-gap: 14px; }
 }
+
+@media (min-width: 1024px) {
+    :root { --grid-cols: 4; --grid-gap: 20px; }
+}
+
+@media (min-width: 1280px) {
+    :root { --grid-cols: 5; }   // gap já 20px — mantém
+}
+
+// ── Mobile: até 767px — setas ocultas, tokens de card reduzidos ───────────────
+
+@media (max-width: (@awa-breakpoint-md - 1)) {
+
+    :root {
+        --card-name-size:   13px;
+        --card-price-size:  17px;
+        --card-cta-h:       40px;
+        --card-cta-size:    13px;
+        --card-name-min-h:  calc(13px * 1.4 * 2 + 4px); // ~40px
+        --card-photo-min-h: 140px;
+    }
+
+    // Setas ocultas em mobile
+    .rokan-bestseller,
+    .rokan-newproduct,
+    .block-products-list,
+    .block-new-products {
+        padding-left: 0;
+        padding-right: 0;
+
+        .owl-nav,
+        .owl-prev,
+        .owl-next,
+        .swiper-button-prev,
+        .swiper-button-next {
+            display: none !important; // setas ocultas em mobile
+        }
+    }
+}
+
+
+// ── Tablet: 768px–1023px — tokens de card intermediários, setas maiores ──────
+
+@media (min-width: @awa-breakpoint-md) and (max-width: 1023px) {
+
+    :root {
+        --card-gap:         10px;
+        --card-price-size:  18px;
+        --card-photo-min-h: 160px;
+    }
+
+    .rokan-bestseller .owl-nav button,
+    .rokan-bestseller .owl-prev,
+    .rokan-bestseller .owl-next,
+    .rokan-newproduct .owl-nav button,
+    .rokan-newproduct .owl-prev,
+    .rokan-newproduct .owl-next {
+        width: 42px;
+        height: 42px;
+    }
+}
+
+
+// ── Desktop: ≥ 1024px — tokens de card completos ─────────────────────────────
+
+@media (min-width: 1024px) {
+
+    :root {
+        --card-name-size:   14px;
+        --card-price-size:  20px;
+        --card-cta-size:    14px;
+        --card-cta-h:       44px;
+        --card-photo-min-h: 180px;
+    }
+
+    // Carousels de home: 5 por slide (fallback sem JS carousel)
+    .rokan-bestseller .products:not(.owl-carousel):not(.swiper-container) .product-items,
+    .rokan-newproduct .products:not(.owl-carousel):not(.swiper-container) .product-items {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 20px;
+    }
+
+    .product-item-details,
+    .product-info {
+        padding: 0 6px 6px;
+    }
+}
+
+
+// ── Large desktop: ≥ 1280px — setas maiores ──────────────────────────────────
+
+@media (min-width: 1280px) {
+    .rokan-bestseller .owl-nav button,
+    .rokan-bestseller .owl-prev,
+    .rokan-bestseller .owl-next,
+    .rokan-newproduct .owl-nav button,
+    .rokan-newproduct .owl-prev,
+    .rokan-newproduct .owl-next,
+    .rokan-bestseller .swiper-button-prev,
+    .rokan-bestseller .swiper-button-next,
+    .rokan-newproduct .swiper-button-prev,
+    .rokan-newproduct .swiper-button-next {
+        width: 44px;
+        height: 44px;
+    }
+}
+
+
+// ============================================================================
+// 8a. GRADE UNIFICADA — PLP, busca, relacionados, upsell
+// ============================================================================
+// display:grid único — colunas e gap controlados pelos CSS vars em seção 8.
+// Carousels (owl-carousel / swiper-container) controlam seu próprio layout.
+
+.catalog-category-view .products-grid .product-items,
+.catalogsearch-result-index .products-grid .product-items,
+.catalog-product-view .block.related .products-grid .product-items,
+.catalog-product-view .block.upsell .products-grid .product-items {
+    display: grid;
+    grid-template-columns: repeat(var(--grid-cols), 1fr);
+    gap: var(--grid-gap);
+}
+
+
+// ============================================================================
+// 9. ACESSIBILIDADE — prefers-reduced-motion
+// ============================================================================
+
+@media (prefers-reduced-motion: reduce) {
+    .product-item,
+    .product-item img,
+    .product-image-photo,
+    .b2b-login-to-buy-btn,
+    .actions-primary .action,
+    .action.primary,
+    .owl-nav button,
+    .owl-prev,
+    .owl-next,
+    .swiper-button-prev,
+    .swiper-button-next {
+        transition: none !important;
+        transform: none !important;
+    }
+
+    .product-item:hover {
+        transform: none !important;
+    }
+
+    .product-item:hover .product-image-photo,
+    .product-item:hover img {
+        transform: none !important;
+    }
+}
+
+
+// ============================================================================
+// SELETORES DO TEMA PAI SOBRESCRITOS
+// (registro para referência durante debugging e atualizações do tema pai)
+// ============================================================================
+//
+//  .product-item               background, border, padding, box-shadow, position
+//  .product-item-info          overflow
+//  .product-item-photo         background (#fafafa → #ffffff), min-height
+//  .product-image-photo        position, inset, object-fit
+//  .product-item-details       display, flex-direction, gap, padding
+//  .product-item-name a        font-size, font-weight, color, line-height
+//  .price-box                  margin
+//  .price-box .price           font-size, font-weight, color
+//  .actions-primary .action    background (!important), color (!important),
+//                              border-radius, min-height, padding
+//  .product-btn-box            display: none !important
+//  .btn-show-detail            display: none !important
+//  .hot-wish                   display: none !important
+//  .product-item-inner         display: none !important
+//  .product-item-actions       display: none !important (overlay do tema pai)
+//  .hot-onsale .onsale         background, font-size, border-radius
+//  body                        background-color (!important)
+//  .page-wrapper               background-color (!important)
+//  .owl-prev / .owl-next       width, height, border-radius, background, border,
+//                              box-shadow, color, transition, position, transform
+// ============================================================================

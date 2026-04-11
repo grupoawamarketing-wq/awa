@@ -3,22 +3,27 @@
 // Gallery + info + tabs + related products
 // =============================================
 
+// Header total: utility bar (34px) + main header (~79px) + nav (~44px) ≈ 157px
+// Usado pelo sticky da galeria. Sobrescrever via JS se necessário.
+:root { --awa-header-h: 160px; }
+
 .catalog-product-view {
 
   // Main layout: gallery left + info right
-  // Grid split (50/50) and stacking → _grid-system.less
-  .product-info-main-wrapper,
-  .column.main > .product-info-main {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--awa-space-xl);
-    align-items: start;
+  // Grid on .product-view (1fr 1fr) → _grid-system.less
+  // Neutralize Rokanthemes parent legacy float/padding on info column
+  .detail-info-product-view {
+    padding-left: 0 !important;   // parent: 25px — kills the asymmetry
+    margin-bottom: 0 !important;  // parent: 50px — controlled by grid gap
+    float: none !important;
+    width: 100% !important;
+    min-width: 0;                 // prevents grid blowout on narrow viewports
   }
 
   // ---- Gallery ----
   .product.media {
     position: sticky;
-    top: 80px;
+    top: calc(var(--awa-header-h) + 16px); // header (~160px) + gap (16px)
     border-radius: var(--awa-radius-lg);
     overflow: hidden;
     background: var(--awa-bg-surface);
@@ -39,8 +44,21 @@
 
         &.fotorama__active { border-color: var(--awa-primary); }
         &:hover { border-color: var(--awa-border-strong); }
+
+        &:focus-visible {
+          outline: 2px solid var(--awa-primary);
+          outline-offset: 2px;
+          border-color: var(--awa-primary);
+        }
       }
     }
+
+  }
+
+  // Arrows: tratados por awa-pdp-modern-clean.css (36px circle, blur, brand primary)
+  // Apenas garantir opacity=1 (sprite default=0) caso awa-pdp-modern-clean não carregue
+  .product.media .fotorama__arr {
+    opacity: 1 !important;
   }
 
   // ---- Product info ----
@@ -53,7 +71,7 @@
       .page-title {
         font-size: clamp(20px, 4vw, 28px); // minimo 20px
         font-weight: 700;
-        color: var(--awa-text);
+        color: var(--awa-text) !important; // beats Rokanthemes * { color: #b73337 !important }
         line-height: var(--awa-leading-tight);
         margin: 0;
       }
@@ -62,14 +80,152 @@
     // SKU / brand
     .product.attribute.sku {
       font-size: 12px;
-      color: var(--awa-text-light);
-      margin-bottom: var(--awa-space-md);
+      color: var(--awa-text-light) !important; // beats Rokanthemes * { color !important }
+      margin-bottom: var(--awa-space-sm);
       letter-spacing: 0.04em;
       text-transform: uppercase;
 
       .value {
         font-weight: var(--awa-weight-semi);
-        color: var(--awa-text-muted);
+        color: var(--awa-text-muted) !important; // beats Rokanthemes * { color !important }
+      }
+    }
+
+    // Avaliações inline (estrelas + contagem)
+    .product-reviews-summary {
+      display: flex;
+      align-items: center;
+      gap: @awa-gap-sm;
+      margin-bottom: var(--awa-space-sm);
+
+      .reviews-actions a {
+        font-size: var(--awa-font-size-xs);
+        color: var(--awa-primary);
+        text-decoration: none;
+
+        &:hover { text-decoration: underline; }
+      }
+    }
+
+    // Descrição curta / overview
+    .product.attribute.overview {
+      font-size: var(--awa-font-size-sm);
+      line-height: var(--awa-leading-relaxed);
+      color: var(--awa-text-muted) !important; // beats Rokanthemes * { color !important }
+      margin-bottom: var(--awa-space-md);
+      padding-bottom: var(--awa-space-md);
+      border-bottom: 1px solid var(--awa-border-subtle);
+    }
+
+    // Opções configuráveis (cor, tamanho, selects)
+    .product-options-wrapper {
+      margin-bottom: var(--awa-space-md);
+    }
+
+    // Swatches — texto (tamanho, ano, etc.)
+    .swatch-attribute {
+      margin-bottom: var(--awa-space-sm);
+
+      .swatch-attribute-label {
+        font-size: var(--awa-font-size-sm);
+        font-weight: var(--awa-weight-semi);
+        color: var(--awa-text) !important; // beats Rokanthemes * { color !important }
+        display: block;
+        margin-bottom: @awa-gap-sm;
+      }
+
+      .swatch-attribute-selected-option {
+        font-size: var(--awa-font-size-xs);
+        color: var(--awa-text-muted) !important; // beats Rokanthemes * { color !important }
+        margin-left: 6px;
+        font-weight: normal;
+      }
+
+      // Opções exibidas em flex (anula float do Magento)
+      .swatch-attribute-options {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+
+        // Swatch texto (tamanho/ano)
+        .swatch-option.text {
+          float: none;            // anula float: left do Magento
+          height: 36px;
+          min-width: 44px;
+          padding: 0 12px;
+          line-height: 34px;     // 36px - 2px borda
+          font-size: var(--awa-font-size-xs);
+          font-weight: var(--awa-weight-semi);
+          color: var(--awa-text) !important; // beats Rokanthemes * { color !important }
+          background: var(--awa-bg);
+          border: 1.5px solid var(--awa-border);
+          border-radius: var(--awa-radius-sm);
+          cursor: pointer;
+          transition: border-color var(--awa-duration-fast) var(--awa-ease),
+                      color var(--awa-duration-fast) var(--awa-ease),
+                      background var(--awa-duration-fast) var(--awa-ease);
+
+          &.selected,
+          &.selected:focus {
+            border-color: var(--awa-primary);   // anula outline laranja #ff5501
+            background: var(--awa-primary-subtle);
+            color: var(--awa-primary) !important; // beats Rokanthemes * { color !important }
+            outline: none;
+          }
+
+          &:not(.disabled):hover {
+            border-color: var(--awa-primary);
+            color: var(--awa-primary) !important; // beats Rokanthemes * { color !important }
+            outline: none;  // anula outline: 1px solid #999
+          }
+
+          &:focus-visible {
+            outline: 2px solid var(--awa-primary);
+            outline-offset: 2px;
+          }
+
+          &.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            border-color: var(--awa-border-subtle);
+          }
+        }
+
+        // Swatch cor/imagem
+        .swatch-option.color,
+        .swatch-option.image {
+          float: none;
+          width: 36px;
+          height: 36px;
+          min-width: 36px;
+          padding: 0;
+          border: 2px solid var(--awa-border);
+          border-radius: 50%;  // circular
+
+          &.selected {
+            border-color: var(--awa-primary);
+            outline: 2px solid var(--awa-primary); // anula outline: 2px solid #ff5501
+            outline-offset: 2px;
+          }
+
+          &:not(.disabled):hover {
+            border-color: var(--awa-primary);
+            outline: 2px solid rgba(183, 51, 55, 0.4);
+            outline-offset: 2px;
+          }
+
+          &:focus-visible {
+            outline: 2px solid var(--awa-primary);
+            outline-offset: 3px;
+          }
+
+          &.disabled { opacity: 0.4; cursor: not-allowed; }
+        }
+
+        // Override global swatch focus (azul #68a8e0 → primário)
+        .swatch-option:focus {
+          box-shadow: none;  // anula box-shadow: 0 0 3px 1px #68a8e0
+        }
       }
     }
 
@@ -82,7 +238,7 @@
 
       .old-price .price {
         font-size: var(--awa-font-size-md);
-        color: var(--awa-text-light);
+        color: var(--awa-text-light) !important; // beats Rokanthemes * { color !important }
         text-decoration: line-through;
       }
 
@@ -90,12 +246,12 @@
       .special-price .price {
         font-size: clamp(26px, 5vw, 32px); // minimo 26px
         font-weight: 700;
-        color: var(--awa-text);
+        color: var(--awa-text) !important; // beats Rokanthemes * { color !important }
       }
 
       .price-pix {
         font-size: var(--awa-font-size-md);
-        color: var(--awa-success);
+        color: var(--awa-success) !important; // beats Rokanthemes * { color !important }
         font-weight: var(--awa-weight-semi);
         margin-top: var(--awa-space-sm);
         display: flex;
@@ -117,12 +273,12 @@
 
       &.available {
         background: var(--awa-success-bg);
-        color: var(--awa-success);
+        color: var(--awa-success) !important; // beats Rokanthemes * { color !important }
       }
 
       &.unavailable {
         background: var(--awa-error-bg);
-        color: var(--awa-error);
+        color: var(--awa-error) !important; // beats Rokanthemes * { color !important }
       }
     }
 
@@ -135,6 +291,7 @@
 
       .field.qty {
         margin: 0;
+        min-width: 80px; // evita compressão em telas < 400px
 
         label { display: none; }
       }
@@ -163,7 +320,7 @@
         gap: 6px;
         padding: 8px 16px;
         font-size: var(--awa-font-size-xs);
-        color: var(--awa-text-muted);
+        color: var(--awa-text-muted) !important; // beats Rokanthemes * { color !important }
         border: 1px solid var(--awa-border);
         border-radius: var(--awa-radius-md);
         background: var(--awa-bg);
@@ -173,10 +330,44 @@
 
         &:hover {
           border-color: var(--awa-primary);
-          color: var(--awa-primary);
+          color: var(--awa-primary) !important; // beats Rokanthemes * { color !important }
           background: var(--awa-primary-subtle);
         }
+
+        &:focus-visible {
+          outline: 2px solid var(--awa-primary);
+          outline-offset: 2px;
+          border-radius: var(--awa-radius-md);
+        }
       }
+    }
+  }
+
+  // ---- Swatches override — sem dependência de .product-info-main ----
+  // Garante aplicação mesmo se Rokanthemes não usar .product-info-main como wrapper
+  .swatch-attribute-options .swatch-option {
+    float: none !important;   // anula float: left global do Magento
+
+    &:focus { box-shadow: none !important; }  // anula azul #68a8e0
+
+    &.selected {
+      outline: 2px solid var(--awa-primary) !important;  // anula laranja #ff5501
+      border-color: var(--awa-primary) !important;
+    }
+
+    &.text.selected {
+      background: var(--awa-primary-subtle) !important;
+      color: var(--awa-primary) !important;
+    }
+
+    &:not(.disabled):hover {
+      outline: 1px solid var(--awa-primary) !important;
+      border-color: var(--awa-primary) !important;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--awa-primary) !important;
+      outline-offset: 2px !important;
     }
   }
 
@@ -201,7 +392,7 @@
           padding: 14px 24px;
           font-size: var(--awa-font-size-sm);
           font-weight: var(--awa-weight-semi);
-          color: var(--awa-text-muted);
+          color: var(--awa-text-muted) !important; // beats Rokanthemes * { color !important }
           text-decoration: none;
           border: 1px solid transparent;
           border-radius: var(--awa-radius-md) var(--awa-radius-md) 0 0;
@@ -209,14 +400,20 @@
           position: relative;
 
           &:hover {
-            color: var(--awa-primary);
+            color: var(--awa-primary) !important; // beats Rokanthemes * { color !important }
             background: var(--awa-primary-subtle);
+          }
+
+          &:focus-visible {
+            outline: 2px solid var(--awa-primary);
+            outline-offset: 2px;
+            color: var(--awa-primary) !important; // beats Rokanthemes * { color !important }
           }
         }
 
         &.active > .switch,
         &.active > a {
-          color: var(--awa-primary);
+          color: var(--awa-primary) !important; // beats Rokanthemes * { color !important }
           background: var(--awa-bg);
           border-color: var(--awa-border);
           border-bottom-color: var(--awa-bg);
@@ -236,7 +433,7 @@
         .product.attribute.description {
           font-size: 14px;
           line-height: 1.6;
-          color: var(--awa-text);
+          color: var(--awa-text) !important; // beats Rokanthemes * { color !important }
         }
 
         // Attributes table
@@ -275,7 +472,7 @@
     .block-title {
       font-size: var(--awa-font-size-lg);
       font-weight: var(--awa-weight-bold);
-      color: var(--awa-text);
+      color: var(--awa-text) !important; // beats Rokanthemes * { color !important }
       margin-bottom: var(--awa-space-md);
       padding-bottom: 12px;
       border-bottom: 2px solid var(--awa-border);
@@ -298,14 +495,24 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
+// prefers-reduced-motion: desativa animações e transições da PDP
+@media (prefers-reduced-motion: reduce) {
+  .catalog-product-view {
+    .product.info.detailed .product.data.items > .item.content {
+      animation: none;
+    }
+    .product-info-main .product-social-links .action,
+    .product-info-main .product-addto-links .action,
+    .product.media .fotorama__nav-wrap .fotorama__nav__frame {
+      transition: none;
+    }
+  }
+}
+
 // ---- Responsive PDP ----
 @media (max-width: (@awa-breakpoint-md - 1)) {
   .catalog-product-view {
-    .product-info-main-wrapper,
-    .column.main > .product-info-main {
-      grid-template-columns: 1fr;
-      gap: var(--awa-space-lg);
-    }
+    // Grid stacking handled in _grid-system.less (.product-view → 1fr)
 
     .product.media {
       position: static;

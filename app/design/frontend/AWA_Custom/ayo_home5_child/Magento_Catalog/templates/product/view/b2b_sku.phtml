@@ -1,6 +1,6 @@
 <?php
 /**
- * Custom B2B SKU display for Product Detail Page
+ * Custom B2B SKU display for Product Detail Page — com botão de copiar
  * @var \Magento\Catalog\Block\Product\View $block
  */
 $_product = $block->getProduct();
@@ -8,6 +8,38 @@ $_product = $block->getProduct();
 <?php if ($_product && $_product->getSku()): ?>
     <div class="awa-b2b-pdp-sku">
         <span class="awa-b2b-sku__label">Cod:</span>
-        <span class="awa-b2b-sku__value"><?php echo $block->escapeHtml($_product->getSku()); ?></span>
+        <span class="awa-b2b-sku__value" id="awa-sku-value"><?php echo $block->escapeHtml($_product->getSku()); ?></span>
+        <button class="awa-sku-copy-btn"
+                type="button"
+                data-sku="<?php echo $block->escapeHtmlAttr($_product->getSku()); ?>"
+                aria-label="<?php echo $block->escapeHtmlAttr(__('Copiar código do produto')) ?>">
+            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+            </svg>
+            <span class="awa-sku-copy-btn__text">Copiar</span>
+        </button>
+        <span class="awa-sku-copy-feedback" id="awa-sku-feedback" aria-live="polite"></span>
     </div>
+    <script>
+    (function () {
+        var btn = document.querySelector('.awa-sku-copy-btn');
+        if (!btn || !navigator.clipboard) { return; }
+        btn.addEventListener('click', function () {
+            var sku = btn.getAttribute('data-sku');
+            navigator.clipboard.writeText(sku).then(function () {
+                btn.setAttribute('data-copied', '');
+                btn.querySelector('.awa-sku-copy-btn__text').textContent = 'Copiado!';
+                var fb = document.getElementById('awa-sku-feedback');
+                if (fb) { fb.textContent = 'SKU copiado!'; fb.classList.add('visible'); }
+                setTimeout(function () {
+                    btn.removeAttribute('data-copied');
+                    btn.querySelector('.awa-sku-copy-btn__text').textContent = 'Copiar';
+                    if (fb) { fb.textContent = ''; fb.classList.remove('visible'); }
+                }, 2000);
+            });
+        });
+    })();
+    </script>
 <?php endif; ?>

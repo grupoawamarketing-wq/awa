@@ -1,0 +1,197 @@
+// ============================================================================
+// AWA Motos — _slider.less
+// Overrides específicos do slider principal da homepage
+//
+// Complementa _awa-slideshow.less (que cobre o full-bleed genérico).
+// Este arquivo trata: alturas por breakpoint, dots/arrows, texto sobre slide.
+//
+// Classe live: .slidebanner (confirmado por auditoria 2026-04-10)
+// Restrições: zero PHP/HTML/XML. !important documentado inline.
+// ============================================================================
+
+@import (once) '_awa-variables';
+
+
+// ============================================================================
+// 1. ALTURA RESPONSIVA DO SLIDER
+// ============================================================================
+
+.slidebanner,
+.banner-slider,
+.banner-slider2 {
+
+    // Desktop — altura natural da imagem
+    .banner_item,
+    .owl-item {
+        line-height: 0; // elimina gap de inline img abaixo do slider
+    }
+
+    // Mobile: garante altura mínima para o CTA ser legível
+    @media (max-width: (@awa-breakpoint-md - 1)) {
+        .banner_item {
+            min-height: 200px;
+        }
+    }
+}
+
+
+// ============================================================================
+// 2. CONTROLES — DOTS (paginação)
+// ============================================================================
+
+.slidebanner,
+.banner-slider,
+.banner-slider2 {
+
+    .owl-dots {
+        position: absolute;
+        bottom: 16px;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: center;
+        gap: 6px;
+        z-index: @z-card-badge; // _z-index.less — acima da imagem, abaixo do overlay
+    }
+
+    .owl-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.5);
+        border: none;
+        cursor: pointer;
+        transition: background @awa-transition, transform @awa-transition;
+        padding: 0;
+
+        &.active,
+        &:hover {
+            background: #ffffff;
+            transform: scale(1.2);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .owl-dot { transition: none !important; }
+    }
+}
+
+
+// ============================================================================
+// 3. CONTROLES — ARROWS (prev/next)
+// ============================================================================
+
+.slidebanner,
+.banner-slider,
+.banner-slider2 {
+
+    .owl-prev,
+    .owl-next {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: @z-carousel-nav; // _z-index.less
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        background: rgba(255, 255, 255, 0.85);
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: background @awa-transition, opacity @awa-transition;
+        opacity: 0;
+
+        @media (prefers-reduced-motion: reduce) { transition: none; }
+    }
+
+    .owl-prev { left: 16px; }
+    .owl-next { right: 16px; }
+
+    &:hover {
+        .owl-prev,
+        .owl-next { opacity: 1; }
+    }
+
+    // Sempre visível em touch devices (sem hover)
+    @media (hover: none) {
+        .owl-prev,
+        .owl-next { opacity: 0.8; }
+    }
+
+    .owl-prev:hover,
+    .owl-next:hover {
+        background: #ffffff;
+    }
+
+    @media (max-width: (@awa-breakpoint-md - 1)) {
+        .owl-prev,
+        .owl-next {
+            width: 36px;
+            height: 36px;
+        }
+
+        .owl-prev { left: 8px; }
+        .owl-next { right: 8px; }
+    }
+}
+
+
+// ============================================================================
+// 4. TEXTO SOBRE O SLIDE
+// ============================================================================
+
+.slidebanner,
+.banner-slider,
+.banner-slider2 {
+
+    .banner-content,
+    .slide-caption {
+        position: absolute;
+        bottom: 40px;
+        left: 5%;
+        max-width: 540px;
+        color: #ffffff;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+
+        h2, h3 {
+            font-size: clamp(22px, 4vw, 40px);
+            font-weight: @awa-weight-bold;
+            line-height: 1.2;
+            margin: 0 0 8px;
+        }
+
+        p {
+            font-size: clamp(14px, 2vw, 18px);
+            margin: 0 0 16px;
+            opacity: 0.9;
+        }
+
+        a.btn,
+        .btn-slide {
+            display: inline-flex;
+            align-items: center;
+            height: 44px;
+            padding: 0 24px;
+            background: var(--awa-primary, #b73337);
+            color: #ffffff;
+            border-radius: 4px;
+            font-size: @awa-font-size-14;
+            font-weight: @awa-weight-bold;
+            text-decoration: none;
+            transition: background @awa-transition;
+
+            &:hover {
+                background: var(--awa-primary-dark, #8e2629);
+            }
+        }
+
+        @media (max-width: (@awa-breakpoint-md - 1)) {
+            bottom: 48px; // acima dos dots
+            left: 4%;
+            right: 4%;
+            max-width: none;
+        }
+    }
+}

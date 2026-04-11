@@ -1,0 +1,690 @@
+/* =====================================================================
+   AWA MOTOS — Premium Finish (Round 11)
+   Acabamentos finais globais: breadcrumbs, messages, customer account,
+   product cards, scroll, loading states, micro-interactions.
+   Carregado via default_head_blocks.xml (global).
+   B2B-safe: nenhuma regra oculta/sobrescreve lógica de acesso B2B.
+   ===================================================================== */
+
+/* –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+   §1 — BREADCRUMBS PREMIUM
+   Refinamento visual + a11y para trilha de navegação.
+   ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––– */
+.breadcrumbs {
+    padding-block: var(--awa-space-2-5); /* P2-fluid: era 10px */
+    font-size: var(--awa-text-sm); /* P1-fluid: era 13px */
+    color: var(--text-muted, #999);
+}
+
+.breadcrumbs .items {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.breadcrumbs .item {
+    display: inline-flex;
+    align-items: center;
+    line-height: 1.4;
+}
+
+.breadcrumbs .item:not(:last-child)::after {
+    content: '';
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    border-right: 1.5px solid var(--text-muted, #aaa);
+    border-bottom: 1.5px solid var(--text-muted, #aaa);
+    transform: rotate(-45deg);
+    margin-inline: 8px;
+    opacity: 0.6;
+    flex-shrink: 0;
+}
+
+.breadcrumbs a {
+    color: var(--text-muted, #999);
+    font-weight: var(--awa-weight-medium);
+    transition: color var(--awa-transition-fast, 150ms ease);
+}
+
+.breadcrumbs a:hover,
+.breadcrumbs a:focus-visible {
+    color: var(--primary-color, #b73337);
+}
+
+.breadcrumbs .item strong {
+    color: var(--text-color, #222);
+    font-weight: var(--awa-weight-semibold);
+}
+
+/* –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+   §2 — MESSAGES / ALERTS PREMIUM
+   Notificações de sucesso, erro, warning, info.
+   ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––– */
+.page.messages .messages {
+    max-width: 1200px;
+    margin-inline: auto;
+    padding-inline: var(--awa-space-4); /* P2-fluid: era 16px */
+}
+
+.message {
+    border-radius: var(--awa-radius-lg, 12px);
+    padding: var(--awa-space-3) var(--awa-space-4); /* P2-fluid: era 12px 16px */
+    font-size: var(--awa-text-base); /* P1-fluid: era 14px */
+    font-weight: var(--awa-weight-medium);
+    line-height: 1.5;
+    display: flex;
+    align-items: flex-start;
+    gap: var(--awa-space-2-5); /* P2-fluid: era 10px */
+    animation: awaMessageSlideIn 350ms var(--awa-ease, cubic-bezier(0.4, 0, 0.2, 1)) both;
+}
+
+@keyframes awaMessageSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.message-success {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: var(--awa-success-dark);
+}
+
+.message-error {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: var(--awa-danger-dark);
+}
+
+.message-warning,
+.message-notice {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    color: var(--awa-warning-dark);
+}
+
+.message-info {
+    background: var(--awa-info-bg);
+    border: 1px solid var(--awa-info-border);
+    color: var(--awa-info-dark);
+}
+
+.message > :first-child::before {
+    flex-shrink: 0;
+}
+
+/* –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+   §3 — CUSTOMER ACCOUNT PAGES PREMIUM
+   Dashboard, orders, address book, wishlist.
+   ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––– */
+:is(body.account, body.customer-account-index, body.sales-order-history,
+    body.customer-address-index, body.wishlist-index-index,
+    body.customer-account-edit, body.newsletter-manage-index) .page-main {
+    padding-top: clamp(12px, 2vw, 20px);
+}
+
+/* Account sidebar navigation */
+:is(body.account, body[class*='customer-']) .block-collapsible-nav {
+    border: 1px solid var(--border-color, #e0e0e0);
+    border-radius: var(--awa-radius-xl, 16px);
+    background: var(--bg-white, #fff);
+    box-shadow: var(--awa-shadow-sm, 0 2px 8px rgb(15 23 42 / 6%));
+    overflow: clip;
+}
+
+:is(body.account, body[class*='customer-']) .block-collapsible-nav .item {
+    border-bottom: 1px solid var(--awa-gray-50);
+}
+
+:is(body.account, body[class*='customer-']) .block-collapsible-nav .item:last-child {
+    border-bottom: 0;
+}
+
+:is(body.account, body[class*='customer-']) .block-collapsible-nav .item a,
+:is(body.account, body[class*='customer-']) .block-collapsible-nav .item strong {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding: var(--awa-space-2-5) var(--awa-space-4); /* P2-fluid: era 10px 16px */
+    font-size: var(--awa-text-base); /* P1-fluid: era 14px */
+    font-weight: var(--awa-weight-medium);
+    color: var(--awa-gray-500);
+    text-decoration: none;
+    transition: background-color 200ms ease, color 200ms ease;
+}
+
+:is(body.account, body[class*='customer-']) .block-collapsible-nav .item a:hover {
+    background: #f8fafc;
+    color: var(--primary-color, #b73337);
+}
+
+:is(body.account, body[class*='customer-']) .block-collapsible-nav .item.current a,
+:is(body.account, body[class*='customer-']) .block-collapsible-nav .item.current strong {
+    background: rgb(183 51 55 / 6%);
+    color: var(--primary-color, #b73337);
+    font-weight: var(--awa-weight-bold);
+    border-inline-start: 3px solid var(--primary-color, #b73337);
+}
+
+/* Account content area — info boxes */
+:is(body.account, body[class*='customer-']) .block-dashboard-info,
+:is(body.account, body[class*='customer-']) .block-dashboard-addresses,
+:is(body.account, body[class*='customer-']) .block-dashboard-orders,
+:is(body.account, body[class*='customer-']) .block-addresses-list,
+:is(body.account, body[class*='customer-']) .block-order-details-view,
+:is(body.account, body[class*='customer-']) .form-edit-account,
+:is(body.account, body[class*='customer-']) .form-address-edit {
+    border: 1px solid var(--border-color, #e0e0e0);
+    border-radius: var(--awa-radius-xl, 16px);
+    background: var(--bg-white, #fff);
+    box-shadow: var(--awa-shadow-card, 0 1px 3px rgb(15 23 42 / 6%), 0 1px 2px rgb(15 23 42 / 4%));
+    padding: var(--awa-space-5); /* P2-fluid: era 20px */
+    margin-bottom: var(--awa-space-4); /* P2-fluid: era 16px */
+}
+
+:is(body.account, body[class*='customer-']) .block-title {
+    padding-bottom: var(--awa-space-2-5); /* P2-fluid: era 10px */
+    margin-bottom: var(--awa-space-3-5); /* P2-fluid: era 14px */
+    border-bottom: 1px solid var(--awa-gray-50);
+}
+
+:is(body.account, body[class*='customer-']) .block-title strong {
+    font-size: var(--awa-text-md); /* P1-fluid: era 16px */
+    font-weight: var(--awa-weight-bold);
+    color: var(--text-color, #222);
+    letter-spacing: -0.01em;
+}
+
+/* Order history table */
+:is(body.account, body.sales-order-history) .table-wrapper {
+    border: 1px solid var(--border-color, #e0e0e0);
+    border-radius: var(--awa-radius-xl, 16px);
+    overflow: clip;
+    background: var(--bg-white, #fff);
+    box-shadow: var(--awa-shadow-card, 0 1px 3px rgb(15 23 42 / 6%), 0 1px 2px rgb(15 23 42 / 4%));
+}
+
+:is(body.account, body.sales-order-history) .table-wrapper table {
+    margin: 0;
+}
+
+:is(body.account, body.sales-order-history) .table-wrapper thead th {
+    background: #f8fafc;
+    color: var(--awa-gray-500);
+    font-size: var(--awa-text-xs); /* P1-fluid: era 12px */
+    font-weight: var(--awa-weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: var(--awa-space-2-5) var(--awa-space-3-5); /* P2-fluid: era 10px 14px */
+    border-bottom: 1px solid var(--border-color, #e0e0e0);
+}
+
+:is(body.account, body.sales-order-history) .table-wrapper tbody td {
+    padding: var(--awa-space-3) var(--awa-space-3-5); /* P2-fluid: era 12px 14px */
+    font-size: var(--awa-text-base); /* P1-fluid: era 14px */
+    color: var(--awa-gray-700);
+    border-bottom: 1px solid var(--awa-gray-50);
+    vertical-align: middle;
+}
+
+:is(body.account, body.sales-order-history) .table-wrapper tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+:is(body.account, body.sales-order-history) .table-wrapper tbody tr:hover td {
+    background: #fafbfc;
+}
+
+:is(body.account, body.sales-order-history) .table-wrapper .action.view,
+:is(body.account, body.sales-order-history) .table-wrapper .action.reorder {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    padding: var(--awa-space-1) var(--awa-space-3); /* P2-fluid: era 4px 12px */
+    border-radius: var(--awa-radius-sm, 8px);
+    font-size: var(--awa-text-sm); /* P1-fluid: era 13px */
+    font-weight: var(--awa-weight-semibold);
+}
+
+/* –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+   §4 — PRODUCT CARDS: Hover & Transition Polish
+   Refinamento de hover nos cards de produto em qualquer contexto.
+   ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––– */
+.product-item {
+    transition: box-shadow var(--awa-transition, 250ms ease), transform var(--awa-transition-fast, 150ms ease);
+}
+
+.product-item:hover {
+    box-shadow: var(--awa-shadow-card-hover, 0 10px 25px rgb(15 23 42 / 10%), 0 4px 10px rgb(15 23 42 / 5%));
+    transform: translateY(-2px);
+}
+
+/* Product image premium treatment */
+.product-item .product-image-container {
+    overflow: clip;
+    border-radius: var(--awa-radius-lg, 12px);
+}
+
+.product-item .product-image-photo {
+    transition: transform 400ms var(--awa-ease, cubic-bezier(0.4, 0, 0.2, 1));
+    will-change: transform;
+}
+
+.product-item:hover .product-image-photo {
+    transform: scale(1.04);
+}
+
+/* Product name typography */
+.product-item .product-item-link {
+    font-weight: var(--awa-weight-semibold);
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+    -webkit-line-clamp: 2;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Review stars refinement */
+.product-item .rating-summary .rating-result > span::before,
+.product-reviews-summary .rating-summary .rating-result > span::before {
+    color: #f59e0b;
+}
+
+/* Product actions refinement */
+.product-item .actions-secondary .action {
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--awa-radius-md, 10px);
+    border: 1px solid var(--border-color, #e0e0e0);
+    background: var(--bg-white, #fff);
+    color: var(--awa-gray-450);
+    transition: all var(--awa-transition-fast, 150ms ease);
+}
+
+.product-item .actions-secondary .action:hover {
+    border-color: var(--primary-color, #b73337);
+    color: var(--primary-color, #b73337);
+    background: rgb(183 51 55 / 6%);
+}
+
+/* Add to cart button refinement */
+.product-item .action.tocart {
+    border-radius: var(--awa-radius-md, 10px);
+    font-weight: var(--awa-weight-bold);
+    font-size: var(--awa-text-sm); /* P1-fluid: era 13px */
+    min-height: 38px;
+    letter-spacing: 0.01em;
+}
+
+/* –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+   §5 — GLOBAL MICRO-INTERACTIONS & SCROLL POLISH
+   Scroll suave, loading states, skeleton shimmer.
+   ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––– */
+
+/* Smooth scroll for anchored navigation */
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 80px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+}
+
+/* Custom scrollbar for sidebar and modals */
+.block-collapsible-nav,
+.filter-options,
+.minicart-items-wrapper,
+.modal-inner-wrap {
+    scrollbar-width: thin;
+    scrollbar-color: var(--awa-gray-275) transparent;
+}
+
+.block-collapsible-nav::-webkit-scrollbar,
+.filter-options::-webkit-scrollbar,
+.minicart-items-wrapper::-webkit-scrollbar,
+.modal-inner-wrap::-webkit-scrollbar {
+    width: 6px;
+}
+
+.block-collapsible-nav::-webkit-scrollbar-thumb,
+.filter-options::-webkit-scrollbar-thumb,
+.minicart-items-wrapper::-webkit-scrollbar-thumb,
+.modal-inner-wrap::-webkit-scrollbar-thumb {
+    background: var(--awa-gray-275);
+    border-radius: 99px;
+}
+
+/* Loading spinner premium */
+.loading-mask {
+    background: rgb(255 255 255 / 85%);
+    backdrop-filter: blur(4px);
+}
+
+.loading-mask .loader > img {
+    filter: hue-rotate(-10deg) saturate(1.2);
+}
+
+/* Skeleton shimmer for lazy-loaded content */
+@keyframes awaShimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+.product-item-info .product-image-wrapper::before,
+.owl-item:not(.active) .product-item-info .product-image-wrapper::before {
+    content: none; /* prevent double shimmer */
+}
+
+/* –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+   §6 — PAGINATION PREMIUM
+   Refinamento visual de paginação.
+   ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––– */
+.pages {
+    margin-top: var(--awa-space-5); /* P2-fluid: era 20px */
+}
+
+.pages .items {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.pages .item {
+    display: inline-flex;
+}
+
+.pages .item a,
+.pages .item strong {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    min-height: 40px;
+    padding: 6px 10px;
+    border-radius: var(--awa-radius-md, 10px);
+    border: 1px solid var(--border-color, #e0e0e0);
+    background: var(--bg-white, #fff);
+    color: var(--awa-gray-500);
+    font-size: var(--awa-text-base); /* P1-fluid: era 14px */
+    font-weight: var(--awa-weight-semibold);
+    text-decoration: none;
+    transition: all var(--awa-transition-fast, 150ms ease);
+}
+
+.pages .item a:hover,
+.pages .item a:focus-visible {
+    border-color: var(--primary-color, #b73337);
+    color: var(--primary-color, #b73337);
+    background: rgb(183 51 55 / 6%);
+    box-shadow: 0 2px 8px rgb(183 51 55 / 10%);
+}
+
+.pages .item.current strong {
+    background: var(--primary-color, #b73337);
+    border-color: var(--primary-color, #b73337);
+    color: var(--awa-white);
+    box-shadow: 0 4px 12px rgb(183 51 55 / 20%);
+}
+
+.pages .item .action.next,
+.pages .item .action.previous {
+    border-color: transparent;
+    background: transparent;
+    color: var(--text-muted, #999);
+}
+
+.pages .item .action.next:hover,
+.pages .item .action.previous:hover {
+    color: var(--primary-color, #b73337);
+    background: rgb(183 51 55 / 4%);
+    border-color: rgb(183 51 55 / 12%);
+}
+
+/* –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+   §7 — MODALS & POPUPS PREMIUM
+   Magento modals, AjaxSuite popup, QuickView.
+   ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––– */
+.modal-popup .modal-inner-wrap {
+    border-radius: var(--awa-radius-xl, 16px);
+    box-shadow: 0 25px 60px rgb(15 23 42 / 18%);
+    border: 1px solid rgb(15 23 42 / 8%);
+}
+
+.modal-popup .modal-header {
+    border-bottom: 1px solid var(--awa-gray-50);
+    padding: var(--awa-space-4) var(--awa-space-5); /* P2-fluid: era 16px 20px */
+}
+
+.modal-popup .modal-title {
+    font-size: var(--awa-text-lg); /* P1-fluid: era 18px */
+    font-weight: var(--awa-weight-bold);
+    color: var(--text-color, #222);
+    letter-spacing: -0.01em;
+}
+
+.modal-popup .modal-content {
+    padding: var(--awa-space-5); /* P2-fluid: era 20px */
+}
+
+.modal-popup .modal-footer {
+    border-top: 1px solid var(--awa-gray-50);
+    padding: var(--awa-space-3-5) var(--awa-space-5); /* P2-fluid: era 14px 20px */
+}
+
+.modal-popup .action-close {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--awa-radius-md, 10px);
+    border: 1px solid transparent;
+    transition: background-color 200ms ease, border-color 200ms ease;
+}
+
+.modal-popup .action-close:hover {
+    background: var(--awa-gray-50);
+    border-color: var(--awa-gray-210);
+}
+
+/* Overlay backdrop */
+.modals-overlay {
+    background: rgb(15 23 42 / 40%);
+    backdrop-filter: blur(4px);
+}
+
+/* AjaxSuite popup compatibility */
+.ajaxsuite-popup-wrapper {
+    border-radius: var(--awa-radius-xl, 16px);
+    box-shadow: 0 25px 60px rgb(15 23 42 / 18%);
+    overflow: clip;
+}
+
+/* –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+   §8 — TOOLTIP & BADGE SYSTEM
+   Tags de desconto, labels "Novo", badges de estoque.
+   ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––– */
+.product-item .onsale,
+.product-item .product-label-sale,
+.product-item .label-sale {
+    border-radius: var(--awa-radius-sm, 8px);
+    font-size: var(--awa-text-2xs); /* P1-fluid: era 11px */
+    font-weight: var(--awa-weight-extrabold);
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    line-height: 1.3;
+}
+
+.product-item .product-label-new,
+.product-item .label-new {
+    border-radius: var(--awa-radius-sm, 8px);
+    font-size: var(--awa-text-2xs); /* P1-fluid: era 11px */
+    font-weight: var(--awa-weight-extrabold);
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    line-height: 1.3;
+}
+
+/* –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+   §9 — FORMS: PREMIUM GLOBAL REFINEMENT
+   Campo de formulário, labels, validação.
+   ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––– */
+.fieldset > .field > .label,
+.fieldset > .field > label {
+    font-size: var(--awa-text-sm); /* P1-fluid: era 13px */
+    font-weight: var(--awa-weight-semibold);
+    color: var(--awa-gray-700);
+    margin-bottom: var(--awa-space-1); /* P2-fluid: era 4px */
+}
+
+.field .control .input-text,
+.field .control select,
+.field .control textarea {
+    border-radius: var(--awa-radius-md, 10px);
+    border: 1px solid var(--border-color, #e0e0e0);
+    padding: var(--awa-space-2-5) var(--awa-space-3-5); /* P2-fluid: era 10px 14px */
+    font-size: var(--awa-text-base); /* P1-fluid: era 14px */
+    min-height: 44px;
+    transition: border-color 200ms ease, box-shadow 200ms ease;
+    background: var(--bg-white, #fff);
+}
+
+.field .control .input-text:focus,
+.field .control select:focus,
+.field .control textarea:focus {
+    border-color: var(--primary-color, #b73337);
+    box-shadow: 0 0 0 3px rgb(183 51 55 / 12%);
+    outline: 0;
+}
+
+.field .control .input-text:hover:not(:focus),
+.field .control select:hover:not(:focus),
+.field .control textarea:hover:not(:focus) {
+    border-color: var(--border-hover, #ddd);
+}
+
+/* Validation error styling */
+.field .control .mage-error,
+.field .control .input-text.mage-error,
+.field .control select.mage-error {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgb(239 68 68 / 10%);
+}
+
+div.mage-error {
+    color: var(--awa-danger);
+    font-size: var(--awa-text-xs); /* P1-fluid: era 12px */
+    font-weight: var(--awa-weight-medium);
+    margin-top: var(--awa-space-1); /* P2-fluid: era 4px */
+}
+
+/* Required asterisk */
+.field.required > .label::after,
+.field._required > .label::after {
+    color: var(--primary-color, #b73337);
+}
+
+/* –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+   §10 — MOBILE REFINEMENTS
+   Touch targets, spacing, readability.
+   ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––– */
+@media (width <= 767px) {
+    /* Ensure touch-friendly minimums */
+    .pages .item a,
+    .pages .item strong {
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    /* Account sidebar collapses cleaner */
+    :is(body.account, body[class*='customer-']) .block-collapsible-nav {
+        border-radius: var(--awa-radius-lg, 12px);
+        margin-bottom: var(--awa-space-3); /* P2-fluid: era 12px */
+    }
+
+    /* Product card hover disabled on touch */
+    @media (hover: none) and (pointer: coarse) {
+        .product-item:hover {
+            box-shadow: none;
+            transform: none;
+        }
+
+        .product-item:hover .product-image-photo {
+            transform: none;
+        }
+    }
+
+    /* Breadcrumbs mobile */
+    .breadcrumbs {
+        font-size: var(--awa-text-xs); /* P1-fluid: era 12px */
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .breadcrumbs::-webkit-scrollbar {
+        display: none;
+    }
+
+    .breadcrumbs .items {
+        flex-wrap: nowrap;
+        white-space: nowrap;
+    }
+
+    /* Messages mobile */
+    .message {
+        font-size: var(--awa-text-sm); /* P1-fluid: era 13px */
+        padding: var(--awa-space-2-5) var(--awa-space-3-5); /* P2-fluid: era 10px 14px */
+    }
+
+    /* Modal mobile */
+    .modal-popup .modal-inner-wrap {
+        border-radius: var(--awa-radius-lg, 12px) var(--awa-radius-lg, 12px) 0 0;
+        margin-top: auto;
+        max-height: 90vh;
+    }
+}
+
+/* –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+   §11 — REDUCED MOTION
+   ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––– */
+@media (prefers-reduced-motion: reduce) {
+    .product-item,
+    .product-item .product-image-photo,
+    .message,
+    .pages .item a,
+    .modal-popup .action-close {
+        transition: none !important;
+        animation: none !important;
+    }
+
+    .product-item:hover {
+        transform: none;
+    }
+
+    .product-item:hover .product-image-photo {
+        transform: none;
+    }
+}

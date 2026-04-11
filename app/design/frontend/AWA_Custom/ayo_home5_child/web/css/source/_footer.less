@@ -1,610 +1,495 @@
-// =============================================================================
-// AWA MOTOS — FOOTER PIXEL-PERFECT
-// Referência visual: imagem de design (2026-04-07)
-// Estrutura: 4 colunas nav | Categorias strip | Bottom 3-col | Copyright | Devby
-// =============================================================================
+// ============================================================================
+// AWA Motos — _footer.less  (tema claro / light footer)
+//
+// Design:
+//   Fundo neutro (#f9fafb) + borda superior vermelha (3px) = identidade AWA
+//   Texto escuro sobre fundo claro — contraste WCAG AA garantido
+//   Tipografia, espaçamento e raio via tokens do DS
+//
+// HTML alvo (Rokanthemes Vela):
+//   <footer class="page-footer">
+//     <div class="page_footer awa-footer--dark">          ← underscore
+//       <div class="footer-container layout2 footer">
+//         <div class="footer-static velaBlock">
+//           <div class="container"><div class="row">
+//             <div class="col-lg-3"> .velaFooterMenu
+//               <h4 class="velaFooterTitle">
+//               <ul class="velaFooterLinks">
+//   <section class="awa-footer-categories-expand">
+//   <div class="footer-bottom">
+//
+// Restrições: zero PHP/HTML/XML. !important apenas para vencer tema pai.
+// ============================================================================
 
 @import (once) '_design-system';
 
-// ── TOKENS LOCAIS ─────────────────────────────────────────────────────────────
-@ft-text-1:     #ffffff;
-@ft-text-2:     rgba(255, 255, 255, 0.75);
-@ft-text-3:     rgba(255, 255, 255, 0.50);
-@ft-border:     rgba(255, 255, 255, 0.15);
-@ft-border-hi:  rgba(255, 255, 255, 0.35);
-@ft-surface:    rgba(0, 0, 0, 0.10);
-@ft-transition: 0.2s ease;
+
+// ── Tokens locais ─────────────────────────────────────────────────────────────
+
+@footer-surface:      @awa-neutral-50;            // #f9fafb — fundo principal
+@footer-surface-2:    @awa-color-white;            // #ffffff — blocos internos
+@footer-accent:       @awa-color-primary;          // #b73337 — borda topo + hover
+@footer-text:         @awa-color-text-primary;     // #333333
+@footer-muted:        @awa-color-text-muted;       // #666666
+@footer-link:         @awa-color-text-primary;     // #333333 — links em fundo claro
+@footer-link-hover:   @awa-color-primary;          // #b73337
+@footer-border:       @awa-color-border;           // #e2e2e2
+@footer-icon-size:    44px;                        // touch target mínimo WCAG
 
 
-// ══════════════════════════════════════════════════════════════════════════════
-// 1. WRAPPER PRINCIPAL
-// ══════════════════════════════════════════════════════════════════════════════
+// ============================================================================
+// 1. RESET — superfície e identidade
+//    Selectors com mesma ou maior especificidade que awa-layout-standardization
+//    (body .page-wrapper .page_footer = 0,2,1) para vencer CSS async
+// ============================================================================
 
-body .page-wrapper .page_footer {
-    color: @ft-text-1;
-    padding-top: 0;
-    padding-bottom: 0;
-
-    // Remove any background do tema pai (o bundle de gradiente controla)
-    &::before, &::after { background: transparent !important; }
-
-    .container {
-        background: transparent;
-    }
+// Outer wrapper (.page-footer = hyphen)
+body .page-wrapper .page-footer,
+body .page-wrapper .page_footer {                  // inner div = underscore
+    background-color: @footer-surface !important;
+    background-image: none !important;
+    color: @footer-text !important;
+    border-top: 3px solid @footer-accent;
 }
 
+// Containers internos do Rokanthemes
+body .page-wrapper .page_footer .footer-container,
+body .page-wrapper .page_footer #footer,
+body .page-wrapper .page_footer .footer-container.layout2,
+body .page-wrapper .page_footer .footer-static,
+body .page-wrapper .page_footer .velaBlock,
+body .page-wrapper .page-footer .footer-static,
+body .page-wrapper .page-footer .velaBlock {
+    background-color: @footer-surface-2 !important;
+    background-image: none !important;
+    color: @footer-text !important;
+}
 
-// ══════════════════════════════════════════════════════════════════════════════
-// 2. SEÇÃO DE LINKS — GRID 4 COLUNAS (#footer CMS block)
-//    HTML: #footer .container > .row > .col-md-3 (×4)
-// ══════════════════════════════════════════════════════════════════════════════
-
-body .page-wrapper .page_footer #footer {
+// Remove gradientes/pseudo do tema pai
+body .page-wrapper .page-footer::before,
+body .page-wrapper .page-footer::after,
+body .page-wrapper .page_footer::before,
+body .page-wrapper .page_footer::after {
     background: transparent !important;
-}
-
-body .page-wrapper .page_footer #footer .container {
-    padding-top: @ds-space-xxl;    // 48px
-    padding-bottom: @ds-space-lg;  // 32px
-}
-
-// Grid CSS (override Bootstrap row)
-body .page-wrapper .page_footer #footer .container > .row {
-    display: grid !important;
-    grid-template-columns: repeat(4, 1fr);
-    column-gap: 32px;
-    row-gap: 32px;
-    align-items: flex-start;
-    flex-wrap: unset !important;
-}
-
-body .page-wrapper .page_footer #footer .container > .row > [class*="col-"] {
-    width: 100% !important;
-    max-width: 100% !important;
-    flex: none !important;
-    padding: 0 !important;
-    margin-bottom: 0 !important;
+    display: none;
 }
 
 
-// ══════════════════════════════════════════════════════════════════════════════
-// 3. TÍTULOS DAS COLUNAS
-//    Seletores Rokanthemes: .velaFooterTitle
-// ══════════════════════════════════════════════════════════════════════════════
+// ============================================================================
+// 2. TIPOGRAFIA — títulos das colunas
+// ============================================================================
 
-body .page-wrapper .page_footer .velaFooterTitle,
-body .page-wrapper .page_footer .velaFooterTitle a {
-    font-size: 13px !important;
-    font-weight: 700 !important;
-    color: @ft-text-1 !important;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    line-height: 1.4;
-    margin-bottom: 20px !important;
-    display: block;
-    text-decoration: none !important;
-}
+body .page-wrapper .page-footer,
+body .page-wrapper .page_footer {
 
+    // Títulos das colunas Vela
+    .velaFooterTitle,
+    .footer-block-title,
+    h4.velaFooterTitle {
+        color: @footer-text !important;
+        font-size: @awa-font-size-13;
+        font-weight: @awa-weight-bold;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin: 0 0 @ds-space-sm;                 // 16px
+        padding-bottom: @awa-space-2;             // 8px
+        border-bottom: 1px solid @footer-border;
+        line-height: @lh-compact;
 
-// ══════════════════════════════════════════════════════════════════════════════
-// 4. LINKS DAS COLUNAS
-//    Seletores Rokanthemes: .velaFooterLinks / .footer-links
-// ══════════════════════════════════════════════════════════════════════════════
+        &::after { display: none !important; }   // remove decorador Rokanthemes
+    }
 
-body .page-wrapper .page_footer .velaFooterLinks,
-body .page-wrapper .page_footer .footer-links,
-body .page-wrapper .page_footer ul.velaFooterLinks {
-    margin: 0 !important;
-    padding: 0 !important;
-    list-style: none !important;
-}
-
-body .page-wrapper .page_footer .velaFooterLinks li,
-body .page-wrapper .page_footer .footer-links li {
-    margin: 0 0 10px !important;
-
-    &:last-child {
-        margin-bottom: 0 !important;
+    // Textos gerais
+    p, span, address, small, em, label, td, th {
+        color: @footer-text !important;
     }
 }
 
-body .page-wrapper .page_footer .velaFooterLinks li a,
-body .page-wrapper .page_footer .footer-links li a {
-    display: block;
-    color: @ft-text-2 !important;
-    text-decoration: none !important;
-    font-size: 13px;
-    line-height: 1.5;
-    padding: 2px 0;
-    transition: color @ft-transition, opacity @ft-transition;
 
-    &:hover,
-    &:focus-visible {
-        color: @ft-text-1 !important;
+// ============================================================================
+// 3. LINKS — listas Vela + links genéricos
+// ============================================================================
+
+body .page-wrapper .page-footer,
+body .page-wrapper .page_footer {
+
+    a,
+    a:link,
+    a:visited {
+        color: @footer-link !important;
         text-decoration: none !important;
-        outline: none;
-    }
-}
-
-
-// ══════════════════════════════════════════════════════════════════════════════
-// 5. COLUNA ATENDIMENTO — CONTATO, TELEFONE, SOCIAL
-// ══════════════════════════════════════════════════════════════════════════════
-
-// Telefone / SAC rótulo
-body .page-wrapper .page_footer .footer-phone-label,
-body .page-wrapper .page_footer .vela-footer-contact-title {
-    font-size: 11px;
-    color: @ft-text-3;
-    line-height: 1.2;
-    margin: 0 0 4px;
-    display: block;
-}
-
-// Número grande
-body .page-wrapper .page_footer .footer-phone-number,
-body .page-wrapper .page_footer .vela-footer-phone {
-    font-size: 22px !important;
-    font-weight: 700;
-    color: @ft-text-1 !important;
-    line-height: 1.2;
-    margin: 0 0 @ds-space-sm; // 16px
-    display: block;
-    text-decoration: none !important;
-}
-
-// E-mail link
-body .page-wrapper .page_footer .footer-email a,
-body .page-wrapper .page_footer .vela-footer-email a {
-    color: @ft-text-2 !important;
-    font-size: 13px;
-    text-decoration: none !important;
-    transition: color @ft-transition;
-
-    &:hover {
-        color: @ft-text-1 !important;
-    }
-}
-
-// Links de WhatsApp / Central de ajuda (com ícone)
-body .page-wrapper .page_footer .footer-contact-links a,
-body .page-wrapper .page_footer .vela-footer-contact-links a {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    color: @ft-text-2 !important;
-    font-size: 13px;
-    text-decoration: none !important;
-    padding: 6px 0;
-    transition: color @ft-transition;
-
-    &:hover { color: @ft-text-1 !important; }
-
-    .icon, i, svg {
-        width: 18px;
-        height: 18px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-        background: @ft-border-hi;
-        flex-shrink: 0;
-    }
-}
-
-// "Siga a Awa Motos" label
-body .page-wrapper .page_footer .footer-social-label,
-body .page-wrapper .page_footer .footer-follow-label {
-    font-size: 12px;
-    font-weight: 600;
-    color: @ft-text-1;
-    margin: @ds-space-sm 0 @ds-space-xs; // 16px top, 8px bottom
-    display: block;
-    text-transform: none;
-}
-
-// Ícones sociais — quadrados arredondados
-body .page-wrapper .page_footer .footer-social-section .social-links,
-body .page-wrapper .page_footer .vela-footer-social {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-top: @ds-space-xs; // 8px
-}
-
-body .page-wrapper .page_footer .footer-social-section .social-links a,
-body .page-wrapper .page_footer .vela-footer-social a {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    min-height: 36px;
-    border-radius: 4px;
-    border: 1px solid @ft-border-hi;
-    color: @ft-text-1 !important;
-    text-decoration: none !important;
-    font-size: 15px;
-    transition: background @ft-transition, border-color @ft-transition;
-
-    &:hover,
-    &:focus-visible {
-        background: rgba(255, 255, 255, 0.18);
-        border-color: @ft-text-1;
-        outline: none;
+        transition: color @awa-transition;
     }
 
-    i, svg {
-        pointer-events: none;
-        width: 16px;
-        height: 16px;
-    }
-}
-
-
-// ══════════════════════════════════════════════════════════════════════════════
-// 6. FAIXA "CATEGORIAS" — EXPANDABLE ACCORDION
-// ══════════════════════════════════════════════════════════════════════════════
-
-.awa-footer-categories-expand {
-    border-top: 1px solid @ft-border;
-    border-bottom: 1px solid @ft-border;
-    padding: 0;
-    margin: 0;
-
-    &__inner {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-
-        // Separadores laterais inline (via ::before/::after do toggle container)
+    a:hover,
+    a:focus {
+        color: @footer-link-hover !important;
+        text-decoration: none !important;
     }
 
-    &__toggle {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        background: none;
-        border: none;
-        color: rgba(255, 255, 255, 0.85);
-        font-size: 14px;
-        font-weight: 600;
-        letter-spacing: 0.5px;
-        padding: 14px 24px;
-        cursor: pointer;
-        transition: color @ft-transition;
-        text-transform: none;
-        white-space: nowrap;
+    a:focus-visible {
+        outline: @awa-focus-ring-width solid @footer-accent;
+        outline-offset: @awa-focus-ring-offset;
+        border-radius: @awa-border-radius-sm;
+    }
 
-        &:hover,
-        &:focus-visible {
-            color: @ft-text-1;
-            outline: 2px solid rgba(255, 255, 255, 0.4);
-            outline-offset: 2px;
+    // Listas de links Vela
+    ul.velaFooterLinks {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+
+        li {
+            margin-bottom: @awa-space-2;           // 8px
+            line-height: @lh-relaxed;
+            &:last-child { margin-bottom: 0; }
         }
-    }
 
-    &__icon {
-        font-size: 18px;
-        font-weight: 300;
-        line-height: 1;
-        transition: transform 0.25s ease;
-        display: inline-block;
-    }
+        a {
+            font-size: @awa-font-size-14;
+            color: @footer-muted !important;
+            display: inline-block;
+            transform: translateX(0);
+            transition: color @awa-transition, transform @awa-transition;
 
-    &__toggle[aria-expanded="true"] &__icon {
-        transform: rotate(45deg);
-    }
-
-    &__panel {
-        padding: 0 0 @ds-space-md; // 24px
-
-        ul {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 8px 16px;
-            list-style: none;
-            padding: 0;
-            margin: 0;
-
-            li a {
-                color: @ft-text-2;
-                font-size: 13px;
-                text-decoration: none;
-                transition: color @ft-transition;
-
-                &:hover {
-                    color: @ft-text-1;
-                    text-decoration: underline;
-                }
+            &:hover {
+                color: @footer-link-hover !important;
+                transform: translateX(3px);
             }
         }
     }
 }
 
 
-// ══════════════════════════════════════════════════════════════════════════════
-// 7. FOOTER BOTTOM — 3 COLUNAS: Logo | Pague com | Certificados
-//    HTML: .footer-bottom > .container > .footer-bottom-inner > .row.awa-footer-bottom__row
-// ══════════════════════════════════════════════════════════════════════════════
+// ============================================================================
+// 4. COLUNA ATENDIMENTO
+// ============================================================================
 
-body .page-wrapper .page_footer .footer-bottom {
-    background: rgba(0, 0, 0, 0.20) !important;
-    border-top: 1px solid @ft-border !important;
-    padding: @ds-space-lg 0 !important; // 32px
-    margin-top: 0;
-}
+body .page-wrapper .page-footer .awa-footer-atendimento,
+body .page-wrapper .page_footer .awa-footer-atendimento {
 
-body .page-wrapper .page_footer .footer-bottom .footer-bottom-inner {
-    background: transparent !important;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
-    border-top: none !important;
-    margin-top: 0;
-}
-
-// O .row do Bootstrap é substituído pelo display:flex aqui
-body .page-wrapper .page_footer .footer-bottom .awa-footer-bottom__row {
-    display: flex !important;
-    align-items: center;
-    justify-content: space-between;
-    gap: @ds-space-md; // 24px
-    flex-wrap: wrap;
-    background: transparent !important;
-}
-
-// Coluna do logo — tamanho fixo
-body .page-wrapper .page_footer .footer-bottom .awa-footer-bottom__logo-col {
-    flex: 0 0 auto;
-}
-
-.awa-footer-bottom__logo-img {
-    max-width: 142px;
-    height: auto;
-    display: block;
-    background: transparent !important;
-}
-
-
-// ══════════════════════════════════════════════════════════════════════════════
-// 8. PAGUE COM — label + logos
-// ══════════════════════════════════════════════════════════════════════════════
-
-.awa-footer-pay-sec {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.awa-footer-pay-sec__label {
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: @ft-text-2 !important;
-    margin: 0 0 4px;
-    display: block;
-}
-
-.awa-footer-pay-logos {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    align-items: center;
-}
-
-// Card de bandeira de pagamento (fundo branco)
-.awa-pay-logo {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255, 255, 255, 0.96) !important;
-    border-radius: 4px;
-    padding: 4px 8px;
-    min-height: 30px;
-    border: 1px solid rgba(255, 255, 255, 0.20) !important;
-    transition: transform @ft-transition, box-shadow @ft-transition;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
-
-    img {
-        max-height: 20px;
-        width: auto;
-        display: block;
-        vertical-align: middle;
-    }
-
-    &:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
-    }
-}
-
-
-// ══════════════════════════════════════════════════════════════════════════════
-// 9. CERTIFICADOS E SEGURANÇA — selos SSL + Google
-// ══════════════════════════════════════════════════════════════════════════════
-
-.awa-footer-sec {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.awa-footer-sec-seals {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-// Cada selo (SVG inline)
-.awa-seal {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255, 255, 255, 0.08) !important;
-    border-radius: 4px;
-    padding: 6px 10px;
-    min-height: 38px;
-    border: 1px solid @ft-border !important;
-    text-decoration: none !important;
-    transition: background @ft-transition, border-color @ft-transition, transform @ft-transition;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
-
-    svg, img {
-        display: block;
-        max-height: 36px;
-        width: auto;
-    }
-
-    &:hover,
-    &:focus-visible {
-        background: rgba(255, 255, 255, 0.15) !important;
-        border-color: @ft-border-hi !important;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
-        outline: 2px solid rgba(255, 255, 255, 0.3);
-        outline-offset: 2px;
-    }
-}
-
-
-// ══════════════════════════════════════════════════════════════════════════════
-// 10. COPYRIGHT / TEXTO LEGAL
-// ══════════════════════════════════════════════════════════════════════════════
-
-.awa-footer-bottom__copyright {
-    border-top: 1px solid @ft-border;
-    padding-top: @ds-space-md;  // 24px
-    margin-top: @ds-space-sm;   // 16px
-}
-
-.awa-footer-copyright {
-    &__main {
-        font-size: 14px;
-        font-weight: 600;
-        color: rgba(255, 255, 255, 0.85);
-        margin: 0 0 6px;
-    }
-
-    &__legal {
-        font-size: 12px;
-        color: rgba(255, 255, 255, 0.60);
-        margin: 0 0 6px;
-    }
-
-    &__disclaimer {
-        font-size: 11px;
-        color: rgba(255, 255, 255, 0.45);
-        line-height: 1.5;
-        margin: 0;
-        max-width: 960px;
-    }
-}
-
-
-// ══════════════════════════════════════════════════════════════════════════════
-// 11. DESENVOLVIDO POR BLUU — barra escura no rodapé
-// ══════════════════════════════════════════════════════════════════════════════
-
-.awa-footer-devby {
-    background: #111;
-    padding: @ds-space-sm 0; // 16px
-
-    &__inner {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-    }
-
-    &__label {
-        font-size: 10px;
-        color: rgba(255, 255, 255, 0.45);
-        letter-spacing: 1.5px;
+    .awa-footer-atendimento__label {
+        font-size: @awa-font-size-11;
+        font-weight: @awa-weight-bold;
         text-transform: uppercase;
-        font-weight: 600;
+        letter-spacing: 0.07em;
+        color: @footer-muted !important;
+        margin: 0 0 @awa-space-1;                 // 4px
     }
 
-    &__link {
+    .awa-footer-atendimento__phone {
+        font-size: @awa-font-size-20;
+        font-weight: @awa-weight-bold;
+        letter-spacing: 0.02em;
+        margin: @awa-space-1 0 @awa-space-3;      // 4px 0 12px
+
+        a {
+            color: @footer-text !important;
+            transition: color @awa-transition;
+
+            &:hover { color: @footer-link-hover !important; }
+        }
+    }
+
+    .awa-footer-atendimento__email a {
+        font-size: @awa-font-size-13;
+        color: @footer-muted !important;
+        display: block;
+        margin-bottom: @ds-space-sm;              // 16px
+
+        &:hover { color: @footer-link-hover !important; }
+    }
+
+    // Ações (WhatsApp, Central de Ajuda)
+    ul.awa-footer-atendimento__actions a {
         display: inline-flex;
         align-items: center;
-        text-decoration: none !important;
-        transition: opacity @ft-transition;
+        gap: @awa-gap-sm;                         // 8px
+        font-size: @awa-font-size-13;
+        color: @footer-muted !important;
+        transition: color @awa-transition;
 
-        &:hover { opacity: 0.8; }
+        &:hover { color: @footer-link-hover !important; }
+
+        .awa-footer-atendimento__icon {
+            display: inline-flex;
+            align-items: center;
+            flex-shrink: 0;
+        }
     }
 
-    &__logo {
-        height: 24px;
-        width: auto;
-        background: transparent !important;
+    // Label "Siga a Awa Motos"
+    .awa-footer-atendimento__label--social {
+        font-size: @awa-font-size-11;
+        font-weight: @awa-weight-bold;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: @footer-muted !important;
+        margin-top: @ds-space-sm;                 // 16px
+        margin-bottom: @awa-space-2;              // 8px
+    }
+}
+
+
+// ============================================================================
+// 5. ÍCONES SOCIAIS — .awa-footer-pro__social
+// ============================================================================
+
+body .page-wrapper .page-footer .awa-footer-pro__social,
+body .page-wrapper .page_footer .awa-footer-pro__social {
+    display: flex;
+    flex-wrap: wrap;
+    gap: @awa-gap-sm;                             // 8px
+    margin-top: @awa-gap-sm;
+
+    .awa-footer-pro__social-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: @footer-icon-size;                 // 44px — touch target
+        height: @footer-icon-size;               // 44px
+        border-radius: 50%;
+        border: 1.5px solid @footer-border;
+        background-color: transparent;
+        color: @footer-muted !important;
+        transition: background-color @awa-transition,
+                    border-color @awa-transition,
+                    color @awa-transition,
+                    transform @awa-transition;
+
+        svg {
+            width: 17px;
+            height: 17px;
+            fill: currentColor;
+            flex-shrink: 0;
+        }
+
+        &:hover {
+            background-color: @footer-accent;
+            border-color: @footer-accent;
+            color: @awa-color-white !important;
+            transform: translateY(-2px);
+        }
+
+        &:focus-visible {
+            outline: @awa-focus-ring-width solid @footer-accent;
+            outline-offset: @awa-focus-ring-offset;
+        }
     }
 }
 
 
-// ══════════════════════════════════════════════════════════════════════════════
-// 12. RESPONSIVO — MOBILE-FIRST
-// ══════════════════════════════════════════════════════════════════════════════
+// ============================================================================
+// 6. CATEGORIAS EXPANDÍVEL
+// ============================================================================
 
-// Tablet (768px – 991px): 2 colunas
-@media (min-width: 768px) and (max-width: 991px) {
-    body .page-wrapper .page_footer #footer .container > .row {
-        grid-template-columns: repeat(2, 1fr) !important;
-        row-gap: @ds-space-lg; // 32px
-    }
+body .page-wrapper .page-footer .awa-footer-categories-expand,
+body .page-wrapper .page_footer .awa-footer-categories-expand {
+    background-color: @footer-surface;
+    border-top: 1px solid @footer-border;
+    border-bottom: 1px solid @footer-border;
+    padding: 0;
 
-    body .page-wrapper .page_footer .footer-bottom .awa-footer-bottom__row {
-        flex-wrap: wrap;
-    }
-}
-
-// Mobile (< 768px): layout empilhado
-@media (max-width: 767px) {
-    body .page-wrapper .page_footer #footer .container > .row {
-        grid-template-columns: 1fr 1fr !important;
-        row-gap: @ds-space-md; // 24px
-    }
-
-    body .page-wrapper .page_footer .footer-bottom .awa-footer-bottom__row {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: @ds-space-md; // 24px
-    }
-
-    body .page-wrapper .page_footer .footer-bottom .awa-footer-bottom__logo-col {
-        width: 100%;
-    }
-
-    body .page-wrapper .page_footer .footer-bottom .col-sm-12 {
-        width: 100%;
-    }
-
-    .awa-footer-pay-logos {
-        gap: 4px;
-    }
-
-    .awa-footer-bottom__copyright {
-        padding-top: @ds-space-sm; // 16px
-    }
-}
-
-// Mobile pequeno (< 576px): 1 coluna de links
-@media (max-width: 575px) {
-    body .page-wrapper .page_footer #footer .container > .row {
-        grid-template-columns: 1fr !important;
+    .awa-footer-categories-expand__inner {
+        padding: @awa-space-2 0;                  // 8px
     }
 
     .awa-footer-categories-expand__toggle {
-        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        gap: @awa-gap-md;                         // 12px
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: @awa-space-2 0;                  // 8px
+        color: @footer-text;
+        font-size: @awa-font-size-13;
+        font-weight: @awa-weight-semibold;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        transition: color @awa-transition;
+        width: 100%;
+        text-align: left;
+
+        &:hover { color: @footer-link-hover; }
+
+        &:focus-visible {
+            outline: @awa-focus-ring-width solid @footer-accent;
+            outline-offset: @awa-focus-ring-offset;
+        }
+    }
+
+    .awa-footer-categories-expand__icon {
+        transition: transform @awa-transition-slow;
+        margin-left: auto;
+    }
+
+    &[data-expanded="true"] .awa-footer-categories-expand__icon,
+    .awa-footer-categories-expand__toggle[aria-expanded="true"] + div .awa-footer-categories-expand__icon,
+    .awa-footer-categories-expand__toggle[aria-expanded="true"] ~ .awa-footer-categories-expand__panel {
+        // panel shown via JS
+    }
+
+    .awa-footer-categories-expand__panel {
+        padding: @awa-space-2 0 @awa-space-3;     // 8px 0 12px
+    }
+
+    ul.awa-footer-categories-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: @awa-gap-sm @ds-space-sm;            // 8px 16px
+
+        a {
+            font-size: @awa-font-size-13;
+            color: @footer-muted !important;
+            background-color: @footer-border;
+            border-radius: 999px;                 // pílula intencional
+            padding: @awa-space-1 @awa-space-3;   // 4px 12px
+            transition: background-color @awa-transition, color @awa-transition;
+
+            &:hover {
+                background-color: @footer-accent;
+                color: @awa-color-white !important;
+            }
+        }
     }
 }
 
-// Desktop grande (>= 1200px): garantir 4 colunas
-@media (min-width: 1200px) {
-    body .page-wrapper .page_footer #footer .container > .row {
-        grid-template-columns: repeat(4, 1fr) !important;
+
+// ============================================================================
+// 7. BARRA INFERIOR — logo | pagamento | selos
+// ============================================================================
+
+body .page-wrapper .page-footer .footer-bottom,
+body .page-wrapper .page_footer .footer-bottom {
+    background-color: @awa-color-white !important;
+    border-top: 1px solid @footer-border;
+    padding: @ds-space-lg 0;                      // 32px
+
+    .footer-bottom-inner,
+    .awa-footer-bottom__row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: @ds-space-md;                        // 24px
+    }
+
+    // Logo
+    .awa-footer-bottom__logo-img {
+        max-height: 52px;
+        width: auto;
+    }
+
+    // Seção de pagamentos
+    .awa-footer-pay-sec {
+        .awa-footer-pay-sec__label {
+            font-size: @awa-font-size-10;
+            font-weight: @awa-weight-bold;
+            text-transform: uppercase;
+            letter-spacing: 0.09em;
+            color: @footer-muted !important;
+            display: block;
+            margin-bottom: @awa-space-2;          // 8px
+        }
+
+        .awa-footer-pay-logos {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: @awa-gap-sm;                     // 8px
+
+            img {
+                height: 28px;
+                width: auto;
+                border-radius: @awa-border-radius-sm;
+            }
+        }
+    }
+
+    // Tablet (768–1023px)
+    @media (min-width: @awa-breakpoint-md) and (max-width: (@ds-bp-lg - 1)) {
+        .footer-bottom-inner,
+        .awa-footer-bottom__row {
+            justify-content: center;
+        }
+    }
+
+    // Mobile (<768px)
+    @media (max-width: (@awa-breakpoint-md - 1)) {
+        padding: @ds-space-md 0;                  // 24px
+
+        .footer-bottom-inner,
+        .awa-footer-bottom__row {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: @ds-space-sm;                    // 16px
+        }
+
+        .awa-footer-pay-logos {
+            justify-content: center;
+        }
+    }
+}
+
+
+// ============================================================================
+// 8. COPYRIGHT
+// ============================================================================
+
+body .page-wrapper .page-footer .footer-copyright,
+body .page-wrapper .page_footer .footer-copyright,
+body .page-wrapper .page-footer .copyright {
+    background-color: @awa-neutral-100 !important; // #f3f4f6 — levemente mais escuro
+    border-top: 1px solid @footer-border;
+    padding: @ds-space-sm 0;                      // 16px
+    text-align: center;
+
+    p, span, address {
+        color: @footer-muted !important;
+        font-size: @awa-font-size-12;
+        line-height: @lh-relaxed;
+    }
+
+    a {
+        color: @footer-muted !important;
+        &:hover { color: @footer-link-hover !important; }
+    }
+}
+
+
+// ============================================================================
+// 9. GRID DE COLUNAS — responsivo
+// ============================================================================
+
+body .page-wrapper .page-footer .container .row,
+body .page-wrapper .page_footer .footer-container .container .row {
+    padding-top: @ds-space-xxl;                   // 48px desktop
+    padding-bottom: @ds-space-xl;                 // 40px
+
+    @media (max-width: (@awa-breakpoint-md - 1)) {
+        padding-top: @ds-space-lg;                // 32px mobile
+        padding-bottom: @ds-space-md;             // 24px
+    }
+}
+
+
+// ============================================================================
+// 10. ACESSIBILIDADE — prefers-reduced-motion
+// ============================================================================
+
+@media (prefers-reduced-motion: reduce) {
+    body .page-wrapper .page-footer,
+    body .page-wrapper .page_footer {
+        a,
+        .awa-footer-pro__social-link,
+        ul.velaFooterLinks a,
+        ul.awa-footer-categories-list a {
+            transition: none !important;
+            transform: none !important;
+        }
     }
 }
