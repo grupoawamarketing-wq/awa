@@ -6,6 +6,7 @@ namespace GrupoAwamotos\B2B\Observer;
 
 use GrupoAwamotos\B2B\Model\ErpIntegration;
 use GrupoAwamotos\B2B\Helper\Data as B2BHelper;
+use GrupoAwamotos\ERPIntegration\Model\B2BClientRegistration;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
@@ -19,17 +20,20 @@ class ErpApprovalSyncObserver implements ObserverInterface
     private ErpIntegration $erpIntegration;
     private B2BHelper $b2bHelper;
     private CustomerRepositoryInterface $customerRepository;
+    private B2BClientRegistration $b2bClientRegistration;
     private LoggerInterface $logger;
 
     public function __construct(
         ErpIntegration $erpIntegration,
         B2BHelper $b2bHelper,
         CustomerRepositoryInterface $customerRepository,
+        B2BClientRegistration $b2bClientRegistration,
         LoggerInterface $logger
     ) {
         $this->erpIntegration = $erpIntegration;
         $this->b2bHelper = $b2bHelper;
         $this->customerRepository = $customerRepository;
+        $this->b2bClientRegistration = $b2bClientRegistration;
         $this->logger = $logger;
     }
 
@@ -55,31 +59,29 @@ class ErpApprovalSyncObserver implements ObserverInterface
         try {
             $customer = $this->customerRepository->getById($customerId);
 
-            // Check if customer has CNPJ (is B2B)
             $cnpj = $this->getCustomerCnpj($customer);
             if (empty($cnpj)) {
                 $this->logger->debug('ErpApprovalSyncObserver: Customer has no CNPJ, skipping ERP sync');
                 return;
             }
 
-            // Check if already linked to ERP
             $erpCode = $this->erpIntegration->getErpCodeForCustomer((int) $customerId);
 
             if ($erpCode) {
-                $erpCodeStr = (string) $erpCode;
                 $this->logger->info(sprintf(
                     'ErpApprovalSyncObserver: Customer already linked to ERP code %s',
-                    $erpCodeStr
+                    $erpCode
                 ));
-                // Update existing ERP customer
-                $this->updateErpCustomer($customer, $erpCodeStr, $newGroupId);
+                $this->updateErpCustomer($customer, (string) $erpCode, $newGroupId);
             } else {
-                // Create new customer in ERP
                 $this->logger->info('ErpApprovalSyncObserver: Creating new customer in ERP');
-                $this->erpIntegration->syncApprovedCustomerToErp((int) $customerId);
+                $syncResult = $this->erpIntegration->syncApprovedCustomerToErp((int) $customerId);
+
+                if ($syncResult['success'] && !empty($syncResult['erp_code'])) {
+                    $this->updateErpCustomer($customer, (string) $syncResult['erp_code'], $newGroupId);
+                }
             }
 
-            // Sync credit limit from ERP if available
             $this->syncCreditLimit($customer);
         } catch (\Exception $e) {
             $this->logger->error(sprintf(
@@ -111,28 +113,62 @@ class ErpApprovalSyncObserver implements ObserverInterface
     }
 
     /**
-     * Update existing ERP customer with approval info
+     * Ensure approved customer is registered in Sectra GR_INTEGRACAOVALIDADOR.
+     *
+     * Without this entry Sectra rejects orders with "Cliente nao foi encontrado".
+     * Tries auto-registration via write connection; falls back to logging the
+     * INSERT SQL for manual execution.
      */
     private function updateErpCustomer($customer, string $erpCode, ?int $newGroupId): void
     {
-        try {
-            // Map Magento group to ERP customer type
-            $erpCustomerType = $this->mapGroupToErpType($newGroupId);
-
-            $this->logger->debug(sprintf(
-                'ErpApprovalSyncObserver: Updating ERP customer %s to type %s',
-                $erpCode,
-                $erpCustomerType
-            ));
-
-            // The actual ERP update would be done through ERPIntegration module
-            // This is a placeholder for the integration logic
-        } catch (\Exception $e) {
+        $erpCodeInt = (int) $erpCode;
+        if ($erpCodeInt <= 0) {
             $this->logger->warning(sprintf(
-                'ErpApprovalSyncObserver: Failed to update ERP customer - %s',
-                $e->getMessage()
+                'ErpApprovalSyncObserver: Invalid ERP code "%s" for customer %s — skipping validator registration',
+                $erpCode,
+                $customer->getId()
             ));
+            return;
         }
+
+        $erpCustomerType = $this->mapGroupToErpType($newGroupId);
+
+        $this->logger->info(sprintf(
+            'ErpApprovalSyncObserver: Ensuring ERP customer %s (type %s) is in GR_INTEGRACAOVALIDADOR',
+            $erpCode,
+            $erpCustomerType
+        ));
+
+        // Already registered — nothing to do
+        if ($this->b2bClientRegistration->isClientRegistered($erpCodeInt)) {
+            $this->logger->info(sprintf(
+                'ErpApprovalSyncObserver: ERP customer %s already in GR_INTEGRACAOVALIDADOR',
+                $erpCode
+            ));
+            return;
+        }
+
+        // Try auto-registration via write connection
+        if ($this->b2bClientRegistration->hasWriteAccess()) {
+            $registered = $this->b2bClientRegistration->registerClient($erpCodeInt);
+            if ($registered) {
+                $this->logger->info(sprintf(
+                    'ErpApprovalSyncObserver: ERP customer %s registered in GR_INTEGRACAOVALIDADOR',
+                    $erpCode
+                ));
+                return;
+            }
+        }
+
+        // Write access unavailable — log SQL for manual execution
+        $sql = $this->b2bClientRegistration->generateRegistrationSQL([$erpCodeInt]);
+        $this->logger->warning(sprintf(
+            'ErpApprovalSyncObserver: ERP customer %s NOT in GR_INTEGRACAOVALIDADOR and write access unavailable. '
+            . 'Orders will be held until manually registered. SQL for Sectra DBA:%s%s',
+            $erpCode,
+            PHP_EOL,
+            $sql
+        ));
     }
 
     /**
@@ -140,10 +176,9 @@ class ErpApprovalSyncObserver implements ObserverInterface
      */
     private function mapGroupToErpType(?int $groupId): string
     {
-        // Get group codes from B2B module configuration
         $groupMapping = [
-            $this->b2bHelper->getGroupIdByCode('b2b_atacado') => 'ATACADO',
-            $this->b2bHelper->getGroupIdByCode('b2b_vip') => 'VIP',
+            $this->b2bHelper->getGroupIdByCode('b2b_atacado')    => 'ATACADO',
+            $this->b2bHelper->getGroupIdByCode('b2b_vip')        => 'VIP',
             $this->b2bHelper->getGroupIdByCode('b2b_revendedor') => 'REVENDEDOR',
         ];
 
@@ -163,11 +198,9 @@ class ErpApprovalSyncObserver implements ObserverInterface
                 return;
             }
 
-            // Get credit limit from ERP
             $creditLimit = $this->erpIntegration->getCreditLimitFromErp((string) $erpCode);
 
             if ($creditLimit !== null && $creditLimit > 0) {
-                // Save credit limit to customer attribute
                 $customer->setCustomAttribute('credit_limit', $creditLimit);
                 $this->customerRepository->save($customer);
 

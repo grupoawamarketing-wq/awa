@@ -1,81 +1,76 @@
-<!--
-/**
- * Email template: Cliente - Cotação Respondida
- */
--->
-<!--@subject Sua Cotação #{{var quote.getId()}} Foi Respondida! @-->
+<!--@subject {{trans "Sua cotação #%quote_id já tem resposta" quote_id=$quote.getId()}} @-->
 <!--@vars {
-"var quote":"Quote Request Object",
-"var customer_name":"Customer Name",
-"var response_price":"Response Price",
-"var response_message":"Response Message",
-"var valid_until":"Valid Until Date",
-"var store.getFrontendName()":"Store Name",
-"var quote_url":"Quote Detail URL"
+"var quote":"Objeto da Cotação",
+"var customer_name":"Nome do Cliente",
+"var response_price":"Valor da Resposta",
+"var response_message":"Mensagem da Resposta",
+"var valid_until":"Validade da Oferta",
+"var store.getFrontendName()":"Nome da Loja",
+"var quote_url":"URL da Cotação"
 } @-->
 
 {{template config_path="design/email/header_template"}}
 
-<table>
-    <tr class="email-intro">
-        <td>
-            <h1 style="font-size: 24px; font-weight: 700; color: #1f2937; margin: 0 0 15px;">
-                Sua Cotação Foi Respondida!
-            </h1>
-            <p style="font-size: 16px; color: #4b5563; margin: 0 0 20px;">
-                Olá {{var customer_name}}, temos novidades sobre sua solicitação de cotação.
-            </p>
-        </td>
-    </tr>
+<table style="width: 100%;">
     <tr>
         <td>
-            <table style="width: 100%; background: #d1fae5; border: 1px solid #34d399; border-radius: 12px; padding: 25px; margin: 20px 0;">
+            <table style="width: 100%; margin-bottom: 24px; background: linear-gradient(135deg, #15803d 0%, #16a34a 100%); border-radius: 16px;">
                 <tr>
-                    <td style="text-align: center;">
-                        <span style="display: inline-block; width: 60px; height: 60px; background: #10b981; border-radius: 50%; margin-bottom: 15px; line-height: 60px;">
-                            <span style="color: #fff; font-size: 24px;">✓</span>
-                        </span>
-                        <p style="font-size: 18px; font-weight: 600; color: #065f46; margin: 0;">
-                            Cotação #{{var quote.getId()}} - Respondida
+                    <td style="padding: 28px 24px; text-align: center;">
+                        <p style="margin: 0 0 10px; color: #dcfce7; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">
+                            Resposta disponível
+                        </p>
+                        <h1 style="margin: 0 0 12px; color: #ffffff; font-size: 28px; line-height: 34px;">
+                            Sua cotação já pode ser avaliada
+                        </h1>
+                        <p style="margin: 0; color: #f0fdf4; font-size: 15px; line-height: 22px;">
+                            {{var customer_name}}, nossa equipe preparou uma resposta para a cotação #{{var quote.getId()}}.
                         </p>
                     </td>
                 </tr>
             </table>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <table style="width: 100%; background: #f9fafb; border-radius: 8px; padding: 20px;">
+
+            <table style="width: 100%; margin-bottom: 24px; background: #ffffff; border: 1px solid #e5e7eb; border-radius: 14px;">
                 <tr>
-                    <td>
-                        <p style="font-size: 14px; color: #374151; font-weight: 600; margin: 0 0 15px;">Detalhes da Resposta:</p>
-                        <p style="margin: 0 0 8px;"><strong>Valor da Cotação:</strong> <span style="font-size: 18px; color: #10b981; font-weight: bold;">R$ {{var response_price}}</span></p>
-                        <p style="margin: 0 0 8px;"><strong>Válido até:</strong> {{var valid_until}}</p>
+                    <td style="padding: 24px;">
+                        <p style="margin: 0 0 10px; color: #111827; font-size: 18px; font-weight: 700;">
+                            Resumo da proposta
+                        </p>
+                        <p style="margin: 0 0 8px; color: #374151; font-size: 14px;"><strong>Valor da cotação:</strong> {{var response_price}}</p>
+                        <p style="margin: 0; color: #374151; font-size: 14px;"><strong>Validade:</strong> {{var valid_until}}</p>
                         {{if response_message}}
-                        <p style="margin: 15px 0 0;"><strong>Mensagem do Vendedor:</strong></p>
-                        <p style="background: #fff; padding: 15px; border-radius: 6px; margin: 10px 0; border-left: 4px solid #10b981;">{{var response_message}}</p>
+                        <table style="width: 100%; margin-top: 16px; background: #f9fafb; border-left: 4px solid #16a34a; border-radius: 10px;">
+                            <tr>
+                                <td style="padding: 16px 18px;">
+                                    <p style="margin: 0 0 6px; color: #166534; font-size: 14px; font-weight: 700;">Observação da equipe</p>
+                                    <p style="margin: 0; color: #4b5563; font-size: 14px; line-height: 22px;">{{var response_message}}</p>
+                                </td>
+                            </tr>
+                        </table>
                         {{/if}}
                     </td>
                 </tr>
             </table>
-        </td>
-    </tr>
-    <tr class="email-action">
-        <td style="text-align: center; padding: 25px;">
-            <a href="{{var quote_url}}" style="background-color: #10b981; color: #fff; padding: 15px 35px; text-decoration: none; border-radius: 4px; display: inline-block; font-size: 16px; font-weight: 600;">
-                Ver Cotação e Aceitar
-            </a>
-        </td>
-    </tr>
-    <tr class="email-outro">
-        <td>
-            <p style="color: #6b7280; font-size: 14px;">
-                Acesse sua conta para visualizar todos os detalhes e aceitar a cotação.<br>
-                Se tiver dúvidas, entre em contato conosco.
-            </p>
-            <p style="color: #374151; font-size: 14px; margin-top: 15px;">
-                Obrigado por escolher {{var store.getFrontendName()}}!
-            </p>
+
+            <table style="width: 100%; margin-bottom: 24px; background: #eff6ff; border-left: 4px solid #2563eb; border-radius: 10px;">
+                <tr>
+                    <td style="padding: 18px 20px;">
+                        <p style="margin: 0; color: #1e3a8a; font-size: 14px; line-height: 22px;">
+                            Consulte os detalhes completos e avance com a aprovação enquanto a proposta estiver vigente.
+                        </p>
+                    </td>
+                </tr>
+            </table>
+
+            <table style="width: 100%; margin-bottom: 24px;">
+                <tr>
+                    <td style="text-align: center;">
+                        <a href="{{var quote_url}}" style="display: inline-block; background-color: #2563eb; color: #fff; padding: 16px 34px; text-decoration: none; border-radius: 10px; font-size: 16px; font-weight: 700;">
+                            Ver cotação
+                        </a>
+                    </td>
+                </tr>
+            </table>
         </td>
     </tr>
 </table>

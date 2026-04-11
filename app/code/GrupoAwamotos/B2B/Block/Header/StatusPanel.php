@@ -270,4 +270,16 @@ class StatusPanel extends Template
     {
         return $this->getUrl('b2b/register');
     }
+
+    /**
+     * Make this block customer-specific so FPC caches it per customer.
+     * Without this, block_html cache serves the guest-rendered HTML to
+     * every logged-in user — customer name never appears after login.
+     */
+    public function getCacheKeyInfo(): array
+    {
+        $customerId = (int) $this->customerSession->getCustomerId();
+        $groupId    = (int) $this->customerSession->getCustomerGroupId();
+        return array_merge(parent::getCacheKeyInfo(), [$customerId, $groupId]);
+    }
 }
