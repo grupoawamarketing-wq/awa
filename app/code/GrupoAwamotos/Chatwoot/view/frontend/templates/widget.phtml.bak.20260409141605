@@ -1,0 +1,162 @@
+<?php
+
+declare(strict_types=1);
+
+/** @var \Magento\Framework\View\Element\Template $block */
+/** @var \GrupoAwamotos\Chatwoot\ViewModel\ChatWidget $viewModel */
+$viewModel = $block->getData('view_model');
+
+if (!$viewModel->isEnabled()) {
+    return;
+}
+
+$baseUrl = $viewModel->getBaseUrl();
+$token = $viewModel->getWebsiteToken();
+$locale = $viewModel->getLocale();
+$position = $viewModel->getPosition();
+$customerData = $viewModel->getCustomerIdentifier();
+$b2bData = $viewModel->getB2bData();
+$erpData = $viewModel->getErpData();
+$widgetSettings = $viewModel->getWidgetSettings();
+$soundEnabled = $viewModel->isSoundEnabled();
+$pushEnabled = $viewModel->usePushNotifications();
+$identifierHash = $viewModel->getIdentifierHash();
+$launcherIconUrl = $block->escapeUrl('https://awamotos.com/media/img/icon_chat.png');
+
+// Merge B2B + ERP como custom_attributes (ERP sobrescreve se houver conflito de chave)
+$customAttributes = array_merge($b2bData, $erpData);
+?>
+<style>
+    .woot--bubble-holder {
+        right: max(16px, env(safe-area-inset-right)) !important;
+        bottom: max(16px, env(safe-area-inset-bottom)) !important;
+        z-index: 1000 !important;
+    }
+
+    .woot-widget-bubble {
+        width: min(72px, 18vw) !important;
+        height: min(72px, 18vw) !important;
+        min-width: 56px !important;
+        min-height: 56px !important;
+        max-width: 72px !important;
+        max-height: 72px !important;
+        padding: 0 !important;
+        border: 2px solid #ffffff !important;
+        border-radius: 50% !important;
+        overflow: hidden !important;
+        background-color: transparent !important;
+        background-image: url('<?= $launcherIconUrl ?>') !important;
+        background-repeat: no-repeat !important;
+        background-position: center 44% !important;
+        background-size: 132% auto !important;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18) !important;
+        transition: transform .16s ease, box-shadow .16s ease !important;
+    }
+
+    .woot-widget-bubble:hover,
+    .woot-widget-bubble:focus,
+    .woot-widget-bubble:active {
+        background-color: transparent !important;
+        background-image: url('<?= $launcherIconUrl ?>') !important;
+        background-repeat: no-repeat !important;
+        background-position: center 44% !important;
+        background-size: 132% auto !important;
+        transform: scale(1.04) !important;
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22) !important;
+    }
+
+    .woot-widget-bubble:focus-visible {
+        outline: 3px solid rgba(255, 255, 255, 0.95) !important;
+        outline-offset: 4px !important;
+    }
+
+    @media (max-width: 767px) {
+        .woot--bubble-holder {
+            right: max(10px, env(safe-area-inset-right)) !important;
+            bottom: max(10px, calc(env(safe-area-inset-bottom) + 6px)) !important;
+        }
+
+        .woot-widget-bubble {
+            width: min(64px, 17vw) !important;
+            height: min(64px, 17vw) !important;
+            min-width: 52px !important;
+            min-height: 52px !important;
+            background-size: 138% auto !important;
+            background-position: center 44% !important;
+        }
+    }
+
+    .woot-widget-bubble svg {
+        opacity: 0 !important;
+    }
+</style>
+<script>
+    window.chatwootSettings = {
+        hideMessageBubble: false,
+        position: '<?= $block->escapeJs($position) ?>',
+        locale: '<?= $block->escapeJs($locale) ?>',
+        useBrowserLanguage: false,
+        darkMode: '<?= $block->escapeJs($widgetSettings['darkMode'] ?? 'auto') ?>',
+        showPopoutButton: <?= $widgetSettings['showPopoutButton'] ? 'true' : 'false' ?>,
+        <?php if (!empty($widgetSettings['widgetColor'])): ?>
+        widgetColor: '<?= $block->escapeJs($widgetSettings['widgetColor']) ?>',
+        <?php endif; ?>
+        type: 'standard'
+    };
+    (function(d,t) {
+        var BASE_URL="<?= $block->escapeUrl($baseUrl) ?>";
+        var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+        g.src=BASE_URL+"/packs/js/sdk.js";
+        g.defer = true;
+        g.async = true;
+        s.parentNode.insertBefore(g,s);
+        g.onload=function(){
+            window.chatwootSDK.run({
+                websiteToken: '<?= $block->escapeJs($token) ?>',
+                baseUrl: BASE_URL
+            });
+            window.addEventListener("chatwoot:ready", function(){
+                <?php if (!$soundEnabled): ?>
+                if (window.$chatwoot && typeof window.$chatwoot.toggleSoundNotification === 'function') {
+                    window.$chatwoot.toggleSoundNotification();
+                }
+                <?php endif; ?>
+
+                <?php if ($pushEnabled): ?>
+                if (window.$chatwoot && typeof window.$chatwoot.toggleBubbleVisibility === 'function') {
+                    try { Notification.requestPermission(); } catch(e) {}
+                }
+                <?php endif; ?>
+
+                var syncLauncherAccessibility = function () {
+                    var launcher = document.querySelector('.woot-widget-bubble');
+                    if (!launcher) {
+                        return;
+                    }
+
+                    launcher.removeAttribute('title');
+                    launcher.setAttribute('aria-label', 'Abrir chat da AWA Motos');
+                };
+
+                syncLauncherAccessibility();
+                window.setTimeout(syncLauncherAccessibility, 400);
+
+                <?php if (!empty($customerData)): ?>
+                window.$chatwoot.setUser('<?= $block->escapeJs($customerData['email'] ?? '') ?>', {
+                    email: '<?= $block->escapeJs($customerData['email'] ?? '') ?>',
+                    name: '<?= $block->escapeJs($customerData['name'] ?? '') ?>'<?php if (!empty($identifierHash)): ?>,
+                    identifier_hash: '<?= $block->escapeJs($identifierHash) ?>'<?php endif; ?><?php if (!empty($b2bData)): ?>,
+                    company_name: '<?= $block->escapeJs($b2bData['razao_social'] ?? '') ?>',
+                    phone_number: '<?= $block->escapeJs($b2bData['telefone'] ?? '') ?>'<?php endif; ?><?php if (!empty($customAttributes)): ?>,
+                    custom_attributes: {
+                        <?php foreach ($customAttributes as $key => $value): ?>
+                        '<?= $block->escapeJs($key) ?>': '<?= $block->escapeJs((string) $value) ?>',
+                        <?php endforeach; ?>
+                    }
+                    <?php endif; ?>
+                });
+                <?php endif; ?>
+            });
+        }
+    })(document,"script");
+</script>

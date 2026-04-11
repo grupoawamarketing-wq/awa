@@ -319,8 +319,8 @@ class ChatWidget implements ArgumentInterface
                  FROM vw_sectra_pedidos_pendentes
                  WHERE customer_id = :cid
                  ORDER BY data_pedido DESC
-                 LIMIT :lim',
-                [':cid' => $customerId, ':lim' => self::ERP_PENDING_ORDERS_LIMIT]
+                 LIMIT ' . (int) self::ERP_PENDING_ORDERS_LIMIT,
+                [':cid' => $customerId]
             );
 
             if (!empty($pending)) {

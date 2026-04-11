@@ -46,4 +46,26 @@
                 type="GrupoAwamotos\CatalogFix\Plugin\CustomMenuBadgeAriaPlugin"
                 sortOrder="10"/>
     </type>
+    <!-- Fix: prevent NoSuchEntityException crash when ordered product is deleted/disabled -->
+    <type name="Magento\Sales\CustomerData\LastOrderedItems">
+        <plugin name="grupoawamotos_catalogfix_last_ordered_items_no_such_entity"
+                type="GrupoAwamotos\CatalogFix\Plugin\LastOrderedItemsPlugin"
+                sortOrder="10"/>
+    </type>
+
+
+    <!-- Fix: CssUrls null pointer during static-content:deploy (email-fonts.css) -->
+    <preference for="Magento\Deploy\Package\Processor\PostProcessor\CssUrls"
+                type="GrupoAwamotos\CatalogFix\Deploy\CssUrlsSafe"/>
+
+
+    <!-- Production: raise debug handler minimum level to WARNING to stop cron INFO/DEBUG
+         from filling var/log/debug.log (Monolog\Logger::WARNING = 300). -->
+    <type name="Magento\Framework\Logger\Monolog">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="debug" xsi:type="object">GrupoAwamotos\CatalogFix\Logger\Handler\ProductionDebug</item>
+            </argument>
+        </arguments>
+    </type>
 </config>

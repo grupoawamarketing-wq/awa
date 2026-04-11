@@ -6,7 +6,7 @@ declare(strict_types=1);
 /** @var \GrupoAwamotos\Chatwoot\ViewModel\ChatWidget $viewModel */
 $viewModel = $block->getData('view_model');
 
-if (!$viewModel->isEnabled()) {
+if (!$viewModel || !$viewModel->isEnabled()) {
     return;
 }
 
@@ -21,10 +21,52 @@ $widgetSettings = $viewModel->getWidgetSettings();
 $soundEnabled = $viewModel->isSoundEnabled();
 $pushEnabled = $viewModel->usePushNotifications();
 $identifierHash = $viewModel->getIdentifierHash();
+$launcherIconUrl = $block->escapeUrl('https://awamotos.com/media/img/icon_chat.png');
 
 // Merge B2B + ERP como custom_attributes (ERP sobrescreve se houver conflito de chave)
 $customAttributes = array_merge($b2bData, $erpData);
 ?>
+<style>
+    .woot-widget-bubble {
+        width: min(98px, 24vw) !important;
+        min-width: 56px !important;
+        max-width: 98px !important;
+        height: auto !important;
+        min-height: 96px !important;
+        max-height: 169px !important;
+        aspect-ratio: 98 / 169 !important;
+        border-radius: 0 !important;
+        background: transparent url('<?= $launcherIconUrl ?>') no-repeat center center / 100% 100% !important;
+        border: 0 !important;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18) !important;
+        transition: transform .16s ease, box-shadow .16s ease !important;
+    }
+
+    .woot-widget-bubble:hover,
+    .woot-widget-bubble:focus,
+    .woot-widget-bubble:active {
+        background: transparent url('<?= $launcherIconUrl ?>') no-repeat center center / 100% 100% !important;
+        transform: scale(1.02) !important;
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22) !important;
+    }
+
+    .woot-widget-bubble:focus-visible {
+        outline: 3px solid rgba(255, 255, 255, 0.95) !important;
+        outline-offset: 4px !important;
+    }
+
+    @media (max-width: 767px) {
+        .woot-widget-bubble {
+            width: min(76px, 22vw) !important;
+            min-width: 52px !important;
+            min-height: 90px !important;
+        }
+    }
+
+    .woot-widget-bubble svg {
+        opacity: 0 !important;
+    }
+</style>
 <script>
     window.chatwootSettings = {
         hideMessageBubble: false,
@@ -40,45 +82,58 @@ $customAttributes = array_merge($b2bData, $erpData);
     };
     (function(d,t) {
         var BASE_URL="<?= $block->escapeUrl($baseUrl) ?>";
-        var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
-        g.src=BASE_URL+"/packs/js/sdk.js";
-        g.defer = true;
-        g.async = true;
-        s.parentNode.insertBefore(g,s);
-        g.onload=function(){
-            window.chatwootSDK.run({
-                websiteToken: '<?= $block->escapeJs($token) ?>',
-                baseUrl: BASE_URL
-            });
-            window.addEventListener("chatwoot:ready", function(){
-                <?php if (!$soundEnabled): ?>
-                if (window.$chatwoot && typeof window.$chatwoot.toggleSoundNotification === 'function') {
-                    window.$chatwoot.toggleSoundNotification();
-                }
-                <?php endif; ?>
 
-                <?php if ($pushEnabled): ?>
-                if (window.$chatwoot && typeof window.$chatwoot.toggleBubbleVisibility === 'function') {
-                    try { Notification.requestPermission(); } catch(e) {}
-                }
-                <?php endif; ?>
-
-                <?php if (!empty($customerData)): ?>
-                window.$chatwoot.setUser('<?= $block->escapeJs($customerData['email'] ?? '') ?>', {
-                    email: '<?= $block->escapeJs($customerData['email'] ?? '') ?>',
-                    name: '<?= $block->escapeJs($customerData['name'] ?? '') ?>'<?php if (!empty($identifierHash)): ?>,
-                    identifier_hash: '<?= $block->escapeJs($identifierHash) ?>'<?php endif; ?><?php if (!empty($b2bData)): ?>,
-                    company_name: '<?= $block->escapeJs($b2bData['razao_social'] ?? '') ?>',
-                    phone_number: '<?= $block->escapeJs($b2bData['telefone'] ?? '') ?>'<?php endif; ?><?php if (!empty($customAttributes)): ?>,
-                    custom_attributes: {
-                        <?php foreach ($customAttributes as $key => $value): ?>
-                        '<?= $block->escapeJs($key) ?>': '<?= $block->escapeJs((string) $value) ?>',
-                        <?php endforeach; ?>
+        function initChatwoot() {
+            var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+            g.src=BASE_URL+"/packs/js/sdk.js";
+            g.defer = true;
+            g.async = true;
+            s.parentNode.insertBefore(g,s);
+            g.onload=function(){
+                window.chatwootSDK.run({
+                    websiteToken: '<?= $block->escapeJs($token) ?>',
+                    baseUrl: BASE_URL
+                });
+                window.addEventListener("chatwoot:ready", function(){
+                    <?php if (!$soundEnabled): ?>
+                    if (window.$chatwoot && typeof window.$chatwoot.toggleSoundNotification === 'function') {
+                        window.$chatwoot.toggleSoundNotification();
                     }
                     <?php endif; ?>
+
+                    <?php if ($pushEnabled): ?>
+                    if (window.$chatwoot && typeof window.$chatwoot.toggleBubbleVisibility === 'function') {
+                        try { Notification.requestPermission(); } catch(e) {}
+                    }
+                    <?php endif; ?>
+
+                    <?php if (!empty($customerData)): ?>
+                    window.$chatwoot.setUser('<?= $block->escapeJs($customerData['email'] ?? '') ?>', {
+                        email: '<?= $block->escapeJs($customerData['email'] ?? '') ?>',
+                        name: '<?= $block->escapeJs($customerData['name'] ?? '') ?>'<?php if (!empty($identifierHash)): ?>,
+                        identifier_hash: '<?= $block->escapeJs($identifierHash) ?>'<?php endif; ?><?php if (!empty($b2bData)): ?>,
+                        company_name: '<?= $block->escapeJs($b2bData['razao_social'] ?? '') ?>',
+                        phone_number: '<?= $block->escapeJs($b2bData['telefone'] ?? '') ?>'<?php endif; ?><?php if (!empty($customAttributes)): ?>,
+                        custom_attributes: <?= /* @noEscape */ json_encode(
+                            array_map(
+                                static fn($v) => is_scalar($v) ? $v : (is_array($v) ? implode(', ', array_filter($v, 'is_scalar')) : (string) $v),
+                                $customAttributes
+                            ),
+                            JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
+                        ) ?>
+                        <?php endif; ?>
+                    });
+                    <?php endif; ?>
                 });
-                <?php endif; ?>
-            });
+            }
+        }
+
+        // Adiar inicialização para não bloquear o carregamento da página.
+        // Usa requestIdleCallback quando disponível; fallback para setTimeout de 3s.
+        if ('requestIdleCallback' in window) {
+            requestIdleCallback(initChatwoot, { timeout: 5000 });
+        } else {
+            setTimeout(initChatwoot, 3000);
         }
     })(document,"script");
 </script>
