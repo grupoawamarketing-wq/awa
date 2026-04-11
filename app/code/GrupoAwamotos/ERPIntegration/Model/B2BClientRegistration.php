@@ -57,9 +57,8 @@ class B2BClientRegistration
 
         try {
             $result = $this->readConnection->fetchOne(
-                "SELECT CHAVE FROM GR_INTEGRACAOVALIDADOR
-                 WHERE CHAVE = :code AND INTEGRACAOORIGEM = :origem",
-                [':code' => (string) $erpClientCode, ':origem' => self::ORIGEM_CLIENTE]
+                "SELECT CHAVE FROM GR_INTEGRACAOVALIDADOR WHERE CHAVE = :code",
+                [':code' => (string) $erpClientCode]
             );
             return $result !== null;
         } catch (\Exception $e) {

@@ -1,96 +1,87 @@
-<!--
-/**
- * ERP Integration - Sales Forecast Alert Email (Admin)
- */
--->
-<!--@subject {{trans "Alerta de Projeção de Vendas - %month" month=$current_month}} @-->
-<!--@vars
-{"var actual_sales":"Vendas Realizadas","var projected_sales":"Projeção","var monthly_target":"Meta Mensal","var store.getFrontendName()":"Nome da Loja"}
-@-->
+<!--@subject {{trans "Alerta de projeção comercial abaixo da meta"}} @-->
+<!--@vars {
+"var alert_level_label":"Nível do Alerta",
+"var current_sales":"Vendas Realizadas",
+"var projected_total":"Projeção Total",
+"var monthly_target":"Meta Mensal",
+"var progress_percentage":"Percentual de Progresso",
+"var days_remaining":"Dias Restantes",
+"var daily_needed":"Meta Diária Necessária",
+"var admin_dashboard_url":"URL do Painel Administrativo",
+"var store.getFrontendName()":"Nome da Loja"
+} @-->
 
 {{template config_path="design/email/header_template"}}
 
-<table>
-    <tr class="email-intro">
+<table style="width: 100%;">
+    <tr>
         <td>
-            <p class="greeting">{{trans "Alerta de Projeção de Vendas"}}</p>
-            <p>
-                {{trans "A projeção de vendas para o mês atual está <strong>abaixo da meta</strong> estabelecida."}}
-            </p>
-        </td>
-    </tr>
-    <tr class="email-information">
-        <td>
-            <table cellspacing="0" cellpadding="15" border="0" width="100%" style="margin:20px 0;">
+            <table style="width: 100%; margin-bottom: 24px; background: linear-gradient(135deg, #92400e 0%, #f97316 100%); border-radius: 16px;">
                 <tr>
-                    <td style="background:#e3f2fd; border-radius:8px; text-align:center; width:33%;">
-                        <span style="color:#666; font-size:12px;">{{trans "Realizado"}}</span>
-                        <br/>
-                        <strong style="color:#1565c0; font-size:28px;">R$ {{var actual_sales}}</strong>
-                    </td>
-                    <td style="background:#fff3e0; border-radius:8px; text-align:center; width:33%;">
-                        <span style="color:#666; font-size:12px;">{{trans "Projeção"}}</span>
-                        <br/>
-                        <strong style="color:#ef6c00; font-size:28px;">R$ {{var projected_sales}}</strong>
-                    </td>
-                    <td style="background:#ffebee; border-radius:8px; text-align:center; width:33%;">
-                        <span style="color:#666; font-size:12px;">{{trans "Meta"}}</span>
-                        <br/>
-                        <strong style="color:#c62828; font-size:28px;">R$ {{var monthly_target}}</strong>
+                    <td style="padding: 28px 24px; text-align: center;">
+                        <p style="margin: 0 0 10px; color: #ffedd5; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">
+                            Projeção comercial
+                        </p>
+                        <h1 style="margin: 0 0 12px; color: #ffffff; font-size: 28px; line-height: 34px;">
+                            Progresso abaixo do esperado
+                        </h1>
+                        <p style="margin: 0; color: #fff7ed; font-size: 15px; line-height: 22px;">
+                            Nível do alerta: {{var alert_level_label}} • progresso atual de {{var progress_percentage}}%.
+                        </p>
                     </td>
                 </tr>
             </table>
-        </td>
-    </tr>
-    <tr class="email-details">
-        <td>
-            <h3 style="color:#333; border-bottom:2px solid #333; padding-bottom:10px;">
-                {{trans "Detalhes da Projeção"}}
-            </h3>
-            <table cellspacing="0" cellpadding="8" border="0" width="100%">
+
+            <table style="width: 100%; margin-bottom: 24px;">
                 <tr>
-                    <td style="border-bottom:1px solid #eee;">{{trans "Dias transcorridos no mês:"}}</td>
-                    <td style="border-bottom:1px solid #eee; text-align:right;"><strong>{{var days_passed}}</strong></td>
-                </tr>
-                <tr>
-                    <td style="border-bottom:1px solid #eee;">{{trans "Dias restantes:"}}</td>
-                    <td style="border-bottom:1px solid #eee; text-align:right;"><strong>{{var days_remaining}}</strong></td>
-                </tr>
-                <tr>
-                    <td style="border-bottom:1px solid #eee;">{{trans "Meta diária necessária:"}}</td>
-                    <td style="border-bottom:1px solid #eee; text-align:right;"><strong>R$ {{var daily_target}}</strong></td>
-                </tr>
-                <tr>
-                    <td style="border-bottom:1px solid #eee;">{{trans "Média diária atual:"}}</td>
-                    <td style="border-bottom:1px solid #eee; text-align:right;"><strong>R$ {{var daily_average}}</strong></td>
-                </tr>
-                <tr>
-                    <td style="border-bottom:1px solid #eee;">{{trans "Gap para atingir meta:"}}</td>
-                    <td style="border-bottom:1px solid #eee; text-align:right; color:#c62828;"><strong>R$ {{var gap_amount}}</strong></td>
+                    <td style="width: 33.33%; padding-right: 8px;">
+                        <table style="width: 100%; background: #eff6ff; border-radius: 12px;">
+                            <tr><td style="padding: 18px; text-align: center;"><p style="margin: 0 0 6px; color: #1d4ed8; font-size: 12px; text-transform: uppercase;">Realizado</p><p style="margin: 0; color: #1e40af; font-size: 24px; font-weight: 700;">R$ {{var current_sales}}</p></td></tr>
+                        </table>
+                    </td>
+                    <td style="width: 33.33%; padding: 0 4px;">
+                        <table style="width: 100%; background: #fff7ed; border-radius: 12px;">
+                            <tr><td style="padding: 18px; text-align: center;"><p style="margin: 0 0 6px; color: #c2410c; font-size: 12px; text-transform: uppercase;">Projetado</p><p style="margin: 0; color: #ea580c; font-size: 24px; font-weight: 700;">R$ {{var projected_total}}</p></td></tr>
+                        </table>
+                    </td>
+                    <td style="width: 33.33%; padding-left: 8px;">
+                        <table style="width: 100%; background: #fef2f2; border-radius: 12px;">
+                            <tr><td style="padding: 18px; text-align: center;"><p style="margin: 0 0 6px; color: #b91c1c; font-size: 12px; text-transform: uppercase;">Meta</p><p style="margin: 0; color: #dc2626; font-size: 24px; font-weight: 700;">R$ {{var monthly_target}}</p></td></tr>
+                        </table>
+                    </td>
                 </tr>
             </table>
-        </td>
-    </tr>
-    <tr class="email-action">
-        <td>
-            <p style="margin-top:20px;">
-                <strong>{{trans "Ações Recomendadas:"}}</strong>
-            </p>
-            <ul style="margin:10px 0; padding-left:20px;">
-                <li>{{trans "Intensificar contato com clientes Champions e Leais"}}</li>
-                <li>{{trans "Enviar campanhas de reengajamento para clientes Em Risco"}}</li>
-                <li>{{trans "Revisar propostas em aberto e agilizar fechamentos"}}</li>
-                <li>{{trans "Considerar promoções ou condições especiais"}}</li>
-            </ul>
-        </td>
-    </tr>
-    <tr class="email-footer">
-        <td>
-            <p style="margin-top:20px; font-size:12px; color:#666;">
-                {{trans "Este alerta foi gerado automaticamente pelo módulo de Integração ERP."}}
-                <br/>
-                {{trans "Nível de confiança da projeção: %confidence%%" confidence=$confidence_level}}
-            </p>
+
+            <table style="width: 100%; margin-bottom: 24px; background: #ffffff; border: 1px solid #e5e7eb; border-radius: 14px;">
+                <tr>
+                    <td style="padding: 24px;">
+                        <p style="margin: 0 0 14px; color: #111827; font-size: 18px; font-weight: 700;">Pontos de atenção</p>
+                        <p style="margin: 0 0 8px; color: #374151; font-size: 14px;">• Faltam {{var days_remaining}} dia(s) para o encerramento do período.</p>
+                        <p style="margin: 0; color: #374151; font-size: 14px;">• A meta diária necessária para recuperação é de R$ {{var daily_needed}}.</p>
+                    </td>
+                </tr>
+            </table>
+
+            <table style="width: 100%; margin-bottom: 24px; background: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 10px;">
+                <tr>
+                    <td style="padding: 18px 20px;">
+                        <p style="margin: 0 0 6px; color: #92400e; font-size: 14px; font-weight: 700;">Ação recomendada</p>
+                        <p style="margin: 0; color: #78350f; font-size: 14px; line-height: 22px;">
+                            Reforce negociações em andamento, priorize clientes mais propensos à conversão e ajuste incentivos de curto prazo.
+                        </p>
+                    </td>
+                </tr>
+            </table>
+
+            <table style="width: 100%;">
+                <tr>
+                    <td style="text-align: center;">
+                        <a href="{{var admin_dashboard_url}}" style="display: inline-block; background: #2563eb; color: #ffffff; padding: 16px 34px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 16px;">
+                            Abrir painel comercial
+                        </a>
+                    </td>
+                </tr>
+            </table>
         </td>
     </tr>
 </table>

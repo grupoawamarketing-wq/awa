@@ -1,62 +1,95 @@
-<!--
-/**
- * ERP Integration - Re-engagement Email (Customer)
- */
--->
-<!--@subject {{trans "Sentimos sua falta! Aqui está um presente especial para você"}} @-->
-<!--@vars
-{"var customer_name":"Nome do Cliente","var coupon_code":"Código do Cupom","var discount_percent":"Percentual de Desconto","var coupon_expiry":"Validade do Cupom","var store.getFrontendName()":"Nome da Loja"}
-@-->
+<!--@subject {{trans "Sentimos sua falta e reservamos um benefício para você voltar"}} @-->
+<!--@vars {
+"var customer.name":"Nome do Cliente",
+"var days_since_purchase":"Dias sem Comprar",
+"var suggested_products":"Produtos Sugeridos",
+"var coupon_code":"Código do Cupom",
+"var coupon_discount":"Percentual de Desconto",
+"var store_url":"URL da Loja",
+"var unsubscribe_url":"URL de Preferências",
+"var store.getFrontendName()":"Nome da Loja"
+} @-->
 
 {{template config_path="design/email/header_template"}}
 
-<table>
-    <tr class="email-intro">
+<table style="width: 100%;">
+    <tr>
         <td>
-            <p class="greeting">{{trans "Olá, %customer_name!" customer_name=$customer_name}}</p>
-            <p>
-                {{trans "Sentimos sua falta! Faz um tempo que você não nos visita, e preparamos algo especial para você voltar."}}
-            </p>
-        </td>
-    </tr>
-    <tr class="email-coupon">
-        <td style="text-align:center; padding:30px 0;">
-            <div style="background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius:16px; padding:30px; display:inline-block; max-width:400px;">
-                <p style="color:#fff; font-size:14px; margin:0 0 10px 0;">{{trans "SEU CUPOM EXCLUSIVO"}}</p>
-                <p style="color:#fff; font-size:48px; font-weight:bold; margin:0;">{{var discount_percent}}% OFF</p>
-                <div style="background:#fff; border-radius:8px; padding:15px; margin:20px 0;">
-                    <p style="color:#333; font-size:12px; margin:0 0 5px 0;">{{trans "Use o código:"}}</p>
-                    <p style="color:#667eea; font-size:24px; font-weight:bold; margin:0; letter-spacing:2px;">{{var coupon_code}}</p>
-                </div>
-                <p style="color:rgba(255,255,255,0.8); font-size:12px; margin:0;">{{trans "Válido até: %expiry" expiry=$coupon_expiry}}</p>
-            </div>
-        </td>
-    </tr>
-    <tr class="email-suggestions">
-        <td>
-            <h3 style="color:#333; border-bottom:2px solid #333; padding-bottom:10px;">
-                {{trans "Produtos que você pode gostar"}}
-            </h3>
-            <p>
-                {{trans "Baseado no seu histórico de compras, selecionamos alguns produtos especiais:"}}
-            </p>
-            {{var suggested_products}}
-        </td>
-    </tr>
-    <tr class="email-cta">
-        <td style="text-align:center; padding:30px 0;">
-            <a href="{{var store_url}}" style="background:#667eea; color:#fff; padding:15px 40px; border-radius:8px; text-decoration:none; font-weight:bold; display:inline-block;">
-                {{trans "APROVEITAR DESCONTO"}}
-            </a>
-        </td>
-    </tr>
-    <tr class="email-footer">
-        <td>
-            <p style="font-size:12px; color:#666; text-align:center;">
-                {{trans "Este cupom é pessoal e intransferível."}}
-                <br/>
-                {{trans "Desconto válido para compras acima de R$ %min_amount" min_amount=$min_order_amount}}
-            </p>
+            <table style="width: 100%; margin-bottom: 24px; background: linear-gradient(135deg, #4338ca 0%, #7c3aed 100%); border-radius: 16px;">
+                <tr>
+                    <td style="padding: 30px 24px; text-align: center;">
+                        <p style="margin: 0 0 10px; color: #ddd6fe; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">
+                            Benefício de retorno
+                        </p>
+                        <h1 style="margin: 0 0 12px; color: #ffffff; font-size: 30px; line-height: 36px;">
+                            Volte a comprar com uma condição especial
+                        </h1>
+                        <p style="margin: 0; color: #ede9fe; font-size: 15px; line-height: 22px;">
+                            {{var customer.name}}, faz {{var days_since_purchase}} dia(s) que sentimos sua ausência e queremos receber você de volta.
+                        </p>
+                    </td>
+                </tr>
+            </table>
+
+            {{depend coupon_code}}
+            <table style="width: 100%; margin-bottom: 24px; background: #f5f3ff; border: 2px dashed #8b5cf6; border-radius: 16px;">
+                <tr>
+                    <td style="padding: 24px; text-align: center;">
+                        <p style="margin: 0 0 10px; color: #6d28d9; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">
+                            Seu cupom exclusivo
+                        </p>
+                        <p style="margin: 0 0 8px; color: #4c1d95; font-size: 32px; font-weight: 700; letter-spacing: 3px; font-family: monospace;">
+                            {{var coupon_code}}
+                        </p>
+                        <p style="margin: 0; color: #5b21b6; font-size: 14px;">
+                            {{var coupon_discount}} de desconto na sua próxima compra
+                        </p>
+                    </td>
+                </tr>
+            </table>
+            {{/depend}}
+
+            <table style="width: 100%; margin-bottom: 24px; background: #ffffff; border: 1px solid #e5e7eb; border-radius: 14px;">
+                <tr>
+                    <td style="padding: 24px;">
+                        <p style="margin: 0 0 12px; color: #111827; font-size: 18px; font-weight: 700;">
+                            Selecionamos algumas sugestões para você
+                        </p>
+                        {{depend suggested_products}}
+                        {{foreach suggested_products as product}}
+                        <table style="width: 100%; margin-bottom: 12px; background: #f9fafb; border-radius: 10px;">
+                            <tr>
+                                <td style="padding: 16px 18px;">
+                                    <p style="margin: 0 0 6px; color: #111827; font-size: 14px; font-weight: 700;">{{var product.name}}</p>
+                                    <p style="margin: 0 0 8px; color: #4b5563; font-size: 13px; line-height: 20px;">Preço sugerido: R$ {{var product.price}}</p>
+                                    <a href="{{var product.url}}" style="color: #6d28d9; font-size: 13px; font-weight: 700; text-decoration: none;">Ver produto</a>
+                                </td>
+                            </tr>
+                        </table>
+                        {{/foreach}}
+                        {{/depend}}
+                    </td>
+                </tr>
+            </table>
+
+            <table style="width: 100%; margin-bottom: 24px;">
+                <tr>
+                    <td style="text-align: center;">
+                        <a href="{{var store_url}}" style="display: inline-block; background: #7c3aed; color: #fff; padding: 16px 34px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 16px;">
+                            Voltar para a loja
+                        </a>
+                    </td>
+                </tr>
+            </table>
+
+            <table style="width: 100%;">
+                <tr>
+                    <td style="text-align: center; color: #6b7280; font-size: 12px; line-height: 20px;">
+                        <p style="margin: 0 0 8px;">Cupom pessoal e intransferível, sujeito às regras comerciais vigentes.</p>
+                        <p style="margin: 0;"><a href="{{var unsubscribe_url}}" style="color: #6b7280;">Atualizar preferências de comunicação</a></p>
+                    </td>
+                </tr>
+            </table>
         </td>
     </tr>
 </table>

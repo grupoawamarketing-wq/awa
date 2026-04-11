@@ -1,58 +1,86 @@
-<!--
-/**
- * ERP Integration - At-Risk Customers Alert Email (Admin)
- */
--->
-<!--@subject {{trans "Alerta: Clientes em Risco Detectados"}} @-->
-<!--@vars
-{"var customer_count":"Quantidade de Clientes em Risco","var customers":"Lista de Clientes","var store.getFrontendName()":"Nome da Loja"}
-@-->
+<!--@subject {{trans "Clientes em risco pedem ação imediata"}} @-->
+<!--@vars {
+"var at_risk_count":"Quantidade de Clientes em Risco",
+"var at_risk_customers":"Lista de Clientes em Risco",
+"var total_revenue_at_risk":"Receita em Risco",
+"var report_date":"Data do Relatório",
+"var admin_dashboard_url":"URL do Painel Administrativo",
+"var store.getFrontendName()":"Nome da Loja"
+} @-->
 
 {{template config_path="design/email/header_template"}}
 
-<table>
-    <tr class="email-intro">
+<table style="width: 100%;">
+    <tr>
         <td>
-            <p class="greeting">{{trans "Alerta de Clientes em Risco"}}</p>
-            <p>
-                {{trans "Foram identificados <strong>%customer_count</strong> clientes no segmento 'Em Risco' que necessitam de atenção imediata." customer_count=$customer_count}}
-            </p>
-        </td>
-    </tr>
-    <tr class="email-information">
-        <td>
-            <table class="order-details" cellspacing="0" cellpadding="0" border="0" width="100%">
+            <table style="width: 100%; margin-bottom: 24px; background: linear-gradient(135deg, #7f1d1d 0%, #dc2626 100%); border-radius: 16px;">
                 <tr>
-                    <th style="text-align:left; padding:10px; background:#f5f5f5; border-bottom:1px solid #ddd;">{{trans "Cliente"}}</th>
-                    <th style="text-align:left; padding:10px; background:#f5f5f5; border-bottom:1px solid #ddd;">{{trans "CNPJ"}}</th>
-                    <th style="text-align:right; padding:10px; background:#f5f5f5; border-bottom:1px solid #ddd;">{{trans "Dias sem Comprar"}}</th>
-                    <th style="text-align:right; padding:10px; background:#f5f5f5; border-bottom:1px solid #ddd;">{{trans "Valor Total"}}</th>
-                    <th style="text-align:center; padding:10px; background:#f5f5f5; border-bottom:1px solid #ddd;">{{trans "Score RFM"}}</th>
+                    <td style="padding: 28px 24px; text-align: center;">
+                        <p style="margin: 0 0 10px; color: #fecaca; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">
+                            Alerta comercial
+                        </p>
+                        <h1 style="margin: 0 0 12px; color: #ffffff; font-size: 28px; line-height: 34px;">
+                            {{var at_risk_count}} cliente(s) exigem atenção imediata
+                        </h1>
+                        <p style="margin: 0; color: #fee2e2; font-size: 15px; line-height: 22px;">
+                            A receita potencial em risco já soma R$ {{var total_revenue_at_risk}}.
+                        </p>
+                    </td>
                 </tr>
-                {{var customers}}
             </table>
-        </td>
-    </tr>
-    <tr class="email-action">
-        <td>
-            <p style="margin-top:20px;">
-                <strong>{{trans "Ações Recomendadas:"}}</strong>
-            </p>
-            <ul style="margin:10px 0; padding-left:20px;">
-                <li>{{trans "Entre em contato pessoalmente com os clientes listados"}}</li>
-                <li>{{trans "Considere oferecer descontos ou condições especiais"}}</li>
-                <li>{{trans "Verifique se houve algum problema com pedidos anteriores"}}</li>
-                <li>{{trans "Agende visitas comerciais se aplicável"}}</li>
-            </ul>
-        </td>
-    </tr>
-    <tr class="email-footer">
-        <td>
-            <p style="margin-top:20px; font-size:12px; color:#666;">
-                {{trans "Este alerta foi gerado automaticamente pelo módulo de Integração ERP."}}
-                <br/>
-                {{trans "Data: %date" date=$generated_at}}
-            </p>
+
+            <table style="width: 100%; margin-bottom: 24px; background: #ffffff; border: 1px solid #e5e7eb; border-radius: 14px;">
+                <tr>
+                    <td style="padding: 24px;">
+                        <p style="margin: 0 0 14px; color: #111827; font-size: 18px; font-weight: 700;">
+                            Clientes priorizados
+                        </p>
+                        {{foreach at_risk_customers as customer}}
+                        <table style="width: 100%; margin-bottom: 12px; background: #f9fafb; border-left: 4px solid #dc2626; border-radius: 10px;">
+                            <tr>
+                                <td style="padding: 16px 18px;">
+                                    <p style="margin: 0 0 6px; color: #111827; font-size: 14px; font-weight: 700;">
+                                        {{var customer.name}}
+                                    </p>
+                                    <p style="margin: 0 0 4px; color: #4b5563; font-size: 13px;">{{var customer.email}}</p>
+                                    <p style="margin: 0 0 4px; color: #4b5563; font-size: 13px;">Segmento: {{var customer.segment_label}}</p>
+                                    <p style="margin: 0; color: #4b5563; font-size: 13px;">{{var customer.days_since_purchase}} dias sem comprar • R$ {{var customer.total_revenue}} em receita histórica</p>
+                                </td>
+                            </tr>
+                        </table>
+                        {{/foreach}}
+                    </td>
+                </tr>
+            </table>
+
+            <table style="width: 100%; margin-bottom: 24px; background: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 10px;">
+                <tr>
+                    <td style="padding: 18px 20px;">
+                        <p style="margin: 0 0 6px; color: #92400e; font-size: 14px; font-weight: 700;">Ações recomendadas</p>
+                        <p style="margin: 0; color: #78350f; font-size: 14px; line-height: 22px;">
+                            Priorize contato consultivo, revise condições comerciais e avalie uma ação de recuperação personalizada.
+                        </p>
+                    </td>
+                </tr>
+            </table>
+
+            <table style="width: 100%; margin-bottom: 16px;">
+                <tr>
+                    <td style="text-align: center;">
+                        <a href="{{var admin_dashboard_url}}" style="display: inline-block; background: #2563eb; color: #ffffff; padding: 16px 34px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 16px;">
+                            Abrir painel de relacionamento
+                        </a>
+                    </td>
+                </tr>
+            </table>
+
+            <table style="width: 100%;">
+                <tr>
+                    <td style="text-align: center; color: #6b7280; font-size: 12px; line-height: 20px;">
+                        <p style="margin: 0;">Relatório gerado em {{var report_date}} para {{var store.getFrontendName()}}.</p>
+                    </td>
+                </tr>
+            </table>
         </td>
     </tr>
 </table>

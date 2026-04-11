@@ -911,12 +911,20 @@ class StockSync implements StockSyncInterface
         $stockItem = $this->stockRegistry->getStockItemBySku($sku);
         $currentQty = (float) $stockItem->getQty();
 
-        if (abs($currentQty - $qty) < 0.001) {
+        // Pula somente se qty igual E já configurado como infinite stock
+        if (abs($currentQty - $qty) < 0.001
+            && !$stockItem->getManageStock()
+            && !$stockItem->getUseConfigManageStock()
+            && (bool) $stockItem->getIsInStock()
+        ) {
             return 'unchanged';
         }
 
         $stockItem->setQty($qty);
-        $stockItem->setIsInStock($qty > 0);
+        // Estoque infinito: produto sempre disponível — controle real de estoque é do ERP
+        $stockItem->setIsInStock(true);
+        $stockItem->setUseConfigManageStock(false);
+        $stockItem->setManageStock(false);
         $this->stockRegistry->updateStockItemBySku($sku, $stockItem);
         $this->invalidateCache($sku);
 
@@ -978,7 +986,10 @@ class StockSync implements StockSyncInterface
 
             $stockItem = $this->stockRegistry->getStockItemBySku($targetSku);
             $stockItem->setQty($qty);
-            $stockItem->setIsInStock($qty > 0);
+            // Estoque infinito: produto sempre disponível — controle real de estoque é do ERP
+            $stockItem->setIsInStock(true);
+            $stockItem->setUseConfigManageStock(false);
+            $stockItem->setManageStock(false);
             $this->stockRegistry->updateStockItemBySku($targetSku, $stockItem);
 
             $this->logger->info('[ERP] Stock synced for SKU', [

@@ -1,79 +1,101 @@
-<!--
-/**
- * ERP Integration - Weekly RFM Report Email (Admin)
- */
--->
-<!--@subject {{trans "Relatório Semanal RFM - %store_name" store_name=$store.getFrontendName()}} @-->
-<!--@vars
-{"var segments":"Dados dos Segmentos","var total_customers":"Total de Clientes","var store.getFrontendName()":"Nome da Loja"}
-@-->
+<!--@subject {{trans "Resumo semanal RFM - %store_name" store_name=$store.getFrontendName()}} @-->
+<!--@vars {
+"var segment_stats":"Dados dos Segmentos",
+"var total_customers":"Total de Clientes",
+"var week_start":"Início da Semana",
+"var week_end":"Fim da Semana",
+"var champions_count":"Clientes Campeões",
+"var at_risk_count":"Clientes em Risco",
+"var lost_count":"Clientes Perdidos",
+"var insight_champions":"Insight sobre Campeões",
+"var insight_at_risk":"Insight sobre Risco",
+"var insight_lost":"Insight sobre Perdidos",
+"var insight_general":"Insight Geral",
+"var admin_dashboard_url":"URL do Painel Administrativo",
+"var store.getFrontendName()":"Nome da Loja"
+} @-->
 
 {{template config_path="design/email/header_template"}}
 
-<table>
-    <tr class="email-intro">
+<table style="width: 100%;">
+    <tr>
         <td>
-            <p class="greeting">{{trans "Relatório Semanal de Segmentação RFM"}}</p>
-            <p>
-                {{trans "Confira abaixo a distribuição dos seus <strong>%total_customers</strong> clientes por segmento RFM." total_customers=$total_customers}}
-            </p>
-        </td>
-    </tr>
-    <tr class="email-information">
-        <td>
-            <h3 style="color:#333; border-bottom:2px solid #333; padding-bottom:10px;">
-                {{trans "Distribuição por Segmento"}}
-            </h3>
-            <table class="order-details" cellspacing="0" cellpadding="0" border="0" width="100%">
+            <table style="width: 100%; margin-bottom: 24px; background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); border-radius: 16px;">
                 <tr>
-                    <th style="text-align:left; padding:10px; background:#f5f5f5; border-bottom:1px solid #ddd;">{{trans "Segmento"}}</th>
-                    <th style="text-align:center; padding:10px; background:#f5f5f5; border-bottom:1px solid #ddd;">{{trans "Clientes"}}</th>
-                    <th style="text-align:center; padding:10px; background:#f5f5f5; border-bottom:1px solid #ddd;">{{trans "% do Total"}}</th>
-                    <th style="text-align:right; padding:10px; background:#f5f5f5; border-bottom:1px solid #ddd;">{{trans "Receita Total"}}</th>
-                    <th style="text-align:left; padding:10px; background:#f5f5f5; border-bottom:1px solid #ddd;">{{trans "Ação Sugerida"}}</th>
-                </tr>
-                {{var segments}}
-            </table>
-        </td>
-    </tr>
-    <tr class="email-highlights">
-        <td style="padding-top:20px;">
-            <h3 style="color:#333; border-bottom:2px solid #333; padding-bottom:10px;">
-                {{trans "Destaques da Semana"}}
-            </h3>
-            <table cellspacing="0" cellpadding="10" border="0" width="100%">
-                <tr>
-                    <td style="background:#e8f5e9; border-radius:8px; text-align:center; width:25%;">
-                        <strong style="color:#2e7d32; font-size:24px;">{{var champions_count}}</strong>
-                        <br/>
-                        <span style="color:#666;">{{trans "Champions"}}</span>
-                    </td>
-                    <td style="background:#e3f2fd; border-radius:8px; text-align:center; width:25%;">
-                        <strong style="color:#1565c0; font-size:24px;">{{var loyal_count}}</strong>
-                        <br/>
-                        <span style="color:#666;">{{trans "Leais"}}</span>
-                    </td>
-                    <td style="background:#fff3e0; border-radius:8px; text-align:center; width:25%;">
-                        <strong style="color:#ef6c00; font-size:24px;">{{var at_risk_count}}</strong>
-                        <br/>
-                        <span style="color:#666;">{{trans "Em Risco"}}</span>
-                    </td>
-                    <td style="background:#ffebee; border-radius:8px; text-align:center; width:25%;">
-                        <strong style="color:#c62828; font-size:24px;">{{var lost_count}}</strong>
-                        <br/>
-                        <span style="color:#666;">{{trans "Perdidos"}}</span>
+                    <td style="padding: 28px 24px; text-align: center;">
+                        <p style="margin: 0 0 10px; color: #dbeafe; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">
+                            Inteligência de relacionamento
+                        </p>
+                        <h1 style="margin: 0 0 12px; color: #ffffff; font-size: 28px; line-height: 34px;">
+                            Resumo semanal da base RFM
+                        </h1>
+                        <p style="margin: 0; color: #eff6ff; font-size: 15px; line-height: 22px;">
+                            {{var total_customers}} cliente(s) monitorado(s) entre {{var week_start}} e {{var week_end}}.
+                        </p>
                     </td>
                 </tr>
             </table>
-        </td>
-    </tr>
-    <tr class="email-footer">
-        <td>
-            <p style="margin-top:20px; font-size:12px; color:#666;">
-                {{trans "Este relatório foi gerado automaticamente pelo módulo de Integração ERP."}}
-                <br/>
-                {{trans "Período: %period" period=$report_period}}
-            </p>
+
+            <table style="width: 100%; margin-bottom: 24px;">
+                <tr>
+                    <td style="width: 33.33%; padding-right: 8px;">
+                        <table style="width: 100%; background: #ecfdf5; border-radius: 12px;">
+                            <tr><td style="padding: 18px; text-align: center;"><p style="margin: 0 0 6px; color: #166534; font-size: 12px; text-transform: uppercase;">Campeões</p><p style="margin: 0; color: #15803d; font-size: 28px; font-weight: 700;">{{var champions_count}}</p></td></tr>
+                        </table>
+                    </td>
+                    <td style="width: 33.33%; padding: 0 4px;">
+                        <table style="width: 100%; background: #fff7ed; border-radius: 12px;">
+                            <tr><td style="padding: 18px; text-align: center;"><p style="margin: 0 0 6px; color: #9a3412; font-size: 12px; text-transform: uppercase;">Em risco</p><p style="margin: 0; color: #ea580c; font-size: 28px; font-weight: 700;">{{var at_risk_count}}</p></td></tr>
+                        </table>
+                    </td>
+                    <td style="width: 33.33%; padding-left: 8px;">
+                        <table style="width: 100%; background: #fef2f2; border-radius: 12px;">
+                            <tr><td style="padding: 18px; text-align: center;"><p style="margin: 0 0 6px; color: #991b1b; font-size: 12px; text-transform: uppercase;">Perdidos</p><p style="margin: 0; color: #dc2626; font-size: 28px; font-weight: 700;">{{var lost_count}}</p></td></tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+
+            <table style="width: 100%; margin-bottom: 24px; background: #ffffff; border: 1px solid #e5e7eb; border-radius: 14px;">
+                <tr>
+                    <td style="padding: 24px;">
+                        <p style="margin: 0 0 14px; color: #111827; font-size: 18px; font-weight: 700;">Distribuição por segmento</p>
+                        {{foreach segment_stats as segment}}
+                        <table style="width: 100%; margin-bottom: 12px; background: #f9fafb; border-radius: 10px;">
+                            <tr>
+                                <td style="padding: 16px 18px;">
+                                    <p style="margin: 0 0 6px; color: #111827; font-size: 14px; font-weight: 700;">{{var segment.label}}</p>
+                                    <p style="margin: 0 0 4px; color: #4b5563; font-size: 13px;">{{var segment.count}} cliente(s) • {{var segment.percentage}}% da base</p>
+                                    <p style="margin: 0; color: #4b5563; font-size: 13px;">Receita acumulada: R$ {{var segment.total_revenue}}</p>
+                                </td>
+                            </tr>
+                        </table>
+                        {{/foreach}}
+                    </td>
+                </tr>
+            </table>
+
+            <table style="width: 100%; margin-bottom: 24px; background: #f8fafc; border-radius: 14px;">
+                <tr>
+                    <td style="padding: 24px;">
+                        <p style="margin: 0 0 14px; color: #111827; font-size: 18px; font-weight: 700;">Insights da semana</p>
+                        {{depend insight_champions}}<p style="margin: 0 0 10px; color: #166534; font-size: 14px; line-height: 22px;">• {{var insight_champions}}</p>{{/depend}}
+                        {{depend insight_at_risk}}<p style="margin: 0 0 10px; color: #9a3412; font-size: 14px; line-height: 22px;">• {{var insight_at_risk}}</p>{{/depend}}
+                        {{depend insight_lost}}<p style="margin: 0 0 10px; color: #991b1b; font-size: 14px; line-height: 22px;">• {{var insight_lost}}</p>{{/depend}}
+                        {{depend insight_general}}<p style="margin: 0; color: #475569; font-size: 14px; line-height: 22px;">• {{var insight_general}}</p>{{/depend}}
+                    </td>
+                </tr>
+            </table>
+
+            <table style="width: 100%;">
+                <tr>
+                    <td style="text-align: center;">
+                        <a href="{{var admin_dashboard_url}}" style="display: inline-block; background: #2563eb; color: #ffffff; padding: 16px 34px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 16px;">
+                            Abrir painel RFM
+                        </a>
+                    </td>
+                </tr>
+            </table>
         </td>
     </tr>
 </table>

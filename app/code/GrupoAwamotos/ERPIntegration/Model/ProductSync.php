@@ -15,6 +15,7 @@ use Magento\Catalog\Model\Product\Type;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Catalog\Model\Product\Visibility;
 use Magento\Catalog\Api\CategoryLinkManagementInterface;
+use Magento\CatalogInventory\Api\StockRegistryInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\App\State as AppState;
@@ -42,6 +43,7 @@ class ProductSync implements ProductSyncInterface
     private LoggerInterface $logger;
     private AppState $appState;
     private CategoryLinkManagementInterface $categoryLinkManagement;
+    private StockRegistryInterface $stockRegistry;
     private ?int $defaultAttributeSetId = null;
 
     public function __construct(
@@ -54,7 +56,8 @@ class ProductSync implements ProductSyncInterface
         ProductValidator $productValidator,
         LoggerInterface $logger,
         AppState $appState,
-        CategoryLinkManagementInterface $categoryLinkManagement
+        CategoryLinkManagementInterface $categoryLinkManagement,
+        StockRegistryInterface $stockRegistry
     ) {
         $this->connection = $connection;
         $this->helper = $helper;
@@ -66,6 +69,7 @@ class ProductSync implements ProductSyncInterface
         $this->logger = $logger;
         $this->appState = $appState;
         $this->categoryLinkManagement = $categoryLinkManagement;
+        $this->stockRegistry = $stockRegistry;
     }
 
     /**
@@ -405,6 +409,9 @@ class ProductSync implements ProductSyncInterface
 
         $this->productRepository->save($product);
 
+        // Configurar estoque infinito: produto sempre disponível, controle de estoque é do ERP
+        $this->configureInfiniteStock($product->getSku());
+
         // Assign product to ERP category via GRUPOCOMERCIAL
         $grupoComercial = $erpProduct['GRUPOCOMERCIAL'] ?? null;
         if ($grupoComercial !== null && $grupoComercial !== '' && (int) $grupoComercial !== 0) {
@@ -661,6 +668,27 @@ class ProductSync implements ProductSyncInterface
         }
 
         return $sku;
+    }
+
+    /**
+     * Configure product as infinite stock: manage_stock=false, is_in_stock=true.
+     * Stock control is handled by the ERP, not by Magento.
+     */
+    private function configureInfiniteStock(string $sku): void
+    {
+        try {
+            $stockItem = $this->stockRegistry->getStockItemBySku($sku);
+            if ($stockItem->getManageStock() || $stockItem->getUseConfigManageStock() || !$stockItem->getIsInStock()) {
+                $stockItem->setUseConfigManageStock(false);
+                $stockItem->setManageStock(false);
+                $stockItem->setIsInStock(true);
+                $this->stockRegistry->updateStockItemBySku($sku, $stockItem);
+            }
+        } catch (\Exception $e) {
+            $this->logger->warning('[ERP] Failed to configure infinite stock for SKU: ' . $sku, [
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**

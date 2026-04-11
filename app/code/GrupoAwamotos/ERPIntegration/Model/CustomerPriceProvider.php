@@ -279,6 +279,10 @@ class CustomerPriceProvider
                 $cacheKey = $priceListCode . ':' . $sku;
                 $this->priceCache[$cacheKey] = $price ?? 0.0;
 
+                // Persist to Redis/cache so next request also skips the ERP query
+                $persistKey = self::CACHE_PREFIX . md5($cacheKey);
+                $this->cache->save((string) ($price ?? ''), $persistKey, [], self::CACHE_TTL);
+
                 if ($price !== null && $price > 0) {
                     $result[$sku] = $price;
                 }

@@ -68,6 +68,12 @@ class Connection implements ConnectionInterface
     private array $availableDrivers = [];
     private int $connectionAttempts = 0;
 
+    /** Timestamp of last successful isConnectionAlive() check (microtime) */
+    private float $lastAliveCheck = 0.0;
+
+    /** Seconds between repeated SELECT 1 health checks on the same connection */
+    private const ALIVE_CHECK_TTL = 5;
+
     public function __construct(
         Helper $helper,
         LoggerInterface $logger,
@@ -136,6 +142,7 @@ class Connection implements ConnectionInterface
             }
             // Connection is dead, reset and reconnect
             $this->connection = null;
+            $this->lastAliveCheck = 0.0;
             $this->logger->info('[ERP] Connection was lost, reconnecting...');
         }
 
@@ -234,10 +241,19 @@ class Connection implements ConnectionInterface
             return false;
         }
 
+        // Skip the SELECT 1 round-trip if we checked very recently.
+        // Avoids extra ERP latency on pages with multiple queries in the same request.
+        $now = microtime(true);
+        if ($now - $this->lastAliveCheck < self::ALIVE_CHECK_TTL) {
+            return true;
+        }
+
         try {
             $this->connection->query('SELECT 1');
+            $this->lastAliveCheck = microtime(true);
             return true;
         } catch (\PDOException $e) {
+            $this->lastAliveCheck = 0.0;
             return false;
         }
     }
@@ -764,6 +780,7 @@ class Connection implements ConnectionInterface
 
                 // Reset connection on transient error
                 $this->connection = null;
+                $this->lastAliveCheck = 0.0;
 
                 $delay = $this->calculateBackoffDelay($attempt);
 
@@ -813,6 +830,7 @@ class Connection implements ConnectionInterface
     public function disconnect(): void
     {
         $this->connection = null;
+        $this->lastAliveCheck = 0.0;
     }
 
     /**
