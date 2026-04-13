@@ -46,6 +46,8 @@ $jsPreloads = [];
 // Total: 9 requests → 5 (-4 requests)
 $asyncBundles = [
     // swiper-bundle.min.css movido para sync (default_head_blocks.xml) — fix carrossel em branco
+    // PageSpeed fix 2026-04-11: themes.css (1.3MB) + vendor-libs (175KB) moved from sync to async
+    $block->getViewFileUrl('css/awa-bundle-vendor-libs.css'),  // Bootstrap+FA+Owl+icons (175KB)
     $block->getViewFileUrl('css/awa-bundle-custom.css'),
     $block->getViewFileUrl('css/awa-bundle-phases.css'),       // + animate-theme
     $block->getViewFileUrl('css/awa-bundle-tail.css'),          // + cosmetic (global)
@@ -87,8 +89,8 @@ body .page-wrapper .awa-benefits-bar,.awa-benefits-bar{background:#fff !importan
 body .page-wrapper .awa-utility-bar-legacy{display:none !important}
 body .page-wrapper .panel.wrapper{background:#1a1a1a !important;background-image:none !important;color:#ccc;border:none}
 body .page-wrapper .header-content .top-header .header,.page-header,.header.content{background:#fff}
-body .page-wrapper .page_footer,.page-footer{background:#f9fafb !important;background-image:none !important;color:#333333;border-top:3px solid #b73337}
-.page_footer .footer-container,.page_footer #footer,.page_footer .footer-container.layout2{background:#fff !important;background-image:none !important;color:#333333}
+body .page-wrapper .page_footer,.page-footer{background:#6b1a1e !important;background-image:linear-gradient(180deg,#6b1a1e 0%,#b73337 100%) !important;color:rgba(255,255,255,.85);border-top:3px solid rgba(255,255,255,.2)}
+.page_footer .footer-container,.page_footer #footer,.page_footer .footer-container.layout2{background:transparent !important;background-image:none !important;color:rgba(255,255,255,.85)}
 </style>
 <!-- AWA Head Preload — DNS Prefetch -->
 <?php foreach ($dnsPrefetch as $domain): ?>
@@ -107,6 +109,7 @@ body .page-wrapper .page_footer,.page-footer{background:#f9fafb !important;backg
 <link rel="preload" href="<?= $block->escapeUrl($jsUrl) ?>" as="script"/>
 <?php endforeach; ?>
 <!-- AWA Async CSS Bundles — media="print" swap (non-render-blocking) -->
+<!-- themes.css: kept blocking — async caused CLS 0.511 (reverted 2026-04-11) -->
 <?php foreach ($asyncBundles as $cssUrl): ?>
 <link rel="stylesheet"
       href="<?= $block->escapeUrl($cssUrl) ?>"

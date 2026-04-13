@@ -21,6 +21,10 @@
             - Ganho estimado: FCP -15% a -20%, LCP -10% a -15%
         -->
 
+        <!-- Remove parent blocking CSS to reload async (PageSpeed fix 2026-04-11) -->
+        <!-- styles-l.css: remove from parent, re-added last via awa-styles-l-last.phtml (was duplicated) -->
+        <remove src="css/styles-l.css"/>
+        <!-- themes.css: kept blocking — async caused CLS 0.511 (reverted 2026-04-11) -->
         <!-- Remove parent's individual CSS (agora servidos via bundles) -->
         <remove src="css/awa-core.css"/>
         <remove src="css/awa-layout.css"/>
@@ -77,7 +81,8 @@
 
         <!-- Bundle Rokanthemes vendor libs (merged 2026-03-16) -->
         <!-- (Bootstrap + Font Awesome + Owl + icons — CSS vars moved to awa-core-variables) -->
-        <css src="css/awa-bundle-vendor-libs.css"/>
+        <!-- vendor-libs: moved to async (PageSpeed fix 2026-04-11) -->
+        <!-- <css src="css/awa-bundle-vendor-libs.css"/> -->
 
         <!-- Swiper 11 + Animate.css: carregados async via awa-head-preload.phtml -->
 
@@ -93,33 +98,16 @@
         <css src="css/awa-bundle-core.css"/>
 
         <!-- MCP Header + Classic Redesign: carregamento sync (crítico para evitar FOUC no header) -->
-        <!-- REMOVED (2026-04-10): conflitos header. Estilos essenciais migrados p/ classic-redesign -->
-        <!-- <css src="css/awa-bundle-mcp-header.css"/> -->
+        <!-- awa-bundle-mcp-header.css: conteúdo crítico migrado para classic-redesign (2026-04-10) -->
         <css src="css/awa-header-classic-redesign.css"/>
         <!-- merged into awa-bundle-refinements: <css src="css/awa-ux-improvements.css"/> -->
         <!-- merged into awa-bundle-refinements: <css src="css/awa-layout-standardization.css"/> -->
 
-        <!-- MCP Header + Classic Redesign: agora sync (não mais async) (2026-04-09) -->
-
-        <!-- Visual Audit Consolidated (v2–v12) — 2026-04-09
-             All visual audit CSS merged into single file to reduce 11 blocking requests to 0.
-             Loaded via deferred template (awa-deferred-cosmetic-css.phtml) for non-blocking delivery. -->
-
-        <!-- AWA Global Modern Clean: sitewide "Compact Elegance" standardization (2026-04-07)
-             Unifies button text-transform, backgrounds, cards, forms, pagination across all pages -->
-
+        <!-- Visual Audit CSS (v2–v12): merged into awa-bundle-refinements (2026-04-09) -->
 
         <!-- Vertical Menu Shell Fix: global styling for vertical menu (all pages).
              Seletores atualizados para body-only scope em 2026-04-08 (antes: body.cms-index-index).
              Garante estilização consistente do menu vertical em home + páginas internas. -->
-
-
-
-
-
-
-
-
 
         <!-- =================================================================
              DEFERRED SECONDARY BUNDLES — Async Load (não-críticos)

@@ -140,10 +140,24 @@ HTML;
         "js/awa-scroll-reveal": {},
         "js/awa-toast": {},
         "js/awa-messages-interceptor": {},
-        "js/awa-keyboard-shortcuts": {},
         "js/awa-compare": {}
     }
 }
+</script>
+<script>
+/* awa-keyboard-shortcuts: carregado via requestIdleCallback — não é crítico para first paint */
+(function () {
+    function loadKbShortcuts() {
+        if (typeof require !== 'undefined') {
+            require(['js/awa-keyboard-shortcuts'], function () {});
+        }
+    }
+    if ('requestIdleCallback' in window) {
+        window.requestIdleCallback(loadKbShortcuts, { timeout: 4000 });
+    } else {
+        window.setTimeout(loadKbShortcuts, 3000);
+    }
+}());
 </script>
 <script>
 /* Service Worker registration — idle callback para zero impacto em TTI (2026-03-23) */
