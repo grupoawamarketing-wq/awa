@@ -78,6 +78,11 @@ define([
     }
 
     function init(config) {
+        // Skip on pages with no product add-to-cart buttons (homepage, checkout, etc.)
+        if (!document.querySelector('.product-item-actions, .product-add-form, .product-info-cart')) {
+            return;
+        }
+
         if (!config) {
             return;
         }

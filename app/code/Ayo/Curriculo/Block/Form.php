@@ -83,6 +83,126 @@ class Form extends Template
         return 'PDF, DOC, DOCX';
     }
 
+    /**
+     * @return array<int, string>
+     */
+    public function getWorkAreas(): array
+    {
+        return [
+            'Vendas / Comercial',
+            'Estoque / Logística',
+            'Atendimento ao Cliente',
+            'Marketing / E-commerce',
+            'Financeiro / Administrativo',
+            'TI / Tecnologia',
+            'Mecânica / Oficina',
+            'Compras',
+            'RH / Gestão de Pessoas',
+        ];
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public function getSpecialties(): array
+    {
+        return [
+            'Peças de Motos',
+            'Acessórios e Equipamentos',
+            'Mecânica de Motos',
+            'Atendimento B2B / Atacado',
+            'E-commerce / Marketplace',
+            'Logística / Expedição',
+            'Marketing Digital',
+            'Gestão de Equipes',
+            'Sistemas ERP / Magento',
+            'Vendas Externas',
+        ];
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public function getExperienceLevels(): array
+    {
+        return ['Estágio', 'Júnior', 'Pleno', 'Sênior', 'Liderança'];
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public function getCnhOptions(): array
+    {
+        return ['Não possuo', 'A', 'B', 'AB', 'C', 'D', 'E', 'Outra'];
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public function getAvailabilityOptions(): array
+    {
+        return ['Imediata', '15 dias', '30 dias', 'A combinar'];
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public function getContractTypes(): array
+    {
+        return ['CLT', 'PJ', 'Estágio', 'Temporário', 'Ambos (CLT ou PJ)'];
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public function getReferralSources(): array
+    {
+        return ['Site AWA Motos', 'Redes Sociais', 'Indicação', 'LinkedIn', 'Indeed / Vagas.com', 'Google', 'Outro'];
+    }
+
+    /**
+     * Returns all 27 Brazilian states as ['UF' => 'Nome'].
+     *
+     * @return array<string, string>
+     */
+    public function getBrazilianStates(): array
+    {
+        return [
+            'AC' => 'Acre',
+            'AL' => 'Alagoas',
+            'AP' => 'Amapá',
+            'AM' => 'Amazonas',
+            'BA' => 'Bahia',
+            'CE' => 'Ceará',
+            'DF' => 'Distrito Federal',
+            'ES' => 'Espírito Santo',
+            'GO' => 'Goiás',
+            'MA' => 'Maranhão',
+            'MT' => 'Mato Grosso',
+            'MS' => 'Mato Grosso do Sul',
+            'MG' => 'Minas Gerais',
+            'PA' => 'Pará',
+            'PB' => 'Paraíba',
+            'PR' => 'Paraná',
+            'PE' => 'Pernambuco',
+            'PI' => 'Piauí',
+            'RJ' => 'Rio de Janeiro',
+            'RN' => 'Rio Grande do Norte',
+            'RS' => 'Rio Grande do Sul',
+            'RO' => 'Rondônia',
+            'RR' => 'Roraima',
+            'SC' => 'Santa Catarina',
+            'SP' => 'São Paulo',
+            'SE' => 'Sergipe',
+            'TO' => 'Tocantins',
+        ];
+    }
+
+    public function getStatusPageUrl(): string
+    {
+        return $this->getUrl('trabalhe-conosco/index/status');
+    }
+
     public function isSuccess(): bool
     {
         return (bool)$this->getRequest()->getParam('success');
