@@ -41,9 +41,7 @@ class WhatsAppAttendant implements AttendantInterface
         }
 
         if (strlen($phone) < 10) {
-            return [
-                ['found' => false, 'message' => 'Telefone inválido']
-            ];
+            return ['found' => false, 'message' => 'Telefone inválido', 'source' => 'invalid_phone'];
         }
 
         $connection = $this->resource->getConnection();
@@ -54,19 +52,18 @@ class WhatsAppAttendant implements AttendantInterface
         if (!$customerId) {
             // No customer found — return default attendant (round-robin)
             $attendant = $this->getDefaultAttendant($connection);
-            return [
-                $attendant,
-                'Cliente não encontrado — atendente padrão'
-            ];
+            if ($attendant) {
+                $attendant['message'] = 'Cliente não encontrado — atendente padrão';
+                return $attendant;
+            }
+            return ['found' => false, 'message' => 'Nenhum atendente disponível', 'source' => 'no_attendant'];
         }
 
         // 2. Check direct assignment in customer_attendant table
         $attendant = $this->getAssignedAttendant($connection, $customerId);
         if ($attendant) {
-            return [
-                $attendant,
-                'Atendente designada do cliente'
-            ];
+            $attendant['message'] = 'Atendente designada do cliente';
+            return $attendant;
         }
 
         // 3. Check ERP VENDPREF via customer attribute or erp_data
@@ -74,22 +71,19 @@ class WhatsAppAttendant implements AttendantInterface
         if ($attendant) {
             // Also save the assignment for next time
             $this->saveAssignment($connection, $customerId, (int) $attendant['attendant_id']);
-            return [
-                $attendant,
-                'Atendente do ERP (VENDPREF)'
-            ];
+            $attendant['message'] = 'Atendente do ERP (VENDPREF)';
+            return $attendant;
         }
 
         // 4. Fallback — round-robin
         $attendant = $this->getDefaultAttendant($connection);
         if ($attendant) {
             $this->saveAssignment($connection, $customerId, (int) $attendant['attendant_id']);
+            $attendant['message'] = 'Atendente padrão (distribuição automática)';
+            return $attendant;
         }
 
-        return [
-            $attendant,
-            'Atendente padrão (distribuição automática)'
-        ];
+        return ['found' => false, 'message' => 'Nenhum atendente disponível', 'source' => 'no_attendant'];
     }
 
     /**

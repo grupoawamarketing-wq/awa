@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace GrupoAwamotos\B2B\Cron;
 
 use GrupoAwamotos\B2B\Model\Attendant\AttendantManager;
+use GrupoAwamotos\ERPIntegration\Api\ConnectionInterface as ErpConnectionInterface;
 use Magento\Framework\App\ResourceConnection;
 use Psr\Log\LoggerInterface;
 
@@ -19,15 +20,18 @@ class SyncAttendantFromErp
 {
     private ResourceConnection $resource;
     private AttendantManager $attendantManager;
+    private ErpConnectionInterface $erpConnection;
     private LoggerInterface $logger;
 
     public function __construct(
         ResourceConnection $resource,
         AttendantManager $attendantManager,
+        ErpConnectionInterface $erpConnection,
         LoggerInterface $logger
     ) {
         $this->resource = $resource;
         $this->attendantManager = $attendantManager;
+        $this->erpConnection = $erpConnection;
         $this->logger = $logger;
     }
 
@@ -95,14 +99,11 @@ class SyncAttendantFromErp
 
         // Check if we have an ERP connection to look up VENDPREF
         try {
-            $erpConnection = \Magento\Framework\App\ObjectManager::getInstance()
-                ->get(\GrupoAwamotos\ERPIntegration\Api\ConnectionInterface::class);
-
             foreach (array_chunk($customers, 50) as $chunk) {
                 $erpCodes = array_column($chunk, 'value');
                 $placeholders = implode(',', array_fill(0, count($erpCodes), '?'));
 
-                $erpData = $erpConnection->query(
+                $erpData = $this->erpConnection->query(
                     "SELECT f.CODIGO, f.VENDPREF
                      FROM dbo.FN_FORNECEDORES f
                      WHERE f.CKCLIENTE = 'S' AND f.CODIGO IN ($placeholders)",
