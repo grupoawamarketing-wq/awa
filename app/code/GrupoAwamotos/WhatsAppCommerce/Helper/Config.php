@@ -20,7 +20,7 @@ class Config extends AbstractHelper
     {
         return $this->scopeConfig->isSetFlag(
             self::XML_PATH_ENABLED,
-            ScopeInterface::SCOPE_WEBSITE
+            ScopeInterface::SCOPE_STORE
         );
     }
 
@@ -36,60 +36,28 @@ class Config extends AbstractHelper
     {
         $url = (string) $this->scopeConfig->getValue(
             self::XML_PATH_CHECKOUT_URL,
-            ScopeInterface::SCOPE_WEBSITE
+            ScopeInterface::SCOPE_STORE
         );
         return $url ?: '';
     }
 
-    public function isNotifyOrderPlaced(): bool
-    {
-        return $this->scopeConfig->isSetFlag(self::XML_PATH_NOTIFY_PLACED, ScopeInterface::SCOPE_WEBSITE);
-    }
-
-    public function isNotifyOrderPaid(): bool
-    {
-        return $this->scopeConfig->isSetFlag(self::XML_PATH_NOTIFY_PAID, ScopeInterface::SCOPE_WEBSITE);
-    }
-
-    public function isNotifyOrderShipped(): bool
-    {
-        return $this->scopeConfig->isSetFlag(self::XML_PATH_NOTIFY_SHIPPED, ScopeInterface::SCOPE_WEBSITE);
-    }
-
-    public function isNotifyOrderRefunded(): bool
-    {
-        return $this->scopeConfig->isSetFlag(self::XML_PATH_NOTIFY_REFUNDED, ScopeInterface::SCOPE_WEBSITE);
-    }
-
     public function isNotifyOrderPlacedEnabled(): bool
     {
-        return $this->scopeConfig->isSetFlag(
-            'whatsapp_commerce/notifications/order_placed',
-            \Magento\Store\Model\ScopeInterface::SCOPE_STORE
-        );
+        return $this->scopeConfig->isSetFlag(self::XML_PATH_NOTIFY_PLACED, ScopeInterface::SCOPE_STORE);
     }
 
     public function isNotifyOrderPaidEnabled(): bool
     {
-        return $this->scopeConfig->isSetFlag(
-            'whatsapp_commerce/notifications/order_paid',
-            \Magento\Store\Model\ScopeInterface::SCOPE_STORE
-        );
+        return $this->scopeConfig->isSetFlag(self::XML_PATH_NOTIFY_PAID, ScopeInterface::SCOPE_STORE);
     }
 
     public function isNotifyOrderShippedEnabled(): bool
     {
-        return $this->scopeConfig->isSetFlag(
-            'whatsapp_commerce/notifications/order_shipped',
-            \Magento\Store\Model\ScopeInterface::SCOPE_STORE
-        );
+        return $this->scopeConfig->isSetFlag(self::XML_PATH_NOTIFY_SHIPPED, ScopeInterface::SCOPE_STORE);
     }
 
     public function isNotifyOrderRefundedEnabled(): bool
     {
-        return $this->scopeConfig->isSetFlag(
-            'whatsapp_commerce/notifications/order_refunded',
-            \Magento\Store\Model\ScopeInterface::SCOPE_STORE
-        );
+        return $this->scopeConfig->isSetFlag(self::XML_PATH_NOTIFY_REFUNDED, ScopeInterface::SCOPE_STORE);
     }
 }

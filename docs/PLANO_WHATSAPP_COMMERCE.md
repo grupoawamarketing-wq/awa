@@ -782,9 +782,11 @@ R: 1-3 dias úteis após confirmação do pagamento. Frete calculado no checkout
 - [ ] Estender AbandonedCart com canal WhatsApp
 - [ ] 3 ondas: 1h, 24h, 72h
 
-### 3.2 Notificações de Pedido
-- [ ] Observers para: pedido confirmado, pago, enviado, reembolso
-- [ ] Config admin para habilitar/desabilitar cada notificação
+### 3.2 Notificações de Pedido ✅
+- [x] Observers para: pedido confirmado, pago, enviado, reembolso
+- [x] Config admin para habilitar/desabilitar cada notificação
+- [x] POST para N8N webhook `nova-ordem` no evento `sales_order_place_after`
+- [x] Configs ativadas: placed=1, paid=1, shipped=1, refunded=0
 
 ### 3.3 Follow-up Pós-Compra ✅
 - [x] Workflow N8N implementado (7 dias + 30 dias)
@@ -823,13 +825,15 @@ R: 1-3 dias úteis após confirmação do pagamento. Frete calculado no checkout
 
 ## Conformidade e Segurança
 
-### LGPD
-- [ ] Atributo EAV `whatsapp_optin` (default 0)
-- [ ] Tabela `awa_whatsapp_consent_log`
-- [ ] Checkbox opt-in no checkout
-- [ ] Opt-in no bot (primeira mensagem)
-- [ ] Descadastro: "SAIR" ou "PARAR" → opt-out automático
-- [ ] Todos os disparos verificam opt-in
+### LGPD ✅
+- [x] Atributo EAV `whatsapp_optin` (attribute_id=208, default 0)
+- [x] Tabela `awa_whatsapp_consent_log` (customer_id, phone, optin, source, IP, user_agent)
+- [x] Checkbox opt-in no checkout (Rokanthemes OPC + standard checkout)
+- [x] Opt-in no bot (Typebot grupo "Opt-in Notificacoes" com webhook N8N)
+- [x] Descadastro: "NAO" no bot → opt-out automático via webhook
+- [x] Todos os disparos verificam opt-in (`hasWhatsappConsent()` no Observer)
+- [x] REST API: GET/POST `/V1/awa-whatsapp/optin` para N8N/Typebot
+- [x] Controller AJAX: `POST /whatsappcommerce/checkout/saveoptin` para checkout
 
 ### WhatsApp Business Policy
 - [ ] Baileys apenas para atendimento receptivo (Fases 0-2)
@@ -881,7 +885,7 @@ R: 1-3 dias úteis após confirmação do pagamento. Frete calculado no checkout
 
 ---
 
-## Status de Implementação (atualizado 2026-04-14)
+## Status de Implementação (atualizado 2026-04-13)
 
 ### ✅ Fase 0 — Infraestrutura Base (COMPLETA)
 - [x] **0.1** Evolution API v2.3.7 em `wpp.awamotos.com` (Baileys)
@@ -895,6 +899,10 @@ R: 1-3 dias úteis após confirmação do pagamento. Frete calculado no checkout
 - [x] **1.2** Typebot bot de triagem com 6 opções de menu
 - [x] **1.3** Módulo WhatsAppCommerce (21 arquivos): APIs catálogo, busca, fitment, tracking
 - [ ] **1.4** WhatsApp número de produção conectado (QR Code pendente)
+- [x] **2.0** Roteamento automático de atendentes ERP (9 atendentes mapeados)
+- [x] **2.1** LGPD checkout opt-in (checkbox → AJAX → customer attribute)
+- [x] **2.2** REST API opt-in/opt-out (Typebot/N8N → Magento)
+- [x] **2.3** Order notifications (4 events → N8N webhook + WhatsApp)
 
 ### ✅ IA com Dados Reais do Catálogo (COMPLETA — 2026-04-14)
 - [x] Workflow N8N com 3 estratégias: produto+marca+modelo (search), marca+modelo (fitment), produto (search)
@@ -903,19 +911,22 @@ R: 1-3 dias úteis após confirmação do pagamento. Frete calculado no checkout
 - [x] Loop de conversação: outra pergunta / voltar ao menu / falar com atendente
 - [x] 6 cenários de teste passando (bagageiro CG 160, peças Fazer 250, retrovisor, saudação, B2B, retrovisor Fazer 250)
 
+### ✅ Fase 2 — LGPD + Notificações (COMPLETA — 2026-04-13)
+- [x] REST API opt-in/opt-out: GET/POST `/V1/awa-whatsapp/optin/:phone`
+- [x] Checkout WhatsApp opt-in checkbox (OPC sortOrder 265 + standard checkout)
+- [x] AJAX controller `SaveOptin` com form_key validation
+- [x] Typebot: 3 novos grupos (Opt-in Notificacoes, Confirmacao com webhook, Recusado)
+- [x] N8N workflow `NcWf3h559OZz49X2` — webhook `whatsapp-optin` → Magento API
+- [x] Roteamento automático de atendentes (9 atendentes, 2382 clientes synced)
+- [x] Order notifications ativadas (4 observers, N8N webhook nova-ordem)
+- [x] Consent log LGPD com audit trail completo
+
 ### 🔲 Pendente
 - [ ] Escanear QR Code WhatsApp (Evolution API state=`connecting`)
 - [ ] Teste end-to-end via WhatsApp real
 - [ ] Fase 2: Carrinho WhatsApp, checkout link, pedido
-- [ ] Fase 3: Notificações transacionais, carrinho abandonado, Cloud API Oficial
+- [ ] Fase 3: Carrinho abandonado via WhatsApp, Cloud API Oficial
 - [ ] Fase 4+: B2B, ERP sync, campanhas em massa
 
 ---
 
-## Próximos Passos
-
-1. **[URGENTE]** Escanear QR Code do WhatsApp no Evolution API
-2. **[1.4]** Teste end-to-end com mensagem WhatsApp real
-3. **[1]** Configurar horário de atendimento + testar handoff
-4. **[2]** Sub-fluxo de categorias no Typebot
-5. **[2]** Carrinho via WhatsApp + checkout link
