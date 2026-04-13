@@ -1,6 +1,12 @@
 // AWA Motos — Vertical Menu overrides
 @import (once) '_awa-variables';
 
+// Badges promocionais do menu vertical — cores intencionais de marketing.
+// Mantidas locais para não poluir o design system global.
+@vmenu-label-1: #0cc485;
+@vmenu-label-2: #eb2771;
+@vmenu-label-3: #0ae3eb;
+
 
 // Garante renderização correta de ícones Font Awesome (em.menu-thumb-icon)
 // e ajustes visuais complementares à documentação Ayo/Rokanthemes.
@@ -48,18 +54,18 @@
         white-space: nowrap;
 
         &.cat-label-label1 {
-            background: #0cc485;
-            color: #fff;
+            background: @vmenu-label-1;
+            color: @awa-color-white;
         }
 
         &.cat-label-label2 {
-            background: #eb2771;
-            color: #fff;
+            background: @vmenu-label-2;
+            color: @awa-color-white;
         }
 
         &.cat-label-label3 {
-            background: #0ae3eb;
-            color: #fff;
+            background: @vmenu-label-3;
+            color: @awa-color-white;
         }
     }
 }
@@ -67,4 +73,66 @@
 // ── Hover: deslocar levemente para a direita (comportamento do tema pai) ──────
 .navigation.verticalmenu.side-verticalmenu > ul li.level0 > a.level-top:hover {
     padding-left: 14px !important; // tema pai redefine padding-left via seletor de alta especificidade no hover
+}
+
+
+// ── Promo Image Carousel — .vertical-bg-img ─────────────────────────────────
+// Container renderizado pelo bloco CMS 'vertical_background_images'.
+// Inicializado via x-magento-init[js/vmenu-promo-carousel].
+// JS: web/js/vmenu-promo-carousel.js — crossfade auto-rotate, pausa no hover.
+
+.vertical-bg-img {
+    list-style: none;
+    display: block;
+    padding: 4px 8px 8px;
+    margin: 0;
+    overflow: hidden;
+}
+
+.vmenu-promo-carousel {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    border-radius: @awa-border-radius-md;
+    background: @awa-color-bg-light;
+}
+
+.vmenu-promo-slide {
+    display: none;
+    width: 100%;
+    opacity: 0;
+    transition: opacity 0.45s ease;
+
+    img {
+        display: block;
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+        border-radius: @awa-border-radius-md;
+    }
+
+    a {
+        display: block;
+        width: 100%;
+        text-decoration: none;
+        border-radius: @awa-border-radius-md;
+        overflow: hidden;
+
+        &:focus-visible {
+            outline: 2px solid var(--awa-primary, #b73337);
+            outline-offset: 2px;
+        }
+    }
+
+    &--active {
+        display: block;
+        opacity: 1;
+    }
+}
+
+// Prefers-reduced-motion: para a animação de crossfade
+@media (prefers-reduced-motion: reduce) {
+    .vmenu-promo-slide {
+        transition: none;
+    }
 }

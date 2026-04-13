@@ -36,7 +36,9 @@ var config = {
         'awa-scroll-reveal': 'js/awa-scroll-reveal',
         'awa-card-enhance': 'js/awa-card-enhance',
         // FASE E: Mobile menu focus trap (WCAG 2.4.3)
-        'awa-vertical-menu-focus-trap': 'js/awa-vertical-menu-focus-trap'
+        'awa-vertical-menu-focus-trap': 'js/awa-vertical-menu-focus-trap',
+        // Carousel promocional do menu vertical (VMente promo images)
+        'js/vmenu-promo-carousel': 'js/vmenu-promo-carousel'
     },
     shim: {
         'swiper': {

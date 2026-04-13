@@ -103,4 +103,23 @@ class Data extends AbstractHelper
             $storeId
         );
     }
+
+    public function isWhatsappEnabled(?int $storeId = null): bool
+    {
+        return $this->scopeConfig->isSetFlag(
+            'abandoned_cart/whatsapp/enabled',
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+    }
+
+    public function isWhatsappEnabledForWave(int $waveNumber, ?int $storeId = null): bool
+    {
+        return $this->scopeConfig->isSetFlag(
+            "abandoned_cart/whatsapp/wave_{$waveNumber}_enabled",
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+    }
+
 }

@@ -7,6 +7,7 @@ namespace GrupoAwamotos\AbandonedCart\Cron;
 use GrupoAwamotos\AbandonedCart\Api\AbandonedCartRepositoryInterface;
 use GrupoAwamotos\AbandonedCart\Api\EmailSenderInterface;
 use GrupoAwamotos\AbandonedCart\Helper\Data as Helper;
+use GrupoAwamotos\AbandonedCart\Model\WhatsAppSender;
 use Psr\Log\LoggerInterface;
 
 class SendEmails
@@ -14,17 +15,20 @@ class SendEmails
     private Helper $helper;
     private AbandonedCartRepositoryInterface $abandonedCartRepository;
     private EmailSenderInterface $emailSender;
+    private WhatsAppSender $whatsappSender;
     private LoggerInterface $logger;
 
     public function __construct(
         Helper $helper,
         AbandonedCartRepositoryInterface $abandonedCartRepository,
         EmailSenderInterface $emailSender,
+        WhatsAppSender $whatsappSender,
         LoggerInterface $logger
     ) {
         $this->helper = $helper;
         $this->abandonedCartRepository = $abandonedCartRepository;
         $this->emailSender = $emailSender;
+        $this->whatsappSender = $whatsappSender;
         $this->logger = $logger;
     }
 
@@ -81,6 +85,9 @@ class SendEmails
 
                     $this->abandonedCartRepository->save($abandonedCart);
                     $sent++;
+
+                    // Send WhatsApp (in addition to email, never replaces)
+                    $this->whatsappSender->send($abandonedCart, $emailNumber);
                 } else {
                     $failed++;
                 }
