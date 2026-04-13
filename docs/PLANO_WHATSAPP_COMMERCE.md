@@ -1,7 +1,7 @@
 # Plano de Desenvolvimento — WhatsApp Commerce AWA Motos
 
-> **Versão:** 2.1
-> **Data:** 2026-04-12
+> **Versão:** 2.2
+> **Data:** 2026-04-13
 > **Autor:** Jess / GrupoAwamotos
 > **Objetivo:** Integrar Chat + WhatsApp + IA para vender pelo WhatsApp (estilo Suri Shop) usando stack open-source
 
@@ -796,12 +796,12 @@ R: 1-3 dias úteis após confirmação do pagamento. Frete calculado no checkout
 
 ---
 
-## Fase 4 — B2B no WhatsApp (Semana 13-16)
+## Fase 4 — B2B no WhatsApp (Semana 13-16) ✅
 
-- [ ] Cadastro B2B via Typebot (CNPJ + validação ReceitaWS)
-- [ ] Cotação B2B (PDF + aprovação → pedido)
-- [ ] Recompra rápida ("repetir último pedido")
-- [ ] Alertas B2B (estoque, preços, crédito)
+- [x] Cadastro B2B via API REST (CNPJ + validação ReceitaWS + BrasilAPI)
+- [x] Cotação B2B (submit, list, detail, accept via API)
+- [x] Recompra rápida (list orders, reorder by ID, reorder last)
+- [x] Alertas B2B cron (estoque, novos produtos, crédito)
 
 ---
 
