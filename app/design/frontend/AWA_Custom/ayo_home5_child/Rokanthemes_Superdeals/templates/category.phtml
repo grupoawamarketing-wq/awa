@@ -34,8 +34,7 @@
 	<div class="rokan-product-heading rokan-onsale-heading"><h2><?php echo $block->escapeHtml($this->getConfig('title')) ?>  <span class="sup-title"><?php echo $block->escapeHtml(__('Of The Day')) ?></span></h2></div>
 <?php }?>
 <div class="hot-deal-tab-slider hot-deal-tab-slider-customcss">
-	<div class="countdown_block">
-		<div class="title_countdown"><?php echo $block->escapeHtml(__('Hurry Up! Offer ends in:')) ?></div>
+	<div class="countdown_block countdown_block--timer-only">
 		<div class="super-deal-countdown" data-date="<?php echo $block->escapeHtmlAttr($block->getConfig('end_date')); ?>"></div>
 	</div>
 	<div class="row">
@@ -96,33 +95,6 @@
 										<?php /* compare desativado */ ?>
 									</ul>
 							    </div>
-							    <div class="product-info-cart">
-				                    <div class="actions-primary addcart-link">
-				                      <?php if ($_item->isSaleable()): ?>
-				                        <?php
-				                          $postDataHelper = $this->helper('Magento\Framework\Data\Helper\PostHelper');
-				                          $postData = $postDataHelper->getPostData($block->getAddToCartUrl($_item), ['product' => $_item->getEntityId()]);
-				                          $postParams = json_decode($postData, true);
-				                          ?>
-				                        <form data-role="tocart-form" action="<?php echo $block->escapeUrl($postParams['action']); ?>" method="post">
-				                          <input type="hidden" name="product" value="<?php echo $block->escapeHtmlAttr($postParams['data']['product']); ?>">
-				                          <input type="hidden" name="<?php echo $block->escapeHtmlAttr(Action::PARAM_NAME_URL_ENCODED); ?>" value="<?php echo $block->escapeHtmlAttr($postParams['data'][Action::PARAM_NAME_URL_ENCODED]); ?>">
-				                          <?php echo $block->getBlockHtml('formkey')?>
-				                          <button type="submit"
-				                              title="<?php echo $block->escapeHtml(__('Add to Cart')); ?>"
-				                              class="btn-add-to-cart action tocart">
-				                            <span><?php echo $block->escapeHtml(__('Add to Cart')); ?></span>
-				                          </button>
-				                        </form>
-				                      <?php else: ?>
-				                        <?php if ($_item->getIsSalable()): ?>
-				                          <div class="stock available"><span><?php echo $block->escapeHtml(__('In stock')) ?></span></div>
-				                        <?php else: ?>
-				                          <div class="stock unavailable"><span><?php echo $block->escapeHtml(__('Out of stock')) ?></span></div>
-				                        <?php endif; ?>
-				                      <?php endif; ?>
-				                    </div>
-	  							</div>
 						    </div>
 						    <div class="product-info">
 								<h3 class="product-name">
@@ -134,17 +106,19 @@
 									<span class="awa-b2b-sku__label">Cod:</span>
 									<span class="awa-b2b-sku__value"><?php echo $block->escapeHtml($_item->getSku()); ?></span>
 								</div>
+								<?php $_reviewHtml = $block->getReviewsSummaryHtml($_item, $templateType, true); ?>
+								<?php if ($_reviewHtml): ?>
 								<div class="product-rating">
-									<?php if ($templateType): ?>
-										<?php echo $block->getReviewsSummaryHtml($_item, $templateType,true); ?>
-									<?php endif; ?>
+									<?php echo $_reviewHtml; ?>
 								</div>
+								<?php endif; ?>
+								<?php $_soldByText = $_item->getAttributeText('sold_by'); ?>
+								<?php if ($_soldByText): ?>
 								<div class="sold-by">
-									<?php
-										$cats = $_item->getAttributeText('sold_by');
-										echo ' <span>'.$block->escapeHtml(__('Sold by:')).'</span>' . $block->escapeHtml($cats);
-									 ?>
+									<span><?php echo $block->escapeHtml(__('Sold by:')); ?></span>
+									<?php echo $block->escapeHtml($_soldByText); ?>
 								</div>
+								<?php endif; ?>
 								<div class="info-price">
 									<?php /* @noEscape */ echo $this->helper('Rokanthemes\Themeoption\Helper\Data')->getPriceDisplayCustom($block->getProductPrice($_item)) ?>
 								</div>
@@ -165,6 +139,33 @@
 									</div>
 								</div>
 								<?php endif; ?>
+								<div class="product-info-cart">
+									<div class="actions-primary addcart-link">
+										<?php if ($_item->isSaleable()): ?>
+											<?php
+												$postDataHelper = $this->helper('Magento\Framework\Data\Helper\PostHelper');
+												$postData = $postDataHelper->getPostData($block->getAddToCartUrl($_item), ['product' => $_item->getEntityId()]);
+												$postParams = json_decode($postData, true);
+											?>
+											<form data-role="tocart-form" action="<?php echo $block->escapeUrl($postParams['action']); ?>" method="post">
+												<input type="hidden" name="product" value="<?php echo $block->escapeHtmlAttr($postParams['data']['product']); ?>">
+												<input type="hidden" name="<?php echo $block->escapeHtmlAttr(Action::PARAM_NAME_URL_ENCODED); ?>" value="<?php echo $block->escapeHtmlAttr($postParams['data'][Action::PARAM_NAME_URL_ENCODED]); ?>">
+												<?php echo $block->getBlockHtml('formkey')?>
+												<button type="submit"
+													title="<?php echo $block->escapeHtml(__('Add to Cart')); ?>"
+													class="btn-add-to-cart action tocart">
+													<span><?php echo $block->escapeHtml(__('Add to Cart')); ?></span>
+												</button>
+											</form>
+										<?php else: ?>
+											<?php if ($_item->getIsSalable()): ?>
+												<div class="stock available"><span><?php echo $block->escapeHtml(__('In stock')) ?></span></div>
+											<?php else: ?>
+												<div class="stock unavailable"><span><?php echo $block->escapeHtml(__('Out of stock')) ?></span></div>
+											<?php endif; ?>
+										<?php endif; ?>
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>
