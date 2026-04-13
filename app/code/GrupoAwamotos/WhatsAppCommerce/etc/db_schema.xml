@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="awa_whatsapp_consent_log" resource="default" engine="innodb" comment="WhatsApp Consent Log (LGPD)">
+        <column xsi:type="int" name="log_id" unsigned="true" nullable="false" identity="true" comment="Log ID"/>
+        <column xsi:type="int" name="customer_id" unsigned="true" nullable="false" comment="Customer ID"/>
+        <column xsi:type="varchar" name="phone" nullable="false" length="32" comment="Phone Number"/>
+        <column xsi:type="smallint" name="optin" unsigned="true" nullable="false" default="0" comment="Opt-in Status (1=yes, 0=no)"/>
+        <column xsi:type="varchar" name="source" nullable="false" length="50" default="admin" comment="Consent Source (admin, checkout, api, account)"/>
+        <column xsi:type="varchar" name="ip_address" nullable="true" length="45" comment="IP Address"/>
+        <column xsi:type="text" name="user_agent" nullable="true" comment="User Agent"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="log_id"/>
+        </constraint>
+        <index referenceId="AWA_WPP_CONSENT_CUSTOMER" indexType="btree">
+            <column name="customer_id"/>
+        </index>
+        <index referenceId="AWA_WPP_CONSENT_PHONE" indexType="btree">
+            <column name="phone"/>
+        </index>
+        <constraint xsi:type="foreign" referenceId="AWA_WPP_CONSENT_CUSTOMER_FK"
+                    table="awa_whatsapp_consent_log" column="customer_id"
+                    referenceTable="customer_entity" referenceColumn="entity_id"
+                    onDelete="CASCADE"/>
+    </table>
+</schema>
