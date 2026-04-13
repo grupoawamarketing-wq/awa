@@ -120,8 +120,8 @@ class Collection extends AbstractCollection
                 ];
             }
 
-            $yearFrom = $application->getYearFrom() ?? $application->getData('model_year_from');
-            $yearTo = $application->getYearTo() ?? $application->getData('model_year_to');
+            $yearFrom = $this->normalizeYearValue($application->getYearFrom() ?? $application->getData('model_year_from'));
+            $yearTo = $this->normalizeYearValue($application->getYearTo() ?? $application->getData('model_year_to'));
 
             $formattedYears = $this->formatYears($yearFrom, $yearTo);
 
@@ -165,5 +165,20 @@ class Collection extends AbstractCollection
         }
 
         return "{$from}-{$to}";
+    }
+
+    /**
+     * Normalize joined year value to nullable int.
+     *
+     * @param int|string|null $value
+     * @return int|null
+     */
+    private function normalizeYearValue(int|string|null $value): ?int
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        return is_numeric($value) ? (int) $value : null;
     }
 }
