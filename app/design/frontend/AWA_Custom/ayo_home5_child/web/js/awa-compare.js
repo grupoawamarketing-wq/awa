@@ -23,7 +23,12 @@ define(['jquery', 'mage/url'], function ($, urlBuilder) {
             return false;
         }
 
-        return body.classList.contains('b2b-register-index') ||
+        return body.classList.contains('cms-index-index') ||
+            body.classList.contains('cms-home') ||
+            body.classList.contains('cms-homepage_ayo_home5') ||
+            body.classList.contains('checkout-index-index') ||
+            body.classList.contains('onepagecheckout-index-index') ||
+            body.classList.contains('b2b-register-index') ||
             body.classList.contains('b2b-auth-shell') ||
             body.classList.contains('b2b-account-login') ||
             body.classList.contains('b2b-account-forgotpassword') ||
