@@ -105,7 +105,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    height: var(--awa-card-img-h, 200px);
+    aspect-ratio: 1 / 1;
+    min-height: 180px;
     padding: var(--awa-card-pad-img, 10px);
     background: var(--awa-bg-surface, #f7f7f7);
     overflow: hidden;
@@ -128,11 +129,10 @@
     }
 
     .first-thumb img {
-      max-width: 100%;
-      max-height: var(--awa-card-img-inner-h, 180px);
-      width: auto;
-      height: auto;
+      width: 100%;
+      height: 100%;
       object-fit: contain;
+      object-position: center;
       display: block;
       // will-change apenas no hover — evita criar camada de composição permanente
       // BUG anterior: will-change:transform em base + will-change:auto em :not(:hover)
@@ -158,9 +158,10 @@
       transition: opacity var(--awa-duration) var(--awa-ease);
 
       img {
-        max-width: 100%;
-        max-height: var(--awa-card-img-inner-h, 180px);
+        width: 100%;
+        height: 100%;
         object-fit: contain;
+        object-position: center;
       }
     }
 
@@ -488,6 +489,22 @@
       border-color: var(--awa-primary);
       color: var(--awa-text-inverse);
     }
+
+    // WCAG 2.1 AA — 2.4.7 Focus Visible
+    &:focus-visible {
+      outline: 2px solid var(--awa-primary);
+      outline-offset: 2px;
+      background: var(--awa-primary);
+      border-color: var(--awa-primary);
+      color: var(--awa-text-inverse);
+    }
+
+    // Disabled state (Swiper adds .swiper-button-disabled)
+    &.swiper-button-disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
   }
 
 } // fecha scope dos wrappers de carrossel
@@ -568,7 +585,7 @@
     }
 
     .product-thumb {
-      height: 160px;
+      min-height: 140px;
     }
 
     .product-name .product-item-link {
@@ -647,10 +664,11 @@
     }
   }
 
-  // Thumbnail: altura fixa, não encolhe
+  // Thumbnail: aspect-ratio, não encolhe
   .product-thumb {
     flex-shrink: 0;
-    height: var(--awa-card-img-h, 200px);
+    aspect-ratio: 1 / 1;
+    min-height: 180px;
   }
 
   // Corpo do card: cresce para preencher espaço disponível
@@ -863,7 +881,7 @@
   .catalogsearch-result-index .products-grid {
 
     .product-thumb {
-      height: 130px;
+      min-height: 120px;
     }
 
     .product-info {
@@ -903,7 +921,7 @@
   .categorytab-container {
 
     .product-thumb {
-      height: 140px;
+      min-height: 120px;
       padding: var(--awa-space-sm, 8px);
     }
 
@@ -929,6 +947,59 @@
     .b2b-login-to-buy-btn.b2b--listing {
       min-height: 38px;
       font-size: @awa-font-size-11;
+    }
+  }
+}
+
+
+// === TOUCH / NO-HOVER DEVICES ===
+// Garante que cards não dependam de hover para CTA e navegação
+@media (hover: none) {
+  .rokan-newproduct,
+  .rokan-bestseller,
+  .list-tab-product,
+  .rokan-featured,
+  .rokan-mostviewed,
+  .rokan-onsale,
+  .rokan-toprate,
+  .categorytab-container,
+  .block.widget.block-products-list {
+
+    // Remove hover zoom que não funciona em touch
+    .product-thumb:hover .first-thumb img {
+      transform: none;
+    }
+
+    // Arrows sempre visíveis em touch (sem depender de hover do container)
+    .swiper-button-prev,
+    .swiper-button-next {
+      opacity: 1;
+    }
+  }
+}
+
+// Mínimo de 44px para alvos touch (WCAG 2.5.5 Target Size)
+@media (pointer: coarse) {
+  .rokan-newproduct,
+  .rokan-bestseller,
+  .list-tab-product,
+  .rokan-featured,
+  .rokan-mostviewed,
+  .rokan-onsale,
+  .rokan-toprate,
+  .categorytab-container,
+  .block.widget.block-products-list {
+
+    .actions-primary .btn-add-to-cart,
+    .actions-primary .action.tocart,
+    .b2b-login-to-buy-btn.b2b--listing {
+      min-height: 44px;
+    }
+
+    .swiper-button-prev,
+    .swiper-button-next {
+      width: 40px;
+      height: 40px;
     }
   }
 }
