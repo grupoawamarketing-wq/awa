@@ -20,7 +20,7 @@
 // ============================================================================
 
 .panel.wrapper {
-    background-color: #1a1a1a; // mantém escuro — identidade do tema Ayo
+    background-color: @color-secondary; // @awa-color-dark (#1a1a1a) — identidade do tema Ayo
     color: rgba(255, 255, 255, 0.85);
 
     .panel.header {
@@ -43,7 +43,7 @@
         transition: color @awa-transition;
 
         &:hover {
-            color: #ffffff;
+            color: @awa-color-white;
         }
     }
 
@@ -79,7 +79,7 @@
 // ============================================================================
 
 .page-header {
-    background-color: #ffffff;
+    background-color: @awa-color-white;
     border-bottom: 1px solid var(--awa-border, #e2e2e2);
     position: relative;
     z-index: @z-header; // _z-index.less
@@ -191,7 +191,7 @@
             border: 1.5px solid var(--awa-border, #e2e2e2);
             border-right: none;
             border-radius: 4px 0 0 4px;
-            background: #ffffff;
+            background: @awa-color-white;
             color: var(--awa-text, #333333);
             font-size: 14px;
             outline: none;
@@ -221,7 +221,7 @@
         border-left: none;
         border-radius: 0 4px 4px 0;
         background: var(--awa-primary, #b73337);
-        color: #ffffff;
+        color: @awa-color-white;
         cursor: pointer;
         transition: background-color @awa-transition, border-color @awa-transition;
         flex-shrink: 0;
@@ -253,7 +253,7 @@
         left: 0;
         right: 0;
         z-index: @z-search-drop; // _z-index.less
-        background: #ffffff;
+        background: @awa-color-white;
         border: 1px solid var(--awa-border, #e2e2e2);
         border-top: none;
         border-radius: 0 0 4px 4px;
@@ -427,7 +427,7 @@ body .page-wrapper .awa-site-header .awa-header-right-col .minicart-wrapper {
             right: 1px !important;
             top: auto !important;
             left: auto !important;
-            border: 1.5px solid #ffffff !important;
+            border: 1.5px solid @awa-color-white !important;
 
             &.empty { display: none !important; }
         }
@@ -439,7 +439,7 @@ body .page-wrapper .awa-site-header .awa-header-right-col .minicart-wrapper {
         right: 0;
         top: calc(100% + 8px);
         width: 340px;
-        background: #ffffff;
+        background: @awa-color-white;
         border: 1px solid var(--awa-border, #e2e2e2);
         border-radius: @awa-border-radius-lg;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
@@ -477,7 +477,7 @@ body .page-wrapper .awa-site-header .awa-header-right-col .minicart-wrapper {
             border: 1px solid var(--awa-border, #e2e2e2);
             border-radius: 4px;
             overflow: hidden;
-            background: #fff;
+            background: @awa-color-white;
 
             img {
                 width: 100%;
@@ -537,7 +537,7 @@ body .page-wrapper .awa-site-header .awa-header-right-col .minicart-wrapper {
 
                 &:hover {
                     background: var(--awa-primary, #b73337);
-                    color: #ffffff;
+                    color: @awa-color-white;
                 }
             }
 
@@ -549,7 +549,7 @@ body .page-wrapper .awa-site-header .awa-header-right-col .minicart-wrapper {
                 border-radius: 4px;
                 border: none;
                 background: var(--awa-primary, #b73337) !important; // sobrescreve gradiente do tema pai
-                color: #ffffff !important;
+                color: @awa-color-white !important;
                 font-size: 14px;
                 font-weight: @awa-weight-bold;
                 text-decoration: none;
@@ -606,7 +606,7 @@ body .page-wrapper .awa-site-header .awa-header-right-col .minicart-wrapper {
         text-decoration: none;
         transition: color @awa-transition;
 
-        &:hover { color: #ffffff; }
+        &:hover { color: @awa-color-white; }
     }
 
     &__whatsapp {
@@ -618,7 +618,7 @@ body .page-wrapper .awa-site-header .awa-header-right-col .minicart-wrapper {
             width: 14px;
             height: 14px;
             flex-shrink: 0;
-            color: #25D366; // verde WhatsApp
+            color: @awa-color-whatsapp; // verde WhatsApp
         }
     }
 
@@ -672,7 +672,7 @@ body .page-wrapper .awa-site-header .awa-header-right-col .minicart-wrapper {
     gap: 6px;
     padding: 9px 16px;
     background: var(--awa-primary, #b73337);
-    color: #ffffff;
+    color: @awa-color-white;
     border-radius: 4px;
     font-size: 13px;
     font-weight: @awa-weight-semibold;
@@ -690,7 +690,7 @@ body .page-wrapper .awa-site-header .awa-header-right-col .minicart-wrapper {
     &:hover,
     &:focus {
         background: var(--awa-primary-dark, #8e2629);
-        color: #ffffff; // garante que o tema pai não sobrescreve a cor do texto
+        color: @awa-color-white; // garante que o tema pai não sobrescreve a cor do texto
     }
 
     @media (max-width: (@awa-breakpoint-md - 1)) {
@@ -771,21 +771,30 @@ body .page-wrapper .awa-site-header .awa-header-right-col .minicart-wrapper {
     }
 }
 
-// BUG 8 — container "TODAS AS CATEGORIAS" (menu_left_home1) vazio em Cat/PDP
-// Causa: awa-bundle-tail.css força `display: flex !important` globalmente
-// Fix: oculta o container em páginas que não são home (ele fica vazio e cria
-//      um gap de 290px na navigation bar em desktop)
+// FIX-VMENU-GLOBAL — Departamentos visível em TODAS as páginas (não só home)
+// Antigo BUG 8 removido: agora o menu vertical aparece em cat/PDP/busca/etc.
+// O conteúdo .awa-nav-categories é renderizado pelo layout XML em todas as páginas.
 @media (min-width: 992px) {
 
     body:not(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) {
 
         #header .header-control .awa-header-categories.menu_left_home1 {
-            display: none !important; // awa-bundle-tail.css força display:flex com esp.1-2-0 — sem !important perde
-            width: 0 !important;
-            max-width: 0 !important;
-            overflow: hidden !important;
+            display: flex !important;
+            align-items: center;
+            flex: 0 0 clamp(240px, 22vw, 300px);
+            min-width: 0;
+            overflow: visible !important;
+        }
+
+        #header .header-control .menu_left_home1 > .awa-nav-categories {
+            display: flex !important;
+            align-items: center;
             padding: 0 !important;
-            margin: 0 !important;
+            min-height: 0;
+        }
+
+        #header .header-control .menu_left_home1 .sections.nav-sections.category-dropdown {
+            display: block !important;
         }
     }
 }

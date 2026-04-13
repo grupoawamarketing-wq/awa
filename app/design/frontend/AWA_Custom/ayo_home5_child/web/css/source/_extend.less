@@ -1,106 +1,124 @@
-// AWA Child Theme — extensão local
-// Ponto único de entrada do child theme. Ordem importa: globais antes de específicos.
-//
-// Hierarquia de imports (cada arquivo importa suas próprias deps via (once)):
-//   _layout-global  → _design-system → _awa-variables
-//   _product-card   → _awa-variables
-//   _awa-qty-control, _awa-spacing, _sections, _vertical-menu → _design-system
-//   _header, _visibility, _account-nav, _responsive-fixes → _awa-variables
-//
-// DEPRECIADO: _awa-product-card.less → substituído por _product-card.less.
+// =============================================
+// AWA MOTOS — DESIGN SYSTEM ENTRY POINT
+// Ordem de imports é CRÍTICA — não alterar
+// =============================================
 
-// ── 0. LAYOUT GLOBAL — container max-width 1440px, grid, sidebar ─────────────
-@import '_layout-global';
+// 0. VARIÁVEIS PRIMITIVAS (LESS vars para interpolação)
+@import (once) '_awa-variables';
 
-// ── 0a. SLIDESHOW — full-bleed 100% width (módulo Ayo Rokan Themes) ──────────
-@import '_awa-slideshow';
+// 0.5. DESIGN SYSTEM FOUNDATION (espaçamento 8px, breakpoints, tipografia fluida)
+@import (once) '_design-system';
 
-// ── 1. TIPOGRAFIA — sem dependências de vars LESS, apenas CSS ────────────────
+// 1. TOKENS (CSS custom properties)
+@import (once) '_tokens';
+
+// 2. BASE GLOBAL (tipografia, inputs, breadcrumb)
+@import '_global';
+
+// 2.5. TIPOGRAFIA FLUIDA (escala responsiva h1-h6, body, small)
 @import '_typography';
 
-// ── 2. CARD GLOBAL — fonte única de verdade para todos os contextos ──────────
-@import '_product-card';
-
-// ── 3. CONTROLE DE QUANTIDADE B2B ────────────────────────────────────────────
-@import '_awa-qty-control';
-
-// ── 4. OVERRIDES DA SEÇÃO LANÇAMENTOS ────────────────────────────────────────
-@import '_awa-launches';
-
-// ── 5. ESPAÇAMENTO GLOBAL ─────────────────────────────────────────────────────
-@import '_awa-spacing';
-
-// ── 6. PADDING DE SEÇÕES ──────────────────────────────────────────────────────
-@import '_sections';
-
-// ── 7. MENU VERTICAL ──────────────────────────────────────────────────────────
-@import '_vertical-menu';
-
-// ── 8. PÁGINA DE REGISTRO B2B ─────────────────────────────────────────────────
-@import '_b2b-register';
-
-// ── 9. FOOTER — restaura fundo vermelho e cores corretas ──────────────────────
-@import '_footer';
-
-// ── 10a. Z-INDEX — hierarquia centralizada de camadas (carregado antes do header) ─
-@import '_z-index';
-
-// ── 10. HEADER — utility bar, search, ícones, mini-cart ───────────────────────
+// 3. HEADER, NAV (3 camadas Balaroti-style)
 @import '_header';
 
-// ── 11. PÁGINAS ESPECÍFICAS — overrides contextuais por tipo de página ─────────
-@import '_product-page';
-@import '_category-page';
-@import '_search-results';
-@import '_checkout';
-@import '_account';
+// 3.5. HEADER PROFESSIONAL — Refactor 3 zonas (topbar, header, nav)
+@import '_header-professional';
 
-// ── 12. VISIBILIDADE POR PERFIL — guest / logged / revendedor ─────────────────
-@import '_visibility';
+// 4. CARD DE PRODUTO (unificado)
+@import '_product-card';
 
-// ── 13. NAV LATERAL DA CONTA — itens, estado ativo, mobile pills ─────────────
-@import '_account-nav';
+// 4.5. PRODUCT CARDS — Rokanthemes carrosseis (item-product)
+@import '_product-cards';
 
-// ── 14. CORREÇÕES RESPONSIVAS — issues da auditoria, global ──────────────────
-@import '_responsive-fixes';
+// 4.8. QTY CONTROL — Seletor de quantidade B2B nos cards
+@import '_awa-qty-control';
 
-// ── 15. LOADING STATES — skeleton shimmer, .is-loading state ─────────────────
-@import '_loading-states';
+// 4.9. GRID SYSTEM — SINGLE SOURCE OF TRUTH (breakpoints, columns, sidebar, PDP split)
+@import '_grid-system';
 
-// ── 16. BOTÃO FLUTUANTE WHATSAPP — global, fixo inferior direito ──────────────
-@import '_awa-whatsapp-float';
+// 5. LISTING PAGE (toolbar, filtros, paginação, card styling)
+@import '_grid-listing';
 
-// ── 17. SLIDER — heights, dots, arrows do slider principal ───────────────────
-@import '_slider';
+// 6. HOMEPAGE (seções, widgets, carrosseis)
+@import '_homepage';
 
-// ── 18. FORMULÁRIOS GLOBAIS — inputs, labels, select, checkbox ────────────────
-@import '_forms';
+// 7. MENU VERTICAL (se ativo)
+@import '_vertical-menu';
 
-// ── 19. BOTÕES — sistema global de botões do DS ───────────────────────────────
+// 8. LOGIN B2B
+@import '_login-b2b';
+
+// 8.5. REGISTER B2B — footer, labels, stepper, icons, button, checkbox
+@import '_b2b-register';
+
+// 9. FOOTER
+@import '_footer';
+
+// 10. COMPONENTES AUXILIARES
+@import '_layout';
+@import '_search';
+@import '_price';
+@import '_filters';
+@import '_carousel-categories';
+@import '_carousel-products';
+@import '_section-ofertas';
+@import '_section-principais';
+@import '_category';
+@import '_navigation';
+// REPLACED by _header-main.less (consolidated) ??? @import '_header-classic-reference';
 @import '_buttons';
+@import '_forms';
+@import '_breadcrumbs';
+@import '_minicart';
+@import '_messages';
+@import '_pdp';
+@import '_z-index';
 
-// ── 20. PAINEL B2B — formulário de login, dashboard, mensagem restrita ────────
-@import '_b2b-panel';
+// 11. LEGACY AWA MODULES
+@import '_awa-layout.less';
+@import '_awa-buttons.less';
+@import '_awa-forms.less';
+@import '_awa-header-professional.less';
+@import '_awa-search-professional.less';
+@import '_awa-search-autocomplete.less';
+@import '_awa-ux-audit-fixes.less';
+@import '_awa-phase20-states.less';
+@import '_awa-b2b-phases4-7.less';
+@import '_qa-visual-fixes';
 
-// ── 21. TABELAS — pedidos, preços B2B, grade Magento ─────────────────────────
-@import '_tables';
+// 11.5. LAYOUT GLOBAL DS (após legacy, para override de container)
+@import '_layout-global';
 
-// ── 22. HOMEPAGE — seções, categorias, benefícios, marcas ────────────────────
-@import '_home';
+// 11.6. SECTIONS — PADDING RESPONSIVO PADRONIZADO
 
-// ── 23. OVERRIDES — conflitos com tema pai (último da cadeia) ─────────────────
+@import '_sections';
+
+// 11.7. SPACING — ESPAÇAMENTO INTERNO PADRONIZADO (escala ds-space)
+@import '_awa-spacing';
+
+// 11.9. SLIDE BANNER — efeitos LQIP e UX do hero
+@import '_slidebanner-super-lazy';
+
+// 12. OVERRIDES — SEMPRE POR ÚLTIMO (vence o tema Ayo)
 @import '_overrides';
+
+// 12.5. HEADER PIXEL-PERFECT — Overrides finais (busca + carrinho)
+@import '_header-pixelperfect';
+
+// 13. IMPROVEMENTS — Camada visual sobre o tema original
+@import '_awa-improvements';
+
+// 13. HEADER PIXEL-PERFECT CONSOLIDADO (fonte de verdade para header principal)
+@import (once) '_header-main';
+
+// 14. CYCLE 1 BUG FIXES — carregado por último (máxima especificidade)
+@import '_awa-cycle1-fixes';
+
+// 16. LOADING STATES — skeleton shimmer e .is-loading
+@import '_loading-states';
 
 // 14.1. HERO FULL-BLEED FIX — override final da primeira dobra da Home 5
 @import '_awa-hero-fullbleed-fix';
 
-// ── 24. CICLO 1 FIXES — correções de bugs críticos (preços, login, slider, logo) ─
-@import '_awa-cycle1-fixes';
-
-// ── 25. MINI-CART ICON VISIBILITY — override final após _awa-cycle1-fixes ─────
-// A regra visibility:hidden usa #header (ID) + aria-expanded="true" = spec 1-6-0
-// Aqui usamos spec 1-6-1 (adiciona elemento "a") e source-order ganhar (última regra)
-.page-wrapper #header.header-container[data-awa-header-shell="true"] .minicart-wrapper > a.showcart.header-mini-cart {
-    visibility: visible !important;
-}
-
+// 17. PDP UPGRADES — galeria zoom, accordion, SKU copy, brand tabs
+@import '_awa-pdp-upgrades';

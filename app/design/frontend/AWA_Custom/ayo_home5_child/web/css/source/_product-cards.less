@@ -36,17 +36,17 @@
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
-    padding-bottom: var(--awa-space-sm);
-    margin-bottom: var(--awa-section-header-mb, 20px);
-    border-bottom: 2px solid var(--awa-border);
+    padding-bottom: var(--awa-section-header-pb, 14px);
+    margin-bottom: var(--awa-section-header-mb, 24px);
+    border-bottom: var(--awa-section-header-border, 1px solid #e5e5e5);
 
     h2 {
-      font-size: var(--awa-font-size-xl, 22px);
-      font-weight: var(--awa-weight-bold);
-      color: var(--awa-text);
+      font-size: var(--awa-section-header-font-size, clamp(17px, 2vw, 22px));
+      font-weight: var(--awa-section-header-font-weight, 700);
+      color: var(--awa-section-header-color, #333333);
       margin: 0;
-      padding-left: 12px;
-      border-left: 4px solid var(--awa-primary);
+      padding-left: var(--awa-section-header-title-pl, 14px);
+      border-left: var(--awa-section-header-accent, 4px solid #b73337);
       line-height: var(--awa-leading-tight);
 
       .sup-title {
@@ -192,7 +192,7 @@
     letter-spacing: 0.04em;
     text-transform: uppercase;
     padding: 2px 7px;
-    border-radius: var(--awa-radius-sm, 4px);
+    border-radius: 3px;
     line-height: 1.6;
     background: var(--awa-success, #2d7a3a);
     color: var(--awa-text-inverse, #fff);
@@ -215,12 +215,45 @@
     font-size: 9px;
     font-weight: var(--awa-weight-bold);
     padding: 2px 7px;
+    border-radius: 3px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    line-height: 1.6;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  // Badge "Esgotado" — injetado em .hot-onsale quando .stock.unavailable está presente
+  // Técnica: o PHP/template já injeta .onsale-esgotado condicionalmente, ou usamos :has()
+  .onsale-esgotado,
+  .stock.unavailable ~ .hot-onsale .onsale,
+  .item-product:has(.stock.unavailable) .hot-onsale .onsale-esgotado {
+    background: var(--awa-text-muted, #888);
+    color: var(--awa-text-inverse, #fff);
+    font-size: 9px;
+    font-weight: var(--awa-weight-bold);
+    padding: 2px 7px;
     border-radius: var(--awa-radius-sm, 4px);
     letter-spacing: 0.04em;
     text-transform: uppercase;
     line-height: 1.6;
     display: inline-flex;
     align-items: center;
+  }
+
+  // Thumbnail esmaecida em produto fora de estoque (:has() CSS4 — suporte wide 2024+)
+  .item-product:has(.stock.unavailable) .product-thumb {
+    opacity: 0.45;
+    transition: opacity var(--awa-duration) var(--awa-ease);
+  }
+
+  // Botão CTA desativado visualmente quando fora de estoque
+  .item-product:has(.stock.unavailable) .btn-add-to-cart,
+  .item-product:has(.stock.unavailable) .action.tocart {
+    background: var(--awa-border, #e0e0e0);
+    color: var(--awa-text-muted, #888);
+    cursor: not-allowed;
+    pointer-events: none;
   }
 
   // === 5. CORPO DO CARD (.product-info) ===
@@ -232,33 +265,45 @@
     gap: 0;
   }
 
-  // === 6. SKU — hierarquia visual menor ===
+  // === 6. SKU — chip visual com separação clara do título ===
   .awa-b2b-sku {
-    display: block;
-    margin-bottom: 4px;
+    align-self: flex-start;
+    max-width: 100%;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    margin-bottom: var(--awa-space-sm, 8px);
+    padding: 2px 7px;
+    border-radius: 3px;
+    background: var(--awa-bg-surface, #f0f0f0);
+    border: 1px solid var(--awa-border, #e8e8e8);
     font-size: var(--awa-font-size-2xs, 10px);
-    color: var(--awa-text-light, #999);
-    line-height: 1.4;
+    color: var(--awa-text-muted, #777);
     letter-spacing: 0.02em;
+    line-height: 1.4;
 
     .awa-b2b-sku__label {
       font-weight: var(--awa-weight-normal);
-      color: inherit;
+      color: var(--awa-text-light, #999);
     }
 
     .awa-b2b-sku__value {
       font-weight: var(--awa-weight-medium);
       color: var(--awa-text-muted, #666);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 120px;
     }
   }
 
   // === 7. NOME DO PRODUTO — truncar em 2 linhas ===
   .product-name {
-    margin: 0 0 var(--awa-space-sm, 8px);
+    margin: 0 0 6px;
 
     .product-item-link {
-      font-size: @awa-font-size-12;
-      font-weight: var(--awa-weight-medium);
+      font-size: @awa-font-size-13;
+      font-weight: var(--awa-weight-semi);
       color: var(--awa-text, #333);
       text-decoration: none;
       line-height: var(--awa-leading-snug, 1.35);
@@ -290,11 +335,25 @@
     margin-bottom: var(--awa-space-sm, 8px);
 
     .price-box {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+
       .price {
-        font-size: var(--awa-font-size-lg, 18px);
+        font-size: var(--awa-font-size-md, 16px);
         font-weight: var(--awa-weight-bold);
         color: var(--awa-text);
         line-height: 1.2;
+      }
+
+      // Preço promocional: cor primária + ordem abaixo do riscado
+      .special-price .price {
+        color: var(--awa-primary);
+      }
+
+      // Preço riscado ("de"): sobe para cima do special-price
+      .old-price {
+        order: -1;
       }
 
       .old-price .price {
@@ -306,10 +365,11 @@
     }
   }
 
-  // === 9. CTA — botão "Add to Cart" / "Faça login" ===
+  // === 9. CTA — botão com separação visual clara do corpo ===
   .product-info-cart {
     margin-top: auto;
-    padding-top: var(--awa-space-sm, 8px);
+    padding-top: 10px;
+    border-top: 1px solid var(--awa-border, #ebebeb);
   }
 
   .actions-primary {
@@ -512,7 +572,7 @@
     }
 
     .product-name .product-item-link {
-      font-size: @awa-font-size-11;
+      font-size: @awa-font-size-12;
     }
 
     .swiper-button-prev,
@@ -604,10 +664,64 @@
     gap: 0;
   }
 
-  // CTA: ancora no fundo do card via flex
+  // CTA: ancora no fundo do card via flex — border-top separa visualmente do corpo
   .product-info-cart {
     margin-top: auto;
-    padding-top: var(--awa-space-sm, 8px);
+    padding-top: 10px;
+    border-top: 1px solid var(--awa-border, #ebebeb);
+  }
+
+  // Código SKU como chip visual (igual ao escopo dos carrosséis)
+  .awa-b2b-sku {
+    align-self: flex-start;
+    max-width: 100%;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    margin-bottom: var(--awa-space-sm, 8px);
+    padding: 2px 7px;
+    border-radius: 3px;
+    background: var(--awa-bg-surface, #f0f0f0);
+    border: 1px solid var(--awa-border, #e8e8e8);
+    font-size: var(--awa-font-size-2xs, 10px);
+    color: var(--awa-text-muted, #777);
+    letter-spacing: 0.02em;
+    line-height: 1.4;
+
+    .awa-b2b-sku__label {
+      font-weight: var(--awa-weight-normal);
+      color: var(--awa-text-light, #999);
+    }
+
+    .awa-b2b-sku__value {
+      font-weight: var(--awa-weight-medium);
+      color: var(--awa-text-muted, #666);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 120px;
+    }
+  }
+
+  // Preço no grid: margem comprimida vs carrossel (grid é mais denso)
+  .info-price {
+    margin-bottom: var(--awa-space-xs, 4px);
+  }
+
+  // Price-box no grid: layout vertical com gap e old-price acima
+  .info-price .price-box {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+
+    .old-price {
+      order: -1;
+    }
+
+    // Preço promocional: cor primária
+    .special-price .price {
+      color: var(--awa-primary);
+    }
   }
 
   // Botão "Add to Cart"
@@ -666,10 +780,15 @@
     &:focus-visible { outline: 2px solid var(--awa-primary); outline-offset: 3px; }
   }
 
+  // Rating: compacto nos cards de grade
+  .product-rating {
+    margin-bottom: 4px;
+  }
+
   // Nome truncado em 2 linhas
   .product-name .product-item-link {
-    font-size: @awa-font-size-12;
-    font-weight: var(--awa-weight-medium);
+    font-size: @awa-font-size-13;
+    font-weight: var(--awa-weight-semi);
     color: var(--awa-text, #333);
     text-decoration: none;
     line-height: var(--awa-leading-snug, 1.35);
@@ -742,6 +861,29 @@
 @media (max-width: @awa-breakpoint-xs) {
   .catalog-category-view .products-grid,
   .catalogsearch-result-index .products-grid {
+
+    .product-thumb {
+      height: 130px;
+    }
+
+    .product-info {
+      padding: 8px 10px 10px;
+    }
+
+    .product-name .product-item-link {
+      font-size: @awa-font-size-11;
+    }
+
+    .actions-primary .btn-add-to-cart,
+    .actions-primary .action.tocart {
+      min-height: 38px;
+      font-size: @awa-font-size-11;
+    }
+  }
+
+  // 2 colunas já definidas acima — este bloco continua com os overrides
+  .catalog-category-view .products-grid,
+  .catalogsearch-result-index .products-grid {
     > ul.product-grid,
     > ul.container-products-switch {
       grid-template-columns: repeat(2, 1fr) !important;
@@ -769,8 +911,16 @@
       padding: var(--awa-space-sm, 8px) 10px 10px;
     }
 
+    .awa-b2b-sku {
+      max-width: calc(100% - 16px);
+
+      .awa-b2b-sku__value {
+        max-width: 80px;
+      }
+    }
+
     .product-name .product-item-link {
-      font-size: @awa-font-size-10;
+      font-size: @awa-font-size-11;
       min-height: calc(2 * 1.35em);
     }
 
