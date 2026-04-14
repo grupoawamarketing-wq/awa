@@ -1,22 +1,49 @@
 /* =============================================================================
  * awa-pdp-visual-fix.css
- * AWA Motos — Product Detail Page (PDP) — Correções Visuais
- * Carregado via catalog_product_view.xml order=1200 (após todos os bundles)
+ * AWA Motos — Product Detail Page (PDP) — Correcoes Visuais
+ * Carregado via catalog_product_view.xml order=1200 (apos todos os bundles)
  *
  * Problemas corrigidos:
  *  1. Input de quantidade duplicado/quebrado
- *  2. Botão "Faça login para ver preço" sem destaque visual
- *  3. Hierarquia fraca (título, SKU, CTA com mesmo peso)
- *  4. Espaçamentos inconsistentes (base 8px)
+ *  2. Botao "Faca login para ver preco" sem destaque visual
+ *  3. Hierarquia fraca (titulo, SKU, CTA com mesmo peso)
+ *  4. Espacamentos inconsistentes (base 8px)
  *  5. Tipografia irregular (tamanhos, line-height, legibilidade)
+ *  6. product-view display:grid 1fr 1fr com 1 filho -> view-product 50% da tela
  *
  * Override de:
+ *  - awa-bundle-refinements.css (.product-view display:grid !important)
  *  - awa-layout-standardization.css (b2b-login-to-see-price sutil)
- *  - _product-page.less → awa-bundle-refinements.css
+ *  - _product-page.less -> awa-bundle-refinements.css
  *  - styles-l.css (layout e tipografia)
  * =============================================================================
  */
 
+/* =============================================================================
+ * 0. CRITICAL LAYOUT FIX -- product-view grid override
+ *
+ * BUG: awa-bundle-refinements.css (e styles-m/l.css, themes.css) definem:
+ *   .catalog-product-view .product-view { display: grid; grid-template-columns: 1fr 1fr }
+ * Mas o HTML tem APENAS 1 filho direto em .product-view:
+ *   <div class="view-product"> (que contem tudo: galeria + info via .main-detail)
+ * Resultado: .view-product fica preso em 1 coluna (~50% da largura) e
+ *   .main-detail fica com ~668px em vez dos ~1168px que deveria ter.
+ * Fix: forcardisplay:block para que .view-product expanda para 100%.
+ * =============================================================================
+ */
+body.catalog-product-view .product-view {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+body.catalog-product-view .product-view > .view-product {
+    width: 100% !important;
+    max-width: 100% !important;
+    display: block !important;
+}
 
 /* =============================================================================
  * 1. QTY INPUT — Esconder duplicatas e normalizar visual
