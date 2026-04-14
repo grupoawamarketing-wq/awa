@@ -1,0 +1,555 @@
+/* =============================================================================
+ * awa-pdp-visual-fix.css
+ * AWA Motos — Product Detail Page (PDP) — Correções Visuais
+ * Carregado via catalog_product_view.xml order=1200 (após todos os bundles)
+ *
+ * Problemas corrigidos:
+ *  1. Input de quantidade duplicado/quebrado
+ *  2. Botão "Faça login para ver preço" sem destaque visual
+ *  3. Hierarquia fraca (título, SKU, CTA com mesmo peso)
+ *  4. Espaçamentos inconsistentes (base 8px)
+ *  5. Tipografia irregular (tamanhos, line-height, legibilidade)
+ *
+ * Override de:
+ *  - awa-layout-standardization.css (b2b-login-to-see-price sutil)
+ *  - _product-page.less → awa-bundle-refinements.css
+ *  - styles-l.css (layout e tipografia)
+ * =============================================================================
+ */
+
+
+/* =============================================================================
+ * 1. QTY INPUT — Esconder duplicatas e normalizar visual
+ *
+ * BUG: Rokanthemes/Magento podem renderizar dois pares label+input qty:
+ *   - O nativo do Magento (#qty via knockout.js)
+ *   - Um stepper customizado do tema acima do mesmo campo
+ * Fix: ocultar o segundo .field.qty se existir; estilizar o que permanece.
+ * ============================================================================= */
+
+/* Ocultar segundo input qty caso exista acima do principal */
+body.catalog-product-view .product-add-form .field.qty ~ .field.qty {
+    display: none !important;
+}
+
+/* Ocultar qualquer stepper externo fora do box-tocart */
+body.catalog-product-view .product-add-form > .field.qty,
+body.catalog-product-view .product-add-form > .qty-wrapper {
+    display: none !important;
+}
+
+/* Input qty: tamanho fixo e centrado */
+body.catalog-product-view .product-add-form .field.qty .input-text.qty,
+body.catalog-product-view .product-add-form #qty {
+    width: 64px !important;
+    height: 48px !important;
+    text-align: center !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    color: var(--awa-text, #333) !important;
+    border: 1.5px solid var(--awa-border, #d9d9d9) !important;
+    border-radius: 8px !important;
+    padding: 0 8px !important;
+    box-sizing: border-box !important;
+    background: #fff !important;
+    /* Remove setas nativas do <input type="number"> */
+    -moz-appearance: textfield !important;
+    appearance: textfield !important;
+}
+
+body.catalog-product-view .product-add-form .field.qty .input-text.qty::-webkit-outer-spin-button,
+body.catalog-product-view .product-add-form .field.qty .input-text.qty::-webkit-inner-spin-button,
+body.catalog-product-view .product-add-form #qty::-webkit-outer-spin-button,
+body.catalog-product-view .product-add-form #qty::-webkit-inner-spin-button {
+    -webkit-appearance: none !important;
+    margin: 0 !important;
+}
+
+/* Focus state com anel vermelho suave */
+body.catalog-product-view .product-add-form .field.qty .input-text.qty:focus,
+body.catalog-product-view .product-add-form #qty:focus {
+    border-color: var(--awa-primary, #b73337) !important;
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(183, 51, 55, 0.15) !important;
+}
+
+/* label qty: texto menor e neutro */
+body.catalog-product-view .product-add-form .field.qty .label {
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    color: var(--awa-text-muted, #888) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.06em !important;
+    margin-bottom: 4px !important;
+}
+
+/* Box-tocart fieldset: qty + botão lado a lado, alinhados na base */
+body.catalog-product-view .product-add-form .box-tocart .fieldset {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: flex-end !important;
+    gap: 8px !important;
+}
+
+body.catalog-product-view .product-add-form .box-tocart .field.qty {
+    flex: 0 0 auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+body.catalog-product-view .product-add-form .box-tocart .actions {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    display: flex !important;
+    align-items: stretch !important;
+}
+
+
+/* =============================================================================
+ * 2. BOTÃO "FAÇA LOGIN PARA VER PREÇO" — gerenciado em awa-layout-standardization.css
+ *
+ * A regra autoritativa está em awa-layout-standardization.css (seção PDP B2B),
+ * que é carregado assincronamente após os bundles e vence na cascata.
+ * Não duplicar aqui para evitar conflito de source-order.
+ * ============================================================================= */
+
+
+/* =============================================================================
+ * 3. HIERARQUIA VISUAL — Título, SKU, preço e CTA
+ *
+ * BUG: .page-title, .price-box e .action.tocart têm pesos visuais semelhantes.
+ * Fix: título dominante (H1 pesado), SKU discreto, preço em destaque, CTA sólido.
+ * ============================================================================= */
+
+/* 3a. Título do produto — H1 proeminente */
+body.catalog-product-view .product-info-main .page-title {
+    font-size: clamp(20px, 3vw, 28px) !important;
+    font-weight: 700 !important;
+    line-height: 1.2 !important;
+    color: var(--awa-text, #1a1a1a) !important;
+    margin-top: 0 !important;
+    margin-bottom: 8px !important;
+    letter-spacing: -0.01em !important;
+}
+
+body.catalog-product-view .product-info-main .page-title .base {
+    font-size: inherit !important;
+    font-weight: inherit !important;
+    color: inherit !important;
+}
+
+/* 3b. SKU — código discreto, abaixo do título */
+body.catalog-product-view .product-info-main .product.attribute.sku {
+    display: flex !important;
+    align-items: baseline !important;
+    gap: 4px !important;
+    font-size: 12px !important;
+    color: var(--awa-text-muted, #888) !important;
+    margin-bottom: 16px !important;
+    margin-top: 0 !important;
+    line-height: 1.5 !important;
+}
+
+body.catalog-product-view .product-info-main .product.attribute.sku .type,
+body.catalog-product-view .product-info-main .product.attribute.sku .value {
+    font-size: 12px !important;
+    color: var(--awa-text-muted, #888) !important;
+    font-weight: 400 !important;
+}
+
+/* 3c. Seção de preço — separação da info acima */
+body.catalog-product-view .product-info-main .product-info-price {
+    margin-bottom: 16px !important;
+    padding-bottom: 16px !important;
+    border-bottom: 1px solid var(--awa-border, #e5e5e5) !important;
+}
+
+/* 3d. Seção de formulário — separação clara do preço */
+body.catalog-product-view .product-info-main .product-add-form {
+    margin-top: 16px !important;
+}
+
+/* 3e. Botão "Adicionar ao Carrinho" — CTA principal */
+body.catalog-product-view .product-add-form .box-tocart .action.tocart,
+body.catalog-product-view #product-addtocart-button {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    height: 52px !important;
+    background: var(--awa-primary, #b73337) !important;
+    color: #fff !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.04em !important;
+    text-transform: uppercase !important;
+    border: none !important;
+    border-radius: var(--awa-radius-lg, 16px) !important;
+    padding: 0 24px !important;
+    box-sizing: border-box !important;
+    cursor: pointer !important;
+    transition: background 0.18s ease,
+                transform 0.12s ease,
+                box-shadow 0.18s ease !important;
+    box-shadow: 0 2px 8px rgba(183, 51, 55, 0.25) !important;
+}
+
+body.catalog-product-view .product-add-form .box-tocart .action.tocart:hover:not(:disabled),
+body.catalog-product-view #product-addtocart-button:hover:not(:disabled) {
+    background: var(--awa-primary-hover, #8e2629) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 16px rgba(183, 51, 55, 0.40) !important;
+}
+
+body.catalog-product-view .product-add-form .box-tocart .action.tocart:active:not(:disabled),
+body.catalog-product-view #product-addtocart-button:active:not(:disabled) {
+    transform: translateY(0) !important;
+    box-shadow: 0 1px 4px rgba(183, 51, 55, 0.15) !important;
+}
+
+body.catalog-product-view .product-add-form .box-tocart .action.tocart:focus-visible,
+body.catalog-product-view #product-addtocart-button:focus-visible {
+    outline: 2px solid var(--awa-primary, #b73337) !important;
+    outline-offset: 3px !important;
+}
+
+body.catalog-product-view .product-add-form .box-tocart .action.tocart:disabled,
+body.catalog-product-view #product-addtocart-button:disabled {
+    opacity: 0.55 !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+
+/* =============================================================================
+ * 4. LAYOUT — Alinhamento imagem vs info, espaçamento base 8px
+ *
+ * A divisão 50/50 já é gerenciada por awa-improvements-grid.css.
+ * Aqui: padding interno da coluna de info e ritmo vertical.
+ * ============================================================================= */
+
+/* Coluna de info: padding interno em desktop */
+@media (min-width: 768px) {
+    body.catalog-product-view .product-info-main {
+        padding-left: 32px !important;
+        padding-top: 0 !important;
+    }
+}
+
+/* Mobile: empilha coluna de info abaixo da imagem */
+@media (max-width: 767px) {
+    body.catalog-product-view .product-info-main {
+        padding-left: 0 !important;
+        padding-top: 16px !important;
+    }
+
+    body.catalog-product-view .main-detail > .row > .col-md-6 {
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
+    }
+}
+
+/* main-detail: ritmo vertical da seção principal */
+body.catalog-product-view .main-detail {
+    padding-top: 16px !important;
+    padding-bottom: 16px !important;
+}
+
+/* Breadcrumb: menos espaço antes do produto */
+body.catalog-product-view .breadcrumbs {
+    margin-bottom: 8px !important;
+}
+
+/* Galeria: remover borda fantasma */
+body.catalog-product-view .product.media {
+    padding: 0 !important;
+}
+
+/* Separação entre seção principal e tabs */
+body.catalog-product-view .awa-pdp-tabs {
+    margin-top: 24px !important;
+}
+
+
+/* =============================================================================
+ * 5. TIPOGRAFIA — Padronização de tamanhos, line-height e legibilidade
+ * ============================================================================= */
+
+/* Preço: destaque numérico forte */
+body.catalog-product-view .product-info-main .price-box .price {
+    font-size: clamp(22px, 3vw, 28px) !important;
+    font-weight: 700 !important;
+    color: var(--awa-text, #1a1a1a) !important;
+    line-height: 1.2 !important;
+}
+
+/* Label de preço ("A partir de", "Regular Price") */
+body.catalog-product-view .product-info-main .price-box .price-label {
+    font-size: 12px !important;
+    color: var(--awa-text-muted, #888) !important;
+    font-weight: 400 !important;
+    display: block !important;
+    margin-bottom: 2px !important;
+}
+
+/* Preço especial / antigo */
+body.catalog-product-view .product-info-main .price-box .old-price .price {
+    font-size: 16px !important;
+    font-weight: 400 !important;
+    color: var(--awa-text-muted, #888) !important;
+    text-decoration: line-through !important;
+}
+
+/* Disponibilidade em estoque */
+body.catalog-product-view .product-info-main .stock.available > span,
+body.catalog-product-view .product-info-main .stock.unavailable > span {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+}
+
+body.catalog-product-view .product-info-main .stock.available > span {
+    color: #2d7a3a !important; /* verde: in stock */
+}
+
+body.catalog-product-view .product-info-main .stock.unavailable > span {
+    color: var(--awa-primary, #b73337) !important;
+}
+
+/* Descrição curta */
+body.catalog-product-view .product.attribute.short-description .value,
+body.catalog-product-view .product.attribute.description .value {
+    font-size: 14px !important;
+    line-height: 1.65 !important;
+    color: var(--awa-text-secondary, #555) !important;
+    margin-bottom: 16px !important;
+}
+
+/* Títulos das tabs — todos */
+body.catalog-product-view .product.info.detailed .data.item.title,
+body.catalog-product-view .awa-pdp-tabs .tab-title {
+    border-bottom: 2px solid transparent !important;
+    cursor: pointer !important;
+}
+
+body.catalog-product-view .product.info.detailed .data.item.title a,
+body.catalog-product-view .awa-pdp-tabs .tab-title {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.01em !important;
+    color: var(--awa-text-muted, #888) !important;
+    text-decoration: none !important;
+    transition: color 0.15s ease !important;
+    display: block !important;
+    padding-bottom: 10px !important;
+}
+
+/* Tab ativa — indicador vermelho na base */
+body.catalog-product-view .product.info.detailed .data.item.title.active,
+body.catalog-product-view .product.info.detailed .data.item.title._active {
+    border-bottom-color: var(--awa-primary, #b73337) !important;
+}
+
+body.catalog-product-view .product.info.detailed .data.item.title.active a,
+body.catalog-product-view .product.info.detailed .data.item.title._active a {
+    color: var(--awa-text, #1a1a1a) !important;
+}
+
+/* Hover nas tabs inativas */
+body.catalog-product-view .product.info.detailed .data.item.title:not(.active):not(._active) a:hover {
+    color: var(--awa-primary, #b73337) !important;
+}
+
+/* Painel das tabs — separação e espaçamento */
+body.catalog-product-view .product.info.detailed .data.item.content {
+    border-top: 1px solid var(--awa-border, #e5e5e5) !important;
+    padding: 20px 0 !important;
+    background: transparent !important;
+}
+
+/* Conteúdo das tabs */
+body.catalog-product-view .product.info.detailed .data.item.content,
+body.catalog-product-view .product.info.detailed .data.item.content p {
+    font-size: 14px !important;
+    line-height: 1.65 !important;
+    color: var(--awa-text-secondary, #555) !important;
+}
+
+/* Tabela de especificações (atributos) */
+body.catalog-product-view .additional-attributes td,
+body.catalog-product-view .additional-attributes th {
+    font-size: 13px !important;
+    line-height: 1.55 !important;
+    padding: 8px 12px !important;
+}
+
+body.catalog-product-view .additional-attributes th.col.label {
+    font-weight: 600 !important;
+    color: var(--awa-text, #333) !important;
+}
+
+body.catalog-product-view .additional-attributes td.col.data {
+    color: var(--awa-text-secondary, #555) !important;
+}
+
+/* Links dentro do conteúdo do produto */
+body.catalog-product-view .product-info-main a:not(.action),
+body.catalog-product-view .product.info.detailed a {
+    color: var(--awa-primary, #b73337) !important;
+    text-decoration: underline !important;
+    text-decoration-color: rgba(183, 51, 55, 0.4) !important;
+}
+
+body.catalog-product-view .product-info-main a:not(.action):hover,
+body.catalog-product-view .product.info.detailed a:hover {
+    text-decoration-color: var(--awa-primary, #b73337) !important;
+}
+
+
+/* =============================================================================
+ * 6. REVIEWS — Avaliações do produto
+ *
+ * Nenhum arquivo do child theme cobre esta seção; Ayo/Magento core deixa
+ * estilos de fallback muito crus. Aqui padronizamos tipografia, ritmo e
+ * o botão "Adicionar Avaliação".
+ * ============================================================================= */
+
+/* Resumo de avaliações (estrelas + contador) acima do título */
+body.catalog-product-view .product-reviews-summary {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin-bottom: 12px !important;
+    margin-top: 4px !important;
+}
+
+body.catalog-product-view .product-reviews-summary .reviews-actions {
+    font-size: 12px !important;
+    color: var(--awa-text-muted, #888) !important;
+}
+
+body.catalog-product-view .product-reviews-summary .reviews-actions a {
+    color: var(--awa-primary, #b73337) !important;
+    text-decoration: underline !important;
+    text-decoration-color: rgba(183, 51, 55, 0.35) !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+}
+
+body.catalog-product-view .product-reviews-summary .reviews-actions a:hover {
+    text-decoration-color: var(--awa-primary, #b73337) !important;
+}
+
+/* Lista de avaliações */
+body.catalog-product-view .review-list {
+    margin-top: 8px !important;
+}
+
+body.catalog-product-view .review-list .review-item {
+    padding: 16px 0 !important;
+    border-bottom: 1px solid var(--awa-border, #e5e5e5) !important;
+}
+
+body.catalog-product-view .review-list .review-item:last-child {
+    border-bottom: none !important;
+}
+
+/* Cabeçalho do review: rating + título + autor */
+body.catalog-product-view .review-list .review-title {
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    color: var(--awa-text, #1a1a1a) !important;
+    margin-bottom: 4px !important;
+    line-height: 1.3 !important;
+}
+
+body.catalog-product-view .review-list .review-ratings {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin-bottom: 8px !important;
+}
+
+body.catalog-product-view .review-list .review-ratings .rating-label {
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    color: var(--awa-text-muted, #888) !important;
+}
+
+/* Texto da avaliação */
+body.catalog-product-view .review-list .review-content,
+body.catalog-product-view .review-list .review-content p {
+    font-size: 14px !important;
+    line-height: 1.65 !important;
+    color: var(--awa-text-secondary, #555) !important;
+    margin-bottom: 0 !important;
+}
+
+/* Autor e data */
+body.catalog-product-view .review-list .review-author,
+body.catalog-product-view .review-list .review-date {
+    font-size: 12px !important;
+    color: var(--awa-text-muted, #888) !important;
+    margin-top: 8px !important;
+}
+
+/* Botão "Adicionar Avaliação" — ghost/outline estilo da marca */
+body.catalog-product-view .block.review-add .action.submit,
+body.catalog-product-view .reviews-actions .action.add,
+body.catalog-product-view a.action.add[href*="review"] {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 40px !important;
+    padding: 0 20px !important;
+    background: transparent !important;
+    color: var(--awa-primary, #b73337) !important;
+    border: 1.5px solid var(--awa-primary, #b73337) !important;
+    border-radius: 8px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
+    transition: background 0.15s ease, color 0.15s ease !important;
+}
+
+body.catalog-product-view .block.review-add .action.submit:hover,
+body.catalog-product-view .reviews-actions .action.add:hover,
+body.catalog-product-view a.action.add[href*="review"]:hover {
+    background: var(--awa-primary, #b73337) !important;
+    color: #fff !important;
+}
+
+/* Formulário de nova avaliação: inputs padronizados */
+body.catalog-product-view .block.review-add .field .label {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: var(--awa-text-muted, #888) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    margin-bottom: 4px !important;
+}
+
+body.catalog-product-view .block.review-add .field input[type="text"],
+body.catalog-product-view .block.review-add .field textarea {
+    border: 1.5px solid var(--awa-border, #d9d9d9) !important;
+    border-radius: 8px !important;
+    font-size: 14px !important;
+    color: var(--awa-text, #333) !important;
+    padding: 10px 12px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+body.catalog-product-view .block.review-add .field input[type="text"]:focus,
+body.catalog-product-view .block.review-add .field textarea:focus {
+    border-color: var(--awa-primary, #b73337) !important;
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(183, 51, 55, 0.12) !important;
+}
