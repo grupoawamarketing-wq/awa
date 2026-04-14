@@ -8,9 +8,11 @@ use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Api\GroupRepositoryInterface;
 use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Framework\Api\SearchCriteriaBuilder;
+use Magento\Framework\Api\SortOrderBuilder;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Encryption\EncryptorInterface;
+use Magento\Framework\Stdlib\CookieManagerInterface;
 use Magento\Framework\View\Element\Block\ArgumentInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Store\Model\ScopeInterface;
@@ -32,6 +34,8 @@ class ChatWidget implements ArgumentInterface
         private readonly GroupRepositoryInterface $groupRepository,
         private readonly OrderRepositoryInterface $orderRepository,
         private readonly SearchCriteriaBuilder $searchCriteriaBuilder,
+        private readonly SortOrderBuilder $sortOrderBuilder,
+        private readonly CookieManagerInterface $cookieManager,
         private readonly EncryptorInterface $encryptor,
         private readonly ResourceConnection $resourceConnection,
         private readonly LoggerInterface $logger
@@ -114,6 +118,10 @@ class ChatWidget implements ArgumentInterface
      */
     public function getIdentifierHash(): string
     {
+        if (!$this->shouldIdentifyCustomer() || !$this->isCustomerLoggedIn()) {
+            return '';
+        }
+
         $hmacToken = $this->getHmacToken();
         if ($hmacToken === '') {
             return '';
@@ -191,17 +199,29 @@ class ChatWidget implements ArgumentInterface
 
     public function isCustomerLoggedIn(): bool
     {
+        if (!$this->hasCustomerSessionCookie()) {
+            return false;
+        }
+
         return $this->customerSession->isLoggedIn();
     }
 
     public function getCustomerName(): string
     {
+        if (!$this->isCustomerLoggedIn()) {
+            return '';
+        }
+
         $customer = $this->customerSession->getCustomer();
         return $customer ? (string) $customer->getName() : '';
     }
 
     public function getCustomerEmail(): string
     {
+        if (!$this->isCustomerLoggedIn()) {
+            return '';
+        }
+
         $customer = $this->customerSession->getCustomer();
         return $customer ? (string) $customer->getEmail() : '';
     }
@@ -295,6 +315,8 @@ class ChatWidget implements ArgumentInterface
             return [];
         }
 
+        $customerId = 0;
+
         try {
             $customerId = (int) $this->customerSession->getCustomerId();
             $connection = $this->resourceConnection->getConnection();
@@ -336,11 +358,16 @@ class ChatWidget implements ArgumentInterface
             return $data;
         } catch (\Exception $e) {
             $this->logger->error('Chatwoot ERP data error', [
-                'customer_id' => $this->customerSession->getCustomerId(),
+                'customer_id' => $customerId,
                 'error' => $e->getMessage(),
             ]);
             return [];
         }
+    }
+
+    private function hasCustomerSessionCookie(): bool
+    {
+        return $this->cookieManager->getCookie(session_name()) !== null;
     }
 
     /**
@@ -374,12 +401,11 @@ class ChatWidget implements ArgumentInterface
                 ->setCurrentPage(1)
                 ->create();
 
-            $searchCriteria->setSortOrders([
-                new \Magento\Framework\Api\SortOrder([
-                    'field' => 'created_at',
-                    'direction' => 'DESC',
-                ]),
-            ]);
+            $sortOrder = $this->sortOrderBuilder
+                ->setField('created_at')
+                ->setDescendingDirection()
+                ->create();
+            $searchCriteria->setSortOrders([$sortOrder]);
 
             $orders = $this->orderRepository->getList($searchCriteria);
             $items = $orders->getItems();

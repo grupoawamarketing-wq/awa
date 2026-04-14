@@ -10,6 +10,7 @@ use Magento\Framework\App\CsrfAwareActionInterface;
 use Magento\Framework\App\Request\Http as HttpRequest;
 use Magento\Framework\App\Request\InvalidRequestException;
 use Magento\Framework\App\RequestInterface;
+use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Encryption\EncryptorInterface;
@@ -24,7 +25,8 @@ class Receive implements HttpPostActionInterface, CsrfAwareActionInterface
         private readonly JsonFactory $jsonFactory,
         private readonly ScopeConfigInterface $scopeConfig,
         private readonly EncryptorInterface $encryptor,
-        private readonly LoggerInterface $logger
+        private readonly LoggerInterface $logger,
+        private readonly ResourceConnection $resource
     ) {
     }
 
@@ -65,8 +67,10 @@ class Receive implements HttpPostActionInterface, CsrfAwareActionInterface
     {
         $secretToken = $this->getWebhookToken();
         if ($secretToken === '') {
-            // Token não configurado — modo permissivo (configure o token para produção)
-            return true;
+            $this->logger->critical('Chatwoot webhook: secret_token não configurado — request bloqueado por segurança', [
+                'ip' => $this->request->getClientIp(true),
+            ]);
+            return false;
         }
 
         $signatureHeader = (string) $this->request->getServer('HTTP_X_CHATWOOT_SIGNATURE', '');
@@ -132,6 +136,13 @@ class Receive implements HttpPostActionInterface, CsrfAwareActionInterface
         $logContext['inbox_id']      = $payload['inbox_id'] ?? null;
 
         $this->logger->info('Chatwoot: nova conversa iniciada', $logContext);
+
+        $this->logConversationEvent(
+            'conversation_created',
+            (int) ($payload['id'] ?? 0),
+            $contact['email'] ?? null,
+            null
+        );
     }
 
     private function onConversationStatusChanged(array $payload, array $logContext): void
@@ -171,6 +182,13 @@ class Receive implements HttpPostActionInterface, CsrfAwareActionInterface
         $logContext['updated_at']    = $payload['updated_at'] ?? null;
 
         $this->logger->info('Chatwoot: conversa resolvida', $logContext);
+
+        $this->logConversationEvent(
+            'resolved',
+            (int) ($payload['id'] ?? 0),
+            $contact['email'] ?? null,
+            $payload['meta']['assignee']['name'] ?? null
+        );
     }
 
     private function onMessageCreated(array $payload, array $logContext): void
@@ -187,5 +205,73 @@ class Receive implements HttpPostActionInterface, CsrfAwareActionInterface
         $logContext['message_preview'] = mb_substr((string) ($payload['content'] ?? ''), 0, 100);
 
         $this->logger->debug('Chatwoot: mensagem enviada por agente', $logContext);
+    }
+
+    /**
+     * Registra evento de conversa no log de atendentes B2B.
+     *
+     * Vincula email do contato Chatwoot ao customer/attendant do Magento.
+     */
+    private function logConversationEvent(
+        string $action,
+        int $conversationId,
+        ?string $contactEmail,
+        ?string $agentName
+    ): void {
+        if ($conversationId === 0) {
+            return;
+        }
+
+        try {
+            $connection = $this->resource->getConnection();
+            $logTable = $this->resource->getTableName('grupoawamotos_b2b_attendant_log');
+
+            if (!$connection->isTableExists($logTable)) {
+                return;
+            }
+
+            $attendantId = null;
+            $customerId = null;
+
+            if ($contactEmail !== null && $contactEmail !== '') {
+                $customerId = (int) $connection->fetchOne(
+                    $connection->select()
+                        ->from($this->resource->getTableName('customer_entity'), ['entity_id'])
+                        ->where('email = ?', $contactEmail)
+                        ->limit(1)
+                );
+
+                if ($customerId > 0) {
+                    $attendantId = (int) $connection->fetchOne(
+                        $connection->select()
+                            ->from(
+                                $this->resource->getTableName('grupoawamotos_b2b_customer_attendant'),
+                                ['attendant_id']
+                            )
+                            ->where('customer_id = ?', $customerId)
+                            ->limit(1)
+                    );
+                    $attendantId = $attendantId > 0 ? $attendantId : null;
+                } else {
+                    $customerId = null;
+                }
+            }
+
+            $connection->insert($logTable, [
+                'attendant_id' => $attendantId,
+                'customer_id'  => $customerId,
+                'action'       => 'chatwoot_' . $action,
+                'details'      => json_encode([
+                    'conversation_id' => $conversationId,
+                    'contact_email'   => $contactEmail,
+                    'agent_name'      => $agentName,
+                ]),
+                'created_at'   => (new \DateTime())->format('Y-m-d H:i:s'),
+            ]);
+        } catch (\Throwable $e) {
+            $this->logger->warning('Chatwoot webhook: erro ao gravar log de atendente', [
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 }
