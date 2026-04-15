@@ -1,0 +1,109 @@
+<?php
+/** @var \GrupoAwamotos\WhatsAppCommerce\Block\Adminhtml\Dashboard $block */
+$health = $block->getHealthData();
+$notifications = $block->getNotificationConfig();
+?>
+<div class="whatsapp-dashboard" style="max-width: 900px;">
+    <h2 style="margin-bottom: 20px;">WhatsApp Commerce &mdash; Dashboard</h2>
+
+    <div class="admin__fieldset" style="margin-bottom: 30px;">
+        <h3>Health Check</h3>
+        <table class="admin__table-primary">
+            <thead>
+                <tr>
+                    <th><?= $block->escapeHtml(__('Componente')) ?></th>
+                    <th><?= $block->escapeHtml(__('Status')) ?></th>
+                    <th><?= $block->escapeHtml(__('Detalhe')) ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($health['checks'] as $name => $check): ?>
+                <tr>
+                    <td><strong><?= $block->escapeHtml($name) ?></strong></td>
+                    <td>
+                        <?php if ($check['status'] === 'ok'): ?>
+                            <span style="color: #2ecc71;">OK</span>
+                        <?php elseif ($check['status'] === 'warning'): ?>
+                            <span style="color: #f39c12;">Warning</span>
+                        <?php elseif ($check['status'] === 'info'): ?>
+                            <span style="color: #3498db;">Info</span>
+                        <?php else: ?>
+                            <span style="color: #e74c3c;">Error</span>
+                        <?php endif; ?>
+                    </td>
+                    <td><?= $block->escapeHtml($check['message']) ?></td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+        <p style="margin-top: 10px;">
+            <strong><?= $block->escapeHtml(__('Status geral:')) ?></strong>
+            <?php if ($health['healthy']): ?>
+                <span style="color: #2ecc71; font-weight: bold;"><?= $block->escapeHtml(__('Operacional')) ?></span>
+            <?php else: ?>
+                <span style="color: #e74c3c; font-weight: bold;"><?= $block->escapeHtml(__('Problemas detectados')) ?></span>
+            <?php endif; ?>
+            &mdash;
+            <small><?= $block->escapeHtml($health['timestamp']) ?></small>
+        </p>
+    </div>
+
+    <div class="admin__fieldset" style="margin-bottom: 30px;">
+        <h3><?= $block->escapeHtml(__('Notificacoes Ativas')) ?></h3>
+        <table class="admin__table-primary">
+            <thead>
+                <tr>
+                    <th><?= $block->escapeHtml(__('Evento')) ?></th>
+                    <th><?= $block->escapeHtml(__('Status')) ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                $labels = [
+                    'order_placed' => 'Pedido Confirmado',
+                    'order_paid' => 'Pagamento Aprovado',
+                    'order_shipped' => 'Pedido Enviado',
+                    'order_refunded' => 'Reembolso Processado',
+                ];
+                foreach ($notifications as $key => $enabled): ?>
+                <tr>
+                    <td><?= $block->escapeHtml($labels[$key] ?? $key) ?></td>
+                    <td>
+                        <?php if ($enabled): ?>
+                            <span style="color: #2ecc71;"><?= $block->escapeHtml(__('Ativo')) ?></span>
+                        <?php else: ?>
+                            <span style="color: #95a5a6;"><?= $block->escapeHtml(__('Desativado')) ?></span>
+                        <?php endif; ?>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+
+    <?php if (isset($health['checks']['optin_stats']['data'])): ?>
+    <?php $stats = $health['checks']['optin_stats']['data']; ?>
+    <div class="admin__fieldset">
+        <h3><?= $block->escapeHtml(__('Opt-in LGPD')) ?></h3>
+        <div style="display: flex; gap: 20px;">
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center; flex: 1;">
+                <div style="font-size: 32px; font-weight: bold; color: #2ecc71;"><?= (int) $stats['opted_in'] ?></div>
+                <div style="color: #666;"><?= $block->escapeHtml(__('Clientes Opt-in')) ?></div>
+            </div>
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center; flex: 1;">
+                <div style="font-size: 32px; font-weight: bold; color: #3498db;"><?= (int) $stats['total_records'] ?></div>
+                <div style="color: #666;"><?= $block->escapeHtml(__('Registros de Consentimento')) ?></div>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
+
+    <div style="margin-top: 20px; padding: 15px; background: #f0f0f0; border-radius: 6px;">
+        <strong>CLI:</strong>
+        <code>bin/magento awa:whatsapp:health</code> &mdash; Health check via terminal<br/>
+        <strong>CLI:</strong>
+        <code>bin/magento awa:whatsapp:test-send 5516991234567</code> &mdash; Mensagem de teste<br/>
+        <strong>API:</strong>
+        <code>GET /V1/awa-whatsapp/health</code> &mdash; Health check via REST
+    </div>
+</div>

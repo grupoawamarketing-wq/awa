@@ -2,6 +2,8 @@
 <routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
 
+    <!-- ==================== Catalog ==================== -->
+
     <route url="/V1/awa-whatsapp/catalog/search" method="GET">
         <service class="GrupoAwamotos\WhatsAppCommerce\Api\CatalogInterface" method="search"/>
         <resources><resource ref="GrupoAwamotos_WhatsAppCommerce::api"/></resources>
@@ -27,6 +29,8 @@
         <resources><resource ref="GrupoAwamotos_WhatsAppCommerce::api"/></resources>
     </route>
 
+    <!-- ==================== Cart ==================== -->
+
     <route url="/V1/awa-whatsapp/cart/create" method="POST">
         <service class="GrupoAwamotos\WhatsAppCommerce\Api\CartInterface" method="createCart"/>
         <resources><resource ref="GrupoAwamotos_WhatsAppCommerce::api"/></resources>
@@ -47,15 +51,21 @@
         <resources><resource ref="GrupoAwamotos_WhatsAppCommerce::api"/></resources>
     </route>
 
+    <!-- ==================== Tracking ==================== -->
+
     <route url="/V1/awa-whatsapp/tracking/:phone" method="GET">
         <service class="GrupoAwamotos\WhatsAppCommerce\Api\TrackingInterface" method="getOrders"/>
         <resources><resource ref="GrupoAwamotos_WhatsAppCommerce::api"/></resources>
     </route>
 
+    <!-- ==================== Attendant ==================== -->
+
     <route url="/V1/awa-whatsapp/attendant/:phone" method="GET">
         <service class="GrupoAwamotos\WhatsAppCommerce\Api\AttendantInterface" method="getByPhone"/>
         <resources><resource ref="GrupoAwamotos_WhatsAppCommerce::api"/></resources>
     </route>
+
+    <!-- ==================== Opt-in (LGPD) ==================== -->
 
     <route url="/V1/awa-whatsapp/optin/:phone" method="GET">
         <service class="GrupoAwamotos\WhatsAppCommerce\Api\OptinInterface" method="getOptin"/>
@@ -67,63 +77,113 @@
         <resources><resource ref="GrupoAwamotos_WhatsAppCommerce::api"/></resources>
     </route>
 
-    <!-- B2B Registration: Validate CNPJ -->
+    <!-- ==================== B2B Registration (Fase 4.1) ==================== -->
+
     <route url="/V1/awa-whatsapp/b2b/validate-cnpj/:cnpj" method="GET">
         <service class="GrupoAwamotos\WhatsAppCommerce\Api\B2BRegistrationInterface" method="validateCnpj"/>
         <resources><resource ref="GrupoAwamotos_WhatsAppCommerce::api"/></resources>
     </route>
 
-    <!-- B2B Registration: Register lead -->
     <route url="/V1/awa-whatsapp/b2b/register" method="POST">
         <service class="GrupoAwamotos\WhatsAppCommerce\Api\B2BRegistrationInterface" method="register"/>
         <resources><resource ref="GrupoAwamotos_WhatsAppCommerce::api"/></resources>
     </route>
 
-    <!-- B2B Registration: Check status -->
     <route url="/V1/awa-whatsapp/b2b/status/:identifier" method="GET">
         <service class="GrupoAwamotos\WhatsAppCommerce\Api\B2BRegistrationInterface" method="checkStatus"/>
         <resources><resource ref="GrupoAwamotos_WhatsAppCommerce::api"/></resources>
     </route>
 
-    <!-- B2B Quote: Submit -->
+    <!-- ==================== B2B Quote (Fase 4.2) ==================== -->
+
     <route url="/V1/awa-whatsapp/b2b/quote/submit" method="POST">
         <service class="GrupoAwamotos\WhatsAppCommerce\Api\B2BQuoteInterface" method="submitQuote"/>
         <resources><resource ref="GrupoAwamotos_WhatsAppCommerce::api"/></resources>
     </route>
 
-    <!-- B2B Quote: List by phone -->
     <route url="/V1/awa-whatsapp/b2b/quotes/:phone" method="GET">
         <service class="GrupoAwamotos\WhatsAppCommerce\Api\B2BQuoteInterface" method="getQuotes"/>
         <resources><resource ref="GrupoAwamotos_WhatsAppCommerce::api"/></resources>
     </route>
 
-    <!-- B2B Quote: Detail -->
     <route url="/V1/awa-whatsapp/b2b/quote/:requestId/:phone" method="GET">
         <service class="GrupoAwamotos\WhatsAppCommerce\Api\B2BQuoteInterface" method="getQuoteDetail"/>
         <resources><resource ref="GrupoAwamotos_WhatsAppCommerce::api"/></resources>
     </route>
 
-    <!-- B2B Quote: Accept -->
     <route url="/V1/awa-whatsapp/b2b/quote/accept" method="POST">
         <service class="GrupoAwamotos\WhatsAppCommerce\Api\B2BQuoteInterface" method="acceptQuote"/>
         <resources><resource ref="GrupoAwamotos_WhatsAppCommerce::api"/></resources>
     </route>
 
-    <!-- B2B Reorder: List orders -->
+    <!-- ==================== B2B Reorder (Fase 4.3) ==================== -->
+
     <route url="/V1/awa-whatsapp/b2b/reorder/list/:phone" method="GET">
         <service class="GrupoAwamotos\WhatsAppCommerce\Api\B2BReorderInterface" method="getReorderableOrders"/>
         <resources><resource ref="GrupoAwamotos_WhatsAppCommerce::api"/></resources>
     </route>
 
-    <!-- B2B Reorder: Specific order -->
     <route url="/V1/awa-whatsapp/b2b/reorder/:phone/:orderIncrementId" method="POST">
         <service class="GrupoAwamotos\WhatsAppCommerce\Api\B2BReorderInterface" method="reorderByOrderId"/>
         <resources><resource ref="GrupoAwamotos_WhatsAppCommerce::api"/></resources>
     </route>
 
-    <!-- B2B Reorder: Last order -->
     <route url="/V1/awa-whatsapp/b2b/reorder-last/:phone" method="POST">
         <service class="GrupoAwamotos\WhatsAppCommerce\Api\B2BReorderInterface" method="reorderLast"/>
         <resources><resource ref="GrupoAwamotos_WhatsAppCommerce::api"/></resources>
     </route>
+
+    <!-- ==================== Review (Fase 6.2) ==================== -->
+
+    <route url="/V1/awa-whatsapp/review" method="POST">
+        <service class="GrupoAwamotos\WhatsAppCommerce\Api\ReviewInterface" method="saveReview"/>
+        <resources><resource ref="GrupoAwamotos_WhatsAppCommerce::api"/></resources>
+    </route>
+
+    <!-- ==================== Campaign (Fase 3.4 / 6) ==================== -->
+
+    <route url="/V1/awa-whatsapp/campaign/broadcast" method="POST">
+        <service class="GrupoAwamotos\WhatsAppCommerce\Api\CampaignInterface" method="sendBroadcast"/>
+        <resources><resource ref="GrupoAwamotos_WhatsAppCommerce::api"/></resources>
+    </route>
+
+    <route url="/V1/awa-whatsapp/campaign/segments" method="GET">
+        <service class="GrupoAwamotos\WhatsAppCommerce\Api\CampaignInterface" method="getSegmentStats"/>
+        <resources><resource ref="GrupoAwamotos_WhatsAppCommerce::api"/></resources>
+    </route>
+
+    <!-- ==================== Admin Dashboard (Fase 5.4) ==================== -->
+
+    <route url="/V1/awa-whatsapp/admin/sales-today" method="GET">
+        <service class="GrupoAwamotos\WhatsAppCommerce\Api\AdminDashboardInterface" method="salesToday"/>
+        <resources><resource ref="GrupoAwamotos_WhatsAppCommerce::api"/></resources>
+    </route>
+
+    <route url="/V1/awa-whatsapp/admin/stock/:sku" method="GET">
+        <service class="GrupoAwamotos\WhatsAppCommerce\Api\AdminDashboardInterface" method="stockCheck"/>
+        <resources><resource ref="GrupoAwamotos_WhatsAppCommerce::api"/></resources>
+    </route>
+
+    <route url="/V1/awa-whatsapp/admin/new-customers" method="GET">
+        <service class="GrupoAwamotos\WhatsAppCommerce\Api\AdminDashboardInterface" method="newCustomers"/>
+        <resources><resource ref="GrupoAwamotos_WhatsAppCommerce::api"/></resources>
+    </route>
+
+    <route url="/V1/awa-whatsapp/admin/order/:incrementId" method="GET">
+        <service class="GrupoAwamotos\WhatsAppCommerce\Api\AdminDashboardInterface" method="orderDetail"/>
+        <resources><resource ref="GrupoAwamotos_WhatsAppCommerce::api"/></resources>
+    </route>
+
+    <route url="/V1/awa-whatsapp/admin/top-selling" method="GET">
+        <service class="GrupoAwamotos\WhatsAppCommerce\Api\AdminDashboardInterface" method="topSelling"/>
+        <resources><resource ref="GrupoAwamotos_WhatsAppCommerce::api"/></resources>
+    </route>
+
+    <!-- ==================== Health Check (Fase 5) ==================== -->
+
+    <route url="/V1/awa-whatsapp/health" method="GET">
+        <service class="GrupoAwamotos\WhatsAppCommerce\Api\HealthCheckInterface" method="check"/>
+        <resources><resource ref="GrupoAwamotos_WhatsAppCommerce::api"/></resources>
+    </route>
+
 </routes>

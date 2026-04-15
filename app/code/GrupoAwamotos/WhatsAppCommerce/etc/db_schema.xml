@@ -24,4 +24,55 @@
                     referenceTable="customer_entity" referenceColumn="entity_id"
                     onDelete="CASCADE"/>
     </table>
+
+    <!-- Phase 6: Review Request tracking -->
+    <table name="awa_whatsapp_review_request_log" resource="default" engine="innodb" comment="WhatsApp Review Request Log">
+        <column xsi:type="int" name="log_id" unsigned="true" nullable="false" identity="true" comment="Log ID"/>
+        <column xsi:type="int" name="order_id" unsigned="true" nullable="false" comment="Order ID"/>
+        <column xsi:type="int" name="customer_id" unsigned="true" nullable="false" comment="Customer ID"/>
+        <column xsi:type="timestamp" name="sent_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Sent At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="log_id"/>
+        </constraint>
+        <index referenceId="AWA_WPP_REVIEW_REQ_ORDER" indexType="btree">
+            <column name="order_id"/>
+        </index>
+        <index referenceId="AWA_WPP_REVIEW_REQ_CUSTOMER" indexType="btree">
+            <column name="customer_id"/>
+        </index>
+    </table>
+
+    <!-- Phase 6: Retargeting campaign tracking -->
+    <table name="awa_whatsapp_retargeting_log" resource="default" engine="innodb" comment="WhatsApp Retargeting Log">
+        <column xsi:type="int" name="log_id" unsigned="true" nullable="false" identity="true" comment="Log ID"/>
+        <column xsi:type="int" name="customer_id" unsigned="true" nullable="false" comment="Customer ID"/>
+        <column xsi:type="varchar" name="segment" nullable="false" length="50" comment="Retargeting Segment"/>
+        <column xsi:type="timestamp" name="sent_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Sent At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="log_id"/>
+        </constraint>
+        <index referenceId="AWA_WPP_RETARGET_CUSTOMER" indexType="btree">
+            <column name="customer_id"/>
+        </index>
+        <index referenceId="AWA_WPP_RETARGET_SEGMENT" indexType="btree">
+            <column name="segment"/>
+        </index>
+    </table>
+
+    <!-- Phase 6: Social media post tracking -->
+    <table name="awa_whatsapp_social_post_log" resource="default" engine="innodb" comment="WhatsApp Social Post Log">
+        <column xsi:type="int" name="log_id" unsigned="true" nullable="false" identity="true" comment="Log ID"/>
+        <column xsi:type="int" name="product_id" unsigned="true" nullable="false" comment="Product ID"/>
+        <column xsi:type="varchar" name="post_type" nullable="false" length="30" comment="Post Type (new_product, on_sale)"/>
+        <column xsi:type="timestamp" name="posted_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Posted At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="log_id"/>
+        </constraint>
+        <index referenceId="AWA_WPP_SOCIAL_PRODUCT" indexType="btree">
+            <column name="product_id"/>
+        </index>
+        <index referenceId="AWA_WPP_SOCIAL_TYPE" indexType="btree">
+            <column name="post_type"/>
+        </index>
+    </table>
 </schema>

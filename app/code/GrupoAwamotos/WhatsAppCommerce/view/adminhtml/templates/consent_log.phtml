@@ -1,0 +1,74 @@
+<?php
+/** @var \GrupoAwamotos\WhatsAppCommerce\Block\Adminhtml\ConsentLog $block */
+$logs = $block->getRecentLogs();
+$bySource = $block->getOptinCountBySource();
+?>
+<div class="whatsapp-consent-log" style="max-width: 1100px;">
+    <h2 style="margin-bottom: 20px;">Consent Log &mdash; LGPD WhatsApp</h2>
+
+    <?php if (!empty($bySource)): ?>
+    <div class="admin__fieldset" style="margin-bottom: 30px;">
+        <h3><?= $block->escapeHtml(__('Resumo por Origem')) ?></h3>
+        <table class="admin__table-primary">
+            <thead>
+                <tr>
+                    <th><?= $block->escapeHtml(__('Origem')) ?></th>
+                    <th><?= $block->escapeHtml(__('Total')) ?></th>
+                    <th><?= $block->escapeHtml(__('Opt-in')) ?></th>
+                    <th><?= $block->escapeHtml(__('Opt-out')) ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($bySource as $row): ?>
+                <tr>
+                    <td><strong><?= $block->escapeHtml($row['source']) ?></strong></td>
+                    <td><?= (int) $row['total'] ?></td>
+                    <td style="color: #2ecc71;"><?= (int) $row['opted_in'] ?></td>
+                    <td style="color: #e74c3c;"><?= (int) $row['opted_out'] ?></td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+    <?php endif; ?>
+
+    <div class="admin__fieldset">
+        <h3><?= $block->escapeHtml(__('Ultimos 50 Registros')) ?></h3>
+        <?php if (empty($logs)): ?>
+            <p style="color: #999;"><?= $block->escapeHtml(__('Nenhum registro de consentimento encontrado.')) ?></p>
+        <?php else: ?>
+        <table class="admin__table-primary">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Customer ID</th>
+                    <th><?= $block->escapeHtml(__('Telefone')) ?></th>
+                    <th>Opt-in</th>
+                    <th><?= $block->escapeHtml(__('Origem')) ?></th>
+                    <th>IP</th>
+                    <th><?= $block->escapeHtml(__('Data')) ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($logs as $log): ?>
+                <tr>
+                    <td><?= (int) $log['log_id'] ?></td>
+                    <td><?= (int) $log['customer_id'] ?></td>
+                    <td><?= $block->escapeHtml($log['phone'] ?? '') ?></td>
+                    <td>
+                        <?php if ((int) $log['optin'] === 1): ?>
+                            <span style="color: #2ecc71;">Sim</span>
+                        <?php else: ?>
+                            <span style="color: #e74c3c;">Nao</span>
+                        <?php endif; ?>
+                    </td>
+                    <td><?= $block->escapeHtml($log['source'] ?? '') ?></td>
+                    <td><small><?= $block->escapeHtml($log['ip_address'] ?? '') ?></small></td>
+                    <td><small><?= $block->escapeHtml($log['created_at'] ?? '') ?></small></td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+        <?php endif; ?>
+    </div>
+</div>
