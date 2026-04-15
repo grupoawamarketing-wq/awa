@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace GrupoAwamotos\ERPIntegration\Observer;
 
-use GrupoAwamotos\ERPIntegration\Model\WhatsApp\ZApiClient;
+use GrupoAwamotos\SmartSuggestions\Api\WhatsappSenderInterface;
 use GrupoAwamotos\ERPIntegration\Helper\Data as Helper;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Event\Observer;
@@ -14,28 +14,17 @@ use Psr\Log\LoggerInterface;
 /**
  * Observer for Shipment Creation
  *
- * Sends WhatsApp notification via Z-API when a shipment is created
- * with tracking information
+ * Sends WhatsApp notification when a shipment is created with tracking information.
  */
 class ShipmentSaveAfter implements ObserverInterface
 {
-    private ZApiClient $zapiClient;
-    private Helper $helper;
-    private LoggerInterface $logger;
-
     public function __construct(
-        ZApiClient $zapiClient,
-        Helper $helper,
-        LoggerInterface $logger
+        private readonly WhatsappSenderInterface $whatsappSender,
+        private readonly Helper $helper,
+        private readonly LoggerInterface $logger
     ) {
-        $this->zapiClient = $zapiClient;
-        $this->helper = $helper;
-        $this->logger = $logger;
     }
 
-    /**
-     * Execute observer
-     */
     public function execute(Observer $observer): void
     {
         if (!$this->helper->isWhatsAppOrderStatusEnabled()) {
@@ -49,13 +38,11 @@ class ShipmentSaveAfter implements ObserverInterface
             return;
         }
 
-        // Only notify on new shipments
         if (!$shipment->isObjectNew()) {
             return;
         }
 
         $order = $shipment->getOrder();
-
         if (!$order) {
             return;
         }
@@ -63,58 +50,53 @@ class ShipmentSaveAfter implements ObserverInterface
         $this->sendShipmentNotification($order, $shipment);
     }
 
-    /**
-     * Send shipment notification via WhatsApp Z-API
-     */
     private function sendShipmentNotification($order, Shipment $shipment): void
     {
         try {
             $phoneNumber = $this->getCustomerPhone($order);
-
             if (!$phoneNumber) {
                 return;
             }
 
-            // Get tracking code
             $trackingCode = null;
-            $tracks = $shipment->getAllTracks();
-            foreach ($tracks as $track) {
+            foreach ($shipment->getAllTracks() as $track) {
                 if ($track->getTrackNumber()) {
                     $trackingCode = $track->getTrackNumber();
                     break;
                 }
             }
 
-            $result = $this->zapiClient->sendOrderStatus(
-                $phoneNumber,
-                $order->getIncrementId(),
-                'shipped',
-                $trackingCode
-            );
+            $message = $trackingCode
+                ? "🚚 Seu pedido #{$order->getIncrementId()} foi enviado!\nRastreio: *{$trackingCode}*\nAcompanhe a entrega com seu código."
+                : "🚚 Seu pedido #{$order->getIncrementId()} foi enviado!\nEm breve você receberá o código de rastreio.";
 
-            if ($result) {
+            $result = $this->whatsappSender->sendMessage($phoneNumber, $message);
+
+            if ($result['success'] ?? false) {
                 $this->logger->info(sprintf(
-                    '[Z-API Order] Shipment notification sent for order %s (tracking: %s)',
+                    '[WhatsApp Shipment] Notification sent for order %s (tracking: %s)',
                     $order->getIncrementId(),
                     $trackingCode ?? 'N/A'
                 ));
-
-                // Add shipment comment
                 $shipment->addComment(
-                    sprintf('WhatsApp (Z-API): Notificacao de envio enviada. Rastreio: %s', $trackingCode ?? 'N/A')
+                    sprintf('WhatsApp: Notificação de envio enviada. Rastreio: %s', $trackingCode ?? 'N/A')
                 );
+            } else {
+                $this->logger->warning(sprintf(
+                    '[WhatsApp Shipment] Failed for order %s: %s',
+                    $order->getIncrementId(),
+                    $result['message'] ?? 'unknown error'
+                ));
             }
         } catch (\Exception $e) {
             $this->logger->error(sprintf(
-                '[Z-API Order] Error sending shipment notification: %s',
+                '[WhatsApp Shipment] Error for order %s: %s',
+                $order->getIncrementId(),
                 $e->getMessage()
             ));
         }
     }
 
-    /**
-     * Get customer phone number from order
-     */
     private function getCustomerPhone($order): ?string
     {
         $shippingAddress = $order->getShippingAddress();

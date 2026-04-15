@@ -6,7 +6,7 @@ namespace GrupoAwamotos\ERPIntegration\Cron;
 
 use GrupoAwamotos\ERPIntegration\Model\Rfm\Calculator as RfmCalculator;
 use GrupoAwamotos\ERPIntegration\Model\Coupon\Generator as CouponGenerator;
-use GrupoAwamotos\ERPIntegration\Model\WhatsApp\Client as WhatsAppClient;
+use GrupoAwamotos\SmartSuggestions\Api\WhatsappSenderInterface;
 use GrupoAwamotos\ERPIntegration\Helper\Data as Helper;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Psr\Log\LoggerInterface;
@@ -14,52 +14,30 @@ use Psr\Log\LoggerInterface;
 /**
  * Cron Job - Send WhatsApp Re-engagement Messages
  *
- * Sends WhatsApp messages with coupons to at-risk customers
- * Runs weekly on Wednesdays (after email campaign on Tuesday)
+ * Sends WhatsApp messages with coupons to at-risk customers via the unified
+ * SmartSuggestions WhatsappSenderInterface.
  */
 class SendWhatsAppReengagement
 {
-    private RfmCalculator $rfmCalculator;
-    private CouponGenerator $couponGenerator;
-    private WhatsAppClient $whatsAppClient;
-    private CustomerRepositoryInterface $customerRepository;
-    private Helper $helper;
-    private LoggerInterface $logger;
-
     public function __construct(
-        RfmCalculator $rfmCalculator,
-        CouponGenerator $couponGenerator,
-        WhatsAppClient $whatsAppClient,
-        CustomerRepositoryInterface $customerRepository,
-        Helper $helper,
-        LoggerInterface $logger
+        private readonly RfmCalculator $rfmCalculator,
+        private readonly CouponGenerator $couponGenerator,
+        private readonly WhatsappSenderInterface $whatsappSender,
+        private readonly CustomerRepositoryInterface $customerRepository,
+        private readonly Helper $helper,
+        private readonly LoggerInterface $logger
     ) {
-        $this->rfmCalculator = $rfmCalculator;
-        $this->couponGenerator = $couponGenerator;
-        $this->whatsAppClient = $whatsAppClient;
-        $this->customerRepository = $customerRepository;
-        $this->helper = $helper;
-        $this->logger = $logger;
     }
 
-    /**
-     * Execute cron job
-     */
     public function execute(): void
     {
         if (!$this->helper->isWhatsAppReengagementEnabled()) {
             return;
         }
 
-        if (!$this->whatsAppClient->isConfigured()) {
-            $this->logger->warning('[WhatsApp Cron] WhatsApp API not configured');
-            return;
-        }
-
         $this->logger->info('[WhatsApp Cron] Starting re-engagement campaign...');
 
         try {
-            // Get at-risk customers (different batch than email to avoid overlap)
             $atRiskCustomers = $this->rfmCalculator->getAtRiskCustomers(15);
 
             if (empty($atRiskCustomers)) {
@@ -73,16 +51,12 @@ class SendWhatsAppReengagement
 
             foreach ($atRiskCustomers as $customerData) {
                 try {
-                    // Get phone number
                     $phoneNumber = $this->getCustomerPhone($customerData);
-
                     if (!$phoneNumber) {
                         continue;
                     }
 
-                    // Get Magento customer ID
-                    $magentoCustomerId = $this->findMagentoCustomerId($customerData);
-
+                    $magentoCustomerId = $customerData['magento_customer_id'] ?? null;
                     if (!$magentoCustomerId) {
                         continue;
                     }
@@ -90,7 +64,6 @@ class SendWhatsAppReengagement
                     $customer = $this->customerRepository->getById($magentoCustomerId);
                     $segment = $customerData['segment'] ?? 'at_risk';
 
-                    // Generate coupon (reuse if already generated for email)
                     $coupon = $this->couponGenerator->generateForCustomer(
                         $magentoCustomerId,
                         $segment,
@@ -102,23 +75,22 @@ class SendWhatsAppReengagement
                         continue;
                     }
 
-                    // Send WhatsApp message
-                    $result = $this->whatsAppClient->sendReengagementMessage(
-                        $phoneNumber,
+                    $message = $this->buildReengagementMessage(
                         $customer->getFirstname(),
                         $coupon['coupon_code'],
                         $coupon['discount_percent'],
                         $validDays
                     );
 
-                    if ($result) {
+                    $result = $this->whatsappSender->sendMessage($phoneNumber, $message);
+
+                    if ($result['success'] ?? false) {
                         $sentCount++;
                     } else {
                         $errorCount++;
                     }
 
-                    // Rate limiting: WhatsApp has limits on messages per second
-                    usleep(1000000); // 1 second delay between messages
+                    usleep(1000000); // 1s rate limiting
                 } catch (\Exception $e) {
                     $errorCount++;
                     $this->logger->error(sprintf(
@@ -138,72 +110,28 @@ class SendWhatsAppReengagement
         }
     }
 
-    /**
-     * Get customer phone number
-     */
+    private function buildReengagementMessage(
+        string $firstName,
+        string $couponCode,
+        int $discountPercent,
+        int $validDays
+    ): string {
+        return "Olá {$firstName}! 👋\n\n"
+            . "Sentimos sua falta! Preparamos uma oferta especial exclusiva para você:\n\n"
+            . "🎁 *{$discountPercent}% de desconto* em todo o site!\n"
+            . "Use o cupom: *{$couponCode}*\n"
+            . "Válido por {$validDays} dias.\n\n"
+            . "Aproveite e volte a comprar com a gente! 🏍️";
+    }
+
     private function getCustomerPhone(array $customerData): ?string
     {
-        // Try phone from ERP data
-        if (!empty($customerData['phone'])) {
-            return $customerData['phone'];
-        }
-
         if (!empty($customerData['celular'])) {
             return $customerData['celular'];
         }
-
-        // Try to get from Magento customer
-        $magentoId = $this->findMagentoCustomerId($customerData);
-
-        if ($magentoId) {
-            try {
-                $customer = $this->customerRepository->getById($magentoId);
-
-                // Check custom attribute for phone
-                $phoneAttr = $customer->getCustomAttribute('telephone');
-                if ($phoneAttr && $phoneAttr->getValue()) {
-                    return $phoneAttr->getValue();
-                }
-
-                $mobileAttr = $customer->getCustomAttribute('mobile');
-                if ($mobileAttr && $mobileAttr->getValue()) {
-                    return $mobileAttr->getValue();
-                }
-            } catch (\Exception $e) {
-                // Ignore
-            }
+        if (!empty($customerData['telefone'])) {
+            return $customerData['telefone'];
         }
-
-        return null;
-    }
-
-    /**
-     * Find Magento customer ID from ERP customer data
-     */
-    private function findMagentoCustomerId(array $customerData): ?int
-    {
-        if (!empty($customerData['magento_customer_id'])) {
-            return (int) $customerData['magento_customer_id'];
-        }
-
-        if (!empty($customerData['email'])) {
-            try {
-                $customer = $this->customerRepository->get($customerData['email']);
-                return (int) $customer->getId();
-            } catch (\Exception $e) {
-                // Customer not found
-            }
-        }
-
-        if (!empty($customerData['customer_code'])) {
-            try {
-                $customer = $this->customerRepository->getById((int) $customerData['customer_code']);
-                return (int) $customer->getId();
-            } catch (\Exception $e) {
-                // Customer not found
-            }
-        }
-
         return null;
     }
 }
