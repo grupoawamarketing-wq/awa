@@ -269,6 +269,36 @@ class Config extends AbstractHelper
 
     // ============ CRON ============
 
+
+    public function getZApiInstanceId(?int $storeId = null): string
+    {
+        return (string) $this->scopeConfig->getValue(
+            self::XML_PATH_WHATSAPP . 'zapi_instance_id',
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+    }
+
+    public function getZApiToken(?int $storeId = null): string
+    {
+        $encrypted = (string) $this->scopeConfig->getValue(
+            self::XML_PATH_WHATSAPP . 'zapi_token',
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+        return $encrypted ? $this->encryptor->decrypt($encrypted) : '';
+    }
+
+    public function getZApiClientToken(?int $storeId = null): string
+    {
+        $encrypted = (string) $this->scopeConfig->getValue(
+            self::XML_PATH_WHATSAPP . 'zapi_client_token',
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+        return $encrypted ? $this->encryptor->decrypt($encrypted) : '';
+    }
+
     public function isRfmCronEnabled(): bool
     {
         return $this->scopeConfig->isSetFlag(

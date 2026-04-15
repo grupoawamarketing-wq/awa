@@ -72,6 +72,8 @@ class Sender implements WhatsappSenderInterface
                     return $this->sendViaTwilio($phoneNumber, $message);
                 case 'evolution':
                     return $this->sendViaEvolution($phoneNumber, $message);
+                case 'zapi':
+                    return $this->sendViaZApi($phoneNumber, $message);
                 case 'custom':
                     return $this->sendViaCustomApi($phoneNumber, $message);
                 default:
@@ -108,6 +110,8 @@ class Sender implements WhatsappSenderInterface
                     return $this->testTwilioConnection();
                 case 'evolution':
                     return $this->testEvolutionConnection();
+                case 'zapi':
+                    return $this->testZApiConnection();
                 default:
                     return [
                         'success' => false,
@@ -525,5 +529,100 @@ class Sender implements WhatsappSenderInterface
             "Total estimado: *{{total_value}}*\n\n" .
             "Entre em contato para fazer seu pedido!\n\n" .
             "_{{store_name}}_";
+    }
+
+    /**
+     * Send message via Z-API
+     */
+    private function sendViaZApi(string $phoneNumber, string $message): array
+    {
+        $instanceId = $this->config->getZApiInstanceId();
+        $token = $this->config->getZApiToken();
+        $clientToken = $this->config->getZApiClientToken();
+
+        if (empty($instanceId) || empty($token)) {
+            return [
+                'success' => false,
+                'message' => 'Z-API credentials not configured'
+            ];
+        }
+
+        $url = sprintf(
+            'https://api.z-api.io/instances/%s/token/%s/send-text',
+            $instanceId,
+            $token
+        );
+
+        $payload = [
+            'phone' => $phoneNumber,
+            'message' => $message
+        ];
+
+        if ($clientToken) {
+            $this->curl->addHeader('Client-Token', $clientToken);
+        }
+        $this->curl->addHeader('Content-Type', 'application/json');
+        $this->curl->post($url, json_encode($payload));
+
+        $response = json_decode($this->curl->getBody(), true);
+        $status = $this->curl->getStatus();
+
+        if ($status >= 200 && $status < 300) {
+            return [
+                'success' => true,
+                'message' => 'Message sent via Z-API',
+                'message_id' => $response['zaapId'] ?? null
+            ];
+        }
+
+        return [
+            'success' => false,
+            'message' => $response['value'] ?? 'Unknown Z-API error',
+            'response' => $response
+        ];
+    }
+
+    /**
+     * Test Z-API connection
+     */
+    private function testZApiConnection(): array
+    {
+        $instanceId = $this->config->getZApiInstanceId();
+        $token = $this->config->getZApiToken();
+        $clientToken = $this->config->getZApiClientToken();
+
+        if (empty($instanceId) || empty($token)) {
+            return [
+                'success' => false,
+                'message' => 'Z-API credentials not configured'
+            ];
+        }
+
+        $url = sprintf(
+            'https://api.z-api.io/instances/%s/token/%s/status',
+            $instanceId,
+            $token
+        );
+
+        if ($clientToken) {
+            $this->curl->addHeader('Client-Token', $clientToken);
+        }
+        $this->curl->get($url);
+
+        $response = json_decode($this->curl->getBody(), true);
+        $status = $this->curl->getStatus();
+
+        if ($status >= 200 && $status < 300 && ($response['connected'] ?? false)) {
+            return [
+                'success' => true,
+                'message' => 'Z-API connected',
+                'state' => 'connected'
+            ];
+        }
+
+        return [
+            'success' => false,
+            'message' => $response['value'] ?? 'Z-API not connected or not configured'
+        ];
     }
 }
