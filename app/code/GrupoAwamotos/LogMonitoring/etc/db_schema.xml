@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+
+    <!-- Log Metrics Table -->
+    <table name="awa_log_metrics" resource="default" engine="innodb">
+        <column xsi:type="int" name="entity_id" unsigned="true" nullable="false" identity="true" comment="Entity ID"/>
+        <column xsi:type="varchar" name="log_type" nullable="false" length="50" comment="Log Type (system, exception, debug, etc)"/>
+        <column xsi:type="varchar" name="source_file" nullable="false" length="255" comment="Source Log File"/>
+        <column xsi:type="int" name="total_entries" unsigned="true" nullable="false" default="0" comment="Total Log Entries"/>
+        <column xsi:type="int" name="error_entries" unsigned="true" nullable="false" default="0" comment="Error Entries"/>
+        <column xsi:type="int" name="warning_entries" unsigned="true" nullable="false" default="0" comment="Warning Entries"/>
+        <column xsi:type="int" name="critical_entries" unsigned="true" nullable="false" default="0" comment="Critical Entries"/>
+        <column xsi:type="bigint" name="file_size_bytes" unsigned="true" nullable="false" default="0" comment="File Size in Bytes"/>
+        <column xsi:type="text" name="analysis_data" comment="JSON Analysis Data"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="true" comment="Updated At"/>
+        
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="UNQ_AWA_LOG_METRICS_LOG_TYPE_SOURCE_CREATED">
+            <column name="log_type"/>
+            <column name="source_file"/>
+            <column name="created_at"/>
+        </constraint>
+        <index referenceId="IDX_AWA_LOG_METRICS_LOG_TYPE" indexType="btree">
+            <column name="log_type"/>
+        </index>
+        <index referenceId="IDX_AWA_LOG_METRICS_CREATED_AT" indexType="btree">
+            <column name="created_at"/>
+        </index>
+        <index referenceId="IDX_AWA_LOG_METRICS_ERROR_ENTRIES" indexType="btree">
+            <column name="error_entries"/>
+        </index>
+    </table>
+
+    <!-- Alerts Table -->
+    <table name="awa_log_alerts" resource="default" engine="innodb">
+        <column xsi:type="int" name="entity_id" unsigned="true" nullable="false" identity="true" comment="Entity ID"/>
+        <column xsi:type="varchar" name="alert_type" nullable="false" length="100" comment="Alert Type"/>
+        <column xsi:type="varchar" name="severity" nullable="false" length="20" comment="Severity Level"/>
+        <column xsi:type="varchar" name="title" nullable="false" length="255" comment="Alert Title"/>
+        <column xsi:type="text" name="message" comment="Alert Message"/>
+        <column xsi:type="text" name="context_data" comment="JSON Context Data"/>
+        <column xsi:type="varchar" name="source" nullable="false" length="100" comment="Alert Source"/>
+        <column xsi:type="varchar" name="status" nullable="false" length="20" default="open" comment="Alert Status"/>
+        <column xsi:type="int" name="occurrences" unsigned="true" nullable="false" default="1" comment="Number of Occurrences"/>
+        <column xsi:type="timestamp" name="first_occurrence" nullable="false" default="CURRENT_TIMESTAMP" comment="First Occurrence"/>
+        <column xsi:type="timestamp" name="last_occurrence" nullable="false" default="CURRENT_TIMESTAMP" on_update="true" comment="Last Occurrence"/>
+        <column xsi:type="timestamp" name="acknowledged_at" nullable="true" comment="Acknowledged At"/>
+        <column xsi:type="varchar" name="acknowledged_by" nullable="true" length="100" comment="Acknowledged By"/>
+        <column xsi:type="timestamp" name="resolved_at" nullable="true" comment="Resolved At"/>
+        <column xsi:type="varchar" name="resolved_by" nullable="true" length="100" comment="Resolved By"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="true" comment="Updated At"/>
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <index referenceId="IDX_AWA_LOG_ALERTS_TYPE_STATUS" indexType="btree">
+            <column name="alert_type"/>
+            <column name="status"/>
+        </index>
+        <index referenceId="IDX_AWA_LOG_ALERTS_SEVERITY" indexType="btree">
+            <column name="severity"/>
+        </index>
+        <index referenceId="IDX_AWA_LOG_ALERTS_CREATED_AT" indexType="btree">
+            <column name="created_at"/>
+        </index>
+        <index referenceId="IDX_AWA_LOG_ALERTS_STATUS" indexType="btree">
+            <column name="status"/>
+        </index>
+    </table>
+
+    <!-- System Health Monitoring -->
+    <table name="awa_system_health" resource="default" engine="innodb">
+        <column xsi:type="int" name="entity_id" unsigned="true" nullable="false" identity="true" comment="Entity ID"/>
+        <column xsi:type="varchar" name="component" nullable="false" length="100" comment="System Component"/>
+        <column xsi:type="varchar" name="status" nullable="false" length="20" comment="Component Status"/>
+        <column xsi:type="decimal" name="health_score" precision="5" scale="2" nullable="false" default="100.00" comment="Health Score (0-100)"/>
+        <column xsi:type="text" name="metrics_data" comment="JSON Metrics Data"/>
+        <column xsi:type="text" name="issues" comment="Current Issues"/>
+        <column xsi:type="timestamp" name="last_check" nullable="false" default="CURRENT_TIMESTAMP" on_update="true" comment="Last Health Check"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="UNQ_AWA_SYSTEM_HEALTH_COMPONENT">
+            <column name="component"/>
+        </constraint>
+        <index referenceId="IDX_AWA_SYSTEM_HEALTH_STATUS" indexType="btree">
+            <column name="status"/>
+        </index>
+        <index referenceId="IDX_AWA_SYSTEM_HEALTH_SCORE" indexType="btree">
+            <column name="health_score"/>
+        </index>
+    </table>
+
+</schema>

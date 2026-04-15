@@ -1,0 +1,135 @@
+<?php
+/**
+ * @var \GrupoAwamotos\LogMonitoring\Block\Adminhtml\Dashboard $block
+ */
+$systemHealth = $block->getSystemHealth();
+$alertSummary = $block->getAlertSummary();
+?>
+
+<div class="awa-log-monitoring-dashboard">
+    <div class="page-actions-inner">
+        <div class="page-actions-buttons">
+            <button type="button" class="action-primary" onclick="refreshDashboard()">
+                <?= $block->escapeHtml(__('Refresh Dashboard')) ?>
+            </button>
+            <button type="button" class="action-secondary" onclick="triggerAnalysis()">
+                <?= $block->escapeHtml(__('Trigger Analysis')) ?>
+            </button>
+        </div>
+    </div>
+
+    <!-- System Health Overview -->
+    <div class="admin__data-grid-wrap">
+        <div class="admin__data-grid-header">
+            <div class="data-grid-header-row">
+                <div class="data-grid-header-cell">
+                    <span><?= $block->escapeHtml(__('System Health Overview')) ?></span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="health-overview">
+            <?php if (isset($systemHealth['error'])): ?>
+                <div class="message message-error">
+                    <?= $block->escapeHtml(__('Error: %1', $systemHealth['error'])) ?>
+                </div>
+            <?php else: ?>
+                <div class="health-cards">
+                    <div class="health-card overall">
+                        <h3><?= $block->escapeHtml(__('Overall Status')) ?></h3>
+                        <div class="health-score <?= $block->escapeHtml($systemHealth['overall_status']) ?>">
+                            <?= $block->escapeHtml(ucfirst($systemHealth['overall_status'])) ?>
+                        </div>
+                        <div class="health-value">
+                            <?= $block->escapeHtml(round($systemHealth['overall_score'], 1)) ?>/100
+                        </div>
+                    </div>
+
+                    <?php if (isset($systemHealth['components'])): ?>
+                        <?php foreach ($systemHealth['components'] as $component => $data): ?>
+                            <div class="health-card">
+                                <h4><?= $block->escapeHtml(ucwords(str_replace('_', ' ', $component))) ?></h4>
+                                <div class="component-status <?= $block->escapeHtml($data['status']) ?>">
+                                    <?= $block->escapeHtml(ucfirst($data['status'])) ?>
+                                </div>
+                                <div class="component-score">
+                                    <?= $block->escapeHtml(round($data['score'], 1)) ?>/100
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+
+    <!-- AWA Metrics Container -->
+    <div id="awa-metrics-dashboard">
+        <div class="admin__data-grid-header">
+            <div class="data-grid-header-row">
+                <div class="data-grid-header-cell">
+                    <span><?= $block->escapeHtml(__('AWA Motos Metrics')) ?></span>
+                </div>
+            </div>
+        </div>
+        <div class="loading-indicator">Loading...</div>
+    </div>
+
+</div>
+
+<style>
+.awa-log-monitoring-dashboard { padding: 20px; }
+.health-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0; }
+.health-card { background: #fff; border: 1px solid #ddd; border-radius: 4px; padding: 15px; }
+.health-score { font-size: 24px; font-weight: bold; margin: 10px 0; }
+.health-score.excellent, .health-score.healthy { color: #28a745; }
+.health-score.warning { color: #ffc107; }
+.health-score.critical, .health-score.failing { color: #dc3545; }
+.loading-indicator { text-align: center; padding: 40px; color: #666; }
+</style>
+
+<script>
+require(['jquery'], function($) {
+    loadDashboardData();
+    setInterval(loadDashboardData, 30000);
+
+    function loadDashboardData() {
+        $.get('<?= $block->escapeJs($block->getApiUrl('dashboard')) ?>')
+            .done(function(data) {
+                updateAwaMetrics(data.awamotos_metrics);
+            })
+            .fail(function() {
+                $('#awa-metrics-dashboard .loading-indicator').text('Error loading data');
+            });
+    }
+    
+    function updateAwaMetrics(metrics) {
+        if (metrics && !metrics.error) {
+            let html = '<div class="awa-metrics-grid">';
+            
+            if (metrics.erp_sync) {
+                html += '<div class="metric-card erp">';
+                html += '<h4>ERP Integration</h4>';
+                html += '<div class="metric-value">' + (metrics.erp_sync.health_score || 0) + '/100</div>';
+                html += '</div>';
+            }
+            
+            if (metrics.chatwoot_integration) {
+                html += '<div class="metric-card chatwoot">';
+                html += '<h4>Chatwoot</h4>';
+                html += '<div class="metric-value">' + (metrics.chatwoot_integration.health_score || 0) + '/100</div>';
+                html += '</div>';
+            }
+            
+            html += '</div>';
+            $('#awa-metrics-dashboard').html(html);
+        }
+    }
+    
+    window.refreshDashboard = function() { location.reload(); };
+    window.triggerAnalysis = function() {
+        $.post('<?= $block->escapeJs($block->getTriggerAnalysisUrl()) ?>')
+            .done(function() { alert('Analysis triggered successfully'); });
+    };
+});
+</script>

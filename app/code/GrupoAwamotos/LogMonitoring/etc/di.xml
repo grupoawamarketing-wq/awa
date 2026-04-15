@@ -1,0 +1,96 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+
+    <!-- API Interfaces -->
+    <preference for="GrupoAwamotos\LogMonitoring\Api\LogMetricsRepositoryInterface"
+                type="GrupoAwamotos\LogMonitoring\Model\LogMetricsRepository"/>
+    <preference for="GrupoAwamotos\LogMonitoring\Api\AlertRepositoryInterface"
+                type="GrupoAwamotos\LogMonitoring\Model\AlertRepository"/>
+    <preference for="GrupoAwamotos\LogMonitoring\Api\MonitoringInterface"
+                type="GrupoAwamotos\LogMonitoring\Service\MonitoringService"/>
+
+    <!-- Data Interfaces -->
+    <preference for="GrupoAwamotos\LogMonitoring\Api\Data\LogMetricsInterface"
+                type="GrupoAwamotos\LogMonitoring\Model\LogMetrics"/>
+    <preference for="GrupoAwamotos\LogMonitoring\Api\Data\AlertInterface"
+                type="GrupoAwamotos\LogMonitoring\Model\Alert"/>
+    <preference for="GrupoAwamotos\LogMonitoring\Api\Data\DashboardDataInterface"
+                type="GrupoAwamotos\LogMonitoring\Model\DashboardData"/>
+
+    <!-- Virtual Types for HTTP Clients -->
+    <virtualType name="AwamotosSlackClient" type="Magento\Framework\HTTP\Client\Curl">
+        <arguments>
+            <argument name="config" xsi:type="array">
+                <item name="timeout" xsi:type="number">30</item>
+                <item name="useragent" xsi:type="string">AWA-Motos-Monitoring/1.0</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="AwamotosWebhookClient" type="Magento\Framework\HTTP\Client\Curl">
+        <arguments>
+            <argument name="config" xsi:type="array">
+                <item name="timeout" xsi:type="number">15</item>
+                <item name="useragent" xsi:type="string">AWA-Motos-Webhook/1.0</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Analyzer Pool Configuration -->
+    <type name="GrupoAwamotos\LogMonitoring\Service\LogAnalyzer\AnalyzerPool">
+        <arguments>
+            <argument name="analyzers" xsi:type="array">
+                <item name="erp" xsi:type="object">GrupoAwamotos\LogMonitoring\Service\LogAnalyzer\ErpAnalyzer</item>
+                <item name="chatwoot" xsi:type="object">GrupoAwamotos\LogMonitoring\Service\LogAnalyzer\ChatwootAnalyzer</item>
+                <item name="performance" xsi:type="object">GrupoAwamotos\LogMonitoring\Service\LogAnalyzer\PerformanceAnalyzer</item>
+            </argument>
+            <argument name="logger" xsi:type="object">GrupoAwamotosLogMonitoringLogger</argument>
+        </arguments>
+    </type>
+
+    <!-- Log Analyzers -->
+    <type name="GrupoAwamotos\LogMonitoring\Service\LogAnalyzer\ErpAnalyzer">
+        <arguments>
+            <argument name="logger" xsi:type="object">GrupoAwamotosLogMonitoringLogger</argument>
+        </arguments>
+    </type>
+
+    <type name="GrupoAwamotos\LogMonitoring\Service\LogAnalyzer\PerformanceAnalyzer">
+        <arguments>
+            <argument name="logger" xsi:type="object">GrupoAwamotosLogMonitoringLogger</argument>
+        </arguments>
+    </type>
+
+    <type name="GrupoAwamotos\LogMonitoring\Service\LogAnalyzer\ChatwootAnalyzer">
+        <arguments>
+            <argument name="logger" xsi:type="object">GrupoAwamotosLogMonitoringLogger</argument>
+        </arguments>
+    </type>
+
+    <!-- Notification Services -->
+    <type name="GrupoAwamotos\LogMonitoring\Service\NotificationService">
+        <arguments>
+            <argument name="slackClient" xsi:type="object">AwamotosSlackClient</argument>
+            <argument name="webhookClient" xsi:type="object">AwamotosWebhookClient</argument>
+            <argument name="logger" xsi:type="object">GrupoAwamotosLogMonitoringLogger</argument>
+        </arguments>
+    </type>
+
+    <!-- Custom Logger -->
+    <virtualType name="GrupoAwamotosLogMonitoringLogger" type="Monolog\Logger">
+        <arguments>
+            <argument name="name" xsi:type="string">awa_log_monitoring</argument>
+            <argument name="handlers" xsi:type="array">
+                <item name="system" xsi:type="object">GrupoAwamotosLogMonitoringHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="GrupoAwamotosLogMonitoringHandler" type="Magento\Framework\Logger\Handler\Base">
+        <arguments>
+            <argument name="fileName" xsi:type="string">/var/log/awa_monitoring.log</argument>
+        </arguments>
+    </virtualType>
+
+</config>
