@@ -305,7 +305,7 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
             if ($categoryImageUrl !== '') {
                 $html .= '<li class="navigation__inner-item navigation__inner-item--level1 imagem img-subcategory col-2">';
                 $html .= '<a href="' . $categoryUrl . '" class="navigation__inner-link">';
-                $html .= '<img loading="lazy" src="' . $this->escapeUrl($categoryImageUrl) . '" alt="' . $categoryNameAttr . '" />';
+                $html .= '<img loading="lazy" src="' . $this->escapeUrl($categoryImageUrl) . '" alt="' . $categoryNameAttr . '" width="400" height="400" />';
                 $html .= '</a>';
                 $html .= '</li>';
             }

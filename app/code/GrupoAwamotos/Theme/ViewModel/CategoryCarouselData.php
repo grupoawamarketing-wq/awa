@@ -6,13 +6,15 @@ namespace GrupoAwamotos\Theme\ViewModel;
 
 use Magento\Catalog\Model\CategoryFactory;
 use Magento\Framework\View\Element\Block\ArgumentInterface;
+use Magento\Store\Model\StoreManagerInterface;
 use Psr\Log\LoggerInterface;
 
 class CategoryCarouselData implements ArgumentInterface
 {
     public function __construct(
         private readonly CategoryFactory $categoryFactory,
-        private readonly LoggerInterface $logger
+        private readonly LoggerInterface $logger,
+        private readonly ?StoreManagerInterface $storeManager = null
     ) {
     }
 
@@ -22,7 +24,12 @@ class CategoryCarouselData implements ArgumentInterface
     public function getCategoryData(int $categoryId): array
     {
         try {
-            $category = $this->categoryFactory->create()->load($categoryId);
+            $category = $this->categoryFactory->create();
+            if ($this->storeManager !== null) {
+                $category->setStoreId((int) $this->storeManager->getStore()->getId());
+            }
+
+            $category->load($categoryId);
             if ($category->getId()) {
                 return [
                     'url' => $category->getUrl(),
