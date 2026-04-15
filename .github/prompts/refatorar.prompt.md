@@ -1,6 +1,6 @@
 ---
 description: "Refatora código Magento 2 — melhora legibilidade, DI, tipagem, performance"
-agent: "agent"
+agent: "Implementador"
 tools:
   - codebase
   - edit

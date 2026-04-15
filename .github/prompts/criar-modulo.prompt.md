@@ -1,6 +1,6 @@
 ---
 description: "Cria um módulo Magento 2 completo sob o namespace GrupoAwamotos — registration.php, module.xml, di.xml, estrutura de pastas e classe inicial"
-agent: "agent"
+agent: "Awa"
 tools:
   - codebase
   - edit

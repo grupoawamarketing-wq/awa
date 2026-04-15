@@ -1,6 +1,6 @@
 ---
 description: "Faz auditoria completa do projeto Magento 2 — módulos, segurança, performance, configuração"
-agent: "agent"
+agent: "Revisor"
 tools:
   - codebase
   - edit

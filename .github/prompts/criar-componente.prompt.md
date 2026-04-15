@@ -1,6 +1,6 @@
 ---
 description: "Cria um módulo Magento 2 completo com Block, Template, Layout, JS e LESS"
-agent: "agent"
+agent: "Awa"
 tools:
   - codebase
   - edit

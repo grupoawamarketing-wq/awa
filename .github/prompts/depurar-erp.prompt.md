@@ -1,6 +1,6 @@
 ---
 description: "Diagnostica e corrige problemas no módulo GrupoAwamotos_ERPIntegration — falha de conexão SQL Server, sync de estoque/catálogo/pedidos, erros de cron, mapeamento de dados"
-agent: "agent"
+agent: "Debugger"
 tools:
   - codebase
   - execute

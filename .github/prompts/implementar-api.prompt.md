@@ -1,6 +1,6 @@
 ---
 description: "Implementa integração completa com API externa — service, tipos, error handling, retry (Magento 2)"
-agent: "agent"
+agent: "Awa"
 tools:
   - codebase
   - edit

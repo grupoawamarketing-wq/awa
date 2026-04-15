@@ -1,6 +1,6 @@
 ---
 description: "Implementa um comando CLI para o Magento 2 (bin/magento namespace:verbo) dentro de um módulo GrupoAwamotos existente"
-agent: "agent"
+agent: "Awa"
 tools:
   - codebase
   - edit

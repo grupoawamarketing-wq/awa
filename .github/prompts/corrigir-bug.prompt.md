@@ -1,6 +1,6 @@
 ---
 description: "Diagnostica e corrige bug no Magento 2 — logs, stack trace, causa raiz, fix mínimo"
-agent: "agent"
+agent: "Debugger"
 tools:
   - codebase
   - edit
