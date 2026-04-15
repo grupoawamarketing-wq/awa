@@ -103,8 +103,9 @@ define([], function () {
         /* --- show / hide recent panel --- */
 
         function isAutocompleteActive() {
-            /* Mirasvit or other autocomplete is active when panel has real results */
-            return !!panel.querySelector('[data-mirasvit-id], .search-autocomplete-item, .item');
+            /* Mirasvit marks itself active with _active class; also check for results */
+            return panel.classList.contains('_active') ||
+                   !!panel.querySelector('[data-mirasvit-id], .mst-searchautocomplete__item, .search-autocomplete-item, .item');
         }
 
         function showRecent() {

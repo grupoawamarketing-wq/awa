@@ -395,7 +395,9 @@
 
         panel.setAttribute('data-awa-search-panel', 'true');
         if (!panel.id) {
-            panel.id = 'search_autocomplete';
+            // Assign a safe unique ID that does not collide with `#search_autocomplete`
+            // which has a high-specificity `display:none !important` rule in styles-m/l.css.
+            panel.id = 'awa-search-panel-a11y';
         }
         if (!input.getAttribute('aria-controls')) {
             input.setAttribute('aria-controls', panel.id);
@@ -415,8 +417,10 @@
         }
 
         function syncExpanded() {
-            var hidden = panel.hasAttribute('hidden') || panel.getAttribute('aria-hidden') === 'true';
-            var hasItems = getSuggestionCount() > 0;
+            // If Mirasvit has set _active, trust it as the source of truth for visibility.
+            var isMirasvitActive = panel.classList.contains('_active');
+            var hidden = !isMirasvitActive && (panel.hasAttribute('hidden') || panel.getAttribute('aria-hidden') === 'true');
+            var hasItems = isMirasvitActive || getSuggestionCount() > 0;
             var expanded = !hidden && hasItems;
             var query = normalizeText(input.value || '');
             input.setAttribute('aria-expanded', expanded ? 'true' : 'false');

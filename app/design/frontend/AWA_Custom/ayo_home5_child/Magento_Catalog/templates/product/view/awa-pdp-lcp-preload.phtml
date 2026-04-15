@@ -1,34 +1,22 @@
 <?php
 /**
  * AWA PDP — LCP Image Preload
- * Emite <link rel="preload" as="image" fetchpriority="high"> para a imagem
- * principal do produto no <head>, minimizando o LCP.
  *
- * Incluído em head.additional via catalog_product_view.xml.
+ * Emite <link rel="preload" as="image"> para a imagem principal do produto.
+ * Reduz o LCP (Largest Contentful Paint) adiantando o download da imagem hero.
  *
- * @var \Magento\Catalog\Block\Product\View\Gallery $block
+ * @var \Magento\Framework\View\Element\Template $block
  */
 declare(strict_types=1);
 
-$images = $block->getGalleryImages()->getItems();
-if (empty($images)) {
+$viewModel = $block->getData('view_model');
+if (!$viewModel instanceof \GrupoAwamotos\Theme\ViewModel\ProductStructuredData) {
     return;
 }
 
-$mainImage = current(array_filter($images, function ($img) use ($block) {
-    return $block->isMainImage($img);
-}));
-
-if (empty($mainImage)) {
-    $mainImage = $block->getGalleryImages()->getFirstItem();
-}
-
-$mainImageUrl = $mainImage ? $mainImage->getData('medium_image_url') : null;
-if (!$mainImageUrl) {
+$imageUrl = $viewModel->getProductLcpImageUrl();
+if ($imageUrl === '') {
     return;
 }
 ?>
-<link rel="preload"
-      as="image"
-      fetchpriority="high"
-      href="<?= $block->escapeUrl($mainImageUrl) ?>"/>
+<link rel="preload" as="image" href="<?= $block->escapeUrl($imageUrl) ?>" fetchpriority="high"/>

@@ -1,0 +1,62 @@
+<?php
+/**
+ * AWA Motos — Category Hero Banner
+ * Banner profissional com identidade visual AWA para paginas de categoria.
+ * Exibe imagem da categoria quando disponivel (com overlay), ou gradiente institucional.
+ *
+ * @var \Magento\Catalog\Block\Category\View $block
+ * @var \Magento\Catalog\ViewModel\Category\Image $image
+ * @var \Magento\Catalog\ViewModel\Category\Output $output
+ */
+declare(strict_types=1);
+
+$_category = $block->getCurrentCategory();
+$_categoryName = $_category->getName();
+$_productCount = (int) $_category->getProductCount();
+$image = $block->getImage();
+$output = $block->getOutput();
+$_imgUrl = $image->getUrl($_category);
+
+// Breadcrumb textual para contexto
+$_parentCategory = $_category->getParentCategory();
+$_parentName = ($_parentCategory && (int) $_parentCategory->getLevel() >= 2)
+    ? $_parentCategory->getName()
+    : null;
+?>
+<div class="awa-category-hero<?= $_imgUrl ? ' awa-category-hero--has-image' : '' ?>"
+     role="banner"
+     aria-label="<?= $block->escapeHtmlAttr(__('Categoria: %1', $_categoryName)) ?>">
+
+    <?php if ($_imgUrl): ?>
+        <img class="awa-category-hero__bg-image"
+             src="<?= $block->escapeUrl($_imgUrl) ?>"
+             alt=""
+             aria-hidden="true"
+             loading="eager" />
+        <div class="awa-category-hero__overlay" aria-hidden="true"></div>
+    <?php endif; ?>
+
+    <div class="awa-category-hero__content">
+        <?php if ($_parentName): ?>
+            <span class="awa-category-hero__eyebrow">
+                <?= $block->escapeHtml($_parentName) ?>
+            </span>
+        <?php endif; ?>
+
+        <h1 class="awa-category-hero__title">
+            <?= $block->escapeHtml($_categoryName) ?>
+        </h1>
+
+        <?php if ($_productCount > 0): ?>
+            <p class="awa-category-hero__count">
+                <?= $block->escapeHtml(
+                    $_productCount === 1
+                        ? __('1 produto disponivel')
+                        : __('%1 produtos disponiveis', $_productCount)
+                ) ?>
+            </p>
+        <?php endif; ?>
+    </div>
+
+    <div class="awa-category-hero__accent" aria-hidden="true"></div>
+</div>

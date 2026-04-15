@@ -1,36 +1,35 @@
 /* =============================================================================
  * awa-pdp-visual-fix.css
- * AWA Motos — Product Detail Page (PDP) — Correcoes Visuais
- * Carregado via catalog_product_view.xml order=1200 (apos todos os bundles)
+ * AWA Motos — Product Detail Page (PDP) — Correções Visuais
+ * Carregado via catalog_product_view.xml order=1200 (após todos os bundles)
  *
  * Problemas corrigidos:
  *  1. Input de quantidade duplicado/quebrado
- *  2. Botao "Faca login para ver preco" sem destaque visual
- *  3. Hierarquia fraca (titulo, SKU, CTA com mesmo peso)
- *  4. Espacamentos inconsistentes (base 8px)
+ *  2. Botão "Faça login para ver preço" sem destaque visual
+ *  3. Hierarquia fraca (título, SKU, CTA com mesmo peso)
+ *  4. Espaçamentos inconsistentes (base 8px)
  *  5. Tipografia irregular (tamanhos, line-height, legibilidade)
- *  6. product-view display:grid 1fr 1fr com 1 filho -> view-product 50% da tela
+ *  6. product-view com display:grid 1fr 1fr mas só 1 filho → view-product 50% da tela
  *
  * Override de:
  *  - awa-bundle-refinements.css (.product-view display:grid !important)
  *  - awa-layout-standardization.css (b2b-login-to-see-price sutil)
- *  - _product-page.less -> awa-bundle-refinements.css
+ *  - _product-page.less → awa-bundle-refinements.css
  *  - styles-l.css (layout e tipografia)
  * =============================================================================
  */
 
 /* =============================================================================
- * 0. CRITICAL LAYOUT FIX -- product-view grid override
+ * 0. CRITICAL LAYOUT FIX — product-view grid override
  *
  * BUG: awa-bundle-refinements.css (e styles-m/l.css, themes.css) definem:
  *   .catalog-product-view .product-view { display: grid; grid-template-columns: 1fr 1fr }
  * Mas o HTML tem APENAS 1 filho direto em .product-view:
- *   <div class="view-product"> (que contem tudo: galeria + info via .main-detail)
+ *   <div class="view-product"> (que contém tudo: galeria + info via .main-detail)
  * Resultado: .view-product fica preso em 1 coluna (~50% da largura) e
  *   .main-detail fica com ~668px em vez dos ~1168px que deveria ter.
- * Fix: forcardisplay:block para que .view-product expanda para 100%.
- * =============================================================================
- */
+ * Fix: forçar display:block para que .view-product expanda para 100%.
+ * ============================================================================= */
 body.catalog-product-view .product-view {
     display: block !important;
     width: 100% !important;
@@ -44,6 +43,7 @@ body.catalog-product-view .product-view > .view-product {
     max-width: 100% !important;
     display: block !important;
 }
+
 
 /* =============================================================================
  * 1. QTY INPUT — Esconder duplicatas e normalizar visual
@@ -252,7 +252,8 @@ body.catalog-product-view #product-addtocart-button:disabled {
 /* =============================================================================
  * 4. LAYOUT — Alinhamento imagem vs info, espaçamento base 8px
  *
- * A divisão 50/50 já é gerenciada por awa-improvements-grid.css.
+ * A divisão principal do main-detail já é gerenciada por
+ * awa-layout-standardization.css (fonte canônica carregada por último).
  * Aqui: padding interno da coluna de info e ritmo vertical.
  * ============================================================================= */
 
@@ -320,6 +321,17 @@ body.catalog-product-view .product-info-main .price-box .price-label {
     margin-bottom: 2px !important;
 }
 
+/* Bug fix: .price-box .price-label rule acima tornava o texto do botão B2B cinza
+ * em vez de branco. Restaura a cor e display corretos dentro do botão B2B. */
+body.catalog-product-view .product-info-main .b2b-login-to-see-price.price-box .price-label,
+body.catalog-product-view .product-info-main .b2b-login-to-see-price .price-label {
+    display: inline !important;
+    color: rgba(255, 255, 255, 0.90) !important;
+    font-size: 15px !important;
+    font-weight: 400 !important;
+    margin-bottom: 0 !important;
+}
+
 /* Preço especial / antigo */
 body.catalog-product-view .product-info-main .price-box .old-price .price {
     font-size: 16px !important;
@@ -329,12 +341,23 @@ body.catalog-product-view .product-info-main .price-box .old-price .price {
 }
 
 /* Disponibilidade em estoque */
+body.catalog-product-view .product-info-main .stock.available,
+body.catalog-product-view .product-info-main .stock.unavailable {
+    overflow: hidden !important;
+    max-width: 100% !important;
+}
+
 body.catalog-product-view .product-info-main .stock.available > span,
 body.catalog-product-view .product-info-main .stock.unavailable > span {
     font-size: 12px !important;
     font-weight: 600 !important;
     text-transform: uppercase !important;
-    letter-spacing: 0.05em !important;
+    letter-spacing: 0.02em !important;
+    display: inline-block !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
 }
 
 body.catalog-product-view .product-info-main .stock.available > span {
@@ -369,8 +392,31 @@ body.catalog-product-view .awa-pdp-tabs .tab-title {
     color: var(--awa-text-muted, #888) !important;
     text-decoration: none !important;
     transition: color 0.15s ease !important;
-    display: block !important;
+    /* Bug #7: flex para acomodar o indicador de expansão à direita */
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
     padding-bottom: 10px !important;
+}
+
+/* Bug #7: indicador +/− nos títulos de abas/accordions */
+body.catalog-product-view .product.info.detailed .data.item.title a::after {
+    content: '+' !important;
+    font-size: 20px !important;
+    font-weight: 300 !important;
+    color: var(--awa-text-muted, #aaa) !important;
+    line-height: 1 !important;
+    flex-shrink: 0 !important;
+    margin-left: 8px !important;
+    transition: color 0.15s ease, transform 0.2s ease !important;
+}
+
+/* Tab/accordion ativa — muda + para − e fica vermelho */
+body.catalog-product-view .product.info.detailed .data.item.title.active a::after,
+body.catalog-product-view .product.info.detailed .data.item.title._active a::after,
+body.catalog-product-view .product.info.detailed .data.item.title[aria-expanded="true"] a::after {
+    content: '−' !important;
+    color: var(--awa-primary, #b73337) !important;
 }
 
 /* Tab ativa — indicador vermelho na base */
@@ -579,4 +625,268 @@ body.catalog-product-view .block.review-add .field textarea:focus {
     border-color: var(--awa-primary, #b73337) !important;
     outline: none !important;
     box-shadow: 0 0 0 3px rgba(183, 51, 55, 0.12) !important;
+}
+
+
+/* =============================================================================
+ * BUG #6 — REVIEWS SUMMARY: chip compacto em vez de ghost button 40px
+ *
+ * O seletor em seção 6 usa height:40px que acaba sobrescrito por min-height
+ * global. Aumentamos especificidade e reduzimos para um pill compacto de 24px
+ * que cabe junto ao rating de estrelas sem dominar visualmente.
+ * ============================================================================= */
+body.catalog-product-view .product-reviews-summary .reviews-actions a.action.add,
+body.catalog-product-view .product-reviews-summary a.action.add {
+    height: 24px !important;
+    min-height: 0 !important;
+    max-height: 24px !important;
+    padding: 0 10px !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+    letter-spacing: 0.02em !important;
+    border-radius: 12px !important;
+    border-width: 1px !important;
+    line-height: 22px !important;
+}
+
+body.catalog-product-view .product-reviews-summary .reviews-actions a.action.add:hover,
+body.catalog-product-view .product-reviews-summary a.action.add:hover {
+    background: var(--awa-primary, #b73337) !important;
+    color: #fff !important;
+}
+
+
+/* =============================================================================
+ * BUG #8 — COMPARTILHAR / IMPRIMIR: layout horizontal e estilo consistente
+ *
+ * .product-social-extra é display:block com dois <a> inline-block lado a lado.
+ * Fix: flex row com gap, botões como pills outline, ícone + label lado a lado.
+ * ============================================================================= */
+body.catalog-product-view .product-social-extra {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin-top: 16px !important;
+    padding-top: 14px !important;
+    border-top: 1px solid var(--awa-border, #e5e5e5) !important;
+}
+
+body.catalog-product-view .product-social-extra a {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 5px 14px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    border: 1.5px solid var(--awa-border, #d9d9d9) !important;
+    border-radius: 20px !important;
+    background: transparent !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: var(--awa-text-secondary, #555) !important;
+    text-decoration: none !important;
+    transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease !important;
+    white-space: nowrap !important;
+    text-transform: none !important;
+    letter-spacing: 0.01em !important;
+}
+
+body.catalog-product-view .product-social-extra a:hover {
+    border-color: var(--awa-primary, #b73337) !important;
+    color: var(--awa-primary, #b73337) !important;
+    background: rgba(183, 51, 55, 0.04) !important;
+}
+
+body.catalog-product-view .product-social-extra a i {
+    font-size: 12px !important;
+    line-height: 1 !important;
+}
+
+body.catalog-product-view .product-social-extra .awa-pdp-social-label {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+}
+
+/* =============================================================================
+ * BUGFIX FOLLOW-UP — 2026-04-14
+ *
+ * 1. Visitante B2B: remover card vazio e manter CTA de suporte
+ * 2. Galeria sem mídia: placeholder menos dominante
+ * 3. Breadcrumb mobile: permitir quebra do título longo
+ * 4. Tabs desktop: remover híbrido tab + accordion
+ * 5. Flutuantes na PDP: esconder comparador e afastar chat do cookie/footer
+ * ============================================================================= */
+
+body.catalog-product-view .product-info-main:has(.b2b-login-to-see-price) .product-add-form {
+    margin-top: 12px !important;
+    padding: 0 !important;
+    min-height: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+body.catalog-product-view .product-info-main:has(.b2b-login-to-see-price) .product-add-form .awa-pdp-whatsapp-cta {
+    display: inline-flex !important;
+    width: 100% !important;
+    margin-top: 0 !important;
+}
+
+body.catalog-product-view .product-info-main:has(.b2b-login-to-see-price) .product-add-form .awa-pdp-whatsapp-cta span {
+    line-height: 1.35 !important;
+}
+
+body.catalog-product-view .product.media .gallery-placeholder.is-placeholder {
+    aspect-ratio: auto !important;
+    min-height: clamp(240px, 38vw, 420px) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 28px !important;
+    background: linear-gradient(180deg, #fbfbfc 0%, #f3f4f6 100%) !important;
+}
+
+body.catalog-product-view .product.media .gallery-placeholder.is-placeholder .gallery-placeholder__image {
+    width: min(280px, 72%) !important;
+    height: auto !important;
+    max-height: 240px !important;
+    object-fit: contain !important;
+    opacity: 0.96 !important;
+}
+
+body.catalog-product-view .product.info.detailed .product.data.items > .item.title:first-child:nth-last-child(2) {
+    display: block !important;
+    width: 100% !important;
+}
+
+@media (min-width: 768px) {
+    body.catalog-product-view .product.info.detailed .data.item.title a::after {
+        content: none !important;
+        display: none !important;
+    }
+
+    body.catalog-product-view .product.info.detailed .data.item.title {
+        border-bottom: 0 !important;
+    }
+
+    body.catalog-product-view .product.info.detailed .data.item.title.active,
+    body.catalog-product-view .product.info.detailed .data.item.title._active {
+        margin-bottom: -1px !important;
+        border-bottom: 2px solid var(--awa-primary, #b73337) !important;
+    }
+
+    body.catalog-product-view .product.info.detailed .product.data.items > .item.title:first-child:nth-last-child(2) > a,
+    body.catalog-product-view .product.info.detailed .product.data.items > .item.title:first-child:nth-last-child(2) > .switch {
+        padding-right: 0 !important;
+    }
+
+    body.catalog-product-view .product.info.detailed .product.data.items > .item.title:first-child:nth-last-child(2) + .item.content,
+    body.catalog-product-view .product.info.detailed .data.item.content {
+        border-top: 1px solid var(--awa-border, #e5e5e5) !important;
+        padding-top: 24px !important;
+    }
+}
+
+body.catalog-product-view .awa-compare-bar {
+    display: none !important;
+}
+
+@media (max-width: 767px) {
+    body.catalog-product-view .product.media .gallery-placeholder.is-placeholder {
+        min-height: 220px !important;
+        padding: 20px !important;
+    }
+
+    body.catalog-product-view .product.media .gallery-placeholder.is-placeholder .gallery-placeholder__image {
+        width: min(220px, 74%) !important;
+        max-height: 180px !important;
+    }
+
+    body.catalog-product-view .breadcrumbs {
+        margin-bottom: 12px !important;
+    }
+
+    body.catalog-product-view .breadcrumbs .items {
+        display: block !important;
+    }
+
+    body.catalog-product-view .breadcrumbs .item {
+        display: inline !important;
+        min-width: 0 !important;
+    }
+
+    body.catalog-product-view .breadcrumbs .item::after {
+        display: inline-block !important;
+        margin: 0 4px !important;
+        vertical-align: middle !important;
+    }
+
+    body.catalog-product-view .breadcrumbs .item:last-child {
+        display: block !important;
+        width: 100% !important;
+        margin-top: 6px !important;
+    }
+
+    body.catalog-product-view .breadcrumbs .item:last-child::after {
+        display: none !important;
+    }
+
+    body.catalog-product-view .breadcrumbs .item:last-child strong,
+    body.catalog-product-view .breadcrumbs .item:last-child [itemprop="name"] {
+        display: block !important;
+        max-width: 100% !important;
+        white-space: normal !important;
+        overflow-wrap: anywhere !important;
+        word-break: break-word !important;
+    }
+
+    body.catalog-product-view .breadcrumbs.awa-breadcrumbs-compact .item.awa-breadcrumbs-mobile-hidden {
+        display: none !important;
+    }
+
+    body.catalog-product-view .breadcrumbs.awa-breadcrumbs-compact .item.awa-breadcrumbs-ellipsis {
+        display: inline !important;
+        color: var(--awa-text-light, #8a8f98) !important;
+    }
+
+    body.catalog-product-view .breadcrumbs.awa-breadcrumbs-compact .item:last-child strong,
+    body.catalog-product-view .breadcrumbs.awa-breadcrumbs-compact .item:last-child [itemprop="name"] {
+        font-size: 12px !important;
+        line-height: 1.45 !important;
+    }
+
+    body.catalog-product-view .block.related .product-item .product-image-container,
+    body.catalog-product-view .products-related .product-item .product-image-container,
+    body.catalog-product-view .block.related .item-product .product-thumb,
+    body.catalog-product-view .products-related .item-product .product-thumb {
+        background: linear-gradient(180deg, #ffffff 0%, #f5f7fa 100%) !important;
+        border: 1px solid rgba(183, 51, 55, 0.08) !important;
+    }
+
+    body.catalog-product-view .block.related .product-item .product-image-photo[src*="placeholder/placeholder"],
+    body.catalog-product-view .products-related .product-item .product-image-photo[src*="placeholder/placeholder"],
+    body.catalog-product-view .block.related .item-product .product-thumb img[src*="placeholder/placeholder"],
+    body.catalog-product-view .products-related .item-product .product-thumb img[src*="placeholder/placeholder"] {
+        opacity: 1 !important;
+        visibility: visible !important;
+        padding: 14px !important;
+        filter: saturate(0.92) contrast(1.03) !important;
+    }
+
+    body.catalog-product-view .woot-widget-bubble {
+        width: min(60px, 16vw) !important;
+        min-width: 48px !important;
+        max-width: 60px !important;
+        min-height: 76px !important;
+        max-height: 104px !important;
+        right: 10px !important;
+        bottom: 96px !important;
+    }
+
+    body.catalog-product-view.awa-cookie-banner-active .woot-widget-bubble {
+        bottom: calc(var(--awa-cookie-banner-height, 132px) + 20px) !important;
+    }
 }

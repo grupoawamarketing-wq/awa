@@ -1,6 +1,7 @@
 <?php
 /** @var \Magento\Framework\View\Element\Template $this */
 $layout = $this->getLayout();
+$categoryCarouselViewModel = $block->getData('category_carousel_view_model');
 
 $renderCmsBlock = static function (string $blockId) use ($layout): string {
 	/** @var \Magento\Cms\Block\Block|null $cmsBlock */
@@ -108,25 +109,22 @@ $categoryCarouselCategories = [
 	['id' => 54,  'icon' => '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 52V20l12-8 12 8v32"/><path d="M20 52h24"/><path d="M16 20h32"/><path d="M28 28h8"/><path d="M28 36h8"/><circle cx="26" cy="28" r="1.5"/><circle cx="26" cy="36" r="1.5"/><circle cx="26" cy="44" r="1.5"/><path d="M28 44h8"/><path d="M32 12v-4"/></svg>', 'name' => 'Suportes'],
 ];
 
-// Build category URLs + product counts
-try {
-	$categoryFactory = \Magento\Framework\App\ObjectManager::getInstance()->get('Magento\Catalog\Model\CategoryFactory');
+// Build category URLs + product counts via ViewModel injected by layout.
+if ($categoryCarouselViewModel instanceof \GrupoAwamotos\Theme\ViewModel\CategoryCarouselData) {
 	foreach ($categoryCarouselCategories as &$cat) {
-		$urlOverride = $cat['url'] ?? null; // preserve hardcoded url if set
-		$catModel = $categoryFactory->create()->load($cat['id']);
-		if ($catModel->getId()) {
-			$cat['url'] = $urlOverride ?? $catModel->getUrl();
-			$cat['name'] = $catModel->getName();
-			$cat['count'] = (int) $catModel->getProductCount();
-		} else {
-			$cat['url'] = $urlOverride ?? '#';
-			$cat['count'] = 0;
-		}
+		$urlOverride = $cat['url'] ?? null;
+		$categoryData = $categoryCarouselViewModel->getCategoryData((int) $cat['id']);
+		$cat['url'] = $urlOverride ?: $categoryData['url'];
+		$cat['name'] = $categoryData['name'] !== '' ? $categoryData['name'] : $cat['name'];
+		$cat['count'] = $categoryData['count'];
 	}
 	unset($cat);
-} catch (\Exception $e) {
-	// Fallback: keep default names/urls
 }
+
+$newProductsCategory = $categoryCarouselViewModel instanceof \GrupoAwamotos\Theme\ViewModel\CategoryCarouselData
+	? $categoryCarouselViewModel->getCategoryData(138)
+	: ['url' => $this->getUrl('ofertas.html')];
+$newProductsUrl = $newProductsCategory['url'] ?: $this->getUrl('ofertas.html');
 
 
 
@@ -266,7 +264,7 @@ if ($benefitsHtml !== '' && strpos($benefitsHtml, 'velaServicesInner--home5') ==
 				<span class="awa-section-header__eyebrow"><?= $escaper->escapeHtml(__('Novo')) ?></span>
 				<h2 class="awa-section-header__title"><?= $escaper->escapeHtml(__('Lançamentos')) ?></h2>
 			</div>
-			<a href="<?= $escaper->escapeUrl($this->getUrl('catalog/category/view', ['id' => 138])) ?>" class="awa-section-header__link" aria-label="<?= $escaper->escapeHtmlAttr(__('Ver todos os lançamentos')) ?>">
+			<a href="<?= $escaper->escapeUrl($newProductsUrl) ?>" class="awa-section-header__link" aria-label="<?= $escaper->escapeHtmlAttr(__('Ver todos os lançamentos')) ?>">
 				<?= $escaper->escapeHtml(__('Ver todos')) ?> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
 			</a>
 		</header>

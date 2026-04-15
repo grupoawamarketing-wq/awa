@@ -15,10 +15,13 @@ declare(strict_types=1);
  * @var \Magento\Framework\View\Element\Template $block
  */
 
-// === DNS Prefetch (economiza 20-120ms latência DNS) ===
+// === Preconnect (economiza handshake DNS + TCP + TLS — ~200-400ms por domínio) ===
+$preconnect = [
+    'https://www.googletagmanager.com',
+    'https://www.google-analytics.com',
+];
+// === DNS Prefetch (outros domínios externos — menor benefício que preconnect) ===
 $dnsPrefetch = [
-    '//www.googletagmanager.com',
-    '//www.google-analytics.com',
     '//connect.facebook.net',
 ];
 
@@ -92,7 +95,12 @@ body .page-wrapper .header-content .top-header .header,.page-header,.header.cont
 body .page-wrapper .page_footer,.page-footer{background:#6b1a1e !important;background-image:linear-gradient(180deg,#6b1a1e 0%,#b73337 100%) !important;color:rgba(255,255,255,.85);border-top:3px solid rgba(255,255,255,.2)}
 .page_footer .footer-container,.page_footer #footer,.page_footer .footer-container.layout2{background:transparent !important;background-image:none !important;color:rgba(255,255,255,.85)}
 </style>
-<!-- AWA Head Preload — DNS Prefetch -->
+<!-- AWA Head Preload — Preconnect (precedência sobre dns-prefetch) -->
+<?php foreach ($preconnect as $origin): ?>
+<link rel="preconnect" href="<?= $block->escapeUrl($origin) ?>" crossorigin="anonymous"/>
+<link rel="dns-prefetch" href="<?= $block->escapeUrl($origin) ?>"/>
+<?php endforeach; ?>
+<!-- AWA Head Preload — DNS Prefetch (demais domínios) -->
 <?php foreach ($dnsPrefetch as $domain): ?>
 <link rel="dns-prefetch" href="<?= $block->escapeUrl($domain) ?>"/>
 <?php endforeach; ?>

@@ -9,6 +9,7 @@ var config = {
         '*': {
             awaCustomCompatBootstrap: 'js/awa-custom-compat-bootstrap',
             'awaVerticalMenu': 'js/vertical-menu',
+            'Magento_Catalog/js/product/breadcrumbs': 'js/awa-pdp-breadcrumbs'
         }
     },
     paths: {

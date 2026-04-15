@@ -1,0 +1,1038 @@
+// =============================================================================
+// _header-main.less
+// AWA Motos — Header pixel-perfect: barra B2B + header principal + navbar
+//
+// Fonte de verdade consolidada (substitui _header-classic-reference.less +
+// _header-pixelperfect.less).  Todos os valores numéricos derivam diretamente
+// da imagem de referência entregue pelo design.
+//
+// Estrutura:
+//   0. Variáveis LESS + tokens CSS
+//   1. Barra promocional B2B  (topo, ~34px, vermelho)
+//   2. Header principal       (~72px, branco, logo + busca + área de conta)
+//   3. Navbar (desktop)       (~52px, #f2f2f2, Departamentos + links)
+//   4. Minicart drawer        (painel lateral direito, 380px)
+//   5. Mobile (<992px)
+//   6. Responsivo intermediário (1280 / 1024px)
+//   7. Acessibilidade — focus rings WCAG 2.1 AA
+// =============================================================================
+
+
+// ---------------------------------------------------------------------------
+// 0. VARIÁVEIS LESS
+//    Usadas somente durante compilação; no runtime o CSS var() prevalece.
+// ---------------------------------------------------------------------------
+
+@awa-primary:            #b73337;
+@awa-primary-dark:       #982c30;
+@awa-primary-alpha-12:   rgba(183, 51, 55, 0.12);
+@awa-primary-alpha-04:   rgba(183, 51, 55, 0.04);
+@awa-primary-border:     rgba(183, 51, 55, 0.55);
+
+@awa-text:               #333333;
+@awa-muted:              #666666;
+@awa-placeholder:        #9b9b9b;
+@awa-white:              #ffffff;
+@awa-bg-alt:             #f2f2f2;
+@awa-border:             #d9d9d9;
+@awa-border-soft:        #e6e6e6;
+
+// Escala 8px
+@sp-1: 8px;    // xs
+@sp-2: 16px;   // sm
+@sp-3: 24px;   // md
+@sp-4: 32px;   // lg
+
+// Raios de borda
+@radius-sm: 4px;
+@radius-md: 8px;
+
+// Alturas fixas (medidas na imagem de referência)
+@h-promo-bar:    34px;
+@h-header-main:  72px;
+@h-navbar:       52px;
+@h-search:       44px;
+@h-cart-btn:     44px;
+
+// Largura máxima do grid
+@grid-max: 1440px;
+
+// Largura do botão Departamentos
+@w-departments: 290px;
+
+// Transição padrão
+@transition-fast: 180ms ease;
+
+
+// ---------------------------------------------------------------------------
+// Escopo de tokens CSS no componente (runtime theming)
+// ---------------------------------------------------------------------------
+body .page-wrapper .awa-site-header {
+  --awa-hdr-primary:        var(--awa-primary,       @awa-primary);
+  --awa-hdr-primary-dark:   var(--awa-primary-hover,  @awa-primary-dark);
+  --awa-hdr-surface:        var(--awa-bg,             @awa-white);
+  --awa-hdr-surface-alt:    @awa-bg-alt;
+  --awa-hdr-border:         @awa-border;
+  --awa-hdr-border-soft:    @awa-border-soft;
+  --awa-hdr-text:           var(--awa-text,           @awa-text);
+  --awa-hdr-muted:          @awa-muted;
+  --awa-hdr-placeholder:    @awa-placeholder;
+  --awa-hdr-radius:         @radius-sm;
+  --awa-hdr-search-h:       @h-search;
+  --awa-hdr-navbar-h:       @h-navbar;
+}
+
+
+// ===========================================================================
+// 1. BARRA PROMOCIONAL B2B
+//    Altura ~34px, fundo vermelho, texto branco centralizado.
+//    ".awa-utility-bar-legacy" permanece oculta (legado).
+// ===========================================================================
+
+.page-wrapper .awa-site-header {
+
+  // Ocultar utility bar legada
+  .awa-utility-bar-legacy {
+    display: none !important;
+  }
+
+  // Barra B2B
+  .top-header.awa-b2b-promo-bar,
+  .awa-b2b-promo-bar[data-awa-header-utility] {
+    background: var(--awa-hdr-primary) !important;
+    border: 0 !important;
+    color: @awa-white !important;
+    margin: 0 !important;
+    min-height: @h-promo-bar !important;
+    padding: @sp-1 @sp-2 !important;
+    text-align: center !important;
+
+    .awa-b2b-promo-bar__inner {
+      align-items: center !important;
+      display: flex !important;
+      gap: 0 !important;
+      justify-content: center !important;
+      min-height: 0 !important;
+      padding: 0 !important;
+    }
+
+    .awa-b2b-promo-bar__text {
+      color: @awa-white !important;
+      font-size: 12px !important;
+      font-weight: 400 !important;
+      letter-spacing: 0 !important;
+      line-height: 1.35 !important;
+      margin: 0 !important;
+
+      em {
+        color: @awa-white !important;
+        font-style: italic !important;
+      }
+    }
+
+    .awa-b2b-promo-bar__cta {
+      color: @awa-white !important;
+      font-weight: 700 !important;
+      text-decoration: underline !important;
+      text-decoration-thickness: 1px !important;
+      text-underline-offset: 2px !important;
+      transition: opacity @transition-fast !important;
+
+      &:hover {
+        opacity: 0.88 !important;
+      }
+
+      &:focus-visible {
+        outline: 2px solid @awa-white !important;
+        outline-offset: 2px !important;
+      }
+    }
+  }
+
+  // Ocultar campos de busca por categoria e metadados desnecessários
+  .awa-professional-search {
+    .awa-search-category-wrapper,
+    .field-by-cat-search,
+    .awa-search-helper-copy,
+    .awa-search-meta,
+    p.awa-search-meta {
+      display: none !important;
+    }
+  }
+}
+
+// Mobile: ajustar padding da barra B2B
+@media (max-width: 991px) {
+  .page-wrapper .awa-site-header {
+    .top-header.awa-b2b-promo-bar,
+    .awa-b2b-promo-bar[data-awa-header-utility] {
+      padding: @sp-1 12px !important;
+
+      .awa-b2b-promo-bar__text {
+        font-size: 11px !important;
+        line-height: 1.4 !important;
+      }
+    }
+
+    // Ocultar nav bar e auth prompt em mobile
+    .awa-header-auth-prompt,
+    .header-control.header-nav,
+    .header-control.header-nav.awa-nav-bar {
+      display: none !important;
+    }
+  }
+}
+
+
+// ===========================================================================
+// 2. HEADER PRINCIPAL  (desktop ≥ 992px)
+//    Altura ~72px, fundo branco, padding 10px vertical.
+//    Layout: logo (flex-shrink:0) | busca (flex:1) | conta + carrinho
+// ===========================================================================
+
+@media (min-width: 992px) {
+
+  .page-wrapper .awa-site-header {
+
+    // ── Containers max-width alinhados ──────────────────────────────────────
+    .awa-b2b-promo-bar > .container,
+    .awa-main-header .header-main > .container,
+    .header-control.awa-nav-bar > .container {
+      max-width: @grid-max !important;
+      padding-inline: 0 !important;
+      width: ~"min(100%, 1440px)" !important;
+    }
+
+    // ── Fundo e borda do header ──────────────────────────────────────────────
+    .awa-main-header {
+      background: var(--awa-hdr-surface) !important;
+      border-bottom: 0 !important;
+      padding-top:    10px !important;
+      padding-bottom: 10px !important;
+    }
+
+    // ── Row interno: logo + busca + conta ───────────────────────────────────
+    .awa-main-header .awa-main-header__inner.wp-header {
+      align-items: center !important;
+      display: flex !important;
+      gap: @sp-1 !important;           // 8px entre colunas (standardization)
+      max-width: @grid-max !important;
+      margin: 0 auto !important;
+      min-height: @h-header-main !important;
+      padding-block: @sp-2 !important;
+      width: 100% !important;
+    }
+
+    // ── Ocultar elementos mobile que não pertencem ao header desktop ─────────
+    .awa-main-header .awa-header-mobile-toggle,
+    .awa-main-header .awa-header-cart-link {
+      display: none !important;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // 2a. LOGO
+    // ─────────────────────────────────────────────────────────────────────────
+    .awa-main-header .awa-header-brand-cell {
+      align-items: center !important;
+      display: flex !important;
+      flex: 0 0 auto !important;
+      min-width: 144px !important;
+
+      .logo img {
+        height: auto !important;
+        max-height: 72px !important;
+        width: auto !important;
+      }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // 2b. BARRA DE BUSCA
+    //     44px de altura, border-radius 8px, borda #d9d9d9.
+    //     Botão lupa: fundo vermelho, ícone branco, 48px wide.
+    //     Focus-within: borda vermelha + box-shadow suave.
+    // ─────────────────────────────────────────────────────────────────────────
+    .awa-main-header .awa-header-search-col {
+      flex: 1 1 auto !important;
+      margin: 0 !important;
+      max-width: none !important;
+      min-width: 0 !important;
+      padding: 0 !important;
+
+      // Block + content: preenche a coluna
+      .block-search,
+      .block-content,
+      form.minisearch,
+      form.search-content {
+        width: 100% !important;
+        max-width: 100% !important;
+      }
+
+      // Formulário: o "pill" completo
+      form.minisearch,
+      .block-search form.minisearch,
+      .block-search form.search-content,
+      .block.block-search form.minisearch,
+      .block.block-search form.search-content {
+        align-items: stretch !important;
+        background: var(--awa-hdr-surface) !important;
+        border: 1px solid var(--awa-hdr-border) !important;
+        border-radius: @radius-md !important;  // 8px — referência
+        box-shadow: none !important;
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        gap: 0 !important;
+        height: @h-search !important;
+        min-height: @h-search !important;
+        overflow: hidden !important;
+        padding: 0 !important;
+        width: 100% !important;
+
+        // Focus-within: anel vermelho suave
+        &:focus-within {
+          border-color: var(--awa-hdr-primary) !important;
+          box-shadow: 0 0 0 2px @awa-primary-alpha-12 !important;
+        }
+      }
+
+      // Input
+      form.minisearch input.input-text,
+      form.minisearch #search,
+      form.search-content input.input-text,
+      form.search-content #search {
+        background: transparent !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        color: var(--awa-hdr-text) !important;
+        flex: 1 1 auto !important;
+        font-size: 15px !important;
+        font-weight: 400 !important;
+        height: 100% !important;
+        margin: 0 !important;
+        min-height: 0 !important;
+        outline: 0 !important;
+        padding: 0 @sp-2 !important;
+
+        &::placeholder {
+          color: var(--awa-hdr-placeholder) !important;
+          font-size: 14px !important;
+          opacity: 1 !important;
+        }
+      }
+
+      // Wrapper do botão
+      form.minisearch .actions,
+      form.search-content .actions,
+      form.minisearch .awa-search-action-wrapper,
+      form.search-content .awa-search-action-wrapper {
+        align-items: stretch !important;
+        display: flex !important;
+        flex: 0 0 48px !important;
+        margin: 0 !important;
+        min-width: 48px !important;
+        padding: 0 !important;
+      }
+
+      // Botão lupa: fundo vermelho + ícone branco (pixel-perfect)
+      button.action.search,
+      button.awa-search-btn.action.search,
+      .actions .action.search,
+      .awa-search-action-wrapper .action.search {
+        align-items: center !important;
+        background: var(--awa-hdr-primary) !important;
+        border: 0 !important;
+        border-radius: 0 @radius-sm @radius-sm 0 !important;
+        box-shadow: none !important;
+        color: @awa-white !important;
+        cursor: pointer !important;
+        display: flex !important;
+        height: 100% !important;
+        justify-content: center !important;
+        margin: 0 !important;
+        min-width: 48px !important;
+        padding: 0 !important;
+        position: static !important;
+        transform: none !important;
+        transition: background @transition-fast !important;
+        width: 48px !important;
+
+        &:hover {
+          background: var(--awa-hdr-primary-dark) !important;
+          color: @awa-white !important;
+        }
+
+        &:focus-visible {
+          outline: 2px solid @awa-white !important;
+          outline-offset: -3px !important;
+        }
+
+        svg {
+          color: @awa-white !important;
+          fill: none !important;
+          height: 20px !important;
+          stroke: @awa-white !important;
+          width: 20px !important;
+        }
+
+        // Suprimir pseudo-elementos herdados
+        &::before,
+        &::after {
+          content: none !important;
+          display: none !important;
+        }
+      }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // 2c. ÁREA DIREITA: auth prompt + carrinho
+    // ─────────────────────────────────────────────────────────────────────────
+    .awa-main-header .awa-header-right-col {
+      align-items: center !important;
+      display: flex !important;
+      flex: 0 0 auto !important;
+      gap: @sp-3 !important;  // 24px
+      justify-content: flex-end !important;
+    }
+
+    // Auth prompt (ícone pessoa + texto + links)
+    .awa-main-header .awa-header-auth-prompt {
+      align-items: center !important;
+      display: flex !important;
+      gap: 12px !important;
+
+      &__icon {
+        color: var(--awa-hdr-primary) !important;
+        flex-shrink: 0 !important;
+        height: 24px !important;
+        stroke: var(--awa-hdr-primary) !important;
+        width: 24px !important;
+      }
+
+      &__text {
+        color: var(--awa-hdr-muted) !important;
+        font-size: 12px !important;
+        line-height: 1.35 !important;
+        max-width: 176px !important;
+        white-space: normal !important;
+      }
+
+      &__link {
+        color: var(--awa-hdr-text) !important;
+        font-weight: 700 !important;
+        text-decoration: none !important;
+        transition: color @transition-fast !important;
+
+        &:hover {
+          color: var(--awa-hdr-primary) !important;
+          text-decoration: underline !important;
+          text-underline-offset: 2px !important;
+        }
+
+        &:focus-visible {
+          outline: 2px solid var(--awa-hdr-primary) !important;
+          outline-offset: 2px !important;
+        }
+      }
+    }
+
+    // Botão do carrinho: fundo vermelho 44×44
+    .awa-main-header .awa-header-minicart .minicart-wrapper {
+
+      .action.showcart {
+        align-items: center !important;
+        background: var(--awa-hdr-primary) !important;
+        border: none !important;
+        border-radius: var(--awa-hdr-radius) !important;
+        box-shadow: none !important;
+        color: @awa-white !important;
+        display: inline-flex !important;
+        height: @h-cart-btn !important;
+        justify-content: center !important;
+        min-width: @h-cart-btn !important;
+        padding: 0 !important;
+        position: relative !important;
+        transition: background @transition-fast !important;
+        width: @h-cart-btn !important;
+
+        &:hover {
+          background: var(--awa-hdr-primary-dark) !important;
+          color: @awa-white !important;
+        }
+
+        &:focus-visible {
+          outline: 2px solid @awa-white !important;
+          outline-offset: -3px !important;
+          box-shadow: 0 0 0 3px var(--awa-hdr-primary) !important;
+        }
+
+        &::before {
+          color: @awa-white !important;
+          font-size: 22px !important;
+          line-height: 1 !important;
+        }
+      }
+
+      // Badge: fundo branco + texto vermelho (contraste sobre fundo vermelho)
+      .counter.qty {
+        align-items: center !important;
+        background: @awa-white !important;
+        border: 1.5px solid var(--awa-hdr-primary) !important;
+        border-radius: 999px !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15) !important;
+        color: var(--awa-hdr-primary) !important;
+        display: inline-flex !important;
+        font-size: 10px !important;
+        font-weight: 700 !important;
+        height: 18px !important;
+        justify-content: center !important;
+        min-width: 18px !important;
+        padding: 0 4px !important;
+        position: absolute !important;
+        right: -4px !important;
+        top: -4px !important;
+
+        &.empty {
+          display: none !important;
+        }
+      }
+    }
+
+    // Elementos redundantes / fallback: ocultar no desktop
+    .awa-main-header .awa-header-cart-fallback,
+    .awa-main-header .awa-minicart-label {
+      display: none !important;
+    }
+  }
+}
+
+// ≥1200px: ampliar gaps
+@media (min-width: 1200px) {
+  .page-wrapper .awa-site-header {
+    .awa-main-header .awa-main-header__inner.wp-header {
+      gap: @sp-3 !important;  // 24px
+    }
+    .awa-main-header .awa-header-right-col {
+      gap: @sp-4 !important;  // 32px
+    }
+  }
+}
+
+
+// ===========================================================================
+// 3. NAVBAR DESKTOP  (≥992px)
+//    ~52px, fundo #f2f2f2, borda superior/inferior suave.
+//    Botão "≡ Departamentos" vermelho 290px.
+//    Links primários: cor texto, hover vermelho.
+// ===========================================================================
+
+@media (min-width: 992px) {
+
+  .page-wrapper .awa-site-header {
+
+    // Container alinhado
+    .header-control.awa-nav-bar > .container {
+      max-width: @grid-max !important;
+      padding-left: @sp-3 !important;
+      padding-right: @sp-3 !important;
+      margin: 0 auto !important;
+      box-sizing: border-box !important;
+      width: 100% !important;
+    }
+
+    // Faixa da navbar
+    .header-control.header-nav.awa-nav-bar,
+    .header-control.awa-nav-bar {
+      background: var(--awa-red, #b73337) !important;
+      border-bottom: 1px solid rgba(0,0,0,0.15) !important;
+      border-top: none !important;
+      min-height: var(--awa-hdr-navbar-h) !important;
+      padding: 0 !important;
+      position: relative !important;
+      z-index: 150 !important;
+      isolation: isolate;
+    }
+
+    // Inner row
+    .header-control.awa-nav-bar .awa-nav-bar__inner {
+      align-items: stretch !important;
+      display: flex !important;
+      gap: 0 !important;
+      min-height: var(--awa-hdr-navbar-h) !important;
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+
+    // ─── Botão Departamentos ──────────────────────────────────────────────────
+    .header-control.awa-nav-bar .awa-header-categories {
+      display: flex !important;
+      flex: 0 0 @w-departments !important;
+      max-width: @w-departments !important;
+      min-width: @w-departments !important;
+      flex-shrink: 0 !important;
+      align-self: stretch;
+      flex-direction: column !important;
+      justify-content: center !important;
+      position: relative !important;
+    }
+
+    // Garantir que .section-item-content não colapsa (Magento collapsible JS fix)
+    .header-control.awa-nav-bar .awa-header-categories .section-items > .section-item-content {
+      display: block !important;
+      height: auto !important;
+      min-height: var(--awa-hdr-navbar-h, 52px) !important;
+      overflow: visible !important;
+      width: 100% !important;
+    }
+
+    // Ocultar título collapsible (só aparece em mobile)
+    .header-control.awa-nav-bar .awa-header-categories .section-item-title {
+      display: none !important;
+    }
+
+    // Botão trigger: vermelho, ícone hamburger, texto branco
+    .header-control.awa-nav-bar .awa-header-categories .our_categories,
+    .header-control.awa-nav-bar .awa-header-categories .our_categories.title-category-dropdown,
+    .header-control.awa-nav-bar .nav-sections.category-dropdown .section-item-title {
+      align-items: center !important;
+      background: var(--awa-hdr-primary) !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+      color: @awa-white !important;
+      cursor: pointer !important;
+      display: flex !important;
+      gap: 12px !important;
+      height: var(--awa-hdr-navbar-h) !important;
+      letter-spacing: 0 !important;
+      padding: 0 20px !important;
+      text-transform: none !important;
+      white-space: nowrap !important;
+      width: 100% !important;
+
+      span,
+      a {
+        color: @awa-white !important;
+        font-size: 14px !important;
+        font-weight: 700 !important;
+      }
+
+      .vm-icon,
+      .vm-icon i {
+        color: @awa-white !important;
+        display: inline-flex !important;
+        flex-shrink: 0 !important;
+        font-size: 16px !important;
+      }
+
+      &:hover {
+        background: var(--awa-hdr-primary-dark) !important;
+      }
+
+      // Arredondamento inferior removido quando aberto
+      &[aria-expanded="true"],
+      &.active {
+        border-bottom-left-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
+      }
+    }
+
+    // Dropdown de categorias: absoluto abaixo do trigger
+    .navigation.verticalmenu.side-verticalmenu {
+      position: relative !important;
+      width: 100% !important;
+
+      > ul.togge-menu.list-category-dropdown {
+        position: absolute !important;
+        top: 100% !important;
+        left: 0 !important;
+        z-index: 9000 !important;
+        width: @w-departments !important;
+        min-width: @w-departments !important;
+        max-width: @w-departments !important;
+      }
+    }
+
+    // Visibilidade forçada (Magento collapsible JS aplica display:none via inline style)
+    .navigation.verticalmenu.side-verticalmenu {
+      display: block !important;
+      visibility: visible !important;
+      overflow: visible !important;
+
+      .section-item-content {
+        display: block !important;
+        width: 100% !important;
+        overflow: visible !important;
+      }
+    }
+
+    // Garantir menu vertical visível em páginas internas
+    // (awa-bundle-pdp.css aplica display:none em body:not(.cms-index-index))
+    .header-control .awa-header-categories.menu_left_home1,
+    .header-control .menu_left_home1 {
+      display: flex !important;
+    }
+
+    // ─── Links primários ───────────────────────────────────────────────────
+    .header-control.awa-nav-bar .awa-header-primary-nav,
+    .header-control.awa-nav-bar .awa-header-primary-nav .header-wrapper-sticky,
+    .header-control.awa-nav-bar .awa-header-primary-nav .container-header-sticky,
+    .header-control.awa-nav-bar .awa-header-primary-nav .col-sticky-logo,
+    .header-control.awa-nav-bar .awa-header-primary-nav .top-menu,
+    .header-control.awa-nav-bar .awa-header-primary-nav .navigation.custommenu,
+    .header-control.awa-nav-bar .awa-header-primary-nav .navigation.custommenu > ul {
+      align-items: stretch !important;
+      display: flex !important;
+      flex: 1 1 auto !important;
+    }
+
+    .header-control.awa-nav-bar .menu_primary nav > ul > li > a,
+    .header-control.awa-nav-bar .menu_primary .level0 > a,
+    .header-control.awa-nav-bar .awa-header-primary-nav .navigation.custommenu li.level0 > a {
+      align-items: center !important;
+      background: transparent !important;
+      border: 0 !important;
+      color: var(--awa-hdr-text) !important;
+      display: inline-flex !important;
+      font-size: 15px !important;
+      font-weight: 500 !important;
+      height: var(--awa-hdr-navbar-h) !important;
+      letter-spacing: 0 !important;
+      padding: 0 22px !important;
+      text-decoration: none !important;
+      text-transform: none !important;
+      transition: color @transition-fast !important;
+      white-space: nowrap !important;
+
+      &:hover {
+        background: transparent !important;
+        color: var(--awa-hdr-primary) !important;
+      }
+
+      &:focus-visible {
+        outline: 2px solid var(--awa-hdr-primary) !important;
+        outline-offset: -2px !important;
+        border-radius: @radius-sm !important;
+      }
+
+      // Suprimir chevrons/badges herdados
+      &::after {
+        content: none !important;
+        display: none !important;
+      }
+    }
+
+    // Ocultar seletor de idioma na navbar
+    .header-control.awa-nav-bar .awa-header-locale {
+      display: none !important;
+    }
+
+    // Ocultar controles mobile que aparecem no desktop via bundle tardio
+    .awa-site-header .awa-nav-bar .awa-header-primary-nav.section-items.category-dropdown-items {
+      background: transparent !important;
+    }
+    .awa-site-header .category-dropdown-item-title.nav-sections {
+      display: none !important;
+    }
+    .page-wrapper .awa-nav-close {
+      display: none !important;
+    }
+  }
+}
+
+// 1280px: departamentos levemente menor
+@media (max-width: 1280px) {
+  .page-wrapper .awa-site-header {
+    .header-control.awa-nav-bar .awa-header-categories,
+    .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown {
+      flex-basis: 260px !important;
+      max-width: 260px !important;
+      min-width: 260px !important;
+      width: 260px !important;
+    }
+  }
+}
+
+// 1024px: tablet landscape
+@media (max-width: 1024px) {
+  .page-wrapper .awa-site-header {
+    .header-control.awa-nav-bar > .container {
+      padding-left: @sp-2 !important;
+      padding-right: @sp-2 !important;
+    }
+    .header-control.awa-nav-bar .awa-header-categories,
+    .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown {
+      flex-basis: 240px !important;
+      max-width: 240px !important;
+      min-width: 240px !important;
+      width: 240px !important;
+    }
+  }
+}
+
+
+// ===========================================================================
+// 4. MINICART DRAWER (painel lateral direito)
+//    Abre como side panel full-height, 380px, z-index 1300.
+//    Backdrop: rgba overlay via ::before.
+// ===========================================================================
+
+// Spinner de busca: ocultar sempre
+.page-wrapper #header.header-container[data-awa-header-shell="true"] {
+  .awa-header-search-col .block-search.awa-professional-search .awa-search-spinner {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    animation: none !important;
+  }
+}
+
+// Drawer: estado aberto
+.page-wrapper #header.header-container[data-awa-header-shell="true"] .minicart-wrapper {
+  // z-index base
+  z-index: 100130 !important;
+
+  .mage-dropdown-dialog,
+  .block-minicart {
+    z-index: 100130 !important;
+  }
+
+  // Backdrop via ::before no .block-minicart
+  .block-minicart::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+    opacity: 0;
+    pointer-events: none;
+    z-index: -1;
+    transition: opacity 220ms ease;
+  }
+
+  &.active .block-minicart::before,
+  &.show  .block-minicart::before,
+  .block-minicart._active::before {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  // Painel principal aberto
+  &.active .block-minicart,
+  &.show  .block-minicart,
+  .block-minicart._active {
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    left: auto !important;
+    width: ~"min(380px, 94vw)" !important;
+    max-width: ~"min(380px, 94vw)" !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    border-radius: 0 !important;
+    border-top: 0 !important;
+    border-right: 0 !important;
+    border-left: 1px solid @awa-border-soft !important;
+    box-shadow: -8px 0 32px rgba(15, 23, 42, 0.14) !important;
+    z-index: 1300 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    overscroll-behavior: contain;
+    padding: 0 !important;
+  }
+
+  // Botão trigger: ocultar enquanto drawer está aberto
+  &.active > .showcart,
+  &.show  > .showcart,
+  > .showcart[aria-expanded="true"] {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  // Suporte ao mage-dropdown-dialog
+  .mage-dropdown-dialog.active,
+  .mage-dropdown-dialog[aria-hidden="false"],
+  .mage-dropdown-dialog[style*="display: block"],
+  .mage-dropdown-dialog[style*="display:block"],
+  .showcart[aria-expanded="true"] + .mage-dropdown-dialog {
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    left: auto !important;
+    width: ~"min(380px, 94vw)" !important;
+    max-width: ~"min(380px, 94vw)" !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    background: @awa-white !important;
+    border-left: 1px solid @awa-border-soft !important;
+    border-radius: 0 !important;
+    box-shadow: 0 0 0 100vmax rgba(15, 23, 42, 0.45), -8px 0 32px rgba(15, 23, 42, 0.14) !important;
+    z-index: 1300 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+
+    // Inner wrapper: fill
+    > #minicart-content-wrapper {
+      flex: 1 1 auto !important;
+      min-height: 0 !important;
+      display: flex !important;
+      flex-direction: column !important;
+    }
+
+    // O .block-minicart dentro do dialog: estático, preenche o drawer
+    .block-minicart {
+      position: static !important;
+      top: auto !important;
+      right: auto !important;
+      bottom: auto !important;
+      left: auto !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      height: 100% !important;
+      min-height: 100% !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+    }
+  }
+}
+
+
+// ===========================================================================
+// 5. MOBILE  (<992px)
+//    Grid 2-linhas: [nav | logo | cart] + [search search search]
+//    Promo bar: font-size 11px, padding menor.
+// ===========================================================================
+
+@media (max-width: 991px) {
+
+  // Grid mobile do wp-header
+  .page-wrapper .awa-site-header .header .header-main .wp-header[data-awa-header-row],
+  .page-wrapper .awa-site-header .header .header_main .wp-header[data-awa-header-row] {
+    display: grid !important;
+    grid-template-columns: 44px minmax(0, 1fr) 44px !important;
+    grid-template-rows: auto auto !important;
+    grid-template-areas:
+      'nav brand cart'
+      'search search search' !important;
+    align-items: center !important;
+    column-gap: 12px !important;
+    row-gap: 10px !important;
+    width: 100% !important;
+    padding-block: 0 !important;
+    padding-inline: @sp-2 !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  // Primary-row: dissolve no grid pai
+  .page-wrapper .awa-site-header .header .awa-header-primary-row {
+    display: contents !important;
+  }
+
+  // Busca mobile: botão vermelho, pill direito
+  .page-wrapper .awa-site-header .header .wp-header[data-awa-header-row] > .top-search {
+    button.action.search,
+    button.awa-search-btn {
+      background: var(--awa-hdr-primary) !important;
+      color: @awa-white !important;
+      border-radius: 0 9999px 9999px 0 !important;
+      min-width: 44px !important;
+      width: 44px !important;
+      height: 100% !important;
+
+      &:hover {
+        background: var(--awa-hdr-primary-dark) !important;
+      }
+
+      svg {
+        color: @awa-white !important;
+        stroke: @awa-white !important;
+        fill: none !important;
+      }
+    }
+  }
+
+  // Dropdown de categorias: estático com scroll em mobile
+  .page-wrapper .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown {
+    position: static !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 320px !important;
+    overflow-y: auto !important;
+  }
+
+  // Header principal: padding menor
+  .page-wrapper .awa-site-header .header.awa-main-header {
+    padding: 8px @sp-2 !important;
+  }
+}
+
+// 480px: padding mínimo + font-size ≥16px (evita zoom iOS no input)
+@media (max-width: 480px) {
+  .page-wrapper .awa-site-header .header.awa-main-header {
+    padding: 8px 12px !important;
+  }
+  .page-wrapper .awa-site-header input#search {
+    font-size: 16px !important;
+  }
+}
+
+
+// ===========================================================================
+// 6. CORREÇÃO: z-index do page-wrapper (revert hack legado)
+//    awa-home-vertical-menu-shell-fix.css aplicava z-index:9999 ao page-wrapper
+//    criando um stacking context global que bloqueava minicart e modais.
+// ===========================================================================
+body .page-wrapper {
+  z-index: auto !important;
+}
+
+
+// ===========================================================================
+// 7. ACESSIBILIDADE — Focus rings WCAG 2.1 AA
+//    :focus-visible para keyboard nav; sem outline em clique de mouse.
+//    Skip-link para leitores de tela.
+// ===========================================================================
+
+// Ring padrão: vermelho primário
+*:focus-visible {
+  outline: 2px solid var(--awa-primary, @awa-primary) !important;
+  outline-offset: 2px !important;
+  border-radius: 2px;
+}
+
+// Suprimir outline em clique (apenas teclado)
+*:focus:not(:focus-visible) {
+  outline: none !important;
+}
+
+// Skip-link
+.skip-to-main-content {
+  position: absolute !important;
+  top: -100% !important;
+  left: @sp-1 !important;
+  z-index: 99999 !important;
+  background: @awa-primary !important;
+  color: @awa-white !important;
+  padding: @sp-1 @sp-2 !important;
+  border-radius: @radius-sm !important;
+  font-weight: 700 !important;
+  font-size: 14px !important;
+  text-decoration: none !important;
+  transition: top 0.15s ease !important;
+
+  &:focus {
+    top: @sp-1 !important;
+  }
+}

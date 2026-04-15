@@ -1,0 +1,709 @@
+/* ============================================================================
+   AWA Search Autocomplete — Clean Modern Professional
+   v4.0  2026-04-13
+   CSS puro. Usa custom properties do design system AWA.
+   NÃO MEXE no layout do form search do cabeçalho.
+   ============================================================================ */
+
+/* === A. CRITICAL OVERRIDES ================================================ */
+
+/* A1. Force autocomplete VISIBLE when _active — overrides [hidden] attribute,
+       themes.css display:none, and any other source. */
+.mst-searchautocomplete__autocomplete._active {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    height: auto !important;
+    min-height: 0 !important;
+}
+
+/* A2. Force overflow visible on form search when dropdown is active
+       so the absolutely-positioned dropdown is not clipped. */
+body .page-wrapper #header.header-container[data-awa-header-shell="true"] #search_mini_form:has(.mst-searchautocomplete__autocomplete._active),
+body .page-wrapper .header-content .block-search #search_mini_form:has(.mst-searchautocomplete__autocomplete._active),
+#search_mini_form:has(.mst-searchautocomplete__autocomplete._active),
+form.minisearch:has(.mst-searchautocomplete__autocomplete._active) {
+    overflow: visible !important;
+}
+
+/* A3. Remove [hidden] override when _active */
+.mst-searchautocomplete__autocomplete._active[hidden] {
+    display: block !important;
+}
+
+
+/* === 1. AUTOCOMPLETE DROPDOWN — Container principal ======================= */
+.mst-searchautocomplete__autocomplete {
+    position: absolute;
+    top: calc(100% + 6px) !important;
+    left: 0 !important;
+    right: auto !important;
+    width: 100% !important;
+    max-width: min(860px, calc(100vw - 32px)) !important;
+    background: #fff;
+    border: 1px solid #e2e2e2;
+    border-radius: 12px !important;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, .10),
+                0 4px 12px rgba(0, 0, 0, .05);
+    z-index: 100130 !important;
+    text-align: left;
+    overflow: hidden;
+    border-top: 2px solid var(--awa-brand-primary, #b73337) !important;
+    margin-top: 0 !important;
+}
+
+.mst-searchautocomplete__autocomplete._active.mst-2-cols {
+    width: min(860px, calc(100vw - 32px)) !important;
+}
+
+
+/* === 2. WRAPPER & RESULTS ================================================= */
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__wrapper {
+    display: flex;
+    flex-direction: column;
+    max-height: 72vh;
+    overflow: hidden;
+}
+
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__results {
+    height: 100%;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0,0,0,.10) transparent;
+}
+
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__results::-webkit-scrollbar { width: 5px; }
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__results::-webkit-scrollbar-track { background: transparent; }
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__results::-webkit-scrollbar-thumb { background: rgba(0,0,0,.10); border-radius: 3px; }
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__results.__all { margin-bottom: 48px; }
+
+
+/* === 3. INDEX SECTION TITLES ============================================== */
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__index-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px 8px;
+    margin: 0;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: #888;
+    border-bottom: 1px solid #f0f0f0;
+    background: #fafafa;
+}
+
+
+/* === 4. PRODUCT ITEMS ===================================================== */
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid #f3f3f3;
+    cursor: pointer;
+    transition: background-color .15s ease;
+}
+
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product:last-child {
+    border-bottom: none;
+}
+
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product:hover,
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product._active {
+    background: #f8f9fa;
+}
+
+/* Product Image */
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product .mst-product-image-wrapper {
+    flex: 0 0 64px;
+    width: 64px;
+    height: 64px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #f8f8f8;
+    border: 1px solid #eee;
+}
+
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product .mst-product-image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+/* Product Meta */
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product .meta {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product .title {
+    display: block;
+    margin-bottom: 4px;
+    line-height: 1.3;
+}
+
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product .title a {
+    color: #333;
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product._active .title a,
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product:hover .title a {
+    color: var(--awa-brand-primary, #b73337);
+}
+
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product .title .sku {
+    display: inline-block;
+    font-size: 11px;
+    color: #999;
+    font-weight: 400;
+    margin-left: 6px;
+}
+
+/* Description */
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product .description {
+    font-size: 12px;
+    color: #777;
+    line-height: 1.4;
+    max-height: 2.8em;
+    overflow: hidden;
+    margin-bottom: 4px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+/* Price */
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product .store {
+    flex: 0 0 auto;
+    text-align: right;
+}
+
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product .store > .price,
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product .store .price {
+    display: block;
+    font-weight: 700;
+    font-size: 14px;
+    white-space: nowrap;
+    color: var(--awa-brand-primary, #b73337);
+    line-height: 1.3;
+    margin: 0;
+}
+
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product .store .price .price-label {
+    display: block;
+    font-size: 10px;
+    color: #999;
+    font-weight: 400;
+    margin-bottom: 2px;
+}
+
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product .store .price .old-price .price {
+    color: #999;
+    text-decoration: line-through;
+    font-size: 12px;
+    font-weight: 400;
+}
+
+/* Stock Status */
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product .inStock {
+    font-size: 11px; font-weight: 500; color: #16a34a;
+}
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product .outOfStock {
+    font-size: 11px; font-weight: 500; color: #dc2626;
+}
+
+/* Rating */
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product .rating-summary {
+    margin: 2px 0;
+}
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product .rating-summary .rating-result {
+    width: 70px;
+}
+
+/* Add to Cart */
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product .to-cart {
+    margin-top: 6px;
+}
+
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product .to-cart .mst__add_to_cart {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--awa-brand-primary, #b73337);
+    color: #fff !important;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color .15s ease, box-shadow .15s ease;
+    line-height: 1.4;
+}
+
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product .to-cart .mst__add_to_cart:hover {
+    background: var(--awa-brand-hover, #8e2629);
+    box-shadow: 0 2px 8px rgba(183, 51, 55, .25);
+}
+
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product .to_cart_message {
+    padding: 4px 8px; font-size: 11px; border-radius: 4px; margin-top: 4px;
+}
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product .to_cart_message.success {
+    color: #16a34a; background: #f0fdf4;
+}
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product .to_cart_message.error {
+    color: #dc2626; background: #fef2f2;
+}
+
+
+/* === 5. NON-PRODUCT ITEMS ================================================= */
+.mst-searchautocomplete__autocomplete ul {
+    list-style: none; margin: 0; padding: 0;
+}
+.mst-searchautocomplete__autocomplete ul li {
+    margin: 0; padding: 8px 16px; cursor: pointer; transition: background-color .12s ease;
+}
+.mst-searchautocomplete__autocomplete ul li:hover,
+.mst-searchautocomplete__autocomplete ul li._active {
+    background: #f8f9fa;
+}
+.mst-searchautocomplete__autocomplete ul li a.title {
+    font-size: 13px; font-weight: 500; color: #333; text-decoration: none; display: block;
+}
+.mst-searchautocomplete__autocomplete ul li._active a.title {
+    color: var(--awa-brand-primary, #b73337);
+}
+
+
+/* === 6. POPULAR SEARCHES ================================================== */
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__index.popular ul {
+    display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 16px 12px;
+}
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__index.popular ul li {
+    float: none; padding: 0; margin: 0; background: none;
+}
+
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__index.popular ul li a {
+    display: inline-block;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #666;
+    background: #f5f5f5;
+    border-radius: 20px;
+    text-decoration: none;
+    border: 1px solid #eee;
+    transition: all .15s ease;
+}
+
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__index.popular ul li:hover a,
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__index.popular ul li a:hover {
+    background: #fff;
+    border-color: var(--awa-brand-primary, #b73337);
+    color: var(--awa-brand-primary, #b73337);
+}
+
+
+/* === 7. SEARCH QUERY SUGGESTIONS ========================================== */
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_search_query {
+    display: flex; align-items: center; justify-content: space-between;
+}
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_search_query a { float: none; }
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_search_query .num_results {
+    float: none; font-size: 11px; color: #999; font-weight: 400;
+    background: #f5f5f5; padding: 2px 8px; border-radius: 10px;
+}
+
+
+/* === 8. SHOW ALL / EMPTY / CLOSE / SPINNER ================================ */
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__show-all {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 48px;
+    border-top: 1px solid #e5e5e5;
+    background: #fafafa;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__show-all a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--awa-brand-primary, #b73337);
+    text-decoration: none;
+    padding: 8px 20px;
+    border-radius: 6px;
+    transition: background-color .15s ease;
+}
+
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__show-all a:hover {
+    background: rgba(183, 51, 55, .06);
+}
+
+/* Empty */
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__empty-result {
+    padding: 32px 24px;
+    text-align: center;
+    color: #888;
+    font-size: 13px;
+    background: #fafafa;
+}
+
+/* Close (mobile) */
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__close {
+    display: none;
+    position: absolute;
+    right: 8px;
+    top: 8px;
+    width: 28px;
+    height: 28px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #999;
+    cursor: pointer;
+    text-align: center;
+    line-height: 28px;
+    border-radius: 50%;
+    background: #f5f5f5;
+    transition: background-color .15s ease;
+    z-index: 2;
+}
+
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__close:hover {
+    background: #e5e5e5; color: #333;
+}
+
+/* Spinner */
+.mst-searchautocomplete__spinner {
+    display: none; position: absolute; top: 12px; right: 12px; width: 18px; height: 18px;
+}
+.mst-searchautocomplete__autocomplete._loading .mst-searchautocomplete__spinner { display: block; }
+
+.mst-searchautocomplete__spinner .spinner-item {
+    box-sizing: border-box;
+    display: block;
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border: 2px solid transparent;
+    border-top-color: var(--awa-brand-primary, #b73337);
+    border-radius: 50%;
+    animation: awa-ac-spin .8s cubic-bezier(.5,0,.5,1) infinite;
+}
+
+.mst-searchautocomplete__spinner .spinner-item-1 { animation-delay: -.3s; }
+.mst-searchautocomplete__spinner .spinner-item-2 { animation-delay: -.2s; }
+.mst-searchautocomplete__spinner .spinner-item-3 { animation-delay: -.1s; }
+
+@keyframes awa-ac-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* Text highlight */
+.mst-searchautocomplete__highlight {
+    font-weight: 700; color: var(--awa-brand-primary, #b73337); background: none;
+}
+.mst-searchautocomplete__autocomplete a.title i {
+    color: #999; display: inline; font-style: normal;
+}
+
+
+/* === 9. TYPEAHEAD OVERLAY ================================================= */
+input.mst-search-autocomplete__typeahead-overlay {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    border: none !important;
+    background: transparent !important;
+    color: #ccc !important;
+    pointer-events: none !important;
+    z-index: -1 !important;
+    opacity: .5 !important;
+    box-shadow: none !important;
+    outline: none !important;
+    padding: inherit !important;
+    font: inherit !important;
+}
+
+
+/* === 10. DESKTOP 2-COLUMN LAYOUT ========================================== */
+@media (min-width: 768px) {
+    .mst-searchautocomplete__autocomplete._active { min-width: 520px; }
+
+    .mst-searchautocomplete__autocomplete._active.mst-2-cols {
+        width: min(860px, calc(100vw - 32px)) !important;
+        position: absolute;
+    }
+
+    .mst-searchautocomplete__autocomplete._active.mst-2-cols .mst-searchautocomplete__index {
+        clear: left;
+        float: left;
+        display: block;
+        position: relative;
+        max-width: 240px;
+        width: 240px;
+        padding-bottom: 2rem;
+        box-sizing: border-box;
+    }
+
+    .mst-searchautocomplete__autocomplete._active.mst-2-cols .mst-searchautocomplete__index .mst-searchautocomplete__index-title {
+        margin-right: 0;
+    }
+
+    .mst-searchautocomplete__autocomplete._active.mst-2-cols div.magento_catalog_product {
+        width: calc(100% - 240px);
+        max-width: calc(100% - 240px);
+        clear: right;
+        float: right;
+        border-left: 1px solid #f0f0f0;
+        padding-bottom: 0;
+    }
+
+    .mst-searchautocomplete__autocomplete._active.mst-2-cols .mst-searchautocomplete__show-all {
+        clear: both;
+    }
+}
+
+
+/* === 11. TABLET =========================================================== */
+@media (min-width: 768px) and (max-width: 1024px) {
+    .mst-searchautocomplete__autocomplete {
+        max-width: min(720px, calc(100vw - 32px)) !important;
+    }
+
+    .mst-searchautocomplete__autocomplete._active.mst-2-cols {
+        width: min(720px, calc(100vw - 32px)) !important;
+    }
+
+    .mst-searchautocomplete__autocomplete._active.mst-2-cols .mst-searchautocomplete__index {
+        max-width: 200px; width: 200px;
+    }
+
+    .mst-searchautocomplete__autocomplete._active.mst-2-cols div.magento_catalog_product {
+        width: calc(100% - 200px); max-width: calc(100% - 200px);
+    }
+
+    .mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product .mst-product-image-wrapper {
+        flex: 0 0 56px; width: 56px; height: 56px;
+    }
+}
+
+
+/* === 12. MOBILE =========================================================== */
+@media (max-width: 767px) {
+    .mst-searchautocomplete__autocomplete {
+        position: fixed !important;
+        top: auto !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: 70vh;
+        border-radius: 16px 16px 0 0 !important;
+        border: none !important;
+        border-top: 2px solid var(--awa-brand-primary, #b73337) !important;
+        box-shadow: 0 -16px 48px rgba(0,0,0,.15);
+        z-index: 100200 !important;
+    }
+
+    .mst-searchautocomplete__autocomplete .mst-searchautocomplete__close {
+        display: flex; align-items: center; justify-content: center;
+    }
+
+    .mst-searchautocomplete__autocomplete .mst-searchautocomplete__wrapper {
+        max-height: 65vh;
+    }
+
+    .mst-searchautocomplete__autocomplete._active.mst-2-cols .mst-searchautocomplete__index,
+    .mst-searchautocomplete__autocomplete._active.mst-2-cols div.magento_catalog_product {
+        float: none; clear: none; width: 100%; max-width: 100%; border-left: none;
+    }
+
+    .mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product {
+        padding: 10px 14px; gap: 10px;
+    }
+
+    .mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product .mst-product-image-wrapper {
+        flex: 0 0 52px; width: 52px; height: 52px; border-radius: 6px;
+    }
+
+    .mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product .title a { font-size: 13px; }
+
+    .mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product .store .price,
+    .mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product .store > .price {
+        font-size: 13px;
+    }
+
+    .mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product .description { display: none; }
+    .mst-searchautocomplete__autocomplete .mst-searchautocomplete__item.magento_catalog_product .to-cart { display: none; }
+
+    .mst-searchautocomplete__autocomplete .mst-searchautocomplete__show-all { height: 44px; }
+    .mst-searchautocomplete__autocomplete .mst-searchautocomplete__show-all a { font-size: 13px; }
+}
+
+
+/* === 13. SEARCH RESULTS PAGE — Mirasvit Tabs ============================= */
+.mst-search__result-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    list-style: none;
+    margin: 0 0 20px;
+    padding: 0 0 12px;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.mst-search__result-tabs li { margin: 0; padding: 0; }
+
+.mst-search__result-tabs li a {
+    display: inline-flex;
+    align-items: center;
+    padding: 7px 16px;
+    border-radius: 9999px;
+    border: 1px solid #e5e5e5;
+    font-size: 13px;
+    font-weight: 500;
+    color: #555;
+    text-decoration: none;
+    background: #fff;
+    transition: background .15s ease, border-color .15s ease, color .15s ease;
+}
+
+.mst-search__result-tabs li a:hover {
+    border-color: var(--awa-brand-primary, #b73337) !important;
+    color: var(--awa-brand-primary, #b73337) !important;
+    background: rgba(183, 51, 55, .04);
+}
+
+.mst-search__result-tabs li a.active {
+    background: var(--awa-brand-primary, #b73337) !important;
+    border-color: var(--awa-brand-primary, #b73337) !important;
+    color: #fff !important;
+    font-weight: 600 !important;
+}
+
+
+/* === 14. SEARCH RESULTS — Misc Recommendations ============================ */
+/* Override themes.css rules that hide dl.block inside search results */
+.search.results dl.block.mst-search__misc-recommendations,
+.shop-tab-select dl.block.mst-search__misc-recommendations,
+dl.mst-search__misc-recommendations {
+    display: flex !important;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 0;
+    background: #f8f9fa;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    padding: 14px 20px;
+    margin: 0 0 24px;
+}
+
+.mst-search__misc-recommendations dt {
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 4px;
+    width: 100%;
+    flex: 0 0 100%;
+}
+
+.mst-search__misc-recommendations dd {
+    margin: 0;
+    padding: 0;
+}
+
+.mst-search__misc-recommendations dd a {
+    display: inline-block;
+    padding: 4px 12px;
+    margin: 3px 4px 3px 0;
+    font-size: 12px;
+    font-weight: 500;
+    color: #666;
+    background: #fff;
+    border: 1px solid #e5e5e5;
+    border-radius: 20px;
+    text-decoration: none;
+    transition: border-color .15s ease, color .15s ease;
+}
+
+.mst-search__misc-recommendations dd a:hover {
+    border-color: var(--awa-brand-primary, #b73337);
+    color: var(--awa-brand-primary, #b73337);
+}
+
+.mst-search__misc-recommendations dd .count {
+    display: inline-block;
+    font-size: 10px;
+    color: #999;
+    font-weight: 400;
+    margin-left: 2px;
+}
+
+.mst-search__misc-recommendations dd .count::before { content: '('; }
+.mst-search__misc-recommendations dd .count::after  { content: ')'; }
+
+
+/* === 15. SEARCH RESULTS — Index blocks ==================================== */
+.mst-search__index { padding: 0; }
+
+.mst-search__list {
+    list-style: none; margin: 0; padding: 0;
+}
+
+.mst-search__list li {
+    padding: 10px 16px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.mst-search__list li:last-child { border-bottom: none; }
+
+.mst-search__list li a {
+    font-size: 14px; color: #333; font-weight: 500;
+    text-decoration: none; transition: color .15s ease;
+}
+
+.mst-search__list li a:hover { color: var(--awa-brand-primary, #b73337); }
+
+
+/* === 16. SEARCH RESULTS — product fitment badge =========================== */
+.awa-ac-product-fitment {
+    font-size: 11px;
+    color: #16a34a;
+    font-weight: 500;
+    margin-top: 4px;
+}
+
+
+/* === 17. ACCESSIBILITY ==================================================== */
+@media (prefers-reduced-motion: reduce) {
+    .mst-searchautocomplete__autocomplete,
+    .mst-searchautocomplete__autocomplete .mst-searchautocomplete__item,
+    .mst-searchautocomplete__autocomplete .mst-searchautocomplete__show-all a,
+    .mst-searchautocomplete__spinner .spinner-item {
+        transition: none !important;
+        animation: none !important;
+    }
+}

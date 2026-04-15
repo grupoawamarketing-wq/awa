@@ -58,7 +58,7 @@ define([
             loop: false,
             watchOverflow: true,
             breakpoints: {
-                480: { slidesPerView: Math.min(Math.max(mobileItems, 2), items), spaceBetween: 12 },
+                480: { slidesPerView: mobileItems, spaceBetween: 12 },
                 768: { slidesPerView: tabletItems, spaceBetween: 16 },
                 992: { slidesPerView: desktopSmallItems, spaceBetween: 16 },
                 1200: { slidesPerView: desktopItems, spaceBetween: 20 }

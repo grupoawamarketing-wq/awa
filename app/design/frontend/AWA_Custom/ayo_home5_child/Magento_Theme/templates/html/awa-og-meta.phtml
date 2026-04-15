@@ -1,40 +1,39 @@
 <?php
 /**
- * AWA B2B — Open Graph Meta Tags (fallback)
+ * AWA B2B — Open Graph Meta Tags
  *
- * Gera OG tags genéricas APENAS em páginas que o SchemaOrg module NÃO cobre.
- * PDP (catalog_product_view): SchemaOrg já injeta og:type=product, imagem, URL.
- * Category pages: SchemaOrg já injeta og:type=website com dados da categoria.
- *
- * Este template é o fallback para CMS pages, checkout, account, etc.
+ * @var \Magento\Framework\View\Element\Template $block
  */
 declare(strict_types=1);
 
-// SchemaOrg module já cobre PDP e category — não duplicar
-$fullActionName = $block->getRequest()->getFullActionName();
-$coveredActions = [
-    'catalog_product_view',
-    'catalog_category_view',
-];
-if (in_array($fullActionName, $coveredActions, true)) {
+$viewModel = $block->getData('open_graph_view_model') ?: $block->getData('view_model');
+if (!$viewModel instanceof \GrupoAwamotos\Theme\ViewModel\OpenGraph) {
     return;
 }
 
-$pageTitleBlock = $block->getLayout()->getBlock('page.main.title');
-$rawTitle = $pageTitleBlock ? trim((string) $pageTitleBlock->getPageTitle()) : '';
-$title = $block->escapeHtml($rawTitle ?: 'AWA Motos | Peças e Acessórios para Motos');
-$description = 'Distribuidora B2B de peças e acessórios para motos. Bauletos, retrovisores, guidões e mais. Preços exclusivos para lojistas.';
-$image = 'https://awamotos.com/media/logo/stores/1/logo-awa.png';
-$url = $block->escapeUrl($block->getBaseUrl());
+$meta = $viewModel->getMetaData();
+if ($meta === []) {
+    return;
+}
+
+$isProductPage = $meta['type'] === 'product';
 ?>
-<meta property="og:type" content="website"/>
-<meta property="og:site_name" content="AWA Motos"/>
-<meta property="og:title" content="<?= $block->escapeHtmlAttr($title) ?>"/>
-<meta property="og:description" content="<?= $block->escapeHtmlAttr($description) ?>"/>
-<meta property="og:image" content="<?= $block->escapeUrl($image) ?>"/>
-<meta property="og:url" content="<?= $block->escapeUrl($url) ?>"/>
-<meta property="og:locale" content="pt_BR"/>
+<meta property="og:type" content="<?= $block->escapeHtmlAttr($meta['type']) ?>"/>
+<meta property="og:site_name" content="<?= $block->escapeHtmlAttr($meta['site_name']) ?>"/>
+<meta property="og:title" content="<?= $block->escapeHtmlAttr($meta['title']) ?>"/>
+<meta property="og:description" content="<?= $block->escapeHtmlAttr($meta['description']) ?>"/>
+<meta property="og:image" content="<?= $block->escapeUrl($meta['image']) ?>"/>
+<meta property="og:url" content="<?= $block->escapeUrl($meta['url']) ?>"/>
+<meta property="og:locale" content="<?= $block->escapeHtmlAttr($meta['locale']) ?>"/>
+<meta property="og:image:alt" content="<?= $block->escapeHtmlAttr($meta['image_alt']) ?>"/>
+<?php if ($isProductPage && isset($meta['price_amount'], $meta['price_currency'])): ?>
+<meta property="product:price:amount" content="<?= $block->escapeHtmlAttr($meta['price_amount']) ?>"/>
+<meta property="product:price:currency" content="<?= $block->escapeHtmlAttr($meta['price_currency']) ?>"/>
+<?php endif; ?>
+<?php if ($isProductPage && isset($meta['availability'])): ?>
+<meta property="product:availability" content="<?= $block->escapeHtmlAttr($meta['availability']) ?>"/>
+<?php endif; ?>
 <meta name="twitter:card" content="summary_large_image"/>
-<meta name="twitter:title" content="<?= $block->escapeHtmlAttr($title) ?>"/>
-<meta name="twitter:description" content="<?= $block->escapeHtmlAttr($description) ?>"/>
-<meta name="twitter:image" content="<?= $block->escapeUrl($image) ?>"/>
+<meta name="twitter:title" content="<?= $block->escapeHtmlAttr($meta['title']) ?>"/>
+<meta name="twitter:description" content="<?= $block->escapeHtmlAttr($meta['description']) ?>"/>
+<meta name="twitter:image" content="<?= $block->escapeUrl($meta['image']) ?>"/>

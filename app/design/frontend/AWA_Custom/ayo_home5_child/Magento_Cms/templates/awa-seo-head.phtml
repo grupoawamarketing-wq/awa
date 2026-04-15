@@ -1,0 +1,79 @@
+<?php
+/**
+ * AWA Motos - SEO <head> extras for the homepage.
+ * Child theme override: removes fetchpriority="high" from logo preload.
+ * On the homepage, the LCP is the hero slider (preloaded in awa-hero-preload.phtml),
+ * not the logo. Competing fetchpriority="high" resources delay the actual LCP image.
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ */
+$baseUrl = rtrim($block->getBaseUrl(), '/');
+?>
+<link rel="canonical" href="<?= /* @noEscape */ $baseUrl . '/' ?>" />
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@graph": [
+        {
+            "@type": "Organization",
+            "@id": "<?= /* @noEscape */ $baseUrl ?>/#organization",
+            "name": "AWA Motos",
+            "alternateName": "Grupo Awamotos",
+            "url": "<?= /* @noEscape */ $baseUrl ?>/",
+            "logo": {
+                "@type": "ImageObject",
+                "url": "<?= /* @noEscape */ $baseUrl ?>/media/logo/default/logo.png"
+            },
+            "description": "Especialistas em pecas, acessorios e equipamentos para motocicletas. Atendemos varejo e atacado (B2B) em todo o Brasil.",
+            "foundingDate": "2010",
+            "contactPoint": {
+                "@type": "ContactPoint",
+                "telephone": "(16) 3301-1890",
+                "contactType": "customer service",
+                "areaServed": "BR",
+                "availableLanguage": "Portuguese"
+            },
+            "sameAs": [
+                "https://www.facebook.com/awamotos",
+                "https://www.instagram.com/awamotos",
+                "https://www.youtube.com/@awamotos",
+                "https://wa.me/5516997367588"
+            ]
+        },
+        {
+            "@type": "LocalBusiness",
+            "@id": "<?= /* @noEscape */ $baseUrl ?>/#localbusiness",
+            "name": "AWA Motos",
+            "url": "<?= /* @noEscape */ $baseUrl ?>/",
+            "image": "<?= /* @noEscape */ $baseUrl ?>/media/logo/default/logo.png",
+            "telephone": "(16) 3301-1890",
+            "address": {
+                "@type": "PostalAddress",
+                "streetAddress": "Rua Lavineo de Arruda Falcao",
+                "addressLocality": "Araraquara",
+                "addressRegion": "SP",
+                "postalCode": "14808-390",
+                "addressCountry": "BR"
+            },
+            "priceRange": "$$"
+        },
+        {
+            "@type": "WebSite",
+            "@id": "<?= /* @noEscape */ $baseUrl ?>/#website",
+            "name": "AWA Motos",
+            "url": "<?= /* @noEscape */ $baseUrl ?>/",
+            "potentialAction": {
+                "@type": "SearchAction",
+                "target": "<?= /* @noEscape */ $baseUrl ?>/catalogsearch/result/?q={search_term_string}",
+                "query-input": "required name=search_term_string"
+            }
+        }
+    ]
+}
+</script>
+
+<!-- Logo: preloaded without fetchpriority=high (homepage LCP is the hero slider, not the logo).
+     Preloading the logo still helps avoid a late discovery penalty on non-homepage pages. -->
+<link rel="preload"
+      href="<?= /* @noEscape */ $baseUrl ?>/media/logo/websites/1/logo_161x92_1.png"
+      as="image" />

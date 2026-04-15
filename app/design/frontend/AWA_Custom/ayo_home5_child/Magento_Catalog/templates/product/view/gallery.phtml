@@ -21,6 +21,7 @@ $helper = $block->getData('imageHelper');
 $mainImageData = $mainImage ?
     $mainImage->getData('medium_image_url') :
     $helper->getDefaultPlaceholderUrl('image');
+$isPlaceholderImage = !$mainImage || strpos((string) $mainImageData, '/placeholder/') !== false;
 $imageWidth  = $block->getImageAttribute('product_page_image_medium', 'width');
 $imageHeight = $block->getImageAttribute('product_page_image_medium', 'height');
 
@@ -29,7 +30,8 @@ $productName = $block->getProduct() ? $block->getProduct()->getName() : '';
 $altText     = $productName ?: __('Imagem principal do produto');
 ?>
 
-<div class="gallery-placeholder _block-content-loading" data-gallery-role="gallery-placeholder">
+<div class="gallery-placeholder _block-content-loading<?= $isPlaceholderImage ? ' is-placeholder' : '' ?>"
+     data-gallery-role="gallery-placeholder">
     <img
         alt="<?= $escaper->escapeHtmlAttr($altText) ?>"
         class="gallery-placeholder__image"

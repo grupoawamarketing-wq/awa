@@ -75,12 +75,23 @@ if ($banners = $block->getBannerCollection()):
 <!-- Slider desktop (oculto no mobile via Bootstrap .hidden-xs) -->
 <div class="wrapper_slider hidden-xs slider_<?php echo (int) $sliderId; ?>">
     <div class="owl owl-carousel">
-        <?php $slideIndex = 0; foreach ($banners as $banner): if ($banner->getSlideStatus() == '2') { continue; } $slideIndex++; $isFirst = ($slideIndex === 1); ?>
+        <?php $slideIndex = 0; foreach ($banners as $banner): ?>
+            <?php
+            if ($banner->getSlideStatus() == '2') {
+                continue;
+            }
+            $desktopImage = trim((string) $banner->getSlideImage());
+            if ($desktopImage === '') {
+                continue;
+            }
+            $slideIndex++;
+            $isFirst = ($slideIndex === 1);
+            ?>
             <div class="banner_item">
                 <div class="banner_item_bg">
                     <?php
                     $slideAlt = $banner->getSlideText() ?: ($banner->getSlideTitle() ?: '');
-                    $imgHtml  = $block->getImageElement($banner->getSlideImage(), $slideAlt, $isFirst);
+                    $imgHtml  = $block->getImageElement($desktopImage, $slideAlt, $isFirst);
                     if ($isFirst && preg_match('/src="([^"]+)"/', $imgHtml, $_m)) {
                         $_webp = preg_replace('/\.(jpg|jpeg|png)$/i', '.webp', $_m[1]);
                         $imgHtml = '<picture>'
@@ -105,12 +116,25 @@ if ($banners = $block->getBannerCollection()):
 <!-- Slider mobile (visível apenas em xs via Bootstrap .visible-xs) -->
 <div class="wrapper_slider visible-xs slider_<?php echo (int) $sliderId; ?>_mobile">
     <div class="owl owl-carousel">
-        <?php $slideIndex = 0; foreach ($banners as $banner): if ($banner->getSlideStatus() == '2') { continue; } $slideIndex++; $isFirst = ($slideIndex === 1); ?>
+        <?php $slideIndex = 0; foreach ($banners as $banner): ?>
+            <?php
+            if ($banner->getSlideStatus() == '2') {
+                continue;
+            }
+            $desktopImage = trim((string) $banner->getSlideImage());
+            $mobileImage = trim((string) $banner->getSlideImageMobile());
+            $heroImage = $mobileImage !== '' ? $mobileImage : $desktopImage;
+            if ($heroImage === '') {
+                continue;
+            }
+            $slideIndex++;
+            $isFirst = ($slideIndex === 1);
+            ?>
             <div class="banner_item">
                 <div class="banner_item_bg">
                     <?php
                     $slideAlt = $banner->getSlideText() ?: ($banner->getSlideTitle() ?: '');
-                    $imgHtml  = $block->getImageElementMobile($banner->getSlideImageMobile(), $slideAlt, $isFirst);
+                    $imgHtml  = $block->getImageElementMobile($heroImage, $slideAlt, $isFirst);
                     if ($isFirst && preg_match('/src="([^"]+)"/', $imgHtml, $_m)) {
                         $_webp = preg_replace('/\.(jpg|jpeg|png)$/i', '.webp', $_m[1]);
                         $imgHtml = '<picture>'
