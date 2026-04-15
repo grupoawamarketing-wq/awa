@@ -11,6 +11,7 @@ namespace GrupoAwamotos\B2B\Model\Attendant;
 
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Store\Model\ScopeInterface;
 use Psr\Log\LoggerInterface;
 
@@ -84,7 +85,8 @@ class AttendantManager
             ->join(
                 ['a' => $tableAttendant],
                 'ca.attendant_id = a.attendant_id',
-                ['name', 'email', 'phone', 'whatsapp', 'department', 'is_active']
+                ['name', 'email', 'phone', 'whatsapp', 'department', 'is_active',
+                 'chatwoot_agent_id', 'erp_seller_code', 'customer_count', 'max_customers']
             )
             ->where('ca.customer_id = ?', $customerId)
             ->where('a.is_active = ?', 1);
@@ -137,9 +139,16 @@ class AttendantManager
 
     /**
      * Atribui cliente automaticamente ao atendente com menos clientes
+     * Respeita max_customers — não atribui a atendentes que já atingiram o limite
      */
     public function autoAssignCustomer(int $customerId, ?string $department = null): ?int
     {
+        // Verificar se já tem atendente
+        $existing = $this->getCustomerAttendant($customerId);
+        if ($existing) {
+            return (int) $existing['attendant_id'];
+        }
+
         $attendant = $this->getAttendantWithLeastCustomers($department);
 
         if ($attendant) {
@@ -151,11 +160,13 @@ class AttendantManager
             return (int) $attendant['attendant_id'];
         }
 
+        $this->logger->warning('[AttendantManager] No available attendant for auto-assign (all at max capacity)');
         return null;
     }
 
     /**
      * Obtém atendente com menos clientes ativos
+     * Respeita max_customers — só retorna atendentes abaixo do limite
      */
     public function getAttendantWithLeastCustomers(?string $department = null): ?array
     {
@@ -165,6 +176,7 @@ class AttendantManager
         $select = $connection->select()
             ->from($table)
             ->where('is_active = ?', 1)
+            ->where('customer_count < max_customers')
             ->order('customer_count ASC')
             ->limit(1);
 
@@ -177,7 +189,7 @@ class AttendantManager
     }
 
     /**
-     * Obtém clientes de um atendente
+     * Obtém clientes de um atendente com dados do customer
      */
     public function getAttendantCustomers(int $attendantId, int $limit = 100, int $offset = 0): array
     {
@@ -185,9 +197,14 @@ class AttendantManager
         $tableMap = $this->resource->getTableName(self::TABLE_CUSTOMER_ATTENDANT);
 
         $select = $connection->select()
-            ->from($tableMap)
-            ->where('attendant_id = ?', $attendantId)
-            ->order('assigned_at DESC')
+            ->from(['ca' => $tableMap])
+            ->joinLeft(
+                ['ce' => $this->resource->getTableName('customer_entity')],
+                'ca.customer_id = ce.entity_id',
+                ['firstname', 'lastname', 'email' => 'ce.email']
+            )
+            ->where('ca.attendant_id = ?', $attendantId)
+            ->order('ca.assigned_at DESC')
             ->limit($limit, $offset);
 
         return $connection->fetchAll($select);
@@ -226,12 +243,79 @@ class AttendantManager
     }
 
     /**
+     * Recalcula contadores de TODOS os atendentes de uma vez
+     */
+    public function recalculateAllCounts(): array
+    {
+        $connection = $this->resource->getConnection();
+        $tableAttendants = $this->resource->getTableName(self::TABLE_ATTENDANTS);
+        $tableMap = $this->resource->getTableName(self::TABLE_CUSTOMER_ATTENDANT);
+
+        // Capture old counts
+        $oldCounts = $connection->fetchPairs(
+            $connection->select()->from($tableAttendants, ['attendant_id', 'customer_count'])
+        );
+
+        // Single query: UPDATE with subquery
+        $connection->query(
+            "UPDATE {$tableAttendants} a SET customer_count = (
+                SELECT COUNT(*) FROM {$tableMap} ca WHERE ca.attendant_id = a.attendant_id
+            )"
+        );
+
+        // Return summary with old vs new
+        $select = $connection->select()
+            ->from($tableAttendants, ['attendant_id', 'name', 'customer_count', 'max_customers'])
+            ->where('is_active = ?', 1)
+            ->order('customer_count DESC');
+
+        $rows = $connection->fetchAll($select);
+        $result = [];
+        foreach ($rows as $row) {
+            $id = $row['attendant_id'];
+            $result[] = [
+                'attendant_id' => $id,
+                'name' => $row['name'],
+                'old_count' => (int) ($oldCounts[$id] ?? 0),
+                'real_count' => (int) $row['customer_count'],
+                'max_customers' => (int) $row['max_customers'],
+            ];
+        }
+
+        return $result;
+    }
+
+    /**
      * Cria ou atualiza atendente
      */
     public function saveAttendant(array $data): int
     {
         $connection = $this->resource->getConnection();
         $table = $this->resource->getTableName(self::TABLE_ATTENDANTS);
+
+        $chatwootAgentId = null;
+        if (isset($data['chatwoot_agent_id']) && $data['chatwoot_agent_id'] !== '') {
+            if (!is_numeric($data['chatwoot_agent_id'])) {
+                throw new LocalizedException(__('O ID do agente Chatwoot deve ser numérico.'));
+            }
+            $chatwootAgentId = (int) $data['chatwoot_agent_id'];
+        }
+
+        $maxCustomers = 100;
+        if (isset($data['max_customers']) && $data['max_customers'] !== '') {
+            if (!is_numeric($data['max_customers'])) {
+                throw new LocalizedException(__('O limite máximo de clientes deve ser numérico.'));
+            }
+            $maxCustomers = max(0, (int) $data['max_customers']);
+        }
+
+        $adminUserId = null;
+        if (isset($data['admin_user_id']) && $data['admin_user_id'] !== '') {
+            if (!is_numeric($data['admin_user_id'])) {
+                throw new LocalizedException(__('O usuário administrador informado é inválido.'));
+            }
+            $adminUserId = (int) $data['admin_user_id'];
+        }
 
         $attendantData = [
             'name' => $data['name'],
@@ -240,7 +324,10 @@ class AttendantManager
             'whatsapp' => $data['whatsapp'] ?? null,
             'department' => $data['department'] ?? 'sales',
             'is_active' => $data['is_active'] ?? 1,
-            'max_customers' => $data['max_customers'] ?? 100,
+            'max_customers' => $maxCustomers,
+            'chatwoot_agent_id' => $chatwootAgentId,
+            'erp_seller_code' => !empty($data['erp_seller_code']) ? trim((string) $data['erp_seller_code']) : null,
+            'admin_user_id' => $adminUserId,
             'updated_at' => date('Y-m-d H:i:s')
         ];
 
@@ -285,7 +372,6 @@ class AttendantManager
 
     /**
      * Transfere todos os clientes de um atendente para outro
-     * Usa batch UPDATE e insertMultiple para performance
      */
     public function transferAllCustomers(int $fromAttendantId, int $toAttendantId): int
     {
@@ -294,7 +380,6 @@ class AttendantManager
         $tableLog = $this->resource->getTableName(self::TABLE_ATTENDANT_LOG);
         $now = date('Y-m-d H:i:s');
 
-        // Obtém IDs dos clientes antes do batch update
         $select = $connection->select()
             ->from($tableMap, ['customer_id'])
             ->where('attendant_id = ?', $fromAttendantId);
@@ -304,7 +389,7 @@ class AttendantManager
             return 0;
         }
 
-        // Batch UPDATE — uma query para todos
+        // Batch UPDATE
         $connection->update(
             $tableMap,
             ['attendant_id' => $toAttendantId, 'assigned_at' => $now],
@@ -342,7 +427,6 @@ class AttendantManager
 
         $startDate = date('Y-m-d H:i:s', strtotime("-{$days} days"));
 
-        // Novos clientes atribuídos
         $selectNew = $connection->select()
             ->from($tableLog, ['count' => new \Magento\Framework\DB\Sql\Expression('COUNT(*)')])
             ->where('attendant_id = ?', $attendantId)
@@ -350,13 +434,21 @@ class AttendantManager
             ->where('created_at >= ?', $startDate);
 
         $newCustomers = (int) $connection->fetchOne($selectNew);
-
-        // Total de clientes atual
         $totalCustomers = $this->countAttendantCustomers($attendantId);
+
+        // Last assignment date
+        $selectLast = $connection->select()
+            ->from($tableLog, ['created_at'])
+            ->where('attendant_id = ?', $attendantId)
+            ->where('action = ?', 'assigned')
+            ->order('created_at DESC')
+            ->limit(1);
+        $lastAssignment = $connection->fetchOne($selectLast);
 
         return [
             'total_customers' => $totalCustomers,
             'new_customers_period' => $newCustomers,
+            'last_assignment' => $lastAssignment ?: null,
             'period_days' => $days
         ];
     }
@@ -378,8 +470,8 @@ class AttendantManager
     }
 
     /**
-     * Redistribui clientes equilibradamente entre atendentes
-     * Usa batch UPDATE para evitar carregar todos os clientes em memória
+     * Redistribui clientes equilibradamente entre atendentes ativos.
+     * Respeita max_customers. Processa em batches para performance.
      */
     public function redistributeCustomers(?string $department = null): array
     {
@@ -393,84 +485,195 @@ class AttendantManager
         $tableMap = $this->resource->getTableName(self::TABLE_CUSTOMER_ATTENDANT);
         $tableLog = $this->resource->getTableName(self::TABLE_ATTENDANT_LOG);
 
-        // Conta total de clientes sem carregar tudo em memória
-        $countSelect = $connection->select()->from($tableMap, ['count' => new \Magento\Framework\DB\Sql\Expression('COUNT(*)')]);
-        $totalCustomers = (int) $connection->fetchOne($countSelect);
+        // Get all assigned customer IDs
+        $allCustomerIds = $connection->fetchCol(
+            $connection->select()->from($tableMap, ['customer_id'])->order('customer_id ASC')
+        );
 
+        $totalCustomers = count($allCustomerIds);
         if ($totalCustomers === 0) {
             return ['redistributed' => 0, 'total_customers' => 0, 'attendants' => count($attendants)];
         }
 
         $attendantCount = count($attendants);
         $perAttendant = (int) ceil($totalCustomers / $attendantCount);
-        $redistributed = 0;
-        $batchSize = 500;
         $now = date('Y-m-d H:i:s');
+        $redistributed = 0;
+        $offset = 0;
 
-        // Processa em batches usando LIMIT/OFFSET com ORDER BY RAND()
         foreach ($attendants as $index => $attendant) {
             $attendantId = (int) $attendant['attendant_id'];
-            $offset = 0;
+            $max = (int) $attendant['max_customers'];
 
-            // Calcula quantos clientes este atendente deve ter
-            $targetCount = ($index === $attendantCount - 1)
-                ? $totalCustomers - ($perAttendant * $index)
-                : $perAttendant;
-
-            // Processa em batches
-            while ($offset < $targetCount) {
-                $batchLimit = min($batchSize, $targetCount - $offset);
-
-                // Seleciona clientes que NÃO estão com este atendente, em batches
-                $select = $connection->select()
-                    ->from($tableMap, ['customer_id'])
-                    ->where('attendant_id != ?', $attendantId)
-                    ->limit($batchLimit, 0);
-
-                $customerIds = $connection->fetchCol($select);
-
-                if (empty($customerIds)) {
-                    break;
-                }
-
-                // Batch UPDATE
-                $connection->update(
-                    $tableMap,
-                    ['attendant_id' => $attendantId, 'assigned_at' => $now],
-                    ['customer_id IN (?)' => $customerIds]
-                );
-
-                // Log batch (single multi-row insert)
-                $logData = [];
-                foreach ($customerIds as $customerId) {
-                    $logData[] = [
-                        'customer_id' => (int) $customerId,
-                        'attendant_id' => $attendantId,
-                        'previous_attendant_id' => null,
-                        'action' => 'redistributed',
-                        'reason' => 'Redistribuição equilibrada (batch)',
-                        'created_at' => $now
-                    ];
-                }
-                if (!empty($logData)) {
-                    $connection->insertMultiple($tableLog, $logData);
-                }
-
-                $redistributed += count($customerIds);
-                $offset += $batchLimit;
+            // Target count: min between fair share and max_customers
+            $targetCount = min($perAttendant, $max);
+            if ($index === $attendantCount - 1) {
+                // Last attendant gets the remainder
+                $targetCount = min($totalCustomers - $offset, $max);
             }
+
+            $batch = array_slice($allCustomerIds, $offset, $targetCount);
+            if (empty($batch)) {
+                break;
+            }
+
+            // Batch update
+            $connection->update(
+                $tableMap,
+                ['attendant_id' => $attendantId, 'assigned_at' => $now],
+                ['customer_id IN (?)' => $batch]
+            );
+
+            $redistributed += count($batch);
+            $offset += count($batch);
         }
 
-        // Atualiza contadores de todos os atendentes de uma vez
-        foreach ($attendants as $attendant) {
-            $this->updateAttendantCustomerCount((int) $attendant['attendant_id']);
-        }
+        // Recalculate all counts
+        $this->recalculateAllCounts();
+
+        $this->logger->info('[AttendantManager] Redistribution completed', [
+            'redistributed' => $redistributed,
+            'total' => $totalCustomers,
+            'attendants' => $attendantCount,
+        ]);
 
         return [
             'redistributed' => $redistributed,
             'total_customers' => $totalCustomers,
             'attendants' => $attendantCount,
             'target_per_attendant' => $perAttendant
+        ];
+    }
+
+
+    /**
+     * Atribui automaticamente clientes sem atendente (em massa).
+     * Distribui equilibradamente respeitando max_customers.
+     *
+     * @return array{assigned: int, skipped: int, remaining: int, total_unassigned: int}
+     */
+    public function assignUnassignedCustomers(?string $department = null, int $batchLimit = 500): array
+    {
+        $connection = $this->resource->getConnection();
+        $tableMap = $this->resource->getTableName(self::TABLE_CUSTOMER_ATTENDANT);
+        $tableLog = $this->resource->getTableName(self::TABLE_ATTENDANT_LOG);
+
+        // Get unassigned customer IDs
+        $select = $connection->select()
+            ->from(
+                ['ce' => $this->resource->getTableName('customer_entity')],
+                ['entity_id']
+            )
+            ->joinLeft(
+                ['ca' => $tableMap],
+                'ce.entity_id = ca.customer_id',
+                []
+            )
+            ->where('ca.customer_id IS NULL')
+            ->order('ce.entity_id ASC')
+            ->limit($batchLimit);
+
+        $unassignedIds = $connection->fetchCol($select);
+
+        if (empty($unassignedIds)) {
+            return ['assigned' => 0, 'skipped' => 0, 'remaining' => 0, 'total_unassigned' => 0];
+        }
+
+        // Get attendants with capacity
+        $attendants = $this->getActiveAttendants($department);
+        $capacities = [];
+        foreach ($attendants as $att) {
+            $available = (int) $att['max_customers'] - (int) $att['customer_count'];
+            if ($available > 0) {
+                $capacities[(int) $att['attendant_id']] = $available;
+            }
+        }
+
+        if (empty($capacities)) {
+            return [
+                'assigned' => 0,
+                'skipped' => count($unassignedIds),
+                'remaining' => count($unassignedIds),
+                'total_unassigned' => count($unassignedIds),
+                'message' => 'Todos os atendentes estão no limite máximo',
+            ];
+        }
+
+        $assigned = 0;
+        $skipped = 0;
+        $now = date('Y-m-d H:i:s');
+        $inserts = [];
+        $logInserts = [];
+        $attendantIds = array_keys($capacities);
+        $attIndex = 0;
+
+        foreach ($unassignedIds as $customerId) {
+            // Find next attendant with capacity (round-robin)
+            $found = false;
+            $checked = 0;
+            while ($checked < count($attendantIds)) {
+                $attId = $attendantIds[$attIndex % count($attendantIds)];
+                $attIndex++;
+                $checked++;
+
+                if ($capacities[$attId] > 0) {
+                    $inserts[] = [
+                        'customer_id' => (int) $customerId,
+                        'attendant_id' => $attId,
+                        'assigned_at' => $now,
+                    ];
+                    $logInserts[] = [
+                        'customer_id' => (int) $customerId,
+                        'attendant_id' => $attId,
+                        'previous_attendant_id' => null,
+                        'action' => 'assigned',
+                        'reason' => 'Auto-assign em massa (equilibrado)',
+                        'created_at' => $now,
+                    ];
+                    $capacities[$attId]--;
+                    $assigned++;
+                    $found = true;
+                    break;
+                }
+            }
+
+            if (!$found) {
+                $skipped++;
+            }
+        }
+
+        // Batch insert
+        if (!empty($inserts)) {
+            $connection->insertMultiple($tableMap, $inserts);
+            $connection->insertMultiple($tableLog, $logInserts);
+        }
+
+        // Count remaining unassigned
+        $remainingCount = (int) $connection->fetchOne(
+            $connection->select()->from(
+                ['ce' => $this->resource->getTableName('customer_entity')],
+                ['cnt' => new \Magento\Framework\DB\Sql\Expression('COUNT(*)')]
+            )->joinLeft(
+                ['ca' => $tableMap],
+                'ce.entity_id = ca.customer_id',
+                []
+            )->where('ca.customer_id IS NULL')
+        );
+
+        // Recalculate counts
+        $this->recalculateAllCounts();
+
+        $this->logger->info('[AttendantManager] Batch auto-assign completed', [
+            'assigned' => $assigned,
+            'skipped' => $skipped,
+            'remaining' => $remainingCount,
+        ]);
+
+        return [
+            'assigned' => $assigned,
+            'skipped' => $skipped,
+            'remaining' => $remainingCount,
+            'total_unassigned' => count($unassignedIds),
         ];
     }
 }

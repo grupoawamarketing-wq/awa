@@ -12,9 +12,12 @@ use Psr\Log\LoggerInterface;
 /**
  * Syncs customer-attendant assignments from ERP Sectra VENDPREF field.
  *
- * Runs daily. For each customer with an erp_code, looks up VENDPREF
- * in the ERP, matches to an attendant by erp_seller_code, and creates
- * the assignment if not already present.
+ * Runs daily at 3am. Two passes:
+ *   1. Customers with no attendant yet  → assign from VENDPREF
+ *   2. Customers already assigned       → update if VENDPREF changed in ERP
+ *
+ * The ERP is the source of truth. Any VENDPREF change is reflected in
+ * Magento on the next run without any manual intervention.
  */
 class SyncAttendantFromErp
 {
@@ -29,22 +32,24 @@ class SyncAttendantFromErp
         ErpConnectionInterface $erpConnection,
         LoggerInterface $logger
     ) {
-        $this->resource = $resource;
+        $this->resource         = $resource;
         $this->attendantManager = $attendantManager;
-        $this->erpConnection = $erpConnection;
-        $this->logger = $logger;
+        $this->erpConnection    = $erpConnection;
+        $this->logger           = $logger;
     }
 
-    /**
-     * Execute the sync
-     */
     public function execute(): void
     {
         $this->logger->info('[B2B AttendantSync] Starting ERP attendant sync');
 
+        if (!$this->erpConnection->hasAvailableDriver()) {
+            $this->logger->warning('[B2B AttendantSync] ERP driver unavailable, skipping');
+            return;
+        }
+
         $connection = $this->resource->getConnection();
 
-        // Get all attendants indexed by erp_seller_code
+        // Index active attendants by erp_seller_code
         $attendants = $connection->fetchAll(
             $connection->select()
                 ->from($this->resource->getTableName('grupoawamotos_b2b_attendants'))
@@ -52,22 +57,22 @@ class SyncAttendantFromErp
                 ->where('erp_seller_code IS NOT NULL')
         );
 
+        if (empty($attendants)) {
+            $this->logger->info('[B2B AttendantSync] No attendants with ERP seller codes found');
+            return;
+        }
+
         $attendantByErpCode = [];
         foreach ($attendants as $att) {
             $attendantByErpCode[(int) $att['erp_seller_code']] = $att;
         }
 
-        if (empty($attendantByErpCode)) {
-            $this->logger->info('[B2B AttendantSync] No attendants with ERP codes found');
-            return;
-        }
-
-        // Get the erp_code attribute ID
+        // Fetch erp_code EAV attribute ID
         $erpCodeAttrId = $connection->fetchOne(
             $connection->select()
                 ->from($this->resource->getTableName('eav_attribute'), ['attribute_id'])
                 ->where('attribute_code = ?', 'erp_code')
-                ->where('entity_type_id = ?', 1) // customer
+                ->where('entity_type_id = ?', 1)
         );
 
         if (!$erpCodeAttrId) {
@@ -75,68 +80,94 @@ class SyncAttendantFromErp
             return;
         }
 
-        // Get all customers with ERP codes that DON'T have an attendant yet
+        // Fetch ALL customers with ERP codes (new and already assigned)
         $select = $connection->select()
             ->from(
                 ['cev' => $this->resource->getTableName('customer_entity_varchar')],
-                ['entity_id', 'value']
+                ['entity_id', 'erp_code' => 'cev.value']
             )
             ->joinLeft(
                 ['ca' => $this->resource->getTableName('grupoawamotos_b2b_customer_attendant')],
                 'cev.entity_id = ca.customer_id',
-                []
+                ['current_attendant_id' => 'ca.attendant_id']
             )
             ->where('cev.attribute_id = ?', $erpCodeAttrId)
             ->where('cev.value IS NOT NULL')
-            ->where('cev.value != ?', '')
-            ->where('ca.customer_id IS NULL'); // Not yet assigned
+            ->where('cev.value != ?', '');
 
         $customers = $connection->fetchAll($select);
-        $this->logger->info('[B2B AttendantSync] Found ' . count($customers) . ' unassigned customers with ERP codes');
+
+        $this->logger->info(sprintf(
+            '[B2B AttendantSync] Processing %d customers with ERP codes',
+            count($customers)
+        ));
 
         $assigned = 0;
-        $noMatch = 0;
+        $updated  = 0;
+        $noMatch  = 0;
+        $errors   = 0;
 
-        // Check if we have an ERP connection to look up VENDPREF
-        try {
-            foreach (array_chunk($customers, 50) as $chunk) {
-                $erpCodes = array_column($chunk, 'value');
-                $placeholders = implode(',', array_fill(0, count($erpCodes), '?'));
+        foreach (array_chunk($customers, 50) as $chunk) {
+            $erpCodes     = array_column($chunk, 'erp_code');
+            $placeholders = implode(',', array_fill(0, count($erpCodes), '?'));
 
+            try {
                 $erpData = $this->erpConnection->query(
                     "SELECT f.CODIGO, f.VENDPREF
                      FROM dbo.FN_FORNECEDORES f
-                     WHERE f.CKCLIENTE = 'S' AND f.CODIGO IN ($placeholders)",
+                     WHERE f.CKCLIENTE = 'S' AND f.CODIGO IN ({$placeholders})",
                     $erpCodes
                 );
-
-                $vendMap = [];
-                foreach ($erpData as $row) {
-                    $vendMap[(string) $row['CODIGO']] = (int) ($row['VENDPREF'] ?? 0);
-                }
-
-                foreach ($chunk as $customer) {
-                    $customerId = (int) $customer['entity_id'];
-                    $erpCode = (string) $customer['value'];
-                    $vendPref = $vendMap[$erpCode] ?? 0;
-
-                    if ($vendPref > 0 && isset($attendantByErpCode[$vendPref])) {
-                        $attendantId = (int) $attendantByErpCode[$vendPref]['attendant_id'];
-                        $this->attendantManager->assignCustomerToAttendant(
-                            $customerId,
-                            $attendantId,
-                            'Sync ERP VENDPREF=' . $vendPref
-                        );
-                        $assigned++;
-                    } else {
-                        $noMatch++;
-                    }
-                }
+            } catch (\Exception $e) {
+                $this->logger->error('[B2B AttendantSync] ERP query error: ' . $e->getMessage());
+                $errors++;
+                continue;
             }
-        } catch (\Exception $e) {
-            $this->logger->error('[B2B AttendantSync] ERP connection error: ' . $e->getMessage());
+
+            $vendMap = [];
+            foreach ($erpData as $row) {
+                $vendMap[(string) $row['CODIGO']] = (int) ($row['VENDPREF'] ?? 0);
+            }
+
+            foreach ($chunk as $customer) {
+                $customerId       = (int) $customer['entity_id'];
+                $erpCode          = (string) $customer['erp_code'];
+                $currentAttendant = $customer['current_attendant_id'] !== null
+                    ? (int) $customer['current_attendant_id']
+                    : null;
+                $vendPref = $vendMap[$erpCode] ?? 0;
+
+                if ($vendPref <= 0 || !isset($attendantByErpCode[$vendPref])) {
+                    $noMatch++;
+                    continue;
+                }
+
+                $targetAttendantId = (int) $attendantByErpCode[$vendPref]['attendant_id'];
+
+                if ($currentAttendant === null) {
+                    // New assignment
+                    $this->attendantManager->assignCustomerToAttendant(
+                        $customerId,
+                        $targetAttendantId,
+                        'Sync ERP VENDPREF=' . $vendPref
+                    );
+                    $assigned++;
+                } elseif ($currentAttendant !== $targetAttendantId) {
+                    // VENDPREF changed — follow the ERP
+                    $this->attendantManager->assignCustomerToAttendant(
+                        $customerId,
+                        $targetAttendantId,
+                        'Re-sync ERP VENDPREF=' . $vendPref . ' (anterior #' . $currentAttendant . ')'
+                    );
+                    $updated++;
+                }
+                // else: already correct attendant, nothing to do
+            }
         }
 
-        $this->logger->info("[B2B AttendantSync] Done: {$assigned} assigned, {$noMatch} no match");
+        $this->logger->info(sprintf(
+            '[B2B AttendantSync] Done: %d new, %d re-assigned, %d no ERP match, %d chunk errors',
+            $assigned, $updated, $noMatch, $errors
+        ));
     }
 }

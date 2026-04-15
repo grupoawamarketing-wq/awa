@@ -1,92 +1,35 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+
+    <!-- Filtrar grid de pedidos no admin: atendente vê apenas pedidos dos seus clientes -->
+    <type name="Magento\Sales\Model\ResourceModel\Order\Grid\Collection">
+        <plugin name="grupoawamotos_b2b_attendant_order_grid"
+                type="GrupoAwamotos\B2B\Plugin\Admin\AttendantOrderGridPlugin"/>
+    </type>
+
+    <!-- Filtrar grid de clientes no admin: atendente vê apenas seus clientes -->
+    <type name="Magento\Customer\Model\ResourceModel\Grid\Collection">
+        <plugin name="grupoawamotos_b2b_attendant_customer_grid"
+                type="GrupoAwamotos\B2B\Plugin\Admin\AttendantCustomerGridPlugin"/>
+    </type>
+
+    <!-- Redirecionar atendentes para o painel pessoal após login no admin -->
+    <type name="Magento\Backend\Controller\Adminhtml\Auth\Login">
+        <plugin name="grupoawamotos_b2b_attendant_login_redirect"
+                type="GrupoAwamotos\B2B\Plugin\Admin\AttendantLoginRedirectPlugin"/>
+    </type>
+
+    <!--
+        AttendantQuoteGridPlugin intercepts GrupoAwamotos\B2B\Model\ResourceModel\QuoteRequest\Collection.
+        Declarar aqui quando a classe QuoteRequest\Collection for criada.
+    -->
+
+    <!-- Service Contracts: preferences -->
     <preference for="GrupoAwamotos\B2B\Api\QuoteRequestRepositoryInterface"
                 type="GrupoAwamotos\B2B\Model\QuoteRequestRepository"/>
-
-    <preference for="GrupoAwamotos\B2B\Api\CustomerApprovalInterface"
-                type="GrupoAwamotos\B2B\Model\CustomerApproval"/>
 
     <preference for="GrupoAwamotos\B2B\Api\PriceVisibilityInterface"
                 type="GrupoAwamotos\B2B\Model\PriceVisibility"/>
 
-    <preference for="GrupoAwamotos\B2B\Api\Data\WhatsAppMessageInterface"
-                type="GrupoAwamotos\B2B\Model\Notification\WhatsAppMessage"/>
-
-    <type name="GrupoAwamotos\B2B\Model\PriceVisibility">
-        <arguments>
-            <argument name="customerSession" xsi:type="object">Magento\Customer\Model\Session\Proxy</argument>
-        </arguments>
-    </type>
-
-    <type name="Magento\Checkout\Api\PaymentInformationManagementInterface">
-        <plugin name="rokanthemes_opc_additional_data"
-                type="Rokanthemes\OnePageCheckout\Plugin\Checkout\Model\CustomerAdditionalData"
-                sortOrder="20"/>
-        <plugin name="grupoawamotos_b2b_block_place_order"
-                type="GrupoAwamotos\B2B\Plugin\Checkout\BlockPlaceOrderPlugin"
-                sortOrder="90"/>
-    </type>
-
-    <type name="Magento\Checkout\Model\PaymentInformationManagement">
-        <plugin name="grupoawamotos_b2b_block_place_order_model"
-                type="GrupoAwamotos\B2B\Plugin\Checkout\BlockPlaceOrderPlugin"
-                sortOrder="90"/>
-    </type>
-
-    <type name="Magento\Checkout\Api\GuestPaymentInformationManagementInterface">
-        <plugin name="rokanthemes_opc_guest_additional_data"
-                type="Rokanthemes\OnePageCheckout\Plugin\Checkout\Model\GuestAdditionalData"
-                sortOrder="20"/>
-        <plugin name="grupoawamotos_b2b_block_guest_place_order"
-                type="GrupoAwamotos\B2B\Plugin\Checkout\BlockGuestPlaceOrderPlugin"
-                sortOrder="90"/>
-    </type>
-
-    <type name="Magento\Checkout\Model\GuestPaymentInformationManagement">
-        <plugin name="grupoawamotos_b2b_block_guest_place_order_model"
-                type="GrupoAwamotos\B2B\Plugin\Checkout\BlockGuestPlaceOrderPlugin"
-                sortOrder="90"/>
-    </type>
-
-    <type name="Magento\Quote\Api\CartItemRepositoryInterface">
-        <plugin name="grupoawamotos_b2b_block_cart_item_save"
-                type="GrupoAwamotos\B2B\Plugin\Checkout\BlockCartItemSavePlugin"
-                sortOrder="90"/>
-    </type>
-
-    <type name="Magento\Quote\Model\Quote\Item\Repository">
-        <plugin name="grupoawamotos_b2b_block_cart_item_save_model"
-                type="GrupoAwamotos\B2B\Plugin\Checkout\BlockCartItemSavePlugin"
-                sortOrder="90"/>
-    </type>
-
-    <type name="Magento\Quote\Api\GuestCartItemRepositoryInterface">
-        <plugin name="grupoawamotos_b2b_block_guest_cart_item_save"
-                type="GrupoAwamotos\B2B\Plugin\Checkout\BlockGuestCartItemSavePlugin"
-                sortOrder="90"/>
-    </type>
-
-    <type name="Magento\Quote\Model\GuestCart\GuestCartItemRepository">
-        <plugin name="grupoawamotos_b2b_block_guest_cart_item_save_model"
-                type="GrupoAwamotos\B2B\Plugin\Checkout\BlockGuestCartItemSavePlugin"
-                sortOrder="90"/>
-    </type>
-
-    <type name="Magento\Framework\Console\CommandListInterface">
-        <arguments>
-            <argument name="commands" xsi:type="array">
-                <item name="grupoawamotos_b2b_clear_cnpj_cache" xsi:type="object">GrupoAwamotos\B2B\Console\Command\ClearCnpjCacheCommand</item>
-                <item name="grupoawamotos_b2b_provision_erp_customers" xsi:type="object">GrupoAwamotos\B2B\Console\Command\ProvisionErpCustomersCommand</item>
-                <item name="grupoawamotos_b2b_test_whatsapp" xsi:type="object">GrupoAwamotos\B2B\Console\Command\TestWhatsAppCommand</item>
-                <item name="grupoawamotos_b2b_seed_carriers" xsi:type="object">GrupoAwamotos\B2B\Console\Command\SeedCarriersCommand</item>
-            </argument>
-        </arguments>
-    </type>
-
-    <type name="GrupoAwamotos\B2B\Observer\B2BPriceWarmObserver">
-        <arguments>
-            <argument name="customerSession" xsi:type="object">Magento\Customer\Model\Session\Proxy</argument>
-        </arguments>
-    </type>
 </config>

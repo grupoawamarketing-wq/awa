@@ -1,0 +1,220 @@
+<?php
+/**
+ * Formulário de criação/edição de atendentes no admin.
+ *
+ * @var \GrupoAwamotos\B2B\Block\Adminhtml\Attendant\Management $block
+ */
+
+$attendant = $block->getAttendant();
+$isEditMode = $block->isEditMode();
+?>
+
+<div class="admin__page-section" id="attendant-management-form">
+    <div class="admin__page-section-title">
+        <span class="title">
+            <?= $block->escapeHtml($isEditMode ? __('Editar Atendente') : __('Novo Atendente')) ?>
+        </span>
+    </div>
+
+    <div class="admin__page-section-content">
+        <div data-role="attendant-form-messages"></div>
+
+        <form id="attendant-management-form-element">
+            <input type="hidden" name="form_key" value="<?= $block->escapeHtmlAttr($block->getFormKey()) ?>"/>
+            <input type="hidden" name="attendant_id" value="<?= (int) ($attendant['attendant_id'] ?? 0) ?>"/>
+
+            <div class="admin__field field field-name required _required">
+                <label class="admin__field-label" for="attendant_name">
+                    <span><?= $block->escapeHtml(__('Nome')) ?></span>
+                </label>
+                <div class="admin__field-control">
+                    <input id="attendant_name"
+                           name="name"
+                           type="text"
+                           class="admin__control-text"
+                           value="<?= $block->escapeHtmlAttr((string) ($attendant['name'] ?? '')) ?>"
+                           required />
+                </div>
+            </div>
+
+            <div class="admin__field field field-email required _required">
+                <label class="admin__field-label" for="attendant_email">
+                    <span><?= $block->escapeHtml(__('E-mail')) ?></span>
+                </label>
+                <div class="admin__field-control">
+                    <input id="attendant_email"
+                           name="email"
+                           type="email"
+                           class="admin__control-text"
+                           value="<?= $block->escapeHtmlAttr((string) ($attendant['email'] ?? '')) ?>"
+                           required />
+                </div>
+            </div>
+
+            <div class="admin__field field field-phone">
+                <label class="admin__field-label" for="attendant_phone">
+                    <span><?= $block->escapeHtml(__('Telefone')) ?></span>
+                </label>
+                <div class="admin__field-control">
+                    <input id="attendant_phone"
+                           name="phone"
+                           type="text"
+                           class="admin__control-text"
+                           value="<?= $block->escapeHtmlAttr((string) ($attendant['phone'] ?? '')) ?>" />
+                </div>
+            </div>
+
+            <div class="admin__field field field-whatsapp">
+                <label class="admin__field-label" for="attendant_whatsapp">
+                    <span><?= $block->escapeHtml(__('WhatsApp')) ?></span>
+                </label>
+                <div class="admin__field-control">
+                    <input id="attendant_whatsapp"
+                           name="whatsapp"
+                           type="text"
+                           class="admin__control-text"
+                           value="<?= $block->escapeHtmlAttr((string) ($attendant['whatsapp'] ?? '')) ?>" />
+                </div>
+            </div>
+
+            <div class="admin__field field field-department">
+                <label class="admin__field-label" for="attendant_department">
+                    <span><?= $block->escapeHtml(__('Departamento')) ?></span>
+                </label>
+                <div class="admin__field-control">
+                    <input id="attendant_department"
+                           name="department"
+                           type="text"
+                           class="admin__control-text"
+                           value="<?= $block->escapeHtmlAttr((string) ($attendant['department'] ?? 'sales')) ?>" />
+                    <div class="admin__field-note">
+                        <?= $block->escapeHtml(__('Use o mesmo código de departamento esperado pelas rotinas de distribuição, por exemplo: sales.')) ?>
+                    </div>
+                </div>
+            </div>
+
+            <div class="admin__field field field-chatwoot-agent-id">
+                <label class="admin__field-label" for="attendant_chatwoot_agent_id">
+                    <span><?= $block->escapeHtml(__('ID do Agente Chatwoot')) ?></span>
+                </label>
+                <div class="admin__field-control">
+                    <input id="attendant_chatwoot_agent_id"
+                           name="chatwoot_agent_id"
+                           type="number"
+                           min="0"
+                           step="1"
+                           class="admin__control-text"
+                           value="<?= $block->escapeHtmlAttr((string) ($attendant['chatwoot_agent_id'] ?? '')) ?>" />
+                </div>
+            </div>
+
+            <div class="admin__field field field-erp-seller-code">
+                <label class="admin__field-label" for="attendant_erp_seller_code">
+                    <span><?= $block->escapeHtml(__('Código do Vendedor no ERP')) ?></span>
+                </label>
+                <div class="admin__field-control">
+                    <input id="attendant_erp_seller_code"
+                           name="erp_seller_code"
+                           type="text"
+                           class="admin__control-text"
+                           value="<?= $block->escapeHtmlAttr((string) ($attendant['erp_seller_code'] ?? '')) ?>" />
+                </div>
+            </div>
+
+            <div class="admin__field field field-max-customers">
+                <label class="admin__field-label" for="attendant_max_customers">
+                    <span><?= $block->escapeHtml(__('Limite Máximo de Clientes')) ?></span>
+                </label>
+                <div class="admin__field-control">
+                    <input id="attendant_max_customers"
+                           name="max_customers"
+                           type="number"
+                           min="0"
+                           step="1"
+                           class="admin__control-text"
+                           value="<?= $block->escapeHtmlAttr((string) ($attendant['max_customers'] ?? '100')) ?>" />
+                </div>
+            </div>
+
+            <div class="admin__field field field-is-active">
+                <label class="admin__field-label" for="attendant_is_active">
+                    <span><?= $block->escapeHtml(__('Ativo')) ?></span>
+                </label>
+                <div class="admin__field-control">
+                    <select id="attendant_is_active" name="is_active" class="admin__control-select">
+                        <option value="1"<?= ((int) ($attendant['is_active'] ?? 1) === 1) ? ' selected' : '' ?>>
+                            <?= $block->escapeHtml(__('Sim')) ?>
+                        </option>
+                        <option value="0"<?= ((int) ($attendant['is_active'] ?? 1) === 0) ? ' selected' : '' ?>>
+                            <?= $block->escapeHtml(__('Não')) ?>
+                        </option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="admin__page-actions" style="margin-top: 20px;">
+                <button type="button"
+                        class="action-default scalable save primary"
+                        data-role="save-attendant">
+                    <span><?= $block->escapeHtml($isEditMode ? __('Salvar Alterações') : __('Cadastrar Atendente')) ?></span>
+                </button>
+
+                <?php if ($isEditMode): ?>
+                    <a href="<?= $block->escapeUrl($block->getIndexUrl()) ?>" class="action-default scalable">
+                        <span><?= $block->escapeHtml(__('Cancelar edição')) ?></span>
+                    </a>
+                <?php endif; ?>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+require([
+    'jquery',
+    'mage/translate'
+], function ($, $t) {
+    'use strict';
+
+    var saveUrl = <?= /* @noEscape */ json_encode($block->getSaveUrl()) ?>;
+    var indexUrl = <?= /* @noEscape */ json_encode($block->getIndexUrl()) ?>;
+    var form = $('#attendant-management-form-element');
+    var messageContainer = $('[data-role="attendant-form-messages"]');
+
+    function renderMessage(type, message) {
+        var wrapper = $('<div/>', {
+            'class': 'message message-' + type + ' ' + type
+        });
+
+        wrapper.append($('<div/>').text(message));
+        messageContainer.empty().append(wrapper);
+        window.location.hash = 'attendant-management-form';
+    }
+
+    $('[data-role="save-attendant"]').on('click', function () {
+        if (!form[0].reportValidity()) {
+            return;
+        }
+
+        messageContainer.empty();
+
+        $.ajax({
+            url: saveUrl,
+            type: 'POST',
+            dataType: 'json',
+            data: form.serialize(),
+            showLoader: true
+        }).done(function (response) {
+            if (!response || response.success !== true) {
+                renderMessage('error', response && response.message ? response.message : $t('Não foi possível salvar o atendente.'));
+                return;
+            }
+
+            renderMessage('success', response.message || $t('Atendente salvo com sucesso.'));
+            window.location.href = indexUrl + '?id=' + encodeURIComponent(response.attendant_id) + '#attendant-management-form';
+        }).fail(function () {
+            renderMessage('error', $t('Falha na comunicação ao salvar o atendente.'));
+        });
+    });
+});
+</script>

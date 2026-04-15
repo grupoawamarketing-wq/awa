@@ -14,6 +14,7 @@ use Magento\Framework\Controller\Result\JsonFactory;
 use GrupoAwamotos\B2B\Model\Attendant\AttendantManager;
 use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\Exception\LocalizedException;
+use Psr\Log\LoggerInterface;
 
 class Save extends Action implements HttpPostActionInterface
 {
@@ -21,15 +22,18 @@ class Save extends Action implements HttpPostActionInterface
 
     private JsonFactory $jsonFactory;
     private AttendantManager $attendantManager;
+    private LoggerInterface $logger;
 
     public function __construct(
         Context $context,
         JsonFactory $jsonFactory,
-        AttendantManager $attendantManager
+        AttendantManager $attendantManager,
+        LoggerInterface $logger
     ) {
         parent::__construct($context);
         $this->jsonFactory = $jsonFactory;
         $this->attendantManager = $attendantManager;
+        $this->logger = $logger;
     }
 
     public function execute()
@@ -44,6 +48,18 @@ class Save extends Action implements HttpPostActionInterface
                     'success' => false,
                     'message' => __('Nome e e-mail são obrigatórios.')
                 ]);
+            }
+
+            if (!filter_var((string) $data['email'], FILTER_VALIDATE_EMAIL)) {
+                return $result->setData([
+                    'success' => false,
+                    'message' => __('Informe um e-mail válido para o atendente.')
+                ]);
+            }
+
+            $adminUser = $this->_auth->getUser();
+            if ($adminUser && $adminUser->getId()) {
+                $data['admin_user_id'] = (int) $adminUser->getId();
             }
 
             $attendantId = $this->attendantManager->saveAttendant($data);

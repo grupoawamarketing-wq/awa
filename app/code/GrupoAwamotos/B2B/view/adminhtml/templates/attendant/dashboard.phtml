@@ -1,0 +1,239 @@
+<?php
+/**
+ * Dashboard pessoal do atendente B2B.
+ *
+ * @var \GrupoAwamotos\B2B\Block\Adminhtml\Attendant\Dashboard $block
+ */
+
+$attendant = $block->getAttendant();
+$isAttendant = $block->isAttendant();
+?>
+
+<?php if (!$isAttendant): ?>
+    <div class="message message-warning warning">
+        <div data-ui-id="messages-message-warning">
+            <?= $block->escapeHtml(__('Você não está vinculado a nenhum atendente. Peça ao administrador para vincular seu usuário.')) ?>
+        </div>
+    </div>
+<?php else: ?>
+    <?php
+    $metrics = $block->getMetrics();
+    $recentCustomers = $block->getRecentCustomers(10);
+    $recentOrders = $block->getRecentOrders(15);
+    $pendingQuotes = $block->getPendingQuotes(10);
+    $capacityPct = (int) ($metrics['capacity_pct'] ?? 0);
+    $capacityClass = $capacityPct >= 90 ? 'critical' : ($capacityPct >= 70 ? 'warning' : 'healthy');
+    ?>
+
+    <style>
+        .att-dashboard { max-width: 1400px; }
+        .att-dashboard h2 { font-size: 20px; margin: 0 0 15px; font-weight: 600; }
+        .att-header { background: #f8f9fa; border: 1px solid #d6d6d6; border-radius: 4px; padding: 20px; margin-bottom: 25px; display: flex; align-items: center; gap: 20px; }
+        .att-header .att-avatar { width: 60px; height: 60px; border-radius: 50%; background: #eb5202; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; flex-shrink: 0; }
+        .att-header .att-info h2 { margin: 0 0 4px; font-size: 22px; }
+        .att-header .att-info p { margin: 0; color: #666; font-size: 13px; }
+        .att-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .att-kpi { background: #fff; border: 1px solid #d6d6d6; border-radius: 4px; padding: 18px; text-align: center; }
+        .att-kpi .att-kpi-value { font-size: 28px; font-weight: 700; color: #333; line-height: 1.2; }
+        .att-kpi .att-kpi-label { font-size: 12px; color: #888; text-transform: uppercase; margin-top: 4px; }
+        .att-kpi.healthy .att-kpi-value { color: #185a00; }
+        .att-kpi.warning .att-kpi-value { color: #b35c00; }
+        .att-kpi.critical .att-kpi-value { color: #c00; }
+        .att-section { margin-bottom: 25px; }
+        .att-section-title { font-size: 16px; font-weight: 600; margin: 0 0 10px; padding-bottom: 8px; border-bottom: 2px solid #eb5202; }
+        .att-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .att-table th { background: #f5f5f5; padding: 8px 10px; text-align: left; font-weight: 600; border-bottom: 1px solid #d6d6d6; }
+        .att-table td { padding: 8px 10px; border-bottom: 1px solid #eee; }
+        .att-table tr:hover td { background: #fafafa; }
+        .att-table .att-link { color: #eb5202; text-decoration: none; font-weight: 500; }
+        .att-table .att-link:hover { text-decoration: underline; }
+        .att-status { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 11px; font-weight: 600; }
+        .att-status-complete, .att-status-closed { background: #e6f4ea; color: #185a00; }
+        .att-status-processing { background: #e8f0fe; color: #174ea6; }
+        .att-status-pending, .att-status-pending_payment { background: #fef7e0; color: #b35c00; }
+        .att-status-canceled, .att-status-fraud { background: #fce8e6; color: #c00; }
+        .att-actions { display: flex; gap: 10px; margin-bottom: 25px; }
+        .att-actions a { display: inline-flex; align-items: center; gap: 5px; padding: 8px 16px; border-radius: 4px; font-size: 13px; text-decoration: none; border: 1px solid #d6d6d6; color: #333; background: #fff; }
+        .att-actions a:hover { background: #f5f5f5; }
+        .att-empty { color: #999; font-style: italic; padding: 15px 0; }
+        .att-capacity-bar { width: 100%; height: 8px; background: #e0e0e0; border-radius: 4px; overflow: hidden; margin-top: 6px; }
+        .att-capacity-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
+        .att-capacity-fill.healthy { background: #34a853; }
+        .att-capacity-fill.warning { background: #fbbc04; }
+        .att-capacity-fill.critical { background: #ea4335; }
+    </style>
+
+    <div class="att-dashboard">
+        <!-- Header -->
+        <div class="att-header">
+            <div class="att-avatar">
+                <?= $block->escapeHtml(mb_substr((string) ($attendant['name'] ?? ''), 0, 1)) ?>
+            </div>
+            <div class="att-info">
+                <h2><?= $block->escapeHtml((string) ($attendant['name'] ?? '')) ?></h2>
+                <p>
+                    <?= $block->escapeHtml((string) ($attendant['email'] ?? '')) ?>
+                    &nbsp;|&nbsp;
+                    <?= $block->escapeHtml(ucfirst((string) ($attendant['department'] ?? 'sales'))) ?>
+                    <?php if (!empty($attendant['chatwoot_agent_id'])): ?>
+                        &nbsp;|&nbsp; Chatwoot #<?= (int) $attendant['chatwoot_agent_id'] ?>
+                    <?php endif; ?>
+                </p>
+            </div>
+        </div>
+
+        <!-- KPIs -->
+        <div class="att-kpis">
+            <div class="att-kpi">
+                <div class="att-kpi-value"><?= (int) ($metrics['customer_count'] ?? 0) ?></div>
+                <div class="att-kpi-label"><?= $block->escapeHtml(__('Clientes Ativos')) ?></div>
+            </div>
+            <div class="att-kpi <?= $block->escapeHtmlAttr($capacityClass) ?>">
+                <div class="att-kpi-value"><?= $capacityPct ?>%</div>
+                <div class="att-kpi-label"><?= $block->escapeHtml(__('Capacidade')) ?></div>
+                <div class="att-capacity-bar">
+                    <div class="att-capacity-fill <?= $block->escapeHtmlAttr($capacityClass) ?>"
+                         style="width: <?= min($capacityPct, 100) ?>%"></div>
+                </div>
+            </div>
+            <div class="att-kpi">
+                <div class="att-kpi-value"><?= (int) ($metrics['orders_30d'] ?? 0) ?></div>
+                <div class="att-kpi-label"><?= $block->escapeHtml(__('Pedidos (30d)')) ?></div>
+            </div>
+            <div class="att-kpi">
+                <div class="att-kpi-value">R$ <?= number_format((float) ($metrics['orders_total_30d'] ?? 0), 2, ',', '.') ?></div>
+                <div class="att-kpi-label"><?= $block->escapeHtml(__('Faturamento (30d)')) ?></div>
+            </div>
+            <div class="att-kpi">
+                <div class="att-kpi-value"><?= (int) ($metrics['new_customers_30d'] ?? 0) ?></div>
+                <div class="att-kpi-label"><?= $block->escapeHtml(__('Novos Clientes (30d)')) ?></div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="att-actions">
+            <a href="<?= $block->escapeUrl($block->getAttendantListUrl()) ?>">
+                &#128101; <?= $block->escapeHtml(__('Gestão de Atendentes')) ?>
+            </a>
+            <a href="<?= $block->escapeUrl($block->getHelpUrl()) ?>">
+                &#10067; <?= $block->escapeHtml(__('Central de Ajuda')) ?>
+            </a>
+        </div>
+
+        <!-- Recent Orders -->
+        <div class="att-section">
+            <h3 class="att-section-title"><?= $block->escapeHtml(__('Pedidos Recentes dos Meus Clientes')) ?></h3>
+            <?php if (empty($recentOrders)): ?>
+                <p class="att-empty"><?= $block->escapeHtml(__('Nenhum pedido encontrado.')) ?></p>
+            <?php else: ?>
+                <table class="att-table">
+                    <thead>
+                        <tr>
+                            <th><?= $block->escapeHtml(__('Pedido')) ?></th>
+                            <th><?= $block->escapeHtml(__('Cliente')) ?></th>
+                            <th><?= $block->escapeHtml(__('Total')) ?></th>
+                            <th><?= $block->escapeHtml(__('Status')) ?></th>
+                            <th><?= $block->escapeHtml(__('Data')) ?></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($recentOrders as $order): ?>
+                            <tr>
+                                <td>
+                                    <a class="att-link"
+                                       href="<?= $block->escapeUrl($block->getOrderViewUrl((int) $order['entity_id'])) ?>">
+                                        #<?= $block->escapeHtml((string) $order['increment_id']) ?>
+                                    </a>
+                                </td>
+                                <td>
+                                    <a class="att-link"
+                                       href="<?= $block->escapeUrl($block->getCustomerViewUrl((int) $order['customer_id'])) ?>">
+                                        <?= $block->escapeHtml(trim(($order['customer_firstname'] ?? '') . ' ' . ($order['customer_lastname'] ?? ''))) ?>
+                                    </a>
+                                </td>
+                                <td>R$ <?= number_format((float) ($order['grand_total'] ?? 0), 2, ',', '.') ?></td>
+                                <td>
+                                    <?php $statusClass = 'att-status att-status-' . preg_replace('/[^a-z_]/', '', strtolower((string) ($order['status'] ?? ''))); ?>
+                                    <span class="<?= $block->escapeHtmlAttr($statusClass) ?>">
+                                        <?= $block->escapeHtml((string) ($order['status'] ?? '')) ?>
+                                    </span>
+                                </td>
+                                <td><?= $block->escapeHtml(date('d/m/Y H:i', strtotime((string) ($order['created_at'] ?? '')))) ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            <?php endif; ?>
+        </div>
+
+        <!-- Recent Customers -->
+        <div class="att-section">
+            <h3 class="att-section-title"><?= $block->escapeHtml(__('Meus Clientes')) ?></h3>
+            <?php if (empty($recentCustomers)): ?>
+                <p class="att-empty"><?= $block->escapeHtml(__('Nenhum cliente atribuído.')) ?></p>
+            <?php else: ?>
+                <table class="att-table">
+                    <thead>
+                        <tr>
+                            <th><?= $block->escapeHtml(__('Nome')) ?></th>
+                            <th><?= $block->escapeHtml(__('E-mail')) ?></th>
+                            <th><?= $block->escapeHtml(__('Empresa')) ?></th>
+                            <th><?= $block->escapeHtml(__('Atribuído em')) ?></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($recentCustomers as $customer): ?>
+                            <tr>
+                                <td>
+                                    <a class="att-link"
+                                       href="<?= $block->escapeUrl($block->getCustomerViewUrl((int) ($customer['entity_id'] ?? $customer['customer_id'] ?? 0))) ?>">
+                                        <?= $block->escapeHtml(trim(($customer['firstname'] ?? '') . ' ' . ($customer['lastname'] ?? ''))) ?>
+                                    </a>
+                                </td>
+                                <td><?= $block->escapeHtml((string) ($customer['email'] ?? '')) ?></td>
+                                <td><?= $block->escapeHtml((string) ($customer['company'] ?? ($customer['razao_social'] ?? '-'))) ?></td>
+                                <td><?= $block->escapeHtml(!empty($customer['assigned_at']) ? date('d/m/Y', strtotime((string) $customer['assigned_at'])) : '-') ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            <?php endif; ?>
+        </div>
+
+        <!-- Pending Quotes -->
+        <?php if (!empty($pendingQuotes)): ?>
+            <div class="att-section">
+                <h3 class="att-section-title"><?= $block->escapeHtml(__('Cotações Pendentes')) ?></h3>
+                <table class="att-table">
+                    <thead>
+                        <tr>
+                            <th><?= $block->escapeHtml(__('ID')) ?></th>
+                            <th><?= $block->escapeHtml(__('Cliente')) ?></th>
+                            <th><?= $block->escapeHtml(__('Status')) ?></th>
+                            <th><?= $block->escapeHtml(__('Data')) ?></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($pendingQuotes as $quote): ?>
+                            <tr>
+                                <td>#<?= (int) ($quote['quote_id'] ?? $quote['entity_id'] ?? 0) ?></td>
+                                <td>
+                                    <?php if (!empty($quote['customer_id'])): ?>
+                                        <a class="att-link"
+                                           href="<?= $block->escapeUrl($block->getCustomerViewUrl((int) $quote['customer_id'])) ?>">
+                                            <?= $block->escapeHtml((string) ($quote['customer_name'] ?? 'Cliente #' . $quote['customer_id'])) ?>
+                                        </a>
+                                    <?php else: ?>
+                                        -
+                                    <?php endif; ?>
+                                </td>
+                                <td><span class="att-status att-status-pending"><?= $block->escapeHtml((string) ($quote['status'] ?? 'pending')) ?></span></td>
+                                <td><?= $block->escapeHtml(!empty($quote['created_at']) ? date('d/m/Y H:i', strtotime((string) $quote['created_at'])) : '-') ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php endif; ?>
+    </div>
+<?php endif; ?>
