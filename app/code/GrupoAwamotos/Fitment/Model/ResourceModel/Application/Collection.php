@@ -142,12 +142,15 @@ class Collection extends AbstractCollection
     /**
      * Format years for display
      *
-     * @param int|null $from
-     * @param int|null $to
+     * @param int|string|null $from
+     * @param int|string|null $to
      * @return string
      */
-    private function formatYears(?int $from, ?int $to): string
+    private function formatYears(int|string|null $from, int|string|null $to): string
     {
+        $from = $this->normalizeYearValue($from);
+        $to = $this->normalizeYearValue($to);
+
         if ($from === null && $to === null) {
             return 'Todos os anos';
         }
