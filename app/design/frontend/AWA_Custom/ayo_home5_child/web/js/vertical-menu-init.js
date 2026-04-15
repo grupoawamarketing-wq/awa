@@ -135,6 +135,14 @@ define([
                 style.setProperty('display', isVisible ? 'block' : 'none', 'important');
 
                 if (isVisible) {
+                    // Usar position:fixed para escapar de qualquer overflow:hidden nos ancestrais
+                    // (.page-wrapper tem overflow:hidden e height:182px, clipa o dropdown sem este fix)
+                    var navRect = $nav[0].getBoundingClientRect();
+
+                    style.setProperty('position', 'fixed', 'important');
+                    style.setProperty('top', navRect.bottom + 'px', 'important');
+                    style.setProperty('left', navRect.left + 'px', 'important');
+                    style.setProperty('width', navRect.width + 'px', 'important');
                     style.setProperty('visibility', 'visible', 'important');
                     style.setProperty('opacity', '1', 'important');
                     style.setProperty('pointer-events', 'auto', 'important');
@@ -143,10 +151,15 @@ define([
                     return;
                 }
 
+                style.removeProperty('position');
+                style.removeProperty('top');
+                style.removeProperty('left');
+                style.removeProperty('width');
                 style.removeProperty('visibility');
                 style.removeProperty('opacity');
                 style.removeProperty('pointer-events');
                 style.removeProperty('transform');
+                style.removeProperty('overflow');
             });
         }
 
@@ -159,11 +172,39 @@ define([
                 var style = this.style;
 
                 style.removeProperty('display');
+                style.removeProperty('position');
+                style.removeProperty('top');
+                style.removeProperty('left');
+                style.removeProperty('width');
                 style.removeProperty('visibility');
                 style.removeProperty('opacity');
                 style.removeProperty('pointer-events');
                 style.removeProperty('transform');
+                style.removeProperty('overflow');
             });
+        }
+
+        /**
+         * Remove ou restaura o overflow:hidden do .awa-nav-bar durante abertura/fechamento
+         * do dropdown. Necessario porque o ancestor tem overflow:hidden !important no CSS
+         * que impede o dropdown de ser visivel fora dos 48px de altura do nav bar.
+         */
+        function setNavBarClip(clip) {
+            var el = $nav.closest('.header-control.header-nav')[0];
+
+            if (!el) {
+                el = document.querySelector('.header-control.header-nav.awa-nav-bar');
+            }
+
+            if (!el) {
+                return;
+            }
+
+            if (clip) {
+                el.style.setProperty('overflow', 'hidden', 'important');
+            } else {
+                el.style.setProperty('overflow', 'visible', 'important');
+            }
         }
 
         function openMenu(withOverlay) {
@@ -171,8 +212,40 @@ define([
                 $toggleMenu.addClass('menu-open').stop(true, true);
                 setDesktopMenuVisibility(true);
                 $nav.addClass('awa-menu-expanded');
+                setNavBarClip(false);
                 $title.addClass('active').attr('aria-expanded', 'true');
                 $('body').removeClass('background_shadow_show');
+
+                // Bug5: reposicionar dropdown ao rolar a página
+                $(window).off('scroll.awaVMenuRepos-' + safeUid)
+                    .on('scroll.awaVMenuRepos-' + safeUid, function () {
+                        if (isMenuOpenState()) {
+                            setDesktopMenuVisibility(true);
+                        } else {
+                            $(window).off('scroll.awaVMenuRepos-' + safeUid);
+                        }
+                    });
+
+                // Bug4: fechar ao clicar fora do nav ou do portal
+                $(document).off('click.awaVMenuClose-' + safeUid)
+                    .on('click.awaVMenuClose-' + safeUid, function (e) {
+                        var $t = $(e.target);
+
+                        if (!$t.closest($nav).length &&
+                                !$t.closest('.awa-side-submenu-portal').length) {
+                            closeMenu();
+                        }
+                    });
+
+                // Bugs6+7: fechar ao pressionar Escape (global — menu aberto por hover)
+                // Nota: não chamar $title.trigger('focus') pois dispara focusin → openMenu
+                $(document).off('keydown.awaVMenuClose-' + safeUid)
+                    .on('keydown.awaVMenuClose-' + safeUid, function (e) {
+                        if (e.key === 'Escape' && isMenuOpenState()) {
+                            closeMenu();
+                        }
+                    });
+
                 $(document).trigger('awa:vmenu:open');
                 return;
             }
@@ -188,8 +261,12 @@ define([
                 $toggleMenu.removeClass('menu-open').stop(true, true);
                 setDesktopMenuVisibility(false);
                 $nav.removeClass('awa-menu-expanded');
+                setNavBarClip(true);
                 $title.removeClass('active').attr('aria-expanded', 'false');
                 $('body').removeClass('background_shadow_show');
+                $(window).off('scroll.awaVMenuRepos-' + safeUid);
+                $(document).off('click.awaVMenuClose-' + safeUid);
+                $(document).off('keydown.awaVMenuClose-' + safeUid);
                 $(document).trigger('awa:vmenu:close');
                 return;
             }
@@ -362,10 +439,12 @@ define([
                 if (isMenuOpenState()) {
                     setDesktopMenuVisibility(true);
                     $nav.addClass('awa-menu-expanded');
+                    setNavBarClip(false);
                     $title.addClass('active').attr('aria-expanded', 'true');
                 } else {
                     setDesktopMenuVisibility(false);
                     $nav.removeClass('awa-menu-expanded');
+                    setNavBarClip(true);
                     $title.removeClass('active').attr('aria-expanded', 'false');
                 }
 
@@ -375,6 +454,7 @@ define([
 
             clearDesktopMenuVisibility();
             $nav.removeClass('awa-menu-expanded');
+            setNavBarClip(true);
             $toggleMenu.removeClass('menu-open').hide();
             $title.removeClass('active').attr('aria-expanded', 'false');
             $('body').removeClass('background_shadow_show');
@@ -740,7 +820,9 @@ define([
 
         $nav.on('remove' + eventNamespace, function () {
             $(window).off(resizeNamespace);
+            $(window).off('.awaVMenuRepos-' + safeUid);
             $(overlaySelector).off(overlayClickNamespace);
+            $(document).off('.awaVMenuClose-' + safeUid);
         });
 
         ensureMobileSubmenuToggles();
