@@ -1,0 +1,66 @@
+# Typebot — Chatbot Visual Builder
+# bot-builder.awamotos.com → painel admin (porta 3001)
+# bot.awamotos.com         → viewer público (porta 3002)
+
+services:
+  typebot-builder:
+    image: baptistearno/typebot-builder:3.16.1
+    container_name: awa-typebot-builder
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3001:3000"
+    environment:
+      DATABASE_URL: postgresql://typebot:${TYPEBOT_DB_PASS}@typebot-db:5432/typebot
+      NEXTAUTH_URL: https://bot-builder.awamotos.com
+      NEXT_PUBLIC_VIEWER_URL: https://bot.awamotos.com
+      ENCRYPTION_SECRET: ${TYPEBOT_ENCRYPTION_SECRET}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      DISABLE_SIGNUP: "true"
+      NEXT_PUBLIC_DISABLE_SIGNUP: "true"
+    depends_on:
+      typebot-db:
+        condition: service_healthy
+    networks:
+      - awa-infra
+
+  typebot-viewer:
+    image: baptistearno/typebot-viewer:3.16.1
+    container_name: awa-typebot-viewer
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3002:3000"
+    environment:
+      DATABASE_URL: postgresql://typebot:${TYPEBOT_DB_PASS}@typebot-db:5432/typebot
+      NEXTAUTH_URL: https://bot-builder.awamotos.com
+      NEXT_PUBLIC_VIEWER_URL: https://bot.awamotos.com
+      ENCRYPTION_SECRET: ${TYPEBOT_ENCRYPTION_SECRET}
+    depends_on:
+      typebot-db:
+        condition: service_healthy
+    networks:
+      - awa-infra
+
+  typebot-db:
+    image: postgres:16-alpine
+    container_name: awa-typebot-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: typebot
+      POSTGRES_PASSWORD: ${TYPEBOT_DB_PASS}
+      POSTGRES_DB: typebot
+    volumes:
+      - typebot_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U typebot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - awa-infra
+
+volumes:
+  typebot_db_data:
+
+networks:
+  awa-infra:
+    external: true

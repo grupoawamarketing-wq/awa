@@ -921,12 +921,28 @@ R: 1-3 dias úteis após confirmação do pagamento. Frete calculado no checkout
 - [x] Order notifications ativadas (4 observers, N8N webhook nova-ordem)
 - [x] Consent log LGPD com audit trail completo
 
+### ✅ Fase 4 — B2B WhatsApp (COMPLETA — 2026-04-13)
+- [x] B2B Registration API: validate CNPJ (ReceitaWS), register lead, check status
+- [x] B2B Quote API: submit, list, detail, accept (integra QuoteRequestRepository)
+- [x] B2B Reorder API: list orders, reorder by ID, reorder last
+- [x] B2B Alerts Cron: estoque, novos produtos, lembrete de crédito (diário 9h)
+- [x] Alertas B2B habilitados no admin (config `whatsapp_commerce/b2b/alerts_enabled`)
+- [x] 12 endpoints REST B2B registrados no webapi.xml
+
+### ✅ Fases 5-6 — APIs Operacionais e Marketing (COMPLETA — 2026-04-13)
+- [x] Admin Dashboard API: vendas hoje, estoque, novos clientes, detalhe pedido, top selling
+- [x] Review API: avaliação de produto via WhatsApp (salva como Review pendente)
+- [x] Campaign API: broadcast por segmento (all_optin, recent_90d, b2b) + stats
+- [x] Todas as 11 interfaces com preferências DI + logger dedicado
+- [x] 30+ endpoints REST no webapi.xml (todos autenticados por Integration Token)
+
 ### 🔲 Pendente
 - [ ] Escanear QR Code WhatsApp (Evolution API state=`connecting`)
 - [ ] Teste end-to-end via WhatsApp real
-- [ ] Fase 2: Carrinho WhatsApp, checkout link, pedido
-- [ ] Fase 3: Carrinho abandonado via WhatsApp, Cloud API Oficial
-- [ ] Fase 4+: B2B, ERP sync, campanhas em massa
+- [ ] Migrar para Cloud API Oficial (antes dos disparos em massa)
+- [ ] Templates WhatsApp pré-aprovados pelo Meta
+- [ ] Backup diário dos volumes Docker
+- [ ] Workflows N8N para B2B (cadastro, cotação, recompra)
 
 ---
 

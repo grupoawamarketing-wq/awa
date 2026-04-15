@@ -1,0 +1,131 @@
+# Evolution API v2.3.7 — WhatsApp Gateway
+# Dominio: wpp.awamotos.com
+# Docs: https://doc.evolution-api.com
+
+services:
+  evolution-api:
+    image: evoapicloud/evolution-api:v2.3.7
+    container_name: awa-evolution
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      # --- Servidor ---
+      SERVER_TYPE: http
+      SERVER_PORT: 8080
+      SERVER_URL: https://wpp.awamotos.com
+
+      # --- Autenticacao global ---
+      AUTHENTICATION_API_KEY: ${EVOLUTION_API_KEY}
+      AUTHENTICATION_EXPOSE_IN_FETCH_INSTANCES: "true"
+
+      # --- Banco de dados (PostgreSQL dedicado) ---
+      DATABASE_PROVIDER: postgresql
+      DATABASE_CONNECTION_URI: postgresql://evolution:${EVOLUTION_DB_PASS}@evolution-db:5432/evolution?schema=public
+      DATABASE_CONNECTION_CLIENT_NAME: awa_evolution
+
+      # --- Persistencia de dados ---
+      DATABASE_SAVE_DATA_INSTANCE: "true"
+      DATABASE_SAVE_DATA_NEW_MESSAGE: "true"
+      DATABASE_SAVE_MESSAGE_UPDATE: "true"
+      DATABASE_SAVE_DATA_CONTACTS: "true"
+      DATABASE_SAVE_DATA_CHATS: "true"
+      DATABASE_SAVE_DATA_LABELS: "true"
+      DATABASE_SAVE_DATA_HISTORIC: "true"
+      DATABASE_SAVE_IS_ON_WHATSAPP: "true"
+      DATABASE_SAVE_IS_ON_WHATSAPP_DAYS: "7"
+      DATABASE_DELETE_MESSAGE: "true"
+
+      # --- Redis (DB separado do Magento) ---
+      CACHE_REDIS_ENABLED: "true"
+      CACHE_REDIS_URI: redis://default:${REDIS_PASS}@host.docker.internal:6379/4
+      CACHE_REDIS_TTL: "604800"
+      CACHE_REDIS_PREFIX_KEY: awa_evolution
+      CACHE_REDIS_SAVE_INSTANCES: "false"
+      CACHE_LOCAL_ENABLED: "false"
+
+      # --- Webhook global (desativado) ---
+      WEBHOOK_GLOBAL_ENABLED: "false"
+
+      # --- Chatwoot ---
+      CHATWOOT_ENABLED: "true"
+      CHATWOOT_MESSAGE_READ: "true"
+      CHATWOOT_MESSAGE_DELETE: "true"
+      CHATWOOT_BOT_CONTACT: "true"
+
+      # --- Typebot ---
+      TYPEBOT_ENABLED: "true"
+      TYPEBOT_API_VERSION: latest
+
+      # --- N8N ---
+      N8N_ENABLED: "true"
+
+      # --- OpenAI / Dify / EvoAI (fase futura) ---
+      OPENAI_ENABLED: "false"
+      DIFY_ENABLED: "false"
+      EVOAI_ENABLED: "false"
+
+      # --- Configuracoes de instancia ---
+      DEL_INSTANCE: "false"
+      QRCODE_LIMIT: 30
+      QRCODE_COLOR: "#198754"
+      CONFIG_SESSION_PHONE_CLIENT: AWA Motos
+      CONFIG_SESSION_PHONE_NAME: Chrome
+
+      # --- Logs ---
+      LOG_LEVEL: ERROR,WARN,DEBUG,INFO,LOG,VERBOSE,DARK,WEBHOOKS
+      LOG_COLOR: "true"
+      LOG_BAILEYS: info
+
+      # --- Cors ---
+      CORS_ORIGIN: "*"
+      CORS_METHODS: GET,POST,PUT,DELETE
+      CORS_CREDENTIALS: "true"
+
+      # --- Idioma ---
+      LANGUAGE: pt-BR
+
+    volumes:
+      - evolution_instances:/evolution/instances
+      # Patch: suppress numeric choice-item messages on WhatsApp
+      - ./patches/typebot.service.js:/evolution/dist/api/integrations/chatbot/typebot/services/typebot.service.js:ro
+      - ./patches/typebot.service.mjs:/evolution/dist/api/integrations/chatbot/typebot/services/typebot.service.mjs:ro
+    depends_on:
+      evolution-db:
+        condition: service_healthy
+    networks:
+      - awa-infra
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  evolution-db:
+    image: postgres:16-alpine
+    container_name: awa-evolution-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: evolution
+      POSTGRES_PASSWORD: ${EVOLUTION_DB_PASS}
+      POSTGRES_DB: evolution
+    command:
+      - postgres
+      - -c
+      - max_connections=200
+      - -c
+      - listen_addresses=*
+    volumes:
+      - evolution_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U evolution"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - awa-infra
+
+volumes:
+  evolution_instances:
+  evolution_db_data:
+
+networks:
+  awa-infra:
+    external: true
