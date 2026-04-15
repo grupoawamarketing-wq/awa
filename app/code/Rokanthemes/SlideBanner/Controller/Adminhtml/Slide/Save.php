@@ -71,7 +71,6 @@ class Save extends \Magento\Backend\App\Action
 			
 			if ($id = $this->getRequest()->getParam('slide_id')) {
 				$model->load($id);
-				//print_r($model->getData()); die;
 			}
 			
 			/**
@@ -82,7 +81,7 @@ class Save extends \Magento\Backend\App\Action
 					'Magento\MediaStorage\Model\File\Uploader',
 					['fileId' => 'slide_image']
 				);
-				$uploader->setAllowedExtensions(['jpg', 'jpeg', 'gif', 'png']);
+				$uploader->setAllowedExtensions(['jpg', 'jpeg', 'gif', 'png', 'webp']);
 
 				/** @var \Magento\Framework\Image\Adapter\AdapterInterface $imageAdapter */
 				$imageAdapter = $this->_objectManager->get('Magento\Framework\Image\AdapterFactory')->create();
@@ -117,7 +116,7 @@ class Save extends \Magento\Backend\App\Action
 					'Magento\MediaStorage\Model\File\Uploader',
 					['fileId' => 'slide_image_mobile']
 				);
-				$uploader2->setAllowedExtensions(['jpg', 'jpeg', 'gif', 'png']);
+				$uploader2->setAllowedExtensions(['jpg', 'jpeg', 'gif', 'png', 'webp']);
 
 				/** @var \Magento\Framework\Image\Adapter\AdapterInterface $imageAdapter */
 				$imageAdapter2 = $this->_objectManager->get('Magento\Framework\Image\AdapterFactory')->create();
@@ -138,7 +137,6 @@ class Save extends \Magento\Backend\App\Action
 				if (isset($data['slide_image_mobile']) && isset($data['slide_image_mobile']['value'])) {
 					if (isset($data['slide_image_mobile']['delete'])) {
 						$data['slide_image_mobile'] = null;
-						$data['slide_image_mobile'] = true;
 					} else if (isset($data['slide_image_mobile']['value'])) {
 						$data['slide_image_mobile'] = $data['slide_image_mobile']['value'];
 					} else {
@@ -172,8 +170,6 @@ class Save extends \Magento\Backend\App\Action
 				}
 				$this->_redirect('*/*/');
 				return;
-			} catch (\Magento\Framework\Model\Exception $e) {
-				$this->messageManager->addError($e->getMessage());
 			} catch (\RuntimeException $e) {
 				$this->messageManager->addError($e->getMessage());
 			} catch (\Exception $e) {

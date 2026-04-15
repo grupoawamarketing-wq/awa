@@ -38,7 +38,6 @@ class Slider extends \Magento\Framework\View\Element\Template
 		$this->_sliderFactory = $sliderFactory;
 		$this->_bannerFactory = $slideFactory;
 		$this->_scopeConfig = $context->getScopeConfig();
-		$this->_storeManager = $context->getStoreManager();
 		$this->_filterProvider = $filterProvider;
 		$this->_storeManager = $storeManager;
 	}
@@ -65,26 +64,26 @@ class Slider extends \Magento\Framework\View\Element\Template
 	{
 		$mediaUrl = $this->_storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA);
 		if (!$src) {
-			return '<img src="" alt="Slide" loading="lazy" decoding="async" width="1920" height="600" />';
+			return '';
 		}
 		$alt = $altText ? strip_tags($altText) : $this->getSlider()->getSliderTitle();
 		$alt = htmlspecialchars($alt, ENT_QUOTES, 'UTF-8');
 		$loading = $isFirst ? 'eager' : 'lazy';
 		$priority = $isFirst ? ' fetchpriority="high"' : '';
-		return '<img src="' . $mediaUrl . $src . '" alt="' . $alt . '" loading="' . $loading . '" decoding="async" width="1920" height="600"' . $priority . ' />';
+		return '<img src="' . $this->escapeUrl($mediaUrl . $src) . '" alt="' . $alt . '" loading="' . $loading . '" decoding="async" width="1920" height="600"' . $priority . ' />';
 	}
 	
 	public function getImageElementMobile($src, $altText = '', $isFirst = false)
 	{
 		$mediaUrl = $this->_storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA);
 		if (!$src) {
-			return '<img src="" alt="Slide" loading="lazy" decoding="async" width="768" height="400" />';
+			return '';
 		}
 		$alt = $altText ? strip_tags($altText) : $this->getSlider()->getSliderTitle();
 		$alt = htmlspecialchars($alt, ENT_QUOTES, 'UTF-8');
 		$loading = $isFirst ? 'eager' : 'lazy';
 		$priority = $isFirst ? ' fetchpriority="high"' : '';
-		return '<img src="' . $mediaUrl . $src . '" alt="' . $alt . '" loading="' . $loading . '" decoding="async" width="768" height="400"' . $priority . ' />';
+		return '<img src="' . $this->escapeUrl($mediaUrl . $src) . '" alt="' . $alt . '" loading="' . $loading . '" decoding="async" width="768" height="400"' . $priority . ' />';
 	}
 
 	/**
@@ -108,8 +107,8 @@ class Slider extends \Magento\Framework\View\Element\Template
 		$loading = $isFirst ? 'eager' : 'lazy';
 		$priority = $isFirst ? ' fetchpriority="high"' : '';
 
-		$desktopUrl = $desktopSrc ? $mediaUrl . $desktopSrc : '';
-		$mobileUrl = $mobileSrc ? $mediaUrl . $mobileSrc : $desktopUrl;
+		$desktopUrl = $desktopSrc ? $this->escapeUrl($mediaUrl . $desktopSrc) : '';
+		$mobileUrl = $mobileSrc ? $this->escapeUrl($mediaUrl . $mobileSrc) : $desktopUrl;
 
 		$source = $desktopUrl
 			? '<source media="(min-width: 768px)" srcset="' . $desktopUrl . '" width="1920" height="600" />'
@@ -131,42 +130,55 @@ class Slider extends \Magento\Framework\View\Element\Template
 		$collection = $this->_bannerFactory->create()->getCollection();
 		$collection->addFieldToFilter('slider_id', $sliderId);
 		$collection->addFieldToFilter('slide_status', 1);
+		$collection->setOrder('slide_position', 'ASC');
 		return $collection;
 	}
 	public function getSlider()
 	{
-		if(is_null($this->_slider)){
-			// First try to load by explicit slider_id if set
-			$sliderId = $this->getSliderId();
-			if($sliderId) {
-				$this->_slider = $this->_sliderFactory->create();
-				$this->_slider->load($sliderId, 'slider_identifier');
-				if($this->_slider->getId() && $this->_slider->getSliderStatus() == 1) {
+		if (is_null($this->_slider)) {
+			// Bug #2: getSliderId() retorna um identifier string, não um ID numérico.
+			// Carregar por 'slider_identifier' está correto; porém se for numérico, carregar por ID.
+			$sliderIdentifier = $this->getSliderId();
+			if ($sliderIdentifier) {
+				$candidate = $this->_sliderFactory->create();
+				if (is_numeric($sliderIdentifier)) {
+					$candidate->load((int)$sliderIdentifier);
+				} else {
+					$candidate->load($sliderIdentifier, 'slider_identifier');
+				}
+				if ($candidate->getId() && $candidate->getSliderStatus() == 1) {
+					$this->_slider = $candidate;
 					return $this->_slider;
 				}
 			}
-			
-			// Fallback to original logic
-			$all_collections = $this->_sliderFactory->create()->getCollection()->addFieldToFilter('slider_status', 1);
-			if(count($all_collections) > 0){
-				$store_id = $this->getStoreId();
-				foreach ($all_collections as $value) {
-					$stores_ids = $value->getStoreIds();
-					if($stores_ids && $stores_ids != ''){
-						$check_json = json_decode($stores_ids, true);
-						if(in_array($store_id, $check_json)){
-							$sliderId = $value->getId();
-							$this->_slider = $this->_sliderFactory->create();
-							$this->_slider->load($sliderId);
-							break;
-						}
-						elseif (isset($check_json[0]) && $check_json[0] == 0) {
-							$sliderId = $value->getId();
-							$this->_slider = $this->_sliderFactory->create();
-							$this->_slider->load($sliderId);
-						}
-					}
+
+			// Bug #17: evitar N+1 — a collection já contém todos os dados necessários;
+			// não fazemos load() adicional, usamos o objeto da collection diretamente.
+			// Bug #3: o elseif para slider global (store_id=0) não tinha break.
+			$store_id = $this->getStoreId();
+			$sliderGlobal = null;
+			$all_collections = $this->_sliderFactory->create()->getCollection()
+				->addFieldToFilter('slider_status', 1);
+			foreach ($all_collections as $value) {
+				$stores_ids = $value->getStoreIds();
+				if (!$stores_ids) {
+					continue;
 				}
+				$check_json = json_decode($stores_ids, true);
+				if (!is_array($check_json)) {
+					continue;
+				}
+				if (in_array($store_id, $check_json)) {
+					// Slider específico desta loja — prioridade máxima
+					$this->_slider = $value;
+					break;
+				} elseif ($sliderGlobal === null && isset($check_json[0]) && (int)$check_json[0] === 0) {
+					// Slider global (todas as lojas) — usar como fallback, continuar procurando
+					$sliderGlobal = $value;
+				}
+			}
+			if ($this->_slider === null && $sliderGlobal !== null) {
+				$this->_slider = $sliderGlobal;
 			}
 		}
 		return $this->_slider;

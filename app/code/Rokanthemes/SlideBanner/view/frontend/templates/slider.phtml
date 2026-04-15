@@ -36,7 +36,7 @@ if ($banners = $block->getBannerCollection()):
                 $hasOverlay = (strpos($rawText, '<') !== false);
                 $pictureHtml = $block->getPictureElement($desktopSrc, $mobileSrc, $slideAlt, $isFirst);
                 $overlayHtml = $hasOverlay
-                    ? '<div class="slide-caption" aria-hidden="true">' . $rawText . '</div>'
+                    ? '<div class="slide-caption" aria-hidden="true">' . $block->getContentText($rawText) . '</div>'
                     : '';
                 $inner = $pictureHtml . $overlayHtml;
                 if ($link = $banner->getSlideLink()) {
@@ -61,10 +61,15 @@ if ($banners = $block->getBannerCollection()):
             lazyLoad: true,
             singleItem: true,
             <?php
+            $allowedOwlKeys = ['autoPlay','autoplay','navigation','stopOnHover','pagination','scrollPerPage','autoSpeed','speed','slideSpeed','paginationSpeed','rewindSpeed','items','itemsDesktop','itemsDesktopSmall','itemsTablet','itemsMobile','singleItem','transitionStyle','loop'];
+            $boolKeys = ['autoPlay','autoplay','navigation','stopOnHover','pagination','scrollPerPage'];
             $settings = [];
             foreach ($sliderSettings as $key => $value) {
-                if (in_array($key, array('autoPlay', 'navigation', 'stopOnHover', 'pagination', 'scrollPerPage'))) {
-                    $value = $value == 0 ? 'false' : 'true';
+                if (!in_array($key, $allowedOwlKeys)) { continue; }
+                if (in_array($key, $boolKeys)) {
+                    $value = $value ? 'true' : 'false';
+                } else {
+                    $value = json_encode($value);
                 }
                 $settings[] = $key . ': ' . $value;
             }

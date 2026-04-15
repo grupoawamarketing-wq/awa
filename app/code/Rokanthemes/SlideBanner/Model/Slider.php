@@ -13,11 +13,12 @@ class Slider extends \Magento\Framework\Model\AbstractModel
     }
 	public function getSliderSetting()
 	{
-		if(!$this->getData('slider_setting'))
-			return $defaultSetting = array('items'=>1, 'itemsDesktop'=>'[1199,1]', 'itemsDesktopSmall' => '[980,3]', 'itemsTablet' => '[768,2]', 'itemsMobile' => '[479,1]', 'slideSpeed' => 500, 'paginationSpeed' => 500, 'rewindSpeed'=>500);
-		$data = $this->getData('slider_setting');
-		$data = json_decode($data, true);
-		return $data;
+		$defaultSetting = ['items'=>1, 'itemsDesktop'=>'[1199,1]', 'itemsDesktopSmall' => '[980,3]', 'itemsTablet' => '[768,2]', 'itemsMobile' => '[479,1]', 'slideSpeed' => 500, 'paginationSpeed' => 500, 'rewindSpeed'=>500];
+		if (!$this->getData('slider_setting')) {
+			return $defaultSetting;
+		}
+		$data = json_decode($this->getData('slider_setting'), true);
+		return is_array($data) ? $data : $defaultSetting;
 	}
 	public function getSetting()
 	{

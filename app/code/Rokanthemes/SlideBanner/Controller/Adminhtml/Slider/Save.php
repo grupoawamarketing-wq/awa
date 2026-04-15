@@ -94,8 +94,6 @@ class Save extends \Magento\Backend\App\Action
 				}
 				$this->_redirect('*/*/');
 				return;
-			} catch (\Magento\Framework\Model\Exception $e) {
-				$this->messageManager->addError($e->getMessage());
 			} catch (\RuntimeException $e) {
 				$this->messageManager->addError($e->getMessage());
 			} catch (\Exception $e) {
