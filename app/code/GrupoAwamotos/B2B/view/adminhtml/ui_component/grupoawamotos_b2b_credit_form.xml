@@ -1,0 +1,127 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * B2B Credit Limit Edit Form
+ */
+-->
+<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">grupoawamotos_b2b_credit_form.grupoawamotos_b2b_credit_form_data_source</item>
+        </item>
+    </argument>
+
+    <settings>
+        <buttons>
+            <button name="back" class="Magento\Backend\Block\Widget\Button\Back"/>
+            <button name="save" class="Magento\Backend\Block\Widget\Button\Save"/>
+        </buttons>
+        <namespace>grupoawamotos_b2b_credit_form</namespace>
+        <dataScope>data</dataScope>
+        <deps>
+            <dep>grupoawamotos_b2b_credit_form.grupoawamotos_b2b_credit_form_data_source</dep>
+        </deps>
+    </settings>
+
+    <dataSource name="grupoawamotos_b2b_credit_form_data_source">
+        <argument name="data" xsi:type="array">
+            <item name="js_config" xsi:type="array">
+                <item name="component" xsi:type="string">Magento_Ui/js/form/provider</item>
+            </item>
+        </argument>
+        <settings>
+            <submitUrl path="grupoawamotos_b2b/credit/save"/>
+        </settings>
+        <dataProvider class="GrupoAwamotos\B2B\Ui\DataProvider\CreditLimit\FormDataProvider"
+                      name="grupoawamotos_b2b_credit_form_data_source"
+                      primaryFieldName="entity_id"
+                      requestFieldName="entity_id">
+            <settings>
+                <requestFieldName>entity_id</requestFieldName>
+                <primaryFieldName>entity_id</primaryFieldName>
+            </settings>
+        </dataProvider>
+    </dataSource>
+
+    <fieldset name="general" sortOrder="10">
+        <settings>
+            <collapsible>false</collapsible>
+            <label translate="true">Limite de Crédito B2B</label>
+        </settings>
+
+        <field name="entity_id" formElement="hidden">
+            <settings>
+                <dataType>text</dataType>
+                <dataScope>entity_id</dataScope>
+            </settings>
+        </field>
+
+        <field name="customer_id" formElement="input" sortOrder="10">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">ID do Cliente (Magento)</label>
+                <dataScope>customer_id</dataScope>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                    <rule name="validate-digits" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+        </field>
+
+        <field name="credit_limit" formElement="input" sortOrder="20">
+            <settings>
+                <dataType>price</dataType>
+                <label translate="true">Limite de Crédito (R$)</label>
+                <dataScope>credit_limit</dataScope>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                    <rule name="validate-number" xsi:type="boolean">true</rule>
+                    <rule name="validate-zero-or-greater" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+        </field>
+
+        <field name="currency_code" formElement="input" sortOrder="30">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Moeda</label>
+                <dataScope>currency_code</dataScope>
+                <notice translate="true">Código ISO da moeda (ex: BRL).</notice>
+                <validation>
+                    <rule name="max_text_length" xsi:type="number">3</rule>
+                </validation>
+            </settings>
+        </field>
+
+        <field name="payment_terms" formElement="input" sortOrder="40">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Prazos de Pagamento</label>
+                <dataScope>payment_terms</dataScope>
+                <notice translate="true">Prazos separados por vírgula. Ex: a_vista,30,60,90</notice>
+                <validation>
+                    <rule name="max_text_length" xsi:type="number">255</rule>
+                </validation>
+            </settings>
+        </field>
+    </fieldset>
+
+    <fieldset name="credit_info" sortOrder="20">
+        <settings>
+            <collapsible>true</collapsible>
+            <label translate="true">Situação Atual (somente leitura)</label>
+        </settings>
+
+        <field name="used_credit" formElement="input" sortOrder="10">
+            <settings>
+                <dataType>price</dataType>
+                <label translate="true">Crédito Utilizado (R$)</label>
+                <dataScope>used_credit</dataScope>
+                <disabled>true</disabled>
+            </settings>
+        </field>
+    </fieldset>
+
+</form>

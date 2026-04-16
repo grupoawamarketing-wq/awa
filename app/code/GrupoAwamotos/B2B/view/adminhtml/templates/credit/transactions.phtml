@@ -1,0 +1,42 @@
+<?php
+/** @var \Magento\Backend\Block\Template $block */
+$customerId = (int) $block->getRequest()->getParam('customer_id');
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$factory = $objectManager->get(\GrupoAwamotos\B2B\Model\ResourceModel\CreditTransaction\CollectionFactory::class);
+$transactions = $factory->create()
+    ->addFieldToFilter('customer_id', $customerId)
+    ->setOrder('transaction_id', 'DESC')
+    ->setPageSize(100);
+?>
+<div class="admin__data-grid-wrap">
+    <h3><?= $block->escapeHtml(__('Transações de Crédito — Cliente #%1', $customerId)) ?></h3>
+    <table class="data-grid">
+        <thead>
+            <tr>
+                <th><?= $block->escapeHtml(__('ID')) ?></th>
+                <th><?= $block->escapeHtml(__('Tipo')) ?></th>
+                <th><?= $block->escapeHtml(__('Valor (R$)')) ?></th>
+                <th><?= $block->escapeHtml(__('Saldo Após')) ?></th>
+                <th><?= $block->escapeHtml(__('Pedido')) ?></th>
+                <th><?= $block->escapeHtml(__('Observação')) ?></th>
+                <th><?= $block->escapeHtml(__('Data')) ?></th>
+            </tr>
+        </thead>
+        <tbody>
+        <?php foreach ($transactions as $t): ?>
+            <tr>
+                <td><?= (int)$t->getData('transaction_id') ?></td>
+                <td><?= $block->escapeHtml((string)$t->getData('type')) ?></td>
+                <td style="text-align:right"><?= number_format((float)$t->getData('amount'), 2, ',', '.') ?></td>
+                <td style="text-align:right"><?= number_format((float)$t->getData('balance_after'), 2, ',', '.') ?></td>
+                <td><?= $t->getData('order_id') ? (int)$t->getData('order_id') : '-' ?></td>
+                <td><?= $block->escapeHtml((string)$t->getData('comment')) ?></td>
+                <td><?= $block->escapeHtml((string)$t->getData('created_at')) ?></td>
+            </tr>
+        <?php endforeach; ?>
+        <?php if ($transactions->count() === 0): ?>
+            <tr><td colspan="7"><?= $block->escapeHtml(__('Nenhuma transação encontrada.')) ?></td></tr>
+        <?php endif; ?>
+        </tbody>
+    </table>
+</div>

@@ -14,8 +14,22 @@ $renderCmsBlock = static function (string $blockId) use ($layout): string {
 	return trim((string)$cmsBlock->toHtml());
 };
 
-// Slider declarado via layout XML (Rokanthemes_SlideBanner::slider.phtml, slider_id=homepageslider)
-$heroSliderHtml = $block->getChildHtml('slider.main');
+// Forca o template do modulo para evitar falhas de validacao no override do tema.
+$heroSliderBlock = $block->getChildBlock('slider.main');
+if ($heroSliderBlock instanceof \Rokanthemes\SlideBanner\Block\Slider) {
+	$heroSliderBlock->setTemplate('Rokanthemes_SlideBanner::slider_home5.phtml');
+	$heroSliderHtml = trim((string) $heroSliderBlock->toHtml());
+} else {
+	/** @var \Rokanthemes\SlideBanner\Block\Slider|null $heroSliderBlock */
+	$heroSliderBlock = $layout->createBlock(\Rokanthemes\SlideBanner\Block\Slider::class);
+	if ($heroSliderBlock) {
+		$heroSliderBlock->setData('slider_id', 'homepageslider');
+		$heroSliderBlock->setTemplate('Rokanthemes_SlideBanner::slider_home5.phtml');
+		$heroSliderHtml = trim((string) $heroSliderBlock->toHtml());
+	} else {
+		$heroSliderHtml = '';
+	}
+}
 
 $heroFallbackHtml = $renderCmsBlock('home_hero');
 $schemaOrgHtml = $renderCmsBlock('home_schema_org');

@@ -34,11 +34,32 @@ define([
      * Check if customer is actually logged in using customer-data sections.
      * This is the authoritative source of truth, not the server-side mode from cached HTML.
      */
+    function isCustomerDataLoggedIn(customer) {
+        if (!customer || typeof customer !== 'object') {
+            return false;
+        }
+
+        return !!(
+            customer.firstname
+            || customer.fullname
+            || customer.email
+            || customer.id
+            || customer.entity_id
+            || customer.websiteId !== undefined
+        );
+    }
+
+    function getCustomerDataPayload() {
+        try {
+            return customerData.get('customer')();
+        } catch (e) {
+            return {};
+        }
+    }
+
     function isCustomerLoggedIn() {
         try {
-            var customer = customerData.get('customer')();
-            // customer-data returns an object with firstname when logged in
-            return !!(customer && customer.firstname);
+            return isCustomerDataLoggedIn(getCustomerDataPayload());
         } catch (e) {
             return false;
         }
@@ -105,6 +126,130 @@ define([
         var lastTriggerButton = null;
         var previousBodyOverflow = null;
         var observerInstance = null;
+        var priceSyncStarted = false;
+
+        function hasHiddenPriceMarkers() {
+            return !!document.querySelector(
+                '.b2b-login-to-see-price, [data-awa-gate-state="guest"], .product .price-box .price-label a[href*="login"]'
+            );
+        }
+
+        function getProductIdFromNode(node) {
+            var root;
+            var fromDataset;
+            var productInput;
+
+            if (!node) {
+                return null;
+            }
+
+            root = node.closest('[data-product-id], .item-product, .product-item, li, .product-info-main, .product-add-form') || node.parentElement;
+            fromDataset = root && root.getAttribute ? parseInt(root.getAttribute('data-product-id'), 10) : 0;
+            if (fromDataset) {
+                return String(fromDataset);
+            }
+
+            productInput = root ? root.querySelector('input[name="product"]') : null;
+            if (!productInput && document.getElementById('product_addtocart_form')) {
+                productInput = document.querySelector('#product_addtocart_form input[name="product"]');
+            }
+
+            return productInput && productInput.value ? String(parseInt(productInput.value, 10)) : null;
+        }
+
+        function collectPriceTargets() {
+            var targetsByProductId = {};
+
+            document.querySelectorAll('.b2b-login-to-see-price').forEach(function (priceMarker) {
+                var productId = getProductIdFromNode(priceMarker);
+
+                if (!productId) {
+                    return;
+                }
+
+                if (!targetsByProductId[productId]) {
+                    targetsByProductId[productId] = [];
+                }
+
+                targetsByProductId[productId].push(priceMarker);
+            });
+
+            return targetsByProductId;
+        }
+
+        function replacePriceTarget(priceMarker, html) {
+            if (!priceMarker || !html) {
+                return;
+            }
+
+            if (priceMarker.parentNode) {
+                priceMarker.outerHTML = html;
+            }
+        }
+
+        function hydrateHiddenPrices() {
+            var targetsByProductId = collectPriceTargets();
+            var productIds = Object.keys(targetsByProductId);
+
+            if (!productIds.length || typeof window.fetch !== 'function') {
+                return Promise.resolve(false);
+            }
+
+            return window.fetch('/b2b/ajax/customerPrices?product_ids=' + encodeURIComponent(productIds.join(',')), {
+                credentials: 'same-origin',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            }).then(function (response) {
+                return response.ok ? response.json() : null;
+            }).then(function (payload) {
+                var hydratedAny = false;
+
+                if (!payload || !payload.success || !payload.allowed || !payload.items) {
+                    return false;
+                }
+
+                Object.keys(payload.items).forEach(function (productId) {
+                    var item = payload.items[productId];
+
+                    if (!item || !item.html || !targetsByProductId[productId]) {
+                        return;
+                    }
+
+                    targetsByProductId[productId].forEach(function (priceMarker) {
+                        replacePriceTarget(priceMarker, item.html);
+                        hydratedAny = true;
+                    });
+                });
+
+                return hydratedAny;
+            }).catch(function () {
+                return false;
+            });
+        }
+
+        function syncPriceBlocksAfterLogin() {
+            if (priceSyncStarted || isRestricted || !hasHiddenPriceMarkers()) {
+                return;
+            }
+
+            priceSyncStarted = true;
+
+            try {
+                customerData.invalidate(['customer', 'cart']);
+                customerData.reload(['customer', 'cart'], true);
+            } catch (error) {
+                // ignore customer-data refresh errors and continue with AJAX hydration
+            }
+
+            hydrateHiddenPrices().then(function (hydratedAny) {
+                if (!hydratedAny) {
+                    window.setTimeout(function () {
+                        window.location.reload();
+                    }, 150);
+                }
+            });
+        }
 
         function isModalOpen() {
             return overlay && overlay.classList.contains('active');
@@ -316,10 +461,11 @@ define([
          * If customer is logged in, restore original buttons.
          */
         function checkAndUpdateState() {
-            if (isCustomerLoggedIn()) {
+            if (serverMode === 'guest' && isCustomerLoggedIn()) {
                 // Customer is actually logged in - FPC served a stale guest page
                 isRestricted = false;
                 restoreOriginalButtons();
+                syncPriceBlocksAfterLogin();
 
                 // Disconnect the MutationObserver to stop replacing buttons
                 if (observerInstance) {
@@ -387,10 +533,11 @@ define([
         // When customer-data loads (async), it will tell us if the user is actually logged in
         try {
             customerData.get('customer').subscribe(function (customer) {
-                if (customer && customer.firstname) {
+                if (serverMode === 'guest' && isCustomerDataLoggedIn(customer)) {
                     // Customer IS logged in - restore everything
                     isRestricted = false;
                     restoreOriginalButtons();
+                    syncPriceBlocksAfterLogin();
                     if (observerInstance) {
                         observerInstance.disconnect();
                         observerInstance = null;

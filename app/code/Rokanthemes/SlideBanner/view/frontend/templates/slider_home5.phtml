@@ -1,0 +1,292 @@
+<?php
+/**
+ * AWA Motos — Slide Banner Template
+ * API: Owl Carousel 2.0.x (Rokanthemes_Themeoption/js/owl.carousel)
+ * Estrutura: hidden-xs (desktop) / visible-xs (mobile) conforme tema Ayo Home5.
+ *
+ * @var \Rokanthemes\SlideBanner\Block\Slider $block
+ */
+
+// @codingStandardsIgnoreFile
+if ($banners = $block->getBannerCollection()):
+    $slider = $block->getSlider();
+    $sliderId = $block->getSliderId();
+    $settings = $slider->getSliderSetting();
+    $desktopSlides = [];
+    $mobileSlides = [];
+
+    /**
+     * Mapeamento DB settings (formato Rokanthemes legado) → OWL Carousel v2 API
+     *
+     * DB usa:     autoPlay (ms|1|0),  navigation (bool), pagination (bool),
+     *             stopOnHover (bool), slideSpeed (ms)
+     * OWL v2 usa: autoplay (bool), autoplayTimeout (ms), autoplayHoverPause,
+     *             nav, dots, smartSpeed, animateOut, animateIn
+     */
+    $s = static function (array $arr, string $key, $default = null) {
+        return array_key_exists($key, $arr) ? $arr[$key] : $default;
+    };
+
+    // autoPlay: 0=off | 1=on (5 s) | N>1 = N ms de intervalo
+    $rawAP = (int) $s($settings, 'autoPlay', 0);
+    $autoplayEnabled = $rawAP !== 0;
+    $autoplayTimeout = $rawAP > 1 ? $rawAP : 5000;
+
+    // slideSpeed → smartSpeed (mínimo 50ms)
+    $smartSpeed = max(50, (int) $s($settings, 'slideSpeed', 500) ?: 500);
+
+    $baseOwlConfig = [
+        'items' => 1,
+        'loop' => false,
+        'autoHeight' => true,
+        'lazyLoad' => false,
+        'touchDrag' => true,
+        'mouseDrag' => true,
+        'nav' => (bool) (int) $s($settings, 'navigation', 1),
+        'dots' => (bool) (int) $s($settings, 'pagination', 1),
+        'autoplay' => $autoplayEnabled,
+        'autoplayTimeout' => $autoplayTimeout,
+        'autoplayHoverPause' => (bool) (int) $s($settings, 'stopOnHover', 1),
+        'smartSpeed' => $smartSpeed,
+        'animateOut' => false,
+        'animateIn' => false,
+    ];
+
+    foreach ($banners as $banner) {
+        if ($banner->getSlideStatus() == '2') {
+            continue;
+        }
+
+        $desktopImage = trim((string) $banner->getSlideImage());
+        $mobileImage = trim((string) $banner->getSlideImageMobile());
+        $heroImage = $mobileImage !== '' ? $mobileImage : $desktopImage;
+
+        if ($desktopImage !== '') {
+            $desktopSlides[] = [
+                'banner' => $banner,
+                'image' => $desktopImage,
+            ];
+        }
+
+        if ($heroImage !== '') {
+            $mobileSlides[] = [
+                'banner' => $banner,
+                'image' => $heroImage,
+            ];
+        }
+    }
+
+    $desktopOwlConfig = $baseOwlConfig;
+    $desktopHasMultipleSlides = count($desktopSlides) > 1;
+    $desktopOwlConfig['loop'] = $desktopHasMultipleSlides;
+    $desktopOwlConfig['nav'] = $desktopHasMultipleSlides && $desktopOwlConfig['nav'];
+    $desktopOwlConfig['dots'] = $desktopHasMultipleSlides && $desktopOwlConfig['dots'];
+    $desktopOwlConfig['autoplay'] = $desktopHasMultipleSlides && $desktopOwlConfig['autoplay'];
+
+    $mobileOwlConfig = $baseOwlConfig;
+    $mobileHasMultipleSlides = count($mobileSlides) > 1;
+    $mobileOwlConfig['loop'] = $mobileHasMultipleSlides;
+    $mobileOwlConfig['nav'] = $mobileHasMultipleSlides && $mobileOwlConfig['nav'];
+    $mobileOwlConfig['dots'] = $mobileHasMultipleSlides && $mobileOwlConfig['dots'];
+    $mobileOwlConfig['autoplay'] = $mobileHasMultipleSlides && $mobileOwlConfig['autoplay'];
+
+    // Resolução de links legados (ambiente de staging → produção)
+    $legacyHosts = ['srv1113343.hstgr.cloud', 'www.srv1113343.hstgr.cloud'];
+    $baseUrl = rtrim((string) $block->getBaseUrl(), '/');
+    $baseHost = (string) parse_url($baseUrl, PHP_URL_HOST);
+    $baseScheme = (string) parse_url($baseUrl, PHP_URL_SCHEME);
+    $resolveLink = static function (?string $link) use ($legacyHosts, $baseHost, $baseScheme): string {
+        if (!is_string($link)) {
+            return '';
+        }
+
+        $link = trim($link);
+        if ($link === '') {
+            return '';
+        }
+
+        $parts = parse_url($link);
+        if (!is_array($parts)) {
+            return $link;
+        }
+
+        $linkHost = isset($parts['host']) ? strtolower((string) $parts['host']) : '';
+        if ($linkHost === '' || !in_array($linkHost, $legacyHosts, true) || $baseHost === '' || $baseScheme === '') {
+            return $link;
+        }
+
+        $path = isset($parts['path']) ? (string) $parts['path'] : '/';
+        $path = $path !== '' ? $path : '/';
+        $query = isset($parts['query']) ? ('?' . $parts['query']) : '';
+        $fragment = isset($parts['fragment']) ? ('#' . $parts['fragment']) : '';
+
+        return $baseScheme . '://' . $baseHost . $path . $query . $fragment;
+    };
+?>
+<div class="wrapper_slider hidden-xs slider_<?php echo (int) $sliderId; ?>">
+    <div class="owl owl-carousel">
+        <?php foreach ($desktopSlides as $slideIndex => $slide): ?>
+            <?php
+            $banner = $slide['banner'];
+            $desktopImage = $slide['image'];
+            $isFirst = ($slideIndex === 0);
+            ?>
+            <div class="banner_item">
+                <div class="banner_item_bg">
+                    <?php
+                    $slideAlt = $banner->getSlideText() ?: ($banner->getSlideTitle() ?: '');
+                    $imgHtml = $block->getImageElement($desktopImage, $slideAlt, $isFirst);
+                    if ($isFirst && preg_match('/src="([^"]+)"/', $imgHtml, $_m)) {
+                        $_webp = preg_replace('/\.(jpg|jpeg|png)$/i', '.webp', $_m[1]);
+                        $imgHtml = '<picture>'
+                            . '<source type="image/webp" srcset="' . $block->escapeUrl($_webp) . '">'
+                            . $imgHtml
+                            . '</picture>';
+                    }
+                    $link = $resolveLink($banner->getSlideLink());
+                    if ($link !== '') {
+                        $imgHtml = '<a href="' . $block->escapeUrl($link) . '">' . $imgHtml . '</a>';
+                    }
+                    echo $imgHtml;
+                    ?>
+                </div>
+                <div class="text-banner">
+                    <?php if ($text = $banner->getSlideText()): ?>
+                        <?php echo $block->getContentText($text); ?>
+                    <?php endif; ?>
+                </div>
+            </div>
+        <?php endforeach; ?>
+    </div>
+</div>
+<div class="wrapper_slider visible-xs slider_<?php echo (int) $sliderId; ?>_mobile">
+    <div class="owl owl-carousel">
+        <?php foreach ($mobileSlides as $slideIndex => $slide): ?>
+            <?php
+            $banner = $slide['banner'];
+            $heroImage = $slide['image'];
+            $isFirst = ($slideIndex === 0);
+            ?>
+            <div class="banner_item">
+                <div class="banner_item_bg">
+                    <?php
+                    $slideAlt = $banner->getSlideText() ?: ($banner->getSlideTitle() ?: '');
+                    $imgHtml = $block->getImageElementMobile($heroImage, $slideAlt, $isFirst);
+                    if ($isFirst && preg_match('/src="([^"]+)"/', $imgHtml, $_m)) {
+                        $_webp = preg_replace('/\.(jpg|jpeg|png)$/i', '.webp', $_m[1]);
+                        $imgHtml = '<picture>'
+                            . '<source type="image/webp" srcset="' . $block->escapeUrl($_webp) . '">'
+                            . $imgHtml
+                            . '</picture>';
+                    }
+                    $link = $resolveLink($banner->getSlideLink());
+                    if ($link !== '') {
+                        $imgHtml = '<a href="' . $block->escapeUrl($link) . '">' . $imgHtml . '</a>';
+                    }
+                    echo $imgHtml;
+                    ?>
+                </div>
+                <div class="text-banner">
+                    <?php if ($text = $banner->getSlideText()): ?>
+                        <?php echo $block->getContentText($text); ?>
+                    <?php endif; ?>
+                </div>
+            </div>
+        <?php endforeach; ?>
+    </div>
+</div>
+<script>
+    require([
+        'jquery',
+        'rokanthemes/owl'
+    ], function ($) {
+        'use strict';
+
+        var desktopConfig = <?php echo json_encode($desktopOwlConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
+        var mobileConfig = <?php echo json_encode($mobileOwlConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
+
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            desktopConfig.autoplay = false;
+            desktopConfig.animateOut = false;
+            desktopConfig.animateIn = false;
+            mobileConfig.autoplay = false;
+            mobileConfig.animateOut = false;
+            mobileConfig.animateIn = false;
+        }
+
+        function doAnimations($slide) {
+            var animEndEv = 'webkitAnimationEnd animationend';
+            $slide.find('.text-banner [data-animation^="animated"]').each(function () {
+                var $el = $(this);
+                var anim = $el.data('animation');
+
+                if (anim) {
+                    $el.addClass(anim).one(animEndEv, function () {
+                        $el.removeClass(anim);
+                    });
+                }
+            });
+        }
+
+        function scheduleRefresh($owl) {
+            var resizeTimer;
+
+            function refreshOwl() {
+                if ($owl.data('owl.carousel')) {
+                    $owl.trigger('refresh.owl.carousel');
+                }
+            }
+
+            if (window.requestAnimationFrame) {
+                window.requestAnimationFrame(function () {
+                    window.requestAnimationFrame(refreshOwl);
+                });
+            } else {
+                window.setTimeout(refreshOwl, 60);
+            }
+
+            $(window).on('load', refreshOwl);
+            $(window).on('resize orientationchange', function () {
+                window.clearTimeout(resizeTimer);
+                resizeTimer = window.setTimeout(refreshOwl, 160);
+            });
+        }
+
+        function ensureDesktopAutoplay($owl, owlConfig) {
+            var timeout = Math.max(parseInt(owlConfig.autoplayTimeout, 10) || 5000, 1000);
+            var owlInstance = $owl.data('owl.carousel');
+
+            if (!owlConfig.autoplay || !$owl.closest('.wrapper_slider.hidden-xs').length) {
+                return;
+            }
+
+            if (owlInstance && owlInstance._plugins && owlInstance._plugins.autoplay) {
+                $owl.trigger('stop.owl.autoplay');
+                $owl.trigger('play.owl.autoplay', [timeout]);
+            }
+        }
+
+        function initOwl(selector, owlConfig) {
+            var $owl = $(selector);
+            if (!$owl.length) {
+                return;
+            }
+
+            $owl
+                .on('initialized.owl.carousel', function (e) {
+                    doAnimations($(e.target).find('.owl-item.active').first());
+                })
+                .on('translated.owl.carousel', function (e) {
+                    doAnimations($(e.target).find('.owl-item.active').first());
+                })
+                .owlCarousel(owlConfig);
+
+            scheduleRefresh($owl);
+            ensureDesktopAutoplay($owl, owlConfig);
+        }
+
+        initOwl('.slider_<?php echo (int) $sliderId; ?> .owl', desktopConfig);
+        initOwl('.slider_<?php echo (int) $sliderId; ?>_mobile .owl', mobileConfig);
+    });
+</script>
+<?php endif; ?>

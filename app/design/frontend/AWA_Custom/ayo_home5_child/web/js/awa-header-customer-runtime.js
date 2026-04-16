@@ -8,12 +8,27 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
 
         window.__awaHeaderCustomerRuntimeInit = true;
 
+        function isLoggedIn(data) {
+            if (!data || typeof data !== 'object') {
+                return false;
+            }
+
+            return !!(
+                data.firstname
+                || data.fullname
+                || data.email
+                || data.id
+                || data.entity_id
+                || data.websiteId !== undefined
+            );
+        }
+
         function updateRightCol(data) {
             var accountNav = document.querySelector('[data-awa-account-nav]');
             var rightCol = document.querySelector('[data-awa-header-right]');
-            var isLoggedIn = !!(data && data.firstname);
+            var customerLoggedIn = isLoggedIn(data);
 
-            if (isLoggedIn) {
+            if (customerLoggedIn) {
                 if (accountNav) {
                     accountNav.style.removeProperty('display');
                 }
@@ -37,8 +52,7 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
                 return;
             }
 
-            var isLoggedIn = !!(data && data.firstname);
-            if (isLoggedIn) {
+            if (isLoggedIn(data)) {
                 link.hidden = false;
                 link.setAttribute('aria-hidden', 'false');
                 link.style.setProperty('display', 'inline-flex', 'important');

@@ -48,8 +48,23 @@ class HttpContextPlugin
      */
     public function beforeDispatch(object $subject, RequestInterface $request): ?array
     {
+        $this->applyContext($request);
+
+        return null;
+    }
+
+    /**
+     * Ensure FPC vary string includes B2B auth context before it is hashed.
+     */
+    public function beforeGetVaryString(HttpContext $subject): void
+    {
+        $this->applyContext();
+    }
+
+    private function applyContext(?RequestInterface $request = null): void
+    {
         if (!$this->config->isEnabled()) {
-            return null;
+            return;
         }
 
         // If there is no session cookie in the request, the visitor cannot be logged in.
@@ -57,10 +72,10 @@ class HttpContextPlugin
         // that the FPC PhpCookieDisabler can strip PHPSESSID from cached responses.
         // NOTE: use PHP's session_name() — do NOT call $this->customerSession->*() here
         // because CustomerSession extends SessionManager whose constructor starts the session.
-        if ($request->getCookie(session_name()) === null) {
+        if (($request ? $request->getCookie(session_name()) : ($_COOKIE[session_name()] ?? null)) === null) {
             $this->httpContext->setValue('b2b_approval_status', 'guest', 'guest');
             $this->httpContext->setValue('customer_id', 0, 0);
-            return null;
+            return;
         }
 
         $approvalStatus = 'guest';
@@ -81,7 +96,5 @@ class HttpContextPlugin
         }
 
         $this->httpContext->setValue('b2b_approval_status', $approvalStatus, 'guest');
-
-        return null;
     }
 }

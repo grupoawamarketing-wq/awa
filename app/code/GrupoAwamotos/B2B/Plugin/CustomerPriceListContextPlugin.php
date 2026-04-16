@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace GrupoAwamotos\B2B\Plugin;
 
 use GrupoAwamotos\B2B\Helper\Config;
+use GrupoAwamotos\B2B\Model\ErpCodeResolver;
 use GrupoAwamotos\ERPIntegration\Model\CustomerPriceProvider;
 use GrupoAwamotos\ERPIntegration\Model\ResourceModel\SyncLog as SyncLogResource;
 use Magento\Customer\Api\CustomerRepositoryInterface;
@@ -32,6 +33,7 @@ class CustomerPriceListContextPlugin
     private CustomerPriceProvider $customerPriceProvider;
     private CustomerRepositoryInterface $customerRepository;
     private LoggerInterface $logger;
+    private ?ErpCodeResolver $erpCodeResolver;
 
     public function __construct(
         CustomerSession $customerSession,
@@ -39,7 +41,8 @@ class CustomerPriceListContextPlugin
         SyncLogResource $syncLogResource,
         CustomerPriceProvider $customerPriceProvider,
         CustomerRepositoryInterface $customerRepository,
-        ?LoggerInterface $logger = null
+        ?LoggerInterface $logger = null,
+        ?ErpCodeResolver $erpCodeResolver = null
     ) {
         $this->customerSession = $customerSession;
         $this->config = $config;
@@ -47,6 +50,7 @@ class CustomerPriceListContextPlugin
         $this->customerPriceProvider = $customerPriceProvider;
         $this->customerRepository = $customerRepository;
         $this->logger = $logger ?? new NullLogger();
+        $this->erpCodeResolver = $erpCodeResolver;
     }
 
     /**
@@ -105,6 +109,10 @@ class CustomerPriceListContextPlugin
     {
         try {
             $customer = $this->customerRepository->getById($customerId);
+
+            if ($this->erpCodeResolver !== null) {
+                return $this->erpCodeResolver->resolveForCustomerId($customerId, $customer);
+            }
 
             // Primary: erp_code attribute (definitive, single value)
             $attr = $customer->getCustomAttribute('erp_code');

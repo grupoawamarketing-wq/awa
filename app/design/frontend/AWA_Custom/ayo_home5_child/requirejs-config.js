@@ -4,7 +4,7 @@
  * rokanthemes/timecircles: real TimeCircles lib (via tema, shim jquery).
  */
 var config = {
-    deps: ['awaVerticalMenu', 'awa-b2b-header', 'awa-scroll-reveal', 'awa-card-enhance', 'awa-b2b-pdp-price-reload'],
+    deps: ['awaVerticalMenu', 'awa-b2b-header', 'awa-scroll-reveal', 'awa-card-enhance', 'awa-b2b-pdp-price-reload', 'awa-b2b-price-hydrator'],
     map: {
         '*': {
             awaCustomCompatBootstrap: 'js/awa-custom-compat-bootstrap',
@@ -40,6 +40,7 @@ var config = {
         // Declarative bootstrap for all header runtime modules
         'awa-header-runtime-bootstrap': 'js/awa-header-runtime-bootstrap',
         'awa-b2b-pdp-price-reload': 'js/awa-b2b-pdp-price-reload',
+        'awa-b2b-price-hydrator': 'js/awa-b2b-price-hydrator',
         'awa-scroll-reveal': 'js/awa-scroll-reveal',
         'awa-card-enhance': 'js/awa-card-enhance',
         // FASE E: Mobile menu focus trap (WCAG 2.4.3)

@@ -6,6 +6,7 @@ namespace GrupoAwamotos\B2B\Model;
 
 use GrupoAwamotos\B2B\Helper\Config;
 use GrupoAwamotos\B2B\Model\Customer\Attribute\Source\ApprovalStatus;
+use GrupoAwamotos\B2B\Model\ErpCodeResolver;
 use GrupoAwamotos\ERPIntegration\Model\ResourceModel\SyncLog as SyncLogResource;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Psr\Log\LoggerInterface;
@@ -25,7 +26,8 @@ class CheckoutAccessValidator
         private readonly Config $config,
         private readonly CustomerRepositoryInterface $customerRepository,
         private readonly SyncLogResource $syncLogResource,
-        private readonly LoggerInterface $logger
+        private readonly LoggerInterface $logger,
+        private readonly ?ErpCodeResolver $erpCodeResolver = null
     ) {
     }
 
@@ -71,6 +73,11 @@ class CheckoutAccessValidator
     {
         try {
             $customer = $this->getCustomer($customerId);
+
+            if ($this->erpCodeResolver !== null) {
+                return $this->erpCodeResolver->resolveForCustomerId($customerId, $customer);
+            }
+
             $attribute = $customer->getCustomAttribute('erp_code');
             $erpCode = ($attribute && $attribute->getValue()) ? $attribute->getValue() : null;
 

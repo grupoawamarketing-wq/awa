@@ -11,6 +11,7 @@ namespace GrupoAwamotos\B2B\Model;
 use GrupoAwamotos\B2B\Api\PriceVisibilityInterface;
 use GrupoAwamotos\B2B\Helper\Config;
 use GrupoAwamotos\B2B\Model\Customer\Attribute\Source\ApprovalStatus;
+use GrupoAwamotos\B2B\Model\ErpCodeResolver;
 use GrupoAwamotos\ERPIntegration\Model\ResourceModel\SyncLog as SyncLogResource;
 use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Customer\Api\CustomerRepositoryInterface;
@@ -48,6 +49,7 @@ class PriceVisibility implements PriceVisibilityInterface
      * @var LoggerInterface
      */
     private $logger;
+    private ?ErpCodeResolver $erpCodeResolver;
 
     /**
      * @var bool|null
@@ -68,7 +70,8 @@ class PriceVisibility implements PriceVisibilityInterface
         CustomerRepositoryInterface $customerRepository,
         UrlInterface $urlBuilder,
         ?SyncLogResource $syncLogResource = null,
-        ?LoggerInterface $logger = null
+        ?LoggerInterface $logger = null,
+        ?ErpCodeResolver $erpCodeResolver = null
     ) {
         $this->config = $config;
         $this->customerSession = $customerSession;
@@ -76,6 +79,7 @@ class PriceVisibility implements PriceVisibilityInterface
         $this->urlBuilder = $urlBuilder;
         $this->syncLogResource = $syncLogResource;
         $this->logger = $logger ?? new \Psr\Log\NullLogger();
+        $this->erpCodeResolver = $erpCodeResolver;
     }
 
     /**
@@ -90,6 +94,7 @@ class PriceVisibility implements PriceVisibilityInterface
         // Se módulo desabilitado, mostrar preços
         if (!$this->config->isEnabled()) {
             $this->canViewPricesCache = true;
+            $this->logDebug('canViewPrices', 'allowed_module_disabled');
             return true;
         }
 
@@ -101,6 +106,7 @@ class PriceVisibility implements PriceVisibilityInterface
             // Se não há status definido, considerar como aprovado (compatibilidade)
             if (empty($approvalStatus)) {
                 $this->canViewPricesCache = true;
+                $this->logDebug('canViewPrices', 'allowed_logged_in_without_status');
                 return true;
             }
 
@@ -108,31 +114,43 @@ class PriceVisibility implements PriceVisibilityInterface
             if ($approvalStatus === ApprovalStatus::STATUS_APPROVED) {
                 if ($this->config->hidePriceForNoErp() && $this->getCustomerErpCode() === null) {
                     $this->canViewPricesCache = false;
+                    $this->logDebug('canViewPrices', 'blocked_approved_missing_erp');
                     return false;
                 }
                 $this->canViewPricesCache = true;
+                $this->logDebug('canViewPrices', 'allowed_approved_customer');
                 return true;
             }
 
             // Cliente pendente - depende da configuração
             if ($approvalStatus === ApprovalStatus::STATUS_PENDING) {
                 $this->canViewPricesCache = $this->config->showPriceForPending();
+                $this->logDebug(
+                    'canViewPrices',
+                    $this->canViewPricesCache ? 'allowed_pending_by_config' : 'blocked_pending_by_config'
+                );
                 return $this->canViewPricesCache;
             }
 
             // Cliente rejeitado ou suspenso não vê preços
             $this->canViewPricesCache = false;
+            $this->logDebug('canViewPrices', 'blocked_rejected_or_suspended');
             return false;
         }
 
         // Modo strict: visitantes NUNCA veem preços
         if ($this->config->isStrictB2B()) {
             $this->canViewPricesCache = false;
+            $this->logDebug('canViewPrices', 'blocked_guest_strict_mode');
             return false;
         }
 
         // Modo mixed: visitante - depende da configuração
         $this->canViewPricesCache = !$this->config->hidePriceForGuests();
+        $this->logDebug(
+            'canViewPrices',
+            $this->canViewPricesCache ? 'allowed_guest_mixed_mode' : 'blocked_guest_hidden_by_config'
+        );
         return $this->canViewPricesCache;
     }
 
@@ -305,6 +323,11 @@ class PriceVisibility implements PriceVisibilityInterface
             $customerId = (int) $this->customerSession->getCustomerId();
             $customer = $this->customerRepository->getById($customerId);
 
+            if ($this->erpCodeResolver !== null) {
+                $this->erpCodeCache = $this->erpCodeResolver->resolveForCustomerId($customerId, $customer);
+                return $this->erpCodeCache;
+            }
+
             // Primary: erp_code attribute
             $attr = $customer->getCustomAttribute('erp_code');
             $erpCode = ($attr && $attr->getValue()) ? $attr->getValue() : null;
@@ -331,5 +354,18 @@ class PriceVisibility implements PriceVisibilityInterface
         $this->canViewPricesCache = null;
         $this->canAddToCartCache = null;
         $this->erpCodeCache = false;
+    }
+
+    /**
+     * Small structured debug log to help diagnose visibility decisions in production.
+     */
+    private function logDebug(string $operation, string $decision): void
+    {
+        $this->logger->info('[B2B PriceVisibility] decision', [
+            'operation' => $operation,
+            'decision' => $decision,
+            'customer_id' => (int) $this->customerSession->getCustomerId(),
+            'is_logged_in' => $this->customerSession->isLoggedIn(),
+        ]);
     }
 }
