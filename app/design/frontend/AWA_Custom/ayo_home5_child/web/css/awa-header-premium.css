@@ -1,0 +1,499 @@
+/**
+ * awa-header-premium.css
+ * AWA Motos — Refinamentos premium do header B2B  v7
+ *
+ * Carregado APÓS styles-l.css via awa-styles-l-last.phtml.
+ *
+ * v3 — Corrigido seletor auth: awa-header-auth-prompt → awa-header-account-prompt
+ *      Ocultado top-account.awa-header-account-nav (bug de especificidade com bundle).
+ *      Adicionado sticky header shadow + seletor correto.
+ * v4 — Condensed/sticky state: override dark-red glassmorphism → white limpo.
+ *      Header compacto (56px) no estado sticky.
+ *      Adicionado seletor awa-header-condensed ao sticky shadow.
+ * v5 — Fix crítico: botão de busca position:absolute (bundle 0,8,1) anulado com
+ *      position:static nos nossos seletores ID (1,x,x). Layout flex completo da
+ *      barra de busca (form→field→control→input + actions→button direita).
+ *      Input padding 0 16px (não mais 42px de icon-left). Mobile right-col oculto.
+ * v6 — Fix crítico: bundle L26064 faz .awa-main-header-inner-wrap virar flex-row.
+ *      .header-main filho sem flex-grow ficava em ~799px (conteúdo) em vez de
+ *      preencher 1430px. Adicionado flex:1 em #header .awa-main-header-inner-wrap
+ *      > .header-main para ocupar toda a largura disponível.
+ * v7 — Bug 2: dropdown Mirasvit alargado para cobrir o botão de busca (calc 100%+48px).
+ *      Bug 3: margin-top:4px no dropdown para não sobrepor a barra de navegação.
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
+
+
+/* =============================================================================
+   STACKING CONTEXT — garante que page-wrapper e o header estejam acima do
+   content-top-home (banner hero da homepage, que vem DEPOIS no DOM e sobrepõe
+   o autocomplete quando awa-home-vertical-menu-shell-fix.css não está ativo).
+   awa-site-header z:100 deveria vencer owl-stage z:auto, mas na prática o
+   banner sobrepõe. Dar position:relative + z-index ao page-wrapper resolve.
+   ============================================================================= */
+
+body > .page-wrapper {
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+body > .content-top-home {
+  position: relative !important;
+  z-index: 0 !important;
+}
+
+/* =============================================================================
+   STICKY / CONDENSED HEADER — sombra ao rolar + white override
+   ============================================================================= */
+
+body .page-wrapper .awa-site-header.is-sticky,
+body .page-wrapper .awa-site-header._fixed,
+body .page-wrapper .awa-site-header.awa-header-condensed,
+body .page-wrapper .page-header.is-sticky,
+body .page-wrapper .page-header.sticky {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 200 !important;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.10) !important;
+}
+
+/* Bundle aplica dark-red glassmorphism em .awa-header-condensed —
+   override para branco limpo, mantendo coerência com o header normal. */
+body .page-wrapper .awa-site-header.awa-header-condensed,
+body .page-wrapper .awa-site-header.awa-header-condensed.awa-header-professional {
+  background: #ffffff !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-bottom: 1px solid #e6e6e6 !important;
+}
+
+/* Inner header mais compacto no sticky (80px → 56px) */
+body .page-wrapper .awa-site-header.awa-header-condensed #header .awa-main-header__inner.wp-header {
+  min-height: 56px !important;
+  height:     56px !important;
+}
+
+/* Logo menor no sticky (46px → 34px) */
+body .page-wrapper .awa-site-header.awa-header-condensed #header .awa-header-brand-cell .logo img {
+  max-height: 34px !important;
+}
+
+/* Search bar menor no sticky (44px → 36px) */
+body .page-wrapper .awa-site-header.awa-header-condensed #header .awa-header-search-col form.minisearch,
+body .page-wrapper .awa-site-header.awa-header-condensed #header .awa-header-search-col .block-search form.minisearch {
+  height:     36px !important;
+  min-height: 36px !important;
+}
+
+
+/* =============================================================================
+   DESKTOP ≥ 992px
+   ============================================================================= */
+
+@media (min-width: 992px) {
+
+  /* ─── CSS variable: navbar height ─────────────────────────────────────────── */
+  body .page-wrapper .awa-site-header {
+    --awa-hdr-navbar-h: 46px;
+  }
+
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     1. HEADER PRINCIPAL — altura 80px limpa
+     Problema: bundle-refinements.css tem .header.awa-main-header {padding:14px}
+     com especificidade 0,4,1 que batia nossos 10px.
+     Fix: #header ID (1,x,x) vence qualquer seletor de classe.
+     ═══════════════════════════════════════════════════════════════════════════ */
+
+  #header .header.awa-main-header,
+  #header .awa-main-header {
+    background:     #ffffff !important;
+    padding-top:    0 !important;
+    padding-bottom: 0 !important;
+    padding-left:   0 !important;
+    padding-right:  0 !important;
+    border-bottom:  1px solid #e6e6e6 !important;
+  }
+
+  /* Inner wrapper: altura exata 80px, zero padding redundante */
+  #header .awa-main-header__inner.wp-header {
+    min-height:     80px !important;
+    height:         80px !important;
+    padding-block:  0 !important;
+    padding-top:    0 !important;
+    padding-bottom: 0 !important;
+    gap:            20px !important;
+  }
+
+  /* ── Fix crítico v6: bundle (linha 26064) transforma .awa-main-header-inner-wrap
+     em flex-row. .header-main filho sem flex-grow fica no tamanho do conteúdo
+     (~799px) em vez de preencher os 1430px disponíveis. flex:1 corrige isso. */
+  #header .awa-main-header-inner-wrap > .header-main {
+    flex:      1 !important;
+    min-width: 0 !important;
+  }
+
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     2. LOGO — equilibrada com header de 80px
+     ═══════════════════════════════════════════════════════════════════════════ */
+
+  #header .awa-header-brand-cell {
+    min-width:   120px !important;
+    align-items: center !important;
+    display:     flex !important;
+  }
+
+  #header .awa-header-brand-cell .logo img {
+    max-height: 46px !important;
+    height:     auto !important;
+    width:      auto !important;
+  }
+
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     3. BUSCA — layout flex correto (botão à DIREITA)
+     Problema: awa-bundle-refinements.css (regra global, especificidade 0,8,1)
+     aplica position:absolute + left:12px + padding-left:42px no botão/input
+     (design de ícone-à-esquerda). A regra desktop do bundle (position:static,
+     especificidade 0,6,2) perde para a regra global. Solução: seletores ID
+     (1,x,x) sobrepõem ambas.
+     ═══════════════════════════════════════════════════════════════════════════ */
+
+  /* Form: flex container horizontal, overflow hidden para border-radius */
+  #header .awa-header-search-col form.minisearch,
+  #header .awa-header-search-col .block-search form.minisearch {
+    display:       flex !important;
+    align-items:   stretch !important;
+    flex-wrap:     nowrap !important;
+    overflow:      hidden !important;
+    border-radius: 8px !important;
+    height:        44px !important;
+    min-height:    44px !important;
+    border:        1px solid #d9d9d9 !important;
+    gap:           0 !important;
+    padding:       0 !important;
+  }
+
+  #header .awa-header-search-col form.minisearch:focus-within,
+  #header .awa-header-search-col .block-search form.minisearch:focus-within {
+    border-color: #b73337 !important;
+    box-shadow:   0 0 0 2px rgba(183, 51, 55, .10) !important;
+  }
+
+  /* .field.search: ocupa todo o espaço horizontal disponível */
+  #header .awa-header-search-col form.minisearch .field.search {
+    flex:    1 1 auto !important;
+    display: flex !important;
+    min-width: 0 !important;
+  }
+
+  /* .control (wrapper do input): preenche o .field.search */
+  #header .awa-header-search-col form.minisearch .field.search .control {
+    flex:    1 !important;
+    display: flex !important;
+    align-items: stretch !important;
+    min-width: 0 !important;
+  }
+
+  /* Input: padding simétrico (não precisa de espaço para ícone à esquerda) */
+  #header .awa-header-search-col input#search,
+  #header .awa-header-search-col form.minisearch input.input-text {
+    flex:          1 !important;
+    height:        100% !important;
+    padding:       0 16px !important;
+    border:        0 !important;
+    border-radius: 0 !important;
+    background:    transparent !important;
+    outline:       none !important;
+    box-shadow:    none !important;
+    min-width:     0 !important;
+    width:         100% !important;
+  }
+
+  /* .actions: wrapper do botão — sem crescimento, alinhado verticalmente */
+  #header .awa-header-search-col form.minisearch .actions,
+  #header .awa-header-search-col form.minisearch .awa-search-action-wrapper {
+    display:     flex !important;
+    align-items: stretch !important;
+    flex:        0 0 auto !important;
+    margin:      0 !important;
+    padding:     0 !important;
+  }
+
+  /* Botão de busca — POSIÇÃO ESTÁTICA (fix crítico: bundle aplica
+     position:absolute + left:12px com especificidade 0,8,1 que vence
+     a regra desktop do bundle, mas perde para nosso seletor ID 1,x,x) */
+  #header .awa-header-search-col button.action.search,
+  #header .awa-header-search-col .actions .action.search,
+  #header .awa-header-search-col .awa-search-action-wrapper .action.search {
+    position:         static !important;   /* anula position:absolute do bundle */
+    left:             auto !important;
+    top:              auto !important;
+    transform:        none !important;
+    display:          flex !important;
+    align-items:      center !important;
+    justify-content:  center !important;
+    background:       #b73337 !important;
+    background-color: #b73337 !important;
+    color:            #ffffff !important;
+    border-radius:    0 6px 6px 0 !important;
+    border:           0 !important;
+    width:            48px !important;
+    min-width:        48px !important;
+    height:           100% !important;
+    transition:       background 180ms ease !important;
+    padding:          0 !important;
+    margin:           0 !important;
+    cursor:           pointer !important;
+  }
+
+  #header .awa-header-search-col button.action.search svg,
+  #header .awa-header-search-col .actions .action.search svg {
+    color:  #ffffff !important;
+    stroke: #ffffff !important;
+    fill:   none !important;
+  }
+
+  #header .awa-header-search-col button.action.search:hover,
+  #header .awa-header-search-col .actions .action.search:hover {
+    background:       #982c30 !important;
+    background-color: #982c30 !important;
+  }
+
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     4. BLOCO DIREITO — auth prompt + carrinho
+     ═══════════════════════════════════════════════════════════════════════════ */
+
+  #header .awa-header-right-col {
+    gap:         16px !important;
+    align-items: center !important;
+    flex:        0 0 auto !important;
+  }
+
+  /* ── Corrigir bug do bundle-refinements.css:
+        .awa-header-right-col .top-account { display: flex !important }
+        sobrescreve o style="display:none" do JS para guests, forçando o nav
+        "logado" a aparecer para usuários não autenticados.
+        awa-header-account-prompt já trata os dois estados (guest / customer). */
+  #header .awa-header-right-col .top-account.awa-header-account-nav {
+    display: none !important;
+  }
+
+  /* Auth prompt (awa-header-account-prompt) — compacto, B2B */
+  #header .awa-header-right-col .awa-header-account-prompt {
+    gap:         8px !important;
+    max-width:   220px !important;
+    flex-shrink: 0 !important;
+  }
+
+  #header .awa-header-right-col .awa-header-account-prompt__icon svg {
+    width:  22px !important;
+    height: 22px !important;
+  }
+
+  #header .awa-header-right-col .awa-header-account-prompt__line1 {
+    font-size:   11px !important;
+    line-height: 1.3 !important;
+    color:       #777777 !important;
+  }
+
+  #header .awa-header-right-col .awa-header-account-prompt__line2 {
+    font-size:   13px !important;
+    font-weight: 600 !important;
+    line-height: 1.3 !important;
+  }
+
+  #header .awa-header-right-col .awa-header-account-prompt__link {
+    color:           #b73337 !important;
+    font-weight:     700 !important;
+    text-decoration: none !important;
+    transition:      color 150ms ease !important;
+  }
+
+  #header .awa-header-right-col .awa-header-account-prompt__link:hover {
+    color:           #982c30 !important;
+    text-decoration: underline !important;
+  }
+
+  #header .awa-header-right-col .awa-header-account-prompt__separator {
+    color:       #999999 !important;
+    font-weight: 400 !important;
+    margin:      0 2px !important;
+  }
+
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     5. NAVBAR — 46px compacta
+     ═══════════════════════════════════════════════════════════════════════════ */
+
+  #header .header-control.header-nav.awa-nav-bar,
+  #header .header-control.awa-nav-bar {
+    min-height:    46px !important;
+    border-top:    1px solid #e6e6e6 !important;
+    border-bottom: 1px solid #e6e6e6 !important;
+  }
+
+  #header .header-control.awa-nav-bar .awa-nav-bar__inner {
+    min-height: 46px !important;
+  }
+
+  /* Trigger Departamentos */
+  #header .awa-header-categories .our_categories,
+  #header .awa-header-categories .our_categories.title-category-dropdown {
+    height:           46px !important;
+    background:       #b73337 !important;
+    background-color: #b73337 !important;
+    color:            #ffffff !important;
+    transition:       background 180ms ease !important;
+  }
+
+  #header .awa-header-categories .our_categories:hover,
+  #header .awa-header-categories .our_categories.title-category-dropdown:hover {
+    background:       #982c30 !important;
+    background-color: #982c30 !important;
+  }
+
+  #header .awa-header-categories .our_categories svg,
+  #header .awa-header-categories .our_categories.title-category-dropdown svg {
+    color:  #ffffff !important;
+    fill:   #ffffff !important;
+    stroke: #ffffff !important;
+  }
+
+  #header .awa-header-categories .section-items > .section-item-content {
+    min-height: 46px !important;
+  }
+
+  /* Links primários da navbar */
+  #header .menu_primary nav > ul > li > a,
+  #header .menu_primary .level0 > a,
+  #header .awa-header-primary-nav .navigation.custommenu li.level0 > a {
+    height:    46px !important;
+    font-size: 14px !important;
+    padding:   0 18px !important;
+  }
+
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     6. DEPARTAMENTOS — 236px
+     ═══════════════════════════════════════════════════════════════════════════ */
+
+  #header .awa-header-categories {
+    flex:      0 0 236px !important;
+    max-width: 236px !important;
+    min-width: 236px !important;
+  }
+
+  #header ~ * .navigation.verticalmenu.side-verticalmenu > ul.togge-menu,
+  body .page-wrapper .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown {
+    width:     236px !important;
+    min-width: 236px !important;
+    max-width: 236px !important;
+  }
+
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     7. INDICADOR DE PÁGINA ATIVA
+     ═══════════════════════════════════════════════════════════════════════════ */
+
+  #header .awa-header-primary-nav .navigation.custommenu li.level0.active > a,
+  #header .awa-header-primary-nav .navigation.custommenu li.level0.current > a,
+  #header .menu_primary .level0.active > a,
+  #header .menu_primary .level0.current > a {
+    color:      #b73337 !important;
+    box-shadow: inset 0 -2px 0 0 #b73337 !important;
+  }
+
+} /* fim ≥992px */
+
+
+/* =============================================================================
+   TELA LARGA ≥ 1200px
+   ============================================================================= */
+
+@media (min-width: 1200px) {
+
+  #header .awa-main-header__inner.wp-header {
+    gap: 24px !important;
+  }
+
+  #header .awa-header-right-col {
+    gap: 20px !important;
+  }
+
+}
+
+
+/* =============================================================================
+   TABLET ≤ 1280px
+   ============================================================================= */
+
+@media (max-width: 1280px) and (min-width: 992px) {
+
+  #header .awa-header-categories {
+    flex:      0 0 220px !important;
+    max-width: 220px !important;
+    min-width: 220px !important;
+  }
+
+}
+
+
+/* =============================================================================
+   MOBILE < 992px
+   ============================================================================= */
+
+@media (max-width: 991px) {
+
+  #header .header.awa-main-header,
+  #header .awa-main-header {
+    padding-top:    0 !important;
+    padding-bottom: 0 !important;
+    border-bottom:  1px solid #e6e6e6 !important;
+  }
+
+  /* Right-col (auth prompt + minicart full) — oculto em mobile.
+     O carrinho mobile usa .awa-header-cart-link na área 'cart' do grid. */
+  #header .awa-header-right-col {
+    display: none !important;
+  }
+
+  /* Botão de busca mobile — vermelho + posição estática (fix igual ao desktop) */
+  #header .top-search button.action.search,
+  #header .top-search button.awa-search-btn,
+  #header .awa-header-search-col button.action.search {
+    position:         static !important;
+    left:             auto !important;
+    top:              auto !important;
+    transform:        none !important;
+    background:       #b73337 !important;
+    background-color: #b73337 !important;
+    color:            #ffffff !important;
+  }
+
+  #header .top-search button.action.search svg,
+  #header .awa-header-search-col button.action.search svg {
+    color:  #ffffff !important;
+    stroke: #ffffff !important;
+  }
+
+  /* ── v7 Bug 2: Mirasvit dropdown width — awa-bundle-site.css define
+     width/max-width: min(760px,...) !important em (0,5,1). O .control (bloco
+     posicionador do dropdown) tem width 803px; o botão de busca (44px) fica
+     fora, deixando o dropdown 45px mais estreito que o form completo.
+     Correcão: left:0 + width abrange input+button; max-width:none remove o
+     cap de 760px do bundle. Seletor (1,2,0) > (0,5,1) → vence com !important. ── */
+  #header .awa-header-search-col .mst-searchautocomplete__autocomplete {
+    left:      0 !important;
+    width:     calc(100% + 44px) !important;
+    max-width: none !important;
+  }
+
+  /* ── v7 Bug 3: Gap visual entre o form e o dropdown. ── */
+  #header .mst-searchautocomplete__autocomplete {
+    margin-top: 4px !important;
+  }
+
+}
