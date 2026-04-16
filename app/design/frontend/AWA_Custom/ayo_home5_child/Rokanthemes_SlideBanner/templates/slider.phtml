@@ -12,6 +12,8 @@ if ($banners = $block->getBannerCollection()):
     $slider   = $block->getSlider();
     $sliderId = $block->getSliderId();
     $settings = $slider->getSliderSetting();
+    $desktopSlides = [];
+    $mobileSlides = [];
 
     /**
      * Mapeamento DB settings (formato Rokanthemes legado) → OWL Carousel v2 API
@@ -33,7 +35,7 @@ if ($banners = $block->getBannerCollection()):
     // slideSpeed → smartSpeed (mínimo 50ms)
     $smartSpeed = max(50, (int) $s($settings, 'slideSpeed', 500) ?: 500);
 
-    $owlConfig = [
+    $baseOwlConfig = [
         'items'              => 1,
         'loop'               => false,
         'autoHeight'         => true,
@@ -49,6 +51,44 @@ if ($banners = $block->getBannerCollection()):
         'animateOut'         => false,
         'animateIn'          => false,
     ];
+
+    foreach ($banners as $banner) {
+        if ($banner->getSlideStatus() == '2') {
+            continue;
+        }
+
+        $desktopImage = trim((string) $banner->getSlideImage());
+        $mobileImage = trim((string) $banner->getSlideImageMobile());
+        $heroImage = $mobileImage !== '' ? $mobileImage : $desktopImage;
+
+        if ($desktopImage !== '') {
+            $desktopSlides[] = [
+                'banner' => $banner,
+                'image' => $desktopImage
+            ];
+        }
+
+        if ($heroImage !== '') {
+            $mobileSlides[] = [
+                'banner' => $banner,
+                'image' => $heroImage
+            ];
+        }
+    }
+
+    $desktopOwlConfig = $baseOwlConfig;
+    $desktopHasMultipleSlides = count($desktopSlides) > 1;
+    $desktopOwlConfig['loop'] = $desktopHasMultipleSlides;
+    $desktopOwlConfig['nav'] = $desktopHasMultipleSlides && $desktopOwlConfig['nav'];
+    $desktopOwlConfig['dots'] = $desktopHasMultipleSlides && $desktopOwlConfig['dots'];
+    $desktopOwlConfig['autoplay'] = $desktopHasMultipleSlides && $desktopOwlConfig['autoplay'];
+
+    $mobileOwlConfig = $baseOwlConfig;
+    $mobileHasMultipleSlides = count($mobileSlides) > 1;
+    $mobileOwlConfig['loop'] = $mobileHasMultipleSlides;
+    $mobileOwlConfig['nav'] = $mobileHasMultipleSlides && $mobileOwlConfig['nav'];
+    $mobileOwlConfig['dots'] = $mobileHasMultipleSlides && $mobileOwlConfig['dots'];
+    $mobileOwlConfig['autoplay'] = $mobileHasMultipleSlides && $mobileOwlConfig['autoplay'];
 
     // Resolução de links legados (ambiente de staging → produção)
     $legacyHosts = ['srv1113343.hstgr.cloud', 'www.srv1113343.hstgr.cloud'];
@@ -75,17 +115,11 @@ if ($banners = $block->getBannerCollection()):
 <!-- Slider desktop (oculto no mobile via Bootstrap .hidden-xs) -->
 <div class="wrapper_slider hidden-xs slider_<?php echo (int) $sliderId; ?>">
     <div class="owl owl-carousel">
-        <?php $slideIndex = 0; foreach ($banners as $banner): ?>
+        <?php foreach ($desktopSlides as $slideIndex => $slide): ?>
             <?php
-            if ($banner->getSlideStatus() == '2') {
-                continue;
-            }
-            $desktopImage = trim((string) $banner->getSlideImage());
-            if ($desktopImage === '') {
-                continue;
-            }
-            $slideIndex++;
-            $isFirst = ($slideIndex === 1);
+            $banner = $slide['banner'];
+            $desktopImage = $slide['image'];
+            $isFirst = ($slideIndex === 0);
             ?>
             <div class="banner_item">
                 <div class="banner_item_bg">
@@ -116,19 +150,11 @@ if ($banners = $block->getBannerCollection()):
 <!-- Slider mobile (visível apenas em xs via Bootstrap .visible-xs) -->
 <div class="wrapper_slider visible-xs slider_<?php echo (int) $sliderId; ?>_mobile">
     <div class="owl owl-carousel">
-        <?php $slideIndex = 0; foreach ($banners as $banner): ?>
+        <?php foreach ($mobileSlides as $slideIndex => $slide): ?>
             <?php
-            if ($banner->getSlideStatus() == '2') {
-                continue;
-            }
-            $desktopImage = trim((string) $banner->getSlideImage());
-            $mobileImage = trim((string) $banner->getSlideImageMobile());
-            $heroImage = $mobileImage !== '' ? $mobileImage : $desktopImage;
-            if ($heroImage === '') {
-                continue;
-            }
-            $slideIndex++;
-            $isFirst = ($slideIndex === 1);
+            $banner = $slide['banner'];
+            $heroImage = $slide['image'];
+            $isFirst = ($slideIndex === 0);
             ?>
             <div class="banner_item">
                 <div class="banner_item_bg">
@@ -163,13 +189,17 @@ if ($banners = $block->getBannerCollection()):
     ], function ($) {
         'use strict';
 
-        var config = <?php echo json_encode($owlConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
+        var desktopConfig = <?php echo json_encode($desktopOwlConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
+        var mobileConfig = <?php echo json_encode($mobileOwlConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
 
         // Respeitar preferências de animação reduzida (WCAG 2.1)
         if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-            config.autoplay   = false;
-            config.animateOut = false;
-            config.animateIn  = false;
+            desktopConfig.autoplay = false;
+            desktopConfig.animateOut = false;
+            desktopConfig.animateIn = false;
+            mobileConfig.autoplay = false;
+            mobileConfig.animateOut = false;
+            mobileConfig.animateIn = false;
         }
 
         function doAnimations($slide) {
@@ -209,42 +239,22 @@ if ($banners = $block->getBannerCollection()):
             });
         }
 
-        function scheduleDesktopAutoplayFallback($owl) {
-            var autoplayTimerKey = 'awaHeroAutoplayTimer';
-            var timeout = Math.max(parseInt(config.autoplayTimeout, 10) || 5000, 1000);
+        function ensureDesktopAutoplay($owl, owlConfig) {
+            var timeout = Math.max(parseInt(owlConfig.autoplayTimeout, 10) || 5000, 1000);
+            var owlInstance = $owl.data('owl.carousel');
 
-            if (!config.autoplay || !$owl.closest('.wrapper_slider.hidden-xs').length) {
+            if (!owlConfig.autoplay || !$owl.closest('.wrapper_slider.hidden-xs').length) {
                 return;
             }
 
-            function restartAutoplay() {
-                var timerId = $owl.data(autoplayTimerKey);
-                if (timerId) {
-                    window.clearInterval(timerId);
-                }
-
-                timerId = window.setInterval(function () {
-                    if ($owl.data('owl.carousel')) {
-                        $owl.trigger('next.owl.carousel');
-                    }
-                }, timeout);
-
-                $owl.data(autoplayTimerKey, timerId);
+            if (owlInstance && owlInstance._plugins && owlInstance._plugins.autoplay) {
+                $owl.trigger('stop.owl.autoplay');
+                $owl.trigger('play.owl.autoplay', [timeout]);
             }
-
-            restartAutoplay();
-
-            $owl.on('translated.owl.carousel refreshed.owl.carousel', restartAutoplay);
-            $(window).on('beforeunload', function () {
-                var timerId = $owl.data(autoplayTimerKey);
-                if (timerId) {
-                    window.clearInterval(timerId);
-                }
-            });
         }
 
         // OWL v2: anexar eventos ANTES de inicializar (initialized dispara no ctor)
-        function initOwl(selector) {
+        function initOwl(selector, owlConfig) {
             var $owl = $(selector);
             if (!$owl.length) { return; }
 
@@ -255,14 +265,14 @@ if ($banners = $block->getBannerCollection()):
                 .on('translated.owl.carousel', function (e) {
                     doAnimations($(e.target).find('.owl-item.active').first());
                 })
-                .owlCarousel(config);
+                .owlCarousel(owlConfig);
 
             scheduleRefresh($owl);
-            scheduleDesktopAutoplayFallback($owl);
+            ensureDesktopAutoplay($owl, owlConfig);
         }
 
-        initOwl('.slider_<?php echo (int) $sliderId; ?> .owl');
-        initOwl('.slider_<?php echo (int) $sliderId; ?>_mobile .owl');
+        initOwl('.slider_<?php echo (int) $sliderId; ?> .owl', desktopConfig);
+        initOwl('.slider_<?php echo (int) $sliderId; ?>_mobile .owl', mobileConfig);
     });
 </script>
 <?php endif; ?>
