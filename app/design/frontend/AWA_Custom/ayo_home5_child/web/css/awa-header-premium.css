@@ -1,6 +1,6 @@
 /**
  * awa-header-premium.css
- * AWA Motos — Refinamentos premium do header B2B  v7
+ * AWA Motos — Refinamentos premium do header B2B  v9
  *
  * Carregado APÓS styles-l.css via awa-styles-l-last.phtml.
  *
@@ -20,6 +20,13 @@
  *      > .header-main para ocupar toda a largura disponível.
  * v7 — Bug 2: dropdown Mirasvit alargado para cobrir o botão de busca (calc 100%+48px).
  *      Bug 3: margin-top:4px no dropdown para não sobrepor a barra de navegação.
+ * v8 — Harden do wrapper principal do header com data attribute dedicado.
+ * v9 — Refinamento global de alinhamento:
+ *      Fix 1: <header> colapsado a 1px → display:contents.
+ *      Fix 2: wp-header a 56px → seletor reforçado contra bundle-tail.
+ *      Fix 3: header_main-wrap padding assimétrico → zero padding.
+ *      Fix 4: Logo aumentado para presença visual proporcional.
+ *      Fix 5: Nav bar links espaçamento refinado.
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
@@ -40,6 +47,12 @@ body > .page-wrapper {
 body > .content-top-home {
   position: relative !important;
   z-index: 0 !important;
+}
+
+/* v9 Fix 1: <header> tag colapsada a 1px — display:contents dissolve o wrapper
+   mantendo a semântica para screen readers. */
+header.awa-site-header.awa-header-professional {
+  display: contents !important;
 }
 
 /* =============================================================================
@@ -65,6 +78,7 @@ body .page-wrapper .awa-site-header.awa-header-condensed.awa-header-professional
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   border-bottom: 1px solid #e6e6e6 !important;
+    padding:       0 !important;
 }
 
 /* Inner header mais compacto no sticky (80px → 56px) */
@@ -78,11 +92,11 @@ body .page-wrapper .awa-site-header.awa-header-condensed #header .awa-header-bra
   max-height: 34px !important;
 }
 
-/* Search bar menor no sticky (44px → 36px) */
+/* Search bar menor no sticky (48px → 38px) */
 body .page-wrapper .awa-site-header.awa-header-condensed #header .awa-header-search-col form.minisearch,
 body .page-wrapper .awa-site-header.awa-header-condensed #header .awa-header-search-col .block-search form.minisearch {
-  height:     36px !important;
-  min-height: 36px !important;
+  height:     38px !important;
+  min-height: 38px !important;
 }
 
 
@@ -115,21 +129,44 @@ body .page-wrapper .awa-site-header.awa-header-condensed #header .awa-header-sea
     border-bottom:  1px solid #e6e6e6 !important;
   }
 
-  /* Inner wrapper: altura exata 80px, zero padding redundante */
+  /* Inner wrapper: 80px, centralização profissional.
+     Layout equilibrado: logo(auto) | busca(55%) | ações(auto) */
+  #header .awa-main-header .awa-main-header__inner.wp-header,
+  #header .header_main .awa-main-header__inner.wp-header,
+  #header .header-main .awa-main-header__inner.wp-header,
   #header .awa-main-header__inner.wp-header {
-    min-height:     80px !important;
-    height:         80px !important;
-    padding-block:  0 !important;
-    padding-top:    0 !important;
-    padding-bottom: 0 !important;
-    gap:            20px !important;
+    display:         flex !important;
+    flex-direction:  row !important;
+    min-height:      80px !important;
+    height:          80px !important;
+    padding-block:   0 !important;
+    padding-top:     0 !important;
+    padding-bottom:  0 !important;
+    gap:             24px !important;
+    flex-wrap:       nowrap !important;
+    align-items:     center !important;
+    justify-content: stretch !important;
   }
 
-  /* ── Fix crítico v6: bundle (linha 26064) transforma .awa-main-header-inner-wrap
-     em flex-row. .header-main filho sem flex-grow fica no tamanho do conteúdo
-     (~799px) em vez de preencher os 1430px disponíveis. flex:1 corrige isso. */
+  /* v9 Fix 3: header_main-wrap padding assimétrico 8px 0 6px → zero */
+  #header .header_main.awa-main-header-inner-wrap,
+  #header [data-awa-header-main-wrap='true'] {
+    padding:     0 !important;
+    margin:      0 !important;
+    display:     flex !important;
+    align-items: center !important;
+    width:       100% !important;
+    box-sizing:  border-box !important;
+  }
+
+  /* ── Fix crítico v6/v9: bundle transforma .awa-main-header-inner-wrap
+     em flex-row. .header-main filho sem flex-grow fica no tamanho do conteúdo.
+     flex:1 corrige. Seletores com e sem data attribute. */
+  #header [data-awa-header-main-wrap='true'] > .header-main,
+  #header .header_main.awa-main-header-inner-wrap > .header-main,
   #header .awa-main-header-inner-wrap > .header-main {
-    flex:      1 !important;
+    flex:      1 1 auto !important;
+    width:     100% !important;
     min-width: 0 !important;
   }
 
@@ -139,15 +176,33 @@ body .page-wrapper .awa-site-header.awa-header-condensed #header .awa-header-sea
      ═══════════════════════════════════════════════════════════════════════════ */
 
   #header .awa-header-brand-cell {
-    min-width:   120px !important;
+    flex:        0 0 auto !important;
+    min-width:   140px !important;
+    max-width:   180px !important;
     align-items: center !important;
     display:     flex !important;
+    flex-shrink: 0 !important;
   }
 
   #header .awa-header-brand-cell .logo img {
-    max-height: 46px !important;
-    height:     auto !important;
-    width:      auto !important;
+    max-height:  50px !important;
+    min-height:  40px !important;
+    height:      auto !important;
+    width:       auto !important;
+    object-fit:  contain !important;
+  }
+
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     2b. BUSCA — centralizada e dominante (50-60% da largura)
+     ═══════════════════════════════════════════════════════════════════════════ */
+
+  #header .awa-header-search-col.top-search,
+  #header .awa-header-search-col.awa-header-actions,
+  #header .awa-header-search-col {
+    flex:      1 1 55% !important;
+    min-width: 320px !important;
+    max-width: none !important;
   }
 
 
@@ -168,17 +223,19 @@ body .page-wrapper .awa-site-header.awa-header-condensed #header .awa-header-sea
     flex-wrap:     nowrap !important;
     overflow:      hidden !important;
     border-radius: 8px !important;
-    height:        44px !important;
-    min-height:    44px !important;
-    border:        1px solid #d9d9d9 !important;
+    height:        48px !important;
+    min-height:    48px !important;
+    border:        1.5px solid #d1d5db !important;
     gap:           0 !important;
     padding:       0 !important;
+    box-shadow:    0 1px 3px rgba(0, 0, 0, 0.04) !important;
+    transition:    border-color 180ms ease, box-shadow 180ms ease !important;
   }
 
   #header .awa-header-search-col form.minisearch:focus-within,
   #header .awa-header-search-col .block-search form.minisearch:focus-within {
     border-color: #b73337 !important;
-    box-shadow:   0 0 0 2px rgba(183, 51, 55, .10) !important;
+    box-shadow:   0 0 0 3px rgba(183, 51, 55, .08), 0 1px 3px rgba(0, 0, 0, 0.04) !important;
   }
 
   /* .field.search: ocupa todo o espaço horizontal disponível */
@@ -209,6 +266,7 @@ body .page-wrapper .awa-site-header.awa-header-condensed #header .awa-header-sea
     box-shadow:    none !important;
     min-width:     0 !important;
     width:         100% !important;
+    font-size:     15px !important;
   }
 
   /* .actions: wrapper do botão — sem crescimento, alinhado verticalmente */
@@ -237,10 +295,10 @@ body .page-wrapper .awa-site-header.awa-header-condensed #header .awa-header-sea
     background:       #b73337 !important;
     background-color: #b73337 !important;
     color:            #ffffff !important;
-    border-radius:    0 6px 6px 0 !important;
+    border-radius:    0 7px 7px 0 !important;
     border:           0 !important;
-    width:            48px !important;
-    min-width:        48px !important;
+    width:            52px !important;
+    min-width:        52px !important;
     height:           100% !important;
     transition:       background 180ms ease !important;
     padding:          0 !important;
@@ -270,6 +328,8 @@ body .page-wrapper .awa-site-header.awa-header-condensed #header .awa-header-sea
     gap:         16px !important;
     align-items: center !important;
     flex:        0 0 auto !important;
+    flex-shrink: 0 !important;
+    max-width:   260px !important;
   }
 
   /* ── Corrigir bug do bundle-refinements.css:
@@ -333,10 +393,15 @@ body .page-wrapper .awa-site-header.awa-header-condensed #header .awa-header-sea
     min-height:    46px !important;
     border-top:    1px solid #e6e6e6 !important;
     border-bottom: 1px solid #e6e6e6 !important;
+    padding:       0 !important;
   }
 
   #header .header-control.awa-nav-bar .awa-nav-bar__inner {
-    min-height: 46px !important;
+    min-height:  46px !important;
+    display:     flex !important;
+    align-items: stretch !important;
+    gap:         0 !important;
+    width:       100% !important;
   }
 
   /* Trigger Departamentos */
@@ -366,13 +431,28 @@ body .page-wrapper .awa-site-header.awa-header-condensed #header .awa-header-sea
     min-height: 46px !important;
   }
 
-  /* Links primários da navbar */
+  /* v9: primary-nav expande para preencher o espaço */
+  #header .awa-header-primary-nav.menu_primary,
+  #header .awa-header-primary-nav {
+    flex:        1 1 auto !important;
+    min-width:   0 !important;
+    display:     flex !important;
+    align-items: stretch !important;
+  }
+
+  /* Links primários da navbar — espaçamento refinado */
   #header .menu_primary nav > ul > li > a,
   #header .menu_primary .level0 > a,
-  #header .awa-header-primary-nav .navigation.custommenu li.level0 > a {
-    height:    46px !important;
-    font-size: 14px !important;
-    padding:   0 18px !important;
+  #header .awa-header-primary-nav .navigation.custommenu li.level0 > a,
+  #header .awa-header-primary-nav .navigation li.level0 > a {
+    height:      46px !important;
+    font-size:   14px !important;
+    font-weight: 500 !important;
+    padding:     0 20px !important;
+    display:     inline-flex !important;
+    align-items: center !important;
+    white-space: nowrap !important;
+    transition:  color 180ms ease, box-shadow 180ms ease !important;
   }
 
 
@@ -416,11 +496,17 @@ body .page-wrapper .awa-site-header.awa-header-condensed #header .awa-header-sea
 @media (min-width: 1200px) {
 
   #header .awa-main-header__inner.wp-header {
-    gap: 24px !important;
+    gap: 28px !important;
   }
 
   #header .awa-header-right-col {
     gap: 20px !important;
+  }
+
+  /* Busca: flex-basis maior em telas largas */
+  #header .awa-header-search-col.top-search,
+  #header .awa-header-search-col {
+    flex-basis: 58% !important;
   }
 
 }
@@ -436,6 +522,17 @@ body .page-wrapper .awa-site-header.awa-header-condensed #header .awa-header-sea
     flex:      0 0 220px !important;
     max-width: 220px !important;
     min-width: 220px !important;
+  }
+
+  /* Tablet: relaxa min-width da busca para caber no container */
+  #header .awa-header-search-col.top-search,
+  #header .awa-header-search-col {
+    min-width:  240px !important;
+    flex-basis: 50% !important;
+  }
+
+  #header .awa-main-header__inner.wp-header {
+    gap: 20px !important;
   }
 
 }
@@ -498,3 +595,9 @@ body .page-wrapper .awa-site-header.awa-header-condensed #header .awa-header-sea
 
 }
 
+
+/* v9 Fix 6: header-content padding 4px 0 do tema base — zero para flush perfeito */
+#header .header-content,
+#header.header-container > .header-content {
+  padding: 0 !important;
+}

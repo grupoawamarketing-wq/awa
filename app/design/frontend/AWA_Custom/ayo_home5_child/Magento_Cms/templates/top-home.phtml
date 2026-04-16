@@ -40,6 +40,7 @@ $featuredCategoriesHtml = $renderCmsBlock('featured_categories');
 $productTabBlock = $layout->createBlock('Rokanthemes\ProductTab\Block\Producttab');
 $productTabHtml = '';
 if ($productTabBlock) {
+	$productTabBlock->setData('cache_lifetime', false);
 	$productTabBlock->setTemplate('Rokanthemes_ProductTab::producttab.phtml');
 	$productTabHtml = trim((string)$productTabBlock->toHtml());
 }
@@ -52,6 +53,7 @@ $b2bPromoHtml = '';
 $hotDealBlock = $layout->createBlock('Rokanthemes\Superdeals\Block\ProductByCat');
 $hotDealHtml = '';
 if ($hotDealBlock) {
+	$hotDealBlock->setData('cache_lifetime', false);
 	$hotDealHtml = trim((string)$hotDealBlock->setTemplate('Rokanthemes_Superdeals::category.phtml')->toHtml());
 }
 
@@ -60,12 +62,14 @@ if ($hotDealBlock) {
 /** @var \Rokanthemes\BestsellerProduct\Block\Bestseller|null */
 $bestsellerBlock = $layout->createBlock('Rokanthemes\BestsellerProduct\Block\Bestseller');
 if ($bestsellerBlock) {
+	$bestsellerBlock->setData('cache_lifetime', false);
 	$bestsellerBlock->setTemplate('Rokanthemes_BestsellerProduct::bestseller.phtml');
 }
 $bestsellerHtml  = $bestsellerBlock ? trim((string)$bestsellerBlock->toHtml()) : '';
 
 /** @var \Rokanthemes\Newproduct\Block\Newproduct|null */
 $newproductBlock = $layout->createBlock('Rokanthemes\Newproduct\Block\Newproduct');
+$newproductBlock?->setData('cache_lifetime', false);
 $newproductHtml  = $newproductBlock ? trim((string)$newproductBlock->toHtml()) : '';
 
 /* Category carousels — Product Carousel (OWL) filtrado por categoria.
@@ -79,6 +83,7 @@ $makeCatProductCarousel = static function (string $categoryIds) use ($layout): s
     /** @var \GrupoAwamotos\Theme\Block\CategoryProductCarousel|null $b */
     $b = $layout->createBlock(\GrupoAwamotos\Theme\Block\CategoryProductCarousel::class);
     if (!$b) return '';
+    $b->setData('cache_lifetime', false);
     $b->setData('category_ids', $categoryIds);
     $b->setTemplate('Rokanthemes_BestsellerProduct::bestseller.phtml');
     return trim((string)$b->toHtml());
