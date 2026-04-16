@@ -18,6 +18,7 @@ declare(strict_types=1);
 namespace GrupoAwamotos\B2B\Plugin\App;
 
 use GrupoAwamotos\B2B\Helper\Config;
+use Magento\Customer\Model\Context as CustomerContext;
 use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Framework\App\Http\Context as HttpContext;
 use Magento\Framework\App\RequestInterface;
@@ -73,14 +74,17 @@ class HttpContextPlugin
         // NOTE: use PHP's session_name() — do NOT call $this->customerSession->*() here
         // because CustomerSession extends SessionManager whose constructor starts the session.
         if (($request ? $request->getCookie(session_name()) : ($_COOKIE[session_name()] ?? null)) === null) {
+            $this->httpContext->setValue(CustomerContext::CONTEXT_AUTH, false, false);
             $this->httpContext->setValue('b2b_approval_status', 'guest', 'guest');
             $this->httpContext->setValue('customer_id', 0, 0);
             return;
         }
 
         $approvalStatus = 'guest';
+        $isLoggedIn = false;
 
         if ($this->customerSession->isLoggedIn()) {
+            $isLoggedIn = true;
             $customerData = $this->customerSession->getCustomerData();
             if ($customerData) {
                 $attr = $customerData->getCustomAttribute('b2b_approval_status');
@@ -95,6 +99,7 @@ class HttpContextPlugin
             $this->httpContext->setValue('customer_id', 0, 0);
         }
 
+        $this->httpContext->setValue(CustomerContext::CONTEXT_AUTH, $isLoggedIn, false);
         $this->httpContext->setValue('b2b_approval_status', $approvalStatus, 'guest');
     }
 }
