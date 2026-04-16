@@ -19,10 +19,10 @@ var config = {
         'rokanthemes/owl': 'Rokanthemes_Themeoption/js/owl.carousel',
         // Swiper 11 — UMD bundle for carousel migration
         'swiper': 'js/swiper-bundle.min',
-        // Custom AWA init scripts — minified versions (geradas com terser, 2026–FASE3)
-        'js/tab-swiper-init': 'js/tab-swiper-init.min',
+        // Swiper hotfixes: usar fonte até regenerar artefatos minificados com paridade.
+        'js/tab-swiper-init': 'js/tab-swiper-init',
         'js/tab-carousel-init': 'js/tab-carousel-init.min',
-        'js/products-swiper-init': 'js/products-swiper-init.min',
+        'js/products-swiper-init': 'js/products-swiper-init',
         'js/rokanthemes-owl-element-init': 'js/rokanthemes-owl-element-init.min',
         'js/superdeals-swiper-init': 'js/superdeals-swiper-init.min',
         'js/owl-carousel-init': 'js/owl-carousel-init.min',
@@ -33,6 +33,12 @@ var config = {
         'js/jquery-andself-compat': 'js/jquery-andself-compat.min',
         // Sticky header — non-minified until terser build step is added
         'awa-header-sticky': 'js/awa-header-sticky',
+        // Header runtime syncs (mobile nav aria + cart badge) extracted from inline script
+        'awa-header-nav-runtime': 'js/awa-header-nav-runtime',
+        // Header customer syncs (account menu + MCP dashboard link)
+        'awa-header-customer-runtime': 'js/awa-header-customer-runtime',
+        // Declarative bootstrap for all header runtime modules
+        'awa-header-runtime-bootstrap': 'js/awa-header-runtime-bootstrap',
         'awa-b2b-pdp-price-reload': 'js/awa-b2b-pdp-price-reload',
         'awa-scroll-reveal': 'js/awa-scroll-reveal',
         'awa-card-enhance': 'js/awa-card-enhance',

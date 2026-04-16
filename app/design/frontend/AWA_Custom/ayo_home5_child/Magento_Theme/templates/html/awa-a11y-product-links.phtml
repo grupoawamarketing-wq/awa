@@ -8,19 +8,169 @@
 <script>
 require(['domReady!'], function () {
     'use strict';
-    var links = document.querySelectorAll(
-        '.product-item-photo, .product-thumb-link, a.product-item-photo'
-    );
-    links.forEach(function (link) {
-        if (link.getAttribute('aria-label') ||
-            link.getAttribute('aria-labelledby') ||
-            link.textContent.trim()) {
+    var LINK_SELECTOR = '.product-item-photo, .product-thumb-link, a.product-item-photo';
+    var THUMB_SELECTOR = '.product-thumb';
+    var observer = null;
+    var normalizeTimer = null;
+
+    function setImportantStyle(element, property, value) {
+        if (!element) {
             return;
         }
-        var img = link.querySelector('img[alt]');
-        if (img && img.alt && img.alt.trim()) {
-            link.setAttribute('aria-label', img.alt.trim());
+        element.style.setProperty(property, value, 'important');
+    }
+
+    function fixProductLinks(root) {
+        var scope = root && root.querySelectorAll ? root : document;
+        var links = scope.querySelectorAll(LINK_SELECTOR);
+
+        links.forEach(function (link) {
+            if (link.getAttribute('aria-label') ||
+                link.getAttribute('aria-labelledby') ||
+                link.textContent.trim()) {
+                return;
+            }
+
+            var img = link.querySelector('img[alt]');
+            if (img && img.alt && img.alt.trim()) {
+                link.setAttribute('aria-label', img.alt.trim());
+            }
+        });
+    }
+
+    function normalizeProductThumb(thumb) {
+        if (!thumb || thumb.getAttribute('data-awa-image-normalized') === 'true') {
+            return;
         }
+
+        var link = thumb.querySelector('.product-thumb-link, a.product-item-photo, .product-item-photo');
+        var first = thumb.querySelector('.first-thumb');
+        var second = thumb.querySelector('.second-thumb');
+        var container = first ? first.querySelector('.product-image-container') : null;
+        var wrapper = first ? first.querySelector('.product-image-wrapper') : null;
+        var image = first ? first.querySelector('img.product-image-photo, img') : null;
+
+        if (!link || !first || !container || !wrapper || !image) {
+            return;
+        }
+
+        setImportantStyle(link, 'display', 'block');
+        setImportantStyle(link, 'position', 'relative');
+        setImportantStyle(link, 'width', '100%');
+        setImportantStyle(link, 'min-width', '0');
+        setImportantStyle(link, 'margin-bottom', '0');
+        setImportantStyle(link, 'overflow', 'visible');
+        setImportantStyle(link, 'background', 'transparent');
+
+        setImportantStyle(first, 'display', 'block');
+        setImportantStyle(first, 'position', 'relative');
+        setImportantStyle(first, 'width', '100%');
+        setImportantStyle(first, 'min-width', '0');
+        setImportantStyle(first, 'line-height', '0');
+
+        setImportantStyle(container, 'display', 'block');
+        setImportantStyle(container, 'position', 'relative');
+        setImportantStyle(container, 'width', '100%');
+        setImportantStyle(container, 'height', 'auto');
+        setImportantStyle(container, 'aspect-ratio', '1 / 1');
+        setImportantStyle(container, 'min-height', 'var(--card-photo-min-h, 220px)');
+
+        setImportantStyle(wrapper, 'display', 'block');
+        setImportantStyle(wrapper, 'position', 'absolute');
+        setImportantStyle(wrapper, 'inset', '0');
+        setImportantStyle(wrapper, 'width', '100%');
+        setImportantStyle(wrapper, 'height', '100%');
+        setImportantStyle(wrapper, 'padding-bottom', '0');
+        setImportantStyle(wrapper, 'overflow', 'hidden');
+
+        setImportantStyle(image, 'display', 'block');
+        setImportantStyle(image, 'position', 'absolute');
+        setImportantStyle(image, 'inset', '6%');
+        setImportantStyle(image, 'width', '88%');
+        setImportantStyle(image, 'height', '88%');
+        setImportantStyle(image, 'max-width', '88%');
+        setImportantStyle(image, 'max-height', '88%');
+        setImportantStyle(image, 'opacity', '1');
+        setImportantStyle(image, 'visibility', 'visible');
+        setImportantStyle(image, 'object-fit', 'contain');
+        setImportantStyle(image, 'object-position', 'center');
+
+        if (second) {
+            setImportantStyle(second, 'display', 'none');
+        }
+
+        thumb.setAttribute('data-awa-image-normalized', 'true');
+    }
+
+    function normalizeThumbs(root) {
+        var scope = root && root.querySelectorAll ? root : document;
+        var thumbs = scope.querySelectorAll(THUMB_SELECTOR);
+
+        thumbs.forEach(normalizeProductThumb);
+    }
+
+    function runFixes(root) {
+        fixProductLinks(root);
+        normalizeThumbs(root);
+    }
+
+    function scheduleRun(root) {
+        var target = root && root.nodeType === 1 ? root : document;
+
+        if (normalizeTimer) {
+            window.clearTimeout(normalizeTimer);
+        }
+
+        normalizeTimer = window.setTimeout(function () {
+            runFixes(target);
+        }, 60);
+    }
+
+    runFixes(document);
+    window.setTimeout(function () {
+        runFixes(document);
+    }, 400);
+
+    document.addEventListener('contentUpdated', function (event) {
+        scheduleRun(event && event.target ? event.target : document);
     });
+
+    if (window.MutationObserver && document.body) {
+        observer = new MutationObserver(function (mutations) {
+            var shouldRun = false;
+
+            mutations.forEach(function (mutation) {
+                if (shouldRun) {
+                    return;
+                }
+
+                Array.prototype.forEach.call(mutation.addedNodes, function (node) {
+                    if (shouldRun || !node || node.nodeType !== 1) {
+                        return;
+                    }
+
+                    if ((node.matches && (node.matches(LINK_SELECTOR) || node.matches(THUMB_SELECTOR))) ||
+                        (node.querySelector && (node.querySelector(LINK_SELECTOR) || node.querySelector(THUMB_SELECTOR)))) {
+                        shouldRun = true;
+                    }
+                });
+            });
+
+            if (shouldRun) {
+                scheduleRun(document);
+            }
+        });
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+
+        window.addEventListener('pagehide', function () {
+            if (observer) {
+                observer.disconnect();
+            }
+        }, { once: true });
+    }
 });
 </script>

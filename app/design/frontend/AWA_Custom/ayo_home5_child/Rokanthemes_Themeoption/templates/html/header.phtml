@@ -102,8 +102,8 @@ $checkoutSupportHtml = $headerHotlineHtml !== '' ? $headerHotlineHtml : '';
 					</div>
 					<div class="top-bar-right" data-awa-header-utility-right="true">
 						<div class="top-info" data-awa-header-account-group="true">
-							<a class="awa-mcp-dashboard-link" href="<?= $escaper->escapeUrl($block->getUrl('customer/account')) ?>" id="awa-mcp-dashboard-link" hidden aria-hidden="true" style="display:none !important" title="<?= $escaper->escapeHtmlAttr(__('Painel MCP')) ?>">
-								<?= $escaper->escapeHtml(__('Painel MCP')) ?>
+							<a class="awa-mcp-dashboard-link" href="<?= $escaper->escapeUrl($block->getUrl('customer/account')) ?>" id="awa-mcp-dashboard-link" hidden aria-hidden="true" style="display:none !important" title="<?= $escaper->escapeHtmlAttr(__('Minha Conta')) ?>">
+								<?= $escaper->escapeHtml(__('Minha Conta')) ?>
 							</a>
 							<?= /* @noEscape */ $this->getChildHtml('awaB2bModeBadge') ?>
 							<nav class="top-account has-child" data-awa-top-account="true">
@@ -138,32 +138,13 @@ $checkoutSupportHtml = $headerHotlineHtml !== '' ? $headerHotlineHtml : '';
 								<div class="awa-header-search-col top-search awa-header-actions" data-awa-header-search-row="true">
 									<?= /* @noEscape */ $this->getChildHtml('topSearch') ?>
 								</div>
-								<div class="awa-header-right-col" data-awa-header-right="true">
-									<!-- ═══ Login/cadastro prompt ═══ -->
-									<?= /* @noEscape */ $headerContactLinksHtml ?>
-								<script>
-								require(['Magento_Customer/js/customer-data'], function (customerData) {
-									var customer = customerData.get('customer');
-									function updateRightCol(data) {
-										var accountNav = document.querySelector('[data-awa-account-nav]');
-										var rightCol = document.querySelector('[data-awa-header-right]');
-										var isLoggedIn = !!(data && data.firstname);
-										if (isLoggedIn) {
-											if (accountNav) { accountNav.style.removeProperty('display'); }
-											if (rightCol) { rightCol.classList.add('awa-header-right--logged'); }
-										} else {
-											if (accountNav) { accountNav.style.setProperty('display', 'none', 'important'); }
-											if (rightCol) { rightCol.classList.remove('awa-header-right--logged'); }
-										}
-									}
-									updateRightCol(customer());
-									customer.subscribe(updateRightCol);
-								});
-							</script>
-								<!-- ═══ Conta (logado) ═══ -->
-									<nav class="top-account has-child awa-header-account-nav"
-										data-awa-account-nav="true"
-										aria-label="<?= $escaper->escapeHtmlAttr(__('Menu da conta')) ?>"
+									<div class="awa-header-right-col" data-awa-header-right="true">
+										<!-- ═══ Login/cadastro prompt ═══ -->
+										<?= /* @noEscape */ $headerContactLinksHtml ?>
+									<!-- ═══ Conta (logado) ═══ -->
+										<nav class="top-account has-child awa-header-account-nav"
+											data-awa-account-nav="true"
+											aria-label="<?= $escaper->escapeHtmlAttr(__('Menu da conta')) ?>"
 										style="display:none">
 										<?= /* @noEscape */ $this->getChildHtml('top.links') ?>
 									</nav>
@@ -218,131 +199,12 @@ $checkoutSupportHtml = $headerHotlineHtml !== '' ? $headerHotlineHtml : '';
 		</div>
 	</div>
 </div>
-<script>
-require(['awa-header-sticky', 'awa-vertical-menu-focus-trap'], function (initStickyHeader, initFocusTrap) {
-    'use strict';
-    initStickyHeader();
-    initFocusTrap();
-});
-</script>
-<script>
-/* MCP Dashboard link: show when customer is logged in (FPC-safe via customer-data sections) */
-require(['Magento_Customer/js/customer-data'], function (customerData) {
-    'use strict';
-    var link = document.getElementById('awa-mcp-dashboard-link');
-    if (!link) { return; }
-
-	function setLinkVisibility(isVisible) {
-		if (isVisible) {
-			link.hidden = false;
-			link.setAttribute('aria-hidden', 'false');
-			link.style.setProperty('display', 'inline-flex', 'important');
-			link.classList.add('is-visible');
-			return;
-		}
-
-		link.hidden = true;
-		link.setAttribute('aria-hidden', 'true');
-		link.style.setProperty('display', 'none', 'important');
-		link.classList.remove('is-visible');
-	}
-
-    customerData.get('customer').subscribe(function (data) {
-        if (data && data.firstname) {
-			setLinkVisibility(true);
-        } else {
-			setLinkVisibility(false);
-        }
-    });
-    /* Initialise immediately with cached section data */
-    var initial = customerData.get('customer')();
-    if (initial && initial.firstname) {
-		setLinkVisibility(true);
-		return;
+<script type="text/x-magento-init">
+{
+    "*": {
+        "awa-header-runtime-bootstrap": {}
     }
-
-	setLinkVisibility(false);
-});
-</script>
-<script>
-(function () {
-	'use strict';
-
-	/* ── Pre-initialize cart badge from localStorage to avoid flash ── */
-	(function () {
-		try {
-			var cache = JSON.parse(localStorage.getItem('mage-cache-storage') || '{}');
-			var count = Number((cache['cart'] || {}).summary_count || 0);
-			if (count > 0) {
-				var b = document.querySelector('.awa-header-cart-link .awa-cart-link-badge');
-				if (b) {
-					b.textContent = count > 99 ? '99+' : String(count);
-					b.style.cssText = 'display:inline-flex;align-items:center;justify-content:center';
-				}
-			}
-		} catch (e) { /* localStorage not available */ }
-	}());
-
-	/* ── aria-expanded sync for hamburger (body.nav-open toggled by Magento menu.js) ── */
-	(function () {
-	function syncNavAria() {
-			var isOpen = document.body.classList.contains('nav-open');
-			var toggle = document.querySelector('.awa-header-mobile-toggle[data-awa-nav-toggle="true"]');
-			if (toggle) {
-				toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-			}
-			/* BUG-3 fix: sync is-awa-mobile-open on #awa-primary-navigation */
-			var primaryNav = document.getElementById('awa-primary-navigation');
-			if (primaryNav) {
-				primaryNav.classList.toggle('is-awa-mobile-open', isOpen);
-			}
-		}
-		if (window.MutationObserver) {
-			new MutationObserver(syncNavAria).observe(document.body, { attributes: true, attributeFilter: ['class'] });
-		}
-		if (document.readyState === 'loading') {
-			document.addEventListener('DOMContentLoaded', syncNavAria, { once: true });
-		} else {
-			syncNavAria();
-		}
-	}());
-
-	if (window.__awaMobileCartBadge) { return; }
-	window.__awaMobileCartBadge = true;
-	function syncBadge() {
-		var badge = document.querySelector('.awa-header-cart-link .awa-cart-link-badge');
-		if (!badge) { return; }
-		var counter = document.querySelector('.awa-header-minicart .counter.qty');
-		if (!counter) { badge.style.display = 'none'; return; }
-		var isEmpty = counter.classList.contains('empty');
-		if (isEmpty) { badge.style.display = 'none'; return; }
-		var el = counter.querySelector('.total-mini-cart-item');
-		var n = el ? (parseInt((el.textContent || '').replace(/\D/g, ''), 10) || 0) : 0;
-		if (n > 0) {
-			badge.textContent = n > 99 ? '99+' : String(n);
-			badge.style.display = 'inline-flex';
-			badge.style.alignItems = 'center';
-			badge.style.justifyContent = 'center';
-		} else {
-			badge.style.display = 'none';
-		}
-	}
-	function boot() {
-		syncBadge();
-		var counter = document.querySelector('.awa-header-minicart .counter.qty');
-		if (counter && window.MutationObserver) {
-			new MutationObserver(syncBadge).observe(counter, {
-				childList: true, subtree: true, characterData: true,
-				attributes: true, attributeFilter: ['class']
-			});
-		}
-	}
-	if (document.readyState === 'loading') {
-		document.addEventListener('DOMContentLoaded', boot, { once: true });
-	} else {
-		boot();
-	}
-}());
+}
 </script>
 </header>
 <?php endif; ?>

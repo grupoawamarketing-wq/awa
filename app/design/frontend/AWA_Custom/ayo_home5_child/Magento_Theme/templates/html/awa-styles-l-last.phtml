@@ -1,143 +1,43 @@
 <?php
+declare(strict_types=1);
 /**
- * AWA Motos — Force styles-l.css to load last + search button fix + typeahead overlay fix.
+ * AWA — styles-l.css carregado por ÚLTIMO (após todos os bundles e deferred templates).
+ *
+ * Posicionado via default_head_blocks.xml com after="awa.search.autocomplete.head.css"
+ * para garantir que o LESS compilado do tema filho vença em cascata:
+ *   !important empate → último stylesheet no DOM ganha.
+ *
+ * Contém: _header-main, _header-classic-reference, _header-pixelperfect,
+ *         _extend.less imports e todo o LESS customizado do child theme.
+ *
+ * @var \Magento\Framework\View\Element\Template $block
  */
+$stylesLUrl = $block->getViewFileUrl('css/styles-l.css');
 ?>
 <link rel="stylesheet"
-      type="text/css"
+      href="<?= $block->escapeUrl($stylesLUrl) ?>"
       media="all"
-      href="<?= $block->escapeUrl($block->getViewFileUrl('css/styles-l.css')) ?>" />
-<style>
-/* Mirasvit TypeAhead overlay — force alignment with #search input */
-body .page-wrapper .awa-site-header .awa-professional-search input.input-text.mst-search-autocomplete__typeahead-overlay,
-body .page-wrapper .field.search > input.input-text.mst-search-autocomplete__typeahead-overlay,
-.field.search > input.mst-search-autocomplete__typeahead-overlay,
-input.mst-search-autocomplete__typeahead-overlay {
-    color: #aaa !important;
-    font-size: 13px !important;
-    font-family: Rubik, "Helvetica Neue", Arial, sans-serif !important;
-    font-weight: 400 !important;
-    box-sizing: border-box !important;
-    border: 0 !important;
-    background: transparent !important;
-    pointer-events: none !important;
-    outline: none !important;
-    box-shadow: none !important;
-    border-radius: 0 !important;
-}
-</style>
+      data-awa-styles-l="1"/>
+<link rel="stylesheet"
+      href="<?= $block->escapeUrl($block->getViewFileUrl('css/awa-header-premium.css')) ?>"
+      media="all"
+      data-awa-header-premium="1"/>
 <script>
-(function() {
-    'use strict';
-    function fixSearchBtn() {
-        var btn = document.querySelector('#search_mini_form .action.search');
-        if (!btn) return;
-        btn.style.cssText += ';background:transparent!important;background-color:transparent!important;color:#999!important;border:none!important;border-radius:0 6px 6px 0!important;box-shadow:none!important;';
-        var svg = btn.querySelector('svg');
-        if (svg) svg.style.cssText += ';color:#999!important;stroke:#999!important;fill:none!important;';
-        var form = btn.closest('form');
-        if (form) form.style.cssText += ';border:1px solid #ddd!important;border-bottom:1.5px solid #c5374b!important;border-radius:6px!important;';
-    }
-    function fixTypeaheadOverlay(el) {
-        if (!el) el = document.querySelector('.mst-search-autocomplete__typeahead-overlay');
-        if (!el) return;
-        var searchInput = document.getElementById('search');
-        if (!searchInput) return;
-        var cs = getComputedStyle(searchInput);
-        var h = cs.height;
-        var pl = cs.paddingLeft;
-        var pr = cs.paddingRight;
-        var fs = cs.fontSize;
-        var ff = cs.fontFamily;
-        var fw = cs.fontWeight;
-        var lh = cs.lineHeight;
-        var topVal = el.style.top || '0px';
-        var leftVal = el.style.left || '1px';
-        var widthVal = el.style.width || cs.width;
-        el.style.cssText = 'color:#aaa!important;'
-            + 'height:' + h + '!important;'
-            + 'font-size:' + fs + '!important;'
-            + 'font-family:' + ff + '!important;'
-            + 'font-weight:' + fw + '!important;'
-            + 'line-height:' + h + '!important;'
-            + 'padding:0 ' + pr + ' 0 ' + pl + '!important;'
-            + 'box-sizing:border-box!important;'
-            + 'border:0!important;'
-            + 'background:transparent!important;'
-            + 'pointer-events:none!important;'
-            + 'outline:none!important;'
-            + 'box-shadow:none!important;'
-            + 'border-radius:0!important;'
-            + 'position:absolute!important;'
-            + 'z-index:-1!important;'
-            + 'top:' + topVal + '!important;'
-            + 'left:' + leftVal + '!important;'
-            + 'width:' + widthVal + '!important;';
-    }
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', fixSearchBtn);
-    } else {
-        fixSearchBtn();
-    }
-    setTimeout(fixSearchBtn, 500);
-    setTimeout(fixSearchBtn, 2000);
-    var obs = new MutationObserver(function(mutations) {
-        mutations.forEach(function(m) {
-            m.addedNodes.forEach(function(n) {
-                if (n.nodeType === 1 && n.classList && n.classList.contains('mst-search-autocomplete__typeahead-overlay')) {
-                    fixTypeaheadOverlay(n);
-                }
-            });
-        });
-    });
-    obs.observe(document.documentElement, { childList: true, subtree: true });
-})();
-</script>
-<script>
-/* Mirasvit Autocomplete: force overflow:visible on .control parent & ensure _active visibility */
-(function(){
-    function fixControlOverflow() {
-        var controls = document.querySelectorAll('.block-search .field.search .control, .block-search .control[data-awa-search-control]');
-        controls.forEach(function(el) { el.style.overflow = 'visible'; });
-    }
-    function ensureMstActive(el) {
-        if (el && el.classList.contains('_active')) {
-            el.style.display = 'block';
-            el.style.visibility = 'visible';
-            el.style.opacity = '1';
-        }
-    }
-    function run() {
-        fixControlOverflow();
-        var mst = document.querySelector('.mst-searchautocomplete__autocomplete');
-        if (mst) ensureMstActive(mst);
-    }
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', run);
-    } else {
-        run();
-    }
-    setTimeout(run, 800);
-    setTimeout(run, 2500);
-    /* MutationObserver: watch for _active class changes */
-    var mstObs = new MutationObserver(function(mutations) {
-        mutations.forEach(function(m) {
-            if (m.type === 'attributes' && m.attributeName === 'class') {
-                var t = m.target;
-                if (t.classList.contains('mst-searchautocomplete__autocomplete')) {
-                    fixControlOverflow();
-                    ensureMstActive(t);
-                }
-            }
-            if (m.type === 'childList') {
-                m.addedNodes.forEach(function(n) {
-                    if (n.nodeType === 1 && n.classList && n.classList.contains('mst-searchautocomplete__autocomplete')) {
-                        fixControlOverflow();
-                    }
-                });
-            }
-        });
-    });
-    mstObs.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
-})();
+/* awa-header-premium: remove inline !important override aplicado por fixSearchBtn()
+   que forçava background:transparent no botão de busca */
+(function () {
+  'use strict';
+  var PROPS = ['background', 'background-color', 'color', 'border-width', 'border-style', 'border-color', 'border-image'];
+  function restoreBtn() {
+    var btn = document.querySelector('#search_mini_form .action.search, form.minisearch button.action.search, .awa-professional-search button.action.search');
+    if (!btn) return;
+    PROPS.forEach(function (p) { btn.style.removeProperty(p); });
+    var svg = btn.querySelector('svg');
+    if (svg) { svg.style.removeProperty('color'); svg.style.removeProperty('stroke'); }
+  }
+  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', restoreBtn); }
+  else { restoreBtn(); }
+  setTimeout(restoreBtn, 400);
+  setTimeout(restoreBtn, 1500);
+}());
 </script>
