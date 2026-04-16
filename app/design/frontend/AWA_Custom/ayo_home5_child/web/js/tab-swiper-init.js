@@ -21,6 +21,20 @@ define([
 
     /* ─── Utilities ─── */
 
+    function normalizeCount(value, fallback, max) {
+        var count = parseInt(value, 10);
+
+        if (isNaN(count) || count < 1) {
+            count = fallback;
+        }
+
+        if (typeof max === 'number') {
+            count = Math.min(count, max);
+        }
+
+        return count;
+    }
+
     function debounce(fn, wait) {
         var timer;
 
@@ -41,6 +55,18 @@ define([
         } else {
             setTimeout(cb, 16);
         }
+    }
+
+    function resolveBoolean(value, fallback) {
+        if (value === undefined || value === null || value === '') {
+            return fallback;
+        }
+
+        if (typeof value === 'string') {
+            return !(value === 'false' || value === '0');
+        }
+
+        return !!value;
     }
 
     /* ─── Keyboard helpers (unchanged from tab-carousel-init) ─── */
@@ -210,55 +236,82 @@ define([
     /* ─── Swiper carousel manager ─── */
 
     function buildSwiperOptions(cfg) {
-        var items = parseInt(cfg.items, 10) || 4,
+        var items = normalizeCount(cfg.items, 4, 4),
             mobileItems = 1,
             tabletItems = Math.min(items, 2),
             desktopSmallItems = Math.min(items, 3),
             desktopItems = items,
-            desktopSpaceBetween = parseInt(cfg.desktopSpaceBetween, 10);
+            baseSpaceBetween = parseInt(cfg.margin, 10),
+            tabletSpaceBetween = parseInt(cfg.tabletSpaceBetween, 10),
+            desktopSpaceBetween = parseInt(cfg.desktopSpaceBetween, 10),
+            scrollPerPage = resolveBoolean(cfg.scrollPerPage, true);
+
+        if (isNaN(baseSpaceBetween)) {
+            baseSpaceBetween = 12;
+        }
+
+        if (isNaN(tabletSpaceBetween)) {
+            tabletSpaceBetween = 14;
+        }
 
         if (isNaN(desktopSpaceBetween)) {
-            desktopSpaceBetween = 20;
+            desktopSpaceBetween = 16;
         }
 
         /* Read Owl v1 keys for backward compatibility */
         if (cfg.itemsMobile && cfg.itemsMobile[1]) {
-            mobileItems = parseInt(cfg.itemsMobile[1], 10) || 1;
+            mobileItems = normalizeCount(cfg.itemsMobile[1], 1, 2);
         }
         if (cfg.itemsTablet && cfg.itemsTablet[1]) {
-            tabletItems = parseInt(cfg.itemsTablet[1], 10) || tabletItems;
+            tabletItems = normalizeCount(cfg.itemsTablet[1], tabletItems, 3);
         }
         if (cfg.itemsDesktopSmall && cfg.itemsDesktopSmall[1]) {
-            desktopSmallItems = parseInt(cfg.itemsDesktopSmall[1], 10) || desktopSmallItems;
+            desktopSmallItems = normalizeCount(cfg.itemsDesktopSmall[1], desktopSmallItems, 3);
         }
         if (cfg.itemsDesktop && cfg.itemsDesktop[1]) {
-            desktopItems = parseInt(cfg.itemsDesktop[1], 10) || desktopItems;
+            desktopItems = normalizeCount(cfg.itemsDesktop[1], desktopItems, 4);
         }
 
         return {
             slidesPerView: mobileItems,
-            spaceBetween: parseInt(cfg.margin, 10) || 16,
-            navigation: cfg.navigation !== false ? {
+            slidesPerGroup: scrollPerPage ? mobileItems : 1,
+            spaceBetween: baseSpaceBetween,
+            navigation: resolveBoolean(cfg.navigation, true) ? {
                 nextEl: '.swiper-button-next',
                 prevEl: '.swiper-button-prev'
             } : false,
-            pagination: cfg.pagination ? {
+            pagination: resolveBoolean(cfg.pagination, false) ? {
                 el: '.swiper-pagination',
                 clickable: true
             } : false,
-            autoplay: cfg.autoPlay ? {
+            autoplay: resolveBoolean(cfg.autoPlay, false) ? {
                 delay: parseInt(cfg.slideSpeed, 10) || 5000,
                 disableOnInteraction: true,
                 pauseOnMouseEnter: true
             } : false,
             loop: false,
             watchOverflow: true,
-            slidesPerGroup: cfg.scrollPerPage ? undefined : 1,
             breakpoints: {
-                480: { slidesPerView: Math.min(Math.max(mobileItems, 2), items), spaceBetween: 12 },
-                768: { slidesPerView: tabletItems, spaceBetween: 16 },
-                992: { slidesPerView: desktopSmallItems, spaceBetween: 16 },
-                1200: { slidesPerView: desktopItems, spaceBetween: desktopSpaceBetween }
+                480: {
+                    slidesPerView: Math.min(Math.max(mobileItems, 2), items),
+                    slidesPerGroup: scrollPerPage ? Math.min(Math.max(mobileItems, 2), items) : 1,
+                    spaceBetween: 12
+                },
+                768: {
+                    slidesPerView: tabletItems,
+                    slidesPerGroup: scrollPerPage ? tabletItems : 1,
+                    spaceBetween: tabletSpaceBetween
+                },
+                992: {
+                    slidesPerView: desktopSmallItems,
+                    slidesPerGroup: scrollPerPage ? desktopSmallItems : 1,
+                    spaceBetween: 16
+                },
+                1200: {
+                    slidesPerView: desktopItems,
+                    slidesPerGroup: scrollPerPage ? desktopItems : 1,
+                    spaceBetween: desktopSpaceBetween
+                }
             },
             a11y: {
                 prevSlideMessage: 'Slide anterior',

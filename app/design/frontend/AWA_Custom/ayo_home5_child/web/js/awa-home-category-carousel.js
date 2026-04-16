@@ -73,10 +73,16 @@ define([], function () {
 
             if (scrollW <= trackW) {
                 dotsWrap.style.display = 'none';
+                dotsWrap.setAttribute('aria-hidden', 'true');
+                dotsWrap.setAttribute('inert', '');
+                dotsWrap.removeAttribute('aria-label');
                 return;
             }
 
             dotsWrap.style.display = '';
+            dotsWrap.removeAttribute('aria-hidden');
+            dotsWrap.removeAttribute('inert');
+            dotsWrap.setAttribute('aria-label', 'Navegacao do carrossel de categorias');
             pages = Math.ceil(scrollW / trackW);
 
             for (i = 0; i < pages; i++) {
@@ -88,6 +94,9 @@ define([], function () {
                     dot.type = 'button';
                     dot.setAttribute('aria-label', 'Ir para página ' + (pageIndex + 1) + ' de ' + pages);
                     dot.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+                    if (isActive) {
+                        dot.setAttribute('aria-current', 'page');
+                    }
 
                     if (isActive) {
                         dot.classList.add('active');
@@ -124,6 +133,11 @@ define([], function () {
 
                 dot.classList.toggle('active', isActive);
                 dot.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+                if (isActive) {
+                    dot.setAttribute('aria-current', 'page');
+                } else {
+                    dot.removeAttribute('aria-current');
+                }
             });
         }
 

@@ -22,29 +22,44 @@ define([
 ], function ($) {
     'use strict';
 
+    function normalizeCount(value, fallback, max) {
+        var count = parseInt(value, 10);
+
+        if (isNaN(count) || count < 1) {
+            count = fallback;
+        }
+
+        if (typeof max === 'number') {
+            count = Math.min(count, max);
+        }
+
+        return count;
+    }
+
     function buildSwiperOptions(owlCfg) {
-        var items = parseInt(owlCfg.items, 10) || 4,
+        var items = normalizeCount(owlCfg.items, 4, 4),
             mobileItems = 1,
             tabletItems = Math.min(items, 2),
             desktopSmallItems = Math.min(items, 3),
             desktopItems = items;
 
         if (owlCfg.itemsMobile && owlCfg.itemsMobile[1]) {
-            mobileItems = parseInt(owlCfg.itemsMobile[1], 10) || 1;
+            mobileItems = normalizeCount(owlCfg.itemsMobile[1], 1, 2);
         }
         if (owlCfg.itemsTablet && owlCfg.itemsTablet[1]) {
-            tabletItems = parseInt(owlCfg.itemsTablet[1], 10) || tabletItems;
+            tabletItems = normalizeCount(owlCfg.itemsTablet[1], tabletItems, 3);
         }
         if (owlCfg.itemsDesktopSmall && owlCfg.itemsDesktopSmall[1]) {
-            desktopSmallItems = parseInt(owlCfg.itemsDesktopSmall[1], 10) || desktopSmallItems;
+            desktopSmallItems = normalizeCount(owlCfg.itemsDesktopSmall[1], desktopSmallItems, 3);
         }
         if (owlCfg.itemsDesktop && owlCfg.itemsDesktop[1]) {
-            desktopItems = parseInt(owlCfg.itemsDesktop[1], 10) || desktopItems;
+            desktopItems = normalizeCount(owlCfg.itemsDesktop[1], desktopItems, 4);
         }
 
         return {
             slidesPerView: mobileItems,
-            spaceBetween: 16,
+            slidesPerGroup: mobileItems,
+            spaceBetween: 12,
             navigation: {
                 nextEl: '.swiper-button-next',
                 prevEl: '.swiper-button-prev'
@@ -61,10 +76,26 @@ define([
             loop: false,
             watchOverflow: true,
             breakpoints: {
-                480: { slidesPerView: Math.max(mobileItems, 2), spaceBetween: 12 },
-                768: { slidesPerView: tabletItems, spaceBetween: 16 },
-                992: { slidesPerView: desktopSmallItems, spaceBetween: 16 },
-                1200: { slidesPerView: desktopItems, spaceBetween: 20 }
+                480: {
+                    slidesPerView: Math.max(mobileItems, 2),
+                    slidesPerGroup: Math.max(mobileItems, 2),
+                    spaceBetween: 12
+                },
+                768: {
+                    slidesPerView: tabletItems,
+                    slidesPerGroup: tabletItems,
+                    spaceBetween: 14
+                },
+                992: {
+                    slidesPerView: desktopSmallItems,
+                    slidesPerGroup: desktopSmallItems,
+                    spaceBetween: 16
+                },
+                1200: {
+                    slidesPerView: desktopItems,
+                    slidesPerGroup: desktopItems,
+                    spaceBetween: 16
+                }
             },
             a11y: {
                 prevSlideMessage: 'Anterior',
