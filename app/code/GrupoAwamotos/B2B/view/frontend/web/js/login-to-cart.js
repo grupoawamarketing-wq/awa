@@ -52,6 +52,10 @@ define([
         // Remove body classes
         document.body.classList.remove('b2b-guest-mode', 'b2b-pending-mode', 'b2b-restricted-mode');
 
+        document.querySelectorAll('.b2b-login-to-buy-mode').forEach(function (container) {
+            container.classList.remove('b2b-login-to-buy-mode');
+        });
+
         // Remove all injected B2B buttons
         document.querySelectorAll('[data-b2b-injected]').forEach(function (btn) {
             btn.parentNode.removeChild(btn);
@@ -239,7 +243,25 @@ define([
             // PDP (product detail page)
             var productAddForm = document.querySelector('.product-add-form');
             if (productAddForm) {
+                var boxToCart = productAddForm.querySelector('.box-tocart');
+                var qtyField = productAddForm.querySelector('.box-tocart .field.qty');
+                var instantPurchase = productAddForm.querySelector('#instant-purchase');
                 var addToCartBtn = productAddForm.querySelector('button.tocart, button#product-addtocart-button');
+
+                if (boxToCart) {
+                    boxToCart.classList.add('b2b-login-to-buy-mode');
+                }
+
+                if (qtyField) {
+                    qtyField.setAttribute('data-b2b-original-hidden', '1');
+                    qtyField.style.display = 'none';
+                }
+
+                if (instantPurchase) {
+                    instantPurchase.setAttribute('data-b2b-original-hidden', '1');
+                    instantPurchase.style.display = 'none';
+                }
+
                 if (addToCartBtn && !productAddForm.querySelector('.b2b-login-to-buy-btn')) {
                     addToCartBtn.setAttribute('data-b2b-original-hidden', '1');
                     addToCartBtn.style.display = 'none';
@@ -333,8 +355,19 @@ define([
             scheduled = true;
             window.setTimeout(function () {
                 scheduled = false;
-                if (isRestricted) {
-                    replaceAddToCartButtons();
+                if (!isRestricted) {
+                    return;
+                }
+                // Desconectar durante nossas próprias mutações DOM para evitar disparo
+                // recursivo: cada botão injetado por replaceAddToCartButtons() causaria
+                // uma nova mutação que re-acionaria este observer indefinidamente.
+                if (observerInstance) {
+                    observerInstance.disconnect();
+                }
+                replaceAddToCartButtons();
+                // Reconectar para capturar conteúdo carregado via AJAX (abas de produto)
+                if (isRestricted && observerInstance) {
+                    observerInstance.observe(document.body, {childList: true, subtree: true});
                 }
             }, 120);
         }

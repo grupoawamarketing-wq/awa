@@ -54,7 +54,12 @@ define([], function () {
             return;
         }
 
-        document.documentElement.style.setProperty('--awa-cookie-banner-height', banner.offsetHeight + 'px');
+        // Defer layout read — evita forced synchronous layout.
+        requestAnimationFrame(function () {
+            if (banner.classList.contains('awa-cookie-banner--visible')) {
+                document.documentElement.style.setProperty('--awa-cookie-banner-height', banner.offsetHeight + 'px');
+            }
+        });
     }
 
     function setBannerActive(isActive) {
@@ -95,9 +100,13 @@ define([], function () {
             return;
         }
         banner.style.display = 'block';
-        banner.offsetHeight; // eslint-disable-line no-unused-expressions
-        banner.classList.add('awa-cookie-banner--visible');
-        setBannerActive(true);
+        // Double-rAF: garante paint de display:block antes da animacao CSS — sem forced layout.
+        requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+                banner.classList.add('awa-cookie-banner--visible');
+                setBannerActive(true);
+            });
+        });
     }
 
     function bindEvents() {

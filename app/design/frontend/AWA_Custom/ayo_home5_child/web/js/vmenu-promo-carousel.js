@@ -23,13 +23,20 @@ define([], function () {
             slides[current].style.display = 'none';
             slides[current].style.opacity = '0';
 
-            current = index % slides.length;
+            var nextIndex = index % slides.length;
 
-            slides[current].style.display = 'block';
-            /* Force reflow for transition */
-            void slides[current].offsetHeight;
-            slides[current].style.opacity = '1';
-            slides[current].classList.add('vmenu-promo-slide--active');
+            slides[nextIndex].style.opacity = '0';
+            slides[nextIndex].style.display = 'block';
+            // Double-rAF: evita forced reflow síncrono (void offsetHeight).
+            // O primeiro rAF garante que o browser processou display:block,
+            // o segundo aplica opacity:1 no próximo frame, ativando a transição CSS.
+            requestAnimationFrame(function () {
+                requestAnimationFrame(function () {
+                    current = nextIndex;
+                    slides[current].style.opacity = '1';
+                    slides[current].classList.add('vmenu-promo-slide--active');
+                });
+            });
         }
 
         function next() {
