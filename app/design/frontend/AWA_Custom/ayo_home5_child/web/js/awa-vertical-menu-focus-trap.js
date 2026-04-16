@@ -178,11 +178,23 @@ define([], function () {
     }
 
     /**
+     * Resolve the mobile drawer shell used by the vertical menu.
+     * Prefers the explicit data attribute and supports legacy fallback IDs.
+     *
+     * @returns {HTMLElement|null}
+     */
+    function resolveDrawerShell() {
+        return document.querySelector('[data-awa-nav-shell="true"]') ||
+            document.getElementById('awa-category-navigation') ||
+            document.querySelector('#awa-primary-navigation.section-items');
+    }
+
+    /**
      * Module entry point.
      * Observes body.nav-open via MutationObserver.
      */
     return function init() {
-        var nav = document.getElementById('awa-primary-navigation');
+        var nav = resolveDrawerShell();
         if (!nav) {
             return;
         }

@@ -79,6 +79,12 @@
         }
     }
 
+    function resolveDrawerShell() {
+        return document.querySelector('[data-awa-nav-shell="true"]') ||
+            document.getElementById('awa-category-navigation') ||
+            document.querySelector('#awa-primary-navigation.section-items');
+    }
+
     function setNavState() {
         var toggle = document.querySelector('[data-awa-nav-toggle="true"]');
         if (!toggle) {
@@ -139,7 +145,7 @@
 
     function wireNavA11y(experiment) {
         var toggle = document.querySelector('[data-awa-nav-toggle="true"]');
-        var navShell = document.getElementById('awa-primary-navigation');
+        var navShell = resolveDrawerShell();
         if (toggle) {
             ensureToggleRole(toggle);
         }
