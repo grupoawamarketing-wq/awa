@@ -14,12 +14,18 @@ use GrupoAwamotos\B2B\Model\Customer\Attribute\Source\ApprovalStatus;
 use GrupoAwamotos\B2B\Model\ErpCodeResolver;
 use GrupoAwamotos\ERPIntegration\Model\ResourceModel\SyncLog as SyncLogResource;
 use Magento\Customer\Model\Session as CustomerSession;
+use Magento\Customer\Model\Context as CustomerContext;
 use Magento\Customer\Api\CustomerRepositoryInterface;
+use Magento\Framework\App\Http\Context as HttpContext;
 use Magento\Framework\UrlInterface;
 use Psr\Log\LoggerInterface;
 
 class PriceVisibility implements PriceVisibilityInterface
 {
+    private const CONTEXT_APPROVAL_STATUS = 'b2b_approval_status';
+    private const CONTEXT_CUSTOMER_ID = 'customer_id';
+    private const CONTEXT_PRICE_LIST = 'erp_price_list';
+
     /**
      * @var Config
      */
@@ -50,6 +56,7 @@ class PriceVisibility implements PriceVisibilityInterface
      */
     private $logger;
     private ?ErpCodeResolver $erpCodeResolver;
+    private HttpContext $httpContext;
 
     /**
      * @var bool|null
@@ -68,6 +75,7 @@ class PriceVisibility implements PriceVisibilityInterface
         Config $config,
         CustomerSession $customerSession,
         CustomerRepositoryInterface $customerRepository,
+        HttpContext $httpContext,
         UrlInterface $urlBuilder,
         ?SyncLogResource $syncLogResource = null,
         ?LoggerInterface $logger = null,
@@ -76,6 +84,7 @@ class PriceVisibility implements PriceVisibilityInterface
         $this->config = $config;
         $this->customerSession = $customerSession;
         $this->customerRepository = $customerRepository;
+        $this->httpContext = $httpContext;
         $this->urlBuilder = $urlBuilder;
         $this->syncLogResource = $syncLogResource;
         $this->logger = $logger ?? new \Psr\Log\NullLogger();
@@ -99,7 +108,7 @@ class PriceVisibility implements PriceVisibilityInterface
         }
 
         // Se usuário está logado
-        if ($this->customerSession->isLoggedIn()) {
+        if ($this->isLoggedInContext()) {
             // Usar repository para garantir que custom attributes EAV sejam carregados
             $approvalStatus = $this->getCustomerApprovalStatus();
 
@@ -112,7 +121,7 @@ class PriceVisibility implements PriceVisibilityInterface
 
             // Cliente aprovado — verificar se tem código ERP
             if ($approvalStatus === ApprovalStatus::STATUS_APPROVED) {
-                if ($this->config->hidePriceForNoErp() && $this->getCustomerErpCode() === null) {
+                if ($this->isApprovedCustomerMissingErp()) {
                     $this->canViewPricesCache = false;
                     $this->logDebug('canViewPrices', 'blocked_approved_missing_erp');
                     return false;
@@ -170,13 +179,13 @@ class PriceVisibility implements PriceVisibilityInterface
         }
 
         // Se usuário está logado
-        if ($this->customerSession->isLoggedIn()) {
+        if ($this->isLoggedInContext()) {
             if (!$this->isCustomerApproved()) {
                 $this->canAddToCartCache = false;
                 return false;
             }
             // Aprovado mas sem ERP code — bloquear compra
-            if ($this->config->hidePriceForNoErp() && $this->getCustomerErpCode() === null) {
+            if ($this->isApprovedCustomerMissingErp()) {
                 $this->canAddToCartCache = false;
                 return false;
             }
@@ -200,14 +209,13 @@ class PriceVisibility implements PriceVisibilityInterface
      */
     public function getPriceReplacementMessage(): string
     {
-        if ($this->customerSession->isLoggedIn()) {
+        if ($this->isLoggedInContext()) {
             $approvalStatus = $this->getCustomerApprovalStatus();
 
             // Aprovado mas sem código ERP — tabela de preços em definição
             if (
                 $approvalStatus === ApprovalStatus::STATUS_APPROVED
-                && $this->config->hidePriceForNoErp()
-                && $this->getCustomerErpCode() === null
+                && $this->isApprovedCustomerMissingErp()
             ) {
                 $msg = $this->config->getPendingErpMessage();
                 return !empty($msg) ? $msg : 'Sua tabela de preços está sendo definida. Consulte o departamento de vendas.';
@@ -251,8 +259,13 @@ class PriceVisibility implements PriceVisibilityInterface
      */
     public function isCustomerApproved(): bool
     {
-        if (!$this->customerSession->isLoggedIn()) {
+        if (!$this->isLoggedInContext()) {
             return false;
+        }
+
+        $approvalStatus = $this->getCustomerApprovalStatus();
+        if ($approvalStatus !== null) {
+            return $approvalStatus === ApprovalStatus::STATUS_APPROVED || $approvalStatus === '';
         }
 
         try {
@@ -281,12 +294,20 @@ class PriceVisibility implements PriceVisibilityInterface
      */
     public function getCustomerApprovalStatus(): ?string
     {
-        if (!$this->customerSession->isLoggedIn()) {
+        if (!$this->isLoggedInContext()) {
             return null;
         }
 
+        $contextApprovalStatus = $this->getContextApprovalStatus();
+        if ($contextApprovalStatus !== null) {
+            return $contextApprovalStatus;
+        }
+
         try {
-            $customerId = $this->customerSession->getCustomerId();
+            $customerId = $this->getCurrentCustomerId();
+            if ($customerId <= 0) {
+                return null;
+            }
             $customer = $this->customerRepository->getById($customerId);
             $approvalStatusAttr = $customer->getCustomAttribute('b2b_approval_status');
             return $approvalStatusAttr ? $approvalStatusAttr->getValue() : null;
@@ -301,13 +322,12 @@ class PriceVisibility implements PriceVisibilityInterface
      */
     public function isApprovedPendingErp(): bool
     {
-        if (!$this->customerSession->isLoggedIn()) {
+        if (!$this->isLoggedInContext()) {
             return false;
         }
         $status = $this->getCustomerApprovalStatus();
         return $status === ApprovalStatus::STATUS_APPROVED
-            && $this->config->hidePriceForNoErp()
-            && $this->getCustomerErpCode() === null;
+            && $this->isApprovedCustomerMissingErp();
     }
 
     /**
@@ -319,8 +339,17 @@ class PriceVisibility implements PriceVisibilityInterface
             return $this->erpCodeCache;
         }
 
+        if ($this->hasMissingErpContext()) {
+            $this->erpCodeCache = null;
+            return null;
+        }
+
         try {
-            $customerId = (int) $this->customerSession->getCustomerId();
+            $customerId = $this->getCurrentCustomerId();
+            if ($customerId <= 0) {
+                $this->erpCodeCache = null;
+                return null;
+            }
             $customer = $this->customerRepository->getById($customerId);
 
             if ($this->erpCodeResolver !== null) {
@@ -364,8 +393,66 @@ class PriceVisibility implements PriceVisibilityInterface
         $this->logger->info('[B2B PriceVisibility] decision', [
             'operation' => $operation,
             'decision' => $decision,
-            'customer_id' => (int) $this->customerSession->getCustomerId(),
-            'is_logged_in' => $this->customerSession->isLoggedIn(),
+            'customer_id' => $this->getCurrentCustomerId(),
+            'is_logged_in' => $this->isLoggedInContext(),
+            'approval_status' => $this->getContextApprovalStatus(),
+            'erp_price_list' => $this->httpContext->getValue(self::CONTEXT_PRICE_LIST),
         ]);
+    }
+
+    private function isLoggedInContext(): bool
+    {
+        $contextCustomerId = (int) $this->httpContext->getValue(self::CONTEXT_CUSTOMER_ID);
+        $contextLoggedIn = (bool) $this->httpContext->getValue(CustomerContext::CONTEXT_AUTH);
+
+        if ($contextLoggedIn || $contextCustomerId > 0) {
+            return true;
+        }
+
+        return (bool) $this->customerSession->isLoggedIn();
+    }
+
+    private function getCurrentCustomerId(): int
+    {
+        $contextCustomerId = (int) $this->httpContext->getValue(self::CONTEXT_CUSTOMER_ID);
+        if ($contextCustomerId > 0) {
+            return $contextCustomerId;
+        }
+
+        return (int) $this->customerSession->getCustomerId();
+    }
+
+    private function getContextApprovalStatus(): ?string
+    {
+        $approvalStatus = $this->httpContext->getValue(self::CONTEXT_APPROVAL_STATUS);
+        if (!is_string($approvalStatus) || $approvalStatus === '' || $approvalStatus === 'guest') {
+            return null;
+        }
+
+        return $approvalStatus;
+    }
+
+    private function hasMissingErpContext(): bool
+    {
+        if (!$this->isLoggedInContext() || !$this->config->hidePriceForNoErp()) {
+            return false;
+        }
+
+        return $this->httpContext->getValue(self::CONTEXT_PRICE_LIST) === 'logged_in';
+    }
+
+    private function isApprovedCustomerMissingErp(): bool
+    {
+        $contextPriceList = $this->httpContext->getValue(self::CONTEXT_PRICE_LIST);
+
+        if (!$this->config->hidePriceForNoErp()) {
+            return false;
+        }
+
+        if ($this->isLoggedInContext() && is_string($contextPriceList) && $contextPriceList !== '' && $contextPriceList !== '0') {
+            return $contextPriceList === 'logged_in';
+        }
+
+        return $this->getCustomerErpCode() === null;
     }
 }

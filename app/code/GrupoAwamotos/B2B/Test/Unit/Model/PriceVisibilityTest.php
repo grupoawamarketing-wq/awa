@@ -10,8 +10,10 @@ use GrupoAwamotos\B2B\Model\PriceVisibility;
 use GrupoAwamotos\ERPIntegration\Model\ResourceModel\SyncLog as SyncLogResource;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Api\Data\CustomerInterface;
+use Magento\Customer\Model\Context as CustomerContext;
 use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Framework\Api\AttributeInterface;
+use Magento\Framework\App\Http\Context as HttpContext;
 use Magento\Framework\UrlInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -24,8 +26,10 @@ class PriceVisibilityTest extends TestCase
     private Config&MockObject $config;
     private CustomerSession&MockObject $customerSession;
     private CustomerRepositoryInterface&MockObject $customerRepository;
+    private HttpContext&MockObject $httpContext;
     private UrlInterface&MockObject $urlBuilder;
     private SyncLogResource&MockObject $syncLogResource;
+    private array $httpContextValues = [];
 
     /**
      * Create a fresh PriceVisibility instance (avoids internal cache between tests)
@@ -36,6 +40,7 @@ class PriceVisibilityTest extends TestCase
             $this->config,
             $this->customerSession,
             $this->customerRepository,
+            $this->httpContext,
             $this->urlBuilder,
             $this->syncLogResource
         );
@@ -46,8 +51,20 @@ class PriceVisibilityTest extends TestCase
         $this->config = $this->createMock(Config::class);
         $this->customerSession = $this->createMock(CustomerSession::class);
         $this->customerRepository = $this->createMock(CustomerRepositoryInterface::class);
+        $this->httpContext = $this->createMock(HttpContext::class);
         $this->urlBuilder = $this->createMock(UrlInterface::class);
         $this->syncLogResource = $this->createMock(SyncLogResource::class);
+        $this->httpContextValues = [
+            CustomerContext::CONTEXT_AUTH => false,
+            'customer_id' => 0,
+            'b2b_approval_status' => 'guest',
+            'erp_price_list' => '0',
+        ];
+
+        $this->httpContext->method('getValue')
+            ->willReturnCallback(function (string $key) {
+                return $this->httpContextValues[$key] ?? null;
+            });
     }
 
     /**
@@ -77,6 +94,17 @@ class PriceVisibilityTest extends TestCase
         );
 
         $this->customerRepository->method('getById')->with(42)->willReturn($customer);
+    }
+
+    private function mockHttpContextLoggedIn(
+        int $customerId = 42,
+        ?string $approvalStatus = ApprovalStatus::STATUS_APPROVED,
+        string $erpPriceList = 'default'
+    ): void {
+        $this->httpContextValues[CustomerContext::CONTEXT_AUTH] = true;
+        $this->httpContextValues['customer_id'] = $customerId;
+        $this->httpContextValues['b2b_approval_status'] = $approvalStatus ?? 'guest';
+        $this->httpContextValues['erp_price_list'] = $erpPriceList;
     }
 
     // ====================================================================
@@ -506,5 +534,27 @@ class PriceVisibilityTest extends TestCase
 
         $service = $this->createService();
         $this->assertTrue($service->canViewPrices());
+    }
+
+    public function testCanViewPricesUsesHttpContextForApprovedCustomer(): void
+    {
+        $this->config->method('isEnabled')->willReturn(true);
+        $this->config->method('hidePriceForNoErp')->willReturn(true);
+        $this->mockHttpContextLoggedIn(42, ApprovalStatus::STATUS_APPROVED, 'default');
+        $this->customerSession->method('isLoggedIn')->willReturn(false);
+
+        $service = $this->createService();
+        $this->assertTrue($service->canViewPrices());
+    }
+
+    public function testCanViewPricesBlocksApprovedCustomerWithoutErpUsingHttpContext(): void
+    {
+        $this->config->method('isEnabled')->willReturn(true);
+        $this->config->method('hidePriceForNoErp')->willReturn(true);
+        $this->mockHttpContextLoggedIn(42, ApprovalStatus::STATUS_APPROVED, 'logged_in');
+        $this->customerSession->method('isLoggedIn')->willReturn(false);
+
+        $service = $this->createService();
+        $this->assertFalse($service->canViewPrices());
     }
 }
