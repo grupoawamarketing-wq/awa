@@ -12,9 +12,14 @@ use Psr\Log\LoggerInterface;
 class CleanSyncLogs
 {
     /**
-     * Default days to keep logs
+     * Default days to keep DB sync log records
      */
     private const DEFAULT_DAYS_TO_KEEP = 30;
+
+    /**
+     * Days to keep auto-generated SQL register files (generated ~3x/day; 7 days = ~21 files)
+     */
+    private const SQL_FILES_DAYS_TO_KEEP = 7;
 
     /**
      * Prefix for auto-generated SQL register files
@@ -68,7 +73,7 @@ class CleanSyncLogs
     {
         try {
             $logDir = $this->directoryList->getPath('var') . '/log';
-            $cutoffTime = time() - (self::DEFAULT_DAYS_TO_KEEP * 86400);
+            $cutoffTime = time() - (self::SQL_FILES_DAYS_TO_KEEP * 86400);
             $pattern = $logDir . '/' . self::SQL_EXPORT_PREFIX . '*.sql';
             $files = glob($pattern);
 

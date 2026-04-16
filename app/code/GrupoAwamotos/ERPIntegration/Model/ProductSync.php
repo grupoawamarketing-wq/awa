@@ -9,6 +9,7 @@ use GrupoAwamotos\ERPIntegration\Api\ConnectionInterface;
 use GrupoAwamotos\ERPIntegration\Helper\Data as Helper;
 use GrupoAwamotos\ERPIntegration\Model\ResourceModel\SyncLog as SyncLogResource;
 use GrupoAwamotos\ERPIntegration\Model\Validator\ProductValidator;
+use GrupoAwamotos\ERPIntegration\Api\ColorNormalizationInterface;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Catalog\Api\Data\ProductInterfaceFactory;
 use Magento\Catalog\Model\Product\Type;
@@ -44,6 +45,7 @@ class ProductSync implements ProductSyncInterface
     private AppState $appState;
     private CategoryLinkManagementInterface $categoryLinkManagement;
     private StockRegistryInterface $stockRegistry;
+    private ColorNormalizationInterface $colorNormalization;
     private ?int $defaultAttributeSetId = null;
 
     public function __construct(
@@ -57,7 +59,8 @@ class ProductSync implements ProductSyncInterface
         LoggerInterface $logger,
         AppState $appState,
         CategoryLinkManagementInterface $categoryLinkManagement,
-        StockRegistryInterface $stockRegistry
+        StockRegistryInterface $stockRegistry,
+        ColorNormalizationInterface $colorNormalization
     ) {
         $this->connection = $connection;
         $this->helper = $helper;
@@ -70,6 +73,7 @@ class ProductSync implements ProductSyncInterface
         $this->appState = $appState;
         $this->categoryLinkManagement = $categoryLinkManagement;
         $this->stockRegistry = $stockRegistry;
+        $this->colorNormalization = $colorNormalization;
     }
 
     /**
@@ -96,7 +100,7 @@ class ProductSync implements ProductSyncInterface
         $sql = "SELECT m.CODIGO, m.DESCRICAO, m.COMPLEMENTO, m.CODINTERNO,
                        m.NCM, m.CPESO, m.VPESO, m.DIMENSOES, m.UNDVENDA,
                        m.CKCOMERCIALIZA, m.CCKATIVO, m.VCKATIVO, m.TPMATERIAL,
-                       m.GRUPOCOMERCIAL, m.EDITDATE,
+                       m.GRUPOCOMERCIAL, m.EDITDATE, m.COR,
                        c.VLRCUSTO, c.MARGEMSUG,
                        p.VLRVDSUG as VLRVENDA
                 FROM MT_MATERIAL m
@@ -405,6 +409,15 @@ class ProductSync implements ProductSyncInterface
         }
         if (!empty($erpProduct['NCM'])) {
             $product->setCustomAttribute('erp_ncm', $erpProduct['NCM']);
+        }
+
+
+        // Sincronizar atributo cor do ERP
+        if (!empty($erpProduct['COR'])) {
+            $colorOptionId = $this->colorNormalization->resolveOptionId($erpProduct['COR']);
+            if ($colorOptionId !== null) {
+                $product->setCustomAttribute('color', $colorOptionId);
+            }
         }
 
         $this->productRepository->save($product);
@@ -845,7 +858,7 @@ class ProductSync implements ProductSyncInterface
             $sql = "SELECT m.CODIGO, m.DESCRICAO, m.COMPLEMENTO, m.CODINTERNO,
                            m.NCM, m.CPESO, m.VPESO, m.DIMENSOES, m.UNDVENDA,
                            m.CKCOMERCIALIZA, m.CCKATIVO, m.VCKATIVO, m.TPMATERIAL,
-                           m.GRUPOCOMERCIAL, m.EDITDATE,
+                           m.GRUPOCOMERCIAL, m.EDITDATE, m.COR,
                            c.VLRCUSTO, c.MARGEMSUG,
                            p.VLRVDSUG as VLRVENDA
                     FROM MT_MATERIAL m

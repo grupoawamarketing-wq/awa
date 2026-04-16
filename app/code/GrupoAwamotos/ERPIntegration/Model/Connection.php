@@ -44,6 +44,12 @@ class Connection implements ConnectionInterface
     private const MAX_DELAY_MS = 5000;
 
     /**
+     * Maximum seconds a single query execution cycle (including retries) may take.
+     * After this, executeWithRetry aborts to protect the PHP-FPM worker.
+     */
+    private const QUERY_WALL_TIMEOUT = 45;
+
+    /**
      * Transient error codes that should be retried
      */
     private const TRANSIENT_ERROR_CODES = [
@@ -408,6 +414,13 @@ class Connection implements ConnectionInterface
 
         $pdo = new \PDO($dsn, $username, $password, $options);
 
+        // dblib (FreeTDS) has no native query timeout attribute.
+        // Enforce a server-side lock timeout via SET LOCK_TIMEOUT (ms)
+        // to prevent runaway queries from blocking PHP-FPM workers.
+        if ($driver === self::DRIVER_DBLIB) {
+            $pdo->exec('SET LOCK_TIMEOUT 30000');
+        }
+
         return $pdo;
     }
 
@@ -766,8 +779,23 @@ class Connection implements ConnectionInterface
     private function executeWithRetry(callable $operation, string $operationType)
     {
         $lastException = null;
+        $startTime = microtime(true);
 
         for ($attempt = 1; $attempt <= self::MAX_RETRIES; $attempt++) {
+            // Wall-clock guard: abort if we already consumed too much time
+            $elapsed = microtime(true) - $startTime;
+            if ($elapsed >= self::QUERY_WALL_TIMEOUT) {
+                $msg = sprintf(
+                    '[ERP] %s aborted — wall timeout of %ds exceeded (%.1fs elapsed, attempt %d)',
+                    $operationType,
+                    self::QUERY_WALL_TIMEOUT,
+                    $elapsed,
+                    $attempt
+                );
+                $this->logger->error($msg);
+                throw $lastException ?? new \RuntimeException($msg);
+            }
+
             try {
                 return $operation();
             } catch (\PDOException $e) {

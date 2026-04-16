@@ -144,8 +144,15 @@ class PurchaseHistory
      */
     public function getLastOrders(int $customerCode, int $limit = 10): array
     {
+        $cacheKey = self::CACHE_PREFIX . 'orders_' . $customerCode . '_' . $limit;
+        $cached = $this->cache->load($cacheKey);
+
+        if ($cached) {
+            return json_decode($cached, true) ?: [];
+        }
+
         try {
-            return $this->connection->query("
+            $orders = $this->connection->query("
                 SELECT TOP " . (int)$limit . "
                     p.CODIGO as pedido_id,
                     p.DTPEDIDO as data_pedido,
@@ -158,6 +165,8 @@ class PurchaseHistory
                 GROUP BY p.CODIGO, p.DTPEDIDO, p.STATUS, p.VLRTOTAL
                 ORDER BY p.DTPEDIDO DESC
             ", [$customerCode]);
+            $this->cache->save(json_encode($orders), $cacheKey, [], self::CACHE_TTL);
+            return $orders;
         } catch (\Exception $e) {
             $this->logger->error('[ERP] Error getting last orders: ' . $e->getMessage());
             return [];
@@ -412,5 +421,8 @@ class PurchaseHistory
         $this->cache->remove(self::CACHE_PREFIX . 'customer_' . $customerCode);
         $this->cache->remove(self::CACHE_PREFIX . 'summary_' . $customerCode);
         $this->cache->remove(self::CACHE_PREFIX . 'products_' . $customerCode);
+        foreach ([5, 10, 20] as $limit) {
+            $this->cache->remove(self::CACHE_PREFIX . 'orders_' . $customerCode . '_' . $limit);
+        }
     }
 }

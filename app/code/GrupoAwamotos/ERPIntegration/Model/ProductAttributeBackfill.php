@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace GrupoAwamotos\ERPIntegration\Model;
 
 use GrupoAwamotos\ERPIntegration\Api\ConnectionInterface;
+use GrupoAwamotos\ERPIntegration\Api\ColorNormalizationInterface;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Psr\Log\LoggerInterface;
@@ -14,15 +15,18 @@ class ProductAttributeBackfill
     private ConnectionInterface $connection;
     private ProductRepositoryInterface $productRepository;
     private LoggerInterface $logger;
+    private ColorNormalizationInterface $colorNormalization;
 
     public function __construct(
         ConnectionInterface $connection,
         ProductRepositoryInterface $productRepository,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        ColorNormalizationInterface $colorNormalization
     ) {
         $this->connection = $connection;
         $this->productRepository = $productRepository;
         $this->logger = $logger;
+        $this->colorNormalization = $colorNormalization;
     }
 
     /**
@@ -103,13 +107,15 @@ class ProductAttributeBackfill
         $sql = "SELECT {$topClause}
                     m.CODIGO,
                     CAST(m.CODINTERNO AS VARCHAR(255)) AS CODINTERNO,
-                    CAST(m.NCM AS VARCHAR(255)) AS NCM
+                    CAST(m.NCM AS VARCHAR(255)) AS NCM,
+                    CAST(m.COR AS VARCHAR(255)) AS COR
                 FROM MT_MATERIAL m
                 WHERE m.CODIGO IS NOT NULL
                   AND LTRIM(RTRIM(CAST(m.CODIGO AS VARCHAR(255)))) != ''
                   AND (
                         (m.CODINTERNO IS NOT NULL AND m.CODINTERNO != 0)
                         OR (m.NCM IS NOT NULL AND LTRIM(RTRIM(CAST(m.NCM AS VARCHAR(255)))) != '')
+                        OR (m.COR IS NOT NULL AND LTRIM(RTRIM(CAST(m.COR AS VARCHAR(255)))) != '')
                   )";
 
         if ($sku !== null && $sku !== '') {
@@ -137,6 +143,14 @@ class ProductAttributeBackfill
         $ncm = $this->normalizeErpValue($row['NCM'] ?? null);
         if ($ncm !== null) {
             $attributes['erp_ncm'] = $ncm;
+        }
+
+        $corRaw = $this->normalizeErpValue($row['COR'] ?? null);
+        if ($corRaw !== null) {
+            $colorOptionId = $this->colorNormalization->resolveOptionId($corRaw);
+            if ($colorOptionId !== null) {
+                $attributes['color'] = (string) $colorOptionId;
+            }
         }
 
         return $attributes;
