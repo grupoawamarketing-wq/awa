@@ -9,6 +9,185 @@ use Magento\Framework\UrlInterface;
 class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
 {
     /**
+     * Cache category models loaded for the current request.
+     *
+     * @var array<int, \Magento\Catalog\Model\Category>
+     */
+    private array $categoryModelCache = [];
+
+    /**
+     * Cache active children list by category id for the current request.
+     *
+     * @var array<int, array>
+     */
+    private array $activeChildrenCache = [];
+
+    /**
+     * Cache category frontend URLs by category id for the current request.
+     *
+     * @var array<int, string>
+     */
+    private array $categoryUrlCache = [];
+
+    /**
+     * @inheritDoc
+     */
+    public function getCategoryModel($id)
+    {
+        $categoryId = (int)$id;
+        if ($categoryId > 0 && isset($this->categoryModelCache[$categoryId])) {
+            return $this->categoryModelCache[$categoryId];
+        }
+
+        $category = parent::getCategoryModel($categoryId);
+
+        if ($categoryId > 0 && $category && (int)$category->getId() > 0) {
+            $this->categoryModelCache[$categoryId] = $category;
+        }
+
+        return $category;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getActiveChildCategories($category)
+    {
+        $categoryId = (int)$category->getId();
+        if ($categoryId > 0 && array_key_exists($categoryId, $this->activeChildrenCache)) {
+            return $this->activeChildrenCache[$categoryId];
+        }
+
+        $children = parent::getActiveChildCategories($category);
+
+        if ($categoryId > 0) {
+            $this->activeChildrenCache[$categoryId] = $children;
+        }
+
+        return $children;
+    }
+
+    /**
+     * Bulk-load menu category models to avoid per-item lazy loading.
+     *
+     * @param int[] $categoryIds
+     */
+    private function preloadCategoryModels(array $categoryIds): void
+    {
+        if ($categoryIds === []) {
+            return;
+        }
+
+        $idsToLoad = [];
+        foreach ($categoryIds as $categoryId) {
+            $categoryId = (int)$categoryId;
+            if ($categoryId <= 0 || isset($this->categoryModelCache[$categoryId])) {
+                continue;
+            }
+
+            $idsToLoad[$categoryId] = $categoryId;
+        }
+
+        if ($idsToLoad === []) {
+            return;
+        }
+
+        $collection = $this->_categoryFactory->create()->getCollection();
+        $collection->setStoreId((int)$this->_storeManager->getStore()->getId());
+        $collection->addAttributeToSelect([
+            'name',
+            'url_key',
+            'image',
+            'vc_menu_hide_item',
+            'vc_menu_cat_label',
+            'vc_menu_font_icon',
+            'vc_menu_cat_columns',
+            'vc_menu_float_type',
+            'vc_menu_type',
+            'vc_menu_static_width',
+            'vc_menu_block_top_content',
+            'vc_menu_block_left_content',
+            'vc_menu_block_left_width',
+            'vc_menu_block_right_content',
+            'vc_menu_block_right_width',
+            'vc_menu_block_bottom_content',
+            'vc_menu_icon_img'
+        ]);
+        $collection->addAttributeToFilter('entity_id', ['in' => array_values($idsToLoad)]);
+
+        foreach ($collection as $categoryModel) {
+            $loadedId = (int)$categoryModel->getId();
+            if ($loadedId > 0) {
+                $this->categoryModelCache[$loadedId] = $categoryModel;
+            }
+        }
+    }
+
+    /**
+     * Collect active category ids up to max menu depth for bulk preloading.
+     *
+     * @param array $categories
+     * @return int[]
+     */
+    private function collectMenuCategoryIds(array $categories, int $maxLevel): array
+    {
+        $ids = [];
+
+        foreach ($categories as $category) {
+            if (!$category || !$category->getIsActive()) {
+                continue;
+            }
+
+            $this->collectMenuCategoryIdsRecursive($category, 0, $maxLevel, $ids);
+        }
+
+        return array_keys($ids);
+    }
+
+    /**
+     * @param mixed $category
+     * @param array<int, bool> $ids
+     */
+    private function collectMenuCategoryIdsRecursive($category, int $level, int $maxLevel, array &$ids): void
+    {
+        $categoryId = (int)$category->getId();
+        if ($categoryId <= 0 || isset($ids[$categoryId])) {
+            return;
+        }
+
+        $ids[$categoryId] = true;
+
+        if ($maxLevel > 0 && $level >= $maxLevel - 1) {
+            return;
+        }
+
+        $children = $this->getActiveChildCategories($category);
+        foreach ($children as $child) {
+            $this->collectMenuCategoryIdsRecursive($child, $level + 1, $maxLevel, $ids);
+        }
+    }
+
+    /**
+     * Resolve and cache category URL.
+     *
+     * @param mixed $category
+     */
+    private function getCategoryUrlCached($category): string
+    {
+        $categoryId = (int)$category->getId();
+        if ($categoryId > 0 && isset($this->categoryUrlCache[$categoryId])) {
+            return $this->categoryUrlCache[$categoryId];
+        }
+
+        $url = (string)$this->_categoryHelper->getCategoryUrl($category);
+        if ($categoryId > 0) {
+            $this->categoryUrlCache[$categoryId] = $url;
+        }
+
+        return $url;
+    }
+
+    /**
      * Allow only safe tokens for CSS classes (single token).
      */
     private function sanitizeClassToken(?string $value): string
@@ -197,7 +376,7 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
 
         $categoryName = $this->escapeHtml($category->getName());
         $categoryNameAttr = $this->escapeHtmlAttr($category->getName());
-        $categoryUrl = $this->escapeUrl($this->_categoryHelper->getCategoryUrl($category));
+        $categoryUrl = $this->escapeUrl($this->getCategoryUrlCached($category));
 
         $html .= '<ul class="' . $this->escapeHtmlAttr(trim($listClass)) . '" data-level="1">';
         $html .= '<li class="navigation__inner-item navigation__inner-item--level1 subcategory-title col-1">';
@@ -241,7 +420,7 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
             $vcMenuFontIcon = (string)$childModel->getData('vc_menu_font_icon');
             $menuToken = 'menu-' . (int)$child->getId();
             $childName = $this->escapeHtml($child->getName());
-            $childUrl = $this->escapeUrl($this->_categoryHelper->getCategoryUrl($child));
+            $childUrl = $this->escapeUrl($this->getCategoryUrlCached($child));
 
             $childSubmenuId = 'submenu-' . $menuToken;
 
@@ -434,7 +613,7 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
                         . '></div>';
                 }
 
-                $childUrl = $this->escapeUrl($this->_categoryHelper->getCategoryUrl($child));
+                $childUrl = $this->escapeUrl($this->getCategoryUrlCached($child));
                 $childName = $this->escapeHtml($child->getName());
                 $childNameAttr = $this->escapeHtmlAttr($child->getName());
                 $linkClassAttr = ' class="' . $this->escapeHtmlAttr(implode(' ', $linkClasses)) . '"';
@@ -480,9 +659,17 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
         $html = '';
 
         $categories = $this->getStoreCategories(true, false, true);
+        if ($categories instanceof \Traversable) {
+            $categories = iterator_to_array($categories);
+        }
+        if (!is_array($categories)) {
+            $categories = [];
+        }
 
         $this->_verticalmenuConfig = $this->_helper->getConfig('verticalmenu');
-        $max_level = $this->_verticalmenuConfig['general']['max_level'] ?? 0;
+        $max_level = (int)($this->_verticalmenuConfig['general']['max_level'] ?? 0);
+
+        $this->preloadCategoryModels($this->collectMenuCategoryIds($categories, $max_level));
 
         $html .= $this->getCustomBlockHtml('before');
 
@@ -557,7 +744,7 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
             }
             $menuToken = 'menu-' . (int)$category->getId();
 
-            $categoryUrl = $this->escapeUrl($this->_categoryHelper->getCategoryUrl($category));
+            $categoryUrl = $this->escapeUrl($this->getCategoryUrlCached($category));
             $categoryName = $this->escapeHtml($category->getName());
             $categoryNameAttr = $this->escapeHtmlAttr($category->getName());
 

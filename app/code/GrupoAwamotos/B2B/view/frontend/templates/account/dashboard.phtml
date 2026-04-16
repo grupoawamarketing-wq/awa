@@ -21,17 +21,21 @@ $hasCustomPriceList = false;
 $customerPriceListName = null;
 
 if ($erpBlock && $erpBlock->isEnabled() && $erpBlock->isLoggedIn()) {
-    $erpCode = $erpBlock->getErpCustomerCode();
-    if ($erpCode) {
-        $erpSummary = $erpBlock->getPurchaseSummary();
-        $erpRfm = $erpBlock->getCustomerRfm();
-        $erpSuggestions = $erpBlock->getSuggestions(6);
-        $erpReorder = $erpBlock->getReorderSuggestions(6);
-        $erpOrders = $erpBlock->getLastOrders(5);
-        $hasCustomPriceList = $erpBlock->hasCustomPriceList();
-        if ($hasCustomPriceList) {
-            $customerPriceListName = $erpBlock->getCustomerPriceListName();
+    try {
+        $erpCode = $erpBlock->getErpCustomerCode();
+        if ($erpCode) {
+            $erpSummary = $erpBlock->getPurchaseSummary();
+            $erpRfm = $erpBlock->getCustomerRfm();
+            $erpSuggestions = $erpBlock->getSuggestions(6);
+            $erpReorder = $erpBlock->getReorderSuggestions(6);
+            $erpOrders = $erpBlock->getLastOrders(5);
+            $hasCustomPriceList = $erpBlock->hasCustomPriceList();
+            if ($hasCustomPriceList) {
+                $customerPriceListName = $erpBlock->getCustomerPriceListName();
+            }
         }
+    } catch (\Throwable $erpException) {
+        // ERP unavailable — dashboard renders without ERP data
     }
 }
 ?>
