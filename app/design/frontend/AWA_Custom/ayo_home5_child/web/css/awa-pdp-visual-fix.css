@@ -20,30 +20,148 @@
  */
 
 /* =============================================================================
- * 0. CRITICAL LAYOUT FIX — product-view grid override
+ * 0. FORCE 1-COLUMN LAYOUT & PRODUCT-VIEW FIX
  *
- * BUG: awa-bundle-refinements.css (e styles-m/l.css, themes.css) definem:
- *   .catalog-product-view .product-view { display: grid; grid-template-columns: 1fr 1fr }
- * Mas o HTML tem APENAS 1 filho direto em .product-view:
- *   <div class="view-product"> (que contém tudo: galeria + info via .main-detail)
- * Resultado: .view-product fica preso em 1 coluna (~50% da largura) e
- *   .main-detail fica com ~668px em vez dos ~1168px que deveria ter.
- * Fix: forçar display:block para que .view-product expanda para 100%.
+ * Theme parent usa layout="2columns-left" que cria sidebar via Bootstrap grid.
+ * Forcamos a coluna principal a 100% e ocultamos sidebar (order=1200, vence tudo).
+ * Tambem setamos product-view max-width 1400px (dentro do container 1440px).
  * ============================================================================= */
+
+/* ────────────────────────────────────────────────────────────────────────
+   PDP GRID STANDARDIZATION — Full-width cascade
+   Garante que .column.main e todos os filhos (grids, tabs, related)
+   ocupem 100% da largura disponivel sem gaps ou compressao.
+   ──────────────────────────────────────────────────────────────────────── */
+
+/* 0. Container: largura maxima para a PDP */
+body.catalog-product-view .page-main.container {
+    max-width: 1440px !important;
+    width: 100% !important;
+    padding-left: clamp(10px, 1.5vw, 20px) !important;
+    padding-right: clamp(10px, 1.5vw, 20px) !important;
+    box-sizing: border-box !important;
+}
+
+/* 1. Columns wrapper: block, full width */
+body.catalog-product-view .columns {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* 2. Column main: block flow, full width (evita flex row que comprime filhos) */
+body.catalog-product-view .columns > .col-main,
+body.catalog-product-view .columns > .column.main {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 0 0 100% !important;
+    float: none !important;
+    box-sizing: border-box !important;
+}
+
+/* 3. Ocultar sidebar na PDP */
+body.catalog-product-view .col-left\.sidebar,
+body.catalog-product-view .columns > [class*="col-lg-2"],
+body.catalog-product-view .sidebar.sidebar-main-1,
+body.catalog-product-view .sidebar.sidebar-additional1,
+body.catalog-product-view .div\.sidebar\.main,
+body.catalog-product-view .div\.sidebar\.additional {
+    display: none !important;
+}
+
+/* 4. Remove Bootstrap grid limits da coluna principal */
+body.catalog-product-view .col-main.col-lg-10,
+body.catalog-product-view .col-main.col-md-9,
+body.catalog-product-view .col-main.col-sm-9 {
+    max-width: 100% !important;
+    flex-basis: 100% !important;
+}
+
+/* 5. Product-view: full width dentro do container */
 body.catalog-product-view .product-view {
     display: block !important;
     width: 100% !important;
     max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
     padding-left: 0 !important;
     padding-right: 0 !important;
+    box-sizing: border-box !important;
 }
 
 body.catalog-product-view .product-view > .view-product {
     width: 100% !important;
     max-width: 100% !important;
     display: block !important;
+    box-sizing: border-box !important;
 }
 
+/* 6. Bootstrap .row: neutralizar margins negativas */
+body.catalog-product-view .product-view .row {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    box-sizing: border-box !important;
+}
+
+/* 7. col-md-12: full width sem padding extra do Bootstrap */
+body.catalog-product-view .product-view .col-md-12 {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    float: none !important;
+    box-sizing: border-box !important;
+}
+
+/* 8. main-detail: full width */
+body.catalog-product-view .main-detail {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* 9. Filhos diretos de .column.main fora do grid: full width */
+body.catalog-product-view .column.main > .product-view,
+body.catalog-product-view .column.main > .product.info.detailed,
+body.catalog-product-view .column.main > .awa-pdp-related,
+body.catalog-product-view .column.main > .block.upsell,
+body.catalog-product-view .column.main > .block.related,
+body.catalog-product-view .column.main > .block.crosssell,
+body.catalog-product-view .column.main > .fitment-applications,
+body.catalog-product-view .column.main > [id="fitment-applications"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* 10. Tabs/accordion: full width */
+body.catalog-product-view .product.info.detailed,
+body.catalog-product-view .product.data.items {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* 11. Related/upsell sections: full width */
+body.catalog-product-view .awa-pdp-related,
+body.catalog-product-view .block.upsell,
+body.catalog-product-view .block.related {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* 12. col-md-6 dentro de .main-detail: resetar padding Bootstrap */
+body.catalog-product-view .main-detail > .row > .col-md-6 {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    float: none !important;
+    box-sizing: border-box !important;
+}
 
 /* =============================================================================
  * 1. QTY INPUT — Esconder duplicatas e normalizar visual
@@ -75,10 +193,10 @@ body.catalog-product-view .product-add-form #qty {
     font-weight: 600 !important;
     color: var(--awa-text, #333) !important;
     border: 1.5px solid var(--awa-border, #d9d9d9) !important;
-    border-radius: 8px !important;
+    border-radius: var(--awa-radius-sm, 8px) !important;
     padding: 0 8px !important;
     box-sizing: border-box !important;
-    background: #fff !important;
+    background: var(--awa-white, #fff) !important;
     /* Remove setas nativas do <input type="number"> */
     -moz-appearance: textfield !important;
     appearance: textfield !important;
@@ -205,7 +323,7 @@ body.catalog-product-view #product-addtocart-button {
     width: 100% !important;
     height: 52px !important;
     background: var(--awa-primary, #b73337) !important;
-    color: #fff !important;
+    color: var(--awa-white, #fff) !important;
     font-size: 15px !important;
     font-weight: 700 !important;
     letter-spacing: 0.04em !important;
@@ -250,18 +368,49 @@ body.catalog-product-view #product-addtocart-button:disabled {
 
 
 /* =============================================================================
- * 4. LAYOUT — Alinhamento imagem vs info, espaçamento base 8px
+ * 4. LAYOUT — Proporcoes galeria/info, espaçamento base 8px
  *
- * A divisão principal do main-detail já é gerenciada por
- * awa-layout-standardization.css (fonte canônica carregada por último).
- * Aqui: padding interno da coluna de info e ritmo vertical.
+ * Este bloco é a fonte final de proporcoes galeria/info da PDP.
+ * Carregado com order=1200 (maior prioridade).
  * ============================================================================= */
+
+/* Desktop: galeria 55% / info 45% — imagem é o foco principal */
+@media (min-width: 992px) {
+    body.catalog-product-view .main-detail > .row {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        align-items: flex-start !important;
+        gap: 32px !important;
+    }
+
+    /* Galeria (primeiro col-md-6) — proporcao dominante */
+    body.catalog-product-view .main-detail > .row > .col-md-6.col-sm-6.col-xs-12:first-child {
+        flex: 0 0 55% !important;
+        max-width: 55% !important;
+        min-width: 0 !important;
+    }
+
+    /* Info (segundo col-md-6) — ocupa o espaco restante */
+    body.catalog-product-view .main-detail > .row > .col-md-6.col-sm-6.col-xs-12:last-child {
+        flex: 1 1 0 !important;
+        max-width: none !important;
+        min-width: 0 !important;
+    }
+}
 
 /* Coluna de info: padding interno em desktop */
 @media (min-width: 768px) {
     body.catalog-product-view .product-info-main {
-        padding-left: 32px !important;
+        padding-left: 24px !important;
         padding-top: 0 !important;
+    }
+}
+
+/* Tablet: 50/50 */
+@media (min-width: 768px) and (max-width: 991px) {
+    body.catalog-product-view .main-detail > .row > .col-md-6.col-sm-6.col-xs-12 {
+        flex: 1 1 0 !important;
+        max-width: 50% !important;
     }
 }
 
@@ -272,7 +421,7 @@ body.catalog-product-view #product-addtocart-button:disabled {
         padding-top: 16px !important;
     }
 
-    body.catalog-product-view .main-detail > .row > .col-md-6 {
+    body.catalog-product-view .main-detail > .row > .col-md-6.col-sm-6.col-xs-12 {
         flex: 0 0 100% !important;
         max-width: 100% !important;
     }
@@ -582,7 +731,7 @@ body.catalog-product-view a.action.add[href*="review"] {
     background: transparent !important;
     color: var(--awa-primary, #b73337) !important;
     border: 1.5px solid var(--awa-primary, #b73337) !important;
-    border-radius: 8px !important;
+    border-radius: var(--awa-radius-sm, 8px) !important;
     font-size: 13px !important;
     font-weight: 600 !important;
     text-transform: uppercase !important;
@@ -596,7 +745,7 @@ body.catalog-product-view .block.review-add .action.submit:hover,
 body.catalog-product-view .reviews-actions .action.add:hover,
 body.catalog-product-view a.action.add[href*="review"]:hover {
     background: var(--awa-primary, #b73337) !important;
-    color: #fff !important;
+    color: var(--awa-white, #fff) !important;
 }
 
 /* Formulário de nova avaliação: inputs padronizados */
@@ -612,7 +761,7 @@ body.catalog-product-view .block.review-add .field .label {
 body.catalog-product-view .block.review-add .field input[type="text"],
 body.catalog-product-view .block.review-add .field textarea {
     border: 1.5px solid var(--awa-border, #d9d9d9) !important;
-    border-radius: 8px !important;
+    border-radius: var(--awa-radius-sm, 8px) !important;
     font-size: 14px !important;
     color: var(--awa-text, #333) !important;
     padding: 10px 12px !important;
@@ -645,7 +794,7 @@ body.catalog-product-view .product-reviews-summary a.action.add {
     font-weight: 600 !important;
     text-transform: none !important;
     letter-spacing: 0.02em !important;
-    border-radius: 12px !important;
+    border-radius: var(--awa-radius-md, 12px) !important;
     border-width: 1px !important;
     line-height: 22px !important;
 }
@@ -653,7 +802,7 @@ body.catalog-product-view .product-reviews-summary a.action.add {
 body.catalog-product-view .product-reviews-summary .reviews-actions a.action.add:hover,
 body.catalog-product-view .product-reviews-summary a.action.add:hover {
     background: var(--awa-primary, #b73337) !important;
-    color: #fff !important;
+    color: var(--awa-white, #fff) !important;
 }
 
 
@@ -862,7 +1011,7 @@ body.catalog-product-view .awa-compare-bar {
     body.catalog-product-view .products-related .product-item .product-image-container,
     body.catalog-product-view .block.related .item-product .product-thumb,
     body.catalog-product-view .products-related .item-product .product-thumb {
-        background: linear-gradient(180deg, #ffffff 0%, #f5f7fa 100%) !important;
+        background: linear-gradient(180deg, var(--awa-white, #ffffff) 0%, #f5f7fa 100%) !important;
         border: 1px solid rgba(183, 51, 55, 0.08) !important;
     }
 
@@ -888,5 +1037,601 @@ body.catalog-product-view .awa-compare-bar {
 
     body.catalog-product-view.awa-cookie-banner-active .woot-widget-bubble {
         bottom: calc(var(--awa-cookie-banner-height, 132px) + 20px) !important;
+    }
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   13. FITMENT BLOCK — Full-width + visual improvement
+   ──────────────────────────────────────────────────────────────────────── */
+
+body.catalog-product-view .fitment-applications,
+body.catalog-product-view #fitment-applications {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    margin: 16px 0 !important;
+    padding: 24px !important;
+    background: #fff !important;
+    border: 1px solid #e0e0e0 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   14. SECTION GAPS — Reduzir espaçamento excessivo entre seções
+   ──────────────────────────────────────────────────────────────────────── */
+
+/* .product-view → próximo irmão: reduzir gap de 76px para 20px */
+body.catalog-product-view .column.main > .product-view {
+    margin-bottom: 16px !important;
+}
+
+/* fitment → tabs: gap controlado */
+body.catalog-product-view .column.main > .fitment-applications,
+body.catalog-product-view .column.main > [id="fitment-applications"] {
+    margin-top: 0 !important;
+    margin-bottom: 16px !important;
+}
+
+/* Tabs: reduzir margin-top de 24px para 0 (gap já vem do irmão anterior) */
+body.catalog-product-view .column.main > .product.info.detailed {
+    margin-top: 0 !important;
+    margin-bottom: 16px !important;
+}
+
+/* Related section: gap controlado */
+body.catalog-product-view .column.main > .awa-pdp-related {
+    margin-top: 8px !important;
+    margin-bottom: 0 !important;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   15. VISUAL PREMIUM — Galeria, Info-Panel, Tabs, Trust Bar
+   Objetivo: aparência de loja premium de moto acessórios.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ── 15.1  GALERIA — card branco com sombra e thumbnails refinados ──── */
+
+/* Container da galeria: card elevado */
+body.catalog-product-view .product-col-media,
+body.catalog-product-view .col-md-6.col-sm-6.col-xs-12:first-child .product.media,
+body.catalog-product-view .product.media {
+    background: #fff !important;
+    border-radius: 16px !important;
+    border: 1px solid #eff0f1 !important;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.07) !important;
+    overflow: hidden !important;
+    padding: 12px !important;
+}
+
+/* Thumbnails Fotorama: gap e visual limpos */
+body.catalog-product-view .fotorama__thumb-border {
+    border-color: var(--primary-color, #b73337) !important;
+    border-radius: 8px !important;
+    border-width: 2px !important;
+}
+
+body.catalog-product-view .fotorama__thumb {
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    opacity: 0.7;
+    transition: opacity 0.2s ease !important;
+}
+
+body.catalog-product-view .fotorama__thumb--video::after,
+body.catalog-product-view .fotorama__nav__frame.fotorama__active .fotorama__thumb {
+    opacity: 1;
+}
+
+body.catalog-product-view .fotorama__nav__frame:hover .fotorama__thumb {
+    opacity: 1;
+}
+
+/* Imagem principal: centralizada e bem proporcionada */
+body.catalog-product-view .fotorama__stage {
+    border-radius: 10px !important;
+    overflow: hidden !important;
+    background: #fafafa !important;
+}
+
+/* ── 15.2  INFO-PANEL — tipografia premium e separadores visuais ──── */
+
+/* Card da coluna de info: fundo ligeiramente diferenciado */
+body.catalog-product-view .product-col-info,
+body.catalog-product-view .col-md-6.col-sm-6.col-xs-12:last-child {
+    padding-left: 24px !important;
+}
+
+/* Título do produto: mais presença */
+body.catalog-product-view .product-info-main .page-title-wrapper .page-title .base {
+    font-size: clamp(1.3rem, 2.2vw, 1.75rem) !important;
+    font-weight: 800 !important;
+    color: #111827 !important;
+    line-height: 1.2 !important;
+    letter-spacing: -0.02em !important;
+    display: block !important;
+}
+
+/* Preço: destaque como hero element */
+body.catalog-product-view .product-info-main .product-info-price {
+    background: linear-gradient(135deg, #fff 0%, #fef7f7 100%) !important;
+    border: 1px solid rgba(183, 51, 55, 0.12) !important;
+    border-radius: 14px !important;
+    padding: 14px 16px !important;
+    box-shadow: 0 2px 12px rgba(183, 51, 55, 0.06), 0 1px 3px rgba(0,0,0,0.04) !important;
+}
+
+/* Tamanho do preço: destaque máximo */
+body.catalog-product-view .product-info-main .price-box .price {
+    font-size: clamp(1.5rem, 2.8vw, 2rem) !important;
+    font-weight: 800 !important;
+    color: var(--primary-color, #b73337) !important;
+    letter-spacing: -0.01em !important;
+}
+
+/* Rating stars: mais visíveis */
+body.catalog-product-view .product-info-main .product-reviews-summary .rating-summary {
+    display: inline-flex !important;
+    align-items: center !important;
+}
+
+body.catalog-product-view .product-info-main .product-reviews-summary .reviews-actions a {
+    font-size: 0.8rem !important;
+    color: var(--primary-color, #b73337) !important;
+    font-weight: 600 !important;
+    text-decoration: none !important;
+}
+
+body.catalog-product-view .product-info-main .product-reviews-summary .reviews-actions a:hover {
+    text-decoration: underline !important;
+}
+
+/* Descrição curta: mais legível */
+body.catalog-product-view .product-info-main .product.attribute.overview,
+body.catalog-product-view .product-info-main .short-description {
+    font-size: 0.9rem !important;
+    color: #4b5563 !important;
+    line-height: 1.65 !important;
+    border-left: 3px solid rgba(183, 51, 55, 0.18) !important;
+    padding-left: 12px !important;
+    margin: 8px 0 12px !important;
+}
+
+/* Box Add to Cart: destaque máximo */
+body.catalog-product-view .product-info-main .box-tocart {
+    background: linear-gradient(180deg, #fff 0%, #fafafa 100%) !important;
+    border: 1.5px solid rgba(183, 51, 55, 0.14) !important;
+    border-radius: 14px !important;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06) !important;
+}
+
+/* Botão Add to Cart: tamanho e presença */
+body.catalog-product-view .product-info-main .actions #product-addtocart-button,
+body.catalog-product-view .product-info-main .actions .action.primary.tocart {
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+    min-height: 50px !important;
+    border-radius: 12px !important;
+    letter-spacing: 0.02em !important;
+    text-transform: uppercase !important;
+    box-shadow: 0 6px 20px rgba(183, 51, 55, 0.22) !important;
+    transition: transform 0.22s ease, box-shadow 0.22s ease, background-color 0.22s ease !important;
+}
+
+body.catalog-product-view .product-info-main .actions #product-addtocart-button:hover,
+body.catalog-product-view .product-info-main .actions .action.primary.tocart:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 10px 28px rgba(142, 38, 41, 0.28) !important;
+}
+
+/* ── 15.3  TRUST BAR — ícones de confiança mais compactos e premium ── */
+
+body.catalog-product-view .product-info-main .awa-pdp-trust-bar {
+    background: #f8f9fc !important;
+    border: 1px solid #e8eaf0 !important;
+    border-radius: 10px !important;
+    padding: 10px 12px !important;
+    gap: 6px !important;
+    margin-top: 14px !important;
+}
+
+body.catalog-product-view .product-info-main .awa-pdp-trust-bar__item {
+    gap: 4px !important;
+    font-size: 10.5px !important;
+    font-weight: 600 !important;
+    color: #374151 !important;
+}
+
+/* ── 15.4  PRODUCT TABS — design premium com indicador ativo ──────── */
+
+/* Container de tabs: borda separadora limpa */
+body.catalog-product-view .product.info.detailed {
+    background: #fff !important;
+    border: 1px solid #eff0f1 !important;
+    border-radius: 16px !important;
+    overflow: hidden !important;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Nav das tabs */
+body.catalog-product-view .product.data.items > .item.title {
+    border: none !important;
+    background: transparent !important;
+}
+
+body.catalog-product-view .product.data.items > .item.title > .switch {
+    border: none !important;
+    border-bottom: 3px solid transparent !important;
+    padding: 14px 20px !important;
+    font-weight: 600 !important;
+    font-size: 0.875rem !important;
+    color: #6b7280 !important;
+    background: transparent !important;
+    transition: color 0.2s ease, border-color 0.2s ease !important;
+    letter-spacing: 0.01em !important;
+}
+
+body.catalog-product-view .product.data.items > .item.title > .switch:hover {
+    color: var(--primary-color, #b73337) !important;
+    border-bottom-color: rgba(183, 51, 55, 0.3) !important;
+}
+
+body.catalog-product-view .product.data.items > .item.title.active > .switch,
+body.catalog-product-view .product.data.items > .item.title.active > .switch:focus {
+    color: var(--primary-color, #b73337) !important;
+    border-bottom-color: var(--primary-color, #b73337) !important;
+    background: transparent !important;
+    font-weight: 700 !important;
+}
+
+/* Conteúdo das tabs */
+body.catalog-product-view .product.data.items > .item.content {
+    padding: 20px 24px !important;
+    border: none !important;
+    background: #fff !important;
+    border-top: 1px solid #f0f0f0 !important;
+    font-size: 0.9rem !important;
+    line-height: 1.7 !important;
+    color: #374151 !important;
+}
+
+/* Separador entre tabs (wrapper) */
+body.catalog-product-view .product.data.items {
+    border-bottom: 1px solid #e5e7eb !important;
+    margin-bottom: 0 !important;
+}
+
+/* ── 15.5  GALERIA × INFO: GAP entre as duas colunas ─────────────── */
+
+body.catalog-product-view .main-detail > .row {
+    gap: 24px !important;
+}
+
+body.catalog-product-view .main-detail > .row > .col-md-6:first-child {
+    flex: 0 0 52% !important;
+    max-width: 52% !important;
+}
+
+body.catalog-product-view .main-detail > .row > .col-md-6:last-child {
+    flex: 1 1 0 !important;
+    max-width: none !important;
+}
+
+/* ── 15.6  BREADCRUMB — mais discreto ───────────────────────────── */
+
+body.catalog-product-view .breadcrumbs .items {
+    font-size: 0.8rem !important;
+    color: #9ca3af !important;
+}
+
+body.catalog-product-view .breadcrumbs .items .item:last-child {
+    color: #374151 !important;
+    font-weight: 600 !important;
+}
+
+body.catalog-product-view .breadcrumbs .items a {
+    color: #9ca3af !important;
+    text-decoration: none !important;
+}
+
+body.catalog-product-view .breadcrumbs .items a:hover {
+    color: var(--primary-color, #b73337) !important;
+}
+
+/* ── 15.7  RELATED PRODUCTS: seção premium ───────────────────────── */
+
+body.catalog-product-view .awa-pdp-related .block-title strong,
+body.catalog-product-view .awa-pdp-related .awa-related-title {
+    font-size: 1.15rem !important;
+    font-weight: 800 !important;
+    color: #111827 !important;
+    letter-spacing: -0.01em !important;
+}
+
+/* ── 15.8  RESPONSIVE: mobile (≤ 768px) ─────────────────────────── */
+
+@media (max-width: 768px) {
+    /* Galeria mobile: sem padding lateral */
+    body.catalog-product-view .product.media {
+        border-radius: 12px !important;
+        padding: 8px !important;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06) !important;
+    }
+
+    /* Info-panel mobile: sem padding extra */
+    body.catalog-product-view .product-col-info,
+    body.catalog-product-view .col-md-6.col-sm-6.col-xs-12:last-child {
+        padding-left: 0 !important;
+    }
+
+    /* Tabs mobile: scroll horizontal */
+    body.catalog-product-view .product.data.items > .item.title > .switch {
+        padding: 12px 14px !important;
+        font-size: 0.82rem !important;
+    }
+
+    body.catalog-product-view .product.data.items > .item.content {
+        padding: 16px !important;
+    }
+
+    /* Gap menor entre colunas no mobile */
+    body.catalog-product-view .main-detail > .row {
+        gap: 16px !important;
+    }
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   16. FIX CARROSSEL RELACIONADOS — overflow: hidden no container Swiper
+   Problema: _product-page.less aplicava overflow: visible no .products-swiper--related
+   que é o próprio container .swiper, quebrando o clip dos slides.
+   Solução: forçar overflow: hidden no container Swiper aqui (maior prioridade).
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* Container Swiper dos relacionados DEVE ter overflow:hidden */
+.awa-pdp-related .swiper,
+.products-swiper--related.swiper,
+.products-swiper--related {
+    overflow: hidden !important;
+}
+
+/* Wrapper externo da seção fica com overflow:visible para sombras */
+.awa-pdp-related {
+    overflow: visible !important;
+}
+
+/* Swiper interno: garante que o wrapper e stage fiquem corretos */
+.awa-pdp-related .swiper-wrapper {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    width: 100% !important;
+}
+
+.awa-pdp-related .swiper-slide {
+    flex-shrink: 0 !important;
+    width: auto !important;
+    height: auto !important;
+}
+
+/* Botões de navegação do Swiper: visíveis e dentro do layout */
+.awa-pdp-related .swiper-button-next,
+.awa-pdp-related .swiper-button-prev {
+    color: var(--primary-color, #b73337) !important;
+    top: 40% !important;
+}
+
+.awa-pdp-related .swiper-button-next::after,
+.awa-pdp-related .swiper-button-prev::after {
+    font-size: 18px !important;
+    font-weight: 700 !important;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   17. AJUSTES FINOS — cards dos relacionados
+   Objetivo: uniformizar altura, imagem, preço e CTA do carrossel da PDP.
+   ════════════════════════════════════════════════════════════════════════ */
+
+body.catalog-product-view .awa-pdp-related {
+    margin-top: 12px !important;
+}
+
+body.catalog-product-view .awa-pdp-related .rokan-product-heading {
+    margin-bottom: 16px !important;
+}
+
+body.catalog-product-view .awa-pdp-related .rokan-mostviewed {
+    position: relative;
+}
+
+body.catalog-product-view .awa-pdp-related .products-swiper--related {
+    padding: 4px 2px 8px !important;
+}
+
+body.catalog-product-view .awa-pdp-related .swiper-slide {
+    height: auto !important;
+}
+
+body.catalog-product-view .awa-pdp-related .swiper-slide > .product-item {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    min-height: 100% !important;
+    border: 1px solid #eceff3 !important;
+    border-radius: 14px !important;
+    background: #fff !important;
+    box-shadow: 0 3px 12px rgba(15, 23, 42, 0.05) !important;
+    overflow: hidden !important;
+    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease !important;
+}
+
+body.catalog-product-view .awa-pdp-related .swiper-slide > .product-item:hover {
+    transform: translateY(-3px) !important;
+    border-color: rgba(183, 51, 55, 0.18) !important;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.10) !important;
+}
+
+body.catalog-product-view .awa-pdp-related .product-thumb {
+    display: flex !important;
+    align-items: stretch !important;
+    justify-content: stretch !important;
+    min-width: 0 !important;
+}
+
+body.catalog-product-view .awa-pdp-related .product-thumb-link,
+body.catalog-product-view .awa-pdp-related .product.photo.product-item-photo {
+    display: grid !important;
+    place-items: center !important;
+    width: 100% !important;
+    aspect-ratio: 1 / 1;
+    min-height: 220px !important;
+    padding: 18px !important;
+    background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%) !important;
+    text-decoration: none !important;
+}
+
+body.catalog-product-view .awa-pdp-related .product-thumb img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    object-position: center !important;
+}
+
+body.catalog-product-view .awa-pdp-related .product-info {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    padding: 14px 14px 16px !important;
+    min-width: 0 !important;
+}
+
+body.catalog-product-view .awa-pdp-related .product-name {
+    margin: 0 !important;
+    min-height: calc(1.4em * 2) !important;
+}
+
+body.catalog-product-view .awa-pdp-related .product-name .product-item-link {
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    line-height: 1.4 !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #1f2937 !important;
+    text-decoration: none !important;
+    min-height: calc(1.4em * 2) !important;
+}
+
+body.catalog-product-view .awa-pdp-related .product-name .product-item-link:hover {
+    color: var(--primary-color, #b73337) !important;
+}
+
+body.catalog-product-view .awa-pdp-related .price-box {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: baseline !important;
+    gap: 6px !important;
+    min-height: 30px !important;
+    margin: 0 !important;
+}
+
+body.catalog-product-view .awa-pdp-related .price-box .price {
+    font-size: 18px !important;
+    font-weight: 800 !important;
+    color: #111827 !important;
+    line-height: 1.2 !important;
+}
+
+body.catalog-product-view .awa-pdp-related .price-box .old-price .price,
+body.catalog-product-view .awa-pdp-related .price-box .price-from .price,
+body.catalog-product-view .awa-pdp-related .price-box .minimal-price .price {
+    font-size: 12px !important;
+}
+
+body.catalog-product-view .awa-pdp-related .awa-related-price-notice {
+    display: inline-flex !important;
+    align-items: center !important;
+    min-height: 36px !important;
+    padding: 0 10px !important;
+    border-radius: 999px !important;
+    background: rgba(183, 51, 55, 0.08) !important;
+    color: var(--primary-color, #b73337) !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    line-height: 1.3 !important;
+}
+
+body.catalog-product-view .awa-pdp-related .product-actions {
+    display: flex !important;
+    align-items: flex-end !important;
+    margin-top: auto !important;
+    min-height: 46px !important;
+}
+
+body.catalog-product-view .awa-pdp-related .product-actions > * {
+    width: 100% !important;
+}
+
+body.catalog-product-view .awa-pdp-related .related-addtocart,
+body.catalog-product-view .awa-pdp-related .related-tocart-form .action.tocart {
+    width: 100% !important;
+    min-height: 44px !important;
+    border-radius: 10px !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.01em !important;
+    justify-content: center !important;
+    box-shadow: 0 6px 18px rgba(183, 51, 55, 0.14) !important;
+}
+
+body.catalog-product-view .awa-pdp-related .swiper-button-next,
+body.catalog-product-view .awa-pdp-related .swiper-button-prev {
+    width: 40px !important;
+    height: 40px !important;
+    margin-top: 0 !important;
+    border-radius: 999px !important;
+    border: 1px solid rgba(183, 51, 55, 0.18) !important;
+    background: rgba(255, 255, 255, 0.96) !important;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08) !important;
+}
+
+body.catalog-product-view .awa-pdp-related .swiper-button-prev {
+    left: 6px !important;
+}
+
+body.catalog-product-view .awa-pdp-related .swiper-button-next {
+    right: 6px !important;
+}
+
+@media (max-width: 768px) {
+    body.catalog-product-view .awa-pdp-related .product-thumb-link,
+    body.catalog-product-view .awa-pdp-related .product.photo.product-item-photo {
+        min-height: 180px !important;
+        padding: 12px !important;
+    }
+
+    body.catalog-product-view .awa-pdp-related .product-info {
+        padding: 12px !important;
+    }
+
+    body.catalog-product-view .awa-pdp-related .product-name .product-item-link {
+        font-size: 12px !important;
+    }
+
+    body.catalog-product-view .awa-pdp-related .price-box .price {
+        font-size: 16px !important;
+    }
+
+    body.catalog-product-view .awa-pdp-related .related-addtocart,
+    body.catalog-product-view .awa-pdp-related .related-tocart-form .action.tocart {
+        min-height: 44px !important;
+        font-size: 12px !important;
+    }
+
+    body.catalog-product-view .awa-pdp-related .swiper-button-next,
+    body.catalog-product-view .awa-pdp-related .swiper-button-prev {
+        width: 34px !important;
+        height: 34px !important;
     }
 }
