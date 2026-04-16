@@ -1,0 +1,468 @@
+{
+    // ═══════════════════════════════════════════════════════════════════════
+    // AWA Motos — Magento 2 PHP Snippets
+    // ═══════════════════════════════════════════════════════════════════════
+
+    // ─── Module boilerplate ──────────────────────────────────────────────────
+    "Magento2: registration.php": {
+        "prefix": "m2reg",
+        "scope": "php",
+        "body": [
+            "<?php",
+            "",
+            "declare(strict_types=1);",
+            "",
+            "use Magento\\\\Framework\\\\Component\\\\ComponentRegistrar;",
+            "",
+            "ComponentRegistrar::register(",
+            "    ComponentRegistrar::MODULE,",
+            "    'GrupoAwamotos_${1:ModuleName}',",
+            "    __DIR__",
+            ");",
+            ""
+        ],
+        "description": "Magento 2 registration.php para módulo GrupoAwamotos"
+    },
+
+    // ─── Class boilerplate ───────────────────────────────────────────────────
+    "Magento2: PHP class header": {
+        "prefix": "m2class",
+        "scope": "php",
+        "body": [
+            "<?php",
+            "",
+            "declare(strict_types=1);",
+            "",
+            "namespace GrupoAwamotos\\\\${1:ModuleName}\\\\${2:Namespace};",
+            "",
+            "class ${3:ClassName}",
+            "{",
+            "    $0",
+            "}",
+            ""
+        ],
+        "description": "Magento 2 class skeleton com strict_types"
+    },
+
+    // ─── Constructor com Logger ──────────────────────────────────────────────
+    "Magento2: Constructor with Logger": {
+        "prefix": "m2ctor",
+        "scope": "php",
+        "body": [
+            "public function __construct(",
+            "    private readonly \\\\Psr\\\\Log\\\\LoggerInterface \\$logger,",
+            "    $0",
+            ") {",
+            "}"
+        ],
+        "description": "Construtor Magento 2 com LoggerInterface (PHP 8 promoted)"
+    },
+
+    // ─── Logger calls ────────────────────────────────────────────────────────
+    "Magento2: logger->info": {
+        "prefix": "mlog",
+        "scope": "php",
+        "body": ["\\$this->logger->info('${1:message}', ['context' => ${2:\\$data}]);"],
+        "description": "Log info no Magento 2"
+    },
+    "Magento2: logger->error": {
+        "prefix": "mloge",
+        "scope": "php",
+        "body": ["\\$this->logger->error('${1:message}', ['exception' => \\$e->getMessage()]);"],
+        "description": "Log error no Magento 2"
+    },
+
+    // ─── Observer ────────────────────────────────────────────────────────────
+    "Magento2: Observer class": {
+        "prefix": "m2observer",
+        "scope": "php",
+        "body": [
+            "<?php",
+            "",
+            "declare(strict_types=1);",
+            "",
+            "namespace GrupoAwamotos\\\\${1:ModuleName}\\\\Observer;",
+            "",
+            "use Magento\\\\Framework\\\\Event\\\\Observer;",
+            "use Magento\\\\Framework\\\\Event\\\\ObserverInterface;",
+            "use Psr\\\\Log\\\\LoggerInterface;",
+            "",
+            "class ${2:ObserverName} implements ObserverInterface",
+            "{",
+            "    public function __construct(",
+            "        private readonly LoggerInterface \\$logger,",
+            "    ) {",
+            "    }",
+            "",
+            "    public function execute(Observer \\$observer): void",
+            "    {",
+            "        $0",
+            "    }",
+            "}",
+            ""
+        ],
+        "description": "Magento 2 Observer completo"
+    },
+
+    // ─── Plugin ──────────────────────────────────────────────────────────────
+    "Magento2: Plugin (after)": {
+        "prefix": "m2plugin",
+        "scope": "php",
+        "body": [
+            "<?php",
+            "",
+            "declare(strict_types=1);",
+            "",
+            "namespace GrupoAwamotos\\\\${1:ModuleName}\\\\Plugin;",
+            "",
+            "use Psr\\\\Log\\\\LoggerInterface;",
+            "",
+            "class ${2:PluginName}",
+            "{",
+            "    public function __construct(",
+            "        private readonly LoggerInterface \\$logger,",
+            "    ) {",
+            "    }",
+            "",
+            "    public function after${3:MethodName}(",
+            "        \\${4:SubjectClass} \\$subject,",
+            "        ${5:mixed} \\$result,",
+            "    ): ${5:mixed} {",
+            "        $0",
+            "        return \\$result;",
+            "    }",
+            "}",
+            ""
+        ],
+        "description": "Magento 2 Plugin afterMethod"
+    },
+
+    // ─── Cron ────────────────────────────────────────────────────────────────
+    "Magento2: Cron class": {
+        "prefix": "m2cron",
+        "scope": "php",
+        "body": [
+            "<?php",
+            "",
+            "declare(strict_types=1);",
+            "",
+            "namespace GrupoAwamotos\\\\${1:ModuleName}\\\\Cron;",
+            "",
+            "use Psr\\\\Log\\\\LoggerInterface;",
+            "",
+            "class ${2:CronName}",
+            "{",
+            "    public function __construct(",
+            "        private readonly LoggerInterface \\$logger,",
+            "    ) {",
+            "    }",
+            "",
+            "    public function execute(): void",
+            "    {",
+            "        $0",
+            "    }",
+            "}",
+            ""
+        ],
+        "description": "Magento 2 Cron job class"
+    },
+
+    // ─── Controller action ───────────────────────────────────────────────────
+    "Magento2: Controller Action": {
+        "prefix": "m2action",
+        "scope": "php",
+        "body": [
+            "<?php",
+            "",
+            "declare(strict_types=1);",
+            "",
+            "namespace GrupoAwamotos\\\\${1:ModuleName}\\\\Controller\\\\${2:Adminhtml};",
+            "",
+            "use Magento\\\\Framework\\\\App\\\\Action\\\\HttpGetActionInterface;",
+            "use Magento\\\\Framework\\\\App\\\\RequestInterface;",
+            "use Magento\\\\Framework\\\\Controller\\\\ResultInterface;",
+            "use Magento\\\\Framework\\\\View\\\\Result\\\\PageFactory;",
+            "",
+            "class ${3:Index} implements HttpGetActionInterface",
+            "{",
+            "    public function __construct(",
+            "        private readonly PageFactory \\$pageFactory,",
+            "        private readonly RequestInterface \\$request,",
+            "    ) {",
+            "    }",
+            "",
+            "    public function execute(): ResultInterface",
+            "    {",
+            "        $0",
+            "        return \\$this->pageFactory->create();",
+            "    }",
+            "}",
+            ""
+        ],
+        "description": "Magento 2 Controller Action (HttpGetActionInterface)"
+    },
+
+    // ─── Block ───────────────────────────────────────────────────────────────
+    "Magento2: Block class": {
+        "prefix": "m2block",
+        "scope": "php",
+        "body": [
+            "<?php",
+            "",
+            "declare(strict_types=1);",
+            "",
+            "namespace GrupoAwamotos\\\\${1:ModuleName}\\\\Block;",
+            "",
+            "use Magento\\\\Framework\\\\View\\\\Element\\\\Template;",
+            "use Magento\\\\Framework\\\\View\\\\Element\\\\Template\\\\Context;",
+            "",
+            "class ${2:BlockName} extends Template",
+            "{",
+            "    public function __construct(",
+            "        Context \\$context,",
+            "        array \\$data = [],",
+            "    ) {",
+            "        parent::__construct(\\$context, \\$data);",
+            "    }",
+            "",
+            "    $0",
+            "}",
+            ""
+        ],
+        "description": "Magento 2 Block (extends Template)"
+    },
+
+    // ─── try/catch com logger ────────────────────────────────────────────────
+    "Magento2: try/catch with logger": {
+        "prefix": "m2try",
+        "scope": "php",
+        "body": [
+            "try {",
+            "    $0",
+            "} catch (\\\\Exception \\$e) {",
+            "    \\$this->logger->error('${1:Contexto}: ' . \\$e->getMessage(), ['exception' => \\$e]);",
+            "    throw \\$e;",
+            "}"
+        ],
+        "description": "try/catch Magento 2 com logger.error"
+    },
+
+    // ─── di.xml type entry ───────────────────────────────────────────────────
+    "Magento2: di.xml type": {
+        "prefix": "m2ditype",
+        "scope": "xml",
+        "body": [
+            "<type name=\"${1:Vendor\\\\Module\\\\Class}\">",
+            "    <arguments>",
+            "        <argument name=\"${2:argName}\" xsi:type=\"${3:object}\">${4:Value}</argument>",
+            "    </arguments>",
+            "</type>"
+        ],
+        "description": "Magento 2 di.xml <type> entry"
+    },
+
+    // ─── events.xml observer entry ───────────────────────────────────────────
+    "Magento2: events.xml observer": {
+        "prefix": "m2event",
+        "scope": "xml",
+        "body": [
+            "<event name=\"${1:event_name}\">",
+            "    <observer name=\"grupoawamotos_${2:module}_${3:observer_name}\"",
+            "              instance=\"GrupoAwamotos\\\\${4:Module}\\\\Observer\\\\${5:ObserverName}\" />",
+            "</event>"
+        ],
+        "description": "Magento 2 events.xml observer entry"
+    },
+
+    // ─── Model ───────────────────────────────────────────────────────────────
+    "Magento2: Model class": {
+        "prefix": "m2model",
+        "scope": "php",
+        "body": [
+            "<?php",
+            "",
+            "declare(strict_types=1);",
+            "",
+            "namespace GrupoAwamotos\\${1:ModuleName}\\Model;",
+            "",
+            "use Magento\\Framework\\Model\\AbstractModel;",
+            "",
+            "class ${2:ModelName} extends AbstractModel",
+            "{",
+            "    public const CACHE_TAG = 'grupoawamotos_${3:cache_tag}';",
+            "",
+            "    protected function _construct(): void",
+            "    {",
+            "        \$this->_init(\\GrupoAwamotos\\${1:ModuleName}\\Model\\ResourceModel\\${2:ModelName}::class);",
+            "    }",
+            "",
+            "    $0",
+            "}",
+            ""
+        ],
+        "description": "Magento 2 Model (extends AbstractModel)"
+    },
+
+    // ─── Repository ──────────────────────────────────────────────────────────
+    "Magento2: Repository class": {
+        "prefix": "m2repo",
+        "scope": "php",
+        "body": [
+            "<?php",
+            "",
+            "declare(strict_types=1);",
+            "",
+            "namespace GrupoAwamotos\\${1:ModuleName}\\Model;",
+            "",
+            "use GrupoAwamotos\\${1:ModuleName}\\Api\\${2:EntityName}RepositoryInterface;",
+            "use GrupoAwamotos\\${1:ModuleName}\\Api\\Data\\${2:EntityName}Interface;",
+            "use GrupoAwamotos\\${1:ModuleName}\\Model\\ResourceModel\\${2:EntityName} as ResourceModel;",
+            "use GrupoAwamotos\\${1:ModuleName}\\Model\\${2:EntityName}Factory;",
+            "use Magento\\Framework\\Exception\\CouldNotDeleteException;",
+            "use Magento\\Framework\\Exception\\CouldNotSaveException;",
+            "use Magento\\Framework\\Exception\\NoSuchEntityException;",
+            "use Psr\\Log\\LoggerInterface;",
+            "",
+            "class ${2:EntityName}Repository implements ${2:EntityName}RepositoryInterface",
+            "{",
+            "    public function __construct(",
+            "        private readonly ResourceModel \$resource,",
+            "        private readonly ${2:EntityName}Factory \$factory,",
+            "        private readonly LoggerInterface \$logger,",
+            "    ) {",
+            "    }",
+            "",
+            "    public function save(${2:EntityName}Interface \$entity): ${2:EntityName}Interface",
+            "    {",
+            "        try {",
+            "            \$this->resource->save(\$entity);",
+            "        } catch (\\Exception \$e) {",
+            "            \$this->logger->error('${2:EntityName}Repository::save: ' . \$e->getMessage());",
+            "            throw new CouldNotSaveException(__(\$e->getMessage()), \$e);",
+            "        }",
+            "        return \$entity;",
+            "    }",
+            "",
+            "    public function getById(int \$id): ${2:EntityName}Interface",
+            "    {",
+            "        \$entity = \$this->factory->create();",
+            "        \$this->resource->load(\$entity, \$id);",
+            "        if (!\$entity->getId()) {",
+            "            throw new NoSuchEntityException(__('${2:EntityName} %1 not found.', \$id));",
+            "        }",
+            "        return \$entity;",
+            "    }",
+            "",
+            "    public function delete(${2:EntityName}Interface \$entity): bool",
+            "    {",
+            "        try {",
+            "            \$this->resource->delete(\$entity);",
+            "        } catch (\\Exception \$e) {",
+            "            throw new CouldNotDeleteException(__(\$e->getMessage()), \$e);",
+            "        }",
+            "        return true;",
+            "    }",
+            "",
+            "    $0",
+            "}",
+            ""
+        ],
+        "description": "Magento 2 Repository (CRUD completo)"
+    },
+
+    // ─── PHTML template ──────────────────────────────────────────────────────
+    "Magento2: PHTML template header": {
+        "prefix": "m2phtml",
+        "scope": "php",
+        "body": [
+            "<?php",
+            "/**",
+            " * @var \\GrupoAwamotos\\${1:ModuleName}\\Block\\${2:BlockName} \$block",
+            " * @var \\Magento\\Framework\\View\\Helper\\SecureHtmlRenderer \$secureRenderer",
+            " * @var \\Magento\\Framework\\Escaper \$escaper",
+            " */",
+            "",
+            "declare(strict_types=1);",
+            "?>",
+            "$0"
+        ],
+        "description": "PHTML template header com typehints Magento 2"
+    },
+
+    // ─── Service Contract Interface ───────────────────────────────────────────
+    "Magento2: Service Contract Interface": {
+        "prefix": "m2interface",
+        "scope": "php",
+        "body": [
+            "<?php",
+            "",
+            "declare(strict_types=1);",
+            "",
+            "namespace GrupoAwamotos\\${1:ModuleName}\\Api;",
+            "",
+            "interface ${2:ServiceName}Interface",
+            "{",
+            "    /**",
+            "     * @param ${3:int} \$${4:id}",
+            "     * @return ${5:mixed}",
+            "     * @throws \\Magento\\Framework\\Exception\\NoSuchEntityException",
+            "     */",
+            "    public function ${6:execute}(${3:int} \$${4:id}): ${5:mixed};",
+            "",
+            "    $0",
+            "}",
+            ""
+        ],
+        "description": "Magento 2 Service Contract Interface (Api/)"
+    },
+
+    // ─── CLI Command ─────────────────────────────────────────────────────────
+    "Magento2: CLI Command": {
+        "prefix": "m2cmd",
+        "scope": "php",
+        "body": [
+            "<?php",
+            "",
+            "declare(strict_types=1);",
+            "",
+            "namespace GrupoAwamotos\\${1:ModuleName}\\Console\\Command;",
+            "",
+            "use Magento\\Framework\\Console\\Cli;",
+            "use Psr\\Log\\LoggerInterface;",
+            "use Symfony\\Component\\Console\\Command\\Command;",
+            "use Symfony\\Component\\Console\\Input\\InputInterface;",
+            "use Symfony\\Component\\Console\\Output\\OutputInterface;",
+            "",
+            "class ${2:CommandName} extends Command",
+            "{",
+            "    public function __construct(",
+            "        private readonly LoggerInterface \$logger,",
+            "        string \$name = null,",
+            "    ) {",
+            "        parent::__construct(\$name);",
+            "    }",
+            "",
+            "    protected function configure(): void",
+            "    {",
+            "        \$this->setName('grupoawamotos:${3:command:name}')",
+            "            ->setDescription('${4:Descrição do comando}');",
+            "    }",
+            "",
+            "    protected function execute(InputInterface \$input, OutputInterface \$output): int",
+            "    {",
+            "        try {",
+            "            $0",
+            "            \$output->writeln('<info>Concluído.</info>');",
+            "            return Cli::RETURN_SUCCESS;",
+            "        } catch (\\Exception \$e) {",
+            "            \$this->logger->error('${2:CommandName}: ' . \$e->getMessage());",
+            "            \$output->writeln('<error>' . \$e->getMessage() . '</error>');",
+            "            return Cli::RETURN_FAILURE;",
+            "        }",
+            "    }",
+            "}",
+            ""
+        ],
+        "description": "Magento 2 CLI Command (Symfony Console)"
+    }
+}

@@ -1,0 +1,652 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        // ═══════════════════════════════════════════════════════════════
+        // 🩹 FITMENT FIX
+        // ═══════════════════════════════════════════════════════════════
+        {
+            "label": "AWA: Fix Fitment - Drop Tables + Full Upgrade",
+            "type": "shell",
+            "command": "set -e && echo '=== 1. Gerando XMLs Fitment ===' && php scripts/create_fitment_xmls.php && echo '=== 2. Dropando tabelas com FK corrompida ===' && mysql -e \"SET FOREIGN_KEY_CHECKS=0; DROP TABLE IF EXISTS grupoawamotos_fitment_application; DROP TABLE IF EXISTS grupoawamotos_fitment_model; DROP TABLE IF EXISTS grupoawamotos_fitment_brand; DELETE FROM setup_module WHERE module='GrupoAwamotos_Fitment'; SET FOREIGN_KEY_CHECKS=1;\" && echo '=== 3. setup:upgrade ===' && php bin/magento setup:upgrade --keep-generated && echo '=== 4. DI Compile ===' && php bin/magento setup:di:compile && echo '=== 5. Cache flush ===' && php bin/magento cache:flush && echo '✅ Fitment instalado com sucesso!'",
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "AWA: Fitment - Apenas Drop Tables",
+            "type": "shell",
+            "command": "mysql -e \"SET FOREIGN_KEY_CHECKS=0; DROP TABLE IF EXISTS grupoawamotos_fitment_application; DROP TABLE IF EXISTS grupoawamotos_fitment_model; DROP TABLE IF EXISTS grupoawamotos_fitment_brand; DELETE FROM setup_module WHERE module='GrupoAwamotos_Fitment'; SET FOREIGN_KEY_CHECKS=1; SHOW TABLES LIKE 'grupoawamotos_fitment%';\" && echo '✅ Tabelas Fitment removidas!'",
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": true
+            },
+            "problemMatcher": []
+        },
+        // ═══════════════════════════════════════════════════════════════
+        // 🔧 MANUTENÇÃO
+        // ═══════════════════════════════════════════════════════════════
+        {
+            "label": "AWA: Ativar Modo Manutencao",
+            "type": "shell",
+            "command": "php bin/magento config:set grupoawamotos_maintenance/general/enabled 1 && php bin/magento config:set grupoawamotos_maintenance/maintenance/show_countdown 0 && php bin/magento cache:clean config full_page && php bin/magento cache:flush && echo '✅ Modo manutenção ATIVADO! Acesse com: ?preview=awa2025'",
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "AWA: Desativar Modo Manutencao",
+            "type": "shell",
+            "command": "php bin/magento config:set grupoawamotos_maintenance/general/enabled 0 && php bin/magento cache:clean config full_page && php bin/magento cache:flush && echo '✅ Modo manutenção DESATIVADO!'",
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": true
+            },
+            "problemMatcher": []
+        },
+        // ═══════════════════════════════════════════════════════════════
+        // 🚀 DEPLOY COMPLETO
+        // ═══════════════════════════════════════════════════════════════
+        {
+            "label": "AWA: Full Deploy Pipeline",
+            "type": "shell",
+            "command": "bash ${workspaceFolder}/deploy-update.sh",
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": true
+            },
+            "problemMatcher": []
+        },
+        // ═══════════════════════════════════════════════════════════════
+        // �🔥 CACHE & COMPILAÇÃO
+        // ═══════════════════════════════════════════════════════════════
+        {
+            "label": "Magento: Cache Clean + Flush",
+            "type": "shell",
+            "command": "php bin/magento cache:clean && php bin/magento cache:flush",
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Magento: Cache Clean",
+            "type": "shell",
+            "command": "php bin/magento cache:clean",
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Magento: DI Compile",
+            "type": "shell",
+            "command": "php bin/magento setup:di:compile",
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Magento: Static Content Deploy (pt_BR)",
+            "type": "shell",
+            "command": "sudo -u www-data php bin/magento setup:static-content:deploy pt_BR en_US -f -t AWA_Custom/ayo_home5_child -t Magento/backend",
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Magento: Setup Upgrade",
+            "type": "shell",
+            "command": "php bin/magento setup:upgrade",
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": true
+            },
+            "problemMatcher": []
+        },
+        // ═══════════════════════════════════════════════════════════════
+        // 🔄 REINDEX
+        // ═══════════════════════════════════════════════════════════════
+        {
+            "label": "Magento: Reindex All",
+            "type": "shell",
+            "command": "php bin/magento indexer:reindex",
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Magento: Reindex Catalog Search",
+            "type": "shell",
+            "command": "php bin/magento indexer:reindex catalogsearch_fulltext",
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Magento: Indexer Status",
+            "type": "shell",
+            "command": "php bin/magento indexer:status",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        // ═══════════════════════════════════════════════════════════════
+        // 🔧 MANUTENÇÃO
+        // ═══════════════════════════════════════════════════════════════
+        {
+            "label": "Magento: Full Rebuild (clean + compile + deploy + flush)",
+            "type": "shell",
+            "command": "rm -rf generated/code/* generated/metadata/* var/view_preprocessed/* pub/static/frontend/* pub/static/adminhtml/* && sudo -u www-data php bin/magento setup:di:compile && sudo -u www-data php bin/magento setup:static-content:deploy pt_BR en_US -f -t AWA_Custom/ayo_home5_child -t Magento/backend && sudo -u www-data php bin/magento cache:flush",
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Magento: Fix Permissions",
+            "type": "shell",
+            "command": "sudo chown -R www-data:www-data generated/ var/ pub/static/ && sudo chmod -R 775 generated/ var/ pub/static/",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Magento: Module Status",
+            "type": "shell",
+            "command": "php bin/magento module:status",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Magento: Deploy Mode Show",
+            "type": "shell",
+            "command": "php bin/magento deploy:mode:show",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        // ═══════════════════════════════════════════════════════════════
+        // 📋 LOGS
+        // ═══════════════════════════════════════════════════════════════
+        {
+            "label": "Magento: Tail System Log",
+            "type": "shell",
+            "command": "tail -100f var/log/system.log",
+            "group": "none",
+            "isBackground": true,
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Magento: Tail Exception Log",
+            "type": "shell",
+            "command": "tail -100f var/log/exception.log",
+            "group": "none",
+            "isBackground": true,
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Magento: Tail All Logs",
+            "type": "shell",
+            "command": "tail -50f var/log/system.log var/log/exception.log",
+            "group": "none",
+            "isBackground": true,
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            },
+            "problemMatcher": []
+        },
+        // ═══════════════════════════════════════════════════════════════
+        // 🐘 PHP
+        // ═══════════════════════════════════════════════════════════════
+        {
+            "label": "PHP: Lint Current File",
+            "type": "shell",
+            "command": "php -l ${file}",
+            "group": "test",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": {
+                "owner": "php-lint",
+                "fileLocation": ["absolute"],
+                "pattern": {
+                    "regexp": "^PHP (?:Parse|Fatal|Warning) error:\\s+(.+) in (.+) on line (\\d+)",
+                    "message": 1,
+                    "file": 2,
+                    "line": 3
+                }
+            }
+        },
+        {
+            "label": "PHP: Lint All Module Files",
+            "type": "shell",
+            "command": "find app/code/GrupoAwamotos -name '*.php' -exec php -l {} \\; 2>&1 | grep -v 'No syntax errors'",
+            "group": "test",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": {
+                "owner": "php-lint",
+                "fileLocation": ["absolute"],
+                "pattern": {
+                    "regexp": "^PHP (?:Parse|Fatal|Warning) error:\\s+(.+) in (.+) on line (\\d+)",
+                    "message": 1,
+                    "file": 2,
+                    "line": 3
+                }
+            }
+        },
+        // ═══════════════════════════════════════════════════════════════
+        // ⚙️  CONFIG (CMS / TEMA)
+        // ═══════════════════════════════════════════════════════════════
+        {
+            "label": "Magento: Config Show cms_home_page",
+            "type": "shell",
+            "command": "php bin/magento config:show web/default/cms_home_page",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Magento: Config Set cms_home_page (Home5)",
+            "type": "shell",
+            "command": "php bin/magento config:set web/default/cms_home_page homepage_ayo_home5",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Magento: Config Show theme_id",
+            "type": "shell",
+            "command": "php bin/magento config:show design/theme/theme_id",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Scripts: Audit Home5 Parity",
+            "type": "shell",
+            "command": "php scripts/audit_home5_parity.php | tee var/log/audit_home5_parity_last.txt",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": true
+            },
+            "problemMatcher": []
+        },
+        // ═══════════════════════════════════════════════════════════════
+        // 🔍 OPENSEARCH
+        // ═══════════════════════════════════════════════════════════════
+        {
+            "label": "OpenSearch: Fix marca_moto mapping",
+            "type": "shell",
+            "command": "bash scripts/fix-opensearch-marca-moto.sh",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "OpenSearch: Check Health",
+            "type": "shell",
+            "command": "curl -s http://127.0.0.1:9200/_cluster/health?pretty",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        // ═══════════════════════════════════════════════════════════════
+        // 🔗 ERP INTEGRATION
+        // ═══════════════════════════════════════════════════════════════
+        {
+            "label": "ERP: Test Connection",
+            "type": "shell",
+            "command": "php bin/magento erp:connection:test",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "ERP: Sync Order Statuses",
+            "type": "shell",
+            "command": "php bin/magento erp:sync:orders --status 2>&1 | tail -100",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "ERP: List Pending Orders",
+            "type": "shell",
+            "command": "php bin/magento erp:sync:orders --pending",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "ERP: Check Logs",
+            "type": "shell",
+            "command": "tail -100 var/log/erp_integration.log 2>/dev/null || echo 'Log file not found'",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "ERP: Recent Logs (Last 30)",
+            "type": "shell",
+            "command": "tail -30 var/log/erp_integration.log 2>/dev/null || echo 'Log file not found'",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "ERP: Check Errors Only",
+            "type": "shell",
+            "command": "grep 'main.ERROR.*ERP' var/log/erp_integration.log | tail -20 || echo 'Nenhum erro ERP encontrado'",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "ERP: Test Info (Produtos/Clientes/Pedidos)",
+            "type": "shell",
+            "command": "sudo -u www-data php scripts/test_erp_info.php 2>&1 && echo '---' && cat var/log/erp_test_info.txt",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "ERP: Criar Pedido Teste",
+            "type": "shell",
+            "command": "sudo -u www-data php scripts/test_erp_create_order.php create 2>&1",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "ERP: Pedidos Pendentes (API Pull)",
+            "type": "shell",
+            "command": "sudo -u www-data php scripts/test_erp_create_order.php pending 2>&1",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "ERP: Teste Completo (create+pending+ack+sync)",
+            "type": "shell",
+            "command": "sudo -u www-data php scripts/test_erp_create_order.php full 2>&1",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "ERP: ACK Pedido 000000015",
+            "type": "shell",
+            "command": "sudo -u www-data php scripts/test_erp_create_order.php ack 000000015 2>&1 && echo '---' && cat var/log/erp_test_ack.txt",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "ERP: Sync Status",
+            "type": "shell",
+            "command": "sudo -u www-data php scripts/test_erp_create_order.php sync 2>&1 && echo '---' && cat var/log/erp_test_sync.txt",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": true
+            },
+            "problemMatcher": []
+        },
+        // ═══════════════════════════════════════════════════════════════
+        // 🌐 GIT
+        // ═══════════════════════════════════════════════════════════════
+        {
+            "label": "Git: Push Current Branch",
+            "type": "shell",
+            "command": "git push origin $(git branch --show-current)",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "ERP: Ler Resultado Info",
+            "type": "shell",
+            "command": "cat var/log/erp_test_info.txt",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": true
+            },
+            "problemMatcher": []
+        }
+        ,
+        // ═══════════════════════════════════════════════════════════════
+        // 🔍 DIAGNÓSTICO RÁPIDO
+        // ═══════════════════════════════════════════════════════════════
+
+        // ── PHP FPM restart (limpa OPcache — obrigatório após editar .php/.phtml) ──
+        {
+            "label": "PHP: Restart FPM (clear OPcache)",
+            "type": "shell",
+            "command": "sudo systemctl restart php8.4-fpm && echo 'PHP-FPM restarted - OPcache cleared'",
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": false
+            },
+            "problemMatcher": []
+        },
+
+        // ── Debug log (var/log/debug.log) ─────────────────────────────────────
+        {
+            "label": "Magento: Tail Debug Log",
+            "type": "shell",
+            "command": "tail -f var/log/debug.log 2>/dev/null || echo 'debug.log not found (enable developer mode)'",
+            "isBackground": true,
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": true
+            },
+            "problemMatcher": []
+        },
+
+        // ── PHP: Lint arquivo XML com DOMDocument ─────────────────────────────
+                {
+            "label": "PHP: Validate XML File",
+            "type": "shell",
+            "command": "xmllint --noout ${file} && echo 'VALID: ${file}' || true",
+            "group": "test",
+            "presentation": { "reveal": "always", "panel": "shared" },
+            "problemMatcher": {
+                "owner": "xmllint",
+                "fileLocation": ["absolute"],
+                "pattern": {
+                    "regexp": "^(.+):(\\d+): (.+)$",
+                    "file": 1, "line": 2, "message": 3
+                }
+            }
+        },
+
+        // ── Git: status + log compacto ────────────────────────────────────────
+        {
+            "label": "Git: Status + Log (10)",
+            "type": "shell",
+            "command": "git status --short && echo '' && git --no-pager log --oneline -10",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            },
+            "problemMatcher": []
+        },
+
+        // ── Git: Diff staged ──────────────────────────────────────────────────
+        {
+            "label": "Git: Diff Staged",
+            "type": "shell",
+            "command": "git --no-pager diff --cached --stat",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+
+        // ── B2B: Listar grupos de clientes (diagnóstico) ──────────────────────
+                {
+            "label": "Magento: List Customer Groups",
+            "type": "shell",
+            "command": "mysql -u magento -p${input:dbPassword} -S /var/run/mysqld/mysqld.sock magento -e 'SELECT customer_group_id, customer_group_code FROM customer_group ORDER BY customer_group_id'",
+            "group": "none",
+            "presentation": { "reveal": "always", "panel": "shared" },
+            "problemMatcher": []
+        },
+
+        // ── Redis: flush cache DB1 + DB2 ─────────────────────────────────────
+        {
+            "label": "Redis: Flush All Cache DBs",
+            "type": "shell",
+            "command": "redis-cli -h ::1 -a 'Aw4R3d1s2026Sec' -n 1 FLUSHDB && redis-cli -h ::1 -a 'Aw4R3d1s2026Sec' -n 2 FLUSHDB && echo 'Redis DB1 (cache) + DB2 (FPC) flushed'",
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        }
+    ]
+}
