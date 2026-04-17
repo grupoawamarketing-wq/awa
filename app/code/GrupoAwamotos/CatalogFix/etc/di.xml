@@ -21,12 +21,7 @@
                 sortOrder="10"/>
     </type>
 
-    <!-- Fix: suppress "Broken reference" INFO log for product.info.media/product.info.main.
-         The vendor container defines before="product.info.main" which creates a sort
-         instruction in ScheduledStructure::elementsToSort. The Ayo theme moves both
-         elements to different containers via <move> (a separate scheduledMoves list),
-         but the original sort instruction is never cleared, causing the broken reference
-         log in developer mode. The actual layout renders correctly. -->
+    <!-- Fix: suppress "Broken reference" INFO log for product.info.media/product.info.main. -->
     <type name="Magento\Framework\View\Layout\ScheduledStructure">
         <plugin name="grupoawamotos_catalogfix_suppress_media_sort_broken_ref"
                 type="GrupoAwamotos\CatalogFix\Plugin\ScheduledStructureSortPlugin"
@@ -83,5 +78,12 @@
                 type="GrupoAwamotos\CatalogFix\Plugin\View\Page\Config\TitleNormalizationPlugin"
                 sortOrder="10"/>
     </type>
+
+    <!-- Fix Magento 2.4.8: ProductRenderSearchResults class missing from vendor.
+         di.xml references Magento\Catalog\Model\ProductRenderSearchResults but the actual
+         class is Magento\Catalog\Model\ProductRenderInfoSearchResults. Override the
+         preference to point to the correct class. -->
+    <preference for="Magento\Catalog\Api\Data\ProductRenderSearchResultsInterface"
+                type="Magento\Catalog\Model\ProductRenderInfoSearchResults"/>
 
 </config>
