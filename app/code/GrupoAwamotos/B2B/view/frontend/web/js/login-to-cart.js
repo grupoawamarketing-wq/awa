@@ -485,11 +485,11 @@ define([
             document.addEventListener('DOMContentLoaded', function () {
                 replaceAddToCartButtons();
                 // Check customer-data shortly after (it loads async)
-                window.setTimeout(checkAndUpdateState, 500);
+                window.setTimeout(checkAndUpdateState, 100);
             });
         } else {
             replaceAddToCartButtons();
-            window.setTimeout(checkAndUpdateState, 500);
+            window.setTimeout(checkAndUpdateState, 100);
         }
 
         // Re-run with throttle on DOM changes
