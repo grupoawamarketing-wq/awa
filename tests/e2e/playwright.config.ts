@@ -10,8 +10,8 @@ export default defineConfig({
   outputDir: path.join(__dirname, 'test-results'),
   snapshotDir: path.join(__dirname, 'snapshots'),
 
-  /* Timeout por teste: 30s (header é renderizado com CSS externo via SW) */
-  timeout: 30_000,
+  /* Timeout por teste: 120s (Magento B2B com KnockoutJS + login assíncrono) */
+  timeout: 120_000,
   expect: {
     timeout: 8_000,
     /* Tolerância para comparação de screenshots: 0.3% de pixels diferentes */
@@ -24,6 +24,9 @@ export default defineConfig({
   fullyParallel: false, // serial para comparações visuais consistentes
   retries: 1,
   workers: 1,
+
+  /* Cleanup garantido ao final — evita processos Chrome órfãos no servidor */
+  globalTeardown: path.join(__dirname, 'helpers/global-teardown.ts'),
 
   reporter: [
     ['html', { outputFolder: path.join(__dirname, 'reports/html'), open: 'never' }],
@@ -43,6 +46,10 @@ export default defineConfig({
     /* Locale BR para renderização correta de fontes/datas */
     locale: 'pt-BR',
     timezoneId: 'America/Sao_Paulo',
+    launchOptions: {
+      executablePath: '/home/deploy/.cache/ms-playwright/chromium_headless_shell-1208/chrome-headless-shell-linux64/chrome-headless-shell',
+      args: ['--no-sandbox', '--disable-dev-shm-usage', '--disable-setuid-sandbox'],
+    },
   },
 
   projects: [

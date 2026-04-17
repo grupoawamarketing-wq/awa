@@ -4,11 +4,15 @@
 import { Page, expect } from '@playwright/test';
 
 /* ── Seletores ─────────────────────────────────────────── */
+const HEADER_ROW_SELECTOR =
+  '.awa-site-header .header .awa-main-header__inner[data-awa-header-row], .awa-site-header .header .wp-header[data-awa-header-row]';
+
 export const SELECTORS = {
-  header:          'header.awa-site-header',
+  header:          '[data-awa-header-content]', // header.awa-site-header tem display:contents (tema profissional), sem bounding box
   topHeader:       '.awa-site-header .top-header',
   headerMain:      '.awa-site-header .header',
-  wpHeader:        '.awa-site-header .header .wp-header[data-awa-header-row]',
+  headerRow:       HEADER_ROW_SELECTOR,
+  wpHeader:        HEADER_ROW_SELECTOR,
   primaryRow:      '.awa-site-header .header .awa-header-primary-row',
   brandCell:       '.awa-site-header .header .awa-header-brand-cell',
   logo:            '.awa-site-header .header .logo',
@@ -38,7 +42,7 @@ export const BREAKPOINTS = {
 export async function waitForHeader(page: Page): Promise<void> {
   // Aguarda DOM carregado
   await page.waitForLoadState('domcontentloaded');
-  // Aguarda o header estar visível
+  // Aguarda o header estar visível — [data-awa-header-content] pois header.awa-site-header tem display:contents
   await page.locator(SELECTORS.header).waitFor({ state: 'visible', timeout: 15_000 });
   // Aguarda estabilidade visual (CSS externo carregado)
   await page.waitForLoadState('networkidle', { timeout: 15_000 }).catch(() => {
