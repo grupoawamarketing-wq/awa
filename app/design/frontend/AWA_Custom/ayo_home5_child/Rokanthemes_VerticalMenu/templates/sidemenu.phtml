@@ -14,6 +14,7 @@ if (!empty($_config['general']['enable'])):
     $limitShow    = (int)($_config['general']['limit_show'] ?? 0);
     $menuId       = 'awa-vertical-menu-' . uniqid('', false);
     $triggerLabel = (string) __('Departamentos');
+    $statusId     = $menuId . '-status';
     $_menu        = $block->getVerticalMenuHtml();
 ?>
 <nav class="navigation verticalmenu side-verticalmenu"
@@ -23,15 +24,31 @@ if (!empty($_config['general']['enable'])):
         class="our_categories title-category-dropdown"
         data-role="awa-vertical-menu-trigger"
         aria-controls="<?= $block->escapeHtmlAttr($menuId) ?>"
+        aria-describedby="<?= $block->escapeHtmlAttr($statusId) ?>"
         aria-expanded="false"
         aria-haspopup="true"
         aria-label="<?= $block->escapeHtmlAttr($triggerLabel) ?>">
-        <span class="vm-icon"><i class="fa fa-bars" aria-hidden="true"></i></span>
-        <span><?= $block->escapeHtml($triggerLabel) ?></span>
+        <span class="vm-icon awa-vmenu-trigger-icon" aria-hidden="true">
+            <span class="awa-hamburger">
+                <span class="awa-hamburger__line"></span>
+                <span class="awa-hamburger__line"></span>
+                <span class="awa-hamburger__line"></span>
+            </span>
+        </span>
+        <span class="awa-vmenu-trigger-text"><?= $block->escapeHtml($triggerLabel) ?></span>
     </button>
+    <span id="<?= $block->escapeHtmlAttr($statusId) ?>"
+        class="awa-sr-only awa-vmenu-status"
+        data-role="awa-vertical-menu-status"
+        aria-live="polite"
+        aria-atomic="true"><?= $block->escapeHtml(__('Menu fechado')) ?></span>
     <ul id="<?= $block->escapeHtmlAttr($menuId) ?>"
         class="togge-menu list-category-dropdown navigation__list"
+        data-role="awa-vertical-menu-panel"
+        data-trigger-label="<?= $block->escapeHtmlAttr($triggerLabel) ?>"
         aria-hidden="true"
+        aria-label="<?= $block->escapeHtmlAttr(__('Lista de categorias')) ?>"
+        tabindex="-1"
         data-limit-show="<?= (int)$limitShow ?>">
         <?= /** @noEscape */ $_menu ?>
         <?php

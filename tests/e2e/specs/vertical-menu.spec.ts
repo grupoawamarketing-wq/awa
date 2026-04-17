@@ -10,7 +10,9 @@ const SEL = {
   trigger: '[data-role="awa-vertical-menu-trigger"]',
   menu: 'nav[data-role="awa-vertical-menu"] > ul.togge-menu.list-category-dropdown',
   firstLevelLink: 'nav[data-role="awa-vertical-menu"] li.level0 > a.level-top',
+  status: '[data-role="awa-vertical-menu-status"]',
   closeButton: '.awa-nav-close',
+  overlay: '.awa-nav-overlay',
   cookieAccept: '.cookie-btn-accept, #btn-cookie-allow, .allow, button:has-text("Permitir cookies")',
 } as const;
 
@@ -62,9 +64,11 @@ test.describe('Vertical Menu', () => {
     const trigger = page.locator(SEL.trigger).first();
     const menu = page.locator(SEL.menu).first();
     const firstLink = page.locator(SEL.firstLevelLink).first();
+    const status = page.locator(SEL.status).first();
 
     await expect(trigger).toBeVisible();
     await expect(trigger).toHaveAttribute('aria-expanded', /false|true/);
+    await expect(status).toContainText(/Menu fechado|Menu aberto/);
 
     await trigger.click();
 
@@ -72,6 +76,7 @@ test.describe('Vertical Menu', () => {
     await expect(menu).toBeVisible();
     await expect(firstLink).toBeVisible();
     await expect(firstLink).not.toHaveText('');
+    await expect(status).toContainText('Menu aberto');
 
     await page.screenshot({
       path: shot(`open-${testInfo.project.name}`),
@@ -106,5 +111,32 @@ test.describe('Vertical Menu', () => {
       await expect(closeButton).not.toBeVisible({ timeout: 5_000 }).catch(() => {});
     }
   });
-});
 
+  test('fecha ao clicar fora do menu ou no overlay mobile', async ({ page }) => {
+    await openPrimaryDrawerIfNeeded(page);
+
+    const trigger = page.locator(SEL.trigger).first();
+    const menu = page.locator(SEL.menu).first();
+    const status = page.locator(SEL.status).first();
+    const viewportWidth = page.viewportSize()?.width ?? 1280;
+
+    await trigger.click();
+    await expect(menu).toBeVisible();
+
+    if (viewportWidth >= 992) {
+      await page.mouse.click(viewportWidth - 20, 140);
+      await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+      await expect(menu).not.toBeVisible();
+      await expect(status).toContainText('Menu fechado');
+      return;
+    }
+
+    const overlay = page.locator(SEL.overlay).first();
+    await expect(overlay).toBeVisible();
+    await overlay.click({ position: { x: 10, y: 10 } });
+
+    await expect.poll(async () =>
+      page.evaluate(() => document.body.classList.contains('nav-open'))
+    ).toBe(false);
+  });
+});

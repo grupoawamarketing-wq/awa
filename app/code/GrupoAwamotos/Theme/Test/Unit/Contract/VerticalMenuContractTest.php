@@ -31,7 +31,10 @@ class VerticalMenuContractTest extends TestCase
         $this->assertStringContainsString('<button type="button"', $contents);
         $this->assertStringContainsString('title-category-dropdown', $contents);
         $this->assertStringContainsString('aria-controls', $contents);
+        $this->assertStringContainsString('aria-describedby', $contents);
         $this->assertStringContainsString('aria-expanded', $contents);
+        $this->assertStringContainsString('data-role="awa-vertical-menu-panel"', $contents);
+        $this->assertStringContainsString('data-role="awa-vertical-menu-status"', $contents);
     }
 
     public function testVerticalMenuInitSyncsAriaHidden(): void
@@ -44,7 +47,10 @@ class VerticalMenuContractTest extends TestCase
         $this->assertNotSame('', $contents);
 
         $this->assertStringContainsString("attr('aria-hidden'", $contents);
-        $this->assertStringContainsString("resolveDesktopAnchorEl", $contents);
+        $this->assertStringContainsString("data-awa-side-inline-flyout", $contents);
+        $this->assertStringContainsString("bindOutsideInteractionHandlers", $contents);
+        $this->assertStringContainsString("getTopLevelKeyboardItems", $contents);
+        $this->assertStringNotContainsString("setProperty('position', 'fixed'", $contents);
     }
 
     public function testRequireJsBootstrapsFocusTrap(): void
@@ -74,5 +80,7 @@ class VerticalMenuContractTest extends TestCase
         $this->assertStringContainsString(':focus-visible', $contents);
         $this->assertStringContainsString('body.nav-open .page-wrapper #awa-category-navigation[data-awa-nav-shell="true"]', $contents);
         $this->assertStringContainsString("content: attr(aria-label)", $contents);
+        $this->assertStringContainsString('.awa-hamburger__line', $contents);
+        $this->assertStringContainsString('.awa-nav-overlay.is-visible', $contents);
     }
 }

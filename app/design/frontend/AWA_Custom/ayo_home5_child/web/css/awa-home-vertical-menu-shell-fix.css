@@ -27,6 +27,24 @@ body .page-wrapper .navigation.verticalmenu.side-verticalmenu {
     to   { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes awa-vml-drawer-slide {
+    from { opacity: 0; transform: translateX(-18px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Screen-reader helper used by the trigger live region. */
+body .page-wrapper .awa-sr-only {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
 /* === Phase 3: Togge-menu container === */
 body .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu,
 body .page-wrapper .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown {
@@ -37,6 +55,12 @@ body .page-wrapper .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.li
     animation: awa-vml-open 0.18s ease forwards !important;
     overflow-x: visible !important;
     overflow-y: visible !important;
+}
+body .page-wrapper .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown[aria-hidden="true"] {
+    pointer-events: none !important;
+}
+body .page-wrapper .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown[aria-hidden="false"] {
+    pointer-events: auto !important;
 }
 /* Safety: cap height to viewport so menu never escapes below fold */
 body .page-wrapper .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown.menu-open {
@@ -73,6 +97,42 @@ body .page-wrapper .our_categories.title-category-dropdown:focus-visible {
 body .page-wrapper .our_categories.title-category-dropdown > span:last-child {
     flex: 1 1 auto !important;
     text-align: left !important;
+}
+body .page-wrapper .our_categories.title-category-dropdown .awa-vmenu-trigger-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 18px !important;
+    height: 18px !important;
+    margin-right: 10px !important;
+}
+body .page-wrapper .our_categories.title-category-dropdown .awa-hamburger {
+    display: inline-flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    gap: 3px !important;
+    width: 18px !important;
+    height: 18px !important;
+}
+body .page-wrapper .our_categories.title-category-dropdown .awa-hamburger__line {
+    display: block !important;
+    width: 18px !important;
+    height: 2px !important;
+    border-radius: 999px !important;
+    background: currentColor !important;
+    transition: transform 0.18s ease, opacity 0.18s ease !important;
+}
+body .page-wrapper .our_categories.title-category-dropdown.is-open .awa-hamburger__line:nth-child(1) {
+    transform: translateY(5px) rotate(45deg) !important;
+}
+body .page-wrapper .our_categories.title-category-dropdown.is-open .awa-hamburger__line:nth-child(2) {
+    opacity: 0 !important;
+}
+body .page-wrapper .our_categories.title-category-dropdown.is-open .awa-hamburger__line:nth-child(3) {
+    transform: translateY(-5px) rotate(-45deg) !important;
+}
+body .page-wrapper .our_categories.title-category-dropdown .awa-vmenu-trigger-text {
+    flex: 1 1 auto !important;
 }
 body .page-wrapper .our_categories.title-category-dropdown:hover {
     background: #a12d30 !important;
@@ -282,12 +342,24 @@ body .page-wrapper .navigation.verticalmenu .level0.submenu .subchildmenu li a:h
 }
 
 @media (min-width: 992px) {
+    body .page-wrapper .menu_left_home1,
+    body .page-wrapper .menu_left_home1 .navigation.verticalmenu.side-verticalmenu,
+    body .page-wrapper .menu_left_home1 .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown {
+        overflow: visible !important;
+    }
+
+    body .page-wrapper .menu_left_home1,
+    body .page-wrapper .menu_left_home1 .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown {
+        max-height: none !important;
+    }
+
     body .page-wrapper .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown {
         min-height: 464px !important;
         width: min(1180px, calc(100vw - 48px)) !important;
         max-width: min(1180px, calc(100vw - 48px)) !important;
         padding: 0 !important;
         box-shadow: 0 16px 32px rgba(0, 0, 0, 0.12) !important;
+        overflow-y: visible !important;
     }
 
     body .page-wrapper .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown > li.expand-category-link,
@@ -312,6 +384,16 @@ body .page-wrapper .navigation.verticalmenu .level0.submenu .subchildmenu li a:h
 
     body .page-wrapper .navigation.verticalmenu .open-children-toggle.navigation__toggle {
         display: none !important;
+    }
+
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu .ui-menu-item.level0.fullwidth:hover > .submenu,
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu .ui-menu-item.level0.staticwidth:hover > .submenu,
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu .ui-menu-item.level0.classic:hover > .submenu,
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu .ui-menu-item.level0.fullwidth:focus-within > .submenu,
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu .ui-menu-item.level0.staticwidth:focus-within > .submenu,
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu .ui-menu-item.level0.classic:focus-within > .submenu {
+        visibility: visible !important;
+        opacity: 1 !important;
     }
 
     body .page-wrapper .navigation.verticalmenu .togge-menu > li.ui-menu-item.level0 > .submenu,
@@ -485,6 +567,7 @@ body .page-wrapper .navigation.verticalmenu .level0.submenu .subchildmenu li a:h
         overflow-x: hidden !important;
         overflow-y: auto !important;
         z-index: 100000 !important;
+        animation: awa-vml-drawer-slide 0.22s ease forwards !important;
     }
 
     body.nav-open .page-wrapper .menu_left_home1,
@@ -506,6 +589,11 @@ body .page-wrapper .navigation.verticalmenu .level0.submenu .subchildmenu li a:h
         margin: 0 !important;
         border-radius: 0 !important;
         box-shadow: 0 1px 0 rgba(17, 24, 39, 0.08) !important;
+    }
+    body.nav-open .page-wrapper .navigation.verticalmenu.side-verticalmenu {
+        position: relative !important;
+        width: 100% !important;
+        max-width: 100% !important;
     }
 
     body.nav-open .page-wrapper .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown {
@@ -612,6 +700,22 @@ body .page-wrapper .navigation.verticalmenu .level0.submenu .subchildmenu li a:h
         outline-offset: -2px !important;
         background: rgba(183, 51, 55, 0.06) !important;
     }
+}
+
+body .awa-nav-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+    background: rgba(17, 24, 39, 0.48) !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transition: opacity 0.2s ease, visibility 0.2s ease !important;
+    z-index: 99990 !important;
+}
+body .awa-nav-overlay.is-visible {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
 }
 
 /* === Phase 11: Scrollbar (vertical only) === */
