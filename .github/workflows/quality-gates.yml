@@ -1,0 +1,45 @@
+name: quality-gates
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  governance-and-syntax:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          fetch-depth: 0
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@44454db4f0199b8b9685a5d763dc37cbf79108e1 # v2.36.0
+        with:
+          php-version: "8.4"
+
+      - name: Composer validate
+        run: composer validate --no-check-all --no-interaction
+
+      - name: Validar sintaxe PHP customizada
+        run: bash ./scripts/ci/lint-custom-php.sh
+
+      - name: Validar arquivos de governanca
+        run: bash ./scripts/ci/validate-governance.sh
+
+      - name: Validar Conventional Commits
+        run: bash ./scripts/ci/check-conventional-commits.sh
+
+      - name: Validar referencias basicas de documentacao
+        run: bash ./scripts/ci/validate-doc-links.sh
+
+      - name: Validar sintaxe shell
+        run: |
+          set -euo pipefail
+          bash -n ./scripts/ci/lint-custom-php.sh
+          bash -n ./scripts/ci/validate-governance.sh
+          bash -n ./scripts/ci/check-conventional-commits.sh
+          bash -n ./scripts/ci/validate-doc-links.sh

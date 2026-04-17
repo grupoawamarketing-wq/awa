@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+if [ "$#" -ne 1 ]; then
+  echo "Uso: commit-msg <arquivo-da-mensagem>"
+  exit 1
+fi
+
+message_file="$1"
+subject="$(head -n 1 "$message_file")"
+pattern='^(feat|fix|refactor|perf|test|docs|build|ci|chore|revert)(\([a-z0-9._/-]+\))?!?: .+'
+
+if [[ ! "$subject" =~ $pattern ]]; then
+  cat <<'EOF'
+Mensagem de commit fora do padrao.
+
+Use:
+  tipo(escopo-opcional): resumo curto
+
+Exemplos:
+  feat(b2b): adiciona validacao de cnpj
+  fix(theme): corrige carregamento de css
+  ci(workflows): adiciona quality gates
+EOF
+  exit 1
+fi
