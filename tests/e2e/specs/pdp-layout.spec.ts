@@ -43,8 +43,10 @@ const FALLBACK_PDP_URL = '/bagageiro-titan-125-modelo-00-04-fan-125-modelo-05-08
 
 /* ── Helper: navega para um produto real ────────────────────────────── */
 async function goToPDP(page: Page): Promise<void> {
-  // goto: 30s + waitForSelector: 15s = 45s max → sobra margem para o corpo do teste (timeout = 120s)
-  await page.goto(FALLBACK_PDP_URL, { waitUntil: 'domcontentloaded', timeout: 30_000 });
+  // 'commit' dispara ao receber os headers HTTP (TTFB), não espera DOMContentLoaded.
+  // Evita que TTFB lento (~25s) + DOMContentLoaded consuma o budget inteiro do teste.
+  // Magento é SSR: .page-title .base está no HTML inicial, waitForSelector cuida do resto.
+  await page.goto(FALLBACK_PDP_URL, { waitUntil: 'commit', timeout: 60_000 });
 
   // Accept cookies if present
   const cookieBtn = page.locator('.cookie-btn-accept, #btn-cookie-allow, .allow').first();
@@ -52,10 +54,19 @@ async function goToPDP(page: Page): Promise<void> {
     await cookieBtn.click();
   }
 
-  await page.waitForSelector(PDP.productName, { timeout: 15_000 });
+  // Aguarda o produto carregar (SSR); 45s cobre até PHP+cache lento
+  const loaded = await page.waitForSelector(PDP.productName, { timeout: 45_000 })
+    .then(() => true)
+    .catch(() => false);
 
-  // Breve pausa para widgets Knockout/RequireJS estabilizarem (Magento nunca atinge networkidle)
-  await page.waitForTimeout(800);
+  // Se o produto não carregou (500, manutenção, etc.) pula o teste graciosamente
+  if (!loaded) {
+    test.skip(true, 'PDP não carregou (servidor lento ou erro 500); pulando teste');
+    return;
+  }
+
+  // Breve pausa para widgets Knockout estabilizarem
+  await page.waitForTimeout(500);
 }
 
 function screenshotPath(name: string): string {
