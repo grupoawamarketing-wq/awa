@@ -2,23 +2,18 @@
 declare(strict_types=1);
 
 /**
- * Social Proof Badges
- * Exibe contador de visualizações, badge "Últimas unidades" e "Mais Vendido"
+ * Social Proof Badges — renderiza dados reais de prova social.
+ * Usa ProductInfo block para obter viewsToday, isBestSeller, isLowStock.
  *
- * @var \Magento\Catalog\Block\Product\View $block
+ * @var \GrupoAwamotos\SocialProof\Block\ProductInfo $block
  * @var \Magento\Framework\Escaper $escaper
  */
 
-$_product = $block->getProduct();
-$viewsToday = (int)$_product->getData('views_today');
-$isBestSeller = (bool)$_product->getData('is_best_seller');
-
-// Verificar estoque
-$extensionAttributes = $_product->getExtensionAttributes();
-$stockItem = $extensionAttributes ? $extensionAttributes->getStockItem() : null;
-$qty = $stockItem ? (int)$stockItem->getQty() : 0;
-$isLowStock = ($qty > 0 && $qty < 10);
-$hasBadges = ($viewsToday > 0) || $isLowStock || $isBestSeller;
+$viewsToday  = $block->getViewsToday();
+$isBestSeller = $block->isBestSeller();
+$isLowStock  = $block->isLowStock();
+$qty         = $block->getStockQty();
+$hasBadges   = ($viewsToday > 0) || $isLowStock || $isBestSeller;
 ?>
 
 <?php if ($hasBadges): ?>
@@ -26,7 +21,7 @@ $hasBadges = ($viewsToday > 0) || $isLowStock || $isBestSeller;
 
     <?php if ($viewsToday > 0): ?>
     <!-- Contador de Visualizações -->
-    <div class="social-proof-badge views-badge" role="note" aria-label="<?= $escaper->escapeHtmlAttr(__('Prova social')) ?>">
+    <div class="social-proof-badge views-badge" role="note" aria-label="<?= $escaper->escapeHtmlAttr(__('%1 visualizações hoje', $viewsToday)) ?>">
         <i class="fa fa-eye" aria-hidden="true"></i>
         <span class="badge-text">
             <strong><?= $escaper->escapeHtml($viewsToday) ?></strong>
@@ -37,7 +32,7 @@ $hasBadges = ($viewsToday > 0) || $isLowStock || $isBestSeller;
 
     <?php if ($isLowStock): ?>
     <!-- Badge Últimas Unidades -->
-    <div class="social-proof-badge low-stock-badge urgency">
+    <div class="social-proof-badge low-stock-badge urgency" role="note" aria-label="<?= $escaper->escapeHtmlAttr(__('Últimas %1 unidades em estoque', $qty)) ?>">
         <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
         <span class="badge-text">
             <strong><?= $escaper->escapeHtml(__('Últimas %1 unidades!', $qty)) ?></strong>
@@ -48,7 +43,7 @@ $hasBadges = ($viewsToday > 0) || $isLowStock || $isBestSeller;
 
     <?php if ($isBestSeller): ?>
     <!-- Badge Mais Vendido -->
-    <div class="social-proof-badge bestseller-badge">
+    <div class="social-proof-badge bestseller-badge" role="note" aria-label="<?= $escaper->escapeHtmlAttr(__('Produto mais vendido')) ?>">
         <i class="fa fa-star" aria-hidden="true"></i>
         <span class="badge-text">
             <strong><?= $escaper->escapeHtml(__('MAIS VENDIDO')) ?></strong>
