@@ -11,24 +11,27 @@ $_helper = $this->helper('Rokanthemes\\VerticalMenu\\Helper\\Data');
 $_config = $_helper->getConfig('verticalmenu');
 
 if (!empty($_config['general']['enable'])):
-    $limitShow = (int)($_config['general']['limit_show'] ?? 0);
-    $menuId    = 'awa-vertical-menu-' . uniqid('', false);
-    $_menu     = $block->getVerticalMenuHtml();
+    $limitShow    = (int)($_config['general']['limit_show'] ?? 0);
+    $menuId       = 'awa-vertical-menu-' . uniqid('', false);
+    $triggerLabel = (string) __('Departamentos');
+    $_menu        = $block->getVerticalMenuHtml();
 ?>
 <nav class="navigation verticalmenu side-verticalmenu"
      aria-label="<?= $block->escapeHtmlAttr(__('Categorias de Produtos')) ?>"
      data-role="awa-vertical-menu">
-    <div class="our_categories title-category-dropdown"
+    <button type="button"
+        class="our_categories title-category-dropdown"
         data-role="awa-vertical-menu-trigger"
         aria-controls="<?= $block->escapeHtmlAttr($menuId) ?>"
         aria-expanded="false"
-        role="button"
-        tabindex="0">
+        aria-haspopup="true"
+        aria-label="<?= $block->escapeHtmlAttr($triggerLabel) ?>">
         <span class="vm-icon"><i class="fa fa-bars" aria-hidden="true"></i></span>
-        <span><?= $block->escapeHtml('Departamentos') ?></span>
-    </div>
+        <span><?= $block->escapeHtml($triggerLabel) ?></span>
+    </button>
     <ul id="<?= $block->escapeHtmlAttr($menuId) ?>"
         class="togge-menu list-category-dropdown navigation__list"
+        aria-hidden="true"
         data-limit-show="<?= (int)$limitShow ?>">
         <?= /** @noEscape */ $_menu ?>
         <?php

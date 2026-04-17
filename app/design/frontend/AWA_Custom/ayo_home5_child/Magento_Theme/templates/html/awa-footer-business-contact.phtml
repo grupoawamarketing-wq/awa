@@ -3,11 +3,19 @@ declare(strict_types=1);
 
 /**
  * @var \Magento\Framework\View\Element\Template $block
- * @var \GrupoAwamotos\Theme\ViewModel\ContactInfo $contactInfo
+ * @var \GrupoAwamotos\Theme\ViewModel\ContactInfo|\GrupoAwamotos\Theme\ViewModel\FooterData $contactInfo
  */
 $contactInfo = $block->getData('view_model');
+
+$whatsAppUrl = method_exists($contactInfo, 'getWhatsAppUrl') ? (string) $contactInfo->getWhatsAppUrl() : '';
+$phoneLabel = method_exists($contactInfo, 'getPhone') ? trim((string) $contactInfo->getPhone()) : '';
+$phoneUrl = method_exists($contactInfo, 'getPhoneUrl') ? (string) $contactInfo->getPhoneUrl() : '';
+$emailLabel = method_exists($contactInfo, 'getEmail') ? trim((string) $contactInfo->getEmail()) : '';
+$emailUrl = method_exists($contactInfo, 'getEmailUrl') ? (string) $contactInfo->getEmailUrl() : '';
+
+$hasAnyContact = $whatsAppUrl !== '' || $phoneLabel !== '' || $emailLabel !== '';
 ?>
-<?php if ($contactInfo instanceof \GrupoAwamotos\Theme\ViewModel\ContactInfo && $contactInfo->hasAnyContact()): ?>
+<?php if ($hasAnyContact): ?>
 <section class="awa-footer-business-contact" aria-labelledby="awa-footer-business-contact-title">
     <div class="container">
         <div class="awa-footer-business-contact__shell">
@@ -21,9 +29,9 @@ $contactInfo = $block->getData('view_model');
                 </p>
             </div>
             <div class="awa-footer-business-contact__actions">
-                <?php if ($contactInfo->hasWhatsApp()): ?>
+                <?php if ($whatsAppUrl !== ''): ?>
                     <a class="awa-footer-business-contact__action awa-footer-business-contact__action--primary"
-                       href="<?= $block->escapeUrl($contactInfo->getWhatsAppUrl()) ?>"
+                       href="<?= $block->escapeUrl($whatsAppUrl) ?>"
                        target="_blank"
                        rel="noopener noreferrer"
                        aria-label="<?= $block->escapeHtmlAttr(__('Abrir WhatsApp comercial')) ?>">
@@ -34,24 +42,24 @@ $contactInfo = $block->getData('view_model');
                         </span>
                     </a>
                 <?php endif; ?>
-                <?php if ($contactInfo->hasPhone()): ?>
+                <?php if ($phoneLabel !== ''): ?>
                     <a class="awa-footer-business-contact__action"
-                       href="<?= $block->escapeUrl($contactInfo->getPhoneUrl()) ?>"
-                       aria-label="<?= $block->escapeHtmlAttr(__('Ligar para %1', $contactInfo->getPhone())) ?>">
+                       href="<?= $block->escapeUrl($phoneUrl) ?>"
+                       aria-label="<?= $block->escapeHtmlAttr(__('Ligar para %1', $phoneLabel)) ?>">
                         <span class="awa-footer-business-contact__action-icon" aria-hidden="true"><i class="fa fa-phone"></i></span>
                         <span class="awa-footer-business-contact__action-copy">
-                            <strong><?= $block->escapeHtml($contactInfo->getPhone()) ?></strong>
+                            <strong><?= $block->escapeHtml($phoneLabel) ?></strong>
                             <small><?= $block->escapeHtml(__('Atendimento por telefone')) ?></small>
                         </span>
                     </a>
                 <?php endif; ?>
-                <?php if ($contactInfo->hasEmail()): ?>
+                <?php if ($emailLabel !== ''): ?>
                     <a class="awa-footer-business-contact__action"
-                       href="<?= $block->escapeUrl($contactInfo->getEmailUrl()) ?>"
-                       aria-label="<?= $block->escapeHtmlAttr(__('Enviar e-mail para %1', $contactInfo->getEmail())) ?>">
+                       href="<?= $block->escapeUrl($emailUrl) ?>"
+                       aria-label="<?= $block->escapeHtmlAttr(__('Enviar e-mail para %1', $emailLabel)) ?>">
                         <span class="awa-footer-business-contact__action-icon" aria-hidden="true"><i class="fa fa-envelope-o"></i></span>
                         <span class="awa-footer-business-contact__action-copy">
-                            <strong><?= $block->escapeHtml($contactInfo->getEmail()) ?></strong>
+                            <strong><?= $block->escapeHtml($emailLabel) ?></strong>
                             <small><?= $block->escapeHtml(__('Canal para compras corporativas')) ?></small>
                         </span>
                     </a>

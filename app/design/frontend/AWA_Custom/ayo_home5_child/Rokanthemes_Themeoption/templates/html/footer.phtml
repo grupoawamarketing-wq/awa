@@ -76,6 +76,13 @@ $logoBlock = $block->getLayout() ? $block->getLayout()->getBlock('logo') : null;
 $logoSrc   = $logoBlock ? $logoBlock->getLogoSrc() : '';
 $logoAlt   = $logoBlock ? $logoBlock->getLogoAlt() : 'AWA Motos';
 
+$footerPhoneLabel = $viewModel ? trim((string) $viewModel->getPhone()) : '';
+$footerPhoneUrl = $viewModel ? trim((string) $viewModel->getPhoneUrl()) : '';
+$footerEmailLabel = $viewModel ? trim((string) $viewModel->getEmail()) : '';
+$footerEmailUrl = $viewModel ? trim((string) $viewModel->getEmailUrl()) : '';
+$footerWhatsAppUrl = $viewModel ? trim((string) $viewModel->getWhatsAppUrl()) : '';
+$showFooterBusinessContact = $footerPhoneLabel !== '' || $footerEmailLabel !== '' || $footerWhatsAppUrl !== '';
+
 $brandHtml = trim((string) $block->getChildHtml('footer_brand_list'));
 ?>
 <div class="page_footer awa-footer--dark<?= $escaper->escapeHtmlAttr($footerExpStateClass . $footerExpVariantClass) ?>"
@@ -186,6 +193,60 @@ $brandHtml = trim((string) $block->getChildHtml('footer_brand_list'));
                 <p class="awa-footer-tags__label"><?= $escaper->escapeHtml(__('Categorias Populares:')) ?></p>
                 <div class="awa-footer-tags__cloud">
                     <?= /* @noEscape */ $footerTagsHtml ?>
+                </div>
+            </div>
+        </div>
+    </section>
+    <?php endif; ?>
+    <?php if ($showFooterBusinessContact): ?>
+    <section class="awa-footer-business-contact" aria-labelledby="awa-footer-business-contact-title">
+        <div class="container">
+            <div class="awa-footer-business-contact__shell">
+                <div class="awa-footer-business-contact__intro">
+                    <span class="awa-footer-business-contact__eyebrow"><?= $escaper->escapeHtml(__('Canal Comercial')) ?></span>
+                    <h4 id="awa-footer-business-contact-title" class="awa-footer-business-contact__title">
+                        <?= $escaper->escapeHtml(__('Atendimento direto para cotação, recompra e atacado')) ?>
+                    </h4>
+                    <p class="awa-footer-business-contact__copy">
+                        <?= $escaper->escapeHtml(__('Use os canais abaixo para falar com a equipe da AWA Motos e acelerar pedidos, dúvidas de estoque e negociações comerciais.')) ?>
+                    </p>
+                </div>
+                <div class="awa-footer-business-contact__actions">
+                    <?php if ($footerWhatsAppUrl !== ''): ?>
+                    <a class="awa-footer-business-contact__action awa-footer-business-contact__action--primary"
+                       href="<?= $escaper->escapeUrl($footerWhatsAppUrl) ?>"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       aria-label="<?= $escaper->escapeHtmlAttr(__('Abrir WhatsApp comercial')) ?>">
+                        <span class="awa-footer-business-contact__action-icon" aria-hidden="true"><i class="fa fa-whatsapp"></i></span>
+                        <span class="awa-footer-business-contact__action-copy">
+                            <strong><?= $escaper->escapeHtml(__('WhatsApp Comercial')) ?></strong>
+                            <small><?= $escaper->escapeHtml(__('Resposta rápida para pedido e cotação')) ?></small>
+                        </span>
+                    </a>
+                    <?php endif; ?>
+                    <?php if ($footerPhoneLabel !== ''): ?>
+                    <a class="awa-footer-business-contact__action"
+                       href="<?= $escaper->escapeUrl($footerPhoneUrl) ?>"
+                       aria-label="<?= $escaper->escapeHtmlAttr(__('Ligar para %1', $footerPhoneLabel)) ?>">
+                        <span class="awa-footer-business-contact__action-icon" aria-hidden="true"><i class="fa fa-phone"></i></span>
+                        <span class="awa-footer-business-contact__action-copy">
+                            <strong><?= $escaper->escapeHtml($footerPhoneLabel) ?></strong>
+                            <small><?= $escaper->escapeHtml(__('Atendimento por telefone')) ?></small>
+                        </span>
+                    </a>
+                    <?php endif; ?>
+                    <?php if ($footerEmailLabel !== ''): ?>
+                    <a class="awa-footer-business-contact__action"
+                       href="<?= $escaper->escapeUrl($footerEmailUrl) ?>"
+                       aria-label="<?= $escaper->escapeHtmlAttr(__('Enviar e-mail para %1', $footerEmailLabel)) ?>">
+                        <span class="awa-footer-business-contact__action-icon" aria-hidden="true"><i class="fa fa-envelope-o"></i></span>
+                        <span class="awa-footer-business-contact__action-copy">
+                            <strong><?= $escaper->escapeHtml($footerEmailLabel) ?></strong>
+                            <small><?= $escaper->escapeHtml(__('Canal para compras corporativas')) ?></small>
+                        </span>
+                    </a>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>

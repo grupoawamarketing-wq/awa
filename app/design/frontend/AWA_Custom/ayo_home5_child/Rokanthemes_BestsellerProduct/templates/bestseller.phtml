@@ -27,6 +27,7 @@ $templateType = \Magento\Catalog\Block\Product\ReviewRendererInterface::SHORT_VI
         <div class="swiper products-swiper products-swiper--bestseller">
             <div class="swiper-wrapper">
                 <?php $i = 0; foreach ($_productCollection as $_product): if ($i >= 8) { break; } ?>
+                <?php $isPriorityCard = $i < 4; ?>
                 <div class="swiper-slide">
                 <div class="product-item item-product" data-product-id="<?php echo (int) $_product->getId(); ?>">
                     <?php
@@ -39,11 +40,20 @@ $templateType = \Magento\Catalog\Block\Product\ReviewRendererInterface::SHORT_VI
                            aria-label="<?php echo $block->escapeHtmlAttr($_product->getName()); ?>"
                            tabindex="-1">
                             <span class="first-thumb">
-                                <?php /* Carousel images always below-fold — lazy load */
+                                <?php
                                 $_imgHtml = $productImage->toHtml();
-                                $_imgHtml = str_replace('loading="eager"', 'loading="lazy"', $_imgHtml);
-                                if (strpos($_imgHtml, 'loading=') === false) {
-                                    $_imgHtml = str_replace('<img ', '<img loading="lazy" decoding="async" ', $_imgHtml);
+                                if ($isPriorityCard) {
+                                    $_imgHtml = str_replace('loading="lazy"', 'loading="eager"', $_imgHtml);
+                                    if (strpos($_imgHtml, 'loading=') === false) {
+                                        $_imgHtml = str_replace('<img ', '<img loading="eager" fetchpriority="high" decoding="sync" ', $_imgHtml);
+                                    } else {
+                                        $_imgHtml = str_replace('<img ', '<img fetchpriority="high" decoding="sync" ', $_imgHtml);
+                                    }
+                                } else {
+                                    $_imgHtml = str_replace('loading="eager"', 'loading="lazy"', $_imgHtml);
+                                    if (strpos($_imgHtml, 'loading=') === false) {
+                                        $_imgHtml = str_replace('<img ', '<img loading="lazy" decoding="async" ', $_imgHtml);
+                                    }
                                 }
                                 echo $_imgHtml; ?>
                             </span>

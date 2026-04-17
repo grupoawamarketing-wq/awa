@@ -93,7 +93,7 @@ $bauletosHtml     = $makeCatProductCarousel('46,75,76,77');
 $retrovisoresHtml = $makeCatProductCarousel('89,51,81,79,42,50');
 $bagageirosHtml   = $makeCatProductCarousel('67');
 $guidoesHtml      = $makeCatProductCarousel('44,85,120');
-$carouselIconSize = 86;
+$carouselIconSize = 80;
 $buildCarouselImage = function (string $asset, string $alt) use ($carouselIconSize): string {
 	$webpAsset = str_replace('.png', '.webp', $asset);
 	return '<picture>'
@@ -108,7 +108,11 @@ $buildCarouselImage = function (string $asset, string $alt) use ($carouselIconSi
 		. $carouselIconSize
 		. '" height="'
 		. $carouselIconSize
-		. '" />'
+		. '" style="display:block;width:auto;height:'
+		. $carouselIconSize
+		. 'px;min-width:0;max-width:100%;min-height:0;max-height:'
+		. $carouselIconSize
+		. 'px;object-fit:contain;background:transparent;border:0;box-shadow:none;filter:none;" />'
 		. '</picture>';
 };
 
@@ -227,13 +231,14 @@ if ($benefitsHtml !== '' && strpos($benefitsHtml, 'velaServicesInner--home5') ==
 		<div class="awa-category-carousel__viewport">
 			<div class="awa-category-carousel__track" id="awa-cat-carousel" data-count="<?php echo count($categoryCarouselCategories); ?>">
 				<?php foreach ($categoryCarouselCategories as $idx => $cat): ?>
-				<a href="<?php echo $this->escapeUrl($cat['url'] ?? '#'); ?>" class="awa-category-carousel__item" title="<?php echo $this->escapeHtmlAttr($cat['name']); ?>" style="--item-index: <?php echo (int) $idx; ?>">
-					<div class="awa-category-carousel__icon">
+				<?php $isGuidoesCard = ($cat['url'] ?? '') === 'guidoes.html' || ($cat['name'] ?? '') === 'Guidões'; ?>
+				<a href="<?php echo $this->escapeUrl($cat['url'] ?? '#'); ?>" class="awa-category-carousel__item" title="<?php echo $this->escapeHtmlAttr($cat['name']); ?>" style="--item-index: <?php echo (int) $idx; ?>;width:164px;min-height:<?php echo $isGuidoesCard ? '190px' : '212px'; ?>;height:<?php echo $isGuidoesCard ? '190px' : '212px'; ?>;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:10px;padding:<?php echo $isGuidoesCard ? '8px' : '14px 14px 16px'; ?>;background:linear-gradient(180deg,#fcfcfd 0%,#f7f8fa 100%);border:1px solid #dde3ea;border-radius:14px;box-shadow:0 8px 24px rgba(16,24,40,.07);text-decoration:none;">
+					<div class="awa-category-carousel__icon" style="width:100%;min-height:128px;display:grid;place-items:center;padding:10px;background:transparent;border:0;border-radius:12px;box-shadow:none;line-height:0;box-sizing:border-box;flex:0 0 auto;">
 						<?php echo /* @noEscape */ $cat['icon']; ?>
 					</div>
-					<span class="awa-category-carousel__label"><?php echo $this->escapeHtml($cat['name']); ?></span>
+					<span class="awa-category-carousel__label" style="margin-top:2px;color:#4b5563;font-size:<?php echo $isGuidoesCard ? '11px' : '1rem'; ?>;font-weight:700;line-height:1.2;letter-spacing:-.01em;text-align:center;"><?php echo $this->escapeHtml($cat['name']); ?></span>
 					<?php if (!empty($cat['count'])): ?>
-					<span class="awa-category-carousel__count"><?php echo (int) $cat['count']; ?> <?php echo $this->escapeHtml(__((int) $cat['count'] === 1 ? 'produto' : 'produtos')); ?></span>
+					<span class="awa-category-carousel__count" style="display:none;"><?php echo (int) $cat['count']; ?> <?php echo $this->escapeHtml(__((int) $cat['count'] === 1 ? 'produto' : 'produtos')); ?></span>
 					<?php endif; ?>
 				</a>
 				<?php endforeach; ?>
