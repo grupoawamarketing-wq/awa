@@ -43,7 +43,8 @@ const FALLBACK_PDP_URL = '/bagageiro-titan-125-modelo-00-04-fan-125-modelo-05-08
 
 /* ── Helper: navega para um produto real ────────────────────────────── */
 async function goToPDP(page: Page): Promise<void> {
-  await page.goto(FALLBACK_PDP_URL, { waitUntil: 'domcontentloaded', timeout: 45_000 });
+  // goto: 30s + waitForSelector: 15s = 45s max → sobra margem para o corpo do teste (timeout = 120s)
+  await page.goto(FALLBACK_PDP_URL, { waitUntil: 'domcontentloaded', timeout: 30_000 });
 
   // Accept cookies if present
   const cookieBtn = page.locator('.cookie-btn-accept, #btn-cookie-allow, .allow').first();
@@ -51,7 +52,10 @@ async function goToPDP(page: Page): Promise<void> {
     await cookieBtn.click();
   }
 
-  await page.waitForSelector(PDP.productName, { timeout: 45_000 });
+  await page.waitForSelector(PDP.productName, { timeout: 15_000 });
+
+  // Aguarda widgets JS (Knockout, RequireJS) estabilizarem — essencial em mobile
+  await page.waitForLoadState('networkidle', { timeout: 10_000 }).catch(() => {});
 }
 
 function screenshotPath(name: string): string {
@@ -72,7 +76,7 @@ test.describe('PDP — Elementos essenciais', () => {
     // wait for at least one li to appear before asserting count
     const items = page.locator(`${PDP.breadcrumb} li, ${PDP.breadcrumb} .item`);
     await items.first().waitFor({ state: 'attached', timeout: 10_000 }).catch(() => {});
-    const count = await items.count();
+    const count = await items.count().catch(() => 0);
     expect(count, 'Breadcrumb deve ter pelo menos 1 item').toBeGreaterThan(0);
   });
 
