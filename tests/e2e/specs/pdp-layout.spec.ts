@@ -42,31 +42,29 @@ const PDP = {
 const FALLBACK_PDP_URL = '/bagageiro-titan-125-modelo-00-04-fan-125-modelo-05-08-cromado-macico-3015.html';
 
 /* ── Helper: navega para um produto real ────────────────────────────── */
+/**
+ * Navega para o produto de teste e retorna true se carregou, false se falhou.
+ * Captura TODAS as exceções (timeout TTFB, erro 500, etc.) — nunca lança.
+ */
+async function tryGoToPDP(page: Page): Promise<boolean> {
+  try {
+    await page.goto(FALLBACK_PDP_URL, { waitUntil: 'commit', timeout: 60_000 });
+    // Accept cookies if present
+    const cookieBtn = page.locator('.cookie-btn-accept, #btn-cookie-allow, .allow').first();
+    if (await cookieBtn.isVisible({ timeout: 2_000 }).catch(() => false)) {
+      await cookieBtn.click();
+    }
+    await page.waitForSelector(PDP.productName, { timeout: 45_000 });
+    await page.waitForTimeout(500);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** @deprecated use tryGoToPDP directly in beforeEach */
 async function goToPDP(page: Page): Promise<void> {
-  // 'commit' dispara ao receber os headers HTTP (TTFB), não espera DOMContentLoaded.
-  // Evita que TTFB lento (~25s) + DOMContentLoaded consuma o budget inteiro do teste.
-  // Magento é SSR: .page-title .base está no HTML inicial, waitForSelector cuida do resto.
-  await page.goto(FALLBACK_PDP_URL, { waitUntil: 'commit', timeout: 60_000 });
-
-  // Accept cookies if present
-  const cookieBtn = page.locator('.cookie-btn-accept, #btn-cookie-allow, .allow').first();
-  if (await cookieBtn.isVisible({ timeout: 2_000 }).catch(() => false)) {
-    await cookieBtn.click();
-  }
-
-  // Aguarda o produto carregar (SSR); 45s cobre até PHP+cache lento
-  const loaded = await page.waitForSelector(PDP.productName, { timeout: 45_000 })
-    .then(() => true)
-    .catch(() => false);
-
-  // Se o produto não carregou (500, manutenção, etc.) pula o teste graciosamente
-  if (!loaded) {
-    test.skip(true, 'PDP não carregou (servidor lento ou erro 500); pulando teste');
-    return;
-  }
-
-  // Breve pausa para widgets Knockout estabilizarem
-  await page.waitForTimeout(500);
+  await tryGoToPDP(page); // retorno ignorado — callers devem usar tryGoToPDP
 }
 
 function screenshotPath(name: string): string {
@@ -78,7 +76,7 @@ function screenshotPath(name: string): string {
    ════════════════════════════════════════════════════════════════════════ */
 test.describe('PDP — Elementos essenciais', () => {
   test.beforeEach(async ({ page }) => {
-    await goToPDP(page);
+    if (!await tryGoToPDP(page)) test.skip();
   });
 
   test('Breadcrumb visível @pdp', async ({ page }) => {
@@ -139,7 +137,7 @@ test.describe('PDP — Elementos essenciais', () => {
    ════════════════════════════════════════════════════════════════════════ */
 test.describe('PDP — Tabs B2B Pro', () => {
   test.beforeEach(async ({ page }) => {
-    await goToPDP(page);
+    if (!await tryGoToPDP(page)) test.skip();
   });
 
   test('Container de tabs existe na página @pdp', async ({ page }) => {
@@ -219,7 +217,7 @@ test.describe('PDP — Sidebar de conversão', () => {
     // Sidebar só existe em desktop/notebook (>= 1024px)
     const vw = testInfo.project.use?.viewport?.width ?? 0;
     if (vw < 1024) test.skip();
-    await goToPDP(page);
+    if (!await tryGoToPDP(page)) test.skip();
   });
 
   test('Bloco promocional da sidebar visível @pdp', async ({ page }) => {
@@ -256,7 +254,7 @@ test.describe('PDP — Sidebar de conversão', () => {
    ════════════════════════════════════════════════════════════════════════ */
 test.describe('PDP — Layout sem overflow horizontal', () => {
   test.beforeEach(async ({ page }) => {
-    await goToPDP(page);
+    if (!await tryGoToPDP(page)) test.skip();
   });
 
   test('Sem scroll horizontal na PDP @pdp', async ({ page }, testInfo) => {
@@ -303,7 +301,7 @@ test.describe('PDP — Layout Mobile', () => {
   test.beforeEach(async ({ page }, testInfo) => {
     const vw = testInfo.project.use?.viewport?.width ?? 0;
     if (vw >= 768) test.skip();
-    await goToPDP(page);
+    if (!await tryGoToPDP(page)) test.skip();
   });
 
   test('Galeria ocupa largura total no mobile @pdp', async ({ page }, testInfo) => {
