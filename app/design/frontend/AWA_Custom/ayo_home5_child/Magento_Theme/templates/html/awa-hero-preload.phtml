@@ -2,50 +2,17 @@
 declare(strict_types=1);
 
 /**
- * AWA — Preload da imagem hero (LCP) da homepage.
+ * AWA — Hero LCP Preload (DESATIVADO)
  *
- * Carregado APENAS na homepage via cms_index_index.xml (head.additional).
+ * O preload dinâmico agora é gerado diretamente pelo template do slider:
+ * Rokanthemes_SlideBanner/templates/slider.phtml
  *
- * Estratégia: rel="preload" as="image" fetchpriority="high" com imagesrcset
- * responsivo → browser prioriza download da imagem correta antes de parsear
- * o OWL Carousel (que usa data-src lazy-load), resolvendo o LCP delay.
+ * Isso garante que o preload sempre corresponda à imagem real do primeiro slide,
+ * mesmo quando os slides são alterados no admin (Rokanthemes → Slide Banner).
  *
- * IMPORTANTE: Atualizar os paths se os slides da homepage forem alterados no admin.
- * Slides configurados em: Admin → Rokanthemes → Slide Banner.
- * --
- * Desktop (≥768px): slider_005_1.jpg   — 1920px × 760px  ~592KB
- * Mobile  (<768px):  slider_005_mobile.jpg — 768px × ~380px ~181KB
+ * O CSS crítico para override do OWL Carousel display:none também está no slider.phtml.
+ *
+ * @see app/design/frontend/AWA_Custom/ayo_home5_child/Rokanthemes_SlideBanner/templates/slider.phtml
  */
 
-/** @var \Magento\Framework\View\Element\Template $block */
-
-// Constrói a URL base de media a partir da URL da loja
-// (evita hardcode do domínio para portabilidade entre envs)
-$baseUrl   = rtrim((string) $block->getUrl('', ['_nosid' => true, '_secure' => true]), '/');
-$mediaPath = '/media/slidebanner/s/l/';
-
-$desktopWebp = $block->escapeUrl($baseUrl . $mediaPath . 'slider_005_1.webp');
-$mobileWebp  = $block->escapeUrl($baseUrl . $mediaPath . 'slider_005_mobile.webp');
-$desktopSrc  = $block->escapeUrl($baseUrl . $mediaPath . 'slider_005_1.jpg');
-$mobileSrc   = $block->escapeUrl($baseUrl . $mediaPath . 'slider_005_mobile.jpg');
-?>
-<!--
-    AWA Hero LCP Preload — homepage only
-    Dois <link> separados por media query (em vez de imagesrcset + imagesizes) para
-    evitar o warning "preloaded but not used" causado por incompatibilidade de
-    descritores de largura entre o preload e os <source> do <picture> no slider.
-    type="image/webp": apenas browsers com suporte a WebP farão este preload (~97%).
-    fetchpriority=high: sinal explícito para o browser priorizar o LCP.
--->
-<link rel="preload"
-      as="image"
-      type="image/webp"
-      fetchpriority="high"
-      media="(min-width: 768px)"
-      href="<?= /* @noEscape */ $desktopWebp ?>"/>
-<link rel="preload"
-      as="image"
-      type="image/webp"
-      fetchpriority="high"
-      media="(max-width: 767px)"
-      href="<?= /* @noEscape */ $mobileWebp ?>"/>
+// Nenhum output — preload movido para slider.phtml

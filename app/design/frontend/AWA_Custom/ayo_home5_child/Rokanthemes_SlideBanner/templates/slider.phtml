@@ -112,6 +112,63 @@ if ($banners = $block->getBannerCollection()):
         return $baseScheme . '://' . $baseHost . $path . $query . $fragment;
     };
 ?>
+<?php
+/**
+ * LCP Fix: Critical CSS to show first hero slide before OWL Carousel JS loads.
+ *
+ * OWL v2 sets .owl-carousel { display: none } in owl.carousel.min.css and only
+ * reveals the carousel after JS adds .owl-loaded. This delays LCP to after JS
+ * execution, causing Lighthouse to report NO_LCP.
+ *
+ * This inline <style> overrides that rule for the first slide only, so the browser
+ * can paint the hero image from the server-rendered HTML immediately.
+ *
+ * Dynamic <link rel=preload> emitted for the actual first-slide image, replacing
+ * the hardcoded preload in awa-hero-preload.phtml.
+ */
+$_lcpDesktopWebp = '';
+$_lcpMobileWebp  = '';
+if (!empty($desktopSlides)) {
+    $_tmpImg = $block->getImageElement($desktopSlides[0]['image'], '', true);
+    if (preg_match('/src="([^"]+)"/', $_tmpImg, $_dm)) {
+        $_lcpDesktopWebp = preg_replace('/\.(jpg|jpeg|png)$/i', '.webp', $_dm[1]);
+    }
+}
+if (!empty($mobileSlides)) {
+    $_tmpImg = $block->getImageElementMobile($mobileSlides[0]['image'], '', true);
+    if (preg_match('/src="([^"]+)"/', $_tmpImg, $_mm)) {
+        $_lcpMobileWebp = preg_replace('/\.(jpg|jpeg|png)$/i', '.webp', $_mm[1]);
+    }
+}
+?>
+<?php if ($_lcpDesktopWebp !== ''): ?>
+<link rel="preload" as="image" type="image/webp" fetchpriority="high"
+      media="(min-width: 768px)" href="<?= /* @noEscape */ $block->escapeUrl($_lcpDesktopWebp) ?>"/>
+<?php endif; ?>
+<?php if ($_lcpMobileWebp !== '' && $_lcpMobileWebp !== $_lcpDesktopWebp): ?>
+<link rel="preload" as="image" type="image/webp" fetchpriority="high"
+      media="(max-width: 767px)" href="<?= /* @noEscape */ $block->escapeUrl($_lcpMobileWebp) ?>"/>
+<?php endif; ?>
+<style>
+/* LCP Fix: Show first hero slide before OWL Carousel JS initializes.
+   Without this, .owl-carousel { display:none } hides the hero image
+   until JS runs, blocking the Largest Contentful Paint. */
+.wrapper_slider .owl-carousel:not(.owl-loaded) {
+    display: block !important;
+    overflow: hidden;
+}
+.wrapper_slider .owl-carousel:not(.owl-loaded) > .banner_item + .banner_item {
+    display: none;
+}
+.wrapper_slider .owl-carousel:not(.owl-loaded) > .banner_item:first-child {
+    display: block;
+}
+.wrapper_slider .owl-carousel:not(.owl-loaded) > .banner_item:first-child img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+</style>
 <!-- Slider desktop (oculto no mobile via Bootstrap .hidden-xs) -->
 <div class="wrapper_slider hidden-xs slider_<?php echo (int) $sliderId; ?>">
     <div class="owl owl-carousel">
