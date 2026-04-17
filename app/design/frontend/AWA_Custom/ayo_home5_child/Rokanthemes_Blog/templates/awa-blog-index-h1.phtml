@@ -1,0 +1,21 @@
+<?php declare(strict_types=1); ?>
+<?php
+/**
+ * AWA Blog — H1 para a página índice do blog.
+ * getPageTitle() retorna "Blog AWA Motos | AWA Motos" (sufixo adicionado pela config
+ * design/head/title_suffix). Removemos o sufixo " | ..." para obter só o heading limpo.
+ * @var \Magento\Theme\Block\Html\Title $block
+ */
+$fullTitle = trim((string) $block->getPageTitle());
+if ($fullTitle === '') {
+    return;
+}
+// Strip " | STORE_NAME" suffix (design/head/title_suffix config value)
+$h1 = trim((string) preg_replace('/\s*\|[^|]+$/', '', $fullTitle));
+if ($h1 === '') {
+    $h1 = $fullTitle;
+}
+?>
+<div class="page-title-wrapper awa-blog-index-title">
+    <h1 class="page-title"><span class="base"><?= $block->escapeHtml($h1) ?></span></h1>
+</div>

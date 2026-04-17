@@ -1,0 +1,36 @@
+<?php declare(strict_types=1); ?>
+<?php
+/**
+ * AWA Blog — post/view.phtml override
+ * Adiciona H1 com o título do post (original não renderiza o título em nenhum heading).
+ * @var \Rokanthemes\Blog\Block\Post\View $block
+ */
+$_post = $this->getPost();
+$_postUrl = $_post->getPostUrl();
+$_postNameStripped = $block->stripTags($_post->getTitle(), null, true);
+?>
+<div class="post-view">
+    <div class="post-holder post-holder-<?= (int) $_post->getId() ?>">
+        <div class="post-images">
+            <a href="<?= $block->escapeUrl($_postUrl) ?>">
+                <img src="<?= $block->escapeUrl($this->getMediaFolder() . $_post->getThumbnailimage()) ?>"
+                     alt="<?= $block->escapeHtmlAttr($_postNameStripped) ?>"
+                     loading="lazy"/>
+            </a>
+            <?= $this->getInfoHtml() ?>
+        </div>
+
+        <h1 class="post-title"><?= $block->escapeHtml($_post->getTitle()) ?></h1>
+
+        <div class="post-content">
+            <div class="post-description">
+                <?= $block->getContent() ?>
+                <div class="clear"></div>
+            </div>
+        </div>
+
+        <div class="post-bottom">
+            <?= $this->getChildHtml('blog.post.bottom') ?>
+        </div>
+    </div>
+</div>
