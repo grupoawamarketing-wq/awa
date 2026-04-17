@@ -9,6 +9,7 @@ use Magento\Catalog\Model\Category;
 use Magento\Catalog\Model\Product;
 use Magento\Framework\App\Request\Http as HttpRequest;
 use Magento\Framework\Registry;
+use Magento\Framework\UrlInterface;
 use Magento\Framework\View\Element\Block\ArgumentInterface;
 use Magento\Framework\View\Page\Config as PageConfig;
 use Magento\Store\Model\StoreManagerInterface;
@@ -24,6 +25,7 @@ final class OpenGraph implements ArgumentInterface
         private readonly PageConfig $pageConfig,
         private readonly ImageHelper $imageHelper,
         private readonly HttpRequest $request,
+        private readonly UrlInterface $urlBuilder,
     ) {
     }
 
@@ -39,10 +41,14 @@ final class OpenGraph implements ArgumentInterface
 
     public function getCurrentUrl(): string
     {
-        $baseUrl = $this->getBaseUrl();
-        $identifier = trim((string) $this->request->getPathInfo(), '/');
+        // Use UrlInterface to get the friendly (rewritten) URL
+        // instead of getPathInfo() which returns internal controller paths
+        $currentUrl = $this->urlBuilder->getCurrentUrl();
 
-        return $identifier !== '' ? $baseUrl . '/' . $identifier : $baseUrl . '/';
+        // Strip query params for og:url (canonical form)
+        $pos = strpos($currentUrl, '?');
+
+        return $pos !== false ? substr($currentUrl, 0, $pos) : $currentUrl;
     }
 
     public function getCurrentProduct(): ?Product

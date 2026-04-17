@@ -128,6 +128,9 @@ class CustomerPriceProvider
 
     /**
      * Get customer's price list name
+     *
+     * Result is cached by list code (shared across all customers on the same list).
+     * On ERP outage, a short 60-second negative cache prevents hammering.
      */
     public function getCustomerPriceListName(int $erpCustomerCode): ?string
     {
@@ -136,13 +139,32 @@ class CustomerPriceProvider
             return null;
         }
 
+        // Cache by list code — same name for all customers on the same list
+        $cacheKey = self::CACHE_PREFIX . 'list_name_' . $listCode;
+        $cached = $this->cache->load($cacheKey);
+        if ($cached !== false) {
+            return $cached === '' ? null : $cached;
+        }
+
         try {
             $row = $this->connection->fetchOne(
                 "SELECT DESCRICAO FROM VE_FATORPRECO WHERE CODIGO = ?",
                 [$listCode]
             );
-            return $row ? trim($row['DESCRICAO']) : null;
+            $name = $row ? trim($row['DESCRICAO']) : null;
+
+            $this->cache->save(
+                (string) ($name ?? ''),
+                $cacheKey,
+                [],
+                self::CACHE_TTL
+            );
+
+            return $name;
         } catch (\Exception $e) {
+            $this->logger->error('[ERP] Error getting price list name: ' . $e->getMessage());
+            // Cache empty briefly to avoid hammering ERP during outage
+            $this->cache->save('', $cacheKey, [], 60);
             return null;
         }
     }
