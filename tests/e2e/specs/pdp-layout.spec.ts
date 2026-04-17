@@ -54,8 +54,8 @@ async function goToPDP(page: Page): Promise<void> {
 
   await page.waitForSelector(PDP.productName, { timeout: 15_000 });
 
-  // Aguarda widgets JS (Knockout, RequireJS) estabilizarem — essencial em mobile
-  await page.waitForLoadState('networkidle', { timeout: 10_000 }).catch(() => {});
+  // Breve pausa para widgets Knockout/RequireJS estabilizarem (Magento nunca atinge networkidle)
+  await page.waitForTimeout(800);
 }
 
 function screenshotPath(name: string): string {

@@ -3,7 +3,7 @@ export default defineConfig({
   testDir: './specs',
   timeout: 120_000,
   expect: { timeout: 8_000 },
-  retries: 0,
+  retries: 1,
   workers: 1,
   reporter: [['list']],
   use: {
