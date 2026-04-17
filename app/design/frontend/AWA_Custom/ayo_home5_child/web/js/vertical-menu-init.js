@@ -124,6 +124,20 @@ define([
             return false; // AWA: menu abre no hover, fecha ao sair
         }
 
+        /**
+         * Resolve the anchor element that defines the megamenu horizontal span.
+         * We prefer the whole nav bar container so the dropdown can behave like a "mega menu"
+         * (Gazin-style), instead of being limited to the "Departamentos" button width.
+         *
+         * @returns {HTMLElement|null}
+         */
+        function resolveDesktopAnchorEl() {
+            return $nav.closest('.header-control.awa-nav-bar')[0] ||
+                document.querySelector('.header-control.awa-nav-bar') ||
+                $nav[0] ||
+                null;
+        }
+
         function setDesktopMenuVisibility(isVisible) {
             if (!$toggleMenu.length) {
                 return;
@@ -137,7 +151,8 @@ define([
                 if (isVisible) {
                     // Usar position:fixed para escapar de qualquer overflow:hidden nos ancestrais
                     // (.page-wrapper tem overflow:hidden e height:182px, clipa o dropdown sem este fix)
-                    var navRect = $nav[0].getBoundingClientRect();
+                    var anchorEl = resolveDesktopAnchorEl();
+                    var navRect = anchorEl ? anchorEl.getBoundingClientRect() : $nav[0].getBoundingClientRect();
 
                     style.setProperty('position', 'fixed', 'important');
                     style.setProperty('top', navRect.bottom + 'px', 'important');
@@ -214,6 +229,7 @@ define([
                 $nav.addClass('awa-menu-expanded');
                 setNavBarClip(false);
                 $title.addClass('active').attr('aria-expanded', 'true');
+                $toggleMenu.attr('aria-hidden', 'false');
                 $('body').removeClass('background_shadow_show');
 
                 // Bug5: reposicionar dropdown ao rolar a página
@@ -263,6 +279,7 @@ define([
                 $nav.removeClass('awa-menu-expanded');
                 setNavBarClip(true);
                 $title.removeClass('active').attr('aria-expanded', 'false');
+                $toggleMenu.attr('aria-hidden', 'true');
                 $('body').removeClass('background_shadow_show');
                 $(window).off('scroll.awaVMenuRepos-' + safeUid);
                 $(document).off('click.awaVMenuClose-' + safeUid);
@@ -274,6 +291,7 @@ define([
             clearDesktopMenuVisibility();
             $toggleMenu.removeClass('menu-open').stop(true, true).fadeOut(200);
             $title.removeClass('active').attr('aria-expanded', 'false');
+            $toggleMenu.attr('aria-hidden', 'true');
             $('body').removeClass('background_shadow_show');
         }
 
@@ -441,11 +459,13 @@ define([
                     $nav.addClass('awa-menu-expanded');
                     setNavBarClip(false);
                     $title.addClass('active').attr('aria-expanded', 'true');
+                    $toggleMenu.attr('aria-hidden', 'false');
                 } else {
                     setDesktopMenuVisibility(false);
                     $nav.removeClass('awa-menu-expanded');
                     setNavBarClip(true);
                     $title.removeClass('active').attr('aria-expanded', 'false');
+                    $toggleMenu.attr('aria-hidden', 'true');
                 }
 
                 $('body').removeClass('background_shadow_show');
@@ -457,6 +477,7 @@ define([
             setNavBarClip(true);
             $toggleMenu.removeClass('menu-open').hide();
             $title.removeClass('active').attr('aria-expanded', 'false');
+            $toggleMenu.attr('aria-hidden', 'true');
             $('body').removeClass('background_shadow_show');
         }
 
@@ -577,6 +598,9 @@ define([
 
         $title.on('click' + eventNamespace, function (event) {
             event.preventDefault();
+            // Prevent the global "click outside" closer from seeing this same click in desktop,
+            // which can cause open->close within a single interaction in some DOM structures.
+            event.stopPropagation();
 
             if (keepDesktopMenuExpanded()) {
                 openMenu(false);

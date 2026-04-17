@@ -52,108 +52,36 @@ define(['jquery', 'domReady!'], function ($) {
 
     function styleHeader($nav) {
         var catHeader = $nav.closest('.menu_left_home1').find('.our_categories.title-category-dropdown');
-        if (!catHeader.length) return;
-        var hdr = catHeader[0];
-        hdr.style.setProperty('display', 'block', 'important');
-        hdr.style.setProperty('width', '100%', 'important');
-        hdr.style.setProperty('max-width', 'none', 'important');
-        hdr.style.setProperty('flex', '1 1 100%', 'important');
-        hdr.style.setProperty('box-sizing', 'border-box', 'important');
-        hdr.style.setProperty('background', '#b73337', 'important');
-        hdr.style.setProperty('color', '#ffffff', 'important');
-        hdr.style.setProperty('border-radius', '10px 10px 0 0', 'important');
-        hdr.style.setProperty('font-size', '13px', 'important');
-        hdr.style.setProperty('font-weight', '600', 'important');
-        hdr.style.setProperty('letter-spacing', '0.5px', 'important');
-        hdr.style.setProperty('padding', '13px 16px', 'important');
-        hdr.style.setProperty('cursor', 'pointer', 'important');
+        if (!catHeader.length) {
+            return;
+        }
+
+        catHeader.attr('data-awa-vmenu-header-enhanced', 'true');
     }
 
     function styleTogge($nav) {
         var $togge = $nav.find('ul.togge-menu');
-        if (!$togge.length) return;
-
-        var togge = $togge[0];
-        togge.style.setProperty('background', '#ffffff', 'important');
-        togge.style.setProperty('border', '1px solid #e0e0e0', 'important');
-        togge.style.setProperty('border-top', 'none', 'important');
-        togge.style.setProperty('border-radius', '0 0 10px 10px', 'important');
-        togge.style.setProperty('box-shadow', '0 12px 32px rgba(0,0,0,0.10)', 'important');
-        togge.style.setProperty('padding', '4px 0', 'important');
+        if (!$togge.length) {
+            return;
+        }
 
         var currentSlug = getCurrentCatSlug();
+        $togge.attr('data-awa-vmenu-shell-enhanced', 'true');
 
         $togge.children('li.level0').each(function () {
             var li  = this;
             var $li = $(li);
-            li.style.setProperty('background', '#ffffff', 'important');
-            li.style.setProperty('border-bottom', '1px solid #f3f3f3', 'important');
-            li.style.setProperty('transition', 'background 0.14s ease', 'important');
 
             var link = li.querySelector('a.level-top, span.level-top');
-            if (!link) return;
-
-            link.style.setProperty('color', '#3a3a3a', 'important');
-            link.style.setProperty('background', 'transparent', 'important');
-            link.style.setProperty('padding', '10px 14px', 'important');
-            link.style.setProperty('font-size', '13px', 'important');
-            link.style.setProperty('font-weight', '500', 'important');
-            link.style.setProperty('display', 'flex', 'important');
-            link.style.setProperty('align-items', 'center', 'important');
-            link.style.setProperty('gap', '10px', 'important');
-            link.style.setProperty('text-decoration', 'none', 'important');
-            link.style.setProperty('transition', 'color 0.14s ease, padding-left 0.14s ease', 'important');
-            link.style.setProperty('position', 'relative', 'important');
+            if (!link) {
+                return;
+            }
 
             // Detect active by URL
             var href = link.getAttribute ? link.getAttribute('href') : '';
             if (currentSlug && href && href.indexOf(currentSlug + '.html') !== -1) {
                 $li.addClass('awa-current-cat');
-                li.style.setProperty('background', 'rgba(183,51,55,0.04)', 'important');
-                link.style.setProperty('color', '#b73337', 'important');
-                link.style.setProperty('font-weight', '600', 'important');
-                link.style.setProperty('padding-left', '18px', 'important');
             }
-        });
-
-        // Expand link
-        $togge.children('li.expand-category-link').each(function () {
-            this.style.setProperty('background', '#ffffff', 'important');
-            this.style.setProperty('border-top', '1px solid #f0f0f0', 'important');
-            this.style.setProperty('border-bottom', 'none', 'important');
-            var a = this.querySelector('a, .vm-toggle-categories');
-            if (a) {
-                a.style.setProperty('color', '#b73337', 'important');
-                a.style.setProperty('font-size', '12px', 'important');
-                a.style.setProperty('font-weight', '600', 'important');
-                a.style.setProperty('text-transform', 'uppercase', 'important');
-                a.style.setProperty('letter-spacing', '0.5px', 'important');
-                a.style.setProperty('padding', '10px 14px', 'important');
-                a.style.setProperty('transition', 'color 0.14s ease', 'important');
-            }
-        });
-
-        // Hover events
-        $togge.children('li.level0').on('mouseenter', function () {
-            if ($(this).hasClass('awa-current-cat')) return;
-            this.style.setProperty('background', '#fafafa', 'important');
-            var link = this.querySelector('a.level-top, span.level-top');
-            if (link) {
-                link.style.setProperty('color', '#b73337', 'important');
-                link.style.setProperty('padding-left', '18px', 'important');
-            }
-            var svg = this.querySelector('.awa-vmenu-icon svg');
-            if (svg) svg.style.setProperty('stroke', '#b73337', 'important');
-        }).on('mouseleave', function () {
-            if ($(this).hasClass('awa-current-cat')) return;
-            this.style.setProperty('background', '#ffffff', 'important');
-            var link = this.querySelector('a.level-top, span.level-top');
-            if (link) {
-                link.style.setProperty('color', '#3a3a3a', 'important');
-                link.style.setProperty('padding-left', '14px', 'important');
-            }
-            var svg = this.querySelector('.awa-vmenu-icon svg');
-            if (svg) svg.style.setProperty('stroke', '#aaa', 'important');
         });
     }
 
@@ -183,28 +111,6 @@ define(['jquery', 'domReady!'], function ($) {
                 }
             }
 
-            // === Style SVG icon ===
-            var iconEl = $link.find('.awa-vmenu-icon')[0];
-            if (iconEl) {
-                iconEl.style.setProperty('display', 'inline-flex', 'important');
-                iconEl.style.setProperty('align-items', 'center', 'important');
-                iconEl.style.setProperty('justify-content', 'center', 'important');
-                iconEl.style.setProperty('width', '22px', 'important');
-                iconEl.style.setProperty('height', '22px', 'important');
-                iconEl.style.setProperty('flex-shrink', '0', 'important');
-                var svg = iconEl.querySelector('svg');
-                if (svg) {
-                    svg.style.setProperty('width', '17px', 'important');
-                    svg.style.setProperty('height', '17px', 'important');
-                    svg.style.setProperty('fill', 'none', 'important');
-                    svg.style.setProperty('stroke', '#aaa', 'important');
-                    svg.style.setProperty('stroke-width', '1.8', 'important');
-                    svg.style.setProperty('stroke-linecap', 'round', 'important');
-                    svg.style.setProperty('stroke-linejoin', 'round', 'important');
-                    svg.style.setProperty('transition', 'stroke 0.14s ease, transform 0.18s ease', 'important');
-                }
-            }
-
             // === Section label ===
             if (SECTION_LABELS[slug]) {
                 if (!$item.prev('.awa-vmenu__section-label').length) {
@@ -222,26 +128,7 @@ define(['jquery', 'domReady!'], function ($) {
                 }
             }
 
-            // === Native cat-label badges (force colors via inline style) ===
-            $item.find('.cat-label').each(function () {
-                var cls = this.className;
-                var bg = '#b73337'; // label3 / unknown — keep red
-                if (cls.indexOf('cat-label-label1') !== -1) bg = '#22c55e'; // green
-                else if (cls.indexOf('cat-label-label2') !== -1) bg = '#f97316'; // orange
-                else if (cls.indexOf('cat-label-label4') !== -1) bg = '#3b82f6'; // blue
-                this.style.setProperty('background', bg, 'important');
-                this.style.setProperty('color', '#ffffff', 'important');
-                this.style.setProperty('font-size', '10px', 'important');
-                this.style.setProperty('font-weight', '700', 'important');
-                this.style.setProperty('letter-spacing', '0.5px', 'important');
-                this.style.setProperty('padding', '2px 7px', 'important');
-                this.style.setProperty('border-radius', '4px', 'important');
-                this.style.setProperty('text-transform', 'uppercase', 'important');
-                this.style.setProperty('margin-left', 'auto', 'important');
-                this.style.setProperty('margin-right', '6px', 'important');
-                this.style.setProperty('flex-shrink', '0', 'important');
-                this.style.setProperty('line-height', '1.3', 'important');
-            });
+            $item.find('.cat-label').attr('data-awa-vmenu-badge', 'true');
         });
     }
 

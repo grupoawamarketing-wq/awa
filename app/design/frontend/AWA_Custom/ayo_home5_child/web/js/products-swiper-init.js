@@ -146,6 +146,22 @@ define([
         });
     }
 
+    function isNearViewport(element) {
+        var rect;
+        var viewportHeight;
+        var preloadBand;
+
+        if (!element || typeof element.getBoundingClientRect !== 'function') {
+            return false;
+        }
+
+        rect = element.getBoundingClientRect();
+        viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+        preloadBand = Math.max(400, viewportHeight * 0.75);
+
+        return rect.top <= viewportHeight + preloadBand && rect.bottom >= -preloadBand;
+    }
+
     return function (config, element) {
         var $scope = $(element),
             cfg = config || {},
@@ -156,6 +172,11 @@ define([
         $el = $scope.is(carouselSel) ? $scope : $scope.find(carouselSel).first();
 
         if (!$el.length || $el.data('awaSwiperInit')) {
+            return;
+        }
+
+        if (isNearViewport($el[0])) {
+            initSwiper($el, owlCfg);
             return;
         }
 

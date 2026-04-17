@@ -9,6 +9,9 @@ define([], function () {
         'gap',
         'grid-column'
     ];
+    var HEADER_ROW_SELECTOR = '.header .awa-main-header__inner[data-awa-header-row], .header .wp-header[data-awa-header-row]';
+    var HEADER_TOP_SEARCH_SELECTOR = '.header .awa-main-header__inner[data-awa-header-row] > .top-search, .header .wp-header[data-awa-header-row] > .top-search';
+    var HEADER_MINICART_SELECTOR = '.header .awa-main-header__inner[data-awa-header-row] > .top-search > .mini-cart-wrapper, .header .wp-header[data-awa-header-row] > .top-search > .mini-cart-wrapper';
 
     function interceptSetProperty(element, overrides, blocked) {
         var original = element.style.setProperty.bind(element.style);
@@ -56,9 +59,9 @@ define([], function () {
             return true;
         }
 
-        var wrapper = document.querySelector('.header .wp-header[data-awa-header-row]');
-        var topSearch = document.querySelector('.header .wp-header[data-awa-header-row] > .top-search');
-        var miniCart = document.querySelector('.header .wp-header[data-awa-header-row] > .top-search > .mini-cart-wrapper');
+        var wrapper = document.querySelector(HEADER_ROW_SELECTOR);
+        var topSearch = document.querySelector(HEADER_TOP_SEARCH_SELECTOR);
+        var miniCart = document.querySelector(HEADER_MINICART_SELECTOR);
 
         if (!wrapper || !topSearch) {
             return false;

@@ -1235,16 +1235,25 @@
 	 * @return {Number} - The width in pixel.
 	 */
 	Owl.prototype.viewport = function() {
-		var width;
+		var width = 0;
 		if (this.options.responsiveBaseElement !== window) {
-			width = $(this.options.responsiveBaseElement).width();
-		} else if (window.innerWidth) {
+			width = $(this.options.responsiveBaseElement).width() || 0;
+		} else if (typeof window.innerWidth === 'number' && window.innerWidth > 0) {
 			width = window.innerWidth;
-		} else if (document.documentElement && document.documentElement.clientWidth) {
+		} else if (document.documentElement && document.documentElement.clientWidth > 0) {
 			width = document.documentElement.clientWidth;
-		} else {
-			throw 'Can not detect viewport width.';
 		}
+
+		if (!width && document.body && document.body.clientWidth > 0) {
+			width = document.body.clientWidth;
+		}
+
+		// Instrumented/headless sessions can briefly report 0 for every source.
+		// Falling back keeps Owl from throwing and freezing audits like Lighthouse.
+		if (!width) {
+			width = 1024;
+		}
+
 		return width;
 	};
 
