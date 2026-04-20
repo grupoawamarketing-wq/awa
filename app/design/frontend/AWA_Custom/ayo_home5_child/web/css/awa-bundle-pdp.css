@@ -1,53 +1,37 @@
 /* =============================================================================
- * awa-bundle-pdp.css
- * AWA Motos — PDP Premium Layout, Card Shell, Relacionados
+ * awa-bundle-pdp.css  — v2 (Fase 3 token migration 2026)
+ * AWA Motos — PDP Premium: Layout, Card Shell, WhatsApp CTA, Relacionados
  * Carregado via catalog_product_view.xml order=1210 (após awa-pdp-visual-fix)
  *
- * DOM real (Ayo theme):
- *   .main-detail > .row > .col-md-6.col-sm-6.col-xs-12 (galeria | info)
- *   .detail-info.product-info.product-info-main > .box-inner1
- *   .awa-pdp-related > .rokan-product-heading + .rokan-mostviewed
- *     > .swiper > .swiper-wrapper > .swiper-slide > .product-item
- *       > .product-thumb + .product-info
- *
- * Override de: awa-pdp-visual-fix.css (order=1200)
+ * Tokens via: awa-core-variables.css
  * ============================================================================= */
-
-/* AWA-AUDIT:pdp-layout-premium-2026-04-16:start */
 
 /* --------------------------------------------------------------------------
  * 1. CARD SHELL — Coluna de compra (product-info-main)
- *
- * awa-pdp-visual-fix.css já define padding-left: 24px em desktop.
- * Adicionamos border, shadow e radius para criar o card shell.
  * -------------------------------------------------------------------------- */
 @media (min-width: 768px) {
     body.catalog-product-view .product-info-main {
-        padding: 24px !important;
-        border: 1px solid #ececec !important;
-        border-radius: 12px !important;
-        background: #fff !important;
-        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07) !important;
+        padding: var(--awa-space-6, 24px) !important;
+        border: var(--awa-border-width, 1px) solid var(--awa-border, #e5e5e5) !important;
+        border-radius: var(--awa-ui-radius-card, 16px) !important;
+        background: var(--awa-white, #fff) !important;
+        box-shadow: var(--awa-ui-panel-shadow, 0 2px 16px rgb(0 0 0 / 7%)) !important;
     }
 }
 
-/* Mobile: card shell mais compacto */
 @media (max-width: 767px) {
     body.catalog-product-view .product-info-main {
-        padding: 16px !important;
-        border: 1px solid #ececec !important;
-        border-radius: 10px !important;
-        background: #fff !important;
-        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.05) !important;
-        margin-top: 12px !important;
+        padding: var(--awa-space-4, 16px) !important;
+        border: var(--awa-border-width, 1px) solid var(--awa-border, #e5e5e5) !important;
+        border-radius: var(--awa-ui-radius-panel, 16px) !important;
+        background: var(--awa-white, #fff) !important;
+        box-shadow: 0 1px 6px rgb(0 0 0 / 5%) !important;
+        margin-top: var(--awa-space-3, 12px) !important;
     }
 }
 
 /* --------------------------------------------------------------------------
  * 2. LAYOUT — Proporções desktop: galeria 58% / info 42%
- *
- * awa-pdp-visual-fix define 55/45. Ajustamos para 58/42 com gap corrigido.
- * Usa mesmos seletores de alta especificidade (body type + class chain = 0,7,1).
  * -------------------------------------------------------------------------- */
 @media (min-width: 992px) {
     body.catalog-product-view .main-detail > .row > .col-md-6.col-sm-6.col-xs-12:first-child {
@@ -63,108 +47,215 @@
 
 /* --------------------------------------------------------------------------
  * 3. PREÇO — destaque máximo quando logado
- *
- * Aumenta o tamanho do preço para clientes logados.
- * O preço fica dentro de .price-box .price (quando não é B2B gate).
  * -------------------------------------------------------------------------- */
 body.catalog-product-view .product-info-main .price-box:not(.b2b-login-to-see-price) .price {
     font-size: clamp(24px, 2.5vw, 32px) !important;
-    font-weight: 800 !important;
-    color: var(--awa-primary, #b73737) !important;
+    font-weight: var(--awa-weight-extrabold, 800) !important;
+    color: var(--awa-primary, var(--awa-red, #b73337)) !important;
 }
 
 /* --------------------------------------------------------------------------
  * 4. ESPAÇAMENTO — Ritmo consistente entre seções
  * -------------------------------------------------------------------------- */
 body.catalog-product-view .product-info-main .product-info-price {
-    margin-block: 12px !important;
+    margin-block: var(--awa-space-3, 12px) !important;
 }
 
 body.catalog-product-view .product-info-main .box-tocart {
-    margin-block: 16px !important;
+    margin-block: var(--awa-space-4, 16px) !important;
 }
 
 /* --------------------------------------------------------------------------
- * 5. STOCK e SKU — Hierarquia secundária (menor que CTA)
+ * 5. STOCK e SKU — Hierarquia secundária
  * -------------------------------------------------------------------------- */
 body.catalog-product-view .product-info-main .product-info-stock-sku .stock,
 body.catalog-product-view .product-info-main .product-info-stock-sku .product.attribute.sku {
-    font-size: 13px !important;
-    line-height: 1.4 !important;
-    color: #666 !important;
+    font-size: var(--awa-text-xs, 13px) !important;
+    line-height: var(--awa-leading-normal, 1.4) !important;
+    color: var(--awa-text-muted, #666) !important;
+}
+
+body.catalog-product-view .product-info-main .product-info-stock-sku .product.attribute.sku .value {
+    display: inline !important;
+    visibility: visible !important;
 }
 
 /* --------------------------------------------------------------------------
  * 6. BOTÃO ADD TO CART — Full width, altura premium
- *
- * awa-pdp-visual-fix já define altura 52px e cor.
- * Aqui reforçamos full width e border-radius consistente.
  * -------------------------------------------------------------------------- */
 body.catalog-product-view .product-info-main .action.tocart,
 body.catalog-product-view .product-info-main #product-addtocart-button {
     width: 100% !important;
-    min-height: 52px !important;
-    border-radius: 10px !important;
-    font-size: 16px !important;
-    font-weight: 700 !important;
-    letter-spacing: 0.01em !important;
+    min-height: var(--awa-space-9-5, 52px) !important;
+    border-radius: var(--awa-ui-radius-button, 12px) !important;
+    font-size: var(--awa-ui-body-size, 15px) !important;
+    font-weight: var(--awa-weight-bold, 700) !important;
+    letter-spacing: var(--awa-tracking-tight, 0.01em) !important;
+    box-shadow: var(--awa-ui-cta-shadow, 0 4px 14px rgb(183 51 55 / 22%)) !important;
+    transition: box-shadow 0.22s ease, transform 0.22s ease, background-color 0.22s ease !important;
+}
+
+body.catalog-product-view .product-info-main .action.tocart:hover,
+body.catalog-product-view .product-info-main #product-addtocart-button:hover {
+    box-shadow: var(--awa-ui-cta-shadow-hover, 0 7px 22px rgb(183 51 55 / 32%)) !important;
+    transform: translateY(var(--awa-neg-0-25, -1px)) !important;
 }
 
 /* --------------------------------------------------------------------------
- * 7. RELACIONADOS — Card shell premium (Swiper carousel)
+ * 7. WHATSAPP CTA — Botão verde full-width abaixo do tocart
  *
- * DOM real: .awa-pdp-related .swiper-slide > .product-item
- *           > .product-thumb + .product-info
+ * DOM: a.awa-pdp-whatsapp-cta > svg.awa-pdp-whatsapp-cta__icon + span
+ * -------------------------------------------------------------------------- */
+body.catalog-product-view a.awa-pdp-whatsapp-cta {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: var(--awa-gap-sm, 8px) !important;
+    width: 100% !important;
+    min-height: var(--awa-size-46, 46px) !important;
+    padding: 0 var(--awa-space-5, 20px) !important;
+    border-radius: var(--awa-ui-radius-button, 12px) !important;
+    background: var(--awa-whatsapp, #25d366) !important;
+    color: var(--awa-white, #fff) !important;
+    font-size: var(--awa-text-sm, 14px) !important;
+    font-weight: var(--awa-weight-bold, 700) !important;
+    letter-spacing: var(--awa-tracking-tight, 0.01em) !important;
+    text-decoration: var(--awa-none, none) !important;
+    box-shadow: 0 3px 10px rgb(37 211 102 / 28%) !important;
+    transition: background-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease !important;
+    margin-top: var(--awa-space-2-5, 10px) !important;
+}
+
+body.catalog-product-view a.awa-pdp-whatsapp-cta:hover {
+    background: #1ebe5d !important;
+    box-shadow: 0 6px 18px rgb(37 211 102 / 36%) !important;
+    transform: translateY(var(--awa-neg-0-25, -1px)) !important;
+    color: var(--awa-white, #fff) !important;
+    text-decoration: var(--awa-none, none) !important;
+}
+
+body.catalog-product-view a.awa-pdp-whatsapp-cta:focus-visible {
+    outline: var(--awa-outline-width, 2px) solid #25d366 !important;
+    outline-offset: var(--awa-space-0-5, 2px) !important;
+}
+
+body.catalog-product-view .awa-pdp-whatsapp-cta__icon {
+    flex-shrink: 0 !important;
+    width: var(--awa-space-4-5, 18px) !important;
+    height: var(--awa-space-4-5, 18px) !important;
+}
+
+body.catalog-product-view a.awa-pdp-whatsapp-cta span {
+    line-height: var(--awa-leading-base, 1.3) !important;
+}
+
+/* --------------------------------------------------------------------------
+ * 8. TRUST BAR — Sinais de confiança (Envio / Garantia / Troca)
+ *
+ * DOM: .awa-pdp-trust-bar > .awa-pdp-trust-bar__item > svg + span
+ * -------------------------------------------------------------------------- */
+body.catalog-product-view .awa-pdp-trust-bar {
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: space-around !important;
+    flex-wrap: wrap !important;
+    gap: var(--awa-gap-2-5, 10px) !important;
+    padding: var(--awa-space-3-5, 14px) var(--awa-space-3, 12px) !important;
+    margin-top: var(--awa-space-3, 12px) !important;
+    border: var(--awa-border-width, 1px) solid var(--awa-border, #e5e5e5) !important;
+    border-radius: var(--awa-ui-radius-card, 16px) !important;
+    background: var(--awa-gray-30, #fafafa) !important;
+}
+
+body.catalog-product-view .awa-pdp-trust-bar__item {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: var(--awa-gap-1-25, 5px) !important;
+    flex: 1 1 var(--awa-size-80, 80px) !important;
+    min-width: var(--awa-size-72, 72px) !important;
+    text-align: center !important;
+    color: var(--awa-text-muted, #555) !important;
+    font-size: var(--awa-text-xs, 12px) !important;
+    font-weight: var(--awa-weight-semibold, 600) !important;
+    line-height: var(--awa-leading-base, 1.3) !important;
+}
+
+body.catalog-product-view .awa-pdp-trust-bar__item svg {
+    color: var(--awa-primary, var(--awa-red, #b73337)) !important;
+    flex-shrink: 0 !important;
+}
+
+/* --------------------------------------------------------------------------
+ * 9. RELACIONADOS — Card shell premium (Swiper carousel)
+ *
+ * DOM: .awa-pdp-related .swiper-slide > .product-item
+ *      > .product-thumb + .product-info
  * -------------------------------------------------------------------------- */
 body.catalog-product-view .awa-pdp-related .product-item {
-    padding: 12px !important;
-    border: 1px solid #ececec !important;
-    border-radius: 12px !important;
-    background: #fff !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
-    transition: box-shadow 0.2s ease, transform 0.2s ease !important;
+    padding: var(--awa-space-3, 12px) !important;
+    border: var(--awa-border-width, 1px) solid var(--awa-border, #e5e5e5) !important;
+    border-radius: var(--awa-ui-radius-card, 16px) !important;
+    background: var(--awa-white, #fff) !important;
+    box-shadow: var(--awa-ui-card-shadow, 0 2px 10px rgb(0 0 0 / 6%)) !important;
+    transition: box-shadow 0.22s ease, transform 0.22s ease !important;
     overflow: hidden !important;
 }
 
 body.catalog-product-view .awa-pdp-related .product-item:hover {
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.10) !important;
-    transform: translateY(-2px) !important;
+    box-shadow: var(--awa-ui-card-shadow-hover, 0 8px 24px rgb(0 0 0 / 11%)) !important;
+    transform: translateY(var(--awa-neg-0-5, -2px)) !important;
 }
 
-/* Título do produto nos relacionados */
 body.catalog-product-view .awa-pdp-related .product-item .product-item-link {
-    font-size: 13px !important;
-    font-weight: 600 !important;
-    line-height: 1.35 !important;
+    font-size: var(--awa-text-sm, 13px) !important;
+    font-weight: var(--awa-weight-semibold, 600) !important;
+    line-height: var(--awa-leading-cozy, 1.35) !important;
     color: var(--awa-text, #333) !important;
     display: -webkit-box !important;
     -webkit-line-clamp: 2 !important;
     -webkit-box-orient: vertical !important;
     overflow: hidden !important;
+    min-height: var(--awa-ui-card-title-min-height, 2.9em) !important;
 }
 
-/* Imagem do produto nos relacionados */
 body.catalog-product-view .awa-pdp-related .product-item .product-thumb {
-    border-radius: 8px !important;
+    border-radius: var(--awa-ui-radius-field, 12px) !important;
     overflow: hidden !important;
-    margin-bottom: 8px !important;
+    margin-bottom: var(--awa-space-2, 8px) !important;
 }
 
-/* Heading da seção de relacionados */
 body.catalog-product-view .awa-pdp-related .rokan-product-heading h2 {
-    font-size: clamp(18px, 2vw, 22px) !important;
-    font-weight: 700 !important;
+    font-size: var(--awa-ui-heading-3, clamp(18px, 2vw, 22px)) !important;
+    font-weight: var(--awa-weight-bold, 700) !important;
     color: var(--awa-text, #333) !important;
-    margin-bottom: 16px !important;
+    margin-bottom: var(--awa-space-4, 16px) !important;
 }
 
 /* --------------------------------------------------------------------------
- * 8. MOBILE — Stack vertical
+ * 10. MOBILE — Ajustes responsivos
  * -------------------------------------------------------------------------- */
 @media (max-width: 767px) {
     body.catalog-product-view .awa-pdp-related .product-item {
-        padding: 10px !important;
+        padding: var(--awa-space-2-5, 10px) !important;
+    }
+
+    body.catalog-product-view .awa-pdp-trust-bar {
+        gap: var(--awa-gap-sm, 8px) !important;
+        padding: var(--awa-space-3, 12px) var(--awa-space-2-5, 10px) !important;
+    }
+
+    body.catalog-product-view .awa-pdp-trust-bar__item {
+        flex: 1 1 var(--awa-size-60, 60px) !important;
+        min-width: var(--awa-size-60, 60px) !important;
     }
 }
 
-/* AWA-AUDIT:pdp-layout-premium-2026-04-16:end */
+@media (prefers-reduced-motion: reduce) {
+    body.catalog-product-view .product-info-main .action.tocart,
+    body.catalog-product-view .product-info-main #product-addtocart-button,
+    body.catalog-product-view a.awa-pdp-whatsapp-cta,
+    body.catalog-product-view .awa-pdp-related .product-item {
+        transition: var(--awa-none, none) !important;
+    }
+}

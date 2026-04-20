@@ -317,6 +317,30 @@
   font-size: 11px;
   color: var(--awa-text-light);
   margin: 2px 0 0;
+
+  // FIX UX: esconder estrelas quando não há reviews — ruído visual
+  // Magento renderiza .rating-summary mesmo com 0 reviews;
+  // .no-rating ou width: 0% no .rating-result indica ausência de reviews.
+  &.no-rating,
+  &:empty {
+    display: none !important;
+  }
+
+  .rating-summary {
+    .rating-result {
+      // Quando a largura do resultado é 0% (sem reviews), esconder
+      &[style*="width: 0%"],
+      &[style*="width:0%"],
+      &[style*="width:0"] {
+        display: none !important;
+      }
+    }
+  }
+
+  // Esconder link "Nenhum review" em contexto de grid
+  .reviews-actions {
+    display: none;
+  }
 }
 
 // ---- ÁREA DE PREÇO B2B ----
