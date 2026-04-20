@@ -133,7 +133,7 @@ define(['jquery', 'domReady!'], function ($) {
     }
 
     function initVerticalMenu() {
-        var $nav = $('[data-role="awa-vertical-menu"]').first();
+        var $nav = $('[data-role="awa-vertical-menu"], .navigation.verticalmenu.side-verticalmenu').first();
         if (!$nav.length || $nav.data('awa-enhanced')) return;
         $nav.data('awa-enhanced', 1);
 
@@ -142,9 +142,8 @@ define(['jquery', 'domReady!'], function ($) {
         injectEnhancements($nav);
     }
 
-    $(document).ready(function () {
-        setTimeout(initVerticalMenu, 150);
-    });
+    // domReady! AMD dependency already guarantees DOM is ready — no need for $(document).ready()
+    setTimeout(initVerticalMenu, 150);
 
     return initVerticalMenu;
 });

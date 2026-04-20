@@ -2,7 +2,11 @@
 declare(strict_types=1);
 
 /**
- * AWA Motos child-theme override using the standard Ayo vertical menu init.
+ * Child theme restore aligned with original Ayo package:
+ * biblioteca/tema/ayo.zip -> app/design/frontend/ayo/ayo_default/Rokanthemes_VerticalMenu/templates/sidemenu.phtml
+ *
+ * Toggle: CSS controls display via .vmm-open on <ul> (awa-bundle-core.css).
+ * Hover is disabled by CSS — click is the only trigger.
  *
  * @var \Rokanthemes\VerticalMenu\Block\Verticalmenu $block
  */
@@ -11,83 +15,113 @@ $_helper = $this->helper('Rokanthemes\\VerticalMenu\\Helper\\Data');
 $_config = $_helper->getConfig('verticalmenu');
 
 if (!empty($_config['general']['enable'])):
-    $limitShow    = (int)($_config['general']['limit_show'] ?? 0);
-    $menuId       = 'awa-vertical-menu-' . uniqid('', false);
-    $triggerLabel = (string) __('Departamentos');
-    $statusId     = $menuId . '-status';
-    $_menu        = $block->getVerticalMenuHtml();
+    $_menu = $block->getVerticalMenuHtml();
 ?>
-<nav class="navigation verticalmenu side-verticalmenu"
-     aria-label="<?= $block->escapeHtmlAttr(__('Categorias de Produtos')) ?>"
-     data-role="awa-vertical-menu">
-    <button type="button"
-        class="our_categories title-category-dropdown"
-        data-role="awa-vertical-menu-trigger"
-        aria-controls="<?= $block->escapeHtmlAttr($menuId) ?>"
-        aria-describedby="<?= $block->escapeHtmlAttr($statusId) ?>"
-        aria-expanded="false"
-        aria-haspopup="true"
-        aria-label="<?= $block->escapeHtmlAttr($triggerLabel) ?>">
-        <span class="vm-icon awa-vmenu-trigger-icon" aria-hidden="true">
-            <span class="awa-hamburger">
-                <span class="awa-hamburger__line"></span>
-                <span class="awa-hamburger__line"></span>
-                <span class="awa-hamburger__line"></span>
-            </span>
-        </span>
-        <span class="awa-vmenu-trigger-text"><?= $block->escapeHtml($triggerLabel) ?></span>
-    </button>
-    <span id="<?= $block->escapeHtmlAttr($statusId) ?>"
-        class="awa-sr-only awa-vmenu-status"
-        data-role="awa-vertical-menu-status"
-        aria-live="polite"
-        aria-atomic="true"><?= $block->escapeHtml(__('Menu fechado')) ?></span>
-    <ul id="<?= $block->escapeHtmlAttr($menuId) ?>"
-        class="togge-menu list-category-dropdown navigation__list"
-        data-role="awa-vertical-menu-panel"
-        data-trigger-label="<?= $block->escapeHtmlAttr($triggerLabel) ?>"
-        aria-hidden="true"
-        aria-label="<?= $block->escapeHtmlAttr(__('Lista de categorias')) ?>"
-        tabindex="-1"
-        data-limit-show="<?= (int)$limitShow ?>">
-        <?= /** @noEscape */ $_menu ?>
-        <?php
-            $_bgBlock  = $block->getLayout()->createBlock(\Magento\Cms\Block\Block::class);
-            $_bgImages = '';
 
-            if ($_bgBlock instanceof \Magento\Cms\Block\Block) {
-                $_bgImages = trim($_bgBlock->setBlockId('vertical_background_images')->toHtml());
-            }
-        ?>
-        <?php if ($_bgImages !== ''): ?>
-        <li class="vertical-bg-img"><?= /** @noEscape */ $_bgImages ?></li>
-        <?php endif; ?>
-        <?php if ($limitShow > 0): ?>
+<nav class="navigation verticalmenu side-verticalmenu"
+     aria-label="<?= $block->escapeHtmlAttr(__('Categorias de Produtos')) ?>">
+    <h2 class="title-category-dropdown"
+        role="button"
+        tabindex="0"
+        aria-expanded="false"
+        aria-controls="vmenu-list-main">
+        <span><?= $block->escapeHtml(__('Shop By Department')) ?></span>
+    </h2>
+    <ul id="vmenu-list-main" class="togge-menu list-category-dropdown">
+        <?= /** @noEscape */ $_menu ?>
         <li class="expand-category-link">
-            <a class="viewall vm-toggle-categories"
-               href="#"
-               role="button"
-               aria-expanded="false"
-               data-show-text="<?= $block->escapeHtmlAttr(__('Show More')) ?>"
-               data-hide-text="<?= $block->escapeHtmlAttr(__('Show Less')) ?>">
-                <span><?= $block->escapeHtml(__('Show More')) ?></span>
-                <i class="fa fa-angle-down vm-toggle-icon" aria-hidden="true"></i>
+            <a href="javascript:void(0);" class="viewall">
+                <?= $block->escapeHtml(__('All Categories')) ?>
             </a>
         </li>
-        <?php endif; ?>
+        <?= /** @noEscape */ $block->getLayout()->createBlock('Magento\\Cms\\Block\\Block')->setBlockId('vertical_background_images')->toHtml() ?>
     </ul>
 </nav>
 
-<script type="text/x-magento-init">
-{
-    "[data-role='awa-vertical-menu']": {
-        "js/vertical-menu-init": {
-            "desktopBreakpoint": 992,
-            "overlaySelector": ".shadow_bkg_show",
-            "limitShow": <?= (int)$limitShow ?>
+<script type="text/javascript">
+    require([
+        'jquery',
+        'rokanthemes/verticalmenu',
+        'awaVerticalMenu'
+    ], function ($, _VerticalMenuPlugin, awaEnhance) {
+        'use strict';
+
+        $('.verticalmenu').VerticalMenu();
+
+        // Apply SVG icons, Super Ofertas highlight, and active category detection.
+        if (typeof awaEnhance === 'function') {
+            awaEnhance();
         }
-    }
-}
+
+        var $nav   = $('.navigation.verticalmenu.side-verticalmenu');
+        var $title = $nav.find('.title-category-dropdown');
+        var $tog   = $nav.find('ul.togge-menu');
+
+        function openMenu() {
+            $tog.addClass('vmm-open');
+            $title.addClass('active').attr('aria-expanded', 'true');
+            $('body').addClass('background_shadow_show');
+        }
+
+        function closeMenu() {
+            $tog.removeClass('vmm-open');
+            $title.removeClass('active').attr('aria-expanded', 'false');
+            $('body').removeClass('background_shadow_show');
+        }
+
+        function toggleMenu() {
+            if ($tog.hasClass('vmm-open')) {
+                closeMenu();
+            } else {
+                openMenu();
+            }
+        }
+
+        $title
+            .off('click.awaVM keydown.awaVM')
+            .on('click.awaVM', toggleMenu)
+            .on('keydown.awaVM', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    toggleMenu();
+                }
+                if (e.key === 'Escape') {
+                    closeMenu();
+                }
+            });
+
+        // Close on shadow overlay click
+        $(document).off('click.awaVMOverlay').on('click.awaVMOverlay', '.shadow_bkg_show', closeMenu);
+
+        // Close on Escape from anywhere inside the menu
+        $nav.off('keydown.awaVMEsc').on('keydown.awaVMEsc', function (e) {
+            if (e.key === 'Escape' && $tog.hasClass('vmm-open')) {
+                closeMenu();
+                $title.trigger('focus');
+            }
+        });
+
+        $(document).ready(function () {
+            var lengthLi = $nav.find('.ui-menu-item.level0').length;
+            var limitItemShow = <?= (int) $block->getConfig('limit_show') ?>;
+
+            if (lengthLi > limitItemShow) {
+                $nav.find('.ui-menu-item.level0').each(function (index) {
+                    if (index >= (limitItemShow - 1)) {
+                        $(this).addClass('orther-link').hide();
+                    }
+                });
+
+                $nav.find('.expand-category-link').show();
+                $nav.find('.expand-category-link').off('click.awaVM').on('click.awaVM', function () {
+                    $(this).toggleClass('expanding');
+                    $nav.find('.ui-menu-item.level0.orther-link').slideToggle('slow');
+                });
+            } else {
+                $nav.find('.expand-category-link').hide();
+            }
+        });
+    });
 </script>
 
 <script type="text/x-magento-init">
@@ -99,4 +133,5 @@ if (!empty($_config['general']['enable'])):
     }
 }
 </script>
+
 <?php endif; ?>

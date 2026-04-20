@@ -4,7 +4,7 @@
  * rokanthemes/timecircles: real TimeCircles lib (via tema, shim jquery).
  */
 var config = {
-    deps: ['awaVerticalMenu', 'awa-vertical-menu-focus-trap', 'awa-b2b-header', 'awa-scroll-reveal', 'awa-card-enhance', 'awa-b2b-pdp-price-reload', 'awa-b2b-price-hydrator'],
+    deps: ['awa-vertical-menu-focus-trap', 'awa-b2b-header', 'awa-scroll-reveal', 'awa-card-enhance', 'awa-b2b-pdp-price-reload', 'awa-b2b-price-hydrator'],
     map: {
         '*': {
             awaCustomCompatBootstrap: 'js/awa-custom-compat-bootstrap',
@@ -30,6 +30,7 @@ var config = {
         'js/awa-home-category-carousel': 'js/awa-home-category-carousel',
         // Hotfix Ayo VM: usar fonte para evitar descompasso com artefato minificado legado.
         'js/vertical-menu-init': 'js/vertical-menu-init',
+        'js/awa-vertical-mega-menu': 'js/awa-vertical-mega-menu',
         'js/jquery-andself-compat': 'js/jquery-andself-compat.min',
         // Sticky header — non-minified until terser build step is added
         'awa-header-sticky': 'js/awa-header-sticky',
