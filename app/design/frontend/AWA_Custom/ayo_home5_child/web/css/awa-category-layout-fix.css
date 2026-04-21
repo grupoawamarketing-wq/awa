@@ -649,6 +649,59 @@
 }
 
 /* =============================================================================
+   AWA-CATEGORY-HERO — reduz altura em mobile para produtos ficarem acima da dobra
+   Medido: hero=343px empurra o grid para 889px (> viewport 812px).
+   Com 160px o grid sobe para ~610px → produtos visíveis sem scroll.
+   OVERLAP FIX: h1 (409px) e mst_categorySearch (429px) se sobrepõem 20px.
+   Solução: esconde search em mobile (header search cobre o caso de uso).
+   ============================================================================= */
+@media (max-width: 767px) {
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+        .awa-category-hero {
+        height: auto !important;
+        max-height: none !important;
+        min-height: 0 !important;
+    }
+
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+        .awa-category-hero img {
+        height: 150px !important;
+        max-height: 150px !important;
+        width: 100% !important;
+        object-fit: cover !important;
+        object-position: center 30% !important;
+        display: block !important;
+    }
+
+    /* Esconde busca por categoria em mobile — header search cobre o caso de uso.
+       Em mobile não há espaço suficiente para a busca sem sobreposição com o h1. */
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+        .mst_categorySearch {
+        display: none !important;
+    }
+
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+        .awa-category-hero__content {
+        padding: 8px 0 4px !important;
+    }
+
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+        .awa-category-hero__title {
+        font-size: 22px !important;
+        margin: 0 0 4px !important;
+    }
+
+    /* FIX: .modes-label tem border-radius:999px (pill). Com 62px de largura e 2 linhas
+       de texto ("Mostrar" / "Filtros") o botão fica quase circular.
+       white-space:nowrap força uma linha → pill horizontal correto (103px×42px). */
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+        .toolbar-products .modes-label {
+        white-space: nowrap !important;
+        width: auto !important;
+    }
+}
+
+/* =============================================================================
    GLOBAL — awa-nav-close: ocultar em desktop (styles-l.css tem seletor errado)
    ============================================================================= */
 @media (min-width: 992px) {
