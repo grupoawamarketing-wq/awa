@@ -120,70 +120,66 @@ if ($banners = $block->getBannerCollection()):
  * reveals the carousel after JS adds .owl-loaded. This delays LCP to after JS
  * execution, causing Lighthouse to report NO_LCP.
  *
- * This inline <style> overrides that rule for the first slide only, so the browser
- * can paint the hero image from the server-rendered HTML immediately.
- *
- * Dynamic <link rel=preload> emitted for the actual first-slide image, replacing
- * the hardcoded preload in awa-hero-preload.phtml.
+ * This inline <style> forces the carousel to display block until JS takes over.
  */
-$_lcpDesktopWebp = '';
-$_lcpMobileWebp  = '';
-if (!empty($desktopSlides)) {
-    $_tmpImg = $block->getImageElement($desktopSlides[0]['image'], '', true);
-    if (preg_match('/src="([^"]+)"/', $_tmpImg, $_dm)) {
-        $_lcpDesktopWebp = preg_replace('/\.(jpg|jpeg|png)$/i', '.webp', $_dm[1]);
-    }
-}
-if (!empty($mobileSlides)) {
-    $_tmpImg = $block->getImageElementMobile($mobileSlides[0]['image'], '', true);
-    if (preg_match('/src="([^"]+)"/', $_tmpImg, $_mm)) {
-        $_lcpMobileWebp = preg_replace('/\.(jpg|jpeg|png)$/i', '.webp', $_mm[1]);
-    }
-}
 ?>
-<?php if ($_lcpDesktopWebp !== ''): ?>
-<link rel="preload" as="image" type="image/webp" fetchpriority="high"
-      media="(min-width: 768px)" href="<?= /* @noEscape */ $block->escapeUrl($_lcpDesktopWebp) ?>"/>
-<?php endif; ?>
-<?php if ($_lcpMobileWebp !== '' && $_lcpMobileWebp !== $_lcpDesktopWebp): ?>
-<link rel="preload" as="image" type="image/webp" fetchpriority="high"
-      media="(max-width: 767px)" href="<?= /* @noEscape */ $block->escapeUrl($_lcpMobileWebp) ?>"/>
-<?php endif; ?>
 <style>
-/* LCP Fix: Show first hero slide before OWL Carousel JS initializes.
-   Without this, .owl-carousel { display:none } hides the hero image
-   until JS runs, blocking the Largest Contentful Paint. */
-.wrapper_slider .owl-carousel:not(.owl-loaded) {
+/* LCP Fix: Show first hero slide before Swiper JS initializes. */
+.wrapper_slider .swiper:not(.swiper-initialized) {
     display: block !important;
     overflow: hidden;
 }
-.wrapper_slider .owl-carousel:not(.owl-loaded) > .banner_item + .banner_item {
+.wrapper_slider .swiper:not(.swiper-initialized) .swiper-slide + .swiper-slide {
     display: none;
 }
-.wrapper_slider .owl-carousel:not(.owl-loaded) > .banner_item:first-child {
+.wrapper_slider .swiper:not(.swiper-initialized) .swiper-slide:first-child {
     display: block;
 }
-.wrapper_slider .owl-carousel:not(.owl-loaded) > .banner_item:first-child img {
+/* LCP Fix: dar dimensões ao container antes da imagem carregar (evita NO_LCP) */
+.wrapper_slider .swiper:not(.swiper-initialized) .swiper-slide:first-child .banner_item_bg {
+    aspect-ratio: 1920 / 600;
+    min-height: clamp(220px, 31.25vw, 600px);
     width: 100%;
-    height: auto;
+    overflow: hidden;
+    display: block;
+    background: #e8ecef;
+}
+@media (max-width: 767px) {
+    .wrapper_slider.visible-xs .swiper:not(.swiper-initialized) .swiper-slide:first-child .banner_item_bg {
+        aspect-ratio: 768 / 400;
+        min-height: clamp(180px, 52vw, 400px);
+    }
+}
+.wrapper_slider .swiper:not(.swiper-initialized) .swiper-slide:first-child img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
     display: block;
 }
 </style>
 <!-- Slider desktop (oculto no mobile via Bootstrap .hidden-xs) -->
 <div class="wrapper_slider hidden-xs slider_<?php echo (int) $sliderId; ?>">
-    <div class="owl owl-carousel">
+    <div class="swiper swiper-container">
+        <div class="swiper-wrapper">
         <?php foreach ($desktopSlides as $slideIndex => $slide): ?>
             <?php
             $banner = $slide['banner'];
             $desktopImage = $slide['image'];
             $isFirst = ($slideIndex === 0);
             ?>
-            <div class="banner_item">
+            <div class="banner_item swiper-slide">
                 <div class="banner_item_bg">
                     <?php
                     $slideAlt = $banner->getSlideText() ?: ($banner->getSlideTitle() ?: '');
                     $imgHtml  = $block->getImageElement($desktopImage, $slideAlt, $isFirst);
                     if ($isFirst && preg_match('/src="([^"]+)"/', $imgHtml, $_m)) {
+                        // LCP: injetar preload da imagem hero no <head> para browser discover ASAP
+                        $block->getPageConfig()->addRemotePageAsset(
+                            $_m[1],
+                            'link',
+                            ['attributes' => ['rel' => 'preload', 'as' => 'image', 'fetchpriority' => 'high']],
+                            'awa-hero-preload-desktop'
+                        );
                         $_webp = preg_replace('/\.(jpg|jpeg|png)$/i', '.webp', $_m[1]);
                         $imgHtml = '<picture>'
                             . '<source type="image/webp" srcset="' . $block->escapeUrl($_webp) . '">'
@@ -202,18 +198,23 @@ if (!empty($mobileSlides)) {
                 </div>
             </div>
         <?php endforeach; ?>
+        </div>
+        <div class="swiper-pagination"></div>
+        <div class="swiper-button-prev"></div>
+        <div class="swiper-button-next"></div>
     </div>
 </div>
 <!-- Slider mobile (visível apenas em xs via Bootstrap .visible-xs) -->
 <div class="wrapper_slider visible-xs slider_<?php echo (int) $sliderId; ?>_mobile">
-    <div class="owl owl-carousel">
+    <div class="swiper swiper-container">
+        <div class="swiper-wrapper">
         <?php foreach ($mobileSlides as $slideIndex => $slide): ?>
             <?php
             $banner = $slide['banner'];
             $heroImage = $slide['image'];
             $isFirst = ($slideIndex === 0);
             ?>
-            <div class="banner_item">
+            <div class="banner_item swiper-slide">
                 <div class="banner_item_bg">
                     <?php
                     $slideAlt = $banner->getSlideText() ?: ($banner->getSlideTitle() ?: '');
@@ -237,29 +238,29 @@ if (!empty($mobileSlides)) {
                 </div>
             </div>
         <?php endforeach; ?>
+        </div>
+        <div class="swiper-pagination"></div>
+        <div class="swiper-button-prev"></div>
+        <div class="swiper-button-next"></div>
     </div>
 </div>
 <script>
     require([
         'jquery',
-        'rokanthemes/owl'
-    ], function ($) {
+        'swiper'
+    ], function ($, Swiper) {
         'use strict';
 
         var desktopConfig = <?php echo json_encode($desktopOwlConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
         var mobileConfig = <?php echo json_encode($mobileOwlConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
 
-        // Respeitar preferências de animação reduzida (WCAG 2.1)
         if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
             desktopConfig.autoplay = false;
-            desktopConfig.animateOut = false;
-            desktopConfig.animateIn = false;
             mobileConfig.autoplay = false;
-            mobileConfig.animateOut = false;
-            mobileConfig.animateIn = false;
         }
 
-        function doAnimations($slide) {
+        function doAnimations(activeSlide) {
+            var $slide = $(activeSlide);
             var animEndEv = 'webkitAnimationEnd animationend';
             $slide.find('.text-banner [data-animation^="animated"]').each(function () {
                 var $el  = $(this);
@@ -270,66 +271,74 @@ if (!empty($mobileSlides)) {
             });
         }
 
-        function scheduleRefresh($owl) {
-            var resizeTimer;
-
-            function refreshOwl() {
-                if ($owl.data('owl.carousel')) {
-                    $owl.trigger('refresh.owl.carousel');
+        function createSwiperConfig(owlCfg) {
+            var swiperCfg = {
+                slidesPerView: owlCfg.items || 1,
+                loop: owlCfg.loop || false,
+                autoHeight: owlCfg.autoHeight || true,
+                on: {
+                    slideChangeTransitionEnd: function () {
+                        if (this.slides && this.slides[this.activeIndex]) {
+                            doAnimations(this.slides[this.activeIndex]);
+                        }
+                    },
+                    init: function () {
+                        if (this.slides && this.slides[this.activeIndex]) {
+                            doAnimations(this.slides[this.activeIndex]);
+                        }
+                    }
                 }
+            };
+
+            if (owlCfg.autoplay) {
+                swiperCfg.autoplay = {
+                    delay: owlCfg.autoplayTimeout || 5000,
+                    disableOnInteraction: false,
+                    pauseOnMouseEnter: owlCfg.autoplayHoverPause || false
+                };
             }
 
-            // Recalcular após layout/CSS final da página, especialmente quando
-            // o hero usa full-bleed fora do grid padrão.
-            if (window.requestAnimationFrame) {
-                window.requestAnimationFrame(function () {
-                    window.requestAnimationFrame(refreshOwl);
-                });
-            } else {
-                window.setTimeout(refreshOwl, 60);
+            if (owlCfg.nav) {
+                swiperCfg.navigation = {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev'
+                };
             }
 
-            $(window).on('load', refreshOwl);
-            $(window).on('resize orientationchange', function () {
-                window.clearTimeout(resizeTimer);
-                resizeTimer = window.setTimeout(refreshOwl, 160);
-            });
+            if (owlCfg.dots) {
+                swiperCfg.pagination = {
+                    el: '.swiper-pagination',
+                    clickable: true
+                };
+            }
+
+            if (owlCfg.smartSpeed) {
+                swiperCfg.speed = owlCfg.smartSpeed;
+            }
+
+            return swiperCfg;
         }
 
-        function ensureDesktopAutoplay($owl, owlConfig) {
-            var timeout = Math.max(parseInt(owlConfig.autoplayTimeout, 10) || 5000, 1000);
-            var owlInstance = $owl.data('owl.carousel');
+        function initSwiper(selector, rawConfig) {
+            var $container = $(selector);
+            if (!$container.length) { return; }
 
-            if (!owlConfig.autoplay || !$owl.closest('.wrapper_slider.hidden-xs').length) {
-                return;
+            var config = createSwiperConfig(rawConfig);
+            // Hide navigation/pagination dom if not enabled
+            if (!rawConfig.nav) {
+                $container.find('.swiper-button-next, .swiper-button-prev').remove();
+            }
+            if (!rawConfig.dots) {
+                $container.find('.swiper-pagination').remove();
             }
 
-            if (owlInstance && owlInstance._plugins && owlInstance._plugins.autoplay) {
-                $owl.trigger('stop.owl.autoplay');
-                $owl.trigger('play.owl.autoplay', [timeout]);
-            }
+            setTimeout(function() {
+                new Swiper($container.find('.swiper')[0], config);
+            }, 50);
         }
 
-        // OWL v2: anexar eventos ANTES de inicializar (initialized dispara no ctor)
-        function initOwl(selector, owlConfig) {
-            var $owl = $(selector);
-            if (!$owl.length) { return; }
-
-            $owl
-                .on('initialized.owl.carousel', function (e) {
-                    doAnimations($(e.target).find('.owl-item.active').first());
-                })
-                .on('translated.owl.carousel', function (e) {
-                    doAnimations($(e.target).find('.owl-item.active').first());
-                })
-                .owlCarousel(owlConfig);
-
-            scheduleRefresh($owl);
-            ensureDesktopAutoplay($owl, owlConfig);
-        }
-
-        initOwl('.slider_<?php echo (int) $sliderId; ?> .owl', desktopConfig);
-        initOwl('.slider_<?php echo (int) $sliderId; ?>_mobile .owl', mobileConfig);
+        initSwiper('.slider_<?php echo (int) $sliderId; ?>', desktopConfig);
+        initSwiper('.slider_<?php echo (int) $sliderId; ?>_mobile', mobileConfig);
     });
 </script>
 <?php endif; ?>
