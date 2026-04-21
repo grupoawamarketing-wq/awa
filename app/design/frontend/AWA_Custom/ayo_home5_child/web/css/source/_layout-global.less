@@ -11,11 +11,12 @@
 
 // ── Section gap custom properties ─────────────────────────────────────────
 :root {
-    --ds-section-gap:       @ds-space-lg;
-    --ds-section-gap-sm:    @ds-space-md;
-    --ds-section-gap-xs:    @ds-space-sm;
-    --ds-section-first-gap: @ds-space-md;
-    --ds-section-last-gap:  @ds-space-xl;
+    --ds-section-gap:       @awa-section-spacing-mobile;
+    --ds-section-gap-sm:    @awa-space-4;
+    --ds-section-gap-xs:    @awa-space-3;
+    --ds-section-first-gap: @awa-space-4;
+    --ds-section-last-gap:  @awa-section-spacing-tablet;
+    --ds-content-rhythm:    clamp(24px, 2.5vw, 40px);
 }
 
 
@@ -31,12 +32,32 @@
 
 .ds-container--narrow {
     &:extend(.ds-container);
-    max-width: 768px;
+    max-width: @awa-breakpoint-sm;
 }
 
 .ds-container--wide {
     &:extend(.ds-container);
-    max-width: 1600px;
+    max-width: @awa-container-wide-max-width;
+}
+
+// ── Rhythm global entre componentes principais ────────────────────────────
+.page-main > :is(.block, section, .widget):not(:last-child) {
+    margin-bottom: var(--ds-content-rhythm);
+}
+
+// Mantém proporção visual em cards/superfícies elevadas com animação suave.
+.awa-surface-card {
+    border: var(--awa-border-width) solid var(--awa-border);
+    border-radius: var(--awa-radius-md);
+    background: var(--awa-bg-elevated);
+    box-shadow: var(--awa-shadow-xs);
+    transition: box-shadow var(--awa-duration) var(--awa-ease),
+                transform var(--awa-duration-fast) var(--awa-ease);
+
+    &:hover {
+        box-shadow: var(--awa-shadow-md);
+        transform: translateY(var(--awa-hover-lift));
+    }
 }
 
 
@@ -155,8 +176,8 @@
 // ── Responsive ────────────────────────────────────────────────────────────
 @media (max-width: 1023px) {
     :root {
-        --ds-section-gap:      @ds-space-lg;
-        --ds-section-last-gap: @ds-space-xxl;
+        --ds-section-gap:      @awa-section-spacing-tablet;
+        --ds-section-last-gap: @awa-space-9;
     }
 
     .cms-index-index .ayo-home5-wrapper,
@@ -166,11 +187,11 @@
     }
 }
 
-@media (max-width: 767px) {
+@media (max-width: (@awa-breakpoint-sm - 1)) {
     :root {
-        --ds-section-gap:       @ds-space-md;
-        --ds-section-first-gap: @ds-space-sm;
-        --ds-section-last-gap:  @ds-space-xl;
+        --ds-section-gap:       @awa-section-spacing-mobile;
+        --ds-section-first-gap: @awa-space-3;
+        --ds-section-last-gap:  @awa-space-8;
     }
 
     .cms-index-index .awa-section-header {
@@ -190,10 +211,10 @@
     }
 }
 
-@media (max-width: 479px) {
+@media (max-width: (@awa-breakpoint-xs - 1)) {
     :root {
-        --ds-section-gap:      @ds-space-sm;
-        --ds-section-last-gap: @ds-space-lg;
+        --ds-section-gap:      @awa-space-6;
+        --ds-section-last-gap: @awa-space-7;
     }
 
     .cms-index-index .ayo-home5-wrapper,
@@ -212,10 +233,10 @@
 // Usa clamp() para transição suave entre breakpoints sem saltos.
 //
 // Escala de padding:
-//   320px  → 16px (@ds-space-sm)
-//   768px  → ~24px (interpolado)
-//   1024px → ~27px (interpolado)
-//   1920px → 40px (@ds-space-xl)
+//   320px  → 16px
+//   768px  → ~24px
+//   1280px → ~28px
+//   1440px → 32px
 //
 // Fórmula linear: f(vw) = 11.2px + 1.5vw
 //   clamp(16px, calc(11.2px + 1.5vw), 40px)
@@ -266,11 +287,11 @@ body .page-wrapper .awa-site-header .container {
     box-sizing: border-box;
 }
 
-// ── .container--large (1600px) ────────────────────────────────────────────
+// ── .container--large (wide contract) ─────────────────────────────────────
 // Para layouts que precisam de mais largura (dashboards, comparações)
 .container--large,
 .awa-container--large {
-    max-width: 1600px;
+    max-width: @awa-container-wide-max-width;
     margin-inline: auto;
     padding-inline: var(--ds-container-padding);
     width: 100%;

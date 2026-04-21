@@ -12,7 +12,7 @@
 //   2. Header principal       (~72px, branco, logo + busca + área de conta)
 //   3. Navbar (desktop)       (~52px, #f2f2f2, Departamentos + links)
 //   4. Minicart drawer        (painel lateral direito, 380px)
-//   5. Mobile (<992px)
+//   5. Mobile (<1024)
 //   6. Responsivo intermediário (1280 / 1024px)
 //   7. Acessibilidade — focus rings WCAG 2.1 AA
 // =============================================================================
@@ -44,8 +44,8 @@
 @sp-4: 32px;   // lg
 
 // Raios de borda
-@radius-sm: 4px;
-@radius-md: 8px;
+@hdr-radius-sm: @awa-radius-xs;  // 4px — header-specific
+@hdr-radius-md: @awa-radius-sm;  // 8px — header-specific
 
 // Alturas fixas (medidas na imagem de referência)
 @h-promo-bar:    34px;
@@ -77,9 +77,11 @@ body .page-wrapper .awa-site-header {
   --awa-hdr-text:           var(--awa-text,           @awa-text);
   --awa-hdr-muted:          @awa-muted;
   --awa-hdr-placeholder:    @awa-placeholder;
-  --awa-hdr-radius:         @radius-sm;
+  --awa-hdr-radius:         @hdr-radius-sm;
   --awa-hdr-search-h:       @h-search;
   --awa-hdr-navbar-h:       @h-navbar;
+  --awa-hdr-container-max:  var(--awa-container-max, @awa-container-max-width);
+  --awa-hdr-pad-inline:     clamp(16px, 2vw, 32px);
 }
 
 
@@ -162,14 +164,14 @@ body .page-wrapper .awa-site-header {
 }
 
 // Mobile: ajustar padding da barra B2B
-@media (max-width: 991px) {
+@media (max-width: (@awa-breakpoint-md - 1)) {
   .page-wrapper .awa-site-header {
     .top-header.awa-b2b-promo-bar,
     .awa-b2b-promo-bar[data-awa-header-utility] {
       padding: @sp-1 12px !important;
 
       .awa-b2b-promo-bar__text {
-        font-size: 11px !important;
+        font-size: var(--awa-font-xs) !important;
         line-height: 1.4 !important;
       }
     }
@@ -185,12 +187,12 @@ body .page-wrapper .awa-site-header {
 
 
 // ===========================================================================
-// 2. HEADER PRINCIPAL  (desktop ≥ 992px)
+// 2. HEADER PRINCIPAL  (desktop ≥ 1024)
 //    Altura ~72px, fundo branco, padding 10px vertical.
 //    Layout: logo (flex-shrink:0) | busca (flex:1) | conta + carrinho
 // ===========================================================================
 
-@media (min-width: 992px) {
+@media (min-width: @awa-breakpoint-md) {
 
   .page-wrapper .awa-site-header {
 
@@ -198,10 +200,10 @@ body .page-wrapper .awa-site-header {
     .awa-b2b-promo-bar > .container,
     .awa-main-header .header-main > .container,
     .header-control.awa-nav-bar > .container {
-      max-width: var(--awa-hdr-container-max, 1320px) !important;
+      max-width: var(--awa-hdr-container-max) !important;
       width: 100% !important;
       margin-inline: auto !important;
-      padding-inline: var(--awa-hdr-pad-inline, 24px) !important;
+      padding-inline: var(--awa-hdr-pad-inline) !important;
       box-sizing: border-box !important;
     }
 
@@ -280,9 +282,8 @@ body .page-wrapper .awa-site-header {
       .block.block-search form.search-content {
         align-items: stretch !important;
         background: var(--awa-hdr-surface) !important;
-        border: 1px solid @awa-neutral-300 !important;
-        border-bottom: 1.5px solid @color-primary !important;
-        border-radius: 2px !important;  // 2px — referência imagem
+        border: var(--awa-border-width) solid var(--awa-border, @awa-neutral-300) !important;
+        border-radius: var(--awa-radius-full) !important;
         box-shadow: none !important;
         display: flex !important;
         flex-wrap: nowrap !important;
@@ -295,8 +296,8 @@ body .page-wrapper .awa-site-header {
 
         // Focus-within: anel vermelho suave
         &:focus-within {
-          border-color: @text-light !important;
-          box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.06) !important;
+          border-color: var(--awa-hdr-primary) !important;
+          box-shadow: @awa-focus-ring !important;
         }
       }
 
@@ -311,7 +312,7 @@ body .page-wrapper .awa-site-header {
         box-shadow: none !important;
         color: var(--awa-hdr-text) !important;
         flex: 1 1 auto !important;
-        font-size: 15px !important;
+        font-size: var(--awa-font-md) !important;
         font-weight: 400 !important;
         height: 100% !important;
         margin: 0 !important;
@@ -321,7 +322,7 @@ body .page-wrapper .awa-site-header {
 
         &::placeholder {
           color: var(--awa-hdr-placeholder) !important;
-          font-size: 14px !important;
+          font-size: var(--awa-font-sm) !important;
           opacity: 1 !important;
         }
       }
@@ -347,7 +348,7 @@ body .page-wrapper .awa-site-header {
         align-items: center !important;
         background: transparent !important;
         border: 0 !important;
-        border-radius: 0 2px 2px 0 !important;
+        border-radius: 0 var(--awa-radius-full) var(--awa-radius-full) 0 !important;
         box-shadow: none !important;
         color: @text-light !important;
         cursor: pointer !important;
@@ -363,20 +364,20 @@ body .page-wrapper .awa-site-header {
         width: 48px !important;
 
         &:hover {
-          background: rgba(0, 0, 0, 0.04) !important;
-          color: @awa-muted !important;
+          background: fade(@awa-color-primary, 5%) !important;
+          color: var(--awa-hdr-primary) !important;
         }
 
         &:focus-visible {
-          outline: 2px solid @awa-neutral-300 !important;
-          outline-offset: -3px !important;
+          outline: var(--awa-border-width-strong) solid var(--awa-hdr-primary) !important;
+          outline-offset: -2px !important;
         }
 
         svg {
-          color: @text-light !important;
+          color: currentColor !important;
           fill: none !important;
           height: 20px !important;
-          stroke: @text-light !important;
+          stroke: currentColor !important;
           width: 20px !important;
         }
 
@@ -482,7 +483,7 @@ body .page-wrapper .awa-site-header {
       .counter.qty {
         align-items: center !important;
         background: @awa-white !important;
-        border: 1.5px solid var(--awa-hdr-primary) !important;
+        border: var(--awa-border-width) solid var(--awa-hdr-primary) !important;
         border-radius: 999px !important;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15) !important;
         color: var(--awa-hdr-primary) !important;
@@ -512,7 +513,7 @@ body .page-wrapper .awa-site-header {
 }
 
 // ≥1200px: ampliar gaps
-@media (min-width: 1200px) {
+@media (min-width: @awa-breakpoint-lg) {
   .page-wrapper .awa-site-header {
     .awa-main-header .awa-main-header__inner[data-awa-header-row],
     .awa-main-header .wp-header[data-awa-header-row] {
@@ -526,13 +527,13 @@ body .page-wrapper .awa-site-header {
 
 
 // ===========================================================================
-// 3. NAVBAR DESKTOP  (≥992px)
+// 3. NAVBAR DESKTOP  (≥1024)
 //    ~52px, fundo #f2f2f2, borda superior/inferior suave.
 //    Botão "≡ Departamentos" vermelho 290px.
 //    Links primários: cor texto, hover vermelho.
 // ===========================================================================
 
-@media (min-width: 992px) {
+@media (min-width: @awa-breakpoint-md) {
 
   .page-wrapper .awa-site-header {
 
@@ -703,7 +704,7 @@ body .page-wrapper .awa-site-header {
       // Antes: var(--awa-hdr-text) = #333 — invisível sobre vermelho.
       color: @awa-white !important;
       display: inline-flex !important;
-      font-size: 15px !important;
+      font-size: var(--awa-font-md) !important;
       font-weight: 500 !important;
       height: var(--awa-hdr-navbar-h) !important;
       letter-spacing: 0 !important;
@@ -721,7 +722,7 @@ body .page-wrapper .awa-site-header {
       &:focus-visible {
         outline: 2px solid @awa-white !important;
         outline-offset: -2px !important;
-        border-radius: @radius-sm !important;
+        border-radius: @hdr-radius-sm !important;
       }
 
       // Suprimir chevrons/badges herdados
@@ -736,7 +737,7 @@ body .page-wrapper .awa-site-header {
       sup {
         background: @awa-white !important;
         color: var(--awa-hdr-primary) !important;
-        font-size: 9px !important;
+        font-size: var(--awa-font-size-2xs) !important;
         font-weight: 700 !important;
         padding: 2px 6px !important;
         border-radius: 3px !important;
@@ -779,7 +780,7 @@ body .page-wrapper .awa-site-header {
 }
 
 // 1024px: tablet landscape
-@media (max-width: 1024px) {
+@media (max-width: @awa-breakpoint-md) {
   .page-wrapper .awa-site-header {
     .header-control.awa-nav-bar > .container {
       padding-left: @sp-2 !important;
@@ -934,12 +935,12 @@ body .page-wrapper .awa-site-header {
 
 
 // ===========================================================================
-// 5. MOBILE  (<992px)
+// 5. MOBILE  (<1024)
 //    Grid 2-linhas: [nav | logo | cart] + [search search search]
 //    Promo bar: font-size 11px, padding menor.
 // ===========================================================================
 
-@media (max-width: 991px) {
+@media (max-width: (@awa-breakpoint-md - 1)) {
 
   // Grid mobile do wp-header
   .page-wrapper .awa-site-header .header .header-main .awa-main-header__inner[data-awa-header-row],
@@ -1007,7 +1008,7 @@ body .page-wrapper .awa-site-header {
 }
 
 // 480px: padding mínimo + font-size ≥16px (evita zoom iOS no input)
-@media (max-width: 480px) {
+@media (max-width: @awa-breakpoint-xs) {
   .page-wrapper .awa-site-header .header.awa-main-header {
     padding: 8px 12px !important;
   }
@@ -1037,7 +1038,7 @@ body .page-wrapper {
 *:focus-visible {
   outline: 2px solid var(--awa-primary, @awa-primary) !important;
   outline-offset: 2px !important;
-  border-radius: 2px;
+  border-radius: @awa-radius-xs;
 }
 
 // Suprimir outline em clique (apenas teclado)
@@ -1054,13 +1055,37 @@ body .page-wrapper {
   background: var(--awa-primary) !important;
   color: @awa-white !important;
   padding: @sp-1 @sp-2 !important;
-  border-radius: @radius-sm !important;
+  border-radius: @hdr-radius-sm !important;
   font-weight: 700 !important;
-  font-size: 14px !important;
+  font-size: var(--awa-font-sm) !important;
   text-decoration: none !important;
   transition: top 0.15s ease !important;
 
   &:focus {
     top: @sp-1 !important;
   }
+}
+
+// Corrige a herança tardia do Ayo Home 5 que força texto branco em
+// `.title-category-dropdown span`, apagando o label do gatilho quando ele usa
+// superfície clara no header profissional.
+body .page-wrapper .awa-site-header.awa-header-professional .navigation.verticalmenu.side-verticalmenu > h2.title-category-dropdown,
+body .page-wrapper .awa-site-header.awa-header-professional .navigation.verticalmenu.side-verticalmenu > h2.title-category-dropdown > span,
+body .page-wrapper .awa-site-header.awa-header-professional .navigation.verticalmenu.side-verticalmenu > h2.title-category-dropdown .awa-vmenu-trigger-text,
+body .page-wrapper .awa-site-header.awa-header-professional .navigation.verticalmenu.side-verticalmenu > h2.title-category-dropdown .icon-menu,
+body .page-wrapper .awa-site-header.awa-header-professional .navigation.verticalmenu.side-verticalmenu > h2.title-category-dropdown .vm-icon {
+  color: @awa-neutral-900 !important;
+}
+
+body .page-wrapper .awa-site-header.awa-header-professional .navigation.verticalmenu.side-verticalmenu > h2.title-category-dropdown:hover,
+body .page-wrapper .awa-site-header.awa-header-professional .navigation.verticalmenu.side-verticalmenu > h2.title-category-dropdown:hover > span,
+body .page-wrapper .awa-site-header.awa-header-professional .navigation.verticalmenu.side-verticalmenu > h2.title-category-dropdown:hover .awa-vmenu-trigger-text,
+body .page-wrapper .awa-site-header.awa-header-professional .navigation.verticalmenu.side-verticalmenu > h2.title-category-dropdown:hover .icon-menu,
+body .page-wrapper .awa-site-header.awa-header-professional .navigation.verticalmenu.side-verticalmenu > h2.title-category-dropdown:hover .vm-icon,
+body .page-wrapper .awa-site-header.awa-header-professional .navigation.verticalmenu.side-verticalmenu > h2.title-category-dropdown:focus-visible,
+body .page-wrapper .awa-site-header.awa-header-professional .navigation.verticalmenu.side-verticalmenu > h2.title-category-dropdown:focus-visible > span,
+body .page-wrapper .awa-site-header.awa-header-professional .navigation.verticalmenu.side-verticalmenu > h2.title-category-dropdown:focus-visible .awa-vmenu-trigger-text,
+body .page-wrapper .awa-site-header.awa-header-professional .navigation.verticalmenu.side-verticalmenu > h2.title-category-dropdown:focus-visible .icon-menu,
+body .page-wrapper .awa-site-header.awa-header-professional .navigation.verticalmenu.side-verticalmenu > h2.title-category-dropdown:focus-visible .vm-icon {
+  color: @awa-color-primary !important;
 }

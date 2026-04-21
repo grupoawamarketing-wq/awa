@@ -32,15 +32,15 @@
     --card-radius:           12px;
     --card-border-color:     var(--awa-border, #e2e2e2);
     --card-bg:               @awa-color-white;
-    --card-padding:          10px;
-    --card-gap:              10px;
+    --card-padding:          @awa-space-3;
+    --card-gap:              @awa-space-3;
     --card-shadow:           0 2px 8px rgba(15, 23, 42, 0.06);
     --card-shadow-hover:     0 14px 34px rgba(15, 23, 42, 0.14);
 
     // Foto
     --card-photo-bg:         @awa-color-white;
-    --card-photo-radius:     10px;
-    --card-photo-min-h:      196px;     // fallback quando aspect-ratio não suportado
+    --card-photo-radius:     @awa-radius-md;
+    --card-photo-min-h:      200px;     // fallback quando aspect-ratio não suportado
 
     // Nome
     --card-name-lines:       2;
@@ -53,17 +53,17 @@
     --card-code-color:       var(--awa-text-muted, #666666);
 
     // Preço
-    --card-price-size:       21px;
+    --card-price-size:       20px;
     --card-price-area-min-h: 64px;      // garante mesma altura em Estado A e B
 
     // CTA
-    --card-cta-h:            46px;
+    --card-cta-h:            @awa-control-height;  // 44px
     --card-cta-size:         14px;
-    --card-cta-radius:       8px;
+    --card-cta-radius:       @awa-radius-sm;
 
     // Grid de produto — controlado por breakpoint (CSS vars evitam duplicação)
     --grid-cols:             2;    // mobile default
-    --grid-gap:              10px;
+    --grid-gap:              @awa-space-3;
 }
 
 
@@ -138,7 +138,7 @@ body,
         flex-direction: column;
         width: 100%;
         height: 100%;
-        border: 1px solid var(--card-border-color);
+        border: var(--awa-border-width) solid var(--card-border-color);
         border-radius: var(--card-radius);
         background: var(--card-bg);
         padding: var(--card-padding);
@@ -178,7 +178,7 @@ body,
         width: 100%;
         aspect-ratio: 1 / 1;
         min-height: var(--card-photo-min-h); // fallback browsers sem aspect-ratio
-        margin-bottom: 10px;
+        margin-bottom: @awa-space-3;
         border-radius: var(--card-photo-radius);
         overflow: hidden;
         // Branco + ícone de câmera: mostra quando imagem quebra / está ausente
@@ -233,8 +233,8 @@ body,
             align-items: center;
             justify-content: center;
             min-height: 22px;
-            padding: 2px 9px;
-            border-radius: @awa-border-radius-sm;
+            padding: 2px @awa-space-2;
+            border-radius: @awa-radius-xs;
             background: var(--awa-primary, #b73337);
             color: @awa-color-white;
             font-size: 10px;
@@ -345,7 +345,7 @@ body,
         display: inline-flex;
         align-items: center;
         gap: 5px;
-        font-size: 11px;
+        font-size: var(--awa-font-xs);
         font-weight: @awa-weight-semibold;
         line-height: 1;
 
@@ -425,7 +425,7 @@ body,
             padding: 2px 6px;
             background: rgba(183, 51, 55, 0.08);
             color: var(--awa-primary, #b73337);
-            font-size: 9px;
+            font-size: var(--awa-font-size-2xs);
             font-weight: @awa-weight-bold;
             letter-spacing: 0.08em;
             border-radius: @awa-border-radius-sm;
@@ -451,10 +451,10 @@ body,
         position: relative;
         font-size: 0; // oculta nó de texto " para ver preços" sem alterar HTML
         // FIX CRO: fundo tintado + borda sutil = bloco visual que comunica valor
-        border: 1px solid rgba(183, 51, 55, 0.15) !important;
+        border: var(--awa-border-width) solid fade(@awa-color-primary, 15%) !important;
         border-radius: var(--card-cta-radius, 8px);
-        background: rgba(183, 51, 55, 0.04) !important;
-        padding: 10px 12px;
+        background: fade(@awa-color-primary, 4%) !important;
+        padding: @awa-space-3;
 
         &::before { content: none; display: none; } // sem placeholder R$ ●●●●
         &::after  { content: none; display: none; } // sem texto duplicado
@@ -466,7 +466,7 @@ body,
             gap: 7px;
             width: 100%;
             padding: 6px 0;
-            font-size: 13px; // restaura tamanho de fonte para o botão
+            font-size: var(--awa-font-sm); // 13px — restaura tamanho de fonte para o botão
             background: transparent !important;
             color: var(--awa-primary, #b73337);
             border: none !important;
@@ -591,9 +591,8 @@ body,
 
 
     // ── 3o. ESTADO A — Botão "Faça login para ver preços" (anônimo) ──────────
-    //   Outline vermelho, fundo transparente, ícone de pessoa via ::before.
-    //   No hover DO CARD (não só do botão) vira sólido: o card é o gatilho,
-    //   isso deixa a interação mais generosa sem exigir precisão no botão.
+    //   CTA sólido vermelho por padrão para manter a mesma hierarquia do
+    //   catálogo aprovado. O hover do card apenas aprofunda o tom e a sombra.
 
     .b2b-login-to-buy-btn {
         position: relative;
@@ -604,9 +603,9 @@ body,
         width: 100%;
         min-height: var(--card-cta-h);
         border-radius: var(--card-cta-radius);
-        border: 1.5px solid var(--awa-primary, #b73337);
-        background: transparent;
-        color: var(--awa-primary, #b73337);
+        border: var(--awa-border-width) solid var(--awa-primary, #b73337);
+        background: var(--awa-primary, #b73337);
+        color: @awa-color-white;
         font-size: var(--card-cta-size);
         font-weight: @awa-weight-semibold;
         line-height: 1.2;
@@ -616,7 +615,7 @@ body,
         cursor: pointer;
         transition: background @awa-transition, color @awa-transition, border-color @awa-transition;
 
-        // Ícone de pessoa — SVG vermelho inline
+        // Ícone de pessoa — SVG branco inline
         &::before {
             content: '';
             display: inline-block;
@@ -624,7 +623,7 @@ body,
             height: 15px;
             flex-shrink: 0;
             background:
-                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='%23b73337' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E")
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E")
                 center / contain no-repeat;
             transition: background-image var(--awa-transition);
         }
@@ -635,14 +634,14 @@ body,
         }
     }
 
-    // Hover do CARD inteiro → botão de login vira sólido vermelho
+    // Hover do CARD inteiro → CTA mantém linguagem primária e ganha profundidade
     .product-item:hover .b2b-login-to-buy-btn {
-        background: var(--awa-primary, #b73337);
+        background: var(--awa-primary-hover, #9a2a2d);
         color: @awa-color-white;
-        border-color: var(--awa-primary, #b73337);
+        border-color: var(--awa-primary-hover, #9a2a2d);
+        box-shadow: 0 8px 20px rgba(183, 51, 55, 0.18);
 
         &::before {
-            // Ícone de pessoa — SVG branco (substitui o vermelho)
             background-image:
                 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E");
         }
@@ -777,10 +776,10 @@ body,
     display: flex;
     align-items: baseline;
     justify-content: space-between;
-    gap: 12px;
+    gap: @awa-space-3;
     flex-wrap: wrap;
-    padding-bottom: var(--awa-section-header-pb, 14px);
-    margin-bottom: var(--awa-section-header-mb, 24px);
+    padding-bottom: var(--awa-section-header-pb, @awa-space-3);
+    margin-bottom: var(--awa-section-header-mb, @awa-space-6);
     border-bottom: var(--awa-section-header-border, 1px solid #e5e5e5);
 
     // Cancela ::after de linha decorativa do tema pai / _awa-product-card.less anterior
@@ -793,10 +792,10 @@ body,
     > h2,
     .awa-section-header__title {
         margin: 0;
-        padding-left: var(--awa-section-header-title-pl, 14px);
+        padding-left: var(--awa-section-header-title-pl, @awa-space-3);
         border-left: var(--awa-section-header-accent, 4px solid #b73337);
         color: var(--awa-section-header-color, #333333);
-        font-size: var(--awa-section-header-font-size, clamp(17px, 2vw, 22px));
+        font-size: var(--awa-section-header-font-size, clamp(18px, 2vw, 24px));
         font-weight: var(--awa-section-header-font-weight, 700);
         line-height: 1.15;
     }
@@ -831,7 +830,7 @@ body,
 
         &::after {
             content: '→';
-            font-size: 15px;
+            font-size: var(--awa-font-md);  // 15px
             line-height: 1;
         }
 
@@ -855,14 +854,14 @@ body,
 //   Circulares, metade fora do container (translateX ±50%).
 //   Padding lateral nos contextos de carousel para abrir espaço às setas.
 //   overflow:visible já declarado na seção 5.
-//   Ocultas em mobile (max-width: 767px).
+//   Ocultas em mobile (max-width: (@awa-breakpoint-sm - 1)).
 
 .rokan-bestseller,
 .rokan-newproduct,
 .block-products-list,
 .block-new-products {
-    padding-left: 24px;
-    padding-right: 24px;
+    padding-left: 12px;
+    padding-right: 12px;
 
     .owl-nav button,
     .owl-prev,
@@ -946,8 +945,8 @@ body,
 
     .swiper-wrapper {
         display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: var(--awa-gap-card, 16px);
+        grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
+        gap: var(--grid-gap);
     }
 
     .swiper-slide {
@@ -960,24 +959,6 @@ body,
     .swiper-button-next,
     .swiper-pagination {
         display: none;
-    }
-}
-
-@media (max-width: 1023px) {
-    .products-swiper:not(.swiper-initialized) .swiper-wrapper {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-}
-
-@media (max-width: 767px) {
-    .products-swiper:not(.swiper-initialized) .swiper-wrapper {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-}
-
-@media (max-width: 479px) {
-    .products-swiper:not(.swiper-initialized) .swiper-wrapper {
-        grid-template-columns: minmax(0, 1fr);
     }
 }
 
@@ -995,19 +976,19 @@ body,
 
 // Default: 2 colunas (mobile) — já declarado em :root na seção 1
 
-@media (min-width: 576px) {
-    :root { --grid-cols: 3; --grid-gap: 14px; }
+@media (min-width: @awa-breakpoint-xs) {
+    :root { --grid-cols: 2; --grid-gap: @awa-space-4; }
 }
 
 @media (min-width: 1024px) {
-    :root { --grid-cols: 4; --grid-gap: 16px; }
+    :root { --grid-cols: 4; --grid-gap: @awa-space-4; }
 }
 
-@media (min-width: 1280px) {
-    :root { --grid-cols: 4; --grid-gap: 20px; }
+@media (min-width: @awa-breakpoint-lg) {
+    :root { --grid-cols: 4; --grid-gap: @awa-space-6; }
 }
 
-@media (min-width: 1536px) {
+@media (min-width: @awa-breakpoint-xl) {
     :root { --grid-cols: 5; }
 }
 
@@ -1016,10 +997,10 @@ body,
 @media (max-width: (@awa-breakpoint-md - 1)) {
 
     :root {
-        --card-name-size:   13px;
-        --card-price-size:  17px;
-        --card-cta-h:       40px;
-        --card-cta-size:    13px;
+        --card-name-size:   var(--awa-font-sm);  // 13px
+        --card-price-size:  var(--awa-font-lg);  // 18px → rounding up
+        --card-cta-h:       @awa-control-height-sm;
+        --card-cta-size:    var(--awa-font-sm);  // 13px
         --card-name-min-h:  calc(13px * 1.4 * 2 + 4px); // ~40px
         --card-photo-min-h: 140px;
     }
@@ -1048,7 +1029,7 @@ body,
 @media (min-width: @awa-breakpoint-md) and (max-width: 1023px) {
 
     :root {
-        --card-gap:         10px;
+        --card-gap:         @awa-space-3;
         --card-price-size:  18px;
         --card-photo-min-h: 160px;
     }
@@ -1064,7 +1045,7 @@ body,
     .rokan-newproduct .swiper-button-prev,
     .rokan-newproduct .swiper-button-next {
         width: 42px;
-        height: 42px;
+        height: @awa-control-height;
     }
 }
 
@@ -1077,8 +1058,8 @@ body,
         --card-name-size:   14px;
         --card-price-size:  21px;
         --card-cta-size:    14px;
-        --card-cta-h:       46px;
-        --card-photo-min-h: 196px;
+        --card-cta-h:       @awa-control-height;  // 44px
+        --card-photo-min-h: 200px;  // fallback (aspect-ratio)
     }
 
     // Carousels de home: 4 por slide no desktop padrão (fallback sem JS carousel)
@@ -1086,7 +1067,7 @@ body,
     .rokan-newproduct .products:not(.owl-carousel):not(.swiper-container) .product-items {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        gap: 20px;
+        gap: @awa-space-6;
     }
 
     .product-item-details,
@@ -1098,7 +1079,7 @@ body,
 
 // ── Large desktop: ≥ 1280px — setas maiores ──────────────────────────────────
 
-@media (min-width: 1280px) {
+@media (min-width: @awa-breakpoint-lg) {
     .rokan-bestseller .owl-nav button,
     .rokan-bestseller .owl-prev,
     .rokan-bestseller .owl-next,
@@ -1114,7 +1095,7 @@ body,
     }
 }
 
-@media (min-width: 1536px) {
+@media (min-width: @awa-breakpoint-xl) {
     .rokan-bestseller .products:not(.owl-carousel):not(.swiper-container) .product-items,
     .rokan-newproduct .products:not(.owl-carousel):not(.swiper-container) .product-items {
         grid-template-columns: repeat(5, 1fr);

@@ -33,24 +33,27 @@ input[type="url"],
 textarea,
 .input-text {
   width: 100%;
-  height: 44px;
+  min-height: @awa-control-height;
   padding: 0 var(--awa-space-md);
-  border: 1px solid var(--awa-border);
-  border-radius: var(--awa-radius-md);
+  border: var(--awa-border-width) solid var(--awa-border);
+  border-radius: var(--awa-radius-sm);  // 8px — inputs
   font-size: var(--awa-font-size-sm);
+  line-height: var(--awa-leading-normal);
   color: var(--awa-text);
   background: var(--awa-bg);
   transition: border-color var(--awa-duration) var(--awa-ease),
-              box-shadow var(--awa-duration) var(--awa-ease);
+              box-shadow var(--awa-duration) var(--awa-ease),
+              background-color var(--awa-duration) var(--awa-ease);
 
   &::placeholder {
     color: var(--awa-text-light);
   }
 
-  &:focus {
+  &:focus,
+  &:focus-visible {
     border-color: var(--awa-primary);
     outline: none;
-    box-shadow: 0 0 0 3px var(--awa-primary-subtle);
+    box-shadow: @awa-focus-ring;
   }
 
   &:disabled {
@@ -64,11 +67,11 @@ textarea,
   &.mage-error,
   &.validation-failed {
     border-color: var(--awa-error);
-    box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.08);
+    box-shadow: 0 0 0 3px fade(@awa-color-error, 12%);
 
     &:focus {
       border-color: var(--awa-error);
-      box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.15);
+      box-shadow: 0 0 0 3px fade(@awa-color-error, 18%);
     }
   }
 }
@@ -84,11 +87,12 @@ textarea {
 // Select
 select {
   width: 100%;
-  height: 44px;
+  min-height: @awa-control-height;
   padding: 0 36px 0 var(--awa-space-md);
-  border: 1px solid var(--awa-border);
-  border-radius: var(--awa-radius-md);
+  border: var(--awa-border-width) solid var(--awa-border);
+  border-radius: var(--awa-radius-sm);  // 8px — inputs
   font-size: var(--awa-font-size-sm);
+  line-height: var(--awa-leading-normal);
   color: var(--awa-text);
   background: var(--awa-bg);
   appearance: none;
@@ -99,18 +103,19 @@ select {
   transition: border-color var(--awa-duration) var(--awa-ease),
               box-shadow var(--awa-duration) var(--awa-ease);
 
-  &:focus {
+  &:focus,
+  &:focus-visible {
     border-color: var(--awa-primary);
     outline: none;
-    box-shadow: 0 0 0 3px var(--awa-primary-subtle);
+    box-shadow: @awa-focus-ring;
   }
 }
 
 // Checkbox e radio
 input[type="checkbox"],
 input[type="radio"] {
-  width: 18px;
-  height: 18px;
+  width: @awa-space-4;  // 16px (touch target via accent-color)
+  height: @awa-space-4;
   accent-color: var(--awa-primary);
   cursor: pointer;
   margin-right: var(--awa-space-xs);
@@ -125,7 +130,22 @@ div.mage-error,
   font-weight: var(--awa-weight-normal);
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: @awa-space-1;  // 4px
+
+  &::before {
+    content: '!';
+    width: 16px;
+    height: 16px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: var(--awa-weight-bold);
+    color: @awa-color-white;
+    background: var(--awa-error);
+    flex-shrink: 0;
+  }
 }
 
 // Field group
@@ -136,7 +156,7 @@ div.mage-error,
 
 // Fieldset
 fieldset {
-  border: 1px solid var(--awa-border);
+  border: var(--awa-border-width) solid var(--awa-border);
   border-radius: var(--awa-radius-lg);
   padding: var(--awa-space-lg);
   margin-bottom: var(--awa-space-lg);
@@ -154,13 +174,13 @@ fieldset {
 .control.qty {
   display: inline-flex;
   align-items: center;
-  border: 1px solid var(--awa-border);
-  border-radius: var(--awa-radius-md);
+  border: var(--awa-border-width) solid var(--awa-border);
+  border-radius: var(--awa-radius-sm);  // 8px — controles
   overflow: hidden;
 
   button, .qty-btn {
-    width: 36px;
-    height: 38px;
+    width: @awa-control-height-sm;  // 36px
+    min-height: @awa-control-height-sm;
     border: none;
     background: var(--awa-bg-surface);
     color: var(--awa-text);
@@ -183,12 +203,12 @@ fieldset {
 
   input.qty,
   input[type="number"].qty {
-    width: 50px;
-    height: 38px;
+    width: @awa-space-9;  // 48px
+    min-height: @awa-control-height-sm;
     text-align: center;
     border: none;
-    border-left: 1px solid var(--awa-border);
-    border-right: 1px solid var(--awa-border);
+    border-left: var(--awa-border-width) solid var(--awa-border);
+    border-right: var(--awa-border-width) solid var(--awa-border);
     border-radius: 0;
     font-weight: var(--awa-weight-semi);
     font-size: var(--awa-font-size-sm);
@@ -198,5 +218,16 @@ fieldset {
     &::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 
     &:focus { box-shadow: none; }
+  }
+}
+
+@media (max-width: (@awa-breakpoint-sm - 1)) {
+  .field,
+  .form-group {
+    margin-bottom: var(--awa-space-sm);
+  }
+
+  fieldset {
+    padding: var(--awa-space-md);
   }
 }

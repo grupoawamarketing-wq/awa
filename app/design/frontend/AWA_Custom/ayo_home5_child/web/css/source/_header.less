@@ -29,8 +29,8 @@
         justify-content: flex-end;
         flex-wrap: wrap;
         gap: 0;
-        padding: 6px 0;
-        min-height: 36px;
+        padding: @awa-space-2 0;
+        min-height: @awa-control-height-sm;
     }
 
     // Links da barra utilitária (conta, ajuda, etc.)
@@ -61,7 +61,7 @@
 
             &:not(:last-child) a::after {
                 content: '|';
-                margin: 0 10px;
+                margin: 0 @awa-space-2;
                 color: rgba(255, 255, 255, 0.25);
             }
 
@@ -87,14 +87,14 @@
     .header.content {
         display: flex;
         align-items: center;
-        gap: 16px;
-        padding-top: 12px;
-        padding-bottom: 12px;
+        gap: @awa-space-4;
+        padding-top: @awa-space-3;
+        padding-bottom: @awa-space-3;
         flex-wrap: nowrap;
 
         @media (max-width: (@awa-breakpoint-md - 1)) {
             flex-wrap: wrap;
-            gap: 8px;
+            gap: @awa-space-2;
         }
     }
 }
@@ -187,16 +187,16 @@
         input[type="text"],
         #search {
             width: 100%;
-            height: 44px;
-            padding: 0 16px;
-            border: 1.5px solid var(--awa-border, #e2e2e2);
+            min-height: @awa-control-height;
+            padding: 0 @awa-space-4;
+            border: var(--awa-border-width) solid var(--awa-border, #e2e2e2);
             border-right: none;
-            border-radius: 4px 0 0 4px;
+            border-radius: @awa-radius-sm 0 0 @awa-radius-sm;
             background: @awa-color-white;
             color: var(--awa-text, #333333);
-            font-size: 14px;
+            font-size: var(--awa-font-sm);
             outline: none;
-            transition: border-color @awa-transition;
+            transition: border-color @awa-transition, box-shadow @awa-transition;
 
             &::placeholder {
                 color: var(--awa-text-muted, #666666);
@@ -204,6 +204,7 @@
 
             &:focus {
                 border-color: var(--awa-primary, #b73337);
+                box-shadow: @awa-focus-ring;
             }
         }
     }
@@ -216,11 +217,11 @@
         align-items: center;
         justify-content: center;
         width: 46px;
-        height: 44px;
+        min-height: @awa-control-height;
         padding: 0;
-        border: 1.5px solid var(--awa-primary, #b73337);
+        border: var(--awa-border-width) solid var(--awa-primary, #b73337);
         border-left: none;
-        border-radius: 0 4px 4px 0;
+        border-radius: 0 @awa-radius-sm @awa-radius-sm 0;
         background: var(--awa-primary, #b73337);
         color: @awa-color-white;
         cursor: pointer;
@@ -230,6 +231,11 @@
         &:hover {
             background: var(--awa-primary-dark, #8e2629);
             border-color: var(--awa-primary-dark, #8e2629);
+        }
+
+        &:focus-visible {
+            outline: var(--awa-border-width-strong) solid var(--awa-primary, #b73337);
+            outline-offset: 2px;
         }
 
         // Ícone de lupa
@@ -257,7 +263,7 @@
         background: @awa-color-white;
         border: 1px solid var(--awa-border, #e2e2e2);
         border-top: none;
-        border-radius: 0 0 4px 4px;
+        border-radius: 0 0 @awa-radius-sm @awa-radius-sm;
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
         overflow: hidden;
 
@@ -268,8 +274,8 @@
 
         dt,
         .title {
-            padding: 8px 16px 4px;
-            font-size: 11px;
+            padding: @awa-space-2 @awa-space-4 @awa-space-1;
+            font-size: var(--awa-font-xs);
             font-weight: @awa-weight-bold;
             text-transform: uppercase;
             letter-spacing: 0.06em;
@@ -288,20 +294,20 @@
         .item {
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 10px 16px;
+            gap: @awa-space-2;
+            padding: @awa-space-3 @awa-space-4;
             cursor: pointer;
             transition: background @awa-transition-fast;
 
             &:hover,
             &[aria-selected="true"] {
-                background: rgba(183, 51, 55, 0.04);
+                background: fade(@awa-color-primary, 4%);
             }
         }
 
         .amount {
             margin-left: auto;
-            font-size: 11px;
+            font-size: var(--awa-font-xs);
             color: var(--awa-text-muted, #666666);
         }
     }
@@ -422,13 +428,13 @@ body .page-wrapper .awa-site-header .awa-header-right-col .minicart-wrapper {
             background: var(--awa-primary, #b73337) !important;
             color: transparent !important;
             font-size: 0 !important;
-            border-radius: 999px !important;
+            border-radius: @awa-radius-full !important;
             position: absolute !important;
             bottom: 1px !important;
             right: 1px !important;
             top: auto !important;
             left: auto !important;
-            border: 1.5px solid @awa-color-white !important;
+            border: var(--awa-border-width) solid @awa-color-white !important;
 
             &.empty { display: none !important; }
         }
@@ -439,13 +445,14 @@ body .page-wrapper .awa-site-header .awa-header-right-col .minicart-wrapper {
         position: absolute;
         right: 0;
         top: calc(100% + 8px);
+        top: calc(100% + @awa-space-2);
         width: 340px;
         background: @awa-color-white;
         border: 1px solid var(--awa-border, #e2e2e2);
         border-radius: @awa-border-radius-lg;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
         z-index: @z-minicart; // _z-index.less
-        padding: 16px;
+        padding: @awa-space-4;
 
         @media (max-width: (@awa-breakpoint-md - 1)) {
             width: calc(100vw - 16px);
@@ -453,19 +460,19 @@ body .page-wrapper .awa-site-header .awa-header-right-col .minicart-wrapper {
         }
 
         .block-title {
-            font-size: 15px;
+            font-size: var(--awa-font-md);
             font-weight: @awa-weight-bold;
             color: var(--awa-text, #333333);
-            padding-bottom: 12px;
-            margin-bottom: 12px;
+            padding-bottom: @awa-space-3;
+            margin-bottom: @awa-space-3;
             border-bottom: 1px solid var(--awa-border, #e2e2e2);
         }
 
         // Itens no mini-cart
         .product-item {
             display: flex;
-            gap: 12px;
-            padding: 10px 0;
+            gap: @awa-space-3;
+            padding: @awa-space-3 0;
             border-bottom: 1px solid var(--awa-border, #e2e2e2);
 
             &:last-child { border-bottom: none; }
@@ -476,7 +483,7 @@ body .page-wrapper .awa-site-header .awa-header-right-col .minicart-wrapper {
             height: 56px;
             flex-shrink: 0;
             border: 1px solid var(--awa-border, #e2e2e2);
-            border-radius: 4px;
+            border-radius: @awa-radius-xs;
             overflow: hidden;
             background: @awa-color-white;
 
@@ -493,10 +500,10 @@ body .page-wrapper .awa-site-header .awa-header-right-col .minicart-wrapper {
         }
 
         .product-item-name {
-            font-size: 13px;
+            font-size: var(--awa-font-sm);
             font-weight: @awa-weight-semibold;
             color: var(--awa-text, #333333);
-            margin-bottom: 4px;
+            margin-bottom: @awa-space-1;
             overflow: hidden;
             display: -webkit-box;
             -webkit-line-clamp: 2;
@@ -510,28 +517,28 @@ body .page-wrapper .awa-site-header .awa-header-right-col .minicart-wrapper {
         }
 
         .price {
-            font-size: 14px;
+            font-size: var(--awa-font-sm);
             font-weight: @awa-weight-bold;
             color: var(--awa-primary, #b73337);
         }
 
         // Botões de ação do mini-cart
         .actions {
-            margin-top: 16px;
+            margin-top: @awa-space-4;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: @awa-space-2;
 
             .action.viewcart {
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                height: 44px;
-                border: 1.5px solid var(--awa-primary, #b73337);
-                border-radius: 4px;
+                min-height: @awa-control-height;
+                border: var(--awa-border-width) solid var(--awa-primary, #b73337);
+                border-radius: @awa-radius-sm;
                 background: transparent;
                 color: var(--awa-primary, #b73337);
-                font-size: 14px;
+                font-size: var(--awa-font-sm);
                 font-weight: @awa-weight-semibold;
                 text-decoration: none;
                 transition: background @awa-transition, color @awa-transition;
@@ -546,12 +553,12 @@ body .page-wrapper .awa-site-header .awa-header-right-col .minicart-wrapper {
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                height: 44px;
-                border-radius: 4px;
+                min-height: @awa-control-height;
+                border-radius: @awa-radius-sm;
                 border: none;
                 background: var(--awa-primary, #b73337) !important; // sobrescreve gradiente do tema pai
                 color: @awa-color-white !important;
-                font-size: 14px;
+                font-size: var(--awa-font-sm);
                 font-weight: @awa-weight-bold;
                 text-decoration: none;
                 cursor: pointer;
@@ -568,8 +575,8 @@ body .page-wrapper .awa-site-header .awa-header-right-col .minicart-wrapper {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 0 0;
-            font-size: 14px;
+            padding: @awa-space-3 0 0;
+            font-size: var(--awa-font-sm);
 
             .label {
                 font-weight: @awa-weight-semibold;
@@ -577,7 +584,7 @@ body .page-wrapper .awa-site-header .awa-header-right-col .minicart-wrapper {
             }
 
             .price {
-                font-size: 16px;
+                font-size: var(--awa-font-md);
                 font-weight: @awa-weight-bold;
                 color: var(--awa-primary, #b73337);
             }
@@ -632,7 +639,7 @@ body .page-wrapper .awa-site-header .awa-header-right-col .minicart-wrapper {
         letter-spacing: 0.01em;
     }
 
-    @media (max-width: 480px) {
+    @media (max-width: @awa-breakpoint-xs) {
         display: none; // utility bar já oculta abaixo de 480px
     }
 }
@@ -646,12 +653,12 @@ body .page-wrapper .awa-site-header .awa-header-right-col .minicart-wrapper {
 .header.content .authorization-link > a {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 7px 16px;
-    border: 1.5px solid var(--awa-border, #e2e2e2);
-    border-radius: 999px;
+    gap: @awa-space-2;
+    padding: @awa-space-2 @awa-space-4;
+    border: var(--awa-border-width) solid var(--awa-border, #e2e2e2);
+    border-radius: @awa-radius-full;
     background: transparent;
-    font-size: 13px;
+    font-size: var(--awa-font-sm);
     font-weight: @awa-weight-semibold;
     color: var(--awa-text, #333333);
     white-space: nowrap;
@@ -670,12 +677,12 @@ body .page-wrapper .awa-site-header .awa-header-right-col .minicart-wrapper {
 .awa-header-cta {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 9px 16px;
+    gap: @awa-space-2;
+    padding: @awa-space-2 @awa-space-4;
     background: var(--awa-primary, #b73337);
     color: @awa-color-white;
-    border-radius: 4px;
-    font-size: 13px;
+    border-radius: @awa-radius-sm;
+    font-size: var(--awa-font-sm);
     font-weight: @awa-weight-semibold;
     text-decoration: none;
     white-space: nowrap;
@@ -732,7 +739,7 @@ body .page-wrapper .awa-site-header .awa-header-right-col .minicart-wrapper {
     }
 
     // Utility bar: oculta em mobile muito pequeno
-    @media (max-width: 480px) {
+    @media (max-width: @awa-breakpoint-xs) {
         .panel.wrapper {
             display: none;
         }
@@ -742,7 +749,7 @@ body .page-wrapper .awa-site-header .awa-header-right-col .minicart-wrapper {
     .block-search {
         .field.search input {
             height: 40px;
-            font-size: 13px;
+            font-size: var(--awa-font-sm);
         }
 
         .action.search,
@@ -775,7 +782,7 @@ body .page-wrapper .awa-site-header .awa-header-right-col .minicart-wrapper {
 // FIX-VMENU-GLOBAL — Departamentos visível em TODAS as páginas (não só home)
 // Antigo BUG 8 removido: agora o menu vertical aparece em cat/PDP/busca/etc.
 // O conteúdo .awa-nav-categories é renderizado pelo layout XML em todas as páginas.
-@media (min-width: 992px) {
+@media (min-width: @awa-breakpoint-md) {
 
     body:not(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) {
 
@@ -884,4 +891,3 @@ body .page-wrapper .awa-site-header .awa-header-right-col .minicart-wrapper {
 .customer-logged-in .hotline_header {
     display: none !important;  // !important: _visibility.less usa !important — manter consistência
 }
-
