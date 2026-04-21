@@ -11,6 +11,7 @@ use GrupoAwamotos\B2B\Helper\Data as B2BHelper;
 
 class QuickOrderLink extends Link
 {
+    private const QUICK_ORDER_ENABLED = false;
     /**
      * @var CustomerSession
      */
@@ -37,7 +38,7 @@ class QuickOrderLink extends Link
      */
     protected function _toHtml()
     {
-        if (!$this->b2bHelper->isEnabled() || !$this->customerSession->isLoggedIn()) {
+        if (!self::QUICK_ORDER_ENABLED || !$this->b2bHelper->isEnabled() || !$this->customerSession->isLoggedIn()) {
             return '';
         }
 

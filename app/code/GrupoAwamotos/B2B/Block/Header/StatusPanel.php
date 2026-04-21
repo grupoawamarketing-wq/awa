@@ -239,7 +239,7 @@ class StatusPanel extends Template
      */
     public function getQuickActions(): array
     {
-        return [
+        $actions = [
             [
                 'url' => $this->getUrl('b2b/account/dashboard'),
                 'label' => __('Painel B2B'),
@@ -251,16 +251,21 @@ class StatusPanel extends Template
                 'icon' => 'file-text-o',
             ],
             [
-                'url' => $this->getUrl('b2b/quote'),
-                'label' => __('Cotações'),
-                'icon' => 'calculator',
-            ],
-            [
                 'url' => $this->getUrl('b2b/shoppinglist'),
                 'label' => __('Listas de Compras'),
                 'icon' => 'list-ul',
             ],
         ];
+
+        if ($this->b2bConfig->isQuoteEnabled()) {
+            array_splice($actions, 2, 0, [[
+                'url' => $this->getUrl('b2b/quote'),
+                'label' => __('Cotações'),
+                'icon' => 'calculator',
+            ]]);
+        }
+
+        return $actions;
     }
 
     /**

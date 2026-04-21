@@ -25,6 +25,7 @@ use GrupoAwamotos\B2B\Model\ResourceModel\ShoppingList\CollectionFactory as Shop
 
 class Dashboard extends Template
 {
+    private const QUICK_ORDER_ENABLED = false;
     /**
      * Cached customer instance — avoids repeated customerRepository->getById() calls per request
      *
@@ -410,6 +411,50 @@ class Dashboard extends Template
     }
 
     /**
+     * Check if requesting a new quote is currently available.
+     */
+    public function isQuoteRequestAvailable(): bool
+    {
+        return $this->b2bHelper->isEnabled() && $this->b2bHelper->isQuoteEnabled();
+    }
+
+    /**
+     * Check if the customer already has quote history.
+     */
+    public function hasQuoteHistory(): bool
+    {
+        return $this->getQuoteRequests(1)->getSize() > 0;
+    }
+
+    /**
+     * Decide if quote actions should be shown on the dashboard.
+     */
+    public function shouldShowQuoteActions(): bool
+    {
+        return $this->isQuoteRequestAvailable() || $this->hasQuoteHistory();
+    }
+
+    /**
+     * Get the most appropriate quote action URL for the current feature state.
+     */
+    public function getQuoteActionUrl(): string
+    {
+        return $this->isQuoteRequestAvailable()
+            ? $this->getQuoteRequestUrl()
+            : $this->getQuotesListUrl();
+    }
+
+    /**
+     * Get the dashboard label for the primary quote action.
+     */
+    public function getQuoteActionLabel(): \Magento\Framework\Phrase
+    {
+        return $this->isQuoteRequestAvailable()
+            ? __('Solicitar Cotação')
+            : __('Ver Cotações');
+    }
+
+    /**
      * Get quotes list URL
      *
      * @return string
@@ -437,6 +482,14 @@ class Dashboard extends Template
     public function getShoppingListUrl(): string
     {
         return $this->getUrl('b2b/shoppinglist');
+    }
+
+    /**
+     * Check if quick order is currently available for customers.
+     */
+    public function isQuickOrderAvailable(): bool
+    {
+        return self::QUICK_ORDER_ENABLED;
     }
 
     /**
@@ -550,6 +603,10 @@ class Dashboard extends Template
 
     private function buildQuoteSuggestion(): ?array
     {
+        if (!$this->isQuoteRequestAvailable()) {
+            return null;
+        }
+
         if ($this->getPendingQuotesCount() > 0 || $this->getApprovedQuotesCount() > 0) {
             return null;
         }
@@ -565,7 +622,7 @@ class Dashboard extends Template
 
     private function buildQuickOrderSuggestion(): ?array
     {
-        if (!$this->isApproved()) {
+        if (!$this->isApproved() || !$this->isQuickOrderAvailable()) {
             return null;
         }
         return [

@@ -127,6 +127,14 @@ class PromoBlock extends Template
     }
 
     /**
+     * Check if quote CTA should be shown.
+     */
+    public function canRequestQuote(): bool
+    {
+        return $this->b2bHelper->isEnabled() && $this->b2bHelper->isQuoteEnabled();
+    }
+
+    /**
      * Short operational rules shown in homepage B2B promo.
      *
      * @return string[]
