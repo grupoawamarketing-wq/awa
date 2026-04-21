@@ -8,6 +8,7 @@ use GrupoAwamotos\ERPIntegration\Api\ConnectionInterface;
 use GrupoAwamotos\ERPIntegration\Model\ProductSuggestion;
 use GrupoAwamotos\ERPIntegration\Model\PurchaseHistory;
 use GrupoAwamotos\ERPIntegration\Model\Rfm\Calculator as RfmCalculator;
+use GrupoAwamotos\ERPIntegration\Model\StockSync;
 use GrupoAwamotos\ERPIntegration\Helper\Data as Helper;
 use Magento\Framework\App\CacheInterface;
 use Magento\Catalog\Api\ProductRepositoryInterface;
@@ -38,6 +39,7 @@ class SuggestedCart
     private ProductRepositoryInterface $productRepository;
     private SearchCriteriaBuilder $searchCriteriaBuilder;
     private StockRegistryInterface $stockRegistry;
+    private StockSync $stockSync;
     private LoggerInterface $logger;
 
     public function __construct(
@@ -50,6 +52,7 @@ class SuggestedCart
         ProductRepositoryInterface $productRepository,
         SearchCriteriaBuilder $searchCriteriaBuilder,
         StockRegistryInterface $stockRegistry,
+        StockSync $stockSync,
         LoggerInterface $logger
     ) {
         $this->connection = $connection;
@@ -61,6 +64,7 @@ class SuggestedCart
         $this->productRepository = $productRepository;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->stockRegistry = $stockRegistry;
+        $this->stockSync = $stockSync;
         $this->logger = $logger;
     }
 
@@ -455,11 +459,17 @@ class SuggestedCart
         try {
             $magentoProducts = $this->productRepository->getList($searchCriteria)->getItems();
             $productsBySku = [];
+            $stockDataBySku = $this->loadStockDataForProducts($magentoProducts);
 
             foreach ($magentoProducts as $product) {
-                $stockItem = $this->stockRegistry->getStockItemBySku($product->getSku());
+                $sku = $product->getSku();
+                $stockData = $stockDataBySku[$sku] ?? null;
 
-                $productsBySku[$product->getSku()] = [
+                if ($stockData === null) {
+                    continue;
+                }
+
+                $productsBySku[$sku] = [
                     'entity_id' => $product->getId(),
                     'name' => $product->getName(),
                     'url_key' => $product->getUrlKey(),
@@ -467,8 +477,8 @@ class SuggestedCart
                     'price' => $product->getPrice(),
                     'final_price' => $product->getFinalPrice(),
                     'image' => $product->getImage(),
-                    'in_stock' => $stockItem->getIsInStock(),
-                    'qty' => $stockItem->getQty(),
+                    'in_stock' => $stockData['in_stock'],
+                    'qty' => $stockData['qty'],
                 ];
             }
         } catch (\Exception $e) {
@@ -519,6 +529,58 @@ class SuggestedCart
         }
 
         return $enriched;
+    }
+
+    /**
+     * Resolve stock for cart suggestions with a batch ERP query when realtime stock is enabled.
+     *
+     * @param array<int, \Magento\Catalog\Api\Data\ProductInterface> $magentoProducts
+     * @return array<string, array{in_stock: bool, qty: float}>
+     */
+    private function loadStockDataForProducts(array $magentoProducts): array
+    {
+        if (empty($magentoProducts)) {
+            return [];
+        }
+
+        $stockDataBySku = [];
+        $skus = [];
+        foreach ($magentoProducts as $product) {
+            $skus[] = $product->getSku();
+        }
+
+        $useRealtimeBatch = $this->helper->isStockSyncEnabled() && $this->helper->isStockRealtime();
+        $realtimeStockBySku = [];
+
+        if ($useRealtimeBatch) {
+            try {
+                $realtimeStockBySku = $this->stockSync->getStocksBySkus($skus);
+            } catch (\Exception $e) {
+                $this->logger->warning('[ERP Cart] Could not batch-load realtime stock: ' . $e->getMessage());
+            }
+        }
+
+        foreach ($magentoProducts as $product) {
+            $sku = $product->getSku();
+            $stockData = $realtimeStockBySku[$sku] ?? null;
+
+            if ($stockData !== null) {
+                $qty = (float) ($stockData['qty'] ?? 0);
+                $stockDataBySku[$sku] = [
+                    'in_stock' => $qty > 0,
+                    'qty' => $qty,
+                ];
+                continue;
+            }
+
+            $stockItem = $this->stockRegistry->getStockItemBySku($sku);
+            $stockDataBySku[$sku] = [
+                'in_stock' => (bool) $stockItem->getIsInStock(),
+                'qty' => (float) $stockItem->getQty(),
+            ];
+        }
+
+        return $stockDataBySku;
     }
 
     /**

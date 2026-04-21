@@ -166,6 +166,63 @@ class StockSyncTest extends TestCase
         $this->assertNull($result);
     }
 
+    public function testGetStocksBySkusSingleBranchQueriesBatchOnce(): void
+    {
+        $this->cache->method('load')->willReturn(false);
+        $this->connection->expects($this->once())
+            ->method('query')
+            ->willReturn([
+                ['MATERIAL' => 'SKU-001', 'QTDE' => 10.0, 'VLRMEDIA' => 25.00, 'DATA' => '2024-01-20'],
+                ['MATERIAL' => 'SKU-002', 'QTDE' => 4.0, 'VLRMEDIA' => 12.50, 'DATA' => '2024-01-20'],
+            ]);
+
+        $result = $this->stockSync->getStocksBySkus(['SKU-001', 'SKU-002']);
+
+        $this->assertSame(10.0, $result['SKU-001']['qty']);
+        $this->assertSame(4.0, $result['SKU-002']['qty']);
+        $this->assertSame(1, $result['SKU-001']['filial']);
+    }
+
+    public function testGetStocksBySkusMultiBranchAggregatesEachSku(): void
+    {
+        $helper = $this->createMock(Helper::class);
+        $helper->method('getStockFilial')->willReturn(1);
+        $helper->method('getStockFiliais')->willReturn([1, 2]);
+        $helper->method('getStockCacheTtl')->willReturn(300);
+        $helper->method('getNegativeCacheTtl')->willReturn(60);
+        $helper->method('isMultiBranchEnabled')->willReturn(true);
+        $helper->method('getStockAggregationMode')->willReturn('sum');
+
+        $stockSync = new StockSync(
+            $this->connection,
+            $helper,
+            $this->productRepository,
+            $this->stockRegistry,
+            $this->syncLogResource,
+            $this->stockValidator,
+            $this->cache,
+            $this->logger,
+            $this->resourceConnection
+        );
+
+        $this->cache->method('load')->willReturn(false);
+        $this->connection->expects($this->once())
+            ->method('query')
+            ->willReturn([
+                ['MATERIAL' => 'SKU-001', 'FILIAL' => 1, 'QTDE' => 3.0, 'VLRMEDIA' => 10.0, 'DATA' => '2024-01-20'],
+                ['MATERIAL' => 'SKU-001', 'FILIAL' => 2, 'QTDE' => 2.0, 'VLRMEDIA' => 11.0, 'DATA' => '2024-01-20'],
+                ['MATERIAL' => 'SKU-002', 'FILIAL' => 1, 'QTDE' => 7.0, 'VLRMEDIA' => 8.0, 'DATA' => '2024-01-19'],
+                ['MATERIAL' => 'SKU-002', 'FILIAL' => 2, 'QTDE' => 1.0, 'VLRMEDIA' => 9.0, 'DATA' => '2024-01-20'],
+            ]);
+
+        $result = $stockSync->getStocksBySkus(['SKU-001', 'SKU-002']);
+
+        $this->assertSame(5.0, $result['SKU-001']['qty']);
+        $this->assertSame(8.0, $result['SKU-002']['qty']);
+        $this->assertSame('multi', $result['SKU-001']['filial']);
+        $this->assertSame([1 => 7.0, 2 => 1.0], $result['SKU-002']['branches']);
+    }
+
     // ========== Multi-Branch Stock Tests ==========
 
     public function testGetStockBySkuMultiBranchSumsQuantities(): void
@@ -374,6 +431,9 @@ class StockSyncTest extends TestCase
         // Stock item already has same quantity
         $stockItem = $this->createMock(StockItemInterface::class);
         $stockItem->method('getQty')->willReturn(10.0); // Same as ERP
+        $stockItem->method('getManageStock')->willReturn(false);
+        $stockItem->method('getUseConfigManageStock')->willReturn(false);
+        $stockItem->method('getIsInStock')->willReturn(true);
 
         // Should NOT update since quantity is same
         $stockItem->expects($this->never())->method('setQty');
@@ -448,9 +508,9 @@ class StockSyncTest extends TestCase
         $stockItem = $this->createMock(StockItemInterface::class);
         $stockItem->method('getQty')->willReturn(10.0);
 
-        // Negative stock should be normalized to 0
+        // Negative stock should be normalized to 0 while keeping availability forced.
         $stockItem->expects($this->once())->method('setQty')->with(0.0);
-        $stockItem->expects($this->once())->method('setIsInStock')->with(false);
+        $stockItem->expects($this->once())->method('setIsInStock')->with(true);
 
         $this->stockRegistry->method('getStockItemBySku')->willReturn($stockItem);
 

@@ -153,9 +153,47 @@ class StockSync implements StockSyncInterface
         ];
     }
 
+    /**
+     * Build SQL bindings for SKU filters.
+     *
+     * @return array{params: array<string, int|string>, list: string}
+     */
+    private function buildSkuBindings(array $skus, array $params = [], string $prefix = 'sku'): array
+    {
+        $placeholders = [];
+        foreach (array_values($skus) as $i => $sku) {
+            $key = ':' . $prefix . $i;
+            $placeholders[] = $key;
+            $params[$key] = trim($sku);
+        }
+
+        return [
+            'params' => $params,
+            'list' => implode(',', $placeholders),
+        ];
+    }
+
     private function isMultiBranch(array $filiais): bool
     {
         return $this->helper->isMultiBranchEnabled() && count($filiais) > 1;
+    }
+
+    /**
+     * @param array<int, string> $skus
+     * @return array<int, string>
+     */
+    private function normalizeSkuList(array $skus): array
+    {
+        $normalized = [];
+        foreach ($skus as $sku) {
+            $sku = trim((string) $sku);
+            if ($sku === '') {
+                continue;
+            }
+            $normalized[$sku] = $sku;
+        }
+
+        return array_values($normalized);
     }
 
     public function getStockBySku(string $sku): ?array
@@ -180,6 +218,65 @@ class StockSync implements StockSyncInterface
         }
 
         return null;
+    }
+
+    /**
+     * Load stock for multiple SKUs while reusing the same cache and ERP query.
+     *
+     * @param array<int, string> $skus
+     * @return array<string, array<string, mixed>>
+     */
+    public function getStocksBySkus(array $skus): array
+    {
+        $normalizedSkus = $this->normalizeSkuList($skus);
+        if (empty($normalizedSkus)) {
+            return [];
+        }
+
+        $filiais = $this->helper->getStockFiliais();
+        $results = [];
+        $missingSkus = [];
+
+        foreach ($normalizedSkus as $sku) {
+            $cacheKeys = $this->generateCacheKeys($sku, $filiais);
+            $cachedResult = $this->getFromCache($cacheKeys['positive'], $cacheKeys['negative'], $sku);
+
+            if ($cachedResult === false) {
+                $missingSkus[] = $sku;
+                continue;
+            }
+
+            if ($cachedResult !== null) {
+                $results[$sku] = $cachedResult;
+            }
+        }
+
+        if (empty($missingSkus)) {
+            return $results;
+        }
+
+        try {
+            $fetchedResults = $this->isMultiBranch($filiais)
+                ? $this->getMultiBranchStockBatch($missingSkus, $filiais)
+                : $this->getSingleBranchStockBatch($missingSkus, (int) $filiais[0]);
+        } catch (\Exception $e) {
+            $this->logger->error('[ERP] Batch stock query error: ' . $e->getMessage(), [
+                'sku_count' => count($missingSkus),
+            ]);
+            return $results;
+        }
+
+        foreach ($missingSkus as $sku) {
+            $cacheKeys = $this->generateCacheKeys($sku, $filiais);
+            $result = $fetchedResults[$sku] ?? null;
+            $this->saveToCache($cacheKeys['positive'], $cacheKeys['negative'], $result, $sku);
+
+            if ($result !== null) {
+                $results[$sku] = $result;
+            }
+        }
+
+        return $results;
     }
 
     /**
@@ -208,6 +305,53 @@ class StockSync implements StockSyncInterface
         }
 
         return null;
+    }
+
+    /**
+     * Load latest stock for multiple SKUs from a single branch in one ERP query.
+     *
+     * @param array<int, string> $skus
+     * @return array<string, array<string, mixed>>
+     */
+    private function getSingleBranchStockBatch(array $skus, int $filial): array
+    {
+        $bindings = $this->buildSkuBindings($skus, [
+            ':filial' => $filial,
+            ':filial2' => $filial,
+        ]);
+        $params = $bindings['params'];
+        $skuList = $bindings['list'];
+
+        $rows = $this->connection->query(
+            "SELECT m.MATERIAL, m.QTDE, m.VLRMEDIA, m.DATA
+             FROM MT_ESTOQUEMEDIA m
+             INNER JOIN (
+                 SELECT MATERIAL, MAX(CODIGO) AS MaxCodigo
+                 FROM MT_ESTOQUEMEDIA
+                 WHERE FILIAL = :filial AND MATERIAL IN ({$skuList})
+                 GROUP BY MATERIAL
+             ) latest ON m.MATERIAL = latest.MATERIAL AND m.CODIGO = latest.MaxCodigo
+             WHERE m.FILIAL = :filial2",
+            $params
+        ) ?? [];
+
+        $results = [];
+        foreach ($rows as $row) {
+            $sku = trim((string) ($row['MATERIAL'] ?? ''));
+            if ($sku === '') {
+                continue;
+            }
+
+            $results[$sku] = [
+                'qty' => (float) $row['QTDE'],
+                'cost' => (float) $row['VLRMEDIA'],
+                'date' => $row['DATA'],
+                'filial' => $filial,
+                'branches' => [$filial => (float) $row['QTDE']],
+            ];
+        }
+
+        return $results;
     }
 
     /**
@@ -269,6 +413,81 @@ class StockSync implements StockSyncInterface
             'branches' => $branches,
             'aggregation_mode' => $this->helper->getStockAggregationMode(),
         ];
+    }
+
+    /**
+     * Load aggregated stock for multiple SKUs from multiple branches in one ERP query.
+     *
+     * @param array<int, string> $skus
+     * @param array<int, int|string> $filiais
+     * @return array<string, array<string, mixed>>
+     */
+    private function getMultiBranchStockBatch(array $skus, array $filiais): array
+    {
+        $bindings = $this->buildFilialBindings($filiais);
+        $bindings = $this->buildSkuBindings($skus, $bindings['params'], 'sku');
+        $params = $bindings['params'];
+        $filialList = $this->buildFilialBindings($filiais)['list'];
+        $skuList = $bindings['list'];
+
+        $rows = $this->connection->query(
+            "SELECT m.MATERIAL, m.FILIAL, m.QTDE, m.VLRMEDIA, m.DATA
+             FROM MT_ESTOQUEMEDIA m
+             INNER JOIN (
+                 SELECT MATERIAL, FILIAL, MAX(CODIGO) AS MaxCodigo
+                 FROM MT_ESTOQUEMEDIA
+                 WHERE FILIAL IN ({$filialList}) AND MATERIAL IN ({$skuList})
+                 GROUP BY MATERIAL, FILIAL
+             ) latest ON m.MATERIAL = latest.MATERIAL
+                     AND m.FILIAL = latest.FILIAL
+                     AND m.CODIGO = latest.MaxCodigo",
+            $params
+        ) ?? [];
+
+        $groupedRows = [];
+        foreach ($rows as $row) {
+            $sku = trim((string) ($row['MATERIAL'] ?? ''));
+            if ($sku === '') {
+                continue;
+            }
+            $groupedRows[$sku][] = $row;
+        }
+
+        $results = [];
+        foreach ($groupedRows as $sku => $skuRows) {
+            $branches = [];
+            $quantities = [];
+            $totalCost = 0.0;
+            $costCount = 0;
+            $latestDate = null;
+
+            foreach ($skuRows as $row) {
+                $filial = (int) $row['FILIAL'];
+                $qty = (float) $row['QTDE'];
+                $branches[$filial] = $qty;
+                $quantities[] = $qty;
+
+                if ((float) $row['VLRMEDIA'] > 0) {
+                    $totalCost += (float) $row['VLRMEDIA'];
+                    $costCount++;
+                }
+
+                if ($latestDate === null || $row['DATA'] > $latestDate) {
+                    $latestDate = $row['DATA'];
+                }
+            }
+
+            $results[$sku] = [
+                'qty' => $this->aggregateQuantities($quantities),
+                'cost' => $costCount > 0 ? $totalCost / $costCount : 0,
+                'date' => $latestDate,
+                'filial' => 'multi',
+                'branches' => $branches,
+                'aggregation_mode' => $this->helper->getStockAggregationMode(),
+            ];
+        }
+
+        return $results;
     }
 
     /**
