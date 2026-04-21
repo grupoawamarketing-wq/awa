@@ -4,28 +4,28 @@
     <type name="Magento\Catalog\Pricing\Render\FinalPriceBox">
         <plugin name="grupoawamotos_catalogfix_finalpricebox_has_special_price_guard"
                 type="GrupoAwamotos\CatalogFix\Plugin\FinalPriceBoxPlugin"
-                sortOrder="10"/>
+                sortOrder="999"/>
     </type>
 
     <!-- Fix: prevent InvalidArgumentException for non-mview indexer action classes -->
     <type name="Magento\Framework\Mview\ActionFactory">
         <plugin name="grupoawamotos_catalogfix_mview_action_factory_guard"
                 type="GrupoAwamotos\CatalogFix\Plugin\MviewActionFactoryPlugin"
-                sortOrder="10"/>
+                sortOrder="999"/>
     </type>
 
     <!-- Fix: add unmapped_type to position sort to prevent OpenSearch 400 errors -->
     <type name="Magento\Elasticsearch\SearchAdapter\Query\Builder\Sort\Position">
         <plugin name="grupoawamotos_catalogfix_position_sort_unmapped"
                 type="GrupoAwamotos\CatalogFix\Plugin\PositionSortUnmappedPlugin"
-                sortOrder="10"/>
+                sortOrder="999"/>
     </type>
 
     <!-- Fix: suppress "Broken reference" INFO log for product.info.media/product.info.main. -->
     <type name="Magento\Framework\View\Layout\ScheduledStructure">
         <plugin name="grupoawamotos_catalogfix_suppress_media_sort_broken_ref"
                 type="GrupoAwamotos\CatalogFix\Plugin\ScheduledStructureSortPlugin"
-                sortOrder="10"/>
+                sortOrder="999"/>
     </type>
 
     <!-- Fix: converte nomes de produtos ALL CAPS (do ERP) para Title Case no frontend -->
@@ -39,13 +39,13 @@
     <type name="Rokanthemes\CustomMenu\Block\Topmenu">
         <plugin name="grupoawamotos_catalogfix_custommenu_badge_aria"
                 type="GrupoAwamotos\CatalogFix\Plugin\CustomMenuBadgeAriaPlugin"
-                sortOrder="10"/>
+                sortOrder="999"/>
     </type>
     <!-- Fix: prevent NoSuchEntityException crash when ordered product is deleted/disabled -->
     <type name="Magento\Sales\CustomerData\LastOrderedItems">
         <plugin name="grupoawamotos_catalogfix_last_ordered_items_no_such_entity"
                 type="GrupoAwamotos\CatalogFix\Plugin\LastOrderedItemsPlugin"
-                sortOrder="10"/>
+                sortOrder="999"/>
     </type>
 
 
@@ -76,7 +76,7 @@
     <type name="Magento\Framework\View\Page\Title">
         <plugin name="grupoawamotos_catalogfix_title_case_normalization"
                 type="GrupoAwamotos\CatalogFix\Plugin\View\Page\Config\TitleNormalizationPlugin"
-                sortOrder="10"/>
+                sortOrder="999"/>
     </type>
 
     <!-- Fix Magento 2.4.8: ProductRenderSearchResults class missing from vendor.
@@ -86,11 +86,13 @@
     <preference for="Magento\Catalog\Api\Data\ProductRenderSearchResultsInterface"
                 type="Magento\Catalog\Model\ProductRenderInfoSearchResults"/>
 
-    <!-- Fix: retorna HTTP 404 real quando Magento redireciona URL inexistente para busca (soft 404 -> hard 404) -->
-    <type name="Magento\CatalogSearch\Controller\Result\Index">
+    <!-- Fix: retorna HTTP 404 real quando Magento/Mirasvit redireciona URL inexistente para busca (soft 404 -> hard 404).
+     Plugin em HttpInterface::beforeSendResponse com sortOrder=999 para rodar APÓS Mirasvit\\Search\\Plugin\\Frontend\\NoRoutePlugin,
+     que converte 404->302. Nossa plugin detecta ?404=1 e reverte para HTTP 404. -->
+    <type name="Magento\Framework\App\Response\HttpInterface">
         <plugin name="grupoawamotos_catalogfix_soft404_header"
                 type="GrupoAwamotos\CatalogFix\Plugin\Soft404Plugin"
-                sortOrder="10"/>
+                sortOrder="999"/>
     </type>
 
 </config>
