@@ -1,23 +1,19 @@
 /**
  * AWA Motos — Auditoria Completa da PDP (Product Detail Page)
  *
- * Complementa pdp-layout.spec.ts com cobertura de:
- *  - SEO: JSON-LD (Product + BreadcrumbList), meta tags, canonical, Open Graph
- *  - SocialProof: badges de visualizações, estoque baixo, mais vendido
- *  - Fitment: tabela de compatibilidade peças × motos, filtro
- *  - B2B: preços por tabela, tier pricing, modal login-to-cart
- *  - Acessibilidade: ARIA, alt text, foco, landmarks
- *  - Performance: LCP preload, lazy loading, CLS, imagens otimizadas
- *  - Core UX: SKU, qty input, stock status, meta viewport
+ * USA UM ÚNICO beforeAll para navegar até a PDP uma única vez.
+ * Todos os describes compartilham a mesma página já carregada.
  */
 
 import { test, expect, Page } from '@playwright/test';
 import path from 'path';
+import fs from 'fs';
 
 const SCREENSHOT_DIR = path.join(__dirname, '..', 'screenshots', 'pdp-audit');
 
 /* Produto real para fallback direto (bagageiro mais vendido) */
 const FALLBACK_PDP_URL = '/bagageiro-titan-125-modelo-00-04-fan-125-modelo-05-08-cromado-macico-3015.html';
+const BASE = 'https://awamotos.com';
 
 /* ── Seletores ────────────────────────────────────────────────────────── */
 const SEL = {
@@ -60,18 +56,32 @@ const SEL = {
   tabTitle:     '.awa-pdp-tabs .awa-tab-title, .product.info.detailed [data-role="title"]',
 } as const;
 
-/* ── Helper: navega para PDP ────────────────────────────────────────── */
-async function goToPDP(page: Page): Promise<void> {
-  // Navega direto ao produto (mais rápido e estável que via listagem)
-  await page.goto(FALLBACK_PDP_URL, { waitUntil: 'domcontentloaded', timeout: 45_000 });
+/* ── Página compartilhada por todos os describes ──────────────────── */
+let pdpPage: Page;
 
-  // Cookie consent
-  const cookieBtn = page.locator('.cookie-btn-accept, #btn-cookie-allow, .allow').first();
-  if (await cookieBtn.isVisible({ timeout: 2_000 }).catch(() => false)) {
-    await cookieBtn.click();
+test.beforeAll(async ({ browser }) => {
+  fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
+  const ctx = await browser.newContext({ ignoreHTTPSErrors: true, locale: 'pt-BR' });
+  pdpPage = await ctx.newPage();
+  try {
+    await pdpPage.goto(`${BASE}${FALLBACK_PDP_URL}`, { waitUntil: 'commit', timeout: 60_000 });
+    const cookieBtn = pdpPage.locator('.cookie-btn-accept, #btn-cookie-allow, .allow').first();
+    if (await cookieBtn.isVisible({ timeout: 2_000 }).catch(() => false)) {
+      await cookieBtn.click();
+    }
+    await pdpPage.waitForSelector(SEL.productName, { timeout: 30_000 });
+    await pdpPage.waitForTimeout(1_000);
+  } catch {
+    // Liveness checks em cada teste fazem o skip
   }
+});
 
-  await page.waitForSelector(SEL.productName, { timeout: 20_000 });
+test.afterAll(async () => {
+  await pdpPage?.context().close().catch(() => {});
+});
+
+async function alive(): Promise<boolean> {
+  try { return await pdpPage.evaluate(() => true); } catch { return false; }
 }
 
 function screenshot(name: string): string {
@@ -82,12 +92,10 @@ function screenshot(name: string): string {
    1 — SEO: STRUCTURED DATA (JSON-LD)
    ════════════════════════════════════════════════════════════════════════ */
 test.describe('PDP Audit — SEO Structured Data', () => {
-  test.beforeEach(async ({ page }) => {
-    await goToPDP(page);
-  });
 
-  test('JSON-LD Product schema presente e válido @seo', async ({ page }) => {
-    const scripts = await page.locator('script[type="application/ld+json"]').allTextContents();
+  test('JSON-LD Product schema presente e válido @seo', async () => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const scripts = await pdpPage.locator('script[type="application/ld+json"]').allTextContents();
     const productSchema = scripts.find(s => s.includes('"@type"') && s.includes('Product'));
     expect(productSchema, 'Deve existir JSON-LD com @type Product').toBeTruthy();
 
@@ -96,7 +104,6 @@ test.describe('PDP Audit — SEO Structured Data', () => {
     expect(parsed.name, 'Product.name não deve ser vazio').toBeTruthy();
     expect(parsed.image, 'Product.image é obrigatório').toBeTruthy();
 
-    // Offers
     const offers = parsed.offers ?? parsed.Offers;
     expect(offers, 'Product.offers é obrigatório para rich results').toBeTruthy();
 
@@ -107,8 +114,9 @@ test.describe('PDP Audit — SEO Structured Data', () => {
     }
   });
 
-  test('JSON-LD BreadcrumbList presente @seo', async ({ page }) => {
-    const scripts = await page.locator('script[type="application/ld+json"]').allTextContents();
+  test('JSON-LD BreadcrumbList presente @seo', async () => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const scripts = await pdpPage.locator('script[type="application/ld+json"]').allTextContents();
     const breadcrumb = scripts.find(s => s.includes('BreadcrumbList'));
     expect(breadcrumb, 'Deve existir JSON-LD BreadcrumbList').toBeTruthy();
 
@@ -117,29 +125,32 @@ test.describe('PDP Audit — SEO Structured Data', () => {
     expect(parsed.itemListElement?.length, 'BreadcrumbList deve ter itens').toBeGreaterThanOrEqual(2);
   });
 
-  test('Meta canonical existe e aponta para URL do produto @seo', async ({ page }) => {
-    const canonical = await page.locator('link[rel="canonical"]').getAttribute('href');
+  test('Meta canonical existe e aponta para URL do produto @seo', async () => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const canonical = await pdpPage.locator('link[rel="canonical"]').getAttribute('href');
     expect(canonical, 'Canonical URL deve existir').toBeTruthy();
     expect(canonical).toMatch(/https?:\/\//);
     expect(canonical).not.toMatch(/\/$/);
   });
 
-  test('Meta title contém nome do produto @seo', async ({ page }) => {
-    const title = await page.title();
-    const productName = await page.locator(SEL.productName).first().textContent();
+  test('Meta title contém nome do produto @seo', async () => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const title = await pdpPage.title();
+    const productName = await pdpPage.locator(SEL.productName).first().textContent();
     expect(title.toLowerCase()).toContain(productName!.trim().toLowerCase().substring(0, 10));
   });
 
-  test('Meta description presente e não vazia @seo', async ({ page }) => {
-    const desc = await page.locator('meta[name="description"]').getAttribute('content');
+  test('Meta description presente e não vazia @seo', async () => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const desc = await pdpPage.locator('meta[name="description"]').getAttribute('content');
     expect(desc, 'Meta description deve existir').toBeTruthy();
     expect(desc!.trim().length, 'Meta description não deve ser vazia').toBeGreaterThan(10);
   });
 
-  test('Open Graph tags presentes @seo', async ({ page }) => {
-    const ogTitle = await page.locator('meta[property="og:title"]').getAttribute('content').catch(() => null);
-    const ogImage = await page.locator('meta[property="og:image"]').getAttribute('content').catch(() => null);
-
+  test('Open Graph tags presentes @seo', async () => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const ogTitle = await pdpPage.locator('meta[property="og:title"]').getAttribute('content').catch(() => null);
+    const ogImage = await pdpPage.locator('meta[property="og:image"]').getAttribute('content').catch(() => null);
     const ogPresent = [ogTitle, ogImage].filter(Boolean).length;
     expect(ogPresent, 'OG tags (title + image) devem existir para compartilhamento social').toBeGreaterThanOrEqual(1);
   });
@@ -149,26 +160,25 @@ test.describe('PDP Audit — SEO Structured Data', () => {
    2 — SOCIAL PROOF MODULE
    ════════════════════════════════════════════════════════════════════════ */
 test.describe('PDP Audit — Social Proof', () => {
-  test.beforeEach(async ({ page }) => {
-    await goToPDP(page);
-  });
 
-  test('Container de Social Proof renderiza (se produto tiver dados) @socialproof', async ({ page }) => {
-    const container = page.locator(SEL.socialProofContainer);
-    const exists = await container.count();
+  test('Container de Social Proof renderiza (se produto tiver dados) @socialproof', async () => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const container = pdpPage.locator(SEL.socialProofContainer);
+    const exists = await container.count().catch(() => 0);
 
     if (exists > 0) {
-      const badges = await page.locator('.social-proof-badge').count();
+      const badges = await pdpPage.locator('.social-proof-badge').count();
       expect(badges, 'Se social-proof-container existe, deve ter pelo menos 1 badge').toBeGreaterThanOrEqual(1);
-      await container.first().screenshot({ path: screenshot('social-proof') });
+      await container.first().screenshot({ path: screenshot('social-proof') }).catch(() => {});
     } else {
       test.skip();
     }
   });
 
-  test('Badge de visualizações tem ícone e texto @socialproof', async ({ page }) => {
-    const badge = page.locator(SEL.viewsBadge).first();
-    if (!await badge.count()) test.skip();
+  test('Badge de visualizações tem ícone e texto @socialproof', async () => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const badge = pdpPage.locator(SEL.viewsBadge).first();
+    if (!await badge.count()) { test.skip(); return; }
 
     await expect(badge).toBeVisible();
     const text = await badge.textContent();
@@ -177,9 +187,10 @@ test.describe('PDP Audit — Social Proof', () => {
     expect(await icon.count(), 'Ícone fa-eye deve existir').toBeGreaterThanOrEqual(1);
   });
 
-  test('Badge de social proof tem role="note" para acessibilidade @socialproof', async ({ page }) => {
-    const badge = page.locator('.social-proof-badge[role="note"]');
-    if (!await badge.count()) test.skip();
+  test('Badge de social proof tem role="note" para acessibilidade @socialproof', async () => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const badge = pdpPage.locator('.social-proof-badge[role="note"]');
+    if (!await badge.count()) { test.skip(); return; }
 
     const ariaLabel = await badge.first().getAttribute('aria-label');
     expect(ariaLabel, 'Badge com role=note deve ter aria-label').toBeTruthy();
@@ -190,36 +201,36 @@ test.describe('PDP Audit — Social Proof', () => {
    3 — FITMENT (Compatibilidade Peças × Motos)
    ════════════════════════════════════════════════════════════════════════ */
 test.describe('PDP Audit — Fitment', () => {
-  test.beforeEach(async ({ page }) => {
-    await goToPDP(page);
-  });
 
-  test('Seção de compatibilidade presente (se produto tem fitment) @fitment', async ({ page }) => {
-    const fitment = page.locator(SEL.fitmentSection);
-    const exists = await fitment.count();
+  test('Seção de compatibilidade presente (se produto tem fitment) @fitment', async () => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const fitment = pdpPage.locator(SEL.fitmentSection);
+    const exists = await fitment.count().catch(() => 0);
 
     if (exists > 0) {
       await expect(fitment).toBeVisible();
-      const title = page.locator(SEL.fitmentTitle);
+      const title = pdpPage.locator(SEL.fitmentTitle);
       await expect(title.first()).toBeVisible();
-      await fitment.screenshot({ path: screenshot('fitment-section') });
+      await fitment.screenshot({ path: screenshot('fitment-section') }).catch(() => {});
     } else {
       test.skip();
     }
   });
 
-  test('Fitment exibe estatísticas (marcas e modelos) @fitment', async ({ page }) => {
-    const stats = page.locator(SEL.fitmentStats);
-    if (!await stats.count()) test.skip();
+  test('Fitment exibe estatísticas (marcas e modelos) @fitment', async () => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const stats = pdpPage.locator(SEL.fitmentStats);
+    if (!await stats.count()) { test.skip(); return; }
 
     await expect(stats.first()).toBeVisible();
     const text = await stats.first().textContent();
     expect(text, 'Stats deve mencionar marcas ou modelos').toMatch(/marca|modelo/i);
   });
 
-  test('Fitment lista pelo menos 1 marca com modelos @fitment', async ({ page }) => {
-    const brandGroups = page.locator(SEL.fitmentBrandGroup);
-    if (!await brandGroups.count()) test.skip();
+  test('Fitment lista pelo menos 1 marca com modelos @fitment', async () => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const brandGroups = pdpPage.locator(SEL.fitmentBrandGroup);
+    if (!await brandGroups.count()) { test.skip(); return; }
 
     const count = await brandGroups.count();
     expect(count, 'Deve haver pelo menos 1 grupo de marca').toBeGreaterThanOrEqual(1);
@@ -231,23 +242,25 @@ test.describe('PDP Audit — Fitment', () => {
     expect(await models.count(), 'Marca deve ter pelo menos 1 modelo').toBeGreaterThanOrEqual(1);
   });
 
-  test('Filtro de fitment funciona (se >10 modelos) @fitment', async ({ page }) => {
-    const filter = page.locator(SEL.fitmentFilter);
-    if (!await filter.count()) test.skip();
+  test('Filtro de fitment funciona (se >10 modelos) @fitment', async () => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const filter = pdpPage.locator(SEL.fitmentFilter);
+    if (!await filter.count()) { test.skip(); return; }
 
     await expect(filter).toBeVisible();
     await filter.fill('Honda');
-    await page.waitForTimeout(500);
+    await pdpPage.waitForTimeout(500);
 
-    const visibleModels = page.locator(SEL.fitmentModelItem + ':not([hidden])');
-    const emptyMsg = page.locator('[data-fitment-empty]:not([hidden])');
+    const visibleModels = pdpPage.locator(SEL.fitmentModelItem + ':not([hidden])');
+    const emptyMsg = pdpPage.locator('[data-fitment-empty]:not([hidden])');
     const hasResults = (await visibleModels.count()) > 0 || (await emptyMsg.count()) > 0;
     expect(hasResults, 'Filtro deve mostrar resultados ou mensagem vazia').toBe(true);
   });
 
-  test('Fitment tem aria-label no stats @fitment @a11y', async ({ page }) => {
-    const stats = page.locator(SEL.fitmentStats);
-    if (!await stats.count()) test.skip();
+  test('Fitment tem aria-label no stats @fitment @a11y', async () => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const stats = pdpPage.locator(SEL.fitmentStats);
+    if (!await stats.count()) { test.skip(); return; }
 
     const ariaLabel = await stats.first().getAttribute('aria-label');
     expect(ariaLabel, 'fitment-stats deve ter aria-label').toBeTruthy();
@@ -258,28 +271,27 @@ test.describe('PDP Audit — Fitment', () => {
    4 — B2B (Preço por Tabela, Tier Pricing, Restrição de Acesso)
    ════════════════════════════════════════════════════════════════════════ */
 test.describe('PDP Audit — B2B', () => {
-  test.beforeEach(async ({ page }) => {
-    await goToPDP(page);
-  });
 
-  test('Modal B2B login-to-cart existe para visitantes @b2b', async ({ page }) => {
-    const modal = page.locator(SEL.b2bLoginModal);
-    const exists = await modal.count();
+  test('Modal B2B login-to-cart existe para visitantes @b2b', async () => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const modal = pdpPage.locator(SEL.b2bLoginModal);
+    const exists = await modal.count().catch(() => 0);
 
     if (exists > 0) {
       const ariaHidden = await modal.getAttribute('aria-hidden');
       expect(ariaHidden, 'Modal deve estar oculto (aria-hidden=true)').toBe('true');
 
-      const options = page.locator(SEL.b2bLoginOption);
+      const options = pdpPage.locator(SEL.b2bLoginOption);
       expect(await options.count(), 'Modal deve ter opções de login/cadastro').toBeGreaterThanOrEqual(1);
     } else {
       test.skip();
     }
   });
 
-  test('Modal B2B tem estrutura acessível @b2b @a11y', async ({ page }) => {
-    const modal = page.locator(SEL.b2bLoginModal + ' .b2b-login-modal');
-    if (!await modal.count()) test.skip();
+  test('Modal B2B tem estrutura acessível @b2b @a11y', async () => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const modal = pdpPage.locator(SEL.b2bLoginModal + ' .b2b-login-modal');
+    if (!await modal.count()) { test.skip(); return; }
 
     const role = await modal.getAttribute('role');
     expect(role, 'Modal deve ter role=dialog').toBe('dialog');
@@ -291,32 +303,34 @@ test.describe('PDP Audit — B2B', () => {
     expect(labelledBy, 'Modal deve ter aria-labelledby').toBeTruthy();
   });
 
-  test('B2B price info renderiza (se cliente logado com tabela) @b2b', async ({ page }) => {
-    const priceInfo = page.locator(SEL.b2bPriceInfo);
-    const exists = await priceInfo.count();
+  test('B2B price info renderiza (se cliente logado com tabela) @b2b', async () => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const priceInfo = pdpPage.locator(SEL.b2bPriceInfo);
+    const exists = await priceInfo.count().catch(() => 0);
 
     if (exists > 0) {
       await expect(priceInfo.first()).toBeVisible();
       const text = await priceInfo.first().textContent();
       expect(text, 'B2B price info deve mencionar tabela').toMatch(/tabela/i);
-      await priceInfo.first().screenshot({ path: screenshot('b2b-price-info') });
+      await priceInfo.first().screenshot({ path: screenshot('b2b-price-info') }).catch(() => {});
     }
   });
 
-  test('B2B tier pricing renderiza (se produto tem tiers) @b2b', async ({ page }) => {
-    const tier = page.locator(SEL.b2bTierPricing);
-    if (!await tier.count()) test.skip();
+  test('B2B tier pricing renderiza (se produto tem tiers) @b2b', async () => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const tier = pdpPage.locator(SEL.b2bTierPricing);
+    if (!await tier.count()) { test.skip(); return; }
 
     await expect(tier.first()).toBeVisible();
 
-    const table = page.locator(SEL.b2bTierTable);
+    const table = pdpPage.locator(SEL.b2bTierTable);
     const headers = await table.locator('th').allTextContents();
     expect(headers.length, 'Tabela tier deve ter cabeçalhos').toBeGreaterThanOrEqual(2);
 
     const rows = await table.locator('tbody tr').count();
     expect(rows, 'Tabela tier deve ter pelo menos 1 faixa').toBeGreaterThanOrEqual(1);
 
-    await tier.first().screenshot({ path: screenshot('b2b-tier-pricing') });
+    await tier.first().screenshot({ path: screenshot('b2b-tier-pricing') }).catch(() => {});
   });
 });
 
@@ -324,12 +338,10 @@ test.describe('PDP Audit — B2B', () => {
    5 — ACESSIBILIDADE
    ════════════════════════════════════════════════════════════════════════ */
 test.describe('PDP Audit — Acessibilidade', () => {
-  test.beforeEach(async ({ page }) => {
-    await goToPDP(page);
-  });
 
-  test('Imagem principal do produto tem alt text @a11y', async ({ page }) => {
-    const mainImg = page.locator('.fotorama img, .gallery-placeholder img, .product.media img').first();
+  test('Imagem principal do produto tem alt text @a11y', async () => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const mainImg = pdpPage.locator('.fotorama img, .gallery-placeholder img, .product.media img').first();
     await mainImg.waitFor({ timeout: 10_000 }).catch(() => null);
 
     if (await mainImg.count()) {
@@ -339,9 +351,10 @@ test.describe('PDP Audit — Acessibilidade', () => {
     }
   });
 
-  test('Botão add-to-cart tem texto acessível @a11y', async ({ page }) => {
-    const btn = page.locator(SEL.addToCart).first();
-    if (!await btn.count()) test.skip();
+  test('Botão add-to-cart tem texto acessível @a11y', async () => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const btn = pdpPage.locator(SEL.addToCart).first();
+    if (!await btn.count()) { test.skip(); return; }
 
     const text = await btn.textContent();
     const ariaLabel = await btn.getAttribute('aria-label');
@@ -352,32 +365,34 @@ test.describe('PDP Audit — Acessibilidade', () => {
     expect(hasAccessibleName, 'Botão add-to-cart deve ter nome acessível').toBe(true);
   });
 
-  test('Campo de quantidade tem label associado @a11y', async ({ page }) => {
-    const qty = page.locator(SEL.qtyInput).first();
-    if (!await qty.count()) test.skip();
+  test('Campo de quantidade tem label associado @a11y', async () => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const qty = pdpPage.locator(SEL.qtyInput).first();
+    if (!await qty.count()) { test.skip(); return; }
 
     const id = await qty.getAttribute('id');
     const ariaLabel = await qty.getAttribute('aria-label');
-    const label = id ? page.locator('label[for="' + id + '"]') : null;
+    const label = id ? pdpPage.locator('label[for="' + id + '"]') : null;
     const hasLabel = (label && await label.count() > 0) || (ariaLabel?.trim().length ?? 0) > 0;
     expect(hasLabel, 'Campo qty deve ter label ou aria-label').toBe(true);
   });
 
-  test('Heading hierarchy: h1 único na PDP @a11y', async ({ page }) => {
-    const h1s = await page.locator('h1').count();
+  test('Heading hierarchy: h1 único na PDP @a11y', async () => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const h1s = await pdpPage.locator('h1').count();
     expect(h1s, 'Deve haver exatamente 1 h1 na PDP').toBe(1);
   });
 
-  test('Links de navegação (breadcrumb) não são genéricos @a11y', async ({ page }) => {
-    // Breadcrumb renderizado via KnockoutJS — aguarda hidratação async
-    await page.waitForFunction(
+  test('Links de navegação (breadcrumb) não são genéricos @a11y', async () => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    await pdpPage.waitForFunction(
       () => document.querySelectorAll('.breadcrumbs a').length > 0,
       { timeout: 8_000 }
-    ).catch(() => { /* breadcrumb pode estar vazio nesta página */ });
+    ).catch(() => {});
 
-    const breadcrumbLinks = page.locator('.breadcrumbs a');
+    const breadcrumbLinks = pdpPage.locator('.breadcrumbs a');
     const count = await breadcrumbLinks.count();
-    if (count === 0) test.skip();
+    if (count === 0) { test.skip(); return; }
 
     for (let i = 0; i < count; i++) {
       const text = await breadcrumbLinks.nth(i).textContent();
@@ -386,8 +401,9 @@ test.describe('PDP Audit — Acessibilidade', () => {
     }
   });
 
-  test('Sem imagens quebradas na PDP @a11y', async ({ page }) => {
-    const brokenImages = await page.evaluate(() => {
+  test('Sem imagens quebradas na PDP @a11y', async () => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const brokenImages = await pdpPage.evaluate(() => {
       const imgs = document.querySelectorAll('img');
       const broken: string[] = [];
       imgs.forEach(img => {
@@ -405,18 +421,17 @@ test.describe('PDP Audit — Acessibilidade', () => {
    6 — PERFORMANCE & CORE WEB VITALS
    ════════════════════════════════════════════════════════════════════════ */
 test.describe('PDP Audit — Performance', () => {
-  test.beforeEach(async ({ page }) => {
-    await goToPDP(page);
-  });
 
-  test('Preload da imagem LCP configurado @perf', async ({ page }) => {
-    const preloadLinks = page.locator('link[rel="preload"][as="image"]');
+  test('Preload da imagem LCP configurado @perf', async () => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const preloadLinks = pdpPage.locator('link[rel="preload"][as="image"]');
     const count = await preloadLinks.count();
     expect(count, 'Deve existir pelo menos 1 link preload para imagem LCP').toBeGreaterThanOrEqual(1);
   });
 
-  test('Imagens abaixo da dobra usam lazy loading @perf', async ({ page }) => {
-    const allImages = await page.locator('img').evaluateAll((imgs) => {
+  test('Imagens abaixo da dobra usam lazy loading @perf', async () => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const allImages = await pdpPage.locator('img').evaluateAll((imgs: HTMLImageElement[]) => {
       return imgs
         .filter(img => {
           const rect = img.getBoundingClientRect();
@@ -435,8 +450,9 @@ test.describe('PDP Audit — Performance', () => {
     ).toBeLessThanOrEqual(3);
   });
 
-  test('Sem CLS significativo na PDP (layout shift) @perf', async ({ page }) => {
-    const cls = await page.evaluate(() => {
+  test('Sem CLS significativo na PDP (layout shift) @perf', async () => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const cls = await pdpPage.evaluate(() => {
       return new Promise<number>((resolve) => {
         let clsValue = 0;
         const observer = new PerformanceObserver((list) => {
@@ -457,14 +473,16 @@ test.describe('PDP Audit — Performance', () => {
     expect(cls, 'CLS=' + cls.toFixed(4) + ' — deve ser < 0.25').toBeLessThan(0.25);
   });
 
-  test('Página carrega CSS customizado (awa-pdp-visual-fix) @perf', async ({ page }) => {
-    const cssLink = page.locator('link[href*="awa-pdp-visual-fix"]');
+  test('Página carrega CSS customizado (awa-pdp-visual-fix) @perf', async () => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const cssLink = pdpPage.locator('link[href*="awa-pdp-visual-fix"]');
     const count = await cssLink.count();
     expect(count, 'CSS awa-pdp-visual-fix deve estar carregado').toBeGreaterThanOrEqual(1);
   });
 
-  test('Scripts de terceiros dentro do limite aceitável @perf', async ({ page }) => {
-    const thirdPartyScripts = await page.evaluate(() => {
+  test('Scripts de terceiros dentro do limite aceitável @perf', async () => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const thirdPartyScripts = await pdpPage.evaluate(() => {
       const scripts = document.querySelectorAll('script[src]');
       const external: string[] = [];
       scripts.forEach(s => {
@@ -492,12 +510,10 @@ test.describe('PDP Audit — Performance', () => {
    7 — CORE UX
    ════════════════════════════════════════════════════════════════════════ */
 test.describe('PDP Audit — Core UX', () => {
-  test.beforeEach(async ({ page }) => {
-    await goToPDP(page);
-  });
 
-  test('SKU do produto visível @ux', async ({ page }) => {
-    const sku = page.locator(SEL.sku).first();
+  test('SKU do produto visível @ux', async () => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const sku = pdpPage.locator(SEL.sku).first();
     const exists = await sku.count();
     if (exists > 0) {
       const text = await sku.textContent();
@@ -505,9 +521,10 @@ test.describe('PDP Audit — Core UX', () => {
     }
   });
 
-  test('Campo de quantidade aceita apenas números positivos @ux', async ({ page }) => {
-    const qty = page.locator(SEL.qtyInput).first();
-    if (!await qty.count()) test.skip();
+  test('Campo de quantidade aceita apenas números positivos @ux', async () => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const qty = pdpPage.locator(SEL.qtyInput).first();
+    if (!await qty.count()) { test.skip(); return; }
 
     const type = await qty.getAttribute('type');
     const min = await qty.getAttribute('min');
@@ -517,50 +534,44 @@ test.describe('PDP Audit — Core UX', () => {
     }
   });
 
-  test('Preço formatado em R$ ou B2B login-to-see-price @ux', async ({ page }) => {
-    // B2B strict mode: guests see "Faça login para ver preços" instead of price
-    const b2bLoginPrice = page.locator('.b2b-login-to-see-price');
+  test('Preço formatado em R$ ou B2B login-to-see-price @ux', async () => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const b2bLoginPrice = pdpPage.locator('.b2b-login-to-see-price');
     const b2bExists = await b2bLoginPrice.count();
     if (b2bExists > 0) {
       await expect(b2bLoginPrice.first()).toBeVisible({ timeout: 8_000 });
       const text = await b2bLoginPrice.first().textContent();
       expect(text, 'B2B login-to-see-price deve mencionar login').toMatch(/login|entrar/i);
-      return; // B2B guest — price hidden by design
+      return;
     }
-    const price = page.locator(SEL.productPrice).first();
+    const price = pdpPage.locator(SEL.productPrice).first();
     await expect(price).toBeVisible({ timeout: 8_000 });
     const text = await price.textContent();
     expect(text, 'Preço deve estar em formato BRL (R$)').toMatch(/R\$/);
   });
 
-  test('Status de estoque visível ou B2B-oculto @ux', async ({ page }) => {
-    const stock = page.locator(SEL.stockStatus).first();
+  test('Status de estoque visível ou B2B-oculto @ux', async () => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const stock = pdpPage.locator(SEL.stockStatus).first();
     const exists = await stock.count();
-    if (exists === 0) {
-      return; // no stock element at all
-    }
-    // B2B: stock may be in DOM but hidden via CSS when b2b-login-to-see-price is active
-    const b2bLoginPrice = page.locator('.b2b-login-to-see-price');
+    if (exists === 0) return;
+    const b2bLoginPrice = pdpPage.locator('.b2b-login-to-see-price');
     const isB2bGuest = (await b2bLoginPrice.count()) > 0;
     const isVisible = await stock.isVisible();
-    if (!isVisible && isB2bGuest) {
-      // Stock hidden by B2B design — this is expected
-      return;
-    }
+    if (!isVisible && isB2bGuest) return;
     await expect(stock).toBeVisible();
   });
 
-  test('Sem console errors JavaScript críticos na PDP @ux', async ({ page }) => {
+  test('Sem console errors JavaScript críticos na PDP @ux', async () => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
     const errors: string[] = [];
-    page.on('console', msg => {
-      if (msg.type() === 'error') {
-        errors.push(msg.text());
-      }
+    pdpPage.on('console', msg => {
+      if (msg.type() === 'error') errors.push(msg.text());
     });
 
-    await page.reload({ waitUntil: 'domcontentloaded' });
-    await page.waitForSelector(SEL.productName, { timeout: 15_000 });
-    await page.waitForTimeout(3_000);
+    await pdpPage.reload({ waitUntil: 'domcontentloaded' }).catch(() => {});
+    await pdpPage.waitForSelector(SEL.productName, { timeout: 15_000 }).catch(() => {});
+    await pdpPage.waitForTimeout(3_000);
 
     const criticalErrors = errors.filter(e =>
       !e.includes('favicon') &&
@@ -583,15 +594,17 @@ test.describe('PDP Audit — Core UX', () => {
     ).toBeLessThanOrEqual(3);
   });
 
-  test('Sem overflow horizontal em qualquer viewport @ux', async ({ page }) => {
-    const hasHScroll = await page.evaluate(() => {
+  test('Sem overflow horizontal em qualquer viewport @ux', async () => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const hasHScroll = await pdpPage.evaluate(() => {
       return document.documentElement.scrollWidth > document.documentElement.clientWidth;
     });
     expect(hasHScroll, 'Sem scroll horizontal').toBe(false);
   });
 
-  test('Meta viewport configurado para mobile @ux', async ({ page }) => {
-    const viewport = await page.locator('meta[name="viewport"]').getAttribute('content');
+  test('Meta viewport configurado para mobile @ux', async () => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const viewport = await pdpPage.locator('meta[name="viewport"]').getAttribute('content');
     expect(viewport, 'Meta viewport deve existir').toBeTruthy();
     expect(viewport).toContain('width=device-width');
   });
@@ -601,17 +614,17 @@ test.describe('PDP Audit — Core UX', () => {
    8 — SCREENSHOTS DOCUMENTAIS
    ════════════════════════════════════════════════════════════════════════ */
 test.describe('PDP Audit — Screenshots', () => {
-  test('Screenshot full-page da PDP para auditoria visual @screenshot', async ({ page }, testInfo) => {
-    await goToPDP(page);
+  test('Screenshot full-page da PDP para auditoria visual @screenshot', async ({}, testInfo) => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
     const vw = testInfo.project.use?.viewport?.width ?? 1280;
 
-    await page.screenshot({
+    await pdpPage.screenshot({
       path: screenshot('full-page-' + vw + 'px'),
       fullPage: true,
       animations: 'disabled',
     });
 
-    await page.screenshot({
+    await pdpPage.screenshot({
       path: screenshot('above-fold-' + vw + 'px'),
       animations: 'disabled',
     });

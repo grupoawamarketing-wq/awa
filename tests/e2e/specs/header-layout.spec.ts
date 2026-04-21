@@ -34,24 +34,51 @@ function screenshotPath(name: string): string {
   return path.join(SCREENSHOT_DIR, `${name}.png`);
 }
 
-async function goHome(page: Page) {
-  await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 30_000 });
-  await waitForHeader(page);
+/** Navega para home e aguarda header — retorna false se Chrome estiver morto */
+async function goHomeQuiet(page: Page): Promise<boolean> {
+  const alive = await Promise.race<boolean>([
+    page.evaluate(() => true).catch(() => false),
+    new Promise<boolean>(r => setTimeout(() => r(false), 5_000)),
+  ]);
+  if (!alive) return false;
+  let ready = false;
+  await Promise.race<void>([
+    (async () => {
+      await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 30_000 });
+      await waitForHeader(page);
+      ready = true;
+    })().catch(() => {}),
+    new Promise<void>(r => setTimeout(r, 45_000)),
+  ]);
+  return ready;
+}
+
+/** Helper para beforeAll: cria contexto+página e navega para home.
+ *  Retorna a página ou null se falhou. */
+async function createHomePage(browser: import('@playwright/test').Browser): Promise<Page | null> {
+  const ctx = await browser.newContext().catch(() => null);
+  if (!ctx) return null;
+  const p = await ctx.newPage().catch(() => null);
+  if (!p) { await ctx.close().catch(() => {}); return null; }
+  const ok = await goHomeQuiet(p).catch(() => false);
+  if (!ok) { await ctx.close().catch(() => {}); return null; }
+  return p;
 }
 
 /* ════════════════════════════════════════════════════════════════════════
    SUITE 1 — ELEMENTOS PRESENTES POR BREAKPOINT
    ════════════════════════════════════════════════════════════════════════ */
+let s1Page: Page | null = null;
 test.describe('Header — Elementos presentes por breakpoint', () => {
-  test.beforeEach(async ({ page }) => {
-    await goHome(page);
-  });
+  test.beforeAll(async ({ browser }) => { s1Page = await createHomePage(browser); });
+  test.afterAll(async () => { await s1Page?.context().close().catch(() => {}); s1Page = null; });
+  test.beforeEach(() => { if (!s1Page) test.skip(); });
 
-  test('Logo é visível no desktop/notebook @header', async ({ page }, testInfo) => {
+  test('Logo é visível no desktop/notebook @header', async ({}, testInfo) => {
     const vw = testInfo.project.use?.viewport?.width ?? 0;
     // Em mobile/tablet (<992px) o tema usa layout diferente — logo fica em container colapsado
     if (vw < 992) test.skip();
-    const logo = page.locator(SELECTORS.logo).first();
+    const logo = s1Page!.locator(SELECTORS.logo).first();
     await expect(logo).toBeVisible({ timeout: 8_000 });
 
     const box = await logo.boundingBox();
@@ -59,56 +86,55 @@ test.describe('Header — Elementos presentes por breakpoint', () => {
     expect(box!.width).toBeGreaterThan(40);
     expect(box!.height).toBeGreaterThan(10);
 
-    // Screenshot documentação
-    await page.locator(SELECTORS.header).screenshot({
-      path: screenshotPath( `header-logo-visible-${vw}px`),
+    await s1Page!.locator(SELECTORS.header).screenshot({
+      path: screenshotPath(`header-logo-visible-${vw}px`),
       animations: 'disabled',
     });
   });
 
-  test('Barra de busca visível no desktop/notebook @header', async ({ page }, testInfo) => {
+  test('Barra de busca visível no desktop/notebook @header', async ({}, testInfo) => {
     const vw = testInfo.project.use?.viewport?.width ?? 0;
 
     if (vw >= BREAKPOINTS.notebookMin) {
       // Notebook: busca deve estar visível no header
-      await expect(page.locator(SELECTORS.topSearch).first()).toBeVisible();
-      const searchBox = await getBBox(page, SELECTORS.topSearch);
+      await expect(s1Page!.locator(SELECTORS.topSearch).first()).toBeVisible();
+      const searchBox = await getBBox(s1Page!, SELECTORS.topSearch);
       expect(searchBox!.width, 'Search bar deve ter largura substancial').toBeGreaterThan(200);
     } else if (vw >= BREAKPOINTS.tabletMin && vw < BREAKPOINTS.notebookMin) {
       // Tablet 768-1023: verificar se search existe (pode estar em grid row 2)
-      const searchVisible = await isVisible(page, SELECTORS.searchBlock);
+      const searchVisible = await isVisible(s1Page!, SELECTORS.searchBlock);
       expect(searchVisible, `Search deve existir na viewport ${vw}px`).toBe(true);
     }
   });
 
-  test('Minicart visível no desktop/notebook @header', async ({ page }, testInfo) => {
+  test('Minicart visível no desktop/notebook @header', async ({}, testInfo) => {
     const vw = testInfo.project.use?.viewport?.width ?? 0;
     // Em mobile (<992px) o minicart fica no menu off-canvas (display:none no header desktop)
     if (vw < 992) test.skip();
-    const minicart = page.locator(SELECTORS.minicart).first();
+    const minicart = s1Page!.locator(SELECTORS.minicart).first();
     await expect(minicart).toBeVisible({ timeout: 8_000 });
     const box = await minicart.boundingBox();
     expect(box!.width).toBeGreaterThan(20);
     expect(box!.height).toBeGreaterThan(20);
   });
 
-  test('Nav toggle (hamburger) visível apenas em mobile (<992px) @header', async ({ page }, testInfo) => {
+  test('Nav toggle (hamburger) visível apenas em mobile (<992px) @header', async ({}, testInfo) => {
     const vw = testInfo.project.use?.viewport?.width ?? 0;
-    const toggle = page.locator(SELECTORS.navToggle).first();
+    const toggle = s1Page!.locator(SELECTORS.navToggle).first();
 
     if (vw < 992) {
       await expect(toggle).toBeVisible({ timeout: 5_000 });
     } else {
       // Desktop/notebook: deve estar oculto via CSS
-      const display = await getCSSProp(page, SELECTORS.navToggle, 'display');
+      const display = await getCSSProp(s1Page!, SELECTORS.navToggle, 'display');
       expect(display, `Nav toggle deve estar oculto em ${vw}px`).toBe('none');
     }
   });
 
-  test('Header nav (categorias + menu) visível em notebook @header', async ({ page }, testInfo) => {
+  test('Header nav (categorias + menu) visível em notebook @header', async ({}, testInfo) => {
     const vw = testInfo.project.use?.viewport?.width ?? 0;
     if (vw >= BREAKPOINTS.notebookMin) {
-      const navVisible = await isVisible(page, SELECTORS.headerNav);
+      const navVisible = await isVisible(s1Page!, SELECTORS.headerNav);
       expect(navVisible, 'Header nav deve estar visível em notebook').toBe(true);
     }
   });
@@ -117,18 +143,19 @@ test.describe('Header — Elementos presentes por breakpoint', () => {
 /* ════════════════════════════════════════════════════════════════════════
    SUITE 2 — LAYOUT E PROPORÇÕES DAS COLUNAS
    ════════════════════════════════════════════════════════════════════════ */
+let s2Page: Page | null = null;
 test.describe('Header — Proporções de colunas e layout', () => {
-  test.beforeEach(async ({ page }) => {
-    await goHome(page);
-  });
+  test.beforeAll(async ({ browser }) => { s2Page = await createHomePage(browser); });
+  test.afterAll(async () => { await s2Page?.context().close().catch(() => {}); s2Page = null; });
+  test.beforeEach(() => { if (!s2Page) test.skip(); });
 
-  test('Search bar ocupa ao menos 40% da largura do header @layout', async ({ page }, testInfo) => {
+  test('Search bar ocupa ao menos 40% da largura do header @layout', async ({}, testInfo) => {
     const vw = testInfo.project.use?.viewport?.width ?? 0;
     if (vw < BREAKPOINTS.notebookMin) test.skip();
 
     // Usa header.awa-site-header (largura total visível) para proporção real
-    const headerBox   = await getBBox(page, SELECTORS.header);
-    const searchBox   = await getBBox(page, SELECTORS.searchBlock);
+    const headerBox   = await getBBox(s2Page!, SELECTORS.header);
+    const searchBox   = await getBBox(s2Page!, SELECTORS.searchBlock);
 
     expect(headerBox, 'Header main deve existir').toBeTruthy();
     expect(searchBox, 'Search bar deve existir').toBeTruthy();
@@ -140,13 +167,13 @@ test.describe('Header — Proporções de colunas e layout', () => {
     ).toBeGreaterThanOrEqual(0.40);
   });
 
-  test('Logo não ultrapassa 20% da largura do header no notebook @layout', async ({ page }, testInfo) => {
+  test('Logo não ultrapassa 20% da largura do header no notebook @layout', async ({}, testInfo) => {
     const vw = testInfo.project.use?.viewport?.width ?? 0;
     if (vw < BREAKPOINTS.notebookMin) test.skip();
 
     // Usa header.awa-site-header (largura total visível) como referência, não .header (só logo-cell)
-    const headerBox = await getBBox(page, SELECTORS.header);
-    const logoBox   = await getBBox(page, SELECTORS.logo);
+    const headerBox = await getBBox(s2Page!, SELECTORS.header);
+    const logoBox   = await getBBox(s2Page!, SELECTORS.logo);
 
     expect(headerBox).toBeTruthy();
     expect(logoBox).toBeTruthy();
@@ -158,50 +185,50 @@ test.describe('Header — Proporções de colunas e layout', () => {
     ).toBeLessThanOrEqual(0.20);
   });
 
-  test('Colunas do header não se sobrepõem @layout', async ({ page }, testInfo) => {
+  test('Colunas do header não se sobrepõem @layout', async ({}, testInfo) => {
     const vw = testInfo.project.use?.viewport?.width ?? 0;
     if (vw < BREAKPOINTS.notebookMin) test.skip();
 
-    const logoBox   = await getBBox(page, SELECTORS.logo);
-    const searchBox = await getBBox(page, SELECTORS.topSearch);
+    const logoBox   = await getBBox(s2Page!, SELECTORS.logo);
+    const searchBox = await getBBox(s2Page!, SELECTORS.topSearch);
 
     expect(logoBox,   'Logo deve ter bounding box').toBeTruthy();
     expect(searchBox, 'Search deve ter bounding box').toBeTruthy();
 
-    const { overlaps, gapPx } = await checkOverlap(page, SELECTORS.logo, SELECTORS.topSearch);
+    const { overlaps, gapPx } = await checkOverlap(s2Page!, SELECTORS.logo, SELECTORS.topSearch);
     expect(
       overlaps,
       `Logo e search bar não devem se sobrepor (gap: ${gapPx}px)`
     ).toBe(false);
 
-    await page.locator(SELECTORS.header).screenshot({
+    await s2Page!.locator(SELECTORS.header).screenshot({
       path: screenshotPath(`header-no-overlap-${vw}px`),
       animations: 'disabled',
     });
   });
 
-  test('Contact slot não se sobrepõe com o search bar @layout', async ({ page }, testInfo) => {
+  test('Contact slot não se sobrepõe com o search bar @layout', async ({}, testInfo) => {
     const vw = testInfo.project.use?.viewport?.width ?? 0;
     if (vw < BREAKPOINTS.notebookMin) test.skip();
 
-    const contactVisible = await isVisible(page, SELECTORS.contactSlot);
+    const contactVisible = await isVisible(s2Page!, SELECTORS.contactSlot);
     if (!contactVisible) {
       test.info().annotations.push({ type: 'info', description: 'Contact slot não visível neste viewport' });
       return;
     }
 
-    const { overlaps } = await checkOverlap(page, SELECTORS.searchBlock, SELECTORS.contactSlot);
+    const { overlaps } = await checkOverlap(s2Page!, SELECTORS.searchBlock, SELECTORS.contactSlot);
     expect(overlaps, 'Contact slot não deve sobrepor o search bar').toBe(false);
   });
 
-  test('Minicart e search bar não se sobrepõem @layout', async ({ page }, testInfo) => {
+  test('Minicart e search bar não se sobrepõem @layout', async ({}, testInfo) => {
     const vw = testInfo.project.use?.viewport?.width ?? 0;
-    const minicartVisible = await isVisible(page, SELECTORS.minicart);
-    const searchVisible   = await isVisible(page, SELECTORS.searchBlock);
+    const minicartVisible = await isVisible(s2Page!, SELECTORS.minicart);
+    const searchVisible   = await isVisible(s2Page!, SELECTORS.searchBlock);
 
     if (!minicartVisible || !searchVisible) return;
 
-    const { overlaps, gapPx } = await checkOverlap(page, SELECTORS.searchBlock, SELECTORS.minicart);
+    const { overlaps, gapPx } = await checkOverlap(s2Page!, SELECTORS.searchBlock, SELECTORS.minicart);
     expect(
       overlaps,
       `Minicart e search não devem se sobrepor (gap: ${gapPx}px) em ${vw}px`
@@ -212,17 +239,18 @@ test.describe('Header — Proporções de colunas e layout', () => {
 /* ════════════════════════════════════════════════════════════════════════
    SUITE 3 — ALINHAMENTO VERTICAL E HORIZONTAL
    ════════════════════════════════════════════════════════════════════════ */
+let s3Page: Page | null = null;
 test.describe('Header — Alinhamento vertical dos componentes', () => {
-  test.beforeEach(async ({ page }) => {
-    await goHome(page);
-  });
+  test.beforeAll(async ({ browser }) => { s3Page = await createHomePage(browser); });
+  test.afterAll(async () => { await s3Page?.context().close().catch(() => {}); s3Page = null; });
+  test.beforeEach(() => { if (!s3Page) test.skip(); });
 
-  test('Logo e search bar estão na mesma faixa vertical @alignment', async ({ page }, testInfo) => {
+  test('Logo e search bar estão na mesma faixa vertical @alignment', async ({}, testInfo) => {
     const vw = testInfo.project.use?.viewport?.width ?? 0;
     if (vw < BREAKPOINTS.notebookMin) test.skip();
 
-    const logoBox   = await getBBox(page, SELECTORS.logo);
-    const searchBox = await getBBox(page, SELECTORS.topSearch);
+    const logoBox   = await getBBox(s3Page!, SELECTORS.logo);
+    const searchBox = await getBBox(s3Page!, SELECTORS.topSearch);
 
     expect(logoBox, 'Logo bounding box').toBeTruthy();
     expect(searchBox, 'Search bounding box').toBeTruthy();
@@ -239,10 +267,10 @@ test.describe('Header — Alinhamento vertical dos componentes', () => {
     ).toBeLessThanOrEqual(24);
   });
 
-  test('Minicart alinhado verticalmente com o search bar @alignment', async ({ page }, testInfo) => {
+  test('Minicart alinhado verticalmente com o search bar @alignment', async ({}, testInfo) => {
     const vw = testInfo.project.use?.viewport?.width ?? 0;
-    const minicartBox = await getBBox(page, SELECTORS.minicart);
-    const searchBox   = await getBBox(page, SELECTORS.topSearch);
+    const minicartBox = await getBBox(s3Page!, SELECTORS.minicart);
+    const searchBox   = await getBBox(s3Page!, SELECTORS.topSearch);
 
     if (!minicartBox || !searchBox) return;
 
@@ -256,14 +284,14 @@ test.describe('Header — Alinhamento vertical dos componentes', () => {
     ).toBeLessThanOrEqual(24);
   });
 
-  test('Linha principal do header não ultrapassa altura máxima @alignment', async ({ page }, testInfo) => {
+  test('Linha principal do header não ultrapassa altura máxima @alignment', async ({}, testInfo) => {
     const vw = testInfo.project.use?.viewport?.width ?? 0;
     // Em mobile (<992px) a linha .header colapsa; testar só em desktop where layout is fixed
     if (vw < 992) test.skip();
 
     // Usa .awa-site-header .header (linha principal: logo + search + minicart + contact)
     // NÃO usa header.awa-site-header (que inclui top-bar ~45px + nav ~60px)
-    const headerBox = await getBBox(page, SELECTORS.headerMain);
+    const headerBox = await getBBox(s3Page!, SELECTORS.headerMain);
     expect(headerBox).toBeTruthy();
 
     // Linha principal: logo row max 120px (sem top-bar, sem nav)
@@ -274,9 +302,9 @@ test.describe('Header — Alinhamento vertical dos componentes', () => {
     ).toBeLessThanOrEqual(maxHeight);
   });
 
-  test('Header alinhado ao topo da viewport @alignment', async ({ page }, testInfo) => {
+  test('Header alinhado ao topo da viewport @alignment', async ({}, testInfo) => {
     const vw = testInfo.project.use?.viewport?.width ?? 0;
-    const headerBox = await getBBox(page, SELECTORS.header);
+    const headerBox = await getBBox(s3Page!, SELECTORS.header);
     expect(headerBox).toBeTruthy();
     // Em tablet (<992px) o header pode ter 24px+ de offset por skip-links; em notebook deve ser 0
     const maxY = vw < 992 ? 30 : 8;
@@ -290,17 +318,18 @@ test.describe('Header — Alinhamento vertical dos componentes', () => {
 /* ════════════════════════════════════════════════════════════════════════
    SUITE 4 — ESPAÇAMENTOS E MARGENS
    ════════════════════════════════════════════════════════════════════════ */
+let s4Page: Page | null = null;
 test.describe('Header — Espaçamentos e padding', () => {
-  test.beforeEach(async ({ page }) => {
-    await goHome(page);
-  });
+  test.beforeAll(async ({ browser }) => { s4Page = await createHomePage(browser); });
+  test.afterAll(async () => { await s4Page?.context().close().catch(() => {}); s4Page = null; });
+  test.beforeEach(() => { if (!s4Page) test.skip(); });
 
-  test('Search input tem padding interno adequado @spacing', async ({ page }, testInfo) => {
+  test('Search input tem padding interno adequado @spacing', async ({}, testInfo) => {
     const vw = testInfo.project.use?.viewport?.width ?? 0;
-    const inputVisible = await isVisible(page, SELECTORS.searchInput);
+    const inputVisible = await isVisible(s4Page!, SELECTORS.searchInput);
     if (!inputVisible) return;
 
-    const props = await getMultipleCSS(page, SELECTORS.searchInput, [
+    const props = await getMultipleCSS(s4Page!, SELECTORS.searchInput, [
       'padding-left', 'padding-right', 'padding-top', 'padding-bottom',
     ]);
 
@@ -316,11 +345,10 @@ test.describe('Header — Espaçamentos e padding', () => {
     ).toBeGreaterThanOrEqual(8);
   });
 
-  test('Header principal tem padding vertical adequado @spacing', async ({ page }, testInfo) => {
+  test('Header principal tem padding vertical adequado @spacing', async ({}, testInfo) => {
     const vw = testInfo.project.use?.viewport?.width ?? 0;
-    const headerMain = '.awa-site-header .header[data-awa-header-main]';
 
-    const props = await getMultipleCSS(page, SELECTORS.headerMain, [
+    const props = await getMultipleCSS(s4Page!, SELECTORS.headerMain, [
       'padding-top', 'padding-bottom',
     ]).catch(() => ({} as Record<string, string>));
 
@@ -333,12 +361,12 @@ test.describe('Header — Espaçamentos e padding', () => {
     });
   });
 
-  test('Gap entre logo e search é uniforme e ≥8px @spacing', async ({ page }, testInfo) => {
+  test('Gap entre logo e search é uniforme e ≥8px @spacing', async ({}, testInfo) => {
     const vw = testInfo.project.use?.viewport?.width ?? 0;
     if (vw < BREAKPOINTS.notebookMin) test.skip();
 
-    const logoBox   = await getBBox(page, SELECTORS.logo);
-    const searchBox = await getBBox(page, SELECTORS.topSearch);
+    const logoBox   = await getBBox(s4Page!, SELECTORS.logo);
+    const searchBox = await getBBox(s4Page!, SELECTORS.topSearch);
 
     expect(logoBox).toBeTruthy();
     expect(searchBox).toBeTruthy();
@@ -353,11 +381,11 @@ test.describe('Header — Espaçamentos e padding', () => {
     ).toBeGreaterThanOrEqual(8);
   });
 
-  test('Gap entre search e minicart ≥4px @spacing', async ({ page }, testInfo) => {
+  test('Gap entre search e minicart ≥4px @spacing', async ({}, testInfo) => {
     const vw = testInfo.project.use?.viewport?.width ?? 0;
 
-    const searchBox   = await getBBox(page, SELECTORS.searchBlock);
-    const minicartBox = await getBBox(page, SELECTORS.minicart);
+    const searchBox   = await getBBox(s4Page!, SELECTORS.searchBlock);
+    const minicartBox = await getBBox(s4Page!, SELECTORS.minicart);
 
     if (!searchBox || !minicartBox) return;
 
@@ -389,7 +417,7 @@ test.describe('Header — Comportamento durante resize', () => {
 
     // Redimensiona para tablet
     await page.setViewportSize({ width: 1024, height: 768 });
-    await page.waitForTimeout(300);
+    await new Promise<void>(r => setTimeout(r, 300));
 
     await page.locator(SELECTORS.header).screenshot({
       path: screenshotPath('header-resize-to-1024px'),
@@ -400,9 +428,10 @@ test.describe('Header — Comportamento durante resize', () => {
     await expect(page.locator(SELECTORS.header)).toBeVisible();
 
     // Verifica ausência de overflow horizontal (soft: pode existir em alguns dispositivos)
-    const hasHScroll = await page.evaluate(() =>
-      document.documentElement.scrollWidth > document.documentElement.clientWidth
-    );
+    const hasHScroll = await Promise.race<boolean>([
+      page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth).catch(() => false),
+      new Promise<boolean>(r => setTimeout(() => r(false), 5_000)),
+    ]);
     // eslint-disable-next-line playwright/no-conditional-expect
     expect.soft(hasHScroll, 'Não deve haver scroll horizontal após resize para 480px').toBe(false);
   });
@@ -418,7 +447,7 @@ test.describe('Header — Comportamento durante resize', () => {
     });
 
     await page.setViewportSize({ width: 480, height: 812 });
-    await page.waitForTimeout(300);
+    await new Promise<void>(r => setTimeout(r, 300));
 
     await page.locator(SELECTORS.header).screenshot({
       path: screenshotPath('header-resize-to-480px'),
@@ -427,9 +456,10 @@ test.describe('Header — Comportamento durante resize', () => {
 
     await expect(page.locator(SELECTORS.header)).toBeVisible();
 
-    const hasHScroll = await page.evaluate(() =>
-      document.documentElement.scrollWidth > document.documentElement.clientWidth
-    );
+    const hasHScroll = await Promise.race<boolean>([
+      page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth).catch(() => false),
+      new Promise<boolean>(r => setTimeout(() => r(false), 5_000)),
+    ]);
     expect(hasHScroll, 'Não deve haver scroll horizontal após resize para 480px').toBe(false);
   });
 
@@ -441,8 +471,11 @@ test.describe('Header — Comportamento durante resize', () => {
     await waitForHeader(page);
 
     // Scroll para metade da página
-    await page.evaluate(() => window.scrollTo({ top: 600, behavior: 'instant' }));
-    await page.waitForTimeout(300);
+    await Promise.race<void>([
+      page.evaluate(() => window.scrollTo({ top: 600, behavior: 'instant' })).catch(() => {}),
+      new Promise<void>(r => setTimeout(r, 3_000)),
+    ]);
+    await new Promise<void>(r => setTimeout(r, 300));
 
     const stickyVisible = await isVisible(page, SELECTORS.stickyHeader);
     if (stickyVisible) {
@@ -496,7 +529,7 @@ test.describe('Header — Screenshots documentais completos', () => {
 
     if (inputVisible) {
       await searchInput.hover();
-      await page.waitForTimeout(150);
+      await new Promise<void>(r => setTimeout(r, 150));
 
       await page.locator(SELECTORS.header).screenshot({
         path: screenshotPath(`header-search-hover-${browser}-${vw}px`),
@@ -509,34 +542,35 @@ test.describe('Header — Screenshots documentais completos', () => {
 /* ════════════════════════════════════════════════════════════════════════
    SUITE 7 — ACESSIBILIDADE E SEMÂNTICA DO HEADER
    ════════════════════════════════════════════════════════════════════════ */
+let s7Page: Page | null = null;
 test.describe('Header — Acessibilidade @a11y', () => {
-  test.beforeEach(async ({ page }) => {
-    await goHome(page);
-  });
+  test.beforeAll(async ({ browser }) => { s7Page = await createHomePage(browser); });
+  test.afterAll(async () => { await s7Page?.context().close().catch(() => {}); s7Page = null; });
+  test.beforeEach(() => { if (!s7Page) test.skip(); });
 
-  test('Header tem role="banner" @a11y', async ({ page }) => {
-    const header = page.locator('header[role="banner"]').first();
+  test('Header tem role="banner" @a11y', async () => {
+    const header = s7Page!.locator('header[role="banner"]').first();
     await expect(header).toBeVisible();
   });
 
-  test('Logo tem link com title/aria-label @a11y', async ({ page }, testInfo) => {
+  test('Logo tem link com title/aria-label @a11y', async ({}, testInfo) => {
     const vw = testInfo.project.use?.viewport?.width ?? 0;
     // Em mobile o logo fica em container colapsado; testar só em notebook/desktop
     if (vw < 992) test.skip();
-    const logoLink = page.locator('.awa-site-header .logo a, .awa-site-header a[aria-label*="Logo"]').first();
+    const logoLink = s7Page!.locator('.awa-site-header .logo a, .awa-site-header a[aria-label*="Logo"]').first();
     await expect(logoLink).toBeVisible();
     const href = await logoLink.getAttribute('href');
     expect(href, 'Logo link deve ter href').toBeTruthy();
   });
 
-  test('Search input tem label ou aria-label @a11y', async ({ page }) => {
-    const inputVisible = await isVisible(page, SELECTORS.searchInput);
+  test('Search input tem label ou aria-label @a11y', async () => {
+    const inputVisible = await isVisible(s7Page!, SELECTORS.searchInput);
     if (!inputVisible) return;
 
-    const input = page.locator(SELECTORS.searchInput).first();
+    const input = s7Page!.locator(SELECTORS.searchInput).first();
     const ariaLabel  = await input.getAttribute('aria-label');
     const id         = await input.getAttribute('id');
-    const hasLabel   = id ? await page.locator(`label[for="${id}"]`).count() > 0 : false;
+    const hasLabel   = id ? await s7Page!.locator(`label[for="${id}"]`).count() > 0 : false;
 
     expect(
       ariaLabel || hasLabel,
@@ -544,12 +578,12 @@ test.describe('Header — Acessibilidade @a11y', () => {
     ).toBeTruthy();
   });
 
-  test('Minicart é identificável e visível @a11y', async ({ page }, testInfo) => {
+  test('Minicart é identificável e visível @a11y', async ({}, testInfo) => {
     const vw = testInfo.project.use?.viewport?.width ?? 0;
     // Em mobile (<992px) o minicart fica oculto no header desktop
     if (vw < 992) test.skip();
     // Usa .mini-cart-wrapper diretamente (o link .awa-header-cart-link tem aria-label mas fica hidden por CSS)
-    const minicart = page.locator('.awa-site-header .mini-cart-wrapper').first();
+    const minicart = s7Page!.locator('.awa-site-header .mini-cart-wrapper').first();
     await expect(minicart).toBeVisible({ timeout: 5_000 });
   });
 });

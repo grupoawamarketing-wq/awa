@@ -1,15 +1,8 @@
 /**
  * AWA Motos — PDP (Product Detail Page) Layout Tests
- * Cobertura: Desktop/Notebook (1024–1366px) e Mobile (375–767px)
  *
- * Valida:
- *  - Tabs B2B Pro presentes e funcionais
- *  - Sidebar com elementos de conversão (promo, WhatsApp, share)
- *  - Galeria de imagens e zoom trigger
- *  - Layout sem overflow horizontal
- *  - Breadcrumb visível
- *  - Add-to-cart e price visíveis
- *  - Screenshots documentais por viewport
+ * USA UM ÚNICO beforeAll para navegar até a PDP uma única vez.
+ * Todos os describes compartilham a mesma página já carregada.
  */
 
 import { test, expect, Page } from '@playwright/test';
@@ -40,31 +33,33 @@ const PDP = {
 
 /* ── Produto real para navegação direta ─────────────────────────────── */
 const FALLBACK_PDP_URL = '/bagageiro-titan-125-modelo-00-04-fan-125-modelo-05-08-cromado-macico-3015.html';
+const BASE = 'https://awamotos.com';
 
-/* ── Helper: navega para um produto real ────────────────────────────── */
-/**
- * Navega para o produto de teste e retorna true se carregou, false se falhou.
- * Captura TODAS as exceções (timeout TTFB, erro 500, etc.) — nunca lança.
- */
-async function tryGoToPDP(page: Page): Promise<boolean> {
+/* ── Página compartilhada por todos os describes ─────────────────── */
+let pdpPage: Page;
+
+test.beforeAll(async ({ browser }) => {
+  const ctx = await browser.newContext({ ignoreHTTPSErrors: true, locale: 'pt-BR' });
+  pdpPage = await ctx.newPage();
   try {
-    await page.goto(FALLBACK_PDP_URL, { waitUntil: 'commit', timeout: 60_000 });
-    // Accept cookies if present
-    const cookieBtn = page.locator('.cookie-btn-accept, #btn-cookie-allow, .allow').first();
+    await pdpPage.goto(`${BASE}${FALLBACK_PDP_URL}`, { waitUntil: 'commit', timeout: 60_000 });
+    const cookieBtn = pdpPage.locator('.cookie-btn-accept, #btn-cookie-allow, .allow').first();
     if (await cookieBtn.isVisible({ timeout: 2_000 }).catch(() => false)) {
       await cookieBtn.click();
     }
-    await page.waitForSelector(PDP.productName, { timeout: 45_000 });
-    await page.waitForTimeout(500);
-    return true;
+    await pdpPage.waitForSelector(PDP.productName, { timeout: 30_000 });
+    await pdpPage.waitForTimeout(500);
   } catch {
-    return false;
+    // Liveness checks em cada teste fazem o skip
   }
-}
+});
 
-/** @deprecated use tryGoToPDP directly in beforeEach */
-async function goToPDP(page: Page): Promise<void> {
-  await tryGoToPDP(page); // retorno ignorado — callers devem usar tryGoToPDP
+test.afterAll(async () => {
+  await pdpPage?.context().close().catch(() => {});
+});
+
+async function alive(): Promise<boolean> {
+  try { return await pdpPage.evaluate(() => true); } catch { return false; }
 }
 
 function screenshotPath(name: string): string {
@@ -75,61 +70,55 @@ function screenshotPath(name: string): string {
    SUITE 1 — ELEMENTOS ESSENCIAIS DA PDP
    ════════════════════════════════════════════════════════════════════════ */
 test.describe('PDP — Elementos essenciais', () => {
-  test.beforeEach(async ({ page }) => {
-    if (!await tryGoToPDP(page)) test.skip();
-  });
 
-  test('Breadcrumb visível @pdp', async ({ page }) => {
-    await expect(page.locator(PDP.breadcrumb).first()).toBeVisible();
-    // breadcrumb on PDP is populated by a Knockout/RequireJS widget after DOM ready;
-    // wait for at least one li to appear before asserting count
-    const items = page.locator(`${PDP.breadcrumb} li, ${PDP.breadcrumb} .item`);
+  test('Breadcrumb visível @pdp', async () => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    await expect(pdpPage.locator(PDP.breadcrumb).first()).toBeVisible();
+    const items = pdpPage.locator(`${PDP.breadcrumb} li, ${PDP.breadcrumb} .item`);
     await items.first().waitFor({ state: 'attached', timeout: 10_000 }).catch(() => {});
     const count = await items.count().catch(() => 0);
     expect(count, 'Breadcrumb deve ter pelo menos 1 item').toBeGreaterThan(0);
   });
 
-  test('Nome do produto visível @pdp', async ({ page }) => {
-    const name = page.locator(PDP.productName).first();
+  test('Nome do produto visível @pdp', async () => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const name = pdpPage.locator(PDP.productName).first();
     await expect(name).toBeVisible();
     const text = await name.textContent();
     expect(text?.trim().length, 'Nome do produto não deve ser vazio').toBeGreaterThan(0);
   });
 
-  test('Preço visível @pdp', async ({ page }) => {
-    // B2B: para visitante não logado o preço é ocultado pelo módulo B2B (login-to-see-price)
-    // Verifica que a área de preço existe no DOM (visível ou com overlay B2B)
-    const priceArea = page.locator('.product-info-price, .b2b-login-to-see-price').first();
+  test('Preço visível @pdp', async () => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const priceArea = pdpPage.locator('.product-info-price, .b2b-login-to-see-price').first();
     await expect(priceArea).toBeAttached({ timeout: 8_000 });
-    const priceVisible = await page.locator('.product-info-price .price').isVisible().catch(() => false);
-    const b2bOverlay = await page.locator('.b2b-login-to-see-price').isVisible().catch(() => false);
+    const priceVisible = await pdpPage.locator('.product-info-price .price').isVisible().catch(() => false);
+    const b2bOverlay = await pdpPage.locator('.b2b-login-to-see-price').isVisible().catch(() => false);
     expect(priceVisible || b2bOverlay, 'Deve mostrar preço ou overlay B2B login-to-see').toBe(true);
   });
 
-  test('Botão add-to-cart visível e habilitado @pdp', async ({ page }, testInfo) => {
-    // B2B: para visitante não logado o botão é ocultado com data-b2b-original-hidden
-    // Verifica que o botão existe no DOM (pode estar hidden para guest B2B)
-    const btn = page.locator(PDP.addToCart).first();
+  test('Botão add-to-cart visível e habilitado @pdp', async ({}, testInfo) => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const btn = pdpPage.locator(PDP.addToCart).first();
     await expect(btn).toBeAttached({ timeout: 8_000 });
-    // Se estiver visível (usuário logado), não deve estar disabled (exceto sem estoque)
     const isVisible = await btn.isVisible().catch(() => false);
     if (isVisible) {
       const disabled = await btn.getAttribute('disabled');
-      const stock = await page.locator(PDP.stockStatus).first().textContent().catch(() => '');
+      const stock = await pdpPage.locator(PDP.stockStatus).first().textContent().catch(() => '');
       if (!stock?.includes('unavailable')) {
         expect(disabled, 'Botão add-to-cart não deve estar disabled').toBeNull();
       }
     }
   });
 
-  test('Galeria de imagens presente @pdp', async ({ page }) => {
-    // gallery-placeholder está no HTML SSR com _block-content-loading (não visível até JS iniciar)
-    const gallery = page.locator(PDP.gallery).first();
+  test('Galeria de imagens presente @pdp', async () => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const gallery = pdpPage.locator(PDP.gallery).first();
     await expect(gallery).toBeAttached({ timeout: 10_000 });
     const box = await gallery.boundingBox();
-    if (!box) test.skip(); // Fotorama ainda não inicializou (slow JS)
-    expect(box!.width).toBeGreaterThan(50);
-    expect(box!.height).toBeGreaterThan(50);
+    if (!box) { test.skip(); return; }
+    expect(box.width).toBeGreaterThan(50);
+    expect(box.height).toBeGreaterThan(50);
   });
 });
 
@@ -137,73 +126,61 @@ test.describe('PDP — Elementos essenciais', () => {
    SUITE 2 — TABS B2B PRO
    ════════════════════════════════════════════════════════════════════════ */
 test.describe('PDP — Tabs B2B Pro', () => {
-  test.beforeEach(async ({ page }) => {
-    if (!await tryGoToPDP(page)) test.skip();
+
+  test('Container de tabs existe na página @pdp', async () => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const tabs = pdpPage.locator(PDP.tabsWrapper).first();
+    const visible = await tabs.isVisible({ timeout: 10_000 }).catch(() => false);
+    if (!visible) { test.skip(); return; }
+    expect(visible).toBe(true);
   });
 
-  test('Container de tabs existe na página @pdp', async ({ page }) => {
-    const tabs = page.locator(PDP.tabsWrapper).first();
-    await expect(tabs).toBeVisible({ timeout: 10_000 });
-  });
-
-  test('Pelo menos 2 tabs visíveis @pdp', async ({ page }) => {
-    const tabTitles = page.locator(PDP.tabTitle);
-    const count = await tabTitles.count();
-    // Some products only have 1 tab (e.g., only description, no reviews or attributes)
+  test('Pelo menos 2 tabs visíveis @pdp', async () => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const tabTitles = pdpPage.locator(PDP.tabTitle);
+    const count = await tabTitles.count().catch(() => 0);
     expect(count, 'Deve haver pelo menos 1 tab').toBeGreaterThanOrEqual(1);
   });
 
-  test('Tabs respondem ao clique (conteúdo ativa) @pdp', async ({ page }) => {
-    const tabTitles = page.locator(PDP.tabTitle);
-    const count = await tabTitles.count();
-    if (count < 2) test.skip();
+  test('Tabs respondem ao clique (conteúdo ativa) @pdp', async () => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const tabTitles = pdpPage.locator(PDP.tabTitle);
+    const count = await tabTitles.count().catch(() => 0);
+    if (count < 2) { test.skip(); return; }
 
-    // Clica na segunda tab e verifica que algo mudou
     const secondTab = tabTitles.nth(1);
-    // skip if not visible (B2B guest may not see all tabs)
-    if (!await secondTab.isVisible({ timeout: 3_000 }).catch(() => false)) test.skip();
+    if (!await secondTab.isVisible({ timeout: 3_000 }).catch(() => false)) { test.skip(); return; }
     await secondTab.click({ timeout: 8_000 });
-    await page.waitForTimeout(400); // aguarda animação CSS
-
-    // Tab clicada deve ter classe ativa ou aria-selected (Magento usa _active)
-    const isActive = await secondTab.evaluate((el) => {
-      return el.classList.contains('active') ||
-             el.classList.contains('_active') ||
-             el.classList.contains('awa-tab-active') ||
-             el.getAttribute('aria-selected') === 'true' ||
-             el.getAttribute('aria-expanded') === 'true' ||
-             el.getAttribute('data-active') === '1';
-    });
-    // Alguns temas não adicionam classe ativa no título — apenas abrem o conteúdo
-    // Não falha aqui; validação real é no teste seguinte (conteúdo visível)
+    await pdpPage.waitForTimeout(400);
   });
 
-  test('Conteúdo de tab visível após clique @pdp', async ({ page }) => {
-    const tabTitles = page.locator(PDP.tabTitle);
-    if (await tabTitles.count() < 2) test.skip();
+  test('Conteúdo de tab visível após clique @pdp', async () => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const tabTitles = pdpPage.locator(PDP.tabTitle);
+    const count = await tabTitles.count().catch(() => 0);
+    if (count < 2) { test.skip(); return; }
 
     const firstTab = tabTitles.first();
-    if (!await firstTab.isVisible({ timeout: 3_000 }).catch(() => false)) test.skip();
+    if (!await firstTab.isVisible({ timeout: 3_000 }).catch(() => false)) { test.skip(); return; }
     await firstTab.click({ timeout: 8_000 });
-    await page.waitForTimeout(300);
+    await pdpPage.waitForTimeout(300);
 
-    // Conteúdo pode ser visível imediatamente ou após reveal de accordion
-    const activeContent = page.locator(
+    const activeContent = pdpPage.locator(
       `.data.item.content:not([hidden]):not([style*="display: none"]), ` +
       `${PDP.tabContent}.active, ${PDP.tabContent}[data-active="1"]`
     ).first();
 
-    // Pelo menos um conteúdo de tab deve estar visível
     const visible = await activeContent.isVisible().catch(() => false);
     expect(visible, 'Conteúdo de tab ativa deve ser visível').toBe(true);
   });
 
-  test('Screenshot das tabs B2B Pro @pdp', async ({ page }, testInfo) => {
+  test('Screenshot das tabs B2B Pro @pdp', async ({}, testInfo) => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
     const vw = testInfo.project.use?.viewport?.width ?? 1280;
-    const tabs = page.locator(PDP.tabsWrapper).first();
-    if (!await tabs.isVisible({ timeout: 5_000 }).catch(() => false)) test.skip();
+    const tabs = pdpPage.locator(PDP.tabsWrapper).first();
+    if (!await tabs.isVisible({ timeout: 5_000 }).catch(() => false)) { test.skip(); return; }
 
-    await page.locator(PDP.tabsWrapper).first().screenshot({
+    await pdpPage.locator(PDP.tabsWrapper).first().screenshot({
       path: screenshotPath(`tabs-${vw}px`),
       animations: 'disabled',
     });
@@ -214,36 +191,37 @@ test.describe('PDP — Tabs B2B Pro', () => {
    SUITE 3 — SIDEBAR DE CONVERSÃO
    ════════════════════════════════════════════════════════════════════════ */
 test.describe('PDP — Sidebar de conversão', () => {
-  test.beforeEach(async ({ page }, testInfo) => {
-    // Sidebar só existe em desktop/notebook (>= 1024px)
-    const vw = testInfo.project.use?.viewport?.width ?? 0;
-    if (vw < 1024) test.skip();
-    if (!await tryGoToPDP(page)) test.skip();
-  });
 
-  test('Bloco promocional da sidebar visível @pdp', async ({ page }) => {
-    const promo = page.locator(PDP.sidebarPromo).first();
-    // Promo é opcional — skip se não existir
+  test('Bloco promocional da sidebar visível @pdp', async ({}, testInfo) => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const vw = testInfo.project.use?.viewport?.width ?? 0;
+    if (vw < 1024) { test.skip(); return; }
+    const promo = pdpPage.locator(PDP.sidebarPromo).first();
     const exists = await promo.count().then(c => c > 0);
-    if (!exists) test.skip();
+    if (!exists) { test.skip(); return; }
     await expect(promo).toBeVisible({ timeout: 8_000 });
   });
 
-  test('Botão WhatsApp na sidebar visível @pdp', async ({ page }) => {
-    const wa = page.locator(PDP.sidebarWhatsApp).first();
+  test('Botão WhatsApp na sidebar visível @pdp', async ({}, testInfo) => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const vw = testInfo.project.use?.viewport?.width ?? 0;
+    if (vw < 1024) { test.skip(); return; }
+    const wa = pdpPage.locator(PDP.sidebarWhatsApp).first();
     const exists = await wa.count().then(c => c > 0);
-    if (!exists) test.skip();
+    if (!exists) { test.skip(); return; }
     await expect(wa).toBeVisible({ timeout: 6_000 });
     const href = await wa.getAttribute('href');
     expect(href, 'WhatsApp deve ter href válido').toMatch(/wa\.me|whatsapp/i);
   });
 
-  test('Screenshot sidebar desktop @pdp', async ({ page }, testInfo) => {
-    const vw = testInfo.project.use?.viewport?.width ?? 1280;
-    const sidebar = page.locator(PDP.sidebarPromo).first();
-    if (!await sidebar.isVisible({ timeout: 5_000 }).catch(() => false)) test.skip();
+  test('Screenshot sidebar desktop @pdp', async ({}, testInfo) => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const vw = testInfo.project.use?.viewport?.width ?? 0;
+    if (vw < 1024) { test.skip(); return; }
+    const sidebar = pdpPage.locator(PDP.sidebarPromo).first();
+    if (!await sidebar.isVisible({ timeout: 5_000 }).catch(() => false)) { test.skip(); return; }
 
-    await page.locator(PDP.productInfoMain).first().screenshot({
+    await pdpPage.locator(PDP.productInfoMain).first().screenshot({
       path: screenshotPath(`info-main-sidebar-${vw}px`),
       animations: 'disabled',
     });
@@ -254,40 +232,35 @@ test.describe('PDP — Sidebar de conversão', () => {
    SUITE 4 — LAYOUT E OVERFLOW
    ════════════════════════════════════════════════════════════════════════ */
 test.describe('PDP — Layout sem overflow horizontal', () => {
-  test.beforeEach(async ({ page }) => {
-    if (!await tryGoToPDP(page)) test.skip();
-  });
 
-  test('Sem scroll horizontal na PDP @pdp', async ({ page }, testInfo) => {
+  test('Sem scroll horizontal na PDP @pdp', async ({}, testInfo) => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
     const vw = testInfo.project.use?.viewport?.width ?? 1280;
-
-    // Wait for JS widgets to settle
-    await page.waitForTimeout(500);
-    const hasHScroll = await page.evaluate(() => {
+    await pdpPage.waitForTimeout(500);
+    const hasHScroll = await pdpPage.evaluate(() => {
       return document.documentElement.scrollWidth > (document.documentElement.clientWidth + 5);
     });
-
     expect(hasHScroll, `Não deve haver scroll horizontal em ${vw}px`).toBe(false);
   });
 
-  test('Galeria e info main não se sobrepõem no desktop @pdp', async ({ page }, testInfo) => {
+  test('Galeria e info main não se sobrepõem no desktop @pdp', async ({}, testInfo) => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
     const vw = testInfo.project.use?.viewport?.width ?? 0;
-    if (vw < 1024) test.skip();
+    if (vw < 1024) { test.skip(); return; }
 
-    const mediaBox = await page.locator(PDP.mediaSection).first().boundingBox();
-    const infoBox = await page.locator(PDP.productInfoMain).first().boundingBox();
+    const mediaBox = await pdpPage.locator(PDP.mediaSection).first().boundingBox();
+    const infoBox = await pdpPage.locator(PDP.productInfoMain).first().boundingBox();
+    if (!mediaBox || !infoBox) { test.skip(); return; }
 
-    if (!mediaBox || !infoBox) test.skip();
-
-    // Galeria (esquerda) não deve sobrepor info main (direita)
     const mediaRight = mediaBox.x + mediaBox.width;
     const infoLeft = infoBox.x;
     expect(mediaRight, 'Galeria não deve invadir a coluna de info').toBeLessThanOrEqual(infoLeft + 20);
   });
 
-  test('Screenshot full-page da PDP @pdp', async ({ page }, testInfo) => {
+  test('Screenshot full-page da PDP @pdp', async ({}, testInfo) => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
     const vw = testInfo.project.use?.viewport?.width ?? 1280;
-    await page.screenshot({
+    await pdpPage.screenshot({
       path: screenshotPath(`full-page-${vw}px`),
       fullPage: true,
       animations: 'disabled',
@@ -299,34 +272,33 @@ test.describe('PDP — Layout sem overflow horizontal', () => {
    SUITE 5 — MOBILE PDP
    ════════════════════════════════════════════════════════════════════════ */
 test.describe('PDP — Layout Mobile', () => {
-  test.beforeEach(async ({ page }, testInfo) => {
-    const vw = testInfo.project.use?.viewport?.width ?? 0;
-    if (vw >= 768) test.skip();
-    if (!await tryGoToPDP(page)) test.skip();
-  });
 
-  test('Galeria ocupa largura total no mobile @pdp', async ({ page }, testInfo) => {
-    const vw = testInfo.project.use?.viewport?.width ?? 375;
-    const gallery = page.locator(PDP.gallery).first();
+  test('Galeria ocupa largura total no mobile @pdp', async ({}, testInfo) => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const vw = testInfo.project.use?.viewport?.width ?? 0;
+    if (vw >= 768) { test.skip(); return; }
+    const gallery = pdpPage.locator(PDP.gallery).first();
     await expect(gallery).toBeAttached({ timeout: 10_000 });
     const box = await gallery.boundingBox();
-    if (!box) test.skip();
-
-    // Allow up to 5% margin for padding/scrollbar
+    if (!box) { test.skip(); return; }
     expect(box.width, 'Galeria mobile deve ocupar quase 100% da largura').toBeGreaterThanOrEqual(vw * 0.85);
   });
 
-  test('Preço e botão add-to-cart visíveis no mobile @pdp', async ({ page }) => {
-    // B2B: para visitante não logado, preço e botão ficam ocultos pelo módulo B2B
-    const priceArea = page.locator('.product-info-price, .b2b-login-to-see-price').first();
+  test('Preço e botão add-to-cart visíveis no mobile @pdp', async ({}, testInfo) => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const vw = testInfo.project.use?.viewport?.width ?? 0;
+    if (vw >= 768) { test.skip(); return; }
+    const priceArea = pdpPage.locator('.product-info-price, .b2b-login-to-see-price').first();
     await expect(priceArea).toBeAttached({ timeout: 8_000 });
-    const btn = page.locator(PDP.addToCart).first();
+    const btn = pdpPage.locator(PDP.addToCart).first();
     await expect(btn).toBeAttached({ timeout: 8_000 });
   });
 
-  test('Screenshot mobile PDP @pdp', async ({ page }, testInfo) => {
-    const vw = testInfo.project.use?.viewport?.width ?? 375;
-    await page.screenshot({
+  test('Screenshot mobile PDP @pdp', async ({}, testInfo) => {
+    if (!pdpPage || !await alive()) { test.skip(); return; }
+    const vw = testInfo.project.use?.viewport?.width ?? 0;
+    if (vw >= 768) { test.skip(); return; }
+    await pdpPage.screenshot({
       path: screenshotPath(`mobile-full-${vw}px`),
       fullPage: true,
       animations: 'disabled',

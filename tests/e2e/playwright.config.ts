@@ -48,7 +48,16 @@ export default defineConfig({
     timezoneId: 'America/Sao_Paulo',
     launchOptions: {
       executablePath: '/home/deploy/.cache/ms-playwright/chromium_headless_shell-1208/chrome-headless-shell-linux64/chrome-headless-shell',
-      args: ['--no-sandbox', '--disable-dev-shm-usage', '--disable-setuid-sandbox'],
+      args: [
+        '--no-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-setuid-sandbox',
+        // Limita RAM para não OOM o servidor de produção (~512MB por renderer)
+        '--js-flags=--max-old-space-size=512',
+        '--disable-extensions',
+        '--disable-plugins',
+        '--renderer-process-limit=2',
+      ],
     },
   },
 

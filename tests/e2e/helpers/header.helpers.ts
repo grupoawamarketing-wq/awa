@@ -1,14 +1,14 @@
 /**
  * Helper: Header Layout — seletores e utilitários compartilhados
  */
-import { Page, expect } from '@playwright/test';
+import { Page } from '@playwright/test';
 
 /* ── Seletores ─────────────────────────────────────────── */
 const HEADER_ROW_SELECTOR =
   '.awa-site-header .header .awa-main-header__inner[data-awa-header-row], .awa-site-header .header .wp-header[data-awa-header-row]';
 
 export const SELECTORS = {
-  header:          '[data-awa-header-content]', // header.awa-site-header tem display:contents (tema profissional), sem bounding box
+  header:          '[data-awa-header-content]',
   topHeader:       '.awa-site-header .top-header',
   headerMain:      '.awa-site-header .header',
   headerRow:       HEADER_ROW_SELECTOR,
@@ -40,25 +40,35 @@ export const BREAKPOINTS = {
 
 /* ── Wait para header estar pronto ───────────────────────── */
 export async function waitForHeader(page: Page): Promise<void> {
-  // Aguarda DOM carregado
   await page.waitForLoadState('domcontentloaded');
-  // Aguarda o header estar visível — [data-awa-header-content] pois header.awa-site-header tem display:contents
-  await page.locator(SELECTORS.header).waitFor({ state: 'visible', timeout: 15_000 });
-  // Aguarda estabilidade visual (CSS externo carregado)
-  await page.waitForLoadState('networkidle', { timeout: 15_000 }).catch(() => {
-    // networkidle pode nunca chegar em sites com polling; ignorar timeout
-  });
-  // Aguarda fontes
-  await page.evaluate(() => document.fonts.ready);
-  // Pequena pausa para garantir que transições CSS terminaram
-  await page.waitForTimeout(400);
+  // waitFor pode travar 120s se Chrome crasha — usar race com Node.js timer
+  await Promise.race<void>([
+    page.locator(SELECTORS.header).waitFor({ state: 'visible', timeout: 15_000 }).catch(() => {}),
+    new Promise<void>(r => setTimeout(r, 17_000)),
+  ]);
+  await page.waitForLoadState('networkidle', { timeout: 15_000 }).catch(() => {});
+  // fonts.ready com race
+  await Promise.race<void>([
+    page.evaluate(() => document.fonts.ready.then(() => {})).catch(() => {}),
+    new Promise<void>(r => setTimeout(r, 5_000)),
+  ]);
+  // Pausa de 400ms via Node.js timer (não via waitForTimeout que chama CDP)
+  await new Promise<void>(r => setTimeout(r, 400));
 }
 
 /* ── Helper: getBoundingBox com verificação ─────────────── */
 export async function getBBox(page: Page, selector: string) {
   const el = page.locator(selector).first();
-  await el.waitFor({ state: 'visible', timeout: 5_000 }).catch(() => {});
-  return el.boundingBox();
+  // waitFor pode travar se Chrome crasha — usar race
+  const visible = await Promise.race<boolean>([
+    el.waitFor({ state: 'visible', timeout: 5_000 }).then(() => true).catch(() => false),
+    new Promise<false>(r => setTimeout(() => r(false), 6_000)),
+  ]);
+  if (!visible) return null;
+  return Promise.race([
+    el.boundingBox().catch(() => null),
+    new Promise<null>(r => setTimeout(() => r(null), 5_000)),
+  ]);
 }
 
 /* ── Helper: getComputedCSS ──────────────────────────────── */
@@ -67,13 +77,16 @@ export async function getCSSProp(
   selector: string,
   property: string
 ): Promise<string> {
-  return page.evaluate(
-    ([sel, prop]) => {
-      const el = document.querySelector(sel as string);
-      return el ? window.getComputedStyle(el).getPropertyValue(prop as string).trim() : '';
-    },
-    [selector, property]
-  );
+  return Promise.race<string>([
+    page.evaluate(
+      ([sel, prop]) => {
+        const el = document.querySelector(sel as string);
+        return el ? window.getComputedStyle(el).getPropertyValue(prop as string).trim() : '';
+      },
+      [selector, property]
+    ).catch(() => ''),
+    new Promise<string>(r => setTimeout(() => r(''), 5_000)),
+  ]);
 }
 
 /* ── Helper: getMultipleCSS ──────────────────────────────── */
@@ -82,18 +95,21 @@ export async function getMultipleCSS(
   selector: string,
   properties: string[]
 ): Promise<Record<string, string>> {
-  return page.evaluate(
-    ([sel, props]) => {
-      const el = document.querySelector(sel as string);
-      if (!el) return {};
-      const cs = window.getComputedStyle(el);
-      return (props as string[]).reduce((acc: Record<string, string>, p) => {
-        acc[p] = cs.getPropertyValue(p).trim();
-        return acc;
-      }, {});
-    },
-    [selector, properties]
-  );
+  return Promise.race<Record<string, string>>([
+    page.evaluate(
+      ([sel, props]) => {
+        const el = document.querySelector(sel as string);
+        if (!el) return {};
+        const cs = window.getComputedStyle(el);
+        return (props as string[]).reduce((acc: Record<string, string>, p) => {
+          acc[p] = cs.getPropertyValue(p).trim();
+          return acc;
+        }, {});
+      },
+      [selector, properties]
+    ).catch(() => ({})),
+    new Promise<Record<string, string>>(r => setTimeout(() => r({}), 5_000)),
+  ]);
 }
 
 /* ── Helper: pxToNum ──────────────────────────────────────── */
@@ -103,13 +119,13 @@ export function px(value: string): number {
 
 /* ── Helper: isVisible ────────────────────────────────────── */
 export async function isVisible(page: Page, selector: string): Promise<boolean> {
-  const el = page.locator(selector).first();
-  try {
-    await el.waitFor({ state: 'visible', timeout: 2_000 });
-    return true;
-  } catch {
-    return false;
-  }
+  return Promise.race<boolean>([
+    page.locator(selector).first()
+      .waitFor({ state: 'visible', timeout: 2_000 })
+      .then(() => true)
+      .catch(() => false),
+    new Promise<false>(r => setTimeout(() => r(false), 4_000)),
+  ]);
 }
 
 /* ── Helper: verificar sobreposição entre dois elementos ─────── */

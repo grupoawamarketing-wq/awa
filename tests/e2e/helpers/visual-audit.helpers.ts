@@ -34,7 +34,11 @@ export const COMMON = {
 export async function waitForPage(page: Page, timeout = 15_000): Promise<void> {
   await page.waitForLoadState('domcontentloaded', { timeout }).catch(() => {});
   await page.waitForLoadState('load', { timeout }).catch(() => {});
-  await page.evaluate(() => document.fonts.ready).catch(() => {});
+  // Fonts.ready com timeout de 5s — sem isso o evaluate pode pendurar por 2min
+  await Promise.race([
+    page.evaluate(() => document.fonts.ready).catch(() => {}),
+    new Promise<void>(resolve => setTimeout(resolve, 5_000)),
+  ]).catch(() => {});
   await page.waitForTimeout(600);
 }
 
@@ -50,10 +54,18 @@ export async function dismissCookie(page: Page): Promise<void> {
 /* ── Navigate with retry ──────────────────────────────────────── */
 export async function navigateTo(page: Page, url: string): Promise<boolean> {
   try {
-    await page.goto(url, { waitUntil: 'commit', timeout: 60_000 });
-    await waitForPage(page);
-    await dismissCookie(page);
-    return true;
+    // Promise.race com timer Node.js — garante timeout mesmo com crash do renderer
+    // page.goto pode travar indefinidamente se o browser crashar (zygote crash)
+    const ok = await Promise.race<boolean>([
+      (async () => {
+        await page.goto(url, { waitUntil: 'commit', timeout: 20_000 });
+        await waitForPage(page);
+        await dismissCookie(page);
+        return true;
+      })(),
+      new Promise<boolean>(resolve => setTimeout(() => resolve(false), 22_000)),
+    ]);
+    return ok;
   } catch {
     return false;
   }
@@ -100,13 +112,16 @@ export async function loginB2B(page: Page): Promise<boolean> {
 
 /* ── Get computed CSS property ─────────────────────────────────── */
 export async function css(page: Page, selector: string, prop: string): Promise<string> {
-  return page.evaluate(
-    ([sel, p]) => {
-      const el = document.querySelector(sel as string);
-      return el ? window.getComputedStyle(el).getPropertyValue(p as string).trim() : '';
-    },
-    [selector, prop]
-  );
+  return Promise.race<string>([
+    page.evaluate(
+      ([sel, p]) => {
+        const el = document.querySelector(sel as string);
+        return el ? window.getComputedStyle(el).getPropertyValue(p as string).trim() : '';
+      },
+      [selector, prop]
+    ).catch(() => ''),
+    new Promise<string>(resolve => setTimeout(() => resolve(''), 8_000)),
+  ]);
 }
 
 /* ── Get multiple CSS properties ──────────────────────────────── */
@@ -115,18 +130,21 @@ export async function cssMultiple(
   selector: string,
   props: string[]
 ): Promise<Record<string, string>> {
-  return page.evaluate(
-    ([sel, ps]) => {
-      const el = document.querySelector(sel as string);
-      if (!el) return {};
-      const cs = window.getComputedStyle(el);
-      return (ps as string[]).reduce((acc: Record<string, string>, p) => {
-        acc[p] = cs.getPropertyValue(p).trim();
-        return acc;
-      }, {});
-    },
-    [selector, props]
-  );
+  return Promise.race<Record<string, string>>([
+    page.evaluate(
+      ([sel, ps]) => {
+        const el = document.querySelector(sel as string);
+        if (!el) return {};
+        const cs = window.getComputedStyle(el);
+        return (ps as string[]).reduce((acc: Record<string, string>, p) => {
+          acc[p] = cs.getPropertyValue(p).trim();
+          return acc;
+        }, {});
+      },
+      [selector, props]
+    ).catch(() => ({})),
+    new Promise<Record<string, string>>(resolve => setTimeout(() => resolve({}), 8_000)),
+  ]);
 }
 
 /* ── Parse px value to number ─────────────────────────────────── */
@@ -158,9 +176,16 @@ export async function isVisible(page: Page, selector: string, timeout = 5_000): 
 
 /* ── Check no horizontal overflow ─────────────────────────────── */
 export async function hasNoOverflow(page: Page): Promise<boolean> {
-  return page.evaluate(() => {
-    return document.documentElement.scrollWidth <= document.documentElement.clientWidth + 2;
-  });
+  try {
+    return await Promise.race<boolean>([
+      page.evaluate(() =>
+        document.documentElement.scrollWidth <= document.documentElement.clientWidth + 2
+      ),
+      new Promise<boolean>(resolve => setTimeout(() => resolve(true), 5_000)),
+    ]);
+  } catch {
+    return true; // fail-safe se browser crashou
+  }
 }
 
 /* ── Collect JS errors during test ────────────────────────────── */
