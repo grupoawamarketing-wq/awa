@@ -17,8 +17,6 @@ use Magento\Framework\View\Element\Template\Context;
 
 class LoginToCart extends Template
 {
-    private const LOGIN_TO_CART_CSS_ASSET = 'GrupoAwamotos_B2B::css/product/login-to-cart.css';
-    private const LOGIN_TO_CART_CSS_ASSET_NAME = 'grupoawamotos_b2b_login_to_cart_css';
 
     /**
      * @var Config
@@ -46,26 +44,6 @@ class LoginToCart extends Template
         $this->config = $config;
         $this->customerSession = $customerSession;
         $this->priceVisibility = $priceVisibility;
-    }
-
-    /**
-     * Load modal styles only when the modal/banner is actually rendered.
-     *
-     * @return $this
-     */
-    protected function _prepareLayout()
-    {
-        parent::_prepareLayout();
-
-        if ($this->shouldRender()) {
-            $this->pageConfig->addPageAsset(
-                self::LOGIN_TO_CART_CSS_ASSET,
-                [],
-                self::LOGIN_TO_CART_CSS_ASSET_NAME
-            );
-        }
-
-        return $this;
     }
 
     /**
