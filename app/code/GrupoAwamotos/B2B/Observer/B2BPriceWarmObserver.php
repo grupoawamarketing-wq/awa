@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace GrupoAwamotos\B2B\Observer;
 
 use GrupoAwamotos\B2B\Helper\Config;
+use GrupoAwamotos\B2B\Model\ErpCodeResolver;
 use GrupoAwamotos\ERPIntegration\Model\CustomerPriceProvider;
 use GrupoAwamotos\ERPIntegration\Model\ResourceModel\SyncLog as SyncLogResource;
 use Magento\Customer\Model\Session as CustomerSession;
@@ -31,6 +32,7 @@ class B2BPriceWarmObserver implements ObserverInterface
     private CustomerPriceProvider $customerPriceProvider;
     private SyncLogResource $syncLogResource;
     private LoggerInterface $logger;
+    private ?ErpCodeResolver $erpCodeResolver;
 
     /** @var int|null|false  false = not yet fetched */
     private int|null|false $erpCodeCache = false;
@@ -38,13 +40,17 @@ class B2BPriceWarmObserver implements ObserverInterface
     /** @var string|null|false  false = not yet fetched */
     private string|null|false $approvalCache = false;
 
+    /** @var array<string, bool> */
+    private array $warmedCollections = [];
+
     public function __construct(
         Config $config,
         CustomerSession $customerSession,
         CustomerRepositoryInterface $customerRepository,
         CustomerPriceProvider $customerPriceProvider,
         SyncLogResource $syncLogResource,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        ?ErpCodeResolver $erpCodeResolver = null
     ) {
         $this->config                = $config;
         $this->customerSession       = $customerSession;
@@ -52,6 +58,7 @@ class B2BPriceWarmObserver implements ObserverInterface
         $this->customerPriceProvider = $customerPriceProvider;
         $this->syncLogResource       = $syncLogResource;
         $this->logger                = $logger;
+        $this->erpCodeResolver       = $erpCodeResolver;
     }
 
     public function execute(Observer $observer): void
@@ -70,7 +77,7 @@ class B2BPriceWarmObserver implements ObserverInterface
         }
 
         $collection = $observer->getData('collection');
-        if (!$collection || $collection->count() === 0) {
+        if (!$collection) {
             return;
         }
 
@@ -86,9 +93,15 @@ class B2BPriceWarmObserver implements ObserverInterface
             return;
         }
 
+        $warmKey = $erpCode . ':' . md5(implode('|', array_values(array_unique($skus))));
+        if (isset($this->warmedCollections[$warmKey])) {
+            return;
+        }
+
         // Single batch query warms in-memory + persistent cache in CustomerPriceProvider.
         // GroupPricePlugin::afterGetPrice() finds all prices already cached; zero ERP round-trips per product.
         $this->customerPriceProvider->getCustomerPrices($erpCode, $skus);
+        $this->warmedCollections[$warmKey] = true;
     }
 
     private function getErpCode(): ?int
@@ -103,8 +116,14 @@ class B2BPriceWarmObserver implements ObserverInterface
                 return null;
             }
             $customer = $this->customerRepository->getById($customerId);
-            $attr     = $customer->getCustomAttribute('erp_code');
-            $erpCode  = ($attr && $attr->getValue()) ? $attr->getValue() : null;
+
+            if ($this->erpCodeResolver !== null) {
+                $this->erpCodeCache = $this->erpCodeResolver->resolveForCustomerId($customerId, $customer);
+                return $this->erpCodeCache;
+            }
+
+            $attr = $customer->getCustomAttribute('erp_code');
+            $erpCode = ($attr && $attr->getValue()) ? $attr->getValue() : null;
             if ($erpCode === null) {
                 $erpCode = $this->syncLogResource->getErpCodeByMagentoId('customer', $customerId);
             }
