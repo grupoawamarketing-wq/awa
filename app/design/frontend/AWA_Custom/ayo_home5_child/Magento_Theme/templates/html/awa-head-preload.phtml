@@ -60,10 +60,11 @@ $asyncBundles = [
     // merged into awa-bundle-refinements: $block->getViewFileUrl('css/awa-visual-audit-consolidated.css'),  // visual-audit v2-v12
     // merged into awa-bundle-refinements: $block->getViewFileUrl('css/awa-global-modern-clean.css'),        // sitewide standardization
     $block->getViewFileUrl('css/awa-home-vertical-menu-shell-fix.css'),   // vertical menu (-40KB sync, 2026-04-17)
+    // rexis-recommendations: emitido explicitamente abaixo (getViewFileUrl modulo falha em prod)
     // MCP Header + Classic Redesign: movidos para SYNC (default_head_blocks.xml)
     // Removidos do async para evitar carregamento duplo (2026-04-09)
     // merged into awa-bundle-refinements: $block->getViewFileUrl('css/awa-color-standardization.css'),     // color standardization + visual polish (last)
-    // merged into awa-bundle-refinements: $block->getViewFileUrl('css/awa-ux-improvements.css'),
+    str_replace('awa-bundle-custom.css', 'awa-ux-improvements.css', $block->getViewFileUrl('css/awa-bundle-custom.css')),
     // awa-layout-standardization.css removido daqui e carregado APÓS refinements
     // para garantir que nossas overrides !important vençam o dark footer do refinements bundle
 ];
@@ -169,6 +170,16 @@ body .page-wrapper .page_footer,.page-footer{background:#f8fafc !important;backg
       data-awa-category-carousel-async="1"
       onload="this.media='all'"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($homeCategoryCarouselUrl) ?>"/></noscript>
+<?php endif; ?>
+<?php /* rexis-recommendations: async — widget nunca está above-fold */ ?>
+<?php $__rexisUrl = str_replace('css/awa-bundle-refinements.css', 'GrupoAwamotos_ProductIntelligence/css/rexis-recommendations.css', $refinementsBundleUrl); ?>
+<?php if ($__rexisUrl !== $refinementsBundleUrl): ?>
+<link rel="stylesheet"
+      href="<?= $block->escapeUrl($__rexisUrl) ?>"
+      media="print"
+      data-rexis-async="1"
+      onload="this.media='all'"/>
+<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__rexisUrl) ?>"/></noscript>
 <?php endif; ?>
 
 <!-- styles-l.css carregado em awa.styles.l.last (after awa.search.autocomplete.head.css) -->
