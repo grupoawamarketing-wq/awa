@@ -75,7 +75,7 @@ class Index implements HttpGetActionInterface
         if (!$this->config->isQuoteEnabled()) {
             $redirect = $this->redirectFactory->create();
             $this->messageManager->addNoticeMessage(__('O sistema de cotação não está disponível no momento.'));
-            return $redirect->setPath('/');
+            return $redirect->setPath('b2b/account/dashboard');
         }
 
         // Verificar se visitantes podem solicitar cotação
