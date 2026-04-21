@@ -229,4 +229,26 @@ class HeaderDataTest extends TestCase
 
         $this->assertSame('home5_header_v2', $this->viewModel->getHeaderExperimentSeed());
     }
+
+    public function testGetStickyLogoUrlMemoizesResolvedValueWithinSameRequest(): void
+    {
+        $this->scopeConfigMock->expects($this->once())
+            ->method('getValue')
+            ->with('themeoption/header/sticky_logo', ScopeInterface::SCOPE_STORE)
+            ->willReturn('my-logo.png');
+
+        $storeMock = $this->createMock(\Magento\Store\Model\Store::class);
+        $storeMock->expects($this->once())
+            ->method('getBaseUrl')
+            ->with(UrlInterface::URL_TYPE_MEDIA)
+            ->willReturn('https://example.com/media/');
+
+        $this->storeManagerMock->expects($this->once())
+            ->method('getStore')
+            ->willReturn($storeMock);
+
+        $expectedUrl = 'https://example.com/media/rokanthemes/stickylogo/my-logo.png';
+        $this->assertSame($expectedUrl, $this->viewModel->getStickyLogoUrl());
+        $this->assertSame($expectedUrl, $this->viewModel->getStickyLogoUrl());
+    }
 }

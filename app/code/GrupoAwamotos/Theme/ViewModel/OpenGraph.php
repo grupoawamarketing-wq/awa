@@ -12,12 +12,45 @@ use Magento\Framework\Registry;
 use Magento\Framework\UrlInterface;
 use Magento\Framework\View\Element\Block\ArgumentInterface;
 use Magento\Framework\View\Page\Config as PageConfig;
+use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
 
 final class OpenGraph implements ArgumentInterface
 {
     private const DEFAULT_DESCRIPTION = 'Distribuidora B2B de peças e acessórios para motos. Bauletos, retrovisores, guidões e mais. Preços exclusivos para lojistas.';
     private const DEFAULT_IMAGE_PATH = '/media/logo/stores/1/logo-awa.png';
+
+    private ?Store $store = null;
+
+    private ?string $baseUrl = null;
+
+    private ?string $storeName = null;
+
+    private ?string $currentUrl = null;
+
+    private bool $currentProductResolved = false;
+
+    private ?Product $currentProduct = null;
+
+    private bool $currentCategoryResolved = false;
+
+    private ?Category $currentCategory = null;
+
+    private ?string $pageTitle = null;
+
+    private ?string $pageDescription = null;
+
+    private ?string $defaultImage = null;
+
+    /**
+     * @var array<int, string>
+     */
+    private array $productImageUrlCache = [];
+
+    /**
+     * @var array<string, string>|null
+     */
+    private ?array $metaData = null;
 
     public function __construct(
         private readonly StoreManagerInterface $storeManager,
@@ -31,60 +64,114 @@ final class OpenGraph implements ArgumentInterface
 
     public function getBaseUrl(): string
     {
-        return rtrim($this->storeManager->getStore()->getBaseUrl(), '/');
+        if ($this->baseUrl !== null) {
+            return $this->baseUrl;
+        }
+
+        $this->baseUrl = rtrim($this->getStore()->getBaseUrl(), '/');
+
+        return $this->baseUrl;
     }
 
     public function getStoreName(): string
     {
-        return (string) $this->storeManager->getStore()->getName();
+        if ($this->storeName !== null) {
+            return $this->storeName;
+        }
+
+        $this->storeName = (string) $this->getStore()->getName();
+
+        return $this->storeName;
     }
 
     public function getCurrentUrl(): string
     {
-        // Use UrlInterface to get the friendly (rewritten) URL
-        // instead of getPathInfo() which returns internal controller paths
+        if ($this->currentUrl !== null) {
+            return $this->currentUrl;
+        }
+
         $currentUrl = $this->urlBuilder->getCurrentUrl();
 
-        // Strip query params for og:url (canonical form)
         $pos = strpos($currentUrl, '?');
 
-        return $pos !== false ? substr($currentUrl, 0, $pos) : $currentUrl;
+        $this->currentUrl = $pos !== false ? substr($currentUrl, 0, $pos) : $currentUrl;
+
+        return $this->currentUrl;
     }
 
     public function getCurrentProduct(): ?Product
     {
-        $product = $this->registry->registry('current_product') ?: $this->registry->registry('product');
+        if ($this->currentProductResolved) {
+            return $this->currentProduct;
+        }
 
-        return $product instanceof Product ? $product : null;
+        $product = $this->registry->registry('current_product') ?: $this->registry->registry('product');
+        $this->currentProduct = $product instanceof Product ? $product : null;
+        $this->currentProductResolved = true;
+
+        return $this->currentProduct;
     }
 
     public function getCurrentCategory(): ?Category
     {
-        $category = $this->registry->registry('current_category');
+        if ($this->currentCategoryResolved) {
+            return $this->currentCategory;
+        }
 
-        return $category instanceof Category ? $category : null;
+        $category = $this->registry->registry('current_category');
+        $this->currentCategory = $category instanceof Category ? $category : null;
+        $this->currentCategoryResolved = true;
+
+        return $this->currentCategory;
     }
 
     public function getPageTitle(): string
     {
-        return $this->normalizeText((string) $this->pageConfig->getTitle()->get());
+        if ($this->pageTitle !== null) {
+            return $this->pageTitle;
+        }
+
+        $this->pageTitle = $this->normalizeText((string) $this->pageConfig->getTitle()->get());
+
+        return $this->pageTitle;
     }
 
     public function getPageDescription(): string
     {
-        $description = $this->normalizeText((string) $this->pageConfig->getDescription());
+        if ($this->pageDescription !== null) {
+            return $this->pageDescription;
+        }
 
-        return $description !== '' ? $description : self::DEFAULT_DESCRIPTION;
+        $description = $this->normalizeText((string) $this->pageConfig->getDescription());
+        $this->pageDescription = $description !== '' ? $description : self::DEFAULT_DESCRIPTION;
+
+        return $this->pageDescription;
     }
 
     public function getDefaultImage(): string
     {
-        return $this->getBaseUrl() . self::DEFAULT_IMAGE_PATH;
+        if ($this->defaultImage !== null) {
+            return $this->defaultImage;
+        }
+
+        $this->defaultImage = $this->getBaseUrl() . self::DEFAULT_IMAGE_PATH;
+
+        return $this->defaultImage;
     }
 
     public function getProductImageUrl(Product $product): string
     {
-        return (string) $this->imageHelper->init($product, 'product_base_image')->getUrl();
+        $productId = (int) $product->getId();
+        if ($productId > 0 && isset($this->productImageUrlCache[$productId])) {
+            return $this->productImageUrlCache[$productId];
+        }
+
+        $imageUrl = (string) $this->imageHelper->init($product, 'product_base_image')->getUrl();
+        if ($productId > 0) {
+            $this->productImageUrlCache[$productId] = $imageUrl;
+        }
+
+        return $imageUrl;
     }
 
     public function isHomepage(): bool
@@ -97,6 +184,10 @@ final class OpenGraph implements ArgumentInterface
      */
     public function getMetaData(): array
     {
+        if ($this->metaData !== null) {
+            return $this->metaData;
+        }
+
         $title = $this->getPageTitle();
         $description = $this->getPageDescription();
         $image = $this->getDefaultImage();
@@ -129,7 +220,9 @@ final class OpenGraph implements ArgumentInterface
                 $meta['availability'] = 'in stock';
             }
 
-            return $meta;
+            $this->metaData = $meta;
+
+            return $this->metaData;
         }
 
         $category = $this->getCurrentCategory();
@@ -144,7 +237,20 @@ final class OpenGraph implements ArgumentInterface
             }
         }
 
-        return $meta;
+        $this->metaData = $meta;
+
+        return $this->metaData;
+    }
+
+    private function getStore(): Store
+    {
+        if ($this->store === null) {
+            /** @var Store $store */
+            $store = $this->storeManager->getStore();
+            $this->store = $store;
+        }
+
+        return $this->store;
     }
 
     private function resolveProductDescription(Product $product): string

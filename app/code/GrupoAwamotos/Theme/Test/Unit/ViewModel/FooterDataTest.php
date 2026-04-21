@@ -155,11 +155,21 @@ class FooterDataTest extends TestCase
 
     public function testGetFooterExperimentRolloutPercentageClampsBounds(): void
     {
-        $this->scopeConfigMock->expects($this->exactly(2))
+        $this->scopeConfigMock->expects($this->once())
             ->method('getValue')
-            ->willReturnOnConsecutiveCalls('150', '-10');
+            ->with('grupoawamotos_theme/footer_experiment/rollout_percentage', ScopeInterface::SCOPE_STORE)
+            ->willReturn('150');
 
         $this->assertSame(100, $this->viewModel->getFooterExperimentRolloutPercentage());
+    }
+
+    public function testGetFooterExperimentRolloutPercentageClampsLowerBound(): void
+    {
+        $this->scopeConfigMock->expects($this->once())
+            ->method('getValue')
+            ->with('grupoawamotos_theme/footer_experiment/rollout_percentage', ScopeInterface::SCOPE_STORE)
+            ->willReturn('-10');
+
         $this->assertSame(0, $this->viewModel->getFooterExperimentRolloutPercentage());
     }
 
@@ -181,5 +191,16 @@ class FooterDataTest extends TestCase
             ->willReturn('   ');
 
         $this->assertSame('home5_footer_v1', $this->viewModel->getFooterExperimentSeed());
+    }
+
+    public function testGetPhoneMemoizesConfigReadsWithinSameRequest(): void
+    {
+        $this->scopeConfigMock->expects($this->once())
+            ->method('getValue')
+            ->with('grupoawamotos_theme/contact/phone', ScopeInterface::SCOPE_STORE)
+            ->willReturn('(16) 99736-7588');
+
+        $this->assertSame('(16) 99736-7588', $this->viewModel->getPhone());
+        $this->assertSame('(16) 99736-7588', $this->viewModel->getPhone());
     }
 }

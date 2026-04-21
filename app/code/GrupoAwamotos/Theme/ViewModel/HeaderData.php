@@ -26,16 +26,39 @@ class HeaderData implements ArgumentInterface
     }
 
     /**
+     * @var array<string, string>
+     */
+    private array $configValueCache = [];
+
+    /**
+     * @var array<string, bool>
+     */
+    private array $configFlagCache = [];
+
+    private ?string $stickyLogoUrl = null;
+
+    private ?bool $stickyHeaderEnabled = null;
+
+    private ?bool $headerExperimentEnabled = null;
+
+    private ?int $headerExperimentRolloutPercentage = null;
+
+    private ?string $headerExperimentSeed = null;
+
+    /**
      * Check if sticky header is enabled in theme configuration.
      *
      * @return bool
      */
     public function isStickyHeaderEnabled(): bool
     {
-        return $this->scopeConfig->isSetFlag(
-            self::XML_PATH_STICKY_ENABLE,
-            ScopeInterface::SCOPE_STORE
-        );
+        if ($this->stickyHeaderEnabled !== null) {
+            return $this->stickyHeaderEnabled;
+        }
+
+        $this->stickyHeaderEnabled = $this->getConfigFlag(self::XML_PATH_STICKY_ENABLE);
+
+        return $this->stickyHeaderEnabled;
     }
 
     /**
@@ -45,13 +68,16 @@ class HeaderData implements ArgumentInterface
      */
     public function getStickyLogoUrl(): string
     {
-        $logo = (string) $this->scopeConfig->getValue(
-            self::XML_PATH_STICKY_LOGO,
-            ScopeInterface::SCOPE_STORE
-        );
+        if ($this->stickyLogoUrl !== null) {
+            return $this->stickyLogoUrl;
+        }
+
+        $logo = $this->getConfigValue(self::XML_PATH_STICKY_LOGO);
 
         $normalizedLogo = $this->normalizeLogoPath($logo);
         if ($normalizedLogo === '') {
+            $this->stickyLogoUrl = '';
+
             return '';
         }
 
@@ -59,46 +85,62 @@ class HeaderData implements ArgumentInterface
             $store = $this->storeManager->getStore();
             $mediaUrl = $store->getBaseUrl(UrlInterface::URL_TYPE_MEDIA);
 
-            return rtrim($mediaUrl, '/') . '/' . self::UPLOAD_DIR . '/' . $normalizedLogo;
+            $this->stickyLogoUrl = rtrim($mediaUrl, '/') . '/' . self::UPLOAD_DIR . '/' . $normalizedLogo;
+
+            return $this->stickyLogoUrl;
         } catch (\Throwable) {
+            $this->stickyLogoUrl = '';
+
             return '';
         }
     }
 
     public function isHeaderExperimentEnabled(): bool
     {
-        return $this->scopeConfig->isSetFlag(
-            self::XML_PATH_HEADER_EXPERIMENT_ENABLED,
-            ScopeInterface::SCOPE_STORE
-        );
+        if ($this->headerExperimentEnabled !== null) {
+            return $this->headerExperimentEnabled;
+        }
+
+        $this->headerExperimentEnabled = $this->getConfigFlag(self::XML_PATH_HEADER_EXPERIMENT_ENABLED);
+
+        return $this->headerExperimentEnabled;
     }
 
     public function getHeaderExperimentRolloutPercentage(): int
     {
-        $value = (int) $this->scopeConfig->getValue(
-            self::XML_PATH_HEADER_EXPERIMENT_ROLLOUT,
-            ScopeInterface::SCOPE_STORE
-        );
+        if ($this->headerExperimentRolloutPercentage !== null) {
+            return $this->headerExperimentRolloutPercentage;
+        }
+
+        $value = (int) $this->getConfigValue(self::XML_PATH_HEADER_EXPERIMENT_ROLLOUT);
 
         if ($value < 0) {
-            return 0;
+            $this->headerExperimentRolloutPercentage = 0;
+
+            return $this->headerExperimentRolloutPercentage;
         }
 
         if ($value > 100) {
-            return 100;
+            $this->headerExperimentRolloutPercentage = 100;
+
+            return $this->headerExperimentRolloutPercentage;
         }
 
-        return $value;
+        $this->headerExperimentRolloutPercentage = $value;
+
+        return $this->headerExperimentRolloutPercentage;
     }
 
     public function getHeaderExperimentSeed(): string
     {
-        $seed = (string) $this->scopeConfig->getValue(
-            self::XML_PATH_HEADER_EXPERIMENT_SEED,
-            ScopeInterface::SCOPE_STORE
-        );
+        if ($this->headerExperimentSeed !== null) {
+            return $this->headerExperimentSeed;
+        }
 
-        return trim($seed) !== '' ? trim($seed) : 'home5_header_v1';
+        $seed = $this->getConfigValue(self::XML_PATH_HEADER_EXPERIMENT_SEED);
+        $this->headerExperimentSeed = trim($seed) !== '' ? trim($seed) : 'home5_header_v1';
+
+        return $this->headerExperimentSeed;
     }
 
     private function normalizeLogoPath(string $logo): string
@@ -113,5 +155,29 @@ class HeaderData implements ArgumentInterface
         $normalized = (string) preg_replace($prefixPattern, '', $normalized);
 
         return trim($normalized);
+    }
+
+    private function getConfigValue(string $path): string
+    {
+        if (!array_key_exists($path, $this->configValueCache)) {
+            $this->configValueCache[$path] = (string) $this->scopeConfig->getValue(
+                $path,
+                ScopeInterface::SCOPE_STORE
+            );
+        }
+
+        return $this->configValueCache[$path];
+    }
+
+    private function getConfigFlag(string $path): bool
+    {
+        if (!array_key_exists($path, $this->configFlagCache)) {
+            $this->configFlagCache[$path] = $this->scopeConfig->isSetFlag(
+                $path,
+                ScopeInterface::SCOPE_STORE
+            );
+        }
+
+        return $this->configFlagCache[$path];
     }
 }

@@ -44,137 +44,274 @@ class FooterData implements ArgumentInterface
     }
 
     /**
+     * @var array<string, string>
+     */
+    private array $configValueCache = [];
+
+    /**
+     * @var array<string, bool>
+     */
+    private array $configFlagCache = [];
+
+    private ?string $storeName = null;
+
+    private ?string $phone = null;
+
+    private ?string $phoneRaw = null;
+
+    private ?string $phoneUrl = null;
+
+    private ?string $whatsApp = null;
+
+    private ?string $whatsAppUrl = null;
+
+    private ?string $email = null;
+
+    private ?string $emailUrl = null;
+
+    private ?string $streetLine1 = null;
+
+    private ?string $cityLabel = null;
+
+    private ?string $postcode = null;
+
+    private ?string $instagramUrl = null;
+
+    private ?string $facebookUrl = null;
+
+    private ?string $youtubeUrl = null;
+
+    private ?bool $mobileMenuEnabled = null;
+
+    private ?bool $footerExperimentEnabled = null;
+
+    private ?int $footerExperimentRolloutPercentage = null;
+
+    private ?string $footerExperimentSeed = null;
+
+    private ?string $formattedAddress = null;
+
+    /**
      * Check if the mobile footer menu is enabled in theme configuration.
      *
      * @return bool
      */
     public function isMobileMenuEnabled(): bool
     {
-        return $this->scopeConfig->isSetFlag(
-            self::XML_PATH_MOBILE_MENU_ENABLE,
-            ScopeInterface::SCOPE_STORE
-        );
+        if ($this->mobileMenuEnabled !== null) {
+            return $this->mobileMenuEnabled;
+        }
+
+        $this->mobileMenuEnabled = $this->getConfigFlag(self::XML_PATH_MOBILE_MENU_ENABLE);
+
+        return $this->mobileMenuEnabled;
     }
 
     public function getStoreName(): string
     {
-        $storeName = $this->getConfigValue(self::XML_PATH_STORE_NAME, '');
+        if ($this->storeName !== null) {
+            return $this->storeName;
+        }
 
-        return $storeName !== '' ? $storeName : 'AWA Motos';
+        $storeName = $this->getConfigValue(self::XML_PATH_STORE_NAME, '');
+        $this->storeName = $storeName !== '' ? $storeName : 'AWA Motos';
+
+        return $this->storeName;
     }
 
     public function getPhone(): string
     {
+        if ($this->phone !== null) {
+            return $this->phone;
+        }
+
         $contactPhone = $this->getConfigValue(self::XML_PATH_CONTACT_PHONE, '');
 
         if ($contactPhone !== '') {
-            return $this->formatPhoneForDisplay($contactPhone);
+            $this->phone = $this->formatPhoneForDisplay($contactPhone);
+
+            return $this->phone;
         }
 
         $storePhone = $this->getConfigValue(self::XML_PATH_STORE_PHONE, '');
 
-        return $storePhone !== '' ? $this->formatPhoneForDisplay($storePhone) : self::DEFAULT_PHONE;
+        $this->phone = $storePhone !== '' ? $this->formatPhoneForDisplay($storePhone) : self::DEFAULT_PHONE;
+
+        return $this->phone;
     }
 
     public function getPhoneUrl(): string
     {
-        $digits = $this->normalizePhoneForDial($this->getPhoneRaw());
+        if ($this->phoneUrl !== null) {
+            return $this->phoneUrl;
+        }
 
-        return $digits !== '' ? 'tel:+' . $digits : '';
+        $digits = $this->normalizePhoneForDial($this->getPhoneRaw());
+        $this->phoneUrl = $digits !== '' ? 'tel:+' . $digits : '';
+
+        return $this->phoneUrl;
     }
 
     public function getWhatsApp(): string
     {
-        $whatsApp = $this->getConfigValue(self::XML_PATH_CONTACT_WHATSAPP, '');
+        if ($this->whatsApp !== null) {
+            return $this->whatsApp;
+        }
 
-        return $whatsApp !== '' ? $whatsApp : self::DEFAULT_WHATSAPP;
+        $whatsApp = $this->getConfigValue(self::XML_PATH_CONTACT_WHATSAPP, '');
+        $this->whatsApp = $whatsApp !== '' ? $whatsApp : self::DEFAULT_WHATSAPP;
+
+        return $this->whatsApp;
     }
 
     public function getWhatsAppUrl(): string
     {
-        $digits = $this->normalizePhoneForDial($this->getWhatsApp());
+        if ($this->whatsAppUrl !== null) {
+            return $this->whatsAppUrl;
+        }
 
-        return $digits !== '' ? 'https://wa.me/' . $digits : '';
+        $digits = $this->normalizePhoneForDial($this->getWhatsApp());
+        $this->whatsAppUrl = $digits !== '' ? 'https://wa.me/' . $digits : '';
+
+        return $this->whatsAppUrl;
     }
 
     public function getEmail(): string
     {
-        $email = $this->getConfigValue(self::XML_PATH_CONTACT_EMAIL, '');
+        if ($this->email !== null) {
+            return $this->email;
+        }
 
-        return $this->normalizeEmail($email !== '' ? $email : self::DEFAULT_EMAIL);
+        $email = $this->getConfigValue(self::XML_PATH_CONTACT_EMAIL, '');
+        $this->email = $this->normalizeEmail($email !== '' ? $email : self::DEFAULT_EMAIL);
+
+        return $this->email;
     }
 
     public function getEmailUrl(): string
     {
-        $email = trim($this->getEmail());
+        if ($this->emailUrl !== null) {
+            return $this->emailUrl;
+        }
 
-        return $email !== '' ? 'mailto:' . $email : '';
+        $email = trim($this->getEmail());
+        $this->emailUrl = $email !== '' ? 'mailto:' . $email : '';
+
+        return $this->emailUrl;
     }
 
     public function getStreetLine1(): string
     {
-        $street = $this->getConfigValue(self::XML_PATH_STORE_STREET, '');
+        if ($this->streetLine1 !== null) {
+            return $this->streetLine1;
+        }
 
-        return $street !== '' ? $street : self::DEFAULT_STREET;
+        $street = $this->getConfigValue(self::XML_PATH_STORE_STREET, '');
+        $this->streetLine1 = $street !== '' ? $street : self::DEFAULT_STREET;
+
+        return $this->streetLine1;
     }
 
     public function getCityLabel(): string
     {
-        $city = $this->getConfigValue(self::XML_PATH_STORE_CITY, '');
+        if ($this->cityLabel !== null) {
+            return $this->cityLabel;
+        }
 
-        return $city !== '' ? $city : self::DEFAULT_CITY;
+        $city = $this->getConfigValue(self::XML_PATH_STORE_CITY, '');
+        $this->cityLabel = $city !== '' ? $city : self::DEFAULT_CITY;
+
+        return $this->cityLabel;
     }
 
     public function getPostcode(): string
     {
-        $postcode = $this->getConfigValue(self::XML_PATH_STORE_POSTCODE, '');
+        if ($this->postcode !== null) {
+            return $this->postcode;
+        }
 
-        return $postcode !== '' ? $postcode : self::DEFAULT_POSTCODE;
+        $postcode = $this->getConfigValue(self::XML_PATH_STORE_POSTCODE, '');
+        $this->postcode = $postcode !== '' ? $postcode : self::DEFAULT_POSTCODE;
+
+        return $this->postcode;
     }
 
     public function getInstagramUrl(): string
     {
-        return $this->getConfigValue(self::XML_PATH_SOCIAL_INSTAGRAM, self::DEFAULT_INSTAGRAM_URL);
+        if ($this->instagramUrl !== null) {
+            return $this->instagramUrl;
+        }
+
+        $this->instagramUrl = $this->getConfigValue(self::XML_PATH_SOCIAL_INSTAGRAM, self::DEFAULT_INSTAGRAM_URL);
+
+        return $this->instagramUrl;
     }
 
     public function getFacebookUrl(): string
     {
-        return $this->getConfigValue(self::XML_PATH_SOCIAL_FACEBOOK, self::DEFAULT_FACEBOOK_URL);
+        if ($this->facebookUrl !== null) {
+            return $this->facebookUrl;
+        }
+
+        $this->facebookUrl = $this->getConfigValue(self::XML_PATH_SOCIAL_FACEBOOK, self::DEFAULT_FACEBOOK_URL);
+
+        return $this->facebookUrl;
     }
 
     public function getYoutubeUrl(): string
     {
-        return $this->getConfigValue(self::XML_PATH_SOCIAL_YOUTUBE, self::DEFAULT_YOUTUBE_URL);
+        if ($this->youtubeUrl !== null) {
+            return $this->youtubeUrl;
+        }
+
+        $this->youtubeUrl = $this->getConfigValue(self::XML_PATH_SOCIAL_YOUTUBE, self::DEFAULT_YOUTUBE_URL);
+
+        return $this->youtubeUrl;
     }
 
     public function isFooterExperimentEnabled(): bool
     {
-        return $this->scopeConfig->isSetFlag(
-            self::XML_PATH_FOOTER_EXPERIMENT_ENABLED,
-            ScopeInterface::SCOPE_STORE
-        );
+        if ($this->footerExperimentEnabled !== null) {
+            return $this->footerExperimentEnabled;
+        }
+
+        $this->footerExperimentEnabled = $this->getConfigFlag(self::XML_PATH_FOOTER_EXPERIMENT_ENABLED);
+
+        return $this->footerExperimentEnabled;
     }
 
     public function getFooterExperimentRolloutPercentage(): int
     {
-        $value = (int) $this->scopeConfig->getValue(
-            self::XML_PATH_FOOTER_EXPERIMENT_ROLLOUT,
-            ScopeInterface::SCOPE_STORE
-        );
+        if ($this->footerExperimentRolloutPercentage !== null) {
+            return $this->footerExperimentRolloutPercentage;
+        }
 
-        return $this->normalizePercentage($value);
+        $value = (int) $this->getConfigValue(self::XML_PATH_FOOTER_EXPERIMENT_ROLLOUT, '0');
+        $this->footerExperimentRolloutPercentage = $this->normalizePercentage($value);
+
+        return $this->footerExperimentRolloutPercentage;
     }
 
     public function getFooterExperimentSeed(): string
     {
-        return $this->getConfigValue(
+        if ($this->footerExperimentSeed !== null) {
+            return $this->footerExperimentSeed;
+        }
+
+        $this->footerExperimentSeed = $this->getConfigValue(
             self::XML_PATH_FOOTER_EXPERIMENT_SEED,
             self::DEFAULT_FOOTER_EXPERIMENT_SEED
         );
+
+        return $this->footerExperimentSeed;
     }
 
     public function getFormattedAddress(): string
     {
+        if ($this->formattedAddress !== null) {
+            return $this->formattedAddress;
+        }
+
         $parts = [
             $this->getStreetLine1(),
             $this->getCityLabel(),
@@ -185,7 +322,9 @@ class FooterData implements ArgumentInterface
             $parts[] = 'CEP: ' . $postcode;
         }
 
-        return implode(' - ', array_filter($parts));
+        $this->formattedAddress = implode(' - ', array_filter($parts));
+
+        return $this->formattedAddress;
     }
 
     private function normalizePhone(string $value): string
@@ -266,24 +405,47 @@ class FooterData implements ArgumentInterface
 
     private function getPhoneRaw(): string
     {
+        if ($this->phoneRaw !== null) {
+            return $this->phoneRaw;
+        }
+
         $contactPhone = $this->getConfigValue(self::XML_PATH_CONTACT_PHONE, '');
         if ($contactPhone !== '') {
-            return $contactPhone;
+            $this->phoneRaw = $contactPhone;
+
+            return $this->phoneRaw;
         }
 
         $storePhone = $this->getConfigValue(self::XML_PATH_STORE_PHONE, '');
+        $this->phoneRaw = $storePhone !== '' ? $storePhone : self::DEFAULT_PHONE;
 
-        return $storePhone !== '' ? $storePhone : self::DEFAULT_PHONE;
+        return $this->phoneRaw;
     }
 
     private function getConfigValue(string $path, string $default): string
     {
-        $value = trim((string) $this->scopeConfig->getValue(
-            $path,
-            ScopeInterface::SCOPE_STORE
-        ));
+        if (!array_key_exists($path, $this->configValueCache)) {
+            $this->configValueCache[$path] = trim((string) $this->scopeConfig->getValue(
+                $path,
+                ScopeInterface::SCOPE_STORE
+            ));
+        }
+
+        $value = $this->configValueCache[$path];
 
         return $value !== '' ? $value : $default;
+    }
+
+    private function getConfigFlag(string $path): bool
+    {
+        if (!array_key_exists($path, $this->configFlagCache)) {
+            $this->configFlagCache[$path] = $this->scopeConfig->isSetFlag(
+                $path,
+                ScopeInterface::SCOPE_STORE
+            );
+        }
+
+        return $this->configFlagCache[$path];
     }
 
     private function normalizePercentage(int $value): int
