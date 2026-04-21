@@ -70,8 +70,13 @@ $asyncBundles = [
 
 // Homepage-only: owl-tabs + overrides + b2b-foundation + compat + premium + polish
 $homeBundleUrl = null;
+$heroPreloadUrl = null;
 if (in_array('cms_index_index', $block->getLayout()->getUpdate()->getHandles(), true)) {
     $homeBundleUrl = $block->getViewFileUrl('css/awa-bundle-home-custom.css');
+    // LCP Hero preload — bloco awa.head.preload usa GrupoAwamotos\Theme\Block\Html\HeroPreload
+    // que tem getHeroImageUrl() via DI de constructor (ResourceConnection + StoreManager)
+    /** @var GrupoAwamotos\Theme\Block\Html\HeroPreload $block */
+    $heroPreloadUrl = $block->getHeroImageUrl();
 }
 
 // Refinements bundle stays async, but is rendered explicitly below because
@@ -98,6 +103,10 @@ body .page-wrapper .page_footer,.page-footer{background:#f8fafc !important;backg
 .wrapper_slider.hidden-xs .banner_item_bg,.wrapper_slider:not(.visible-xs) .banner_item_bg{aspect-ratio:1920/600;min-height:clamp(220px,31.25vw,600px)}
 .wrapper_slider.visible-xs .banner_item_bg{aspect-ratio:768/400;min-height:clamp(180px,52vw,400px)}
 </style>
+<!-- LCP Hero Image Preload — fetchpriority=high (Swiper SlideBanner, homepage) -->
+<?php if ($heroPreloadUrl): ?>
+<link rel="preload" href="<?= $block->escapeUrl($heroPreloadUrl) ?>" as="image" fetchpriority="high"/>
+<?php endif; ?>
 <!-- AWA Head Preload — Preconnect (precedência sobre dns-prefetch) -->
 <?php foreach ($preconnect as $origin): ?>
 <link rel="preconnect" href="<?= $block->escapeUrl($origin) ?>" crossorigin="anonymous"/>

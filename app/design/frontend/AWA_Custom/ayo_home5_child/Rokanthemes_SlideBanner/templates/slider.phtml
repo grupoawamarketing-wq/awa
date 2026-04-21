@@ -173,13 +173,6 @@ if ($banners = $block->getBannerCollection()):
                     $slideAlt = $banner->getSlideText() ?: ($banner->getSlideTitle() ?: '');
                     $imgHtml  = $block->getImageElement($desktopImage, $slideAlt, $isFirst);
                     if ($isFirst && preg_match('/src="([^"]+)"/', $imgHtml, $_m)) {
-                        // LCP: injetar preload da imagem hero no <head> para browser discover ASAP
-                        $block->getPageConfig()->addRemotePageAsset(
-                            $_m[1],
-                            'link',
-                            ['attributes' => ['rel' => 'preload', 'as' => 'image', 'fetchpriority' => 'high']],
-                            'awa-hero-preload-desktop'
-                        );
                         $_webp = preg_replace('/\.(jpg|jpeg|png)$/i', '.webp', $_m[1]);
                         $imgHtml = '<picture>'
                             . '<source type="image/webp" srcset="' . $block->escapeUrl($_webp) . '">'
