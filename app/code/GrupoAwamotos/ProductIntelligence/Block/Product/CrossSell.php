@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace GrupoAwamotos\ProductIntelligence\Block\Product;
 
+use GrupoAwamotos\ProductIntelligence\Model\Product\BulkSkuProductLoader;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
 use Magento\Framework\Registry;
 use Magento\Framework\App\ResourceConnection;
-use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Catalog\Block\Product\ListProduct;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Pricing\PriceCurrencyInterface;
@@ -18,7 +18,7 @@ class CrossSell extends Template
 {
     private Registry $registry;
     private ResourceConnection $resource;
-    private ProductRepositoryInterface $productRepository;
+    private BulkSkuProductLoader $bulkSkuProductLoader;
     private ListProduct $listProductBlock;
     private ScopeConfigInterface $scopeConfig;
     private PriceCurrencyInterface $priceCurrency;
@@ -29,7 +29,7 @@ class CrossSell extends Template
         Context $context,
         Registry $registry,
         ResourceConnection $resource,
-        ProductRepositoryInterface $productRepository,
+        BulkSkuProductLoader $bulkSkuProductLoader,
         ListProduct $listProductBlock,
         ScopeConfigInterface $scopeConfig,
         PriceCurrencyInterface $priceCurrency,
@@ -39,7 +39,7 @@ class CrossSell extends Template
         parent::__construct($context, $data);
         $this->registry = $registry;
         $this->resource = $resource;
-        $this->productRepository = $productRepository;
+        $this->bulkSkuProductLoader = $bulkSkuProductLoader;
         $this->listProductBlock = $listProductBlock;
         $this->scopeConfig = $scopeConfig;
         $this->priceCurrency = $priceCurrency;
@@ -83,26 +83,26 @@ class CrossSell extends Template
                     ->limit($limit + 5) // fetch extra in case some aren't saleable
             );
 
+            $productsBySku = $this->bulkSkuProductLoader->loadBySkus(array_column($rules, 'consequent'));
+
             foreach ($rules as $rule) {
                 if (count($this->cachedItems) >= $limit) {
                     break;
                 }
 
-                try {
-                    $relatedProduct = $this->productRepository->get($rule['consequent']);
-                    if ($relatedProduct->isSaleable()) {
-                        $lift = (float)$rule['lift'];
-                        $this->cachedItems[] = [
-                            'product' => $relatedProduct,
-                            'lift' => $lift,
-                            'confidence' => (float)$rule['confidence'],
-                            'support' => (float)$rule['support'],
-                            'badge' => $this->getLiftBadge($lift),
-                        ];
-                    }
-                } catch (\Exception $e) {
+                $relatedProduct = $productsBySku[(string)($rule['consequent'] ?? '')] ?? null;
+                if ($relatedProduct === null || !$relatedProduct->isSaleable()) {
                     continue;
                 }
+
+                $lift = (float)$rule['lift'];
+                $this->cachedItems[] = [
+                    'product' => $relatedProduct,
+                    'lift' => $lift,
+                    'confidence' => (float)$rule['confidence'],
+                    'support' => (float)$rule['support'],
+                    'badge' => $this->getLiftBadge($lift),
+                ];
             }
         } catch (\Exception $e) {
             $this->logger->error('[ProductIntelligence PDP CrossSell] Error: ' . $e->getMessage());

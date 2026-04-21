@@ -9,12 +9,12 @@ declare(strict_types=1);
 
 namespace GrupoAwamotos\RexisML\Block;
 
+use GrupoAwamotos\RexisML\Model\Product\BulkSkuProductLoader;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
 use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Framework\App\ResourceConnection;
-use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Catalog\Block\Product\ListProduct;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Psr\Log\LoggerInterface;
@@ -24,20 +24,23 @@ class Recommendations extends Template
     protected $customerSession;
     protected $customerRepository;
     protected $resource;
-    protected $productRepository;
+    protected $bulkSkuProductLoader;
     protected $listProductBlock;
     protected $scopeConfig;
     protected $logger;
 
     private $cachedProducts = null;
     private $cachedRfm = null;
+    private $cachedCounts = null;
+    private bool $erpCodeResolved = false;
+    private ?string $resolvedErpCode = null;
 
     public function __construct(
         Context $context,
         CustomerSession $customerSession,
         CustomerRepositoryInterface $customerRepository,
         ResourceConnection $resource,
-        ProductRepositoryInterface $productRepository,
+        BulkSkuProductLoader $bulkSkuProductLoader,
         ListProduct $listProductBlock,
         ScopeConfigInterface $scopeConfig,
         LoggerInterface $logger,
@@ -47,7 +50,7 @@ class Recommendations extends Template
         $this->customerSession = $customerSession;
         $this->customerRepository = $customerRepository;
         $this->resource = $resource;
-        $this->productRepository = $productRepository;
+        $this->bulkSkuProductLoader = $bulkSkuProductLoader;
         $this->listProductBlock = $listProductBlock;
         $this->scopeConfig = $scopeConfig;
         $this->logger = $logger;
@@ -70,8 +73,14 @@ class Recommendations extends Template
      */
     private function resolveErpCode(): ?string
     {
+        if ($this->erpCodeResolved) {
+            return $this->resolvedErpCode;
+        }
+
         $customerId = $this->customerSession->getCustomerId();
         if (!$customerId) {
+            $this->erpCodeResolved = true;
+
             return null;
         }
 
@@ -80,7 +89,10 @@ class Recommendations extends Template
             $customer = $this->customerRepository->getById($customerId);
             $erpAttr = $customer->getCustomAttribute('erp_code');
             if ($erpAttr && $erpAttr->getValue()) {
-                return (string) $erpAttr->getValue();
+                $this->resolvedErpCode = (string)$erpAttr->getValue();
+                $this->erpCodeResolved = true;
+
+                return $this->resolvedErpCode;
             }
 
             // 2. Fallback: entity_map table
@@ -92,14 +104,20 @@ class Recommendations extends Template
                 ->where('magento_entity_id = ?', $customerId);
             $erpCode = $connection->fetchOne($select);
             if ($erpCode) {
-                return (string) $erpCode;
+                $this->resolvedErpCode = (string)$erpCode;
+                $this->erpCodeResolved = true;
+
+                return $this->resolvedErpCode;
             }
         } catch (\Exception $e) {
             $this->logger->debug('[RexisML] Could not resolve ERP code: ' . $e->getMessage());
         }
 
         // 3. Fallback final: usar o próprio Magento customer ID
-        return (string) $customerId;
+        $this->resolvedErpCode = (string)$customerId;
+        $this->erpCodeResolved = true;
+
+        return $this->resolvedErpCode;
     }
 
     /**
@@ -151,24 +169,23 @@ class Recommendations extends Template
             }
 
             $rows = $connection->fetchAll($select);
+            $productsBySku = $this->bulkSkuProductLoader->loadBySkus(array_column($rows, 'identificador_produto'));
 
             foreach ($rows as $row) {
-                try {
-                    $product = $this->productRepository->get($row['identificador_produto']);
-                    if ($product->isSaleable()) {
-                        $tipo = $row['tipo_recomendacao'] ?: $row['classificacao_produto'];
-                        $this->cachedProducts[] = [
-                            'product' => $product,
-                            'score' => (float)$row['pred'],
-                            'classificacao' => $this->normalizeClassification($tipo),
-                            'predicted_value' => (float)$row['previsao_gasto_round_up'],
-                            'recencia' => (int)($row['recencia'] ?? 0),
-                            'tipo' => $row['tipo_recomendacao'] ?? ''
-                        ];
-                    }
-                } catch (\Exception $e) {
+                $product = $productsBySku[(string)($row['identificador_produto'] ?? '')] ?? null;
+                if ($product === null || !$product->isSaleable()) {
                     continue;
                 }
+
+                $tipo = $row['tipo_recomendacao'] ?: $row['classificacao_produto'];
+                $this->cachedProducts[] = [
+                    'product' => $product,
+                    'score' => (float)$row['pred'],
+                    'classificacao' => $this->normalizeClassification($tipo),
+                    'predicted_value' => (float)$row['previsao_gasto_round_up'],
+                    'recencia' => (int)($row['recencia'] ?? 0),
+                    'tipo' => $row['tipo_recomendacao'] ?? ''
+                ];
             }
         } catch (\Exception $e) {
             $this->logger->error('[RexisML] Error loading recommendations: ' . $e->getMessage());
@@ -215,9 +232,15 @@ class Recommendations extends Template
      */
     public function getRecommendationCounts()
     {
+        if ($this->cachedCounts !== null) {
+            return $this->cachedCounts;
+        }
+
         $erpCode = $this->resolveErpCode();
         if (!$erpCode) {
-            return ['churn' => 0, 'crosssell' => 0, 'total' => 0];
+            $this->cachedCounts = ['churn' => 0, 'crosssell' => 0, 'total' => 0];
+
+            return $this->cachedCounts;
         }
 
         try {
@@ -232,9 +255,13 @@ class Recommendations extends Template
                 ])
                 ->where('identificador_cliente = ?', $erpCode);
 
-            return $connection->fetchRow($select) ?: ['churn' => 0, 'crosssell' => 0, 'total' => 0];
+            $this->cachedCounts = $connection->fetchRow($select) ?: ['churn' => 0, 'crosssell' => 0, 'total' => 0];
+
+            return $this->cachedCounts;
         } catch (\Exception $e) {
-            return ['churn' => 0, 'crosssell' => 0, 'total' => 0];
+            $this->cachedCounts = ['churn' => 0, 'crosssell' => 0, 'total' => 0];
+
+            return $this->cachedCounts;
         }
     }
 
