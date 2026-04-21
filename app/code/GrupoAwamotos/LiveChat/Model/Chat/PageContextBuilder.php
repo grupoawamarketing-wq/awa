@@ -24,6 +24,16 @@ class PageContextBuilder
 
     private ApplicationCollectionFactory $applicationCollectionFactory;
 
+    /**
+     * @var array<int, array<int, array<string, mixed>>>
+     */
+    private array $groupedApplicationsCache = [];
+
+    /**
+     * @var array<int, array{name: string, value: string}>|null
+     */
+    private ?array $pageVariablesCache = null;
+
     public function __construct(
         RequestInterface $request,
         Registry $registry,
@@ -43,6 +53,10 @@ class PageContextBuilder
      */
     public function build(): array
     {
+        if ($this->pageVariablesCache !== null) {
+            return $this->pageVariablesCache;
+        }
+
         $variables = [];
 
         $this->appendVariable($variables, 'Tipo de pagina', $this->resolvePageType());
@@ -63,7 +77,9 @@ class PageContextBuilder
             $this->appendVariable($variables, 'Busca', $searchQuery);
         }
 
-        return $variables;
+        $this->pageVariablesCache = $variables;
+
+        return $this->pageVariablesCache;
     }
 
     /**
@@ -179,10 +195,16 @@ class PageContextBuilder
             return [];
         }
 
+        if (array_key_exists($productId, $this->groupedApplicationsCache)) {
+            return $this->groupedApplicationsCache[$productId];
+        }
+
         $collection = $this->applicationCollectionFactory->create();
         $collection->addProductFilter($productId);
 
-        return $collection->getGroupedByBrand();
+        $this->groupedApplicationsCache[$productId] = $collection->getGroupedByBrand();
+
+        return $this->groupedApplicationsCache[$productId];
     }
 
     /**

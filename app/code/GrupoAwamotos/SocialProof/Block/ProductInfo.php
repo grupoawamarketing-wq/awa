@@ -17,11 +17,24 @@ class ProductInfo extends Template
     private const BESTSELLER_DAYS = 30;
     private const BESTSELLER_MIN_QTY = 2;
     private const LOW_STOCK_THRESHOLD = 10;
+    private const DEFAULT_DATA = [
+        'views_today' => 0,
+        'is_best_seller' => false,
+        'low_stock' => false,
+        'qty' => 0,
+    ];
 
     protected Registry $registry;
     private ResourceConnection $resourceConnection;
     private CacheInterface $cache;
     private LoggerInterface $logger;
+
+    /**
+     * @var array<string, int|bool>
+     */
+    private array $socialProofData = self::DEFAULT_DATA;
+
+    private bool $socialProofDataLoaded = false;
 
     public function __construct(
         Template\Context $context,
@@ -51,20 +64,27 @@ class ProductInfo extends Template
 
     private function getSocialProofData(): array
     {
+        if ($this->socialProofDataLoaded) {
+            return $this->socialProofData;
+        }
+
         $productId = $this->getProductId();
         if ($productId === 0) {
-            return ['views_today' => 0, 'is_best_seller' => false, 'low_stock' => false, 'qty' => 0];
+            return $this->storeSocialProofData(self::DEFAULT_DATA);
         }
 
         $cacheKey = self::CACHE_PREFIX . $productId;
         $cached = $this->cache->load($cacheKey);
         if ($cached !== false) {
-            return json_decode($cached, true);
+            $decoded = json_decode($cached, true);
+
+            return $this->storeSocialProofData(is_array($decoded) ? array_replace(self::DEFAULT_DATA, $decoded) : self::DEFAULT_DATA);
         }
 
         try {
             $conn     = $this->resourceConnection->getConnection();
-            $today    = date('Y-m-d');
+            $todayStart = date('Y-m-d 00:00:00');
+            $tomorrowStart = date('Y-m-d 00:00:00', strtotime('+1 day'));
 
             // Visualizações hoje
             $viewsTable = $this->resourceConnection->getTableName('report_viewed_product_index');
@@ -72,20 +92,21 @@ class ProductInfo extends Template
                 $conn->select()
                     ->from($viewsTable, ['cnt' => 'COUNT(*)'])
                     ->where('product_id = ?', $productId)
-                    ->where('DATE(added_at) = ?', $today)
+                    ->where('added_at >= ?', $todayStart)
+                    ->where('added_at < ?', $tomorrowStart)
             );
 
             // Mais vendido (últimos 30 dias)
             $oiTable   = $this->resourceConnection->getTableName('sales_order_item');
             $oTable    = $this->resourceConnection->getTableName('sales_order');
-            $periodStart = date('Y-m-d', strtotime('-' . self::BESTSELLER_DAYS . ' days'));
+            $periodStart = date('Y-m-d 00:00:00', strtotime('-' . self::BESTSELLER_DAYS . ' days'));
             $totalQty  = (int) $conn->fetchOne(
                 $conn->select()
                     ->from(['soi' => $oiTable], ['total_qty' => 'SUM(soi.qty_ordered)'])
                     ->join(['so' => $oTable], 'soi.order_id = so.entity_id', [])
                     ->where('soi.product_id = ?', $productId)
                     ->where('so.status IN (?)', ['processing', 'complete'])
-                    ->where('DATE(so.created_at) >= ?', $periodStart)
+                    ->where('so.created_at >= ?', $periodStart)
             );
             $isBestSeller = $totalQty >= self::BESTSELLER_MIN_QTY;
 
@@ -116,11 +137,24 @@ class ProductInfo extends Template
                 self::CACHE_LIFETIME
             );
 
-            return $data;
+            return $this->storeSocialProofData($data);
         } catch (\Exception $e) {
             $this->logger->warning('[SocialProof::ProductInfo] ' . $e->getMessage());
-            return ['views_today' => 0, 'is_best_seller' => false, 'low_stock' => false, 'qty' => 0];
+
+            return $this->storeSocialProofData(self::DEFAULT_DATA);
         }
+    }
+
+    /**
+     * @param array<string, int|bool> $data
+     * @return array<string, int|bool>
+     */
+    private function storeSocialProofData(array $data): array
+    {
+        $this->socialProofData = array_replace(self::DEFAULT_DATA, $data);
+        $this->socialProofDataLoaded = true;
+
+        return $this->socialProofData;
     }
 
     public function getViewsToday(): int
