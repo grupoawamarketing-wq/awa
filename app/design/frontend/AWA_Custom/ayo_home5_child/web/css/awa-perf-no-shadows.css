@@ -1,0 +1,239 @@
+/* =============================================================================
+   AWA Motos — Performance: Remove Sombras e Efeitos
+   Gerado: 2026-04-21
+   Objetivo: Eliminar box-shadow, text-shadow, backdrop-filter e animações
+   não-compostas que causam repaint/reflow e prejudicam o Lighthouse score.
+   Carregado ÚLTIMO — tem precedência sobre todos os outros bundles.
+   ============================================================================= */
+
+/* ── 1. Zerar variáveis CSS de sombra (cascata automática para todos os seletores) ── */
+:root {
+  /* Sombras decorativas → none */
+  --awa-shadow-sm:             none;
+  --awa-shadow:                none;
+  --awa-shadow-md:             none;
+  --awa-shadow-hover:          none;
+  --awa-shadow-lg:             none;
+  --awa-shadow-dropdown:       none;
+  --awa-shadow-red:            none;
+  --awa-shadow-badge:          none;
+  --awa-shadow-red-hover:      none;
+  --awa-shadow-red-lift:       none;
+  --awa-shadow-xs2:            none;
+  --awa-shadow-sm2:            none;
+  --awa-shadow-sm3:            none;
+  --awa-shadow-sm4:            none;
+  --awa-shadow-md2:            none;
+  --awa-shadow-md3:            none;
+  --awa-shadow-md4:            none;
+  --awa-shadow-lg2:            none;
+  --awa-shadow-lg3:            none;
+  --awa-shadow-xl2:            none;
+  --awa-shadow-xl3:            none;
+  --awa-shadow-xl4:            none;
+  --awa-shadow-2xl:            none;
+  --awa-shadow-side:           none;
+  --awa-shadow-brand-sm2:      none;
+  --awa-shadow-brand-md2:      none;
+  --awa-shadow-brand-lg2:      none;
+  --awa-shadow-brand-xl2:      none;
+  --awa-shadow-brand-2xl2:     none;
+  --awa-shadow-inset-green:    none;
+
+  /* Card shadows */
+  --card-shadow:               none;
+  --card-shadow-hover:         none;
+  --awa-ui-card-shadow:        none;
+  --awa-ui-card-shadow-hover:  none;
+
+  /* Alias shadows */
+  --shadow-xs:                 none;
+  --shadow-md:                 none;
+  --shadow-lg:                 none;
+  --shadow-red:                none;
+
+  /* Transitions: remover box-shadow de transições compostas
+     (box-shadow força repaint; manter apenas transform + opacity) */
+  --awa-transition-sh-tf-brd:  transform 250ms ease, border-color 250ms ease;
+  --awa-transition-brd-sh-015: border-color 0.15s;
+  --awa-transition-border-shadow: border-color 180ms ease;
+}
+
+/* ── 2. Reset global de sombras hardcoded (não via variável) ── */
+/* Seletores principais que usam valores fixos no awa-bundle-refinements.css */
+
+/* Cards de produto */
+.product-item-info,
+.product-item,
+.product-item-inner,
+.awa-product-card,
+[class*="product-card"],
+.item.product-item {
+  box-shadow: none !important;
+}
+.product-item-info:hover,
+.product-item:hover,
+.awa-product-card:hover {
+  box-shadow: none !important;
+}
+
+/* Dropdowns e menus */
+.dropdown-menu,
+.nav-sections,
+.block-nav,
+.submenu,
+[class*="megamenu"],
+[class*="dropdown"],
+.ui-menu,
+.ui-autocomplete,
+.autocomplete-wrapper,
+#search_autocomplete,
+.search-autocomplete,
+.mst-searchautocomplete__autocomplete {
+  box-shadow: none !important;
+  border: 1px solid #e5e7eb !important;
+}
+
+/* Botões */
+button,
+.btn,
+.action,
+.action-primary,
+.action-secondary,
+[class*="btn-"],
+a.action {
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+button:hover,
+.btn:hover,
+.action:hover,
+.action-primary:hover {
+  box-shadow: none !important;
+}
+
+/* Header */
+.page-header,
+.header.content,
+.awa-site-header,
+.awa-header-professional,
+.header-wrapper-sticky {
+  box-shadow: none !important;
+}
+
+/* Minicart */
+.block-minicart,
+.minicart-wrapper .block-minicart {
+  box-shadow: none !important;
+  border: 1px solid #e5e7eb !important;
+}
+
+/* Modais */
+.modal-popup,
+.modal-slide,
+._has-modal,
+[data-role="modal"] {
+  box-shadow: none !important;
+}
+
+/* Forms / inputs (manter outline para acessibilidade) */
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="search"]:focus,
+textarea:focus,
+select:focus,
+.input-text:focus {
+  box-shadow: none !important;
+  outline: 2px solid var(--awa-primary, #b73337) !important;
+  outline-offset: 1px !important;
+}
+
+/* Banners / blocos de destaque */
+.awa-banner,
+.banner-wrapper,
+[class*="promo-block"],
+[class*="featured-block"] {
+  box-shadow: none !important;
+}
+
+/* Footer */
+.page-footer,
+footer {
+  box-shadow: none !important;
+}
+
+/* Notificações / toasts */
+.message,
+.messages .message,
+.mage-error,
+[data-bind*="mageInit"] .message {
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+/* ── 3. Remover text-shadow globalmente ── */
+* {
+  text-shadow: none !important;
+}
+
+/* ── 4. Remover backdrop-filter (força compositing layer extra) ── */
+.awa-site-header.awa-header-professional.awa-header-condensed,
+.mst-searchautocomplete__autocomplete,
+#search_autocomplete.searchsuite-autocomplete,
+.search-autocomplete.searchsuite-autocomplete,
+[style*="backdrop-filter"],
+[class*="glass"],
+[class*="frosted"] {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  /* Compensar fundo: garantir opacidade total */
+  background-color: var(--awa-primary, #b73337) !important;
+}
+/* Search autocomplete: restaurar fundo branco após remover backdrop */
+.mst-searchautocomplete__autocomplete,
+#search_autocomplete.searchsuite-autocomplete,
+.search-autocomplete.searchsuite-autocomplete {
+  background-color: #ffffff !important;
+}
+
+/* ── 5. Substituir animação awa-stock-pulse (animava box-shadow — não-composta) ── */
+@keyframes awa-stock-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.65; }
+}
+
+/* ── 6. Remover filter decorativo (não afeta grayscale funcional) ── */
+[class*="hover-grayscale"]:hover,
+[class*="img-grayscale"] {
+  filter: none !important;
+}
+
+/* ── 7. Forçar will-change nos elementos que animam por transform ── */
+.product-item-info,
+.awa-product-card,
+.action-primary,
+.btn {
+  will-change: transform;
+}
+
+/* ── 8. Remover sombras inline críticas remanescentes no awa-bundle-refinements ── */
+/* Botão primário (sombra vermelha hardcoded) */
+.action-primary,
+button.action-primary,
+a.action-primary {
+  box-shadow: none !important;
+}
+.action-primary:hover,
+button.action-primary:hover {
+  box-shadow: none !important;
+  transform: translateY(-1px);
+}
+
+/* Badges / contadores */
+.counter.qty,
+.minicart-wrapper .counter {
+  box-shadow: none !important;
+}
+
+/* ── FIM ── */

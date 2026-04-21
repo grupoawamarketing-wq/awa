@@ -1,5 +1,5 @@
 /** AWA Service Worker v2.4.0 — Multi-strategy Cache (2026-03-29) */
-const CACHE_VERSION = 'awa-v20260416-1';
+const CACHE_VERSION = '20260421-perf-noshadows';
 const FONT_CACHE = 'awa-fonts-v1';
 const IMAGE_CACHE = 'awa-images-v1';
 const IMAGE_CACHE_MAX = 300; // max entries
@@ -12,7 +12,7 @@ const CACHEABLE_PATTERNS = [
   /\/css\/awa-pdp-b2b-pro\.css$/,
   /\/css\/swiper-bundle\.min\.css$/,
   /\/css\/themes5\.css$/,
-  /\/js\/awa-bundle\.min\.js$/,
+  // awa-bundle.min.js removed (file no longer exists — SW-A3 fix 2026-04-18)
   /\/js\/swiper-bundle\.min\.js$/,
   /\/fonts\/rubik\/rubik-\d{3}\.woff2$/
 ];
