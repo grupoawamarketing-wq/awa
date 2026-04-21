@@ -15,8 +15,8 @@ var config = {
     paths: {
         'awa-b2b-header': 'js/awa-b2b-header',
         'rokanthemes/timecircles': 'js/rokanthemes/timecircles',
-        // Restore Owl Carousel explicitly for Rokanthemes modules that hardcode the path
-        'rokanthemes/owl': 'Rokanthemes_Themeoption/js/owl.carousel',
+        // Redirect Owl Carousel to Swiper Polyfill
+        'rokanthemes/owl': 'js/rokanthemes-owl-polyfill',
         // Swiper 11 — UMD bundle for carousel migration
         'swiper': 'js/swiper-bundle.min',
         // Swiper hotfixes: usar fonte até regenerar artefatos minificados com paridade.

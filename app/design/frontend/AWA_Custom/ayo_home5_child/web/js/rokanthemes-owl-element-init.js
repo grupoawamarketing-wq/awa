@@ -2,8 +2,8 @@
 
 define([
     'jquery',
-    'rokanthemes/owl'
-], function ($) {
+    'swiper'
+], function ($, Swiper) {
     'use strict';
 
     var V1_RESPONSIVE_KEYS = ['itemsDesktop', 'itemsDesktopSmall', 'itemsTablet', 'itemsMobile'];
@@ -19,160 +19,148 @@ define([
     }
 
     /**
-     * Convert OWL v1 options to v2 format.
+     * Convert OWL v1/v2 legacy options to Swiper format.
      */
-    function convertToV2(opts) {
-        var v2 = {};
-        var responsive = {};
-        var hasV1Responsive = false;
-        var mobileItems, tabletItems, desktopSmallItems, desktopItems;
-        var i;
+    function convertToSwiper(opts) {
+        var desktopItems = parseInt(opts.items || opts.itemsDesktop || 3, 10) || 3;
+        var swiperConfig = {
+            slidesPerView: desktopItems,
+            spaceBetween: parseInt(opts.margin, 10) || parseInt(opts.slideMargin, 10) || 0,
+            loop: resolveBoolean(opts.loop, false) || resolveBoolean(opts.autoPlay, false),
+            autoHeight: resolveBoolean(opts.autoHeight, false),
+            breakpoints: {}
+        };
 
-        for (i = 0; i < V1_RESPONSIVE_KEYS.length; i++) {
-            if (opts[V1_RESPONSIVE_KEYS[i]] !== undefined) {
-                hasV1Responsive = true;
-                break;
-            }
+        var autoplayAttr = opts.autoPlay || opts.autoplay;
+        if (autoplayAttr && autoplayAttr !== 'false' && autoplayAttr !== '0') {
+            var delay = typeof autoplayAttr === 'number' ? autoplayAttr : (parseInt(opts.slideSpeed, 10) || parseInt(opts.autoplayTimeout, 10) || 5000);
+            swiperConfig.autoplay = {
+                delay: Math.max(delay, 500),
+                disableOnInteraction: false,
+                pauseOnMouseEnter: resolveBoolean(opts.stopOnHover, true) || resolveBoolean(opts.autoplayHoverPause, true)
+            };
         }
 
-        desktopItems = parseInt(opts.items, 10) || 3;
+        var speed = parseInt(opts.slideSpeed, 10) || parseInt(opts.smartSpeed, 10);
+        if (speed) {
+            swiperConfig.speed = speed;
+        }
 
+        var nav = resolveBoolean(opts.navigation, false) || resolveBoolean(opts.nav, false);
+        var dots = resolveBoolean(opts.pagination, false) || resolveBoolean(opts.dots, false);
+        
+        if (nav) {
+            swiperConfig.navigation = {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev'
+            };
+        }
+        if (dots) {
+            swiperConfig.pagination = {
+                el: '.swiper-pagination',
+                clickable: true
+            };
+        }
+
+        var hasV1Responsive = V1_RESPONSIVE_KEYS.some(function(k) { return opts[k] !== undefined; });
+        var res = {};
+        
         if (hasV1Responsive) {
-            mobileItems = 1;
-            tabletItems = 2;
-            desktopSmallItems = 3;
-
-            if (opts.itemsMobile && opts.itemsMobile[1]) {
-                mobileItems = parseInt(opts.itemsMobile[1], 10) || 1;
-            }
-            if (opts.itemsTablet && opts.itemsTablet[1]) {
-                tabletItems = parseInt(opts.itemsTablet[1], 10) || 2;
-            }
-            if (opts.itemsDesktopSmall && opts.itemsDesktopSmall[1]) {
-                desktopSmallItems = parseInt(opts.itemsDesktopSmall[1], 10) || 3;
-            }
-            if (opts.itemsDesktop && opts.itemsDesktop[1]) {
-                desktopItems = parseInt(opts.itemsDesktop[1], 10) || desktopItems;
-            }
-
-            responsive[0] = { items: mobileItems };
-            responsive[opts.itemsMobile && opts.itemsMobile[0] ? opts.itemsMobile[0] : 680] = { items: mobileItems };
-            responsive[opts.itemsTablet && opts.itemsTablet[0] ? opts.itemsTablet[0] : 991] = { items: tabletItems };
-            responsive[opts.itemsDesktopSmall && opts.itemsDesktopSmall[0] ? opts.itemsDesktopSmall[0] : 1199] = { items: desktopSmallItems };
-            responsive[opts.itemsDesktop && opts.itemsDesktop[0] ? opts.itemsDesktop[0] : 1366] = { items: desktopItems };
-
-            v2.responsive = responsive;
+            var mItems = 1, tItems = 2, dsItems = 3;
+            if (opts.itemsMobile && opts.itemsMobile[1]) mItems = parseInt(opts.itemsMobile[1], 10);
+            if (opts.itemsTablet && opts.itemsTablet[1]) tItems = parseInt(opts.itemsTablet[1], 10);
+            if (opts.itemsDesktopSmall && opts.itemsDesktopSmall[1]) dsItems = parseInt(opts.itemsDesktopSmall[1], 10);
+            
+            res[0] = { slidesPerView: mItems };
+            res[opts.itemsMobile && opts.itemsMobile[0] ? opts.itemsMobile[0] : 480] = { slidesPerView: Math.max(1, mItems) };
+            res[opts.itemsTablet && opts.itemsTablet[0] ? opts.itemsTablet[0] : 768] = { slidesPerView: tItems };
+            res[opts.itemsDesktopSmall && opts.itemsDesktopSmall[0] ? opts.itemsDesktopSmall[0] : 992] = { slidesPerView: dsItems };
+            res[opts.itemsDesktop && opts.itemsDesktop[0] ? opts.itemsDesktop[0] : 1200] = { slidesPerView: desktopItems };
         } else if (opts.responsive && Object.keys(opts.responsive).length > 0) {
-            v2.responsive = opts.responsive;
-        } else {
-            /* Auto-generate responsive breakpoints from items count */
-            mobileItems = Math.max(1, Math.min(desktopItems, 1));
-            tabletItems = Math.max(1, Math.min(desktopItems, 2));
-            desktopSmallItems = Math.max(1, Math.min(desktopItems, 3));
-
-            responsive[0] = { items: mobileItems };
-            responsive[480] = { items: Math.max(1, Math.min(desktopItems, 2)) };
-            responsive[768] = { items: tabletItems };
-            responsive[992] = { items: desktopSmallItems };
-            responsive[1200] = { items: desktopItems };
-
-            v2.responsive = responsive;
-        }
-
-        v2.items = desktopItems;
-        v2.nav = resolveBoolean(opts.navigation, false);
-        v2.navText = ['<span aria-label="Anterior">&#8249;</span>', '<span aria-label="Próximo">&#8250;</span>'];
-        v2.dots = resolveBoolean(opts.pagination, false);
-        v2.autoplay = resolveBoolean(opts.autoPlay, false);
-        v2.autoplayHoverPause = resolveBoolean(opts.stopOnHover, true);
-        v2.slideBy = resolveBoolean(opts.scrollPerPage, true) ? 'page' : 1;
-        v2.smartSpeed = parseInt(opts.slideSpeed, 10) || 250;
-        v2.lazyLoad = resolveBoolean(opts.lazyLoad, false);
-        v2.loop = resolveBoolean(opts.loop, false);
-        v2.margin = parseInt(opts.margin, 10) || 0;
-
-        return v2;
-    }
-
-    function normalizeOptions(rawOptions) {
-        return convertToV2(rawOptions || {});
-    }
-
-    function initWhenReady($el, options, attemptsLeft) {
-        var remaining = (attemptsLeft !== undefined) ? attemptsLeft : 8;
-
-        if (!$el || !$el.length) {
-            return;
-        }
-
-        if (typeof $el.owlCarousel === 'function') {
-            try {
-                $el.owlCarousel(options);
-                $el.addClass('owl-loaded');
-                /* Add .owl-carousel after init for unified CSS targeting */
-                if (!$el.hasClass('owl-carousel')) {
-                    $el.addClass('owl-carousel');
+            for (var bp in opts.responsive) {
+                if (opts.responsive.hasOwnProperty(bp)) {
+                    res[bp] = { slidesPerView: parseInt(opts.responsive[bp].items, 10) || 1 };
                 }
-            } catch (e) {
-                $el.removeData('awaOwlElementInit');
             }
+        } else {
+            res[0] = { slidesPerView: Math.max(1, Math.min(desktopItems, 1)) };
+            res[480] = { slidesPerView: Math.max(1, Math.min(desktopItems, 2)) };
+            res[768] = { slidesPerView: Math.max(1, Math.min(desktopItems, 2)) };
+            res[992] = { slidesPerView: Math.max(1, Math.min(desktopItems, 3)) };
+            res[1200] = { slidesPerView: desktopItems };
+        }
+        swiperConfig.breakpoints = res;
+
+        return swiperConfig;
+    }
+
+    function initSwiperShim($el, options) {
+        if (!$el || !$el.length || $el.hasClass('swiper-initialized')) {
             return;
         }
 
-        if (remaining <= 0) {
-            $el.removeData('awaOwlElementInit');
-            return;
+        $el.removeClass('owl').addClass('swiper owl-carousel-shim');
+        if (!$el.find('> .swiper-wrapper').length) {
+            $el.wrapInner('<div class="swiper-wrapper"></div>');
+        }
+        $el.find('> .swiper-wrapper > *').each(function() {
+            var $child = $(this);
+            if (!$child.hasClass('swiper-slide')) {
+                $child.addClass('swiper-slide');
+            }
+        });
+
+        if (options.navigation && !$el.find('.swiper-button-next').length) {
+            $el.append('<div class="swiper-button-prev"></div><div class="swiper-button-next"></div>');
+        }
+        if (options.pagination && !$el.find('.swiper-pagination').length) {
+            $el.append('<div class="swiper-pagination"></div>');
         }
 
         setTimeout(function () {
-            initWhenReady($el, options, remaining - 1);
-        }, 150);
+            try {
+                var finalOptions = options;
+                // Disable loop if there are not enough slides to support it.
+                // Swiper requires at least slidesPerView * 2 slides for loop mode.
+                if (finalOptions.loop) {
+                    var slideCount = $el.find('> .swiper-wrapper > .swiper-slide').length;
+                    var spv = parseFloat(finalOptions.slidesPerView) || 1;
+                    if (slideCount < spv * 2) {
+                        finalOptions = Object.assign({}, finalOptions, { loop: false });
+                        if (finalOptions.autoplay) {
+                            finalOptions.autoplay = Object.assign({}, finalOptions.autoplay);
+                        }
+                    }
+                }
+                new Swiper($el[0], finalOptions);
+                $el.addClass('owl-loaded swiper-loaded'); // Keep legacy flag happy
+            } catch (e) {
+                // Swiper init failed — element may not be ready or config is invalid
+            }
+        }, 100);
     }
 
-    /**
-     * Magento initializer for Owl Carousel v1.
-     *
-     * Pattern A — bind directly to the .owl element:
-     *   ".rokan-featuredproduct .owl": {
-     *     "js/rokanthemes-owl-element-init": { items: 4, navigation: true, ... }
-     *   }
-     *
-     * Pattern B — bind to container, find carousel inside via carouselSelector:
-     *   ".rokan-featuredproduct": {
-     *     "js/rokanthemes-owl-element-init": {
-     *       "carouselSelector": ".owl",
-     *       "owl": { items: 4, navigation: true, ... }
-     *     }
-     *   }
-     */
     return function (config, element) {
         var cfg = config || {};
         var $container = $(element);
-        var $el, owlOptions;
+        var $el, swiperOptions;
 
         if (!$container.length) {
             return;
         }
 
         if (cfg.carouselSelector) {
-            /* Pattern B */
             $el = $container.find(cfg.carouselSelector).first();
-            owlOptions = normalizeOptions(cfg.owl ? $.extend({}, cfg.owl) : {});
+            swiperOptions = convertToSwiper(cfg.owl ? $.extend({}, cfg.owl) : {});
         } else {
-            /* Pattern A — element IS the carousel */
             $el = $container;
-            owlOptions = normalizeOptions($.extend({}, cfg));
+            swiperOptions = convertToSwiper($.extend({}, cfg));
         }
 
         if (!$el.length) {
             return;
         }
 
-        if ($el.data('owl.carousel') || $el.data('owlCarousel') || $el.hasClass('owl-loaded') || $el.data('awaOwlElementInit')) {
-            return;
-        }
-
-        $el.data('awaOwlElementInit', 1);
-        initWhenReady($el, owlOptions, 8);
+        initSwiperShim($el, swiperOptions);
     };
 });
