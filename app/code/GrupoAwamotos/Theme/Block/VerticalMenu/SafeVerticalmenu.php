@@ -30,6 +30,27 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
     private array $categoryUrlCache = [];
 
     /**
+     * Cache category image URLs by "attribute:categoryId" for the current request.
+     *
+     * @var array<string, string>
+     */
+    private array $categoryImageUrlCache = [];
+
+    /**
+     * Cache product counts per category id for the current request.
+     *
+     * @var array<int, int>
+     */
+    private array $categoryProductCountCache = [];
+
+    /**
+     * Cache CMS block content by identifier list for the current request.
+     *
+     * @var array<string, string>
+     */
+    private array $menuBlockContentCache = [];
+
+    /**
      * @inheritDoc
      */
     public function getCategoryModel($id)
@@ -185,6 +206,86 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
         }
 
         return $url;
+    }
+
+    /**
+     * Resolve and cache category image URL by attribute code.
+     *
+     * @param mixed $category
+     */
+    private function getCategoryImageUrlCached($category, string $attributeCode): string
+    {
+        $categoryId = (int)$category->getId();
+        $cacheKey = $attributeCode . ':' . $categoryId;
+        if ($categoryId > 0 && isset($this->categoryImageUrlCache[$cacheKey])) {
+            return $this->categoryImageUrlCache[$cacheKey];
+        }
+
+        $image = (string)$category->getData($attributeCode);
+        if ($image === '') {
+            if ($categoryId > 0) {
+                $this->categoryImageUrlCache[$cacheKey] = '';
+            }
+
+            return '';
+        }
+
+        try {
+            $url = (string)$category->getImageUrl($attributeCode);
+        } catch (\Exception $e) {
+            $store = $this->_storeManager->getStore();
+            $mediaUrl = '';
+            if (is_object($store) && method_exists($store, 'getBaseUrl')) {
+                $mediaUrl = (string)call_user_func([$store, 'getBaseUrl'], UrlInterface::URL_TYPE_MEDIA);
+            }
+            $url = $mediaUrl . 'catalog/category/' . ltrim($image, '/');
+        }
+
+        if ($categoryId > 0) {
+            $this->categoryImageUrlCache[$cacheKey] = $url;
+        }
+
+        return $url;
+    }
+
+    /**
+     * Resolve and cache category product count for the current request.
+     *
+     * @param mixed $category
+     */
+    private function getCategoryProductCountCached($category): int
+    {
+        $categoryId = (int)$category->getId();
+        if ($categoryId > 0 && isset($this->categoryProductCountCache[$categoryId])) {
+            return $this->categoryProductCountCache[$categoryId];
+        }
+
+        try {
+            $productCount = (int)$category->getProductCount();
+        } catch (\Exception $e) {
+            $productCount = 0;
+        }
+
+        if ($categoryId > 0) {
+            $this->categoryProductCountCache[$categoryId] = $productCount;
+        }
+
+        return $productCount;
+    }
+
+    private function getMenuBlockContentCached(string $blockIdentifier): string
+    {
+        if ($blockIdentifier === '') {
+            return '';
+        }
+
+        if (array_key_exists($blockIdentifier, $this->menuBlockContentCache)) {
+            return $this->menuBlockContentCache[$blockIdentifier];
+        }
+
+        $this->menuBlockContentCache[$blockIdentifier] = (string)$this->getBlockContent($blockIdentifier);
+
+        return $this->menuBlockContentCache[$blockIdentifier];
     }
 
     /**
@@ -566,31 +667,12 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
                 /* --- Phase C: product count + category image as data attrs --- */
                 $dataAttrs = '';
                 if ($level === 1) {
-                    try {
-                        $productCount = (int) $cat_model->getProductCount();
-                    } catch (\Exception $e) {
-                        $productCount = 0;
-                    }
+                    $productCount = $this->getCategoryProductCountCached($cat_model);
                     $dataAttrs .= ' data-product-count="' . $productCount . '"';
 
-                    $catImage = (string) $cat_model->getData('image');
-                    if ($catImage !== '') {
-                        try {
-                            $catImageUrl = (string) $cat_model->getImageUrl('image');
-                        } catch (\Exception $e) {
-                            $store = $this->_storeManager->getStore();
-                            $mediaUrl = '';
-                            if (is_object($store) && method_exists($store, 'getBaseUrl')) {
-                                $mediaUrl = (string) call_user_func(
-                                    [$store, 'getBaseUrl'],
-                                    \Magento\Framework\UrlInterface::URL_TYPE_MEDIA
-                                );
-                            }
-                            $catImageUrl = $mediaUrl . 'catalog/category/' . ltrim($catImage, '/');
-                        }
-                        if ($catImageUrl !== '') {
-                            $dataAttrs .= ' data-cat-image="' . $this->escapeUrl($catImageUrl) . '"';
-                        }
+                    $catImageUrl = $this->getCategoryImageUrlCached($cat_model, 'image');
+                    if ($catImageUrl !== '') {
+                        $dataAttrs .= ' data-cat-image="' . $this->escapeUrl($catImageUrl) . '"';
                     }
                 }
 
@@ -772,7 +854,7 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
 
             $vc_menu_icon_img = $this->_helper->getVerticalIconimageUrl($cat_model);
             if ($vc_menu_icon_img) {
-                $iconImgUrl = (string)$cat_model->getImageUrl('vc_menu_icon_img');
+                $iconImgUrl = $this->getCategoryImageUrlCached($cat_model, 'vc_menu_icon_img');
                 if ($iconImgUrl !== '') {
                     $html .= '<img class="menu-thumb-icon" src="' . $this->escapeUrl($iconImgUrl) . '" alt="" role="presentation" width="20" height="20" loading="lazy"/>';
                 }
@@ -804,7 +886,7 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
                     . '>';
 
                 if (($menu_type === 'fullwidth' || $menu_type === 'staticwidth') && $menu_top_content !== '') {
-                    $html .= '<div class="menu-top-block">' . $this->getBlockContent($menu_top_content) . '</div>';
+                    $html .= '<div class="menu-top-block">' . $this->getMenuBlockContentCached($menu_top_content) . '</div>';
                 }
 
                 if (count($children) > 0 || (($menu_type === 'fullwidth' || $menu_type === 'staticwidth') && ($menu_left_content !== '' || $menu_right_content !== ''))) {
@@ -815,7 +897,7 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
                     $centerWidth = $this->clampGridColumns(12 - $menu_left_width - $menu_right_width);
 
                     if (($menu_type === 'fullwidth' || $menu_type === 'staticwidth') && $menu_left_content !== '' && $menu_left_width > 0) {
-                        $html .= '<div class="menu-left-block col-sm-' . $menu_left_width . '">' . $this->getBlockContent($menu_left_content) . '</div>';
+                        $html .= '<div class="menu-left-block col-sm-' . $menu_left_width . '">' . $this->getMenuBlockContentCached($menu_left_content) . '</div>';
                     }
 
                     $html .= $this->getLevelOneItemsHtml(
@@ -829,14 +911,14 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
                     );
 
                     if (($menu_type === 'fullwidth' || $menu_type === 'staticwidth') && $menu_right_content !== '' && $menu_right_width > 0) {
-                        $html .= '<div class="menu-right-block col-sm-' . $menu_right_width . '">' . $this->getBlockContent($menu_right_content) . '</div>';
+                        $html .= '<div class="menu-right-block col-sm-' . $menu_right_width . '">' . $this->getMenuBlockContentCached($menu_right_content) . '</div>';
                     }
 
                     $html .= '</div>';
                 }
 
                 if (($menu_type === 'fullwidth' || $menu_type === 'staticwidth') && $menu_bottom_content !== '') {
-                    $html .= '<div class="menu-bottom-block">' . $this->getBlockContent($menu_bottom_content) . '</div>';
+                    $html .= '<div class="menu-bottom-block">' . $this->getMenuBlockContentCached($menu_bottom_content) . '</div>';
                 }
 
                 $html .= '</div>';

@@ -127,7 +127,10 @@ define([
             var expandedValue = isOpen ? 'true' : 'false';
             var hiddenValue = isOpen ? 'false' : 'true';
 
-            $nav.attr('data-menu-state', isOpen ? 'open' : 'closed');
+            $nav
+                .attr('data-menu-state', isOpen ? 'open' : 'closed')
+                .toggleClass('menu-open', isOpen)
+                .toggleClass('vmm-open', isOpen);
             $title
                 .toggleClass('active', isOpen)
                 .toggleClass('is-open', isOpen)
@@ -135,13 +138,14 @@ define([
                 .attr('aria-label', isOpen ? ('Fechar ' + triggerLabel) : triggerLabel);
             $list
                 .toggleClass('menu-open', isOpen)
+                .toggleClass('vmm-open', isOpen)
                 .attr('aria-hidden', hiddenValue);
 
             setStatusMessage(isOpen ? 'Menu aberto' : 'Menu fechado');
         }
 
         function isOpen() {
-            return $list.hasClass('menu-open');
+            return $list.hasClass('menu-open') || $list.hasClass('vmm-open');
         }
 
         function bindOutsideInteractionHandlers() {
@@ -435,7 +439,8 @@ define([
                 return;
             }
 
-            $list.removeClass('menu-open').hide();
+            $nav.removeClass('menu-open vmm-open');
+            $list.removeClass('menu-open vmm-open').hide();
             syncMenuA11yState(false);
             $('body').removeClass('background_shadow_show');
             setNavBarClip(true);
