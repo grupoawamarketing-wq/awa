@@ -17,7 +17,11 @@
 
     /* Só executa em desktop e na home */
     if (window.innerWidth < 992) return;
-    if (!document.body.classList.contains('cms-index-index')) return;
+    if (!(
+        document.body.classList.contains('cms-index-index') ||
+        document.body.classList.contains('cms-home') ||
+        document.body.classList.contains('cms-homepage_ayo_home5')
+    )) return;
 
     var PORTAL_CLASS = 'awa-vmf-portal';
     var ACTIVE_CLASS = 'awa-vmf-active';

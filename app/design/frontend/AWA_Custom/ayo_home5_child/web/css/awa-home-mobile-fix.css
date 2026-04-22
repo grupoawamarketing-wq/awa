@@ -1,0 +1,142 @@
+/**
+ * AWA Motos — Homepage Mobile Fix
+ * Carregado via cms_index_index.xml (sync, order 1400).
+ *
+ * Auditoria: 2026-04-22, viewport 375×812.
+ * Bugs encontrados e corrigidos:
+ *  1. HERO BANNER — awa-bundle-phases.css força min-height:0 !important na
+ *     .banner-slider2, colapsando o hero de 220px para 92px em mobile.
+ *  2. SWIPER NÃO INICIALIZADOS — 5 de 6 carrosséis ficam com h=1260px antes
+ *     do Intersection Observer inicializar o Swiper (lazy init by scroll).
+ *     Fix CSS: oculta slides extras e limita altura até a inicialização.
+ *  3. FOOTER CATEGORY PILLS — awa-bundle-cosmetic-home.css (async, carregado
+ *     depois) define color:white 75% !important no .footer-tags a, mas o
+ *     fundo da seção .awa-footer-tags é #fafafa → texto invisível.
+ *  4. FOOTER BACKGROUND — #f9fafb → #fff.
+ *
+ * ESTRATÉGIA DE ESPECIFICIDADE:
+ *  - awa-bundle-phases.css (sync antes): seletor (0,3,1) + !important
+ *    → fix usa .banner-slider.banner-slider2 (2 classes) → (0,4,1) !important → VENCE
+ *  - awa-bundle-cosmetic-home.css (async depois): seletor (0,4,2) + !important
+ *    → fix adiciona .awa-footer--dark → (0,5,2) !important → VENCE
+ */
+
+/* =============================================================================
+   1. HERO BANNER — ALTURA COLAPSADA (92px → 220px)
+
+   ROOT CAUSE:
+   awa-bundle-phases.css define:
+     :is(body.cms-index-index, ...) .top-home-content--above-fold .banner-slider2 {
+       min-height: var(--awa-zero, 0) !important;   ← (0,3,1) + !important
+     }
+   Como --awa-zero não está definida, resulta em min-height:0 !important.
+   O .banner-slider2 tem overflow:hidden e colapsa para 92px.
+   O swiper interno (.visible-xs) tem 220px mas fica cortado.
+
+   FIX: Seletor .banner-slider.banner-slider2 (2 classes) = (0,4,1) > (0,3,1).
+   Spec superior + !important garante vitória independente da ordem de load.
+   ============================================================================= */
+
+/* Desktop: min-height corresponde ao slider desktop (clamp para ser responsivo) */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .top-home-content--above-fold .banner-slider.banner-slider2 {
+    min-height: clamp(220px, 28vw, 480px) !important;
+}
+
+/* Mobile: min-height corresponde ao slider mobile configurado (220px = aspect 768/400 × 375px ≈ 195px + padding swiper) */
+@media (max-width: 767px) {
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+        .top-home-content--above-fold .banner-slider.banner-slider2 {
+        min-height: clamp(190px, 52vw, 240px) !important;
+    }
+}
+
+
+/* =============================================================================
+   2. SWIPER NÃO INICIALIZADOS — h=1260px antes do lazy-init por scroll
+
+   ROOT CAUSE:
+   Rokanthemes inicializa Swiper somente quando o carousel entra no viewport
+   (IntersectionObserver). Antes disso, os 8 slides ficam em flex-row com
+   width natural (~77px cada) e height de 306px, totalizando h≈1260px.
+   Isso cria gaps enormes entre seções durante o scroll inicial.
+
+   FIX: CSS pré-inicialização que:
+     a) Oculta slides 2-8 (mostra só o primeiro como preview)
+     b) Limita a altura do swiper a 320px (uma linha de card)
+     c) Faz o primeiro slide ocupar a largura total do container
+   Quando Swiper inicializa (adiciona .swiper-initialized), essas regras
+   deixam de se aplicar (seletores usam :not(.swiper-initialized)).
+   ============================================================================= */
+
+/* Limita altura do swiper antes da inicialização */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .products-swiper:not(.swiper-initialized) {
+    max-height: 320px;
+    overflow: hidden;
+}
+
+/* Mostra apenas o 1° slide como preview; oculta os demais */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .products-swiper:not(.swiper-initialized)
+    .swiper-slide:not(:first-child) {
+    display: none !important;
+}
+
+/* Expande o 1° slide para ocupar largura do container */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .products-swiper:not(.swiper-initialized)
+    .swiper-slide:first-child {
+    width: 100% !important;
+    max-width: 220px !important; /* Mantém card em tamanho razoável, não full-width */
+    flex-shrink: 0 !important;
+}
+
+
+/* =============================================================================
+   3. FOOTER CATEGORY PILLS — TEXTO BRANCO SOBRE FUNDO BRANCO
+
+   ROOT CAUSE:
+   awa-bundle-cosmetic-home.css (async, carrega depois) define:
+     :is(body.cms-index-index, ...) .page_footer .awa-footer-tags .footer-tags a {
+       color: var(--awa-white-75, rgb(255 255 255 / 75%)) !important;  ← (0,4,2)
+     }
+   O texto branco faz sentido para footer escuro, mas o fundo atual da seção
+   .awa-footer-tags é #fafafa (claro). Resultado: texto invisível.
+
+   FIX: Adicionar .awa-footer--dark ao seletor = (0,5,2) > (0,4,2) → VENCE.
+   Restaura cor legível (#4b5563 = gray-600) para fundo claro.
+   ============================================================================= */
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .page_footer.awa-footer--dark .awa-footer-tags .footer-tags a,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .page_footer.awa-footer--dark .awa-footer-tags__cloud .footer-tags a {
+    color: #4b5563 !important; /* gray-600 — legível sobre #fafafa */
+    border-color: rgba(0, 0, 0, 0.12) !important;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .page_footer.awa-footer--dark .awa-footer-tags .footer-tags a:hover,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .page_footer.awa-footer--dark .awa-footer-tags__cloud .footer-tags a:hover {
+    color: #1f2937 !important; /* gray-800 — hover mais escuro */
+    background: rgba(0, 0, 0, 0.04) !important;
+    border-color: rgba(0, 0, 0, 0.2) !important;
+}
+
+
+/* =============================================================================
+   4. FOOTER BACKGROUND — #f9fafb → #fff
+   ============================================================================= */
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    footer.page-footer {
+    background-color: #fff !important;
+}
+
+/* A seção de tags do footer: fundo #fff para consistência */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .page_footer .awa-footer-tags {
+    background-color: #fff !important;
+}

@@ -124,9 +124,22 @@ if ($banners = $block->getBannerCollection()):
  */
 ?>
 <style>
+/*
+ * Breakpoint gating inline (antes do CSS do tema carregar).
+ * Evita duplicar o hero (desktop+mobile) no DOM inicial e reduz trabalho de parse/layout.
+ */
+.wrapper_slider.hidden-xs { display: block !important; }
+.wrapper_slider.visible-xs { display: none !important; }
+@media (max-width: 767px) {
+    .wrapper_slider.hidden-xs { display: none !important; }
+    .wrapper_slider.visible-xs { display: block !important; }
+}
+
 /* LCP Fix: Show first hero slide before Swiper JS initializes. */
 .wrapper_slider .swiper:not(.swiper-initialized) {
     display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
     overflow: hidden;
 }
 .wrapper_slider .swiper:not(.swiper-initialized) .swiper-slide + .swiper-slide {
@@ -172,12 +185,16 @@ if ($banners = $block->getBannerCollection()):
                     <?php
                     $slideAlt = $banner->getSlideText() ?: ($banner->getSlideTitle() ?: '');
                     $imgHtml  = $block->getImageElement($desktopImage, $slideAlt, $isFirst);
-                    if ($isFirst && preg_match('/src="([^"]+)"/', $imgHtml, $_m)) {
+                    if (preg_match('/src="([^"]+)"/', $imgHtml, $_m)) {
                         $_webp = preg_replace('/\.(jpg|jpeg|png)$/i', '.webp', $_m[1]);
-                        $imgHtml = '<picture>'
-                            . '<source type="image/webp" srcset="' . $block->escapeUrl($_webp) . '">'
-                            . $imgHtml
-                            . '</picture>';
+                        // Converte URL em caminho relativo dentro de pub/media
+                        $_webpPath = preg_replace('#^.*/media/#', '', $_webp);
+                        if (file_exists(BP . '/pub/media/' . ltrim($_webpPath, '/'))) {
+                            $imgHtml = '<picture>'
+                                . '<source type="image/webp" srcset="' . $block->escapeUrl($_webp) . '">'
+                                . $imgHtml
+                                . '</picture>';
+                        }
                     }
                     $link     = $resolveLink($banner->getSlideLink());
                     if ($link !== '') {
@@ -212,12 +229,16 @@ if ($banners = $block->getBannerCollection()):
                     <?php
                     $slideAlt = $banner->getSlideText() ?: ($banner->getSlideTitle() ?: '');
                     $imgHtml  = $block->getImageElementMobile($heroImage, $slideAlt, $isFirst);
-                    if ($isFirst && preg_match('/src="([^"]+)"/', $imgHtml, $_m)) {
+                    if (preg_match('/src="([^"]+)"/', $imgHtml, $_m)) {
                         $_webp = preg_replace('/\.(jpg|jpeg|png)$/i', '.webp', $_m[1]);
-                        $imgHtml = '<picture>'
-                            . '<source type="image/webp" srcset="' . $block->escapeUrl($_webp) . '">'
-                            . $imgHtml
-                            . '</picture>';
+                        // Converte URL em caminho relativo dentro de pub/media
+                        $_webpPath = preg_replace('#^.*/media/#', '', $_webp);
+                        if (file_exists(BP . '/pub/media/' . ltrim($_webpPath, '/'))) {
+                            $imgHtml = '<picture>'
+                                . '<source type="image/webp" srcset="' . $block->escapeUrl($_webp) . '">'
+                                . $imgHtml
+                                . '</picture>';
+                        }
                     }
                     $link     = $resolveLink($banner->getSlideLink());
                     if ($link !== '') {
@@ -239,9 +260,8 @@ if ($banners = $block->getBannerCollection()):
 </div>
 <script>
     require([
-        'jquery',
-        'swiper'
-    ], function ($, Swiper) {
+        'jquery'
+    ], function ($) {
         'use strict';
 
         var desktopConfig = <?php echo json_encode($desktopOwlConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
@@ -312,7 +332,7 @@ if ($banners = $block->getBannerCollection()):
             return swiperCfg;
         }
 
-        function initSwiper(selector, rawConfig) {
+        function initSwiper(selector, rawConfig, Swiper) {
             var $container = $(selector);
             if (!$container.length) { return; }
 
@@ -325,13 +345,102 @@ if ($banners = $block->getBannerCollection()):
                 $container.find('.swiper-pagination').remove();
             }
 
-            setTimeout(function() {
+            setTimeout(function () {
                 new Swiper($container.find('.swiper')[0], config);
             }, 50);
         }
 
-        initSwiper('.slider_<?php echo (int) $sliderId; ?>', desktopConfig);
-        initSwiper('.slider_<?php echo (int) $sliderId; ?>_mobile', mobileConfig);
+        function afterFirstPaint(callback) {
+            if (!window.requestAnimationFrame) {
+                setTimeout(callback, 0);
+                return;
+            }
+            window.requestAnimationFrame(function () {
+                window.requestAnimationFrame(callback);
+            });
+        }
+
+        function runAfterWindowLoad(callback) {
+            if (document.readyState === 'complete') {
+                callback();
+                return;
+            }
+            window.addEventListener('load', callback, { once: true });
+        }
+
+        function loadSwiper(callback) {
+            require(['swiper'], function (Swiper) {
+                callback(Swiper);
+            });
+        }
+
+        function initForViewport(Swiper) {
+            var isMobile = !!(window.matchMedia && window.matchMedia('(max-width: 767px)').matches);
+            if (isMobile) {
+                initSwiper('.slider_<?php echo (int) $sliderId; ?>_mobile', mobileConfig, Swiper);
+                return;
+            }
+
+            initSwiper('.slider_<?php echo (int) $sliderId; ?>', desktopConfig, Swiper);
+        }
+
+        var isMobileViewport = !!(window.matchMedia && window.matchMedia('(max-width: 767px)').matches);
+        var scheduleInit = function () {
+            afterFirstPaint(function () {
+                if (window.requestIdleCallback) {
+                    window.requestIdleCallback(function () {
+                        loadSwiper(initForViewport);
+                    }, { timeout: isMobileViewport ? 6500 : 2500 });
+                    return;
+                }
+                setTimeout(function () {
+                    loadSwiper(initForViewport);
+                }, isMobileViewport ? 3500 : 0);
+            });
+        };
+        // Mobile: não inicializa automaticamente (carrossel pode distorcer LCP ao trocar slides).
+        // Inicializa somente com intenção do usuário (toque/click no hero), mantendo o 1º slide estável no carregamento.
+        if (isMobileViewport) {
+            // Autoplay em mobile vira um "LCP killer" (o 2º slide pode virar LCP tardiamente).
+            mobileConfig.autoplay = false;
+
+            var mobileRootSelector = '.slider_<?php echo (int) $sliderId; ?>_mobile';
+
+            function bindMobileIntentInit() {
+                var root = document.querySelector(mobileRootSelector);
+                if (!root) {
+                    return;
+                }
+
+                var started = false;
+                var start = function () {
+                    if (started) {
+                        return;
+                    }
+                    started = true;
+                    loadSwiper(initForViewport);
+                };
+
+                // Qualquer interação dentro do hero inicia o carrossel.
+                root.addEventListener('pointerdown', start, { passive: true, capture: true, once: true });
+                root.addEventListener('touchstart', start, { passive: true, capture: true, once: true });
+                root.addEventListener('click', start, { passive: true, capture: true, once: true });
+
+                // Fallback bem tardio (não competir com LCP/TBT): inicia depois de um bom tempo.
+                // Obs: em Lighthouse, isso tende a ficar fora da janela de medição.
+                if ('requestIdleCallback' in window) {
+                    window.requestIdleCallback(start, { timeout: 60000 });
+                } else {
+                    window.setTimeout(start, 60000);
+                }
+            }
+
+            runAfterWindowLoad(bindMobileIntentInit);
+            return;
+        }
+
+        scheduleInit();
+
     });
 </script>
 <?php endif; ?>

@@ -60,6 +60,12 @@ class HeroPreload extends Template
                 \Magento\Framework\UrlInterface::URL_TYPE_MEDIA
             );
 
+            // Prefere WebP quando disponível em disco
+            $webpImage = (string) preg_replace('/\.(jpg|jpeg|png)$/i', '.webp', $slideImage);
+            if ($webpImage !== $slideImage && file_exists(BP . '/pub/media/' . ltrim($webpImage, '/'))) {
+                $slideImage = $webpImage;
+            }
+
             return rtrim($mediaUrl, '/') . '/' . ltrim($slideImage, '/');
         } catch (\Throwable $e) {
             return '';

@@ -47,12 +47,30 @@ class HeroPreloadPlugin
         try {
             $conn = $this->resource->getConnection();
 
-            // Buscar imagem do primeiro slide ativo, ordenado por posicao
+            $sliderIdentifier = (string) $subject->getSliderId();
+
+            // Buscar imagem do primeiro slide ativo do slider atual.
             $select = $conn->select()
                 ->from(['s' => $this->resource->getTableName('rokanthemes_slide')], ['slide_image'])
+                ->joinInner(
+                    ['sl' => $this->resource->getTableName('rokanthemes_slider')],
+                    'sl.slider_id = s.slider_id',
+                    []
+                )
                 ->where('s.slide_status = ?', 1)
+                ->where('sl.slider_status = ?', 1)
                 ->where('s.slide_image IS NOT NULL')
-                ->where('s.slide_image != ?', '')
+                ->where('s.slide_image != ?', '');
+
+            if ($sliderIdentifier !== '') {
+                if (is_numeric($sliderIdentifier)) {
+                    $select->where('sl.slider_id = ?', (int) $sliderIdentifier);
+                } else {
+                    $select->where('sl.slider_identifier = ?', $sliderIdentifier);
+                }
+            }
+
+            $select
                 ->order('s.slide_position ASC')
                 ->limit(1);
 
@@ -67,6 +85,13 @@ class HeroPreloadPlugin
             );
 
             $imageUrl = rtrim($mediaUrl, '/') . '/' . ltrim($slideImage, '/');
+
+            // Prefere WebP quando disponível em disco (85% menor que JPEG/PNG)
+            $webpImage = preg_replace('/\.(jpg|jpeg|png)$/i', '.webp', $slideImage);
+            $webpDiskPath = BP . '/pub/media/' . ltrim($webpImage, '/');
+            if ($webpImage !== $slideImage && file_exists($webpDiskPath)) {
+                $imageUrl = rtrim($mediaUrl, '/') . '/' . ltrim($webpImage, '/');
+            }
 
             $this->pageConfig->addRemotePageAsset(
                 $imageUrl,
