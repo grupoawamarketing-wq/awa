@@ -117,19 +117,20 @@ define([
                 el.removeAttribute('inert');
             }
         }
-        document.querySelectorAll('.navigation__submenu[aria-hidden], .navigation__inner-list[aria-hidden]').forEach(syncInert);
+        // Aplicar estado inicial + re-verificar após scripts de terceiros (footer accordion, modal B2B)
+        document.querySelectorAll('[aria-hidden]').forEach(syncInert);
+        setTimeout(function () {
+            document.querySelectorAll('[aria-hidden]').forEach(syncInert);
+        }, 800);
+        // Observar mudanças em todo o documento (footer + modais estão fora do nav)
         if (window.MutationObserver) {
-            var navRoot = document.querySelector('.nav-sections, .category-dropdown, .navigation__menu') || document.body;
             new MutationObserver(function (mutations) {
                 mutations.forEach(function (m) {
                     if (m.attributeName === 'aria-hidden') {
-                        var t = m.target;
-                        if (t.classList.contains('navigation__submenu') || t.classList.contains('navigation__inner-list')) {
-                            syncInert(t);
-                        }
+                        syncInert(m.target);
                     }
                 });
-            }).observe(navRoot, { subtree: true, attributes: true, attributeFilter: ['aria-hidden'] });
+            }).observe(document.documentElement, { subtree: true, attributes: true, attributeFilter: ['aria-hidden'] });
         }
     }());
 
