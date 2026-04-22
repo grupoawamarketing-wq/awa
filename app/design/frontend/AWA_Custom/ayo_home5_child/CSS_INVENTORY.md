@@ -1,5 +1,5 @@
 # CSS_INVENTORY.md — Inventário de Arquivos CSS
-**AWA Motos · ayo_home5_child · web/css/**  |  **Última atualização:** 2026-03-30
+**AWA Motos · ayo_home5_child · web/css/**  |  **Última atualização:** 2026-04-22
 
 **Legenda:** `ATIVO` carregado em produção | `UNMIN` fonte não-minificada (debug) | `LAYERS` carregado via layout XML específico
 
@@ -9,7 +9,7 @@
 
 | Arquivo | Modo | Mecanismo |
 |---|---|---|
-| `awa-core-variables.css` | sync 1° | `default_head_blocks.xml` |
+| `awa-core-variables.css` | **MERGED** | fundido em `awa-bundle-core.css` (2026-04-22) — eliminado 1 HTTP request |
 | `awa-bundle-vendor-libs.css` | sync | `default_head_blocks.xml` |
 | `awa-bundle-core.css` | sync | `default_head_blocks.xml` |
 | `awa-critical-fold.css` | sync | `default_head_blocks.xml` |
