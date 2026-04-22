@@ -12,12 +12,64 @@ require(['domReady!'], function () {
     var THUMB_SELECTOR = '.product-thumb';
     var observer = null;
     var normalizeTimer = null;
+    var HOVER_GUARD_ATTR = 'data-awa-hover-guard';
 
     function setImportantStyle(element, property, value) {
         if (!element) {
             return;
         }
         element.style.setProperty(property, value, 'important');
+    }
+
+    function keepPrimaryImageVisible(thumb) {
+        if (!thumb) {
+            return;
+        }
+
+        var first = thumb.querySelector('.first-thumb');
+        var second = thumb.querySelector('.second-thumb');
+        var secondImage = second ? second.querySelector('img.product-image-photo, img') : null;
+
+        if (first) {
+            setImportantStyle(first, 'opacity', '1');
+            setImportantStyle(first, 'visibility', 'visible');
+            setImportantStyle(first, 'display', 'block');
+            setImportantStyle(first, 'position', 'relative');
+            setImportantStyle(first, 'z-index', '2');
+        }
+
+        if (second) {
+            setImportantStyle(second, 'display', 'none');
+            setImportantStyle(second, 'position', 'absolute');
+            setImportantStyle(second, 'inset', '0');
+            setImportantStyle(second, 'opacity', '0');
+            setImportantStyle(second, 'visibility', 'hidden');
+            setImportantStyle(second, 'pointer-events', 'none');
+        }
+
+        if (secondImage) {
+            setImportantStyle(secondImage, 'opacity', '0');
+            setImportantStyle(secondImage, 'visibility', 'hidden');
+            setImportantStyle(secondImage, 'pointer-events', 'none');
+        }
+    }
+
+    function addHoverGuard(thumb) {
+        if (!thumb || thumb.getAttribute(HOVER_GUARD_ATTR) === 'true') {
+            return;
+        }
+
+        thumb.addEventListener('mouseenter', function () {
+            keepPrimaryImageVisible(thumb);
+        });
+        thumb.addEventListener('mouseleave', function () {
+            keepPrimaryImageVisible(thumb);
+        });
+        thumb.addEventListener('touchstart', function () {
+            keepPrimaryImageVisible(thumb);
+        }, { passive: true });
+
+        thumb.setAttribute(HOVER_GUARD_ATTR, 'true');
     }
 
     function fixProductLinks(root) {
@@ -64,9 +116,12 @@ require(['domReady!'], function () {
 
         setImportantStyle(first, 'display', 'block');
         setImportantStyle(first, 'position', 'relative');
+        setImportantStyle(first, 'z-index', '2');
         setImportantStyle(first, 'width', '100%');
         setImportantStyle(first, 'min-width', '0');
         setImportantStyle(first, 'line-height', '0');
+        setImportantStyle(first, 'opacity', '1');
+        setImportantStyle(first, 'visibility', 'visible');
 
         setImportantStyle(container, 'display', 'block');
         setImportantStyle(container, 'position', 'relative');
@@ -95,9 +150,8 @@ require(['domReady!'], function () {
         setImportantStyle(image, 'object-fit', 'contain');
         setImportantStyle(image, 'object-position', 'center');
 
-        if (second) {
-            setImportantStyle(second, 'display', 'none');
-        }
+        keepPrimaryImageVisible(thumb);
+        addHoverGuard(thumb);
 
         thumb.setAttribute('data-awa-image-normalized', 'true');
     }

@@ -363,4 +363,96 @@ if ($_b2bActive) {
         }
         </script>
     <?php endif; ?>
+    <script>
+    require(['domReady!'], function () {
+        'use strict';
+
+        var THUMB_SELECTOR = '.item-product .product-thumb';
+        var GUARD_ATTR = 'data-awa-thumb-guard';
+
+        function setImportantStyle(element, property, value) {
+            if (!element) {
+                return;
+            }
+            element.style.setProperty(property, value, 'important');
+        }
+
+        function stabilizeThumb(thumb) {
+            if (!thumb) {
+                return;
+            }
+
+            var first = thumb.querySelector('.first-thumb');
+            var second = thumb.querySelector('.second-thumb');
+            var firstImage = first ? first.querySelector('img.product-image-photo, img') : null;
+            var secondImage = second ? second.querySelector('img.product-image-photo, img') : null;
+
+            if (first) {
+                setImportantStyle(first, 'display', 'block');
+                setImportantStyle(first, 'position', 'relative');
+                setImportantStyle(first, 'z-index', '2');
+                setImportantStyle(first, 'opacity', '1');
+                setImportantStyle(first, 'visibility', 'visible');
+            }
+
+            if (firstImage) {
+                setImportantStyle(firstImage, 'opacity', '1');
+                setImportantStyle(firstImage, 'visibility', 'visible');
+                setImportantStyle(firstImage, 'pointer-events', 'auto');
+            }
+
+            if (second) {
+                setImportantStyle(second, 'display', 'none');
+                setImportantStyle(second, 'position', 'absolute');
+                setImportantStyle(second, 'inset', '0');
+                setImportantStyle(second, 'opacity', '0');
+                setImportantStyle(second, 'visibility', 'hidden');
+                setImportantStyle(second, 'pointer-events', 'none');
+            }
+
+            if (secondImage) {
+                setImportantStyle(secondImage, 'opacity', '0');
+                setImportantStyle(secondImage, 'visibility', 'hidden');
+                setImportantStyle(secondImage, 'pointer-events', 'none');
+            }
+        }
+
+        function bindThumbGuard(thumb) {
+            if (!thumb || thumb.getAttribute(GUARD_ATTR) === 'true') {
+                return;
+            }
+
+            thumb.addEventListener('mouseenter', function () {
+                stabilizeThumb(thumb);
+            });
+            thumb.addEventListener('mouseleave', function () {
+                stabilizeThumb(thumb);
+            });
+            thumb.addEventListener('touchstart', function () {
+                stabilizeThumb(thumb);
+            }, { passive: true });
+
+            thumb.setAttribute(GUARD_ATTR, 'true');
+        }
+
+        function run(root) {
+            var scope = root && root.querySelectorAll ? root : document;
+            var thumbs = scope.querySelectorAll(THUMB_SELECTOR);
+
+            thumbs.forEach(function (thumb) {
+                stabilizeThumb(thumb);
+                bindThumbGuard(thumb);
+            });
+        }
+
+        run(document);
+        window.setTimeout(function () {
+            run(document);
+        }, 300);
+
+        document.addEventListener('contentUpdated', function (event) {
+            run(event && event.target ? event.target : document);
+        });
+    });
+    </script>
 <?php endif; ?>
