@@ -35,7 +35,7 @@ class RemoveItem implements HttpPostActionInterface
         try {
             $this->shoppingListService->removeItem($itemId);
             return $result->setData(['success' => true, 'message' => __('Item removido.')->render()]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return $result->setData(['success' => false, 'message' => $e->getMessage()]);
         }
     }

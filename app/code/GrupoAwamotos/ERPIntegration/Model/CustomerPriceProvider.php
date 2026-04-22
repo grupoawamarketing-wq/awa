@@ -120,7 +120,7 @@ class CustomerPriceProvider
             );
 
             return $listCode;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('[ERP] Error getting customer price list: ' . $e->getMessage());
             return null;
         }
@@ -161,7 +161,7 @@ class CustomerPriceProvider
             );
 
             return $name;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('[ERP] Error getting price list name: ' . $e->getMessage());
             // Cache empty briefly to avoid hammering ERP during outage
             $this->cache->save('', $cacheKey, [], 60);
@@ -220,7 +220,7 @@ class CustomerPriceProvider
             );
 
             return $price;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('[ERP] Error getting price from list: ' . $e->getMessage());
             return null;
         }
@@ -309,7 +309,7 @@ class CustomerPriceProvider
                     $result[$sku] = $price;
                 }
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('[ERP] Error batch-fetching prices: ' . $e->getMessage());
         }
 

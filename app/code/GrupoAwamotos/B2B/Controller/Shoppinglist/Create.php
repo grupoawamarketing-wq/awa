@@ -39,7 +39,7 @@ class Create implements HttpPostActionInterface
         try {
             $this->shoppingListService->createList($name, '', (int) $this->customerSession->getCustomerId());
             $this->messageManager->addSuccessMessage(__('Lista "%1" criada.', $name));
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->messageManager->addErrorMessage(__('Erro: %1', $e->getMessage()));
         }
         return $redirect->setPath('b2b/shoppinglist/index');

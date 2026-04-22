@@ -39,7 +39,7 @@ class Delete implements HttpPostActionInterface
         try {
             $this->shoppingListService->deleteList($listId);
             $this->messageManager->addSuccessMessage(__('Lista excluída.'));
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->messageManager->addErrorMessage(__('Erro: %1', $e->getMessage()));
         }
         return $redirect->setPath('b2b/shoppinglist/index');

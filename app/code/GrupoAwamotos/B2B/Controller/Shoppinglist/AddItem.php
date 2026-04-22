@@ -37,7 +37,7 @@ class AddItem implements HttpPostActionInterface
         try {
             $this->shoppingListService->addItem($listId, $productId, $qty);
             return $result->setData(['success' => true, 'message' => __('Item adicionado.')->render()]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return $result->setData(['success' => false, 'message' => $e->getMessage()]);
         }
     }

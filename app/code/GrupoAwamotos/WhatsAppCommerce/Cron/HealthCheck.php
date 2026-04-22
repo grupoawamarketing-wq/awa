@@ -44,7 +44,7 @@ class HealthCheck
             } else {
                 $this->logger->debug('[HealthCheck] WhatsApp Commerce healthy');
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('[HealthCheck] Cron failed: ' . $e->getMessage());
         }
     }

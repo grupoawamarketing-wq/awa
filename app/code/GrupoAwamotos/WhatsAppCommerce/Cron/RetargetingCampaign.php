@@ -55,7 +55,7 @@ class RetargetingCampaign
                 'total_sent' => $totalSent,
                 'total_failed' => $totalFailed,
             ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('[Retargeting] Cron error: ' . $e->getMessage());
         }
     }

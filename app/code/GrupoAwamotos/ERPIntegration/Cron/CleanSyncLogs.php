@@ -59,7 +59,7 @@ class CleanSyncLogs
                     'days_kept' => $daysToKeep,
                 ]);
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('[ERP] Sync logs cleanup failed: ' . $e->getMessage());
         }
 
@@ -95,7 +95,7 @@ class CleanSyncLogs
                     'days_kept' => self::SQL_FILES_DAYS_TO_KEEP,
                 ]);
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('[ERP] SQL export files cleanup failed: ' . $e->getMessage());
         }
     }

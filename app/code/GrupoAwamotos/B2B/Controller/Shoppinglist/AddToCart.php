@@ -46,7 +46,7 @@ class AddToCart implements HttpPostActionInterface
             foreach ($errors as $err) {
                 $this->messageManager->addWarningMessage($err);
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->messageManager->addErrorMessage(__('Erro: %1', $e->getMessage()));
         }
         return $redirect->setPath('checkout/cart');

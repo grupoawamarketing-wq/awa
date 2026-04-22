@@ -32,6 +32,7 @@ class WarmCachePostSync
         '/retrovisores/cromados.html',
         '/bauletos/bauletos-34-l.html',
         '/checkout/cart',
+        '/catalogsearch/result/?q=freio',
         '/catalogsearch/result/?q=bagageiro',
         '/catalogsearch/result/?q=retrovisor',
         '/catalogsearch/result/?q=titan+160',
@@ -112,7 +113,7 @@ class WarmCachePostSync
             );
 
             $urls = array_merge($urls, $categoryUrls ?: [], $productUrls ?: []);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->warning('[CacheWarmer] DB URL fetch failed: ' . $e->getMessage());
         }
 

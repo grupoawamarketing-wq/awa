@@ -86,6 +86,7 @@ class DataCleanup
     {
         $patterns = [
             'erp_register_clients_auto_*.sql',
+            'erp_register_clients_[0-9]*.sql',
         ];
         $cutoff = strtotime('-7 days');
         $deleted = 0;
