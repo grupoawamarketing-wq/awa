@@ -104,6 +104,36 @@ define([
     });
 
     /*
+     * WCAG 4.1.3 / aria-hidden-focus: O mega-menu usa visibility:hidden +
+     * aria-hidden="true" nos submenus fechados, mas links internos ficam
+     * focalizáveis via teclado. O atributo `inert` corrige isso: bloqueia
+     * foco, eventos e AT em toda a subárvore, sincronizado com aria-hidden.
+     */
+    (function () {
+        function syncInert(el) {
+            if (el.getAttribute('aria-hidden') === 'true') {
+                el.setAttribute('inert', '');
+            } else {
+                el.removeAttribute('inert');
+            }
+        }
+        document.querySelectorAll('.navigation__submenu[aria-hidden], .navigation__inner-list[aria-hidden]').forEach(syncInert);
+        if (window.MutationObserver) {
+            var navRoot = document.querySelector('.nav-sections, .category-dropdown, .navigation__menu') || document.body;
+            new MutationObserver(function (mutations) {
+                mutations.forEach(function (m) {
+                    if (m.attributeName === 'aria-hidden') {
+                        var t = m.target;
+                        if (t.classList.contains('navigation__submenu') || t.classList.contains('navigation__inner-list')) {
+                            syncInert(t);
+                        }
+                    }
+                });
+            }).observe(navRoot, { subtree: true, attributes: true, attributeFilter: ['aria-hidden'] });
+        }
+    }());
+
+    /*
      * WCAG 1.3.6 / landmark-one-main + WCAG 1.1.1 / image-alt
      * Diferido para requestIdleCallback — getComputedStyle força layout reflow.
      * requestIdleCallback executa quando browser está ocioso (após LCP).
