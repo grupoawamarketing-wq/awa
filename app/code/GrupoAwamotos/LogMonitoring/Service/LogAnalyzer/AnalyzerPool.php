@@ -40,7 +40,7 @@ class AnalyzerPool
         foreach ($this->analyzers as $type => $analyzer) {
             try {
                 $results[$type] = $analyzer->analyze();
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 $this->logger->error("Error in analyzer {$type}: " . $e->getMessage());
                 $results[$type] = ['error' => $e->getMessage()];
             }

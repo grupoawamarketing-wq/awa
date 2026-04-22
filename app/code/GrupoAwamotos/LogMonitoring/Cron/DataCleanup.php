@@ -21,13 +21,13 @@ class DataCleanup
         DateTime $dateTime,
         LoggerInterface $logger,
         FileDriver $fileDriver,
-        string $logDir = BP . '/var/log'
+        ?string $logDir = null
     ) {
         $this->resourceConnection = $resourceConnection;
         $this->dateTime = $dateTime;
         $this->logger = $logger;
         $this->fileDriver = $fileDriver;
-        $this->logDir = $logDir;
+        $this->logDir = $logDir ?? (BP . '/var/log');
     }
 
     public function execute(): void
@@ -77,7 +77,7 @@ class DataCleanup
 
             $this->logger->info('Completed log monitoring data cleanup');
             
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Error in data cleanup: ' . $e->getMessage());
         }
     }

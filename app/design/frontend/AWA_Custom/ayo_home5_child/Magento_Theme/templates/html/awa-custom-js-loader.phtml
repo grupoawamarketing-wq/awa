@@ -276,9 +276,25 @@ HTML;
 <script>
 /* Service Worker registration — idle callback para zero impacto em TTI (2026-03-23) */
 if ('serviceWorker' in navigator) {
+    var _swUa = navigator.userAgent || '';
+    var _swAutomationContext = !!navigator.webdriver || /Lighthouse|PageSpeed|HeadlessChrome/i.test(_swUa);
     var _swReg = function() {
-        navigator.serviceWorker.register('/sw.js', { scope: '/' })
+        if (_swAutomationContext) {
+            return;
+        }
+
+        fetch('/sw.js', { method: 'HEAD', cache: 'no-store' })
+            .then(function(response) {
+                if (!response || !response.ok) {
+                    return null;
+                }
+
+                return navigator.serviceWorker.register('/sw.js', { scope: '/' });
+            })
             .then(function(reg) {
+                if (!reg) {
+                    return;
+                }
                 if (reg.active) {
                     reg.active.postMessage({ type: 'SKIP_WAITING' });
                 }

@@ -56,7 +56,7 @@ class AlertProcessor
             
             $this->logger->info('Completed alert processing');
             
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Error in alert processing: ' . $e->getMessage());
         }
     }

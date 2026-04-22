@@ -55,7 +55,7 @@ class LogAnalysis
             
             $this->logger->info('Completed scheduled log analysis');
             
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Error in scheduled log analysis: ' . $e->getMessage());
         }
     }

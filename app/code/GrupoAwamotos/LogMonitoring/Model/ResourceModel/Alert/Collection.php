@@ -43,9 +43,9 @@ class Collection extends AbstractCollection
 
     public function orderBySeverity(): self
     {
-        return $this->setOrder([
-            'FIELD(severity, "critical", "high", "medium", "low")',
-            'last_occurrence DESC'
-        ]);
+        $select = $this->getSelect();
+        $select->order(new \Zend_Db_Expr("FIELD(severity, 'critical', 'high', 'medium', 'low')"));
+        $select->order(new \Zend_Db_Expr('last_occurrence DESC'));
+        return $this;
     }
 }

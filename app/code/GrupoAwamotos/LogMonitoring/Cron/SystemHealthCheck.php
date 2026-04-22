@@ -47,7 +47,7 @@ class SystemHealthCheck
                 'score' => $healthData['overall_score']
             ]);
             
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Error in system health check: ' . $e->getMessage());
         }
     }

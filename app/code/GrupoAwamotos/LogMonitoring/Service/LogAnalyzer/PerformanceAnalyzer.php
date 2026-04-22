@@ -38,18 +38,18 @@ class PerformanceAnalyzer implements AnalyzerInterface
 
     public function analyze(): array
     {
-        $logDir = $this->filesystem->getDirectoryRead(DirectoryList::VAR_DIR);
+        $logDir = $this->filesystem->getDirectoryRead(DirectoryList::LOG);
         $logFiles = [
-            'var/log/debug.log',
-            'var/log/system.log',
-            'var/log/awa_performance.log'
+            'debug.log',
+            'system.log',
+            'performance_monitor.log',
         ];
 
         $analysis = [];
         
         foreach ($logFiles as $logFile) {
             if ($logDir->isExist($logFile)) {
-                $analysis[$logFile] = $this->analyzeLogFile($logFile);
+                $analysis[$logFile] = $this->analyzeLogFile($logDir, $logFile);
             }
         }
         
@@ -161,12 +161,22 @@ class PerformanceAnalyzer implements AnalyzerInterface
         return $alerts;
     }
 
-    private function analyzeLogFile(string $logFile): array
+    private function analyzeLogFile(\Magento\Framework\Filesystem\Directory\ReadInterface $logDir, string $logFile): array
     {
-        $logDir = $this->filesystem->getDirectoryRead(DirectoryList::VAR_DIR);
-        
         try {
-            $content = $logDir->readFile($logFile);
+            $stat = $logDir->stat($logFile);
+            $fileSize = (int)($stat['size'] ?? 0);
+
+            // Read at most 200 KB from the end of large files to avoid OOM
+            $maxBytes = 204800;
+            $position = $fileSize > $maxBytes ? $fileSize - $maxBytes : 0;
+            // ReadInterface::readFile() 3rd param is stream context, not offset
+            $absolutePath = $logDir->getAbsolutePath($logFile);
+            $content = file_get_contents($absolutePath, false, null, $position);
+            if ($content === false) {
+                throw new \RuntimeException('Cannot read log file: ' . $logFile);
+            }
+
             $lines = explode("\n", $content);
             
             $analysis = [
@@ -181,7 +191,7 @@ class PerformanceAnalyzer implements AnalyzerInterface
                     'timeout_errors' => 0,
                     'performance_alerts' => 0
                 ],
-                'file_size' => $logDir->stat($logFile)['size'],
+                'file_size' => $fileSize,
                 'patterns' => []
             ];
             
@@ -230,7 +240,7 @@ class PerformanceAnalyzer implements AnalyzerInterface
             
             return $analysis;
             
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Error analyzing performance log file: ' . $e->getMessage());
             return ['error' => $e->getMessage()];
         }

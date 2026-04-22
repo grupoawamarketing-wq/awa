@@ -92,7 +92,7 @@ class CleanSyncLogs
             if ($removed > 0) {
                 $this->logger->info('[ERP] SQL export files cleanup completed', [
                     'removed_files' => $removed,
-                    'days_kept' => self::DEFAULT_DAYS_TO_KEEP,
+                    'days_kept' => self::SQL_FILES_DAYS_TO_KEEP,
                 ]);
             }
         } catch (\Exception $e) {

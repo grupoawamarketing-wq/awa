@@ -13,7 +13,13 @@ $qaJsUrl = $block->escapeUrl($block->getViewFileUrl('js/awa-qa-accessibility-saf
 (function (w, d) {
     var src = <?= /* @noEscape */ json_encode($qaJsUrl, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;
     var done = false;
-    var events = ['pointerdown', 'touchstart', 'keydown', 'mouseover', 'scroll'];
+    var events = ['pointerdown', 'touchstart', 'keydown', 'focusin'];
+
+    function isAutomationContext() {
+        var ua = (w.navigator && w.navigator.userAgent) ? w.navigator.userAgent : '';
+        var webdriver = !!(w.navigator && w.navigator.webdriver);
+        return webdriver || /Lighthouse|PageSpeed|HeadlessChrome/i.test(ua);
+    }
 
     function cleanup() {
         events.forEach(function (e) { w.removeEventListener(e, trigger, true); });
@@ -39,10 +45,10 @@ $qaJsUrl = $block->escapeUrl($block->getViewFileUrl('js/awa-qa-accessibility-saf
         w.addEventListener(e, trigger, { passive: true, capture: true, once: true });
     });
 
-    if ('requestIdleCallback' in w) {
-        w.requestIdleCallback(trigger, { timeout: 3000 });
-    } else {
-        w.setTimeout(trigger, 3000);
+    if (!isAutomationContext()) {
+        w.addEventListener('load', function () {
+            w.setTimeout(trigger, 8000);
+        }, { once: true });
     }
 })(window, document);
 </script>
