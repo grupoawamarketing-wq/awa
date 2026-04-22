@@ -529,7 +529,7 @@ define([
 
         // Rola para a categoria ativa quando o menu abre no mobile
         function scrollToActiveItem() {
-            var $active = $list.find('.awa-current-cat, .ui-menu-item.level0._active').first();
+            var $active = $list.find('.awa-current-cat, .vmm-current-cat, .ui-menu-item.level0._active').first();
             var listEl = $list.get(0);
 
             if (!$active.length || !listEl || isDesktop()) {
@@ -601,6 +601,26 @@ define([
             }
         });
 
+        // Fallback: fecha ao clicar fora do menu no mobile (útil quando o overlay está desativado por CSS)
+        $(document).on('click' + namespace, function (event) {
+            if (isDesktop() || !isOpen()) {
+                return;
+            }
+
+            var target = event && event.target;
+            var root = $nav.get(0);
+
+            if (!target || !root) {
+                return;
+            }
+
+            if (root.contains(target)) {
+                return;
+            }
+
+            closeMenu();
+        });
+
         $(window).on('resize' + namespace, debounce(function () {
             ensureMobileToggles();
 
@@ -613,6 +633,7 @@ define([
 
         $nav.on('remove' + namespace, function () {
             $(window).off(namespace);
+            $(document).off(namespace);
             $(overlaySelector).off(namespace);
         });
 
