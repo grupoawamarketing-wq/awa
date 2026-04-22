@@ -29,18 +29,18 @@
 
 :root {
     // Layout
-    --card-radius:           12px;
-    --card-border-color:     var(--awa-border, #e2e2e2);
+    --card-radius:           5px;
+    --card-border-color:     rgba(15, 23, 42, 0.10);
     --card-bg:               @awa-color-white;
-    --card-padding:          @awa-space-3;
-    --card-gap:              @awa-space-3;
-    --card-shadow:           0 2px 8px rgba(15, 23, 42, 0.06);
-    --card-shadow-hover:     0 14px 34px rgba(15, 23, 42, 0.14);
+    --card-padding:          0;
+    --card-gap:              @awa-space-2;
+    --card-shadow:           none;
+    --card-shadow-hover:     none;
 
     // Foto
-    --card-photo-bg:         @awa-color-white;
-    --card-photo-radius:     @awa-radius-md;
-    --card-photo-min-h:      200px;     // fallback quando aspect-ratio não suportado
+    --card-photo-bg:         #f6f7f8;
+    --card-photo-radius:     5px;
+    --card-photo-min-h:      184px;     // fallback quando aspect-ratio não suportado
 
     // Nome
     --card-name-lines:       2;
@@ -54,12 +54,12 @@
 
     // Preço
     --card-price-size:       20px;
-    --card-price-area-min-h: 64px;      // garante mesma altura em Estado A e B
+    --card-price-area-min-h: 54px;      // garante mesma altura em Estado A e B
 
     // CTA
     --card-cta-h:            @awa-control-height;  // 44px
     --card-cta-size:         14px;
-    --card-cta-radius:       @awa-radius-sm;
+    --card-cta-radius:       5px;
 
     // Grid de produto — controlado por breakpoint (CSS vars evitam duplicação)
     --grid-cols:             2;    // mobile default
@@ -129,9 +129,8 @@ body,
 
 
     // ── 3c. Container do card ─────────────────────────────────────────────────
-    //   Hover: sobe 3px (translateY) + sombra intensa.
-    //   will-change: prepara camada de composição GPU para transição suave.
-    //   overflow: visible garante que sombra e setas não sejam clipados.
+    //   Visual clean: sem lift, sem sombra protagonista.
+    //   O hover atua só em borda e fundo para evitar ruído visual.
 
     .product-item {
         display: flex;
@@ -143,15 +142,13 @@ body,
         background: var(--card-bg);
         padding: var(--card-padding);
         box-shadow: var(--card-shadow);
-        transition: box-shadow @awa-transition, transform @awa-transition, border-color @awa-transition;
+        transition: border-color @awa-transition, background-color @awa-transition;
         position: relative;
         overflow: visible;
-        will-change: transform;
 
         &:hover {
-            transform: translateY(-3px);
-            box-shadow: var(--card-shadow-hover);
-            border-color: rgba(183, 51, 55, 0.20);
+            background: #fffdfd;
+            border-color: rgba(183, 51, 55, 0.18);
         }
 
         &:focus-within {
@@ -178,9 +175,10 @@ body,
         width: 100%;
         aspect-ratio: 1 / 1;
         min-height: var(--card-photo-min-h); // fallback browsers sem aspect-ratio
-        margin-bottom: @awa-space-3;
+        margin-bottom: @awa-space-2;
         border-radius: var(--card-photo-radius);
         overflow: hidden;
+        padding: 10px;
         // Branco + ícone de câmera: mostra quando imagem quebra / está ausente
         background:
             var(--card-photo-bg, #ffffff)
@@ -191,22 +189,13 @@ body,
         .product-image-photo {
             display: block;
             position: absolute;
-            inset: 6%;          // respiro maior para leitura premium do produto
-            width: 88%;
-            height: 88%;
+            inset: 8%;
+            width: 84%;
+            height: 84%;
             object-fit: contain;
+            object-position: center;
             color: transparent; // oculta texto alt quando imagem quebra
             font-size: 0;       // elimina resquícios de texto alt em alguns browsers
-            transition: transform @awa-transition-slow;
-        }
-    }
-
-    // Zoom da imagem no hover do card
-    .product-item:hover {
-        .product-item-photo img,
-        .product-image-container img,
-        .product-image-photo {
-            transform: scale(1.05);
         }
     }
 
@@ -257,7 +246,7 @@ body,
         flex-direction: column;
         flex: 1;
         gap: var(--card-gap);
-        padding: 0 4px 4px;
+        padding: 0;
     }
 
 
@@ -691,7 +680,11 @@ body,
 
 // Homepage: carrosséis Rokanthemes
 .rokan-bestseller,
-.rokan-newproduct { .awa-card(); }
+.rokan-newproduct,
+.rokan-mostviewed,
+.categorytab-container,
+.category_tab_slider,
+.hot-deal { .awa-card(); }
 
 // Target only the second homepage bestseller slide instance requested by the user.
 .cms-index-index .rokan-bestseller .products-swiper--bestseller .swiper-slide:nth-child(2)
@@ -1110,12 +1103,23 @@ body,
 // Carousels (owl-carousel / swiper-container) controlam seu próprio layout.
 
 .catalog-category-view .products-grid .product-items,
+.catalog-category-view .products-grid :is(ul.row.product-grid, ul.container-products-switch),
 .catalogsearch-result-index .products-grid .product-items,
+.catalogsearch-result-index .products-grid :is(ul.row.product-grid, ul.container-products-switch),
 .catalog-product-view .block.related .products-grid .product-items,
 .catalog-product-view .block.upsell .products-grid .product-items {
     display: grid;
     grid-template-columns: repeat(var(--grid-cols), 1fr);
     gap: var(--grid-gap);
+    align-items: start;
+}
+
+.catalog-category-view .products-grid :is(ul.row.product-grid, ul.container-products-switch) > li.item-product,
+.catalogsearch-result-index .products-grid :is(ul.row.product-grid, ul.container-products-switch) > li.item-product {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
 }
 
 
