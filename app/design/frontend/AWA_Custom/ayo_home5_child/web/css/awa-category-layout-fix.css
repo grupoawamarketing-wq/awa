@@ -772,9 +772,10 @@
     white-space: nowrap !important;
 }
 
-/* Select de ordenação: compacto */
+/* Select de ordenação: compacto
+   Seletor (0,4,2) > awa-bundle-refinements (0,3,2) para ganhar no !important */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
-    .toolbar-products select.sorter-options {
+    .toolbar-products .toolbar-sorter select.sorter-options {
     height: 36px !important;
     padding: 0 28px 0 10px !important;
     font-size: 12px !important;
@@ -783,6 +784,45 @@
     background-color: #fff !important;
     color: #333 !important;
     cursor: pointer !important;
+    transition: border-color 0.2s ease !important;
+}
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .toolbar-products .toolbar-sorter select.sorter-options:hover,
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .toolbar-products .toolbar-sorter select.sorter-options:focus {
+    border-color: var(--awa-primary, #b73337) !important;
+    outline: none !important;
+}
+
+/* Botão direção de ordenação (.sorter-action) — Rokanthemes não renderiza por padrão;
+   regra aqui para compatibilidade caso o template seja restaurado */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .toolbar-products .toolbar-sorter .sorter-action {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    border-radius: 6px !important;
+    border: 1px solid #d9d9d9 !important;
+    background: #fff !important;
+    color: #333 !important;
+    cursor: pointer !important;
+    transition: border-color 0.2s ease !important;
+    text-decoration: none !important;
+}
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .toolbar-products .toolbar-sorter .sorter-action:hover {
+    border-color: var(--awa-primary, #b73337) !important;
+    color: var(--awa-primary, #b73337) !important;
+}
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .toolbar-products .toolbar-sorter .sorter-action > span {
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
 }
 
 /* Label do sorter: discreto */
@@ -913,9 +953,11 @@
     justify-content: space-between !important;
 }
 
-/* Chevron ▾ no título do filtro (indica collapsible) */
+/* Chevron ▾ no título do filtro (indica collapsible)
+   DOM real: <dl class="filter-options"><dt class="filter-options-title">...
+   NÃO existe wrapper .filter-options-item — o DT é filho direto da DL */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
-    .filter-options-item .filter-options-title::after {
+    .filter-options .filter-options-title::after {
     content: '' !important;
     display: inline-block !important;
     width: 10px !important;
@@ -927,17 +969,42 @@
     opacity: 0.45 !important;
 }
 
-/* Girar chevron quando ativo/expandido */
+/* Girar chevron quando ativo/expandido
+   Estado ativo: DT recebe classe .active (não um wrapper) */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
-    .filter-options-item.active .filter-options-title::after,
-:is(body.catalog-category-view, body.catalogsearch-result-index)
-    .filter-options-item[aria-expanded="true"] .filter-options-title::after {
+    .filter-options .filter-options-title.active::after {
     transform: rotate(180deg) !important;
 }
 
 :is(body.catalog-category-view, body.catalogsearch-result-index)
-    .filter-options-item .filter-options-content {
+    .filter-options .filter-options-content {
     padding: 8px 0 !important;
+}
+
+/* ========================================================================
+   § Price-box — PLP/Busca: cor e labels
+   Problema: styles-l.css (idx=29) e awa-bundle-refinements (idx=24) sobrescrevem
+   color para --awa-text mesmo quando há special-price.
+   Fix: !important com seletor suficientemente específico.
+   ======================================================================== */
+
+/* Preço especial → vermelho */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .products-grid .price-box .special-price .price {
+    color: var(--awa-primary, #b73337) !important;
+}
+
+/* Preço normal (sem desconto) → dark */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .products-grid .price-box:not(:has(.special-price)) .price {
+    color: var(--awa-text, #1a1a1a) !important;
+}
+
+/* Esconder labels "Preço especial" / "Preço normal" nos itens de produto
+   (mostrar apenas o valor numérico, sem label textual) */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .item-product .price-box .price-label {
+    display: none !important;
 }
 
 /* Links de filtro: subtis */
