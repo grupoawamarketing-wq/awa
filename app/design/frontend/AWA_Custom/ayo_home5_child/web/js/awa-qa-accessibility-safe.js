@@ -72,3 +72,39 @@
         d.addEventListener('DOMContentLoaded', applyFixes, { once: true });
     }
 }(window, document);
+
+/* AWA WCAG 4.1.3: aria-hidden-focus — inert fix (2026-04-22)
+   Evita que elementos filhos de [aria-hidden="true"] recebam foco de teclado.
+   Solução: atributo `inert` que bloqueia interação em toda a subárvore.
+   Carregado via awa-qa-accessibility-safe.js (script direto, não RequireJS). */
+!function (w, d) {
+    'use strict';
+    if (w.__awaInertSyncInit) { return; }
+    w.__awaInertSyncInit = true;
+
+    function syncInert(el) {
+        if (el.getAttribute('aria-hidden') === 'true') {
+            el.setAttribute('inert', '');
+        } else {
+            el.removeAttribute('inert');
+        }
+    }
+
+    // Aplicar em todos os elementos aria-hidden presentes no DOM
+    d.querySelectorAll('[aria-hidden]').forEach(syncInert);
+
+    // Observar mudanças futuras (modais, accordion, Knockout bindings)
+    if (w.MutationObserver) {
+        new MutationObserver(function (mutations) {
+            mutations.forEach(function (m) {
+                if (m.attributeName === 'aria-hidden') {
+                    syncInert(m.target);
+                }
+            });
+        }).observe(d.documentElement, {
+            subtree: true,
+            attributes: true,
+            attributeFilter: ['aria-hidden']
+        });
+    }
+}(window, document);
