@@ -93,10 +93,15 @@ class HeroPreloadPlugin
                 $imageUrl = rtrim($mediaUrl, '/') . '/' . ltrim($webpImage, '/');
             }
 
+            $preloadAttrs = ['rel' => 'preload', 'as' => 'image', 'fetchpriority' => 'high'];
+            // type hint allows browser to skip preload if format unsupported
+            if (str_ends_with(strtolower($imageUrl), '.webp')) {
+                $preloadAttrs['type'] = 'image/webp';
+            }
             $this->pageConfig->addRemotePageAsset(
                 $imageUrl,
                 'link',
-                ['attributes' => ['rel' => 'preload', 'as' => 'image', 'fetchpriority' => 'high']],
+                ['attributes' => $preloadAttrs],
                 'awa-hero-preload-desktop'
             );
             $this->done = true;
@@ -105,5 +110,29 @@ class HeroPreloadPlugin
         }
 
         return null;
+    }
+
+    /**
+     * Corrige decoding="async" → "sync" nas imagens LCP do slider.
+     *
+     * decoding="async" adia o decode para um task off-thread, mas sob throttling
+     * de CPU 4x (Lighthouse) a tarefa pode ser postergada, atrasando o paint e
+     * causando NO_LCP. Somente imagens com loading="eager" são afetadas (hero).
+     *
+     * @param Slider $subject
+     * @param string $result HTML gerado pelo bloco
+     * @return string
+     */
+    public function afterToHtml(Slider $subject, string $result): string
+    {
+        if (!str_contains($result, 'decoding="async"')) {
+            return $result;
+        }
+        // Substitui decoding=async somente em <img> que tenham loading="eager"
+        return (string) preg_replace(
+            '/(<img\b[^>]*loading="eager"[^>]*)decoding="async"/',
+            '$1decoding="sync"',
+            $result
+        );
     }
 }

@@ -22,9 +22,9 @@
    ============================================================================= */
 
 :root {
-  --awa-hdr-content-max:   1272px;
-  --awa-hdr-container-max: 1320px;
-  --awa-hdr-pad-inline:    24px;
+  --awa-hdr-container-max: var(--awa-container-max, 1440px);
+  --awa-hdr-pad-inline:    var(--awa-container-pad, 24px);
+  --awa-hdr-content-max:   calc(var(--awa-hdr-container-max) - (var(--awa-hdr-pad-inline) * 2));
   --awa-hdr-height:        var(--awa-size-80, 80px);
   --awa-hdr-height-sticky: 56px;
   --awa-hdr-navbar-h:      46px;
@@ -184,15 +184,16 @@ body .page-wrapper .awa-site-header.awa-header-condensed #header .awa-header-sea
   #header .header-main :is(.awa-main-header__inner[data-awa-header-row], .wp-header[data-awa-header-row]),
   #header :is(.awa-main-header__inner[data-awa-header-row], .wp-header[data-awa-header-row]) {
     display:               grid !important;
-    grid-template-columns: 1fr minmax(280px, 660px) 1fr !important;
+    grid-template-columns: auto minmax(0, 1fr) auto !important;
     gap:                   var(--awa-hdr-gap) !important;
     min-height:            var(--awa-hdr-height) !important;
     height:                var(--awa-hdr-height) !important;
-    max-width:             var(--awa-hdr-content-max) !important;
+    max-width:             none !important;
     margin-left:           auto !important;
     margin-right:          auto !important;
     padding:               0 !important;
     align-items:           center !important;
+    width:                 100% !important;
   }
 
   /* primary-row dissolve — filhos participam do grid diretamente */
@@ -214,6 +215,7 @@ body .page-wrapper .awa-site-header.awa-header-condensed #header .awa-header-sea
     align-self:   center !important;
     display:      flex !important;
     align-items:  center !important;
+    justify-content: flex-start !important;
     min-width:    var(--awa-size-120, 120px) !important;
   }
 
@@ -342,6 +344,7 @@ body .page-wrapper .awa-site-header.awa-header-condensed #header .awa-header-sea
     align-items:  center !important;
     gap:          var(--awa-gap-lg, 16px) !important;
     white-space:  nowrap !important;
+    min-width:    max-content !important;
   }
 
   #header .awa-header-right-col .top-account.awa-header-account-nav {
@@ -654,7 +657,7 @@ body .page-wrapper .awa-site-header.awa-header-condensed #header .awa-header-sea
 
   #header .awa-main-header :is(.awa-main-header__inner[data-awa-header-row], .wp-header[data-awa-header-row]),
   #header :is(.awa-main-header__inner[data-awa-header-row], .wp-header[data-awa-header-row]) {
-    grid-template-columns: 1fr minmax(300px, 700px) 1fr !important;
+    grid-template-columns: auto minmax(0, 1fr) auto !important;
   }
 
 }
@@ -678,7 +681,7 @@ body .page-wrapper .awa-site-header.awa-header-condensed #header .awa-header-sea
 
   #header .awa-main-header :is(.awa-main-header__inner[data-awa-header-row], .wp-header[data-awa-header-row]),
   #header :is(.awa-main-header__inner[data-awa-header-row], .wp-header[data-awa-header-row]) {
-    grid-template-columns: 1fr minmax(240px, 560px) 1fr !important;
+    grid-template-columns: auto minmax(0, 1fr) auto !important;
     gap: var(--awa-hdr-gap) !important;
   }
 
@@ -690,6 +693,73 @@ body .page-wrapper .awa-site-header.awa-header-condensed #header .awa-header-sea
    ============================================================================= */
 
 @media (max-width: 991px) {
+
+  #header .header .header-main :is(.awa-main-header__inner[data-awa-header-row], .wp-header[data-awa-header-row]),
+  #header .header .header_main :is(.awa-main-header__inner[data-awa-header-row], .wp-header[data-awa-header-row]),
+  #header .header_main :is(.awa-main-header__inner[data-awa-header-row], .wp-header[data-awa-header-row]),
+  #header .header-main :is(.awa-main-header__inner[data-awa-header-row], .wp-header[data-awa-header-row]),
+  #header :is(.awa-main-header__inner[data-awa-header-row], .wp-header[data-awa-header-row]) {
+    display: grid !important;
+    grid-template-columns: 44px minmax(0, 1fr) 44px !important;
+    grid-template-rows: auto auto !important;
+    grid-template-areas:
+      "nav brand cart"
+      "search search search" !important;
+    gap: 10px 12px !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-height: auto !important;
+    height: auto !important;
+    padding: 0 16px !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+  }
+
+  #header :is(.awa-main-header__inner[data-awa-header-row], .wp-header[data-awa-header-row]) .awa-header-primary-row {
+    display: contents !important;
+  }
+
+  #header .awa-header-mobile-toggle {
+    grid-area: nav !important;
+    justify-self: start !important;
+    align-self: center !important;
+  }
+
+  #header .awa-header-brand-cell,
+  #header .col-md-2.awa-header-brand {
+    grid-area: brand !important;
+    justify-self: center !important;
+    justify-content: center !important;
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+
+  #header .awa-header-brand-cell .logo,
+  #header .col-md-2.awa-header-brand .logo {
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  #header .awa-header-brand-cell .logo img,
+  #header .col-md-2.awa-header-brand .logo img {
+    max-height: 44px !important;
+    min-height: 0 !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  #header .awa-header-cart-link {
+    grid-area: cart !important;
+    justify-self: end !important;
+    align-self: center !important;
+  }
+
+  #header :is(.awa-main-header__inner[data-awa-header-row], .wp-header[data-awa-header-row]) > .top-search,
+  #header :is(.awa-main-header__inner[data-awa-header-row], .wp-header[data-awa-header-row]) > .awa-header-search-col {
+    grid-area: search !important;
+    width: 100% !important;
+    max-width: none !important;
+  }
 
   #header .header.awa-main-header,
   #header .awa-main-header {
@@ -783,4 +853,109 @@ body .page-wrapper .awa-site-header.awa-header-condensed #header .awa-header-sea
 /* Fix 6: header-content padding reset (global) */
 #header .header-content {
   padding: 0 !important;
+}
+
+/* =============================================================================
+   V10-POLISH — Premium Refinements
+   Tokens via awa-design-tokens.css.
+   ============================================================================= */
+
+/* ── POLISH 1: Sticky header com glassmorphism sutil ──────────────────────── */
+body .page-wrapper .awa-site-header.is-sticky,
+body .page-wrapper .awa-site-header._fixed {
+    backdrop-filter: blur(12px) saturate(1.2) !important;
+    -webkit-backdrop-filter: blur(12px) saturate(1.2) !important;
+    background: rgba(255, 255, 255, 0.92) !important;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.06),
+                0 4px 16px rgba(0,0,0,0.06) !important;
+}
+
+/* Condensed mantém sólido (conteúdo abaixo pode ser opaco) */
+body .page-wrapper .awa-site-header.awa-header-condensed {
+    background: var(--awa-white, #fff) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* ── POLISH 2: Transição suave ao entrar/sair de sticky ───────────────────── */
+body .page-wrapper .awa-site-header,
+body .page-wrapper .page-header {
+    transition:
+        background 0.3s ease,
+        box-shadow 0.3s ease,
+        backdrop-filter 0.3s ease !important;
+}
+
+/* ── POLISH 3: Search input — focus glow de marca ─────────────────────────── */
+@media (min-width: 992px) {
+  #header .awa-header-search-col form.minisearch:focus-within,
+  #header .awa-header-search-col .block-search form.minisearch:focus-within {
+      border-color: var(--awa-primary, #b73337) !important;
+      box-shadow: 0 0 0 3px rgb(183 51 55 / 10%),
+                  0 1px 3px rgb(0 0 0 / 4%) !important;
+  }
+
+  #header .awa-header-search-col form.minisearch:focus-within input#search,
+  #header .awa-header-search-col .block-search form.minisearch:focus-within input.input-text {
+      background: rgba(183, 51, 55, 0.02) !important;
+  }
+
+  /* ── POLISH 4: Botão search — gradiente sutil no hover ──────────────────── */
+  #header .awa-header-search-col button.action.search:hover,
+  #header .awa-header-search-col .actions .action.search:hover {
+      background: var(--awa-primary-hover, #8e2629) !important;
+      background-color: var(--awa-primary-hover, #8e2629) !important;
+      transition: background var(--awa-duration-fast, 0.15s) ease !important;
+  }
+
+  /* ── POLISH 5: Navbar links — underline animado ─────────────────────────── */
+  #header .menu_primary nav > ul > li > a,
+  #header .menu_primary .level0 > a,
+  #header .awa-header-primary-nav .navigation.custommenu li.level0 > a,
+  #header .awa-header-primary-nav .navigation li.level0 > a {
+      position: relative !important;
+  }
+
+  #header .menu_primary .level0 > a::after,
+  #header .awa-header-primary-nav .navigation.custommenu li.level0 > a::after,
+  #header .awa-header-primary-nav .navigation li.level0 > a::after {
+      content: '' !important;
+      position: absolute !important;
+      bottom: -2px !important;
+      left: 50% !important;
+      width: 0 !important;
+      height: 2px !important;
+      background: var(--awa-primary, #b73337) !important;
+      border-radius: 2px !important;
+      transform: translateX(-50%) !important;
+      transition: width var(--awa-duration-fast, 0.15s) ease !important;
+  }
+
+  #header .menu_primary .level0 > a:hover::after,
+  #header .awa-header-primary-nav .navigation.custommenu li.level0 > a:hover::after,
+  #header .awa-header-primary-nav .navigation li.level0 > a:hover::after,
+  #header .awa-header-primary-nav .navigation.custommenu li.level0.active > a::after,
+  #header .awa-header-primary-nav .navigation.custommenu li.level0.current > a::after,
+  #header .menu_primary .level0.active > a::after,
+  #header .menu_primary .level0.current > a::after {
+      width: 60% !important;
+  }
+
+  /* Remove o box-shadow inset antigo do active em favor do ::after underline */
+  #header .awa-header-primary-nav .navigation.custommenu li.level0.active > a,
+  #header .awa-header-primary-nav .navigation.custommenu li.level0.current > a,
+  #header .menu_primary .level0.active > a,
+  #header .menu_primary .level0.current > a {
+      box-shadow: none !important;
+  }
+}
+
+/* ===========================================================
+   WCAG 2.1 AA — Color Contrast Fix
+   .awa-b2b-promo-bar__lead: #999999 on #b73337 = 2.08:1 (fail)
+   Override → #ffffff on #b73337 = 6.0:1 (pass)
+   =========================================================== */
+#header .awa-site-header .top-header.awa-b2b-promo-bar .awa-b2b-promo-bar__lead,
+#header .awa-site-header .awa-b2b-promo-bar[data-awa-header-utility] .awa-b2b-promo-bar__lead {
+    color: #ffffff !important;
 }

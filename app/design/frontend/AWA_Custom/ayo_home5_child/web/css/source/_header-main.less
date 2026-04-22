@@ -220,8 +220,10 @@ body .page-wrapper .awa-site-header {
     .awa-main-header .wp-header[data-awa-header-row] {
       align-items: center !important;
       display: flex !important;
-      gap: @sp-1 !important;           // 8px entre colunas (standardization)
-      max-width: var(--awa-hdr-content-max, 1272px) !important;
+      gap: clamp(12px, 1.6vw, 24px) !important;
+      // Keep the main row on the same width contract as the shared header container.
+      // The previous inner cap (1272px) made logo/search/icons drift relative to the nav below.
+      max-width: 100% !important;
       margin: 0 auto !important;
       min-height: @h-header-main !important;
       padding-block: @sp-2 !important;
@@ -243,6 +245,7 @@ body .page-wrapper .awa-site-header {
       align-items: center !important;
       display: flex !important;
       flex: 0 0 auto !important;
+      justify-content: flex-start !important;
       min-width: 144px !important;
 
       .logo img {
@@ -397,8 +400,10 @@ body .page-wrapper .awa-site-header {
       align-items: center !important;
       display: flex !important;
       flex: 0 0 auto !important;
+      flex-shrink: 0 !important;
       gap: @sp-3 !important;  // 24px
       justify-content: flex-end !important;
+      min-width: max-content !important;
     }
 
     // Auth prompt (ícone pessoa + texto + links)
@@ -539,9 +544,8 @@ body .page-wrapper .awa-site-header {
 
     // Container alinhado
     .header-control.awa-nav-bar > .container {
-      max-width: @grid-max !important;
-      padding-left: @sp-3 !important;
-      padding-right: @sp-3 !important;
+      max-width: var(--awa-hdr-container-max) !important;
+      padding-inline: var(--awa-hdr-pad-inline) !important;
       margin: 0 auto !important;
       box-sizing: border-box !important;
       width: 100% !important;
@@ -966,6 +970,51 @@ body .page-wrapper .awa-site-header {
   // Primary-row: dissolve no grid pai
   .page-wrapper .awa-site-header .header .awa-header-primary-row {
     display: contents !important;
+  }
+
+  // Explicit grid placement avoids auto-flow drift between logo, search and icons.
+  .page-wrapper .awa-site-header .header .awa-header-mobile-toggle {
+    grid-area: nav !important;
+    justify-self: start !important;
+    align-self: center !important;
+  }
+
+  .page-wrapper .awa-site-header .header .awa-header-brand-cell {
+    grid-area: brand !important;
+    align-items: center !important;
+    display: flex !important;
+    justify-content: center !important;
+    justify-self: center !important;
+    min-width: 0 !important;
+    width: 100% !important;
+
+    .logo {
+      margin-inline: auto !important;
+    }
+
+    .logo img {
+      margin-inline: auto !important;
+      max-height: 44px !important;
+      width: auto !important;
+    }
+  }
+
+  .page-wrapper .awa-site-header .header .awa-header-cart-link {
+    grid-area: cart !important;
+    justify-self: end !important;
+    align-self: center !important;
+  }
+
+  .page-wrapper .awa-site-header .header .awa-main-header__inner[data-awa-header-row] > .top-search,
+  .page-wrapper .awa-site-header .header .wp-header[data-awa-header-row] > .top-search,
+  .page-wrapper .awa-site-header .header .header_main .awa-main-header__inner[data-awa-header-row] > .top-search,
+  .page-wrapper .awa-site-header .header .header_main .wp-header[data-awa-header-row] > .top-search {
+    grid-area: search !important;
+    width: 100% !important;
+  }
+
+  .page-wrapper .awa-site-header .header :is(.awa-main-header__inner[data-awa-header-row], .wp-header[data-awa-header-row]) > .awa-header-right-col {
+    display: none !important;
   }
 
   // Busca mobile: botão transparente, pill direito
