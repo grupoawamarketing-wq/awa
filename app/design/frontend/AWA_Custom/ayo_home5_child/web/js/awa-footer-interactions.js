@@ -129,9 +129,11 @@ define([
 
                 $title.attr({
                     id: titleId,
-                    role: 'button',
                     tabindex: '0'
                 });
+                // role="button" é inválido em h1-h6 (ARIA 1.2 §6.5).
+                // accordion funciona via aria-expanded + aria-controls + tabindex.
+                $title.removeAttr('role');
 
                 if (!$title.attr('aria-expanded')) {
                     $title.attr('aria-expanded', isMobileViewport() ? 'false' : 'true');
