@@ -1,3 +1,21 @@
+/**
+ * AWA Motos — Vertical Menu Toggle Controller
+ *
+ * Manages the sidebar vertical-menu lifecycle:
+ *  - Desktop >= 992 px : hover/focus opens category dropdown (Home 5 default behavior)
+ *  - Mobile  <  992 px : animated drawer + overlay + submenu accordions
+ *
+ * The native Rokanthemes VerticalMenu jQuery plugin is still initialised for
+ * its flyout-positioning logic (hover on desktop). AWA does NOT duplicate
+ * that behaviour; it only adds: open/close of the category list,
+ * expand/collapse "Show More", and mobile submenu toggles when the
+ * Rokanthemes widget is absent.
+ *
+ * Important: the child theme CSS still expects the alias class `vmm-open`
+ * for dropdown visibility, so we keep `menu-open` and `vmm-open` synchronized.
+ *
+ * @module js/vertical-menu-init
+ */
 define([
     'jquery',
     'rokanthemes/verticalmenu'
@@ -9,7 +27,7 @@ define([
             return false;
         }
 
-        var initialized = false;
+        var ok = false;
 
         $menus.each(function () {
             var $menu = $(this);
@@ -19,23 +37,23 @@ define([
                 $menu.data('awaRokanInit', 1);
             }
 
-            initialized = true;
+            ok = true;
         });
 
-        return initialized;
+        return ok;
     }
 
-    function debounce(fn, wait) {
-        var timer = null;
+    function debounce(fn, ms) {
+        var timer;
 
         return function () {
-            var args = arguments;
             var context = this;
+            var args = arguments;
 
             clearTimeout(timer);
             timer = setTimeout(function () {
                 fn.apply(context, args);
-            }, wait || 120);
+            }, ms || 120);
         };
     }
 
@@ -44,12 +62,12 @@ define([
             return;
         }
 
-        var selector = 'img[src],picture source[srcset],video source[src],iframe[src],a[href],.block,.cms-block';
+        var contentSelector = 'img[src],picture source[srcset],video source[src],iframe[src],a[href],.block,.cms-block';
 
         $list.find('> li.vertical-menu-custom-block, > li.vertical-bg-img').each(function () {
             var $item = $(this);
 
-            if (!$.trim($item.text()).length && !$item.find(selector).length) {
+            if (!$.trim($item.text()).length && !$item.find(contentSelector).length) {
                 $item.remove();
             }
         });
@@ -59,7 +77,6 @@ define([
         var $nav = $(element);
         var $title = $nav.find('.title-category-dropdown');
         var $list = $nav.find('.togge-menu');
-        var $status = $nav.find('[data-role="awa-vertical-menu-status"]');
         var $expandLink = $nav.find('.vm-toggle-categories');
         var $items = $nav.find('.ui-menu-item.level0');
         var safeUid = ($nav.attr('id') || $title.attr('aria-controls') || 'avm-' + Math.random().toString(36).slice(2))
@@ -70,13 +87,10 @@ define([
             || parseInt(config && config.limitShow, 10) || 0;
         var childPanelSelector = '.submenu, ul.level0, .subchildmenu';
         var namespace = '.awaVM-' + safeUid;
-        var outsideNamespace = '.awaVMOutside-' + safeUid;
-        var outsideEvents = window.PointerEvent ?
-            ('pointerdown' + outsideNamespace) :
-            ('touchstart' + outsideNamespace + ' mousedown' + outsideNamespace);
-        var triggerLabel = $.trim($title.attr('aria-label') || $title.text()) || 'Departamentos';
         var rokanActive;
-        var desktopHoverCloseTimer = null;
+        var mediaQuery = window.matchMedia
+            ? window.matchMedia('(min-width: ' + desktopBreakpoint + 'px)')
+            : null;
 
         if (!$nav.length || $nav.data('awaVMInit')) {
             return;
@@ -84,7 +98,6 @@ define([
 
         $nav.data('awaVMInit', 1);
         $nav.attr('data-awa-verticalmenu-owner', 'vertical-menu-init');
-        $nav.attr('data-awa-side-inline-flyout', 'true');
 
         rokanActive = initRokanWidget(
             $nav.filter('.verticalmenu').add($nav.find('.verticalmenu'))
@@ -93,11 +106,7 @@ define([
         pruneEmptyBlocks($list);
 
         function isDesktop() {
-            if (window.matchMedia) {
-                return window.matchMedia('(min-width: ' + desktopBreakpoint + 'px)').matches;
-            }
-
-            return window.innerWidth >= desktopBreakpoint;
+            return mediaQuery ? mediaQuery.matches : window.innerWidth >= desktopBreakpoint;
         }
 
         function isHomeContext() {
@@ -117,125 +126,40 @@ define([
             return isDesktop() && isHomeContext();
         }
 
-        function setStatusMessage(message) {
-            if ($status.length) {
-                $status.text(message);
-            }
-        }
+        function setMenuOpenState(isOpen) {
+            var expanded = isOpen ? 'true' : 'false';
 
-        function syncMenuA11yState(isOpen) {
-            var expandedValue = isOpen ? 'true' : 'false';
-            var hiddenValue = isOpen ? 'false' : 'true';
-
-            $nav
-                .attr('data-menu-state', isOpen ? 'open' : 'closed')
-                .toggleClass('menu-open', isOpen)
-                .toggleClass('vmm-open', isOpen);
-            $title
-                .toggleClass('active', isOpen)
-                .toggleClass('is-open', isOpen)
-                .attr('aria-expanded', expandedValue)
-                .attr('aria-label', isOpen ? ('Fechar ' + triggerLabel) : triggerLabel);
-            $list
-                .toggleClass('menu-open', isOpen)
-                .toggleClass('vmm-open', isOpen)
-                .attr('aria-hidden', hiddenValue);
-
-            setStatusMessage(isOpen ? 'Menu aberto' : 'Menu fechado');
-        }
-
-        function isOpen() {
-            return $list.hasClass('menu-open') || $list.hasClass('vmm-open');
-        }
-
-        function bindOutsideInteractionHandlers() {
-            $(document)
-                .off(outsideEvents)
-                .on(outsideEvents, function (event) {
-                    var $target = $(event.target);
-
-                    if (!$target.closest($nav).length &&
-                            !$target.closest('.awa-side-submenu-portal').length &&
-                            !$target.closest('.awa-nav-overlay').length) {
-                        closeMenu();
-                    }
-                });
-        }
-
-        function unbindOutsideInteractionHandlers() {
-            $(document).off(outsideEvents);
-        }
-
-        function getTopLevelKeyboardItems() {
-            return $list.children('.ui-menu-item.level0:visible').children('a.level-top:visible');
-        }
-
-        function focusTopLevelItem(index) {
-            var $links = getTopLevelKeyboardItems();
-
-            if ($links.length) {
-                $links.eq(index).trigger('focus');
-            }
-        }
-
-        function focusFirstCategoryLink() {
-            focusTopLevelItem(0);
-        }
-
-        function focusLastCategoryLink() {
-            var $links = getTopLevelKeyboardItems();
-
-            if ($links.length) {
-                $links.last().trigger('focus');
-            }
-        }
-
-        function setNavBarClip(clip) {
-            var element = $nav.closest('.header-control.header-nav')[0]
-                || document.querySelector('.header-control.header-nav.awa-nav-bar');
-
-            if (!element) {
-                return;
-            }
-
-            element.style.setProperty('overflow', clip ? 'hidden' : 'visible', 'important');
+            $nav.toggleClass('menu-open', isOpen).toggleClass('vmm-open', isOpen);
+            $list.toggleClass('menu-open', isOpen).toggleClass('vmm-open', isOpen);
+            $title.toggleClass('active', isOpen).attr('aria-expanded', expanded);
         }
 
         function openMenu() {
-            syncMenuA11yState(true);
+            setMenuOpenState(true);
 
             if (isDesktop()) {
                 $list.stop(true, true).removeAttr('style').show();
                 $('body').removeClass('background_shadow_show');
-                setNavBarClip(false);
-                bindOutsideInteractionHandlers();
-                return;
+            } else {
+                $list.stop(true, true).fadeIn(200);
+                $('body').addClass('background_shadow_show');
             }
-
-            $list.stop(true, true).fadeIn(200);
-            $('body').addClass('background_shadow_show');
-            bindOutsideInteractionHandlers();
         }
 
         function closeMenu() {
-            if (keepDesktopMenuExpanded()) {
-                openMenu();
-                return;
-            }
-
-            syncMenuA11yState(false);
+            setMenuOpenState(false);
 
             if (isDesktop()) {
                 $list.stop(true, true).hide();
-                $('body').removeClass('background_shadow_show');
-                setNavBarClip(true);
-                unbindOutsideInteractionHandlers();
-                return;
+            } else {
+                $list.stop(true, true).fadeOut(200);
             }
 
-            $list.stop(true, true).fadeOut(200);
             $('body').removeClass('background_shadow_show');
-            unbindOutsideInteractionHandlers();
+        }
+
+        function isOpen() {
+            return $list.hasClass('menu-open') || $list.hasClass('vmm-open');
         }
 
         function ensureMobileToggles() {
@@ -248,15 +172,16 @@ define([
                         '<div class="open-children-toggle navigation__toggle" role="button"' +
                         ' aria-label="Expandir subcategorias" aria-expanded="false" tabindex="0"></div>'
                     );
-                    return;
+                } else {
+                    $toggle
+                        .attr({
+                            role: 'button',
+                            tabindex: '0',
+                            'aria-label': $toggle.attr('aria-label') || 'Expandir subcategorias',
+                            'aria-expanded': $toggle.attr('aria-expanded') || 'false'
+                        })
+                        .addClass('navigation__toggle');
                 }
-
-                $toggle.attr({
-                    role: 'button',
-                    tabindex: '0',
-                    'aria-label': $toggle.attr('aria-label') || 'Expandir subcategorias',
-                    'aria-expanded': $toggle.attr('aria-expanded') || 'false'
-                }).addClass('navigation__toggle');
             });
         }
 
@@ -330,6 +255,14 @@ define([
             });
         }
 
+        function focusFirstCategoryLink() {
+            var $first = $list.children('.ui-menu-item.level0:visible').children('a').first();
+
+            if ($first.length) {
+                $first.trigger('focus');
+            }
+        }
+
         function bindRokanMobileBridgeHandlers() {
             var $toggles = $nav.find('.open-children-toggle');
 
@@ -371,45 +304,6 @@ define([
             });
         }
 
-        function fixSectionAriaHidden() {
-            var $panels = $nav
-                .closest('[data-role="content"], .section-item-content')
-                .add($nav.closest('#nav-sections, .sections.nav-sections.category-dropdown'));
-
-            if (!$panels.length) {
-                return;
-            }
-
-            $panels.removeAttr('aria-hidden');
-
-            if (typeof MutationObserver === 'undefined') {
-                return;
-            }
-
-            $panels.each(function () {
-                var element = this;
-                var observer = new MutationObserver(function (mutations) {
-                    var index;
-                    var mutation;
-
-                    for (index = 0; index < mutations.length; index++) {
-                        mutation = mutations[index];
-
-                        if (mutation.attributeName === 'aria-hidden'
-                                && element.getAttribute('aria-hidden') !== null) {
-                            element.removeAttribute('aria-hidden');
-                        }
-                    }
-                });
-
-                observer.observe(element, { attributes: true, attributeFilter: ['aria-hidden'] });
-
-                $nav.one('remove' + namespace, function () {
-                    observer.disconnect();
-                });
-            });
-        }
-
         function syncOnResize() {
             if (isDesktop()) {
                 getParentItems().each(function () {
@@ -419,49 +313,40 @@ define([
                 $list.stop(true, true).removeAttr('style');
 
                 if (keepDesktopMenuExpanded()) {
-                    openMenu();
-                    return;
+                    setMenuOpenState(true);
                 }
 
                 if (isOpen()) {
                     $list.show();
-                    syncMenuA11yState(true);
-                    setNavBarClip(false);
-                    bindOutsideInteractionHandlers();
+                    setMenuOpenState(true);
                 } else {
                     $list.hide();
-                    syncMenuA11yState(false);
-                    setNavBarClip(true);
-                    unbindOutsideInteractionHandlers();
+                    setMenuOpenState(false);
                 }
 
                 $('body').removeClass('background_shadow_show');
-                return;
+            } else {
+                $nav.removeClass('menu-open vmm-open');
+                $list.removeClass('menu-open vmm-open').hide();
+                $title.removeClass('active').attr('aria-expanded', 'false');
+                $('body').removeClass('background_shadow_show');
             }
-
-            $nav.removeClass('menu-open vmm-open');
-            $list.removeClass('menu-open vmm-open').hide();
-            syncMenuA11yState(false);
-            $('body').removeClass('background_shadow_show');
-            setNavBarClip(true);
-            unbindOutsideInteractionHandlers();
         }
 
         $title.on('click' + namespace, function (event) {
             event.preventDefault();
-            event.stopPropagation();
 
-            if (keepDesktopMenuExpanded()) {
-                openMenu();
+            if (isDesktop()) {
+                if (keepDesktopMenuExpanded()) {
+                    openMenu();
+                    return;
+                }
+
+                isOpen() ? closeMenu() : openMenu();
                 return;
             }
 
-            if (isOpen()) {
-                closeMenu();
-                return;
-            }
-
-            openMenu();
+            isOpen() ? closeMenu() : openMenu();
         });
 
         $title.on('keydown' + namespace, function (event) {
@@ -492,16 +377,9 @@ define([
         });
 
         $nav.on('mouseenter' + namespace, function () {
-            if (!isDesktop()) {
-                return;
+            if (isDesktop()) {
+                openMenu();
             }
-
-            if (desktopHoverCloseTimer) {
-                clearTimeout(desktopHoverCloseTimer);
-                desktopHoverCloseTimer = null;
-            }
-
-            openMenu();
         });
 
         $nav.on('mouseleave' + namespace, function () {
@@ -516,14 +394,12 @@ define([
                 return;
             }
 
-            if (desktopHoverCloseTimer) {
-                clearTimeout(desktopHoverCloseTimer);
+            if (keepDesktopMenuExpanded()) {
+                openMenu();
+                return;
             }
 
-            desktopHoverCloseTimer = window.setTimeout(function () {
-                desktopHoverCloseTimer = null;
-                closeMenu();
-            }, 120);
+            closeMenu();
         });
 
         $nav.on('focusin' + namespace, function () {
@@ -545,6 +421,11 @@ define([
                     return;
                 }
 
+                if (keepDesktopMenuExpanded()) {
+                    openMenu();
+                    return;
+                }
+
                 closeMenu();
             }, 0);
         });
@@ -558,55 +439,14 @@ define([
                 return;
             }
 
+            if (keepDesktopMenuExpanded()) {
+                openMenu();
+                return;
+            }
+
             event.stopPropagation();
             closeMenu();
             $title.trigger('focus');
-        });
-
-        $list.on('keydown' + namespace, '> li.ui-menu-item.level0 > a.level-top', function (event) {
-            var $links;
-            var currentIndex;
-
-            if (!isOpen()) {
-                return;
-            }
-
-            $links = getTopLevelKeyboardItems();
-            currentIndex = $links.index(this);
-
-            if (!$links.length || currentIndex === -1) {
-                return;
-            }
-
-            if (event.key === 'ArrowDown') {
-                event.preventDefault();
-                focusTopLevelItem((currentIndex + 1) % $links.length);
-                return;
-            }
-
-            if (event.key === 'ArrowUp') {
-                event.preventDefault();
-                focusTopLevelItem((currentIndex - 1 + $links.length) % $links.length);
-                return;
-            }
-
-            if (event.key === 'Home') {
-                event.preventDefault();
-                focusFirstCategoryLink();
-                return;
-            }
-
-            if (event.key === 'End') {
-                event.preventDefault();
-                focusLastCategoryLink();
-                return;
-            }
-
-            if (event.key === 'Escape') {
-                event.preventDefault();
-                closeMenu();
-                $title.trigger('focus');
-            }
         });
 
         if (rokanActive) {
@@ -694,9 +534,7 @@ define([
                     .closest('.expand-category-link').toggleClass('expanding', expanding);
 
                 if ($anchor.data('show-text') && $anchor.data('hide-text')) {
-                    $anchor.find('span').text(
-                        expanding ? $anchor.data('hide-text') : $anchor.data('show-text')
-                    );
+                    $anchor.find('span').text(expanding ? $anchor.data('hide-text') : $anchor.data('show-text'));
                 }
 
                 $anchor.attr('aria-expanded', expanding ? 'true' : 'false');
@@ -734,8 +572,46 @@ define([
         $nav.on('remove' + namespace, function () {
             $(window).off(namespace);
             $(overlaySelector).off(namespace);
-            unbindOutsideInteractionHandlers();
         });
+
+        function fixSectionAriaHidden() {
+            var $panels = $nav
+                .closest('[data-role="content"], .section-item-content')
+                .add($nav.closest('#nav-sections, .sections.nav-sections.category-dropdown'));
+
+            if (!$panels.length) {
+                return;
+            }
+
+            $panels.removeAttr('aria-hidden');
+
+            if (typeof MutationObserver === 'undefined') {
+                return;
+            }
+
+            $panels.each(function () {
+                var element = this;
+                var observer = new MutationObserver(function (mutations) {
+                    var index;
+                    var mutation;
+
+                    for (index = 0; index < mutations.length; index++) {
+                        mutation = mutations[index];
+
+                        if (mutation.attributeName === 'aria-hidden'
+                                && element.getAttribute('aria-hidden') !== null) {
+                            element.removeAttribute('aria-hidden');
+                        }
+                    }
+                });
+
+                observer.observe(element, { attributes: true, attributeFilter: ['aria-hidden'] });
+
+                $nav.one('remove' + namespace, function () {
+                    observer.disconnect();
+                });
+            });
+        }
 
         ensureMobileToggles();
 
