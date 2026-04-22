@@ -30,11 +30,16 @@ define(['jquery', 'domReady!'], function ($) {
         'protetor-de-carenagem': '<svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>',
         'capas-de-corrente':     '<svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07L12 4.93"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07L12 19.07"/></svg>',
         'blocos-oticos':         '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>',
+        'lancamentos':           '<svg viewBox="0 0 24 24"><path d="M12 2L9.5 9.5 2 12l7.5 2.5L12 22l2.5-7.5L22 12l-7.5-2.5z"/></svg>',
+        'linha-esportiva':       '<svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9z"/></svg>',
+        'linha-honda':           '<svg viewBox="0 0 24 24"><path d="M5 4h2v7h4V4h2v16h-2v-7H7v7H5z"/><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".25"/></svg>',
+        'linha-yamaha':          '<svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>',
+        'linha-suzuki':          '<svg viewBox="0 0 24 24"><path d="M17 7H7a3 3 0 0 0 0 6h10a3 3 0 0 1 0 6H7M12 4v2M12 18v2"/></svg>',
         'default':               '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>'
     };
 
-    var SECTION_LABELS = { 'manetes': 'Peças' };
-    var HIGHLIGHTS     = ['super-ofertas'];
+    var SECTION_LABELS = { 'lancamentos': 'Novidades', 'linha-honda': 'Por Marca', 'manetes': 'Peças' };
+    var HIGHLIGHTS     = ['super-ofertas', 'lancamentos'];
 
     function slugify(str) {
         return (str || '').toLowerCase()

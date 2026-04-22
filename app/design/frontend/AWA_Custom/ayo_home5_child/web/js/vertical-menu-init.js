@@ -109,23 +109,6 @@ define([
             return mediaQuery ? mediaQuery.matches : window.innerWidth >= desktopBreakpoint;
         }
 
-        function isHomeContext() {
-            var body = document.body;
-
-            if (!body) {
-                return false;
-            }
-
-            return body.classList.contains('cms-index-index')
-                || body.classList.contains('cms-home')
-                || body.classList.contains('cms-homepage_ayo_home5')
-                || body.classList.contains('cms-homepage_ayo_home5_demo_stage');
-        }
-
-        function keepDesktopMenuExpanded() {
-            return isDesktop() && isHomeContext();
-        }
-
         function setMenuOpenState(isOpen) {
             var expanded = isOpen ? 'true' : 'false';
 
@@ -312,10 +295,6 @@ define([
 
                 $list.stop(true, true).removeAttr('style');
 
-                if (keepDesktopMenuExpanded()) {
-                    setMenuOpenState(true);
-                }
-
                 if (isOpen()) {
                     $list.show();
                     setMenuOpenState(true);
@@ -337,16 +316,16 @@ define([
             event.preventDefault();
 
             if (isDesktop()) {
-                if (keepDesktopMenuExpanded()) {
-                    openMenu();
-                    return;
-                }
-
                 isOpen() ? closeMenu() : openMenu();
                 return;
             }
 
-            isOpen() ? closeMenu() : openMenu();
+            if (isOpen()) {
+                closeMenu();
+            } else {
+                openMenu();
+                scrollToActiveItem();
+            }
         });
 
         $title.on('keydown' + namespace, function (event) {
@@ -376,9 +355,12 @@ define([
             }
         });
 
+        var hoverTimer;
+
         $nav.on('mouseenter' + namespace, function () {
             if (isDesktop()) {
-                openMenu();
+                clearTimeout(hoverTimer);
+                hoverTimer = window.setTimeout(function () { openMenu(); }, 120);
             }
         });
 
@@ -386,16 +368,13 @@ define([
             var root = $nav.get(0);
             var active = document.activeElement;
 
+            clearTimeout(hoverTimer);
+
             if (!isDesktop()) {
                 return;
             }
 
             if (root && active && root.contains(active)) {
-                return;
-            }
-
-            if (keepDesktopMenuExpanded()) {
-                openMenu();
                 return;
             }
 
@@ -421,11 +400,6 @@ define([
                     return;
                 }
 
-                if (keepDesktopMenuExpanded()) {
-                    openMenu();
-                    return;
-                }
-
                 closeMenu();
             }, 0);
         });
@@ -436,11 +410,6 @@ define([
             }
 
             if (!isDesktop() && !isOpen()) {
-                return;
-            }
-
-            if (keepDesktopMenuExpanded()) {
-                openMenu();
                 return;
             }
 
@@ -498,6 +467,43 @@ define([
             });
         } else {
             bindRokanMobileBridgeHandlers();
+        }
+
+        // Swipe-to-close no mobile (deslizar p/ esquerda fecha o menu)
+        (function initSwipeToClose() {
+            var touchStartX = 0;
+            var touchStartY = 0;
+
+            $list.on('touchstart' + namespace, function (e) {
+                var touch = e.originalEvent.changedTouches[0];
+                touchStartX = touch.screenX;
+                touchStartY = touch.screenY;
+            });
+
+            $list.on('touchend' + namespace, function (e) {
+                var touch = e.originalEvent.changedTouches[0];
+                var dx = touch.screenX - touchStartX;
+                var dy = Math.abs(touch.screenY - touchStartY);
+
+                if (dx < -60 && dy < 100 && !isDesktop()) {
+                    closeMenu();
+                }
+            });
+        })();
+
+        // Rola para a categoria ativa quando o menu abre no mobile
+        function scrollToActiveItem() {
+            var $active = $list.find('.awa-current-cat, .ui-menu-item.level0._active').first();
+            var listEl = $list.get(0);
+
+            if (!$active.length || !listEl || isDesktop()) {
+                return;
+            }
+
+            window.setTimeout(function () {
+                var itemTop = $active.position() ? $active.position().top : 0;
+                listEl.scrollTop = Math.max(0, itemTop - 60);
+            }, 220);
         }
 
         (function initExpandLink() {
