@@ -96,37 +96,32 @@ define([
      */
     document.querySelectorAll('.awa-footer-business-contact__action[aria-label]').forEach(function (link) {
         var ariaLabel = (link.getAttribute('aria-label') || '').toLowerCase();
-        var visibleText = (link.innerText || link.textContent || '').replace(/\s+/g, ' ').trim().toLowerCase();
+        // textContent instead of innerText — innerText forces layout recalculation (reflow)
+        var visibleText = (link.textContent || '').replace(/\s+/g, ' ').trim().toLowerCase();
         if (visibleText && !ariaLabel.includes(visibleText)) {
             link.removeAttribute('aria-label');
         }
     });
 
     /*
-     * WCAG 1.3.6 / landmark-one-main: Na homepage, themes5.css oculta o
-     * elemento <main> com display:none — todo o conteúdo fica em
-     * .content-top-home (div fora do <main>). Adicionamos role="main" ao
-     * container visível para que Lighthouse e leitores de tela encontrem
-     * exatamente um ponto de referência principal.
+     * WCAG 1.3.6 / landmark-one-main + WCAG 1.1.1 / image-alt
+     * Diferido para requestIdleCallback — getComputedStyle força layout reflow.
+     * requestIdleCallback executa quando browser está ocioso (após LCP).
      */
-    var mainEl = document.querySelector('main#maincontent');
-    if (mainEl && window.getComputedStyle(mainEl).display === 'none') {
-        var contentTopHome = document.querySelector('.content-top-home');
-        if (contentTopHome) {
-            contentTopHome.setAttribute('role', 'main');
-            contentTopHome.setAttribute('aria-label', 'Conteúdo principal');
+    (window.requestIdleCallback || function (cb) { setTimeout(cb, 0); })(function () {
+        var mainEl = document.querySelector('main#maincontent');
+        if (mainEl && window.getComputedStyle(mainEl).display === 'none') {
+            var contentTopHome = document.querySelector('.content-top-home');
+            if (contentTopHome) {
+                contentTopHome.setAttribute('role', 'main');
+                contentTopHome.setAttribute('aria-label', 'Conteúdo principal');
+            }
         }
-    }
-
-    /*
-     * WCAG 1.1.1 / image-alt: O img de logo no modal de autenticação B2B
-     * não possui atributo alt — o data-bind Knockout define apenas o src.
-     * Adicionamos alt manualmente após o DOM estar disponível.
-     */
-    var authLogo = document.querySelector('.block-authentication .wave-top img.logo');
-    if (authLogo && !authLogo.getAttribute('alt')) {
-        authLogo.setAttribute('alt', 'AWA Motos');
-    }
+        var authLogo = document.querySelector('.block-authentication .wave-top img.logo');
+        if (authLogo && !authLogo.getAttribute('alt')) {
+            authLogo.setAttribute('alt', 'AWA Motos');
+        }
+    });
 
     if (window.MutationObserver) {
         var observerTarget = document.querySelector('.page-wrapper') || document.body;
