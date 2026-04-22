@@ -951,23 +951,73 @@ body .page-wrapper .page-header {
 }
 
 /* ===========================================================
-   WCAG 2.1 AA — Color Contrast Fix
-   .awa-b2b-promo-bar__lead: #999999 on #b73337 = 2.08:1 (fail)
-   Override → #ffffff on #b73337 = 6.0:1 (pass)
+   WCAG 2.1 AA — Color Contrast Fixes (Lighthouse audit 2026-04)
+   Targets all elements failing color-contrast audit.
    =========================================================== */
-.top-header .awa-b2b-promo-bar__lead,
-.awa-b2b-promo-bar__inner .awa-b2b-promo-bar__lead,
-#header .awa-site-header .top-header.awa-b2b-promo-bar .awa-b2b-promo-bar__lead,
-#header .awa-site-header .awa-b2b-promo-bar[data-awa-header-utility] .awa-b2b-promo-bar__lead {
+
+/* --- A+B: Promo bar lead, tail & text ---
+   Problem: var(--awa-text-light)=#999 on #b73337 = 2.08:1
+   Fix: #fff on #b73337 = 6.0:1
+   Specificity: html body .page-wrapper to beat utility-bar p rule */
+html body .page-wrapper .awa-site-header .awa-b2b-promo-bar .awa-b2b-promo-bar__lead,
+html body .page-wrapper .awa-site-header .awa-b2b-promo-bar .awa-b2b-promo-bar__tail,
+html body .page-wrapper .awa-site-header .awa-b2b-promo-bar .awa-b2b-promo-bar__text,
+html body .page-wrapper .awa-site-header .awa-utility-bar.awa-b2b-promo-bar p {
     color: #ffffff !important;
 }
 
-/* WCAG 2.1 AA: footer security seals microcopy #999 on #fff = 2.84:1 → #595959 on #fff = 7.0:1 */
+/* --- C: SKU values in product cards ---
+   Problem: #777 on #fff = 4.48:1 (fails AA for 11px/500w small text)
+   Fix: #595959 on #fff = 7.0:1 */
+.awa-b2b-sku__value {
+    color: #595959 !important;
+}
+
+/* --- D: Footer business-contact section on light bg ---
+   Problem: #fff text on #f8fafc bg = 1.01:1
+   awa-footer--dark experiment inactive → bg stays light.
+   Fix: dark text when experiment control variant is active */
+.awa-footer-exp--control .awa-footer-business-contact__title,
+.page_footer:not(.awa-footer--active-dark) .awa-footer-business-contact__title {
+    color: #1e293b !important;
+}
+.awa-footer-exp--control .awa-footer-business-contact__eyebrow,
+.page_footer:not(.awa-footer--active-dark) .awa-footer-business-contact__eyebrow {
+    color: #b73337 !important;
+}
+.awa-footer-exp--control .awa-footer-business-contact__copy,
+.page_footer:not(.awa-footer--active-dark) .awa-footer-business-contact__copy {
+    color: #334155 !important;
+}
+
+/* --- E: Footer contact action labels on light bg ---
+   Problem: #e5e5e5 on #f8fafc = 1.07:1 */
+.awa-footer-exp--control .awa-footer-business-contact__action-copy strong,
+.page_footer:not(.awa-footer--active-dark) .awa-footer-business-contact__action-copy strong {
+    color: #1e293b !important;
+}
+.awa-footer-exp--control .awa-footer-business-contact__action-copy small,
+.page_footer:not(.awa-footer--active-dark) .awa-footer-business-contact__action-copy small {
+    color: #475569 !important;
+}
+.awa-footer-exp--control .awa-footer-business-contact__action-icon,
+.page_footer:not(.awa-footer--active-dark) .awa-footer-business-contact__action-icon {
+    color: #b73337 !important;
+}
+
+/* --- F: Footer pay-sec label ---
+   Problem: #6b7280 on #f0f2f5 = 3.5:1 (fails 4.5:1 for small text)
+   Fix: #4b5563 on #f0f2f5 = 5.9:1 */
+.awa-footer-pay-sec__label {
+    color: #4b5563 !important;
+}
+
+/* WCAG 2.1 AA: footer security seals microcopy */
 .security-seals .microcopy {
     color: #595959 !important;
 }
 
-/* WCAG 2.5.5: cart fallback link target size — ensure min 24×24px clickable area */
+/* WCAG 2.5.5: cart fallback link target size */
 a.awa-header-cart-fallback {
     min-height: 24px;
     display: inline-flex;
