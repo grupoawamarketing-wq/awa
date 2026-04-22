@@ -35,3 +35,30 @@ Diagnostique e corrija o bug descrito no Magento 2.
 - Se for workaround, diga explicitamente
 - Corrija o mínimo necessário
 - Se o fix pode quebrar outra coisa, avise
+
+## Diagnóstico de CSP / JavaScript quebrado
+
+### Sintoma: `require.config is not a function` + erros CSP em massa
+
+**Causa #1 — FPC cacheou HTML com domínio antigo (mais comum):**
+```bash
+# Verificar se URL base está correta
+sudo -u www-data php bin/magento config:show web/secure/base_url
+
+# Verificar se HTML cacheado tem domínio errado
+curl -s "https://awamotos.com/PAGINA/" | grep -oE 'src="https?://[^/]+' | sort | uniq
+
+# Fix: flush FPC
+redis-cli -h ::1 -a 'Aw4R3d1s2026Sec' -n 2 FLUSHDB
+sudo -u www-data php bin/magento cache:flush
+```
+
+**Causa #2 — Nonce CSP desatualizado no FPC:**
+O Magento gera nonce único por request para scripts inline. Se o FPC serve HTML com nonce antigo mas o CSP header tem nonce novo → scripts inline bloqueados.
+Fix: mesmo que acima — flush Redis DB2.
+
+**Causa #3 — require.js não deployado:**
+```bash
+ls pub/static/frontend/AWA_Custom/ayo_home5_child/pt_BR/requirejs/require.js
+# Se não existir: setup:static-content:deploy
+```

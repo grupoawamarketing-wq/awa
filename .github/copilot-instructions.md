@@ -215,3 +215,115 @@ Resumo operacional (detalhes completos em `docs/theme-ayo.md`):
 - Blocos CMS críticos: footer/menu/menu vertical/sidebar
 - Configurações principais: Theme Settings, Menu, Slider, Layered Ajax, One Page Checkout
 - Regra de ouro: nunca editar `app/code/Rokanthemes/*`; sempre sobrescrever no tema em `app/design/frontend/ayo/...`
+
+## Frontend — Proteção de Layout
+
+> Regras obrigatórias para qualquer edição visual (CSS, LESS, PHTML, layout XML).
+
+### Protocolo antes de editar
+
+1. **Identifique a zona** — verifique se o arquivo pertence ao tema filho (`AWA_Custom/ayo_home5_child`) ou a um módulo customizado (`app/code/GrupoAwamotos/`). Nunca edite `app/code/Rokanthemes/*`.
+2. **Leia o bundle correto** — para CSS, identifique qual bundle gerencia a área:
+   - Header/footer → `awa-bundle-core.unmin.css`
+   - Páginas de categoria/PLP → `awa-bundle-category.unmin.css`
+   - PDP (produto) → `awa-bundle-site.unmin.css`
+   - Variáveis globais → `awa-core-variables.unmin.css` (tokens)
+3. **Verifique `var/view_preprocessed`** — em produção, templates PHTML são servidos de `var/view_preprocessed/pub/static/app/design/frontend/AWA_Custom/ayo_home5_child/`. Após criar override, copie manualmente o arquivo para lá antes de limpar cache.
+4. **Nunca use hex hardcoded** — use sempre `var(--awa-red)`, `var(--awa-primary)` etc. do `awa-core-variables.unmin.css`.
+
+### Cascata CSS (ordem de prioridade, última ganha)
+
+1. `styles-m.css` / `styles-l.css` (LESS compilado Magento)
+2. `themes.css` / `themes5.css` (tema Ayo pai)
+3. `awa-bundle-core.css` — base global AWA
+4. `awa-bundle-category.css` — PLP específico
+5. `awa-bundle-phases.css` — variáveis CSS, `!important` pontual
+6. `awa-bundle-site.css` — "final wins" geral
+7. `awa-bundle-refinements.css` — carrega por último, overrides globais
+
+Para novos estilos que precisam ter prioridade: adicionar no bundle de menor nível que abrange o contexto, **com seletor específico**, evitando `!important`.
+
+### Deploy após edição
+
+```bash
+# CSS/LESS alterado
+sudo -u www-data php bin/magento setup:static-content:deploy pt_BR -f --theme AWA_Custom/ayo_home5_child
+sudo -u www-data php bin/magento cache:flush
+
+# Apenas PHTML alterado
+sudo -u www-data php bin/magento cache:clean block_html full_page
+
+# Se var/view_preprocessed estiver desatualizado
+sudo -u www-data cp app/design/frontend/AWA_Custom/ayo_home5_child/[Vendor_Module]/templates/[file].phtml \
+  var/view_preprocessed/pub/static/app/design/frontend/AWA_Custom/ayo_home5_child/[Vendor_Module]/templates/[file].phtml
+sudo -u www-data php bin/magento cache:clean block_html full_page
+```
+
+### Checklist pós-edição de layout
+
+- [ ] Página modificada renderiza sem erros (sem 500, sem 0 bytes)
+- [ ] `tail -5 var/log/exception.log` sem novas entradas
+- [ ] Áreas adjacentes não regrediram (header, footer, mobile)
+- [ ] Inspecionar no browser sem service worker (`Disable cache` + unregister SW se necessário)
+
+### Proibições de layout
+
+- ❌ Editar `app/code/Rokanthemes/*` — usar override no tema filho
+- ❌ `!important` sem comentário explicando motivo
+- ❌ CSS inline no PHP/PHTML (usar classes)
+- ❌ Hex hardcoded — usar tokens CSS (`var(--awa-*)`)
+- ❌ `setup:static-content:deploy` sem `--theme AWA_Custom/ayo_home5_child` para mudanças no tema filho (mais lento e pode causar diferença de comportamento)
+
+## Ferramentas de Debug Visual
+
+### Chrome MCP (investigação em tempo real)
+Disponível via deferred tools `mcp_io_github_chr_*`. Carregar antes de usar.
+
+Fluxo para investigar layout quebrado:
+1. `navigate_page` → URL da página com problema
+2. `take_screenshot` → estado atual desktop
+3. `emulate` viewport `"375x812x2,mobile,touch"` → `take_screenshot` mobile
+4. `take_snapshot` → inspecionar DOM sem executar JS
+5. `evaluate_script` → `getComputedStyle(document.querySelector('.seletor'))` para confirmar qual CSS está ativo
+6. `grep` no bundle CSS para rastrear a origem da regra
+
+### Playwright (testes visuais automatizados)
+Specs em `tests/e2e/specs/` — cobrem home, header, footer, PDP, categoria, checkout, 404, B2B, acessibilidade.
+
+```bash
+cd tests/e2e
+
+# Rodar spec visual
+npx playwright test specs/visual-audit-home-header-footer.spec.ts
+
+# Criar/atualizar baseline (só após confirmar visualmente!)
+npx playwright test --update-snapshots
+
+# Relatório HTML
+npx playwright show-report reports/html
+```
+
+> ⚠️ O diretório `tests/e2e/snapshots/` ainda não tem baseline gerado. Antes de usar `toHaveScreenshot`, rode `--update-snapshots` uma vez com o layout em estado correto.
+
+## Procedimentos Operacionais Críticos
+
+### Mudança de Domínio / URL Base
+Após qualquer alteração de `web/secure/base_url` ou `web/unsecure/base_url`, execute **obrigatoriamente** nesta ordem:
+
+```bash
+sudo -u www-data php bin/magento cache:flush
+redis-cli -h ::1 -a 'Aw4R3d1s2026Sec' -n 1 FLUSHDB  # Redis DB1: cache Magento
+redis-cli -h ::1 -a 'Aw4R3d1s2026Sec' -n 2 FLUSHDB  # Redis DB2: FPC (Full Page Cache)
+sudo -u www-data php bin/magento indexer:reindex catalog_url
+```
+
+**Por quê:** O FPC armazena HTML completo incluindo URLs absolutas. Se o domínio mudou mas o FPC não foi limpo, o browser receberá HTML com URLs do domínio antigo. O CSP usa `'self'` = domínio atual, então todas as referências ao domínio antigo serão bloqueadas — incluindo `require.js`, que derruba toda a stack JavaScript do Magento.
+
+### Redis AWA — Mapa de bancos
+| DB | Conteúdo | Comando flush |
+|----|----------|--------------|
+| 0 | Sessions | `redis-cli -h ::1 -a 'Aw4R3d1s2026Sec' -n 0 FLUSHDB` |
+| 1 | Cache Magento (config, block, layout) | `redis-cli -h ::1 -a 'Aw4R3d1s2026Sec' -n 1 FLUSHDB` |
+| 2 | FPC — Full Page Cache (HTML completo) | `redis-cli -h ::1 -a 'Aw4R3d1s2026Sec' -n 2 FLUSHDB` |
+
+> `php bin/magento cache:flush` faz flush do DB1 via Magento. O DB2 (FPC) precisa ser limpo separadamente via redis-cli.

@@ -121,3 +121,74 @@ php bin/magento module:status | grep Awa
 - NUNCA hardcode secrets, tokens, credenciais
 - NUNCA rode `setup:upgrade` sem avisar o usuário
 - NUNCA edite `app/code/Rokanthemes/*` — customizar via `app/design/frontend/ayo/`
+## Zonas de Edição — Frontend
+
+### Zonas EDITÁVEIS (sempre aqui, nunca em vendor)
+| Zona | Localização | Bundle CSS |
+|------|------------|-----------|
+| Tema filho (CSS global) | `app/design/frontend/AWA_Custom/ayo_home5_child/web/css/` | `awa-bundle-*.unmin.css` |
+| Tema filho (templates) | `app/design/frontend/AWA_Custom/ayo_home5_child/[Module]/templates/` | — |
+| Módulos customizados | `app/code/GrupoAwamotos/*/view/frontend/` | CSS do módulo |
+| Layout overrides | `app/design/frontend/AWA_Custom/ayo_home5_child/[Module]/layout/` | — |
+
+### Zonas PROIBIDAS
+| Zona | Motivo |
+|------|--------|
+| `app/code/Rokanthemes/*` | Core do tema — usar override no tema filho |
+| `vendor/*` | Core Magento/dependências — nunca alterar |
+| `pub/static/*` | Gerado — sobrescrito a cada deploy |
+| `generated/*` | Gerado pelo DI compiler — nunca alterar |
+
+### Protocolo Anti-Regressão (obrigatório antes de qualquer edição visual)
+
+1. **Identifique exatamente o que muda** — liste os seletores CSS ou blocos PHTML afetados
+2. **Verifique cascata** — qual bundle já define esse seletor? Use `grep -r "seletor" pub/static/frontend/AWA_Custom/ayo_home5_child/pt_BR/css/`
+3. **Edite no bundle correto** — header/footer → `core`, PLP → `category`, PDP → `site`
+4. **Copie para preprocessed se PHTML** — `sudo -u www-data cp [source] var/view_preprocessed/...`
+5. **Deploy scoped** — sempre `--theme AWA_Custom/ayo_home5_child`, nunca deploy global para mudança de tema
+6. **Verifique adjacências** — após deploy, confirme que header, footer e mobile não regrediram
+7. **Verifique service worker** — `sw.js` usa cache de CSS; bump `CACHE_VERSION` após editar bundles
+
+### NUNCA (layout)
+- ❌ `setup:static-content:deploy` sem `--theme` para mudança de tema filho
+- ❌ Hex hardcoded — usar `var(--awa-red)`, `var(--awa-primary)` etc.
+- ❌ `!important` sem comentário explicando o motivo
+- ❌ CSS inline em PHTML
+- ❌ Editar `pub/static/` diretamente (exceto hotfix de urgência com cp manual documentado)
+
+## Debug Visual — Chrome MCP + Playwright
+
+### Ferramentas disponíveis para investigar bugs visuais
+
+**Chrome MCP** (disponível como deferred tools — carregar antes de usar):
+| Tool | Uso |
+|------|-----|
+| `mcp_io_github_chr_navigate_page` | Navegar para a página com o bug |
+| `mcp_io_github_chr_take_screenshot` | Capturar screenshot (desktop e mobile) |
+| `mcp_io_github_chr_take_snapshot` | Inspecionar DOM / a11y tree sem JS |
+| `mcp_io_github_chr_evaluate_script` | Rodar `getComputedStyle`, `getBoundingClientRect` etc. |
+| `mcp_io_github_chr_emulate` | Mudar viewport: `"375x812x2,mobile,touch"` (mobile) |
+| `mcp_io_github_chr_lighthouse_audit` | Auditoria Lighthouse (performance, a11y, SEO) |
+
+**Fluxo de debug visual:**
+1. Navigate → screenshot desktop → emulate mobile → screenshot mobile
+2. `take_snapshot` no elemento problemático para ver DOM real
+3. `evaluate_script` para obter `getComputedStyle(el)` e confirmar qual CSS está aplicado
+4. `grep` no bundle CSS para encontrar a origem da regra
+5. Editar bundle correto → deploy scoped → screenshot para confirmar
+
+**Playwright** (testes já existentes em `tests/e2e/`):
+```bash
+cd tests/e2e
+
+# Rodar spec específico
+npx playwright test specs/visual-audit-home-header-footer.spec.ts
+
+# Atualizar baseline (só após confirmar que o layout está correto!)
+npx playwright test specs/visual-audit-home-header-footer.spec.ts --update-snapshots
+
+# Ver relatório HTML
+npx playwright show-report reports/html
+```
+
+Specs disponíveis: `header-layout`, `visual-audit-home-header-footer`, `visual-audit-pdp-login`, `visual-audit-search-category`, `visual-audit-cart-checkout-404`, `pdp-audit`, `accessibility`, `ux-audit-b2b`
