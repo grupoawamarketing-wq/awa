@@ -60,6 +60,7 @@ $asyncBundles = [
     // merged into awa-bundle-refinements: $block->getViewFileUrl('css/awa-visual-audit-consolidated.css'),  // visual-audit v2-v12
     // merged into awa-bundle-refinements: $block->getViewFileUrl('css/awa-global-modern-clean.css'),        // sitewide standardization
     $block->getViewFileUrl('css/awa-home-vertical-menu-shell-fix.css'),   // vertical menu (-40KB sync, 2026-04-17)
+    str_replace('awa-bundle-custom.css', 'awa-perf-no-shadows.css', $block->getViewFileUrl('css/awa-bundle-custom.css')), // async: cosmetic shadow removal (2026-04-22)
     // rexis-recommendations: emitido explicitamente abaixo (getViewFileUrl modulo falha em prod)
     // MCP Header + Classic Redesign: movidos para SYNC (default_head_blocks.xml)
     // Removidos do async para evitar carregamento duplo (2026-04-09)
@@ -71,12 +72,17 @@ $asyncBundles = [
 
 // Homepage-only: owl-tabs + overrides + b2b-foundation + compat + premium + polish
 $homeBundleUrl = null;
+$homeProductCardsUrl = null;
 $homeCategoryCarouselUrl = null;
 $heroPreloadUrl = null;
+$homeMobileFixUrl = null;
 if (in_array('cms_index_index', $block->getLayout()->getUpdate()->getHandles(), true)) {
     $homeBundleUrl = $block->getViewFileUrl('css/awa-bundle-home-custom.css');
-    // URL derivada de homeBundleUrl (mesmo diretorio css/ do tema, evita getViewFileUrl vazio)
+    // URLs derivadas de homeBundleUrl (mesmo diretorio css/ do tema, evita getViewFileUrl vazio em prod)
+    $homeProductCardsUrl = str_replace('awa-bundle-home-custom.css', 'awa-product-cards-modern.css', $homeBundleUrl);
     $homeCategoryCarouselUrl = str_replace('awa-bundle-home-custom.css', 'awa-category-carousel.css', $homeBundleUrl);
+    // awa-home-mobile-fix: secoes 1+2 inlined Anti-FOUC; secoes 3+4 async
+    $homeMobileFixUrl = str_replace('awa-bundle-home-custom.css', 'awa-home-mobile-fix.css', $homeBundleUrl);
     // LCP Hero preload — bloco awa.head.preload usa GrupoAwamotos\Theme\Block\Html\HeroPreload
     // que tem getHeroImageUrl() via DI de constructor (ResourceConnection + StoreManager)
     /** @var GrupoAwamotos\Theme\Block\Html\HeroPreload $block */
@@ -106,6 +112,15 @@ body .page-wrapper .page_footer,.page-footer{background:#f8fafc !important;backg
 /* LCP Critical: hero slide container aspect-ratio (Swiper — evita NO_LCP) */
 .wrapper_slider.hidden-xs .banner_item_bg,.wrapper_slider:not(.visible-xs) .banner_item_bg{aspect-ratio:1920/600;min-height:clamp(220px,31.25vw,600px)}
 .wrapper_slider.visible-xs .banner_item_bg{aspect-ratio:768/400;min-height:clamp(180px,52vw,400px)}
+/* Homepage: banner-slider min-height (previne colapso 92px por --awa-zero bug) */
+:is(body.cms-index-index,body.cms-home,body.cms-homepage_ayo_home5) .top-home-content--above-fold .banner-slider.banner-slider2{min-height:clamp(220px,28vw,480px)!important}
+@media(max-width:767px){:is(body.cms-index-index,body.cms-home,body.cms-homepage_ayo_home5) .top-home-content--above-fold .banner-slider.banner-slider2{min-height:clamp(190px,52vw,240px)!important}}
+/* Homepage: swiper pre-init (previne h=1260px antes do IntersectionObserver) */
+:is(body.cms-index-index,body.cms-home,body.cms-homepage_ayo_home5) .products-swiper:not(.swiper-initialized){max-height:320px;overflow:hidden}
+:is(body.cms-index-index,body.cms-home,body.cms-homepage_ayo_home5) .products-swiper:not(.swiper-initialized) .swiper-slide:not(:first-child){display:none!important}
+:is(body.cms-index-index,body.cms-home,body.cms-homepage_ayo_home5) .products-swiper:not(.swiper-initialized) .swiper-slide:first-child{width:100%!important;max-width:220px!important;flex-shrink:0!important}
+/* Design tokens inline — elimina 1 HTTP request bloqueante (awa-design-tokens.css 2026-04-22) */
+:root{--awa-primary:#b73337;--awa-primary-hover:#8e2629;--awa-primary-dark:#6d1c1f;--awa-primary-light:#fef2f2;--awa-primary-subtle:rgba(183,51,55,0.08);--awa-text:#1a1a1a;--awa-text-secondary:#555;--awa-text-muted:#888;--awa-text-disabled:#bbb;--awa-text-inverse:#ffffff;--awa-bg:#ffffff;--awa-bg-subtle:#fafafa;--awa-bg-muted:#f5f5f5;--awa-border:#e5e5e5;--awa-border-strong:#d0d0d0;--awa-radius-xs:4px;--awa-radius-sm:6px;--awa-radius-md:8px;--awa-radius-lg:12px;--awa-radius-xl:16px;--awa-radius-pill:9999px;--awa-shadow-xs:0 1px 2px rgba(0,0,0,0.05);--awa-shadow-sm:0 2px 8px rgba(0,0,0,0.08);--awa-shadow-md:0 4px 16px rgba(0,0,0,0.10);--awa-shadow-lg:0 8px 24px rgba(0,0,0,0.12);--awa-shadow-xl:0 16px 40px rgba(0,0,0,0.15);--awa-shadow-brand:0 4px 16px rgba(183,51,55,0.25);--awa-font-2xs:10px;--awa-font-xs:11px;--awa-font-sm:12px;--awa-font-base:14px;--awa-font-md:15px;--awa-font-lg:16px;--awa-font-xl:18px;--awa-font-2xl:20px;--awa-font-3xl:24px;--awa-font-4xl:28px;--awa-weight-normal:400;--awa-weight-medium:500;--awa-weight-semibold:600;--awa-weight-bold:700;--awa-weight-extrabold:800;--awa-space-1:4px;--awa-space-2:8px;--awa-space-3:12px;--awa-space-4:16px;--awa-space-5:20px;--awa-space-6:24px;--awa-space-8:32px;--awa-space-10:40px;--awa-space-12:48px;--awa-ease:cubic-bezier(0.4,0,0.2,1);--awa-ease-out:cubic-bezier(0,0,0.2,1);--awa-duration-fast:0.15s;--awa-duration:0.25s;--awa-duration-slow:0.4s;--awa-z-base:1;--awa-z-overlay:100;--awa-z-drawer:200;--awa-z-modal:300;--awa-z-toast:400}
 </style>
 <!-- LCP Hero Image Preload — fetchpriority=high (Swiper SlideBanner, homepage) -->
 <?php if ($heroPreloadUrl): ?>
@@ -162,6 +177,23 @@ body .page-wrapper .page_footer,.page-footer{background:#f8fafc !important;backg
       media="print"
       onload="this.media='all'"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($homeBundleUrl) ?>"/></noscript>
+<?php endif; ?>
+<?php if ($homeMobileFixUrl): ?>
+<!-- awa-home-mobile-fix: seções 1+2 inline no Anti-FOUC; async para seções 3+4 (footer cosmetics) -->
+<link rel="stylesheet"
+      href="<?= $block->escapeUrl($homeMobileFixUrl) ?>"
+      media="print"
+      data-awa-home-mobile-fix="1"
+      onload="this.media='all'"/>
+<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($homeMobileFixUrl) ?>"/></noscript>
+<?php endif; ?>
+<?php if ($homeProductCardsUrl): ?>
+<link rel="stylesheet"
+      href="<?= $block->escapeUrl($homeProductCardsUrl) ?>"
+      media="print"
+      data-awa-home-product-cards="1"
+      onload="this.media='all'"/>
+<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($homeProductCardsUrl) ?>"/></noscript>
 <?php endif; ?>
 <?php if ($homeCategoryCarouselUrl): ?>
 <link rel="stylesheet"
