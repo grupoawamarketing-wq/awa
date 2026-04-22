@@ -107,11 +107,125 @@ $renderIdleScriptLoader = static function (string $scriptUrl, int $timeout = 200
 })(window, document);
 </script>
 HTML;
+
+
+$renderIntentScriptLoader = static function (
+    string $scriptUrl,
+    array $intentSelectors,
+    int $desktopIdleTimeout = 2200
+): string {
+    $encodedUrl = json_encode($scriptUrl, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
+    $encodedSelectors = json_encode(array_values($intentSelectors), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
+    $encodedDesktopIdleTimeout = json_encode($desktopIdleTimeout);
+
+    return <<<HTML
+<script>
+(function (w, d) {
+    var src = {$encodedUrl};
+    var selectors = {$encodedSelectors};
+    var desktopIdleTimeout = {$encodedDesktopIdleTimeout};
+
+    var done = false;
+
+    function isMobile() {
+        return !!(w.matchMedia && w.matchMedia('(max-width: 767px)').matches);
+    }
+
+    function matchesIntentTarget(evTarget) {
+        if (!evTarget || !evTarget.closest) {
+            return false;
+        }
+        for (var i = 0; i < selectors.length; i += 1) {
+            if (evTarget.closest(selectors[i])) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function appendScript() {
+        if (d.querySelector('script[data-awa-lazy-src="' + src + '"]')) {
+            return;
+        }
+        var script = d.createElement('script');
+        script.src = src;
+        script.defer = true;
+        script.setAttribute('data-awa-lazy-src', src);
+        (d.body || d.documentElement).appendChild(script);
+    }
+
+    function cleanup() {
+        d.removeEventListener('pointerdown', onIntent, true);
+        d.removeEventListener('touchstart', onIntent, true);
+        d.removeEventListener('click', onIntent, true);
+        d.removeEventListener('focusin', onIntent, true);
+        d.removeEventListener('keydown', onIntent, true);
+    }
+
+    function trigger() {
+        if (done) {
+            return;
+        }
+        done = true;
+        cleanup();
+        appendScript();
+    }
+
+    function onIntent(ev) {
+        var t = ev && ev.target ? ev.target : null;
+        if (!matchesIntentTarget(t)) {
+            return;
+        }
+
+        if (ev.type === 'keydown') {
+            var key = ev.key || '';
+            if (key && key !== 'Enter' && key !== ' ' && key !== 'Spacebar') {
+                return;
+            }
+        }
+
+        trigger();
+    }
+
+    // Intent-based only on mobile (evita TBT alto em Lighthouse e não disputa com LCP)
+    d.addEventListener('pointerdown', onIntent, { passive: true, capture: true, once: false });
+    d.addEventListener('touchstart', onIntent, { passive: true, capture: true, once: false });
+    d.addEventListener('click', onIntent, { passive: true, capture: true, once: false });
+    d.addEventListener('focusin', onIntent, { passive: true, capture: true, once: false });
+    d.addEventListener('keydown', onIntent, { passive: true, capture: true, once: false });
+
+    // Desktop mantém fallback por idle.
+    if (!isMobile()) {
+        if ('requestIdleCallback' in w) {
+            w.requestIdleCallback(trigger, { timeout: desktopIdleTimeout });
+        } else {
+            w.setTimeout(trigger, desktopIdleTimeout);
+        }
+    }
+})(window, document);
+</script>
+HTML;
+};
+
 };
 ?>
 <?php if ($loadHeaderJs): ?>
-<?= /* @noEscape */ $renderIdleScriptLoader($block->escapeUrl($block->getViewFileUrl('js/awa-header-minicart-ui-v2.js')), 1800) ?>
-<?= /* @noEscape */ $renderIdleScriptLoader($block->escapeUrl($block->getViewFileUrl('js/awa-minicart-defer-init.js')), 2000) ?>
+<?= /* @noEscape */ $renderIntentScriptLoader($block->escapeUrl($block->getViewFileUrl('js/awa-header-minicart-ui-v2.js')), [
+    '.header .top-search',
+    '.header .minicart-wrapper',
+    '.header .mini-cart-wrapper',
+    '.header .action.showcart',
+    '.header .block-search',
+    '.header .nav-toggle',
+    '.top-account',
+    '#search',
+    '#search_mini_form'
+], 2200) ?>
+<?= /* @noEscape */ $renderIntentScriptLoader($block->escapeUrl($block->getViewFileUrl('js/awa-minicart-defer-init.js')), [
+    '.header .minicart-wrapper',
+    '.header .mini-cart-wrapper',
+    '.header .action.showcart'
+], 2500) ?>
 <?= /* @noEscape */ $renderIdleScriptLoader($block->escapeUrl($block->getViewFileUrl('js/awa-header-a11y-performance.js')), 2100) ?>
 <?php endif; ?>
 <?php if ($loadHomeOwlTabsJs): ?>

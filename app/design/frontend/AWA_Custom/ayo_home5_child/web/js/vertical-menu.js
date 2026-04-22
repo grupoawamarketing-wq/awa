@@ -161,8 +161,7 @@ define(['jquery', 'domReady!'], function ($) {
             // Detect active by URL
             var href = link.getAttribute ? link.getAttribute('href') : '';
             if (currentSlug && href && href.indexOf(currentSlug + '.html') !== -1) {
-                $li.addClass('awa-current-cat vmm-current-cat');
-                $(link).addClass('vmm-current');
+                $li.addClass('awa-current-cat');
             }
         });
     }

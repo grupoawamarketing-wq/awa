@@ -1295,3 +1295,155 @@ body.catalogsearch-result-index .item-product .info-price .b2b-login-to-see-pric
     transform: none !important;
     box-shadow: 0 10px 22px rgb(183 51 55 / 16%) !important;
 }
+
+/* =============================================================================
+   24. MOBILE CARDS — Botao "Adicionar" compacto em 2 colunas (max 375px)
+   Em telas estreitas o padding 0 16px + font 12px pode deixar o botao largo
+   demais. Reduzir padding e font-size para garantir encaixe sem wrap.
+   ============================================================================= */
+
+@media (max-width: 575px) {
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+    .page-wrapper .item-product .btn-add-to-cart.action.tocart,
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+    .page-wrapper .item-product .action.tocart {
+        font-size: 11px !important;
+        padding: 0 10px !important;
+        min-height: 38px !important;
+        white-space: nowrap !important;
+        letter-spacing: 0 !important;
+    }
+
+    /* Em 2 colunas o produto-thumb-link tem 165px de largura total.
+       Com padding:12px (de awa-improvements-grid.css) a area de imagem fica em 141px.
+       Reduzindo para 6px a imagem ocupa 153px — mais impacto visual. */
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+    .page-wrapper .item-product .product-thumb-link {
+        padding: 6px 6px 0 !important;
+    }
+
+    /* Info area: padding compacto para economizar espaco vertical */
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+    .page-wrapper .item-product .product-info {
+        padding: 0 8px 10px !important;
+    }
+
+    /* B2B login box: padding menor em 2 colunas (card ~165px, menos visual noise) */
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+    .page-wrapper .item-product .b2b-login-to-see-price {
+        padding: 6px 8px !important;
+        border-radius: 8px !important;
+        gap: 2px !important;
+    }
+
+    /* Linha do label "Preço para logados": fonte menor */
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+    .page-wrapper .item-product .b2b-login-to-see-price .price-label {
+        font-size: 10px !important;
+    }
+}
+
+
+/* =============================================================================
+   25. BREADCRUMB — Mobile: esconder items intermediarios, mostrar so inicio e fim
+   Breadcrumbs longos quebram o layout em mobile (375px).
+   Tecnica: flex overflow oculto + ultimo item visivel.
+   ============================================================================= */
+
+@media (max-width: 575px) {
+    .breadcrumbs .items {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        overflow: hidden !important;
+        align-items: center !important;
+        gap: 0 !important;
+    }
+
+    .breadcrumbs .item {
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        min-width: 0 !important;
+        flex-shrink: 1 !important;
+        max-width: 120px !important;
+    }
+
+    /* Ultimo item (pagina atual): nao cortar, flexivel */
+    .breadcrumbs .item:last-child {
+        flex-shrink: 0 !important;
+        max-width: none !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+    }
+
+    /* Separadores: nao encolher */
+    .breadcrumbs .item:not(:last-child)::after {
+        flex-shrink: 0 !important;
+    }
+}
+
+
+/* =============================================================================
+   26. PRICE BOX — Tipografia canonica para cards de categoria e busca
+   Estabelece hierarquia visual clara: preco destaque + riscado discreto.
+   Carregado por ultimo (async) para vencer todos os bundles.
+   ============================================================================= */
+
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+.page-wrapper .item-product .price-box .price {
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    color: #1a1a1a !important;
+    line-height: 1.2 !important;
+}
+
+/* Preco em oferta: destaque em vermelho primário */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+.page-wrapper .item-product .price-box .special-price .price {
+    color: var(--awa-primary, #b73337) !important;
+}
+
+/* Preco antigo: riscado + discreto */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+.page-wrapper .item-product .price-box .old-price .price {
+    font-size: 12px !important;
+    font-weight: 400 !important;
+    color: #aaa !important;
+    text-decoration: line-through !important;
+    line-height: 1.3 !important;
+}
+
+/* Label "Preço especial" / "Preço normal" — ruído visual, ocultar.
+   :not(.b2b-login-to-see-price) — preserva o label do gate B2B (contém o link de login) */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+.page-wrapper .item-product .price-box:not(.b2b-login-to-see-price) .price-label {
+    display: none !important;
+}
+
+/* Container de preço: alinhar preço especial + antigo lado a lado.
+   :not(.b2b-login-to-see-price) — exclui o gate B2B que também usa .price-box */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+.page-wrapper .item-product .price-box:not(.b2b-login-to-see-price) {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: baseline !important;
+    gap: 4px 8px !important;
+}
+
+/* SKU: esconder em mobile pequeno para economizar espaco vertical no card */
+@media (max-width: 575px) {
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+    .page-wrapper .item-product .product-item-sku,
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+    .page-wrapper .item-product .product-sku,
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+    .page-wrapper .item-product [class*="sku"] {
+        display: none !important;
+    }
+
+    /* Preco levemente menor em 2 colunas */
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+    .page-wrapper .item-product .price-box .price {
+        font-size: 14px !important;
+    }
+}
