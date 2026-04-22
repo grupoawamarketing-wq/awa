@@ -4,28 +4,31 @@
 import { Page } from '@playwright/test';
 
 /* ── Seletores ─────────────────────────────────────────── */
+// NOTE: .awa-site-header .header é o header Magento legado (visibility:hidden; height:0)
+// O header customizado AWA está em [data-awa-header-content]
 const HEADER_ROW_SELECTOR =
-  '.awa-site-header .header .awa-main-header__inner[data-awa-header-row], .awa-site-header .header .wp-header[data-awa-header-row]';
+  '[data-awa-header-content] .awa-main-header__inner[data-awa-header-row], [data-awa-header-content] .wp-header[data-awa-header-row]';
 
 export const SELECTORS = {
   header:          '[data-awa-header-content]',
-  topHeader:       '.awa-site-header .top-header',
-  headerMain:      '.awa-site-header .header',
+  topHeader:       '[data-awa-header-content] .top-header',
+  // Linha principal (logo + search + minicart), sem top-bar (~34px) e nav (~52px) — h≈80px
+  headerMain:      '[data-awa-header-content] .awa-main-header__inner',
   headerRow:       HEADER_ROW_SELECTOR,
   wpHeader:        HEADER_ROW_SELECTOR,
-  primaryRow:      '.awa-site-header .header .awa-header-primary-row',
-  brandCell:       '.awa-site-header .header .awa-header-brand-cell',
-  logo:            '.awa-site-header .header .logo',
-  mobileLogo:      '.awa-site-header .header .awa-header-mobile-logo',
-  topSearch:       '.awa-site-header .header .top-search',
-  searchBlock:     '.awa-site-header .header .top-search .block-search',
-  searchInput:     '.awa-site-header .header input[data-awa-search-input="true"], .awa-site-header .header #search',
-  minicart:        '.awa-site-header .header .awa-header-minicart, .awa-site-header .header .mini-cart-wrapper',
-  contactSlot:     '.awa-site-header .header .awa-header-contact-slot',
-  navToggle:       '.awa-site-header .header .awa-header-mobile-toggle',
-  stickyHeader:    '.awa-site-header .header-wrapper-sticky',
-  headerNav:       '.awa-site-header .header-control',
-  headerCart:      '.awa-site-header .header .awa-header-cart-link',
+  primaryRow:      '[data-awa-header-content] .awa-header-primary-row',
+  brandCell:       '[data-awa-header-content] .awa-header-brand-cell',
+  logo:            '[data-awa-header-content] .logo',
+  mobileLogo:      '[data-awa-header-content] .awa-header-mobile-logo',
+  topSearch:       '[data-awa-header-content] .top-search',
+  searchBlock:     '[data-awa-header-content] .top-search .block-search',
+  searchInput:     '[data-awa-header-content] input[data-awa-search-input="true"], [data-awa-header-content] #search',
+  minicart:        '[data-awa-header-content] .awa-header-minicart, [data-awa-header-content] .mini-cart-wrapper',
+  contactSlot:     '[data-awa-header-content] .awa-header-contact-slot',
+  navToggle:       '[data-awa-header-content] .awa-header-mobile-toggle',
+  stickyHeader:    '.header-wrapper-sticky',
+  headerNav:       '[data-awa-header-content] .header-control',
+  headerCart:      '[data-awa-header-content] .awa-header-cart-link',
 } as const;
 
 /* ── Breakpoints ───────────────────────────────────────── */
