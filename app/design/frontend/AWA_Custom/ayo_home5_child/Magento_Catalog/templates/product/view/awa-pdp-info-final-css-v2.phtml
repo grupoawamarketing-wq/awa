@@ -158,3 +158,20 @@ body.catalog-product-view .product-info-main:has(.b2b-login-to-see-price) .produ
     display: none !important;
 }
 </style>
+<?php
+/**
+ * PDP CSS não-crítico — carregamento async (media="print" onload).
+ * Elimina 4 requests bloqueantes do critical path da PDP.
+ * CSS crítico acima-da-dobra já está no bloco <style> inline acima.
+ */
+$pdpCss = [
+    $block->getViewFileUrl('css/awa-pdp-visual-fix.css'),
+    $block->getViewFileUrl('css/awa-pdp-b2b-pro.css'),
+    $block->getViewFileUrl('css/awa-pdp-final-polish.css'),
+    $block->getViewFileUrl('GrupoAwamotos_Fitment::css/fitment-application.css'),
+];
+foreach ($pdpCss as $url):
+?>
+<link rel="stylesheet" href="<?= $block->escapeUrl($url) ?>" media="print" onload="this.media='all'"/>
+<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($url) ?>"/></noscript>
+<?php endforeach; ?>
