@@ -109,6 +109,41 @@ define([
             return mediaQuery ? mediaQuery.matches : window.innerWidth >= desktopBreakpoint;
         }
 
+        function syncDesktopPanelPosition() {
+            var anchor = $title.get(0) || $nav.get(0);
+            var rect;
+            var availableWidth;
+            var width;
+            var top;
+            var left;
+
+            if (!isDesktop() || !$list.length || !anchor) {
+                return;
+            }
+
+            rect = anchor.getBoundingClientRect();
+
+            if (!rect.width && !rect.height) {
+                return;
+            }
+
+            availableWidth = Math.min(window.innerWidth - rect.left - 8, 980);
+            width = Math.max(availableWidth, 560);
+            top = rect.bottom.toFixed(1) + 'px';
+            left = rect.left.toFixed(1) + 'px';
+            width = width.toFixed(1) + 'px';
+
+            $list.get(0).style.setProperty('--vmm-top', top);
+            $list.get(0).style.setProperty('--vmm-left', left);
+            $list.get(0).style.setProperty('--vmm-width', width);
+
+            $list.find('> li.ui-menu-item.level0 > .level0.submenu, > li.ui-menu-item.level0 > .vmm-empty-submenu').each(function () {
+                this.style.setProperty('--vmm-top', top);
+                this.style.setProperty('--vmm-left', left);
+                this.style.setProperty('--vmm-width', width);
+            });
+        }
+
         function setMenuOpenState(isOpen) {
             var expanded = isOpen ? 'true' : 'false';
 
@@ -121,7 +156,8 @@ define([
             setMenuOpenState(true);
 
             if (isDesktop()) {
-                $list.stop(true, true).removeAttr('style').show();
+                syncDesktopPanelPosition();
+                $list.stop(true, true).css('display', 'grid');
                 $('body').removeClass('background_shadow_show');
             } else {
                 $list.stop(true, true).fadeIn(200);
@@ -133,7 +169,7 @@ define([
             setMenuOpenState(false);
 
             if (isDesktop()) {
-                $list.stop(true, true).hide();
+                $list.stop(true, true).css('display', 'none');
             } else {
                 $list.stop(true, true).fadeOut(200);
             }
@@ -293,13 +329,13 @@ define([
                     resetParentItemState($(this), false);
                 });
 
-                $list.stop(true, true).removeAttr('style');
+                syncDesktopPanelPosition();
 
                 if (isOpen()) {
-                    $list.show();
+                    $list.stop(true, true).css('display', 'grid');
                     setMenuOpenState(true);
                 } else {
-                    $list.hide();
+                    $list.stop(true, true).css('display', 'none');
                     setMenuOpenState(false);
                 }
 

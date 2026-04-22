@@ -1,6 +1,8 @@
 define(['jquery', 'domReady!'], function ($) {
     'use strict';
 
+    var DESKTOP_BREAKPOINT = 992;
+
     // =============================================
     // AWA MOTOS — VERTICAL MENU ENHANCEMENTS v8
     // White theme | hover-open | animated | modern
@@ -53,6 +55,80 @@ define(['jquery', 'domReady!'], function ($) {
         var path = window.location.pathname;
         var match = path.match(/\/([^/]+)\.html$/);
         return match ? match[1].toLowerCase() : null;
+    }
+
+    function isDesktop() {
+        return window.innerWidth >= DESKTOP_BREAKPOINT;
+    }
+
+    function syncDesktopPanelPosition($nav) {
+        var $title = $nav.find('.title-category-dropdown').first();
+        var $togge = $nav.find('ul.togge-menu.list-category-dropdown').first();
+        var anchor = ($title.length ? $title : $nav).get(0);
+        var rect;
+        var availableWidth;
+        var width;
+        var top;
+        var left;
+
+        if (!anchor || !$togge.length || !isDesktop()) {
+            return;
+        }
+
+        rect = anchor.getBoundingClientRect();
+
+        if (!rect.width && !rect.height) {
+            return;
+        }
+
+        availableWidth = Math.min(window.innerWidth - rect.left - 8, 980);
+        width = Math.max(availableWidth, 560);
+        top = rect.bottom.toFixed(1) + 'px';
+        left = rect.left.toFixed(1) + 'px';
+        width = width.toFixed(1) + 'px';
+
+        $togge.get(0).style.setProperty('--vmm-top', top);
+        $togge.get(0).style.setProperty('--vmm-left', left);
+        $togge.get(0).style.setProperty('--vmm-width', width);
+
+        $togge.find('> li.ui-menu-item.level0 > .level0.submenu, > li.ui-menu-item.level0 > .vmm-empty-submenu').each(function () {
+            this.style.setProperty('--vmm-top', top);
+            this.style.setProperty('--vmm-left', left);
+            this.style.setProperty('--vmm-width', width);
+        });
+    }
+
+    function bindDesktopPanelPosition($nav) {
+        var namespace = '.awaVMenuPosition';
+        var rafId = 0;
+
+        function scheduleSync() {
+            if (!isDesktop()) {
+                return;
+            }
+
+            if (rafId) {
+                window.cancelAnimationFrame(rafId);
+            }
+
+            rafId = window.requestAnimationFrame(function () {
+                rafId = 0;
+                syncDesktopPanelPosition($nav);
+            });
+        }
+
+        if ($nav.data('awa-vmenu-position-bound')) {
+            scheduleSync();
+            return;
+        }
+
+        $nav.data('awa-vmenu-position-bound', 1);
+
+        $nav.on('mouseenter' + namespace + ' focusin' + namespace, scheduleSync);
+        $nav.find('.title-category-dropdown').on('click' + namespace + ' keydown' + namespace, scheduleSync);
+        $(window).on('resize' + namespace + ' scroll' + namespace, scheduleSync);
+
+        scheduleSync();
     }
 
     function styleHeader($nav) {
@@ -145,6 +221,7 @@ define(['jquery', 'domReady!'], function ($) {
         styleHeader($nav);
         styleTogge($nav);
         injectEnhancements($nav);
+        bindDesktopPanelPosition($nav);
     }
 
     // domReady! AMD dependency already guarantees DOM is ready — no need for $(document).ready()
