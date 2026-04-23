@@ -34,7 +34,10 @@ define(['jquery', 'mage/url'], function ($, urlBuilder) {
             body.classList.contains('b2b-account-forgotpassword') ||
             body.classList.contains('b2b-account-claim') ||
             body.classList.contains('customer-account-login') ||
-            body.classList.contains('customer-account-create');
+            body.classList.contains('customer-account-create') ||
+            body.classList.contains('catalogsearch-result-index') ||
+            body.classList.contains('catalogsearch-advanced-result') ||
+            body.classList.contains('catalogsearch-advanced-index');
     }
 
     function removeCompareUiArtifacts() {

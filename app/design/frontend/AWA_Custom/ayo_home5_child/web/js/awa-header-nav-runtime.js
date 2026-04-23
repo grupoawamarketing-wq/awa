@@ -110,5 +110,32 @@ define([], function () {
         } else {
             bootBadgeSync();
         }
+
+        /* ── Fix: botão de busca fica disabled quando input já está pré-preenchido no carregamento
+           Causa: form-mini.js do Magento inicia com submitBtn.disabled=true e só re-habilita via
+           evento 'input', que não dispara quando o valor vem do URL (ex.: /catalogsearch/result/?q=zz).
+           Fix: disparar o evento 'input' após o RequireJS inicializar o widget. ── */
+        function fixSearchSubmitBtn() {
+            var searchInput = document.getElementById('search');
+            if (!searchInput || !searchInput.value) {
+                return;
+            }
+
+            var form = searchInput.closest('form');
+            var submitBtn = form ? form.querySelector('button[type="submit"]') : null;
+
+            if (submitBtn && submitBtn.disabled) {
+                searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        }
+
+        // Aguarda 500ms para o RequireJS inicializar o form-mini widget antes de disparar o fix
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function () {
+                setTimeout(fixSearchSubmitBtn, 500);
+            }, { once: true });
+        } else {
+            setTimeout(fixSearchSubmitBtn, 500);
+        }
     };
 });

@@ -1,1 +1,202 @@
-!function(){"use strict";if(!window.__awaRound2HomeOwlTabsUiInit){window.__awaRound2HomeOwlTabsUiInit=!0;var t,e=!1;t=function(){var t,a;(a=document.body)&&(a.classList.contains("cms-index-index")||a.classList.contains("cms-home")||a.classList.contains("cms-homepage_ayo_home5"))&&(i(document),window.MutationObserver&&(t=document.querySelector(".page-wrapper"))&&new MutationObserver(function(){e||(e=!0,window.requestAnimationFrame(function(){e=!1,i(document)}))}).observe(t,{childList:!0,subtree:!0}))},"loading"!==document.readyState?t():document.addEventListener("DOMContentLoaded",t,{once:!0})}function a(t,e,a){t&&a&&!t.getAttribute(e)&&t.setAttribute(e,a)}function i(t){!function(t){t.querySelectorAll(".top-home-content .banner-slider.banner-slider2 .wrapper_slider .owl").forEach(function(t){var e,a=t.closest(".wrapper_slider"),i=t.querySelectorAll(".banner_item"),r=t.classList.contains("owl-carousel")||t.classList.contains("owl-loaded")||!!t.querySelector(".owl-wrapper, .owl-stage");if(i.length)for(t.setAttribute("data-awa-hero-carousel","true"),t.classList.toggle("awa-hero-fallback-ready",!r),a&&a.classList.toggle("awa-hero-fallback-active",!r),e=0;e<i.length;e+=1){var o=i[e],n=o.querySelector("img"),s=0===e;o&&(o.classList.toggle("awa-hero-fallback-primary",s),o.classList.toggle("awa-hero-fallback-secondary",!s),o.setAttribute("aria-hidden",r||s?"false":"true"),n&&(s?(n.setAttribute("loading","eager"),n.setAttribute("fetchpriority","high"),n.setAttribute("decoding","sync")):r||(n.getAttribute("loading")||n.setAttribute("loading","lazy"),n.getAttribute("decoding")||n.setAttribute("decoding","async"))))}})}(t||document),function(t){t.querySelectorAll(".list-tab-product .tab-title-link, .tab_product .tab-title-item, .tab_product ul.tabs li").forEach(function(t){var e=(t.textContent||"").replace(/\s+/g," ").trim();e&&(a(t,"title",e),t.getAttribute("aria-label")||t.setAttribute("aria-label","Selecionar aba "+e),"A"===t.tagName||t.getAttribute("tabindex")||t.setAttribute("tabindex","0"))})}(t||document),function(t){t.querySelectorAll(".list-tab-product .owl-nav button, .tab_product .owl-nav button").forEach(function(t){var e,i=t.classList.contains("owl-prev"),r=t.classList.contains("owl-next");(i||r)&&(a(t,"title",e=i?"Ver produtos anteriores":"Ver próximos produtos"),t.getAttribute("aria-label")||t.setAttribute("aria-label",e),t.setAttribute("aria-disabled",t.classList.contains("disabled")?"true":"false"))})}(t||document)}}();
+﻿(function () {
+    'use strict';
+
+    if (window.__awaRound2HomeOwlTabsUiInit) {
+        return;
+    }
+    window.__awaRound2HomeOwlTabsUiInit = true;
+
+    function setAttributeIfMissing(element, attributeName, value) {
+        if (!element || !value || element.getAttribute(attributeName)) {
+            return;
+        }
+
+        element.setAttribute(attributeName, value);
+    }
+
+    function normalizeHeroFallback(root) {
+        var scope = root || document;
+        var carousels = scope.querySelectorAll('.top-home-content .banner-slider.banner-slider2 .wrapper_slider .owl');
+        var i;
+        var carousel;
+        var wrapper;
+        var slides;
+        var isOwlReady;
+        var slideIndex;
+        var slide;
+        var image;
+        var isPrimary;
+
+        for (i = 0; i < carousels.length; i += 1) {
+            carousel = carousels[i];
+            wrapper = carousel.closest('.wrapper_slider');
+            slides = carousel.querySelectorAll('.banner_item');
+            isOwlReady = carousel.classList.contains('owl-carousel') ||
+                carousel.classList.contains('owl-loaded') ||
+                !!carousel.querySelector('.owl-wrapper, .owl-stage');
+
+            if (!slides.length) {
+                continue;
+            }
+
+            carousel.setAttribute('data-awa-hero-carousel', 'true');
+            carousel.classList.toggle('awa-hero-fallback-ready', !isOwlReady);
+
+            if (wrapper) {
+                wrapper.classList.toggle('awa-hero-fallback-active', !isOwlReady);
+            }
+
+            for (slideIndex = 0; slideIndex < slides.length; slideIndex += 1) {
+                slide = slides[slideIndex];
+                image = slide.querySelector('img');
+                isPrimary = slideIndex === 0;
+
+                slide.classList.toggle('awa-hero-fallback-primary', isPrimary);
+                slide.classList.toggle('awa-hero-fallback-secondary', !isPrimary);
+                slide.setAttribute('aria-hidden', (isOwlReady || isPrimary) ? 'false' : 'true');
+
+                if (!image) {
+                    continue;
+                }
+
+                if (isPrimary) {
+                    image.setAttribute('loading', 'eager');
+                    image.setAttribute('fetchpriority', 'high');
+                    image.setAttribute('decoding', 'sync');
+                } else if (!isOwlReady) {
+                    if (!image.getAttribute('loading')) {
+                        image.setAttribute('loading', 'lazy');
+                    }
+                    if (!image.getAttribute('decoding')) {
+                        image.setAttribute('decoding', 'async');
+                    }
+                }
+            }
+        }
+    }
+
+    function normalizeTabsAccessibility(root) {
+        var scope = root || document;
+        var tabTriggers = scope.querySelectorAll(
+            '.list-tab-product .tab-title-link, .tab_product .tab-title-item, .tab_product ul.tabs li'
+        );
+        var i;
+        var trigger;
+        var label;
+
+        for (i = 0; i < tabTriggers.length; i += 1) {
+            trigger = tabTriggers[i];
+            label = (trigger.textContent || '').replace(/\s+/g, ' ').trim();
+
+            if (!label) {
+                continue;
+            }
+
+            setAttributeIfMissing(trigger, 'title', label);
+
+            if (!trigger.getAttribute('aria-label')) {
+                trigger.setAttribute('aria-label', 'Selecionar aba ' + label);
+            }
+
+            if (trigger.tagName !== 'A' && !trigger.getAttribute('tabindex')) {
+                trigger.setAttribute('tabindex', '0');
+            }
+        }
+    }
+
+    function normalizeOwlNavButtons(root) {
+        var scope = root || document;
+        var navButtons = scope.querySelectorAll('.list-tab-product .owl-nav button, .tab_product .owl-nav button');
+        var i;
+        var button;
+        var isPrev;
+        var isNext;
+        var label;
+
+        for (i = 0; i < navButtons.length; i += 1) {
+            button = navButtons[i];
+            isPrev = button.classList.contains('owl-prev');
+            isNext = button.classList.contains('owl-next');
+
+            if (!isPrev && !isNext) {
+                continue;
+            }
+
+            label = isPrev ? 'Ver produtos anteriores' : 'Ver proximos produtos';
+            setAttributeIfMissing(button, 'title', label);
+
+            if (!button.getAttribute('aria-label')) {
+                button.setAttribute('aria-label', label);
+            }
+
+            button.setAttribute('aria-disabled', button.classList.contains('disabled') ? 'true' : 'false');
+        }
+    }
+
+    function applyHomeAdjustments(root) {
+        normalizeHeroFallback(root);
+        normalizeTabsAccessibility(root);
+        normalizeOwlNavButtons(root);
+    }
+
+    function initHomeAdjustments() {
+        var body = document.body;
+        var pageWrapper;
+        var mutationCount;
+        var scheduled;
+        var observer;
+
+        /*
+         * Single positive if-block (no early returns) prevents the minifier
+         * from creating invalid `fn(), if(...)` comma+statement sequences.
+         * Inner `if (window.MutationObserver)` becomes `MutationObserver && ...`
+         * which is a valid logical expression inside the comma chain.
+         */
+        if (body &&
+            (body.classList.contains('cms-index-index') ||
+             body.classList.contains('cms-home') ||
+             body.classList.contains('cms-homepage_ayo_home5'))) {
+
+            applyHomeAdjustments(document);
+
+            if (window.MutationObserver) {
+                pageWrapper = document.querySelector('.page-wrapper');
+
+                if (pageWrapper) {
+                    mutationCount = 0;
+                    scheduled = false;
+
+                    observer = new MutationObserver(function () {
+                        mutationCount += 1;
+
+                        if (mutationCount > 25) {
+                            observer.disconnect();
+                        } else if (!scheduled) {
+                            scheduled = true;
+                            window.requestAnimationFrame(function () {
+                                scheduled = false;
+                                applyHomeAdjustments(document);
+                            });
+                        }
+                    });
+
+                    observer.observe(pageWrapper, {
+                        childList: true,
+                        subtree: true
+                    });
+
+                    window.setTimeout(function () {
+                        observer.disconnect();
+                    }, 4000);
+                }
+            }
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initHomeAdjustments, { once: true });
+        return;
+    }
+
+    initHomeAdjustments();
+}());

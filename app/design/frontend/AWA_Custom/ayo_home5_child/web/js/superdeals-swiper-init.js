@@ -175,11 +175,10 @@ define([
                         break;
                     }
                 }
-            }, { rootMargin: '400px 0px' });
+            }, { rootMargin: (window.matchMedia && window.matchMedia('(max-width: 767px)').matches) ? '160px 0px' : '280px 0px' });
             observer.observe($scope[0]);
 
-            /* Fallback: if IO never fires within 8s (e.g. element was
-               hidden during observe), initialize anyway */
+            /* Fallback: se o IO nunca disparar em 8s, inicia mesmo assim */
             setTimeout(function () {
                 if (!initDone && $scope[0].offsetWidth > 0) {
                     observer.disconnect();

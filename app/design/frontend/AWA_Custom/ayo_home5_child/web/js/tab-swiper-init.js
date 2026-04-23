@@ -474,6 +474,9 @@ define([
 
         /* Defer entire tab+swiper init until element enters viewport */
         if ('IntersectionObserver' in window) {
+            var rootMargin = (window.matchMedia && window.matchMedia('(max-width: 767px)').matches)
+                ? '160px 0px'
+                : '280px 0px';
             var observer = new IntersectionObserver(function (entries) {
                 for (var i = 0; i < entries.length; i++) {
                     if (entries[i].isIntersecting) {
@@ -482,7 +485,7 @@ define([
                         break;
                     }
                 }
-            }, { rootMargin: '400px 0px' });
+            }, { rootMargin: rootMargin });
             observer.observe($scope[0]);
         } else {
             bootstrap();
