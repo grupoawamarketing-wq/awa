@@ -30,9 +30,9 @@ $templateType = \Magento\Catalog\Block\Product\ReviewRendererInterface::SHORT_VI
                 // Static counter: eager loading apenas no 1o bloco renderizado na pagina.
                 // Multiplas instancias (abas de categoria) causavam 24 eager imgs abaixo-da-dobra
                 // competindo com o LCP hero. Blocos subsequentes usam lazy. (2026-04-23)
-                static $awaNewproductBlockCount = 0;
-                $awaNewproductBlockCount++;
-                $isFirstNewproductBlock = ($awaNewproductBlockCount === 1);
+                if (!isset($GLOBALS['_awa_newproduct_rendered'])) { $GLOBALS['_awa_newproduct_rendered'] = 0; }
+                $GLOBALS['_awa_newproduct_rendered']++;
+                $isFirstNewproductBlock = ($GLOBALS['_awa_newproduct_rendered'] === 1);
                 ?>
                 <?php $i = 0; foreach ($_productCollection as $_product): if ($i >= 8) { break; } ?>
                 <?php $isPriorityCard = $isFirstNewproductBlock && ($i < 2); ?>

@@ -27,12 +27,12 @@ $templateType = \Magento\Catalog\Block\Product\ReviewRendererInterface::SHORT_VI
         <div class="swiper products-swiper products-swiper--bestseller">
             <div class="swiper-wrapper">
                 <?php
-                // Static counter: eager loading apenas no 1o bloco renderizado na pagina.
-                // Multiplas instancias (abas de categoria) causavam 24 eager imgs abaixo-da-dobra
-                // competindo com o LCP hero. Blocos subsequentes usam lazy. (2026-04-23)
-                static $awaBestsellerBlockCount = 0;
-                $awaBestsellerBlockCount++;
-                $isFirstBlock = ($awaBestsellerBlockCount === 1);
+                // $GLOBALS counter: eager loading apenas no 1o bloco renderizado na pagina.
+                // static falha quando cada tab usa contexto de include diferente.
+                // $GLOBALS persiste em toda a requisicao independente do contexto. (2026-04-23)
+                if (!isset($GLOBALS['_awa_bestseller_rendered'])) { $GLOBALS['_awa_bestseller_rendered'] = 0; }
+                $GLOBALS['_awa_bestseller_rendered']++;
+                $isFirstBlock = ($GLOBALS['_awa_bestseller_rendered'] === 1);
                 ?>
                 <?php $i = 0; foreach ($_productCollection as $_product): if ($i >= 8) { break; } ?>
                 <?php $isPriorityCard = $isFirstBlock && ($i < 2); ?>
