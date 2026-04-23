@@ -2,10 +2,6 @@
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <body>
-        <!-- Legacy megamenuMobile init disabled.
-             Vertical menu behavior is handled by:
-             - js/vertical-menu-init -->
-
         <!-- Override blank theme logo_width=170 with natural dimensions of logo_161x92_1.png -->
         <referenceBlock name="logo">
             <arguments>
@@ -21,5 +17,53 @@
                    template="Magento_Theme::html/awa-a11y-product-links.phtml"
                    after="-"/>
         </referenceContainer>
+
+        <!--
+            head.additional blocks — movidos de default_head_blocks.xml para cá
+            porque <referenceBlock> em handles carregados via <update> não
+            adiciona filhos corretamente ao bloco head.additional do Magento.
+            O handle default é sempre ativo e resolve o merge.
+        -->
+        <referenceBlock name="head.additional">
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.critical.inline.css"
+                   template="Magento_Theme::html/awa-critical-inline.phtml"
+                   before="-"/>
+
+            <block class="GrupoAwamotos\Theme\Block\Html\HeroPreload"
+                   name="awa.head.preload"
+                   template="Magento_Theme::html/awa-head-preload.phtml"
+                   after="awa.critical.inline.css"/>
+
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.deferred.interaction.css"
+                   template="Magento_Theme::html/awa-deferred-interaction-css.phtml"
+                   after="awa.head.preload"/>
+
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.deferred.cosmetic.css"
+                   template="Magento_Theme::html/awa-deferred-cosmetic-css.phtml"
+                   after="awa.deferred.interaction.css"/>
+
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.search.autocomplete.head.css"
+                   template="Magento_Theme::html/awa-search-autocomplete-head-css.phtml"
+                   after="awa.deferred.cosmetic.css"/>
+
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.styles.l.last"
+                   template="Magento_Theme::html/awa-styles-l-last.phtml"
+                   after="awa.search.autocomplete.head.css"/>
+
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.og.meta"
+                   template="Magento_Theme::html/awa-og-meta.phtml"
+                   after="awa.styles.l.last">
+                <arguments>
+                    <argument name="view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\OpenGraph</argument>
+                    <argument name="open_graph_view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\OpenGraph</argument>
+                </arguments>
+            </block>
+        </referenceBlock>
     </body>
 </page>

@@ -40,6 +40,22 @@ body.catalog-product-view .product-info-main .b2b-login-to-see-price.price-box:h
     transform: translateY(var(--awa-neg-0-25, -1px)) !important;
 }
 
+@media (max-width: 767px) {
+    body.catalog-product-view .product-info-main .b2b-login-to-see-price.price-box {
+        padding: var(--awa-space-2-5, 10px) var(--awa-space-3, 12px) !important;
+        min-height: 48px !important;
+        flex-direction: column !important;
+        gap: 6px !important;
+    }
+    body.catalog-product-view .product-info-main .b2b-login-to-see-price .price-label {
+        font-size: 13px !important;
+    }
+    body.catalog-product-view .product-info-main .b2b-login-to-see-price a[href*="/b2b/account/login/"],
+    body.catalog-product-view .product-info-main .b2b-login-to-see-price a[href*="/customer/account/login/"] {
+        font-size: 13px !important;
+    }
+}
+
 /* --------------------------------------------------------------------------
  * 2. GATE B2B — Texto (.price-label)
  * -------------------------------------------------------------------------- */
@@ -134,4 +150,40 @@ body.catalog-product-view .awa-pdp-related .product-item .price {
     body.catalog-product-view .product-info-main .b2b-login-to-see-price a[href*="/b2b/account/login/"] {
         transition: var(--awa-none, none) !important;
     }
+}
+
+/* ==========================================================================
+   PDP Visual Bug Fixes (2026-04-23)
+   ========================================================================== */
+
+/* BUG-2 FIX: Hide add-to-cart form for B2B guests when login-to-see-price is shown */
+body.catalog-product-view .product-info-main:has(.b2b-login-to-see-price) .box-tocart {
+    display: none !important;
+}
+
+/* BUG-3 FIX: Remove price card styling when B2B login replaces price,
+   so stock-sku inside is not wrapped in a misleading card */
+body.catalog-product-view .product-info-main:has(.b2b-login-to-see-price) .product-info-price {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    gap: 16px !important;
+}
+
+/* BUG-2+3: Also hide SKU/stock duplicates inside product-add-form for B2B */
+body.catalog-product-view .product-info-main:has(.b2b-login-to-see-price) .product-add-form .awa-b2b-pdp-sku,
+body.catalog-product-view .product-info-main:has(.b2b-login-to-see-price) .product-add-form .awa-stock-level,
+body.catalog-product-view .product-info-main:has(.b2b-login-to-see-price) .product-add-form .awa-pdp-trust-bar,
+body.catalog-product-view .product-info-main:has(.b2b-login-to-see-price) .product-social-extra,
+body.catalog-product-view .product-info-main:has(.b2b-login-to-see-price) .product-social-links {
+    display: none !important;
+}
+
+/* BUG-4 FIX: Hide empty product-actions containers in related/upsell products */
+.product-item .product-item-actions .product-actions:empty,
+.block.related .product-actions:empty,
+.block.upsell .product-actions:empty {
+    display: none !important;
 }

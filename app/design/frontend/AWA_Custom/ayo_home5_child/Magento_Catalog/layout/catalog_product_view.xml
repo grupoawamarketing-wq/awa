@@ -6,16 +6,15 @@
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <head>
-        <!-- awa-pdp-visual-fix, awa-pdp-b2b-pro, awa-pdp-final-polish e fitment-application
-             movidos para carregamento async em awa-pdp-info-final-css-v2.phtml
-             (media="print" onload) — elimina 4 requests bloqueantes na PDP. -->
-        <remove src="css/awa-pdp-visual-fix.css"/>
-        <remove src="css/awa-pdp-b2b-pro.css"/>
-        <remove src="css/awa-pdp-final-polish.css"/>
-        <remove src="GrupoAwamotos_Fitment::css/fitment-application.css"/>
+        <!-- PDP CSS: loaded normally (head.additional workaround — blocks there don't render in production).
+             Previously removed for async loading via phtml, but head.additional is broken. -->
+        <css src="css/awa-pdp-visual-fix.css"/>
+        <css src="css/awa-pdp-b2b-pro.css"/>
+        <css src="css/awa-pdp-final-polish.css"/>
+        <css src="GrupoAwamotos_Fitment::css/fitment-application.css"/>
     </head>
     <body>
-        <!-- Remove Magento native OG (duplicates awa.og.meta in default_head_blocks.xml) -->
+        <!-- Remove Magento native OG (duplicates awa.og.meta in default.xml) -->
         <referenceBlock name="opengraph.general" remove="true"/>
         <!-- PDP info cleanup: parent Ayo renders duplicate print/share buttons here. -->
         <referenceBlock name="awa.product.info.addto" remove="true"/>
@@ -27,12 +26,18 @@
         <referenceBlock name="review_form" remove="true"/>
         <referenceBlock name="product.review.form" remove="true"/>
 
-        <!-- LCP Preload: adiantamento da imagem principal do produto (melhoria de LCP/CWV) -->
-        <referenceBlock name="head.additional">
+        <!-- PDP inline critical CSS + async CSS loader
+             Moved to after.body.start because head.additional block doesn't render
+             children in production mode (block_html cache issue). -->
+        <referenceContainer name="after.body.start">
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.pdp.info.final.css"
                    template="Magento_Catalog::product/view/awa-pdp-info-final-css-v2.phtml"
-                   after="awa.styles.l.last"/>
+                   after="-"/>
+        </referenceContainer>
+
+        <!-- LCP Preload: placed in after.body.start for reliability -->
+        <referenceContainer name="after.body.start">
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.pdp.lcp.preload"
                    template="Magento_Catalog::product/view/awa-pdp-lcp-preload.phtml"
@@ -41,7 +46,7 @@
                     <argument name="view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\ProductStructuredData</argument>
                 </arguments>
             </block>
-        </referenceBlock>
+        </referenceContainer>
 
         <!-- Product JSON-LD + BreadcrumbList for SEO rich results -->
         <referenceContainer name="after.body.start">

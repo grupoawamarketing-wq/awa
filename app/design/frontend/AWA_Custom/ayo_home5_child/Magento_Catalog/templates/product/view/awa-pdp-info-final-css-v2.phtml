@@ -157,21 +157,27 @@ body.catalog-product-view .product-info-main:has(.b2b-login-to-see-price) .produ
 body.catalog-product-view .product-info-main:has(.b2b-login-to-see-price) .product-social-links {
     display: none !important;
 }
+
+/* BUG-2 FIX: Hide add-to-cart form entirely for B2B guests */
+body.catalog-product-view .product-info-main:has(.b2b-login-to-see-price) .box-tocart {
+    display: none !important;
+}
+
+/* BUG-3 FIX: Remove price card styling when B2B login replaces price,
+   so stock-sku inside is not wrapped in a misleading card */
+body.catalog-product-view .product-info-main:has(.b2b-login-to-see-price) .product-info-price {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    gap: 16px !important;
+}
+
+/* BUG-4 FIX: Hide empty product-actions in related/upsell products */
+.product-item .product-item-actions .product-actions:empty,
+.block.related .product-actions:empty,
+.block.upsell .product-actions:empty {
+    display: none !important;
+}
 </style>
-<?php
-/**
- * PDP CSS não-crítico — carregamento async (media="print" onload).
- * Elimina 4 requests bloqueantes do critical path da PDP.
- * CSS crítico acima-da-dobra já está no bloco <style> inline acima.
- */
-$pdpCss = [
-    $block->getViewFileUrl('css/awa-pdp-visual-fix.css'),
-    $block->getViewFileUrl('css/awa-pdp-b2b-pro.css'),
-    $block->getViewFileUrl('css/awa-pdp-final-polish.css'),
-    $block->getViewFileUrl('GrupoAwamotos_Fitment::css/fitment-application.css'),
-];
-foreach ($pdpCss as $url):
-?>
-<link rel="stylesheet" href="<?= $block->escapeUrl($url) ?>" media="print" onload="this.media='all'"/>
-<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($url) ?>"/></noscript>
-<?php endforeach; ?>
