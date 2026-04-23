@@ -13,7 +13,7 @@ use Psr\Log\LoggerInterface;
 
 class Load implements HttpGetActionInterface
 {
-    private const ALLOWED_TEMPLATES = ['grid', 'grid-original'];
+    private const ALLOWED_TEMPLATES = ['grid'];
     private const MAX_LIMIT = 20;
 
     public function __construct(

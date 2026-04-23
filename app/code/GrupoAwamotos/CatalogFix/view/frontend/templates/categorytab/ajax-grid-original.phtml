@@ -64,50 +64,6 @@ foreach ($products as $_item) {
                     </li>
                 </ul>
             </div>
-            <div class="product-info-cart">
-                <div class="actions-primary addcart-link">
-                    <?php if ($_item->isSaleable()): ?>
-                        <?php
-                        $postData = $postDataHelper->getPostData(
-                            $block->getAddToCartUrl($_item),
-                            ['product' => $_item->getEntityId()]
-                        );
-                        $postDataConfig = json_decode($postData, true);
-                        ?>
-                        <?php if (is_array($postDataConfig) && isset($postDataConfig['action'], $postDataConfig['data']) && is_array($postDataConfig['data'])): ?>
-                            <form data-role="tocart-form"
-                                  class="catalogfix-tocart-form"
-                                  action="<?php echo $block->escapeUrl((string) $postDataConfig['action']); ?>"
-                                  method="post">
-                                <?php foreach ($postDataConfig['data'] as $key => $value): ?>
-                                    <input type="hidden"
-                                           name="<?php echo $block->escapeHtmlAttr((string) $key); ?>"
-                                           value="<?php echo $block->escapeHtmlAttr((string) $value); ?>" />
-                                <?php endforeach; ?>
-                                <button class="action tocart btn-add-to-cart"
-                                        type="submit"
-                                        title="<?php echo $block->escapeHtmlAttr(__('Adicionar')); ?>">
-                                    <span><?php echo $block->escapeHtml(__('Adicionar')); ?></span>
-                                </button>
-                            </form>
-                        <?php else: ?>
-                            <button class="action tocart btn-add-to-cart disabled"
-                                    type="button"
-                                    disabled="disabled"
-                                    aria-disabled="true"
-                                    title="<?php echo $block->escapeHtmlAttr(__('Produto indisponível')); ?>">
-                                <span><?php echo $block->escapeHtml(__('Produto indisponível')); ?></span>
-                            </button>
-                        <?php endif; ?>
-                    <?php else: ?>
-                        <?php if ($_item->getIsSalable()): ?>
-                            <div class="stock available"><span><?php echo __('Disponível'); ?></span></div>
-                        <?php else: ?>
-                            <div class="stock unavailable"><span><?php echo __('Produto esgotado'); ?></span></div>
-                        <?php endif; ?>
-                    <?php endif; ?>
-                </div>
-            </div>
             <div class="product-info">
                 <h3 class="product-name">
                     <a title="<?php echo $block->escapeHtmlAttr($_item->getName()); ?>"
@@ -116,12 +72,56 @@ foreach ($products as $_item) {
                         <?php echo $block->escapeHtml($_item->getName()); ?>
                     </a>
                 </h3>
-                <div class="awa-b2b-sku" style="font-size: 11px; color: #64748b; margin-bottom: 6px; font-weight: 500;">
-                    <span class="label" style="text-transform: uppercase; margin-right: 2px; color: #9ca3af;">Cod:</span>
-                    <span class="value" style="font-family: monospace; color: #475569; letter-spacing: 0.5px;"><?php echo $block->escapeHtml($_item->getSku()); ?></span>
+                <div class="awa-b2b-sku">
+                    <span class="awa-b2b-sku__label"><?php echo $block->escapeHtml(__('Cod:')); ?></span>
+                    <span class="awa-b2b-sku__value"><?php echo $block->escapeHtml($_item->getSku()); ?></span>
                 </div>
                 <div class="info-price">
                     <?php echo $priceHelper->getPriceDisplayCustom($block->getProductPrice($_item)); ?>
+                </div>
+                <div class="product-info-cart">
+                    <div class="actions-primary addcart-link">
+                        <?php if ($_item->isSaleable()): ?>
+                            <?php
+                            $postData = $postDataHelper->getPostData(
+                                $block->getAddToCartUrl($_item),
+                                ['product' => $_item->getEntityId()]
+                            );
+                            $postDataConfig = json_decode($postData, true);
+                            ?>
+                            <?php if (is_array($postDataConfig) && isset($postDataConfig['action'], $postDataConfig['data']) && is_array($postDataConfig['data'])): ?>
+                                <form data-role="tocart-form"
+                                      class="catalogfix-tocart-form"
+                                      action="<?php echo $block->escapeUrl((string) $postDataConfig['action']); ?>"
+                                      method="post">
+                                    <?php foreach ($postDataConfig['data'] as $key => $value): ?>
+                                        <input type="hidden"
+                                               name="<?php echo $block->escapeHtmlAttr((string) $key); ?>"
+                                               value="<?php echo $block->escapeHtmlAttr((string) $value); ?>" />
+                                    <?php endforeach; ?>
+                                    <button class="action tocart btn-add-to-cart"
+                                            type="submit"
+                                            title="<?php echo $block->escapeHtmlAttr(__('Adicionar')); ?>">
+                                        <span><?php echo $block->escapeHtml(__('Adicionar')); ?></span>
+                                    </button>
+                                </form>
+                            <?php else: ?>
+                                <button class="action tocart btn-add-to-cart disabled"
+                                        type="button"
+                                        disabled="disabled"
+                                        aria-disabled="true"
+                                        title="<?php echo $block->escapeHtmlAttr(__('Produto indisponível')); ?>">
+                                    <span><?php echo $block->escapeHtml(__('Produto indisponível')); ?></span>
+                                </button>
+                            <?php endif; ?>
+                        <?php else: ?>
+                            <?php if ($_item->getIsSalable()): ?>
+                                <div class="stock available"><span><?php echo __('Disponível'); ?></span></div>
+                            <?php else: ?>
+                                <div class="stock unavailable"><span><?php echo __('Produto esgotado'); ?></span></div>
+                            <?php endif; ?>
+                        <?php endif; ?>
+                    </div>
                 </div>
             </div>
         </div>

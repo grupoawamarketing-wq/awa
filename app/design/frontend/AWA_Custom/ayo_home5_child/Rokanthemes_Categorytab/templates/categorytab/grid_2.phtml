@@ -68,16 +68,29 @@
 							<?php if($i++%$rows==0) { ?> <div class="swiper-slide product_row"> <?php } ?>
 									<div class="item-product">
 										<div class="product-thumb">
-											<a href="<?php echo $block->escapeUrl($_item->getProductUrl()) ?>" class="product-thumb-link" aria-label="<?php echo $block->escapeHtmlAttr($_item->getName()); //phpcs:ignore ?>">
-												<?php $productImageThumb = $block->getImage($_item, 'category_image_second_small');?>
-												<span class="first-thumb">
-													<?php echo $productImage->toHtml(); ?>
-												</span>
-												<?php $productType = $_item->getTypeID();
-												if($productType == "simple"): ?>
-													<span class="second-thumb">
-														<?php echo $productImageThumb->toHtml(); ?>
+												<a href="<?php echo $block->escapeUrl($_item->getProductUrl()) ?>" class="product-thumb-link" aria-label="<?php echo $block->escapeHtmlAttr($_item->getName()); //phpcs:ignore ?>">
+													<?php $productImageThumb = $block->getImage($_item, 'category_image_second_small');?>
+													<span class="first-thumb">
+														<?php
+															$_imgHtml = $productImage->toHtml();
+															$_imgHtml = str_replace('loading="eager"', 'loading="lazy"', $_imgHtml);
+															if (strpos($_imgHtml, 'loading=') === false) {
+																$_imgHtml = str_replace('<img ', '<img loading="lazy" decoding="async" ', $_imgHtml);
+															}
+															echo $_imgHtml;
+														?>
 													</span>
+													<?php $productType = $_item->getTypeID();
+													if($productType == "simple"): ?>
+														<span class="second-thumb">
+															<?php
+																$_thumbHtml = $productImageThumb->toHtml();
+																if (strpos($_thumbHtml, 'loading=') === false) {
+																	$_thumbHtml = str_replace('<img ', '<img loading="lazy" decoding="async" ', $_thumbHtml);
+																}
+																echo $_thumbHtml;
+															?>
+														</span>
 						                		<?php endif; ?>
 											</a>
 											<div class="hot-onsale">
@@ -126,7 +139,32 @@
 											<?php endif; ?>
 												</ul>
 										    </div>
-										    <div class="product-info-cart">
+									    </div>
+									    <div class="product-info">
+											<h3 class="product-name">
+											 							<a title="<?php echo $block->escapeHtmlAttr($_item->getName()); ?>" href="<?php echo $block->escapeUrl($_item->getProductUrl()) ?>" class="product-item-link">
+												<?php echo $block->escapeHtml($_item->getName()); ?>
+												</a>
+											</h3>
+											<div class="awa-b2b-sku">
+												<span class="awa-b2b-sku__label"><?php echo $block->escapeHtml(__('Cod:')); ?></span>
+												<span class="awa-b2b-sku__value"><?php echo $block->escapeHtml($_item->getSku()); ?></span>
+											</div>
+											<div class="product-rating">
+												<?php if ($templateType): ?>
+			   										<?php echo $block->getReviewsSummaryHtml($_item, $templateType,true); ?>
+			   									<?php endif; ?>
+											</div>
+											<div class="sold-by">
+												<?php
+													$cats = $_item->getAttributeText('sold_by');
+												echo ' <span>'.$block->escapeHtml(__('Sold by:')).'</span>' . $block->escapeHtml($cats);
+												 ?>
+											</div>
+											<div class="info-price">
+												<?php /* @noEscape */ echo $this->helper('Rokanthemes\Themeoption\Helper\Data')->getPriceDisplayCustom($block->getProductPrice($_item)) ?>
+											</div>
+											<div class="product-info-cart">
 								                <?php if ($showWishlist || $showCompare || $showCart): ?>
 								                	<?php if ($showCart): ?>
 									                    <div class="actions-primary addcart-link">
@@ -155,34 +193,8 @@
 									                      <?php endif; ?>
 									                    </div>
 									                <?php endif; ?>
-
 					  							<?php endif; ?>
 				  							</div>
-									    </div>
-									    <div class="product-info">
-											<h3 class="product-name">
-											 							<a title="<?php echo $block->escapeHtmlAttr($_item->getName()); ?>" href="<?php echo $block->escapeUrl($_item->getProductUrl()) ?>" class="product-item-link">
-												<?php echo $block->escapeHtml($_item->getName()); ?>
-												</a>
-											</h3>
-											<div class="awa-b2b-sku">
-												<span class="awa-b2b-sku__label">Cod:</span>
-												<span class="awa-b2b-sku__value" style="color: #595959 !important;"><?php echo $block->escapeHtml($_item->getSku()); ?></span>
-											</div>
-											<div class="product-rating">
-												<?php if ($templateType): ?>
-			   										<?php echo $block->getReviewsSummaryHtml($_item, $templateType,true); ?>
-			   									<?php endif; ?>
-											</div>
-											<div class="sold-by">
-												<?php
-													$cats = $_item->getAttributeText('sold_by');
-												echo ' <span>'.$block->escapeHtml(__('Sold by:')).'</span>' . $block->escapeHtml($cats);
-												 ?>
-											</div>
-											<div class="info-price">
-												<?php /* @noEscape */ echo $this->helper('Rokanthemes\Themeoption\Helper\Data')->getPriceDisplayCustom($block->getProductPrice($_item)) ?>
-											</div>
 										</div>
 									</div>
 
