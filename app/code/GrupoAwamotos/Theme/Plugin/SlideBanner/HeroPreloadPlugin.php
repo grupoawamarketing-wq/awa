@@ -93,16 +93,28 @@ class HeroPreloadPlugin
                 $imageUrl = rtrim($mediaUrl, '/') . '/' . ltrim($webpImage, '/');
             }
 
-            $preloadAttrs = ['rel' => 'preload', 'as' => 'image', 'fetchpriority' => 'high'];
-            // type hint allows browser to skip preload if format unsupported
-            if (str_ends_with(strtolower($imageUrl), '.webp')) {
-                $preloadAttrs['type'] = 'image/webp';
-            }
+            // Usa media queries para separar desktop/mobile:
+            // - desktop (.hidden-xs): so carregado em viewport >= 768px
+            // - mobile (.visible-xs): so carregado em viewport <= 767px
+            // Sem media, o preload desktop seria consumido pelo <img> do slider desktop
+            // antes do CSS display:none ser aplicado, desperdicando bandwidth no mobile
+            // e causando CLS.
+            $typeAttr = str_ends_with(strtolower($imageUrl), '.webp') ? ['type' => 'image/webp'] : [];
+
             $this->pageConfig->addRemotePageAsset(
                 $imageUrl,
                 'link',
-                ['attributes' => $preloadAttrs],
+                ['attributes' => ['rel' => 'preload', 'as' => 'image', 'fetchpriority' => 'high',
+                                  'media' => '(min-width: 768px)'] + $typeAttr],
                 'awa-hero-preload-desktop'
+            );
+            // Mobile: mesma imagem (slide_image_mobile e NULL no DB para este slider).
+            $this->pageConfig->addRemotePageAsset(
+                $imageUrl,
+                'link',
+                ['attributes' => ['rel' => 'preload', 'as' => 'image', 'fetchpriority' => 'high',
+                                  'media' => '(max-width: 767px)'] + $typeAttr],
+                'awa-hero-preload-mobile'
             );
             $this->done = true;
         } catch (\Throwable $e) {

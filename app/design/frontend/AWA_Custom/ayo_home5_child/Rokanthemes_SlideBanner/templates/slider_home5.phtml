@@ -161,6 +161,20 @@ if (!empty($mobileSlides)) {
 }
 
 /* LCP Fix: Show first hero slide before Swiper JS initializes. */
+/* CLS Fix: aspect-ratio + min-height permanente evita colapso quando .swiper-initialized é adicionado.
+ * O aspect-ratio garante que o container NUNCA mude de proporção durante o init do Swiper. */
+.wrapper_slider.hidden-xs .swiper {
+    aspect-ratio: 1920 / 600;
+    min-height: clamp(220px, 31.25vw, 600px);
+    overflow: hidden;
+}
+@media (max-width: 767px) {
+    .wrapper_slider.visible-xs .swiper {
+        aspect-ratio: 768 / 400;
+        min-height: clamp(180px, 52vw, 400px);
+        overflow: hidden;
+    }
+}
 .wrapper_slider .swiper:not(.swiper-initialized) {
     display: block !important;
     visibility: visible !important;
@@ -193,6 +207,18 @@ if (!empty($mobileSlides)) {
     height: 100%;
     object-fit: cover;
     display: block;
+}
+
+/* Fix LCP: awa-bundle-home-custom.css tem @media(max-width:480px) que seta
+   :is(.page-wrapper,.content-top-home) .swiper-slide { width:50%!important }
+   para product carousels 2-col. Esta regra (espec. 4 classes vs 3) exclui
+   o hero slider desta limitação e garante width:100% nos slides do hero. */
+@media (max-width: 767px) {
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+        .top-home-content--above-fold .banner-slider2 .swiper-slide {
+        width: 100% !important;
+        flex-shrink: 0 !important;
+    }
 }
 </style>
 <!-- Slider desktop (oculto no mobile via Bootstrap .hidden-xs) -->
@@ -425,40 +451,18 @@ if (!empty($mobileSlides)) {
                 }, isMobileViewport ? 3500 : 0);
             });
         };
-        // Mobile: não inicializa automaticamente (carrossel pode distorcer LCP ao trocar slides).
-        // Inicializa somente com intenção do usuário (toque/click no hero), mantendo o 1º slide estável no carregamento.
+        // Mobile: autoplay desativado para evitar que slide 2 vire LCP (Render Delay tardio).
+        // Mobile LCP fix: desabilita loop (evita clones DOM que re-registram candidato LCP)
+        // e inicia Swiper IMEDIATAMENTE após FCP (sem delay) para que o repaint do Swiper
+        // coincida com o FCP — impedindo que LH meça um LCP tardio (~18s) por init atrasado.
+        // O 1º slide é visível via CSS :not(.swiper-initialized) durante o carregamento.
         if (isMobileViewport) {
-            // Autoplay em mobile vira um "LCP killer" (o 2º slide pode virar LCP tardiamente).
             mobileConfig.autoplay = false;
+            mobileConfig.loop     = false;
 
-            var mobileRootSelector = '.slider_<?php echo (int) $sliderId; ?>_mobile';
-
-            function bindMobileIntentInit() {
-                var root = document.querySelector(mobileRootSelector);
-                if (!root) {
-                    return;
-                }
-
-                var started = false;
-                var start = function () {
-                    if (started) {
-                        return;
-                    }
-                    started = true;
-                    loadSwiper(initForViewport);
-                };
-
-                // Qualquer interação dentro do hero inicia o carrossel.
-                root.addEventListener('pointerdown', start, { passive: true, capture: true, once: true });
-                root.addEventListener('touchstart', start, { passive: true, capture: true, once: true });
-                root.addEventListener('click', start, { passive: true, capture: true, once: true });
-
-                // Sem fallback automatico: Swiper so inicia com interacao do usuario no mobile.
-                // O requestIdleCallback(timeout=60s) disparava durante gaps de idle (~25s)
-                // fazendo cavalete_lateral (slide 2) tornar-se o LCP por Render Delay tardio.
-            }
-
-            runAfterWindowLoad(bindMobileIntentInit);
+            afterFirstPaint(function () {
+                loadSwiper(initForViewport);
+            });
             return;
         }
 

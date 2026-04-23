@@ -1,5 +1,6 @@
 <?php
-/**
+/* TRACER=AWA_TRACER_1776949738 */
+/** AWA_TEST_AWA_TEST_1776949730 */
  * AWA Motos — Slide Banner Template
  * API: Owl Carousel 2.0.x (Rokanthemes_Themeoption/js/owl.carousel)
  * Estrutura: hidden-xs (desktop) / visible-xs (mobile) conforme tema Ayo Home5.
@@ -398,44 +399,17 @@ if ($banners = $block->getBannerCollection()):
                 }, isMobileViewport ? 3500 : 0);
             });
         };
-        // Mobile: não inicializa automaticamente (carrossel pode distorcer LCP ao trocar slides).
-        // Inicializa somente com intenção do usuário (toque/click no hero), mantendo o 1º slide estável no carregamento.
+        // Mobile LCP fix: desabilita loop (evita clones DOM que re-registram candidato LCP)
+        // e inicia Swiper IMEDIATAMENTE após FCP (sem delay) para que o repaint do Swiper
+        // coincida com o FCP — impedindo que LH meça um LCP tardio (~18s) por init atrasado.
+        // O 1º slide é visível via CSS :not(.swiper-initialized) durante o carregamento.
         if (isMobileViewport) {
-            // Autoplay em mobile vira um "LCP killer" (o 2º slide pode virar LCP tardiamente).
             mobileConfig.autoplay = false;
+            mobileConfig.loop     = false;
 
-            var mobileRootSelector = '.slider_<?php echo (int) $sliderId; ?>_mobile';
-
-            function bindMobileIntentInit() {
-                var root = document.querySelector(mobileRootSelector);
-                if (!root) {
-                    return;
-                }
-
-                var started = false;
-                var start = function () {
-                    if (started) {
-                        return;
-                    }
-                    started = true;
-                    loadSwiper(initForViewport);
-                };
-
-                // Qualquer interação dentro do hero inicia o carrossel.
-                root.addEventListener('pointerdown', start, { passive: true, capture: true, once: true });
-                root.addEventListener('touchstart', start, { passive: true, capture: true, once: true });
-                root.addEventListener('click', start, { passive: true, capture: true, once: true });
-
-                // Fallback bem tardio (não competir com LCP/TBT): inicia depois de um bom tempo.
-                // Obs: em Lighthouse, isso tende a ficar fora da janela de medição.
-                if ('requestIdleCallback' in window) {
-                    window.requestIdleCallback(start, { timeout: 60000 });
-                } else {
-                    window.setTimeout(start, 60000);
-                }
-            }
-
-            runAfterWindowLoad(bindMobileIntentInit);
+            afterFirstPaint(function () {
+                loadSwiper(initForViewport);
+            });
             return;
         }
 

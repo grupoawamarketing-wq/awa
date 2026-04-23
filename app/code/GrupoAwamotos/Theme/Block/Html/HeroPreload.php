@@ -60,10 +60,13 @@ class HeroPreload extends Template
                 \Magento\Framework\UrlInterface::URL_TYPE_MEDIA
             );
 
-            // slider_home5.phtml já gera preloads WebP corretos com media queries.
-            // HeroPreload.php é redundante — retorna vazio para evitar preload extra
-            // que causaria duplo download (JPEG = 408KB; WebP = 74KB já preloaded).
-            return '';
+            // Preload da imagem hero no <head> (descoberta antecipada pelo browser scanner).
+            // A URL .webp é idêntica à gerada pelo slider_home5.phtml no body,
+            // então o browser NÃO faz duplo download (deduplicação de URL).
+            // Rokanthemes salva a imagem como .jpeg no DB (ex: slidebanner/b/a/bauletos.jpg.jpeg)
+            // O arquivo WebP correspondente tem extensão .webp (ex: bauletos.jpg.webp)
+            $webpImage = str_replace('.jpeg', '.webp', $slideImage);
+            return rtrim($mediaUrl, '/') . '/' . ltrim($webpImage, '/');
         } catch (\Throwable $e) {
             return '';
         }
@@ -71,23 +74,34 @@ class HeroPreload extends Template
 
     /**
      * Retorna a URL da versao mobile (primeira imagem mobile ativa) ou string vazia.
+     * Se slide_image_mobile for NULL, usa slide_image como fallback (mesma imagem).
      */
     public function getHeroImageMobileUrl(): string
     {
         try {
             $conn = $this->resource->getConnection();
+            // Tenta o campo mobile primeiro; se NULL, cai para slide_image
             $select = $conn->select()
                 ->from(
                     ['s' => $this->resource->getTableName('rokanthemes_slide')],
-                    ['slide_image_mobile']
+                    ['slide_image_mobile', 'slide_image']
                 )
                 ->where('s.slide_status = ?', 1)
-                ->where('s.slide_image_mobile IS NOT NULL')
-                ->where('s.slide_image_mobile != ?', '')
+                ->where('s.slide_image IS NOT NULL')
+                ->where('s.slide_image != ?', '')
                 ->order('s.slide_position ASC')
                 ->limit(1);
 
-            $slideImage = (string) $conn->fetchOne($select);
+            $row = $conn->fetchRow($select);
+            if (empty($row)) {
+                return '';
+            }
+
+            // Usa mobile especifico se disponivel, senao fallback para desktop
+            $slideImage = (string) (!empty($row['slide_image_mobile'])
+                ? $row['slide_image_mobile']
+                : $row['slide_image']);
+
             if ($slideImage === '') {
                 return '';
             }
@@ -96,7 +110,10 @@ class HeroPreload extends Template
                 \Magento\Framework\UrlInterface::URL_TYPE_MEDIA
             );
 
-            return rtrim($mediaUrl, '/') . '/' . ltrim($slideImage, '/');
+            // Mesma logica do getHeroImageUrl: Rokanthemes salva .jpeg no DB,
+            // arquivo WebP correspondente tem extensao .webp
+            $webpImage = str_replace('.jpeg', '.webp', $slideImage);
+            return rtrim($mediaUrl, '/') . '/' . ltrim($webpImage, '/');
         } catch (\Throwable $e) {
             return '';
         }

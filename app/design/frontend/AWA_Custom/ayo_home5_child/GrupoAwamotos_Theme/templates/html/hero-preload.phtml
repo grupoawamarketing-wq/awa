@@ -5,8 +5,13 @@
  * Injeta <link rel="preload" as="image" fetchpriority="high"> para a imagem
  * hero do primeiro slide ativo do Rokanthemes SlideBanner.
  *
- * Renderiza no <head> (head.additional) ANTES do body, garantindo que o
- * browser descubra e priorize o download da imagem LCP.
+ * Usa media queries para separar desktop e mobile:
+ * - media="(min-width: 768px)" → preload do slider desktop (.hidden-xs)
+ * - media="(max-width: 767px)" → preload do slider mobile (.visible-xs)
+ *
+ * Isso evita que o browser em mobile viewport baixe o preload desktop,
+ * que seria "consumido" pelo <img> do desktop slider antes do CSS
+ * display:none ser aplicado, desperdiçando bandwidth e causando CLS.
  *
  * @var GrupoAwamotos\Theme\Block\Html\HeroPreload $block
  */
@@ -14,6 +19,12 @@ $heroUrl = $block->getHeroImageUrl();
 if (!$heroUrl) {
     return;
 }
+// Usa imagem mobile se disponível (campo slide_image_mobile no DB),
+// senão usa a mesma imagem desktop (Rokanthemes usa a mesma para ambos).
+$heroMobileUrl = $block->getHeroImageMobileUrl() ?: $heroUrl;
 ?>
 <!-- LCP Hero Image Preload (Swiper SlideBanner - first active slide) -->
-<link rel="preload" href="<?= $block->escapeUrl($heroUrl) ?>" as="image" fetchpriority="high"/>
+<!-- Desktop: slider .hidden-xs — só carregado em viewport ≥ 768px -->
+<link rel="preload" href="<?= $block->escapeUrl($heroUrl) ?>" as="image" fetchpriority="high" media="(min-width: 768px)"/>
+<!-- Mobile: slider .visible-xs — só carregado em viewport ≤ 767px -->
+<link rel="preload" href="<?= $block->escapeUrl($heroMobileUrl) ?>" as="image" fetchpriority="high" media="(max-width: 767px)"/>
