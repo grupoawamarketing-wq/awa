@@ -1,637 +1,1302 @@
-/*
- * AWA Motos — Visual Modernization v1
- * Loaded LAST in cascade (after all bundles) — surgical overrides only.
- * Strategy: --m-* tokens for clean design intent, high-specificity overrides.
+/* ═══════════════════════════════════════════════════════════════════════════════
+ * AWA Motos — Modernization CSS v2.0
+ * ═══════════════════════════════════════════════════════════════════════════════
  *
- * Sections:
- *   A. Design Tokens (Clean set)
- *   B. Typography & Headings
- *   C. Buttons (Unified)
- *   D. Header & Utility Bar
- *   E. Search Box
- *   F. Navigation & Menu
- *   G. Product Cards (Home + PLP)
- *   H. Home Sections (Vitrines, Swiper)
- *   I. PLP (Breadcrumbs, Toolbar, Filters, Pagination)
- *   J. PDP (Title, Price, Cart, Tabs)
- *   K. Forms, Login, Cadastro
+ * Arquivo ÚNICO de modernização visual. Carregado por ÚLTIMO na cascata.
+ * NÃO adicionar mais arquivos CSS — todas as melhorias visuais vão aqui.
+ *
+ * Estratégia: overrides cirúrgicos sobre a base existente, usando tokens do
+ * awa-core-variables.css quando possível, com seletores de alta especificidade
+ * para vencer os 55+ bundles carregados antes.
+ *
+ * Seções:
+ *   A. Design Tokens Refinados
+ *   B. Tipografia Global
+ *   C. Botões
+ *   D. Header / Utility Bar
+ *   E. Busca
+ *   F. Menu / Navegação
+ *   G. Cards de Produto
+ *   H. Seções Home (vitrines, carrosséis)
+ *   I. PLP (Categoria)
+ *   J. PDP (Produto)
+ *   K. Formulários / Login / Cadastro
  *   L. Footer
- *   M. Responsiveness
- *   N. Microinteractions & Polish
- */
+ *   M. Responsividade
+ *   N. Microinterações
+ *   O. De-clutter Global
+ *   P. Responsive Extras
+ *   Q. Skeleton Loader
+ * ═══════════════════════════════════════════════════════════════════════════════ */
 
-/* ========================================
-   A. DESIGN TOKENS — Clean Modern Set
-   ======================================== */
+/* ─── A. DESIGN TOKENS REFINADOS ─────────────────────────────────────────── */
+
 :root {
-  /* Gray Scale — consolidated 10 stops (replaces 96+ variants) */
-  --m-gray-50:  #f8fafc;
-  --m-gray-100: #f1f5f9;
-  --m-gray-200: #e2e8f0;
-  --m-gray-300: #cbd5e1;
-  --m-gray-400: #94a3b8;
-  --m-gray-500: #64748b;
-  --m-gray-600: #475569;
-  --m-gray-700: #334155;
-  --m-gray-800: #1e293b;
-  --m-gray-900: #0f172a;
+  /* === Cores primárias consolidadas === */
+  --m-primary: #b73337;
+  --m-primary-hover: #9a2b2e;
+  --m-primary-active: #832528;
+  --m-primary-light: rgba(183, 51, 55, 0.08);
+  --m-primary-surface: rgba(183, 51, 55, 0.04);
 
-  /* Brand */
-  --m-primary:       #b73337;
-  --m-primary-dark:  #8e2629;
-  --m-primary-light: rgb(183 51 55 / 8%);
+  /* === Neutros (10 stops, basta) === */
+  --m-white: #ffffff;
+  --m-gray-50: #f8f9fa;
+  --m-gray-100: #f1f3f5;
+  --m-gray-200: #e9ecef;
+  --m-gray-300: #dee2e6;
+  --m-gray-400: #adb5bd;
+  --m-gray-500: #6c757d;
+  --m-gray-600: #495057;
+  --m-gray-700: #343a40;
+  --m-gray-800: #212529;
+  --m-gray-900: #0f1114;
 
-  /* Surfaces */
-  --m-surface:    #ffffff;
-  --m-surface-alt: var(--m-gray-50);
-  --m-border:     var(--m-gray-200);
+  /* === Semânticas === */
+  --m-success: #0f766e;
+  --m-success-bg: #f0fdfa;
+  --m-warning: #b45309;
+  --m-warning-bg: #fffbeb;
+  --m-danger: #dc2626;
+  --m-danger-bg: #fef2f2;
+  --m-info: #0369a1;
+  --m-info-bg: #f0f9ff;
+
+  /* === Superfícies === */
+  --m-surface: var(--m-white);
+  --m-surface-raised: var(--m-gray-50);
+  --m-surface-sunken: var(--m-gray-100);
+  --m-border: var(--m-gray-200);
   --m-border-strong: var(--m-gray-300);
-
-  /* Text */
-  --m-text:       var(--m-gray-800);
+  --m-text: var(--m-gray-800);
   --m-text-muted: var(--m-gray-500);
-  --m-text-light: var(--m-gray-400);
+  --m-text-subtle: var(--m-gray-400);
 
-  /* Spacing rhythm — 4px base */
-  --m-space-xs:  4px;
-  --m-space-sm:  8px;
-  --m-space-md:  12px;
-  --m-space-lg:  16px;
-  --m-space-xl:  24px;
-  --m-space-2xl: 32px;
-  --m-space-3xl: 48px;
+  /* === Tipografia === */
+  --m-font: 'Rubik', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --m-font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+  --m-text-xs: 0.6875rem;    /* 11px */
+  --m-text-sm: 0.8125rem;    /* 13px */
+  --m-text-base: 0.9375rem;  /* 15px */
+  --m-text-lg: 1.0625rem;    /* 17px */
+  --m-text-xl: 1.25rem;      /* 20px */
+  --m-text-2xl: 1.5rem;      /* 24px */
+  --m-text-3xl: 1.875rem;    /* 30px */
+  --m-leading-tight: 1.3;
+  --m-leading-normal: 1.5;
+  --m-leading-relaxed: 1.65;
 
-  /* Radius — progressive scale */
-  --m-radius-sm:  6px;
-  --m-radius-md:  10px;
-  --m-radius-lg:  14px;
-  --m-radius-xl:  20px;
+  /* === Espaçamentos (4px grid) === */
+  --m-sp-1: 4px;   --m-sp-2: 8px;   --m-sp-3: 12px;  --m-sp-4: 16px;
+  --m-sp-5: 20px;  --m-sp-6: 24px;  --m-sp-8: 32px;  --m-sp-10: 40px;
+  --m-sp-12: 48px; --m-sp-16: 64px;
+
+  /* === Border Radius — escala limpa 6-8px ===
+   * Filosofia: visual clean sem arredondamentos excessivos.
+   * - 4px  → micro-elementos (badges, chips, tags)
+   * - 6px  → padrão universal (botões, inputs, cards internos)
+   * - 8px  → containers e cards maiores
+   * - 9999px → apenas pills/avatares circulares
+   */
+  --m-radius-xs: 4px;
+  --m-radius-sm: 6px;
+  --m-radius-md: 8px;
+  --m-radius-lg: 8px;
   --m-radius-full: 9999px;
 
-  /* Shadows — light, consistent */
-  --m-shadow-sm: 0 1px 3px rgb(0 0 0 / 6%);
-  --m-shadow-md: 0 4px 12px rgb(0 0 0 / 8%);
-  --m-shadow-lg: 0 8px 24px rgb(0 0 0 / 10%);
-  --m-shadow-brand: 0 4px 14px rgb(183 51 55 / 18%);
+  /* === Override dos 19+ tokens legados --awa-radius-* ===
+   * Força TODA a base existente para a escala limpa 6-8px.
+   * Isso afeta os 1600+ usos de var(--awa-radius-*) sem editar nenhum bundle. */
+  --awa-radius-2xs: 4px;
+  --awa-radius-xs: 4px;
+  --awa-radius-sm: 6px;
+  --awa-radius: 6px;
+  --awa-radius-md: 8px;
+  --awa-radius-md-lg: 8px;
+  --awa-radius-lg: 8px;
+  --awa-radius-xl: 8px;
+  --awa-radius-2xl: 8px;
+  --awa-radius-pill: 6px;
+  --awa-radius-none: 0;
+  --awa-radius-full: 9999px;
+  --awa-radius-bottom-sm: 0 0 6px 6px;
+  --awa-radius-bottom-lg: 0 0 8px 8px;
+  --awa-radius-top-sm: 6px 6px 0 0;
+  --awa-radius-top-lg: 8px 8px 0 0;
+  --awa-radius-right-xs: 0 4px 4px 0;
+  --awa-radius-right-sm: 0 6px 6px 0;
+  --awa-radius-left-sm: 6px 0 0 6px;
+  --awa-control-radius: 6px;
+  --border-radius-base: 6px;
+  --card-cta-radius: 6px;
+  --awa-ui-radius-avatar: 9999px;
 
-  /* Transitions */
-  --m-ease: 180ms ease;
-  --m-ease-fast: 120ms ease;
+  /* === Sombras — mínimas, clean ===
+   * Menos sombra = menos poluição visual. */
+  --m-shadow-xs: 0 1px 2px rgba(0,0,0,.04);
+  --m-shadow-sm: 0 1px 3px rgba(0,0,0,.06);
+  --m-shadow-md: 0 2px 8px rgba(0,0,0,.06);
+  --m-shadow-lg: 0 4px 16px rgba(0,0,0,.08);
+  --m-shadow-card: 0 1px 2px rgba(0,0,0,.04);
+  --m-shadow-card-hover: 0 4px 12px rgba(0,0,0,.08);
+  --m-shadow-none: none;
+
+  /* === Transitions === */
+  --m-transition-fast: 150ms cubic-bezier(.4,0,.2,1);
+  --m-transition-base: 200ms cubic-bezier(.4,0,.2,1);
+  --m-transition-slow: 300ms cubic-bezier(.4,0,.2,1);
+
+  /* === Containers === */
+  --m-container-max: 1320px;
+  --m-container-padding: 20px;
 }
 
 
-/* ========================================
-   B. TYPOGRAPHY — Clean, Professional
-   ======================================== */
+/* ─── B. TIPOGRAFIA GLOBAL ───────────────────────────────────────────────── */
 
-/* Section headings (home vitrines) */
-.shop-tab-title h3,
-.shop-tab-title .title,
-.categorytab-container .block-title,
-.rokan-bestseller .block-title,
-.rokan-newproduct .block-title,
-.rokan-mostviewed .block-title {
-  font-size: clamp(18px, 2vw, 22px);
-  font-weight: 700;
-  color: var(--m-gray-900);
-  letter-spacing: -0.01em;
-  line-height: 1.2;
-}
-
-/* Body text consistency */
-.page-main p,
-.page-main li,
-.page-main .std,
-.page-main .description {
+body .page-wrapper {
+  font-family: var(--m-font);
   color: var(--m-text);
-  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-
-/* ========================================
-   C. BUTTONS — Unified System
-   ======================================== */
-
-/* Primary buttons — full width CTA look */
-.action.primary,
-.action.tocart.primary,
-.btn-add-to-cart.action.tocart.primary,
-button.action.primary {
-  background: var(--m-primary);
-  color: #fff;
-  border: none;
-  border-radius: var(--m-radius-md);
+body .page-wrapper h1,
+body .page-wrapper h2,
+body .page-wrapper h3,
+body .page-wrapper h4 {
   font-weight: 700;
-  letter-spacing: 0.01em;
-  cursor: pointer;
-  transition: background var(--m-ease), transform var(--m-ease-fast), box-shadow var(--m-ease);
-}
-
-.action.primary:hover,
-.action.tocart.primary:hover,
-.btn-add-to-cart.action.tocart.primary:hover,
-button.action.primary:hover {
-  background: var(--m-primary-dark);
-  transform: translateY(-1px);
-  box-shadow: var(--m-shadow-brand);
-}
-
-.action.primary:active,
-button.action.primary:active {
-  transform: translateY(0);
-}
-
-/* Secondary/ghost buttons */
-.action.secondary,
-.action.view,
-a.action.view {
-  background: transparent;
-  color: var(--m-primary);
-  border: 1.5px solid var(--m-primary);
-  border-radius: var(--m-radius-md);
-  font-weight: 600;
-  cursor: pointer;
-  transition: background var(--m-ease), color var(--m-ease);
-}
-
-.action.secondary:hover,
-.action.view:hover {
-  background: var(--m-primary-light);
-  color: var(--m-primary-dark);
-}
-
-
-/* ========================================
-   D. HEADER — Professional & Clean
-   ======================================== */
-
-/* Promo bar refinement */
-.awa-site-header .awa-b2b-promo-bar {
-  font-size: 12px;
-  letter-spacing: 0.02em;
-  padding-block: 6px;
-}
-
-/* Main header area - cleaner vertical rhythm */
-.awa-site-header .awa-main-header {
-  padding-block: var(--m-space-md);
-  gap: var(--m-space-lg);
-}
-
-/* Header icons - consistent sizing */
-.awa-site-header .awa-header-right-col .awa-header-action {
-  color: var(--m-gray-600);
-  transition: color var(--m-ease);
-}
-
-.awa-site-header .awa-header-right-col .awa-header-action:hover {
-  color: var(--m-primary);
-}
-
-
-/* ========================================
-   E. SEARCH — Larger, More Prominent
-   ======================================== */
-
-.awa-site-header .awa-header-search-col .block-search input[type="text"],
-.awa-site-header .awa-header-search-col .block-search input.input-text {
-  height: 46px;
-  border-radius: var(--m-radius-lg);
-  border: 1.5px solid var(--m-gray-200);
-  padding: 0 48px 0 16px;
-  font-size: 14px;
-  background: var(--m-gray-50);
-  transition: border-color var(--m-ease), box-shadow var(--m-ease), background var(--m-ease);
-}
-
-.awa-site-header .awa-header-search-col .block-search input:focus {
-  border-color: var(--m-primary);
-  background: #fff;
-  box-shadow: 0 0 0 3px rgb(183 51 55 / 10%);
-  outline: none;
-}
-
-
-/* ========================================
-   F. NAVIGATION — Clean Menu
-   ======================================== */
-
-/* Nav links */
-.awa-nav-bar .awa-nav__link,
-.navigation .level-top {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--m-gray-700);
-  letter-spacing: 0.01em;
-  padding: 10px 14px;
-  transition: color var(--m-ease-fast), background var(--m-ease-fast);
-  border-radius: var(--m-radius-sm);
-}
-
-.awa-nav-bar .awa-nav__link:hover,
-.navigation .level-top:hover {
-  color: var(--m-primary);
-  background: var(--m-primary-light);
-}
-
-/* Dropdown menus */
-.navigation .submenu,
-.awa-nav-bar .awa-mega-dropdown {
-  border: 1px solid var(--m-border);
-  border-radius: var(--m-radius-md);
-  box-shadow: var(--m-shadow-lg);
-  background: #fff;
-}
-
-
-/* ========================================
-   G. PRODUCT CARDS — Modern, Consistent
-   ======================================== */
-
-/* Card container */
-:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5,
-    body.catalog-category-view, body.catalogsearch-result-index)
-  .item-product,
-:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5,
-    body.catalog-category-view, body.catalogsearch-result-index)
-  .product-item {
-  border: 1px solid var(--m-border);
-  border-radius: var(--m-radius-md);
-  background: #fff;
-  overflow: hidden;
-  transition: border-color var(--m-ease), box-shadow var(--m-ease);
-}
-
-:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5,
-    body.catalog-category-view, body.catalogsearch-result-index)
-  .item-product:hover,
-:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5,
-    body.catalog-category-view, body.catalogsearch-result-index)
-  .product-item:hover {
-  border-color: rgb(183 51 55 / 20%);
-  box-shadow: var(--m-shadow-md);
-}
-
-/* Product name — consistent across all contexts */
-:is(.item-product, .product-item) .product-name a,
-:is(.item-product, .product-item) .product-item-link {
-  font-size: 13px;
-  font-weight: 600;
+  line-height: var(--m-leading-tight);
   color: var(--m-gray-800);
-  line-height: 1.4;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-decoration: none;
-  transition: color var(--m-ease-fast);
+  letter-spacing: -0.01em;
 }
 
-:is(.item-product, .product-item) .product-name a:hover,
-:is(.item-product, .product-item) .product-item-link:hover {
-  color: var(--m-primary);
+body .page-wrapper h1 { font-size: var(--m-text-3xl); }
+body .page-wrapper h2 { font-size: var(--m-text-2xl); }
+body .page-wrapper h3 { font-size: var(--m-text-xl); }
+
+/* Section titles */
+body .page-wrapper .section-title,
+body .page-wrapper .shop-tab-title h2,
+body .page-wrapper .section-title-wrapper h2 {
+  font-size: var(--m-text-xl) !important;
+  font-weight: 700 !important;
+  color: var(--m-gray-800) !important;
+  letter-spacing: -0.02em;
+  text-transform: none !important;
+  position: relative;
 }
 
-/* SKU code — subtle */
-:is(.item-product, .product-item) .awa-b2b-sku {
-  font-size: 11px;
-  color: var(--m-text-muted);
-  letter-spacing: 0.02em;
-}
 
-/* Price */
-:is(.item-product, .product-item) .price-box .price {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--m-gray-900);
-}
+/* ─── C. BOTÕES ──────────────────────────────────────────────────────────── */
 
-:is(.item-product, .product-item) .price-box .old-price .price {
-  font-size: 13px;
-  font-weight: 400;
-  color: var(--m-text-light);
-  text-decoration: line-through;
-}
-
-/* CTA button in card */
-:is(.item-product, .product-item) .product-info-cart .action.tocart,
-:is(.item-product, .product-item) .product-info-cart .btn-add-to-cart {
-  width: 100%;
-  min-height: 40px;
-  border-radius: var(--m-radius-sm);
-  font-size: 13px;
-  font-weight: 700;
-  text-transform: none;
+/* --- Reset base para todos os botões de ação --- */
+body .page-wrapper .action.primary,
+body .page-wrapper button.action.primary,
+body .page-wrapper .btn-add-to-cart.action.tocart.primary,
+body .page-wrapper .actions-primary .action.tocart {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 10px 24px !important;
+  font-family: var(--m-font) !important;
+  font-size: var(--m-text-sm) !important;
+  font-weight: 600 !important;
+  line-height: 1.2 !important;
   letter-spacing: 0.01em;
+  text-transform: none !important;
+  text-decoration: none !important;
+  color: var(--m-white) !important;
+  background: var(--m-primary) !important;
+  border: 1px solid transparent !important;
+  border-radius: var(--m-radius-sm) !important;
+  cursor: pointer;
+  transition: background var(--m-transition-fast), box-shadow var(--m-transition-fast), transform var(--m-transition-fast) !important;
+  box-shadow: none !important;
+  white-space: nowrap;
 }
 
-
-/* ========================================
-   H. HOME SECTIONS — Vitrines & Spacing
-   ======================================== */
-
-/* Section vertical rhythm */
-.cms-index-index .page-main .shop-tab-title,
-.cms-index-index .page-main .block-title {
-  margin-bottom: var(--m-space-lg);
+body .page-wrapper .action.primary:hover,
+body .page-wrapper button.action.primary:hover,
+body .page-wrapper .btn-add-to-cart.action.tocart.primary:hover,
+body .page-wrapper .actions-primary .action.tocart:hover {
+  background: var(--m-primary-hover) !important;
+  box-shadow: none !important;
+  transform: translateY(-1px);
 }
 
-/* Swiper navigation arrows — modernized */
-.swiper-button-prev,
-.swiper-button-next,
-.owl-nav .owl-prev,
-.owl-nav .owl-next {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--m-radius-full);
-  background: #fff;
-  border: 1px solid var(--m-border);
-  box-shadow: var(--m-shadow-sm);
-  color: var(--m-gray-600);
-  transition: all var(--m-ease);
+body .page-wrapper .action.primary:active,
+body .page-wrapper button.action.primary:active,
+body .page-wrapper .btn-add-to-cart.action.tocart.primary:active,
+body .page-wrapper .actions-primary .action.tocart:active {
+  background: var(--m-primary-active) !important;
+  transform: translateY(0);
+  box-shadow: none !important;
 }
 
-.swiper-button-prev:hover,
-.swiper-button-next:hover,
-.owl-nav .owl-prev:hover,
-.owl-nav .owl-next:hover {
-  background: var(--m-primary);
-  color: #fff;
-  border-color: var(--m-primary);
-  box-shadow: var(--m-shadow-brand);
-}
-
-/* Swiper pagination dots */
-.swiper-pagination-bullet {
-  width: 8px;
-  height: 8px;
-  background: var(--m-gray-300);
-  opacity: 1;
-  transition: all var(--m-ease);
-}
-
-.swiper-pagination-bullet-active {
-  width: 24px;
-  border-radius: var(--m-radius-full);
-  background: var(--m-primary);
-}
-
-
-/* ========================================
-   I. PLP — Category Pages
-   ======================================== */
-
-/* Toolbar — cleaner */
-:is(body.catalog-category-view, body.catalogsearch-result-index)
-  .toolbar-products {
-  background: var(--m-surface-alt);
-  border: 1px solid var(--m-border);
-  border-radius: var(--m-radius-md);
-  padding: var(--m-space-sm) var(--m-space-lg);
-}
-
-/* Filter titles */
-:is(body.catalog-category-view, body.catalogsearch-result-index)
-  .filter-options-title {
-  font-weight: 600;
-  color: var(--m-gray-700);
-  font-size: 14px;
-  padding: var(--m-space-sm) 0;
-  border-bottom: 1px solid var(--m-border);
-}
-
-/* Pagination — modern */
-.pages .item a,
-.pages .item strong {
-  min-width: 36px;
-  min-height: 36px;
+/* Botão secundário / outlined */
+body .page-wrapper .action.secondary,
+body .page-wrapper .action.view,
+body .page-wrapper .action.add {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  min-height: 40px;
+  padding: 8px 16px;
+  font-family: var(--m-font);
+  font-size: var(--m-text-sm);
+  font-weight: 500;
+  color: var(--m-gray-700) !important;
+  background: var(--m-white) !important;
+  border: 1px solid var(--m-border-strong) !important;
+  border-radius: var(--m-radius-sm) !important;
+  transition: all var(--m-transition-fast);
+  cursor: pointer;
+}
+
+body .page-wrapper .action.secondary:hover,
+body .page-wrapper .action.view:hover,
+body .page-wrapper .action.add:hover {
+  color: var(--m-primary) !important;
+  border-color: var(--m-primary) !important;
+  background: var(--m-primary-light) !important;
+}
+
+
+/* ─── D. HEADER / UTILITY BAR ────────────────────────────────────────────── */
+
+/* B2B promo bar — mais refinado */
+body .page-wrapper .awa-b2b-promo-bar {
+  background: var(--m-primary) !important;
+  padding: 8px 0 !important;
+  font-size: var(--m-text-xs) !important;
+  letter-spacing: 0.02em;
+}
+
+body .page-wrapper .awa-b2b-promo-bar__text {
+  color: var(--m-white) !important;
+  font-weight: 400 !important;
+}
+
+body .page-wrapper .awa-b2b-promo-bar__cta {
+  color: var(--m-white) !important;
+  text-decoration: underline !important;
+  text-underline-offset: 2px;
+}
+
+/* Main header */
+body .page-wrapper .awa-main-header {
+  background: var(--m-white) !important;
+  border-bottom: 1px solid var(--m-gray-200) !important;
+  box-shadow: none !important;
+}
+
+body .page-wrapper .awa-main-header__inner.wp-header {
+  display: flex !important;
+  align-items: center !important;
+  gap: var(--m-sp-4) !important;
+  padding-top: var(--m-sp-3) !important;
+  padding-bottom: var(--m-sp-3) !important;
+  min-height: 72px !important;
+}
+
+/* Logo area */
+body .page-wrapper .awa-header-brand {
+  flex-shrink: 0 !important;
+}
+
+body .page-wrapper .awa-header-brand .logo img {
+  max-height: 52px !important;
+  width: auto !important;
+  object-fit: contain !important;
+}
+
+/* Right column */
+body .page-wrapper .awa-header-right-col {
+  display: flex !important;
+  align-items: center !important;
+  gap: var(--m-sp-3) !important;
+  flex-shrink: 0 !important;
+}
+
+/* Minicart styling */
+body .page-wrapper .awa-header-minicart .showcart {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 8px 14px !important;
+  background: var(--m-surface-raised) !important;
+  border: 1px solid var(--m-border) !important;
+  border-radius: var(--m-radius-sm) !important;
+  color: var(--m-gray-700) !important;
+  font-size: var(--m-text-sm) !important;
+  font-weight: 500 !important;
+  transition: all var(--m-transition-fast) !important;
+  text-decoration: none !important;
+}
+
+body .page-wrapper .awa-header-minicart .showcart:hover {
+  background: var(--m-white) !important;
+  border-color: var(--m-border-strong) !important;
+}
+
+body .page-wrapper .awa-header-minicart .showcart .counter.qty {
+  background: var(--m-primary) !important;
+  color: var(--m-white) !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  min-width: 18px !important;
+  height: 18px !important;
+  line-height: 18px !important;
+  border-radius: var(--m-radius-full) !important;
+  padding: 0 5px !important;
+}
+
+
+/* ─── E. BUSCA ───────────────────────────────────────────────────────────── */
+
+/* Caixa de busca principal */
+body .page-wrapper .awa-header-search-col {
+  flex: 1 !important;
+  max-width: 640px !important;
+}
+
+body .page-wrapper .awa-professional-search .input-text,
+body .page-wrapper .awa-header-search-col #search {
+  height: 46px !important;
+  padding: 0 48px 0 18px !important;
+  font-size: var(--m-text-base) !important;
+  font-family: var(--m-font) !important;
+  color: var(--m-text) !important;
+  background: var(--m-gray-50) !important;
+  border: 1.5px solid var(--m-border) !important;
+  border-radius: var(--m-radius-sm) !important;
+  transition: border-color var(--m-transition-fast), background var(--m-transition-fast) !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+body .page-wrapper .awa-professional-search .input-text:focus,
+body .page-wrapper .awa-header-search-col #search:focus {
+  background: var(--m-white) !important;
+  border-color: var(--m-primary) !important;
+  box-shadow: none !important;
+}
+
+body .page-wrapper .awa-professional-search .input-text::placeholder,
+body .page-wrapper .awa-header-search-col #search::placeholder {
+  color: var(--m-text-subtle) !important;
+  font-weight: 400 !important;
+}
+
+/* Botão de busca */
+body .page-wrapper .awa-header-search-col .action.search {
+  width: 46px !important;
+  height: 46px !important;
+  border-radius: 0 var(--m-radius-sm) var(--m-radius-sm) 0 !important;
+  background: var(--m-primary) !important;
+  color: var(--m-white) !important;
+  border: none !important;
+  transition: background var(--m-transition-fast) !important;
+}
+
+body .page-wrapper .awa-header-search-col .action.search:hover {
+  background: var(--m-primary-hover) !important;
+}
+
+
+/* ─── F. MENU / NAVEGAÇÃO ────────────────────────────────────────────────── */
+
+/* Nav bar */
+body .page-wrapper .awa-nav-bar {
+  background: var(--m-white) !important;
+  border-bottom: 1px solid var(--m-gray-100) !important;
+  box-shadow: none !important;
+}
+
+/* Nav links */
+body .page-wrapper .awa-nav-bar .top-menu > li > a,
+body .page-wrapper .awa-nav-bar .menu_primary .top-menu > li > a {
+  font-size: var(--m-text-sm) !important;
+  font-weight: 500 !important;
+  color: var(--m-gray-700) !important;
+  padding: 12px 16px !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  transition: color var(--m-transition-fast), background var(--m-transition-fast) !important;
   border-radius: var(--m-radius-sm);
-  font-size: 13px;
-  font-weight: 600;
-  transition: all var(--m-ease);
 }
 
-.pages .item.current strong {
-  background: var(--m-primary);
-  color: #fff;
-  border-radius: var(--m-radius-sm);
+body .page-wrapper .awa-nav-bar .top-menu > li > a:hover,
+body .page-wrapper .awa-nav-bar .menu_primary .top-menu > li > a:hover {
+  color: var(--m-primary) !important;
+  background: var(--m-primary-light) !important;
 }
 
-.pages .item a:hover {
-  background: var(--m-primary-light);
-  color: var(--m-primary);
+/* Dropdown/submenu */
+body .page-wrapper .awa-nav-bar .top-menu li.has-child .sub-menu,
+body .page-wrapper .awa-nav-bar .menu_primary .top-menu li.has-child .sub-menu {
+  background: var(--m-white) !important;
+  border: 1px solid var(--m-border) !important;
+  border-radius: var(--m-radius-md) !important;
+  box-shadow: var(--m-shadow-md) !important;
+  padding: var(--m-sp-2) !important;
+  min-width: 220px !important;
+}
+
+body .page-wrapper .awa-nav-bar .top-menu .sub-menu a {
+  font-size: var(--m-text-sm) !important;
+  color: var(--m-gray-600) !important;
+  padding: 8px 14px !important;
+  border-radius: var(--m-radius-sm) !important;
+  transition: all var(--m-transition-fast) !important;
+}
+
+body .page-wrapper .awa-nav-bar .top-menu .sub-menu a:hover {
+  color: var(--m-primary) !important;
+  background: var(--m-primary-surface) !important;
+}
+
+/* Category vertical menu trigger */
+body .page-wrapper .awa-header-categories .awa-nav-categories {
+  font-size: var(--m-text-sm) !important;
 }
 
 
-/* ========================================
-   J. PDP — Product Detail Page
-   ======================================== */
+/* ─── G. CARDS DE PRODUTO ────────────────────────────────────────────────── */
+
+/* Card container */
+body .page-wrapper .product-item.item-product {
+  background: var(--m-white) !important;
+  border: 1px solid var(--m-gray-200) !important;
+  border-radius: var(--m-radius-md) !important;
+  overflow: hidden !important;
+  transition: border-color var(--m-transition-base), box-shadow var(--m-transition-base) !important;
+  box-shadow: none !important;
+}
+
+body .page-wrapper .product-item.item-product:hover {
+  border-color: var(--m-gray-300) !important;
+  box-shadow: var(--m-shadow-sm) !important;
+}
+
+/* Product thumb area */
+body .page-wrapper .product-item .product-thumb {
+  position: relative !important;
+  overflow: hidden !important;
+  background: var(--m-surface-raised) !important;
+  aspect-ratio: 1 / 1 !important;
+}
+
+body .page-wrapper .product-item .product-thumb .product-image-photo {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  padding: var(--m-sp-3) !important;
+  transition: transform var(--m-transition-slow) !important;
+}
+
+body .page-wrapper .product-item:hover .product-thumb .product-image-photo {
+  transform: scale(1.03) !important;
+}
+
+/* Product info area */
+body .page-wrapper .product-item .product-info {
+  padding: var(--m-sp-3) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: var(--m-sp-1) !important;
+}
+
+/* Product name */
+body .page-wrapper .product-item .product-name {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+body .page-wrapper .product-item .product-name a,
+body .page-wrapper .product-item .product-item-link {
+  font-size: var(--m-text-sm) !important;
+  font-weight: 500 !important;
+  line-height: var(--m-leading-tight) !important;
+  color: var(--m-gray-700) !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  text-decoration: none !important;
+  min-height: calc(var(--m-text-sm) * var(--m-leading-tight) * 2) !important;
+}
+
+body .page-wrapper .product-item .product-name a:hover {
+  color: var(--m-primary) !important;
+}
+
+/* SKU */
+body .page-wrapper .product-item .awa-b2b-sku {
+  font-size: var(--m-text-xs) !important;
+  color: var(--m-text-muted) !important;
+  font-family: var(--m-font-mono) !important;
+  letter-spacing: 0.02em;
+}
+
+body .page-wrapper .product-item .awa-b2b-sku__label {
+  font-weight: 500 !important;
+  color: var(--m-text-subtle) !important;
+}
+
+/* Price area */
+body .page-wrapper .product-item .awa-price-slot {
+  margin-top: var(--m-sp-1) !important;
+  min-height: 36px !important;
+}
+
+body .page-wrapper .product-item .price-box .price {
+  font-size: 1.125rem !important;
+  font-weight: 700 !important;
+  color: var(--m-gray-800) !important;
+}
+
+body .page-wrapper .product-item .price-box .old-price .price {
+  font-size: var(--m-text-sm) !important;
+  font-weight: 400 !important;
+  color: var(--m-text-muted) !important;
+  text-decoration: line-through !important;
+}
+
+body .page-wrapper .product-item .price-box .special-price .price {
+  color: var(--m-primary) !important;
+}
+
+/* B2B login prompt */
+body .page-wrapper .product-item .b2b-login-to-see-price {
+  font-size: var(--m-text-xs) !important;
+  color: var(--m-text-muted) !important;
+  padding: var(--m-sp-1) 0 !important;
+}
+
+body .page-wrapper .product-item .b2b-login-to-see-price a {
+  color: var(--m-primary) !important;
+  font-weight: 600 !important;
+  text-decoration: underline !important;
+  text-underline-offset: 2px !important;
+}
+
+/* Add to cart button on card */
+body .page-wrapper .product-item .product-info-cart {
+  margin-top: auto !important;
+  padding-top: var(--m-sp-2) !important;
+}
+
+body .page-wrapper .product-item .actions-primary .action.tocart,
+body .page-wrapper .product-item .btn-add-to-cart {
+  width: 100% !important;
+  min-height: 40px !important;
+  font-size: var(--m-text-xs) !important;
+  padding: 8px 12px !important;
+  border-radius: var(--m-radius-sm) !important;
+}
+
+/* Quick action buttons (compare, wishlist) */
+body .page-wrapper .product-item .actions-secondary {
+  display: flex !important;
+  gap: var(--m-sp-1) !important;
+  margin-top: var(--m-sp-1) !important;
+}
+
+body .page-wrapper .product-item .actions-secondary .action {
+  width: 32px !important;
+  height: 32px !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: var(--m-radius-sm) !important;
+  background: var(--m-gray-50) !important;
+  border: 1px solid var(--m-border) !important;
+  color: var(--m-text-muted) !important;
+  transition: all var(--m-transition-fast) !important;
+}
+
+body .page-wrapper .product-item .actions-secondary .action:hover {
+  color: var(--m-primary) !important;
+  border-color: var(--m-primary) !important;
+  background: var(--m-primary-light) !important;
+}
+
+
+/* ─── H. SEÇÕES HOME (vitrines, carrosséis) ──────────────────────────────── */
+
+/* Seção wrapper */
+body.cms-index-index .page-wrapper .home-content > .container > div,
+body.cms-home .page-wrapper .home-content > .container > div,
+body.cms-homepage_ayo_home5 .page-wrapper .home-content > .container > div {
+  margin-bottom: var(--m-sp-8) !important;
+}
+
+/* Section titles com underline sutil */
+body .page-wrapper .shop-tab-title {
+  margin-bottom: var(--m-sp-5) !important;
+  padding-bottom: var(--m-sp-3) !important;
+  border-bottom: 2px solid var(--m-gray-100) !important;
+}
+
+body .page-wrapper .shop-tab-title h2 {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Swiper navigation arrows */
+body .page-wrapper .swiper-button-next,
+body .page-wrapper .swiper-button-prev {
+  width: 38px !important;
+  height: 38px !important;
+  background: var(--m-white) !important;
+  border: 1px solid var(--m-border) !important;
+  border-radius: var(--m-radius-full) !important;
+  box-shadow: none !important;
+  color: var(--m-gray-600) !important;
+  transition: all var(--m-transition-fast) !important;
+}
+
+body .page-wrapper .swiper-button-next:hover,
+body .page-wrapper .swiper-button-prev:hover {
+  background: var(--m-gray-50) !important;
+  border-color: var(--m-border-strong) !important;
+  color: var(--m-gray-800) !important;
+}
+
+body .page-wrapper .swiper-button-next::after,
+body .page-wrapper .swiper-button-prev::after {
+  font-size: 14px !important;
+  font-weight: 700 !important;
+}
+
+/* Swiper pagination dots */
+body .page-wrapper .swiper-pagination-bullet {
+  width: 8px !important;
+  height: 8px !important;
+  background: var(--m-gray-300) !important;
+  opacity: 1 !important;
+  transition: all var(--m-transition-fast) !important;
+}
+
+body .page-wrapper .swiper-pagination-bullet-active {
+  background: var(--m-primary) !important;
+  width: 24px !important;
+  border-radius: var(--m-radius-full) !important;
+}
+
+/* Owl carousel (onde ainda usado) */
+body .page-wrapper .owl-dots .owl-dot span {
+  width: 8px !important;
+  height: 8px !important;
+  background: var(--m-gray-300) !important;
+  border: none !important;
+  transition: all var(--m-transition-fast) !important;
+}
+
+body .page-wrapper .owl-dots .owl-dot.active span {
+  background: var(--m-primary) !important;
+  width: 24px !important;
+}
+
+
+/* ─── I. PLP (CATEGORIA) ─────────────────────────────────────────────────── */
+
+/* Breadcrumbs */
+body .page-wrapper .nav-breadcrumbs,
+body .page-wrapper .breadcrumbs {
+  font-size: var(--m-text-xs) !important;
+  color: var(--m-text-muted) !important;
+  padding: var(--m-sp-3) 0 !important;
+}
+
+body .page-wrapper .breadcrumbs a {
+  color: var(--m-text-muted) !important;
+  text-decoration: none !important;
+  transition: color var(--m-transition-fast) !important;
+}
+
+body .page-wrapper .breadcrumbs a:hover {
+  color: var(--m-primary) !important;
+}
+
+/* Toolbar */
+body .page-wrapper .toolbar.toolbar-products {
+  display: flex !important;
+  align-items: center !important;
+  gap: var(--m-sp-3) !important;
+  padding: var(--m-sp-3) var(--m-sp-4) !important;
+  background: var(--m-surface-raised) !important;
+  border: 1px solid var(--m-gray-100) !important;
+  border-radius: var(--m-radius-md) !important;
+  margin-bottom: var(--m-sp-4) !important;
+  font-size: var(--m-text-sm) !important;
+}
+
+body .page-wrapper .toolbar.toolbar-products select {
+  height: 36px !important;
+  padding: 0 32px 0 12px !important;
+  font-size: var(--m-text-sm) !important;
+  font-family: var(--m-font) !important;
+  border: 1px solid var(--m-border) !important;
+  border-radius: var(--m-radius-sm) !important;
+  background-color: var(--m-white) !important;
+  color: var(--m-text) !important;
+  cursor: pointer !important;
+  transition: border-color var(--m-transition-fast) !important;
+}
+
+body .page-wrapper .toolbar.toolbar-products select:focus {
+  border-color: var(--m-primary) !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Filter sidebar */
+body .page-wrapper .sidebar-main-1 .filter-options-title {
+  font-size: var(--m-text-sm) !important;
+  font-weight: 600 !important;
+  color: var(--m-gray-700) !important;
+  padding: var(--m-sp-3) 0 !important;
+  border-bottom: 1px solid var(--m-gray-100) !important;
+  cursor: pointer !important;
+}
+
+body .page-wrapper .sidebar-main-1 .filter-options-content {
+  padding: var(--m-sp-2) 0 !important;
+}
+
+body .page-wrapper .sidebar-main-1 .filter-options-item .item a {
+  display: flex !important;
+  align-items: center !important;
+  gap: var(--m-sp-2) !important;
+  padding: 6px 0 !important;
+  font-size: var(--m-text-sm) !important;
+  color: var(--m-gray-600) !important;
+  text-decoration: none !important;
+  transition: color var(--m-transition-fast) !important;
+}
+
+body .page-wrapper .sidebar-main-1 .filter-options-item .item a:hover {
+  color: var(--m-primary) !important;
+}
+
+/* Pagination */
+body .page-wrapper .pages .items .item a,
+body .page-wrapper .pages .items .item strong {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 36px !important;
+  height: 36px !important;
+  font-size: var(--m-text-sm) !important;
+  font-weight: 500 !important;
+  border: 1px solid var(--m-border) !important;
+  border-radius: var(--m-radius-sm) !important;
+  color: var(--m-gray-600) !important;
+  background: var(--m-white) !important;
+  text-decoration: none !important;
+  transition: all var(--m-transition-fast) !important;
+}
+
+body .page-wrapper .pages .items .item a:hover {
+  border-color: var(--m-primary) !important;
+  color: var(--m-primary) !important;
+  background: var(--m-primary-light) !important;
+}
+
+body .page-wrapper .pages .items .item.current strong {
+  background: var(--m-primary) !important;
+  border-color: var(--m-primary) !important;
+  color: var(--m-white) !important;
+}
+
+
+/* ─── J. PDP (PRODUTO) ───────────────────────────────────────────────────── */
 
 /* Product title */
-body.catalog-product-view .page-title-wrapper .page-title {
-  font-size: clamp(22px, 3vw, 28px);
-  font-weight: 700;
-  color: var(--m-gray-900);
-  line-height: 1.2;
-  letter-spacing: -0.01em;
+body.catalog-product-view .page-wrapper .page-title-wrapper h1.page-title {
+  font-size: var(--m-text-2xl) !important;
+  font-weight: 700 !important;
+  color: var(--m-gray-800) !important;
+  line-height: var(--m-leading-tight) !important;
+  letter-spacing: -0.02em !important;
+  margin-bottom: var(--m-sp-2) !important;
 }
 
-/* PDP price */
-body.catalog-product-view .product-info-price .price {
-  font-size: clamp(24px, 3vw, 32px);
-  font-weight: 800;
-  color: var(--m-gray-900);
+/* Product SKU on PDP */
+body.catalog-product-view .page-wrapper .product.attribute.sku .value,
+body.catalog-product-view .page-wrapper .awa-b2b-sku {
+  font-family: var(--m-font-mono) !important;
+  font-size: var(--m-text-xs) !important;
+  color: var(--m-text-muted) !important;
 }
 
-/* Add to cart on PDP */
-body.catalog-product-view #product-addtocart-button,
-body.catalog-product-view .box-tocart .action.tocart {
-  min-height: 52px;
-  border-radius: var(--m-radius-lg);
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: 0.01em;
-  padding: 0 var(--m-space-2xl);
+/* Price on PDP */
+body.catalog-product-view .page-wrapper .product-info-price .price {
+  font-size: var(--m-text-3xl) !important;
+  font-weight: 700 !important;
+  color: var(--m-gray-800) !important;
 }
 
-/* Tabs */
-body.catalog-product-view .product.data.items > .item.title > .switch {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--m-gray-500);
-  padding: var(--m-space-md) var(--m-space-lg);
-  border-bottom: 2px solid transparent;
-  transition: color var(--m-ease), border-color var(--m-ease);
+body.catalog-product-view .page-wrapper .product-info-price .old-price .price {
+  font-size: var(--m-text-lg) !important;
+  color: var(--m-text-muted) !important;
 }
 
-body.catalog-product-view .product.data.items > .item.title.active > .switch {
-  color: var(--m-primary);
-  border-bottom-color: var(--m-primary);
+/* Add to cart area */
+body.catalog-product-view .page-wrapper .box-tocart {
+  padding: var(--m-sp-4) 0 !important;
+  border-top: 1px solid var(--m-gray-100) !important;
+  border-bottom: 1px solid var(--m-gray-100) !important;
+  margin: var(--m-sp-4) 0 !important;
 }
 
-/* Attribute table */
-body.catalog-product-view .additional-attributes th {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--m-gray-600);
-  background: var(--m-surface-alt);
-  padding: var(--m-space-sm) var(--m-space-md);
+/* Qty input */
+body.catalog-product-view .page-wrapper .box-tocart .input-text.qty {
+  width: 60px !important;
+  height: 44px !important;
+  text-align: center !important;
+  font-size: var(--m-text-base) !important;
+  font-weight: 600 !important;
+  border: 1.5px solid var(--m-border) !important;
+  border-radius: var(--m-radius-sm) !important;
+  font-family: var(--m-font) !important;
+  color: var(--m-text) !important;
 }
 
-body.catalog-product-view .additional-attributes td {
-  font-size: 13px;
-  color: var(--m-text);
-  padding: var(--m-space-sm) var(--m-space-md);
+body.catalog-product-view .page-wrapper .box-tocart .input-text.qty:focus {
+  border-color: var(--m-primary) !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Product tabs */
+body.catalog-product-view .page-wrapper .product.data.items > .item.title > .switch {
+  font-size: var(--m-text-sm) !important;
+  font-weight: 600 !important;
+  color: var(--m-gray-600) !important;
+  padding: var(--m-sp-3) var(--m-sp-4) !important;
+  border: 1px solid var(--m-border) !important;
+  border-bottom: none !important;
+  border-radius: var(--m-radius-sm) var(--m-radius-sm) 0 0 !important;
+  background: var(--m-surface-raised) !important;
+  transition: all var(--m-transition-fast) !important;
+}
+
+body.catalog-product-view .page-wrapper .product.data.items > .item.title.active > .switch {
+  color: var(--m-primary) !important;
+  background: var(--m-white) !important;
+  border-bottom-color: var(--m-white) !important;
+}
+
+body.catalog-product-view .page-wrapper .product.data.items > .item.content {
+  border: 1px solid var(--m-border) !important;
+  border-radius: 0 0 var(--m-radius-md) var(--m-radius-md) !important;
+  padding: var(--m-sp-5) !important;
+  font-size: var(--m-text-sm) !important;
+  line-height: var(--m-leading-relaxed) !important;
+  color: var(--m-gray-600) !important;
+}
+
+/* Product description tables */
+body.catalog-product-view .page-wrapper .additional-attributes {
+  width: 100% !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+}
+
+body.catalog-product-view .page-wrapper .additional-attributes th,
+body.catalog-product-view .page-wrapper .additional-attributes td {
+  padding: var(--m-sp-2) var(--m-sp-3) !important;
+  font-size: var(--m-text-sm) !important;
+  border-bottom: 1px solid var(--m-gray-100) !important;
+}
+
+body.catalog-product-view .page-wrapper .additional-attributes th {
+  font-weight: 600 !important;
+  color: var(--m-gray-700) !important;
+  background: var(--m-surface-raised) !important;
+  width: 35% !important;
+}
+
+body.catalog-product-view .page-wrapper .additional-attributes td {
+  color: var(--m-gray-600) !important;
 }
 
 
-/* ========================================
-   K. FORMS — Inputs & Login
-   ======================================== */
+/* ─── K. FORMULÁRIOS / LOGIN / CADASTRO ──────────────────────────────────── */
 
-/* Consistent inputs */
-input[type="text"],
-input[type="email"],
-input[type="password"],
-input[type="tel"],
-input[type="number"],
-input[type="search"],
-select,
-textarea {
-  border: 1.5px solid var(--m-gray-200);
-  border-radius: var(--m-radius-md);
-  min-height: 44px;
-  padding: 0 14px;
-  font-size: 14px;
-  color: var(--m-text);
-  background: #fff;
-  transition: border-color var(--m-ease), box-shadow var(--m-ease);
+/* Input base */
+body .page-wrapper input[type="text"],
+body .page-wrapper input[type="email"],
+body .page-wrapper input[type="password"],
+body .page-wrapper input[type="tel"],
+body .page-wrapper input[type="number"],
+body .page-wrapper input[type="url"],
+body .page-wrapper textarea,
+body .page-wrapper select {
+  height: 44px !important;
+  padding: 0 var(--m-sp-3) !important;
+  font-size: var(--m-text-sm) !important;
+  font-family: var(--m-font) !important;
+  color: var(--m-text) !important;
+  background: var(--m-white) !important;
+  border: 1.5px solid var(--m-border) !important;
+  border-radius: var(--m-radius-sm) !important;
+  transition: border-color var(--m-transition-fast) !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
-input:focus,
-select:focus,
-textarea:focus {
-  border-color: var(--m-primary);
-  box-shadow: 0 0 0 3px rgb(183 51 55 / 10%);
-  outline: none;
+body .page-wrapper textarea {
+  height: auto !important;
+  padding: var(--m-sp-3) !important;
+  min-height: 100px;
+}
+
+body .page-wrapper input:focus,
+body .page-wrapper textarea:focus,
+body .page-wrapper select:focus {
+  border-color: var(--m-primary) !important;
+  box-shadow: none !important;
 }
 
 /* Labels */
-.field .label,
-.field label {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--m-gray-600);
-  margin-bottom: 4px;
+body .page-wrapper .field .label,
+body .page-wrapper .fieldset > .field > .label {
+  font-size: var(--m-text-sm) !important;
+  font-weight: 600 !important;
+  color: var(--m-gray-700) !important;
+  margin-bottom: var(--m-sp-1) !important;
+}
+
+/* Required asterisk */
+body .page-wrapper .field._required > .label::after {
+  color: var(--m-danger) !important;
+}
+
+/* Validation errors */
+body .page-wrapper .mage-error {
+  border-color: var(--m-danger) !important;
+}
+
+body .page-wrapper div.mage-error {
+  font-size: var(--m-text-xs) !important;
+  color: var(--m-danger) !important;
+  margin-top: var(--m-sp-1) !important;
+}
+
+/* Login form */
+body .page-wrapper .login-container .block-customer-login,
+body .page-wrapper .login-container .block-new-customer {
+  padding: var(--m-sp-6) !important;
+  background: var(--m-white) !important;
+  border: 1px solid var(--m-gray-100) !important;
+  border-radius: var(--m-radius-md) !important;
+  box-shadow: none !important;
+}
+
+body .page-wrapper .login-container .block-title {
+  font-size: var(--m-text-xl) !important;
+  font-weight: 700 !important;
+  color: var(--m-gray-800) !important;
+  padding-bottom: var(--m-sp-3) !important;
+  border-bottom: 2px solid var(--m-gray-100) !important;
+  margin-bottom: var(--m-sp-4) !important;
+}
+
+/* Fieldset spacing */
+body .page-wrapper .fieldset > .field {
+  margin-bottom: var(--m-sp-4) !important;
 }
 
 
-/* ========================================
-   L. FOOTER — Dark Professional
-   ======================================== */
+/* ─── L. FOOTER ──────────────────────────────────────────────────────────── */
 
-/* Footer heading refinement */
-.page_footer .velaFooterTitle,
-.page_footer .footer-block-title,
-.page_footer h4 {
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  margin-bottom: var(--m-space-lg);
+body .page-wrapper .page-footer {
+  background: var(--m-gray-800) !important;
+  color: var(--m-gray-300) !important;
+  font-size: var(--m-text-sm) !important;
+  line-height: var(--m-leading-relaxed) !important;
 }
 
-/* Footer links — consistent hover */
-.page_footer .velaFooterLinks a {
-  font-size: 13px;
-  line-height: 1.8;
-  transition: color var(--m-ease), padding-left var(--m-ease);
+body .page-wrapper .page-footer a {
+  color: var(--m-gray-300) !important;
+  text-decoration: none !important;
+  transition: color var(--m-transition-fast) !important;
 }
 
-.page_footer .velaFooterLinks a:hover {
-  padding-left: 4px;
+body .page-wrapper .page-footer a:hover {
+  color: var(--m-white) !important;
+}
+
+/* Footer headings */
+body .page-wrapper .page-footer h3,
+body .page-wrapper .page-footer h4,
+body .page-wrapper .page-footer .footer-title {
+  font-size: var(--m-text-sm) !important;
+  font-weight: 700 !important;
+  color: var(--m-white) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.06em !important;
+  margin-bottom: var(--m-sp-3) !important;
+}
+
+/* Footer links list */
+body .page-wrapper .page-footer ul {
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+body .page-wrapper .page-footer ul li {
+  padding: 4px 0 !important;
+}
+
+body .page-wrapper .page-footer ul li a {
+  font-size: var(--m-text-sm) !important;
+  color: var(--m-gray-400) !important;
+}
+
+body .page-wrapper .page-footer ul li a:hover {
+  color: var(--m-white) !important;
+}
+
+/* Footer social icons */
+body .page-wrapper .page-footer .awa-footer-social a {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: var(--m-radius-full) !important;
+  background: rgba(255,255,255,0.08) !important;
+  color: var(--m-gray-400) !important;
+  transition: all var(--m-transition-fast) !important;
+}
+
+body .page-wrapper .page-footer .awa-footer-social a:hover {
+  background: var(--m-primary) !important;
+  color: var(--m-white) !important;
+}
+
+/* Footer bottom bar */
+body .page-wrapper .page-footer .footer-bottom,
+body .page-wrapper .page-footer .copyright {
+  border-top: 1px solid rgba(255,255,255,0.08) !important;
+  padding-top: var(--m-sp-4) !important;
+  margin-top: var(--m-sp-6) !important;
+  font-size: var(--m-text-xs) !important;
+  color: var(--m-gray-500) !important;
 }
 
 
-/* ========================================
-   M. RESPONSIVENESS
-   ======================================== */
+/* ─── M. RESPONSIVIDADE ──────────────────────────────────────────────────── */
 
 @media (max-width: 991px) {
-  /* Reduce section gaps on tablet */
-  .cms-index-index .page-main .block,
-  .cms-index-index .page-main .shop-tab-title {
-    margin-bottom: var(--m-space-lg);
+  /* Header mobile */
+  body .page-wrapper .awa-main-header__inner.wp-header {
+    min-height: 56px !important;
+    gap: var(--m-sp-2) !important;
+    flex-wrap: wrap !important;
   }
 
-  /* Swiper arrows smaller */
-  .swiper-button-prev,
-  .swiper-button-next {
-    width: 34px;
-    height: 34px;
+  body .page-wrapper .awa-header-brand .logo img {
+    max-height: 40px !important;
+  }
+
+  /* Search goes full width on mobile */
+  body .page-wrapper .awa-header-search-col {
+    order: 10 !important;
+    flex: 1 0 100% !important;
+    max-width: 100% !important;
+    margin-top: var(--m-sp-1) !important;
+  }
+
+  body .page-wrapper .awa-professional-search .input-text,
+  body .page-wrapper .awa-header-search-col #search {
+    height: 42px !important;
+    font-size: var(--m-text-sm) !important;
+  }
+
+  /* Card grid mobile */
+  body .page-wrapper .products-grid .product-items,
+  body .page-wrapper .wrapper.grid .product-items {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: var(--m-sp-2) !important;
+  }
+
+  /* Card mobile adjustments */
+  body .page-wrapper .product-item .product-info {
+    padding: var(--m-sp-2) !important;
+  }
+
+  body .page-wrapper .product-item .product-name a {
+    font-size: var(--m-text-xs) !important;
+  }
+
+  /* Section spacing mobile */
+  body.cms-index-index .page-wrapper .home-content > .container > div,
+  body.cms-home .page-wrapper .home-content > .container > div {
+    margin-bottom: var(--m-sp-5) !important;
+  }
+
+  /* Toolbar mobile */
+  body .page-wrapper .toolbar.toolbar-products {
+    flex-wrap: wrap !important;
+    gap: var(--m-sp-2) !important;
+    padding: var(--m-sp-2) var(--m-sp-3) !important;
+  }
+
+  /* PDP mobile */
+  body.catalog-product-view .page-wrapper .page-title-wrapper h1.page-title {
+    font-size: var(--m-text-xl) !important;
+  }
+
+  body.catalog-product-view .page-wrapper .product-info-price .price {
+    font-size: var(--m-text-2xl) !important;
+  }
+
+  /* Footer mobile columns */
+  body .page-wrapper .page-footer .awa-footer-columns {
+    flex-direction: column !important;
+    gap: var(--m-sp-6) !important;
   }
 }
 
 @media (max-width: 575px) {
-  /* Mobile typography */
-  .shop-tab-title h3,
-  .shop-tab-title .title {
-    font-size: 18px;
+  /* Ultra narrow cards */
+  body .page-wrapper .products-grid .product-items,
+  body .page-wrapper .wrapper.grid .product-items {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: var(--m-sp-1) !important;
   }
 
-  /* Mobile card CTA */
-  :is(.item-product, .product-item) .product-info-cart .action.tocart,
-  :is(.item-product, .product-item) .product-info-cart .btn-add-to-cart {
-    min-height: 38px;
-    font-size: 12px;
+  body .page-wrapper .product-item .product-info {
+    padding: 8px !important;
   }
 
-  /* Mobile PDP */
-  body.catalog-product-view .page-title-wrapper .page-title {
-    font-size: 20px;
+  body .page-wrapper .product-item .product-name a {
+    font-size: 11px !important;
+    min-height: auto !important;
+    -webkit-line-clamp: 2 !important;
   }
 
-  body.catalog-product-view .product-info-price .price {
-    font-size: 24px;
+  body .page-wrapper .product-item .actions-primary .action.tocart,
+  body .page-wrapper .product-item .btn-add-to-cart {
+    min-height: 36px !important;
+    font-size: 10px !important;
+    padding: 6px 8px !important;
   }
 
-  body.catalog-product-view #product-addtocart-button {
-    min-height: 48px;
-    font-size: 15px;
-    width: 100%;
+  /* B2B promo bar single line */
+  body .page-wrapper .awa-b2b-promo-bar__separator,
+  body .page-wrapper .awa-b2b-promo-bar__tail {
+    display: none !important;
+  }
+}
+
+@media (min-width: 1200px) {
+  /* Desktop larger cards grid */
+  body .page-wrapper .products-grid .product-items,
+  body .page-wrapper .wrapper.grid .product-items {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
+    gap: var(--m-sp-4) !important;
   }
 }
 
 
-/* ========================================
-   N. MICRO-INTERACTIONS & POLISH
-   ======================================== */
+/* ─── N. MICROINTERAÇÕES ─────────────────────────────────────────────────── */
 
-/* Focus rings — accessible, branded */
-:focus-visible {
-  outline: 2px solid var(--m-primary);
-  outline-offset: 2px;
+/* Focus ring global */
+body .page-wrapper a:focus-visible,
+body .page-wrapper button:focus-visible,
+body .page-wrapper input:focus-visible,
+body .page-wrapper select:focus-visible,
+body .page-wrapper [tabindex]:focus-visible {
+  outline: 2px solid var(--m-primary) !important;
+  outline-offset: 2px !important;
 }
 
-/* Messages — clean modern style */
-.messages .message {
-  border-radius: var(--m-radius-md);
-  padding: var(--m-space-md) var(--m-space-lg);
-  font-size: 14px;
-  line-height: 1.5;
+/* Smooth link transitions */
+body .page-wrapper a {
+  transition: color var(--m-transition-fast) !important;
 }
 
-/* Badge modernization (sale, new) */
-.onsale .sale-text,
-.product-label {
-  border-radius: var(--m-radius-sm);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  padding: 3px 8px;
+/* Loading state for buttons */
+body .page-wrapper .action.primary[disabled],
+body .page-wrapper .action.primary.disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+}
+
+/* Messages */
+body .page-wrapper .message.success {
+  background: var(--m-success-bg) !important;
+  color: var(--m-success) !important;
+  border: 1px solid var(--m-success) !important;
+  border-radius: var(--m-radius-sm) !important;
+  padding: var(--m-sp-3) var(--m-sp-4) !important;
+  font-size: var(--m-text-sm) !important;
+}
+
+body .page-wrapper .message.error {
+  background: var(--m-danger-bg) !important;
+  color: var(--m-danger) !important;
+  border: 1px solid var(--m-danger) !important;
+  border-radius: var(--m-radius-sm) !important;
+  padding: var(--m-sp-3) var(--m-sp-4) !important;
+  font-size: var(--m-text-sm) !important;
+}
+
+body .page-wrapper .message.warning,
+body .page-wrapper .message.notice {
+  background: var(--m-warning-bg) !important;
+  color: var(--m-warning) !important;
+  border: 1px solid var(--m-warning) !important;
+  border-radius: var(--m-radius-sm) !important;
+  padding: var(--m-sp-3) var(--m-sp-4) !important;
+  font-size: var(--m-text-sm) !important;
+}
+
+body .page-wrapper .message.info {
+  background: var(--m-info-bg) !important;
+  color: var(--m-info) !important;
+  border: 1px solid var(--m-info) !important;
+  border-radius: var(--m-radius-sm) !important;
+  padding: var(--m-sp-3) var(--m-sp-4) !important;
+  font-size: var(--m-text-sm) !important;
+}
+
+/* Badge / tag genérico */
+body .page-wrapper .hot-onsale .onsale,
+body .page-wrapper .hot-onsale .new-label,
+body .page-wrapper .hot-onsale .hot-label {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em !important;
+  padding: 4px 8px !important;
+  border-radius: var(--m-radius-sm) !important;
+  line-height: 1 !important;
+}
+
+body .page-wrapper .hot-onsale .onsale {
+  background: var(--m-primary) !important;
+  color: var(--m-white) !important;
+}
+
+body .page-wrapper .hot-onsale .new-label {
+  background: var(--m-info) !important;
+  color: var(--m-white) !important;
 }
 
 /* Smooth scroll */
@@ -641,11 +1306,148 @@ html {
 
 /* Selection */
 ::selection {
-  background: rgb(183 51 55 / 15%);
+  background: rgba(183, 51, 55, 0.12);
   color: var(--m-gray-900);
 }
 
-/* Skeleton loading placeholder for future JS */
+
+/* ─── O. DE-CLUTTER GLOBAL — Remoção de poluição visual ──────────────── */
+/* Eliminação cirúrgica de shadows excessivos, bordas duplas,
+   text-shadow, e inconsistências visuais em toda a loja. */
+
+/* Kill shadows em blocos/widgets/sidebar */
+body .page-wrapper .block,
+body .page-wrapper .widget,
+body .page-wrapper .sidebar-main .block {
+  box-shadow: none !important;
+}
+
+/* Kill bordas duplas em containers aninhados */
+body .page-wrapper .page-main .columns .column.main,
+body .page-wrapper .page-main .sidebar-main {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Kill text-shadow globalizado */
+body .page-wrapper h1,
+body .page-wrapper h2,
+body .page-wrapper h3,
+body .page-wrapper h4,
+body .page-wrapper p,
+body .page-wrapper a,
+body .page-wrapper span {
+  text-shadow: none !important;
+}
+
+/* Breadcrumbs — cleanup total */
+body .page-wrapper .breadcrumbs {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Dropdowns / Autocomplete / Minicart */
+body .page-wrapper .dropdown-menu,
+body .page-wrapper .ui-autocomplete,
+body .page-wrapper .search-autocomplete,
+body .page-wrapper .mage-suggest-dropdown,
+body .page-wrapper .autocomplete-suggestions,
+body .page-wrapper .action-menu,
+body .page-wrapper .minicart-wrapper .block-minicart {
+  border-radius: var(--m-radius-md) !important;
+  border: 1px solid var(--m-border) !important;
+  box-shadow: var(--m-shadow-md) !important;
+  overflow: hidden !important;
+}
+
+/* Modais / Overlays */
+body .page-wrapper .modal-inner-wrap,
+body .page-wrapper .modals-wrapper .modal-popup .modal-inner-wrap,
+body .page-wrapper .block-quickview .modal-inner-wrap {
+  border-radius: var(--m-radius-md) !important;
+  box-shadow: var(--m-shadow-lg) !important;
+}
+
+/* Category carousel items — consistent radius */
+body .page-wrapper .awa-category-item,
+body .page-wrapper .awa-category-card,
+body .page-wrapper .categorytab-container .item {
+  border-radius: var(--m-radius-md) !important;
+  overflow: hidden !important;
+  border: 1px solid var(--m-gray-200) !important;
+  box-shadow: none !important;
+}
+
+/* Testimonials / blocos genéricos */
+body .page-wrapper .testimonials-item,
+body .page-wrapper .testimonial-item {
+  border-radius: var(--m-radius-md) !important;
+  border: 1px solid var(--m-gray-100) !important;
+  box-shadow: none !important;
+  padding: var(--m-sp-4) !important;
+}
+
+/* Cart / Checkout containers */
+body .page-wrapper .cart-container .form-cart,
+body .page-wrapper .checkout-container .opc-wrapper,
+body .page-wrapper .opc-block-summary {
+  border-radius: var(--m-radius-md) !important;
+}
+
+/* Qty input universal */
+body .page-wrapper .input-text.qty,
+body .page-wrapper input.qty {
+  border-radius: var(--m-radius-sm) !important;
+  text-align: center !important;
+}
+
+/* Compare floating bar */
+body .page-wrapper .awa-compare-floating-bar {
+  border-radius: var(--m-radius-md) !important;
+  box-shadow: var(--m-shadow-md) !important;
+}
+
+/* System messages — kill shadows */
+body .page-wrapper .messages .message {
+  box-shadow: none !important;
+}
+
+/* Footer — kill shadow */
+body .page-wrapper .page_footer {
+  box-shadow: none !important;
+}
+
+/* Swatch options — 4px radius */
+body .page-wrapper .swatch-option {
+  border-radius: var(--m-radius-xs) !important;
+}
+
+
+/* ─── P. RESPONSIVE EXTRAS ───────────────────────────────────────────── */
+
+@media (max-width: 991px) {
+  body .page-wrapper .swiper-button-next,
+  body .page-wrapper .swiper-button-prev {
+    width: 34px !important;
+    height: 34px !important;
+  }
+}
+
+@media (max-width: 575px) {
+  body .page-wrapper .modal-inner-wrap {
+    border-radius: var(--m-radius-sm) var(--m-radius-sm) 0 0 !important;
+  }
+
+  body.catalog-product-view .page-wrapper #product-addtocart-button {
+    width: 100% !important;
+    min-height: 48px !important;
+  }
+}
+
+
+/* ─── Q. SKELETON LOADER ─────────────────────────────────────────────── */
+
 .awa-skeleton {
   background: linear-gradient(90deg, var(--m-gray-100) 25%, var(--m-gray-50) 50%, var(--m-gray-100) 75%);
   background-size: 200% 100%;
