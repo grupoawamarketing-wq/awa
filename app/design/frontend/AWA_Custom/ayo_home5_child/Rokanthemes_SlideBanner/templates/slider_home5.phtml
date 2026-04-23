@@ -113,6 +113,31 @@ if ($banners = $block->getBannerCollection()):
     };
 ?>
 <?php
+// LCP Preload: inject <link rel="preload"> for the first hero images so the
+// browser fetches them as soon as this template is parsed — before Swiper JS.
+// This eliminates the "Load Delay" that causes LCP > 20s on mobile Lighthouse.
+if (!empty($desktopSlides)) {
+    $_plHtml = $block->getImageElement($desktopSlides[0]['image'], '', true);
+    if (preg_match('/src="([^"]+)"/', $_plHtml, $_plM)) {
+        $_plWebp = preg_replace('/\.(jpg|jpeg|png)$/i', '.webp', $_plM[1]);
+        $_plPath = preg_replace('#^.*/media/#', '', $_plWebp);
+        $__useWebp = file_exists(BP . '/pub/media/' . ltrim($_plPath, '/'));
+        $_plFinal = $__useWebp ? $_plWebp : $_plM[1];
+        echo '<link rel="preload" as="image" fetchpriority="high" href="' . $block->escapeUrl($_plFinal) . '" media="(min-width: 768px)">' . "\n";
+    }
+}
+if (!empty($mobileSlides)) {
+    $_plHtml = $block->getImageElementMobile($mobileSlides[0]['image'], '', true);
+    if (preg_match('/src="([^"]+)"/', $_plHtml, $_plM)) {
+        $_plWebp = preg_replace('/\.(jpg|jpeg|png)$/i', '.webp', $_plM[1]);
+        $_plPath = preg_replace('#^.*/media/#', '', $_plWebp);
+        $__useWebp = file_exists(BP . '/pub/media/' . ltrim($_plPath, '/'));
+        $_plFinal = $__useWebp ? $_plWebp : $_plM[1];
+        echo '<link rel="preload" as="image" fetchpriority="high" href="' . $block->escapeUrl($_plFinal) . '" media="(max-width: 767px)">' . "\n";
+    }
+}
+?>
+<?php
 /**
  * LCP Fix: Critical CSS to show first hero slide before OWL Carousel JS loads.
  *
@@ -179,12 +204,13 @@ if ($banners = $block->getBannerCollection()):
             $banner = $slide['banner'];
             $desktopImage = $slide['image'];
             $isFirst = ($slideIndex === 0);
+            $isEager = ($slideIndex <= 1); // 2 primeiros slides: eager load (autoplay avança)
             ?>
             <div class="banner_item swiper-slide">
                 <div class="banner_item_bg">
                     <?php
                     $slideAlt = $banner->getSlideText() ?: ($banner->getSlideTitle() ?: '');
-                    $imgHtml  = $block->getImageElement($desktopImage, $slideAlt, $isFirst);
+                    $imgHtml  = $block->getImageElement($desktopImage, $slideAlt, $isFirst); // fetchpriority=high apenas slide 0
                     if (preg_match('/src="([^"]+)"/', $imgHtml, $_m)) {
                         $_webp = preg_replace('/\.(jpg|jpeg|png)$/i', '.webp', $_m[1]);
                         // Converte URL em caminho relativo dentro de pub/media
@@ -223,12 +249,13 @@ if ($banners = $block->getBannerCollection()):
             $banner = $slide['banner'];
             $heroImage = $slide['image'];
             $isFirst = ($slideIndex === 0);
+            $isEager = ($slideIndex <= 1); // 2 primeiros slides: eager load (autoplay avança)
             ?>
             <div class="banner_item swiper-slide">
                 <div class="banner_item_bg">
                     <?php
                     $slideAlt = $banner->getSlideText() ?: ($banner->getSlideTitle() ?: '');
-                    $imgHtml  = $block->getImageElementMobile($heroImage, $slideAlt, $isFirst);
+                    $imgHtml  = $block->getImageElementMobile($heroImage, $slideAlt, $isFirst); // fetchpriority=high apenas slide 0
                     if (preg_match('/src="([^"]+)"/', $imgHtml, $_m)) {
                         $_webp = preg_replace('/\.(jpg|jpeg|png)$/i', '.webp', $_m[1]);
                         // Converte URL em caminho relativo dentro de pub/media
@@ -426,13 +453,9 @@ if ($banners = $block->getBannerCollection()):
                 root.addEventListener('touchstart', start, { passive: true, capture: true, once: true });
                 root.addEventListener('click', start, { passive: true, capture: true, once: true });
 
-                // Fallback bem tardio (não competir com LCP/TBT): inicia depois de um bom tempo.
-                // Obs: em Lighthouse, isso tende a ficar fora da janela de medição.
-                if ('requestIdleCallback' in window) {
-                    window.requestIdleCallback(start, { timeout: 60000 });
-                } else {
-                    window.setTimeout(start, 60000);
-                }
+                // Sem fallback automatico: Swiper so inicia com interacao do usuario no mobile.
+                // O requestIdleCallback(timeout=60s) disparava durante gaps de idle (~25s)
+                // fazendo cavalete_lateral (slide 2) tornar-se o LCP por Render Delay tardio.
             }
 
             runAfterWindowLoad(bindMobileIntentInit);
