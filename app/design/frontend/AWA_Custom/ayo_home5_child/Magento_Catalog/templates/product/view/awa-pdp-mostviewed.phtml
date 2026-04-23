@@ -2,9 +2,6 @@
 /**
  * AWA PDP — Produtos que Você Também Pode Gostar
  *
- * Reutiliza a coleção de mais visualizados como seção de
- * "produtos relacionados" no PDP. Título customizado para contexto de PDP.
- *
  * @var \Rokanthemes\MostviewedProduct\Block\Mostviewed $block
  */
 declare(strict_types=1);
@@ -20,17 +17,12 @@ if (!$_productCollection || !$_productCollection->getSize()) {
     return;
 }
 
-$_helper    = $this->helper('Magento\Catalog\Helper\Output');
-$image      = 'category_page_grid';
-$templateType = \Magento\Catalog\Block\Product\ReviewRendererInterface::SHORT_VIEW;
+$image = 'category_page_grid';
 ?>
 
 <section class="awa-pdp-mostviewed" aria-labelledby="awa-pdp-mv-heading">
-
     <div class="rokan-product-heading rokan-featured-heading">
-        <h2 id="awa-pdp-mv-heading">
-            <?= $block->escapeHtml(__('Você também pode se interessar')) ?>
-        </h2>
+        <h2 id="awa-pdp-mv-heading"><?php echo $block->escapeHtml(__('Você também pode se interessar')); ?></h2>
     </div>
 
     <div class="awa-pdp-mv-tabs" id="awa-pdp-mv-tabs" role="tablist" aria-label="Filtrar por marca"></div>
@@ -39,7 +31,7 @@ $templateType = \Magento\Catalog\Block\Product\ReviewRendererInterface::SHORT_VI
         <div class="swiper products-swiper products-swiper--mostviewed">
             <div class="swiper-wrapper">
                 <?php $i = 0; foreach ($_productCollection as $_product): if ($i >= 8) { break; } ?>
-                <?php
+                    <?php
                     $_brand = '';
                     try {
                         $_brandAttr = $_product->getResource()->getAttribute('marca_moto');
@@ -47,58 +39,127 @@ $templateType = \Magento\Catalog\Block\Product\ReviewRendererInterface::SHORT_VI
                             $_brandVal = $_product->getAttributeText('marca_moto');
                             $_brand = is_array($_brandVal) ? implode(',', $_brandVal) : (string) $_brandVal;
                         }
-                    } catch (\Throwable $e) {}
-                ?>
-                <div class="swiper-slide" data-brand="<?= $block->escapeHtmlAttr($_brand) ?>">
-                <div class="product-item">
-                    <?php
-                    $productImage      = $block->getImage($_product, $image);
+                    } catch (\Throwable $e) {
+                        $_brand = '';
+                    }
+
+                    $productImage = $block->getImage($_product, $image);
+                    $productImageSm = $block->getImage($_product, 'category_page_grid_sm');
+                    $productImageMd = $block->getImage($_product, 'category_page_list');
                     $productImageThumb = $block->getImage($_product, 'category_image_second_small');
                     ?>
-                    <div class="product-thumb">
-                        <a href="<?= $block->escapeUrl($_product->getProductUrl()) ?>"
-                           class="product-thumb-link product photo product-item-photo"
-                           aria-label="<?= $block->escapeHtmlAttr($_product->getName()) ?>"
-                           tabindex="-1">
-                            <span class="first-thumb">
-                                <?php
-                                $_imgHtml = $productImage->toHtml();
-                                $_imgHtml = str_replace('loading="eager"', 'loading="lazy"', $_imgHtml);
-                                if (strpos($_imgHtml, 'loading=') === false) {
-                                    $_imgHtml = str_replace('<img ', '<img loading="lazy" decoding="async" ', $_imgHtml);
-                                }
-                                echo $_imgHtml; ?>
-                            </span>
-                        </a>
-                    </div>
+                    <div class="swiper-slide" data-brand="<?php echo $block->escapeHtmlAttr($_brand); ?>">
+                        <div class="product-item item-product" data-product-id="<?php echo (int) $_product->getId(); ?>">
+                            <div class="product-thumb">
+                                <a href="<?php echo $block->escapeUrl($_product->getProductUrl()); ?>"
+                                   class="product-thumb-link product photo product-item-photo"
+                                   aria-label="<?php echo $block->escapeHtmlAttr($_product->getName()); ?>"
+                                   tabindex="-1">
+                                    <span class="first-thumb">
+                                        <?php
+                                        $_mvSrcset = $block->escapeUrl($productImageSm->getImageUrl()) . ' 350w, '
+                                            . $block->escapeUrl($productImageMd->getImageUrl()) . ' 480w, '
+                                            . $block->escapeUrl($productImage->getImageUrl()) . ' 700w';
+                                        $_mvSizes = '(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw';
+                                        $_imgHtml = $productImage->toHtml();
+                                        $_imgHtml = str_replace('loading="eager"', 'loading="lazy"', $_imgHtml);
+                                        if (strpos($_imgHtml, 'loading=') === false) {
+                                            $_imgHtml = str_replace('<img ', '<img loading="lazy" decoding="async" ', $_imgHtml);
+                                        }
+                                        $_imgHtml = str_replace('<img ', '<img srcset="' . $_mvSrcset . '" sizes="' . $_mvSizes . '" ', $_imgHtml);
+                                        echo $_imgHtml;
+                                        ?>
+                                    </span>
+                                    <?php if ($_product->getTypeID() === 'simple'): ?>
+                                        <span class="second-thumb">
+                                            <?php
+                                            $_thumbHtml = $productImageThumb->toHtml();
+                                            if (strpos($_thumbHtml, 'loading=') === false) {
+                                                $_thumbHtml = str_replace('<img ', '<img loading="lazy" decoding="async" ', $_thumbHtml);
+                                            }
+                                            echo $_thumbHtml;
+                                            ?>
+                                        </span>
+                                    <?php endif; ?>
+                                </a>
+                                <div class="hot-onsale">
+                                    <?php if ($_product->getFinalPrice() < $_product->getPrice()): ?>
+                                        <span class="onsale">
+                                            <span class="sale-bg"></span>
+                                            <span class="sale-text"><?php echo $block->escapeHtml(__('Sale')); ?></span>
+                                        </span>
+                                    <?php else: ?>
+                                        <?php $newLabelHelper = $this->helper('Rokanthemes\RokanBase\Helper\Newlabel'); ?>
+                                        <?php if ($newLabelHelper->isProductNew($_product)): ?>
+                                            <div class="onsale new-lable"><?php echo $block->escapeHtml(__('New')); ?></div>
+                                        <?php endif; ?>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
 
-                    <div class="product-info">
-                        <div class="product-name">
-                            <a class="product-item-link"
-                               href="<?= $block->escapeUrl($_product->getProductUrl()) ?>"
-                               title="<?= $block->escapeHtmlAttr($_product->getName()) ?>">
-                                <?= $block->escapeHtml($_product->getName()) ?>
-                            </a>
-                        </div>
+                            <div class="product-info">
+                                <h3 class="product-name">
+                                    <a class="product-item-link"
+                                       href="<?php echo $block->escapeUrl($_product->getProductUrl()); ?>"
+                                       title="<?php echo $block->escapeHtmlAttr($_product->getName()); ?>">
+                                        <?php echo $block->escapeHtml($_product->getName()); ?>
+                                    </a>
+                                </h3>
+                                <div class="awa-b2b-sku">
+                                    <span class="awa-b2b-sku__label"><?php echo $block->escapeHtml(__('Cod:')); ?></span>
+                                    <span class="awa-b2b-sku__value"><?php echo $block->escapeHtml($_product->getSku()); ?></span>
+                                </div>
 
-                        <?php if ($this->getConfig('show_price')): ?>
-                        <div class="price-box">
-                            <?= /* @noEscape */ $block->getProductPrice($_product) ?>
+                                <?php if ($this->getConfig('show_price')): ?>
+                                    <div class="info-price">
+                                        <?php /* @noEscape */ echo $this->helper('Rokanthemes\Themeoption\Helper\Data')->getPriceDisplayCustom($block->getProductPrice($_product)); ?>
+                                    </div>
+                                <?php endif; ?>
+
+                                <div class="product-info-cart">
+                                    <?php if ($this->getConfig('addtocart')): ?>
+                                        <div class="actions-primary addcart-link">
+                                            <?php if ($_product->isSaleable()): ?>
+                                                <?php $postDataHelper = $this->helper('Magento\Framework\Data\Helper\PostHelper'); ?>
+                                                <?php
+                                                $postData = $postDataHelper->getPostData(
+                                                    $block->getAddToCartUrl($_product),
+                                                    ['product' => $_product->getEntityId()]
+                                                );
+                                                $postParams = json_decode($postData, true);
+                                                ?>
+                                                <form data-role="tocart-form"
+                                                      action="<?php echo $block->escapeUrl($postParams['action']); ?>"
+                                                      method="post">
+                                                    <input type="hidden" name="product" value="<?php echo $block->escapeHtmlAttr((string) $postParams['data']['product']); ?>">
+                                                    <input type="hidden" name="<?php echo $block->escapeHtmlAttr(Action::PARAM_NAME_URL_ENCODED); ?>" value="<?php echo $block->escapeHtmlAttr($postParams['data'][Action::PARAM_NAME_URL_ENCODED]); ?>">
+                                                    <?php echo $block->getBlockHtml('formkey'); ?>
+                                                    <button type="submit" title="<?php echo $block->escapeHtmlAttr(__('Add to Cart')); ?>" class="btn-add-to-cart action tocart primary">
+                                                        <span><?php echo $block->escapeHtml(__('Add to Cart')); ?></span>
+                                                    </button>
+                                                </form>
+                                            <?php else: ?>
+                                                <?php if ($_product->getIsSalable()): ?>
+                                                    <div class="stock available"><span><?php echo $block->escapeHtml(__('In stock')); ?></span></div>
+                                                <?php else: ?>
+                                                    <div class="stock unavailable"><span><?php echo $block->escapeHtml(__('Out of stock')); ?></span></div>
+                                                <?php endif; ?>
+                                            <?php endif; ?>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
                         </div>
-                        <?php endif; ?>
                     </div>
-                </div>
-                </div>
                 <?php $i++; endforeach; ?>
             </div>
 
             <?php if ($this->getConfig('next_back')): ?>
-            <div class="swiper-button-prev" aria-label="<?= $block->escapeHtmlAttr(__('Anterior')) ?>"></div>
-            <div class="swiper-button-next" aria-label="<?= $block->escapeHtmlAttr(__('Próximo')) ?>"></div>
+                <div class="swiper-button-prev" aria-label="<?php echo $block->escapeHtmlAttr(__('Anterior')); ?>"></div>
+                <div class="swiper-button-next" aria-label="<?php echo $block->escapeHtmlAttr(__('Próximo')); ?>"></div>
             <?php endif; ?>
         </div>
     </div>
-
 </section>
 
 <script type="text/x-magento-init">
@@ -134,6 +195,7 @@ $templateType = \Magento\Catalog\Block\Product\ReviewRendererInterface::SHORT_VI
         if (b && brands.indexOf(b) === -1) { brands.push(b); }
     });
     if (brands.length < 2) { tabsEl.style.display = 'none'; return; }
+
     function makeTab(label, value) {
         var btn = document.createElement('button');
         btn.className = 'awa-pdp-mv-tab' + (value === '' ? ' awa-active' : '');
@@ -161,6 +223,7 @@ $templateType = \Magento\Catalog\Block\Product\ReviewRendererInterface::SHORT_VI
         });
         return btn;
     }
+
     tabsEl.appendChild(makeTab('Todos', ''));
     brands.forEach(function (b) { tabsEl.appendChild(makeTab(b, b)); });
 })();

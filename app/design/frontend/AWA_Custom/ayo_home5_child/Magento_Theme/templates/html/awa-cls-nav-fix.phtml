@@ -1,0 +1,65 @@
+<?php
+declare(strict_types=1);
+/**
+ * AWA CLS Fix v5.0 — Critical header layout CSS inline no head (2026-04-23).
+ *
+ * Replica as regras de layout do awa-header-premium.css (carregado async)
+ * para que o header já tenha o layout final no first paint → CLS → 0.
+ *
+ * Inclui:
+ *   1. display:contents no header (sem caixa própria = sem shift de conteúdo)
+ *   2. Mobile grid layout ≤991px (replicado de awa-header-premium.css)
+ *   3. Promo bar min-height ≤480px
+ *   4. Nav collapse na homepage (preservado do v4.1)
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ */
+?>
+<style id="awa-cls-nav-fix">
+/* AWA CLS Fix v5.0 — inline last-in-head (2026-04-23)
+   Replica layout rules de awa-header-premium.css para evitar CLS ao carregar async. */
+
+/* 1. HEADER DISSOLVE */
+header.awa-site-header.awa-header-professional{display:contents!important}
+
+/* 2. MOBILE GRID ≤991px */
+@media(max-width:991px){
+#header .header .header-main :is(.awa-main-header__inner[data-awa-header-row],.wp-header[data-awa-header-row]),
+#header .header .header_main :is(.awa-main-header__inner[data-awa-header-row],.wp-header[data-awa-header-row]),
+#header .header_main :is(.awa-main-header__inner[data-awa-header-row],.wp-header[data-awa-header-row]),
+#header .header-main :is(.awa-main-header__inner[data-awa-header-row],.wp-header[data-awa-header-row]),
+#header :is(.awa-main-header__inner[data-awa-header-row],.wp-header[data-awa-header-row]){
+display:grid!important;grid-template-columns:44px minmax(0,1fr) 44px!important;
+grid-template-rows:auto auto!important;
+grid-template-areas:"nav brand cart" "search search search"!important;
+gap:10px 12px!important;width:100%!important;max-width:none!important;
+min-height:auto!important;height:auto!important;
+padding:0 16px!important;align-items:center!important;box-sizing:border-box!important}
+#header :is(.awa-main-header__inner[data-awa-header-row],.wp-header[data-awa-header-row]) .awa-header-primary-row{display:contents!important}
+#header .awa-header-mobile-toggle{grid-area:nav!important;justify-self:start!important;align-self:center!important}
+#header .awa-header-brand-cell,#header .col-md-2.awa-header-brand{grid-area:brand!important;justify-self:center!important;justify-content:center!important;min-width:0!important;width:100%!important}
+#header .awa-header-brand-cell .logo,#header .col-md-2.awa-header-brand .logo{margin-left:auto!important;margin-right:auto!important}
+#header .awa-header-brand-cell .logo img,#header .col-md-2.awa-header-brand .logo img{max-height:44px!important;min-height:0!important;margin-left:auto!important;margin-right:auto!important}
+#header .awa-header-cart-link{grid-area:cart!important;justify-self:end!important;align-self:center!important}
+#header :is(.awa-main-header__inner[data-awa-header-row],.wp-header[data-awa-header-row])>.top-search,
+#header :is(.awa-main-header__inner[data-awa-header-row],.wp-header[data-awa-header-row])>.awa-header-search-col{grid-area:search!important;width:100%!important;max-width:none!important}
+#header .awa-header-right-col{display:none!important}
+#header .header.awa-main-header,#header .awa-main-header{padding:0!important}
+}
+
+/* 3. PROMO BAR ≤480px */
+@media(max-width:480px){
+#header .top-header.awa-b2b-promo-bar,
+#header .awa-b2b-promo-bar[data-awa-header-utility]{min-height:var(--awa-size-38,38px)!important;padding:var(--awa-space-1-5,6px) var(--awa-space-3,12px)!important}
+}
+
+/* 4. NAV COLLAPSE homepage (v4.1) */
+@media(max-width:991px){
+#html-body.cms-index-index #awa-primary-navigation,
+#html-body.cms-home #awa-primary-navigation,
+#html-body.cms-homepage_ayo_home5 #awa-primary-navigation{height:0!important;min-height:0!important;max-height:0!important;margin-top:0!important;margin-bottom:0!important;padding-top:0!important;padding-bottom:0!important;border:0!important;overflow:hidden!important}
+#html-body.cms-index-index .header-control.header-nav-global.cms_home_1,
+#html-body.cms-home .header-control.header-nav-global.cms_home_1,
+#html-body.cms-homepage_ayo_home5 .header-control.header-nav-global.cms_home_1{height:0!important;min-height:0!important;max-height:0!important;overflow:hidden!important}
+}
+</style>

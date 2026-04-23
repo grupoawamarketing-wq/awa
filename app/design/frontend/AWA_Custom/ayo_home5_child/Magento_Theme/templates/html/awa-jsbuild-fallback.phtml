@@ -1,0 +1,44 @@
+<script>
+(function (w) {
+    'use strict';
+
+    var attempts = 0;
+    var maxAttempts = 200;
+    var timer = null;
+
+    function installFallback() {
+        var context;
+
+        if (typeof w.define !== 'function' || !w.define.amd || !w.requirejs || !w.requirejs.s) {
+            return false;
+        }
+
+        context = w.requirejs.s.contexts && w.requirejs.s.contexts._;
+        if (!context) {
+            return false;
+        }
+
+        if (context.defined && context.defined.jsbuild) {
+            return true;
+        }
+
+        w.define('jsbuild', [], function () {
+            return {};
+        });
+
+        return true;
+    }
+
+    if (installFallback()) {
+        return;
+    }
+
+    timer = w.setInterval(function () {
+        attempts += 1;
+
+        if (installFallback() || attempts >= maxAttempts) {
+            w.clearInterval(timer);
+        }
+    }, 25);
+}(window));
+</script>

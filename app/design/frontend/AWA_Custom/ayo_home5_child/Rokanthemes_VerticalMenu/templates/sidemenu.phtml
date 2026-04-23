@@ -39,6 +39,15 @@ if (!empty($_config['general']['enable'])):
     <ul id="<?= $block->escapeHtmlAttr($menuId) ?>"
         class="togge-menu list-category-dropdown"
         data-limit-show="<?= (int) $limitShow ?>">
+        <li class="awa-vmenu-close-li" aria-hidden="true">
+            <button type="button"
+                    class="awa-vmenu-desktop-close-btn"
+                    data-role="awa-vmenu-desktop-close"
+                    aria-label="Fechar menu de categorias">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+                Fechar
+            </button>
+        </li>
         <?= /** @noEscape */ $_menu ?>
         <?php
             $_bgBlock = $block->getLayout()->createBlock(\Magento\Cms\Block\Block::class);
@@ -81,3 +90,70 @@ if (!empty($_config['general']['enable'])):
 </script>
 
 <?php endif; ?>
+
+<script>
+(function () {
+    'use strict';
+
+    function initVMenuDesktopClose() {
+        var nav = document.querySelector('[data-role="awa-vertical-menu"]');
+        if (!nav) return;
+
+        var trigger = nav.querySelector('.title-category-dropdown');
+        if (!trigger) return;
+
+        // Criar backdrop
+        var backdrop = document.getElementById('awa-vmenu-backdrop');
+        if (!backdrop) {
+            backdrop = document.createElement('div');
+            backdrop.id = 'awa-vmenu-backdrop';
+            backdrop.className = 'awa-vmenu-backdrop';
+            backdrop.setAttribute('aria-hidden', 'true');
+            document.body.appendChild(backdrop);
+        }
+
+        function isOpen() {
+            var ul = nav.querySelector('.togge-menu');
+            return ul ? ul.classList.contains('menu-open') : false;
+        }
+
+        function closeMenu() {
+            if (isOpen()) {
+                trigger.click();
+            }
+        }
+
+        // Backdrop fecha o menu
+        backdrop.addEventListener('click', closeMenu);
+
+        // Botão fechar dentro do painel fecha o menu
+        nav.addEventListener('click', function (e) {
+            if (e.target.closest('[data-role="awa-vmenu-desktop-close"]')) {
+                e.stopPropagation();
+                closeMenu();
+            }
+        });
+
+        // MutationObserver para sincronizar o backdrop com o estado do painel
+        if (window.MutationObserver) {
+            var ul = nav.querySelector('.togge-menu');
+            if (ul) {
+                new MutationObserver(function () {
+                    var open = ul.classList.contains('menu-open');
+                    if (open) {
+                        backdrop.classList.add('is-active');
+                    } else {
+                        backdrop.classList.remove('is-active');
+                    }
+                }).observe(ul, { attributes: true, attributeFilter: ['class'] });
+            }
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initVMenuDesktopClose, { once: true });
+    } else {
+        initVMenuDesktopClose();
+    }
+}());
+</script>
