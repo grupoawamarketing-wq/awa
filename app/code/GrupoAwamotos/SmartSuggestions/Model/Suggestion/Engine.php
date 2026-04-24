@@ -89,12 +89,12 @@ class Engine implements SuggestionEngineInterface
             // Get products customer buys regularly and calculate expected repurchase time
             $sql = "
                 SELECT
-                    i.PRODUTO as product_id,
-                    pr.DESCRICAO as product_name,
-                    pr.CODIGO as sku,
+                    i.MATERIAL as product_id,
+                    MAX(i.DESCRICAO) as product_name,
+                    i.MATERIAL as sku,
                     COUNT(DISTINCT p.CODIGO) as order_count,
-                    SUM(i.QUANTIDADE) as total_qty,
-                    AVG(i.QUANTIDADE) as avg_qty,
+                    SUM(i.QTDE) as total_qty,
+                    AVG(i.QTDE) as avg_qty,
                     MAX(i.VLRUNITARIO) as last_price,
                     MAX(p.DTPEDIDO) as last_purchase,
                     DATEDIFF(DAY, MAX(p.DTPEDIDO), GETDATE()) as days_since_purchase,
@@ -105,11 +105,10 @@ class Engine implements SuggestionEngineInterface
                     END as avg_cycle_days
                 FROM VE_PEDIDOITENS i
                 INNER JOIN VE_PEDIDO p ON i.PEDIDO = p.CODIGO
-                INNER JOIN ES_ESTOQUE pr ON i.PRODUTO = pr.CODIGO
                 WHERE p.CLIENTE = ?
                   AND p.STATUS NOT IN ('C', 'X')
                   AND p.DTPEDIDO >= DATEADD(YEAR, -2, GETDATE())
-                GROUP BY i.PRODUTO, pr.DESCRICAO, pr.CODIGO
+                GROUP BY i.MATERIAL
                 HAVING COUNT(DISTINCT p.CODIGO) >= 2
                 ORDER BY
                     (DATEDIFF(DAY, MAX(p.DTPEDIDO), GETDATE()) * 1.0 /
@@ -122,14 +121,15 @@ class Engine implements SuggestionEngineInterface
 
             $products = $this->connection->query($sql, [$customerId]);
 
+            // Filter by cycle ratio across all products, then cap at $limit
             $suggestions = [];
-            foreach (array_slice($products, 0, $limit) as $product) {
+            foreach ($products as $product) {
                 $cycleRatio = $product['avg_cycle_days'] > 0
                     ? $product['days_since_purchase'] / $product['avg_cycle_days']
                     : 0;
 
-                // Only suggest if approaching or past expected repurchase time
-                if ($cycleRatio >= 0.7) {
+                // Suggest when at least 50% of expected cycle has elapsed
+                if ($cycleRatio >= 0.5) {
                     $suggestions[] = [
                         'product_id' => (int)$product['product_id'],
                         'sku' => $product['sku'],
@@ -143,6 +143,10 @@ class Engine implements SuggestionEngineInterface
                         'urgency' => $cycleRatio >= 1.2 ? 'high' : ($cycleRatio >= 1.0 ? 'medium' : 'low'),
                         'reason' => 'repurchase'
                     ];
+
+                    if (count($suggestions) >= $limit) {
+                        break;
+                    }
                 }
             }
 
@@ -162,7 +166,7 @@ class Engine implements SuggestionEngineInterface
             // Find products frequently bought together with customer's recent purchases
             $sql = "
                 WITH CustomerProducts AS (
-                    SELECT DISTINCT i.PRODUTO
+                    SELECT DISTINCT i.MATERIAL
                     FROM VE_PEDIDOITENS i
                     INNER JOIN VE_PEDIDO p ON i.PEDIDO = p.CODIGO
                     WHERE p.CLIENTE = ?
@@ -171,25 +175,24 @@ class Engine implements SuggestionEngineInterface
                 ),
                 RelatedProducts AS (
                     SELECT
-                        i2.PRODUTO as related_product,
+                        i2.MATERIAL as related_product,
                         COUNT(DISTINCT i1.PEDIDO) as cooccurrence_count
                     FROM VE_PEDIDOITENS i1
-                    INNER JOIN VE_PEDIDOITENS i2 ON i1.PEDIDO = i2.PEDIDO AND i1.PRODUTO <> i2.PRODUTO
-                    WHERE i1.PRODUTO IN (SELECT PRODUTO FROM CustomerProducts)
-                      AND i2.PRODUTO NOT IN (SELECT PRODUTO FROM CustomerProducts)
-                    GROUP BY i2.PRODUTO
-                    HAVING COUNT(DISTINCT i1.PEDIDO) >= 3
+                    INNER JOIN VE_PEDIDOITENS i2 ON i1.PEDIDO = i2.PEDIDO AND i1.MATERIAL <> i2.MATERIAL
+                    WHERE i1.MATERIAL IN (SELECT MATERIAL FROM CustomerProducts)
+                      AND i2.MATERIAL NOT IN (SELECT MATERIAL FROM CustomerProducts)
+                    GROUP BY i2.MATERIAL
+                    HAVING COUNT(DISTINCT i1.PEDIDO) >= 2
                 )
                 SELECT
                     rp.related_product as product_id,
-                    pr.DESCRICAO as product_name,
-                    pr.CODIGO as sku,
+                    MAX(i.DESCRICAO) as product_name,
+                    rp.related_product as sku,
                     rp.cooccurrence_count,
                     MAX(i.VLRUNITARIO) as avg_price
                 FROM RelatedProducts rp
-                INNER JOIN ES_ESTOQUE pr ON rp.related_product = pr.CODIGO
-                INNER JOIN VE_PEDIDOITENS i ON rp.related_product = i.PRODUTO
-                GROUP BY rp.related_product, pr.DESCRICAO, pr.CODIGO, rp.cooccurrence_count
+                INNER JOIN VE_PEDIDOITENS i ON rp.related_product = i.MATERIAL
+                GROUP BY rp.related_product, rp.cooccurrence_count
                 ORDER BY rp.cooccurrence_count DESC
             ";
 
@@ -225,7 +228,7 @@ class Engine implements SuggestionEngineInterface
             // Find customers with similar purchase patterns (Jaccard similarity)
             $sql = "
                 WITH CustomerProducts AS (
-                    SELECT DISTINCT i.PRODUTO
+                    SELECT DISTINCT i.MATERIAL
                     FROM VE_PEDIDOITENS i
                     INNER JOIN VE_PEDIDO p ON i.PEDIDO = p.CODIGO
                     WHERE p.CLIENTE = ?
@@ -234,41 +237,42 @@ class Engine implements SuggestionEngineInterface
                 SimilarCustomers AS (
                     SELECT TOP 20
                         p.CLIENTE as similar_customer,
-                        COUNT(DISTINCT CASE WHEN i.PRODUTO IN (SELECT PRODUTO FROM CustomerProducts) THEN i.PRODUTO END) as common_products,
-                        COUNT(DISTINCT i.PRODUTO) as total_products
+                        COUNT(DISTINCT CASE WHEN i.MATERIAL IN (SELECT MATERIAL FROM CustomerProducts) THEN i.MATERIAL END) as common_products,
+                        COUNT(DISTINCT i.MATERIAL) as total_products
                     FROM VE_PEDIDO p
                     INNER JOIN VE_PEDIDOITENS i ON p.CODIGO = i.PEDIDO
                     WHERE p.CLIENTE <> ?
                       AND p.STATUS NOT IN ('C', 'X')
                       AND p.DTPEDIDO >= DATEADD(YEAR, -1, GETDATE())
                     GROUP BY p.CLIENTE
-                    HAVING COUNT(DISTINCT CASE WHEN i.PRODUTO IN (SELECT PRODUTO FROM CustomerProducts) THEN i.PRODUTO END) >= 3
+                    HAVING COUNT(DISTINCT CASE WHEN i.MATERIAL IN (SELECT MATERIAL FROM CustomerProducts) THEN i.MATERIAL END) >= 2
                     ORDER BY
-                        CAST(COUNT(DISTINCT CASE WHEN i.PRODUTO IN (SELECT PRODUTO FROM CustomerProducts) THEN i.PRODUTO END) AS FLOAT) /
-                        COUNT(DISTINCT i.PRODUTO) DESC
+                        CAST(COUNT(DISTINCT CASE WHEN i.MATERIAL IN (SELECT MATERIAL FROM CustomerProducts) THEN i.MATERIAL END) AS FLOAT) /
+                        COUNT(DISTINCT i.MATERIAL) DESC
                 ),
                 SimilarProducts AS (
                     SELECT
-                        i.PRODUTO as product_id,
+                        i.MATERIAL as product_id,
                         COUNT(DISTINCT p.CLIENTE) as customer_count,
-                        SUM(i.QUANTIDADE) as total_qty,
+                        SUM(i.QTDE) as total_qty,
                         AVG(i.VLRUNITARIO) as avg_price
                     FROM VE_PEDIDO p
                     INNER JOIN VE_PEDIDOITENS i ON p.CODIGO = i.PEDIDO
                     WHERE p.CLIENTE IN (SELECT similar_customer FROM SimilarCustomers)
-                      AND i.PRODUTO NOT IN (SELECT PRODUTO FROM CustomerProducts)
+                      AND i.MATERIAL NOT IN (SELECT MATERIAL FROM CustomerProducts)
                       AND p.STATUS NOT IN ('C', 'X')
-                    GROUP BY i.PRODUTO
+                    GROUP BY i.MATERIAL
                     HAVING COUNT(DISTINCT p.CLIENTE) >= 2
                 )
                 SELECT
                     sp.product_id,
-                    pr.DESCRICAO as product_name,
-                    pr.CODIGO as sku,
+                    MAX(i.DESCRICAO) as product_name,
+                    sp.product_id as sku,
                     sp.customer_count,
                     sp.avg_price
                 FROM SimilarProducts sp
-                INNER JOIN ES_ESTOQUE pr ON sp.product_id = pr.CODIGO
+                INNER JOIN VE_PEDIDOITENS i ON sp.product_id = i.MATERIAL
+                GROUP BY sp.product_id, sp.customer_count, sp.avg_price
                 ORDER BY sp.customer_count DESC, sp.total_qty DESC
             ";
 
@@ -416,9 +420,10 @@ class Engine implements SuggestionEngineInterface
                 f.CGC as cnpj,
                 f.CIDADE as city,
                 f.UF as state,
-                f.TELEFONE as phone,
-                f.EMAIL as email
+                COALESCE(c.FONECEL, c.FONE1) as phone,
+                c.EMAIL as email
             FROM FN_FORNECEDORES f
+            LEFT JOIN FN_CONTATO c ON c.FORNECEDOR = f.CODIGO AND c.PRINCIPAL = 'S'
             WHERE f.CODIGO = ?
         ";
 

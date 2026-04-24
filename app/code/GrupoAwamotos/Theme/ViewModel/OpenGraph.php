@@ -263,7 +263,23 @@ final class OpenGraph implements ArgumentInterface
             return mb_substr($description, 0, 200);
         }
 
-        return $this->getPageDescription();
+        // Build product-specific fallback instead of store default
+        $name = $this->normalizeText((string) $product->getName());
+        $parts = [$name];
+
+        $sku = (string) $product->getSku();
+        if ($sku !== '') {
+            $parts[] = "Cód. $sku";
+        }
+
+        $brand = $product->getAttributeText('manufacturer');
+        if ($brand && is_string($brand)) {
+            $parts[] = $brand;
+        }
+
+        $fallback = implode(' | ', $parts) . '. Compre na AWA Motos com entrega para todo Brasil.';
+
+        return mb_substr($fallback, 0, 200);
     }
 
     private function resolveCategoryDescription(Category $category): string

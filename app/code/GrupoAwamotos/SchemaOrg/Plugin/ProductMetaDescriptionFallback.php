@@ -8,6 +8,7 @@ use Magento\Catalog\Helper\Product\View as ProductViewHelper;
 use Magento\Framework\View\Result\Page;
 use Magento\Catalog\Model\Product;
 use Magento\Framework\Registry;
+use Magento\Framework\App\Config\ScopeConfigInterface;
 
 /**
  * Generates a human-readable meta description fallback when the product
@@ -16,7 +17,8 @@ use Magento\Framework\Registry;
 class ProductMetaDescriptionFallback
 {
     public function __construct(
-        private readonly Registry $registry
+        private readonly Registry $registry,
+        private readonly ScopeConfigInterface $scopeConfig
     ) {
     }
 
@@ -67,6 +69,26 @@ class ProductMetaDescriptionFallback
         }
         // Too short to be useful for SEO
         if (mb_strlen($description) < 50) {
+            return true;
+        }
+        // Store default description (not product-specific)
+        $storeDefault = trim((string) $this->scopeConfig->getValue(
+            'design/head/default_description',
+            \Magento\Store\Model\ScopeInterface::SCOPE_STORE
+        ));
+        if ($storeDefault !== '' && $description === $storeDefault) {
+            return true;
+        }
+        // Description doesn't mention product name at all (likely store-level)
+        $nameWords = array_filter(explode(' ', mb_strtolower($productName)), fn($w) => mb_strlen($w) > 3);
+        $descLower = mb_strtolower($description);
+        $matchCount = 0;
+        foreach ($nameWords as $word) {
+            if (str_contains($descLower, $word)) {
+                $matchCount++;
+            }
+        }
+        if (count($nameWords) > 0 && $matchCount === 0) {
             return true;
         }
 

@@ -63,6 +63,7 @@ class GenerateSuggestions
             $generated = 0;
             $sent = 0;
             $errors = 0;
+            $skipped = 0;
 
             foreach ($opportunities as $opportunity) {
                 try {
@@ -77,6 +78,16 @@ class GenerateSuggestions
                             'error' => $suggestion['error']
                         ]);
                         $errors++;
+                        continue;
+                    }
+
+                    // Skip saving if no products were suggested (empty cart)
+                    $productsCount = $suggestion['cart_summary']['total_products'] ?? 0;
+                    if ($productsCount === 0) {
+                        $this->logger->debug('SmartSuggestions: Skipping customer with no suggestions', [
+                            'customer_id' => $opportunity['customer_id'],
+                        ]);
+                        $skipped++;
                         continue;
                     }
 
@@ -108,8 +119,10 @@ class GenerateSuggestions
                     // Single save with final status
                     $history = $this->historyFactory->create();
                     $history->setData([
-                        'customer_id' => $opportunity['customer_id'],
-                        'customer_name' => $opportunity['customer_name'],
+                        'erp_customer_id' => $opportunity['customer_id'],
+                        'customer_name'   => $opportunity['customer_name'] ?? '',
+                        'customer_phone'  => $suggestion['customer']['phone'] ?? null,
+                        'customer_cnpj'   => $suggestion['customer']['cnpj'] ?? null,
                         'suggestion_data' => json_encode($suggestion),
                         'total_value' => $suggestion['cart_summary']['total_value'] ?? 0,
                         'products_count' => $suggestion['cart_summary']['total_products'] ?? 0,
@@ -132,9 +145,10 @@ class GenerateSuggestions
             $duration = round(microtime(true) - $startTime, 2);
 
             $this->logger->info(sprintf(
-                'SmartSuggestions: Suggestion generation completed. Generated: %d, Sent: %d, Errors: %d in %s seconds',
+                'SmartSuggestions: Suggestion generation completed. Generated: %d, Sent: %d, Skipped: %d, Errors: %d in %s seconds',
                 $generated,
                 $sent,
+                $skipped,
                 $errors,
                 $duration
             ));
