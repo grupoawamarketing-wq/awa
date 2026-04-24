@@ -1,6 +1,17 @@
 <?xml version="1.0"?>
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <!-- AWA Design System — Global CSS loaded on all pages (order 1300+) -->
+        <!-- AWA Design System — CSS Variables (must load first, sync) -->
+        <css src="css/awa-core-variables.css" order="100"/>
+        <css src="css/awa-global-components.css" order="1300"/>
+        <css src="css/awa-bugfixes-v2.css" order="1310"/>
+        <css src="css/awa-extra-pages.css" order="1315"/>
+        <css src="css/awa-mobile-polish.css" order="1325"/>
+        <css src="css/awa-animations-a11y.css" order="1330"/>
+        <css src="css/awa-final-polish.css" order="1335"/>
+    </head>
     <body>
         <!-- Override blank theme logo_width=170 with natural dimensions of logo_161x92_1.png -->
         <referenceBlock name="logo">
@@ -25,10 +36,21 @@
             O handle default é sempre ativo e resolve o merge.
         -->
         <referenceBlock name="head.additional">
+            <!--
+                AWA CLS Fix v5.0 — inline CSS no head para evitar layout shift no nav.
+                Replica as regras de layout de awa-header-premium.css (carregado async)
+                garantindo que o header já tenha layout final no first paint → CLS → 0.
+                Deve vir ANTES do critical inline CSS para aplicar antes do primeiro paint.
+            -->
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.cls.nav.fix"
+                   template="Magento_Theme::html/awa-cls-nav-fix.phtml"
+                   before="-"/>
+
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.critical.inline.css"
                    template="Magento_Theme::html/awa-critical-inline.phtml"
-                   before="-"/>
+                   after="awa.cls.nav.fix"/>
 
             <block class="GrupoAwamotos\Theme\Block\Html\HeroPreload"
                    name="awa.head.preload"

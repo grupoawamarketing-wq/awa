@@ -57,6 +57,7 @@ $asyncBundles = [
     // awa-header-classic-redesign: movido para async (2026-04-22) — themes.css já provê
     // flex layout base do header; anti-FOUC cobre cores; removido do XML (evita duplo).
     // awa-header-classic-redesign: revertido para sync (2026-04-23) via default_head_blocks.xml
+    $block->getViewFileUrl('css/awa-bundle-core.css'),      // Core rules + header promo bar (595KB)
     $block->getViewFileUrl('css/awa-bundle-vendor-libs.css'),  // Bootstrap+FA+Owl+icons (175KB)
     $block->getViewFileUrl('css/awa-bundle-custom.css'),
     $block->getViewFileUrl('css/awa-bundle-phases.css'),       // + animate-theme
@@ -133,10 +134,11 @@ body .page-wrapper .page_footer,.page-footer{background:#f8fafc !important;backg
 <?php if ($heroPreloadUrl): ?>
 <!-- LCP Hero Image Preload — fetchpriority=high, com media queries (Swiper SlideBanner, homepage) -->
 <!-- Desktop (.hidden-xs): só carregado em viewport >= 768px, evita consumo indevido no mobile -->
-<link rel="preload" href="<?= $block->escapeUrl($heroPreloadUrl) ?>" as="image" fetchpriority="high" media="(min-width: 768px)" type="image/webp"/>
+<!-- imagesrcset necessário para que Chrome associe o preload ao <source srcset> do <picture> gerado pelo slider_home5.phtml -->
+<link rel="preload" href="<?= $block->escapeUrl($heroPreloadUrl) ?>" imagesrcset="<?= $block->escapeUrl($heroPreloadUrl) ?>" as="image" fetchpriority="high" media="(min-width: 768px)" type="image/webp"/>
 <!-- Mobile (.visible-xs): só carregado em viewport <= 767px -->
 <?php $heroMobileUrl = $block->getHeroImageMobileUrl() ?: $heroPreloadUrl; ?>
-<link rel="preload" href="<?= $block->escapeUrl($heroMobileUrl) ?>" as="image" fetchpriority="high" media="(max-width: 767px)" type="image/webp"/>
+<link rel="preload" href="<?= $block->escapeUrl($heroMobileUrl) ?>" imagesrcset="<?= $block->escapeUrl($heroMobileUrl) ?>" as="image" fetchpriority="high" media="(max-width: 767px)" type="image/webp"/>
 <?php endif; ?>
 <!-- AWA Head Preload — Preconnect (precedência sobre dns-prefetch) -->
 <?php foreach ($preconnect as $origin): ?>

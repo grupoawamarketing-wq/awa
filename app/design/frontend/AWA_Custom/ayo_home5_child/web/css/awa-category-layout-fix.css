@@ -1,219 +1,144 @@
-/**
- * AWA Motos — Category Page Layout Fix
- * Carregado via catalog_category_view.xml, order 1200 (após todos os bundles).
- *
- * Corrige os seguintes bugs identificados em 2025-04-09:
- *  1. Imagem banner da categoria truncada em 200px por max-height do styles-m.css
- *  2. Botão "Faça login para ver preços" com texto cortado (flex row sem wrap)
- *  3. Toolbar inferior desalinhada por margin: 0 -15px do Bootstrap .row
- *  4. li.item-product sem reset de width/margin/padding correto
- */
-
-/* =============================================================================
-   1. BANNER DA CATEGORIA — fix max-height:200px (styles-m.css order 0)
-   awa-bundle-site.css (order 21) define height:clamp(180px,28vh,280px) !important
-   mas max-height sobrepõe height. Fix: anula max-height.
-   ============================================================================= */
-
 :is(body.catalog-category-view, body.catalogsearch-result-index) .category-image {
-    max-height: none !important;
-    height: clamp(170px, 22vh, 220px) !important;
+    max-height: none ;
+    height: clamp(170px, 22vh, 220px) ;
     overflow: hidden;
-    border-radius: 5px !important;
-    margin-bottom: 12px !important;
+    border-radius: 5px ;
+    margin-bottom: 12px ;
 }
 
 :is(body.catalog-category-view, body.catalogsearch-result-index) .category-image img,
 :is(body.catalog-category-view, body.catalogsearch-result-index) .category-image .image {
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: cover !important;
-    object-position: center center !important;
-    display: block !important;
+    width: 100% ;
+    height: 100% ;
+    object-fit: cover ;
+    object-position: center center ;
+    display: block ;
 }
 
-/* Em mobile: mantém banner oculto (padrão já definido no awa-bundle-category.css) */
 @media (max-width: 767px) {
     :is(body.catalog-category-view, body.catalogsearch-result-index) .category-image {
-        display: none !important;
+        display: none ;
     }
 }
 
-
-/* =============================================================================
-   2. B2B GATE — regras migradas
-   Fonte canônica: awa-ux-improvements.css seção 27.
-   ============================================================================= */
-/* B2B gate → ver awa-ux-improvements.css seção 27 */
-
-
-/* =============================================================================
-   3. TOOLBAR INFERIOR — margin: 0 -15px do Bootstrap .row causa 30px overflow
-   .product-content-right tem overflow-x:clip mas o conteúdo interno
-   da paginação fica levemente desalinhado.
-   ============================================================================= */
-
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .product-content-right > .row:last-child {
-    margin-left: 0 !important;
-    margin-right: 0 !important;
+    margin-left: 0 ;
+    margin-right: 0 ;
 }
 
-/* =============================================================================
-   3b. FIX: .product-content-right display:grid sem grid-template-columns
-   awa-cro-priority.css aplica display:grid sem definir colunas, fazendo o
-   grid column auto-sized pelo conteúdo interno (intrinsic sizing) e excedendo
-   a largura disponível em mobile (+40px de overflow).
-   Fix: forçar a coluna a usar todo o espaço disponível sem transbordar.
-   ============================================================================= */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .product-content-right {
-    grid-template-columns: minmax(0, 1fr) !important;
-    overflow-x: clip !important;
+    grid-template-columns: minmax(0, 1fr) ;
+    overflow-x: clip ;
 }
 
-/* Padroniza visual da toolbar inferior com a toolbar superior */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .toolbar-products.toolbar-bottom {
     background: var(--awa-bg-surface, #fff);
     border: 1px solid var(--awa-plp-border, var(--awa-border, #e5e5e5));
-    border-radius: 5px !important;
-    padding: 10px 12px !important;
-    margin-top: 12px !important;
+    border-radius: 5px ;
+    padding: 10px 12px ;
+    margin-top: 12px ;
 }
 
-
-/* =============================================================================
-   4. GRID DE PRODUTOS — CSS Grid multi-colunas restaurado
-   O bundle compilado (awa-bundle-refinements etc.) contém:
-     display: block !important; grid-template-columns: none !important;
-   que destrói o grid do tema pai. Restauramos aqui com maior especificidade.
-   ============================================================================= */
-
-/* 4a. UL container: forçar CSS Grid sobre o display:block do bundle
-   Usa .wrapper.grid.products-grid para igualar/superar especificidade do
-   selector concorrente: .wrapper.grid.products-grid .product-grid { display:block !important }
-*/
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .wrapper.grid.products-grid ul.row.product-grid,
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .wrapper.grid.products-grid ul.container-products-switch {
-    display: grid !important;
-    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-    gap: 16px !important;
-    list-style: none !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    align-items: start !important;
-    align-content: start !important;
+    display: grid ;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) ;
+    gap: 16px ;
+    list-style: none ;
+    margin: 0 ;
+    padding: 0 ;
+    align-items: start ;
+    align-content: start ;
 }
 @media (min-width: 1536px) {
     :is(body.catalog-category-view, body.catalogsearch-result-index)
         .wrapper.grid.products-grid ul.row.product-grid,
     :is(body.catalog-category-view, body.catalogsearch-result-index)
         .wrapper.grid.products-grid ul.container-products-switch {
-        grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
-        gap: 20px !important;
+        grid-template-columns: repeat(5, minmax(0, 1fr)) ;
+        gap: 20px ;
     }
 }
 
-/* 4 colunas de 768 até 1199px */
 @media (min-width: 768px) and (max-width: 1199px) {
     :is(body.catalog-category-view, body.catalogsearch-result-index)
         .wrapper.grid.products-grid ul.row.product-grid,
     :is(body.catalog-category-view, body.catalogsearch-result-index)
         .wrapper.grid.products-grid ul.container-products-switch {
-        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        grid-template-columns: repeat(4, minmax(0, 1fr)) ;
     }
 }
 
-/* 3 colunas de 576 até 767px */
 @media (min-width: 576px) and (max-width: 767px) {
     :is(body.catalog-category-view, body.catalogsearch-result-index)
         .wrapper.grid.products-grid ul.row.product-grid,
     :is(body.catalog-category-view, body.catalogsearch-result-index)
         .wrapper.grid.products-grid ul.container-products-switch {
-        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-        gap: 10px !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) ;
+        gap: 10px ;
     }
 }
 
-/* 2 colunas abaixo de 576px */
 @media (max-width: 575px) {
     :is(body.catalog-category-view, body.catalogsearch-result-index)
         .wrapper.grid.products-grid ul.row.product-grid,
     :is(body.catalog-category-view, body.catalogsearch-result-index)
         .wrapper.grid.products-grid ul.container-products-switch {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: 8px !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) ;
+        gap: 8px ;
     }
 
 }
 
-/* 4b. LI item: ocupa célula completa do grid sem forçar width fixa */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .products-grid ul.product-grid > li.item-product,
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .products-grid ul.container-products-switch > li.item-product {
-    width: 100% !important;
-    max-width: none !important;
-    margin: 0 !important;
-    padding: 0 !important;
+    width: 100% ;
+    max-width: none ;
+    margin: 0 ;
+    padding: 0 ;
 }
 
-/* card: overflow:hidden evita que .actions-secondary posicionada absolutamente
-   cause body scroll horizontal (+31px no último card).
-   border-radius aqui (SYNC) garante que overflow:hidden tenha efeito imediato —
-   evita CLS enquanto awa-improvements-grid.css (ASYNC) ainda não carregou. */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .products-grid .item-product {
-    overflow: hidden !important;
-    border-radius: 5px !important;
+    overflow: hidden ;
+    border-radius: 5px ;
 }
 
-/* A composição final da mídia agora vem do card base + acabamento final.
-   Aqui fica apenas o fallback neutro para evitar vazamento visual antes da
-   última camada ser aplicada. */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .products-grid .item-product .product-thumb {
-    background: #f6f7f8 !important;
-    overflow: hidden !important;
-    height: auto !important;
-    min-height: 0 !important;
-    aspect-ratio: 1 / 1 !important;
+    background: #f6f7f8 ;
+    overflow: hidden ;
+    height: auto ;
+    min-height: 0 ;
+    aspect-ratio: 1 / 1 ;
 }
 
-/* .actions-secondary é carregada via async (awa-bundle-cosmetic.css) com display:none.
-   Repete aqui em ordem 1200 para garantir que não fica visível antes do async carregar */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .products-grid .item-product .actions-secondary {
-    display: none !important;
+    display: none ;
 }
 
-
-/* =============================================================================
-   5. HOVER STATES — corrige transições sem regra :hover correspondente
-   BUG: .b2b-login-to-see-price tinha transition definida mas NENHUMA regra
-   :hover → transição completamente inerte.
-   BUG: .item-product:hover tinha box-shadow mas sem transform → sem "lift".
-   ============================================================================= */
-
-/* 5a. Botão "Faça login" redesenhado — transições no <a> */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .products-grid .item-product .info-price .b2b-login-to-see-price {
-    transition: none !important;
+    transition: none ;
 }
 
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .products-grid .item-product .info-price .b2b-login-to-see-price:hover,
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .products-grid .item-product .info-price .b2b-login-to-see-price:active {
-    filter: none !important;
-    transform: none !important;
-    box-shadow: none !important;
+    filter: none ;
+    transform: none ;
+    box-shadow: none ;
 }
 
-/* 5b. Focus-visible ring para acessibilidade (WCAG 2.1 AA) */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .products-grid .item-product .info-price .b2b-login-to-see-price:focus-visible {
     outline: 2px solid #fff;
@@ -221,46 +146,39 @@
     box-shadow: 0 0 0 4px rgba(183, 51, 55, 0.5);
 }
 
-/* 5c. Product card hover → canônico em awa-ux-improvements.css seção 28b */
-/* Regras de transform/box-shadow/border-color removidas — seção 28 é a fonte única. */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .products-grid .item-product:hover {
-    background: #fffdfd !important;
+    background: #fffdfd ;
 }
 
-/* Card base transition → seção 28a em awa-ux-improvements.css controla a transition completa.
-   Mantém apenas background-color aqui para não conflitar. */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .products-grid .item-product {
-    transition: background-color var(--awa-duration, 0.2s) var(--awa-ease, cubic-bezier(0.4, 0, 0.2, 1)) !important;
+    transition: background-color var(--awa-duration, 0.2s) var(--awa-ease, cubic-bezier(0.4, 0, 0.2, 1)) ;
 }
 
-/* 5d. Botão "Adicionar ao Carrinho" no grid — normaliza hover
-   BUG: awa-bundle-refinements.css só tem transition:background → transform no hover snapava.
-   Fix: sobrescreve transition para incluir transform. */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .products-grid .item-product .actions-primary .action.tocart,
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .products-grid .item-product .actions-primary .btn-add-to-cart {
     transition: background var(--awa-duration-fast, 0.15s) var(--awa-ease, cubic-bezier(0.4, 0, 0.2, 1)),
                 transform var(--awa-duration-fast, 0.15s) var(--awa-ease, cubic-bezier(0.4, 0, 0.2, 1)),
-                box-shadow var(--awa-duration-fast, 0.15s) var(--awa-ease, cubic-bezier(0.4, 0, 0.2, 1)) !important;
+                box-shadow var(--awa-duration-fast, 0.15s) var(--awa-ease, cubic-bezier(0.4, 0, 0.2, 1)) ;
 }
 
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .products-grid .item-product .actions-primary .action.tocart:hover:not(:disabled),
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .products-grid .item-product .actions-primary .btn-add-to-cart:hover:not(:disabled) {
-    background: var(--awa-primary-hover, #8e2629) !important;
-    /* transform/box-shadow → seção 28e em awa-ux-improvements.css */
+    background: var(--awa-primary-hover, #8e2629) ;
+
 }
 
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .products-grid .item-product .actions-primary .action.tocart:active:not(:disabled),
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .products-grid .item-product .actions-primary .btn-add-to-cart:active:not(:disabled) {
-    transform: none !important;
-    box-shadow: none !important;
+    transform: none ;
+    box-shadow: none ;
 }
 
 :is(body.catalog-category-view, body.catalogsearch-result-index)
@@ -271,14 +189,6 @@
     outline-offset: 3px;
 }
 
-
-/* =============================================================================
-   6. BLOCK-REORDER "Pedidos feitos recentemente" — Redesign
-   Decisão UX: MANTER — quick reorder é fluxo primário B2B (recompra frequente).
-   Problema: bloco sem nenhum estilo (background:none, border:none, padding:none).
-   Fix: card matching o visual language do filter sidebar (bg-surface + border).
-   ============================================================================= */
-
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .sidebar-additional1 .block-reorder {
     background: #fff;
@@ -288,7 +198,6 @@
     margin-top: 16px;
 }
 
-/* Título */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .block-reorder .block-title strong {
     display: flex;
@@ -302,7 +211,6 @@
     margin: 0;
 }
 
-/* Ícone clock via pseudo-element (Unicode U+1F551) */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .block-reorder .block-title strong::before {
     content: '';
@@ -315,35 +223,32 @@
     opacity: 0.85;
 }
 
-/* Subtítulo "Últimos itens comprados" — redundante com o título */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .block-reorder .subtitle {
     display: none;
 }
 
-/* Lista de produtos */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .block-reorder .product-items {
-    list-style: none !important;
-    margin: 12px 0 0 !important;
-    padding: 0 !important;
+    list-style: none ;
+    margin: 12px 0 0 ;
+    padding: 0 ;
     display: flex;
     flex-direction: column;
     gap: 6px;
 }
 
-/* Item individual */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .block-reorder .product-item {
-    display: flex !important;
-    align-items: flex-start !important;
-    gap: 8px !important;
-    padding: 8px 10px !important;
+    display: flex ;
+    align-items: flex-start ;
+    gap: 8px ;
+    padding: 8px 10px ;
     border-radius: 8px;
     background: var(--awa-bg-surface, #f7f7f7);
     border: 1px solid transparent;
     transition: background 0.15s, border-color 0.15s;
-    margin: 0 !important;
+    margin: 0 ;
 }
 
 :is(body.catalog-category-view, body.catalogsearch-result-index)
@@ -352,49 +257,46 @@
     border-color: var(--awa-border, #e5e5e5);
 }
 
-/* Campo do checkbox — alinha verticalmente */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .block-reorder .field.item.choice {
     flex-shrink: 0;
-    margin: 0 !important;
-    padding: 0 !important;
+    margin: 0 ;
+    padding: 0 ;
 }
 
-/* Oculta label de texto "Adicionar ao Carrinho" — visualmente redundante */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .block-reorder .field.item.choice .label {
-    display: none !important;
+    display: none ;
 }
 
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .block-reorder .field.item.choice .control {
-    margin: 0 !important;
+    margin: 0 ;
 }
 
-/* Checkbox customizado — substitui o nativo */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .block-reorder .checkbox {
     -webkit-appearance: none;
     appearance: none;
-    width: 18px !important;
-    height: 18px !important;
+    width: 18px ;
+    height: 18px ;
     min-width: 18px;
-    border: 2px solid var(--awa-border-strong, #ccc) !important;
-    border-radius: 4px !important;
-    background: #fff !important;
+    border: 2px solid var(--awa-border-strong, #ccc) ;
+    border-radius: 4px ;
+    background: #fff ;
     cursor: pointer;
     position: relative;
-    margin: 1px 0 0 !important;
-    padding: 0 !important;
-    display: block !important;
-    transition: border-color 0.15s, background 0.15s !important;
-    box-shadow: none !important;
+    margin: 1px 0 0 ;
+    padding: 0 ;
+    display: block ;
+    transition: border-color 0.15s, background 0.15s ;
+    box-shadow: none ;
 }
 
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .block-reorder .checkbox:checked {
-    border-color: var(--awa-primary, #b73337) !important;
-    background: var(--awa-primary, #b73337) !important;
+    border-color: var(--awa-primary, #b73337) ;
+    background: var(--awa-primary, #b73337) ;
 }
 
 :is(body.catalog-category-view, body.catalogsearch-result-index)
@@ -413,12 +315,12 @@
 
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .block-reorder .checkbox:hover:not(:disabled) {
-    border-color: var(--awa-primary, #b73337) !important;
+    border-color: var(--awa-primary, #b73337) ;
 }
 
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .block-reorder .checkbox:focus-visible {
-    outline: 2px solid var(--awa-primary, #b73337) !important;
+    outline: 2px solid var(--awa-primary, #b73337) ;
     outline-offset: 2px;
 }
 
@@ -428,10 +330,9 @@
     cursor: not-allowed;
 }
 
-/* Nome do produto */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .block-reorder .product-item-name {
-    font-size: 11px !important;
+    font-size: 11px ;
     font-weight: 500;
     line-height: 1.45;
     flex: 1;
@@ -440,9 +341,9 @@
 
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .block-reorder .product-item-link {
-    color: var(--awa-text, #333) !important;
-    text-decoration: none !important;
-    display: -webkit-box !important;
+    color: var(--awa-text, #333) ;
+    text-decoration: none ;
+    display: -webkit-box ;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
@@ -451,50 +352,49 @@
 
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .block-reorder .product-item-link:hover {
-    color: var(--awa-primary, #b73337) !important;
-    text-decoration: underline !important;
-    text-decoration-color: rgba(183, 51, 55, 0.5) !important;
+    color: var(--awa-primary, #b73337) ;
+    text-decoration: underline ;
+    text-decoration-color: rgba(183, 51, 55, 0.5) ;
 }
 
-/* Botão submit "Adicionar ao Carrinho" do reorder */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .block-reorder .actions-toolbar {
-    margin-top: 12px !important;
+    margin-top: 12px ;
 }
 
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .block-reorder .actions-toolbar .action.tocart {
-    width: 100% !important;
-    display: block !important;
-    padding: 10px 12px !important;
-    font-size: 12px !important;
-    font-weight: 700 !important;
-    border-radius: var(--awa-radius-md, 8px) !important;
-    background: var(--awa-primary, #b73337) !important;
-    color: #fff !important;
-    border: none !important;
+    width: 100% ;
+    display: block ;
+    padding: 10px 12px ;
+    font-size: 12px ;
+    font-weight: 700 ;
+    border-radius: var(--awa-radius-md, 8px) ;
+    background: var(--awa-primary, #b73337) ;
+    color: #fff ;
+    border: none ;
     cursor: pointer;
     text-align: center;
     letter-spacing: 0.02em;
-    transition: background 0.15s, transform 0.1s, box-shadow 0.15s !important;
+    transition: background 0.15s, transform 0.1s, box-shadow 0.15s ;
 }
 
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .block-reorder .actions-toolbar .action.tocart:hover:not(:disabled) {
-    background: var(--awa-primary-hover, #8e2629) !important;
+    background: var(--awa-primary-hover, #8e2629) ;
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(142, 38, 41, 0.35);
 }
 
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .block-reorder .actions-toolbar .action.tocart:active:not(:disabled) {
-    transform: translateY(1px) !important;
-    box-shadow: none !important;
+    transform: translateY(1px) ;
+    box-shadow: none ;
 }
 
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .block-reorder .actions-toolbar .action.tocart:focus-visible {
-    outline: 2px solid var(--awa-primary, #b73337) !important;
+    outline: 2px solid var(--awa-primary, #b73337) ;
     outline-offset: 3px;
 }
 
@@ -502,10 +402,9 @@
     .block-reorder .actions-toolbar .action.tocart:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    transform: none !important;
+    transform: none ;
 }
 
-/* Mobile: bloco menor com top margin reduzida */
 @media (max-width: 767px) {
     :is(body.catalog-category-view, body.catalogsearch-result-index)
         .sidebar-additional1 .block-reorder {
@@ -514,24 +413,18 @@
     }
 }
 
-
-/* =============================================================================
-   7. FILTER SIDEBAR — sticky em desktop + mobile collapse toggle
-   ============================================================================= */
-
-/* Sticky sidebar: fica visível enquanto o grid de produtos é rolado */
 @media (min-width: 992px) {
     :is(body.catalog-category-view, body.catalogsearch-result-index)
         #layered-ajax-filter-block,
     :is(body.catalog-category-view, body.catalogsearch-result-index)
         .sidebar.sidebar-main > .block.filter {
-        position: sticky !important;
-        top: 16px !important;
-        max-height: calc(100vh - 32px) !important;
-        overflow-y: auto !important;
-        overflow-x: hidden !important;
-        scrollbar-width: thin !important;
-        scrollbar-color: var(--awa-border-strong, #ccc) transparent !important;
+        position: sticky ;
+        top: 16px ;
+        max-height: calc(100vh - 32px) ;
+        overflow-y: auto ;
+        overflow-x: hidden ;
+        scrollbar-width: thin ;
+        scrollbar-color: var(--awa-border-strong, #ccc) transparent ;
     }
 
     :is(body.catalog-category-view, body.catalogsearch-result-index)
@@ -542,53 +435,42 @@
     }
 }
 
-
-/* =============================================================================
-   8. CATEGORY PAGE — aproveitamento de espaço e melhorias de UX
-   ============================================================================= */
-
-/* Reduz gap entre toolbar e grid de produtos */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .shop-tab-select {
-    margin-bottom: 12px !important;
+    margin-bottom: 12px ;
 }
 
-/* Product name: 2-line clamp para altura uniforme no grid (todas as telas).
-   font-weight e font-size canonicos para categoria e busca (awa-bundle-category.css nao esta carregado). */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .products-grid .item-product .product-name,
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .products-grid .item-product .product-item-name {
-    display: -webkit-box !important;
-    -webkit-line-clamp: 2 !important;
-    -webkit-box-orient: vertical !important;
-    overflow: hidden !important;
-    min-height: calc(1.4em * 2) !important;
-    font-size: 14px !important;
-    font-weight: 600 !important;
-    line-height: 1.45 !important;
-    color: var(--awa-text, #333) !important;
+    display: -webkit-box ;
+    -webkit-line-clamp: 2 ;
+    -webkit-box-orient: vertical ;
+    overflow: hidden ;
+    min-height: calc(1.4em * 2) ;
+    font-size: 14px ;
+    font-weight: 600 ;
+    line-height: 1.45 ;
+    color: var(--awa-text, #333) ;
 }
 
-/* Link do nome: herdar cor e tipografia do container para evitar override do refinements bundle
-   (refinements bundle seta font-size: 13px e font-weight: semi explicitamente no .product-item-link
-    sem !important, mas como é regra explícita no filho, sobrescreve herança do pai). */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .products-grid .item-product .product-name a,
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .products-grid .item-product .product-item-name a {
-    color: inherit !important;
-    text-decoration: none !important;
-    font-size: inherit !important;
-    font-weight: inherit !important;
-    line-height: inherit !important;
+    color: inherit ;
+    text-decoration: none ;
+    font-size: inherit ;
+    font-weight: inherit ;
+    line-height: inherit ;
 }
 
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .products-grid .item-product .product-name a:hover,
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .products-grid .item-product .product-item-name a:hover {
-    color: var(--awa-primary, #b73337) !important;
+    color: var(--awa-primary, #b73337) ;
 }
 
 @media (max-width: 575px) {
@@ -596,20 +478,18 @@
         .products-grid .item-product .product-name,
     :is(body.catalog-category-view, body.catalogsearch-result-index)
         .products-grid .item-product .product-item-name {
-        font-size: 12px !important;
+        font-size: 12px ;
     }
 }
 
-/* Toolbar inferior: menos espaço em mobile */
 @media (max-width: 767px) {
     :is(body.catalog-category-view, body.catalogsearch-result-index)
         .toolbar-products.toolbar-bottom {
-        margin-top: 12px !important;
-        padding: 10px 12px !important;
+        margin-top: 12px ;
+        padding: 10px 12px ;
     }
 }
 
-/* Pagination: alinha ao centro em mobile */
 @media (max-width: 767px) {
     :is(body.catalog-category-view, body.catalogsearch-result-index)
         .pages {
@@ -617,788 +497,625 @@
         display: flex;
     }
 
-    /* Ocultar paginação dentro da toolbar SUPERIOR em mobile.
-       Em mobile a pagination column é 67px de largura → 6 itens empilham em coluna
-       de 260px, inflando o toolbar de ~118px para 378px.
-       A toolbar inferior (toolbar-bottom) já mostra a paginação. */
+
     :is(body.catalog-category-view, body.catalogsearch-result-index)
         .toolbar-products:not(.toolbar-bottom) .pages {
-        display: none !important;
+        display: none ;
     }
 }
 
-/* Category view header: remove top padding desnecessário */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .page-main {
-    padding-top: 12px !important;
+    padding-top: 12px ;
 }
 
-/* Breadcrumb menos espaço em categoria */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .breadcrumbs {
-    margin-bottom: 8px !important;
-    padding-bottom: 0 !important;
+    margin-bottom: 8px ;
+    padding-bottom: 0 ;
 }
 
-/* =============================================================================
-   AWA-CATEGORY-HERO — reduz altura em mobile para produtos ficarem acima da dobra
-   Medido: hero=343px empurra o grid para 889px (> viewport 812px).
-   Com 160px o grid sobe para ~610px → produtos visíveis sem scroll.
-   OVERLAP FIX: h1 (409px) e mst_categorySearch (429px) se sobrepõem 20px.
-   Solução: esconde search em mobile (header search cobre o caso de uso).
-   ============================================================================= */
 @media (max-width: 767px) {
     :is(body.catalog-category-view, body.catalogsearch-result-index)
         .awa-category-hero {
-        height: auto !important;
-        max-height: none !important;
-        min-height: 0 !important;
+        height: auto ;
+        max-height: none ;
+        min-height: 0 ;
     }
 
     :is(body.catalog-category-view, body.catalogsearch-result-index)
         .awa-category-hero img {
-        height: 150px !important;
-        max-height: 150px !important;
-        width: 100% !important;
-        object-fit: cover !important;
-        object-position: center 30% !important;
-        display: block !important;
+        height: 150px ;
+        max-height: 150px ;
+        width: 100% ;
+        object-fit: cover ;
+        object-position: center 30% ;
+        display: block ;
     }
 
-    /* Esconde busca por categoria em mobile — header search cobre o caso de uso.
-       Em mobile não há espaço suficiente para a busca sem sobreposição com o h1. */
+
     :is(body.catalog-category-view, body.catalogsearch-result-index)
         .mst_categorySearch {
-        display: none !important;
+        display: none ;
     }
 
     :is(body.catalog-category-view, body.catalogsearch-result-index)
         .awa-category-hero__content {
-        padding: 8px 0 4px !important;
+        padding: 8px 0 4px ;
     }
 
     :is(body.catalog-category-view, body.catalogsearch-result-index)
         .awa-category-hero__title {
-        font-size: 22px !important;
-        margin: 0 0 4px !important;
+        font-size: 22px ;
+        margin: 0 0 4px ;
     }
 
     :is(body.catalog-category-view, body.catalogsearch-result-index)
         .awa-category-hero__count {
-        font-size: 12px !important;
-        color: #888 !important;
-        font-weight: 400 !important;
-        margin: 0 !important;
-        line-height: 1.4 !important;
+        font-size: 12px ;
+        color: #888 ;
+        font-weight: 400 ;
+        margin: 0 ;
+        line-height: 1.4 ;
     }
 
 }
 
-/* =============================================================================
-   GLOBAL — awa-nav-close: ocultar em desktop (styles-l.css tem seletor errado)
-   ============================================================================= */
 @media (min-width: 992px) {
     body .page-wrapper .awa-nav-close,
     body .page-wrapper .awa-nav-overlay {
-        display: none !important;
+        display: none ;
     }
 }
 
-
-/* =============================================================================
-   9. TOOLBAR — Hierarquia visual refinada
-   Padronizar toolbar superior com modo de visualização, ordenação e counter
-   ============================================================================= */
-
-/* Toolbar superior: layout mais limpo */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .toolbar-products:not(.toolbar-bottom) {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    flex-wrap: wrap !important;
-    gap: 8px !important;
-    padding: 10px 14px !important;
-    background: #fafafa !important;
-    border: 1px solid #e5e5e5 !important;
-    border-radius: 8px !important;
-    margin-bottom: 16px !important;
+    display: flex ;
+    align-items: center ;
+    justify-content: space-between ;
+    flex-wrap: wrap ;
+    gap: 8px ;
+    padding: 10px 14px ;
+    background: #fafafa ;
+    border: 1px solid #e5e5e5 ;
+    border-radius: 8px ;
+    margin-bottom: 16px ;
 }
 
-/* Override awa-bundle-site.css (spec 0,4,1): border-radius:var(--awa-radius-md-lg)=14px.
-   Seletor com main.page-main: spec (0,5,2) → vence bundle async carregado depois. */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     main.page-main .shop-tab-select .toolbar.toolbar-products {
-    border-radius: 8px !important;
+    border-radius: 8px ;
 }
 
-/* Filtro toggle pill: border-radius:999px com texto em 2 linhas vira circulo.
-   white-space:nowrap forca uma linha (103px de largura, pill horizontal). */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .toolbar-products .modes-label {
-    white-space: nowrap !important;
-    width: auto !important;
+    white-space: nowrap ;
+    width: auto ;
 }
 
-/* Counter de produtos: discreto */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .toolbar-products .toolbar-amount {
-    font-size: 12px !important;
-    color: #888 !important;
-    font-weight: 400 !important;
-    white-space: nowrap !important;
+    font-size: 12px ;
+    color: #888 ;
+    font-weight: 400 ;
+    white-space: nowrap ;
 }
 
-/* Select de ordenação: compacto
-   Seletor (0,4,2) > awa-bundle-refinements (0,3,2) para ganhar no !important */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .toolbar-products .toolbar-sorter select.sorter-options {
-    height: 36px !important;
-    padding: 0 28px 0 10px !important;
-    font-size: 12px !important;
-    border-radius: 6px !important;
-    border: 1px solid #d9d9d9 !important;
-    background-color: #fff !important;
-    color: #333 !important;
-    cursor: pointer !important;
-    transition: border-color 0.2s ease !important;
+    height: 36px ;
+    padding: 0 28px 0 10px ;
+    font-size: 12px ;
+    border-radius: 6px ;
+    border: 1px solid #d9d9d9 ;
+    background-color: #fff ;
+    color: #333 ;
+    cursor: pointer ;
+    transition: border-color 0.2s ease ;
 }
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .toolbar-products .toolbar-sorter select.sorter-options:hover,
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .toolbar-products .toolbar-sorter select.sorter-options:focus {
-    border-color: var(--awa-primary, #b73337) !important;
-    outline: none !important;
+    border-color: var(--awa-primary, #b73337) ;
+    outline: none ;
 }
 
-/* Botão direção de ordenação (.sorter-action) — Rokanthemes não renderiza por padrão;
-   regra aqui para compatibilidade caso o template seja restaurado */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .toolbar-products .toolbar-sorter .sorter-action {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    height: 36px !important;
-    min-width: 36px !important;
-    border-radius: 6px !important;
-    border: 1px solid #d9d9d9 !important;
-    background: #fff !important;
-    color: #333 !important;
-    cursor: pointer !important;
-    transition: border-color 0.2s ease !important;
-    text-decoration: none !important;
+    display: inline-flex ;
+    align-items: center ;
+    justify-content: center ;
+    height: 36px ;
+    min-width: 36px ;
+    border-radius: 6px ;
+    border: 1px solid #d9d9d9 ;
+    background: #fff ;
+    color: #333 ;
+    cursor: pointer ;
+    transition: border-color 0.2s ease ;
+    text-decoration: none ;
 }
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .toolbar-products .toolbar-sorter .sorter-action:hover {
-    border-color: var(--awa-primary, #b73337) !important;
-    color: var(--awa-primary, #b73337) !important;
+    border-color: var(--awa-primary, #b73337) ;
+    color: var(--awa-primary, #b73337) ;
 }
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .toolbar-products .toolbar-sorter .sorter-action > span {
-    display: flex !important;
-    align-items: center !important;
-    gap: 4px !important;
-    font-size: 12px !important;
-    font-weight: 500 !important;
+    display: flex ;
+    align-items: center ;
+    gap: 4px ;
+    font-size: 12px ;
+    font-weight: 500 ;
 }
 
-/* Label do sorter: discreto */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .toolbar-products .sorter-label {
-    font-size: 11px !important;
-    color: #888 !important;
-    font-weight: 500 !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.05em !important;
+    font-size: 11px ;
+    color: #888 ;
+    font-weight: 500 ;
+    text-transform: uppercase ;
+    letter-spacing: 0.05em ;
 }
 
-/* Limiter (itens por página): compacto */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .toolbar-products .limiter {
-    font-size: 12px !important;
-    color: #888 !important;
+    font-size: 12px ;
+    color: #888 ;
 }
 
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .toolbar-products .limiter select {
-    height: 32px !important;
-    padding: 0 24px 0 8px !important;
-    font-size: 12px !important;
-    border-radius: 6px !important;
-    min-width: 50px !important;
+    height: 32px ;
+    padding: 0 24px 0 8px ;
+    font-size: 12px ;
+    border-radius: 6px ;
+    min-width: 50px ;
 }
 
-/* Mode switches (grid/list): discretos */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .toolbar-products .modes-mode {
-    width: 32px !important;
-    height: 32px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    border-radius: 6px !important;
-    border: 1px solid #e5e5e5 !important;
-    background: #fff !important;
-    transition: border-color 0.15s, background 0.15s !important;
+    width: 32px ;
+    height: 32px ;
+    display: inline-flex ;
+    align-items: center ;
+    justify-content: center ;
+    border-radius: 6px ;
+    border: 1px solid #e5e5e5 ;
+    background: #fff ;
+    transition: border-color 0.15s, background 0.15s ;
 }
 
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .toolbar-products .modes-mode:hover {
-    border-color: var(--awa-primary, #b73337) !important;
+    border-color: var(--awa-primary, #b73337) ;
 }
 
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .toolbar-products .modes-mode.active {
-    background: var(--awa-primary, #b73337) !important;
-    border-color: var(--awa-primary, #b73337) !important;
-    color: #fff !important;
+    background: var(--awa-primary, #b73337) ;
+    border-color: var(--awa-primary, #b73337) ;
+    color: #fff ;
 }
 
-/* Mobile: toolbar superior compacta */
 @media (max-width: 767px) {
     :is(body.catalog-category-view, body.catalogsearch-result-index)
         .toolbar-products:not(.toolbar-bottom) {
-        padding: 8px 10px !important;
-        gap: 6px !important;
+        padding: 8px 10px ;
+        gap: 6px ;
     }
 
-    /* Limiter (itens por pagina): pouca relevancia em mobile */
+
     :is(body.catalog-category-view, body.catalogsearch-result-index)
         .toolbar-products:not(.toolbar-bottom) .limiter {
-        display: none !important;
+        display: none ;
     }
 
-    /* Counter de produtos: ocultar para liberar espaco */
+
     :is(body.catalog-category-view, body.catalogsearch-result-index)
         .toolbar-products:not(.toolbar-bottom) .toolbar-amount {
-        display: none !important;
+        display: none ;
     }
 
-    /* Sorter select: altura reduzida em mobile */
+
     :is(body.catalog-category-view, body.catalogsearch-result-index)
         .toolbar-products select.sorter-options {
-        height: 32px !important;
-        font-size: 11px !important;
+        height: 32px ;
+        font-size: 11px ;
     }
 
-    /* Label do sorter: ocultar em mobile (espaco insuficiente) */
+
     :is(body.catalog-category-view, body.catalogsearch-result-index)
         .toolbar-products .sorter-label {
-        display: none !important;
+        display: none ;
     }
 }
 
-
-/* =============================================================================
-   10. FILTER SIDEBAR — Visual refinado
-   ============================================================================= */
-
-/* Container do filtro: visual limpo com background suave */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .sidebar.sidebar-main > .block.filter,
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     #layered-ajax-filter-block {
-    background: #fff !important;
-    border: 1px solid #e5e5e5 !important;
-    border-radius: 12px !important;
-    padding: 16px !important;
+    background: #fff ;
+    border: 1px solid #e5e5e5 ;
+    border-radius: 12px ;
+    padding: 16px ;
 }
 
-/* Título "Filtrar por:" */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .block.filter .block-title strong,
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .filter-title strong {
-    font-size: 12px !important;
-    font-weight: 700 !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.08em !important;
-    color: #333 !important;
+    font-size: 12px ;
+    font-weight: 700 ;
+    text-transform: uppercase ;
+    letter-spacing: 0.08em ;
+    color: #333 ;
 }
 
-/* Itens de filtro: compactos */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .filter-options-item .filter-options-title {
-    font-size: 13px !important;
-    font-weight: 600 !important;
-    color: #333 !important;
-    padding: 10px 0 !important;
-    border-bottom: 1px solid #f0f0f0 !important;
-    cursor: pointer !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
+    font-size: 13px ;
+    font-weight: 600 ;
+    color: #333 ;
+    padding: 10px 0 ;
+    border-bottom: 1px solid #f0f0f0 ;
+    cursor: pointer ;
+    display: flex ;
+    align-items: center ;
+    justify-content: space-between ;
 }
 
-/* Chevron ▾ no título do filtro (indica collapsible)
-   DOM real: <dl class="filter-options"><dt class="filter-options-title">...
-   NÃO existe wrapper .filter-options-item — o DT é filho direto da DL */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .filter-options .filter-options-title::after {
-    content: '' !important;
-    display: inline-block !important;
-    width: 10px !important;
-    height: 6px !important;
-    background: currentColor !important;
-    clip-path: polygon(0 0, 100% 0, 50% 100%) !important;
-    flex-shrink: 0 !important;
-    transition: transform 0.2s ease !important;
-    opacity: 0.45 !important;
+    content: '' ;
+    display: inline-block ;
+    width: 10px ;
+    height: 6px ;
+    background: currentColor ;
+    clip-path: polygon(0 0, 100% 0, 50% 100%) ;
+    flex-shrink: 0 ;
+    transition: transform 0.2s ease ;
+    opacity: 0.45 ;
 }
 
-/* Girar chevron quando ativo/expandido
-   Estado ativo: DT recebe classe .active (não um wrapper) */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .filter-options .filter-options-title.active::after {
-    transform: rotate(180deg) !important;
+    transform: rotate(180deg) ;
 }
 
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .filter-options .filter-options-content {
-    padding: 8px 0 !important;
+    padding: 8px 0 ;
 }
 
-/* ========================================================================
-   § Price-box — PLP/Busca: cor e labels
-   Problema: styles-l.css (idx=29) e awa-bundle-refinements (idx=24) sobrescrevem
-   color para --awa-text mesmo quando há special-price.
-   Fix: !important com seletor suficientemente específico.
-   ======================================================================== */
-
-/* Preço especial → vermelho */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .products-grid .price-box .special-price .price {
-    color: var(--awa-primary, #b73337) !important;
+    color: var(--awa-primary, #b73337) ;
 }
 
-/* Preço normal (sem desconto) → dark */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .products-grid .price-box:not(:has(.special-price)) .price {
-    color: var(--awa-text, #1a1a1a) !important;
+    color: var(--awa-text, #1a1a1a) ;
 }
 
-/* Esconder labels "Preço especial" / "Preço normal" nos itens de produto
-   (mostrar apenas o valor numérico, sem label textual) */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .item-product .price-box .price-label {
-    display: none !important;
+    display: none ;
 }
 
-/* Links de filtro: subtis */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .filter-options-item .item a {
-    font-size: 13px !important;
-    color: #555 !important;
-    text-decoration: none !important;
-    padding: 4px 0 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    transition: color 0.15s !important;
+    font-size: 13px ;
+    color: #555 ;
+    text-decoration: none ;
+    padding: 4px 0 ;
+    display: flex ;
+    align-items: center ;
+    justify-content: space-between ;
+    transition: color 0.15s ;
 }
 
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .filter-options-item .item a:hover {
-    color: var(--awa-primary, #b73337) !important;
+    color: var(--awa-primary, #b73337) ;
 }
 
-/* Counter nos filtros: discreto */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .filter-options-item .count {
-    font-size: 11px !important;
-    color: #aaa !important;
-    font-weight: 400 !important;
+    font-size: 11px ;
+    color: #aaa ;
+    font-weight: 400 ;
 }
 
-
-/* =============================================================================
-   11. ACTIVE FILTER CHIPS — filtros aplicados como pills com botão de remover
-   Magento 2 padrão: .filter-current > .items > .item com .filter-label + .filter-value
-   ============================================================================= */
-
-/* Label "Filtros aplicados:" acima dos chips */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .filter-current .block-subtitle {
-    font-size: 11px !important;
-    font-weight: 700 !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.07em !important;
-    color: #888 !important;
-    margin-bottom: 8px !important;
-    display: block !important;
+    font-size: 11px ;
+    font-weight: 700 ;
+    text-transform: uppercase ;
+    letter-spacing: 0.07em ;
+    color: #888 ;
+    margin-bottom: 8px ;
+    display: block ;
 }
 
-/* Container dos chips */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .filter-current .items {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    gap: 6px !important;
-    margin: 0 0 10px !important;
-    padding: 0 !important;
-    list-style: none !important;
+    display: flex ;
+    flex-wrap: wrap ;
+    gap: 6px ;
+    margin: 0 0 10px ;
+    padding: 0 ;
+    list-style: none ;
 }
 
-/* Cada chip de filtro ativo */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .filter-current .item {
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 4px !important;
-    background: #fef2f2 !important;
-    border: 1px solid var(--awa-primary, #b73337) !important;
-    border-radius: 999px !important;
-    padding: 3px 6px 3px 10px !important;
-    font-size: 12px !important;
-    color: var(--awa-primary, #b73337) !important;
-    font-weight: 500 !important;
-    max-width: 220px !important;
-    overflow: hidden !important;
+    display: inline-flex ;
+    align-items: center ;
+    gap: 4px ;
+    background: #fef2f2 ;
+    border: 1px solid var(--awa-primary, #b73337) ;
+    border-radius: 999px ;
+    padding: 3px 6px 3px 10px ;
+    font-size: 12px ;
+    color: var(--awa-primary, #b73337) ;
+    font-weight: 500 ;
+    max-width: 220px ;
+    overflow: hidden ;
 }
 
-/* Texto do valor do filtro (e.g. "Honda") */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .filter-current .item .filter-value {
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    min-width: 0 !important;
+    white-space: nowrap ;
+    overflow: hidden ;
+    text-overflow: ellipsis ;
+    min-width: 0 ;
 }
 
-/* Categoria do filtro (e.g. "Marca:") */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .filter-current .item .filter-label {
-    font-weight: 600 !important;
-    opacity: 0.75 !important;
-    white-space: nowrap !important;
+    font-weight: 600 ;
+    opacity: 0.75 ;
+    white-space: nowrap ;
 }
 
-/* Botão × para remover o filtro */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .filter-current .item .action.remove {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 18px !important;
-    height: 18px !important;
-    min-width: 18px !important;
-    border-radius: 50% !important;
-    background: var(--awa-primary, #b73337) !important;
-    color: #fff !important;
-    font-size: 10px !important;
-    font-weight: 700 !important;
-    text-decoration: none !important;
-    flex-shrink: 0 !important;
-    line-height: 1 !important;
-    transition: background 0.15s !important;
-    margin-left: 2px !important;
+    display: inline-flex ;
+    align-items: center ;
+    justify-content: center ;
+    width: 18px ;
+    height: 18px ;
+    min-width: 18px ;
+    border-radius: 50% ;
+    background: var(--awa-primary, #b73337) ;
+    color: #fff ;
+    font-size: 10px ;
+    font-weight: 700 ;
+    text-decoration: none ;
+    flex-shrink: 0 ;
+    line-height: 1 ;
+    transition: background 0.15s ;
+    margin-left: 2px ;
 }
 
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .filter-current .item .action.remove:hover {
-    background: var(--awa-primary-hover, #8e2629) !important;
+    background: var(--awa-primary-hover, #8e2629) ;
 }
 
-/* Span de texto dentro do .remove — visualmente oculto (ícone × via content) */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .filter-current .item .action.remove span {
-    display: none !important;
+    display: none ;
 }
 
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .filter-current .item .action.remove::after {
-    content: '×' !important;
-    font-size: 12px !important;
-    line-height: 1 !important;
+    content: '×' ;
+    font-size: 12px ;
+    line-height: 1 ;
 }
 
-
-/* =============================================================================
-   12. FILTER ACTIONS — "Limpar todos os filtros" estilizado
-   ============================================================================= */
-
-/* Container das ações do filtro */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .filter-actions {
-    margin-bottom: 12px !important;
+    margin-bottom: 12px ;
 }
 
-/* Botão "Limpar todos": fallback quando não tem a classe .filter-clear
-   (visual-audit-consolidated.css cobre .action.clear.filter-clear com pill visual melhor).
-   Este seletor menos específico aplica somente quando .filter-clear está ausente. */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .filter-actions .action.clear {
-    font-size: 12px !important;
-    color: var(--awa-primary, #b73337) !important;
-    font-weight: 600 !important;
-    text-decoration: none !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 4px !important;
-    padding: 4px 0 !important;
-    transition: color 0.15s !important;
+    font-size: 12px ;
+    color: var(--awa-primary, #b73337) ;
+    font-weight: 600 ;
+    text-decoration: none ;
+    display: inline-flex ;
+    align-items: center ;
+    gap: 4px ;
+    padding: 4px 0 ;
+    transition: color 0.15s ;
 }
 
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .filter-actions .action.clear:hover {
-    color: var(--awa-primary-hover, #8e2629) !important;
-    text-decoration: underline !important;
+    color: var(--awa-primary-hover, #8e2629) ;
+    text-decoration: underline ;
 }
 
-
-
-
-/* =============================================================================
-   16. MOBILE FILTER DRAWER — toggle nativo em <=767px + coluna em 768-991px
-   
-   DIAGNOSTICO (Chrome DevTools MCP, 2026-04-22, viewport 375px):
-   - Sidebar class real: .sidebar.sidebar-main-1 (Rokanthemes LayeredAjax)
-     Seletor pai: .col-xs-12.col-sm-3.col-md-3.col-lg-2 → .columns > div:first-child
-   - Toggle nativo: .shop-tab-select .toolbar.toolbar-products .modes-label
-   - JS (awa-custom-home-category-compat.js + awa-header-minicart-ui-v2.min.js):
-       Na init mobile: body.classList.add('awa-plp-filters-collapsed') → filtros ocultos
-       Ao clicar no .modes-label[data-awa-filter-toggle="true"]: body.classList.toggle(...)
-       updateFilterLabel() muda texto "Mostrar Filtros" ou "Ocultar Filtros"
-   - Bloqueadores:
-     a) awa-bundle-custom.css (global): .modes { display: none !important }
-     b) awa-bundle-refinements.css @media(max-width:991px):
-        .catalog-category-view .columns > div:first-child { display:none !important }
-        (idem em styles-m.css, themes.css, styles-l.css a max-width:1023px)
-     c) @media(max-width:960px) (multiplos): .catalog-category-view .sidebar { display:none !important }
-   - Estrategia:
-       <=767px  → toggle JS nativo; sidebar inline full-width quando aberta
-       768-991px → sidebar sempre visivel como coluna 25%
-       Especificidade alvo >= (0,4,2) para vencer !important dos bloqueadores
-   ============================================================================= */
-
-/* --- 16a. Botao toggle — reativar .modes no toolbar em mobile (<=767px) ---
-   Bloqueador: awa-bundle-custom.css .modes { display:none !important }
-   Nosso seletor (0,5,1) > bloqueador (0,1,1) */
 @media (max-width: 767px) {
     :is(body.catalog-category-view, body.catalogsearch-result-index)
         main.page-main
         .shop-tab-select
         .toolbar.toolbar-products
         .modes {
-        display: inline-flex !important;
-        align-items: center !important;
-        flex-shrink: 0 !important;
-        margin: 0 !important;
+        display: inline-flex ;
+        align-items: center ;
+        flex-shrink: 0 ;
+        margin: 0 ;
     }
 
-    /* Ocultar grid/list switcher — apenas o modes-label de filtro deve aparecer */
+
     :is(body.catalog-category-view, body.catalogsearch-result-index)
         main.page-main
         .shop-tab-select
         .toolbar.toolbar-products
         .modes
         .modes-mode {
-        display: none !important;
+        display: none ;
     }
 
-    /* Pill SYNC antes do JS definir data-awa-filter-toggle (evita flash sem estilo) */
+
     :is(body.catalog-category-view, body.catalogsearch-result-index)
         main.page-main
         .shop-tab-select
         .toolbar.toolbar-products
         .modes
         .modes-label {
-        display: inline-flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        min-height: 44px !important;
-        padding: 0 14px !important;
-        border-radius: 999px !important;
-        border: 1px solid var(--awa-primary, #b73337) !important;
-        background: #fff !important;
-        color: var(--awa-primary, #b73337) !important;
-        font-size: 13px !important;
-        font-weight: 700 !important;
-        cursor: pointer !important;
-        user-select: none !important;
-        white-space: nowrap !important;
-        line-height: 1 !important;
+        display: inline-flex ;
+        align-items: center ;
+        justify-content: center ;
+        min-height: 44px ;
+        padding: 0 14px ;
+        border-radius: 999px ;
+        border: 1px solid var(--awa-primary, #b73337) ;
+        background: #fff ;
+        color: var(--awa-primary, #b73337) ;
+        font-size: 13px ;
+        font-weight: 700 ;
+        cursor: pointer ;
+        user-select: none ;
+        white-space: nowrap ;
+        line-height: 1 ;
     }
 
-    /* Estado ABERTO (JS removeu awa-plp-filters-collapsed): inverter pill */
+
     :is(body.catalog-category-view, body.catalogsearch-result-index):not(.awa-plp-filters-collapsed)
         main.page-main
         .shop-tab-select
         .toolbar.toolbar-products
         .modes
         .modes-label {
-        background: var(--awa-primary, #b73337) !important;
-        color: #fff !important;
-        border-color: var(--awa-primary, #b73337) !important;
+        background: var(--awa-primary, #b73337) ;
+        color: #fff ;
+        border-color: var(--awa-primary, #b73337) ;
     }
 }
 
-/* --- 16b. Tablet 768-991px — sidebar sempre visivel como coluna 25% ---
-   Bloqueadores: max-width:991px + max-width:1023px + max-width:960px
-   Nosso seletor (0,4,2) supera bloqueadores (0,2-3,1) com !important */
 @media (min-width: 768px) and (max-width: 991px) {
     :is(body.catalog-category-view, body.catalogsearch-result-index)
         .columns
         > div:first-child {
-        display: block !important;
+        display: block ;
     }
 
-    /* Sobrescreve .catalog-category-view .sidebar { display:none !important } */
+
     :is(body.catalog-category-view, body.catalogsearch-result-index)
         .sidebar.sidebar-main-1 {
-        display: block !important;
+        display: block ;
     }
 }
 
-/* --- 16c. Mobile <=767px — mostrar coluna quando filtros ABERTOS ---
-   Padrao mobile: body.awa-plp-filters-collapsed → oculto (regras existentes OK).
-   Quando usuario toca "Mostrar Filtros": JS remove a classe → regra abaixo ativa.
-   Seletor: (0,5,2) → vence bloqueadores !important de especificidade (0,2-3,1) */
 @media (max-width: 767px) {
-    /* Coluna wrapper: inline full-width acima do product grid */
+
     :is(body.catalog-category-view, body.catalogsearch-result-index):not(.awa-plp-filters-collapsed)
         .columns
         > div:first-child {
-        display: block !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        float: none !important;
-        flex: 0 0 100% !important;
-        padding: 0 !important;
-        margin-bottom: 12px !important;
+        display: block ;
+        width: 100% ;
+        max-width: 100% ;
+        float: none ;
+        flex: 0 0 100% ;
+        padding: 0 ;
+        margin-bottom: 12px ;
     }
 
-    /* Sobrescreve .catalog-category-view .sidebar { display:none !important } */
+
     :is(body.catalog-category-view, body.catalogsearch-result-index):not(.awa-plp-filters-collapsed)
         .sidebar.sidebar-main-1 {
-        display: block !important;
+        display: block ;
     }
 
-    /* sidebar-additional1: ocultar em mobile (banners/produtos relacionados) */
+
     :is(body.catalog-category-view, body.catalogsearch-result-index)
         .columns
         > div:first-child
         > .sidebar.sidebar-additional1 {
-        display: none !important;
+        display: none ;
     }
 }
 
-/* --- 16d. Garantia: block.filter visivel quando sidebar aberta em mobile ---
-   awa-bundle-search.css (async) oculta #layered-ajax-filter-block quando collapsed.
-   Regra SYNC para garantir visibilidade quando NOT collapsed. */
 @media (max-width: 767px) {
     :is(body.catalog-category-view, body.catalogsearch-result-index):not(.awa-plp-filters-collapsed)
         #layered-ajax-filter-block,
     :is(body.catalog-category-view, body.catalogsearch-result-index):not(.awa-plp-filters-collapsed)
         .block.filter {
-        display: block !important;
+        display: block ;
     }
 }
-/* =============================================================================
-   13. SEARCH RESULTS — estado sem resultados
-   awa-visual-audit-consolidated.css já tem uma versão superior com ícone SVG,
-   max-width:500px e margin:auto. Não sobrescrever aqui — deixar visual-audit agir.
-   ============================================================================= */
-/* (sem regras — visual-audit-consolidated.css já cobre este estado adequadamente) */
 
-
-/* =============================================================================
-   14. PAGINAÇÃO — hit area ≥ 40px + página atual destacada em primário
-   ============================================================================= */
-
-/* Botões de página: hit area WCAG AA mínima + border-radius */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .pages .item a,
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .pages .item strong {
-    min-width: 40px !important;
-    min-height: 40px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    border-radius: 8px !important;
-    font-size: 14px !important;
+    min-width: 40px ;
+    min-height: 40px ;
+    display: inline-flex ;
+    align-items: center ;
+    justify-content: center ;
+    border-radius: 8px ;
+    font-size: 14px ;
 }
 
-/* Hover */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .pages .item a:hover {
-    background: #f5f5f5 !important;
-    text-decoration: none !important;
+    background: #f5f5f5 ;
+    text-decoration: none ;
 }
 
-/* Página atual: fundo primário + texto branco */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .pages .item.current strong {
-    background: var(--awa-primary, #b73337) !important;
-    color: #fff !important;
-    font-weight: 700 !important;
+    background: var(--awa-primary, #b73337) ;
+    color: #fff ;
+    font-weight: 700 ;
 }
 
-
-/* =============================================================================
-   15. TOOLBAR INFERIOR — separador visual sutil acima da paginação
-   (Toolbar superior já tem full border via Section 9)
-   ============================================================================= */
-
-/* Toolbar inferior: visual matching da toolbar superior (Section 9) */
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .toolbar.toolbar-products.toolbar-bottom {
-    border: 1px solid #e5e5e5 !important;
-    border-radius: 8px !important;
-    padding: 10px 14px !important;
-    background: #fafafa !important;
-    margin-top: 24px !important;
+    border: 1px solid #e5e5e5 ;
+    border-radius: 8px ;
+    padding: 10px 14px ;
+    background: #fafafa ;
+    margin-top: 24px ;
 }
-
-
-/* =============================================================================
-   17. TOOLBAR — ORDER dos elementos (migrado de awa-bundle-category.css)
-   Garante hierarquia visual independente da ordem no DOM:
-     1. toolbar-amount  2. toolbar-sorter  3. modes  4. limiter
-   awa-bundle-category.css usava seletores .catalog-category-view sem :is() e
-   sem !important (spec 0,2,1). Aqui adotamos o padrão do arquivo (:is() +
-   !important) para cobrir também body.catalogsearch-result-index.
-   ============================================================================= */
 
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .toolbar.toolbar-products .toolbar-amount {
-    order: 1 !important;
+    order: 1 ;
 }
 
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .toolbar.toolbar-products .toolbar-sorter {
-    order: 2 !important;
+    order: 2 ;
 }
 
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .toolbar.toolbar-products .modes {
-    order: 3 !important;
+    order: 3 ;
 }
 
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .toolbar.toolbar-products .limiter {
-    order: 4 !important;
+    order: 4 ;
 }
-
-
-/* =============================================================================
-   18. CARD DE PRODUTO — push do CTA para rodapé do card (migrado de awa-bundle-category.css)
-   .product-info flex-column com flex:1 garante que a área de informação preenche
-   a altura disponível no card. .product-info-cart margin-top:auto empurra o CTA
-   para o rodapé do card em qualquer altura — efeito "sticky footer" interno.
-   Não coberto em nenhuma seção anterior do layout-fix.
-   ============================================================================= */
 
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .products-grid .item-product .product-info {
-    display: flex !important;
-    flex-direction: column !important;
-    flex: 1 1 auto !important;
-    gap: 6px !important;
+    display: flex ;
+    flex-direction: column ;
+    flex: 1 1 auto ;
+    gap: 6px ;
 }
 
 :is(body.catalog-category-view, body.catalogsearch-result-index)
     .products-grid .item-product .product-info-cart {
-    margin-top: auto !important;
+    margin-top: auto ;
 }

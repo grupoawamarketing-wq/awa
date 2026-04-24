@@ -9,7 +9,7 @@
    REGRAS:
    1. Breakpoints vêm de _awa-variables.less (@awa-breakpoint-*)
    2. Nenhum outro .less ou .css deve definir grid-template-columns para
-      .product-items, .columns, ou .main-detail > .row
+      .product-items, ul.product-grid, .columns, ou .main-detail > .row
    3. Para alterar colunas ou breakpoints: editar APENAS este arquivo
    ========================================================================== */
 
@@ -67,11 +67,30 @@
 // APPLICATION: Product Grid (Non-Carousel)
 // ════════════════════════════════════════════════════════════════════════════
 
+@awa-grid-targets: ~".products-grid .product-items:not(.owl-carousel):not(.swiper-wrapper),\
+.products.list .product-items:not(.owl-carousel):not(.swiper-wrapper),\
+.products.grid .product-items:not(.owl-carousel):not(.swiper-wrapper),\
+.products-grid > ul.product-grid,\
+.products-grid > ul.container-products-switch,\
+.products-grid > ul.row.product-grid,\
+.products-grid > ul.row.container-products-switch,\
+.catalog-category-view .products-grid > ul.product-grid,\
+.catalog-category-view .products-grid > ul.container-products-switch,\
+.catalogsearch-result-index .products-grid > ul.product-grid,\
+.catalogsearch-result-index .products-grid > ul.container-products-switch,\
+.block.widget .product-items:not(.owl-carousel):not(.swiper-wrapper),\
+.block.widget .products-grid > ul.product-grid,\
+.block.widget .products-grid > ul.container-products-switch";
+
 // Base: 4 columns (default for 1024–1279px)
 .products-grid,
 .products.list,
 .products.grid {
-    .product-items:not(.owl-carousel):not(.swiper-wrapper) {
+    .product-items:not(.owl-carousel):not(.swiper-wrapper),
+    > ul.product-grid,
+    > ul.container-products-switch,
+    > ul.row.product-grid,
+    > ul.row.container-products-switch {
         display: grid !important;
         grid-template-columns: repeat(@awa-grid-cols-lg, minmax(0, 1fr)) !important;
         gap: @awa-grid-gap-lg !important;
@@ -86,7 +105,11 @@
     // Neutralize legacy float/clear on items
     .product-items > .product-item,
     .product-items > li,
-    .product-items > .item-product {
+    .product-items > .item-product,
+    > ul.product-grid > li.item-product,
+    > ul.container-products-switch > li.item-product,
+    > ul.row.product-grid > li.item-product,
+    > ul.row.container-products-switch > li.item-product {
         clear: none !important;
         float: none !important;
         padding: 0 !important;
@@ -98,10 +121,7 @@
 
 // ── XXL: ≥1440px — 5 columns, no sidebar ──────────────────────────────────
 @media (min-width: @awa-breakpoint-xxl) {
-    .products-grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
-    .products.list .product-items:not(.owl-carousel):not(.swiper-wrapper),
-    .products.grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
-    .block.widget .product-items:not(.owl-carousel):not(.swiper-wrapper) {
+    @{awa-grid-targets} {
         grid-template-columns: repeat(@awa-grid-cols-xxl, minmax(0, 1fr)) !important;
         gap: @awa-grid-gap-xl !important;
     }
@@ -109,10 +129,7 @@
 
 // ── XL: 1280–1439px — 4 columns ──────────────────────────────────────────
 @media (min-width: @awa-breakpoint-lg) and (max-width: (@awa-breakpoint-xxl - 1)) {
-    .products-grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
-    .products.list .product-items:not(.owl-carousel):not(.swiper-wrapper),
-    .products.grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
-    .block.widget .product-items:not(.owl-carousel):not(.swiper-wrapper) {
+    @{awa-grid-targets} {
         grid-template-columns: repeat(@awa-grid-cols-xl, minmax(0, 1fr)) !important;
         gap: @awa-grid-gap-xl !important;
     }
@@ -120,10 +137,7 @@
 
 // ── LG: 1024–1279px — 4 columns ──────────────────────────────────────────
 @media (min-width: @awa-breakpoint-md) and (max-width: (@awa-breakpoint-lg - 1)) {
-    .products-grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
-    .products.list .product-items:not(.owl-carousel):not(.swiper-wrapper),
-    .products.grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
-    .block.widget .product-items:not(.owl-carousel):not(.swiper-wrapper) {
+    @{awa-grid-targets} {
         grid-template-columns: repeat(@awa-grid-cols-lg, minmax(0, 1fr)) !important;
         gap: @awa-grid-gap-lg !important;
     }
@@ -131,10 +145,7 @@
 
 // ── MD: 768–1023 — 3 columns ────────────────────────────────────────────
 @media (min-width: @awa-breakpoint-sm) and (max-width: (@awa-breakpoint-md - 1)) {
-    .products-grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
-    .products.list .product-items:not(.owl-carousel):not(.swiper-wrapper),
-    .products.grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
-    .block.widget .product-items:not(.owl-carousel):not(.swiper-wrapper) {
+    @{awa-grid-targets} {
         grid-template-columns: repeat(@awa-grid-cols-md, minmax(0, 1fr)) !important;
         gap: @awa-grid-gap-md !important;
     }
@@ -142,10 +153,7 @@
 
 // ── SM: 480–767px — 2 columns ────────────────────────────────────────────
 @media (min-width: @awa-breakpoint-xs) and (max-width: (@awa-breakpoint-sm - 1)) {
-    .products-grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
-    .products.list .product-items:not(.owl-carousel):not(.swiper-wrapper),
-    .products.grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
-    .block.widget .product-items:not(.owl-carousel):not(.swiper-wrapper) {
+    @{awa-grid-targets} {
         grid-template-columns: repeat(@awa-grid-cols-sm, minmax(0, 1fr)) !important;
         gap: @awa-grid-gap-sm !important;
     }
@@ -153,10 +161,7 @@
 
 // ── XS: <480px — 1 column ────────────────────────────────────────────────
 @media (max-width: (@awa-breakpoint-xs - 1)) {
-    .products-grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
-    .products.list .product-items:not(.owl-carousel):not(.swiper-wrapper),
-    .products.grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
-    .block.widget .product-items:not(.owl-carousel):not(.swiper-wrapper) {
+    @{awa-grid-targets} {
         grid-template-columns: repeat(@awa-grid-cols-xs, minmax(0, 1fr)) !important;
         gap: @awa-grid-gap-xs !important;
     }
@@ -174,7 +179,11 @@
     // ── XXL with sidebar: 4 cols instead of 5 ─────────────────────────────
     @media (min-width: @awa-breakpoint-xxl) {
         .products-grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
-        .products.grid .product-items:not(.owl-carousel):not(.swiper-wrapper) {
+        .products.grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
+        .products-grid > ul.product-grid,
+        .products-grid > ul.container-products-switch,
+        .products-grid > ul.row.product-grid,
+        .products-grid > ul.row.container-products-switch {
             grid-template-columns: repeat(@awa-grid-cols-xxl-sb, minmax(0, 1fr)) !important;
         }
     }
@@ -182,7 +191,11 @@
     // ── XL with sidebar: 4 cols ───────────────────────────────────────────
     @media (min-width: @awa-breakpoint-lg) and (max-width: (@awa-breakpoint-xxl - 1)) {
         .products-grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
-        .products.grid .product-items:not(.owl-carousel):not(.swiper-wrapper) {
+        .products.grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
+        .products-grid > ul.product-grid,
+        .products-grid > ul.container-products-switch,
+        .products-grid > ul.row.product-grid,
+        .products-grid > ul.row.container-products-switch {
             grid-template-columns: repeat(@awa-grid-cols-xl-sb, minmax(0, 1fr)) !important;
         }
     }
@@ -190,7 +203,11 @@
     // ── LG with sidebar: 3 cols ───────────────────────────────────────────
     @media (min-width: @awa-breakpoint-md) and (max-width: (@awa-breakpoint-lg - 1)) {
         .products-grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
-        .products.grid .product-items:not(.owl-carousel):not(.swiper-wrapper) {
+        .products.grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
+        .products-grid > ul.product-grid,
+        .products-grid > ul.container-products-switch,
+        .products-grid > ul.row.product-grid,
+        .products-grid > ul.row.container-products-switch {
             grid-template-columns: repeat(@awa-grid-cols-lg-sb, minmax(0, 1fr)) !important;
         }
     }
@@ -371,25 +388,15 @@
     max-width: 100% !important;
 }
 
-// Desktop: 2-column grid (gallery | info)
-// .product-view wraps .product.media + .detail-info-product-view in Rokanthemes HTML
+// Rokanthemes Ayo usa `.product-view > .view-product > .main-detail > .row`.
+// Portanto o split 50/50 acontece no `.main-detail > .row` (acima), e
+// `.product-view` deve ocupar largura total sem criar colunas extras.
 .catalog-product-view .product-view {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
-    gap: @awa-pdp-split-gap !important;    // 32px
-    align-items: start !important;
+    display: block !important;
     width: 100% !important;
+    max-width: 100% !important;
     padding-left: 0 !important;
     padding-right: 0 !important;
-    max-width: 100% !important;
-}
-
-// Mobile: stack vertically below md (1024)
-@media (max-width: (@awa-breakpoint-md - 1)) {
-    .catalog-product-view .product-view {
-        grid-template-columns: 1fr !important;
-        gap: 24px !important;
-    }
 }
 
 // Hide orphan swiper-slide that leaks into .columns

@@ -1,0 +1,127 @@
+// ============================================================================
+// AWA Motos — _awa-vertical-menu-fix.less
+// Fix definitivo de visibilidade do Menu Vertical em TODAS as páginas.
+//
+// PROBLEMA:
+//   O tema pai (ayo/ayo_home5) serve CSS bundle (awa-bundle-pdp.css,
+//   awa-bundle-tail.css, awa-bundle-custom.css) que contém:
+//
+//     body:not(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+//       .page-wrapper .header-control .menu_left_home1 { display: none }
+//
+//   Isso esconde o container do Menu Vertical em Cat/PDP/CMS, causando:
+//     - Gap de 290px no header (container invisível mas com largura)
+//     - Dropdown "Todas as Categorias" só funciona na Home
+//     - Nav horizontal comprimido desnecessariamente
+//
+// SOLUÇÃO:
+//   Regra com especificidade >= ao bundle, carregada POR ÚLTIMO na cascata
+//   do _extend.less. Garante que o menu vertical fica visível e funcional
+//   em todas as páginas, conforme documentação Ayo/Rokanthemes:
+//     Admin > Rokanthemes > Vertical Menu > Show on All Pages = Yes
+//
+// DEPENDÊNCIA:
+//   Este fix SÓ funciona se a configuração admin estiver correta:
+//     verticalmenu/general/enabled = 1
+//     verticalmenu/general/show_all_page = 1
+//   Use: sudo -u www-data php scripts/diagnose_vertical_menu.php
+//
+// CARREGAMENTO: importado em _extend.less (posição 17 — último LESS)
+// ============================================================================
+
+@import (once) '_awa-variables';
+
+// ── 1. Container do menu: VISÍVEL em todas as páginas ─────────────────────
+// Especificidade: body .page-wrapper #header .header-control ... (2-3-0+)
+// Vence o bundle que usa body:not(...) .page-wrapper .header-control (0-4-1)
+
+@media (min-width: @awa-breakpoint-md) {
+
+  // Container principal: força flex + dimensões
+  body .page-wrapper #header .header-control .awa-header-categories.menu_left_home1,
+  body .page-wrapper #header .header-control .menu_left_home1,
+  body .page-wrapper .awa-site-header .header-control .awa-header-categories.menu_left_home1,
+  body .page-wrapper .awa-site-header .header-control .menu_left_home1 {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    overflow: visible !important;
+    width: auto !important;
+    max-width: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  // Navigation container: desbloqueio de height e visibility
+  body .page-wrapper #header .navigation.verticalmenu.side-verticalmenu,
+  body .page-wrapper .awa-site-header .navigation.verticalmenu.side-verticalmenu {
+    display: block !important;
+    visibility: visible !important;
+    overflow: visible !important;
+    height: auto !important;
+    min-height: var(--awa-hdr-navbar-h, 52px) !important;
+  }
+
+  // Section-item-content: Magento collapsible JS aplica inline display:none
+  body .page-wrapper #header .awa-header-categories .section-items > .section-item-content,
+  body .page-wrapper .awa-site-header .awa-header-categories .section-items > .section-item-content {
+    display: block !important;
+    height: auto !important;
+    min-height: var(--awa-hdr-navbar-h, 52px) !important;
+    overflow: visible !important;
+    width: 100% !important;
+  }
+
+  // Dropdown UL: posição absoluta sob o trigger
+  body .page-wrapper #header .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown,
+  body .page-wrapper .awa-site-header .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown {
+    position: absolute !important;
+    top: 100% !important;
+    left: 0 !important;
+    z-index: 9000 !important;
+  }
+}
+
+// ── 2. Nav bar inner: overflow visible para dropdown escapar do clip ──────
+// O awa-header-classic-redesign.css define:
+//   max-height: 48px !important; overflow: hidden!important;
+// Isso impede o dropdown do menu vertical de aparecer abaixo do nav bar.
+// O CLS fix script (inline no HTML) também define height:0 no mobile;
+// o JS awa-nav-cls-fix-reset.js remove esses estilos inline no desktop.
+
+@media (min-width: @awa-breakpoint-md) {
+
+  // Nav bar outer: overflow visible para o dropdown não ser cortado
+  body .page-wrapper .awa-site-header .header-control.awa-nav-bar,
+  body .page-wrapper .awa-site-header .header-control.header-nav.awa-nav-bar,
+  body .page-wrapper #header .header-control.awa-nav-bar {
+    overflow: visible !important;
+  }
+
+  // Nav bar inner: garante altura e overflow para o menu aparecer
+  body .page-wrapper .awa-site-header .header-control.awa-nav-bar .awa-nav-bar__inner,
+  body .page-wrapper .awa-site-header .header-nav .awa-nav-bar__inner,
+  body .page-wrapper #header .awa-nav-bar__inner {
+    height: auto !important;
+    min-height: var(--awa-space-9, 48px) !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  // Container direto do nav bar: também precisa de overflow visible
+  body .page-wrapper .awa-site-header .header-control.awa-nav-bar > .container,
+  body .page-wrapper #header .header-control.awa-nav-bar > .container {
+    overflow: visible !important;
+  }
+}
+
+// ── 3. Mobile: menu via drawer, não inline ─────────────────────────────────
+@media (max-width: (@awa-breakpoint-md - 1)) {
+
+  // Em mobile o menu vertical entra no drawer lateral; não forçar flex
+  body .page-wrapper .header-control .awa-header-categories.menu_left_home1,
+  body .page-wrapper .header-control .menu_left_home1 {
+    // Respeitar o fluxo do drawer mobile do tema pai
+    display: none !important;
+  }
+}

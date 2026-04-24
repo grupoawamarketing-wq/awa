@@ -1,0 +1,506 @@
+// ============================================================================
+// AWA Motos — _awa-ux-audit-2026-07.less
+// Implementação das melhorias UX/UI da auditoria de Julho 2026 (M02–M25)
+//
+// Fonte: audit/ux_ui_25_improvements_2026-07.md
+// Carregado DEPOIS de _awa-vertical-menu-fix.less (último na cascata)
+//
+// Itens implementados aqui:
+//   M02 — Breakpoints tablet (768–1024px)              🔴 Crítico
+//   M08 — Product cards altura consistente             🟡 Médio
+//   M10 — Footer accordion animação suave              🟢 Baixo
+//   M13 — Sistema de botões unificado                  🟡 Médio
+//   M18 — Breadcrumb fade gradient mobile              🟢 Baixo
+//   M19 — Cart summary sticky desktop                  🟡 Médio
+//   M20 — Menu vertical estado ativo persistente       🟢 Baixo
+//   M22 — Touch targets mínimo 44px mobile             🟡 Médio
+//
+// NÃO implementados (requerem refactor do parent ou backend):
+//   M01 — CSS bloat 8.4 MB (refactor de bundles do parent)
+//   M03 — z-index scale (valores no parent — tokens não aplicáveis via override)
+//   M04 — Token bloat (parent CSS)
+//   M05 — font-size:0 hack (parent CSS)
+//   M06 — Header height reduction (impacto em layout global, ciclo separado)
+//   M07 — Minicart posicionamento (JS-dependent)
+//   M09 — box-shadow tokens (parent CSS)
+//   M11 — Busca loading spinner (requer JS + template)
+//   M12 — B2B register wizard (requer PHP/template — ciclo B2B separado)
+//   M14 — img width/height attributes (template change, não CSS)
+//   M15 — Owl lazy loading (JS change)
+//   M16 — B2B preço CTA (template change)
+//   M17 — Banner hero CTA mobile (gradiente já existe, ajuste menor)
+//   M21 — Newsletter validação (JS + CSS, ciclo separado)
+//   M23 — Carrossel categorias indicador (JS/Swiper config)
+//   M24 — Print stylesheet (prioridade baixa)
+//   M25 — prefers-reduced-motion (já aplicado em _awa-cycle1-fixes.less)
+// ============================================================================
+
+@import (once) '_awa-variables';
+
+
+// ============================================================================
+// M02 — Breakpoints Tablet (768–1024px)
+// ============================================================================
+// Crítico: zero media queries tablet no awa-bundle-core.css.
+// Layout pula de mobile (≤767) para desktop (≥992/≥1025) sem passagem tablet.
+// Resultado: iPads, tablets Android e notebooks 1024px recebem layout desktop
+// comprimido, elementos cortados, header apertado.
+
+// Grid de produtos: 3 colunas no tablet (desktop usa 4, mobile usa 2 ou 1)
+@media (min-width: 768px) and (max-width: 1024px) {
+
+    // ── Grid de produtos ──────────────────────────────────────────────────────
+    .products.list .product-items,
+    .products-grid .product-items,
+    .widget-product-grid .product-items {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important; // !important: parent força 4 colunas
+        gap: 16px;
+    }
+
+    // Carrossel de produtos: mostrar 3 por vez
+    .awa-products-carousel .owl-item,
+    .products-carousel .owl-item {
+        min-width: 0;
+    }
+
+    // ── Header: compactar em tablet ───────────────────────────────────────────
+    // Utility bar: manter mas reduzir padding
+    .awa-utility-bar,
+    .header-top-bar {
+        padding-block: 4px;
+        font-size: 12px;
+    }
+
+    // Main header: reduzir logo e busca
+    body .page-wrapper .awa-site-header .header,
+    body .page-wrapper #header .header {
+        padding-block: 8px;
+    }
+
+    // Logo: ligeiramente menor
+    body .page-wrapper .awa-site-header .logo img,
+    body .page-wrapper #header .logo img {
+        max-height: 44px;
+    }
+
+    // ── Sidebar de filtros: overlay em vez de inline ──────────────────────────
+    // Em tablet, a sidebar de filtros (coluna esquerda) deve ser colapsável
+    .catalog-category-view {
+        .columns {
+            .column.main { width: 100%; }
+            .sidebar.sidebar-main {
+                position: fixed;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                z-index: 300; // var(--z-overlay)
+                background: #fff;
+                width: 280px;
+                transform: translateX(-100%);
+                transition: transform 0.28s ease;
+                overflow-y: auto;
+                padding: 20px;
+                box-shadow: 4px 0 16px rgba(0,0,0,.12);
+
+                &.is-open { transform: translateX(0); }
+            }
+        }
+    }
+
+    // ── Footer: 2 colunas em vez de 4 ────────────────────────────────────────
+    .page-footer .footer.content,
+    .page_footer .footer-widget-area,
+    .page_footer .vela-footer-col-wrap {
+        grid-template-columns: repeat(2, 1fr) !important; // !important: parent força 4 colunas
+        gap: 32px 24px;
+    }
+}
+
+// Garantir que PLP tem sidebar oculta por padrão no tablet
+@media (min-width: 768px) and (max-width: 1024px) {
+    .catalog-category-view .columns {
+        display: block; // remove o float/grid do parent que posiciona sidebar
+    }
+}
+
+
+// ============================================================================
+// M08 — Product Cards: Altura Consistente em Carrosséis
+// ============================================================================
+// Problema: cards com nomes longos empurram botão "Comprar" para baixo em
+// carrosséis owl. Fix: flex column com margin-top:auto no botão + min-height.
+
+.product-item-info,
+.awa-product-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%; // ocupa toda altura do owl-item
+
+    .product-item-details {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .product-item-name,
+    .product.name {
+        flex: 1; // empurra preço + botão para baixo
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        display: -webkit-box;
+    }
+
+    .price-box,
+    .price-wrapper,
+    .price-container {
+        min-height: 1.5em; // reserva espaço mesmo sem preço visível (guests B2B)
+    }
+
+    .product-item-actions,
+    .actions-primary,
+    .action.tocart {
+        margin-top: auto; // sempre cola no fundo do card
+    }
+}
+
+// Owl carousel: igualar altura dos itens
+.owl-carousel.products-carousel .owl-item {
+    display: flex;
+    flex-direction: column;
+
+    > * {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+}
+
+
+// ============================================================================
+// M10 — Footer Accordion: Animação Suave
+// ============================================================================
+// Atual: display:none → display:block (abrupto).
+// Fix: max-height 0 → max-height:500px com transition.
+
+.page_footer,
+.page-footer {
+
+    .vela-footer-col,
+    .footer-widget,
+    [data-role="collapsible"] {
+
+        .velaContent,
+        .block-content,
+        [data-role="content"] {
+            overflow: hidden;
+            max-height: 0;
+            transition: max-height 0.3s ease, opacity 0.25s ease;
+            opacity: 0;
+
+            // Quando a seção do parent tem a classe .active no título irmão:
+            // O JS do Rokanthemes adiciona .active no <h3>/<h4> pai quando expandido
+        }
+
+        // Aberto — verificar classes usadas pelo tema (active, open, _show)
+        &.active,
+        &.open,
+        &._show {
+            .velaContent,
+            .block-content,
+            [data-role="content"] {
+                max-height: 600px;
+                opacity: 1;
+            }
+        }
+    }
+
+    // Desktop: sempre visível (sem accordion)
+    @media (min-width: 768px) {
+        .velaContent,
+        .block-content,
+        [data-role="content"] {
+            max-height: none !important;    // !important: JS pode setar inline style
+            opacity: 1 !important;
+            overflow: visible;
+            transition: none;
+        }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .page_footer .velaContent,
+    .page-footer .velaContent {
+        transition: none !important;
+    }
+}
+
+
+// ============================================================================
+// M13 — Sistema de Botões: Unificação
+// ============================================================================
+// Problema: 3+ padrões de botões primários com border-radius/padding diferentes.
+// Fix: classes utilitárias + override dos principais seletores do tema.
+
+:root {
+    --awa-btn-radius: 8px;
+    --awa-btn-pad-v:  12px;
+    --awa-btn-pad-h:  24px;
+    --awa-btn-font:   600 14px/1.4 inherit;
+    --awa-btn-ls:     0.02em;
+}
+
+// Mixin de reset de botão (aplicado via classes em cascata)
+.awa-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    font: var(--awa-btn-font);
+    letter-spacing: var(--awa-btn-ls);
+    border-radius: var(--awa-btn-radius);
+    padding: var(--awa-btn-pad-v) var(--awa-btn-pad-h);
+    transition: background 0.18s ease, box-shadow 0.18s ease, transform 0.12s ease;
+    white-space: nowrap;
+    -webkit-user-select: none;
+    user-select: none;
+
+    &:hover  { text-decoration: none; transform: translateY(-1px); }
+    &:active { transform: translateY(0); }
+    &:focus-visible { outline: 3px solid rgba(183,51,55,.5); outline-offset: 2px; }
+}
+
+.awa-btn--primary,
+.awa-btn.primary {
+    background: var(--awa-primary, #b73337);
+    color: #fff !important;
+    box-shadow: 0 2px 8px rgba(183,51,55,.25);
+
+    &:hover {
+        background: color-mix(in srgb, var(--awa-primary,#b73337) 85%, black);
+        box-shadow: 0 4px 12px rgba(183,51,55,.35);
+        color: #fff !important;
+    }
+}
+
+.awa-btn--secondary,
+.awa-btn.secondary {
+    background: transparent;
+    color: var(--awa-primary, #b73337) !important;
+    border: 2px solid var(--awa-primary, #b73337);
+
+    &:hover {
+        background: rgba(183,51,55,.06);
+    }
+}
+
+.awa-btn--ghost,
+.awa-btn.ghost {
+    background: transparent;
+    color: #374151 !important;
+    border: 1px solid #d1d5db;
+
+    &:hover {
+        background: #f9fafb;
+        border-color: #9ca3af;
+    }
+}
+
+// Unificar border-radius dos botões principais do tema
+// !important: parent tema usa valores hardcoded diferentes por componente
+.action.primary,
+.action.tocart,
+.btn-cart,
+.button.action.primary {
+    border-radius: var(--awa-btn-radius) !important; // !important: tema pai hardcoda 6px/12px
+    font-weight: 600 !important;
+    letter-spacing: var(--awa-btn-ls) !important;
+}
+
+// Padding mínimo consistente
+.action.primary:not(.checkout) {
+    padding: var(--awa-btn-pad-v) var(--awa-btn-pad-h) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .awa-btn { transition: none; &:hover { transform: none; } }
+    .action.primary, .action.tocart { transition: none !important; }
+}
+
+
+// ============================================================================
+// M18 — Breadcrumb: Fade Gradient Nas Bordas Mobile
+// ============================================================================
+// Breadcrumbs longos ficam cortados com overflow-x:auto mas sem indicador.
+// Fix: mask-image fade nas bordas + seta visual à direita.
+
+@media (max-width: 767px) {
+    .breadcrumbs {
+        position: relative;
+
+        .items {
+            overflow-x: auto;
+            scrollbar-width: none;     // Firefox
+            -ms-overflow-style: none;  // IE/Edge
+            &::-webkit-scrollbar { display: none; }
+
+            // Fade nas bordas esquerda e direita
+            -webkit-mask-image: linear-gradient(
+                90deg,
+                transparent 0%,
+                black 20px,
+                black calc(100% - 20px),
+                transparent 100%
+            );
+            mask-image: linear-gradient(
+                90deg,
+                transparent 0%,
+                black 20px,
+                black calc(100% - 20px),
+                transparent 100%
+            );
+        }
+    }
+}
+
+
+// ============================================================================
+// M19 — Cart Summary: Sticky no Desktop
+// ============================================================================
+// O botão "Finalizar Compra" desaparece quando o usuário scrolla itens do
+// carrinho. Fix: position:sticky no .cart-summary.
+// Pré-requisito: container pai deve ser display:flex ou grid (o Magento default
+// usa float — precisamos garantir que o wrapper use flexbox).
+
+@media (min-width: 768px) {
+    // Wrapper do carrinho: garantir flex (remove float)
+    .checkout-cart-index .cart-container {
+        display: flex;
+        align-items: flex-start;
+        gap: 24px;
+    }
+
+    // Main: flex:1 para ocupar espaço restante
+    .checkout-cart-index .cart-container .form-cart {
+        flex: 1;
+        min-width: 0; // previne overflow
+    }
+
+    // Sidebar do resumo: sticky
+    .checkout-cart-index .cart-summary {
+        position: sticky;
+        top: calc(80px + 16px); // altura do header sticky + gap
+        align-self: flex-start;
+        min-width: 300px;
+        max-width: 360px;
+    }
+}
+
+
+// ============================================================================
+// M20 — Menu Vertical: Estado Ativo Persistente
+// ============================================================================
+// O estado ativo (._active) some quando subcategoria é expandida.
+// Fix: manter destaque no item pai (.level0) quando filho está expandido.
+
+// Estado ativo — item raiz com subcategoria aberta
+.navigation.side-verticalmenu,
+.verticalmenu-wrapper {
+
+    // Item pai com filho expandido (classe adicionada pelo JS Rokanthemes)
+    .ui-menu-item.level0.active > a,
+    .ui-menu-item.level0._active > a,
+    .ui-menu-item.level0.ui-state-active > a {
+        background: rgba(183,51,55,.07) !important;    // !important: parent tema anula sem
+        color: var(--awa-primary, #b73337) !important;
+        font-weight: 600 !important;
+    }
+
+    // Indicator bar persistente no item ativo
+    .ui-menu-item.level0.active > a::before,
+    .ui-menu-item.level0._active > a::before,
+    .ui-menu-item.level0.ui-state-active > a::before {
+        transform: scaleY(1) !important;               // !important: override da animação
+        opacity: 1 !important;
+        background: var(--awa-primary, #b73337);
+    }
+
+    // Subcategorias abertas: item pai mantém fundo
+    .ui-menu-item.level0:has(.ui-menu-item._active) > a,
+    .ui-menu-item.level0:has(.active) > a {
+        background: rgba(183,51,55,.04);
+        color: var(--awa-primary, #b73337);
+    }
+}
+
+
+// ============================================================================
+// M22 — Touch Targets: Mínimo 44px em Mobile
+// ============================================================================
+// Links do top-bar (36px), pagination (36px), sorter controls ficam abaixo do
+// mínimo WCAG 2.2. Fix: padding extra para expandir área de toque.
+
+@media (max-width: 991px) {
+
+    // Top bar links
+    .top-account .header.links > li > a,
+    .top-account .header.links > li > button,
+    .awa-utility-bar a,
+    .awa-utility-bar button {
+        min-height: 44px !important;   // !important: parent define 36px
+        min-width: 44px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    // Paginação
+    .pages .pages-items .page > a,
+    .pages .pages-items .page > strong,
+    .pages-items .item > a,
+    .pages-items .item > strong {
+        min-height: 44px !important;   // !important: parent define 36px em ≤480px
+        min-width: 44px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    // Sorter (ordenação)
+    .toolbar-sorter .sorter-action {
+        min-height: 44px;
+        min-width: 44px;
+        padding: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    // Toolbar: per-page select
+    .toolbar-amount,
+    .limiter-options,
+    .limiter select {
+        min-height: 40px;
+    }
+
+    // Swatches de filtro mobile
+    .swatch-option {
+        min-height: 40px !important;
+        min-width: 40px !important;
+    }
+
+    // Links do minicart, header buttons
+    .action.toggle.showcart,
+    .action.showcart,
+    .action.nav-toggle {
+        min-height: 44px;
+        min-width: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+}

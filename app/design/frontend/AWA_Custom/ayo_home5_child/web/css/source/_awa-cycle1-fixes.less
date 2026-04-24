@@ -12,6 +12,7 @@
 // Restrições: !important documentado inline em todos os usos.
 // ============================================================================
 
+@import (once) '_awa-variables';
 
 // ============================================================================
 // BUG 3 — Slider .slidebanner: full-bleed 100vw
@@ -49,7 +50,7 @@
 }
 
 // Tela ≥ 1440px: garantir que não haja max-width residual
-@media (min-width: @awa-breakpoint-xl) {
+@media (min-width: 1440px) {
     .slidebanner {
         max-width: 100vw !important;
     }
@@ -126,7 +127,7 @@ body.customer-guest {
 // O header.phtml já trata via inline <style>; este bloco é um reforço
 // para o caso de o CSS externo sobrescrever as regras do phtml.
 
-// Desktop ≥ 1024: logo desktop visível, mobile oculto
+// Desktop ≥ 992px: logo desktop visível, mobile oculto
 @media (min-width: @awa-breakpoint-md) {
     body .page-wrapper .awa-site-header .header .awa-header-brand-desktop {
         display: block !important;       // !important: algum CSS pode forçar display:none
@@ -137,7 +138,7 @@ body.customer-guest {
     }
 }
 
-// Mobile < 1024: logo mobile visível, desktop oculto
+// Mobile < 992px: logo mobile visível, desktop oculto
 @media (max-width: (@awa-breakpoint-md - 1)) {
     body .page-wrapper .awa-site-header .header .awa-header-brand-desktop {
         display: none !important;
@@ -220,14 +221,14 @@ body.customer-guest {
 .sales-order-view .table-wrapper thead th,
 .order-details-items thead th,
 .awa-orders-table thead th {
-    background: @awa-color-bg-soft !important;     // !important: anula transparent do ux-audit-fixes
-    color: @awa-neutral-700 !important;          // awa-neutral-700 — texto legível
-    border-bottom: 2px solid @awa-color-border-subtle !important; // separador visual consistente
+    background: #f7f7f7 !important;     // !important: anula transparent do ux-audit-fixes
+    color: #374151 !important;          // awa-neutral-700 — texto legível
+    border-bottom: 2px solid #e5e7eb !important; // separador visual consistente
 }
 
 // Garantir que thead do carrinho mantenha o estilo do ux-audit-fixes (não sobrescrever)
 .cart.table-wrapper .data.table thead th {
-    background: @awa-color-bg-soft !important;    // !important: era transparent — agora coerente
+    background: #f7f7f7 !important;    // !important: era transparent — agora coerente
 }
 
 
@@ -348,7 +349,7 @@ body.customer-guest {
 // !important: alinha com _awa-ux-audit-fixes.less — tema pai tem especificidade alta.
 
 body.account .sidebar-main .block-collapsible-nav .content .nav.items > .nav.item > a {
-    color: @awa-neutral-600 !important;          // !important: tema pai força cor primária
+    color: #4b5563 !important;          // !important: tema pai força cor primária
     font-weight: 500 !important;
     font-size: 14px !important;
     padding: 12px 20px !important;
@@ -478,7 +479,7 @@ body.account .sidebar-main .block-collapsible-nav .content .nav.items > .nav.ite
         right: 0;
         padding: 20px 12px 12px;
         background: linear-gradient(to top, rgba(0, 0, 0, 0.55) 0%, transparent 100%);
-        color: @awa-color-white;
+        color: #fff;
         font-size: 12px;
         font-weight: 600;
         letter-spacing: 0.04em;
@@ -531,49 +532,159 @@ body.account .sidebar-main .block-collapsible-nav .content .nav.items > .nav.ite
     }
 }
 
+
 // ============================================================================
-// M3 — Trigger do menu vertical: neutralizar texto branco legado do Ayo Home 5
+// AUDIT 2026-04-23 — Ciclo 7: Fixes remanescentes
 // ============================================================================
-body .page-wrapper .navigation.verticalmenu.side-verticalmenu > h2.title-category-dropdown,
-body .page-wrapper .navigation.verticalmenu.side-verticalmenu > h2.title-category-dropdown > span,
-body .page-wrapper .navigation.verticalmenu.side-verticalmenu > h2.title-category-dropdown .awa-vmenu-trigger-text,
-body .page-wrapper .navigation.verticalmenu.side-verticalmenu > h2.title-category-dropdown .icon-menu,
-body .page-wrapper .navigation.verticalmenu.side-verticalmenu > h2.title-category-dropdown .vm-icon {
-    color: @awa-neutral-900 !important;
+
+
+// ============================================================================
+// A7-1 — H1 duplicado na página 404
+// ============================================================================
+// Audit: dois <h1>Página não encontrada</h1> na mesma página.
+// O parent theme injeta um segundo H1 via bloco desconhecido.
+// Fix via CSS: esconde o segundo H1 na página 404 sem quebrar o DOM.
+// O bloco XML correto está em noroute_index_index.xml (descomentado quando
+// o nome do bloco for identificado).
+
+.cms-noroute-index .page-title-wrapper ~ .page-title-wrapper,
+.cms-noroute-index h1.page-title + h1.page-title,
+.cms-noroute-index .columns h1:nth-of-type(n+2) {
+    display: none !important;       // !important: parent theme força display do segundo H1
 }
 
-body .page-wrapper .navigation.verticalmenu.side-verticalmenu > h2.title-category-dropdown:hover,
-body .page-wrapper .navigation.verticalmenu.side-verticalmenu > h2.title-category-dropdown:hover > span,
-body .page-wrapper .navigation.verticalmenu.side-verticalmenu > h2.title-category-dropdown:hover .awa-vmenu-trigger-text,
-body .page-wrapper .navigation.verticalmenu.side-verticalmenu > h2.title-category-dropdown:hover .icon-menu,
-body .page-wrapper .navigation.verticalmenu.side-verticalmenu > h2.title-category-dropdown:hover .vm-icon,
-body .page-wrapper .navigation.verticalmenu.side-verticalmenu > h2.title-category-dropdown:focus-visible,
-body .page-wrapper .navigation.verticalmenu.side-verticalmenu > h2.title-category-dropdown:focus-visible > span,
-body .page-wrapper .navigation.verticalmenu.side-verticalmenu > h2.title-category-dropdown:focus-visible .awa-vmenu-trigger-text,
-body .page-wrapper .navigation.verticalmenu.side-verticalmenu > h2.title-category-dropdown:focus-visible .icon-menu,
-body .page-wrapper .navigation.verticalmenu.side-verticalmenu > h2.title-category-dropdown:focus-visible .vm-icon {
-    color: @awa-color-primary !important;
+
+// ============================================================================
+// A7-2 — Título da Home com espaço duplo (SEO)
+// ============================================================================
+// Audit: <title>Peças e Acessórios para Motos  | AWA Motos</title>
+// Dois espaços antes do |. Não é possível corrigir via CSS; documentado aqui.
+// FIX: Admin > Content > Design > Configuration > HTML Head > Title Suffix
+// Verifique: sem espaço duplo entre o título do página e o sufixo.
+
+
+// ============================================================================
+// A7-3 — CSS duplicados (6 requests desnecessários)
+// ============================================================================
+// Audit: custom_default.css, cookie-consent.css, login-to-cart.css, cada
+// carregado 2x. Causado por registro duplo em layout XML do parent theme
+// e/ou Rokanthemes_Themeoption que carrega via requirejs-config.js também.
+//
+// FIX (PHP/CLI):
+//   php bin/magento dev:layout:export --area=frontend \
+//     --theme=AWA_Custom/ayo_home5_child > /tmp/layout_export.xml
+//   grep -n "custom_default\|cookie-consent\|login-to-cart" /tmp/layout_export.xml
+//
+// Fix CSS temporário: esses arquivos são carregados pelo parent (não controlamos aqui).
+// Enquanto o layout XML do parent não é corrigido, o impacto é apenas de
+// requests duplicados — o CSS em si é idempotente.
+
+
+// ============================================================================
+// A7-4 — Página /contato: estilos base
+// ============================================================================
+// Audit: /contato retorna 404. Fix: scripts/create_contato_page.php cria
+// a CMS page. Este LESS estiliza o conteúdo da página quando carregada.
+
+.cms-contato {
+
+    .awa-contact-page {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 40px 20px 60px;
+    }
+
+    .awa-contact-page__hero {
+        text-align: center;
+        margin-bottom: 48px;
+
+        .awa-contact-page__subtitle {
+            font-size: 22px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 12px;
+        }
+
+        p {
+            color: #6b7280;
+            font-size: 16px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+    }
+
+    .awa-contact-page__grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 24px;
+
+        @media (max-width: 640px) {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .awa-contact-page__card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 28px 24px;
+        text-align: center;
+        transition: box-shadow 0.2s ease, transform 0.2s ease;
+
+        &:hover {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
+        }
+
+        h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #374151;
+            margin: 12px 0 8px;
+        }
+
+        p {
+            color: #6b7280;
+            font-size: 14px;
+            margin: 0 0 6px;
+
+            a {
+                color: var(--awa-primary, #b73337);
+                font-weight: 500;
+                text-decoration: none;
+
+                &:hover { text-decoration: underline; }
+            }
+        }
+    }
+
+    .awa-contact-page__card-icon {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 56px;
+        height: 56px;
+        background: rgba(183, 51, 55, 0.08);
+        border-radius: 50%;
+        margin: 0 auto;
+        color: var(--awa-primary, #b73337);
+
+        svg {
+            width: 24px;
+            height: 24px;
+        }
+    }
+
+    .awa-contact-page__hours {
+        font-size: 12px !important;
+        color: #9ca3af !important;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .awa-contact-page__card {
+            transition: none;
+            &:hover { transform: none; }
+        }
+    }
 }
 
-body:not(.cms-index-index):not(.cms-home):not(.cms-homepage_ayo_home5) {
-    .page-wrapper .navigation.verticalmenu.side-verticalmenu > h2.title-category-dropdown {
-        min-width: @awa-control-height-sm !important;
-        width: 128px !important;
-        padding: 0 @awa-space-3 !important;
-        justify-content: center !important;
-        background: @awa-color-primary !important;
-        border-color: @awa-color-primary !important;
-        box-shadow: 0 8px 18px fade(@awa-color-primary, 22%) !important;
-    }
-
-    .page-wrapper .navigation.verticalmenu.side-verticalmenu > h2.title-category-dropdown > span:last-child,
-    .page-wrapper .navigation.verticalmenu.side-verticalmenu > h2.title-category-dropdown .awa-vmenu-trigger-text {
-        display: inline-flex !important;
-        color: @awa-color-white !important;
-    }
-
-    .page-wrapper .navigation.verticalmenu.side-verticalmenu > h2.title-category-dropdown .icon-menu,
-    .page-wrapper .navigation.verticalmenu.side-verticalmenu > h2.title-category-dropdown .vm-icon {
-        color: @awa-color-white !important;
-    }
-}
