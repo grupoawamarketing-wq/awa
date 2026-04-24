@@ -34,7 +34,8 @@ class Index extends Action implements HttpGetActionInterface
             }
         }
         $collection->setPageSize(30)->setCurPage(1);
-        $this->_view->getLayout()->getBlock('fitment.results')?->setData('fitment_collection', $collection);
+        $block = $this->_view->getLayout()->getBlock('fitment.results') ?: null;
+        $block?->setData('fitment_collection', $collection);
         return $this->pageFactory->create();
     }
 }
