@@ -186,8 +186,8 @@ define([
             setMenuOpenState(true);
 
             if (isDesktop()) {
-                syncDesktopPanelPosition();
                 $list.stop(true, true).removeAttr('style').show();
+                syncDesktopPanelPosition();
                 $('body').removeClass('background_shadow_show');
             } else {
                 $list.stop(true, true).fadeIn(200);
