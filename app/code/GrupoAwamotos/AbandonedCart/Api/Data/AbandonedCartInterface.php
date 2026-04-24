@@ -27,6 +27,7 @@ interface AbandonedCartInterface
     public const STATUS = 'status';
     public const CREATED_AT = 'created_at';
     public const UPDATED_AT = 'updated_at';
+    public const ATTENDANT_ID = 'attendant_id';
 
     public const STATUS_PENDING = 'pending';
     public const STATUS_PROCESSING = 'processing';
@@ -89,4 +90,7 @@ interface AbandonedCartInterface
 
     public function getStatus(): string;
     public function setStatus(string $status): self;
+
+    public function getAttendantId(): ?int;
+    public function setAttendantId(?int $attendantId): self;
 }

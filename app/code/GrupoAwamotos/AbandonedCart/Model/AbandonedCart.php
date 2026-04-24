@@ -208,4 +208,15 @@ class AbandonedCart extends AbstractModel implements AbandonedCartInterface
     {
         return $this->setData(self::STATUS, $status);
     }
+
+    public function getAttendantId(): ?int
+    {
+        $val = $this->getData(self::ATTENDANT_ID);
+        return $val !== null ? (int) $val : null;
+    }
+
+    public function setAttendantId(?int $attendantId): self
+    {
+        return $this->setData(self::ATTENDANT_ID, $attendantId);
+    }
 }

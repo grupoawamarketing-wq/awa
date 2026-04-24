@@ -82,6 +82,10 @@ class ProcessAbandonedCarts
         $quoteIds = array_map('intval', $collection->getColumnValues('entity_id'));
         $existingIds = $this->loadExistingQuoteIds($quoteIds);
 
+        // Batch lookup de attendant por customer_id — evita N+1
+        $customerIds = array_filter(array_map('intval', $collection->getColumnValues('customer_id')));
+        $attendantByCustomer = $this->loadAttendantsByCustomerIds($customerIds);
+
         $processed = 0;
         $skipped = 0;
 
@@ -110,15 +114,19 @@ class ProcessAbandonedCarts
                 }
 
                 // Criar registro
+                $customerId = $quote->getCustomerId() ? (int) $quote->getCustomerId() : null;
+                $attendantId = $customerId !== null ? ($attendantByCustomer[$customerId] ?? null) : null;
+
                 $abandonedCart = $this->abandonedCartFactory->create();
                 $abandonedCart->setQuoteId($quoteId)
-                    ->setCustomerId($quote->getCustomerId() ? (int) $quote->getCustomerId() : null)
+                    ->setCustomerId($customerId)
                     ->setCustomerEmail($quote->getCustomerEmail())
                     ->setCustomerName($this->getCustomerName($quote))
                     ->setStoreId($storeId)
                     ->setCartValue((float) $quote->getGrandTotal())
                     ->setItemsCount((int) $quote->getItemsCount())
                     ->setAbandonedAt($quote->getUpdatedAt())
+                    ->setAttendantId($attendantId)
                     ->setStatus(AbandonedCartInterface::STATUS_PENDING);
 
                 $this->abandonedCartRepository->save($abandonedCart);
@@ -217,6 +225,35 @@ class ProcessAbandonedCarts
                 'recovered = ?'   => 0,
             ]
         );
+    }
+
+    /**
+     * Retorna mapa [customer_id => attendant_id] em uma única query.
+     *
+     * @param int[] $customerIds
+     * @return array<int, int>
+     */
+    private function loadAttendantsByCustomerIds(array $customerIds): array
+    {
+        if (empty($customerIds)) {
+            return [];
+        }
+
+        $connection = $this->resource->getConnection();
+        $table = $connection->getTableName('grupoawamotos_b2b_customer_attendant');
+
+        $rows = $connection->fetchAll(
+            $connection->select()
+                ->from($table, ['customer_id', 'attendant_id'])
+                ->where('customer_id IN (?)', $customerIds)
+        );
+
+        $map = [];
+        foreach ($rows as $row) {
+            $map[(int) $row['customer_id']] = (int) $row['attendant_id'];
+        }
+
+        return $map;
     }
 
     private function getCustomerName($quote): string
