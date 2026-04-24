@@ -276,16 +276,18 @@ sudo -u www-data php bin/magento cache:clean block_html full_page
 
 ## Ferramentas de Debug Visual
 
-### Chrome MCP (investigação em tempo real)
-Disponível via deferred tools `mcp_io_github_chr_*`. Carregar antes de usar.
+### Chrome MCP — Playwright MCP (investigação em tempo real)
+Servidor: `io.github.chr` → tools prefixadas com `mcp_io_github_chr_*`. Carregar antes de usar.
+Instalação: `playwright-mcp` global + Google Chrome 145 (`--browser chrome --no-sandbox --caps vision`).
 
 Fluxo para investigar layout quebrado:
-1. `navigate_page` → URL da página com problema
-2. `take_screenshot` → estado atual desktop
-3. `emulate` viewport `"375x812x2,mobile,touch"` → `take_screenshot` mobile
-4. `take_snapshot` → inspecionar DOM sem executar JS
-5. `evaluate_script` → `getComputedStyle(document.querySelector('.seletor'))` para confirmar qual CSS está ativo
-6. `grep` no bundle CSS para rastrear a origem da regra
+1. `browser_navigate` → URL da página com problema
+2. `browser_take_screenshot` → estado atual desktop
+3. `browser_resize` `{"width": 375, "height": 812}` → `browser_take_screenshot` mobile
+4. `browser_snapshot` → inspecionar DOM (accessibility tree) sem executar JS
+5. `browser_evaluate` → `getComputedStyle(document.querySelector('.seletor'))` para confirmar qual CSS está ativo
+6. `browser_network_requests` → verificar recursos bloqueados/com erro
+7. Busca em bundle CSS → via filesystem MCP ou `browser_evaluate` com fetch+text
 
 ### Playwright (testes visuais automatizados)
 Specs em `tests/e2e/specs/` — cobrem home, header, footer, PDP, categoria, checkout, 404, B2B, acessibilidade.
