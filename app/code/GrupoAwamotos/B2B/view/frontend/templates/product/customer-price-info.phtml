@@ -21,7 +21,17 @@ if (!$priceData && !$tierData) {
 </div>
 <?php endif; ?>
 <?php endif; ?>
-<?php if ($tierData): ?>
+<?php if ($tierData):
+    // M18: Encontrar a faixa com maior economia para destacar
+    $bestTierIdx = 0;
+    $maxSavings = 0;
+    foreach ($tierData as $idx => $t) {
+        if ((float) $t['savings_pct'] > $maxSavings) {
+            $maxSavings = (float) $t['savings_pct'];
+            $bestTierIdx = $idx;
+        }
+    }
+?>
 <div class="b2b-tier-pricing">
     <div class="b2b-tier-heading">
         <span class="b2b-tier-icon" aria-hidden="true">
@@ -42,12 +52,17 @@ if (!$priceData && !$tierData) {
             </tr>
         </thead>
         <tbody>
-            <?php foreach ($tierData as $tier): ?>
-            <tr>
+            <?php foreach ($tierData as $tierIdx => $tier):
+                $isBest = ($tierIdx === $bestTierIdx && $maxSavings > 0);
+            ?>
+            <tr class="<?= $isBest ? 'b2b-tier-best' : '' ?>">
                 <td class="b2b-tier-qty"><?= $block->escapeHtml(__('%1+ unidades', $tier['qty'])) ?></td>
                 <td class="b2b-tier-price"><?= /* @noEscape */ $block->formatPrice($tier['price']) ?></td>
                 <td class="b2b-tier-savings">
                     <span class="b2b-savings-badge">-<?= $block->escapeHtml((string) $tier['savings_pct']) ?>%</span>
+                    <?php if ($isBest): ?>
+                        <span class="b2b-tier-best-label"><?= $block->escapeHtml(__('Melhor preço')) ?></span>
+                    <?php endif; ?>
                 </td>
             </tr>
             <?php endforeach; ?>

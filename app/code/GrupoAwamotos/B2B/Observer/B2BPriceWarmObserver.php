@@ -63,7 +63,11 @@ class B2BPriceWarmObserver implements ObserverInterface
 
     public function execute(Observer $observer): void
     {
-        if (!$this->config->isEnabled() || !$this->customerSession->isLoggedIn()) {
+        // Avoid session_start() for guests: check cookie before calling isLoggedIn().
+        if (!$this->config->isEnabled()
+            || !isset($_COOKIE[session_name()])
+            || !$this->customerSession->isLoggedIn()
+        ) {
             return;
         }
 

@@ -21,8 +21,10 @@ use GrupoAwamotos\B2B\Model\ErpCodeResolver;
 use GrupoAwamotos\ERPIntegration\Model\CustomerPriceProvider;
 use GrupoAwamotos\ERPIntegration\Model\ResourceModel\SyncLog as SyncLogResource;
 use Magento\Catalog\Model\Product;
+use Magento\Customer\Model\Context as CustomerContext;
 use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Customer\Api\CustomerRepositoryInterface;
+use Magento\Framework\App\Http\Context as HttpContext;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
@@ -35,6 +37,7 @@ class GroupPricePlugin
     private SyncLogResource $syncLogResource;
     private LoggerInterface $logger;
     private ?ErpCodeResolver $erpCodeResolver;
+    private HttpContext $httpContext;
 
     /** Cache: productId → computed price */
     private array $processedProducts = [];
@@ -54,6 +57,7 @@ class GroupPricePlugin
         CustomerRepositoryInterface $customerRepository,
         CustomerPriceProvider $customerPriceProvider,
         SyncLogResource $syncLogResource,
+        HttpContext $httpContext,
         ?LoggerInterface $logger = null,
         ?ErpCodeResolver $erpCodeResolver = null
     ) {
@@ -62,6 +66,7 @@ class GroupPricePlugin
         $this->customerRepository = $customerRepository;
         $this->customerPriceProvider = $customerPriceProvider;
         $this->syncLogResource = $syncLogResource;
+        $this->httpContext = $httpContext;
         $this->logger = $logger ?? new NullLogger();
         $this->erpCodeResolver = $erpCodeResolver;
     }
@@ -71,7 +76,7 @@ class GroupPricePlugin
      */
     public function afterGetPrice(Product $subject, $result)
     {
-        if (!$this->config->isEnabled() || !$this->customerSession->isLoggedIn()) {
+        if (!$this->config->isEnabled() || !$this->isLoggedInContext()) {
             return $result;
         }
 
@@ -91,7 +96,7 @@ class GroupPricePlugin
      */
     public function afterGetFinalPrice(Product $subject, $result)
     {
-        if (!$this->config->isEnabled() || !$this->customerSession->isLoggedIn()) {
+        if (!$this->config->isEnabled() || !$this->isLoggedInContext()) {
             return $result;
         }
 
@@ -152,6 +157,27 @@ class GroupPricePlugin
         // → use base Magento price (VLRVDSUG NACIONAL, already synced from ERP)
         // ERP is the pricing authority — no group discounts applied
         return $basePrice;
+    }
+
+    /**
+     * Check login status via Http\Context (FPC-safe: no session start for guests).
+     *
+     * IMPORTANT: Context::setValue(CONTEXT_AUTH, false, false) REMOVES the key from _data
+     * when value===default, so getValue(CONTEXT_AUTH) returns null for guests even after
+     * HttpContextPlugin ran. Null alone cannot signal "context was populated".
+     */
+    private function isLoggedInContext(): bool
+    {
+        $contextLoggedIn = $this->httpContext->getValue(CustomerContext::CONTEXT_AUTH);
+        if ($contextLoggedIn !== null) {
+            return (bool) $contextLoggedIn;
+        }
+        // Null = guest (removed as value==default) OR context not yet set.
+        // Cookie check avoids session_start() for every anonymous request.
+        if (!isset($_COOKIE[session_name()])) {
+            return false;
+        }
+        return (bool) $this->customerSession->isLoggedIn();
     }
 
     /**

@@ -93,7 +93,7 @@ class RestrictedProductViewPlugin
             return $proceed();
         }
 
-        $isLoggedIn = $this->customerSession->isLoggedIn();
+        $isLoggedIn = isset($_COOKIE[session_name()]) && $this->customerSession->isLoggedIn();
 
         // B2B SEO-friendly: permite que visitantes vejam specs/fotos do produto.
         // Preços ficam ocultos pelo HidePricePlugin, cart bloqueado pelo BlockCartAddPlugin,

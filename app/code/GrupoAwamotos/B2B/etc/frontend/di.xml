@@ -282,6 +282,18 @@
         </arguments>
     </type>
 
+    <!--
+        Guard FormKey::set() on GET requests to prevent session_start() overhead on FPC HIT paths.
+        RegisterFormKeyFromCookie::beforeDispatch() calls formKey->set() for any visitor with a
+        form_key cookie, starting a PHP session even when FPC will serve the cached page.
+        REQUIRES: bin/magento setup:di:compile
+    -->
+    <type name="Magento\Framework\Data\Form\FormKey">
+        <plugin name="grupoawamotos_b2b_form_key_session_guard"
+                type="GrupoAwamotos\B2B\Plugin\FormKeySessionGuardPlugin"
+                sortOrder="1"/>
+    </type>
+
     <!-- B2B Checkout Validators -->
     <type name="GrupoAwamotos\B2B\Plugin\Checkout\DeliveryDateValidatorPlugin">
         <arguments>

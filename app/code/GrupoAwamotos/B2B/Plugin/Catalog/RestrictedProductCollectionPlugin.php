@@ -77,7 +77,9 @@ class RestrictedProductCollectionPlugin
             return;
         }
 
-        $isLoggedIn = $this->customerSession->isLoggedIn();
+        // Avoid session_start() for guests: check cookie before calling isLoggedIn().
+        $hasCookie  = isset($_COOKIE[session_name()]);
+        $isLoggedIn = $hasCookie && $this->customerSession->isLoggedIn();
         $customerGroupId = $isLoggedIn ? (int) $this->customerSession->getCustomerGroupId() : 0;
         $isB2BCustomer = in_array($customerGroupId, $this->b2bHelper->getB2BGroupIds(), true);
 

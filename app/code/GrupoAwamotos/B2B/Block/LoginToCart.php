@@ -3,6 +3,11 @@
 /**
  * Block for B2B access restriction modals.
  * Shown to guests (login/register modal) AND to logged-in non-approved users (pending message).
+ *
+ * FPC note: uses Http\Context (not CustomerSession) for the login check so that guest page
+ * renders do NOT start a PHP session → the homepage stays FPC-cacheable for guest visitors.
+ * For logged-in users Magento's customer middleware already initialised the session before we
+ * get here, so calling CustomerSession-dependent helpers (canAddToCart, etc.) is safe.
  */
 
 declare(strict_types=1);
@@ -11,7 +16,9 @@ namespace GrupoAwamotos\B2B\Block;
 
 use GrupoAwamotos\B2B\Api\PriceVisibilityInterface;
 use GrupoAwamotos\B2B\Helper\Config;
+use Magento\Customer\Model\Context as CustomerContext;
 use Magento\Customer\Model\Session;
+use Magento\Framework\App\Http\Context as HttpContext;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
 
@@ -33,21 +40,29 @@ class LoginToCart extends Template
      */
     private $priceVisibility;
 
+    /**
+     * @var HttpContext
+     */
+    private $httpContext;
+
     public function __construct(
         Context $context,
         Config $config,
         Session $customerSession,
         PriceVisibilityInterface $priceVisibility,
+        HttpContext $httpContext,
         array $data = []
     ) {
         parent::__construct($context, $data);
         $this->config = $config;
         $this->customerSession = $customerSession;
         $this->priceVisibility = $priceVisibility;
+        $this->httpContext = $httpContext;
     }
 
     /**
-     * Check if modal should be rendered (guests OR non-approved logged-in users)
+     * Check if modal should be rendered (guests OR non-approved logged-in users).
+     * Uses Http\Context for the login check to keep guest pages FPC-cacheable.
      *
      * @return bool
      */
@@ -57,12 +72,11 @@ class LoginToCart extends Template
             return false;
         }
 
-        // Guest: render if hide_add_to_cart_guests is enabled
-        if (!$this->customerSession->isLoggedIn()) {
+        if ($this->isGuest()) {
             return $this->config->hideAddToCartForGuests();
         }
 
-        // Logged-in: render if user cannot add to cart (non-approved)
+        // Logged-in user: session is already active via Magento customer middleware
         return !$this->priceVisibility->canAddToCart();
     }
 
@@ -80,23 +94,25 @@ class LoginToCart extends Template
     }
 
     /**
-     * Check if user is a guest (not logged in)
+     * Check if user is a guest (not logged in).
+     * Uses Http\Context so guests do not trigger session_start() during page render.
      *
      * @return bool
      */
     public function isGuest(): bool
     {
-        return !$this->customerSession->isLoggedIn();
+        return !(bool)$this->httpContext->getValue(CustomerContext::CONTEXT_AUTH);
     }
 
     /**
-     * Check if user is logged in but pending approval
+     * Check if user is logged in but pending approval.
+     * Only meaningful for authenticated users (session already active).
      *
      * @return bool
      */
     public function isPendingApproval(): bool
     {
-        if (!$this->customerSession->isLoggedIn()) {
+        if ($this->isGuest()) {
             return false;
         }
         return !$this->priceVisibility->isCustomerApproved();

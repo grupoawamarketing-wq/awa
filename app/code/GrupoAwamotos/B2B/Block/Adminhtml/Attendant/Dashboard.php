@@ -126,7 +126,7 @@ class Dashboard extends Template
         }
 
         $connection = $this->resource->getConnection();
-        $table = $this->resource->getTableName('grupoawamotos_b2b_quotes');
+        $table = $this->resource->getTableName('grupoawamotos_b2b_quote_request');
 
         if (!$connection->isTableExists($table)) {
             return [];
@@ -198,6 +198,88 @@ class Dashboard extends Template
             'orders_total_30d' => $ordersTotal,
             'new_customers_30d' => $newCustomers,
         ];
+    }
+
+
+    /**
+     * Follow-ups pendentes/vencidos do atendente.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function getPendingFollowups(int $limit = 10): array
+    {
+        $attId = $this->currentAttendant->getId();
+        if (!$attId) {
+            return [];
+        }
+
+        $connection = $this->resource->getConnection();
+        $table = $this->resource->getTableName('grupoawamotos_b2b_followup');
+        $today = date('Y-m-d 23:59:59');
+
+        $select = $connection->select()
+            ->from(['f' => $table])
+            ->joinLeft(
+                ['c' => $this->resource->getTableName('customer_entity')],
+                'c.entity_id = f.customer_id',
+                ['customer_firstname' => 'c.firstname', 'customer_lastname' => 'c.lastname', 'customer_email' => 'c.email']
+            )
+            ->where('f.attendant_id = ?', $attId)
+            ->where('f.status != ?', 'done')
+            ->where('(f.next_contact_at IS NULL OR f.next_contact_at <= ?)', $today)
+            ->order('f.next_contact_at ASC')
+            ->limit($limit);
+
+        return $connection->fetchAll($select);
+    }
+
+    /**
+     * Carrinhos abandonados dos clientes do atendente.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function getAbandonedCarts(int $limit = 10): array
+    {
+        $attId = $this->currentAttendant->getId();
+        if (!$attId) {
+            return [];
+        }
+
+        $connection = $this->resource->getConnection();
+        $table = $this->resource->getTableName('grupoawamotos_abandoned_cart');
+
+        if (!$connection->isTableExists($table)) {
+            return [];
+        }
+
+        $select = $connection->select()
+            ->from($table)
+            ->where('attendant_id = ?', $attId)
+            ->where('status != ?', 'recovered')
+            ->order('abandoned_at DESC')
+            ->limit($limit);
+
+        return $connection->fetchAll($select);
+    }
+
+    /**
+     * URL para salvar follow-up via AJAX.
+     */
+    public function getFollowupSaveUrl(): string
+    {
+        return $this->getUrl('grupoawamotos_b2b/followup/save');
+    }
+
+    /**
+     * URL para listar follow-ups via AJAX.
+     */
+    public function getFollowupListUrl(?int $customerId = null): string
+    {
+        $params = [];
+        if ($customerId) {
+            $params['customer_id'] = $customerId;
+        }
+        return $this->getUrl('grupoawamotos_b2b/followup/listAction', $params);
     }
 
     /**

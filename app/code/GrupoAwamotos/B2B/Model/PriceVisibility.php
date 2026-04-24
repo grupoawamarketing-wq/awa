@@ -403,10 +403,18 @@ class PriceVisibility implements PriceVisibilityInterface
     private function isLoggedInContext(): bool
     {
         $contextCustomerId = (int) $this->httpContext->getValue(self::CONTEXT_CUSTOMER_ID);
-        $contextLoggedIn = (bool) $this->httpContext->getValue(CustomerContext::CONTEXT_AUTH);
+        $contextLoggedIn = $this->httpContext->getValue(CustomerContext::CONTEXT_AUTH);
 
-        if ($contextLoggedIn || $contextCustomerId > 0) {
-            return true;
+        // Context::setValue(CONTEXT_AUTH, false, false) removes the key when value===default,
+        // so getValue returns null for guests even after HttpContextPlugin ran.
+        if ($contextLoggedIn !== null) {
+            return (bool) $contextLoggedIn || $contextCustomerId > 0;
+        }
+
+        // Null = guest (removed as value==default) OR context not yet populated.
+        // Cookie check avoids session_start() for anonymous requests.
+        if (!isset($_COOKIE[session_name()])) {
+            return false;
         }
 
         return (bool) $this->customerSession->isLoggedIn();
@@ -418,7 +426,10 @@ class PriceVisibility implements PriceVisibilityInterface
         if ($contextCustomerId > 0) {
             return $contextCustomerId;
         }
-
+        // Avoid session_start() for guests — cookie check first.
+        if (!isset($_COOKIE[session_name()])) {
+            return 0;
+        }
         return (int) $this->customerSession->getCustomerId();
     }
 

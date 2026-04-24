@@ -9,9 +9,6 @@ use Magento\Framework\App\ResourceConnection;
 
 /**
  * Verifica se o usuário admin logado é um atendente B2B e retorna seu ID.
- *
- * A tabela grupoawamotos_b2b_attendants vincula admin_user_id ao atendente.
- * Resultados são cacheados por instância para evitar múltiplas queries por request.
  */
 class CurrentAttendant
 {
@@ -42,6 +39,31 @@ class CurrentAttendant
         }
 
         return $this->attendantId;
+    }
+
+    /**
+     * Retorna os dados completos do atendente logado, ou null se não for atendente.
+     *
+     * @return array<string, mixed>|null
+     */
+    public function get(): ?array
+    {
+        $id = $this->getId();
+        if (!$id) {
+            return null;
+        }
+
+        $connection = $this->resource->getConnection();
+        $table = $this->resource->getTableName('grupoawamotos_b2b_attendants');
+
+        $row = $connection->fetchRow(
+            $connection->select()
+                ->from($table)
+                ->where('attendant_id = ?', $id)
+                ->limit(1)
+        );
+
+        return $row ?: null;
     }
 
     private function resolveAttendantId(): ?int

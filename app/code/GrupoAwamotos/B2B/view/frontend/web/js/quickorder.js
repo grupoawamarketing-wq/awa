@@ -60,6 +60,63 @@ define([
         var $csvDownloadSample = $root.find('#csv-download-sample');
 
         var rowIndex = 0;
+        // M15: SKU Autocomplete configuration
+        var searchUrl = config.searchUrl || '/catalogsearch/ajax/suggest';
+        var autocompleteDelay = null;
+
+        function initSkuAutocomplete($input) {
+            var $row = $input.closest('.quickorder-row');
+            var $suggestions = $row.find('.sku-suggestions');
+            
+            $input.on('input', function () {
+                var query = $.trim($(this).val());
+                clearTimeout(autocompleteDelay);
+                
+                if (query.length < 3) {
+                    $suggestions.hide().empty();
+                    return;
+                }
+                
+                autocompleteDelay = setTimeout(function () {
+                    $.ajax({
+                        url: searchUrl,
+                        data: { q: query },
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function (data) {
+                            $suggestions.empty();
+                            var items = data || [];
+                            if (items.length === 0) {
+                                $suggestions.hide();
+                                return;
+                            }
+                            $.each(items.slice(0, 8), function (_, item) {
+                                var title = escapeHtml(item.title || item.name || '');
+                                var sku = escapeHtml(item.sku || item.title || '');
+                                $suggestions.append(
+                                    '<div class="sku-suggestion" data-sku="' + sku + '">' +
+                                    '<span class="sku-suggestion-sku">' + sku + '</span>' +
+                                    '<span class="sku-suggestion-name">' + title + '</span>' +
+                                    '</div>'
+                                );
+                            });
+                            $suggestions.show();
+                        }
+                    });
+                }, 300);
+            });
+
+            $input.on('blur', function () {
+                setTimeout(function () { $suggestions.hide(); }, 200);
+            });
+
+            $suggestions.on('click', '.sku-suggestion', function () {
+                var selectedSku = $(this).data('sku');
+                $input.val(selectedSku);
+                $suggestions.hide().empty();
+                $input.closest('.quickorder-row').find('.qty-input').focus();
+            });
+        }
 
         function buttonText(text) {
             if ($submitButtonText.length) {
@@ -85,7 +142,10 @@ define([
         }
 
         function addRow() {
-            $rowsContainer.append(createRow());
+            var html = createRow();
+            $rowsContainer.append(html);
+            var $lastRow = $rowsContainer.find('.quickorder-row:last');
+            initSkuAutocomplete($lastRow.find('.sku-input'));
         }
 
         function clearStatuses() {

@@ -61,6 +61,28 @@ $isAttendant = $block->isAttendant();
         .att-capacity-fill.healthy { background: #34a853; }
         .att-capacity-fill.warning { background: #fbbc04; }
         .att-capacity-fill.critical { background: #ea4335; }
+        /* Follow-up e Carrinhos */
+        .att-followup-badge { display: inline-block; padding: 2px 7px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+        .att-followup-overdue { background: #fce8e6; color: #c00; }
+        .att-followup-today   { background: #fef7e0; color: #b35c00; }
+        .att-followup-open    { background: #e8f0fe; color: #174ea6; }
+        .att-followup-done    { background: #e6f4ea; color: #185a00; }
+        .att-cart-value       { font-weight: 600; color: #333; }
+        .att-btn-sm { display: inline-flex; align-items: center; gap: 4px; padding: 5px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; border: 1px solid #d6d6d6; background: #fff; color: #333; text-decoration: none; }
+        .att-btn-sm:hover { background: #f5f5f5; }
+        .att-btn-primary { background: #eb5202; color: #fff; border-color: #eb5202; }
+        .att-btn-primary:hover { background: #c94602; }
+        /* Modal */
+        .att-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 9999; align-items: center; justify-content: center; }
+        .att-modal-overlay.open { display: flex; }
+        .att-modal { background: #fff; border-radius: 6px; padding: 24px; width: 480px; max-width: 95vw; box-shadow: 0 8px 32px rgba(0,0,0,.2); }
+        .att-modal h3 { margin: 0 0 16px; font-size: 17px; font-weight: 600; }
+        .att-modal-close { float: right; cursor: pointer; font-size: 20px; color: #999; background: none; border: none; padding: 0; margin-top: -4px; }
+        .att-form-row { margin-bottom: 12px; }
+        .att-form-row label { display: block; font-size: 12px; font-weight: 600; color: #666; margin-bottom: 4px; }
+        .att-form-row select, .att-form-row input, .att-form-row textarea { width: 100%; padding: 7px 10px; border: 1px solid #d6d6d6; border-radius: 4px; font-size: 13px; box-sizing: border-box; }
+        .att-form-row textarea { height: 80px; resize: vertical; }
+        .att-form-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; }
     </style>
 
     <div class="att-dashboard">
@@ -235,5 +257,230 @@ $isAttendant = $block->isAttendant();
                 </table>
             </div>
         <?php endif; ?>
+
+        <!-- Follow-ups Pendentes -->
+        <?php
+        $pendingFollowups = $block->getPendingFollowups(10);
+        $abandonedCarts = $block->getAbandonedCarts(10);
+        ?>
+        <div class="att-section">
+            <h3 class="att-section-title">
+                &#128203; <?= $block->escapeHtml(__('Follow-ups Pendentes')) ?>
+                <button class="att-btn-sm att-btn-primary" style="float:right;margin-top:-2px"
+                        onclick="attOpenFollowup(0,'')">
+                    + <?= $block->escapeHtml(__('Novo Follow-up')) ?>
+                </button>
+            </h3>
+            <?php if (empty($pendingFollowups)): ?>
+                <p class="att-empty"><?= $block->escapeHtml(__('Nenhum follow-up pendente para hoje. Bom trabalho!')) ?></p>
+            <?php else: ?>
+                <table class="att-table">
+                    <thead>
+                        <tr>
+                            <th><?= $block->escapeHtml(__('Cliente')) ?></th>
+                            <th><?= $block->escapeHtml(__('Tipo')) ?></th>
+                            <th><?= $block->escapeHtml(__('Observação')) ?></th>
+                            <th><?= $block->escapeHtml(__('Próximo Contato')) ?></th>
+                            <th><?= $block->escapeHtml(__('Status')) ?></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($pendingFollowups as $fu): ?>
+                            <?php
+                            $fuDate = $fu['next_contact_at'] ?? null;
+                            $fuOverdue = $fuDate && strtotime($fuDate) < strtotime('today');
+                            $fuBadge = $fuOverdue ? 'att-followup-overdue' : 'att-followup-open';
+                            ?>
+                            <tr>
+                                <td>
+                                    <?php if (!empty($fu['customer_id'])): ?>
+                                        <a class="att-link" href="<?= $block->escapeUrl($block->getCustomerViewUrl((int) $fu['customer_id'])) ?>">
+                                            <?= $block->escapeHtml(trim(($fu['customer_firstname'] ?? '') . ' ' . ($fu['customer_lastname'] ?? ''))) ?>
+                                        </a>
+                                    <?php else: ?>-<?php endif; ?>
+                                </td>
+                                <td><?= $block->escapeHtml((string) ($fu['contact_type'] ?? '')) ?></td>
+                                <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+                                    <?= $block->escapeHtml((string) ($fu['observation'] ?? '')) ?>
+                                </td>
+                                <td>
+                                    <?php if ($fuDate): ?>
+                                        <span class="att-followup-badge <?= $fuOverdue ? 'att-followup-overdue' : 'att-followup-today' ?>">
+                                            <?= $block->escapeHtml(date('d/m/Y', strtotime($fuDate))) ?>
+                                        </span>
+                                    <?php else: ?>-<?php endif; ?>
+                                </td>
+                                <td><span class="att-followup-badge <?= $block->escapeHtmlAttr($fuBadge) ?>"><?= $block->escapeHtml((string) ($fu['status'] ?? 'open')) ?></span></td>
+                                <td>
+                                    <button class="att-btn-sm"
+                                            onclick="attOpenFollowup(<?= (int) $fu['followup_id'] ?>, <?= (int) ($fu['customer_id'] ?? 0) ?>)">
+                                        ✏️
+                                    </button>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            <?php endif; ?>
+        </div>
+
+        <!-- Carrinhos Abandonados -->
+        <?php if (!empty($abandonedCarts)): ?>
+        <div class="att-section">
+            <h3 class="att-section-title">&#128722; <?= $block->escapeHtml(__('Carrinhos Abandonados dos Meus Clientes')) ?></h3>
+            <table class="att-table">
+                <thead>
+                    <tr>
+                        <th><?= $block->escapeHtml(__('Cliente')) ?></th>
+                        <th><?= $block->escapeHtml(__('Valor')) ?></th>
+                        <th><?= $block->escapeHtml(__('Itens')) ?></th>
+                        <th><?= $block->escapeHtml(__('Abandonado em')) ?></th>
+                        <th><?= $block->escapeHtml(__('Status')) ?></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($abandonedCarts as $cart): ?>
+                        <tr>
+                            <td>
+                                <?php if (!empty($cart['customer_id'])): ?>
+                                    <a class="att-link" href="<?= $block->escapeUrl($block->getCustomerViewUrl((int) $cart['customer_id'])) ?>">
+                                        <?= $block->escapeHtml((string) ($cart['customer_name'] ?? $cart['customer_email'] ?? '-')) ?>
+                                    </a>
+                                <?php else: ?>
+                                    <?= $block->escapeHtml((string) ($cart['customer_email'] ?? '-')) ?>
+                                <?php endif; ?>
+                            </td>
+                            <td class="att-cart-value">R$ <?= number_format((float) ($cart['cart_value'] ?? 0), 2, ',', '.') ?></td>
+                            <td><?= (int) ($cart['items_count'] ?? 0) ?></td>
+                            <td><?= $block->escapeHtml(!empty($cart['abandoned_at']) ? date('d/m/Y H:i', strtotime($cart['abandoned_at'])) : '-') ?></td>
+                            <td><span class="att-status att-status-<?= $block->escapeHtmlAttr((string) ($cart['status'] ?? 'pending')) ?>"><?= $block->escapeHtml((string) ($cart['status'] ?? 'pending')) ?></span></td>
+                            <td>
+                                <?php if (!empty($cart['customer_id'])): ?>
+                                    <button class="att-btn-sm att-btn-primary"
+                                            onclick="attOpenFollowup(0, <?= (int) $cart['customer_id'] ?>)"
+                                            title="<?= $block->escapeHtmlAttr(__('Registrar follow-up para este cliente')) ?>">
+                                        📞
+                                    </button>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+        <?php endif; ?>
+
+        <!-- Modal de Follow-up -->
+        <div class="att-modal-overlay" id="att-followup-modal">
+            <div class="att-modal">
+                <button class="att-modal-close" onclick="attCloseFollowup()">&#215;</button>
+                <h3 id="att-fu-modal-title"><?= $block->escapeHtml(__('Novo Follow-up')) ?></h3>
+                <form id="att-fu-form">
+                    <input type="hidden" name="followup_id" id="att-fu-id" value="0"/>
+                    <input type="hidden" name="customer_id" id="att-fu-customer-id" value="0"/>
+                    <div class="att-form-row">
+                        <label><?= $block->escapeHtml(__('Tipo de Contato')) ?></label>
+                        <select name="contact_type" id="att-fu-type">
+                            <option value="whatsapp">WhatsApp</option>
+                            <option value="phone">Telefone</option>
+                            <option value="email">E-mail</option>
+                            <option value="order">Pedido Manual</option>
+                            <option value="quote">Orçamento</option>
+                            <option value="recovery">Recuperação de Carrinho</option>
+                            <option value="aftersale">Pós-venda</option>
+                            <option value="visit">Visita</option>
+                        </select>
+                    </div>
+                    <div class="att-form-row">
+                        <label><?= $block->escapeHtml(__('Observação')) ?> *</label>
+                        <textarea name="observation" id="att-fu-obs" placeholder="<?= $block->escapeHtmlAttr(__('Descreva o contato realizado...')) ?>"></textarea>
+                    </div>
+                    <div class="att-form-row">
+                        <label><?= $block->escapeHtml(__('Resultado')) ?></label>
+                        <input type="text" name="result" id="att-fu-result" placeholder="<?= $block->escapeHtmlAttr(__('Ex: Cliente interessado, aguarda orçamento')) ?>"/>
+                    </div>
+                    <div class="att-form-row">
+                        <label><?= $block->escapeHtml(__('Próximo Contato')) ?></label>
+                        <input type="date" name="next_contact_at" id="att-fu-next"/>
+                    </div>
+                    <div class="att-form-row">
+                        <label><?= $block->escapeHtml(__('Status')) ?></label>
+                        <select name="status" id="att-fu-status">
+                            <option value="open"><?= $block->escapeHtml(__('Em aberto')) ?></option>
+                            <option value="scheduled"><?= $block->escapeHtml(__('Agendado')) ?></option>
+                            <option value="done"><?= $block->escapeHtml(__('Concluído')) ?></option>
+                        </select>
+                    </div>
+                    <div class="att-form-actions">
+                        <button type="button" class="att-btn-sm" onclick="attCloseFollowup()"><?= $block->escapeHtml(__('Cancelar')) ?></button>
+                        <button type="button" class="att-btn-sm att-btn-primary" onclick="attSaveFollowup()"><?= $block->escapeHtml(__('Salvar Follow-up')) ?></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script>
+        var attFollowupSaveUrl = '<?= $block->escapeJs($block->getFollowupSaveUrl()) ?>';
+        var attFormKey = '<?= $block->escapeJs($block->getFormKey()) ?>';
+
+        function attOpenFollowup(followupId, customerId) {
+            document.getElementById('att-fu-id').value = followupId || 0;
+            document.getElementById('att-fu-customer-id').value = customerId || 0;
+            document.getElementById('att-fu-modal-title').textContent = followupId
+                ? '<?= $block->escapeJs(__('Editar Follow-up')) ?>'
+                : '<?= $block->escapeJs(__('Novo Follow-up')) ?>';
+            document.getElementById('att-fu-obs').value = '';
+            document.getElementById('att-fu-result').value = '';
+            document.getElementById('att-fu-next').value = '';
+            document.getElementById('att-fu-type').value = 'whatsapp';
+            document.getElementById('att-fu-status').value = 'open';
+            document.getElementById('att-followup-modal').classList.add('open');
+        }
+
+        function attCloseFollowup() {
+            document.getElementById('att-followup-modal').classList.remove('open');
+        }
+
+        function attSaveFollowup() {
+            var obs = document.getElementById('att-fu-obs').value.trim();
+            if (!obs) { alert('<?= $block->escapeJs(__('A observação é obrigatória.')) ?>'); return; }
+
+            var data = {
+                form_key:       attFormKey,
+                followup_id:    document.getElementById('att-fu-id').value,
+                customer_id:    document.getElementById('att-fu-customer-id').value,
+                contact_type:   document.getElementById('att-fu-type').value,
+                observation:    obs,
+                result:         document.getElementById('att-fu-result').value,
+                next_contact_at:document.getElementById('att-fu-next').value,
+                status:         document.getElementById('att-fu-status').value,
+            };
+
+            var params = new URLSearchParams(data).toString();
+            fetch(attFollowupSaveUrl, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest'},
+                body: params
+            })
+            .then(r => r.json())
+            .then(function(res) {
+                if (res.success) {
+                    attCloseFollowup();
+                    window.location.reload();
+                } else {
+                    alert(res.message || '<?= $block->escapeJs(__('Erro ao salvar.')) ?>');
+                }
+            })
+            .catch(function() { alert('<?= $block->escapeJs(__('Erro de comunicação com o servidor.')) ?>'); });
+        }
+
+        // Fechar modal ao clicar fora
+        document.getElementById('att-followup-modal').addEventListener('click', function(e) {
+            if (e.target === this) attCloseFollowup();
+        });
+        </script>
+
     </div>
 <?php endif; ?>
