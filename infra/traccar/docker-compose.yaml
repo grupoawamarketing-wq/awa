@@ -1,0 +1,45 @@
+# Traccar GPS Tracking Server
+# Dominio: rastreamento.awamotos.com
+#
+# Uso:
+#   cd infra/traccar
+#   cp .env.example .env   # editar se necessario
+#   docker compose up -d
+
+services:
+  traccar-db:
+    image: postgres:16-alpine
+    container_name: awa-traccar-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-traccar}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME:-traccar}
+    volumes:
+      - traccar_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-traccar} -d ${DB_NAME:-traccar}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  traccar:
+    image: traccar/traccar:latest
+    container_name: awa-traccar
+    restart: unless-stopped
+    depends_on:
+      traccar-db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8082:8082"     # Web interface (behind Nginx)
+      - "0.0.0.0:5055:5055"       # OsmAnd protocol (Traccar Client app)
+      - "0.0.0.0:5055:5055/udp"   # OsmAnd UDP
+    volumes:
+      - traccar_data:/opt/traccar/data
+      - traccar_logs:/opt/traccar/logs
+      - ./traccar.xml:/opt/traccar/conf/traccar.xml:ro
+
+volumes:
+  traccar_db_data:
+  traccar_data:
+  traccar_logs:
