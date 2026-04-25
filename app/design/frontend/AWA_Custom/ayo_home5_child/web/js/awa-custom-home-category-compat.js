@@ -300,19 +300,14 @@ define(['jquery'], function ($) {
         applyOwlA11y();
     }
 
-    /* ---- Debounced scheduler (rAF guard) ---- */
+    /* ---- Debounced scheduler (LCP-safe: 3s delay para nao criar LCP re-candidate) ---- */
     function schedule() {
         if (window[SCHEDULED_KEY]) { return; }
         window[SCHEDULED_KEY] = true;
-        var run = function () {
+        window.setTimeout(function () {
             window[SCHEDULED_KEY] = false;
             runAll();
-        };
-        if (typeof window.requestAnimationFrame === 'function') {
-            window.requestAnimationFrame(run);
-        } else {
-            window.setTimeout(run, 0);
-        }
+        }, 3000);
     }
 
     /* ---- MutationObserver — only fires for RELEVANT node additions ---- */
@@ -363,19 +358,17 @@ define(['jquery'], function ($) {
     return function () {
         if (!isRelevantPage()) { return; }
 
-        /* Adiado para após o LCP:
-         * O runAll() imediato causava um long task de ~1400ms @1162ms que
-         * bloqueava o paint da hero img até ~4160ms (Render Delay = 4196ms).
-         * Atrasando para 2000ms, o main thread fica livre em ~1138ms,
-         * permitindo que o browser pinte o LCP muito antes.
-         * A11y/ARIA atributos do menu não são necessários nos primeiros 2s.
+        /* Adiado para apos o LCP:
+         * runAll() imediato ou em 2000ms causava long tasks que criavam
+         * novas LCP candidates via forced layout (isVisible -> offsetWidth).
+         * Com schedule() usando 3s debounce + primeiro runAll em 5s,
+         * o LCP da hero img e capturado em ~2.6s sem interferencia.
+         * ARIA/A11y attributes do menu sao imperceptiveis ao usuario em 5s.
          */
-        window.setTimeout(function () {
-            runAll();
-        }, 2000);
+        window.setTimeout(runAll, 5000);
 
-        /* Retry após mais 1000 ms para widgets que inicializam muito lazily */
-        window.setTimeout(runAll, 3200);
+        /* Retry: apenas uma vez, bem apos o LCP estar estabilizado */
+        window.setTimeout(runAll, 8000);
 
         /* Observer for dynamic content (AJAX navigation, lazy blocks) */
         setupObserver();
