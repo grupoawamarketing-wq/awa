@@ -185,3 +185,42 @@
         color: @awa-color-white !important;
     }
 }
+
+// ── Desktop backdrop (.awa-vmenu-backdrop) ───────────────────────────────────
+// Definido em awa-header-classic-redesign.css (classe, dark overlay rgba 0.35).
+// Aqui apenas garantimos que o painel .togge-menu fique acima do backdrop.
+// Não redefine o backdrop via ID — evita conflito de especificidade.
+
+.navigation.verticalmenu .togge-menu {
+    z-index: 9999; // garante painel acima do backdrop (z-index 399 na classe)
+}
+
+// ── Expand-category-link: chevron rotation animation ─────────────────────────
+// .expanding é adicionado pelo vertical-menu-init.js quando a lista está expandida
+.navigation.verticalmenu .togge-menu > li.expand-category-link {
+    .vm-toggle-icon {
+        display: inline-block;
+        transition: transform 0.2s ease;
+    }
+
+    &.expanding .vm-toggle-icon {
+        transform: rotate(180deg);
+    }
+}
+
+// ── orther-link: CSS fallback para itens ocultos além do limite ───────────────
+// O JS já faz jQuery hide(), mas o CSS garante que itens não fiquem visíveis
+// em estados intermediários (antes do init ou durante re-render).
+.navigation.verticalmenu .togge-menu > li.ui-menu-item.level0.orther-link {
+    display: none !important;
+}
+
+// ── is-highlight: acento visual para Super Ofertas / Lançamentos ─────────────
+// Adiciona borda interna (box-shadow, sem afetar layout) + cor de destaque.
+// O shell-fix.css já define font-weight e stroke do SVG.
+.navigation.verticalmenu .togge-menu > li.ui-menu-item.level0.is-highlight {
+    > a.level-top {
+        box-shadow: inset 3px 0 0 var(--awa-primary, @awa-color-primary) !important;
+        color: var(--awa-primary, @awa-color-primary) !important;
+    }
+}
