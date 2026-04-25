@@ -363,11 +363,19 @@ define(['jquery'], function ($) {
     return function () {
         if (!isRelevantPage()) { return; }
 
-        /* Initial run */
-        runAll();
+        /* Adiado para após o LCP:
+         * O runAll() imediato causava um long task de ~1400ms @1162ms que
+         * bloqueava o paint da hero img até ~4160ms (Render Delay = 4196ms).
+         * Atrasando para 2000ms, o main thread fica livre em ~1138ms,
+         * permitindo que o browser pinte o LCP muito antes.
+         * A11y/ARIA atributos do menu não são necessários nos primeiros 2s.
+         */
+        window.setTimeout(function () {
+            runAll();
+        }, 2000);
 
-        /* Retry after 600 ms to catch widgets that initialize lazily */
-        window.setTimeout(runAll, 600);
+        /* Retry após mais 1000 ms para widgets que inicializam muito lazily */
+        window.setTimeout(runAll, 3200);
 
         /* Observer for dynamic content (AJAX navigation, lazy blocks) */
         setupObserver();
