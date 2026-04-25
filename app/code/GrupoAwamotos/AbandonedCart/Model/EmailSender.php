@@ -106,6 +106,7 @@ class EmailSender implements EmailSenderInterface
                 'cart_value' => $this->pricingHelper->currency($abandonedCart->getCartValue(), true, false),
                 'items_count' => $abandonedCart->getItemsCount(),
                 'cart_items' => $cartItems,
+                'cart_items_html' => $this->buildCartItemsHtml($cartItems),
                 'cart_url' => $cartUrl,
                 'coupon_code' => $couponCode,
                 'coupon_discount' => $couponDiscount,
@@ -233,13 +234,51 @@ class EmailSender implements EmailSenderInterface
     private function getProductImageUrl($product): string
     {
         try {
+            $imageFile = $product->getImage();
+            if (!$imageFile || $imageFile === '/no_selection') {
+                return '';
+            }
             return $this->imageHelper->init($product, 'product_thumbnail_image')
-                ->setImageFile($product->getImage())
+                ->setImageFile($imageFile)
                 ->resize(80, 80)
                 ->getUrl();
         } catch (\Exception $e) {
             return '';
         }
+    }
+
+    private function buildCartItemsHtml(array $cartItems): string
+    {
+        if (empty($cartItems)) {
+            return '';
+        }
+        $rows = '';
+        foreach ($cartItems as $item) {
+            $name = htmlspecialchars((string)($item['name'] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            $sku  = htmlspecialchars((string)($item['sku'] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            $qty  = (int)($item['qty'] ?? 1);
+            $price = htmlspecialchars((string)($item['price'] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            $img  = htmlspecialchars((string)($item['image'] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+            $imgHtml = $img
+                ? '<img src="' . $img . '" alt="' . $name . '" width="64" height="64"'
+                  . ' style="border-radius:6px;object-fit:cover;display:block;" />'
+                : '<div style="width:64px;height:64px;background:#f3f4f6;border-radius:6px;"></div>';
+
+            $rows .= '<tr style="border-bottom:1px solid #f3f4f6;">'
+                . '<td style="padding:10px 8px;width:80px;vertical-align:top;">' . $imgHtml . '</td>'
+                . '<td style="padding:10px 8px;vertical-align:top;">'
+                . '<p style="margin:0 0 2px;font-size:13px;font-weight:600;color:#111827;">' . $name . '</p>'
+                . '<p style="margin:0;font-size:12px;color:#6b7280;">SKU: ' . $sku . ' &nbsp;|&nbsp; Qtd: ' . $qty . '</p>'
+                . '</td>'
+                . '<td style="padding:10px 8px;text-align:right;vertical-align:top;white-space:nowrap;">'
+                . '<span style="font-size:14px;font-weight:700;color:#b73337;">' . $price . '</span>'
+                . '</td>'
+                . '</tr>';
+        }
+        return '<table style="width:100%;border-collapse:collapse;">'
+            . '<tbody>' . $rows . '</tbody>'
+            . '</table>';
     }
 
     private function ensureFrontendAreaCode(): void
