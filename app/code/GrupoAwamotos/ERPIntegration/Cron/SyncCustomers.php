@@ -30,7 +30,6 @@ class SyncCustomers
             return;
         }
 
-        $this->logger->info('[ERP Cron] Starting customer sync...');
         $result = $this->customerSync->syncAll();
         $this->logger->info('[ERP Cron] Customer sync finished.', $result);
     }

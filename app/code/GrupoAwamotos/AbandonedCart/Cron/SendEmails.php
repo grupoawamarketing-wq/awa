@@ -34,8 +34,6 @@ class SendEmails
 
     public function execute(): void
     {
-        $this->logger->info('[AbandonedCart] Starting email sending cron');
-
         $totalSent = 0;
         $totalFailed = 0;
 
@@ -46,11 +44,13 @@ class SendEmails
             $totalFailed += $result['failed'];
         }
 
-        $this->logger->info(sprintf(
-            '[AbandonedCart] Email cron completed: sent=%d, failed=%d',
-            $totalSent,
-            $totalFailed
-        ));
+        if ($totalSent > 0 || $totalFailed > 0) {
+            $this->logger->info(sprintf(
+                '[AbandonedCart] Email cron completed: sent=%d, failed=%d',
+                $totalSent,
+                $totalFailed
+            ));
+        }
     }
 
     private function processEmailLevel(int $emailNumber): array

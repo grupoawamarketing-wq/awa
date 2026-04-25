@@ -22,8 +22,6 @@ class CleanupOldRecords
 
     public function execute(): void
     {
-        $this->logger->info('[AbandonedCart] Starting cleanup cron');
-
         // Remover registros mais antigos que 90 dias
         $cutoffDate = date('Y-m-d H:i:s', strtotime('-90 days'));
 

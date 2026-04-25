@@ -64,13 +64,11 @@ class ResolveCustomerErpCodes
             // Area already set
         }
 
-        $this->logger->info('[ERP Cron] Starting customer ERP code resolution (auto-link by CPF/CNPJ)');
 
         $customers = $this->getCustomersWithoutErpCode();
         $total = count($customers);
 
         if ($total === 0) {
-            $this->logger->info('[ERP Cron] No customers without erp_code found');
             return;
         }
 

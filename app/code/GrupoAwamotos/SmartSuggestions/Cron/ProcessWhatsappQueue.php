@@ -69,8 +69,6 @@ class ProcessWhatsappQueue
             return;
         }
 
-        $this->logger->info('SmartSuggestions: Starting WhatsApp queue processing');
-
         try {
             $startTime = microtime(true);
 
