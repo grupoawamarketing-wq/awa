@@ -197,6 +197,12 @@ if ($banners = $block->getBannerCollection()):
         <?php endforeach; ?>
     </div>
 </div>
+<style>
+    /* AWA PERF: mostra o 1º slide imediatamente para LCP. Owl sobrescreve após init. */
+    .wrapper_slider .owl-carousel:not(.owl-loaded) .banner_item { display: none !important; }
+    .wrapper_slider .owl-carousel:not(.owl-loaded) .banner_item:first-child { display: block !important; }
+    .wrapper_slider .owl-carousel:not(.owl-loaded) { display: block !important; overflow: hidden; }
+</style>
 <script>
     (function () {
         var depsStarted = false;
@@ -322,8 +328,16 @@ if ($banners = $block->getBannerCollection()):
 
                 // AWA PERF (2026-04-25): inicia o carrossel após a fase crítica do LCP.
                 // Usuários interativos iniciam imediatamente no primeiro gesto.
-                scheduleOwlInit('.slider_<?php echo (int) $sliderId; ?> .owl', desktopConfig, 3000, 6000);
-                scheduleOwlInit('.slider_<?php echo (int) $sliderId; ?>_mobile .owl', mobileConfig, 5000, 8000);
+                // AWA PERF: desktop init via rIC (após FCP, antes de interação).
+                // O 1º slide já é visível via CSS; o Owl só adiciona controles/autoplay.
+                if (window.requestIdleCallback) {
+                    requestIdleCallback(function () {
+                        initOwl('.slider_<?php echo (int) $sliderId; ?> .owl', desktopConfig);
+                    }, { timeout: 2000 });
+                } else {
+                    scheduleOwlInit('.slider_<?php echo (int) $sliderId; ?> .owl', desktopConfig, 800, 1500);
+                }
+                scheduleOwlInit('.slider_<?php echo (int) $sliderId; ?>_mobile .owl', mobileConfig, 1500, 3000);
             });
         }
 
@@ -332,8 +346,13 @@ if ($banners = $block->getBannerCollection()):
         ['pointerdown', 'touchstart', 'scroll', 'keydown', 'mousemove'].forEach(function (evtName) {
             window.addEventListener(evtName, bootstrapSlider, { once: true, passive: true });
         });
-        window.setTimeout(bootstrapSlider, 5000);
-        window.setTimeout(bootstrapSlider, 8000);
+        // AWA PERF: inicia bootstrapSlider via rIC (sem bloquear FCP/LCP).
+        // Fallback síncrono curto — Owl pode inicializar enquanto a página ainda carrega.
+        if (window.requestIdleCallback) {
+            requestIdleCallback(bootstrapSlider, { timeout: 1500 });
+        } else {
+            window.setTimeout(bootstrapSlider, 600);
+        }
     }());
 </script>
 <?php endif; ?>
