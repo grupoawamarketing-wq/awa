@@ -14,17 +14,19 @@ html body.catalog-product-view .page-wrapper .columns .column.main .product-view
 html body.catalog-product-view .page-wrapper .columns .column.main .product-view > .view-product > .main-detail > .row {
     display: flex !important;
     flex-wrap: wrap !important;
+    align-items: flex-start !important;
     width: 100% !important;
+    gap: clamp(16px, 2vw, 28px) !important;
 }
 
 @media (min-width: 992px) {
     html body.catalog-product-view .page-wrapper .columns .column.main .product-view > .view-product > .main-detail > .row > .col-md-6:first-child {
-        flex: 0 0 52% !important;
-        max-width: 52% !important;
+        flex: 0 0 min(52%, 640px) !important;
+        max-width: min(52%, 640px) !important;
     }
 
     html body.catalog-product-view .page-wrapper .columns .column.main .product-view > .view-product > .main-detail > .row > .col-md-6:last-child {
-        flex: 1 1 0 !important;
+        flex: 1 1 360px !important;
         max-width: none !important;
     }
 }
@@ -83,9 +85,88 @@ html body.catalog-product-view .awa-pdp-related .product-item .awa-related-price
     color: var(--awa-white, #fff) !important;
 }
 
+/* Defeat late async refinements that reset notice text color in related cards */
+html body.catalog-product-view.catalog-product-view .page-wrapper .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .awa-related-price-notice,
+html body.catalog-product-view.catalog-product-view .page-wrapper .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .awa-related-price-notice *,
+html body.catalog-product-view.catalog-product-view .page-wrapper .awa-pdp-related .product-item .awa-related-price-notice,
+html body.catalog-product-view.catalog-product-view .page-wrapper .awa-pdp-related .product-item .awa-related-price-notice * {
+    color: var(--awa-white, #fff) !important;
+}
+
 html body.catalog-product-view .awa-pdp-related .awa-related-price-notice a,
 html body.catalog-product-view .awa-pdp-related .awa-related-price-notice a * {
     color: var(--awa-white, #fff) !important;
+}
+
+html body.catalog-product-view .awa-pdp-related .awa-related-price-notice {
+    color: var(--awa-white, #fff) !important;
+}
+
+/* Related products: robust placeholder fallback for missing product images */
+html body.catalog-product-view .awa-pdp-related .product-item .product-image-container:has(img.product-image-photo[src*="placeholder/placeholder"]) {
+    background: linear-gradient(180deg, var(--awa-gray-100, #f3f4f6) 0%, var(--awa-gray-200, #e5e7eb) 100%) !important;
+    border-radius: 8px !important;
+}
+
+html body.catalog-product-view .awa-pdp-related .product-item img.product-image-photo[src*="placeholder/placeholder"] {
+    opacity: 0.22 !important;
+    filter: grayscale(1) contrast(0.9) !important;
+    object-fit: contain !important;
+    padding: 14px !important;
+}
+
+/* Related products: normalize card grid rhythm (title/price/action alignment) */
+html body.catalog-product-view .awa-pdp-related .products-swiper--related .swiper-slide {
+    height: auto !important;
+}
+
+html body.catalog-product-view .awa-pdp-related .products-swiper--related .swiper-slide > .product-item {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    min-height: 100% !important;
+}
+
+html body.catalog-product-view .awa-pdp-related .product-thumb {
+    aspect-ratio: 1 / 1 !important;
+}
+
+html body.catalog-product-view .awa-pdp-related .product-thumb .product-image-container {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+html body.catalog-product-view .awa-pdp-related .product-info {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 auto !important;
+    gap: 8px !important;
+}
+
+html body.catalog-product-view .awa-pdp-related .product-name {
+    min-height: 40px !important;
+}
+
+html body.catalog-product-view .awa-pdp-related .product-name .product-item-link {
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+html body.catalog-product-view .awa-pdp-related .price-box {
+    min-height: 34px !important;
+}
+
+html body.catalog-product-view .awa-pdp-related .product-actions {
+    margin-top: auto !important;
+}
+
+html body.catalog-product-view .awa-pdp-related .related-tocart-form .action.tocart,
+html body.catalog-product-view .awa-pdp-related .related-addtocart {
+    min-height: 40px !important;
+    border-radius: 10px !important;
 }
 
 /* PDP top categories: keep closed state to prevent broken/open block in header */
