@@ -78,13 +78,10 @@ class RetryHeldOrders
             // Area already set
         }
 
-        $this->logger->info('[ERP Cron] Starting held orders retry (ERP code resolution)');
-
         $orders = $this->getOrdersWithoutErpCode();
         $total = count($orders);
 
         if ($total === 0) {
-            $this->logger->info('[ERP Cron] No held orders to retry');
             return;
         }
 

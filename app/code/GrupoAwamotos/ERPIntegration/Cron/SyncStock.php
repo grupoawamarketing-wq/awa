@@ -30,8 +30,9 @@ class SyncStock
             return;
         }
 
-        $this->logger->info('[ERP Cron] Starting stock sync...');
         $result = $this->stockSync->syncAll();
-        $this->logger->info('[ERP Cron] Stock sync finished.', $result);
+        if (!empty($result['synced']) || !empty($result['errors'])) {
+            $this->logger->info('[ERP Cron] Stock sync finished.', $result);
+        }
     }
 }

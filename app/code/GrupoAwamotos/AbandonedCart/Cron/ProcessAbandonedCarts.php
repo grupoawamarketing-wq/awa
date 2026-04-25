@@ -43,15 +43,11 @@ class ProcessAbandonedCarts
 
     public function execute(): void
     {
-        $this->logger->info('[AbandonedCart] Starting cart processing cron');
-
         // Processar novos carrinhos abandonados
         $this->processNewAbandonedCarts();
 
         // Verificar carrinhos convertidos em pedidos
         $this->checkRecoveredCarts();
-
-        $this->logger->info('[AbandonedCart] Cart processing cron completed');
     }
 
     private function processNewAbandonedCarts(): void
