@@ -975,7 +975,7 @@ body.catalog-category-view .awa-category-hero__accent {
     display: flex !important;
     flex-direction: column;
     margin-top: auto !important;
-    padding-top: 4px !important;
+    padding-top: 0 !important;   /* gap do parent já separa visualmente */
 }
 
 :is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
@@ -1292,4 +1292,103 @@ body.catalog-category-view .awa-category-hero__accent {
         .toolbar.toolbar-products :is(.modes-mode, .modes-label) {
         font-size: 11px !important;
     }
+}
+
+/* ══ STANDARDIZE IMAGE HOVER SCALE ══════════════════════════════════
+ * Override dos scale(1.22) home / scale(1.1) PLP dos bundles anteriores.
+ * Meta: efeito sutil e consistente em todas as páginas (home, categoria,
+ * busca). Transition com ease-out para sentir mais responsivo.
+ * ================================================================== */
+:is(
+    body.catalog-category-view,
+    body.catalogsearch-result-index,
+    body.cms-index-index,
+    body.cms-home,
+    body.cms-homepage_ayo_home5
+)
+    :is(
+        .wrapper.grid.products-grid .item-product,
+        .products-swiper .product-item,
+        .product-tab-slider .item-product,
+        .rokan-bestseller .item-product,
+        .rokan-newproduct .item-product,
+        .rokan-mostviewed .item-product,
+        .rokan-featuredproduct .item-product,
+        .list-tab-product .item-product,
+        .block-products-list .item-product,
+        .block-new-products .item-product,
+        .hot-deal .item-product
+    )
+    :is(.product-thumb img, .product-image-photo) {
+    transition: transform 0.38s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+}
+
+:is(
+    body.catalog-category-view,
+    body.catalogsearch-result-index,
+    body.cms-index-index,
+    body.cms-home,
+    body.cms-homepage_ayo_home5
+)
+    :is(
+        .wrapper.grid.products-grid .item-product:hover,
+        .products-swiper .product-item:hover,
+        .product-tab-slider .item-product:hover,
+        .rokan-bestseller .item-product:hover,
+        .rokan-newproduct .item-product:hover,
+        .rokan-mostviewed .item-product:hover,
+        .rokan-featuredproduct .item-product:hover,
+        .list-tab-product .item-product:hover,
+        .block-products-list .item-product:hover,
+        .block-new-products .item-product:hover,
+        .hot-deal .item-product:hover
+    )
+    :is(.product-thumb img, .product-image-photo) {
+    transform: scale(1.06) !important;
+}
+
+/* ══ SWIPER PRODUCT CARDS — FIX OVERFLOW + FLEX-SHRINK ═══════════════════
+ * Bugs confirmados em produção (browser audit 2026-04-24):
+ *  1. overflow: visible no .products-swiper → 6+ cards visíveis em vez de 4
+ *  2. flex-shrink: 1 nos .swiper-slide → Swiper reduz 268px → 180px (errado)
+ *  3. min-width: 180px em awa-ux-improvements.css reforça o tamanho errado
+ * Fix: overflow:hidden no container + flex-shrink:0 + min-width:0 nos slides.
+ * ========================================================================= */
+:is(
+    body.cms-index-index,
+    body.cms-home,
+    body.cms-homepage_ayo_home5
+)
+    :is(
+        .rokan-bestseller,
+        .rokan-newproduct,
+        .rokan-mostviewed,
+        .rokan-featuredproduct,
+        .list-tab-product,
+        .block-products-list,
+        .block-new-products,
+        .hot-deal
+    )
+    .products-swiper.swiper-initialized {
+    overflow: hidden !important;
+}
+
+:is(
+    body.cms-index-index,
+    body.cms-home,
+    body.cms-homepage_ayo_home5
+)
+    :is(
+        .rokan-bestseller,
+        .rokan-newproduct,
+        .rokan-mostviewed,
+        .rokan-featuredproduct,
+        .list-tab-product,
+        .block-products-list,
+        .block-new-products,
+        .hot-deal
+    )
+    .products-swiper.swiper-initialized .swiper-slide {
+    flex-shrink: 0 !important; /* garante que Swiper controla a largura */
+    min-width: 0 !important;   /* remove fallback 180px que interferia */
 }

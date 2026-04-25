@@ -189,11 +189,12 @@ body.b2b-register-index .b2b-register-page .action.primary:focus-visible {
 
 @media (max-width: 768px) {
     body.b2b-register-index .b2b-register-page {
-        padding: 24px 12px;
+        padding: 20px 12px;
     }
 
-    body.b2b-register-index .b2b-register-page .b2b-register-container {
-        padding: 24px 18px;
+    /* ID selector + !important para superar regra base */
+    body.b2b-register-index #b2b-register-shell .b2b-register-container {
+        padding: 20px 16px !important;
     }
 }
 
@@ -237,10 +238,7 @@ body.b2b-register-index .b2b-register-page .field.required > .label span::after 
     align-items: stretch !important;
     gap: 0 !important;
     padding-bottom: clamp(32px, 4vw, 48px);
-    background:
-        radial-gradient(circle at 8% -8%, rgb(183 51 55 / 8%), transparent 42%),
-        radial-gradient(circle at 92% 8%, rgb(142 38 41 / 6%), transparent 38%),
-        linear-gradient(180deg, #f7f8fa 0%, #eef1f5 100%) !important;
+    background: #ffffff !important;
 }
 
 /* Fix logo: auth CSS constrains it to min(100%, 468px); make it full-width with a real max */
@@ -264,7 +262,7 @@ body.b2b-register-index .b2b-register-page .field.required > .label span::after 
 
 /* Enforce proper register-page width if module CSS loses cascade */
 body.b2b-register-index .b2b-register-page {
-    max-width: 1040px !important;
+    max-width: 1200px !important;
     margin: 0 auto !important;
     padding: clamp(24px, 3vw, 40px) var(--awa-container-padding, 24px) !important;
     box-sizing: border-box;
@@ -528,4 +526,120 @@ body.b2b-register-index .b2b-register-page .form-section .form-section__toggle:f
     outline: 2px solid var(--awa-primary, #b73337) !important;
     outline-offset: 2px;
     box-shadow: none !important;
+}
+
+/* ======================================================
+   LAYOUT 2-COLUNAS — Desktop ≥ 960px
+   Painel de info/benefícios à esquerda (320px sticky-ish),
+   formulário em card branco à direita (restante do espaço).
+   Aproveita os ~700px antes inutilizados no 1200px page-max.
+   ====================================================== */
+@media (min-width: 960px) {
+    /* Largura máxima expandida (já definida acima, reforço sem !important
+       para que a mesma media query não duplique, apenas 1200px base basta) */
+
+    /* Container vira grid 2 colunas — remove card unificado */
+    body.b2b-register-index #b2b-register-shell .b2b-register-container {
+        display: grid !important;
+        grid-template-columns: 300px 1fr;
+        grid-template-rows: auto auto;
+        column-gap: 40px;
+        align-items: start;
+        max-width: 100% !important;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        border-radius: 0 !important;
+    }
+
+    /* Coluna esquerda — row 1: cabeçalho + info */
+    body.b2b-register-index .b2b-register-page .b2b-register-container > .register-header {
+        grid-column: 1;
+        grid-row: 1;
+        text-align: left;
+        margin-bottom: 24px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    /* Toggle benefícios — sempre oculto no desktop */
+    body.b2b-register-index .b2b-register-page .b2b-register-container > .b2b-benefits-toggle {
+        display: none !important;
+    }
+
+    /* Coluna esquerda — row 2: card de benefícios */
+    body.b2b-register-index .b2b-register-page .b2b-register-container > .b2b-benefits {
+        grid-column: 1;
+        grid-row: 2;
+        align-self: start;
+        margin-bottom: 0;
+    }
+
+    /* Coluna direita — formulário, span rows 1-2, card branco */
+    body.b2b-register-index .b2b-register-page .b2b-register-container > .b2b-register-form {
+        grid-column: 2;
+        grid-row: 1 / 3;
+        align-self: start;
+        background: #fff !important;
+        border: 1px solid var(--b2b-reg-ayo-card-border, #e5e7eb) !important;
+        border-radius: 20px !important;
+        box-shadow: 0 12px 32px rgb(15 23 42 / 8%) !important;
+        padding: clamp(24px, 3vw, 36px) !important;
+    }
+
+    /* Texto do painel info: alinhado à esquerda */
+    body.b2b-register-index .b2b-register-page .register-header .register-title {
+        font-size: 26px;
+        text-align: left;
+        white-space: normal;
+    }
+
+    body.b2b-register-index .b2b-register-page .register-header .subtitle,
+    body.b2b-register-index .b2b-register-page .register-header .register-trust-note,
+    body.b2b-register-index .b2b-register-page .register-header .b2b-register-login-link {
+        text-align: left;
+    }
+
+    /* Meta: 1 coluna no painel estreito (300px) */
+    body.b2b-register-index .b2b-register-page .register-meta {
+        grid-template-columns: 1fr !important;
+        gap: 8px;
+        margin-top: 14px;
+    }
+
+    /* Benefícios: 1 coluna no painel (cabe melhor em 300px) */
+    body.b2b-register-index .b2b-register-page .b2b-benefits {
+        grid-template-columns: 1fr !important;
+        gap: 10px;
+    }
+
+    /* Remove título do cabeçalho — visível apenas no painel info */
+    body.b2b-register-index .b2b-register-page .register-header {
+        text-align: left;
+    }
+}
+
+/* ======================================================
+   TABLET 768-959px — Largura máxima aproveitada, 1 coluna
+   ====================================================== */
+@media (min-width: 768px) and (max-width: 959px) {
+    body.b2b-register-index .b2b-register-page {
+        padding: 24px var(--awa-container-padding, 16px) !important;
+    }
+
+    body.b2b-register-index .b2b-register-page .b2b-register-container {
+        padding: 28px 24px !important;
+        max-width: 100% !important;
+    }
+}
+
+/* ======================================================
+   MOBILE ≤768px — Override de padding (vem após padding:34px da linha 433)
+   ID selector mantém especificidade igual; source order aqui ganha
+   ====================================================== */
+@media (max-width: 768px) {
+    body.b2b-register-index #b2b-register-shell .b2b-register-container {
+        padding: 20px 16px !important;
+    }
 }

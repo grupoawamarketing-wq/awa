@@ -1,0 +1,366 @@
+/* =============================================================================
+ * awa-animations-a11y.css
+ * AWA Motos — Micro-animations, transitions, accessibility, print
+ * Carregado via Magento_Theme/layout/default.xml order=1330 (global)
+ * ============================================================================= */
+
+
+/* =============================================================================
+   1. GLOBAL TRANSITIONS — Smooth state changes
+   ============================================================================= */
+
+/* Links */
+a {
+    transition: color 0.15s ease;
+}
+
+/* Interactive elements */
+button, .action, input[type="submit"], input[type="button"],
+select, .btn, [role="button"] {
+    transition: background-color 0.2s ease, border-color 0.2s ease,
+                color 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
+}
+
+/* Active press feedback */
+button:active, .action:active, input[type="submit"]:active,
+[role="button"]:active {
+    transform: scale(0.98);
+}
+
+/* Cards and product items */
+.product-item, .awa-card, .box, .block {
+    transition: box-shadow 0.25s ease, transform 0.2s ease;
+}
+
+/* Images */
+img {
+    transition: opacity 0.3s ease;
+}
+
+
+/* =============================================================================
+   2. HOVER MICRO-INTERACTIONS
+   ============================================================================= */
+
+/* Product image zoom on hover */
+@media (hover: hover) {
+    .products-grid .product-item-photo img,
+    .products-list .product-item-photo img {
+        transition: transform 0.4s cubic-bezier(0.25, 0, 0.15, 1) !important;
+    }
+
+    .products-grid .product-item:hover .product-item-photo img,
+    .products-list .product-item:hover .product-item-photo img {
+        transform: scale(1.05) !important;
+    }
+
+    /* Nav item underline animation */
+    .navigation li.level0 > a {
+        position: relative !important;
+    }
+
+    .navigation li.level0 > a::after {
+        content: '' !important;
+        position: absolute !important;
+        bottom: 0 !important;
+        left: 50% !important;
+        width: 0 !important;
+        height: 2px !important;
+        background: var(--awa-primary, #b73337) !important;
+        transition: width 0.25s ease, left 0.25s ease !important;
+    }
+
+    .navigation li.level0 > a:hover::after,
+    .navigation li.level0.active > a::after {
+        width: 100% !important;
+        left: 0 !important;
+    }
+}
+
+
+/* =============================================================================
+   3. FADE-IN ANIMATIONS (for dynamically loaded content)
+   ============================================================================= */
+
+@keyframes awa-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes awa-fade-in-up {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes awa-scale-in {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes awa-slide-in-right {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Messages animate in */
+.message {
+    animation: awa-fade-in 0.3s ease-out !important;
+}
+
+/* Modal/popup animate in */
+.modal-popup._show .modal-inner-wrap {
+    animation: awa-scale-in 0.25s cubic-bezier(0.25, 0, 0.15, 1) !important;
+}
+
+/* Dropdown menus */
+.navigation .submenu,
+.ui-menu,
+.mst-searchautocomplete__autocomplete {
+    animation: awa-fade-in 0.15s ease-out !important;
+}
+
+/* Toast/notifications */
+.page.messages .message {
+    animation: awa-slide-in-right 0.3s ease-out !important;
+}
+
+
+/* =============================================================================
+   4. LOADING STATE TRANSITIONS
+   ============================================================================= */
+
+/* Skeleton pulse animation */
+@keyframes awa-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+.loading-mask {
+    background: rgba(255, 255, 255, 0.8) !important;
+    backdrop-filter: blur(2px) !important;
+}
+
+/* Spinner */
+.loading-mask .loader img {
+    animation: spin 0.8s linear infinite;
+}
+
+
+/* =============================================================================
+   5. ACCESSIBILITY — Focus styles
+   ============================================================================= */
+
+/* Focus-visible ring (only for keyboard navigation) */
+*:focus-visible {
+    outline: 2px solid var(--awa-primary, #b73337) !important;
+    outline-offset: 2px !important;
+    border-radius: var(--awa-radius-xs, 4px);
+}
+
+/* Remove outline for mouse users */
+*:focus:not(:focus-visible) {
+    outline: none !important;
+}
+
+/* Enhanced focus for inputs */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+    outline: 2px solid var(--awa-primary, #b73337) !important;
+    outline-offset: -1px !important;
+    box-shadow: 0 0 0 4px rgba(183, 51, 55, 0.12) !important;
+}
+
+/* Skip to content link */
+.action.skip:focus {
+    position: fixed !important;
+    top: 8px !important;
+    left: 8px !important;
+    z-index: 9999 !important;
+    padding: 12px 24px !important;
+    background: var(--awa-primary, #b73337) !important;
+    color: #fff !important;
+    border-radius: var(--awa-radius-md, 8px) !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    text-decoration: none !important;
+    box-shadow: var(--awa-shadow-lg, 0 8px 24px rgba(0,0,0,0.12)) !important;
+}
+
+
+/* =============================================================================
+   6. REDUCED MOTION — Respect user preferences
+   ============================================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+
+/* =============================================================================
+   7. HIGH CONTRAST — Better visibility
+   ============================================================================= */
+
+@media (prefers-contrast: high) {
+    :root {
+        --awa-border: #999;
+        --awa-border-strong: #666;
+        --awa-text-muted: #555;
+        --awa-text-secondary: #333;
+    }
+
+    .awa-btn-primary, button.action.primary,
+    button.action.tocart, .action.checkout {
+        border: 2px solid #000 !important;
+    }
+
+    input, textarea, select {
+        border-width: 2px !important;
+    }
+}
+
+
+/* =============================================================================
+   8. PRINT STYLESHEET
+   ============================================================================= */
+
+@media print {
+    /* Hide non-essential elements */
+    header, .header, .page-header,
+    footer, .footer, .page-footer, .page_footer,
+    .sidebar, .sidebar-main, .sidebar-additional,
+    .breadcrumbs, .toolbar, .toolbar-products,
+    .nav-sections, .navigation,
+    .minicart-wrapper, .block-search,
+    .cookie-status-message,
+    .modals-wrapper, .modals-overlay,
+    .loading-mask,
+    #awa-scroll-top, .scroll-to-top,
+    .action.towishlist, .action.tocompare,
+    .messages,
+    [data-role="sticky-bar"],
+    .box-tocart,
+    .product-social-links,
+    .block.related, .block.upsell, .block.crosssell,
+    .newsletter, .block.newsletter {
+        display: none !important;
+    }
+
+    /* Reset backgrounds */
+    body, .page-wrapper, .columns, .column.main,
+    .product-info-main, .product-info-price,
+    .order-details-items, .block-order-details-view .box {
+        background: #fff !important;
+        color: #000 !important;
+        box-shadow: none !important;
+    }
+
+    /* Full width */
+    .page-wrapper, .columns, .column.main {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        float: none !important;
+    }
+
+    /* Typography */
+    body {
+        font-size: 12pt !important;
+        line-height: 1.4 !important;
+        font-family: Georgia, serif !important;
+    }
+
+    h1 { font-size: 18pt !important; }
+    h2 { font-size: 16pt !important; }
+    h3 { font-size: 14pt !important; }
+
+    /* Links show URL */
+    a[href]::after {
+        content: " (" attr(href) ")" !important;
+        font-size: 9pt !important;
+        font-weight: normal !important;
+        color: #666 !important;
+    }
+
+    a[href^="#"]::after,
+    a[href^="javascript"]::after,
+    a[href^="mailto"]::after {
+        content: "" !important;
+    }
+
+    /* Tables */
+    table, th, td {
+        border: 1px solid #ccc !important;
+    }
+
+    /* Images */
+    img {
+        max-width: 200px !important;
+        height: auto !important;
+    }
+
+    /* Product info for PDP print */
+    .product-info-main .page-title span {
+        font-size: 18pt !important;
+    }
+
+    .product-info-main .price-box .price {
+        font-size: 16pt !important;
+        font-weight: bold !important;
+    }
+
+    /* Order print */
+    .sales-order-view .page-title-wrapper,
+    .sales-order-print .page-title-wrapper {
+        margin-bottom: 20pt !important;
+    }
+
+    .order-details-items .table-order-items {
+        page-break-inside: avoid !important;
+    }
+
+    /* Page breaks */
+    h1, h2, h3 {
+        page-break-after: avoid !important;
+    }
+
+    tr, img {
+        page-break-inside: avoid !important;
+    }
+
+    /* Force color printing for important elements */
+    .order-status {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+}

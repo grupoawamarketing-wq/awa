@@ -165,6 +165,15 @@ class SyncAttendantFromErp
             }
         }
 
+        // Refresh customer_count in attendants table
+        $attTable = $this->resource->getTableName('grupoawamotos_b2b_attendants');
+        $caTable  = $this->resource->getTableName('grupoawamotos_b2b_customer_attendant');
+        $connection->query(
+            "UPDATE {$attTable} a SET a.customer_count = ("
+            . "SELECT COUNT(*) FROM {$caTable} ca WHERE ca.attendant_id = a.attendant_id"
+            . ")"
+        );
+
         $this->logger->info(sprintf(
             '[B2B AttendantSync] Done: %d new, %d re-assigned, %d no ERP match, %d chunk errors',
             $assigned, $updated, $noMatch, $errors

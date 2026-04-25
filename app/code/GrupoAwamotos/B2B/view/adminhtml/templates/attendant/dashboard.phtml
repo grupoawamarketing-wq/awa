@@ -134,9 +134,11 @@ $isAttendant = $block->isAttendant();
 
         <!-- Actions -->
         <div class="att-actions">
+            <?php if ($block->isAdminUser()): ?>
             <a href="<?= $block->escapeUrl($block->getAttendantListUrl()) ?>">
                 &#128101; <?= $block->escapeHtml(__('Gestão de Atendentes')) ?>
             </a>
+            <?php endif; ?>
             <a href="<?= $block->escapeUrl($block->getHelpUrl()) ?>">
                 &#10067; <?= $block->escapeHtml(__('Central de Ajuda')) ?>
             </a>
@@ -365,6 +367,42 @@ $isAttendant = $block->isAttendant();
                                     </button>
                                 <?php endif; ?>
                             </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+        <?php endif; ?>
+
+        <!-- Smart Suggestions -->
+        <?php
+        $attData = $block->getAttendant();
+        $suggestions = $attData ? $block->getSmartSuggestions((int) $attData['attendant_id'], 5) : [];
+        ?>
+        <?php if (!empty($suggestions)): ?>
+        <div class="att-section">
+            <h3 class="att-section-title">&#128161; <?= $block->escapeHtml(__('Sugestões de Recompra')) ?></h3>
+            <table class="att-table">
+                <thead>
+                    <tr>
+                        <th><?= $block->escapeHtml(__('Cliente ERP')) ?></th>
+                        <th><?= $block->escapeHtml(__('Segmento RFM')) ?></th>
+                        <th><?= $block->escapeHtml(__('Produtos')) ?></th>
+                        <th><?= $block->escapeHtml(__('Valor Est.')) ?></th>
+                        <th><?= $block->escapeHtml(__('Gerado em')) ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($suggestions as $sug):
+                        $sugData = json_decode((string) ($sug['suggestion_data'] ?? '{}'), true);
+                        $rfmSegment = $sugData['rfm']['segment'] ?? '-';
+                    ?>
+                        <tr>
+                            <td><?= $block->escapeHtml((string) ($sug['customer_name'] ?? '-')) ?></td>
+                            <td><span class="att-followup-badge"><?= $block->escapeHtml($rfmSegment) ?></span></td>
+                            <td><?= (int) ($sug['products_count'] ?? 0) ?></td>
+                            <td>R$ <?= number_format((float) ($sug['total_value'] ?? 0), 2, ',', '.') ?></td>
+                            <td><?= $block->escapeHtml(!empty($sug['created_at']) ? date('d/m/Y', strtotime($sug['created_at'])) : '-') ?></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>

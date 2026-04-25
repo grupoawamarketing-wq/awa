@@ -1,0 +1,150 @@
+/* ═══════════════════════════════════════════════════════════════
+   AWA Grid & Container Audit — Padronização Global
+   2026-07-18 — Carregado APÓS awa-layout-standardization.css
+   Corrige inconsistências de container, padding e margin
+   detectadas via auditoria MCP browser em múltiplas páginas.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ────────────────────────────────────────────────────────────
+   1. CONTAINER BASE — .page-main unificado
+   Token: --awa-container-max (1280px na prática)
+   Garante margin auto + padding consistente em TODAS as páginas
+   ──────────────────────────────────────────────────────────── */
+:root {
+  --awa-page-main-max: 1280px;
+  --awa-page-padding: var(--awa-container-padding, clamp(12px, 2.1vw, 20px));
+}
+
+/* Força margin auto em page-main (busca/categoria tinham margin:0) */
+body .page-wrapper .page-main {
+  max-width: var(--awa-page-main-max);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--awa-page-padding);
+  padding-right: var(--awa-page-padding);
+}
+
+/* ────────────────────────────────────────────────────────────
+   2. BREADCRUMBS — alinhar com page-main (era 1440px, deve ser 1280px)
+   Especificidade elevada: styles-l.css carrega 2x (pos 59 > 54)
+   ──────────────────────────────────────────────────────────── */
+body .page-wrapper .breadcrumbs {
+  max-width: var(--awa-page-main-max);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--awa-page-padding);
+  padding-right: var(--awa-page-padding);
+}
+
+/* ────────────────────────────────────────────────────────────
+   3. ACCOUNT PANEL — sidebar + main grid padronizado
+   Desktop: sidebar 260px + main flex
+   Mobile: stack vertical
+   ──────────────────────────────────────────────────────────── */
+body.account .columns {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: var(--awa-space-6, 24px);
+  align-items: start;
+}
+
+body.account .columns .sidebar {
+  min-width: 0;
+}
+
+body.account .columns .column.main {
+  min-width: 0;
+}
+
+@media (max-width: 991px) {
+  body.account .columns {
+    grid-template-columns: 1fr;
+    gap: var(--awa-space-4, 16px);
+  }
+}
+
+/* ────────────────────────────────────────────────────────────
+   4. CATEGORY/SEARCH — sidebar + grid padronizado
+   ──────────────────────────────────────────────────────────── */
+body.catalog-category-view .columns,
+body.catalogsearch-result-index .columns {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: var(--awa-space-5, 20px);
+  align-items: start;
+}
+
+@media (max-width: 991px) {
+  body.catalog-category-view .columns,
+  body.catalogsearch-result-index .columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ────────────────────────────────────────────────────────────
+   5. CHECKOUT — container consistente
+   ──────────────────────────────────────────────────────────── */
+body.checkout-cart-index .page-main {
+  padding-left: var(--awa-page-padding);
+  padding-right: var(--awa-page-padding);
+}
+
+/* ────────────────────────────────────────────────────────────
+   6. B2B PAGES — container alinhado
+   ──────────────────────────────────────────────────────────── */
+body.b2b-account-login .page-main,
+body.b2b-register-index .page-main {
+  padding-left: var(--awa-page-padding);
+  padding-right: var(--awa-page-padding);
+}
+
+/* ────────────────────────────────────────────────────────────
+   7. MESSAGES CONTAINER — alinhar mensagens globais
+   ──────────────────────────────────────────────────────────── */
+body .page-wrapper .page.messages {
+  max-width: var(--awa-page-main-max);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--awa-page-padding);
+  padding-right: var(--awa-page-padding);
+}
+
+/* ────────────────────────────────────────────────────────────
+   8. MOBILE RESPONSIVE — breakpoints unificados
+   ──────────────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  body .page-wrapper .page-main {
+    padding-left: var(--awa-space-3, 12px);
+    padding-right: var(--awa-space-3, 12px);
+  }
+
+  body .page-wrapper .breadcrumbs {
+    padding-left: var(--awa-space-3, 12px);
+    padding-right: var(--awa-space-3, 12px);
+  }
+
+  body .page-wrapper .page.messages {
+    padding-left: var(--awa-space-3, 12px);
+    padding-right: var(--awa-space-3, 12px);
+  }
+}
+
+@media (max-width: 479px) {
+  body .page-wrapper .page-main {
+    padding-left: var(--awa-space-2, 8px);
+    padding-right: var(--awa-space-2, 8px);
+  }
+}
+
+/* ────────────────────────────────────────────────────────────
+   9. NAV-BREADCRUMBS CONTAINER — alinhamento com page-main
+   Bootstrap 3 seta width:1200px @media(min-width:1200px).
+   Override com seletor mais específico (0,0,2,1 > 0,0,1,0)
+   para alinhar left-edge das breadcrumbs com page-main (1280px).
+   ──────────────────────────────────────────────────────────── */
+@media (min-width: 1200px) {
+  body .nav-breadcrumbs .container {
+    width: 100%;
+    max-width: var(--awa-page-main-max);
+  }
+}

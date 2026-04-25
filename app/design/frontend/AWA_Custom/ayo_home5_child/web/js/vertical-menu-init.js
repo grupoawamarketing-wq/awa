@@ -108,6 +108,18 @@ define([
         $nav.data('awaVMInit', 1);
         $nav.attr('data-awa-verticalmenu-owner', 'vertical-menu-init');
 
+        /* ---- Fix: force title background via inline style ---------- */
+        /* Multiple CSS shorthand rules with !important conflict,     */
+        /* making the computed background transparent. Inline longhand */
+        /* overrides all stylesheet rules reliably.                    */
+        if ($title.length) {
+            $title.css({
+                'background-color': '#b73337',
+                'color': '#fff'
+            });
+            $title[0].style.setProperty('background-color', '#b73337', 'important');
+        }
+
         /* ---- Rokanthemes flyout widget ------------------------------ */
         var rokanActive = initRokanWidget(
             $nav.filter('.verticalmenu').add($nav.find('.verticalmenu'))
@@ -363,8 +375,6 @@ define([
                     resetParentItemState($(this), false);
                 });
 
-                syncDesktopPanelPosition();
-
                 /* Re-sync list visibility to current state */
                 $list.stop(true, true).removeAttr('style');
 
@@ -381,6 +391,8 @@ define([
                 }
 
                 $('body').removeClass('background_shadow_show');
+
+                syncDesktopPanelPosition();
             } else {
                 /* Entering mobile — collapse */
                 setMenuOpenState(false);

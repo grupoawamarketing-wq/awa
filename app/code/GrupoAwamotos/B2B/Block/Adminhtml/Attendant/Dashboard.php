@@ -281,6 +281,52 @@ class Dashboard extends Template
         }
         return $this->getUrl('grupoawamotos_b2b/followup/listAction', $params);
     }
+    /**
+     * Retorna true se o usuário logado é admin (não é atendente restrito).
+     * Usado para mostrar/ocultar botões de gestão no template.
+     */
+    public function isAdminUser(): bool
+    {
+        return $this->_authorization->isAllowed('Magento_Backend::dashboard');
+    }
+
+    /**
+     * Retorna as últimas sugestões de SmartSuggestions filtradas pelos clientes do atendente.
+     * JOIN: smart_suggestions_history → customer_entity_varchar (erp_code=198) → customer_attendant.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function getSmartSuggestions(int $attendantId, int $limit = 5): array
+    {
+        try {
+            $connection = $this->resource->getConnection();
+            $histTable = $this->resource->getTableName('smart_suggestions_history');
+            $caTable   = $this->resource->getTableName('grupoawamotos_b2b_customer_attendant');
+            $eavTable  = $this->resource->getTableName('customer_entity_varchar');
+
+            // erp_code está em customer_entity_varchar com attribute_id=198
+            $select = $connection->select()
+                ->from(['h' => $histTable])
+                ->join(
+                    ['cev' => $eavTable],
+                    'cev.attribute_id = 198 AND CAST(cev.value AS UNSIGNED) = h.erp_customer_id',
+                    []
+                )
+                ->join(
+                    ['ca' => $caTable],
+                    'ca.customer_id = cev.entity_id AND ca.attendant_id = ' . (int) $attendantId,
+                    []
+                )
+                ->where('h.products_count > 0')
+                ->order('h.created_at DESC')
+                ->limit($limit);
+
+            return $connection->fetchAll($select);
+        } catch (\Exception $e) {
+            $this->_logger->error('Dashboard::getSmartSuggestions error: ' . $e->getMessage());
+            return [];
+        }
+    }
 
     /**
      * URL da gestão de atendentes.
