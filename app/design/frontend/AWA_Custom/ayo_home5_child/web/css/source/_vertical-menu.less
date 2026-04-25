@@ -1,64 +1,180 @@
-// AWA Motos — Vertical Menu overrides
+// ============================================================================
+// AWA Motos - Vertical Menu Overrides
+// Referencia visual: https://ayo.nextsky.co/en_5/ (Home 5)
+// Tokens: @awa-* de _awa-variables.less | Escala 8px de _design-system.less
+// ============================================================================
 @import (once) '_awa-variables';
 
-// Badges promocionais do menu vertical — cores intencionais de marketing.
-// Mantidas locais para não poluir o design system global.
+// Badges promocionais - cores intencionais de marketing (nao poluem DS global)
 @vmenu-label-1: #0cc485;
 @vmenu-label-2: #eb2771;
 @vmenu-label-3: #0ae3eb;
 
-// Garante renderização correta de ícones Font Awesome (em.menu-thumb-icon)
-// e ajustes visuais complementares à documentação Ayo/Rokanthemes.
+// ============================================================================
+//  1. TRIGGER - "Departamentos" (h2.title-category-dropdown)
+// ============================================================================
 
-// ── Ícone via Font Awesome (<em class="menu-thumb-icon fa fa-xxx">) ─────────
-.navigation.verticalmenu .togge-menu > li.ui-menu-item.level0 > a.level-top {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+.navigation.verticalmenu.side-verticalmenu {
 
-    em.menu-thumb-icon,
-    .awa-vmenu-icon {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 18px;
-        height: 18px;
-        flex-shrink: 0;
-        font-size: 14px;
+    h2.title-category-dropdown {
+        background-color: var(--awa-primary, @awa-color-primary);
+        color: @awa-color-white;
+        font-size: @awa-font-size-14;
+        font-weight: @awa-weight-bold;
         line-height: 1;
-        font-style: normal;
-        color: @awa-color-primary;
-        transition: color var(--awa-transition);
-    }
+        padding: @ds-space-sm @ds-space-sm;
+        margin: 0;
+        border-radius: @awa-radius-sm @awa-radius-sm 0 0;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: @ds-space-xs;
+        transition: background-color @awa-transition;
+        text-transform: none;
+        letter-spacing: 0;
+        border: 0;
 
-    .awa-vmenu-icon {
-        min-width: 18px;
-    }
+        &:hover,
+        &.active {
+            background-color: var(--awa-primary-dark, @awa-color-primary-dark);
+        }
 
-    .awa-vmenu-icon svg {
-        width: 18px;
-        height: 18px;
-        stroke: currentColor;
-        fill: none;
-        transition: stroke var(--awa-transition), transform var(--awa-transition);
-    }
+        .icon-menu,
+        .awa-vmenu-trigger-icon {
+            display: inline-flex;
+            align-items: center;
+            color: @awa-color-white;
+        }
 
-    &:hover em.menu-thumb-icon,
-    &:hover .awa-vmenu-icon {
-        color: @awa-color-primary-dark;
-    }
-
-    &:hover .awa-vmenu-icon svg {
-        stroke: currentColor;
-    }
-
-    > span:not(.awa-vmenu-icon) {
-        flex: 1;
-        min-width: 0;
+        > span:not(.icon-menu):not(.awa-vmenu-trigger-icon) {
+            flex: 1;
+            min-width: 0;
+        }
     }
 }
 
-// ── Category Labels (Novo / Quente / Oferta) ─────────────────────────────────
+// ============================================================================
+//  2. PAINEL / DROPDOWN (.togge-menu)
+// ============================================================================
+
+.navigation.verticalmenu.side-verticalmenu {
+
+    > ul.togge-menu.list-category-dropdown {
+        background: @awa-color-white;
+        border: @awa-border-width solid @awa-color-border;
+        border-top: 0;
+        border-radius: 0 0 @awa-radius-sm @awa-radius-sm;
+        box-shadow: @shadow-1;
+        padding: @ds-space-xs 0;
+        margin: 0;
+        z-index: 9999;
+    }
+}
+
+// ============================================================================
+//  3. ITENS LEVEL0 - tipografia, padding escala 8px, hover, barra ativa
+// ============================================================================
+
+.navigation.verticalmenu .togge-menu > li.ui-menu-item.level0 {
+
+    > a.level-top {
+        display: flex;
+        align-items: center;
+        gap: @ds-space-xs;
+        padding: 0 @ds-space-sm;
+        margin: 0;
+        border-top: @awa-border-width solid @awa-color-border;
+        line-height: 40px;
+        font-size: @awa-font-size-14;
+        font-weight: 400;
+        color: @awa-color-text-primary;
+        text-decoration: none;
+        position: relative;
+        transition: color @awa-transition, background-color @awa-transition, padding-left @awa-transition;
+
+        &::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--awa-primary, @awa-color-primary);
+            transform: scaleY(0);
+            transition: transform @awa-transition;
+        }
+
+        em.menu-thumb-icon,
+        .awa-vmenu-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+            font-size: @awa-font-size-14;
+            line-height: 1;
+            font-style: normal;
+            color: @awa-color-primary;
+            transition: color @awa-transition;
+        }
+
+        .awa-vmenu-icon {
+            min-width: 18px;
+
+            svg {
+                width: 18px;
+                height: 18px;
+                stroke: currentColor;
+                fill: none;
+                transition: stroke @awa-transition, transform @awa-transition;
+            }
+        }
+
+        &::after {
+            font-size: @awa-font-size-12;
+            color: @awa-color-text-muted;
+            transition: color @awa-transition;
+        }
+
+        > span:not(.awa-vmenu-icon):not(.cat-label):not(.arrow) {
+            flex: 1;
+            min-width: 0;
+        }
+    }
+
+    &:first-child > a.level-top {
+        border-top: 0;
+    }
+
+    &:hover > a.level-top {
+        background-color: @awa-color-primary-50;
+        color: var(--awa-primary, @awa-color-primary);
+        padding-left: @ds-space-md;
+
+        &::before {
+            transform: scaleY(1);
+        }
+
+        em.menu-thumb-icon,
+        .awa-vmenu-icon {
+            color: @awa-color-primary-dark;
+        }
+
+        .awa-vmenu-icon svg {
+            stroke: currentColor;
+        }
+
+        &::after {
+            color: var(--awa-primary, @awa-color-primary);
+        }
+    }
+}
+
+// ============================================================================
+//  4. CATEGORY LABELS (Novo / Quente / Oferta)
+// ============================================================================
+
 .navigation.verticalmenu .togge-menu > li.ui-menu-item.level0 {
     span.cat-label {
         font-size: 9px;
@@ -67,7 +183,7 @@
         border-radius: @awa-border-radius-sm;
         text-transform: uppercase;
         letter-spacing: 0.3px;
-        margin-left: 4px;
+        margin-left: @awa-gap-xs;
         vertical-align: middle;
         white-space: nowrap;
 
@@ -88,21 +204,106 @@
     }
 }
 
-// ── Hover: deslocar levemente para a direita (comportamento do tema pai) ──────
-.navigation.verticalmenu.side-verticalmenu > ul li.level0 > a.level-top:hover {
-    padding-left: 14px !important; // tema pai redefine padding-left via seletor de alta especificidade no hover
+// ============================================================================
+//  5. SUBMENU / MEGA-MENU (fullwidth + classic)
+// ============================================================================
+
+.navigation.verticalmenu.side-verticalmenu {
+
+    li.level0 > .submenu {
+        border-left: 3px solid var(--awa-primary, @awa-color-primary);
+        border-radius: 0 @awa-radius-sm @awa-radius-sm 0;
+        box-shadow: @shadow-2;
+        background: @awa-color-white;
+        padding: @ds-space-sm;
+
+        .subchildmenu li {
+            > a {
+                font-size: @awa-font-size-13;
+                color: @awa-color-text-primary;
+                padding: @awa-gap-xs @ds-space-xs;
+                line-height: @awa-line-height-base;
+                display: block;
+                transition: color @awa-transition, padding-left @awa-transition;
+                border-radius: @awa-border-radius-sm;
+
+                &:hover {
+                    color: var(--awa-primary, @awa-color-primary);
+                    background: @awa-color-primary-50;
+                    padding-left: @ds-space-sm;
+                    text-decoration: none;
+                }
+            }
+
+            &.level1 > a {
+                font-size: @awa-font-size-14;
+                font-weight: 600;
+                color: @awa-color-text-primary;
+                padding-bottom: @awa-gap-xs;
+                margin-bottom: @awa-gap-xs;
+                border-bottom: @awa-border-width solid @awa-color-border;
+            }
+        }
+    }
+
+    li.level0.fullwidth > .submenu {
+        min-width: 600px;
+    }
+
+    li.level0.classic > .submenu {
+        min-width: 220px;
+    }
 }
 
+// ── 5b. PORTAL SUBMENU — flyout movido para body via awa-vmf-portal ─────────
+// O JS awa-vertical-menu-flyout-fix.js move .submenu para document.body;
+// fora da hierarquia .navigation.verticalmenu, os estilos da secao 5 nao se aplicam.
+.level0.submenu.awa-vmf-portal {
+    // !important necessario: awa-super-global.css aplica .submenu { border: 1px solid #e5e7eb !important; box-shadow: none !important; }
+    border: none !important;
+    border-left: 3px solid var(--awa-primary, @awa-color-primary) !important;
+    border-radius: 0 @awa-radius-sm @awa-radius-sm 0;
+    box-shadow: @shadow-2 !important;
+    background: @awa-color-white;
+    padding: @ds-space-sm;
 
-// ── Promo Image Carousel — .vertical-bg-img ─────────────────────────────────
-// Container renderizado pelo bloco CMS 'vertical_background_images'.
-// Inicializado via x-magento-init[js/vmenu-promo-carousel].
-// JS: web/js/vmenu-promo-carousel.js — crossfade auto-rotate, pausa no hover.
+    .subchildmenu li {
+        > a {
+            font-size: @awa-font-size-13;
+            color: @awa-color-text-primary;
+            padding: @awa-gap-xs @ds-space-xs;
+            line-height: @awa-line-height-base;
+            display: block;
+            transition: color @awa-transition, padding-left @awa-transition;
+            border-radius: @awa-border-radius-sm;
+
+            &:hover {
+                color: var(--awa-primary, @awa-color-primary);
+                background: @awa-color-primary-50;
+                padding-left: @ds-space-sm;
+                text-decoration: none;
+            }
+        }
+
+        &.level1 > a {
+            font-size: @awa-font-size-14;
+            font-weight: 600;
+            color: @awa-color-text-primary;
+            padding-bottom: @awa-gap-xs;
+            margin-bottom: @awa-gap-xs;
+            border-bottom: @awa-border-width solid @awa-color-border;
+        }
+    }
+}
+
+// ============================================================================
+//  6. PROMO IMAGE CAROUSEL - .vertical-bg-img
+// ============================================================================
 
 .vertical-bg-img {
     list-style: none;
     display: block;
-    padding: 4px 8px 8px;
+    padding: @awa-gap-xs @ds-space-xs @ds-space-xs;
     margin: 0;
     overflow: hidden;
 }
@@ -148,56 +349,83 @@
     }
 }
 
-// Prefers-reduced-motion: para a animação de crossfade
 @media (prefers-reduced-motion: reduce) {
     .vmenu-promo-slide {
         transition: none;
     }
 }
 
-// ── Fix A3: Override de cores hardcoded #08c do vendor (Auditoria 2025-04) ────
-// O vendor _module.less usa #08c para active/hover state, conflitando com a
-// identidade visual AWA Motos (--awa-primary = vermelho).
-// Seletores replicados dos que usam #08c no vendor para garantir especificidade.
+// ============================================================================
+//  7. ACTIVE STATE - Override de #08c do vendor
+// ============================================================================
 
 .navigation.verticalmenu {
 
-    // Active category item (nível 0 e sub-níveis)
     > ul > li.active > a,
     > ul > li.ui-state-active > a,
     .togge-menu > li.ui-menu-item.active > a,
     .togge-menu > li.ui-menu-item.level0.active > a.level-top {
-        background-color: var(--awa-primary, @awa-color-primary) !important; // substitui #08c
-        color: @awa-color-white !important;
-        border-top-color: var(--awa-primary, @awa-color-primary) !important;
+        background-color: @awa-color-primary-50 !important; // !important: substitui #08c do vendor
+        color: var(--awa-primary, @awa-color-primary) !important;
+        border-top-color: @awa-color-border !important;
+
+        &::before {
+            transform: scaleY(1) !important;
+        }
     }
 
-    // Seta (arrow) em itens com submenu no active
     .togge-menu > li.ui-menu-item.level0.active > a.level-top > span.arrow,
     .togge-menu > li.ui-menu-item.active > a > span.arrow {
         border-right-color: var(--awa-primary, @awa-color-primary) !important;
     }
 
-    // Hover state do link — substitui #08c do _module.less linha 285
     .side-menu-list .active a,
     .side-menu-list li a:hover {
-        background-color: var(--awa-primary, @awa-color-primary) !important;
-        color: @awa-color-white !important;
+        background-color: @awa-color-primary-50 !important;
+        color: var(--awa-primary, @awa-color-primary) !important;
     }
 }
 
-// ── Desktop backdrop (.awa-vmenu-backdrop) ───────────────────────────────────
-// Definido em awa-header-classic-redesign.css (classe, dark overlay rgba 0.35).
-// Aqui apenas garantimos que o painel .togge-menu fique acima do backdrop.
-// Não redefine o backdrop via ID — evita conflito de especificidade.
+// ============================================================================
+//  8. Z-INDEX, BACKDROP, EXPAND LINK, HIGHLIGHT
+// ============================================================================
 
 .navigation.verticalmenu .togge-menu {
-    z-index: 9999; // garante painel acima do backdrop (z-index 399 na classe)
+    z-index: 9999;
 }
 
-// ── Expand-category-link: chevron rotation animation ─────────────────────────
-// .expanding é adicionado pelo vertical-menu-init.js quando a lista está expandida
+// Compatibilidade AWA: runtime usa classes de estado (.is-open/.vmm-active)
+// e o CSS herdado do tema mantém visibility:hidden no submenu.
+.navigation.verticalmenu .togge-menu.list-category-dropdown > li.ui-menu-item.level0.is-open > .level0.submenu,
+.navigation.verticalmenu .togge-menu.list-category-dropdown > li.ui-menu-item.level0.vmm-active > .level0.submenu,
+.navigation.verticalmenu .togge-menu.list-category-dropdown > li.ui-menu-item.level0.active > .level0.submenu,
+.navigation.verticalmenu .togge-menu.list-category-dropdown > li.ui-menu-item.level0._active > .level0.submenu {
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+
+// "Ver mais / Ver menos" - link de expansao
 .navigation.verticalmenu .togge-menu > li.expand-category-link {
+    border-top: @awa-border-width solid @awa-color-border;
+    padding: @awa-gap-xs @ds-space-sm;
+
+    a, span {
+        font-size: @awa-font-size-13;
+        font-weight: 600;
+        color: var(--awa-primary, @awa-color-primary);
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: @awa-gap-xs;
+        transition: color @awa-transition;
+        text-decoration: none;
+
+        &:hover {
+            color: var(--awa-primary-dark, @awa-color-primary-dark);
+        }
+    }
+
     .vm-toggle-icon {
         display: inline-block;
         transition: transform 0.2s ease;
@@ -208,19 +436,99 @@
     }
 }
 
-// ── orther-link: CSS fallback para itens ocultos além do limite ───────────────
-// O JS já faz jQuery hide(), mas o CSS garante que itens não fiquem visíveis
-// em estados intermediários (antes do init ou durante re-render).
+// orther-link: CSS fallback para itens ocultos alem do limite
 .navigation.verticalmenu .togge-menu > li.ui-menu-item.level0.orther-link {
     display: none !important;
 }
 
-// ── is-highlight: acento visual para Super Ofertas / Lançamentos ─────────────
-// Adiciona borda interna (box-shadow, sem afetar layout) + cor de destaque.
-// O shell-fix.css já define font-weight e stroke do SVG.
+// is-highlight: acento visual para Super Ofertas / Lancamentos
 .navigation.verticalmenu .togge-menu > li.ui-menu-item.level0.is-highlight {
     > a.level-top {
         box-shadow: inset 3px 0 0 var(--awa-primary, @awa-color-primary) !important;
         color: var(--awa-primary, @awa-color-primary) !important;
+        font-weight: 600;
+    }
+}
+
+// ============================================================================
+//  9. DESKTOP CLOSE BUTTON
+// ============================================================================
+
+.navigation.verticalmenu .togge-menu > li.awa-vmenu-close-li {
+    text-align: right;
+    padding: @awa-gap-xs @ds-space-sm 0;
+    border: 0;
+
+    .awa-vmenu-desktop-close-btn {
+        background: none;
+        border: 0;
+        padding: @awa-gap-xs;
+        color: @awa-color-text-muted;
+        cursor: pointer;
+        font-size: @awa-font-size-16;
+        line-height: 1;
+        transition: color @awa-transition;
+
+        &:hover {
+            color: var(--awa-primary, @awa-color-primary);
+        }
+    }
+}
+
+// ============================================================================
+//  10. MOBILE - drawer override (< 1024px)
+// ============================================================================
+
+@media (max-width: (@awa-breakpoint-md - 1)) {
+
+    .navigation.verticalmenu.side-verticalmenu {
+
+        h2.title-category-dropdown {
+            border-radius: 0;
+            padding: @ds-space-sm;
+        }
+
+        > ul.togge-menu.list-category-dropdown {
+            border: 0;
+            border-radius: 0;
+            box-shadow: none;
+            padding: 0;
+        }
+
+        li.level0 > a.level-top {
+            line-height: 44px;
+            padding: 0 @ds-space-sm;
+        }
+    }
+
+    .navigation.verticalmenu li.ui-menu-item > .open-children-toggle {
+        width: 44px;
+        height: 44px;
+        min-height: 44px;
+    }
+
+    .navigation.verticalmenu.side-verticalmenu li.level0 > .submenu {
+        position: relative !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        border-left: 0;
+        border-radius: 0;
+        box-shadow: none;
+        padding: 0 0 0 @ds-space-sm;
+        background: @awa-neutral-50;
+    }
+}
+
+// ============================================================================
+//  11. TABLET BREAKPOINTS (768-1023px)
+// ============================================================================
+
+@media (min-width: @awa-breakpoint-sm) and (max-width: (@awa-breakpoint-md - 1)) {
+
+    .navigation.verticalmenu .togge-menu > li.ui-menu-item.level0 > a.level-top {
+        font-size: @awa-font-size-13;
+        line-height: 44px;
     }
 }

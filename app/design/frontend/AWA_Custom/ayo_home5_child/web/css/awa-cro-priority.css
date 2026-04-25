@@ -1701,3 +1701,47 @@ body .page-wrapper .message.global.cookie {
     display: block;
   }
 }
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   HEADER DENSITY OVERRIDES — last-cascade position, ID-level specificity
+   Fixes: topbar link color, search border-radius, nav marcas dedup
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* 1. Topbar — links brancos (vence _awa-header-professional.less) */
+#header .awa-utility-bar a:not(.awa-header-quote-cta),
+#header .awa-utility-bar span,
+#header .awa-utility-bar .awa-topbar__contact-link,
+#header .awa-utility-bar .whatsapp-hotline,
+#header .awa-utility-bar .awa-topbar__hours-info {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+#header .awa-utility-bar a:not(.awa-header-quote-cta):hover {
+  color: #ffffff !important;
+}
+
+/* 2. Search — border-radius 8px (vence ID #search_mini_form + radius-full) */
+@media (min-width: 992px) {
+  #header #search_mini_form,
+  #header .awa-header-search-col form.minisearch,
+  #header .awa-header-search-col form.search-content {
+    border-radius: var(--awa-radius-md, 8px) !important;
+  }
+  #header .awa-header-search-col form.minisearch .actions button.action.search,
+  #header .awa-header-search-col form.search-content .actions button.action.search {
+    border-radius: 0 var(--awa-radius-md, 8px) var(--awa-radius-md, 8px) 0 !important;
+  }
+}
+
+/* 3. Nav — ocultar Marcas duplicado (vence li>a display:flex + inline-flex) */
+/* Specificity: (1, 8, 2) com :has() > (1, 7, 3) do premium */
+body .page-wrapper #header .awa-nav-bar .navigation.custommenu.main-nav li.nav-item.level0:has(> a[href*="/marcas"]:not([href*="nossas"])) {
+  display: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 0 !important;
+  overflow: hidden !important;
+}
+body .page-wrapper #header .awa-nav-bar .awa-header-primary-nav .navigation.custommenu li.level0 > a[href*="/marcas"]:not([href*="nossas"]) {
+  display: none !important;
+}

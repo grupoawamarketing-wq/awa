@@ -7,8 +7,9 @@
  * de produtos da homepage isso disparava querySelectorAll('a[href]') centenas
  * de vezes em sequência, bloqueando a thread principal → "Página sem resposta".
  *
- * Fix: as chamadas ao hotfix são batched via requestAnimationFrame, liberando
- * a thread entre mutações e evitando o travamento.
+ * Fix v2: applyAwaPublicHotfix e o batch do MutationObserver são diferidos
+ * via requestIdleCallback, empurrando o trabalho para fora da janela TTI e
+ * eliminando o long task de ~1365ms atribuído ao theme.js no LH trace.
  */
 define([
     'jquery',
@@ -86,21 +87,27 @@ define([
         });
     }
 
-    applyAwaPublicHotfix(document);
+    // Diferido: hotfix DOM + footer aria-label não são críticos para LCP/interatividade.
+    // requestIdleCallback garante execução após o browser estar ocioso (pós-TTI).
+    var _ric = window.requestIdleCallback || function (cb) { setTimeout(cb, 300); };
 
-    /*
-     * WCAG 2.5.3 fix: footer contact links have aria-labels that don't contain
-     * the full visible text ("WhatsApp Comercial Resposta rápida..."). Removing
-     * the mismatched aria-label lets the accessible name fall back to the
-     * visible text content, which is already descriptive and satisfies 2.5.3.
-     */
-    document.querySelectorAll('.awa-footer-business-contact__action[aria-label]').forEach(function (link) {
-        var ariaLabel = (link.getAttribute('aria-label') || '').toLowerCase();
-        // textContent instead of innerText — innerText forces layout recalculation (reflow)
-        var visibleText = (link.textContent || '').replace(/\s+/g, ' ').trim().toLowerCase();
-        if (visibleText && !ariaLabel.includes(visibleText)) {
-            link.removeAttribute('aria-label');
-        }
+    _ric(function () {
+        applyAwaPublicHotfix(document);
+
+        /*
+         * WCAG 2.5.3 fix: footer contact links have aria-labels that don't contain
+         * the full visible text ("WhatsApp Comercial Resposta rápida..."). Removing
+         * the mismatched aria-label lets the accessible name fall back to the
+         * visible text content, which is already descriptive and satisfies 2.5.3.
+         */
+        document.querySelectorAll('.awa-footer-business-contact__action[aria-label]').forEach(function (link) {
+            var ariaLabel = (link.getAttribute('aria-label') || '').toLowerCase();
+            // textContent instead of innerText — innerText forces layout recalculation (reflow)
+            var visibleText = (link.textContent || '').replace(/\s+/g, ' ').trim().toLowerCase();
+            if (visibleText && !ariaLabel.includes(visibleText)) {
+                link.removeAttribute('aria-label');
+            }
+        });
     });
 
     /*
@@ -179,7 +186,7 @@ define([
 
                 if (!_rafScheduled && _pendingNodes.length > 0) {
                     _rafScheduled = true;
-                    requestAnimationFrame(function () {
+                    _ric(function () {
                         var nodes = _pendingNodes.splice(0);
                         _rafScheduled = false;
                         nodes.forEach(applyAwaPublicHotfix);
@@ -246,7 +253,7 @@ define([
                 });
                 if (!_imgRafScheduled && _imgPendingNodes.length > 0) {
                     _imgRafScheduled = true;
-                    requestAnimationFrame(function () {
+                    _ric(function () {
                         var nodes = _imgPendingNodes.splice(0);
                         _imgRafScheduled = false;
                         nodes.forEach(fixBrokenProductImages);
