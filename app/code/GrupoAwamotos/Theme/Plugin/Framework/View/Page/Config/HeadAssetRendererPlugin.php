@@ -37,6 +37,7 @@ class HeadAssetRendererPlugin
         'Rokanthemes_RokanBase/css/jquery.fancybox.css',
         'Rokanthemes_Themeoption/css/loader.css',
         'Rokanthemes_Brand/css/styles.css',
+        'css/styles-l.css',
     ];
 
     /**
