@@ -25,17 +25,15 @@ define([
         $('[data-role="awa-vertical-menu"]').each(function () {
             var $nav = $(this);
 
-            if ($nav.attr('data-awa-vm-bootstrapped') === '1') {
-                return;
+            if ($nav.attr('data-awa-vm-bootstrapped') !== '1') {
+                initVerticalMenu({
+                    desktopBreakpoint: 992,
+                    overlaySelector: '.shadow_bkg_show',
+                    limitShow: parseLimit($nav)
+                }, this);
+
+                $nav.attr('data-awa-vm-bootstrapped', '1');
             }
-
-            $nav.attr('data-awa-vm-bootstrapped', '1');
-
-            initVerticalMenu({
-                desktopBreakpoint: 992,
-                overlaySelector: '.shadow_bkg_show',
-                limitShow: parseLimit($nav)
-            }, this);
 
             wireDesktopHoverFallback(this);
         });
