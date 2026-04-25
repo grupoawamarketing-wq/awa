@@ -37,11 +37,13 @@ define(['jquery', 'domReady!'], function ($) {
         'linha-honda':           '<svg viewBox="0 0 24 24"><path d="M5 4h2v7h4V4h2v16h-2v-7H7v7H5z"/><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".25"/></svg>',
         'linha-yamaha':          '<svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>',
         'linha-suzuki':          '<svg viewBox="0 0 24 24"><path d="M17 7H7a3 3 0 0 0 0 6h10a3 3 0 0 1 0 6H7M12 4v2M12 18v2"/></svg>',
-        'default':               '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>'
+        'ofertas': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>',
+        'atacado-b2b': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="17"/><line x1="9" y1="14.5" x2="15" y2="14.5"/></svg>',
+                'default':               '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>'
     };
 
-    var SECTION_LABELS = { 'lancamentos': 'Novidades', 'linha-honda': 'Por Marca', 'manetes': 'Peças' };
-    var HIGHLIGHTS     = ['super-ofertas', 'lancamentos'];
+    var SECTION_LABELS = { 'super-ofertas': 'Promoções', 'lancamentos': 'Novidades', 'linha-honda': 'Por Marca', 'manetes': 'Peças' };
+    var HIGHLIGHTS     = ['super-ofertas', 'ofertas', 'lancamentos'];
 
     function slugify(str) {
         return (str || '').toLowerCase()
@@ -54,7 +56,10 @@ define(['jquery', 'domReady!'], function ($) {
     function getCurrentCatSlug() {
         var path = window.location.pathname;
         var match = path.match(/\/([^/]+)\.html$/);
-        return match ? match[1].toLowerCase() : null;
+        if (match) return match[1].toLowerCase();
+        // Fallback: /catalog/category/view/s/{slug}/id/{id}/ (URL nao-canonica)
+        var catMatch = path.match(/\/s\/([^/]+)\/id\/\d+/);
+        return catMatch ? catMatch[1].toLowerCase() : null;
     }
 
     function isDesktop() {
