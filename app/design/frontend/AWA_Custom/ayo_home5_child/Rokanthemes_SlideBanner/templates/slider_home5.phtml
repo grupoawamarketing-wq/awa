@@ -287,8 +287,33 @@ if ($banners = $block->getBannerCollection()):
             ensureDesktopAutoplay($owl, owlConfig);
         }
 
-        initOwl('.slider_<?php echo (int) $sliderId; ?> .owl', desktopConfig);
-        initOwl('.slider_<?php echo (int) $sliderId; ?>_mobile .owl', mobileConfig);
+        function scheduleOwlInit(selector, owlConfig, primaryDelayMs, fallbackDelayMs) {
+            var started = false;
+
+            function startInit() {
+                if (started) {
+                    return;
+                }
+
+                started = true;
+                initOwl(selector, owlConfig);
+            }
+
+            window.setTimeout(startInit, Math.max(0, primaryDelayMs || 0));
+
+            if (fallbackDelayMs && fallbackDelayMs > primaryDelayMs) {
+                window.setTimeout(startInit, fallbackDelayMs);
+            }
+
+            ['pointerdown', 'touchstart', 'scroll', 'keydown', 'mousemove'].forEach(function (evtName) {
+                window.addEventListener(evtName, startInit, { once: true, passive: true });
+            });
+        }
+
+        // AWA PERF (2026-04-25): inicia o carrossel após a fase crítica do LCP.
+        // Usuários interativos iniciam imediatamente no primeiro gesto.
+        scheduleOwlInit('.slider_<?php echo (int) $sliderId; ?> .owl', desktopConfig, 3000, 6000);
+        scheduleOwlInit('.slider_<?php echo (int) $sliderId; ?>_mobile .owl', mobileConfig, 5000, 8000);
     });
 </script>
 <?php endif; ?>

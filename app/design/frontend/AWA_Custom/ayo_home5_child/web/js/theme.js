@@ -33,8 +33,24 @@ define([
 
     $('.panel.header > .header.links').clone().appendTo('#store\\.links');
 
+    var bodyEl = document.body;
+    var pathName = (window.location && window.location.pathname) ? window.location.pathname : '';
+    var isHomePath = /^\/(?:index\.php\/?)?$/.test(pathName);
+    var bodyClassName = bodyEl ? bodyEl.className : '';
+    var isHomePage = isHomePath || /\bcms-index-index\b|\bcms-home\b|\bcms-homepage_ayo_home5\b/.test(bodyClassName);
+    var shouldRunAwaPublicHotfix = !isHomePage;
+
+    // PERF HOME (experimento controlado): evita executar blocos pesados no caminho crítico.
+    if (isHomePage) {
+        return;
+    }
+
     function applyAwaPublicHotfix(root) {
         var scope = root && root.querySelectorAll ? root : document;
+
+        if (!shouldRunAwaPublicHotfix) {
+            return;
+        }
 
         scope.querySelectorAll('.contact-index-index h1, .contact-index-index h2, .contact-index-index h3, .contact-index-index button, .contact-index-index .action.submit').forEach(function (el) {
             var text = (el.textContent || '').trim();
@@ -92,7 +108,9 @@ define([
     var _ric = window.requestIdleCallback || function (cb) { setTimeout(cb, 300); };
 
     _ric(function () {
-        applyAwaPublicHotfix(document);
+        if (shouldRunAwaPublicHotfix) {
+            applyAwaPublicHotfix(document);
+        }
 
         /*
          * WCAG 2.5.3 fix: footer contact links have aria-labels that don't contain
@@ -117,6 +135,10 @@ define([
      * foco, eventos e AT em toda a subárvore, sincronizado com aria-hidden.
      */
     (function () {
+        if (isHomePage) {
+            return;
+        }
+
         function syncInert(el) {
             if (el.getAttribute('aria-hidden') === 'true') {
                 el.setAttribute('inert', '');
@@ -161,7 +183,7 @@ define([
         }
     });
 
-    if (window.MutationObserver) {
+    if (window.MutationObserver && shouldRunAwaPublicHotfix) {
         var observerTarget = document.querySelector('.page-wrapper') || document.body;
         if (observerTarget) {
 
@@ -201,7 +223,25 @@ define([
         }
     }
 
-    keyboardHandler.apply();
+    function runKeyboardHandlerOnce() {
+        if (runKeyboardHandlerOnce._done) {
+            return;
+        }
+
+        runKeyboardHandlerOnce._done = true;
+        keyboardHandler.apply();
+    }
+
+    if (isHomePage) {
+        // PERF home: evita long task no caminho crítico do LCP/TTI.
+        // Acessibilidade é preservada em interação real ou fallback tardio.
+        ['pointerdown', 'touchstart', 'keydown', 'scroll', 'mousemove'].forEach(function (evtName) {
+            window.addEventListener(evtName, runKeyboardHandlerOnce, { once: true, passive: true });
+        });
+        window.setTimeout(runKeyboardHandlerOnce, 7000);
+    } else {
+        runKeyboardHandlerOnce();
+    }
 
     /**
      * Fallback para imagens de produto quebradas (ex: _2.jpg que não existe).
@@ -237,30 +277,34 @@ define([
         });
     }
 
-    fixBrokenProductImages(document);
+    // PERF: na homepage este scan varre centenas de imagens e causa long task >1s.
+    // Mantemos o fallback apenas fora da home (PDP/PLP/checkout etc), onde o custo é menor.
+    if (!isHomePage) {
+        fixBrokenProductImages(document);
 
-    // Also apply to dynamically loaded carousels
-    if (window.MutationObserver) {
-        var imgObserverTarget = document.querySelector('.page-wrapper') || document.body;
-        if (imgObserverTarget) {
-            var _imgPendingNodes = [];
-            var _imgRafScheduled = false;
-            var imgObserver = new MutationObserver(function (mutations) {
-                mutations.forEach(function (mutation) {
-                    mutation.addedNodes.forEach(function (node) {
-                        if (node && node.nodeType === 1) { _imgPendingNodes.push(node); }
+        // Also apply to dynamically loaded carousels
+        if (window.MutationObserver) {
+            var imgObserverTarget = document.querySelector('.page-wrapper') || document.body;
+            if (imgObserverTarget) {
+                var _imgPendingNodes = [];
+                var _imgRafScheduled = false;
+                var imgObserver = new MutationObserver(function (mutations) {
+                    mutations.forEach(function (mutation) {
+                        mutation.addedNodes.forEach(function (node) {
+                            if (node && node.nodeType === 1) { _imgPendingNodes.push(node); }
+                        });
                     });
+                    if (!_imgRafScheduled && _imgPendingNodes.length > 0) {
+                        _imgRafScheduled = true;
+                        _ric(function () {
+                            var nodes = _imgPendingNodes.splice(0);
+                            _imgRafScheduled = false;
+                            nodes.forEach(fixBrokenProductImages);
+                        });
+                    }
                 });
-                if (!_imgRafScheduled && _imgPendingNodes.length > 0) {
-                    _imgRafScheduled = true;
-                    _ric(function () {
-                        var nodes = _imgPendingNodes.splice(0);
-                        _imgRafScheduled = false;
-                        nodes.forEach(fixBrokenProductImages);
-                    });
-                }
-            });
-            imgObserver.observe(imgObserverTarget, { childList: true, subtree: true });
+                imgObserver.observe(imgObserverTarget, { childList: true, subtree: true });
+            }
         }
     }
 });

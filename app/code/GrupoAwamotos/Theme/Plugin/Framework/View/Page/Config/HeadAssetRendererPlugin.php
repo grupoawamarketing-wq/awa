@@ -6,19 +6,41 @@ namespace GrupoAwamotos\Theme\Plugin\Framework\View\Page\Config;
 use Magento\Framework\View\Page\Config\Renderer;
 
 /**
- * Converte links bloqueantes de Google Fonts herdados do tema pai (ayo_default)
- * em carregamento assíncrono via media="print" onload="this.media='all'".
+ * Remove ou converte em async CSS render-blocking do head.
  *
- * Problema: ayo/ayo_default/Magento_Theme/layout/default_head_blocks.xml adiciona:
- *   <link src="https://fonts.googleapis.com/css2?family=Rubik..." src_type="url"/>
- * Esse link é renderizado com media="all" (bloqueante), atrasando o FCP em ~779ms.
+ * 1. Google Fonts Rubik -> async (herdado do tema pai ayo_default).
+ * 2. CSS de interacao (calendar, uppy, chosen, fancybox, quickview, loader, brand)
+ *    -> removidos (conteudo consolidado em awa-super-global.css via CSS gate).
+ * 3. styles-l.css duplicata -> removida a instancia extra (awa-styles-l-last.phtml
+ *    carrega a versao definitiva por ultimo para garantir cascata correta).
+ *
+ * O mecanismo <remove> do layout XML nao remove assets declarados com <link src>
+ * por modulos de terceiros (Rokanthemes). Este plugin opera diretamente no HTML
+ * renderizado, garantindo a remocao independente do tipo de declaracao.
  */
 class HeadAssetRendererPlugin
 {
     private const RUBIK_URL_PATTERN = 'fonts.googleapis.com/css2?family=Rubik';
 
     /**
-     * Converte o link do Google Fonts Rubik de bloqueante para assíncrono.
+     * Sufixos de arquivo a remover completamente do head (conteudo em awa-super-global.css).
+     * Apenas CSS declarados como bloqueantes (media="all") sao removidos.
+     * Versoes com media="print" ou data-awa-gate sao mantidas (async/gated).
+     *
+     * @var string[]
+     */
+    private const BLOCKING_CSS_TO_REMOVE = [
+        'mage/calendar.css',
+        'jquery/uppy/dist/uppy-custom.css',
+        'Rokanthemes_QuickView/css/rokan_quickview.css',
+        'Rokanthemes_RokanBase/css/chosen.css',
+        'Rokanthemes_RokanBase/css/jquery.fancybox.css',
+        'Rokanthemes_Themeoption/css/loader.css',
+        'Rokanthemes_Brand/css/styles.css',
+    ];
+
+    /**
+     * Remove CSS render-blocking redundantes e converte Rubik para async.
      *
      * @param Renderer $subject
      * @param string   $result
@@ -26,11 +48,86 @@ class HeadAssetRendererPlugin
      */
     public function afterRenderHeadAssets(Renderer $subject, string $result): string
     {
-        if (strpos($result, self::RUBIK_URL_PATTERN) === false) {
-            return $result;
+        $result = $this->removeBlockingCss($result);
+        $result = $this->removeStylesLDuplicate($result);
+        $result = $this->convertRubikToAsync($result);
+
+        return $result;
+    }
+
+    /**
+     * Remove CSS blocking cujo conteudo ja esta no awa-super-global.css (CSS gate).
+     * So remove tags com media="all" (ou sem media) -- mantém async (media="print").
+     *
+     * @param string $html
+     * @return string
+     */
+    private function removeBlockingCss(string $html): string
+    {
+        foreach (self::BLOCKING_CSS_TO_REMOVE as $cssPath) {
+            $pattern = '/<link\s[^>]*href=["\'][^"\']*'
+                . preg_quote($cssPath, '/')
+                . '[^"\']*["\'][^>]*>/i';
+
+            $html = preg_replace_callback($pattern, static function (array $m): string {
+                $tag = $m[0];
+                if (strpos($tag, 'media="print"') !== false
+                    || strpos($tag, "media='print'") !== false
+                    || strpos($tag, 'data-awa-gate') !== false
+                    || strpos($tag, 'onload') !== false
+                ) {
+                    return $tag;
+                }
+                return '';
+            }, $html) ?? $html;
         }
 
-        $result = preg_replace_callback(
+        return $html;
+    }
+
+    /**
+     * Remove a instancia duplicada de styles-l.css declarada pelo modulo/tema pai.
+     * awa-styles-l-last.phtml adiciona a versao final corretamente posicionada.
+     * Se houver 2+ instancias blocking de styles-l.css, mantem apenas a ultima.
+     *
+     * @param string $html
+     * @return string
+     */
+    private function removeStylesLDuplicate(string $html): string
+    {
+        $pattern = '/<link\s[^>]*href=["\'][^"\']*\/css\/styles-l\.css[^"\']*["\'][^>]*>/i';
+        preg_match_all($pattern, $html, $matches);
+
+        $blockingMatches = array_values(array_filter($matches[0], static function (string $tag): bool {
+            return strpos($tag, 'media="print"') === false
+                && strpos($tag, "media='print'") === false
+                && strpos($tag, 'onload') === false
+                && strpos($tag, 'data-awa-gate') === false;
+        }));
+
+        if (count($blockingMatches) > 1) {
+            $toRemove = array_slice($blockingMatches, 0, -1);
+            foreach ($toRemove as $tag) {
+                $html = str_replace($tag, '', $html);
+            }
+        }
+
+        return $html;
+    }
+
+    /**
+     * Converte o link do Google Fonts Rubik de bloqueante para assincrono.
+     *
+     * @param string $html
+     * @return string
+     */
+    private function convertRubikToAsync(string $html): string
+    {
+        if (strpos($html, self::RUBIK_URL_PATTERN) === false) {
+            return $html;
+        }
+
+        $html = preg_replace_callback(
             '/<link\s[^>]*' . preg_quote(self::RUBIK_URL_PATTERN, '/') . '[^>]*>/i',
             static function (array $matches): string {
                 $original = $matches[0];
@@ -55,9 +152,9 @@ class HeadAssetRendererPlugin
                     . '<noscript><link rel="stylesheet" type="text/css"'
                     . ' href="' . $href . '"/></noscript>';
             },
-            $result
-        );
+            $html
+        ) ?? $html;
 
-        return (string) $result;
+        return $html;
     }
 }
