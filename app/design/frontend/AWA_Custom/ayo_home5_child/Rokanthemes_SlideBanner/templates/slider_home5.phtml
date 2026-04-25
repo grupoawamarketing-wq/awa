@@ -9,7 +9,7 @@
 
 // @codingStandardsIgnoreFile
 if ($banners = $block->getBannerCollection()):
-    $slider   = $block->getSlider();
+    $slider = $block->getSlider();
     $sliderId = $block->getSliderId();
     $settings = $slider->getSliderSetting();
     $desktopSlides = [];
@@ -28,7 +28,7 @@ if ($banners = $block->getBannerCollection()):
     };
 
     // autoPlay: 0=off | 1=on (5 s) | N>1 = N ms de intervalo
-    $rawAP           = (int) $s($settings, 'autoPlay', 0);
+    $rawAP = (int) $s($settings, 'autoPlay', 0);
     $autoplayEnabled = $rawAP !== 0;
     $autoplayTimeout = $rawAP > 1 ? $rawAP : 5000;
 
@@ -36,20 +36,20 @@ if ($banners = $block->getBannerCollection()):
     $smartSpeed = max(50, (int) $s($settings, 'slideSpeed', 500) ?: 500);
 
     $baseOwlConfig = [
-        'items'              => 1,
-        'loop'               => false,
-        'autoHeight'         => true,
-        'lazyLoad'           => false,
-        'touchDrag'          => true,
-        'mouseDrag'          => true,
-        'nav'                => (bool) (int) $s($settings, 'navigation', 1),
-        'dots'               => (bool) (int) $s($settings, 'pagination', 1),
-        'autoplay'           => $autoplayEnabled,
-        'autoplayTimeout'    => $autoplayTimeout,
+        'items' => 1,
+        'loop' => false,
+        'autoHeight' => true,
+        'lazyLoad' => false,
+        'touchDrag' => true,
+        'mouseDrag' => true,
+        'nav' => (bool) (int) $s($settings, 'navigation', 1),
+        'dots' => (bool) (int) $s($settings, 'pagination', 1),
+        'autoplay' => $autoplayEnabled,
+        'autoplayTimeout' => $autoplayTimeout,
         'autoplayHoverPause' => (bool) (int) $s($settings, 'stopOnHover', 1),
-        'smartSpeed'         => $smartSpeed,
-        'animateOut'         => false,
-        'animateIn'          => false,
+        'smartSpeed' => $smartSpeed,
+        'animateOut' => false,
+        'animateIn' => false,
     ];
 
     foreach ($banners as $banner) {
@@ -64,14 +64,14 @@ if ($banners = $block->getBannerCollection()):
         if ($desktopImage !== '') {
             $desktopSlides[] = [
                 'banner' => $banner,
-                'image' => $desktopImage
+                'image' => $desktopImage,
             ];
         }
 
         if ($heroImage !== '') {
             $mobileSlides[] = [
                 'banner' => $banner,
-                'image' => $heroImage
+                'image' => $heroImage,
             ];
         }
     }
@@ -92,163 +92,60 @@ if ($banners = $block->getBannerCollection()):
 
     // Resolução de links legados (ambiente de staging → produção)
     $legacyHosts = ['srv1113343.hstgr.cloud', 'www.srv1113343.hstgr.cloud'];
-    $baseUrl     = rtrim((string) $block->getBaseUrl(), '/');
-    $baseHost    = (string) parse_url($baseUrl, PHP_URL_HOST);
-    $baseScheme  = (string) parse_url($baseUrl, PHP_URL_SCHEME);
+    $baseUrl = rtrim((string) $block->getBaseUrl(), '/');
+    $baseHost = (string) parse_url($baseUrl, PHP_URL_HOST);
+    $baseScheme = (string) parse_url($baseUrl, PHP_URL_SCHEME);
     $resolveLink = static function (?string $link) use ($legacyHosts, $baseHost, $baseScheme): string {
-        if (!is_string($link)) { return ''; }
+        if (!is_string($link)) {
+            return '';
+        }
+
         $link = trim($link);
-        if ($link === '') { return ''; }
-        $parts    = parse_url($link);
-        if (!is_array($parts)) { return $link; }
+        if ($link === '') {
+            return '';
+        }
+
+        $parts = parse_url($link);
+        if (!is_array($parts)) {
+            return $link;
+        }
+
         $linkHost = isset($parts['host']) ? strtolower((string) $parts['host']) : '';
         if ($linkHost === '' || !in_array($linkHost, $legacyHosts, true) || $baseHost === '' || $baseScheme === '') {
             return $link;
         }
-        $path     = isset($parts['path'])     ? (string) $parts['path']     : '/';
-        $path     = $path !== '' ? $path : '/';
-        $query    = isset($parts['query'])    ? ('?' . $parts['query'])    : '';
+
+        $path = isset($parts['path']) ? (string) $parts['path'] : '/';
+        $path = $path !== '' ? $path : '/';
+        $query = isset($parts['query']) ? ('?' . $parts['query']) : '';
         $fragment = isset($parts['fragment']) ? ('#' . $parts['fragment']) : '';
+
         return $baseScheme . '://' . $baseHost . $path . $query . $fragment;
     };
 ?>
-<?php
-// LCP Preload: inject <link rel="preload"> for the first hero images so the
-// browser fetches them as soon as this template is parsed — before Swiper JS.
-// This eliminates the "Load Delay" that causes LCP > 20s on mobile Lighthouse.
-if (!empty($desktopSlides)) {
-    $_plHtml = $block->getImageElement($desktopSlides[0]['image'], '', true);
-    if (preg_match('/src="([^"]+)"/', $_plHtml, $_plM)) {
-        $_plWebp = preg_replace('/\.(jpg|jpeg|png)$/i', '.webp', $_plM[1]);
-        $_plPath = preg_replace('#^.*/media/#', '', $_plWebp);
-        $__useWebp = file_exists(BP . '/pub/media/' . ltrim($_plPath, '/'));
-        $_plFinal = $__useWebp ? $_plWebp : $_plM[1];
-        echo '<link rel="preload" as="image" fetchpriority="high" href="' . $block->escapeUrl($_plFinal) . '" media="(min-width: 768px)">' . "\n";
-    }
-}
-if (!empty($mobileSlides)) {
-    $_plHtml = $block->getImageElementMobile($mobileSlides[0]['image'], '', true);
-    if (preg_match('/src="([^"]+)"/', $_plHtml, $_plM)) {
-        $_plWebp = preg_replace('/\.(jpg|jpeg|png)$/i', '.webp', $_plM[1]);
-        $_plPath = preg_replace('#^.*/media/#', '', $_plWebp);
-        $__useWebp = file_exists(BP . '/pub/media/' . ltrim($_plPath, '/'));
-        $_plFinal = $__useWebp ? $_plWebp : $_plM[1];
-        echo '<link rel="preload" as="image" fetchpriority="high" href="' . $block->escapeUrl($_plFinal) . '" media="(max-width: 767px)">' . "\n";
-    }
-}
-?>
-<?php
-/**
- * LCP Fix: Critical CSS to show first hero slide before OWL Carousel JS loads.
- *
- * OWL v2 sets .owl-carousel { display: none } in owl.carousel.min.css and only
- * reveals the carousel after JS adds .owl-loaded. This delays LCP to after JS
- * execution, causing Lighthouse to report NO_LCP.
- *
- * This inline <style> forces the carousel to display block until JS takes over.
- */
-?>
-<style>
-/*
- * Breakpoint gating inline (antes do CSS do tema carregar).
- * Evita duplicar o hero (desktop+mobile) no DOM inicial e reduz trabalho de parse/layout.
- */
-.wrapper_slider.hidden-xs { display: block !important; }
-.wrapper_slider.visible-xs { display: none !important; }
-@media (max-width: 767px) {
-    .wrapper_slider.hidden-xs { display: none !important; }
-    .wrapper_slider.visible-xs { display: block !important; }
-}
-
-/* LCP Fix: Show first hero slide before Swiper JS initializes. */
-/* CLS Fix: aspect-ratio + min-height permanente evita colapso quando .swiper-initialized é adicionado.
- * O aspect-ratio garante que o container NUNCA mude de proporção durante o init do Swiper. */
-.wrapper_slider.hidden-xs .swiper {
-    aspect-ratio: 1920 / 600;
-    min-height: clamp(220px, 31.25vw, 600px);
-    overflow: hidden;
-}
-@media (max-width: 767px) {
-    .wrapper_slider.visible-xs .swiper {
-        aspect-ratio: 768 / 400;
-        min-height: clamp(180px, 52vw, 400px);
-        overflow: hidden;
-    }
-}
-.wrapper_slider .swiper:not(.swiper-initialized) {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    overflow: hidden;
-}
-.wrapper_slider .swiper:not(.swiper-initialized) .swiper-slide + .swiper-slide {
-    display: none;
-}
-.wrapper_slider .swiper:not(.swiper-initialized) .swiper-slide:first-child {
-    display: block;
-}
-/* LCP Fix: dar dimensões ao container antes da imagem carregar (evita NO_LCP) */
-.wrapper_slider .swiper:not(.swiper-initialized) .swiper-slide:first-child .banner_item_bg {
-    aspect-ratio: 1920 / 600;
-    min-height: clamp(220px, 31.25vw, 600px);
-    width: 100%;
-    overflow: hidden;
-    display: block;
-    background: #e8ecef;
-}
-@media (max-width: 767px) {
-    .wrapper_slider.visible-xs .swiper:not(.swiper-initialized) .swiper-slide:first-child .banner_item_bg {
-        aspect-ratio: 768 / 400;
-        min-height: clamp(180px, 52vw, 400px);
-    }
-}
-.wrapper_slider .swiper:not(.swiper-initialized) .swiper-slide:first-child img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-
-/* Fix LCP: awa-bundle-home-custom.css tem @media(max-width:480px) que seta
-   :is(.page-wrapper,.content-top-home) .swiper-slide { width:50%!important }
-   para product carousels 2-col. Esta regra (espec. 4 classes vs 3) exclui
-   o hero slider desta limitação e garante width:100% nos slides do hero. */
-@media (max-width: 767px) {
-    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
-        .top-home-content--above-fold .banner-slider2 .swiper-slide {
-        width: 100% !important;
-        flex-shrink: 0 !important;
-    }
-}
-</style>
-<!-- Slider desktop (oculto no mobile via Bootstrap .hidden-xs) -->
 <div class="wrapper_slider hidden-xs slider_<?php echo (int) $sliderId; ?>">
-    <div class="swiper swiper-container">
-        <div class="swiper-wrapper">
+    <div class="owl owl-carousel">
         <?php foreach ($desktopSlides as $slideIndex => $slide): ?>
             <?php
             $banner = $slide['banner'];
             $desktopImage = $slide['image'];
-            $isFirst = ($slideIndex === 0);
-            $isEager = ($slideIndex <= 1); // 2 primeiros slides: eager load (autoplay avança)
+            $isFirst = ($slideIndex === 0); // AWA PERF: so slide 0 (LCP) e eager
             ?>
-            <div class="banner_item swiper-slide">
+            <div class="banner_item">
                 <div class="banner_item_bg">
                     <?php
                     $slideAlt = $banner->getSlideText() ?: ($banner->getSlideTitle() ?: '');
-                    $imgHtml  = $block->getImageElement($desktopImage, $slideAlt, $isFirst); // fetchpriority=high apenas slide 0
-                    if (preg_match('/src="([^"]+)"/', $imgHtml, $_m)) {
+                    $imgHtml = $block->getImageElement($desktopImage, $slideAlt, $isFirst);
+                    if ($slideIndex === 0 && preg_match('/src="([^"]+)"/', $imgHtml, $_m)) {
                         $_webp = preg_replace('/\.(jpg|jpeg|png)$/i', '.webp', $_m[1]);
-                        // Converte URL em caminho relativo dentro de pub/media
-                        $_webpPath = preg_replace('#^.*/media/#', '', $_webp);
-                        if (file_exists(BP . '/pub/media/' . ltrim($_webpPath, '/'))) {
-                            $imgHtml = '<picture>'
-                                . '<source type="image/webp" srcset="' . $block->escapeUrl($_webp) . '">'
-                                . $imgHtml
-                                . '</picture>';
-                        }
+                        // Preload LCP hero image agora é emitido no <head> via GrupoAwamotos\Theme\Block\Html\HeroPreload.
+                        // O body preload foi removido para evitar duplicidade com o <link rel="preload"> do head.
+                        $imgHtml = '<picture>'
+                            . '<source type="image/webp" srcset="' . $block->escapeUrl($_webp) . '">'
+                            . $imgHtml
+                            . '</picture>';
                     }
-                    $link     = $resolveLink($banner->getSlideLink());
+                    $link = $resolveLink($banner->getSlideLink());
                     if ($link !== '') {
                         $imgHtml = '<a href="' . $block->escapeUrl($link) . '">' . $imgHtml . '</a>';
                     }
@@ -256,44 +153,35 @@ if (!empty($mobileSlides)) {
                     ?>
                 </div>
                 <div class="text-banner">
-                    <?php if ($text = $banner->getSlideText()): echo $block->getContentText($text); endif; ?>
+                    <?php if ($text = $banner->getSlideText()): ?>
+                        <?php echo $block->getContentText($text); ?>
+                    <?php endif; ?>
                 </div>
             </div>
         <?php endforeach; ?>
-        </div>
-        <div class="swiper-pagination"></div>
-        <div class="swiper-button-prev"></div>
-        <div class="swiper-button-next"></div>
     </div>
 </div>
-<!-- Slider mobile (visível apenas em xs via Bootstrap .visible-xs) -->
 <div class="wrapper_slider visible-xs slider_<?php echo (int) $sliderId; ?>_mobile">
-    <div class="swiper swiper-container">
-        <div class="swiper-wrapper">
+    <div class="owl owl-carousel">
         <?php foreach ($mobileSlides as $slideIndex => $slide): ?>
             <?php
             $banner = $slide['banner'];
             $heroImage = $slide['image'];
             $isFirst = ($slideIndex === 0);
-            $isEager = ($slideIndex <= 1); // 2 primeiros slides: eager load (autoplay avança)
             ?>
-            <div class="banner_item swiper-slide">
+            <div class="banner_item">
                 <div class="banner_item_bg">
                     <?php
                     $slideAlt = $banner->getSlideText() ?: ($banner->getSlideTitle() ?: '');
-                    $imgHtml  = $block->getImageElementMobile($heroImage, $slideAlt, $isFirst); // fetchpriority=high apenas slide 0
-                    if (preg_match('/src="([^"]+)"/', $imgHtml, $_m)) {
+                    $imgHtml = $block->getImageElementMobile($heroImage, $slideAlt, $isFirst);
+                    if ($isFirst && preg_match('/src="([^"]+)"/', $imgHtml, $_m)) {
                         $_webp = preg_replace('/\.(jpg|jpeg|png)$/i', '.webp', $_m[1]);
-                        // Converte URL em caminho relativo dentro de pub/media
-                        $_webpPath = preg_replace('#^.*/media/#', '', $_webp);
-                        if (file_exists(BP . '/pub/media/' . ltrim($_webpPath, '/'))) {
-                            $imgHtml = '<picture>'
-                                . '<source type="image/webp" srcset="' . $block->escapeUrl($_webp) . '">'
-                                . $imgHtml
-                                . '</picture>';
-                        }
+                        $imgHtml = '<picture>'
+                            . '<source type="image/webp" srcset="' . $block->escapeUrl($_webp) . '">'
+                            . $imgHtml
+                            . '</picture>';
                     }
-                    $link     = $resolveLink($banner->getSlideLink());
+                    $link = $resolveLink($banner->getSlideLink());
                     if ($link !== '') {
                         $imgHtml = '<a href="' . $block->escapeUrl($link) . '">' . $imgHtml . '</a>';
                     }
@@ -301,19 +189,18 @@ if (!empty($mobileSlides)) {
                     ?>
                 </div>
                 <div class="text-banner">
-                    <?php if ($text = $banner->getSlideText()): echo $block->getContentText($text); endif; ?>
+                    <?php if ($text = $banner->getSlideText()): ?>
+                        <?php echo $block->getContentText($text); ?>
+                    <?php endif; ?>
                 </div>
             </div>
         <?php endforeach; ?>
-        </div>
-        <div class="swiper-pagination"></div>
-        <div class="swiper-button-prev"></div>
-        <div class="swiper-button-next"></div>
     </div>
 </div>
 <script>
     require([
-        'jquery'
+        'jquery',
+        'rokanthemes/owl'
     ], function ($) {
         'use strict';
 
@@ -322,152 +209,86 @@ if (!empty($mobileSlides)) {
 
         if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
             desktopConfig.autoplay = false;
+            desktopConfig.animateOut = false;
+            desktopConfig.animateIn = false;
             mobileConfig.autoplay = false;
+            mobileConfig.animateOut = false;
+            mobileConfig.animateIn = false;
         }
 
-        function doAnimations(activeSlide) {
-            var $slide = $(activeSlide);
+        function doAnimations($slide) {
             var animEndEv = 'webkitAnimationEnd animationend';
             $slide.find('.text-banner [data-animation^="animated"]').each(function () {
-                var $el  = $(this);
+                var $el = $(this);
                 var anim = $el.data('animation');
+
                 if (anim) {
-                    $el.addClass(anim).one(animEndEv, function () { $el.removeClass(anim); });
+                    $el.addClass(anim).one(animEndEv, function () {
+                        $el.removeClass(anim);
+                    });
                 }
             });
         }
 
-        function createSwiperConfig(owlCfg) {
-            var swiperCfg = {
-                slidesPerView: owlCfg.items || 1,
-                loop: owlCfg.loop || false,
-                autoHeight: owlCfg.autoHeight || true,
-                on: {
-                    slideChangeTransitionEnd: function () {
-                        if (this.slides && this.slides[this.activeIndex]) {
-                            doAnimations(this.slides[this.activeIndex]);
-                        }
-                    },
-                    init: function () {
-                        if (this.slides && this.slides[this.activeIndex]) {
-                            doAnimations(this.slides[this.activeIndex]);
-                        }
-                    }
+        function scheduleRefresh($owl) {
+            var resizeTimer;
+
+            function refreshOwl() {
+                if ($owl.data('owl.carousel')) {
+                    $owl.trigger('refresh.owl.carousel');
                 }
-            };
-
-            if (owlCfg.autoplay) {
-                swiperCfg.autoplay = {
-                    delay: owlCfg.autoplayTimeout || 5000,
-                    disableOnInteraction: false,
-                    pauseOnMouseEnter: owlCfg.autoplayHoverPause || false
-                };
             }
 
-            if (owlCfg.nav) {
-                swiperCfg.navigation = {
-                    nextEl: '.swiper-button-next',
-                    prevEl: '.swiper-button-prev'
-                };
+            if (window.requestAnimationFrame) {
+                window.requestAnimationFrame(function () {
+                    window.requestAnimationFrame(refreshOwl);
+                });
+            } else {
+                window.setTimeout(refreshOwl, 60);
             }
 
-            if (owlCfg.dots) {
-                swiperCfg.pagination = {
-                    el: '.swiper-pagination',
-                    clickable: true
-                };
-            }
-
-            if (owlCfg.smartSpeed) {
-                swiperCfg.speed = owlCfg.smartSpeed;
-            }
-
-            return swiperCfg;
-        }
-
-        function initSwiper(selector, rawConfig, Swiper) {
-            var $container = $(selector);
-            if (!$container.length) { return; }
-
-            var config = createSwiperConfig(rawConfig);
-            // Hide navigation/pagination dom if not enabled
-            if (!rawConfig.nav) {
-                $container.find('.swiper-button-next, .swiper-button-prev').remove();
-            }
-            if (!rawConfig.dots) {
-                $container.find('.swiper-pagination').remove();
-            }
-
-            setTimeout(function () {
-                new Swiper($container.find('.swiper')[0], config);
-            }, 50);
-        }
-
-        function afterFirstPaint(callback) {
-            if (!window.requestAnimationFrame) {
-                setTimeout(callback, 0);
-                return;
-            }
-            window.requestAnimationFrame(function () {
-                window.requestAnimationFrame(callback);
+            $(window).on('load', refreshOwl);
+            $(window).on('resize orientationchange', function () {
+                window.clearTimeout(resizeTimer);
+                resizeTimer = window.setTimeout(refreshOwl, 160);
             });
         }
 
-        function runAfterWindowLoad(callback) {
-            if (document.readyState === 'complete') {
-                callback();
-                return;
-            }
-            window.addEventListener('load', callback, { once: true });
-        }
+        function ensureDesktopAutoplay($owl, owlConfig) {
+            var timeout = Math.max(parseInt(owlConfig.autoplayTimeout, 10) || 5000, 1000);
+            var owlInstance = $owl.data('owl.carousel');
 
-        function loadSwiper(callback) {
-            require(['swiper'], function (Swiper) {
-                callback(Swiper);
-            });
-        }
-
-        function initForViewport(Swiper) {
-            var isMobile = !!(window.matchMedia && window.matchMedia('(max-width: 767px)').matches);
-            if (isMobile) {
-                initSwiper('.slider_<?php echo (int) $sliderId; ?>_mobile', mobileConfig, Swiper);
+            if (!owlConfig.autoplay || !$owl.closest('.wrapper_slider.hidden-xs').length) {
                 return;
             }
 
-            initSwiper('.slider_<?php echo (int) $sliderId; ?>', desktopConfig, Swiper);
+            if (owlInstance && owlInstance._plugins && owlInstance._plugins.autoplay) {
+                $owl.trigger('stop.owl.autoplay');
+                $owl.trigger('play.owl.autoplay', [timeout]);
+            }
         }
 
-        var isMobileViewport = !!(window.matchMedia && window.matchMedia('(max-width: 767px)').matches);
-        var scheduleInit = function () {
-            afterFirstPaint(function () {
-                if (window.requestIdleCallback) {
-                    window.requestIdleCallback(function () {
-                        loadSwiper(initForViewport);
-                    }, { timeout: isMobileViewport ? 6500 : 2500 });
-                    return;
-                }
-                setTimeout(function () {
-                    loadSwiper(initForViewport);
-                }, isMobileViewport ? 3500 : 0);
-            });
-        };
-        // Mobile: autoplay desativado para evitar que slide 2 vire LCP (Render Delay tardio).
-        // Mobile LCP fix: desabilita loop (evita clones DOM que re-registram candidato LCP)
-        // e inicia Swiper IMEDIATAMENTE após FCP (sem delay) para que o repaint do Swiper
-        // coincida com o FCP — impedindo que LH meça um LCP tardio (~18s) por init atrasado.
-        // O 1º slide é visível via CSS :not(.swiper-initialized) durante o carregamento.
-        if (isMobileViewport) {
-            mobileConfig.autoplay = false;
-            mobileConfig.loop     = false;
+        function initOwl(selector, owlConfig) {
+            var $owl = $(selector);
+            if (!$owl.length) {
+                return;
+            }
 
-            afterFirstPaint(function () {
-                loadSwiper(initForViewport);
-            });
-            return;
+            $owl
+                .on('initialized.owl.carousel', function (e) {
+                    doAnimations($(e.target).find('.owl-item.active').first());
+                })
+                .on('translated.owl.carousel', function (e) {
+                    doAnimations($(e.target).find('.owl-item.active').first());
+                })
+                .owlCarousel(owlConfig);
+
+            scheduleRefresh($owl);
+            ensureDesktopAutoplay($owl, owlConfig);
         }
 
-        scheduleInit();
-
+        initOwl('.slider_<?php echo (int) $sliderId; ?> .owl', desktopConfig);
+        initOwl('.slider_<?php echo (int) $sliderId; ?>_mobile .owl', mobileConfig);
     });
 </script>
 <?php endif; ?>

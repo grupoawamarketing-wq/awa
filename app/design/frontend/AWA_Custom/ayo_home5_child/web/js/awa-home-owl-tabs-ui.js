@@ -141,56 +141,24 @@
 
     function initHomeAdjustments() {
         var body = document.body;
-        var pageWrapper;
-        var mutationCount;
-        var scheduled;
-        var observer;
+
+        if (!body ||
+            (!body.classList.contains('cms-index-index') &&
+             !body.classList.contains('cms-home') &&
+             !body.classList.contains('cms-homepage_ayo_home5'))) {
+            return;
+        }
+
+        applyHomeAdjustments(document);
 
         /*
-         * Single positive if-block (no early returns) prevents the minifier
-         * from creating invalid `fn(), if(...)` comma+statement sequences.
-         * Inner `if (window.MutationObserver)` becomes `MutationObserver && ...`
-         * which is a valid logical expression inside the comma chain.
+         * AWA PERF: window.load dispara após Owl Carousel E Swiper 11 terem
+         * concluído a inicialização DOM. Substitui MutationObserver que estava
+         * sendo acionado por Swiper init causando TBT >3s (v4 regression).
          */
-        if (body &&
-            (body.classList.contains('cms-index-index') ||
-             body.classList.contains('cms-home') ||
-             body.classList.contains('cms-homepage_ayo_home5'))) {
-
+        window.addEventListener('load', function () {
             applyHomeAdjustments(document);
-
-            if (window.MutationObserver) {
-                pageWrapper = document.querySelector('.page-wrapper');
-
-                if (pageWrapper) {
-                    mutationCount = 0;
-                    scheduled = false;
-
-                    observer = new MutationObserver(function () {
-                        mutationCount += 1;
-
-                        if (mutationCount > 25) {
-                            observer.disconnect();
-                        } else if (!scheduled) {
-                            scheduled = true;
-                            window.requestAnimationFrame(function () {
-                                scheduled = false;
-                                applyHomeAdjustments(document);
-                            });
-                        }
-                    });
-
-                    observer.observe(pageWrapper, {
-                        childList: true,
-                        subtree: true
-                    });
-
-                    window.setTimeout(function () {
-                        observer.disconnect();
-                    }, 4000);
-                }
-            }
-        }
+        }, { once: true });
     }
 
     if (document.readyState === 'loading') {

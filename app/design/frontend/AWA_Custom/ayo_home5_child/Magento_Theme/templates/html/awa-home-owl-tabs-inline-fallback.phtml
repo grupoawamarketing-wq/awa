@@ -129,60 +129,25 @@
 
     function initHomeAdjustments() {
         var body = document.body;
-        var pageWrapper;
-        var mutationCount = 0;
-        var scheduled = false;
-        var observer;
 
-        if (!body) {
-            return;
-        }
-
-        if (
-            !body.classList.contains('cms-index-index') &&
-            !body.classList.contains('cms-home') &&
-            !body.classList.contains('cms-homepage_ayo_home5')
-        ) {
+        if (!body ||
+            (!body.classList.contains('cms-index-index') &&
+             !body.classList.contains('cms-home') &&
+             !body.classList.contains('cms-homepage_ayo_home5'))) {
             return;
         }
 
         window.__awaRound2HomeOwlTabsUiInit = true;
         applyHomeAdjustments(document);
 
-        if (!window.MutationObserver) {
-            return;
-        }
-
-        pageWrapper = document.querySelector('.page-wrapper');
-        if (!pageWrapper) {
-            return;
-        }
-
-        observer = new MutationObserver(function () {
-            mutationCount += 1;
-
-            if (mutationCount > 25) {
-                observer.disconnect();
-                return;
-            }
-
-            if (!scheduled) {
-                scheduled = true;
-                window.requestAnimationFrame(function () {
-                    scheduled = false;
-                    applyHomeAdjustments(document);
-                });
-            }
-        });
-
-        observer.observe(pageWrapper, {
-            childList: true,
-            subtree: true
-        });
-
-        window.setTimeout(function () {
-            observer.disconnect();
-        }, 4000);
+        /*
+         * AWA PERF: window.load dispara após Owl Carousel E Swiper 11 terem
+         * concluído a inicialização DOM. Substitui MutationObserver que estava
+         * sendo acionado por Swiper init causando TBT >3s (v4 regression).
+         */
+        window.addEventListener('load', function () {
+            applyHomeAdjustments(document);
+        }, { once: true });
     }
 
     if (document.readyState === 'loading') {
