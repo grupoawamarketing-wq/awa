@@ -4,7 +4,7 @@
  * rokanthemes/timecircles: real TimeCircles lib (via tema, shim jquery).
  */
 var config = {
-    deps: ['awa-nav-cls-fix-reset', 'awa-vertical-menu-focus-trap', 'awa-b2b-header', 'awa-scroll-reveal', 'awa-card-enhance', 'awa-b2b-pdp-price-reload', 'awa-b2b-price-hydrator'],
+    deps: ['awa-nav-cls-fix-reset', 'awa-vertical-menu-focus-trap', 'awa-vertical-menu-bootstrap', 'awa-b2b-header', 'awa-scroll-reveal', 'awa-card-enhance', 'awa-b2b-pdp-price-reload', 'awa-b2b-price-hydrator'],
     map: {
         '*': {
             awaCustomCompatBootstrap: 'js/awa-custom-compat-bootstrap',
@@ -45,6 +45,7 @@ var config = {
         'awa-scroll-reveal': 'js/awa-scroll-reveal',
         'awa-card-enhance': 'js/awa-card-enhance',
         'awa-nav-cls-fix-reset': 'js/awa-nav-cls-fix-reset',
+        'awa-vertical-menu-bootstrap': 'js/awa-vertical-menu-bootstrap',
         // FASE E: Mobile menu focus trap (WCAG 2.4.3)
         'awa-vertical-menu-focus-trap': 'js/awa-vertical-menu-focus-trap',
         // Carousel promocional do menu vertical (VMente promo images)

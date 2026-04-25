@@ -1,0 +1,127 @@
+<?php
+/** @var \Mirasvit\SearchAutocomplete\Block\Injection $block */
+
+use Mirasvit\Core\Service\CspService;
+use Mirasvit\SearchAutocomplete\Model\ConfigProvider;
+
+$config = $block->getJsConfig();
+$nonce  = CspService::getNonce();
+?>
+<?php if ($block->getAutocompleteLayout() == ConfigProvider::LAYOUT_IN_PAGE): ?>
+    <?php
+    $templates = [
+        'Mirasvit_SearchAutocomplete::in-page/page.phtml',
+        'Mirasvit_SearchAutocomplete::in-page/pagination.phtml',
+        'Mirasvit_SearchAutocomplete::in-page/itemList.phtml',
+        'Mirasvit_SearchAutocomplete::in-page/indexList.phtml',
+        'Mirasvit_SearchAutocomplete::in-page/sidebar.phtml',
+        'Mirasvit_SearchAutocomplete::in-page/stat.phtml',
+        'Mirasvit_SearchAutocomplete::in-page/searchBar.phtml',
+        'Mirasvit_SearchAutocomplete::in-page/index/magento_catalog_product.phtml',
+        'Mirasvit_SearchAutocomplete::in-page/index/magento_catalog_category.phtml',
+        'Mirasvit_SearchAutocomplete::in-page/index/magento_cms_page.phtml',
+        'Mirasvit_SearchAutocomplete::in-page/index/mirasvit_brand_page.phtml',
+        'Mirasvit_SearchAutocomplete::in-page/index/magefan_blog_post.phtml',
+        'Mirasvit_SearchAutocomplete::in-page/index/magento_catalog_attribute.phtml',
+        'Mirasvit_SearchAutocomplete::in-page/index/magento_search_query.phtml',
+    ]
+    ?>
+    <?php foreach ($templates as $template): ?>
+        <?= /* @noEscape */ $block->getTemplateScript($template) ?>
+    <?php endforeach ?>
+
+    <script<?php if ($nonce): ?> nonce="<?= $block->escapeHtml($nonce) ?>"<?php endif; ?>>
+        (function () {
+            var selector = 'input#search, input#mobile_search, .minisearch input[type="text"]';
+            var started = false;
+            var pathName = (window.location && window.location.pathname) ? window.location.pathname : '';
+            var bodyClassName = document.body ? document.body.className : '';
+            var isHomePage = /^\/(?:index\.php\/?)*$/.test(pathName) || /\bcms-index-index\b|\bcms-home\b|\bcms-homepage_ayo_home5\b/.test(bodyClassName);
+
+            function bootstrapInPageAutocomplete() {
+                if (started) {
+                    return;
+                }
+
+                started = true;
+
+                require([
+                    'jquery',
+                    'Mirasvit_SearchAutocomplete/js/in-page'
+                ], function ($, InPage) {
+                    $(document).ready(function () {
+                        $('#search_mini_form').prop('minSearchLength', 10000);
+
+                        var $input = $(selector);
+                        $input.each(function (index, searchInput) {
+                            new InPage($(searchInput), <?= /* @noEscape */ $block->jsonEncode($config)?>);
+                        });
+                    });
+                });
+            }
+
+            if (isHomePage) {
+                ['pointerdown', 'touchstart', 'scroll', 'keydown', 'mousemove', 'focusin'].forEach(function (evtName) {
+                    window.addEventListener(evtName, bootstrapInPageAutocomplete, { once: true, passive: true });
+                });
+                window.setTimeout(bootstrapInPageAutocomplete, 5000);
+                window.setTimeout(bootstrapInPageAutocomplete, 8000);
+            } else {
+                bootstrapInPageAutocomplete();
+            }
+        }());
+    </script>
+<?php else: ?>
+    <script<?php if ($nonce): ?> nonce="<?= $block->escapeHtml($nonce) ?>"<?php endif; ?>>
+        (function () {
+            var selector = 'input#search, input#mobile_search, .minisearch input[type="text"]';
+            var started = false;
+            var pathName = (window.location && window.location.pathname) ? window.location.pathname : '';
+            var bodyClassName = document.body ? document.body.className : '';
+            var isHomePage = /^\/(?:index\.php\/?)*$/.test(pathName) || /\bcms-index-index\b|\bcms-home\b|\bcms-homepage_ayo_home5\b/.test(bodyClassName);
+
+            function bootstrapAutocomplete() {
+                if (started) {
+                    return;
+                }
+
+                started = true;
+
+                require([
+                    'jquery',
+                    'Mirasvit_SearchAutocomplete/js/autocomplete',
+                    'Mirasvit_SearchAutocomplete/js/typeahead'
+                ], function ($, autocomplete, typeahead) {
+                    $(document).ready(function () {
+                        $('#search_mini_form').prop('minSearchLength', 10000);
+
+                        var $input = $(selector);
+
+                        $input.each(function (index, searchInput) {
+                            <?php if ($config['isTypeaheadEnabled']): ?>
+                            new typeahead($(searchInput)).init(<?= /* @noEscape */ $block->jsonEncode($config)?>);
+                            <?php endif ?>
+                            new autocomplete($(searchInput)).init(<?= /* @noEscape */ $block->jsonEncode($config)?>);
+                        });
+                    });
+                });
+            }
+
+            if (isHomePage) {
+                ['pointerdown', 'touchstart', 'scroll', 'keydown', 'mousemove', 'focusin'].forEach(function (evtName) {
+                    window.addEventListener(evtName, bootstrapAutocomplete, { once: true, passive: true });
+                });
+                window.setTimeout(bootstrapAutocomplete, 5000);
+                window.setTimeout(bootstrapAutocomplete, 8000);
+            } else {
+                bootstrapAutocomplete();
+            }
+        }());
+    </script>
+
+    <?= /* @noEscape */ $block->fetchView($block->getTemplateFile('Mirasvit_SearchAutocomplete::injection_templates.phtml')) ?>
+<?php endif ?>
+
+<?php if ($block->getCssStyles() != ''): ?>
+    <style<?php if ($nonce): ?> nonce="<?= $block->escapeHtml($nonce) ?>"<?php endif; ?>><?= $block->escapeHtml($block->getCssStyles()) ?></style>
+<?php endif ?>

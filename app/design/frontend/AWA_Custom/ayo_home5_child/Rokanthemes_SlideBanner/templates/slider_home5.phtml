@@ -198,11 +198,21 @@ if ($banners = $block->getBannerCollection()):
     </div>
 </div>
 <script>
-    require([
-        'jquery',
-        'rokanthemes/owl'
-    ], function ($) {
-        'use strict';
+    (function () {
+        var depsStarted = false;
+
+        function bootstrapSlider() {
+            if (depsStarted) {
+                return;
+            }
+
+            depsStarted = true;
+
+            require([
+                'jquery',
+                'rokanthemes/owl'
+            ], function ($) {
+                'use strict';
 
         var desktopConfig = <?php echo json_encode($desktopOwlConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
         var mobileConfig = <?php echo json_encode($mobileOwlConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
@@ -310,10 +320,20 @@ if ($banners = $block->getBannerCollection()):
             });
         }
 
-        // AWA PERF (2026-04-25): inicia o carrossel após a fase crítica do LCP.
-        // Usuários interativos iniciam imediatamente no primeiro gesto.
-        scheduleOwlInit('.slider_<?php echo (int) $sliderId; ?> .owl', desktopConfig, 3000, 6000);
-        scheduleOwlInit('.slider_<?php echo (int) $sliderId; ?>_mobile .owl', mobileConfig, 5000, 8000);
-    });
+                // AWA PERF (2026-04-25): inicia o carrossel após a fase crítica do LCP.
+                // Usuários interativos iniciam imediatamente no primeiro gesto.
+                scheduleOwlInit('.slider_<?php echo (int) $sliderId; ?> .owl', desktopConfig, 3000, 6000);
+                scheduleOwlInit('.slider_<?php echo (int) $sliderId; ?>_mobile .owl', mobileConfig, 5000, 8000);
+            });
+        }
+
+        // Perf: adia o carregamento de jQuery/Owl (dependências pesadas) para pós-LCP
+        // ou na primeira interação real do usuário.
+        ['pointerdown', 'touchstart', 'scroll', 'keydown', 'mousemove'].forEach(function (evtName) {
+            window.addEventListener(evtName, bootstrapSlider, { once: true, passive: true });
+        });
+        window.setTimeout(bootstrapSlider, 5000);
+        window.setTimeout(bootstrapSlider, 8000);
+    }());
 </script>
 <?php endif; ?>

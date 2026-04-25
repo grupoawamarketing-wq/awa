@@ -207,6 +207,37 @@ define([
             }
         }
 
+        function setDesktopSubmenuInlineState($item, open) {
+            var $panel;
+
+            if (!isDesktop() || !$item || !$item.length) {
+                return;
+            }
+
+            $panel = $item.children('.submenu, .level0.submenu').first();
+
+            if (!$panel.length) {
+                return;
+            }
+
+            if (open) {
+                $item.addClass('vmm-active');
+                $panel.css({
+                    visibility: 'visible',
+                    opacity: '1',
+                    pointerEvents: 'auto'
+                });
+                return;
+            }
+
+            $item.removeClass('vmm-active');
+            $panel.css({
+                visibility: '',
+                opacity: '',
+                pointerEvents: ''
+            });
+        }
+
         function closeMenu() {
             setMenuOpenState(false);
 
@@ -538,6 +569,34 @@ define([
                 }
             });
         }
+
+        /* ---- deterministic desktop submenu visibility -------------- */
+        $nav.on('mouseenter' + NS, 'li.ui-menu-item.level0.parent', function () {
+            setDesktopSubmenuInlineState($(this), true);
+        });
+
+        $nav.on('focusin' + NS, 'li.ui-menu-item.level0.parent', function () {
+            setDesktopSubmenuInlineState($(this), true);
+        });
+
+        $nav.on('mouseleave' + NS, 'li.ui-menu-item.level0.parent', function () {
+            setDesktopSubmenuInlineState($(this), false);
+        });
+
+        $nav.on('focusout' + NS, 'li.ui-menu-item.level0.parent', function () {
+            var $item = $(this);
+
+            window.setTimeout(function () {
+                var active = document.activeElement;
+                var node = $item.get(0);
+
+                if (node && active && node.contains(active)) {
+                    return;
+                }
+
+                setDesktopSubmenuInlineState($item, false);
+            }, 0);
+        });
 
         /* ---- mobile submenu accordion (only when Rokanthemes absent) */
         if (!rokanActive) {
