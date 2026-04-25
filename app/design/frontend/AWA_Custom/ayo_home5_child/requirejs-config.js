@@ -57,5 +57,16 @@ var config = {
         'swiper': {
             exports: 'Swiper'
         }
+    },
+    config: {
+        mixins: {
+            // PERF: adia todo processamento de data-mage-init / x-magento-init
+            // até a primeira interação do usuário (ou fallback de 8s).
+            // Empurra long tasks pesadas para fora da janela FCP→TTI do Lighthouse
+            // reduzindo TBT significativamente sem impacto perceptível ao usuário.
+            'mage/apply/main': {
+                'js/mixin-awa-apply-main': true
+            }
+        }
     }
 };
