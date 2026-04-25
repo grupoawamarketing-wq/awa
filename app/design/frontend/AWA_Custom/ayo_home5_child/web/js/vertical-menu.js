@@ -209,7 +209,8 @@ define(['jquery', 'domReady!'], function ($) {
             // === Highlight (Super Ofertas) ===
             if (HIGHLIGHTS.indexOf(slug) !== -1) {
                 $item.addClass('is-highlight');
-                if (!$item.prev('.awa-vmenu__divider').length) {
+                var $prevEl = $item.prev();
+                if (!$prevEl.hasClass('awa-vmenu__divider') && !$prevEl.hasClass('awa-vmenu__section-label')) {
                     $item.before('<div class="awa-vmenu__divider"></div>');
                 }
             }
@@ -229,8 +230,21 @@ define(['jquery', 'domReady!'], function ($) {
         bindDesktopPanelPosition($nav);
     }
 
-    // domReady! AMD dependency already guarantees DOM is ready — no need for $(document).ready()
-    setTimeout(initVerticalMenu, 150);
+    // Wait for Rokanthemes to render .togge-menu, then init (max 2s)
+    (function waitForMenu() {
+        if ($('.navigation.verticalmenu .togge-menu').length) {
+            initVerticalMenu();
+            return;
+        }
+        var waited = 0;
+        var interval = setInterval(function () {
+            waited += 50;
+            if ($('.navigation.verticalmenu .togge-menu').length || waited >= 2000) {
+                clearInterval(interval);
+                initVerticalMenu();
+            }
+        }, 50);
+    }());
 
     return initVerticalMenu;
 });
