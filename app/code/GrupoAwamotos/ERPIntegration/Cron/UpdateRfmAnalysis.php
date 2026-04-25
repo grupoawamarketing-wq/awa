@@ -39,7 +39,6 @@ class UpdateRfmAnalysis
         }
 
         try {
-            $this->logger->info('[ERP Cron] Starting RFM analysis update...');
 
             // Clear cache and force recalculation
             $this->rfmCalculator->clearCache();

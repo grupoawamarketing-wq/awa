@@ -32,7 +32,6 @@ class DataCleanup
 
     public function execute(): void
     {
-        $this->logger->info('Starting log monitoring data cleanup');
 
         try {
             $connection = $this->resourceConnection->getConnection();

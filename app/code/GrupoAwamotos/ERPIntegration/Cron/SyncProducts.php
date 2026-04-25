@@ -30,7 +30,6 @@ class SyncProducts
             return;
         }
 
-        $this->logger->info('[ERP Cron] Starting product sync...');
         $result = $this->productSync->syncAll();
         $this->logger->info('[ERP Cron] Product sync finished.', $result);
     }

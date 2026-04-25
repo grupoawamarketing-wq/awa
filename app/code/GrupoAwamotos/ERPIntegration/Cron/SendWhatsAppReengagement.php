@@ -35,8 +35,6 @@ class SendWhatsAppReengagement
             return;
         }
 
-        $this->logger->info('[WhatsApp Cron] Starting re-engagement campaign...');
-
         try {
             $atRiskCustomers = $this->rfmCalculator->getAtRiskCustomers(15);
 

@@ -17,7 +17,6 @@ class ScanCompetitorAds
 
     public function execute(): void
     {
-        $this->logger->info('Cron ScanCompetitorAds: starting.');
 
         try {
             $count = $this->competitorMonitor->scanAll();

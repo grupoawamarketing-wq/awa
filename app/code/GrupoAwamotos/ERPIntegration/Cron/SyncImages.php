@@ -30,8 +30,6 @@ class SyncImages
             return;
         }
 
-        $this->logger->info('[ERP Cron] Starting image sync');
-
         try {
             $result = $this->imageSync->syncAll();
 

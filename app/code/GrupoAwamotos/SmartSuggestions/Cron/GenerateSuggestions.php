@@ -52,8 +52,6 @@ class GenerateSuggestions
             return;
         }
 
-        $this->logger->info('SmartSuggestions: Starting suggestion generation cron');
-
         try {
             $startTime = microtime(true);
 

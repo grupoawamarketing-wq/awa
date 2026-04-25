@@ -19,7 +19,6 @@ class SyncInsights
 
     public function execute(): void
     {
-        $this->logger->info('Cron SyncInsights: starting.');
 
         try {
             $synced = $this->insightsApiService->fetchAndStore();

@@ -40,7 +40,6 @@ class SyncAttendantFromErp
 
     public function execute(): void
     {
-        $this->logger->info('[B2B AttendantSync] Starting ERP attendant sync');
 
         if (!$this->erpConnection->hasAvailableDriver()) {
             $this->logger->warning('[B2B AttendantSync] ERP driver unavailable, skipping');

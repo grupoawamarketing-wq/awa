@@ -38,7 +38,6 @@ class SyncData
 
     public function execute(): void
     {
-        $this->logger->info('[RexisML Cron] Starting daily sync');
 
         try {
             $orders = $this->collector->fetchOrders(24);

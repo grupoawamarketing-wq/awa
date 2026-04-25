@@ -17,7 +17,6 @@ class FetchProspects
 
     public function execute(): void
     {
-        $this->logger->info('Cron FetchProspects: starting.');
 
         try {
             $count = $this->prospectFetcher->execute();

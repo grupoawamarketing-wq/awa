@@ -43,8 +43,6 @@ class UpdateForecasts
             return;
         }
 
-        $this->logger->info('SmartSuggestions: Starting forecast update cron');
-
         try {
             $startTime = microtime(true);
 

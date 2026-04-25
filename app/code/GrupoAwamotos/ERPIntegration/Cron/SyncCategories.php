@@ -30,7 +30,6 @@ class SyncCategories
             return;
         }
 
-        $this->logger->info('[ERP Cron] Starting category sync...');
         $result = $this->categorySync->syncAll();
         $this->logger->info('[ERP Cron] Category sync finished.', $result);
     }

@@ -30,7 +30,6 @@ class SyncPrices
             return;
         }
 
-        $this->logger->info('[ERP Cron] Starting price sync...');
         $result = $this->priceSync->syncAll();
         $this->logger->info('[ERP Cron] Price sync finished.', $result);
     }

@@ -55,8 +55,6 @@ class SendReengagementCoupons
             return;
         }
 
-        $this->logger->info('[ERP Cron] Starting re-engagement coupon campaign...');
-
         try {
             // Get at-risk customers (limit to prevent email flooding)
             $atRiskCustomers = $this->rfmCalculator->getAtRiskCustomers(20);

@@ -44,8 +44,6 @@ class CalculateRfm
             return;
         }
 
-        $this->logger->info('SmartSuggestions: Starting RFM calculation cron');
-
         try {
             $startTime = microtime(true);
 

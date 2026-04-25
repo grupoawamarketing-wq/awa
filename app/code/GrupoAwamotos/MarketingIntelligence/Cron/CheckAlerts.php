@@ -17,7 +17,6 @@ class CheckAlerts
 
     public function execute(): void
     {
-        $this->logger->info('Cron CheckAlerts: starting.');
 
         try {
             $alerts = $this->alertService->checkAlerts();

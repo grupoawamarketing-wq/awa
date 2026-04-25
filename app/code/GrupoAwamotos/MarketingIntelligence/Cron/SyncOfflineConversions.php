@@ -17,7 +17,6 @@ class SyncOfflineConversions
 
     public function execute(): void
     {
-        $this->logger->info('Cron SyncOfflineConversions: starting.');
 
         try {
             $count = $this->uploader->uploadRecentOrders();

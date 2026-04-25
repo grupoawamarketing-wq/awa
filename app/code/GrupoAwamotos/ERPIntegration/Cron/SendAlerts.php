@@ -40,8 +40,6 @@ class SendAlerts
             return;
         }
 
-        $this->logger->info('[ERP Cron] Starting alert check...');
-
         $alertsSent = 0;
 
         // Send At-Risk customers alert

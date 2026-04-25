@@ -39,7 +39,6 @@ class UpdateForecasts
         }
 
         try {
-            $this->logger->info('[ERP Cron] Starting forecast update...');
 
             // Clear cache
             $this->salesProjection->clearCache();

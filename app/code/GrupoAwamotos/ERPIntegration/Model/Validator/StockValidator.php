@@ -74,11 +74,18 @@ class StockValidator
 
         // Keep per-item logs focused on true validation problems.
         // Anomaly warnings are consolidated by StockSync.
-        if ($result->hasErrors() || ($result->hasWarnings() && !$result->getField('anomaly_detected', false))) {
+        // Use debug level for warnings-only (valid=true) to avoid noise from not_found SKUs.
+        if ($result->hasErrors()) {
             $this->logger->info('[ERP Validator] Stock validation', [
                 'sku' => $validatedSku ?? ($stockData['MATERIAL'] ?? '?'),
                 'valid' => $result->isValid(),
                 'errors' => $result->getErrors(),
+                'warnings' => $result->getWarnings(),
+            ]);
+        } elseif ($result->hasWarnings() && !$result->getField('anomaly_detected', false)) {
+            $this->logger->debug('[ERP Validator] Stock validation', [
+                'sku' => $validatedSku ?? ($stockData['MATERIAL'] ?? '?'),
+                'valid' => $result->isValid(),
                 'warnings' => $result->getWarnings(),
             ]);
         }

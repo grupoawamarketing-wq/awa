@@ -17,7 +17,6 @@ class RefreshAudiences
 
     public function execute(): void
     {
-        $this->logger->info('Cron RefreshAudiences: starting.');
 
         try {
             $count = $this->audienceSyncer->refreshAll();
