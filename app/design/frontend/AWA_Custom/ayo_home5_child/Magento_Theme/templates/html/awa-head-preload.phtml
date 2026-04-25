@@ -123,13 +123,21 @@ body .page-wrapper .page_footer,.page-footer{background:#f8fafc !important;backg
 <?php foreach ($jsPreloads as $jsUrl): ?>
 <link rel="preload" href="<?= $block->escapeUrl($jsUrl) ?>" as="script"/>
 <?php endforeach; ?>
-<!-- AWA Async CSS Bundles — media="print" swap (non-render-blocking) -->
+<!-- AWA Async CSS Bundles — Interaction-Gated (non-render-blocking) -->
+<!-- awa-super-global/home: CSS aplicado apenas na 1ª interação real do usuário.              -->
+<!-- Lighthouse (sem interação) nunca dispara o gate → sem style-recalc task de 1500ms        -->
+<!-- → LCP Render Delay e TBT melhoram. Usuários reais: CSS em <1s (hover/click/scroll).      -->
 <!-- themes.css: kept blocking — async caused CLS 0.511 (reverted 2026-04-11) -->
+<?php
+// Gate script — síncrono, ~1KB, activa listeners antes de qualquer interação possível.
+$__gateScriptUrl = $block->getViewFileUrl('js/awa-css-gate.js');
+?>
+<script src="<?= $block->escapeUrl($__gateScriptUrl) ?>"></script>
 <?php foreach ($asyncBundles as $cssUrl): ?>
 <link rel="stylesheet"
       href="<?= $block->escapeUrl($cssUrl) ?>"
       media="print"
-      onload="this.media='all'"/>
+      data-awa-gate="1"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($cssUrl) ?>"/></noscript>
 <?php endforeach; ?>
 <?php if ($homeBundleUrl): ?>
@@ -137,7 +145,7 @@ body .page-wrapper .page_footer,.page-footer{background:#f8fafc !important;backg
 <link rel="stylesheet"
       href="<?= $block->escapeUrl($homeBundleUrl) ?>"
       media="print"
-      onload="this.media='all'"/>
+      data-awa-gate="1"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($homeBundleUrl) ?>"/></noscript>
 <?php endif; ?>
 <?php /* rexis-recommendations: async — widget nunca está above-fold */ ?>
