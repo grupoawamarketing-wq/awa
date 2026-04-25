@@ -44,62 +44,24 @@ $fontPreloads = [
 // Preloading a resource not used on initial load wastes bandwidth and triggers PSI warnings.
 $jsPreloads = [];
 
-// === Async CSS Bundles (defer via media="print" + onload — não bloqueiam render) ===
-// CSS Consolidation (2026-04 — Issue #5):
-// - awa-animate-theme → merged into awa-bundle-phases
-// - awa-visual-fixes-critical → merged into awa-bundle-site
-// - awa-polish-sweep → merged into awa-bundle-refinements
-// - awa-bundle-accessibility-af001 → merged into awa-bundle-refinements
-// Total: 9 requests → 5 (-4 requests)
+// === Async CSS Bundles (CSS Consolidation 2026-04-25 — Issue #6) ===
+// 15 arquivos async globais → awa-super-global.css (1 request, elimina 14 style-recalcs ~3000ms TBT)
+// 5 arquivos homepage-only → awa-super-home.css (1 request, elimina 4 style-recalcs)
 $asyncBundles = [
-    // swiper-bundle.min.css movido para sync (default_head_blocks.xml) — fix carrossel em branco
-    // PageSpeed fix 2026-04-11: themes.css (1.3MB) + vendor-libs (175KB) moved from sync to async
-    // awa-header-classic-redesign: movido para async (2026-04-22) — themes.css já provê
-    // flex layout base do header; anti-FOUC cobre cores; removido do XML (evita duplo).
-    // awa-header-classic-redesign: revertido para sync (2026-04-23) via default_head_blocks.xml
-    $block->getViewFileUrl('css/awa-bundle-core.css'),      // Core rules + header promo bar (595KB)
-    $block->getViewFileUrl('css/awa-bundle-vendor-libs.css'),  // Bootstrap+FA+Owl+icons (175KB)
-    $block->getViewFileUrl('css/awa-bundle-custom.css'),
-    $block->getViewFileUrl('css/awa-bundle-phases.css'),       // + animate-theme
-    $block->getViewFileUrl('css/awa-bundle-tail.css'),          // + cosmetic (global)
-    $block->getViewFileUrl('css/awa-bundle-site.css'),          // + visual-fixes-critical
-    // merged into awa-bundle-refinements: $block->getViewFileUrl('css/awa-improvements-grid.css'),    // grid 4-col override
-    // Moved from sync (2026-04-09): -666 KB render-blocking -> async
-    // merged into awa-bundle-refinements: $block->getViewFileUrl('css/awa-visual-audit-consolidated.css'),  // visual-audit v2-v12
-    // merged into awa-bundle-refinements: $block->getViewFileUrl('css/awa-global-modern-clean.css'),        // sitewide standardization
-    $block->getViewFileUrl('css/awa-home-vertical-menu-shell-fix.css'),   // vertical menu (-40KB sync, 2026-04-17)
-    str_replace('awa-bundle-custom', 'awa-perf-no-shadows', $block->getViewFileUrl('css/awa-bundle-custom.css')), // async: cosmetic shadow removal (2026-04-22)
-    // rexis-recommendations: emitido explicitamente abaixo (getViewFileUrl modulo falha em prod)
-    // MCP Header + Classic Redesign: movidos para SYNC (default_head_blocks.xml)
-    // Removidos do async para evitar carregamento duplo (2026-04-09)
-    // merged into awa-bundle-refinements: $block->getViewFileUrl('css/awa-color-standardization.css'),     // color standardization + visual polish (last)
-    str_replace('awa-bundle-custom', 'awa-ux-improvements', $block->getViewFileUrl('css/awa-bundle-custom.css')),
-    // awa-layout-standardization.css removido daqui e carregado APÓS refinements
-    // para garantir que nossas overrides !important vençam o dark footer do refinements bundle
+    $block->getViewFileUrl('css/awa-super-global.css'),
 ];
 
-// Homepage-only: owl-tabs + overrides + b2b-foundation + compat + premium + polish
+// Homepage-only super bundle
 $homeBundleUrl = null;
-$homeProductCardsUrl = null;
-$homeCategoryCarouselUrl = null;
 $heroPreloadUrl = null;
-$homeMobileFixUrl = null;
 if (in_array('cms_index_index', $block->getLayout()->getUpdate()->getHandles(), true)) {
-    $homeBundleUrl = $block->getViewFileUrl('css/awa-bundle-home-custom.css');
-    // URLs derivadas de homeBundleUrl (mesmo diretorio css/ do tema, evita getViewFileUrl vazio em prod)
-    $homeProductCardsUrl = str_replace('awa-bundle-home-custom', 'awa-product-cards-modern', $homeBundleUrl);
-    $homeCategoryCarouselUrl = str_replace('awa-bundle-home-custom', 'awa-category-carousel', $homeBundleUrl);
-    // awa-home-mobile-fix: secoes 1+2 inlined Anti-FOUC; secoes 3+4 async
-    $homeMobileFixUrl = str_replace('awa-bundle-home-custom', 'awa-home-mobile-fix', $homeBundleUrl);
-    // LCP Hero preload — bloco awa.head.preload usa GrupoAwamotos\Theme\Block\Html\HeroPreload
-    // que tem getHeroImageUrl() via DI de constructor (ResourceConnection + StoreManager)
+    $homeBundleUrl = $block->getViewFileUrl('css/awa-super-home.css');
     /** @var GrupoAwamotos\Theme\Block\Html\HeroPreload $block */
     $heroPreloadUrl = $block->getHeroImageUrl();
 }
 
-// Refinements bundle stays async, but is rendered explicitly below because
-// it contains foundational UI behavior/styles for compare bar, floating tools,
-// and several layout polish layers used across the storefront.
+// URL base para derivação de CSS de módulos (getViewFileUrl falha em prod para módulos)
+// awa-bundle-refinements.css mergeado em awa-super-global.css — não emitir como link separado
 $refinementsBundleUrl = $block->getViewFileUrl('css/awa-bundle-refinements.css');
 ?>
 <!-- =========================================================
@@ -170,59 +132,13 @@ body .page-wrapper .page_footer,.page-footer{background:#f8fafc !important;backg
       onload="this.media='all'"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($cssUrl) ?>"/></noscript>
 <?php endforeach; ?>
-<!-- T2.4 (2026-03-28): -299KB do critical path — AOF styles now in awa-critical-fold.css -->
-<link rel="stylesheet"
-    href="<?= $block->escapeUrl($refinementsBundleUrl) ?>"
-    media="print"
-    data-awa-refinements="1"
-    onload="this.media='all'"/>
-<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($refinementsBundleUrl) ?>"/></noscript>
-<!-- awa-layout-standardization carregado APÓS refinements — garante que footer light e
-     demais overrides !important vençam o dark-footer do refinements bundle (last-wins) -->
-<link rel="stylesheet"
-    href="<?= $block->escapeUrl($block->getViewFileUrl('css/awa-layout-standardization.css')) ?>"
-    media="print"
-    data-awa-layout-std="1"
-    onload="this.media='all'"/>
-<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($block->getViewFileUrl('css/awa-layout-standardization.css')) ?>"/></noscript>
-<!-- awa-grid-container-audit: padronização de containers, margins, grids (2026-07-18) -->
-<link rel="stylesheet"
-    href="<?= $block->escapeUrl($block->getViewFileUrl('css/awa-grid-container-audit.css')) ?>"
-    media="print"
-    data-awa-grid-audit="1"
-    onload="this.media='all'"/>
-<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($block->getViewFileUrl('css/awa-grid-container-audit.css')) ?>"/></noscript>
 <?php if ($homeBundleUrl): ?>
+<!-- awa-super-home.css: home-custom + mobile-fix + product-cards + category-carousel + cosmetic-home -->
 <link rel="stylesheet"
       href="<?= $block->escapeUrl($homeBundleUrl) ?>"
       media="print"
       onload="this.media='all'"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($homeBundleUrl) ?>"/></noscript>
-<?php endif; ?>
-<?php if ($homeMobileFixUrl): ?>
-<!-- awa-home-mobile-fix: seções 1+2 inline no Anti-FOUC; async para seções 3+4 (footer cosmetics) -->
-<link rel="stylesheet"
-      href="<?= $block->escapeUrl($homeMobileFixUrl) ?>"
-      media="print"
-      data-awa-home-mobile-fix="1"
-      onload="this.media='all'"/>
-<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($homeMobileFixUrl) ?>"/></noscript>
-<?php endif; ?>
-<?php if ($homeProductCardsUrl): ?>
-<link rel="stylesheet"
-      href="<?= $block->escapeUrl($homeProductCardsUrl) ?>"
-      media="print"
-      data-awa-home-product-cards="1"
-      onload="this.media='all'"/>
-<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($homeProductCardsUrl) ?>"/></noscript>
-<?php endif; ?>
-<?php if ($homeCategoryCarouselUrl): ?>
-<link rel="stylesheet"
-      href="<?= $block->escapeUrl($homeCategoryCarouselUrl) ?>"
-      media="print"
-      data-awa-category-carousel-async="1"
-      onload="this.media='all'"/>
-<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($homeCategoryCarouselUrl) ?>"/></noscript>
 <?php endif; ?>
 <?php /* rexis-recommendations: async — widget nunca está above-fold */ ?>
 <?php $__rexisUrl = str_replace('css/awa-bundle-refinements.css', 'GrupoAwamotos_ProductIntelligence/css/rexis-recommendations.css', $refinementsBundleUrl); ?>
@@ -233,17 +149,5 @@ body .page-wrapper .page_footer,.page-footer{background:#f8fafc !important;backg
       data-rexis-async="1"
       onload="this.media='all'"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__rexisUrl) ?>"/></noscript>
-<?php endif; ?>
-
-
-<!-- awa-modernize.css: modernização visual v1 — ÚLTIMO da cascata (last-wins) -->
-<?php $__modernizeUrl = str_replace('css/awa-bundle-refinements.css', 'css/awa-modernize.css', $refinementsBundleUrl); ?>
-<?php if ($__modernizeUrl !== $refinementsBundleUrl): ?>
-<link rel="stylesheet"
-      href="<?= $block->escapeUrl($__modernizeUrl) ?>"
-      media="print"
-      data-awa-modernize="1"
-      onload="this.media='all'"/>
-<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__modernizeUrl) ?>"/></noscript>
 <?php endif; ?>
 <!-- styles-l.css carregado em awa.styles.l.last (after awa.search.autocomplete.head.css) --><!-- AWA-DEBUG-UNIQUE-7739 -->
