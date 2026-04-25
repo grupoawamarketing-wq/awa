@@ -25,8 +25,6 @@ class LogAnalysis
 
     public function execute(): void
     {
-        $this->logger->info('Starting scheduled log analysis');
-
         try {
             // Run all analyzers
             $results = $this->analyzerPool->analyzeAll();
@@ -52,8 +50,6 @@ class LogAnalysis
                     $this->logger->error("Error processing alerts for {$analyzerType}: " . $e->getMessage());
                 }
             }
-            
-            $this->logger->info('Completed scheduled log analysis');
             
         } catch (\Throwable $e) {
             $this->logger->error('Error in scheduled log analysis: ' . $e->getMessage());

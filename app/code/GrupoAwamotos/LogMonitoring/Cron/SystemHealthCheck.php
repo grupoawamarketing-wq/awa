@@ -25,8 +25,6 @@ class SystemHealthCheck
 
     public function execute(): void
     {
-        $this->logger->info('Starting scheduled system health check');
-
         try {
             $healthData = $this->systemHealthService->getOverallHealth();
             

@@ -25,8 +25,6 @@ class AlertProcessor
 
     public function execute(): void
     {
-        $this->logger->info('Starting alert processing');
-
         try {
             // Get critical alerts that need immediate attention
             $criticalAlerts = $this->alertRepository->getCriticalAlerts();
@@ -53,8 +51,6 @@ class AlertProcessor
                     }
                 }
             }
-            
-            $this->logger->info('Completed alert processing');
             
         } catch (\Throwable $e) {
             $this->logger->error('Error in alert processing: ' . $e->getMessage());
