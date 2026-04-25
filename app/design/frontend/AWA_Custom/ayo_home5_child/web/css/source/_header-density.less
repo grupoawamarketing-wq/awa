@@ -1,0 +1,233 @@
+// =============================================================================
+// _header-density.less
+// AWA Motos — Header Density Override (inspiracao gridmotors.com.br)
+//
+// Padroniza alturas, espacamentos e densidade visual do header sem alterar
+// HTML/PHTML/XML/PHP.  Todos os valores derivam de var(--awa-*) canonicos.
+//
+// Tokens extras definidos localmente como aliases semanticos:
+//   --awa-ink   -> superficie escura (alias de --awa-bg-dark)
+//   --awa-fs-xs -> font-size extra-small (alias de --awa-font-size-xs)
+//
+// Importar DEPOIS de _header-main.less (fonte de verdade) para vencer a cascata.
+// =============================================================================
+
+@import (once) '_awa-variables';
+@import (once) '_design-system';
+
+
+// ---------------------------------------------------------------------------
+// 0. ALIASES SEMANTICOS (facilita leitura e futuro theming)
+// ---------------------------------------------------------------------------
+:root {
+  --awa-ink:   var(--awa-bg-dark, #1a1a1a);
+  --awa-fs-xs: var(--awa-font-size-xs, 11px);
+}
+
+
+// ---------------------------------------------------------------------------
+// 1. TOP BAR -- 32px, fundo escuro, texto claro
+//    Reduz de 34px para 32px (-2px), alinha ao padrao gridmotors.
+// ---------------------------------------------------------------------------
+
+body .page-wrapper .awa-site-header .top-header.awa-utility-bar {
+  background: var(--awa-ink) !important;
+  min-height: 32px !important;
+  height: 32px !important;
+  font-size: var(--awa-fs-xs) !important;
+  color: var(--awa-bg) !important;
+
+  .awa-utility-bar__inner {
+    min-height: 32px !important;
+    height: 32px !important;
+  }
+}
+
+// Top bar -- links e contatos: cor clara para vencer _awa-header-professional.less
+// Precisa de .awa-header-professional para vencer seletores daquele arquivo
+body .page-wrapper .awa-site-header.awa-header-professional .top-header.awa-utility-bar {
+  color: rgba(255, 255, 255, 0.9) !important;
+
+  // Catch-all para todos os links/spans internos
+  a, span, .awa-topbar__contact-link, .whatsapp-hotline, .awa-topbar__hours-info {
+    color: rgba(255, 255, 255, 0.85) !important;
+    font-size: var(--awa-fs-xs) !important;
+
+    &:hover {
+      color: var(--awa-bg) !important;
+    }
+  }
+
+  .top-bar-right::after {
+    font-size: var(--awa-fs-xs) !important;
+  }
+}
+
+// Top bar responsiva
+@media (min-width: 320px) {
+  body .page-wrapper .awa-site-header .top-header.awa-utility-bar {
+    display: block !important;
+  }
+}
+
+// Mobile: top bar empilha mas mantem visibilidade
+@media (max-width: 767px) {
+  body .page-wrapper .awa-site-header .top-header.awa-utility-bar {
+    height: auto !important;
+    min-height: 28px !important;
+
+    .awa-utility-bar__inner {
+      height: auto !important;
+      min-height: 28px !important;
+      padding: 4px 0 !important;
+    }
+  }
+}
+
+
+// ---------------------------------------------------------------------------
+// 2. HEADER PRINCIPAL -- 80px desktop / 64px mobile, sombra ao scrollar
+// ---------------------------------------------------------------------------
+
+// Desktop (>=992px)
+@media (min-width: @awa-breakpoint-md) {
+  body .page-wrapper .awa-site-header .header.awa-main-header {
+    min-height: 80px !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    transition: box-shadow var(--awa-duration) var(--awa-ease) !important;
+  }
+
+  body .page-wrapper .awa-site-header .awa-main-header .awa-main-header__inner.wp-header {
+    min-height: 80px !important;
+    padding-block: 0 !important;
+  }
+}
+
+// Mobile (<992px)
+@media (max-width: (@awa-breakpoint-md - 1)) {
+  body .page-wrapper .awa-site-header .header.awa-main-header {
+    min-height: 64px !important;
+    transition: box-shadow var(--awa-duration) var(--awa-ease) !important;
+  }
+}
+
+// Sombra ao scrollar (sticky state)
+body .page-wrapper .awa-site-header.is-sticky .header.awa-main-header,
+body .page-wrapper .page-header.fixed .header.awa-main-header,
+body.sticky .page-wrapper .awa-site-header .header.awa-main-header {
+  box-shadow: var(--awa-shadow-sm) !important;
+}
+
+
+// ---------------------------------------------------------------------------
+// 3. LOGO DUPLICADO -- ocultar .logo no header quando sticky ativo
+// ---------------------------------------------------------------------------
+
+body .page-wrapper .awa-site-header.is-sticky .awa-main-header .awa-header-brand-cell > .logo,
+body .page-wrapper .page-header.fixed .awa-main-header .awa-header-brand-cell > .logo,
+body.sticky .page-wrapper .awa-site-header .awa-main-header .awa-header-brand-cell > .logo {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  transition: opacity var(--awa-duration-fast) var(--awa-ease),
+              max-height var(--awa-duration-fast) var(--awa-ease) !important;
+}
+
+body .page-wrapper .awa-site-header:not(.is-sticky) .awa-header-brand-cell img[src*="stickylogo"] {
+  display: none !important;
+}
+
+
+// ---------------------------------------------------------------------------
+// 4. BUSCA -- min 480px desktop, border-radius md, focus ring primary
+// ---------------------------------------------------------------------------
+
+@media (min-width: @awa-breakpoint-md) {
+  body .page-wrapper .awa-site-header .awa-main-header .awa-header-search-col {
+    min-width: 480px !important;
+  }
+
+  // Usa ID #search_mini_form para vencer body .page-wrapper #search_mini_form
+  // que seta var(--awa-radius-full) com specificity (1,1,1)
+  body .page-wrapper .awa-site-header #search_mini_form,
+  body .page-wrapper .awa-site-header .awa-header-search-col form.minisearch,
+  body .page-wrapper .awa-site-header .awa-header-search-col form.search-content,
+  body .page-wrapper .awa-site-header .block-search.awa-professional-search form.minisearch,
+  body .page-wrapper .awa-site-header .block-search.awa-professional-search form.search-content {
+    border-radius: var(--awa-radius-md) !important;
+    overflow: hidden !important;
+  }
+}
+
+// Focus ring: anel primario acessivel (WCAG 2.1 AA)
+body .page-wrapper .awa-site-header .awa-header-search-col form.minisearch:focus-within,
+body .page-wrapper .awa-site-header .awa-header-search-col form.search-content:focus-within,
+body .page-wrapper .awa-site-header .block-search.awa-professional-search form.minisearch:focus-within,
+body .page-wrapper .awa-site-header .block-search.awa-professional-search form.search-content:focus-within {
+  border-color: var(--awa-primary) !important;
+  box-shadow: 0 0 0 3px var(--awa-primary-15, rgba(183, 51, 55, 0.15)) !important;
+  outline: none !important;
+}
+
+body .page-wrapper .awa-site-header .awa-header-search-col button.action.search {
+  border-radius: 0 var(--awa-radius-md) var(--awa-radius-md) 0 !important;
+}
+
+
+// ---------------------------------------------------------------------------
+// 5. MINI-CART -- contador pilula primary, drawer com shadow-md
+// ---------------------------------------------------------------------------
+
+body .page-wrapper .awa-site-header .minicart-wrapper .action.showcart .counter.qty {
+  background: var(--awa-primary) !important;
+  color: var(--awa-bg) !important;
+  border: none !important;
+  border-radius: var(--awa-radius-full) !important;
+  font-size: 10px !important;
+  font-weight: var(--awa-weight-bold) !important;
+  min-width: 18px !important;
+  height: 18px !important;
+  padding: 0 5px !important;
+  line-height: 18px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18) !important;
+}
+
+body .page-wrapper .minicart-wrapper.active .block-minicart,
+body .page-wrapper .minicart-wrapper.show .block-minicart,
+body .page-wrapper .minicart-wrapper .block-minicart._active,
+body .page-wrapper .minicart-wrapper .mage-dropdown-dialog.active,
+body .page-wrapper .minicart-wrapper .mage-dropdown-dialog[aria-hidden="false"] {
+  box-shadow: var(--awa-shadow-md) !important;
+}
+
+
+// ---------------------------------------------------------------------------
+// 6. WELCOME -- font-weight 600 (semi-bold)
+// ---------------------------------------------------------------------------
+
+body .page-wrapper .awa-site-header .customer-welcome,
+body .page-wrapper .awa-site-header .customer-welcome .customer-name,
+body .page-wrapper .awa-site-header .customer-welcome button.action.switch {
+  font-weight: var(--awa-weight-semi) !important;
+}
+
+
+// ---------------------------------------------------------------------------
+// 7. NAV -- ocultar link duplicado "Marcas" (redundante com "Nossas Marcas")
+//    Usa [href*="/marcas"]:not([href*="nossas"]) em vez de [href$="/marcas/"]
+//    porque LESS nao suporta $= em seletores de atributo.
+//    Especificidade alta para vencer li.level0>a{display:flex!important} (0,8,3).
+//    :has() oculta o <li> inteiro evitando espaco vazio no nav.
+// ---------------------------------------------------------------------------
+
+// Ocultar o <li> via :has()
+body .page-wrapper .awa-site-header .awa-nav-bar .awa-header-primary-nav .navigation.custommenu li.nav-item.level0:has(> a[href*="/marcas"]:not([href*="nossas"])) {
+  display: none !important;
+}
+
+// Fallback: ocultar o <a> com specificity (0,9,3+) > (0,8,3)
+body .page-wrapper .awa-site-header .header-control.awa-nav-bar .awa-header-primary-nav .navigation.custommenu li.level0 > a[href*="/marcas"]:not([href*="nossas"]) {
+  display: none !important;
+}

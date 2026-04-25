@@ -398,11 +398,35 @@
 // e o CSS herdado do tema mantém visibility:hidden no submenu.
 .navigation.verticalmenu .togge-menu.list-category-dropdown > li.ui-menu-item.level0.is-open > .level0.submenu,
 .navigation.verticalmenu .togge-menu.list-category-dropdown > li.ui-menu-item.level0.vmm-active > .level0.submenu,
+.navigation.verticalmenu .togge-menu.list-category-dropdown > li.ui-menu-item.level0.awa-vmf-active > .level0.submenu,
 .navigation.verticalmenu .togge-menu.list-category-dropdown > li.ui-menu-item.level0.active > .level0.submenu,
 .navigation.verticalmenu .togge-menu.list-category-dropdown > li.ui-menu-item.level0._active > .level0.submenu {
     visibility: visible !important;
     opacity: 1 !important;
     pointer-events: auto !important;
+}
+
+@media (min-width: @awa-breakpoint-md) {
+    // Fallback desktop: se o flyout-portal nao inicializar, o submenu local ainda abre.
+    .navigation.verticalmenu.side-verticalmenu .togge-menu.list-category-dropdown > li.ui-menu-item.level0:hover > .level0.submenu,
+    .navigation.verticalmenu.side-verticalmenu .togge-menu.list-category-dropdown > li.ui-menu-item.level0:focus-within > .level0.submenu,
+    .navigation.verticalmenu.side-verticalmenu .togge-menu.list-category-dropdown > li.ui-menu-item.level0.is-open > .level0.submenu,
+    .navigation.verticalmenu.side-verticalmenu .togge-menu.list-category-dropdown > li.ui-menu-item.level0.vmm-active > .level0.submenu,
+    .navigation.verticalmenu.side-verticalmenu .togge-menu.list-category-dropdown > li.ui-menu-item.level0.awa-vmf-active > .level0.submenu {
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        transition-delay: 0s !important;
+    }
+
+    .navigation.verticalmenu.side-verticalmenu li.level0.is-open > .submenu,
+    .navigation.verticalmenu.side-verticalmenu li.level0.vmm-active > .submenu,
+    .navigation.verticalmenu.side-verticalmenu li.level0.awa-vmf-active > .submenu {
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        transition-delay: 0s !important;
+    }
 }
 
 // "Ver mais / Ver menos" - link de expansao
@@ -451,32 +475,7 @@
 }
 
 // ============================================================================
-//  9. DESKTOP CLOSE BUTTON
-// ============================================================================
-
-.navigation.verticalmenu .togge-menu > li.awa-vmenu-close-li {
-    text-align: right;
-    padding: @awa-gap-xs @ds-space-sm 0;
-    border: 0;
-
-    .awa-vmenu-desktop-close-btn {
-        background: none;
-        border: 0;
-        padding: @awa-gap-xs;
-        color: @awa-color-text-muted;
-        cursor: pointer;
-        font-size: @awa-font-size-16;
-        line-height: 1;
-        transition: color @awa-transition;
-
-        &:hover {
-            color: var(--awa-primary, @awa-color-primary);
-        }
-    }
-}
-
-// ============================================================================
-//  10. MOBILE - drawer override (< 1024px)
+//  9. MOBILE - drawer override (< 1024px)
 // ============================================================================
 
 @media (max-width: (@awa-breakpoint-md - 1)) {
@@ -522,7 +521,7 @@
 }
 
 // ============================================================================
-//  11. TABLET BREAKPOINTS (768-1023px)
+//  10. TABLET BREAKPOINTS (768-1023px)
 // ============================================================================
 
 @media (min-width: @awa-breakpoint-sm) and (max-width: (@awa-breakpoint-md - 1)) {
@@ -530,5 +529,39 @@
     .navigation.verticalmenu .togge-menu > li.ui-menu-item.level0 > a.level-top {
         font-size: @awa-font-size-13;
         line-height: 44px;
+    }
+}
+
+// ============================================================================
+//  11. DESKTOP AYO COMPAT (submenu local, sem portal)
+// ============================================================================
+@media (min-width: @awa-breakpoint-md) {
+    body.cms-index-index .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu > li.ui-menu-item.level0 {
+        position: relative !important;
+        overflow: visible !important;
+    }
+
+    body.cms-index-index .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu > li.ui-menu-item.level0 > .submenu,
+    body.cms-index-index .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu > li.ui-menu-item.level0 > .level0.submenu {
+        position: absolute !important;
+        top: 0 !important;
+        left: 100% !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        z-index: 100120 !important;
+        transform: translateX(0) !important;
+    }
+
+    body.cms-index-index .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu > li.ui-menu-item.level0:hover > .submenu,
+    body.cms-index-index .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu > li.ui-menu-item.level0:hover > .level0.submenu,
+    body.cms-index-index .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu > li.ui-menu-item.level0:focus-within > .submenu,
+    body.cms-index-index .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu > li.ui-menu-item.level0:focus-within > .level0.submenu,
+    body.cms-index-index .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu > li.ui-menu-item.level0.is-open > .submenu,
+    body.cms-index-index .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu > li.ui-menu-item.level0.vmm-active > .submenu,
+    body.cms-index-index .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu > li.ui-menu-item.level0.awa-vmf-active > .submenu {
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
     }
 }

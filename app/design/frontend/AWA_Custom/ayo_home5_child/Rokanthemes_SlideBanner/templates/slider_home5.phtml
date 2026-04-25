@@ -85,7 +85,7 @@ if ($banners = $block->getBannerCollection()):
 
     $mobileOwlConfig = $baseOwlConfig;
     $mobileHasMultipleSlides = count($mobileSlides) > 1;
-    $mobileOwlConfig['loop'] = $mobileHasMultipleSlides;
+    $mobileOwlConfig['loop'] = false; // AWA PERF: loop:false no mobile evita que Owl mova slide original antes do LCP
     $mobileOwlConfig['nav'] = $mobileHasMultipleSlides && $mobileOwlConfig['nav'];
     $mobileOwlConfig['dots'] = $mobileHasMultipleSlides && $mobileOwlConfig['dots'];
     $mobileOwlConfig['autoplay'] = $mobileHasMultipleSlides && $mobileOwlConfig['autoplay'];
@@ -136,7 +136,7 @@ if ($banners = $block->getBannerCollection()):
                     <?php
                     $slideAlt = $banner->getSlideText() ?: ($banner->getSlideTitle() ?: '');
                     $imgHtml = $block->getImageElement($desktopImage, $slideAlt, $isFirst);
-                    if ($slideIndex === 0 && preg_match('/src="([^"]+)"/', $imgHtml, $_m)) {
+                    if (preg_match('/src="([^"]+)"/', $imgHtml, $_m)) {
                         $_webp = preg_replace('/\.(jpg|jpeg|png)$/i', '.webp', $_m[1]);
                         // Preload LCP hero image agora é emitido no <head> via GrupoAwamotos\Theme\Block\Html\HeroPreload.
                         // O body preload foi removido para evitar duplicidade com o <link rel="preload"> do head.
@@ -174,7 +174,7 @@ if ($banners = $block->getBannerCollection()):
                     <?php
                     $slideAlt = $banner->getSlideText() ?: ($banner->getSlideTitle() ?: '');
                     $imgHtml = $block->getImageElementMobile($heroImage, $slideAlt, $isFirst);
-                    if ($isFirst && preg_match('/src="([^"]+)"/', $imgHtml, $_m)) {
+                    if (preg_match('/src="([^"]+)"/', $imgHtml, $_m)) {
                         $_webp = preg_replace('/\.(jpg|jpeg|png)$/i', '.webp', $_m[1]);
                         $imgHtml = '<picture>'
                             . '<source type="image/webp" srcset="' . $block->escapeUrl($_webp) . '">'
