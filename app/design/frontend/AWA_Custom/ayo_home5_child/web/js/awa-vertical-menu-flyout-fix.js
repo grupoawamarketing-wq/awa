@@ -29,57 +29,87 @@
     var OFFSET_LEFT  = 0;   /* px além do right do LI */
     var OFFSET_TOP   = 0;   /* px além do top do LI */
 
+    /* Estado de inicialização — evita double-init no resize */
+    var _observer    = null;
+    var _ul          = null;
+    var _initialized = false;
+
+    /* Handlers nomeados para permitir removeEventListener exato */
+    function onMenuMouseenter(e) {
+        var li = e.target.closest('li.level0.parent, li.level0.navigation__item--parent');
+        if (!li) return;
+        attachFlyout(li);
+    }
+
+    function onMenuMouseleave(e) {
+        var li = e.target.closest('li.level0');
+        if (!li) return;
+        var to = e.relatedTarget;
+        /* Se saiu para o flyout portal, não remove */
+        if (to && to.classList && (to.classList.contains(PORTAL_CLASS) || to.closest('.' + PORTAL_CLASS))) return;
+        detachFlyout(li);
+    }
+
+    function onDocMouseout(e) {
+        var portal = e.target.closest('.' + PORTAL_CLASS);
+        if (!portal) return;
+        var to = e.relatedTarget;
+        var liId = portal.dataset.awVmfLiMenu;
+        var li = liId && document.querySelector('li.level0[data-menu="' + liId + '"]');
+        /* Se o mouse foi para o LI, fica aberto */
+        if (to && li && (li.contains(to) || li === to)) return;
+        /* Se foi para outro portal — fecha o atual */
+        detachPortal(portal);
+    }
+
+    /* Remove todos os listeners e observer (chamado antes de re-init no resize) */
+    function teardown() {
+        if (_observer) {
+            _observer.disconnect();
+            _observer = null;
+        }
+        if (_ul) {
+            _ul.removeEventListener('mouseenter', onMenuMouseenter, true);
+            _ul.removeEventListener('mouseleave', onMenuMouseleave, true);
+            _ul = null;
+        }
+        document.removeEventListener('mouseout', onDocMouseout);
+        _initialized = false;
+    }
+
     /* Aguarda o menu ser renderizado */
     function init() {
+        if (_initialized) return;
+
         var menu = document.querySelector(
             '.menu_left_home1 .navigation.verticalmenu.side-verticalmenu'
         );
         if (!menu) return;
 
         /* Observe mutations para quando o togge-menu abrir */
-        var ul = menu.querySelector('ul.togge-menu.list-category-dropdown');
-        if (!ul) return;
+        _ul = menu.querySelector('ul.togge-menu.list-category-dropdown');
+        if (!_ul) return;
 
-        var observer = new MutationObserver(function (mutations) {
+        _initialized = true;
+
+        _observer = new MutationObserver(function (mutations) {
             mutations.forEach(function (m) {
                 if (m.type === 'attributes' && m.attributeName === 'class') {
-                    var isOpen = ul.classList.contains('vmm-open') ||
-                                 ul.classList.contains('menu-open') ||
-                                 window.getComputedStyle(ul).display !== 'none';
+                    var isOpen = _ul.classList.contains('vmm-open') ||
+                                 _ul.classList.contains('menu-open') ||
+                                 window.getComputedStyle(_ul).display !== 'none';
                     if (!isOpen) detachAll();
                 }
             });
         });
-        observer.observe(ul, { attributes: true });
+        _observer.observe(_ul, { attributes: true });
 
         /* Eventos nos LIs de nível 0 */
-        ul.addEventListener('mouseenter', function (e) {
-            var li = e.target.closest('li.level0.parent, li.level0.navigation__item--parent');
-            if (!li) return;
-            attachFlyout(li);
-        }, true);
-
-        ul.addEventListener('mouseleave', function (e) {
-            var li = e.target.closest('li.level0');
-            if (!li) return;
-            var to = e.relatedTarget;
-            /* Se saiu para o flyout portal, não remove */
-            if (to && to.classList && (to.classList.contains(PORTAL_CLASS) || to.closest('.' + PORTAL_CLASS))) return;
-            detachFlyout(li);
-        }, true);
+        _ul.addEventListener('mouseenter', onMenuMouseenter, true);
+        _ul.addEventListener('mouseleave', onMenuMouseleave, true);
 
         /* Ao sair do flyout portal, fecha */
-        document.addEventListener('mouseout', function (e) {
-            var portal = e.target.closest('.' + PORTAL_CLASS);
-            if (!portal) return;
-            var to = e.relatedTarget;
-            var liId = portal.dataset.awVmfLiMenu;
-            var li = liId && document.querySelector('li.level0[data-menu="' + liId + '"]');
-            /* Se o mouse foi para o LI, fica aberto */
-            if (to && li && (li.contains(to) || li === to)) return;
-            /* Se foi para outro portal — fecha o atual */
-            detachPortal(portal);
-        });
+        document.addEventListener('mouseout', onDocMouseout);
     }
 
     function attachFlyout(li) {
@@ -184,12 +214,12 @@
         setTimeout(init, 300);
     }
 
-    /* Re-init ao resize acima de 992 */
+    /* Re-init ao resize acima de 992 — teardown() limpa observers e listeners antes de re-init */
     var resizeTimer;
     window.addEventListener('resize', function () {
         clearTimeout(resizeTimer);
         resizeTimer = setTimeout(function () {
-            detachAll();
+            teardown();
             if (window.innerWidth >= 992) init();
         }, 200);
     });
