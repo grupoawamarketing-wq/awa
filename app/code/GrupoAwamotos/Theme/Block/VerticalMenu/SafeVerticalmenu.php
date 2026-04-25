@@ -931,4 +931,86 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
 
         return $html;
     }
+
+    /**
+     * Block-level HTML cache key.
+     *
+     * The vertical menu content is identical for all visitors within the same store view,
+     * so we key only on store ID / code. This allows Magento to store the rendered HTML
+     * in the block_html cache (Redis) and skip re-rendering on every non-FPC request.
+     *
+     * @return array<int, string>
+     */
+    public function getCacheKeyInfo(): array
+    {
+        return [
+            'AWA_VERTICAL_MENU',
+            (string)$this->_storeManager->getStore()->getId(),
+            (string)$this->_storeManager->getStore()->getCode(),
+        ];
+    }
+
+    /**
+     * Cache tags for automatic invalidation when categories change.
+     *
+     * @return string[]
+     */
+    public function getCacheTags(): array
+    {
+        return [
+            \Magento\Catalog\Model\Category::CACHE_TAG,
+            \Magento\Framework\App\Cache\Type\Block::CACHE_TAG,
+        ];
+    }
+
+    /**
+     * Block HTML cache lifetime in seconds (2 hours).
+     *
+     * The parent Rokanthemes constructor does not accept an $data array, so
+     * the layout XML <argument name="cache_lifetime"> never reaches the block
+     * data bag — override getCacheLifetime() directly to guarantee the value.
+     *
+     * @return int
+     */
+    protected function getCacheLifetime(): int
+    {
+        return 7200;
+    }
+
+    /**
+     * Render block HTML with manual Redis cache.
+     *
+     * Overrides AbstractBlock::toHtml() to guarantee block-level caching.
+     * The Magento framework lockQuery mechanism may not trigger for this block
+     * because the Rokanthemes constructor does not pass $data[] to the parent.
+     * We bypass that path and use $this->_cache directly with our cache key.
+     *
+     * @return string
+     */
+    public function toHtml(): string
+    {
+        if (!$this->_cacheState->isEnabled(\Magento\Framework\App\Cache\Type\Block::TYPE_IDENTIFIER)) {
+            return parent::toHtml();
+        }
+
+        $cacheKey = 'AWA_VM_' . $this->_storeManager->getStore()->getId();
+        $cached = $this->_cache->load($cacheKey);
+
+        if ($cached !== false) {
+            return (string)$cached;
+        }
+
+        $html = parent::toHtml();
+
+        if ($html !== '') {
+            $this->_cache->save(
+                $html,
+                $cacheKey,
+                array_unique($this->getCacheTags()),
+                $this->getCacheLifetime()
+            );
+        }
+
+        return $html;
+    }
 }

@@ -154,3 +154,34 @@
         transition: none;
     }
 }
+
+// ── Fix A3: Override de cores hardcoded #08c do vendor (Auditoria 2025-04) ────
+// O vendor _module.less usa #08c para active/hover state, conflitando com a
+// identidade visual AWA Motos (--awa-primary = vermelho).
+// Seletores replicados dos que usam #08c no vendor para garantir especificidade.
+
+.navigation.verticalmenu {
+
+    // Active category item (nível 0 e sub-níveis)
+    > ul > li.active > a,
+    > ul > li.ui-state-active > a,
+    .togge-menu > li.ui-menu-item.active > a,
+    .togge-menu > li.ui-menu-item.level0.active > a.level-top {
+        background-color: var(--awa-primary, @awa-color-primary) !important; // substitui #08c
+        color: @awa-color-white !important;
+        border-top-color: var(--awa-primary, @awa-color-primary) !important;
+    }
+
+    // Seta (arrow) em itens com submenu no active
+    .togge-menu > li.ui-menu-item.level0.active > a.level-top > span.arrow,
+    .togge-menu > li.ui-menu-item.active > a > span.arrow {
+        border-right-color: var(--awa-primary, @awa-color-primary) !important;
+    }
+
+    // Hover state do link — substitui #08c do _module.less linha 285
+    .side-menu-list .active a,
+    .side-menu-list li a:hover {
+        background-color: var(--awa-primary, @awa-color-primary) !important;
+        color: @awa-color-white !important;
+    }
+}

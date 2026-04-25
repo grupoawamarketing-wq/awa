@@ -48,7 +48,9 @@ var config = {
         // FASE E: Mobile menu focus trap (WCAG 2.4.3)
         'awa-vertical-menu-focus-trap': 'js/awa-vertical-menu-focus-trap',
         // Carousel promocional do menu vertical (VMente promo images)
-        'js/vmenu-promo-carousel': 'js/vmenu-promo-carousel'
+        'js/vmenu-promo-carousel': 'js/vmenu-promo-carousel',
+        // Fix [A1][A2]: substituir IIFE+shim vendor por versão AMD com .on()/.off()
+        'rokanthemes/verticalmenu': 'js/vendor-verticalmenu-fixed'
     },
     shim: {
         'swiper': {
