@@ -79,8 +79,10 @@ class ProductSchema extends Template
         $baseUrl = $store->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_WEB);
 
         // Imagem principal
-        $imageUrl = $store->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA) .
-                    'catalog/product' . $product->getImage();
+        $productImage = $product->getImage();
+        $imageUrl = ($productImage && $productImage !== '/no_selection')
+            ? $store->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA) . 'catalog/product' . $productImage
+            : '';
 
         // Dados básicos
         $description = $product->getShortDescription() ?: $product->getDescription();
@@ -90,9 +92,12 @@ class ProductSchema extends Template
             'name' => $product->getName(),
             'description' => $description ? strip_tags($description) : '',
             'sku' => $product->getSku(),
-            'image' => $imageUrl,
             'url' => $product->getProductUrl(),
         ];
+
+        if ($imageUrl) {
+            $schema['image'] = $imageUrl;
+        }
 
         // Marca
         if ($manufacturer = $product->getAttributeText('manufacturer')) {
@@ -120,7 +125,6 @@ class ProductSchema extends Template
                 'https://schema.org/OutOfStock',
             'url' => $product->getProductUrl(),
             'priceValidUntil' => date('Y-12-31', strtotime('+1 year')),
-            'itemCondition' => 'https://schema.org/NewCondition',
             'seller' => [
                 '@type' => 'Organization',
                 'name' => 'Grupo Awamotos'
