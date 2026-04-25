@@ -30,8 +30,6 @@ class SyncOrderStatuses
             return;
         }
 
-        $this->logger->info('[ERP Cron] Starting order status sync');
-
         try {
             $result = $this->orderSync->syncOrderStatuses();
 

@@ -89,8 +89,6 @@ class ProcessOrderQueue
             return;
         }
 
-        $this->logger->info('[ERP Cron] Starting order queue processing');
-
         $processedMain = 0;
         $processedRetry = 0;
         $errors = 0;
@@ -111,11 +109,13 @@ class ProcessOrderQueue
             $errors++;
         }
 
-        $this->logger->info('[ERP Cron] Order queue processing completed', [
-            'main_processed' => $processedMain,
-            'retry_processed' => $processedRetry,
-            'errors' => $errors,
-        ]);
+        if ($processedMain > 0 || $processedRetry > 0 || $errors > 0) {
+            $this->logger->info('[ERP Cron] Order queue processing completed', [
+                'main_processed' => $processedMain,
+                'retry_processed' => $processedRetry,
+                'errors' => $errors,
+            ]);
+        }
     }
 
     /**
