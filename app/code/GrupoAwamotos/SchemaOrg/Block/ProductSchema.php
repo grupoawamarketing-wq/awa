@@ -89,6 +89,7 @@ class ProductSchema extends Template
         $schema = [
             '@context' => 'https://schema.org',
             '@type' => 'Product',
+            '@id' => $product->getProductUrl() . '#product',
             'name' => $product->getName(),
             'description' => $description ? strip_tags($description) : '',
             'sku' => $product->getSku(),
