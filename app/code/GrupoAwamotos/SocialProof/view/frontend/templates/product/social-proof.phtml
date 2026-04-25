@@ -2,54 +2,39 @@
 declare(strict_types=1);
 
 /**
- * Social Proof Badges — renderiza dados reais de prova social.
- * Usa ProductInfo block para obter viewsToday, isBestSeller, isLowStock.
+ * Social Proof Badges — placeholder para carregamento AJAX.
+ *
+ * O JS GrupoAwamotos_SocialProof/js/social-proof-inject.js faz fetch
+ * em /socialproof/product/data?product_id=X e popula este container.
+ *
+ * Abordagem: bloco sem cacheable="false", PDP permanece cacheavel no FPC/Varnish.
+ * Badges carregam assincronamente apos o HTML (nao bloqueia LCP/TTFB).
  *
  * @var \GrupoAwamotos\SocialProof\Block\ProductInfo $block
  * @var \Magento\Framework\Escaper $escaper
  */
 
-$viewsToday  = $block->getViewsToday();
-$isBestSeller = $block->isBestSeller();
-$isLowStock  = $block->isLowStock();
-$qty         = $block->getStockQty();
-$hasBadges   = ($viewsToday > 0) || $isLowStock || $isBestSeller;
+$productId = (int) ($block->getProduct() ? $block->getProduct()->getId() : 0);
+if (!$productId) {
+    return;
+}
+
+$baseUrl = $block->getBaseUrl();
 ?>
-
-<?php if ($hasBadges): ?>
-<div class="social-proof-container awa-sp-pdp">
-
-    <?php if ($viewsToday > 0): ?>
-    <!-- Contador de Visualizações -->
-    <div class="social-proof-badge views-badge" role="note" aria-label="<?= $escaper->escapeHtmlAttr(__('%1 visualizações hoje', $viewsToday)) ?>">
-        <i class="fa fa-eye" aria-hidden="true"></i>
-        <span class="badge-text">
-            <strong><?= $escaper->escapeHtml($viewsToday) ?></strong>
-            <?= $escaper->escapeHtml(__('pessoas visualizaram este produto hoje')) ?>
-        </span>
-    </div>
-    <?php endif; ?>
-
-    <?php if ($isLowStock): ?>
-    <!-- Badge Últimas Unidades -->
-    <div class="social-proof-badge low-stock-badge urgency" role="note" aria-label="<?= $escaper->escapeHtmlAttr(__('Últimas %1 unidades em estoque', $qty)) ?>">
-        <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
-        <span class="badge-text">
-            <strong><?= $escaper->escapeHtml(__('Últimas %1 unidades!', $qty)) ?></strong>
-            <?= $escaper->escapeHtml(__('Aproveite enquanto há estoque')) ?>
-        </span>
-    </div>
-    <?php endif; ?>
-
-    <?php if ($isBestSeller): ?>
-    <!-- Badge Mais Vendido -->
-    <div class="social-proof-badge bestseller-badge" role="note" aria-label="<?= $escaper->escapeHtmlAttr(__('Produto mais vendido')) ?>">
-        <i class="fa fa-star" aria-hidden="true"></i>
-        <span class="badge-text">
-            <strong><?= $escaper->escapeHtml(__('MAIS VENDIDO')) ?></strong>
-        </span>
-    </div>
-    <?php endif; ?>
-
-</div>
-<?php endif; ?>
+<div id="awa-social-proof-pdp"
+     data-product-id="<?= $escaper->escapeHtmlAttr($productId) ?>"
+     data-label-views="<?= $escaper->escapeHtmlAttr(__('pessoas visualizaram este produto hoje')) ?>"
+     data-label-low-stock-pre="<?= $escaper->escapeHtmlAttr(__('Ultimas')) ?>"
+     data-label-low-stock-suf="<?= $escaper->escapeHtmlAttr(__('unidades!')) ?>"
+     data-label-stock-msg="<?= $escaper->escapeHtmlAttr(__('Aproveite enquanto ha estoque')) ?>"
+     data-label-bestseller="<?= $escaper->escapeHtmlAttr(__('MAIS VENDIDO')) ?>"
+     class="social-proof-container"></div>
+<script type="text/x-magento-init">
+{
+    "#awa-social-proof-pdp": {
+        "GrupoAwamotos_SocialProof/js/social-proof-inject": {
+            "baseUrl": "<?= $escaper->escapeJs($baseUrl) ?>"
+        }
+    }
+}
+</script>
