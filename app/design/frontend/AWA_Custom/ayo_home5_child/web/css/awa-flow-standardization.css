@@ -300,3 +300,34 @@ body.b2b-register-index .action.action-login {
     border-radius: 12px !important;
     min-height: 54px !important;
 }
+
+
+/* =============================================================================
+ * FIX P0-A — Sticky Header
+ * Causa: header.awa-site-header tem display:contents (intencional/shell arch),
+ * mas o wrapper real #header.header-container tem position:relative — não sticky.
+ * Fix: tornar #header sticky. z-index 9998 já estava definido.
+ * Carrega: order=1340, DEPOIS de awa-bugfixes-v2.css (1310) e awa-bundle-*.css
+ * ============================================================================= */
+#header,
+.header-container {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 9998 !important;
+}
+
+
+/* =============================================================================
+ * FIX P0-B — Mobile Menu (nav-sections não desliza ao abrir)
+ * Causa: awa-bugfixes-v2.css usa `html.nav-open .nav-sections { left: 0 }`
+ * mas o Magento adiciona a classe nav-open em body (não html).
+ * Resultado: overlay aparece mas painel fica em left:-100% = invisível.
+ * Fix: adicionar selector body.nav-open para fazer o painel deslizar.
+ * ============================================================================= */
+@media (max-width: 991px) {
+    body.nav-open .nav-sections {
+        left: 0 !important;
+        width: 85vw !important;
+        max-width: 360px !important;
+    }
+}
