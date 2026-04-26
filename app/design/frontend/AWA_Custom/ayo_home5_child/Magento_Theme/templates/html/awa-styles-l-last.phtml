@@ -10,6 +10,11 @@ declare(strict_types=1);
  * Contém: _header-main, _header-classic-reference, _header-pixelperfect,
  *         _extend.less imports e todo o LESS customizado do child theme.
  *
+ * CSS Consolidation 2026-04-26:
+ *   awa-cls-vars-fix.css, awa-header-premium.css e awa-cro-priority.css
+ *   foram consolidados em _awa-consolidated.less (compilado em styles-m/l.css).
+ *   Não são mais carregados como arquivos separados.
+ *
  * @var \Magento\Framework\View\Element\Template $block
  */
 $stylesLUrl = $block->getViewFileUrl('css/styles-l.css');
@@ -18,24 +23,6 @@ $stylesLUrl = $block->getViewFileUrl('css/styles-l.css');
       href="<?= $block->escapeUrl($stylesLUrl) ?>"
       media="all"
       data-awa-styles-l="1"/>
-<!-- awa-cls-vars-fix: BLOCKING — corrige 110 vars CSS que styles-l.css define com valores
-     divergentes do awa-super-global.css (gate). Carrega APÓS styles-l.css para vencer cascata.
-     Sem esse fix: quando o gate dispara (após 1400ms+ de TBT), as vars mudam → CLS 0.056. -->
-<link rel="stylesheet"
-      href="<?= $block->escapeUrl($block->getViewFileUrl('css/awa-cls-vars-fix.css')) ?>"
-      media="all"
-      data-awa-cls-vars-fix="1"/>
-<!-- awa-header-premium: async — critical layout CSS já inlined em awa-cls-nav-fix.phtml (CLS fix v5.0) -->
-<link rel="stylesheet" media="print" onload="this.media='all'"
-      href="<?= $block->escapeUrl($block->getViewFileUrl('css/awa-header-premium.css')) ?>"
-      data-awa-header-premium="1"/>
-<noscript><link rel="stylesheet" media="all"
-      href="<?= $block->escapeUrl($block->getViewFileUrl('css/awa-header-premium.css')) ?>"/></noscript>
-<link rel="stylesheet" media="print" onload="this.media='all'"
-      href="<?= $block->escapeUrl($block->getViewFileUrl('css/awa-cro-priority.css')) ?>"
-      data-awa-cro-priority="1"/>
-<noscript><link rel="stylesheet" media="all"
-      href="<?= $block->escapeUrl($block->getViewFileUrl('css/awa-cro-priority.css')) ?>"/></noscript>
 <script>
 /* awa-header-premium: remove inline !important override aplicado por fixSearchBtn()
    que forçava background:transparent no botão de busca */
