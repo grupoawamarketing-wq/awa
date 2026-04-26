@@ -79,14 +79,14 @@
     //   nosso seletor simples.
     .awa-section-header__title {
         
-        font-size: clamp(28px, calc(28px + 8 * ((100vw - 320px) / 960)), 36px) !important;
-        font-weight: @awa-weight-bold !important; // bundle reseta para 600
+        font-size: clamp(28px, calc(28px + 8 * ((100vw - 320px) / 960)), 36px);
+        font-weight: @awa-weight-bold; // bundle reseta para 600
         color: var(--awa-text, @awa-color-text-primary);
         margin: 0;
 
         // Divisor de 32px com cor primária (substitui border-left)
-        padding-left: 0 !important;  // bundle aplica padding-left em h2
-        border-left: none !important; // bundle aplica border-left em h2
+        padding-left: 0;  // bundle aplica padding-left em h2
+        border-left: none; // bundle aplica border-left em h2
         padding-bottom: @awa-space-2;  // 8px
 
         &::after {
@@ -179,61 +179,101 @@
     // !important: awa-super-home.css reseta order via :is(body.cms-index-index,
     //   ...) .page-wrapper .ayo-home5-wrapper selectors (3+ classes)
     .ayo-home5-wrapper > .top-home-content--above-fold {
-        order: -3 !important;
+        order: -3;
     }
 
     // Category carousel fica logo após hero
     .ayo-home5-wrapper > .top-home-content--category-carousel {
-        order: -2 !important;
+        order: -2;
     }
 
     // Trust & Offers section: sobe para logo após category carousel
     .ayo-home5-wrapper > .top-home-content--trust-and-offers {
-        order: -1 !important;
+        order: -1;
     }
 }
 
 
 // ============================================================================
-// 5. SELOS SSL / Compra Protegida — ocultar bloco duplicado
+// 5. SELOS SSL / Compra Protegida — ocultar bloco duplicado  [BUG #6]
 // ============================================================================
 //
-// Existem dois blocos de selos:
-//   1. .awa-security-section (selos de pagamento + compatibilidade)
-//   2. .trust-badges-homepage (Site Seguro / Compra Protegida)
-// Ambos aparecem em sequência. Ocultar o segundo para evitar redundância.
+// Existem dois blocos de selos consecutivos no CMS da home:
+//   1. .awa-security-section  (pagamento + compatibilidade + SSL inline)
+//   2. .trust-badges-homepage (imagens Site Seguro / Compra Protegida)
+// São classes DIFERENTES, então `~ .trust-badges-homepage` nunca casa.
+// Ocultamos o bloco inline (.awa-security-section) pois é duplicado
+// semanticamente pelo .trust-badges-homepage mais completo.
+//
+// !important: ambos os seletores precisam vencer regras em awa-super-home.css
+//   que pode setar display:flex/block em .section via :is() + .page-wrapper.
 
-.cms-index-index {
+body.cms-index-index .page-wrapper .column.main .awa-security-section {
+    display: none !important;
+}
 
-    .trust-badges-homepage ~ .trust-badges-homepage,
-    .column.main > .trust-badges-homepage:nth-of-type(2) {
-        display: none;
+// Fallback: se houver duas .trust-badges-homepage (futuro), ocultar a segunda
+body.cms-index-index .page-wrapper .column.main {
+    .trust-badges-homepage ~ .trust-badges-homepage {
+        display: none !important;
     }
 }
 
 
 // ============================================================================
 // 6. LABELS CRUS — ocultar strings técnicas dos widgets Rokan/Ayo
+//    [BUG #2 "Topo"] [BUG #3 "Categoria"] [BUG #4 "Novo"]
 // ============================================================================
+//
+// FIX-EYEBROW-SELETOR 2026-04-26 v2 — diagnóstico forense confirma seletor real:
+//   .top-home-content > section > header > .awa-section-header__left > span.awa-section-header__eyebrow
+//
+// Problema 1: seletores anteriores não cobriam seções FORA de .top-home-content /
+//   .awa-carousel-section (Mais Vendidos, Lançamentos, Guidões etc. vivem em
+//   section > header direto sob .page-wrapper).
+//
+// Problema 2: awa-super-home.css (cascade pos 23-24) re-mostra com:
+//   :is(body.cms-index-index,...) .page-wrapper .awa-section-header__eyebrow
+//     { display: inline-flex !important; }   => specificity (0,3,1)+!important
+//
+// Solução: dois seletores sem :is() — body(0,0,1)+.cms-*(0,1,0)+.page-wrapper(0,1,0)
+//   + .top-home-content(0,1,0)+.eyebrow(0,1,0) = (0,4,1)+!important
+//   + section>header+.awa-section-header__left(element+classes) = (0,4,3)+!important
+// Seletor 1: cobre tudo dentro de .top-home-content (descendant, qualquer nível)
+// Seletor 2: caminho estrutural direto section>header — cobre seções fora de containers nomeados
 
-.cms-index-index {
+body.cms-index-index .page-wrapper .top-home-content .awa-section-header__eyebrow,
+body.cms-index-index .page-wrapper section > header .awa-section-header__left > .awa-section-header__eyebrow,
+body.cms-homepage_ayo_home5 .page-wrapper .top-home-content .awa-section-header__eyebrow,
+body.cms-homepage_ayo_home5 .page-wrapper section > header .awa-section-header__left > .awa-section-header__eyebrow {
+    display: none !important; // FIX-EYEBROW-SELETOR v2 2026-04-26
+}
 
-    // 6.1 Eyebrows genéricos ("Topo", "Categoria", "Novo" sobre seções)
-    //     Estes são eyebrows raw sem valor semântico para o usuário final.
-    //     A informação já está no título da seção (Mais Vendidos, Guidões etc.)
-    .awa-section-header__eyebrow {
-        display: none;
+
+// ============================================================================
+// 6.2  "Sold: 0/0" no widget Super Ofertas               [BUG #5]
+// ============================================================================
+//
+// themes.css (parent Ayo) estiliza .product-sold .count-sold com font-size/margin.
+// _qa-visual-fixes.less e awa-super-global.css já setam display:none!important,
+// mas carregam em posições intermediárias na cascata.
+// Reforçamos aqui com seletor de alta especificidade para garantir.
+
+body.cms-index-index .page-wrapper .column.main {
+    .sold-by,
+    .product-sold,
+    .ruler-sold,
+    .ruler-sold-count,
+    .count-sold,
+    .sold-count,
+    .qty-sold {
+        display: none !important;
+        visibility: hidden !important;
+        height: 0;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
     }
-
-    // 6.2 "Sold: 0/0" — já oculto via _qa-visual-fixes.less
-    //     Mantemos aqui apenas como referência; sem duplicação de regra.
-
-    // 6.3 Label "Novo" nos product cards (widget Rokanthemes)
-    //     NOTA: mantido visível pois é um badge intencional (.new-lable).
-    //     Caso deseje ocultar, descomentar:
-    // .hot-onsale .onsale.new-lable {
-    //     display: none;
-    // }
 }
 
 
@@ -250,4 +290,56 @@
     .awa-category-carousel__count {
         display: none !important;
     }
+}
+
+
+// ============================================================================
+// 8. LOGO DUPLICADO NO HEADER STICKY                      [BUG #1]
+// ============================================================================
+//
+// Quando o user scrolla > 60px, awa-header-sticky.js adiciona:
+//   - `awa-header-condensed` ao .awa-site-header  (parent)
+//   - `is-sticky` ao .header-wrapper-sticky       (nav bar)
+//
+// O .header-wrapper-sticky contém .logo-sticky (versão condensada).
+// O .awa-main-header contém .logo (versão completa).
+// Ambos ficam visíveis simultaneamente → logo duplicado.
+//
+// _header-density.less alvejava .awa-site-header.is-sticky (classe errada).
+// Corrigimos usando awa-header-condensed, que É adicionado ao .awa-site-header.
+
+body .page-wrapper .awa-site-header.awa-header-condensed .awa-main-header .awa-header-brand-cell > .logo {
+    visibility: hidden !important;
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    pointer-events: none !important;
+    transition: opacity 150ms ease, max-height 150ms ease;
+}
+
+// Quando NÃO sticky, esconder o logo da barra sticky (evita flash)
+body .page-wrapper .awa-site-header:not(.awa-header-condensed) .header-wrapper-sticky .logo-sticky {
+    visibility: hidden !important;
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+}
+
+
+// ============================================================================
+// 9. FOOTER — 3 LISTAS DE CATEGORIAS REDUNDANTES          [BUG #7]
+// ============================================================================
+//
+// O footer renderiza 3 blocos de categorias:
+//   1. <section class="awa-footer-tags">        → tag cloud "Categorias Populares"
+//   2. <h4>Principais Categorias</h4>           → coluna velaFooterMenu (4-col grid)
+//   3. <section class="awa-footer-categories-expand"> → collapse mobile
+//
+// A coluna "Principais Categorias" (#2) é a versão canônica no grid 4-col.
+// O collapse (#3) serve de fallback mobile (boa UX em < 768px).
+// O tag cloud (#1) é pura redundância — ocultamos.
+
+body .page-wrapper .page-footer .awa-footer-tags,
+body .page-wrapper .page_footer .awa-footer-tags {
+    display: none !important;
 }

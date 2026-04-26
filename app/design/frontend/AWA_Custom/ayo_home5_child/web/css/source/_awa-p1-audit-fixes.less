@@ -1,0 +1,322 @@
+// =============================================
+// P1 AUDIT FIXES -- 2026-04-26
+// Ref: audit/visual-regression-audit-2026-04-26.md
+// Constraint: LESS only, zero HTML/PHTML/XML/PHP
+// =============================================
+
+// ---------------------------------------------
+// FIX P1-1 -- Footer categorias duplicado (6x -> 1x)
+// Mantém apenas a coluna "Principais Categorias" no footer estático.
+// Esconde: secao expandivel + tag cloud (redundantes).
+// ---------------------------------------------
+body .page-wrapper .page_footer .awa-footer-categories-expand {
+    display: none;
+}
+body .page-wrapper .page-footer .awa-footer-categories-expand {
+    display: none;
+}
+body .page-wrapper .page_footer .awa-footer-tags {
+    display: none;
+}
+body .page-wrapper .page-footer .awa-footer-tags {
+    display: none;
+}
+
+
+// ---------------------------------------------
+// FIX P1-2 -- Footer payment flags ausentes
+// A secao HTML existe com <img>, mas pode estar colapsada
+// por heranca de display/visibility do parent.
+// Forca visibilidade explicita em toda a cadeia.
+// ---------------------------------------------
+body .page-wrapper .page_footer .footer-bottom {
+    display: block;
+}
+body .page-wrapper .page_footer .footer-bottom .awa-footer-bottom__row {
+    display: flex;
+    flex-wrap: wrap;
+}
+body .page-wrapper .page_footer .awa-footer-pay-sec {
+    display: flex;
+    flex-direction: column;
+}
+body .page-wrapper .page_footer .awa-footer-pay-sec .awa-footer-pay-logos {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+body .page-wrapper .page_footer .awa-footer-pay-sec .awa-footer-pay-logos li.awa-pay-logo {
+    display: inline-flex;
+    align-items: center;
+}
+body .page-wrapper .page_footer .awa-footer-pay-sec .awa-footer-pay-logos li.awa-pay-logo img {
+    display: block;
+    height: 28px;
+    width: auto;
+}
+
+
+// ---------------------------------------------
+// FIX P1-3 -- PDP galeria 44x44px -> dimensoes adequadas
+// Causa: awa-pdp-grid-hardfix.css esconde gallery-placeholder__image
+// com display:none!important quando :not(.is-placeholder).
+// No SSR (sem JS/Fotorama), a imagem é escondida.
+// NOTE: !important necessario para sobrescrever !important existente
+// ---------------------------------------------
+html body.catalog-product-view .page-main .product.media .gallery-placeholder {
+    min-height: 400px;
+    background: #f9fafb;
+    border-radius: 12px;
+    overflow: hidden;
+}
+// Specificity: (0,7,3) beats hardfix (0,6,3)
+html body.catalog-product-view .page-main .product.media .gallery-placeholder > img.gallery-placeholder__image {
+    display: block !important;
+    width: 100%;
+    max-width: 560px;
+    height: auto;
+    margin: 0 auto;
+    object-fit: contain;
+}
+// Quando fotorama JA inicializou, esconder placeholder
+html body.catalog-product-view .page-main .product.media .gallery-placeholder .fotorama-item ~ img.gallery-placeholder__image {
+    display: none !important;
+}
+
+
+// ---------------------------------------------
+// FIX P1-4 -- PDP CTA 0x0 invisivel no desktop
+// Causa: awa-pdp-b2b-pro.css aplica display:none!important via :has()
+// CTA deve ser visivel mesmo para visitantes B2B (consistente com PLP).
+// NOTE: !important necessario para sobrescrever !important existente
+// Especificidade: (0,4,2) > original (0,4,1)
+// ---------------------------------------------
+html body.catalog-product-view .page-main .product-info-main .box-tocart {
+    display: flex !important;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+html body.catalog-product-view .page-main .product-info-main .box-tocart .fieldset {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+}
+html body.catalog-product-view .page-main .product-info-main .box-tocart .actions {
+    flex: 1;
+    min-width: 0;
+}
+html body.catalog-product-view .page-main .product-info-main .box-tocart .actions button.tocart {
+    width: 100%;
+    min-height: 56px;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+
+// ---------------------------------------------
+// FIX P1-5 -- Trust block 1715px -> acima do fold
+// Causa: secao trust-badges-homepage renderiza apos multiplos carrosseis.
+// Fix: converter column.main em flex column e reordenar via order.
+// LESS nao suporta :is()/:has() -- usar seletores separados.
+// ---------------------------------------------
+body.cms-index-index .column.main,
+body.cms-home .column.main,
+body.cms-homepage_ayo_home5 .column.main {
+    display: flex;
+    flex-direction: column;
+}
+body.cms-index-index .column.main > *,
+body.cms-home .column.main > *,
+body.cms-homepage_ayo_home5 .column.main > * {
+    width: 100%;
+    order: 5;
+}
+// Hero/primeiro conteudo fica no topo
+body.cms-index-index .column.main > [data-content-type]:first-child,
+body.cms-home .column.main > [data-content-type]:first-child,
+body.cms-homepage_ayo_home5 .column.main > [data-content-type]:first-child {
+    order: 0;
+}
+// Trust badges logo apos o hero
+body.cms-index-index .column.main .trust-badges-homepage,
+body.cms-home .column.main .trust-badges-homepage,
+body.cms-homepage_ayo_home5 .column.main .trust-badges-homepage {
+    order: 1;
+}
+
+
+// ---------------------------------------------
+// FIX P1-6 -- CTA dos cards nao e full-width (210px / 124px -> 100%)
+// Causa: .actions-primary e form nao ocupam 100% da largura.
+// ---------------------------------------------
+// Cards PLP (Ayo: .item-product)
+.item-product .product-info-cart {
+    width: 100%;
+    padding-left: 0;
+    padding-right: 0;
+}
+.item-product .product-info-cart .actions-primary {
+    width: 100%;
+}
+.item-product .product-info-cart .actions-primary form[data-role="tocart-form"] {
+    width: 100%;
+}
+.item-product .product-info-cart .actions-primary .btn-add-to-cart,
+.item-product .product-info-cart .actions-primary .action.tocart {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+// Cards Magento padrao (.product-item-info)
+.product-item-info .product-item-actions {
+    width: 100%;
+    padding: 0 12px 12px;
+}
+.product-item-info .product-item-actions .actions-primary {
+    width: 100%;
+}
+.product-item-info .product-item-actions .actions-primary form {
+    width: 100%;
+}
+.product-item-info .product-item-actions .actions-primary .action.tocart {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+// B2B login-to-buy button tambem full-width
+.b2b-login-to-buy-btn {
+    width: 100%;
+    text-align: center;
+}
+
+
+// ---------------------------------------------
+// FIX P1-7 -- Imagens dos cards nao sao 1:1 (100x139px)
+// Causa: _grid-listing.less fixa height:200px e height:176px!important na img.
+// NOTE: !important necessario para sobrescrever !important existente.
+// ---------------------------------------------
+// PLP cards (Ayo)
+.item-product .product-thumb {
+    aspect-ratio: 1 / 1;
+    height: auto;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.item-product .product-thumb .product-image-container {
+    width: 100%;
+    height: 100%;
+}
+.item-product .product-thumb .product-image-wrapper {
+    padding-bottom: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.item-product .product-thumb img.product-image-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+// Magento standard cards (grid-listing)
+.products-grid .product-item-photo,
+.products-grid .product-image-container {
+    height: auto;
+    aspect-ratio: 1 / 1;
+    padding: 12px;
+}
+.products-grid .product-item-photo .product-image-wrapper,
+.products-grid .product-image-container .product-image-wrapper {
+    padding-bottom: 0 !important;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.products-grid .product-item-photo img.product-image-photo,
+.products-grid .product-image-container img.product-image-photo {
+    width: 100% !important;
+    height: 100% !important;
+    max-height: none !important;
+    object-fit: contain !important;
+}
+
+
+
+// ─────────────────────────────────────────────
+// FIX-REVIEWS-CRU — "0 Avaliação" cru nos cards da home/PLP
+// O tema exibe .reviews-actions ("0 Avaliação") em cards com
+// .product-reviews-summary.empty. Em PDP o link é funcional,
+// então oculta apenas no contexto de cards (.item-product).
+// ─────────────────────────────────────────────
+.item-product .product-reviews-summary .reviews-actions {
+    display: none;
+}
+
+// Magento standard cards (.product-item)
+.products-grid .product-item .product-reviews-summary .reviews-actions {
+    display: none;
+}
+
+
+// ─────────────────────────────────────────────
+// FIX-SSL-TRIPLO — Selos SSL triplicados no rodapé
+// Bloco 1 (text badges): .awa-security-section > .awa-seal-row
+// Bloco 2 (microcopy+links): .awa-security-section > .microcopy
+// Bloco 3 (SVG images): .trust-badges-homepage ← MANTER
+// Decisão: ocultar .awa-security-section inteira (Blocos 1+2)
+// ─────────────────────────────────────────────
+.awa-security-section {
+    display: none;
+}
+
+// ---------------------------------------------
+// FIX P1-8 -- PLP mobile 3 colunas de 74px -> 2 colunas legiveis
+// Causa: tema pai define grid com view-mode/data attr que vence
+// o breakpoint xs (480px). Estender para todo < 768px.
+// ---------------------------------------------
+@media (max-width: 767px) {
+    .catalog-category-view .products-grid > ul.product-grid,
+    .catalog-category-view .products-grid > ul.container-products-switch,
+    .catalog-category-view .products-grid > ul.row.product-grid,
+    .catalogsearch-result-index .products-grid > ul.product-grid,
+    .catalogsearch-result-index .products-grid > ul.container-products-switch,
+    .catalogsearch-result-index .products-grid > ul.row.product-grid {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 8px !important;
+    }
+    .catalog-category-view .products-grid > ul.product-grid > li.item-product,
+    .catalog-category-view .products-grid > ul.container-products-switch > li.item-product,
+    .catalogsearch-result-index .products-grid > ul.product-grid > li.item-product,
+    .catalogsearch-result-index .products-grid > ul.container-products-switch > li.item-product {
+        width: auto !important;
+        max-width: 100% !important;
+        float: none !important;
+        flex: none !important;
+    }
+}
+
+// Single column for very narrow screens (<360px)
+@media (max-width: 359px) {
+    .catalog-category-view .products-grid > ul.product-grid,
+    .catalog-category-view .products-grid > ul.container-products-switch,
+    .catalogsearch-result-index .products-grid > ul.product-grid,
+    .catalogsearch-result-index .products-grid > ul.container-products-switch {
+        grid-template-columns: 1fr !important;
+    }
+}

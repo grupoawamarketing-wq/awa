@@ -1,18 +1,75 @@
 /* ==========================================================================
    AWA Design System — Foundation Layer  (source/_design-system.less)
+   Versão 2.0 — Tokens consolidados  (2026-04-26)
 
    Camada de fundação do design system AWA Motos.
-   Importa _awa-variables.less e extende com:
-     1. Sistema de espaçamento base 8px (named scale)
-     2. Breakpoints padronizados + mixin respond-to
-     3. Tipografia fluida + mixin font-size
-     4. Cores base documentadas (sem alteração visual)
-     5. Container / grid padrão
+   Importa _awa-variables.less e extende com tokens, mixins e CSS custom
+   properties para uso direto em qualquer partial LESS ou runtime CSS.
+
+   ┌──────────────────────────────────────────────────────────────────────┐
+   │  TABELA DE TOKENS — Referência rápida                               │
+   ├────────────┬──────────────────┬───────────────────┬─────────────────┤
+   │ Grupo      │ LESS var          │ CSS custom prop    │ Valor           │
+   ├────────────┼──────────────────┼───────────────────┼─────────────────┤
+   │ CORES      │ @awa-color-primary│ --awa-primary      │ #b73337         │
+   │            │ (ver _awa-vars)  │ --awa-primary-hover│ #8e2629         │
+   │            │ @awa-ink         │ --awa-ink          │ #1a1a1a         │
+   │            │ @awa-ink-05      │ --awa-ink-05       │ rgba(0,0,0,.05) │
+   │            │ @awa-ink-20      │ --awa-ink-20       │ rgba(0,0,0,.20) │
+   │            │ @awa-ink-50      │ --awa-ink-50       │ rgba(0,0,0,.50) │
+   │            │ @awa-ink-80      │ --awa-ink-80       │ rgba(0,0,0,.80) │
+   │            │ @awa-color-white │ --awa-bg           │ #ffffff         │
+   │            │ @awa-color-bg-soft│ --awa-bg-soft     │ #f7f7f7         │
+   │            │ @awa-color-success│ --awa-success     │ #16a34a         │
+   │            │ @awa-color-warning│ --awa-warning     │ #d97706         │
+   │            │ @awa-color-error │ --awa-error        │ #b73337         │
+   │            │ @awa-color-info  │ --awa-info         │ #0ea5e9         │
+   ├────────────┼──────────────────┼───────────────────┼─────────────────┤
+   │ ESPAÇAMENTO│ @awa-s-0         │ --awa-s-0          │ 0               │
+   │ (8px base) │ @awa-s-1         │ --awa-s-1          │ 8px             │
+   │            │ @awa-s-2         │ --awa-s-2          │ 16px            │
+   │            │ @awa-s-3         │ --awa-s-3          │ 24px            │
+   │            │ @awa-s-4         │ --awa-s-4          │ 32px            │
+   │            │ @awa-s-5         │ --awa-s-5          │ 40px            │
+   │            │ @awa-s-6         │ --awa-s-6          │ 48px            │
+   │            │ @awa-s-7         │ --awa-s-7          │ 64px            │
+   │            │ @awa-s-8         │ --awa-s-8          │ 80px            │
+   │            │ @awa-s-9         │ --awa-s-9          │ 96px            │
+   ├────────────┼──────────────────┼───────────────────┼─────────────────┤
+   │ TIPOGRAFIA │ @awa-fs-xs       │ --awa-fs-xs        │ clamp(10..12px) │
+   │ (fluida)   │ @awa-fs-sm       │ --awa-fs-sm        │ clamp(12..14px) │
+   │            │ @awa-fs-md       │ --awa-fs-md        │ clamp(14..16px) │
+   │            │ @awa-fs-lg       │ --awa-fs-lg        │ clamp(16..18px) │
+   │            │ @awa-fs-xl       │ --awa-fs-xl        │ clamp(18..20px) │
+   │            │ @awa-fs-2xl      │ --awa-fs-2xl       │ clamp(24..32px) │
+   │            │ @awa-fs-3xl      │ --awa-fs-3xl       │ clamp(28..36px) │
+   ├────────────┼──────────────────┼───────────────────┼─────────────────┤
+   │ RAIOS      │ @awa-radius-sm   │ --awa-radius-sm    │ 8px             │
+   │            │ @awa-radius-md   │ --awa-radius-md    │ 10px            │
+   │            │ @awa-radius-lg   │ --awa-radius-lg    │ 16px            │
+   │            │ @awa-radius-pill │ --awa-radius-pill  │ 9999px          │
+   ├────────────┼──────────────────┼───────────────────┼─────────────────┤
+   │ SOMBRAS    │ @awa-shadow-sm   │ --awa-shadow-sm    │ 0 1px 3px…      │
+   │            │ @awa-shadow-md   │ --awa-shadow-md    │ 0 4px 12px…     │
+   │            │ @awa-shadow-lg   │ --awa-shadow-lg    │ 0 8px 24px…     │
+   ├────────────┼──────────────────┼───────────────────┼─────────────────┤
+   │ MOTION     │ @awa-ease        │ --awa-ease         │ cubic-bezier…   │
+   │            │ @awa-dur-fast    │ --awa-dur-fast     │ 120ms           │
+   │            │ @awa-dur-base    │ --awa-dur-base     │ 200ms           │
+   │            │ @awa-dur-slow    │ --awa-dur-slow     │ 350ms           │
+   ├────────────┼──────────────────┼───────────────────┼─────────────────┤
+   │ LAYOUT     │ @awa-container-  │ --awa-container-   │ 1200px          │
+   │            │   content        │   content          │                 │
+   │            │ @ds-grid-max-    │ --ds-grid-max-     │ 1440px          │
+   │            │   width          │   width            │                 │
+   │            │ @awa-bp-576…1200 │ --awa-bp-576…1200  │ breakpoints     │
+   └────────────┴──────────────────┴───────────────────┴─────────────────┘
 
    USO:
-     @import '_design-system';
-     — OU —
-     já disponível via _variables.less se adicionada a import chain.
+     LESS:  padding: @awa-s-3;          // 24px
+     CSS:   padding: var(--awa-s-3);    // 24px
+     Fluid: font-size: var(--awa-fs-lg);// clamp(16px..18px)
+     Mixin: .font-size-h2();            // clamp(28px..36px)
 
    REGRA: Este arquivo é 100% não-destrutivo. Apenas define variáveis,
    mapas e mixins para uso futuro. Nenhum seletor HTML é alterado.
@@ -41,6 +98,19 @@
 @ds-space-3xl: 64px;
 @ds-space-4xl: 80px;
 
+// ── Escala s-0..s-9 (API pública @awa-s-*) ───────────────────────────────
+// Base 8px com saltos em s-7+ para espaçamento macro.
+@awa-s-0: 0;
+@awa-s-1: 8px;
+@awa-s-2: 16px;
+@awa-s-3: 24px;
+@awa-s-4: 32px;
+@awa-s-5: 40px;
+@awa-s-6: 48px;
+@awa-s-7: 64px;
+@awa-s-8: 80px;
+@awa-s-9: 96px;
+
 // CSS custom properties (disponíveis no runtime)
 :root {
     --ds-space-xs:   @ds-space-xs;
@@ -51,6 +121,18 @@
     --ds-space-xxl:  @ds-space-xxl;
     --ds-space-3xl:  @ds-space-3xl;
     --ds-space-4xl:  @ds-space-4xl;
+
+    // Escala s-0..s-9 (API pública)
+    --awa-s-0: @awa-s-0;
+    --awa-s-1: @awa-s-1;
+    --awa-s-2: @awa-s-2;
+    --awa-s-3: @awa-s-3;
+    --awa-s-4: @awa-s-4;
+    --awa-s-5: @awa-s-5;
+    --awa-s-6: @awa-s-6;
+    --awa-s-7: @awa-s-7;
+    --awa-s-8: @awa-s-8;
+    --awa-s-9: @awa-s-9;
 }
 
 
@@ -72,6 +154,13 @@
 @ds-bp-xxl: 1920px;
 @ds-bp-4k:  2560px;
 
+// ── Breakpoints canônicos (API pública @awa-bp-*) ────────────────────────
+// Breakpoints 576/768/992/1200 usados em media queries do tema.
+@awa-bp-576:   576px;
+@awa-bp-768:   768px;
+@awa-bp-992:   992px;
+@awa-bp-1200: 1200px;
+
 // CSS custom properties para JS (matchMedia, etc.)
 :root {
     --ds-bp-xs:   @ds-bp-xs;
@@ -81,6 +170,11 @@
     --ds-bp-xl:   @ds-bp-xl;
     --ds-bp-xxl:  @ds-bp-xxl;
     --ds-bp-4k:   @ds-bp-4k;
+
+    --awa-bp-576:  @awa-bp-576;
+    --awa-bp-768:  @awa-bp-768;
+    --awa-bp-992:  @awa-bp-992;
+    --awa-bp-1200: @awa-bp-1200;
 }
 
 // ── Mixins respond-to (min-width — mobile-first) ──────────────────────────
@@ -163,6 +257,8 @@
 //   base     14px     16px
 //   lg       16px     18px
 //   xl       18px     20px
+//   2xl      24px     32px
+//   3xl      28px     36px
 //   h6       16px     18px
 //   h5       18px     22px
 //   h4       20px     24px
@@ -182,8 +278,20 @@
 @ds-font-h3-mobile:   24px;   @ds-font-h3-desktop:   28px;
 @ds-font-h2-mobile:   28px;   @ds-font-h2-desktop:   36px;
 @ds-font-h1-mobile:   32px;   @ds-font-h1-desktop:   48px;
+@ds-font-2xl-mobile:  24px;   @ds-font-2xl-desktop:  32px;
+@ds-font-3xl-mobile:  28px;   @ds-font-3xl-desktop:  36px;
 
-// CSS custom properties (desktop values — fallback estático)
+// ── LESS aliases fs-xs..fs-3xl (valores desktop, fallback estático) ───────
+@awa-fs-xs:   @ds-font-xs-desktop;
+@awa-fs-sm:   @ds-font-sm-desktop;
+@awa-fs-md:   @ds-font-base-desktop;
+@awa-fs-lg:   @ds-font-lg-desktop;
+@awa-fs-xl:   @ds-font-xl-desktop;
+@awa-fs-2xl:  @ds-font-2xl-desktop;
+@awa-fs-3xl:  @ds-font-3xl-desktop;
+
+// CSS custom properties — tipografia fluida com clamp()
+// Viewport range: 320px → 1280px (960px). Fórmula: clamp(min, calc(intercept + slope*100vw), max)
 :root {
     --ds-font-xs:   @ds-font-xs-desktop;
     --ds-font-sm:   @ds-font-sm-desktop;
@@ -196,6 +304,15 @@
     --ds-font-h3:   @ds-font-h3-desktop;
     --ds-font-h2:   @ds-font-h2-desktop;
     --ds-font-h1:   @ds-font-h1-desktop;
+
+    // Escala fluida fs-xs..fs-3xl (API pública com clamp)
+    --awa-fs-xs:  clamp(10px, calc(9.33px + 0.208vw), 12px);
+    --awa-fs-sm:  clamp(12px, calc(11.33px + 0.208vw), 14px);
+    --awa-fs-md:  clamp(14px, calc(13.33px + 0.208vw), 16px);
+    --awa-fs-lg:  clamp(16px, calc(15.33px + 0.208vw), 18px);
+    --awa-fs-xl:  clamp(18px, calc(17.33px + 0.208vw), 20px);
+    --awa-fs-2xl: clamp(24px, calc(21.33px + 0.833vw), 32px);
+    --awa-fs-3xl: clamp(28px, calc(25.33px + 0.833vw), 36px);
 }
 
 // ── Mixin: fluid-type (clamp generator) ───────────────────────────────────
@@ -264,6 +381,14 @@
     .fluid-type(@ds-font-h1-mobile, @ds-font-h1-desktop);
     line-height: @lh-tight;
 }
+.font-size-2xl() {
+    .fluid-type(@ds-font-2xl-mobile, @ds-font-2xl-desktop);
+    line-height: @lh-tight;
+}
+.font-size-3xl() {
+    .fluid-type(@ds-font-3xl-mobile, @ds-font-3xl-desktop);
+    line-height: @lh-tight;
+}
 
 
 // ╔══════════════════════════════════════════════════════════════════════════╗
@@ -307,6 +432,107 @@
 @ds-color-surface:      @awa-color-white;
 @ds-color-surface-alt:  @awa-color-bg-soft;
 @ds-color-border:       @awa-color-border;
+
+
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  4b. INK SCALE — Opacidades de texto/borda (LESS + CSS)                 ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+//
+// Escala de opacidade sobre preto puro. Útil para bordas, dividers,
+// estados hover e texto atenuado sem depender de hex específico.
+
+@awa-ink:    #1a1a1a;
+@awa-ink-05: rgba(0, 0, 0, 0.05);
+@awa-ink-10: rgba(0, 0, 0, 0.10);
+@awa-ink-20: rgba(0, 0, 0, 0.20);
+@awa-ink-50: rgba(0, 0, 0, 0.50);
+@awa-ink-80: rgba(0, 0, 0, 0.80);
+
+
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  4c. RADIUS — Escala de arredondamento (LESS aliases)                   ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+//
+// Valores canônicos em _awa-variables.less. Aqui apenas aliases ds-* para
+// consistência do design system. Exportados como --awa-radius-* no :root.
+
+@ds-radius-sm:   @awa-radius-sm;     // 8px
+@ds-radius-md:   @awa-radius-md;     // 10px
+@ds-radius-lg:   @awa-radius-lg;     // 16px
+@ds-radius-pill: @awa-radius-full;   // 9999px
+
+
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  4d. SOMBRAS — Escala sm/md/lg (LESS vars)                              ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+
+@awa-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+@awa-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.10);
+@awa-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+
+
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  4e. MOTION — Easing + durações (LESS vars)                             ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+
+@awa-ease:     cubic-bezier(0.4, 0, 0.2, 1);
+@awa-dur-fast: 120ms;
+@awa-dur-base: 200ms;
+@awa-dur-slow: 350ms;
+
+
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  4f. LAYOUT — Container content width (1200px)                          ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+
+@awa-container-content: 1200px;
+
+
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  4g. CSS CUSTOM PROPERTIES — Consolidação :root (API pública)           ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+//
+// Bloco único com todos os --awa-* do design system foundation.
+// _tokens.less (carregado depois) adiciona tokens semânticos e de componente.
+// Duplicatas intencionais em _tokens.less ganham pela cascata (último vence).
+
+:root {
+    // ── Cores ──────────────────────────────────────────────────────────────
+    --awa-primary:        @awa-color-primary;
+    --awa-primary-hover:  @awa-color-primary-dark;
+    --awa-ink:            @awa-ink;
+    --awa-ink-05:         @awa-ink-05;
+    --awa-ink-10:         @awa-ink-10;
+    --awa-ink-20:         @awa-ink-20;
+    --awa-ink-50:         @awa-ink-50;
+    --awa-ink-80:         @awa-ink-80;
+    --awa-bg:             @awa-color-white;
+    --awa-bg-soft:        @awa-color-bg-soft;
+    --awa-success:        @awa-color-success;
+    --awa-warning:        @awa-color-warning;
+    --awa-error:          @awa-color-error;
+    --awa-info:           @awa-color-info;
+
+    // ── Raios ──────────────────────────────────────────────────────────────
+    --awa-radius-sm:      @awa-radius-sm;
+    --awa-radius-md:      @awa-radius-md;
+    --awa-radius-lg:      @awa-radius-lg;
+    --awa-radius-pill:    @awa-radius-full;
+
+    // ── Sombras ────────────────────────────────────────────────────────────
+    --awa-shadow-sm:      @awa-shadow-sm;
+    --awa-shadow-md:      @awa-shadow-md;
+    --awa-shadow-lg:      @awa-shadow-lg;
+
+    // ── Motion ─────────────────────────────────────────────────────────────
+    --awa-ease:           @awa-ease;
+    --awa-dur-fast:       @awa-dur-fast;
+    --awa-dur-base:       @awa-dur-base;
+    --awa-dur-slow:       @awa-dur-slow;
+
+    // ── Layout ─────────────────────────────────────────────────────────────
+    --awa-container-content: @awa-container-content;
+}
 
 
 // ╔══════════════════════════════════════════════════════════════════════════╗
