@@ -1,0 +1,153 @@
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  AWA MOTOS — COLOR SYSTEM                                              ║
+// ║  Paleta canônica + escala neutra + aliases semânticos                   ║
+// ║  Posição: 0.9 (após _awa-typography-system, antes de _tokens)          ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+//
+// DIAGNÓSTICO: 3511 hex hardcoded vs 1693 var() = 67% não-tokenizado.
+// Top offenders: #b73337 (610×), #fff (612×), #e5e5e5 (154×), #8e2629 (105×)
+//
+// SOLUÇÃO: Escala canônica como SINGLE SOURCE OF TRUTH.
+// Tokens definidos em _awa-variables.less (LESS) e _tokens.less (CSS props).
+// Este arquivo adiciona:
+// 1. Escala neutra/slate como CSS custom properties
+// 2. Aliases semânticos extras
+// 3. Mapa de migração (hex → token)
+// 4. Classes utilitárias
+//
+// ┌─────────────────────────────────────────────────────────────────────────┐
+// │ MAPA DE MIGRAÇÃO — use este guia para substituir hex hardcoded         │
+// ├───────────────┬──────────────────────┬─────────────────────────────────┤
+// │ Hex           │ Token canônico       │ Uso                            │
+// ├───────────────┼──────────────────────┼─────────────────────────────────┤
+// │ #b73337       │ --awa-red            │ Primary brand, CTA, links       │
+// │ #8e2629       │ --awa-red-dark       │ Hover states, active            │
+// │ #fef2f2       │ --awa-primary-50     │ Error bg, subtle alert          │
+// │ #ffffff / #fff│ --awa-white          │ Backgrounds, button text        │
+// │ #1a1a1a       │ --awa-secondary      │ Dark surfaces, utility bar      │
+// │ #0f172a       │ --awa-neutral-900    │ Headings, body text (slate 900) │
+// │ #333 / #333333│ --awa-neutral-800    │ Body text                       │
+// │ #475569       │ --awa-neutral-600    │ Muted text (slate 600)          │
+// │ #555          │ --awa-neutral-500    │ Secondary text                  │
+// │ #888 / #999   │ --awa-neutral-400    │ Placeholder, disabled text      │
+// │ #e5e5e5       │ --awa-border         │ Default borders                 │
+// │ #e5e7eb       │ --awa-border-subtle  │ Subtle borders (slate 200)      │
+// │ #d1d1d1       │ --awa-neutral-300    │ Stronger borders                │
+// │ #e2e8f0       │ --awa-neutral-200    │ Dividers                        │
+// │ #f5f5f5       │ --awa-bg-soft        │ Soft backgrounds                │
+// │ #f7f7f7       │ --awa-bg-muted       │ Muted backgrounds               │
+// │ #f8fafc       │ --awa-neutral-50     │ Lightest background (slate 50)  │
+// │ #f0f0f0       │ --awa-bg-accent      │ Accent backgrounds              │
+// │ #fafafa       │ --awa-bg-surface-alt │ Alternate surface               │
+// │ #16a34a       │ --awa-success        │ Success states                  │
+// │ #d97706       │ --awa-warning        │ Warning states                  │
+// │ #ff5501       │ --awa-orange         │ Urgency, special offers         │
+// │ #365397       │ --awa-social-fb      │ Facebook brand                  │
+// └───────────────┴──────────────────────┴─────────────────────────────────┘
+
+
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  1. NEUTRAL / SLATE SCALE (CSS Custom Properties)                      ║
+// ║  Canoniza @awa-neutral-* de _awa-variables.less como CSS props         ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+
+:root {
+    // ── Escala neutra (slate-based) ────────────────────────────────────
+    --awa-neutral-50:  #f8fafc;
+    --awa-neutral-100: #f1f5f9;
+    --awa-neutral-200: #e2e8f0;
+    --awa-neutral-300: #cbd5e1;
+    --awa-neutral-400: #94a3b8;
+    --awa-neutral-500: #64748b;
+    --awa-neutral-600: #475569;
+    --awa-neutral-700: #334155;
+    --awa-neutral-800: #1e293b;
+    --awa-neutral-900: #0f172a;
+
+    // ── Brand core ─────────────────────────────────────────────────────
+    --awa-white:  #ffffff;
+    --awa-black:  #000000;
+
+    // ── Gray scale aliases (retrocompatibilidade _awa-consolidated) ────
+    // --awa-gray-50 through --awa-gray-900 already defined in consolidated
+    // These neutral tokens are the canonical ones (Tailwind slate palette)
+
+
+    // ╔══════════════════════════════════════════════════════════════════╗
+    // ║  2. SEMANTIC COLOR ALIASES                                      ║
+    // ║  Nome descreve USO, não valor visual                            ║
+    // ╚══════════════════════════════════════════════════════════════════╝
+
+    // ── Backgrounds ────────────────────────────────────────────────────
+    --awa-bg-page:        var(--awa-white);
+    --awa-bg-muted:       #f7f7f7;
+    --awa-bg-accent:      #f0f0f0;
+    --awa-bg-surface-alt: #fafafa;
+    --awa-bg-hover:       var(--awa-neutral-50);
+    --awa-bg-selected:    var(--awa-primary-50, #fef2f2);
+
+    // ── Text ───────────────────────────────────────────────────────────
+    --awa-text-primary:   var(--awa-neutral-900);
+    --awa-text-secondary: var(--awa-neutral-600);
+    --awa-text-tertiary:  var(--awa-neutral-400);
+    --awa-text-disabled:  var(--awa-neutral-300);
+    --awa-text-on-primary: var(--awa-white);
+
+    // ── Borders ────────────────────────────────────────────────────────
+    --awa-border-default: #e5e5e5;
+    --awa-border-hover:   var(--awa-neutral-400);
+    --awa-border-focus:   var(--awa-red);
+    --awa-border-error:   var(--awa-red);
+
+    // ── Interactive ────────────────────────────────────────────────────
+    --awa-focus-ring-color: var(--awa-red);
+    --awa-link-color:       var(--awa-red);
+    --awa-link-hover:       var(--awa-red-dark);
+
+    // ── Social media ───────────────────────────────────────────────────
+    --awa-social-fb:       #365397;
+    --awa-social-twitter:  #1da1f2;
+    --awa-social-whatsapp: #25d366;
+    --awa-social-youtube:  #ff0000;
+    --awa-social-instagram: #e4405f;
+
+    // ── Status (reafirma, canonical) ───────────────────────────────────
+    --awa-status-success:  #16a34a;
+    --awa-status-warning:  #d97706;
+    --awa-status-error:    var(--awa-red);
+    --awa-status-info:     #2563eb;
+
+    --awa-status-success-bg: #f0fdf4;
+    --awa-status-warning-bg: #fffbeb;
+    --awa-status-error-bg:   #fef2f2;
+    --awa-status-info-bg:    #eff6ff;
+}
+
+
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  3. COLOR UTILITY CLASSES                                               ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+
+// Text colors
+.awa-text-primary   { color: var(--awa-neutral-900); }
+.awa-text-secondary { color: var(--awa-neutral-600); }
+.awa-text-muted     { color: var(--awa-neutral-400); }
+.awa-text-red       { color: var(--awa-red); }
+.awa-text-success   { color: var(--awa-status-success); }
+.awa-text-warning   { color: var(--awa-status-warning); }
+.awa-text-white     { color: var(--awa-white); }
+
+// Background colors
+.awa-bg-white   { background-color: var(--awa-white); }
+.awa-bg-muted   { background-color: var(--awa-bg-muted); }
+.awa-bg-accent  { background-color: var(--awa-bg-accent); }
+.awa-bg-red     { background-color: var(--awa-red); }
+.awa-bg-dark    { background-color: var(--awa-secondary); }
+.awa-bg-success { background-color: var(--awa-status-success-bg); }
+.awa-bg-warning { background-color: var(--awa-status-warning-bg); }
+.awa-bg-error   { background-color: var(--awa-status-error-bg); }
+
+// Border colors
+.awa-border-default { border-color: var(--awa-border-default); }
+.awa-border-red     { border-color: var(--awa-red); }
+.awa-border-success { border-color: var(--awa-status-success); }
