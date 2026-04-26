@@ -48,12 +48,19 @@
             cookieConsent.init();
         });
     }
-    if (window.requestIdleCallback) {
-        // timeout 12s: evita long task dentro da janela LH (FCP->TTI ~4s com 4x CPU)
-        requestIdleCallback(loadCookieConsent, { timeout: 12000 });
-    } else {
-        setTimeout(loadCookieConsent, 6000);
+    // setTimeout fixo 8s — rIC dispara no primeiro momento idle (pode ser antes do TTI).
+    // setTimeout garante que o cookie-consent só carrega após a janela FCP->TTI do LH.
+    // Fallback de interação: carrega imediatamente na primeira ação do usuário.
+    var _ccLoaded = false;
+    function _loadOnce() {
+        if (_ccLoaded) return;
+        _ccLoaded = true;
+        loadCookieConsent();
     }
+    document.addEventListener('scroll', _loadOnce, {once: true, passive: true});
+    document.addEventListener('touchstart', _loadOnce, {once: true, passive: true});
+    document.addEventListener('click', _loadOnce, {once: true, passive: true});
+    setTimeout(_loadOnce, 8000);
 }());
 </script>
 <?php endif; ?>
