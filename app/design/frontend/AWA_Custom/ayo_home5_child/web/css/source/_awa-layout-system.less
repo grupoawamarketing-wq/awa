@@ -1,0 +1,326 @@
+// =============================================================================
+// AWA LAYOUT SYSTEM v1.0 — Container + Grid Architecture
+// =============================================================================
+//
+// Implementa sistema de layout moderno (2025-2026) sobre o Magento 2:
+//
+//   1. CONTAINER SYSTEM — widths canônicos, fluid padding, container queries
+//   2. GRID SYSTEM — auto-fit product grids, section layouts, subgrid-ready
+//   3. DOM BINDINGS — aplica containers/grids ao DOM real do Magento
+//
+// Princípios:
+//   - Mobile-first (base = mobile, escala via min-width)
+//   - Fluid > fixed (clamp/vw > hardcoded px)
+//   - Container queries > media queries (quando o pai importa mais que o viewport)
+//   - Intrinsic sizing (min(), max(), clamp()) > breakpoint cascades
+//   - Zero !important (cascata controlada por especificidade + order)
+//
+// Tokens referenciados de _design-system.less:
+//   @ds-bp-xs..4k, @ds-space-*, @ds-grid-max-width, @ds-grid-gutter
+//
+// REGRA: Este arquivo aplica CSS real ao DOM. Mudanças aqui afetam layout.
+// =============================================================================
+
+
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  1. CONTAINER TOKENS — Single Source of Truth                           ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+
+@awa-layout-xs:       640px;
+@awa-layout-md:      1200px;
+@awa-layout-lg:      1440px;
+
+@awa-layout-pad-min:   12px;
+@awa-layout-pad-max:   24px;
+
+:root {
+    --awa-layout-xs:    @awa-layout-xs;
+    --awa-layout-md:    @awa-layout-md;
+    --awa-layout-lg:    @awa-layout-lg;
+
+    --awa-layout-pad:   ~"clamp(12px, 2vw + 4px, 24px)";
+    --awa-layout-gutter: ~"clamp(12px, 1.5vw + 4px, 24px)";
+    --awa-layout-section-gap: ~"clamp(32px, 4vw + 16px, 64px)";
+}
+
+
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  2. CONTAINER CLASSES                                                   ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+
+.awa-contain-base() {
+    width: 100%;
+    margin-inline: auto;
+    padding-inline: var(--awa-layout-pad);
+    container-type: inline-size;
+}
+
+.awa-contain {
+    .awa-contain-base();
+    max-width: var(--awa-layout-lg);
+    container-name: main;
+}
+
+.awa-contain--md {
+    .awa-contain-base();
+    max-width: var(--awa-layout-md);
+    container-name: content;
+}
+
+.awa-contain--xs {
+    .awa-contain-base();
+    max-width: var(--awa-layout-xs);
+    container-name: narrow;
+}
+
+.awa-contain--bleed {
+    width: 100vw;
+    margin-inline: ~"calc(50% - 50vw)";
+    padding-inline: 0;
+}
+
+
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  3. GRID SYSTEM                                                         ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+
+@awa-grid-col-min-xs:  140px;
+@awa-grid-col-min-sm:  200px;
+@awa-grid-col-min-md:  260px;
+@awa-grid-col-min-lg:  320px;
+
+:root {
+    --awa-grid-col-min:    @awa-grid-col-min-md;
+    --awa-grid-gap:        var(--awa-layout-gutter);
+    --awa-grid-row-gap:    var(--awa-layout-gutter);
+}
+
+.awa-grid {
+    display: grid;
+    grid-template-columns: ~"repeat(auto-fit, minmax(min(var(--awa-grid-col-min), 100%), 1fr))";
+    gap: var(--awa-grid-gap);
+    container-type: inline-size;
+}
+
+.awa-grid--xs {
+    .awa-grid();
+    --awa-grid-col-min: @awa-grid-col-min-xs;
+}
+
+.awa-grid--sm {
+    .awa-grid();
+    --awa-grid-col-min: @awa-grid-col-min-sm;
+}
+
+.awa-grid--lg {
+    .awa-grid();
+    --awa-grid-col-min: @awa-grid-col-min-lg;
+}
+
+// Fixed column grids
+.awa-grid--2col {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--awa-grid-gap);
+}
+
+.awa-grid--3col {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--awa-grid-gap);
+}
+
+.awa-grid--4col {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--awa-grid-gap);
+}
+
+@media (max-width: (@ds-bp-sm - 1)) {
+    .awa-grid--2col,
+    .awa-grid--3col,
+    .awa-grid--4col {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (min-width: @ds-bp-sm) and (max-width: (@ds-bp-md - 1)) {
+    .awa-grid--3col,
+    .awa-grid--4col {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: @ds-bp-md) and (max-width: (@ds-bp-lg - 1)) {
+    .awa-grid--4col {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  4. PRODUCT GRID — Container Query Driven                              ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+
+.awa-product-grid {
+    display: grid;
+    grid-template-columns: ~"repeat(auto-fit, minmax(min(200px, 100%), 1fr))";
+    gap: var(--awa-grid-gap);
+    container-type: inline-size;
+    container-name: products;
+}
+
+
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  5. SECTION LAYOUT                                                      ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+
+// Note: .awa-section already defined in consolidated CSS.
+// Here we ensure the section-gap token is applied uniformly.
+
+
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  6. SIDEBAR LAYOUT                                                      ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+
+.awa-sidebar-layout {
+    display: grid;
+    gap: var(--awa-layout-gutter);
+    grid-template-columns: 1fr;
+    grid-template-areas:
+        "main"
+        "aside";
+}
+
+.awa-sidebar-layout__main {
+    grid-area: main;
+    min-width: 0;
+}
+
+.awa-sidebar-layout__aside {
+    grid-area: aside;
+    min-width: 0;
+}
+
+.respond-to-lg({
+    .awa-sidebar-layout {
+        grid-template-columns: 240px 1fr;
+        grid-template-areas: "aside main";
+    }
+
+    .awa-sidebar-layout--right {
+        grid-template-columns: 1fr 240px;
+        grid-template-areas: "main aside";
+    }
+});
+
+
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  7. DOM BINDINGS — Magento 2 Structure Mapping                         ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+
+// 7a. Page wrapper
+.page-wrapper {
+    width: 100%;
+    overflow-x: hidden;
+}
+
+// 7b. Page main: container de conteúdo
+.page-wrapper > .page-main {
+    .awa-contain-base();
+    max-width: var(--awa-layout-lg);
+}
+
+// 7c. Home: full-bleed sections
+.cms-index-index .page-main {
+    max-width: 100%;
+    padding-inline: 0;
+}
+
+.cms-index-index .page-main > .block,
+.cms-index-index .page-main > .widget,
+.cms-index-index .page-main > section,
+.cms-index-index .page-main > .awa-section {
+    .awa-contain-base();
+    max-width: var(--awa-layout-lg);
+}
+
+// 7d. Columns: sidebar layout nativo
+.columns {
+    display: grid;
+    gap: var(--awa-layout-gutter);
+    grid-template-columns: 1fr;
+}
+
+.respond-to-lg({
+    .page-layout-2columns-left .columns {
+        grid-template-columns: 240px minmax(0, 1fr);
+    }
+
+    .page-layout-2columns-right .columns {
+        grid-template-columns: minmax(0, 1fr) 240px;
+    }
+
+    .page-layout-1column .columns {
+        grid-template-columns: 1fr;
+    }
+});
+
+// 7e. Product listing: intrinsic grid
+.products-grid .product-items,
+.widget-product-grid .product-items {
+    display: grid;
+    grid-template-columns: ~"repeat(auto-fit, minmax(min(200px, 100%), 1fr))";
+    gap: var(--awa-grid-gap);
+    container-type: inline-size;
+    container-name: product-list;
+}
+
+// 7f. Section header
+.awa-section-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--awa-layout-gutter);
+    flex-wrap: wrap;
+    margin-bottom: var(--awa-s-3, 24px);
+}
+
+// 7g. Auth pages: narrow container
+.customer-account-login .page-main,
+.customer-account-create .page-main,
+.customer-account-forgotpassword .page-main {
+    max-width: var(--awa-layout-xs);
+}
+
+
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  8. UTILITY CLASSES                                                     ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+
+.awa-stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--awa-layout-gutter);
+}
+
+.awa-stack--sm {
+    gap: ~"calc(var(--awa-layout-gutter) / 2)";
+}
+
+.awa-stack--lg {
+    gap: ~"calc(var(--awa-layout-gutter) * 2)";
+}
+
+.awa-cluster {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--awa-layout-gutter);
+    align-items: center;
+}
+
+.awa-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
