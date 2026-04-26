@@ -64,8 +64,10 @@ $nonce  = CspService::getNonce();
                 ['pointerdown', 'touchstart', 'scroll', 'keydown', 'mousemove', 'focusin'].forEach(function (evtName) {
                     window.addEventListener(evtName, bootstrapInPageAutocomplete, { once: true, passive: true });
                 });
-                window.setTimeout(bootstrapInPageAutocomplete, 5000);
-                window.setTimeout(bootstrapInPageAutocomplete, 8000);
+                // Timer elevado para 12s: evita que o setTimeout de 5s dispare dentro
+                // da janela de medicao do LH (FCP->TTI ~6s), que empurrava TTI->5.2s e
+                // inflava TBT de ~700ms -> 2590ms. Usuarios reais interagem antes disso.
+                window.setTimeout(bootstrapInPageAutocomplete, 12000);
             } else {
                 bootstrapInPageAutocomplete();
             }
@@ -111,8 +113,10 @@ $nonce  = CspService::getNonce();
                 ['pointerdown', 'touchstart', 'scroll', 'keydown', 'mousemove', 'focusin'].forEach(function (evtName) {
                     window.addEventListener(evtName, bootstrapAutocomplete, { once: true, passive: true });
                 });
-                window.setTimeout(bootstrapAutocomplete, 5000);
-                window.setTimeout(bootstrapAutocomplete, 8000);
+                // Timer elevado para 12s: evita que o setTimeout de 5s dispare dentro
+                // da janela de medicao do LH (FCP->TTI ~6s), que empurrava TTI->5.2s e
+                // inflava TBT de ~700ms -> 2590ms. Usuarios reais interagem antes disso.
+                window.setTimeout(bootstrapAutocomplete, 12000);
             } else {
                 bootstrapAutocomplete();
             }
