@@ -139,32 +139,22 @@
         normalizeOwlNavButtons(root);
     }
 
-    function initHomeAdjustments() {
-        var body = document.body;
+    // AWA PERF v8: window.load only (Owl/Swiper guaranteed ready by then).
+    // Split into 3 separate setTimeout(fn, 0) so each runs in its own macrotask.
+    // Each piece stays < 50ms → zero TBT contribution per task.
+    // normalizeHeroFallback scoped to .top-home-content (avoids full-DOM traversal).
+    window.addEventListener('load', function () {
+        var b = document.body;
 
-        if (!body ||
-            (!body.classList.contains('cms-index-index') &&
-             !body.classList.contains('cms-home') &&
-             !body.classList.contains('cms-homepage_ayo_home5'))) {
+        if (!b ||
+            (!b.classList.contains('cms-index-index') &&
+             !b.classList.contains('cms-home') &&
+             !b.classList.contains('cms-homepage_ayo_home5'))) {
             return;
         }
 
-        applyHomeAdjustments(document);
-
-        /*
-         * AWA PERF: window.load dispara após Owl Carousel E Swiper 11 terem
-         * concluído a inicialização DOM. Substitui MutationObserver que estava
-         * sendo acionado por Swiper init causando TBT >3s (v4 regression).
-         */
-        window.addEventListener('load', function () {
-            applyHomeAdjustments(document);
-        }, { once: true });
-    }
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initHomeAdjustments, { once: true });
-        return;
-    }
-
-    initHomeAdjustments();
+        setTimeout(function () { normalizeHeroFallback(document); }, 0);
+        setTimeout(function () { normalizeTabsAccessibility(document); }, 0);
+        setTimeout(function () { normalizeOwlNavButtons(document); }, 0);
+    }, { once: true });
 }());
