@@ -15,16 +15,16 @@ var config = {
     paths: {
         // PERF: usar jQuery minificado para reduzir parse/compile na main thread.
         'jquery': 'jquery.min',
-        'awa-b2b-header': 'js/awa-b2b-header.min',
+        'awa-b2b-header': 'js/awa-b2b-header',
         'rokanthemes/timecircles': 'js/rokanthemes/timecircles',
         // Redirect Owl Carousel to Swiper Polyfill
         'rokanthemes/owl': 'js/rokanthemes-owl-polyfill',
         // Swiper 11 — UMD bundle for carousel migration
         'swiper': 'js/swiper-bundle.min',
         // Swiper hotfixes: usar fonte até regenerar artefatos minificados com paridade.
-        'js/tab-swiper-init': 'js/tab-swiper-init.min',
+        'js/tab-swiper-init': 'js/tab-swiper-init',
         'js/tab-carousel-init': 'js/tab-carousel-init.min',
-        'js/products-swiper-init': 'js/products-swiper-init.min',
+        'js/products-swiper-init': 'js/products-swiper-init',
         'js/rokanthemes-owl-element-init': 'js/rokanthemes-owl-element-init.min',
         'js/superdeals-swiper-init': 'js/superdeals-swiper-init.min',
         'js/owl-carousel-init': 'js/owl-carousel-init.min',
@@ -42,12 +42,12 @@ var config = {
         'awa-header-customer-runtime': 'js/awa-header-customer-runtime',
         // Declarative bootstrap for all header runtime modules
         'awa-header-runtime-bootstrap': 'js/awa-header-runtime-bootstrap',
-        'awa-b2b-pdp-price-reload': 'js/awa-b2b-pdp-price-reload.min',
-        'awa-b2b-price-hydrator': 'js/awa-b2b-price-hydrator.min',
-        'awa-scroll-reveal': 'js/awa-scroll-reveal.min',
-        'awa-card-enhance': 'js/awa-card-enhance.min',
-        'awa-nav-cls-fix-reset': 'js/awa-nav-cls-fix-reset.min',
-        'awa-vertical-menu-bootstrap': 'js/awa-vertical-menu-bootstrap.min',
+        'awa-b2b-pdp-price-reload': 'js/awa-b2b-pdp-price-reload',
+        'awa-b2b-price-hydrator': 'js/awa-b2b-price-hydrator',
+        'awa-scroll-reveal': 'js/awa-scroll-reveal',
+        'awa-card-enhance': 'js/awa-card-enhance',
+        'awa-nav-cls-fix-reset': 'js/awa-nav-cls-fix-reset',
+        'awa-vertical-menu-bootstrap': 'js/awa-vertical-menu-bootstrap',
         // FASE E: Mobile menu focus trap (WCAG 2.4.3)
         'awa-vertical-menu-focus-trap': 'js/awa-vertical-menu-focus-trap',
         // Carousel promocional do menu vertical (VMente promo images)
