@@ -14,6 +14,18 @@ require(['domReady!'], function () {
     var normalizeTimer = null;
     var HOVER_GUARD_ATTR = 'data-awa-hover-guard';
 
+    function isHomePage() {
+        var body = document.body;
+
+        if (!body) {
+            return false;
+        }
+
+        return body.classList.contains('cms-index-index')
+            || body.classList.contains('cms-home')
+            || body.classList.contains('cms-homepage_ayo_home5');
+    }
+
     function setImportantStyle(element, property, value) {
         if (!element) {
             return;
@@ -180,51 +192,72 @@ require(['domReady!'], function () {
         }, 60);
     }
 
-    runFixes(document);
-    window.setTimeout(function () {
+    function bootstrapHeavyFixes() {
+        if (window.__awaA11yProductLinksBooted) {
+            return;
+        }
+
+        window.__awaA11yProductLinksBooted = true;
+
         runFixes(document);
-    }, 400);
+        window.setTimeout(function () {
+            runFixes(document);
+        }, 400);
 
-    document.addEventListener('contentUpdated', function (event) {
-        scheduleRun(event && event.target ? event.target : document);
-    });
+        document.addEventListener('contentUpdated', function (event) {
+            scheduleRun(event && event.target ? event.target : document);
+        });
 
-    if (window.MutationObserver && document.body) {
-        observer = new MutationObserver(function (mutations) {
-            var shouldRun = false;
+        if (window.MutationObserver && document.body) {
+            observer = new MutationObserver(function (mutations) {
+                var shouldRun = false;
 
-            mutations.forEach(function (mutation) {
-                if (shouldRun) {
-                    return;
-                }
-
-                Array.prototype.forEach.call(mutation.addedNodes, function (node) {
-                    if (shouldRun || !node || node.nodeType !== 1) {
+                mutations.forEach(function (mutation) {
+                    if (shouldRun) {
                         return;
                     }
 
-                    if ((node.matches && (node.matches(LINK_SELECTOR) || node.matches(THUMB_SELECTOR))) ||
-                        (node.querySelector && (node.querySelector(LINK_SELECTOR) || node.querySelector(THUMB_SELECTOR)))) {
-                        shouldRun = true;
-                    }
+                    Array.prototype.forEach.call(mutation.addedNodes, function (node) {
+                        if (shouldRun || !node || node.nodeType !== 1) {
+                            return;
+                        }
+
+                        if ((node.matches && (node.matches(LINK_SELECTOR) || node.matches(THUMB_SELECTOR))) ||
+                            (node.querySelector && (node.querySelector(LINK_SELECTOR) || node.querySelector(THUMB_SELECTOR)))) {
+                            shouldRun = true;
+                        }
+                    });
                 });
+
+                if (shouldRun) {
+                    scheduleRun(document);
+                }
             });
 
-            if (shouldRun) {
-                scheduleRun(document);
-            }
-        });
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
 
-        observer.observe(document.body, {
-            childList: true,
-            subtree: true
-        });
+            window.addEventListener('pagehide', function () {
+                if (observer) {
+                    observer.disconnect();
+                }
+            }, { once: true });
+        }
+    }
 
-        window.addEventListener('pagehide', function () {
-            if (observer) {
-                observer.disconnect();
-            }
-        }, { once: true });
+    if (isHomePage()) {
+        // Home PERF: mantém apenas ajuste leve de aria-label no critical path.
+        // A normalização pesada de thumbs fica desativada na home para evitar long tasks.
+        fixProductLinks(document);
+
+        document.addEventListener('contentUpdated', function (event) {
+            var target = event && event.target && event.target.querySelectorAll ? event.target : document;
+            fixProductLinks(target);
+        });
+    } else {
+        bootstrapHeavyFixes();
     }
 });
 </script>
