@@ -13,6 +13,8 @@ var config = {
         }
     },
     paths: {
+        // PERF: usar jQuery minificado para reduzir parse/compile na main thread.
+        'jquery': 'jquery.min',
         'awa-b2b-header': 'js/awa-b2b-header',
         'rokanthemes/timecircles': 'js/rokanthemes/timecircles',
         // Redirect Owl Carousel to Swiper Polyfill

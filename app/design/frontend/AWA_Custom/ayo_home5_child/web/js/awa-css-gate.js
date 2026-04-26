@@ -10,6 +10,10 @@
  *
  * Com este gate: Lighthouse (sem interação) nunca aplica o CSS
  * durante a medição → sem recalc task → LCP e TBT melhoram.
+ *
+ * NOTA: requestIdleCallback foi testado mas se mostrou PIOR no LH
+ * simulate mode — o engine chama rIC durante a janela TBT, ativando
+ * o CSS e aumentando TBT. Mantido apenas eventos de interação real.
  */
 (function () {
     'use strict';

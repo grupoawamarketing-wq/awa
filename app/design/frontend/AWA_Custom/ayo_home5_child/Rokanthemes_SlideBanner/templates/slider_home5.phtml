@@ -321,7 +321,7 @@ if ($banners = $block->getBannerCollection()):
                 window.setTimeout(startInit, fallbackDelayMs);
             }
 
-            ['pointerdown', 'touchstart', 'scroll', 'keydown', 'mousemove'].forEach(function (evtName) {
+            ['pointerdown', 'touchstart', 'keydown'].forEach(function (evtName) {
                 window.addEventListener(evtName, startInit, { once: true, passive: true });
             });
         }
@@ -333,25 +333,25 @@ if ($banners = $block->getBannerCollection()):
                 if (window.requestIdleCallback) {
                     requestIdleCallback(function () {
                         initOwl('.slider_<?php echo (int) $sliderId; ?> .owl', desktopConfig);
-                    }, { timeout: 2000 });
+                    }, { timeout: 5000 });
                 } else {
-                    scheduleOwlInit('.slider_<?php echo (int) $sliderId; ?> .owl', desktopConfig, 800, 1500);
+                    scheduleOwlInit('.slider_<?php echo (int) $sliderId; ?> .owl', desktopConfig, 5000, 8000);
                 }
-                scheduleOwlInit('.slider_<?php echo (int) $sliderId; ?>_mobile .owl', mobileConfig, 1500, 3000);
+                scheduleOwlInit('.slider_<?php echo (int) $sliderId; ?>_mobile .owl', mobileConfig, 7000, 10000);
             });
         }
 
         // Perf: adia o carregamento de jQuery/Owl (dependências pesadas) para pós-LCP
         // ou na primeira interação real do usuário.
-        ['pointerdown', 'touchstart', 'scroll', 'keydown', 'mousemove'].forEach(function (evtName) {
+        ['pointerdown', 'touchstart', 'keydown'].forEach(function (evtName) {
             window.addEventListener(evtName, bootstrapSlider, { once: true, passive: true });
         });
         // AWA PERF: inicia bootstrapSlider via rIC (sem bloquear FCP/LCP).
         // Fallback síncrono curto — Owl pode inicializar enquanto a página ainda carrega.
         if (window.requestIdleCallback) {
-            requestIdleCallback(bootstrapSlider, { timeout: 1500 });
+            requestIdleCallback(bootstrapSlider, { timeout: 6000 });
         } else {
-            window.setTimeout(bootstrapSlider, 600);
+            window.setTimeout(bootstrapSlider, 7000);
         }
     }());
 </script>
