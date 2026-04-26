@@ -1,0 +1,208 @@
+// ============================================================================
+// AWA Motos — _product-card-refinements.less
+//
+// Refinamento visual do .product-item para consistência em TODOS os contextos:
+//   Home (carrosséis), PLP (categoria/busca), Relacionados, Upsell, Widgets.
+//
+// Carregado APÓS _product-card.less e _product-cards.less via _extend.less.
+// Zero HTML/PHTML/XML/PHP — apenas overrides via tokens globais --awa-*.
+//
+// NOTA: Os tokens :root do card (--card-*) são definidos em _product-card.less.
+//       Este arquivo complementa com overrides de seletor e badge variants.
+//
+// Dependências: _awa-variables.less, _tokens.less
+// ============================================================================
+
+@import (once) '_awa-variables';
+
+
+// ============================================================================
+// 1. CONTAINER — transition com tokens + hover refinado
+// ============================================================================
+// !important: o mixin .awa-card() gera hover com translateY(-3px) em contextos
+// com especificidade alta (.rokan-bestseller .product-item:hover, etc.).
+// Necessário para unificar o lift em -2px em todos os contextos.
+
+.product-item,
+.item-product {
+    transition: transform 250ms ease,
+                box-shadow 250ms ease,
+                border-color 250ms ease !important; // --awa-dur-base + --awa-ease
+}
+
+.product-item:hover,
+.item-product:hover {
+    transform: translateY(-2px) !important; // -3px → -2px (mais sutil, sem shift)
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10) !important; // --awa-shadow-md
+}
+
+
+// ============================================================================
+// 2. IMAGEM — reforço aspect-ratio + bg-soft para todos os contextos
+// ============================================================================
+
+.product-item .product-item-photo,
+.product-item .product-image-container,
+.item-product .product-thumb {
+    aspect-ratio: 1 / 1;
+    background-color: #f8f8f8; // --awa-bg-soft
+    overflow: hidden;
+
+    img,
+    .product-image-photo {
+        object-fit: contain;
+    }
+}
+
+
+// ============================================================================
+// 3. TÍTULO — line-clamp 2, min-height 2.8em, font-size awa-fs-md
+// ============================================================================
+
+.product-item-name a,
+.product-item-name .product-item-link,
+.product-name .product-item-link {
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    display: -webkit-box;
+    overflow: hidden;
+    min-height: 2.8em;
+    font-size: 1.0625rem; // --awa-fs-md
+}
+
+
+// ============================================================================
+// 4. SKU — pílula com fundo ink-05
+// ============================================================================
+
+.awa-b2b-sku,
+.product-sku {
+    background: rgba(0, 0, 0, 0.05); // --awa-ink-05
+    border: none;
+    padding: 2px 8px;
+    border-radius: 10px; // 10px
+    font-size: 0.875rem; // --awa-fs-xs
+}
+
+
+// ============================================================================
+// 5. BADGES — posição padronizada + variantes semânticas
+// ============================================================================
+
+.hot-onsale,
+.product-label {
+    top: @awa-space-2;  // 8px (--awa-s-2)
+    left: @awa-space-2;
+}
+
+// Variantes semânticas — classes CSS para uso em PHTML ou CMS
+// LESS v2.x interpreta -- como subtração. Usamos seletores fully escaped.
+[class*="badge--"] {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: @awa-weight-bold;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #fff;
+    line-height: 1.6;
+    pointer-events: none;
+}
+
+[class*="badge--new"]      { background: var(--awa-info, #1976d2); }
+[class*="badge--promo"]    { background: var(--awa-success, #16a34a); }
+[class*="badge--discount"] { background: var(--awa-primary, #b73337); }
+[class*="badge--best"]     { background: var(--awa-warning, #d97706); }
+[class*="badge--outlet"]   { background: var(--awa-secondary, #1a1a1a); }
+
+
+// ============================================================================
+// 6. SOLD COUNTER — oculto em todos os contextos
+// ============================================================================
+// Reforço global (complementa _overrides.less e _qa-visual-fixes.less)
+
+.sold-by,
+.product-sold,
+.ruler-sold,
+.ruler-sold-count,
+.count-sold,
+.sold-count,
+.qty-sold,
+[class*="sold-counter"] {
+    display: none !important; // suprime "Sold: 0/0"
+}
+
+
+// ============================================================================
+// 7. CTA "ADICIONAR AO CARRINHO" — full-width, 40px, weight 600
+// ============================================================================
+// !important em font-weight: o mixin usa @awa-weight-bold (700/800) via
+// seletor contextual. Necessário para padronizar em 600.
+
+.product-item .actions-primary .action,
+.product-item .actions-primary .action.tocart,
+.product-item .btn-add-to-cart,
+.item-product .actions-primary .action.tocart,
+.item-product .btn-add-to-cart {
+    width: 100%;
+    min-height: 40px;
+    font-weight: @awa-weight-semibold !important; // 700/800 → 600
+    background: var(--awa-primary, #b73337) !important; // sobrescreve gradiente pai
+
+    &:hover,
+    &:focus-visible {
+        background: var(--awa-primary-hover, #8e2629) !important; // --awa-primary-600
+    }
+}
+
+
+// ============================================================================
+// 8. "FAÇA LOGIN PARA VER PREÇOS" — link discreto, não preço
+// ============================================================================
+// !important: múltiplas camadas (mixin + _product-cards.less + bundles CSS)
+// definem este elemento como botão outline. Convertido em link simples.
+
+.product-item .b2b-login-to-see-price,
+.item-product .info-price .b2b-login-to-see-price {
+    min-height: auto !important;    // remove reserva de espaço de preço
+    background: transparent !important;
+    border: none !important;
+    padding: 4px 0 !important;
+
+    a {
+        display: inline !important; // inline, não botão
+        min-height: auto !important;
+        padding: 0 !important;
+        border: none !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+        color: var(--awa-text-muted, #666) !important;
+        font-size: 0.875rem; // --awa-fs-xs
+        font-weight: @awa-weight-normal;
+        text-decoration: underline;
+        text-decoration-color: rgba(0, 0, 0, 0.2);
+        text-underline-offset: 2px;
+        letter-spacing: normal;
+        text-transform: none;
+
+        &:hover {
+            color: var(--awa-primary, #b73337) !important;
+            text-decoration-color: currentColor;
+        }
+    }
+}
+
+
+// ============================================================================
+// 9. RESPONSIVO — ajustes de mobile
+// ============================================================================
+
+@media (max-width: (@awa-breakpoint-md - 1)) {
+    :root {
+        --card-padding:      @awa-space-2;  // 16px → 8px em mobile
+        --card-name-min-h:   2.4em;
+        --card-cta-h:        38px;
+    }
+}
