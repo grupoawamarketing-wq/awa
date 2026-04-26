@@ -1,0 +1,253 @@
+// ============================================================================
+// AWA Motos — _awa-home-polish.less
+// Polimento visual da homepage: hero, seções, banners 3-up, selos, labels.
+//
+// Regras:
+//   - Zero HTML/PHTML/XML/PHP — apenas CSS via LESS
+//   - Usa tokens de _design-system.less e _awa-variables.less
+//   - Seletores scoped via .cms-index-index (homepage only)
+//   - Carregado após _header-density (última camada de _extend.less)
+//
+// NOTA SOBRE !important:
+//   Os bundles assíncronos (awa-super-global.css, awa-super-home.css,
+//   awa-fixes.css) carregam DEPOIS do styles-m.css (onde este LESS compila)
+//   e usam seletores :is() com 3+ classes de especificidade.
+//   Para que as regras deste partial prevaleçam sem mover para um bundle
+//   separado, !important é necessário e documentado em cada uso.
+// ============================================================================
+
+@import (once) '_design-system';
+
+
+// ============================================================================
+// 1. HERO — overlay + CTA reserve
+// ============================================================================
+// aspect-ratio gerenciado por awa-super-global.css (16/5 desktop, responsivo).
+// Adicionamos apenas overlay de legibilidade e reserva CTA.
+
+.cms-index-index {
+
+    .banner-slider.banner-slider2 {
+
+        // Imagens hero: cobrir a área sem distorção
+        .banner_item_bg img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+        }
+
+        // Overlay para legibilidade de texto sobre imagem
+        .banner_item {
+            position: relative;
+
+            &::after {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background: linear-gradient(
+                    to top,
+                    rgba(0, 0, 0, 0.45) 0%,
+                    rgba(0, 0, 0, 0.10) 40%,
+                    transparent 70%
+                );
+                pointer-events: none;
+                z-index: 1;
+            }
+        }
+
+        // Texto sobre o hero: acima do overlay
+        .text-banner {
+            position: relative;
+            z-index: 2;
+        }
+    }
+}
+
+
+// ============================================================================
+// 2. SEÇÕES — headlines uniformes + divisor
+// ============================================================================
+// padding-block já gerenciado por awa-fixes.css com clamp(28px, 4vw, 48px).
+// Focamos em tipografia uniforme das headlines.
+
+.cms-index-index {
+
+    // Headlines uniformes em todas as seções
+    // !important: awa-super-global.css aplica font-size inline via seletores
+    //   :is(body.cms-index-index, ...) .ayo-home5-wrapper h2 que vencem
+    //   nosso seletor simples.
+    .awa-section-header__title {
+        
+        font-size: clamp(28px, calc(28px + 8 * ((100vw - 320px) / 960)), 36px) !important;
+        font-weight: @awa-weight-bold !important; // bundle reseta para 600
+        color: var(--awa-text, @awa-color-text-primary);
+        margin: 0;
+
+        // Divisor de 32px com cor primária (substitui border-left)
+        padding-left: 0 !important;  // bundle aplica padding-left em h2
+        border-left: none !important; // bundle aplica border-left em h2
+        padding-bottom: @awa-space-2;  // 8px
+
+        &::after {
+            content: '';
+            display: block;
+            width: 32px;
+            height: 3px;
+            background: var(--awa-primary, @awa-color-primary);
+            margin-top: @awa-space-2;  // 8px acima do divisor
+            border-radius: 2px;
+        }
+    }
+
+    // Rokan heading (Super Ofertas) — mesma tipografia
+    .rokan-product-heading {
+
+        .sup-title {
+            
+            font-size: clamp(28px, calc(28px + 8 * ((100vw - 320px) / 960)), 36px);
+            font-weight: @awa-weight-bold;
+            color: var(--awa-text, @awa-color-text-primary);
+        }
+    }
+}
+
+
+// ============================================================================
+// 3. BANNERS 3-UP (Envio / Pagamento / Ofertas)
+// ============================================================================
+
+.cms-index-index {
+
+    .top-home-content--trust-and-offers {
+
+        .top-home-content__trust-offers-grid {
+
+            .rowFlex {
+                display: grid;
+                gap: @awa-space-5;   // 20px
+                grid-template-columns: 1fr;
+
+                .respond-to-md({
+                    grid-template-columns: repeat(3, 1fr);
+                });
+            }
+        }
+
+        // Cada banner individual
+        .bs-banner {
+            border-radius: @awa-radius-sm;
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+            &:hover {
+                transform: translateY(-2px);
+                box-shadow: @awa-shadow-card-hover;
+            }
+
+            // Imagens responsivas dentro dos banners
+            img {
+                width: 100%;
+                height: auto;
+                display: block;
+            }
+        }
+
+        // Reset col_banner floats/widths do grid legado Rokanthemes
+        .col_banner1,
+        .col_banner2,
+        .col_banner3 {
+            width: 100%;
+            float: none;
+            padding: 0;
+        }
+    }
+}
+
+
+// ============================================================================
+// 4. BLOCO DE CONFIANÇA — mover acima via order
+// ============================================================================
+//
+// O wrapper .ayo-home5-wrapper já é display:grid via awa-super-home.css.
+// Grid suporta order. Precisamos apenas setar order nos filhos.
+// !important: awa-super-home.css reseta order em :is() seletores de 3 classes.
+
+.cms-index-index {
+
+    // Hero fica no topo absoluto
+    // !important: awa-super-home.css reseta order via :is(body.cms-index-index,
+    //   ...) .page-wrapper .ayo-home5-wrapper selectors (3+ classes)
+    .ayo-home5-wrapper > .top-home-content--above-fold {
+        order: -3 !important;
+    }
+
+    // Category carousel fica logo após hero
+    .ayo-home5-wrapper > .top-home-content--category-carousel {
+        order: -2 !important;
+    }
+
+    // Trust & Offers section: sobe para logo após category carousel
+    .ayo-home5-wrapper > .top-home-content--trust-and-offers {
+        order: -1 !important;
+    }
+}
+
+
+// ============================================================================
+// 5. SELOS SSL / Compra Protegida — ocultar bloco duplicado
+// ============================================================================
+//
+// Existem dois blocos de selos:
+//   1. .awa-security-section (selos de pagamento + compatibilidade)
+//   2. .trust-badges-homepage (Site Seguro / Compra Protegida)
+// Ambos aparecem em sequência. Ocultar o segundo para evitar redundância.
+
+.cms-index-index {
+
+    .trust-badges-homepage ~ .trust-badges-homepage,
+    .column.main > .trust-badges-homepage:nth-of-type(2) {
+        display: none;
+    }
+}
+
+
+// ============================================================================
+// 6. LABELS CRUS — ocultar strings técnicas dos widgets Rokan/Ayo
+// ============================================================================
+
+.cms-index-index {
+
+    // 6.1 Eyebrows genéricos ("Topo", "Categoria", "Novo" sobre seções)
+    //     Estes são eyebrows raw sem valor semântico para o usuário final.
+    //     A informação já está no título da seção (Mais Vendidos, Guidões etc.)
+    .awa-section-header__eyebrow {
+        display: none;
+    }
+
+    // 6.2 "Sold: 0/0" — já oculto via _qa-visual-fixes.less
+    //     Mantemos aqui apenas como referência; sem duplicação de regra.
+
+    // 6.3 Label "Novo" nos product cards (widget Rokanthemes)
+    //     NOTA: mantido visível pois é um badge intencional (.new-lable).
+    //     Caso deseje ocultar, descomentar:
+    // .hot-onsale .onsale.new-lable {
+    //     display: none;
+    // }
+}
+
+
+// ============================================================================
+// 7. CARROSSEL DE CATEGORIAS — ocultar contagem "X produtos"
+// ============================================================================
+//
+// !important: awa-super-home.css set display:inline-flex no __count com
+//   seletor :is(body.cms-index-index, ...) .page-wrapper ... (3+ classes)
+//   que vence nosso seletor simples. Carrega depois do styles-m.css.
+
+.cms-index-index {
+
+    .awa-category-carousel__count {
+        display: none !important;
+    }
+}
