@@ -1,0 +1,322 @@
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  AWA MOTOS — EFFECTS SYSTEM                                            ║
+// ║  Spacing (unificado) + Shadows/Elevation + Border-radius + Transitions  ║
+// ║  Posição: 0.95 (após _awa-color-system, antes de _tokens)              ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+
+
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  1. SPACING SCALE (unification layer)                                   ║
+// ║  Canonical: --awa-space-N (1-10). Named aliases for discoverability.    ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+//
+// ┌──────────────┬─────────┬────────────────┬──────────────────────────────┐
+// │ Canonical    │ Value   │ Named alias    │ Uso                          │
+// ├──────────────┼─────────┼────────────────┼──────────────────────────────┤
+// │ --awa-s-1    │   4px   │ --awa-s-xs     │ gaps mínimos, icon margins   │
+// │ --awa-s-2    │   8px   │ --awa-s-sm     │ padding cards, input padding │
+// │ --awa-s-3    │  12px   │ --awa-s-md     │ list gaps, badge padding     │
+// │ --awa-s-4    │  16px   │ --awa-s-lg     │ section padding, card gaps   │
+// │ --awa-s-5    │  20px   │ --awa-s-xl     │ container padding mobile     │
+// │ --awa-s-6    │  24px   │ --awa-s-2xl    │ section gaps, large padding  │
+// │ --awa-s-7    │  32px   │ --awa-s-3xl    │ section spacing tablet       │
+// │ --awa-s-8    │  40px   │ --awa-s-4xl    │ section spacing desktop      │
+// │ --awa-s-9    │  48px   │ --awa-s-5xl    │ hero padding                 │
+// │ --awa-s-10   │  64px   │ --awa-s-6xl    │ page sections, mega spacing  │
+// └──────────────┴─────────┴────────────────┴──────────────────────────────┘
+//
+// Half-steps (de _awa-consolidated):
+// --awa-space-2-5 (10px), --awa-space-3-5 (14px), --awa-space-3-75 (15px)
+
+:root {
+    // ── Short aliases (--awa-s-*) — para uso em novo código ────────────
+    --awa-s-0:   0;
+    --awa-s-px:  1px;
+    --awa-s-0-5: 2px;
+    --awa-s-1:   4px;
+    --awa-s-1-5: 6px;
+    --awa-s-2:   8px;
+    --awa-s-2-5: 10px;
+    --awa-s-3:   12px;
+    --awa-s-3-5: 14px;
+    --awa-s-4:   16px;
+    --awa-s-5:   20px;
+    --awa-s-6:   24px;
+    --awa-s-7:   32px;
+    --awa-s-8:   40px;
+    --awa-s-9:   48px;
+    --awa-s-10:  64px;
+    --awa-s-12:  80px;
+    --awa-s-16:  96px;
+
+    // ── Named aliases → numeric (for discoverability) ──────────────────
+    --awa-s-xs:  var(--awa-s-1);     // 4px
+    --awa-s-sm:  var(--awa-s-2);     // 8px
+    --awa-s-md:  var(--awa-s-3);     // 12px
+    --awa-s-lg:  var(--awa-s-4);     // 16px
+    --awa-s-xl:  var(--awa-s-5);     // 20px
+    --awa-s-2xl: var(--awa-s-6);     // 24px
+    --awa-s-3xl: var(--awa-s-7);     // 32px
+    --awa-s-4xl: var(--awa-s-8);     // 40px
+    --awa-s-5xl: var(--awa-s-9);     // 48px
+    --awa-s-6xl: var(--awa-s-10);    // 64px
+
+    // ── Legacy aliases (--awa-space-* → --awa-s-*) ────────────────────
+    // Estes já existem em _tokens.less; reafirmamos aqui para completude.
+    // NÃO duplicam — CSS vars silenciosamente ignoram redeclarações
+    // se o valor é idêntico. Última declaração vence.
+
+
+    // ╔══════════════════════════════════════════════════════════════════╗
+    // ║  2. SHADOW / ELEVATION SYSTEM                                   ║
+    // ║  560 hardcoded box-shadows → escala semântica tokenizada         ║
+    // ╚══════════════════════════════════════════════════════════════════╝
+    //
+    // ┌─────────────────────────┬───────────────────────────────────────────┐
+    // │ Token                   │ Uso / Migração                            │
+    // ├─────────────────────────┼───────────────────────────────────────────┤
+    // │ --awa-shadow-none       │ Remover sombra (box-shadow: none)         │
+    // │ --awa-shadow-xs         │ Sutil: inputs, badges (0 1px 2px)         │
+    // │ --awa-shadow-sm         │ Cards em repouso (0 1px 3px)              │
+    // │ --awa-shadow            │ Cards, dropdowns (0 2px 8px) — default    │
+    // │ --awa-shadow-md         │ Cards hover, popups (0 4px 12px)          │
+    // │ --awa-shadow-lg         │ Modals, overlays (0 8px 24px)             │
+    // │ --awa-shadow-xl         │ Full-page overlays (0 16px 48px)          │
+    // │ --awa-shadow-2xl        │ Mega overlays (0 24px 64px)               │
+    // ├─────────────────────────┼───────────────────────────────────────────┤
+    // │ --awa-shadow-brand      │ CTA glow vermelho (hover, 0 4px 12px)    │
+    // │ --awa-shadow-brand-lg   │ CTA hover forte (0 8px 20px)             │
+    // │ --awa-shadow-focus      │ Focus ring (0 0 0 3px red/25%)           │
+    // │ --awa-shadow-focus-soft │ Focus ring suave (0 0 0 3px red/12%)     │
+    // │ --awa-shadow-inset      │ Inputs focus (inset 0 0 0 1px)           │
+    // │ --awa-shadow-card       │ Card default (alias → --awa-shadow-sm)   │
+    // │ --awa-shadow-card-hover │ Card hover (alias → --awa-shadow-md)     │
+    // │ --awa-shadow-dropdown   │ Menus (0 6px 20px)                       │
+    // └─────────────────────────┴───────────────────────────────────────────┘
+    //
+    // MIGRAÇÃO hex → token:
+    //   0 0 0 3px rgba(183,51,55,0.25)    → var(--awa-shadow-focus)       [28×]
+    //   0 8px 20px rgba(183,51,55,0.18)   → var(--awa-shadow-brand-lg)   [9×]
+    //   0 3px 3px rgba(0,0,0,0.15)        → var(--awa-shadow-sm)         [7×]
+    //   0 2px 8px rgba(183,51,55,0.2)     → var(--awa-shadow-brand)      [5×]
+    //   0 0 0 3px rgba(183,51,55,0.12)    → var(--awa-shadow-focus-soft) [5×]
+    //   0 4px 12px rgba(183,51,55,0.3)    → var(--awa-shadow-brand)      [4×]
+    //   0 12px 32px rgba(17,24,39,0.1)    → var(--awa-shadow-lg)         [3×]
+
+    // ── Elevation scale (neutral) ──────────────────────────────────────
+    --awa-shadow-none:  none;
+    --awa-shadow-xs:    0 1px 2px rgba(0, 0, 0, 0.04);
+    --awa-shadow-sm:    0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+    --awa-shadow:       0 2px 8px rgba(0, 0, 0, 0.08);
+    --awa-shadow-md:    0 4px 12px rgba(0, 0, 0, 0.10);
+    --awa-shadow-lg:    0 8px 24px rgba(0, 0, 0, 0.12);
+    --awa-shadow-xl:    0 16px 48px rgba(0, 0, 0, 0.16);
+    --awa-shadow-2xl:   0 24px 64px rgba(0, 0, 0, 0.20);
+
+    // ── Brand shadows (vermelho AWA) ───────────────────────────────────
+    --awa-shadow-brand:     ~"0 4px 12px color-mix(in srgb, var(--awa-red) 24%, transparent)";
+    --awa-shadow-brand-lg:  ~"0 8px 20px color-mix(in srgb, var(--awa-red) 18%, transparent)";
+    --awa-shadow-brand-xl:  ~"0 8px 24px color-mix(in srgb, var(--awa-red) 36%, transparent)";
+
+    // ── Focus rings ────────────────────────────────────────────────────
+    --awa-shadow-focus:      ~"0 0 0 3px color-mix(in srgb, var(--awa-red) 25%, transparent)";
+    --awa-shadow-focus-soft: ~"0 0 0 3px color-mix(in srgb, var(--awa-red) 12%, transparent)";
+
+    // ── Specialty ──────────────────────────────────────────────────────
+    --awa-shadow-inset:    ~"inset 0 0 0 1px var(--awa-border-default, #e5e5e5)";
+    --awa-shadow-card:     var(--awa-shadow-sm);
+    --awa-shadow-card-hover: var(--awa-shadow-md);
+    --awa-shadow-dropdown: 0 6px 20px rgba(0, 0, 0, 0.12);
+    --awa-shadow-badge:    0 1px 4px rgba(0, 0, 0, 0.12);
+    --awa-shadow-hover:    var(--awa-shadow-md);
+
+    // ── Alias retrocompat (--awa-shadow-red → --awa-shadow-brand) ──────
+    --awa-shadow-red:       var(--awa-shadow-brand);
+    --awa-shadow-focus-ring: var(--awa-shadow-focus);
+
+
+    // ╔══════════════════════════════════════════════════════════════════╗
+    // ║  3. BORDER-RADIUS SYSTEM                                        ║
+    // ║  Reafirma escala canônica + adiciona md-lg (69× usado)          ║
+    // ╚══════════════════════════════════════════════════════════════════╝
+    //
+    // ┌───────────────────┬────────┬──────────────────────────────────────┐
+    // │ Token             │ Value  │ Uso                                   │
+    // ├───────────────────┼────────┼──────────────────────────────────────┤
+    // │ --awa-radius-none │   0    │ Sem arredondamento                    │
+    // │ --awa-radius-2xs  │   4px  │ Badges, chips compactos               │
+    // │ --awa-radius-xs   │   4px  │ Alias (= 2xs)                        │
+    // │ --awa-radius-sm   │   8px  │ Inputs, botões, cards pequenos       │
+    // │ --awa-radius-md   │  12px  │ Cards médios, dialogs                │
+    // │ --awa-radius-md-lg│  14px  │ Product cards (69× usado)            │
+    // │ --awa-radius-lg   │  16px  │ Cards grandes, modais                │
+    // │ --awa-radius-xl   │  20px  │ Painéis, sidebars                    │
+    // │ --awa-radius-2xl  │  24px  │ Mega cards                           │
+    // │ --awa-radius-pill │ 9999px │ Pill buttons, tags                   │
+    // │ --awa-radius-full │ 9999px │ Circular (= pill)                    │
+    // └───────────────────┴────────┴──────────────────────────────────────┘
+    //
+    // MIGRAÇÃO:
+    //   4px  → var(--awa-radius-2xs)   [82× hardcoded]
+    //   8px  → var(--awa-radius-sm)    [60× hardcoded]
+    //   2px  → var(--awa-radius-2xs)   [38× hardcoded, arredondar para 4px]
+    //   50%  → var(--awa-radius-full)  [56× hardcoded]
+
+    --awa-radius-none:  0;
+    --awa-radius-2xs:   4px;
+    --awa-radius-xs:    4px;
+    --awa-radius-sm:    8px;
+    --awa-radius-md:    12px;
+    --awa-radius-md-lg: 14px;
+    --awa-radius-lg:    16px;
+    --awa-radius-xl:    20px;
+    --awa-radius-2xl:   24px;
+    --awa-radius-pill:  9999px;
+    --awa-radius-full:  9999px;
+
+    // Alias genérico (para componentes que usam --awa-radius sem sufixo)
+    --awa-radius: var(--awa-radius-md);
+
+
+    // ╔══════════════════════════════════════════════════════════════════╗
+    // ║  4. TRANSITION SYSTEM                                           ║
+    // ║  Durações + easings canônicos para consistência de animação      ║
+    // ╚══════════════════════════════════════════════════════════════════╝
+
+    --awa-duration-fast:   100ms;
+    --awa-duration-base:   200ms;
+    --awa-duration-slow:   300ms;
+    --awa-duration-slower: 500ms;
+
+    --awa-ease-default:    ~"cubic-bezier(0.4, 0, 0.2, 1)";    // Material ease
+    --awa-ease-in:         ~"cubic-bezier(0.4, 0, 1, 1)";
+    --awa-ease-out:        ~"cubic-bezier(0, 0, 0.2, 1)";
+    --awa-ease-bounce:     ~"cubic-bezier(0.34, 1.56, 0.64, 1)";
+
+    // Presets
+    --awa-transition-colors:   ~"color var(--awa-duration-base) var(--awa-ease-default), background-color var(--awa-duration-base) var(--awa-ease-default), border-color var(--awa-duration-base) var(--awa-ease-default)";
+    --awa-transition-shadow:   ~"box-shadow var(--awa-duration-base) var(--awa-ease-default)";
+    --awa-transition-transform: ~"transform var(--awa-duration-fast) var(--awa-ease-default)";
+    --awa-transition-all:      ~"all var(--awa-duration-base) var(--awa-ease-default)";
+}
+
+
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  5. SPACING UTILITY CLASSES                                             ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+
+// Margin utilities
+.awa-m-0    { margin: 0; }
+.awa-mt-0   { margin-top: 0; }
+.awa-mb-0   { margin-bottom: 0; }
+.awa-mb-1   { margin-bottom: var(--awa-s-1); }
+.awa-mb-2   { margin-bottom: var(--awa-s-2); }
+.awa-mb-3   { margin-bottom: var(--awa-s-3); }
+.awa-mb-4   { margin-bottom: var(--awa-s-4); }
+.awa-mb-6   { margin-bottom: var(--awa-s-6); }
+.awa-mb-8   { margin-bottom: var(--awa-s-8); }
+.awa-mx-auto { margin-inline: auto; }
+
+// Padding utilities
+.awa-p-0    { padding: 0; }
+.awa-p-2    { padding: var(--awa-s-2); }
+.awa-p-3    { padding: var(--awa-s-3); }
+.awa-p-4    { padding: var(--awa-s-4); }
+.awa-p-6    { padding: var(--awa-s-6); }
+.awa-px-4   { padding-inline: var(--awa-s-4); }
+.awa-px-6   { padding-inline: var(--awa-s-6); }
+.awa-py-2   { padding-block: var(--awa-s-2); }
+.awa-py-4   { padding-block: var(--awa-s-4); }
+.awa-py-6   { padding-block: var(--awa-s-6); }
+
+// Gap utilities
+.awa-gap-1  { gap: var(--awa-s-1); }
+.awa-gap-2  { gap: var(--awa-s-2); }
+.awa-gap-3  { gap: var(--awa-s-3); }
+.awa-gap-4  { gap: var(--awa-s-4); }
+.awa-gap-6  { gap: var(--awa-s-6); }
+
+
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  6. SHADOW UTILITY CLASSES                                              ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+
+.awa-shadow-none { box-shadow: var(--awa-shadow-none); }
+.awa-shadow-xs   { box-shadow: var(--awa-shadow-xs); }
+.awa-shadow-sm   { box-shadow: var(--awa-shadow-sm); }
+.awa-shadow      { box-shadow: var(--awa-shadow); }
+.awa-shadow-md   { box-shadow: var(--awa-shadow-md); }
+.awa-shadow-lg   { box-shadow: var(--awa-shadow-lg); }
+.awa-shadow-xl   { box-shadow: var(--awa-shadow-xl); }
+
+
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  7. RADIUS UTILITY CLASSES                                              ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+
+.awa-rounded-none { border-radius: var(--awa-radius-none); }
+.awa-rounded-sm   { border-radius: var(--awa-radius-sm); }
+.awa-rounded      { border-radius: var(--awa-radius-md); }
+.awa-rounded-lg   { border-radius: var(--awa-radius-lg); }
+.awa-rounded-xl   { border-radius: var(--awa-radius-xl); }
+.awa-rounded-pill { border-radius: var(--awa-radius-pill); }
+.awa-rounded-full { border-radius: var(--awa-radius-full); }
+
+
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  8. EFFECT PRESET MIXINS                                                ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+
+// Card base: radius + shadow + hover transition
+.awa-effect-card() {
+    border-radius: var(--awa-radius-md);
+    box-shadow: var(--awa-shadow-card);
+    transition: ~"box-shadow var(--awa-duration-base) var(--awa-ease-default), transform var(--awa-duration-fast) var(--awa-ease-default)";
+
+    &:hover {
+        box-shadow: var(--awa-shadow-card-hover);
+    }
+}
+
+// Interactive element: focus ring
+.awa-effect-focus() {
+    &:focus-visible {
+        outline: 2px solid var(--awa-red);
+        outline-offset: 2px;
+        box-shadow: var(--awa-shadow-focus);
+    }
+}
+
+// CTA glow: brand shadow on hover
+.awa-effect-cta() {
+    transition: ~"box-shadow var(--awa-duration-base) var(--awa-ease-default), transform var(--awa-duration-fast) var(--awa-ease-default), background-color var(--awa-duration-base) var(--awa-ease-default)";
+
+    &:hover {
+        box-shadow: var(--awa-shadow-brand-lg);
+        transform: translateY(-1px);
+    }
+
+    &:active {
+        transform: translateY(0);
+    }
+}
+
+// Elevated surface: subtle lift
+.awa-effect-elevated() {
+    box-shadow: var(--awa-shadow);
+    transition: ~"box-shadow var(--awa-duration-slow) var(--awa-ease-default)";
+
+    &:hover {
+        box-shadow: var(--awa-shadow-lg);
+    }
+}
+
+// Respect reduced motion
+@media (prefers-reduced-motion: reduce) {
+    :root {
+        --awa-duration-fast:   0ms;
+        --awa-duration-base:   0ms;
+        --awa-duration-slow:   0ms;
+        --awa-duration-slower: 0ms;
+    }
+}
