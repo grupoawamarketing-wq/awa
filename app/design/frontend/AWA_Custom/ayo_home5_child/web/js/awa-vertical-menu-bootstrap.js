@@ -41,12 +41,18 @@ define([
 
     function wireDesktopHoverFallback(navEl) {
         var items;
+        var listEl;
 
         if (!navEl) {
             return;
         }
 
         items = navEl.querySelectorAll('.togge-menu > li.ui-menu-item.level0.parent');
+        listEl = navEl.querySelector('.togge-menu');
+
+        if (listEl && window.innerWidth >= 992) {
+            listEl.style.setProperty('overflow', 'visible', 'important');
+        }
 
         items.forEach(function (item) {
             if (item.getAttribute('data-awa-vm-hover-wired') === '1') {
@@ -68,10 +74,16 @@ define([
                     return;
                 }
 
+                if (open && document.body) {
+                    document.body.classList.remove('nav-open');
+                    document.body.classList.remove('nav-before-open');
+                    document.documentElement.classList.remove('nav-open');
+                }
+
                 item.classList.toggle('vmm-active', open);
-                panel.style.visibility = open ? 'visible' : 'hidden';
-                panel.style.opacity = open ? '1' : '0';
-                panel.style.pointerEvents = open ? 'auto' : 'none';
+                panel.style.setProperty('visibility', open ? 'visible' : 'hidden', 'important');
+                panel.style.setProperty('opacity', open ? '1' : '0', 'important');
+                panel.style.setProperty('pointer-events', open ? 'auto' : 'none', 'important');
             }
 
             item.addEventListener('mouseenter', function () {
@@ -94,6 +106,7 @@ define([
                 setOpenState(false);
             });
         });
+
     }
 
     $(bootstrapMenus);

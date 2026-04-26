@@ -177,6 +177,23 @@ define([], function () {
         }
     }
 
+    function isDesktopViewport() {
+        return window.matchMedia && window.matchMedia('(min-width: 992px)').matches;
+    }
+
+    function removeDrawerControls() {
+        if (_closeBtn && _closeBtn.parentNode) {
+            _closeBtn.parentNode.removeChild(_closeBtn);
+        }
+
+        if (_overlay && _overlay.parentNode) {
+            _overlay.parentNode.removeChild(_overlay);
+        }
+
+        _closeBtn = null;
+        _overlay = null;
+    }
+
     /**
      * Resolve the mobile drawer shell used by the vertical menu.
      * Prefers the explicit data attribute and supports legacy fallback IDs.
@@ -201,6 +218,12 @@ define([], function () {
 
         if (!window.MutationObserver) {
             return; // Graceful degradation for old browsers
+        }
+
+        if (isDesktopViewport()) {
+            removeDrawerControls();
+            deactivateTrap();
+            return;
         }
 
         ensureDrawerControls(nav);
