@@ -161,19 +161,10 @@
         }, { once: true });
     }
 
-    // AWA PERF v7: remover chamada em DOMContentLoaded — Owl Carousel ainda não
-    // inicializou nesse ponto, então DOM queries em normalizeHeroFallback e
-    // normalizeOwlNavButtons são trabalho desperdiçado e causam task de 200-300ms TBT.
-    // Rodar apenas pós-window.load (Owl já finalizou) via rAF para não bloquear o task.
-    window.addEventListener('load', function () {
-        var b = document.body;
-        if (!b || (!b.classList.contains('cms-index-index') &&
-                   !b.classList.contains('cms-home') &&
-                   !b.classList.contains('cms-homepage_ayo_home5'))) {
-            return;
-        }
-        window.requestAnimationFrame(function () {
-            applyHomeAdjustments(document);
-        });
-    }, { once: true });
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initHomeAdjustments, { once: true });
+        return;
+    }
+
+    initHomeAdjustments();
 }());
