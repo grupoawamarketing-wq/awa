@@ -1,0 +1,336 @@
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  AWA MOTOS — TYPOGRAPHY SYSTEM                                         ║
+// ║  Escala tipográfica unificada + aliases de compatibilidade              ║
+// ║  Posição: 0.8 (após _awa-layout-system, antes de _tokens)              ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+//
+// PROBLEMA: 5 naming conventions, 79 tokens distintos de font-size.
+// SOLUÇÃO: Escala canônica --awa-text-*, aliases para retrocompatibilidade.
+//
+// ┌────────────────────────────────────────────────────────────────────────┐
+// │ ESCALA CANÔNICA                                                       │
+// ├──────────────────┬────────┬───────────────────────────────────────────┤
+// │ Token            │ Static │ Uso recomendado                           │
+// ├──────────────────┼────────┼───────────────────────────────────────────┤
+// │ --awa-text-3xs   │ 10px   │ badges mínimos, counters, superscript    │
+// │ --awa-text-2xs   │ 11px   │ labels, captions extra-pequenos          │
+// │ --awa-text-xs    │ 12px   │ captions, disclaimers, notas de rodapé   │
+// │ --awa-text-sm    │ 13px   │ metadados, subtextos, breadcrumbs        │
+// │ --awa-text-base  │ 14px   │ corpo de texto, inputs, botões           │
+// │ --awa-text-md    │ 16px   │ corpo enfatizado, nav items              │
+// │ --awa-text-lg    │ 18px   │ subtítulos, card headers                 │
+// │ --awa-text-xl    │ 20px   │ section headers, preços destaque         │
+// │ --awa-text-2xl   │ 24px   │ headings h3-h4                           │
+// │ --awa-text-3xl   │ 28px   │ headings h2-h3                           │
+// │ --awa-text-4xl   │ 32px   │ headings h1-h2, display                  │
+// │ --awa-text-5xl   │ 40px   │ display headings, hero                   │
+// └──────────────────┴────────┴───────────────────────────────────────────┘
+//
+// USO:
+//   font-size: var(--awa-text-base);          // estático 14px
+//   font-size: var(--awa-text-fluid-base);    // clamp(14→16px)
+//   .awa-type-body();                         // preset: size + weight + leading
+//
+// ALIASES (retrocompatibilidade, NÃO usar em código novo):
+//   --awa-font-sm, --awa-font-size-sm, --awa-fs-sm → todos apontam para
+//   o valor canônico correspondente.
+
+
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  1. CANONICAL TYPE SCALE (source of truth)                             ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+
+:root {
+    // ── Escala estática (values em px) ─────────────────────────────────
+    --awa-text-3xs:       10px;
+    --awa-text-2xs:       11px;
+    --awa-text-xs:        12px;
+    --awa-text-sm:        13px;
+    --awa-text-base:      14px;
+    --awa-text-base-plus: 15px;
+    --awa-text-md:        16px;
+    --awa-text-lg:        18px;
+    --awa-text-xl:        20px;
+    --awa-text-xl-plus:   22px;
+    --awa-text-2xl:       24px;
+    --awa-text-3xl:       28px;
+    --awa-text-4xl:       32px;
+    --awa-text-5xl:       40px;
+
+    // ── Escala fluida (clamp mobile→desktop) ───────────────────────────
+    // Interpola entre 320px e 1280px viewport
+    --awa-text-fluid-xs:    ~"clamp(10px, calc(9.33px + 0.208vw), 12px)";
+    --awa-text-fluid-sm:    ~"clamp(12px, calc(11.33px + 0.208vw), 14px)";
+    --awa-text-fluid-base:  ~"clamp(14px, calc(13.33px + 0.208vw), 16px)";
+    --awa-text-fluid-md:    ~"clamp(14px, calc(13.33px + 0.208vw), 16px)";
+    --awa-text-fluid-lg:    ~"clamp(16px, calc(15.33px + 0.208vw), 18px)";
+    --awa-text-fluid-xl:    ~"clamp(18px, calc(17.33px + 0.208vw), 20px)";
+    --awa-text-fluid-2xl:   ~"clamp(24px, calc(21.33px + 0.833vw), 32px)";
+    --awa-text-fluid-3xl:   ~"clamp(28px, calc(25.33px + 0.833vw), 36px)";
+
+    // ── Headings fluidos ───────────────────────────────────────────────
+    --awa-text-fluid-h6:    ~"clamp(16px, calc(15.33px + 0.208vw), 18px)";
+    --awa-text-fluid-h5:    ~"clamp(18px, calc(16.67px + 0.417vw), 22px)";
+    --awa-text-fluid-h4:    ~"clamp(20px, calc(18.67px + 0.417vw), 24px)";
+    --awa-text-fluid-h3:    ~"clamp(24px, calc(22.67px + 0.417vw), 28px)";
+    --awa-text-fluid-h2:    ~"clamp(28px, calc(25.33px + 0.833vw), 36px)";
+    --awa-text-fluid-h1:    ~"clamp(32px, calc(26.67px + 1.667vw), 48px)";
+
+
+    // ╔══════════════════════════════════════════════════════════════════╗
+    // ║  2. BACKWARD-COMPATIBLE ALIASES                                 ║
+    // ║  Map ALL legacy naming conventions → canonical --awa-text-*     ║
+    // ║  NÃO usar em código novo — apenas retrocompatibilidade.         ║
+    // ╚══════════════════════════════════════════════════════════════════╝
+
+    // ── Convention B: --awa-font-size-* (210 ocorrências) ──────────────
+    --awa-font-size-2xs:   var(--awa-text-3xs);    // 10px
+    --awa-font-size-xs:    var(--awa-text-2xs);    // 11px
+    --awa-font-size-12:    var(--awa-text-xs);     // 12px
+    --awa-font-size-sm:    var(--awa-text-sm);     // 13px
+    --awa-font-size-14:    var(--awa-text-base);   // 14px
+    --awa-font-size-md:    var(--awa-text-base-plus); // 15px
+    --awa-font-size-base:  var(--awa-text-base);   // 14px
+    --awa-font-size:       var(--awa-text-md);     // 16px (sem sufixo = base padrão)
+    --awa-font-size-16:    var(--awa-text-md);     // 16px
+    --awa-font-size-lg:    var(--awa-text-lg);     // 18px
+    --awa-font-size-20:    var(--awa-text-xl);     // 20px
+    --awa-font-size-xl:    var(--awa-text-xl);     // 20px
+    --awa-font-size-24:    var(--awa-text-2xl);    // 24px
+    --awa-font-size-2xl:   var(--awa-text-2xl);    // 24px
+    --awa-font-size-3xl:   var(--awa-text-4xl);    // 32px
+
+    // ── Convention C: --awa-font-* (172 ocorrências) ───────────────────
+    --awa-font-xs:         var(--awa-text-2xs);    // 11px
+    --awa-font-sm:         var(--awa-text-sm);     // 13px
+    --awa-font-base:       var(--awa-text-base);   // 14px
+    --awa-font-md:         var(--awa-text-base-plus); // 15px
+    --awa-font-lg:         var(--awa-text-lg);     // 18px
+    --awa-font-xl:         var(--awa-text-xl);     // 20px
+
+    // ── Convention D: --awa-fs-* (108 ocorrências, fluid design-system) ─
+    // Nota: Os --awa-fs-* originais usam clamp(). Aliasando para fluid.
+    --awa-fs-xs:           var(--awa-text-fluid-xs);
+    --awa-fs-sm:           var(--awa-text-fluid-sm);
+    --awa-fs-base:         var(--awa-text-fluid-base);
+    --awa-fs-md:           var(--awa-text-fluid-md);
+    --awa-fs-lg:           var(--awa-text-fluid-lg);
+    --awa-fs-xl:           var(--awa-text-fluid-xl);
+    --awa-fs-2xl:          var(--awa-text-fluid-2xl);
+    --awa-fs-3xl:          var(--awa-text-fluid-3xl);
+
+    // ── Convention E: --awa-fluid-text-* (22 ocorrências) ──────────────
+    --awa-fluid-text-sm:   var(--awa-text-fluid-sm);
+    --awa-fluid-text-sm2:  var(--awa-text-fluid-sm);
+    --awa-fluid-text-md:   var(--awa-text-fluid-md);
+    --awa-fluid-text-md2:  var(--awa-text-fluid-md);
+    --awa-fluid-text-md4:  var(--awa-text-fluid-lg);
+    --awa-fluid-text-md6:  var(--awa-text-fluid-lg);
+    --awa-fluid-text-lg:   var(--awa-text-fluid-lg);
+    --awa-fluid-text-xl2:  var(--awa-text-fluid-xl);
+    --awa-fluid-text-2xl:  var(--awa-text-fluid-2xl);
+    --awa-fluid-text-2xl2: var(--awa-text-fluid-2xl);
+
+    // ── Aliases numéricos (--awa-text-10, --awa-text-12, etc.) ─────────
+    --awa-text-10-5: 10.5px;
+    --awa-text-12-5: 12.5px;
+    --awa-text-36:   36px;
+
+    // ── Aliases --awa-fs-* adicionais ──────────────────────────────────
+    --awa-fs-90:     ~"clamp(10px, calc(9px + 0.15vw), 12px)";
+    --awa-fs-115:    ~"clamp(12px, calc(11.5px + 0.15vw), 14px)";
+    --awa-fs-130:    ~"clamp(13px, calc(12.33px + 0.208vw), 15px)";
+    --awa-fs-xs2:    var(--awa-text-fluid-xs);
+    --awa-fs-xs3:    var(--awa-text-fluid-xs);
+
+
+    // ╔══════════════════════════════════════════════════════════════════╗
+    // ║  3. WEIGHT SCALE (canonical)                                    ║
+    // ╚══════════════════════════════════════════════════════════════════╝
+
+    --awa-weight-light:     300;
+    --awa-weight-normal:    400;
+    --awa-weight-medium:    500;
+    --awa-weight-semibold:  600;
+    --awa-weight-bold:      700;
+    --awa-weight-extrabold: 800;
+
+    // Alias (retrocompatibilidade _tokens.less)
+    --awa-weight-semi:      var(--awa-weight-semibold);
+
+
+    // ╔══════════════════════════════════════════════════════════════════╗
+    // ║  4. LEADING (line-height) SCALE                                 ║
+    // ╚══════════════════════════════════════════════════════════════════╝
+
+    --awa-leading-none:        1;
+    --awa-leading-tight:       1.1;
+    --awa-leading-compact:     1.2;
+    --awa-leading-snug:        1.25;
+    --awa-leading-base:        1.3;
+    --awa-leading-cozy:        1.35;
+    --awa-leading-normal:      1.4;
+    --awa-leading-comfortable: 1.45;
+    --awa-leading-relaxed:     1.5;
+    --awa-leading-loose:       1.6;
+
+
+    // ╔══════════════════════════════════════════════════════════════════╗
+    // ║  5. TRACKING (letter-spacing) SCALE                             ║
+    // ╚══════════════════════════════════════════════════════════════════╝
+
+    --awa-tracking-tighter: -0.02em;
+    --awa-tracking-tight:   -0.01em;
+    --awa-tracking-normal:   0;
+    --awa-tracking-wide:     0.02em;
+    --awa-tracking-wider:    0.04em;
+    --awa-tracking-widest:   0.08em;
+}
+
+
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  6. TYPE PRESET MIXINS                                                 ║
+// ║  Combinações semânticas de size + weight + leading + tracking           ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+
+// Body text — leitura confortável
+.awa-type-body() {
+    font-size: var(--awa-text-base);
+    font-weight: var(--awa-weight-normal);
+    line-height: var(--awa-leading-relaxed);
+    letter-spacing: var(--awa-tracking-normal);
+}
+
+// Body fluid — se adapta ao viewport
+.awa-type-body-fluid() {
+    font-size: var(--awa-text-fluid-base);
+    font-weight: var(--awa-weight-normal);
+    line-height: var(--awa-leading-relaxed);
+}
+
+// Caption / small text
+.awa-type-caption() {
+    font-size: var(--awa-text-xs);
+    font-weight: var(--awa-weight-normal);
+    line-height: var(--awa-leading-relaxed);
+    letter-spacing: var(--awa-tracking-wide);
+    color: var(--awa-text-muted);
+}
+
+// Label — UI elements (botões, nav, tags)
+.awa-type-label() {
+    font-size: var(--awa-text-sm);
+    font-weight: var(--awa-weight-semibold);
+    line-height: var(--awa-leading-compact);
+    letter-spacing: var(--awa-tracking-wide);
+}
+
+// Small label — badges, counters
+.awa-type-label-sm() {
+    font-size: var(--awa-text-2xs);
+    font-weight: var(--awa-weight-bold);
+    line-height: var(--awa-leading-none);
+    letter-spacing: var(--awa-tracking-wider);
+    text-transform: uppercase;
+}
+
+// Subtitle — card headers, section sub-headings
+.awa-type-subtitle() {
+    font-size: var(--awa-text-lg);
+    font-weight: var(--awa-weight-semibold);
+    line-height: var(--awa-leading-snug);
+    letter-spacing: var(--awa-tracking-tight);
+}
+
+// Section heading — category titles, section headers
+.awa-type-section() {
+    font-size: var(--awa-text-fluid-xl);
+    font-weight: var(--awa-weight-bold);
+    line-height: var(--awa-leading-compact);
+    letter-spacing: var(--awa-tracking-tight);
+}
+
+// Price — valores monetários (destaque)
+.awa-type-price() {
+    font-size: var(--awa-text-xl);
+    font-weight: var(--awa-weight-bold);
+    line-height: var(--awa-leading-none);
+    letter-spacing: var(--awa-tracking-tight);
+    font-variant-numeric: tabular-nums;
+}
+
+// Price small — preço em cards compactos
+.awa-type-price-sm() {
+    font-size: var(--awa-text-base);
+    font-weight: var(--awa-weight-bold);
+    line-height: var(--awa-leading-none);
+    font-variant-numeric: tabular-nums;
+}
+
+// Display heading — hero banners, páginas de destaque
+.awa-type-display() {
+    font-size: var(--awa-text-fluid-h1);
+    font-weight: var(--awa-weight-bold);
+    line-height: var(--awa-leading-tight);
+    letter-spacing: var(--awa-tracking-tighter);
+}
+
+
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  7. UTILITY CLASSES                                                     ║
+// ║  Aplicação direta em templates PHTML                                    ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+
+.awa-text-3xs  { font-size: var(--awa-text-3xs); }
+.awa-text-2xs  { font-size: var(--awa-text-2xs); }
+.awa-text-xs   { font-size: var(--awa-text-xs); }
+.awa-text-sm   { font-size: var(--awa-text-sm); }
+.awa-text-base { font-size: var(--awa-text-base); }
+.awa-text-md   { font-size: var(--awa-text-md); }
+.awa-text-lg   { font-size: var(--awa-text-lg); }
+.awa-text-xl   { font-size: var(--awa-text-xl); }
+.awa-text-2xl  { font-size: var(--awa-text-2xl); }
+.awa-text-3xl  { font-size: var(--awa-text-3xl); }
+.awa-text-4xl  { font-size: var(--awa-text-4xl); }
+.awa-text-5xl  { font-size: var(--awa-text-5xl); }
+
+.awa-font-light     { font-weight: var(--awa-weight-light); }
+.awa-font-normal    { font-weight: var(--awa-weight-normal); }
+.awa-font-medium    { font-weight: var(--awa-weight-medium); }
+.awa-font-semibold  { font-weight: var(--awa-weight-semibold); }
+.awa-font-bold      { font-weight: var(--awa-weight-bold); }
+.awa-font-extrabold { font-weight: var(--awa-weight-extrabold); }
+
+.awa-leading-tight   { line-height: var(--awa-leading-tight); }
+.awa-leading-snug    { line-height: var(--awa-leading-snug); }
+.awa-leading-normal  { line-height: var(--awa-leading-normal); }
+.awa-leading-relaxed { line-height: var(--awa-leading-relaxed); }
+.awa-leading-loose   { line-height: var(--awa-leading-loose); }
+
+// Truncate text
+.awa-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// Line clamp (multiline truncate)
+.awa-line-clamp(@lines: 2) {
+    display: -webkit-box;
+    -webkit-line-clamp: @lines;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.awa-line-clamp-2 { .awa-line-clamp(2); }
+.awa-line-clamp-3 { .awa-line-clamp(3); }
+
+// Tabular numbers (para preços, quantities)
+.awa-tabular-nums {
+    font-variant-numeric: tabular-nums;
+}
+
+// No wrap
+.awa-nowrap {
+    white-space: nowrap;
+}
