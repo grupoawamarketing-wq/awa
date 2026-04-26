@@ -16,7 +16,7 @@
 
     var CSS_GATE_ATTR = 'data-awa-gate';
     var applied = false;
-    var GATE_EVENTS = ['pointerdown', 'keydown', 'touchstart', 'mousemove'];
+    var GATE_EVENTS = ['pointerdown', 'keydown', 'touchstart'];
 
     function applyGatedCSS() {
         if (applied) {
