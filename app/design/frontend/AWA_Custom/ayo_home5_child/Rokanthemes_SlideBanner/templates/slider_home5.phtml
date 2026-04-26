@@ -137,7 +137,7 @@ if ($banners = $block->getBannerCollection()):
                     $slideAlt = $banner->getSlideText() ?: ($banner->getSlideTitle() ?: '');
                     $imgHtml = $block->getImageElement($desktopImage, $slideAlt, $isFirst);
                     if (preg_match('/src="([^"]+)"/', $imgHtml, $_m)) {
-                        $_webp = preg_replace('/\.(jpg|jpeg|png)$/i', '.webp', $_m[1]);
+                        $_webp = $_m[1] . '.webp'; // Magento salva WebP como original.ext.webp (ex: bauletos.jpg.webp)
                         // Preload LCP hero image agora é emitido no <head> via GrupoAwamotos\Theme\Block\Html\HeroPreload.
                         // O body preload foi removido para evitar duplicidade com o <link rel="preload"> do head.
                         $imgHtml = '<picture>'
@@ -175,7 +175,7 @@ if ($banners = $block->getBannerCollection()):
                     $slideAlt = $banner->getSlideText() ?: ($banner->getSlideTitle() ?: '');
                     $imgHtml = $block->getImageElementMobile($heroImage, $slideAlt, $isFirst);
                     if (preg_match('/src="([^"]+)"/', $imgHtml, $_m)) {
-                        $_webp = preg_replace('/\.(jpg|jpeg|png)$/i', '.webp', $_m[1]);
+                        $_webp = $_m[1] . '.webp'; // Magento salva WebP como original.ext.webp (ex: bauletos.jpg.webp)
                         $imgHtml = '<picture>'
                             . '<source type="image/webp" srcset="' . $block->escapeUrl($_webp) . '">'
                             . $imgHtml
