@@ -54,6 +54,7 @@
   --awa-heading-1-size:clamp(28px, 2vw + 20px, var(--awa-cro-h1-size));
   --awa-heading-2-size:clamp(22px, 1.2vw + 18px, var(--awa-cro-h2-size));
   --awa-heading-3-size:clamp(17px, 0.6vw + 15px, var(--awa-cro-h3-size));
+  --awa-heading-letter-spacing:-0.015em;
   --awa-heading-line-height:1.25;
   --awa-home-final-radius:8px;
   --awa-page-main-max:1280px;
@@ -258,3 +259,13 @@
   --z-sticky:200;
   --z-toast:2000;
 }
+
+/* Preempt direct layout rules from awa-cro-priority.css gate
+   These rules fire after first paint in high-TBT conditions causing CLS.
+   Declaring them here (blocking, after styles-l.css) ensures first paint
+   already has the final values → gate fires → no visual change → no CLS. */
+body{font-size:var(--awa-cro-body-size);line-height:var(--awa-cro-body-line)}
+p,.std,.cms-page-view .column.main,.product.attribute.description{font-size:var(--awa-cro-body-size);line-height:var(--awa-cro-body-line)}
+h1,.page-title,.page-title span,.product-info-main .page-title-wrapper .page-title .base{font-size:var(--awa-heading-1-size);line-height:var(--awa-cro-h1-line);font-weight:700;letter-spacing:var(--awa-heading-letter-spacing)}
+h2,.block-title>strong,.section-title,.awa-section__title{font-size:var(--awa-heading-2-size);line-height:var(--awa-cro-h2-line);font-weight:700;letter-spacing:var(--awa-heading-letter-spacing)}
+h3,.subtitle{font-size:var(--awa-heading-3-size);line-height:var(--awa-cro-h3-line);font-weight:600}
