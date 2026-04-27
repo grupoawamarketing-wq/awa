@@ -58,7 +58,7 @@ class FooterExperimentContractTest extends TestCase
         $this->assertStringContainsString('data-awa-footer-exp-variant="<?= $escaper->escapeHtmlAttr($footerExpVariant) ?>"', $contents);
         $this->assertStringContainsString('data-awa-footer-exp-active="<?= $footerExpActive ? \'1\' : \'0\' ?>"', $contents);
         $this->assertStringContainsString('$this->helper(\'GrupoAwamotos\\Theme\\Helper\\FooterExperiment\')', $contents);
-        $this->assertStringContainsString('class="page_footer awa-footer--dark<?= $escaper->escapeHtmlAttr($footerExpStateClass . $footerExpVariantClass) ?>"', $contents);
+        $this->assertStringContainsString('class="page_footer<?= $escaper->escapeHtmlAttr($footerExpStateClass . $footerExpVariantClass) ?>"', $contents);
         $this->assertStringContainsString('"js/awa-footer-interactions"', $contents);
     }
 

@@ -61,7 +61,7 @@ if (in_array('cms_index_index', $block->getLayout()->getUpdate()->getHandles(), 
 }
 
 // URL base para derivação de CSS de módulos (getViewFileUrl falha em prod para módulos)
-// awa-bundle-refinements.css mergeado em awa-super-global.css — não emitir como link separado
+// awa-bundle-refinements.css — safety-net CSS: carrega POR ÚLTIMO para overrides (footer-light, etc.)
 $refinementsBundleUrl = $block->getViewFileUrl('css/awa-bundle-refinements.css');
 ?>
 <!-- =========================================================
@@ -140,38 +140,34 @@ body .page-wrapper .page_footer,.page-footer{background:#f8fafc !important;backg
 <?php foreach ($jsPreloads as $jsUrl): ?>
 <link rel="preload" href="<?= $block->escapeUrl($jsUrl) ?>" as="script"/>
 <?php endforeach; ?>
-<!-- AWA Async CSS Bundles — Interaction-Gated (non-render-blocking) -->
-<!-- awa-super-global/home: CSS aplicado apenas na 1ª interação real do usuário.              -->
-<!-- Lighthouse (sem interação) nunca dispara o gate → sem style-recalc task de 1500ms        -->
-<!-- → LCP Render Delay e TBT melhoram. Usuários reais: CSS em <1s (hover/click/scroll).      -->
-<!-- themes.css: kept blocking — async caused CLS 0.511 (reverted 2026-04-11) -->
-<?php
-// Gate script — síncrono, ~1KB, activa listeners antes de qualquer interação possível.
-$__gateScriptUrl = $block->getViewFileUrl('js/awa-css-gate.js');
-?>
-<script src="<?= $block->escapeUrl($__gateScriptUrl) ?>"></script>
+<!-- AWA Async CSS Bundles -->
+<!-- Bundles estruturais críticos não podem depender de interação do usuário.
+     Home/PLP/PDP precisam receber layout completo no first paint para evitar
+     colapso de grids, carrosséis e conteúdo invisível. -->
 <?php foreach ($asyncBundles as $cssUrl): ?>
 <link rel="stylesheet"
       href="<?= $block->escapeUrl($cssUrl) ?>"
-      media="print"
-      data-awa-gate="1"/>
+      media="all"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($cssUrl) ?>"/></noscript>
 <?php endforeach; ?>
 <?php if ($homeBundleUrl): ?>
 <!-- awa-super-home.css: home-custom + mobile-fix + product-cards + category-carousel + cosmetic-home -->
 <link rel="stylesheet"
       href="<?= $block->escapeUrl($homeBundleUrl) ?>"
-      media="print"
-      data-awa-gate="1"/>
+      media="all"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($homeBundleUrl) ?>"/></noscript>
 <?php endif; ?>
 <?php /* awa-vertical-menu-modern.css — refinamento visual do menu vertical (2026-04-26) */ ?>
 <?php $__vmModernUrl = $block->getViewFileUrl('css/awa-vertical-menu-modern.css'); ?>
 <link rel="stylesheet"
       href="<?= $block->escapeUrl($__vmModernUrl) ?>"
-      media="print"
-      data-awa-gate="1"/>
+      media="all"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__vmModernUrl) ?>"/></noscript>
+<?php /* awa-bundle-refinements.css — safety-net overrides, LAST non-async bundle (2026-04-27) */ ?>
+<link rel="stylesheet"
+      href="<?= $block->escapeUrl($refinementsBundleUrl) ?>"
+      media="all"/>
+<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($refinementsBundleUrl) ?>"/></noscript>
 <?php /* rexis-recommendations: async — widget nunca está above-fold */ ?>
 <?php $__rexisUrl = str_replace('css/awa-bundle-refinements.css', 'GrupoAwamotos_ProductIntelligence/css/rexis-recommendations.css', $refinementsBundleUrl); ?>
 <?php if ($__rexisUrl !== $refinementsBundleUrl): ?>
