@@ -63,16 +63,19 @@ class GenerateSuggestions
             $errors = 0;
             $skipped = 0;
 
+            // Batch-fetch all suggestions to optimize ERP queries
+            $customerIds = array_column($opportunities, 'customer_id');
+            $allSuggestions = $this->suggestionEngine->generateBatchCartSuggestions($customerIds);
+
             foreach ($opportunities as $opportunity) {
+                $customerId = $opportunity['customer_id'];
                 try {
-                    // Generate suggestion
-                    $suggestion = $this->suggestionEngine->generateCartSuggestion(
-                        $opportunity['customer_id']
-                    );
+                    // Get pre-generated suggestion
+                    $suggestion = $allSuggestions[$customerId] ?? ['error' => 'Sugestão não encontrada no lote'];
 
                     if (isset($suggestion['error'])) {
                         $this->logger->warning('SmartSuggestions: Failed to generate suggestion', [
-                            'customer_id' => $opportunity['customer_id'],
+                            'customer_id' => $customerId,
                             'error' => $suggestion['error']
                         ]);
                         $errors++;

@@ -6,6 +6,7 @@ namespace GrupoAwamotos\SmartSuggestions\Model\Suggestion;
 
 use GrupoAwamotos\SmartSuggestions\Api\SuggestionEngineInterface;
 use GrupoAwamotos\SmartSuggestions\Api\RfmCalculatorInterface;
+use GrupoAwamotos\SmartSuggestions\Helper\Config;
 use GrupoAwamotos\ERPIntegration\Api\ConnectionInterface;
 use Psr\Log\LoggerInterface;
 
@@ -21,25 +22,28 @@ class Engine implements SuggestionEngineInterface
 {
     private ConnectionInterface $connection;
     private RfmCalculatorInterface $rfmCalculator;
+    private Config $config;
     private LoggerInterface $logger;
 
     public function __construct(
         ConnectionInterface $connection,
         RfmCalculatorInterface $rfmCalculator,
+        Config $config,
         LoggerInterface $logger
     ) {
         $this->connection = $connection;
         $this->rfmCalculator = $rfmCalculator;
+        $this->config = $config;
         $this->logger = $logger;
     }
 
     /**
      * @inheritdoc
      */
-    public function generateCartSuggestion(int $customerId): array
+    public function generateCartSuggestion(int $customerId, ?array $prefetchedInfo = null): array
     {
         try {
-            $customerInfo = $this->getCustomerInfo($customerId);
+            $customerInfo = $prefetchedInfo ?: $this->getCustomerInfo($customerId);
 
             if (empty($customerInfo)) {
                 return ['error' => 'Cliente não encontrado'];
@@ -86,6 +90,9 @@ class Engine implements SuggestionEngineInterface
     public function getRepurchaseSuggestions(int $customerId, int $limit = 10): array
     {
         try {
+            $defaultCycle = $this->config->getRepurchaseCycleDefault();
+            $lookbackYears = $this->config->getRepurchaseLookbackYears();
+
             // Get products customer buys regularly and calculate expected repurchase time
             $sql = "
                 SELECT
@@ -101,13 +108,13 @@ class Engine implements SuggestionEngineInterface
                     CASE
                         WHEN COUNT(DISTINCT p.CODIGO) > 1 THEN
                             DATEDIFF(DAY, MIN(p.DTPEDIDO), MAX(p.DTPEDIDO)) / (COUNT(DISTINCT p.CODIGO) - 1)
-                        ELSE 30
+                        ELSE {$defaultCycle}
                     END as avg_cycle_days
                 FROM VE_PEDIDOITENS i
                 INNER JOIN VE_PEDIDO p ON i.PEDIDO = p.CODIGO
                 WHERE p.CLIENTE = ?
                   AND p.STATUS NOT IN ('C', 'X')
-                  AND p.DTPEDIDO >= DATEADD(YEAR, -2, GETDATE())
+                  AND p.DTPEDIDO >= DATEADD(YEAR, -{$lookbackYears}, GETDATE())
                 GROUP BY i.MATERIAL
                 HAVING COUNT(DISTINCT p.CODIGO) >= 2
                 ORDER BY
@@ -115,11 +122,13 @@ class Engine implements SuggestionEngineInterface
                      NULLIF(CASE
                         WHEN COUNT(DISTINCT p.CODIGO) > 1 THEN
                             DATEDIFF(DAY, MIN(p.DTPEDIDO), MAX(p.DTPEDIDO)) / (COUNT(DISTINCT p.CODIGO) - 1)
-                        ELSE 30
+                        ELSE {$defaultCycle}
                     END, 0)) DESC
             ";
 
             $products = $this->connection->query($sql, [$customerId]);
+
+            $minRatio = $this->config->getRepurchaseMinCycleRatio();
 
             // Filter by cycle ratio across all products, then cap at $limit
             $suggestions = [];
@@ -128,8 +137,8 @@ class Engine implements SuggestionEngineInterface
                     ? $product['days_since_purchase'] / $product['avg_cycle_days']
                     : 0;
 
-                // Suggest when at least 50% of expected cycle has elapsed
-                if ($cycleRatio >= 0.5) {
+                // Suggest when at least the configured expected cycle has elapsed
+                if ($cycleRatio >= $minRatio) {
                     $suggestions[] = [
                         'product_id' => (int)$product['product_id'],
                         'sku' => $product['sku'],
@@ -171,7 +180,7 @@ class Engine implements SuggestionEngineInterface
                     INNER JOIN VE_PEDIDO p ON i.PEDIDO = p.CODIGO
                     WHERE p.CLIENTE = ?
                       AND p.STATUS NOT IN ('C', 'X')
-                      AND p.DTPEDIDO >= DATEADD(MONTH, -6, GETDATE())
+                      AND p.DTPEDIDO >= DATEADD(MONTH, -{$this->config->getCrossSellLookbackMonths()}, GETDATE())
                 ),
                 RelatedProducts AS (
                     SELECT
@@ -408,6 +417,68 @@ class Engine implements SuggestionEngineInterface
     }
 
     /**
+     * Generate cart suggestions for multiple customers in batch
+     *
+     * @param int[] $customerIds
+     * @return array customerId => suggestion
+     */
+    public function generateBatchCartSuggestions(array $customerIds): array
+    {
+        if (empty($customerIds)) {
+            return [];
+        }
+
+        $results = [];
+        $allCustomerInfo = $this->getBatchCustomerInfo($customerIds);
+
+        foreach ($customerIds as $customerId) {
+            $info = $allCustomerInfo[$customerId] ?? null;
+            $results[$customerId] = $this->generateCartSuggestion((int)$customerId, $info);
+        }
+
+        return $results;
+    }
+
+    /**
+     * Batch-fetch customer info
+     *
+     * @param int[] $customerIds
+     * @return array<int, array> customerId => info
+     */
+    private function getBatchCustomerInfo(array $customerIds): array
+    {
+        if (empty($customerIds)) {
+            return [];
+        }
+
+        $infoMap = [];
+        foreach (array_chunk($customerIds, 200) as $chunk) {
+            $placeholders = implode(',', array_fill(0, count($chunk), '?'));
+            $sql = "
+                SELECT
+                    f.CODIGO as customer_id,
+                    f.RAZAO as customer_name,
+                    f.FANTASIA as trade_name,
+                    f.CGC as cnpj,
+                    f.CIDADE as city,
+                    f.UF as state,
+                    COALESCE(c.FONECEL, c.FONE1) as phone,
+                    c.EMAIL as email
+                FROM FN_FORNECEDORES f
+                LEFT JOIN FN_CONTATO c ON c.FORNECEDOR = f.CODIGO AND c.PRINCIPAL = 'S'
+                WHERE f.CODIGO IN ({$placeholders})
+            ";
+
+            $results = $this->connection->query($sql, $chunk);
+            foreach ($results as $row) {
+                $infoMap[(int)$row['customer_id']] = $row;
+            }
+        }
+
+        return $infoMap;
+    }
+
+    /**
      * Get customer info
      */
     private function getCustomerInfo(int $customerId): ?array
@@ -441,16 +512,16 @@ class Engine implements SuggestionEngineInterface
                 CASE
                     WHEN COUNT(DISTINCT p.CODIGO) > 1 THEN
                         DATEDIFF(DAY, MIN(p.DTPEDIDO), MAX(p.DTPEDIDO)) / (COUNT(DISTINCT p.CODIGO) - 1)
-                    ELSE 30
+                    ELSE {$this->config->getRepurchaseCycleDefault()}
                 END as avg_cycle
             FROM VE_PEDIDO p
             WHERE p.CLIENTE = ?
               AND p.STATUS NOT IN ('C', 'X')
-              AND p.DTPEDIDO >= DATEADD(YEAR, -2, GETDATE())
+              AND p.DTPEDIDO >= DATEADD(YEAR, -{$this->config->getRepurchaseLookbackYears()}, GETDATE())
         ";
 
         $result = $this->connection->query($sql, [$customerId]);
-        return (int)($result[0]['avg_cycle'] ?? 30);
+        return (int)($result[0]['avg_cycle'] ?? $this->config->getRepurchaseCycleDefault());
     }
 
     /**

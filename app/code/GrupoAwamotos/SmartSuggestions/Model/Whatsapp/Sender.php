@@ -7,6 +7,7 @@ namespace GrupoAwamotos\SmartSuggestions\Model\Whatsapp;
 use GrupoAwamotos\SmartSuggestions\Api\WhatsappSenderInterface;
 use GrupoAwamotos\SmartSuggestions\Helper\Config;
 use Magento\Framework\HTTP\Client\Curl;
+use GrupoAwamotos\SmartSuggestions\Model\WhatsappQueueFactory;
 use Magento\Store\Model\StoreManagerInterface;
 use Psr\Log\LoggerInterface;
 
@@ -19,17 +20,20 @@ class Sender implements WhatsappSenderInterface
     private Curl $curl;
     private StoreManagerInterface $storeManager;
     private LoggerInterface $logger;
+    private WhatsappQueueFactory $queueFactory;
 
     public function __construct(
         Config $config,
         Curl $curl,
         StoreManagerInterface $storeManager,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        WhatsappQueueFactory $queueFactory
     ) {
         $this->config = $config;
         $this->curl = $curl;
         $this->storeManager = $storeManager;
         $this->logger = $logger;
+        $this->queueFactory = $queueFactory;
     }
 
     /**
@@ -63,6 +67,10 @@ class Sender implements WhatsappSenderInterface
         }
 
         $provider = $this->config->getWhatsappProvider();
+
+        // Set reasonable timeouts for API calls
+        $this->curl->setOption(CURLOPT_CONNECTTIMEOUT, 5);
+        $this->curl->setTimeout(10);
 
         try {
             switch ($provider) {
@@ -273,7 +281,8 @@ class Sender implements WhatsappSenderInterface
             ];
         }
 
-        $url = rtrim($apiUrl, '/') . '/message/sendText/awamotos';
+        $instance = $this->config->getEvolutionInstance();
+        $url = rtrim($apiUrl, '/') . '/message/sendText/' . $instance;
 
         $payload = [
             'number' => $phoneNumber,
@@ -624,5 +633,24 @@ class Sender implements WhatsappSenderInterface
             'success' => false,
             'message' => $response['value'] ?? 'Z-API not connected or not configured'
         ];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function queueMessage(string $phoneNumber, string $message, int $priority = 5): bool
+    {
+        try {
+            $queue = $this->queueFactory->create();
+            $queue->setPhoneNumber($phoneNumber);
+            $queue->setMessageContent($message);
+            $queue->setStatus($queue::STATUS_PENDING);
+            $queue->setPriority($priority);
+            $queue->save();
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('WhatsApp queue error: ' . $e->getMessage());
+            return false;
+        }
     }
 }

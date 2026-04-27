@@ -145,6 +145,42 @@ class Config extends AbstractHelper
         ) ?: 3;
     }
 
+    public function getRepurchaseCycleDefault(?int $storeId = null): int
+    {
+        return (int) $this->scopeConfig->getValue(
+            self::XML_PATH_SUGGESTIONS . 'repurchase_cycle_default',
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        ) ?: 30;
+    }
+
+    public function getRepurchaseMinCycleRatio(?int $storeId = null): float
+    {
+        return (float) $this->scopeConfig->getValue(
+            self::XML_PATH_SUGGESTIONS . 'repurchase_min_cycle_ratio',
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        ) ?: 0.5;
+    }
+
+    public function getRepurchaseLookbackYears(?int $storeId = null): int
+    {
+        return (int) $this->scopeConfig->getValue(
+            self::XML_PATH_SUGGESTIONS . 'repurchase_lookback_years',
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        ) ?: 2;
+    }
+
+    public function getCrossSellLookbackMonths(?int $storeId = null): int
+    {
+        return (int) $this->scopeConfig->getValue(
+            self::XML_PATH_SUGGESTIONS . 'crosssell_lookback_months',
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        ) ?: 6;
+    }
+
     // ============ FORECAST ============
 
     public function getMonteCarloIterations(): int
@@ -258,6 +294,15 @@ class Config extends AbstractHelper
         ) ?: '';
     }
 
+    public function getEvolutionInstance(?int $storeId = null): string
+    {
+        return (string) $this->scopeConfig->getValue(
+            self::XML_PATH_WHATSAPP . 'evolution_instance',
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        ) ?: 'awamotos';
+    }
+
     public function getWhatsappMessageTemplate(?int $storeId = null): string
     {
         return (string) $this->scopeConfig->getValue(
@@ -354,6 +399,39 @@ class Config extends AbstractHelper
     {
         return $this->scopeConfig->isSetFlag(
             self::XML_PATH_EXPORT . 'include_headers',
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+    }
+
+    // ============ WHATSAPP BUSINESS HOURS ============
+
+    public function getWhatsappStartHour(?int $storeId = null): int
+    {
+        $value = $this->scopeConfig->getValue(
+            self::XML_PATH_WHATSAPP . 'start_hour',
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+
+        return $value !== null ? (int) $value : 8;
+    }
+
+    public function getWhatsappEndHour(?int $storeId = null): int
+    {
+        $value = $this->scopeConfig->getValue(
+            self::XML_PATH_WHATSAPP . 'end_hour',
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+
+        return $value !== null ? (int) $value : 20;
+    }
+
+    public function skipWeekendsForWhatsapp(?int $storeId = null): bool
+    {
+        return $this->scopeConfig->isSetFlag(
+            self::XML_PATH_WHATSAPP . 'skip_weekends',
             ScopeInterface::SCOPE_STORE,
             $storeId
         );

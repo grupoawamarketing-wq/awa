@@ -14,7 +14,7 @@ use Magento\Framework\View\Element\Block\ArgumentInterface;
 use Magento\Review\Model\ReviewFactory;
 use Magento\Store\Model\StoreManagerInterface;
 
-final class ProductStructuredData implements ArgumentInterface
+class ProductStructuredData implements ArgumentInterface
 {
     private bool $currentProductResolved = false;
 
@@ -148,12 +148,21 @@ final class ProductStructuredData implements ArgumentInterface
 
         $mpn = $product->getData('mpn') ?: $product->getData('codigo_original');
         if ($mpn) {
-            $schema['mpn'] = (string) $mpn;
+            $schema['mpn'] = $this->normalizeText((string) $mpn);
         }
 
-        $gtin = $product->getData('ean') ?: $product->getData('gtin');
+        $gtin = $product->getData('ean') ?: $product->getData('gtin') ?: $product->getData('barcode');
         if ($gtin) {
-            $schema['gtin13'] = (string) $gtin;
+            $gtinStr = $this->normalizeText((string) $gtin);
+            if (strlen($gtinStr) === 13) {
+                $schema['gtin13'] = $gtinStr;
+            } elseif (strlen($gtinStr) === 14) {
+                $schema['gtin14'] = $gtinStr;
+            } elseif (strlen($gtinStr) === 12) {
+                $schema['gtin12'] = $gtinStr;
+            } else {
+                $schema['gtin'] = $gtinStr;
+            }
         }
 
         $this->productStructuredData = $schema;
