@@ -67,7 +67,7 @@ test.beforeAll(async ({ browser }) => {
         }
         // state:'visible' aguarda KO.js renderizar o header (remove display:none)
         await homePage.waitForSelector(
-          '.awa-site-header, header[role="banner"], .page-header',
+          '#header, .awa-site-header, header[role="banner"]',
           { state: 'visible', timeout: 40_000 },
         );
         // Verifica que Chrome responde ANTES de sair do race
@@ -93,7 +93,7 @@ test.afterAll(async () => {
    ═══════════════════════════════════════════════════════════════════ */
 test.describe('Fase 1 — Header Premium', () => {
   test('Header está visível e tem altura adequada', async () => {
-    const header = homePage.locator('.page-header, .awa-site-header, header').first();
+    const header = homePage.locator('#header, .awa-site-header').first(); // #header tem altura real (display:contents no pai)
     const visible = await Promise.race<boolean>([
       header.isVisible({ timeout: 10_000 }).catch(() => false),
       new Promise<false>(r => setTimeout(() => r(false), 12_000)),
