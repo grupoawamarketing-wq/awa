@@ -1,12 +1,9 @@
 <?php
 /** @var \Magento\Backend\Block\Template $block */
-$customerId = (int) $block->getRequest()->getParam('customer_id');
-$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-$factory = $objectManager->get(\GrupoAwamotos\B2B\Model\ResourceModel\CreditTransaction\CollectionFactory::class);
-$transactions = $factory->create()
-    ->addFieldToFilter('customer_id', $customerId)
-    ->setOrder('transaction_id', 'DESC')
-    ->setPageSize(100);
+/** @var \GrupoAwamotos\B2B\ViewModel\CreditTransactions $viewModel */
+$viewModel = $block->getData('view_model');
+$customerId = $viewModel->getCustomerId();
+$transactions = $viewModel->getTransactions();
 ?>
 <div class="admin__data-grid-wrap">
     <h3><?= $block->escapeHtml(__('Transações de Crédito — Cliente #%1', $customerId)) ?></h3>

@@ -56,8 +56,9 @@ class Config extends AbstractHelper
     const XML_PATH_PENDING_GROUP = 'grupoawamotos_b2b/customer_groups/pending_group';
 
     // CNAE Profiling
-    const XML_PATH_CNAE_ENABLED = 'grupoawamotos_b2b/cnae_profiling/enabled';
     const XML_PATH_CNAE_AUTO_APPROVE_DIRECT = 'grupoawamotos_b2b/cnae_profiling/auto_approve_direct';
+    const XML_PATH_CNAE_DIRECT_GROUP = 'grupoawamotos_b2b/cnae_profiling/direct_group';
+    const XML_PATH_CNAE_ADJACENT_GROUP = 'grupoawamotos_b2b/cnae_profiling/adjacent_group';
 
     // Checkout Fields (Delivery Date, Order Notes, PO Number)
     const XML_PATH_DELIVERY_DATE_ENABLED = 'grupoawamotos_b2b/checkout/delivery_date_enabled';
@@ -454,6 +455,30 @@ class Config extends AbstractHelper
     {
         return $this->scopeConfig->isSetFlag(
             self::XML_PATH_CNAE_AUTO_APPROVE_DIRECT,
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+    }
+
+    /**
+     * Get target group ID for Direct profile (Motos)
+     */
+    public function getDirectProfileGroupId($storeId = null): int
+    {
+        return (int) $this->scopeConfig->getValue(
+            self::XML_PATH_CNAE_DIRECT_GROUP,
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+    }
+
+    /**
+     * Get target group ID for Adjacent profile (Automotive)
+     */
+    public function getAdjacentProfileGroupId($storeId = null): int
+    {
+        return (int) $this->scopeConfig->getValue(
+            self::XML_PATH_CNAE_ADJACENT_GROUP,
             ScopeInterface::SCOPE_STORE,
             $storeId
         );

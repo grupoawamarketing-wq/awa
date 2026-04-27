@@ -561,4 +561,15 @@ class Data extends AbstractHelper
 
         return $normalized !== '' ? $normalized : $fallback;
     }
+
+    /**
+     * Get frontend URL to view an order.
+     *
+     * @param \Magento\Sales\Model\Order $order
+     * @return string
+     */
+    public function getOrderViewUrl(\Magento\Sales\Model\Order $order): string
+    {
+        return $this->_getUrl('sales/order/view', ['order_id' => $order->getId()]);
+    }
 }

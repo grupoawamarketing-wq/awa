@@ -11,6 +11,7 @@ namespace GrupoAwamotos\B2B\Model;
 use GrupoAwamotos\B2B\Api\CustomerApprovalInterface;
 use GrupoAwamotos\B2B\Helper\Config;
 use GrupoAwamotos\B2B\Model\Customer\Attribute\Source\ApprovalStatus;
+use GrupoAwamotos\B2B\Model\CnaeClassifier;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Api\Data\CustomerInterface;
 use Magento\Framework\App\ResourceConnection;
@@ -115,10 +116,23 @@ class CustomerApproval implements CustomerApprovalInterface
             $customer->setCustomAttribute('b2b_approval_status', ApprovalStatus::STATUS_APPROVED);
             $customer->setCustomAttribute('b2b_approved_at', $this->dateTime->gmtDate());
 
-            // Atribuir grupo B2B padrão se configurado
-            $defaultGroup = $this->config->getDefaultB2BGroupId();
-            if ($defaultGroup > 0 && $customer->getGroupId() == 1) { // Se está no grupo General
-                $customer->setGroupId($defaultGroup);
+            // Atribuir grupo B2B baseado no perfil CNAE se disponível
+            $targetGroup = 0;
+            $cnaeProfile = $this->getCustomerAttributeValue($customer, 'b2b_cnae_profile');
+
+            if ($cnaeProfile === CnaeClassifier::PROFILE_DIRECT) {
+                $targetGroup = $this->config->getDirectProfileGroupId();
+            } elseif ($cnaeProfile === CnaeClassifier::PROFILE_ADJACENT) {
+                $targetGroup = $this->config->getAdjacentProfileGroupId();
+            }
+
+            // Fallback para o grupo B2B padrão se nenhum perfil específico foi encontrado ou configurado
+            if ($targetGroup <= 0) {
+                $targetGroup = $this->config->getDefaultB2BGroupId();
+            }
+
+            if ($targetGroup > 0 && ($customer->getGroupId() == 1 || $customer->getGroupId() == $this->config->getPendingGroupId())) {
+                $customer->setGroupId($targetGroup);
             }
 
             $this->customerRepository->save($customer);
