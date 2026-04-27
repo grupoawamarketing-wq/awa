@@ -84,10 +84,29 @@ test.describe('UX Audit B2B', () => {
     const logo    = await page.locator('.logo').first().isVisible().catch(() => false);
     const search  = await page.locator('input#search, input[name="q"]').first().isVisible().catch(() => false);
     const cart    = await page.locator('.minicart-wrapper, .action.showcart').first().isVisible().catch(() => false);
-    const loginLk = await page.locator('a[data-awa-auth-link]').first().isVisible().catch(() => false);
+    const loginLk = await page.locator('a.awa-header-account-prompt__link:visible').count().catch(() => 0) > 0;
+    
+    // DEBUG: check bounding box
+    const debugLoginLk = await page.evaluate(() => {
+        const els = document.querySelectorAll('a.awa-header-account-prompt__link');
+        return Array.from(els).map((el, i) => {
+            let hiddenAncestors = [];
+            let curr = el;
+            while(curr && curr !== document.body) {
+                const style = window.getComputedStyle(curr);
+                if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') {
+                    hiddenAncestors.push(`${curr.tagName}.${curr.className} (d:${style.display}, v:${style.visibility}, o:${style.opacity})`);
+                }
+                curr = curr.parentElement;
+            }
+            return `el[${i}]: hidden_by=[${hiddenAncestors.join(' | ')}] text="${el.textContent.trim()}"`;
+        }).join(' || ');
+    });
+    console.log('DEBUG LOGIN LINK ANCESTORS:', debugLoginLk);
+
     const nav     = await page.locator('nav.navigation, .nav-sections').first().isVisible().catch(() => false);
     const hh      = await page.evaluate(() => {
-      const h = document.querySelector('header[role="banner"].awa-site-header');
+      const h = document.querySelector('header[role="banner"].awa-site-header .awa-main-header__inner') || document.querySelector('header[role="banner"].awa-site-header .header.content') || document.querySelector('header[role="banner"].awa-site-header');
       return h ? h.getBoundingClientRect().height : 0;
     }).catch(() => 0);
 

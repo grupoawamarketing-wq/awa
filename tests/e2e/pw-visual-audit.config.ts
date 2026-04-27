@@ -7,7 +7,7 @@ import path from 'path';
 
 export default defineConfig({
   testDir: path.join(__dirname, 'specs'),
-  testMatch: /visual-audit-.*\.spec\.ts/,
+  testMatch: /(?:visual-audit-.*|layout-container-grid)\.spec\.ts/,
   outputDir: path.join(__dirname, 'test-results'),
 
   timeout: 120_000,

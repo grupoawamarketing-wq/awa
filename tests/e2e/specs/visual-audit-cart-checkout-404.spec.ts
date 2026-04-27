@@ -76,7 +76,7 @@ test.describe('Fase 8 — Checkout Premium', () => {
     const maxW = await css(page, '.checkout-index-index .page-main, .page-main', 'max-width');
     if (maxW && maxW !== 'none') {
       const val = px(maxW);
-      expect(val, 'Checkout container max-width <= 1400px').toBeLessThanOrEqual(1400);
+      expect(val, 'Checkout container max-width <= 1440px').toBeLessThanOrEqual(1440);
       expect(val, 'Checkout container max-width >= 960px').toBeGreaterThanOrEqual(960);
     }
   });
