@@ -180,6 +180,66 @@ class B2BClientRegistration
     }
 
     /**
+     * Register multiple clients in bulk.
+     *
+     * Tries write access first; for each failure logs details and continues.
+     * Returns a summary with counts of registered, already_registered, and failed.
+     *
+     * @param int[] $erpClientCodes
+     * @return array{registered: int, already_registered: int, failed: int, no_write_access: bool}
+     */
+    public function registerBulk(array $erpClientCodes): array
+    {
+        $result = [
+            'registered' => 0,
+            'already_registered' => 0,
+            'failed' => 0,
+            'no_write_access' => false,
+        ];
+
+        if (empty($erpClientCodes)) {
+            return $result;
+        }
+
+        if (!$this->hasWriteAccess()) {
+            $result['no_write_access'] = true;
+            $result['failed'] = count(array_unique($erpClientCodes));
+            return $result;
+        }
+
+        // Pre-fetch registered codes in one query for efficiency
+        $registeredCodes = array_fill_keys($this->getRegisteredClientCodes(), true);
+
+        foreach (array_unique($erpClientCodes) as $code) {
+            $code = (int) $code;
+            if ($code <= 0) {
+                continue;
+            }
+
+            if (isset($registeredCodes[$code])) {
+                $result['already_registered']++;
+                continue;
+            }
+
+            if ($this->registerClient($code)) {
+                $result['registered']++;
+                $registeredCodes[$code] = true; // avoid double registration in same batch
+            } else {
+                $result['failed']++;
+                if (!$this->hasWriteAccess()) {
+                    // Write access was lost mid-batch (e.g. permission denied error)
+                    $result['no_write_access'] = true;
+                    $result['failed'] += count(array_unique($erpClientCodes)) - $result['registered']
+                        - $result['already_registered'] - $result['failed'];
+                    break;
+                }
+            }
+        }
+
+        return $result;
+    }
+
+    /**
      * Get list of unregistered clients from pending Magento orders
      *
      * @return array<int, array{erp_code: int, razao: string, cgc: string}>

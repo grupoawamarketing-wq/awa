@@ -50,7 +50,8 @@ class SyncOrdersCommand extends Command
             ->addOption('status', null, InputOption::VALUE_NONE, 'Sincroniza status de pedidos do ERP para Magento')
             ->addOption('pending', 'p', InputOption::VALUE_NONE, 'Lista pedidos pendentes de envio ao ERP')
             ->addOption('limit', 'l', InputOption::VALUE_REQUIRED, 'Limite de pedidos a processar', 10)
-            ->addOption('dry-run', null, InputOption::VALUE_NONE, 'Apenas simula, não faz alterações');
+            ->addOption('dry-run', null, InputOption::VALUE_NONE, 'Apenas simula, não faz alterações')
+            ->addOption('canceled', null, InputOption::VALUE_NONE, 'Detecta pedidos cancelados no Magento ainda abertos no ERP');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -87,6 +88,10 @@ class SyncOrdersCommand extends Command
 
         if ($listPending) {
             return $this->listPendingOrders($output, (int) $input->getOption('limit'));
+        }
+
+        if ($input->getOption('canceled')) {
+            return $this->syncCanceledOrders($output, $dryRun);
         }
 
         // Default: show help
@@ -231,6 +236,24 @@ class SyncOrdersCommand extends Command
         }
     }
 
+    private function syncCanceledOrders(OutputInterface $output, bool $dryRun): int
+    {
+        $output->writeln('<info>Verificando pedidos cancelados no Magento que ainda estão abertos no ERP...</info>');
+        $output->writeln('');
+
+        $result = $this->orderSync->syncCanceledOrders();
+
+        $found = $result['found'] ?? 0;
+        if ($found === 0) {
+            $output->writeln('<info>✓ Nenhum pedido cancelado encontrado aberto no ERP.</info>');
+            return Command::SUCCESS;
+        }
+
+        $output->writeln('<comment>Verificar os logs em var/log/erp_integration.log para detalhes.</comment>');
+        $output->writeln('<comment>Esses pedidos precisam ser cancelados manualmente no Sectra.</comment>');
+        return Command::SUCCESS;
+    }
+
     private function showOrderSyncStatus(OutputInterface $output): int
     {
         $output->writeln('<info>ERP Order Sync - Status</info>');
@@ -240,6 +263,7 @@ class SyncOrdersCommand extends Command
         $output->writeln('  <comment>--pending, -p</comment>      Lista pedidos pendentes de envio');
         $output->writeln('  <comment>--send, -s PEDIDO</comment>  Envia pedido específico para o ERP');
         $output->writeln('  <comment>--status</comment>           Sincroniza status do ERP para Magento');
+        $output->writeln('  <comment>--canceled</comment>         Detecta pedidos cancelados no Magento ainda abertos no ERP');
         $output->writeln('  <comment>--dry-run</comment>          Simula sem fazer alterações');
         $output->writeln('');
         $output->writeln('Exemplos:');

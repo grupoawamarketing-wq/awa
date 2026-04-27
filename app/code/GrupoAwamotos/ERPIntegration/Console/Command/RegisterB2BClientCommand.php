@@ -45,7 +45,10 @@ class RegisterB2BClientCommand extends Command
             ->addArgument('erp_codes', InputArgument::OPTIONAL, 'Codigos ERP separados por virgula (ex: 2541,699)')
             ->addOption('pending', 'p', InputOption::VALUE_NONE, 'Registrar clientes de todos os pedidos pendentes')
             ->addOption('check', 'c', InputOption::VALUE_NONE, 'Apenas verificar sem registrar')
-            ->addOption('generate-sql', 's', InputOption::VALUE_NONE, 'Gerar SQL para execucao manual');
+            ->addOption('generate-sql', 's', InputOption::VALUE_NONE, 'Gerar SQL para execucao manual')
+            ->addOption('all', null, InputOption::VALUE_NONE, 'Processar TODOS os clientes B2B nao registrados no Sectra')
+            ->addOption('batch-size', null, InputOption::VALUE_OPTIONAL, 'Tamanho do lote para processamento em massa', '500')
+            ->addOption('save', null, InputOption::VALUE_NONE, 'Salvar SQL gerado em var/log/ (use com --generate-sql)');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -58,8 +61,13 @@ class RegisterB2BClientCommand extends Command
             $erpCodes = array_map('intval', explode(',', $codesArg));
         }
 
-        // Collect ERP codes from pending orders
-        if ($input->getOption('pending') || empty($erpCodes)) {
+        // --all: carrega todos os clientes B2B nao registrados no Sectra
+        if ($input->getOption('all')) {
+            $batchSize = max(1, (int) $input->getOption('batch-size'));
+            $allCodes = $this->getAllUnregisteredB2BCodes($batchSize);
+            $erpCodes = array_unique(array_merge($erpCodes, $allCodes));
+        } elseif ($input->getOption('pending') || empty($erpCodes)) {
+            // Collect ERP codes from pending orders
             $pendingCodes = $this->getClientCodesFromPendingOrders();
             $erpCodes = array_unique(array_merge($erpCodes, $pendingCodes));
         }
@@ -78,7 +86,8 @@ class RegisterB2BClientCommand extends Command
 
         // Generate SQL mode
         if ($input->getOption('generate-sql')) {
-            return $this->generateSQL($erpCodes, $output);
+            $save = $input->getOption('save');
+            return $this->generateSQL($erpCodes, $output, $save);
         }
 
         // Register mode
@@ -119,10 +128,22 @@ class RegisterB2BClientCommand extends Command
         return Command::FAILURE;
     }
 
-    private function generateSQL(array $erpCodes, OutputInterface $output): int
+    private function generateSQL(array $erpCodes, OutputInterface $output, bool $save = false): int
     {
         $sql = $this->b2bRegistration->generateRegistrationSQL($erpCodes);
-        $output->writeln($sql);
+
+        if ($save) {
+            $dir = BP . '/var/log';
+            $file = $dir . '/sectra_register_clients_' . date('Ymd_His') . '.sql';
+            $latest = $dir . '/sectra_register_clients_latest.sql';
+            file_put_contents($file, $sql);
+            file_put_contents($latest, $sql);
+            $output->writeln(sprintf('<info>SQL salvo em: %s</info>', $file));
+            $output->writeln(sprintf('<info>Link latest: %s</info>', $latest));
+        } else {
+            $output->writeln($sql);
+        }
+
         return Command::SUCCESS;
     }
 
@@ -169,6 +190,34 @@ class RegisterB2BClientCommand extends Command
         $output->writeln(sprintf('<info>Resultado: %d registrado(s), %d falha(s)</info>', $success, $failed));
 
         return $failed > 0 ? Command::FAILURE : Command::SUCCESS;
+    }
+
+    /**
+     * Get all B2B customer ERP codes that are not yet registered in Sectra.
+     *
+     * @param int $limit Maximum number to return
+     * @return int[]
+     */
+    private function getAllUnregisteredB2BCodes(int $limit = 500): array
+    {
+        $connection = $this->syncLogResource->getConnection();
+
+        // Get all B2B customers with ERP codes
+        $select = $connection->select()
+            ->from(['em' => 'grupoawamotos_erp_entity_map'], ['erp_code'])
+            ->where('em.entity_type = ?', 'customer')
+            ->where('em.erp_code > ?', '0')
+            ->where('em.erp_code != ?', '')
+            ->limit($limit * 3); // fetch extra to account for already-registered ones
+
+        $allCodes = array_unique(array_map('intval', $connection->fetchCol($select)));
+        $allCodes = array_filter($allCodes, fn($c) => $c > 0);
+
+        // Filter out already registered ones
+        $registeredCodes = array_fill_keys($this->b2bRegistration->getRegisteredClientCodes(), true);
+        $unregistered = array_filter($allCodes, fn($c) => !isset($registeredCodes[$c]));
+
+        return array_slice(array_values($unregistered), 0, $limit);
     }
 
     private function getClientCodesFromPendingOrders(): array

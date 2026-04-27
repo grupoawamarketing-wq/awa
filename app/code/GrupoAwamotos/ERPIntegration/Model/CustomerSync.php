@@ -100,6 +100,7 @@ class CustomerSync implements CustomerSyncInterface
                     LEFT JOIN FN_CONTATO c ON c.FORNECEDOR = f.CODIGO AND c.PRINCIPAL = 'S'
                     LEFT JOIN FN_FORNECEDORES tp ON tp.CODIGO = f.TRANSPPREF AND tp.CKTRANSPORTADOR = 'S'
                     WHERE f.CKCLIENTE = 'S'
+                      AND f.ATCLIENTE = 'S'
                       AND (REPLACE(REPLACE(REPLACE(f.CGC, '.', ''), '/', ''), '-', '') = :taxvat
                            OR REPLACE(REPLACE(f.CPF, '.', ''), '-', '') = :taxvat2)";
 
@@ -125,7 +126,7 @@ class CustomerSync implements CustomerSyncInterface
                     FROM FN_FORNECEDORES f
                     LEFT JOIN FN_CONTATO c ON c.FORNECEDOR = f.CODIGO AND c.PRINCIPAL = 'S'
                     LEFT JOIN FN_FORNECEDORES tp ON tp.CODIGO = f.TRANSPPREF AND tp.CKTRANSPORTADOR = 'S'
-                    WHERE f.CODIGO = :code AND f.CKCLIENTE = 'S'";
+                    WHERE f.CODIGO = :code AND f.CKCLIENTE = 'S' AND f.ATCLIENTE = 'S'";
 
             return $this->connection->fetchOne($sql, [':code' => $code]);
         } catch (\Exception $e) {
@@ -442,7 +443,7 @@ class CustomerSync implements CustomerSyncInterface
             $sql = "SELECT f.CODIGO, f.LIMITE_CREDITO, f.SALDO_DEVEDOR, f.DIAS_ATRASO,
                            f.BLOQUEADO, f.MOTIVO_BLOQUEIO, f.CONDPAGTO
                     FROM FN_FORNECEDORES f
-                    WHERE f.CODIGO = :code AND f.CKCLIENTE = 'S'";
+                    WHERE f.CODIGO = :code AND f.CKCLIENTE = 'S' AND f.ATCLIENTE = 'S'";
 
             return $this->connection->fetchOne($sql, [':code' => (int)$erpCode]);
         } catch (\Exception $e) {

@@ -867,7 +867,7 @@ class ProductSync implements ProductSyncInterface
                         ON p.MATERIAL = m.CODIGO
                         AND p.FILIAL = :filial2
                         AND p.FATORPRECO = :priceList
-                    WHERE m.CODIGO = :sku";
+                    WHERE m.CODIGO = :sku AND m.CCKATIVO = 'S'";
 
             $row = $this->connection->fetchOne($sql, [
                 ':filial1' => $this->helper->getStockFilial(),

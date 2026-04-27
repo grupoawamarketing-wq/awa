@@ -35,6 +35,13 @@ class OrderSync implements OrderSyncInterface
         'D' => ['state' => Order::STATE_HOLDED, 'status' => 'holded'],
     ];
 
+    /**
+     * ERP status codes acknowledged but requiring no Magento status change.
+     * 'W' = Aguardando importacao no Sectra (pedido recebido, pendente de processamento)
+     * 'T' = Transferido (pedido enviado para outra filial/processo)
+     */
+    private const STATUS_PASSTHROUGH = ['W', 'T'];
+
     private ConnectionInterface $connection;
     private Helper $helper;
     private SyncLogResource $syncLogResource;
@@ -267,8 +274,17 @@ class OrderSync implements OrderSyncInterface
 
                     if ($syncResult['success']) {
                         $result['synced']++;
+                    } elseif ($syncResult['passthrough'] ?? false) {
+                        // ERP reconhece o pedido mas nao requer mudanca de status no Magento
+                        $result['synced']++;
                     } else {
                         $result['skipped']++;
+                        $this->logger->debug(sprintf(
+                            '[ERP] Order %d skipped: %s (erp_order=%d)',
+                            $magentoOrderId,
+                            $syncResult['message'] ?? 'unknown',
+                            $erpOrderId
+                        ));
                     }
                 } catch (\Exception $e) {
                     $result['errors']++;
@@ -338,7 +354,8 @@ class OrderSync implements OrderSyncInterface
         $optionalColumns = [
             'DTFATURAMENTO', 'DTSAIDA', 'DTENTREGA',
             'NFNUMERO', 'NFSERIE', 'NFCHAVE',
-            'TRANSPORTADORA', 'CODRASTREIO'
+            'TRANSPORTADORA', 'CODRASTREIO',
+            'TPPAGAMENTO', 'DTPEDIDO',
         ];
 
         if ($availableOptionalColumns === null) {
@@ -665,10 +682,51 @@ class OrderSync implements OrderSyncInterface
             }
 
             $erpStatusCode = $erpStatus['STATUS'] ?? '';
+
+            // Passthrough: ERP recebeu o pedido mas ainda nao processou (ex: Aguardando Sectra)
+            if (in_array($erpStatusCode, self::STATUS_PASSTHROUGH, true)) {
+                $tpPagamento = $erpStatus['TPPAGAMENTO'] ?? '';
+                $dtPedido    = $erpStatus['DTPEDIDO'] ?? null;
+                $diasEspera  = 0;
+
+                if ($dtPedido instanceof \DateTime) {
+                    $diasEspera = (int) $dtPedido->diff(new \DateTime())->days;
+                } elseif (is_string($dtPedido) && $dtPedido !== '') {
+                    try {
+                        $diasEspera = (int) (new \DateTime($dtPedido))->diff(new \DateTime())->days;
+                    } catch (\Exception $ignored) {
+                    }
+                }
+
+                if ($tpPagamento === 'BLQ') {
+                    // Pedido bloqueado financeiramente no Sectra — alertar se espera > 7 dias
+                    $logMsg = sprintf(
+                        '[ERP] Pedido %s bloqueado no Sectra (BLQ) há %d dias — cliente deve ser liberado pelo financeiro',
+                        $order->getIncrementId(),
+                        $diasEspera
+                    );
+                    if ($diasEspera >= 7) {
+                        $this->logger->warning($logMsg);
+                    } else {
+                        $this->logger->info($logMsg);
+                    }
+                    $result['message'] = sprintf('ERP status "W" bloqueado financeiramente (BLQ) há %d dias', $diasEspera);
+                } else {
+                    $result['message'] = sprintf(
+                        'ERP status "%s" — aguardando processamento Sectra (%d dias)',
+                        $erpStatusCode,
+                        $diasEspera
+                    );
+                }
+
+                $result['passthrough'] = true;
+                return $result;
+            }
+
             $statusMap = self::STATUS_MAP[$erpStatusCode] ?? null;
 
             if (!$statusMap) {
-                $result['message'] = sprintf('Status ERP "%s" não mapeado', $erpStatusCode);
+                $result['message'] = sprintf('Status ERP "%s" nao mapeado', $erpStatusCode);
                 return $result;
             }
 
@@ -1037,6 +1095,57 @@ class OrderSync implements OrderSyncInterface
         }
 
         return $itemsSynced;
+    }
+
+    /**
+     * Detecta pedidos CANCELADOS no Magento que ainda estão em STATUS='W' no Sectra.
+     * Loga warnings para que o time possa cancelar manualmente no Sectra.
+     *
+     * @return array{found: int}
+     */
+    public function syncCanceledOrders(): array
+    {
+        $found = 0;
+
+        try {
+            $sql = "SELECT em.erp_code, em.magento_entity_id, so.increment_id
+                    FROM grupoawamotos_erp_entity_map em
+                    INNER JOIN sales_order so ON so.entity_id = em.magento_entity_id
+                    WHERE em.entity_type = 'order'
+                      AND so.state = 'canceled'
+                      AND em.erp_code REGEXP '^[0-9]+$'
+                      AND CAST(em.erp_code AS UNSIGNED) > 0
+                      AND em.last_sync_at >= DATE_SUB(NOW(), INTERVAL 90 DAY)
+                    ORDER BY em.last_sync_at DESC
+                    LIMIT 50";
+
+            $orders = $this->syncLogResource->getConnection()->fetchAll($sql);
+
+            foreach ($orders as $orderData) {
+                $erpOrderId = (int) $orderData['erp_code'];
+                $erpStatus  = $this->getErpOrderStatus($erpOrderId);
+
+                if (!$erpStatus) {
+                    continue;
+                }
+
+                $erpStatusCode = $erpStatus['STATUS'] ?? '';
+
+                if (in_array($erpStatusCode, self::STATUS_PASSTHROUGH, true)) {
+                    $found++;
+                    $this->logger->warning(sprintf(
+                        '[ERP] Pedido %s CANCELADO no Magento mas STATUS="%s" no Sectra (ERP #%d) — cancelar manualmente no Sectra',
+                        $orderData['increment_id'],
+                        $erpStatusCode,
+                        $erpOrderId
+                    ));
+                }
+            }
+        } catch (\Exception $e) {
+            $this->logger->error('[ERP] syncCanceledOrders error: ' . $e->getMessage());
+        }
+
+        return ['found' => $found];
     }
 
     private function getPendingOrdersForSync(): array

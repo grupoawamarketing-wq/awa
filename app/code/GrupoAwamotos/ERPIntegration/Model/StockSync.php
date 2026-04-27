@@ -593,6 +593,13 @@ class StockSync implements StockSyncInterface
             $this->logSyncSummary($filiais, $result);
 
             $this->logger->info('[ERP] Stock sync completed', $result);
+            if ($result['not_found'] > 100) {
+                $this->logger->warning('[ERP] Stock sync: alto numero de SKUs nao encontrados', [
+                    'not_found' => $result['not_found'],
+                    'total_erp_records' => $result['total_erp_records'],
+                    'mensagem' => $result['not_found'] . ' SKUs do ERP nao existem no Magento. Verificar importacao de produtos.',
+                ]);
+            }
         } catch (\Exception $e) {
             $result = $this->finalizeSyncResult($result, $startTime);
             $this->logAnomalySummary($result);

@@ -73,22 +73,21 @@ class OrderStatusChange implements ObserverInterface
             }
 
             $message = $this->buildStatusMessage($order->getIncrementId(), $status);
-            $result = $this->whatsappSender->sendMessage($phoneNumber, $message);
+            $result = $this->whatsappSender->queueMessage($phoneNumber, $message, 10);
 
-            if ($result['success'] ?? false) {
+            if ($result) {
                 $this->logger->info(sprintf(
-                    '[WhatsApp Order] Status notification sent for order %s (status: %s)',
+                    '[WhatsApp Order] Status notification queued for order %s (status: %s)',
                     $order->getIncrementId(),
                     $status
                 ));
                 $order->addCommentToStatusHistory(
-                    sprintf('WhatsApp: Notificação de status "%s" enviada.', $status)
+                    sprintf('WhatsApp: Notificação de status "%s" agendada.', $status)
                 );
             } else {
                 $this->logger->warning(sprintf(
-                    '[WhatsApp Order] Failed to send notification for order %s: %s',
-                    $order->getIncrementId(),
-                    $result['message'] ?? 'unknown error'
+                    '[WhatsApp Order] Failed to queue notification for order %s',
+                    $order->getIncrementId()
                 ));
             }
         } catch (\Exception $e) {

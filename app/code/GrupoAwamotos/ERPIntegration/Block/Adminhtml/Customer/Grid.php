@@ -73,8 +73,8 @@ class Grid extends Template
         try {
             $offset = ($this->page - 1) * $this->pageSize;
 
-            // Build WHERE clause for search - show all records from FN_FORNECEDORES
-            $whereClause = "1=1";
+            // Build WHERE clause - only active records
+            $whereClause = "f.ATCLIENTE = 'S'";
             $params = [];
 
             // Type filter
@@ -142,7 +142,7 @@ class Grid extends Template
         }
 
         try {
-            $whereClause = "1=1";
+            $whereClause = "ATCLIENTE = 'S'";
             $params = [];
 
             // Apply type filter to count
@@ -368,6 +368,7 @@ class Grid extends Template
                     SUM(CASE WHEN CKCLIENTE = 'S' THEN 1 ELSE 0 END) as clientes,
                     SUM(CASE WHEN CKCLIENTE <> 'S' OR CKCLIENTE IS NULL THEN 1 ELSE 0 END) as fornecedores
                 FROM FN_FORNECEDORES
+                WHERE ATCLIENTE = 'S'
             ");
 
             return $stats[0] ?? [];
