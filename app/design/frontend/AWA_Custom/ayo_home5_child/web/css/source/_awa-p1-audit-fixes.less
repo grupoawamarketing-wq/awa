@@ -519,3 +519,69 @@ body .page-wrapper .swiper-pagination-bullet::after {
     transform: translate(-50%, -50%);
     width: 44px;
 }
+
+// =============================================================
+// FIX AUDIT-2026-04-27 — 50 bugs batch
+// =============================================================
+
+// BUG #35: body.scrollWidth excede viewport ~38px no mobile
+// Causa: .row Bootstrap dentro de .hot-deal-tab-slider tem margin: 0 -15px
+// Fix: zerar margins + overflow:hidden na section
+body .top-home-content--trust-and-offers {
+    overflow-x: hidden !important;
+}
+
+body .hot-deal-tab-slider > .row,
+body .top-home-content .hot-deal-tab-slider .row {
+    box-sizing: border-box !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+}
+
+// BUG #38: .actions-secondary fora do viewport no desktop
+@media (max-width: 1440px) {
+    body .page-wrapper .product-item .actions-secondary {
+        right: auto !important;
+    }
+}
+
+// BUG #16: Link "Saiba mais" muito pequeno — area de toque WCAG AA
+body .page-wrapper a.saiba-mais,
+body .page-wrapper a[title="Saiba mais"],
+body .page-wrapper a[title="Ver todos"],
+body .top-home-content a.saiba-mais {
+    display: inline-flex !important;
+    align-items: center !important;
+    min-height: 44px !important;
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+}
+
+// BUG #28: .awa-b2b-promo-bar container abaixo de 44px
+body .awa-b2b-promo-bar {
+    min-height: 44px !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+// BUG #49: Back-to-top button (61x44) — largura minima
+body .page-wrapper .jtop,
+body .page-wrapper #back-top,
+body .page-wrapper .back-top {
+    min-width: 44px !important;
+    min-height: 44px !important;
+}
+
+// BUG #20: Minicart position:absolute 0x0 no mobile
+// Garante que .minicart-wrapper nao bloqueia interacoes
+@media (max-width: 991px) {
+    body .page-wrapper .minicart-wrapper {
+        pointer-events: none;
+    }
+    body .page-wrapper .minicart-wrapper .showcart,
+    body .page-wrapper .minicart-wrapper .action.showcart {
+        pointer-events: auto;
+    }
+}

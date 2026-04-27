@@ -1,0 +1,42 @@
+<?php
+declare(strict_types=1);
+/**
+ * Newsletter Subscribe Form — AWA_Custom override
+ * Fix: form_key CSRF token ausente (bug audit 2026-04-27).
+ *
+ * @var \Magento\Newsletter\Block\Subscribe $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+$escaper = $block->getData('escaper')
+    ?? \Magento\Framework\App\ObjectManager::getInstance()
+        ->get(\Magento\Framework\Escaper::class);
+?>
+<div class="newsletter-footer">
+    <label class="visually-hidden" for="newsletter"><?= $escaper->escapeHtml(__('Receba nossas novidades')) ?></label>
+    <form class="form subscribe"
+          novalidate
+          action="<?= $escaper->escapeUrl($block->getFormActionUrl()) ?>"
+          method="post"
+          data-mage-init='{"validation": {"errorClass": "mage-error"}}'
+          id="newsletter-validate-detail">
+        <?= $block->getBlockHtml('formkey') ?>
+        <div class="field newsletter">
+            <div class="control">
+                <input name="email"
+                       type="email"
+                       id="newsletter"
+                       placeholder="<?= $escaper->escapeHtmlAttr(__('Seu endereço de e-mail...')) ?>"
+                       data-validate="{required:true, 'validate-email':true}"
+                       aria-label="<?= $escaper->escapeHtmlAttr(__('Endereço de e-mail para newsletter')) ?>"
+                       autocomplete="email"/>
+            </div>
+            <div class="actions">
+                <button class="action subscribe primary"
+                        title="<?= $escaper->escapeHtmlAttr(__('Assinar newsletter')) ?>"
+                        type="submit">
+                    <?= $escaper->escapeHtml(__('Assinar')) ?>
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
