@@ -1,0 +1,178 @@
+// =============================================================================
+// AWA PAGE CONTAINERS — v1.2 — Single Source of Truth para larguras de página
+// =============================================================================
+//
+// Problema resolvido: havia 27 regras concorrentes de `.page-main max-width`
+// espalhadas por ~15 arquivos LESS. Este arquivo centraliza TUDO.
+//
+// HIERARQUIA DE LARGURAS:
+//
+//   Tier 0 — full-bleed  : home (seções internas gerenciam o próprio container)
+//   Tier 1 — catalog     : PLP / PDP / Search / Cart — 1440px
+//   Tier 2 — dashboard   : B2B dashboard / account / orders — 1280px (2 colunas)
+//   Tier 3 — flow        : cotações, listas, quickorder — 1100px (1 coluna ampla)
+//   Tier 4 — narrow      : login / cadastro / B2B register / checkout — 960px
+//   Tier 5 — prose       : CMS genérico / currículo — 800px
+//
+// REGRA: nunca definir max-width no .page-main fora deste arquivo.
+//        Exceções são permitidas apenas com comentário // [CONTAINER-EXCEPTION]
+//
+
+// ── TOKENS DE LARGURA ─────────────────────────────────────────────────────────
+@awa-page-catalog : 1440px;  // PLP / PDP / Search / Cart
+@awa-page-dash    : 1280px;  // B2B Dashboard (2-col com sidebar)
+@awa-page-flow    : 1100px;  // Cotações, listas, quickorder
+@awa-page-narrow  : 960px;   // Login, cadastro, B2B register, checkout
+@awa-page-prose   : 800px;   // CMS prose, currículo
+
+// ── BREAKPOINTS LOCAIS (fallback caso _awa-variables não defina) ──────────────
+@awa-page-bp-md   : 1024px;
+@awa-page-bp-sm   : 768px;
+
+// ── PADDING LATERAL POR TIER ──────────────────────────────────────────────────
+@awa-page-pad-desktop : 24px;
+@awa-page-pad-tablet  : 16px;
+@awa-page-pad-mobile  : 12px;
+
+// Exportar tokens para CSS custom properties (uso em JS/templates)
+:root {
+    --awa-page-catalog : 1440px;
+    --awa-page-dash    : 1280px;
+    --awa-page-flow    : 1100px;
+    --awa-page-narrow  : 960px;
+    --awa-page-prose   : 800px;
+    --awa-page-pad     : 24px;
+}
+
+// ── MIXIN: padrão de container ────────────────────────────────────────────────
+.awa-page-container(@max-w) {
+    max-width: @max-w !important; // single source of truth
+    width: 100%;
+    margin-inline: auto;
+    padding-inline: @awa-page-pad-desktop;
+
+    @media (max-width: @awa-page-bp-md) {
+        padding-inline: @awa-page-pad-tablet;
+    }
+    @media (max-width: @awa-page-bp-sm) {
+        padding-inline: @awa-page-pad-mobile;
+    }
+}
+
+
+// =============================================================================
+// TIER 0 — HOME: full-bleed
+// =============================================================================
+body.cms-index-index .page-main,
+body.cms-homepage_ayo_home5 .page-main {
+    max-width: 100% !important; // single source of truth
+    padding-inline: 0 !important;
+}
+
+
+// =============================================================================
+// TIER 1 — CATALOG: PLP / PDP / Search / Cart (1440px)
+// =============================================================================
+body.catalog-category-view .page-main,
+body.catalog-product-view .page-main,
+body.catalogsearch-result-index .page-main,
+body.checkout-cart-index .page-main {
+    .awa-page-container(@awa-page-catalog);
+}
+
+
+// =============================================================================
+// TIER 2 — DASHBOARD: B2B + Account (1280px, 2-col com sidebar)
+// =============================================================================
+body.b2b-account-dashboard .page-main,
+body.b2b-company-index .page-main,
+body.b2b-credit-index .page-main,
+body.b2b-approval-index .page-main,
+body.b2b-reorder-history .page-main,
+body.customer-account-index .page-main,
+body.account .page-main,
+body.sales-order-history .page-main,
+body.sales-order-view .page-main,
+body.wishlist-index-index .page-main {
+    .awa-page-container(@awa-page-dash);
+}
+
+// Sidebar 2-col grid
+body.b2b-account-dashboard .page-main > .columns,
+body.customer-account-index .page-main > .columns,
+body.account .page-main > .columns {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 32px;
+    align-items: start;
+
+    @media (max-width: @awa-page-bp-md) {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+// =============================================================================
+// TIER 3 — FLOW: Cotações, Listas, QuickOrder (1100px)
+// =============================================================================
+body.b2b-quote-index .page-main,
+body.b2b-quote-view .page-main,
+body.b2b-quote-create .page-main,
+body.b2b-shoppinglist-index .page-main,
+body.b2b-shoppinglist-view .page-main,
+body.b2b-quickorder-index .page-main {
+    .awa-page-container(@awa-page-flow);
+}
+
+
+// =============================================================================
+// TIER 4 — NARROW: Auth + Checkout (960px)
+// =============================================================================
+body.b2b-auth-shell .page-main,
+body.b2b-account-login .page-main,
+body.b2b-register-index .page-main,
+body.customer-account-login .page-main,
+body.customer-account-create .page-main,
+body.customer-account-forgotpassword .page-main,
+body.checkout-index-index .page-main,
+body.onepagecheckout-index-index .page-main {
+    .awa-page-container(@awa-page-narrow);
+    padding-block: 40px;
+
+    @media (max-width: @awa-page-bp-sm) {
+        padding-block: 24px;
+    }
+}
+
+
+// =============================================================================
+// TIER 5 — PROSE: CMS genérico + Currículo (800px)
+// =============================================================================
+body.cms-page-view .page-main,
+body.curriculo-index-index .page-main,
+body.curriculo-index-status .page-main,
+body.ayo-curriculo-index-index .page-main,
+body.ayo-curriculo-index-status .page-main {
+    .awa-page-container(@awa-page-prose);
+    padding-block: 48px;
+
+    @media (max-width: @awa-page-bp-sm) {
+        padding-block: 24px;
+    }
+}
+
+
+// =============================================================================
+// BREADCRUMBS — alinhados ao container da página
+// =============================================================================
+body.catalog-category-view .breadcrumbs,
+body.catalog-product-view .breadcrumbs,
+body.catalogsearch-result-index .breadcrumbs {
+    max-width: @awa-page-catalog;
+    margin-inline: auto;
+    padding-inline: @awa-page-pad-desktop;
+
+    @media (max-width: @awa-page-bp-md) {
+        padding-inline: @awa-page-pad-tablet;
+    }
+}

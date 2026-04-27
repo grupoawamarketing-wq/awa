@@ -4023,7 +4023,7 @@ body .page-wrapper .product-item {
     background: var(--awa-bg-surface); /* BP-12 */
     border-radius: var(--awa-radius);
     border: 1px solid var(--awa-gray-200);
-    overflow: visible;
+    overflow: hidden;
     transition: transform var(--awa-transition),
                 box-shadow var(--awa-transition),
                 border-color var(--awa-transition); /* BUG-10: era 'all', causava repintura desnecessária */
@@ -20770,8 +20770,9 @@ body .page-wrapper .awa-site-header.awa-header-condensed #header .awa-header-sea
   #header .awa-header-search-col.top-search,
   #header .awa-header-search-col.awa-header-actions,
   #header .awa-header-search-col {
-    justify-self: stretch !important;
-    max-width:    none !important;
+    justify-self: center !important;
+    width:        100% !important;
+    max-width:    720px !important;
     min-width:    var(--awa-zero, 0) !important;
   }
 
@@ -21044,6 +21045,12 @@ body .page-wrapper .awa-site-header.awa-header-condensed #header .awa-header-sea
     transition:  color 180ms ease, box-shadow 180ms ease !important;
   }
 
+  /* Force visibility for all top level menu items (overrides refinements.css) */
+  #header .navigation li.level0,
+  #header .navigation .level0 {
+    display: inline-flex !important;
+  }
+
   #header ~ * .navigation.verticalmenu.side-verticalmenu > ul.togge-menu,
   body .page-wrapper .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown {
     width:     var(--awa-size-236, 236px) !important;
@@ -21119,63 +21126,6 @@ body .page-wrapper .awa-site-header.awa-header-condensed #header .awa-header-sea
   }
 
 
-  /* Fix 7: Navbar links visiveis (override refinements.css display:none) */
-  body .page-wrapper #header .awa-nav-bar .header-wrapper-sticky .container-header-sticky {
-    display: flex !important;
-    align-items: stretch !important;
-    width: 100% !important;
-  }
-
-  body .page-wrapper #header .awa-nav-bar .header-wrapper-sticky .container-header-sticky .col-sticky-logo {
-    display: flex !important;
-    flex: var(--awa-flex-none, 0 0 auto) !important;
-  }
-
-  body .page-wrapper #header .awa-nav-bar .header-wrapper-sticky .container-header-sticky .col-sticky-logo .logo-sticky {
-    display: none !important;
-  }
-
-  body .page-wrapper #header .awa-nav-bar .header-wrapper-sticky .container-header-sticky nav.top-menu-sticky {
-    display: flex !important;
-    flex: var(--awa-flex-auto, 1 1 auto) !important;
-    min-width: var(--awa-zero, 0) !important;
-  }
-
-  body .page-wrapper #header .awa-nav-bar .navigation.custommenu.main-nav ul.main-nav-list {
-    display: flex !important;
-    flex-wrap: nowrap !important;
-    list-style: var(--awa-none, none) !important;
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-
-  body .page-wrapper #header .awa-nav-bar .navigation.custommenu.main-nav ul.main-nav-list > div {
-    display: inline-flex !important;
-  }
-
-  body .page-wrapper #header .awa-nav-bar .navigation.custommenu.main-nav ul.main-nav-list li.level0 {
-    display: inline-flex !important;
-    align-items: stretch !important;
-  }
-
-  body .page-wrapper #header .awa-nav-bar .navigation.custommenu.main-nav ul.main-nav-list li.level0 > .submenu {
-    display: none !important;
-  }
-
-  /* Fix 8b: Verticalmenu button min-width override */
-  #header .awa-header-categories nav.navigation.verticalmenu.side-verticalmenu {
-    width: var(--awa-size-236, 236px) !important;
-    max-width: var(--awa-size-236, 236px) !important;
-    min-width: var(--awa-zero, 0) !important;
-  }
-
-  #header .awa-header-categories {
-    padding: 0 !important;
-    position: relative !important;
-    z-index: var(--awa-z-100, 100) !important;
-    overflow: visible !important;
-  }
-
 } /* fim ≥992px */
 
 
@@ -21243,7 +21193,7 @@ body .page-wrapper .awa-site-header.awa-header-condensed #header .awa-header-sea
     grid-template-areas:
       "nav brand cart"
       "search search search" !important;
-    gap: 10px 12px !important;
+    gap: 16px 12px !important;
     width: 100% !important;
     max-width: none !important;
     min-height: auto !important;
@@ -25739,7 +25689,7 @@ body .page-wrapper .navigation.verticalmenu li.level0.is-highlight .awa-vmenu-ic
  */
 
 :is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) {
-    --awa-modern-card-radius: 5px;
+    --awa-modern-card-radius: 14px;
     --awa-modern-card-border: rgba(15, 23, 42, 0.10);
     --awa-modern-card-border-hover: rgba(183, 51, 55, 0.18);
     --awa-modern-card-bg: #ffffff;
@@ -26233,9 +26183,10 @@ body.catalog-category-view .awa-category-hero__accent {
     border: 1px solid var(--awa-modern-card-border) !important;
     border-radius: var(--awa-modern-card-radius) !important;
     background: var(--awa-modern-card-bg) !important;
-    box-shadow: none !important;
+    box-shadow: var(--awa-shadow-card, 0 1px 3px rgba(0,0,0,.08)) !important;
     overflow: hidden !important;
-    transition: border-color 0.18s ease, background-color 0.18s ease !important;
+    transition: border-color 0.18s ease, background-color 0.18s ease,
+                box-shadow 0.18s ease, transform 0.18s ease !important;
 }
 
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
@@ -26409,18 +26360,20 @@ body.catalog-category-view .awa-category-hero__accent {
     border: 1px solid var(--awa-modern-card-border) !important;
     border-radius: var(--awa-modern-card-radius) !important;
     background: var(--awa-modern-card-bg) !important;
-    box-shadow: none !important;
+    box-shadow: var(--awa-shadow-card, 0 1px 3px rgba(0,0,0,.08)) !important;
     overflow: hidden !important;
-    transition: border-color 0.18s ease, background-color 0.18s ease !important;
+    transition: border-color 0.18s ease, background-color 0.18s ease,
+                box-shadow 0.18s ease, transform 0.18s ease !important;
 }
 
 :is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
     :is(.wrapper.grid.products-grid .item-product, .products-swiper .product-item, .product-tab-slider .item-product, .rokan-bestseller .item-product, .rokan-newproduct .item-product, .list-tab-product .item-product, .block-products-list .item-product, .block-new-products .item-product, .hot-deal .item-product):hover,
 :is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
     :is(.wrapper.grid.products-grid .item-product, .products-swiper .product-item, .product-tab-slider .item-product, .rokan-bestseller .item-product, .rokan-newproduct .item-product, .list-tab-product .item-product, .block-products-list .item-product, .block-new-products .item-product, .hot-deal .item-product):focus-within {
-    /* transform/box-shadow → seção 28 em awa-ux-improvements.css */
     background: #fffdfd !important;
     border-color: var(--awa-modern-card-border-hover) !important;
+    box-shadow: var(--awa-shadow-md, 0 4px 12px rgba(0,0,0,.1)) !important;
+    transform: translateY(-2px) !important;
 }
 
 :is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
@@ -27370,7 +27323,6 @@ body.catalog-category-view .awa-category-hero__accent {
     align-content: initial !important;
     height: auto !important;
     min-height: var(--awa-zero, 0) !important;
-    overflow: visible !important;
     position: relative;
     margin-bottom: var(--awa-space-4, 16px);
     border-radius: var(--awa-radius-card, 14px);
@@ -27877,7 +27829,6 @@ body.checkout-cart-index #discount-coupon-form .action.apply.primary {
     }
 
     :is(body.catalog-category-view, body.catalogsearch-result-index) .wrapper.grid.products-grid .product-grid > li.item-product {
-        overflow: visible !important;
     }
 
     :is(body.catalog-category-view, body.catalogsearch-result-index) .shop-tab-select .toolbar.toolbar-products {
@@ -33133,7 +33084,6 @@ body:not(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper .he
     grid-row: auto !important;
     grid-column: auto !important;
     align-self: start !important;
-    overflow: visible !important;
     height: auto !important;
 }
 
@@ -40450,7 +40400,6 @@ body:not(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper .he
     grid-row: auto !important;
     grid-column: auto !important;
     align-self: start !important;
-    overflow: visible !important;
     height: auto !important;
 }
 
@@ -44745,11 +44694,12 @@ select:focus-visible {
     background: #ffffff !important;
 }
 
-:is(body.checkout-cart-index, body.checkout-index-index, body.rokanthemes-onepagecheckout) .page-main,
-:is(body.customer-account-login, body.customer-account-create, body.b2b-auth-shell, body.b2b-register-index) .page-main {
-    max-width: var(--awa-flow-max);
-    margin-inline: auto;
-}
+/* [CONTAINER-EXCEPTION] Auth/login page-main max-width delegado para _awa-page-containers.less */
+
+
+
+
+
 
 /* 2) Cartões e blocos alinhados */
 :is(
@@ -44932,9 +44882,10 @@ body.rokanthemes-onepagecheckout .checkout-container {
 }
 
 /* 6) Trabalhe Conosco (Currículo) */
-:is(body.ayo-curriculo-index-index, body.curriculo-index-index, body.ayo-curriculo-index-status, body.curriculo-index-status) .page-main {
-    max-width: 980px !important;
-}
+/* [CONTAINER-EXCEPTION] Curriculo page-main max-width delegado para _awa-page-containers.less */
+
+
+
 
 :is(body.ayo-curriculo-index-index, body.curriculo-index-index) .curriculo-wrapper {
     padding-top: clamp(20px, 3vw, 36px);
