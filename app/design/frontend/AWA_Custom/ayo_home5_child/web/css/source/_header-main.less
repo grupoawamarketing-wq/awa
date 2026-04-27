@@ -50,8 +50,8 @@
 @radius-md: 8px;
 
 // Alturas fixas (medidas na imagem de referência)
-@h-promo-bar:    34px;
-@h-header-main:  72px;
+@h-promo-bar:    32px;
+@h-header-main:  80px;
 @h-navbar:       52px;
 @h-search:       44px;
 @h-cart-btn:     44px;
@@ -201,8 +201,17 @@ body .page-wrapper .awa-site-header {
     .awa-main-header .header-main > .container,
     .header-control.awa-nav-bar > .container {
       max-width: @grid-max;
-      padding-inline: 0;
-      width: ~"min(100%, 1440px)";
+      margin-inline: auto;
+      padding-inline: @awa-page-pad-desktop;
+      width: 100%;
+
+      @media (max-width: @awa-breakpoint-lg) {
+        padding-inline: @awa-page-pad-tablet;
+      }
+
+      @media (max-width: @awa-breakpoint-sm) {
+        padding-inline: @awa-page-pad-mobile;
+      }
     }
 
     // ── Fundo e borda do header ──────────────────────────────────────────────
@@ -1150,22 +1159,310 @@ body .page-wrapper {
   outline: none;
 }
 
-// Skip-link
-.skip-to-main-content {
-  position: absolute !important;
-  top: -100%;
-  left: @sp-1;
-  z-index: 99999 !important;
-  background: @awa-primary;
-  color: @awa-white;
-  padding: @sp-1 @sp-2;
-  border-radius: @radius-sm;
-  font-weight: 700;
-  font-size: var(--awa-fs-xs);
-  text-decoration: none;
-  transition: top 0.15s ease;
+// ── B2B Status Panel & Registration CTA ──────────────────────────────────
+// Extracted from Status Panel CSS and standardized with AWA tokens.
+// Specificity high enough to win over legacy module CSS.
 
-  &:focus {
-    top: @sp-1;
-  }
+.b2b-status-panel {
+    position: relative;
+    display: flex;
+    align-items: center;
+    z-index: var(--awa-z-dropdown, 99);
+}
+
+.b2b-status-trigger {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 14px;
+    background: linear-gradient(135deg, fade(@awa-red, 8%) 0%, fade(@awa-red, 4%) 100%) !important;
+    border: 1px solid fade(@awa-red, 15%) !important;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+
+    &:hover {
+        background: linear-gradient(135deg, fade(@awa-red, 12%) 0%, fade(@awa-red, 8%) 100%) !important;
+        border-color: fade(@awa-red, 25%) !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px fade(@awa-red, 15%);
+    }
+
+    .status-badge {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        background: @awa-red;
+        border-radius: 8px;
+        color: @awa-white;
+        font-size: 14px;
+        flex-shrink: 0;
+    }
+
+    .status-info {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        line-height: 1.2;
+        min-width: 0;
+
+        .status-greeting {
+            font-size: 10px;
+            font-weight: 500;
+            color: @awa-text-muted;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+
+        .status-group {
+            font-size: 12px;
+            font-weight: 700;
+            color: @awa-text-primary;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 140px;
+        }
+    }
+
+    .status-arrow {
+        font-size: 10px;
+        color: @awa-text-muted;
+        transition: transform 0.2s ease;
+    }
+
+    &[aria-expanded="true"] {
+        background: @awa-red !important;
+        border-color: @awa-red !important;
+        
+        .status-greeting, .status-group, .status-arrow { color: @awa-white !important; }
+        .status-badge { background: rgba(255, 255, 255, 0.2); }
+        .status-arrow { transform: rotate(180deg); }
+    }
+}
+
+.b2b-register-cta {
+    display: flex;
+    align-items: center;
+    margin-right: @sp-2;
+}
+
+.b2b-register-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: linear-gradient(135deg, @awa-red 0%, darken(@awa-red, 10%) 100%) !important;
+    border-radius: 12px;
+    color: @awa-white !important;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 10px fade(@awa-red, 25%);
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px fade(@awa-red, 35%);
+        background: linear-gradient(135deg, lighten(@awa-red, 5%) 0%, @awa-red 100%) !important;
+        color: @awa-white !important;
+    }
+
+    i { font-size: 14px; opacity: 0.9; }
+}
+
+// ── Sticky Header (Refined Density) ──────────────────────────────────────
+// Uses classes from awa-header-sticky.js
+
+.header-wrapper-sticky {
+    position: relative;
+    z-index: 9998;
+    background: @awa-white;
+    transition: all 0.3s @awa-ease;
+    width: 100%;
+
+    &.is-sticky,
+    &.awa-header-condensed {
+        position: sticky;
+        top: 0;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        
+        // Density reduction
+        .awa-main-header {
+            min-height: 64px !important;
+            padding-block: 0 !important;
+
+            .awa-main-header-inner-wrap {
+                min-height: 64px !important;
+            }
+
+            .logo img {
+                max-height: 44px !important;
+                width: auto !important;
+            }
+
+            // Align elements to the center of the reduced height
+            .awa-main-header__inner {
+                min-height: 64px !important;
+            }
+        }
+
+        // Hide promo bar at the top shell level to prevent layout shift
+        & ~ .awa-nav-bar {
+            // preserve nav bar height
+        }
+    }
+}
+
+// Hide promo bar when sticky is active
+.awa-site-header.awa-header-condensed .awa-b2b-promo-bar,
+.awa-site-header.is-sticky .awa-b2b-promo-bar {
+    display: none !important;
+    visibility: hidden;
+    height: 0;
+    overflow: hidden;
+}
+
+// Mobile specific sticky refinements
+@media (max-width: @awa-breakpoint-sm) {
+    .header-wrapper-sticky.is-sticky {
+        .awa-main-header {
+            min-height: 56px !important;
+            
+            .awa-main-header-inner-wrap { min-height: 56px !important; }
+            .logo img { max-height: 36px !important; }
+        }
+    }
+}
+
+// ── Consolidate refinements from _header-density.less ─────────────────────
+
+@media (min-width: @awa-breakpoint-md) {
+    // Search width and border radius optimization
+    .page-wrapper .awa-site-header .awa-main-header .awa-header-search-col {
+        min-width: 480px;
+
+        form.minisearch, form.search-content {
+            border-radius: @radius-md;
+            overflow: hidden;
+
+            &:focus-within {
+                border-color: @awa-primary;
+                box-shadow: 0 0 0 3px fade(@awa-primary, 15%);
+            }
+        }
+
+        button.action.search {
+            border-radius: 0 @radius-md @radius-md 0;
+        }
+    }
+}
+
+// Customer Welcome Font Weight
+body .page-wrapper .awa-site-header .customer-welcome,
+body .page-wrapper .awa-site-header .customer-welcome .customer-name,
+body .page-wrapper .awa-site-header .customer-welcome button.action.switch {
+    font-weight: 600 !important;
+}
+
+// Nav Link Deduplication (Hide redundant "Marcas" link)
+body .page-wrapper .awa-site-header .awa-nav-bar .awa-header-primary-nav .navigation.custommenu li.nav-item.level0:has(> a[href*="/marcas"]:not([href*="nossas"])) {
+    display: none !important;
+}
+
+// Minicart Pill Styling
+body .page-wrapper .awa-site-header .minicart-wrapper .action.showcart .counter.qty {
+    background: var(--awa-hdr-primary) !important;
+    color: @awa-white !important;
+    border-radius: 50px;
+    font-size: 10px;
+    font-weight: 700;
+    min-width: 18px;
+    height: 18px;
+    line-height: 18px;
+    padding: 0 5px;
+}
+
+// ── Account Prompt & Auth states ──────────────────────────────────────────
+
+.awa-header-account-prompt {
+    display: flex;
+    align-items: center;
+    gap: @sp-1;
+    padding: @sp-1;
+    border-radius: @radius-md;
+    transition: all 0.2s @transition-fast;
+    text-decoration: none !important;
+
+    &:hover {
+        background: rgba(0, 0, 0, 0.03);
+    }
+
+    &__icon {
+        color: var(--awa-hdr-primary);
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+    }
+
+    &__text {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.2;
+        min-width: 0;
+    }
+
+    &__line1 {
+        font-size: 10px;
+        color: var(--awa-hdr-muted);
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &__line2 {
+        font-size: 13px;
+        color: var(--awa-hdr-text);
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    &__link {
+        color: var(--awa-hdr-primary);
+        text-decoration: none !important;
+        
+        &:hover {
+            color: var(--awa-hdr-primary-dark);
+            text-decoration: underline !important;
+        }
+
+        &--register {
+            color: var(--awa-hdr-text);
+        }
+    }
+
+    &__separator {
+        margin-inline: 4px;
+        color: var(--awa-hdr-muted);
+        font-weight: 400;
+        font-size: 11px;
+    }
+}
+
+// Mobile state handling
+@media (max-width: @awa-breakpoint-md) {
+    .awa-header-account-prompt {
+        padding: 0;
+        &:hover { background: none; }
+        
+        &__text { display: none; } // Icon only or handle differently in drawer
+    }
 }
