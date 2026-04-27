@@ -28,7 +28,7 @@
 
 <div class="categorytab-container awa-cat-tabs-<?php echo $block->escapeHtmlAttr($identifyClass); ?>">
 <div class="container">
-<header class='group-title1'><?php echo '<h2>' . $title . '</h2>'; ?></header>
+<header class='group-title1'><h2><?php echo $block->escapeHtml($title); ?></h2></header>
   <ul class="tabs tabs-<?php echo $block->escapeHtmlAttr($identifyClass); ?>">
    <?php
     $k = 0;
@@ -37,7 +37,7 @@
         $cateName = $cate_model->load($cate_id)->getName();
         if ($cateName) {
    ?>
-            <li class="<?php if ($k == 0) { echo 'active'; } ?>" rel="tab<?php echo trim($cate_id) . '-' . $identifyClass; ?>"><?php echo $cateName; ?></li>
+            <li class="<?php if ($k == 0) { echo 'active'; } ?>" rel="tab<?php echo (int) $cate_id; ?>-<?php echo $block->escapeHtmlAttr($identifyClass); ?>"><?php echo $block->escapeHtml($cateName); ?></li>
     <?php }
         $k++;
     } ?>
@@ -55,7 +55,7 @@
         <?php
         $tabIndex = 0;
         foreach ($categoryIds as $cate_id) { ?>
-        <div id="tab<?php echo trim($cate_id) . '-' . $identifyClass; ?>" class="tab_content_<?php echo $identifyClass; ?>">
+        <div id="tab<?php echo (int) $cate_id; ?>-<?php echo $block->escapeHtmlAttr($identifyClass); ?>" class="tab_content_<?php echo $block->escapeHtmlAttr($identifyClass); ?>">
         <div class="owl-container">
             <?php if ($tabIndex === 0): ?>
             <div class="category_tab_slider swiper">
@@ -86,7 +86,7 @@
                                         if (strpos($_thumbHtml, 'loading=') === false) {
                                             $_thumbHtml = str_replace('<img ', '<img loading="lazy" decoding="async" ', $_thumbHtml);
                                         }
-                                        echo $_thumbHtml; ?>
+                                        /* @noEscape — HTML from block->toHtml(), safe */ echo $_thumbHtml; ?>
                                     </span>
                                 <?php endif; ?>
                             </a>
@@ -117,7 +117,7 @@
                                 <span class="awa-b2b-sku__value"><?php echo $block->escapeHtml($_item->getSku()); ?></span>
                             </div>
                             <?php if ($templateType): ?>
-                                <div class="product-rating"><?php echo $block->getReviewsSummaryHtml($_item, $templateType, true); ?></div>
+                                <div class="product-rating"><?php /* @noEscape — internal Magento reviews HTML */ echo $block->getReviewsSummaryHtml($_item, $templateType, true); ?></div>
                             <?php endif; ?>
                             <div class="info-price">
                                 <?php /* @noEscape */ echo $this->helper('Rokanthemes\Themeoption\Helper\Data')->getPriceDisplayCustom($block->getProductPrice($_item)); ?>
@@ -138,7 +138,7 @@
                                                 $postData = $postDataHelper->getPostData($block->getAddToCartUrl($_item), ['product' => $_item->getEntityId()]);
                                                 ?>
                                                 <button class="action tocart btn-add-to-cart"
-                                                        data-post='<?php echo $postData; ?>'
+                                                        data-post='<?php echo $block->escapeHtmlAttr($postData); ?>'
                                                         type="button" title="<?php echo $block->escapeHtmlAttr(__('Add to Cart')); ?>">
                                                     <span><?php echo $block->escapeHtml(__('Add to Cart')); ?></span>
                                                 </button>
