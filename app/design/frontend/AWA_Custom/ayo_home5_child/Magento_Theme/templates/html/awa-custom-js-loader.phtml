@@ -40,6 +40,7 @@ $pathSlug = trim($pathInfo, '/');
 $isCmsHomeRoute = $fullActionName === 'cms_index_index' || $pathSlug === '';
 $isDemoStagePreview = $fullActionName === 'cms_page_view'
     && in_array($pathSlug, ['homepage_ayo_home5_stage', 'homepage_ayo_home5_demo_stage'], true);
+$shouldEagerLoadHeaderA11y = $isCmsHomeRoute || $isDemoStagePreview;
 
 // Home demo routes should stay close to Ayo base and avoid observer-heavy compat scripts.
 if ($isCmsHomeRoute || $isDemoStagePreview) {
@@ -226,6 +227,9 @@ HTML;
     '.header .mini-cart-wrapper',
     '.header .action.showcart'
 ], 2500) ?>
+<?php if ($shouldEagerLoadHeaderA11y): ?>
+<script src="<?= $block->escapeUrl($block->getViewFileUrl('js/awa-header-a11y-performance.js')) ?>" defer></script>
+<?php else: ?>
 <?= /* @noEscape */ $renderIntentScriptLoader($block->escapeUrl($block->getViewFileUrl('js/awa-header-a11y-performance.js')), [
     '.header .nav-toggle',
     '[data-awa-nav-toggle]',
@@ -235,6 +239,7 @@ HTML;
     '.top-account',
     '[data-awa-component="site-header"]'
 ], 3000) ?>
+<?php endif; ?>
 <?php endif; ?>
 <?php if ($loadHomeOwlTabsJs): ?>
 <script src="<?= $block->escapeUrl($block->getViewFileUrl('js/awa-home-owl-tabs-ui.js')) ?>" defer></script>

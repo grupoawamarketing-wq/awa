@@ -1756,3 +1756,722 @@ body.catalog-product-view .product-info-main .b2b-login-to-see-price::after {
         font-size: 18px !important;
     }
 }
+
+
+/* =============================================================================
+   AWA Fix: Header mobile — hambúrguer e centralização do logo (2026-04-27)
+   Problema 1: .action.nav-toggle herdava inset-block-start:-62px de regra
+                legada, sobrepondo a barra promoção vermelha.
+   Problema 2: grid-wrapper tinha padding-left:16px mas padding-right:0,
+                causando deslocamento de +8px no logo e hambúrguer.
+   ============================================================================= */
+
+/* Fix 1 — hambúrguer: cancela o inset legado quando dentro do grid mobile */
+@media (max-width: 991px) {
+    #html-body .page-wrapper .awa-site-header .header
+        :is(.awa-main-header__inner, .wp-header)[data-awa-header-row]
+        .action.nav-toggle {
+        inset: auto !important;
+        top: auto !important;
+        position: relative !important;
+        transform: none !important;
+    }
+}
+
+/* Fix 2 — padding simétrico no grid: força padding-right igual ao padding-left
+   para que logo e ícones fiquem centrados em relação ao viewport */
+@media (max-width: 991px) {
+    #html-body .page-wrapper .awa-site-header .header
+        :is(.awa-main-header__inner, .wp-header)[data-awa-header-row] {
+        padding-right: var(--awa-space-4, 16px) !important;
+    }
+}
+@media (max-width: 480px) {
+    #html-body .page-wrapper .awa-site-header .header
+        :is(.awa-main-header__inner, .wp-header)[data-awa-header-row] {
+        padding-right: var(--awa-space-3, 12px) !important;
+    }
+}
+
+/* === AWA Fix v2: padding-right com duplo-ID (2026-04-27) ===
+   A regra "#header .awa-main-header :is(...)" usa padding:0!important.
+   Para sobrescrever com padding-right, precisamos de dois IDs (#html-body #header).
+   Especificidade: (2,2,0) bate qualquer regra de um único ID.
+   Também setamos padding-inline-end para cobrir propriedades lógicas. */
+@media (max-width: 991px) {
+    #html-body #header .awa-main-header__inner[data-awa-header-row],
+    #html-body #header .wp-header[data-awa-header-row] {
+        padding-right: var(--awa-space-4, 16px) !important;
+        padding-inline-end: var(--awa-space-4, 16px) !important;
+    }
+}
+@media (max-width: 480px) {
+    #html-body #header .awa-main-header__inner[data-awa-header-row],
+    #html-body #header .wp-header[data-awa-header-row] {
+        padding-right: var(--awa-space-3, 12px) !important;
+        padding-inline-end: var(--awa-space-3, 12px) !important;
+    }
+}
+
+/* === AWA Fix v3: Remove padding-left para centralizar logo (2026-04-27) ===
+   Causa: #header .header .header-main :is(.awa-main-header__inner[data-awa-header-row], ...)
+   define padding-left:16px com especificidade (1,4,0) no merged CSS.
+   Solucao: dois IDs (#html-body #header) = especificidade (2,2,0) supera (1,4,0).
+   Testado: padding-left=0 + padding-right=0 -> brand center=188px ≈ 187.5px (vpCenter).
+   Breakpoints: 991px (grid de 2 colunas) e 480px (grid mais estreito). */
+@media (max-width: 991px) {
+    #html-body #header .awa-main-header__inner[data-awa-header-row],
+    #html-body #header .wp-header[data-awa-header-row] {
+        padding-left: 0 !important;
+        padding-inline-start: 0 !important;
+    }
+}
+@media (max-width: 480px) {
+    #html-body #header .awa-main-header__inner[data-awa-header-row],
+    #html-body #header .wp-header[data-awa-header-row] {
+        padding-left: 0 !important;
+        padding-inline-start: 0 !important;
+    }
+}
+
+/* =============================================================================
+   AWA Visual Bug Fixes — Batch 2026-07-13
+   22 bugs identificados no audit visual. Fixes CSS-addressable abaixo.
+   ============================================================================= */
+
+/* ---------------------------------------------------------------------------
+   #1 Cookie banner: Reset das regras do super-global que quebram posição
+   O super-global define: background:0 0, pointer-events:none, bottom:12px,
+   left:16px, right:16px. Precisamos reverter para o design original do módulo.
+   --------------------------------------------------------------------------- */
+#html-body #awa-cookie-banner {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    background: #1a1a1a !important;
+    color: #f5f5f5 !important;
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.35) !important;
+    pointer-events: auto !important;
+    animation: none !important;
+    z-index: 99999 !important;
+}
+#html-body #awa-cookie-banner .awa-cookie-banner__inner {
+    pointer-events: auto !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    max-width: 1280px !important;
+    margin: 0 auto !important;
+    padding: 16px 24px !important;
+}
+
+/* ---------------------------------------------------------------------------
+   #2 Dual cookie banners: Esconder o cookie notice default do Magento
+   já que usamos o #awa-cookie-banner customizado
+   --------------------------------------------------------------------------- */
+.message.global.cookie {
+    display: none !important;
+}
+
+/* ---------------------------------------------------------------------------
+   #3 Cart icon invisível (w=0, h=0): Garante dimensões e visibilidade
+   do ícone do carrinho no header
+   --------------------------------------------------------------------------- */
+#html-body .minicart-wrapper .action.showcart {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    min-height: 38px !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+#html-body .minicart-wrapper .action.showcart::before {
+    content: "\f290" !important;
+    font-family: FontAwesome, sans-serif !important;
+    font-size: 17px !important;
+    line-height: 1 !important;
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+/* Garante que o wrapper do minicart não colapsa */
+#html-body .minicart-wrapper {
+    display: inline-flex !important;
+    align-items: center !important;
+    position: relative !important;
+    min-width: 38px !important;
+    min-height: 38px !important;
+}
+
+/* ---------------------------------------------------------------------------
+   #4 Horizontal overflow (15-32px): Previne scroll horizontal
+   --------------------------------------------------------------------------- */
+html {
+    overflow-x: hidden !important;
+}
+body {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+}
+/* Elementos comuns que causam overflow horizontal */
+.page-wrapper {
+    overflow-x: hidden !important;
+    max-width: 100% !important;
+}
+.row,
+.owl-carousel .owl-stage-outer,
+.slick-list {
+    overflow: hidden !important;
+}
+
+/* ---------------------------------------------------------------------------
+   #5 PDP: Add-to-cart + preço escondido para visitantes (não logados)
+   O B2B hide-price esconde tudo, mas visitantes precisam ver o CTA de login
+   --------------------------------------------------------------------------- */
+body.catalog-product-view .product-info-main .b2b-login-to-see-price {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+body.catalog-product-view .product-info-main .b2b-login-to-see-price a {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 44px !important;
+    padding: 10px 24px !important;
+    background: var(--awa-red, #b73337) !important;
+    color: #fff !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    text-decoration: none !important;
+    width: 100% !important;
+    text-align: center !important;
+    border: none !important;
+}
+body.catalog-product-view .product-info-main .b2b-login-to-see-price a:hover {
+    background: var(--awa-red-dark, #8e2629) !important;
+}
+/* Para clientes logados, garantir que o form de add-to-cart é visível */
+body.catalog-product-view .product-info-main .box-tocart,
+body.catalog-product-view .product-info-main form[data-role="tocart-form"] {
+    display: block !important;
+    visibility: visible !important;
+}
+
+/* ---------------------------------------------------------------------------
+   #8 Navbar desaparece em páginas internas: Garantir visibilidade
+   --------------------------------------------------------------------------- */
+#html-body .page-wrapper .awa-site-header {
+    display: block !important;
+    visibility: visible !important;
+}
+#html-body .page-wrapper .awa-site-header .navigation.custommenu {
+    display: block !important;
+    visibility: visible !important;
+}
+/* Navbar wrapper em páginas que não são home */
+body:not(.cms-index-index) .awa-site-header .header-control.header-nav-global {
+    display: block !important;
+    visibility: visible !important;
+    max-height: none !important;
+    overflow: visible !important;
+    opacity: 1 !important;
+}
+
+/* ---------------------------------------------------------------------------
+   #12 Breadcrumb: Melhor formatação e espaçamento
+   --------------------------------------------------------------------------- */
+.breadcrumbs .items > li {
+    display: inline-flex !important;
+    align-items: center !important;
+}
+.breadcrumbs .items > li + li::before {
+    content: "/" !important;
+    display: inline-block !important;
+    margin: 0 6px !important;
+    color: var(--awa-gray-400, #9ca3af) !important;
+    font-size: 12px !important;
+}
+/* Remove separador duplicado do Magento se existir */
+.breadcrumbs .item:not(:last-child)::after {
+    content: none !important;
+}
+
+/* ---------------------------------------------------------------------------
+   #13 z-index conflicts: Normalizar camadas
+   O cookie banner deve estar acima de tudo (99999)
+   O header sticky abaixo (1000)
+   Modais de busca/minicart entre os dois (9999)
+   --------------------------------------------------------------------------- */
+#html-body .awa-site-header {
+    z-index: 1000 !important;
+}
+#html-body .block-search {
+    z-index: 9999 !important;
+}
+#html-body .minicart-wrapper .block-minicart {
+    z-index: 9999 !important;
+}
+#html-body .modals-wrapper {
+    z-index: 99990 !important;
+}
+/* Cookie banner já definido acima como 99999 */
+
+/* ---------------------------------------------------------------------------
+   #16 Sidebar fixa overflow: Prevenir que sidebar fixa cause scroll
+   --------------------------------------------------------------------------- */
+.sidebar.sidebar-main,
+.sidebar.sidebar-additional {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    max-height: calc(100vh - 120px) !important;
+}
+/* Apenas para sidebar sticky/fixed */
+.sidebar.sidebar-main[style*="position: fixed"],
+.sidebar.sidebar-main[style*="position:fixed"] {
+    max-height: calc(100vh - 80px) !important;
+    overflow-y: auto !important;
+}
+
+/* ---------------------------------------------------------------------------
+   #17 B2B banner mobile: Fix clipping
+   --------------------------------------------------------------------------- */
+@media (max-width: 767px) {
+    #html-body .awa-b2b-promo-bar {
+        overflow: visible !important;
+        white-space: normal !important;
+        min-height: auto !important;
+        padding: 6px 12px !important;
+    }
+    #html-body .awa-b2b-promo-bar__text {
+        white-space: normal !important;
+        text-overflow: initial !important;
+        overflow: visible !important;
+        line-height: 1.4 !important;
+        font-size: 11px !important;
+    }
+}
+
+/* ---------------------------------------------------------------------------
+   #22 Bottom nav (nav.fixed-bottom, 57px) existe no mobile — padding-body necessário
+   Cookie banner posicionado acima do nav (bottom: 65px = 57px nav + 8px gap)
+   NÃO usar !important no body para que regras inline da PDP possam sobrescrever
+   --------------------------------------------------------------------------- */
+@media (max-width: 767px) {
+    /* Compensa nav.fixed-bottom (57px) para não cobrir conteúdo */
+    body {
+        padding-bottom: 60px;
+    }
+    /* Posiciona cookie banner acima do nav.fixed-bottom */
+    #html-body #awa-cookie-banner {
+        bottom: 65px !important;
+    }
+}
+
+/* ---------------------------------------------------------------------------
+   Fim das correções visuais — 2026-07-13
+   --------------------------------------------------------------------------- */
+
+/* ---------------------------------------------------------------------------
+   #23 Banners decorativos: cursor default para span.banner-hover (era <a href="#">)
+   --------------------------------------------------------------------------- */
+span.banner-hover {
+    cursor: default !important;
+}
+span.banner-hover:hover img {
+    opacity: 0.92;
+    transition: opacity 0.3s ease;
+}
+
+/* ===========================================================================
+   VISUAL AUDIT BATCH FIX — 2026-04-27
+   Bugs #6,#10,#11,#21,#25-27,#32,#36,#38,#49 do audit de 50 itens
+   =========================================================================== */
+
+/* ---------------------------------------------------------------------------
+   #10 SVGs inline (truck/clock/shield) — reservar espaço para evitar CLS
+   --------------------------------------------------------------------------- */
+.awa-benefits-item svg,
+.awa-security-seal svg,
+.awa-trust-badge svg {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+/* ---------------------------------------------------------------------------
+   #11 Imagens sem width/height na CAT — reservar espaço
+   --------------------------------------------------------------------------- */
+img[src*="loader-1.gif"] {
+    width: 44px;
+    height: 44px;
+}
+
+/* ---------------------------------------------------------------------------
+   #21 font-display: fallback de FOIT → FOUT para fontes self-hosted
+   --------------------------------------------------------------------------- */
+@font-face {
+    font-family: 'Rubik';
+    font-display: swap !important; /* Garante FOUT ao invés de FOIT */
+}
+@font-face {
+    font-family: 'Montserrat';
+    font-display: swap !important;
+}
+
+/* ---------------------------------------------------------------------------
+   #25-27 Contrast fixes — substituir cores de baixo contraste
+   --------------------------------------------------------------------------- */
+/* color:#ccc (#cccccc) sobre fundo branco = ratio 1.6:1 (fail AA) → #767676 = 4.54:1 */
+.product-item .price-label,
+.product-item .old-price .price,
+.toolbar-amount,
+.sorter-label,
+.modes-label,
+.limiter-label {
+    color: #595959; /* 7:1 ratio — AAA compliant */
+}
+
+/* color:#999 (#999999) sobre branco = 2.85:1 (fail AA) → #767676 */
+.breadcrumbs a,
+.breadcrumbs li:last-child strong,
+.product-info-main .product-reviews-summary .reviews-actions a {
+    color: #767676; /* 4.54:1 — AA compliant */
+}
+
+/* ---------------------------------------------------------------------------
+   #32 Logo <a> com aria-hidden="true" — fix visual (JS fix via a11y script)
+   --------------------------------------------------------------------------- */
+/* O logo link precisa ser focável — remove aria-hidden via JS, aqui garantimos visual */
+.logo a:focus-visible {
+    outline: 2px solid var(--awa-primary, #b73337);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* ---------------------------------------------------------------------------
+   #36 outline:none sem alternativa de foco — focus-visible global
+   --------------------------------------------------------------------------- */
+*:focus-visible {
+    outline: 2px solid var(--awa-primary, #b73337) !important; /* Global focus ring — a11y WCAG 2.4.7 */
+    outline-offset: 2px !important;
+}
+/* Exceções: campos de input já têm estilo de foco próprio */
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 2px solid var(--awa-primary, #b73337) !important;
+    outline-offset: 0 !important;
+}
+
+/* ---------------------------------------------------------------------------
+   #38 B2B "para ver preços" — evitar truncamento em <360px
+   --------------------------------------------------------------------------- */
+.awa-login-to-see-price,
+.price-box .awa-b2b-login-link {
+    font-size: clamp(11px, 3.2vw, 14px);
+    white-space: normal;
+    word-break: break-word;
+    line-height: 1.3;
+}
+
+/* ---------------------------------------------------------------------------
+   #49 Category carousel imgs — fetchpriority via CSS (reservar espaço, não shift)
+   --------------------------------------------------------------------------- */
+.awa-category-carousel__icon img,
+.awa-category-carousel__icon picture {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+}
+
+/* ---------------------------------------------------------------------------
+   #6 Heading hierarchy jump h1→h3 — visual consistency
+   Cart page: h1→h3 sem h2. Fix: tornar visualmente consistente
+   --------------------------------------------------------------------------- */
+.cart-container .cart-title h3,
+.cart-summary h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin: 0 0 16px;
+}
+
+/* ---------------------------------------------------------------------------
+   #33 Minicart img sem alt — placeholder visual (JS fix no a11y script)
+   --------------------------------------------------------------------------- */
+.minicart-wrapper img:not([alt]),
+.minicart-wrapper img[alt=""] {
+    min-width: 48px;
+    min-height: 48px;
+}
+
+/* ===========================================================================
+   FIM — VISUAL AUDIT BATCH FIX — 2026-04-27
+   =========================================================================== */
+
+/* ---------------------------------------------------------------------------
+   P0: HORIZONTAL OVERFLOW FIX (Mobile 375px)
+   --------------------------------------------------------------------------- */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper {
+    overflow-x: hidden !important;
+    overflow-x: clip !important;
+    width: 100vw !important;
+    position: relative !important;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .top-home-content {
+    max-width: 100vw !important;
+    overflow: hidden !important;
+}
+
+/* Fix carousels specifically */
+.owl-carousel, .swiper, .swiper-container, .awa-category-carousel__viewport {
+    max-width: 100% !important;
+    overflow: hidden !important;
+}
+
+/* WhatsApp button containment fallback */
+.awa-whatsapp-float {
+    max-width: calc(100vw - 32px);
+}
+
+/* ---------------------------------------------------------------------------
+   P0: BROKEN CATEGORY ICONS FIX
+   --------------------------------------------------------------------------- */
+.awa-category-carousel__icon img,
+.awa-category-carousel__icon picture img {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    max-width: 100% !important;
+    height: auto !important;
+    filter: none !important;
+}
+
+/* Ensure SVG icons also show */
+.awa-category-carousel__icon svg {
+    display: block !important;
+    width: 64px !important;
+    height: 64px !important;
+    color: var(--awa-primary, #b73337) !important;
+}
+
+/* ---------------------------------------------------------------------------
+   HEADER: AUTH CHIPS REFINEMENT
+   --------------------------------------------------------------------------- */
+
+
+/* ---------------------------------------------------------------------------
+   #24 Home mobile nav drawer: forçar shell/menu visíveis quando nav-open ativa
+   Na home mobile, o body recebe nav-open e o overlay aparece, mas o header nav
+   continua com display:none/width:0. Este override reabre o shell correto.
+   --------------------------------------------------------------------------- */
+@media (max-width: 991px) {
+    #html-body.cms-index-index.nav-open #header .header-control.header-nav-global.cms_home_1,
+    #html-body.cms-index-index.nav-before-open #header .header-control.header-nav-global.cms_home_1,
+    #html-body.cms-home.nav-open #header .header-control.header-nav-global.cms_home_1,
+    #html-body.cms-home.nav-before-open #header .header-control.header-nav-global.cms_home_1,
+    #html-body.cms-homepage_ayo_home5.nav-open #header .header-control.header-nav-global.cms_home_1,
+    #html-body.cms-homepage_ayo_home5.nav-before-open #header .header-control.header-nav-global.cms_home_1,
+    #html-body.cms-index-index.nav-open #header .header-control.header-nav-global.cms_home_1 > .container,
+    #html-body.cms-index-index.nav-before-open #header .header-control.header-nav-global.cms_home_1 > .container,
+    #html-body.cms-home.nav-open #header .header-control.header-nav-global.cms_home_1 > .container,
+    #html-body.cms-home.nav-before-open #header .header-control.header-nav-global.cms_home_1 > .container,
+    #html-body.cms-homepage_ayo_home5.nav-open #header .header-control.header-nav-global.cms_home_1 > .container,
+    #html-body.cms-homepage_ayo_home5.nav-before-open #header .header-control.header-nav-global.cms_home_1 > .container,
+    #html-body.cms-index-index.nav-open #header .header-control.header-nav-global.cms_home_1 > .container > .row,
+    #html-body.cms-index-index.nav-before-open #header .header-control.header-nav-global.cms_home_1 > .container > .row,
+    #html-body.cms-home.nav-open #header .header-control.header-nav-global.cms_home_1 > .container > .row,
+    #html-body.cms-home.nav-before-open #header .header-control.header-nav-global.cms_home_1 > .container > .row,
+    #html-body.cms-homepage_ayo_home5.nav-open #header .header-control.header-nav-global.cms_home_1 > .container > .row,
+    #html-body.cms-homepage_ayo_home5.nav-before-open #header .header-control.header-nav-global.cms_home_1 > .container > .row {
+        display: block !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        overflow: visible !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+
+    #html-body.cms-index-index.nav-open .page-wrapper #awa-category-navigation,
+    #html-body.cms-index-index.nav-before-open .page-wrapper #awa-category-navigation,
+    #html-body.cms-home.nav-open .page-wrapper #awa-category-navigation,
+    #html-body.cms-home.nav-before-open .page-wrapper #awa-category-navigation,
+    #html-body.cms-homepage_ayo_home5.nav-open .page-wrapper #awa-category-navigation,
+    #html-body.cms-homepage_ayo_home5.nav-before-open .page-wrapper #awa-category-navigation {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        display: block !important;
+        width: min(92vw, 360px) !important;
+        max-width: min(92vw, 360px) !important;
+        height: 100dvh !important;
+        min-height: 100vh !important;
+        padding: 56px 0 20px !important;
+        background: var(--awa-white, #fff) !important;
+        box-shadow: 14px 0 32px rgb(17 24 39 / 18%) !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        z-index: 100000 !important;
+    }
+
+    #html-body.cms-index-index.nav-open .page-wrapper .menu_left_home1,
+    #html-body.cms-index-index.nav-before-open .page-wrapper .menu_left_home1,
+    #html-body.cms-home.nav-open .page-wrapper .menu_left_home1,
+    #html-body.cms-home.nav-before-open .page-wrapper .menu_left_home1,
+    #html-body.cms-homepage_ayo_home5.nav-open .page-wrapper .menu_left_home1,
+    #html-body.cms-homepage_ayo_home5.nav-before-open .page-wrapper .menu_left_home1,
+    #html-body.cms-index-index.nav-open .page-wrapper .menu_left_home1 .section-items.nav-sections.category-dropdown-items,
+    #html-body.cms-index-index.nav-before-open .page-wrapper .menu_left_home1 .section-items.nav-sections.category-dropdown-items,
+    #html-body.cms-home.nav-open .page-wrapper .menu_left_home1 .section-items.nav-sections.category-dropdown-items,
+    #html-body.cms-home.nav-before-open .page-wrapper .menu_left_home1 .section-items.nav-sections.category-dropdown-items,
+    #html-body.cms-homepage_ayo_home5.nav-open .page-wrapper .menu_left_home1 .section-items.nav-sections.category-dropdown-items,
+    #html-body.cms-homepage_ayo_home5.nav-before-open .page-wrapper .menu_left_home1 .section-items.nav-sections.category-dropdown-items,
+    #html-body.cms-index-index.nav-open .page-wrapper .menu_left_home1 .navigation.verticalmenu.side-verticalmenu,
+    #html-body.cms-index-index.nav-before-open .page-wrapper .menu_left_home1 .navigation.verticalmenu.side-verticalmenu,
+    #html-body.cms-home.nav-open .page-wrapper .menu_left_home1 .navigation.verticalmenu.side-verticalmenu,
+    #html-body.cms-home.nav-before-open .page-wrapper .menu_left_home1 .navigation.verticalmenu.side-verticalmenu,
+    #html-body.cms-homepage_ayo_home5.nav-open .page-wrapper .menu_left_home1 .navigation.verticalmenu.side-verticalmenu,
+    #html-body.cms-homepage_ayo_home5.nav-before-open .page-wrapper .menu_left_home1 .navigation.verticalmenu.side-verticalmenu,
+    #html-body.cms-index-index.nav-open .page-wrapper .menu_left_home1 .togge-menu.list-category-dropdown,
+    #html-body.cms-index-index.nav-before-open .page-wrapper .menu_left_home1 .togge-menu.list-category-dropdown,
+    #html-body.cms-home.nav-open .page-wrapper .menu_left_home1 .togge-menu.list-category-dropdown,
+    #html-body.cms-home.nav-before-open .page-wrapper .menu_left_home1 .togge-menu.list-category-dropdown,
+    #html-body.cms-homepage_ayo_home5.nav-open .page-wrapper .menu_left_home1 .togge-menu.list-category-dropdown,
+    #html-body.cms-homepage_ayo_home5.nav-before-open .page-wrapper .menu_left_home1 .togge-menu.list-category-dropdown {
+        display: block !important;
+        position: static !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        margin: 0 !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        overflow-x: hidden !important;
+        overflow-y: visible !important;
+        pointer-events: auto !important;
+        box-sizing: border-box !important;
+    }
+}
+
+
+/* ---------------------------------------------------------------------------
+   #24b Home mobile nav drawer: override com cadeia completa
+   As regras de ocultação usam #html-body + .header-control... .menu_left_home1.
+   Repetimos a cadeia completa com nav-open/nav-before-open para vencer o hide.
+   --------------------------------------------------------------------------- */
+@media (max-width: 991px) {
+    #html-body.cms-index-index.nav-open #header .header-control.header-nav-global.cms_home_1,
+    #html-body.cms-index-index.nav-before-open #header .header-control.header-nav-global.cms_home_1,
+    #html-body.cms-homepage_ayo_home5.nav-open #header .header-control.header-nav-global.cms_home_1,
+    #html-body.cms-homepage_ayo_home5.nav-before-open #header .header-control.header-nav-global.cms_home_1 {
+        display: block !important;
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        overflow: visible !important;
+    }
+
+    #html-body.cms-index-index.nav-open #header .header-control.header-nav-global.cms_home_1 .menu_left_home1,
+    #html-body.cms-index-index.nav-before-open #header .header-control.header-nav-global.cms_home_1 .menu_left_home1,
+    #html-body.cms-homepage_ayo_home5.nav-open #header .header-control.header-nav-global.cms_home_1 .menu_left_home1,
+    #html-body.cms-homepage_ayo_home5.nav-before-open #header .header-control.header-nav-global.cms_home_1 .menu_left_home1 {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        overflow: visible !important;
+        position: static !important;
+        flex: 1 1 auto !important;
+    }
+
+    #html-body.cms-index-index.nav-open #header .header-control.header-nav-global.cms_home_1 .menu_left_home1 #awa-category-navigation,
+    #html-body.cms-index-index.nav-before-open #header .header-control.header-nav-global.cms_home_1 .menu_left_home1 #awa-category-navigation,
+    #html-body.cms-homepage_ayo_home5.nav-open #header .header-control.header-nav-global.cms_home_1 .menu_left_home1 #awa-category-navigation,
+    #html-body.cms-homepage_ayo_home5.nav-before-open #header .header-control.header-nav-global.cms_home_1 .menu_left_home1 #awa-category-navigation {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        width: min(92vw, 360px) !important;
+        max-width: min(92vw, 360px) !important;
+        min-width: min(92vw, 360px) !important;
+        height: 100dvh !important;
+        min-height: 100vh !important;
+        max-height: none !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        z-index: 100000 !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+        background: var(--awa-white, #fff) !important;
+    }
+
+    #html-body.cms-index-index.nav-open #header .header-control.header-nav-global.cms_home_1 .menu_left_home1 .togge-menu.list-category-dropdown,
+    #html-body.cms-index-index.nav-before-open #header .header-control.header-nav-global.cms_home_1 .menu_left_home1 .togge-menu.list-category-dropdown,
+    #html-body.cms-homepage_ayo_home5.nav-open #header .header-control.header-nav-global.cms_home_1 .menu_left_home1 .togge-menu.list-category-dropdown,
+    #html-body.cms-homepage_ayo_home5.nav-before-open #header .header-control.header-nav-global.cms_home_1 .menu_left_home1 .togge-menu.list-category-dropdown {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        height: auto !important;
+        max-height: none !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+        position: static !important;
+    }
+}
+
+/* ===========================================================================
+   FIX: PDP Bootstrap .row overflow (margin -15px) + WhatsApp label mobile
+   =========================================================================== */
+
+/* Bootstrap .row tem margin: 0 -15px que extrapola o container no mobile.
+   .view-product é o container pai — clip para evitar scroll horizontal */
+@media (max-width: 767px) {
+    body.catalog-product-view .view-product,
+    body.catalog-product-view .col-main {
+        overflow-x: hidden !important;
+    }
+
+    /* WhatsApp float label: esconder no mobile para não ultrapassar viewport */
+    .awa-whatsapp-float__label {
+        display: none !important;
+    }
+}
+
+/* =====================================================================
+   #24c Home mobile nav — reset transform no .menu_left_home1 quando nav-open
+   MOTIVO: transform:matrix(1,0,0,1,0,0) no menu_left_home1 cria novo
+   containing block para position:fixed, capturando #awa-category-navigation
+   relativo ao header (top:163px) em vez do viewport. Transform: none libera
+   o fixed para o viewport.
+   ===================================================================== */
+#html-body.cms-index-index.nav-open .header-control.header-nav-global.cms_home_1 .menu_left_home1,
+#html-body.cms-index-index.nav-before-open .header-control.header-nav-global.cms_home_1 .menu_left_home1,
+#html-body.cms-homepage_ayo_home5.nav-open .header-control.header-nav-global.cms_home_1 .menu_left_home1,
+#html-body.cms-homepage_ayo_home5.nav-before-open .header-control.header-nav-global.cms_home_1 .menu_left_home1 {
+    transform: none !important; /* libera position:fixed do shell para o viewport */
+}
+/* end #24c */

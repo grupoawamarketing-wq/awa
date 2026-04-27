@@ -150,6 +150,7 @@
             ensureToggleRole(toggle);
         }
         var useEnhancedDrawer = !!experiment && experiment.variant === 'B';
+        var useLegacyMobileNavFallback = !useEnhancedDrawer && !!navShell && isHomeHeaderPage() && isMobileHeaderViewport();
         var overlay = null;
         var lastFocusedElement = null;
         var focusableSelector = [
@@ -275,6 +276,10 @@
                 } else {
                     openDrawer();
                 }
+            } else if (useLegacyMobileNavFallback) {
+                event.preventDefault();
+                document.body.classList.toggle('nav-open');
+                navShell.classList.toggle('is-awa-mobile-open', document.body.classList.contains('nav-open'));
             }
             raf(setNavState);
             raf(syncDrawerState);
@@ -881,12 +886,6 @@
     }
 
     onReady(function () {
-        var isMobileHomeHeader = isHomeHeaderPage() && isMobileHeaderViewport();
-
-        if (isMobileHomeHeader) {
-            return;
-        }
-
         var experiment = getExperimentConfig();
 
         wireNavA11y(experiment);
