@@ -515,3 +515,204 @@ button.action.primary:hover,
 .fitment-table tbody tr:hover {
     background-color: var(--awa-primary-subtle);
 }
+
+/* =============================================================
+   AWA MOTOS - FASE 2: Formulários, Busca, Filtros e Notificações
+   ============================================================= */
+
+/* 9. Inputs B2B com Floating Labels (Estilo Material) */
+.fieldset .field { 
+    position: relative; 
+    margin-bottom: var(--awa-space-6); 
+}
+.fieldset .field.required > .label:after, 
+.fieldset .field .label:after { 
+    margin-left: 4px; 
+}
+.fieldset .field .control input.input-text,
+.fieldset .field .control textarea {
+    height: 3.4rem;
+    padding: 1.4rem 1rem 0.4rem;
+    border-radius: var(--awa-radius-md);
+    border: 1px solid var(--awa-border-strong);
+    background: var(--awa-bg-subtle);
+    transition: border-color var(--awa-duration) var(--awa-ease), box-shadow var(--awa-duration) var(--awa-ease);
+}
+.fieldset .field .control input.input-text:focus,
+.fieldset .field .control textarea:focus {
+    border-color: var(--awa-primary);
+    box-shadow: 0 0 0 3px var(--awa-primary-subtle);
+    background: var(--awa-bg);
+    outline: none;
+}
+.fieldset .field > .label {
+    position: absolute;
+    top: 50%;
+    left: 1rem;
+    transform: translateY(-50%);
+    font-size: var(--awa-font-base);
+    color: var(--awa-text-muted);
+    pointer-events: none;
+    transition: all var(--awa-duration-fast) var(--awa-ease);
+    margin: 0;
+    padding: 0;
+    z-index: 1;
+}
+/* Quando focado ou com valor preenchido (placeholder-shown hack ou via JS :not(:placeholder-shown)) */
+.fieldset .field .control input.input-text:focus ~ .label,
+.fieldset .field .control input.input-text:not(:placeholder-shown) ~ .label,
+.fieldset .field._active > .label,
+.fieldset .field._has-value > .label {
+    top: 0.8rem;
+    font-size: var(--awa-font-xs);
+    color: var(--awa-primary);
+}
+
+/* 14. Busca Expandida com Overlay Blur */
+.block-search input[type="text"]:focus {
+    position: relative;
+    z-index: calc(var(--awa-z-overlay) + 2);
+}
+body:has(.block-search input[type="text"]:focus)::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: var(--awa-z-overlay);
+    pointer-events: none;
+    animation: awa-fade-in var(--awa-duration) ease-out forwards;
+}
+
+/* 21. Accordion Suave para Filtros Sidebar */
+.filter-options-item .filter-options-content {
+    transition: max-height var(--awa-duration-slow) var(--awa-ease), opacity var(--awa-duration) var(--awa-ease), padding var(--awa-duration) var(--awa-ease);
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+.filter-options-item.active .filter-options-content {
+    max-height: 800px; /* valor seguro para permitir a transição */
+    opacity: 1;
+    padding-top: var(--awa-space-3);
+    padding-bottom: var(--awa-space-3);
+}
+
+/* 22. Hover Reveal Image (Transição suave na listagem) */
+.product-item-photo .product-image-wrapper {
+    position: relative;
+}
+.product-item-photo .hover_image {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity var(--awa-duration-slow) var(--awa-ease), transform var(--awa-duration-slow) var(--awa-ease);
+    transform: scale(1.05);
+    object-fit: cover;
+}
+.product-item-info:hover .product-item-photo .hover_image {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* 26. Abas (Tabs) com Indicador Animado */
+.product.data.items {
+    position: relative;
+}
+.product.data.items > .item.title {
+    position: relative;
+    padding-bottom: var(--awa-space-2);
+}
+.product.data.items > .item.title > a {
+    color: var(--awa-text-muted);
+    transition: color var(--awa-duration) var(--awa-ease);
+}
+.product.data.items > .item.title.active > a {
+    color: var(--awa-primary);
+    font-weight: var(--awa-weight-bold);
+}
+.product.data.items > .item.title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: var(--awa-primary);
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform var(--awa-duration) var(--awa-ease);
+    border-radius: var(--awa-radius-pill) var(--awa-radius-pill) 0 0;
+}
+.product.data.items > .item.title.active::after,
+.product.data.items > .item.title:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+}
+
+/* 27. Toaster Notifications Modernas (Magento Messages) */
+.page.messages {
+    position: fixed;
+    bottom: var(--awa-space-6);
+    right: var(--awa-space-6);
+    z-index: var(--awa-z-toast);
+    max-width: 400px;
+    width: calc(100% - var(--awa-space-6) * 2);
+    pointer-events: none;
+}
+.page.messages .message {
+    pointer-events: auto;
+    margin-top: var(--awa-space-3);
+    padding: var(--awa-space-4);
+    border-radius: var(--awa-radius-lg);
+    box-shadow: var(--awa-shadow-xl);
+    background: var(--awa-bg);
+    border-left: 4px solid var(--awa-border);
+    animation: awa-slide-in-right 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    display: flex;
+    align-items: center;
+}
+.page.messages .message-success { border-left-color: #10b981; }
+.page.messages .message-error { border-left-color: var(--awa-primary); }
+.page.messages .message-notice, 
+.page.messages .message-info { border-left-color: #3b82f6; }
+
+@keyframes awa-slide-in-right {
+    0% { transform: translateX(120%); opacity: 0; }
+    100% { transform: translateX(0); opacity: 1; }
+}
+@keyframes awa-fade-in {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+/* 28. Loading State Seguro em Botões (Spinner) */
+button.action.primary.disabled,
+button.action.primary[disabled],
+.tocart.disabled {
+    position: relative;
+    color: transparent !important;
+    pointer-events: none;
+}
+button.action.primary.disabled::after,
+button.action.primary[disabled]::after,
+.tocart.disabled::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 1.2rem;
+    height: 1.2rem;
+    margin-top: -0.6rem;
+    margin-left: -0.6rem;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: var(--awa-white);
+    border-radius: 50%;
+    animation: awa-spin 0.8s linear infinite;
+}
+@keyframes awa-spin {
+    100% { transform: rotate(360deg); }
+}
