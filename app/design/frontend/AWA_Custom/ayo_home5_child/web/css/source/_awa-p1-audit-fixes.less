@@ -320,3 +320,86 @@ body.cms-homepage_ayo_home5 .column.main .trust-badges-homepage {
         grid-template-columns: 1fr !important;
     }
 }
+
+
+// =============================================
+// HEADER AUDIT FIXES -- 2026-04-27
+// Ref: auditoria de container, grid e alinhamento header
+// =============================================
+
+// ---------------------------------------------
+// FIX HDR-01 -- Nav-toggle (hamburger) oculto em ≤991px
+// Causa: regra base `display:none` no bundle sync (Rokanthemes)
+// aparece DEPOIS da regra condicional `display:flex @media≤991px`,
+// ganhando a cascata. _awa-p1-audit-fixes (último import do _extend)
+// sobrescreve com especificidade superior via ID #header.
+// !important necessário: regra original usa display:none sem !important
+// mas vem depois na ordem de fonte — por segurança, usamos !important.
+// ---------------------------------------------
+@media (max-width: 991px) {
+    body #header .action.nav-toggle,
+    body #header .awa-header-mobile-toggle {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+
+// ---------------------------------------------
+// FIX HDR-02 -- swiper-button-prev tem width:100% (1440px) no hero slider
+// Causa: seletor Rokanthemes agrupa `.owl-nav` (container 100%-wide)
+// com `.swiper-button-prev` (botão 36px) numa mesma regra `width:100%`.
+// O `.wrapper_slider .owl-prev` recebe left:16px depois, mas mantém
+// width:100% → right edge = 16 + 1440 = 1456px (overflow de 16px).
+// Fix: forçar width:36px e posicionamento correto dos dois botões.
+// !important necessário para sobrescrever o width:100% com mesma
+// especificidade mas anterior na cascata.
+// ---------------------------------------------
+.wrapper_slider .swiper-button-prev,
+.wrapper_slider .owl-carousel .owl-prev {
+    width: 36px !important;
+    height: 36px !important;
+    right: auto !important;
+    left: 16px !important;
+    max-width: 36px !important;
+}
+.wrapper_slider .swiper-button-next,
+.wrapper_slider .owl-carousel .owl-next {
+    width: 36px !important;
+    height: 36px !important;
+    left: auto !important;
+    right: 16px !important;
+    max-width: 36px !important;
+}
+
+
+// ---------------------------------------------
+// FIX HDR-03 -- Category carousel track sem overflow:hidden
+// Causa: `.top-home-content--category-carousel` tem overflow:visible,
+// permitindo que itens fora do viewport causem scroll horizontal.
+// O contêiner pai da trilha precisa clipar o conteúdo excedente.
+// ---------------------------------------------
+.top-home-content--category-carousel,
+.awa-category-carousel-wrapper {
+    overflow-x: hidden;
+}
+
+
+// ---------------------------------------------
+// FIX HDR-04 -- Hero slider e carrosséis de produto sem overflow:hidden
+// Causa: `.wrapper_slider` (hero) e seções de produto permitem que
+// botões de navegação (absolute) ou slides sejam renderizados fora
+// do viewport, causando scroll horizontal em todos os breakpoints.
+// `overflow-x: clip` em vez de `hidden`: não cria stacking context
+// e não afeta position:sticky dentro do elemento.
+// ---------------------------------------------
+.wrapper_slider {
+    overflow-x: clip;
+}
+
+@media (max-width: 991px) {
+    .owl-carousel.owl-loaded {
+        overflow-x: hidden;
+    }
+}
