@@ -1,6 +1,6 @@
 <?php
 /** @var \Magento\Framework\View\Element\Template $this */
-$layout = $this->getLayout();
+$layout = $block->getLayout();
 $categoryCarouselViewModel = $block->getData('category_carousel_view_model');
 
 $renderCmsBlock = static function (string $blockId) use ($layout): string {
@@ -13,6 +13,7 @@ $renderCmsBlock = static function (string $blockId) use ($layout): string {
 	$cmsBlock->setBlockId($blockId);
 	return trim((string)$cmsBlock->toHtml());
 };
+$directUrl = fn(string $path): string => $block->getUrl('', ['_direct' => ltrim($path, '/')]);
 
 // Forca o template do modulo para evitar falhas de validacao no override do tema.
 $heroSliderBlock = $block->getChildBlock('slider.main');
@@ -94,16 +95,16 @@ $retrovisoresHtml = $makeCatProductCarousel('89,51,81,79,42,50');
 $bagageirosHtml   = $makeCatProductCarousel('67');
 $guidoesHtml      = $makeCatProductCarousel('44,85,120');
 $carouselIconSize = 80;
-$buildCarouselImage = function (string $asset, string $alt) use ($carouselIconSize): string {
+$buildCarouselImage = function (string $asset, string $alt) use ($carouselIconSize, $block): string {
 	$webpAsset = str_replace('.png', '.webp', $asset);
 	return '<picture>'
 		. '<source srcset="'
-		. $this->escapeUrl($this->getViewFileUrl('images/category-carousel/' . $webpAsset))
+		. $block->escapeUrl($block->getViewFileUrl('images/category-carousel/' . $webpAsset))
 		. '" type="image/webp" />'
 		. '<img src="'
-		. $this->escapeUrl($this->getViewFileUrl('images/category-carousel/' . $asset))
+		. $block->escapeUrl($block->getViewFileUrl('images/category-carousel/' . $asset))
 		. '" alt="'
-		. $this->escapeHtmlAttr(__($alt))
+		. $block->escapeHtmlAttr(__($alt))
 		. '" loading="eager" decoding="async" width="'
 		. $carouselIconSize
 		. '" height="'
@@ -114,16 +115,16 @@ $buildCarouselImage = function (string $asset, string $alt) use ($carouselIconSi
 
 /* Phase 9: "Busque por Categorias" — B2B Enterprise Category Carousel */
 $categoryCarouselCategories = [
-	['id' => 141, 'url' => 'bauletos.html', 'icon' => $buildCarouselImage('bauleto.png', ''), 'name' => 'Bauletos'],
-	['id' => 154, 'url' => 'guidoes.html', 'icon' => $buildCarouselImage('guidoes.png', ''), 'name' => 'Guidões'],
-	['id' => 146, 'url' => 'retrovisores.html', 'icon' => $buildCarouselImage('retrovisores.png', ''), 'name' => 'Retrovisores'],
-	['id' => 159, 'url' => 'carcacas.html', 'icon' => $buildCarouselImage('carcacas.png', ''), 'name' => 'Carcaças'],
-	['id' => 78, 'url' => 'cavaletes.html', 'icon' => $buildCarouselImage('cavaletes.png', ''), 'name' => 'Cavaletes'],
-	['id' => 67, 'url' => 'bagageiros.html', 'icon' => $buildCarouselImage('bagageiros.png', ''), 'name' => 'Bagageiros'],
-	['id' => 74, 'url' => 'manetes.html', 'icon' => $buildCarouselImage('manetes.png', ''), 'name' => 'Manetes'],
-	['id' => 88, 'url' => 'pedaleiras.html', 'icon' => $buildCarouselImage('pedaleiras.png', ''), 'name' => 'Pedaleiras'],
-	['id' => 68, 'url' => 'protetores-de-carter.html', 'icon' => $buildCarouselImage('protetores-de-carter.png', ''), 'name' => 'Protetores de Carter'],
-	['id' => 165, 'url' => 'lentes/lentes-de-freio.html', 'icon' => $buildCarouselImage('lentes-de-freio.png', ''), 'name' => 'Lentes de Freio'],
+	['id' => 141, 'url' => 'bauletos.html', 'icon' => $buildCarouselImage('bauleto.png', 'Bauletos'), 'name' => 'Bauletos'],
+	['id' => 154, 'url' => 'guidoes.html', 'icon' => $buildCarouselImage('guidoes.png', 'Guidões'), 'name' => 'Guidões'],
+	['id' => 146, 'url' => 'retrovisores.html', 'icon' => $buildCarouselImage('retrovisores.png', 'Retrovisores'), 'name' => 'Retrovisores'],
+	['id' => 159, 'url' => 'carcacas.html', 'icon' => $buildCarouselImage('carcacas.png', 'Carcaças'), 'name' => 'Carcaças'],
+	['id' => 78, 'url' => 'cavaletes.html', 'icon' => $buildCarouselImage('cavaletes.png', 'Cavaletes'), 'name' => 'Cavaletes'],
+	['id' => 67, 'url' => 'bagageiros.html', 'icon' => $buildCarouselImage('bagageiros.png', 'Bagageiros'), 'name' => 'Bagageiros'],
+	['id' => 74, 'url' => 'manetes.html', 'icon' => $buildCarouselImage('manetes.png', 'Manetes'), 'name' => 'Manetes'],
+	['id' => 88, 'url' => 'pedaleiras.html', 'icon' => $buildCarouselImage('pedaleiras.png', 'Pedaleiras'), 'name' => 'Pedaleiras'],
+	['id' => 68, 'url' => 'protetores-de-carter.html', 'icon' => $buildCarouselImage('protetores-de-carter.png', 'Protetores de Carter'), 'name' => 'Protetores de Carter'],
+	['id' => 165, 'url' => 'lentes/lentes-de-freio.html', 'icon' => $buildCarouselImage('lentes-de-freio.png', 'Lentes de Freio'), 'name' => 'Lentes de Freio'],
 	['id' => 120, 'icon' => '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 32h48"/><circle cx="32" cy="32" r="5"/><rect x="12" y="28" width="6" height="8" rx="2"/><rect x="46" y="28" width="6" height="8" rx="2"/><path d="M18 32v-8a2 2 0 012-2h4"/><path d="M46 32v-8a2 2 0 00-2-2h-4"/><path d="M10 28v-4"/><path d="M54 28v-4"/><circle cx="10" cy="22" r="2"/><circle cx="54" cy="22" r="2"/></svg>', 'name' => 'Barras de Guidão'],
 	['id' => 54,  'icon' => '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 52V20l12-8 12 8v32"/><path d="M20 52h24"/><path d="M16 20h32"/><path d="M28 28h8"/><path d="M28 36h8"/><circle cx="26" cy="28" r="1.5"/><circle cx="26" cy="36" r="1.5"/><circle cx="26" cy="44" r="1.5"/><path d="M28 44h8"/><path d="M32 12v-4"/></svg>', 'name' => 'Suportes'],
 ];
@@ -142,8 +143,8 @@ if ($categoryCarouselViewModel instanceof \GrupoAwamotos\Theme\ViewModel\Categor
 
 $newProductsCategory = $categoryCarouselViewModel instanceof \GrupoAwamotos\Theme\ViewModel\CategoryCarouselData
 	? $categoryCarouselViewModel->getCategoryData(138)
-	: ['url' => $this->getUrl('ofertas.html')];
-$newProductsUrl = $newProductsCategory['url'] ?: $this->getUrl('ofertas.html');
+	: ['url' => $directUrl('ofertas.html')];
+$newProductsUrl = $newProductsCategory['url'] ?: $directUrl('ofertas.html');
 
 
 
@@ -218,38 +219,38 @@ if ($benefitsHtml !== '' && strpos($benefitsHtml, 'velaServicesInner--home5') ==
 <?php endif; ?>
 
 <!-- ①b Phase 9: "Busque por Categorias" — B2B Enterprise Carousel -->
-<section class="top-home-content top-home-content--category-carousel awa-home-section ayo-home5-section" aria-label="<?php echo $this->escapeHtmlAttr(__('Busque por Categorias')); ?>">
+<section class="top-home-content top-home-content--category-carousel awa-home-section ayo-home5-section" aria-label="<?php echo $block->escapeHtmlAttr(__('Busque por Categorias')); ?>">
 	<div class="container">
 		<header class="awa-category-carousel__header">
-			<h2><?php echo $this->escapeHtml(__('Busque por Categorias')); ?></h2>
-			<p><?php echo $this->escapeHtml(__('Encontre peças e acessórios para sua moto')); ?></p>
+			<h2><?php echo $block->escapeHtml(__('Busque por Categorias')); ?></h2>
+			<p><?php echo $block->escapeHtml(__('Encontre peças e acessórios para sua moto')); ?></p>
 		</header>
 		<div class="awa-category-carousel__viewport">
 			<div class="awa-category-carousel__track" id="awa-cat-carousel" data-count="<?php echo count($categoryCarouselCategories); ?>">
 				<?php foreach ($categoryCarouselCategories as $idx => $cat): ?>
 				<?php $isGuidoesCard = ($cat['url'] ?? '') === 'guidoes.html' || ($cat['name'] ?? '') === 'Guidões'; ?>
-				<a href="<?php echo $this->escapeUrl($cat['url'] ?? '#'); ?>" class="awa-category-carousel__item<?php echo $isGuidoesCard ? ' awa-category-carousel__item--compact' : ''; ?>" title="<?php echo $this->escapeHtmlAttr($cat['name']); ?>" style="--item-index: <?php echo (int) $idx; ?>">
+				<a href="<?php echo $block->escapeUrl($cat['url'] ?? '#'); ?>" class="awa-category-carousel__item<?php echo $isGuidoesCard ? ' awa-category-carousel__item--compact' : ''; ?>" title="<?php echo $block->escapeHtmlAttr($cat['name']); ?>" style="--item-index: <?php echo (int) $idx; ?>">
 					<div class="awa-category-carousel__icon">
 						<?php echo /* @noEscape */ $cat['icon']; ?>
 					</div>
-					<span class="awa-category-carousel__label"><?php echo $this->escapeHtml($cat['name']); ?></span>
+					<span class="awa-category-carousel__label"><?php echo $block->escapeHtml($cat['name']); ?></span>
 					<?php if (!empty($cat['count'])): ?>
-					<span class="awa-category-carousel__count"><?php echo (int) $cat['count']; ?> <?php echo $this->escapeHtml(__((int) $cat['count'] === 1 ? 'produto' : 'produtos')); ?></span>
+					<span class="awa-category-carousel__count"><?php echo (int) $cat['count']; ?> <?php echo $block->escapeHtml(__((int) $cat['count'] === 1 ? 'produto' : 'produtos')); ?></span>
 					<?php endif; ?>
 				</a>
 				<?php endforeach; ?>
 			</div>
-			<button class="awa-category-carousel__prev" aria-label="<?php echo $this->escapeHtmlAttr(__('Anterior')); ?>" type="button">
+			<button class="awa-category-carousel__prev" aria-label="<?php echo $block->escapeHtmlAttr(__('Anterior')); ?>" type="button">
 				<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
 			</button>
-			<button class="awa-category-carousel__next" aria-label="<?php echo $this->escapeHtmlAttr(__('Próximo')); ?>" type="button">
+			<button class="awa-category-carousel__next" aria-label="<?php echo $block->escapeHtmlAttr(__('Próximo')); ?>" type="button">
 				<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
 			</button>
 		</div>
 		<div class="awa-category-carousel__dots" id="awa-cat-dots" aria-hidden="true" inert></div>
 		<div class="awa-category-carousel__cta">
-			<a href="<?php echo $this->escapeUrl($this->getUrl('catalogsearch/advanced/')); ?>" class="awa-category-carousel__cta-link">
-				<?php echo $this->escapeHtml(__('Ver todas as categorias')); ?>
+			<a href="<?php echo $block->escapeUrl($block->getUrl('catalogsearch/advanced/')); ?>" class="awa-category-carousel__cta-link">
+				<?php echo $block->escapeHtml(__('Ver todas as categorias')); ?>
 				<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
 			</a>
 		</div>
@@ -266,7 +267,7 @@ if ($benefitsHtml !== '' && strpos($benefitsHtml, 'velaServicesInner--home5') ==
 				<span class="awa-section-header__eyebrow"><?= $escaper->escapeHtml(__('Top Vendas')) ?></span>
 				<h2 class="awa-section-header__title"><?= $escaper->escapeHtml(__('Mais Vendidos')) ?></h2>
 			</div>
-			<a href="<?= $escaper->escapeUrl($this->getUrl('catalogsearch/result', ['q' => 'mais vendidos'])) ?>" class="awa-section-header__link" aria-label="<?= $escaper->escapeHtmlAttr(__('Ver todos os mais vendidos')) ?>">
+			<a href="<?= $escaper->escapeUrl($block->getUrl('catalogsearch/result', ['q' => 'mais vendidos'])) ?>" class="awa-section-header__link" aria-label="<?= $escaper->escapeHtmlAttr(__('Ver todos os mais vendidos')) ?>">
 				<?= $escaper->escapeHtml(__('Ver todos')) ?> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
 			</a>
 		</header>
@@ -295,7 +296,7 @@ if ($benefitsHtml !== '' && strpos($benefitsHtml, 'velaServicesInner--home5') ==
 
 <!-- ② Benefits + Super Deals -->
 <?php if ($benefitsHtml !== '' || $hotDealHtml !== ''): ?>
-<section class="top-home-content top-home-content--trust-and-offers awa-home-section ayo-home5-section" aria-label="<?php echo $this->escapeHtmlAttr(__('Confiança e ofertas')); ?>">
+<section class="top-home-content top-home-content--trust-and-offers awa-home-section ayo-home5-section" aria-label="<?php echo $block->escapeHtmlAttr(__('Confiança e ofertas')); ?>">
 	<div class="container top-home-content__trust-offers-grid" data-role="trust-offers-grid">
 		<?php if ($benefitsHtml !== ''): ?>
 			<?php echo /* @noEscape */ $benefitsHtml; ?>
@@ -321,7 +322,7 @@ if ($benefitsHtml !== '' && strpos($benefitsHtml, 'velaServicesInner--home5') ==
                                 <span class="awa-section-header__eyebrow"><?= $escaper->escapeHtml(__('Peças')) ?></span>
                                 <h2 class="awa-section-header__title"><?= $escaper->escapeHtml(__('Guidões')) ?></h2>
                         </div>
-                        <a href="<?= $escaper->escapeUrl($this->getUrl('guidoes')) ?>" class="awa-section-header__link" aria-label="<?= $escaper->escapeHtmlAttr(__('Ver todos os Guidões')) ?>">
+                        <a href="<?= $escaper->escapeUrl($directUrl('guidoes.html')) ?>" class="awa-section-header__link" aria-label="<?= $escaper->escapeHtmlAttr(__('Ver todos os Guidões')) ?>">
                                 <?= $escaper->escapeHtml(__('Ver todos')) ?> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
                         </a>
                 </header>
@@ -339,7 +340,7 @@ if ($benefitsHtml !== '' && strpos($benefitsHtml, 'velaServicesInner--home5') ==
 				<span class="awa-section-header__eyebrow"><?= $escaper->escapeHtml(__('Acessórios')) ?></span>
 				<h2 class="awa-section-header__title"><?= $escaper->escapeHtml(__('Bauletos')) ?></h2>
 			</div>
-			<a href="<?= $escaper->escapeUrl($this->getUrl('bauletos')) ?>" class="awa-section-header__link" aria-label="<?= $escaper->escapeHtmlAttr(__('Ver todos os Bauletos')) ?>">
+			<a href="<?= $escaper->escapeUrl($directUrl('bauletos.html')) ?>" class="awa-section-header__link" aria-label="<?= $escaper->escapeHtmlAttr(__('Ver todos os Bauletos')) ?>">
 				<?= $escaper->escapeHtml(__('Ver todos')) ?> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
 			</a>
 		</header>
@@ -357,7 +358,7 @@ if ($benefitsHtml !== '' && strpos($benefitsHtml, 'velaServicesInner--home5') ==
 				<span class="awa-section-header__eyebrow"><?= $escaper->escapeHtml(__('Peças')) ?></span>
 				<h2 class="awa-section-header__title"><?= $escaper->escapeHtml(__('Retrovisores')) ?></h2>
 			</div>
-			<a href="<?= $escaper->escapeUrl($this->getUrl('retrovisores')) ?>" class="awa-section-header__link" aria-label="<?= $escaper->escapeHtmlAttr(__('Ver todos os Retrovisores')) ?>">
+			<a href="<?= $escaper->escapeUrl($directUrl('retrovisores.html')) ?>" class="awa-section-header__link" aria-label="<?= $escaper->escapeHtmlAttr(__('Ver todos os Retrovisores')) ?>">
 				<?= $escaper->escapeHtml(__('Ver todos')) ?> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
 			</a>
 		</header>
@@ -375,7 +376,7 @@ if ($benefitsHtml !== '' && strpos($benefitsHtml, 'velaServicesInner--home5') ==
 				<span class="awa-section-header__eyebrow"><?= $escaper->escapeHtml(__('Acessórios')) ?></span>
 				<h2 class="awa-section-header__title"><?= $escaper->escapeHtml(__('Bagageiros')) ?></h2>
 			</div>
-			<a href="<?= $escaper->escapeUrl($this->getUrl('bagageiros')) ?>" class="awa-section-header__link" aria-label="<?= $escaper->escapeHtmlAttr(__('Ver todos os Bagageiros')) ?>">
+			<a href="<?= $escaper->escapeUrl($directUrl('bagageiros.html')) ?>" class="awa-section-header__link" aria-label="<?= $escaper->escapeHtmlAttr(__('Ver todos os Bagageiros')) ?>">
 				<?= $escaper->escapeHtml(__('Ver todos')) ?> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
 			</a>
 		</header>
@@ -386,7 +387,7 @@ if ($benefitsHtml !== '' && strpos($benefitsHtml, 'velaServicesInner--home5') ==
 
 <!-- ⑤ B2B / Atacado — DESATIVADO temporariamente -->
 <?php /* if ($b2bPromoHtml !== ''): ?>
-<section class="top-home-content top-home-content--b2b-promo awa-home-section awa-home-section--highlight ayo-home5-section" aria-label="<?php echo $this->escapeHtmlAttr(__('Atacado e Revenda')); ?>">
+<section class="top-home-content top-home-content--b2b-promo awa-home-section awa-home-section--highlight ayo-home5-section" aria-label="<?php echo $block->escapeHtmlAttr(__('Atacado e Revenda')); ?>">
 	<div class="container">
 		<?php echo $b2bPromoHtml; ?>
 	</div>

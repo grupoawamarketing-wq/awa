@@ -70,10 +70,10 @@ $refinementsBundleUrl = $block->getViewFileUrl('css/awa-bundle-refinements.css')
      Mantém abaixo de 600 bytes. NÃO adicionar regras complexas aqui.
      ========================================================= -->
 <style>
-/* Anti-FOUC v8 — 2026-04-15 — footer light */
-/* CLS preempt: awa-super-global.css aplica overflow-x:hidden async (~3541ms) causando
-   layout shift nao atribuido. Preemptando inline, browser nao detecta mudanca de geometria. */
-html{overflow-x:hidden;scrollbar-width:thin;scroll-behavior:smooth;color-scheme:light}*,*::before,*::after{box-sizing:border-box}body{overflow-x:hidden;overflow:hidden}
+/* Anti-FOUC v9 — 2026-04-27 — fix position:fixed nav mobile */
+/* Usa overflow-x:clip em vez de hidden: clip nao cria scroll container no html,
+   entao position:fixed funciona corretamente no Chrome. Chrome 90+, Firefox 81+, Safari 16+ */
+html{overflow-x:clip;scrollbar-width:thin;scroll-behavior:smooth;color-scheme:light}*,*::before,*::after{box-sizing:border-box}body{overflow-x:clip}
 /* Legacy utility bar = hidden, header = white, footer = white AWA */
 body .page-wrapper .nav-sections:not(.category-dropdown,.category-dropdown-items,.category-dropdown-item-content){background:#b73337}
 body .page-wrapper .awa-benefits-bar,.awa-benefits-bar{background:#fff !important;color:#333}
@@ -179,3 +179,8 @@ body .page-wrapper .page_footer,.page-footer{background:#f8fafc !important;backg
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__rexisUrl) ?>"/></noscript>
 <?php endif; ?>
 <!-- styles-l.css carregado em awa.styles.l.last (after awa.search.autocomplete.head.css) --><!-- AWA-DEBUG-UNIQUE-7739 -->
+
+<?php /* === PWA Meta Tags === */ ?>
+<meta name="theme-color" content="#b73337"/>
+<link rel="apple-touch-icon" sizes="180x180" href="<?= $block->escapeUrl($block->getViewFileUrl('images/apple-touch-icon.png')) ?>"/>
+<link rel="manifest" href="/manifest.json"/>
