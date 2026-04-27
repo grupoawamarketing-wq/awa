@@ -28,14 +28,14 @@ define(['jquery'], function ($) {
                 var html = '';
 
                 if (data.views_today > 0) {
-                    html += '<div class="social-proof-badge views-badge" role="note">'
+                    html += '<div class="social-proof-badge views-badge" role="note" aria-label="Visualizações do produto">'
                         + '<i class="fa fa-eye" aria-hidden="true"></i>'
                         + '<span class="badge-text"><strong>' + data.views_today + '</strong> '
                         + container.getAttribute('data-label-views') + '</span></div>';
                 }
 
                 if (data.low_stock) {
-                    html += '<div class="social-proof-badge low-stock-badge urgency" role="note">'
+                    html += '<div class="social-proof-badge low-stock-badge urgency" role="note" aria-label="Alerta de baixo estoque">'
                         + '<i class="fa fa-exclamation-triangle" aria-hidden="true"></i>'
                         + '<span class="badge-text"><strong>'
                         + container.getAttribute('data-label-low-stock-pre') + ' ' + data.qty + ' '
@@ -44,7 +44,7 @@ define(['jquery'], function ($) {
                 }
 
                 if (data.is_best_seller) {
-                    html += '<div class="social-proof-badge bestseller-badge" role="note">'
+                    html += '<div class="social-proof-badge bestseller-badge" role="note" aria-label="Produto mais vendido">'
                         + '<i class="fa fa-star" aria-hidden="true"></i>'
                         + '<span class="badge-text"><strong>'
                         + container.getAttribute('data-label-bestseller') + '</strong></span></div>';

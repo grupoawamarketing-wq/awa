@@ -42,11 +42,18 @@ class FormKeySessionGuardPlugin
     /**
      * @param FormKey $subject
      * @param callable $proceed
-     * @param string $value
+     * @param string|null $value
      * @return void
      */
-    public function aroundSet(FormKey $subject, callable $proceed, string $value): void
+    public function aroundSet(FormKey $subject, callable $proceed, ?string $value): void
     {
+        // FlushFormKey (login/logout) may call set(null) to clear the key.
+        // Always allow null through so the core flow is not disrupted.
+        if ($value === null) {
+            $proceed($value);
+            return;
+        }
+
         // If the session is already active, proceed normally.
         // This handles FPC MISS paths where the session was started during action execution,
         // as well as POST requests where CustomerSession/other code already started the session.
