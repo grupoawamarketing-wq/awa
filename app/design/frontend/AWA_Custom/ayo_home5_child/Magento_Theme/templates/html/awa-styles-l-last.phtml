@@ -1,28 +1,21 @@
 <?php
 declare(strict_types=1);
 /**
- * AWA — styles-l.css carregado por ÚLTIMO (após todos os bundles e deferred templates).
+ * AWA — awa-styles-l-last.phtml
  *
- * Posicionado via default_head_blocks.xml com after="awa.search.autocomplete.head.css"
- * para garantir que o LESS compilado do tema filho vença em cascata:
- *   !important empate → último stylesheet no DOM ganha.
+ * styles-l.css NÃO é carregado aqui como <link> separado.
+ * Com dev/css/merge_css_files=1 (produção), styles-l.css já está no merged bundle.
+ * awa-layout-canonical.css é o último no bundle → final-wins garantido.
  *
- * Contém: _header-main, _header-classic-reference, _header-pixelperfect,
- *         _extend.less imports e todo o LESS customizado do child theme.
+ * Carregar styles-l.css aqui causaria:
+ *   1) duplo download de styles-l.css (+287KB brotli bloqueante desperdiçado)
+ *   2) styles-l.css sobrescreveria awa-layout-canonical.css no DOM (viola final-wins)
  *
- * CSS Consolidation 2026-04-26:
- *   awa-cls-vars-fix.css, awa-header-premium.css e awa-cro-priority.css
- *   foram consolidados em _awa-consolidated.less (compilado em styles-m/l.css).
- *   Não são mais carregados como arquivos separados.
+ * Este bloco mantém apenas o script de correção do botão de busca.
  *
  * @var \Magento\Framework\View\Element\Template $block
  */
-$stylesLUrl = $block->getViewFileUrl('css/styles-l.css');
 ?>
-<link rel="stylesheet"
-      href="<?= $block->escapeUrl($stylesLUrl) ?>"
-      media="all"
-      data-awa-styles-l="1"/>
 <script>
 /* awa-header-premium: remove inline !important override aplicado por fixSearchBtn()
    que forçava background:transparent no botão de busca */
