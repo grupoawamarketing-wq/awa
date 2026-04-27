@@ -426,8 +426,8 @@ async function basicVisualHealth(page) {
         return null;
       }
 
-      const headerSelectors = ['header.page-header', '.page-header', '.header .top-search', 'header'];
-      const footerSelectors = ['footer.page-footer', '.page-footer', 'footer'];
+      const headerSelectors = ['header.awa-site-header', '#header', 'header.page-header', '.page-header', '.header .top-search', 'header'];
+      const footerSelectors = ['footer.page-footer', '.page-footer', '.footer.content', 'footer'];
       const mainSelectors = ['main', '.page-main', '#maincontent', '.columns', '.main'];
       const heroSelectors = [
         '.top-home-content--above-fold',
