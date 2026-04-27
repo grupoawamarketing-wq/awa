@@ -1,6 +1,21 @@
 :root{--ds-space-xs:8px;--ds-space-sm:16px;--ds-space-md:24px;--ds-space-lg:32px;--ds-space-xl:40px;--ds-space-xxl:48px;--ds-space-3xl:64px;--ds-space-4xl:80px}
 
 /* =============================================================
+   FIX CART-FALLBACK VISIBILITY (2026-04-27)
+   Problema: show rule (0,4,2) body a.awa-header-cart-fallback{display:inline-flex!important}
+   sobrescreve hide rule (0,4,1) .awa-header-cart-fallback{display:none!important}
+   Fix: ID #html-body eleva especificidade para (1,4,2) — ganha de tudo
+   O fallback deve SEMPRE ser oculto — o minicart real renderiza via KO.js
+   ============================================================= */
+#html-body .page-wrapper .awa-site-header .awa-header-right-col a.awa-header-cart-fallback,
+#html-body .page-wrapper .awa-site-header .awa-header-right-col .awa-header-cart-fallback {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+
+/* =============================================================
    AWA MOTOS - HERO BANNERS / CAROUSELS E SCROLL SNAP
    ============================================================= */
 
@@ -11,24 +26,6 @@
 }
 .rokanthemes-slider .owl-item.active .item-image {
     transform: scale(1.05);
-}
-
-/* Scroll Snap Nativo no Mobile */
-@media (max-width: 767px) {
-    .products-grid .product-items {
-        display: flex !important;
-        overflow-x: auto;
-        scroll-snap-type: x mandatory;
-        scroll-behavior: smooth;
-        -webkit-overflow-scrolling: touch;
-    }
-    .products-grid .product-items::-webkit-scrollbar {
-        display: none;
-    }
-    .products-grid .product-items .product-item {
-        flex: 0 0 85% !important;
-        scroll-snap-align: center;
-    }
 }
 
 /* =============================================================
@@ -56,27 +53,6 @@
 .table-fitment td {
     padding: var(--awa-space-3);
     border-bottom: 1px solid var(--awa-border);
-}
-
-/* Sticky Add to Cart (Mobile) */
-@media (max-width: 767px) {
-    .product-info-main .box-tocart {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: var(--awa-bg);
-        padding: var(--awa-space-4);
-        box-shadow: 0 -4px 16px rgba(0,0,0,0.1);
-        z-index: var(--awa-z-overlay);
-        display: flex;
-        gap: var(--awa-space-3);
-        align-items: center;
-    }
-    /* Compensar espaço oculto no rodapé */
-    .page-footer {
-        padding-bottom: 100px;
-    }
 }
 
 /* Indicador de Abas Animado */
@@ -919,63 +895,6 @@ textarea:focus-visible,
    AWA MOTOS - FASE 5: Homepage B2B Conversão & Mobile Peek
    ============================================================= */
 
-/* ── 1. Layout Peek (Mobile Scroll Horizontal) nas vitrines ───────── */
-@media (max-width: 991px) {
-    .cms-index-index .products-grid .product-items,
-    .cms-index-index .category-slider-wrapper {
-        display: flex !important;
-        flex-wrap: nowrap !important;
-        overflow-x: auto !important;
-        scroll-snap-type: x mandatory !important;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-        gap: var(--awa-space-4);
-        padding-bottom: var(--awa-space-4);
-        margin: 0 -15px !important; /* Compensa padding do container */
-        padding-left: 15px !important;
-        padding-right: 15px !important;
-    }
-    
-    .cms-index-index .products-grid .product-items::-webkit-scrollbar,
-    .cms-index-index .category-slider-wrapper::-webkit-scrollbar {
-        display: none;
-    }
-    
-    /* Configuração PEEK: Cada item ocupa 85% da tela, deixando 15% do próximo visível */
-    .cms-index-index .products-grid .product-items .product-item,
-    .cms-index-index .category-slider-wrapper .category-item {
-        scroll-snap-align: center;
-        flex: 0 0 85% !important;
-        width: 85% !important;
-        min-width: 85% !important;
-    }
-}
-
-/* ── 2. Badges de Estoque Disponível / B2B na Home ───────── */
-.product-item-info {
-    position: relative;
-}
-.product-item-info::before {
-    content: 'Pronta Entrega';
-    position: absolute;
-    top: var(--awa-space-3);
-    left: var(--awa-space-3);
-    background: #dcfce7; /* Verde suave Tailwind */
-    color: #166534; /* Verde escuro Tailwind */
-    font-size: var(--awa-font-xs);
-    font-weight: var(--awa-weight-bold);
-    padding: 2px 8px;
-    border-radius: var(--awa-radius-pill);
-    z-index: 5;
-    text-transform: uppercase;
-    box-shadow: var(--awa-shadow-xs);
-    pointer-events: none;
-}
-/* Se houver badge de desconto, desce o de estoque */
-.product-item-info .product-label + .product-item-photo {
-    margin-top: 10px;
-}
-
 /* ── 3. Trust Badges (Selos de Confiança) com melhor contraste ───────── */
 .awa-trust-badges {
     display: flex;
@@ -1005,6 +924,73 @@ textarea:focus-visible,
     font-size: var(--awa-font-sm);
     font-weight: var(--awa-weight-semibold);
     color: var(--awa-text);
+}
+
+/* Correções de regressão visual confirmadas em Home/PLP/PDP */
+.products-grid .product-items {
+    display: flex;
+    flex-wrap: wrap;
+    overflow: visible;
+    scroll-snap-type: none;
+    scroll-behavior: auto;
+}
+
+.products-grid .product-items .product-item {
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 0;
+    scroll-snap-align: none;
+}
+
+.product-item-info::before {
+    content: none !important;
+}
+
+@media (max-width: 767px) {
+    .product-info-main .box-tocart {
+        position: static;
+        inset: auto;
+        display: block;
+        padding: 0;
+        background: transparent;
+        box-shadow: none;
+        z-index: auto;
+    }
+
+    .page-footer {
+        padding-bottom: 0;
+    }
+}
+
+.awa-footer-sprite {
+    position: absolute !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+.awa-footer-trust-icon,
+.awa-footer-business-contact__action-icon,
+.awa-trust-badge__icon {
+    flex: 0 0 auto;
+}
+
+.awa-footer-trust-icon svg,
+.awa-footer-business-contact__action-icon svg,
+.awa-trust-badge__icon svg {
+    width: 24px !important;
+    height: 24px !important;
+    max-width: 24px !important;
+    max-height: 24px !important;
+}
+
+.awa-footer-business-contact__action-icon i,
+.awa-footer-pro__social-link i,
+.awa-footer-social a i {
+    font-size: 18px !important;
+    line-height: 1 !important;
 }
 
 /* ── 4. Hero Banner CTAs e Contraste B2B ───────── */
@@ -1154,5 +1140,59 @@ textarea:focus-visible,
         transition: none !important;
         transform: none !important;
         will-change: auto;
+    }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   AWA CSS Fase 4 — Badge NOVO, SKU chip, "Ver todos" hover
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Badge "NOVO" — pill moderno ──────────────────────────────── */
+body .page-wrapper .onsale.new-lable,
+body .page-wrapper .label-new.onsale,
+body .page-wrapper .hot-onsale .onsale.new-lable {
+    border-radius: 50px !important;
+    font-size: 10px !important;
+    padding: 3px 10px !important;
+    letter-spacing: 0.04em;
+    font-weight: 700 !important;
+}
+
+/* ── 2. SKU chip — pill com fundo sutil ──────────────────────────── */
+body .page-wrapper .product-item .awa-b2b-sku {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 3px !important;
+    padding: 2px 8px !important;
+    background: rgba(0, 0, 0, 0.04) !important;
+    border-radius: 50px !important;
+    font-size: 10px !important;
+    width: fit-content !important;
+    opacity: 0.75;
+    transition: opacity var(--awa-duration-fast, 0.15s);
+}
+
+body .page-wrapper .product-item:hover .awa-b2b-sku {
+    opacity: 1;
+}
+
+/* ── 3. "Ver todos" — hover fill vermelho ────────────────────────── */
+.awa-section-header a.btn-view-all:hover,
+.awa-section-header a[class*="view-all"]:hover,
+.awa-section-header a[href]:hover:not([href="#"]) {
+    background: var(--awa-primary, #b73337) !important;
+    color: #fff !important;
+    border-color: var(--awa-primary, #b73337) !important;
+}
+
+/* ── 4. Reduced motion — respeitar preferência ───────────────────── */
+@media (prefers-reduced-motion: reduce) {
+    body .page-wrapper .product-item.item-product {
+        transition: border-color var(--m-transition-base) !important;
+        transform: none !important;
+    }
+    body .page-wrapper .product-item.item-product:hover {
+        transform: none !important;
     }
 }
