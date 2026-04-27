@@ -10,27 +10,26 @@ $_product = $block->getProduct();
 $_wishlistSubmitParams = $this->helper('Magento\Wishlist\Helper\Data')->getAddParams($_product);
 
 // Issue #24 — Hide wishlist for guests when B2B gate hides prices
-$_b2bActive = \Magento\Framework\App\ObjectManager::getInstance()
-    ->get(\Magento\Framework\Module\Manager::class)
-    ->isEnabled('GrupoAwamotos_B2B');
 $_b2bCanViewPrices = true;
-if ($_b2bActive) {
+try {
     $_b2bCanViewPrices = $this->helper('GrupoAwamotos\B2B\Helper\Data')->canViewPrices();
+} catch (\Exception $e) {
+    // B2B module not active — show wishlist by default
 }
 ?>
 
 <?php if ($_b2bCanViewPrices && $this->helper('Magento\Wishlist\Helper\Data')->isAllow()) : ?>
-	<a href="#" title="<?= $this->escapeHtmlAttr(__('Add To Wishlist')) ?>"
-		class="action towishlist wishlist-link"
-		data-post='<?php /* @escapeNotVerified */ echo $_wishlistSubmitParams; ?>'
-		data-action="add-to-wishlist"
-		aria-label="<?= $this->escapeHtmlAttr(__('Add To Wishlist')) ?>"><i class="fa fa-heart" aria-hidden="true"></i><span class="awa-pdp-social-label"><?= $this->escapeHtml(__('Favoritos')) ?></span></a>
+        <a href="#" title="<?= $this->escapeHtmlAttr(__('Add To Wishlist')) ?>"
+                class="action towishlist wishlist-link"
+                data-post='<?= $this->escapeHtmlAttr($_wishlistSubmitParams) ?>'
+                data-action="add-to-wishlist"
+                aria-label="<?= $this->escapeHtmlAttr(__('Add To Wishlist')) ?>"><i class="fa fa-heart" aria-hidden="true"></i><span class="awa-pdp-social-label"><?= $this->escapeHtml(__('Favoritos')) ?></span></a>
 <?php endif; ?>
 <?php /* compare desativado */ ?>
 <script type="text/x-magento-init">
     {
         "body": {
-            "addToWishlist": <?php /* @escapeNotVerified */ echo $this->helper('Magento\Framework\Json\Helper\Data')->jsonEncode($block->getWishlistOptions())?>
+            "addToWishlist": <?= /* @noEscape */ $this->helper('Magento\Framework\Json\Helper\Data')->jsonEncode($block->getWishlistOptions()) ?>
         }
     }
 </script>
