@@ -204,6 +204,42 @@ class Suggestions extends Template
     }
 
     /**
+     * Get monthly purchase trend for charts
+     */
+    public function getMonthlyTrend(int $months = 12): array
+    {
+        $customerCode = $this->getErpCustomerCode();
+        if (!$customerCode) {
+            return [];
+        }
+        return $this->purchaseHistory->getMonthlyTrend($customerCode, $months);
+    }
+
+    /**
+     * Get purchase frequency analysis
+     */
+    public function getPurchaseFrequency(): array
+    {
+        $customerCode = $this->getErpCustomerCode();
+        if (!$customerCode) {
+            return [];
+        }
+        return $this->purchaseHistory->getPurchaseFrequency($customerCode);
+    }
+
+    /**
+     * Get filtered purchase history
+     */
+    public function getFilteredHistory(array $filters = []): array
+    {
+        $customerCode = $this->getErpCustomerCode();
+        if (!$customerCode) {
+            return ['items' => [], 'total_count' => 0];
+        }
+        return $this->purchaseHistory->getFilteredHistory($customerCode, $filters);
+    }
+
+    /**
      * Format price
      */
     public function formatPrice(float $price): string

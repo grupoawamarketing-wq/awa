@@ -1,0 +1,30 @@
+<?php
+/**
+ * AWA Mobile Bottom Navigation
+ * Renderizado fora do <footer> para evitar bug Chrome com position:fixed
+ * dentro de scroll containers (footer com scrollHeight > clientHeight).
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+
+declare(strict_types=1);
+
+/** @var \GrupoAwamotos\Theme\ViewModel\FooterData $viewModel */
+$viewModel = $block->getData('view_model');
+$enableMenu = $viewModel ? $viewModel->isMobileMenuEnabled() : false;
+
+if (!$enableMenu) {
+    return;
+}
+?>
+<nav class="fixed-bottom hidden-sm hidden-md hidden-lg" role="navigation" aria-label="<?= $escaper->escapeHtmlAttr(__('Navegação Móvel')) ?>">
+    <div class="link-on-bottom">
+        <ul class="mobile-bottom-link flex-layout space-between list-unstyled">
+            <li><a href="<?= $escaper->escapeUrl($block->getUrl('')) ?>" aria-label="<?= $escaper->escapeHtmlAttr(__('Início')) ?>" title="<?= $escaper->escapeHtmlAttr(__('Início')) ?>"><span class="icon icon-chrome" aria-hidden="true"></span><?= $escaper->escapeHtml(__('Home')) ?></a></li>
+            <li><button type="button" class="toggle-nav-footer" aria-haspopup="true" aria-expanded="false" aria-label="<?= $escaper->escapeHtmlAttr(__('Abrir menu')) ?>" title="<?= $escaper->escapeHtmlAttr(__('Abrir menu')) ?>"><span class="icon icon-menu" aria-hidden="true"></span><?= $escaper->escapeHtml(__('Menu')) ?></button></li>
+            <li><a href="<?= $escaper->escapeUrl($block->getUrl('customer/account/')) ?>" aria-label="<?= $escaper->escapeHtmlAttr(__('Minha Conta')) ?>" title="<?= $escaper->escapeHtmlAttr(__('Minha Conta')) ?>"><span class="icon icon-users" aria-hidden="true"></span><?= $escaper->escapeHtml(__('Conta')) ?></a></li>
+            <li><a href="<?= $escaper->escapeUrl($block->getUrl('checkout/cart/')) ?>" aria-label="<?= $escaper->escapeHtmlAttr(__('Carrinho de Compras')) ?>" title="<?= $escaper->escapeHtmlAttr(__('Carrinho de Compras')) ?>"><span class="icon icon-shopping-cart" aria-hidden="true"></span><?= $escaper->escapeHtml(__('Carrinho')) ?></a></li>
+        </ul>
+    </div>
+</nav>

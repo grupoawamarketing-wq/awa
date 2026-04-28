@@ -1,7 +1,9 @@
-/** AWA Service Worker v2.4.0 — Multi-strategy Cache (2026-03-29) */
-const CACHE_VERSION = '20260427v2-logo-center';
+/** AWA Service Worker v2.5.0 — Multi-strategy Cache & Offline Support (2026-04-28) */
+const CACHE_VERSION = '20260428v1-offline-support';
 const FONT_CACHE = 'awa-fonts-v1';
 const IMAGE_CACHE = 'awa-images-v1';
+const OFFLINE_CACHE = 'awa-offline-v1';
+const OFFLINE_URL = '/offline.html';
 const IMAGE_CACHE_MAX = 300; // max entries
 
 /* Patterns to cache with stale-while-revalidate */
@@ -12,7 +14,6 @@ const CACHEABLE_PATTERNS = [
   /\/css\/awa-pdp-b2b-pro\.css$/,
   /\/css\/swiper-bundle\.min\.css$/,
   /\/css\/themes5\.css$/,
-  // awa-bundle.min.js removed (file no longer exists — SW-A3 fix 2026-04-18)
   /\/js\/swiper-bundle\.min\.js$/,
   /\/fonts\/rubik\/rubik-\d{3}\.woff2$/
 ];
@@ -24,8 +25,8 @@ const FONT_PATTERNS = [
 
 /* Product image cache: cache-first with LRU eviction */
 const IMAGE_PATTERNS = [
-  /\/media\/catalog\/product\/cache\/.+\.(jpe?g|png|webp)$/,
-  /\/media\/catalog\/product\/.+\.(jpe?g|png|webp)$/
+  /\/media\/catalog\/product\/cache\/.+\.(jpe?g|png|webp|avif)$/,
+  /\/media\/catalog\/product\/.+\.(jpe?g|png|webp|avif)$/
 ];
 
 /** LRU eviction: keep cache under IMAGE_CACHE_MAX entries */
@@ -38,6 +39,11 @@ async function trimImageCache(cache) {
 }
 
 self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(OFFLINE_CACHE).then((cache) => {
+      return cache.addAll([OFFLINE_URL]);
+    })
+  );
   self.skipWaiting();
 });
 
@@ -46,7 +52,7 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((names) =>
       Promise.all(
         names
-          .filter((name) => name !== CACHE_VERSION && name !== FONT_CACHE && name !== IMAGE_CACHE)
+          .filter((name) => name !== CACHE_VERSION && name !== FONT_CACHE && name !== IMAGE_CACHE && name !== OFFLINE_CACHE)
           .map((name) => caches.delete(name))
       )
     ).then(() => self.clients.claim())
@@ -63,6 +69,19 @@ self.addEventListener('fetch', (event) => {
 
   /* Skip non-GET requests */
   if (event.request.method !== 'GET') {
+    return;
+  }
+
+  // --- NAVIGATION (HTML) Strategy: Network First with Offline Fallback ---
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .catch(() => {
+          return caches.open(OFFLINE_CACHE).then((cache) => {
+            return cache.match(OFFLINE_URL);
+          });
+        })
+    );
     return;
   }
 
@@ -119,3 +138,4 @@ self.addEventListener('fetch', (event) => {
 
   /* Everything else: network-only (no caching) */
 });
+

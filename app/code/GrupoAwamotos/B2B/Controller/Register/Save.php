@@ -374,7 +374,7 @@ class Save implements HttpPostActionInterface
             // Login automático
             $this->customerSession->setCustomerDataAsLoggedIn($savedCustomer);
 
-            return $resultRedirect->setPath('b2b/account/dashboard');
+            return $resultRedirect->setPath('b2b/register/success');
         } catch (LocalizedException $e) {
             $this->messageManager->addErrorMessage($e->getMessage());
             return $resultRedirect->setPath('*/*/');

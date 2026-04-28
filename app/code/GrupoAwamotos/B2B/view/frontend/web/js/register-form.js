@@ -96,8 +96,12 @@ define([
         }
 
         function updateRegisterPasswordToggleButton($toggle, isVisible) {
+            var isConfirm = $toggle.attr('data-target') === '#password_confirmation';
+            var showLabel = isConfirm ? 'Mostrar confirmação de senha' : 'Mostrar senha';
+            var hideLabel = isConfirm ? 'Ocultar confirmação de senha' : 'Ocultar senha';
+
             $toggle.attr('aria-pressed', isVisible ? 'true' : 'false');
-            $toggle.attr('aria-label', isVisible ? 'Ocultar senha' : 'Mostrar senha');
+            $toggle.attr('aria-label', isVisible ? hideLabel : showLabel);
             $toggle.text(isVisible ? 'Ocultar' : 'Mostrar');
         }
 
@@ -1186,9 +1190,12 @@ define([
             $field('#password').on('input.strengthMeter', function () {
                 var strength = getPasswordStrength(String($(this).val() || ''));
                 $meter.removeClass('is-weak is-medium is-strong');
+                $meter.attr('aria-valuenow', '0');
                 $label.text('');
                 if (strength) {
+                    var strengthValues = { weak: 33, medium: 66, strong: 100 };
                     $meter.addClass('is-' + strength);
+                    $meter.attr('aria-valuenow', String(strengthValues[strength]));
                     $label.text(strengthLabels[strength]);
                 }
             });

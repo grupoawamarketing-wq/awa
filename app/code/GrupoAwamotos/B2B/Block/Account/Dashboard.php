@@ -25,7 +25,7 @@ use GrupoAwamotos\B2B\Model\ResourceModel\ShoppingList\CollectionFactory as Shop
 
 class Dashboard extends Template
 {
-    private const QUICK_ORDER_ENABLED = false;
+    private const QUICK_ORDER_ENABLED = true;
     /**
      * Cached customer instance — avoids repeated customerRepository->getById() calls per request
      *
@@ -278,30 +278,40 @@ class Dashboard extends Template
     }
 
     /**
-     * Get total orders amount (last 30 days)
-     * Uses aggregate SUM to avoid loading all order objects
+     * Get purchase history data for charts (last 6 months)
      *
-     * @return float
+     * @return array
      */
-    public function getTotalOrdersAmount(): float
+    public function getPurchaseHistoryData(): array
     {
         $customerId = $this->customerSession->getCustomerId();
         if (!$customerId) {
-            return 0;
+            return [];
         }
 
-        $collection = $this->orderCollectionFactory->create();
-        $thirtyDaysAgo = date('Y-m-d H:i:s', strtotime('-30 days'));
+        $data = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $month = date('Y-m', strtotime("-$i months"));
+            $monthLabel = date('M/y', strtotime("-$i months"));
+            
+            $collection = $this->orderCollectionFactory->create();
+            $collection->addFieldToFilter('customer_id', $customerId)
+                ->addFieldToFilter('created_at', ['from' => "$month-01 00:00:00", 'to' => "$month-31 23:59:59"])
+                ->addFieldToFilter('state', ['neq' => 'canceled']);
+            
+            $collection->getSelect()->columns([
+                'monthly_total' => new \Zend_Db_Expr('SUM(grand_total)')
+            ]);
+            
+            $total = (float) ($collection->getFirstItem()->getData('monthly_total') ?? 0);
+            
+            $data[] = [
+                'label' => $monthLabel,
+                'value' => $total
+            ];
+        }
 
-        $collection->addFieldToFilter('customer_id', $customerId)
-            ->addFieldToFilter('created_at', ['gteq' => $thirtyDaysAgo])
-            ->addFieldToFilter('state', ['neq' => 'canceled']);
-
-        $collection->getSelect()->columns([
-            'total_amount' => new \Zend_Db_Expr('SUM(grand_total)')
-        ]);
-
-        return (float) ($collection->getFirstItem()->getData('total_amount') ?? 0);
+        return $data;
     }
 
     /**

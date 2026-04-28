@@ -1,0 +1,90 @@
+<?php
+/** @var \GrupoAwamotos\ERPIntegration\Block\Customer\Suggestions $block */
+/** @var \GrupoAwamotos\B2B\Block\Account\Dashboard $parentBlock */
+$parentBlock = $block->getParentBlock();
+$erpSummary = $block->getPurchaseSummary();
+$rfm = $block->getCustomerRfm();
+$trend = $block->getMonthlyTrend(12);
+$frequency = $block->getPurchaseFrequency();
+?>
+
+<div class="b2b-section b2b-intelligence-section">
+    <div class="section-header">
+        <h3>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg>
+            <?= $block->escapeHtml(__('Inteligência de Vendas B2B')) ?>
+        </h3>
+        <span class="badge intelligence-badge"><?= $block->escapeHtml(__('Exclusivo B2B')) ?></span>
+    </div>
+
+    <div class="intelligence-grid">
+        <!-- RFM Status -->
+        <?php if ($rfm): ?>
+            <div class="intelligence-card rfm-card">
+                <div class="card-header">
+                    <h4><?= $block->escapeHtml(__('Seu Perfil de Compra')) ?></h4>
+                    <span class="rfm-tag" style="background: <?= $block->escapeHtmlAttr($rfm['segment_color'] ?? '#6b7280') ?>">
+                        <?= $block->escapeHtml($rfm['segment_label'] ?? 'Novo') ?>
+                    </span>
+                </div>
+                <div class="rfm-stats">
+                    <div class="rfm-item">
+                        <span class="label"><?= $block->escapeHtml(__('Recência:')) ?></span>
+                        <span class="value"><?= $block->escapeHtml($rfm['recency_days']) ?> <?= $block->escapeHtml(__('dias')) ?></span>
+                    </div>
+                    <div class="rfm-item">
+                        <span class="label"><?= $block->escapeHtml(__('Frequência:')) ?></span>
+                        <span class="value"><?= $block->escapeHtml($rfm['frequency_count']) ?> <?= $block->escapeHtml(__('pedidos')) ?></span>
+                    </div>
+                    <div class="rfm-item">
+                        <span class="label"><?= $block->escapeHtml(__('Valor Total:')) ?></span>
+                        <span class="value"><?= $block->escapeHtml($block->formatPrice((float)$rfm['monetary_value'])) ?></span>
+                    </div>
+                </div>
+                <div class="rfm-recommendation">
+                    <p><strong><?= $block->escapeHtml(__('Dica do Consultor:')) ?></strong> <?= $block->escapeHtml($rfm['recommendation'] ?? '') ?></p>
+                </div>
+            </div>
+        <?php endif; ?>
+
+        <!-- Frequency Analysis -->
+        <?php if ($frequency && $frequency['total_orders'] > 1): ?>
+            <div class="intelligence-card frequency-card">
+                <div class="card-header">
+                    <h4><?= $block->escapeHtml(__('Ciclo de Reposição')) ?></h4>
+                </div>
+                <div class="frequency-content">
+                    <div class="frequency-main">
+                        <span class="freq-value"><?= $block->escapeHtml($frequency['avg_days_between_orders']) ?></span>
+                        <span class="freq-unit"><?= $block->escapeHtml(__('dias em média')) ?></span>
+                    </div>
+                    <p class="freq-detail">
+                        <?= $block->escapeHtml(__('Seu menor intervalo foi de %1 dias e o maior de %2 dias.', $frequency['min_days'], $frequency['max_days'])) ?>
+                    </p>
+                </div>
+            </div>
+        <?php endif; ?>
+    </div>
+
+    <!-- Monthly Trend Chart (Advanced) -->
+    <?php if (!empty($trend)): ?>
+        <div class="intelligence-trend">
+            <div class="card-header">
+                <h4><?= $block->escapeHtml(__('Tendência de Crescimento (12 Meses)')) ?></h4>
+            </div>
+            <div class="b2b-chart-container advanced-chart">
+                <canvas id="b2b-performance-trend-chart" 
+                        data-chart-data='<?= $block->escapeHtmlAttr(json_encode($trend)) ?>'
+                        aria-label="Grafico de tendencia de performance" role="img"></canvas>
+            </div>
+        </div>
+    <?php endif; ?>
+</div>
+
+<script type="text/x-magento-init">
+{
+    "#b2b-performance-trend-chart": {
+        "GrupoAwamotos_B2B/js/account/performance-charts": {}
+    }
+}
+</script>

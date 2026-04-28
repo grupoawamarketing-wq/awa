@@ -1,0 +1,72 @@
+<?php
+/** @var \GrupoAwamotos\B2B\Block\Account\Subscription\ListSubscription $block */
+$subscriptions = $block->getSubscriptions();
+?>
+<div class="b2b-subscriptions-list b2b-page-shell">
+    <div class="b2b-section-header">
+        <h1><?= $block->escapeHtml(__('Minhas Assinaturas de Pedidos')) ?></h1>
+        <div class="actions">
+            <a href="<?= $block->escapeUrl($block->getUrl('b2b/subscription/create')) ?>" class="action primary">
+                <?= $block->escapeHtml(__('Nova Assinatura')) ?>
+            </a>
+        </div>
+    </div>
+
+    <?php if ($subscriptions->getSize() > 0): ?>
+        <div class="table-wrapper subscriptions-history">
+            <table class="data table table-subscriptions-items history" id="my-subscriptions-table">
+                <caption class="table-caption"><?= $block->escapeHtml(__('Assinaturas')) ?></caption>
+                <thead>
+                    <tr>
+                        <th scope="col" class="col name"><?= $block->escapeHtml(__('Nome')) ?></th>
+                        <th scope="col" class="col frequency"><?= $block->escapeHtml(__('Frequência')) ?></th>
+                        <th scope="col" class="col status"><?= $block->escapeHtml(__('Status')) ?></th>
+                        <th scope="col" class="col next-run"><?= $block->escapeHtml(__('Próxima Execução')) ?></th>
+                        <th scope="col" class="col actions"><?= $block->escapeHtml(__('Ações')) ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($subscriptions as $subscription): ?>
+                        <tr>
+                            <td data-th="<?= $block->escapeHtmlAttr(__('Nome')) ?>" class="col name">
+                                <strong><?= $block->escapeHtml($subscription->getName()) ?></strong>
+                            </td>
+                            <td data-th="<?= $block->escapeHtmlAttr(__('Frequência')) ?>" class="col frequency">
+                                <?= $block->escapeHtml($block->getFrequencyLabel($subscription->getFrequency())) ?>
+                            </td>
+                            <td data-th="<?= $block->escapeHtmlAttr(__('Status')) ?>" class="col status">
+                                <span class="subscription-status status--<?= $block->escapeHtmlAttr($subscription->getStatus()) ?>">
+                                    <?= $block->escapeHtml($block->getStatusLabel($subscription->getStatus())) ?>
+                                </span>
+                            </td>
+                            <td data-th="<?= $block->escapeHtmlAttr(__('Próxima Execução')) ?>" class="col next-run">
+                                <?= $subscription->getNextRunAt() ? $block->escapeHtml(date('d/m/Y', strtotime($subscription->getNextRunAt()))) : '-' ?>
+                            </td>
+                            <td data-th="<?= $block->escapeHtmlAttr(__('Ações')) ?>" class="col actions">
+                                <a href="<?= $block->escapeUrl($block->getEditUrl($subscription)) ?>" class="action edit">
+                                    <span><?= $block->escapeHtml(__('Editar')) ?></span>
+                                </a>
+                                <a href="<?= $block->escapeUrl($block->getDeleteUrl($subscription)) ?>" 
+                                   class="action delete"
+                                   data-role="delete-subscription"
+                                   data-subscription-id="<?= (int)$subscription->getId() ?>">
+                                    <span><?= $block->escapeHtml(__('Remover')) ?></span>
+                                </a>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    <?php else: ?>
+        <div class="message info empty">
+            <span><?= $block->escapeHtml(__('Você ainda não possui assinaturas de pedidos recorrentes.')) ?></span>
+        </div>
+        <div class="b2b-empty-state">
+            <p><?= $block->escapeHtml(__('Automatize suas compras frequentes e garanta seu estoque sempre em dia.')) ?></p>
+            <a href="<?= $block->escapeUrl($block->getUrl('b2b/subscription/create')) ?>" class="action secondary">
+                <?= $block->escapeHtml(__('Criar minha primeira assinatura')) ?>
+            </a>
+        </div>
+    <?php endif; ?>
+</div>

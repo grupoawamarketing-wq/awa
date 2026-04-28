@@ -8,6 +8,9 @@ $isNew = $block->isNewCustomer();
 $progress = $block->getOnboardingProgress();
 $suggestions = $block->getSmartSuggestions();
 $checklist = $block->getOnboardingChecklist();
+?>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/shepherd.js@11.2.0/dist/css/shepherd.css">
+<?php
 
 // ERP Integration — child block injected via layout XML
 $erpBlock = $block->getChildBlock('erp.dashboard.suggestions');
@@ -51,6 +54,9 @@ if ($erpBlock && $erpBlock->isEnabled() && $erpBlock->isLoggedIn()) {
                 <h1><?= $block->escapeHtml(__('Painel B2B')) ?></h1>
                 <p class="b2b-welcome-sub"><?= $block->escapeHtml(__('Olá, %1!', $customer ? $customer->getFirstname() : '')) ?>
                     <span class="b2b-member-since"><?= $block->escapeHtml(__('Cliente desde %1', $block->getRegistrationDate())) ?></span>
+                    <a href="#" class="action secondary trigger-b2b-tour" style="margin-left: 15px; font-size: 13px; text-decoration: underline;">
+                        <?= $block->escapeHtml(__('Como funciona o portal?')) ?>
+                    </a>
                 </p>
                 <div class="b2b-badges">
                     <span class="b2b-group-badge <?= $block->isApproved() ? 'approved' : 'pending' ?>">
@@ -173,6 +179,13 @@ if ($erpBlock && $erpBlock->isEnabled() && $erpBlock->isLoggedIn()) {
                 <?php endif; ?>
             </div>
         </div>
+
+        <!-- ============================================ -->
+        <!-- SALES INTELLIGENCE (ERP Historical Data)      -->
+        <!-- ============================================ -->
+        <?php if ($erpBlock && $erpBlock->isEnabled() && $erpBlock->isLoggedIn()): ?>
+            <?= $erpBlock->setTemplate('GrupoAwamotos_B2B::account/dashboard/intelligence.phtml')->toHtml() ?>
+        <?php endif; ?>
 
         <!-- ======================================= -->
         <!-- CARDS DE RESUMO (B2B + ERP)             -->
@@ -707,12 +720,16 @@ if ($erpBlock && $erpBlock->isEnabled() && $erpBlock->isLoggedIn()) {
         "GrupoAwamotos_B2B/js/dashboard-async": {
             "ajaxUrl": "<?= $block->escapeUrl($block->getUrl('b2b/account/dashboardData')) ?>"
         },
+        "GrupoAwamotos_B2B/js/dashboard-charts": {
+            "chartId": "b2b-purchase-chart"
+        },
         "GrupoAwamotos_B2B/js/contact-tracker": {
             "eventName": "Contact",
             "storagePrefix": "b2b_dashboard_contact_fired_",
             "funnelStage": "mid_funnel",
             "touchpoint": "b2b_dashboard"
-        }
+        },
+        "GrupoAwamotos_B2B/js/account/onboarding": {}
     }
 }
 </script>

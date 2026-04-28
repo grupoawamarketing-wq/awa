@@ -115,8 +115,9 @@ body.b2b-register-index .b2b-register-page .field-error .input.mage-error {
     box-shadow: 0 0 0 3px rgb(220 38 38 / 10%) !important;
 }
 
+/* FIX #18: !important para sobrescrever cor cinza herdada de styles-l */
 body.b2b-register-index .b2b-register-page .mage-error {
-    color: #7f1d1d;
+    color: #7f1d1d !important;
     font-size: 13px;
     margin-top: 6px;
 }
@@ -211,12 +212,11 @@ body.b2b-register-index .b2b-register-page .action.primary:focus-visible {
 
 /* =====================================================
    REQUIRED FIELD INDICATOR — Better visibility
-   ===================================================== */
-body.b2b-register-index .b2b-register-page .field.required > .label span::after {
-    content: ' *';
-    color: #dc2626;
-    font-weight: 700;
-    margin-left: 2px;
+   FIX #5: label::after (regra acima) já injeta o asterisco.
+   span::after era redundante e causava duplo "* *". */
+body.b2b-register-index .b2b-register-page .field.required > .label span::after,
+body.b2b-register-index .b2b-register-page .field.required > .label > span::after {
+    content: none !important; /* !important: mesma especificidade mas regra na merged CSS vem após este fix */
 }
 
 /* =====================================================
@@ -460,8 +460,9 @@ body.b2b-register-index #b2b-register-shell .b2b-register-page .form-section.has
     box-shadow: 0 0 0 2px rgb(220 38 38 / 6%) !important;
 }
 
-/* FORM SECTION BODY — ensure it's visible (not hidden by async CSS) */
-body.b2b-register-index #b2b-register-shell .b2b-register-page .form-section .form-section__body {
+/* FORM SECTION BODY — ensure it's visible (not hidden by async CSS)
+   FIX #1: usa :not(.is-hidden) para preservar o acordeão. */
+body.b2b-register-index #b2b-register-shell .b2b-register-page .form-section .form-section__body:not(.is-hidden) {
     display: block !important;
     margin-top: 16px;
 }
@@ -541,7 +542,7 @@ body.b2b-register-index .b2b-register-page .form-section .form-section__toggle:f
     /* Container vira grid 2 colunas — remove card unificado */
     body.b2b-register-index #b2b-register-shell .b2b-register-container {
         display: grid !important;
-        grid-template-columns: 300px 1fr;
+        grid-template-columns: 300px minmax(0, 1fr);
         grid-template-rows: auto auto;
         column-gap: 40px;
         align-items: start;
