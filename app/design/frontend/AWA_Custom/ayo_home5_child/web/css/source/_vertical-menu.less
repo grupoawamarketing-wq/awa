@@ -212,10 +212,10 @@
 
     li.level0 > .submenu {
         border-left: 3px solid var(--awa-primary, @awa-color-primary);
-        border-radius: 0 @awa-radius-sm @awa-radius-sm 0;
-        box-shadow: @shadow-2;
+        border-radius: 0 @awa-radius-md @awa-radius-md 0;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
         background: @awa-color-white;
-        padding: @ds-space-sm;
+        padding: @ds-space-md @ds-space-lg;
 
         .subchildmenu li {
             > a {
@@ -262,10 +262,10 @@
     // !important necessario: awa-super-global.css aplica .submenu { border: 1px solid #e5e7eb !important; box-shadow: none !important; }
     border: none;
     border-left: 3px solid var(--awa-primary, @awa-color-primary);
-    border-radius: 0 @awa-radius-sm @awa-radius-sm 0;
-    box-shadow: @shadow-2;
+    border-radius: 0 @awa-radius-md @awa-radius-md 0;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
     background: @awa-color-white;
-    padding: @ds-space-sm;
+    padding: @ds-space-md @ds-space-lg;
 
     .subchildmenu li {
         > a {
@@ -550,7 +550,8 @@
         opacity: 0;
         pointer-events: none !important;
         z-index: 100120 !important;
-        transform: translateX(0);
+        transform: translateX(-15px);
+        transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     }
 
     body.cms-index-index .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu > li.ui-menu-item.level0:hover > .submenu,
@@ -563,5 +564,40 @@
         visibility: visible !important;
         opacity: 1;
         pointer-events: auto !important;
+        transform: translateX(0);
+    }
+}
+
+// ============================================================================
+//  12. PREMIUM GLOWING DOT (Para itens sem icone)
+// ============================================================================
+.navigation.verticalmenu .togge-menu > li.ui-menu-item.level0 > a.level-top {
+    // Adiciona o dot apenas se nao houver icone nativo configurado no admin
+    &:not(:has(.awa-vmenu-icon)):not(:has(.menu-thumb-icon)) {
+        > span:first-of-type:not(.arrow):not(.cat-label) {
+            position: relative;
+            padding-left: 16px;
+            
+            &::before {
+                content: '';
+                position: absolute;
+                left: 0;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 6px;
+                height: 6px;
+                border-radius: 50%;
+                background: @awa-color-border;
+                transition: all 0.3s ease;
+            }
+        }
+    }
+    
+    &:hover:not(:has(.awa-vmenu-icon)):not(:has(.menu-thumb-icon)) {
+        > span:first-of-type:not(.arrow):not(.cat-label)::before {
+            background: var(--awa-primary, @awa-color-primary);
+            box-shadow: 0 0 8px rgba(183, 51, 55, 0.6); // Usa a cor primaria com opacity
+            transform: translateY(-50%) scale(1.2);
+        }
     }
 }
