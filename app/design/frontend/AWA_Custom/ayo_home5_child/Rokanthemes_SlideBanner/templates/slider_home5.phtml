@@ -116,7 +116,9 @@ if ($banners = $block->getBannerCollection()):
                 <div class="banner_item_bg">
                     <?php
                     $slideAlt = $banner->getSlideText() ?: ($banner->getSlideTitle() ?: '');
-                    $html = $block->getImageElementMobile($banner->getSlideImageMobile(), $slideAlt, $__isFirstMob);
+                    // Fallback: se não há imagem mobile, usa desktop (garante LCP válido em mobile)
+                    $_mobSrc = $banner->getSlideImageMobile() ?: $banner->getSlideImage();
+                    $html = $block->getImageElementMobile($_mobSrc, $slideAlt, $__isFirstMob);
                     if ($__isFirstMob && preg_match('/src="([^"]+)"/', $html, $_wmm)) {
                         $_webpm = $_wmm[1] . '.webp';
                         $html = '<picture>'
