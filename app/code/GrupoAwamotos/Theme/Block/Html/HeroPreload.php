@@ -65,7 +65,7 @@ class HeroPreload extends Template
             // então o browser NÃO faz duplo download (deduplicação de URL).
             // Rokanthemes salva a imagem como .jpeg no DB (ex: slidebanner/b/a/bauletos.jpg.jpeg)
             // O arquivo WebP correspondente tem extensão .webp (ex: bauletos.jpg.webp)
-            $webpImage = str_replace('.jpeg', '.webp', $slideImage);
+            $webpImage = $slideImage . '.webp';
             return rtrim($mediaUrl, '/') . '/' . ltrim($webpImage, '/');
         } catch (\Throwable $e) {
             return '';
@@ -112,7 +112,7 @@ class HeroPreload extends Template
 
             // Mesma logica do getHeroImageUrl: Rokanthemes salva .jpeg no DB,
             // arquivo WebP correspondente tem extensao .webp
-            $webpImage = str_replace('.jpeg', '.webp', $slideImage);
+            $webpImage = $slideImage . '.webp';
             return rtrim($mediaUrl, '/') . '/' . ltrim($webpImage, '/');
         } catch (\Throwable $e) {
             return '';

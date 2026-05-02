@@ -44,6 +44,37 @@ body .page-wrapper .awa-footer-pro__social {
   align-items: center !important;
 }
 
+@media (max-width: 639px) {
+  body .page-wrapper .page-footer .awa-footer-business-contact .awa-footer-business-contact__shell,
+  body .page-wrapper .page_footer .awa-footer-business-contact .awa-footer-business-contact__shell {
+    padding: 16px !important;
+    gap: 16px !important;
+  }
+
+  body .page-wrapper .page-footer .awa-footer-business-contact .awa-footer-business-contact__actions,
+  body .page-wrapper .page_footer .awa-footer-business-contact .awa-footer-business-contact__actions {
+    gap: 12px !important;
+  }
+
+  body .page-wrapper .page-footer .awa-footer-business-contact .awa-footer-business-contact__action,
+  body .page-wrapper .page_footer .awa-footer-business-contact .awa-footer-business-contact__action {
+    padding: 12px !important;
+    min-height: 0 !important;
+  }
+
+  body .page-wrapper .page-footer .awa-footer-business-contact .awa-footer-business-contact__action-copy strong,
+  body .page-wrapper .page_footer .awa-footer-business-contact .awa-footer-business-contact__action-copy strong {
+    font-size: 13px !important;
+    line-height: 1.3 !important;
+  }
+
+  body .page-wrapper .page-footer .awa-footer-business-contact .awa-footer-business-contact__action-copy span,
+  body .page-wrapper .page_footer .awa-footer-business-contact .awa-footer-business-contact__action-copy span {
+    font-size: 11px !important;
+    line-height: 1.35 !important;
+  }
+}
+
 /**
  * awa-visual-bugfix-2026-04-30.css
  * AWA Motos — Correção de bugs visuais identificados em investigação MCP (Round 3).
@@ -7931,4 +7962,23 @@ body.cms-homepage_ayo_home5 .page-wrapper .product-tab-slider .item-product:hove
   transform: translateY(-3px) !important;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12) !important;
   border-color: rgba(183, 51, 55, 0.15) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   LCP FIX — Hero slider opacity override (2026-05-XX)
+   Problema: OWL Carousel v2 define style="opacity:0;display:block;"
+   inline no elemento .owl durante a inicialização. A regra em
+   awa-super-global.css define opacity:var(--awa-opacity-100,1) mas
+   SEM !important, então o inline style vence, ocultando a imagem LCP
+   por 9,6s (97% do LCP de 9,9s).
+   Solução: !important em stylesheet sobrepõe inline style per CSS spec.
+   A infraestrutura de fallback já existe em awa-super-global.css
+   (mostra só .banner_item:first-child quando .awa-hero-fallback-ready).
+   Apenas faltava o !important para vencer o inline style do OWL.
+═════════════════════════════════════════════════════════════════ */
+body.cms-home .page-wrapper .banner-slider2 .wrapper_slider .owl.awa-hero-fallback-ready,
+body.cms-index-index .page-wrapper .banner-slider2 .wrapper_slider .owl.awa-hero-fallback-ready,
+body.cms-homepage_ayo_home5 .page-wrapper .banner-slider2 .wrapper_slider .owl.awa-hero-fallback-ready {
+  opacity: 1 !important; /* override OWL inline style="opacity:0" */
+  /* sem transition: OWL gerencia a transição após .owl-loaded */
 }

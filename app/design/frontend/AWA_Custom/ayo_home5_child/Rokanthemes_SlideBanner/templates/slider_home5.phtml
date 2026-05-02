@@ -1,8 +1,13 @@
 <?php
 /**
- * AWA Motos — Slide Banner Template
- * API: Owl Carousel 2.0.x (Rokanthemes_Themeoption/js/owl.carousel)
- * Estrutura: hidden-xs (desktop) / visible-xs (mobile) conforme tema Ayo Home5.
+ * Copyright © 2015 Magento. All rights reserved.
+ * See COPYING.txt for license details.
+ *
+ * AWA SlideBanner Fix - 2026-02-10
+ * - singleItem:true for hero banners (always 1 slide)
+ * - autoHeight:true for SVG/mixed aspect ratios
+ * - afterInit callback to trigger text animations
+ * - touchDrag/mouseDrag for mobile swipe
  *
  * @var \Rokanthemes\SlideBanner\Block\Slider $block
  */
@@ -12,90 +17,21 @@ if ($banners = $block->getBannerCollection()):
     $slider = $block->getSlider();
     $sliderId = $block->getSliderId();
     $settings = $slider->getSliderSetting();
-    $desktopSlides = [];
-    $mobileSlides = [];
-
-    /**
-     * Mapeamento DB settings (formato Rokanthemes legado) → OWL Carousel v2 API
-     *
-     * DB usa:     autoPlay (ms|1|0),  navigation (bool), pagination (bool),
-     *             stopOnHover (bool), slideSpeed (ms)
-     * OWL v2 usa: autoplay (bool), autoplayTimeout (ms), autoplayHoverPause,
-     *             nav, dots, smartSpeed, animateOut, animateIn
-     */
-    $s = static function (array $arr, string $key, $default = null) {
-        return array_key_exists($key, $arr) ? $arr[$key] : $default;
-    };
-
-    // autoPlay: 0=off | 1=on (5 s) | N>1 = N ms de intervalo
-    $rawAP = (int) $s($settings, 'autoPlay', 0);
-    $autoplayEnabled = $rawAP !== 0;
-    $autoplayTimeout = $rawAP > 1 ? $rawAP : 5000;
-
-    // slideSpeed → smartSpeed (mínimo 50ms)
-    $smartSpeed = max(50, (int) $s($settings, 'slideSpeed', 500) ?: 500);
-
-    $baseOwlConfig = [
-        'items' => 1,
-        'loop' => false,
+    $owlConfig = [
+        'singleItem' => true,
         'autoHeight' => true,
-        'lazyLoad' => false,
+        'lazyLoad' => true,
         'touchDrag' => true,
         'mouseDrag' => true,
-        'nav' => (bool) (int) $s($settings, 'navigation', 1),
-        'dots' => (bool) (int) $s($settings, 'pagination', 1),
-        'autoplay' => $autoplayEnabled,
-        'autoplayTimeout' => $autoplayTimeout,
-        'autoplayHoverPause' => (bool) (int) $s($settings, 'stopOnHover', 1),
-        'smartSpeed' => $smartSpeed,
-        'animateOut' => false,
-        'animateIn' => false,
+        'transitionStyle' => 'fade',
     ];
+    $booleanKeys = ['autoPlay', 'navigation', 'stopOnHover', 'pagination', 'scrollPerPage'];
 
-    foreach ($banners as $banner) {
-        if ($banner->getSlideStatus() == '2') {
-            continue;
-        }
-
-        $desktopImage = trim((string) $banner->getSlideImage());
-        $mobileImage = trim((string) $banner->getSlideImageMobile());
-        $heroImage = $mobileImage !== '' ? $mobileImage : $desktopImage;
-
-        if ($desktopImage !== '') {
-            $desktopSlides[] = [
-                'banner' => $banner,
-                'image' => $desktopImage,
-            ];
-        }
-
-        if ($heroImage !== '') {
-            $mobileSlides[] = [
-                'banner' => $banner,
-                'image' => $heroImage,
-            ];
-        }
-    }
-
-    $desktopOwlConfig = $baseOwlConfig;
-    $desktopHasMultipleSlides = count($desktopSlides) > 1;
-    $desktopOwlConfig['loop'] = $desktopHasMultipleSlides;
-    $desktopOwlConfig['nav'] = $desktopHasMultipleSlides && $desktopOwlConfig['nav'];
-    $desktopOwlConfig['dots'] = $desktopHasMultipleSlides && $desktopOwlConfig['dots'];
-    $desktopOwlConfig['autoplay'] = $desktopHasMultipleSlides && $desktopOwlConfig['autoplay'];
-
-    $mobileOwlConfig = $baseOwlConfig;
-    $mobileHasMultipleSlides = count($mobileSlides) > 1;
-    $mobileOwlConfig['loop'] = false; // AWA PERF: loop:false no mobile evita que Owl mova slide original antes do LCP
-    $mobileOwlConfig['nav'] = $mobileHasMultipleSlides && $mobileOwlConfig['nav'];
-    $mobileOwlConfig['dots'] = $mobileHasMultipleSlides && $mobileOwlConfig['dots'];
-    $mobileOwlConfig['autoplay'] = $mobileHasMultipleSlides && $mobileOwlConfig['autoplay'];
-
-    // Resolução de links legados (ambiente de staging → produção)
     $legacyHosts = ['srv1113343.hstgr.cloud', 'www.srv1113343.hstgr.cloud'];
     $baseUrl = rtrim((string) $block->getBaseUrl(), '/');
     $baseHost = (string) parse_url($baseUrl, PHP_URL_HOST);
     $baseScheme = (string) parse_url($baseUrl, PHP_URL_SCHEME);
-    $resolveLink = static function (?string $link) use ($legacyHosts, $baseHost, $baseScheme): string {
+    $resolveSlideLink = static function (?string $link) use ($legacyHosts, $baseHost, $baseScheme): string {
         if (!is_string($link)) {
             return '';
         }
@@ -122,237 +58,127 @@ if ($banners = $block->getBannerCollection()):
 
         return $baseScheme . '://' . $baseHost . $path . $query . $fragment;
     };
+
+    foreach ($settings as $key => $value) {
+        if (in_array($key, $booleanKeys, true)) {
+            $owlConfig[$key] = ((int) $value) === 1;
+            continue;
+        }
+
+        if (is_string($value)) {
+            $trimmed = trim($value);
+
+            if (is_numeric($trimmed)) {
+                $owlConfig[$key] = (strpos($trimmed, '.') !== false) ? (float) $trimmed : (int) $trimmed;
+                continue;
+            }
+        }
+
+        $owlConfig[$key] = $value;
+    }
 ?>
 <div class="wrapper_slider hidden-xs slider_<?php echo (int) $sliderId; ?>">
-    <div class="owl owl-carousel">
-        <?php foreach ($desktopSlides as $slideIndex => $slide): ?>
-            <?php
-            $banner = $slide['banner'];
-            $desktopImage = $slide['image'];
-            $isFirst = ($slideIndex === 0); // AWA PERF: so slide 0 (LCP) e eager
-            ?>
+    <div class="owl">
+        <?php $__deskIdx = 0; foreach ($banners as $banner) { if ($banner->getSlideStatus() == '2') { continue; } $__isFirst = ($__deskIdx === 0); $__deskIdx++; ?>
             <div class="banner_item">
                 <div class="banner_item_bg">
                     <?php
                     $slideAlt = $banner->getSlideText() ?: ($banner->getSlideTitle() ?: '');
-                    $imgHtml = $block->getImageElement($desktopImage, $slideAlt, $isFirst);
-                    if (preg_match('/src="([^"]+)"/', $imgHtml, $_m)) {
-                        $_webp = $_m[1] . '.webp'; // Magento salva WebP como original.ext.webp (ex: bauletos.jpg.webp)
-                        // Preload LCP hero image agora é emitido no <head> via GrupoAwamotos\Theme\Block\Html\HeroPreload.
-                        // O body preload foi removido para evitar duplicidade com o <link rel="preload"> do head.
-                        $imgHtml = '<picture>'
+                    $html = $block->getImageElement($banner->getSlideImage(), $slideAlt, $__isFirst);
+                    if ($__isFirst && preg_match('/src="([^"]+)"/', $html, $_wm)) {
+                        $_webp = $_wm[1] . '.webp';
+                        $html = '<picture>'
                             . '<source type="image/webp" srcset="' . $block->escapeUrl($_webp) . '">'
-                            . $imgHtml
+                            . $html
                             . '</picture>';
                     }
-                    $link = $resolveLink($banner->getSlideLink());
+                    $link = $resolveSlideLink($banner->getSlideLink());
                     if ($link !== '') {
-                        $imgHtml = '<a href="' . $block->escapeUrl($link) . '">' . $imgHtml . '</a>';
+                        $html = '<a href="' . $block->escapeUrl($link) . '">' . $html . '</a>';
                     }
-                    echo $imgHtml;
+                    echo $html;
                     ?>
                 </div>
                 <div class="text-banner">
-                    <?php if ($text = $banner->getSlideText()): ?>
-                        <?php echo $block->getContentText($text); ?>
-                    <?php endif; ?>
+                    <?php if ($text = $banner->getSlideText()) {
+                        echo $block->getContentText($text);
+                    }
+                    ?>
                 </div>
             </div>
-        <?php endforeach; ?>
+        <?php } ?>
     </div>
 </div>
 <div class="wrapper_slider visible-xs slider_<?php echo (int) $sliderId; ?>_mobile">
-    <div class="owl owl-carousel">
-        <?php foreach ($mobileSlides as $slideIndex => $slide): ?>
-            <?php
-            $banner = $slide['banner'];
-            $heroImage = $slide['image'];
-            $isFirst = ($slideIndex === 0);
-            ?>
+    <div class="owl">
+        <?php $__mobIdx = 0; foreach ($banners as $banner) { if ($banner->getSlideStatus() == '2') { continue; } $__isFirstMob = ($__mobIdx === 0); $__mobIdx++; ?>
             <div class="banner_item">
                 <div class="banner_item_bg">
                     <?php
                     $slideAlt = $banner->getSlideText() ?: ($banner->getSlideTitle() ?: '');
-                    $imgHtml = $block->getImageElementMobile($heroImage, $slideAlt, $isFirst);
-                    if (preg_match('/src="([^"]+)"/', $imgHtml, $_m)) {
-                        $_webp = $_m[1] . '.webp'; // Magento salva WebP como original.ext.webp (ex: bauletos.jpg.webp)
-                        $imgHtml = '<picture>'
-                            . '<source type="image/webp" srcset="' . $block->escapeUrl($_webp) . '">'
-                            . $imgHtml
+                    $html = $block->getImageElementMobile($banner->getSlideImageMobile(), $slideAlt, $__isFirstMob);
+                    if ($__isFirstMob && preg_match('/src="([^"]+)"/', $html, $_wmm)) {
+                        $_webpm = $_wmm[1] . '.webp';
+                        $html = '<picture>'
+                            . '<source type="image/webp" srcset="' . $block->escapeUrl($_webpm) . '">'
+                            . $html
                             . '</picture>';
                     }
-                    $link = $resolveLink($banner->getSlideLink());
+                    $link = $resolveSlideLink($banner->getSlideLink());
                     if ($link !== '') {
-                        $imgHtml = '<a href="' . $block->escapeUrl($link) . '">' . $imgHtml . '</a>';
+                        $html = '<a href="' . $block->escapeUrl($link) . '">' . $html . '</a>';
                     }
-                    echo $imgHtml;
+                    echo $html;
                     ?>
                 </div>
                 <div class="text-banner">
-                    <?php if ($text = $banner->getSlideText()): ?>
-                        <?php echo $block->getContentText($text); ?>
-                    <?php endif; ?>
+                    <?php if ($text = $banner->getSlideText()) {
+                        echo $block->getContentText($text);
+                    }
+                    ?>
                 </div>
             </div>
-        <?php endforeach; ?>
+        <?php } ?>
     </div>
 </div>
-<style>
-    /* AWA PERF: mostra o 1º slide imediatamente para LCP. Owl sobrescreve após init. */
-    .wrapper_slider .owl-carousel:not(.owl-loaded) .banner_item { display: none !important; }
-    .wrapper_slider .owl-carousel:not(.owl-loaded) .banner_item:first-child { display: block !important; }
-    .wrapper_slider .owl-carousel:not(.owl-loaded) { display: block !important; overflow: hidden; }
-</style>
 <script>
-    (function () {
-        var depsStarted = false;
+    require([
+        'jquery',
+        'mage/mage',
+        'rokanthemes/owl'
+    ], function ($) {
+        'use strict';
 
-        function bootstrapSlider() {
-            if (depsStarted) {
-                return;
-            }
-
-            depsStarted = true;
-
-            require([
-                'jquery',
-                'rokanthemes/owl'
-            ], function ($) {
-                'use strict';
-
-        var desktopConfig = <?php echo json_encode($desktopOwlConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
-        var mobileConfig = <?php echo json_encode($mobileOwlConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
-
-        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-            desktopConfig.autoplay = false;
-            desktopConfig.animateOut = false;
-            desktopConfig.animateIn = false;
-            mobileConfig.autoplay = false;
-            mobileConfig.animateOut = false;
-            mobileConfig.animateIn = false;
-        }
-
-        function doAnimations($slide) {
+        function doAnimations(elems) {
             var animEndEv = 'webkitAnimationEnd animationend';
-            $slide.find('.text-banner [data-animation^="animated"]').each(function () {
-                var $el = $(this);
-                var anim = $el.data('animation');
-
-                if (anim) {
-                    $el.addClass(anim).one(animEndEv, function () {
-                        $el.removeClass(anim);
+            elems.each(function () {
+                var $this = $(this),
+                    $animationType = $this.data('animation');
+                if ($animationType) {
+                    $this.addClass($animationType).one(animEndEv, function () {
+                        $this.removeClass($animationType);
                     });
                 }
             });
         }
 
-        function scheduleRefresh($owl) {
-            var resizeTimer;
-
-            function refreshOwl() {
-                if ($owl.data('owl.carousel')) {
-                    $owl.trigger('refresh.owl.carousel');
-                }
+        var owlConfig = $.extend(true, {}, <?php echo json_encode($owlConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>, {
+            afterInit: function (elem) {
+                var $firstSlide = elem.find('.owl-item').eq(0);
+                doAnimations($firstSlide.find('.text-banner').find("[data-animation ^= 'animated']"));
+            },
+            afterMove: function (elem) {
+                var $currentSlide = elem.find('.owl-item').eq(this.currentItem);
+                doAnimations($currentSlide.find('.text-banner').find("[data-animation ^= 'animated']"));
             }
-
-            if (window.requestAnimationFrame) {
-                window.requestAnimationFrame(function () {
-                    window.requestAnimationFrame(refreshOwl);
-                });
-            } else {
-                window.setTimeout(refreshOwl, 60);
-            }
-
-            $(window).on('load', refreshOwl);
-            $(window).on('resize orientationchange', function () {
-                window.clearTimeout(resizeTimer);
-                resizeTimer = window.setTimeout(refreshOwl, 160);
-            });
-        }
-
-        function ensureDesktopAutoplay($owl, owlConfig) {
-            var timeout = Math.max(parseInt(owlConfig.autoplayTimeout, 10) || 5000, 1000);
-            var owlInstance = $owl.data('owl.carousel');
-
-            if (!owlConfig.autoplay || !$owl.closest('.wrapper_slider.hidden-xs').length) {
-                return;
-            }
-
-            if (owlInstance && owlInstance._plugins && owlInstance._plugins.autoplay) {
-                $owl.trigger('stop.owl.autoplay');
-                $owl.trigger('play.owl.autoplay', [timeout]);
-            }
-        }
-
-        function initOwl(selector, owlConfig) {
-            var $owl = $(selector);
-            if (!$owl.length) {
-                return;
-            }
-
-            $owl
-                .on('initialized.owl.carousel', function (e) {
-                    doAnimations($(e.target).find('.owl-item.active').first());
-                })
-                .on('translated.owl.carousel', function (e) {
-                    doAnimations($(e.target).find('.owl-item.active').first());
-                })
-                .owlCarousel(owlConfig);
-
-            scheduleRefresh($owl);
-            ensureDesktopAutoplay($owl, owlConfig);
-        }
-
-        function scheduleOwlInit(selector, owlConfig, primaryDelayMs, fallbackDelayMs) {
-            var started = false;
-
-            function startInit() {
-                if (started) {
-                    return;
-                }
-
-                started = true;
-                initOwl(selector, owlConfig);
-            }
-
-            window.setTimeout(startInit, Math.max(0, primaryDelayMs || 0));
-
-            if (fallbackDelayMs && fallbackDelayMs > primaryDelayMs) {
-                window.setTimeout(startInit, fallbackDelayMs);
-            }
-
-            ['pointerdown', 'touchstart', 'keydown'].forEach(function (evtName) {
-                window.addEventListener(evtName, startInit, { once: true, passive: true });
-            });
-        }
-
-                // AWA PERF (2026-04-25): inicia o carrossel após a fase crítica do LCP.
-                // Usuários interativos iniciam imediatamente no primeiro gesto.
-                // AWA PERF: desktop init via rIC (após FCP, antes de interação).
-                // O 1º slide já é visível via CSS; o Owl só adiciona controles/autoplay.
-                if (window.requestIdleCallback) {
-                    requestIdleCallback(function () {
-                        initOwl('.slider_<?php echo (int) $sliderId; ?> .owl', desktopConfig);
-                    }, { timeout: 5000 });
-                } else {
-                    scheduleOwlInit('.slider_<?php echo (int) $sliderId; ?> .owl', desktopConfig, 5000, 8000);
-                }
-                scheduleOwlInit('.slider_<?php echo (int) $sliderId; ?>_mobile .owl', mobileConfig, 7000, 10000);
-            });
-        }
-
-        // Perf: adia o carregamento de jQuery/Owl (dependências pesadas) para pós-LCP
-        // ou na primeira interação real do usuário.
-        ['pointerdown', 'touchstart', 'keydown'].forEach(function (evtName) {
-            window.addEventListener(evtName, bootstrapSlider, { once: true, passive: true });
         });
-        // AWA PERF: inicia bootstrapSlider via rIC (sem bloquear FCP/LCP).
-        // Fallback síncrono curto — Owl pode inicializar enquanto a página ainda carrega.
-        if (window.requestIdleCallback) {
-            requestIdleCallback(bootstrapSlider, { timeout: 6000 });
-        } else {
-            window.setTimeout(bootstrapSlider, 7000);
+
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            owlConfig.autoPlay = false;
         }
-    }());
+
+        $(".slider_<?php echo (int) $sliderId; ?> .owl").owlCarousel(owlConfig);
+        $(".slider_<?php echo (int) $sliderId; ?>_mobile .owl").owlCarousel(owlConfig);
+    });
 </script>
 <?php endif; ?>
