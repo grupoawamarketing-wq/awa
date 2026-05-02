@@ -4,28 +4,23 @@
  * rokanthemes/timecircles: real TimeCircles lib (via tema, shim jquery).
  */
 var config = {
-    deps: ['awa-nav-cls-fix-reset', 'awa-vertical-menu-focus-trap', 'awa-vertical-menu-bootstrap', 'awa-vertical-menu-toggle-hotfix', 'awa-b2b-header', 'awa-scroll-reveal', 'awa-card-enhance', 'awa-b2b-pdp-price-reload', 'awa-b2b-price-hydrator'],
+    deps: ['awa-nav-cls-fix-reset', 'awa-vertical-menu-focus-trap', 'awa-vertical-menu-bootstrap', 'awa-vertical-menu-toggle-hotfix', 'awa-b2b-header', 'awa-scroll-reveal', 'awa-card-enhance', 'awa-b2b-pdp-price-reload', 'awa-b2b-price-hydrator', 'awa-footer-returns-hotfix', 'awa-link-a11y-hotfix'],
     map: {
         '*': {
             awaCustomCompatBootstrap: 'js/awa-custom-compat-bootstrap',
             'awaVerticalMenu': 'js/vertical-menu',
-            'Magento_Catalog/js/product/breadcrumbs': 'js/awa-pdp-breadcrumbs'
+            'Magento_Catalog/js/product/breadcrumbs': 'js/awa-pdp-breadcrumbs',
+            // Backward compatibility for cached HTML still referencing old module ID.
+            'AWA_Custom/js/awa-back-to-top': 'js/awa-back-to-top'
         }
     },
     paths: {
         'awa-b2b-header': 'js/awa-b2b-header',
         'rokanthemes/timecircles': 'js/rokanthemes/timecircles',
-        // Redirect Owl Carousel to Swiper Polyfill
-        'rokanthemes/owl': 'js/rokanthemes-owl-polyfill',
         // Swiper 11 — UMD bundle for carousel migration
         'swiper': 'js/swiper-bundle.min',
-        // Swiper hotfixes: usar fonte até regenerar artefatos minificados com paridade.
-        'js/tab-swiper-init': 'js/tab-swiper-init',
-        'js/tab-carousel-init': 'js/tab-carousel-init.min',
-        'js/products-swiper-init': 'js/products-swiper-init',
-        'js/rokanthemes-owl-element-init': 'js/rokanthemes-owl-element-init.min',
-        'js/superdeals-swiper-init': 'js/superdeals-swiper-init.min',
-        'js/owl-carousel-init': 'js/owl-carousel-init.min',
+        // Unified carousel module (replaces products-swiper-init, tab-swiper-init, superdeals-swiper-init)
+        'js/awa-carousel': 'js/awa-carousel.min',
         // Home category carousel usa fonte não-minificada para manter paridade com a versão auditada.
         'js/awa-home-category-carousel': 'js/awa-home-category-carousel',
         // Hotfix Ayo VM: usar fonte para evitar descompasso com artefato minificado legado.
@@ -44,6 +39,10 @@ var config = {
         'awa-b2b-price-hydrator': 'js/awa-b2b-price-hydrator',
         'awa-scroll-reveal': 'js/awa-scroll-reveal',
         'awa-card-enhance': 'js/awa-card-enhance',
+        // Runtime fix: normalize legacy footer returns URL to canonical route.
+        'awa-footer-returns-hotfix': 'js/awa-footer-returns-hotfix',
+        // Runtime fix: propagate image alt text to icon/image-only links.
+        'awa-link-a11y-hotfix': 'js/awa-link-a11y-hotfix',
         'awa-nav-cls-fix-reset': 'js/awa-nav-cls-fix-reset',
         'awa-vertical-menu-bootstrap': 'js/awa-vertical-menu-bootstrap',
         'awa-vertical-menu-toggle-hotfix': 'js/awa-vertical-menu-toggle-hotfix',
