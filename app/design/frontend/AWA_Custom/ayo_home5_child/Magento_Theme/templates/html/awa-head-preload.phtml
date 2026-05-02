@@ -121,6 +121,8 @@ body .page-wrapper .page_footer,.page-footer{background:#f8fafc !important;backg
 @media(min-width:992px){body.cms-index-index .navigation.verticalmenu.side-verticalmenu .togge-menu>li.level0>.submenu,body.cms-index-index .navigation.verticalmenu.side-verticalmenu .togge-menu>li.level0>.level0.submenu,body.cms-index-index .navigation.verticalmenu.side-verticalmenu .togge-menu>li.level0>.navigation__submenu{display:none!important;opacity:0!important;visibility:hidden!important;pointer-events:none!important}body.cms-index-index .navigation.verticalmenu.side-verticalmenu .togge-menu>li.level0:hover>.submenu,body.cms-index-index .navigation.verticalmenu.side-verticalmenu .togge-menu>li.level0:hover>.level0.submenu,body.cms-index-index .navigation.verticalmenu.side-verticalmenu .togge-menu>li.level0:hover>.navigation__submenu{display:flex!important;opacity:1!important;visibility:visible!important;pointer-events:auto!important}body.cms-index-index .navigation.verticalmenu.side-verticalmenu .togge-menu>li.level0.awa-vmf-active>.submenu,body.cms-index-index .navigation.verticalmenu.side-verticalmenu .togge-menu>li.level0.awa-vmf-active>.level0.submenu,body.cms-index-index .navigation.verticalmenu.side-verticalmenu .togge-menu>li.level0.awa-vmf-active>.navigation__submenu{display:flex!important;opacity:1!important;visibility:visible!important;pointer-events:auto!important}.awa-vmf-portal.submenu,.awa-vmf-portal.navigation__submenu{display:flex!important;opacity:1!important;visibility:visible!important;pointer-events:auto!important}}
 /* Header alignment fix */
 #html-body .page-wrapper .header-control.awa-nav-bar .awa-nav-bar__inner,#html-body .page-wrapper .awa-site-header .awa-nav-bar__inner{max-width:var(--awa-container-wide, var(--awa-container-max, 1440px))!important;margin:0 auto!important;width:100%!important;}
+/* cart-fallback SEMPRE oculto — minicart real via KO.js (guard para refinements.css async) */
+.awa-header-cart-fallback{display:none!important;visibility:hidden!important;pointer-events:none!important}
 </style>
 <?php if ($heroPreloadUrl): ?>
 <!-- LCP Hero Image Preload — fetchpriority=high, com media queries (Swiper SlideBanner, homepage) -->
@@ -183,10 +185,14 @@ body .page-wrapper .page_footer,.page-footer{background:#f8fafc !important;backg
       href="<?= $block->escapeUrl($__vmModernUrl) ?>"
       media="all"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__vmModernUrl) ?>"/></noscript>
-<?php /* awa-bundle-refinements.css — safety-net overrides, LAST non-async bundle (2026-04-27) */ ?>
+<?php /* awa-bundle-refinements.css — safety-net overrides, carrega async (2026-05-02)
+         Regras críticas above-fold (cart-fallback, b2b-promo-bar) cobertas no inline anti-FOUC.
+         media="print" onload trick: força download sem bloquear render, swap para 'all' ao carregar. */ ?>
+<link rel="preload" href="<?= $block->escapeUrl($refinementsBundleUrl) ?>?v=2" as="style"/>
 <link rel="stylesheet"
       href="<?= $block->escapeUrl($refinementsBundleUrl) ?>?v=2"
-      media="all"/>
+      media="print"
+      onload="this.media='all'"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($refinementsBundleUrl) ?>?v=2"/></noscript>
 <?php /* awa-visual-bugfix.css — consolidação de bugfix-2026-04-{28,29,30} + modernization-gridmotors (2026-05-02)
          Elimina 3 requisições HTTP bloqueantes → 1 arquivo (saves ~300ms render blocking) */ ?>
