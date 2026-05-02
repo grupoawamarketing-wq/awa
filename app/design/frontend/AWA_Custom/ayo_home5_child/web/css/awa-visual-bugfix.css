@@ -5653,6 +5653,43 @@ body .page-wrapper .b2b-login-to-see-price a:hover {
   text-decoration-color: currentColor;
 }
 
+/* ============================================================================
+   FIX: Nos carrosseis de produtos (rokan-bestseller, rokan-newproduct, etc.)
+   o botao "Faca login" tem fundo vermelho (via awa-bundle-refinements.css),
+   mas a regra acima sobrescreve a cor do texto para vermelho tambem -
+   tornando o texto INVISIVEL (vermelho sobre vermelho).
+   Fix: restaurar color:#fff para esses contextos com especificidade maior.
+   ============================================================================ */
+body .page-wrapper .rokan-bestseller .b2b-login-to-see-price a,
+body .page-wrapper .rokan-newproduct .b2b-login-to-see-price a,
+body .page-wrapper .block-new-products .b2b-login-to-see-price a,
+body .page-wrapper .block-products-list .b2b-login-to-see-price a {
+  color: #fff !important;
+  text-decoration: none !important;
+}
+
+body .page-wrapper .rokan-bestseller .b2b-login-to-see-price a:hover,
+body .page-wrapper .rokan-newproduct .b2b-login-to-see-price a:hover,
+body .page-wrapper .block-new-products .b2b-login-to-see-price a:hover,
+body .page-wrapper .block-products-list .b2b-login-to-see-price a:hover {
+  color: #fff !important;
+  opacity: 0.9;
+}
+
+/* ============================================================================
+   FIX: A div .actions.clearfix.product-info-cart tem min-height:52px mas
+   todos os filhos (botao add-to-cart) estao display:none para usuarios B2B
+   nao logados - gerando 52px de whitespace vazio no rodape de cada card.
+   Fix: ocultar completamente quando o contexto e "somente ver precos com login".
+   ============================================================================ */
+body .page-wrapper .rokan-bestseller .b2b-login-to-see-price ~ .actions.clearfix,
+body .page-wrapper .rokan-newproduct .b2b-login-to-see-price ~ .actions.clearfix,
+body .page-wrapper .block-new-products .b2b-login-to-see-price ~ .actions.clearfix,
+body .page-wrapper .block-products-list .b2b-login-to-see-price ~ .actions.clearfix {
+  display: none !important;
+  min-height: 0 !important;
+}
+
 
 /* =============================================================================
    MELHORIA: Footer trust section spacing — prevenir overlap
@@ -11973,4 +12010,46 @@ body.cms-homepage_ayo_home5 .page-wrapper .banner-slider2 .wrapper_slider .owl.a
   .hot-deal-tab-slider.hot-deal-tab-slider-customcss {
   border: none !important;
   background: #fff !important;
+}
+
+/* ===================================================================
+   AWA FIX 2026-05-07 — Banner col height + Footer label compaction
+   Acrescenta ao final para ganhar na cascata CSSOM
+   =================================================================== */
+
+/* FIX-BANNER-HEIGHT: cols de banner esticam via flex stretch (232px vs 200px img).
+   align-items: start no grid rowFlex corta o excesso. */
+@media (max-width: 767px) {
+  body .page-wrapper .top-home-content--trust-and-offers .rowFlex,
+  html body .page-wrapper .top-home-content--trust-and-offers .rowFlex {
+    align-items: start !important;
+  }
+  body .page-wrapper .top-home-content--trust-and-offers [class*="col_banner"],
+  html body .page-wrapper .top-home-content--trust-and-offers [class*="col_banner"] {
+    align-self: start !important;
+    overflow: hidden !important;
+  }
+}
+
+/* FIX-LABEL-FS: awa-visual-bugfix.css linha ~11824 seta 12px; este bloco vence por
+   especificidade maior (html body .page-wrapper = 0,3,2 vs body .page-wrapper = 0,2,2) */
+@media (max-width: 639px) {
+  html body .page-wrapper .footer-bottom .awa-footer-muted-label,
+  html body .page-wrapper .footer-bottom .awa-footer-pay-sec__label,
+  html body .page-wrapper .page-footer .footer-bottom .awa-footer-muted-label,
+  html body .page-wrapper .page-footer .footer-bottom .awa-footer-pay-sec__label,
+  html body .page-wrapper .page_footer .footer-bottom .awa-footer-muted-label,
+  html body .page-wrapper .page_footer .footer-bottom .awa-footer-pay-sec__label {
+    font-size: 10.5px !important;
+    line-height: 1.3 !important;
+  }
+}
+
+/* FIX-BANNER-MARGIN: span.banner-hover tem margin-bottom:32px causando col 232px vs 200px img.
+   Override para 0 no mobile elimina os 32px extras por coluna (saves 2x32=64px total) */
+@media (max-width: 767px) {
+  body .page-wrapper .top-home-content--trust-and-offers .bs-banner .banner-hover,
+  html body .page-wrapper .top-home-content--trust-and-offers .bs-banner .banner-hover {
+    margin-bottom: 0 !important;
+  }
 }
