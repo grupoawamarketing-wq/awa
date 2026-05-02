@@ -184,7 +184,14 @@ define([
             var go = function () {
                 if (!item.$el.data('awaSwiperInit')) {
                     item.$el.data('awaSwiperInit', 1);
-                    try { new Swiper(item.$el[0], item.opts); } catch (e) { item.$el.removeData('awaSwiperInit'); }
+                    try {
+                        new Swiper(item.$el[0], item.opts);
+                    } catch (e) {
+                        item.$el.removeData('awaSwiperInit');
+                        if (window.console && typeof window.console.warn === 'function') {
+                            window.console.warn('AWA carousel: falha ao inicializar Swiper.', e);
+                        }
+                    }
                 }
                 queueRunning = false;
                 if (initQueue.length) { setTimeout(processQueue, QUEUE_GAP_MS); }
@@ -328,13 +335,7 @@ define([
         var url = $carousel.attr('data-lazy-url');
         if (!url) { callback(); return; }
 
-        $carousel.html(
-            '<div style="text-align:center;padding:40px 20px;color:#94a3b8;">' +
-            '<div style="display:inline-block;width:24px;height:24px;border:3px solid #e2e8f0;' +
-            'border-top-color:#3b82f6;border-radius:50%;animation:awa-spin .8s linear infinite;margin-bottom:10px"></div>' +
-            '<div style="font-size:13px">Carregando produtos...</div></div>' +
-            '<style>@keyframes awa-spin{to{transform:rotate(360deg)}}</style>'
-        );
+        $carousel.html('<div class="awa-carousel-lazy-status">Carregando produtos...</div>');
 
         $.ajax({ url: url, type: 'GET', dataType: 'json', timeout: 15000 })
             .done(function (res) {
@@ -349,9 +350,10 @@ define([
             })
             .fail(function () {
                 $carousel.html(
-                    '<div style="text-align:center;padding:30px 20px;color:#94a3b8;font-size:13px">' +
+                    '<div class="awa-carousel-lazy-status awa-carousel-lazy-status--error">' +
                     'Erro ao carregar produtos.</div>'
                 ).removeAttr('data-lazy-url');
+                callback();
             });
     }
 
@@ -408,6 +410,9 @@ define([
                     instances[key] = new SwiperCtor($el[0], baseOpts);
                 } catch (e) {
                     $el.removeData('awaSwiperInit');
+                    if (window.console && typeof window.console.warn === 'function') {
+                        window.console.warn('AWA carousel: erro ao criar instância em painel de tabs.', e);
+                    }
                 }
             });
         }
@@ -528,7 +533,8 @@ define([
             labels = cfg.labels || {},
             countdownCfg = cfg.countdown || {};
 
-        require(['swiper', 'rokanthemes/timecircles'], function (Swiper) {
+        // Load swiper for the carousel (always needed in superdeals mode)
+        require(['swiper'], function (Swiper) {
             SwiperCtor = Swiper;
             var opts = buildSwiperOptions(owlCfg);
 
@@ -539,23 +545,29 @@ define([
                 raf(function () { new Swiper($el[0], opts); });
             });
 
-            $scope.find(countdownSel).each(function () {
-                var $cd = $(this);
-                if ($cd.data('awaCountdownInit') || typeof $cd.TimeCircles !== 'function') { return; }
-                $cd.data('awaCountdownInit', 1);
-                $cd.TimeCircles({
-                    fg_width: parseFloat(countdownCfg.fg_width) || 0.01,
-                    bg_width: parseFloat(countdownCfg.bg_width) || 1.2,
-                    text_size: parseFloat(countdownCfg.text_size) || 0.07,
-                    circle_bg_color: countdownCfg.circle_bg_color || '#ffffff',
-                    time: {
-                        Days: { show: true, text: labels.days || 'Days', color: '#f9bc02' },
-                        Hours: { show: true, text: labels.hours || 'Hours', color: '#f9bc02' },
-                        Minutes: { show: true, text: labels.minutes || 'Mins', color: '#f9bc02' },
-                        Seconds: { show: true, text: labels.seconds || 'Secs', color: '#f9bc02' }
-                    }
+            // Lazy-load timecircles ONLY when countdown elements actually exist
+            var $countdowns = $scope.find(countdownSel);
+            if ($countdowns.length > 0) {
+                require(['rokanthemes/timecircles'], function () {
+                    $countdowns.each(function () {
+                        var $cd = $(this);
+                        if ($cd.data('awaCountdownInit') || typeof $cd.TimeCircles !== 'function') { return; }
+                        $cd.data('awaCountdownInit', 1);
+                        $cd.TimeCircles({
+                            fg_width: parseFloat(countdownCfg.fg_width) || 0.01,
+                            bg_width: parseFloat(countdownCfg.bg_width) || 1.2,
+                            text_size: parseFloat(countdownCfg.text_size) || 0.07,
+                            circle_bg_color: countdownCfg.circle_bg_color || '#ffffff',
+                            time: {
+                                Days: { show: true, text: labels.days || 'Days', color: '#f9bc02' },
+                                Hours: { show: true, text: labels.hours || 'Hours', color: '#f9bc02' },
+                                Minutes: { show: true, text: labels.minutes || 'Mins', color: '#f9bc02' },
+                                Seconds: { show: true, text: labels.seconds || 'Secs', color: '#f9bc02' }
+                            }
+                        });
+                    });
                 });
-            });
+            }
         });
     }
 
