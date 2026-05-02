@@ -138,6 +138,19 @@
     }
 
     /**
+     * Defer equalizeCardHeights to idle time — avoids forced layout during critical path.
+     * Uses requestIdleCallback with 3s timeout fallback (runs at idle or max 3s after call).
+     */
+    function scheduleEqualize(carouselEl) {
+        var fn = function () { equalizeCardHeights(carouselEl); };
+        if (typeof requestIdleCallback === 'function') {
+            requestIdleCallback(fn, { timeout: 3000 });
+        } else {
+            setTimeout(fn, 3000);
+        }
+    }
+
+    /**
      * Main init — initialize broken carousels, scan and inject nav.
      */
     function init() {
@@ -182,7 +195,7 @@
                     anchor2.style.position = 'relative';
                     injectNav(el, anchor2);
                     injectProgress(el, anchor2);
-                    equalizeCardHeights(el);
+                    scheduleEqualize(el);
                 }
             }
 
@@ -195,7 +208,7 @@
                     anchor2.style.position = 'relative';
                     injectNav(el, anchor2);
                     injectProgress(el, anchor2);
-                    equalizeCardHeights(el);
+                    scheduleEqualize(el);
                 }
             }
         }, 200);
