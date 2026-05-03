@@ -12147,3 +12147,91 @@ body.cms-homepage_ayo_home5 .page-wrapper .banner-slider2 .wrapper_slider .owl.a
     padding-bottom: 14px !important;
   }
 }
+
+/* FIX-BIZ-CONTACT: outer pt:32px reduced to 16px, shell padding/gap compacted.
+   Outer pt: 32px->16px saves 16px. Shell padding: 16px->10px saves 12px. Gap: 16px->8px saves 8px. */
+@media (max-width: 639px) {
+  html body .page-wrapper .awa-footer-business-contact,
+  html body .page-wrapper .page-footer .awa-footer-business-contact,
+  html body .page-wrapper .page_footer .awa-footer-business-contact {
+    padding-top: 16px !important;
+  }
+  html body .page-wrapper .page-footer .awa-footer-business-contact .awa-footer-business-contact__shell,
+  html body .page-wrapper .page_footer .awa-footer-business-contact .awa-footer-business-contact__shell {
+    padding: 10px !important;
+    gap: 8px !important;
+  }
+}
+
+/* FIX-CAT-CAROUSEL: category carousel pt:24+pb:24+mb:20 -> pt:12+pb:12+mb:10 saves ~34px */
+@media (max-width: 639px) {
+  html body .page-wrapper .top-home-content--category-carousel,
+  html body .page-wrapper .categorytab-container {
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
+    margin-bottom: 10px !important;
+  }
+}
+
+/* FIX-TRUST-ITEMS: each trust item has pt:10+pb:10. Reduce to 6px saves 8px x4 = 32px total.
+   gap also from 8px to 4px saves 4px more per item (limited by flex gap). */
+@media (max-width: 639px) {
+  html body .page-wrapper .awa-footer-trust-bar .awa-footer-trust-item,
+  html body .page-wrapper .page-footer .awa-footer-trust-bar .awa-footer-trust-item,
+  html body .page-wrapper .page_footer .awa-footer-trust-bar .awa-footer-trust-item {
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+    gap: 6px !important;
+  }
+}
+
+/* FIX-BIZ-ACTIONS: each action has pt:12+pb:12. Reduce to pt:8+pb:8 saves 8px x3 = 24px.
+   actionsGap 12px -> 8px saves 2x4=8px more. minH:44px preserved so actions stay tappable. */
+@media (max-width: 639px) {
+  html body .page-wrapper .page-footer .awa-footer-business-contact .awa-footer-business-contact__action,
+  html body .page-wrapper .page_footer .awa-footer-business-contact .awa-footer-business-contact__action {
+    padding: 8px 12px !important;
+    min-height: 44px !important;
+  }
+  html body .page-wrapper .page-footer .awa-footer-business-contact .awa-footer-business-contact__actions,
+  html body .page-wrapper .page_footer .awa-footer-business-contact .awa-footer-business-contact__actions {
+    gap: 8px !important;
+  }
+}
+
+/* ==========================================================================
+   FIX-FOOTER-PAY-COLS: Footer bottom columns — Bootstrap widths & grid fix
+   
+   Root cause: Bootstrap col-md-* width:N% computes to N% of the grid CELL,
+   not the full container. With 292px cell: col-md-5(41.67%) = 122px → logos
+   stack vertically instead of horizontally.
+   
+   Actual grid cell assignment (from getBoundingClientRect measurements):
+     Cell 1 → col-md-4 (Certificados/Seals)
+     Cell 2 → col-md-3 (Logo AWA)
+     Cell 3 → col-md-5 (Logos de pagamento) ← needs the widest column
+
+   Fix:
+   1. Force cols to fill 100% of their grid cell
+   2. Rebalance grid template: 1fr | 1fr | 2fr so payment gets the largest column
+   ========================================================================== */
+@media (min-width: 992px) {
+  html body .page-wrapper .page_footer .footer-bottom .awa-footer-bottom__row > [class*="col-"] {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  html body .page-wrapper .page_footer .footer-bottom .footer-bottom-inner .row {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 2fr) !important;
+  }
+}
+
+/* FIX-FOOTER-MAXW: Bootstrap col-md-* has max-width:41.666% which applies inside
+   CSS Grid containers and prevents cols from filling their grid cell.
+   Override so grid auto-stretch works correctly at desktop. */
+@media (min-width: 992px) {
+  .awa-footer-bottom__row > [class*="col-"] {
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+}
