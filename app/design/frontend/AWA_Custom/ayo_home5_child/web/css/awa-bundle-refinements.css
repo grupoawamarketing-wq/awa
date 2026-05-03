@@ -3879,3 +3879,197 @@ body .page-wrapper .awa-site-header .awa-header-search-col.top-search .block.blo
     padding: 10px 12px !important;
   }
 }
+
+/* =====================================================================
+   BESTSELLER CARD FIXES — Match ProductTab card structure
+   Bugs #1-#15 — Hide duplicate heading, card styling consistency
+   ===================================================================== */
+
+/* #1 #2: Hide duplicate rokan heading (top-home.phtml already provides section header) */
+.awa-carousel-section .rokan-bestseller .rokan-product-heading {
+  display: none !important; /* Prevent duplicate "Mais Vendidos" heading */
+}
+
+/* #7 #13 #14: Card structure — border, shadow, padding like tab cards */
+.rokan-bestseller .item-product .content-item-product {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border: var(--awa-border-width, 1px) solid var(--awa-color-border, #e5e5e5);
+  border-radius: var(--awa-radius-sm, 8px);
+  background: var(--awa-white, #fff);
+  overflow: hidden;
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.rokan-bestseller .item-product .content-item-product:hover {
+  box-shadow: var(--card-shadow-hover, 0 12px 32px rgb(0 0 0 / 10%));
+  transform: translateY(-2px);
+}
+
+/* #3: Hover image — second-thumb hidden until hover */
+.rokan-bestseller .item-product .product-thumb .second-thumb {
+  display: none !important;
+  position: absolute !important;
+  inset: 0 !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.rokan-bestseller .item-product .product-thumb .first-thumb {
+  display: block !important;
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+/* #10: Image container — consistent sizing */
+.rokan-bestseller .item-product .product-thumb {
+  position: relative;
+  overflow: hidden;
+  padding: 0 !important;
+}
+
+.rokan-bestseller .item-product .product-thumb .product-image-photo,
+.rokan-bestseller .item-product .product-thumb img {
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  transform: scale(1.08) !important;
+  transition: transform 0.3s ease;
+}
+
+.rokan-bestseller .item-product .product-thumb:hover .product-image-photo,
+.rokan-bestseller .item-product .product-thumb:hover img {
+  transform: scale(1.12) !important;
+}
+
+/* #4: QuickView icon positioning */
+.rokan-bestseller .item-product .actions-secondary {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  z-index: 5;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.rokan-bestseller .item-product .content-item-product:hover .actions-secondary {
+  opacity: 1;
+}
+
+.rokan-bestseller .item-product .actions-secondary .quickview-product a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: var(--awa-white, #fff);
+  border-radius: var(--awa-radius-full, 50%);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 15%);
+  color: var(--awa-gray-700, #374151);
+  font-size: 14px;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.rokan-bestseller .item-product .actions-secondary .quickview-product a:hover {
+  background: var(--awa-red, #b73337);
+  color: var(--awa-white, #fff);
+}
+
+/* #8 #9: Add-to-cart button — consistent class, B2B-aware */
+.rokan-bestseller .item-product .product-info-cart {
+  padding: 0 12px;
+}
+
+.rokan-bestseller .item-product .product-info-cart .btn-add-to-cart {
+  width: 100%;
+  min-height: 40px;
+  border-radius: var(--awa-radius-xs, 4px);
+  padding: 0 !important;
+}
+
+/* #12: Product name — line-clamp for consistent height */
+.rokan-bestseller .item-product .product-name {
+  margin: 0;
+}
+
+.rokan-bestseller .item-product .product-name .product-item-link {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  min-height: calc(14px * 1.4 * 2); /* 2 lines */
+  font-size: var(--awa-text-base, 14px);
+  font-weight: var(--awa-weight-semibold, 600);
+  line-height: 1.4;
+  color: var(--awa-text, #333);
+}
+
+/* #11: SKU with REF label */
+.rokan-bestseller .item-product .awa-b2b-sku {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--awa-text-xs, 11px);
+  line-height: 1.3;
+}
+
+.rokan-bestseller .item-product .awa-b2b-sku .awa-b2b-sku__label {
+  color: var(--awa-gray-400, #9ca3af);
+  font-weight: var(--awa-weight-semibold, 600);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.rokan-bestseller .item-product .awa-b2b-sku .awa-b2b-sku__value {
+  color: var(--awa-gray-500, #6b7280) !important;
+}
+
+/* Product info section — gap and padding */
+.rokan-bestseller .item-product .product-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px 12px;
+  flex: 1;
+}
+
+/* Price area */
+.rokan-bestseller .item-product .info-price {
+  margin-top: auto; /* Push price to bottom */
+}
+
+/* Rating */
+.rokan-bestseller .item-product .product-rating {
+  font-size: 0; /* Hide empty ratings gracefully */
+}
+
+.rokan-bestseller .item-product .product-rating:empty {
+  display: none;
+}
+
+/* Badges */
+.rokan-bestseller .item-product .hot-onsale {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 4;
+}
+
+.rokan-bestseller .item-product .hot-onsale .onsale {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: var(--awa-radius-full, 9999px);
+  font-size: var(--awa-text-xs, 11px);
+  font-weight: var(--awa-weight-bold, 700);
+  background: var(--awa-red, #b73337);
+  color: var(--awa-white, #fff);
+}
+
+.rokan-bestseller .item-product .hot-onsale .onsale.new-lable {
+  background: var(--awa-success, #16a34a);
+}
