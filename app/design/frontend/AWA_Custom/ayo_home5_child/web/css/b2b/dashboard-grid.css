@@ -1,0 +1,237 @@
+/* ================================================================
+   AWA B2B Dashboard — Grid System Canônico
+   Referência: .github/prompts/ds-04-grid-container.prompt.md
+   Carregado via: GrupoAwamotos_B2B/layout/b2b_account_dashboard_index.xml
+   Sobrescreve: awa-visual-audit-consolidated.css (último na cascata)
+   ================================================================ */
+
+/* --- 1. Container principal ------------------------------------ */
+.b2b-dashboard {
+    max-width: var(--awa-container, 1280px);
+    margin-inline: auto;
+    padding: 0 var(--awa-container-pad, 24px) var(--awa-space-10, 40px);
+}
+
+@media (max-width: 767px) {
+    .b2b-dashboard {
+        padding-inline: var(--awa-container-pad-sm, 15px);
+    }
+}
+
+/* --- 2. Summary Cards (Histórico de Compras, Cotações…) -------- */
+/*
+   BUG CORRIGIDO: awa-visual-audit-consolidated.css usava
+   auto-fill + minmax(160px) → criava 6 colunas de 172px para 2 cards.
+   auto-fit + minmax(280px) → colunas vazias colapsam, cards preenchem
+   o espaço disponível corretamente.
+*/
+.b2b-summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--awa-space-4, 16px);
+    margin: var(--awa-space-5, 20px) 0;
+}
+
+@media (max-width: 639px) {
+    .b2b-summary-cards {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* --- 3. Quick Actions ------------------------------------------ */
+/*
+   BUG CORRIGIDO: awa-visual-audit-consolidated.css aplicava
+   display:grid direto em .b2b-quick-actions (que contém <h3> + .actions-grid),
+   fazendo o heading e o grid virarem colunas — comprimia .actions-grid a 167px.
+   Correto: display:block no wrapper, grid apenas em .actions-grid.
+*/
+.b2b-quick-actions {
+    display: block;
+    margin: var(--awa-space-6, 24px) 0;
+}
+
+.b2b-quick-actions .actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: var(--awa-space-3, 12px);
+}
+
+@media (max-width: 479px) {
+    .b2b-quick-actions .actions-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* --- 4. ERP Products Grid (Produtos Sugeridos) ----------------- */
+/*
+   Mobile-first: 2 → 3 → 4 colunas.
+   dashboard.css já tinha mobile media queries, mas dashboard-refinement.css
+   sobrescrevia a base sem breakpoints → perdia 4 colunas no wide.
+*/
+.erp-products-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--awa-space-4, 16px);
+}
+
+@media (min-width: 768px) {
+    .erp-products-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (min-width: 1280px) {
+    .erp-products-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: var(--awa-space-5, 20px);
+    }
+}
+
+/* --- 5. Suggestions Grid (Sugestões para Você) ----------------- */
+.suggestions-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--awa-space-4, 16px);
+}
+
+@media (min-width: 640px) {
+    .suggestions-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1280px) {
+    .suggestions-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* --- 6. Sections spacing --------------------------------------- */
+.b2b-section {
+    margin-bottom: var(--awa-space-8, 32px);
+}
+
+/* --- 7. Reorder list ------------------------------------------ */
+.erp-reorder-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+/* --- 8. Reduce motion ----------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+    .b2b-summary-cards .summary-card,
+    .action-item,
+    .erp-product-card {
+        transition: none;
+        transform: none;
+    }
+}
+
+/* --- 9. Visual polish for B2B cards ----------------------------- */
+.b2b-summary-cards .summary-card {
+    background: var(--awa-bg, #fff);
+    border: 1px solid var(--awa-border, #e5e5e5);
+    border-radius: var(--awa-radius-lg, 16px);
+    padding: var(--awa-space-4-5, 18px);
+    box-shadow: var(--awa-shadow-xs, 0 1px 3px rgba(0, 0, 0, 0.04));
+    transition: box-shadow var(--awa-duration, 0.25s) var(--awa-ease),
+                transform var(--awa-duration-fast, 0.15s) var(--awa-ease);
+}
+
+.b2b-summary-cards .summary-card:hover {
+    box-shadow: var(--awa-shadow-md, 0 4px 16px rgba(0, 0, 0, 0.10));
+    transform: translateY(-2px);
+}
+
+.b2b-summary-cards .summary-card__label {
+    margin: 0 0 var(--awa-space-1-5, 6px);
+    font-size: var(--awa-font-sm, 12px);
+    font-weight: var(--awa-weight-bold, 700);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--awa-text-muted, #888);
+}
+
+.b2b-summary-cards .summary-card__value {
+    margin: 0;
+    font-size: clamp(22px, 2.2vw, 30px);
+    line-height: 1.1;
+    font-weight: var(--awa-weight-extrabold, 800);
+    color: var(--awa-text, #1a1a1a);
+}
+
+/* --- 10. Quick actions card buttons ------------------------------ */
+.b2b-quick-actions .action-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--awa-btn-h, 44px);
+    padding: var(--awa-space-2-5, 10px) var(--awa-space-3-5, 14px);
+    border: 1.5px solid var(--awa-border, #e5e5e5);
+    border-radius: var(--awa-radius-md, 8px);
+    background: var(--awa-bg, #fff);
+    color: var(--awa-text-secondary, #555);
+    font-size: var(--awa-font-sm, 12px);
+    font-weight: var(--awa-weight-semibold, 600);
+    text-align: center;
+    text-decoration: none;
+    transition: all var(--awa-duration-fast, 0.15s) var(--awa-ease);
+}
+
+.b2b-quick-actions .action-item:hover,
+.b2b-quick-actions .action-item:focus-visible {
+    border-color: var(--awa-primary, #b73337);
+    background: var(--awa-primary-light, #fef2f2);
+    color: var(--awa-primary, #b73337);
+}
+
+/* --- 11. ERP product cards -------------------------------------- */
+.erp-products-grid .erp-product-card {
+    background: var(--awa-bg, #fff);
+    border: 1px solid var(--awa-border, #e5e5e5);
+    border-radius: var(--awa-radius-lg, 16px);
+    padding: var(--awa-space-3-5, 14px);
+    box-shadow: var(--awa-shadow-xs, 0 1px 3px rgba(0, 0, 0, 0.04));
+    transition: box-shadow var(--awa-duration, 0.25s) var(--awa-ease),
+                transform var(--awa-duration-fast, 0.15s) var(--awa-ease);
+}
+
+.erp-products-grid .erp-product-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--awa-shadow-md, 0 4px 16px rgba(0, 0, 0, 0.10));
+}
+
+.erp-products-grid .erp-product-card .product-name {
+    margin: 0 0 var(--awa-space-2, 8px);
+    font-size: var(--awa-font-base, 14px);
+    font-weight: var(--awa-weight-bold, 700);
+    line-height: 1.35;
+    color: var(--awa-text, #1a1a1a);
+}
+
+.erp-products-grid .erp-product-card .product-meta {
+    margin: 0;
+    font-size: var(--awa-font-sm, 12px);
+    color: var(--awa-text-muted, #888);
+}
+
+/* --- 12. Section titles ----------------------------------------- */
+.b2b-section > h2,
+.b2b-section > h3,
+.b2b-section .section-title {
+    margin: 0 0 var(--awa-space-3, 12px);
+    font-size: var(--awa-font-2xl, 20px);
+    line-height: 1.2;
+    font-weight: var(--awa-weight-extrabold, 800);
+    color: var(--awa-text, #1a1a1a);
+    letter-spacing: -0.01em;
+}
+
+/* --- 13. Suggestions cards -------------------------------------- */
+.suggestions-grid > * {
+    background: var(--awa-bg, #fff);
+    border: 1px solid var(--awa-border, #e5e5e5);
+    border-radius: var(--awa-radius-lg, 16px);
+    padding: var(--awa-space-4, 16px);
+}

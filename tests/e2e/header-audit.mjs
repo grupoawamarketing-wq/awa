@@ -12,7 +12,7 @@ await page.route('**/*', route => {
   }
   return route.continue();
 });
-await page.goto('https://awamotos.com', { waitUntil: 'domcontentloaded', timeout: 30000 });
+await page.goto(`https://awamotos.com/`, { waitUntil: 'domcontentloaded', timeout: 30000 });
 await page.waitForTimeout(3000);
 
 const data = await page.evaluate(() => {
@@ -20,8 +20,18 @@ const data = await page.evaluate(() => {
   const r = {};
   const navBarInner = document.querySelector('.awa-nav-bar__inner');
   if (navBarInner) {
-    const cs = getComputedStyle(navBarInner);
-    r.navBarInner = { w: navBarInner.offsetWidth, maxW: cs.maxWidth, padL: cs.paddingLeft, padR: cs.paddingRight };
+    const s = window.getComputedStyle(navBarInner);
+    r.navBarInner = { 
+      w: navBarInner.offsetWidth, 
+      maxW: s.maxWidth,
+      padL: s.paddingLeft,
+      padR: s.paddingRight,
+      l: Math.round(navBarInner.getBoundingClientRect().left),
+      parentClasses: navBarInner.parentElement ? Array.from(navBarInner.parentElement.classList) : [],
+      parentWidth: navBarInner.parentElement ? navBarInner.parentElement.offsetWidth : null,
+      parentL: navBarInner.parentElement ? Math.round(navBarInner.parentElement.getBoundingClientRect().left) : null,
+      grandparentClasses: navBarInner.parentElement && navBarInner.parentElement.parentElement ? Array.from(navBarInner.parentElement.parentElement.classList) : []
+    };
   }
   const cats = document.querySelector('.awa-header-categories');
   if (cats) r.cats = { w: cats.offsetWidth, l: Math.round(cats.getBoundingClientRect().left), pad: getComputedStyle(cats).padding };
@@ -29,10 +39,20 @@ const data = await page.evaluate(() => {
   if (primaryNav) r.primaryNav = { w: primaryNav.offsetWidth, l: Math.round(primaryNav.getBoundingClientRect().left) };
   const locale = document.querySelector('.awa-header-locale');
   if (locale) r.locale = { w: locale.offsetWidth };
-  const wpHeader = document.querySelector(HEADER_ROW_SELECTOR);
+  const wpHeader = document.querySelector('.wp-header');
   if (wpHeader) {
-    const cs = getComputedStyle(wpHeader);
-    r.wpHeader = { w: wpHeader.offsetWidth, maxW: cs.maxWidth, gridCols: cs.gridTemplateColumns, l: Math.round(wpHeader.getBoundingClientRect().left) };
+    const s = window.getComputedStyle(wpHeader);
+    r.wpHeader = { 
+      w: wpHeader.offsetWidth, 
+      maxW: s.maxWidth, 
+      gridCols: s.gridTemplateColumns, 
+      l: Math.round(wpHeader.getBoundingClientRect().left),
+      padL: s.paddingLeft,
+      padR: s.paddingRight,
+      parentClasses: wpHeader.parentElement ? Array.from(wpHeader.parentElement.classList) : [],
+      parentWidth: wpHeader.parentElement ? wpHeader.parentElement.offsetWidth : null,
+      parentL: wpHeader.parentElement ? Math.round(wpHeader.parentElement.getBoundingClientRect().left) : null
+    };
   }
   const logo = document.querySelector(`${HEADER_ROW_SELECTOR} .logo`);
   if (logo) r.logo = { l: Math.round(logo.getBoundingClientRect().left) };
@@ -57,6 +77,23 @@ const data = await page.evaluate(() => {
   if (navBar) r.navBar = { h: navBar.offsetHeight, borderTop: getComputedStyle(navBar).borderTopWidth };
   const chs = document.querySelector('.container-header-sticky');
   if (chs) r.containerSticky = { display: getComputedStyle(chs).display, w: chs.offsetWidth };
+  
+  // Debug CSS rules
+  r.debugRules = [];
+  try {
+    for (const sheet of document.styleSheets) {
+      try {
+        if (sheet.cssRules) {
+          for (const rule of sheet.cssRules) {
+            if (rule.selectorText && rule.selectorText.includes('.awa-nav-bar__inner')) {
+              r.debugRules.push({ href: sheet.href, cssText: rule.cssText });
+            }
+          }
+        }
+      } catch (e) {}
+    }
+  } catch(e) {}
+  r.inlineStylesCheck = Array.from(document.querySelectorAll('style')).some(s => s.innerHTML.includes('1300px'));
   return r;
 });
 

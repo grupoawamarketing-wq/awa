@@ -56,6 +56,7 @@ class Config extends AbstractHelper
     const XML_PATH_PENDING_GROUP = 'grupoawamotos_b2b/customer_groups/pending_group';
 
     // CNAE Profiling
+    const XML_PATH_CNAE_ENABLED = 'grupoawamotos_b2b/cnae_profiling/enabled';
     const XML_PATH_CNAE_AUTO_APPROVE_DIRECT = 'grupoawamotos_b2b/cnae_profiling/auto_approve_direct';
     const XML_PATH_CNAE_DIRECT_GROUP = 'grupoawamotos_b2b/cnae_profiling/direct_group';
     const XML_PATH_CNAE_ADJACENT_GROUP = 'grupoawamotos_b2b/cnae_profiling/adjacent_group';

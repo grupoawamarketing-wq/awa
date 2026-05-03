@@ -556,6 +556,26 @@ class Data extends AbstractHelper
             ScopeInterface::SCOPE_STORE
         );
     }
+    // ========== Stock Anomaly Alert Configuration ==========
+
+    public function isStockAnomalyAlertEnabled(): bool
+    {
+        return $this->scopeConfig->isSetFlag(
+            self::XML_PREFIX . 'sync_stock/anomaly_alert_enabled',
+            ScopeInterface::SCOPE_STORE
+        );
+    }
+
+    public function getStockAnomalyAlertEmail(): string
+    {
+        $email = (string) $this->scopeConfig->getValue(
+            self::XML_PREFIX . 'sync_stock/anomaly_alert_email',
+            ScopeInterface::SCOPE_STORE
+        );
+
+        return $email ?: $this->getAtRiskAlertEmail();
+    }
+
 
     // ========== Suggested Cart Configuration ==========
 

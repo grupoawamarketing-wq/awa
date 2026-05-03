@@ -20,16 +20,14 @@ define([], function () {
 
         function show(index) {
             slides[current].classList.remove('vmenu-promo-slide--active');
-            slides[current].style.display = 'none';
             slides[current].style.opacity = '0';
+            slides[current].style.zIndex = '0';
 
             var nextIndex = index % slides.length;
 
-            slides[nextIndex].style.opacity = '0';
-            slides[nextIndex].style.display = 'block';
+            slides[nextIndex].style.zIndex = '1';
+            
             // Double-rAF: evita forced reflow síncrono (void offsetHeight).
-            // O primeiro rAF garante que o browser processou display:block,
-            // o segundo aplica opacity:1 no próximo frame, ativando a transição CSS.
             requestAnimationFrame(function () {
                 requestAnimationFrame(function () {
                     current = nextIndex;
@@ -55,7 +53,7 @@ define([], function () {
 
         /* Initialize: ensure first slide visible */
         slides[0].classList.add('vmenu-promo-slide--active');
-        slides[0].style.display = 'block';
+        slides[0].style.zIndex = '1';
         slides[0].style.opacity = '1';
 
         start();

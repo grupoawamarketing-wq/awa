@@ -108,50 +108,41 @@ if ($_b2bActive) {
         <ul class="row product-grid container-products-switch products <?php echo $block->escapeHtmlAttr($col_grid); ?>" data-view-mode="4" role="list">
             <?php /** @var $_product \Magento\Catalog\Model\Product */ ?>
 	            <?php foreach ($_productCollection as $_product): ?>
-	                <li class="item-product" data-container="product-grid">
+	                <li class="item-product" data-container="product-grid" data-product-id="<?php echo $block->escapeHtmlAttr($_product->getId()); ?>">
 	                    <?php
 	                    $productImage = $block->getImage($_product, $image);
 	                    $productImageSm = $block->getImage($_product, 'category_page_grid_sm');
-                    if ($pos != null) {
-                        $position = ' style="left:' . $productImage->getWidth() . 'px;'
-                            . 'top:' . $productImage->getHeight() . 'px;"';
-                    }
-	                    // Build responsive srcset and sizes (sm=350w, md=480w, lg=700w)
 	                    $productImageMd = $block->getImage($_product, 'category_page_list');
+	                    $productImageThumb = $block->getImage($_product, 'category_page_grid-1');
+
+	                    // Build responsive srcset and sizes
 	                    $srcset = $block->escapeUrl($productImageSm->getImageUrl()) . ' 350w, '
 	                            . $block->escapeUrl($productImageMd->getImageUrl()) . ' 480w, '
 	                            . $block->escapeUrl($productImage->getImageUrl()) . ' 700w';
 	                    $sizes = '(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw';
 	                    $imgOnError = "this.onerror=null;this.removeAttribute('srcset');this.src=this.src.replace(/\\/cache\\/[^\\/]+\\//,'/');";
 
-	                    // Above-the-fold: eager load first 4, fetchpriority on first 2
+	                    // Image HTML Processing
 	                    $mainImgHtml = $productImage->toHtml();
-	                    $mainImgHtml = str_replace('<img ', '<img srcset="' . $srcset . '" sizes="' . $sizes . '" ', $mainImgHtml);
+	                    $mainImgHtml = str_replace('<img ', '<img srcset="' . $srcset . '" sizes="' . $sizes . '" onerror="' . $block->escapeHtmlAttr($imgOnError) . '" ', $mainImgHtml);
+
+	                    // Performance: eager load first 4
 	                    if ($iterator <= 4) {
 	                        $mainImgHtml = str_replace('loading="lazy"', 'loading="eager"', $mainImgHtml);
+	                        if ($iterator <= 2) {
+	                            $mainImgHtml = str_replace('decoding="async"', 'decoding="async" fetchpriority="high"', $mainImgHtml);
+	                        }
 	                    }
-	                    if ($iterator <= 2) {
-	                        $mainImgHtml = str_replace('decoding="async"', 'decoding="async" fetchpriority="high"', $mainImgHtml);
-	                    }
-	                    $mainImgHtml = str_replace('<img ', '<img onerror="' . $block->escapeHtmlAttr($imgOnError) . '" ', $mainImgHtml);
+
+	                    $productThumbHtml = $productImageThumb->toHtml();
+	                    $productThumbHtml = str_replace('<img ', '<img onerror="' . $block->escapeHtmlAttr($imgOnError) . '" loading="lazy" ', $productThumbHtml);
 	                    ?>
-	                	<div class="product-thumb">
+	                	<div class="product-thumb" data-awa-thumb-stabilized="true">
 	                		<a href="<?php echo $block->escapeUrl($_product->getProductUrl()); ?>" class="product-thumb-link" aria-label="<?php echo $block->escapeHtml($_product->getName()); ?>">
-								<?php
-								$productImageThumb = $block->getImage($_product, 'category_page_grid-1');
-								$productThumbHtml = $productImageThumb->toHtml();
-								$productThumbHtml = str_replace('<img ', '<img onerror="' . $block->escapeHtmlAttr($imgOnError) . '" ', $productThumbHtml);
-								// Hover thumbnails are never above-the-fold — always lazy
-								$productThumbHtml = str_replace('loading="eager"', 'loading="lazy"', $productThumbHtml);
-								if (strpos($productThumbHtml, 'loading=') === false) {
-								    $productThumbHtml = str_replace('<img ', '<img loading="lazy" ', $productThumbHtml);
-								}
-								?>
 								<span class="first-thumb">
 									<?php /* @noEscape */ echo $mainImgHtml; ?>
 								</span>
-								<?php $productType = $_product->getTypeID();
-								if($productType == "simple"): ?>
+								<?php if($_product->getTypeID() == "simple"): ?>
 									<span class="second-thumb" aria-hidden="true">
 										<?php /* @noEscape */ echo $productThumbHtml; ?>
 									</span>
@@ -174,7 +165,6 @@ if ($_b2bActive) {
 						</div>
 						<div class="actions-secondary">
 							<ul class="product-extra-link add-to-links">
-								<?php /* B2B: wishlist/compare desativados */ ?>
 								<li class="quickview-product">
 									<a class="quickview-link" data-role="quickview-button" data-id="<?php echo $block->escapeHtmlAttr($_product->getId()); ?>" href="javascript: void(0);" data-href="<?php echo $block->escapeUrl($block->getUrl('quickview/product/quickview/id/' . $_product->getId())); ?>" role="button" aria-label="<?php echo $block->escapeHtml(__('Visualização rápida de %1', $_product->getName())); ?>" title="<?php echo $block->escapeHtml(__('Quick view')); ?>"></a>
 								</li>
@@ -183,59 +173,60 @@ if ($_b2bActive) {
                 	</div>
 						<div class="product-info">
 							<h3 class="product-name">
-							 <?php
-								$_productNameStripped = $block->stripTags($_product->getName(), null, true);
-							?>
-							<a title="<?php echo $block->escapeHtml($_helper->productAttribute($_product, $_product->getName(), 'name')); ?>"
-							   href="<?php echo $block->escapeUrl($_product->getProductUrl()); ?>"
-							   class="product-item-link">
-							<?php echo $block->escapeHtml($_helper->productAttribute($_product, $_product->getName(), 'name')); ?>
+							<a href="<?php echo $block->escapeUrl($_product->getProductUrl()); ?>" class="product-item-link">
+								<?php echo $block->escapeHtml($_helper->productAttribute($_product, $_product->getName(), 'name')); ?>
 							</a>
 						</h3>
-							<div class="awa-b2b-sku">
+							<div class="awa-b2b-sku" title="<?php echo $block->escapeHtmlAttr(__('Código do produto')); ?>">
 								<span class="awa-b2b-sku__label"><?php echo $block->escapeHtml(__('Cod:')); ?></span>
 								<span class="awa-b2b-sku__value"><?php echo $block->escapeHtml($_product->getSku()); ?></span>
 						</div>
 						<div class="product-rating">
 							<?php echo $block->getReviewsSummaryHtml($_product, $templateType, true); ?>
 						</div>
-						<div class="info-price">
+						<div class="info-price" data-product-id="<?php echo $block->escapeHtmlAttr($_product->getId()); ?>">
 						<?php /* @noEscape */ echo $this->helper('Rokanthemes\Themeoption\Helper\Data')->getPriceDisplayCustom($block->getProductPrice($_product)); ?>
 						</div>
 						<div class="product-info-cart">
 							<div class="actions-primary addcart-link">
-								<?php if ($_product->isSaleable()): ?>
-								<?php $postParams = $block->getAddToCartPostParams($_product); ?>
-								<form data-role="tocart-form" action="<?php echo $block->escapeUrl($postParams['action']); ?>" method="post">
-									<input type="hidden" name="product" value="<?php echo $block->escapeHtmlAttr($postParams['data']['product']); ?>">
-									<input type="hidden" name="<?php echo $block->escapeHtmlAttr(Action::PARAM_NAME_URL_ENCODED); ?>" value="<?php echo $block->escapeHtmlAttr($postParams['data'][Action::PARAM_NAME_URL_ENCODED]); ?>">
-									<?php echo $block->getBlockHtml('formkey')?>
+								<?php if (!$b2bCanAddToCart): ?>
+									<div class="awa-b2b-gate-card awa-b2b-gate-card--compact" data-awa-gate-state="<?= /* @noEscape */ $b2bGateState ?>" aria-hidden="true">
+										<span class="awa-b2b-gate-card__badge"><?= $block->escapeHtml(__('B2B')) ?></span>
+										<div class="awa-b2b-gate-card__title"><?= /* @noEscape */ $b2bGateHeadline ?></div>
+										<div class="awa-b2b-gate-card__actions">
+											<a class="awa-b2b-gate-card__action" href="<?= /* @noEscape */ $b2bPrimaryUrl ?>" tabindex="-1"><?= /* @noEscape */ $b2bPrimaryLabel ?></a>
+										</div>
+									</div>
+								<?php elseif ($_product->isSaleable()): ?>
+									<?php $postParams = $block->getAddToCartPostParams($_product); ?>
+									<form data-role="tocart-form" action="<?php echo $block->escapeUrl($postParams['action']); ?>" method="post">
+										<input type="hidden" name="product" value="<?php echo $block->escapeHtmlAttr($postParams['data']['product']); ?>">
+										<input type="hidden" name="<?php echo $block->escapeHtmlAttr(Action::PARAM_NAME_URL_ENCODED); ?>" value="<?php echo $block->escapeHtmlAttr($postParams['data'][Action::PARAM_NAME_URL_ENCODED]); ?>">
+										<?php echo $block->getBlockHtml('formkey')?>
 									<button type="submit"
-									    title="<?php echo $block->escapeHtml(__('Add to Cart')); ?>"
-									    aria-label="<?php echo $block->escapeHtml(__('Adicionar %1 ao Carrinho', $_product->getName())); ?>"
-									    class="btn-add-to-cart action tocart addcart-link b2b-primary-btn">
-									    <span><?php echo $block->escapeHtml(__('Add to Cart')); ?></span>
-									</button>
-								</form>
+											title="<?php echo $block->escapeHtml(__('Adicionar ao Carrinho')); ?>"
+											aria-label="<?php echo $block->escapeHtml(__('Adicionar %1 ao Carrinho', $_product->getName())); ?>"
+											class="btn-add-to-cart action tocart addcart-link b2b-primary-btn">
+											<span><?php echo $block->escapeHtml(__('Adicionar ao Carrinho')); ?></span>
+										</button>
+									</form>
 								<?php else: ?>
-								<?php if ($_product->getIsSalable()): ?>
-									<div class="stock available"><span><?php echo $block->escapeHtml(__('In stock')); ?></span></div>
-								<?php else: ?>
-									<div class="stock unavailable"><span><?php echo $block->escapeHtml(__('Out of stock')); ?></span></div>
-								<?php endif; ?>
+									<div class="stock <?php echo $_product->getIsSalable() ? 'available' : 'unavailable'; ?>">
+										<span><?php echo $block->escapeHtml($_product->getIsSalable() ? __('Em estoque') : __('Fora de estoque')); ?></span>
+									</div>
 								<?php endif; ?>
 							</div>
 						</div>
-						<?php /* compare desativado */ ?>
 					</div>
                 </li>
             <?php $iterator++; endforeach; ?>
         </ul>
+
 		<?php }else{ ?>
 		<ul class="product-list" role="list">
 			<?php foreach ($_productCollection as $_product): ?>
 				<li class="item-product" data-product-id="<?php echo $block->escapeHtmlAttr($_product->getId()); ?>">
-						<div class="product-thumb">
+						<div class="product-thumb" data-awa-thumb-stabilized="true">
 							<a href="<?php echo $block->escapeUrl($_product->getProductUrl()); ?>" class="product-thumb-link" aria-label="<?php echo $block->escapeHtml($_product->getName()); ?>">
 								<?php
 									$productImage = $block->getImage($_product, $image);
@@ -272,18 +263,15 @@ if ($_b2bActive) {
 					</div>
 					<div class="product-info">
 						<h3 class="product-name">
-							 <?php
-								$_productNameStripped = $block->stripTags($_product->getName(), null, true);
-							?>
 							<a title="<?php echo $block->escapeHtml($_helper->productAttribute($_product, $_product->getName(), 'name')); ?>"
 							   href="<?php echo $block->escapeUrl($_product->getProductUrl()); ?>"
-							   class="title-product">
+							   class="product-item-link">
 							<?php echo $block->escapeHtml($_helper->productAttribute($_product, $_product->getName(), 'name')); ?>
 							</a>
 						</h3>
-<div class="awa-b2b-sku">
-								<span class="awa-b2b-sku__label"><?php echo $block->escapeHtml(__('Cod:')); ?></span>
-								<span class="awa-b2b-sku__value"><?php echo $block->escapeHtml($_product->getSku()); ?></span>
+						<div class="awa-b2b-sku" title="<?php echo $block->escapeHtmlAttr(__('Código do produto')); ?>">
+							<span class="awa-b2b-sku__label"><?php echo $block->escapeHtml(__('Cod:')); ?></span>
+							<span class="awa-b2b-sku__value"><?php echo $block->escapeHtml($_product->getSku()); ?></span>
 						</div>
 
 						<div class="product-rating">
@@ -298,13 +286,12 @@ if ($_b2bActive) {
 						<div class="product-info-cart">
 							<div class="actions-primary">
 								<?php if (!$b2bCanAddToCart): ?>
-<div class="awa-b2b-gate-card awa-b2b-gate-card--compact" data-awa-gate-state="<?= /* @noEscape */ $b2bGateState ?>" aria-hidden="true">
-									<span class="awa-b2b-gate-card__badge"><?= $block->escapeHtml(__('Conta B2B')) ?></span>
-								<div class="awa-b2b-gate-card__title"><?= /* @noEscape */ $b2bGateHeadline ?></div>
-								<div class="awa-b2b-gate-card__description"><?= /* @noEscape */ $b2bGateDescription ?></div>
-												<div class="awa-b2b-gate-card__actions">
-												<a class="awa-b2b-gate-card__action" href="<?= /* @noEscape */ $b2bPrimaryUrl ?>" tabindex="-1"><?= /* @noEscape */ $b2bPrimaryLabel ?></a>
-												<a class="awa-b2b-gate-card__action awa-b2b-gate-card__action--secondary" href="<?= /* @noEscape */ $b2bSecondaryUrl ?>" tabindex="-1"><?= /* @noEscape */ $b2bSecondaryLabel ?></a>
+									<div class="awa-b2b-gate-card awa-b2b-gate-card--compact" data-awa-gate-state="<?= /* @noEscape */ $b2bGateState ?>" aria-hidden="true">
+										<span class="awa-b2b-gate-card__badge"><?= $block->escapeHtml(__('B2B')) ?></span>
+										<div class="awa-b2b-gate-card__title"><?= /* @noEscape */ $b2bGateHeadline ?></div>
+										<div class="awa-b2b-gate-card__actions">
+											<a class="awa-b2b-gate-card__action" href="<?= /* @noEscape */ $b2bPrimaryUrl ?>" tabindex="-1"><?= /* @noEscape */ $b2bPrimaryLabel ?></a>
+											<a class="awa-b2b-gate-card__action awa-b2b-gate-card__action--secondary" href="<?= /* @noEscape */ $b2bSecondaryUrl ?>" tabindex="-1"><?= /* @noEscape */ $b2bSecondaryLabel ?></a>
 										</div>
 									</div>
 								<?php elseif ($_product->isSaleable()): ?>
@@ -363,104 +350,4 @@ if ($_b2bActive) {
         }
         </script>
     <?php endif; ?>
-    <script>
-    require(['domReady!'], function () {
-        'use strict';
-
-        var THUMB_SELECTOR = '.item-product .product-thumb';
-        var GUARD_ATTR = 'data-awa-thumb-guard';
-
-        function setImportantStyle(element, property, value) {
-            if (!element) {
-                return;
-            }
-            element.style.setProperty(property, value, 'important');
-        }
-
-        function stabilizeThumb(thumb) {
-            if (!thumb) {
-                return;
-            }
-
-            var first = thumb.querySelector('.first-thumb');
-            var second = thumb.querySelector('.second-thumb');
-            var firstImage = first ? first.querySelector('img.product-image-photo, img') : null;
-            var secondImage = second ? second.querySelector('img.product-image-photo, img') : null;
-
-            if (first) {
-                setImportantStyle(first, 'display', 'block');
-                setImportantStyle(first, 'position', 'relative');
-                setImportantStyle(first, 'z-index', '2');
-                setImportantStyle(first, 'opacity', '1');
-                setImportantStyle(first, 'visibility', 'visible');
-            }
-
-            if (firstImage) {
-                setImportantStyle(firstImage, 'position', 'absolute');
-                setImportantStyle(firstImage, 'inset', '0');
-                setImportantStyle(firstImage, 'width', '100%');
-                setImportantStyle(firstImage, 'height', '100%');
-                setImportantStyle(firstImage, 'max-width', '100%');
-                setImportantStyle(firstImage, 'max-height', '100%');
-                setImportantStyle(firstImage, 'object-fit', 'contain');
-                setImportantStyle(firstImage, 'object-position', 'center');
-                setImportantStyle(firstImage, 'opacity', '1');
-                setImportantStyle(firstImage, 'visibility', 'visible');
-                setImportantStyle(firstImage, 'pointer-events', 'auto');
-            }
-
-            if (second) {
-                setImportantStyle(second, 'display', 'none');
-                setImportantStyle(second, 'position', 'absolute');
-                setImportantStyle(second, 'inset', '0');
-                setImportantStyle(second, 'opacity', '0');
-                setImportantStyle(second, 'visibility', 'hidden');
-                setImportantStyle(second, 'pointer-events', 'none');
-            }
-
-            if (secondImage) {
-                setImportantStyle(secondImage, 'opacity', '0');
-                setImportantStyle(secondImage, 'visibility', 'hidden');
-                setImportantStyle(secondImage, 'pointer-events', 'none');
-            }
-        }
-
-        function bindThumbGuard(thumb) {
-            if (!thumb || thumb.getAttribute(GUARD_ATTR) === 'true') {
-                return;
-            }
-
-            thumb.addEventListener('mouseenter', function () {
-                stabilizeThumb(thumb);
-            });
-            thumb.addEventListener('mouseleave', function () {
-                stabilizeThumb(thumb);
-            });
-            thumb.addEventListener('touchstart', function () {
-                stabilizeThumb(thumb);
-            }, { passive: true });
-
-            thumb.setAttribute(GUARD_ATTR, 'true');
-        }
-
-        function run(root) {
-            var scope = root && root.querySelectorAll ? root : document;
-            var thumbs = scope.querySelectorAll(THUMB_SELECTOR);
-
-            thumbs.forEach(function (thumb) {
-                stabilizeThumb(thumb);
-                bindThumbGuard(thumb);
-            });
-        }
-
-        run(document);
-        window.setTimeout(function () {
-            run(document);
-        }, 300);
-
-        document.addEventListener('contentUpdated', function (event) {
-            run(event && event.target ? event.target : document);
-        });
-    });
-    </script>
 <?php endif; ?>

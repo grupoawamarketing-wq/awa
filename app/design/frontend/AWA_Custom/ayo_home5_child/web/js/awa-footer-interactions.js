@@ -1,7 +1,7 @@
 define([
     'jquery',
-    'rokanthemes/owl'
-], function ($) {
+    'swiper'
+], function ($, Swiper) {
     'use strict';
 
     return function (config, element) {
@@ -174,33 +174,54 @@ define([
 
         function initBrandSlider() {
             var $slider = $root.find(sliderSelector);
+            var slidesCount;
+            var maxSlidesPerView;
+            var shouldLoop;
 
-            if (!$slider.length || brandSliderInitialized || $slider.hasClass('owl-loaded') || typeof $slider.owlCarousel !== 'function') {
+            if (!$slider.length || brandSliderInitialized || $slider.data('awaSwiperInit')) {
                 return;
             }
 
             brandSliderInitialized = true;
+            $slider.data('awaSwiperInit', 1);
             $slider.attr('data-awa-footer-slider-ready', '1');
 
-            $slider.owlCarousel({
-                items: 6,
-                loop: true,
-                margin: 0,
-                nav: true,
-                dots: false,
-                autoplay: !prefersReducedMotion(),
-                autoplayTimeout: 3000,
-                autoplayHoverPause: true,
-                navText: [
-                    '<i class="fa fa-angle-left"></i>',
-                    '<i class="fa fa-angle-right"></i>'
-                ],
-                responsive: {
-                    0: { items: 2 },
-                    480: { items: 3 },
-                    768: { items: 4 },
-                    992: { items: 5 },
-                    1200: { items: 6 }
+            // Wrap children in swiper markup if not already present
+            if (!$slider.find('.swiper-wrapper').length) {
+                $slider.addClass('swiper');
+                $slider.children().wrap('<div class="swiper-slide"></div>');
+                $slider.children('.swiper-slide').wrapAll('<div class="swiper-wrapper"></div>');
+                $slider.append('<div class="swiper-button-prev" aria-label="Marca anterior"><span aria-hidden="true">&#8249;</span></div>');
+                $slider.append('<div class="swiper-button-next" aria-label="Próxima marca"><span aria-hidden="true">&#8250;</span></div>');
+            }
+
+            slidesCount = $slider.find('.swiper-slide').length;
+            maxSlidesPerView = 6;
+            shouldLoop = slidesCount > maxSlidesPerView;
+
+            new Swiper($slider[0], {
+                slidesPerView: 2,
+                spaceBetween: 0,
+                loop: shouldLoop,
+                watchOverflow: true,
+                navigation: {
+                    nextEl: $slider.find('.swiper-button-next')[0],
+                    prevEl: $slider.find('.swiper-button-prev')[0]
+                },
+                autoplay: prefersReducedMotion() ? false : {
+                    delay: 3000,
+                    disableOnInteraction: false,
+                    pauseOnMouseEnter: true
+                },
+                a11y: {
+                    prevSlideMessage: 'Marca anterior',
+                    nextSlideMessage: 'Próxima marca'
+                },
+                breakpoints: {
+                    480: { slidesPerView: 3 },
+                    768: { slidesPerView: 4 },
+                    992: { slidesPerView: 5 },
+                    1200: { slidesPerView: 6 }
                 }
             });
         }
@@ -250,7 +271,7 @@ define([
         function initCategoriesToggle() {
             var $toggleBtn = $root.closest('.page_footer, .page-footer')
                 .find('[data-awa-categories-toggle]');
-            
+
             if (!$toggleBtn.length) {
                 $toggleBtn = $('[data-awa-categories-toggle]');
             }

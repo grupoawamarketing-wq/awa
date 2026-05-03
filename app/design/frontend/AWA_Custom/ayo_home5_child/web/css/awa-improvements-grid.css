@@ -1,0 +1,768 @@
+/* AWA Improvements — Grid & Ayo Override
+   Carregado APOS awa-bundle-phases.css para sobrescrever variavel de grid
+   e corrigir padding nested que esmaga imagens na grid de categoria */
+
+/* --- GRID VARIABLE OVERRIDE ---
+   Grid columns, breakpoints, and responsive rules are now centralized
+   in _grid-system.less. Do NOT re-define here. --- */
+
+/* --- FIX: Ayo Nested Padding Crushing Product Images ---
+   Cadeia: .item-product (211px) > .product-thumb (pad 15) > .product-thumb-link (pad 16) > .first-thumb (117px)
+   Resultado: imagem so 93px em card de 211px. Fix: remover paddings internos. */
+
+.product-thumb {
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+/* =====================================================================
+ * REFINO VISUAL — CARDS MAIS LIMPOS E SEM DUPLA BORDA/RADIUS
+ * Mantém a borda apenas no wrapper do card; wrappers internos ficam transparentes.
+ * ===================================================================== */
+
+:is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .item-product {
+    background: #ffffff !important;
+    border: 1px solid rgb(226 232 240 / 92%) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 10px 24px rgb(15 23 42 / 4%) !important;
+    overflow: hidden !important;
+}
+
+:is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .item-product:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 18px 34px rgb(15 23 42 / 8%) !important;
+    border-color: rgb(183 51 55 / 14%) !important;
+}
+
+:is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .item-product > .product-thumb,
+:is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .item-product > .content-item-product,
+:is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .item-product > .content-item-product > .product-thumb,
+:is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .item-product > .product-info,
+:is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .item-product .product-info-cart {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+.page-wrapper .wrapper.grid.products-grid .item-product > .product-thumb,
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+.page-wrapper .wrapper.grid.products-grid .item-product > .content-item-product > .product-thumb {
+    padding-bottom: 0 !important;
+}
+
+:is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .item-product .product-thumb-link {
+    padding: 12px 12px 0 !important;
+}
+
+:is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .item-product .product-info {
+    padding: 0 14px 14px !important;
+}
+
+.product-thumb-link {
+  padding: 8px !important;
+  display: block !important;
+  width: 100% !important;
+}
+
+.first-thumb,
+.second-thumb {
+  display: block !important;
+  width: 100% !important;
+}
+
+/* Container de imagem deve preencher 100% da largura disponivel */
+.item-product .product-image-container,
+.item-product .first-thumb .product-image-container,
+.item-product .second-thumb .product-image-container {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Wrapper de imagem preenche o container */
+.item-product .product-image-wrapper {
+  width: 100% !important;
+}
+
+/* A imagem deve usar toda a largura disponivel */
+.item-product img.product-image-photo {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  max-height: 200px !important;
+  object-fit: contain !important;
+}
+
+/* --- FIX: Hover image (second-thumb) --- */
+.second-thumb {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  opacity: 0 !important;
+  transition: opacity 0.3s ease !important;
+}
+
+.product-thumb:hover .second-thumb {
+  opacity: 1 !important;
+}
+
+.second-thumb img.product-image-photo {
+  opacity: 1 !important;
+}
+
+/* --- FIX: Category 2-column layout (sidebar + main) ---
+   Sidebar/main grid placement → _grid-system.less */
+
+/* --- FIX: PDP Related Products images tiny --- */
+.block.related .product-item-photo,
+.block.upsell .product-item-photo,
+.block.crosssell .product-item-photo,
+.block.related .product-image-container,
+.block.upsell .product-image-container,
+.block.crosssell .product-image-container {
+  height: auto !important;
+  min-height: 120px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.block.related .product-image-wrapper,
+.block.upsell .product-image-wrapper,
+.block.crosssell .product-image-wrapper {
+  width: 100% !important;
+}
+
+.block.related img.product-image-photo,
+.block.upsell img.product-image-photo,
+.block.crosssell img.product-image-photo {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  max-height: 180px !important;
+  object-fit: contain !important;
+}
+
+/* --- FIX: Sidebar product images --- */
+.sidebar .product-image-container,
+.sidebar .product-item-photo {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+.sidebar img.product-image-photo {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  max-height: 120px !important;
+  object-fit: contain !important;
+}
+
+/* ============================================================
+   PDP LAYOUT FIX — Product Detail Page
+   ============================================================
+   Problemas diagnosticados:
+   1) .columns (flex, row) tem .swiper-slide orfao (1232px)
+      roubando largura do .column.main (fica so 832px)
+   2) .column.main (flex, row) coloca product-view, tabs e
+      mostviewed lado a lado em vez de empilhar
+   3) styles-m/l/themes.css definem
+      .catalog-product-view .columns .column.main { display: flex !important }
+      (4 classes, especificidade 0-4-0) — precisamos igualar ou superar
+   ============================================================ */
+
+/* 1) Orphan .swiper-slide → _grid-system.less */
+
+/* 2) .column.main display:block and product-view → _grid-system.less */
+
+/* 4) Galeria e info: delegado para awa-pdp-visual-fix.css (55/45 split)
+   Removido flex/max-width fixo para evitar conflito de cascata.
+   Apenas garantir que não há sidebar roubando espaço. */
+
+/* 5) Secao mostviewed e related ocupam largura total */
+.catalog-product-view .awa-pdp-mostviewed,
+.catalog-product-view .awa-pdp-related {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+}
+
+/* 6) Tabs full width */
+.catalog-product-view .awa-pdp-tabs {
+  width: 100% !important;
+}
+
+/* 7) Swiper carousels no PDP — conter dimensoes */
+.catalog-product-view .products-swiper {
+  max-width: 100% !important;
+  overflow: hidden !important;
+}
+
+.catalog-product-view .products-swiper .swiper-wrapper {
+  max-width: 100% !important;
+}
+
+.catalog-product-view .products-swiper .swiper-slide {
+  max-width: 308px !important;
+}
+
+/* ================================================================
+   B2B GATE — regras migradas
+   Fonte canônica: awa-ux-improvements.css seção 27.
+   ================================================================ */
+/* B2B gate → ver awa-ux-improvements.css seção 27 */
+
+/* ================================================================
+   FIX: Mirasvit category search — empty placeholder
+   ================================================================ */
+#mst_categorySearch::placeholder {
+
+  color: var(--awa-gray-430);
+  font-size:var(--awa-font-size-sm);
+}
+
+#mst_categorySearch:placeholder-shown + .mst_categorySearch_searchIcon {
+  opacity: 0.5;
+}
+
+/* ================================================================
+   FIX: PDP specs table — TH display:block creates gap
+   ================================================================ */
+.catalog-product-view .additional-attributes th.col.label {
+  display: table-cell !important;
+  width: 40%;
+}
+
+/* ================================================================
+   FIX: b2b-login — mobile wrapping (2-col grid is too narrow)
+   ================================================================ */
+@media (max-width: 767px) {
+  body.catalog-category-view .item-product .info-price .b2b-login-to-see-price,
+  body.catalogsearch-result-index .item-product .info-price .b2b-login-to-see-price {
+    white-space: normal;
+    font-size:var(--awa-font-size-xs);
+    padding: 6px 8px;
+    gap: 3px;
+    text-align: center;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+}
+
+/* ================================================================
+   FIX: PDP mobile — gallery + info stacking → _grid-system.less
+   Only keep the image max-height fix.
+   ================================================================ */
+@media (max-width: 767px) {
+  .catalog-product-view .product.media img.product-image-photo {
+    max-height: 320px !important;
+  }
+}
+
+/* ================================================================
+   FIX: PDP related/mostviewed — reduce excessive image gap
+   Image container is 200px tall for 176px images = wasted space.
+   Product cards are ~500px tall but content only needs ~400px.
+   ================================================================ */
+.catalog-product-view .awa-pdp-mostviewed .product-image-container,
+.catalog-product-view .awa-pdp-related .product-image-container {
+  height: auto !important;
+  min-height: unset !important;
+}
+
+.catalog-product-view .awa-pdp-mostviewed .product-image-wrapper,
+.catalog-product-view .awa-pdp-related .product-image-wrapper {
+  padding-bottom: 0 !important;
+  height: auto !important;
+}
+
+.catalog-product-view .awa-pdp-mostviewed img.product-image-photo,
+.catalog-product-view .awa-pdp-related img.product-image-photo {
+  position: relative !important;
+  max-height: 180px !important;
+  width: auto !important;
+  max-width: 100% !important;
+  margin: 0 auto !important;
+  display: block !important;
+}
+
+/* Remove the visible image border in related products */
+.catalog-product-view .awa-pdp-mostviewed .product-image-container,
+.catalog-product-view .awa-pdp-related .product-image-container {
+  border: none !important;
+}
+
+/* ================================================================
+   FIX: Product name links — never underline in product cards
+   Ensures consistency across all carousels and grids.
+   ================================================================ */
+.item-product .product-item-link,
+.item-product .product-name a,
+.swiper-slide .product-item-link,
+.swiper-slide .product-name a {
+  text-decoration: none !important;
+  color: var(--awa-gray-920) !important;
+}
+
+.item-product .product-item-link:hover,
+.item-product .product-name a:hover,
+.swiper-slide .product-item-link:hover,
+.swiper-slide .product-name a:hover {
+  text-decoration: none !important;
+  color: var(--awa-primary) !important;
+}
+
+/* ================================================================
+   FIX: Homepage carousel — style "Faça login" CTA consistently
+   Match the category page AWA-branded look (lock icon + red).
+   ================================================================ */
+.ayo-home-block .item-product .b2b-login-to-see-price,
+.top-home-content .item-product .b2b-login-to-see-price {
+  display: flex !important;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent !important;
+  color: var(--awa-primary, #b73337);
+  font-size:var(--awa-font-size-sm);
+  font-weight: var(--awa-weight-bold);
+}
+
+.ayo-home-block .item-product .b2b-login-to-see-price a,
+.top-home-content .item-product .b2b-login-to-see-price a {
+  color: var(--awa-primary, #b73337) !important;
+  font-weight: var(--awa-weight-bold);
+  text-decoration: none;
+}
+
+.ayo-home-block .item-product .b2b-login-to-see-price a:hover,
+.top-home-content .item-product .b2b-login-to-see-price a:hover {
+  text-decoration: underline;
+}
+
+/* ================================================================
+   FIX: PDP related/mostviewed — product-thumb aspect-ratio: 1/1
+   creates a 291×291px square with only 200px of content.
+   Remove square ratio for PDP slider cards only.
+   ================================================================ */
+.catalog-product-view .awa-pdp-mostviewed .product-thumb,
+.catalog-product-view .awa-pdp-related .product-thumb {
+  aspect-ratio: auto !important;
+}
+
+/* ================================================================
+   STANDARDIZATION: Container/Grid/Responsive System
+   ================================================================
+   Design Tokens:
+   - Container max: 1280px
+   - Container pad desktop: 24px
+   - Container pad mobile: 15px
+   - Content width desktop: 1232px (1280 - 48)
+   - Content width mobile: 100% - 30px
+   - Grid gap: 24px (layout) / 16px (cards)
+   - Sidebar: 260px (desktop only)
+   - Breakpoints: 1200px (tablet), 768px (mobile)
+   ================================================================ */
+
+/* --- TABLET SIDEBAR ---
+   Sidebar hide/show on tablet → _grid-system.less */
+
+/* --- PDP GALLERY 50/50 ---
+   PDP gallery/info split → _grid-system.less */
+
+/* ================================================================
+   4. Category/Search: Standardize .columns padding
+   Remove extra padding on .columns — .page-main already handles it.
+   ================================================================ */
+.catalog-category-view .columns,
+.catalogsearch-result-index .columns {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* --- PRODUCT GRID RESPONSIVE ---
+   Product grid columns and responsive breakpoints → _grid-system.less */
+
+/* ================================================================
+   6. PDP bottom sections: consistent full-width and no extra margin
+   ================================================================ */
+.catalog-product-view .awa-pdp-tabs,
+.catalog-product-view .awa-pdp-specs,
+.catalog-product-view .awa-pdp-mostviewed,
+.catalog-product-view .awa-pdp-related {
+  width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* ================================================================
+   7. Footer container: match .page-main max-width
+   ================================================================ */
+.page-footer .footer.content,
+.page-footer .footer-container {
+  max-width: 1280px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding-left: 24px !important;
+  padding-right: 24px !important;
+}
+
+@media (max-width: 767px) {
+  .page-footer .footer.content,
+  .page-footer .footer-container {
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+  }
+}
+
+/* ================================================================
+   8. PADRONIZAÇÃO: Form inputs, buttons, cards border-radius
+   Design tokens: --awa-radius-sm=4px, --awa-radius-md=8px
+   Added: --awa-radius-lg=12px for cards/containers
+   ================================================================ */
+
+/* --- 8a. Design tokens agora definidos em awa-design-tokens.css ---
+   --awa-radius-lg, --awa-radius-pill, --awa-radius-full,
+   --awa-input-h, --awa-btn-h, --awa-btn-h-lg → centralizados no token file. */
+
+/* --- 8b. Form input standardization --- */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="tel"],
+input[type="number"],
+input[type="search"],
+input[type="url"],
+select,
+textarea {
+  height: var(--awa-input-h) !important;
+  border-radius: var(--awa-radius-md) !important;
+  border: 1px solid var(--awa-border, #e5e5e5) !important;
+  font-size:var(--awa-font-size-14) !important;
+  padding: 0 16px !important;
+  transition: border-color 0.15s !important;
+}
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--awa-primary) !important;
+  outline: none !important;
+}
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--awa-primary, #b73337) 15%, transparent) !important;
+}
+textarea {
+  height: auto !important;
+  padding: 12px 16px !important;
+  min-height: 100px !important;
+}
+
+/* --- 8c. Button standardization (PLP = 44px, PDP = 52px) --- */
+/* PLP / Category / Search — compact buttons */
+.catalog-category-view .action.tocart,
+.catalogsearch-result-index .action.tocart,
+.cms-index-index .action.tocart {
+  height: var(--awa-btn-h) !important;
+  border-radius: var(--awa-radius-md) !important;
+  font-size:var(--awa-font-size-14) !important;
+  font-weight: var(--awa-weight-semibold) !important;
+  padding: 0 24px !important;
+}
+/* PDP — larger CTA button */
+.catalog-product-view .box-tocart .action.tocart,
+.catalog-product-view #product-addtocart-button {
+  height: var(--awa-btn-h-lg) !important;
+  border-radius: var(--awa-radius-lg) !important;
+  font-size:var(--awa-font-size-16) !important;
+  font-weight: var(--awa-weight-semibold) !important;
+  padding: 0 25px !important;
+  text-transform: uppercase !important;
+}
+
+/* --- 8d. B2B login badge — Outlined CTA (Fase 2 Design) --- */
+/* Container is a transparent wrapper; the <a> inside carries the visual button style */
+.b2b-login-to-see-price,
+.b2b-pdp-price-wrapper,
+.btn-b2b-login {
+  font-size:var(--awa-font-size-sm) !important;
+  background: transparent !important;
+  color: var(--awa-primary, #b73337) !important;
+  border: none !important;
+  border-radius: 0 !important;
+}
+.catalog-product-view .b2b-login-to-see-price {
+  border-radius: 0 !important;
+}
+
+/* --- 8e. Card/container border-radius consistency --- */
+.product-item-info {
+  border-radius: var(--awa-radius-md) !important;
+}
+.product-info-price,
+.price-box-container {
+  border-radius: var(--awa-radius-lg) !important;
+}
+.toolbar.toolbar-products {
+  border-radius: var(--awa-radius-lg) !important;
+}
+
+/* --- 8f. Product image container consistency --- */
+.product-item-photo,
+.product-image-container {
+  border-radius: var(--awa-radius-md) var(--awa-radius-md) 0 0 !important;
+}
+
+/* ================================================================
+   9. PADRONIZAÇÃO: Vertical rhythm / section spacing
+   Consistent spacing between major page sections
+   ================================================================ */
+
+/* Homepage sections — consistent top margin */
+.awa-home-section,
+.top-home-content {
+  margin-bottom: 0 !important;
+}
+.awa-home-section + .awa-home-section,
+.top-home-content + .top-home-content {
+  margin-top: 48px !important;
+}
+
+/* PDP bottom sections spacing */
+.catalog-product-view .awa-pdp-tabs,
+.catalog-product-view .awa-pdp-mostviewed,
+.catalog-product-view .awa-pdp-related,
+.catalog-product-view .block.related,
+.catalog-product-view .block.upsell {
+  margin-top: 40px !important;
+}
+
+/* Section headings — consistent */
+.awa-home-section h2,
+.top-home-content h2,
+.block-title strong {
+  font-size:var(--awa-font-size-xl) !important;
+  font-weight: var(--awa-weight-bold) !important;
+  color: var(--awa-text, #333) !important;
+  margin-bottom: 16px !important;
+}
+
+/* ================================================================
+   10. PADRONIZAÇÃO: Breadcrumbs consistency
+   ================================================================ */
+.breadcrumbs {
+  font-size:var(--awa-font-size-sm) !important;
+  color: var(--awa-text-muted, #666) !important;
+  margin-bottom: 16px !important;
+  padding-bottom: 12px !important;
+}
+.breadcrumbs a {
+  color: var(--awa-text-muted, #666) !important;
+  text-decoration: none !important;
+}
+.breadcrumbs a:hover {
+  color: var(--awa-primary) !important;
+}
+.breadcrumbs .item:not(:last-child)::after {
+  color: var(--awa-text-light, #999) !important;
+}
+
+/* ================================================================
+   11. PADRONIZAÇÃO: PDP bottom section headings
+   Descrição, Especificações, Mais Vendidos, Relacionados — all
+   should use consistent font-size, weight, and spacing.
+   ================================================================ */
+.catalog-product-view .column.main h2 {
+  font-size:var(--awa-font-size-20) !important;
+  font-weight: var(--awa-weight-bold) !important;
+  color: var(--awa-text, #333) !important;
+  margin-bottom: 16px !important;
+  line-height: 1.3 !important;
+}
+/* Product title (h1) stays larger */
+.catalog-product-view .page-title .base {
+  font-size:var(--awa-font-size-24) !important;
+  font-weight: var(--awa-weight-bold) !important;
+  line-height: 1.3 !important;
+}
+
+/* Specs table heading override */
+.catalog-product-view .awa-pdp-specs h2,
+.catalog-product-view .product.info.detailed h2,
+.catalog-product-view .product.info.detailed .title {
+  font-size:var(--awa-font-size-20) !important;
+  font-weight: var(--awa-weight-bold) !important;
+  margin-bottom: 16px !important;
+}
+
+/* ================================================================
+   12. PADRONIZAÇÃO: Header — consistência cross-page e cross-breakpoint
+   Corrige:
+   12a — Token --awa-radius-lg consolidado (16px definitivo)
+   12b — Search form pill shape consistente (desktop + mobile)
+   12c — Search button radius consistente (pill-right em todos breakpoints)
+   12d — Mobile search width: full-width consistente em todas as páginas
+   12e — Mobile wp-header grid consistency across pages
+   ================================================================ */
+
+/* 12b — Search form: pill shape consistente (desktop + mobile)
+   Desktop usa var(--awa-radius-full) via .awa-professional-search;
+   Mobile precisa herdar o mesmo shape. */
+body .page-wrapper .header .top-search .block-search #search_mini_form,
+body .page-wrapper .header .top-search > .block-search form#search_mini_form,
+body .page-wrapper .header .top-search > .block-search form.minisearch,
+.awa-professional-search form.search-content,
+.awa-professional-search form.minisearch {
+  border-radius: var(--awa-radius-full, 9999px) !important;
+}
+
+/* 12c — Search button: pill-right consistente em TODOS breakpoints */
+body .page-wrapper .header .top-search .block-search .action.search {
+  border-radius: 0 var(--awa-radius-full, 9999px) var(--awa-radius-full, 9999px) 0 !important;
+}
+
+/* 12d — Search input: pill-left consistente */
+body .page-wrapper .header .top-search .block-search input#search {
+  border-radius: var(--awa-radius-full, 9999px) 0 0 var(--awa-radius-full, 9999px) !important;
+}
+
+/* 12e — Mobile: search form full-width, grid consistente entre páginas */
+@media (max-width: 767px) {
+  /* wp-header grid: 2 colunas iguais em todas as páginas */
+  body .page-wrapper .header .header_main .wp-header,
+  body .page-wrapper .header .header-main .wp-header {
+    grid-template-columns: clamp(74px, 22vw, 96px) minmax(0, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  /* top-search inner grid: search + cart */
+  body .page-wrapper .header .top-search {
+    grid-template-columns: minmax(0, 1fr) 44px !important;
+    gap: 8px !important;
+  }
+
+  /* Search form min-height consistente */
+  body .page-wrapper .header .top-search > .block-search form.minisearch,
+  body .page-wrapper .header .top-search > .block-search form#search_mini_form {
+    min-height: 44px !important;
+  }
+
+  /* Category page search — ensure full grid-column span */
+  body .page-wrapper .header .top-search > .block-search {
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+}
+
+/* ================================================================
+   13. PRODUCT GRID — Melhorias v2: imagem, hover, carregamento
+   - position:relative no .product-thumb (fix second-thumb absolute)
+   - Placeholder neutro no container de imagem
+   - Fade-in suave na imagem ao carregar (lazy-load)
+   - Hover state para carrosséis da homepage
+   - Touch: :focus-within como fallback de hover
+   ================================================================ */
+
+/* 13a. Containing block para .second-thumb (position:absolute) */
+.item-product .product-thumb {
+  position: relative !important;
+}
+
+/* 13b. Placeholder cinza claro enquanto a imagem carrega */
+.item-product .product-image-container,
+.item-product .product-thumb {
+  background-color: var(--awa-gray-50, #f9f9f9) !important;
+}
+
+/* 13d. Hover card — homepage carrosséis (cobre .ayo-home-block + .top-home-content)
+   A regra de category/search está em awa-category-layout-fix.css.
+   Esta cobre carrosséis e blocos da homepage. */
+.ayo-home-block .item-product,
+.top-home-content .item-product,
+.products-swiper .item-product {
+  transition: transform var(--awa-duration, 0.2s) var(--awa-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+              box-shadow var(--awa-duration, 0.2s) var(--awa-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+              border-color var(--awa-duration, 0.2s) var(--awa-ease, cubic-bezier(0.4, 0, 0.2, 1)) !important;
+}
+
+.ayo-home-block .item-product:hover,
+.top-home-content .item-product:hover,
+.products-swiper .item-product:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.10) !important;
+  border-color: var(--awa-border-strong, #cccccc) !important;
+  will-change: transform;
+}
+
+/* 13e. Nome do produto — fade de cor no hover (homepage + global) */
+.item-product:hover .product-item-link,
+.item-product:hover .product-name a {
+  color: var(--awa-primary, #b73337) !important;
+}
+
+/* 13f. Imagem principal — zoom suave no hover (sutil, 1.03×) */
+.item-product .product-thumb .first-thumb img.product-image-photo {
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease !important;
+  will-change: auto;
+}
+
+.item-product:hover .product-thumb .first-thumb img.product-image-photo {
+  transform: scale(1.03) !important;
+  will-change: transform;
+}
+
+/* Não aplicar zoom quando há second-thumb (hover image swap prevalece) */
+.item-product:hover .product-thumb:has(.second-thumb) .first-thumb img.product-image-photo {
+  transform: none !important;
+}
+
+/* 13g. Second-thumb: garantir que cobre o container e tem position correta */
+.item-product .product-thumb .second-thumb {
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.item-product .product-thumb .second-thumb img.product-image-photo {
+  max-height: 100% !important;
+  width: auto !important;
+  max-width: 100% !important;
+}
+
+/* 13h. Touch/keyboard: :focus-within como substituto de :hover em mobile */
+@media (hover: none) {
+  /* Em dispositivos touch, remove o lift permanente (sem hover real) */
+  .item-product:hover {
+    transform: none !important;
+    box-shadow: none !important;
+  }
+  /* Feedback de toque via :active em vez de :hover */
+  .item-product:active {
+    transform: scale(0.98) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+    transition: transform 0.1s ease, box-shadow 0.1s ease !important;
+  }
+}
+
+/* 13i. PDP — prevenir animação desnecessária nas imagens do slider do PDP
+   (carrossel de galeria principal — não é lazy loaded) */
+.catalog-product-view .product.media img.product-image-photo {
+  animation: none !important;
+}

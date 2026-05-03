@@ -28,7 +28,7 @@ $image = 'category_page_grid';
     <div class="awa-pdp-mv-tabs" id="awa-pdp-mv-tabs" role="tablist" aria-label="Filtrar por marca"></div>
 
     <div class="rokan-mostviewed">
-        <div class="swiper products-swiper products-swiper--mostviewed">
+        <div class="swiper products-swiper products-swiper--mostviewed" id="awa-pdp-mv-carousel">
             <div class="swiper-wrapper">
                 <?php $i = 0; foreach ($_productCollection as $_product): if ($i >= 8) { break; } ?>
                     <?php
@@ -53,8 +53,7 @@ $image = 'category_page_grid';
                             <div class="product-thumb">
                                 <a href="<?php echo $block->escapeUrl($_product->getProductUrl()); ?>"
                                    class="product-thumb-link product photo product-item-photo"
-                                   aria-label="<?php echo $block->escapeHtmlAttr($_product->getName()); ?>"
-                                   tabindex="-1">
+                                   aria-label="<?php echo $block->escapeHtmlAttr($_product->getName()); ?>">
                                     <span class="first-thumb">
                                         <?php
                                         $_mvSrcset = $block->escapeUrl($productImageSm->getImageUrl()) . ' 350w, '
@@ -155,8 +154,8 @@ $image = 'category_page_grid';
             </div>
 
             <?php if ($this->getConfig('next_back')): ?>
-                <div class="swiper-button-prev" aria-label="<?php echo $block->escapeHtmlAttr(__('Anterior')); ?>"></div>
-                <div class="swiper-button-next" aria-label="<?php echo $block->escapeHtmlAttr(__('Próximo')); ?>"></div>
+                <div class="swiper-button-prev" role="button" tabindex="0" aria-label="<?php echo $block->escapeHtmlAttr(__('Previous products')); ?>"></div>
+                <div class="swiper-button-next" role="button" tabindex="0" aria-label="<?php echo $block->escapeHtmlAttr(__('Next products')); ?>"></div>
             <?php endif; ?>
         </div>
     </div>
@@ -165,7 +164,7 @@ $image = 'category_page_grid';
 <script type="text/x-magento-init">
 {
     ".awa-pdp-mostviewed": {
-        "js/products-swiper-init": {
+        "js/awa-carousel": {
             "carouselSelector": ".products-swiper--mostviewed",
             "owl": {
                 "items": 4,
@@ -175,7 +174,8 @@ $image = 'category_page_grid';
                 "itemsMobile": [479, 1],
                 "navigation": true,
                 "pagination": false,
-                "margin": 16
+                "margin": 16,
+                "scrollPerPage": true
             }
         }
     }
@@ -188,6 +188,7 @@ $image = 'category_page_grid';
     if (!section) { return; }
     var slides = section.querySelectorAll('.swiper-slide[data-brand]');
     var tabsEl = document.getElementById('awa-pdp-mv-tabs');
+    var carouselEl = document.getElementById('awa-pdp-mv-carousel');
     if (!slides.length || !tabsEl) { return; }
     var brands = [];
     slides.forEach(function (s) {
@@ -195,6 +196,38 @@ $image = 'category_page_grid';
         if (b && brands.indexOf(b) === -1) { brands.push(b); }
     });
     if (brands.length < 2) { tabsEl.style.display = 'none'; return; }
+
+    function syncSwiper() {
+        if (!carouselEl || !carouselEl.swiper) { return; }
+        carouselEl.swiper.updateSlides();
+        carouselEl.swiper.updateProgress();
+        carouselEl.swiper.updateSize();
+        carouselEl.swiper.update();
+        carouselEl.swiper.slideTo(0, 0);
+    }
+
+    function matchesBrand(brandRaw, filter) {
+        if (filter === '') { return true; }
+        return brandRaw.split(',').map(function (item) {
+            return item.trim();
+        }).indexOf(filter) !== -1;
+    }
+
+    function applyFilter(filter) {
+        slides.forEach(function (s) {
+            var brand = (s.getAttribute('data-brand') || '').trim();
+            if (matchesBrand(brand, filter)) {
+                s.removeAttribute('data-brand-hidden');
+                s.removeAttribute('hidden');
+                s.style.display = '';
+            } else {
+                s.setAttribute('data-brand-hidden', '');
+                s.setAttribute('hidden', 'hidden');
+                s.style.display = 'none';
+            }
+        });
+        syncSwiper();
+    }
 
     function makeTab(label, value) {
         var btn = document.createElement('button');
@@ -211,20 +244,12 @@ $image = 'category_page_grid';
             });
             btn.classList.add('awa-active');
             btn.setAttribute('aria-selected', 'true');
-            var filter = btn.getAttribute('data-filter');
-            slides.forEach(function (s) {
-                var brand = (s.getAttribute('data-brand') || '').trim();
-                if (filter === '' || brand === filter) {
-                    s.removeAttribute('data-brand-hidden');
-                } else {
-                    s.setAttribute('data-brand-hidden', '');
-                }
-            });
+            applyFilter(btn.getAttribute('data-filter'));
         });
         return btn;
     }
 
-    tabsEl.appendChild(makeTab('Todos', ''));
+    tabsEl.appendChild(makeTab('<?php echo $block->escapeJs((string) __('Todos')); ?>', ''));
     brands.forEach(function (b) { tabsEl.appendChild(makeTab(b, b)); });
 })();
 </script>

@@ -117,6 +117,48 @@ body.catalog-category-view,body.catalogsearch-result-index
   }
 }
 
+/* ---------------------------------------------------------------------------
+   HEADER CENTER FIX (desktop): centraliza awa-main-header no viewport
+   --------------------------------------------------------------------------- */
+@media (min-width: 992px) {
+    body .page-wrapper .awa-site-header .header_main.awa-main-header-inner-wrap,
+    #header.header-container .header-content .header_main.awa-main-header-inner-wrap {
+        justify-content: center !important;
+    }
+
+    body .page-wrapper .awa-site-header .header_main.awa-main-header-inner-wrap > .header-main,
+    body .page-wrapper .awa-site-header [data-awa-header-main-wrap='true'] > .header-main,
+    body .page-wrapper .awa-site-header .awa-main-header-inner-wrap > .header-main {
+        flex: 1 1 auto !important;
+        width: 100% !important;
+        max-width: none !important;
+        min-width: 0 !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+
+    body .page-wrapper .awa-site-header .header-main > .container,
+    body .page-wrapper .awa-site-header .header-main .container {
+        width: 100% !important;
+        max-width: var(--awa-container-max, 1300px) !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+
+    /* Specificity boost: garante centralização no chain real do header */
+    #header.header-container .header-content .header_main.awa-main-header-inner-wrap > .header-main,
+    #header.header-container .header-content .header.awa-main-header .header_main.awa-main-header-inner-wrap > .header-main {
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+
+    #header.header-container .header-content .header_main.awa-main-header-inner-wrap > .header-main > .container,
+    #header.header-container .header-content .header.awa-main-header .header_main.awa-main-header-inner-wrap > .header-main > .container {
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+}
+
 /* Fix: Swiper adiciona role=button nos bullets.
    Tap-target @media(max-width:991px){[role=button]{min-width:44px}} infla bullets de 10px para 44px.
    awa-super-global.css carrega com media="print" (print trick async) e NAO aplica ao screen,
@@ -2055,7 +2097,7 @@ body:not(.cms-index-index) .awa-site-header .header-control.header-nav-global {
         text-overflow: initial !important;
         overflow: visible !important;
         line-height: 1.4 !important;
-        font-size: 11px !important;
+        font-size: 12px !important;
     }
 }
 
@@ -2935,6 +2977,101 @@ body .page-wrapper .header-wrapper-sticky.is-sticky .top-menu-sticky .navigation
     }
 }
 
+/* =============================================================
+   HEADER ALIGNMENT + MOBILE OVERFLOW FIXES (2026-05-02)
+   Justificativa: overrides com !important para vencer consolidated/bundles
+   e corrigir gaps/overflow identificados no audit visual.
+   ============================================================= */
+
+/* Busca: garantir que o input expanda 100% e não colapse no mobile */
+#html-body #header .awa-header-search-col .block-search,
+#html-body #header .awa-header-search-col .block-search form.minisearch,
+#html-body #header .awa-header-search-col .block-search form.search-content {
+    width: 100% !important; /* override de widths hardcoded no bundle */
+    max-width: 100% !important;
+}
+
+#html-body #header .awa-header-search-col .control {
+    display: flex !important; /* força layout flex para input ocupar espaço */
+    align-items: center !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+}
+
+#html-body #header .awa-header-search-col .control input#search,
+#html-body #header .awa-header-search-col .control input.input-text {
+    width: 100% !important; /* evita input estreito no mobile */
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+}
+
+/* Minicart: touch target mínimo 44px (a11y) */
+#html-body #header .awa-header-minicart .minicart-wrapper,
+#html-body #header .awa-header-minicart .minicart-wrapper .action.showcart {
+    min-width: var(--awa-space-12, 48px) !important;
+    min-height: var(--awa-space-12, 48px) !important;
+}
+
+#html-body #header .awa-header-minicart .minicart-wrapper .action.showcart {
+    width: var(--awa-space-12, 48px) !important;
+    height: var(--awa-space-12, 48px) !important;
+}
+
+@media (min-width: 992px) {
+    /* Desktop: reduzir gaps excessivos entre busca/conta/carrinho */
+    #html-body #header .awa-main-header__inner[data-awa-header-row],
+    #html-body #header .wp-header[data-awa-header-row] {
+        gap: var(--awa-space-4, 16px) !important; /* override gap 24/32px */
+    }
+
+    #html-body #header .awa-header-search-col.top-search {
+        margin-inline: var(--awa-space-3, 12px) !important; /* reduz gap lateral */
+    }
+
+    #html-body #header .awa-header-right-col {
+        gap: var(--awa-space-3, 12px) !important; /* aproxima conta/carrinho */
+        align-items: center !important;
+    }
+}
+
+@media (max-width: 767px) {
+    /* Mobile: evitar overflow da área de conta e reduzir altura do header */
+    #html-body #header .awa-main-header__inner[data-awa-header-row],
+    #html-body #header .wp-header[data-awa-header-row] {
+        row-gap: var(--awa-space-2, 8px) !important; /* menos altura */
+    }
+
+    #html-body #header .awa-header-right-col {
+        width: 100% !important;
+        padding-inline: var(--awa-space-3, 12px) !important;
+        box-sizing: border-box !important;
+        border-top: 0 !important; /* remove linha extra do redesign */
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+        justify-content: flex-start !important;
+        gap: var(--awa-space-2, 8px) !important;
+        flex-wrap: wrap !important;
+    }
+
+    #html-body #header .awa-header-account-prompt {
+        white-space: normal !important; /* evita x negativo no viewport */
+        flex-wrap: wrap !important;
+        max-width: 100% !important;
+    }
+
+    #html-body #header .awa-header-account-prompt__text,
+    #html-body #header .awa-header-account-prompt__line1,
+    #html-body #header .awa-header-account-prompt__line2 {
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    #html-body #header .awa-header-account-prompt__line2 {
+        flex-wrap: wrap !important;
+        row-gap: var(--awa-space-1, 4px) !important;
+    }
+}
+
 /* ---------------------------------------------------------------------------
    FIX #4: Cookie status false positive
    O Magento seta style="display:none" via JS quando cookies estão habilitados.
@@ -2991,4 +3128,754 @@ body.b2b-register-index .b2b-register-page .field.required > .label span::after 
     body {
         padding-bottom: 60px !important;
     }
+}
+
+/* FIX LOGIN INPUT FONT SIZE */
+#html-body input#b2b-email,
+#html-body input#email,
+#html-body .b2b-field input,
+#html-body .login-container input.input-text {
+    font-size: 15px !important;
+    height: 52px !important;
+    min-height: 52px !important;
+    border-radius: 8px !important;
+}
+
+/* ---------------------------------------------------------------------------
+   FIX MENU VERTICAL (desktop/home): evita empilhamento de múltiplos submenus.
+   Segurança de cascata: mantém fechado por padrão e abre só o item ativo/hover.
+   --------------------------------------------------------------------------- */
+@media (min-width: 992px) {
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .page-wrapper .menu_left_home1 .navigation.verticalmenu.side-verticalmenu
+    .togge-menu > li.ui-menu-item.level0 {
+        position: relative !important;
+        overflow: visible !important;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .page-wrapper .menu_left_home1 .navigation.verticalmenu.side-verticalmenu
+    .togge-menu > li.ui-menu-item.level0 > .submenu,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .page-wrapper .menu_left_home1 .navigation.verticalmenu.side-verticalmenu
+    .togge-menu > li.ui-menu-item.level0 > .level0.submenu {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+
+    /* Classes residuais (_active/is-open/active) não devem abrir submenu no desktop */
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .page-wrapper .menu_left_home1 .navigation.verticalmenu.side-verticalmenu
+    .togge-menu > li.ui-menu-item.level0.parent._active:not(:hover):not(:focus-within):not(.vmm-active):not(.awa-vmf-active) > .submenu,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .page-wrapper .menu_left_home1 .navigation.verticalmenu.side-verticalmenu
+    .togge-menu > li.ui-menu-item.level0.parent._active:not(:hover):not(:focus-within):not(.vmm-active):not(.awa-vmf-active) > .level0.submenu,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .page-wrapper .menu_left_home1 .navigation.verticalmenu.side-verticalmenu
+    .togge-menu > li.ui-menu-item.level0.parent.is-open:not(:hover):not(:focus-within):not(.vmm-active):not(.awa-vmf-active) > .submenu,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .page-wrapper .menu_left_home1 .navigation.verticalmenu.side-verticalmenu
+    .togge-menu > li.ui-menu-item.level0.parent.is-open:not(:hover):not(:focus-within):not(.vmm-active):not(.awa-vmf-active) > .level0.submenu,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .page-wrapper .menu_left_home1 .navigation.verticalmenu.side-verticalmenu
+    .togge-menu > li.ui-menu-item.level0.parent.active:not(:hover):not(:focus-within):not(.vmm-active):not(.awa-vmf-active) > .submenu,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .page-wrapper .menu_left_home1 .navigation.verticalmenu.side-verticalmenu
+    .togge-menu > li.ui-menu-item.level0.parent.active:not(:hover):not(:focus-within):not(.vmm-active):not(.awa-vmf-active) > .level0.submenu {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .page-wrapper .menu_left_home1 .navigation.verticalmenu.side-verticalmenu
+    .togge-menu > li.ui-menu-item.level0:hover > .submenu,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .page-wrapper .menu_left_home1 .navigation.verticalmenu.side-verticalmenu
+    .togge-menu > li.ui-menu-item.level0:hover > .level0.submenu,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .page-wrapper .menu_left_home1 .navigation.verticalmenu.side-verticalmenu
+    .togge-menu > li.ui-menu-item.level0:focus-within > .submenu,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .page-wrapper .menu_left_home1 .navigation.verticalmenu.side-verticalmenu
+    .togge-menu > li.ui-menu-item.level0:focus-within > .level0.submenu,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .page-wrapper .menu_left_home1 .navigation.verticalmenu.side-verticalmenu
+    .togge-menu > li.ui-menu-item.level0.vmm-active > .submenu,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .page-wrapper .menu_left_home1 .navigation.verticalmenu.side-verticalmenu
+    .togge-menu > li.ui-menu-item.level0.vmm-active > .level0.submenu,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .page-wrapper .menu_left_home1 .navigation.verticalmenu.side-verticalmenu
+    .togge-menu > li.ui-menu-item.level0.awa-vmf-active > .submenu,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .page-wrapper .menu_left_home1 .navigation.verticalmenu.side-verticalmenu
+    .togge-menu > li.ui-menu-item.level0.awa-vmf-active > .level0.submenu {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+    }
+}
+
+/* =============================================================
+   AWA MOTOS - HEADER FIX: NAV BAR ALIGNMENT (1300PX)
+   ============================================================= */
+.awa-nav-bar__inner,
+body .page-wrapper .awa-site-header .header-control.awa-nav-bar .awa-nav-bar__inner,
+body .page-wrapper .header-control.awa-nav-bar .awa-nav-bar__inner {
+    max-width: var(--awa-container-max, 1300px) !important; /* Via token — alinha Menu com Logo */
+    margin: 0 auto !important;
+    width: 100% !important;
+}
+
+/* ============================================================================
+   HOME CAROUSEL CANONICAL CONTRACT (2026-04-29)
+   Scope only homepage product carousels to prevent global Swiper regressions.
+   ============================================================================ */
+body.cms-index-index .awa-carousel-section .products-swiper,
+body.cms-home .awa-carousel-section .products-swiper,
+body.cms-homepage_ayo_home5 .awa-carousel-section .products-swiper {
+  overflow: hidden !important;
+  position: relative;
+}
+
+body.cms-index-index .awa-carousel-section .products-swiper .swiper-wrapper,
+body.cms-home .awa-carousel-section .products-swiper .swiper-wrapper,
+body.cms-homepage_ayo_home5 .awa-carousel-section .products-swiper .swiper-wrapper {
+  display: flex !important;
+  align-items: stretch !important;
+}
+
+body.cms-index-index .awa-carousel-section .products-swiper .swiper-slide,
+body.cms-home .awa-carousel-section .products-swiper .swiper-slide,
+body.cms-homepage_ayo_home5 .awa-carousel-section .products-swiper .swiper-slide {
+  min-width: 0 !important;
+  height: auto !important;
+  display: flex !important;
+  align-items: stretch !important;
+  box-sizing: border-box !important;
+}
+
+body.cms-index-index .awa-carousel-section .products-swiper .swiper-slide .item-product,
+body.cms-home .awa-carousel-section .products-swiper .swiper-slide .item-product,
+body.cms-homepage_ayo_home5 .awa-carousel-section .products-swiper .swiper-slide .item-product {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+body.cms-index-index .awa-carousel-section .products-swiper .swiper-slide .product-thumb :is(.product-image-photo, img),
+body.cms-home .awa-carousel-section .products-swiper .swiper-slide .product-thumb :is(.product-image-photo, img),
+body.cms-homepage_ayo_home5 .awa-carousel-section .products-swiper .swiper-slide .product-thumb :is(.product-image-photo, img) {
+  transform: scale(1.08) !important;
+}
+
+body.cms-index-index .awa-carousel-section .products-swiper .swiper-slide .product-thumb:hover :is(.product-image-photo, img),
+body.cms-index-index .awa-carousel-section .products-swiper .swiper-slide .product-thumb:focus-within :is(.product-image-photo, img),
+body.cms-home .awa-carousel-section .products-swiper .swiper-slide .product-thumb:hover :is(.product-image-photo, img),
+body.cms-home .awa-carousel-section .products-swiper .swiper-slide .product-thumb:focus-within :is(.product-image-photo, img),
+body.cms-homepage_ayo_home5 .awa-carousel-section .products-swiper .swiper-slide .product-thumb:hover :is(.product-image-photo, img),
+body.cms-homepage_ayo_home5 .awa-carousel-section .products-swiper .swiper-slide .product-thumb:focus-within :is(.product-image-photo, img) {
+  transform: scale(1.10) !important;
+}
+
+/* ============================================================================
+   PRODUCT CAROUSEL GLOBAL CONTRACT (2026-04-29)
+   Unified rules for product carousels only (excludes hero/banner sliders).
+   ============================================================================ */
+body .page-wrapper :is(
+  .rokan-bestseller,
+  .rokan-newproduct,
+  .rokan-mostviewed,
+  .rokan-featuredproduct,
+  .rokan-onsaleproduct,
+  .rokan-toprate,
+  .list-tab-product,
+  .categorytab-container,
+  .awa-pdp-mostviewed
+) :is(
+  .products-swiper,
+  .products-swiper--bestseller,
+  .products-swiper--newproduct,
+  .products-swiper--mostviewed,
+  .awa-featured-swiper,
+  .awa-onsale-swiper,
+  .awa-toprate-swiper,
+  .productTabContent,
+  .category_tab_slider,
+  .awa-pricecountdown-carousel
+) {
+  overflow: hidden !important;
+  position: relative;
+}
+
+body .page-wrapper :is(
+  .rokan-bestseller,
+  .rokan-newproduct,
+  .rokan-mostviewed,
+  .rokan-featuredproduct,
+  .rokan-onsaleproduct,
+  .rokan-toprate,
+  .list-tab-product,
+  .categorytab-container,
+  .awa-pdp-mostviewed
+) :is(
+  .products-swiper,
+  .products-swiper--bestseller,
+  .products-swiper--newproduct,
+  .products-swiper--mostviewed,
+  .awa-featured-swiper,
+  .awa-onsale-swiper,
+  .awa-toprate-swiper,
+  .productTabContent,
+  .category_tab_slider,
+  .awa-pricecountdown-carousel
+) .swiper-wrapper {
+  display: flex !important;
+  align-items: stretch !important;
+}
+
+body .page-wrapper :is(
+  .rokan-bestseller,
+  .rokan-newproduct,
+  .rokan-mostviewed,
+  .rokan-featuredproduct,
+  .rokan-onsaleproduct,
+  .rokan-toprate,
+  .list-tab-product,
+  .categorytab-container,
+  .awa-pdp-mostviewed
+) :is(
+  .products-swiper,
+  .products-swiper--bestseller,
+  .products-swiper--newproduct,
+  .products-swiper--mostviewed,
+  .awa-featured-swiper,
+  .awa-onsale-swiper,
+  .awa-toprate-swiper,
+  .productTabContent,
+  .category_tab_slider,
+  .awa-pricecountdown-carousel
+) .swiper-slide {
+  min-width: 0 !important;
+  height: auto !important;
+  display: flex !important;
+  align-items: stretch !important;
+  box-sizing: border-box !important;
+}
+
+body .page-wrapper :is(
+  .rokan-bestseller,
+  .rokan-newproduct,
+  .rokan-mostviewed,
+  .rokan-featuredproduct,
+  .rokan-onsaleproduct,
+  .rokan-toprate,
+  .list-tab-product,
+  .categorytab-container,
+  .awa-pdp-mostviewed
+) :is(
+  .products-swiper,
+  .products-swiper--bestseller,
+  .products-swiper--newproduct,
+  .products-swiper--mostviewed,
+  .awa-featured-swiper,
+  .awa-onsale-swiper,
+  .awa-toprate-swiper,
+  .productTabContent,
+  .category_tab_slider,
+  .awa-pricecountdown-carousel
+) .swiper-slide > :is(.item-product, .product-item) {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+/* =============================================================
+   RESPIRAÇÃO VISUAL — Ajustes inspirados em balaroti.com.br
+   Objetivo: Aumentar whitespace entre seções, dentro de cards,
+   e nos títulos para criar um ritmo visual mais premium.
+   Balaroti usa ~60-80px entre blocos. AWA usava ~32px.
+   ============================================================= */
+
+/* --- 1. TOKENS DE ESPAÇAMENTO GLOBAL (override) --- */
+:root {
+  --awa-section-gap: 56px;          /* era 32px — agora mais próximo de Balaroti (~60px) */
+  --awa-section-gap-sm: 40px;       /* era 24px */
+  --card-padding: 14px;             /* era 6px — card mais "arejado" */
+  --card-gap: 10px;                 /* era 8px */
+  --card-photo-min-h: 200px;        /* mantém */
+  --awa-section-title-mt: 48px;     /* novo: margem acima dos títulos de seção */
+  --awa-section-title-mb: 24px;     /* novo: margem abaixo dos títulos de seção */
+}
+
+@media (max-width: 767px) {
+  :root {
+    --awa-section-gap: 40px;        /* era 24px */
+    --awa-section-gap-sm: 28px;     /* era 16px */
+    --card-padding: 10px;           /* era 6px (mobile) */
+    --awa-section-title-mt: 32px;
+    --awa-section-title-mb: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --awa-section-gap: 32px;        /* era 16px */
+    --awa-section-gap-sm: 24px;     /* era 16px */
+    --card-padding: 8px;
+    --awa-section-title-mt: 24px;
+    --awa-section-title-mb: 14px;
+  }
+}
+
+/* --- 2. ESPAÇAMENTO ENTRE SEÇÕES DA HOMEPAGE --- */
+/* Balaroti: ~60-80px entre cada bloco de conteúdo */
+.cms-index-index .page-main > .block,
+.cms-index-index .page-main > .widget,
+.cms-index-index .page-main > section,
+.cms-index-index .page-main > .columns > .column.main > .block,
+.cms-index-index .page-main > .columns > .column.main > .widget,
+.cms-index-index .rokan-bestseller,
+.cms-index-index .rokan-newproduct,
+.cms-index-index .rokan-featuredproduct,
+.cms-index-index .rokan-onsaleproduct,
+.cms-index-index .awa-carousel-section,
+.cms-index-index .block-products-list,
+.cms-index-index .block-new-products,
+.cms-index-index .categorytab-container,
+.cms-index-index .list-tab-product {
+  margin-bottom: var(--awa-section-gap);
+}
+
+/* Espaço entre o slider principal e o primeiro bloco de conteúdo */
+.cms-index-index .rokanthemes-slider,
+.cms-index-index .rokanthemes-slider + *,
+.cms-index-index .home-slider,
+.cms-index-index .home-slider + * {
+  margin-bottom: var(--awa-section-gap);
+}
+
+/* --- 3. TÍTULOS DE SEÇÃO — Mais destaque como Balaroti --- */
+/* Balaroti: ~40px margin-top, ~25px margin-bottom nos headings */
+.cms-index-index .block-title,
+.cms-index-index .awa-section-header,
+.cms-index-index .section-title-wrapper,
+.cms-index-index .rokan-bestseller .block-title,
+.cms-index-index .rokan-newproduct .block-title,
+.cms-index-index .block-products-list .block-title,
+.cms-index-index .block-new-products .block-title,
+.cms-index-index .awa-carousel-section .block-title {
+  margin-top: var(--awa-section-title-mt);
+  margin-bottom: var(--awa-section-title-mb);
+  padding-bottom: var(--awa-section-header-pb, 14px);
+}
+
+/* Primeiro bloco após slider: não precisa de margin-top extra */
+.cms-index-index .rokanthemes-slider + .block .block-title,
+.cms-index-index .rokanthemes-slider + .widget .block-title,
+.cms-index-index .home-slider + .block .block-title,
+.cms-index-index .home-slider + .widget .block-title {
+  margin-top: 0;
+}
+
+/* --- 4. HEADER — Mais padding vertical como Balaroti --- */
+/* Balaroti: ~20-30px de padding vertical, criando mais espaço para logo e busca */
+body .page-wrapper .awa-site-header .header.awa-main-header {
+  padding-top: 18px !important;    /* era 14px */
+  padding-bottom: 18px !important; /* era 14px */
+}
+
+/* Nav bar: mais respiro */
+body .page-wrapper .awa-site-header .header-control.awa-nav-bar {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+/* --- 5. BANNER → CONTEÚDO (zona de respiro pós-hero) --- */
+/* Balaroti: gap generoso após o hero principal (~40px) */
+.cms-index-index .rokanthemes-slider {
+  margin-bottom: 48px;
+}
+
+/* Banners promocionais (grid de 3 banners) */
+.cms-index-index .rokanthemes-banners,
+.cms-index-index .home-banner,
+.cms-index-index .banner-grid,
+.cms-index-index [class*="banner-"] {
+  margin-bottom: var(--awa-section-gap);
+}
+
+/* --- 6. CARDS DE PRODUTO — Padding interno mais generoso --- */
+/* Balaroti: ~20px padding interno nos cards */
+/* Os tokens --card-padding já foram atualizados acima */
+
+/* Espaço entre imagem do produto e nome */
+.rokan-bestseller .product-image-container,
+.rokan-bestseller .product-item-photo,
+.rokan-newproduct .product-image-container,
+.rokan-newproduct .product-item-photo,
+.block-new-products .product-image-container,
+.block-new-products .product-item-photo,
+.block-products-list .product-image-container,
+.block-products-list .product-item-photo {
+  margin-bottom: 14px; /* era 10px */
+}
+
+/* Detalhes do produto: mais gap interno */
+.rokan-bestseller .product-info,
+.rokan-bestseller .product-item-details,
+.rokan-newproduct .product-info,
+.rokan-newproduct .product-item-details,
+.block-new-products .product-info,
+.block-new-products .product-item-details,
+.block-products-list .product-info,
+.block-products-list .product-item-details {
+  gap: 10px;                    /* era 8px */
+  padding: 0 8px 8px;          /* era 0 4px 4px */
+}
+
+/* --- 7. CATEGORIAS HOME (Busque por Categorias) --- */
+/* Balaroti: amplo espaço em torno dos ícones de categoria */
+.cms-index-index .categorytab-container,
+.cms-index-index .home-category,
+.cms-index-index .category-icons {
+  padding-top: 32px;
+  padding-bottom: 32px;
+}
+
+/* --- 8. FOOTER — Mais respiro como Balaroti --- */
+/* Balaroti: ~50px padding-top, colunas ~40px apart */
+.page-footer,
+footer.page-footer {
+  padding-top: 48px;           /* mais respiro antes do conteúdo do footer */
+}
+
+/* Espaço entre bloco de newsletter e colunas de links do footer */
+.footer.content .block.newsletter {
+  margin-bottom: 40px;
+}
+
+/* Colunas do footer: mais gap */
+.footer.content .footer-columns,
+.footer.content .footer-col,
+.footer.content .footer-links {
+  gap: 32px;
+}
+
+/* --- 9. CONTENT BLOCKS (CMS blocks genéricos na home) --- */
+/* Balaroti: alterna backgrounds para criar "ilhas" de conteúdo */
+.cms-index-index .page-main > .block:nth-child(even),
+.cms-index-index .page-main > .widget:nth-child(even) {
+  /* Alternância sutil de fundo — cria ritmo visual como Balaroti */
+  /* Descomente se quiser backgrounds alternados:
+  background: var(--awa-bg-subtle, #f7f7f7);
+  padding: 48px var(--awa-container-pad);
+  margin-left: calc(-1 * var(--awa-container-pad));
+  margin-right: calc(-1 * var(--awa-container-pad));
+  */
+}
+
+/* --- 10. PÁGINAS INTERNAS — Breathing room geral --- */
+/* Breadcrumbs: mais espaço vertical */
+.breadcrumbs {
+  padding: 16px 0 12px; /* era 12px 0 8px */
+}
+
+/* Page title: mais margem inferior */
+.page-title-wrapper .page-title {
+  margin-bottom: 24px; /* era 16px */
+}
+
+/* Blocos de produto em páginas internas */
+.page-main > .block,
+.page-main > .widget,
+.page-main > section {
+  margin-bottom: var(--awa-section-gap);
+}
+
+/* --- 11. SWIPER / CAROUSEL NAVIGATION — Mais espaço --- */
+/* Indicadores de paginação do carousel */
+.cms-index-index .swiper-pagination {
+  margin-top: 20px; /* mais afastado dos cards */
+  padding-bottom: 8px;
+}
+
+/* --- 12. PLP (Category) — Consistência de respiro --- */
+.catalog-category-view .products-grid .product-item {
+  padding: var(--card-padding);
+}
+
+.catalog-category-view .products-grid .product-item-details {
+  gap: 10px;
+  padding: 0 8px 8px;
+}
+
+.catalog-category-view .products-grid .product-image-container,
+.catalog-category-view .products-grid .product-item-photo {
+  margin-bottom: 14px;
+}
+
+/* =============================================================
+   REFINAMENTOS VISUAIS FASE 2 — Polimento inspirado em Balaroti
+   ============================================================= */
+
+/* --- 13. BACKGROUNDS ALTERNADOS (ritmo visual) --- */
+/* Balaroti alterna branco / cinza claro para criar "ilhas" de conteúdo */
+.cms-index-index .rokan-bestseller,
+.cms-index-index .block-products-list,
+.cms-index-index .awa-carousel-section {
+  background: var(--awa-white, #fff);
+}
+
+.cms-index-index .rokan-newproduct,
+.cms-index-index .block-new-products,
+.cms-index-index .categorytab-container,
+.cms-index-index .list-tab-product {
+  background: var(--awa-bg-subtle, #f7f7f7);
+  margin-left: calc(-1 * var(--awa-container-pad, 16px));
+  margin-right: calc(-1 * var(--awa-container-pad, 16px));
+  padding: 48px var(--awa-container-pad, 16px) 56px;
+  /* Borda top sutil para separar zonas */
+  border-top: 1px solid var(--awa-border-subtle, #e5e7eb);
+  border-bottom: 1px solid var(--awa-border-subtle, #e5e7eb);
+}
+
+/* --- 14. NAVEGAÇÃO MAIS LEVE (como Balaroti) --- */
+/* Balaroti: nav links com peso 400, mais "aéreo" e clean */
+body .page-wrapper .awa-site-header .awa-header-primary-nav a.level-top,
+body .page-wrapper .awa-site-header .awa-nav-bar .awa-header-primary-nav a,
+body .page-wrapper .awa-site-header .nav-sections .navigation a.level-top,
+body .page-wrapper .awa-site-header .awa-nav-bar .awa-header-primary-nav .top-menu .navigation a.level-top,
+body .page-wrapper .awa-site-header .awa-nav-bar .awa-header-primary-nav .top-menu .navigation.custommenu a.level-top {
+  font-weight: var(--awa-weight-normal, 400) !important; /* era 500 — mais leve */
+  letter-spacing: 0.01em !important;
+  padding: 12px 16px !important; /* era 10px 14px — mais respiro */
+}
+
+/* Active link mantém semi-bold para contraste */
+body .page-wrapper .awa-site-header .nav-sections .navigation li.active > a,
+body .page-wrapper .awa-site-header .nav-sections .navigation li.ui-state-active > a {
+  font-weight: var(--awa-weight-semi, 600) !important;
+}
+
+/* --- 15. GRID DE BANNERS PROMOCIONAIS --- */
+/* Balaroti: gaps de ~20px entre banners com border-radius suave */
+.cms-index-index .rokanthemes-banners .owl-stage,
+.cms-index-index .home-banner .row,
+.cms-index-index .banner-grid,
+.cms-index-index .rokanthemes-banners .items,
+.cms-index-index .rokanthemes-banners .owl-item {
+  gap: 20px;
+}
+
+.cms-index-index .rokanthemes-banners .item img,
+.cms-index-index .rokanthemes-banners .banner-item img,
+.cms-index-index .home-banner img,
+.cms-index-index .banner-grid img {
+  border-radius: var(--awa-radius-md, 8px);
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+
+.cms-index-index .rokanthemes-banners .item:hover img,
+.cms-index-index .rokanthemes-banners .banner-item:hover img,
+.cms-index-index .home-banner a:hover img,
+.cms-index-index .banner-grid a:hover img {
+  transform: scale(1.02);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 12%);
+}
+
+/* --- 16. NEWSLETTER — Bloco mais proeminente (como Balaroti) --- */
+/* Balaroti: newsletter grande com fundo escuro, bastante padding */
+.footer.content .block.newsletter,
+.page-footer .block.newsletter,
+footer .block.newsletter {
+  background: var(--awa-bg-dark, #1a1a1a);
+  color: var(--awa-white, #fff);
+  padding: 40px 32px;
+  border-radius: var(--awa-radius-lg, 8px);
+  margin-bottom: 48px;
+  text-align: center;
+}
+
+.footer.content .block.newsletter .title,
+.footer.content .block.newsletter .block-title strong,
+.page-footer .block.newsletter .title,
+.page-footer .block.newsletter .block-title strong {
+  color: var(--awa-white, #fff);
+  font-size: clamp(20px, 3vw, 26px);
+  font-weight: var(--awa-weight-bold, 700);
+  margin-bottom: 12px;
+  display: block;
+}
+
+.footer.content .block.newsletter .field,
+.page-footer .block.newsletter .field {
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.footer.content .block.newsletter input[type="email"],
+.page-footer .block.newsletter input[type="email"] {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: var(--awa-white, #fff);
+}
+
+.footer.content .block.newsletter input[type="email"]::placeholder,
+.page-footer .block.newsletter input[type="email"]::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.footer.content .block.newsletter input[type="email"]:focus,
+.page-footer .block.newsletter input[type="email"]:focus {
+  border-color: var(--awa-primary, #b73337);
+  box-shadow: 0 0 0 3px rgba(183, 51, 55, 0.2);
+}
+
+/* --- 17. FOOTER COLUNAS — Mais espaçadas (como Balaroti) --- */
+/* Balaroti: ~40px entre colunas, headings claros */
+.page-footer .footer.content,
+footer.page-footer .footer.content {
+  padding-top: 48px;
+  padding-bottom: 32px;
+}
+
+.footer.content .footer-col,
+.footer.content .column,
+.footer.content .block.footer-block {
+  padding-right: 24px;
+}
+
+/* Footer headings: mais destaque */
+.footer.content .block-title strong,
+.footer.content h4,
+.footer.content h3,
+.footer.content .footer-col-title {
+  font-size: 15px;
+  font-weight: var(--awa-weight-bold, 700);
+  color: var(--awa-text, #333);
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--awa-primary, #b73337);
+  display: inline-block;
+}
+
+/* Footer links: mais line-height */
+.footer.content ul li,
+.footer.content .footer-links li {
+  margin-bottom: 8px;
+  line-height: 1.6;
+}
+
+.footer.content ul li a,
+.footer.content .footer-links li a {
+  font-size: 13px;
+  color: var(--awa-text-muted, #666);
+  transition: color 0.15s ease, padding-left 0.15s ease;
+}
+
+.footer.content ul li a:hover,
+.footer.content .footer-links li a:hover {
+  color: var(--awa-primary, #b73337);
+  padding-left: 4px; /* micro-animação sutil no hover */
+}
+
+/* --- 18. CARD HOVER — Sombra mais difusa (como Balaroti) --- */
+/* Balaroti: sombra muito suave e ampla no hover */
+:root {
+  --card-shadow: 0 1px 4px rgb(0 0 0 / 5%);          /* mais sutil em repouso */
+  --card-shadow-hover: 0 12px 32px rgb(0 0 0 / 10%);  /* mais difusa e suave */
+}
+
+/* Reduzir o translateY para algo mais sutil */
+.rokan-bestseller .product-item:hover,
+.rokan-newproduct .product-item:hover,
+.block-new-products .product-item:hover,
+.block-products-list .product-item:hover,
+.block.widget.block-products-list .product-item:hover {
+  transform: translateY(-2px); /* era -3px — mais sutil como Balaroti */
+}
+
+/* --- 19. SEARCH BAR — Mais destaque visual (como Balaroti) --- */
+/* Balaroti: busca centralizada com padding generoso */
+body .page-wrapper .awa-site-header .awa-header-search-col.top-search {
+  margin: 0 24px !important; /* mais espaço lateral ao redor da busca */
+}
+
+body .page-wrapper .awa-site-header .awa-header-search-col.top-search .block.block-search input#search {
+  height: 48px !important;      /* era 44px — mais proeminente */
+  border-radius: 10px !important; /* era 8px — mais arredondado */
+  font-size: 14px !important;    /* era 13px */
+  padding-left: 46px !important; /* mais espaço para o ícone */
+  border-width: 1.5px;
+  border-color: var(--awa-gray-300, #ddd) !important;
+  background: var(--awa-bg-subtle, #f7f7f7) !important; /* fundo sutil como Balaroti */
+}
+
+body .page-wrapper .awa-site-header .awa-header-search-col.top-search .block.block-search input#search:focus {
+  background: var(--awa-white, #fff) !important;
+  border-color: var(--awa-primary, #b73337) !important;
+  box-shadow: 0 0 0 4px rgba(183, 51, 55, 0.08) !important;
+}
+
+body .page-wrapper .awa-site-header .awa-header-search-col.top-search .block.block-search input#search::placeholder {
+  color: var(--awa-text-light, #999) !important;
+  font-weight: 400;
+}
+
+/* --- 20. TRANSIÇÃO BANNER→CATEGORIAS (separador visual) --- */
+/* Linha sutil entre o hero e o primeiro bloco, como Balaroti */
+.cms-index-index .rokanthemes-slider + *::before,
+.cms-index-index .home-slider + *::before {
+  content: '';
+  display: block;
+  width: 60px;
+  height: 3px;
+  background: var(--awa-primary, #b73337);
+  margin: 0 auto 32px;
+  border-radius: 2px;
+  opacity: 0.6;
+}
+
+@media (max-width: 767px) {
+  /* Mobile: newsletter mais compacto */
+  .footer.content .block.newsletter,
+  .page-footer .block.newsletter,
+  footer .block.newsletter {
+    padding: 28px 20px;
+    margin-left: -12px;
+    margin-right: -12px;
+    border-radius: 0;
+  }
+
+  /* Mobile: backgrounds alternados responsivos */
+  .cms-index-index .rokan-newproduct,
+  .cms-index-index .block-new-products,
+  .cms-index-index .categorytab-container,
+  .cms-index-index .list-tab-product {
+    margin-left: calc(-1 * var(--awa-container-pad, 12px));
+    margin-right: calc(-1 * var(--awa-container-pad, 12px));
+    padding: 32px var(--awa-container-pad, 12px) 40px;
+  }
+
+  /* Mobile: search bar ajustado */
+  body .page-wrapper .awa-site-header .awa-header-search-col.top-search {
+    margin: 0 !important;
+  }
+
+  body .page-wrapper .awa-site-header .awa-header-search-col.top-search .block.block-search input#search {
+    height: 44px !important;
+    border-radius: 8px !important;
+  }
+
+  /* Mobile: nav padding */
+  body .page-wrapper .awa-site-header .awa-header-primary-nav a.level-top,
+  body .page-wrapper .awa-site-header .nav-sections .navigation a.level-top {
+    padding: 10px 12px !important;
+  }
 }

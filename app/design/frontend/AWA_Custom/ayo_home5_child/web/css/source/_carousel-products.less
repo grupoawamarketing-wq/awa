@@ -1,123 +1,207 @@
-// =============================================
-// AWA MOTOS — CAROUSEL PRODUCTS (MODERN)
-// Grid responsivo padronizado + scroll mode
-// Breakpoints: 1col(<480) 2col(480-1023) 3col(1024-1279) 4col(1280+)
-// =============================================
+// =========================================================
+// AWA MOTOS — CARROSSEL ÚNICO DE PRODUTOS (HOME)
+// Escopo: somente seções de produto da home (sem hero e categorias)
+// =========================================================
 
-.awa-product-carousel,
-.products-grid.widget-product-grid {
+@awa-carousel-arrow-size: 44px;
+@awa-carousel-gap: 16px;
+@awa-carousel-arrow-offset-desktop: -22px;
+@awa-carousel-arrow-bg: #fff;
+@awa-carousel-arrow-icon: var(--awa-primary);
+@awa-carousel-arrow-hover-bg: var(--awa-primary);
+@awa-carousel-arrow-hover-icon: #fff;
+@awa-carousel-arrow-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+@awa-carousel-desktop-columns: 5;
+@awa-carousel-tablet-columns: 3;
+@awa-carousel-mobile-columns: 2;
 
-  // Default grid mode (4 columns — desktop 1280+)
-  .product-items {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: var(--awa-gap-card);
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
+.awa-carousel-arrow() {
+  width: @awa-carousel-arrow-size;
+  height: @awa-carousel-arrow-size;
+  min-width: @awa-carousel-arrow-size;
+  min-height: @awa-carousel-arrow-size;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: @awa-carousel-arrow-bg;
+  color: @awa-carousel-arrow-icon;
+  box-shadow: @awa-carousel-arrow-shadow;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 200ms ease, color 200ms ease, opacity 200ms ease;
+  cursor: pointer;
+  z-index: 3;
+}
 
-  // Carousel mode (scroll-snap)
-  &.is-carousel .product-items {
-    display: flex;
-    gap: var(--awa-gap-card);
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
-    padding-bottom: var(--awa-space-sm);
-
-    scrollbar-width: none;
-    &::-webkit-scrollbar { display: none; }
-
-    > .product-item {
-      flex: 0 0 calc(25% - var(--awa-gap-card) * 3 / 4);
-      scroll-snap-align: start;
-    }
-  }
-
-  // Carousel controls
-  .carousel-controls {
+// Seletor guarda-chuva dos 7 carrosséis de produto da home.
+.ayo-home5-wrapper {
+  .awa-carousel-section .swiper.products-swiper,
+  .awa-carousel-section .slick-slider,
+  .top-home-content--trust-and-offers .hot-deal .swiper.hot-deal-slide,
+  .top-home-content--trust-and-offers .hot-deal .slick-slider {
     position: relative;
 
-    .carousel-arrow {
+    .swiper-wrapper,
+    .slick-track {
+      display: flex;
+      align-items: stretch;
+      gap: @awa-carousel-gap;
+      margin: 0;
+    }
+
+    .swiper-slide,
+    .slick-slide {
+      height: auto;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    // Necessário para sobrescrever widths inline do Swiper/Slick via CSS-only.
+    .swiper-slide,
+    .slick-slide {
+      width: calc((100% - ((@awa-carousel-desktop-columns - 1) * @awa-carousel-gap)) / @awa-carousel-desktop-columns) !important;
+      max-width: calc((100% - ((@awa-carousel-desktop-columns - 1) * @awa-carousel-gap)) / @awa-carousel-desktop-columns) !important;
+      flex: 0 0 calc((100% - ((@awa-carousel-desktop-columns - 1) * @awa-carousel-gap)) / @awa-carousel-desktop-columns) !important;
+    }
+
+    .product-item {
+      height: 100%;
+    }
+
+    .slick-prev,
+    .slick-next,
+    .swiper-button-prev,
+    .swiper-button-next {
+      .awa-carousel-arrow();
       position: absolute;
       top: 50%;
       transform: translateY(-50%);
-      width: 40px;
-      height: 40px;
-      border-radius: var(--awa-radius-full);
-      background: var(--awa-bg-elevated);
-      border: 1px solid var(--awa-border);
-      box-shadow: var(--awa-shadow-md);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      z-index: var(--awa-z-base);
-      color: var(--awa-text);
-      font-size: var(--awa-font-size-lg);
-      transition: all var(--awa-duration) var(--awa-ease);
 
-      &:hover {
-        background: var(--awa-primary);
-        color: var(--awa-text-inverse);
-        border-color: var(--awa-primary);
-        box-shadow: var(--awa-shadow-lg);
+      &::after {
+        font-size: 14px;
+        font-weight: 700;
       }
 
-      &.prev { left: -16px; }
-      &.next { right: -16px; }
+      &:hover {
+        background: @awa-carousel-arrow-hover-bg;
+        color: @awa-carousel-arrow-hover-icon;
+      }
+
+      &.slick-disabled,
+      &.swiper-button-disabled,
+      &[aria-disabled='true'] {
+        opacity: .4;
+        cursor: not-allowed;
+        pointer-events: none;
+      }
+    }
+
+    .slick-prev,
+    .swiper-button-prev {
+      left: @awa-carousel-arrow-offset-desktop;
+    }
+
+    .slick-next,
+    .swiper-button-next {
+      right: @awa-carousel-arrow-offset-desktop;
+    }
+
+    // Dots/paginação ocultos visualmente, mantendo acessibilidade no DOM.
+    .slick-dots,
+    .swiper-pagination {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      min-width: 1px !important;
+      min-height: 1px !important;
+      margin: -1px !important;
+      border: 0 !important;
+      padding: 0 !important;
+      overflow: hidden !important;
+      clip: rect(0 0 0 0) !important;
+      clip-path: inset(50%) !important;
+      white-space: nowrap !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+      left: 0 !important;
+      bottom: 0 !important;
+      transform: none !important;
+    }
+
+    .slick-dots li,
+    .slick-dots li button,
+    .swiper-pagination-bullet {
+      width: 1px !important;
+      height: 1px !important;
+      min-width: 1px !important;
+      min-height: 1px !important;
+      margin: 0 !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
     }
   }
 }
 
-// ---- Responsive grid columns (padronizado) ----
-
-// 3 colunas — small desktop (1024-1279)
-@media (max-width: (@awa-breakpoint-lg - 1)) {
-  .awa-product-carousel .product-items,
-  .products-grid.widget-product-grid .product-items {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .awa-product-carousel.is-carousel .product-items > .product-item {
-    flex: 0 0 calc(33.333% - var(--awa-gap-card) * 2 / 3);
+// Desktop >= 1200: 5 cards
+@media (min-width: 1200px) {
+  .ayo-home5-wrapper .awa-carousel-section .swiper.products-swiper .swiper-slide,
+  .ayo-home5-wrapper .awa-carousel-section .slick-slider .slick-slide,
+  .ayo-home5-wrapper .top-home-content--trust-and-offers .hot-deal .swiper.hot-deal-slide .swiper-slide,
+  .ayo-home5-wrapper .top-home-content--trust-and-offers .hot-deal .slick-slider .slick-slide {
+    width: calc((100% - ((@awa-carousel-desktop-columns - 1) * @awa-carousel-gap)) / @awa-carousel-desktop-columns) !important;
+    max-width: calc((100% - ((@awa-carousel-desktop-columns - 1) * @awa-carousel-gap)) / @awa-carousel-desktop-columns) !important;
+    flex-basis: calc((100% - ((@awa-carousel-desktop-columns - 1) * @awa-carousel-gap)) / @awa-carousel-desktop-columns) !important;
   }
 }
 
-// 2 colunas — tablet (768-1023)
-@media (max-width: (@awa-breakpoint-md - 1)) {
-  .awa-product-carousel .product-items,
-  .products-grid.widget-product-grid .product-items {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+// Tablet 768-1199: 3 cards
+@media (min-width: 768px) and (max-width: 1199px) {
+  .ayo-home5-wrapper .awa-carousel-section .swiper.products-swiper .swiper-slide,
+  .ayo-home5-wrapper .awa-carousel-section .slick-slider .slick-slide,
+  .ayo-home5-wrapper .top-home-content--trust-and-offers .hot-deal .swiper.hot-deal-slide .swiper-slide,
+  .ayo-home5-wrapper .top-home-content--trust-and-offers .hot-deal .slick-slider .slick-slide {
+    width: calc((100% - ((@awa-carousel-tablet-columns - 1) * @awa-carousel-gap)) / @awa-carousel-tablet-columns) !important;
+    max-width: calc((100% - ((@awa-carousel-tablet-columns - 1) * @awa-carousel-gap)) / @awa-carousel-tablet-columns) !important;
+    flex-basis: calc((100% - ((@awa-carousel-tablet-columns - 1) * @awa-carousel-gap)) / @awa-carousel-tablet-columns) !important;
   }
 
-  .awa-product-carousel.is-carousel .product-items > .product-item {
-    flex: 0 0 calc(50% - var(--awa-gap-card) / 2);
+  .ayo-home5-wrapper .awa-carousel-section .slick-prev,
+  .ayo-home5-wrapper .awa-carousel-section .swiper-button-prev,
+  .ayo-home5-wrapper .top-home-content--trust-and-offers .hot-deal .slick-prev,
+  .ayo-home5-wrapper .top-home-content--trust-and-offers .hot-deal .swiper-button-prev {
+    left: 4px;
   }
 
-  .carousel-controls .carousel-arrow { display: none; }
+  .ayo-home5-wrapper .awa-carousel-section .slick-next,
+  .ayo-home5-wrapper .awa-carousel-section .swiper-button-next,
+  .ayo-home5-wrapper .top-home-content--trust-and-offers .hot-deal .slick-next,
+  .ayo-home5-wrapper .top-home-content--trust-and-offers .hot-deal .swiper-button-next {
+    right: 4px;
+  }
 }
 
-// 2 colunas — mobile sm (480-767)
-@media (max-width: (@awa-breakpoint-sm - 1)) {
-  .awa-product-carousel .product-items,
-  .products-grid.widget-product-grid .product-items {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--awa-gap-card);
-  }
-}
-
-// 1 coluna — mobile xs (<480)
-@media (max-width: (@awa-breakpoint-xs - 1)) {
-  .awa-product-carousel .product-items,
-  .products-grid.widget-product-grid .product-items {
-    grid-template-columns: 1fr;
-    gap: var(--awa-gap-card);
+// Mobile <768: 2 cards + setas dentro do viewport para evitar corte.
+@media (max-width: 767px) {
+  .ayo-home5-wrapper .awa-carousel-section .swiper.products-swiper .swiper-slide,
+  .ayo-home5-wrapper .awa-carousel-section .slick-slider .slick-slide,
+  .ayo-home5-wrapper .top-home-content--trust-and-offers .hot-deal .swiper.hot-deal-slide .swiper-slide,
+  .ayo-home5-wrapper .top-home-content--trust-and-offers .hot-deal .slick-slider .slick-slide {
+    width: calc((100% - ((@awa-carousel-mobile-columns - 1) * @awa-carousel-gap)) / @awa-carousel-mobile-columns) !important;
+    max-width: calc((100% - ((@awa-carousel-mobile-columns - 1) * @awa-carousel-gap)) / @awa-carousel-mobile-columns) !important;
+    flex-basis: calc((100% - ((@awa-carousel-mobile-columns - 1) * @awa-carousel-gap)) / @awa-carousel-mobile-columns) !important;
   }
 
-  .awa-product-carousel.is-carousel .product-items > .product-item {
-    flex: 0 0 100%;
+  .ayo-home5-wrapper .awa-carousel-section .slick-prev,
+  .ayo-home5-wrapper .awa-carousel-section .swiper-button-prev,
+  .ayo-home5-wrapper .top-home-content--trust-and-offers .hot-deal .slick-prev,
+  .ayo-home5-wrapper .top-home-content--trust-and-offers .hot-deal .swiper-button-prev {
+    left: 4px;
+  }
+
+  .ayo-home5-wrapper .awa-carousel-section .slick-next,
+  .ayo-home5-wrapper .awa-carousel-section .swiper-button-next,
+  .ayo-home5-wrapper .top-home-content--trust-and-offers .hot-deal .slick-next,
+  .ayo-home5-wrapper .top-home-content--trust-and-offers .hot-deal .swiper-button-next {
+    right: 4px;
   }
 }

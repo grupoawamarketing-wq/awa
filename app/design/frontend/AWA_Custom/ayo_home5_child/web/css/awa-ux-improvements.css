@@ -1,0 +1,1489 @@
+/**
+ * AWA UX Improvements — Global Visual Refinements
+ * Auditoria visual 2026-04-10.
+ * Fase 2 refinements 2026-04-15.
+ *
+ * 1.  Product thumb — skeleton shimmer loader
+ * 2.  Broken images — graceful fallback
+ * 3.  Home carousels — placeholder min-height durante JS init
+ * 4.  Footer payment logos — micro melhorias
+ * 5.  Scrollbar sutil (Webkit)
+ * 6.  Focus ring global WCAG 2.1 AA
+ * 7.  Category/Search micro melhorias
+ * 8.  Minicart z-index e overlay
+ * 9.  SKU typography
+ * 10. Swiper overflow fix
+ * 11. Mobile header — logo duplo fix
+ * 12. Mirasvit search
+ * 13. B2B login-to-see-price / Footer trust bar
+ * 14. Homepage — espaçamento pré-footer
+ * 15. PDP — nav categorias
+ * 16. B2B login-to-see-price global
+ * 17. Category/Search — beat styles-l.css
+ * 18. CLS prevention
+ * 19. Card image separator — remover linha divisória
+ * 20. Broken/placeholder images — fallback mais limpo
+ * 21. Super Ofertas — padronizar CTA "Faça login"
+ * 22. Deal widget — esconder "Sold: 0/0" noise
+ * 23. Reviews "0 Avaliação" — esconder quando zero
+ */
+
+/* =============================================================================
+   1. PRODUCT THUMB — SKELETON SHIMMER LOADER
+   Shimmer enquanto a imagem lazy nao carregou. Cobre quando imagem aparece.
+   ============================================================================= */
+
+@keyframes awa-shimmer {
+    0%   { background-position: -600px 0; }
+    100% { background-position:  600px 0; }
+}
+
+/* Placeholder neutro enquanto a imagem carrega */
+.product-thumb {
+    background: var(--awa-bg-surface, #f7f7f7);
+    overflow: hidden;
+}
+
+/* Shimmer no wrapper da imagem (tem aspect-ratio:1/1, então tem área visível) */
+.item-product .product-image-wrapper,
+.swiper-slide .product-image-wrapper {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+    background-size: 600px 100%;
+    animation: awa-shimmer 1.4s ease-in-out infinite;
+}
+
+/* Imagem carregada cobre o shimmer — z-index garante que fica acima */
+.product-thumb img,
+.product-thumb .product-thumb-link,
+.item-product .product-image-wrapper img {
+    position: relative;
+    z-index: 1;
+}
+
+/* Reduzir movimento para usuários com preferência de acessibilidade */
+@media (prefers-reduced-motion: reduce) {
+    .item-product .product-image-wrapper,
+    .swiper-slide .product-image-wrapper {
+        animation: none;
+        background: #f0f0f0;
+    }
+}
+
+
+/* =============================================================================
+   2. BROKEN / MISSING IMAGES — graceful fallback
+   ============================================================================= */
+
+/* Payment logos: texto do alt visivel se img falhar */
+.awa-pay-logo img {
+    font-size: 9px;
+    color: var(--awa-text-muted, #888);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 46px;
+}
+
+
+/* =============================================================================
+   3. HOME CAROUSELS — PLACEHOLDER MIN-HEIGHT DURANTE JS INIT
+   Previne colapso da secao (espaco em branco) enquanto Swiper inicializa.
+   ============================================================================= */
+
+.rokan-newproduct .swiper-wrapper,
+.rokan-bestseller .swiper-wrapper,
+.rokan-onsale .swiper-wrapper,
+.rokan-toprate .swiper-wrapper,
+.rokan-featured .swiper-wrapper,
+.rokan-mostviewed .swiper-wrapper,
+.categorytab-container .swiper-wrapper,
+.list-tab-product .swiper-wrapper {
+    min-height: 300px;
+}
+
+.rokan-newproduct .swiper-slide,
+.rokan-bestseller .swiper-slide,
+.categorytab-container .swiper-slide {
+    min-width: 180px;
+}
+
+
+/* =============================================================================
+   4. FOOTER PAYMENT LOGOS
+   ============================================================================= */
+
+.awa-footer-pay-logos {
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.awa-pay-logo {
+    min-width: 40px;
+    min-height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--awa-radius-sm, 4px);
+    border: 1px solid var(--awa-gray-200, #e5e5e5);
+    background: var(--awa-bg-surface, #fff);
+    padding: 3px 6px;
+    transition: border-color 0.15s;
+}
+
+.awa-pay-logo:hover {
+    border-color: var(--awa-gray-300, #ccc);
+}
+
+.awa-pay-logo img {
+    display: block;
+    max-height: 24px;
+    width: auto;
+    max-width: 46px;
+    object-fit: contain;
+}
+
+
+/* =============================================================================
+   5. SCROLLBAR — WEBKIT SUTIL
+   ============================================================================= */
+
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--awa-bg-muted, #f5f5f5);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--awa-border-strong, #ccc);
+    border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--awa-text-muted, #888);
+}
+
+
+/* =============================================================================
+   6. FOCUS RING GLOBAL — WCAG 2.1 AA
+   Remove outline em clique, mantem para teclado/screen reader.
+   ============================================================================= */
+
+:focus:not(:focus-visible) {
+    outline: none;
+}
+
+:focus-visible {
+    outline: 2px solid var(--awa-primary, #b73337);
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+button:focus-visible,
+.action:focus-visible {
+    border-radius: var(--awa-radius-sm, 4px);
+}
+
+
+/* =============================================================================
+   7. CATEGORY / SEARCH — MICRO MELHORIAS
+   ============================================================================= */
+
+/* Breadcrumb */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .breadcrumbs {
+    margin-bottom: 8px;
+    font-size: 12px;
+}
+
+/* Toolbar top: separador sutil */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .toolbar-products.toolbar-top {
+    border-bottom: 1px solid var(--awa-border, #e5e5e5);
+    padding-bottom: 10px;
+    margin-bottom: 12px;
+}
+
+/* Paginacao: botoes com tamanho minimo e hover */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .pages .item a.page,
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .pages .item strong.page {
+    min-width: 34px;
+    min-height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--awa-radius-sm, 4px);
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid var(--awa-border, #e5e5e5);
+    background: var(--awa-bg-surface, #fff);
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .pages .item a.page:hover {
+    background: var(--awa-bg-alt, #f5f5f5);
+    border-color: var(--awa-border-strong, #ccc);
+    color: var(--awa-primary, #b73337);
+}
+
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .pages .item.current strong.page {
+    background: var(--awa-primary, #b73337);
+    border-color: var(--awa-primary, #b73337);
+    color: #fff;
+}
+
+/* Filter title */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .filter-options-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--awa-border, #e5e5e5);
+    margin-bottom: 6px;
+}
+
+/* Filter items */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .filter-options-content .item a {
+    font-size: 12px;
+    color: var(--awa-text-muted, #555);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 0;
+    min-height: 32px;
+    transition: color 0.15s;
+}
+
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .filter-options-content .item a:hover {
+    color: var(--awa-primary, #b73337);
+}
+
+/* Search page title */
+body.catalogsearch-result-index .page-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+/* Category description */
+body.catalog-category-view .category-description {
+    font-size: 13px;
+    color: var(--awa-text-muted, #666);
+    line-height: 1.6;
+    max-width: 70ch;
+    margin-bottom: 16px;
+}
+
+
+/* =============================================================================
+   8. MINICART — Z-INDEX E OVERLAY DE FUNDO
+   ============================================================================= */
+
+.minicart-wrapper .block-minicart {
+    z-index: 1001;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+
+/* =============================================================================
+   9. SKU TYPOGRAPHY
+   ============================================================================= */
+
+.awa-b2b-sku,
+.product-sku,
+.product-item-sku {
+    font-size: 10px;
+    color: var(--awa-text-light, #aaa);
+    letter-spacing: 0.03em;
+}
+
+/* =============================================================================
+   10. SWIPER OVERFLOW FIX — prevent autoplay slide transitions from extending
+   body scrollWidth. The footer brand slider and other Swiper carousels
+   temporarily expose the next slide at translateX(viewport_width) during
+   transitions, causing oscillating horizontal overflow.
+   ============================================================================= */
+
+.footer_brand_list_slider,
+.rokan-newproduct,
+.rokan-bestseller,
+.rokan-onsale,
+.rokan-toprate,
+.rokan-featured,
+.rokan-mostviewed,
+.categorytab-container,
+.list-tab-product,
+[data-content-type="products"][data-appearance="carousel"],
+[data-content-type="slider"] {
+    overflow: hidden;
+}
+
+
+@media (max-width: 767px) {
+    .rokan-newproduct .swiper-wrapper,
+    .rokan-bestseller .swiper-wrapper,
+    .categorytab-container .swiper-wrapper {
+        min-height: 260px;
+    }
+
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+        .toolbar-products.toolbar-top {
+        margin-bottom: 8px;
+    }
+}
+
+
+/* =============================================================================
+   11. MOBILE HEADER — corrige logo duplo
+   awa-bundle-mcp-header.css aplica display:flex !important sem breakpoint em
+   .awa-header-brand-desktop, sobrescrevendo o display:none de max-width:991px
+   definido em awa-bundle-site.css. Fix: força ocultar em mobile com mesma
+   especificidade + breakpoint.
+   ============================================================================= */
+
+@media (max-width: 991px) {
+    /* Specificity matches awa-header-classic-redesign.css (html body + 4 ancestors) */
+    html body .page-wrapper .awa-site-header .awa-main-header .awa-header-brand-desktop,
+    html body .page-wrapper .awa-site-header .awa-header-brand-desktop {
+        display: none !important;
+    }
+
+    html body .page-wrapper .awa-site-header .header .awa-header-mobile-logo,
+    html body .page-wrapper .awa-site-header .header .awa-header-mobile-logo-fallback {
+        display: inline-flex !important;
+    }
+}
+
+
+/* =============================================================================
+   12. MIRASVIT SEARCH — tabs, CMS content, empty state
+   ============================================================================= */
+
+/* Tabs container */
+.mst-search__result-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    list-style: none;
+    margin: 0 0 16px;
+    padding: 0;
+    border-bottom: 1px solid var(--awa-border, #e5e5e5);
+    padding-bottom: 12px;
+}
+
+.mst-search__result-tabs li {
+    margin: 0;
+    padding: 0;
+}
+
+.mst-search__result-tabs li a {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: var(--awa-radius-pill, 9999px);
+    border: 1px solid var(--awa-border, #e5e5e5);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--awa-text-muted, #555);
+    text-decoration: none;
+    background: var(--awa-bg-surface, #fff);
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.mst-search__result-tabs li a:hover {
+    border-color: var(--awa-primary, #b73337) !important;
+    color: var(--awa-primary, #b73337) !important;
+}
+
+.mst-search__result-tabs li a.active {
+    background: var(--awa-primary, #b73337) !important;
+    border-color: var(--awa-primary, #b73337) !important;
+    color: #fff !important;
+    font-weight: 600 !important;
+}
+
+/* CMS page results (Informações tab) */
+.mst-search__index {
+    padding: 0;
+}
+
+.mst-search__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.mst-search__list li {
+    padding: 14px 16px;
+    border: 1px solid var(--awa-border, #e5e5e5);
+    border-radius: var(--awa-radius-md, 8px);
+    background: var(--awa-bg-surface, #fff);
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.mst-search__list li:hover {
+    border-color: var(--awa-border-strong, #ccc);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.mst-search__index-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.mst-search__index-title a {
+    color: var(--awa-text, #333);
+    text-decoration: none;
+}
+
+.mst-search__index-title a:hover {
+    color: var(--awa-primary, #b73337);
+}
+
+.mst-search__index-content {
+    font-size: 12px;
+    color: var(--awa-text-muted, #666);
+    line-height: 1.6;
+    max-height: 80px;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
+
+/* Category results */
+.mst-search__index-magento-catalog-category .mst-search__list li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+}
+
+/* "No more results" notice inside alternate tab */
+.catalogsearch-result-index .search.results .message.notice {
+    background: var(--awa-bg-alt, #f5f5f5);
+    border: 1px solid var(--awa-border, #e5e5e5);
+    border-radius: var(--awa-radius-md, 8px);
+    padding: 16px 20px;
+    font-size: 13px;
+    color: var(--awa-text-muted, #666);
+    margin-top: 16px;
+}
+
+/* Highlight match text */
+.mst-search__highlight {
+    background: var(--awa-brand-opacity-10, rgba(183, 51, 55, 0.10));
+    color: var(--awa-primary, #b73337);
+    border-radius: 2px;
+    padding: 0 2px;
+    font-weight: 600;
+}
+
+/* Search "in" breadcrumb */
+.mst-search-in__wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    font-size: 12px;
+    color: var(--awa-text-muted, #666);
+}
+
+.mst-search-in__title {
+    font-weight: 600;
+    color: var(--awa-text, #333);
+}
+
+.mst-search-in__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border: 1px solid var(--awa-border, #e5e5e5);
+    border-radius: var(--awa-radius-pill, 9999px);
+    font-size: 12px;
+    color: var(--awa-text-muted, #555);
+    text-decoration: none;
+    transition: border-color 0.15s, color 0.15s;
+}
+
+.mst-search-in__item:hover {
+    border-color: var(--awa-primary, #b73337);
+    color: var(--awa-primary, #b73337);
+}
+
+.mst-search-in__item .count {
+    font-weight: 600;
+    color: var(--awa-primary, #b73337);
+}
+
+@media (max-width: 767px) {
+    .mst-search__result-tabs {
+        gap: 4px;
+    }
+
+    .mst-search__result-tabs li a {
+        font-size: 12px;
+        padding: 5px 10px;
+    }
+
+    .mst-search__list li {
+        padding: 12px;
+    }
+
+    .mst-search__index-content {
+        -webkit-line-clamp: 2;
+        max-height: 56px;
+    }
+}
+
+
+/* =============================================================================
+   13. FOOTER TRUST BAR — mobile: 2×2 grid compacto em vez de 4 colunas
+   ============================================================================= */
+
+.awa-footer-trust-bar {
+    padding: 16px 0;
+    border-top: 1px solid var(--awa-border, #e5e5e5);
+    border-bottom: 1px solid var(--awa-border, #e5e5e5);
+    margin-bottom: 0;
+}
+
+.awa-footer-trust-grid {
+    display: flex;
+    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    gap: 16px;
+    align-items: start;
+}
+
+.awa-footer-trust-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.awa-footer-trust-icon {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--awa-primary, #b73337);
+}
+
+.awa-footer-trust-icon svg {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+}
+
+.awa-footer-trust-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.awa-footer-trust-copy strong {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--awa-text, #333);
+    line-height: 1.3;
+}
+
+.awa-footer-trust-copy span {
+    font-size: 11px;
+    color: var(--awa-text-muted, #666);
+    line-height: 1.3;
+}
+
+@media (max-width: 991px) {
+    .awa-footer-trust-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+}
+
+@media (max-width: 479px) {
+    .awa-footer-trust-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .awa-footer-trust-icon {
+        width: 26px;
+        height: 26px;
+    }
+
+    .awa-footer-trust-icon svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .awa-footer-trust-copy strong {
+        font-size: 11px;
+    }
+
+    .awa-footer-trust-copy span {
+        font-size: 10px;
+    }
+}
+
+/* 13. B2B login-to-see-price / Footer trust bar
+   Redesenhado como CTA compacto e legível dentro do card de produto.
+   Aplica globalmente (grid, carrossel, PDP).
+   ============================================================================= */
+
+/* Regras unificadas movidas para a seção 27 no final do arquivo para garantir vitória na cascata */
+
+/* Reset the ghost lock icon visual-audit-consolidated injects on the container ::before */
+body .page-wrapper .product-item .b2b-login-to-see-price::before,
+body .page-wrapper .item-product .b2b-login-to-see-price::before {
+    content: none !important;
+    display: none !important;
+}
+
+/* Link button — (0,4,2) beats visual-audit-consolidated (0,3,2) AND bundle-refinements (0,1,1)
+   Must include display+border or bundle-refinements (pos 12) collapses to inline/no-border */
+body .page-wrapper .top-home-content .item-product .b2b-login-to-see-price a,
+body .page-wrapper .ayo-home-block .item-product .b2b-login-to-see-price a,
+body .page-wrapper .products-swiper .item-product .b2b-login-to-see-price a,
+body .page-wrapper .swiper-slide .item-product .b2b-login-to-see-price a {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    width: 100% !important;
+    padding: 8px 12px !important;
+    background: transparent !important;
+    color: var(--awa-primary, #b73337) !important;
+    border: 1.5px solid var(--awa-primary, #b73337) !important;
+    border-radius: 6px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    line-height: 1.3 !important;
+    text-decoration: none !important;
+    white-space: nowrap !important;
+    cursor: pointer !important;
+}
+
+/* =============================================================================
+   15. PDP — NAV "TODAS AS CATEGORIAS" BUTTON LABEL
+   O bundle do PDP esconde .navigation.verticalmenu com display:none, deixando
+   o botão sem texto. Exibimos o nav mas escondemos a lista de categorias.
+   ============================================================================= */
+
+body.catalog-product-view .page-wrapper .header-control .sections.nav-sections.category-dropdown,
+body.catalog-product-view .page-wrapper .header-control .navigation.verticalmenu.side-verticalmenu {
+    display: block !important;
+}
+
+/* Esconder a lista de categorias — só o cabeçalho deve aparecer */
+body.catalog-product-view .navigation.verticalmenu.side-verticalmenu .list-category-dropdown,
+body.catalog-product-view .navigation.verticalmenu.side-verticalmenu .togge-menu {
+    display: none !important;
+}
+
+/* =============================================================================
+   16. B2B LOGIN-TO-SEE-PRICE — GLOBAL (categoria, busca, carrosseis)
+   PDP main column: regras canônicas ficam em awa-layout-standardization.css
+   (botão sólido vermelho). Aqui apenas regras globais de baixa especificidade
+   para category/search e carrosseis de produtos.
+   ============================================================================= */
+
+/* The <a> link becomes the primary CTA button */
+.b2b-login-to-see-price a {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    width: 100% !important;
+    padding: 8px 12px !important;
+    background: transparent !important;
+    color: var(--awa-primary, #b73337) !important;
+    border: 1.5px solid var(--awa-primary, #b73337) !important;
+    border-radius: 6px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    line-height: 1.3 !important;
+    letter-spacing: 0.01em !important;
+    text-decoration: none !important;
+    white-space: nowrap !important;
+    transition: background 0.18s ease, color 0.18s ease !important;
+    cursor: pointer !important;
+}
+
+.b2b-login-to-see-price a::before {
+    content: '';
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b73337' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    flex-shrink: 0;
+    transition: background-image 0.18s ease;
+}
+
+.b2b-login-to-see-price a:hover,
+.b2b-login-to-see-price a:focus-visible {
+    background: var(--awa-primary, #b73337) !important;
+    color: #fff !important;
+}
+
+.b2b-login-to-see-price a:hover::before,
+.b2b-login-to-see-price a:focus-visible::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E");
+}
+
+/* "para ver preços" label — subtle muted text below the button */
+.b2b-login-to-see-price {
+    /* text after the </a> — style via container font */
+    font-size: 11px !important;
+    color: var(--awa-text-muted, #888) !important;
+    font-weight: 400 !important;
+    line-height: 1.4 !important;
+}
+
+/* price-label inside the container: awa-bundle-refinements sets color:#fff (no !important),
+   override to keep text readable on transparent background */
+.b2b-login-to-see-price .price-label {
+    color: var(--awa-text-muted, #888) !important;
+}
+
+/* Wrapper context: ensure no overflow cuts the button */
+.info-price {
+    overflow: visible !important;
+}
+
+/* =============================================================================
+   17. CATEGORY/SEARCH — BEAT styles-l.css (loaded last) ON LINK BUTTON STYLE
+   styles-l.css sets display:inline !important; border:none !important at (0,4,1).
+   We need (0,4,2) — adding body element tag to the existing (0,4,1) selectors.
+   ============================================================================= */
+body.catalog-category-view .item-product .info-price .b2b-login-to-see-price a,
+body.catalogsearch-result-index .item-product .info-price .b2b-login-to-see-price a {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    width: 100% !important;
+    padding: 8px 12px !important;
+    background: transparent !important;
+    color: var(--awa-primary, #b73337) !important;
+    border: 1.5px solid var(--awa-primary, #b73337) !important;
+    border-radius: 6px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    line-height: 1.3 !important;
+    text-decoration: none !important;
+    white-space: nowrap !important;
+    transition: background 0.18s ease, color 0.18s ease !important;
+    cursor: pointer !important;
+}
+
+body.catalog-category-view .item-product .info-price .b2b-login-to-see-price a:hover,
+body.catalog-category-view .item-product .info-price .b2b-login-to-see-price a:focus-visible,
+body.catalogsearch-result-index .item-product .info-price .b2b-login-to-see-price a:hover,
+body.catalogsearch-result-index .item-product .info-price .b2b-login-to-see-price a:focus-visible {
+    background: var(--awa-primary, #b73337) !important;
+    color: #fff !important;
+}
+
+/* Mobile: smaller padding */
+@media (max-width: 575px) {
+    .b2b-login-to-see-price a {
+        font-size: 11px !important;
+        padding: 7px 10px !important;
+    }
+}
+
+/* =============================================================================
+   14. HOMEPAGE — REDUZIR ESPAÇAMENTO EXCESSIVO ANTES DO FOOTER
+   awa-bundle-tail.css dá margin-bottom: 64px a todo filho direto de .column.main
+   nas páginas CMS. As seções de trust/segurança ficam muito espaçadas.
+   ============================================================================= */
+
+/* Benefits bar ("Envio para todo o Brasil", etc.) */
+.cms-index-index .column.main .benefits-bar {
+    margin-bottom: 16px !important;
+}
+
+/* Seção "PIX · SSL · Compra Protegida" */
+.cms-index-index .column.main .awa-security-section,
+.cms-index-index .column.main .section.awa-security-section {
+    margin-bottom: 16px !important;
+}
+
+/* Wrapper anônimo que envolve .trust-badges-homepage */
+.cms-index-index .column.main > div:has(.trust-badges-homepage) {
+    margin-bottom: 0 !important;
+}
+
+/* Própria seção trust-badges */
+.trust-badges-homepage {
+    padding-top: 16px !important;
+    padding-bottom: 16px !important;
+}
+
+
+/* =============================================================================
+   18. CLS PREVENTION — Cumulative Layout Shift fixes (loaded SYNC via
+   default_head_blocks.xml so space is reserved before first paint)
+
+   Root causes identified from PSI score 54 / CLS 0.603:
+   a) OWL/Swiper carousels collapse to 0px before JS initializes → expand
+      after paint → everything below shifts down.
+   b) Banner slider uses padding-bottom aspect-ratio trick which is zeroed
+      out by awa-bundle-home-custom.css → image load causes shift.
+   c) Non-composited transitions on product cards (awa-bundle-home-custom
+      animates margin/width via transforms that affect layout).
+   ============================================================================= */
+
+/* --- 18a. Reserve carousel section heights before OWL/Swiper init ---
+   These are min-heights: once carousels initialize they may be taller,
+   but they will never collapse below this, preventing the upward shift. */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .rokan-newproduct,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .rokan-bestseller,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .rokan-onsale,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .rokan-toprate,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .rokan-featured,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .rokan-mostviewed {
+    min-height: 420px;
+    contain: layout style;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .categorytab-container,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .list-tab-product {
+    min-height: 460px;
+    contain: layout style;
+}
+
+/* --- 18b. Hero banner — 100% viewport width (full-bleed) + height reservation ---
+   Technique: width:100vw + margin-left:calc(50% - 50vw) escapes any centered
+   container hierarchy. Requires NO overflow:hidden/contain:layout on ancestors.
+
+   Overflow chain:
+     .ayo-home5-wrapper        → overflow-x: visible  (let banner escape)
+     .top-home-content--above-fold → overflow-x: visible  (let banner escape)
+     .top-home-content--above-fold > .banner-slider → full-bleed via 100vw trick
+     .banner-slider .wrapper_slider → overflow: hidden  (clip OWL slide transitions)
+
+   !important needed to win against:
+     - custom_default.css  (a { color: #b73337 !important })
+     - awa-bundle-refinements.css (various !important overrides)
+     - styles-l.css loaded last with padding rules on .ayo-home5-wrapper
+*/
+
+/* DOM note: .content-top-home renders OUTSIDE .page-wrapper in Ayo theme.
+   Chain: body > .content-top-home > .ayo-home5-wrapper > .top-home-content--above-fold > .banner-slider
+   Selectors must NOT include .page-wrapper. */
+
+/* 1. Overflow chain — ancestors must not clip the escaping banner.
+   Use overflow-x: clip (not hidden) so we don't create a new scroll container. */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .ayo-home5-wrapper {
+    overflow-x: clip !important;
+}
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .top-home-content--above-fold {
+    overflow-x: visible !important;
+}
+
+/* 2. Full-bleed on the banner-slider itself.
+   calc(50% - 50vw): 50% resolves to half the containing-block width; 50vw = half viewport.
+   The small scrollbar-width discrepancy (~5px) is absorbed by the clip on .ayo-home5-wrapper. */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .top-home-content--above-fold > .banner-slider,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .top-home-content--above-fold > .banner-slider.banner-slider2 {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    margin-left: calc(50% - 50vw) !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    border-radius: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    min-height: clamp(240px, 33vw, 520px);
+}
+
+/* 3. wrapper_slider: clip OWL Carousel transition slides */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .top-home-content--above-fold > .banner-slider .wrapper_slider {
+    height: auto !important;
+    min-height: inherit;
+    overflow: hidden;
+    padding-bottom: 0 !important;
+}
+
+/* 4. Banner images — fill full width */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .banner-slider .banner_item_bg img,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .banner-slider .banner_item > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+@media (max-width: 767px) {
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+        .top-home-content--above-fold > .banner-slider,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+        .top-home-content--above-fold > .banner-slider.banner-slider2 {
+        min-height: clamp(180px, 45vw, 320px);
+    }
+}
+
+/* --- 18c. Product images — intrinsic size prevents reflow on load ---
+   Prevents shift when lazy-loaded images go from 0×0 to their real size.
+   aspect-ratio matches the object-fit:contain constraint in awa-improvements-grid.css. */
+.item-product .product-image-wrapper,
+.product-item .product-image-wrapper {
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+}
+
+/* --- 18d. Non-composited animations → composited-only ---
+   PSI flagged 25 elements with non-composited animations (layout/paint transitions).
+   Our card hover uses transform+box-shadow (partially composited).
+   box-shadow and border-color transitions can't be made fully composited, but
+   we can ensure they're on isolated layers so they don't trigger ancestor repaints. */
+.item-product:hover,
+.product-item:hover {
+    will-change: transform;
+}
+
+/* Ensure .awa-home-section transitions don't animate layout properties.
+   NOTE: .top-home-content--above-fold hosts the full-bleed hero banner —
+   contain:layout would confine negative-margin full-bleed inside the container,
+   so we CANNOT apply it there. Only apply to sections that do NOT host full-bleed. */
+.awa-home-section,
+.top-home-content:not(.top-home-content--above-fold) {
+    contain: layout style;
+}
+
+/* --- 18e. Category/search page — reserve grid height before CSS applies ---
+   Without explicit height, the product grid starts at 0 before async CSS
+   restores display:grid, causing a single large shift. */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .wrapper.grid.products-grid ul.product-grid,
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+    .wrapper.grid.products-grid ul.container-products-switch {
+    min-height: 400px;
+}
+
+@media (max-width: 575px) {
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+        .rokan-newproduct,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+        .rokan-bestseller,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+        .rokan-onsale,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+        .rokan-featured,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+        .rokan-mostviewed {
+        min-height: 300px;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+        .categorytab-container,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+        .list-tab-product {
+        min-height: 340px;
+    }
+}
+
+
+/* =============================================================================
+   19. CARD IMAGE SEPARATOR — Remover linha divisória entre imagem e conteúdo
+   A linha entre product-thumb e product-info é ruído visual desnecessário.
+   Pode vir do parent theme (Rokanthemes AYO) como border-bottom ou ::after.
+   ============================================================================= */
+
+/* Remove qualquer border/separator entre a imagem e a área de texto do card */
+.item-product .product-thumb,
+.swiper-slide .item-product .product-thumb {
+    border-bottom: none !important;
+}
+
+.item-product .product-thumb::after,
+.swiper-slide .item-product .product-thumb::after {
+    display: none !important;
+}
+
+/* Remove hr/separator elements dentro dos cards */
+.item-product hr,
+.item-product .separator,
+.item-product .product-thumb + hr {
+    display: none !important;
+}
+
+/* Remove border-top que pode existir no .product-info vindo do parent theme */
+.item-product .product-info {
+    border-top: none !important;
+}
+
+
+/* =============================================================================
+   20. BROKEN/PLACEHOLDER IMAGES — Estilizar fallback mais limpo
+   Quando a imagem real não existe, o Magento mostra um placeholder genérico
+   (ícone de câmera cinza). Estilizar para ficar mais neutro e menos "quebrado".
+   ============================================================================= */
+
+/* Placeholder images: fundo neutro e filtro para discretizar */
+.product-thumb img[src*="placeholder"],
+.item-product img[src*="placeholder"],
+.product-image-photo[src*="placeholder"] {
+    opacity: 0.35 !important;
+    filter: grayscale(100%) !important;
+    mix-blend-mode: multiply;
+}
+
+/* Container do placeholder: fundo limpo */
+.product-thumb:has(img[src*="placeholder"]) {
+    background: #f5f5f5 !important;
+}
+
+
+/* =============================================================================
+   21. SUPER OFERTAS — Padronizar "para ver preços" text noise
+   Na seção de deals, "Faça login" e "para ver preços" aparecem separados.
+   Esconder o texto "para ver preços" solto e deixar só o botão CTA.
+   ============================================================================= */
+
+/* Deal widget: esconder texto "para ver preços" avulso */
+.rokan-onsale .b2b-login-to-see-price,
+.onsale-products .b2b-login-to-see-price,
+.deal-product .b2b-login-to-see-price,
+[class*="deal"] .b2b-login-to-see-price {
+    flex-direction: column !important;
+    gap: 0 !important;
+}
+
+/* O texto descritivo "para ver preços" fora do <a> fica oculto */
+.rokan-onsale .b2b-login-to-see-price > :not(a),
+.onsale-products .b2b-login-to-see-price > :not(a) {
+    display: none !important;
+}
+
+/* Manter só o <a> "Faça login" como CTA completo */
+.rokan-onsale .b2b-login-to-see-price a,
+.onsale-products .b2b-login-to-see-price a {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    padding: 7px 12px !important;
+    background: transparent !important;
+    color: var(--awa-primary, #b73337) !important;
+    border: 1.5px solid var(--awa-primary, #b73337) !important;
+    border-radius: 6px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    text-decoration: none !important;
+    transition: background 0.18s ease, color 0.18s ease !important;
+}
+
+.rokan-onsale .b2b-login-to-see-price a:hover,
+.onsale-products .b2b-login-to-see-price a:hover {
+    background: var(--awa-primary, #b73337) !important;
+    color: #fff !important;
+}
+
+
+/* =============================================================================
+   22. DEAL WIDGET — Esconder "Sold: 0/0" noise
+   O progress bar do deal mostra "Sold: 0/0" quando não há vendas.
+   Esconder completamente quando vazio ou zero.
+   ============================================================================= */
+
+/* Esconder progress bar e "Sold: X/Y" quando value é 0 */
+.deal-product .progress-bar,
+.deal-product .deal-sold,
+.rokan-onsale .deal-sold,
+.item-product .deal-sold,
+[class*="deal"] .deal-count,
+[class*="deal"] .sold-count,
+.item-product .sold-text,
+.product-item .sold-text {
+    display: none !important;
+}
+
+/* Esconder a barra de progresso completa no deal widget */
+.deal-product .deal-progress,
+.rokan-onsale .deal-progress,
+.item-product .deal-progress {
+    display: none !important;
+}
+
+
+/* =============================================================================
+   23. REVIEWS "0 Avaliação" — Esconder quando zero
+   Links "0 Avaliação" ou "0 Review(s)" são ruído quando não há reviews.
+   ============================================================================= */
+
+/* Esconder review summary quando não tem reviews (0 rating) */
+.item-product .reviews-actions:empty,
+.item-product .rating-summary:not([class*="rated"]) + .reviews-actions {
+    display: none !important;
+}
+
+/* Na homepage e listagens: esconder reviews de cards */
+.rokan-newproduct .reviews-actions,
+.rokan-bestseller .reviews-actions,
+.rokan-onsale .reviews-actions,
+.rokan-featured .reviews-actions,
+.rokan-mostviewed .reviews-actions,
+.list-tab-product .reviews-actions,
+.categorytab-container .reviews-actions,
+.swiper-slide .reviews-actions {
+    display: none !important;
+}
+
+/* Esconder rating summary vazio nos carrosséis */
+.rokan-newproduct .rating-summary,
+.rokan-bestseller .rating-summary,
+.rokan-onsale .rating-summary,
+.rokan-featured .rating-summary,
+.rokan-mostviewed .rating-summary,
+.list-tab-product .rating-summary,
+.swiper-slide .rating-summary {
+    display: none !important;
+}
+
+/* Seção de CTAs dos cards consolidada na seção 27 */
+    font-weight: 700 !important;
+    letter-spacing: 0.01em !important;
+    text-decoration: none !important;
+}
+
+:is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .item-product .b2b-login-to-see-price a::before {
+    width: 12px !important;
+    height: 12px !important;
+}
+
+:is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .item-product .b2b-login-to-see-price a:hover,
+:is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .item-product .b2b-login-to-see-price a:focus-visible {
+    background: transparent !important;
+    color: #842528 !important;
+    box-shadow: none !important;
+    text-decoration: underline !important;
+    text-underline-offset: 2px !important;
+}
+
+:is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .item-product .btn-add-to-cart.action.tocart,
+:is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .item-product .action.tocart {
+    min-height: 42px !important;
+    padding: 0 16px !important;
+    border-radius: 12px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.01em !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+:is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .item-product .btn-add-to-cart.action.tocart:hover,
+:is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .item-product .btn-add-to-cart.action.tocart:focus-visible,
+:is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .item-product .action.tocart:hover,
+:is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .item-product .action.tocart:focus-visible {
+    transform: none !important;
+    box-shadow: 0 10px 22px rgb(183 51 55 / 16%) !important;
+}
+
+/* =============================================================================
+   24. MOBILE CARDS — Botao "Adicionar" compacto em 2 colunas (max 375px)
+   Em telas estreitas o padding 0 16px + font 12px pode deixar o botao largo
+   demais. Reduzir padding e font-size para garantir encaixe sem wrap.
+   ============================================================================= */
+
+@media (max-width: 575px) {
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+    .page-wrapper .item-product .btn-add-to-cart.action.tocart,
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+    .page-wrapper .item-product .action.tocart {
+        font-size: 11px !important;
+        padding: 0 10px !important;
+        min-height: 38px !important;
+        white-space: nowrap !important;
+        letter-spacing: 0 !important;
+    }
+
+    /* Em 2 colunas o produto-thumb-link tem 165px de largura total.
+       Com padding:12px (de awa-improvements-grid.css) a area de imagem fica em 141px.
+       Reduzindo para 6px a imagem ocupa 153px — mais impacto visual. */
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+    .page-wrapper .item-product .product-thumb-link {
+        padding: 6px 6px 0 !important;
+    }
+
+    /* Info area: padding compacto para economizar espaco vertical */
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+    .page-wrapper .item-product .product-info {
+        padding: 0 8px 10px !important;
+    }
+
+    /* B2B login box: padding menor em 2 colunas (card ~165px, menos visual noise) */
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+    .page-wrapper .item-product .b2b-login-to-see-price {
+        padding: 6px 8px !important;
+        border-radius: 8px !important;
+        gap: 2px !important;
+    }
+
+    /* Linha do label "Preço para logados": fonte menor */
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+    .page-wrapper .item-product .b2b-login-to-see-price .price-label {
+        font-size: 10px !important;
+    }
+}
+
+
+/* =============================================================================
+   25. BREADCRUMB — Mobile: esconder items intermediarios, mostrar so inicio e fim
+   Breadcrumbs longos quebram o layout em mobile (375px).
+   Tecnica: flex overflow oculto + ultimo item visivel.
+   ============================================================================= */
+
+@media (max-width: 575px) {
+    .breadcrumbs .items {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        overflow: hidden !important;
+        align-items: center !important;
+        gap: 0 !important;
+    }
+
+    .breadcrumbs .item {
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        min-width: 0 !important;
+        flex-shrink: 1 !important;
+        max-width: 120px !important;
+    }
+
+    /* Ultimo item (pagina atual): nao cortar, flexivel */
+    .breadcrumbs .item:last-child {
+        flex-shrink: 0 !important;
+        max-width: none !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+    }
+
+    /* Separadores: nao encolher */
+    .breadcrumbs .item:not(:last-child)::after {
+        flex-shrink: 0 !important;
+    }
+}
+
+
+/* =============================================================================
+   26. PRICE BOX — Tipografia canonica para cards de categoria e busca
+   Estabelece hierarquia visual clara: preco destaque + riscado discreto.
+   Carregado por ultimo (async) para vencer todos os bundles.
+   ============================================================================= */
+
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+.page-wrapper .item-product .price-box .price {
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    color: #1a1a1a !important;
+    line-height: 1.2 !important;
+}
+
+/* Preco em oferta: destaque em vermelho primário */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+.page-wrapper .item-product .price-box .special-price .price {
+    color: var(--awa-primary, #b73337) !important;
+}
+
+/* Preco antigo: riscado + discreto */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+.page-wrapper .item-product .price-box .old-price .price {
+    font-size: 12px !important;
+    font-weight: 400 !important;
+    color: var(--awa-text-light, #aaaaaa) !important;
+    text-decoration: line-through !important;
+    line-height: 1.3 !important;
+}
+
+/* Label "Preço especial" / "Preço normal" — ruído visual, ocultar.
+   :not(.b2b-login-to-see-price) — preserva o label do gate B2B (contém o link de login) */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+.page-wrapper .item-product .price-box:not(.b2b-login-to-see-price) .price-label {
+    display: none !important;
+}
+
+/* Container de preço: alinhar preço especial + antigo lado a lado.
+   :not(.b2b-login-to-see-price) — exclui o gate B2B que também usa .price-box */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+.page-wrapper .item-product .price-box:not(.b2b-login-to-see-price) {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: baseline !important;
+    gap: 4px 8px !important;
+}
+
+/* SKU: esconder em mobile pequeno para economizar espaco vertical no card */
+@media (max-width: 575px) {
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+    .page-wrapper .item-product .product-item-sku,
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+    .page-wrapper .item-product .product-sku,
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+    .page-wrapper .item-product [class*="sku"] {
+        display: none !important;
+    }
+
+    /* Preco levemente menor em 2 colunas */
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+    .page-wrapper .item-product .price-box .price {
+        font-size: 14px !important;
+    }
+}
+
+/* =============================================================================
+   27. B2B GATE — Componente Unificado
+   Categoria/busca e home usam um único visual premium e persuasivo.
+   PDP permanece canônico em awa-pdp-b2b-pro.css.
+   ============================================================================= */
+
+/* === VARIAÇÃO A: Cards de categoria/busca (card estreito, ~165–212px) === */
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+.page-wrapper .item-product .b2b-login-to-see-price {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: center !important;
+    width: 100% !important;
+    min-height: auto !important;
+    padding: 8px 10px !important;
+    border-radius: var(--awa-radius-md, 8px) !important;
+    background: var(--awa-primary-light, #fef2f2) !important;
+    border: 1px solid var(--awa-brand-opacity-15, rgba(183, 51, 55, 0.15)) !important;
+    box-shadow: none !important;
+    gap: 2px !important;
+    color: var(--awa-text-secondary, #555) !important;
+    font-size: var(--awa-font-xs, 11px) !important;
+    font-weight: var(--awa-weight-medium, 500) !important;
+    line-height: 1.35 !important;
+    text-align: center !important;
+    white-space: normal !important;
+}
+
+/* === VARIAÇÃO B: Carousels da homepage (cards ~220px) === */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .item-product .b2b-login-to-see-price {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: center !important;
+    width: 100% !important;
+    min-height: auto !important;
+    padding: 10px 12px !important;
+    border-radius: var(--awa-radius-md, 8px) !important;
+    background: var(--awa-primary-light, #fef2f2) !important;
+    border: 1px solid var(--awa-brand-opacity-15, rgba(183, 51, 55, 0.15)) !important;
+    box-shadow: none !important;
+    gap: 3px !important;
+    color: var(--awa-text-secondary, #555) !important;
+    font-size: var(--awa-font-xs, 11px) !important;
+    font-weight: var(--awa-weight-medium, 500) !important;
+    line-height: 1.35 !important;
+    text-align: center !important;
+    white-space: normal !important;
+}
+
+/* Texto auxiliar "para ver preços" */
+:is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .item-product .b2b-login-to-see-price .price-label {
+    display: block !important;
+    margin: 0 !important;
+    color: inherit !important;
+    font-size: inherit !important;
+    font-weight: inherit !important;
+    line-height: inherit !important;
+    text-align: inherit !important;
+}
+
+/* Link "Faça login" nos cards/home */
+:is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .item-product .b2b-login-to-see-price a {
+    display: block !important;
+    width: 100% !important;
+    min-height: auto !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    color: var(--awa-primary, #b73337) !important;
+    font-size: var(--awa-font-sm, 12px) !important;
+    font-weight: var(--awa-weight-bold, 700) !important;
+    line-height: 1.3 !important;
+    text-decoration: none !important;
+    text-align: center !important;
+    white-space: normal !important;
+}
+
+:is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .item-product .b2b-login-to-see-price a::before {
+    content: none !important;
+    display: none !important;
+}
+
+:is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .item-product .b2b-login-to-see-price a:hover,
+:is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .item-product .b2b-login-to-see-price a:focus-visible {
+    background: transparent !important;
+    color: var(--awa-primary, #b73337) !important;
+    box-shadow: none !important;
+    text-decoration: underline !important;
+    text-underline-offset: 2px !important;
+}
+
+/* === VARIAÇÃO C: PDP (full-width, destaque máximo) === */
+/* Manter o awa-pdp-b2b-pro.css como está — design de referência */

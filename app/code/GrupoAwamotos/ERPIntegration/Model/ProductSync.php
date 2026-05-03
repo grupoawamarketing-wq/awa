@@ -846,6 +846,172 @@ class ProductSync implements ProductSyncInterface
         return $deactivated;
     }
 
+    /**
+     * Sync only products modified since the last successful product sync.
+     * Falls back to syncAll() if no previous sync exists.
+     *
+     * @return array Same result shape as syncAll()
+     */
+    public function syncDelta(): array
+    {
+        $lastSync = $this->getLastSuccessfulProductSync();
+
+        if ($lastSync === null) {
+            $this->logger->info('[ERP] No previous product sync found, running full sync');
+            return $this->syncAll();
+        }
+
+        $startTime = microtime(true);
+        $result = [
+            'created' => 0,
+            'updated' => 0,
+            'deactivated' => 0,
+            'errors' => 0,
+            'skipped' => 0,
+            'validation_failed' => 0,
+            'batches_processed' => 0,
+            'total_products' => 0,
+            'execution_time' => 0,
+            'mode' => 'delta',
+        ];
+
+        try {
+            $this->appState->setAreaCode(\Magento\Framework\App\Area::AREA_ADMINHTML);
+        } catch (\Magento\Framework\Exception\LocalizedException $e) {
+            // Already set
+        }
+
+        try {
+            $deltaProducts = $this->getErpProductsModifiedSince($lastSync);
+            $result['total_products'] = count($deltaProducts);
+
+            if ($result['total_products'] === 0) {
+                $this->logger->info('[ERP] Delta product sync: no changes since ' . $lastSync);
+                $result['execution_time'] = round((microtime(true) - $startTime) * 1000, 2);
+                return $result;
+            }
+
+            $this->logger->info('[ERP] Starting delta product sync', [
+                'modified_since' => $lastSync,
+                'total_products' => $result['total_products'],
+            ]);
+
+            $websiteIds = [$this->storeManager->getDefaultStoreView()->getWebsiteId()];
+
+            foreach ($deltaProducts as $erpProduct) {
+                $sku = trim((string) ($erpProduct['CODIGO'] ?? ''));
+
+                try {
+                    $validationResult = $this->productValidator->validate($erpProduct);
+                    if (!$validationResult->isValid()) {
+                        $result['validation_failed']++;
+                        continue;
+                    }
+
+                    $syncResult = $this->syncSingleProduct($erpProduct, $websiteIds, $validationResult);
+                    match ($syncResult) {
+                        'created' => $result['created']++,
+                        'updated' => $result['updated']++,
+                        default => $result['skipped']++,
+                    };
+                } catch (\Exception $e) {
+                    $result['errors']++;
+                    $this->logger->error('[ERP] Delta product sync error', [
+                        'sku' => $sku,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
+
+            $result['execution_time'] = round((microtime(true) - $startTime) * 1000, 2);
+
+            $this->syncLogResource->addLog(
+                'product',
+                'import',
+                $result['errors'] > 0 ? 'partial' : 'success',
+                sprintf(
+                    '[Delta] Criados: %d, Atualizados: %d, Erros: %d, Ignorados: %d | Tempo: %dms | Desde: %s',
+                    $result['created'],
+                    $result['updated'],
+                    $result['errors'],
+                    $result['skipped'],
+                    $result['execution_time'],
+                    $lastSync
+                ),
+                null,
+                null,
+                $result['created'] + $result['updated']
+            );
+
+            $this->logger->info('[ERP] Delta product sync completed', $result);
+        } catch (\Exception $e) {
+            $result['execution_time'] = round((microtime(true) - $startTime) * 1000, 2);
+            $this->logger->error('[ERP] Delta product sync failed', [
+                'error' => $e->getMessage(),
+            ]);
+            $this->syncLogResource->addLog('product', 'import', 'error', $e->getMessage());
+            $result['errors']++;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get ERP products modified since a given datetime
+     */
+    private function getErpProductsModifiedSince(string $since): array
+    {
+        $priceList = $this->helper->getDefaultPriceList();
+        $sql = "SELECT m.CODIGO, m.DESCRICAO, m.COMPLEMENTO, m.CODINTERNO,
+                       m.NCM, m.CPESO, m.VPESO, m.DIMENSOES, m.UNDVENDA,
+                       m.CKCOMERCIALIZA, m.CCKATIVO, m.VCKATIVO, m.TPMATERIAL,
+                       m.GRUPOCOMERCIAL, m.EDITDATE, m.COR,
+                       c.VLRCUSTO, c.MARGEMSUG,
+                       p.VLRVDSUG as VLRVENDA
+                FROM MT_MATERIAL m
+                LEFT JOIN MT_MATERIALCUSTO c ON c.MATERIAL = m.CODIGO AND c.FILIAL = :filial1
+                LEFT JOIN MT_MATERIALLISTA p
+                    ON p.MATERIAL = m.CODIGO
+                    AND p.FILIAL = :filial2
+                    AND p.FATORPRECO = :priceList
+                WHERE m.CCKATIVO = 'S'
+                AND m.EDITDATE > :since";
+
+        if ($this->helper->filterComercializa()) {
+            $sql .= " AND m.CKCOMERCIALIZA = 'S'";
+        }
+
+        $sql .= " ORDER BY m.EDITDATE ASC";
+
+        $params = [
+            ':filial1' => $this->helper->getStockFilial(),
+            ':filial2' => $this->helper->getStockFilial(),
+            ':priceList' => $priceList,
+            ':since' => $since,
+        ];
+
+        return $this->applyBaseSkuPriceFallback(
+            $this->connection->query($sql, $params)
+        );
+    }
+
+    /**
+     * Get timestamp of last successful product sync from sync log
+     */
+    private function getLastSuccessfulProductSync(): ?string
+    {
+        $connection = $this->syncLogResource->getConnection();
+        $select = $connection->select()
+            ->from('grupoawamotos_erp_sync_log', 'created_at')
+            ->where('entity_type = ?', 'product')
+            ->where('status IN (?)', ['success', 'partial'])
+            ->order('created_at DESC')
+            ->limit(1);
+
+        $result = $connection->fetchOne($select);
+        return $result ?: null;
+    }
+
     public function syncBySku(string $sku): bool
     {
         try {

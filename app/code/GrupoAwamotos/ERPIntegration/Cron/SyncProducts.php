@@ -30,7 +30,7 @@ class SyncProducts
             return;
         }
 
-        $result = $this->productSync->syncAll();
+        $result = $this->productSync->syncDelta();
         $this->logger->info('[ERP Cron] Product sync finished.', $result);
     }
 }

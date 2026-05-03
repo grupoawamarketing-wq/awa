@@ -122,7 +122,15 @@ body .page-wrapper .page_footer,.page-footer{background:#f8fafc !important;backg
 /* Header alignment fix */
 #html-body .page-wrapper .header-control.awa-nav-bar .awa-nav-bar__inner,#html-body .page-wrapper .awa-site-header .awa-nav-bar__inner{max-width:var(--awa-container-wide, var(--awa-container-max, 1440px))!important;margin:0 auto!important;width:100%!important;}
 /* cart-fallback SEMPRE oculto — minicart real via KO.js (guard para refinements.css async) */
+/* BUG-1: Header right-col overflow — extraído inline antes de awa-visual-bugfix.css ir async */
+@media(min-width:992px){.awa-site-header .awa-header-right-col{overflow:hidden!important;min-width:0!important;gap:12px!important;flex-wrap:nowrap!important}.awa-site-header .awa-header-right-col .awa-header-contact-links,.awa-site-header .awa-header-right-col .awa-header-account-prompt{flex:1 1 auto!important;min-width:0!important;overflow:hidden!important}.awa-header-account-prompt .awa-header-account-prompt__text,.awa-header-account-prompt .awa-header-account-prompt__cta-text{white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;max-width:100%!important;font-size:11px!important;line-height:1.3!important}.awa-site-header .awa-header-right-col .awa-header-cart,.awa-site-header .awa-header-right-col .mini-cart-wrapper{flex-shrink:0!important}}
 .awa-header-cart-fallback{display:none!important;visibility:hidden!important;pointer-events:none!important}
+/* FIX-HOME-MAIN-CRITICAL: themes5.min.css define .cms-index-index .page-main.container{display:none} — fix inline síncrono garante lazy-load de imagens. */
+body.cms-index-index .page-main.container,body.cms-home .page-main.container,body.cms-homepage_ayo_home5 .page-main.container{display:block!important}
+/* FIX-SECURITY-CRITICAL */
+body.cms-index-index .page-wrapper .column.main .awa-security-section,body.cms-home .page-wrapper .column.main .awa-security-section{display:block!important}
+/* FIX-SCROLL-TOP-CRITICAL */
+.fixed-right .fixed-right-ul li.scroll-top:not(.show){opacity:0!important;visibility:hidden!important;pointer-events:none!important}
 </style>
 <?php if ($heroPreloadUrl): ?>
 <!-- LCP Hero Image Preload — fetchpriority=high, com media queries (Swiper SlideBanner, homepage) -->
@@ -154,6 +162,18 @@ body .page-wrapper .page_footer,.page-footer{background:#f8fafc !important;backg
 <?php foreach ($jsPreloads as $jsUrl): ?>
 <link rel="preload" href="<?= $block->escapeUrl($jsUrl) ?>" as="script"/>
 <?php endforeach; ?>
+<?php /* themes.css — async (2026-05-xx, saves ~2550ms render blocking)
+         Removido de blocking via <remove src="css/themes.css"/> em default_head_blocks.xml.
+         Carregado aqui como media=print onload para zero-blocking download.
+         Anti-FOUC inline CSS cobre: hero slider, header bg, design tokens, grids.
+         Bootstrap v3.3.6 removido inteiramente (97% unused, 19KB, coberto por awa-super-global). */ ?>
+<?php $__themesUrl = $block->getViewFileUrl('css/themes.css'); ?>
+<link rel="preload" href="<?= $block->escapeUrl($__themesUrl) ?>" as="style"/>
+<link rel="stylesheet"
+      href="<?= $block->escapeUrl($__themesUrl) ?>"
+      media="print"
+      onload="this.media='all'"/>
+<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__themesUrl) ?>"/></noscript>
 <!-- AWA Async CSS Bundles -->
 <!-- Bundles estruturais críticos não podem depender de interação do usuário.
      Home/PLP/PDP precisam receber layout completo no first paint para evitar
@@ -196,21 +216,25 @@ body .page-wrapper .page_footer,.page-footer{background:#f8fafc !important;backg
       media="print"
       onload="this.media='all'"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($refinementsBundleUrl) ?>?v=2"/></noscript>
-<?php /* awa-visual-bugfix.css — consolidação de bugfix-2026-04-{28,29,30} + modernization-gridmotors (2026-05-02)
-         Elimina 3 requisições HTTP bloqueantes → 1 arquivo (saves ~300ms render blocking) */ ?>
+<?php /* awa-visual-bugfix.css — async (2026-05-xx, saves ~450ms render blocking)
+         Critical BUG-1 header right-col rules extracted to inline Anti-FOUC above.
+         BUG-3/5/6/7 rokan grid rules already in Anti-FOUC since v9.
+         Remainig rules (BUG-2,4,8 + Round2/3) non-critical for above-fold paint. */ ?>
 <?php $__bugfixConsolidatedUrl = $block->getViewFileUrl('css/awa-visual-bugfix.css'); ?>
+<link rel="preload" href="<?= $block->escapeUrl($__bugfixConsolidatedUrl) ?>?v=27" as="style"/>
 <link rel="stylesheet"
-      href="<?= $block->escapeUrl($__bugfixConsolidatedUrl) ?>?v=10"
-      media="all"/>
-<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__bugfixConsolidatedUrl) ?>?v=10"/></noscript>
-<?php /* awa-home-gap-fix.css — spacing sections; async: above-fold hero unaffected by section gaps */ ?>
-<?php $__homeGapFixUrl = $block->getViewFileUrl('css/awa-home-gap-fix.css'); ?>
-<link rel="preload" href="<?= $block->escapeUrl($__homeGapFixUrl) ?>?v=2" as="style"/>
-<link rel="stylesheet"
-      href="<?= $block->escapeUrl($__homeGapFixUrl) ?>?v=2"
+      href="<?= $block->escapeUrl($__bugfixConsolidatedUrl) ?>?v=27"
       media="print"
       onload="this.media='all'"/>
-<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__homeGapFixUrl) ?>?v=2"/></noscript>
+<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__bugfixConsolidatedUrl) ?>?v=27"/></noscript>
+<?php /* awa-home-gap-fix.css — spacing sections; async: above-fold hero unaffected by section gaps */ ?>
+<?php $__homeGapFixUrl = $block->getViewFileUrl('css/awa-home-gap-fix.css'); ?>
+<link rel="preload" href="<?= $block->escapeUrl($__homeGapFixUrl) ?>?v=11" as="style"/>
+<link rel="stylesheet"
+      href="<?= $block->escapeUrl($__homeGapFixUrl) ?>?v=11"
+      media="print"
+      onload="this.media='all'"/>
+<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__homeGapFixUrl) ?>?v=11"/></noscript>
 <?php /* awa-vertical-menu-desktop-final.css — desktop-only menu; async: not above-fold on mobile */ ?>
 <?php $__verticalMenuFinalUrl = $block->getViewFileUrl('css/awa-vertical-menu-desktop-final.css'); ?>
 <link rel="preload" href="<?= $block->escapeUrl($__verticalMenuFinalUrl) ?>?v=1" as="style"/>

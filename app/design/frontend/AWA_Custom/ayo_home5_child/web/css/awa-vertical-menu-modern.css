@@ -1,7 +1,8 @@
 /* ==========================================================================
- * AWA MOTOS — Vertical Menu Modernization v1
- * Data: 2026-04-26
- * Objetivo: Modernizar visual e UX do menu vertical sem afetar o que funciona.
+ * AWA MOTOS — Vertical Menu Modernization v2
+ * Data: 2026-04-29
+ * Objetivo: UX/visual premium — animações suaves, flyout polish, scroll
+ *           indicators, micro-interações, stagger entrance, badges animados.
  * Cascata: Carrega APÓS awa-bundle-refinements.css (último bundle).
  * Escopo: .navigation.verticalmenu.side-verticalmenu
  * ========================================================================== */
@@ -15,13 +16,14 @@ body .page-wrapper .navigation.verticalmenu.side-verticalmenu {
     --vm-shadow: 0 8px 32px rgb(0 0 0 / 10%), 0 2px 6px rgb(0 0 0 / 5%);
     --vm-shadow-flyout: 0 12px 40px rgb(0 0 0 / 14%), 0 4px 12px rgb(0 0 0 / 6%);
     --vm-border: rgb(0 0 0 / 6%);
-    --vm-hover-bg: var(--awa-primary-subtle);
-    --vm-active-bar: var(--awa-primary);
+    --vm-hover-bg: var(--awa-primary-subtle, rgba(183, 51, 55, 0.05));
+    --vm-active-bar: var(--awa-primary, #b73337);
     --vm-transition: 180ms cubic-bezier(0.4, 0, 0.2, 1);
+    --vm-transition-fast: 120ms cubic-bezier(0.4, 0, 0.2, 1);
+    --vm-flyout-enter: 220ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* ─── 2. TRIGGER "Departamentos" ──────────────────────────────────────── */
-/* Glassmorphism sutil no header + ícone animado */
 #html-body .page-wrapper .navigation.verticalmenu .our_categories.title-category-dropdown,
 #html-body .page-wrapper .our_categories.title-category-dropdown {
     border-radius: var(--vm-radius) var(--vm-radius) 0 0 !important;
@@ -54,14 +56,14 @@ body .page-wrapper .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.li
     border-radius: 0 0 var(--vm-radius) var(--vm-radius) !important;
     box-shadow: var(--vm-shadow) !important;
     border-color: var(--vm-border) !important;
-    backdrop-filter: blur(6px) saturate(140%) !important;
-    -webkit-backdrop-filter: blur(6px) saturate(140%) !important;
 }
 
 /* Scrollbar moderna e fina */
 body .page-wrapper .navigation.verticalmenu .togge-menu.list-category-dropdown {
     scrollbar-width: thin !important;
     scrollbar-color: rgb(0 0 0 / 10%) transparent !important;
+    scroll-behavior: smooth !important;
+    position: relative !important;
 }
 body .page-wrapper .navigation.verticalmenu .togge-menu.list-category-dropdown::-webkit-scrollbar {
     width: 3px !important;
@@ -72,6 +74,32 @@ body .page-wrapper .navigation.verticalmenu .togge-menu.list-category-dropdown::
 }
 body .page-wrapper .navigation.verticalmenu .togge-menu.list-category-dropdown::-webkit-scrollbar-thumb:hover {
     background: rgb(0 0 0 / 20%) !important;
+}
+
+/* ─── 3b. SCROLL SHADOW INDICATORS ───────────────────────────────────── */
+/* Pseudo-elementos para indicar conteúdo rolável (top/bottom fade) */
+body .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu.vmm-scroll-top::before,
+body .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu.vmm-scroll-bottom::after {
+    content: '' !important;
+    position: sticky !important;
+    display: block !important;
+    height: 24px !important;
+    pointer-events: none !important;
+    z-index: 2 !important;
+    opacity: 0 !important;
+    transition: opacity 300ms ease !important;
+}
+body .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu.vmm-scroll-top::before {
+    top: 0 !important;
+    background: linear-gradient(to bottom, #fff 0%, transparent 100%) !important;
+    margin-bottom: -24px !important;
+    opacity: 1 !important;
+}
+body .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu.vmm-scroll-bottom::after {
+    bottom: 0 !important;
+    background: linear-gradient(to top, #fff 0%, transparent 100%) !important;
+    margin-top: -24px !important;
+    opacity: 1 !important;
 }
 
 /* ─── 4. ITENS LEVEL0 — MODERNIZAÇÃO ─────────────────────────────────── */
@@ -92,7 +120,7 @@ body .page-wrapper .navigation.verticalmenu .togge-menu.list-category-dropdown >
     min-height: var(--vm-item-h) !important;
     padding: 0 36px 0 14px !important;
     gap: 10px !important;
-    color: var(--awa-text) !important;
+    color: var(--awa-text, #333) !important;
     transition: color var(--vm-transition),
                 background var(--vm-transition),
                 padding-left var(--vm-transition) !important;
@@ -116,7 +144,7 @@ body .page-wrapper .navigation.verticalmenu .togge-menu.list-category-dropdown >
 
 /* Hover state */
 body .page-wrapper .navigation.verticalmenu .togge-menu.list-category-dropdown > li.ui-menu-item.level0:hover > a.level-top {
-    color: var(--awa-primary) !important;
+    color: var(--awa-primary, #b73337) !important;
     background: var(--vm-hover-bg) !important;
     padding-left: 18px !important;
 }
@@ -127,13 +155,26 @@ body .page-wrapper .navigation.verticalmenu .togge-menu.list-category-dropdown >
 /* Active state */
 body .page-wrapper .navigation.verticalmenu .togge-menu > li.ui-menu-item.level0.vmm-active > a.level-top,
 body .page-wrapper .navigation.verticalmenu .togge-menu > li.ui-menu-item.level0._active > a.level-top {
-    color: var(--awa-primary) !important;
+    color: var(--awa-primary, #b73337) !important;
     font-weight: 550 !important;
     padding-left: 18px !important;
 }
 body .page-wrapper .navigation.verticalmenu .togge-menu > li.ui-menu-item.level0.vmm-active > a.level-top::before,
 body .page-wrapper .navigation.verticalmenu .togge-menu > li.ui-menu-item.level0._active > a.level-top::before {
     transform: scaleY(1) !important;
+}
+
+/* ─── 4b. CURRENT CATEGORY HIGHLIGHT ─────────────────────────────────── */
+body .page-wrapper .navigation.verticalmenu .togge-menu > li.ui-menu-item.level0.vmm-current-category > a.level-top {
+    color: var(--awa-primary, #b73337) !important;
+    font-weight: 600 !important;
+    padding-left: 18px !important;
+    background: rgba(183, 51, 55, 0.04) !important;
+}
+body .page-wrapper .navigation.verticalmenu .togge-menu > li.ui-menu-item.level0.vmm-current-category > a.level-top::before {
+    transform: scaleY(1) !important;
+    width: 3px !important;
+    background: var(--awa-primary, #b73337) !important;
 }
 
 /* ─── 5. ÍCONES SVG — refinamento ────────────────────────────────────── */
@@ -144,15 +185,18 @@ body .page-wrapper .navigation.verticalmenu .vmm-cat-icon {
     stroke-width: 1.6 !important;
     opacity: 0.55 !important;
     transition: opacity var(--vm-transition), stroke var(--vm-transition), transform var(--vm-transition) !important;
+    flex-shrink: 0 !important;
 }
 body .page-wrapper .navigation.verticalmenu li.level0:hover .awa-vmenu-icon svg,
 body .page-wrapper .navigation.verticalmenu li.level0:hover .vmm-cat-icon {
     opacity: 1 !important;
-    stroke: var(--awa-primary) !important;
+    stroke: var(--awa-primary, #b73337) !important;
     transform: scale(1.1) !important;
 }
 body .page-wrapper .navigation.verticalmenu li.level0.vmm-active .awa-vmenu-icon svg,
-body .page-wrapper .navigation.verticalmenu li.level0.vmm-active .vmm-cat-icon {
+body .page-wrapper .navigation.verticalmenu li.level0.vmm-active .vmm-cat-icon,
+body .page-wrapper .navigation.verticalmenu li.level0.vmm-current-category .awa-vmenu-icon svg,
+body .page-wrapper .navigation.verticalmenu li.level0.vmm-current-category .vmm-cat-icon {
     opacity: 1 !important;
     stroke: var(--awa-red, #b73337) !important;
 }
@@ -174,15 +218,15 @@ body .page-wrapper .navigation.verticalmenu li.level0.vmm-active .vmm-cat-icon {
         transition: border-color var(--vm-transition), transform var(--vm-transition) !important;
     }
     body .page-wrapper .navigation.verticalmenu .togge-menu > li.level0.parent:hover > a.level-top::after {
-        border-color: var(--awa-primary) !important;
+        border-color: var(--awa-primary, #b73337) !important;
         transform: rotate(45deg) translateX(2px) !important;
     }
     body .page-wrapper .navigation.verticalmenu .togge-menu > li.level0.parent.vmm-active > a.level-top::after {
-        border-color: var(--awa-primary) !important;
+        border-color: var(--awa-primary, #b73337) !important;
     }
 }
 
-/* ─── 7. BADGES (cat-label) — pill moderno ───────────────────────────── */
+/* ─── 7. BADGES (cat-label) — pill moderno com animação ──────────────── */
 body .page-wrapper .navigation.verticalmenu .cat-label {
     font-family: var(--vm-font) !important;
     font-size: 9px !important;
@@ -193,33 +237,119 @@ body .page-wrapper .navigation.verticalmenu .cat-label {
     line-height: 1 !important;
     text-transform: uppercase !important;
     flex-shrink: 0 !important;
+    animation: vmm-badge-pulse 3s ease-in-out infinite !important;
 }
 
-/* ─── 8. SUBMENU FLYOUT — DESKTOP ────────────────────────────────────── */
+/* Badge "Quente" — pulso sutil vermelho */
+body .page-wrapper .navigation.verticalmenu .cat-label[style*="background:#ff6600"],
+body .page-wrapper .navigation.verticalmenu .cat-label[style*="background: #ff6600"],
+body .page-wrapper .navigation.verticalmenu .cat-label.cat-label-hot {
+    background: linear-gradient(135deg, #ff6600 0%, #ff4400 100%) !important;
+    color: #fff !important;
+    animation: vmm-badge-glow-hot 2.5s ease-in-out infinite !important;
+}
+
+/* Badge "Oferta" — pulso sutil verde */
+body .page-wrapper .navigation.verticalmenu .cat-label[style*="background:#00aa00"],
+body .page-wrapper .navigation.verticalmenu .cat-label[style*="background: #00aa00"],
+body .page-wrapper .navigation.verticalmenu .cat-label.cat-label-sale {
+    background: linear-gradient(135deg, #0d9f4f 0%, #0a7f3f 100%) !important;
+    color: #fff !important;
+}
+
+@keyframes vmm-badge-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.85; }
+}
+
+@keyframes vmm-badge-glow-hot {
+    0%, 100% { box-shadow: 0 0 0 0 rgb(255 102 0 / 0%); }
+    50% { box-shadow: 0 0 6px 2px rgb(255 102 0 / 25%); }
+}
+
+/* ─── 8. SECTION DIVIDERS & LABELS — premium gradient ────────────────── */
+body .page-wrapper .navigation.verticalmenu .awa-vmenu__divider {
+    height: 1px !important;
+    background: linear-gradient(90deg, transparent 0%, rgb(0 0 0 / 8%) 20%, rgb(0 0 0 / 8%) 80%, transparent 100%) !important;
+    margin: 6px 14px !important;
+    pointer-events: none !important;
+}
+
+body .page-wrapper .navigation.verticalmenu .awa-vmenu__section-label {
+    font-family: var(--vm-font) !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1.2px !important;
+    color: var(--awa-text-muted, #999) !important;
+    padding: 10px 16px 4px !important;
+    background: transparent !important;
+    pointer-events: none !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+/* Linha decorativa após o label */
+body .page-wrapper .navigation.verticalmenu .awa-vmenu__section-label::after {
+    content: '' !important;
+    flex: 1 !important;
+    height: 1px !important;
+    background: linear-gradient(90deg, rgb(0 0 0 / 6%) 0%, transparent 100%) !important;
+}
+
+/* ─── 9. SUBMENU FLYOUT — DESKTOP (v2 com animação) ──────────────────── */
 @media (min-width: 992px) {
-    /* Painel do submenu modernizado */
+    /* Painel do submenu modernizado com animação de entrada */
     body .page-wrapper .navigation.verticalmenu .level0.submenu,
     body .page-wrapper .navigation.verticalmenu .level0 > .level0.submenu {
         border-radius: 0 var(--vm-radius) var(--vm-radius) 0 !important;
         box-shadow: var(--vm-shadow-flyout) !important;
         border: 1px solid rgb(0 0 0 / 6%) !important;
-        border-left: 3px solid var(--awa-primary) !important;
-        backdrop-filter: blur(8px) saturate(150%) !important;
-        -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
+        border-left: 3px solid var(--awa-primary, #b73337) !important;
+        /* Animação de entrada suave */
+        opacity: 0 !important;
+        transform: translateX(-8px) !important;
+        transition: opacity var(--vm-flyout-enter),
+                    transform var(--vm-flyout-enter),
+                    visibility 0ms linear var(--vm-flyout-enter) !important;
     }
 
-    /* Título da categoria no submenu */
-    body .page-wrapper .navigation.verticalmenu .level0.submenu .vmm-category-header {
-        padding: 16px 20px 12px !important;
-        border-bottom: 1px solid rgb(0 0 0 / 6%) !important;
-        margin-bottom: 4px !important;
+    /* Quando visível (via JS inline ou classe) */
+    body .page-wrapper .navigation.verticalmenu li.level0.vmm-active > .level0.submenu,
+    body .page-wrapper .navigation.verticalmenu li.level0:hover > .level0.submenu,
+    body .page-wrapper .navigation.verticalmenu .level0.submenu[style*="visibility: visible"],
+    body .page-wrapper .navigation.verticalmenu .level0.submenu.opened {
+        opacity: 1 !important;
+        transform: translateX(0) !important;
+        transition: opacity var(--vm-flyout-enter),
+                    transform var(--vm-flyout-enter),
+                    visibility 0ms linear 0ms !important;
     }
-    body .page-wrapper .navigation.verticalmenu .level0.submenu .vmm-category-header__title {
+
+    /* Cabeçalho da categoria no flyout */
+    body .page-wrapper .navigation.verticalmenu .level0.submenu .subcategory-title {
+        padding: 14px 20px 10px !important;
+        margin-bottom: 2px !important;
+    }
+    body .page-wrapper .navigation.verticalmenu .level0.submenu .subcategory-title > span {
         font-family: var(--vm-font) !important;
-        font-size: 16px !important;
+        font-size: 15px !important;
         font-weight: 700 !important;
         color: #2d3239 !important;
         letter-spacing: -0.01em !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+    }
+
+    /* Linha decorativa após título */
+    body .page-wrapper .navigation.verticalmenu .level0.submenu .subcategory-title > span::after {
+        content: '' !important;
+        flex: 1 !important;
+        height: 1px !important;
+        background: linear-gradient(90deg, rgb(0 0 0 / 8%) 0%, transparent 80%) !important;
+        min-width: 20px !important;
     }
 
     /* Links de subcategoria no flyout */
@@ -229,16 +359,34 @@ body .page-wrapper .navigation.verticalmenu .cat-label {
         font-size: 13px !important;
         font-weight: 450 !important;
         color: #555b66 !important;
-        padding: 7px 12px !important;
+        padding: 8px 14px !important;
         border-radius: 6px !important;
-        transition: color var(--vm-transition), background var(--vm-transition), padding-left var(--vm-transition) !important;
+        transition: color var(--vm-transition-fast), background var(--vm-transition-fast), padding-left var(--vm-transition-fast) !important;
         line-height: 1.4 !important;
+        position: relative !important;
     }
     body .page-wrapper .navigation.verticalmenu .level0.submenu .subchildmenu li a:hover,
     body .page-wrapper .navigation.verticalmenu .level0.submenu .navigation__inner-item--level1 > a:hover {
         color: var(--awa-red, #b73337) !important;
         background: var(--vm-hover-bg) !important;
-        padding-left: 16px !important;
+        padding-left: 18px !important;
+    }
+
+    /* Mini-barra no hover dos sub-links */
+    body .page-wrapper .navigation.verticalmenu .level0.submenu .subchildmenu li a::before {
+        content: '' !important;
+        position: absolute !important;
+        left: 4px !important;
+        top: 50% !important;
+        width: 2px !important;
+        height: 0 !important;
+        background: var(--awa-primary, #b73337) !important;
+        border-radius: 2px !important;
+        transform: translateY(-50%) !important;
+        transition: height var(--vm-transition-fast) !important;
+    }
+    body .page-wrapper .navigation.verticalmenu .level0.submenu .subchildmenu li a:hover::before {
+        height: 14px !important;
     }
 
     /* Subcategorias nível 1 (títulos) */
@@ -258,24 +406,26 @@ body .page-wrapper .navigation.verticalmenu .cat-label {
         color: var(--awa-red, #b73337) !important;
         text-transform: uppercase !important;
         letter-spacing: 0.05em !important;
-        padding: 8px 12px !important;
+        padding: 8px 14px !important;
         border-radius: 6px !important;
-        background: var(--awa-primary-subtle) !important;
-        transition: background var(--vm-transition), color var(--vm-transition) !important;
+        background: rgba(183, 51, 55, 0.06) !important;
+        transition: background var(--vm-transition), color var(--vm-transition), transform var(--vm-transition) !important;
         display: inline-flex !important;
         align-items: center !important;
         gap: 6px !important;
+        margin-top: 4px !important;
     }
     body .page-wrapper .navigation.verticalmenu .level0.submenu .vmm-view-all-link:hover,
     body .page-wrapper .navigation.verticalmenu .level0.submenu .navigation__inner-item--all > a:hover {
-        background: var(--awa-primary) !important;
+        background: var(--awa-primary, #b73337) !important;
         color: #fff !important;
+        transform: translateX(2px) !important;
     }
 
     /* Imagem de categoria no submenu */
     body .page-wrapper .navigation.verticalmenu .level0.submenu .navigation__inner-item--level1.imagem img {
         border-radius: 0 var(--vm-radius) var(--vm-radius) 0 !important;
-        transition: transform 0.3s ease !important;
+        transition: transform 0.35s ease !important;
     }
     body .page-wrapper .navigation.verticalmenu .level0.submenu .navigation__inner-item--level1.imagem:hover img {
         transform: scale(1.02) !important;
@@ -289,47 +439,16 @@ body .page-wrapper .navigation.verticalmenu .cat-label {
         color: rgb(0 0 0 / 35%) !important;
         margin-left: 4px !important;
     }
-
-    /* Empty state */
-    body .page-wrapper .navigation.verticalmenu .vmm-empty-state {
-        text-align: center !important;
-        padding: 40px 24px !important;
-    }
-    body .page-wrapper .navigation.verticalmenu .vmm-empty-state__icon {
-        width: 48px !important;
-        height: 48px !important;
-        stroke: rgb(0 0 0 / 15%) !important;
-        margin-bottom: 12px !important;
-    }
-    body .page-wrapper .navigation.verticalmenu .vmm-empty-state__text {
-        font-family: var(--vm-font) !important;
-        font-size: 13px !important;
-        color: #999 !important;
-        margin-bottom: 12px !important;
-    }
-    body .page-wrapper .navigation.verticalmenu .vmm-empty-state__link {
-        font-family: var(--vm-font) !important;
-        font-size: 12px !important;
-        font-weight: 700 !important;
-        color: var(--awa-red, #b73337) !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.05em !important;
-        padding: 8px 16px !important;
-        border-radius: 6px !important;
-        background: rgb(183 51 55 / 6%) !important;
-        transition: background var(--vm-transition) !important;
-        display: inline-block !important;
-    }
-    body .page-wrapper .navigation.verticalmenu .vmm-empty-state__link:hover {
-        background: var(--awa-red, #b73337) !important;
-        color: #fff !important;
-    }
 }
 
-/* ─── 9. EXPAND "Ver mais" — MODERNIZADO ─────────────────────────────── */
+/* ─── 10. EXPAND "Ver mais" — botão CTA modernizado ──────────────────── */
 body .page-wrapper .navigation.verticalmenu .togge-menu > li.expand-category-link {
     border-top: 1px solid rgb(0 0 0 / 5%) !important;
     border-bottom: none !important;
+    position: sticky !important;
+    bottom: 0 !important;
+    background: #fff !important;
+    z-index: 3 !important;
 }
 body .page-wrapper .navigation.verticalmenu .togge-menu > li.expand-category-link .vm-toggle-categories {
     font-family: var(--vm-font) !important;
@@ -342,9 +461,14 @@ body .page-wrapper .navigation.verticalmenu .togge-menu > li.expand-category-lin
     gap: 6px !important;
     border-radius: 0 0 var(--vm-radius) var(--vm-radius) !important;
     transition: background var(--vm-transition), color var(--vm-transition) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    text-decoration: none !important;
 }
 body .page-wrapper .navigation.verticalmenu .togge-menu > li.expand-category-link .vm-toggle-categories:hover {
-    background: rgb(183 51 55 / 4%) !important;
+    background: rgba(183, 51, 55, 0.06) !important;
 }
 body .page-wrapper .navigation.verticalmenu .togge-menu > li.expand-category-link .vm-toggle-icon {
     transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
@@ -354,7 +478,26 @@ body .page-wrapper .navigation.verticalmenu .togge-menu > li.expand-category-lin
     transform: rotate(180deg) !important;
 }
 
-/* ─── 10. MOBILE DRAWER — MODERNIZADO ────────────────────────────────── */
+/* ─── 11. "Todas as Categorias" — link final estilizado ──────────────── */
+body .page-wrapper .navigation.verticalmenu .togge-menu > li.ui-menu-item.level0:last-of-type[class*="todas"],
+body .page-wrapper .navigation.verticalmenu .togge-menu > li.ui-menu-item.level0.vmm-all-categories {
+    border-top: 1px solid rgb(0 0 0 / 6%) !important;
+    border-bottom: none !important;
+}
+body .page-wrapper .navigation.verticalmenu .togge-menu > li.ui-menu-item.level0.vmm-all-categories > a.level-top {
+    font-weight: 600 !important;
+    color: var(--awa-primary, #b73337) !important;
+    justify-content: center !important;
+    font-size: 12px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    background: rgba(183, 51, 55, 0.03) !important;
+}
+body .page-wrapper .navigation.verticalmenu .togge-menu > li.ui-menu-item.level0.vmm-all-categories > a.level-top:hover {
+    background: rgba(183, 51, 55, 0.08) !important;
+}
+
+/* ─── 12. MOBILE DRAWER — MODERNIZADO ────────────────────────────────── */
 @media (max-width: 991px) {
     /* Container do drawer */
     body.nav-open .page-wrapper .navigation.verticalmenu.side-verticalmenu {
@@ -397,8 +540,8 @@ body .page-wrapper .navigation.verticalmenu .togge-menu > li.expand-category-lin
 
     /* Submenu mobile expandido */
     body.nav-open .page-wrapper .navigation.verticalmenu .level0.submenu {
-        background: var(--awa-bg-subtle) !important;
-        border-left: 3px solid var(--awa-primary) !important;
+        background: var(--awa-bg-subtle, #fafafa) !important;
+        border-left: 3px solid var(--awa-primary, #b73337) !important;
         border-top: 1px solid rgb(0 0 0 / 4%) !important;
         padding: 8px 12px !important;
     }
@@ -436,7 +579,7 @@ body .page-wrapper .navigation.verticalmenu .togge-menu > li.expand-category-lin
     }
 }
 
-/* ─── 11. TABLET (768-991px) ─────────────────────────────────────────── */
+/* ─── 13. TABLET (768-991px) ─────────────────────────────────────────── */
 @media (min-width: 768px) and (max-width: 991px) {
     body.nav-open .page-wrapper .navigation.verticalmenu .togge-menu > li.ui-menu-item.level0 > a.level-top {
         font-size: 14.5px !important;
@@ -450,7 +593,7 @@ body .page-wrapper .navigation.verticalmenu .togge-menu > li.expand-category-lin
     }
 }
 
-/* ─── 12. DESKTOP PEQUENO (992-1199px) ───────────────────────────────── */
+/* ─── 14. DESKTOP PEQUENO (992-1199px) ───────────────────────────────── */
 @media (min-width: 992px) and (max-width: 1199px) {
     body .page-wrapper .navigation.verticalmenu .togge-menu.list-category-dropdown > li.ui-menu-item.level0 > a.level-top {
         font-size: 12.5px !important;
@@ -465,7 +608,7 @@ body .page-wrapper .navigation.verticalmenu .togge-menu > li.expand-category-lin
     }
 }
 
-/* ─── 13. FOCUS VISIBLE — acessibilidade moderna ─────────────────────── */
+/* ─── 15. FOCUS VISIBLE — acessibilidade moderna ─────────────────────── */
 body .page-wrapper .navigation.verticalmenu .togge-menu > li.ui-menu-item.level0 > a.level-top:focus-visible {
     outline: 2px solid var(--awa-red, #b73337) !important;
     outline-offset: -2px !important;
@@ -479,23 +622,99 @@ body .page-wrapper .navigation.verticalmenu .level0.submenu a:focus-visible {
     border-radius: 4px !important;
 }
 
-/* ─── 14. PREFERS-REDUCED-MOTION ─────────────────────────────────────── */
+/* ─── 16. PREFERS-REDUCED-MOTION ─────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
     body .page-wrapper .navigation.verticalmenu.side-verticalmenu {
         --vm-transition: 0ms !important;
+        --vm-transition-fast: 0ms !important;
+        --vm-flyout-enter: 0ms !important;
     }
     body .page-wrapper .navigation.verticalmenu .togge-menu,
     body .page-wrapper .navigation.verticalmenu .level0.submenu {
         animation: none !important;
     }
+    body .page-wrapper .navigation.verticalmenu .cat-label {
+        animation: none !important;
+    }
 }
 
-/* ─── 15. HIGH CONTRAST MODE ─────────────────────────────────────────── */
+/* ─── 17. HIGH CONTRAST MODE ─────────────────────────────────────────── */
 @media (forced-colors: active) {
     body .page-wrapper .navigation.verticalmenu .togge-menu > li.ui-menu-item.level0 > a.level-top::before {
         background: CanvasText !important;
     }
     body .page-wrapper .navigation.verticalmenu .togge-menu > li.ui-menu-item.level0 > a.level-top:focus-visible {
         outline: 2px solid CanvasText !important;
+    }
+    body .page-wrapper .navigation.verticalmenu .awa-vmenu__divider {
+        background: CanvasText !important;
+    }
+}
+
+/* ─── 18. STAGGER ANIMATION — itens entram com delay escalonado ──────── */
+@media (min-width: 992px) {
+    body .page-wrapper .navigation.verticalmenu .togge-menu.vmm-animate-in > li.ui-menu-item.level0 {
+        opacity: 0 !important;
+        transform: translateY(6px) !important;
+        animation: vmm-item-enter 200ms ease forwards !important;
+    }
+
+    /* Gerar delays para os primeiros 12 itens visíveis */
+    body .page-wrapper .navigation.verticalmenu .togge-menu.vmm-animate-in > li.ui-menu-item.level0:nth-child(1) { animation-delay: 30ms !important; }
+    body .page-wrapper .navigation.verticalmenu .togge-menu.vmm-animate-in > li.ui-menu-item.level0:nth-child(2) { animation-delay: 55ms !important; }
+    body .page-wrapper .navigation.verticalmenu .togge-menu.vmm-animate-in > li.ui-menu-item.level0:nth-child(3) { animation-delay: 80ms !important; }
+    body .page-wrapper .navigation.verticalmenu .togge-menu.vmm-animate-in > li.ui-menu-item.level0:nth-child(4) { animation-delay: 105ms !important; }
+    body .page-wrapper .navigation.verticalmenu .togge-menu.vmm-animate-in > li.ui-menu-item.level0:nth-child(5) { animation-delay: 130ms !important; }
+    body .page-wrapper .navigation.verticalmenu .togge-menu.vmm-animate-in > li.ui-menu-item.level0:nth-child(6) { animation-delay: 155ms !important; }
+    body .page-wrapper .navigation.verticalmenu .togge-menu.vmm-animate-in > li.ui-menu-item.level0:nth-child(7) { animation-delay: 180ms !important; }
+    body .page-wrapper .navigation.verticalmenu .togge-menu.vmm-animate-in > li.ui-menu-item.level0:nth-child(8) { animation-delay: 200ms !important; }
+    body .page-wrapper .navigation.verticalmenu .togge-menu.vmm-animate-in > li.ui-menu-item.level0:nth-child(9) { animation-delay: 215ms !important; }
+    body .page-wrapper .navigation.verticalmenu .togge-menu.vmm-animate-in > li.ui-menu-item.level0:nth-child(10) { animation-delay: 225ms !important; }
+    body .page-wrapper .navigation.verticalmenu .togge-menu.vmm-animate-in > li.ui-menu-item.level0:nth-child(n+11) { animation-delay: 235ms !important; }
+}
+
+@keyframes vmm-item-enter {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ─── 19. SUBMENU FLYOUT SUBCATEGORY GRID ────────────────────────────── */
+@media (min-width: 992px) {
+    /* Subchild grid otimizado */
+    body .page-wrapper .navigation.verticalmenu .level0.submenu .subchildmenu.mega-columns {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important;
+        gap: 2px !important;
+        padding: 8px 12px 12px !important;
+    }
+
+    /* Título da subcategoria dentro do grid ocupa full width */
+    body .page-wrapper .navigation.verticalmenu .level0.submenu .subchildmenu .subcategory-title {
+        grid-column: 1 / -1 !important;
+    }
+
+    /* "Ver tudo" link ocupa full width */
+    body .page-wrapper .navigation.verticalmenu .level0.submenu .subchildmenu .navigation__inner-item--all {
+        grid-column: 1 / -1 !important;
+        padding-top: 4px !important;
+        border-top: 1px solid rgb(0 0 0 / 5%) !important;
+        margin-top: 4px !important;
+    }
+}
+
+/* ─── 20. HOVER INTENT HELPER (CSS) ──────────────────────────────────── */
+/* Delay CSS para evitar abertura acidental do flyout ao passar o mouse rápido */
+@media (min-width: 992px) {
+    body .page-wrapper .navigation.verticalmenu .togge-menu > li.level0.parent > .level0.submenu {
+        transition-delay: 80ms !important;
+    }
+    body .page-wrapper .navigation.verticalmenu .togge-menu > li.level0.parent:hover > .level0.submenu {
+        transition-delay: 80ms !important;
     }
 }

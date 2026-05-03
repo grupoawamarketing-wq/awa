@@ -28,6 +28,7 @@ class EmailSender
     private const TEMPLATE_REENGAGEMENT = 'erp_alert_reengagement_customer';
     private const TEMPLATE_RFM_WEEKLY = 'erp_report_rfm_weekly';
     private const TEMPLATE_FORECAST = 'erp_alert_forecast';
+    private const TEMPLATE_STOCK_ANOMALY = 'erp_alert_stock_anomaly';
 
     private TransportBuilder $transportBuilder;
     private StateInterface $inlineTranslation;
@@ -401,5 +402,63 @@ class EmailSender
         }
 
         return $insights;
+    }
+
+    /**
+     * Send stock anomaly alert to admin when unusual stock changes are detected.
+     *
+     * @param int $anomalyCount Total anomalies detected
+     * @param array $samples Sample anomaly data [{sku, change_percent, previous_qty, new_qty}]
+     * @return bool
+     */
+    public function sendStockAnomalyAlert(int $anomalyCount, array $samples): bool
+    {
+        if (!$this->helper->isStockAnomalyAlertEnabled()) {
+            return false;
+        }
+
+        $recipientEmail = $this->helper->getStockAnomalyAlertEmail();
+        if (empty($recipientEmail)) {
+            return false;
+        }
+
+        try {
+            $store = $this->storeManager->getStore();
+
+            $samplesFormatted = array_map(function (array $sample): array {
+                return [
+                    'sku' => $sample['sku'] ?? '',
+                    'change_percent' => isset($sample['change_percent'])
+                        ? number_format((float) $sample['change_percent'], 1) . '%'
+                        : 'N/A',
+                    'previous_qty' => (int) ($sample['previous_qty'] ?? 0),
+                    'new_qty' => (int) ($sample['new_qty'] ?? 0),
+                ];
+            }, array_slice($samples, 0, 10));
+
+            $templateVars = [
+                'anomaly_count' => $anomalyCount,
+                'samples' => $samplesFormatted,
+                'report_date' => date('d/m/Y H:i'),
+                'store' => $store,
+            ];
+
+            $this->sendEmail(
+                self::TEMPLATE_STOCK_ANOMALY,
+                $recipientEmail,
+                $templateVars,
+                'frontend'
+            );
+
+            $this->logger->info(sprintf(
+                '[ERP Alert] Stock anomaly alert sent: %d anomalies detected',
+                $anomalyCount
+            ));
+
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('[ERP Alert] Error sending stock anomaly alert: ' . $e->getMessage());
+            return false;
+        }
     }
 }

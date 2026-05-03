@@ -1,0 +1,222 @@
+// =============================================
+// Fix: General Visual Bugs (Z-index, Overlaps, Mobile Spacing)
+// =============================================
+
+// 1. Fix WhatsApp Button overlapping Cookie Banner & Bottom Nav
+@media (max-width: 767px) {
+    // If there's a mobile nav bar or cookie banner, push WhatsApp up
+    .awa-whatsapp-float {
+        bottom: 85px !important; // Clear the bottom mobile navigation
+        z-index: 9998 !important; // Keep below modals (99990)
+    }
+
+    // CookieConsent JS toggles body.awa-cookie-banner-active
+    body.awa-cookie-banner-active .awa-whatsapp-float {
+        bottom: 160px !important;
+    }
+    
+    // Back to top button adjustment
+    #awaBackToTop {
+        bottom: 85px !important;
+        z-index: 9997 !important;
+    }
+
+    body.awa-cookie-banner-active #awaBackToTop {
+        bottom: 160px !important;
+    }
+}
+
+// Desktop + mobile: keep floating actions above cookie banner when active.
+body.awa-cookie-banner-active .awa-whatsapp-float,
+body.awa-cookie-banner-active #awaBackToTop {
+    bottom: calc(var(--awa-cookie-banner-height, 0px) + 24px) !important;
+}
+
+// 2. Fix Z-index conflicts between Modals and Submenus
+.modals-wrapper {
+    z-index: 100005 !important; // Must be higher than vertical menu flyout (10000)
+}
+
+#awa-cookie-banner {
+    z-index: 100000 !important; // Top priority but below Magento Modals
+}
+
+// 3. Fix missing Overflow on Carousels hiding Badges
+.swiper-wrapper {
+    // Ensure only badge/photo wrappers can overflow slightly without clipping.
+    .product-thumb,
+    .hot-onsale,
+    .onsale {
+        overflow: visible !important;
+    }
+}
+
+// 4. Duplicated topnav is fixed structurally in layout override
+// Rokanthemes_CustomMenu/layout/default.xml (no CSS hide hack required).
+
+// =============================================
+// Fix: Batch 2 - Structural & Micro-Interactions
+// =============================================
+
+// 5. Smooth Dismiss for B2B Promo Bar (Prevents abrupt CLS)
+#awa-b2b-promo-bar {
+    transition: max-height 0.35s ease-out, opacity 0.3s ease, padding 0.3s ease;
+    max-height: 60px;
+    overflow: hidden;
+    
+    &.is-dismissing {
+        max-height: 0 !important;
+        opacity: 0 !important;
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+        margin: 0 !important;
+        border: none !important;
+    }
+}
+
+// 6. Fix Search Bar crushing on Ultra-Mobile (320px)
+@media (max-width: 360px) {
+    .awa-header-primary-row {
+        flex-wrap: wrap;
+        .awa-header-actions, .awa-header-search-col {
+            order: 4;
+            width: 100% !important;
+            margin-top: 8px;
+            flex-basis: 100%;
+        }
+    }
+}
+
+// 7. Fix Static Grid Button Alignment (Uniform height for products with/without discount)
+.products-grid .product-item-info {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    
+    .product-item-details {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+    
+    .price-box, 
+    .product-item-inner {
+        margin-top: auto;
+    }
+}
+
+// 8. Fix Footer Social & Payment Icons Vertical Alignment
+.footer-static5 .footer-payments img, 
+.footer-static5 .social-links li {
+    vertical-align: middle;
+    display: inline-flex;
+    align-items: center;
+}
+
+// 9. QuickView Active Thumbnail State
+.fotorama__nav__frame.fotorama__active {
+    outline: 2px solid var(--awa-primary);
+    outline-offset: -2px;
+    opacity: 1 !important;
+}
+.fotorama__nav__frame {
+    opacity: 0.6;
+    transition: opacity 0.2s ease;
+}
+.fotorama__nav__frame:hover {
+    opacity: 0.9;
+}
+
+// 10. Vertical Menu Promo Flicker Fix
+// Use CSS Grid to stack slides instead of display:none/block.
+// This allows the container to automatically match the height of the tallest slide.
+.vmenu-promo-carousel {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+    
+    .vmenu-promo-slide {
+        grid-area: 1 / 1;
+        transition: opacity 0.5s ease-in-out;
+        z-index: 0;
+        
+        &.vmenu-promo-slide--active {
+            z-index: 1;
+        }
+    }
+}
+
+// 11. Footer brand slider pre-hydration stability (avoid layout jump)
+.footer_brand_list_slider:not([data-awa-footer-slider-ready='1']) {
+    min-height: 56px;
+    overflow: hidden;
+}
+
+// 12. Home spacing compaction (reduz "vazios" entre blocos sem quebrar o layout)
+body.cms-index-index {
+    .ayo-home5-wrapper > .top-home-content,
+    .ayo-home5-wrapper > .awa-home-section {
+        padding-block: clamp(20px, 3.2vw, 44px) !important;
+    }
+
+    .top-home-content + .top-home-content {
+        margin-top: clamp(10px, 1.8vw, 24px) !important;
+    }
+}
+
+// 13. Cookie banner theme moved to module CSS to avoid double-cascade/Fouc.
+
+// 14. Header/menu overlap guard for desktop nav shells
+@media (min-width: 1025px) {
+    .awa-nav-bar .awa-nav-categories .nav-sections {
+        position: relative;
+        z-index: 1;
+    }
+
+    .awa-nav-bar .awa-header-primary-nav .top-menu {
+        position: relative;
+        z-index: 2;
+    }
+}
+
+// 15. Header promo bar cleanup (replace inline styles in template)
+.awa-b2b-promo-bar__layout {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.awa-b2b-promo-close {
+    position: absolute;
+    right: 15px;
+    background: none;
+    border: 0;
+    color: #fff;
+    cursor: pointer;
+    padding: 4px;
+    font-size: 20px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    border-radius: 4px;
+}
+
+.awa-b2b-promo-close:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.8);
+    outline-offset: 2px;
+}
+
+// 16. Tighten trust/offers spacing to reduce large white gaps between home blocks
+body.cms-index-index .top-home-content--trust-and-offers {
+    margin-top: clamp(6px, 1vw, 14px) !important;
+}
+
+body.cms-index-index .top-home-content--trust-and-offers .top-home-content__trust-offers-grid {
+    row-gap: clamp(12px, 1.6vw, 20px) !important;
+}
+
+// 17. Footer label color cleanup (replace inline styles)
+.awa-footer-muted-label {
+    color: #4b5563 !important;
+}

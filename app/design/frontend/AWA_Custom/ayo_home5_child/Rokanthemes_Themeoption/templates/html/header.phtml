@@ -90,13 +90,32 @@ $checkoutSupportHtml = $headerHotlineHtml !== '' ? $headerHotlineHtml : '';
 	<div class="header-content" data-awa-header-content="true">
 		<!-- ═══ B2B PROMO BAR (scrolls away) ═══ -->
 		<div class="top-header awa-utility-bar awa-b2b-promo-bar"
+			id="awa-b2b-promo-bar"
 			data-awa-header-utility="b2b-promo"
 			role="complementary"
 			aria-label="<?= $escaper->escapeHtmlAttr(__('Ambiente exclusivo para empresas')) ?>">
-			<div class="awa-b2b-promo-bar__inner">
+			<div class="awa-b2b-promo-bar__inner awa-b2b-promo-bar__layout">
 				<p class="awa-b2b-promo-bar__text"><span class="awa-b2b-promo-bar__lead"><?= $escaper->escapeHtml(__('Ambiente exclusivo para vendas corporativas')) ?></span><span class="awa-b2b-promo-bar__separator" aria-hidden="true"> |&nbsp;</span><a href="<?= $escaper->escapeUrl($block->getUrl('b2b/register')) ?>" class="awa-b2b-promo-bar__cta"><strong><?= $escaper->escapeHtml(__('Cadastre agora')) ?></strong></a><span class="awa-b2b-promo-bar__tail">&nbsp;<?= $escaper->escapeHtml(__('sua empresa e confira ofertas especiais para o seu CNPJ.')) ?></span></p>
+				<button type="button" id="awa-b2b-promo-close" class="awa-b2b-promo-close" aria-label="<?= $escaper->escapeHtmlAttr(__('Fechar')) ?>">&times;</button>
 			</div>
 		</div>
+		<script>
+			/* Bug #20: dismiss com transição CSS suave (evita CLS abrupto) */
+			try {
+				var _bar = document.getElementById('awa-b2b-promo-bar');
+				if (localStorage.getItem('awa_b2b_promo_dismissed') === '1') {
+					if (_bar) _bar.style.display = 'none';
+				}
+				var _close = document.getElementById('awa-b2b-promo-close');
+				if (_close && _bar) {
+					_close.addEventListener('click', function() {
+						_bar.classList.add('is-dismissing');
+						setTimeout(function() { _bar.style.display = 'none'; }, 320);
+						localStorage.setItem('awa_b2b_promo_dismissed', '1');
+					});
+				}
+			} catch (e) {}
+		</script>
 	</div>
 </div>
 
@@ -126,7 +145,14 @@ $checkoutSupportHtml = $headerHotlineHtml !== '' ? $headerHotlineHtml : '';
 								<?= /* @noEscape — Links de conta: bloco do core */ $this->getChildHtml('top.links') ?>
 							</nav>
 							<div class="awa-header-cart mini-cart-wrapper shadowcart awa-header-minicart" data-awa-header-cart="true">
-								<a class="awa-header-cart-fallback" href="<?= $escaper->escapeUrl($block->getUrl('checkout/cart')) ?>" aria-label="<?= $escaper->escapeHtmlAttr(__('Abrir carrinho')) ?>"><span><?= $escaper->escapeHtml(__('Abrir carrinho')) ?></span></a>
+								<a class="awa-header-cart-fallback" href="<?= $escaper->escapeUrl($block->getUrl('checkout/cart')) ?>" aria-label="<?= $escaper->escapeHtmlAttr(__('Abrir carrinho')) ?>">
+									<svg class="awa-header-cart-fallback__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+										<path fill="#b73337" d="M2 7l10 5 10-5v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7z"/>
+										<path fill="none" stroke="#b73337" stroke-width="2" stroke-linejoin="round" d="M2 7l10-5 10 5"/>
+										<path fill="none" stroke="#ffffff" stroke-width="1.45" stroke-linejoin="round" d="M2 7l10 5 10-5 M12 12v10"/>
+									</svg>
+									<span class="awa-sr-only"><?= $escaper->escapeHtml(__('Abrir carrinho')) ?></span>
+								</a>
 								<div class="mini-carts">
 									<?= /* @noEscape — Minicart: bloco do core */ $this->getChildHtml('minicart') ?>
 								</div>
@@ -157,6 +183,7 @@ $checkoutSupportHtml = $headerHotlineHtml !== '' ? $headerHotlineHtml : '';
 						</nav>
 					</div>
 				</div>
+				<?= /* @noEscape — Quick links de categorias populares */ $this->getChildHtml('awaNavQuickLinks') ?>
 				<div class="awa-header-locale">
 					<div class="top-header-locale">
 						<?= /* @noEscape — Idioma: bloco do core */ $this->getChildHtml('store_language') ?>

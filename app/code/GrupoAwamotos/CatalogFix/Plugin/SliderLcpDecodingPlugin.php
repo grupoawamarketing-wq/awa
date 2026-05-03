@@ -28,7 +28,7 @@ final class SliderLcpDecodingPlugin
     public function afterGetImageElement(
         Slider $subject,
         string $result,
-        string $src,
+        ?string $src,
         string $altText = '',
         bool $isFirst = false
     ): string {
@@ -41,7 +41,7 @@ final class SliderLcpDecodingPlugin
     public function afterGetImageElementMobile(
         Slider $subject,
         string $result,
-        string $src,
+        ?string $src,
         string $altText = '',
         bool $isFirst = false
     ): string {

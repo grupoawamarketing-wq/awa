@@ -1,0 +1,299 @@
+/* =============================================================================
+   AWA MOTOS — Grid System (Utility Classes)
+
+   Camada de utility classes para containers e grids padronizados.
+   Consome tokens de awa-design-tokens.css.
+
+   Carregado via awa-head-preload.phtml — APÓS design-tokens, ANTES de bundles.
+
+   Hierarquia:
+     .awa-container  → max-width + padding + centralização
+     .awa-grid       → display:grid + gap
+     .awa-bento      → layout assimétrico premium (homepage)
+
+   Uso em PHTML:
+     <div class="awa-container">
+       <div class="awa-grid awa-grid--products"> ... </div>
+     </div>
+   ============================================================================= */
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   1. CONTAINER — max-width + padding + centralização
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.awa-container {
+  width: 100%;
+  max-width: var(--awa-container-max, 1440px);
+  margin-inline: auto;
+  padding-inline: var(--awa-container-pad, clamp(16px, 3vw, 24px));
+  box-sizing: border-box;
+}
+
+/* Variante estreita — formulários, auth, checkout */
+.awa-container--narrow {
+  max-width: var(--awa-container-narrow, 960px);
+}
+
+/* Variante larga — hero sections, header interno */
+.awa-container--wide {
+  max-width: var(--awa-container-wide, 1440px);
+}
+
+/* Variante conteúdo — texto corrido, CMS pages (legibilidade ótima) */
+.awa-container--content {
+  max-width: var(--awa-container-content, 720px);
+}
+
+/* Full-bleed: escapa do container pai, fundo full-width */
+.awa-container--bleed {
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  padding-inline: var(--awa-container-pad, clamp(16px, 3vw, 24px));
+  box-sizing: border-box;
+}
+
+/* Conteúdo interno do bleed volta para o container padrão */
+.awa-container--bleed > .awa-container {
+  max-width: var(--awa-container-max, 1440px);
+  margin-inline: auto;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   2. GRID BASE — display:grid + gap
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.awa-grid {
+  display: grid;
+  gap: var(--awa-grid-gap, clamp(12px, 2vw, 24px));
+}
+
+/* Gap compacto */
+.awa-grid--gap-sm {
+  gap: var(--awa-grid-gap-sm, clamp(8px, 1.5vw, 16px));
+}
+
+/* Gap generoso */
+.awa-grid--gap-lg {
+  gap: var(--awa-grid-gap-lg, clamp(16px, 3vw, 32px));
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   3. GRID INTRÍNSECO — auto-fill (adapta colunas ao espaço)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Grid de produtos: mínimo 240px por item, adapta 2→3→4→5 colunas */
+.awa-grid--products {
+  grid-template-columns: var(--awa-grid-cols-product,
+    repeat(auto-fill, minmax(var(--awa-grid-item-min, 240px), 1fr)));
+}
+
+/* Grid de benefits/badges: mínimo 180px */
+.awa-grid--benefits {
+  grid-template-columns: repeat(auto-fill,
+    minmax(var(--awa-grid-item-min-sm, 180px), 1fr));
+}
+
+/* Grid de dashboard: mínimo 320px */
+.awa-grid--dashboard {
+  grid-template-columns: repeat(auto-fill,
+    minmax(var(--awa-grid-item-min-lg, 320px), 1fr));
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   4. GRID FIXO — colunas explícitas
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.awa-grid--2 {
+  grid-template-columns: var(--awa-grid-cols-2, repeat(2, minmax(0, 1fr)));
+}
+
+.awa-grid--3 {
+  grid-template-columns: var(--awa-grid-cols-3, repeat(3, minmax(0, 1fr)));
+}
+
+.awa-grid--4 {
+  grid-template-columns: var(--awa-grid-cols-4,
+    repeat(auto-fill, minmax(280px, 1fr)));
+}
+
+/* Sidebar + Content (layout clássico PLP/Category) */
+.awa-grid--sidebar {
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: var(--awa-grid-gap-lg, clamp(16px, 3vw, 32px));
+}
+
+@media (max-width: 991px) {
+  .awa-grid--sidebar {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 767px) {
+  /* Em mobile, grids fixos colapsam para 1 coluna */
+  .awa-grid--2,
+  .awa-grid--3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   5. BENTO GRID — layout assimétrico premium (homepage banners)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.awa-bento {
+  display: grid;
+  gap: var(--awa-grid-gap, clamp(12px, 2vw, 24px));
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+}
+
+/* Item alto: ocupa 2 rows */
+.awa-bento__tall {
+  grid-row: span 2;
+}
+
+/* Item largo: ocupa 2 columns */
+.awa-bento__wide {
+  grid-column: span 2;
+}
+
+/* Item destaque: ocupa 2×2 */
+.awa-bento__featured {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+
+@media (max-width: 991px) {
+  .awa-bento {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: auto;
+  }
+
+  .awa-bento__tall {
+    grid-row: span 1;
+    grid-column: span 2;
+  }
+
+  .awa-bento__featured {
+    grid-column: span 2;
+    grid-row: span 1;
+  }
+}
+
+@media (max-width: 479px) {
+  .awa-bento {
+    grid-template-columns: 1fr;
+  }
+
+  .awa-bento__tall,
+  .awa-bento__wide,
+  .awa-bento__featured {
+    grid-column: 1;
+    grid-row: auto;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   6. SECTION — espaçamento vertical entre seções
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.awa-section {
+  margin-block: var(--awa-grid-gap-lg, clamp(16px, 3vw, 32px));
+}
+
+.awa-section:first-child {
+  margin-top: 0;
+}
+
+.awa-section:last-child {
+  margin-bottom: 0;
+}
+
+/* Seção full-bleed (background full-width, conteúdo contido) */
+.awa-section--bleed {
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  padding-inline: var(--awa-container-pad, clamp(16px, 3vw, 24px));
+}
+
+.awa-section--bleed > .awa-container {
+  max-width: var(--awa-container-max, 1440px);
+  margin-inline: auto;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   7. ASPECT RATIO — banners e imagens consistentes
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.awa-aspect--16-9 {
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+}
+
+.awa-aspect--4-3 {
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+}
+
+.awa-aspect--1-1 {
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+}
+
+.awa-aspect--16-9 img,
+.awa-aspect--4-3 img,
+.awa-aspect--1-1 img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   8. UTILITIES — helpers de layout
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Centralização flex rápida */
+.awa-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Stack vertical com gap */
+.awa-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--awa-grid-gap-sm, clamp(8px, 1.5vw, 16px));
+}
+
+.awa-stack--lg {
+  gap: var(--awa-grid-gap, clamp(12px, 2vw, 24px));
+}
+
+/* Row horizontal com gap */
+.awa-row {
+  display: flex;
+  align-items: center;
+  gap: var(--awa-grid-gap-sm, clamp(8px, 1.5vw, 16px));
+  flex-wrap: wrap;
+}
+
+.awa-row--nowrap {
+  flex-wrap: nowrap;
+}

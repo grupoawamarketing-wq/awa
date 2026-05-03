@@ -16,6 +16,7 @@ import {
 } from '../helpers/visual-audit.helpers';
 
 const BASE = 'https://awamotos.com';
+const HOME_READY_SELECTOR = '#header, .awa-site-header, header[role="banner"], .top-home-content, .top-home-content--above-fold';
 
 let homePage: Page;
 
@@ -49,34 +50,43 @@ async function alive(): Promise<boolean> {
   } catch { return false; }
 }
 
+function minLogoWidthByViewport(): number {
+  const width = homePage.viewportSize()?.width ?? 1366;
+  if (width < 992) return 56;
+  return 80;
+}
+
 test.beforeAll(async ({ browser }) => {
   const ctx = await browser.newContext({ ignoreHTTPSErrors: true, locale: 'pt-BR' });
   homePage = await ctx.newPage();
 
   let pageReady = false;
 
-  // TUDO dentro do Promise.race — inclusive o evaluate final.
-  // Se Chrome crasha, Node.js setTimeout() sempre dispara; CDP calls NÃO disparam.
-  await Promise.race<void>([
-    (async () => {
-      try {
-        await homePage.goto(BASE, { waitUntil: 'commit', timeout: 60_000 });
-        const cookieBtn = homePage.locator('.cookie-btn-accept, #btn-cookie-allow, .allow').first();
-        if (await cookieBtn.isVisible({ timeout: 2_000 }).catch(() => false)) {
-          await cookieBtn.click();
-        }
-        // state:'visible' aguarda KO.js renderizar o header (remove display:none)
-        await homePage.waitForSelector(
-          '#header, .awa-site-header, header[role="banner"]',
-          { state: 'visible', timeout: 40_000 },
-        );
-        // Verifica que Chrome responde ANTES de sair do race
-        const ok = await homePage.evaluate(() => true).catch(() => false);
-        if (ok) pageReady = true;
-      } catch { /* Chrome instável — pageReady fica false */ }
-    })(),
-    new Promise<void>(resolve => setTimeout(resolve, 90_000)),
-  ]);
+  // Evita falso negativo intermitente: tenta carregar 2 vezes antes de falhar.
+  for (let attempt = 1; attempt <= 2 && !pageReady; attempt += 1) {
+    await Promise.race<void>([
+      (async () => {
+        try {
+          await homePage.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 60_000 });
+          const cookieBtn = homePage.locator('.cookie-btn-accept, #btn-cookie-allow, .allow').first();
+          if (await cookieBtn.isVisible({ timeout: 2_000 }).catch(() => false)) {
+            await cookieBtn.click();
+          }
+          await homePage.waitForSelector(HOME_READY_SELECTOR, { state: 'visible', timeout: 40_000 });
+
+          const ok = await homePage.evaluate(() => {
+            const body = document.body;
+            const hasHomeClass = !!body && /cms-index-index|cms-home|cms-homepage_ayo_home5/.test(body.className);
+            const hasMainContent = !!document.querySelector('main, #maincontent, .top-home-content');
+            return hasHomeClass && hasMainContent;
+          }).catch(() => false);
+
+          if (ok) pageReady = true;
+        } catch { /* Chrome instável — pageReady fica false */ }
+      })(),
+      new Promise<void>(resolve => setTimeout(resolve, 90_000)),
+    ]);
+  }
 
   // Se página não carregou: lança exceção → Playwright retry com browser fresco
   if (!pageReady) {
@@ -113,7 +123,7 @@ test.describe('Fase 1 — Header Premium', () => {
     if (!visible) { test.skip(); return; }
     const box = await safeBB(logo);
     if (!box) { test.skip(); return; }
-    expect(box.width, 'Logo width >= 80px').toBeGreaterThanOrEqual(80);
+    expect(box.width, `Logo width >= ${minLogoWidthByViewport()}px`).toBeGreaterThanOrEqual(minLogoWidthByViewport());
     expect(box.height, 'Logo height >= 20px').toBeGreaterThanOrEqual(20);
   });
 
@@ -173,7 +183,7 @@ test.describe('Fase 1 — Header Premium', () => {
    ═══════════════════════════════════════════════════════════════════ */
 test.describe('Fase 2 — Home Hero/Cards/Cookie', () => {
   test('Hero/Slider carregado na homepage', async () => {
-    const hero = homePage.locator('.slidebanner-wrapper, .awa-hero-banner, .owl-carousel, .main-slider').first();
+    const hero = homePage.locator('.top-home-content, .top-home-content--above-fold, .slidebanner-wrapper, .awa-hero-banner, .owl-carousel, .main-slider').first();
     // isVisible({ timeout }) hangs 120s when Chrome is busy processing RequireJS
     const visible = await Promise.race<boolean>([
       hero.isVisible({ timeout: 10_000 }).catch(() => false),

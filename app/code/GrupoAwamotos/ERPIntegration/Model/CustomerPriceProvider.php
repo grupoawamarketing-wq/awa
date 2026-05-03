@@ -21,7 +21,7 @@ use Psr\Log\LoggerInterface;
 class CustomerPriceProvider
 {
     private const CACHE_PREFIX = 'erp_customer_price_';
-    private const CACHE_TTL = 900; // 15 minutes
+    private const CACHE_TTL = 7200; // 2 hours — prices change infrequently; ERP sync cron updates Magento
 
     private ConnectionInterface $connection;
     private Helper $helper;

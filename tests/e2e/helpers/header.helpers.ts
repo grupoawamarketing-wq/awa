@@ -7,28 +7,30 @@ import { Page } from '@playwright/test';
 // NOTE: .awa-site-header .header é o header Magento legado (visibility:hidden; height:0)
 // O header customizado AWA está em [data-awa-header-content]
 const HEADER_ROW_SELECTOR =
-  '[data-awa-header-content] .awa-main-header__inner[data-awa-header-row], [data-awa-header-content] .wp-header[data-awa-header-row]';
+  '.awa-main-header__inner[data-awa-header-row], .wp-header[data-awa-header-row]';
 
 export const SELECTORS = {
   header:          '[data-awa-header-content]',
   topHeader:       '[data-awa-header-content] .top-header',
   // Linha principal (logo + search + minicart), sem top-bar (~34px) e nav (~52px) — h≈80px
-  headerMain:      '[data-awa-header-content] .awa-main-header__inner',
+  headerMain:      '.awa-main-header__inner',
   headerRow:       HEADER_ROW_SELECTOR,
   wpHeader:        HEADER_ROW_SELECTOR,
-  primaryRow:      '[data-awa-header-content] .awa-header-primary-row',
-  brandCell:       '[data-awa-header-content] .awa-header-brand-cell',
-  logo:            '[data-awa-header-content] .logo',
-  mobileLogo:      '[data-awa-header-content] .awa-header-mobile-logo',
-  topSearch:       '[data-awa-header-content] .top-search',
-  searchBlock:     '[data-awa-header-content] .top-search .block-search',
-  searchInput:     '[data-awa-header-content] input[data-awa-search-input="true"], [data-awa-header-content] #search',
-  minicart:        '[data-awa-header-content] .awa-header-minicart, [data-awa-header-content] .mini-cart-wrapper',
-  contactSlot:     '[data-awa-header-content] .awa-header-contact-slot',
-  navToggle:       '[data-awa-header-content] .awa-header-mobile-toggle',
+  primaryRow:      '.awa-header-primary-row',
+  brandCell:       '.awa-header-brand-cell, .col-md-2.col-sm-2.col-xs-12',
+  logo:            '.logo',
+  mobileLogo:      '.awa-header-mobile-logo',
+  topSearch:       '.top-search, .awa-header-search-col',
+  searchBlock:     '.top-search .block-search, .awa-header-search-col .block-search',
+  searchInput:     'input[data-awa-search-input="true"], #search',
+  minicart:        '.awa-header-minicart, .mini-cart-wrapper',
+  contactSlot:     '.awa-header-contact-slot',
+  navToggle:       '.awa-header-mobile-toggle, .action.nav-toggle',
   stickyHeader:    '.header-wrapper-sticky',
-  headerNav:       '[data-awa-header-content] .header-control',
-  headerCart:      '[data-awa-header-content] .awa-header-cart-link',
+  headerNav:       '.header-control, .header-nav, .awa-nav-bar',
+  headerCart:      '.awa-header-cart-link',
+  rightCol:        '.awa-header-right-col',
+  desktopAccNav:   '.top-account.awa-header-account-nav',
 } as const;
 
 /* ── Breakpoints ───────────────────────────────────────── */

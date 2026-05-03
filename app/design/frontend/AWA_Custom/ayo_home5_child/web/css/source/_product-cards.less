@@ -81,34 +81,34 @@
   // === 2. CARD CONTAINER ===
   .item-product {
     position: relative;
-    background: var(--awa-bg, #fff);
-    border: 1px solid var(--awa-border);
-    border-radius: var(--awa-card-radius, 8px);
-    overflow: hidden;
+    background: var(--card-bg, #fff);
+    border: 1px solid var(--card-border-color, rgba(0, 0, 0, 0.05));
+    border-radius: var(--card-radius, 8px);
+    overflow: hidden; // clip no border-radius do card
     display: flex;
     flex-direction: column;
-    // transform incluído para suavizar o lift no hover (igual ao grid de categoria)
-    transition: box-shadow var(--awa-duration) var(--awa-ease),
-                border-color var(--awa-duration) var(--awa-ease),
-                transform var(--awa-duration) var(--awa-ease);
+    padding: 0; // edge-to-edge — foto colada na borda
+    transition: box-shadow 0.2s ease,
+                border-color 0.2s ease,
+                transform 0.2s ease;
 
     &:hover {
-      box-shadow: var(--awa-card-shadow-hover, 0 8px 24px rgba(0, 0, 0, .12));
-      border-color: var(--awa-border-strong, #cccccc);
-      transform: translateY(-2px); // lift sutil — mesmo padrão do grid de categoria
+      box-shadow: var(--card-shadow-hover, 0 4px 16px rgba(0, 0, 0, .10));
+      border-color: rgba(183, 51, 55, 0.18);
+      transform: translateY(-2px);
     }
   }
 
-  // === 3. IMAGEM — altura fixa, aspect-ratio ===
+  // === 3. IMAGEM — foto em destaque, fundo branco ===
   .product-thumb {
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
     aspect-ratio: 1 / 1;
-    min-height: 180px;
-    padding: var(--awa-card-pad-img, 10px);
-    background: var(--awa-bg-surface, #f7f7f7);
+    min-height: var(--card-photo-min-h, 184px);
+    padding: var(--card-photo-padding, 6px);
+    background: var(--card-photo-bg, #ffffff);
     overflow: hidden;
     flex-shrink: 0;
 
@@ -121,9 +121,6 @@
       text-decoration: none;
     }
 
-    // Primeira imagem: transition em AMBAS as propriedades para fade simétrico
-    // BUG anterior: só .second-thumb tinha transition:opacity → .first-thumb
-    // desaparecia instantaneamente enquanto .second-thumb aparecia suavemente (janky).
     .first-thumb {
       transition: opacity var(--awa-duration) var(--awa-ease);
     }
@@ -134,26 +131,22 @@
       object-fit: contain;
       object-position: center;
       display: block;
-      // will-change apenas no hover — evita criar camada de composição permanente
-      // BUG anterior: will-change:transform em base + will-change:auto em :not(:hover)
-      // era ineficaz (seletor :not() tem especificidade menor que o pai).
-      transition: transform var(--awa-duration) var(--awa-ease);
+      transition: transform 0.3s ease;
     }
 
-    // Hover: zoom sutil + ativa will-change só quando necessário
+    // Hover: zoom sutil
     &:hover .first-thumb img {
-      transform: scale(1.05);
-      will-change: transform;
+      transform: scale(1.04);
     }
 
-    // Segunda imagem desativada no grid (evita sumiço em hover por conflito legado)
+    // Segunda imagem desativada (evita sumiço em hover por conflito legado)
     .second-thumb {
       position: absolute;
       inset: 0;
       display: none;
       align-items: center;
       justify-content: center;
-      padding: var(--awa-card-pad-img, 10px);
+      padding: var(--card-photo-padding, 6px);
       opacity: 0;
       visibility: hidden;
       pointer-events: none;
@@ -256,7 +249,7 @@
 
   // === 5. CORPO DO CARD (.product-info) ===
   .product-info {
-    padding: var(--awa-card-pad-body, 12px 14px);
+    padding: 10px 12px 12px; // respiro do texto — compensa card edge-to-edge
     display: flex;
     flex-direction: column;
     flex: 1;
@@ -649,33 +642,35 @@
     padding: 0;
   }
 
-  // Card container
+  // Card container — edge-to-edge, foto em destaque
   .item-product {
     position: relative;
-    background: var(--awa-bg, #fff);
-    border: 1px solid var(--awa-border);
-    border-radius: var(--awa-card-radius, 8px);
-    overflow: hidden;
+    background: var(--card-bg, #fff);
+    border: 1px solid var(--card-border-color, rgba(0, 0, 0, 0.05));
+    border-radius: var(--card-radius, 8px);
+    overflow: hidden; // clip no border-radius do card
     display: flex;
     flex-direction: column;
-    height: auto; // anula height:100% do tema pai (impedia o card de crescer)
-    transition: box-shadow var(--awa-duration) var(--awa-ease),
-                border-color var(--awa-duration) var(--awa-ease),
-                transform var(--awa-duration) var(--awa-ease);
+    height: auto; // anula height:100% do tema pai
+    padding: 0; // edge-to-edge
+    transition: box-shadow 0.2s ease,
+                border-color 0.2s ease,
+                transform 0.2s ease;
 
     &:hover {
-      box-shadow: var(--awa-card-shadow-hover, 0 8px 24px rgba(0, 0, 0, .12));
-      border-color: var(--awa-border-strong, #cccccc); // fallback explícito
+      box-shadow: var(--card-shadow-hover, 0 4px 16px rgba(0, 0, 0, .10));
+      border-color: rgba(183, 51, 55, 0.18);
       transform: translateY(-2px);
-      will-change: transform;
     }
   }
 
-  // Thumbnail: aspect-ratio, não encolhe
+  // Thumbnail: foto em destaque, fundo branco
   .product-thumb {
     flex-shrink: 0;
     aspect-ratio: 1 / 1;
-    min-height: 180px;
+    min-height: var(--card-photo-min-h, 184px);
+    padding: var(--card-photo-padding, 6px);
+    background: var(--card-photo-bg, #ffffff);
   }
 
   // Corpo do card: cresce para preencher espaço disponível
@@ -685,7 +680,7 @@
     flex-direction: column;
     flex: 1;
     height: auto;
-    padding: var(--awa-card-pad-body, 12px 14px);
+    padding: 10px 12px 12px; // respiro do texto — compensa card edge-to-edge
     gap: 0;
   }
 

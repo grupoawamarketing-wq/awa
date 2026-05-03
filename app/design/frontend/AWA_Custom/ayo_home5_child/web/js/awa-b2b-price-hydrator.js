@@ -5,6 +5,7 @@ define([
 
     var hydratedProducts = {};
     var refreshScheduled = false;
+    var observerStarted = false;
 
     function isLoggedIn(customer) {
         if (!customer || typeof customer !== 'object') {
@@ -137,22 +138,41 @@ define([
     }
 
     function init() {
+        var customerSection;
+        var initialCustomer;
+
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', scheduleHydration);
         } else {
             scheduleHydration();
         }
 
+        customerSection = customerData.get('customer');
+        initialCustomer = getCustomerPayload();
+
+        // Guest nao precisa observar mutacoes da home inteira.
+        if (isLoggedIn(initialCustomer)) {
+            startObserver();
+        }
+
         try {
-            customerData.get('customer').subscribe(function (customer) {
+            customerSection.subscribe(function (customer) {
                 if (isLoggedIn(customer)) {
+                    startObserver();
                     scheduleHydration();
                 }
             });
         } catch (e) {
             // ignore subscription errors
         }
+    }
 
+    function startObserver() {
+        if (observerStarted) {
+            return;
+        }
+
+        observerStarted = true;
         new MutationObserver(function (mutations) {
             var shouldRefresh = false;
 

@@ -17,14 +17,17 @@ define([
         var $slides = $track.find(slideSelector);
         var $prev = $root.find(prevSelector).first();
         var $next = $root.find(nextSelector).first();
+        var $viewport = $track.parent();
         var position = 0;
         var resizeTimer = null;
+        var snapOffsets = [0];
 
         if (!$track.length || !$slides.length || $root.data('rexisCarouselInit')) {
             return;
         }
 
         $root.data('rexisCarouselInit', true);
+        $root.attr('tabindex', $root.attr('tabindex') || '0');
 
         function getVisibleSlides() {
             var width = $root.outerWidth();
@@ -45,34 +48,65 @@ define([
         }
 
         function clampPosition(pos) {
-            var max = Math.max(0, $slides.length - getVisibleSlides());
+            var max = Math.max(0, snapOffsets.length - 1);
 
             return Math.max(0, Math.min(max, pos));
         }
 
-        function render() {
-            var slideWidth = $slides.first().outerWidth(true) || 0;
-            var max = Math.max(0, $slides.length - getVisibleSlides());
+        function buildSnapOffsets() {
+            var maxTranslate = Math.max(0, $track.get(0).scrollWidth - $viewport.get(0).clientWidth + 2); // +2 buffer
+            var visibleSlides = getVisibleSlides();
+            var rawOffsets = [];
+            var maxStartIndex = Math.max(0, $slides.length - visibleSlides);
 
-            position = clampPosition(position);
+            $slides.each(function (index, slide) {
+                if (index > maxStartIndex) {
+                    return false;
+                }
 
-            if (window.requestAnimationFrame) {
-                window.requestAnimationFrame(function () {
-                    $track.css('transform', 'translate3d(-' + (position * slideWidth) + 'px, 0, 0)');
-                });
-            } else {
-                $track.css('transform', 'translate3d(-' + (position * slideWidth) + 'px, 0, 0)');
+                rawOffsets.push(Math.min(slide.offsetLeft, maxTranslate));
+            });
+
+            if (!rawOffsets.length) {
+                rawOffsets = [0];
             }
+
+            snapOffsets = rawOffsets.filter(function (offset, index, offsets) {
+                return index === 0 || offset !== offsets[index - 1];
+            });
+        }
+
+        function updateNavState() {
+            var max = Math.max(0, snapOffsets.length - 1);
 
             if ($prev.length) {
                 $prev.prop('disabled', position <= 0);
                 $prev.attr('aria-disabled', position <= 0 ? 'true' : 'false');
+                $prev.toggleClass('is-disabled', position <= 0);
             }
 
             if ($next.length) {
                 $next.prop('disabled', position >= max);
                 $next.attr('aria-disabled', position >= max ? 'true' : 'false');
+                $next.toggleClass('is-disabled', position >= max);
             }
+        }
+
+        function render() {
+            var offset = snapOffsets[position] || 0;
+
+            position = clampPosition(position);
+            offset = snapOffsets[position] || 0;
+
+            if (window.requestAnimationFrame) {
+                window.requestAnimationFrame(function () {
+                    $track.css('transform', 'translate3d(-' + offset + 'px, 0, 0)');
+                });
+            } else {
+                $track.css('transform', 'translate3d(-' + offset + 'px, 0, 0)');
+            }
+
+            updateNavState();
         }
 
         function move(direction) {
@@ -102,7 +136,10 @@ define([
 
         $(window).on('resize.rexisCarousel', function () {
             clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(render, 160);
+            resizeTimer = setTimeout(function () {
+                buildSnapOffsets();
+                render();
+            }, 160);
         });
 
         if ('IntersectionObserver' in window) {
@@ -110,6 +147,7 @@ define([
                 entries.forEach(function (entry) {
                     if (entry.isIntersecting) {
                         observer.disconnect();
+                        buildSnapOffsets();
                         render();
                     }
                 });
@@ -117,6 +155,7 @@ define([
 
             observer.observe($root.get(0));
         } else {
+            buildSnapOffsets();
             render();
         }
     };

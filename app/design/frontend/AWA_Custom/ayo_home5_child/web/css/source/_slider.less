@@ -43,7 +43,8 @@
 .banner-slider,
 .banner-slider2 {
 
-    .owl-dots {
+    .owl-dots,
+    .swiper-pagination {
         position: absolute;
         bottom: 16px;
         left: 0;
@@ -54,7 +55,8 @@
         z-index: @z-card-badge; // _z-index.less — acima da imagem, abaixo do overlay
     }
 
-    .owl-dot {
+    .owl-dot,
+    .swiper-pagination-bullet {
         width: 8px;
         height: 8px;
         border-radius: 50%;
@@ -63,8 +65,10 @@
         cursor: pointer;
         transition: background @awa-transition, transform @awa-transition;
         padding: 0;
+        opacity: 1;
 
         &.active,
+        &.swiper-pagination-bullet-active,
         &:hover {
             background: @awa-color-white;
             transform: scale(1.2);
@@ -72,7 +76,8 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
-        .owl-dot { transition: none !important; }
+        .owl-dot,
+        .swiper-pagination-bullet { transition: none !important; }
     }
 }
 
@@ -86,7 +91,9 @@
 .banner-slider2 {
 
     .owl-prev,
-    .owl-next {
+    .owl-next,
+    .swiper-button-prev,
+    .swiper-button-next {
         position: absolute;
         top: 50%;
         transform: translateY(-50%);
@@ -100,40 +107,70 @@
         border: none;
         border-radius: 50%;
         cursor: pointer;
-        transition: background @awa-transition, opacity @awa-transition;
+        color: var(--awa-primary, #b73337);
+        transition: background @awa-transition, opacity @awa-transition, color @awa-transition;
         opacity: 0;
 
         @media (prefers-reduced-motion: reduce) { transition: none; }
+
+        &::after {
+            font-size: 14px;
+            font-weight: @awa-weight-bold;
+            color: currentColor;
+        }
+
+        &.swiper-button-disabled {
+            opacity: 0.35;
+            pointer-events: none;
+        }
     }
 
-    .owl-prev { left: 16px; }
-    .owl-next { right: 16px; }
+    .owl-prev,
+    .swiper-button-prev { left: 16px; }
+
+    .owl-next,
+    .swiper-button-next { right: 16px; }
 
     &:hover {
         .owl-prev,
-        .owl-next { opacity: 1; }
+        .owl-next,
+        .swiper-button-prev,
+        .swiper-button-next { opacity: 1; }
     }
 
     // Sempre visível em touch devices (sem hover)
     @media (hover: none) {
         .owl-prev,
-        .owl-next { opacity: 0.8; }
+        .owl-next,
+        .swiper-button-prev,
+        .swiper-button-next { opacity: 0.8; }
     }
 
     .owl-prev:hover,
-    .owl-next:hover {
+    .owl-next:hover,
+    .swiper-button-prev:hover,
+    .swiper-button-next:hover,
+    .owl-prev:focus-visible,
+    .owl-next:focus-visible,
+    .swiper-button-prev:focus-visible,
+    .swiper-button-next:focus-visible {
         background: @awa-color-white;
     }
 
     @media (max-width: (@awa-breakpoint-md - 1)) {
         .owl-prev,
-        .owl-next {
+        .owl-next,
+        .swiper-button-prev,
+        .swiper-button-next {
             width: 36px;
             height: 36px;
         }
 
-        .owl-prev { left: 8px; }
-        .owl-next { right: 8px; }
+        .owl-prev,
+        .swiper-button-prev { left: 8px; }
+
+        .owl-next,
+        .swiper-button-next { right: 8px; }
     }
 }
 

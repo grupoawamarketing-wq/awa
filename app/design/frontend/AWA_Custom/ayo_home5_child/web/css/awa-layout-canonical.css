@@ -4,64 +4,32 @@
    Loaded LAST via default_head_blocks.xml (order=9990)
    ========================================================================== */
 
-/* -- TOKENS ------------------------------------------------------------- */
-/* bp-xxs:360  bp-xs:480  bp-sm:768  bp-md:1024  bp-lg:1280  bp-xl:1440    */
-/* container:1440  narrow:640  sidebar:240  sidebar-tab:200                 */
-/* gap-desktop:16  gap-tablet:16  gap-mobile:8  sidebar-gap:24  tab-gap:16  */
+/* -- TOKENS (migrados para awa-design-tokens.css 2026-04-29) ------------- */
+/* Containers: var(--awa-container-wide)=1440  var(--awa-container-narrow)=960 */
+/* Gaps:       var(--awa-grid-gap)=clamp(12-24)  var(--awa-grid-gap-sm)=clamp(8-16) */
+/* Breakpoints: 360  480  768  1024  1280  1440                              */
 
 
 /* ======================================================================
    1. CONTAINER CONTRACT
    ====================================================================== */
 
-/* -- 1a. Catalog (6 sel) -- */
+/* -- 1a. Default shell: site-wide content rhythm -- */
 body.catalog-category-view .page-main,
 body.catalogsearch-result-index .page-main,
 body.catalog-product-view .page-main,
 body.checkout-cart-index .page-main,
 body.checkout-index-index .page-main,
-body.rokanthemes-onepagecheckout .page-main {
-  max-width: 1440px !important;
-  width: 100% !important;
-  margin-inline: auto;
-  box-sizing: border-box;
-}
-
-/* -- 1b. Auth (4 sel) -- */
-body.b2b-auth-shell .page-main,
-body.b2b-register-index .page-main,
-body.customer-account-login .page-main,
-body.customer-account-create .page-main {
-  max-width: 640px !important;
-  width: 100% !important;
-  margin-inline: auto;
-  box-sizing: border-box;
-}
-
-/* -- 1c. Home (3 sel) -- */
+body.rokanthemes-onepagecheckout .page-main,
 body.cms-index-index .page-main,
 body.cms-home .page-main,
-body.cms-homepage_ayo_home5 .page-main {
-  max-width: 1440px !important;
-  width: 100% !important;
-  margin-inline: auto;
-  box-sizing: border-box;
-}
-
-/* -- 1d. B2B Account A (6 sel) -- */
+body.cms-homepage_ayo_home5 .page-main,
 body.b2b-account-dashboard .page-main,
 body.b2b-quote-history .page-main,
 body.b2b-quote-view .page-main,
 body.b2b-quote-index .page-main,
 body.b2b-shoppinglist-index .page-main,
-body.b2b-shoppinglist-view .page-main {
-  max-width: 1440px !important;
-  width: 100% !important;
-  margin-inline: auto;
-  box-sizing: border-box;
-}
-
-/* -- 1e. B2B Account B (7 sel) -- */
+body.b2b-shoppinglist-view .page-main,
 body.b2b-credit-index .page-main,
 body.b2b-approval-index .page-main,
 body.b2b-company-index .page-main,
@@ -69,122 +37,78 @@ body.b2b-reorder-history .page-main,
 body.b2b-quickorder-index .page-main,
 body.customer-account-index .page-main,
 body.sales-order-history .page-main {
-  max-width: 1440px !important;
+  max-width: var(--awa-container-max, 1440px);
   width: 100% !important;
   margin-inline: auto;
+  padding-inline: var(--awa-container-pad, clamp(16px, 3vw, 24px));
+  box-sizing: border-box;
+}
+
+/* -- 1b. Auth — Login/Create use the narrow shell -- */
+body.b2b-auth-shell:not(.b2b-register-index) .page-main,
+body.customer-account-login .page-main,
+body.customer-account-create .page-main {
+  max-width: var(--awa-container-narrow, 960px) !important;
+  width: 100% !important;
+  margin-inline: auto;
+  padding-inline: var(--awa-container-pad, clamp(16px, 3vw, 24px));
+  box-sizing: border-box;
+}
+
+/* -- 1c. Register keeps a wide two-column shell but aligns to the site grid -- */
+body.b2b-register-index .page-main {
+  max-width: var(--awa-container-max, 1440px) !important;
+  width: 100% !important;
+  margin-inline: auto;
+  padding-inline: var(--awa-container-pad, clamp(16px, 3vw, 24px));
   box-sizing: border-box;
 }
 
 
 /* ======================================================================
-   2. GRID CONTRACT — PLP/Search
+   2. GRID CONTRACT — PLP/Search & Widgets
    ====================================================================== */
 
-/* -- 2a. Base: 1 col mobile -- */
 body .page-wrapper .products-grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
 body .page-wrapper .products.list .product-items:not(.owl-carousel):not(.swiper-wrapper),
 body .page-wrapper .products.grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
 body .page-wrapper .products-grid ul.product-grid.container-products-switch,
 body .page-wrapper .block.widget .product-items:not(.owl-carousel):not(.swiper-wrapper) {
   display: grid !important;
-  grid-template-columns: 1fr !important;
-  gap: 8px !important;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)) !important;
+  gap: var(--awa-container-pad, 16px) !important;
   list-style: none !important;
   padding: 0 !important;
   margin: 0 !important;
 }
 
-/* -- 2b. >=360px: 2 col -- */
-@media (min-width: 360px) {
+/* Mobile grid adjustment: allow 2 columns on very small screens */
+@media (max-width: 575px) {
   body .page-wrapper .products-grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
   body .page-wrapper .products.list .product-items:not(.owl-carousel):not(.swiper-wrapper),
   body .page-wrapper .products.grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
   body .page-wrapper .products-grid ul.product-grid.container-products-switch,
   body .page-wrapper .block.widget .product-items:not(.owl-carousel):not(.swiper-wrapper) {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 8px !important;
-  }
-}
-
-/* -- 2c. >=768px: 2 col tablet -- */
-@media (min-width: 768px) {
-  body .page-wrapper .products-grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
-  body .page-wrapper .products.list .product-items:not(.owl-carousel):not(.swiper-wrapper),
-  body .page-wrapper .products.grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
-  body .page-wrapper .products-grid ul.product-grid.container-products-switch,
-  body .page-wrapper .block.widget .product-items:not(.owl-carousel):not(.swiper-wrapper) {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 16px !important;
-  }
-}
-
-/* -- 2d. >=1024px: 4 col -- */
-@media (min-width: 1024px) {
-  body .page-wrapper .products-grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
-  body .page-wrapper .products.list .product-items:not(.owl-carousel):not(.swiper-wrapper),
-  body .page-wrapper .products.grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
-  body .page-wrapper .products-grid ul.product-grid.container-products-switch,
-  body .page-wrapper .block.widget .product-items:not(.owl-carousel):not(.swiper-wrapper) {
-    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-    gap: 16px !important;
-  }
-}
-
-/* -- 2e. >=1440px: 5 col -- */
-@media (min-width: 1440px) {
-  body .page-wrapper .products-grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
-  body .page-wrapper .products.list .product-items:not(.owl-carousel):not(.swiper-wrapper),
-  body .page-wrapper .products.grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
-  body .page-wrapper .products-grid ul.product-grid.container-products-switch,
-  body .page-wrapper .block.widget .product-items:not(.owl-carousel):not(.swiper-wrapper) {
-    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
-    gap: 16px !important;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
+    gap: var(--awa-grid-gap-sm, 8px) !important;
   }
 }
 
 
 /* ======================================================================
-   3. SIDEBAR PAGES — Fewer Columns
+   3. LEGACY NEUTRALIZATION (Floats & Clears)
    ====================================================================== */
 
-@media (min-width: 1440px) {
-  body.catalog-category-view .page-wrapper .products-grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
-  body.catalog-category-view .page-wrapper .products.grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
-  body.catalog-category-view .page-wrapper .products-grid ul.product-grid.container-products-switch,
-  body.catalogsearch-result-index .page-wrapper .products-grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
-  body.catalogsearch-result-index .page-wrapper .products.grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
-  body.catalogsearch-result-index .page-wrapper .products-grid ul.product-grid.container-products-switch {
-    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-  }
-}
-
-@media (min-width: 1024px) and (max-width: 1439px) {
-  body.catalog-category-view .page-wrapper .products-grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
-  body.catalog-category-view .page-wrapper .products.grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
-  body.catalog-category-view .page-wrapper .products-grid ul.product-grid.container-products-switch,
-  body.catalogsearch-result-index .page-wrapper .products-grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
-  body.catalogsearch-result-index .page-wrapper .products.grid .product-items:not(.owl-carousel):not(.swiper-wrapper),
-  body.catalogsearch-result-index .page-wrapper .products-grid ul.product-grid.container-products-switch {
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-  }
-}
-
-
-/* ======================================================================
-   4. LEGACY NEUTRALIZATION
-   ====================================================================== */
-
-@media (min-width: 769px) and (max-width: 991px) {
-  body .page-wrapper .products-grid ul.product-grid.container-products-switch {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 16px !important;
-  }
-}
-
-@media (min-width: 992px) and (max-width: 1399px) {
-  body .page-wrapper .products-grid ul.product-grid.container-products-switch {
-    gap: 16px !important;
-  }
+body .page-wrapper .products-grid .product-item,
+body .page-wrapper .products.list .product-item,
+body .page-wrapper .products.grid .product-item,
+body .page-wrapper .block.widget .product-item {
+  float: none !important;
+  clear: none !important;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 
@@ -217,6 +141,38 @@ body.sales-order-history .columns {
   grid-template-columns: 1fr !important;
   gap: 8px !important;
   width: 100% !important;
+}
+
+/* -- 5a-clearfix guard -- */
+/* Bootstrap .row ::before/::after acts as grid items and breaks CSS grid */
+body.b2b-account-dashboard .columns.row::before,
+body.b2b-account-dashboard .columns.row::after,
+body.b2b-quote-history .columns.row::before,
+body.b2b-quote-history .columns.row::after,
+body.b2b-quote-view .columns.row::before,
+body.b2b-quote-view .columns.row::after,
+body.b2b-quote-index .columns.row::before,
+body.b2b-quote-index .columns.row::after,
+body.b2b-shoppinglist-index .columns.row::before,
+body.b2b-shoppinglist-index .columns.row::after,
+body.b2b-shoppinglist-view .columns.row::before,
+body.b2b-shoppinglist-view .columns.row::after,
+body.b2b-credit-index .columns.row::before,
+body.b2b-credit-index .columns.row::after,
+body.b2b-approval-index .columns.row::before,
+body.b2b-approval-index .columns.row::after,
+body.b2b-company-index .columns.row::before,
+body.b2b-company-index .columns.row::after,
+body.b2b-reorder-history .columns.row::before,
+body.b2b-reorder-history .columns.row::after,
+body.b2b-quickorder-index .columns.row::before,
+body.b2b-quickorder-index .columns.row::after,
+body.customer-account-index .columns.row::before,
+body.customer-account-index .columns.row::after,
+body.sales-order-history .columns.row::before,
+body.sales-order-history .columns.row::after {
+  display: none !important;
+  content: none !important;
 }
 
 /* -- 5a-float A1 (6 sel) -- */
@@ -394,33 +350,17 @@ body .page-wrapper .products-grid ul.product-grid.container-products-switch > li
    7. MOBILE CONTAINER PADDING
    ====================================================================== */
 
-@media (max-width: 767px) {
-  body .page-wrapper .page-main {
-    padding-left: 12px !important;
-    padding-right: 12px !important;
-  }
-}
-
-@media (min-width: 768px) and (max-width: 1023px) {
-  body .page-wrapper .page-main {
-    padding-left: 16px !important;
-    padding-right: 16px !important;
-  }
-}
-
-@media (min-width: 1024px) {
-  body .page-wrapper .page-main {
-    padding-left: 24px !important;
-    padding-right: 24px !important;
-  }
+/* Mobile container padding — clamp() in --awa-container-pad handles all breakpoints
+   Legacy 3-breakpoint split replaced with single fluid declaration */
+body .page-wrapper .page-main {
+  padding-inline: var(--awa-container-pad, clamp(16px, 3vw, 24px)) !important;
 }
 
 /* Fix: Swiper role=button infla bullets — tap-target rule min-width:44px (sync bundle)
    Deve estar no bundle SINCRONO pois awa-super-global carrega com media=print (async).
    .wrapper_slider esta fora do .page-wrapper (em .content-top-home). */
 @media (max-width: 991px) {
-  .wrapper_slider .swiper-pagination .swiper-pagination-bullet,
-  .wrapper_slider .owl-dots .owl-dot {
+  .wrapper_slider .swiper-pagination .swiper-pagination-bullet{
     min-width: 0 !important;
     min-height: 0 !important;
   }

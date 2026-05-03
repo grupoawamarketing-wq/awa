@@ -32,6 +32,11 @@ class HidePricePlugin
     public function afterGetProductPrice(AbstractProduct $subject, string $result): string
     {
         try {
+            // Evita duplicar marcador quando outro renderer/plugin ja substituiu o preco.
+            if (strpos($result, 'b2b-login-to-see-price') !== false) {
+                return $result;
+            }
+
             if (!$this->priceVisibility->canViewPrices()) {
                 return '<div class="b2b-login-to-see-price">'
                     . $this->priceVisibility->getPriceReplacementMessage()

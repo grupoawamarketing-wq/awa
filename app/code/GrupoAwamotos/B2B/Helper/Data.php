@@ -15,6 +15,8 @@ use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Store\Model\ScopeInterface;
 use GrupoAwamotos\B2B\Helper\Config as B2BConfig;
+use Magento\Framework\Pricing\PriceCurrencyInterface;
+use Magento\Catalog\Model\Product;
 
 class Data extends AbstractHelper
 {
@@ -61,6 +63,11 @@ class Data extends AbstractHelper
      * @var PriceVisibilityInterface
      */
     private $priceVisibility;
+
+    /**
+     * @var PriceCurrencyInterface
+     */
+    private $priceCurrency;
 
     /**
      * @var array|null
@@ -452,7 +459,7 @@ class Data extends AbstractHelper
     public function getPriceGateHeadline(): string
     {
         return match ($this->getPriceGateState()) {
-            'guest' => 'Entre para comprar com condições B2B',
+            'guest' => 'Preços exclusivos para revendedores',
             'erp_pending' => 'Sua tabela de preços está sendo liberada',
             'rejected' => 'Seu cadastro precisa de revisão',
             'suspended' => 'Seu acesso comercial está suspenso',
@@ -467,7 +474,7 @@ class Data extends AbstractHelper
     public function getPriceGateDescription(): string
     {
         $fallback = match ($this->getPriceGateState()) {
-            'guest' => 'Solicite seu cadastro ou entre na conta da sua empresa para consultar preços e comprar no atacado.',
+            'guest' => 'Cadastre-se gratuitamente em 2 min para consultar preços e comprar no atacado.',
             'erp_pending' => 'Sua empresa já foi aprovada e nossa equipe está concluindo a tabela comercial no ERP.',
             'rejected' => 'Fale com a equipe comercial para revisar os dados da sua empresa e liberar o acesso novamente.',
             'suspended' => 'Seu acesso comercial está pausado. Nossa equipe pode orientar os próximos passos.',
@@ -498,7 +505,7 @@ class Data extends AbstractHelper
     public function getPriceGatePrimaryLabel(): string
     {
         return match ($this->getPriceGateState()) {
-            'guest' => 'Solicitar cadastro B2B',
+            'guest' => 'Cadastrar para ver preços',
             'erp_pending' => 'Acompanhar minha conta',
             'rejected' => 'Minha conta',
             'suspended' => 'Minha conta',
@@ -568,6 +575,34 @@ class Data extends AbstractHelper
      * @param \Magento\Sales\Model\Order $order
      * @return string
      */
+    /**
+     * Get a "Price Teaser" for products when prices are hidden.
+     * Shows something like "A partir de R$ XX,XX" for guest users.
+     *
+     * @param Product $product
+     * @return string
+     */
+    public function getPriceTeaser(Product $product): string
+    {
+        if ($this->getPriceGateState() !== 'guest') {
+            return '';
+        }
+
+        // Use the final price as a reference (this might be the B2C price)
+        $price = $product->getFinalPrice();
+        if (!$price) {
+            return '';
+        }
+
+        // Temporary OM fallback to avoid breaking DI in production without compile
+        $priceCurrency = \Magento\Framework\App\ObjectManager::getInstance()->get(
+            \Magento\Framework\Pricing\PriceCurrencyInterface::class
+        );
+
+        $formattedPrice = $priceCurrency->format($price, false);
+        return (string) __('A partir de %1', $formattedPrice);
+    }
+
     public function getOrderViewUrl(\Magento\Sales\Model\Order $order): string
     {
         return $this->_getUrl('sales/order/view', ['order_id' => $order->getId()]);

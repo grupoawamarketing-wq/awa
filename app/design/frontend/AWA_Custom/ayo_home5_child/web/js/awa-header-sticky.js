@@ -13,7 +13,22 @@
 define([], function () {
     'use strict';
 
-    var SCROLL_THRESHOLD = 60;
+    var SCROLL_THRESHOLD_BASE = 60;
+
+    /**
+     * Bug #19: O banner B2B fica acima do wrapper sticky e tem altura ~40px.
+     * Ao ativar o condensed com threshold fixo de 60px, o header condensa enquanto
+     * o banner ainda está parcialmente visível. Corrigido medindo a altura real do
+     * banner e somando ao threshold base.
+     */
+    function getScrollThreshold() {
+        var bar = document.getElementById('awa-b2b-promo-bar');
+        if (!bar || bar.style.display === 'none') {
+            return SCROLL_THRESHOLD_BASE;
+        }
+        var h = bar.getBoundingClientRect().height;
+        return SCROLL_THRESHOLD_BASE + (h > 0 ? Math.round(h) : 0);
+    }
 
     return function () {
         /** @type {Element|null} */
@@ -35,7 +50,7 @@ define([], function () {
                 ? window.pageYOffset
                 : (document.documentElement || document.body.parentNode || document.body).scrollTop;
 
-            var isSticky = scrollY > SCROLL_THRESHOLD;
+            var isSticky = scrollY > getScrollThreshold();
 
             header.classList.toggle('awa-header-condensed', isSticky);
 

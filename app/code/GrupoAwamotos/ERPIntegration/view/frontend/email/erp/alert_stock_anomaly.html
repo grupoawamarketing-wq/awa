@@ -1,0 +1,69 @@
+<!--@subject {{trans "⚠️ Anomalias de estoque detectadas (%1 itens)" anomaly_count}} @-->
+<!--@vars {
+"var anomaly_count":"Quantidade de Anomalias",
+"var samples":"Amostras de Anomalias",
+"var report_date":"Data do Relatório",
+"var store.getFrontendName()":"Nome da Loja"
+} @-->
+
+{{template config_path="design/email/header_template"}}
+
+<table style="width: 100%;">
+    <tr>
+        <td>
+            <table style="width: 100%; margin-bottom: 24px; background: linear-gradient(135deg, #78350f 0%, #d97706 100%); border-radius: 16px;">
+                <tr>
+                    <td style="padding: 28px 24px; text-align: center;">
+                        <p style="margin: 0 0 10px; color: #fef3c7; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">
+                            Alerta de Estoque
+                        </p>
+                        <h1 style="margin: 0 0 12px; color: #ffffff; font-size: 28px; line-height: 34px;">
+                            {{var anomaly_count}} anomalia(s) de estoque detectada(s)
+                        </h1>
+                        <p style="margin: 0; color: #fef9c3; font-size: 15px; line-height: 22px;">
+                            Variações de estoque acima do esperado foram identificadas na última sincronização com o ERP.
+                        </p>
+                    </td>
+                </tr>
+            </table>
+
+            <table style="width: 100%; margin-bottom: 24px;">
+                <tr>
+                    <td style="padding: 16px; background: #fffbeb; border: 1px solid #fbbf24; border-radius: 8px;">
+                        <p style="margin: 0 0 12px; font-size: 14px; font-weight: bold; color: #92400e;">
+                            📊 Amostras de variação (até 10 itens):
+                        </p>
+                        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                            <tr style="background: #fef3c7;">
+                                <th style="padding: 8px; text-align: left; border-bottom: 1px solid #fbbf24;">SKU</th>
+                                <th style="padding: 8px; text-align: center; border-bottom: 1px solid #fbbf24;">Anterior</th>
+                                <th style="padding: 8px; text-align: center; border-bottom: 1px solid #fbbf24;">Novo</th>
+                                <th style="padding: 8px; text-align: center; border-bottom: 1px solid #fbbf24;">Variação</th>
+                            </tr>
+                            {{foreach samples as sample}}
+                            <tr>
+                                <td style="padding: 6px 8px; border-bottom: 1px solid #e5e7eb; font-family: monospace;">{{var sample.sku}}</td>
+                                <td style="padding: 6px 8px; border-bottom: 1px solid #e5e7eb; text-align: center;">{{var sample.previous_qty}}</td>
+                                <td style="padding: 6px 8px; border-bottom: 1px solid #e5e7eb; text-align: center;">{{var sample.new_qty}}</td>
+                                <td style="padding: 6px 8px; border-bottom: 1px solid #e5e7eb; text-align: center; color: #dc2626; font-weight: bold;">{{var sample.change_percent}}</td>
+                            </tr>
+                            {{/foreach}}
+                        </table>
+                    </td>
+                </tr>
+            </table>
+
+            <table style="width: 100%; margin-bottom: 16px;">
+                <tr>
+                    <td style="padding: 12px 16px; background: #f3f4f6; border-radius: 8px; font-size: 12px; color: #6b7280;">
+                        <p style="margin: 0;">
+                            Relatório gerado em {{var report_date}}. Verifique os movimentos no ERP Sectra para confirmar se as variações são legítimas.
+                        </p>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+
+{{template config_path="design/email/footer_template"}}

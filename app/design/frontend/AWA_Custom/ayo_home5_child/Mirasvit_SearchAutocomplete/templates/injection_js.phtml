@@ -38,16 +38,6 @@ $nonce  = CspService::getNonce();
             var bodyClassName = document.body ? document.body.className : '';
             var isHomePage = /^\/(?:index\.php\/?)*$/.test(pathName) || /\bcms-index-index\b|\bcms-home\b|\bcms-homepage_ayo_home5\b/.test(bodyClassName);
 
-
-            // Homepage: bloquear carga antecipada do awa-search-autocomplete-compat via minicart UI.
-            // O minicart check busca #searchAutocompletePlaceholder antes de carregar o compat.
-            // Sem isso, o compat executa 2500ms de heavy work antes do LCP.
-            if (isHomePage && !document.getElementById('searchAutocompletePlaceholder')) {
-                var _sph = document.createElement('div');
-                _sph.id = 'searchAutocompletePlaceholder';
-                _sph.style.cssText = 'display:none;position:absolute;width:0;height:0;overflow:hidden;';
-                (document.head || document.body).appendChild(_sph);
-            }
             function bootstrapInPageAutocomplete() {
                 if (started) {
                     return;
@@ -64,7 +54,15 @@ $nonce  = CspService::getNonce();
 
                         var $input = $(selector);
                         $input.each(function (index, searchInput) {
-                            new InPage($(searchInput), <?= /* @noEscape */ $block->jsonEncode($config)?>);
+                            var $searchInput = $(searchInput);
+                            var hasPanel = $searchInput.nextAll('#search_autocomplete, .search-autocomplete, .searchsuite-autocomplete').length > 0;
+
+                            if (!hasPanel || $searchInput.data('awaMirasvitInPageInit')) {
+                                return;
+                            }
+
+                            $searchInput.data('awaMirasvitInPageInit', 1);
+                            new InPage($searchInput, <?= /* @noEscape */ $block->jsonEncode($config)?>);
                         });
                     });
                 });
@@ -92,16 +90,6 @@ $nonce  = CspService::getNonce();
             var bodyClassName = document.body ? document.body.className : '';
             var isHomePage = /^\/(?:index\.php\/?)*$/.test(pathName) || /\bcms-index-index\b|\bcms-home\b|\bcms-homepage_ayo_home5\b/.test(bodyClassName);
 
-
-            // Homepage: bloquear carga antecipada do awa-search-autocomplete-compat via minicart UI.
-            // O minicart check busca #searchAutocompletePlaceholder antes de carregar o compat.
-            // Sem isso, o compat executa 2500ms de heavy work antes do LCP.
-            if (isHomePage && !document.getElementById('searchAutocompletePlaceholder')) {
-                var _sph2 = document.createElement('div');
-                _sph2.id = 'searchAutocompletePlaceholder';
-                _sph2.style.cssText = 'display:none;position:absolute;width:0;height:0;overflow:hidden;';
-                (document.head || document.body).appendChild(_sph2);
-            }
             function bootstrapAutocomplete() {
                 if (started) {
                     return;
@@ -118,12 +106,20 @@ $nonce  = CspService::getNonce();
                         $('#search_mini_form').prop('minSearchLength', 10000);
 
                         var $input = $(selector);
-
                         $input.each(function (index, searchInput) {
+                            var $searchInput = $(searchInput);
+                            var hasPanel = $searchInput.nextAll('#search_autocomplete, .search-autocomplete, .searchsuite-autocomplete').length > 0;
+
+                            if (!hasPanel || $searchInput.data('awaMirasvitAutocompleteInit')) {
+                                return;
+                            }
+
+                            $searchInput.data('awaMirasvitAutocompleteInit', 1);
+
                             <?php if ($config['isTypeaheadEnabled']): ?>
-                            new typeahead($(searchInput)).init(<?= /* @noEscape */ $block->jsonEncode($config)?>);
+                            new typeahead($searchInput).init(<?= /* @noEscape */ $block->jsonEncode($config)?>);
                             <?php endif ?>
-                            new autocomplete($(searchInput)).init(<?= /* @noEscape */ $block->jsonEncode($config)?>);
+                            new autocomplete($searchInput).init(<?= /* @noEscape */ $block->jsonEncode($config)?>);
                         });
                     });
                 });

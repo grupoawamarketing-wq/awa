@@ -4,27 +4,17 @@
     <!-- R35: awa-consistency-home5.css carregado apenas na homepage (antes era global via default_head_blocks.xml) -->
     <head>
         <!-- Remove legacy parent homepage CSS (now in bundle or global bundles) -->
-        <!-- awa-bundle-site contém CSS de páginas não-homepage — removido aqui (homepage tem home-custom) -->
         <remove src="css/awa-round9-post-themeoption-overrides.css"/>
         <remove src="css/awa-components-b2b-foundation.css"/>
         <remove src="css/awa-compat-b2b-nav-plp-cart-checkout.css"/>
         <remove src="css/awa-page-home-category-premium.css"/>
         <remove src="css/awa-home-final-polish.css"/>
-        <remove src="css/awa-round2-home-owl-tabs.css"/>
+        <css src="css/awa-round2-home-owl-tabs.css"/>
         <remove src="css/awa-consistency-home5.css"/>
-        <!-- awa-category-carousel.css: movido de sync para async (awa-head-preload.phtml) — 11KB -1 bloqueante -->
         <remove src="css/awa-category-carousel.css"/>
-        <!-- awa-product-cards-modern.css: movido de sync para async via awa-head-preload.phtml (2026-04-22) -->
-        <!-- awa-home-mobile-fix.css: seções 1+2 inlined no Anti-FOUC (awa-head-preload.phtml v7); seções 3+4 carregadas async (2026-04-22) -->
-
-        <!-- Homepage CSS bundle (owl-tabs + overrides + b2b-foundation + compat + premium + polish) -->
-        <!-- awa-home-vertical-menu-shell-fix.css movido para default_head_blocks.xml (2026-04-08) -->
-        <!--
-            awa-home-safe-refine.css e awa-brand-lock-strict-home.css removidos do head bloqueante (2026-03-18).
-            Ambos são camadas aditivas/enforcement — carregados via preload+onload em
-            awa-deferred-cosmetic-css.phtml (handle cms_index_index) → não bloqueiam render.
-            Reduz homepage de 12 → 10 CSS bloqueantes.
-        -->
+        <css src="css/awa-plp-final-polish.css"/>
+        <css src="css/awa-home-carousel-standard.css"/>
+        <css src="css/awa-carousel-modern.css"/>
     </head>
     <body>
         <referenceBlock name="theme.active.editor" remove="true"/>
@@ -82,6 +72,10 @@
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.home.category.carousel.init"
                    template="Magento_Theme::html/awa-home-category-carousel-init.phtml"/>
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.carousel.nav.js"
+                   template="Magento_Theme::html/awa-carousel-nav-loader.phtml"
+                   after="awa.home.category.carousel.init"/>
             <block class="GrupoAwamotos\B2B\Block\LoginToCart"
                    name="b2b.login.to.cart.home"
                    template="GrupoAwamotos_B2B::product/login-to-cart.phtml"

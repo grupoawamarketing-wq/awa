@@ -32,14 +32,15 @@
     --card-radius:           8px;                            // --awa-radius-md
     --card-border-color:     rgba(0, 0, 0, 0.05);           // --awa-ink-05
     --card-bg:               @awa-color-white;
-    --card-padding:          @awa-space-4;                   // 16px (--awa-s-4)
+    --card-padding:          0;                              // edge-to-edge: foto colada na borda
     --card-gap:              @awa-space-2;
     --card-shadow:           none;
-    --card-shadow-hover:     0 2px 8px rgba(0, 0, 0, 0.10); // --awa-shadow-md
+    --card-shadow-hover:     0 4px 16px rgba(0, 0, 0, 0.10); // --awa-shadow-md — mais presença
 
-    // Foto — --awa-bg-soft (#f8f8f8), --awa-radius-md (8px)
-    --card-photo-bg:         #f8f8f8;
-    --card-photo-radius:     8px;
+    // Foto — fundo branco puro para imagem destacada
+    --card-photo-bg:         #ffffff;
+    --card-photo-radius:     0;                              // sem radius interno — segue o radius do card
+    --card-photo-padding:    6px;                            // padding mínimo para respiração
     --card-photo-min-h:      184px;     // fallback quando aspect-ratio não suportado
 
     // Nome — --awa-fs-md (1.0625rem ~17px)
@@ -142,13 +143,21 @@ body,
         background: var(--card-bg);
         padding: var(--card-padding);
         box-shadow: var(--card-shadow);
-        transition: border-color @awa-transition, background-color @awa-transition;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
         position: relative;
-        overflow: visible;
+        overflow: hidden; // clip a foto no border-radius do card
 
         &:hover {
-            background: #fffdfd;
             border-color: rgba(183, 51, 55, 0.18);
+            box-shadow: var(--card-shadow-hover);
+            transform: translateY(-2px);
+
+            // Zoom sutil na foto ao hover no card inteiro
+            .product-item-photo img,
+            .product-image-photo,
+            .product-thumb-link img {
+                transform: scale(1.04);
+            }
         }
 
         &:focus-within {
@@ -175,27 +184,28 @@ body,
         width: 100%;
         aspect-ratio: 1 / 1;
         min-height: var(--card-photo-min-h); // fallback browsers sem aspect-ratio
-        margin-bottom: @awa-space-2;
-        border-radius: var(--card-photo-radius);
+        margin-bottom: 0; // sem gap — separação feita pelo padding do .product-info
+        border-radius: 0; // segue o border-radius do card pai (clip via overflow:hidden)
         overflow: hidden;
-        padding: 10px;
-        // Branco + ícone de câmera: mostra quando imagem quebra / está ausente
+        padding: var(--card-photo-padding, 6px);
+        // Fundo branco limpo + ícone de câmera placeholder (imagem quebrada/ausente)
         background:
             var(--card-photo-bg, #ffffff)
-            url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24' fill='none' stroke='%23d8d8d8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='18' height='18' rx='2'/%3E%3Ccircle cx='8.5' cy='8.5' r='1.5'/%3E%3Cpolyline points='21 15 16 10 5 21'/%3E%3C/svg%3E")
+            url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24' fill='none' stroke='%23e0e0e0' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='18' height='18' rx='2'/%3E%3Ccircle cx='8.5' cy='8.5' r='1.5'/%3E%3Cpolyline points='21 15 16 10 5 21'/%3E%3C/svg%3E")
             center / 40px no-repeat;
 
         img,
         .product-image-photo {
             display: block;
             position: absolute;
-            inset: 8%;
-            width: 84%;
-            height: 84%;
+            inset: 3%;        // foto ocupa 94% do container — máximo destaque
+            width: 94%;
+            height: 94%;
             object-fit: contain;
             object-position: center;
             color: transparent; // oculta texto alt quando imagem quebra
             font-size: 0;       // elimina resquícios de texto alt em alguns browsers
+            transition: transform 0.3s ease; // zoom suave no hover do card
         }
     }
 
@@ -239,6 +249,7 @@ body,
 
 
     // ── 3f. Wrapper de detalhes — flex cresce para empurrar CTA à base ────────
+    //   padding horizontal compensa o --card-padding: 0 (foto edge-to-edge)
 
     .product-item-details,
     .product-info {
@@ -246,7 +257,8 @@ body,
         flex-direction: column;
         flex: 1;
         gap: var(--card-gap);
-        padding: 0;
+        padding: 10px 12px 12px; // top | horizontal | bottom — respiro do texto
+        border-top: 1px solid rgba(0, 0, 0, 0.04); // divisor sutil foto↔texto
     }
 
 
@@ -678,10 +690,14 @@ body,
 // ============================================================================
 // Card idêntico em todos os contextos sem exceção.
 
-// Homepage: carrosséis Rokanthemes
+// Homepage + seções de produto: todos os carrosséis Rokanthemes
 .rokan-bestseller,
 .rokan-newproduct,
 .rokan-mostviewed,
+.rokan-toprate,
+.rokan-onsale,
+.rokan-featured,
+.list-tab-product,
 .categorytab-container,
 .category_tab_slider,
 .hot-deal { .awa-card(); }
@@ -733,6 +749,11 @@ body,
 
 .rokan-bestseller,
 .rokan-newproduct,
+.rokan-mostviewed,
+.rokan-toprate,
+.rokan-onsale,
+.rokan-featured,
+.list-tab-product,
 .block-products-list,
 .block-new-products {
     overflow: visible; // sobrescreve overflow:hidden do tema pai
@@ -743,6 +764,17 @@ body,
 .rokan-bestseller .product-items,
 .rokan-newproduct .products,
 .rokan-newproduct .product-items,
+.rokan-mostviewed .products,
+.rokan-mostviewed .product-items,
+.rokan-toprate .products,
+.rokan-toprate .product-items,
+.rokan-toprate .row,
+.rokan-onsale .products,
+.rokan-onsale .product-items,
+.rokan-featured .products,
+.rokan-featured .product-items,
+.list-tab-product .products,
+.list-tab-product .product-items,
 .block-products-list .products,
 .block-products-list .product-items,
 .catalog-category-view .products-grid,
@@ -773,7 +805,7 @@ body,
     flex-wrap: wrap;
     padding-bottom: var(--awa-section-header-pb, @awa-space-3);
     margin-bottom: var(--awa-section-header-mb, @awa-space-6);
-    border-bottom: var(--awa-section-header-border, 1px solid #e5e5e5);
+    border-bottom: var(--awa-section-header-border, 1px solid var(--awa-border-default));
 
     // Cancela ::after de linha decorativa do tema pai / _awa-product-card.less anterior
     &::after { display: none !important; }
@@ -786,8 +818,8 @@ body,
     .awa-section-header__title {
         margin: 0;
         padding-left: var(--awa-section-header-title-pl, @awa-space-3);
-        border-left: var(--awa-section-header-accent, 4px solid #b73337);
-        color: var(--awa-section-header-color, #333333);
+        border-left: var(--awa-section-header-accent, 4px solid var(--awa-primary));
+        color: var(--awa-section-header-color, var(--awa-neutral-800));
         font-size: var(--awa-section-header-font-size, clamp(18px, 2vw, 24px));
         font-weight: var(--awa-section-header-font-weight, 700);
         line-height: 1.15;
@@ -813,7 +845,7 @@ body,
         display: inline-flex;
         align-items: center;
         gap: 4px;
-        color: var(--awa-section-header-link-color, #b73337);
+        color: var(--awa-section-header-link-color, var(--awa-primary));
         font-size: var(--awa-section-header-link-size, 13px);
         font-weight: @awa-weight-semibold;
         text-decoration: none;
@@ -851,6 +883,11 @@ body,
 
 .rokan-bestseller,
 .rokan-newproduct,
+.rokan-mostviewed,
+.rokan-toprate,
+.rokan-onsale,
+.rokan-featured,
+.list-tab-product,
 .block-products-list,
 .block-new-products {
     padding-left: 12px;
@@ -869,8 +906,8 @@ body,
         border-radius: 50%;
         border: 1px solid var(--card-border-color);
         background: @awa-color-white;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.09);
-        color: var(--awa-text, #333333);
+        box-shadow: @awa-shadow-sm;
+        color: var(--awa-text, var(--awa-neutral-800));
         cursor: pointer;
         transition: background @awa-transition, border-color @awa-transition,
                     color @awa-transition, box-shadow @awa-transition;
@@ -1001,6 +1038,11 @@ body,
     // Setas ocultas em mobile
     .rokan-bestseller,
     .rokan-newproduct,
+    .rokan-mostviewed,
+    .rokan-toprate,
+    .rokan-onsale,
+    .rokan-featured,
+    .list-tab-product,
     .block-products-list,
     .block-new-products {
         padding-left: 0;
@@ -1011,7 +1053,7 @@ body,
         .owl-next,
         .swiper-button-prev,
         .swiper-button-next {
-            display: none !important; // setas ocultas em mobile
+            display: none !important; // setas ocultas em mobile — !important necessário pois Swiper.js injeta display:flex via JS
         }
     }
 }
@@ -1320,11 +1362,11 @@ body,
 ) :is(.item-product, .product-item) :is(.product-thumb img, .product-image-photo) {
     display: block;
     position: absolute;
-    inset: 6%;
-    width: 88%;
-    height: 88%;
-    max-width: 88%;
-    max-height: 88%;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
     margin: 0;
     object-fit: contain;
     object-position: center;

@@ -1,0 +1,41 @@
+<?php
+declare(strict_types=1);
+/**
+ * AWA Nav Quick Links — Links rápidos de categorias populares na barra de navegação.
+ * Renderiza links de categorias level-2 com include_in_menu=true, posicionados
+ * na nav-bar entre "Departamentos" e o locale selector.
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ */
+
+$escaper = $block->getEscaper() ?? $this;
+
+/** @var \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory $collectionFactory */
+$collectionFactory = $this->helper(\Magento\Catalog\Helper\Data::class);
+
+// Categorias de destaque hardcoded (IDs das mais vendidas)
+// Fallback para nomes + URLs se a collection não estiver disponível.
+$quickLinks = [
+    ['name' => 'Bauletos',        'url' => 'bauletos.html'],
+    ['name' => 'Linha Honda',     'url' => 'linha-honda.html'],
+    ['name' => 'Linha Yamaha',    'url' => 'linha-yamaha.html'],
+    ['name' => 'Linha Esportiva', 'url' => 'linha-esportiva.html'],
+    ['name' => 'Suportes',        'url' => 'suportes.html'],
+    ['name' => 'Adaptadores',     'url' => 'adaptadores.html'],
+];
+
+$baseUrl = rtrim((string) $block->getBaseUrl(), '/');
+?>
+<div class="awa-nav-quick-links" data-awa-nav-quick="true" role="navigation" aria-label="<?= $escaper->escapeHtmlAttr(__('Links rápidos de categorias')) ?>">
+    <ul class="awa-nav-quick-links__list">
+        <?php foreach ($quickLinks as $link): ?>
+        <li class="awa-nav-quick-links__item">
+            <a href="<?= $escaper->escapeUrl($baseUrl . '/' . $link['url']) ?>"
+               class="awa-nav-quick-links__link"
+               title="<?= $escaper->escapeHtmlAttr($link['name']) ?>">
+                <?= $escaper->escapeHtml($link['name']) ?>
+            </a>
+        </li>
+        <?php endforeach; ?>
+    </ul>
+</div>

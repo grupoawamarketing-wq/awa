@@ -216,18 +216,19 @@ body .page-wrapper .awa-site-header .customer-welcome button.action.switch {
 
 // ---------------------------------------------------------------------------
 // 7. NAV -- ocultar link duplicado "Marcas" (redundante com "Nossas Marcas")
-//    Usa [href*="/marcas"]:not([href*="nossas"]) em vez de [href$="/marcas/"]
-//    porque LESS nao suporta $= em seletores de atributo.
+//    Usa :not(.home-link) para excluir o item customizado "Nossas Marcas" (classe
+//    home-link definida no bloco CMS rokanthemes_custom_menu_before).
+//    NOTA: [href*="nossas"] nao funciona pois o href e /marcas/ (sem "nossas").
 //    Especificidade alta para vencer li.level0>a{display:flex!important} (0,8,3).
 //    :has() oculta o <li> inteiro evitando espaco vazio no nav.
 // ---------------------------------------------------------------------------
 
-// Ocultar o <li> via :has()
-body .page-wrapper .awa-site-header .awa-nav-bar .awa-header-primary-nav .navigation.custommenu li.nav-item.level0:has(> a[href*="/marcas"]:not([href*="nossas"])) {
+// Ocultar o <li> via :has() — exclui o item com classe .home-link
+body .page-wrapper .awa-site-header .awa-nav-bar .awa-header-primary-nav .navigation.custommenu li.nav-item.level0:not(.home-link):has(> a[href*="/marcas"]) {
   display: none !important;
 }
 
 // Fallback: ocultar o <a> com specificity (0,9,3+) > (0,8,3)
-body .page-wrapper .awa-site-header .header-control.awa-nav-bar .awa-header-primary-nav .navigation.custommenu li.level0 > a[href*="/marcas"]:not([href*="nossas"]) {
+body .page-wrapper .awa-site-header .header-control.awa-nav-bar .awa-header-primary-nav .navigation.custommenu li.level0:not(.home-link) > a[href*="/marcas"] {
   display: none !important;
 }

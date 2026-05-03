@@ -1,5 +1,4 @@
 <?php
-	/** @var \Rokanthemes\Categorytab\Block\CateWidget $block */
 	use Magento\Framework\App\Action\Action;
 	$enable = $block->getConfig('enabled');
 	if($enable < 1) return ;
@@ -8,7 +7,7 @@
 	$qty = $block->getConfig('qty');
 	$showCart = $block->getConfig('addtocart');
 	$showWishlist = $block->getConfig('wishlist');
-	$showCompare = false; /* compare desativado */
+	$showCompare = $block->getConfig('compare');
 	$show_navigation = $block->getConfig('navigation');
 	$show_pagination = $block->getConfig('pagination');
 	$auto = $block->getConfig('auto');
@@ -38,7 +37,7 @@
 					$cateName = $cate_model->load($cate_id)->getName();
 					if($cateName) {
 			   ?>
-					<li class="<?php if($k==0){ echo "active"; }?>" rel="tab<?php echo (int) $cate_id; ?>-<?php echo $block->escapeHtmlAttr($identifyClass); ?>" role="tab" tabindex="0" aria-selected="<?php echo ($k==0) ? 'true' : 'false'; ?>"><a><?php echo $block->escapeHtml($cateName); ?></a></li>
+					<li class="<?php if($k==0){ echo "active"; }?>" rel="tab<?php echo trim($cate_id).'-'.$identifyClass;?>" role="tab" tabindex="0" aria-selected="<?php echo ($k==0) ? 'true' : 'false'; ?>"><a><?php echo $block->escapeHtml($cateName); ?></a></li>
 				<?php }  $k++; } ?>
 		    </ul>
 		</div>
@@ -54,43 +53,29 @@
 				?>
 				<div class="tab_container tab_container2">
 					<?php foreach($categoryIds as $cate_id) { ?>
-					<div id="tab<?php echo (int) $cate_id; ?>-<?php echo $block->escapeHtmlAttr($identifyClass); ?>" class="tab_content_<?php echo $block->escapeHtmlAttr($identifyClass); ?>">
+					<div id="tab<?php echo trim($cate_id).'-'.$identifyClass;?>" class="tab_content_<?php echo $identifyClass; ?>">
 
 						<div class="owl-container">
-						<div class="cat_home cat_home2 swiper">
-							<div class="swiper-wrapper">
-							<?php
-							$newItems =  $block -> getProductCate($cate_id)->getItems();
-							$i=0;
-							foreach($newItems as $_item) {
-								$productImage = $block->getImage($_item, $image);
-							?>
-							<?php if($i++%$rows==0) { ?> <div class="swiper-slide product_row"> <?php } ?>
+							<div class="cat_home cat_home2 owl-carousel">
+								<?php
+								$newItems =  $block -> getProductCate($cate_id)->getItems();
+								$i=0;
+								foreach($newItems as $_item) {
+									$productImage = $block->getImage($_item, $image);
+								?>
+								<?php if($i++%$rows==0) { ?> <div class="product_row"> <?php } ?>
 									<div class="item-product">
 										<div class="product-thumb">
-												<a href="<?php echo $block->escapeUrl($_item->getProductUrl()) ?>" class="product-thumb-link" aria-label="<?php echo $block->escapeHtmlAttr($_item->getName()); //phpcs:ignore ?>">
-													<?php $productImageThumb = $block->getImage($_item, 'category_image_second_small');?>
-													<span class="first-thumb">
-														<?php
-															$_imgHtml = $productImage->toHtml();
-															$_imgHtml = str_replace('loading="eager"', 'loading="lazy"', $_imgHtml);
-															if (strpos($_imgHtml, 'loading=') === false) {
-																$_imgHtml = str_replace('<img ', '<img loading="lazy" decoding="async" ', $_imgHtml);
-															}
-															echo $_imgHtml;
-														?>
+											<a href="<?php echo $block->escapeUrl($_item->getProductUrl()) ?>" class="product-thumb-link">
+												<?php $productImageThumb = $block->getImage($_item, 'category_image_second_small');?>
+												<span class="first-thumb">
+													<?php echo $productImage->toHtml(); ?>
+												</span>
+												<?php $productType = $_item->getTypeID();
+												if($productType == "simple"): ?>
+													<span class="second-thumb">
+														<?php echo $productImageThumb->toHtml(); ?>
 													</span>
-													<?php $productType = $_item->getTypeID();
-													if($productType == "simple"): ?>
-														<span class="second-thumb">
-															<?php
-																$_thumbHtml = $productImageThumb->toHtml();
-																if (strpos($_thumbHtml, 'loading=') === false) {
-																	$_thumbHtml = str_replace('<img ', '<img loading="lazy" decoding="async" ', $_thumbHtml);
-																}
-																echo $_thumbHtml;
-															?>
-														</span>
 						                		<?php endif; ?>
 											</a>
 											<div class="hot-onsale">
@@ -139,32 +124,7 @@
 											<?php endif; ?>
 												</ul>
 										    </div>
-									    </div>
-									    <div class="product-info">
-											<h3 class="product-name">
-											 							<a title="<?php echo $block->escapeHtmlAttr($_item->getName()); ?>" href="<?php echo $block->escapeUrl($_item->getProductUrl()) ?>" class="product-item-link">
-												<?php echo $block->escapeHtml($_item->getName()); ?>
-												</a>
-											</h3>
-											<div class="awa-b2b-sku">
-												<span class="awa-b2b-sku__label"><?php echo $block->escapeHtml(__('Cod:')); ?></span>
-												<span class="awa-b2b-sku__value"><?php echo $block->escapeHtml($_item->getSku()); ?></span>
-											</div>
-											<div class="product-rating">
-												<?php if ($templateType): ?>
-			   										<?php echo $block->getReviewsSummaryHtml($_item, $templateType,true); ?>
-			   									<?php endif; ?>
-											</div>
-											<div class="sold-by">
-												<?php
-													$cats = $_item->getAttributeText('sold_by');
-												echo ' <span>'.$block->escapeHtml(__('Sold by:')).'</span>' . $block->escapeHtml($cats);
-												 ?>
-											</div>
-											<div class="info-price">
-												<?php /* @noEscape */ echo $this->helper('Rokanthemes\Themeoption\Helper\Data')->getPriceDisplayCustom($block->getProductPrice($_item)) ?>
-											</div>
-											<div class="product-info-cart">
+										    <div class="product-info-cart">
 								                <?php if ($showWishlist || $showCompare || $showCart): ?>
 								                	<?php if ($showCart): ?>
 									                    <div class="actions-primary addcart-link">
@@ -193,8 +153,30 @@
 									                      <?php endif; ?>
 									                    </div>
 									                <?php endif; ?>
+
 					  							<?php endif; ?>
 				  							</div>
+									    </div>
+									    <div class="product-info">
+											<h3 class="product-name">
+											 							<a title="<?php echo $block->escapeHtmlAttr($_item->getName()); ?>" href="<?php echo $block->escapeUrl($_item->getProductUrl()) ?>" class="product-item-link">
+												<?php echo $block->escapeHtml($_item->getName()); ?>
+												</a>
+											</h3>
+											<div class="product-rating">
+												<?php if ($templateType): ?>
+			   										<?php echo $block->getReviewsSummaryHtml($_item, $templateType,true); ?>
+			   									<?php endif; ?>
+											</div>
+											<div class="sold-by">
+												<?php
+													$cats = $_item->getAttributeText('sold_by');
+												echo ' <span>'.$block->escapeHtml(__('Sold by:')).'</span>' . $block->escapeHtml($cats);
+												 ?>
+											</div>
+											<div class="info-price">
+												<?php /* @noEscape */ echo $this->helper('Rokanthemes\Themeoption\Helper\Data')->getPriceDisplayCustom($block->getProductPrice($_item)) ?>
+											</div>
 										</div>
 									</div>
 
@@ -204,8 +186,9 @@
 								}
 								?>
 							</div>
-							<div class="swiper-button-prev" aria-label="<?php echo $block->escapeHtmlAttr(__('Previous')); ?>"></div>
-							<div class="swiper-button-next" aria-label="<?php echo $block->escapeHtmlAttr(__('Next')); ?>"></div>
+						</div>
+
+					 </div><!-- #tab1 -->
 					<?php }?>
 				</div>
 			</div>
@@ -214,18 +197,18 @@
 </div>
 <script type="text/x-magento-init">
 {
-	"[data-role=tocart-form], .form.map.checkout": {
+	"[data-role=tocart-form]": {
 		"catalogAddToCart": {}
 	},
 	".awa-cat-tabs-<?php echo $block->escapeJsQuote($identifyClass); ?>": {
-		"js/tab-swiper-init": {
+		"js/tab-carousel-init": {
 			"tabsSelector": "ul.tabs-<?php echo $block->escapeJsQuote($identifyClass); ?> li",
 			"contentSelector": ".tab_content_<?php echo $block->escapeJsQuote($identifyClass); ?>",
 			"carouselSelector": ".cat_home2",
 			"owl": {
 				"lazyLoad": true,
-				"items": 4,
-				"itemsDesktop": [1366, 4],
+				"items": <?php echo (int)$items ?: 7; ?>,
+				"itemsDesktop": [1366, 5],
 				"itemsDesktopSmall": [1199, 4],
 				"itemsTablet": [991, 3],
 				"itemsMobile": [680, 2],

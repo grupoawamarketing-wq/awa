@@ -109,6 +109,7 @@ async function collectMetrics(page: Page, routeName: string): Promise<LayoutMetr
         '.awa-home-section > .container',
         '.tab_product > .container',
       ],
+      'login-b2b': ['.column.main'],
       default: ['body .page-wrapper .page-main', '.page-main'],
     };
 
@@ -223,7 +224,7 @@ for (const viewport of VIEWPORTS) {
 
       assertContainerMetrics(beforeInteraction, tier, viewport.width);
 
-      if (route.needsGrid) {
+      if ('needsGrid' in route && route.needsGrid) {
         expect(beforeInteraction.grid, `grid must exist on ${route.name}`).toBeTruthy();
         if (beforeInteraction.grid) {
           expect(beforeInteraction.grid.cols, `pre-gate cols for ${route.name} @${viewport.width}px`).toBe(expectedGridCols(viewport.width, 'hasSidebar' in route && route.hasSidebar));
@@ -250,7 +251,7 @@ for (const viewport of VIEWPORTS) {
         ).toBeLessThanOrEqual(4);
       }
 
-      if (route.needsGrid) {
+      if ('needsGrid' in route && route.needsGrid) {
         expect(afterInteraction.grid, `grid must exist post-gate on ${route.name}`).toBeTruthy();
         if (afterInteraction.grid) {
           expect(afterInteraction.grid.cols, `post-gate cols for ${route.name} @${viewport.width}px`).toBe(expectedGridCols(viewport.width, 'hasSidebar' in route && route.hasSidebar));

@@ -14,9 +14,11 @@ define([], function () {
 
             if (y > threshold && !shown) {
                 element.classList.add('is-visible');
+                element.setAttribute('aria-hidden', 'false');
                 shown = true;
             } else if (y <= threshold && shown) {
                 element.classList.remove('is-visible');
+                element.setAttribute('aria-hidden', 'true');
                 shown = false;
             }
         }

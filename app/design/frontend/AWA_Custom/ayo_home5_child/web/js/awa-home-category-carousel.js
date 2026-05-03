@@ -21,6 +21,7 @@ define([], function () {
         var next;
         var dotsWrap;
         var items;
+        var pageOffsets = [0];
         var startX = 0;
         var startScrollLeft = 0;
         var isDragging = false;
@@ -43,18 +44,79 @@ define([], function () {
         }
 
         function getScrollAmount() {
+            // Scroll by almost a full page (track.clientWidth) to match dots logic
+            var scroll = track.clientWidth;
             var item = items[0];
-            var style;
-            var gap;
+            if (item) {
+                var style = getComputedStyle(track);
+                var gap = parseInt(style.gap, 10) || 16;
+                var itemW = item.offsetWidth + gap;
+                // Round down to nearest whole item to prevent cutting
+                scroll = Math.floor(track.clientWidth / itemW) * itemW;
+            }
+            return Math.max(scroll, 280);
+        }
 
-            if (!item) {
-                return 280;
+        function getMaxScroll() {
+            return Math.max(0, track.scrollWidth - track.clientWidth);
+        }
+
+        function buildPageOffsets() {
+            var trackW = track.clientWidth;
+            var maxScroll = getMaxScroll();
+            var offset = 0;
+
+            pageOffsets = [0];
+
+            if (!trackW || maxScroll <= 0) {
+                return;
             }
 
-            style = getComputedStyle(track);
-            gap = parseInt(style.gap, 10) || 16;
+            while (offset + trackW < maxScroll) {
+                offset += trackW;
+                pageOffsets.push(offset);
+            }
 
-            return item.offsetWidth + gap;
+            if (pageOffsets[pageOffsets.length - 1] !== maxScroll) {
+                pageOffsets.push(maxScroll);
+            }
+        }
+
+        function getCurrentPage() {
+            var currentScroll = track.scrollLeft;
+            var activeIndex = 0;
+            var activeDistance = Infinity;
+
+            pageOffsets.forEach(function (offset, idx) {
+                var distance = Math.abs(currentScroll - offset);
+
+                if (distance < activeDistance) {
+                    activeDistance = distance;
+                    activeIndex = idx;
+                }
+            });
+
+            return activeIndex;
+        }
+
+        function updateNavState() {
+            var maxScroll = getMaxScroll();
+            var atStart = track.scrollLeft <= 4;
+            var atEnd = track.scrollLeft >= (maxScroll - 4);
+
+            [prev, next].forEach(function (button, idx) {
+                var disabled = idx === 0 ? atStart : atEnd;
+
+                if (!button) {
+                    return;
+                }
+
+                button.disabled = disabled;
+                button.classList.toggle('is-disabled', disabled);
+                button.setAttribute('aria-disabled', disabled ? 'true' : 'false');
+                button.style.opacity = disabled ? '0.45' : '';
+                button.style.pointerEvents = disabled ? 'none' : '';
+            });
         }
 
         function buildDots() {
@@ -70,6 +132,7 @@ define([], function () {
             dotsWrap.innerHTML = '';
             trackW = track.offsetWidth;
             scrollW = track.scrollWidth;
+            buildPageOffsets();
 
             if (scrollW <= trackW) {
                 dotsWrap.style.display = 'none';
@@ -83,7 +146,7 @@ define([], function () {
             dotsWrap.removeAttribute('aria-hidden');
             dotsWrap.removeAttribute('inert');
             dotsWrap.setAttribute('aria-label', 'Navegacao do carrossel de categorias');
-            pages = Math.ceil(scrollW / trackW);
+            pages = pageOffsets.length;
 
             for (i = 0; i < pages; i++) {
                 (function (pageIndex) {
@@ -103,17 +166,18 @@ define([], function () {
                     }
 
                     dot.addEventListener('click', function () {
-                        track.scrollTo({left: pageIndex * trackW, behavior: scrollBehavior()});
+                        track.scrollTo({left: pageOffsets[pageIndex] || 0, behavior: scrollBehavior()});
                     });
 
                     dotsWrap.appendChild(dot);
                 })(i);
             }
+
+            updateNavState();
         }
 
         function updateDots() {
             var dots;
-            var trackW;
             var currentPage;
 
             if (!dotsWrap) {
@@ -125,8 +189,7 @@ define([], function () {
                 return;
             }
 
-            trackW = track.offsetWidth;
-            currentPage = Math.round(track.scrollLeft / trackW);
+            currentPage = getCurrentPage();
 
             dots.forEach(function (dot, idx) {
                 var isActive = idx === currentPage;
@@ -139,6 +202,8 @@ define([], function () {
                     dot.removeAttribute('aria-current');
                 }
             });
+
+            updateNavState();
         }
 
         if (prev) {

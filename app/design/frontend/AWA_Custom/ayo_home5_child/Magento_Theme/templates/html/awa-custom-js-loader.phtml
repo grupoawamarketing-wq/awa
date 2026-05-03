@@ -296,23 +296,15 @@ if ('serviceWorker' in navigator) {
             return;
         }
 
-        fetch('/sw.js', { method: 'HEAD', cache: 'no-store' })
-            .then(function(response) {
-                if (!response || !response.ok) {
-                    return null;
-                }
-
-                return navigator.serviceWorker.register('/sw.js', { scope: '/' });
-            })
+        navigator.serviceWorker.register('/sw.js', { scope: '/' })
             .then(function(reg) {
-                if (!reg) {
-                    return;
-                }
-                if (reg.active) {
+                if (reg && reg.active) {
                     reg.active.postMessage({ type: 'SKIP_WAITING' });
                 }
             })
-            .catch(function() {});
+            .catch(function(err) {
+                // Ignore registration errors (e.g. aborted during navigation or 404)
+            });
     };
     if ('requestIdleCallback' in window) {
         requestIdleCallback(_swReg, { timeout: 5000 });

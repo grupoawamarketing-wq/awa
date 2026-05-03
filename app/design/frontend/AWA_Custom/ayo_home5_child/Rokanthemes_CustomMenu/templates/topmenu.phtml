@@ -21,6 +21,13 @@
     } else {
         $_menu = $block->getHtml('level-top', 'submenu', $columnsLimit);
     }
+    
+    // Fix: Strip each individual PageBuilder HTML wrapper so <li> items land
+    // directly inside the <ul> without intervening <div> elements.
+    // Non-greedy .*? ensures each wrapper is matched separately.
+    if ($_menu) {
+        $_menu = preg_replace('/<div[^>]*data-content-type="html"[^>]*>\s*(.*?)\s*<\/div>/is', '$1', $_menu);
+    }
 ?>
 <div class="navigation custommenu main-nav"
      role="navigation"

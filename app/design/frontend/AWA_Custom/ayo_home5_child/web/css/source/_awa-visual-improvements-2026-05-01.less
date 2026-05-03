@@ -1,0 +1,307 @@
+/* ==========================================================================
+   AWA MOTOS - B2B MOBILE UI FINALIZATION (2026-05-01)
+   
+   FIXES:
+   1. Legacy Search Bar Icons (suppress duplicate pseudo-elements)
+   2. Mobile Search Form flex layout (button wrapping below input)
+   3. Mobile Login/Register horizontal overflow (footer .container 410px > 375px)
+   4. Desktop Vertical Menu Overlap Fixing
+   5. Footer visibility on non-home pages (desktop category/login/register height=0)
+   6. Search bar width optimization on inner pages
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. LEGACY SEARCH BAR ICONS — suppress duplicate ::before/::after pseudo-elements
+   that conflict with the SVG icon inside the button
+   ========================================================================== */
+body .page-wrapper .awa-site-header .awa-header-search-col.top-search .block.block-search .action.search::after,
+body .page-wrapper .awa-site-header .awa-header-search-col.top-search .block.block-search .action.search::before {
+    display: none !important;
+    content: none !important;
+}
+body .page-wrapper .awa-site-header .awa-header-search-col.top-search .block.block-search .action.search svg {
+    display: block !important;
+    width: 18px !important;
+    height: 18px !important;
+    color: var(--awa-red, #b73337) !important;
+    stroke: var(--awa-red, #b73337) !important;
+}
+body .page-wrapper .awa-site-header .awa-header-search-col.top-search .block.block-search .action.search:hover svg {
+    color: var(--awa-white, #ffffff) !important;
+    stroke: var(--awa-white, #ffffff) !important;
+}
+
+
+/* ==========================================================================
+   2. MOBILE SEARCH FORM — Fix orphaned magnifying glass icon
+   
+   Problem: On mobile (< 992px), the search form has display:block (from bundle),
+   causing .actions (the button wrapper) to wrap below the input field instead of
+   sitting inline on the right side.
+   
+   Fix: Make the form a flex container with nowrap, and the .field.search flex:1 
+   to fill available space, keeping the button inline.
+   ========================================================================== */
+@media (max-width: 991px) {
+
+    /* Search form: horizontal flex layout */
+    #header .awa-header-search-col form.minisearch,
+    #header .awa-header-search-col .block-search form.minisearch,
+    body .page-wrapper .awa-site-header .awa-header-search-col form#search_mini_form {
+        display:       flex !important;
+        flex-wrap:     nowrap !important;
+        align-items:   stretch !important;
+        overflow:      hidden !important;
+        border-radius: 8px !important;
+        border:        1.5px solid #d1d5db !important;
+        gap:           0 !important;
+        padding:       0 !important;
+        box-shadow:    0 1px 3px rgba(0, 0, 0, 0.04) !important;
+        height:        44px !important;
+        min-height:    44px !important;
+        max-height:    44px !important;
+    }
+
+    /* Focus-within state for mobile search */
+    #header .awa-header-search-col form.minisearch:focus-within,
+    body .page-wrapper .awa-site-header .awa-header-search-col form#search_mini_form:focus-within {
+        border-color: var(--awa-red, #b73337) !important;
+        box-shadow:   0 0 0 3px rgba(183, 51, 55, .08), 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+    }
+
+    /* .field.search — flex grow to fill available width */
+    #header .awa-header-search-col form.minisearch .field.search,
+    body .page-wrapper .awa-site-header .awa-header-search-col form#search_mini_form .field.search {
+        flex:      1 1 auto !important;
+        display:   flex !important;
+        min-width: 0 !important;
+        margin:    0 !important;
+        padding:   0 !important;
+    }
+
+    /* .control — fill the .field.search */
+    #header .awa-header-search-col form.minisearch .field.search .control,
+    body .page-wrapper .awa-site-header .awa-header-search-col form#search_mini_form .field.search .control {
+        flex:        1 !important;
+        display:     flex !important;
+        align-items: stretch !important;
+        min-width:   0 !important;
+    }
+
+    /* Input — fill all available space, no padding-left for icon */
+    #header .awa-header-search-col form.minisearch input#search,
+    #header .awa-header-search-col form.minisearch input.input-text,
+    body .page-wrapper .awa-site-header .awa-header-search-col input#search {
+        flex:          1 !important;
+        width:         100% !important;
+        height:        100% !important;
+        padding:       0 12px !important;
+        border:        0 !important;
+        border-radius: 0 !important;
+        background:    transparent !important;
+        outline:       none !important;
+        box-shadow:    none !important;
+        min-width:     0 !important;
+        font-size:     14px !important;
+    }
+
+    /* .actions — no grow, stays inline right */
+    #header .awa-header-search-col form.minisearch .actions,
+    body .page-wrapper .awa-site-header .awa-header-search-col form#search_mini_form .actions {
+        display:     flex !important;
+        align-items: stretch !important;
+        flex:        0 0 auto !important;
+        margin:      0 !important;
+        padding:     0 !important;
+    }
+
+    /* Search button — clean red pill on right side */
+    #header .awa-header-search-col button.action.search,
+    #header .top-search button.action.search,
+    body .page-wrapper .awa-site-header .awa-header-search-col button.action.search {
+        position:         static !important;
+        left:             auto !important;
+        top:              auto !important;
+        transform:        none !important;
+        display:          flex !important;
+        align-items:      center !important;
+        justify-content:  center !important;
+        background:       var(--awa-red, #b73337) !important;
+        background-color: var(--awa-red, #b73337) !important;
+        color:            #ffffff !important;
+        border-radius:    0 8px 8px 0 !important;
+        border:           0 !important;
+        width:            44px !important;
+        min-width:        44px !important;
+        height:           100% !important;
+        padding:          0 !important;
+        margin:           0 !important;
+        cursor:           pointer !important;
+        transition:       background 180ms ease !important;
+    }
+
+    #header .awa-header-search-col button.action.search svg,
+    #header .top-search button.action.search svg,
+    body .page-wrapper .awa-site-header .awa-header-search-col button.action.search svg {
+        color:  #ffffff !important;
+        stroke: #ffffff !important;
+        fill:   none !important;
+        width:  18px !important;
+        height: 18px !important;
+    }
+
+    /* Suppress pseudo-element icons on mobile too */
+    #header .awa-header-search-col button.action.search::before,
+    #header .awa-header-search-col button.action.search::after {
+        display: none !important;
+        content: none !important;
+    }
+
+    /* Helper copy below search — hidden on mobile to save space */
+    body .page-wrapper .awa-site-header .awa-search-helper-copy {
+        display: none !important;
+    }
+
+}
+
+
+/* ==========================================================================
+   3. MOBILE HORIZONTAL OVERFLOW FIX — Login/Register pages
+   
+   Problem: .footer-bottom .container is 386px wide on 375px viewport.
+   The container has margin/padding that push content to 410px.
+   The footer-bottom styles are only scoped to :is(body.cms-index-index, ...)
+   meaning non-home pages don't get the containment.
+   
+   Fix: Apply global overflow containment to footer-bottom on ALL pages.
+   ========================================================================== */
+@media (max-width: 991px) {
+
+    /* Global containment for footer-bottom on all pages */
+    html body .page-wrapper .page_footer .footer-bottom,
+    html body .page-wrapper .footer-container .footer-bottom {
+        overflow-x:    hidden !important;
+        max-width:     100vw !important;
+        box-sizing:    border-box !important;
+    }
+
+    /* The .container inside footer-bottom must not exceed viewport */
+    html body .page-wrapper .page_footer .footer-bottom .container,
+    html body .page-wrapper .footer-container .footer-bottom .container {
+        max-width:     100% !important;
+        width:         100% !important;
+        padding-left:  16px !important;
+        padding-right: 16px !important;
+        margin-left:   0 !important;
+        margin-right:  0 !important;
+        box-sizing:    border-box !important;
+        overflow-x:    hidden !important;
+    }
+
+    /* footer-bottom-inner row must respect parent boundaries */
+    html body .page-wrapper .page_footer .footer-bottom .footer-bottom-inner,
+    html body .page-wrapper .footer-container .footer-bottom .footer-bottom-inner {
+        max-width:     100% !important;
+        padding-left:  0 !important;
+        padding-right: 0 !important;
+        box-sizing:    border-box !important;
+    }
+
+    html body .page-wrapper .page_footer .footer-bottom .footer-bottom-inner .row,
+    html body .page-wrapper .footer-container .footer-bottom .footer-bottom-inner .row {
+        margin-left:  0 !important;
+        margin-right: 0 !important;
+        max-width:    100% !important;
+    }
+
+    /* Columns inside footer-bottom — full width stacked */
+    html body .page-wrapper .page_footer .footer-bottom .row > [class*="col-"],
+    html body .page-wrapper .footer-container .footer-bottom .row > [class*="col-"] {
+        width:         100% !important;
+        max-width:     100% !important;
+        padding-left:  0 !important;
+        padding-right: 0 !important;
+        box-sizing:    border-box !important;
+    }
+
+    /* Copyright text overflow — ensure wrapping */
+    html body .page-wrapper .page_footer .footer-bottom .awa-footer-copyright__main,
+    html body .page-wrapper .page_footer .footer-bottom .awa-footer-copyright__legal,
+    html body .page-wrapper .page_footer .footer-bottom .awa-footer-copyright__disclaimer {
+        word-break:    break-word !important;
+        overflow-wrap: break-word !important;
+        max-width:     100% !important;
+    }
+
+    /* Payment logos and seals — wrap properly */
+    html body .page-wrapper .page_footer .footer-bottom .awa-footer-pay-logos,
+    html body .page-wrapper .page_footer .footer-bottom .awa-footer-sec-seals {
+        flex-wrap:  wrap !important;
+        max-width:  100% !important;
+    }
+
+    /* Global body overflow protection for all pages */
+    html body {
+        overflow-x: hidden !important;
+    }
+}
+
+
+/* ==========================================================================
+   4. DESKTOP VERTICAL MENU — Overlap + scrollbar fixes
+   ========================================================================== */
+@media (min-width: 992px) {
+    .menu_left_home1 {
+        z-index: 90 !important;
+    }
+    .footer-container {
+        position: relative !important;
+        z-index: 100 !important;
+    }
+    .menu_left_home1 .sections.nav-sections.category-dropdown {
+        max-height: calc(100vh - 200px);
+        overflow-y: auto;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+    }
+    /* Minimal scrollbar for vertical menu */
+    .menu_left_home1 .sections.nav-sections.category-dropdown::-webkit-scrollbar {
+        width: 6px;
+    }
+    .menu_left_home1 .sections.nav-sections.category-dropdown::-webkit-scrollbar-track {
+        background: var(--awa-bg-surface, #ffffff);
+    }
+    .menu_left_home1 .sections.nav-sections.category-dropdown::-webkit-scrollbar-thumb {
+        background: var(--awa-border-strong, #dddddd);
+        border-radius: 4px;
+    }
+    .menu_left_home1 .sections.nav-sections.category-dropdown::-webkit-scrollbar-thumb:hover {
+        background: var(--awa-text-muted, #666666);
+    }
+}
+
+
+/* ==========================================================================
+   5. FOOTER VISIBILITY ON NON-HOME PAGES
+   
+   Problem: Desktop footer height=0 on category, login, register pages.
+   The footer styles from awa-visual-bugfix-2026-04-30.css are scoped to
+   :is(body.cms-index-index, body.cms-home, ...) only.
+   
+   Fix: Ensure footer-container and page_footer are visible on all pages.
+   ========================================================================== */
+html body .page-wrapper .page_footer,
+html body .page-wrapper .footer-container {
+    display: block !important;
+    visibility: visible !important;
+}
+
+/* Ensure the footer renders with minimum height on all pages */
+html body .page-wrapper .page_footer .footer-bottom {
+    display: block !important;
+}
+
+/* Footer content columns — ensure they are visible */
+html body .page-wrapper .page_footer .footer-bottom .footer-bottom-inner {
+    display: block !important;
+}

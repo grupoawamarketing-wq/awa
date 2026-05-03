@@ -192,53 +192,6 @@ define([
         return $target;
     }
 
-    /**
-     * Load lazy tab content via AJAX.
-     *
-     * @param {jQuery} $carousel - The carousel element with data-lazy-url
-     * @param {Function} callback - Called after HTML is injected
-     */
-    function loadLazyTab($carousel, callback) {
-        var url = $carousel.attr('data-lazy-url');
-
-        if (!url) {
-            callback();
-            return;
-        }
-
-        $carousel.html(
-            '<div class="awa-lazy-tab-loading" style="text-align:center;padding:40px 20px;color:#94a3b8;">' +
-                '<div style="display:inline-block;width:24px;height:24px;border:3px solid #e2e8f0;border-top-color:#3b82f6;border-radius:50%;animation:awa-spin 0.8s linear infinite;margin-bottom:10px;"></div>' +
-                '<div style="font-size:13px;">Carregando produtos...</div>' +
-            '</div>' +
-            '<style>@keyframes awa-spin{to{transform:rotate(360deg)}}</style>'
-        );
-
-        $.ajax({
-            url: url,
-            type: 'GET',
-            dataType: 'json',
-            timeout: 15000
-        }).done(function (response) {
-            if (response && response.html) {
-                $carousel.html(response.html);
-                $carousel.removeAttr('data-lazy-url');
-                $carousel.trigger('contentUpdated');
-            } else {
-                $carousel.html('');
-                $carousel.removeAttr('data-lazy-url');
-            }
-            callback();
-        }).fail(function () {
-            $carousel.html(
-                '<div style="text-align:center;padding:30px 20px;color:#94a3b8;font-size:13px;">' +
-                    'Erro ao carregar produtos.' +
-                '</div>'
-            );
-            $carousel.removeAttr('data-lazy-url');
-        });
-    }
-
     function initTabs($scope, config, onTabActivated) {
         var tabsSelector = config.tabsSelector || 'ul.tabs li';
         var contentSelector = config.contentSelector || '.tab_content';
@@ -280,61 +233,6 @@ define([
         activateAndNotify($active, true);
     }
 
-    /**
-     * Convert OWL Carousel v1 options to v2 format.
-     * v1 uses itemsDesktop/itemsTablet/itemsMobile arrays; v2 uses responsive object.
-     */
-    function convertOwlV1ToV2(v1) {
-        var responsive = {};
-        var mobileItems = 1;
-        var tabletItems = 2;
-        var desktopSmallItems = 3;
-        var desktopItems;
-
-        desktopItems = parseInt(v1.items, 10) || 3;
-
-        if (v1.itemsMobile && v1.itemsMobile[1]) {
-            mobileItems = parseInt(v1.itemsMobile[1], 10) || 1;
-        }
-        if (v1.itemsTablet && v1.itemsTablet[1]) {
-            tabletItems = parseInt(v1.itemsTablet[1], 10) || 2;
-        }
-        if (v1.itemsDesktopSmall && v1.itemsDesktopSmall[1]) {
-            desktopSmallItems = parseInt(v1.itemsDesktopSmall[1], 10) || 3;
-        }
-        if (v1.itemsDesktop && v1.itemsDesktop[1]) {
-            desktopItems = parseInt(v1.itemsDesktop[1], 10) || desktopItems;
-        }
-
-        responsive[0] = { items: mobileItems };
-        responsive[v1.itemsMobile && v1.itemsMobile[0] ? v1.itemsMobile[0] : 680] = { items: mobileItems };
-        responsive[v1.itemsTablet && v1.itemsTablet[0] ? v1.itemsTablet[0] : 991] = { items: tabletItems };
-        responsive[v1.itemsDesktopSmall && v1.itemsDesktopSmall[0] ? v1.itemsDesktopSmall[0] : 1199] = { items: desktopSmallItems };
-        responsive[v1.itemsDesktop && v1.itemsDesktop[0] ? v1.itemsDesktop[0] : 1366] = { items: desktopItems };
-
-        return {
-            items: desktopItems,
-            responsive: responsive,
-            nav: resolveBoolean(v1.navigation, false),
-            dots: resolveBoolean(v1.pagination, false),
-            autoplay: resolveBoolean(v1.autoPlay, false),
-            autoplayHoverPause: resolveBoolean(v1.stopOnHover, true),
-            slideBy: resolveBoolean(v1.scrollPerPage, true) ? 'page' : 1,
-            smartSpeed: parseInt(v1.slideSpeed, 10) || 500,
-            lazyLoad: resolveBoolean(v1.lazyLoad, true),
-            loop: false,
-            margin: parseInt(v1.margin, 10) || 0,
-            onTranslated: function () {
-                var $items = this.$stage ? this.$stage.children() : $();
-
-                $items.removeClass('first-active');
-                if (this._current !== undefined) {
-                    $items.eq(this.relative(this._current)).addClass('first-active');
-                }
-            }
-        };
-    }
-
     function initCarousel(config) {
         var carouselSelector = config.carouselSelector;
         var owlConfig = config.owl || {};
@@ -347,14 +245,42 @@ define([
             return manager;
         }
 
-        baseOptions = convertOwlV1ToV2(owlConfig);
+        baseOptions = {
+            lazyLoad: resolveBoolean(owlConfig.lazyLoad, true),
+            autoPlay: resolveBoolean(owlConfig.autoPlay, false),
+            navigation: resolveBoolean(owlConfig.navigation, false),
+            pagination: resolveBoolean(owlConfig.pagination, false),
+            stopOnHover: resolveBoolean(owlConfig.stopOnHover, true),
+            scrollPerPage: resolveBoolean(owlConfig.scrollPerPage, true),
+            items: parseInt(owlConfig.items, 10) || 3,
+            itemsDesktop: owlConfig.itemsDesktop || [1366, 3],
+            itemsDesktopSmall: owlConfig.itemsDesktopSmall || [1199, 2],
+            itemsTablet: owlConfig.itemsTablet || [991, 2],
+            itemsMobile: owlConfig.itemsMobile || [680, 1],
+            slideSpeed: parseInt(owlConfig.slideSpeed, 10) || 500,
+            paginationSpeed: parseInt(owlConfig.paginationSpeed, 10) || 500,
+            rewindSpeed: parseInt(owlConfig.rewindSpeed, 10) || 500,
+            afterAction: function () {
+                if (this.$owlItems && this.$owlItems.length) {
+                    this.$owlItems.removeClass('first-active');
+                    this.$owlItems.eq(this.currentItem).addClass('first-active');
+                }
+            }
+        };
 
         function reinitCarousel($carousel) {
-            if (!$carousel.data('owl.carousel') && !$carousel.data('owlCarousel')) {
+            var owl = $carousel.data('owlCarousel');
+
+            if (!owl) {
                 return;
             }
 
-            $carousel.trigger('refresh.owl.carousel');
+            if (typeof owl.reinit === 'function') {
+                owl.reinit(baseOptions);
+                return;
+            }
+
+            $carousel.trigger('owl.update');
         }
 
         function ensureIn($container) {
@@ -365,12 +291,7 @@ define([
             $container.find(carouselSelector).each(function () {
                 var $carousel = $(this);
 
-                // Skip lazy-loading carousels — they will be initialized after AJAX load
-                if ($carousel.attr('data-lazy-url')) {
-                    return;
-                }
-
-                if ($carousel.data('owl.carousel') || $carousel.data('owlCarousel') || $carousel.hasClass('owl-loaded')) {
+                if ($carousel.data('owlCarousel') || $carousel.hasClass('owl-loaded')) {
                     reinitCarousel($carousel);
                     return;
                 }
@@ -403,7 +324,6 @@ define([
         var currentConfig = config || {};
         var tabsSelector = currentConfig.tabsSelector || 'ul.tabs li';
         var contentSelector = currentConfig.contentSelector || '.tab_content';
-        var carouselSelector = currentConfig.carouselSelector;
         var resizeNamespace = $scope.data('awaTabCarouselResizeNs');
         var visibilityRetryTimer = null;
         var carouselManager = initCarousel(currentConfig);
@@ -439,24 +359,12 @@ define([
 
         initTabs($scope, currentConfig, function ($panel) {
             runOnNextFrame(function () {
-                if (!$panel || !$panel.length) {
-                    carouselManager.ensureIn($scope);
+                if ($panel && $panel.length) {
+                    carouselManager.ensureIn($panel);
                     return;
                 }
 
-                // Check for lazy-loading carousel inside this panel
-                var $lazyCarousel = carouselSelector
-                    ? $panel.find(carouselSelector + '[data-lazy-url]')
-                    : $panel.find('[data-lazy-url]');
-
-                if ($lazyCarousel.length) {
-                    loadLazyTab($lazyCarousel, function () {
-                        carouselManager.ensureIn($panel);
-                    });
-                    return;
-                }
-
-                carouselManager.ensureIn($panel);
+                carouselManager.ensureIn($scope);
             });
         });
 

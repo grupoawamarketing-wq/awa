@@ -61,4 +61,198 @@ body.cms-homepage_ayo_home5 {
     overflow: hidden;
     max-width: 100%;
   }
+
+  // Home category carousel — align visual states with JS navigation logic
+  .top-home-content--category-carousel {
+    .awa-category-carousel__viewport {
+      position: relative;
+    }
+
+    .awa-category-carousel__prev,
+    .awa-category-carousel__next {
+      box-shadow: 0 8px 24px rgb(15 23 42 / 10%);
+      outline: none;
+
+      &:focus-visible {
+        outline: 2px solid var(--awa-primary, #b73337);
+        outline-offset: 2px;
+      }
+
+      &.is-disabled,
+      &[disabled],
+      &[aria-disabled='true'] {
+        background: var(--awa-gray-100, #f3f4f6);
+        border-color: var(--awa-gray-200, #e5e7eb);
+        color: var(--awa-gray-400, #9ca3af);
+        box-shadow: none;
+        transform: none;
+      }
+    }
+
+    .awa-category-carousel__dots {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .awa-category-carousel__dot {
+      width: 10px;
+      height: 10px;
+      border: 0;
+      border-radius: 999px;
+      background: var(--awa-gray-300, #d1d5db);
+      padding: 0;
+      transition: transform .18s ease, background-color .18s ease, width .18s ease;
+
+      &:hover,
+      &:focus-visible {
+        background: rgb(183 51 55 / 55%);
+        outline: none;
+      }
+
+      &.active,
+      &[aria-current='page'] {
+        width: 24px;
+        background: var(--awa-primary, #b73337);
+      }
+    }
+  }
+
+  // QuickView gallery — active thumbnail feedback
+  .awa-qv-thumbs {
+    .swiper-slide {
+      border: 2px solid transparent;
+      border-radius: 10px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+
+      &:hover,
+      &:focus-within {
+        border-color: rgb(183 51 55 / 28%);
+      }
+
+      &.is-active,
+      &[aria-current='true'] {
+        border-color: var(--awa-primary, #b73337);
+        box-shadow: 0 8px 20px rgb(183 51 55 / 16%);
+      }
+    }
+
+    img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+  }
+}
+
+// =============================================
+// Fix: Product Carousel Card Geometry & Spacing
+// Prevents image squeezing, normalizes heights,
+// and aligns buttons on the bottom.
+// =============================================
+
+body.cms-index-index,
+body.cms-home,
+body.cms-homepage_ayo_home5 {
+  .swiper-wrapper {
+    // 1. Prevent legacy Owl floats from breaking gap/spacing
+    & > .product-item,
+    & > .item-product,
+    & > .swiper-slide,
+    & > .product_row {
+      float: none !important;
+    }
+
+    // 2. Cards should stretch to fill slide height
+    .item-product,
+    .product-item-info {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      box-sizing: border-box;
+
+      // 3. Prevent images from being squeezed by flexbox when text is long
+      .product-thumb,
+      .product-image-container,
+      .product-item-photo {
+        flex-shrink: 0 !important;
+        width: 100%;
+        position: relative;
+      }
+
+      // 4. Push content to fill space, align CTA at bottom
+      .product-info,
+      .product-item-details {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        padding-top: var(--awa-space-3);
+      }
+
+      // Push price/actions to bottom
+      .price-box,
+      .product-item-inner {
+        margin-top: auto;
+      }
+      
+      // Ensure the inner CTA takes full width if needed
+      .product-item-inner {
+        width: 100%;
+      }
+    }
+  }
+}
+
+// =============================================
+// Fix: Breakpoint Conflict (<= 680px)
+// Swiper JS calculates 2 slides for mobile, but legacy CSS
+// forces 100% width on .item-product / .product_row.
+// We must let Swiper control the sizing.
+// =============================================
+
+@media (max-width: 680px) {
+  body.cms-index-index,
+  body.cms-home,
+  body.cms-homepage_ayo_home5 {
+    .swiper-wrapper {
+      & > .product-item,
+      & > .item-product,
+      & > .swiper-slide,
+      & > .product_row {
+        width: auto !important;
+        max-width: none !important;
+        flex: 0 0 auto !important; // Let Swiper's width rule take effect
+      }
+      
+      .item-product,
+      .product-item-info {
+        width: 100% !important; // Ensure inner card takes the full slide width
+      }
+    }
+  }
+}
+
+// =============================================
+// Fix: Ultra Mobile (< 480px) Carousel Alignment
+// Ensures Swiper forces 1 slide per view to take full width
+// =============================================
+
+@media (max-width: 480px) {
+  body.cms-index-index,
+  body.cms-home,
+  body.cms-homepage_ayo_home5 {
+    .swiper-wrapper {
+      & > .product-item,
+      & > .item-product,
+      & > .swiper-slide,
+      & > .product_row {
+        width: 100% !important; // 1 slide per view guaranteed
+        max-width: 100% !important;
+        flex: 0 0 100% !important;
+      }
+    }
+  }
 }

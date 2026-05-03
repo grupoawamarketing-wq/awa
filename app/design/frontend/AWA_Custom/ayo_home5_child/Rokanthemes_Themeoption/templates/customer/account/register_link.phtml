@@ -4,12 +4,22 @@ declare(strict_types=1);
  * Override do register_link.phtml do tema pai (ayo_default), que está comentado.
  * Reativa o "Cadastre-se" na utility bar da Camada 1 (estilo Balaroti).
  *
+ * Bug #9 fix: quando B2B está habilitado, o link de cadastro deve apontar para
+ * b2b/register (portal B2B), não para customer/account/create (cadastro PF padrão).
+ * Garante consistência com o link "Entrar" que já usa b2b/account/login.
+ *
  * @var \Magento\Customer\Block\Account\RegisterLink $block
  * @var \Magento\Framework\Escaper $escaper
  */
+
+/** @var \GrupoAwamotos\B2B\Helper\Config $b2bConfig */
+$b2bConfig   = $this->helper(\GrupoAwamotos\B2B\Helper\Config::class);
+$registerUrl = ($b2bConfig->isEnabled())
+    ? $block->getUrl('b2b/register')
+    : $block->getHref();
 ?>
 <li>
-    <a href="<?= $escaper->escapeUrl($block->getHref()) ?>"
+    <a href="<?= $escaper->escapeUrl($registerUrl) ?>"
        title="<?= $escaper->escapeHtmlAttr(__('Criar sua conta')) ?>">
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
         <?= $escaper->escapeHtml(__('Cadastre-se')) ?>

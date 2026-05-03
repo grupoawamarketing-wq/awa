@@ -127,6 +127,19 @@ define([
 
         pruneEmptyBlocks($list);
 
+        /* ---- Fix: aria-label on level-top links includes badge text --- */
+        /* Rokanthemes .VerticalMenu() sets aria-label from full textContent,
+           which includes .cat-label badge text even when it is aria-hidden.
+           Correct each link aria-label to use only .navigation__label text. */
+        $nav.find('a.level-top, a.navigation__link').each(function () {
+            var $a     = $(this);
+            var $label = $a.children('.navigation__label');
+
+            if ($a.attr('aria-label') && $a.find('.cat-label[aria-hidden]').length && $label.length) {
+                $a.attr('aria-label', $label.text().trim());
+            }
+        });
+
         /* ---- viewport ---------------------------------------------- */
         var mql = window.matchMedia
             ? window.matchMedia('(min-width: ' + desktopBreakpoint + 'px)')
@@ -150,7 +163,9 @@ define([
         }
 
         function keepDesktopMenuExpanded() {
-            return isDesktop() && isHomeContext();
+            /* AWA AUDIT-2026-04: Menu should NOT auto-expand on homepage.
+               Hero banner visibility is priority. Menu opens on hover/click. */
+            return false;
         }
 
         /* ---- Submenu position sync (CSS vars for fixed flyouts) ----- */
@@ -198,6 +213,7 @@ define([
             setMenuOpenState(true);
 
             if (isDesktop()) {
+                closeDesktopSiblingSubmenus();
                 $list.stop(true, true).removeAttr('style').show();
                 syncDesktopPanelPosition();
                 $('body').removeClass('background_shadow_show');
@@ -235,6 +251,39 @@ define([
                 visibility: '',
                 opacity: '',
                 pointerEvents: ''
+            });
+        }
+
+        function closeDesktopSiblingSubmenus($activeItem) {
+            var $targets;
+
+            if (!isDesktop()) {
+                return;
+            }
+
+            $targets = $nav.find('li.ui-menu-item.level0.parent');
+
+            if ($activeItem && $activeItem.length) {
+                $targets = $targets.not($activeItem);
+            }
+
+            $targets.each(function () {
+                var $item = $(this);
+                var $panel = $item.children('.submenu, .level0.submenu').first();
+
+                $item.removeClass('vmm-active _active is-open active ui-state-active awa-vmf-active');
+                $item.children('a.level-top, > a').attr('aria-expanded', 'false');
+                $item.children('.open-children-toggle').attr('aria-expanded', 'false');
+
+                if ($panel.length) {
+                    $panel.removeClass('opened');
+                    $panel.css({
+                        display: 'none',
+                        visibility: 'hidden',
+                        opacity: '0',
+                        pointerEvents: 'none'
+                    });
+                }
             });
         }
 
@@ -405,12 +454,18 @@ define([
                 getParentItems().each(function () {
                     resetParentItemState($(this), false);
                 });
+                closeDesktopSiblingSubmenus();
 
                 /* Re-sync list visibility to current state */
                 $list.stop(true, true).removeAttr('style');
 
                 if (keepDesktopMenuExpanded()) {
                     setMenuOpenState(true);
+                } else {
+                    /* Bug #8 fix: Rokanthemes .VerticalMenu() may add menu-open/vmm-open
+                       to $nav on init. setMenuOpenState(false) strips those stale classes
+                       from $nav AND $list so CSS state is authoritative. */
+                    setMenuOpenState(false);
                 }
 
                 if (isOpen()) {
@@ -572,11 +627,15 @@ define([
 
         /* ---- deterministic desktop submenu visibility -------------- */
         $nav.on('mouseenter' + NS, 'li.ui-menu-item.level0.parent', function () {
-            setDesktopSubmenuInlineState($(this), true);
+            var $item = $(this);
+            closeDesktopSiblingSubmenus($item);
+            setDesktopSubmenuInlineState($item, true);
         });
 
         $nav.on('focusin' + NS, 'li.ui-menu-item.level0.parent', function () {
-            setDesktopSubmenuInlineState($(this), true);
+            var $item = $(this);
+            closeDesktopSiblingSubmenus($item);
+            setDesktopSubmenuInlineState($item, true);
         });
 
         $nav.on('mouseleave' + NS, 'li.ui-menu-item.level0.parent', function () {
@@ -791,6 +850,186 @@ define([
                 $nav.one('remove' + NS, function () { obs.disconnect(); });
             });
         }
+        /* ============================================================ */
+        /*  Scroll Shadow Indicators (v2 enhancement)                   */
+        /* ============================================================ */
+
+        function initScrollShadows() {
+            var listEl = $list.get(0);
+
+            if (!listEl) {
+                return;
+            }
+
+            function updateShadows() {
+                var scrollTop     = listEl.scrollTop;
+                var scrollH       = listEl.scrollHeight;
+                var clientH       = listEl.clientHeight;
+                var canScrollUp   = scrollTop > 4;
+                var canScrollDown = (scrollTop + clientH) < (scrollH - 4);
+
+                $list.toggleClass('vmm-scroll-top', canScrollUp);
+                $list.toggleClass('vmm-scroll-bottom', canScrollDown);
+            }
+
+            listEl.addEventListener('scroll', updateShadows, { passive: true });
+
+            var shadowObs = new MutationObserver(function () {
+                window.setTimeout(updateShadows, 50);
+            });
+
+            shadowObs.observe(listEl, { childList: true, attributes: true, subtree: false });
+            $nav.one('remove' + NS, function () { shadowObs.disconnect(); });
+
+            window.setTimeout(updateShadows, 100);
+        }
+
+        /* ============================================================ */
+        /*  Current Category Highlight (v2 enhancement)                 */
+        /* ============================================================ */
+
+        function highlightCurrentCategory() {
+            var currentPath = window.location.pathname.replace(/\/$/, '').toLowerCase();
+
+            if (!currentPath || currentPath === '' || currentPath === '/') {
+                return;
+            }
+
+            $nav.find('li.ui-menu-item.level0').each(function () {
+                var $li = $(this);
+                var $a  = $li.children('a.level-top').first();
+
+                if (!$a.length) {
+                    return;
+                }
+
+                var href = ($a.attr('href') || '').replace(/\/$/, '').toLowerCase();
+
+                if (!href || href === '#' || href === 'javascript:void(0)') {
+                    return;
+                }
+
+                try {
+                    var linkPath = new URL(href, window.location.origin).pathname
+                                       .replace(/\/$/, '').toLowerCase();
+
+                    if (linkPath === currentPath) {
+                        $li.addClass('vmm-current-category');
+                    }
+                } catch (e) {
+                    /* ignore invalid URLs */
+                }
+            });
+        }
+
+        /* ============================================================ */
+        /*  "Todas as Categorias" link styling (v2 enhancement)         */
+        /* ============================================================ */
+
+        function markAllCategoriesLink() {
+            /* Check li.ui-menu-item.level0 */
+            $nav.find("li.ui-menu-item.level0").each(function () {
+                var $li = $(this);
+                var $a  = $li.children("a.level-top").first();
+
+                if (!$a.length) {
+                    return;
+                }
+
+                var text = ($a.text() || "").trim().toLowerCase();
+
+                if (text.indexOf("todas as categorias") > -1
+                        || text.indexOf("todas categorias") > -1
+                        || text.indexOf("ver todas") > -1) {
+                    $li.addClass("vmm-all-categories");
+                }
+            });
+
+            /* Also check expand-category-link (Rokanthemes "show more" link) */
+            $nav.find("li.expand-category-link").each(function () {
+                var $li = $(this);
+                var text = ($li.text() || "").trim().toLowerCase();
+
+                if (text.indexOf("todas as categorias") > -1
+                        || text.indexOf("todas categorias") > -1
+                        || text.indexOf("ver todas") > -1) {
+                    $li.addClass("vmm-all-categories");
+                }
+            });
+        }
+
+        /* ============================================================ */
+        /*  Stagger Entrance Animation (v2 enhancement)                 */
+        /* ============================================================ */
+
+        var staggerTimeout = null;
+
+        function triggerStaggerAnimation() {
+            if (!isDesktop()) {
+                return;
+            }
+
+            if ($list.hasClass('vmm-animate-in')) {
+                return;
+            }
+
+            if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                return;
+            }
+
+            $list.addClass('vmm-animate-in');
+
+            clearTimeout(staggerTimeout);
+            staggerTimeout = setTimeout(function () {
+                $list.removeClass('vmm-animate-in');
+            }, 500);
+        }
+
+        /* Patch openMenu to trigger stagger */
+        var _origOpenMenu = openMenu;
+        openMenu = function () {
+            _origOpenMenu();
+            triggerStaggerAnimation();
+        };
+
+        /* ============================================================ */
+        /*  Hover Intent for Flyout (v2 enhancement)                    */
+        /* ============================================================ */
+
+        (function initHoverIntent() {
+            if (!isDesktop()) {
+                return;
+            }
+
+            var hoverTimer = null;
+            var HOVER_DELAY = 100;
+
+            $nav.off('mouseenter' + NS, 'li.ui-menu-item.level0.parent');
+            $nav.off('mouseleave' + NS, 'li.ui-menu-item.level0.parent');
+
+            $nav.on('mouseenter' + NS + '-intent', 'li.ui-menu-item.level0.parent', function () {
+                var $item = $(this);
+
+                clearTimeout(hoverTimer);
+                hoverTimer = setTimeout(function () {
+                    closeDesktopSiblingSubmenus($item);
+                    setDesktopSubmenuInlineState($item, true);
+                }, HOVER_DELAY);
+            });
+
+            $nav.on('mouseleave' + NS + '-intent', 'li.ui-menu-item.level0.parent', function () {
+                var $item = $(this);
+
+                clearTimeout(hoverTimer);
+                setDesktopSubmenuInlineState($item, false);
+            });
+
+            $nav.on('focusin' + NS, 'li.ui-menu-item.level0.parent', function () {
+                var $item = $(this);
+                closeDesktopSiblingSubmenus($item);
+                setDesktopSubmenuInlineState($item, true);
+            });
+        })();
 
         /* ============================================================ */
         /*  Boot                                                        */
@@ -804,5 +1043,8 @@ define([
 
         syncOnResize();
         fixSectionAriaHidden();
+        initScrollShadows();
+        highlightCurrentCategory();
+        markAllCategoriesLink();
     };
 });

@@ -14,6 +14,7 @@ use Magento\CatalogInventory\Api\StockRegistryInterface;
 use Magento\Framework\App\CacheInterface;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Exception\NoSuchEntityException;
+use GrupoAwamotos\ERPIntegration\Model\Alert\EmailSender;
 use Psr\Log\LoggerInterface;
 
 class StockSync implements StockSyncInterface
@@ -25,6 +26,7 @@ class StockSync implements StockSyncInterface
     private const ANOMALY_WARNING_COOLDOWN_SECONDS = 21600;
 
     private ConnectionInterface $connection;
+    private EmailSender $emailSender;
     private Helper $helper;
     private ProductRepositoryInterface $productRepository;
     private StockRegistryInterface $stockRegistry;
@@ -52,7 +54,8 @@ class StockSync implements StockSyncInterface
         StockValidator $stockValidator,
         CacheInterface $cache,
         LoggerInterface $logger,
-        ResourceConnection $resourceConnection
+        ResourceConnection $resourceConnection,
+        EmailSender $emailSender
     ) {
         $this->connection = $connection;
         $this->helper = $helper;
@@ -63,6 +66,7 @@ class StockSync implements StockSyncInterface
         $this->cache = $cache;
         $this->logger = $logger;
         $this->resourceConnection = $resourceConnection;
+        $this->emailSender = $emailSender;
     }
 
     /**
@@ -593,13 +597,6 @@ class StockSync implements StockSyncInterface
             $this->logSyncSummary($filiais, $result);
 
             $this->logger->info('[ERP] Stock sync completed', $result);
-            if ($result['not_found'] > 100) {
-                $this->logger->warning('[ERP] Stock sync: alto numero de SKUs nao encontrados', [
-                    'not_found' => $result['not_found'],
-                    'total_erp_records' => $result['total_erp_records'],
-                    'mensagem' => $result['not_found'] . ' SKUs do ERP nao existem no Magento. Verificar importacao de produtos.',
-                ]);
-            }
         } catch (\Exception $e) {
             $result = $this->finalizeSyncResult($result, $startTime);
             $this->logAnomalySummary($result);
@@ -700,10 +697,26 @@ class StockSync implements StockSyncInterface
     }
 
     /**
+     * Build WHERE clause fragment to filter by active/sellable materials.
+     * Applies the same business rules as ProductSync to avoid fetching stock
+     * for materials that will never exist in Magento.
+     */
+    private function buildMaterialFilter(): string
+    {
+        $filter = " AND mat.CCKATIVO = 'S'";
+        if ($this->helper->filterComercializa()) {
+            $filter .= " AND mat.CKCOMERCIALIZA = 'S'";
+        }
+        return $filter;
+    }
+
+    /**
      * Sync stock from a single branch
      */
     private function syncSingleBranch(int $filial, array $result): array
     {
+        $materialFilter = $this->buildMaterialFilter();
+
         $sql = "SELECT m.MATERIAL, m.QTDE, m.VLRMEDIA
                 FROM MT_ESTOQUEMEDIA m
                 INNER JOIN (
@@ -712,7 +725,8 @@ class StockSync implements StockSyncInterface
                     WHERE FILIAL = :filial
                     GROUP BY MATERIAL
                 ) latest ON m.MATERIAL = latest.MATERIAL AND m.CODIGO = latest.MaxCodigo
-                WHERE m.FILIAL = :filial2";
+                INNER JOIN MT_MATERIAL mat ON mat.CODIGO = m.MATERIAL
+                WHERE m.FILIAL = :filial2" . $materialFilter;
 
         $rows = $this->connection->query($sql, [
             ':filial' => $filial,
@@ -742,8 +756,9 @@ class StockSync implements StockSyncInterface
         $bindings = $this->buildFilialBindings($filiais);
         $params = $bindings['params'];
         $filialList = $bindings['list'];
+        $materialFilter = $this->buildMaterialFilter();
 
-        // Get aggregated stock per material across all branches
+        // Get aggregated stock per material across all branches (filtered by active materials)
         $sql = "SELECT m.MATERIAL,
                        SUM(m.QTDE) AS QTDE_TOTAL,
                        AVG(m.VLRMEDIA) AS VLRMEDIA,
@@ -757,6 +772,8 @@ class StockSync implements StockSyncInterface
                 ) latest ON m.MATERIAL = latest.MATERIAL
                         AND m.FILIAL = latest.FILIAL
                         AND m.CODIGO = latest.MaxCodigo
+                INNER JOIN MT_MATERIAL mat ON mat.CODIGO = m.MATERIAL
+                WHERE 1=1" . $materialFilter . "
                 GROUP BY m.MATERIAL";
 
         $rows = $this->connection->query($sql, $params);
@@ -909,6 +926,10 @@ class StockSync implements StockSyncInterface
         }
 
         $this->logger->warning('[ERP] Stock anomalies detected during sync', $context);
+
+        // Send admin notification
+        $this->emailSender->sendStockAnomalyAlert($total, $this->anomalySamples);
+
     }
 
     private function logInternalCodeResolutionSummary(): void
