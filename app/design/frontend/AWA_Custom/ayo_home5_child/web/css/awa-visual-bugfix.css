@@ -12053,3 +12053,97 @@ body.cms-homepage_ayo_home5 .page-wrapper .banner-slider2 .wrapper_slider .owl.a
     margin-bottom: 0 !important;
   }
 }
+
+/* FIX-SEAL-COL: awa-footer-sec is flex-row with 292px total.
+   Label gets only 144px, seals get 136px (<163px needed) so seals wrap to 2 lines (88px).
+   Fix: flex-direction column gives full width to both items.
+   Label becomes 1 line (14px), seals fit on 1 line (44px), col drops 88px->62px. */
+@media (max-width: 639px) {
+  html body .page-wrapper .footer-bottom .awa-footer-sec,
+  html body .page-wrapper .page-footer .footer-bottom .awa-footer-sec,
+  html body .page-wrapper .page_footer .footer-bottom .awa-footer-sec {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 4px !important;
+  }
+  html body .page-wrapper .footer-bottom .awa-footer-sec-seals,
+  html body .page-wrapper .page-footer .footer-bottom .awa-footer-sec-seals,
+  html body .page-wrapper .page_footer .footer-bottom .awa-footer-sec-seals {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: center !important;
+    gap: 8px !important;
+  }
+}
+
+
+/* =============================================================================
+   FIX: Remover dois pontos (:) apos "para ver precos" nos cards B2B
+   
+   O Magento core define:
+     .product-item .price-box .price-label::after { content: ":"; }
+   Esse ":" foi desenhado para aparecer antes de um valor de preco (ex: "Preco: R$99").
+   No contexto B2B sem login, o label mostra "Faca login para ver precos:" — o dois-pontos
+   fica solitario e nao faz sentido semantico.
+   
+   Override com content:none de maior especificidade.
+   ============================================================================= */
+.b2b-login-to-see-price.price-box .price-label::after,
+.price-box.b2b-login-to-see-price .price-label::after,
+.b2b-login-to-see-price .price-label::after {
+  content: none !important;
+}
+
+/* =============================================================================
+   REFINAMENTO: Badge SKU com prefixo "REF:" para clareza
+   
+   .awa-b2b-sku exibe apenas o numero SKU (ex: "2220").
+   Adicionar "REF: " como ::before melhora legibilidade sem alterar o HTML.
+   ============================================================================= */
+.product-item .awa-b2b-sku::before {
+  content: "REF: ";
+  font-size: 0.85em;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  opacity: 0.7;
+}
+
+/* =============================================================================
+   REFINAMENTO: Nome do produto nos cards — clamp a 2 linhas uniforme
+   
+   .product-item-name tem altura variavel (1 a 3 linhas) causando cards com
+   alturas diferentes no mesmo row. Fixar em 2 linhas com -webkit-line-clamp
+   garante cards uniformes independente do comprimento do nome.
+   ============================================================================= */
+.rokan-bestseller .product-item .product-item-name .product-item-link,
+.rokan-newproduct .product-item .product-item-name .product-item-link,
+.block-new-products .product-item .product-item-name .product-item-link,
+.block-products-list .product-item .product-item-name .product-item-link {
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+
+/* FIX-PAY-LABEL-MB: pay-sec label has margin-bottom:8px. Reduce to 4px saves 4px on middle col. */
+@media (max-width: 639px) {
+  html body .page-wrapper .footer-bottom .awa-footer-pay-sec .awa-footer-muted-label,
+  html body .page-wrapper .footer-bottom .awa-footer-pay-sec .awa-footer-pay-sec__label,
+  html body .page-wrapper .page-footer .footer-bottom .awa-footer-pay-sec .awa-footer-muted-label,
+  html body .page-wrapper .page-footer .footer-bottom .awa-footer-pay-sec .awa-footer-pay-sec__label {
+    margin-bottom: 4px !important;
+  }
+}
+
+/* FIX-TRUST-BAR: .awa-footer-trust-bar has 22px pt+pb. Reduce to 14px each saves 16px total.
+   Inner grid stays unchanged, only outer bar padding reduced. */
+@media (max-width: 639px) {
+  html body .page-wrapper .awa-footer-trust-bar,
+  html body .page-wrapper .page-footer .awa-footer-trust-bar,
+  html body .page-wrapper .page_footer .awa-footer-trust-bar {
+    padding-top: 14px !important;
+    padding-bottom: 14px !important;
+  }
+}
