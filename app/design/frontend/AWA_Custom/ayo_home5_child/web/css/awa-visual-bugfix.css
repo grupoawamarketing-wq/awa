@@ -5284,6 +5284,18 @@ body .page-wrapper .banner-slider.banner-slider2 {
   overflow: hidden !important;
 }
 
+/* FIX-FULL-BLEED-RESTORE: A regra acima seta margin:0!important, quebrando
+   o full-bleed da homepage. awa-super-home.min.css usa margin-left:calc(50%-50vw)
+   no .banner-slider2 para full-bleed, mas e anulado pelo margin:0!important acima.
+   Restauramos com especificidade maior (0,3,1 via :is(body.*) supera (0,2,1)). */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+  .page-wrapper .top-home-content--above-fold > .banner-slider.banner-slider2 {
+  width: 100vw !important;
+  max-width: 100vw !important;
+  margin-left: calc(50% - 50vw) !important;
+  margin-right: 0 !important;
+}
+
 /* Wrapper do slider: full-width */
 body .page-wrapper .banner-slider.banner-slider2 .wrapper_slider {
   width: 100% !important;
@@ -12234,4 +12246,388 @@ body.cms-homepage_ayo_home5 .page-wrapper .banner-slider2 .wrapper_slider .owl.a
     max-width: 100% !important;
     width: 100% !important;
   }
+}
+
+/* =============================================================================
+   FIX-HOME-MAIN-VISIBLE: themes5.min.css (Ayo pai) tem regra
+   .cms-index-index .page-main.container { display: none }
+   que esconde todo o container principal da homepage — trust-badges, FAQ,
+   security-section e outras seções ficam com height:0 (ghost sections).
+   Fix: revelar o container em todas as home-class bodys.
+   ============================================================================= */
+body.cms-index-index .page-main.container,
+body.cms-home .page-main.container,
+body.cms-homepage_ayo_home5 .page-main.container {
+  display: block !important;
+}
+
+/* =============================================================================
+   FIX-SECURITY-SECTION: .awa-security-section tem display:none — revelar.
+   ============================================================================= */
+body.cms-index-index .awa-security-section,
+body.cms-home .awa-security-section,
+.cms-index-index .awa-security-section {
+  display: block !important;
+}
+
+/* =============================================================================
+   FIX-SCROLL-TOP-HIDDEN: Botão scroll-to-top não deve aparecer no topo da página.
+   O JS adiciona a classe .show ao rolar para baixo — garantir que sem ela fique
+   invisible (opacity:0 + pointer-events:none) para evitar flash no carregamento.
+   ============================================================================= */
+body .page-wrapper .fixed-right .fixed-right-ul .scroll-top:not(.show),
+body .page-wrapper .fixed-right .scroll-top:not(.show),
+body .page-wrapper .fixed-right-ul .scroll-top:not(.show) {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+
+/* =============================================================================
+   FIX-WHATSAPP-OVERFLOW: Botão WhatsApp fixo cortado na borda direita.
+   right:0 sem padding causa clipagem pelo overflow do viewport.
+   ============================================================================= */
+body .page-wrapper .fixed-right,
+body .fixed-right {
+  right: 0 !important;
+  padding-right: 8px !important;
+}
+
+/* =============================================================================
+   FIX-VIEWMODE-ICONS: Ícones grid/list view na PLP sem renderização visível.
+   ============================================================================= */
+body .page-wrapper .toolbar-products .modes .modes-mode {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+}
+
+body .page-wrapper .toolbar-products .modes .modes-mode::before {
+  font-family: 'icons-blank-theme', 'luma-icons', sans-serif !important;
+  font-size: 16px !important;
+  line-height: 1 !important;
+}
+
+/* =============================================================================
+   FIX-PDP-TABS: Abas de produto com height:0 antes do JS inicializar.
+   ============================================================================= */
+body .page-wrapper .product.data.items .data.item.content[aria-hidden="false"],
+body .page-wrapper .product.data.items .data.item.content.active {
+  display: block !important;
+  height: auto !important;
+  overflow: visible !important;
+}
+
+/* =============================================================================
+   FIX-SECURITY-SECTION-V2: Corrige especificidade insuficiente do fix anterior.
+   Regra conflitante: body.cms-index-index .page-wrapper .column.main .awa-security-section{display:none!important}
+   de themes.min.css e merged CSS tem especificidade (0,5,1) — precisa ser superada.
+   ============================================================================= */
+body.cms-index-index .page-wrapper .column.main .awa-security-section,
+body.cms-home .page-wrapper .column.main .awa-security-section {
+  display: block !important;
+}
+
+/* =============================================================================
+   FIX-SCROLL-TOP-V2: Correto — .fixed-right está como filho direto de body,
+   NÃO dentro de .page-wrapper. Remove .page-wrapper da cadeia de seletores.
+   ============================================================================= */
+body .fixed-right .fixed-right-ul .scroll-top:not(.show),
+body .fixed-right-ul .scroll-top:not(.show),
+.fixed-right .fixed-right-ul li.scroll-top:not(.show) {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+
+/* FIX-CERT-SEALS: SVGs have fill="white"; seal containers need dark background to be visible.
+   NOTE: DOM uses footer.page-footer (hyphen), not div.page_footer (underscore).
+   Correct selector uses .page-footer (hyphen). */
+html body .page-wrapper .page-footer .footer-bottom .awa-footer-sec-seals .awa-seal,
+html body .page-wrapper .footer-bottom .awa-footer-sec-seals .awa-seal {
+    background: #1e2432 !important;
+    border-color: rgba(255,255,255,0.15) !important;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.25) !important;
+}
+html body .page-wrapper .page-footer .footer-bottom .awa-footer-sec-seals .awa-seal:hover,
+html body .page-wrapper .page-footer .footer-bottom .awa-footer-sec-seals .awa-seal:focus-visible,
+html body .page-wrapper .footer-bottom .awa-footer-sec-seals .awa-seal:hover,
+html body .page-wrapper .footer-bottom .awa-footer-sec-seals .awa-seal:focus-visible {
+    background: #2a3248 !important;
+    border-color: var(--awa-primary, #b73337) !important;
+}
+
+/* =============================================================================
+   FIX-TRUST-BADGE-IMAGES: awa-super-global.min.css tem
+   .trust-badge-item img { height: auto !important } que zera a altura das imagens
+   (height:auto sem imagem carregada = 0px).
+   Fix: forçar dimensões explícitas com !important e especificidade maior.
+   ============================================================================= */
+body .page-wrapper .trust-badges-homepage .trust-badge-item img,
+body .page-wrapper .trust-badge-item img {
+  width: auto !important;
+  max-width: 100% !important;
+  height: 40px !important;
+  min-height: 32px !important;
+  max-height: 48px !important;
+  display: block !important;
+}
+
+/* =============================================================================
+   FIX-AUTOCOMPLETE-POSITION: awa-bundle-refinements.css e awa-super-global.css
+   têm: .mst-searchautocomplete__autocomplete { top: calc(100%+12px) !important }
+   Mas o Mirasvit usa position:fixed via JS inline style. Para position:fixed,
+   100% = viewport height (812px mobile) → top = 824px (fora da tela!).
+   Fix: forçar position:absolute para que 100% seja relativo ao .control (44px)
+   → top = 52px a partir do .control → autocomplete aparece abaixo da barra de busca.
+   Também forçar min-height para garantir visibilidade mesmo com height:auto bugado.
+   ============================================================================= */
+.mst-searchautocomplete__autocomplete {
+  position: absolute !important;
+}
+.mst-searchautocomplete__autocomplete._active {
+  min-height: min(500px, 70vh) !important;
+}
+
+/* =============================================================================
+   FIX-FIXED-RIGHT-CONTAINER: .fixed-right mostra como caixa branca (54x286px)
+   quando o scroll-top não tem classe .show e os outros items são display:none.
+   O container tem background:white e border visíveis mesmo sem itens visíveis.
+   Fix: esconder o container inteiro quando scroll-top não está ativo.
+   Usa :has() seletor (suportado Chrome 105+, Firefox 121+, Safari 15.4+).
+   ============================================================================= */
+.fixed-right:has(> .fixed-right-ul > li.scroll-top:not(.show)) {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: visibility 0s, opacity 0.3s ease !important;
+}
+.fixed-right:has(> .fixed-right-ul > li.scroll-top.show) {
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* =============================================================================
+   FIX-CONTACT-ACTION-BG: Non-primary contact action buttons (phone/email) show
+   white background on dark container. Root cause: merged CSS sets
+   background: var(--awa-plp-final-surface-soft) on .awa-footer-business-contact__action
+   but --awa-plp-final-surface-soft is undefined, resolving to white.
+   The container (div.page_footer) has black background — white text on white bg = invisible.
+   Fix: force correct semi-transparent backgrounds so white text is readable.
+   ============================================================================= */
+html body .awa-footer-business-contact__action:not(.awa-footer-business-contact__action--primary),
+html body .page_footer .awa-footer-business-contact__action:not(.awa-footer-business-contact__action--primary),
+html body .page-footer .awa-footer-business-contact__action:not(.awa-footer-business-contact__action--primary) {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+html body .awa-footer-business-contact__action:not(.awa-footer-business-contact__action--primary):hover,
+html body .page_footer .awa-footer-business-contact__action:not(.awa-footer-business-contact__action--primary):hover,
+html body .page-footer .awa-footer-business-contact__action:not(.awa-footer-business-contact__action--primary):hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+}
+html body .awa-footer-business-contact__action:not(.awa-footer-business-contact__action--primary) .awa-footer-business-contact__action-copy,
+html body .awa-footer-business-contact__action:not(.awa-footer-business-contact__action--primary) .awa-footer-business-contact__action-copy strong,
+html body .awa-footer-business-contact__action:not(.awa-footer-business-contact__action--primary) .awa-footer-business-contact__action-copy span {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+/* =============================================================================
+   FIX-ATENDIMENTO-STORE-TEXT: Store info card in ATENDIMENTO footer column has
+   white text (rgba(255,255,255,0.85)) because our own rule
+   `:is(body.cms-index-index,...) .page-wrapper .page_footer .velaContent p`
+   (specificity 0,4,2) overrides the bundle's gray rule.
+   Root: div.velaContent wraps the store card inside .awa-footer-atendimento.
+   Fix: Higher-specificity (0,5,3) direct rules to restore readable dark text.
+   ============================================================================= */
+html body .page-wrapper .page_footer .awa-footer-atendimento .awa-footer-atendimento__store p.awa-footer-atendimento__store-name,
+html body .page-wrapper .page_footer .awa-footer-atendimento .awa-footer-atendimento__store p.awa-footer-atendimento__store-address {
+  color: var(--awa-text-muted, #666) !important;
+}
+
+html body .page-wrapper .page_footer .awa-footer-atendimento .awa-footer-atendimento__store span.awa-footer-atendimento__store-badge {
+  color: var(--awa-primary, #b73337) !important;
+  background: rgba(183, 51, 55, 0.08) !important;
+}
+
+/* =============================================================================
+   FIX-ATENDIMENTO-LABELS-PHONE-EMAIL: Phone/email/label elements in ATENDIMENTO
+   footer column have white/near-white text because earlier rules in this file
+   (lines 6327-6345) set `--awa-text-inverse` and `--awa-text-on-dark-muted-solid`
+   for dark-background context, but the column card now has `--awa-bg-surface`
+   (white) background. Fix: higher-specificity dark text overrides.
+   ============================================================================= */
+html body .page-wrapper .page_footer .awa-footer-atendimento .awa-footer-atendimento__label,
+html body .page-wrapper .page_footer .awa-footer-atendimento .awa-footer-atendimento__label--social {
+  color: var(--awa-text-muted, #666) !important;
+  text-transform: uppercase !important;
+}
+
+html body .page-wrapper .page_footer .awa-footer-atendimento .awa-footer-atendimento__phone,
+html body .page-wrapper .page_footer .awa-footer-atendimento .awa-footer-atendimento__email {
+  color: var(--awa-text-muted, #666) !important;
+}
+
+html body .page-wrapper .page_footer .awa-footer-atendimento .awa-footer-atendimento__phone a,
+html body .page-wrapper .page_footer .awa-footer-atendimento .awa-footer-atendimento__email a {
+  color: var(--awa-text, #333) !important;
+}
+
+/* =============================================================================
+   FIX-ATENDIMENTO-ACTION-LINKS (v22): WhatsApp and help action links in
+   ATENDIMENTO footer column have rgb(187,187,187) = #bbb color inherited from
+   earlier dark-background rules. The ATENDIMENTO column has white background
+   (--awa-bg-surface), making #bbb text near-invisible.
+   ul.awa-footer-atendimento__actions > li > a
+   ============================================================================= */
+html body .page-wrapper .page_footer .awa-footer-atendimento .awa-footer-atendimento__actions a {
+  color: var(--awa-text-muted, #666) !important;
+}
+
+html body .page-wrapper .page_footer .awa-footer-atendimento .awa-footer-atendimento__actions a:hover {
+  color: var(--awa-primary, #b73337) !important;
+}
+
+html body .page-wrapper .page_footer .awa-footer-atendimento .awa-footer-atendimento__actions .awa-footer-atendimento__icon svg {
+  stroke: currentColor !important;
+}
+
+/* FIX-HERO-BLEED: clone do OWL aparece à esquerda do slider quando
+   o full-bleed posiciona .top-home-content--above-fold com margem negativa.
+   .wrapper_slider já contém os botões nav (left:16px/right:16px), então
+   overflow:hidden não os corta. */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+  .page-wrapper .banner-slider2 .wrapper_slider.hidden-xs {
+  overflow: hidden !important;
+}
+
+/* =============================================================================
+   FIX-ATENDIMENTO-ACTION-LINKS-V2 (v22b): Previous rule (html body... 0,4,3 spec)
+   is overridden by the earlier rule at line ~6329:
+   `:is(body.cms-*,...) .page-wrapper .page_footer .velaFooterMenu .velaFooterLinks li a`
+   which has specificity (0,5,3) because :is() takes the most specific argument.
+   Fix: use :is(body.cms-*) format to reach (0,5,3) and WIN because this rule 
+   comes LATER in the cascade (same file, later position → wins on equal specificity).
+   ============================================================================= */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .awa-footer-atendimento .awa-footer-atendimento__actions li a {
+  color: var(--awa-text-muted, #666) !important;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .awa-footer-atendimento .awa-footer-atendimento__actions li a:hover {
+  color: var(--awa-primary, #b73337) !important;
+}
+
+/* =============================================================================
+   FIX-FOOTER-LIGHT-SPECIFICITY-LOCK (v24): o footer da home ainda ficava preto
+   porque os blocos escuros usam :is(body.cms-*) com especificidade maior do que
+   a correção genérica light adicionada depois. Reaplica a paleta clara com a
+   mesma assinatura de seletor para vencer na cascata sem alterar layout/spacing.
+   ============================================================================= */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer {
+  background: var(--awa-bg-page, #f8fafc) !important;
+  color: var(--awa-text, #333) !important;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .footer-container,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .footer-static,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .awa-footer-categories-expand,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .footer-bottom,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .awa-footer-devby {
+  background: var(--awa-bg-surface, #fff) !important;
+  color: var(--awa-text, #333) !important;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .footer-container .vela-content,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .velaFooterMenu,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .awa-footer-categories-list a,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .footer-bottom .awa-footer-sec-seals .awa-seal,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .awa-footer-pro__social .awa-footer-pro__social-link {
+  background: var(--awa-bg-surface, #fff) !important;
+  border-color: color-mix(in srgb, var(--awa-primary, #b73337) 20%, var(--awa-border, #e5e5e5)) !important;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .velaFooterTitle,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .awa-footer-copyright__main,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .awa-footer-categories-expand__toggle,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .awa-footer-atendimento__phone,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .awa-footer-atendimento__phone a,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .awa-footer-atendimento__email,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .awa-footer-atendimento__email a {
+  color: var(--awa-text, #333) !important;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .velaContent,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .velaContent p,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .velaContent span,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .velaContent small,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .awa-footer-pay-sec__label,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .awa-footer-copyright__legal,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .awa-footer-copyright__disclaimer,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .awa-footer-devby__label,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .awa-footer-atendimento__label,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .awa-footer-atendimento__label--social,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .velaFooterLinks li a,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .awa-footer-atendimento__actions li a,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .awa-footer-categories-list a,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .awa-footer-pro__social .awa-footer-pro__social-link {
+  color: var(--awa-text-muted, #666) !important;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .velaFooterLinks li a:hover,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .velaFooterLinks li a:focus-visible,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .awa-footer-atendimento__actions li a:hover,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .awa-footer-atendimento__actions li a:focus-visible,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .awa-footer-categories-list a:hover,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .awa-footer-categories-list a:focus-visible {
+  color: var(--awa-primary, #b73337) !important;
+  background: color-mix(in srgb, var(--awa-primary, #b73337) 8%, transparent) !important;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .awa-footer-pro__social .awa-footer-pro__social-link:hover,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .awa-footer-pro__social .awa-footer-pro__social-link:focus-visible {
+  background: var(--awa-primary, #b73337) !important;
+  border-color: var(--awa-primary, #b73337) !important;
+  color: var(--awa-text-inverse, #fff) !important;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .awa-footer-business-contact__action:not(.awa-footer-business-contact__action--primary) {
+  background: color-mix(in srgb, var(--awa-primary, #b73337) 6%, #fff) !important;
+  border-color: color-mix(in srgb, var(--awa-primary, #b73337) 20%, var(--awa-border, #e5e5e5)) !important;
+  color: var(--awa-text, #333) !important;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .awa-footer-business-contact__action:not(.awa-footer-business-contact__action--primary):hover {
+  background: color-mix(in srgb, var(--awa-primary, #b73337) 10%, #fff) !important;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .awa-footer-business-contact__action:not(.awa-footer-business-contact__action--primary) .awa-footer-business-contact__action-copy,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .awa-footer-business-contact__action:not(.awa-footer-business-contact__action--primary) .awa-footer-business-contact__action-copy strong,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .awa-footer-business-contact__action:not(.awa-footer-business-contact__action--primary) .awa-footer-business-contact__action-copy span {
+  color: var(--awa-text, #333) !important;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .footer-bottom,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .awa-footer-bottom__copyright,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .awa-footer-devby {
+  border-top: 1px solid color-mix(in srgb, var(--awa-primary, #b73337) 20%, var(--awa-border, #e5e5e5)) !important;
+}
+
+/* =============================================================================
+   FIX-FOOTER-LINK-SPECIFICITY-LOCK (v26): a regra escura original inclui
+   `.velaFooterMenu`, então a correção genérica ainda perdia em especificidade.
+   Igualamos a cadeia para restaurar links legíveis nos cards brancos do footer.
+   ============================================================================= */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .velaFooterMenu .velaFooterLinks li a {
+  color: var(--awa-text-muted, #666) !important;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .velaFooterMenu .velaFooterLinks li a:hover,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .velaFooterMenu .velaFooterLinks li a:focus-visible {
+  color: var(--awa-primary, #b73337) !important;
+  background: color-mix(in srgb, var(--awa-primary, #b73337) 8%, transparent) !important;
 }
