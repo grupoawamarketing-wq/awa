@@ -31,11 +31,11 @@ done
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] Fase 0: pre-warm concluído" >> "$LOG"
 
 # ── Pós Fase 0: pré-comprimir brotli do merged CSS recém-gerado ───────────────
+# Sem -newer: comprime todos .min.css sem .br (idempotente, sem dependência de stamp)
 if command -v brotli &>/dev/null; then
-    find "$ROOT_DIR/pub/static/_cache/merged" -name "*.min.css" ! -name "*.br" -newer "$ROOT_DIR/pub/static/_cache/merged/.brotli_stamp" 2>/dev/null | while read -r css; do
+    find "$ROOT_DIR/pub/static/_cache/merged" -name "*.min.css" ! -name "*.br" 2>/dev/null | while read -r css; do
         brotli -q 6 -f "$css" -o "${css}.br" 2>/dev/null || true
-    done
-    touch "$ROOT_DIR/pub/static/_cache/merged/.brotli_stamp" 2>/dev/null || true
+    done || true
 fi
 # ─────────────────────────────────────────────────────────────────────────────
 
