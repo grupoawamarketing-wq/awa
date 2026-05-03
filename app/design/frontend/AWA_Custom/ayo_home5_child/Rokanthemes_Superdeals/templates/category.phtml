@@ -20,7 +20,7 @@
 	$limitProducts = (int)$block->getConfig('limit_products');
 	$desktopItems = $items > 0 ? $items : $limitProducts;
 	if ($desktopItems <= 0) {
-	$desktopItems = 4;
+		$desktopItems = 4;
 	}
 	$desktopItems = min($desktopItems, 4);
 	$desktopSmallItems = min($desktopItems, 3);
@@ -34,17 +34,21 @@
 	<div class="rokan-product-heading rokan-onsale-heading"><h2><?php echo $block->escapeHtml($this->getConfig('title')) ?>  <span class="sup-title"><?php echo $block->escapeHtml(__('Of The Day')) ?></span></h2></div>
 <?php }?>
 <div class="hot-deal-tab-slider hot-deal-tab-slider-customcss">
+	<div class="countdown_block">
+		<div class="title_countdown"><?php echo $block->escapeHtml(__('Hurry Up! Offer ends in:')) ?></div>
+		<div class="super-deal-countdown" data-date="<?php echo $block->escapeHtmlAttr($block->getConfig('end_date')); ?>"></div>
+	</div>
 	<div class="row">
-		<div class="swiper hot-deal-slide">
-			<div class="swiper-wrapper">
+		<div class="hot-deal-slide">
 			<?php
 				$newItems =  $block->getProducts();
 				$i=0;
 				foreach($newItems as $_item) {
 					$productImage = $block->getImage($_item, $image);
 				?>
-				<?php if($i++%$rows==0) { ?> <div class="swiper-slide product_row"> <?php } ?>
+				<?php if($i++%$rows==0) { ?> <div class="product_row"> <?php } ?>
 					<div class="item-product product-item">
+						<div class="content-item-product">
 							<div class="product-thumb">
 								<a href="<?php echo $block->escapeUrl($_item->getProductUrl()) ?>" class="product-thumb-link">
 									<?php $productImageThumb = $block->getImage($_item, 'category_image_second_small');?>
@@ -88,9 +92,44 @@
 										<a  class="quickview-link" data-role="quickview-button" data-id="<?php echo (int)$_item->getId(); ?>" href="#" data-href="<?php echo $block->escapeUrl($block->getUrl('quickview/product/quickview/id/' . (int)$_item->getId())) ?>" title="<?php echo $block->escapeHtmlAttr(__('Quick view'));?>" aria-label="<?php echo $block->escapeHtmlAttr(__('Quick view'));?>">
 											</a>
 										</li>
-										<?php /* compare desativado */ ?>
+										<li class="compare-product">
+										<?php $compareHelper = $this->helper('Magento\Catalog\Helper\Product\Compare');?>
+										<a href="#" class="compare-link action tocompare"
+										  data-post='<?php echo $compareHelper->getPostDataParams($_item);?>'
+										  title="<?php echo $block->escapeHtmlAttr(__('Add to Compare')); ?>"
+										  aria-label="<?php echo $block->escapeHtmlAttr(__('Add to Compare')); ?>">
+										</a>
+										</li>
 									</ul>
 							    </div>
+							    <div class="product-info-cart">
+				                    <div class="actions-primary addcart-link">
+				                      <?php if ($_item->isSaleable()): ?>
+				                        <?php
+				                          $postDataHelper = $this->helper('Magento\Framework\Data\Helper\PostHelper');
+				                          $postData = $postDataHelper->getPostData($block->getAddToCartUrl($_item), ['product' => $_item->getEntityId()]);
+				                          $postParams = json_decode($postData, true);
+				                          ?>
+				                        <form data-role="tocart-form" action="<?php echo $block->escapeUrl($postParams['action']); ?>" method="post">
+				                          <input type="hidden" name="product" value="<?php echo $block->escapeHtmlAttr($postParams['data']['product']); ?>">
+				                          <input type="hidden" name="<?php echo $block->escapeHtmlAttr(Action::PARAM_NAME_URL_ENCODED); ?>" value="<?php echo $block->escapeHtmlAttr($postParams['data'][Action::PARAM_NAME_URL_ENCODED]); ?>">
+				                          <?php echo $block->getBlockHtml('formkey')?>
+				                          <button type="submit"
+				                              title="<?php echo $block->escapeHtml(__('Adicionar ao Carrinho')); ?>"
+                                                               aria-label="<?php echo $block->escapeHtml(__('Adicionar ao Carrinho') . (isset($_product) ? ': ' . $_product->getName() : (isset($_item) ? ': ' . $_item->getName() : ''))); ?>"
+				                              class="btn-add-to-cart action tocart">
+				                            <span><?php echo $block->escapeHtml(__('Adicionar ao Carrinho')); ?></span>
+				                          </button>
+				                        </form>
+				                      <?php else: ?>
+				                        <?php if ($_item->getIsSalable()): ?>
+				                          <div class="stock available"><span><?php echo $block->escapeHtml(__('In stock')) ?></span></div>
+				                        <?php else: ?>
+				                          <div class="stock unavailable"><span><?php echo $block->escapeHtml(__('Out of stock')) ?></span></div>
+				                        <?php endif; ?>
+				                      <?php endif; ?>
+				                    </div>
+	  							</div>
 						    </div>
 						    <div class="product-info">
 								<h3 class="product-name">
@@ -98,23 +137,17 @@
 										<?php echo $block->escapeHtml($_item->getName()); ?>
 									</a>
 								</h3>
-								<div class="awa-b2b-sku">
-									<span class="awa-b2b-sku__label"><?php echo $block->escapeHtml(__('Cod:')); ?></span>
-									<span class="awa-b2b-sku__value"><?php echo $block->escapeHtml($_item->getSku()); ?></span>
-								</div>
-								<?php $_reviewHtml = $block->getReviewsSummaryHtml($_item, $templateType, true); ?>
-								<?php if ($_reviewHtml): ?>
 								<div class="product-rating">
-									<?php echo $_reviewHtml; ?>
+									<?php if ($templateType): ?>
+										<?php echo $block->getReviewsSummaryHtml($_item, $templateType,true); ?>
+									<?php endif; ?>
 								</div>
-								<?php endif; ?>
-								<?php $_soldByText = $_item->getAttributeText('sold_by'); ?>
-								<?php if ($_soldByText): ?>
 								<div class="sold-by">
-									<span><?php echo $block->escapeHtml(__('Sold by:')); ?></span>
-									<?php echo $block->escapeHtml($_soldByText); ?>
+									<?php
+										$cats = $_item->getAttributeText('sold_by');
+										echo ' <span>'.$block->escapeHtml(__('Sold by:')).'</span>' . $block->escapeHtml($cats);
+									 ?>
 								</div>
-								<?php endif; ?>
 								<div class="info-price">
 									<?php /* @noEscape */ echo $this->helper('Rokanthemes\Themeoption\Helper\Data')->getPriceDisplayCustom($block->getProductPrice($_item)) ?>
 								</div>
@@ -135,52 +168,25 @@
 									</div>
 								</div>
 								<?php endif; ?>
-								<div class="product-info-cart">
-									<div class="actions-primary addcart-link">
-										<?php if ($_item->isSaleable()): ?>
-											<?php
-												$postDataHelper = $this->helper('Magento\Framework\Data\Helper\PostHelper');
-												$postData = $postDataHelper->getPostData($block->getAddToCartUrl($_item), ['product' => $_item->getEntityId()]);
-												$postParams = json_decode($postData, true);
-											?>
-											<form data-role="tocart-form" action="<?php echo $block->escapeUrl($postParams['action']); ?>" method="post">
-												<input type="hidden" name="product" value="<?php echo $block->escapeHtmlAttr($postParams['data']['product']); ?>">
-												<input type="hidden" name="<?php echo $block->escapeHtmlAttr(Action::PARAM_NAME_URL_ENCODED); ?>" value="<?php echo $block->escapeHtmlAttr($postParams['data'][Action::PARAM_NAME_URL_ENCODED]); ?>">
-												<?php echo $block->getBlockHtml('formkey')?>
-												<button type="submit"
-													title="<?php echo $block->escapeHtml(__('Add to Cart')); ?>"
-													class="btn-add-to-cart action tocart">
-													<span><?php echo $block->escapeHtml(__('Add to Cart')); ?></span>
-												</button>
-											</form>
-										<?php else: ?>
-											<?php if ($_item->getIsSalable()): ?>
-												<div class="stock available"><span><?php echo $block->escapeHtml(__('In stock')) ?></span></div>
-											<?php else: ?>
-												<div class="stock unavailable"><span><?php echo $block->escapeHtml(__('Out of stock')) ?></span></div>
-											<?php endif; ?>
-										<?php endif; ?>
-									</div>
-								</div>
 							</div>
+						</div>
 					</div>
 						<?php if($i%$rows==0 || $i == count($newItems)) { ?> </div> <?php }?>
 				<?php
 				}
 				?>
-		<div class="swiper-button-prev" role="button" tabindex="0" aria-label="<?php echo $block->escapeHtmlAttr(__('Previous offers')); ?>"></div>
-		<div class="swiper-button-next" role="button" tabindex="0" aria-label="<?php echo $block->escapeHtmlAttr(__('Next offers')); ?>"></div>
 		</div>
 	</div>
 </div>
 <script type="text/x-magento-init">
 {
-	"[data-role=tocart-form], .form.map.checkout": {
+	"[data-role=tocart-form]": {
 		"catalogAddToCart": {}
 	},
 	".hot-deal-tab-slider-customcss": {
-		"js/superdeals-swiper-init": {
+		"js/superdeals-init": {
 			"carouselSelector": ".hot-deal-slide",
+			"countdownSelector": ".super-deal-countdown",
 			"owl": {
 				"lazyLoad": true,
 				"items": <?php echo (int)$desktopItems; ?>,
@@ -191,6 +197,18 @@
 				"navigation": <?php echo ($show_navigation) ? 'true' : 'false'; ?>,
 				"pagination": <?php echo ($show_pagination) ? 'true' : 'false'; ?>,
 				"autoPlay": <?php echo ($auto) ? 'true' : 'false'; ?>
+			},
+			"countdown": {
+				"fg_width": 0.01,
+				"bg_width": 1.2,
+				"text_size": 0.07,
+				"circle_bg_color": "#ffffff"
+			},
+			"labels": {
+				"days": "<?php echo $block->escapeJsQuote(__('Days')); ?>",
+				"hours": "<?php echo $block->escapeJsQuote(__('Hours')); ?>",
+				"minutes": "<?php echo $block->escapeJsQuote(__('Mins')); ?>",
+				"seconds": "<?php echo $block->escapeJsQuote(__('Secs')); ?>"
 			}
 		}
 	}

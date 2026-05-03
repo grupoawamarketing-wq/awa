@@ -1,5 +1,4 @@
 	<?php
-/** @var \Rokanthemes\ProductTab\Block\Producttab|Magento\Catalog\Block\Product\AbstractProduct $block */
 use Magento\Framework\App\Action\Action;
 	$enable = $block->getConfig('enabled');
 	if($enable < 1) return ;
@@ -8,7 +7,7 @@ use Magento\Framework\App\Action\Action;
 	$qty = $block->getConfig('qty');
 	$showCart = $block->getConfig('addtocart');
 	$showWishlist = $block->getConfig('wishlist');
-	$showCompare = false; /* compare desativado */
+	$showCompare = $block->getConfig('compare');
 	$show_navigation = $block->getConfig('navigation');
 	$show_pagination = $block->getConfig('pagination');
 	$auto = $block->getConfig('auto');
@@ -16,7 +15,8 @@ use Magento\Framework\App\Action\Action;
 	$image = 'new_products_content_widget_grid';
 	$type = 'widget-new-grid';
 	$templateType = \Magento\Catalog\Block\Product\ReviewRendererInterface::DEFAULT_VIEW;
-	$rows = 1;
+	$rows = 2;
+	$newLabelHelper = $this->helper('Rokanthemes\RokanBase\Helper\Newlabel');
 	?>
 <div class="list-tab-product common-tab-system-fixed">
 	<div class="rokan-product-heading clearfix">
@@ -30,10 +30,17 @@ use Magento\Framework\App\Action\Action;
 		        $tabIdx = 0;
 		        foreach($tab_contents as $tab) {
 		          ?>
-		          <li rel="tab_<?php echo $block->escapeHtmlAttr($tab['id']);?>" class="<?php echo $block->escapeHtmlAttr($tab['class']); ?>" role="tab" tabindex="0" aria-selected="<?php echo ($tabIdx++ === 0) ? 'true' : 'false'; ?>" aria-controls="tab_<?php echo $block->escapeHtmlAttr($tab['id']);?>">
-		              <button type="button" class="awa-tab-button" aria-label="<?php echo $block->escapeHtmlAttr($tab['name']); ?>">
-		                  <?php echo $block->escapeHtml($tab['name']);?>
-		              </button>
+		          <?php $tabId = 'tab_' . $block->escapeHtmlAttr($tab['id']) . '_tab'; ?>
+		          <li
+		              id="<?php echo $tabId; ?>"
+		              rel="tab_<?php echo $block->escapeHtmlAttr($tab['id']);?>"
+		              class="<?php echo $block->escapeHtmlAttr($tab['class']); ?>"
+		              role="tab"
+		              tabindex="0"
+		              aria-selected="<?php echo ($tabIdx++ === 0) ? 'true' : 'false'; ?>"
+		              aria-controls="tab_<?php echo $block->escapeHtmlAttr($tab['id']);?>"
+		          >
+		              <span><?php echo $block->escapeHtml($tab['name']);?></span>
 		          </li>
 		          <?php
 		        }
@@ -46,64 +53,46 @@ use Magento\Framework\App\Action\Action;
 		   <?php
 			foreach($tab_contents as $tab) {
 			?>
-			 <div id="tab_<?php echo $block->escapeHtmlAttr($tab['id']);?>" class="product-tab-slider tab_content <?php echo $block->escapeHtmlAttr($tab['class']); ?>" role="tabpanel" aria-labelledby="tab_<?php echo $block->escapeHtmlAttr($tab['id']);?>">
-			 	<div class="swiper productTabContent">
-				<div class="swiper-wrapper">
+			 <div id="tab_<?php echo $block->escapeHtmlAttr($tab['id']);?>" class="product-tab-slider tab_content <?php echo $block->escapeHtmlAttr($tab['class']); ?>" role="tabpanel" aria-labelledby="tab_<?php echo $block->escapeHtmlAttr($tab['id']);?>_tab">
+			 	<div class="productTabContent">
 				<?php
 					$i=0;
 					$productItems =  $tab['productInfo'];
 					foreach($productItems as $_item) {
 							$productImage = $block->getImage($_item, $image);
 							$productImageThumb = $block->getImage($_item, 'category_page_grid-1');
-				?>
-						<?php if($i++%$rows==0) { ?> <div class="swiper-slide product_row"> <?php } ?>
+					?>
+						<?php if($i++%$rows==0) { ?> <div class="product_row"> <?php } ?>
 						<div class="item-product-parent">
 							<div class="item-product listview">
 								<div class="product-thumb">
-									<a href="<?php echo $block->escapeUrl($_item->getProductUrl()); ?>" class="product-thumb-link" aria-label="<?php echo $block->escapeHtmlAttr($_item->getName()); ?>">
+									<a href="<?php echo $block->escapeUrl($_item->getProductUrl()); ?>" class="product-thumb-link">
 										<?php $productImageThumb = $block->getImage($_item, 'category_image_second_small');?>
 										<span class="first-thumb">
-										<?php /* Carousel images always below-fold — lazy load + srcset */
-										$productImageLg = $block->getImage($_item, 'new_products_content_widget_grids'); // 480px
-										$_tabSrcset = $block->escapeUrl($productImage->getImageUrl()) . ' 360w, '
-										           . $block->escapeUrl($productImageLg->getImageUrl()) . ' 480w';
-										$_tabSizes  = '(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw';
-										$_imgHtml = $productImage->toHtml();
-										$_imgHtml = str_replace('loading="eager"', 'loading="lazy"', $_imgHtml);
-										if (strpos($_imgHtml, 'loading=') === false) {
-										    $_imgHtml = str_replace('<img ', '<img loading="lazy" decoding="async" ', $_imgHtml);
-										}
-										// Inject srcset and sizes for responsiveness
-										$_imgHtml = str_replace('<img ', '<img srcset="' . $_tabSrcset . '" sizes="' . $_tabSizes . '" ', $_imgHtml);
-										echo $_imgHtml; ?>
+											<?php echo $productImage->toHtml(); ?>
 										</span>
 										<?php $productType = $_item->getTypeID();
 										if($productType == "simple"): ?>
 											<span class="second-thumb">
-											<?php $_thumbHtml = $productImageThumb->toHtml();
-											if (strpos($_thumbHtml, 'loading=') === false) {
-											    $_thumbHtml = str_replace('<img ', '<img loading="lazy" decoding="async" ', $_thumbHtml);
-											}
-											echo $_thumbHtml; ?>
+												<?php echo $productImageThumb->toHtml(); ?>
 											</span>
 				                		<?php endif; ?>
 									</a>
 									<div class="hot-onsale">
 										<?php if ( $_item->getFinalPrice() < $_item->getPrice() ): ?>
-
+											
 												<span class="onsale">
 												<span class="sale-bg"></span>
 												<span class="sale-text"><?php /* @noEscape */ echo $block->showLableSalePrice($_item); ?>
 												</span>
 												</span>
 										<?php endif; ?>
-										<?php $helper = $this->helper('Rokanthemes\RokanBase\Helper\Newlabel'); ?>
-											<?php if($helper->isProductNew($_item)): ?>
+											<?php if($newLabelHelper->isProductNew($_item)): ?>
 											<div class="onsale new-lable">
 										    <?php echo $block->escapeHtml(__('New')); ?>
 											</div>
 										<?php endif; ?>
-									</div>
+									</div>					
 							    </div>
 							    <div class="product-info">
 									<h3 class="product-name">
@@ -111,20 +100,16 @@ use Magento\Framework\App\Action\Action;
 											<?php echo $block->escapeHtml($_item->getName()); ?>
 										</a>
 									</h3>
-										<div class="awa-b2b-sku">
-											<span class="awa-b2b-sku__label"><?php echo $block->escapeHtml(__('Cod:')); ?></span>
-											<span class="awa-b2b-sku__value"><?php echo $block->escapeHtml($_item->getSku()); ?></span>
-									</div>
 									<div class="product-rating">
 										<?php if ($templateType): ?>
 												<?php echo $block->getReviewsSummaryHtml($_item, $templateType,true); ?>
 											<?php endif; ?>
 									</div>
 									<div class="sold-by">
-										<?php
-											$cats = $_item->getAttributeText('sold_by');
-											echo ' <span>' . $block->escapeHtml(__('Sold by:')) . '</span>' . $block->escapeHtml($cats);
-										 ?>
+										<?php $cats = $_item->getAttributeText('sold_by'); ?>
+										<?php if (!empty($cats)): ?>
+											<span><?php echo $block->escapeHtml(__('Sold by:')); ?></span><?php echo $block->escapeHtml($cats); ?>
+										<?php endif; ?>
 									</div>
 									<div class="info-price">
 										<?php /* @noEscape */ echo $this->helper('Rokanthemes\Themeoption\Helper\Data')->getPriceDisplayCustom($block->getProductPrice($_item)) ?>
@@ -143,16 +128,17 @@ use Magento\Framework\App\Action\Action;
 						                          <input type="hidden" name="<?php echo $block->escapeHtmlAttr(Action::PARAM_NAME_URL_ENCODED); ?>" value="<?php echo $block->escapeHtmlAttr($postParams['data'][Action::PARAM_NAME_URL_ENCODED]); ?>">
 						                          <?php echo $block->getBlockHtml('formkey')?>
 						                          <button type="submit"
-						                              title="<?php echo $block->escapeHtml(__('Add to Cart')); ?>"
+						                              title="<?php echo $block->escapeHtml(__('Adicionar ao Carrinho')); ?>"
+                                                               aria-label="<?php echo $block->escapeHtml(__('Adicionar ao Carrinho') . ': ' . $_item->getName()); ?>"
 						                              class="btn-add-to-cart action tocart">
-						                            <span><?php echo $block->escapeHtml(__('Add to Cart')); ?></span>
+						                            <span><?php echo $block->escapeHtml(__('Adicionar ao Carrinho')); ?></span>
 						                          </button>
 						                        </form>
 						                      <?php else: ?>
 						                        <?php if ($_item->getIsSalable()): ?>
-						                          <div class="stock available"><span><?php echo $block->escapeHtml(__('In stock')) ?></span></div>
+						                          <div class="stock available"><span><?php echo $block->escapeHtml(__('Em estoque')) ?></span></div>
 						                        <?php else: ?>
-						                          <div class="stock unavailable"><span><?php echo $block->escapeHtml(__('Out of stock')) ?></span></div>
+						                          <div class="stock unavailable"><span><?php echo $block->escapeHtml(__('Esgotado')) ?></span></div>
 						                        <?php endif; ?>
 						                      <?php endif; ?>
 						                    </div>
@@ -166,8 +152,6 @@ use Magento\Framework\App\Action\Action;
 					}
 					?>
 				</div>
-				<div class="swiper-button-prev"></div>
-				<div class="swiper-button-next"></div>
 			 </div>
 			<?php
 			}
@@ -177,20 +161,20 @@ use Magento\Framework\App\Action\Action;
 </div>
 <script type="text/x-magento-init">
 {
-	"[data-role=tocart-form], .form.map.checkout": {
+	"[data-role=tocart-form]": {
 		"catalogAddToCart": {}
 	},
 	".list-tab-product": {
-		"js/tab-swiper-init": {
+		"js/tab-carousel-init": {
 			"tabsSelector": "ul.tabs li",
 			"contentSelector": ".tab_content",
 			"carouselSelector": ".productTabContent",
 			"owl": {
 				"lazyLoad": true,
 				"autoPlay": <?php echo ($auto) ? 'true' : 'false'; ?>,
-				"items": 4,
-				"itemsDesktop": [1366, 4],
-				"itemsDesktopSmall": [1199, 3],
+				"items": <?php echo (int)$items ?: 3; ?>,
+				"itemsDesktop": [1366, 3],
+				"itemsDesktopSmall": [1199, 2],
 				"itemsTablet": [991, 2],
 				"itemsMobile": [680, 1],
 				"slideSpeed": <?php echo (int)$speed ?: 500; ?>,
