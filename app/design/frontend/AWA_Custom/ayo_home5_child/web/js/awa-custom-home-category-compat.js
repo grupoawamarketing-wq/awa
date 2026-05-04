@@ -243,7 +243,7 @@ define(['jquery'], function ($) {
             if (!$label.length) { return; }
             var isMob    = window.matchMedia && window.matchMedia('(max-width: 767px)').matches;
             var collapsed = isMob && $body.hasClass('awa-plp-filters-collapsed');
-            $label.text(collapsed ? 'Mostrar Filtros' : 'Ocultar Filtros')
+            $label.text(collapsed ? 'Mostrar Filtros ·' : 'Ocultar Filtros ·')
                   .attr('aria-expanded', collapsed ? 'false' : 'true');
             if ($filter.length) {
                 $filter.attr('aria-hidden', collapsed ? 'true' : 'false');

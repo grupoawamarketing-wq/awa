@@ -102,7 +102,12 @@ define(['jquery'], function ($) {
     ============================================================ */
     function injectTrustSignals() {
         try {
+            /* Loja já possui faixas de confiança nativas no tema/footer.
+               Evitar inserção automática para não duplicar conteúdo visual. */
+            return;
+
             if (document.getElementById('awa-trust-signals')) return;
+            if (document.querySelector('.trust-badges-homepage, .awa-trust-badges, .awa-security-section, .awa-footer-trust')) return;
             var footer = document.querySelector('.page-footer, .footer.content');
             if (!footer) return;
 
@@ -215,6 +220,10 @@ define(['jquery'], function ($) {
     ============================================================ */
     function initValueProp() {
         try {
+            /* A home já renderiza blocos equivalentes; manter apenas uma versão
+               para evitar repetição/concatenação de texto no front. */
+            return;
+
             if (document.getElementById('awa-value-prop-bar')) return;
             if (!document.body.classList.contains('cms-index-index') &&
                 !document.body.classList.contains('cms-home')) return;

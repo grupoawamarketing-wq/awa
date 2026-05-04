@@ -4624,13 +4624,101 @@ body.catalogsearch-result-index .block.filter .filter-options-item .filter-optio
 
 
 /* =============================================================================
-   B2B-PRICE-LABEL-DEDUP: suprimir ::after "para ver preços" duplicado no
-   .rokan-bestseller. O awa-super-home.css usa o padrão font-size:0 no
-   container + ::after para exibir o texto. Mas awa-bundle-refinements.css
-   restaura font-size no .price-label dos cards bestseller, tornando o texto
-   DOM visível. Com ambos ativos, "para ver preços" aparece duas vezes.
-   Solução: suprimir o ::after quando o DOM text já está visível.
+   B2B-PRICE-LABEL-DEDUP: suprimir ::after "para ver preços" duplicado nos
+   cards da home, vitrines e listagens de PLP/search quando o texto já está
+   visível no DOM.
    ============================================================================= */
-.rokan-bestseller .item-product .b2b-login-to-see-price::after {
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5, body.catalog-category-view, body.catalogsearch-result-index)
+  :is(
+    .wrapper.grid.products-grid .item-product,
+    .products-swiper .product-item,
+    .product-tab-slider .item-product,
+    .rokan-bestseller .item-product,
+    .rokan-newproduct .item-product,
+    .list-tab-product .item-product,
+    .block-products-list .item-product,
+    .block-new-products .item-product,
+    .hot-deal .item-product,
+    .categorytab-container .item-product,
+    .category_tab_slider .item-product,
+    .products-grid .item-product,
+    .products-grid .product-item
+  ) .b2b-login-to-see-price::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* =============================================================================
+   B2B-PRICE-HARD-DEDUP: quando tema + módulo renderizam "para ver preços"
+   em múltiplas fontes (texto irmão + .price-label + ::after), manter apenas o
+   CTA do link para evitar "para ver preços para ver preços".
+   ============================================================================= */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5, body.catalog-category-view, body.catalogsearch-result-index)
+  :is(
+    .wrapper.grid.products-grid .item-product,
+    .products-swiper .product-item,
+    .product-tab-slider .item-product,
+    .rokan-bestseller .item-product,
+    .rokan-newproduct .item-product,
+    .list-tab-product .item-product,
+    .block-products-list .item-product,
+    .block-new-products .item-product,
+    .hot-deal .item-product,
+    .categorytab-container .item-product,
+    .category_tab_slider .item-product,
+    .products-grid .item-product,
+    .products-grid .product-item
+  ) .b2b-login-to-see-price {
+  font-size: 0 !important;
+  line-height: 1 !important;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5, body.catalog-category-view, body.catalogsearch-result-index)
+  :is(
+    .wrapper.grid.products-grid .item-product,
+    .products-swiper .product-item,
+    .product-tab-slider .item-product,
+    .rokan-bestseller .item-product,
+    .rokan-newproduct .item-product,
+    .list-tab-product .item-product,
+    .block-products-list .item-product,
+    .block-new-products .item-product,
+    .hot-deal .item-product,
+    .categorytab-container .item-product,
+    .category_tab_slider .item-product,
+    .products-grid .item-product,
+    .products-grid .product-item
+  ) .b2b-login-to-see-price a {
+  font-size: var(--awa-font-sm, 12px) !important;
+  line-height: 1.3 !important;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5, body.catalog-category-view, body.catalogsearch-result-index)
+  :is(
+    .wrapper.grid.products-grid .item-product,
+    .products-swiper .product-item,
+    .product-tab-slider .item-product,
+    .rokan-bestseller .item-product,
+    .rokan-newproduct .item-product,
+    .list-tab-product .item-product,
+    .block-products-list .item-product,
+    .block-new-products .item-product,
+    .hot-deal .item-product,
+    .categorytab-container .item-product,
+    .category_tab_slider .item-product,
+    .products-grid .item-product,
+    .products-grid .product-item
+  ) .b2b-login-to-see-price .price-label {
+  display: none !important;
+}
+
+/* B2B-CATEGORYTAB-DES-DEDUP: cobertura específica do widget categorytab
+   (SUPER OFERTAS) onde .des NÃO está dentro de .item-product, fazendo o
+   seletor genérico acima não alcançar o ::after deste widget.
+   Mesmo seletor que awa-super-home.css usa, logo ganha por cascata (refinements
+   carrega por último). Ref: awa-super-home.css line 768. */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+  .categorytab-container .category_tab_slider .des .b2b-login-to-see-price::after {
+  content: none !important;
   display: none !important;
 }
