@@ -66,6 +66,20 @@ class Sender implements WhatsappSenderInterface
             ];
         }
 
+        // TEST MODE — apenas o número de teste autorizado recebe mensagens
+        $testPhone = '5516997777415';
+        if ($phoneNumber !== $testPhone) {
+            $this->logger->info(sprintf(
+                'SmartSuggestions TEST MODE: envio bloqueado para %s (apenas %s permitido)',
+                $phoneNumber,
+                $testPhone
+            ));
+            return [
+                'success' => false,
+                'message' => 'TEST MODE: somente ' . $testPhone . ' é permitido'
+            ];
+        }
+
         $provider = $this->config->getWhatsappProvider();
 
         // Set reasonable timeouts for API calls

@@ -5,6 +5,15 @@ define([
 ], function ($, urlBuilder) {
     'use strict';
 
+    function escapeHtml(value) {
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
     return function (config, element) {
         var options = config || {};
         var $form = $(element);
@@ -710,7 +719,7 @@ define([
                         '<span class="erp-alert-icon">&#128269;</span>' +
                         '<div class="erp-alert-content">' +
                             '<strong>Cliente encontrado no sistema!</strong><br>' +
-                            'E-mail cadastrado: <strong>' + erpEmailMasked + '</strong><br>' +
+                            'E-mail cadastrado: <strong>' + escapeHtml(erpEmailMasked) + '</strong><br>' +
                             '<small>Informe o mesmo e-mail para vincular sua conta automaticamente.</small>' +
                         '</div>' +
                     '</div>'
@@ -736,8 +745,8 @@ define([
                 '<div class="erp-alert erp-alert-warning">' +
                     '<span class="erp-alert-icon">&#9888;</span>' +
                     '<div class="erp-alert-content">' +
-                        '<strong>Atencao:</strong> O e-mail cadastrado no sistema e <strong>' + erpEmailMasked + '</strong>.<br>' +
-                        'O e-mail informado e diferente. Deseja continuar com <strong>' + currentEmail + '</strong>?<br>' +
+                        '<strong>Atencao:</strong> O e-mail cadastrado no sistema e <strong>' + escapeHtml(erpEmailMasked) + '</strong>.<br>' +
+                        'O e-mail informado e diferente. Deseja continuar com <strong>' + escapeHtml(currentEmail) + '</strong>?<br>' +
                         '<small>Se possivel, use o mesmo e-mail para vincular seu historico de compras.</small>' +
                     '</div>' +
                 '</div>'
@@ -761,7 +770,7 @@ define([
                         '<span class="email-check-alert-icon">&#9888;</span>' +
                         '<div class="email-check-alert-content">' +
                             '<strong>Confirme seu e-mail antes de criar a conta:</strong><br>' +
-                            'A aprovacao e a recuperacao de senha serao enviadas para <strong>' + email + '</strong>.' +
+                            'A aprovacao e a recuperacao de senha serao enviadas para <strong>' + escapeHtml(email) + '</strong>.' +
                         '</div>' +
                     '</div>'
                 );

@@ -230,9 +230,9 @@ define([
          * @private
          */
         _handleResize: function () {
-            // Close dropdown on resize to desktop if in mobile mode
+            // Close dropdown when resizing from mobile to desktop to prevent layout overlap
             if (window.innerWidth > 767 && this.isOpen) {
-                // Optional: close on resize or adjust position
+                this.close();
             }
         },
 
