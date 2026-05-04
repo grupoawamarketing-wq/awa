@@ -1,0 +1,314 @@
+/* ==========================================================================
+   4. OTIMIZAÇÃO DE RESPONSIVIDADE E LAYOUT FLUIDO (MOBILE/TABLET)
+   ========================================================================== */
+
+/* Prevenir overflow horizontal no body que quebra layout em mobile */
+html, body {
+    overflow-x: hidden;
+    max-width: 100vw;
+}
+
+/* Grids e containers fluidos usando clamp() */
+body .page-wrapper .page-main {
+    padding-inline: var(--awa-container-pad, clamp(16px, 3vw, 24px)) !important;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Forçar responsividade em tabelas nativas do Magento (Checkout/Carrinho/B2B) */
+@media (max-width: 767px) {
+    .table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Evitar botões esmagados em telas muito pequenas */
+    .action.primary, .action.secondary {
+        white-space: normal;
+        word-wrap: break-word;
+        height: auto;
+        min-height: var(--awa-btn-h, 44px);
+    }
+}
+
+/* ==========================================================================
+   5. BOTÕES — PADRONIZAÇÃO GLOBAL DE ESPAÇAMENTO
+   ========================================================================== */
+
+body .page-wrapper :is(
+    .action.primary,
+    .action.secondary,
+    .action.tocart,
+    .btn-add-to-cart,
+    .action.checkout,
+    button[type="submit"],
+    input[type="submit"]
+) {
+    min-height: var(--awa-btn-h, 44px) !important;
+    padding-inline: var(--awa-space-4, 16px) !important;
+    padding-block: 0 !important;
+    border-radius: var(--awa-radius-md, 8px) !important;
+    line-height: 1.2 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* CTA principal da PDP mantém hierarquia visual maior */
+body.catalog-product-view .page-wrapper .box-tocart .action.tocart {
+    min-height: var(--awa-btn-h-lg, 52px) !important;
+    padding-inline: var(--awa-space-5, 20px) !important;
+}
+
+/* Exceções: botões utilitários de ícone/controle não devem herdar padding horizontal */
+body .page-wrapper :is(
+    .action.action-show,
+    .minicart-wrapper .action.showcart,
+    .nav-toggle,
+    .qty-btn,
+    .qtyplus,
+    .qtyminus
+) {
+    padding-inline: 0 !important;
+}
+
+/* ==========================================================================
+   6. FLUXOS B2B CRÍTICOS — CARRINHO/CHECKOUT/SHOPPING LIST
+   ========================================================================== */
+
+/* Shopping list: uniformiza ações para o padrão global de botões */
+body.b2b-shoppinglist-index .b2b-shopping-lists__create-btn,
+body.b2b-shoppinglist-index .b2b-shopping-list__actions .action,
+body.b2b-shoppinglist-index .b2b-shopping-list__items .b2b-remove-item {
+    min-height: var(--awa-btn-h, 44px) !important;
+    padding-inline: var(--awa-space-4, 16px) !important;
+    border-radius: var(--awa-radius-md, 8px) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* Carrinho/checkout: mantém CTA com largura cheia e espaçamento consistente */
+body.checkout-cart-index .page-wrapper .action.checkout,
+body.checkout-index-index .page-wrapper .actions-toolbar .action.checkout,
+body.rokanthemes-onepagecheckout .page-wrapper .actions-toolbar .action.checkout,
+body.checkout-index-index .page-wrapper .action.primary.checkout.btn-placeorder,
+body.rokanthemes-onepagecheckout .page-wrapper .action.primary.checkout.btn-placeorder {
+    min-height: var(--awa-btn-h-lg, 52px) !important;
+    padding-inline: var(--awa-space-5, 20px) !important;
+    border-radius: var(--awa-radius-md, 8px) !important;
+}
+
+/* Auth/registro + ações auxiliares do checkout com alvo mínimo consistente */
+body:is(.b2b-auth-shell, .b2b-register-index, .checkout-cart-index, .checkout-index-index, .rokanthemes-onepagecheckout) :is(
+    .b2b-password-toggle,
+    .b2b-register-password-toggle,
+    .b2b-terms-link,
+    .cart-empty p:last-child a,
+    .block-recently-ordered .action.viewall,
+    .b2b-register-progress .progress-step,
+    .shipping-address-item .action.edit-address-link
+) {
+    min-height: var(--awa-btn-h, 44px) !important;
+    padding-inline: var(--awa-space-3, 12px) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* ==========================================================================
+   7. OUTLIERS LEGADOS (PLP/PDP/FILTROS/PAGINAÇÃO)
+   ========================================================================== */
+
+body .page-wrapper .product-item .action.tocart {
+    min-height: var(--awa-btn-h, 44px) !important;
+    height: auto !important;
+    padding-inline: var(--awa-space-4, 16px) !important;
+}
+
+body .page-wrapper .block.filter .filter-options-content a,
+body .page-wrapper .toolbar-products .pages .action,
+body .page-wrapper .pages .pages-items .item .action.next,
+body .page-wrapper .pages .pages-items .item .action.previous,
+body .page-wrapper .wishlist-link.action.towishlist,
+body .page-wrapper .quickview-link.action,
+body .page-wrapper .modal-popup .action-close,
+body .page-wrapper .swiper-button-prev,
+body .page-wrapper .swiper-button-next,
+body .page-wrapper .owl-dot {
+    min-width: var(--awa-btn-h, 44px) !important;
+    min-height: var(--awa-btn-h, 44px) !important;
+    height: auto !important;
+}
+
+/* ==========================================================================
+   8. CONTA / WISHLIST / COMPARE / MINICART — CONSISTÊNCIA FINAL
+   ========================================================================== */
+
+body.customer-account .page-wrapper .account-nav .nav.item a,
+body.customer-account .page-wrapper .account-nav .nav.item.current strong {
+    min-height: var(--awa-btn-h, 44px) !important;
+    padding-inline: var(--awa-space-3, 12px) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+}
+
+body.wishlist-index-index .page-wrapper .action.tocart,
+body.checkout-onepage-success .page-wrapper .checkout-success .action.primary,
+body .page-wrapper .block-minicart .action.viewcart,
+body .page-wrapper .block.block-compare .action.primary {
+    min-height: var(--awa-btn-h, 44px) !important;
+    padding-inline: var(--awa-space-4, 16px) !important;
+}
+
+/* Ações de remoção permanecem compactas, com alvo mínimo mais seguro */
+body.catalog-product-compare-index .page-wrapper .cell.remove.action > .action.delete,
+body .page-wrapper .minicart-items .action.delete {
+    min-width: 36px !important;
+    min-height: 36px !important;
+}
+
+/* Filtro ativo (chip "x"): evita alvo muito pequeno em mobile */
+body .page-wrapper .filter-current .action.remove,
+body .page-wrapper .block.filter .filter-current .action.remove {
+    min-width: 36px !important;
+    min-height: 36px !important;
+}
+
+/* Busca: mantém botão de ícone compacto, mas com alvo melhor para toque */
+body .page-wrapper .block-search button.action.search,
+body .page-wrapper .awa-site-header .action.search {
+    min-width: 36px !important;
+    min-height: 36px !important;
+}
+
+/* ==========================================================================
+   9. ACESSIBILIDADE E MICROINTERAÇÕES (FOCO + REDUCED MOTION)
+   ========================================================================== */
+
+body .page-wrapper :is(
+    .action,
+    button,
+    a,
+    .swiper-button-prev,
+    .swiper-button-next,
+    .owl-dot
+):focus-visible {
+    outline: 2px solid var(--awa-primary) !important;
+    outline-offset: 2px !important;
+}
+
+body .page-wrapper :is(
+    .action,
+    button,
+    .swiper-button-prev,
+    .swiper-button-next,
+    .owl-dot
+) {
+    transition: background-color .15s ease, color .15s ease, box-shadow .15s ease, transform .15s ease;
+}
+
+/* Foco também em formulários (não depende de border-color para não brigar com estados de erro) */
+body .page-wrapper :is(
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="search"],
+    input[type="tel"],
+    input[type="number"],
+    input[type="url"],
+    select,
+    textarea,
+    .control .input-text,
+    .field .input-text
+):focus-visible {
+    outline: 2px solid var(--awa-primary) !important;
+    outline-offset: 2px !important;
+}
+
+body .page-wrapper :is(
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="search"],
+    input[type="tel"],
+    input[type="number"],
+    input[type="url"],
+    select,
+    textarea,
+    .control .input-text,
+    .field .input-text
+) {
+    transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease, color .15s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body .page-wrapper :is(
+        .action,
+        button,
+        .swiper-button-prev,
+        .swiper-button-next,
+        .owl-dot
+    ) {
+        transition: none !important;
+        transform: none !important;
+    }
+}
+
+/* ==========================================================================
+   10. FORMULÁRIOS — RITMO DE ESPAÇAMENTO E ALINHAMENTO
+   ========================================================================== */
+
+/* Padroniza altura e padding em campos de texto sem afetar checkbox/radio */
+body .page-wrapper :is(
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="search"],
+    input[type="tel"],
+    input[type="number"],
+    input[type="url"],
+    select,
+    .control .input-text,
+    .field .input-text
+) {
+    min-height: var(--awa-btn-h, 44px) !important;
+    padding-inline: var(--awa-space-3, 12px) !important;
+    border-radius: var(--awa-radius-md, 8px) !important;
+    line-height: 1.2 !important;
+    box-sizing: border-box !important;
+}
+
+/* Textareas mantêm ritmo vertical, sem forçar altura fixa */
+body .page-wrapper :is(
+    textarea,
+    .field textarea
+) {
+    min-height: 120px !important;
+    padding: var(--awa-space-3, 12px) !important;
+    border-radius: var(--awa-radius-md, 8px) !important;
+    line-height: 1.4 !important;
+    box-sizing: border-box !important;
+}
+
+body.catalog-product-view .page-wrapper .awa-qty-stepper {
+    display: inline-flex !important;
+    align-items: stretch !important;
+}
+
+body.catalog-product-view .page-wrapper .awa-qty-stepper .awa-qty-btn {
+    min-width: var(--awa-btn-h, 44px) !important;
+    min-height: var(--awa-btn-h, 44px) !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 1 !important;
+}
+
+body.catalog-product-view .page-wrapper .awa-qty-stepper .input-text.qty {
+    min-height: var(--awa-btn-h, 44px) !important;
+    padding-inline: var(--awa-space-2, 8px) !important;
+    text-align: center !important;
+    width: 84px !important;
+}
