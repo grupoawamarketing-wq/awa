@@ -1,5 +1,27 @@
 import { defineConfig, devices } from '@playwright/test';
+import fs from 'fs';
 import path from 'path';
+
+/** Caminho fixo legado (CI deploy); se inexistente, Playwright usa o browser bundled. */
+function resolveChromiumHeadlessShell(): string | undefined {
+  const candidates = [
+    process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH,
+    '/home/deploy/.cache/ms-playwright/chromium_headless_shell-1208/chrome-headless-shell-linux64/chrome-headless-shell',
+    path.join(process.env.HOME || '', '.cache/ms-playwright/chromium_headless_shell-1208/chrome-headless-shell-linux64/chrome-headless-shell'),
+  ].filter((p): p is string => !!p && p.length > 0);
+  for (const p of candidates) {
+    try {
+      if (fs.existsSync(p)) {
+        return p;
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+  return undefined;
+}
+
+const chromiumShell = resolveChromiumHeadlessShell();
 
 /**
  * Playwright Config — AWA Motos Header Visual Tests
@@ -47,7 +69,9 @@ export default defineConfig({
     locale: 'pt-BR',
     timezoneId: 'America/Sao_Paulo',
     launchOptions: {
-      executablePath: '/home/deploy/.cache/ms-playwright/chromium_headless_shell-1208/chrome-headless-shell-linux64/chrome-headless-shell',
+      ...(chromiumShell ? { executablePath: chromiumShell } : {}),
+      /** Evita TimeoutError: browserType.launch em hosts lentos ou cold cache do shell */
+      timeout: 300_000,
       args: [
         '--no-sandbox',
         '--disable-dev-shm-usage',

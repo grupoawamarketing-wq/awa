@@ -473,11 +473,11 @@ test.describe('PDP Audit — Performance', () => {
     expect(cls, 'CLS=' + cls.toFixed(4) + ' — deve ser < 0.45').toBeLessThan(0.45);
   });
 
-  test('Página carrega CSS customizado (awa-pdp-visual-fix) @perf', async () => {
+  test('Página carrega CSS customizado de refinamentos (awa-bundle-refinements) @perf', async () => {
     if (!pdpPage || !await alive()) { test.skip(); return; }
-    const cssLink = pdpPage.locator('link[href*="awa-pdp-visual-fix"]');
+    const cssLink = pdpPage.locator('link[href*="awa-bundle-refinements"]');
     const count = await cssLink.count();
-    expect(count, 'CSS awa-pdp-visual-fix deve estar carregado').toBeGreaterThanOrEqual(1);
+    expect(count, 'CSS awa-bundle-refinements deve estar carregado').toBeGreaterThanOrEqual(1);
   });
 
   test('Scripts de terceiros dentro do limite aceitável @perf', async () => {
