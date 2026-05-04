@@ -1,5 +1,5 @@
 /** AWA Service Worker v2.5.0 — Multi-strategy Cache & Offline Support (2026-04-28) */
-const CACHE_VERSION = '20260502-header-fixes';
+const CACHE_VERSION = '20260504-account-dropdown';
 const FONT_CACHE = 'awa-fonts-v1';
 const IMAGE_CACHE = 'awa-images-v1';
 const OFFLINE_CACHE = 'awa-offline-v1';
