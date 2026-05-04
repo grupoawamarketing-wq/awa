@@ -256,8 +256,7 @@ class Engine implements SuggestionEngineInterface
                     GROUP BY p.CLIENTE
                     HAVING COUNT(DISTINCT CASE WHEN i.MATERIAL IN (SELECT MATERIAL FROM CustomerProducts) THEN i.MATERIAL END) >= 2
                     ORDER BY
-                        CAST(COUNT(DISTINCT CASE WHEN i.MATERIAL IN (SELECT MATERIAL FROM CustomerProducts) THEN i.MATERIAL END) AS FLOAT) /
-                        COUNT(DISTINCT i.MATERIAL) DESC
+                        CAST(common_products AS FLOAT) / NULLIF(total_products, 0) DESC
                 ),
                 SimilarProducts AS (
                     SELECT
