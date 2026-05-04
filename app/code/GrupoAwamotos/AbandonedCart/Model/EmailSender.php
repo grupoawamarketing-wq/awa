@@ -85,19 +85,27 @@ class EmailSender implements EmailSenderInterface
             $cartItems = $this->getCartItems($abandonedCart->getQuoteId());
             $cartUrl = $store->getUrl('checkout/cart');
 
-            // Gerar cupom se necessário
+            // Gerar ou reutilizar cupom
             $couponCode = null;
             $couponDiscount = null;
             if ($this->helper->isCouponEnabled($emailNumber, $storeId)) {
                 $discount = $this->helper->getCouponDiscount($emailNumber, $storeId);
-                $type = $this->helper->getCouponType($emailNumber, $storeId);
-                $couponCode = $this->couponGenerator->generate(
-                    $discount,
-                    $type,
-                    $abandonedCart->getQuoteId(),
-                    $abandonedCart->getCustomerEmail()
-                );
-                $couponDiscount = $type === 'percent' ? "{$discount}%" : "R$ {$discount}";
+                $type     = $this->helper->getCouponType($emailNumber, $storeId);
+
+                // Reutilizar cupom gerado em email anterior (evita cupons duplicados)
+                $existingCode = $abandonedCart->getCouponCode();
+                if ($existingCode !== null && $existingCode !== '') {
+                    $couponCode = $existingCode;
+                } else {
+                    $couponCode = $this->couponGenerator->generate(
+                        $discount,
+                        $type,
+                        $abandonedCart->getQuoteId(),
+                        $abandonedCart->getCustomerEmail()
+                    );
+                }
+
+                $couponDiscount = $type === 'percent' ? "{$discount}%" : "R\$ {$discount}";
             }
 
             $templateVars = [
@@ -128,6 +136,11 @@ class EmailSender implements EmailSenderInterface
             $transport->sendMessage();
 
             $this->inlineTranslation->resume();
+
+            // Persistir o código do cupom na entidade para rastreamento e reutilização
+            if ($couponCode !== null) {
+                $abandonedCart->setCouponCode($couponCode);
+            }
 
             $this->logger->info(sprintf(
                 '[AbandonedCart] Email %d sent: quote_id=%d, email=%s, coupon=%s',
