@@ -117,8 +117,8 @@ body .page-wrapper .page_footer,.page-footer{background:#f8fafc !important;backg
 .awa-category-carousel__icon{width:128px!important;height:128px!important;min-width:128px!important;min-height:128px!important}
 .awa-category-carousel__icon img,.awa-category-carousel__icon picture{width:92px!important;height:92px!important;object-fit:contain!important}
 @media(max-width:991px){.awa-category-carousel__icon{width:96px!important;height:96px!important;min-width:96px!important;min-height:96px!important}.awa-category-carousel__icon img,.awa-category-carousel__icon picture{width:68px!important;height:68px!important}}
-/* BUG-9: hide mega menu flyout submenus by default, show on hover/JS */
-@media(min-width:992px){body.cms-index-index .navigation.verticalmenu.side-verticalmenu .togge-menu>li.level0>.submenu,body.cms-index-index .navigation.verticalmenu.side-verticalmenu .togge-menu>li.level0>.level0.submenu,body.cms-index-index .navigation.verticalmenu.side-verticalmenu .togge-menu>li.level0>.navigation__submenu{display:none!important;opacity:0!important;visibility:hidden!important;pointer-events:none!important}body.cms-index-index .navigation.verticalmenu.side-verticalmenu .togge-menu>li.level0:hover>.submenu,body.cms-index-index .navigation.verticalmenu.side-verticalmenu .togge-menu>li.level0:hover>.level0.submenu,body.cms-index-index .navigation.verticalmenu.side-verticalmenu .togge-menu>li.level0:hover>.navigation__submenu{display:flex!important;opacity:1!important;visibility:visible!important;pointer-events:auto!important}body.cms-index-index .navigation.verticalmenu.side-verticalmenu .togge-menu>li.level0.awa-vmf-active>.submenu,body.cms-index-index .navigation.verticalmenu.side-verticalmenu .togge-menu>li.level0.awa-vmf-active>.level0.submenu,body.cms-index-index .navigation.verticalmenu.side-verticalmenu .togge-menu>li.level0.awa-vmf-active>.navigation__submenu{display:flex!important;opacity:1!important;visibility:visible!important;pointer-events:auto!important}.awa-vmf-portal.submenu,.awa-vmf-portal.navigation__submenu{display:flex!important;opacity:1!important;visibility:visible!important;pointer-events:auto!important}}
+/* BUG-9: hide mega menu flyout submenus by default, show on hover/JS (todas as páginas) */
+@media(min-width:992px){body .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu>li.level0>.submenu,body .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu>li.level0>.level0.submenu,body .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu>li.level0>.navigation__submenu{display:none!important;opacity:0!important;visibility:hidden!important;pointer-events:none!important}body .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu>li.level0:hover>.submenu,body .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu>li.level0:hover>.level0.submenu,body .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu>li.level0:hover>.navigation__submenu{display:flex!important;opacity:1!important;visibility:visible!important;pointer-events:auto!important}body .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu>li.level0.awa-vmf-active>.submenu,body .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu>li.level0.awa-vmf-active>.level0.submenu,body .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu>li.level0.awa-vmf-active>.navigation__submenu{display:flex!important;opacity:1!important;visibility:visible!important;pointer-events:auto!important}.awa-vmf-portal.submenu,.awa-vmf-portal.navigation__submenu{display:flex!important;opacity:1!important;visibility:visible!important;pointer-events:auto!important}}
 /* Header alignment fix */
 #html-body .page-wrapper .header-control.awa-nav-bar .awa-nav-bar__inner,#html-body .page-wrapper .awa-site-header .awa-nav-bar__inner{max-width:var(--awa-container-wide, var(--awa-container-max, 1440px))!important;margin:0 auto!important;width:100%!important;}
 /* cart-fallback SEMPRE oculto — minicart real via KO.js (guard para refinements.css async) */
@@ -210,23 +210,25 @@ body.cms-index-index .page-wrapper .column.main .awa-security-section,body.cms-h
 <?php /* awa-bundle-refinements.css — safety-net overrides, carrega async (2026-05-02)
          Regras críticas above-fold (cart-fallback, b2b-promo-bar) cobertas no inline anti-FOUC.
          media="print" onload trick: força download sem bloquear render, swap para 'all' ao carregar. */ ?>
-<link rel="preload" href="<?= $block->escapeUrl($refinementsBundleUrl) ?>?v=3" as="style"/>
+<link rel="preload" href="<?= $block->escapeUrl($refinementsBundleUrl) ?>?v=4" as="style"/>
 <link rel="stylesheet"
-      href="<?= $block->escapeUrl($refinementsBundleUrl) ?>?v=3"
+      href="<?= $block->escapeUrl($refinementsBundleUrl) ?>?v=4"
       media="print"
       onload="this.media='all'"/>
-<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($refinementsBundleUrl) ?>?v=3"/></noscript>
+<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($refinementsBundleUrl) ?>?v=4"/></noscript>
+<?php $__bsFixUrl = str_replace("awa-bundle-refinements.css", "awa-bestseller-fixes.css", $refinementsBundleUrl); ?>
+<link rel="stylesheet" href="<?= $block->escapeUrl($__bsFixUrl) ?>?v=1"/><!-- Bestseller nuclear fixes -->
 <?php /* awa-visual-bugfix.css — async (2026-05-xx, saves ~450ms render blocking)
          Critical BUG-1 header right-col rules extracted to inline Anti-FOUC above.
          BUG-3/5/6/7 rokan grid rules already in Anti-FOUC since v9.
          Remainig rules (BUG-2,4,8 + Round2/3) non-critical for above-fold paint. */ ?>
 <?php $__bugfixConsolidatedUrl = $block->getViewFileUrl('css/awa-visual-bugfix.css'); ?>
-<link rel="preload" href="<?= $block->escapeUrl($__bugfixConsolidatedUrl) ?>?v=29" as="style"/>
+<link rel="preload" href="<?= $block->escapeUrl($__bugfixConsolidatedUrl) ?>?v=33" as="style"/>
 <link rel="stylesheet"
-      href="<?= $block->escapeUrl($__bugfixConsolidatedUrl) ?>?v=29"
+      href="<?= $block->escapeUrl($__bugfixConsolidatedUrl) ?>?v=33"
       media="print"
       onload="this.media='all'"/>
-<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__bugfixConsolidatedUrl) ?>?v=29"/></noscript>
+<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__bugfixConsolidatedUrl) ?>?v=33"/></noscript>
 <?php /* awa-home-gap-fix.css — spacing sections; async: above-fold hero unaffected by section gaps */ ?>
 <?php $__homeGapFixUrl = $block->getViewFileUrl('css/awa-home-gap-fix.css'); ?>
 <link rel="preload" href="<?= $block->escapeUrl($__homeGapFixUrl) ?>?v=11" as="style"/>
@@ -268,4 +270,3 @@ body.cms-index-index .page-wrapper .column.main .awa-security-section,body.cms-h
 <?php /* VB-26: Departamentos menu — collapse on homepage by default.
    This is handled entirely via CSS in awa-visual-bugfix-2026-04-29.css 
    using opacity: 0 and visibility: hidden on the fixed-position .togge-menu. */ ?>
-
