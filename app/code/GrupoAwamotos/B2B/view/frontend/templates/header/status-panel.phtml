@@ -14,7 +14,7 @@
 <?php $data = $block->getCustomerData(); ?>
 <?php
     $company = trim((string) ($data['company'] ?? ''));
-    $firstName = $block->escapeHtml($data['first_name']);
+    $firstName = (string) ($data['first_name'] ?? ''); // raw — escaped at output via escapeHtml()
     $badgeColor = $block->escapeHtmlAttr($data['group_badge']['color']);
     $badgeIcon = $block->escapeHtmlAttr($data['group_badge']['icon']);
     $groupName = $block->escapeHtml($data['group_name']);
@@ -36,7 +36,7 @@
             <i class="fa fa-<?= $badgeIcon ?>" aria-hidden="true"></i>
         </span>
         <span class="status-info">
-            <span class="status-greeting"><?= $block->escapeHtml(__('Ol&aacute;, %1', $firstName)) ?></span>
+            <span class="status-greeting"><?= $block->escapeHtml(__('Olá, %1', $firstName)) ?></span>
             <?php if ($company): ?>
             <span class="status-company"><?= $block->escapeHtml($company) ?></span>
             <?php endif; ?>
@@ -92,7 +92,7 @@
                     <span class="stat-icon"><i class="fa fa-credit-card" aria-hidden="true"></i></span>
                     <span class="stat-content">
                         <span class="stat-value"><?= /* @noEscape */ $block->formatPrice($data['credit_available']) ?></span>
-                        <span class="stat-label"><?= $block->escapeHtml(__('Cr&eacute;dito Dispon&iacute;vel')) ?></span>
+                        <span class="stat-label"><?= $block->escapeHtml(__('Crédito Disponível')) ?></span>
                     </span>
                     <div class="credit-bar">
                         <?php $creditPercent = $data['credit_limit'] > 0 ? ($data['credit_available'] / $data['credit_limit']) * 100 : 0; ?>
@@ -105,8 +105,8 @@
 
             <!-- Quick Actions -->
             <div class="dropdown-section actions-section">
-                <span class="section-title"><?= $block->escapeHtml(__('Acesso R&aacute;pido')) ?></span>
-                <nav class="quick-actions" aria-label="<?= $block->escapeHtmlAttr(__('A&ccedil;&otilde;es r&aacute;pidas B2B')) ?>">
+                <span class="section-title"><?= $block->escapeHtml(__('Acesso Rápido')) ?></span>
+                <nav class="quick-actions" aria-label="<?= $block->escapeHtmlAttr(__('Ações rápidas B2B')) ?>">
                     <?php foreach ($block->getQuickActions() as $action): ?>
                     <a href="<?= $block->escapeUrl($action['url']) ?>" class="quick-action-link">
                         <i class="fa fa-<?= $block->escapeHtmlAttr($action['icon']) ?>" aria-hidden="true"></i>

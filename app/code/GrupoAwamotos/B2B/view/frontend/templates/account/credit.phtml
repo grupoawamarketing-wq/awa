@@ -29,11 +29,11 @@ $usagePercent = $block->getUsagePercent();
     <div class="credit-usage-bar">
         <div class="credit-usage-bar__label">
             <span><?= __('Uso do Crédito') ?></span>
-            <span><?= number_format($usagePercent, 0) ?>%</span>
+            <span><?= number_format(min(100.0, (float)$usagePercent), 0) ?>%</span>
         </div>
         <div class="credit-usage-bar__track">
             <div class="credit-usage-bar__fill <?= $usagePercent > 80 ? 'credit-usage-bar__fill--warning' : '' ?>"
-                 style="width: <?= (float)$usagePercent ?>%"></div>
+                 style="width: <?= min(100.0, (float)$usagePercent) ?>%"></div>
         </div>
     </div>
 
@@ -57,22 +57,22 @@ $usagePercent = $block->getUsagePercent();
                     <?php foreach ($transactions as $txn): ?>
                         <?php $amount = (float) $txn->getData('amount'); ?>
                         <tr>
-                            <td data-th="<?= __('Data') ?>">
+                            <td data-th="<?= $block->escapeHtmlAttr(__('Data')) ?>">
                                 <?= $block->escapeHtml(date('d/m/Y H:i', strtotime($txn->getData('created_at')))) ?>
                             </td>
-                            <td data-th="<?= __('Tipo') ?>">
+                            <td data-th="<?= $block->escapeHtmlAttr(__('Tipo')) ?>">
                                 <span class="txn-type txn-type--<?= $block->escapeHtmlAttr($txn->getData('type')) ?>">
                                     <?= $block->escapeHtml($block->getTransactionTypeLabel($txn->getData('type'))) ?>
                                 </span>
                             </td>
-                            <td data-th="<?= __('Valor') ?>" class="<?= $amount >= 0 ? 'txn-positive' : 'txn-negative' ?>">
+                            <td data-th="<?= $block->escapeHtmlAttr(__('Valor')) ?>" class="<?= $amount >= 0 ? 'txn-positive' : 'txn-negative' ?>">
                                 <?= $amount >= 0 ? '+' : '' ?><?= /* @noEscape */ $block->formatPrice($amount) ?>
                             </td>
-                            <td data-th="<?= __('Saldo') ?>">
+                            <td data-th="<?= $block->escapeHtmlAttr(__('Saldo')) ?>">
                                 <?= /* @noEscape */ $block->formatPrice((float) $txn->getData('balance_after')) ?>
                             </td>
-                            <td data-th="<?= __('Ref') ?>"><?= $block->escapeHtml($txn->getData('reference')) ?></td>
-                            <td data-th="<?= __('Obs') ?>"><?= $block->escapeHtml($txn->getData('comment')) ?></td>
+                            <td data-th="<?= $block->escapeHtmlAttr(__('Ref')) ?>"><?= $block->escapeHtml($txn->getData('reference')) ?></td>
+                            <td data-th="<?= $block->escapeHtmlAttr(__('Obs')) ?>"><?= $block->escapeHtml($txn->getData('comment')) ?></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
