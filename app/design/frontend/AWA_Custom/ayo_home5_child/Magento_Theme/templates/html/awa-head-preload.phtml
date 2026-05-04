@@ -184,6 +184,31 @@ body.cms-index-index .page-wrapper .column.main .awa-security-section,body.cms-h
       media="all"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($cssUrl) ?>"/></noscript>
 <?php endforeach; ?>
+<?php /* === AWA Layout Override CSS (blocking, após super-global — cascata correta) ===
+         Movidos de default_head_blocks.xml (2026-05-04):
+         - Em XML, estes CSSes carregavam ANTES do super-global → super-global os sobrescrevia.
+         - Agora carregam DEPOIS (media=all, blocking) → "canonical"/"fixed" realmente ganham.
+         - awa-ux-improvements + awa-ux-responsiveness → async (cosmético, zero layout crítico). */ ?>
+<?php foreach ([
+    'css/awa-layout-canonical.css',
+    'css/awa-layout-fixed.css',
+    'css/awa-clean-ui-final.css',
+] as $__layoutCssUrl): ?>
+<link rel="stylesheet"
+      href="<?= $block->escapeUrl($block->getViewFileUrl($__layoutCssUrl)) ?>"
+      media="all"/>
+<?php endforeach; ?>
+<?php foreach ([
+    'css/awa-ux-improvements.css',
+    'css/awa-ux-responsiveness.css',
+] as $__uxCssUrl): ?>
+<link rel="preload" href="<?= $block->escapeUrl($block->getViewFileUrl($__uxCssUrl)) ?>" as="style"/>
+<link rel="stylesheet"
+      href="<?= $block->escapeUrl($block->getViewFileUrl($__uxCssUrl)) ?>"
+      media="print"
+      onload="this.media='all'"/>
+<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($block->getViewFileUrl($__uxCssUrl)) ?>"/></noscript>
+<?php endforeach; ?>
 <?php /* awa-grid-system.css — Container & Grid utility classes (2026-04-29)
          Carregado SYNC após super-global, antes dos bundles page-specific.
          Consome tokens de awa-design-tokens.css (inline acima). */ ?>
@@ -216,27 +241,34 @@ body.cms-index-index .page-wrapper .column.main .awa-security-section,body.cms-h
       media="print"
       onload="this.media='all'"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($refinementsBundleUrl) ?>?v=7"/></noscript>
+<?php /* awa-bestseller-fixes.css — async (below-fold widget fixes, never above-fold)
+         Convertido de blocking para async 2026-05-04. */ ?>
 <?php $__bsFixUrl = str_replace("awa-bundle-refinements.css", "awa-bestseller-fixes.css", $refinementsBundleUrl); ?>
-<link rel="stylesheet" href="<?= $block->escapeUrl($__bsFixUrl) ?>?v=1"/><!-- Bestseller nuclear fixes -->
+<link rel="preload" href="<?= $block->escapeUrl($__bsFixUrl) ?>?v=1" as="style"/>
+<link rel="stylesheet"
+      href="<?= $block->escapeUrl($__bsFixUrl) ?>?v=1"
+      media="print"
+      onload="this.media='all'"/><!-- Bestseller nuclear fixes (async) -->
+<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__bsFixUrl) ?>?v=1"/></noscript>
 <?php /* awa-visual-bugfix.css — async (2026-05-xx, saves ~450ms render blocking)
          Critical BUG-1 header right-col rules extracted to inline Anti-FOUC above.
          BUG-3/5/6/7 rokan grid rules already in Anti-FOUC since v9.
          Remainig rules (BUG-2,4,8 + Round2/3) non-critical for above-fold paint. */ ?>
 <?php $__bugfixConsolidatedUrl = $block->getViewFileUrl('css/awa-visual-bugfix.css'); ?>
-<link rel="preload" href="<?= $block->escapeUrl($__bugfixConsolidatedUrl) ?>?v=38" as="style"/>
+<link rel="preload" href="<?= $block->escapeUrl($__bugfixConsolidatedUrl) ?>?v=41" as="style"/>
 <link rel="stylesheet"
-      href="<?= $block->escapeUrl($__bugfixConsolidatedUrl) ?>?v=38"
+      href="<?= $block->escapeUrl($__bugfixConsolidatedUrl) ?>?v=41"
       media="print"
       onload="this.media='all'"/>
-<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__bugfixConsolidatedUrl) ?>?v=38"/></noscript>
+<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__bugfixConsolidatedUrl) ?>?v=41"/></noscript>
 <?php /* awa-home-gap-fix.css — spacing sections; async: above-fold hero unaffected by section gaps */ ?>
 <?php $__homeGapFixUrl = $block->getViewFileUrl('css/awa-home-gap-fix.css'); ?>
-<link rel="preload" href="<?= $block->escapeUrl($__homeGapFixUrl) ?>?v=11" as="style"/>
+<link rel="preload" href="<?= $block->escapeUrl($__homeGapFixUrl) ?>?v=12" as="style"/>
 <link rel="stylesheet"
-      href="<?= $block->escapeUrl($__homeGapFixUrl) ?>?v=11"
+      href="<?= $block->escapeUrl($__homeGapFixUrl) ?>?v=12"
       media="print"
       onload="this.media='all'"/>
-<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__homeGapFixUrl) ?>?v=11"/></noscript>
+<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__homeGapFixUrl) ?>?v=12"/></noscript>
 <?php /* awa-vertical-menu-desktop-final.css — desktop-only menu; async: not above-fold on mobile */ ?>
 <?php $__verticalMenuFinalUrl = $block->getViewFileUrl('css/awa-vertical-menu-desktop-final.css'); ?>
 <link rel="preload" href="<?= $block->escapeUrl($__verticalMenuFinalUrl) ?>?v=1" as="style"/>

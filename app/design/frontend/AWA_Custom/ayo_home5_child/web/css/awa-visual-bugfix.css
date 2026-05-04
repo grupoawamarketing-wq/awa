@@ -14368,3 +14368,95 @@ html body.catalog-product-view .awa-pdp-related {
     color: var(--awa-red, #b73337) !important;
     font-weight: 700 !important;
 }
+/* =============================================================================
+   SECTION 21 - Nav gap nuclear fix + auth duplicate removal + auth prompt repair
+   (v39 - 2026-05-04)
+   ============================================================================= */
+
+/* 21a. Nuclear collapse of empty primary nav.
+   Theme rule: #header .awa-header-primary-nav.menu_primary { flex: 1 1 auto !important }
+   Specificity (1,2,0). We beat it with double-ID (2,2,0). */
+@media (min-width: 992px) {
+    #html-body #header .awa-header-primary-nav.menu_primary:has(.top-menu:empty),
+    #html-body #header .awa-header-primary-nav.menu_primary:has(.top-menu:not(:has(li))) {
+        flex: 0 0 0% !important;
+        width: 0 !important;
+        max-width: 0 !important;
+        min-width: 0 !important;
+        overflow: hidden !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    #html-body #header .awa-header-primary-nav.menu_primary:has(.top-menu:empty) .container-header-sticky,
+    #html-body #header .awa-header-primary-nav.menu_primary:has(.top-menu:not(:has(li))) .container-header-sticky {
+        display: none !important;
+    }
+}
+
+/* 21b. Hide the duplicate Magento auth white card (ul.header.links). */
+@media (min-width: 992px) {
+    #html-body .page-wrapper .awa-site-header ul.header.links,
+    #html-body .page-wrapper .awa-site-header .authorization-link.awa-top-link-auth-item {
+        display: none !important;
+    }
+}
+
+/* 21c. Auth prompt - proper width once duplicate is hidden */
+@media (min-width: 992px) {
+    #html-body .page-wrapper .awa-site-header .awa-header-account-prompt {
+        overflow: visible !important;
+        min-width: 170px !important;
+        max-width: 240px !important;
+        flex-shrink: 0 !important;
+        align-self: center !important;
+    }
+    #html-body .page-wrapper .awa-site-header .awa-header-right-col {
+        align-items: center !important;
+        flex-wrap: nowrap !important;
+    }
+}
+
+/* =============================================================================
+   SECTION 22 - Unconditional primary-nav collapse + account-nav toggle hide
+   (v40 - 2026-05-04)
+   ============================================================================= */
+
+/* 22a. Unconditional primary nav collapse.
+   :has() condition in Section 21a may not fire if .top-menu has whitespace.
+   Double-ID specificity (2,2,0) beats theme #header rule (1,2,0) — no :has() needed. */
+@media (min-width: 992px) {
+    #html-body #header .awa-header-primary-nav.menu_primary {
+        flex: 0 0 0% !important;
+        width: 0 !important;
+        max-width: 0 !important;
+        min-width: 0 !important;
+        overflow: hidden !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+}
+
+/* 22b. Hide nav.awa-header-account-nav (toggle-button widget in right-col).
+   .awa-force-hidden class has no CSS backing so the element renders.
+   Section 21b hid its ul child but the nav container itself still shows as
+   a styled toggle. Hide the container entirely. */
+#html-body .page-wrapper .awa-site-header nav.awa-header-account-nav,
+#html-body .page-wrapper .awa-site-header .top-account[data-awa-account-nav] {
+    display: none !important;
+}
+
+/* =============================================================================
+   SECTION 23 - True nav gap nuke: target element by its own ID
+   (v41 - 2026-05-04)
+   ============================================================================= */
+
+/* 23a. Primary nav collapse by element ID.
+   flex:0 0 0% in Section 22a is not enough because display:flex !important
+   forces intrinsic min-content sizing. display:none !important is the only
+   guaranteed zero-footprint solution.
+   Specificity #html-body #awa-primary-navigation = (2,0,0) > theme (1,2,0). */
+@media (min-width: 992px) {
+    #html-body #awa-primary-navigation {
+        display: none !important;
+    }
+}

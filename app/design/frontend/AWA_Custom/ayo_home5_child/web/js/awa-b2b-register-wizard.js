@@ -1,0 +1,1 @@
+define([],function(){"use strict";if(window.__awaB2BWizInit)return{};window.__awaB2BWizInit=true;return{};});
