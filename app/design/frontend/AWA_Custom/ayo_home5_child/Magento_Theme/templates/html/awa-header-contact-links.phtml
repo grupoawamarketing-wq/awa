@@ -20,6 +20,9 @@ $registerUrl = $isB2bEnabled
     ? $block->getUrl('b2b/register')
     : $block->getUrl('customer/account/create');
 $accountUrl  = $block->getUrl('customer/account');
+$ordersUrl   = $block->getUrl('sales/order/history');
+$quotesUrl   = $isB2bEnabled ? $block->getUrl('b2b/quote') : '';
+$logoutUrl   = $block->getUrl('customer/account/logout');
 ?>
 <div class="awa-header-contact-links awa-header-account-prompt"
      data-awa-auth-state="guest"
@@ -53,15 +56,64 @@ $accountUrl  = $block->getUrl('customer/account');
             </span>
         </span>
         <?php /* Logged-in state (hidden by default, shown via customer-data JS) */ ?>
-        <span class="awa-header-account-prompt__customer" style="display:none">
+        <span class="awa-header-account-prompt__customer awa-account-dropdown" style="display:none">
             <span class="awa-header-account-prompt__line1"><?= $block->escapeHtml(__('Seja bem-vindo(a) à AWA Motos!')) ?></span>
-            <span class="awa-header-account-prompt__line2">
-                <a class="awa-header-account-prompt__link"
+            <button class="awa-header-account-prompt__line2 awa-account-dropdown__trigger"
+                    type="button"
+                    aria-haspopup="menu"
+                    aria-expanded="false"
+                    aria-label="<?= $block->escapeHtmlAttr(__('Abrir menu da conta')) ?>">
+                <span class="awa-header-account-prompt__link"><?= $block->escapeHtml(__('Minha conta')) ?></span>
+                <svg class="awa-account-dropdown__chevron" viewBox="0 0 10 6" width="9" height="9"
+                     fill="none" stroke="currentColor" stroke-width="1.8"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M1 1l4 4 4-4"/>
+                </svg>
+            </button>
+            <div class="awa-account-dropdown__menu" role="menu"
+                 aria-label="<?= $block->escapeHtmlAttr(__('Opções da conta')) ?>">
+                <a class="awa-account-dropdown__item"
                    href="<?= $block->escapeUrl($accountUrl) ?>"
-                   title="<?= $block->escapeHtmlAttr(__('Acessar minha conta')) ?>">
-                    <?= $block->escapeHtml(__('Minha conta')) ?>
+                   role="menuitem"
+                   title="<?= $block->escapeHtmlAttr(__('Acessar dashboard')) ?>">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                        <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+                        <rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>
+                    </svg>
+                    <?= $block->escapeHtml(__('Dashboard')) ?>
                 </a>
-            </span>
+                <a class="awa-account-dropdown__item"
+                   href="<?= $block->escapeUrl($ordersUrl) ?>"
+                   role="menuitem"
+                   title="<?= $block->escapeHtmlAttr(__('Ver meus pedidos')) ?>">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                        <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
+                        <rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/>
+                    </svg>
+                    <?= $block->escapeHtml(__('Meus pedidos')) ?>
+                </a>
+                <?php if ($isB2bEnabled): ?>
+                <a class="awa-account-dropdown__item"
+                   href="<?= $block->escapeUrl($quotesUrl) ?>"
+                   role="menuitem"
+                   title="<?= $block->escapeHtmlAttr(__('Ver minhas cotações')) ?>">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    <?= $block->escapeHtml(__('Minhas cotações')) ?>
+                </a>
+                <?php endif; ?>
+                <a class="awa-account-dropdown__item awa-account-dropdown__item--logout"
+                   href="<?= $block->escapeUrl($logoutUrl) ?>"
+                   role="menuitem"
+                   title="<?= $block->escapeHtmlAttr(__('Sair da conta')) ?>">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                        <polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
+                    <?= $block->escapeHtml(__('Sair')) ?>
+                </a>
+            </div>
         </span>
     </span>
 </div>
@@ -75,11 +127,34 @@ require(['Magento_Customer/js/customer-data'], function (customerData) {
         el.setAttribute('data-awa-auth-state', isLoggedIn ? 'customer' : 'guest');
         var guest = el.querySelector('.awa-header-account-prompt__guest');
         var cust  = el.querySelector('.awa-header-account-prompt__customer');
-        if (guest) guest.style.display = isLoggedIn ? 'none' : '';
-        if (cust)  cust.style.display  = isLoggedIn ? '' : 'none';
+        if (isLoggedIn) {
+            if (guest) guest.style.setProperty('display', 'none', 'important');
+            if (cust)  cust.style.removeProperty('display');
+        } else {
+            if (guest) guest.style.removeProperty('display');
+            if (cust)  cust.style.setProperty('display', 'none', 'important');
+        }
         if (isLoggedIn && data.firstname) {
             var line1 = el.querySelector('.awa-header-account-prompt__customer .awa-header-account-prompt__line1');
             if (line1) { line1.textContent = 'Olá, ' + data.firstname + '!'; }
+        }
+        // Setup dropdown toggle (once, when customer block is visible)
+        if (isLoggedIn) {
+            var trigger = el.querySelector('.awa-account-dropdown__trigger');
+            if (trigger && !trigger.dataset.dropdownInit) {
+                trigger.dataset.dropdownInit = '1';
+                trigger.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    var isOpen = this.getAttribute('aria-expanded') === 'true';
+                    this.setAttribute('aria-expanded', String(!isOpen));
+                });
+                document.addEventListener('click', function() {
+                    trigger.setAttribute('aria-expanded', 'false');
+                });
+                el.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') trigger.setAttribute('aria-expanded', 'false');
+                });
+            }
         }
     }
     customer.subscribe(toggle);

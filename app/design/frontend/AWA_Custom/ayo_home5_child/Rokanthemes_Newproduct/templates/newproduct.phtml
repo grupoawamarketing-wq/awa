@@ -39,7 +39,7 @@ $_helper = $this->helper('Magento\Catalog\Helper\Output');
 					<?php $i=0; foreach ($_productCollection as $_product): ?>
 						<?php if($i %$rows == 0) echo "<li class='item newproductslider-item'>"; ?>
 
-							<div class="product-item">
+							<div class="product-item" data-product-id="<?php echo (int) $_product->getId(); ?>">
 								<?php
 								$newFromDate = $_product->getNewsFromDate();
 								$newToDate = $_product->getNewsToDate();                 
@@ -62,6 +62,10 @@ $_helper = $this->helper('Magento\Catalog\Helper\Output');
 								?>
 								<?php
 								$productImage = $block->getImage($_product, $image);
+								$productImageHtml = (string) $productImage->toHtml();
+								if ($i < 2) {
+								       $productImageHtml = str_replace(' loading="lazy"', ' loading="eager" fetchpriority="high"', $productImageHtml);
+								}
 								if ($pos != null) {
 									$position = ' style="left:' . $productImage->getWidth() . 'px;'
 										. 'top:' . $productImage->getHeight() . 'px;"';
@@ -69,7 +73,7 @@ $_helper = $this->helper('Magento\Catalog\Helper\Output');
 								?>
 								<?php // Product Image ?>
 								<a href="<?php echo $block->escapeUrl($_product->getProductUrl()) ?>" class="product photo product-item-photo" tabindex="-1" aria-label="<?php echo $block->escapeHtml($_product->getName()); ?>">
-									<?php echo $productImage->toHtml(); ?>
+									<?php /* @noEscape */ echo $productImageHtml; ?>
 								</a>
 								<?php
 									$_productNameStripped = $block->stripTags($_product->getName(), null, true);

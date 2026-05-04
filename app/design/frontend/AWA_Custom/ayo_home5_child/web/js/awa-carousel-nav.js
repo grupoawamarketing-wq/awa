@@ -199,19 +199,29 @@
                 }
             }
 
-            // Newproduct carousels
+            // Newproduct carousels — processed after bestseller
+        }, 200);
+
+        // Newproduct carousels deferred 1200ms: OWL lazy-inits only when visible,
+        // so we need extra time for user to scroll past hero before OWL fires.
+        setTimeout(function () {
+            var j, el, anchor2;
             var npCarousels = document.querySelectorAll('.rokan-newproduct .owl-carousel');
             for (j = 0; j < npCarousels.length; j++) {
                 el = npCarousels[j];
                 anchor2 = el.closest('.rokan-newproduct') || el.parentElement;
                 if (anchor2) {
                     anchor2.style.position = 'relative';
-                    injectNav(el, anchor2);
+                    // Only inject awa-owl-nav if OWL has no built-in nav
+                    if (!el.querySelector('.owl-prev')) {
+                        injectNav(el, anchor2);
+                    }
+                    // Always inject progress bar if missing
                     injectProgress(el, anchor2);
                     scheduleEqualize(el);
                 }
             }
-        }, 200);
+        }, 1200);
 
         // Product Tabs carousel — deferred to 1500ms because Rokanthemes tab JS
         // initialises OWL after bestseller/newproduct, causing waitForOwl to fire
@@ -262,8 +272,8 @@
             attempts++;
             var ready = document.querySelector('.hot-deal-slide .owl-wrapper-outer') ||
                         document.querySelector('.productTabContent .owl-wrapper-outer') ||
-                        document.querySelector('.rokan-newproduct .owl-wrapper-outer') ||
-                        (typeof jQuery !== 'undefined' && jQuery.fn.owlCarousel);
+                        document.querySelector('.rokan-bestseller .owl-wrapper-outer') ||
+                        document.querySelector('.rokan-newproduct .owl-wrapper-outer');
             if (ready || attempts >= maxAttempts) {
                 clearInterval(timer);
                 init();

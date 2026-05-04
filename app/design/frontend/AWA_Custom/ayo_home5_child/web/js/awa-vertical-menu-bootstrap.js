@@ -69,6 +69,17 @@ define([
                     return;
                 }
 
+                /* JS-1 fix: se flyout-fix estiver ativo (data-awa-vmf-active='1' no UL),
+                   ele gerencia portal + visibilidade + nav-open cleanup.
+                   Este handler fica como fallback apenas quando flyout-fix não inicializou. */
+                var listEl = item.closest('ul.togge-menu') || item.closest('.navigation.verticalmenu');
+                if (listEl) {
+                    var ul = listEl.matches('ul.togge-menu') ? listEl : listEl.querySelector('ul.togge-menu');
+                    if (ul && ul.getAttribute('data-awa-vmf-active') === '1') {
+                        return;
+                    }
+                }
+
                 panel = item.querySelector(
                     ':scope > .submenu, :scope > .level0.submenu, :scope > .navigation__submenu'
                 );

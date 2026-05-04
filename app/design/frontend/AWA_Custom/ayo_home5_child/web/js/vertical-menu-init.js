@@ -236,7 +236,17 @@ define([
 
             if (isDesktop()) {
                 closeDesktopSiblingSubmenus();
-                $list.stop(true, true).removeAttr('style').show();
+                $list.stop(true, true);
+                /* JS-2 fix: do not removeAttr('style') — that wipes the hotfix's
+                   display:grid !important. Instead clear only animation leftovers
+                   and explicitly force display:grid (consistent with CSS grid layout). */
+                if ($list[0]) {
+                    $list[0].style.setProperty('display', 'grid', 'important');
+                    $list[0].style.removeProperty('height');
+                    $list[0].style.removeProperty('max-height');
+                    $list[0].style.removeProperty('overflow');
+                    $list[0].style.removeProperty('opacity');
+                }
                 syncDesktopPanelPosition();
                 $('body').removeClass('background_shadow_show');
             } else {
@@ -260,20 +270,23 @@ define([
 
             if (open) {
                 $item.addClass('vmm-active');
-                $panel.css({
-                    visibility: 'visible',
-                    opacity: '1',
-                    pointerEvents: 'auto'
-                });
+                /* JS-3b fix: use setProperty !important so open state reliably
+                   overrides any prior !important close state on portaled panels. */
+                var pNodeOpen = $panel[0];
+                pNodeOpen.style.setProperty('visibility', 'visible', 'important');
+                pNodeOpen.style.setProperty('opacity', '1', 'important');
+                pNodeOpen.style.setProperty('pointer-events', 'auto', 'important');
                 return;
             }
 
             $item.removeClass('vmm-active');
-            $panel.css({
-                visibility: '',
-                opacity: '',
-                pointerEvents: ''
-            });
+            /* JS-3b close: remove inline overrides — CSS rules (BUG-9) take over
+               for panels in normal DOM; portaled panels lose !important state
+               and become hidden by their own portal detach sequence. */
+            var pNodeClose = $panel[0];
+            pNodeClose.style.removeProperty('visibility');
+            pNodeClose.style.removeProperty('opacity');
+            pNodeClose.style.removeProperty('pointer-events');
         }
 
         function closeDesktopSiblingSubmenus($activeItem) {
@@ -299,12 +312,14 @@ define([
 
                 if ($panel.length) {
                     $panel.removeClass('opened');
-                    $panel.css({
-                        display: 'none',
-                        visibility: 'hidden',
-                        opacity: '0',
-                        pointerEvents: 'none'
-                    });
+                    /* JS-3 fix: use setProperty !important to override the portal's
+                       visibility:visible !important / opacity:1 !important from
+                       awa-vertical-menu-flyout-fix.js portaled panels. */
+                    var pNode = $panel[0];
+                    pNode.style.setProperty('display', 'none', 'important');
+                    pNode.style.setProperty('visibility', 'hidden', 'important');
+                    pNode.style.setProperty('opacity', '0', 'important');
+                    pNode.style.setProperty('pointer-events', 'none', 'important');
                 }
             });
         }
@@ -313,7 +328,12 @@ define([
             setMenuOpenState(false);
 
             if (isDesktop()) {
-                $list.stop(true, true).hide();
+                $list.stop(true, true);
+                /* JS-2b fix: use setProperty !important to reliably override the
+                   hotfix's display:grid !important or CSS display:grid !important. */
+                if ($list[0]) {
+                    $list[0].style.setProperty('display', 'none', 'important');
+                }
             } else {
                 $list.stop(true, true).fadeOut(200);
             }

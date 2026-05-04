@@ -3,7 +3,8 @@ define([
 ], function (customerData) {
     'use strict';
 
-    var hydratedProducts = {};
+    var hydratedHtmlByProductId = {};
+    var inFlightProducts = {};
     var refreshScheduled = false;
     var observerStarted = false;
 
@@ -62,7 +63,12 @@ define([
         document.querySelectorAll('.b2b-login-to-see-price').forEach(function (priceMarker) {
             var productId = resolveProductId(priceMarker);
 
-            if (!productId || hydratedProducts[productId]) {
+            if (!productId) {
+                return;
+            }
+
+            if (hydratedHtmlByProductId[productId]) {
+                priceMarker.outerHTML = hydratedHtmlByProductId[productId];
                 return;
             }
 
@@ -84,11 +90,17 @@ define([
                 return;
             }
 
+            hydratedHtmlByProductId[productId] = item.html;
+
             targets[productId].forEach(function (marker) {
                 marker.outerHTML = item.html;
             });
+        });
+    }
 
-            hydratedProducts[productId] = true;
+    function releaseInFlight(productIds) {
+        productIds.forEach(function (productId) {
+            delete inFlightProducts[productId];
         });
     }
 
@@ -101,11 +113,17 @@ define([
         }
 
         targets = collectTargets();
-        productIds = Object.keys(targets);
+        productIds = Object.keys(targets).filter(function (productId) {
+            return !inFlightProducts[productId];
+        });
 
         if (!productIds.length) {
             return;
         }
+
+        productIds.forEach(function (productId) {
+            inFlightProducts[productId] = true;
+        });
 
         window.fetch('/b2b/ajax/customerPrices?product_ids=' + encodeURIComponent(productIds.join(',')), {
             credentials: 'same-origin',
@@ -122,6 +140,8 @@ define([
             replaceTargets(targets, payload.items);
         }).catch(function () {
             // no-op: placeholder remains until next refresh
+        }).then(function () {
+            releaseInFlight(productIds);
         });
     }
 

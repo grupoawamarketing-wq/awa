@@ -14294,6 +14294,12 @@ html body.catalog-product-view .awa-pdp-related {
     align-items: flex-start !important;
     gap: 1px !important;
 }
+#html-body .page-wrapper .awa-site-header .awa-header-account-prompt__customer {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 1px !important;
+}
 
 /* =============================================================================
    SECTION 20 – Layout gap fix + top bar + search icon + auth links
@@ -14458,5 +14464,240 @@ html body.catalog-product-view .awa-pdp-related {
 @media (min-width: 992px) {
     #html-body #awa-primary-navigation {
         display: none !important;
+    }
+}
+
+/* =============================================================================
+   SECTION 24 - Hide duplicate cart fallback icon
+   (v42 - 2026-05-04)
+   ============================================================================= */
+/* 24a. The .awa-header-cart-fallback red button was a pre-KO stand-in.
+   The native Magento .action.showcart button is always server-rendered
+   and shown alongside it, producing two cart icons.
+   Hide the fallback so only the native minicart button shows. */
+#html-body .awa-header-minicart .awa-header-cart-fallback {
+    display: none !important;
+}
+
+/* 24b. Ensure native .action.showcart is visible and styled consistently. */
+@media (min-width: 992px) {
+    #html-body .awa-header-minicart .minicart-wrapper .action.showcart,
+    #html-body .awa-header-minicart > .action.showcart {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 44px !important;
+        height: 44px !important;
+        background: #b73337 !important;
+        border-radius: 8px !important;
+        border: none !important;
+        text-decoration: none !important;
+        flex-shrink: 0 !important;
+        position: relative !important;
+        cursor: pointer !important;
+        padding: 0 !important;
+    }
+    #html-body .awa-header-minicart .action.showcart .text {
+        position: absolute !important;
+        width: 1px !important;
+        height: 1px !important;
+        overflow: hidden !important;
+        clip: rect(0,0,0,0) !important;
+    }
+    #html-body .awa-header-minicart .action.showcart .counter.qty {
+        position: absolute !important;
+        top: -4px !important;
+        right: -4px !important;
+        background: #8e2629 !important;
+        color: #fff !important;
+        font-size: 10px !important;
+        font-weight: 700 !important;
+        border-radius: 999px !important;
+        min-width: 16px !important;
+        height: 16px !important;
+        line-height: 16px !important;
+        text-align: center !important;
+        padding: 0 3px !important;
+        z-index: 1 !important;
+    }
+    #html-body .awa-header-minicart .action.showcart .counter.qty.empty {
+        display: none !important;
+    }
+}
+
+/* =============================================================================
+   SECTION 25 - Override cart-fallback forcing rule with matching selectors
+   (v43 - 2026-05-04)
+   ============================================================================= */
+/* 25a. Same selectors as the Section 11 forcing rule (specificity 1,3,1).
+   Cascade order wins: this section is later in file, so display:none wins. */
+#html-body .page-wrapper .awa-site-header .awa-header-right-col a.awa-header-cart-fallback,
+#html-body .page-wrapper .awa-site-header .awa-header-right-col .awa-header-cart.mini-cart-wrapper a.awa-header-cart-fallback,
+body .page-wrapper .awa-site-header .awa-header-right-col .awa-header-cart-fallback,
+.page-wrapper .awa-site-header .awa-main-header .awa-header-cart-fallback {
+    display: none !important;
+}
+
+/* =============================================================================
+   SECTION 26 - Style native minicart showcart button (correct selector)
+   (v44 - 2026-05-04)
+   ============================================================================= */
+/* 26a. Target actual element: a.showcart.header-mini-cart (NOT .action.showcart)
+   Located in: .awa-header-minicart > .mini-carts > .minicart-wrapper > a.showcart */
+@media (min-width: 992px) {
+    #html-body .awa-header-minicart .minicart-wrapper a.showcart,
+    #html-body .awa-header-minicart .minicart-wrapper .showcart.header-mini-cart {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 44px !important;
+        height: 44px !important;
+        min-width: 44px !important;
+        background: #b73337 !important;
+        border-radius: 8px !important;
+        border: none !important;
+        cursor: pointer !important;
+        position: relative !important;
+        text-decoration: none !important;
+        flex-shrink: 0 !important;
+        z-index: 1 !important;
+        overflow: visible !important;
+    }
+    /* Icon: white SVG via ::before (overrides theme icon-font glyph) */
+    #html-body .awa-header-minicart .minicart-wrapper a.showcart::before,
+    #html-body .awa-header-minicart .minicart-wrapper .showcart.header-mini-cart::before {
+        content: '' !important;
+        display: block !important;
+        width: 22px !important;
+        height: 22px !important;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='9' cy='20' r='1'/%3E%3Ccircle cx='18' cy='20' r='1'/%3E%3Cpath d='M3.5 4h2l2.2 10.2a1 1 0 0 0 1 .8h8.6a1 1 0 0 0 1-.8L20 7H7.1'/%3E%3C/svg%3E") !important;
+        background-repeat: no-repeat !important;
+        background-position: center !important;
+        background-size: 22px 22px !important;
+        font-size: 0 !important;
+    }
+    /* Hide screen-reader text and icon font glyph character */
+    #html-body .awa-header-minicart .minicart-wrapper a.showcart .awa-sr-only {
+        position: absolute !important;
+        width: 1px !important;
+        height: 1px !important;
+        overflow: hidden !important;
+        clip: rect(0,0,0,0) !important;
+    }
+    /* Counter badge */
+    #html-body .awa-header-minicart .minicart-wrapper a.showcart .counter.qty:not(.empty) {
+        position: absolute !important;
+        top: -4px !important;
+        right: -4px !important;
+        background: #8e2629 !important;
+        color: #fff !important;
+        font-size: 10px !important;
+        font-weight: 700 !important;
+        border-radius: 999px !important;
+        min-width: 16px !important;
+        height: 16px !important;
+        line-height: 16px !important;
+        text-align: center !important;
+        padding: 0 3px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    #html-body .awa-header-minicart .minicart-wrapper a.showcart .counter.qty.empty {
+        display: none !important;
+    }
+}
+
+/* SECTION 27 - Fix showcart after fallback removal (v45) */
+#html-body .page-wrapper .awa-site-header .awa-header-right-col .minicart-wrapper .showcart,
+#html-body .page-wrapper .awa-site-header .awa-header-right-col .minicart-wrapper a.showcart.header-mini-cart {
+    left: 0 !important; position: relative !important;
+    width: 44px !important; height: 44px !important; min-width: 44px !important;
+    background: #b73337 !important; border-radius: 8px !important;
+    display: inline-flex !important; align-items: center !important;
+    justify-content: center !important; text-decoration: none !important;
+    cursor: pointer !important; flex-shrink: 0 !important; overflow: visible !important;
+}
+#html-body .page-wrapper .awa-site-header .awa-header-right-col .minicart-wrapper a.showcart.header-mini-cart::before,
+#html-body .page-wrapper .awa-site-header .awa-header-right-col .minicart-wrapper .showcart::before {
+    content: '' !important; display: block !important;
+    width: 22px !important; height: 22px !important;
+    background-image: url(data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='9' cy='20' r='1'/%3E%3Ccircle cx='18' cy='20' r='1'/%3E%3Cpath d='M3.5 4h2l2.2 10.2a1 1 0 0 0 1 .8h8.6a1 1 0 0 0 1-.8L20 7H7.1'/%3E%3C/svg%3E) !important;
+    background-repeat: no-repeat !important; background-position: center !important;
+    background-size: 22px 22px !important; font-size: 0 !important;
+    line-height: 0 !important; color: transparent !important;
+}
+/* =============================================================================
+   SECTION 28 - Fix cart icon: white SVG on red background
+   (v46 - 2026-05-04)
+   ============================================================================= */
+/* 28a. Override ::after cart icon fill: was %23b73337 (red-on-red = invisible).
+   Change to %23ffffff (white). Specificity #html-body selectors (1,6,2) >
+   awa-bundle-refinements body selectors (0,5,3). */
+#html-body .page-wrapper .awa-site-header .awa-header-right-col .minicart-wrapper a.showcart::after,
+#html-body .page-wrapper .awa-site-header .awa-header-right-col .minicart-wrapper .showcart.header-mini-cart::after {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ffffff'%3E%3Cpath d='M18 6h-2c0-2.21-1.79-4-4-4S8 3.79 8 6H6C4.9 6 4 6.9 4 8v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-8 4c0 .55-.45 1-1 1s-1-.45-1-1V8h2v2zm6 0c0 .55-.45 1-1 1s-1-.45-1-1V8h2v2zm-2-4H10c0-1.1.9-2 2-2s2 .9 2 2z'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-size: 28px 28px !important;
+    background-position: center !important;
+    width: 28px !important;
+    height: 28px !important;
+    display: block !important;
+    content: '' !important;
+    flex-shrink: 0 !important;
+}
+/* 28b. Suppress broken ::before from Section 26 (22px empty flex item).
+   Same selectors as Sec 26 — later in file wins cascade. */
+@media (min-width: 992px) {
+    #html-body .awa-header-minicart .minicart-wrapper a.showcart::before,
+    #html-body .awa-header-minicart .minicart-wrapper .showcart.header-mini-cart::before {
+        display: none !important;
+        content: none !important;
+        width: 0 !important;
+        height: 0 !important;
+        background-image: none !important;
+    }
+}
+/* 28c. Suppress broken ::before from Section 27 */
+#html-body .page-wrapper .awa-site-header .awa-header-right-col .minicart-wrapper a.showcart::before,
+#html-body .page-wrapper .awa-site-header .awa-header-right-col .minicart-wrapper .showcart::before {
+    display: none !important;
+    content: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    background-image: none !important;
+}
+/* ==========================================================================
+ * MOBILE MINICART VISIBILITY FIX (390px reggression)
+ * This block forces the .awa-header-minicart and its children to be visible
+ * on mobile viewports. Overrides any aggressive 'display: none !important',
+ * 'width: 1px' or 'clip' rules coming from parent theme.
+ * ========================================================================== */
+@media (max-width: 991px) {
+    #html-body .page-wrapper .awa-site-header .header .top-search > .mini-cart-wrapper, 
+    #html-body .page-wrapper .awa-site-header .header .top-search > .shadowcart, 
+    #html-body .page-wrapper .awa-site-header [data-awa-header-cart="true"],
+    #html-body .page-wrapper .awa-header-minicart[data-awa-header-cart="true"] {
+        display: inline-flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        position: absolute !important;
+        width: 44px !important;
+        height: 44px !important;
+        top: 4px !important;
+        right: 0 !important;
+        overflow: visible !important;
+        clip: auto !important;
+        margin: 0 !important;
+        z-index: 100 !important;
+    }
+
+    #html-body .page-wrapper .awa-site-header [data-awa-header-cart="true"] .minicart-wrapper,
+    #html-body .page-wrapper .awa-site-header [data-awa-header-cart="true"] .showcart {
+        display: inline-flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
     }
 }

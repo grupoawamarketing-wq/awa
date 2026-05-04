@@ -163,8 +163,8 @@ define(['jquery', 'domReady!'], function ($) {
 
         quickLinks = [
             { name: 'Nossas Marcas', path: '/nossas-marcas/' },
-            { name: 'Lançamentos', path: '/novidades/' },
-            { name: 'Catálogo', path: '/catalogo/' }
+            { name: 'Lançamentos', path: '/ofertas.html' },
+            { name: 'Catálogo', path: '/catalogsearch/result/' }
         ];
 
         if ($quickList.length) {

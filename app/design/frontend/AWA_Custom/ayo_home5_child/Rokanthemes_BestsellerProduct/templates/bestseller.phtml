@@ -53,6 +53,18 @@ $showReview = (bool) $this->getConfig('review');
 
                     $productImage = $block->getImage($_product, $image);
                     $productImageThumb = $block->getImage($_product, 'category_page_grid-1');
+                    $productImageHtml = (string) $productImage->toHtml();
+                    $productImageThumbHtml = (string) $productImageThumb->toHtml();
+                    $productImageThumbUrl = (string) $productImageThumb->getImageUrl();
+
+                    if ($i < 2) {
+                        $productImageHtml = str_replace(' loading="lazy"', ' loading="eager" fetchpriority="high"', $productImageHtml);
+                    }
+
+                    if ($productImageThumbUrl === '' || strpos($productImageThumbUrl, '/placeholder/') !== false) {
+                        $productImageThumbHtml = $productImageHtml;
+                    }
+
                     $now = date('Y-m-d H:i:s');
                     $specialprice = $_product->getSpecialPrice();
                     $specialPriceFromDate = $_product->getSpecialFromDate();
@@ -67,7 +79,7 @@ $showReview = (bool) $this->getConfig('review');
                             . 'top:' . $productImage->getHeight() . 'px;"';
                     }
                 ?>
-                    <div class="item-product col-md-3">
+                    <div class="item-product col-md-3" data-product-id="<?= (int) $_product->getId() ?>">
                         <div class="content-item-product">
                             <div class="product-thumb">
                                 <a href="<?= $block->escapeUrl($_product->getProductUrl()) ?>"
@@ -75,10 +87,10 @@ $showReview = (bool) $this->getConfig('review');
                                    tabindex="-1"
                                    aria-label="<?= $block->escapeHtmlAttr($_product->getName()) ?>">
                                     <span class="first-thumb">
-                                        <?= $productImage->toHtml() ?>
+                                        <?= /* @noEscape */ $productImageHtml ?>
                                     </span>
                                     <span class="second-thumb">
-                                        <?= $productImageThumb->toHtml() ?>
+                                        <?= /* @noEscape */ $productImageThumbHtml ?>
                                     </span>
                                 </a>
                                 <div class="hot-onsale">

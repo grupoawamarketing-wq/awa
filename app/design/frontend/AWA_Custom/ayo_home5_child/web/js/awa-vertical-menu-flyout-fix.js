@@ -111,6 +111,8 @@
         if (!_ul) return;
 
         _initialized = true;
+        /* JS-1 fix: flag para o bootstrap saber que flyout-fix está ativo */
+        _ul.setAttribute('data-awa-vmf-active', '1');
 
         _observer = new MutationObserver(function (mutations) {
             mutations.forEach(function (m) {
@@ -146,6 +148,12 @@
             ':scope > .submenu, :scope > .level0.submenu, :scope > .navigation__submenu, :scope > .vmm-empty-submenu'
         );
         if (!sub) return;
+
+        /* JS-1 fix: limpar classes de nav mobile que possam ter ficado abertas */
+        if (document.body) {
+            document.body.classList.remove('nav-open', 'nav-before-open');
+            document.documentElement.classList.remove('nav-open');
+        }
 
         if (sub.dataset.awVmfPortaled === '1') {
             positionPortal(li, sub);

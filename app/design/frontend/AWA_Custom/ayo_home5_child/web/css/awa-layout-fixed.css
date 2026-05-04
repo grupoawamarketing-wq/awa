@@ -3460,3 +3460,144 @@ h4.velaFooterTitle,
 .awa-back-to-top {
     display: none !important;
 }
+
+/* =============================================================================
+   AUTH STATE VISIBILITY — data-awa-auth-state CSS toggle
+   
+   Root cause: awa-visual-bugfix.css has display:flex/block !important on
+   .awa-header-account-prompt__guest (specificity 1,3,0), which overrides the
+   JS inline style="display:none". Fix uses higher specificity (1,5,0) via the
+   data-awa-auth-state attribute that the JS already sets on the parent element.
+   ============================================================================= */
+
+/* When logged in: hide guest block */
+#html-body .page-wrapper .awa-site-header .awa-header-account-prompt[data-awa-auth-state="customer"] .awa-header-account-prompt__guest,
+html body .page-wrapper .awa-site-header .awa-header-account-prompt[data-awa-auth-state="customer"] .awa-header-account-prompt__guest {
+    display: none !important;
+}
+
+/* When guest (default/initial): hide customer block */
+#html-body .page-wrapper .awa-site-header .awa-header-account-prompt[data-awa-auth-state="guest"] .awa-header-account-prompt__customer,
+html body .page-wrapper .awa-site-header .awa-header-account-prompt[data-awa-auth-state="guest"] .awa-header-account-prompt__customer,
+#html-body .page-wrapper .awa-site-header .awa-header-account-prompt:not([data-awa-auth-state]) .awa-header-account-prompt__customer,
+html body .page-wrapper .awa-site-header .awa-header-account-prompt:not([data-awa-auth-state]) .awa-header-account-prompt__customer {
+    display: none !important;
+}
+
+/* Flex layout for account prompt — column stacking (line1 above line2).
+   Defined here (blocking CSS) to prevent row→column FOUC from async awa-visual-bugfix.css */
+#html-body .page-wrapper .awa-site-header .awa-header-account-prompt__guest,
+#html-body .page-wrapper .awa-site-header .awa-header-account-prompt__customer {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 1px !important;
+}
+
+/* =============================================================================
+   ACCOUNT DROPDOWN — hover/click menu para estado logado
+   ============================================================================= */
+
+/* Wrapper relativo para posicionar o menu */
+.awa-account-dropdown {
+    position: relative !important;
+}
+
+/* Reset de button para o trigger */
+.awa-account-dropdown__trigger {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 3px !important;
+    font-family: inherit !important;
+    font-size: 14px !important;
+    line-height: 1.2 !important;
+    color: inherit !important;
+    min-height: 0 !important;
+    height: auto !important;
+    width: fit-content !important;
+    align-self: flex-start !important;
+}
+
+/* Chevron rotaciona quando aberto */
+.awa-account-dropdown__chevron {
+    stroke: var(--awa-red, #b73337) !important;
+    transition: transform 0.18s ease !important;
+    flex-shrink: 0 !important;
+    display: inline-block !important;
+}
+.awa-account-dropdown__trigger[aria-expanded="true"] .awa-account-dropdown__chevron {
+    transform: rotate(180deg) !important;
+}
+
+/* Painel do dropdown */
+.awa-account-dropdown__menu {
+    display: none !important;
+    position: absolute !important;
+    top: calc(100% + 6px) !important;
+    right: 0 !important;
+    left: auto !important;
+    min-width: 195px !important;
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.11) !important;
+    z-index: 9999 !important;
+    padding: 6px 0 !important;
+    white-space: nowrap !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+}
+
+/* Abertura por hover (desktop) */
+.awa-account-dropdown:hover .awa-account-dropdown__menu {
+    display: flex !important;
+}
+
+/* Abertura por clique — JS seta aria-expanded="true" no trigger */
+.awa-account-dropdown__trigger[aria-expanded="true"] ~ .awa-account-dropdown__menu {
+    display: flex !important;
+}
+
+/* Itens do menu */
+.awa-account-dropdown__item {
+    display: flex !important;
+    align-items: center !important;
+    flex-direction: row !important;
+    gap: 8px !important;
+    padding: 9px 16px !important;
+    color: #334155 !important;
+    font-size: 13px !important;
+    font-weight: 400 !important;
+    text-decoration: none !important;
+    transition: background 0.12s, color 0.12s !important;
+    line-height: 1.2 !important;
+}
+.awa-account-dropdown__item:hover {
+    background: #f8fafc !important;
+    color: var(--awa-red, #b73337) !important;
+    text-decoration: none !important;
+}
+.awa-account-dropdown__item svg {
+    width: 14px !important;
+    height: 14px !important;
+    stroke: currentColor !important;
+    flex-shrink: 0 !important;
+    stroke-width: 1.5 !important;
+    fill: none !important;
+}
+
+/* Item Sair — separador visual + cor discreta */
+.awa-account-dropdown__item--logout {
+    margin-top: 4px !important;
+    border-top: 1px solid #f1f5f9 !important;
+    color: #64748b !important;
+}
+.awa-account-dropdown__item--logout:hover {
+    color: var(--awa-red, #b73337) !important;
+    background: #fff5f5 !important;
+}
