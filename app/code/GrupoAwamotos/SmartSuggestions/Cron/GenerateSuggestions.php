@@ -7,8 +7,10 @@ namespace GrupoAwamotos\SmartSuggestions\Cron;
 use GrupoAwamotos\SmartSuggestions\Api\SuggestionEngineInterface;
 use GrupoAwamotos\SmartSuggestions\Api\WhatsappSenderInterface;
 use GrupoAwamotos\SmartSuggestions\Helper\Config;
+use GrupoAwamotos\SmartSuggestions\Model\SuggestionHistory;
 use GrupoAwamotos\SmartSuggestions\Model\SuggestionHistoryFactory;
 use GrupoAwamotos\SmartSuggestions\Model\ResourceModel\SuggestionHistory as SuggestionHistoryResource;
+use GrupoAwamotos\SmartSuggestions\Model\ResourceModel\SuggestionHistory\CollectionFactory as SuggestionHistoryCollectionFactory;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -22,6 +24,7 @@ class GenerateSuggestions
     private LoggerInterface $logger;
     private SuggestionHistoryFactory $historyFactory;
     private SuggestionHistoryResource $historyResource;
+    private SuggestionHistoryCollectionFactory $historyCollectionFactory;
 
     public function __construct(
         SuggestionEngineInterface $suggestionEngine,
@@ -29,7 +32,8 @@ class GenerateSuggestions
         Config $config,
         LoggerInterface $logger,
         SuggestionHistoryFactory $historyFactory,
-        SuggestionHistoryResource $historyResource
+        SuggestionHistoryResource $historyResource,
+        SuggestionHistoryCollectionFactory $historyCollectionFactory
     ) {
         $this->suggestionEngine = $suggestionEngine;
         $this->whatsappSender = $whatsappSender;
@@ -37,6 +41,7 @@ class GenerateSuggestions
         $this->logger = $logger;
         $this->historyFactory = $historyFactory;
         $this->historyResource = $historyResource;
+        $this->historyCollectionFactory = $historyCollectionFactory;
     }
 
     /**
@@ -54,6 +59,9 @@ class GenerateSuggestions
 
         try {
             $startTime = microtime(true);
+
+            // Retry previously generated items that were not sent (e.g., WhatsApp was off)
+            $this->retryGeneratedItems();
 
             // Get top opportunities (at-risk customers)
             $opportunities = $this->suggestionEngine->getTopOpportunities(50);
@@ -158,6 +166,76 @@ class GenerateSuggestions
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
+        }
+    }
+
+    /**
+     * Retry suggestions that are in 'generated' status but have a phone number.
+     *
+     * These are items that were generated when auto-send was disabled or when the
+     * WhatsApp provider was temporarily unavailable. On each new generation run,
+     * we retry up to 30 older items before proceeding with new ones.
+     */
+    private function retryGeneratedItems(): void
+    {
+        if (!$this->config->isAutoSendWhatsappEnabled() || !$this->config->isWhatsappEnabled()) {
+            return;
+        }
+
+        /** @var \GrupoAwamotos\SmartSuggestions\Model\ResourceModel\SuggestionHistory\Collection $collection */
+        $collection = $this->historyCollectionFactory->create();
+        $collection->addFieldToFilter('status', SuggestionHistory::STATUS_GENERATED)
+            ->addFieldToFilter('customer_phone', ['notnull' => true])
+            ->addFieldToFilter('customer_phone', ['neq' => ''])
+            // Avoid re-sending items from the same run (older than 1 hour)
+            ->addFieldToFilter('created_at', ['lt' => date('Y-m-d H:i:s', strtotime('-1 hour'))])
+            ->setPageSize(30)
+            ->setOrder('created_at', 'ASC');
+
+        $retried = 0;
+        $retrySent = 0;
+
+        foreach ($collection as $history) {
+            $phone = trim((string) $history->getData('customer_phone'));
+            if (empty($phone)) {
+                continue;
+            }
+
+            $suggestionData = json_decode((string) $history->getData('suggestion_data'), true);
+            if (!is_array($suggestionData)) {
+                continue;
+            }
+
+            try {
+                $result = $this->whatsappSender->sendSuggestion($phone, $suggestionData);
+                $retried++;
+
+                if ($result['success']) {
+                    $retrySent++;
+                    $history->setData('status', SuggestionHistory::STATUS_SENT);
+                    $history->setData('sent_at', date('Y-m-d H:i:s'));
+                    $history->setData('whatsapp_message_id', $result['message_id'] ?? null);
+                } else {
+                    $history->setData('status', SuggestionHistory::STATUS_FAILED);
+                    $history->setData('error_message', $result['message']);
+                }
+
+                $this->historyResource->save($history);
+            } catch (\Exception $e) {
+                $this->logger->error('SmartSuggestions: Error retrying generated item', [
+                    'history_id' => $history->getId(),
+                    'error'      => $e->getMessage(),
+                ]);
+            }
+        }
+
+        if ($retried > 0) {
+            $this->logger->info(sprintf(
+                'SmartSuggestions: Retried %d generated items — %d sent, %d failed.',
+                $retried,
+                $retrySent,
+                $retried - $retrySent
+            ));
         }
     }
 }
