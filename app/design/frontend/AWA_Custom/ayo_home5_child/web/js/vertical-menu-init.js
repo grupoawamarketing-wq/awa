@@ -163,9 +163,8 @@ define([
         }
 
         function keepDesktopMenuExpanded() {
-            /* AWA AUDIT-2026-04: Menu should NOT auto-expand on homepage.
-               Hero banner visibility is priority. Menu opens on hover/click. */
-            return false;
+            /* Ayo Home 5 default (demo ayo.nextsky.co): lista de categorias aberta no desktop na homepage. */
+            return isDesktop() && isHomeContext();
         }
 
         /* ---- Submenu position sync (CSS vars for fixed flyouts) ----- */
@@ -195,6 +194,29 @@ define([
                 this.style.setProperty('--vmm-top', top);
                 this.style.setProperty('--vmm-left', left);
             });
+        }
+
+        /**
+         * Painel mega-menu no LI ou portado para body (awa-vertical-menu-flyout-fix.js).
+         */
+        function resolveLevel0SubmenuPanel($item) {
+            var $p = $item.children('.submenu, .level0.submenu, .navigation__submenu').first();
+            var id;
+            var el;
+
+            if ($p.length) {
+                return $p;
+            }
+
+            id = $item.attr('data-menu');
+
+            if (!id || typeof document === 'undefined') {
+                return $();
+            }
+
+            el = document.querySelector('.awa-vmf-portal[data-aw-vmf-li-menu="' + id + '"]');
+
+            return el ? $(el) : $();
         }
 
         /* ============================================================ */
@@ -230,7 +252,7 @@ define([
                 return;
             }
 
-            $panel = $item.children('.submenu, .level0.submenu').first();
+            $panel = resolveLevel0SubmenuPanel($item);
 
             if (!$panel.length) {
                 return;
@@ -269,7 +291,7 @@ define([
 
             $targets.each(function () {
                 var $item = $(this);
-                var $panel = $item.children('.submenu, .level0.submenu').first();
+                var $panel = resolveLevel0SubmenuPanel($item);
 
                 $item.removeClass('vmm-active _active is-open active ui-state-active awa-vmf-active');
                 $item.children('a.level-top, > a').attr('aria-expanded', 'false');
@@ -516,11 +538,6 @@ define([
         $title.on('keydown' + NS, function (e) {
             if (e.key === 'Escape') {
                 e.preventDefault();
-
-                if (keepDesktopMenuExpanded()) {
-                    return;
-                }
-
                 closeMenu();
                 return;
             }
@@ -565,6 +582,7 @@ define([
             }
 
             if (keepDesktopMenuExpanded()) {
+                openMenu();
                 return;
             }
 
@@ -591,6 +609,7 @@ define([
                 }
 
                 if (keepDesktopMenuExpanded()) {
+                    openMenu();
                     return;
                 }
 
@@ -608,6 +627,7 @@ define([
             }
 
             if (keepDesktopMenuExpanded()) {
+                openMenu();
                 return;
             }
 

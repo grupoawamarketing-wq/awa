@@ -14,10 +14,15 @@
         <!-- NAV-FIX: nav.fixed-bottom renderizado FORA do <footer> para evitar bug Chrome -->
         <!-- position:fixed dentro de footer com scrollHeight > clientHeight = posicionamento errado -->
         <referenceContainer name="before.body.end">
+            <!-- Flyout: escapa stacking context do header (slider/home + páginas com menu vertical) -->
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.vertical.menu.flyout.fix"
+                   template="Magento_Theme::html/awa-vertical-menu-flyout-fix.phtml"
+                   before="-"/>
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.mobile.nav"
                    template="Magento_Theme::html/awa-mobile-nav.phtml"
-                   before="-">
+                   after="awa.vertical.menu.flyout.fix">
                 <arguments>
                     <argument name="view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\FooterData</argument>
                 </arguments>
@@ -77,9 +82,14 @@
                    after="awa.search.autocomplete.head.css"/>
 
             <block class="Magento\Framework\View\Element\Template"
+                   name="awa.visual.audit.final.css"
+                   template="Magento_Theme::html/awa-visual-audit-final-css-v2.phtml"
+                   after="awa.styles.l.last"/>
+
+            <block class="Magento\Framework\View\Element\Template"
                    name="awa.og.meta"
                    template="Magento_Theme::html/awa-og-meta.phtml"
-                   after="awa.styles.l.last">
+                   after="awa.visual.audit.final.css">
                 <arguments>
                     <argument name="view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\OpenGraph</argument>
                     <argument name="open_graph_view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\OpenGraph</argument>

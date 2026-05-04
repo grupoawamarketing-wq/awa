@@ -24,6 +24,7 @@ define(['jquery', 'domReady!'], function ($) {
     }
 
     function keepDesktopMenuExpanded() {
+        /* Igual Ayo Home 5 / demo: lista de categorias expandida no desktop na homepage. */
         return isDesktop() && isHomeContext();
     }
 
@@ -109,6 +110,140 @@ define(['jquery', 'domReady!'], function ($) {
 
     function closeMenu($nav) {
         setOpenState($nav, false);
+    }
+
+    function enforceDesktopHeaderNavVisualState($nav) {
+        var $list;
+        var $quickWrap;
+        var $quickList;
+        var quickLinks;
+        var quickHtml;
+        var $logoImg;
+        var $promo;
+        var $promoText;
+        var $promoClose;
+        var $loginLine1;
+        var $loginLine2;
+        var $cart;
+        var $cartCounter;
+        var $cartFallback;
+        var $cartFallbackIcon;
+
+        if (!isDesktop()) {
+            return;
+        }
+
+        $list = getList($nav);
+        $quickWrap = $('.awa-site-header .header-control.awa-nav-bar .awa-nav-quick-links').first();
+        $quickList = $quickWrap.find('.awa-nav-quick-links__list').first();
+
+        /* Homepage desktop (demo Ayo): lista expandida + desbloqueia altura após estilos antigos */
+        if ($list.length && keepDesktopMenuExpanded()) {
+            getState($nav).pinned = false;
+            openMenu($nav);
+            $list[0].style.removeProperty('height');
+            $list[0].style.removeProperty('max-height');
+        }
+        /*
+         * NÃO fechar nem aplicar display:none !important aqui nas outras páginas.
+         * Este enforce corre a cada bind e no intervalo de retry — isso anulava o hover
+         * (vertical-menu-init abria e o hotfix fechava de novo). Abrir/fechar fica só
+         * com vertical-menu-init.js + CSS.
+         */
+
+        if ($quickWrap.length) {
+            $quickWrap[0].style.setProperty('display', 'flex', 'important');
+            $quickWrap[0].style.setProperty('align-items', 'center', 'important');
+        }
+
+        if ($quickList.length) {
+            $quickList[0].style.setProperty('display', 'flex', 'important');
+            $quickList[0].style.setProperty('align-items', 'center', 'important');
+        }
+
+        quickLinks = [
+            { name: 'Nossas Marcas', path: '/nossas-marcas/' },
+            { name: 'Lançamentos', path: '/novidades/' },
+            { name: 'Catálogo', path: '/catalogo/' }
+        ];
+
+        if ($quickList.length) {
+            quickHtml = quickLinks.map(function (item) {
+                return '<li class="awa-nav-quick-links__item">'
+                    + '<a href="' + window.location.origin + item.path + '" class="awa-nav-quick-links__link" title="' + item.name + '">'
+                    + item.name
+                    + '</a></li>';
+            }).join('');
+
+            if ($quickList.attr('data-awa-header-links-final') !== '1') {
+                $quickList.html(quickHtml);
+                $quickList.attr('data-awa-header-links-final', '1');
+            }
+        }
+
+        $logoImg = $('.awa-site-header .awa-header-brand-cell .logo img').first();
+        if ($logoImg.length) {
+            $logoImg[0].style.setProperty('width', '161px', 'important');
+            $logoImg[0].style.setProperty('height', '92px', 'important');
+            $logoImg[0].style.setProperty('max-height', 'none', 'important');
+            $logoImg[0].style.setProperty('max-width', '161px', 'important');
+        }
+
+        $promo = $('.awa-site-header .top-header.awa-b2b-promo-bar').first();
+        $promoText = $promo.find('.awa-b2b-promo-bar__text, .awa-b2b-promo-bar__lead, .awa-b2b-promo-bar__cta, .awa-b2b-promo-bar__tail');
+        $promoClose = $promo.find('.awa-b2b-promo-close, #awa-b2b-promo-close');
+
+        if ($promo.length) {
+            $promo[0].style.setProperty('background-color', 'var(--awa-red-dark, var(--awa-primary-dark))', 'important');
+        }
+        $promoText.each(function () {
+            this.style.setProperty('font-size', '13px', 'important');
+            this.style.setProperty('font-weight', '700', 'important');
+        });
+        $promoClose.each(function () {
+            this.style.setProperty('display', 'none', 'important');
+        });
+
+        $loginLine1 = $('.awa-site-header .awa-header-account-prompt__line1').first();
+        $loginLine2 = $('.awa-site-header .awa-header-account-prompt__line2').first();
+        if ($loginLine1.length) {
+            $loginLine1[0].style.setProperty('font-size', '13px', 'important');
+            $loginLine1[0].style.setProperty('font-weight', '500', 'important');
+        }
+        if ($loginLine2.length) {
+            $loginLine2[0].style.setProperty('font-size', '14px', 'important');
+            $loginLine2[0].style.setProperty('font-weight', '700', 'important');
+        }
+
+        $cart = $('.awa-site-header .awa-header-minicart .minicart-wrapper .showcart.header-mini-cart').first();
+        $cartCounter = $cart.find('.counter.qty');
+        $cartFallback = $('.awa-site-header .awa-header-minicart .awa-header-cart-fallback').first();
+        $cartFallbackIcon = $cartFallback.find('.awa-header-cart-fallback__icon');
+        if ($cart.length) {
+            $cart[0].style.setProperty('width', '36px', 'important');
+            $cart[0].style.setProperty('height', '36px', 'important');
+            $cart[0].style.setProperty('color', 'var(--awa-primary)', 'important');
+            $cart[0].style.setProperty('left', 'auto', 'important');
+            $cart[0].style.setProperty('right', '0', 'important');
+            $cart[0].style.setProperty('display', 'none', 'important');
+        }
+        if ($cartFallback.length) {
+            $cartFallback[0].style.setProperty('display', 'inline-flex', 'important');
+            $cartFallback[0].style.setProperty('visibility', 'visible', 'important');
+            $cartFallback[0].style.setProperty('opacity', '1', 'important');
+        }
+        if ($cartFallbackIcon.length) {
+            $cartFallbackIcon[0].style.setProperty('visibility', 'visible', 'important');
+            $cartFallbackIcon[0].style.setProperty('opacity', '1', 'important');
+            $cartFallbackIcon[0].style.setProperty('display', 'block', 'important');
+        }
+        if ($cartCounter.length) {
+            $cartCounter[0].style.setProperty('width', '14px', 'important');
+            $cartCounter[0].style.setProperty('height', '14px', 'important');
+            $cartCounter[0].style.setProperty('border', '1px solid var(--awa-primary)', 'important');
+            $cartCounter[0].style.setProperty('background', 'var(--awa-bg)', 'important');
+            $cartCounter[0].style.setProperty('color', 'var(--awa-primary)', 'important');
+        }
     }
 
     function wireTitleCapture($nav) {
@@ -231,8 +366,10 @@ define(['jquery', 'domReady!'], function ($) {
 
         if (keepDesktopMenuExpanded()) {
             getState($nav).pinned = false;
-            openMenu($nav);
         }
+
+        /* Sempre aplica header (links rápidos, logo, etc.); estado do menu lista expandida/contraída está dentro. */
+        enforceDesktopHeaderNavVisualState($nav);
     }
 
     function allMenus() {
@@ -304,22 +441,30 @@ define(['jquery', 'domReady!'], function ($) {
                 getState($nav).pinned = false;
                 openMenu($nav);
             });
+            return;
         }
+
+        allMenus().each(function () {
+            enforceDesktopHeaderNavVisualState($(this));
+        });
     });
 
     bindAll();
 
     (function retryForEsiMenu() {
         var attempts = 0;
-        var maxAttempts = 40;
+        var maxAttempts = 20;
         var timer = window.setInterval(function () {
             attempts += 1;
             bindAll();
+            allMenus().each(function () {
+                enforceDesktopHeaderNavVisualState($(this));
+            });
 
             if (attempts >= maxAttempts) {
                 window.clearInterval(timer);
             }
-        }, 500);
+        }, 400);
     }());
 
     return {};

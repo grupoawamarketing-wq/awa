@@ -1,6 +1,36 @@
 (function () {
     'use strict';
 
+    function reportError(context, error) {
+        if (typeof console !== 'undefined' && console && typeof console.warn === 'function') {
+            console.warn('[AWA Header A11y]', context, error);
+        }
+    }
+
+    function normalizeText(value) {
+        return String(value || '').replace(/\s+/g, ' ').trim();
+    }
+
+    function clampInt(value, min, max, fallback) {
+        var parsed = parseInt(String(value || ''), 10);
+        var result = isNaN(parsed) ? fallback : parsed;
+        if (typeof min === 'number') {
+            result = Math.max(min, result);
+        }
+        if (typeof max === 'number') {
+            result = Math.min(max, result);
+        }
+        return result;
+    }
+
+    if (typeof module === 'object' && module.exports) {
+        module.exports = {
+            normalizeText: normalizeText,
+            clampInt: clampInt
+        };
+        return;
+    }
+
     if (window.__awaHeaderA11yPerformanceInit) {
         return;
     }
@@ -15,7 +45,11 @@
         }
         var eventPayload = payload || {};
         eventPayload.event = eventName;
-        window.dataLayer.push(eventPayload);
+        try {
+            window.dataLayer.push(eventPayload);
+        } catch (e) {
+            reportError('dataLayer push', e);
+        }
     }
 
     function pushHeaderTelemetry(eventName, experiment, payload) {
@@ -35,10 +69,6 @@
         pushDataLayer(eventName, basePayload);
     }
 
-    function normalizeText(value) {
-        return String(value || '').replace(/\s+/g, ' ').trim();
-    }
-
     try {
         var optionsProbe = Object.defineProperty({}, 'passive', {
             get: function () {
@@ -48,7 +78,9 @@
         });
         window.addEventListener('testPassive', null, optionsProbe);
         window.removeEventListener('testPassive', null, optionsProbe);
-    } catch (e) {}
+    } catch (e) {
+        reportError('passive probe', e);
+    }
 
     function addListener(target, eventName, handler, options) {
         if (!target || !target.addEventListener) {
@@ -103,19 +135,11 @@
         }
 
         var enabled = header.getAttribute('data-awa-header-exp-enabled') === '1';
-        var rollout = parseInt(header.getAttribute('data-awa-header-exp-rollout') || '0', 10);
+        var rollout = clampInt(header.getAttribute('data-awa-header-exp-rollout') || '0', 0, 100, 0);
         var seed = header.getAttribute('data-awa-header-exp-seed') || 'home5_header_v1';
-        var bucket = parseInt(header.getAttribute('data-awa-header-exp-bucket') || '0', 10);
+        var bucket = clampInt(header.getAttribute('data-awa-header-exp-bucket') || '0', 0, 99, 0);
         var active = header.getAttribute('data-awa-header-exp-active') === '1';
         var variantCode = header.getAttribute('data-awa-header-exp-variant') || (active ? 'v2' : 'control');
-        if (isNaN(rollout)) {
-            rollout = 0;
-        }
-        if (isNaN(bucket)) {
-            bucket = 0;
-        }
-        rollout = Math.max(0, Math.min(100, rollout));
-        bucket = Math.max(0, Math.min(99, bucket));
 
         var variant = enabled && active ? 'B' : 'A';
         header.setAttribute('data-awa-header-exp-group', variant);
@@ -885,6 +909,84 @@
         }
     }
 
+    function normalizeDesktopHeaderVisualParity() {
+        var isDesktop = !!window.matchMedia && window.matchMedia('(min-width: 992px)').matches;
+        var nav;
+        var list;
+        var trigger;
+        var quickWrap;
+        var quickList;
+        var searchBtn;
+        var searchSvg;
+
+        if (!isDesktop) {
+            return;
+        }
+
+        nav = document.querySelector('[data-role="awa-vertical-menu"]');
+        list = nav ? nav.querySelector('.togge-menu.list-category-dropdown') : null;
+        trigger = nav ? nav.querySelector('.title-category-dropdown.our_categories') : null;
+
+        if (nav && list) {
+            nav.classList.remove('menu-open', 'vmm-open');
+            list.classList.remove('menu-open', 'vmm-open');
+            setImportantStyle(list, 'display', 'none');
+            setImportantStyle(list, 'visibility', 'hidden');
+            setImportantStyle(list, 'opacity', '0');
+            setImportantStyle(list, 'pointer-events', 'none');
+            setImportantStyle(list, 'height', '0');
+            setImportantStyle(list, 'max-height', '0');
+        }
+
+        if (trigger) {
+            trigger.classList.remove('active');
+            trigger.setAttribute('aria-expanded', 'false');
+        }
+
+        quickWrap = document.querySelector('.awa-site-header .header-control.awa-nav-bar .awa-nav-quick-links');
+        quickList = quickWrap ? quickWrap.querySelector('.awa-nav-quick-links__list') : null;
+
+        if (quickWrap) {
+            setImportantStyle(quickWrap, 'display', 'flex');
+            setImportantStyle(quickWrap, 'align-items', 'center');
+        }
+
+        if (quickList) {
+            setImportantStyle(quickList, 'display', 'flex');
+            setImportantStyle(quickList, 'align-items', 'center');
+        }
+
+        searchBtn = document.querySelector('#search_mini_form .actions .action.search');
+        searchSvg = searchBtn ? searchBtn.querySelector('svg') : null;
+
+        if (searchBtn) {
+            setImportantStyle(searchBtn, 'background', 'transparent');
+            setImportantStyle(searchBtn, 'background-color', 'transparent');
+            setImportantStyle(searchBtn, 'color', 'var(--awa-primary)');
+            setImportantStyle(searchBtn, 'border-left', '1px solid var(--awa-border)');
+        }
+
+        if (searchSvg) {
+            setImportantStyle(searchSvg, 'stroke', 'var(--awa-primary)');
+            setImportantStyle(searchSvg, 'color', 'var(--awa-primary)');
+            setImportantStyle(searchSvg, 'fill', 'none');
+        }
+    }
+
+    var desktopHeaderParityQueued = false;
+
+    function scheduleDesktopHeaderVisualParity() {
+        if (desktopHeaderParityQueued) {
+            return;
+        }
+
+        desktopHeaderParityQueued = true;
+        raf(function () {
+            desktopHeaderParityQueued = false;
+            normalizeDesktopHeaderVisualParity();
+        });
+    }
+
     onReady(function () {
         var experiment = getExperimentConfig();
 
@@ -892,6 +994,15 @@
         wireSearchA11y();
         wireHeaderClickTelemetry(experiment);
         wireDeferredBadges();
+        scheduleDesktopHeaderVisualParity();
+
+        addListener(window, 'resize', function () {
+            scheduleDesktopHeaderVisualParity();
+        }, { passive: true });
+
+        window.setTimeout(scheduleDesktopHeaderVisualParity, 250);
+        window.setTimeout(scheduleDesktopHeaderVisualParity, 1200);
+        window.setTimeout(scheduleDesktopHeaderVisualParity, 2800);
 
         if (ENABLE_HOME_HEADER_COLLAPSE_GUARD) {
             guardHomeMobileHeaderCollapse();
@@ -956,5 +1067,16 @@
             }
             pushHeaderTelemetry('awa_header_minicart_click', experiment);
         }, { capture: true });
+
+        if (window.MutationObserver) {
+            new MutationObserver(function () {
+                scheduleDesktopHeaderVisualParity();
+            }).observe(document.body, {
+                attributes: true,
+                attributeFilter: ['class'],
+                childList: true,
+                subtree: true
+            });
+        }
     });
 })();

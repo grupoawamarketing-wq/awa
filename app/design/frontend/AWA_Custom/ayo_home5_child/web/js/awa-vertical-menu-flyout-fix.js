@@ -15,24 +15,22 @@
 (function () {
     'use strict';
 
-    /* Só executa em desktop e na home */
-    if (window.innerWidth < 992) return;
-    if (!(
-        document.body.classList.contains('cms-index-index') ||
-        document.body.classList.contains('cms-home') ||
-        document.body.classList.contains('cms-homepage_ayo_home5')
-    )) return;
-
+    var DESKTOP_MIN = 992;
     var PORTAL_CLASS = 'awa-vmf-portal';
     var ACTIVE_CLASS = 'awa-vmf-active';
-    var Z_INDEX      = 99990;
-    var OFFSET_LEFT  = 0;   /* px além do right do LI */
-    var OFFSET_TOP   = 0;   /* px além do top do LI */
+    var Z_INDEX = 99990;
+    var OFFSET_LEFT = 0;
+    var OFFSET_TOP = 0;
 
-    /* Estado de inicialização — evita double-init no resize */
-    var _observer    = null;
-    var _ul          = null;
+    var _observer = null;
+    var _ul = null;
     var _initialized = false;
+    var _scrollRaf = 0;
+    var resizeTimer;
+
+    function isDesktop() {
+        return window.innerWidth >= DESKTOP_MIN;
+    }
 
     /* Handlers nomeados para permitir removeEventListener exato */
     function onMenuMouseenter(e) {
@@ -45,7 +43,6 @@
         var li = e.target.closest('li.level0');
         if (!li) return;
         var to = e.relatedTarget;
-        /* Se saiu para o flyout portal, não remove */
         if (to && to.classList && (to.classList.contains(PORTAL_CLASS) || to.closest('.' + PORTAL_CLASS))) return;
         detachFlyout(li);
     }
@@ -56,14 +53,27 @@
         var to = e.relatedTarget;
         var liId = portal.dataset.awVmfLiMenu;
         var li = liId && document.querySelector('li.level0[data-menu="' + liId + '"]');
-        /* Se o mouse foi para o LI, fica aberto */
         if (to && li && (li.contains(to) || li === to)) return;
-        /* Se foi para outro portal — fecha o atual */
         detachPortal(portal);
     }
 
-    /* Remove todos os listeners e observer (chamado antes de re-init no resize) */
+    function onWinScrollReposition() {
+        if (!_initialized || !isDesktop()) return;
+        if (_scrollRaf) {
+            window.cancelAnimationFrame(_scrollRaf);
+        }
+        _scrollRaf = window.requestAnimationFrame(function () {
+            _scrollRaf = 0;
+            document.querySelectorAll('.' + PORTAL_CLASS).forEach(function (portal) {
+                var id = portal.dataset.awVmfLiMenu;
+                var li = id && document.querySelector('li.level0[data-menu="' + id + '"]');
+                if (li) positionPortal(li, portal);
+            });
+        });
+    }
+
     function teardown() {
+        detachAll();
         if (_observer) {
             _observer.disconnect();
             _observer = null;
@@ -74,19 +84,29 @@
             _ul = null;
         }
         document.removeEventListener('mouseout', onDocMouseout);
+        window.removeEventListener('scroll', onWinScrollReposition, true);
+        if (_scrollRaf) {
+            window.cancelAnimationFrame(_scrollRaf);
+            _scrollRaf = 0;
+        }
         _initialized = false;
     }
 
-    /* Aguarda o menu ser renderizado */
-    function init() {
-        if (_initialized) return;
+    function tryInit() {
+        if (!isDesktop()) {
+            teardown();
+            return;
+        }
+
+        if (_initialized) {
+            return;
+        }
 
         var menu = document.querySelector(
             '.menu_left_home1 .navigation.verticalmenu.side-verticalmenu'
         );
         if (!menu) return;
 
-        /* Observe mutations para quando o togge-menu abrir */
         _ul = menu.querySelector('ul.togge-menu.list-category-dropdown');
         if (!_ul) return;
 
@@ -96,47 +116,54 @@
             mutations.forEach(function (m) {
                 if (m.type === 'attributes' && m.attributeName === 'class') {
                     var isOpen = _ul.classList.contains('vmm-open') ||
-                                 _ul.classList.contains('menu-open') ||
-                                 window.getComputedStyle(_ul).display !== 'none';
+                        _ul.classList.contains('menu-open') ||
+                        window.getComputedStyle(_ul).display !== 'none';
                     if (!isOpen) detachAll();
                 }
             });
         });
         _observer.observe(_ul, { attributes: true });
 
-        /* Eventos nos LIs de nível 0 */
         _ul.addEventListener('mouseenter', onMenuMouseenter, true);
         _ul.addEventListener('mouseleave', onMenuMouseleave, true);
 
-        /* Ao sair do flyout portal, fecha */
         document.addEventListener('mouseout', onDocMouseout);
+        window.addEventListener('scroll', onWinScrollReposition, true);
+    }
+
+    function scheduleInit() {
+        setTimeout(function () {
+            if (!isDesktop()) {
+                teardown();
+                return;
+            }
+            tryInit();
+        }, 300);
     }
 
     function attachFlyout(li) {
-        var sub = li.querySelector(':scope > .submenu, :scope > .vmm-empty-submenu');
+        var sub = li.querySelector(
+            ':scope > .submenu, :scope > .level0.submenu, :scope > .navigation__submenu, :scope > .vmm-empty-submenu'
+        );
         if (!sub) return;
 
-        /* Verifica se já está portado */
         if (sub.dataset.awVmfPortaled === '1') {
             positionPortal(li, sub);
             return;
         }
 
-        /* Calcula posição baseada no LI */
         var liRect = li.getBoundingClientRect();
         var subStyle = getSubStyle(li, liRect);
 
-        /* Salva referência para devolver depois */
         var placeholder = document.createElement('span');
         placeholder.className = 'awa-vmf-placeholder';
         placeholder.style.cssText = 'display:none;';
         li.insertBefore(placeholder, sub);
 
         sub.dataset.awVmfPortaled = '1';
-        sub.dataset.awVmfLiMenu   = li.dataset.menu || '';
-        sub._awVmfPlaceholder     = placeholder;
+        sub.dataset.awVmfLiMenu = li.dataset.menu || '';
+        sub._awVmfPlaceholder = placeholder;
 
-        /* Move para BODY */
         sub.classList.add(PORTAL_CLASS);
         sub.style.cssText = subStyle;
         document.body.appendChild(sub);
@@ -156,7 +183,6 @@
         var placeholder = portal._awVmfPlaceholder;
         if (!placeholder) return;
 
-        /* Devolve ao LI */
         portal.style.cssText = '';
         portal.classList.remove(PORTAL_CLASS);
         delete portal.dataset.awVmfPortaled;
@@ -177,22 +203,20 @@
 
     function positionPortal(li, portal) {
         var liRect = li.getBoundingClientRect();
-        var style  = getSubStyle(li, liRect);
-        portal.style.cssText = style;
+        portal.style.cssText = getSubStyle(li, liRect);
     }
 
     function getSubStyle(li, liRect) {
         var isFullwidth = li.classList.contains('fullwidth');
-        var top   = liRect.top  + OFFSET_TOP;
-        var left  = liRect.right + OFFSET_LEFT;
-        var maxW  = Math.min(isFullwidth ? 890 : 540, window.innerWidth - left - 8);
+        var top = liRect.top + OFFSET_TOP;
+        var left = liRect.right + OFFSET_LEFT;
+        var maxW = Math.min(isFullwidth ? 890 : 540, window.innerWidth - left - 8);
         if (maxW < 360) {
-            /* Abre para a esquerda se não há espaço */
             left = liRect.left - maxW;
             if (left < 4) left = 4;
         }
 
-        return [
+        var parts = [
             'position:fixed',
             'top:' + top.toFixed(1) + 'px',
             'left:' + left.toFixed(1) + 'px',
@@ -201,26 +225,23 @@
             'visibility:visible',
             'opacity:1',
             'overflow:hidden',
-            'pointer-events:auto',
-        ].join('!important;') + '!important;';
+            'pointer-events:auto'
+        ];
+
+        return parts.map(function (p) { return p + ' !important'; }).join('; ') + ';';
     }
 
-    /* Aguarda DOM ready */
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function () {
-            setTimeout(init, 300);
-        });
+        document.addEventListener('DOMContentLoaded', scheduleInit);
     } else {
-        setTimeout(init, 300);
+        scheduleInit();
     }
 
-    /* Re-init ao resize acima de 992 — teardown() limpa observers e listeners antes de re-init */
-    var resizeTimer;
     window.addEventListener('resize', function () {
         clearTimeout(resizeTimer);
         resizeTimer = setTimeout(function () {
             teardown();
-            if (window.innerWidth >= 992) init();
+            if (isDesktop()) scheduleInit();
         }, 200);
     });
 })();

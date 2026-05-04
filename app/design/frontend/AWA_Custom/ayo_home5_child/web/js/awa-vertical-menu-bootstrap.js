@@ -63,12 +63,23 @@ define([
 
             function setOpenState(open) {
                 var panel;
+                var menuId;
 
                 if (window.innerWidth < 992) {
                     return;
                 }
 
-                panel = item.querySelector(':scope > .submenu, :scope > .level0.submenu');
+                panel = item.querySelector(
+                    ':scope > .submenu, :scope > .level0.submenu, :scope > .navigation__submenu'
+                );
+                if (!panel) {
+                    menuId = item.getAttribute('data-menu') || '';
+                    if (menuId) {
+                        panel = document.querySelector(
+                            '.awa-vmf-portal[data-aw-vmf-li-menu="' + menuId + '"]'
+                        );
+                    }
+                }
 
                 if (!panel) {
                     return;
