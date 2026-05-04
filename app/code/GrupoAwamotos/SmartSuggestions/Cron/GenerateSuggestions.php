@@ -63,6 +63,9 @@ class GenerateSuggestions
             // Retry previously generated items that were not sent (e.g., WhatsApp was off)
             $this->retryGeneratedItems();
 
+            // Retry send_failed items with valid Brazilian mobile phones (landlines skipped)
+            $this->retrySendFailedItems();
+
             // Get top opportunities (at-risk customers)
             $opportunities = $this->suggestionEngine->getTopOpportunities(50);
 
@@ -232,6 +235,84 @@ class GenerateSuggestions
         if ($retried > 0) {
             $this->logger->info(sprintf(
                 'SmartSuggestions: Retried %d generated items — %d sent, %d failed.',
+                $retried,
+                $retrySent,
+                $retried - $retrySent
+            ));
+        }
+    }
+
+    /**
+     * Retry suggestions in send_failed status that have valid Brazilian mobile phone numbers.
+     *
+     * Landlines (8-digit numbers without 9 prefix after DDD) are skipped since they have no
+     * WhatsApp. Only items created within the last 30 days are retried to avoid stale content.
+     */
+    private function retrySendFailedItems(): void
+    {
+        $enabled = $this->config->isAutoSendWhatsappEnabled() && $this->config->isWhatsappEnabled();
+        if (!$enabled) {
+            return;
+        }
+
+        /** @var \GrupoAwamotos\SmartSuggestions\Model\ResourceModel\SuggestionHistory\Collection $collection */
+        $collection = $this->historyCollectionFactory->create();
+        $collection->addFieldToFilter('status', SuggestionHistory::STATUS_FAILED)
+            ->addFieldToFilter('customer_phone', ['notnull' => true])
+            ->addFieldToFilter('customer_phone', ['neq' => ''])
+            ->addFieldToFilter('created_at', ['gteq' => date('Y-m-d H:i:s', strtotime('-30 days'))])
+            ->addFieldToFilter('created_at', ['lt' => date('Y-m-d H:i:s', strtotime('-1 hour'))])
+            ->setPageSize(30)
+            ->setOrder('created_at', 'ASC');
+
+        $retried = 0;
+        $retrySent = 0;
+
+        foreach ($collection as $history) {
+            $phone = trim((string) $history->getData('customer_phone'));
+
+            // Validate Brazilian mobile: strip non-digits, keep last 11,
+            // then verify the 3rd character (index 2) is '9' (mobile prefix after DDD)
+            $digits = preg_replace('/\D/', '', $phone);
+            if (strlen($digits) > 11) {
+                $digits = substr($digits, -11);
+            }
+            if (strlen($digits) !== 11 || $digits[2] !== '9') {
+                // Landline or malformed — skip silently
+                continue;
+            }
+
+            $suggestionData = json_decode((string) $history->getData('suggestion_data'), true);
+            if (!is_array($suggestionData)) {
+                continue;
+            }
+
+            try {
+                $result = $this->whatsappSender->sendSuggestion($phone, $suggestionData);
+                $retried++;
+
+                if ($result['success']) {
+                    $retrySent++;
+                    $history->setData('status', SuggestionHistory::STATUS_SENT);
+                    $history->setData('sent_at', date('Y-m-d H:i:s'));
+                    $history->setData('whatsapp_message_id', $result['message_id'] ?? null);
+                    $history->setData('error_message', null);
+                } else {
+                    $history->setData('error_message', $result['message']);
+                }
+
+                $this->historyResource->save($history);
+            } catch (\Exception $e) {
+                $this->logger->error('SmartSuggestions: Error retrying send_failed item', [
+                    'history_id' => $history->getId(),
+                    'error'      => $e->getMessage(),
+                ]);
+            }
+        }
+
+        if ($retried > 0) {
+            $this->logger->info(sprintf(
+                'SmartSuggestions: Retried %d send_failed mobile items — %d sent, %d still failed.',
                 $retried,
                 $retrySent,
                 $retried - $retrySent
