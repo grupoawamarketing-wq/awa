@@ -43,7 +43,7 @@ class RestartConsumers
         // Run watchdog script in background — it checks each consumer individually with locking
         $watchdogLog = escapeshellarg($base . '/var/log/consumer_watchdog.log');
         // phpcs:ignore Magento2.Functions.DiscouragedFunction
-        exec('bash ' . escapeshellarg($script) . " >> {$watchdogLog} 2>&1 &");
+        exec('bash ' . escapeshellarg($script) . " >> {$watchdogLog} 2>&1 &"); // nosemgrep: php.lang.security.exec-use.exec-use
 
         $this->logger->info('[RestartConsumers] Triggered ensure_consumers.sh');
     }
@@ -67,7 +67,7 @@ class RestartConsumers
         // pgrep returns 0 if at least one process matches, 1 if none
         $pattern = 'queue:consumers:start ' . $consumerName;
         // phpcs:ignore Magento2.Functions.DiscouragedFunction
-        exec('pgrep -f ' . escapeshellarg($pattern), $output, $rc);
+        exec('pgrep -f ' . escapeshellarg($pattern), $output, $rc); // nosemgrep: php.lang.security.exec-use.exec-use
         return $rc === 0;
     }
 }

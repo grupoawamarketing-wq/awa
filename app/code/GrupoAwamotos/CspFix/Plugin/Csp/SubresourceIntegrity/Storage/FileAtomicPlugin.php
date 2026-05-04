@@ -55,6 +55,8 @@ class FileAtomicPlugin
 
             // Rename atômico via PHP nativo — evita o chmod() interno do Magento
             // que falha quando o processo não é dono do arquivo destino.
+            $renameError = null;
+            $writeError   = null;
             if (!$this->safeRename($absTmp, $absDest, $renameError)) {
 
                 // Fallback sem passar pelo Driver\File do Magento. Em cenários com
@@ -64,8 +66,8 @@ class FileAtomicPlugin
                     throw new \RuntimeException(sprintf(
                         '[CspFix] Falha ao persistir %s (rename: %s | write: %s)',
                         $absDest,
-                        $renameError['message'] ?? 'unknown',
-                        $writeError['message'] ?? 'unknown'
+                        $renameError ?? 'unknown',
+                        $writeError ?? 'unknown'
                     ));
                 }
 
