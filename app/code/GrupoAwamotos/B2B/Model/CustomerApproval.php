@@ -155,6 +155,8 @@ class CustomerApproval implements CustomerApprovalInterface
 
             $this->logger->info(sprintf('B2B: Cliente #%d aprovado', $customerId));
 
+            $this->recalibratePendingAlertCounter();
+
             return true;
         } catch (\Exception $e) {
             $this->logger->error('B2B approveCustomer error: ' . $e->getMessage());
@@ -188,6 +190,8 @@ class CustomerApproval implements CustomerApprovalInterface
             $this->sendRejectionEmail($customerId, $reason);
 
             $this->logger->info(sprintf('B2B: Cliente #%d rejeitado. Motivo: %s', $customerId, $reason ?? 'N/A'));
+
+            $this->recalibratePendingAlertCounter();
 
             return true;
         } catch (\Exception $e) {
@@ -417,4 +421,51 @@ class CustomerApproval implements CustomerApprovalInterface
         $attribute = $customer->getCustomAttribute($attributeCode);
         return $attribute ? (string) $attribute->getValue() : null;
     }
+    /**
+     * Recalibrates the B2B pending alert counter after an approval or rejection.
+     *
+     * The daily cron only alerts when pending count > last_sent_count.
+     * After processing a customer, we update last_sent_count to the CURRENT pending count
+     * so that the next cron cycle detects only truly new additions.
+     */
+    private function recalibratePendingAlertCounter(): void
+    {
+        try {
+            $connection = $this->resourceConnection->getConnection();
+
+            $select = $connection->select()
+                ->from(
+                    ['c' => $connection->getTableName('customer_entity')],
+                    ['COUNT(*) AS cnt']
+                )
+                ->joinInner(
+                    ['v' => $connection->getTableName('customer_entity_varchar')],
+                    'c.entity_id = v.entity_id',
+                    []
+                )
+                ->joinInner(
+                    ['a' => $connection->getTableName('eav_attribute')],
+                    "v.attribute_id = a.attribute_id AND a.attribute_code = 'b2b_approval_status'",
+                    []
+                )
+                ->where('v.value = ?', 'pending')
+                ->where('c.created_at < ?', new \Zend_Db_Expr('DATE_SUB(NOW(), INTERVAL 48 HOUR)'));
+
+            $pendingCount = (int) $connection->fetchOne($select);
+
+            $connection->insertOnDuplicate(
+                $connection->getTableName('core_config_data'),
+                [
+                    'scope'    => 'default',
+                    'scope_id' => 0,
+                    'path'     => 'grupoawamotos_b2b/pending_alert/last_sent_count',
+                    'value'    => (string) $pendingCount,
+                ],
+                ['value']
+            );
+        } catch (\Exception $e) {
+            $this->logger->warning('B2B: Failed to recalibrate pending alert counter: ' . $e->getMessage());
+        }
+    }
+
 }
