@@ -2227,7 +2227,7 @@ body .page-wrapper .pages .item.current > span {
    HOTFIX WCAG — Contraste + Target Size (2026-04-30)
 
    Causa raiz:
-   - `awa-super-home.css` força subtítulo da seção de categorias para `#999 !important`.
+   - `awa-super-home.css` força subtítulo da seção de categorias para `var(--awa-text-muted, #999) !important`.
    - múltiplos bundles e bugfixes mantêm bullets do hero em 8x8 / 24x8.
 
    Estratégia:
@@ -3163,7 +3163,7 @@ body.catalog-product-view .awa-pdp-whatsapp-cta {
   display: inline-flex;
   align-items: center;
   gap: var(--awa-space-2, 8px);
-  background: #25d366;
+  background: var(--awa-whatsapp, #25d366);
   color: var(--awa-bg) !important;
   font-size: var(--awa-text-sm, 13px);
   font-weight: var(--awa-weight-semibold, 600);
@@ -3177,7 +3177,7 @@ body.catalog-product-view .awa-pdp-whatsapp-cta {
 }
 
 body.catalog-product-view .awa-pdp-whatsapp-cta:hover {
-  background: #1ebe5d;
+  background: var(--awa-whatsapp-hover, #1ebe5d);
   transform: translateY(-2px);
   box-shadow: var(--awa-shadow-md);
 }
@@ -5321,7 +5321,7 @@ body .page-wrapper .messages .message.success {
   background: rgba(22, 163, 74, 0.08) !important;
   border: 1px solid rgba(22, 163, 74, 0.25) !important;
   border-radius: var(--awa-radius, 8px) !important;
-  color: #166534 !important;
+  color: var(--awa-whatsapp-text, #166534) !important;
 }
 
 /* =============================================================================
@@ -6409,7 +6409,7 @@ body .page-wrapper .awa-header-account-prompt .awa-header-account-prompt__text {
 body .page-wrapper .awa-header-account-prompt .awa-header-account-prompt__line1 {
   font-size: var(--awa-font-sm) !important;
   font-weight: 400 !important;
-  color: #64748b !important;
+  color: var(--awa-text-secondary, #64748b) !important;
   line-height: 1.2 !important;
   margin-bottom: 0 !important;
   text-transform: none !important;
@@ -6420,11 +6420,11 @@ body .page-wrapper .awa-header-account-prompt .awa-header-account-prompt__line2 
   font-size: var(--awa-font-base) !important;
   font-weight: 400 !important;
   line-height: 1.2 !important;
-  color: #1e293b !important;
+  color: var(--awa-text-dark, #1e293b) !important;
 }
 
 body .page-wrapper .awa-header-account-prompt .awa-header-account-prompt__link {
-  color: #1e293b !important;
+  color: var(--awa-text-dark, #1e293b) !important;
   font-weight: 700 !important;
   text-decoration: none !important;
 }
@@ -6435,7 +6435,7 @@ body .page-wrapper .awa-header-account-prompt .awa-header-account-prompt__link:h
 }
 
 body .page-wrapper .awa-header-account-prompt .awa-header-account-prompt__separator {
-  color: #64748b !important;
+  color: var(--awa-text-secondary, #64748b) !important;
   margin: 0 4px !important;
   font-weight: 400 !important;
 }
@@ -7751,7 +7751,7 @@ html body.cms-homepage_ayo_home5 .page-wrapper .columns .column.main,
   aspect-ratio: 1 / 1 !important;
   overflow: hidden !important;
   border-radius: 0 !important;
-  background-color: #f9fafb !important;
+  background-color: var(--awa-bg-subtle, #f9fafb) !important;
   background-image: none !important;
   position: relative !important;
   display: block !important;
@@ -8085,4 +8085,21 @@ body.cms-homepage_ayo_home5 .page-wrapper .banner-slider2 .wrapper_slider .owl.a
   .ayo-home5-wrapper > .top-home-content--category-carousel {
   padding-top: unset !important;
   border-top: none !important;
+}
+
+/* ============================================================
+ * FIX: Bootstrap .row clearfix ::before/::after become grid items
+ * when display:grid is applied, displacing all columns.
+ * Suppress them in grid context so the 3 cols align correctly.
+ * ============================================================ */
+@media (min-width: 992px) {
+  body .page-wrapper .page-footer .footer-bottom .awa-footer-bottom__row::before,
+  body .page-wrapper .page-footer .footer-bottom .awa-footer-bottom__row::after,
+  body .page-wrapper .page_footer .footer-bottom .awa-footer-bottom__row::before,
+  body .page-wrapper .page_footer .footer-bottom .awa-footer-bottom__row::after,
+  body .page-wrapper .footer-bottom .row.awa-footer-bottom__row::before,
+  body .page-wrapper .footer-bottom .row.awa-footer-bottom__row::after {
+    display: none !important;
+    content: none !important;
+  }
 }
