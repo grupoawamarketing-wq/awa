@@ -66,7 +66,7 @@ define(['jquery'], function ($) {
     ============================================================ */
     function injectWhatsApp() {
         try {
-            var WA_NUMBER = '5581996070007';
+            var WA_NUMBER = '5516997367588';
             var WA_MSG    = encodeURIComponent('Olá! Vim pelo site awamotos.com e gostaria de saber mais.');
             var WA_URL    = 'https://wa.me/' + WA_NUMBER + '?text=' + WA_MSG;
 
