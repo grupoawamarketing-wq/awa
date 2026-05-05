@@ -1,95 +1,96 @@
 /**
  * AWA Motos — Visual Overhaul 2026-05-04
  * Camada final de refinamento visual (load late cascade).
+ * ESCOPO: apenas PLP (catalog-category-view) e busca (catalogsearch-result-index).
+ * Regras globais migradas para _grid-listing.less (compilado no tema LESS).
  */
 
-:root {
-    --awa-focus-ring: 0 0 0 3px color-mix(in srgb, var(--awa-red, #d71920) 28%, #ffffff 72%);
+/* =================================================================
+ * AWA PLP IMAGE OCCUPANCY FIX — 2026-05-04
+ * Root cause: late cascade layers add padding/inset that shrinks
+ * the usable render box of product photos in PLP/search cards.
+ * This block loads LAST in the cascade chain via awa-visual-audit-final-css-v2.phtml
+ * and neutralises those constraints.
+ * ================================================================= */
+
+body.catalog-category-view .page-wrapper .wrapper.grid.products-grid .item-product .product-thumb-link,
+body.catalogsearch-result-index .page-wrapper .wrapper.grid.products-grid .item-product .product-thumb-link,
+body.catalog-category-view .page-wrapper .wrapper.list.products-list .item-product .product-thumb-link,
+body.catalogsearch-result-index .page-wrapper .wrapper.list.products-list .item-product .product-thumb-link {
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
 }
 
-/* Header + busca */
-.awa-site-header .block-search .control input,
-.awa-site-header .search .input-text {
-    border-radius: 12px;
+body.catalog-category-view .page-wrapper .item-product .product-thumb,
+body.catalogsearch-result-index .page-wrapper .item-product .product-thumb,
+body.catalog-category-view .page-wrapper .item-product .product-image-container,
+body.catalogsearch-result-index .page-wrapper .item-product .product-image-container,
+body.catalog-category-view .page-wrapper .item-product .product-image-wrapper,
+body.catalogsearch-result-index .page-wrapper .item-product .product-image-wrapper,
+body.catalog-category-view .page-wrapper .item-product .first-thumb,
+body.catalogsearch-result-index .page-wrapper .item-product .first-thumb,
+body.catalog-category-view .page-wrapper .item-product .second-thumb,
+body.catalogsearch-result-index .page-wrapper .item-product .second-thumb {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
 }
 
-.awa-site-header .block-search .control input:focus-visible,
-.awa-site-header .search .input-text:focus-visible,
-.awa-nav-quick-links__link:focus-visible,
-.product-item .action.tocart:focus-visible,
-.actions-primary .action.primary:focus-visible {
-    outline: none;
-    box-shadow: var(--awa-focus-ring);
+body.catalog-category-view .page-wrapper .item-product .product-image-photo,
+body.catalogsearch-result-index .page-wrapper .item-product .product-image-photo,
+body.catalog-category-view .page-wrapper .item-product .product-thumb img,
+body.catalogsearch-result-index .page-wrapper .item-product .product-thumb img {
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    object-fit: contain !important;
+    object-position: center center !important;
+    mix-blend-mode: normal !important;
 }
 
-/* Quick links */
-.awa-nav-quick-links__link {
-    transition: color .2s ease, background-color .2s ease, transform .2s ease;
-    border-radius: 10px;
+/* =================================================================
+ * AWA PLP — B2B PRICE LINE VISIBILITY FIX — 2026-05-05
+ * Problema: .info-price é esmagado para height:0 pela flexbox
+ * porque .product-info tem apenas 73px (nome 54px + sku 19px).
+ * Fix: flex-shrink:0 + min-height impede o esmagamento, o card
+ * cresce naturalmente (sem min-height explícito no card).
+ * ================================================================= */
+
+/* Evita que a linha de preço (Faça login) seja esmagada para 0px */
+body.catalog-category-view .products-grid .item-product .info-price,
+body.catalogsearch-result-index .products-grid .item-product .info-price {
+    flex-shrink: 0 !important;
+    height: auto !important; /* override: themes.css sets height:0px !important */
+    min-height: 36px !important;
+    display: flex !important;
+    align-items: center !important;
 }
 
-.awa-nav-quick-links__link:hover {
-    transform: translateY(-1px);
+/* Garante que o texto "Faça login para ver preços" seja legível */
+body.catalog-category-view .products-grid .item-product .b2b-login-to-see-price,
+body.catalogsearch-result-index .products-grid .item-product .b2b-login-to-see-price {
+    flex-shrink: 0 !important;
+    font-size: 12px !important;
+    line-height: 1.4 !important;
+    color: var(--awa-text-muted, #777) !important;
 }
 
-/* Cards de produto */
-.products-grid .product-item {
-    border-radius: 14px;
-    overflow: clip;
+body.catalog-category-view .products-grid .item-product .b2b-login-to-see-price a,
+body.catalogsearch-result-index .products-grid .item-product .b2b-login-to-see-price a {
+    color: var(--awa-primary, #b73337) !important;
+    font-weight: 600 !important;
+    text-decoration: none !important;
 }
 
-.products-grid .product-item .product-item-info {
-    border-radius: 14px;
-}
-
-.products-grid .product-item .action.tocart,
-.products-grid .product-item .action.primary {
-    border-radius: 10px;
-}
-
-.products-grid .product-item .price-box .price-label {
-    font-weight: 600;
-}
-
-/* Toolbar/PLP */
-.catalog-category-view .toolbar,
-.catalogsearch-result-index .toolbar {
-    border-radius: 12px;
-}
-
-/* PDP */
-.catalog-product-view .product-info-main,
-.catalog-product-view .box-tocart {
-    border-radius: 14px;
-}
-
-/* Formulários gerais */
-.customer-account-login .fieldset .input-text,
-.checkout-index-index input,
-.checkout-index-index select,
-.contact-index-index .fieldset .input-text {
-    border-radius: 10px;
-}
-
-/* Footer */
-.footer-static .velaFooterLinks a {
-    transition: color .2s ease;
-}
-
-/* Acessibilidade e movimento reduzido */
-@media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-        scroll-behavior: auto !important;
-    }
-}
-
-/* Responsivo */
-@media (max-width: 992px) {
-    .products-grid .product-item,
-    .products-grid .product-item .product-item-info {
-        border-radius: 12px;
-    }
+body.catalog-category-view .products-grid .item-product .b2b-login-to-see-price a:hover,
+body.catalogsearch-result-index .products-grid .item-product .b2b-login-to-see-price a:hover {
+    text-decoration: underline !important;
 }
