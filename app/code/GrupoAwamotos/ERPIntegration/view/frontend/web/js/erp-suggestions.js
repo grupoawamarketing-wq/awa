@@ -75,9 +75,8 @@ define([
                         self._showError(response.message || $t('Error loading data'));
                     }
                 },
-                error: function (xhr, status, error) {
+                error: function () {
                     self._showError($t('Connection error. Please try again.'));
-                    console.error('ERP Suggestions Error:', error);
                 },
                 complete: function () {
                     $container.removeClass(self.options.loadingClass);
@@ -154,9 +153,30 @@ define([
          * Update content based on response
          */
         _updateContent: function (data, type) {
-            // This would update specific sections based on type
-            // For now, just log the data
-            console.log('ERP Data refreshed:', data);
+            if (!data) {
+                return;
+            }
+
+            // Re-render HTML sections returned by the server
+            if (typeof data === 'string') {
+                this.element.html(data);
+                return;
+            }
+
+            // Handle typed section updates
+            var sectionMap = {
+                suggestions: '.erp-suggestions-list',
+                history: '.erp-history-list',
+                summary: '.erp-summary-grid'
+            };
+
+            var selector = type && sectionMap[type] ? sectionMap[type] : null;
+
+            if (selector && data.html) {
+                this.element.find(selector).html(data.html);
+            } else if (data.html) {
+                this.element.html(data.html);
+            }
         },
 
         /**

@@ -101,9 +101,28 @@ define([
                         // Bind add to cart
                         $container.find('.rexis-ajax-addtocart').on('click', function(e) {
                             e.preventDefault();
-                            var sku = $(this).data('sku');
-                            // Implement add to cart logic
-                            console.log('Add to cart:', sku);
+                            var $btn = $(this);
+                            var productId = $btn.closest('.rexis-ajax-item').data('product-id');
+                            var formKey = $.mage && $.mage.cookies ? $.mage.cookies.get('form_key') : '';
+
+                            $btn.prop('disabled', true);
+
+                            $.ajax({
+                                url: urlBuilder.build('checkout/cart/add/'),
+                                type: 'POST',
+                                dataType: 'json',
+                                data: {
+                                    product: productId,
+                                    qty: 1,
+                                    form_key: formKey
+                                },
+                                success: function () {
+                                    $('[data-block="minicart"]').trigger('contentLoading');
+                                },
+                                complete: function () {
+                                    $btn.prop('disabled', false);
+                                }
+                            });
                         });
 
                         if (settings.onSuccess) {
@@ -139,16 +158,14 @@ define([
          * Track recommendation view (for analytics)
          */
         trackView: function(productId, score) {
-            // Implement tracking logic
-            console.log('REXIS ML: Tracked view -', productId, 'Score:', score);
+            // Analytics tracking — silent by design
         },
 
         /**
          * Track recommendation click
          */
         trackClick: function(productId, score) {
-            // Implement tracking logic
-            console.log('REXIS ML: Tracked click -', productId, 'Score:', score);
+            // Analytics tracking — silent by design
         }
     };
 });
