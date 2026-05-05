@@ -264,34 +264,61 @@ define([], function () {
                 el.classList.add('awa-carousel-hidden');
             });
 
-            /* Reveal items: fires up to 200px before track enters viewport so
-               items are never invisible on above-fold / near-fold loads. */
+            /* Reveal hidden items in the track, with optional stagger delay. */
+            function revealTrackItems(stagger) {
+                var cards = track.querySelectorAll('.awa-carousel-hidden');
+
+                if (!cards.length) {
+                    return;
+                }
+
+                cards.forEach(function (card, i) {
+                    var delay = stagger ? i * 80 : 0;
+
+                    setTimeout(function () {
+                        card.classList.remove('awa-carousel-hidden');
+                        card.classList.add('awa-carousel-visible');
+                    }, delay);
+                });
+            }
+
+            /* IO reveals items when track scrolls into (or near) viewport.
+               rootMargin 400px ensures items just below fold are revealed early. */
             var io = new IntersectionObserver(function (entries) {
                 entries.forEach(function (entry) {
                     if (entry.isIntersecting) {
-                        var cards = entry.target.querySelectorAll('.awa-carousel-hidden');
-
-                        cards.forEach(function (card, i) {
-                            setTimeout(function () {
-                                card.classList.remove('awa-carousel-hidden');
-                                card.classList.add('awa-carousel-visible');
-                            }, i * 80);
-                        });
+                        revealTrackItems(true);
                         io.unobserve(entry.target);
                     }
                 });
-            }, {threshold: 0.05, rootMargin: '0px 0px 200px 0px'});
+            }, {threshold: 0.05, rootMargin: '0px 0px 400px 0px'});
 
-            /* Immediate reveal: if track is already in or very near viewport
-               (within 400px of fold), skip animation and show items at once. */
-            var trackRect = track.getBoundingClientRect();
-            if (trackRect.top < window.innerHeight + 400) {
-                animItems.forEach(function (el) {
-                    el.classList.remove('awa-carousel-hidden');
-                    el.classList.add('awa-carousel-visible');
-                });
+            /* Always start observing — IO fires immediately if track is in the
+               extended zone (within 400px below fold). */
+            io.observe(track);
+
+            /* Fallback: on window load, the hero slider has finished collapsing
+               (Slick init), so the track position is final. If it is near the
+               fold and IO hasn't fired yet, reveal at once. */
+            function tryRevealAfterLoad() {
+                var remaining = track.querySelectorAll('.awa-carousel-hidden');
+
+                if (!remaining.length) {
+                    return; // IO already handled it
+                }
+
+                var rect = track.getBoundingClientRect();
+
+                if (rect.top < window.innerHeight + 400) {
+                    io.unobserve(track);
+                    revealTrackItems(false); // No stagger for fold-visible items
+                }
+            }
+
+            if (document.readyState === 'complete') {
+                tryRevealAfterLoad();
             } else {
-                io.observe(track);
+                window.addEventListener('load', tryRevealAfterLoad, {once: true});
             }
         }
     };
