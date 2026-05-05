@@ -87,27 +87,28 @@ html body .awa-site-header .awa-header-right-col {
 // ----------------------------------------------------------------------------
 // 3. PRODUCT GRIDS & CARDS
 // ----------------------------------------------------------------------------
-html body .products-grid .product-items,
+// NOTE: Grid layout controlled by _grid-listing.less (source of truth).
+// Only structural/containment rules kept here; card visual styles removed to
+// prevent double-card effect (card styling belongs on .product-item-info, not .product-item).
+// Hover removed — _grid-listing.less has correct border-color/box-shadow on .product-item-info.
+
+// Ensure grid containment for homepage widget grids not covered by _grid-listing.less
 html body .widget-product-grid .product-items,
 html body .awa-product-grid {
     display: grid !important;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)) !important;
-    gap: @awa-gap-md !important;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
+    gap: var(--awa-gap-card, 16px) !important;
     margin: 0 !important;
     padding: 0 !important;
 }
 
+// Structural cell rules — no visual decoration (card styled on .product-item-info)
 html body .product-item {
     display: flex !important;
     flex-direction: column !important;
-    background: #fff !important;
-    border: 1px solid #eaeaea !important;
-    border-radius: 8px !important;
-    padding: 16px !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
-    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
     width: 100% !important;
     height: 100% !important;
+    min-width: 0 !important;
 }
 
 html body .product-item-info {
@@ -118,16 +119,10 @@ html body .product-item-info {
     width: 100% !important;
 }
 
-html body .product-item:hover {
-    transform: translateY(-4px) !important;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.08) !important;
-}
-
+// Containment for image area — visual card styles from _grid-listing.less
 html body .product-item-photo {
     display: block !important;
     width: 100% !important;
-    aspect-ratio: 1 / 1 !important;
-    margin-bottom: 16px !important;
 }
 
 html body .product-item-photo img {
@@ -142,43 +137,25 @@ html body .product-item-details {
     flex: 1 1 auto !important;
 }
 
-html body .product-item-name {
-    font-size: 14px !important;
-    line-height: 1.4 !important;
-    margin-bottom: 8px !important;
-    color: #333 !important;
-    font-weight: 500 !important;
-}
-
-html body .price-box {
-    margin-top: auto !important;
-    margin-bottom: 0 !important;
-}
-
-html body .price-box .price {
-    font-size: 18px !important;
-    font-weight: 700 !important;
-    color: #111 !important;
-}
-
 html body .product-item-actions {
     margin-top: auto !important;
 }
 
+// Add-to-cart button — uses CSS variable for primary color, respects theme
 html body .product-item-actions .action.tocart {
     width: 100% !important;
     height: 44px !important;
     background: var(--awa-primary, #b73337) !important;
-    color: #fff !important;
+    color: var(--awa-text-inverse, #fff) !important;
     border: none !important;
-    border-radius: 6px !important;
+    border-radius: var(--awa-radius-sm, 6px) !important;
     font-weight: 600 !important;
     cursor: pointer !important;
     transition: background 0.2s ease !important;
 }
 
 html body .product-item-actions .action.tocart:hover {
-    background: #8e2629 !important;
+    background: var(--awa-primary-hover, #8e2629) !important;
 }
 
 // ----------------------------------------------------------------------------
