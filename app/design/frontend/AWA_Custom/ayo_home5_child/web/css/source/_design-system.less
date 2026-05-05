@@ -326,14 +326,12 @@
 // O cálculo preferred = min + (max - min) × ((100vw - 320px) / (1280 - 320))
 // simplificado para: clamp(min, calc(min + (max-min) * vw-ratio), max)
 .fluid-type(@min-size, @max-size) {
-    // Viewport range: 320px → 1280px = 960px
-    @slope: (unit(@max-size) - unit(@min-size)) / 960;
-    @intercept: unit(@min-size) - @slope * 320;
-    font-size: clamp(
-        @min-size,
-        ~"calc(@{intercept}px + @{slope} * 100vw)",
-        @max-size
-    );
+    // LESS PHP does not evaluate / as division (outputs literal CSS expression).
+    // Using step-up approach: min-size on mobile, max-size on wide viewport.
+    font-size: @min-size;
+    @media (min-width: 1024px) {
+        font-size: @max-size;
+    }
 }
 
 // ── Mixins de escala tipográfica nomeados ──────────────────────────────────
