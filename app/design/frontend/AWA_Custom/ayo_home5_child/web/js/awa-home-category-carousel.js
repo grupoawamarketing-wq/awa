@@ -264,6 +264,8 @@ define([], function () {
                 el.classList.add('awa-carousel-hidden');
             });
 
+            /* Reveal items: fires up to 200px before track enters viewport so
+               items are never invisible on above-fold / near-fold loads. */
             var io = new IntersectionObserver(function (entries) {
                 entries.forEach(function (entry) {
                     if (entry.isIntersecting) {
@@ -278,9 +280,19 @@ define([], function () {
                         io.unobserve(entry.target);
                     }
                 });
-            }, {threshold: 0.15});
+            }, {threshold: 0.05, rootMargin: '0px 0px 200px 0px'});
 
-            io.observe(track);
+            /* Immediate reveal: if track is already in or very near viewport
+               (within 400px of fold), skip animation and show items at once. */
+            var trackRect = track.getBoundingClientRect();
+            if (trackRect.top < window.innerHeight + 400) {
+                animItems.forEach(function (el) {
+                    el.classList.remove('awa-carousel-hidden');
+                    el.classList.add('awa-carousel-visible');
+                });
+            } else {
+                io.observe(track);
+            }
         }
     };
 });
