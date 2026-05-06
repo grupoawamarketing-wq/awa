@@ -14,6 +14,7 @@ define([], function () {
     'use strict';
 
     var SCROLL_THRESHOLD_BASE = 60;
+    var DELTA_MIN = 6;
 
     /**
      * Bug #19: O banner B2B fica acima do wrapper sticky e tem altura ~40px.
@@ -41,6 +42,8 @@ define([], function () {
         }
 
         var ticking = false;
+        var lastScrollY = window.pageYOffset || 0;
+        var lastSticky = false;
 
         /**
          * Apply or remove sticky classes based on current scrollY.
@@ -51,15 +54,30 @@ define([], function () {
                 : (document.documentElement || document.body.parentNode || document.body).scrollTop;
 
             var isSticky = scrollY > getScrollThreshold();
+            var direction = (scrollY - lastScrollY) > DELTA_MIN
+                ? 'down'
+                : ((lastScrollY - scrollY) > DELTA_MIN ? 'up' : 'still');
 
-            header.classList.toggle('awa-header-condensed', isSticky);
-
-            if (stickyWrapper) {
-                stickyWrapper.classList.toggle('is-sticky', isSticky);
-                // Match existing LESS: .header-wrapper-sticky.awa-header-condensed { box-shadow: … }
-                stickyWrapper.classList.toggle('awa-header-condensed', isSticky);
+            if (isSticky !== lastSticky) {
+                header.classList.toggle('awa-header-condensed', isSticky);
+                document.body.classList.toggle('awa-header-is-sticky', isSticky);
+                lastSticky = isSticky;
             }
 
+            header.classList.toggle('awa-scroll-down', direction === 'down' && isSticky);
+            header.classList.toggle('awa-scroll-up', direction === 'up' && isSticky);
+
+            if (stickyWrapper) {
+                if (isSticky !== stickyWrapper.classList.contains('is-sticky')) {
+                    stickyWrapper.classList.toggle('is-sticky', isSticky);
+                }
+                // Match existing LESS: .header-wrapper-sticky.awa-header-condensed { box-shadow: … }
+                if (isSticky !== stickyWrapper.classList.contains('awa-header-condensed')) {
+                    stickyWrapper.classList.toggle('awa-header-condensed', isSticky);
+                }
+            }
+
+            lastScrollY = scrollY;
             ticking = false;
         }
 

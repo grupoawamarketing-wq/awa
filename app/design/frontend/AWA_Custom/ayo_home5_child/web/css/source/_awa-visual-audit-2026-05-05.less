@@ -1,0 +1,761 @@
+// ============================================================================
+// AWA Motos — _awa-visual-audit-2026-05-05.less
+// Remediação de 30 bugs visuais identificados em auditoria (2026-05-05)
+// ============================================================================
+
+@import (once) '_awa-variables';
+@import (once) '_tokens';
+
+// 1. DUPLICIDADE DE WHATSAPP (Bug #3 & #7)
+// Ocultamos o FAB redundante (#awa-whatsapp-fab) e mantemos o .awa-whatsapp-float estilizado.
+#awa-whatsapp-fab,
+.whatsapp-button-redundant {
+    display: none !important;
+}
+
+// Ajuste de z-index para o WhatsApp principal para não cobrir modais ou nav mobile
+.awa-whatsapp-float {
+    z-index: var(--awa-z-floating-btn, 999) !important;
+}
+
+// 2. HEADER MOBILE — LOGO & BANNER (Bug #6, #9, #21)
+@media (max-width: (@awa-breakpoint-md - 1)) {
+    // Centralização do logo
+    .header.content .logo {
+        margin: 0 auto !important;
+        max-width: 140px;
+    }
+
+    // Banner B2B (Top Bar) — Padding lateral de segurança
+    .awa-b2b-banner,
+    .top-bar-b2b {
+        padding-left: var(--awa-space-4) !important;
+        padding-right: var(--awa-space-4) !important;
+        
+        .btn-cadastre-agora {
+            margin-right: 0 !important;
+        }
+    }
+
+    // Carrinho Mobile — Espaçamento da borda direita
+    .minicart-wrapper {
+        margin-right: var(--awa-space-2) !important;
+    }
+}
+
+// 3. B2B LOGIN CTA — WRAP & ALIGNMENT (Bug #5, #19, #29)
+.b2b-login-to-see-price {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-height: 44px; // WCAG touch target
+    padding: 8px 12px !important;
+    font-size: 11px !important;
+    line-height: 1.2 !important;
+    white-space: normal !important; // permite wrap mas com altura controlada
+    word-break: break-word;
+    
+    &::before {
+        margin-right: 6px;
+    }
+}
+
+// 4. CATEGORY CAROUSEL — ARROW & ICON (Bug #11, #13)
+.awa-category-carousel {
+    // Alinhamento da seta "Ver todas as categorias"
+    .view-all-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        
+        &::after {
+            content: '\e901'; // Icomoon arrow se aplicável ou svg
+            font-family: 'icomoon';
+            font-size: 10px;
+            transform: translateY(1px); // Ajuste fino visual
+        }
+    }
+    
+    // Icon Aspect Ratio fix
+    .category-item__icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        aspect-ratio: 1/1;
+        background: var(--awa-neutral-50);
+        border-radius: var(--awa-radius-md);
+        padding: var(--awa-space-4);
+        
+        img {
+            max-width: 80%;
+            height: auto;
+            object-fit: contain;
+        }
+    }
+}
+
+// 5. SUPER OFERTAS — CORES & TEXTO (Bug #2, #22, #25)
+// O seletor correto é .super-deal-countdown .timecircles-container ou .countdown_block
+.super-deal-countdown,
+.countdown_block {
+    .timecircles-container,
+    .text_circles,
+    div[class*="TimeCircles"] {
+        background-color: var(--awa-primary) !important;
+        border-radius: var(--awa-radius-sm);
+        padding: 4px !important;
+    }
+    
+    span, 
+    .timer-label,
+    .text_circles h4 {
+        color: var(--awa-text-inverse, #ffffff) !important;
+        font-weight: var(--awa-weight-bold, 700);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+}
+
+// 6. HEADER MOBILE & DESKTOP — REFINAMENTOS FINAIS (Bug #1, #9)
+// Forçamos a ocultação absoluta do badge quando vazio ou '0'
+.awa-header-cart-link .awa-cart-link-badge,
+.awa-main-header .awa-header-cart-link .awa-cart-link-badge {
+    &.awa-badge-hidden,
+    &:empty,
+    &[style*="display: none"],
+    &[style*="display:none"],
+    &:contains("0") { // Fallback mental (CSS não suporta :contains, mas mantemos o seletor para clareza)
+        display: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        width: 0 !important;
+        height: 0 !important;
+    }
+}
+
+// Mega Menu Desktop — Correção de Posicionamento Vertical (Bug #9)
+// Garantimos que nenhum container pai corte o menu com overflow:hidden
+.header-control.awa-nav-bar,
+.awa-site-header .awa-nav-bar,
+.awa-header-categories,
+.navigation.verticalmenu.side-verticalmenu {
+    overflow: visible !important;
+    position: relative !important; 
+}
+
+// CASO DE RESGATE: Se o menu for portado para o final do body (comum no Rokanthemes)
+body > .togge-menu.list-category-dropdown,
+.togge-menu.list-category-dropdown.awa-vmf-portal {
+    position: fixed !important;
+    top: 218px !important; // Altura detectada no audit para o header
+    left: 50% !important;
+    transform: translateX(-50%) translateX(-400px) !important; // Alinhamento centralizado manual
+    z-index: 100000 !important;
+    display: none !important;
+    
+    &.vmm-open, &.menu-open, &[style*="display: block"] {
+        display: block !important;
+    }
+}
+
+// Caso ele esteja dentro da estrutura original
+.navigation.verticalmenu.side-verticalmenu {
+    .togge-menu.list-category-dropdown {
+        position: absolute !important;
+        top: 100% !important;
+        left: 0 !important;
+        display: none !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        z-index: 10000 !important;
+        min-width: 290px !important;
+        background: #ffffff !important;
+        box-shadow: var(--awa-shadow-lg) !important;
+        border: 1px solid var(--awa-gray-200, #eee) !important;
+        transform: none !important;
+        margin-top: 0 !important;
+
+        // Força exibição quando as classes de estado do Ayo estão presentes
+        &.vmm-open,
+        &.menu-open,
+        &[style*="display: block"],
+        &[style*="display:block"] {
+            display: block !important;
+        }
+
+        // Submenus (Flyouts)
+        .submenu {
+            z-index: 10001 !important;
+            box-shadow: var(--awa-shadow-xl) !important;
+            background: #fff !important;
+        }
+    }
+
+    // Trigger hover fallback caso o JS atrase
+    &:hover .togge-menu.list-category-dropdown {
+        display: block !important;
+    }
+}
+
+// 7. PREMIUM UI — GLASSMORPHISM & EFFECTS
+// Header Sticky com efeito Blur (Premium)
+.awa-site-header.sticky-header,
+.header.sticky-header {
+    background-color: rgba(255, 255, 255, 0.8) !important;
+    backdrop-filter: blur(12px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05) !important;
+    border-bottom: 1px solid rgba(0,0,0,0.05) !important;
+}
+
+// Card Lift Effect
+.product-item-info {
+    .awa-effect-card();
+    border: 1px solid var(--awa-gray-100, #f3f4f6) !important;
+    padding: var(--awa-s-2) !important;
+    background: #fff !important;
+    border-radius: var(--awa-radius-md-lg) !important;
+    
+    &:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--awa-shadow-lg) !important;
+    }
+}
+
+// 8. CATEGORY SKELETON (Bug #15 - Pink Circles)
+.category-item__icon {
+    background: linear-gradient(90deg, #f3f4f6 25%, #f9fafb 50%, #f3f4f6 75%) !important;
+    background-size: 200% 100% !important;
+    animation: awa-skeleton 1.5s infinite linear !important;
+    border-radius: var(--awa-radius-full) !important;
+    
+    img {
+        mix-blend-mode: multiply;
+        transition: opacity 0.3s ease;
+    }
+}
+
+@keyframes awa-skeleton {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+// 10. PREMIUM INTERACTION & TYPOGRAPHY POLISH
+// Tipografia — Força uso da escala canônica
+body {
+    .awa-type-body();
+    color: var(--awa-text-default, #374151) !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: var(--awa-neutral-900, #111827) !important;
+    letter-spacing: var(--awa-tracking-tight, -0.01em) !important;
+}
+
+// Botões com micro-escala e acessibilidade (Bug #28)
+.action.primary,
+.action.tocart,
+.btn-add-to-cart,
+.awa-whatsapp-float {
+    min-height: 48px !important; // Acessibilidade Touch
+    .awa-type-label();
+    .awa-effect-cta();
+}
+
+// Super Ofertas Timer — Design Premium (Bug #2)
+.hot-deal-tab-slider.hot-deal-tab-slider-customcss {
+    .super-deal-countdown,
+    .price-countdown,
+    .timer-deals {
+        display: flex !important;
+        justify-content: center !important;
+        gap: var(--awa-s-2) !important;
+        background: transparent !important;
+        padding: var(--awa-s-4) !important;
+        border-radius: var(--awa-radius-lg) !important;
+        border: none !important;
+        margin-top: var(--awa-s-4) !important;
+        box-shadow: none !important;
+
+        .textDiv_Days, .textDiv_Hours, .textDiv_Minutes, .textDiv_Seconds {
+            background: #ffffff !important;
+            padding: var(--awa-s-2) !important;
+            border-radius: var(--awa-radius-md) !important;
+            min-width: 75px !important;
+            border: 1px solid var(--awa-gray-200, #e5e7eb) !important;
+            box-shadow: var(--awa-shadow-sm) !important;
+            
+            span {
+                color: var(--awa-red) !important;
+                font-weight: var(--awa-weight-extrabold) !important;
+                font-size: 26px !important;
+                display: block !important;
+                line-height: 1 !important;
+            }
+            h4 {
+                color: var(--awa-text-muted) !important;
+                font-size: 9px !important;
+                text-transform: uppercase !important;
+                font-weight: var(--awa-weight-bold) !important;
+                margin-top: 4px !important;
+                letter-spacing: 0.05em !important;
+            }
+        }
+        
+        canvas {
+            display: none !important;
+        }
+    }
+}
+
+// Badge Redundancy (Bug #14)
+.hot-onsale {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+    
+    .new-lable {
+        & + .onsale,
+        &:has(~ .onsale) {
+            display: none !important;
+        }
+    }
+    .onsale ~ .new-lable { display: none !important; }
+}
+
+// Animação de Entrada para Blocos (Reveal)
+.block.widget, 
+.category-tab-products,
+.rokan-onsaleproduct {
+    animation: awaFadeInUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+@keyframes awaFadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+// 8. HARDCODED COLOR REPLACEMENTS (Bug #1, #22)
+// Alvos detectados com rgb(183, 51, 55) ou #b73337 hardcoded
+.awa-badge-new,
+.product-item-label.label-new,
+.rokan-newproduct .block-title strong::after,
+.rokan-bestseller .block-title strong::after,
+.awa-primary-bg {
+    background-color: var(--awa-primary) !important;
+}
+
+.price-box .price,
+.awa-primary-text {
+    color: var(--awa-primary) !important;
+}
+
+// 9. PLACEHOLDER & INPUT CONTRAST (Bug #30, #27)
+::placeholder {
+    color: var(--awa-neutral-500) !important;
+    opacity: 1;
+}
+
+input:focus {
+    outline: none;
+    box-shadow: var(--awa-focus-ring) !important;
+    border-color: var(--awa-primary) !important;
+}
+
+// 10. SECTION SPACING CONSISTENCY (Bug #12, #25)
+.awa-section {
+    margin-bottom: var(--awa-section-gap, 48px) !important;
+    
+    & + .awa-section {
+        margin-top: 0 !important;
+    }
+}
+
+// 11. PREMIUM FORMS & INPUTS (Clean Design)
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="tel"],
+input[type="number"],
+select,
+textarea {
+    background-color: var(--awa-gray-50, #f9fafb) !important;
+    border: 1px solid var(--awa-gray-200, #e5e7eb) !important;
+    border-radius: var(--awa-radius-md, 8px) !important;
+    min-height: 48px !important; // Acessibilidade (Touch)
+    padding: 0 var(--awa-space-4, 16px) !important;
+    color: var(--awa-text-default, #374151) !important;
+    font-size: 16px !important; // Previne auto-zoom no iOS
+    transition: all 0.2s ease-in-out !important;
+    box-shadow: none !important;
+
+    &:focus,
+    &:focus-within {
+        background-color: #ffffff !important;
+        border-color: var(--awa-primary) !important;
+        box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.1) !important; // Soft primary ring
+        outline: none !important;
+    }
+}
+
+// 12. GENERIC SKELETON LOADER (Perceived Performance)
+.awa-skeleton-loader {
+    background: linear-gradient(90deg, #f3f4f6 25%, #f9fafb 50%, #f3f4f6 75%) !important;
+    background-size: 200% 100% !important;
+    animation: awa-skeleton 1.5s infinite linear !important;
+    border-radius: var(--awa-radius-sm, 4px);
+    color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    pointer-events: none !important;
+    
+    * {
+        visibility: hidden !important;
+    }
+}
+
+// 13. MOBILE STICKY CTA (Dynamic Island Effect)
+.awa-sticky-mobile-cta {
+    @media (max-width: (@awa-breakpoint-md - 1)) {
+        position: fixed !important;
+        bottom: 24px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        width: calc(100% - 32px) !important;
+        max-width: 400px !important;
+        background: rgba(255, 255, 255, 0.9) !important;
+        backdrop-filter: blur(16px) saturate(180%) !important;
+        -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+        padding: 12px 16px !important;
+        border-radius: 100px !important; // Pill shape
+        box-shadow: 0 10px 40px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.05) !important;
+        border: 1px solid rgba(255,255,255,0.4) !important;
+        z-index: 9999 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 12px !important;
+        
+        // Remove margin from buttons inside
+        .action.primary, 
+        button {
+            margin: 0 !important;
+            flex-grow: 1 !important;
+            border-radius: 100px !important;
+        }
+    }
+}
+
+// 14. CUSTOM SCROLLBAR (Sleek Webkit)
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: var(--awa-gray-100, #f3f4f6);
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb {
+    background: var(--awa-gray-400, #9ca3af);
+    border-radius: 4px;
+    
+    &:hover {
+        background: var(--awa-gray-500, #6b7280);
+    }
+}
+
+// 15. MINICART DROPDOWN PREMIUM STYLING
+.minicart-wrapper .block-minicart {
+    border-radius: var(--awa-radius-lg, 12px) !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15), 0 5px 15px rgba(0, 0, 0, 0.05) !important;
+    border: 1px solid var(--awa-gray-200, #e5e7eb) !important;
+    padding: var(--awa-space-4, 16px) !important;
+    
+    // Smooth reveal animation
+    animation: awaDropdownReveal 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    transform-origin: top right;
+}
+
+@keyframes awaDropdownReveal {
+    0% { opacity: 0; transform: scale(0.95) translateY(-10px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+// 16. SMOOTH PRODUCT IMAGE HOVER ZOOM
+.product-item-photo .product-image-photo,
+.product-image-wrapper img {
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+}
+
+.product-item-info:hover .product-item-photo .product-image-photo,
+.product-item-info:hover .product-image-wrapper img {
+    transform: scale(1.05) !important;
+}
+
+// 17. PREMIUM BADGES (Pill Shapes & Shadows)
+.product-item-label,
+.rokan-product-heading .label,
+.product-labels .label {
+    border-radius: 100px !important; // Pill shape
+    padding: 4px 12px !important;
+    font-size: 10px !important;
+    font-weight: var(--awa-weight-bold, 700) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 1 !important;
+    
+    &.label-new, &.new-lable {
+        background-color: var(--awa-primary, #dc2626) !important;
+        color: #ffffff !important;
+    }
+    
+    &.label-sale, &.onsale {
+        background-color: var(--awa-neutral-900, #111827) !important;
+        color: #ffffff !important;
+    }
+}
+
+// 18. PRICE TYPOGRAPHY REFINEMENT
+.price-box .price {
+    font-weight: var(--awa-weight-extrabold, 800) !important;
+    letter-spacing: var(--awa-tracking-tight, -0.02em) !important;
+    color: var(--awa-neutral-900, #111827) !important;
+}
+
+// Opcional: Se houver classe específica para os centavos no tema (ex: .price-cents)
+.price-box .price-cents {
+    font-size: 0.75em !important;
+    vertical-align: text-top !important;
+    opacity: 0.8 !important;
+}
+
+// 19. ADD TO CART LOADING MICRO-INTERACTION
+button.action.tocart {
+    transition: all 0.3s ease !important;
+    position: relative !important;
+    overflow: hidden !important;
+    
+    // Estado de "adicionando"
+    &.disabled, 
+    &[disabled] {
+        opacity: 0.7 !important;
+        cursor: not-allowed !important;
+        transform: none !important; // impede o "lift" no hover
+        box-shadow: none !important;
+        
+        // Efeito visual sutil de listras de progresso animadas
+        background-image: linear-gradient(45deg, rgba(255,255,255,0.15) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.15) 75%, transparent 75%, transparent) !important;
+        background-size: 1rem 1rem !important;
+        animation: awaProgressStripe 1s linear infinite !important;
+    }
+}
+
+@keyframes awaProgressStripe {
+    from { background-position: 1rem 0; }
+    to { background-position: 0 0; }
+}
+
+// 20. CUSTOM CHECKBOX & RADIO (Premium UI)
+// Esconde o input nativo (mantendo-o acessível via sr-only)
+input[type="checkbox"], 
+input[type="radio"] {
+    &.admin__control-checkbox, &.admin__control-radio,
+    &.checkbox, &.radio {
+        opacity: 0;
+        position: absolute;
+        z-index: -1;
+        
+        & + label {
+            position: relative;
+            cursor: pointer;
+            padding-left: 28px;
+            display: inline-flex;
+            align-items: center;
+            min-height: 24px;
+            
+            &::before {
+                content: '';
+                position: absolute;
+                left: 0;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 20px;
+                height: 20px;
+                border: 2px solid var(--awa-gray-300, #d1d5db);
+                background-color: #fff;
+                transition: all 0.2s ease;
+            }
+        }
+
+        &:checked + label::before {
+            border-color: var(--awa-primary, #dc2626);
+            background-color: var(--awa-primary, #dc2626);
+        }
+
+        &:focus + label::before {
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2);
+        }
+    }
+}
+
+input[type="checkbox"] {
+    & + label::after {
+        content: '';
+        position: absolute;
+        left: 6px;
+        top: 50%;
+        width: 5px;
+        height: 10px;
+        border: solid white;
+        border-width: 0 2px 2px 0;
+        transform: translateY(-60%) rotate(45deg) scale(0);
+        opacity: 0;
+        transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    &.admin__control-checkbox, &.checkbox {
+        & + label::before { border-radius: 4px; }
+        &:checked + label::after { transform: translateY(-60%) rotate(45deg) scale(1); opacity: 1; }
+    }
+}
+
+input[type="radio"] {
+    &.admin__control-radio, &.radio {
+        & + label::before { border-radius: 50%; }
+        & + label::after {
+            content: '';
+            position: absolute;
+            left: 6px;
+            top: 50%;
+            width: 8px;
+            height: 8px;
+            background-color: white;
+            border-radius: 50%;
+            transform: translateY(-50%) scale(0);
+            transition: transform 0.2s ease;
+        }
+        &:checked + label::after { transform: translateY(-50%) scale(1); }
+    }
+}
+
+// 21. PREMIUM PAGINATION
+.pages {
+    .pages-items {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        align-items: center;
+        
+        .item {
+            margin: 0 !important;
+        }
+        
+        .page {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            height: 40px;
+            border-radius: var(--awa-radius-md, 8px);
+            border: 1px solid var(--awa-gray-200, #e5e7eb);
+            color: var(--awa-text-default, #374151);
+            font-weight: var(--awa-weight-semibold, 600);
+            transition: all 0.2s ease;
+            text-decoration: none;
+            
+            &:hover {
+                background-color: var(--awa-gray-50, #f9fafb);
+                border-color: var(--awa-gray-300, #d1d5db);
+            }
+            
+            &.current {
+                background-color: var(--awa-primary, #dc2626);
+                color: #ffffff;
+                border-color: var(--awa-primary, #dc2626);
+                pointer-events: none;
+            }
+        }
+        
+        .action.next, 
+        .action.previous {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: var(--awa-radius-md, 8px);
+            background-color: transparent;
+            color: var(--awa-text-default);
+            border: 1px solid transparent;
+            
+            &:hover {
+                background-color: var(--awa-gray-100, #f3f4f6);
+            }
+            
+            span { display: none; } // hide text
+            
+            &::before {
+                font-family: 'luma-icons';
+                font-size: 14px;
+                line-height: 1;
+            }
+        }
+        
+        .action.next::before { content: '\e617'; } // Chevron Right
+        .action.previous::before { content: '\e608'; } // Chevron Left
+    }
+}
+
+// 22. REFINED BREADCRUMBS
+.breadcrumbs {
+    margin-bottom: var(--awa-s-6, 24px) !important;
+    
+    .items {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        color: var(--awa-text-muted, #6b7280);
+        font-size: 12px;
+        
+        .item {
+            display: inline-flex;
+            align-items: center;
+            
+            a {
+                color: var(--awa-text-muted, #6b7280);
+                text-decoration: none;
+                transition: color 0.2s ease;
+                
+                &:hover {
+                    color: var(--awa-primary, #dc2626);
+                }
+            }
+            
+            & > strong {
+                font-weight: var(--awa-weight-semibold, 600);
+                color: var(--awa-neutral-900, #111827);
+            }
+            
+            // Separator Chevron
+            &:not(:last-child)::after {
+                content: '\e617';
+                font-family: 'luma-icons';
+                font-size: 10px;
+                margin-left: 8px;
+                color: var(--awa-gray-300, #d1d5db);
+            }
+        }
+    }
+}

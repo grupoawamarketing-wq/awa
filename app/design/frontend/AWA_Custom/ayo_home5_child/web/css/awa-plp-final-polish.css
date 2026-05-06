@@ -1307,3 +1307,180 @@ body.checkout-index-index .action.primary.checkout {
     padding: 0 14px;
     min-width: auto;
 }
+
+/* =============================================================================
+   GRID CORRECTIONS — Audit 2026-05-05
+   Corrige: desktop thumb ratio, info-price visibilidade, mobile sidebar,
+   gutter responsivo, alinhamento vertical dos cards.
+   ============================================================================= */
+
+/* --- 1. Desktop: limitar altura da thumb para dar espaço ao texto ---
+   Sem isso, aspect-ratio:1/1 numa coluna de 254px gera thumb de 254px
+   (70% do card), sobrando pouco para nome+SKU+preço */
+@media (min-width: 992px) {
+    :is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index)
+    .wrapper.grid.products-grid .item-product .product-thumb {
+        max-height: 200px !important;
+        /* Mantém aspect-ratio mas cap at 200px */
+    }
+}
+
+/* --- 2. Desktop: info-price visível (não colapsar para 1px) ---
+   O Ayo define product-info-cart como absolute/bottom:-100% para hover reveal.
+   O info-price deve sempre mostrar "Faça login" ou o preço, 
+   portanto min-height garante visibilidade. */
+:is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index)
+.wrapper.grid.products-grid .item-product .info-price {
+    min-height: 44px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    overflow: visible !important;
+}
+
+/* --- 3. Desktop: product-info-cart em fluxo normal (retira absolute) ---
+   O Ayo coloca product-info-cart como position:absolute/bottom:-100% para
+   hover reveal. Em B2B guest mode, o gate card aparece fora do card.
+   Para o layout estático (sem hover JS), usamos position:relative. */
+:is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index)
+.wrapper.grid.products-grid .item-product .product-info-cart {
+    position: relative !important;
+    bottom: auto !important;
+    top: auto !important;
+    z-index: auto !important;
+    margin-top: auto !important;
+    width: 100% !important;
+}
+
+/* --- 4. Card: overflow hidden para evitar que absolute vaze ---
+   Garante que qualquer elemento posicionado fora do card não seja visível */
+:is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index)
+.wrapper.grid.products-grid .item-product {
+    overflow: hidden !important;
+}
+
+/* --- 5. Card: garantir flex-column com alinhamento vertical dos filhos ---
+   Permite que product-info cresça e empurre o CTA para o rodapé */
+:is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index)
+.wrapper.grid.products-grid .item-product {
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+:is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index)
+.wrapper.grid.products-grid .item-product .product-info {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 auto !important;
+}
+
+/* --- 6. Mobile: sidebar filtros — colapsar no mobile (<768px) para não ocupar 639px ---
+   O Ayo desktop sidebar não deve ser display:block em mobile */
+@media (max-width: 767px) {
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+    .page-layout-2columns-left .sidebar.sidebar-main,
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+    .page-layout-2columns-left .block.filter {
+        /* Sidebar já deve estar visível como accordion no mobile — só garantir não overflow */
+        overflow: hidden;
+    }
+}
+
+/* --- 7. Grid responsivo: garantir fr units nos breakpoints de transição ---
+   Evita que o grid quebre para 1 coluna em telas 769px-991px (tablet landscape) */
+@media (min-width: 769px) and (max-width: 991px) {
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+    .wrapper.grid.products-grid ul.product-grid,
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+    .wrapper.grid.products-grid ul.container-products-switch {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 12px !important;
+    }
+}
+
+/* --- 8. Mobile <480px: 2 colunas sempre (prevenir 1 coluna em phones pequenos) --- */
+@media (max-width: 479px) {
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+    .wrapper.grid.products-grid ul.product-grid,
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+    .wrapper.grid.products-grid ul.container-products-switch {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 8px !important;
+    }
+
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+    .wrapper.grid.products-grid .item-product {
+        padding: 8px !important;
+    }
+}
+
+/* --- 9. Nome do produto: 2 linhas no desktop (min-height = 2×line-height) ---
+   Evita que cards com nomes curtos pareçam inconsistentes */
+@media (min-width: 768px) {
+    :is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index)
+    .wrapper.grid.products-grid .item-product .product-item-link {
+        min-height: calc(1.4em * 2) !important;
+        -webkit-line-clamp: 2 !important;
+        line-clamp: 2 !important;
+    }
+}
+
+/* --- 10. Gutter do grid: consistência desktop --- */
+@media (min-width: 992px) {
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+    .wrapper.grid.products-grid ul.product-grid,
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+    .wrapper.grid.products-grid ul.container-products-switch {
+        gap: 16px !important;
+    }
+}
+
+/* =============================================================================
+   GRID CORRECTIONS v2 — 2026-05-05 (patch)
+   Corrige problemas introduzidos pelas Grid Corrections v1:
+   1. Fix2 sobrescrevia regra :has(.awa-b2b-gate-card) que faz display:none no info-price
+   2. Fix3 position:relative fazia card mobile crescer 137px (433px total)
+   ============================================================================= */
+
+/* --- Override Fix 2: info-price só recebe min-height quando NÃO há gate card ---
+   Quando há .awa-b2b-gate-card, o B2B module já oculta .info-price com display:none.
+   Nossa min-height:44px estava sobrescrevendo essa ocultação. */
+:is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index)
+.wrapper.grid.products-grid .item-product:has(.awa-b2b-gate-card) .info-price {
+    display: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+}
+
+/* --- Override Fix 3: product-info-cart relative apenas no desktop ---
+   No mobile, position:relative no gate card faz o card crescer para 433px (era 296px).
+   No mobile (<768px), manter position:absolute mas usar overflow:hidden no card. */
+@media (max-width: 767px) {
+    :is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index)
+    .wrapper.grid.products-grid .item-product .product-info-cart {
+        position: absolute !important;
+        bottom: -100% !important;
+        top: auto !important;
+        left: 0 !important;
+        right: 0 !important;
+        z-index: 2 !important;
+        margin-top: 0 !important;
+    }
+}
+
+/* --- Mobile gate card compacto (quando toque revela via JS) ---
+   Reduz padding e esconde badge para minimizar altura */
+@media (max-width: 767px) {
+    :is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index)
+    .awa-b2b-gate-card__badge {
+        display: none !important;
+    }
+
+    :is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index)
+    .awa-b2b-gate-card--compact {
+        padding: 8px !important;
+    }
+}

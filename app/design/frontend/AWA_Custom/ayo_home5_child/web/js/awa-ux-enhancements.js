@@ -439,7 +439,7 @@ define(['jquery'], function ($) {
         contentVisibilityFix();
         fixBreadcrumb();
         fixMobileTouch();
-        injectWhatsApp();
+        // injectWhatsApp(); // Removido para evitar duplicidade (Bug #3)
         injectTrustSignals();
         initValueProp();
         initActiveFiltersBadge();

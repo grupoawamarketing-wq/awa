@@ -10,8 +10,8 @@ define([
                 categoryUrlSuffix: '',
                 useCategoryPathInUrl: false,
                 product: '',
-                categoryItemSelector: '.category-item',
-                menuContainer: '[data-action="navigation"] > ul',
+                categoryItemSelector: '.navigation__item',
+                menuContainer: 'nav.navigation',
                 mobileBreakpoint: 640,
                 compactProductLabelLength: 58
             },
@@ -105,7 +105,7 @@ define([
             _getCategoryCrumb: function (menuItem) {
                 return {
                     name: 'category',
-                    label: menuItem.text(),
+                    label: menuItem.find(".navigation__label").text() || menuItem.clone().children().remove().end().text().trim(),
                     link: menuItem.attr('href'),
                     title: ''
                 };
