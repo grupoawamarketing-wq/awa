@@ -1484,3 +1484,45 @@ body.checkout-index-index .action.primary.checkout {
         padding: 8px !important;
     }
 }
+
+/* =============================================================================
+   ROUND 46 — PLP Viewport Optimization (2026-05-06)
+   Objetivo: trazer products grid mais alto no viewport desktop (1280x900)
+   Atual:  produtos começam a ~767px (abaixo da dobra)
+   Meta:   produtos visíveis acima de ~700px
+
+   1. Ocultar seletores de coluna (.grid-mode-show-type-products) no desktop
+      — Esses botões (⋮⋮ ⋮ ⋮⋮ para 2/3/4 colunas) ficam numa 2ª linha da toolbar
+      — No desktop o grid já usa 3 colunas por padrão; a escolha manual é raramente
+        usada e causa a toolbar ser 2 linhas (106px → ~60px com esta mudança)
+      — No mobile continua visível se necessário
+   2. Reduzir padding-top do .column.main de 16px → 8px
+      — Espaço de respiro entre breadcrumb e conteúdo principal
+   3. Reduzir min-height do hero de categoria de 180px → 150px
+      — Banner de categoria mais compacto sem perder identidade visual
+   ============================================================================= */
+
+/* 46a — Ocultar seletores de coluna na toolbar desktop */
+@media (min-width: 768px) {
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+    .shop-tab-select .toolbar-products .grid-mode-show-type-products {
+        display: none !important; /* Economiza ~44px da toolbar (2ª linha) */
+    }
+}
+
+/* 46b — Reduzir padding-top do column.main */
+@media (min-width: 768px) {
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+    .page-main .column.main {
+        padding-top: 8px !important; /* era 16px, economiza 8px */
+    }
+}
+
+/* 46c — Hero de categoria mais compacto */
+@media (min-width: 768px) {
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+    .awa-category-hero {
+        min-height: 150px !important; /* era 180px, economiza 30px */
+        height: 150px !important;
+    }
+}
