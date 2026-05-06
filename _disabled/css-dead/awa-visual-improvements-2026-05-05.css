@@ -1,0 +1,472 @@
+/**
+ * AWA Motos — Visual Improvements 2026-05-05
+ * Foco: font-size dos botões "Adicionar ao Carrinho" nos carrosséis da homepage,
+ *        breadcrumb, line-clamp nos nomes de produto, consistência visual geral.
+ *
+ * Carregado via awa-visual-audit-final-css-v2.phtml — posição final na cascata.
+ * Usar prefixo #html-body para especificidade máxima sem !important desnecessário.
+ */
+
+/* =================================================================
+ * FIX 1: Font-size do botão "Adicionar ao Carrinho" nos carrosséis
+ * Problema: tema Ayo aplica font-size 9.625px em .action.tocart.primary
+ *           nos cards .product-item da homepage (Mais Vendidos, Guidões, etc.)
+ * Fix: elevar para 13px — consistente com os cards .item-product (PLP/busca).
+ * ================================================================= */
+#html-body .product-item .action.tocart,
+#html-body .product-item .action.tocart.primary,
+#html-body .product-items .action.tocart {
+    font-size: 13px !important; /* sobe de 9.625px (herança do tema pai) para 13px */
+    line-height: 1.3 !important;
+}
+
+/* =================================================================
+ * FIX 2: Font-size do container .breadcrumbs
+ * Problema: .breadcrumbs container tem font-size 9.625px herdado.
+ *           Os <li> dentro têm 13px próprio — visualmente OK,
+ *           mas referências de em/% dentro do container ficam erradas.
+ * ================================================================= */
+#html-body .breadcrumbs {
+    font-size: 13px !important; /* alinha container com font-size dos <li> filhos */
+}
+
+/* =================================================================
+ * FIX 3: Line-clamp nos nomes de produto (cards .product-item)
+ * Problema: nomes longos transbordam ou cortam de forma abrupta
+ *           (overflow:hidden sem ellipsis).
+ * Fix: limitar a 2 linhas com ellipsis — mantém altura de card uniforme.
+ * ================================================================= */
+#html-body .product-item .product-item-name,
+#html-body .product-item .product-item-name a {
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: normal !important;
+    max-height: calc(1.4em * 2) !important;
+}
+
+/* =================================================================
+ * FIX 4: Padding interno na área de ações dos cards .product-item
+ * Problema: .product-item-actions / .actions-primary têm padding 0
+ *           — o botão tocart toca na borda do card sem respiro.
+ * Fix: adicionar padding horizontal e inferior.
+ * ================================================================= */
+#html-body .product-item-info .product-item-actions,
+#html-body .product-item-info .actions-primary {
+    padding: 0 10px 12px !important;
+}
+
+/* =================================================================
+ * FIX 5: Consistência border-radius nos botões primários
+ * Problema: button.primary genérico tem border-radius 4px
+ *           enquanto tocart tem 6px.
+ * Fix: uniformizar todos os botões primários em 6px.
+ * ================================================================= */
+#html-body button.primary:not(.btn-add-to-cart):not(.checkout),
+#html-body .action.primary:not(.tocart):not(.btn-add-to-cart):not(.checkout) {
+    border-radius: 6px !important; /* uniformiza com .action.tocart que já tem 6px */
+}
+
+/* =================================================================
+ * FIX 6: Preço REF/SKU — visibilidade mínima nos cards homepage
+ * Problema: REF (SKU) em 11px cinza é difícil de ler.
+ * Fix: elevar para 12px e escurecer levemente o cinza para WCAG AA.
+ * ================================================================= */
+#html-body .product-item .product-sku,
+#html-body .product-item [class*="ref-product"] {
+    font-size: 12px !important;
+    color: #5a6370 !important; /* contraste 4.8:1 no fundo branco (WCAG AA) */
+}
+
+/* =================================================================
+ * FIX 7: Min-height e flex no botão tocart — UX touch targets
+ * Problema: botão pode ter altura insuficiente para toque.
+ * Fix: garantir min-height 40px nos cards de produto.
+ * ================================================================= */
+#html-body .product-item .action.tocart,
+#html-body .product-item .action.tocart.primary {
+    min-height: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* =================================================================
+ * FIX 8: Toolbar PLP (Ordenar por / Mostrar por página)
+ * Problema: .toolbar-products tem font-size 11.375px — difícil de ler.
+ *           Labels "Ordenar por" em 11px e selects em 11.375px.
+ * Fix: elevar para 13px — consistente com o resto da UI.
+ * ================================================================= */
+#html-body .toolbar-products,
+#html-body .toolbar-products .sorter-label,
+#html-body .toolbar-products .limiter .label,
+#html-body .toolbar-products .toolbar-label {
+    font-size: 13px !important;
+}
+
+#html-body .toolbar-products select.sorter-options,
+#html-body .toolbar-products select.limiter-options {
+    font-size: 13px !important;
+    /* height já está OK (48px/44px) */
+}
+
+/* =================================================================
+ * FIX 9: B2B Gate Card — legibilidade e tamanho de texto
+ * Problema: .awa-b2b-gate-card__title e __action têm font-size 11px
+ *           — muito pequeno para o contexto B2B.
+ * Fix: elevar título para 12px e ação para 12px.
+ * O badge (12px) já está OK.
+ * ================================================================= */
+#html-body .awa-b2b-gate-card--compact .awa-b2b-gate-card__title {
+    font-size: 12px !important; /* era 11px */
+    line-height: 1.35 !important;
+}
+
+#html-body .awa-b2b-gate-card--compact .awa-b2b-gate-card__action {
+    font-size: 12px !important; /* era 11px */
+}
+
+/* =================================================================
+ * FIX 10: Sorter — adiciona ícone de seta no select customizado
+ * Melhoria: arrow customizada no select de ordenação para parecer
+ *           mais polido vs a seta padrão do sistema operacional.
+ * ================================================================= */
+#html-body .toolbar-products .sorter-options,
+#html-body .toolbar-products .limiter-options {
+    cursor: pointer;
+    border-radius: 6px !important; /* arredonda levemente para consistência */
+    padding: 0 8px !important;
+}
+
+/* =================================================================
+ * FIX 11: Hover nos cards de produto — transform mais perceptível
+ * Problema: o transform no hover é muito sutil (já existe transição
+ *           mas o elevação (translateY) não está definida).
+ * Fix: adicionar translateY(-2px) no hover para feedback visual.
+ * Cards .product-item já têm transition: transform 0.22s
+ * ================================================================= */
+#html-body .product-item:hover {
+    transform: translateY(-2px) !important; /* elevação sutil no hover */
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important; /* sombra mais pronunciada */
+}
+
+/* =================================================================
+ * FIX 12: "Mais vendidos" / Carrosséis — section title spacing
+ * Problema: margin-bottom dos títulos das seções é 6px — muito
+ *           próximo do carrossel. Adicionar respiro visual.
+ * Fix: margin-bottom 12px para os títulos das seções de produto.
+ * ================================================================= */
+#html-body .block-title,
+#html-body .rokan-bestseller .block-title,
+#html-body .rokan-newproduct .block-title,
+#html-body .rokan-featured .block-title,
+#html-body .rokan-mostviewed .block-title {
+    margin-bottom: 12px !important; /* era 6px */
+}
+
+/* =================================================================
+ * FIX 13: Paginação — espaçamento entre páginas
+ * Problema: itens de paginação estão no limite de toque (44px OK),
+ *           mas o espaço entre o list e o toolbar inferior é 0.
+ * Fix: adicionar margin-top à área de paginação.
+ * ================================================================= */
+#html-body .pages-wrapper,
+#html-body .pages {
+    margin-top: 8px !important;
+}
+
+/* =================================================================
+ * FIX 14: .item-product hover effect (PLP — Ayo cards)
+ * Problema: cards da PLP têm transition: border-color + background-color
+ *           mas NÃO têm transform no hover — sem feedback visual de elevação.
+ * Fix: adicionar transform + box-shadow ao hover, consistente com
+ *      os cards .product-item da homepage.
+ * ================================================================= */
+#html-body .item-product {
+    transition: border-color 0.18s, background-color 0.18s,
+                transform 0.22s ease, box-shadow 0.22s ease !important;
+}
+
+#html-body .item-product:hover {
+    transform: translateY(-2px) !important; /* elevação sutil */
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.09) !important; /* sombra mais pronunciada */
+    border-color: rgba(183, 51, 55, 0.18) !important; /* leve borda vermelha AWA no hover */
+}
+
+/* =================================================================
+ * FIX 15: Footer links — hover color
+ * Problema: links do footer têm cor rgba(255,255,255,0.75) — ao hoverar
+ *           não há mudança visual de feedback.
+ * Fix: mudar para branco puro no hover para feedback visível.
+ * ================================================================= */
+#html-body .page-footer a:hover,
+#html-body footer.page-footer a:hover {
+    color: #fff !important;
+    opacity: 1 !important;
+    text-decoration: underline !important;
+}
+
+/* =================================================================
+ * FIX 16: Footer link line-height — espaçamento entre itens do menu
+ * Problema: line-height 19.2px resulta em itens muito próximos.
+ * Fix: aumentar para 28px para melhor escaneabilidade.
+ * ================================================================= */
+#html-body .page-footer .links li,
+#html-body .page-footer .footer-links li,
+#html-body footer .links a {
+    line-height: 1.9 !important; /* ~27px a 13px — respiro entre links */
+}
+
+/* =================================================================
+ * FIX 17: Mobile — padding inferior do conteúdo principal
+ * Problema: no mobile, o conteúdo pode ficar escondido atrás da
+ *           barra de navegação inferior fixada (72px).
+ * Já existe regra no awa-visual-audit-final para isso, mas reforçamos
+ *           para product-info-price na PDP (acima do bottom nav).
+ * ================================================================= */
+@media (max-width: 768px) {
+    #html-body .page-wrapper {
+        padding-bottom: 80px !important; /* garante espaço acima do bottom nav fixo */
+    }
+    
+    /* Evitar que o botão "Solicitar Cotação" no PDP fique atrás da barra */
+    #html-body .product-add-form,
+    #html-body .product-info-main {
+        padding-bottom: 16px !important;
+    }
+}
+
+/* =================================================================
+ * FIX 18: B2B gate card border-radius (PLP)
+ * Problema: .awa-b2b-gate-card--compact mostra 6px mas o design
+ *           system espera 10px (themes.css tem 12px com !important
+ *           mas é sobreposto por outra regra base).
+ * Fix: usar especificidade máxima #html-body para garantir 10px.
+ * ================================================================= */
+#html-body .awa-b2b-gate-card--compact {
+    border-radius: 10px !important; /* alinhado com o design system (meio-caminho entre 6px base e 12px tema) */
+}
+
+/* =================================================================
+ * FIX 19: Mobile gate card — altura reduzida
+ * Problema: gate card 154px cobre 77% da imagem (199px) no mobile.
+ *           No desktop cobre 42% (120px/289px) — proporção OK.
+ *           No mobile a cobertura é excessiva.
+ * Fix: reduzir padding e gap no mobile para ~100px coverage.
+ * ================================================================= */
+@media (max-width: 768px) {
+    #html-body .awa-b2b-gate-card--compact {
+        padding: 6px 8px !important; /* era 8px 12px */
+        gap: 4px !important; /* era 6px */
+    }
+    
+    #html-body .awa-b2b-gate-card__badge {
+        font-size: 10px !important;
+        padding: 2px 6px !important;
+        line-height: 1.4 !important;
+    }
+    
+    #html-body .awa-b2b-gate-card__title {
+        font-size: 11px !important; /* um pouco menor no mobile */
+        line-height: 1.3 !important;
+    }
+    
+    #html-body .awa-b2b-gate-card__action {
+        font-size: 11px !important;
+        padding: 6px 10px !important; /* reduz padding do botão */
+    }
+}
+
+/* =================================================================
+ * FIX 20: Filtros ativos — estado visual mais pronunciado
+ * Problema: quando um filtro está ativo na layered navigation,
+ *           o item ativo tem o mesmo visual que os inativos.
+ * Fix: highlight dos filtros ativos com cor primária AWA.
+ * ================================================================= */
+#html-body .filter-options .filter-options-item .item a.am_shopby_link_selected,
+#html-body .filter-options .filter-options-item li.active > a,
+#html-body .filter-options [class*="item"] .am-shopby-form-checkbox:checked + label,
+#html-body .filter-options [class*="item"] input:checked + label {
+    color: var(--awa-primary, #b73337) !important;
+    font-weight: 600 !important;
+}
+
+/* Estado ativo nos itens do filtro para o Layered Ajax */
+#html-body .filter-active .item a,
+#html-body .items.am-shopby-items .item a[class*="selected"],
+#html-body .filter-current .items .item .remove {
+    color: var(--awa-primary, #b73337) !important;
+}
+
+/* =================================================================
+ * FIX 21: Seções de bloco — visual do título mais consistente
+ * Problema: alguns .block-title strong têm text-transform uppercase,
+ *           outros não — inconsistência visual entre seções.
+ * Fix: garantir que o tamanho de fonte dos títulos seja sempre 18px
+ *      no desktop (não depende de herança do módulo).
+ * ================================================================= */
+#html-body .sidebar-main .block-title strong,
+#html-body .sidebar-main .filter-options-title {
+    font-size: 14px !important; /* sidebar titles menores que main content */
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+}
+
+/* =================================================================
+ * FIX 22: Current filters area — limpeza visual
+ * Problema: a área de "Filtros Ativos" pode aparecer sem espaçamento.
+ * Fix: adicionar espaçamento e visual limpo ao filtro ativo.
+ * ================================================================= */
+#html-body .filter-current {
+    margin-bottom: 16px !important;
+    padding-bottom: 12px !important;
+    border-bottom: 1px solid rgba(0,0,0,0.08) !important;
+}
+
+#html-body .filter-current .filter-label {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: #5a6370 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
+    margin-bottom: 6px !important;
+    display: block !important;
+}
+
+/* =================================================================
+ * FIX 23: Premium Glassmorphism UI (Mobile Bottom Nav & Header)
+ * Melhoria: Efeito de vidro temperado premium na barra inferior
+ *           mobile e no sticky header para sensação de leveza
+ *           e modernidade.
+ * ================================================================= */
+@media (max-width: 767px) {
+    /* Mobile Bottom Navigation Bar */
+    #html-body .link-on-bottom {
+        background-color: rgba(255, 255, 255, 0.85) !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+        border-top: 1px solid rgba(0, 0, 0, 0.05) !important;
+        box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06) !important;
+    }
+
+    /* Sticky Mobile Header */
+    #html-body .header-wrapper-sticky .header_main,
+    #html-body .page-header.is-sticky .header_main {
+        background-color: rgba(255, 255, 255, 0.85) !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06) !important;
+    }
+}
+
+/* =================================================================
+ * FIX 24: Premium Custom Scrollbar (Webkit)
+ * Melhoria: Scrollbar moderna e fina (Mac-like) ao invés do
+ *           padrão largo do Windows, elevando o "premium feel".
+ * ================================================================= */
+@media (min-width: 1024px) {
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+        background-color: rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+        border: 2px solid #ffffff; /* Creates a padding effect */
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background-color: rgba(0, 0, 0, 0.4);
+    }
+}
+
+/* =================================================================
+ * FIX 25: Super Ofertas Timer High-Contrast Design
+ * Melhoria: Aplicar alto contraste no contador de Super Ofertas
+ *           para melhor legibilidade e "urgência" visual.
+ * ================================================================= */
+#html-body .super-deal-countdown .time_circles .number {
+    color: #ffffff !important;
+    font-weight: 800 !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4) !important;
+}
+
+#html-body .super-deal-countdown .time_circles .text {
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.05em !important;
+    text-transform: uppercase !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* =================================================================
+ * FIX 26: Mobile Touch Target Accessibility
+ * Melhoria: Garantir que elementos interativos (inputs, botões,
+ *           toggles) tenham um tamanho mínimo de 44px em
+ *           dispositivos móveis para acessibilidade e UX (B2B/B2C).
+ * ================================================================= */
+@media (max-width: 767px) {
+    #html-body input[type="text"],
+    #html-body input[type="password"],
+    #html-body input[type="email"],
+    #html-body input[type="tel"],
+    #html-body input[type="number"],
+    #html-body select {
+        min-height: 48px !important;
+    }
+
+    #html-body button,
+    #html-body .action,
+    #html-body .checkout-button,
+    #html-body .btn-add-to-cart {
+        min-height: 44px !important;
+    }
+}
+
+/* =================================================================
+ * FIX 27: Premium B2B Gate Card (PDP)
+ * Melhoria: Transformar o aviso B2B em um card premium com
+ *           profundidade e botão estilizado.
+ * ================================================================= */
+#html-body .b2b-login-to-see-price {
+    background-color: #fcfcfc !important;
+    border: 1px solid rgba(0,0,0,0.06) !important;
+    border-radius: 8px !important;
+    padding: 16px !important;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.04) !important;
+    text-align: center !important;
+    margin-top: 8px !important;
+}
+
+#html-body .b2b-login-to-see-price .price-label {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    font-size: 13px !important;
+    color: #5a6370 !important;
+}
+
+#html-body .b2b-login-to-see-price a {
+    background-color: var(--awa-primary, #b73337) !important;
+    color: #ffffff !important;
+    padding: 12px 16px !important;
+    border-radius: 6px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    font-size: 12px !important;
+    letter-spacing: 0.05em !important;
+    text-decoration: none !important;
+    display: inline-block !important;
+    box-shadow: 0 4px 12px rgba(183, 51, 55, 0.25) !important;
+    transition: transform 0.2s, box-shadow 0.2s !important;
+}
+
+#html-body .b2b-login-to-see-price a:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 16px rgba(183, 51, 55, 0.35) !important;
+}

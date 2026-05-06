@@ -1,189 +1,154 @@
 /* =============================================================================
- * awa-pdp-b2b-pro.css  — v2 (Fase 3 token migration 2026)
+ * awa-pdp-b2b-pro.css
  * AWA Motos — PDP B2B Gate Premium Styling
  * Carregado via catalog_product_view.xml order=1215 (após awa-bundle-pdp)
  *
- * DOM do gate B2B (deslogado):
+ * DOM real do gate B2B (deslogado):
  *   .product-info-price
  *     > .b2b-login-to-see-price.price-box
  *       > .price-label
  *         > <a href="/b2b/account/login/">Faça login</a> para ver preços
  *
- * NOTA: o inline PHTML (awa-pdp-info-final-css-v2.phtml) cobre o gate com
- * !important. Este arquivo foca nos relacionados e no estado logado.
- * Tokens via: awa-core-variables.css
+ * ACHADOS da inspeção (2026-04-17):
+ *   - NÃO há duplicação de texto dentro do <a>
+ *   - O <a> contém apenas "Faça login", o "para ver preços" é texto irmão
+ *   - O botão "Adicionar ao Carrinho" aparece com disabled no deslogado
+ *   - Nos relacionados: .awa-related-price-notice > a[href*="/b2b/account/login/"]
  * ============================================================================= */
+
+/* AWA-AUDIT:pdp-b2b-gate-premium-2026-04-16:start */
 
 /* --------------------------------------------------------------------------
  * 1. GATE B2B — Container (.b2b-login-to-see-price)
  *
- * Transforma o wrapper num card vermelho full-width dominante.
- * O PHTML inline sobrescreve com !important — este é o fallback.
+ * Transforma o wrapper do gate num card vermelho dominante full-width.
+ * É o CTA mais destacado na página quando deslogado.
  * -------------------------------------------------------------------------- */
 body.catalog-product-view .product-info-main .b2b-login-to-see-price.price-box {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     width: 100% !important;
-    min-height: var(--awa-ui-card-actions-min-height, 56px) !important;
-    padding: var(--awa-space-3, 12px) var(--awa-space-5, 20px) !important;
-    border-radius: var(--awa-ui-radius-button, 12px) !important;
-    background: var(--awa-primary, var(--awa-red, #b73337)) !important;
-    box-shadow: var(--awa-ui-cta-shadow, 0 4px 14px rgb(183 51 55 / 22%)) !important;
-    transition: background-color 0.22s ease, box-shadow 0.22s ease, transform 0.15s ease !important;
+    min-height: 60px !important;
+    padding: 16px 20px !important;
+    border-radius: var(--awa-radius-inner) !important;
+    background: linear-gradient(135deg, var(--awa-primary, var(--awa-primary)) 0%, #d83d42 100%) !important;
+    box-shadow: 0 8px 24px rgba(183, 51, 55, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+    transition: background 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
     text-align: center !important;
+    cursor: pointer !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
 body.catalog-product-view .product-info-main .b2b-login-to-see-price.price-box:hover {
-    background: var(--awa-primary-dark, #8e2023) !important;
-    box-shadow: var(--awa-ui-cta-shadow-hover, 0 7px 22px rgb(183 51 55 / 32%)) !important;
-    transform: translateY(var(--awa-neg-0-25, -1px)) !important;
-}
-
-@media (max-width: 767px) {
-    body.catalog-product-view .product-info-main .b2b-login-to-see-price.price-box {
-        padding: var(--awa-space-2-5, 10px) var(--awa-space-3, 12px) !important;
-        min-height: 48px !important;
-        flex-direction: column !important;
-        gap: 6px !important;
-    }
-    body.catalog-product-view .product-info-main .b2b-login-to-see-price .price-label {
-        font-size: 13px !important;
-    }
-    body.catalog-product-view .product-info-main .b2b-login-to-see-price a[href*="/b2b/account/login/"],
-    body.catalog-product-view .product-info-main .b2b-login-to-see-price a[href*="/customer/account/login/"] {
-        font-size: 13px !important;
-    }
+    background: linear-gradient(135deg, #d83d42 0%, var(--awa-primary, #b73337) 100%) !important;
+    box-shadow: 0 12px 32px rgba(183, 51, 55, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+    transform: translateY(-2px) !important;
 }
 
 /* --------------------------------------------------------------------------
  * 2. GATE B2B — Texto (.price-label)
+ *
+ * Texto branco dentro do gate. O "para ver preços" fica visível e integrado.
  * -------------------------------------------------------------------------- */
 body.catalog-product-view .product-info-main .b2b-login-to-see-price .price-label {
     display: inline !important;
-    color: var(--awa-white-92, rgb(255 255 255 / 92%)) !important;
-    font-size: var(--awa-ui-body-size, 15px) !important;
-    font-weight: var(--awa-weight-semibold, 600) !important;
-    letter-spacing: var(--awa-tracking-tight, 0.01em) !important;
-    line-height: var(--awa-leading-normal, 1.4) !important;
+    color: rgba(255, 255, 255, 0.92) !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.01em !important;
+    line-height: 1.4 !important;
 }
 
 /* --------------------------------------------------------------------------
  * 3. GATE B2B — Link "Faça login"
+ *
+ * O link dentro do gate: branco, sublinhado e bold para chamar atenção.
  * -------------------------------------------------------------------------- */
 body.catalog-product-view .product-info-main .b2b-login-to-see-price a[href*="/b2b/account/login/"],
 body.catalog-product-view .product-info-main .b2b-login-to-see-price a[href*="/customer/account/login/"] {
-    color: var(--awa-white, #fff) !important;
-    font-weight: var(--awa-weight-bold, 700) !important;
-    font-size: var(--awa-ui-body-size, 15px) !important;
-    text-decoration: var(--awa-underline, underline) !important;
-    text-decoration-color: rgb(255 255 255 / 60%) !important;
-    text-underline-offset: var(--awa-underline-offset-sm, 2px) !important;
+    color: var(--awa-bg) !important;
+    font-weight: 700 !important;
+    font-size: 16px !important;
+    text-decoration: underline !important;
+    text-decoration-color: rgba(255, 255, 255, 0.6) !important;
+    text-underline-offset: 2px !important;
     transition: text-decoration-color 0.15s ease !important;
 }
 
 body.catalog-product-view .product-info-main .b2b-login-to-see-price a[href*="/b2b/account/login/"]:hover,
 body.catalog-product-view .product-info-main .b2b-login-to-see-price a[href*="/customer/account/login/"]:hover {
-    text-decoration-color: var(--awa-white, #fff) !important;
+    text-decoration-color: var(--awa-bg) !important;
 }
 
 /* --------------------------------------------------------------------------
  * 4. GATE B2B — Botão "Adicionar ao Carrinho" desabilitado
+ *
+ * No estado deslogado o botão está presente mas disabled.
+ * Reduzimos destaque para não competir com o gate vermelho.
  * -------------------------------------------------------------------------- */
 body.catalog-product-view .product-info-main .action.tocart[disabled],
 body.catalog-product-view .product-info-main #product-addtocart-button[disabled] {
-    opacity: var(--awa-opacity-disabled, 0.45) !important;
-    pointer-events: var(--awa-none, none) !important;
+    opacity: 0.35 !important;
+    pointer-events: none !important;
     cursor: not-allowed !important;
-    box-shadow: var(--awa-shadow-none, none) !important;
-    background: var(--awa-gray-250, #ccc) !important;
-    color: #888 !important;
-    transform: none !important;
+    box-shadow: none !important;
+    background: var(--awa-border-strong) !important;
+    color: var(--awa-text-muted) !important;
 }
 
 /* --------------------------------------------------------------------------
- * 5. RELACIONADOS — Gate B2B nos cards (price notice)
+ * 5. RELACIONADOS — Gate B2B nos cards de produto
  *
  * DOM: .price-box.price-box--hidden > .awa-related-price-notice > a
+ * Estiliza de forma compacta dentro do card.
  * -------------------------------------------------------------------------- */
 body.catalog-product-view .awa-pdp-related .awa-related-price-notice {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: var(--awa-gap-xs, 4px) !important;
-    padding: var(--awa-space-1-25, 5px) var(--awa-space-2-5, 10px) !important;
-    border-radius: var(--awa-ui-radius-field, 12px) !important;
-    background: var(--awa-primary, var(--awa-red, #b73337)) !important;
-    color: var(--awa-white-92, rgb(255 255 255 / 92%)) !important;
-    font-size: var(--awa-text-xs, 12px) !important;
-    font-weight: var(--awa-weight-semibold, 600) !important;
+    gap: 4px !important;
+    padding: 6px 10px !important;
+    border-radius: var(--awa-radius-sm) !important;
+    background: var(--awa-primary, var(--awa-primary)) !important;
+    color: rgba(255, 255, 255, 0.92) !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
     text-align: center !important;
-    margin-top: var(--awa-space-2, 8px) !important;
+    margin-top: 8px !important;
 }
 
 body.catalog-product-view .awa-pdp-related .awa-related-price-notice a {
-    color: var(--awa-white, #fff) !important;
-    font-weight: var(--awa-weight-bold, 700) !important;
-    text-decoration: var(--awa-underline, underline) !important;
-    text-decoration-color: rgb(255 255 255 / 50%) !important;
-    font-size: var(--awa-text-xs, 12px) !important;
+    color: var(--awa-bg) !important;
+    font-weight: 700 !important;
+    text-decoration: underline !important;
+    text-decoration-color: rgba(255, 255, 255, 0.5) !important;
+    font-size: 12px !important;
 }
 
 body.catalog-product-view .awa-pdp-related .awa-related-price-notice a:hover {
-    text-decoration-color: var(--awa-white, #fff) !important;
+    text-decoration-color: var(--awa-bg) !important;
 }
 
 /* --------------------------------------------------------------------------
- * 6. PREÇO NOS RELACIONADOS — destaque mínimo (card pequeno)
+ * 6. NÃO necessário: supressão de duplicação
+ *
+ * Inspeção DOM (2026-04-17) confirmou:
+ *   - <a> contém APENAS "Faça login" (sem filhos duplicados)
+ *   - "para ver preços" é texto irmão dentro de .price-label
+ * → Regra de supressão NÃO aplicada.
  * -------------------------------------------------------------------------- */
-body.catalog-product-view .awa-pdp-related .product-item .price {
-    font-size: var(--awa-text-sm, 14px) !important;
-    font-weight: var(--awa-weight-bold, 700) !important;
-    color: var(--awa-primary, var(--awa-red, #b73337)) !important;
-    min-height: var(--awa-ui-card-price-min-height, 48px) !important;
-    display: flex !important;
-    align-items: center !important;
-}
 
-@media (prefers-reduced-motion: reduce) {
-    body.catalog-product-view .product-info-main .b2b-login-to-see-price.price-box,
-    body.catalog-product-view .product-info-main .b2b-login-to-see-price a[href*="/b2b/account/login/"] {
-        transition: var(--awa-none, none) !important;
-    }
-}
-
-/* ==========================================================================
-   PDP Visual Bug Fixes (2026-04-23)
-   ========================================================================== */
-
-/* BUG-2 FIX: Hide add-to-cart form for B2B guests when login-to-see-price is shown */
-body.catalog-product-view .product-info-main:has(.b2b-login-to-see-price) .box-tocart {
+/* --------------------------------------------------------------------------
+ * 7. Ocultar "Adicionar ao Carrinho" no estado deslogado
+ *
+ * DESCOMENTAR apenas se desejado — atualmente o botão disabled dá feedback
+ * que a ação existe mas requer login. Mantido como referência.
+ * -------------------------------------------------------------------------- */
+/*
+body.catalog-product-view .product-info-main .box-tocart:has(~ .b2b-login-to-see-price) {
     display: none !important;
 }
+*/
 
-/* BUG-3 FIX: Remove price card styling when B2B login replaces price,
-   so stock-sku inside is not wrapped in a misleading card */
-body.catalog-product-view .product-info-main:has(.b2b-login-to-see-price) .product-info-price {
-    background: transparent !important;
-    border: 0 !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-    gap: 16px !important;
-}
-
-/* BUG-2+3: Also hide SKU/stock duplicates inside product-add-form for B2B */
-body.catalog-product-view .product-info-main:has(.b2b-login-to-see-price) .product-add-form .awa-b2b-pdp-sku,
-body.catalog-product-view .product-info-main:has(.b2b-login-to-see-price) .product-add-form .awa-stock-level,
-body.catalog-product-view .product-info-main:has(.b2b-login-to-see-price) .product-add-form .awa-pdp-trust-bar,
-body.catalog-product-view .product-info-main:has(.b2b-login-to-see-price) .product-social-extra,
-body.catalog-product-view .product-info-main:has(.b2b-login-to-see-price) .product-social-links {
-    display: none !important;
-}
-
-/* BUG-4 FIX: Hide empty product-actions containers in related/upsell products */
-.product-item .product-item-actions .product-actions:empty,
-.block.related .product-actions:empty,
-.block.upsell .product-actions:empty {
-    display: none !important;
-}
+/* AWA-AUDIT:pdp-b2b-gate-premium-2026-04-16:end */

@@ -1,0 +1,545 @@
+/**
+ * awa-visual-bugfix-2026-04-28.css
+ * AWA Motos — Correção de 8 bugs visuais identificados em auditoria.
+ *
+ * BUG-1: Header — Logo sobrepõe botões Login/Cadastre-se (right-col overflow)
+ * BUG-2: Imagens — 50 imagens quebradas / tiny (corrigido via grid fix + fallback)
+ * BUG-3: Layout — Espaços em branco enormes entre seções (rokan grid bug)
+ * BUG-4: Header — Ícone de busca sobrepõe placeholder (position:absolute)
+ * BUG-5: Produtos — Grid mostra só 1 card por célula (rokan grid repeat(5))
+ * BUG-6: Produtos — Nomes truncados agressivamente (container 254px → full)
+ * BUG-7: Produtos — Código do produto cortado (container 254px → full)
+ * BUG-8: UI — WhatsApp widget z-index / scroll-to-top collision
+ *
+ * Carregado via Magento_Theme/layout/default.xml order="1340"
+ * (após awa-final-polish.css 1335 — última camada).
+ */
+
+
+/* =============================================================================
+   BUG-3 + BUG-5 + BUG-6 + BUG-7  (ROOT CAUSE)
+   .rokan-bestseller / .rokan-newproduct usam display:grid com
+   grid-template-columns: repeat(5, ~254px). Como só têm 1 filho (swiper),
+   o swiper fica preso na primeira célula (254px) em vez de 1400px.
+   Fix: forçar display:block para que o swiper ocupe a largura total,
+   OU grid-column:1/-1 para span all columns.
+   ============================================================================= */
+
+.rokan-bestseller,
+.rokan-newproduct {
+    display: block !important;
+    width: 100% !important;
+}
+
+/* Caso algum outro CSS force grid de volta, garantir span total do filho */
+.rokan-bestseller > .swiper,
+.rokan-bestseller > .products-swiper,
+.rokan-newproduct > .swiper,
+.rokan-newproduct > .products-swiper {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* Swiper slides: tamanho correto quando container full-width */
+.rokan-bestseller .swiper-wrapper,
+.rokan-newproduct .swiper-wrapper {
+    display: flex !important;
+    width: 100% !important;
+}
+
+.rokan-bestseller .swiper-slide,
+.rokan-newproduct .swiper-slide {
+    flex-shrink: 0 !important;
+    width: auto !important;
+}
+
+
+/* =============================================================================
+   BUG-4: Search button position:absolute → static
+   Selectors na awa-header-premium.css usam #header .awa-header-search-col
+   mas .awa-header-search-col NÃO está dentro de #header no DOM.
+   Cadeia real: button.action.search < .actions < form#search_mini_form
+     < .block-content < .block-search < .awa-header-search-col < .wp-header
+     < .container < .header-main < .header_main
+   Fix: usar seletores que correspondem à cadeia real do DOM.
+   ============================================================================= */
+
+@media (min-width: 992px) {
+
+    /* Form container: flex horizontal */
+    .awa-site-header .awa-header-search-col form.minisearch,
+    .awa-site-header .awa-header-search-col .block-search form.minisearch,
+    body .page-wrapper .awa-site-header form#search_mini_form {
+        display:       flex !important;
+        align-items:   stretch !important;
+        flex-wrap:     nowrap !important;
+        overflow:      hidden !important;
+        border-radius: 8px !important;
+        height:        46px !important;
+        min-height:    46px !important;
+        border:        1.5px solid var(--awa-border-strong, #d1d5db) !important;
+        gap:           0 !important;
+        padding:       0 !important;
+        box-shadow:    0 1px 3px rgba(0, 0, 0, 0.04) !important;
+    }
+
+    .awa-site-header form#search_mini_form:focus-within {
+        border-color: var(--awa-primary, #b73337) !important;
+        box-shadow:   0 0 0 3px rgba(183, 51, 55, .08), 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+    }
+
+    /* Input: ocupa todo espaço, padding simétrico (sem 42px left!) */
+    .awa-site-header form#search_mini_form input#search,
+    .awa-site-header form#search_mini_form input.input-text {
+        flex:          1 1 auto !important;
+        height:        100% !important;
+        padding:       0 16px !important;
+        border:        0 !important;
+        border-radius: 0 !important;
+        background:    transparent !important;
+        outline:       none !important;
+        box-shadow:    none !important;
+        min-width:     0 !important;
+        font-size:     15px !important;
+    }
+
+    /* Field.search: flex grow */
+    .awa-site-header form#search_mini_form .field.search {
+        flex: 1 1 auto !important;
+        display: flex !important;
+        min-width: 0 !important;
+    }
+
+    .awa-site-header form#search_mini_form .field.search .control {
+        flex: 1 !important;
+        display: flex !important;
+        align-items: stretch !important;
+        min-width: 0 !important;
+    }
+
+    /* .actions wrapper: sem crescimento */
+    .awa-site-header form#search_mini_form .actions {
+        display:     flex !important;
+        align-items: stretch !important;
+        flex:        0 0 auto !important;
+        margin:      0 !important;
+        padding:     0 !important;
+    }
+
+    /* Botão de busca: POSIÇÃO ESTÁTICA (fix principal) - Redesign: sem fundo, ícone outline */
+    .awa-site-header form#search_mini_form button.action.search,
+    .awa-site-header form#search_mini_form .actions button.action.search,
+    body .page-wrapper form#search_mini_form button.action.search {
+        position:         static !important;
+        left:             auto !important;
+        top:              auto !important;
+        transform:        none !important;
+        display:          flex !important;
+        align-items:      center !important;
+        justify-content:  center !important;
+        background:       transparent !important;
+        background-color: transparent !important;
+        color:            var(--awa-primary, #b73337) !important;
+        border-radius:    0 7px 7px 0 !important;
+        border:           0 !important;
+        width:            52px !important;
+        min-width:        52px !important;
+        height:           100% !important;
+        padding:          0 !important;
+        margin:           0 !important;
+        cursor:           pointer !important;
+        opacity:          1 !important;
+        visibility:       visible !important;
+    }
+
+    .awa-site-header form#search_mini_form button.action.search:hover {
+        background:       rgba(0,0,0,0.03) !important;
+        background-color: rgba(0,0,0,0.03) !important;
+    }
+
+    .awa-site-header form#search_mini_form button.action.search svg {
+        color:  var(--awa-primary, #b73337) !important;
+        stroke: var(--awa-primary, #b73337) !important;
+        fill:   none !important;
+        width:  22px !important;
+        height: 22px !important;
+    }
+}
+
+
+/* =============================================================================
+   BUG-1: Header right-col overflow
+   A célula 1fr do grid (236px) não comporta auth-prompt (225px) + cart (75px).
+   Fix: overflow hidden + truncar texto do auth prompt + flex-shrink.
+   ============================================================================= */
+
+@media (min-width: 992px) {
+    .awa-site-header .awa-header-right-col {
+        overflow: hidden !important;
+        min-width: 0 !important;
+        gap: 12px !important;
+        flex-wrap: nowrap !important;
+    }
+
+    /* Auth prompt: truncar texto, flex-shrink */
+    .awa-site-header .awa-header-right-col .awa-header-contact-links,
+    .awa-site-header .awa-header-right-col .awa-header-account-prompt {
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        overflow: hidden !important;
+    }
+
+    /* Texto "PARA VER OS PREÇOS FAÇA O" — limitar a 1 linha */
+    .awa-header-account-prompt .awa-header-account-prompt__text,
+    .awa-header-account-prompt .awa-header-account-prompt__cta-text {
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        max-width: 100% !important;
+        font-size: 11px !important;
+        line-height: 1.3 !important;
+    }
+
+    /* Cart: não encolher */
+    .awa-site-header .awa-header-right-col .awa-header-cart,
+    .awa-site-header .awa-header-right-col .mini-cart-wrapper {
+        flex-shrink: 0 !important;
+    }
+}
+
+
+/* =============================================================================
+   BUG-2: Broken/tiny product images
+   Imagens dentro dos swipers corrigidos agora terão espaço adequado.
+   Garantir dimensões mínimas e fallback visual para imagens quebradas.
+   ============================================================================= */
+
+/* Product images nas seções Swiper: dimensões mínimas */
+.products-swiper .swiper-slide .product-thumb img,
+.products-swiper .swiper-slide .product-image-photo,
+.rokan-bestseller .product-image-photo,
+.rokan-newproduct .product-image-photo {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 120px;
+    max-height: none;
+    object-fit: contain !important;
+    background: var(--awa-gray-100, #f8f8f8);
+}
+
+/* Fallback visual para imagens quebradas (onerror não fez fallback) */
+.product-image-photo[src=""],
+.product-image-photo:not([src]) {
+    visibility: hidden;
+    min-height: 120px;
+    background: var(--awa-gray-100, #f0f0f0);
+}
+
+/* Product cards dentro dos swipers: largura mínima razoável */
+.products-swiper .swiper-slide .item-product,
+.products-swiper .swiper-slide {
+    min-width: 180px;
+}
+
+
+/* =============================================================================
+   BUG-3 (complemento): Remover espaço em branco excessivo entre seções
+   Os containers de seção têm margin/padding excessivo quando vazio.
+   ============================================================================= */
+
+/* Seções de produto: margem consistente */
+.rokan-bestseller,
+.rokan-newproduct {
+    margin-bottom: 24px !important;
+}
+
+/* Headers de seção: espaçamento limpo */
+.rokan-product-heading {
+    margin-top: 16px !important;
+    margin-bottom: 12px !important;
+    padding: 0 !important;
+}
+
+/* Widgets Rokanthemes: remover gaps entre seções */
+.home-bestseller-products,
+.home-newproduct-products,
+.home-sale-products,
+[class*="home-"][class*="-products"] {
+    margin-bottom: 32px !important;
+    padding-bottom: 0 !important;
+}
+
+/* Remover espaço em branco de CMS widgets vazios */
+.widget:empty,
+.block-static-block:empty,
+.cms-block:empty {
+    display: none !important;
+}
+
+
+/* =============================================================================
+   BUG-8: WhatsApp / floating buttons z-index
+   Garantir que botões flutuantes não sobreponham uns aos outros.
+   ============================================================================= */
+
+/* Scroll-to-top button: posicionar acima do WhatsApp */
+.scroll-to-top,
+#scroll-top,
+[class*="back-to-top"],
+a[class*="scrolltop"] {
+    z-index: 90 !important;
+    right: 20px !important;
+    bottom: 80px !important;
+}
+
+/* WhatsApp floating (se existir como botão flutuante) */
+.awa-whatsapp-float,
+[class*="whatsapp-float"],
+.chatwoot-widget,
+.woot-widget-holder {
+    z-index: 85 !important;
+    bottom: 20px !important;
+}
+
+/* Evitar sobreposição quando ambos visíveis */
+.scroll-to-top + .awa-whatsapp-float,
+.scroll-to-top ~ [class*="whatsapp-float"] {
+    bottom: 20px !important;
+    right: 80px !important;
+}
+
+
+/* =============================================================================
+   PRODUCT NAME & COD TRUNCATION FIX (BUG-6, BUG-7 complemento)
+   Com o container full-width, os nomes ainda podem ser truncados se
+   o -webkit-line-clamp estiver muito agressivo.
+   ============================================================================= */
+
+/* Homepage product cards: permitir 3 linhas para nomes */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.products-swiper .item-product h3.product-name,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.products-swiper .item-product .product-name a {
+    -webkit-line-clamp: 3 !important;
+    min-height: 3.8em !important;
+    line-height: 1.35 !important;
+    font-size: 13px !important;
+}
+
+/* COD / SKU: não truncar */
+.products-swiper .item-product .product-sku,
+.products-swiper .item-product [class*="cod"],
+.products-swiper .item-product .product-cod {
+    white-space: nowrap !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+    font-size: 11px !important;
+}
+
+
+/* =============================================================================
+   BUG-9: Vertical Mega Menu — ALL flyout panels visible simultaneously
+   Root cause: .submenu elements inside .togge-menu > li.level0 have no
+   default hiding rule. The flyout JS (awa-vertical-menu-flyout-fix.js)
+   portals them on hover but before interaction ALL panels render at once,
+   overlaying the hero slider and content area.
+   Fix: hide submenus by default, show only on hover / JS-activated state.
+   ============================================================================= */
+
+@media (min-width: 992px) {
+    /* DEFAULT: hide all submenu flyout panels */
+    body.cms-index-index .navigation.verticalmenu.side-verticalmenu .togge-menu > li.level0 > .submenu,
+    body.cms-index-index .navigation.verticalmenu.side-verticalmenu .togge-menu > li.level0 > .level0.submenu,
+    body.cms-index-index .navigation.verticalmenu.side-verticalmenu .togge-menu > li.level0 > .navigation__submenu {
+        display: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+    }
+
+    /* SHOW on LI hover */
+    body.cms-index-index .navigation.verticalmenu.side-verticalmenu .togge-menu > li.level0:hover > .submenu,
+    body.cms-index-index .navigation.verticalmenu.side-verticalmenu .togge-menu > li.level0:hover > .level0.submenu,
+    body.cms-index-index .navigation.verticalmenu.side-verticalmenu .togge-menu > li.level0:hover > .navigation__submenu {
+        display: flex !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+    }
+
+    /* SHOW when JS flyout activates the LI (.awa-vmf-active from flyout-fix.js) */
+    body.cms-index-index .navigation.verticalmenu.side-verticalmenu .togge-menu > li.level0.awa-vmf-active > .submenu,
+    body.cms-index-index .navigation.verticalmenu.side-verticalmenu .togge-menu > li.level0.awa-vmf-active > .level0.submenu,
+    body.cms-index-index .navigation.verticalmenu.side-verticalmenu .togge-menu > li.level0.awa-vmf-active > .navigation__submenu {
+        display: flex !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+    }
+
+    /* SHOW when portaled to body (JS moves submenu out of LI — these have inline styles anyway,
+       but this ensures the class-based rule doesn't interfere) */
+    .awa-vmf-portal.submenu,
+    .awa-vmf-portal.navigation__submenu {
+        display: flex !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+    }
+}
+
+/* =============================================================================
+   REDESIGN HEADER & VERTICAL MENU (2026-04-28 Mockup)
+   ============================================================================= */
+
+/* 1. B2B Promo Bar - Red bg, white text */
+body .page-wrapper .awa-b2b-promo-bar {
+    background-color: var(--awa-primary, #b73337) !important;
+    color: var(--awa-white, #fff) !important;
+    border-bottom: none !important;
+}
+body .page-wrapper .awa-b2b-promo-bar * {
+    color: var(--awa-white, #fff) !important;
+}
+
+/* 2. Main Header Background */
+.header-wrapper-sticky, .awa-site-header .header_main, .awa-site-header .header-main {
+    background-color: var(--awa-white, #fff) !important;
+}
+
+/* 3. Search Bar Input (background light gray) */
+@media (min-width: 992px) {
+    .awa-site-header form#search_mini_form {
+        background-color: var(--awa-gray-50, #f7f7f7) !important;
+        border: 1px solid var(--awa-border, #eee) !important;
+        border-radius: 6px !important;
+        box-shadow: 0 2px 8px rgb(183 51 55 / 15%) !important; /* v2: subtle red shadow */
+    }
+    .awa-site-header form#search_mini_form input#search {
+        background-color: transparent !important;
+        color: var(--awa-text-dark, #333) !important;
+    }
+}
+
+/* 4. Account Prompt (Login/Register) */
+@media (min-width: 992px) {
+    .awa-site-header .awa-header-account-prompt {
+        display: flex !important;
+        align-items: center !important;
+        gap: 12px !important;
+    }
+    .awa-site-header .awa-header-account-prompt__icon svg {
+        stroke: var(--awa-primary, #b73337) !important;
+        width: 32px !important;
+        height: 32px !important;
+    }
+    .awa-site-header .awa-header-account-prompt__text {
+        font-family: var(--awa-font, sans-serif) !important;
+    }
+    .awa-site-header .awa-header-account-prompt__line1 {
+        color: var(--awa-text-muted, #777) !important;
+        font-size: 13px !important;
+        display: block !important;
+    }
+    .awa-site-header .awa-header-account-prompt__line2,
+    .awa-site-header .awa-header-account-prompt__link {
+        color: var(--awa-text-dark, #333) !important;
+        font-size: 13px !important;
+        font-weight: 700 !important;
+    }
+}
+
+/* 5. Cart Icon (Solid Red Box) */
+@media (min-width: 992px) {
+    .awa-site-header .minicart-wrapper .showcart {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        position: relative !important;
+        width: 44px !important;
+        height: 44px !important;
+    }
+    /* SVG mask for a solid bag/box */
+    .awa-site-header .minicart-wrapper .showcart::before {
+        content: '' !important;
+        display: block !important;
+        width: 34px !important;
+        height: 34px !important;
+        background-color: var(--awa-primary, #b73337) !important;
+        mask: url('data:image/svg+xml;utf8,<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M4 6h16a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2zm0 0V4a2 2 0 012-2h12a2 2 0 012 2v2"/></svg>') no-repeat center / contain;
+        -webkit-mask: url('data:image/svg+xml;utf8,<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M4 6h16a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2zm0 0V4a2 2 0 012-2h12a2 2 0 012 2v2"/></svg>') no-repeat center / contain;
+    }
+    /* Hide the old SVG icon */
+    .awa-site-header .awa-header-cart-link-icon, 
+    .awa-site-header .minicart-wrapper .showcart svg {
+        display: none !important;
+    }
+    /* Cart Badge Positioned at Bottom Right with White Border */
+    .awa-site-header .minicart-wrapper .showcart .counter.qty {
+        position: absolute !important;
+        bottom: 0 !important;
+        right: 0 !important;
+        top: auto !important;
+        margin: 0 !important;
+        background: var(--awa-white, #fff) !important;
+        color: var(--awa-primary, #b73337) !important;
+        border: 2px solid var(--awa-primary, #b73337) !important;
+        border-radius: 50% !important;
+        min-width: 20px !important;
+        height: 20px !important;
+        line-height: 16px !important;
+        padding: 0 4px !important;
+        font-size: 11px !important;
+        font-weight: 800 !important;
+        box-shadow: 0 2px 8px rgb(183 51 55 / 15%) !important; /* v2: subtle red shadow */
+    }
+}
+
+/* 6. Navigation Bar (Bottom) - Light gray bg */
+@media (min-width: 992px) {
+    .header-nav.awa-nav-bar, 
+    body .page-wrapper .header-nav.awa-nav-bar .container {
+        background-color: var(--awa-gray-50, #f6f6f6) !important;
+        border: none !important;
+    }
+    
+    /* Departamentos trigger - Modern Block */
+    #html-body .page-wrapper .navigation.verticalmenu .our_categories.title-category-dropdown,
+    #html-body .page-wrapper .our_categories.title-category-dropdown {
+        background-color: var(--awa-primary, #b73337) !important;
+        color: var(--awa-white, #fff) !important;
+        border-radius: var(--vm-radius, 12px) var(--vm-radius, 12px) 0 0 !important; /* v2: rounded top corners */
+        padding: 0 24px !important;
+        margin: 0 !important;
+        min-height: 52px !important;
+        display: flex !important;
+        align-items: center !important;
+        box-shadow: 0 2px 8px rgb(183 51 55 / 15%) !important; /* v2: subtle red shadow */
+    }
+    #html-body .page-wrapper .our_categories.title-category-dropdown:hover {
+        background-color: var(--awa-primary-hover, #982c30) !important;
+    }
+    #html-body .page-wrapper .our_categories.title-category-dropdown .awa-vmenu-trigger-icon svg {
+        stroke: var(--awa-white, #fff) !important;
+    }
+    #html-body .page-wrapper .our_categories.title-category-dropdown .awa-vmenu-trigger-text {
+        color: var(--awa-white, #fff) !important;
+        font-weight: 700 !important;
+        font-size: 15px !important;
+    }
+    
+    /* Other Nav Links */
+    .awa-header-primary-nav .main-nav-list a {
+        color: var(--awa-text, #444) !important;
+        font-weight: 600 !important;
+        font-size: 15px !important;
+        text-transform: none !important;
+        transition: color var(--awa-duration-fast) var(--awa-ease) !important;
+        padding: 14px 20px !important;
+    }
+    .awa-header-primary-nav .main-nav-list a:hover {
+        color: var(--awa-primary, #b73337) !important;
+        background-color: transparent !important;
+    }
+}

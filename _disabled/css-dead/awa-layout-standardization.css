@@ -159,11 +159,10 @@ body .page-wrapper .awa-site-header .awa-nav-bar__inner {
   gap: 0 !important;
 }
 
-/* Nav container: alinhar max-width com o header principal (1440px) */
+/* Nav container: alinhar max-width com o header principal — via token */
 body .page-wrapper .header-control.header-nav.awa-nav-bar > .container {
-  max-width: 1440px !important;
-  padding-left: 24px !important;
-  padding-right: 24px !important;
+  max-width: var(--awa-container-wide, 1440px) !important;
+  padding-inline: var(--awa-container-pad, clamp(16px, 3vw, 24px)) !important;
   margin: 0 auto !important;
   box-sizing: border-box !important;
   width: 100% !important;
@@ -175,9 +174,9 @@ body .page-wrapper .awa-site-header .header.awa-main-header {
   padding-bottom: 10px !important;
 }
 
-/* Inner do header: max-width alinhado com nav (elimina assimetria) */
+/* Inner do header: max-width alinhado com nav — via token (elimina assimetria) */
 body .page-wrapper .awa-site-header .awa-main-header__inner.wp-header {
-  max-width: 1440px !important;
+  max-width: var(--awa-container-wide, 1440px) !important;
   margin: 0 auto !important;
   width: 100% !important;
 }
@@ -281,7 +280,7 @@ body .page-wrapper .navigation.verticalmenu .level-top:focus-visible {
 }
 
 /* 768px: tablet portrait */
-@media (max-width:767px) {
+@media (max-width: 768px) {
   body .page-wrapper .awa-site-header .header.awa-main-header {
     padding: 8px 16px !important;
   }
@@ -435,6 +434,32 @@ body.checkout-cart-index .cart-empty .awa-cart-empty__cta::after {
 
 body.checkout-cart-index .cart-empty .awa-cart-empty__cta:hover::after {
     transform: translateX(3px);
+}
+
+/* =====================================================================
+ * SECAO: FIX — IMAGENS DE PRODUTO QUEBRADAS
+ * Oculta o alt-text de imagens 404 em carrosséis de produto e
+ * mostra um placeholder neutro. O JS em theme.js já tenta _1.jpg
+ * como fallback; este CSS é o backstop visual.
+ * ===================================================================== */
+
+/* Imagem que falhou: mantém dimensões mas sem alt-text visível */
+.awa-pdp-mostviewed img[src*="/media/catalog/product/"],
+.awa-pdp-related img[src*="/media/catalog/product/"],
+.rokan-mostviewed img[src*="/media/catalog/product/"],
+.item-product img[src*="/media/catalog/product/"],
+.product-item img[src*="/media/catalog/product/"] {
+    /* Quando a imagem falha o browser mostra fundo com alt-text.
+       color:transparent esconde o texto do alt sem remover acessibilidade. */
+    color: transparent !important;
+}
+
+/* Placeholder cinza quando imagem não carrega */
+.awa-pdp-mostviewed .product-image-wrapper,
+.awa-pdp-related .product-image-wrapper,
+.rokan-mostviewed .product-image-wrapper {
+    background: #f5f5f5;
+    border-radius: 8px;
 }
 
 /* =====================================================================
@@ -2777,15 +2802,4 @@ body .page-wrapper .awa-footer-devby .awa-footer-devby__label {
 .product-label .sale-text label,
 .categorytab-container .sale-text label {
     color: #ffffff !important; /* white on #b73337 = 6.0:1 ✓ WCAG AA */
-}
-
-/* PDP header cleanup (2026-04-24): remove left categories stub in product page */
-body.catalog-product-view .page-wrapper .awa-header-categories.menu_left_home1 {
-    display: flex !important;
-    position: absolute !important;
-    left: -9999px !important;
-    top: auto !important;
-    overflow: hidden !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
 }

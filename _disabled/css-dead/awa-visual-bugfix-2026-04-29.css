@@ -1,0 +1,3008 @@
+/**
+ * awa-visual-bugfix-2026-04-29.css
+ * AWA Motos — Correção de bugs visuais identificados em auditoria visual (Round 2).
+ *
+ * VB-01: Nav bar — ghost white blocks (empty category-dropdown containers)
+ * VB-02: Mega menu flyout — subcategory list covering main content area
+ * VB-03: Cart button — solid red rectangle without icon, "cadastre-se" hidden
+ * VB-04: PLP — products not visible (JS-loaded, ensure container visible)
+ * VB-05: B2B register — oversized red banner box at top
+ * VB-06: Mobile search — icon misaligned, unstyled container
+ * VB-07: Mobile PLP — large empty gap between header and content
+ * VB-08: Footer — contrast issues and certificate seal placeholders
+ * VB-09: Pagination — raw styling, needs refinement
+ * VB-10: Product title truncation — too aggressive
+ *
+ * Carregado via awa-head-preload.phtml APÓS awa-modernization-gridmotors.css.
+ * Zero alteração estrutural. Refinamentos visuais sobre o design system existente.
+ */
+
+
+/* =============================================================================
+   VB-01: Nav bar ghost white blocks
+   O elemento .section-item-title tem classes "nav-sections category-dropdown-item-title".
+   A regra inline `.nav-sections:not(.category-dropdown,...){background:#b73337}`
+   aplica fundo vermelho, mas Rokanthemes adiciona border/background branco por cima.
+   Fix: forçar transparência total nesses containers dentro da .awa-nav-bar.
+   ============================================================================= */
+
+/* O section-item-title dentro da nav bar: tirar fundo, borda, outline */
+body .page-wrapper .header-control.awa-nav-bar .section-item-title,
+body .page-wrapper .header-control.awa-nav-bar .nav-sections.section-item-title,
+body .page-wrapper .header-control.awa-nav-bar .section-item-title.nav-sections.category-dropdown-item-title {
+  background: transparent !important; /* Override Rokanthemes inline bg — justified: tema pai aplica bg:white via JS */
+  border: none !important;
+  box-shadow: none;
+  padding: 0;
+  margin: 0;
+  height: 0;
+  overflow: hidden;
+  width: 0;
+  min-width: 0;
+  display: none;
+}
+
+/* O section-item-content: não precisa de styling visual — é apenas container */
+body .page-wrapper .header-control.awa-nav-bar .section-item-content.nav-sections.category-dropdown-item-content {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none;
+}
+
+/* Ghost switch link (empty anchor) */
+body .page-wrapper .header-control.awa-nav-bar a.nav-sections.category-dropdown-item-switch {
+  display: none;
+}
+
+/* Rokanthemes tabs widget: reset styling on nav-sections tabs inside nav bar */
+body .page-wrapper .header-control.awa-nav-bar .section-items.nav-sections {
+  background: transparent;
+  border: none;
+}
+
+
+/* =============================================================================
+   VB-02: Mega menu flyout — subcategory text list covering content
+   The submenu panels (.level0.submenu.navigation__submenu) contain subcategory
+   text lists (Bauletos, Suportes, etc.) that render inline in the flow,
+   covering the main content area (banner/slider).
+   Fix: hide by default, show on hover with absolute positioning.
+   ============================================================================= */
+
+@media (min-width: 992px) {
+  /* ALL submenu panels: hidden by default */
+  body .page-wrapper .navigation.verticalmenu.side-verticalmenu .ui-menu-item.level0 > .level0.submenu,
+  body .page-wrapper .navigation.verticalmenu.side-verticalmenu .ui-menu-item.level0 > .submenu.navigation__submenu,
+  body .page-wrapper .navigation.verticalmenu.side-verticalmenu .ui-menu-item.level0 > div[id^="submenu-menu-"] {
+    display: none;
+    position: absolute;
+    left: 100%;
+    top: 0;
+    z-index: 200;
+    background: var(--awa-bg, #fff);
+    border-radius: var(--awa-radius-md, 8px);
+    box-shadow: 0 8px 32px rgba(0,0,0,.12);
+    min-width: 280px;
+    max-width: 600px;
+    border: 1px solid var(--awa-border, #e5e5e5);
+    padding: 16px;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+
+  /* Show on hover of parent item */
+  body .page-wrapper .navigation.verticalmenu.side-verticalmenu .ui-menu-item.level0:hover > .level0.submenu,
+  body .page-wrapper .navigation.verticalmenu.side-verticalmenu .ui-menu-item.level0:hover > .submenu.navigation__submenu,
+  body .page-wrapper .navigation.verticalmenu.side-verticalmenu .ui-menu-item.level0:hover > div[id^="submenu-menu-"] {
+    display: block;
+  }
+
+  /* The vertical menu container itself: position relative for flyout anchoring */
+  body .page-wrapper .navigation.verticalmenu.side-verticalmenu {
+    position: relative;
+  }
+
+  /* Each level0 item: position relative for submenu positioning */
+  body .page-wrapper .navigation.verticalmenu.side-verticalmenu .ui-menu-item.level0 {
+    position: relative;
+  }
+}
+
+
+/* =============================================================================
+   VB-03: Cart button — solid red rectangle without icon
+   DOM analysis (2026-04-29):
+   - a.awa-header-cart-link is at pos ~33229 (inside logo area), has SVG icon.
+     Positioned via CSS grid: `grid-area:cart` on `#header .awa-header-cart-link`.
+   - div.awa-header-cart (data-awa-header-cart) at pos ~39502 (right-col).
+     Contains: a.awa-header-cart-fallback + div.mini-carts > div.minicart-wrapper
+     > a.showcart.header-mini-cart (KnockoutJS — NO visible icon, just sr-only
+     text + counter.qty.empty). This renders as a solid red block.
+
+   Strategy:
+   1. The awa-header-cart-link SVG is the REAL visible cart — style it properly.
+   2. The minicart-wrapper must be visually transparent but FUNCTIONAL (KO dropdown).
+   3. The awa-header-cart container in right-col: collapse visually.
+   ============================================================================= */
+
+/* 1. AWA SVG Cart Link (in logo area, positioned via grid-area:cart) */
+body .page-wrapper .awa-header-cart-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: var(--awa-primary, #b73337);
+  border-radius: var(--awa-radius-md, 8px);
+  color: #fff;
+  text-decoration: none;
+  position: relative;
+  flex-shrink: 0;
+}
+
+body .page-wrapper .awa-header-cart-link .awa-header-cart-link-icon {
+  width: 22px;
+  height: 22px;
+  stroke: #fff;
+  fill: none;
+}
+
+/* Badge on AWA cart icon */
+body .page-wrapper .awa-cart-link-badge:not(.awa-badge-hidden) {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--awa-primary, #b73337);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #fff;
+  line-height: 1;
+}
+
+/* 2. Magento minicart in right-col: make visually invisible */
+/* The entire awa-header-cart wrapper in the right-col: collapse */
+body .page-wrapper .awa-header-minicart[data-awa-header-cart="true"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+  padding: 0;
+  margin: -1px;
+}
+
+/* BUT when the KO dropdown is active, make it visible again */
+body .page-wrapper .awa-header-minicart[data-awa-header-cart="true"] .minicart-wrapper.active,
+body .page-wrapper .awa-header-minicart[data-awa-header-cart="true"] .block-minicart:not(.empty) {
+  position: fixed;
+  top: 60px;
+  right: 16px;
+  width: 360px;
+  max-width: 90vw;
+  height: auto;
+  max-height: 80vh;
+  clip: auto;
+  overflow: auto;
+  z-index: 9999;
+  background: var(--awa-bg, #fff);
+  border-radius: var(--awa-radius-lg, 12px);
+  box-shadow: 0 16px 48px rgba(0,0,0,.15);
+  border: 1px solid var(--awa-border, #e5e5e5);
+  padding: 16px;
+}
+
+/* Cart fallback text: sr-only */
+body .page-wrapper .awa-header-cart-fallback span {
+  clip: rect(0, 0, 0, 0);
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* Account prompt — "cadastre-se" link styling */
+body .page-wrapper .awa-site-header .awa-header-account-prompt__link--register {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  border: 1.5px solid var(--awa-primary, #b73337);
+  border-radius: var(--awa-radius-md, 8px);
+  color: var(--awa-primary, #b73337);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background .15s var(--awa-ease), color .15s var(--awa-ease);
+}
+
+body .page-wrapper .awa-site-header .awa-header-account-prompt__link--register:hover {
+  background: var(--awa-primary, #b73337);
+  color: #fff;
+}
+
+
+/* =============================================================================
+   VB-04: PLP — products not visible
+   Os produtos na listagem de categoria não são exibidos na renderização inicial.
+   Podem ser carregados via JS (AJAX pagination). Garantir que os containers
+   de produto estejam visíveis e não colapsados.
+   ============================================================================= */
+
+.catalog-category-view .product-item,
+.catalogsearch-result-index .product-item {
+  display: flex;
+  flex-direction: column;
+  min-height: 200px;
+}
+
+/* Ensure product images load with proper dimensions */
+.catalog-category-view .product-image-container,
+.catalogsearch-result-index .product-image-container {
+  width: 100%;
+  min-height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--awa-bg-subtle);
+  border-radius: var(--card-radius) var(--card-radius) 0 0;
+}
+
+/* Product toolbar: better layout */
+.catalog-category-view .toolbar.toolbar-products {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+}
+
+
+/* =============================================================================
+   VB-05: B2B register — b2b-login-bar rendering as oversized red box
+   The .b2b-login-bar is an EMPTY div meant to be a 3px decorative gradient line
+   between the header and content. CSS in awa-super-global sets height:3px + gradient.
+   Fix: ensure the decorative line renders correctly without expanding.
+   ============================================================================= */
+
+body.b2b-register-index .b2b-login-bar {
+  height: 3px;
+  min-height: 0;
+  max-height: 3px;
+  padding: 0;
+  margin: 0 auto;
+  width: 60%;
+  max-width: 400px;
+  background: linear-gradient(90deg, var(--awa-primary, #b73337) 0%, #e8474c 100%);
+  border-radius: 9999px;
+  overflow: hidden;
+  display: block;
+  border: none;
+}
+
+/* B2B login header: clean centering */
+body.b2b-register-index .b2b-login-header {
+  text-align: center;
+  padding: 24px 16px 0;
+}
+
+/* B2B logo: controlled size */
+body.b2b-register-index .b2b-login-logo {
+  display: flex;
+  justify-content: center;
+  padding: 32px 16px 16px;
+}
+
+body.b2b-register-index .b2b-login-logo img {
+  max-width: 160px;
+  height: auto;
+}
+
+/* B2B form container: proper max-width */
+body.b2b-register-index .b2b-register-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+
+/* =============================================================================
+   VB-06: Mobile search — icon misaligned, unstyled container
+   No mobile, o ícone de busca aparece abaixo do input em vez de inline.
+   Fix: flex container para o form, ícone alinhado à esquerda dentro do input.
+   ============================================================================= */
+
+@media (max-width: 991px) {
+  /* Search form on mobile: horizontal flex */
+  body .page-wrapper .awa-site-header form#search_mini_form,
+  body .page-wrapper .block-search form.minisearch {
+    display: flex;
+    align-items: stretch;
+    border: 1.5px solid var(--awa-border);
+    border-radius: var(--awa-radius-md);
+    background: var(--awa-bg);
+    overflow: hidden;
+    height: 44px;
+  }
+
+  /* Search field: fill available space */
+  body .page-wrapper .awa-site-header form#search_mini_form .field.search,
+  body .page-wrapper .block-search form.minisearch .field.search {
+    flex: 1 1 auto;
+    display: flex;
+    min-width: 0;
+  }
+
+  body .page-wrapper .awa-site-header form#search_mini_form .field.search .control,
+  body .page-wrapper .block-search form.minisearch .field.search .control {
+    flex: 1;
+    display: flex;
+    align-items: stretch;
+  }
+
+  /* Search input on mobile: clean styling */
+  body .page-wrapper .awa-site-header form#search_mini_form input#search,
+  body .page-wrapper .block-search form.minisearch input#search {
+    width: 100%;
+    border: none;
+    background: transparent;
+    padding: 0 12px;
+    font-size: 16px; /* prevents zoom on iOS */
+    outline: none;
+    box-shadow: none;
+    height: 100%;
+  }
+
+  /* Search button on mobile: aligned right */
+  body .page-wrapper .awa-site-header form#search_mini_form .actions,
+  body .page-wrapper .block-search form.minisearch .actions {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: stretch;
+  }
+
+  body .page-wrapper .awa-site-header form#search_mini_form button.action.search,
+  body .page-wrapper .block-search form.minisearch button.action.search {
+    position: static;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    min-width: 44px;
+    height: 100%;
+    background: var(--awa-primary);
+    color: var(--awa-text-inverse);
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    cursor: pointer;
+  }
+
+  body .page-wrapper .awa-site-header form#search_mini_form button.action.search svg,
+  body .page-wrapper .block-search form.minisearch button.action.search svg {
+    width: 18px;
+    height: 18px;
+    color: var(--awa-text-inverse);
+    stroke: var(--awa-text-inverse);
+    fill: none;
+  }
+
+  /* Fix: Insufficient padding causing icon overlap in search input */
+  body .page-wrapper .awa-site-header form#search_mini_form input#search,
+  body .page-wrapper .block-search form.minisearch input#search {
+    padding-right: 48px !important;
+    padding-left: 12px !important;
+  }
+
+  /* Search button on mobile: ensure it is a clickable icon on the right */
+  body .page-wrapper .awa-site-header form#search_mini_form .actions,
+  body .page-wrapper .block-search form.minisearch .actions {
+    position: absolute !important;
+    right: 0 !important;
+    top: 0 !important;
+    height: 100% !important;
+    z-index: 5 !important;
+  }
+}
+
+
+/* =============================================================================
+   VB-07: Mobile PLP — large empty gap between header and content
+   Fix: reduzir min-height do sidebar e page-main no mobile para evitar
+   espaço vazio fantasma.
+   ============================================================================= */
+
+@media (max-width: 991px) {
+  .catalog-category-view .page-main,
+  .catalogsearch-result-index .page-main {
+    min-height: auto;
+    padding-top: 0;
+  }
+
+  .catalog-category-view .columns,
+  .catalogsearch-result-index .columns {
+    min-height: auto;
+  }
+
+  .catalog-category-view .sidebar-main,
+  .catalogsearch-result-index .sidebar-main {
+    min-height: auto;
+    max-height: none;
+  }
+
+  /* Category filter: compact */
+  .catalog-category-view .block.filter {
+    margin-bottom: 12px;
+  }
+
+  /* Category banner: full width on mobile */
+  .catalog-category-view .category-view .category-image {
+    width: 100%;
+    border-radius: var(--awa-radius-md);
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+
+  .catalog-category-view .category-view .category-image img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    max-height: 200px;
+  }
+}
+
+
+/* =============================================================================
+   VB-08: Footer — contrast and certificate seals
+   Selos de certificado aparecem como retângulos cinza vazios.
+   Texto do rodapé com contraste fraco.
+   ============================================================================= */
+
+/* Footer certificate seals: ensure images load, add fallback */
+.page_footer .awa-footer-sec-seals img,
+.page_footer .awa-footer-pay-logos img,
+.page_footer .footer-bottom img[alt*="seguro"],
+.page_footer .footer-bottom img[alt*="certificado"] {
+  min-width: 40px;
+  min-height: 28px;
+  object-fit: contain;
+}
+
+/* Footer text: better contrast (WCAG AA) */
+.page_footer .copyright,
+.page_footer .copyright p,
+.page_footer .footer-bottom-inner {
+  color: var(--awa-text-secondary);
+  font-size: var(--awa-font-sm);
+}
+
+/* "DESENVOLVIDO POR" — ensure content visible */
+.page_footer .awa-footer-dev {
+  color: var(--awa-text-muted);
+  font-size: var(--awa-font-xs);
+}
+
+
+/* =============================================================================
+   VB-09: Pagination refinement
+   Botões de paginação crus, sem bordas arredondadas ou estados visuais.
+   ============================================================================= */
+
+.pages .pages-items .item a.page,
+.pages .pages-items .item > span.page {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  border-radius: var(--awa-radius-md);
+  border: 1px solid var(--awa-border);
+  font-size: var(--awa-font-sm);
+  font-weight: var(--awa-weight-medium);
+  color: var(--awa-text);
+  background: var(--awa-bg);
+  transition: background var(--awa-duration-fast) var(--awa-ease),
+              border-color var(--awa-duration-fast) var(--awa-ease);
+}
+
+.pages .pages-items .item a.page:hover {
+  background: var(--awa-bg-muted);
+  border-color: var(--awa-border-strong);
+}
+
+/* Active page */
+.pages .pages-items .item.current > span.page {
+  background: var(--awa-primary);
+  color: var(--awa-text-inverse);
+  border-color: var(--awa-primary);
+  font-weight: var(--awa-weight-bold);
+}
+
+/* Next/Previous buttons */
+.pages .pages-items .item .action.next,
+.pages .pages-items .item .action.previous {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  border-radius: var(--awa-radius-md);
+  border: 1px solid var(--awa-border);
+  background: var(--awa-bg);
+  color: var(--awa-text);
+}
+
+.pages .pages-items .item .action.next:hover,
+.pages .pages-items .item .action.previous:hover {
+  background: var(--awa-bg-muted);
+  border-color: var(--awa-border-strong);
+}
+
+
+/* =============================================================================
+   VB-10: Product title truncation — too aggressive
+   Nomes de produto muito truncados, difícil identificar peças específicas.
+   Fix: permitir até 3 linhas no desktop, 2 no mobile.
+   ============================================================================= */
+
+/* PLP product names: 3 lines on desktop */
+.catalog-category-view .product-item-name a,
+.catalogsearch-result-index .product-item-name a {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.4;
+  min-height: 4.2em; /* 3 lines × 1.4 */
+  font-size: var(--awa-font-sm);
+}
+
+@media (max-width: 767px) {
+  .catalog-category-view .product-item-name a,
+  .catalogsearch-result-index .product-item-name a {
+    -webkit-line-clamp: 2;
+    min-height: 2.8em; /* 2 lines × 1.4 */
+  }
+}
+
+/* Homepage swiper: already handled in bugfix-2026-04-28, reinforce */
+.products-swiper .item-product .product-name a {
+  -webkit-line-clamp: 3;
+  min-height: 3.8em;
+  line-height: 1.35;
+}
+
+
+/* =============================================================================
+   VB-11: Footer — Certificados e Segurança empty seal placeholders
+   As 2 imagens de certificado são retângulos cinza vazios.
+   Fix: hide broken images, show text fallback, add visual container.
+   ============================================================================= */
+
+/* Container for certificate seals: flex layout, centered */
+body .page-wrapper .page_footer .footer-bottom .awa-footer-sec-seals {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Fix: White SVGs on white background in footer */
+body .page-wrapper .page_footer .footer-bottom .awa-seal svg path,
+body .page-wrapper .page_footer .footer-bottom .footer-seal-item svg path {
+  fill: var(--awa-primary, #b73337) !important;
+}
+
+body .page-wrapper .page_footer .footer-bottom .awa-seal img,
+body .page-wrapper .page_footer .footer-bottom .footer-seal-item img {
+  display: block !important;
+  width: auto !important;
+  height: 40px !important;
+  max-width: 120px !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Broken seal images: give visual container so empty state looks intentional */
+body .page-wrapper .page_footer .footer-bottom .awa-seal,
+body .page-wrapper .page_footer .footer-bottom .footer-seal-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 60px;
+  min-height: 40px;
+  padding: 6px 10px;
+  background: var(--awa-bg-subtle, #f5f5f5);
+  border: 1px solid var(--awa-border, #e5e5e5);
+  border-radius: var(--awa-radius-sm, 6px);
+  font-size: 10px;
+  color: var(--awa-text-muted, #999);
+}
+
+/* Broken images: hide alt text overflow */
+body .page-wrapper .page_footer .footer-bottom img[src=""]:not([src]),
+body .page-wrapper .page_footer .footer-bottom img:not([src]) {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+/* Footer gap between social and payment sections: tighten */
+body .page-wrapper .page_footer .footer-bottom {
+  padding-top: 24px;
+  padding-bottom: 24px;
+}
+
+body .page-wrapper .page_footer .footer-bottom-inner {
+  max-width: var(--awa-container-max, 1300px);
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+/* Payment and seal section: horizontal flex with gap */
+body .page-wrapper .page_footer .awa-footer-pay-sec {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 24px;
+  justify-content: center;
+  padding: 16px 0;
+}
+
+/* Payment logos: better spacing */
+body .page-wrapper .page_footer .awa-footer-pay-logos {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+body .page-wrapper .page_footer .awa-pay-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  height: 30px;
+  padding: 4px 6px;
+  background: var(--awa-bg, #fff);
+  border: 1px solid var(--awa-border, #e5e5e5);
+  border-radius: var(--awa-radius-sm, 6px);
+}
+
+body .page-wrapper .page_footer .awa-pay-logo img {
+  height: 20px;
+  width: auto;
+  object-fit: contain;
+}
+
+/* Copyright block: better spacing and hierarchy */
+body .page-wrapper .page_footer .awa-footer-bottom__copyright {
+  text-align: center;
+  padding-top: 16px;
+  border-top: 1px solid var(--awa-border, #e5e5e5);
+  margin-top: 16px;
+  color: var(--awa-text-secondary, #666);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+
+/* =============================================================================
+   VB-12: Mobile — Category grid showing only 2 items
+   "Busque por Categorias" mostra apenas Bauletos e Guidões.
+   Fix: garantir grid responsivo que mostra mais items no mobile.
+   ============================================================================= */
+
+@media (max-width: 767px) {
+  /* Category browse grid: responsive mobile columns */
+  body .page-wrapper .awa-categories-grid,
+  body .page-wrapper .home-category-grid,
+  body .page-wrapper .awa-home-categories .category-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+    padding: 0 16px;
+  }
+
+  /* Category cards: proper sizing */
+  body .page-wrapper .awa-categories-grid .category-card,
+  body .page-wrapper .home-category-grid .category-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px 8px;
+    background: var(--awa-bg-subtle, #f7f7f7);
+    border-radius: var(--awa-radius-lg, 12px);
+    text-align: center;
+    gap: 8px;
+  }
+
+  /* Category card images: contain within card */
+  body .page-wrapper .awa-categories-grid .category-card img,
+  body .page-wrapper .home-category-grid .category-card img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+  }
+}
+
+
+/* =============================================================================
+   VB-13: Homepage sections — excessive whitespace between sections
+   Fix: normalize vertical spacing between homepage content blocks.
+   ============================================================================= */
+
+/* Homepage section containers: consistent spacing */
+body.cms-index-index .page-main .widget,
+body.cms-index-index .page-main .block-static-block,
+body.cms-index-index .page-main .cms-home-section,
+body.cms-index-index .page-main .home-section {
+  margin-bottom: 32px;
+}
+
+body.cms-index-index .page-main .widget:last-child,
+body.cms-index-index .page-main .block-static-block:last-child {
+  margin-bottom: 0;
+}
+
+/* Section headings on homepage: consistent sizing */
+body.cms-index-index .page-main .section-title,
+body.cms-index-index .page-main .block-title,
+body.cms-index-index .page-main h2.title {
+  font-size: clamp(18px, 2.2vw, 24px);
+  font-weight: var(--awa-weight-bold, 700);
+  text-align: center;
+  margin-bottom: 20px;
+  color: var(--awa-text, #1a1a1a);
+  line-height: 1.3;
+}
+
+
+/* =============================================================================
+   VB-14: Cart page — visual polish
+   A página do carrinho está funcional mas pode ser refinada.
+   ============================================================================= */
+
+/* Cart page title */
+body.checkout-cart-index .page-title-wrapper .page-title {
+  font-size: clamp(22px, 2.5vw, 28px);
+  font-weight: var(--awa-weight-bold, 700);
+  color: var(--awa-text, #1a1a1a);
+}
+
+/* Empty cart: centered card */
+body.checkout-cart-index .cart-empty {
+  text-align: center;
+  padding: 48px 24px;
+  max-width: 600px;
+  margin: 32px auto;
+  background: var(--awa-bg, #fff);
+  border-radius: var(--awa-radius-lg, 12px);
+  border: 1px solid var(--awa-border, #e8e8e8);
+  box-shadow: 0 2px 8px rgba(0,0,0,.04);
+}
+
+/* Continue shopping CTA */
+body.checkout-cart-index .cart-empty .action.primary,
+body.checkout-cart-index .action.continue {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 28px;
+  background: var(--awa-primary, #b73337);
+  color: var(--awa-text-inverse, #fff);
+  border: none;
+  border-radius: var(--awa-radius-md, 8px);
+  font-size: 14px;
+  font-weight: var(--awa-weight-semibold, 600);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background var(--awa-duration-fast, .15s) var(--awa-ease, ease),
+              transform var(--awa-duration-fast, .15s) var(--awa-ease, ease);
+}
+
+body.checkout-cart-index .cart-empty .action.primary:hover,
+body.checkout-cart-index .action.continue:hover {
+  background: var(--awa-primary-hover, #9a2a2d);
+  transform: translateY(-1px);
+}
+
+
+/* =============================================================================
+   VB-15: Sidebar sticky buttons — too intrusive
+   Botões flutuantes à direita (scroll-top, cart, account) são muito grandes.
+   Fix: reduzir tamanho, adicionar opacidade e transição suave.
+   ============================================================================= */
+
+@media (min-width: 992px) {
+  body .page-wrapper .awa-sticky-sidebar,
+  body .page-wrapper .sidebar-fixed-buttons,
+  body .page-wrapper .rk-sticky-sidebar {
+    opacity: 0.6;
+    transition: opacity var(--awa-duration-normal, .3s) var(--awa-ease, ease);
+  }
+
+  body .page-wrapper .awa-sticky-sidebar:hover,
+  body .page-wrapper .sidebar-fixed-buttons:hover,
+  body .page-wrapper .rk-sticky-sidebar:hover {
+    opacity: 1;
+  }
+
+  /* Reduce button size */
+  body .page-wrapper .awa-sticky-sidebar a,
+  body .page-wrapper .awa-sticky-sidebar button,
+  body .page-wrapper .rk-sticky-sidebar a,
+  body .page-wrapper .rk-sticky-sidebar button {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+    border-radius: var(--awa-radius-md, 8px);
+  }
+}
+
+
+/* =============================================================================
+   VB-16: B2B promo bar — mobile overlap fix
+   "Cadastre agora" CTA sobrepõe o texto descritivo no mobile.
+   ============================================================================= */
+
+@media (max-width: 767px) {
+  body .page-wrapper .awa-b2b-promo-bar .awa-b2b-promo-bar__inner {
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px 12px;
+    text-align: center;
+  }
+
+  body .page-wrapper .awa-b2b-promo-bar .awa-b2b-promo-bar__text {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  body .page-wrapper .awa-b2b-promo-bar .awa-b2b-promo-bar__cta {
+    font-size: 12px;
+    padding: 6px 14px;
+    width: auto;
+    align-self: center;
+  }
+
+  /* Hide separator and tail on mobile — already handled, reinforce */
+  body .page-wrapper .awa-b2b-promo-bar .awa-b2b-promo-bar__separator,
+  body .page-wrapper .awa-b2b-promo-bar .awa-b2b-promo-bar__tail {
+    display: none;
+  }
+}
+
+
+/* =============================================================================
+   VB-17: Breadcrumbs — mobile positioning and visibility
+   ============================================================================= */
+
+@media (max-width: 991px) {
+  body .page-wrapper .breadcrumbs {
+    padding: 8px 16px;
+    margin: 0;
+    font-size: 12px;
+    background: var(--awa-bg-subtle, #f7f7f7);
+  }
+
+  body .page-wrapper .breadcrumbs .items {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  body .page-wrapper .breadcrumbs .items::-webkit-scrollbar {
+    display: none;
+  }
+
+  body .page-wrapper .breadcrumbs .item {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+}
+
+
+/* =============================================================================
+   VB-18: Product cards — hover elevation and image scale
+   Cards de produto precisam de micro-interação no hover para sensação premium.
+   ============================================================================= */
+
+/* Product cards: hover effect */
+body .page-wrapper .product-item-info {
+  transition: transform var(--awa-duration-normal, .25s) var(--awa-ease, ease),
+              box-shadow var(--awa-duration-normal, .25s) var(--awa-ease, ease);
+  border-radius: var(--awa-radius-lg, 12px);
+  overflow: hidden;
+}
+
+body .page-wrapper .product-item-info:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+/* Product image: subtle zoom on hover */
+body .page-wrapper .product-item-info .product-image-wrapper {
+  overflow: hidden;
+  border-radius: var(--awa-radius-lg, 12px) var(--awa-radius-lg, 12px) 0 0;
+}
+
+body .page-wrapper .product-item-info .product-image-photo {
+  transition: transform var(--awa-duration-slow, .4s) var(--awa-ease, ease);
+}
+
+body .page-wrapper .product-item-info:hover .product-image-photo {
+  transform: scale(1.04);
+}
+
+
+/* =============================================================================
+   VB-19: Container alignment — enforce max-width 1300px globally
+   Evita que conteúdo se espalhe em monitores ultra-wide.
+   ============================================================================= */
+
+body .page-wrapper .page-main > .columns,
+body .page-wrapper .page-main > .page-title-wrapper,
+body .page-wrapper .breadcrumbs > .items {
+  max-width: var(--awa-container-max, 1300px);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 16px;
+  padding-right: 16px;
+  box-sizing: border-box;
+}
+
+
+/* =============================================================================
+   VB-20: WhatsApp float button — prevent conflict with mobile bottom nav
+   O botão do WhatsApp flutua no canto inferior direito, conflitando com
+   a bottom nav no mobile.
+   ============================================================================= */
+
+@media (max-width: 991px) {
+  body .page-wrapper #whatsapp-btn,
+  body .page-wrapper .awa-whatsapp-float,
+  body .page-wrapper [class*="whatsapp"] {
+    bottom: 72px; /* above bottom nav (56px + 16px margin) */
+    right: 12px;
+    z-index: 999;
+  }
+}
+
+@media (min-width: 992px) {
+  body .page-wrapper #whatsapp-btn,
+  body .page-wrapper .awa-whatsapp-float {
+    bottom: 20px;
+    right: 20px;
+  }
+}
+
+
+/* =============================================================================
+   VB-21: Focus states — accessibility improvement
+   Garantir que todos os elementos interativos tenham focus ring visível
+   para navegação via teclado (WCAG 2.1 AA).
+   ============================================================================= */
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--awa-primary, #b73337);
+  outline-offset: 2px;
+  border-radius: var(--awa-radius-sm, 4px);
+}
+
+/* Remove default outline for mouse users */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+
+/* =============================================================================
+   VB-22: Form inputs — global styling consistency
+   Inputs no site inteiro precisam de aparência consistente.
+   ============================================================================= */
+
+body .page-wrapper input[type="text"],
+body .page-wrapper input[type="email"],
+body .page-wrapper input[type="password"],
+body .page-wrapper input[type="tel"],
+body .page-wrapper input[type="number"],
+body .page-wrapper input[type="search"],
+body .page-wrapper select,
+body .page-wrapper textarea {
+  border: 1.5px solid var(--awa-border, #ddd);
+  border-radius: var(--awa-radius-md, 8px);
+  padding: 10px 14px;
+  font-size: 14px;
+  color: var(--awa-text, #1a1a1a);
+  background: var(--awa-bg, #fff);
+  transition: border-color var(--awa-duration-fast, .15s) var(--awa-ease, ease),
+              box-shadow var(--awa-duration-fast, .15s) var(--awa-ease, ease);
+  -webkit-appearance: none;
+}
+
+body .page-wrapper input[type="text"]:focus,
+body .page-wrapper input[type="email"]:focus,
+body .page-wrapper input[type="password"]:focus,
+body .page-wrapper input[type="tel"]:focus,
+body .page-wrapper input[type="number"]:focus,
+body .page-wrapper input[type="search"]:focus,
+body .page-wrapper select:focus,
+body .page-wrapper textarea:focus {
+  border-color: var(--awa-primary, #b73337);
+  box-shadow: 0 0 0 3px rgba(183, 51, 55, 0.1);
+}
+
+/* Prevent iOS zoom on input focus (font-size < 16px) */
+@media (max-width: 767px) {
+  body .page-wrapper input[type="text"],
+  body .page-wrapper input[type="email"],
+  body .page-wrapper input[type="password"],
+  body .page-wrapper input[type="tel"],
+  body .page-wrapper input[type="number"],
+  body .page-wrapper select {
+    font-size: 16px;
+  }
+}
+
+/* =============================================================================
+   VB-25: B2B Register Layout Fixes
+   Fixes the header receiving an unwanted red gradient and enforces the correct
+   block layout for the B2B registration form container.
+   ============================================================================= */
+
+body.b2b-register-index .page-wrapper .register-header {
+  background: transparent !important;
+  color: var(--awa-text, #1a1a1a) !important;
+  border: none !important;
+  padding: 0 !important;
+  margin-bottom: 26px !important;
+  text-align: center !important;
+  display: block !important;
+}
+
+body.b2b-register-index .page-wrapper .register-header .register-title {
+  color: var(--awa-text, #1a1a1a) !important;
+  font-size: clamp(24px, 3vw, 30px) !important;
+}
+
+body.b2b-register-index .page-wrapper .register-header .subtitle,
+body.b2b-register-index .page-wrapper .register-header .register-trust-note {
+  color: var(--awa-text-muted, #666) !important;
+}
+
+body.b2b-register-index .b2b-register-container {
+  display: block !important;
+  max-width: 1000px !important;
+  margin: 0 auto !important;
+}
+
+body.b2b-register-index .b2b-benefits {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+}
+
+
+/* =============================================================================
+   VB-26: Nav-bar red bar — clean appearance on category/search pages
+   Na homepage a nav-bar é height:0. Em categorias, ela é visível com:
+   - Ghost blocks (section-item-title) — handled by VB-01 display:none
+   - "Departamentos" button + vertical menu
+   - "Lançamentos" link
+   Fix: ensure the red bar looks clean, properly sized, and items are aligned.
+   ============================================================================= */
+
+/* Red nav-bar: consistent height and alignment */
+body .page-wrapper .header-control.header-nav.awa-nav-bar {
+  background: var(--awa-primary, #b73337);
+  min-height: 44px;
+  display: flex;
+  align-items: stretch;
+}
+
+/* Nav-bar inner container: proper alignment */
+body .page-wrapper .header-control.awa-nav-bar .container {
+  max-width: var(--awa-container-max, 1300px);
+  margin: 0 auto;
+  width: 100%;
+  padding-left: var(--awa-container-pad, clamp(16px, 3vw, 24px));
+  padding-right: var(--awa-container-pad, clamp(16px, 3vw, 24px));
+  box-sizing: border-box;
+  display: flex;
+  align-items: stretch;
+}
+
+body .page-wrapper .header-control.awa-nav-bar .awa-nav-bar__inner {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  max-width: var(--awa-container-max, 1300px) !important;
+  margin: 0 auto !important;
+  box-sizing: border-box;
+  gap: 0;
+}
+
+/* Remove .container restrictions inside the header so the inner elements can reach 1300px */
+body .page-wrapper .awa-site-header .header_main > .container,
+body .page-wrapper .awa-site-header .header-nav > .container,
+body .page-wrapper .awa-site-header .header-control.awa-nav-bar > .container {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding-left: var(--awa-container-pad, clamp(16px, 3vw, 24px)) !important;
+    padding-right: var(--awa-container-pad, clamp(16px, 3vw, 24px)) !important;
+    box-sizing: border-box !important;
+}
+
+body .page-wrapper .awa-site-header .wp-header {
+    max-width: var(--awa-container-max, 1300px) !important;
+    margin: 0 auto !important;
+    width: 100% !important;
+}
+
+/* "Departamentos" button: premium style */
+body .page-wrapper .header-control.awa-nav-bar .awa-header-categories {
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* Departamentos trigger button */
+body .page-wrapper .header-control.awa-nav-bar .awa-header-categories > nav > .sections > .section-items {
+  display: flex;
+  align-items: stretch;
+}
+
+/* Nav links inside the red bar (e.g., "Lançamentos") */
+body .page-wrapper .header-control.awa-nav-bar a.level-top,
+body .page-wrapper .header-control.awa-nav-bar .navigation__link.level-top {
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: opacity .15s var(--awa-ease);
+}
+
+body .page-wrapper .header-control.awa-nav-bar a.level-top:hover {
+  opacity: 0.85;
+}
+
+/* Category labels (QUENTE badge) */
+body .page-wrapper .header-control.awa-nav-bar .cat-label {
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 6px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+
+/* =============================================================================
+   VB-27: Header search input — premium polish
+   The search bar needs a cleaner look with proper border-radius and icon.
+   ============================================================================= */
+
+/* Desktop search form */
+@media (min-width: 992px) {
+  body .page-wrapper .awa-site-header .block-search form.minisearch,
+  body .page-wrapper .awa-site-header form#search_mini_form {
+    display: flex;
+    align-items: stretch;
+    border: 2px solid var(--awa-border, #e0e0e0);
+    border-radius: var(--awa-radius-lg, 12px);
+    background: var(--awa-bg, #fff);
+    overflow: hidden;
+    height: 46px;
+    transition: border-color .2s var(--awa-ease), box-shadow .2s var(--awa-ease);
+  }
+
+  body .page-wrapper .awa-site-header .block-search form.minisearch:focus-within,
+  body .page-wrapper .awa-site-header form#search_mini_form:focus-within {
+    border-color: var(--awa-primary, #b73337);
+    box-shadow: 0 0 0 3px rgba(183, 51, 55, 0.08);
+  }
+
+  /* Search input */
+  body .page-wrapper .awa-site-header input#search {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 0 16px;
+    font-size: 15px;
+    color: var(--awa-text, #1a1a1a);
+    outline: none;
+  }
+
+  body .page-wrapper .awa-site-header input#search::placeholder {
+    color: var(--awa-text-muted, #999);
+  }
+
+  /* Search button */
+  body .page-wrapper .awa-site-header button.action.search {
+    flex-shrink: 0;
+    width: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--awa-primary, #b73337);
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    transition: background .15s var(--awa-ease);
+  }
+
+  body .page-wrapper .awa-site-header button.action.search:hover {
+    background: var(--awa-primary-hover, #9a2a2d);
+  }
+}
+
+
+/* =============================================================================
+   VB-28: Header logo — proper sizing and alignment
+   ============================================================================= */
+
+body .page-wrapper .awa-site-header .logo img,
+body .page-wrapper #header .logo img {
+  max-height: 48px;
+  width: auto;
+  object-fit: contain;
+}
+
+@media (max-width: 767px) {
+  body .page-wrapper .awa-site-header .logo img,
+  body .page-wrapper #header .logo img {
+    max-height: 36px;
+  }
+}
+
+
+/* =============================================================================
+   VB-29: Mobile header — spacing and alignment refinements
+   ============================================================================= */
+
+@media (max-width: 991px) {
+  /* Main header: compact padding */
+  body .page-wrapper .awa-site-header .header-main,
+  body .page-wrapper #header .header-main {
+    padding: 8px 12px;
+  }
+
+  /* B2B promo bar: single line on mobile */
+  body .page-wrapper .awa-b2b-promo-bar {
+    font-size: 11px;
+    min-height: 32px;
+    padding: 4px 8px;
+  }
+
+  /* Nav hamburger: clean touch target */
+  body .page-wrapper .awa-site-header .nav-toggle,
+  body .page-wrapper .awa-site-header .awa-nav-toggle {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--awa-radius-md, 8px);
+    background: transparent;
+    border: none;
+    color: var(--awa-text, #1a1a1a);
+  }
+
+  /* Cart icon on mobile: proper sizing in grid */
+  body .page-wrapper .awa-header-cart-link {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--awa-primary, #b73337);
+    box-shadow: 0 4px 12px rgba(183, 51, 55, 0.2);
+  }
+
+  body .page-wrapper .awa-header-cart-link .awa-header-cart-link-icon {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+
+/* =============================================================================
+   VB-30: Vertical menu panel — premium dropdown appearance
+   On category pages, when hovering "Departamentos", the vertical menu
+   should look like a premium dropdown panel.
+   ============================================================================= */
+
+@media (min-width: 992px) {
+  /* Vertical menu panel: white card with shadow */
+  body .page-wrapper .navigation.verticalmenu.side-verticalmenu {
+    background: var(--awa-bg, #fff);
+    border-radius: 0 0 var(--awa-radius-lg, 12px) var(--awa-radius-lg, 12px);
+    box-shadow: 0 8px 32px rgba(0,0,0,.1);
+    border: 1px solid var(--awa-border, #e5e5e5);
+    border-top: none;
+    max-height: 70vh;
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+
+  /* Menu items: clean styling */
+  body .page-wrapper .navigation.verticalmenu.side-verticalmenu .ui-menu-item.level0 > a {
+    padding: 10px 16px;
+    font-size: 14px;
+    color: var(--awa-text, #1a1a1a);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid var(--awa-border-light, #f0f0f0);
+    transition: background .15s var(--awa-ease), color .15s var(--awa-ease);
+  }
+
+  body .page-wrapper .navigation.verticalmenu.side-verticalmenu .ui-menu-item.level0 > a:hover {
+    background: var(--awa-bg-subtle, #f7f7f7);
+    color: var(--awa-primary, #b73337);
+  }
+
+  body .page-wrapper .navigation.verticalmenu.side-verticalmenu .ui-menu-item.level0:last-child > a {
+    border-bottom: none;
+  }
+
+  /* Navigation label: proper text styling */
+  body .page-wrapper .navigation.verticalmenu.side-verticalmenu .navigation__label {
+    font-weight: 500;
+  }
+
+  /* Icon before category name */
+  body .page-wrapper .navigation.verticalmenu.side-verticalmenu .ui-menu-item.level0 > a > em {
+    width: 20px;
+    text-align: center;
+    color: var(--awa-text-muted, #999);
+    font-size: 14px;
+  }
+
+  /* Category expand toggle */
+  body .page-wrapper .navigation.verticalmenu.side-verticalmenu .open-children-toggle {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--awa-text-muted, #999);
+    transition: background .15s var(--awa-ease);
+  }
+
+  body .page-wrapper .navigation.verticalmenu.side-verticalmenu .open-children-toggle:hover {
+    background: var(--awa-bg-subtle, #f0f0f0);
+    color: var(--awa-text, #333);
+  }
+}
+
+
+/* =============================================================================
+   VB-31: E-01 FIX — Círculo vermelho fantasma dentro do campo de busca
+   Causa: Magento core CSS (lib/web/css) aplica content:'\e615' (font icon lupa)
+   no button.action.search::before com position:absolute + left:12px.
+   O CSS async (awa-header-premium.css) corrige com position:static, mas há
+   FOUC no primeiro paint — a lupa renderiza como círculo vermelho sobre o input.
+   Fix: Seletores nucleares (2,6,2) matching _header-pixelperfect.less pattern
+   para matar ::before com content:none + position:static reforçado.
+   ============================================================================= */
+
+/* Nuclear: matar font icon ::before no botão de busca — especificidade (2,6,2) */
+html body .page-wrapper #header.header-container[data-awa-header-shell="true"] #search_mini_form .actions .action.search::before,
+html body .page-wrapper #header.header-container[data-awa-header-shell="true"] .awa-header-search-col button.action.search::before,
+html body .page-wrapper .awa-site-header .awa-main-header .awa-header-search-col button.action.search::before,
+html body .page-wrapper .awa-site-header .awa-main-header .awa-header-search-col .actions .action.search::before,
+html body .page-wrapper .block-search .actions button.action.search::before,
+body .page-wrapper #header button.action.search::before,
+body .page-wrapper .awa-site-header button.action.search::before {
+  content: none !important; /* Elimina glifo font icon — justificado: botão usa SVG inline */
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* ::after também, por segurança */
+html body .page-wrapper #header.header-container[data-awa-header-shell="true"] .awa-header-search-col button.action.search::after,
+html body .page-wrapper .awa-site-header .awa-main-header .awa-header-search-col button.action.search::after,
+body .page-wrapper #header button.action.search::after,
+body .page-wrapper .awa-site-header button.action.search::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* Fix: The ghost magnifying glass inside search input (from #awa-search-label::before) */
+body .page-wrapper .block-search .label#awa-search-label::before,
+body .page-wrapper #search_mini_form .label#awa-search-label::before,
+body .page-wrapper .block-search .control::before,
+body .page-wrapper .block-search .control::after,
+body .page-wrapper .block-search .field.search::before,
+body .page-wrapper .block-search .field.search::after {
+  content: none !important;
+  display: none !important;
+  background: none !important;
+}
+
+/* Fix: The red magnifying glass inside search input (often from Magento core CSS) */
+body .page-wrapper .block-search .control::before,
+body .page-wrapper .block-search .control::after,
+body .page-wrapper .block-search .field.search::before,
+body .page-wrapper .block-search .field.search::after,
+body .page-wrapper #search_mini_form .control::before,
+body .page-wrapper #search_mini_form .field.search::before {
+  content: none !important;
+  display: none !important;
+  background: none !important;
+}
+
+/* Reforçar position:static — especificidade nuclear */
+html body .page-wrapper #header.header-container[data-awa-header-shell="true"] #search_mini_form .actions .action.search,
+html body .page-wrapper #header.header-container[data-awa-header-shell="true"] .awa-header-search-col button.action.search,
+html body .page-wrapper .awa-site-header .awa-main-header .awa-header-search-col button.action.search,
+html body .page-wrapper .awa-site-header .awa-main-header .awa-header-search-col .actions .action.search,
+body .page-wrapper #header .awa-header-search-col button.action.search,
+body .page-wrapper .block-search .actions button.action.search {
+  position: static !important; /* Override bundle position:absolute — justificado: layout flex */
+  left: auto !important;
+  top: auto !important;
+  transform: none !important;
+}
+
+
+/* =============================================================================
+   VB-32: E-02 FIX — Carrinho desktop sem ícone visível
+
+   Causa raiz (v2 — análise corrigida):
+   1. a.awa-header-cart-link (SVG bonito) → display:none no desktop (premium:181)
+   2. div.awa-header-minicart (KO) → clipped 1×1px (VB-03 bugfix:171)
+   3. a.awa-header-cart-fallback → era clipped no VB-32 v1, escondendo o único
+      elemento visível antes do KnockoutJS carregar
+
+   O KnockoutJS .action.showcart SÓ existe DEPOIS do RequireJS carregar,
+   que pode levar 2-5 segundos. Antes disso, nada era visível.
+
+   Fix v2:
+   1. Un-clip o minicart container
+   2. Estilizar .awa-header-cart-fallback como botão de carrinho com SVG via ::before
+      (SEMPRE visível, não depende de JS)
+   3. Quando KO carrega, estilizar o .showcart também
+   4. Ambos coexistem — fallback é link para /checkout/cart, showcart abre dropdown
+   ============================================================================= */
+
+@media (min-width: 992px) {
+  /* 1. Un-clip o minicart container no desktop */
+  body .page-wrapper .awa-header-minicart[data-awa-header-cart="true"] {
+    position: relative !important; /* Override VB-03 clip — justificado: carrinho deve ser visível */
+    width: auto !important;
+    height: auto !important;
+    overflow: visible !important;
+    clip: auto !important;
+    clip-path: none !important;
+    white-space: normal !important;
+    border: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0 !important;
+  }
+
+  /* 2. Fallback link: botão de carrinho premium 44×44 (SEMPRE visível) */
+  body .page-wrapper .awa-header-minicart .awa-header-cart-fallback {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    background: var(--awa-primary, #b73337) !important;
+    border-radius: var(--awa-radius-md, 8px) !important;
+    border: none !important;
+    cursor: pointer !important;
+    position: relative !important;
+    text-decoration: none !important;
+    transition: background .15s var(--awa-ease) !important;
+    flex-shrink: 0 !important;
+  }
+
+  body .page-wrapper .awa-header-minicart .awa-header-cart-fallback:hover {
+    background: var(--awa-primary-hover, #9a2a2d) !important;
+  }
+
+  /* Fallback: SVG carrinho via ::before */
+  body .page-wrapper .awa-header-minicart .awa-header-cart-fallback::before {
+    content: '' !important;
+    display: block !important;
+    width: 22px !important;
+    height: 22px !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='9' cy='20' r='1'/%3E%3Ccircle cx='18' cy='20' r='1'/%3E%3Cpath d='M3.5 4h2l2.2 10.2a1 1 0 0 0 1 .8h8.6a1 1 0 0 0 1-.8L20 7H7.1'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    background-size: 22px 22px !important;
+  }
+
+  /* Fallback: esconder texto sr-only */
+  body .page-wrapper .awa-header-minicart .awa-header-cart-fallback > span {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    overflow: hidden !important;
+    clip: rect(0,0,0,0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+  }
+
+  /* 3. Mini-carts container: inline para não quebrar layout */
+  body .page-wrapper .awa-header-minicart .mini-carts {
+    display: inline-flex !important;
+    align-items: center !important;
+  }
+
+  /* 4. KO showcart button: quando carrega, fica ao lado do fallback ou sobrepõe */
+  body .page-wrapper .awa-header-minicart .minicart-wrapper {
+    display: inline-flex !important;
+    align-items: center !important;
+    position: relative !important;
+  }
+
+  body .page-wrapper .awa-header-minicart .minicart-wrapper .action.showcart {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    background: transparent !important;
+    border-radius: var(--awa-radius-md, 8px) !important;
+    border: none !important;
+    cursor: pointer !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: -44px !important; /* Sobrepõe o fallback — mesma posição */
+    padding: 0 !important;
+    z-index: 2 !important;
+  }
+
+  /* Showcart: esconder todos os filhos visuais — o fallback é o visual */
+  body .page-wrapper .awa-header-minicart .minicart-wrapper .action.showcart > .text,
+  body .page-wrapper .awa-header-minicart .minicart-wrapper .action.showcart > span:not(.counter) {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    overflow: hidden !important;
+    clip: rect(0,0,0,0) !important;
+  }
+
+  /* Showcart ::before: transparent (usa o visual do fallback abaixo) */
+  body .page-wrapper .awa-header-minicart .minicart-wrapper .action.showcart::before {
+    content: none !important;
+    display: none !important;
+  }
+
+  /* Badge counter: sobre o botão fallback */
+  body .page-wrapper .awa-header-minicart .minicart-wrapper .action.showcart .counter.qty {
+    position: absolute !important;
+    top: -5px !important;
+    right: -5px !important;
+    left: auto !important;
+    min-width: 18px !important;
+    height: 18px !important;
+    padding: 0 5px !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    line-height: 18px !important;
+    text-align: center !important;
+    color: #fff !important;
+    background: var(--awa-primary, #b73337) !important;
+    border-radius: 9px !important;
+    border: 2px solid #fff !important;
+    z-index: 3 !important;
+  }
+
+  body .page-wrapper .awa-header-minicart .minicart-wrapper .action.showcart .counter.qty.empty {
+    display: none !important;
+  }
+
+  /* 5. Minicart dropdown: slide-in panel quando ativo */
+  body .page-wrapper .awa-header-minicart .minicart-wrapper.active .block-minicart,
+  body .page-wrapper .awa-header-minicart .minicart-wrapper .block-minicart._active {
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    left: auto !important;
+    width: min(380px, 94vw) !important;
+    max-width: min(380px, 94vw) !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    z-index: 1300 !important;
+    background: var(--awa-bg, #fff) !important;
+    border-left: 1px solid var(--awa-border, #e5e5e5) !important;
+    box-shadow: -8px 0 32px rgba(15, 23, 42, 0.14) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow-y: auto !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+  }
+}
+
+
+/* =============================================================================
+   VB-33: E-03 FIX — Texto de login truncado "PARA VER OS PR..."
+   Causa: awa-header-premium.css L428-436 aplica white-space:nowrap + font-size:10px
+   no .awa-header-account-prompt__line1. O texto "Para ver os preços faça o" é
+   muito longo para o 1fr da grid.
+   Fix: permitir quebra de linha no __line1 e ajustar tamanho de fonte.
+   ============================================================================= */
+
+
+
+/* =============================================================================
+   VB-34: E-04 FIX — Ghost white box na nav-bar
+   Causa: o core Magento renderiza .section-item-title (tab headers) dentro do
+   nav-sections. O VB-01 já aplica display:none, mas pode haver FOUC.
+   Fix: reforçar com seletores mais fortes e também matar inline.
+   ============================================================================= */
+
+/* Nuclear kill dos ghost tab headers */
+body .page-wrapper .header-control .nav-sections .section-items .section-item-title,
+body .page-wrapper .awa-nav-bar .nav-sections .section-items .section-item-title,
+body .page-wrapper #header .nav-sections .section-items .section-item-title,
+body .page-wrapper .sections.nav-sections .section-items > .section-item-title {
+  display: none !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+}
+
+
+/* =============================================================================
+   VB-35: E-09 FIX — Botões flutuantes laterais redundantes
+   Cart e Account no sidebar são redundantes com o header.
+   Fix: esconder apenas os botões de cart/account, manter scroll-to-top.
+   ============================================================================= */
+
+@media (min-width: 992px) {
+  /* Esconder botões de carrinho e conta do sidebar fixo — já existem no header */
+  body .fixed-right-ul a[href*="checkout/cart"],
+  body .fixed-right-ul a[href*="customer/account"],
+  body .fixed-right-ul .shooping-cart,
+  body .fixed-right-ul .my-account {
+    display: none !important; /* Redundante com header — justificado: deduplicação UX */
+  }
+}
+
+
+/* =============================================================================
+   VB-36: E-10 FIX — Touch target do botão × na promo bar
+   Mínimo 44×44px para acessibilidade WCAG + mobile usability.
+   ============================================================================= */
+
+body .page-wrapper .awa-b2b-promo-bar .awa-b2b-promo-bar__close,
+body .page-wrapper .awa-b2b-promo-bar [data-action="close"],
+body .page-wrapper .awa-b2b-promo-bar button.close,
+body .page-wrapper .awa-b2b-promo-bar .close-btn {
+  min-width: 44px !important; /* WCAG touch target — justificado: acessibilidade */
+  min-height: 44px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  font-size: 18px !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+  transition: color .15s var(--awa-ease) !important;
+  flex-shrink: 0 !important;
+}
+
+body .page-wrapper .awa-b2b-promo-bar .awa-b2b-promo-bar__close:hover,
+body .page-wrapper .awa-b2b-promo-bar [data-action="close"]:hover {
+  color: #fff !important;
+}
+
+
+/* =============================================================================
+   VB-37: E-11 FIX — Lupa mobile sobrepõe placeholder do campo de busca
+   Fix: padding-left suficiente no input mobile para não sobrepor o ícone.
+   ============================================================================= */
+
+@media (max-width: 991px) {
+  /* Search input: padding-left para ícone da lupa */
+  body .page-wrapper #header input#search,
+  body .page-wrapper .awa-site-header input#search,
+  body .page-wrapper .block-search input#search {
+    padding-left: 40px !important; /* Espaço para a lupa mobile — justificado: legibilidade */
+    font-size: 16px !important; /* Previne zoom iOS */
+  }
+
+  /* Search button mobile: posição fixa à esquerda do input */
+  body .page-wrapper #header .awa-header-search-col button.action.search,
+  body .page-wrapper .awa-site-header .awa-header-search-col button.action.search,
+  body .page-wrapper .block-search button.action.search {
+    position: absolute !important;
+    left: 8px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: 32px !important;
+    height: 32px !important;
+    background: transparent !important;
+    border: none !important;
+    z-index: 2 !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  /* Search form container: relative para posicionamento da lupa */
+  body .page-wrapper #header form#search_mini_form,
+  body .page-wrapper .awa-site-header form#search_mini_form,
+  body .page-wrapper .awa-site-header form.minisearch {
+    position: relative !important;
+  }
+}
+
+/* =============================================================================
+   MOBILE APP EXPERIENCE - PREMIUM MENU DRAWER
+   ============================================================================= */
+@media (max-width: 991px) {
+  body .nav-sections {
+    background: #ffffff !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border-radius: 0 16px 16px 0 !important;
+    border-right: 1px solid rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 12px 0 32px rgba(0, 0, 0, 0.15) !important;
+    transition: transform var(--awa-duration-slow) var(--awa-ease) !important;
+    z-index: 1000 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    display: block !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    width: 280px !important;
+    max-width: 80vw !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    transform: translateX(0) !important;
+  }
+
+  /* Force visibility on all nav elements when open */
+  body.nav-open .nav-sections,
+  body.nav-open .nav-sections * {
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  body:not(.nav-open) .nav-sections {
+    transform: translateX(-100%) !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  /* Ensure navigation content is visible inside drawer */
+  body.nav-open .nav-sections .section-item-content {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    height: auto !important;
+  }
+
+  body.nav-open .nav-sections .navigation,
+  body.nav-open .nav-sections .navigation li,
+  body.nav-open .nav-sections .navigation a,
+  body.nav-open .nav-sections .navigation span {
+    visibility: visible !important;
+    opacity: 1 !important;
+    display: block !important;
+  }
+
+  /* Fix: Hide tab titles in mobile drawer only if they are empty or redundant */
+  body.nav-open .nav-sections .section-item-title {
+    display: none !important;
+  }
+  body .nav-sections {
+    transition: transform var(--awa-duration-slow) var(--awa-ease) !important;
+  }
+
+  /* Mobile App Bottom Nav: Premium Floating Action Bar */
+  body .page-wrapper .footer-mobile,
+  body .page-wrapper .sticky-menu-bottom {
+    background: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border-top: 1px solid rgba(0, 0, 0, 0.05) !important;
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.08) !important;
+    padding-bottom: env(safe-area-inset-bottom) !important;
+  }
+}
+
+/* =============================================================================
+   E2E HEADER LAYOUT BUGFIX (Desktop vs Mobile Visibility)
+   ============================================================================= */
+
+/* Desktop & Notebook (>= 992px) */
+@media (min-width: 992px) {
+  body .page-wrapper [data-awa-header-content] .top-search,
+  body .page-wrapper [data-awa-header-content] .awa-header-search-col.top-search {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  body .page-wrapper [data-awa-header-content] .awa-header-mobile-toggle {
+    display: none !important;
+  }
+}
+
+/* Mobile & Tablet (< 992px) */
+@media (max-width: 991px) {
+  body .page-wrapper [data-awa-header-content] .awa-header-mobile-toggle {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+}
+
+
+/* =============================================================================
+   VB-23: Header Bento Grid — .wp-header container alignment fix
+
+   Problem: .wp-header is 1240px because parent .container has max-width:1320px
+   + padding:0 40px, while .awa-topbar__inner and .awa-nav-bar__inner are 1300px.
+
+   Root cause (discovered via CSS rule audit):
+     awa-bundle-refinements.min.css sets:
+       .page-wrapper .awa-site-header .awa-main-header .header-main > .container {
+         max-width: var(--awa-hdr-container-max, 1320px) !important;
+         padding-inline: var(--awa-hdr-pad-inline, 24px) !important;
+       }
+     AND a second rule:
+       body .page-wrapper .awa-site-header .header-main > .container {
+         max-width: 1320px !important;
+       }
+
+   Fix strategy:
+     1. Override CSS variables at :root to 1300px / 0
+     2. Use EXACT same selectors from refinements + higher specificity to win
+     3. Remove horizontal padding from .header.awa-main-header
+   ============================================================================= */
+
+/* Override CSS custom properties used by awa-super-global and awa-bundle-refinements */
+:root {
+  --awa-hdr-container-max: 1300px;
+  --awa-hdr-pad-inline: var(--awa-container-pad, clamp(16px, 3vw, 24px));
+}
+
+@media (min-width: 992px) {
+  /* 1. Remove horizontal padding from .awa-main-header so inner wrappers
+     have full viewport width to center the 1300px container correctly */
+  body .page-wrapper .header.awa-main-header,
+  body .page-wrapper .awa-site-header .header.awa-main-header {
+    padding-left: 0 !important; /* Override tema pai 24px padding — justified: causes nested width constraint */
+    padding-right: 0 !important;
+  }
+
+  /* 2. Beat awa-bundle-refinements by matching its EXACT selectors + adding body prefix */
+  body .page-wrapper .awa-site-header .awa-main-header .header-main > .container,
+  body .page-wrapper .awa-site-header .awa-b2b-promo-bar > .container {
+    max-width: var(--awa-container-max, 1300px) !important; /* Override var(--awa-hdr-container-max, 1320px) */
+    padding-inline: var(--awa-container-pad, clamp(16px, 3vw, 24px)) !important;
+    padding-left: var(--awa-container-pad, clamp(16px, 3vw, 24px)) !important;
+    padding-right: var(--awa-container-pad, clamp(16px, 3vw, 24px)) !important;
+    margin-inline: auto !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* 3. Beat the second refinements rule that hardcodes 1320px */
+  body .page-wrapper .awa-site-header .header-main > .container,
+  body .page-wrapper .awa-site-header .header-main .container {
+    max-width: var(--awa-container-max, 1300px) !important; /* Override hardcoded 1320px — justified: Bento Grid 1300px alignment */
+    padding-left: var(--awa-container-pad, clamp(16px, 3vw, 24px)) !important;
+    padding-right: var(--awa-container-pad, clamp(16px, 3vw, 24px)) !important;
+  }
+
+  /* 4. Homepage-specific override */
+  body.cms-index-index .page-wrapper .awa-site-header .header_main.awa-main-header-inner-wrap > .header-main > .container,
+  body.cms-home .page-wrapper .awa-site-header .header_main.awa-main-header-inner-wrap > .header-main > .container {
+    max-width: var(--awa-container-max, 1300px) !important;
+    padding-left: var(--awa-container-pad, clamp(16px, 3vw, 24px)) !important;
+    padding-right: var(--awa-container-pad, clamp(16px, 3vw, 24px)) !important;
+  }
+
+  /* 5. NUCLEAR padding override using #html-body for max specificity.
+     On PLP/login pages, merged CSS reorders rules so awa-super-global's
+     `.container { padding: var(--awa-space-6,24px) }` wins by cascade.
+     #html-body has ID specificity (1,0,0) which beats any class-only selector. */
+  #html-body .page-wrapper .awa-site-header .header-main > .container,
+  #html-body .page-wrapper .awa-site-header .header-main .container,
+  #html-body .page-wrapper .header.awa-main-header .header-main > .container,
+  #html-body .page-wrapper .awa-main-header .header_main .header-main > .container {
+    max-width: var(--awa-container-max, 1300px) !important;
+    padding-left: var(--awa-container-pad, clamp(16px, 3vw, 24px)) !important;
+    padding-right: var(--awa-container-pad, clamp(16px, 3vw, 24px)) !important;
+    padding-inline: var(--awa-container-pad, clamp(16px, 3vw, 24px)) !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    width: 100% !important;
+  }
+
+  /* 6. .wp-header itself: ensure it fills the 1300px container */
+  body .page-wrapper .header.awa-main-header .wp-header,
+  body .page-wrapper .awa-site-header .wp-header {
+    max-width: var(--awa-container-max, 1300px) !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+}
+
+/* =============================================================================
+   VB-24: Nav bar — .awa-nav-quick-links__list bleeding text
+   The ".awa-nav-quick-links__list" renders "Bauletos", "Linha Honda",
+   "Linha Yamaha", "Linha Esportiva", "Suportes", "Adaptadores" as a vertical
+   list at x=1039 overlapping the hero banner. Should be hidden on desktop
+   (it's a mobile-only feature or should be inside the mega-menu flyout).
+   ============================================================================= */
+
+@media (min-width: 992px) {
+  body .page-wrapper .awa-nav-quick-links__list,
+  body .page-wrapper .awa-nav-quick-links,
+  body .page-wrapper .awa-site-header .awa-nav-quick-links,
+  body .page-wrapper .header-control.awa-nav-bar .awa-nav-quick-links__list {
+    display: none !important; /* Hide on desktop — justified: bleeds over hero, mobile-only feature */
+  }
+}
+
+
+/* =============================================================================
+   VB-25: Cart icon — solid red block without icon
+
+   Root cause:
+     1. a.awa-header-cart-fallback has display:none (hidden by another rule)
+     2. a.awa-header-cart-link (SVG) has display:none (hidden by awa-super-global)
+     3. a.showcart.header-mini-cart is visible but has red bg and no icon
+        (::before was set to content:none, but the element class is
+        "showcart header-mini-cart" NOT "action showcart" as VB-32 targeted)
+
+   Fix:
+     1. Force .awa-header-cart-fallback visible with SVG icon via ::before
+     2. Fix showcart selector to match actual DOM class
+     3. Make showcart transparent (clickable overlay for KO minicart dropdown)
+   ============================================================================= */
+
+@media (min-width: 992px) {
+  /* 1. Force fallback visible — must beat:
+     - awa-bundle-refinements: #html-body .page-wrapper .awa-site-header .awa-header-right-col a.awa-header-cart-fallback { display:none !important }
+     - awa-super-home: #html-body .page-wrapper .awa-site-header .awa-header-right-col .awa-header-cart.mini-cart-wrapper a { display:none !important }
+     Strategy: exact same selectors (same specificity), loads AFTER them → wins by cascade */
+  #html-body .page-wrapper .awa-site-header .awa-header-right-col a.awa-header-cart-fallback,
+  #html-body .page-wrapper .awa-site-header .awa-header-right-col .awa-header-cart.mini-cart-wrapper a.awa-header-cart-fallback,
+  body .page-wrapper .awa-site-header .awa-header-right-col .awa-header-cart-fallback {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    background: var(--awa-primary, #b73337) !important;
+    border-radius: var(--awa-radius-md, 8px) !important;
+    border: none !important;
+    cursor: pointer !important;
+    position: relative !important;
+    text-decoration: none !important;
+    flex-shrink: 0 !important;
+    z-index: 1 !important;
+  }
+
+  /* Also beat the .awa-main-header and .awa-site-header selectors */
+  .page-wrapper .awa-site-header .awa-main-header .awa-header-cart-fallback {
+    display: inline-flex !important;
+  }
+
+  /* Fallback: cart icon via ::before background SVG */
+  #html-body .page-wrapper .awa-site-header .awa-header-right-col a.awa-header-cart-fallback::before {
+    content: '' !important;
+    display: block !important;
+    width: 22px !important;
+    height: 22px !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='9' cy='20' r='1'/%3E%3Ccircle cx='18' cy='20' r='1'/%3E%3Cpath d='M3.5 4h2l2.2 10.2a1 1 0 0 0 1 .8h8.6a1 1 0 0 0 1-.8L20 7H7.1'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    background-size: 22px 22px !important;
+  }
+
+  /* Fallback: hide text span */
+  #html-body .page-wrapper .awa-site-header .awa-header-right-col a.awa-header-cart-fallback > span {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    overflow: hidden !important;
+    clip: rect(0,0,0,0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+  }
+
+  /* 2. Showcart: make transparent overlay.
+     Must beat: body .page-wrapper .awa-site-header .awa-header-right-col .minicart-wrapper a { bg: var(--awa-red) }
+     Use #html-body for higher specificity */
+  #html-body .page-wrapper .awa-site-header .awa-header-right-col .minicart-wrapper .showcart,
+  #html-body .page-wrapper .awa-site-header .awa-header-right-col .minicart-wrapper a.showcart.header-mini-cart {
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    width: 44px !important;
+    height: 44px !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: -44px !important; /* Overlay on top of the fallback button */
+    z-index: 2 !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: var(--awa-radius-md, 8px) !important;
+    cursor: pointer !important;
+  }
+
+  /* Showcart: hide font icon (::before) */
+  #html-body .page-wrapper .awa-site-header .awa-header-right-col .minicart-wrapper .showcart::before {
+    content: none !important;
+    display: none !important;
+  }
+
+  /* Showcart: hide text spans */
+  #html-body .page-wrapper .awa-site-header .awa-header-right-col .minicart-wrapper .showcart > .awa-sr-only,
+  #html-body .page-wrapper .awa-site-header .awa-header-right-col .minicart-wrapper .showcart > span:not(.counter) {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    overflow: hidden !important;
+    clip: rect(0,0,0,0) !important;
+  }
+}
+
+
+/* =============================================================================
+   VB-26: Homepage — Departamentos vertical menu collapsed by default
+
+   Strategy: The togge-menu inline style is controlled by Rokanthemes VMM JS
+   and cannot be overridden via CSS or our JS. Instead, we clip the PARENT
+   container (#menu.section-item-content) which Rokanthemes JS does NOT touch.
+   The nav.verticalmenu itself is 69px tall (only the title bar) — but the
+   togge-menu inside overflows it. By clipping the section-item-content parent
+   with max-height:69px and overflow:hidden, the categories are hidden.
+   On hover, we allow overflow via pointer-events.
+   ============================================================================= */
+
+@media (min-width: 992px) {
+  /* Parent clipping strategy: clip the overflow of #menu.vertical so the absolutely positioned menu inside is hidden */
+  body.cms-index-index .page-wrapper [id="menu.vertical"],
+  body.cms-home .page-wrapper [id="menu.vertical"],
+  body.cms-homepage_ayo_home5 .page-wrapper [id="menu.vertical"] {
+    position: relative !important;
+    overflow: hidden !important;
+    max-height: 69px !important;
+    transition: max-height var(--awa-duration) var(--awa-ease) !important;
+  }
+
+  /* Force the menu to be absolute instead of fixed so it can be clipped by the parent */
+  body.cms-index-index .page-wrapper [id="menu.vertical"] .togge-menu,
+  body.cms-home .page-wrapper [id="menu.vertical"] .togge-menu,
+  body.cms-homepage_ayo_home5 .page-wrapper [id="menu.vertical"] .togge-menu {
+    position: absolute !important;
+    top: 100% !important;
+    left: 0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: none !important;
+  }
+
+  /* Reveal the menu on hover of the categories container by removing the clipping */
+  body.cms-index-index .page-wrapper .awa-nav-categories:hover [id="menu.vertical"],
+  body.cms-home .page-wrapper .awa-nav-categories:hover [id="menu.vertical"],
+  body.cms-homepage_ayo_home5 .page-wrapper .awa-nav-categories:hover [id="menu.vertical"] {
+    overflow: visible !important;
+    max-height: 2000px !important;
+  }
+
+  /* Also un-clip when JS toggle hotfix has opened the menu (vmm-open / menu-open class on child nav) */
+  body.cms-index-index .page-wrapper [id="menu.vertical"]:has(> .vmm-open),
+  body.cms-index-index .page-wrapper [id="menu.vertical"]:has(> .menu-open),
+  body.cms-home .page-wrapper [id="menu.vertical"]:has(> .vmm-open),
+  body.cms-home .page-wrapper [id="menu.vertical"]:has(> .menu-open),
+  body.cms-homepage_ayo_home5 .page-wrapper [id="menu.vertical"]:has(> .vmm-open),
+  body.cms-homepage_ayo_home5 .page-wrapper [id="menu.vertical"]:has(> .menu-open) {
+    overflow: visible !important;
+    max-height: 2000px !important;
+  }
+}
+
+
+
+/* =============================================================================
+   VB-27: Departamentos bar — ensure text visibility on all pages
+
+   The red "Departamentos" bar sometimes appears as a solid red block without
+   visible text on some pages due to color/z-index conflicts.
+   ============================================================================= */
+
+@media (min-width: 992px) {
+  /* Ensure Departamentos text is always visible */
+  body .page-wrapper .awa-nav-bar .title-category-dropdown,
+  body .page-wrapper .awa-nav-bar .nav-sections .title-category-dropdown {
+    display: flex !important;
+    align-items: center !important;
+    color: #fff !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    z-index: 5 !important;
+    position: relative !important;
+  }
+
+  /* The icon inside the title */
+  body .page-wrapper .awa-nav-bar .title-category-dropdown .icon-menu {
+    display: inline-flex !important;
+    margin-right: 8px !important;
+  }
+
+  /* Title text span */
+  body .page-wrapper .awa-nav-bar .title-category-dropdown span {
+    color: #fff !important;
+    font-weight: 700 !important;
+  }
+}
+
+
+/* =============================================================================
+   VB-28: PLP product grid — widen cards to fill available space
+
+   Product grid cards are only 130px wide in a 566px grid because the
+   grid-template-columns is set to 4×129.5px. With the sidebar filter panel
+   taking left space, the product area should use more width.
+   ============================================================================= */
+
+@media (min-width: 992px) {
+  /* Ensure container fills width to allow intrinsic grid to expand */
+  body.catalog-category-view .page-wrapper ul.product-grid.container-products-switch,
+  body.page-products .page-wrapper ul.product-grid.container-products-switch {
+    width: 100% !important;
+  }
+
+  /* Product cards should take full column width */
+  body.catalog-category-view .page-wrapper .item-product,
+  body.page-products .page-wrapper .item-product {
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  /* Product thumbnails should fill card */
+  body.catalog-category-view .page-wrapper .item-product .product-thumb,
+  body.page-products .page-wrapper .item-product .product-thumb {
+    width: 100% !important;
+  }
+
+  /* Product images responsive */
+  body.catalog-category-view .page-wrapper .item-product .product-image-photo,
+  body.page-products .page-wrapper .item-product .product-image-photo {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+}
+
+
+/* =============================================================================
+   VB-29: PLP/search — sidebar column too wide (missing flex-basis on Bootstrap cols)
+   The .columns flex container sets display:flex but Bootstrap col-sm-3/col-sm-9
+   have no flex-basis, causing both columns to get equal ~50% width.
+   Fix: explicit flex values for the direct column wrapper children.
+   ============================================================================= */
+@media (min-width: 992px) {
+  body.page-layout-2columns-left .page-wrapper .columns.layout.layout-2-col > [class*="col-sm-3"],
+  body.page-layout-2columns-right .page-wrapper .columns.layout.layout-2-col > [class*="col-sm-3"],
+  body.catalog-category-view .page-wrapper .columns.layout.layout-2-col > [class*="col-sm-3"],
+  body.catalogsearch-result-index .page-wrapper .columns.layout.layout-2-col > [class*="col-sm-3"] {
+    flex: 0 0 270px;
+    max-width: 270px;
+    width: 270px;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  body.page-layout-2columns-left .page-wrapper .columns.layout.layout-2-col > .col-main,
+  body.page-layout-2columns-right .page-wrapper .columns.layout.layout-2-col > .col-main,
+  body.catalog-category-view .page-wrapper .columns.layout.layout-2-col > .col-main,
+  body.catalogsearch-result-index .page-wrapper .columns.layout.layout-2-col > .col-main {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+}
+
+/* =============================================================================
+   VB-30: Nav items invisible — .navigation has "background: var(--awa-white) !important"
+   from Ayo theme (appears 3× in merged CSS). White text on white background.
+   Fix: force transparent on .navigation.custommenu.main-nav inside nav bar.
+   Source rule: .navigation { background: var(--awa-white) !important } (Rokanthemes)
+   ============================================================================= */
+body .page-wrapper .top-menu .navigation.custommenu.main-nav,
+body .page-wrapper .header-nav .navigation.custommenu.main-nav,
+body .page-wrapper .awa-nav-bar .navigation.custommenu.main-nav {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* =============================================================================
+   VB-31: Product card height equalization (Homepage Carousels)
+   Ensures all cards in "Mais Vendidos" and other carousels have the same height.
+   Also standardizes card padding and hover interaction.
+   ============================================================================= */
+
+/* Force swiper wrapper to allow children to stretch */
+.products-swiper .swiper-wrapper {
+  display: flex !important;
+  align-items: stretch !important;
+}
+
+/* Slide must fill the swiper height */
+.products-swiper .swiper-slide {
+  height: auto !important;
+  display: flex !important;
+  align-items: stretch !important;
+}
+
+/* Card must fill the slide height */
+.products-swiper .swiper-slide .item-product {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  background: var(--awa-bg, #ffffff) !important;
+  border: 1px solid var(--awa-border, #e5e5e5) !important;
+  border-radius: var(--awa-radius-lg, 12px) !important;
+  padding: 16px !important; /* Increased padding for premium feel */
+  box-sizing: border-box !important;
+  transition: transform var(--awa-duration-normal, var(--awa-duration)) var(--awa-ease, ease),
+              box-shadow var(--awa-duration-normal, var(--awa-duration)) var(--awa-ease, ease) !important;
+}
+
+.products-swiper .swiper-slide .item-product:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: var(--awa-shadow-lg, 0 12px 24px rgba(0,0,0,0.1)) !important;
+  z-index: 10 !important;
+}
+
+/* =============================================================================
+   HOTFIX HOME — Swiper clipping guard
+   Prevent global overflow:visible rules from leaking next/prev cards outside
+   homepage product carousels.
+   ============================================================================= */
+body.cms-index-index .awa-carousel-section .products-swiper,
+body.cms-home .awa-carousel-section .products-swiper,
+body.cms-homepage_ayo_home5 .awa-carousel-section .products-swiper {
+  overflow: hidden !important;
+}
+
+body.cms-index-index .awa-carousel-section .products-swiper .swiper-wrapper,
+body.cms-home .awa-carousel-section .products-swiper .swiper-wrapper,
+body.cms-homepage_ayo_home5 .awa-carousel-section .products-swiper .swiper-wrapper {
+  overflow: visible;
+}
+
+/* Image container consistency */
+.products-swiper .item-product .product-thumb {
+  flex: 0 0 auto !important;
+  margin-bottom: 12px !important;
+  background: #fbfbfb !important;
+  border-radius: var(--awa-radius-md, 8px) !important;
+  min-height: 180px !important;
+  max-height: 220px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+  position: relative !important;
+}
+
+/* Fallback for missing/broken images */
+.products-swiper .item-product .product-thumb:empty,
+.products-swiper .item-product .product-thumb img[src=""] {
+  background: #f1f1f1 !important;
+}
+
+.products-swiper .item-product .product-thumb img {
+  max-width: 90% !important;
+  max-height: 90% !important;
+  object-fit: contain !important;
+}
+
+/* Content area should grow to push the bottom elements */
+.products-swiper .item-product .product-info {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 1 auto !important;
+  margin-top: 12px !important;
+}
+
+/* Name grows to push price/SKU/buttons down */
+.products-swiper .item-product .product-name {
+  flex: 1 1 auto !important;
+  margin: 0 0 12px 0 !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: var(--awa-text, #1a1a1a) !important;
+  line-height: 1.4 !important;
+  min-height: 3.8em !important; /* Visual stability for 3 lines */
+  display: -webkit-box !important;
+  -webkit-line-clamp: 3 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+}
+
+/* Price and secondary info */
+.products-swiper .item-product .price-box {
+  flex: 0 0 auto !important;
+  margin-bottom: 8px !important;
+}
+
+/* Actions/Price area at the bottom */
+.products-swiper .item-product .product-sku,
+.products-swiper .item-product .product-cod,
+.products-swiper .item-product .product-cod-wrapper {
+  flex: 0 0 auto !important;
+  font-size: 11px !important;
+  color: var(--awa-text-muted, #888) !important;
+  margin-bottom: 12px !important;
+}
+
+/* Primary action button at the absolute bottom of the card content */
+.products-swiper .item-product .actions-primary {
+  margin-top: auto !important;
+  flex: 0 0 auto !important;
+}
+
+.products-swiper .item-product .actions-primary .action.tocart {
+  width: 100% !important;
+  justify-content: center !important;
+}
+
+
+/* =============================================================================
+   VB-32: Header inner width — override lingering 100% rules from super-global
+   Target: .awa-main-header__inner.wp-header[data-awa-header-row]
+   ============================================================================= */
+@media (min-width: 992px) {
+  #html-body .page-wrapper .awa-site-header :is(.awa-main-header__inner, .wp-header)[data-awa-header-row],
+  #html-body .page-wrapper .awa-site-header .header-main :is(.awa-main-header__inner, .wp-header),
+  #html-body .page-wrapper .header.awa-main-header :is(.awa-main-header__inner, .wp-header) {
+    max-width: var(--awa-container-max, 1300px) !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    width: 100% !important;
+    float: none !important; /* Prevent any legacy float interference */
+  }
+}
+
+
+/* =============================================================================
+   VB-33: Batch 1 — Header & Branding Polish (Bugs #01, #04, #05, #06, #44)
+   ============================================================================= */
+
+/* Bug #01: Header Logo Scale & Vertical Centering */
+#header .awa-header-brand-cell {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  min-height: 80px !important;
+}
+
+#header .awa-header-brand-cell .logo img {
+  max-height: 48px !important; /* Slightly reduced for better breathing room */
+  margin-top: 0 !important;
+  transition: transform var(--awa-duration) var(--awa-ease) !important;
+}
+
+/* Bug #04: Search Icon Vertical Centering */
+#header .awa-header-search-col .block-search .action.search::before {
+  line-height: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 100% !important;
+}
+
+/* Bug #05: Minicart Badge Visibility */
+#header .awa-header-cart .counter.qty {
+  min-width: 20px !important;
+  height: 20px !important;
+  line-height: 20px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  background: var(--awa-red, #b73337) !important;
+  border: 2px solid #ffffff !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important;
+}
+
+/* Bug #06: B2B Focus State (remove default blue outline) */
+.awa-b2b-promo-bar__cta:focus,
+.awa-b2b-promo-bar__cta:active {
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(183, 51, 55, 0.3) !important;
+}
+
+/* Bug #44: Footer Logo Resolution & Contrast */
+body .page-wrapper .page-footer .logo img,
+body .page-wrapper .page-footer .contacinfo-logo img {
+  max-height: 54px !important; /* Cap to prevent pixelation of upscaled source */
+  filter: brightness(1) contrast(1.1) !important; /* Improve legibility against dark bg */
+  image-rendering: -webkit-optimize-contrast !important;
+}
+
+/* Bug #15: Back to Top Button Overlap (z-index fix) */
+#rocket-back-top,
+.back-top {
+  z-index: 999 !important;
+  bottom: 80px !important; /* Move up to avoid collision with chat widgets */
+}
+
+
+/* =============================================================================
+   VB-34: Batch 2 — Micro-interactions & Spacing (Bugs #03, #07, #11, #15)
+   ============================================================================= */
+
+/* Bug #03: Search input placeholder contrast */
+#header .awa-header-search-col .block-search .input-text::placeholder {
+  color: var(--awa-gray-500, #71717a) !important;
+  opacity: 0.8 !important;
+}
+
+/* Bug #11: Vertical menu "View All" styling */
+.navigation.verticalmenu .viewall.vm-toggle-categories {
+  background: #ffffff !important;
+  color: var(--awa-primary, #b73337) !important;
+  font-weight: 600 !important;
+  border-top: 1px solid rgba(0,0,0,0.05) !important;
+  margin: 0 !important;
+  padding: 14px 20px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+
+/* Bug #07: Smooth Sticky Header Entry */
+.awa-site-header {
+  transition: transform 0.35s var(--awa-ease),
+              background-color var(--awa-duration) var(--awa-ease),
+              box-shadow var(--awa-duration) var(--awa-ease) !important;
+}
+
+/* Bug #08: Vertical menu icon alignment & styling */
+.navigation.verticalmenu .ui-menu-item.level0 > a .vm-icon {
+  width: 24px !important;
+  display: inline-flex !important;
+  justify-content: center !important;
+  margin-right: 10px !important;
+  color: var(--awa-gray-400, #a1a1aa) !important;
+}
+
+/* Bug #15: Back-to-top z-index collision */
+#rocket-back-top {
+  z-index: 1000 !important;
+}
+
+
+/* =============================================================================
+   VB-35: Batch 3 — Homepage Content & UI Language (Bugs #12, #18, #21, #22)
+   ============================================================================= */
+
+/* Bug #18: Standardize Product Badges (Sale/New/etc) */
+.product-item-info .product-label,
+.product-item-info .product-item-label,
+.product-item-info .awa-product-label {
+  position: absolute !important;
+  top: 12px !important;
+  left: 12px !important;
+  right: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 5px !important;
+  z-index: 10 !important;
+}
+
+/* Bug #22: Swiper Pagination — Consistent "Pill" language for active state */
+.swiper-pagination-bullet {
+  width: 8px !important;
+  height: 8px !important;
+  background: var(--awa-primary, #b73337) !important;
+  border-radius: 50% !important;
+  opacity: 0.25 !important;
+  transition: all var(--awa-duration) var(--awa-ease) !important;
+}
+
+.swiper-pagination-bullet-active {
+  width: 24px !important;
+  border-radius: 4px !important;
+  opacity: 1 !important;
+}
+
+/* Bug #12: Banner padding and subtext spacing */
+.item-banner .content-banner {
+  padding: 12% 10% !important; /* Use percentages for responsive breathing room */
+}
+
+.item-banner .content-banner h2 {
+  margin-bottom: 0.5em !important;
+}
+
+/* Bug #21: Category bubble icon centering */
+.awa-category-bubble__icon,
+.category-bubble-image-wrapper {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+}
+
+
+/* =============================================================================
+   VB-36: Z-index fixes for header and promo bar
+   Ensures B2B promo bar doesn't block critical header interactions on mobile.
+   ============================================================================= */
+#header .awa-b2b-promo-bar {
+  z-index: 10 !important; /* Base level for utility bar */
+  position: relative !important;
+}
+
+.header-wrapper-sticky {
+  z-index: 1000 !important; /* Higher than promo bar and other content */
+}
+
+/* =============================================================================
+   VB-37: Search Autocomplete UX Polish (Bug #03 related)
+   Improves density and interactive states for better search experience.
+   ============================================================================= */
+.search-autocomplete {
+  margin-top: 5px !important;
+  border-radius: 8px !important;
+  border: 1px solid #eeeeee !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.12) !important;
+  overflow: hidden !important;
+}
+
+.search-autocomplete ul li {
+  padding: 10px 15px !important;
+  border-bottom: 1px solid #f5f5f5 !important;
+  transition: background var(--awa-duration-fast) var(--awa-ease), color var(--awa-duration-fast) var(--awa-ease) !important;
+}
+
+.search-autocomplete ul li:last-child { border-bottom: none !important; }
+
+.search-autocomplete ul li:hover,
+.search-autocomplete ul li.active {
+  background-color: #fdf2f2 !important; /* Subtle AWA Red tint */
+}
+
+.search-autocomplete ul li .amount {
+  color: var(--awa-gray-500, #71717a) !important;
+  font-size: 0.9em !important;
+}
+
+/* =============================================================================
+   VB-38: Form Validation (Mage-error) Styling
+   Aligns Magento's default error messages with AWA's premium aesthetic.
+   ============================================================================= */
+#html-body .mage-error,
+#html-body div.mage-error,
+#html-body .message.error {
+  color: var(--awa-red, #b73337) !important;
+  font-size: 12px !important;
+  margin-top: 5px !important;
+  font-weight: 500 !important;
+}
+
+#html-body input.mage-error,
+#html-body select.mage-error,
+#html-body textarea.mage-error {
+  border-color: var(--awa-red, #b73337) !important;
+  background-color: #fff8f8 !important;
+  box-shadow: 0 0 0 1px rgba(183, 51, 55, 0.1) !important;
+}
+
+/* =============================================================================
+   VB-39: Generic loading state support
+   Provides a reusable CSS class for future AJAX-heavy interactions.
+   ============================================================================= */
+.awa-loading-indicator {
+  pointer-events: none !important;
+  position: relative !important;
+  opacity: 0.6 !important;
+}
+
+.awa-loading-indicator::after {
+  content: "" !important;
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  width: 20px !important;
+  height: 20px !important;
+  margin: -10px 0 0 -10px !important;
+  border: 2px solid rgba(183, 51, 55, 0.2) !important;
+  border-top-color: var(--awa-red, #b73337) !important;
+  border-radius: 50% !important;
+  animation: awa-spinner 0.6s linear infinite !important;
+}
+
+@keyframes awa-spinner {
+  to { transform: rotate(360deg); }
+}
+
+
+/* =============================================================================
+   VB-40: Product Card Micro-Layout (Bugs #17, #19, #20)
+   Ensures uniform height and alignment across all grids/carousels.
+   ============================================================================= */
+.product-item-info {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  background: #ffffff !important;
+}
+
+.product-item-details {
+  display: flex !important;
+  flex-direction: column !important;
+  flex-grow: 1 !important;
+  padding: 15px !important;
+}
+
+.product-item-name {
+  min-height: 3em !important; /* Reserve space for 2 lines */
+  margin-bottom: 8px !important;
+  flex-grow: 1 !important;
+}
+
+.price-box {
+  margin-top: auto !important;
+  margin-bottom: 12px !important;
+}
+
+.product-item-actions {
+  margin-top: 0 !important;
+}
+
+/* Bug #17: Soften broken/missing images */
+.product-image-container {
+  background-color: #f8f8f8 !important;
+}
+
+.product-image-photo {
+  mix-blend-mode: multiply !important; /* Helps blend product cuts with white/gray bg */
+}
+
+
+/* =============================================================================
+   VB-41: Typography & Accessibility Polish (Bugs #30, #46, #50)
+   ============================================================================= */
+
+/* Bug #30: Better legibility for listing metadata */
+.toolbar-amount,
+.toolbar .limiter,
+.products-grid .product-item .product-reviews-summary .reviews-actions {
+  font-size: 13px !important;
+}
+
+/* Bug #46: Stronger hierarchy in footer */
+.page-footer .block-title strong,
+.footer.content .block-title {
+  font-weight: 700 !important;
+  color: #ffffff !important;
+  margin-bottom: 20px !important;
+}
+
+/* Bug #50: Cleanup legacy link colors */
+.page-footer a:not(.awa-header-account-prompt__link),
+.footer-static a {
+  color: #d1d1d1 !important;
+  transition: color var(--awa-duration-fast) var(--awa-ease) !important;
+}
+
+.page-footer a:hover,
+.footer-static a:hover {
+  color: #ffffff !important;
+  text-decoration: underline !important;
+}
+
+
+
+/* =============================================================================
+   VB-51: Mobile Header & Search Polish (Final Strike)
+   ============================================================================= */
+@media (max-width: 991px) {
+  body.checkout-cart-index .page-wrapper .awa-site-header .header :is(.awa-main-header__inner, .wp-header) {
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 15px !important;
+    gap: 15px !important;
+    height: auto !important;
+    background: #ffffff !important;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.06) !important;
+  }
+
+  body.checkout-cart-index .page-wrapper .awa-site-header .header :is(.awa-main-header__inner, .wp-header) .top-search {
+    width: 100% !important;
+    order: 3 !important;
+    margin: 0 !important;
+  }
+
+  /* Fix search icon overlap using the specific ID */
+  body.checkout-cart-index #search {
+    padding-left: 48px !important;
+    border-radius: 12px !important;
+    background: #f4f4f5 !important;
+    border: 1px solid #e4e4e7 !important;
+    height: 44px !important;
+  }
+
+  body.checkout-cart-index .block-search .action.search {
+    position: absolute !important;
+    left: 14px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    z-index: 10 !important;
+    opacity: 0.7 !important;
+  }
+
+  /* Hide noisy elements in mobile header on cart */
+  body.checkout-cart-index .awa-site-header .header-main :is(.nav-toggle, .mini-cart-wrapper, .awa-header-mobile-toggle, .header-nav) {
+    display: none !important;
+  }
+}
+
+/* =============================================================================
+   VB-52/53: Cart Item Card Polish (Final Strike)
+   ============================================================================= */
+@media (max-width: 767px) {
+  body.checkout-cart-index table#shopping-cart-table {
+    display: block !important;
+    border: none !important;
+    margin-top: 20px !important;
+  }
+
+  body.checkout-cart-index table#shopping-cart-table tbody {
+    display: block !important;
+  }
+
+  body.checkout-cart-index table#shopping-cart-table tr.item-info {
+    display: block !important;
+    position: relative !important;
+    background: #ffffff !important;
+    border: 1px solid #eef2f6 !important;
+    border-radius: 16px !important;
+    margin-bottom: 20px !important;
+    padding: 20px 15px 20px 110px !important; /* Space for photo */
+    min-height: 120px !important;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.03) !important;
+    overflow: visible !important;
+  }
+
+  body.checkout-cart-index table#shopping-cart-table .product-item-photo {
+    display: block !important;
+    position: absolute !important;
+    left: 15px !important;
+    top: 20px !important;
+    width: 80px !important;
+    height: 80px !important;
+    z-index: 5 !important;
+    background: #fff !important;
+    border: 1px solid #f3f4f6 !important;
+    border-radius: 10px !important;
+  }
+
+  body.checkout-cart-index table#shopping-cart-table .product-item-photo a,
+  body.checkout-cart-index table#shopping-cart-table .product-item-photo img {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    max-height: 100% !important;
+  }
+
+  body.checkout-cart-index table#shopping-cart-table .product-item-name {
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    margin-bottom: 12px !important;
+    color: #111827 !important;
+    display: block !important;
+    line-height: 1.4 !important;
+  }
+
+  /* Hide theme legacy labels if they interfere with our labels */
+  body.checkout-cart-index table#shopping-cart-table .col.qty .label,
+  body.checkout-cart-index table#shopping-cart-table .col.price .label {
+    display: none !important;
+  }
+
+  body.checkout-cart-index table#shopping-cart-table td.col.price,
+  body.checkout-cart-index table#shopping-cart-table td.col.subtotal {
+    display: flex !important;
+    align-items: center !important;
+    font-size: 13px !important;
+    margin-bottom: 5px !important;
+    padding: 0 !important;
+    border: none !important;
+  }
+
+  body.checkout-cart-index table#shopping-cart-table td.col.price::before {
+    content: "Preço: " !important;
+    font-weight: 600 !important;
+    color: #9ca3af !important;
+    margin-right: 6px !important;
+  }
+
+  body.checkout-cart-index table#shopping-cart-table td.col.subtotal::before {
+    content: "Subtotal: " !important;
+    font-weight: 600 !important;
+    color: #9ca3af !important;
+    margin-right: 6px !important;
+  }
+
+  body.checkout-cart-index table#shopping-cart-table td.col.qty {
+    display: flex !important;
+    align-items: center !important;
+    padding: 15px 0 0 !important;
+    margin-top: 15px !important;
+    border-top: 1px solid #f3f4f6 !important;
+  }
+
+  body.checkout-cart-index table#shopping-cart-table td.col.qty::before {
+    content: "Qtd: " !important;
+    font-weight: 600 !important;
+    color: #9ca3af !important;
+    margin-right: 12px !important;
+    font-size: 13px !important;
+  }
+
+  /* Quantity input & controls polish */
+  body.checkout-cart-index table#shopping-cart-table .col.qty .control.qty {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0 !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    height: 36px !important;
+  }
+
+  body.checkout-cart-index table#shopping-cart-table .col.qty .input-text.qty {
+    width: 40px !important;
+    height: 36px !important;
+    border: none !important;
+    text-align: center !important;
+    font-size: 14px !important;
+    padding: 0 !important;
+    background: #f9fafb !important;
+  }
+
+  /* Style increment/decrement buttons if present */
+  body.checkout-cart-index table#shopping-cart-table .col.qty button.qty-minus,
+  body.checkout-cart-index table#shopping-cart-table .col.qty button.qty-plus {
+    width: 36px !important;
+    height: 36px !important;
+    border: none !important;
+    background: #ffffff !important;
+    color: #374151 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    font-size: 18px !important;
+  }
+
+  body.checkout-cart-index table#shopping-cart-table .col.qty button.qty-minus:hover,
+  body.checkout-cart-index table#shopping-cart-table .col.qty button.qty-plus:hover {
+    background: #f3f4f6 !important;
+  }
+}
+
+/* =============================================================================
+   VB-54: Price Dash Polish
+   ============================================================================= */
+body.checkout-cart-index .price:contains("-") {
+  color: #d1d5db !important;
+  font-weight: 400 !important;
+}
+
+/* =============================================================================
+   VB-55: Bug #12/#13 — Mobile search button position:absolute sobrepõe o input
+
+   Causa raiz: awa-bundle-refinements.css e awa-super-global.css definem
+   body .page-wrapper .awa-site-header .awa-header-search-col.top-search
+   .block.block-search .action.search { position: absolute !important; }
+   com especificidade (0,8,1) que bate o fix anterior (0,5,2).
+
+   Solução: usar o mesmo seletor longo (especificidade idêntica) neste arquivo
+   que é carregado DEPOIS → source order vence em empate de especificidade + !important.
+   ============================================================================= */
+@media (max-width: 991px) {
+  body .page-wrapper .awa-site-header .awa-header-search-col.top-search .block.block-search .action.search,
+  body .page-wrapper .awa-site-header .awa-header-search-col.top-search .block.block-search .actions .action.search {
+    position: static !important; /* Revert absolute — layout flex não precisa de absolute. Source order vence bundle-refinements */
+    left: auto !important;
+    top: auto !important;
+    transform: none !important;
+    width: 40px !important;
+    min-width: 40px !important;
+    height: 44px !important;
+    padding: 0 !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* .actions wrapper também deve ser static para não criar stacking context desnecessário */
+  body .page-wrapper .awa-site-header .awa-header-search-col.top-search .block.block-search .actions {
+    position: static !important;
+    width: auto !important;
+    min-width: 0 !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Input ocupa o restante da largura disponível */
+  body .page-wrapper .awa-site-header .awa-header-search-col.top-search .block.block-search .field.search {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    width: auto !important;
+  }
+
+  body .page-wrapper .awa-site-header .awa-header-search-col.top-search .block.block-search #search {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+}
+
+/* =============================================================================
+   VB-56: Bug #20 — Banner B2B: .is-dismissing CSS transition
+
+   A classe .is-dismissing é adicionada via JS (header.phtml) ao clicar no X.
+   Precisa estar no CSS carregado (não no merged bundle que não carrega standalone).
+   ============================================================================= */
+#awa-b2b-promo-bar {
+  overflow: hidden !important;
+  transition: max-height var(--awa-duration) var(--awa-ease), opacity var(--awa-duration) var(--awa-ease) !important; /* Smooth dismiss */
+}
+
+#awa-b2b-promo-bar.is-dismissing {
+  opacity: 0 !important; /* Fade out; JS sets display:none after 320ms — height collapses after invisible */
+  pointer-events: none !important;
+  /* Nota: NÃO usar max-height:0 aqui — sem valor numérico inicial, a transição não anima e causa CLS imediato */
+}

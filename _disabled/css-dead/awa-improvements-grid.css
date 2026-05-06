@@ -15,7 +15,62 @@
   overflow: hidden !important;
 }
 
+/* =====================================================================
+ * REFINO VISUAL — CARDS MAIS LIMPOS E SEM DUPLA BORDA/RADIUS
+ * Mantém a borda apenas no wrapper do card; wrappers internos ficam transparentes.
+ * ===================================================================== */
+
+:is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .item-product {
+    background: #ffffff !important;
+    border: 1px solid rgb(226 232 240 / 92%) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 10px 24px rgb(15 23 42 / 4%) !important;
+    overflow: hidden !important;
+}
+
+:is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .item-product:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 18px 34px rgb(15 23 42 / 8%) !important;
+    border-color: rgb(183 51 55 / 14%) !important;
+}
+
+:is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .item-product > .product-thumb,
+:is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .item-product > .content-item-product,
+:is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .item-product > .content-item-product > .product-thumb,
+:is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .item-product > .product-info,
+:is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .item-product .product-info-cart {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+.page-wrapper .wrapper.grid.products-grid .item-product > .product-thumb,
+:is(body.catalog-category-view, body.catalogsearch-result-index)
+.page-wrapper .wrapper.grid.products-grid .item-product > .content-item-product > .product-thumb {
+    padding-bottom: 0 !important;
+}
+
+:is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .item-product .product-thumb-link {
+    padding: 12px 12px 0 !important;
+}
+
+:is(body.catalog-category-view, body.catalogsearch-result-index, body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+.page-wrapper .item-product .product-info {
+    padding: 0 14px 14px !important;
+}
+
 .product-thumb-link {
+  padding: 8px !important;
   display: block !important;
   width: 100% !important;
 }
@@ -44,28 +99,25 @@
   width: 100% !important;
   max-width: 100% !important;
   height: auto !important;
-  max-height: var(--awa-size-200, 200px) !important;
+  max-height: 200px !important;
   object-fit: contain !important;
 }
 
-/* --- Hover image swap desativado (estabilidade da thumb principal) --- */
+/* --- FIX: Hover image (second-thumb) --- */
 .second-thumb {
   position: absolute !important;
   top: 0 !important;
   left: 0 !important;
-  opacity: var(--awa-opacity-0, 0) !important;
-  display: none !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
+  opacity: 0 !important;
+  transition: opacity 0.3s ease !important;
 }
 
 .product-thumb:hover .second-thumb {
-  opacity: var(--awa-opacity-0, 0) !important;
-  display: none !important;
+  opacity: 1 !important;
 }
 
 .second-thumb img.product-image-photo {
-  opacity: var(--awa-opacity-0, 0) !important;
+  opacity: 1 !important;
 }
 
 /* --- FIX: Category 2-column layout (sidebar + main) ---
@@ -79,7 +131,7 @@
 .block.upsell .product-image-container,
 .block.crosssell .product-image-container {
   height: auto !important;
-  min-height: var(--awa-size-120, 120px) !important;
+  min-height: 120px !important;
   width: 100% !important;
   max-width: 100% !important;
 }
@@ -96,7 +148,7 @@
   width: 100% !important;
   max-width: 100% !important;
   height: auto !important;
-  max-height: var(--awa-size-180, 180px) !important;
+  max-height: 180px !important;
   object-fit: contain !important;
 }
 
@@ -112,7 +164,7 @@
   width: 100% !important;
   max-width: 100% !important;
   height: auto !important;
-  max-height: var(--awa-size-120, 120px) !important;
+  max-height: 120px !important;
   object-fit: contain !important;
 }
 
@@ -133,11 +185,9 @@
 
 /* 2) .column.main display:block and product-view → _grid-system.less */
 
-/* 4) Galeria e info devem dividir 50/50 */
-.catalog-product-view .main-detail > .row > .col-md-6 {
-  flex: 0 0 50% !important;
-  max-width: 50% !important;
-}
+/* 4) Galeria e info: delegado para awa-pdp-visual-fix.css (55/45 split)
+   Removido flex/max-width fixo para evitar conflito de cascata.
+   Apenas garantir que não há sidebar roubando espaço. */
 
 /* 5) Secao mostviewed e related ocupam largura total */
 .catalog-product-view .awa-pdp-mostviewed,
@@ -182,7 +232,7 @@
 }
 
 #mst_categorySearch:placeholder-shown + .mst_categorySearch_searchIcon {
-  opacity: var(--awa-opacity-muted, 0.55);
+  opacity: 0.5;
 }
 
 /* ================================================================
@@ -201,8 +251,8 @@
   body.catalogsearch-result-index .item-product .info-price .b2b-login-to-see-price {
     white-space: normal;
     font-size:var(--awa-font-size-xs);
-    padding: var(--awa-space-1-5, 6px) var(--awa-space-2, 8px);
-    gap: var(--awa-gap-0-75, 3px);
+    padding: 6px 8px;
+    gap: 3px;
     text-align: center;
     justify-content: center;
     flex-wrap: wrap;
@@ -215,7 +265,7 @@
    ================================================================ */
 @media (max-width: 767px) {
   .catalog-product-view .product.media img.product-image-photo {
-    max-height: var(--awa-size-320, 320px) !important;
+    max-height: 320px !important;
   }
 }
 
@@ -239,7 +289,7 @@
 .catalog-product-view .awa-pdp-mostviewed img.product-image-photo,
 .catalog-product-view .awa-pdp-related img.product-image-photo {
   position: relative !important;
-  max-height: var(--awa-size-180, 180px) !important;
+  max-height: 180px !important;
   width: auto !important;
   max-width: 100% !important;
   margin: 0 auto !important;
@@ -249,7 +299,7 @@
 /* Remove the visible image border in related products */
 .catalog-product-view .awa-pdp-mostviewed .product-image-container,
 .catalog-product-view .awa-pdp-related .product-image-container {
-  border: var(--awa-none, none) !important;
+  border: none !important;
 }
 
 /* ================================================================
@@ -260,7 +310,7 @@
 .item-product .product-name a,
 .swiper-slide .product-item-link,
 .swiper-slide .product-name a {
-  text-decoration: var(--awa-none, none) !important;
+  text-decoration: none !important;
   color: var(--awa-gray-920) !important;
 }
 
@@ -268,7 +318,7 @@
 .item-product .product-name a:hover,
 .swiper-slide .product-item-link:hover,
 .swiper-slide .product-name a:hover {
-  text-decoration: var(--awa-none, none) !important;
+  text-decoration: none !important;
   color: var(--awa-primary) !important;
 }
 
@@ -282,24 +332,24 @@
   flex-direction: column;
   align-items: stretch;
   padding: 0;
-  border: var(--awa-none, none);
-  border-radius: var(--awa-radius-none, 0);
-  background: var(--awa-transparent, transparent) !important;
-  color: var(--awa-primary, var(--awa-red, #b73337));
+  border: none;
+  border-radius: 0;
+  background: transparent !important;
+  color: var(--awa-primary, #b73337);
   font-size:var(--awa-font-size-sm);
   font-weight: var(--awa-weight-bold);
 }
 
 .ayo-home-block .item-product .b2b-login-to-see-price a,
 .top-home-content .item-product .b2b-login-to-see-price a {
-  color: var(--awa-primary, var(--awa-red, #b73337)) !important;
+  color: var(--awa-primary, #b73337) !important;
   font-weight: var(--awa-weight-bold);
-  text-decoration: var(--awa-none, none);
+  text-decoration: none;
 }
 
 .ayo-home-block .item-product .b2b-login-to-see-price a:hover,
 .top-home-content .item-product .b2b-login-to-see-price a:hover {
-  text-decoration: var(--awa-underline, underline);
+  text-decoration: underline;
 }
 
 /* ================================================================
@@ -364,18 +414,18 @@
    ================================================================ */
 .page-footer .footer.content,
 .page-footer .footer-container {
-  max-width: var(--awa-size-1280, 1280px) !important;
+  max-width: 1280px !important;
   margin-left: auto !important;
   margin-right: auto !important;
-  padding-left: var(--awa-space-6, 24px) !important;
-  padding-right: var(--awa-space-6, 24px) !important;
+  padding-left: 24px !important;
+  padding-right: 24px !important;
 }
 
 @media (max-width: 767px) {
   .page-footer .footer.content,
   .page-footer .footer-container {
-    padding-left: var(--awa-space-3-75, 15px) !important;
-    padding-right: var(--awa-space-3-75, 15px) !important;
+    padding-left: 15px !important;
+    padding-right: 15px !important;
   }
 }
 
@@ -385,14 +435,9 @@
    Added: --awa-radius-lg=12px for cards/containers
    ================================================================ */
 
-/* --- 8a. Extend design tokens --- */
-:root {
-  --awa-radius-lg: 16px;
-  --awa-radius-pill: 999px;
-  --awa-input-h: 44px;
-  --awa-btn-h: 44px;
-  --awa-btn-h-lg: 52px;
-}
+/* --- 8a. Design tokens agora definidos em awa-design-tokens.css ---
+   --awa-radius-lg, --awa-radius-pill, --awa-radius-full,
+   --awa-input-h, --awa-btn-h, --awa-btn-h-lg → centralizados no token file. */
 
 /* --- 8b. Form input standardization --- */
 input[type="text"],
@@ -406,26 +451,26 @@ select,
 textarea {
   height: var(--awa-input-h) !important;
   border-radius: var(--awa-radius-md) !important;
-  border: var(--awa-border-width, 1px) solid var(--awa-border, #e5e5e5) !important;
+  border: 1px solid var(--awa-border, #e5e5e5) !important;
   font-size:var(--awa-font-size-14) !important;
-  padding: 0 var(--awa-space-4, 16px) !important;
-  transition: var(--awa-transition-brd-015, border-color 0.15s) !important;
+  padding: 0 16px !important;
+  transition: border-color 0.15s !important;
 }
 input:focus,
 select:focus,
 textarea:focus {
-  border-color: var(--awa-primary, var(--awa-primary)) !important;
-  outline: var(--awa-none, none) !important;
+  border-color: var(--awa-primary) !important;
+  outline: none !important;
 }
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--awa-primary, var(--awa-red, #b73337)) 15%, transparent) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--awa-primary, #b73337) 15%, transparent) !important;
 }
 textarea {
   height: auto !important;
-  padding: var(--awa-space-3, 12px) var(--awa-space-4, 16px) !important;
-  min-height: var(--awa-size-100, 100px) !important;
+  padding: 12px 16px !important;
+  min-height: 100px !important;
 }
 
 /* --- 8c. Button standardization (PLP = 44px, PDP = 52px) --- */
@@ -437,7 +482,7 @@ textarea {
   border-radius: var(--awa-radius-md) !important;
   font-size:var(--awa-font-size-14) !important;
   font-weight: var(--awa-weight-semibold) !important;
-  padding: 0 var(--awa-space-6, 24px) !important;
+  padding: 0 24px !important;
 }
 /* PDP — larger CTA button */
 .catalog-product-view .box-tocart .action.tocart,
@@ -456,13 +501,13 @@ textarea {
 .b2b-pdp-price-wrapper,
 .btn-b2b-login {
   font-size:var(--awa-font-size-sm) !important;
-  background: var(--awa-transparent, transparent) !important;
-  color: var(--awa-primary, var(--awa-red, #b73337)) !important;
-  border: var(--awa-none, none) !important;
-  border-radius: var(--awa-radius-none, 0) !important;
+  background: transparent !important;
+  color: var(--awa-primary, #b73337) !important;
+  border: none !important;
+  border-radius: 0 !important;
 }
 .catalog-product-view .b2b-login-to-see-price {
-  border-radius: var(--awa-radius-none, 0) !important;
+  border-radius: 0 !important;
 }
 
 /* --- 8e. Card/container border-radius consistency --- */
@@ -495,7 +540,7 @@ textarea {
 }
 .awa-home-section + .awa-home-section,
 .top-home-content + .top-home-content {
-  margin-top: var(--awa-space-9, 48px) !important;
+  margin-top: 48px !important;
 }
 
 /* PDP bottom sections spacing */
@@ -504,7 +549,7 @@ textarea {
 .catalog-product-view .awa-pdp-related,
 .catalog-product-view .block.related,
 .catalog-product-view .block.upsell {
-  margin-top: var(--awa-space-8, 40px) !important;
+  margin-top: 40px !important;
 }
 
 /* Section headings — consistent */
@@ -514,7 +559,7 @@ textarea {
   font-size:var(--awa-font-size-xl) !important;
   font-weight: var(--awa-weight-bold) !important;
   color: var(--awa-text, #333) !important;
-  margin-bottom: var(--awa-space-4, 16px) !important;
+  margin-bottom: 16px !important;
 }
 
 /* ================================================================
@@ -523,15 +568,15 @@ textarea {
 .breadcrumbs {
   font-size:var(--awa-font-size-sm) !important;
   color: var(--awa-text-muted, #666) !important;
-  margin-bottom: var(--awa-space-4, 16px) !important;
-  padding-bottom: var(--awa-space-3, 12px) !important;
+  margin-bottom: 16px !important;
+  padding-bottom: 12px !important;
 }
 .breadcrumbs a {
   color: var(--awa-text-muted, #666) !important;
-  text-decoration: var(--awa-none, none) !important;
+  text-decoration: none !important;
 }
 .breadcrumbs a:hover {
-  color: var(--awa-primary, var(--awa-primary)) !important;
+  color: var(--awa-primary) !important;
 }
 .breadcrumbs .item:not(:last-child)::after {
   color: var(--awa-text-light, #999) !important;
@@ -546,14 +591,14 @@ textarea {
   font-size:var(--awa-font-size-20) !important;
   font-weight: var(--awa-weight-bold) !important;
   color: var(--awa-text, #333) !important;
-  margin-bottom: var(--awa-space-4, 16px) !important;
-  line-height: var(--awa-leading-base, 1.3) !important;
+  margin-bottom: 16px !important;
+  line-height: 1.3 !important;
 }
 /* Product title (h1) stays larger */
 .catalog-product-view .page-title .base {
   font-size:var(--awa-font-size-24) !important;
   font-weight: var(--awa-weight-bold) !important;
-  line-height: var(--awa-leading-base, 1.3) !important;
+  line-height: 1.3 !important;
 }
 
 /* Specs table heading override */
@@ -562,7 +607,7 @@ textarea {
 .catalog-product-view .product.info.detailed .title {
   font-size:var(--awa-font-size-20) !important;
   font-weight: var(--awa-weight-bold) !important;
-  margin-bottom: var(--awa-space-4, 16px) !important;
+  margin-bottom: 16px !important;
 }
 
 /* ================================================================
@@ -601,25 +646,25 @@ body .page-wrapper .header .top-search .block-search input#search {
   /* wp-header grid: 2 colunas iguais em todas as páginas */
   body .page-wrapper .header .header_main .wp-header,
   body .page-wrapper .header .header-main .wp-header {
-    grid-template-columns: var(--awa-gtc-clamp-md, clamp(74px, 22vw, 96px) minmax(0, 1fr)) !important;
-    gap: var(--awa-gap-2-5, 10px) !important;
+    grid-template-columns: clamp(74px, 22vw, 96px) minmax(0, 1fr) !important;
+    gap: 10px !important;
   }
 
   /* top-search inner grid: search + cart */
   body .page-wrapper .header .top-search {
-    grid-template-columns: var(--awa-gtc-1fr-44, minmax(0, 1fr) 44px) !important;
-    gap: var(--awa-gap-sm, 8px) !important;
+    grid-template-columns: minmax(0, 1fr) 44px !important;
+    gap: 8px !important;
   }
 
   /* Search form min-height consistente */
   body .page-wrapper .header .top-search > .block-search form.minisearch,
   body .page-wrapper .header .top-search > .block-search form#search_mini_form {
-    min-height: var(--awa-space-8-5, 44px) !important;
+    min-height: 44px !important;
   }
 
   /* Category page search — ensure full grid-column span */
   body .page-wrapper .header .top-search > .block-search {
-    min-width: var(--awa-zero, 0) !important;
+    min-width: 0 !important;
     width: 100% !important;
   }
 }
@@ -644,30 +689,6 @@ body .page-wrapper .header .top-search .block-search input#search {
   background-color: var(--awa-gray-50, #f9f9f9) !important;
 }
 
-/* 13c. Fade-in suave da imagem no carregamento
-   A imagem começa invisível e aparece com opacidade quando o
-   browser concluir o decode. Funciona com lazy e eager loading.
-   Referência: @starting-style é Baseline 2023+ — fallback seguro
-   via animation para navegadores mais antigos. */
-@keyframes awa-img-fadein {
-  from { opacity: var(--awa-opacity-0, 0); }
-  to   { opacity: var(--awa-opacity-100, 1); }
-}
-
-.item-product img.product-image-photo {
-  animation: awa-img-fadein 0.4s ease both !important;
-  /* Garante que imagens já em cache não piscam — animation-play-state:running
-     só se aplica se a imagem ainda não foi decodificada */
-  animation-delay: 0s !important;
-}
-
-/* Parar animação se o prefers-reduced-motion estiver ativo */
-@media (prefers-reduced-motion: reduce) {
-  .item-product img.product-image-photo {
-    animation: none !important;
-  }
-}
-
 /* 13d. Hover card — homepage carrosséis (cobre .ayo-home-block + .top-home-content)
    A regra de category/search está em awa-category-layout-fix.css.
    Esta cobre carrosséis e blocos da homepage. */
@@ -682,8 +703,8 @@ body .page-wrapper .header .top-search .block-search input#search {
 .ayo-home-block .item-product:hover,
 .top-home-content .item-product:hover,
 .products-swiper .item-product:hover {
-  transform: translateY(var(--awa-neg-0-5, -2px)) !important;
-  box-shadow: var(--awa-shadow-xl3, 0 8px 24px rgb(0 0 0 / 10%)) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.10) !important;
   border-color: var(--awa-border-strong, #cccccc) !important;
   will-change: transform;
 }
@@ -691,7 +712,7 @@ body .page-wrapper .header .top-search .block-search input#search {
 /* 13e. Nome do produto — fade de cor no hover (homepage + global) */
 .item-product:hover .product-item-link,
 .item-product:hover .product-name a {
-  color: var(--awa-primary, var(--awa-red, #b73337)) !important;
+  color: var(--awa-primary, #b73337) !important;
 }
 
 /* 13f. Imagem principal — zoom suave no hover (sutil, 1.03×) */
@@ -701,32 +722,28 @@ body .page-wrapper .header .top-search .block-search input#search {
 }
 
 .item-product:hover .product-thumb .first-thumb img.product-image-photo {
-  transform: var(--awa-transform-scale-103, scale(1.03)) !important;
+  transform: scale(1.03) !important;
   will-change: transform;
 }
 
-/* second-thumb desativado: mantém comportamento estável da imagem principal */
+/* Não aplicar zoom quando há second-thumb (hover image swap prevalece) */
 .item-product:hover .product-thumb:has(.second-thumb) .first-thumb img.product-image-photo {
   transform: none !important;
 }
 
-/* 13g. Second-thumb permanece oculto para evitar competição de camadas */
+/* 13g. Second-thumb: garantir que cobre o container e tem position correta */
 .item-product .product-thumb .second-thumb {
   width: 100% !important;
   height: 100% !important;
-  display: none !important;
+  display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  opacity: var(--awa-opacity-0, 0) !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
 }
 
 .item-product .product-thumb .second-thumb img.product-image-photo {
   max-height: 100% !important;
   width: auto !important;
   max-width: 100% !important;
-  opacity: var(--awa-opacity-0, 0) !important;
 }
 
 /* 13h. Touch/keyboard: :focus-within como substituto de :hover em mobile */
@@ -734,12 +751,12 @@ body .page-wrapper .header .top-search .block-search input#search {
   /* Em dispositivos touch, remove o lift permanente (sem hover real) */
   .item-product:hover {
     transform: none !important;
-    box-shadow: var(--awa-shadow-none, none) !important;
+    box-shadow: none !important;
   }
   /* Feedback de toque via :active em vez de :hover */
   .item-product:active {
     transform: scale(0.98) !important;
-    box-shadow: var(--awa-shadow, 0 2px 8px rgb(0 0 0 / 8%)) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
     transition: transform 0.1s ease, box-shadow 0.1s ease !important;
   }
 }
