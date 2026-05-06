@@ -158,5 +158,17 @@
                 sortOrder="100"/>
     </type>
 
+    <!-- Fix: global.php metadata injects null for formIds (module-captcha defines it only
+         in etc/frontend/di.xml). When ObjectManager is initialized in global scope (scripts,
+         REST API context) Captcha\Model\Checkout\ConfigProvider throws TypeError.
+         Providing a global-scope default array prevents the fatal error. -->
+    <type name="Magento\Captcha\Model\Checkout\ConfigProvider">
+        <arguments>
+            <argument name="formIds" xsi:type="array">
+                <item name="user_login" xsi:type="string">user_login</item>
+            </argument>
+        </arguments>
+    </type>
+
 </config>
 
