@@ -40,12 +40,17 @@ class Breadcrumbs extends Template
         $position = 1;
 
         foreach ($breadcrumbs as $crumb) {
-            $itemListElement[] = [
+            $item = [
                 '@type' => 'ListItem',
                 'position' => $position++,
-                'name' => $crumb['label'],
-                'item' => isset($crumb['link']) ? $crumb['link'] : ''
+                'name' => $crumb['label']
             ];
+            
+            if (!empty($crumb['link'])) {
+                $item['item'] = $crumb['link'];
+            }
+            
+            $itemListElement[] = $item;
         }
 
         $schema = [

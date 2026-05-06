@@ -172,8 +172,10 @@ class ProductSchema extends Template
             $schema['gtin13'] = $ean;
         }
 
-        // Condição do produto na raiz
-        $schema['itemCondition'] = 'https://schema.org/NewCondition';
+        // Condição do produto dentro de Offers (Padrão Schema.org correto)
+        if (isset($schema['offers'])) {
+            $schema['offers']['itemCondition'] = 'https://schema.org/NewCondition';
+        }
 
         return $schema;
     }

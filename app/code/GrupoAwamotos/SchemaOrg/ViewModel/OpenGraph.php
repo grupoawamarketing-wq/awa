@@ -89,7 +89,7 @@ class OpenGraph implements ArgumentInterface
 
     public function getProductImageUrl(\Magento\Catalog\Model\Product $product): string
     {
-        return $this->imageHelper->init($product, 'product_base_image')->getUrl();
+        return $this->imageHelper->init($product, 'product_page_main_image')->getUrl();
     }
 
     /**
