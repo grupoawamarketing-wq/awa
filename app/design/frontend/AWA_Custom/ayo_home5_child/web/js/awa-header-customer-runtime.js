@@ -449,11 +449,72 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
                 }
             });
 
+            document.addEventListener('keydown', function (event) {
+                var menu = getAccountMenu();
+                if (!menu || !isAccountMenuOpen()) {
+                    return;
+                }
+
+                if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') {
+                    return;
+                }
+
+                var items = getAccountMenuFocusable(menu);
+                if (!items.length) {
+                    return;
+                }
+
+                event.preventDefault();
+                var active = document.activeElement;
+                var index = items.indexOf(active);
+
+                if (index === -1) {
+                    items[0].focus();
+                    return;
+                }
+
+                if (event.key === 'ArrowDown') {
+                    items[(index + 1) % items.length].focus();
+                    return;
+                }
+
+                items[(index - 1 + items.length) % items.length].focus();
+            });
+
+            document.addEventListener('keydown', function (event) {
+                var menu = getAccountMenu();
+                if (!menu || !isAccountMenuOpen()) {
+                    return;
+                }
+
+                var items = getAccountMenuFocusable(menu);
+                if (!items.length) {
+                    return;
+                }
+
+                if (event.key === 'Home') {
+                    event.preventDefault();
+                    items[0].focus();
+                    return;
+                }
+
+                if (event.key === 'End') {
+                    event.preventDefault();
+                    items[items.length - 1].focus();
+                }
+            });
+
             window.addEventListener('resize', function () {
                 if (window.innerWidth < 992) {
                     closeAccountMenu(false);
                 }
             });
+
+            window.addEventListener('scroll', function () {
+                if (isAccountMenuOpen()) {
+                    closeAccountMenu(false);
+                }
+            }, { passive: true });
 
             // Desktop hover support with delay, controlled by same JS state.
             document.addEventListener('mouseover', function (event) {
@@ -533,6 +594,13 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
             link.className = 'awa-account-quick-actions__item ' + mod;
             link.href = href;
             link.textContent = label;
+            if (window.location && window.location.pathname) {
+                var currentPath = window.location.pathname.replace(/\/+$/, '');
+                var targetPath = String(href).replace(/\/+$/, '');
+                if (currentPath === targetPath) {
+                    link.setAttribute('aria-current', 'page');
+                }
+            }
             return link;
         }
 

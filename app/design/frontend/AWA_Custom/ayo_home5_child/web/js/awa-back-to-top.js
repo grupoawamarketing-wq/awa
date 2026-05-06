@@ -6,22 +6,44 @@ define([], function () {
     'use strict';
 
     return function (config, element) {
+        if (!element) {
+            return;
+        }
+
         const threshold = config.threshold || 600;
         let shown = false;
+
+        function showButton() {
+            element.hidden = false;
+            element.removeAttribute('hidden');
+            element.classList.add('is-visible');
+            element.setAttribute('aria-hidden', 'false');
+            shown = true;
+        }
+
+        function hideButton() {
+            element.hidden = true;
+            element.classList.remove('is-visible');
+            element.setAttribute('aria-hidden', 'true');
+            shown = false;
+        }
 
         function toggle() {
             const y = window.pageYOffset || document.documentElement.scrollTop;
 
             if (y > threshold && !shown) {
-                element.classList.add('is-visible');
-                element.setAttribute('aria-hidden', 'false');
-                shown = true;
+                showButton();
             } else if (y <= threshold && shown) {
-                element.classList.remove('is-visible');
-                element.setAttribute('aria-hidden', 'true');
-                shown = false;
+                hideButton();
             }
         }
+
+        // Keep only the new AWA button active; hide legacy fixed-right scroll-top item.
+        document.querySelectorAll('.fixed-right .scroll-top, .fixed-right-ul .scroll-top').forEach((legacyNode) => {
+            legacyNode.style.display = 'none';
+        });
+
+        hideButton();
 
         window.addEventListener('scroll', toggle, {passive: true});
 

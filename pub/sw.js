@@ -1,5 +1,5 @@
 /** AWA Service Worker v2.5.0 — Multi-strategy Cache & Offline Support (2026-04-28) */
-const CACHE_VERSION = '20260504-account-dropdown';
+const CACHE_VERSION = '20260506-visual-qa-split';
 const FONT_CACHE = 'awa-fonts-v1';
 const IMAGE_CACHE = 'awa-images-v1';
 const OFFLINE_CACHE = 'awa-offline-v1';
@@ -63,7 +63,7 @@ self.addEventListener('fetch', (event) => {
   const url = event.request.url;
 
   /* Skip admin, checkout, customer, and API routes entirely — never intercept */
-  if (/\/(admin_|admin\/|checkout|customer\/|rest\/|graphql)/.test(url)) {
+  if (/\/(admin_|admin\/|checkout(\/|$|\?|#)|customer\/|rest\/|graphql)/.test(url)) {
     return;
   }
 
@@ -110,7 +110,7 @@ self.addEventListener('fetch', (event) => {
           return fetch(event.request).then((response) => {
             if (response.ok) {
               cache.put(event.request, response.clone());
-              trimImageCache(cache);
+              trimImageCache(cache).catch(function () {});
             }
             return response;
           }).catch(() => cached || Response.error());
@@ -129,7 +129,7 @@ self.addEventListener('fetch', (event) => {
             if (response.ok) cache.put(event.request, response.clone());
             return response;
           });
-          return cached || networkFetch;
+          return cached || networkFetch.catch(function () { return Response.error(); });
         })
       )
     );
