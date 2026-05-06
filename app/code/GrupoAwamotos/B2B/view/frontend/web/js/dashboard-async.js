@@ -8,17 +8,28 @@ define(['jquery'], function ($) {
     return function (config) {
         var baseUrl = config.ajaxUrl || '/b2b/account/dashboardData';
 
+        function escapeHtml(str) {
+            if (!str) return '';
+            var div = document.createElement('div');
+            div.appendChild(document.createTextNode(String(str)));
+            return div.innerHTML;
+        }
+
         function renderOrders(data) {
             var $container = $('[data-dashboard-section="orders"]');
             if (!$container.length || !data.items || !data.items.length) return;
 
             var html = '';
             data.items.forEach(function (order) {
+                var url = escapeHtml(order.view_url || '#');
+                var id = escapeHtml(order.increment_id);
+                var status = escapeHtml(order.status);
+                var total = escapeHtml(order.grand_total);
                 html += '<tr>' +
-                    '<td><a href="' + (order.view_url || '#') + '">#' + order.increment_id + '</a></td>' +
+                    '<td><a href="' + url + '">#' + id + '</a></td>' +
                     '<td>' + formatDate(order.created_at) + '</td>' +
-                    '<td><span class="status-badge">' + order.status + '</span></td>' +
-                    '<td>' + order.grand_total + '</td></tr>';
+                    '<td><span class="status-badge">' + status + '</span></td>' +
+                    '<td>' + total + '</td></tr>';
             });
             var $tbody = $container.find('tbody');
             if ($tbody.length && !$tbody.children().length) {
@@ -55,6 +66,11 @@ define(['jquery'], function ($) {
                     if (resp.orders) renderOrders(resp.orders);
                     if (resp.quotes) renderQuotes(resp.quotes);
                     if (resp.credit) renderCredit(resp.credit);
+                },
+                error: function (xhr) {
+                    if (xhr.status === 401) {
+                        window.location.reload();
+                    }
                 }
             });
         }

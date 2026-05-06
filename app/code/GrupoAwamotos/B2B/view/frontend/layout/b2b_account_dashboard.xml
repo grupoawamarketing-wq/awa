@@ -6,6 +6,7 @@
         <title>Minha Conta B2B</title>
         <css src="GrupoAwamotos_B2B::css/account/dashboard.css"/>
         <css src="GrupoAwamotos_B2B::css/account/dashboard-refinement.css"/>
+        <css src="GrupoAwamotos_B2B::css/account/dashboard-visual-upgrade.css"/>
     </head>
     <update handle="customer_account"/>
     <body>
@@ -14,15 +15,14 @@
                    name="b2b.account.dashboard"
                    template="GrupoAwamotos_B2B::account/dashboard.phtml"
                    cacheable="false">
-                <!-- ERP Suggestions block as child (data only, no own template) -->
+                <!-- ERP Suggestions block as child (data + intelligence template) -->
                 <block class="GrupoAwamotos\ERPIntegration\Block\Customer\Suggestions"
                        name="erp.dashboard.suggestions"
-                       cacheable="false"/>
+                       template="GrupoAwamotos_B2B::account/dashboard/intelligence.phtml"/>
                 <!-- RexisML AI Recommendations (data reais do pipeline) -->
                 <block class="GrupoAwamotos\ProductIntelligence\Block\Recommendations"
                        name="rexisml.b2b.recommendations"
-                       template="GrupoAwamotos_ProductIntelligence::b2b/recommendations-widget.phtml"
-                       cacheable="false">
+                       template="GrupoAwamotos_ProductIntelligence::b2b/recommendations-widget.phtml">
                     <arguments>
                         <argument name="limit" xsi:type="number">6</argument>
                     </arguments>
@@ -43,6 +43,11 @@
             <block class="Magento\Framework\View\Element\Template"
                    name="b2b.shepherd.css"
                    template="GrupoAwamotos_B2B::head/shepherd-css.phtml"/>
+            <!-- Late-loading CSS: bypass merge, loads AFTER awa-bundle-refinements.css -->
+            <block class="Magento\Framework\View\Element\Template"
+                   name="b2b.dashboard.late.css"
+                   template="GrupoAwamotos_B2B::head/b2b-dashboard-css.phtml"
+                   after="b2b.shepherd.css"/>
         </referenceBlock>
     </body>
 </page>

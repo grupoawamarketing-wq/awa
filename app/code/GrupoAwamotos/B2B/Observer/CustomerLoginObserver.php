@@ -75,7 +75,8 @@ class CustomerLoginObserver implements ObserverInterface
             return;
         }
 
-        $whatsAppUrl = 'https://wa.me/5516997367588';
+        $supportNumber = (string) $this->config->getWhatsAppSupportNumber() ?: '5516997367588';
+        $whatsAppUrl = 'https://wa.me/' . preg_replace('/\D/', '', $supportNumber);
 
         switch ($approvalStatus) {
             case ApprovalStatus::STATUS_PENDING:

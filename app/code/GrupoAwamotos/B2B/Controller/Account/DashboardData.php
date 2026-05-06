@@ -58,6 +58,11 @@ class DashboardData implements HttpGetActionInterface
     {
         $result = $this->jsonFactory->create();
 
+        // Validate AJAX request (X-Requested-With header) to prevent cross-site data leakage
+        if ($this->request->getHeader('X-Requested-With') !== 'XMLHttpRequest') {
+            return $result->setHttpResponseCode(403)->setData(['error' => 'Forbidden']);
+        }
+
         if (!$this->customerSession->isLoggedIn()) {
             return $result->setHttpResponseCode(401)->setData(['error' => 'Not authenticated']);
         }

@@ -556,4 +556,15 @@ class Config extends AbstractHelper
             $storeId
         );
     }
+    /**
+     * Get WhatsApp support number from config
+     */
+    public function getWhatsAppSupportNumber($storeId = null): string
+    {
+        return (string) $this->scopeConfig->getValue(
+            'grupoawamotos_b2b/whatsapp/default_number',
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+    }
 }

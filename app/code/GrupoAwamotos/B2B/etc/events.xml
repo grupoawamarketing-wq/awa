@@ -1,13 +1,14 @@
 <?xml version="1.0"?>
 <!--
 /**
- * B2B Module Events Configuration
+ * B2B Module Events Configuration (Global scope)
+ * Frontend-specific observers are in etc/frontend/events.xml
  */
 -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
 
-    <!-- Aprovação de cliente B2B -->
+    <!-- Aprovação de cliente B2B (custom event, fires from admin) -->
     <event name="grupoawamotos_b2b_customer_approved">
         <observer name="grupoawamotos_b2b_erp_approval_sync"
                   instance="GrupoAwamotos\B2B\Observer\ErpApprovalSyncObserver"/>
@@ -19,43 +20,19 @@
                   instance="GrupoAwamotos\B2B\Observer\AttendantAssignOnApprovalObserver"/>
     </event>
 
-    <!-- Registro de novo cliente -->
-    <event name="customer_register_success">
-        <observer name="grupoawamotos_b2b_customer_register"
-                  instance="GrupoAwamotos\B2B\Observer\CustomerRegisterObserver"/>
-        <observer name="grupoawamotos_b2b_registration_notification"
-                  instance="GrupoAwamotos\B2B\Observer\CustomerRegistrationNotification"/>
-        <observer name="grupoawamotos_b2b_erp_registration_check"
-                  instance="GrupoAwamotos\B2B\Observer\ErpRegistrationCheckObserver"/>
-    </event>
-
-    <!-- Login de cliente -->
-    <event name="customer_login">
-        <observer name="grupoawamotos_b2b_customer_login"
-                  instance="GrupoAwamotos\B2B\Observer\CustomerLoginObserver"/>
-    </event>
-
-    <!-- Classificação CNAE no save do cliente -->
+    <!-- Classificação CNAE no save do cliente (fires in admin + frontend) -->
     <event name="customer_save_after_data_object">
         <observer name="grupoawamotos_b2b_cnae_classification"
                   instance="GrupoAwamotos\B2B\Observer\CnaeClassificationObserver"/>
     </event>
 
-    <!-- Pedido colocado: aprovação B2B e crédito -->
-    <event name="sales_order_place_after">
-        <observer name="grupoawamotos_b2b_order_place_after"
-                  instance="GrupoAwamotos\B2B\Observer\OrderPlaceAfterObserver"/>
-        <observer name="grupoawamotos_b2b_order_notification"
-                  instance="GrupoAwamotos\B2B\Observer\OrderNotification"/>
-    </event>
-
-    <!-- Notificação de mudança de status do pedido -->
+    <!-- Notificação de mudança de status do pedido (admin area triggers) -->
     <event name="sales_order_save_after">
         <observer name="grupoawamotos_b2b_order_status_notification"
                   instance="GrupoAwamotos\B2B\Observer\OrderStatusNotification"/>
     </event>
 
-    <!-- Cotações B2B -->
+    <!-- Cotações B2B (custom events) -->
     <event name="grupoawamotos_b2b_quote_submit_after">
         <observer name="grupoawamotos_b2b_quote_notification"
                   instance="GrupoAwamotos\B2B\Observer\QuoteNotification"/>

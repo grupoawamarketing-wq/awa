@@ -22,10 +22,13 @@ use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory as ProductColl
 use Magento\Catalog\Model\ResourceModel\Category\CollectionFactory as CategoryCollectionFactory;
 use Magento\Catalog\Helper\Image as ImageHelper;
 use GrupoAwamotos\B2B\Model\ResourceModel\ShoppingList\CollectionFactory as ShoppingListCollectionFactory;
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Store\Model\ScopeInterface;
+use Magento\Framework\DB\Sql\Expression;
 
 class Dashboard extends Template
 {
-    private const QUICK_ORDER_ENABLED = true;
+    private const XML_PATH_QUICK_ORDER_ENABLED = 'grupoawamotos_b2b/features/quick_order_enabled';
     /**
      * Cached customer instance — avoids repeated customerRepository->getById() calls per request
      *
@@ -91,6 +94,8 @@ class Dashboard extends Template
      * @var ShoppingListCollectionFactory
      */
     private $shoppingListCollectionFactory;
+    private ScopeConfigInterface $scopeConfig;
+    private ?\Magento\Sales\Model\ResourceModel\Order\Collection $cachedRecentOrders = null;
 
     public function __construct(
         Context $context,
@@ -106,8 +111,15 @@ class Dashboard extends Template
         CategoryCollectionFactory $categoryCollectionFactory,
         ImageHelper $imageHelper,
         ShoppingListCollectionFactory $shoppingListCollectionFactory,
+        ScopeConfigInterface|array|null $scopeConfig = null,
         array $data = []
     ) {
+        if (is_array($scopeConfig) && $data === []) {
+            // Backward compatibility: stale generated metadata may pass $data in this position.
+            $data = $scopeConfig;
+            $scopeConfig = null;
+        }
+
         $this->customerSession = $customerSession;
         $this->orderCollectionFactory = $orderCollectionFactory;
         $this->quoteCollectionFactory = $quoteCollectionFactory;
@@ -120,6 +132,9 @@ class Dashboard extends Template
         $this->categoryCollectionFactory = $categoryCollectionFactory;
         $this->imageHelper = $imageHelper;
         $this->shoppingListCollectionFactory = $shoppingListCollectionFactory;
+        $this->scopeConfig = $scopeConfig instanceof ScopeConfigInterface
+            ? $scopeConfig
+            : $context->getScopeConfig();
         parent::__construct($context, $data);
     }
 
@@ -261,6 +276,32 @@ class Dashboard extends Template
     }
 
     /**
+    /**
+     * Get total orders amount for last 30 days
+     *
+     * @return float
+     */
+    public function getTotalOrdersAmount(): float
+    {
+        $customerId = $this->customerSession->getCustomerId();
+        if (!$customerId) {
+            return 0.0;
+        }
+
+        $thirtyDaysAgo = date('Y-m-d H:i:s', strtotime('-30 days'));
+        $collection = $this->orderCollectionFactory->create();
+        $collection->addFieldToFilter('customer_id', $customerId)
+            ->addFieldToFilter('created_at', ['from' => $thirtyDaysAgo])
+            ->addFieldToFilter('state', ['neq' => 'canceled']);
+
+        $collection->getSelect()
+            ->reset(\Magento\Framework\DB\Select::COLUMNS)
+            ->columns(['total' => new Expression('SUM(grand_total)')]);
+
+        return (float) ($collection->getFirstItem()->getData('total') ?? 0);
+    }
+
+    /**
      * Get recent orders
      *
      * @param int $limit
@@ -268,11 +309,20 @@ class Dashboard extends Template
      */
     public function getRecentOrders(int $limit = 5)
     {
+        // Cache only the default (limit=5) call to avoid repeated queries within single request
+        if ($limit === 5 && $this->cachedRecentOrders !== null) {
+            return $this->cachedRecentOrders;
+        }
+
         $customerId = $this->customerSession->getCustomerId();
         $collection = $this->orderCollectionFactory->create();
         $collection->addFieldToFilter('customer_id', $customerId)
             ->setOrder('created_at', 'DESC')
             ->setPageSize($limit);
+
+        if ($limit === 5) {
+            $this->cachedRecentOrders = $collection;
+        }
 
         return $collection;
     }
@@ -289,25 +339,36 @@ class Dashboard extends Template
             return [];
         }
 
+        $timezone = $this->_localeDate->getConfigTimezone();
+        $now = new \DateTimeImmutable('now', new \DateTimeZone($timezone));
+
+        $collection = $this->orderCollectionFactory->create();
+        $sixMonthsAgo = $now->modify('first day of -5 months')->format('Y-m-d 00:00:00');
+
+        $collection->addFieldToFilter('customer_id', $customerId)
+            ->addFieldToFilter('created_at', ['from' => $sixMonthsAgo])
+            ->addFieldToFilter('state', ['neq' => 'canceled']);
+
+        $collection->getSelect()
+            ->reset(\Magento\Framework\DB\Select::COLUMNS)
+            ->columns([
+                'month_label' => new Expression("DATE_FORMAT(created_at, '%Y-%m')"),
+                'monthly_total' => new Expression('SUM(grand_total)'),
+            ])
+            ->group(new Expression("DATE_FORMAT(created_at, '%Y-%m')"));
+
+        $results = [];
+        foreach ($collection as $row) {
+            $results[$row->getData('month_label')] = (float) $row->getData('monthly_total');
+        }
+
         $data = [];
         for ($i = 5; $i >= 0; $i--) {
-            $month = date('Y-m', strtotime("-$i months"));
-            $monthLabel = date('M/y', strtotime("-$i months"));
-            
-            $collection = $this->orderCollectionFactory->create();
-            $collection->addFieldToFilter('customer_id', $customerId)
-                ->addFieldToFilter('created_at', ['from' => "$month-01 00:00:00", 'to' => "$month-31 23:59:59"])
-                ->addFieldToFilter('state', ['neq' => 'canceled']);
-            
-            $collection->getSelect()->columns([
-                'monthly_total' => new \Zend_Db_Expr('SUM(grand_total)')
-            ]);
-            
-            $total = (float) ($collection->getFirstItem()->getData('monthly_total') ?? 0);
-            
+            $monthKey = $now->modify("-$i months")->format('Y-m');
+            $monthLabel = $now->modify("-$i months")->format('M/y');
             $data[] = [
                 'label' => $monthLabel,
-                'value' => $total
+                'value' => $results[$monthKey] ?? 0.0,
             ];
         }
 
@@ -499,7 +560,10 @@ class Dashboard extends Template
      */
     public function isQuickOrderAvailable(): bool
     {
-        return self::QUICK_ORDER_ENABLED;
+        return $this->scopeConfig->isSetFlag(
+            self::XML_PATH_QUICK_ORDER_ENABLED,
+            ScopeInterface::SCOPE_STORE
+        );
     }
 
     /**
@@ -668,7 +732,8 @@ class Dashboard extends Template
     private function buildAttendantContactUrl(array $attendant): string
     {
         if (!empty($attendant['whatsapp'])) {
-            return 'https://wa.me/55' . preg_replace('/\D/', '', $attendant['whatsapp']);
+            $countryCode = (string) $this->scopeConfig->getValue('grupoawamotos_b2b/whatsapp/country_code', ScopeInterface::SCOPE_STORE) ?: '55';
+            return 'https://wa.me/' . $countryCode . preg_replace('/\D/', '', $attendant['whatsapp']);
         }
         return 'mailto:' . ($attendant['email'] ?? '');
     }

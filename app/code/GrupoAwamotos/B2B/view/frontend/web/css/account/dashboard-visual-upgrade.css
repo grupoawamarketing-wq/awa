@@ -1,0 +1,644 @@
+/**
+ * B2B Dashboard — Visual Upgrade Layer
+ *
+ * Carrega APÓS dashboard-refinement.css.
+ * Melhora grid de produtos, micro-interações, animações de entrada,
+ * e consistência visual desktop/mobile.
+ */
+
+/* =================================================================
+   §1 — ENTRANCE ANIMATIONS
+   ================================================================= */
+
+@keyframes b2b-fade-up {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes b2b-scale-in {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.b2b-dashboard-header,
+.b2b-company-info,
+.b2b-summary-cards,
+.b2b-onboarding-section,
+.b2b-suggestions-section,
+.b2b-quick-actions,
+.b2b-section,
+.b2b-rexis-section,
+.erp-suggestions-section,
+.erp-reorder-section,
+.categories-section {
+    animation: b2b-fade-up 0.4s ease-out both;
+}
+
+.b2b-dashboard-header { animation-delay: 0ms; }
+.b2b-company-info { animation-delay: 60ms; }
+.b2b-summary-cards { animation-delay: 120ms; }
+.b2b-onboarding-section { animation-delay: 100ms; }
+.erp-suggestions-section { animation-delay: 160ms; }
+.erp-reorder-section { animation-delay: 200ms; }
+.b2b-suggestions-section { animation-delay: 240ms; }
+.b2b-quick-actions { animation-delay: 280ms; }
+.b2b-section.attendant-section { animation-delay: 320ms; }
+.b2b-rexis-section { animation-delay: 260ms; }
+.categories-section { animation-delay: 300ms; }
+
+.summary-card {
+    animation: b2b-scale-in 0.35s ease-out both;
+}
+.summary-card:nth-child(1) { animation-delay: 140ms; }
+.summary-card:nth-child(2) { animation-delay: 200ms; }
+.summary-card:nth-child(3) { animation-delay: 260ms; }
+
+/* =================================================================
+   §2 — ERP PRODUCT GRID: Structural Fix
+   Problemas corrigidos:
+   - Cards esticados em telas largas (max column width)
+   - Gap inconsistente entre breakpoints
+   - Altura desigual entre cards com/sem imagem
+   - Alinhamento vertical do conteúdo (price/name/sku)
+   - Mobile: 1col muito largo, 2col apertado
+   ================================================================= */
+
+/* Grid container: auto-fill com min/max para controlar largura */
+.erp-products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+    align-items: stretch;
+}
+
+/* Force all cards same height structure */
+.erp-product-card {
+    display: flex;
+    flex-direction: column;
+    min-height: 0; /* prevent overflow */
+    height: 100%; /* fill grid cell */
+}
+
+/* Image area: fixed aspect ratio for consistency */
+.erp-product-image {
+    aspect-ratio: 4 / 3;
+    height: auto;
+    min-height: 100px;
+    max-height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    background: #fafbfc;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.erp-product-image img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+}
+
+.erp-product-image.placeholder {
+    background: #f7f8fa;
+}
+
+.erp-product-image.placeholder svg {
+    opacity: 0.5;
+}
+
+/* Info section: flex-grow pushes price to bottom */
+.erp-product-info {
+    padding: 14px 16px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+}
+
+/* Name: fixed 2 lines clamp, consistent height */
+.erp-product-name {
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.45;
+    min-height: calc(2 * 13px * 1.45); /* reserve 2 lines */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin: 0;
+}
+
+/* SKU */
+.erp-product-sku {
+    font-size: 11px;
+    color: #9ca3af;
+    font-family: ui-monospace, 'Cascadia Code', 'Fira Mono', monospace;
+    letter-spacing: 0.02em;
+}
+
+/* Price: pushed to bottom via auto margin */
+.erp-product-price {
+    margin-top: auto;
+    padding-top: 8px;
+}
+
+/* Meta info (XX empresas compraram) */
+.erp-product-meta {
+    font-size: 11px;
+    color: #6b7280;
+    margin-top: 2px;
+}
+
+/* =================================================================
+   §3 — ERP PRODUCT GRID: Desktop breakpoints
+   ================================================================= */
+
+/* Large screens: cap at 3 columns, cards don't stretch beyond 280px */
+@media (width >= 1200px) {
+    .erp-products-grid {
+        grid-template-columns: repeat(3, 1fr);
+        max-width: 100%;
+    }
+}
+
+/* Medium screens: 2 columns with comfortable gaps */
+@media (width >= 641px) and (width <= 1199px) {
+    .erp-products-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+    }
+
+    .erp-product-image {
+        max-height: 140px;
+    }
+}
+
+/* =================================================================
+   §4 — ERP PRODUCT GRID: Mobile
+   ================================================================= */
+
+@media (width <= 640px) {
+    /* 2-column compact grid on mobile (not 1-col) */
+    .erp-products-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    /* Compact cards for mobile */
+    .erp-product-card {
+        border-radius: 10px;
+    }
+
+    .erp-product-image {
+        aspect-ratio: 1 / 1;
+        max-height: 110px;
+        min-height: 80px;
+        padding: 8px;
+    }
+
+    .erp-product-info {
+        padding: 10px 12px 12px;
+        gap: 4px;
+    }
+
+    .erp-product-name {
+        font-size: 12px;
+        min-height: calc(2 * 12px * 1.45);
+    }
+
+    .erp-product-sku {
+        font-size: 10px;
+    }
+
+    .erp-product-price {
+        font-size: 14px;
+        padding-top: 6px;
+    }
+
+    .erp-product-meta {
+        font-size: 10px;
+    }
+
+    .erp-price-badge {
+        font-size: 9px;
+        padding: 1px 5px;
+    }
+}
+
+/* Very small screens: still 2-col but tighter */
+@media (width <= 380px) {
+    .erp-products-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .erp-product-image {
+        max-height: 90px;
+        padding: 6px;
+    }
+
+    .erp-product-info {
+        padding: 8px 10px 10px;
+    }
+
+    .erp-product-name {
+        font-size: 11px;
+        min-height: calc(2 * 11px * 1.45);
+    }
+}
+
+/* =================================================================
+   §5 — ERP REORDER LIST: Vertical alignment fix
+   ================================================================= */
+
+.erp-reorder-item {
+    display: grid;
+    grid-template-columns: 60px 1fr auto auto;
+    gap: 14px;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.erp-reorder-item:last-child {
+    border-bottom: none;
+}
+
+.reorder-image {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: #f9fafb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.reorder-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.reorder-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0; /* allow text truncation */
+}
+
+.reorder-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.reorder-name a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.reorder-name a:hover {
+    color: var(--b2b-ayo-primary, #b73337);
+}
+
+.reorder-sku {
+    font-size: 11px;
+    color: #9ca3af;
+    font-family: ui-monospace, monospace;
+}
+
+.reorder-stats {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    font-size: 12px;
+    color: #6b7280;
+    white-space: nowrap;
+}
+
+.reorder-price {
+    font-size: 15px;
+    font-weight: 700;
+    color: #059669;
+    white-space: nowrap;
+    text-align: right;
+}
+
+/* Reorder list: mobile stack */
+@media (width <= 640px) {
+    .erp-reorder-item {
+        grid-template-columns: 50px 1fr;
+        grid-template-rows: auto auto;
+        gap: 8px 12px;
+    }
+
+    .reorder-image {
+        width: 50px;
+        height: 50px;
+        grid-row: span 2;
+    }
+
+    .reorder-info {
+        grid-column: 2;
+    }
+
+    .reorder-stats {
+        grid-column: 2;
+        font-size: 11px;
+        gap: 8px;
+    }
+
+    .reorder-price {
+        grid-column: 2;
+        text-align: left;
+        font-size: 14px;
+    }
+}
+
+/* =================================================================
+   §6 — HOVER POLISH: Product cards + action items
+   ================================================================= */
+
+/* Product card hover: gradient accent bottom */
+.erp-product-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.erp-product-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--b2b-ayo-primary, #b73337), transparent);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+
+.erp-product-card:hover::after {
+    opacity: 1;
+}
+
+/* Unavailable: de-emphasize */
+.erp-product-card.unavailable {
+    filter: grayscale(20%);
+}
+
+.erp-product-card.unavailable:hover {
+    filter: grayscale(0%);
+}
+
+/* Action items: icon scale on hover */
+.action-item svg {
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s ease;
+}
+
+.action-item:hover svg {
+    transform: scale(1.12);
+    color: var(--b2b-ayo-primary, #b73337);
+}
+
+/* Suggestion cards: lift on hover */
+.suggestion-card {
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease;
+}
+
+.suggestion-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 8%);
+}
+
+.suggestion-action svg {
+    transition: transform 0.2s ease;
+}
+
+.suggestion-action:hover svg {
+    transform: translateX(3px);
+}
+
+/* Category chips */
+.category-chip {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.category-chip:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgb(0 0 0 / 6%);
+}
+
+/* =================================================================
+   §7 — FOCUS RINGS (accessibility)
+   ================================================================= */
+
+.action-item:focus-visible,
+.suggestion-action:focus-visible,
+.checklist-action:focus-visible,
+.category-chip:focus-visible,
+.view-all:focus-visible,
+.contact-link:focus-visible,
+.erp-product-card a:focus-visible {
+    outline: 2px solid var(--b2b-ayo-primary, #b73337);
+    outline-offset: 3px;
+    border-radius: 8px;
+}
+
+/* =================================================================
+   §8 — PROGRESS BAR SHINE
+   ================================================================= */
+
+@keyframes b2b-progress-shine {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+.progress-fill,
+.credit-bar-fill {
+    position: relative;
+    overflow: hidden;
+}
+
+.progress-fill::after,
+.credit-bar-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 35%), transparent);
+    animation: b2b-progress-shine 2.5s ease-in-out infinite;
+}
+
+/* =================================================================
+   §9 — PENDING BADGE PULSE
+   ================================================================= */
+
+@keyframes b2b-pulse-soft {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.b2b-group-badge.pending {
+    animation: b2b-pulse-soft 2s ease-in-out infinite;
+}
+
+/* =================================================================
+   §10 — SUMMARY CARDS: Glassmorphism + accent
+   ================================================================= */
+
+.summary-card {
+    position: relative;
+    overflow: hidden;
+    background: rgb(255 255 255 / 85%);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+.summary-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--b2b-ayo-primary, #b73337), var(--b2b-ayo-primary-dark, #8b1a1e));
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+
+.summary-card:hover::before {
+    opacity: 1;
+}
+
+.credit-card::before {
+    background: linear-gradient(90deg, var(--b2b-ayo-primary, #b73337), #f87171);
+}
+
+.purchases-card::before {
+    background: linear-gradient(90deg, #059669, #10b981);
+}
+
+.quotes-card::before {
+    background: linear-gradient(90deg, #d97706, #f59e0b);
+}
+
+/* =================================================================
+   §11 — MOBILE: Scroll-snap summary cards
+   ================================================================= */
+
+@media (width <= 640px) {
+    .b2b-summary-cards {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        gap: 12px;
+        padding-bottom: 8px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .summary-card {
+        min-width: 80vw;
+        scroll-snap-align: center;
+        flex-shrink: 0;
+    }
+}
+
+/* =================================================================
+   §12 — SCROLLBAR (tables & horizontal scroll)
+   ================================================================= */
+
+.data-table::-webkit-scrollbar,
+.b2b-summary-cards::-webkit-scrollbar {
+    height: 5px;
+}
+
+.data-table::-webkit-scrollbar-track,
+.b2b-summary-cards::-webkit-scrollbar-track {
+    background: #f5f5f5;
+    border-radius: 3px;
+}
+
+.data-table::-webkit-scrollbar-thumb,
+.b2b-summary-cards::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 3px;
+}
+
+/* =================================================================
+   §13 — PREFERS REDUCED MOTION
+   ================================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+    .b2b-dashboard-header,
+    .b2b-company-info,
+    .b2b-summary-cards,
+    .b2b-onboarding-section,
+    .b2b-suggestions-section,
+    .b2b-quick-actions,
+    .b2b-section,
+    .b2b-rexis-section,
+    .erp-suggestions-section,
+    .erp-reorder-section,
+    .categories-section,
+    .summary-card,
+    .action-item {
+        animation: none;
+    }
+
+    .b2b-group-badge.pending {
+        animation: none;
+    }
+
+    .progress-fill::after,
+    .credit-bar-fill::after {
+        animation: none;
+    }
+
+    .summary-card:hover,
+    .action-item:hover,
+    .suggestion-card:hover,
+    .erp-product-card:hover,
+    .category-chip:hover {
+        transform: none;
+    }
+}
+
+/* =================================================================
+   §14 — PRINT
+   ================================================================= */
+
+@media print {
+    .b2b-quick-actions,
+    .b2b-onboarding-section,
+    .b2b-suggestions-section,
+    .trigger-b2b-tour,
+    .attendant-section {
+        display: none;
+    }
+
+    .b2b-dashboard-header,
+    .summary-card,
+    .b2b-section,
+    .b2b-company-info,
+    .erp-product-card {
+        break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #ccc;
+    }
+
+    .summary-card::before,
+    .erp-product-card::after {
+        display: none;
+    }
+}

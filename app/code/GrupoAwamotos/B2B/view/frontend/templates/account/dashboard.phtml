@@ -53,9 +53,9 @@ if ($erpBlock && $erpBlock->isEnabled() && $erpBlock->isLoggedIn()) {
                 <h1><?= $block->escapeHtml(__('Painel B2B')) ?></h1>
                 <p class="b2b-welcome-sub"><?= $block->escapeHtml(__('Olá, %1!', $customer ? $customer->getFirstname() : '')) ?>
                     <span class="b2b-member-since"><?= $block->escapeHtml(__('Cliente desde %1', $block->getRegistrationDate())) ?></span>
-                    <a href="#" class="action secondary trigger-b2b-tour" style="margin-left: 15px; font-size: 13px; text-decoration: underline;">
+                    <button type="button" class="action secondary trigger-b2b-tour b2b-tour-link">
                         <?= $block->escapeHtml(__('Como funciona o portal?')) ?>
-                    </a>
+                    </button>
                 </p>
                 <div class="b2b-badges">
                     <span class="b2b-group-badge <?= $block->isApproved() ? 'approved' : 'pending' ?>">
@@ -183,7 +183,7 @@ if ($erpBlock && $erpBlock->isEnabled() && $erpBlock->isLoggedIn()) {
         <!-- SALES INTELLIGENCE (ERP Historical Data)      -->
         <!-- ============================================ -->
         <?php if ($erpBlock && $erpBlock->isEnabled() && $erpBlock->isLoggedIn()): ?>
-            <?= $erpBlock->setTemplate('GrupoAwamotos_B2B::account/dashboard/intelligence.phtml')->toHtml() ?>
+            <?= $erpBlock->toHtml() ?>
         <?php endif; ?>
 
         <!-- ======================================= -->
@@ -439,7 +439,8 @@ if ($erpBlock && $erpBlock->isEnabled() && $erpBlock->isLoggedIn()) {
                         <?= $block->escapeHtml(__('Ver Todos')) ?>
                     </a>
                 </div>
-                <table class="data-table orders-table">
+                <table class="data-table orders-table" aria-label="<?= $block->escapeHtmlAttr(__('Pedidos recentes do ERP')) ?>">
+                    <caption class="sr-only"><?= $block->escapeHtml(__('Pedidos recentes do ERP')) ?></caption>
                     <thead>
                         <tr>
                             <th><?= $block->escapeHtml(__('Pedido')) ?></th>
@@ -501,6 +502,18 @@ if ($erpBlock && $erpBlock->isEnabled() && $erpBlock->isLoggedIn()) {
                         </tbody>
                     </table>
                 </div>
+            <?php else: ?>
+                <div class="b2b-section orders-section orders-empty-state" data-dashboard-section="orders">
+                    <div class="section-header">
+                        <h3><?= $block->escapeHtml(__('Últimos Pedidos')) ?></h3>
+                    </div>
+                    <div class="empty-state-message">
+                        <p><?= $block->escapeHtml(__('Você ainda não realizou nenhum pedido.')) ?></p>
+                        <a href="<?= $block->escapeUrl($block->getUrl('catalogsearch/result/?q=')) ?>" class="action primary">
+                            <?= $block->escapeHtml(__('Explorar Catálogo')) ?>
+                        </a>
+                    </div>
+                </div>
             <?php endif; ?>
         <?php endif; ?>
 
@@ -514,7 +527,7 @@ if ($erpBlock && $erpBlock->isEnabled() && $erpBlock->isLoggedIn()) {
                         <?= $block->escapeHtml(__('Ver Todas')) ?>
                     </a>
                 </div>
-                <table class="data-table quotes-table">
+                <table class="data-table quotes-table" aria-label="<?= $block->escapeHtmlAttr(__('Cotações recentes')) ?>">
                     <thead>
                         <tr>
                             <th><?= $block->escapeHtml(__('Nº')) ?></th>
@@ -638,7 +651,7 @@ if ($erpBlock && $erpBlock->isEnabled() && $erpBlock->isLoggedIn()) {
                     </svg>
                     <span><?= $block->escapeHtml(__('Meus Pedidos')) ?></span>
                 </a>
-                <a href="<?= $block->escapeUrl($block->getUrl('sales/order/history')) ?>" class="action-item">
+                <a href="<?= $block->escapeUrl($block->getUrl('sales/invoice')) ?>" class="action-item">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                         <polyline points="14 2 14 8 20 8"></polyline>

@@ -6,8 +6,8 @@ var config = {
         '*': {
             inputMask: 'GrupoAwamotos_B2B/js/inputMask',
             b2bHeaderStatusPanel: 'GrupoAwamotos_B2B/js/header-status-panel',
-            chartjs: 'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min',
-            shepherd: 'https://cdn.jsdelivr.net/npm/shepherd.js@11.2.0/dist/js/shepherd.min',
+            chartjs: 'GrupoAwamotos_B2B/js/vendor/chart.umd.min',
+            shepherd: 'GrupoAwamotos_B2B/js/vendor/shepherd.min',
             'Rokanthemes_AjaxSuite/template/authentication-popup.html':
                 'GrupoAwamotos_B2B/template/authentication-popup.html'
         }

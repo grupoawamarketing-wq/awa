@@ -8,6 +8,7 @@ use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Data\Form\FormKey\Validator as FormKeyValidator;
+use Magento\Framework\Exception\LocalizedException;
 
 class AddItem implements HttpPostActionInterface
 {
@@ -37,8 +38,10 @@ class AddItem implements HttpPostActionInterface
         try {
             $this->shoppingListService->addItem($listId, $productId, $qty);
             return $result->setData(['success' => true, 'message' => __('Item adicionado.')->render()]);
-        } catch (\Throwable $e) {
+        } catch (\Magento\Framework\Exception\LocalizedException $e) {
             return $result->setData(['success' => false, 'message' => $e->getMessage()]);
+        } catch (\Throwable $e) {
+            return $result->setData(['success' => false, 'message' => __('Erro ao adicionar item. Tente novamente.')->render()]);
         }
     }
 }
