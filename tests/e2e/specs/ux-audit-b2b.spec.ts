@@ -167,10 +167,10 @@ test.describe('UX Audit B2B', () => {
     await page.goto(`${BASE_URL}/catalogsearch/result/?q=retrovisor`, { waitUntil: 'domcontentloaded' });
     await waitReady(page);
     // Aguardar KO.js renderizar produtos (dinâmico via AJAX)
-    await page.locator('.product-item, .search.results .note-msg, .message.info.empty').first().waitFor({ state: 'visible', timeout: 20_000 }).catch(() => {});
+    await page.locator('.item-product, .search.results .note-msg, .message.info.empty').first().waitFor({ state: 'visible', timeout: 20_000 }).catch(() => {});
     await screenshot(page, '03a-search-results');
 
-    const count   = await page.locator('.product-item').count();
+    const count   = await page.locator('.item-product').count();
     const prices  = await page.locator('.price').count();
     const filters = await page.locator('.filter-options, #layered-filter-block').first().isVisible().catch(() => false);
     const paging  = await page.locator('.pages').first().isVisible().catch(() => false);
@@ -200,7 +200,7 @@ test.describe('UX Audit B2B', () => {
     await waitReady(page);
     await screenshot(page, '04a-category');
 
-    const items     = await page.locator('.product-item').count();
+    const items     = await page.locator('.item-product').count();
     const toolbar   = await page.locator('.toolbar-products').first().isVisible().catch(() => false);
     const filterOpt = await page.locator('.filter-options-item').count();
     const addBtns   = await page.locator('.action.tocart').count();

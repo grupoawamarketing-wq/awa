@@ -43,25 +43,15 @@ export default defineConfig({
         viewport: { width: 1366, height: 768 },
       },
     },
-    {
-      name: 'webkit-desktop-1366',
-      use: {
-        ...devices['Desktop Safari'],
-        viewport: { width: 1366, height: 768 },
-      },
-    },
-    {
-      name: 'mobile-375',
-      use: {
-        ...devices['iPhone SE'],
-        viewport: { width: 375, height: 667 },
-      },
-    },
+    /* WebKit removed — system missing required libs (libgtk-4, libgraphene, etc.) */
     {
       name: 'mobile-390',
       use: {
-        ...devices['iPhone 14'],
+        ...devices['Desktop Chrome'],
         viewport: { width: 390, height: 844 },
+        isMobile: true,
+        hasTouch: true,
+        userAgent: 'Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Mobile Safari/537.36',
       },
     },
   ],

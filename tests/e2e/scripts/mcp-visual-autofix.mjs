@@ -92,6 +92,99 @@ if (rules.has('cookie-banner-obstructive')) {
 `);
 }
 
+
+if (rules.has('grid-cols-inconsistent')) {
+  snippets.push(`
+/* MCP autofix: grid-cols-inconsistent */
+.products.list.items.product-items {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+@media (max-width: 1199px) {
+  .products.list.items.product-items {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (max-width: 767px) {
+  .products.list.items.product-items {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+}
+@media (max-width: 479px) {
+  .products.list.items.product-items {
+    grid-template-columns: 1fr;
+  }
+}
+`);
+}
+
+if (rules.has('image-distortion')) {
+  snippets.push(`
+/* MCP autofix: image-distortion */
+.product-image-photo,
+.product-image-container img {
+  object-fit: contain;
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  height: auto;
+}
+`);
+}
+
+if (rules.has('footer-layout')) {
+  snippets.push(`
+/* MCP autofix: footer-layout */
+.footer.content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 32px;
+}
+@media (max-width: 767px) {
+  .footer.content {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+`);
+}
+
+if (rules.has('search-input-overflow')) {
+  snippets.push(`
+/* MCP autofix: search-input-overflow */
+.block-search .field.search {
+  width: 100%;
+  max-width: 100%;
+}
+.block-search .input-text {
+  width: 100%;
+  box-sizing: border-box;
+}
+`);
+}
+
+if (rules.has('mobile-header-stacking')) {
+  snippets.push(`
+/* MCP autofix: mobile-header-stacking */
+@media (max-width: 767px) {
+  .page-header .header.content {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 0 12px;
+    min-height: 60px;
+  }
+  .page-header .logo {
+    flex: 0 0 auto;
+    max-width: 120px;
+  }
+}
+`);
+}
+
 const banner = [
   '/**',
   ' * AUTO-GENERATED FILE - MCP Visual AutoFix',

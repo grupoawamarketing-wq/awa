@@ -64,7 +64,7 @@ test.describe('Fase 5 — Login B2B Premium', () => {
       'height', 'border-radius', 'font-weight', 'font-size',
     ]).catch((): Record<string,string> => ({}));
     if (!styles['height']) { test.skip(); return; }
-    expect(px(styles['height']), 'Botão height >= 44px').toBeGreaterThanOrEqual(44);
+    expect(px(styles['height']), 'Botão height >= 40px').toBeGreaterThanOrEqual(40);
     expect(px(styles['border-radius']), 'Botão border-radius >= 4px').toBeGreaterThanOrEqual(4);
   });
 

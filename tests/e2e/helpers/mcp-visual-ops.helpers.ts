@@ -1,6 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
+import { PNG } from 'pngjs';
+import pixelmatch from 'pixelmatch';
 import type { Page } from '@playwright/test';
 
 export type Severity = 'critical' | 'major' | 'minor';
@@ -41,10 +43,37 @@ export const MCP_COOKIE_SELECTORS = [
 ].join(', ');
 
 export const DEFAULT_TARGETS: VisualTarget[] = [
+  // Core pages
   { slug: 'home', url: 'https://awamotos.com/', pageLabel: 'Home' },
+  // Category / PLP
   { slug: 'category-guidoes', url: 'https://awamotos.com/guidoes.html', pageLabel: 'PLP Guidoes' },
+  { slug: 'category-bagageiros', url: 'https://awamotos.com/bagageiros.html', pageLabel: 'PLP Bagageiros' },
+  // PDP
   { slug: 'pdp-ret-biz', url: 'https://awamotos.com/ret-biz-100-cr-redondo-universal-2220.html', pageLabel: 'PDP Ret BIZ' },
+  // Search
+  { slug: 'search-bagageiro', url: 'https://awamotos.com/catalogsearch/result/?q=bagageiro', pageLabel: 'Search Results' },
+  // Auth / Account
+  { slug: 'login', url: 'https://awamotos.com/customer/account/login/', pageLabel: 'Login' },
+  // Cart
+  { slug: 'cart', url: 'https://awamotos.com/checkout/cart/', pageLabel: 'Cart' },
+  // B2B
+  { slug: 'b2b-landing', url: 'https://awamotos.com/b2b', pageLabel: 'B2B Landing' },
 ];
+
+/**
+ * Maximum allowed pixel difference ratio before flagging as regression.
+ * 0.005 = 0.5% of total pixels can differ (handles dynamic content like
+ * social proof counters, timestamps, product ordering changes).
+ */
+const parsedVisualThreshold = Number.parseFloat(process.env.MCP_VISUAL_THRESHOLD || '0.005');
+const MAX_DIFF_PIXEL_RATIO = Number.isFinite(parsedVisualThreshold) && parsedVisualThreshold >= 0
+  ? parsedVisualThreshold
+  : 0.005;
+const MCP_VISUAL_DEBUG = process.env.MCP_VISUAL_DEBUG === '1';
+
+function isMobile390Snapshot(filePath: string): boolean {
+  return /[\\/]mobile-390[\\/][^\\/]+\.png$/i.test(filePath);
+}
 
 export function resolveAuditPaths(rootDir: string): AuditPaths {
   return {
@@ -73,30 +102,133 @@ export async function dismissCookieBanner(page: Page): Promise<void> {
   }
 }
 
+export async function stabilizeVisualSnapshot(page: Page): Promise<void> {
+  await page
+    .evaluate(() => {
+      const volatileSelectors = [
+        '.link-on-bottom',
+        '.awa-whatsapp-float',
+        'a.awa-whatsapp-float',
+        '[class*="link-on-bottom"]',
+        '[class*="whatsapp-float"]',
+      ];
+
+      const styleId = 'mcp-visual-stabilize-overlays';
+      let styleEl = document.getElementById(styleId) as HTMLStyleElement | null;
+      if (!styleEl) {
+        styleEl = document.createElement('style');
+        styleEl.id = styleId;
+        styleEl.textContent = `${volatileSelectors.join(',')} { visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; }`;
+        document.head.appendChild(styleEl);
+      }
+
+      for (const selector of volatileSelectors) {
+        const elements = document.querySelectorAll<HTMLElement>(selector);
+        for (const el of elements) {
+          el.style.setProperty('visibility', 'hidden', 'important');
+          el.style.setProperty('opacity', '0', 'important');
+          el.style.setProperty('pointer-events', 'none', 'important');
+        }
+      }
+    })
+    .catch(() => {});
+
+  await page.waitForTimeout(120);
+}
+
 function sha256(filePath: string): string {
   const content = fs.readFileSync(filePath);
   return crypto.createHash('sha256').update(content).digest('hex');
+}
+
+/**
+ * Compare screenshots using pixel-level diff with tolerance.
+ * Returns the ratio of different pixels (0.0 = identical, 1.0 = completely different).
+ * Falls back to SHA256 hash if images have different dimensions.
+ */
+function pixelDiffRatio(actualPath: string, baselinePath: string): number {
+  try {
+    const actualBuf = fs.readFileSync(actualPath);
+    const baselineBuf = fs.readFileSync(baselinePath);
+
+    const actual = PNG.sync.read(actualBuf);
+    const baseline = PNG.sync.read(baselineBuf);
+
+    // If dimensions differ, treat as 100% different
+    if (actual.width !== baseline.width || actual.height !== baseline.height) {
+      return 1.0;
+    }
+
+    let compareHeight = actual.height;
+    // Mobile pages have volatile floating widgets near viewport bottom; ignore this strip for stability.
+    if (isMobile390Snapshot(actualPath)) {
+      compareHeight = Math.max(1, actual.height - 180);
+    }
+
+    const totalPixels = actual.width * compareHeight;
+    if (totalPixels === 0) return 0;
+
+    const compareBytes = totalPixels * 4;
+    const actualData = compareHeight === actual.height
+      ? actual.data
+      : actual.data.subarray(0, compareBytes);
+    const baselineData = compareHeight === baseline.height
+      ? baseline.data
+      : baseline.data.subarray(0, compareBytes);
+
+    const diffPixels = pixelmatch(
+      actualData,
+      baselineData,
+      undefined, // no output diff image
+      actual.width,
+      compareHeight,
+      { threshold: 0.1 } // per-pixel color sensitivity
+    );
+
+    return diffPixels / totalPixels;
+  } catch (error: unknown) {
+    if (MCP_VISUAL_DEBUG) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      // eslint-disable-next-line no-console
+      console.warn(
+        `[mcp-visual] pixel comparison fallback to hash for ${path.basename(actualPath)} vs ${path.basename(baselinePath)}: ${errorMessage}`
+      );
+    }
+    // If pixel comparison fails, fall back to hash comparison
+    return sha256(actualPath) !== sha256(baselinePath) ? 1.0 : 0;
+  }
 }
 
 export function compareAgainstBaseline(
   actualPath: string,
   baselinePath: string,
   updateBaseline: boolean
-): { changed: boolean; baselineMissing: boolean } {
+): { changed: boolean; baselineMissing: boolean; diffRatio?: number } {
   const baselineExists = fs.existsSync(baselinePath);
   if (!baselineExists) {
     if (updateBaseline) {
       ensureDir(path.dirname(baselinePath));
       fs.copyFileSync(actualPath, baselinePath);
+      return { changed: false, baselineMissing: false, diffRatio: 0 };
     }
     return { changed: false, baselineMissing: true };
   }
 
-  const changed = sha256(actualPath) !== sha256(baselinePath);
-  if (changed && updateBaseline) {
-    fs.copyFileSync(actualPath, baselinePath);
+  // Quick check: if hashes match, no need for pixel comparison
+  if (sha256(actualPath) === sha256(baselinePath)) {
+    return { changed: false, baselineMissing: false, diffRatio: 0 };
   }
-  return { changed, baselineMissing: false };
+
+  // Pixel-level comparison with tolerance
+  const diffRatio = pixelDiffRatio(actualPath, baselinePath);
+  const changed = diffRatio > MAX_DIFF_PIXEL_RATIO;
+
+  if (updateBaseline) {
+    fs.copyFileSync(actualPath, baselinePath);
+    return { changed: false, baselineMissing: false, diffRatio };
+  }
+
+  return { changed, baselineMissing: false, diffRatio };
 }
 
 async function getRect(page: Page, selector: string): Promise<{ x: number; y: number; width: number; height: number } | null> {
@@ -268,9 +400,41 @@ export async function detectVisualFindings(
   return findings;
 }
 
+function sanitizeReportValue(value: unknown, rootDir: string): unknown {
+  if (typeof value === 'string') {
+    if (!path.isAbsolute(value)) {
+      return value;
+    }
+
+    const resolvedRoot = `${path.resolve(rootDir)}${path.sep}`;
+    const resolvedValue = path.resolve(value);
+
+    if (resolvedValue.startsWith(resolvedRoot)) {
+      return path.relative(rootDir, resolvedValue).split(path.sep).join('/');
+    }
+
+    return path.basename(resolvedValue);
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((item) => sanitizeReportValue(item, rootDir));
+  }
+
+  if (value !== null && typeof value === 'object') {
+    const result: Record<string, unknown> = {};
+    for (const [key, nestedValue] of Object.entries(value)) {
+      result[key] = sanitizeReportValue(nestedValue, rootDir);
+    }
+    return result;
+  }
+
+  return value;
+}
+
 export function writeJsonReport(reportPath: string, payload: unknown): void {
   ensureDir(path.dirname(reportPath));
-  fs.writeFileSync(reportPath, JSON.stringify(payload, null, 2), 'utf8');
+  const sanitizedPayload = sanitizeReportValue(payload, process.cwd());
+  fs.writeFileSync(reportPath, JSON.stringify(sanitizedPayload, null, 2), 'utf8');
 }
 
 export function severityWeight(severity: Severity): number {

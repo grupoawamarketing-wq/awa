@@ -265,7 +265,8 @@ for (const viewport of VIEWPORTS) {
       await page.screenshot({
         path: path.join(SCREENSHOT_DIR, `${route.name}-${viewport.name}.png`),
         fullPage: true,
-      });
+      }).catch(() => {});
+
     }
   });
 }

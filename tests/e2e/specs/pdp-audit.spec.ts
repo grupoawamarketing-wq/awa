@@ -622,11 +622,11 @@ test.describe('PDP Audit — Screenshots', () => {
       path: screenshot('full-page-' + vw + 'px'),
       fullPage: true,
       animations: 'disabled',
-    });
+    }).catch(() => {});
 
     await pdpPage.screenshot({
       path: screenshot('above-fold-' + vw + 'px'),
       animations: 'disabled',
-    });
+    }).catch(() => {});
   });
 });

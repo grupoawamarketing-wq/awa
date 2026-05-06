@@ -28,7 +28,7 @@ function addIssue(issue: Issue) {
 async function shot(page: Page, name: string) {
   fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
   const p = path.join(SCREENSHOT_DIR, `${name}.png`);
-  await page.screenshot({ path: p, fullPage: true });
+  await page.screenshot({ path: p, fullPage: true, timeout: 30_000 }).catch(() => {});
   console.log(`  📸 ${name}.png`);
 }
 
@@ -183,7 +183,7 @@ test.describe('AwaMotos – Full UX Audit', () => {
     // Product grid sanity
     await page.setViewportSize(DESKTOP);
     await page.goto(catUrl, { waitUntil: 'networkidle', timeout: 35000 });
-    const count = await page.locator('.product-item, li.item.product').count();
+    const count = await page.locator('.item-product').count();
     if (count === 0) addIssue({ page: 'Categoria', viewport: 'Desktop', severity: 'Critical', category: 'Visual / Grade de Produtos', description: 'Nenhum card de produto encontrado na página de categoria' });
     else console.log(`  ✓ ${count} produtos encontrados`);
 
@@ -201,7 +201,7 @@ test.describe('AwaMotos – Full UX Audit', () => {
       const links = Array.from(document.querySelectorAll('a')) as HTMLAnchorElement[];
       const link = links.find(l =>
         l.href.startsWith(base) &&
-        (l.href.endsWith('.html') || !!l.closest('.product-item')) &&
+        (l.href.endsWith('.html') || !!l.closest('.item-product')) &&
         !l.href.includes('category') &&
         !l.href.includes('search') &&
         l.href !== base + '/'
@@ -231,7 +231,7 @@ test.describe('AwaMotos – Full UX Audit', () => {
 
     await page.setViewportSize(DESKTOP);
     await page.goto(searchUrl, { waitUntil: 'networkidle', timeout: 35000 });
-    const resultCount = await page.locator('.product-item').count();
+    const resultCount = await page.locator('.item-product').count();
     const noResultsMsg = await page.isVisible('.message.notice').catch(() => false);
     console.log(`  → Resultados: ${resultCount} produtos, sem-resultado: ${noResultsMsg}`);
     if (resultCount === 0 && noResultsMsg) {

@@ -35,7 +35,7 @@ async function goPDP(page: Page): Promise<void> {
   let ok = false;
   await Promise.race<void>([
     (async () => {
-      const firstProduct = page.locator('.product-item a.product-item-link').first();
+      const firstProduct = page.locator('.item-product a.product-item-link').first();
       await firstProduct.waitFor({ timeout: 10_000 });
       await firstProduct.click();
       await page.waitForLoadState('domcontentloaded', { timeout: 30_000 });
