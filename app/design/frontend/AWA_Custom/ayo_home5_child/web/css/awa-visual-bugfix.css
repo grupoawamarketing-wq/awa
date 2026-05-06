@@ -28,44 +28,6 @@
  */
 
 
-/* =============================================================================
-   BUG-3 + BUG-5 + BUG-6 + BUG-7  (ROOT CAUSE)
-   .rokan-bestseller / .rokan-newproduct usam display:grid com
-   grid-template-columns: repeat(5, ~254px). Como só têm 1 filho (swiper),
-   o swiper fica preso na primeira célula (254px) em vez de 1400px.
-   Fix: forçar display:block para que o swiper ocupe a largura total,
-   OU grid-column:1/-1 para span all columns.
-   ============================================================================= */
-
-.rokan-bestseller,
-.rokan-newproduct {
-    display: block !important;
-    width: 100% !important;
-}
-
-/* Caso algum outro CSS force grid de volta, garantir span total do filho */
-.rokan-bestseller > .swiper,
-.rokan-bestseller > .products-swiper,
-.rokan-newproduct > .swiper,
-.rokan-newproduct > .products-swiper {
-    grid-column: 1 / -1 !important;
-    width: 100% !important;
-    max-width: 100% !important;
-}
-
-/* Swiper slides: tamanho correto quando container full-width */
-.rokan-bestseller .swiper-wrapper,
-.rokan-newproduct .swiper-wrapper {
-    display: flex !important;
-    width: 100% !important;
-}
-
-.rokan-bestseller .swiper-slide,
-.rokan-newproduct .swiper-slide {
-    flex-shrink: 0 !important;
-    width: auto !important;
-}
-
 
 /* =============================================================================
    BUG-4: Search button position:absolute → static
@@ -179,46 +141,6 @@
     }
 }
 
-
-/* =============================================================================
-   BUG-1: Header right-col overflow
-   A célula 1fr do grid (236px) não comporta auth-prompt (225px) + cart (75px).
-   Fix: overflow hidden + truncar texto do auth prompt + flex-shrink.
-   ============================================================================= */
-
-@media (min-width: 992px) {
-    .awa-site-header .awa-header-right-col {
-        overflow: hidden !important;
-        min-width: 0 !important;
-        gap: 12px !important;
-        flex-wrap: nowrap !important;
-    }
-
-    /* Auth prompt: truncar texto, flex-shrink */
-    .awa-site-header .awa-header-right-col .awa-header-contact-links,
-    .awa-site-header .awa-header-right-col .awa-header-account-prompt {
-        flex: 1 1 auto !important;
-        min-width: 0 !important;
-        overflow: hidden !important;
-    }
-
-    /* Texto "PARA VER OS PREÇOS FAÇA O" — limitar a 1 linha */
-    .awa-header-account-prompt .awa-header-account-prompt__text,
-    .awa-header-account-prompt .awa-header-account-prompt__cta-text {
-        white-space: nowrap !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-        max-width: 100% !important;
-        font-size: 11px !important;
-        line-height: 1.3 !important;
-    }
-
-    /* Cart: não encolher */
-    .awa-site-header .awa-header-right-col .awa-header-cart,
-    .awa-site-header .awa-header-right-col .mini-cart-wrapper {
-        flex-shrink: 0 !important;
-    }
-}
 
 
 /* =============================================================================
@@ -1068,106 +990,6 @@ body .page-wrapper .header-control.awa-nav-bar .section-items.nav-sections {
 }
 
 
-/* =============================================================================
-   VB-03: Cart button — solid red rectangle without icon
-   DOM analysis (2026-04-29):
-   - a.awa-header-cart-link is at pos ~33229 (inside logo area), has SVG icon.
-     Positioned via CSS grid: `grid-area:cart` on `#header .awa-header-cart-link`.
-   - div.awa-header-cart (data-awa-header-cart) at pos ~39502 (right-col).
-     Contains: a.awa-header-cart-fallback + div.mini-carts > div.minicart-wrapper
-     > a.showcart.header-mini-cart (KnockoutJS — NO visible icon, just sr-only
-     text + counter.qty.empty). This renders as a solid red block.
-
-   Strategy:
-   1. The awa-header-cart-link SVG is the REAL visible cart — style it properly.
-   2. The minicart-wrapper must be visually transparent but FUNCTIONAL (KO dropdown).
-   3. The awa-header-cart container in right-col: collapse visually.
-   ============================================================================= */
-
-/* 1. AWA SVG Cart Link (in logo area, positioned via grid-area:cart) */
-body .page-wrapper .awa-header-cart-link {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  background: var(--awa-primary, #b73337);
-  border-radius: var(--awa-radius-md, 8px);
-  color: #fff;
-  text-decoration: none;
-  position: relative;
-  flex-shrink: 0;
-}
-
-body .page-wrapper .awa-header-cart-link .awa-header-cart-link-icon {
-  width: 22px;
-  height: 22px;
-  stroke: #fff;
-  fill: none;
-}
-
-/* Badge on AWA cart icon */
-body .page-wrapper .awa-cart-link-badge:not(.awa-badge-hidden) {
-  position: absolute;
-  top: -4px;
-  right: -4px;
-  min-width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: var(--awa-primary, #b73337);
-  color: #fff;
-  font-size: 10px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid #fff;
-  line-height: 1;
-}
-
-/* 2. Magento minicart in right-col: make visually invisible */
-/* The entire awa-header-cart wrapper in the right-col: collapse */
-body .page-wrapper .awa-header-minicart[data-awa-header-cart="true"] {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-  padding: 0;
-  margin: -1px;
-}
-
-/* BUT when the KO dropdown is active, make it visible again */
-body .page-wrapper .awa-header-minicart[data-awa-header-cart="true"] .minicart-wrapper.active,
-body .page-wrapper .awa-header-minicart[data-awa-header-cart="true"] .block-minicart:not(.empty) {
-  position: fixed;
-  top: 60px;
-  right: 16px;
-  width: 360px;
-  max-width: 90vw;
-  height: auto;
-  max-height: 80vh;
-  clip: auto;
-  overflow: auto;
-  z-index: 9999;
-  background: var(--awa-bg, #fff);
-  border-radius: var(--awa-radius-lg, 12px);
-  box-shadow: 0 16px 48px rgba(0,0,0,.15);
-  border: 1px solid var(--awa-border, #e5e5e5);
-  padding: 16px;
-}
-
-/* Cart fallback text: sr-only */
-body .page-wrapper .awa-header-cart-fallback span {
-  clip: rect(0, 0, 0, 0);
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-}
-
 /* Account prompt — "cadastre-se" link styling */
 body .page-wrapper .awa-site-header .awa-header-account-prompt__link--register {
   display: inline-flex;
@@ -1279,98 +1101,6 @@ body.b2b-register-index .b2b-register-container {
    Fix: flex container para o form, ícone alinhado à esquerda dentro do input.
    ============================================================================= */
 
-@media (max-width: 991px) {
-  /* Search form on mobile: horizontal flex */
-  body .page-wrapper .awa-site-header form#search_mini_form,
-  body .page-wrapper .block-search form.minisearch {
-    display: flex;
-    align-items: stretch;
-    border: 1.5px solid var(--awa-border);
-    border-radius: var(--awa-radius-md);
-    background: var(--awa-bg);
-    overflow: hidden;
-    height: 44px;
-  }
-
-  /* Search field: fill available space */
-  body .page-wrapper .awa-site-header form#search_mini_form .field.search,
-  body .page-wrapper .block-search form.minisearch .field.search {
-    flex: 1 1 auto;
-    display: flex;
-    min-width: 0;
-  }
-
-  body .page-wrapper .awa-site-header form#search_mini_form .field.search .control,
-  body .page-wrapper .block-search form.minisearch .field.search .control {
-    flex: 1;
-    display: flex;
-    align-items: stretch;
-  }
-
-  /* Search input on mobile: clean styling */
-  body .page-wrapper .awa-site-header form#search_mini_form input#search,
-  body .page-wrapper .block-search form.minisearch input#search {
-    width: 100%;
-    border: none;
-    background: transparent;
-    padding: 0 12px;
-    font-size: 16px; /* prevents zoom on iOS */
-    outline: none;
-    box-shadow: none;
-    height: 100%;
-  }
-
-  /* Search button on mobile: aligned right */
-  body .page-wrapper .awa-site-header form#search_mini_form .actions,
-  body .page-wrapper .block-search form.minisearch .actions {
-    flex: 0 0 auto;
-    display: flex;
-    align-items: stretch;
-  }
-
-  body .page-wrapper .awa-site-header form#search_mini_form button.action.search,
-  body .page-wrapper .block-search form.minisearch button.action.search {
-    position: static;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    min-width: 44px;
-    height: 100%;
-    background: var(--awa-primary);
-    color: var(--awa-text-inverse);
-    border: none;
-    border-radius: 0;
-    padding: 0;
-    cursor: pointer;
-  }
-
-  body .page-wrapper .awa-site-header form#search_mini_form button.action.search svg,
-  body .page-wrapper .block-search form.minisearch button.action.search svg {
-    width: 18px;
-    height: 18px;
-    color: var(--awa-text-inverse);
-    stroke: var(--awa-text-inverse);
-    fill: none;
-  }
-
-  /* Fix: Insufficient padding causing icon overlap in search input */
-  body .page-wrapper .awa-site-header form#search_mini_form input#search,
-  body .page-wrapper .block-search form.minisearch input#search {
-    padding-right: 48px !important;
-    padding-left: 12px !important;
-  }
-
-  /* Search button on mobile: ensure it is a clickable icon on the right */
-  body .page-wrapper .awa-site-header form#search_mini_form .actions,
-  body .page-wrapper .block-search form.minisearch .actions {
-    position: absolute !important;
-    right: 0 !important;
-    top: 0 !important;
-    height: 100% !important;
-    z-index: 5 !important;
-  }
-}
 
 
 /* =============================================================================
@@ -1505,40 +1235,6 @@ body.b2b-register-index .b2b-register-container {
   border-color: var(--awa-border-strong);
 }
 
-
-/* =============================================================================
-   VB-10: Product title truncation — too aggressive
-   Nomes de produto muito truncados, difícil identificar peças específicas.
-   Fix: permitir até 3 linhas no desktop, 2 no mobile.
-   ============================================================================= */
-
-/* PLP product names: 3 lines on desktop */
-.catalog-category-view .product-item-name a,
-.catalogsearch-result-index .product-item-name a {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 1.4;
-  min-height: 4.2em; /* 3 lines × 1.4 */
-  font-size: var(--awa-font-sm);
-}
-
-@media (max-width: 767px) {
-  .catalog-category-view .product-item-name a,
-  .catalogsearch-result-index .product-item-name a {
-    -webkit-line-clamp: 2;
-    min-height: 2.8em; /* 2 lines × 1.4 */
-  }
-}
-
-/* Homepage swiper: already handled in bugfix-2026-04-28, reinforce */
-.products-swiper .item-product .product-name a {
-  -webkit-line-clamp: 3;
-  min-height: 3.8em;
-  line-height: 1.35;
-}
 
 
 /* =============================================================================
@@ -9559,7 +9255,6 @@ body .page-wrapper .swatch-option.disabled {
 /* Spinner overlay */
 body .page-wrapper .loading-mask {
   background: rgba(255, 255, 255, 0.8) !important;
-  backdrop-filter: blur(2px) !important;
   z-index: 999 !important;
 }
 
@@ -14100,7 +13795,8 @@ html body .page-wrapper .page_footer .awa-footer-atendimento .awa-footer-atendim
    ============================================================================= */
 @media (min-width: 992px) {
   #html-body .page-wrapper .awa-site-header .awa-main-header__inner.wp-header {
-    grid-template-columns: 161px minmax(0, 1fr) 410px !important;
+    grid-template-columns: 161px minmax(0, 1fr) auto !important;
+    display: grid !important;
     gap: var(--awa-space-md) !important;
     align-items: center !important;
   }
@@ -15397,4 +15093,489 @@ body.cms-homepage_ayo_home5,
 body.cms-index-index,
 body.cms-home {
     overflow: visible !important;
+}
+
+/* ============================================================
+   ROUND 40 — PLP Banner + Back-to-top + Mobile Header polish (2026-07)
+   ============================================================ */
+
+/* 40a — PLP/Categoria: banner com altura consistente e corte elegante */
+body.catalog-category-view .page-wrapper .category-view .category-image,
+body.catalog-category-view .page-wrapper .category-image {
+    margin-bottom: var(--awa-space-5, 20px) !important;
+    border-radius: var(--awa-radius-md, 12px) !important;
+    overflow: hidden !important;
+}
+
+body.catalog-category-view .page-wrapper .category-view .category-image :is(img, .image),
+body.catalog-category-view .page-wrapper .category-image :is(img, .image) {
+    display: block !important;
+    width: 100% !important;
+    min-height: 140px !important;
+    max-height: clamp(180px, 21vw, 300px) !important;
+    object-fit: cover !important;
+    object-position: center !important;
+}
+
+@media (max-width: 767px) {
+    body.catalog-category-view .page-wrapper .category-view .category-image :is(img, .image),
+    body.catalog-category-view .page-wrapper .category-image :is(img, .image) {
+        min-height: 120px !important;
+        max-height: 180px !important;
+    }
+}
+
+/* 40b — Back-to-top unificado: usa #awa-back-to-top e aposenta o legado fixed-right */
+#awa-back-to-top,
+button#awa-back-to-top[data-awa-back-to-top="true"] {
+    position: fixed !important;
+    right: var(--awa-space-4, 16px) !important;
+    bottom: var(--awa-space-5, 20px) !important;
+    width: 44px !important;
+    height: 44px !important;
+    border: var(--awa-none, none) !important;
+    border-radius: var(--awa-radius-full, 9999px) !important;
+    background: var(--awa-red, #b73337) !important;
+    color: var(--awa-white, #ffffff) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transform: translateY(8px) !important;
+    box-shadow: var(--awa-shadow-md, 0 4px 12px rgba(0, 0, 0, 0.12)) !important;
+    transition: opacity var(--awa-transition-base, 200ms ease),
+                transform var(--awa-transition-base, 200ms ease),
+                background var(--awa-transition-fast, 150ms ease) !important;
+    z-index: 10020 !important;
+}
+
+#awa-back-to-top.is-visible {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: translateY(0) !important;
+}
+
+#awa-back-to-top:hover {
+    background: var(--awa-red-dark, #8e2629) !important;
+}
+
+@media (max-width: 767px) {
+    #awa-back-to-top,
+    button#awa-back-to-top[data-awa-back-to-top="true"] {
+        bottom: calc(72px + var(--awa-space-3, 12px)) !important;
+        right: var(--awa-space-3, 12px) !important;
+    }
+}
+
+body .fixed-right .fixed-right-ul .scroll-top,
+body .fixed-right-ul .scroll-top,
+.fixed-right .fixed-right-ul li.scroll-top {
+    display: none !important;
+}
+
+/* 40c — Header mobile: logo/nav com escala e alinhamento consistentes */
+@media (max-width: 991px) {
+    body .page-wrapper .awa-site-header .header-main > .container,
+    body .page-wrapper .header.awa-main-header .header-main > .container,
+    body .page-wrapper .awa-site-header .header-main .container {
+        min-height: 56px !important;
+        padding-left: var(--awa-space-3, 12px) !important;
+        padding-right: var(--awa-space-3, 12px) !important;
+    }
+
+    body .page-wrapper .awa-site-header .logo img,
+    body .page-wrapper #header .logo img {
+        max-height: 32px !important;
+        width: auto !important;
+    }
+
+    body .page-wrapper .header-control.awa-nav-bar,
+    body .page-wrapper .header-nav.awa-nav-bar {
+        min-height: 44px !important;
+    }
+
+    body .page-wrapper .header-control.awa-nav-bar .container,
+    body .page-wrapper .header-nav.awa-nav-bar .container {
+        padding-left: var(--awa-space-3, 12px) !important;
+        padding-right: var(--awa-space-3, 12px) !important;
+    }
+}
+
+@media (max-width: 767px) {
+    body .page-wrapper .awa-site-header .header-main > .container,
+    body .page-wrapper .header.awa-main-header .header-main > .container,
+    body .page-wrapper .awa-site-header .header-main .container {
+        min-height: 52px !important;
+    }
+
+    body .page-wrapper .awa-site-header .logo img,
+    body .page-wrapper #header .logo img {
+        max-height: 30px !important;
+    }
+
+    body .page-wrapper .header-control.awa-nav-bar,
+    body .page-wrapper .header-nav.awa-nav-bar {
+        min-height: 40px !important;
+    }
+}
+
+
+/* =============================================================================
+   ROUND 42 — Mobile PLP vertical whitespace tightening (2026-07)
+   Reduces ~64px of wasted space above first product card on 375px viewports.
+   Target areas: products-grid padding-top, toolbar margins, sidebar margin.
+   ============================================================================= */
+
+/* 42a — Products grid padding-top: 48px is excessive on mobile */
+@media (max-width: 767px) {
+    body.catalog-category-view .wrapper.grid.products-grid,
+    body.catalogsearch-result-index .wrapper.grid.products-grid {
+        padding-top: 16px !important;
+    }
+}
+
+/* 42b — Toolbar (.shop-tab-title) margins on mobile */
+@media (max-width: 767px) {
+    body.catalog-category-view .shop-tab-title,
+    body.catalogsearch-result-index .shop-tab-title {
+        margin-bottom: 8px !important;
+        padding-bottom: 4px !important;
+    }
+}
+
+/* 42c — Filter sidebar col bottom margin on mobile (stacked layout)
+   html+body prefix matches specificity (0,4,2) of existing rule:
+   "html body.page-products .columns > .col-xs-12.col-sm-3 { mb:24px !important; @991px }" */
+@media (max-width: 767px) {
+    html body.catalog-category-view .columns > .col-sm-3.col-xs-12,
+    html body.catalogsearch-result-index .columns > .col-sm-3.col-xs-12 {
+        margin-bottom: 8px !important;
+    }
+}
+
+/* =============================================================================
+   ROUND 43 — Mobile filter content cap (2026-07)
+   Search results page: filter-options-content has NO --open class, so
+   max-height is "none" → all 4 groups expand fully → filter = 2695px tall.
+   Category page: --open class applies max-height:200px already (theme CSS).
+   Fix: mirror the same 200px cap for search results + non-open category items.
+   ============================================================================= */
+
+/* 43a — Search results: cap each filter group content to 200px on mobile */
+@media (max-width: 767px) {
+    body.catalogsearch-result-index .filter-options-content {
+        max-height: 200px !important;
+        overflow-y: auto !important;
+    }
+}
+
+/* 43b — Category pages: also cap non-open filter content (belt-and-suspenders) */
+@media (max-width: 767px) {
+    body.catalog-category-view .filter-options-content:not(.filter-options-content--open) {
+        max-height: 200px !important;
+        overflow-y: auto !important;
+    }
+}
+
+/* 43c — Mobile: reorder columns so products appear ABOVE filter
+   The theme sets order:-1 on col-sm-3 (filter) so it renders first in stacked layout.
+   On mobile, products are more valuable above the fold than the filter sidebar.
+   Override order to push filter below the product column.
+   Note: DOM order (filter first) is maintained for search-engine/screen-reader parsing.
+   Specificity: html+body+class = (0,4,2) to beat existing order:-1 rule. */
+@media (max-width: 767px) {
+    html body.catalog-category-view .columns > .col-sm-3.col-xs-12,
+    html body.catalogsearch-result-index .columns > .col-sm-3.col-xs-12 {
+        order: 99 !important;
+    }
+}
+
+/* =============================================================================
+   ROUND 44 — Desktop: hide top toolbar pagination (2026-07)
+   Problem: .shop-tab-title is 272px on desktop because the top .toolbar
+   contains a .pages element (92px, full-width, order:0) placed ABOVE the
+   sort/modes/limiter row. Products start at 951px on 1280x900 screens —
+   below the viewport fold.
+   Fix: Hide .pages from the TOP toolbar (.shop-tab-select ancestor).
+   Bottom toolbar (.sort-pagi-bar-bottom) keeps its pagination untouched.
+   Result: top toolbar shrinks from 226px → ~50px, products visible at ~770px.
+   ============================================================================= */
+@media (min-width: 768px) {
+    .shop-tab-select .toolbar.toolbar-products .pages {
+        display: none !important;
+    }
+}
+
+/* =============================================================================
+   ROUND 45 — Desktop vertical spacing tightening (2026-07)
+   Goal: bring products grid from 831px to ≤768px so 1366x768 users see
+   products without scrolling.
+   Savings needed: 63px.
+   Changes:
+     45a — category-view-move margin-bottom: 40px → 20px (saves 20px)
+     45b — shop-tab-title margin-bottom: 20px → 8px (saves 12px)
+     45c — shop-tab-title padding-bottom: 12px → 4px (saves 8px)
+     45d — products-grid padding-top: 48px → 24px (saves 24px)
+   Total: 64px → products at ~767px.
+   Mobile unaffected (all @media min-width:768px).
+   ============================================================================= */
+
+/* 45a — Category description margin-bottom */
+@media (min-width: 768px) {
+    body.catalog-category-view .category-view-move,
+    body.catalogsearch-result-index .category-view-move {
+        margin-bottom: 20px !important;
+    }
+}
+
+/* 45b — Toolbar container margin-bottom */
+@media (min-width: 768px) {
+    body.catalog-category-view .shop-tab-title,
+    body.catalogsearch-result-index .shop-tab-title {
+        margin-bottom: 8px !important;
+    }
+}
+
+/* 45c — Toolbar container padding-bottom */
+@media (min-width: 768px) {
+    body.catalog-category-view .shop-tab-title,
+    body.catalogsearch-result-index .shop-tab-title {
+        padding-bottom: 4px !important;
+    }
+}
+
+/* 45d — Products grid padding-top: reduce from 48px to 24px */
+@media (min-width: 768px) {
+    body.catalog-category-view .wrapper.grid.products-grid,
+    body.catalogsearch-result-index .wrapper.grid.products-grid {
+        padding-top: 24px !important;
+    }
+}
+
+/* 45e — Reduce product-content-right grid row-gap (was 24px → 8px) and remove
+   shop-tab-title margin-bottom. In CSS Grid, item margin-bottom is included in
+   row track sizing: 144px height + 8px margin-bottom = 152px row + 24px gap = 176px.
+   After: 144px row + 8px gap = 152px → saves 24px → products at 767px (below 768px fold). */
+@media (min-width: 768px) {
+    body.catalog-category-view .product-content-right,
+    body.catalogsearch-result-index .product-content-right {
+        row-gap: 8px !important;
+    }
+    body.catalog-category-view .shop-tab-title,
+    body.catalogsearch-result-index .shop-tab-title {
+        margin-bottom: 0 !important;
+    }
+}
+
+/* 45f — Remove products-grid padding-top on desktop.
+   gridTop=767 but firstLiTop=791 (padding-top:24 pushes products off fold).
+   Setting padding-top:0 aligns first product with grid container at 767px (at fold).
+   Toolbar and category elements above provide enough visual separation context. */
+@media (min-width: 768px) {
+    body.catalog-category-view .wrapper.grid.products-grid,
+    body.catalogsearch-result-index .wrapper.grid.products-grid {
+        padding-top: 0 !important;
+    }
+}
+
+/* ROUND 46 — Mobile: raise back-to-top button above bottom nav (2026-07)
+   Back-to-top (bottom:84px → bottom edge at 728px from top) overlapped with
+   mobile bottom nav (.link-on-bottom, top:714px) by 14px when .is-visible.
+   Increase bottom from calc(72px + 12px)=84px to 106px (+22px) to clear
+   the 81px bottom nav height + safe area offset + 8px margin. */
+@media (max-width: 767px) {
+    #awa-back-to-top,
+    button#awa-back-to-top[data-awa-back-to-top="true"] {
+        bottom: 106px !important;
+    }
+}
+
+/* =============================================================================
+   BUG-HOME-04: Trust & Offers Grid Layout Collapse
+   Fix for removed .velaServicesInner and .banner_mid_1 wrapper elements.
+   Restores side-by-side desktop layout for banners and deals.
+   ============================================================================= */
+@media (min-width: 992px) {
+    /* Override grid template areas to match current HTML structure */
+    body.cms-homepage_ayo_home5 .page-wrapper .top-home-content--trust-and-offers > .container.top-home-content__trust-offers-grid {
+        grid-template-areas: "banners deals" !important;
+        grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr) !important;
+        gap: 20px !important;
+        align-items: start !important;
+    }
+
+    /* First child: rowFlex (Banners) */
+    body.cms-homepage_ayo_home5 .page-wrapper .top-home-content--trust-and-offers > .container.top-home-content__trust-offers-grid > .rowFlex:first-child {
+        grid-area: banners !important;
+        grid-column: auto !important; /* Remove benefits column assignment */
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 14px !important;
+        margin: 0 !important;
+    }
+
+    /* Remove bootstrap column styles from banner children */
+    body.cms-homepage_ayo_home5 .page-wrapper .top-home-content--trust-and-offers > .container.top-home-content__trust-offers-grid > .rowFlex:first-child > div[class*="col_banner"] {
+        width: 100% !important;
+        float: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        display: block !important;
+    }
+
+    /* Make the 3rd banner span full width of the banners column */
+    body.cms-homepage_ayo_home5 .page-wrapper .top-home-content--trust-and-offers > .container.top-home-content__trust-offers-grid > .rowFlex:first-child > div:nth-child(3) {
+        grid-column: 1 / -1 !important;
+    }
+    
+    body.cms-homepage_ayo_home5 .page-wrapper .top-home-content--trust-and-offers > .container.top-home-content__trust-offers-grid > .rowFlex:first-child > div:nth-child(3) .bs-banner img {
+        aspect-ratio: 2.25 / 1 !important;
+        object-fit: cover !important;
+        object-position: center !important;
+    }
+
+    /* Second child: hot-deal (Deals) */
+    body.cms-homepage_ayo_home5 .page-wrapper .top-home-content--trust-and-offers > .container.top-home-content__trust-offers-grid > .hot-deal.top-home-content__trust-offers-deals {
+        grid-area: deals !important;
+        grid-column: auto !important; /* Remove 1 / -1 override */
+        margin: 0 !important;
+    }
+}
+
+@media (max-width: 991px) {
+    body.cms-homepage_ayo_home5 .page-wrapper .top-home-content--trust-and-offers > .container.top-home-content__trust-offers-grid {
+        grid-template-areas: 
+            "banners"
+            "deals" !important;
+        grid-template-columns: 1fr !important;
+    }
+    
+    body.cms-homepage_ayo_home5 .page-wrapper .top-home-content--trust-and-offers > .container.top-home-content__trust-offers-grid > .rowFlex:first-child {
+        grid-area: banners !important;
+        grid-column: 1 / -1 !important;
+    }
+    
+    body.cms-homepage_ayo_home5 .page-wrapper .top-home-content--trust-and-offers > .container.top-home-content__trust-offers-grid > .hot-deal.top-home-content__trust-offers-deals {
+        grid-area: deals !important;
+        grid-column: 1 / -1 !important;
+    }
+}
+
+/* =============================================================================
+   VB-HEADER-POLISH (v41): Header visual improvements
+   1. Fix "C" character: clip minicart-wrapper text node overflow
+   2. Quick action links: semibold + separator + hover effect
+   3. Nav bar link spacing improvements
+   4. Search bar: consistent border-radius on button
+   =============================================================================
+*/
+@media (min-width: 992px) {
+  /* --- 1. Fix minicart text leak + collapse --------------------------------- */
+  /* Collapse .mini-carts to 0 width — the fallback icon handles the cart.
+     The dropdown uses position:fixed so it still works with collapsed parent.
+     Also hide all child text elements that inherit their own font-size. */
+  #html-body .page-wrapper .awa-site-header .awa-header-minicart .mini-carts,
+  #html-body .page-wrapper .awa-site-header .awa-header-cart .mini-carts {
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    font-size: 0 !important;
+  }
+
+  #html-body .page-wrapper .awa-site-header .awa-header-minicart .minicart-wrapper,
+  #html-body .page-wrapper .awa-site-header .awa-header-cart .minicart-wrapper {
+    width: 0 !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    font-size: 0 !important;
+  }
+
+  /* Hide text/subtitle that have own font-size (belt-and-suspenders) */
+  #html-body .page-wrapper .awa-site-header .awa-header-minicart .minicart-wrapper .text,
+  #html-body .page-wrapper .awa-site-header .awa-header-minicart .minicart-wrapper .subtitle,
+  #html-body .page-wrapper .awa-site-header .awa-header-cart .minicart-wrapper .text,
+  #html-body .page-wrapper .awa-site-header .awa-header-cart .minicart-wrapper .subtitle {
+    display: none !important;
+  }
+
+  /* Counter badge: keep visible if qty > 0 */
+  #html-body .page-wrapper .awa-site-header .awa-header-minicart .minicart-wrapper .counter.qty {
+    font-size: var(--awa-font-xs) !important;
+  }
+
+  #html-body .page-wrapper .awa-site-header .awa-header-minicart .minicart-wrapper .counter.qty.empty {
+    font-size: 0 !important;
+  }
+
+  /* --- 2. Quick action links: semibold + separator + hover ------------------ */
+  #html-body .page-wrapper .awa-site-header .awa-header-mobile-quick-actions {
+    gap: 0 !important;
+    align-items: stretch !important;
+  }
+
+  #html-body .page-wrapper .awa-site-header .awa-header-mobile-quick-actions .awa-account-quick-actions__item {
+    font-size: var(--awa-font-sm) !important;
+    font-weight: var(--awa-weight-semibold) !important;
+    color: var(--awa-primary) !important;
+    padding: 4px 10px !important;
+    border-radius: var(--awa-radius-sm) !important;
+    line-height: 1.4 !important;
+    transition: background-color 0.15s ease, color 0.15s ease !important;
+  }
+
+  #html-body .page-wrapper .awa-site-header .awa-header-mobile-quick-actions .awa-account-quick-actions__item:hover {
+    background: var(--awa-primary-light) !important;
+    color: var(--awa-primary) !important;
+    text-decoration: none !important;
+  }
+
+  /* Visual separator between quick links */
+  #html-body .page-wrapper .awa-site-header .awa-header-mobile-quick-actions .awa-account-quick-actions__item + .awa-account-quick-actions__item {
+    border-left: 1px solid var(--awa-border-strong) !important;
+    border-radius: 0 var(--awa-radius-sm) var(--awa-radius-sm) 0 !important;
+    padding-left: 10px !important;
+  }
+
+  #html-body .page-wrapper .awa-site-header .awa-header-mobile-quick-actions .awa-account-quick-actions__item:first-child {
+    border-radius: var(--awa-radius-sm) 0 0 var(--awa-radius-sm) !important;
+  }
+
+  /* --- 3. Nav bar: tighter gap between primary links + better hover --------- */
+  #html-body .page-wrapper .awa-site-header .menu_primary nav > ul,
+  #html-body .page-wrapper .awa-site-header .awa-header-primary-nav .navigation > ul {
+    gap: 0 !important;
+  }
+
+  #html-body .page-wrapper .awa-site-header .menu_primary nav > ul > li > a,
+  #html-body .page-wrapper .awa-site-header .awa-header-primary-nav .navigation li.level0 > a {
+    padding: 0 var(--awa-space-5) !important;
+    border-radius: 0 !important;
+    transition: background-color 0.15s ease !important;
+  }
+
+  #html-body .page-wrapper .awa-site-header .menu_primary nav > ul > li > a:hover,
+  #html-body .page-wrapper .awa-site-header .awa-header-primary-nav .navigation li.level0 > a:hover {
+    background: rgba(0, 0, 0, 0.12) !important;
+    color: var(--awa-text-inverse) !important;
+  }
+
+  /* --- 4. Search bar: full pill border-radius matches button corner --------- */
+  #html-body .page-wrapper .awa-site-header .awa-header-search-col form.minisearch,
+  #html-body .page-wrapper .awa-site-header .awa-header-search-col .block-search form.minisearch {
+    border-radius: var(--awa-radius-sm) !important;
+    overflow: hidden !important;
+  }
+
+  #html-body .page-wrapper .awa-site-header .awa-header-search-col button.action.search,
+  #html-body .page-wrapper .awa-site-header .awa-header-search-col .actions .action.search {
+    border-radius: 0 var(--awa-radius-sm) var(--awa-radius-sm) 0 !important;
+  }
+
 }
