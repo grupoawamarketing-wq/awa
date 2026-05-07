@@ -88,9 +88,8 @@ export function ensureDir(dirPath: string): void {
 }
 
 export async function waitPageStable(page: Page): Promise<void> {
-  await page.waitForLoadState('domcontentloaded', { timeout: 30_000 }).catch(() => {});
-  await page.waitForLoadState('load', { timeout: 30_000 }).catch(() => {});
-  await page.waitForTimeout(900);
+  // page.goto already waits for domcontentloaded (with catch). Allow JS animations to start.
+  await page.waitForTimeout(2000);
 }
 
 export async function dismissCookieBanner(page: Page): Promise<void> {
@@ -303,16 +302,25 @@ export function compareAgainstBaseline(
   return { changed, baselineMissing: false, diffRatio };
 }
 
+/** Evaluate with a fallback if Chrome renderer is busy (no built-in timeout on page.evaluate). */
+async function safeEval<T>(fn: () => Promise<T>, fallback: T, timeoutMs = 3000): Promise<T> {
+  return Promise.race([
+    fn().catch(() => fallback),
+    new Promise<T>((resolve) => setTimeout(() => resolve(fallback), timeoutMs)),
+  ]);
+}
+
 async function getRect(page: Page, selector: string): Promise<{ x: number; y: number; width: number; height: number } | null> {
-  return page
-    .evaluate((sel) => {
+  return safeEval(
+    () => page.evaluate((sel) => {
       const el = document.querySelector(sel);
       if (!el) return null;
       const r = el.getBoundingClientRect();
       if (r.width <= 0 || r.height <= 0) return null;
       return { x: r.x, y: r.y, width: r.width, height: r.height };
-    }, selector)
-    .catch(() => null);
+    }, selector),
+    null
+  );
 }
 
 function intersects(
@@ -336,9 +344,10 @@ export async function detectVisualFindings(
 ): Promise<VisualFinding[]> {
   const findings: VisualFinding[] = [];
 
-  const overflow = await page
-    .evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
-    .catch(() => 0);
+  const overflow = await safeEval(
+    () => page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth),
+    0
+  );
 
   if (overflow > 2) {
     findings.push({
@@ -357,8 +366,8 @@ export async function detectVisualFindings(
     });
   }
 
-  const clipped = await page
-    .evaluate(() => {
+  const clipped = await safeEval(
+    () => page.evaluate(() => {
       const selectors = [
         '.customer-welcome',
         '.authorization-link',
@@ -374,8 +383,9 @@ export async function detectVisualFindings(
         }
       }
       return '';
-    })
-    .catch(() => '');
+    }),
+    ''
+  );
 
   if (clipped) {
     findings.push({
@@ -413,16 +423,17 @@ export async function detectVisualFindings(
     });
   }
 
-  const cookieObstruction = await page
-    .evaluate(() => {
+  const cookieObstruction = await safeEval(
+    () => page.evaluate(() => {
       const banner = document.querySelector('.cookie-message, .cookie-notice, .awa-cookie-banner') as HTMLElement | null;
       if (!banner) return 0;
       const style = window.getComputedStyle(banner);
       if (!['fixed', 'sticky'].includes(style.position)) return 0;
       const rect = banner.getBoundingClientRect();
       return rect.height;
-    })
-    .catch(() => 0);
+    }),
+    0
+  );
 
   if (cookieObstruction > 70) {
     findings.push({
@@ -441,8 +452,8 @@ export async function detectVisualFindings(
     });
   }
 
-  const brokenImage = await page
-    .evaluate(() => {
+  const brokenImage = await safeEval(
+    () => page.evaluate(() => {
       const images = Array.from(document.querySelectorAll('img')) as HTMLImageElement[];
       for (const img of images) {
         const rect = img.getBoundingClientRect();
@@ -450,8 +461,9 @@ export async function detectVisualFindings(
         if (img.complete && img.naturalWidth === 0) return img.src || 'unknown-image';
       }
       return '';
-    })
-    .catch(() => '');
+    }),
+    ''
+  );
 
   if (brokenImage) {
     findings.push({

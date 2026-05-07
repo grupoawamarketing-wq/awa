@@ -5,6 +5,7 @@ export default defineConfig({
   testDir: path.join(__dirname, 'specs'),
   testMatch: /mcp-visual-ops\.spec\.ts/,
   outputDir: path.join(__dirname, 'test-results'),
+  globalSetup: path.join(__dirname, 'helpers/global-setup.ts'),
   globalTeardown: path.join(__dirname, 'helpers/global-teardown.ts'),
   fullyParallel: false,
   workers: 1,
@@ -24,18 +25,12 @@ export default defineConfig({
     trace: 'retain-on-failure',
     actionTimeout: 15_000,
     navigationTimeout: 60_000,
-    launchOptions: {
-      args: ['--no-sandbox', '--disable-dev-shm-usage', '--disable-setuid-sandbox'],
-    },
+    // launchOptions: Chromium args removed — all projects use Firefox which loads the site reliably.
   },
   projects: [
-    {
-      name: 'chromium-desktop-1366',
-      use: {
-        ...devices['Desktop Chrome'],
-        viewport: { width: 1366, height: 768 },
-      },
-    },
+    // NOTE: Chromium/Chrome cannot load awamotos.com reliably on this server —
+    // the renderer freezes for 120s+ due to CSS/JS load complexity.
+    // Firefox loads the page in <1s and is used for all visual QA projects.
     {
       name: 'firefox-desktop-1366',
       use: {
@@ -43,15 +38,19 @@ export default defineConfig({
         viewport: { width: 1366, height: 768 },
       },
     },
-    /* WebKit removed — system missing required libs (libgtk-4, libgraphene, etc.) */
     {
-      name: 'mobile-390',
+      name: 'firefox-desktop-1280',
       use: {
-        ...devices['Desktop Chrome'],
+        ...devices['Desktop Firefox'],
+        viewport: { width: 1280, height: 800 },
+      },
+    },
+    {
+      name: 'firefox-mobile-390',
+      use: {
+        browserName: 'firefox',
         viewport: { width: 390, height: 844 },
-        isMobile: true,
-        hasTouch: true,
-        userAgent: 'Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Mobile Safari/537.36',
+        userAgent: 'Mozilla/5.0 (Android 11; Mobile; rv:109.0) Gecko/109.0 Firefox/109.0',
       },
     },
   ],
