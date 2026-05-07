@@ -37,6 +37,7 @@ class Dashboard extends Template
                 'performance_data' => $dashboardData->getPerformanceData()
             ]);
         } catch (\Exception $e) {
+            $this->_logger->error('[LogMonitoring] Failed to load dashboard data: ' . $e->getMessage());
             return $this->serializer->serialize(['error' => $e->getMessage()]);
         }
     }
@@ -46,6 +47,7 @@ class Dashboard extends Template
         try {
             return $this->monitoringService->getSystemHealth();
         } catch (\Exception $e) {
+            $this->_logger->error('[LogMonitoring] Failed to load system health: ' . $e->getMessage());
             return ['error' => $e->getMessage()];
         }
     }
@@ -55,6 +57,7 @@ class Dashboard extends Template
         try {
             return $this->monitoringService->getAlertSummary();
         } catch (\Exception $e) {
+            $this->_logger->error('[LogMonitoring] Failed to load alert summary: ' . $e->getMessage());
             return ['error' => $e->getMessage()];
         }
     }

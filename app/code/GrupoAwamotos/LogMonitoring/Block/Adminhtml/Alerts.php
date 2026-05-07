@@ -33,6 +33,7 @@ class Alerts extends Template
         try {
             return $this->alertRepository->getActiveAlerts();
         } catch (\Exception $e) {
+            $this->_logger->error('[LogMonitoring] Failed to load active alerts: ' . $e->getMessage());
             return [];
         }
     }
@@ -42,6 +43,7 @@ class Alerts extends Template
         try {
             return $this->alertRepository->getCriticalAlerts();
         } catch (\Exception $e) {
+            $this->_logger->error('[LogMonitoring] Failed to load critical alerts: ' . $e->getMessage());
             return [];
         }
     }

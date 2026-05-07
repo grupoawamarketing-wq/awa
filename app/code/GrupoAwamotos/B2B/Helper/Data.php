@@ -79,12 +79,14 @@ class Data extends AbstractHelper
         CustomerSession $customerSession,
         CustomerRepositoryInterface $customerRepository,
         B2BConfig $b2bConfig,
-        PriceVisibilityInterface $priceVisibility
+        PriceVisibilityInterface $priceVisibility,
+        PriceCurrencyInterface $priceCurrency
     ) {
         $this->customerSession = $customerSession;
         $this->customerRepository = $customerRepository;
         $this->b2bConfig = $b2bConfig;
         $this->priceVisibility = $priceVisibility;
+        $this->priceCurrency = $priceCurrency;
         parent::__construct($context);
     }
 
@@ -594,12 +596,7 @@ class Data extends AbstractHelper
             return '';
         }
 
-        // Temporary OM fallback to avoid breaking DI in production without compile
-        $priceCurrency = \Magento\Framework\App\ObjectManager::getInstance()->get(
-            \Magento\Framework\Pricing\PriceCurrencyInterface::class
-        );
-
-        $formattedPrice = $priceCurrency->format($price, false);
+        $formattedPrice = $this->priceCurrency->format($price, false);
         return (string) __('A partir de %1', $formattedPrice);
     }
 
