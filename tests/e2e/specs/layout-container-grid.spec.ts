@@ -209,69 +209,78 @@ function assertContainerMetrics(metrics: LayoutMetrics, tier: Tier, viewportWidt
 }
 
 for (const viewport of VIEWPORTS) {
-  test(`Layout contract core-commerce @${viewport.name}`, async ({ page }) => {
+  test(`Layout contract core-commerce @${viewport.name}`, async ({ context }) => {
     test.setTimeout(210_000);
     fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
 
-    await page.setViewportSize({ width: viewport.width, height: viewport.height });
-
-    // Block media resources to reduce memory during layout measurements.
-    // Images are irrelevant for DOM/CSS metrics; blocking prevents OOM in long multi-route runs.
-    await page.route('**/*.{jpg,jpeg,png,gif,webp,mp4,mp3,woff,woff2}', (route) => route.abort());
-
     for (const route of ROUTES) {
-      await navigate(page, `${BASE}${route.path}`);
-      await dismissCookie(page);
-      await page.waitForTimeout(400);
+      // Create a fresh page per route from the fixture context (preserves Pixel 5 device
+      // settings: userAgent, isMobile, deviceScaleFactor). Closing after each route releases
+      // the renderer process memory and prevents OOM accumulation across route loads.
+      const page = await context.newPage();
+      page.setDefaultTimeout(10_000);
+      page.setDefaultNavigationTimeout(30_000);
+      await page.setViewportSize({ width: viewport.width, height: viewport.height });
 
-      const beforeInteraction = await collectMetrics(page, route.name);
-      const tier = inferTier(beforeInteraction.bodyClass, route.tier);
+      // Block media resources to reduce memory during layout measurements.
+      // Images are irrelevant for DOM/CSS metrics; blocking prevents OOM in long multi-route runs.
+      await page.route('**/*.{jpg,jpeg,png,gif,webp,mp4,mp3,woff,woff2}', (r) => r.abort());
 
-      assertContainerMetrics(beforeInteraction, tier, viewport.width);
+      try {
+        await navigate(page, `${BASE}${route.path}`);
+        await dismissCookie(page);
+        await page.waitForTimeout(400);
 
-      if ('needsGrid' in route && route.needsGrid) {
-        expect(beforeInteraction.grid, `grid must exist on ${route.name}`).toBeTruthy();
-        if (beforeInteraction.grid) {
-          expect(beforeInteraction.grid.cols, `pre-gate cols for ${route.name} @${viewport.width}px`).toBe(expectedGridCols(viewport.width, 'hasSidebar' in route && route.hasSidebar));
+        const beforeInteraction = await collectMetrics(page, route.name);
+        const tier = inferTier(beforeInteraction.bodyClass, route.tier);
+
+        assertContainerMetrics(beforeInteraction, tier, viewport.width);
+
+        if ('needsGrid' in route && route.needsGrid) {
+          expect(beforeInteraction.grid, `grid must exist on ${route.name}`).toBeTruthy();
+          if (beforeInteraction.grid) {
+            expect(beforeInteraction.grid.cols, `pre-gate cols for ${route.name} @${viewport.width}px`).toBe(expectedGridCols(viewport.width, 'hasSidebar' in route && route.hasSidebar));
+          }
         }
-      }
 
-      await triggerGateInteraction(page);
-      await page.waitForTimeout(800);
+        await triggerGateInteraction(page);
+        await page.waitForTimeout(800);
 
-      const afterInteraction = await collectMetrics(page, route.name);
-      const tierAfter = inferTier(afterInteraction.bodyClass, tier);
+        const afterInteraction = await collectMetrics(page, route.name);
+        const tierAfter = inferTier(afterInteraction.bodyClass, tier);
 
-      assertContainerMetrics(afterInteraction, tierAfter, viewport.width);
+        assertContainerMetrics(afterInteraction, tierAfter, viewport.width);
 
-      if (beforeInteraction.container && afterInteraction.container) {
-        expect(
-          Math.abs(beforeInteraction.container.width - afterInteraction.container.width),
-          `container width must not depend on gate (${route.name} @${viewport.width}px)`
-        ).toBeLessThanOrEqual(4);
+        if (beforeInteraction.container && afterInteraction.container) {
+          expect(
+            Math.abs(beforeInteraction.container.width - afterInteraction.container.width),
+            `container width must not depend on gate (${route.name} @${viewport.width}px)`
+          ).toBeLessThanOrEqual(4);
 
-        expect(
-          Math.abs(beforeInteraction.container.x - afterInteraction.container.x),
-          `container alignment must not depend on gate (${route.name} @${viewport.width}px)`
-        ).toBeLessThanOrEqual(4);
-      }
-
-      if ('needsGrid' in route && route.needsGrid) {
-        expect(afterInteraction.grid, `grid must exist post-gate on ${route.name}`).toBeTruthy();
-        if (afterInteraction.grid) {
-          expect(afterInteraction.grid.cols, `post-gate cols for ${route.name} @${viewport.width}px`).toBe(expectedGridCols(viewport.width, 'hasSidebar' in route && route.hasSidebar));
+          expect(
+            Math.abs(beforeInteraction.container.x - afterInteraction.container.x),
+            `container alignment must not depend on gate (${route.name} @${viewport.width}px)`
+          ).toBeLessThanOrEqual(4);
         }
+
+        if ('needsGrid' in route && route.needsGrid) {
+          expect(afterInteraction.grid, `grid must exist post-gate on ${route.name}`).toBeTruthy();
+          if (afterInteraction.grid) {
+            expect(afterInteraction.grid.cols, `post-gate cols for ${route.name} @${viewport.width}px`).toBe(expectedGridCols(viewport.width, 'hasSidebar' in route && route.hasSidebar));
+          }
+        }
+
+        if (beforeInteraction.gate.total > 0) {
+          expect(afterInteraction.gate.active, `gate links should be active after interaction on ${route.name}`).toBe(beforeInteraction.gate.total);
+        }
+
+        await page.screenshot({
+          path: path.join(SCREENSHOT_DIR, `${route.name}-${viewport.name}.png`),
+          fullPage: true,
+        }).catch(() => {});
+      } finally {
+        await page.close().catch(() => {}); // Release renderer memory before next route.
       }
-
-      if (beforeInteraction.gate.total > 0) {
-        expect(afterInteraction.gate.active, `gate links should be active after interaction on ${route.name}`).toBe(beforeInteraction.gate.total);
-      }
-
-      await page.screenshot({
-        path: path.join(SCREENSHOT_DIR, `${route.name}-${viewport.name}.png`),
-        fullPage: true,
-      }).catch(() => {});
-
     }
   });
 }
