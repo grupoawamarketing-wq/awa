@@ -3,6 +3,32 @@
 $health = $block->getHealthData();
 $notifications = $block->getNotificationConfig();
 ?>
+<style>
+:root {
+    --wa-green:      #2ecc71;
+    --wa-amber:      #f39c12;
+    --wa-blue:       #3498db;
+    --wa-red:        #e74c3c;
+    --wa-gray:       #95a5a6;
+    --wa-muted:      #666666;
+    --wa-bg-subtle:  #f8f9fa;
+    --wa-bg-cli:     #f0f0f0;
+}
+    /* WhatsApp Commerce admin — status tokens */
+    .wa-status-ok      { color: var(--wa-green); }
+    .wa-status-warn    { color: var(--wa-amber); }
+    .wa-status-info    { color: var(--wa-blue); }
+    .wa-status-error   { color: var(--wa-red); }
+    .wa-status-ok-bold { color: var(--wa-green); font-weight: bold; }
+    .wa-status-err-bold{ color: var(--wa-red); font-weight: bold; }
+    .wa-active         { color: var(--wa-green); }
+    .wa-inactive       { color: var(--wa-gray); }
+    .wa-stat-card      { background: var(--wa-bg-subtle); padding: 20px; border-radius: 8px; text-align: center; flex: 1; }
+    .wa-stat-value-green { font-size: 32px; font-weight: bold; color: var(--wa-green); }
+    .wa-stat-value-blue  { font-size: 32px; font-weight: bold; color: var(--wa-blue); }
+    .wa-stat-label     { color: var(--wa-muted); }
+    .wa-cli-box        { margin-top: 20px; padding: 15px; background: var(--wa-bg-cli); border-radius: 6px; }
+</style>
 <div class="whatsapp-dashboard" style="max-width: 900px;">
     <h2 style="margin-bottom: 20px;">WhatsApp Commerce &mdash; Dashboard</h2>
 
@@ -22,13 +48,13 @@ $notifications = $block->getNotificationConfig();
                     <td><strong><?= $block->escapeHtml($name) ?></strong></td>
                     <td>
                         <?php if ($check['status'] === 'ok'): ?>
-                            <span style="color: #2ecc71;">OK</span>
+                            <span class="wa-status-ok">OK</span>
                         <?php elseif ($check['status'] === 'warning'): ?>
-                            <span style="color: #f39c12;">Warning</span>
+                            <span class="wa-status-warn">Warning</span>
                         <?php elseif ($check['status'] === 'info'): ?>
-                            <span style="color: #3498db;">Info</span>
+                            <span class="wa-status-info">Info</span>
                         <?php else: ?>
-                            <span style="color: #e74c3c;">Error</span>
+                            <span class="wa-status-error">Error</span>
                         <?php endif; ?>
                     </td>
                     <td><?= $block->escapeHtml($check['message']) ?></td>
@@ -39,9 +65,9 @@ $notifications = $block->getNotificationConfig();
         <p style="margin-top: 10px;">
             <strong><?= $block->escapeHtml(__('Status geral:')) ?></strong>
             <?php if ($health['healthy']): ?>
-                <span style="color: #2ecc71; font-weight: bold;"><?= $block->escapeHtml(__('Operacional')) ?></span>
+                <span class="wa-status-ok-bold"><?= $block->escapeHtml(__('Operacional')) ?></span>
             <?php else: ?>
-                <span style="color: #e74c3c; font-weight: bold;"><?= $block->escapeHtml(__('Problemas detectados')) ?></span>
+                <span class="wa-status-err-bold"><?= $block->escapeHtml(__('Problemas detectados')) ?></span>
             <?php endif; ?>
             &mdash;
             <small><?= $block->escapeHtml($health['timestamp']) ?></small>
@@ -70,9 +96,9 @@ $notifications = $block->getNotificationConfig();
                     <td><?= $block->escapeHtml($labels[$key] ?? $key) ?></td>
                     <td>
                         <?php if ($enabled): ?>
-                            <span style="color: #2ecc71;"><?= $block->escapeHtml(__('Ativo')) ?></span>
+                            <span class="wa-active"><?= $block->escapeHtml(__('Ativo')) ?></span>
                         <?php else: ?>
-                            <span style="color: #95a5a6;"><?= $block->escapeHtml(__('Desativado')) ?></span>
+                            <span class="wa-inactive"><?= $block->escapeHtml(__('Desativado')) ?></span>
                         <?php endif; ?>
                     </td>
                 </tr>
@@ -86,19 +112,19 @@ $notifications = $block->getNotificationConfig();
     <div class="admin__fieldset">
         <h3><?= $block->escapeHtml(__('Opt-in LGPD')) ?></h3>
         <div style="display: flex; gap: 20px;">
-            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center; flex: 1;">
-                <div style="font-size: 32px; font-weight: bold; color: #2ecc71;"><?= (int) $stats['opted_in'] ?></div>
-                <div style="color: #666;"><?= $block->escapeHtml(__('Clientes Opt-in')) ?></div>
+            <div class="wa-stat-card">
+                <div class="wa-stat-value-green"><?= (int) $stats['opted_in'] ?></div>
+                <div class="wa-stat-label"><?= $block->escapeHtml(__('Clientes Opt-in')) ?></div>
             </div>
-            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center; flex: 1;">
-                <div style="font-size: 32px; font-weight: bold; color: #3498db;"><?= (int) $stats['total_records'] ?></div>
-                <div style="color: #666;"><?= $block->escapeHtml(__('Registros de Consentimento')) ?></div>
+            <div class="wa-stat-card">
+                <div class="wa-stat-value-blue"><?= (int) $stats['total_records'] ?></div>
+                <div class="wa-stat-label"><?= $block->escapeHtml(__('Registros de Consentimento')) ?></div>
             </div>
         </div>
     </div>
     <?php endif; ?>
 
-    <div style="margin-top: 20px; padding: 15px; background: #f0f0f0; border-radius: 6px;">
+    <div class="wa-cli-box">
         <strong>CLI:</strong>
         <code>bin/magento awa:whatsapp:health</code> &mdash; Health check via terminal<br/>
         <strong>CLI:</strong>

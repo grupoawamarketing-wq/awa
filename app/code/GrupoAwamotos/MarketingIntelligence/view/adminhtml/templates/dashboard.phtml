@@ -22,47 +22,80 @@ $growthExperiments = $block->getGrowthExperiments();
 ?>
 
 <style>
+:root {
+    /* Text */
+    --mktg-text-dark:       #1e293b;
+    --mktg-text-body:       #334155;
+    --mktg-text-secondary:  #475569;
+    --mktg-text-muted:      #64748b;
+    --mktg-white:           #ffffff;
+    /* Backgrounds */
+    --mktg-bg-subtle:       #f8fafc;
+    --mktg-bg-light:        #f1f5f9;
+    --mktg-border:          #e2e8f0;
+    /* Buttons */
+    --mktg-blue:            #2563eb;
+    --mktg-blue-dark:       #1d4ed8;
+    --mktg-purple:          #7c3aed;
+    --mktg-purple-dark:     #6d28d9;
+    --mktg-amber:           #d97706;
+    --mktg-amber-dark:      #b45309;
+    --mktg-gray:            #6b7280;
+    --mktg-green:           #059669;
+    /* Alerts */
+    --mktg-warn-bg:         #fef3c7;
+    --mktg-warn-border:     #f59e0b;
+    --mktg-warn-text:       #92400e;
+    --mktg-alert-high-bg:   #fef2f2;
+    --mktg-alert-high-bdr:  #fecaca;
+    --mktg-alert-high-txt:  #991b1b;
+    --mktg-alert-med-bg:    #fffbeb;
+    --mktg-alert-med-bdr:   #fde68a;
+    --mktg-alert-low-bg:    #eff6ff;
+    --mktg-alert-low-bdr:   #bfdbfe;
+    --mktg-alert-low-txt:   #1e40af;
+}
     .mktg-dashboard { padding: 0 10px; font-family: 'Open Sans', sans-serif; }
     .mktg-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-    .mktg-header h1 { font-size: 24px; font-weight: 700; color: #1e293b; margin: 0; }
-    .mktg-disabled-banner { background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 16px; margin-bottom: 20px; color: #92400e; display: flex; align-items: center; gap: 12px; }
+    .mktg-header h1 { font-size: 24px; font-weight: 700; color: var(--mktg-text-dark); margin: 0; }
+    .mktg-disabled-banner { background: var(--mktg-warn-bg); border: 1px solid var(--mktg-warn-border); border-radius: 8px; padding: 16px; margin-bottom: 20px; color: var(--mktg-warn-text); display: flex; align-items: center; gap: 12px; }
     .mktg-actions { display: flex; gap: 8px; }
     .mktg-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.15s; text-decoration: none; }
-    .mktg-btn-primary { background: #2563eb; color: #fff; }
-    .mktg-btn-primary:hover { background: #1d4ed8; }
-    .mktg-btn-secondary { background: #7c3aed; color: #fff; }
-    .mktg-btn-secondary:hover { background: #6d28d9; }
-    .mktg-btn-warning { background: #d97706; color: #fff; }
-    .mktg-btn-warning:hover { background: #b45309; }
+    .mktg-btn-primary { background: var(--mktg-blue); color: var(--mktg-white); }
+    .mktg-btn-primary:hover { background: var(--mktg-blue-dark); }
+    .mktg-btn-secondary { background: var(--mktg-purple); color: var(--mktg-white); }
+    .mktg-btn-secondary:hover { background: var(--mktg-purple-dark); }
+    .mktg-btn-warning { background: var(--mktg-amber); color: var(--mktg-white); }
+    .mktg-btn-warning:hover { background: var(--mktg-amber-dark); }
 
     /* KPI Cards */
     .mktg-kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
-    .mktg-kpi-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 20px; display: flex; align-items: center; gap: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .mktg-kpi-card { background: var(--mktg-white); border: 1px solid var(--mktg-border); border-radius: 10px; padding: 20px; display: flex; align-items: center; gap: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
     .mktg-kpi-icon { font-size: 28px; width: 54px; height: 54px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: color-mix(in srgb, var(--mktg-kpi-color, #2563eb) 15%, transparent); }
     .mktg-kpi-info { flex: 1; }
     .mktg-kpi-value { font-size: 28px; font-weight: 800; color: var(--mktg-kpi-color, #1e293b); line-height: 1.1; }
-    .mktg-kpi-label { font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+    .mktg-kpi-label { font-size: 12px; font-weight: 600; color: var(--mktg-text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
 
     /* Sections */
     .mktg-grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
-    .mktg-section { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-    .mktg-section-title { font-size: 16px; font-weight: 700; color: #1e293b; margin: 0 0 16px 0; display: flex; align-items: center; gap: 8px; }
+    .mktg-section { background: var(--mktg-white); border: 1px solid var(--mktg-border); border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .mktg-section-title { font-size: 16px; font-weight: 700; color: var(--mktg-text-dark); margin: 0 0 16px 0; display: flex; align-items: center; gap: 8px; }
 
     /* Tables */
     .mktg-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    .mktg-table th { text-align: left; padding: 10px 12px; background: #f8fafc; color: #64748b; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #e2e8f0; }
-    .mktg-table td { padding: 10px 12px; border-bottom: 1px solid #f1f5f9; color: #334155; }
-    .mktg-table tr:hover td { background: #f8fafc; }
+    .mktg-table th { text-align: left; padding: 10px 12px; background: var(--mktg-bg-subtle); color: var(--mktg-text-muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid var(--mktg-border); }
+    .mktg-table td { padding: 10px 12px; border-bottom: 1px solid var(--mktg-bg-light); color: var(--mktg-text-body); }
+    .mktg-table tr:hover td { background: var(--mktg-bg-subtle); }
 
     /* Status Pipeline */
     .mktg-pipeline { display: flex; gap: 4px; }
     .mktg-pipeline-step { flex: 1; text-align: center; padding: 12px 8px; border-radius: 8px; background: color-mix(in srgb, var(--mktg-pipeline-color, #2563eb) 10%, transparent); }
-    .mktg-pipeline-count { font-size: 22px; font-weight: 800; color: #1e293b; }
-    .mktg-pipeline-label { font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; margin-top: 2px; }
+    .mktg-pipeline-count { font-size: 22px; font-weight: 800; color: var(--mktg-text-dark); }
+    .mktg-pipeline-label { font-size: 11px; font-weight: 600; color: var(--mktg-text-muted); text-transform: uppercase; margin-top: 2px; }
 
     /* Badges */
-    .mktg-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; color: #fff; background: var(--mktg-badge-color, #6b7280); }
-    .mktg-score-bar { height: 6px; border-radius: 3px; background: #e2e8f0; overflow: hidden; }
+    .mktg-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; color: var(--mktg-white); background: var(--mktg-badge-color, #6b7280); }
+    .mktg-score-bar { height: 6px; border-radius: 3px; background: var(--mktg-border); overflow: hidden; }
     .mktg-score-fill { height: 100%; border-radius: 3px; width: var(--mktg-score-w, 0%); background: var(--mktg-score-color, #059669); }
     .mktg-score-strong { color: var(--mktg-score-color, #059669); }
 
@@ -72,9 +105,9 @@ $growthExperiments = $block->getGrowthExperiments();
     /* Alert Cards */
     .mktg-alerts { margin-bottom: 24px; }
     .mktg-alert-card { display: flex; align-items: flex-start; gap: 12px; padding: 14px 18px; border-radius: 8px; margin-bottom: 8px; font-size: 13px; line-height: 1.5; }
-    .mktg-alert-high { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
-    .mktg-alert-medium { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
-    .mktg-alert-low { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; }
+    .mktg-alert-high { background: var(--mktg-alert-high-bg); border: 1px solid var(--mktg-alert-high-bdr); color: var(--mktg-alert-high-txt); }
+    .mktg-alert-medium { background: var(--mktg-white)beb; border: 1px solid var(--mktg-alert-med-bdr); color: var(--mktg-warn-text); }
+    .mktg-alert-low { background: var(--mktg-alert-low-bg); border: 1px solid var(--mktg-alert-low-bdr); color: var(--mktg-alert-low-txt); }
     .mktg-alert-icon { font-size: 18px; flex-shrink: 0; }
 
     /* Funnel */
@@ -82,18 +115,18 @@ $growthExperiments = $block->getGrowthExperiments();
     .mktg-funnel-step { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 8px; background: color-mix(in srgb, var(--mktg-funnel-color, #2563eb) 8%, transparent); }
     .mktg-funnel-bar { height: 8px; border-radius: 4px; transition: width 0.3s; width: var(--mktg-funnel-bar-w, 100%); background: var(--mktg-funnel-color, #2563eb); }
     .mktg-funnel-count { font-size: 20px; font-weight: 800; min-width: 48px; color: var(--mktg-funnel-color, #2563eb); }
-    .mktg-funnel-label { font-size: 13px; font-weight: 600; color: #475569; flex: 1; }
+    .mktg-funnel-label { font-size: 13px; font-weight: 600; color: var(--mktg-text-secondary); flex: 1; }
 
     /* Budget summary table */
-    .mktg-budget-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
+    .mktg-budget-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--mktg-bg-light); font-size: 13px; }
     .mktg-budget-row:last-child { border-bottom: none; }
 
     /* Signal Quality */
     .mktg-signal-score { font-size: 48px; font-weight: 900; line-height: 1; color: var(--mktg-signal-color, #059669); }
     .mktg-signal-status { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; color: var(--mktg-signal-color, #059669); }
-    .mktg-signal-meter { height: 10px; border-radius: 5px; background: #e2e8f0; overflow: hidden; margin-top: 8px; }
+    .mktg-signal-meter { height: 10px; border-radius: 5px; background: var(--mktg-border); overflow: hidden; margin-top: 8px; }
     .mktg-signal-fill { height: 100%; border-radius: 5px; transition: width 0.5s; width: var(--mktg-signal-w, 0%); background: var(--mktg-signal-color, #059669); }
-    .mktg-signal-event { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
+    .mktg-signal-event { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--mktg-bg-light); font-size: 13px; }
     .mktg-signal-event:last-child { border-bottom: none; }
     .mktg-signal-event-score { font-weight: 700; color: var(--mktg-evt-color, #059669); }
     .mktg-freshness-badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; background: color-mix(in srgb, var(--mktg-freshness-color, #059669) 15%, transparent); color: var(--mktg-freshness-color, #059669); }
@@ -101,17 +134,17 @@ $growthExperiments = $block->getGrowthExperiments();
     /* Experiment Cards */
     .mktg-exp-card { background: var(--mktg-exp-bg, #f8fafc); border: 1px solid color-mix(in srgb, var(--mktg-exp-border, #64748b) 30%, transparent); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
     .mktg-exp-header { display: flex; justify-content: space-between; align-items: flex-start; }
-    .mktg-exp-name { font-weight: 700; font-size: 14px; color: #1e293b; flex: 1; }
-    .mktg-exp-priority-badge { background: var(--mktg-exp-badge, #6b7280); color: #fff; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
-    .mktg-exp-desc { font-size: 12px; color: #475569; margin: 0; line-height: 1.5; }
-    .mktg-exp-meta { display: flex; gap: 12px; margin-top: 4px; font-size: 11px; color: #64748b; }
+    .mktg-exp-name { font-weight: 700; font-size: 14px; color: var(--mktg-text-dark); flex: 1; }
+    .mktg-exp-priority-badge { background: var(--mktg-exp-badge, #6b7280); color: var(--mktg-white); font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
+    .mktg-exp-desc { font-size: 12px; color: var(--mktg-text-secondary); margin: 0; line-height: 1.5; }
+    .mktg-exp-meta { display: flex; gap: 12px; margin-top: 4px; font-size: 11px; color: var(--mktg-text-muted); }
     .mktg-exp-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; }
-    .mktg-exp-objective { font-size: 11px; color: #64748b; }
-    .mktg-exp-code { background: #f1f5f9; padding: 1px 6px; border-radius: 3px; font-size: 10px; }
+    .mktg-exp-objective { font-size: 11px; color: var(--mktg-text-muted); }
+    .mktg-exp-code { background: var(--mktg-bg-light); padding: 1px 6px; border-radius: 3px; font-size: 10px; }
     .mktg-exp-status { font-size: 11px; }
     .mktg-btn-form { display: inline; }
     .mktg-budget-label { font-weight: 600; }
-    .mktg-budget-pct { color: #64748b; }
+    .mktg-budget-pct { color: var(--mktg-text-muted); }
 
     /* Responsive */
     @media (max-width: 1200px) {
@@ -222,7 +255,7 @@ $growthExperiments = $block->getGrowthExperiments();
         <div class="mktg-section">
             <h3 class="mktg-section-title">🔥 Top 10 Prospects</h3>
             <?php if (empty($topProspects)): ?>
-                <p style="color:#64748b; text-align:center; padding:20px;">Nenhum prospect encontrado. Clique em "Buscar Prospects" para iniciar.</p>
+                <p style="color:var(--mktg-text-muted);text-align:center;padding:20px;">Nenhum prospect encontrado. Clique em "Buscar Prospects" para iniciar.</p>
             <?php else: ?>
             <table class="mktg-table">
                 <thead>
@@ -273,7 +306,7 @@ $growthExperiments = $block->getGrowthExperiments();
         <div class="mktg-section">
             <h3 class="mktg-section-title">📢 Anúncios Recentes de Concorrentes</h3>
             <?php if (empty($recentAds)): ?>
-                <p style="color:#64748b; text-align:center; padding:20px;">Nenhum anúncio encontrado. Clique em "Varrer Concorrentes" para iniciar.</p>
+                <p style="color:var(--mktg-text-muted);text-align:center;padding:20px;">Nenhum anúncio encontrado. Clique em "Varrer Concorrentes" para iniciar.</p>
             <?php else: ?>
             <table class="mktg-table">
                 <thead>
@@ -329,7 +362,7 @@ $growthExperiments = $block->getGrowthExperiments();
         <div class="mktg-section">
             <h3 class="mktg-section-title">💰 Atribuição de Budget (30 dias)</h3>
             <?php if (empty($budgetAttribution)): ?>
-                <p style="color:#64748b; text-align:center; padding:20px;">Nenhum dado de campanha. Execute a sincronização de insights.</p>
+                <p style="color:var(--mktg-text-muted);text-align:center;padding:20px;">Nenhum dado de campanha. Execute a sincronização de insights.</p>
             <?php else: ?>
             <div style="display:flex;gap:20px;align-items:flex-start;">
                 <div class="mktg-chart-container" style="width:180px;height:180px;flex-shrink:0;">
@@ -426,7 +459,7 @@ $growthExperiments = $block->getGrowthExperiments();
                     </div>
                 </div>
                 <div style="flex:1;">
-                    <div style="font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;margin-bottom:8px;">Eventos Recebidos</div>
+                    <div style="font-size:12px;font-weight:600;color:var(--mktg-text-muted);text-transform:uppercase;margin-bottom:8px;">Eventos Recebidos</div>
                     <?php if (!empty($sqEvents)):
                         foreach ($sqEvents as $evt):
                             $evtName = $block->escapeHtml((string) ($evt['event_name'] ?? ''));
@@ -438,7 +471,7 @@ $growthExperiments = $block->getGrowthExperiments();
                         <span class="mktg-signal-event-score" style="--mktg-evt-color: <?= $block->escapeHtmlAttr($evtColor) ?>"><?= $block->escapeHtml(number_format($evtScore, 1)) ?></span>
                     </div>
                     <?php endforeach; else: ?>
-                    <p style="color:#64748b;font-size:13px;">Nenhum evento registrado ainda.</p>
+                    <p style="color:var(--mktg-text-muted);font-size:13px;">Nenhum evento registrado ainda.</p>
                     <?php endif; ?>
                 </div>
             </div>
@@ -447,7 +480,7 @@ $growthExperiments = $block->getGrowthExperiments();
         <!-- Placeholder for future CAPI Funnel visualization -->
         <div class="mktg-section">
             <h3 class="mktg-section-title">🔄 Funil CAPI B2B</h3>
-            <p style="color:#64748b;font-size:13px;text-align:center;padding:20px;">
+            <p style="color:var(--mktg-text-muted);font-size:13px;text-align:center;padding:20px;">
                 Eventos CAPI enviados: QualifiedLead, ProposalSent, CreditApproved, InvoiceConfirmed, B2BRepurchase.<br>
                 Os dados de volume aparecem no painel de Qualidade do Sinal acima.
             </p>
@@ -459,7 +492,7 @@ $growthExperiments = $block->getGrowthExperiments();
     <?php if (!empty($growthExperiments)): ?>
     <div class="mktg-section" style="margin-bottom:24px;">
         <h3 class="mktg-section-title">🧪 Experimentos de Crescimento B2B</h3>
-        <p style="color:#64748b;font-size:13px;margin-bottom:16px;">
+        <p style="color:var(--mktg-text-muted);font-size:13px;margin-bottom:16px;">
             Sugestões de campanhas Meta baseadas nos dados B2B disponíveis. Prioridade calculada automaticamente.
         </p>
         <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(320px, 1fr));gap:16px;">
