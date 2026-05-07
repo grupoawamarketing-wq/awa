@@ -14,8 +14,14 @@ define(['jquery', 'domReady!'], function ($) {
     'use strict';
 
     return function (config) {
-        // Only activate for B2B approved customers
-        if (!document.body.classList.contains('b2b-customer')) {
+        // Only activate for approved B2B customers.
+        // .b2b-status-panel is a cacheable=false block rendered only for
+        // logged-in customers in B2B groups (Atacado/VIP/Revendedor).
+        // Guard also against pages with no add-to-cart forms (non-PLP pages).
+        if (!document.querySelector('.b2b-status-panel')) {
+            return;
+        }
+        if (!document.querySelector('[data-role="tocart-form"]')) {
             return;
         }
 

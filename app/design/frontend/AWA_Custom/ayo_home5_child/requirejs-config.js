@@ -4,7 +4,7 @@
  * rokanthemes/timecircles: real TimeCircles lib (via tema, shim jquery).
  */
 var config = {
-    deps: ['awa-nav-cls-fix-reset', 'awa-vertical-menu-focus-trap', 'awa-vertical-menu-bootstrap', 'awa-vertical-menu-toggle-hotfix', 'awa-b2b-header', 'awa-scroll-reveal', 'awa-card-enhance', 'awa-b2b-pdp-price-reload', 'awa-b2b-price-hydrator', 'awa-footer-returns-hotfix', 'awa-link-a11y-hotfix'],
+    deps: ['awa-nav-cls-fix-reset', 'awa-vertical-menu-focus-trap', 'awa-vertical-menu-bootstrap', 'awa-vertical-menu-toggle-hotfix', 'awa-b2b-header', 'awa-scroll-reveal', 'awa-card-enhance', 'awa-b2b-pdp-price-reload', 'awa-b2b-price-hydrator', 'awa-footer-returns-hotfix', 'awa-link-a11y-hotfix', 'awa-b2b-plp-qty'],
     map: {
         '*': {
             awaCustomCompatBootstrap: 'js/awa-custom-compat-bootstrap',
