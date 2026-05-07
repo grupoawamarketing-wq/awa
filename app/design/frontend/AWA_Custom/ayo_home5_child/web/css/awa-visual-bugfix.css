@@ -15630,3 +15630,453 @@ body .fixed-right-ul .scroll-top,
   }
 
 }
+
+/* ==========================================================================
+   DEEP VISUAL AUDIT FIXES — 2026-05-07
+   Addressing issues found by automated Playwright deep audit:
+   - H1 vs H2 visual hierarchy (H2 was 40px, H1 was 28px)
+   - Text clipping on homepage page-title
+   - Form input height inconsistency (48/36/44px)
+   - Product grid alignment 4px misalignment
+   - Breadcrumbs container width mismatch
+   ========================================================================== */
+
+/* --- FIX 1: Typography Hierarchy — H1 must always be larger than H2 -------- 
+   Problem: _tokens.less defines --awa-heading-2-size: clamp(28px, 4vw, 40px)
+   which at 1366px evaluates to 40px, while H1 evaluates to ~28-32px.
+   The LESS compiler silently discards complex clamp()+var() from _awa-cro-priority.
+   Fix: Override in pure CSS to ensure correct hierarchy.
+*/
+:root {
+  --awa-heading-1-size: clamp(28px, 2vw + 22px, 36px);
+  --awa-heading-2-size: clamp(20px, 1.5vw + 14px, 28px);
+  --awa-heading-3-size: clamp(18px, 1.2vw + 12px, 24px);
+}
+
+/* Enforce H1 > H2 with direct selectors as safety net */
+h1,
+.page-title,
+.page-title span.base {
+  font-size: var(--awa-heading-1-size);
+}
+
+h2,
+.block-title > strong,
+.section-title,
+.awa-section__title {
+  font-size: var(--awa-heading-2-size);
+}
+
+/* --- FIX 2: Text Clipping on page-title (homepage H1) ---------------------
+   Problem: "AWA Motos — Peças e Acessórios para Motos" clips in fixed container.
+   Fix: Allow wrapping and prevent clipping.
+*/
+.page-title-wrapper .page-title,
+.cms-home .page-title,
+h1.page-title {
+  overflow: visible;
+  text-overflow: unset;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* --- FIX 3: Form Input Height Normalization --------------------------------
+   Problem: input[text]=48px, select=36px, search=44px. 3 different heights.
+   Fix: Normalize to consistent 44px min-height with unified padding.
+*/
+body .page-wrapper input[type="text"],
+body .page-wrapper input[type="email"],
+body .page-wrapper input[type="password"],
+body .page-wrapper input[type="tel"],
+body .page-wrapper input[type="search"],
+body .page-wrapper input[type="number"],
+body .page-wrapper select,
+body .page-wrapper textarea {
+  min-height: 44px;
+  padding: 10px 12px;
+  font-size: 14px;
+  line-height: 1.4;
+  box-sizing: border-box;
+}
+
+body .page-wrapper textarea {
+  min-height: 88px;
+}
+
+/* --- FIX 4: Product Grid Alignment (4px misalignment) ----------------------
+   Problem: Product items within same row misaligned by 4px.
+   Fix: Use flexbox with align-items:stretch for equal row alignment.
+*/
+.products-grid .product-items {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+}
+
+.products-grid .product-items .product-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.products-grid .product-items .product-item .product-item-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.products-grid .product-items .product-item .product-item-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Push "add to cart" to bottom of card for alignment */
+.products-grid .product-items .product-item .product-item-details .product-item-inner {
+  margin-top: auto;
+}
+
+/* --- FIX 5: Breadcrumbs Container Alignment --------------------------------
+   Problem: Breadcrumbs 86px narrower (1280px vs 1366px max container).
+   Fix: Match breadcrumbs to page-main max-width.
+*/
+.breadcrumbs {
+  max-width: var(--awa-cro-container-max, 1280px);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--awa-cro-container-pad-desktop, 24px);
+  padding-right: var(--awa-cro-container-pad-desktop, 24px);
+  box-sizing: border-box;
+  width: 100%;
+}
+
+/* --- FIX 6: Section Padding Normalization ----------------------------------
+   Problem: 7 different padding-top values across homepage widget sections.
+   Fix: Standardize section spacing.
+*/
+.page-main .block.widget,
+.page-main section,
+.top-home-content > .block {
+  padding-top: var(--awa-space-6, 24px);
+  padding-bottom: var(--awa-space-6, 24px);
+}
+
+/* First section after breadcrumbs needs less top padding */
+.page-main .block.widget:first-child,
+.page-main section:first-child {
+  padding-top: var(--awa-space-4, 16px);
+}
+
+
+/* =============================================================================
+   FIX-BATCH-2026-05: Home page visual conflicts
+   =============================================================================
+
+   FIX-B2B-01: B2B promo bar text — multi-line wrap clipping resolved.
+   Root cause: span children (display:block, flex items) had fixed pixel widths
+   smaller than their text content, causing each span to wrap to 2-3 lines.
+   The __inner had overflow:hidden at 28px, clipping top 7px of 48px text block.
+   Fix: force white-space:nowrap on all child spans so each renders on one line.
+   The bar height collapses to ~32px (1 line + padding), text fully visible.
+   =============================================================================
+*/
+
+@media (min-width: 768px) {
+  body .page-wrapper .awa-b2b-promo-bar .awa-b2b-promo-bar__lead,
+  body .page-wrapper .awa-b2b-promo-bar .awa-b2b-promo-bar__separator,
+  body .page-wrapper .awa-b2b-promo-bar .awa-b2b-promo-bar__cta,
+  body .page-wrapper .awa-b2b-promo-bar .awa-b2b-promo-bar__tail {
+    white-space: nowrap !important; /* Prevents text wrapping inside flex-item span — justificado: fix de clipping */
+    display: inline !important; /* Inline in P flex context to remove fixed width forcing */
+    width: auto !important;
+    height: auto !important;
+    flex-shrink: 1 !important;
+  }
+  body .page-wrapper .awa-b2b-promo-bar .awa-b2b-promo-bar__tail {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    min-width: 0 !important;
+  }
+  body .page-wrapper .awa-b2b-promo-bar .awa-b2b-promo-bar__text {
+    overflow: hidden !important;
+    max-width: 100% !important;
+    align-items: center !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+  body .page-wrapper .awa-b2b-promo-bar .awa-b2b-promo-bar__inner {
+    height: auto !important;
+    min-height: 0 !important;
+    align-items: center !important;
+    overflow: hidden !important;
+  }
+  body .page-wrapper .awa-b2b-promo-bar {
+    height: auto !important;
+    min-height: 0 !important;
+    padding-top: 7px !important;
+    padding-bottom: 7px !important;
+  }
+}
+
+/* =============================================================================
+   FIX-CART-02: Cart minicart overlay — Ayo a.showcart overlay on fallback.
+   Root cause: existing VB-32 targets .action.showcart (standard Magento),
+   but Ayo renders a.showcart.header-mini-cart inside .minicart-wrapper.
+   Also the position:absolute left:-44px relied on minicart-wrapper being
+   positioned at the right offset, but it was at x=1351 (8px off the fallback).
+   Fix: position .mini-carts absolutely to overlay the entire awa-header-cart
+   container, then size and overlay the a.showcart invisibly on top of fallback.
+   =============================================================================
+*/
+
+@media (min-width: 992px) {
+  /* Ensure parent has position:relative (already set in VB-32, reinforce) */
+  body .page-wrapper .awa-header-minicart[data-awa-header-cart="true"] {
+    position: relative !important;
+    overflow: visible !important;
+  }
+
+  /* overlay mini-carts over the full minicart container area */
+  body .page-wrapper .awa-header-minicart .mini-carts {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    pointer-events: none !important;
+    z-index: 3 !important;
+    min-width: 0 !important;
+    flex-shrink: 1 !important;
+  }
+
+  body .page-wrapper .awa-header-minicart .minicart-wrapper {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: relative !important;
+    pointer-events: auto !important;
+  }
+
+  /* Ayo custom showcart: invisible overlay on top of fallback SVG button */
+  body .page-wrapper .awa-header-minicart .minicart-wrapper a.showcart,
+  body .page-wrapper .awa-header-minicart .minicart-wrapper .action.showcart {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    opacity: 0 !important; /* Invisible — fallback SVG below is the visual. Justificado: overlay click target */
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 4 !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    pointer-events: auto !important;
+  }
+
+  /* Cart counter badge: always visible above the overlay */
+  body .page-wrapper .awa-header-minicart .minicart-wrapper .counter.qty {
+    position: absolute !important;
+    top: -4px !important;
+    right: -4px !important;
+    z-index: 5 !important;
+    opacity: 1 !important;
+    pointer-events: none !important;
+    display: flex !important;
+  }
+  body .page-wrapper .awa-header-minicart .minicart-wrapper .counter.qty.empty {
+    display: none !important;
+  }
+
+  /* Dropdown minicart: restore full display when open */
+  body .page-wrapper .awa-header-minicart .minicart-wrapper .block-minicart {
+    pointer-events: auto !important;
+    opacity: 1 !important;
+    z-index: 10 !important;
+    position: absolute !important;
+    top: 44px !important;
+    right: 0 !important;
+    left: auto !important;
+    width: 320px !important;
+  }
+}
+
+/* =============================================================================
+   End FIX-BATCH-2026-05
+   =============================================================================
+*/
+
+
+/* =============================================================================
+   FIX-BATCH-2026-05-HSPEC: High-specificity overrides (#html-body .awa-site-header)
+   
+   Context: awa-layout-fixed.css and existing VB-32 rules use #html-body prefix
+   (specificity 1,4,0) to set position:relative !important and width:0 on .mini-carts.
+   These override the lower-specificity body-prefixed rules above.
+   The rules below use the same #html-body prefix and come LATER in the file,
+   winning by cascade order at equal specificity.
+   =============================================================================
+*/
+
+/* B2B bar — high-specificity single-line fix */
+@media (min-width: 768px) {
+  #html-body .page-wrapper .awa-b2b-promo-bar .awa-b2b-promo-bar__lead,
+  #html-body .page-wrapper .awa-b2b-promo-bar .awa-b2b-promo-bar__separator,
+  #html-body .page-wrapper .awa-b2b-promo-bar .awa-b2b-promo-bar__cta,
+  #html-body .page-wrapper .awa-b2b-promo-bar .awa-b2b-promo-bar__tail {
+    white-space: nowrap !important; /* Justificado: prevents multi-line clipping */
+    width: auto !important;
+    height: auto !important;
+    flex-shrink: 1 !important;
+  }
+  #html-body .page-wrapper .awa-b2b-promo-bar .awa-b2b-promo-bar__tail {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    min-width: 0 !important;
+  }
+  #html-body .page-wrapper .awa-b2b-promo-bar .awa-b2b-promo-bar__inner {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+  #html-body .page-wrapper .awa-b2b-promo-bar {
+    height: auto !important;
+    min-height: 0 !important;
+    padding-top: 7px !important;
+    padding-bottom: 7px !important;
+  }
+}
+
+/* Cart — override high-specificity rules collapsing mini-carts to 0 */
+@media (min-width: 992px) {
+  #html-body .page-wrapper .awa-site-header .awa-header-minicart .mini-carts,
+  #html-body .page-wrapper .awa-site-header .awa-header-cart .mini-carts {
+    position: absolute !important; /* Justificado: overlay showcart on fallback */
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    pointer-events: none !important;
+    z-index: 3 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    font-size: 1rem !important;
+  }
+
+  #html-body .page-wrapper .awa-site-header .awa-header-minicart .minicart-wrapper {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: relative !important;
+    pointer-events: auto !important;
+  }
+
+  #html-body .page-wrapper .awa-site-header .awa-header-minicart .minicart-wrapper a.showcart,
+  #html-body .page-wrapper .awa-site-header .awa-header-minicart .minicart-wrapper .action.showcart {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    opacity: 0 !important; /* Justificado: invisible overlay — fallback SVG is the visual */
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 4 !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    pointer-events: auto !important;
+  }
+
+  #html-body .page-wrapper .awa-site-header .awa-header-minicart .minicart-wrapper .counter.qty {
+    position: absolute !important;
+    top: -4px !important;
+    right: -4px !important;
+    z-index: 5 !important;
+    opacity: 1 !important;
+    pointer-events: none !important;
+    display: flex !important;
+  }
+  #html-body .page-wrapper .awa-site-header .awa-header-minicart .minicart-wrapper .counter.qty.empty {
+    display: none !important;
+  }
+
+  #html-body .page-wrapper .awa-site-header .awa-header-minicart .minicart-wrapper .block-minicart {
+    pointer-events: auto !important;
+    opacity: 1 !important;
+    z-index: 10 !important;
+    position: absolute !important;
+    top: 44px !important;
+    right: 0 !important;
+    left: auto !important;
+    width: 320px !important;
+  }
+}
+
+/* =============================================================================
+   End FIX-BATCH-2026-05-HSPEC
+   =============================================================================
+*/
+
+/* ═══════════════════════════════════════════════════════════════════════
+   VISUAL AUDIT 2026-05-07 — Targeted Fixes (Round 2)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* FIX-R2-1: Form input height normalization (PLPs report 36/44/48px mix) */
+.page-wrapper input[type="text"],
+.page-wrapper input[type="email"],
+.page-wrapper input[type="password"],
+.page-wrapper input[type="search"],
+.page-wrapper input[type="tel"],
+.page-wrapper input[type="number"],
+.page-wrapper select,
+.page-wrapper textarea {
+    min-height: 44px !important;
+    box-sizing: border-box !important;
+}
+
+/* FIX-R2-2: Layered navigation filter inputs (smallest at 36px) */
+.filter-options .filter-options-content input[type="text"],
+.filter-options .filter-options-content select {
+    min-height: 44px !important;
+    height: 44px !important;
+}
+
+/* FIX-R2-3: Ensure section H2 typography consistency */
+.awa-home-section h2,
+.awa-section-header__title,
+.awa-category-carousel__header h2,
+.top-home-content h2 {
+    font-size: clamp(18px, 1.5vw + 12px, 24px) !important;
+    font-weight: 700 !important;
+    line-height: 1.25 !important;
+}
+
+/* FIX-R2-4: Toolbar sorter/limiter selects (36px → 44px) */
+.toolbar .sorter-options,
+.toolbar .limiter-options {
+    min-height: 44px !important;
+    height: 44px !important;
+}

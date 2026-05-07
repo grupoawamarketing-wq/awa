@@ -225,18 +225,21 @@ define(['jquery', 'domReady!'], function ($) {
             $cart[0].style.setProperty('color', 'var(--awa-primary)', 'important');
             $cart[0].style.setProperty('left', 'auto', 'important');
             $cart[0].style.setProperty('right', '0', 'important');
-            $cart[0].style.setProperty('display', 'none', 'important');
+            $cart[0].style.setProperty('display', 'inline-flex', 'important');
+            $cart[0].style.setProperty('visibility', 'visible', 'important');
+            $cart[0].style.setProperty('opacity', '1', 'important');
+            $cart[0].style.setProperty('pointer-events', 'auto', 'important');
         }
         if ($cartFallback.length) {
-            $cartFallback[0].style.setProperty('display', 'inline-flex', 'important');
-            $cartFallback[0].style.setProperty('visibility', 'visible', 'important');
-            $cartFallback[0].style.setProperty('opacity', '1', 'important');
-            $cartFallback[0].style.setProperty('pointer-events', 'auto', 'important');
+            $cartFallback[0].style.setProperty('display', 'none', 'important');
+            $cartFallback[0].style.setProperty('visibility', 'hidden', 'important');
+            $cartFallback[0].style.setProperty('opacity', '0', 'important');
+            $cartFallback[0].style.setProperty('pointer-events', 'none', 'important');
         }
         if ($cartFallbackIcon.length) {
-            $cartFallbackIcon[0].style.setProperty('visibility', 'visible', 'important');
-            $cartFallbackIcon[0].style.setProperty('opacity', '1', 'important');
-            $cartFallbackIcon[0].style.setProperty('display', 'block', 'important');
+            $cartFallbackIcon[0].style.setProperty('visibility', 'hidden', 'important');
+            $cartFallbackIcon[0].style.setProperty('opacity', '0', 'important');
+            $cartFallbackIcon[0].style.setProperty('display', 'none', 'important');
         }
         if ($cartCounter.length) {
             $cartCounter[0].style.setProperty('width', '14px', 'important');
