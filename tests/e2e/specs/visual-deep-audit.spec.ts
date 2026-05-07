@@ -374,16 +374,21 @@ async function runDeepVisualChecks(page: Page): Promise<RawIssue[]> {
     });
 
     // 14. Visual Hierarchy
+    // Compare the LARGEST visible H1 against the LARGEST visible H2 to avoid
+    // false positives from breadcrumb/sr-only H1s (small) vs hero H2s (large).
+    // Only flag if the delta is meaningful (>= 2px) and H1 is at least 16px.
     if (h1s.length > 0 && h2s.length > 0) {
-      const h1Size = px(cs(h1s[0]).fontSize);
-      const h2Size = px(cs(h2s[0]).fontSize);
-      if (h2Size >= h1Size && h1Size > 0) {
+      const h1Sizes = h1s.map(el => px(cs(el).fontSize)).filter(s => s >= 16);
+      const h2Sizes = h2s.map(el => px(cs(el).fontSize)).filter(s => s >= 12);
+      const maxH1 = h1Sizes.length > 0 ? Math.max(...h1Sizes) : 0;
+      const maxH2 = h2Sizes.length > 0 ? Math.max(...h2Sizes) : 0;
+      if (maxH1 > 0 && maxH2 > 0 && maxH2 > maxH1 + 2) {
         issues.push({
           category: 'visual-hierarchy',
-          description: 'H2 (' + h2Size + 'px) is same size or larger than H1 (' + h1Size + 'px)',
+          description: 'H2 (' + maxH2 + 'px) is larger than H1 (' + maxH1 + 'px) — check typography scale',
           severity: 'major',
           selector: 'h1, h2',
-          computed: { h1FontSize: String(h1Size), h2FontSize: String(h2Size) },
+          computed: { h1FontSize: String(maxH1), h2FontSize: String(maxH2) },
           probableCause: 'H2 has a custom font-size overriding hierarchy.',
           recommendedFix: 'Ensure H1 > H2 > H3 font sizes.',
         });
