@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Plugin to add B2B approval status and customer_id to HTTP Context for FPC cache variation.
  *
