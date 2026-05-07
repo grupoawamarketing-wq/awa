@@ -95,9 +95,10 @@ async function dismissCookie(page: Page): Promise<void> {
 }
 
 async function triggerGateInteraction(page: Page): Promise<void> {
-  await page.mouse.move(10, 10).catch(() => {});
-  await page.mouse.down().catch(() => {});
-  await page.mouse.up().catch(() => {});
+  // Move to a safe content-area position that avoids header navigation links.
+  // At desktop widths, (10,10) lands on the logo and triggers navigation — fixed here.
+  // A Tab keypress is sufficient to activate the AWA CSS gate (link[data-awa-gate]).
+  await page.mouse.move(100, 300).catch(() => {});
   await page.keyboard.press('Tab').catch(() => {});
 }
 
@@ -212,6 +213,10 @@ for (const viewport of VIEWPORTS) {
   test(`Layout contract core-commerce @${viewport.name}`, async ({ context }) => {
     test.setTimeout(210_000);
     fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
+
+    // Keep a sentinel page open to prevent Playwright from auto-closing the context
+    // when all route pages are closed between iterations.
+    const _sentinel = await context.newPage();
 
     for (const route of ROUTES) {
       // Create a fresh page per route from the fixture context (preserves Pixel 5 device

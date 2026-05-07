@@ -7,7 +7,7 @@ import { execSync } from 'child_process';
 export default async function globalTeardown(): Promise<void> {
   try {
     // Mata qualquer processo Chrome/Chromium remanescente
-    execSync('pkill -f "google-chrome|chromium|chrome-headless" 2>/dev/null || true', {
+    execSync('pkill -9 -f "chrome-headless-shell|google-chrome|chromium" 2>/dev/null || true', {
       shell: '/bin/bash',
       stdio: 'ignore',
     });

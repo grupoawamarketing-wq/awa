@@ -17,6 +17,7 @@ export default defineConfig({
   retries: 1,
   workers: 1,
 
+  globalSetup: path.join(__dirname, 'helpers/global-setup.ts'),
   globalTeardown: path.join(__dirname, 'helpers/global-teardown.ts'),
 
   reporter: [
