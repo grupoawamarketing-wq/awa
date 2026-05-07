@@ -45,6 +45,8 @@ class RecommendationRepository implements RecommendationRepositoryInterface
 
     /**
      * @inheritDoc
+  
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function getByCustomer(
         int $customerId,

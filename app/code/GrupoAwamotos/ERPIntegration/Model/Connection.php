@@ -119,6 +119,8 @@ class Connection implements ConnectionInterface
 
     /**
      * Check if any SQL Server driver is available
+     *
+     * @throws \RuntimeException When no SQL Server driver is available
      */
     public function hasAvailableDriver(): bool
     {
@@ -127,6 +129,8 @@ class Connection implements ConnectionInterface
 
     /**
      * Get connection using the best available driver with retry logic and circuit breaker
+     *
+     * @throws \RuntimeException When connection cannot be established after retries
      */
     public function getConnection(): \PDO
     {

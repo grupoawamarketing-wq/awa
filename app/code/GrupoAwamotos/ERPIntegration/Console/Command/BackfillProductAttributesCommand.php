@@ -80,6 +80,7 @@ class BackfillProductAttributesCommand extends Command
             $this->appState->getAreaCode();
             return;
         } catch (LocalizedException) {
+            // Area code already set — safe to continue
         }
 
         $this->appState->setAreaCode(Area::AREA_ADMINHTML);
