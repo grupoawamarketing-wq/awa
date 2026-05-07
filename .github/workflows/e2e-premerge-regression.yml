@@ -1,0 +1,55 @@
+name: e2e-premerge-regression
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: e2e-premerge-regression-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    env:
+      MCP_VISUAL_UPDATE_BASELINE: "0"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: tests/e2e/package-lock.json
+
+      - name: Install dependencies
+        working-directory: tests/e2e
+        run: npm ci
+
+      - name: Install Playwright browsers
+        working-directory: tests/e2e
+        run: npx playwright install --with-deps
+
+      - name: B2B regression (all projects)
+        working-directory: tests/e2e
+        run: npm run test:b2b-regression:all
+
+      - name: MCP visual regression pipeline
+        working-directory: tests/e2e
+        run: npm run pipeline:mcp-visual
+
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-premerge-regression-artifacts
+          path: |
+            tests/e2e/test-results/**
+            tests/e2e/reports/**
+            tests/e2e/playwright-report/**

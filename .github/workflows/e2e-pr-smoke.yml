@@ -1,0 +1,56 @@
+name: e2e-pr-smoke
+
+on:
+  pull_request:
+
+concurrency:
+  group: e2e-pr-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  b2b-and-visual-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: tests/e2e/package-lock.json
+
+      - name: Install dependencies
+        working-directory: tests/e2e
+        run: npm ci
+
+      - name: Install Playwright browsers
+        working-directory: tests/e2e
+        run: npx playwright install --with-deps
+
+      - name: B2B smoke (notebook-1366)
+        working-directory: tests/e2e
+        run: npm run test:b2b-regression
+
+      - name: Visual smoke - CLS scroll stability
+        working-directory: tests/e2e
+        run: |
+          npx playwright test \
+            specs/visual-audit-cls-performance.spec.ts \
+            --project=notebook-1366 \
+            -g "Estabilidade no scroll" \
+            --reporter=line \
+            --timeout=60000
+
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-pr-smoke-artifacts
+          path: |
+            tests/e2e/test-results/**
+            tests/e2e/reports/**
+            tests/e2e/playwright-report/**
