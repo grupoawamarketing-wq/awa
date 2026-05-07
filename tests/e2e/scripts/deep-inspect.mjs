@@ -6,7 +6,7 @@ const page = await ctx.newPage();
 // Home - header structure
 await page.goto('https://awamotos.com/', { waitUntil: 'networkidle', timeout: 45000 });
 const headerData = await page.evaluate(() => {
-  const candidates = ['header', '.page-header', '.page-header-v2', '#header', '.header', '.page-wrapper > *:first-child'];
+  const candidates = ['header.awa-site-header', '#header', 'header', '.page-wrapper > *:first-child', '.page-header'];
   const found = [];
   for (const sel of candidates) {
     const el = document.querySelector(sel);
