@@ -5,24 +5,41 @@
  */
 -->
 <!-- ko if: isVisible -->
-<div class="b2b-order-notes-wrapper">
-    <div class="field">
-        <label class="label" for="b2b-order-notes">
-            <span data-bind="i18n: getLabel()"></span>
+<section class="b2b-order-notes-wrapper checkout-block"
+         data-awa-component="b2b-order-notes"
+         aria-labelledby="b2b-order-notes-label">
+    <div class="b2b-order-notes-header">
+        <label class="label" id="b2b-order-notes-label" for="b2b-order-notes">
+            <span data-bind="text: getLabel()"></span>
         </label>
+        <span class="b2b-order-notes-badge"
+              data-bind="text: getOptionalLabel()"></span>
+    </div>
+
+    <p class="b2b-order-notes-help"
+       data-bind="text: getHelperText(), attr: { id: getFieldDescriptionId() }"></p>
+
+    <div class="field">
         <div class="control">
             <textarea id="b2b-order-notes"
                       name="b2b_order_notes"
                       class="input-text b2b-order-notes-input"
-                      rows="3"
+                      rows="4"
                       data-bind="value: orderNotes,
+                                 valueUpdate: 'input',
                                  attr: {
                                      placeholder: getPlaceholder(),
-                                     maxlength: getMaxLength()
+                                     maxlength: getMaxLength(),
+                                     'aria-describedby': getAriaDescribedBy()
                                  }"></textarea>
-            <span class="b2b-order-notes-counter"
-                  data-bind="text: (orderNotes() || '').length + '/' + getMaxLength()"></span>
         </div>
     </div>
-</div>
+
+    <div class="b2b-order-notes-footer">
+        <span class="b2b-order-notes-footnote"
+              data-bind="text: getFootnoteText()"></span>
+        <span class="b2b-order-notes-counter"
+              data-bind="text: getCounterText(), attr: { id: getCounterId(), 'aria-live': 'polite' }"></span>
+    </div>
+</section>
 <!-- /ko -->

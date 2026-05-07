@@ -5,71 +5,83 @@
  */
 -->
 <!-- ko if: isVisible() -->
-<div class="b2b-terms-container checkout-block">
+<section class="b2b-terms-container checkout-block"
+         data-awa-component="b2b-terms"
+         aria-labelledby="b2b-terms-title">
+    <div class="b2b-terms-heading">
+        <h3 id="b2b-terms-title" class="b2b-terms-title" data-bind="text: getSectionTitle()"></h3>
+        <p class="b2b-terms-description"
+           data-bind="text: getSectionDescription(), attr: { id: getFieldDescriptionId() }"></p>
+    </div>
+
     <div class="b2b-terms-wrapper">
-        <!-- Checkbox de aceite -->
         <div class="field b2b-terms-field choice">
             <input type="checkbox"
                    id="b2b-terms-checkbox"
                    name="b2b_terms_accepted"
                    class="checkbox"
                    aria-required="true"
-                   data-bind="checked: isAccepted, attr: {'aria-checked': isAccepted() ? 'true' : 'false'}" />
+                   data-bind="checked: isAccepted,
+                              attr: {
+                                  'aria-checked': isAccepted() ? 'true' : 'false',
+                                  'aria-describedby': getFieldDescriptionId()
+                              }" />
             <label class="label" for="b2b-terms-checkbox">
                 <span data-bind="text: getCheckboxLabel()"></span>
                 <!-- ko if: hasTermsContent() -->
-                <a href="#" class="b2b-terms-link"
-                   data-bind="click: function () { openTermsModal(); return false; }"
-                   title="Ver termos completos">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <a href="#"
+                   class="b2b-terms-link"
+                   data-bind="click: function () { openTermsModal(); return false; }, attr: { title: getTermsLinkLabel(), 'aria-label': getTermsLinkLabel() }">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                         <circle cx="12" cy="12" r="10"></circle>
                         <line x1="12" y1="16" x2="12" y2="12"></line>
                         <line x1="12" y1="8" x2="12.01" y2="8"></line>
                     </svg>
-                    <span>Ver termos</span>
+                    <span data-bind="text: getTermsLinkLabel()"></span>
                 </a>
                 <!-- /ko -->
             </label>
         </div>
 
-        <!-- Indicador visual de aceite -->
         <div class="b2b-terms-status" data-bind="visible: isAccepted()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" aria-hidden="true">
                 <polyline points="20 6 9 17 4 12"></polyline>
             </svg>
-            <span>Termos aceitos</span>
+            <span data-bind="text: getAcceptedLabel()"></span>
         </div>
     </div>
 
-    <!-- Modal de Termos -->
     <!-- ko if: isModalOpen() -->
     <div class="b2b-terms-modal-overlay" data-bind="click: closeTermsModal">
-        <div class="b2b-terms-modal" role="dialog" aria-modal="true" aria-labelledby="b2b-terms-modal-title" data-bind="click: function() {}, clickBubble: false">
+        <div class="b2b-terms-modal"
+             role="dialog"
+             aria-modal="true"
+             aria-labelledby="b2b-terms-modal-title"
+             data-bind="click: function() {}, clickBubble: false">
             <div class="b2b-terms-modal-header">
-                <h3 id="b2b-terms-modal-title">termos e condições de venda b2b</h3>
-                <button type="button" class="b2b-terms-modal-close"
-                        data-bind="click: closeTermsModal"
-                        title="Fechar">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <h3 id="b2b-terms-modal-title" data-bind="text: getModalTitle()"></h3>
+                <button type="button"
+                        class="b2b-terms-modal-close"
+                        data-bind="click: closeTermsModal, attr: { title: getCloseLabel(), 'aria-label': getCloseLabel() }">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
                         <line x1="6" y1="6" x2="18" y2="18"></line>
                     </svg>
                 </button>
             </div>
-            <div class="b2b-terms-modal-content" data-bind="html: getTermsContent()">
-            </div>
+            <div class="b2b-terms-modal-content" data-bind="html: getTermsContent()"></div>
             <div class="b2b-terms-modal-footer">
-                <button type="button" class="action secondary"
-                        data-bind="click: closeTermsModal">
-                    <span>fechar</span>
+                <button type="button" class="action secondary" data-bind="click: closeTermsModal">
+                    <span data-bind="text: getCloseButtonLabel()"></span>
                 </button>
-                <button type="button" class="action primary"
+                <button type="button"
+                        class="action primary"
                         data-bind="click: acceptTerms, visible: !isAccepted()">
-                    <span>li e aceito os termos</span>
+                    <span data-bind="text: getAcceptButtonLabel()"></span>
                 </button>
             </div>
         </div>
     </div>
     <!-- /ko -->
-</div>
+</section>
 <!-- /ko -->

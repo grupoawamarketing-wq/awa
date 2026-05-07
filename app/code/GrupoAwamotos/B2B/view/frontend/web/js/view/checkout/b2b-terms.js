@@ -25,7 +25,7 @@ define([
             template: 'GrupoAwamotos_B2B/checkout/b2b-terms',
             isAccepted: false,
             isVisible: true,
-            checkboxText: termsConfig.checkboxText || $t('Li e aceito os Termos de Venda B2B'),
+            checkboxText: termsConfig.checkboxText || $t('Li e aceito os termos de venda B2B'),
             termsContent: termsConfig.content || '',
             warningTitle: termsConfig.warningTitle || $t('Atenção'),
             warningContent: termsConfig.warningContent || $t('Você deve aceitar os termos e condições para continuar.')
@@ -37,19 +37,12 @@ define([
         initialize: function () {
             this._super();
 
-            // Observable for acceptance
             this.isAccepted = ko.observable(false);
-
-            // Modal state
             this.isModalOpen = ko.observable(false);
-
-            // Show only for logged in customers when terms feature is enabled.
-            // Terms content is optional; the link is rendered conditionally in template.
             this.isVisible = ko.computed(function () {
                 return customer.isLoggedIn() && termsConfig.enabled === true;
             }, this);
 
-            // Register validator only if terms are enabled
             if (termsConfig.enabled && !validatorRegistered) {
                 additionalValidators.registerValidator(this);
                 validatorRegistered = true;
@@ -60,6 +53,7 @@ define([
 
         /**
          * Validate acceptance
+         *
          * @returns {boolean}
          */
         validate: function () {
@@ -118,7 +112,22 @@ define([
         },
 
         /**
+         * @returns {string}
+         */
+        getSectionTitle: function () {
+            return $t('Condições comerciais B2B');
+        },
+
+        /**
+         * @returns {string}
+         */
+        getSectionDescription: function () {
+            return $t('Confirme a leitura dos termos para seguir com um pedido corporativo seguro e alinhado às políticas comerciais vigentes.');
+        },
+
+        /**
          * Get checkbox label with link
+         *
          * @returns {string}
          */
         getCheckboxLabel: function () {
@@ -126,7 +135,15 @@ define([
         },
 
         /**
+         * @returns {string}
+         */
+        getTermsLinkLabel: function () {
+            return $t('Ver termos completos');
+        },
+
+        /**
          * Get terms content HTML
+         *
          * @returns {string}
          */
         getTermsContent: function () {
@@ -135,10 +152,53 @@ define([
 
         /**
          * Check if terms link should be shown
+         *
          * @returns {boolean}
          */
         hasTermsContent: function () {
             return !!this.termsContent;
+        },
+
+        /**
+         * @returns {string}
+         */
+        getAcceptedLabel: function () {
+            return $t('Termos aceitos');
+        },
+
+        /**
+         * @returns {string}
+         */
+        getModalTitle: function () {
+            return $t('Termos e condições de venda B2B');
+        },
+
+        /**
+         * @returns {string}
+         */
+        getCloseLabel: function () {
+            return $t('Fechar');
+        },
+
+        /**
+         * @returns {string}
+         */
+        getCloseButtonLabel: function () {
+            return $t('Fechar');
+        },
+
+        /**
+         * @returns {string}
+         */
+        getAcceptButtonLabel: function () {
+            return $t('Li e aceito os termos');
+        },
+
+        /**
+         * @returns {string}
+         */
+        getFieldDescriptionId: function () {
+            return 'b2b-terms-description';
         }
     });
 });

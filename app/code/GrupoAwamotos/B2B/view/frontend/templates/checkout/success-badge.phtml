@@ -7,7 +7,10 @@
 declare(strict_types=1);
 ?>
 <?php if ($block->shouldDisplay()): ?>
-<div class="b2b-success-badge" role="status" aria-label="<?= $block->escapeHtmlAttr(__('Pedido via Crédito B2B')) ?>">
+<div class="b2b-success-badge"
+     data-awa-component="b2b-success-badge"
+     role="status"
+     aria-label="<?= $block->escapeHtmlAttr(__('Pedido via Crédito B2B')) ?>">
     <div class="b2b-success-badge__icon" aria-hidden="true">
         <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -16,19 +19,26 @@ declare(strict_types=1);
         </svg>
     </div>
     <div class="b2b-success-badge__content">
+        <span class="b2b-success-badge__eyebrow"><?= $block->escapeHtml(__('Fluxo corporativo aprovado')) ?></span>
         <strong class="b2b-success-badge__title">
             <?= $block->escapeHtml(__('Pedido faturado via Crédito B2B')) ?>
         </strong>
         <p class="b2b-success-badge__detail">
-            <?= $block->escapeHtml(__(
-                'Pedido #%1 — Condição: %2',
-                $block->getOrderIncrementId(),
-                $block->getPaymentTermTitle()
-            )) ?>
+            <?= $block->escapeHtml(__('Pedido #%1 — Condição: %2', $block->getOrderIncrementId(), $block->getPaymentTermTitle())) ?>
         </p>
         <p class="b2b-success-badge__note">
-            <?= $block->escapeHtml(__('O valor será debitado do seu limite de crédito. Acompanhe em seu Painel B2B.')) ?>
+            <?= $block->escapeHtml(__('O valor será debitado do seu limite de crédito. Você pode acompanhar status, histórico e próximas ações no Painel B2B.')) ?>
         </p>
+        <div class="b2b-success-badge__actions">
+            <a class="action primary b2b-success-badge__action"
+               href="<?= $block->escapeUrl($block->getUrl('b2b/account/dashboard')) ?>">
+                <span><?= $block->escapeHtml(__('Abrir Painel B2B')) ?></span>
+            </a>
+            <a class="action secondary b2b-success-badge__action"
+               href="<?= $block->escapeUrl($block->getUrl('sales/order/history')) ?>">
+                <span><?= $block->escapeHtml(__('Ver pedidos')) ?></span>
+            </a>
+        </div>
     </div>
 </div>
 <?php endif; ?>

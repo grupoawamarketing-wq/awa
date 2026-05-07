@@ -8,8 +8,9 @@ define([
     'uiComponent',
     'ko',
     'Magento_Customer/js/model/customer',
-    'GrupoAwamotos_B2B/js/model/checkout/po-number-storage'
-], function (Component, ko, customer, poNumberStorage) {
+    'GrupoAwamotos_B2B/js/model/checkout/po-number-storage',
+    'mage/translate'
+], function (Component, ko, customer, poNumberStorage, $t) {
     'use strict';
 
     return Component.extend({
@@ -25,7 +26,6 @@ define([
         initialize: function () {
             this._super();
 
-            // Reuse shared storage observable to survive checkout component re-renders.
             this.poNumber = poNumberStorage.poNumberObservable;
             var config = (window.checkoutConfig || {}).b2bCheckout || {};
             var poNumberConfig = config.poNumber || {};
@@ -40,30 +40,69 @@ define([
 
         /**
          * Get component label
+         *
          * @returns {string}
          */
         getLabel: function () {
-            return 'Número do Pedido de Compra (PO)';
+            return $t('Número do pedido de compra (PO)');
+        },
+
+        /**
+         * @returns {string}
+         */
+        getOptionalLabel: function () {
+            return $t('Opcional');
         },
 
         /**
          * Get placeholder text
+         *
          * @returns {string}
          */
         getPlaceholder: function () {
-            return 'Ex: PO-2026-00123';
+            return $t('Ex.: PO-2026-00123');
         },
 
         /**
          * Get help text
+         *
          * @returns {string}
          */
         getHelpText: function () {
-            return 'Opcional. Informe o número do seu pedido de compra interno para referência.';
+            return $t('Informe o identificador interno do seu pedido de compra para facilitar conciliação comercial e atendimento pós-venda.');
+        },
+
+        /**
+         * @returns {string}
+         */
+        getSupportText: function () {
+            return $t('Esse código será associado ao pedido confirmado para consulta futura.');
+        },
+
+        /**
+         * @returns {string}
+         */
+        getDescriptionId: function () {
+            return 'b2b-po-number-description';
+        },
+
+        /**
+         * @returns {string}
+         */
+        getSupportId: function () {
+            return 'b2b-po-number-support';
+        },
+
+        /**
+         * @returns {string}
+         */
+        getAriaDescribedBy: function () {
+            return this.getDescriptionId() + ' ' + this.getSupportId();
         },
 
         /**
          * Check if field is visible
+         *
          * @returns {boolean}
          */
         isFieldVisible: function () {
