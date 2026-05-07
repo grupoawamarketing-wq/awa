@@ -220,8 +220,6 @@ for (const viewport of VIEWPORTS) {
     await page.route('**/*.{jpg,jpeg,png,gif,webp,mp4,mp3,woff,woff2}', (route) => route.abort());
 
     for (const route of ROUTES) {
-      // Navigate to blank first to allow Chrome to GC resources from the previous route.
-      await page.goto('about:blank', { waitUntil: 'commit', timeout: 5_000 }).catch(() => {});
       await navigate(page, `${BASE}${route.path}`);
       await dismissCookie(page);
       await page.waitForTimeout(400);
