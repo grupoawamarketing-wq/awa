@@ -41,39 +41,45 @@ class ExpireQuotes
             return;
         }
 
-        $now = date('Y-m-d H:i:s');
-        $connection = $this->resource->getConnection();
-        $table = $connection->getTableName(self::TABLE);
-        $count = 0;
+        try {
+            $now = date('Y-m-d H:i:s');
+            $connection = $this->resource->getConnection();
+            $table = $connection->getTableName(self::TABLE);
+            $count = 0;
 
-        // Batch UPDATE: cotações com expires_at no passado
-        $count += (int) $connection->update(
-            $table,
-            ['status' => 'expired'],
-            [
-                'status IN (?)' => self::ACTIVE_STATUSES,
-                'expires_at IS NOT NULL',
-                'expires_at < ?' => $now,
-            ]
-        );
-
-        // Batch UPDATE: cotações sem expires_at mas com prazo configurado
-        $expiryDays = $this->config->getQuoteExpiryDays();
-        if ($expiryDays > 0) {
-            $cutoffDate = date('Y-m-d H:i:s', strtotime("-{$expiryDays} days"));
+            // Batch UPDATE: cotações com expires_at no passado
             $count += (int) $connection->update(
                 $table,
                 ['status' => 'expired'],
                 [
                     'status IN (?)' => self::ACTIVE_STATUSES,
-                    'expires_at IS NULL',
-                    'created_at < ?' => $cutoffDate,
+                    'expires_at IS NOT NULL',
+                    'expires_at < ?' => $now,
                 ]
             );
-        }
 
-        if ($count > 0) {
-            $this->logger->info("B2B: {$count} cotação(ões) expirada(s) automaticamente.");
+            // Batch UPDATE: cotações sem expires_at mas com prazo configurado
+            $expiryDays = $this->config->getQuoteExpiryDays();
+            if ($expiryDays > 0) {
+                $cutoffDate = date('Y-m-d H:i:s', strtotime("-{$expiryDays} days"));
+                $count += (int) $connection->update(
+                    $table,
+                    ['status' => 'expired'],
+                    [
+                        'status IN (?)' => self::ACTIVE_STATUSES,
+                        'expires_at IS NULL',
+                        'created_at < ?' => $cutoffDate,
+                    ]
+                );
+            }
+
+            if ($count > 0) {
+                $this->logger->info("B2B: {$count} cotação(ões) expirada(s) automaticamente.");
+            }
+        } catch (\Throwable $e) {
+            $this->logger->error('[B2B] ExpireQuotes failed: ' . $e->getMessage(), [
+                'exception' => $e,
+            ]);
         }
     }
 }

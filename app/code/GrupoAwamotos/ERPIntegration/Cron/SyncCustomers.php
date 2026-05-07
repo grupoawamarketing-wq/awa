@@ -30,7 +30,13 @@ class SyncCustomers
             return;
         }
 
-        $result = $this->customerSync->syncAll();
-        $this->logger->info('[ERP Cron] Customer sync finished.', $result);
+        try {
+            $result = $this->customerSync->syncAll();
+            $this->logger->info('[ERP Cron] Customer sync finished.', $result);
+        } catch (\Throwable $e) {
+            $this->logger->error('[ERP Cron] SyncCustomers failed: ' . $e->getMessage(), [
+                'exception' => $e,
+            ]);
+        }
     }
 }

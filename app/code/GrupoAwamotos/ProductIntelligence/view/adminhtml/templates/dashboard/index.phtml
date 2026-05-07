@@ -40,6 +40,7 @@ $percConversao = !empty($conversion['perc_conversao_cliente']) ? (float)$convers
     --rx-amber: #f59e0b;
     --rx-blue: #3b82f6;
     --rx-purple: #8b5cf6;
+    --rx-slate: #64748b;
 }
 
 .rx-dashboard {
@@ -302,6 +303,19 @@ $percConversao = !empty($conversion['perc_conversao_cliente']) ? (float)$convers
     width: var(--rx-bar-width, 50%);
     background: var(--rx-bar-color, var(--rx-green));
 }
+
+.rx-chart-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--rx-slate);
+    font-style: italic;
+}
+.rx-chart-error {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--rx-red);
+    font-size: 12px;
+}
 </style>
 
 <div class="rx-dashboard">
@@ -563,11 +577,19 @@ $percConversao = !empty($conversion['perc_conversao_cliente']) ? (float)$convers
     };
 
     function showEmpty(el, msg) {
-        el.innerHTML = '<div style="text-align:center;padding:60px 20px;color:#64748b;font-style:italic">' + msg + '</div>';
+        const d = document.createElement('div');
+        d.className = 'rx-chart-empty';
+        d.textContent = msg;
+        el.innerHTML = '';
+        el.appendChild(d);
     }
 
     function showError(el, err) {
-        el.innerHTML = '<div style="text-align:center;padding:40px 20px;color:#ef4444;font-size:12px">Erro: ' + err + '</div>';
+        const d = document.createElement('div');
+        d.className = 'rx-chart-error';
+        d.textContent = 'Erro: ' + err;
+        el.innerHTML = '';
+        el.appendChild(d);
         console.error('[RexisML Chart]', err);
     }
 
