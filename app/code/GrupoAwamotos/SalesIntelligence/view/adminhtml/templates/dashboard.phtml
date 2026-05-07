@@ -19,8 +19,8 @@ $chartJson = $block->getSalesChartJson();
     <!-- A. Health Score Header -->
     <div class="si-section si-health-header">
         <div class="si-health-score-container">
-            <div class="si-health-circle" style="border-color: <?= $block->escapeHtmlAttr($healthScore['color']) ?>">
-                <span class="si-health-number" style="color: <?= $block->escapeHtmlAttr($healthScore['color']) ?>">
+            <div class="si-health-circle" style="--si-health-color: <?= $block->escapeHtmlAttr($healthScore['color']) ?>">
+                <span class="si-health-number">
                     <?= (int) $healthScore['total'] ?>
                 </span>
                 <span class="si-health-label"><?= $block->escapeHtml($healthScore['label']) ?></span>
@@ -40,8 +40,7 @@ $chartJson = $block->getSalesChartJson();
                     </div>
                     <div class="si-health-bar-track">
                         <div class="si-health-bar-fill"
-                             style="width: <?= $item['max'] > 0 ? round(($item['score'] / $item['max']) * 100) : 0 ?>%;
-                                    background-color: <?= $block->escapeHtmlAttr($item['color']) ?>">
+                             style="--si-bar-width: <?= $item['max'] > 0 ? round(($item['score'] / $item['max']) * 100) : 0 ?>%; --si-bar-color: <?= $block->escapeHtmlAttr($item['color']) ?>">
                         </div>
                     </div>
                 </div>
@@ -67,8 +66,7 @@ $chartJson = $block->getSalesChartJson();
                 <?php if ($kpi['progress'] !== null): ?>
                     <div class="si-progress-bar">
                         <div class="si-progress-fill"
-                             style="width: <?= min(100, (float) $kpi['progress']) ?>%;
-                                    background: <?= $kpi['progress'] >= 70 ? '#059669' : ($kpi['progress'] >= 40 ? '#d97706' : '#dc2626') ?>">
+                             style="--si-progress-width: <?= min(100, (float) $kpi['progress']) ?>%; --si-progress-bg: <?= $kpi['progress'] >= 70 ? '#059669' : ($kpi['progress'] >= 40 ? '#d97706' : '#dc2626') ?>">
                         </div>
                     </div>
                     <div class="si-kpi-progress-label"><?= round($kpi['progress'], 1) ?>% da meta</div>
@@ -296,9 +294,9 @@ $chartJson = $block->getSalesChartJson();
                 $color = $typeColors[$rec['type'] ?? 'operational'] ?? '#6b7280';
                 $typeLabel = $typeLabels[$rec['type'] ?? 'operational'] ?? 'Geral';
                 ?>
-                <div class="si-rec-card" style="border-left: 4px solid <?= $block->escapeHtmlAttr($color) ?>">
+                <div class="si-rec-card" style="--si-rec-color: <?= $block->escapeHtmlAttr($color) ?>">
                     <div class="si-rec-header">
-                        <span class="si-rec-badge" style="background: <?= $block->escapeHtmlAttr($color) ?>">
+                        <span class="si-rec-badge">
                             <?= $block->escapeHtml($typeLabel) ?>
                         </span>
                         <span class="si-rec-priority">
@@ -426,10 +424,11 @@ document.addEventListener('DOMContentLoaded', function() {
     .si-health-score-container { display: flex; align-items: center; gap: 20px; flex-shrink: 0; }
     .si-health-circle {
         width: 100px; height: 100px; border-radius: 50%; border: 4px solid;
+        border-color: var(--si-health-color, #059669);
         display: flex; flex-direction: column; align-items: center; justify-content: center;
         flex-shrink: 0;
     }
-    .si-health-number { font-size: 32px; font-weight: 700; line-height: 1; }
+    .si-health-number { font-size: 32px; font-weight: 700; line-height: 1; color: var(--si-health-color, #059669); }
     .si-health-label { font-size: 11px; font-weight: 500; color: #6b7280; text-transform: uppercase; }
     .si-health-title h2 { font-size: 18px; margin: 0 0 4px 0; color: #111827; }
     .si-health-title p { font-size: 13px; color: #6b7280; margin: 0; }
@@ -437,7 +436,7 @@ document.addEventListener('DOMContentLoaded', function() {
     .si-health-bar-item { margin-bottom: 8px; }
     .si-health-bar-label { display: flex; justify-content: space-between; font-size: 12px; color: #374151; margin-bottom: 3px; }
     .si-health-bar-track { height: 8px; background: #f3f4f6; border-radius: 4px; overflow: hidden; }
-    .si-health-bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+    .si-health-bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; width: var(--si-bar-width, 0%); background: var(--si-bar-color, #059669); }
 
     /* === KPI Cards === */
     .si-kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
@@ -451,7 +450,7 @@ document.addEventListener('DOMContentLoaded', function() {
     .si-trend-up { color: #059669; font-size: 14px; }
     .si-trend-down { color: #dc2626; font-size: 14px; }
     .si-progress-bar { height: 6px; background: #f3f4f6; border-radius: 3px; margin-top: 10px; overflow: hidden; }
-    .si-progress-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+    .si-progress-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; width: var(--si-progress-width, 0%); background: var(--si-progress-bg, #059669); }
 
     /* === Chart === */
     .si-chart-container { height: 300px; position: relative; }
@@ -520,12 +519,14 @@ document.addEventListener('DOMContentLoaded', function() {
     .si-recommendations { display: grid; gap: 12px; }
     .si-rec-card {
         padding: 16px 16px 16px 20px; background: #fff; border: 1px solid #e5e7eb;
+        border-left: 4px solid var(--si-rec-color, #6b7280);
         border-radius: 6px;
     }
     .si-rec-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
     .si-rec-badge {
         display: inline-block; padding: 2px 8px; border-radius: 10px;
         font-size: 10px; font-weight: 600; color: #fff; text-transform: uppercase;
+        background: var(--si-rec-color, #6b7280);
     }
     .si-rec-priority { font-size: 12px; color: #dc2626; font-weight: 700; }
     .si-rec-title { font-size: 14px; font-weight: 600; color: #111827; margin-bottom: 4px; }
