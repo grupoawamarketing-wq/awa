@@ -842,7 +842,7 @@ class ImageSync implements ImageSyncInterface
         }
 
         if (!empty($this->missingMagentoCandidates)) {
-            $this->logger->info(sprintf(
+            $this->logger->debug(sprintf(
                 '[ERP] Skipping %d image candidates not yet in Magento catalog: %s',
                 count($this->missingMagentoCandidates),
                 $this->summarizeIdentifiers(array_keys($this->missingMagentoCandidates))
