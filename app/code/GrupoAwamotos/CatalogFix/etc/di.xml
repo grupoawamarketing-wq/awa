@@ -158,6 +158,15 @@
                 sortOrder="100"/>
     </type>
 
+    <!-- SRCH-002: instant.json store_id=0 references magento2_product_0 which does not
+         exist in OpenSearch. Autocomplete requests without store_id default to 0 → 404 → 0 results.
+         This plugin copies real store_id=1 index names into the store_id=0 section after ensure(). -->
+    <type name="Mirasvit\SearchAutocomplete\InstantProvider\ConfigMaker">
+        <plugin name="grupoawamotos_catalogfix_instant_json_store_zero_fix"
+                type="GrupoAwamotos\CatalogFix\Plugin\Search\InstantJsonStoreZeroFixPlugin"
+                sortOrder="100"/>
+    </type>
+
     <!-- Fix: global.php metadata injects null for formIds (module-captcha defines it only
          in etc/frontend/di.xml). When ObjectManager is initialized in global scope (scripts,
          REST API context) Captcha\Model\Checkout\ConfigProvider throws TypeError.
