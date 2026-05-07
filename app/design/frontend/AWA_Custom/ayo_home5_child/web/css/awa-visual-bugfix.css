@@ -16074,9 +16074,222 @@ body .page-wrapper textarea {
     line-height: 1.25 !important;
 }
 
-/* FIX-R2-4: Toolbar sorter/limiter selects (36px → 44px) */
+/* FIX-R2-4: Toolbar sorter/limiter selects (36px → 44px)
+   Targets both generic class and select element+class (bundle-refinements uses
+   select.sorter-options which is more specific, but our !important wins
+   since bundle-refinements does not use !important on height). */
+.toolbar select.sorter-options,
+.toolbar select.limiter-options,
 .toolbar .sorter-options,
 .toolbar .limiter-options {
     min-height: 44px !important;
     height: 44px !important;
+}
+
+/* ============================================================
+   B2B Sidebar "Pedidos Feitos Recentemente" — block-reorder fix
+   Prevent awa-layout-fixed.css .product-item overrides from
+   breaking the compact horizontal layout of reorder items.
+   Moved here (global) from awa-visual-qa-category.css so it
+   also applies on cart, account, and cotacao pages.
+   ============================================================ */
+.sidebar .block-reorder {
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    margin-bottom: 16px !important;
+}
+.sidebar .block-reorder .block-title {
+    padding: 12px 16px 8px !important;
+    margin: 0 !important;
+}
+.sidebar .block-reorder .product-item {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 8px 16px !important;
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 1px solid var(--awa-gray-100, #f3f4f6) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    width: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+}
+.sidebar .block-reorder .product-item:last-child {
+    border-bottom: none !important;
+}
+.sidebar .block-reorder .field.choice {
+    flex-shrink: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    width: auto !important;
+    height: auto !important;
+}
+.sidebar .block-reorder .field.choice input[type='checkbox'] {
+    opacity: 1 !important;
+    position: static !important;
+    width: 16px !important;
+    height: 16px !important;
+    min-width: 16px !important;
+    -webkit-appearance: auto !important;
+    appearance: auto !important;
+    cursor: pointer !important;
+}
+.sidebar .block-reorder .product-item-link {
+    font-size: 12px !important;
+    line-height: 1.3 !important;
+    display: -webkit-box !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-line-clamp: 2 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    word-break: break-word !important;
+    color: var(--awa-gray-800, #1e293b) !important;
+    text-decoration: none !important;
+}
+.sidebar .block-reorder form.reorder {
+    display: flex !important;
+    flex-direction: column !important;
+}
+.sidebar .block-reorder .actions-toolbar {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    padding: 12px 16px !important;
+}
+.sidebar .block-reorder .actions-toolbar .action.tocart {
+    width: 100% !important;
+    text-align: center !important;
+}
+.sidebar .block-reorder .actions-toolbar a.action.view {
+    text-align: center !important;
+    font-size: 12px !important;
+}
+
+/* =====================================================================
+   AUTH-SHELL FINAL OVERRIDE (desktop)
+   This file loads late and can safely override header search/account drift.
+   ===================================================================== */
+@media (min-width: 992px) {
+  #html-body.b2b-auth-shell .page-wrapper .awa-site-header #search_mini_form .actions .action.search,
+  #html-body.page-layout-empty .page-wrapper .awa-site-header #search_mini_form .actions .action.search {
+    background: var(--awa-primary) !important;
+    background-color: var(--awa-primary) !important;
+    color: var(--awa-white, #fff) !important;
+    border: 0 !important;
+    border-left: 1px solid var(--awa-border) !important;
+    border-radius: 0 9999px 9999px 0 !important;
+  }
+
+  #html-body.b2b-auth-shell .page-wrapper .awa-site-header #search_mini_form .actions .action.search svg,
+  #html-body.page-layout-empty .page-wrapper .awa-site-header #search_mini_form .actions .action.search svg {
+    stroke: var(--awa-white, #fff) !important;
+    color: var(--awa-white, #fff) !important;
+    fill: none !important;
+  }
+
+  #html-body.b2b-auth-shell .page-wrapper .awa-site-header .awa-header-account-prompt__line2 .awa-header-account-prompt__link,
+  #html-body.b2b-auth-shell .page-wrapper .awa-site-header .awa-header-account-prompt__line2 .awa-header-account-prompt__link--register,
+  #html-body.page-layout-empty .page-wrapper .awa-site-header .awa-header-account-prompt__line2 .awa-header-account-prompt__link,
+  #html-body.page-layout-empty .page-wrapper .awa-site-header .awa-header-account-prompt__line2 .awa-header-account-prompt__link--register {
+    font-size: 14px !important;
+    line-height: 1.2 !important;
+    font-weight: 700 !important;
+    color: var(--awa-primary) !important;
+    background: transparent !important;
+    border: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+}
+
+/* =============================================================================
+   VB-MINICART-MODAL — Fix mini-cart drawer sidebar (2026-05-07)
+   Problema: ao clicar no ícone do carrinho, o mini-cart aparece como popup
+   errado em vez de sidebar lateral (drawer).
+   Causa: conflito entre jQuery UI (.ui-dialog) e CSS AWA (position:fixed).
+   O .ui-dialog wrapper precisa ser transparente/inerte para não criar um
+   stacking context ou overflow que impeça o position:fixed do .block-minicart.
+   ============================================================================= */
+
+/* 1. Neutralizar o .ui-dialog wrapper — deve ser totalmente inerte */
+body .page-wrapper .minicart-wrapper .mage-dropdown-dialog.ui-dialog {
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    width: auto !important;
+    height: auto !important;
+    max-width: none !important;
+    max-height: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    overflow: visible !important;
+    z-index: auto !important;
+    display: block !important;
+}
+
+/* 2. O .block-minicart fechado deve ser display:none — impede vazamento */
+body .page-wrapper .minicart-wrapper:not(.active):not(.show) .block-minicart {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+/* 3. Garantir que o drawer aberto (sidebar) sempre use position:fixed full-height */
+body .page-wrapper .minicart-wrapper.active .block-minicart,
+body .page-wrapper .minicart-wrapper.show .block-minicart,
+body .page-wrapper .minicart-wrapper .block-minicart._active {
+    display: flex !important;
+    flex-direction: column !important;
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    left: auto !important;
+    bottom: 0 !important;
+    width: min(380px, 94vw) !important;
+    max-width: min(380px, 94vw) !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    z-index: 1300 !important;
+    overflow-y: auto !important;
+    background: var(--awa-bg, #fff) !important;
+    border-left: 1px solid var(--awa-border, #e5e5e5) !important;
+    box-shadow: -8px 0 32px rgba(15, 23, 42, 0.14) !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    transform: none !important;
+    animation: awa-minicart-slide-in 260ms cubic-bezier(0.25, 0.46, 0.45, 0.94) both !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+
+/* 4. Backdrop overlay quando aberto */
+body .page-wrapper .minicart-wrapper.active::before,
+body .page-wrapper .minicart-wrapper.show::before {
+    content: '' !important;
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 1299 !important;
+    background: rgba(15, 23, 42, 0.45) !important;
+    pointer-events: auto !important;
+}
+
+/* 5. Suprimir o showcart[aria-expanded=true] como trigger CSS de exibição
+   (apenas o .minicart-wrapper.active deve controlar a visibilidade) */
+body .page-wrapper .minicart-wrapper:not(.active):not(.show) .mage-dropdown-dialog[style*="display: block"] .block-minicart,
+body .page-wrapper .minicart-wrapper:not(.active):not(.show) .mage-dropdown-dialog[style*="display:block"] .block-minicart {
+    display: none !important;
 }
