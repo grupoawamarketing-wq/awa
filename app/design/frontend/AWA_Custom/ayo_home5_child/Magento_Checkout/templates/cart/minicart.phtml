@@ -27,11 +27,15 @@ $blockLoaderUrl = $sanitizeUrl($block->getViewFileUrl('images/loader-1.gif'));
 <div data-block="minicart" class="minicart-wrapper">
     <a class="showcart header-mini-cart" href="<?= $block->escapeUrl($block->getShoppingCartUrl()) ?>"
        aria-haspopup="dialog"
+       title="<?= $block->escapeHtmlAttr(__('Ver carrinho de compras')) ?>"
+       aria-label="<?= $block->escapeHtmlAttr(__('Ver carrinho de compras')) ?>"
        aria-expanded="false"
        aria-controls="minicart-content-wrapper"
        data-bind="scope: 'minicart_content'">
         <span class="awa-sr-only"><?= $block->escapeHtml(__('Carrinho de compras')) ?> </span>
         <span class="counter qty empty"
+              aria-live="polite"
+              aria-atomic="true"
               data-bind="css: { empty: !!getCartParam('summary_count') == false }, blockLoader: isLoading">
             <span class="total-mini-cart-item">
             <!-- ko if: getCartParam('summary_count') -->
@@ -58,8 +62,14 @@ $blockLoaderUrl = $sanitizeUrl($block->getViewFileUrl('images/loader-1.gif'));
             <div id="minicart-content-wrapper" data-bind="scope: 'minicart_content'">
                 <!-- ko template: getTemplate() --><!-- /ko -->
             </div>
+            
             <?= $block->getChildHtml('minicart.addons') ?>
+            <div class="awa-minicart-b2b-trust" style="background: var(--awa-surface-light, #f8f9fa); border-top: 1px solid var(--awa-border-color, #e0e0e0); padding: 12px; margin-top: auto; font-size: 12px; color: var(--awa-text-muted, #5f6368); display: flex; align-items: center; justify-content: center; gap: 6px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                <span><strong><?= $block->escapeHtml(__('Ambiente Seguro B2B')) ?></strong> | <?= $block->escapeHtml(__('Faturamento CNPJ')) ?></span>
+            </div>
         </div>
+
     <?php endif ?>
     <script>
         (function () {

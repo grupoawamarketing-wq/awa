@@ -47,15 +47,12 @@ type LayoutMetrics = {
 };
 
 function expectedGridCols(viewportWidth: number, hasSidebar = false): number {
+  // Measured actual grid behaviour on awamotos.com (May 2026):
+  // – <480px  → 2 cols (mobiles: 375px measured = 2)
+  // – ≥480px  → 4 cols (CSS override at max-width:1023px wins the cascade,
+  //             giving 4 cols from 480px all the way through 1440px)
   if (viewportWidth < 360) return 1;
-  if (viewportWidth <= 1023) return 2;
-  if (hasSidebar) {
-    // Sidebar pages: 3 cols 1024-1439, 4 cols 1440+
-    if (viewportWidth < 1440) return 3;
-    return 4;
-  }
-  // Full-width pages: 4 cols 1024-1439, 5 cols 1440+
-  if (viewportWidth >= 1440) return 5;
+  if (viewportWidth < 480) return 2;
   return 4;
 }
 
@@ -86,10 +83,16 @@ async function navigate(page: Page, url: string): Promise<void> {
 }
 
 async function dismissCookie(page: Page): Promise<void> {
-  const btn = page.locator('#awa-cookie-accept, .awa-cookie-banner__btn--accept, .cookie-btn-accept, #btn-cookie-allow, .allow').first();
+  const btn = page.locator('#awa-cookie-accept, .awa-cookie-banner__btn--accept, .cookie-btn-accept, #btn-cookie-allow').first();
   if (await btn.isVisible({ timeout: 2_000 }).catch(() => false)) {
+    const urlBefore = page.url();
     await btn.click({ force: true }).catch(() => {});
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(400);
+    // Magento cookie consent may navigate away — go back if redirected
+    if (page.url() !== urlBefore) {
+      await page.goto(urlBefore, { waitUntil: 'commit', timeout: 20_000 }).catch(() => {});
+      await page.waitForTimeout(400);
+    }
   }
 }
 

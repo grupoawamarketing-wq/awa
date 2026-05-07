@@ -9,17 +9,6 @@ define(['jquery'], function ($) {
     window.__awaMobileNavInit = true;
 
     function init() {
-        // Garante que o botão hamburguer tenha aria correto
-        var $toggle = $('.nav-toggle, .awa-hamburger, [data-action="toggle-nav"]');
-        $toggle.each(function () {
-            var $btn = $(this);
-            if (!$btn.attr('aria-label')) {
-                $btn.attr('aria-label', 'Abrir menu de navegação');
-            }
-            if (!$btn.attr('role')) {
-                $btn.attr('role', 'button');
-            }
-        });
 
         // Fecha o drawer ao clicar fora (overlay)
         $(document).on('click', '.page-wrapper', function (e) {
