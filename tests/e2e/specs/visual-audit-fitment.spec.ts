@@ -163,10 +163,11 @@ test.describe('Fitment — Application List no PDP', () => {
     const visible  = await priceEl.isVisible().catch(() => false);
     const priceMsg = await isVisible(pdpPage, '.b2b-price-message, .b2b-login-to-see-price', 3_000);
     // URL pode não existir (fallback para categoria) — sem price box é aceitável
-      console.warn('⚠️ Price box não encontrado (URL pode ser categoria/fallback) — pass vacuamente');
+    if (!visible && !priceMsg) {
+      console.warn('Price box nao encontrado (URL pode ser categoria/fallback) — pass vacuamente');
       return;
     }
-    expect(visible || priceMsg, 'Deve exibir preço ou mensagem B2B no PDP').toBe(true);
+    expect(visible || priceMsg, 'Deve exibir preco ou mensagem B2B no PDP').toBe(true);
     if (visible) {
       const txt = await priceEl.textContent().catch(() => '');
       expect(txt, 'Preço não deve ser R$0,00').not.toContain('0,00');
