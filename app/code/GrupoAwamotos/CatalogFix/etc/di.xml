@@ -160,11 +160,13 @@
 
     <!-- SRCH-002: instant.json store_id=0 references magento2_product_0 which does not
          exist in OpenSearch. Autocomplete requests without store_id default to 0 → 404 → 0 results.
-         This plugin copies real store_id=1 index names into the store_id=0 section after ensure(). -->
-    <type name="Mirasvit\SearchAutocomplete\InstantProvider\ConfigMaker">
+         Plugin on Magento\CatalogSearch\Model\Indexer\Fulltext::executeFull() runs AFTER
+         Mirasvit's FullReindexPlugin::aroundExecuteFull() which calls ConfigMaker::ensure().
+         ConfigMaker itself is not interceptable (interception.php → false). -->
+    <type name="Magento\CatalogSearch\Model\Indexer\Fulltext">
         <plugin name="grupoawamotos_catalogfix_instant_json_store_zero_fix"
                 type="GrupoAwamotos\CatalogFix\Plugin\Search\InstantJsonStoreZeroFixPlugin"
-                sortOrder="100"/>
+                sortOrder="999"/>
     </type>
 
     <!-- Fix: global.php metadata injects null for formIds (module-captcha defines it only

@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+
+    <!-- SRCH-002: Fix instant.json store_id=0 after admin saves search config.
+         Mirasvit's OnConfigChanged fires on these same events and calls
+         ConfigMaker::ensure(), which regenerates instant.json with invalid
+         store_id=0 index names. Our observer fires after with sortOrder=999. -->
+    <event name="admin_system_config_changed_section_searchautocomplete">
+        <observer name="grupoawamotos_catalogfix_fix_instant_json_config_autocomplete"
+                  instance="GrupoAwamotos\CatalogFix\Observer\FixInstantJsonAfterConfigSave"
+                  sortOrder="999"/>
+    </event>
+    <event name="admin_system_config_changed_section_search">
+        <observer name="grupoawamotos_catalogfix_fix_instant_json_config_search"
+                  instance="GrupoAwamotos\CatalogFix\Observer\FixInstantJsonAfterConfigSave"
+                  sortOrder="999"/>
+    </event>
+
+</config>
