@@ -74,6 +74,8 @@ class ForecastManagement implements ForecastInterface
 
     /**
      * Validate feature is enabled
+     *
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     private function validateEnabled(): void
     {

@@ -97,6 +97,8 @@ class CompanyService
 
     /**
      * Invite user to company
+     *
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function addUser(int $companyId, int $customerId, string $role = Company::ROLE_BUYER): CompanyUser
     {

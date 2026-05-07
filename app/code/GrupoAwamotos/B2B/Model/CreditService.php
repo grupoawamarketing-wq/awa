@@ -160,6 +160,8 @@ class CreditService
      * Charge credit (debit for an order)
      *
      * Uses atomic UPDATE with row-level lock to prevent race conditions.
+     *
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function charge(int $customerId, float $amount, int $orderId, string $reference = ''): void
     {

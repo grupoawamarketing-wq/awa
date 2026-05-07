@@ -68,6 +68,9 @@ class RfmAnalysisManagement implements RfmAnalysisInterface
 
     /**
      * @inheritdoc
+     *
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\AuthorizationException
      */
     public function getAtRiskCustomers(int $limit = 50): array
     {
@@ -78,6 +81,8 @@ class RfmAnalysisManagement implements RfmAnalysisInterface
 
     /**
      * Validate feature is enabled
+     *
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     private function validateEnabled(): void
     {
@@ -88,6 +93,8 @@ class RfmAnalysisManagement implements RfmAnalysisInterface
 
     /**
      * Validate customer is logged in
+     *
+     * @throws \Magento\Framework\Exception\AuthorizationException
      */
     private function validateLoggedIn(): void
     {

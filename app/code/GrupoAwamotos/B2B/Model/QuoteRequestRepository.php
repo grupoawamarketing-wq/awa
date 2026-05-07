@@ -111,6 +111,8 @@ class QuoteRequestRepository implements QuoteRequestRepositoryInterface
 
     /**
      * @inheritDoc
+     *
+     * @throws \Magento\Framework\Exception\CouldNotSaveException
      */
     public function save(QuoteRequestInterface $quoteRequest): QuoteRequestInterface
     {
@@ -127,6 +129,8 @@ class QuoteRequestRepository implements QuoteRequestRepositoryInterface
 
     /**
      * @inheritDoc
+     *
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function getById(int $requestId): QuoteRequestInterface
     {
@@ -179,6 +183,8 @@ class QuoteRequestRepository implements QuoteRequestRepositoryInterface
 
     /**
      * @inheritDoc
+     *
+     * @throws \Magento\Framework\Exception\CouldNotDeleteException
      */
     public function delete(QuoteRequestInterface $quoteRequest): bool
     {
