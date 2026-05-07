@@ -231,6 +231,7 @@ define(['jquery', 'domReady!'], function ($) {
             $cartFallback[0].style.setProperty('display', 'inline-flex', 'important');
             $cartFallback[0].style.setProperty('visibility', 'visible', 'important');
             $cartFallback[0].style.setProperty('opacity', '1', 'important');
+            $cartFallback[0].style.setProperty('pointer-events', 'auto', 'important');
         }
         if ($cartFallbackIcon.length) {
             $cartFallbackIcon[0].style.setProperty('visibility', 'visible', 'important');

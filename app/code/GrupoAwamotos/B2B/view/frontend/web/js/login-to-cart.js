@@ -95,7 +95,7 @@ define([
         // Hide pending banner
         var pendingBanner = document.getElementById('b2b-pending-banner');
         if (pendingBanner) {
-            pendingBanner.style.display = 'none';
+            pendingBanner.hidden = true;
         }
 
         // Hide login modal
@@ -481,7 +481,7 @@ define([
 
         // Show pending banner if in pending mode
         if (serverMode === 'pending' && pendingBanner) {
-            pendingBanner.style.display = '';
+            pendingBanner.hidden = false;
         }
 
         // Initial run - replace buttons (may be reverted by customer-data check)
