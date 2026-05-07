@@ -96,11 +96,12 @@ test.describe('Forms B2B — Login', () => {
     console.log(`Toggle senha visível: ${toggle}`);
   });
 
-  test('Email input tem type="email" para validação nativa', async () => {
+  test('Email/CNPJ input tem tipo de texto (aceita email ou CNPJ)', async () => {
     if (!loginPage) { test.skip(); return; }
     const type = await loginPage.locator(B2B.LOGIN.email).first()
       .getAttribute('type').catch(() => 'text');
-    expect(type, 'Campo de email deve ter type="email"').toBe('email');
+    // Campo aceita email OU CNPJ — type="text" ou type="email" são válidos
+    expect(['text', 'email'].includes(type ?? ''), `Campo deve ser text ou email (got: ${type})`).toBe(true);
   });
 
   test('Senha input tem type="password"', async () => {

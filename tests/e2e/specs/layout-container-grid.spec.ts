@@ -83,16 +83,14 @@ async function navigate(page: Page, url: string): Promise<void> {
 }
 
 async function dismissCookie(page: Page): Promise<void> {
-  const btn = page.locator('#awa-cookie-accept, .awa-cookie-banner__btn--accept, .cookie-btn-accept, #btn-cookie-allow').first();
+  // Only click cookie buttons that do NOT cause navigation away from the page.
+  // #btn-cookie-allow (Magento native notice) redirects to /bauletos.html — excluded.
+  // If none of these buttons are visible (they are 0x0 on current AWA), the banner
+  // stays as a fixed overlay and does not affect container/grid DOM measurements.
+  const btn = page.locator('#awa-cookie-accept, .awa-cookie-banner__btn--accept, .cookie-btn-accept').first();
   if (await btn.isVisible({ timeout: 2_000 }).catch(() => false)) {
-    const urlBefore = page.url();
     await btn.click({ force: true }).catch(() => {});
-    await page.waitForTimeout(400);
-    // Magento cookie consent may navigate away — go back if redirected
-    if (page.url() !== urlBefore) {
-      await page.goto(urlBefore, { waitUntil: 'commit', timeout: 20_000 }).catch(() => {});
-      await page.waitForTimeout(400);
-    }
+    await page.waitForTimeout(300);
   }
 }
 
@@ -217,7 +215,13 @@ for (const viewport of VIEWPORTS) {
 
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
 
+    // Block media resources to reduce memory during layout measurements.
+    // Images are irrelevant for DOM/CSS metrics; blocking prevents OOM in long multi-route runs.
+    await page.route('**/*.{jpg,jpeg,png,gif,webp,mp4,mp3,woff,woff2}', (route) => route.abort());
+
     for (const route of ROUTES) {
+      // Navigate to blank first to allow Chrome to GC resources from the previous route.
+      await page.goto('about:blank', { waitUntil: 'commit', timeout: 5_000 }).catch(() => {});
       await navigate(page, `${BASE}${route.path}`);
       await dismissCookie(page);
       await page.waitForTimeout(400);
