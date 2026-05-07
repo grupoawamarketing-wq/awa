@@ -54,6 +54,9 @@ test.describe('MCP Visual Ops - Automated Visual QA', () => {
       const screenshotPath = path.join(currentDir, screenshotName);
       const baselinePath = path.join(baselineDir, screenshotName);
 
+      await dismissCookieBanner(page);
+      await stabilizeVisualSnapshot(page);
+      await page.waitForTimeout(500); // allow stabilization to render
       await page.screenshot({ path: screenshotPath, fullPage: false, timeout: 15_000 });
 
       const baselineDiff = compareAgainstBaseline(screenshotPath, baselinePath, UPDATE_BASELINE);

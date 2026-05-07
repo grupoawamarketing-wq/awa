@@ -189,6 +189,25 @@ export async function stabilizeVisualSnapshot(page: Page): Promise<void> {
         });
       });
 
+      // --- 4b. Freeze Swiper instances (Ayo theme hero banner) ---
+      type SwiperInstance = {
+        autoplay?: { stop?: () => void; running?: boolean };
+        slideTo?: (index: number, speed: number, runCallbacks: boolean) => void;
+      };
+      type SwiperEl = HTMLElement & { swiper?: SwiperInstance };
+      document.querySelectorAll<SwiperEl>('.swiper, .swiper-container').forEach((el) => {
+        const sw = el.swiper;
+        if (sw) {
+          try { sw.autoplay?.stop?.(); } catch (_) {}
+          try { sw.slideTo?.(0, 0, false); } catch (_) {}
+        }
+        // DOM fallback: hide all slides except the first
+        const slides = Array.from(el.querySelectorAll<HTMLElement>('.swiper-slide:not(.swiper-slide-duplicate)'));
+        slides.forEach((slide, i) => {
+          if (i > 0) slide.style.setProperty('opacity', '0', 'important');
+        });
+      });
+
       // --- 5. Hide social proof dynamic counters ---
       const spSelectors = [
         '[class*="social-proof"]',
