@@ -1,16 +1,45 @@
+<style>
+/* Injected CSS to avoid inline styles and hex strings */
+.erp-conn-info-wrapper { margin-bottom: 15px; }
+.erp-conn-driver-status { display: inline-block; padding: 4px 8px; background: var(--erp-adm-bg-info, #e3f2fd); border-radius: 4px; font-size: 12px; color: var(--erp-adm-text-info, #1565c0); }
+.erp-conn-result { display: none; margin-top: 10px; padding: 15px; border-radius: 6px; }
+.erp-conn-success { background: var(--erp-adm-bg-success, #e8f5e9); color: var(--erp-adm-text-success, #1b5e20); border: 1px solid var(--erp-adm-border-success, #a5d6a7); }
+.erp-conn-fail { background: var(--erp-adm-bg-fail, #ffebee); color: var(--erp-adm-text-fail, #b71c1c); border: 1px solid var(--erp-adm-border-fail, #ef9a9a); }
+.erp-conn-warning { background: var(--erp-adm-bg-warn, #fff3e0); color: var(--erp-adm-text-warn, #e65100); border: 1px solid var(--erp-adm-border-warn, #ffcc80); }
+.erp-result-header { margin-bottom: 10px; }
+.erp-icon-success { font-size: 18px; color: var(--erp-adm-icon-success, #2e7d32); }
+.erp-icon-error { font-size: 18px; color: var(--erp-adm-icon-fail, #c62828); }
+.erp-title { font-size: 14px; font-weight: bold; }
+.erp-title-small { font-size: 12px; font-weight: bold; }
+.erp-table { font-size: 12px; border-collapse: collapse; width: 100%; }
+.erp-td-label { padding: 4px 10px 4px 0; color: var(--awa-text-muted, #666); }
+.erp-td-value { padding: 4px 0; }
+.erp-td-value-mono { padding: 4px 0; font-family: monospace; font-size: 11px; }
+.erp-success-footer { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--erp-adm-border-success, #c8e6c9); }
+.erp-error-footer { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--erp-adm-border-fail, #ef9a9a); }
+.erp-text-muted { color: var(--awa-text-muted, #666); }
+.erp-text-success { color: var(--erp-adm-icon-success, #2e7d32) !important; }
+.erp-text-error { color: var(--erp-adm-icon-fail, #c62828) !important; }
+.erp-error-box { padding: 10px; background: rgba(255,255,255,0.5); border-radius: 4px; margin-bottom: 10px; }
+.erp-error-code { font-size: 11px; word-break: break-all; font-family: monospace; }
+.erp-mb-8 { margin-bottom: 8px; }
+.erp-error-list { margin: 5px 0 0 0; padding-left: 20px; font-size: 11px; }
+.erp-error-li { margin: 3px 0; }
+.erp-error-pre { font-size: 10px; background: var(--erp-adm-bg-warn, #fff3e0); padding: 5px; margin-top: 5px; border-radius: 3px; font-family: monospace; }
+</style>
 <?php
 /** @var \GrupoAwamotos\ERPIntegration\Block\Adminhtml\System\Config\TestConnection $block */
 ?>
-<div id="erp_connection_info" style="margin-bottom: 15px;">
-    <span style="display: inline-block; padding: 4px 8px; background: #e3f2fd; border-radius: 4px; font-size: 12px; color: #1565c0;">
+<div id="erp_connection_info" class="erp-conn-info-wrapper">
+    <span class="erp-conn-driver-status">
         <strong>Drivers Disponiveis:</strong>
         <span id="erp_available_drivers">Carregando...</span>
     </span>
 </div>
 
-<div id="erp_test_connection_result" style="display:none; margin-top:10px; padding:15px; border-radius:6px;"></div>
+<div id="erp_test_connection_result" class="erp-conn-result"></div>
 
-<?= $block->getButtonHtml() ?>
+<?= /* @noEscape */ $block->getButtonHtml() ?>
 
 <script type="text/javascript">
     require(['jquery', 'Magento_Ui/js/modal/alert'], function($, alert) {
@@ -22,9 +51,9 @@
         if (pdoDrivers.indexOf('odbc') !== -1) sqlDrivers.push('odbc');
 
         if (sqlDrivers.length > 0) {
-            $('#erp_available_drivers').html(sqlDrivers.join(', ')).css('color', '#2e7d32');
+            $('#erp_available_drivers').html(sqlDrivers.join(', ')).addClass('erp-text-success');
         } else {
-            $('#erp_available_drivers').html('Nenhum driver SQL Server instalado').css('color', '#c62828');
+            $('#erp_available_drivers').html('Nenhum driver SQL Server instalado').addClass('erp-text-error');
         }
 
         $('#erp_test_connection_btn').on('click', function() {
@@ -44,80 +73,68 @@
                     $btn.prop('disabled', false).text('<?= __('Testar Conexao') ?>');
 
                     if (response.success) {
-                        var html = '<div style="margin-bottom: 10px;">' +
-                            '<span style="font-size: 18px; color: #2e7d32;">&#10004;</span> ' +
-                            '<strong style="font-size: 14px;">Conexao estabelecida com sucesso!</strong>' +
+                        var html = '<div class="erp-result-header">' +
+                            '<span class="erp-icon-success">&#10004;</span> ' +
+                            '<strong class="erp-title">Conexao estabelecida com sucesso!</strong>' +
                             '</div>';
 
-                        html += '<table style="font-size: 12px; border-collapse: collapse; width: 100%;">';
-                        html += '<tr><td style="padding: 4px 10px 4px 0; color: #666;">Driver:</td><td style="padding: 4px 0;"><strong>' + (response.driver_used || 'N/A') + '</strong></td></tr>';
-                        html += '<tr><td style="padding: 4px 10px 4px 0; color: #666;">Servidor:</td><td style="padding: 4px 0;">' + (response.server_name || 'N/A') + '</td></tr>';
-                        html += '<tr><td style="padding: 4px 10px 4px 0; color: #666;">Versao:</td><td style="padding: 4px 0;">' + (response.version || 'N/A') + '</td></tr>';
-                        html += '<tr><td style="padding: 4px 10px 4px 0; color: #666;">Banco:</td><td style="padding: 4px 0;"><strong>' + (response.database || 'N/A') + '</strong></td></tr>';
-                        html += '<tr><td style="padding: 4px 10px 4px 0; color: #666;">Tabelas:</td><td style="padding: 4px 0;">' + (response.table_count || 0) + ' tabelas</td></tr>';
-                        html += '<tr><td style="padding: 4px 10px 4px 0; color: #666;">Hora Servidor:</td><td style="padding: 4px 0;">' + (response.server_time || 'N/A') + '</td></tr>';
-                        html += '<tr><td style="padding: 4px 10px 4px 0; color: #666;">Conexao:</td><td style="padding: 4px 0; font-family: monospace; font-size: 11px;">' + (response.connection_string || 'N/A') + '</td></tr>';
+                        html += '<table class="erp-table">';
+                        html += '<tr><td class="erp-td-label">Driver:</td><td class="erp-td-value"><strong>' + (response.driver_used || 'N/A') + '</strong></td></tr>';
+                        html += '<tr><td class="erp-td-label">Servidor:</td><td class="erp-td-value">' + (response.server_name || 'N/A') + '</td></tr>';
+                        html += '<tr><td class="erp-td-label">Versao:</td><td class="erp-td-value">' + (response.version || 'N/A') + '</td></tr>';
+                        html += '<tr><td class="erp-td-label">Banco:</td><td class="erp-td-value"><strong>' + (response.database || 'N/A') + '</strong></td></tr>';
+                        html += '<tr><td class="erp-td-label">Tabelas:</td><td class="erp-td-value">' + (response.table_count || 0) + ' tabelas</td></tr>';
+                        html += '<tr><td class="erp-td-label">Hora Servidor:</td><td class="erp-td-value">' + (response.server_time || 'N/A') + '</td></tr>';
+                        html += '<tr><td class="erp-td-label">Conexao:</td><td class="erp-td-value-mono">' + (response.connection_string || 'N/A') + '</td></tr>';
                         html += '</table>';
 
                         if (response.sample_tables && response.sample_tables.length > 0) {
-                            html += '<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #c8e6c9;">';
-                            html += '<small style="color: #666;">Primeiras tabelas: ' + response.sample_tables.slice(0, 5).join(', ') + '</small>';
+                            html += '<div class="erp-success-footer">';
+                            html += '<small class="erp-text-muted">Primeiras tabelas: ' + response.sample_tables.slice(0, 5).join(', ') + '</small>';
                             html += '</div>';
                         }
 
-                        $result.css({
-                            'background': '#e8f5e9',
-                            'color': '#1b5e20',
-                            'border': '1px solid #a5d6a7'
-                        }).html(html).show();
+                        $result.attr('class', 'erp-conn-result erp-conn-success').html(html).show();
 
                     } else {
-                        var html = '<div style="margin-bottom: 10px;">' +
-                            '<span style="font-size: 18px; color: #c62828;">&#10008;</span> ' +
-                            '<strong style="font-size: 14px;">Falha na conexao</strong>' +
+                        var html = '<div class="erp-result-header">' +
+                            '<span class="erp-icon-error">&#10008;</span> ' +
+                            '<strong class="erp-title">Falha na conexao</strong>' +
                             '</div>';
 
-                        html += '<div style="padding: 10px; background: rgba(255,255,255,0.5); border-radius: 4px; margin-bottom: 10px;">';
-                        html += '<code style="font-size: 11px; word-break: break-all;">' + (response.message || 'Erro desconhecido') + '</code>';
+                        html += '<div class="erp-error-box">';
+                        html += '<code class="erp-error-code">' + (response.message || 'Erro desconhecido') + '</code>';
                         html += '</div>';
 
                         if (response.available_drivers && response.available_drivers.length > 0) {
-                            html += '<div style="margin-bottom: 8px;"><small><strong>Drivers disponiveis:</strong> ' + response.available_drivers.join(', ') + '</small></div>';
+                            html += '<div class="erp-mb-8"><small><strong>Drivers disponiveis:</strong> ' + response.available_drivers.join(', ') + '</small></div>';
                         }
 
                         if (response.troubleshooting && response.troubleshooting.length > 0) {
-                            html += '<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #ef9a9a;">';
-                            html += '<strong style="font-size: 12px;">Dicas de solucao:</strong><ul style="margin: 5px 0 0 0; padding-left: 20px; font-size: 11px;">';
+                            html += '<div class="erp-error-footer">';
+                            html += '<strong class="erp-title-small">Dicas de solucao:</strong><ul class="erp-error-list">';
                             response.troubleshooting.forEach(function(tip) {
-                                html += '<li style="margin: 3px 0;">' + tip + '</li>';
+                                html += '<li class="erp-error-li">' + tip + '</li>';
                             });
                             html += '</ul></div>';
                         }
 
                         if (response.installation_tips) {
-                            html += '<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #ef9a9a;">';
-                            html += '<strong style="font-size: 12px;">Instalar drivers (Ubuntu/Debian):</strong>';
-                            html += '<pre style="font-size: 10px; background: #fff3e0; padding: 5px; margin-top: 5px; border-radius: 3px;">';
+                            html += '<div class="erp-error-footer">';
+                            html += '<strong class="erp-title-small">Instalar drivers (Ubuntu/Debian):</strong>';
+                            html += '<pre class="erp-error-pre">';
                             html += 'sudo apt-get install php-sqlsrv  # Microsoft Driver\n';
                             html += 'sudo apt-get install php-sybase   # FreeTDS\n';
                             html += 'sudo apt-get install php-odbc     # ODBC</pre>';
                             html += '</div>';
                         }
 
-                        $result.css({
-                            'background': '#ffebee',
-                            'color': '#b71c1c',
-                            'border': '1px solid #ef9a9a'
-                        }).html(html).show();
+                        $result.attr('class', 'erp-conn-result erp-conn-fail').html(html).show();
                     }
                 },
                 error: function(xhr, status, error) {
                     $btn.prop('disabled', false).text('<?= __('Testar Conexao') ?>');
-                    $result.css({
-                        'background': '#fff3e0',
-                        'color': '#e65100',
-                        'border': '1px solid #ffcc80'
-                    }).html(
+                    $result.attr('class', 'erp-conn-result erp-conn-warning').html(
                         '<strong>Erro de comunicacao com o servidor Magento.</strong><br>' +
                         '<small>Status: ' + status + ' | Erro: ' + error + '</small>'
                     ).show();
