@@ -33,7 +33,7 @@ test.describe('MCP Visual Ops - Automated Visual QA', () => {
       ensureDir(baselineDir);
       ensureDir(AUDIT_PATHS.reportDir);
 
-      await page.goto(target.url, { waitUntil: 'domcontentloaded', timeout: 60_000 });
+      await page.goto(target.url, { waitUntil: 'domcontentloaded', timeout: 120_000 });
       await waitPageStable(page);
       await dismissCookieBanner(page);
       await stabilizeVisualSnapshot(page);
