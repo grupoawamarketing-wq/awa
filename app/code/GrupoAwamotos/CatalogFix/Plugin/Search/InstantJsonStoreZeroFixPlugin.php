@@ -4,89 +4,40 @@ declare(strict_types=1);
 
 namespace GrupoAwamotos\CatalogFix\Plugin\Search;
 
-use Magento\Framework\App\Filesystem\DirectoryList;
-use Magento\Framework\Filesystem;
-use Magento\Framework\Serialize\Serializer\Json;
-use Mirasvit\SearchAutocomplete\InstantProvider\ConfigMaker;
+use GrupoAwamotos\CatalogFix\Model\InstantJsonFixer;
+use Magento\CatalogSearch\Model\Indexer\Fulltext;
 
 /**
- * Fix: instant.json store_id=0 uses non-existent index names.
+ * Fix: instant.json store_id=0 fallback uses non-existent OpenSearch index names.
  *
- * Mirasvit generates instant.json with store_id=0 entries (e.g. magento2_product_0)
- * that are never created by the indexer. When a request omits the store_id parameter,
- * ConfigProvider defaults to 0 and the OpenSearch query fails with 404 (caught silently
- * resulting in 0 results).
+ * Mirasvit's FullReindexPlugin::aroundExecuteFull() calls ConfigMaker::ensure()
+ * which regenerates instant.json. The generated store_id=0 elasticsearch7 section
+ * maps to magento2_product_0 etc. — indices that are never created.
  *
- * After ensure() writes instant.json, this plugin copies the real store_id=1
- * elasticsearch7 index names into the store_id=0 section so that the fallback
- * always hits valid indices.
+ * By plugging afterExecuteFull on Magento\CatalogSearch\Model\Indexer\Fulltext
+ * (which IS interceptable), we run AFTER FullReindexPlugin's around plugin has
+ * already called ensure() and written instant.json.
  */
 class InstantJsonStoreZeroFixPlugin
 {
-    private Filesystem $filesystem;
+    private InstantJsonFixer $fixer;
 
-    private Json $serializer;
-
-    public function __construct(Filesystem $filesystem, Json $serializer)
+    public function __construct(InstantJsonFixer $fixer)
     {
-        $this->filesystem = $filesystem;
-        $this->serializer = $serializer;
+        $this->fixer = $fixer;
     }
 
-    public function afterEnsure(ConfigMaker $subject): void
+    /**
+     * After the catalogsearch_fulltext reindex completes (which triggers
+     * Mirasvit's ConfigMaker::ensure()), fix instant.json store_id=0 indices.
+     *
+     * @param Fulltext $subject
+     * @param mixed    $result
+     * @return mixed
+     */
+    public function afterExecuteFull(Fulltext $subject, $result)
     {
-        $dir  = $this->filesystem->getDirectoryWrite(DirectoryList::CONFIG);
-        $path = $dir->getRelativePath('instant.json');
-
-        if (!$dir->isExist($path)) {
-            return;
-        }
-
-        $raw    = $dir->readFile($path);
-        $config = $this->serializer->unserialize($raw);
-
-        if (!is_array($config)) {
-            return;
-        }
-
-        // Find the first real store's elasticsearch7 section (store_id >= 1)
-        $sourceEngine = null;
-        for ($storeId = 1; $storeId <= 10; $storeId++) {
-            $key = "{$storeId}/elasticsearch7";
-            if (isset($config[$key]) && is_array($config[$key])) {
-                $sourceEngine = $config[$key];
-                break;
-            }
-        }
-
-        if ($sourceEngine === null || !isset($config['0/elasticsearch7'])) {
-            return;
-        }
-
-        $indexKeys = [
-            'magento_catalog_product',
-            'magento_catalog_category',
-            'magento_cms_page',
-            'mst_misspell_index',
-        ];
-
-        $changed = false;
-        foreach ($indexKeys as $indexKey) {
-            if (isset($sourceEngine[$indexKey])
-                && isset($config['0/elasticsearch7'][$indexKey])
-                && $config['0/elasticsearch7'][$indexKey] !== $sourceEngine[$indexKey]
-            ) {
-                $config['0/elasticsearch7'][$indexKey] = $sourceEngine[$indexKey];
-                $changed = true;
-            }
-        }
-
-        if (!$changed) {
-            return;
-        }
-
-        $tmp = $path . '.tmp.' . uniqid('', true);
-        $dir->writeFile($tmp, $this->serializer->serialize($config));
-        $dir->renameFile($tmp, $path);
+        $this->fixer->fix();
+        return $result;
     }
 }
