@@ -32,20 +32,24 @@ class FallbackRebuild
             return;
         }
 
-        $phpBin = PHP_BINARY ?: '/usr/bin/php';
-        $process = new Process([$phpBin, $script, '--truncate']);
-        $process->setTimeout(300);
-        $process->run();
+        try {
+            $phpBin = PHP_BINARY ?: '/usr/bin/php';
+            $process = new Process([$phpBin, $script, '--truncate']);
+            $process->setTimeout(300);
+            $process->run();
 
-        $outputStr = trim($process->getOutput() . $process->getErrorOutput());
-        $exitCode = $process->getExitCode();
+            $outputStr = trim($process->getOutput() . $process->getErrorOutput());
+            $exitCode = $process->getExitCode();
 
-        if ($exitCode !== 0) {
-            $this->logger->error(
-                '[Fitment] Fallback rebuild falhou (exit ' . $exitCode . '): ' . $outputStr
-            );
-        } else {
-            $this->logger->info('[Fitment] Fallback rebuild OK: ' . $outputStr);
+            if ($exitCode !== 0) {
+                $this->logger->error(
+                    '[Fitment] Fallback rebuild falhou (exit ' . $exitCode . '): ' . $outputStr
+                );
+            } else {
+                $this->logger->info('[Fitment] Fallback rebuild OK: ' . $outputStr);
+            }
+        } catch (\Throwable $e) {
+            $this->logger->error('[Fitment] FallbackRebuild exception: ' . $e->getMessage(), ['exception' => $e]);
         }
     }
 }

@@ -40,12 +40,16 @@ class RestartConsumers
 
         $this->logger->notice('[RestartConsumers] Down consumers: ' . implode(', ', $down));
 
-        // Run watchdog script in background — it checks each consumer individually with locking
-        $watchdogLog = escapeshellarg($base . '/var/log/consumer_watchdog.log');
-        // phpcs:ignore Magento2.Functions.DiscouragedFunction
-        exec('bash ' . escapeshellarg($script) . " >> {$watchdogLog} 2>&1 &"); // nosemgrep: php.lang.security.exec-use.exec-use
+        try {
+            // Run watchdog script in background — it checks each consumer individually with locking
+            $watchdogLog = escapeshellarg($base . '/var/log/consumer_watchdog.log');
+            // phpcs:ignore Magento2.Functions.DiscouragedFunction
+            exec('bash ' . escapeshellarg($script) . " >> {$watchdogLog} 2>&1 &"); // nosemgrep: php.lang.security.exec-use.exec-use
 
-        $this->logger->info('[RestartConsumers] Triggered ensure_consumers.sh');
+            $this->logger->info('[RestartConsumers] Triggered ensure_consumers.sh');
+        } catch (\Throwable $e) {
+            $this->logger->error('[RestartConsumers] Failed to trigger script: ' . $e->getMessage(), ['exception' => $e]);
+        }
     }
 
     /** @return string[] Names of consumers whose process is not found */

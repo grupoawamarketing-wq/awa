@@ -34,20 +34,24 @@ class FallbackDelta
             return;
         }
 
-        $phpBin = PHP_BINARY ?: '/usr/bin/php';
-        $process = new Process([$phpBin, $script]);
-        $process->setTimeout(120);
-        $process->run();
+        try {
+            $phpBin = PHP_BINARY ?: '/usr/bin/php';
+            $process = new Process([$phpBin, $script]);
+            $process->setTimeout(120);
+            $process->run();
 
-        $outputStr = trim($process->getOutput() . $process->getErrorOutput());
-        $exitCode = $process->getExitCode();
+            $outputStr = trim($process->getOutput() . $process->getErrorOutput());
+            $exitCode = $process->getExitCode();
 
-        if ($exitCode !== 0) {
-            $this->logger->error(
-                '[Fitment] Fallback delta falhou (exit ' . $exitCode . '): ' . $outputStr
-            );
-        } else {
-            $this->logger->info('[Fitment] Fallback delta OK: ' . $outputStr);
+            if ($exitCode !== 0) {
+                $this->logger->error(
+                    '[Fitment] Fallback delta falhou (exit ' . $exitCode . '): ' . $outputStr
+                );
+            } else {
+                $this->logger->info('[Fitment] Fallback delta OK: ' . $outputStr);
+            }
+        } catch (\Throwable $e) {
+            $this->logger->error('[Fitment] FallbackDelta exception: ' . $e->getMessage(), ['exception' => $e]);
         }
     }
 }
