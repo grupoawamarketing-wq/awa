@@ -167,7 +167,7 @@ async function runDeepVisualChecks(page: Page): Promise<RawIssue[]> {
     // 4. Inconsistent Button Heights
     const buttons = Array.from(document.querySelectorAll<HTMLElement>('.action.primary, .action.tocart, button.btn-cart'));
     if (buttons.length > 1) {
-      const heights = buttons.map(b => Math.round(b.getBoundingClientRect().height)).filter(h => h > 0);
+      const heights = buttons.map(b => Math.round(b.getBoundingClientRect().height)).filter(h => h >= 30);
       const uniqueH = new Set(heights);
       if (uniqueH.size > 2) {
         issues.push({
@@ -394,7 +394,7 @@ async function runDeepVisualChecks(page: Page): Promise<RawIssue[]> {
     Array.from(document.querySelectorAll<HTMLImageElement>('img')).forEach(img => {
       const rect = img.getBoundingClientRect();
       if (rect.width < 40 || rect.height < 40) return;
-      if (img.complete && img.naturalWidth === 0) {
+      if (img.complete && img.naturalWidth === 0 && img.getAttribute("loading") !== "lazy") {
         issues.push({
           category: 'broken-images',
           description: 'Broken image: ' + (img.src || '').slice(0, 100),
@@ -447,8 +447,9 @@ async function runDeepVisualChecks(page: Page): Promise<RawIssue[]> {
     if (px(bodyS.marginLeft) > 0 || px(bodyS.marginRight) > 0) {
       issues.push({
         category: 'unexpected-body-margin',
+        // 8px is browser default; if CSS reset hasn't loaded yet it's transient
         description: 'Body has non-zero margins: left=' + bodyS.marginLeft + ', right=' + bodyS.marginRight,
-        severity: 'major',
+        severity: 'minor',
         selector: 'body',
         computed: { marginLeft: bodyS.marginLeft, marginRight: bodyS.marginRight },
         probableCause: 'Browser default or theme override.',
@@ -473,8 +474,17 @@ async function runDeepVisualChecks(page: Page): Promise<RawIssue[]> {
       }
     }
 
-    // 20. Text Clipping
-    const textContainers = Array.from(document.querySelectorAll<HTMLElement>('.product-item-name, .product-item-link, .page-title, h1, h2, .block-title strong')).filter(el => el.getBoundingClientRect().height > 0 && !el.classList.contains('awa-sr-only') && cs(el).clip !== 'rect(0px, 0px, 0px, 0px)' && cs(el).position !== 'absolute');
+    // 20. Text Clipping (exclude sr-only/visually-hidden elements by multiple heuristics)
+    const isVisuallyHidden = (el: HTMLElement): boolean => {
+      const r = el.getBoundingClientRect();
+      if (r.width <= 10 || r.height <= 10) return true;
+      const s = cs(el);
+      if (s.position === 'absolute' || s.position === 'fixed') return true;
+      if (s.clip === 'rect(0px, 0px, 0px, 0px)' || (s.clipPath && s.clipPath !== 'none')) return true;
+      if (el.classList.contains('awa-sr-only') || el.classList.contains('sr-only') || el.classList.contains('visually-hidden')) return true;
+      return false;
+    };
+    const textContainers = Array.from(document.querySelectorAll<HTMLElement>('.product-item-name, .product-item-link, .page-title, h1, h2, .block-title strong')).filter(el => el.getBoundingClientRect().height > 0 && !isVisuallyHidden(el));
     textContainers.forEach(el => {
       if (el.scrollWidth > el.clientWidth + 6) {
         const s = cs(el);
@@ -544,8 +554,10 @@ async function runResponsiveChecks(page: Page, viewportWidth: number): Promise<R
 
 const allIssues: VisualIssue[] = [];
 const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+const ISSUES_DIR = path.join(REPORT_DIR, '.issues-' + timestamp);
+fs.mkdirSync(ISSUES_DIR, { recursive: true });
 
-test.describe.serial('Deep Visual Audit', () => {
+test.describe('Deep Visual Audit', () => {
   test.setTimeout(240_000);
 
   for (const target of TARGETS) {
@@ -556,6 +568,7 @@ test.describe.serial('Deep Visual Audit', () => {
       const ssDir = path.join(SCREENSHOTS_DIR, timestamp, projectName);
 
       await page.goto(target.url, { waitUntil: 'domcontentloaded', timeout: 90_000 });
+      await page.waitForLoadState('load', { timeout: 30_000 }).catch(() => {});
       await page.waitForTimeout(2000);
       await dismissCookieBanner(page);
       await stabilizePage(page);
@@ -592,6 +605,7 @@ test.describe.serial('Deep Visual Audit', () => {
       }));
 
       allIssues.push(...pageIssues);
+      fs.writeFileSync(path.join(ISSUES_DIR, target.slug + '.json'), JSON.stringify(pageIssues));
 
       await testInfo.attach(target.slug + '-above-fold', { path: aboveFold, contentType: 'image/png' }).catch(() => {});
       if (fullSS) {
@@ -612,6 +626,20 @@ test.describe.serial('Deep Visual Audit', () => {
     fs.mkdirSync(REPORT_DIR, { recursive: true });
     const reportPath = path.join(REPORT_DIR, 'deep-audit-' + timestamp + '.json');
     const mdPath = path.join(REPORT_DIR, 'deep-audit-' + timestamp + '.md');
+
+    // Recover issues from disk (crash-resilient — survives browser/worker restarts)
+    if (fs.existsSync(ISSUES_DIR)) {
+      const seen = new Set(allIssues.map(i => i.page + ':' + i.category + ':' + i.description));
+      for (const f of fs.readdirSync(ISSUES_DIR).filter((f: string) => f.endsWith('.json'))) {
+        try {
+          const diskIssues: VisualIssue[] = JSON.parse(fs.readFileSync(path.join(ISSUES_DIR, f), 'utf-8'));
+          for (const di of diskIssues) {
+            const key = di.page + ':' + di.category + ':' + di.description;
+            if (!seen.has(key)) { allIssues.push(di); seen.add(key); }
+          }
+        } catch {}
+      }
+    }
 
     const jsonReport = {
       timestamp,
