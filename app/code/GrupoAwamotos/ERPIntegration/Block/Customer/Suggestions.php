@@ -307,9 +307,12 @@ class Suggestions extends Template
             'F' => 'Faturado',
             'E' => 'Entregue',
             'V' => 'Em Separação',
+            'S' => 'Saiu p/ Entrega',
+            'W' => 'Aguardando',
             'A' => 'Aberto',
             'P' => 'Pendente',
             'L' => 'Liberado',
+            'B' => 'Bloqueado',
             'C' => 'Cancelado',
             'X' => 'Excluído',
             default => $status,
@@ -323,8 +326,9 @@ class Suggestions extends Template
     {
         return match ($status) {
             'F', 'E' => 'status-success',
-            'A', 'V', 'L' => 'status-info',
-            'P' => 'status-warning',
+            'V', 'S', 'L' => 'status-info',
+            'A', 'W' => 'status-warning',
+            'P', 'B' => 'status-warning',
             'C', 'X' => 'status-error',
             default => '',
         };
