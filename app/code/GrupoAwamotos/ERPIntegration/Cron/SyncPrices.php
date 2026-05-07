@@ -30,7 +30,11 @@ class SyncPrices
             return;
         }
 
-        $result = $this->priceSync->syncAll();
-        $this->logger->info('[ERP Cron] Price sync finished.', $result);
+        try {
+            $result = $this->priceSync->syncAll();
+            $this->logger->info('[ERP Cron] Price sync finished.', $result);
+        } catch (\Throwable $e) {
+            $this->logger->error('[ERP Cron] SyncPrices failed: ' . $e->getMessage(), ['exception' => $e]);
+        }
     }
 }

@@ -30,9 +30,13 @@ class SyncStock
             return;
         }
 
-        $result = $this->stockSync->syncAll();
-        if (!empty($result['synced']) || !empty($result['errors'])) {
-            $this->logger->info('[ERP Cron] Stock sync finished.', $result);
+        try {
+            $result = $this->stockSync->syncAll();
+            if (!empty($result['synced']) || !empty($result['errors'])) {
+                $this->logger->info('[ERP Cron] Stock sync finished.', $result);
+            }
+        } catch (\Throwable $e) {
+            $this->logger->error('[ERP Cron] SyncStock failed: ' . $e->getMessage(), ['exception' => $e]);
         }
     }
 }

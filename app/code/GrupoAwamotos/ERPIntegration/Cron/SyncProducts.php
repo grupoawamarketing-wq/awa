@@ -30,7 +30,11 @@ class SyncProducts
             return;
         }
 
-        $result = $this->productSync->syncDelta();
-        $this->logger->info('[ERP Cron] Product sync finished.', $result);
+        try {
+            $result = $this->productSync->syncDelta();
+            $this->logger->info('[ERP Cron] Product sync finished.', $result);
+        } catch (\Throwable $e) {
+            $this->logger->error('[ERP Cron] SyncProducts failed: ' . $e->getMessage(), ['exception' => $e]);
+        }
     }
 }

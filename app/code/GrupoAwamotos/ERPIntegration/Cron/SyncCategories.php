@@ -30,7 +30,11 @@ class SyncCategories
             return;
         }
 
-        $result = $this->categorySync->syncAll();
-        $this->logger->info('[ERP Cron] Category sync finished.', $result);
+        try {
+            $result = $this->categorySync->syncAll();
+            $this->logger->info('[ERP Cron] Category sync finished.', $result);
+        } catch (\Throwable $e) {
+            $this->logger->error('[ERP Cron] SyncCategories failed: ' . $e->getMessage(), ['exception' => $e]);
+        }
     }
 }
