@@ -57,7 +57,7 @@ export const DEFAULT_TARGETS: VisualTarget[] = [
   // Cart
   { slug: 'cart', url: 'https://awamotos.com/checkout/cart/', pageLabel: 'Cart' },
   // B2B
-  { slug: 'b2b-landing', url: 'https://awamotos.com/b2b', pageLabel: 'B2B Landing' },
+  { slug: 'b2b-landing', url: 'https://awamotos.com/seja-cliente-b2b', pageLabel: 'B2B Landing' },
 ];
 
 /**
