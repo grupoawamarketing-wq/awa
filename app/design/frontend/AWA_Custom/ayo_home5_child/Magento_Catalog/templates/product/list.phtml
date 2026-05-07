@@ -4,9 +4,7 @@
  * See COPYING.txt for license details.
  */
 use Magento\Framework\App\Action\Action;
-
 // @codingStandardsIgnoreFile
-
 ?>
 <?php
 /**
@@ -66,14 +64,12 @@ if ($_b2bActive) {
     $showDescription = false;
     $templateType = \Magento\Catalog\Block\Product\ReviewRendererInterface::SHORT_VIEW;
     $col_grid = '';
-
     if ($block->getMode() == 'list') {
         $viewMode = 'list';
         $image = 'category_page_list';
         $showDescription = true;
         $templateType = \Magento\Catalog\Block\Product\ReviewRendererInterface::FULL_VIEW;
     }
-
     /**
      * Position for actions regarding image size changing in vde if needed
      */
@@ -90,7 +86,6 @@ if ($_b2bActive) {
 				} catch (\Throwable $e) {
 					$category = null;
 				}
-
 				if ($category) {
 					echo '<h2 class="hidden">' . $block->escapeHtml($category->getName()) . '</h2>';
 				}
@@ -101,7 +96,6 @@ if ($_b2bActive) {
 		</div>
 		<div class="clr"></div>
 	</div>
-
     <div class="wrapper <?php echo $block->escapeHtmlAttr($viewMode); ?> products-<?php echo $block->escapeHtmlAttr($viewMode); ?>">
         <?php $iterator = 1; ?>
 		<?php if ($block->getMode() == 'grid') { ?>
@@ -114,18 +108,15 @@ if ($_b2bActive) {
 	                    $productImageSm = $block->getImage($_product, 'category_page_grid_sm');
 	                    $productImageMd = $block->getImage($_product, 'category_page_list');
 	                    $productImageThumb = $block->getImage($_product, 'category_page_grid-1');
-
 	                    // Build responsive srcset and sizes
 	                    $srcset = $block->escapeUrl($productImageSm->getImageUrl()) . ' 500w, '
 	                            . $block->escapeUrl($productImageMd->getImageUrl()) . ' 600w, '
 	                            . $block->escapeUrl($productImage->getImageUrl()) . ' 1000w';
 	                    $sizes = '(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw';
 	                    $imgOnError = "this.onerror=null;this.removeAttribute('srcset');this.src=this.src.replace(/\\/cache\\/[^\\/]+\\//,'/');";
-
 	                    // Image HTML Processing
 	                    $mainImgHtml = $productImage->toHtml();
 	                    $mainImgHtml = str_replace('<img ', '<img srcset="' . $srcset . '" sizes="' . $sizes . '" onerror="' . $block->escapeHtmlAttr($imgOnError) . '" ', $mainImgHtml);
-
 	                    // Performance: eager load first 4
 	                    if ($iterator <= 4) {
 	                        $mainImgHtml = str_replace('loading="lazy"', 'loading="eager"', $mainImgHtml);
@@ -133,7 +124,6 @@ if ($_b2bActive) {
 	                            $mainImgHtml = str_replace('decoding="async"', 'decoding="async" fetchpriority="high"', $mainImgHtml);
 	                        }
 	                    }
-
 	                    $productThumbHtml = $productImageThumb->toHtml();
 	                    $productThumbHtml = str_replace('<img ', '<img onerror="' . $block->escapeHtmlAttr($imgOnError) . '" loading="lazy" ', $productThumbHtml);
 	                    ?>
@@ -190,7 +180,6 @@ if ($_b2bActive) {
                 </span>
             </div>
         <?php endif; ?>
-
 						<div class="product-rating">
 							<?php echo $block->getReviewsSummaryHtml($_product, $templateType, true); ?>
 						</div>
@@ -231,7 +220,6 @@ if ($_b2bActive) {
                 </li>
             <?php $iterator++; endforeach; ?>
         </ul>
-
 		<?php }else{ ?>
 		<ul class="product-list" role="list">
 			<?php foreach ($_productCollection as $_product): ?>
@@ -283,11 +271,9 @@ if ($_b2bActive) {
 							<span class="awa-b2b-sku__label"><?php echo $block->escapeHtml(__('Cod:')); ?></span>
 							<span class="awa-b2b-sku__value"><?php echo $block->escapeHtml($_product->getSku()); ?></span>
 						</div>
-
 						<div class="product-rating">
 							<?php echo $block->getReviewsSummaryHtml($_product, $templateType, true); ?>
 						</div>
-
 						<div class="info-price" data-product-id="<?php echo $block->escapeHtmlAttr($_product->getId()); ?>">
 						<?php /* @noEscape */ echo $this->helper('Rokanthemes\Themeoption\Helper\Data')->getPriceDisplayCustom($block->getProductPrice($_product)); ?>
 						</div>
@@ -310,19 +296,16 @@ if ($_b2bActive) {
 										<input type="hidden" name="product" value="<?php echo $block->escapeHtmlAttr($postParams['data']['product']); ?>">
 										<input type="hidden" name="<?php echo $block->escapeHtmlAttr(Action::PARAM_NAME_URL_ENCODED); ?>" value="<?php echo $block->escapeHtmlAttr($postParams['data'][Action::PARAM_NAME_URL_ENCODED]); ?>">
 										<?php echo $block->getBlockHtml('formkey')?>
-
 										<?php /* Card de catálogo: mantém qty padrão no form sem exibir stepper visual */ ?>
 										<input type="hidden"
 										name="qty"
 										id="list_qty_<?php echo $_product->getId(); ?>"
 										value="1"
 										data-awa-role="qty-input">
-
 										<button type="submit"
 												title="<?php echo $block->escapeHtml(__('Add to Cart')); ?>"
 												aria-label="<?php echo $block->escapeHtml(__('Adicionar %1 ao Carrinho', $_product->getName())); ?>"
 												class="btn-add-to-cart action tocart addcart-link b2b-primary-btn">
-
 											 <span><?php echo $block->escapeHtml(__('Add to Cart')); ?></span>
 										</button>
 									</form>
@@ -356,6 +339,18 @@ if ($_b2bActive) {
         {
             "[data-role=tocart-form]": {
                 "catalogAddToCart": {}
+            }
+        }
+        </script>
+    <?php endif; ?>
+    <?php if ($_b2bActive && $b2bCanAddToCart): ?>
+        <script type="text/x-magento-init">
+        {
+            "*": {
+                "js/awa-b2b-plp-qty": {
+                    "minQty": 1,
+                    "maxQty": 999
+                }
             }
         }
         </script>

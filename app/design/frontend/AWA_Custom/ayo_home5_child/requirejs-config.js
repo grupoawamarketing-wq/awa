@@ -43,6 +43,8 @@ var config = {
         'awa-footer-returns-hotfix': 'js/awa-footer-returns-hotfix',
         // Runtime fix: propagate image alt text to icon/image-only links.
         'awa-link-a11y-hotfix': 'js/awa-link-a11y-hotfix',
+        // B2B PLP qty stepper: converts hidden qty to visible +/- stepper for B2B customers
+        'awa-b2b-plp-qty': 'js/awa-b2b-plp-qty',
         'awa-nav-cls-fix-reset': 'js/awa-nav-cls-fix-reset',
         'awa-vertical-menu-bootstrap': 'js/awa-vertical-menu-bootstrap',
         'awa-vertical-menu-toggle-hotfix': 'js/awa-vertical-menu-toggle-hotfix',
