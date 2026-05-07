@@ -9,11 +9,12 @@ use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Controller\ResultInterface;
+use Magento\Framework\App\Action\HttpGetActionInterface;
 
 /**
  * Admin POST endpoint: validates Meta API access and returns JSON with capabilities.
  */
-class ValidateAccess extends Action
+class ValidateAccess extends Action implements HttpGetActionInterface
 {
     public const ADMIN_RESOURCE = 'GrupoAwamotos_MarketingIntelligence::config';
 

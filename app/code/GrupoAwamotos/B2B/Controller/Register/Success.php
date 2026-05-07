@@ -6,8 +6,9 @@ namespace GrupoAwamotos\B2B\Controller\Register;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\View\Result\PageFactory;
+use Magento\Framework\App\Action\HttpGetActionInterface;
 
-class Success extends Action
+class Success extends Action implements HttpGetActionInterface
 {
     private PageFactory $resultPageFactory;
 

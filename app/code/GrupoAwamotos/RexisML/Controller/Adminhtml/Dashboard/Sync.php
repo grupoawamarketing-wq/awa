@@ -12,8 +12,9 @@ use GrupoAwamotos\RexisML\Model\DataPipeline\RfmCalculator;
 use GrupoAwamotos\RexisML\Model\DataPipeline\ChurnDetector;
 use GrupoAwamotos\RexisML\Model\DataPipeline\CrossSellGenerator;
 use GrupoAwamotos\RexisML\Model\DataPipeline\CrossSellRecommender;
+use Magento\Framework\App\Action\HttpGetActionInterface;
 
-class Sync extends Action
+class Sync extends Action implements HttpGetActionInterface
 {
     const ADMIN_RESOURCE = 'GrupoAwamotos_RexisML::dashboard';
 

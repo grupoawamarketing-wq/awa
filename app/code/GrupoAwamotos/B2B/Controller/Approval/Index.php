@@ -7,8 +7,9 @@ namespace GrupoAwamotos\B2B\Controller\Approval;
 use Magento\Customer\Controller\AbstractAccount;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\View\Result\PageFactory;
+use Magento\Framework\App\Action\HttpGetActionInterface;
 
-class Index extends AbstractAccount
+class Index extends AbstractAccount implements HttpGetActionInterface
 {
     private PageFactory $resultPageFactory;
 

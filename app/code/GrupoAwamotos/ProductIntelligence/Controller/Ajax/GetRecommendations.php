@@ -19,8 +19,9 @@ use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Framework\Pricing\Helper\Data as PricingHelper;
 use Magento\Catalog\Helper\Image as ImageHelper;
 use Psr\Log\LoggerInterface;
+use Magento\Framework\App\Action\HttpGetActionInterface;
 
-class GetRecommendations extends Action
+class GetRecommendations extends Action implements HttpGetActionInterface
 {
     protected $resultJsonFactory;
     protected $customerSession;

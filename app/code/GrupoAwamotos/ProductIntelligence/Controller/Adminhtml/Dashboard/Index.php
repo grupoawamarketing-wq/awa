@@ -11,8 +11,9 @@ namespace GrupoAwamotos\ProductIntelligence\Controller\Adminhtml\Dashboard;
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 use Magento\Framework\View\Result\PageFactory;
+use Magento\Framework\App\Action\HttpGetActionInterface;
 
-class Index extends Action
+class Index extends Action implements HttpGetActionInterface
 {
     const ADMIN_RESOURCE = 'GrupoAwamotos_ProductIntelligence::dashboard';
 

@@ -12,8 +12,9 @@ use GrupoAwamotos\ProductIntelligence\Model\DataPipeline\RfmCalculator;
 use GrupoAwamotos\ProductIntelligence\Model\DataPipeline\ChurnDetector;
 use GrupoAwamotos\ProductIntelligence\Model\DataPipeline\CrossSellGenerator;
 use GrupoAwamotos\ProductIntelligence\Model\DataPipeline\CrossSellRecommender;
+use Magento\Framework\App\Action\HttpGetActionInterface;
 
-class Sync extends Action
+class Sync extends Action implements HttpGetActionInterface
 {
     const ADMIN_RESOURCE = 'GrupoAwamotos_ProductIntelligence::dashboard';
 

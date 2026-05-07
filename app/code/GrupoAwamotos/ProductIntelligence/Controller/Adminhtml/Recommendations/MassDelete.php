@@ -9,8 +9,9 @@ use Magento\Backend\App\Action\Context;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Ui\Component\MassAction\Filter;
 use Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory;
+use Magento\Framework\App\Action\HttpPostActionInterface;
 
-class MassDelete extends Action
+class MassDelete extends Action implements HttpPostActionInterface
 {
     const ADMIN_RESOURCE = 'GrupoAwamotos_ProductIntelligence::recommendations';
 

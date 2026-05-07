@@ -9,11 +9,12 @@ use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Controller\ResultInterface;
+use Magento\Framework\App\Action\HttpGetActionInterface;
 
 /**
  * POST action: creates the 4 B2B pre-defined audience segments on Meta.
  */
-class CreateSegments extends Action
+class CreateSegments extends Action implements HttpGetActionInterface
 {
     public const ADMIN_RESOURCE = 'GrupoAwamotos_MarketingIntelligence::audiences';
 
