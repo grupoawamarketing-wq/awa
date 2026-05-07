@@ -40,6 +40,9 @@ $percConversao = !empty($conversion['perc_conversao_cliente']) ? (float)$convers
     --rx-amber: #f59e0b;
     --rx-blue: #3b82f6;
     --rx-purple: #8b5cf6;
+    /* KPI segment tints */
+    --rx-churn-kpi:     #fca5a5;
+    --rx-crosssell-kpi: #6ee7b7;
 }
 
 .rx-dashboard {
@@ -104,9 +107,9 @@ $percConversao = !empty($conversion['perc_conversao_cliente']) ? (float)$convers
 }
 .rx-btn-primary {
     background: var(--rx-accent);
-    color: #fff;
+    color: var(--rx-text-bright);
 }
-.rx-btn-primary:hover { background: var(--rx-accent-light); color: #fff; }
+.rx-btn-primary:hover { background: var(--rx-accent-light); color: var(--rx-text-bright); }
 .rx-btn-ghost {
     background: transparent;
     color: var(--rx-text-dim);
@@ -151,9 +154,12 @@ $percConversao = !empty($conversion['perc_conversao_cliente']) ? (float)$convers
 .rx-kpi-value {
     font-size: 26px;
     font-weight: 700;
-    color: var(--rx-text-bright);
+    color: var(--rx-kpi-color, var(--rx-text-bright));
     line-height: 1.1;
 }
+.rx-kpi-value--amber { color: var(--rx-amber); }
+.rx-kpi-value--red-light { color: var(--rx-churn-kpi); }
+.rx-kpi-value--green-light { color: var(--rx-crosssell-kpi); }
 .rx-kpi-sub {
     font-size: 12px;
     color: var(--rx-text-dim);
@@ -263,6 +269,8 @@ $percConversao = !empty($conversion['perc_conversao_cliente']) ? (float)$convers
 }
 .rx-score-fill {
     height: 100%;
+    width: var(--rx-score-w, 0%);
+    background: var(--rx-score-color, var(--rx-green));
     border-radius: 3px;
     transition: width 0.4s ease;
 }
@@ -274,10 +282,10 @@ $percConversao = !empty($conversion['perc_conversao_cliente']) ? (float)$convers
     font-size: 11px;
     font-weight: 600;
 }
-.rx-badge-red { background: rgba(239,68,68,0.15); color: #fca5a5; }
-.rx-badge-green { background: rgba(16,185,129,0.15); color: #6ee7b7; }
-.rx-badge-blue { background: rgba(59,130,246,0.15); color: #93c5fd; }
-.rx-badge-amber { background: rgba(245,158,11,0.15); color: #fcd34d; }
+.rx-badge-red { background: rgba(239,68,68,0.15); color: var(--rx-churn-kpi); }
+.rx-badge-green { background: rgba(16,185,129,0.15); color: var(--rx-crosssell-kpi); }
+.rx-badge-blue { background: rgba(59,130,246,0.15); color: var(--rx-blue); }
+.rx-badge-amber { background: rgba(245,158,11,0.15); color: var(--rx-amber); }
 
 .rx-empty {
     text-align: center;
@@ -295,8 +303,10 @@ $percConversao = !empty($conversion['perc_conversao_cliente']) ? (float)$convers
     padding: 0 8px;
     font-size: 11px;
     font-weight: 600;
-    color: #fff;
+    color: var(--rx-text-bright);
     min-width: 40px;
+    width: var(--rx-bar-width, auto);
+    background: var(--rx-bar-color, var(--rx-accent));
 }
 </style>
 
@@ -339,7 +349,7 @@ $percConversao = !empty($conversion['perc_conversao_cliente']) ? (float)$convers
     <div class="rx-kpi-grid">
         <div class="rx-kpi">
             <div class="rx-kpi-label"><span class="dot" style="background:var(--rx-amber)"></span> Valor Potencial</div>
-            <div class="rx-kpi-value" style="color:#fbbf24"><?= $block->formatMoney($valorPotencial) ?></div>
+            <div class="rx-kpi-value" style="--rx-kpi-color:var(--rx-amber)"><?= $block->formatMoney($valorPotencial) ?></div>
             <div class="rx-kpi-sub">Revenue estimado pelo modelo</div>
         </div>
         <div class="rx-kpi">
@@ -349,12 +359,12 @@ $percConversao = !empty($conversion['perc_conversao_cliente']) ? (float)$convers
         </div>
         <div class="rx-kpi">
             <div class="rx-kpi-label"><span class="dot" style="background:var(--rx-red)"></span> Churn</div>
-            <div class="rx-kpi-value" style="color:#fca5a5"><?= $block->formatNumber($churnCount) ?></div>
+            <div class="rx-kpi-value" style="--rx-kpi-color:var(--rx-churn-kpi)"><?= $block->formatNumber($churnCount) ?></div>
             <div class="rx-kpi-sub">Clientes a reativar</div>
         </div>
         <div class="rx-kpi">
             <div class="rx-kpi-label"><span class="dot" style="background:var(--rx-green)"></span> Cross-sell</div>
-            <div class="rx-kpi-value" style="color:#6ee7b7"><?= $block->formatNumber($crosssellCount) ?></div>
+            <div class="rx-kpi-value" style="--rx-kpi-color:var(--rx-crosssell-kpi)"><?= $block->formatNumber($crosssellCount) ?></div>
             <div class="rx-kpi-sub">Oportunidades detectadas</div>
         </div>
         <div class="rx-kpi">
@@ -364,7 +374,7 @@ $percConversao = !empty($conversion['perc_conversao_cliente']) ? (float)$convers
         </div>
         <div class="rx-kpi">
             <div class="rx-kpi-label"><span class="dot" style="background:var(--rx-green)"></span> Conversao</div>
-            <div class="rx-kpi-value" style="color:#6ee7b7"><?= $block->formatPercent($percConversao) ?></div>
+            <div class="rx-kpi-value" style="--rx-kpi-color:var(--rx-crosssell-kpi)"><?= $block->formatPercent($percConversao) ?></div>
             <div class="rx-kpi-sub">R$ <?= number_format($totalConvertido, 2, ',', '.') ?> convertidos</div>
         </div>
     </div>
@@ -435,11 +445,11 @@ $percConversao = !empty($conversion['perc_conversao_cliente']) ? (float)$convers
                                 <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
                                     <?= $block->escapeHtml($item['identificador_produto']) ?>
                                 </td>
-                                <td>
+                                <td style="--rx-score-color:<?= $s >= 50 ? 'var(--rx-green)' : ($s >= 30 ? 'var(--rx-amber)' : 'var(--rx-red)') ?>;--rx-score-w:<?= min($s, 100) ?>%">
                                     <?php $s = $item['score'] * 100; ?>
-                                    <strong style="color:<?= $s >= 50 ? 'var(--rx-green)' : ($s >= 30 ? 'var(--rx-amber)' : 'var(--rx-red)') ?>"><?= number_format($s, 1) ?>%</strong>
+                                    <strong style="color:var(--rx-score-color)"><?= number_format($s, 1) ?>%</strong>
                                     <div class="rx-score-bar">
-                                        <div class="rx-score-fill" style="width:<?= min($s, 100) ?>%;background:<?= $s >= 50 ? 'var(--rx-green)' : ($s >= 30 ? 'var(--rx-amber)' : 'var(--rx-red)') ?>"></div>
+                                        <div class="rx-score-fill"></div>
                                     </div>
                                 </td>
                                 <td style="white-space:nowrap"><?= $block->formatMoneyFull($item['previsao_gasto_round_up']) ?></td>
@@ -529,7 +539,7 @@ $percConversao = !empty($conversion['perc_conversao_cliente']) ? (float)$convers
                                 <td><strong><?= $block->escapeHtml($seg) ?></strong></td>
                                 <td><?= $block->formatNumberFull($rfm['total_clientes']) ?></td>
                                 <td>
-                                    <div class="rx-rfm-bar" style="width:<?= max($pct, 8) ?>%;background:<?= $color ?>">
+                                    <div class="rx-rfm-bar" style="--rx-bar-width:<?= max($pct, 8) ?>%;--rx-bar-color:<?= $block->escapeHtmlAttr($color) ?>">
                                         <?= number_format($pct, 1) ?>%
                                     </div>
                                 </td>
