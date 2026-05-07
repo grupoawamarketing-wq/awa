@@ -105,6 +105,7 @@ export async function dismissCookieBanner(page: Page): Promise<void> {
 export async function stabilizeVisualSnapshot(page: Page): Promise<void> {
   await page
     .evaluate(() => {
+      // --- 1. Hide volatile floating overlays ---
       const volatileSelectors = [
         '.link-on-bottom',
         '.awa-whatsapp-float',
@@ -130,10 +131,81 @@ export async function stabilizeVisualSnapshot(page: Page): Promise<void> {
           el.style.setProperty('pointer-events', 'none', 'important');
         }
       }
+
+      // --- 2. Freeze CSS animations and transitions globally ---
+      const freezeId = 'mcp-visual-freeze-animations';
+      if (!document.getElementById(freezeId)) {
+        const freezeStyle = document.createElement('style');
+        freezeStyle.id = freezeId;
+        freezeStyle.textContent = [
+          '*, *::before, *::after {',
+          '  animation-play-state: paused !important;',
+          '  animation-duration: 0.01ms !important;',
+          '  animation-delay: 0ms !important;',
+          '  transition-duration: 0.01ms !important;',
+          '  transition-delay: 0ms !important;',
+          '}',
+        ].join('\n');
+        document.head.appendChild(freezeStyle);
+      }
+
+      // --- 3. Freeze Owl Carousel sliders at first slide ---
+      try {
+        type JQueryFn = (sel: string) => { each: (fn: (this: HTMLElement) => void) => void };
+        const jq = (window as unknown as Record<string, unknown>)['jQuery'] as JQueryFn | undefined;
+        if (typeof jq === 'function') {
+          jq('.owl-carousel').each(function () {
+            type OwlData = { stop?: () => void; to?: (pos: number, speed: number, standard: boolean) => void };
+            type OwlEl = HTMLElement & { data?: (key: string) => OwlData | undefined };
+            const self = this as OwlEl;
+            const data = typeof self.data === 'function' ? self.data('owl.carousel') : undefined;
+            if (data) {
+              data.stop?.();
+              data.to?.(0, 0, false);
+            }
+          });
+        }
+      } catch (_) {
+        // jQuery unavailable or carousel not initialised — fallback below
+      }
+
+      // Fallback: show only the first real owl-item per carousel
+      document.querySelectorAll<HTMLElement>('.owl-carousel').forEach((carousel) => {
+        const items = Array.from(carousel.querySelectorAll<HTMLElement>('.owl-item'));
+        if (items.length === 0) return;
+        const firstReal = items.find((el) => !el.classList.contains('cloned')) ?? items[0];
+        items.forEach((item) => {
+          if (item !== firstReal) {
+            item.style.setProperty('opacity', '0', 'important');
+            item.style.setProperty('transition', 'none', 'important');
+          }
+        });
+      });
+
+      // --- 4. Freeze slick carousels (if any) ---
+      document.querySelectorAll<HTMLElement>('.slick-slider').forEach((slider) => {
+        slider.querySelectorAll<HTMLElement>('.slick-slide:not(.slick-active)').forEach((slide) => {
+          slide.style.setProperty('opacity', '0', 'important');
+        });
+      });
+
+      // --- 5. Hide social proof dynamic counters ---
+      const spSelectors = [
+        '[class*="social-proof"]',
+        '[class*="awa-social"]',
+        '[data-social-proof]',
+        '.fake-purchase-notification',
+        '.fake-purchase',
+      ];
+      document.querySelectorAll<HTMLElement>(spSelectors.join(',')).forEach((el) => {
+        el.style.setProperty('visibility', 'hidden', 'important');
+        el.style.setProperty('opacity', '0', 'important');
+      });
     })
     .catch(() => {});
 
-  await page.waitForTimeout(120);
+  // Allow the first stabilized frame to render
+  await page.waitForTimeout(300);
 }
 
 function sha256(filePath: string): string {
