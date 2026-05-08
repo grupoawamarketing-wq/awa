@@ -24,6 +24,26 @@ function resolveChromiumHeadlessShell(): string | undefined {
 const chromiumShell = resolveChromiumHeadlessShell();
 
 /**
+ * launchOptions exclusivas para projetos Chromium.
+ * NÃO aplicar ao Firefox/WebKit — os args são Chrome-specific e executablePath
+ * aponta para chrome-headless-shell, incompatível com geckodriver/webkit.
+ */
+const chromiumLaunchOptions = {
+  ...(chromiumShell ? { executablePath: chromiumShell } : {}),
+  timeout: 300_000,
+  args: [
+    '--no-sandbox',
+    '--disable-dev-shm-usage',
+    '--disable-setuid-sandbox',
+    // Limita RAM para não OOM o servidor de produção (~512MB por renderer)
+    '--js-flags=--max-old-space-size=512',
+    '--disable-extensions',
+    '--disable-plugins',
+    '--renderer-process-limit=2',
+  ],
+};
+
+/**
  * Playwright Config — AWA Motos Header Visual Tests
  * Breakpoints: Tablet (768–1024px), Notebook (1024–1366px)
  */
@@ -74,20 +94,10 @@ export default defineConfig({
     /* Locale BR para renderização correta de fontes/datas */
     locale: 'pt-BR',
     timezoneId: 'America/Sao_Paulo',
+    // Nota: launchOptions com executablePath/args Chrome-specific ficam nos projetos
+    // Chromium abaixo — não aqui, para não corromper Firefox/WebKit.
     launchOptions: {
-      ...(chromiumShell ? { executablePath: chromiumShell } : {}),
-      /** Evita TimeoutError: browserType.launch em hosts lentos ou cold cache do shell */
       timeout: 300_000,
-      args: [
-        '--no-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-setuid-sandbox',
-        // Limita RAM para não OOM o servidor de produção (~512MB por renderer)
-        '--js-flags=--max-old-space-size=512',
-        '--disable-extensions',
-        '--disable-plugins',
-        '--renderer-process-limit=2',
-      ],
     },
   },
 
@@ -98,6 +108,7 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 768, height: 1024 },
+        launchOptions: chromiumLaunchOptions,
       },
     },
     {
@@ -105,6 +116,7 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 960, height: 768 },
+        launchOptions: chromiumLaunchOptions,
       },
     },
     {
@@ -112,6 +124,7 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1024, height: 768 },
+        launchOptions: chromiumLaunchOptions,
       },
     },
 
@@ -121,6 +134,7 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1024, height: 600 },
+        launchOptions: chromiumLaunchOptions,
       },
     },
     {
@@ -128,6 +142,7 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1280, height: 720 },
+        launchOptions: chromiumLaunchOptions,
       },
     },
     {
@@ -135,6 +150,7 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1366, height: 768 },
+        launchOptions: chromiumLaunchOptions,
       },
     },
 
