@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace GrupoAwamotos\TawkIntegration\Controller\Webhook;
 
 use GrupoAwamotos\TawkIntegration\Helper\Config;
+use GrupoAwamotos\TawkIntegration\Model\AttendantService;
 use GrupoAwamotos\TawkIntegration\Model\ChatLogFactory;
 use GrupoAwamotos\TawkIntegration\Model\ResourceModel\ChatLog as ChatLogResource;
 use Magento\Customer\Api\CustomerRepositoryInterface;
@@ -23,6 +24,7 @@ class Receive implements HttpPostActionInterface, CsrfAwareActionInterface
     private RequestInterface $request;
     private JsonFactory $jsonFactory;
     private Config $config;
+    private AttendantService $attendantService;
     private ChatLogFactory $chatLogFactory;
     private ChatLogResource $chatLogResource;
     private CustomerRepositoryInterface $customerRepository;
@@ -33,6 +35,7 @@ class Receive implements HttpPostActionInterface, CsrfAwareActionInterface
         RequestInterface $request,
         JsonFactory $jsonFactory,
         Config $config,
+        AttendantService $attendantService,
         ChatLogFactory $chatLogFactory,
         ChatLogResource $chatLogResource,
         CustomerRepositoryInterface $customerRepository,
@@ -42,6 +45,7 @@ class Receive implements HttpPostActionInterface, CsrfAwareActionInterface
         $this->request = $request;
         $this->jsonFactory = $jsonFactory;
         $this->config = $config;
+        $this->attendantService = $attendantService;
         $this->chatLogFactory = $chatLogFactory;
         $this->chatLogResource = $chatLogResource;
         $this->customerRepository = $customerRepository;
@@ -148,6 +152,16 @@ class Receive implements HttpPostActionInterface, CsrfAwareActionInterface
         }
 
         $this->chatLogResource->save($chatLog);
+
+        if ($customerId !== null) {
+            $customerData = [
+                'name'  => $visitor['name'] ?? '',
+                'email' => $email ?? '',
+                'cnpj'  => '',
+            ];
+            $this->attendantService->sendChatNotification($customerId, $customerData, (string) $chatId);
+        }
+
         $this->logger->info('[TawkIntegration] Chat started: ' . $chatId);
     }
 

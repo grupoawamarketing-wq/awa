@@ -10,6 +10,7 @@ use GrupoAwamotos\B2B\Model\CustomerApproval;
 use GrupoAwamotos\ERPIntegration\Model\OrderHistory;
 use GrupoAwamotos\ERPIntegration\Model\Rfm\Calculator as RfmCalculator;
 use GrupoAwamotos\TawkIntegration\Helper\Config;
+use GrupoAwamotos\TawkIntegration\Model\AttendantService;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Model\Session as CustomerSession;
@@ -21,6 +22,7 @@ use Psr\Log\LoggerInterface;
 class Widget extends Template
 {
     private Config $config;
+    private AttendantService $attendantService;
     private B2BConfig $b2bConfig;
     private CustomerSession $customerSession;
     private CheckoutSession $checkoutSession;
@@ -35,6 +37,7 @@ class Widget extends Template
     public function __construct(
         Context $context,
         Config $config,
+        AttendantService $attendantService,
         B2BConfig $b2bConfig,
         CustomerSession $customerSession,
         CheckoutSession $checkoutSession,
@@ -49,6 +52,7 @@ class Widget extends Template
     ) {
         parent::__construct($context, $data);
         $this->config = $config;
+        $this->attendantService = $attendantService;
         $this->b2bConfig = $b2bConfig;
         $this->customerSession = $customerSession;
         $this->checkoutSession = $checkoutSession;
@@ -230,6 +234,11 @@ class Widget extends Template
             ];
             $attrs['situacao'] = $statusLabels[$approvalStatus] ?? $approvalStatus;
         }
+        $attendant = $this->attendantService->getAssignedAttendant($customerId);
+        if ($attendant !== null) {
+            $attrs['atendente'] = $attendant['name'];
+        }
+
         if ($this->creditService->isEnabled()) {
             try {
                 $credit = $this->creditService->getCreditLimit($customerId);
