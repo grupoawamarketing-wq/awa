@@ -89,3 +89,88 @@
   font-size: 14px !important; /* justified: Rokan theme rounds to 17px, overriding --awa-font-base */
   line-height: 1.45;
 }
+
+/* =====================================================
+   Homepage Visual Improvements — 2026-05-08 (v2)
+   ===================================================== */
+
+/* 1. Carousel product card hover — stronger brand accent
+   Base hover from awa-visual-audit-final (#html-body .item-product:hover) provides
+   transform: -2px. We scope a stronger effect here for homepage carousels.
+   Specificity: #html-body(1,0,0) + :is(body.*)(0,1,0) + .item-product(0,1,0) + :hover = (1,2,0)
+   Beats audit-final #html-body .item-product:hover = (1,1,0)+:hover */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  :is(.rokan-bestseller, .rokan-newproduct, .rokan-mostviewed, .list-tab-product,
+      .hot-deal, .categorytab-container, .product-tab-slider)
+  .item-product:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: rgba(0, 0, 0, 0.12) 0px 6px 16px 0px, rgba(0, 0, 0, 0.08) 0px 2px 4px 0px !important;
+  border-color: rgba(163, 59, 59, 0.22) !important;
+}
+
+/* 2. Carousel button border-radius 8px on homepage
+   themes.css rule at ~84165: :is(bodyA) :is(bigList) :is(.btn-add-to-cart,.tocart) = (0,6,1)
+   This rule: :is(bodyA)(0,1,1) + :is(carouselWrapper)(0,1,0) + .item-product(0,1,0) + .btn-add-to-cart.action.tocart(0,3,0) = (0,6,1)
+   Equal specificity, but awa-visual-qa-home.css is linked AFTER themes.css in HTML → wins */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+  :is(.rokan-bestseller, .rokan-newproduct, .rokan-mostviewed, .list-tab-product,
+      .hot-deal, .categorytab-container, .product-tab-slider)
+  .item-product
+  .btn-add-to-cart.action.tocart {
+  border-radius: 8px !important; /* (0,6,1) equal spec, loaded after themes.css → wins */
+  font-weight: 700 !important;
+  letter-spacing: 0.03em;
+}
+
+/* 3. Card transition — ensure smooth hover on homepage (mirror category) */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+  :is(.rokan-bestseller, .rokan-newproduct, .rokan-mostviewed, .list-tab-product,
+      .hot-deal, .categorytab-container, .product-tab-slider)
+  .item-product {
+  transition: border-color 0.18s ease, transform 0.22s ease, box-shadow 0.22s ease !important;
+  will-change: transform;
+}
+
+/* 4. Section heading — tighter bottom margin when no subtitle present
+   awa-section-header already has border-bottom from inline CSS; add color accent */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .awa-section-header {
+  border-bottom-color: var(--awa-primary, #A33B3B) !important;
+  border-bottom-width: 1px !important;
+  padding-bottom: var(--awa-space-3, 12px) !important;
+  margin-bottom: var(--awa-space-4, 16px) !important;
+}
+
+/* 5. Trust section — trust icons padding and card consistency */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+  .top-home-content--trust-and-offers {
+  padding-top: var(--awa-space-4, 16px) !important;
+  padding-bottom: var(--awa-space-4, 16px) !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────────
+   Mobile improvements — 2026-05-08 (v3)
+────────────────────────────────────────────────────────────────────────────── */
+
+/* H-m1: Section header font-size scaling on mobile */
+@media (max-width: 480px) {
+  :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    :is(.awa-section-header__title,
+        .hot-deal .block-title strong,
+        .categorytab-container .block-title strong,
+        .list-tab-product .block-title strong) {
+    font-size: clamp(17px, 5vw, 20px) !important;
+  }
+
+  /* H-m2: Trust section — tighter on mobile */
+  :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .awa-footer-trust-grid {
+    gap: 8px !important;
+  }
+
+  /* H-m3: Carousel card border-radius — slightly smaller on mobile */
+  :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    :is(.rokan-bestseller, .rokan-newproduct, .rokan-mostviewed, .list-tab-product,
+        .hot-deal, .categorytab-container) .item-product {
+    border-radius: 10px !important;
+  }
+}
