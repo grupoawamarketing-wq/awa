@@ -256,7 +256,7 @@ class Engine implements SuggestionEngineInterface
                     GROUP BY p.CLIENTE
                     HAVING COUNT(DISTINCT CASE WHEN i.MATERIAL IN (SELECT MATERIAL FROM CustomerProducts) THEN i.MATERIAL END) >= 2
                     ORDER BY
-                        CAST(common_products AS FLOAT) / NULLIF(total_products, 0) DESC
+                        CAST(COUNT(DISTINCT CASE WHEN i.MATERIAL IN (SELECT MATERIAL FROM CustomerProducts) THEN i.MATERIAL END) AS FLOAT) / NULLIF(COUNT(DISTINCT i.MATERIAL), 0) DESC
                 ),
                 SimilarProducts AS (
                     SELECT
@@ -277,10 +277,11 @@ class Engine implements SuggestionEngineInterface
                     MAX(i.DESCRICAO) as product_name,
                     sp.product_id as sku,
                     sp.customer_count,
-                    sp.avg_price
+                    sp.avg_price,
+                    sp.total_qty
                 FROM SimilarProducts sp
                 INNER JOIN VE_PEDIDOITENS i ON sp.product_id = i.MATERIAL
-                GROUP BY sp.product_id, sp.customer_count, sp.avg_price
+                GROUP BY sp.product_id, sp.customer_count, sp.avg_price, sp.total_qty
                 ORDER BY sp.customer_count DESC, sp.total_qty DESC
             ";
 
