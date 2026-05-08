@@ -621,8 +621,6 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
 
             container.style.display = 'grid';
             container.appendChild(createQuickAction('/b2b/account/dashboard', 'Dashboard', 'is-dashboard'));
-            container.appendChild(createQuickAction('/sales/order/history', 'Pedidos', 'is-orders'));
-            container.appendChild(createQuickAction('/b2b/account/reorder', 'Recompra', 'is-reorder'));
             container.appendChild(createQuickAction('/checkout/cart', 'Carrinho', 'is-cart'));
         }
 
@@ -643,9 +641,7 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
                 host.style.display = 'none';
                 return;
             }
-            host.style.display = '';
-            host.appendChild(createQuickAction('/sales/order/history', 'Pedidos', 'is-orders'));
-            host.appendChild(createQuickAction('/b2b/account/reorder', 'Recompra', 'is-reorder'));
+            host.style.display = 'none';  // nenhum item a exibir
         }
 
         function updateMcpDashboardLink(data) {
