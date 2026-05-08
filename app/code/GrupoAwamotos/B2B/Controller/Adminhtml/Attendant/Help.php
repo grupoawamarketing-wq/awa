@@ -15,7 +15,7 @@ use Magento\Framework\View\Result\PageFactory;
 
 class Help extends Action implements HttpGetActionInterface
 {
-    public const ADMIN_RESOURCE = 'GrupoAwamotos_B2B::attendants';
+    public const ADMIN_RESOURCE = 'GrupoAwamotos_B2B::attendant_self';
 
     private PageFactory $resultPageFactory;
 

@@ -17,7 +17,7 @@ use Magento\Framework\View\Result\PageFactory;
 
 class Dashboard extends Action implements HttpGetActionInterface
 {
-    public const ADMIN_RESOURCE = 'GrupoAwamotos_B2B::attendants';
+    public const ADMIN_RESOURCE = 'GrupoAwamotos_B2B::attendant_self';
 
     public function __construct(
         Context $context,
