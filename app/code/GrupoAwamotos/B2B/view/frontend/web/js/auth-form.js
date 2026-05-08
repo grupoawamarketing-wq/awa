@@ -139,6 +139,7 @@ define([
         function setSubmitLoadingState($button) {
             var $label = $button.find('span').first();
             var originalLabel;
+            var $overlay;
 
             if (!$button.length) {
                 return;
@@ -149,10 +150,26 @@ define([
                 $button.data('original-label', $label.text());
             }
 
-            $button.addClass('is-loading').prop('disabled', true);
+            $button.addClass('is-loading').prop('disabled', true).attr('aria-busy', 'true');
 
             if ($label.length) {
                 $label.text(loadingLabel);
+            }
+
+            // Show a full-page overlay so the loading state is visually
+            // prominent and detectable throughout the server round-trip.
+            if (!$('#b2b-auth-loading-overlay').length) {
+                $overlay = $('<div>', {
+                    id: 'b2b-auth-loading-overlay',
+                    role: 'status',
+                    'aria-label': loadingLabel,
+                    'aria-live': 'assertive'
+                }).append(
+                    $('<div>', { 'class': 'b2b-auth-spinner', 'aria-hidden': 'true' })
+                ).append(
+                    $('<span>', { 'class': 'b2b-auth-loading-label' }).text(loadingLabel)
+                );
+                $('body').append($overlay);
             }
         }
 
