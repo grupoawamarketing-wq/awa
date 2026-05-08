@@ -75,8 +75,10 @@ test.describe('Vertical Menu', () => {
 
     await expect(trigger).toBeVisible();
 
+    // Give some time for Magento x-magento-init and our controller to boot.
+    await page.waitForTimeout(1500);
+
     // On desktop homepage, the menu starts already expanded (keepDesktopMenuExpanded).
-    // Detect initial state so we can ensure the menu ends up open for assertions.
     const initialExpanded = await trigger.getAttribute('aria-expanded');
     const isAlreadyOpen = initialExpanded === 'true';
 

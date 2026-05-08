@@ -179,7 +179,8 @@ test.describe('AwaMotos – Full UX Audit', () => {
     const catUrl: string = await page.evaluate((base) => {
       const links = Array.from(document.querySelectorAll('nav a, .navigation a, .nav-sections a')) as HTMLAnchorElement[];
       const link = links.find(l => l.href && l.href.startsWith(base) && l.href !== base + '/' && !l.href.includes('#'));
-      return link?.href || `${base}/pecas-para-motos.html`;
+      // Fallback: bagageiros.html é categoria real com produtos
+      return link?.href || `${base}/bagageiros.html`;
     }, BASE_URL);
 
     console.log(`  → Category URL: ${catUrl}`);
@@ -188,7 +189,7 @@ test.describe('AwaMotos – Full UX Audit', () => {
     // Product grid sanity
     await page.setViewportSize(DESKTOP);
     await page.goto(catUrl, { waitUntil: 'networkidle', timeout: 35000 });
-    const count = await page.locator('.product-item, .item-product').count();
+    const count = await page.locator('.product-item, .item-product, .quickview-product').count();
     if (count === 0) addIssue({ page: 'Categoria', viewport: 'Desktop', severity: 'Critical', category: 'Visual / Grade de Produtos', description: 'Nenhum card de produto encontrado na página de categoria' });
     else console.log(`  ✓ ${count} produtos encontrados`);
 
@@ -236,7 +237,7 @@ test.describe('AwaMotos – Full UX Audit', () => {
 
     await page.setViewportSize(DESKTOP);
     await page.goto(searchUrl, { waitUntil: 'networkidle', timeout: 35000 });
-    const resultCount = await page.locator('.product-item, .item-product').count();
+    const resultCount = await page.locator('.product-item, .item-product, .quickview-product').count();
     const noResultsMsg = await page.isVisible('.message.notice').catch(() => false);
     console.log(`  → Resultados: ${resultCount} produtos, sem-resultado: ${noResultsMsg}`);
     if (resultCount === 0 && noResultsMsg) {
@@ -245,10 +246,10 @@ test.describe('AwaMotos – Full UX Audit', () => {
   });
 
   test('5 – Login', async ({ page }) => {
-    await runAudit(page, `${BASE_URL}/customer/account/login/`, 'Login');
+    await runAudit(page, `${BASE_URL}/b2b/account/login/`, 'Login');
 
     await page.setViewportSize(MOBILE);
-    await page.goto(`${BASE_URL}/customer/account/login/`, { waitUntil: 'networkidle', timeout: 35000 });
+    await page.goto(`${BASE_URL}/b2b/account/login/`, { waitUntil: 'networkidle', timeout: 35000 });
 
     // Standard login redirects to B2B login — selectors include both standard and B2B form
     const email = await page.isVisible('#email, #b2b-email, input[name="login[username]"]').catch(() => false);
