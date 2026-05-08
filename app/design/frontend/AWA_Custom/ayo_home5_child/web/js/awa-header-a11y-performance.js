@@ -1110,17 +1110,40 @@
         searchBtn = document.querySelector('#search_mini_form .actions .action.search');
         searchSvg = searchBtn ? searchBtn.querySelector('svg') : null;
 
-        if (searchBtn) {
-            setImportantStyle(searchBtn, 'background', 'transparent');
-            setImportantStyle(searchBtn, 'background-color', 'transparent');
-            setImportantStyle(searchBtn, 'color', 'var(--awa-primary)');
+        if (searchBtn && window.innerWidth >= 992) {
+            setImportantStyle(searchBtn, 'display', 'inline-flex');
+            setImportantStyle(searchBtn, 'align-items', 'center');
+            setImportantStyle(searchBtn, 'justify-content', 'center');
+            setImportantStyle(searchBtn, 'background', 'var(--awa-primary)');
+            setImportantStyle(searchBtn, 'background-color', 'var(--awa-primary)');
+            setImportantStyle(searchBtn, 'color', 'var(--awa-white, #fff)');
             setImportantStyle(searchBtn, 'border-left', '1px solid var(--awa-border)');
+            setImportantStyle(searchBtn, 'border-radius', '0');
         }
 
-        if (searchSvg) {
-            setImportantStyle(searchSvg, 'stroke', 'var(--awa-primary)');
-            setImportantStyle(searchSvg, 'color', 'var(--awa-primary)');
+        if (searchSvg && window.innerWidth >= 992) {
+            setImportantStyle(searchSvg, 'stroke', 'var(--awa-white, #fff)');
+            setImportantStyle(searchSvg, 'color', 'var(--awa-white, #fff)');
             setImportantStyle(searchSvg, 'fill', 'none');
+        }
+
+        if (window.innerWidth >= 992) {
+            Array.prototype.forEach.call(
+                document.querySelectorAll('.awa-header-account-prompt[data-awa-auth-state="guest"] .awa-header-account-prompt__line2 .awa-header-account-prompt__link, .awa-header-account-prompt[data-awa-auth-state="guest"] .awa-header-account-prompt__line2 .awa-header-account-prompt__link--register'),
+                function (link) {
+                    setImportantStyle(link, 'display', 'inline');
+                    setImportantStyle(link, 'font-size', '14px');
+                    setImportantStyle(link, 'line-height', '1.2');
+                    setImportantStyle(link, 'font-weight', '700');
+                    setImportantStyle(link, 'background', 'transparent');
+                    setImportantStyle(link, 'background-color', 'transparent');
+                    setImportantStyle(link, 'color', 'var(--awa-primary)');
+                    setImportantStyle(link, 'padding', '0');
+                    setImportantStyle(link, 'margin', '0');
+                    setImportantStyle(link, 'border', '0');
+                    setImportantStyle(link, 'box-shadow', 'none');
+                }
+            );
         }
     }
 

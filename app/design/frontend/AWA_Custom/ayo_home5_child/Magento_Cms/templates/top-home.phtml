@@ -36,6 +36,8 @@ $heroFallbackHtml = $renderCmsBlock('home_hero');
 $schemaOrgHtml = $renderCmsBlock('home_schema_org');
 $benefitsHtml = $renderCmsBlock('banner_mid_home1');
 $featuredCategoriesHtml = $renderCmsBlock('featured_categories');
+$homeCarouselProductQty = 6;
+$homeCategoryCarouselQty = 6;
 
 /** @var \Rokanthemes\ProductTab\Block\Producttab|Magento\Catalog\Block\Product\AbstractProduct $productTabBlock */
 $productTabBlock = $layout->createBlock('Rokanthemes\ProductTab\Block\Producttab');
@@ -64,6 +66,7 @@ if ($hotDealBlock) {
 $bestsellerBlock = $layout->createBlock('Rokanthemes\BestsellerProduct\Block\Bestseller');
 if ($bestsellerBlock) {
 	$bestsellerBlock->setData('cache_lifetime', false);
+	$bestsellerBlock->setData('qty', $homeCarouselProductQty);
 	$bestsellerBlock->setTemplate('Rokanthemes_BestsellerProduct::bestseller.phtml');
 }
 $bestsellerHtml  = $bestsellerBlock ? trim((string)$bestsellerBlock->toHtml()) : '';
@@ -71,6 +74,7 @@ $bestsellerHtml  = $bestsellerBlock ? trim((string)$bestsellerBlock->toHtml()) :
 /** @var \Rokanthemes\Newproduct\Block\Newproduct|null */
 $newproductBlock = $layout->createBlock('Rokanthemes\Newproduct\Block\Newproduct');
 $newproductBlock?->setData('cache_lifetime', false);
+$newproductBlock?->setData('qty', $homeCarouselProductQty);
 $newproductHtml  = $newproductBlock ? trim((string)$newproductBlock->toHtml()) : '';
 
 /* Category carousels — Product Carousel (OWL) filtrado por categoria.
@@ -80,12 +84,13 @@ $newproductHtml  = $newproductBlock ? trim((string)$newproductBlock->toHtml()) :
  * Retrovisores (41) -> subcats: Arrow(89), Cromados(51), Esportivos(81), Mini(79), Original(42), Pr.Haste(50)
  * Bagageiros (67)   -> sem subcats, usa categoria pai
  */
-$makeCatProductCarousel = static function (string $categoryIds) use ($layout): string {
+$makeCatProductCarousel = static function (string $categoryIds) use ($layout, $homeCategoryCarouselQty): string {
     /** @var \GrupoAwamotos\Theme\Block\CategoryProductCarousel|null $b */
     $b = $layout->createBlock(\GrupoAwamotos\Theme\Block\CategoryProductCarousel::class);
     if (!$b) return '';
     $b->setData('cache_lifetime', false);
     $b->setData('category_ids', $categoryIds);
+    $b->setData('qty', $homeCategoryCarouselQty);
     $b->setTemplate('Rokanthemes_BestsellerProduct::bestseller.phtml');
     return trim((string)$b->toHtml());
 };

@@ -137,7 +137,7 @@ define(['jquery'], function ($) {
                 '#awa-trust-signals{background:#f8f8f8;border-top:1px solid #e0e0e0;padding:16px 20px;text-align:center}',
                 '.awa-trust-inner{display:flex;justify-content:center;align-items:center;gap:24px;flex-wrap:wrap;max-width:1200px;margin:0 auto}',
                 '.awa-trust-item{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#555;font-weight:500}',
-                '.awa-trust-item svg{width:18px;height:18px;color:#b73337;flex-shrink:0}',
+                '.awa-trust-item svg{width:18px;height:18px;color:#A33B3B;flex-shrink:0}',
                 '@media(max-width:767px){.awa-trust-inner{gap:12px 20px}.awa-trust-item{font-size:12px}}'
             ].join('');
             document.head.appendChild(style);
@@ -163,7 +163,7 @@ define(['jquery'], function ($) {
                     if (!badge) {
                         badge = document.createElement('span');
                         badge.className = 'awa-filter-badge';
-                        badge.style.cssText = 'display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;background:#b73337;color:#fff;border-radius:50%;font-size:11px;font-weight:700;margin-left:6px;vertical-align:middle;';
+                        badge.style.cssText = 'display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;background:#A33B3B;color:#fff;border-radius:50%;font-size:11px;font-weight:700;margin-left:6px;vertical-align:middle;';
                         btn.appendChild(badge);
                     }
                     badge.textContent = count;
@@ -313,7 +313,7 @@ define(['jquery'], function ($) {
 
             var style = document.createElement('style');
             style.id   = 'awa-scroll-style';
-            style.textContent = '#awa-scroll-progress{position:fixed;top:0;left:0;width:0%;height:3px;background:linear-gradient(90deg,#b73337,#e05a5e);z-index:99999;transition:width .1s linear;pointer-events:none}';
+            style.textContent = '#awa-scroll-progress{position:fixed;top:0;left:0;width:0%;height:3px;background:linear-gradient(90deg,#A33B3B,#e05a5e);z-index:99999;transition:width .1s linear;pointer-events:none}';
             document.head.appendChild(style);
             document.body.prepend(bar);
 
@@ -408,7 +408,7 @@ define(['jquery'], function ($) {
                 '#awa-search-clear{position:absolute;right:48px;top:50%;transform:translateY(-50%);',
                 'background:none;border:none;cursor:pointer;color:#999;font-size:14px;line-height:1;',
                 'padding:4px 8px;display:none;z-index:2}',
-                '#awa-search-clear:hover{color:#b73337}',
+                '#awa-search-clear:hover{color:#A33B3B}',
                 '.block-search,.header-search{position:relative}'
             ].join('');
             document.head.appendChild(style);

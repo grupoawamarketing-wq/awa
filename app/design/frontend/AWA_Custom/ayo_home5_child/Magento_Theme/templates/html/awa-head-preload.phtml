@@ -186,6 +186,21 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px
 <?php foreach ($jsPreloads as $jsUrl): ?>
 <link rel="preload" href="<?= $block->escapeUrl($jsUrl) ?>" as="script"/>
 <?php endforeach; ?>
+<?php /* styles-l.css — CSS de desktop (4.3MB), separado do merged bundle 2026-05-08.
+         media="screen and (min-width: 768px)": não bloqueia render em mobile (viewport < 768px).
+         No PSI/Lighthouse (Moto G Power emulado), este CSS NÃO bloqueia o FCP.
+         Em desktop (>= 768px), carrega como blocking (correto: CSS critical para layout desktop).
+         Requer <remove src="css/styles-l.css"/> em default_head_blocks.xml (já adicionado).
+         Reduz merged bundle de 9.5MB → ~5.2MB (retira 4.3MB de CSS desktop do blocking path). */ ?>
+<?php $__stylesLUrl = $block->getViewFileUrl('css/styles-l.css'); ?>
+<link rel="preload"
+      href="<?= $block->escapeUrl($__stylesLUrl) ?>"
+      as="style"
+      media="screen and (min-width: 768px)"/>
+<link rel="stylesheet"
+      href="<?= $block->escapeUrl($__stylesLUrl) ?>"
+      media="screen and (min-width: 768px)"/>
+<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__stylesLUrl) ?>"/></noscript>
 <?php /* themes.css — async (2026-05-xx, saves ~2550ms render blocking)
          Removido de blocking via <remove src="css/themes.css"/> em default_head_blocks.xml.
          Carregado aqui como media=print onload para zero-blocking download.
@@ -198,14 +213,14 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px
       media="print"
       onload="this.media='all'"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__themesUrl) ?>"/></noscript>
-<!-- AWA Async CSS Bundles -->
-<!-- Bundles estruturais críticos não podem depender de interação do usuário.
-     Home/PLP/PDP precisam receber layout completo no first paint para evitar
-     colapso de grids, carrosséis e conteúdo invisível. -->
+<!-- AWA Async CSS Bundles — convertidos para async 2026-05-08 (FCP fix: NO_FCP causado por 2.6MB CSS bloqueante) -->
+<!-- Anti-FOUC inline CSS (awa-head-preload.phtml) já cobre tokens, hero, grids, header/footer above-fold. -->
 <?php foreach ($asyncBundles as $cssUrl): ?>
+<link rel="preload" href="<?= $block->escapeUrl($cssUrl) ?>" as="style"/>
 <link rel="stylesheet"
       href="<?= $block->escapeUrl($cssUrl) ?>"
-      media="all"/>
+      media="print"
+      onload="this.media='all'"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($cssUrl) ?>"/></noscript>
 <?php endforeach; ?>
 <?php /* === AWA Layout Override CSS (blocking, após super-global — cascata correta) ===
@@ -218,9 +233,12 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px
     'css/awa-layout-fixed.css',
     'css/awa-clean-ui-final.css',
 ] as $__layoutCssUrl): ?>
+<link rel="preload" href="<?= $block->escapeUrl($block->getViewFileUrl($__layoutCssUrl)) ?>" as="style"/>
 <link rel="stylesheet"
       href="<?= $block->escapeUrl($block->getViewFileUrl($__layoutCssUrl)) ?>"
-      media="all"/>
+      media="print"
+      onload="this.media='all'"/>
+<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($block->getViewFileUrl($__layoutCssUrl)) ?>"/></noscript>
 <?php endforeach; ?>
 <?php /* awa-ux-improvements.css removed 2026-05 — superseded by _awa-ux-conversao-2026-05-07.less (LESS pipeline). Saves 3KB async. */
 // phpcs:ignore
@@ -245,10 +263,12 @@ foreach ([
       onload="this.media='all'"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__gridSystemUrl) ?>"/></noscript>
 <?php if ($homeBundleUrl): ?>
-<!-- awa-super-home.css: home-custom + mobile-fix + product-cards + category-carousel + cosmetic-home -->
+<!-- awa-super-home.css: home-custom + mobile-fix + product-cards + category-carousel + cosmetic-home (async 2026-05-08) -->
+<link rel="preload" href="<?= $block->escapeUrl($homeBundleUrl) ?>" as="style"/>
 <link rel="stylesheet"
       href="<?= $block->escapeUrl($homeBundleUrl) ?>"
-      media="all"/>
+      media="print"
+      onload="this.media='all'"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($homeBundleUrl) ?>"/></noscript>
 <?php endif; ?>
 <?php /* awa-vertical-menu-modern.css — menu vertical refinements; async: menu oculto mobile, below-fold desktop */ ?>
@@ -358,7 +378,8 @@ $__qaCssAssets = $__qaCssByAction[$__fullActionName] ?? [];
 <?php foreach ($__qaCssAssets as $__qaCssAsset): ?>
       <?php $__qaCssUrl = $block->getViewFileUrl($__qaCssAsset); ?>
       <link rel="preload" as="style" href="<?= $block->escapeUrl($__qaCssUrl) ?>"/>
-      <link rel="stylesheet" href="<?= $block->escapeUrl($__qaCssUrl) ?>"/>
+      <link rel="stylesheet" href="<?= $block->escapeUrl($__qaCssUrl) ?>" media="print" onload="this.media='all'"/>
+      <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__qaCssUrl) ?>"/></noscript>
 <?php endforeach; ?>
 
 <?php /* === Hreflang (loja monolíngue pt-BR) === */ ?>

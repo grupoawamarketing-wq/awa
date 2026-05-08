@@ -114,10 +114,10 @@ define([
         /* overrides all stylesheet rules reliably.                    */
         if ($title.length) {
             $title.css({
-                'background-color': '#b73337',
+                'background-color': '#A33B3B',
                 'color': '#fff'
             });
-            $title[0].style.setProperty('background-color', '#b73337', 'important');
+            $title[0].style.setProperty('background-color', '#A33B3B', 'important');
         }
 
         /* ---- Rokanthemes flyout widget ------------------------------ */
