@@ -1,0 +1,518 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - progressbar "Progresso de leitura"
+  - link "Ir para o conteúdo principal" [ref=e2] [cursor=pointer]:
+    - /url: "#maincontent"
+  - link "Ir para a navegação" [ref=e3] [cursor=pointer]:
+    - /url: "#awa-primary-navigation"
+  - generic [ref=e4]:
+    - banner [ref=e5]:
+      - complementary "Ambiente exclusivo para empresas" [ref=e8]:
+        - paragraph [ref=e10]:
+          - generic [ref=e11]: Ambiente exclusivo para vendas corporativas
+          - generic [ref=e12]: "|"
+          - link "Cadastre agora" [ref=e13] [cursor=pointer]:
+            - /url: https://awamotos.com/b2b/register/
+            - strong [ref=e14]: Cadastre agora
+          - generic [ref=e15]: sua empresa e confira ofertas especiais para o seu CNPJ.
+      - generic [ref=e16]:
+        - generic [ref=e21]:
+          - generic [ref=e22]:
+            - text: 
+            - link "AWA Motos - Página inicial" [ref=e25] [cursor=pointer]:
+              - /url: https://awamotos.com/
+              - img "AWA Motos" [ref=e26]
+          - search "Busca de produtos" [ref=e28]:
+            - generic [ref=e30]:
+              - generic [ref=e31]:
+                - generic [ref=e33]: Buscar
+                - generic [ref=e34]: Digite ao menos 2 caracteres para começar a pesquisar.
+                - combobox "Buscar" [ref=e37]
+              - button "Buscar produtos" [disabled] [ref=e39] [cursor=pointer]:
+                - generic [ref=e40]: Buscar
+                - img
+          - generic [ref=e41]:
+            - generic "Área do cliente" [ref=e42]:
+              - img [ref=e44]
+              - generic [ref=e48]:
+                - generic [ref=e49]: Para ver os preços faça o
+                - generic [ref=e50]:
+                  - link "Login" [ref=e51] [cursor=pointer]:
+                    - /url: https://awamotos.com/customer/account/login/
+                  - generic [ref=e52]: ou
+                  - link "Cadastre-se" [ref=e53] [cursor=pointer]:
+                    - /url: https://awamotos.com/b2b/register/
+            - generic [ref=e55]:
+              - link "Ver carrinho de compras" [ref=e56] [cursor=pointer]:
+                - /url: https://awamotos.com/checkout/cart/
+                - generic [ref=e57]: Carrinho de compras
+              - text: ✕ 🛒
+        - navigation "Navegação principal da loja" [ref=e58]:
+          - generic [ref=e60]:
+            - generic:
+              - navigation "Menu de categorias":
+                - generic:
+                  - tablist "Navegacao principal":
+                    - tabpanel:
+                      - navigation "Categorias de Produtos":
+                        - button "Departamentos":
+                          - generic:
+                            - text: 
+                            - img
+                          - generic: Departamentos
+                        - text: OFERTA % % +  ↓
+            - navigation "Links rápidos de categorias" [ref=e61]:
+              - list [ref=e62]:
+                - listitem [ref=e63]:
+                  - link "Nossas Marcas" [ref=e64] [cursor=pointer]:
+                    - /url: https://awamotos.com/nossas-marcas/
+                - listitem [ref=e65]:
+                  - link "Lançamentos" [ref=e66] [cursor=pointer]:
+                    - /url: https://awamotos.com/ofertas.html
+                - listitem [ref=e67]:
+                  - link "Catálogo" [ref=e68] [cursor=pointer]:
+                    - /url: https://awamotos.com/catalogsearch/result/
+    - list [ref=e74]:
+      - listitem [ref=e75]:
+        - link "⌂ Início" [ref=e76] [cursor=pointer]:
+          - /url: https://awamotos.com/
+      - listitem [ref=e77]:
+        - text: /
+        - strong [ref=e78]: Ret. BIZ 100 CR. Redondo Universal
+    - main [ref=e79]:
+      - generic [ref=e81]:
+        - generic [ref=e87]:
+          - generic [ref=e89]:
+            - link "Pular para o final da Galeria de imagens" [ref=e90] [cursor=pointer]:
+              - /url: "#gallery-next-area"
+            - generic [ref=e94]:
+              - img "Ret. BIZ 100 CR. Redondo Universal" [ref=e97]
+              - text: Clique para ampliar
+            - link "Saltar para o início da Galeria de imagens" [ref=e98] [cursor=pointer]:
+              - /url: "#gallery-prev-area"
+          - generic [ref=e100]:
+            - generic [ref=e101]:
+              - heading "Ret. BIZ 100 CR. Redondo Universal" [level=1] [ref=e103]:
+                - generic [ref=e104]: Ret. BIZ 100 CR. Redondo Universal
+              - generic [ref=e105]:
+                - generic [ref=e107]:
+                  - link "Faça login" [ref=e108] [cursor=pointer]:
+                    - /url: https://awamotos.com/customer/account/login/
+                  - text: para ver preços
+                - generic [ref=e109]:
+                  - generic "Disponibilidade" [ref=e110]:
+                    - text: "● Disponibilidade:"
+                    - generic [ref=e111]: Em estoque
+                  - generic [ref=e112]:
+                    - strong [ref=e113]: "SKU:"
+                    - generic [ref=e114]: "2220"
+              - generic [ref=e116]: Retrovisor Biz 100 cromado universal.
+            - generic [ref=e119]:
+              - generic [ref=e120]:
+                - text: "Cód: 2220"
+                - button "Copiar código" [ref=e121] [cursor=pointer]:
+                  - img [ref=e122]
+                  - generic [ref=e125]: Copiar
+              - generic [ref=e126]: Em estoque
+              - generic [ref=e128]:
+                - strong [ref=e129]:
+                  - img [ref=e130]
+                  - text: Condição Especial B2B
+                - text: Consulte as faixas de desconto para compras em quantidade master.
+              - generic [ref=e133]:
+                - generic [ref=e134]:
+                  - generic:
+                    - generic: Qtd
+                  - generic [ref=e135]:
+                    - button "Diminuir quantidade" [ref=e136] [cursor=pointer]: −
+                    - spinbutton "Quantidade" [ref=e137]: "1"
+                    - button "Aumentar quantidade" [ref=e138] [cursor=pointer]: +
+                - button "Adicionar ao Carrinho" [ref=e140] [cursor=pointer]:
+                  - generic [ref=e141]: Adicionar ao Carrinho
+              - link "Tirar dúvida sobre este produto via WhatsApp" [ref=e142] [cursor=pointer]:
+                - /url: https://wa.me/5516997367588?text=Ol%C3%A1%21%20Gostaria%20de%20tirar%20uma%20d%C3%BAvida%20sobre%20o%20produto%3A%20Ret.%20BIZ%20100%20CR.%20Redondo%20Universal%20%28C%C3%B3d%3A%202220%29%20%E2%80%94%20https%3A%2F%2Fawamotos.com%2Fret-biz-100-cr-redondo-universal-2220.html
+                - img [ref=e143]
+                - generic [ref=e145]: Tirar dúvida via WhatsApp
+              - generic "Garantias de compra" [ref=e146]:
+                - generic [ref=e147]:
+                  - img [ref=e148]
+                  - generic [ref=e153]: Envio imediato
+                - generic [ref=e154]:
+                  - img [ref=e155]
+                  - generic [ref=e157]: Garantia de fábrica
+                - generic [ref=e158]:
+                  - img [ref=e159]
+                  - generic [ref=e162]: Troca em 30 dias
+                - generic [ref=e163]:
+                  - img [ref=e164]
+                  - generic [ref=e166]: Parcela em 10x
+              - generic [ref=e167]:
+                - link "📋 Solicitar Cotação" [ref=e168] [cursor=pointer]:
+                  - /url: https://awamotos.com/b2b/quote/
+                  - generic [ref=e169]: 📋
+                  - generic [ref=e170]: Solicitar Cotação
+                - paragraph [ref=e171]: Receba uma proposta personalizada para sua empresa
+            - generic [ref=e172]:
+              - link "Imprimir" [ref=e173] [cursor=pointer]:
+                - /url: "#"
+                - generic [ref=e174]: 
+                - generic [ref=e175]: Imprimir
+              - link "Compartilhar" [ref=e176] [cursor=pointer]:
+                - /url: https://www.facebook.com/sharer.php?u=https://awamotos.com/ret-biz-100-cr-redondo-universal-2220.html
+                - generic [ref=e177]: 
+                - generic [ref=e178]: Compartilhar
+            - generic [ref=e179]:
+              - button "Adicionar à Lista de Reposição" [ref=e181] [cursor=pointer]:
+                - img [ref=e182]
+                - text: Adicionar à Lista de Reposição
+              - generic [ref=e183]:
+                - link "Cotação para Lote" [ref=e184] [cursor=pointer]:
+                  - /url: https://wa.me/5516997367588?text=Ol%C3%A1%2C%20gostaria%20de%20solicitar%20cota%C3%A7%C3%A3o%20para%20lote%20do%20produto%3A%20Ret.%20BIZ%20100%20CR.%20Redondo%20Universal%20%28SKU%3A%202220%29%20%E2%80%94%20https%3A%2F%2Fawamotos.com%2Fret-biz-100-cr-redondo-universal-2220.html%2F
+                  - img [ref=e185]
+                  - text: Cotação para Lote
+                - link "Minhas Cotações" [ref=e188] [cursor=pointer]:
+                  - /url: https://awamotos.com/b2b/quote/index/product_id/4/
+                  - img [ref=e189]
+                  - text: Minhas Cotações
+                - button "Imprimir Ficha" [ref=e192] [cursor=pointer]: Imprimir Ficha
+        - text: "* * * *"
+        - generic [ref=e196]:
+          - heading "🏍️ Compatibilidade / Aplicação" [level=2] [ref=e198]:
+            - generic [ref=e199]: 🏍️
+            - text: Compatibilidade / Aplicação
+          - generic [ref=e200]:
+            - paragraph [ref=e201]: "Este produto é compatível com os seguintes modelos:"
+            - generic "Resumo da compatibilidade" [ref=e202]:
+              - generic [ref=e203]: 1 marca
+              - generic [ref=e204]: 1 modelo
+            - generic [ref=e205]:
+              - heading "Honda" [level=3] [ref=e206]
+              - list [ref=e207]:
+                - listitem [ref=e208]:
+                  - text: ✓
+                  - generic [ref=e209]: Biz 100 (1998-2015) 100
+            - paragraph [ref=e210]: ⚠️ Verifique sempre as especificações do seu veículo antes da compra.
+        - tablist [ref=e212]:
+          - tab "Detalhes" [expanded] [ref=e213] [cursor=pointer]:
+            - link "Detalhes" [ref=e214]:
+              - /url: "#description"
+          - tabpanel "Detalhes" [ref=e215]:
+            - generic [ref=e217]: Retrovisor possui acabamento com injeção interna, em ABS Possuem a articulação em esfera de aço e conformação a frio, Ajuste com porca e parafuso, Garantia de cromeação Fixação do espelho por contração.
+          - tab "Mais Informações" [ref=e218] [cursor=pointer]:
+            - link "Mais Informações" [ref=e219]:
+              - /url: "#additional"
+        - region "Produtos Relacionados" [ref=e220]:
+          - heading "Produtos Relacionados" [level=2] [ref=e222]
+          - generic [ref=e224]:
+            - generic [ref=e225]:
+              - generic [ref=e227]:
+                - link "Ret. Bmw GS 650/800 Haste Curta Padrao Honda DIR/ESQ" [ref=e229] [cursor=pointer]:
+                  - /url: https://awamotos.com/ret-bmw-gs-650-800-haste-curta-padrao-honda-dir-esq-649.html
+                  - img "Ret. Bmw GS 650/800 Haste Curta Padrao Honda DIR/ESQ" [ref=e233]
+                  - text: Ver produto
+                - generic [ref=e234]:
+                  - link "Ret. Bmw GS 650/800 Haste Curta Padrao Honda DIR/ESQ" [ref=e236] [cursor=pointer]:
+                    - /url: https://awamotos.com/ret-bmw-gs-650-800-haste-curta-padrao-honda-dir-esq-649.html
+                  - generic [ref=e238]:
+                    - link "Faça login" [ref=e239] [cursor=pointer]:
+                      - /url: https://awamotos.com/b2b/account/login/
+                    - generic [ref=e240]: para ver preços
+              - generic [ref=e243]:
+                - link "ANTENA ANTI CEROL FIXA - Pacote com 10 pç's" [ref=e245] [cursor=pointer]:
+                  - /url: https://awamotos.com/antena-anti-cerol-fixa-pacote-com-10-pc-s-1125.html
+                  - img "ANTENA ANTI CEROL FIXA - Pacote com 10 pç's" [ref=e249]
+                  - text: Ver produto
+                - generic [ref=e250]:
+                  - link "ANTENA ANTI CEROL FIXA - Pacote com 10 pç's" [ref=e252] [cursor=pointer]:
+                    - /url: https://awamotos.com/antena-anti-cerol-fixa-pacote-com-10-pc-s-1125.html
+                  - generic [ref=e254]:
+                    - link "Faça login" [ref=e255] [cursor=pointer]:
+                      - /url: https://awamotos.com/b2b/account/login/
+                    - generic [ref=e256]: para ver preços
+              - generic [ref=e259]:
+                - link "Ret. XT 660 Rotativo Padrão Honda DIR/ESQ" [ref=e261] [cursor=pointer]:
+                  - /url: https://awamotos.com/ret-xt-660-rotativo-padrao-honda-dir-esq-525.html
+                  - img "Ret. XT 660 Rotativo Padrão Honda DIR/ESQ" [ref=e265]
+                  - text: Ver produto
+                - generic [ref=e266]:
+                  - link "Ret. XT 660 Rotativo Padrão Honda DIR/ESQ" [ref=e268] [cursor=pointer]:
+                    - /url: https://awamotos.com/ret-xt-660-rotativo-padrao-honda-dir-esq-525.html
+                  - generic [ref=e270]:
+                    - link "Faça login" [ref=e271] [cursor=pointer]:
+                      - /url: https://awamotos.com/b2b/account/login/
+                    - generic [ref=e272]: para ver preços
+              - generic [ref=e275]:
+                - link "Ret. XT 660 Rotativo Padrão Yam. DIR/ESQ" [ref=e277] [cursor=pointer]:
+                  - /url: https://awamotos.com/ret-xt-660-rotativo-padrao-yam-dir-esq-526.html
+                  - img "Ret. XT 660 Rotativo Padrão Yam. DIR/ESQ" [ref=e281]
+                  - text: Ver produto
+                - generic [ref=e282]:
+                  - link "Ret. XT 660 Rotativo Padrão Yam. DIR/ESQ" [ref=e284] [cursor=pointer]:
+                    - /url: https://awamotos.com/ret-xt-660-rotativo-padrao-yam-dir-esq-526.html
+                  - generic [ref=e286]:
+                    - link "Faça login" [ref=e287] [cursor=pointer]:
+                      - /url: https://awamotos.com/b2b/account/login/
+                    - generic [ref=e288]: para ver preços
+              - generic [ref=e291]:
+                - link "Ret. Twister CBX 250 CR. D/E" [ref=e293] [cursor=pointer]:
+                  - /url: https://awamotos.com/ret-twister-cbx-250-cr-d-e-2226.html
+                  - img "Ret. Twister CBX 250 CR. D/E" [ref=e297]
+                  - text: Ver produto
+                - generic [ref=e298]:
+                  - link "Ret. Twister CBX 250 CR. D/E" [ref=e300] [cursor=pointer]:
+                    - /url: https://awamotos.com/ret-twister-cbx-250-cr-d-e-2226.html
+                  - generic [ref=e302]:
+                    - link "Faça login" [ref=e303] [cursor=pointer]:
+                      - /url: https://awamotos.com/b2b/account/login/
+                    - generic [ref=e304]: para ver preços
+              - generic [ref=e307]:
+                - link "Ret. Mini Cb300 CR. D/E Honda" [ref=e309] [cursor=pointer]:
+                  - /url: https://awamotos.com/ret-mini-cb300-cr-d-e-honda-2205.html
+                  - img "Ret. Mini Cb300 CR. D/E Honda" [ref=e313]
+                  - text: Ver produto
+                - generic [ref=e314]:
+                  - link "Ret. Mini Cb300 CR. D/E Honda" [ref=e316] [cursor=pointer]:
+                    - /url: https://awamotos.com/ret-mini-cb300-cr-d-e-honda-2205.html
+                  - generic [ref=e318]:
+                    - link "Faça login" [ref=e319] [cursor=pointer]:
+                      - /url: https://awamotos.com/b2b/account/login/
+                    - generic [ref=e320]: para ver preços
+              - generic [ref=e323]:
+                - link "Retrovisor XRE 300 Sahara Mod. 24/25 / Xr300L Tornado Mod. 25 DIR/ESQ (Rosca Esquerda)" [ref=e325] [cursor=pointer]:
+                  - /url: https://awamotos.com/retrovisor-xre-300-sahara-mod-24-25-xr300l-tornado-mod-25-dir-esq-rosca-esquerda-684.html
+                  - img "Retrovisor XRE 300 Sahara Mod. 24/25 / Xr300L Tornado Mod. 25 DIR/ESQ (Rosca Esquerda)" [ref=e329]
+                  - text: Ver produto
+                - generic [ref=e330]:
+                  - link "Retrovisor XRE 300 Sahara Mod. 24/25 / Xr300L Tornado Mod. 25 DIR/ESQ (Rosca Esquerda)" [ref=e332] [cursor=pointer]:
+                    - /url: https://awamotos.com/retrovisor-xre-300-sahara-mod-24-25-xr300l-tornado-mod-25-dir-esq-rosca-esquerda-684.html
+                  - generic [ref=e334]:
+                    - link "Faça login" [ref=e335] [cursor=pointer]:
+                      - /url: https://awamotos.com/b2b/account/login/
+                    - generic [ref=e336]: para ver preços
+              - generic [ref=e339]:
+                - link "Guidao CB 300 Mod. 09/15 Cromado com Bucha Para Fixacao de Peso" [ref=e341] [cursor=pointer]:
+                  - /url: https://awamotos.com/guidao-cb-300-mod-09-15-cromado-com-bucha-para-fixacao-de-peso-2352.html
+                  - img "Guidao CB 300 Mod. 09/15 Cromado com Bucha Para Fixacao de Peso" [ref=e345]
+                  - text: Ver produto
+                - generic [ref=e346]:
+                  - link "Guidao CB 300 Mod. 09/15 Cromado com Bucha Para Fixacao de Peso" [ref=e348] [cursor=pointer]:
+                    - /url: https://awamotos.com/guidao-cb-300-mod-09-15-cromado-com-bucha-para-fixacao-de-peso-2352.html
+                  - generic [ref=e350]:
+                    - link "Faça login" [ref=e351] [cursor=pointer]:
+                      - /url: https://awamotos.com/b2b/account/login/
+                    - generic [ref=e352]: para ver preços
+            - generic "Próximo" [ref=e354] [cursor=pointer]
+            - generic "Anterior" [ref=e355] [cursor=pointer]
+    - contentinfo [ref=e356]:
+      - contentinfo [ref=e357]:
+        - region "Diferenciais AWA Motos" [ref=e358]:
+          - generic [ref=e360]:
+            - generic [ref=e361]:
+              - img [ref=e363]
+              - generic [ref=e365]:
+                - strong [ref=e366]: Envio p/ Todo Brasil
+                - generic [ref=e367]: Logística rápida para varejo e atacado
+            - generic [ref=e368]:
+              - img [ref=e370]
+              - generic [ref=e372]:
+                - strong [ref=e373]: Compra 100% Segura
+                - generic [ref=e374]: Checkout protegido e antifraude
+            - generic [ref=e375]:
+              - img [ref=e377]
+              - generic [ref=e379]:
+                - strong [ref=e380]: Garantia de Fábrica
+                - generic [ref=e381]: Peças com origem e suporte confiáveis
+            - generic [ref=e382]:
+              - img [ref=e384]
+              - generic [ref=e386]:
+                - strong [ref=e387]: Condições de Atacado
+                - generic [ref=e388]: Preço progressivo e atendimento B2B
+        - region "Atendimento direto para cotação, recompra e atacado" [ref=e389]:
+          - generic [ref=e391]:
+            - generic [ref=e392]:
+              - generic [ref=e393]: Canal Comercial
+              - heading "Atendimento direto para cotação, recompra e atacado" [level=3] [ref=e394]
+              - paragraph [ref=e395]: Use os canais abaixo para falar com a equipe da AWA Motos e acelerar pedidos, dúvidas de estoque e negociações comerciais.
+            - generic [ref=e396]:
+              - link "WhatsApp Comercial Resposta rápida para pedido e cotação" [ref=e397] [cursor=pointer]:
+                - /url: https://wa.me/5516997367588
+                - generic [ref=e399]: 
+                - generic [ref=e400]:
+                  - strong [ref=e401]: WhatsApp Comercial
+                  - generic [ref=e402]: Resposta rápida para pedido e cotação
+              - link "(16) 3301-1890 Atendimento por telefone" [ref=e403] [cursor=pointer]:
+                - /url: tel:+551633011890
+                - generic [ref=e405]: 
+                - generic [ref=e406]:
+                  - strong [ref=e407]: (16) 3301-1890
+                  - generic [ref=e408]: Atendimento por telefone
+              - link "falecom@awamotos.com.br Canal para compras corporativas" [ref=e409] [cursor=pointer]:
+                - /url: mailto:falecom@awamotos.com.br
+                - generic [ref=e411]: 
+                - generic [ref=e412]:
+                  - strong [ref=e413]: falecom@awamotos.com.br
+                  - generic [ref=e414]: Canal para compras corporativas
+        - generic [ref=e415]:
+          - generic [ref=e418]:
+            - generic [ref=e419]:
+              - img [ref=e421]
+              - generic [ref=e424]:
+                - heading "Receba ofertas exclusivas" [level=3] [ref=e425]
+                - paragraph [ref=e426]: Cadastre-se e receba promoções, lançamentos e conteúdos técnicos sobre motos.
+            - generic [ref=e428]:
+              - generic [ref=e429]: Receba nossas novidades
+              - generic [ref=e431]:
+                - textbox "Endereço de e-mail para newsletter" [ref=e433]:
+                  - /placeholder: Seu endereço de e-mail...
+                - button "Assinar newsletter" [ref=e435] [cursor=pointer]: Assinar
+          - generic [ref=e437]:
+            - generic [ref=e439]:
+              - heading "Quem somos" [level=4] [ref=e440]
+              - generic "Quem somos" [ref=e441]:
+                - list [ref=e442]:
+                  - listitem [ref=e443]:
+                    - link "Sobre a Awa" [ref=e444] [cursor=pointer]:
+                      - /url: https://awamotos.com/about-us/
+                  - listitem [ref=e445]:
+                    - link "Programa de Parceiros" [ref=e446] [cursor=pointer]:
+                      - /url: https://awamotos.com/seja-revendedor/
+                  - listitem [ref=e447]:
+                    - link "Blog da Awa" [ref=e448] [cursor=pointer]:
+                      - /url: https://awamotos.com/blog/
+                  - listitem [ref=e449]:
+                    - link "Trabalhe Conosco" [ref=e450] [cursor=pointer]:
+                      - /url: https://awamotos.com/trabalhe-conosco/
+                  - listitem [ref=e451]:
+                    - link "Nossas Marcas" [ref=e452] [cursor=pointer]:
+                      - /url: https://awamotos.com/nossas-marcas/
+                  - listitem [ref=e453]:
+                    - link "Catálogo" [ref=e454] [cursor=pointer]:
+                      - /url: https://awamotos.com/catalogsearch/result/
+            - generic [ref=e456]:
+              - heading "Suporte e Segurança" [level=4] [ref=e457]
+              - generic "Suporte e Segurança" [ref=e458]:
+                - list [ref=e459]:
+                  - listitem [ref=e460]:
+                    - link "Atendimento" [ref=e461] [cursor=pointer]:
+                      - /url: https://awamotos.com/customer-service/
+                  - listitem [ref=e462]:
+                    - link "Formas de Pagamento" [ref=e463] [cursor=pointer]:
+                      - /url: https://awamotos.com/formas-pagamento/
+                  - listitem [ref=e464]:
+                    - link "Formas de Entrega" [ref=e465] [cursor=pointer]:
+                      - /url: https://awamotos.com/shipping/
+                  - listitem [ref=e466]:
+                    - link "Trocas e Devoluções" [ref=e467] [cursor=pointer]:
+                      - /url: https://awamotos.com/returns/
+                  - listitem [ref=e468]:
+                    - link "Política de Privacidade" [ref=e469] [cursor=pointer]:
+                      - /url: https://awamotos.com/politica-de-privacidade/
+                  - listitem [ref=e470]:
+                    - link "Termos de Uso" [ref=e471] [cursor=pointer]:
+                      - /url: https://awamotos.com/terms/
+            - generic [ref=e473]:
+              - heading "Principais Categorias" [level=4] [ref=e474]
+              - generic "Principais Categorias" [ref=e475]:
+                - list [ref=e476]:
+                  - listitem [ref=e477]:
+                    - link "Bagageiros" [ref=e478] [cursor=pointer]:
+                      - /url: https://awamotos.com/bagageiros.html
+                  - listitem [ref=e479]:
+                    - link "Cavaletes" [ref=e480] [cursor=pointer]:
+                      - /url: https://awamotos.com/cavaletes.html
+                  - listitem [ref=e481]:
+                    - link "Guidão" [ref=e482] [cursor=pointer]:
+                      - /url: https://awamotos.com/guidoes.html
+                  - listitem [ref=e483]:
+                    - link "Bauletos" [ref=e484] [cursor=pointer]:
+                      - /url: https://awamotos.com/bauletos.html
+                  - listitem [ref=e485]:
+                    - link "Retrovisores" [ref=e486] [cursor=pointer]:
+                      - /url: https://awamotos.com/retrovisores.html
+                  - listitem [ref=e487]:
+                    - link "Manetes" [ref=e488] [cursor=pointer]:
+                      - /url: https://awamotos.com/manetes.html
+            - generic [ref=e490]:
+              - heading "Atendimento" [level=4] [ref=e491]
+              - generic "Atendimento" [ref=e492]:
+                - paragraph [ref=e493]: Telefone / SAC
+                - paragraph [ref=e494]:
+                  - link "(16) 3301-1890" [ref=e495] [cursor=pointer]:
+                    - /url: tel:+551633011890
+                - paragraph [ref=e496]:
+                  - link "falecom@awamotos.com.br" [ref=e497] [cursor=pointer]:
+                    - /url: mailto:falecom@awamotos.com.br
+                - generic [ref=e498]:
+                  - paragraph [ref=e499]: AWA Motos
+                  - paragraph [ref=e500]: "R. Lavineo de Arruda Falcão, 1272 - Araraquara - CEP: 14808-390"
+                - list [ref=e501]:
+                  - listitem [ref=e502]:
+                    - link "Converse por WhatsApp" [ref=e503] [cursor=pointer]:
+                      - /url: https://wa.me/5516997367588
+                      - img [ref=e505]
+                      - text: Converse por WhatsApp
+                  - listitem [ref=e507]:
+                    - link "? Central de ajuda e suporte" [ref=e508] [cursor=pointer]:
+                      - /url: https://awamotos.com/customer-service/
+                      - img [ref=e510]:
+                        - generic [ref=e512]: "?"
+                      - text: Central de ajuda e suporte
+                - paragraph [ref=e513]: Siga a Awa Motos
+                - navigation "Redes sociais AWA Motos" [ref=e514]:
+                  - link "AWA Motos no Facebook" [ref=e515] [cursor=pointer]:
+                    - /url: https://www.facebook.com/awamotos
+                    - img [ref=e516]
+                  - link "AWA Motos no Instagram" [ref=e518] [cursor=pointer]:
+                    - /url: https://www.instagram.com/awamotos
+                    - img [ref=e519]
+                  - link "AWA Motos no YouTube" [ref=e521] [cursor=pointer]:
+                    - /url: https://www.youtube.com/@awamotos
+                    - img [ref=e522]
+                  - link "AWA Motos no Pinterest" [ref=e524] [cursor=pointer]:
+                    - /url: https://www.pinterest.com.br/awamotos/
+                    - img [ref=e525]
+      - generic [ref=e529]:
+        - generic [ref=e530]:
+          - link "AWA Motos" [ref=e532] [cursor=pointer]:
+            - /url: https://awamotos.com/
+            - img "AWA Motos" [ref=e533]
+          - region "Pagamentos" [ref=e535]:
+            - paragraph [ref=e536]: Pague com
+            - list "Formas de pagamento aceitas" [ref=e537]:
+              - listitem [ref=e538]:
+                - img "Visa" [ref=e539]
+              - listitem [ref=e540]:
+                - img "Mastercard" [ref=e541]
+              - listitem [ref=e542]:
+                - img "Elo" [ref=e543]
+              - listitem [ref=e544]:
+                - img "American Express" [ref=e545]
+              - listitem [ref=e546]:
+                - img "Diners Club" [ref=e547]
+              - listitem [ref=e548]:
+                - img "Boleto Bancário" [ref=e549]
+              - listitem [ref=e550]:
+                - img "PIX" [ref=e551]
+          - region "Certificados e Segurança" [ref=e553]:
+            - paragraph [ref=e554]: Certificados e Segurança
+            - list "Selos de segurança" [ref=e555]:
+              - listitem [ref=e556]:
+                - link "Certificado SSL 256 bits" [ref=e557] [cursor=pointer]:
+                  - /url: https://www.ssllabs.com/ssltest/analyze.html?d=awamotos.com
+                  - img [ref=e558]
+              - listitem [ref=e560]:
+                - link "Google Safe Browsing" [ref=e561] [cursor=pointer]:
+                  - /url: https://transparencyreport.google.com/safe-browsing/search?url=awamotos.com
+                  - img [ref=e562]
+        - generic [ref=e564]:
+          - paragraph [ref=e565]: © 2026 - Awa Motos
+          - paragraph [ref=e566]: Todos os direitos reservados © 2026 - AWA Motos. - CNPJ 77.044.618/0001-88
+          - paragraph [ref=e567]: Os preços e condições de pagamento são válidos para o dia de hoje e exclusivas via internet. Na divergência de preços fica válido o apresentado no carrinho. Ofertas válidas até o término de nossos estoques. Vendas sujeitas à análise, confirmação de dados e estoque. As imagens são ilustrativas e informações sobre os produtos são resumidas e sujeitas à alteração sem aviso prévio.
+      - generic [ref=e570]:
+        - generic [ref=e571]: DESENVOLVIDO POR
+        - link "Bluu Consulting - Desenvolvimento do site" [ref=e572] [cursor=pointer]:
+          - /url: https://bluuconsulting.com.br
+          - img "Bluu Consulting" [ref=e573]
+```

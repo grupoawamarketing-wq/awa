@@ -34,7 +34,7 @@ define([
                 datasets: [{
                     label: 'Compras (R$)',
                     data: values,
-                    borderColor: '#b73337',
+                    borderColor: '#A33B3B',
                     backgroundColor: gradient,
                     fill: true,
                     tension: 0.4,
@@ -42,7 +42,7 @@ define([
                     pointBackgroundColor: '#fff',
                     pointBorderWidth: 2,
                     pointHoverRadius: 6,
-                    pointHoverBackgroundColor: '#b73337'
+                    pointHoverBackgroundColor: '#A33B3B'
                 }]
             },
             options: {

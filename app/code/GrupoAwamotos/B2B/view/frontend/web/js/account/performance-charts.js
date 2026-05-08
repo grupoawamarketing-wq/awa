@@ -30,7 +30,7 @@ define([
                     {
                         label: $t('Volume de Compras (R$)'),
                         data: revenueData,
-                        borderColor: '#b73337',
+                        borderColor: '#A33B3B',
                         backgroundColor: 'rgba(183, 51, 55, 0.1)',
                         borderWidth: 3,
                         fill: true,

@@ -1,0 +1,112 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - progressbar "Progresso de leitura"
+  - link "Ir para o conteúdo principal" [ref=e2] [cursor=pointer]:
+    - /url: "#maincontent"
+  - link "Ir para a navegação" [ref=e3] [cursor=pointer]:
+    - /url: "#awa-primary-navigation"
+  - generic [ref=e4]:
+    - banner [ref=e5]:
+      - generic [ref=e7]:
+        - generic [ref=e12]:
+          - generic [ref=e13]:
+            - button "Abrir menu de navegação" [ref=e14] [cursor=pointer]:
+              - img
+              - generic [ref=e15]: Abrir menu de navegação
+            - link "AWA Motos - Página inicial" [ref=e18] [cursor=pointer]:
+              - /url: https://awamotos.com/
+              - img "AWA Motos" [ref=e19]
+            - link "Abrir carrinho" [ref=e20] [cursor=pointer]:
+              - /url: https://awamotos.com/checkout/cart/
+              - img [ref=e21]
+          - search "Busca de produtos" [ref=e27]:
+            - generic [ref=e28]:
+              - generic [ref=e29]:
+                - generic [ref=e30]:
+                  - generic [ref=e31]: Digite ao menos 2 caracteres para começar a pesquisar.
+                  - combobox "Buscar" [ref=e34]
+                - button "Buscar produtos" [disabled] [ref=e36] [cursor=pointer]:
+                  - generic [ref=e37]: Buscar
+                  - img
+              - text: "Busca rápida:"
+          - generic [ref=e40]:
+            - link "Ver carrinho de compras" [ref=e41] [cursor=pointer]:
+              - /url: https://awamotos.com/checkout/cart/
+              - generic [ref=e42]: Carrinho de compras
+            - text: ✕ 🛒
+        - navigation "Navegação principal da loja" [ref=e43]:
+          - generic [ref=e45]:
+            - generic [ref=e46] [cursor=pointer]:
+              - navigation "Menu de categorias":
+                - navigation "Categorias de Produtos":
+                  - button "Departamentos":
+                    - generic:
+                      - text: 
+                      - img
+                    - generic: Departamentos
+                  - text:        OFERTA  % % +  ↓
+            - navigation "Links rápidos de categorias" [ref=e47]:
+              - list [ref=e48]:
+                - listitem [ref=e49]:
+                  - link "Nossas Marcas" [ref=e50] [cursor=pointer]:
+                    - /url: https://awamotos.com/nossas-marcas/
+                - listitem [ref=e51]:
+                  - link "Lançamentos" [ref=e52] [cursor=pointer]:
+                    - /url: https://awamotos.com/ofertas.html/
+                - listitem [ref=e53]:
+                  - link "Catálogo" [ref=e54] [cursor=pointer]:
+                    - /url: https://awamotos.com/catalogsearch/result/
+    - main [ref=e55]:
+      - heading "Carrinho de Compras" [level=1] [ref=e57]:
+        - generic [ref=e58]: Carrinho de Compras
+      - generic [ref=e60]:
+        - text: "* * * *"
+        - generic [ref=e61]:
+          - img [ref=e63]
+          - paragraph [ref=e67]: Seu carrinho está vazio
+          - paragraph [ref=e68]: Adicione peças e acessórios para sua moto e aproveite nossas condições exclusivas.
+          - link "Continuar comprando →" [ref=e69] [cursor=pointer]:
+            - /url: https://awamotos.com/
+    - contentinfo [ref=e70]:
+      - text:    + + + +
+      - generic [ref=e73]:
+        - generic [ref=e74]:
+          - link "AWA Motos" [ref=e76] [cursor=pointer]:
+            - /url: https://awamotos.com/
+            - img "AWA Motos" [ref=e77]
+          - region "Pagamentos" [ref=e79]:
+            - paragraph [ref=e80]: Pague com
+            - list "Formas de pagamento aceitas" [ref=e81]:
+              - listitem [ref=e82]:
+                - img "Visa" [ref=e83]
+              - listitem [ref=e84]:
+                - img "Mastercard" [ref=e85]
+              - listitem [ref=e86]:
+                - img "Elo" [ref=e87]
+              - listitem [ref=e88]:
+                - img "American Express" [ref=e89]
+              - listitem [ref=e90]:
+                - img "Diners Club" [ref=e91]
+              - listitem [ref=e92]:
+                - img "Boleto Bancário" [ref=e93]
+              - listitem [ref=e94]:
+                - img "PIX" [ref=e95]
+          - region "Certificados e Segurança" [ref=e97]:
+            - paragraph [ref=e98]: Certificados e Segurança
+            - list "Selos de segurança" [ref=e99]:
+              - listitem [ref=e100]:
+                - link "Certificado SSL 256 bits" [ref=e101] [cursor=pointer]:
+                  - /url: https://www.ssllabs.com/ssltest/analyze.html?d=awamotos.com
+                  - img [ref=e102]
+              - listitem [ref=e104]:
+                - link "Google Safe Browsing" [ref=e105] [cursor=pointer]:
+                  - /url: https://transparencyreport.google.com/safe-browsing/search?url=awamotos.com
+                  - img [ref=e106]
+        - generic [ref=e108]:
+          - paragraph [ref=e109]: © 2026 - Awa Motos
+          - paragraph [ref=e110]: Todos os direitos reservados © 2026 - AWA Motos. - CNPJ 77.044.618/0001-88
+          - paragraph [ref=e111]: Os preços e condições de pagamento são válidos para o dia de hoje e exclusivas via internet. Na divergência de preços fica válido o apresentado no carrinho. Ofertas válidas até o término de nossos estoques. Vendas sujeitas à análise, confirmação de dados e estoque. As imagens são ilustrativas e informações sobre os produtos são resumidas e sujeitas à alteração sem aviso prévio.
+  - navigation "Navegação Móvel" [ref=e112]
+```

@@ -1,0 +1,441 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - progressbar "Progresso de leitura"
+  - link "Ir para o conteúdo principal" [ref=e2] [cursor=pointer]:
+    - /url: "#maincontent"
+  - link "Ir para a navegação" [ref=e3] [cursor=pointer]:
+    - /url: "#awa-primary-navigation"
+  - generic [ref=e4]:
+    - banner [ref=e5]:
+      - generic [ref=e7]:
+        - generic [ref=e12]:
+          - generic [ref=e13]:
+            - button "Abrir menu de navegação" [ref=e14] [cursor=pointer]:
+              - img
+              - generic [ref=e15]: Abrir menu de navegação
+            - link "AWA Motos - Página inicial" [ref=e18] [cursor=pointer]:
+              - /url: https://awamotos.com/
+              - img "AWA Motos" [ref=e19]
+            - link "Abrir carrinho" [ref=e20] [cursor=pointer]:
+              - /url: https://awamotos.com/checkout/cart/
+              - img [ref=e21]
+          - search "Busca de produtos" [ref=e27]:
+            - generic [ref=e28]:
+              - generic [ref=e29]:
+                - generic [ref=e30]:
+                  - generic [ref=e31]: Digite ao menos 2 caracteres para começar a pesquisar.
+                  - combobox "Buscar" [ref=e34]
+                - button "Buscar produtos" [disabled] [ref=e36] [cursor=pointer]:
+                  - generic [ref=e37]: Buscar
+                  - img
+              - text: "Busca rápida:"
+          - generic [ref=e40]:
+            - link "Ver carrinho de compras" [ref=e41] [cursor=pointer]:
+              - /url: https://awamotos.com/checkout/cart/
+              - generic [ref=e42]: Carrinho de compras
+            - text: ✕ 🛒
+        - navigation "Navegação principal da loja" [ref=e43]:
+          - generic [ref=e45]:
+            - generic [ref=e46] [cursor=pointer]:
+              - navigation "Menu de categorias":
+                - navigation "Categorias de Produtos":
+                  - button "Departamentos":
+                    - generic:
+                      - text: 
+                      - img
+                    - generic: Departamentos
+                  - text:        OFERTA  % % +  ↓
+            - navigation "Links rápidos de categorias" [ref=e47]:
+              - list [ref=e48]:
+                - listitem [ref=e49]:
+                  - link "Nossas Marcas" [ref=e50] [cursor=pointer]:
+                    - /url: https://awamotos.com/nossas-marcas/
+                - listitem [ref=e51]:
+                  - link "Lançamentos" [ref=e52] [cursor=pointer]:
+                    - /url: https://awamotos.com/ofertas.html/
+                - listitem [ref=e53]:
+                  - link "Catálogo" [ref=e54] [cursor=pointer]:
+                    - /url: https://awamotos.com/catalogsearch/result/
+    - generic "Navegação estrutural" [ref=e59]:
+      - list [ref=e60]:
+        - listitem [ref=e61]:
+          - link "⌂ Início" [ref=e62] [cursor=pointer]:
+            - /url: https://awamotos.com/
+        - listitem [ref=e63]:
+          - text: /
+          - strong [ref=e64]: Bagageiros
+    - main [ref=e65]:
+      - generic [ref=e68]:
+        - 'banner "Categoria: Bagageiros" [ref=e70]':
+          - img [ref=e71]
+          - generic [ref=e73]:
+            - heading "Bagageiros" [level=1] [ref=e74]
+            - paragraph [ref=e75]: 24 produtos no catálogo
+        - text:  * * * *
+        - generic [ref=e77]:
+          - generic [ref=e81]:
+            - 'combobox "Ordenar por: Ordenar por:" [ref=e83] [cursor=pointer]':
+              - option "Posição" [selected]
+              - option "Nome do Produto"
+              - option "Preço"
+            - text: →
+          - list [ref=e85]:
+            - listitem [ref=e86]:
+              - link "Bagageiro Titan 125 Modelo 00/04 / Fan 125 Modelo 05/08 Cromado (Macico)" [ref=e88] [cursor=pointer]:
+                - /url: https://awamotos.com/bagageiros/bagageiro-titan-125-modelo-00-04-fan-125-modelo-05-08-cromado-macico-3015.html
+                - img "Bagageiro Titan 125 Modelo 00/04 / Fan 125 Modelo 05/08 Cromado (Macico)" [ref=e92]
+              - generic [ref=e93]:
+                - heading "Bagageiro Titan 125 Modelo 00/04 / Fan 125 Modelo 05/08 Cromado (Macico)" [level=3] [ref=e94]:
+                  - link "Bagageiro Titan 125 Modelo 00/04 / Fan 125 Modelo 05/08 Cromado (Macico)" [ref=e95] [cursor=pointer]:
+                    - /url: https://awamotos.com/bagageiros/bagageiro-titan-125-modelo-00-04-fan-125-modelo-05-08-cromado-macico-3015.html
+                - generic "Código do produto"
+                - generic [ref=e96]:
+                  - generic:
+                    - img
+                    - text: Pronta Entrega
+                - generic [ref=e99]:
+                  - link "Faça login" [ref=e100] [cursor=pointer]:
+                    - /url: https://awamotos.com/customer/account/login/
+                  - text: para ver preços
+                - button "Adicionar Bagageiro Titan 125 Modelo 00/04 / Fan 125 Modelo 05/08 Cromado (Macico) ao Carrinho" [ref=e104] [cursor=pointer]:
+                  - generic [ref=e105]: Adicionar ao Carrinho
+            - listitem [ref=e106]:
+              - link "Bagageiro Titan 150 09/13 Modelo Preto (Macico)" [ref=e108] [cursor=pointer]:
+                - /url: https://awamotos.com/bagageiros/bagageiro-titan-150-09-13-modelo-preto-macico-3000.html
+                - img "Bagageiro Titan 150 09/13 Modelo Preto (Macico)" [ref=e112]
+              - generic [ref=e113]:
+                - heading "Bagageiro Titan 150 09/13 Modelo Preto (Macico)" [level=3] [ref=e114]:
+                  - link "Bagageiro Titan 150 09/13 Modelo Preto (Macico)" [ref=e115] [cursor=pointer]:
+                    - /url: https://awamotos.com/bagageiros/bagageiro-titan-150-09-13-modelo-preto-macico-3000.html
+                - generic "Código do produto"
+                - generic [ref=e116]:
+                  - generic:
+                    - img
+                    - text: Pronta Entrega
+                - generic [ref=e119]:
+                  - link "Faça login" [ref=e120] [cursor=pointer]:
+                    - /url: https://awamotos.com/customer/account/login/
+                  - text: para ver preços
+                - button "Adicionar Bagageiro Titan 150 09/13 Modelo Preto (Macico) ao Carrinho" [ref=e124] [cursor=pointer]:
+                  - generic [ref=e125]: Adicionar ao Carrinho
+            - listitem [ref=e126]:
+              - link "Bagageiro BIZ 100/110I/125 Modelo 11/17 Preto (Macico)" [ref=e128] [cursor=pointer]:
+                - /url: https://awamotos.com/bagageiros/bagageiro-biz-100-110i-125-modelo-11-17-preto-macico-3018.html
+                - img "Bagageiro BIZ 100/110I/125 Modelo 11/17 Preto (Macico)" [ref=e132]
+              - generic [ref=e133]:
+                - heading "Bagageiro BIZ 100/110I/125 Modelo 11/17 Preto (Macico)" [level=3] [ref=e134]:
+                  - link "Bagageiro BIZ 100/110I/125 Modelo 11/17 Preto (Macico)" [ref=e135] [cursor=pointer]:
+                    - /url: https://awamotos.com/bagageiros/bagageiro-biz-100-110i-125-modelo-11-17-preto-macico-3018.html
+                - generic "Código do produto"
+                - generic [ref=e136]:
+                  - generic:
+                    - img
+                    - text: Pronta Entrega
+                - generic [ref=e139]:
+                  - link "Faça login" [ref=e140] [cursor=pointer]:
+                    - /url: https://awamotos.com/customer/account/login/
+                  - text: para ver preços
+                - button "Adicionar Bagageiro BIZ 100/110I/125 Modelo 11/17 Preto (Macico) ao Carrinho" [ref=e144] [cursor=pointer]:
+                  - generic [ref=e145]: Adicionar ao Carrinho
+            - listitem [ref=e146]:
+              - link "Bagageiro YBR Factor 125 Modelo 09/15 Preto (Macico)" [ref=e148] [cursor=pointer]:
+                - /url: https://awamotos.com/bagageiros/bagageiro-ybr-factor-125-modelo-09-15-preto-macico-3016.html
+                - img "Bagageiro YBR Factor 125 Modelo 09/15 Preto (Macico)" [ref=e152]
+              - generic [ref=e153]:
+                - heading "Bagageiro YBR Factor 125 Modelo 09/15 Preto (Macico)" [level=3] [ref=e154]:
+                  - link "Bagageiro YBR Factor 125 Modelo 09/15 Preto (Macico)" [ref=e155] [cursor=pointer]:
+                    - /url: https://awamotos.com/bagageiros/bagageiro-ybr-factor-125-modelo-09-15-preto-macico-3016.html
+                - generic "Código do produto"
+                - generic [ref=e156]:
+                  - generic:
+                    - img
+                    - text: Pronta Entrega
+                - generic [ref=e159]:
+                  - link "Faça login" [ref=e160] [cursor=pointer]:
+                    - /url: https://awamotos.com/customer/account/login/
+                  - text: para ver preços
+                - button "Adicionar Bagageiro YBR Factor 125 Modelo 09/15 Preto (Macico) ao Carrinho" [ref=e164] [cursor=pointer]:
+                  - generic [ref=e165]: Adicionar ao Carrinho
+            - listitem [ref=e166]:
+              - link "Bagageiro Twister CBX 250 Modelo 01/08 Preto (Macico)" [ref=e168] [cursor=pointer]:
+                - /url: https://awamotos.com/bagageiros/bagageiro-twister-cbx-250-modelo-01-08-preto-macico-3012.html
+                - img "Bagageiro Twister CBX 250 Modelo 01/08 Preto (Macico)" [ref=e172]
+              - generic [ref=e173]:
+                - heading "Bagageiro Twister CBX 250 Modelo 01/08 Preto (Macico)" [level=3] [ref=e174]:
+                  - link "Bagageiro Twister CBX 250 Modelo 01/08 Preto (Macico)" [ref=e175] [cursor=pointer]:
+                    - /url: https://awamotos.com/bagageiros/bagageiro-twister-cbx-250-modelo-01-08-preto-macico-3012.html
+                - generic "Código do produto"
+                - generic [ref=e176]:
+                  - generic:
+                    - img
+                    - text: Pronta Entrega
+                - generic [ref=e179]:
+                  - link "Faça login" [ref=e180] [cursor=pointer]:
+                    - /url: https://awamotos.com/customer/account/login/
+                  - text: para ver preços
+                - button "Adicionar Bagageiro Twister CBX 250 Modelo 01/08 Preto (Macico) ao Carrinho" [ref=e184] [cursor=pointer]:
+                  - generic [ref=e185]: Adicionar ao Carrinho
+            - listitem [ref=e186]:
+              - link "Bagageiro Titan 150 Modelo 04/08 Preto (Macico)" [ref=e188] [cursor=pointer]:
+                - /url: https://awamotos.com/bagageiros/bagageiro-titan-150-modelo-04-08-preto-macico-3006.html
+                - img "Bagageiro Titan 150 Modelo 04/08 Preto (Macico)" [ref=e192]
+              - generic [ref=e193]:
+                - heading "Bagageiro Titan 150 Modelo 04/08 Preto (Macico)" [level=3] [ref=e194]:
+                  - link "Bagageiro Titan 150 Modelo 04/08 Preto (Macico)" [ref=e195] [cursor=pointer]:
+                    - /url: https://awamotos.com/bagageiros/bagageiro-titan-150-modelo-04-08-preto-macico-3006.html
+                - generic "Código do produto"
+                - generic [ref=e196]:
+                  - generic:
+                    - img
+                    - text: Pronta Entrega
+                - generic [ref=e199]:
+                  - link "Faça login" [ref=e200] [cursor=pointer]:
+                    - /url: https://awamotos.com/customer/account/login/
+                  - text: para ver preços
+                - button "Adicionar Bagageiro Titan 150 Modelo 04/08 Preto (Macico) ao Carrinho" [ref=e204] [cursor=pointer]:
+                  - generic [ref=e205]: Adicionar ao Carrinho
+            - listitem [ref=e206]:
+              - link "Bagageiro Fazer 250 Modelo 05/17 Preto (Macico)" [ref=e208] [cursor=pointer]:
+                - /url: https://awamotos.com/bagageiros/bagageiro-fazer-250-modelo-05-17-preto-macico-3008.html
+                - img "Bagageiro Fazer 250 Modelo 05/17 Preto (Macico)" [ref=e212]
+              - generic [ref=e213]:
+                - heading "Bagageiro Fazer 250 Modelo 05/17 Preto (Macico)" [level=3] [ref=e214]:
+                  - link "Bagageiro Fazer 250 Modelo 05/17 Preto (Macico)" [ref=e215] [cursor=pointer]:
+                    - /url: https://awamotos.com/bagageiros/bagageiro-fazer-250-modelo-05-17-preto-macico-3008.html
+                - generic "Código do produto"
+                - generic [ref=e216]:
+                  - generic:
+                    - img
+                    - text: Pronta Entrega
+                - generic [ref=e219]:
+                  - link "Faça login" [ref=e220] [cursor=pointer]:
+                    - /url: https://awamotos.com/customer/account/login/
+                  - text: para ver preços
+                - button "Adicionar Bagageiro Fazer 250 Modelo 05/17 Preto (Macico) ao Carrinho" [ref=e224] [cursor=pointer]:
+                  - generic [ref=e225]: Adicionar ao Carrinho
+            - listitem [ref=e226]:
+              - link "Bagageiro Titan 150 Modelo 04/08 Cromado (Macico)" [ref=e228] [cursor=pointer]:
+                - /url: https://awamotos.com/bagageiros/bagageiro-titan-150-modelo-04-08-cromado-macico-3007.html
+                - img "Bagageiro Titan 150 Modelo 04/08 Cromado (Macico)" [ref=e232]
+              - generic [ref=e233]:
+                - heading "Bagageiro Titan 150 Modelo 04/08 Cromado (Macico)" [level=3] [ref=e234]:
+                  - link "Bagageiro Titan 150 Modelo 04/08 Cromado (Macico)" [ref=e235] [cursor=pointer]:
+                    - /url: https://awamotos.com/bagageiros/bagageiro-titan-150-modelo-04-08-cromado-macico-3007.html
+                - generic "Código do produto"
+                - generic [ref=e236]:
+                  - generic:
+                    - img
+                    - text: Pronta Entrega
+                - generic [ref=e239]:
+                  - link "Faça login" [ref=e240] [cursor=pointer]:
+                    - /url: https://awamotos.com/customer/account/login/
+                  - text: para ver preços
+                - button "Adicionar Bagageiro Titan 150 Modelo 04/08 Cromado (Macico) ao Carrinho" [ref=e244] [cursor=pointer]:
+                  - generic [ref=e245]: Adicionar ao Carrinho
+            - listitem [ref=e246]:
+              - link "Bagageiro Fazer 150 Modelo 14/25 E Factor 150 Modelo 16/25 Preto (Macico)" [ref=e248] [cursor=pointer]:
+                - /url: https://awamotos.com/bagageiros/bagageiro-fazer-150-modelo-14-25-e-factor-150-modelo-16-25-preto-macico-3004.html
+                - img "Bagageiro Fazer 150 Modelo 14/25 E Factor 150 Modelo 16/25 Preto (Macico)" [ref=e252]
+              - generic [ref=e253]:
+                - heading "Bagageiro Fazer 150 Modelo 14/25 E Factor 150 Modelo 16/25 Preto (Macico)" [level=3] [ref=e254]:
+                  - link "Bagageiro Fazer 150 Modelo 14/25 E Factor 150 Modelo 16/25 Preto (Macico)" [ref=e255] [cursor=pointer]:
+                    - /url: https://awamotos.com/bagageiros/bagageiro-fazer-150-modelo-14-25-e-factor-150-modelo-16-25-preto-macico-3004.html
+                - generic "Código do produto"
+                - generic [ref=e256]:
+                  - generic:
+                    - img
+                    - text: Pronta Entrega
+                - generic [ref=e259]:
+                  - link "Faça login" [ref=e260] [cursor=pointer]:
+                    - /url: https://awamotos.com/customer/account/login/
+                  - text: para ver preços
+                - button "Adicionar Bagageiro Fazer 150 Modelo 14/25 E Factor 150 Modelo 16/25 Preto (Macico) ao Carrinho" [ref=e264] [cursor=pointer]:
+                  - generic [ref=e265]: Adicionar ao Carrinho
+            - listitem [ref=e266]:
+              - link "Bagageiro CB 300 Modelo 09/15 Preto (Macico)" [ref=e268] [cursor=pointer]:
+                - /url: https://awamotos.com/bagageiros/bagageiro-cb-300-modelo-09-15-preto-macico-3010.html
+                - img "Bagageiro CB 300 Modelo 09/15 Preto (Macico)" [ref=e272]
+              - generic [ref=e273]:
+                - heading "Bagageiro CB 300 Modelo 09/15 Preto (Macico)" [level=3] [ref=e274]:
+                  - link "Bagageiro CB 300 Modelo 09/15 Preto (Macico)" [ref=e275] [cursor=pointer]:
+                    - /url: https://awamotos.com/bagageiros/bagageiro-cb-300-modelo-09-15-preto-macico-3010.html
+                - generic "Código do produto"
+                - generic [ref=e276]:
+                  - generic:
+                    - img
+                    - text: Pronta Entrega
+                - generic [ref=e279]:
+                  - link "Faça login" [ref=e280] [cursor=pointer]:
+                    - /url: https://awamotos.com/customer/account/login/
+                  - text: para ver preços
+                - button "Adicionar Bagageiro CB 300 Modelo 09/15 Preto (Macico) ao Carrinho" [ref=e284] [cursor=pointer]:
+                  - generic [ref=e285]: Adicionar ao Carrinho
+            - listitem [ref=e286]:
+              - link "Bagageiro Titan 150 Modelo 09/13 Cromado (Macico)" [ref=e288] [cursor=pointer]:
+                - /url: https://awamotos.com/bagageiros/bagageiro-titan-150-modelo-09-13-cromado-macico-3001.html
+                - img "Bagageiro Titan 150 Modelo 09/13 Cromado (Macico)" [ref=e292]
+              - generic [ref=e293]:
+                - heading "Bagageiro Titan 150 Modelo 09/13 Cromado (Macico)" [level=3] [ref=e294]:
+                  - link "Bagageiro Titan 150 Modelo 09/13 Cromado (Macico)" [ref=e295] [cursor=pointer]:
+                    - /url: https://awamotos.com/bagageiros/bagageiro-titan-150-modelo-09-13-cromado-macico-3001.html
+                - generic "Código do produto"
+                - generic [ref=e296]:
+                  - generic:
+                    - img
+                    - text: Pronta Entrega
+                - generic [ref=e299]:
+                  - link "Faça login" [ref=e300] [cursor=pointer]:
+                    - /url: https://awamotos.com/customer/account/login/
+                  - text: para ver preços
+                - button "Adicionar Bagageiro Titan 150 Modelo 09/13 Cromado (Macico) ao Carrinho" [ref=e304] [cursor=pointer]:
+                  - generic [ref=e305]: Adicionar ao Carrinho
+            - listitem [ref=e306]:
+              - link "Bagageiro Titan 125 Modelo 00/04 / Fan 125 Modelo 05/08 Preto (Macico)" [ref=e308] [cursor=pointer]:
+                - /url: https://awamotos.com/bagageiros/bagageiro-titan-125-modelo-00-04-fan-125-modelo-05-08-preto-macico-3014.html
+                - img "Bagageiro Titan 125 Modelo 00/04 / Fan 125 Modelo 05/08 Preto (Macico)" [ref=e312]
+              - generic [ref=e313]:
+                - heading "Bagageiro Titan 125 Modelo 00/04 / Fan 125 Modelo 05/08 Preto (Macico)" [level=3] [ref=e314]:
+                  - link "Bagageiro Titan 125 Modelo 00/04 / Fan 125 Modelo 05/08 Preto (Macico)" [ref=e315] [cursor=pointer]:
+                    - /url: https://awamotos.com/bagageiros/bagageiro-titan-125-modelo-00-04-fan-125-modelo-05-08-preto-macico-3014.html
+                - generic "Código do produto"
+                - generic [ref=e316]:
+                  - generic:
+                    - img
+                    - text: Pronta Entrega
+                - generic [ref=e319]:
+                  - link "Faça login" [ref=e320] [cursor=pointer]:
+                    - /url: https://awamotos.com/customer/account/login/
+                  - text: para ver preços
+                - button "Adicionar Bagageiro Titan 125 Modelo 00/04 / Fan 125 Modelo 05/08 Preto (Macico) ao Carrinho" [ref=e324] [cursor=pointer]:
+                  - generic [ref=e325]: Adicionar ao Carrinho
+          - generic [ref=e330]:
+            - generic [ref=e331]:
+              - strong [ref=e332]: Ocultar Filtros
+              - strong [ref=e333] [cursor=pointer]:
+                - generic [ref=e334]: Grade
+              - link "Ocultar Filtros Lista" [ref=e335] [cursor=pointer]:
+                - /url: "#"
+                - generic [ref=e336]: Lista
+            - combobox [ref=e338] [cursor=pointer]:
+              - option "Posição" [selected]
+              - option "Nome do Produto"
+              - option "Preço"
+            - combobox [ref=e341] [cursor=pointer]:
+              - option "12" [selected]
+              - option "24"
+              - option "36"
+            - text: →
+    - contentinfo [ref=e342]:
+      - contentinfo [ref=e343]:
+        - region "Diferenciais AWA Motos" [ref=e344]:
+          - generic [ref=e346]:
+            - generic [ref=e347]:
+              - img [ref=e349]
+              - generic [ref=e351]:
+                - strong [ref=e352]: Envio p/ Todo Brasil
+                - generic [ref=e353]: Logística rápida para varejo e atacado
+            - generic [ref=e354]:
+              - img [ref=e356]
+              - generic [ref=e358]:
+                - strong [ref=e359]: Compra 100% Segura
+                - generic [ref=e360]: Checkout protegido e antifraude
+            - generic [ref=e361]:
+              - img [ref=e363]
+              - generic [ref=e365]:
+                - strong [ref=e366]: Garantia de Fábrica
+                - generic [ref=e367]: Peças com origem e suporte confiáveis
+            - generic [ref=e368]:
+              - img [ref=e370]
+              - generic [ref=e372]:
+                - strong [ref=e373]: Condições de Atacado
+                - generic [ref=e374]: Preço progressivo e atendimento B2B
+        - region "Atendimento direto para cotação, recompra e atacado" [ref=e375]:
+          - generic [ref=e377]:
+            - generic [ref=e378]:
+              - generic [ref=e379]: Canal Comercial
+              - heading "Atendimento direto para cotação, recompra e atacado" [level=3] [ref=e380]
+              - paragraph [ref=e381]: Use os canais abaixo para falar com a equipe da AWA Motos e acelerar pedidos, dúvidas de estoque e negociações comerciais.
+            - generic [ref=e382]:
+              - link "WhatsApp Comercial Resposta rápida para pedido e cotação" [ref=e383] [cursor=pointer]:
+                - /url: https://wa.me/5516997367588
+                - generic [ref=e385]: 
+                - generic [ref=e386]:
+                  - strong [ref=e387]: WhatsApp Comercial
+                  - generic [ref=e388]: Resposta rápida para pedido e cotação
+              - link "(16) 3301-1890 Atendimento por telefone" [ref=e389] [cursor=pointer]:
+                - /url: tel:+551633011890
+                - generic [ref=e391]: 
+                - generic [ref=e392]:
+                  - strong [ref=e393]: (16) 3301-1890
+                  - generic [ref=e394]: Atendimento por telefone
+              - link "falecom@awamotos.com.br Canal para compras corporativas" [ref=e395] [cursor=pointer]:
+                - /url: mailto:falecom@awamotos.com.br
+                - generic [ref=e397]: 
+                - generic [ref=e398]:
+                  - strong [ref=e399]: falecom@awamotos.com.br
+                  - generic [ref=e400]: Canal para compras corporativas
+        - generic [ref=e401]:
+          - generic [ref=e404]:
+            - generic [ref=e405]:
+              - img [ref=e407]
+              - generic [ref=e410]:
+                - heading "Receba ofertas exclusivas" [level=3] [ref=e411]
+                - paragraph [ref=e412]: Cadastre-se e receba promoções, lançamentos e conteúdos técnicos sobre motos.
+            - generic [ref=e414]:
+              - generic [ref=e415]: Receba nossas novidades
+              - generic [ref=e417]:
+                - textbox "Endereço de e-mail para newsletter" [ref=e419]:
+                  - /placeholder: Seu endereço de e-mail...
+                - button "Assinar newsletter" [ref=e421] [cursor=pointer]: Assinar
+          - generic [ref=e423]:
+            - heading "+ Quem somos" [level=4] [ref=e426]
+            - heading "+ Suporte e Segurança" [level=4] [ref=e429]
+            - heading "+ Principais Categorias" [level=4] [ref=e432]
+            - heading "+ Atendimento" [level=4] [ref=e435]
+      - generic [ref=e438]:
+        - generic [ref=e439]:
+          - link "AWA Motos" [ref=e441] [cursor=pointer]:
+            - /url: https://awamotos.com/
+            - img "AWA Motos" [ref=e442]
+          - region "Pagamentos" [ref=e444]:
+            - paragraph [ref=e445]: Pague com
+            - list "Formas de pagamento aceitas" [ref=e446]:
+              - listitem [ref=e447]:
+                - img "Visa" [ref=e448]
+              - listitem [ref=e449]:
+                - img "Mastercard" [ref=e450]
+              - listitem [ref=e451]:
+                - img "Elo" [ref=e452]
+              - listitem [ref=e453]:
+                - img "American Express" [ref=e454]
+              - listitem [ref=e455]:
+                - img "Diners Club" [ref=e456]
+              - listitem [ref=e457]:
+                - img "Boleto Bancário" [ref=e458]
+              - listitem [ref=e459]:
+                - img "PIX" [ref=e460]
+          - region "Certificados e Segurança" [ref=e462]:
+            - paragraph [ref=e463]: Certificados e Segurança
+            - list "Selos de segurança" [ref=e464]:
+              - listitem [ref=e465]:
+                - link "Certificado SSL 256 bits" [ref=e466] [cursor=pointer]:
+                  - /url: https://www.ssllabs.com/ssltest/analyze.html?d=awamotos.com
+                  - img [ref=e467]
+              - listitem [ref=e469]:
+                - link "Google Safe Browsing" [ref=e470] [cursor=pointer]:
+                  - /url: https://transparencyreport.google.com/safe-browsing/search?url=awamotos.com
+                  - img [ref=e471]
+        - generic [ref=e473]:
+          - paragraph [ref=e474]: © 2026 - Awa Motos
+          - paragraph [ref=e475]: Todos os direitos reservados © 2026 - AWA Motos. - CNPJ 77.044.618/0001-88
+          - paragraph [ref=e476]: Os preços e condições de pagamento são válidos para o dia de hoje e exclusivas via internet. Na divergência de preços fica válido o apresentado no carrinho. Ofertas válidas até o término de nossos estoques. Vendas sujeitas à análise, confirmação de dados e estoque. As imagens são ilustrativas e informações sobre os produtos são resumidas e sujeitas à alteração sem aviso prévio.
+      - generic [ref=e479]:
+        - generic [ref=e480]: DESENVOLVIDO POR
+        - link "Bluu Consulting - Desenvolvimento do site" [ref=e481] [cursor=pointer]:
+          - /url: https://bluuconsulting.com.br
+          - img "Bluu Consulting" [ref=e482]
+  - navigation "Navegação Móvel" [ref=e483]
+  - text: 
+```

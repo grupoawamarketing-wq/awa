@@ -321,7 +321,7 @@ class ProductStructuredData implements ArgumentInterface
             return $this->productImageUrl;
         }
 
-        $this->productImageUrl = (string) $this->imageHelper->init($product, 'product_base_image')->getUrl();
+        $this->productImageUrl = (string) $this->imageHelper->init($product, 'product_page_image_medium')->getUrl();
         $this->productImageUrlResolved = true;
 
         return $this->productImageUrl;

@@ -1,0 +1,296 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - progressbar "Progresso de leitura"
+  - link "Ir para o conteúdo principal" [ref=e2] [cursor=pointer]:
+    - /url: "#maincontent"
+  - link "Ir para a navegação" [ref=e3] [cursor=pointer]:
+    - /url: "#awa-primary-navigation"
+  - generic [ref=e4]:
+    - banner [ref=e5]:
+      - complementary "Ambiente exclusivo para empresas" [ref=e8]:
+        - paragraph [ref=e10]:
+          - generic [ref=e11]: Ambiente exclusivo para vendas corporativas
+          - generic [ref=e12]: "|"
+          - link "Cadastre agora" [ref=e13] [cursor=pointer]:
+            - /url: https://awamotos.com/b2b/register/
+            - strong [ref=e14]: Cadastre agora
+          - generic [ref=e15]: sua empresa e confira ofertas especiais para o seu CNPJ.
+      - generic [ref=e16]:
+        - generic [ref=e21]:
+          - generic [ref=e22]:
+            - text: 
+            - link "AWA Motos - Página inicial" [ref=e25] [cursor=pointer]:
+              - /url: https://awamotos.com/
+              - img "AWA Motos" [ref=e26]
+          - search "Busca de produtos" [ref=e28]:
+            - generic [ref=e30]:
+              - generic [ref=e31]:
+                - generic [ref=e33]: Buscar
+                - generic [ref=e34]: Digite ao menos 2 caracteres para começar a pesquisar.
+                - combobox "Buscar" [ref=e37]
+              - button "Buscar produtos" [disabled] [ref=e39] [cursor=pointer]:
+                - generic [ref=e40]: Buscar
+                - img
+          - generic [ref=e41]:
+            - generic "Área do cliente" [ref=e42]:
+              - img [ref=e44]
+              - generic [ref=e48]:
+                - generic [ref=e49]: Para ver os preços faça o
+                - generic [ref=e50]:
+                  - link "Login" [ref=e51] [cursor=pointer]:
+                    - /url: https://awamotos.com/customer/account/login/
+                  - generic [ref=e52]: ou
+                  - link "Cadastre-se" [ref=e53] [cursor=pointer]:
+                    - /url: https://awamotos.com/b2b/register/
+            - generic [ref=e55]:
+              - link "Ver carrinho de compras" [ref=e56] [cursor=pointer]:
+                - /url: https://awamotos.com/checkout/cart/
+                - generic [ref=e57]: Carrinho de compras
+              - text: ✕ 🛒
+        - navigation "Navegação principal da loja" [ref=e58]:
+          - generic [ref=e60]:
+            - navigation "Menu de categorias" [ref=e62] [cursor=pointer]:
+              - tablist "Navegacao principal" [ref=e64]:
+                - tabpanel [ref=e65]:
+                  - navigation "Categorias de Produtos" [ref=e66]:
+                    - button "Departamentos" [ref=e67]:
+                      - generic [ref=e68]:
+                        - text: 
+                        - img [ref=e69]
+                      - generic [ref=e71]: Departamentos
+                    - text: OFERTA % % +  ↓
+            - navigation "Links rápidos de categorias" [ref=e72]:
+              - list [ref=e73]:
+                - listitem [ref=e74]:
+                  - link "Nossas Marcas" [ref=e75] [cursor=pointer]:
+                    - /url: https://awamotos.com/nossas-marcas/
+                - listitem [ref=e76]:
+                  - link "Lançamentos" [ref=e77] [cursor=pointer]:
+                    - /url: https://awamotos.com/ofertas.html
+                - listitem [ref=e78]:
+                  - link "Catálogo" [ref=e79] [cursor=pointer]:
+                    - /url: https://awamotos.com/catalogsearch/result/
+    - main [ref=e80]:
+      - heading "Carrinho de Compras" [level=1] [ref=e82]:
+        - generic [ref=e83]: Carrinho de Compras
+      - generic [ref=e85]:
+        - text: "* * * *"
+        - generic [ref=e86]:
+          - img [ref=e88]
+          - paragraph [ref=e92]: Seu carrinho está vazio
+          - paragraph [ref=e93]: Adicione peças e acessórios para sua moto e aproveite nossas condições exclusivas.
+          - link "Continuar comprando →" [ref=e94] [cursor=pointer]:
+            - /url: https://awamotos.com/
+    - contentinfo [ref=e95]:
+      - contentinfo [ref=e96]:
+        - region "Diferenciais AWA Motos" [ref=e97]:
+          - generic [ref=e99]:
+            - generic [ref=e100]:
+              - img [ref=e102]
+              - generic [ref=e104]:
+                - strong [ref=e105]: Envio p/ Todo Brasil
+                - generic [ref=e106]: Logística rápida para varejo e atacado
+            - generic [ref=e107]:
+              - img [ref=e109]
+              - generic [ref=e111]:
+                - strong [ref=e112]: Compra 100% Segura
+                - generic [ref=e113]: Checkout protegido e antifraude
+            - generic [ref=e114]:
+              - img [ref=e116]
+              - generic [ref=e118]:
+                - strong [ref=e119]: Garantia de Fábrica
+                - generic [ref=e120]: Peças com origem e suporte confiáveis
+            - generic [ref=e121]:
+              - img [ref=e123]
+              - generic [ref=e125]:
+                - strong [ref=e126]: Condições de Atacado
+                - generic [ref=e127]: Preço progressivo e atendimento B2B
+        - region "Atendimento direto para cotação, recompra e atacado" [ref=e128]:
+          - generic [ref=e130]:
+            - generic [ref=e131]:
+              - generic [ref=e132]: Canal Comercial
+              - heading "Atendimento direto para cotação, recompra e atacado" [level=3] [ref=e133]
+              - paragraph [ref=e134]: Use os canais abaixo para falar com a equipe da AWA Motos e acelerar pedidos, dúvidas de estoque e negociações comerciais.
+            - generic [ref=e135]:
+              - link "WhatsApp Comercial Resposta rápida para pedido e cotação" [ref=e136] [cursor=pointer]:
+                - /url: https://wa.me/5516997367588
+                - generic [ref=e138]: 
+                - generic [ref=e139]:
+                  - strong [ref=e140]: WhatsApp Comercial
+                  - generic [ref=e141]: Resposta rápida para pedido e cotação
+              - link "(16) 3301-1890 Atendimento por telefone" [ref=e142] [cursor=pointer]:
+                - /url: tel:+551633011890
+                - generic [ref=e144]: 
+                - generic [ref=e145]:
+                  - strong [ref=e146]: (16) 3301-1890
+                  - generic [ref=e147]: Atendimento por telefone
+              - link "falecom@awamotos.com.br Canal para compras corporativas" [ref=e148] [cursor=pointer]:
+                - /url: mailto:falecom@awamotos.com.br
+                - generic [ref=e150]: 
+                - generic [ref=e151]:
+                  - strong [ref=e152]: falecom@awamotos.com.br
+                  - generic [ref=e153]: Canal para compras corporativas
+        - generic [ref=e154]:
+          - generic [ref=e157]:
+            - generic [ref=e158]:
+              - img [ref=e160]
+              - generic [ref=e163]:
+                - heading "Receba ofertas exclusivas" [level=3] [ref=e164]
+                - paragraph [ref=e165]: Cadastre-se e receba promoções, lançamentos e conteúdos técnicos sobre motos.
+            - generic [ref=e167]:
+              - generic [ref=e168]: Receba nossas novidades
+              - generic [ref=e170]:
+                - textbox "Endereço de e-mail para newsletter" [ref=e172]:
+                  - /placeholder: Seu endereço de e-mail...
+                - button "Assinar newsletter" [ref=e174] [cursor=pointer]: Assinar
+          - generic [ref=e176]:
+            - generic [ref=e178]:
+              - heading "Quem somos" [level=4] [ref=e179]
+              - generic "Quem somos" [ref=e180]:
+                - list [ref=e181]:
+                  - listitem [ref=e182]:
+                    - link "Sobre a Awa" [ref=e183] [cursor=pointer]:
+                      - /url: https://awamotos.com/about-us/
+                  - listitem [ref=e184]:
+                    - link "Programa de Parceiros" [ref=e185] [cursor=pointer]:
+                      - /url: https://awamotos.com/seja-revendedor/
+                  - listitem [ref=e186]:
+                    - link "Blog da Awa" [ref=e187] [cursor=pointer]:
+                      - /url: https://awamotos.com/blog/
+                  - listitem [ref=e188]:
+                    - link "Trabalhe Conosco" [ref=e189] [cursor=pointer]:
+                      - /url: https://awamotos.com/trabalhe-conosco/
+                  - listitem [ref=e190]:
+                    - link "Nossas Marcas" [ref=e191] [cursor=pointer]:
+                      - /url: https://awamotos.com/nossas-marcas/
+                  - listitem [ref=e192]:
+                    - link "Catálogo" [ref=e193] [cursor=pointer]:
+                      - /url: https://awamotos.com/catalogsearch/result/
+            - generic [ref=e195]:
+              - heading "Suporte e Segurança" [level=4] [ref=e196]
+              - generic "Suporte e Segurança" [ref=e197]:
+                - list [ref=e198]:
+                  - listitem [ref=e199]:
+                    - link "Atendimento" [ref=e200] [cursor=pointer]:
+                      - /url: https://awamotos.com/customer-service/
+                  - listitem [ref=e201]:
+                    - link "Formas de Pagamento" [ref=e202] [cursor=pointer]:
+                      - /url: https://awamotos.com/formas-pagamento/
+                  - listitem [ref=e203]:
+                    - link "Formas de Entrega" [ref=e204] [cursor=pointer]:
+                      - /url: https://awamotos.com/shipping/
+                  - listitem [ref=e205]:
+                    - link "Trocas e Devoluções" [ref=e206] [cursor=pointer]:
+                      - /url: https://awamotos.com/returns/
+                  - listitem [ref=e207]:
+                    - link "Política de Privacidade" [ref=e208] [cursor=pointer]:
+                      - /url: https://awamotos.com/politica-de-privacidade/
+                  - listitem [ref=e209]:
+                    - link "Termos de Uso" [ref=e210] [cursor=pointer]:
+                      - /url: https://awamotos.com/terms/
+            - generic [ref=e212]:
+              - heading "Principais Categorias" [level=4] [ref=e213]
+              - generic "Principais Categorias" [ref=e214]:
+                - list [ref=e215]:
+                  - listitem [ref=e216]:
+                    - link "Bagageiros" [ref=e217] [cursor=pointer]:
+                      - /url: https://awamotos.com/bagageiros.html
+                  - listitem [ref=e218]:
+                    - link "Cavaletes" [ref=e219] [cursor=pointer]:
+                      - /url: https://awamotos.com/cavaletes.html
+                  - listitem [ref=e220]:
+                    - link "Guidão" [ref=e221] [cursor=pointer]:
+                      - /url: https://awamotos.com/guidoes.html
+                  - listitem [ref=e222]:
+                    - link "Bauletos" [ref=e223] [cursor=pointer]:
+                      - /url: https://awamotos.com/bauletos.html
+                  - listitem [ref=e224]:
+                    - link "Retrovisores" [ref=e225] [cursor=pointer]:
+                      - /url: https://awamotos.com/retrovisores.html
+                  - listitem [ref=e226]:
+                    - link "Manetes" [ref=e227] [cursor=pointer]:
+                      - /url: https://awamotos.com/manetes.html
+            - generic [ref=e229]:
+              - heading "Atendimento" [level=4] [ref=e230]
+              - generic "Atendimento" [ref=e231]:
+                - paragraph [ref=e232]: Telefone / SAC
+                - paragraph [ref=e233]:
+                  - link "(16) 3301-1890" [ref=e234] [cursor=pointer]:
+                    - /url: tel:+551633011890
+                - paragraph [ref=e235]:
+                  - link "falecom@awamotos.com.br" [ref=e236] [cursor=pointer]:
+                    - /url: mailto:falecom@awamotos.com.br
+                - generic [ref=e237]:
+                  - paragraph [ref=e238]: AWA Motos
+                  - paragraph [ref=e239]: "R. Lavineo de Arruda Falcão, 1272 - Araraquara - CEP: 14808-390"
+                - list [ref=e240]:
+                  - listitem [ref=e241]:
+                    - link "Converse por WhatsApp" [ref=e242] [cursor=pointer]:
+                      - /url: https://wa.me/5516997367588
+                      - img [ref=e244]
+                      - text: Converse por WhatsApp
+                  - listitem [ref=e246]:
+                    - link "? Central de ajuda e suporte" [ref=e247] [cursor=pointer]:
+                      - /url: https://awamotos.com/customer-service/
+                      - img [ref=e249]:
+                        - generic [ref=e251]: "?"
+                      - text: Central de ajuda e suporte
+                - paragraph [ref=e252]: Siga a Awa Motos
+                - navigation "Redes sociais AWA Motos" [ref=e253]:
+                  - link "AWA Motos no Facebook" [ref=e254] [cursor=pointer]:
+                    - /url: https://www.facebook.com/awamotos
+                    - img [ref=e255]
+                  - link "AWA Motos no Instagram" [ref=e257] [cursor=pointer]:
+                    - /url: https://www.instagram.com/awamotos
+                    - img [ref=e258]
+                  - link "AWA Motos no YouTube" [ref=e260] [cursor=pointer]:
+                    - /url: https://www.youtube.com/@awamotos
+                    - img [ref=e261]
+                  - link "AWA Motos no Pinterest" [ref=e263] [cursor=pointer]:
+                    - /url: https://www.pinterest.com.br/awamotos/
+                    - img [ref=e264]
+      - generic [ref=e268]:
+        - generic [ref=e269]:
+          - link "AWA Motos" [ref=e271] [cursor=pointer]:
+            - /url: https://awamotos.com/
+            - img "AWA Motos" [ref=e272]
+          - region "Pagamentos" [ref=e274]:
+            - paragraph [ref=e275]: Pague com
+            - list "Formas de pagamento aceitas" [ref=e276]:
+              - listitem [ref=e277]:
+                - img "Visa" [ref=e278]
+              - listitem [ref=e279]:
+                - img "Mastercard" [ref=e280]
+              - listitem [ref=e281]:
+                - img "Elo" [ref=e282]
+              - listitem [ref=e283]:
+                - img "American Express" [ref=e284]
+              - listitem [ref=e285]:
+                - img "Diners Club" [ref=e286]
+              - listitem [ref=e287]:
+                - img "Boleto Bancário" [ref=e288]
+              - listitem [ref=e289]:
+                - img "PIX" [ref=e290]
+          - region "Certificados e Segurança" [ref=e292]:
+            - paragraph [ref=e293]: Certificados e Segurança
+            - list "Selos de segurança" [ref=e294]:
+              - listitem [ref=e295]:
+                - link "Certificado SSL 256 bits" [ref=e296] [cursor=pointer]:
+                  - /url: https://www.ssllabs.com/ssltest/analyze.html?d=awamotos.com
+                  - img [ref=e297]
+              - listitem [ref=e299]:
+                - link "Google Safe Browsing" [ref=e300] [cursor=pointer]:
+                  - /url: https://transparencyreport.google.com/safe-browsing/search?url=awamotos.com
+                  - img [ref=e301]
+        - generic [ref=e303]:
+          - paragraph [ref=e304]: © 2026 - Awa Motos
+          - paragraph [ref=e305]: Todos os direitos reservados © 2026 - AWA Motos. - CNPJ 77.044.618/0001-88
+          - paragraph [ref=e306]: Os preços e condições de pagamento são válidos para o dia de hoje e exclusivas via internet. Na divergência de preços fica válido o apresentado no carrinho. Ofertas válidas até o término de nossos estoques. Vendas sujeitas à análise, confirmação de dados e estoque. As imagens são ilustrativas e informações sobre os produtos são resumidas e sujeitas à alteração sem aviso prévio.
+      - generic [ref=e309]:
+        - generic [ref=e310]: DESENVOLVIDO POR
+        - link "Bluu Consulting - Desenvolvimento do site" [ref=e311] [cursor=pointer]:
+          - /url: https://bluuconsulting.com.br
+          - img "Bluu Consulting" [ref=e312]
+```
