@@ -158,7 +158,8 @@ test.describe('AwaMotos – Full UX Audit', () => {
     // Hero slider check (desktop)
     await page.setViewportSize(DESKTOP);
     await page.goto(`${BASE_URL}/`, { waitUntil: 'networkidle', timeout: 35000 });
-    const heroOk = await page.isVisible('.slick-slider, .pagebuilder-slider, .hero-slider, [data-content-type="slider"], .banner-slider, .owl-carousel, .swiper-wrapper').catch(() => false);
+    await page.waitForTimeout(2000); // Rokanthemes Ayo carousels initialize late
+    const heroOk = await page.isVisible('.slick-slider, .pagebuilder-slider, .hero-slider, [data-content-type="slider"], .banner-slider, .owl-carousel, .swiper-wrapper, .swiper-container, .roka-slide-content, .slide-banner-container').catch(() => false);
     if (!heroOk) addIssue({ page: 'Homepage', viewport: 'Desktop', severity: 'High', category: 'Visual / Hero', description: 'Hero slider/banner não encontrado ou não visível' });
 
     // Hamburger menu (mobile)
@@ -227,7 +228,8 @@ test.describe('AwaMotos – Full UX Audit', () => {
     const priceBox = await page.isVisible('.price-box, .product-info-price').catch(() => false);
     if (!priceBox) addIssue({ page: 'PDP', viewport: 'Desktop', severity: 'High', category: 'UX / Preço', description: 'Preço do produto não visível (B2B restrito?)' });
 
-    const gallery = await page.isVisible('.fotorama, .product.media, .gallery-placeholder, .product-image-container, .product-image').catch(() => false);
+    await page.waitForTimeout(1500); // Fotorama initializes async
+    const gallery = await page.isVisible('.fotorama, .product.media, .gallery-placeholder, .product-image-container, .product-image, .rokanthemes-product-gallery, .product-gallery-container').catch(() => false);
     if (!gallery) addIssue({ page: 'PDP', viewport: 'Desktop', severity: 'High', category: 'Visual / Galeria', description: 'Galeria de imagens do produto não visível' });
   });
 
