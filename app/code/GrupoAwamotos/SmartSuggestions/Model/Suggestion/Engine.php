@@ -243,20 +243,27 @@ class Engine implements SuggestionEngineInterface
                     WHERE p.CLIENTE = ?
                       AND p.STATUS NOT IN ('C', 'X')
                 ),
-                SimilarCustomers AS (
-                    SELECT TOP 20
+                SimilarCustomersRaw AS (
+                    SELECT
                         p.CLIENTE as similar_customer,
-                        COUNT(DISTINCT CASE WHEN i.MATERIAL IN (SELECT MATERIAL FROM CustomerProducts) THEN i.MATERIAL END) as common_products,
+                        COUNT(DISTINCT CASE WHEN cp.MATERIAL IS NOT NULL THEN i.MATERIAL END) as common_products,
                         COUNT(DISTINCT i.MATERIAL) as total_products
                     FROM VE_PEDIDO p
                     INNER JOIN VE_PEDIDOITENS i ON p.CODIGO = i.PEDIDO
+                    LEFT JOIN CustomerProducts cp ON cp.MATERIAL = i.MATERIAL
                     WHERE p.CLIENTE <> ?
                       AND p.STATUS NOT IN ('C', 'X')
                       AND p.DTPEDIDO >= DATEADD(YEAR, -1, GETDATE())
                     GROUP BY p.CLIENTE
-                    HAVING COUNT(DISTINCT CASE WHEN i.MATERIAL IN (SELECT MATERIAL FROM CustomerProducts) THEN i.MATERIAL END) >= 2
-                    ORDER BY
-                        CAST(COUNT(DISTINCT CASE WHEN i.MATERIAL IN (SELECT MATERIAL FROM CustomerProducts) THEN i.MATERIAL END) AS FLOAT) / NULLIF(COUNT(DISTINCT i.MATERIAL), 0) DESC
+                ),
+                SimilarCustomers AS (
+                    SELECT TOP 20
+                        similar_customer,
+                        common_products,
+                        total_products
+                    FROM SimilarCustomersRaw
+                    WHERE common_products >= 2
+                    ORDER BY common_products DESC
                 ),
                 SimilarProducts AS (
                     SELECT
