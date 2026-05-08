@@ -1,12 +1,8 @@
-const { chromium } = require('@playwright/test');
+const { chromium } = require('playwright');
 (async () => {
-  const browser = await chromium.launch({ headless: true });
-  const page = await browser.newPage({ viewport: { width: 1300, height: 1080 } });
-  await page.goto('https://awamotos.com/');
-  await page.waitForTimeout(3000);
-  await page.screenshot({ path: '/tmp/screenshot_desktop.png', fullPage: true });
-  await page.setViewportSize({ width: 375, height: 812 });
-  await page.waitForTimeout(2000);
-  await page.screenshot({ path: '/tmp/screenshot_mobile.png', fullPage: true });
+  const browser = await chromium.launch();
+  const page = await browser.newPage();
+  await page.goto('https://awamotos.com', { waitUntil: 'networkidle' });
+  await page.screenshot({ path: 'homepage_screenshot.png', fullPage: true });
   await browser.close();
 })();

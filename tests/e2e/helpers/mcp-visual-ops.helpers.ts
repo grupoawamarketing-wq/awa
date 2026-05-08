@@ -103,8 +103,9 @@ export async function dismissCookieBanner(page: Page): Promise<void> {
 }
 
 export async function stabilizeVisualSnapshot(page: Page): Promise<void> {
-  await page
-    .evaluate(() => {
+  await Promise.race<void>([
+    page
+      .evaluate(() => {
       // --- 1. Hide volatile floating overlays ---
       const volatileSelectors = [
         '.link-on-bottom',
@@ -220,8 +221,10 @@ export async function stabilizeVisualSnapshot(page: Page): Promise<void> {
         el.style.setProperty('visibility', 'hidden', 'important');
         el.style.setProperty('opacity', '0', 'important');
       });
-    })
-    .catch(() => {});
+      })
+      .catch(() => {}),
+    new Promise<void>((resolve) => setTimeout(resolve, 5_000)),
+  ]);
 
   // Allow the first stabilized frame to render
   await page.waitForTimeout(300);

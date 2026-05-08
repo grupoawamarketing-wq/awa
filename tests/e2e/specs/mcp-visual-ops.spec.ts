@@ -27,15 +27,15 @@ test.describe('MCP Visual Ops - Automated Visual QA', () => {
   for (const target of DEFAULT_TARGETS) {
     test(`audit ${target.slug}`, async ({ page, browserName }, testInfo) => {
       const projectName = testInfo.project.name;
+      const runtimeLabel = `${browserName}/${projectName}`;
       const currentDir = path.join(AUDIT_PATHS.currentDir, projectName);
       const baselineDir = path.join(AUDIT_PATHS.baselineDir, projectName);
       ensureDir(currentDir);
       ensureDir(baselineDir);
       ensureDir(AUDIT_PATHS.reportDir);
 
-      // Resilient navigation: DCL can take 39-90s on this server due to heavy CSS.
-      // If DCL times out (Chrome frozen), we throw to trigger Playwright retry with fresh browser.
-      // On retry, Varnish cache is warm → DCL fires in ~10s and test passes.
+      // Resilient navigation: DCL can take tens of seconds on this server due to heavy CSS/JS.
+      // If it times out, throw to trigger Playwright retry with a fresh browser process.
       let pageLoaded = false;
       await Promise.race<void>([
         (async () => {
@@ -47,7 +47,7 @@ test.describe('MCP Visual Ops - Automated Visual QA', () => {
         new Promise<void>(resolve => setTimeout(resolve, 95_000)),
       ]);
       if (!pageLoaded) {
-        throw new Error(`${target.pageLabel} não carregou (Chrome instável) — retry com browser fresco`);
+        throw new Error(`${target.pageLabel} não carregou dentro do prazo esperado (${runtimeLabel}) — retry com browser fresco`);
       }
 
       const screenshotName = `${target.slug}.png`;
@@ -55,6 +55,7 @@ test.describe('MCP Visual Ops - Automated Visual QA', () => {
       const baselinePath = path.join(baselineDir, screenshotName);
 
       await dismissCookieBanner(page);
+      await waitPageStable(page);
       await stabilizeVisualSnapshot(page);
       await page.waitForTimeout(500); // allow stabilization to render
       await page.screenshot({ path: screenshotPath, fullPage: false, timeout: 15_000 });
@@ -118,6 +119,7 @@ test.describe('MCP Visual Ops - Automated Visual QA', () => {
           file: baselinePath,
           changed: baselineDiff.changed,
           baselineMissing: baselineDiff.baselineMissing,
+          diffRatio: baselineDiff.diffRatio,
           updateMode: UPDATE_BASELINE,
         },
         findings,
