@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace GrupoAwamotos\PreprocessedFallback\Plugin\View\TemplateEngine;
 
 use GrupoAwamotos\PreprocessedFallback\Model\PreprocessedTemplateHealer;
+use Magento\Framework\App\State;
 use Magento\Framework\View\Element\BlockInterface;
 use Magento\Framework\View\TemplateEngine\Php;
 use Throwable;
@@ -12,10 +13,14 @@ final class PhpFallbackPlugin
 {
     private PreprocessedTemplateHealer $templateHealer;
 
+    private State $appState;
+
     public function __construct(
-        PreprocessedTemplateHealer $templateHealer
+        PreprocessedTemplateHealer $templateHealer,
+        State $appState
     ) {
         $this->templateHealer = $templateHealer;
+        $this->appState = $appState;
     }
 
     /**
@@ -31,6 +36,10 @@ final class PhpFallbackPlugin
         array $dictionary = []
     ): string {
         if (!is_string($fileName)) {
+            return $proceed($block, $fileName, $dictionary);
+        }
+
+        if ($this->appState->getMode() !== State::MODE_PRODUCTION) {
             return $proceed($block, $fileName, $dictionary);
         }
 

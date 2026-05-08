@@ -5,6 +5,7 @@ namespace GrupoAwamotos\PreprocessedFallback\Plugin\View\Result;
 
 use GrupoAwamotos\PreprocessedFallback\Model\PreprocessedTemplateHealer;
 use Magento\Framework\App\ResponseInterface;
+use Magento\Framework\App\State;
 use Magento\Framework\View\Result\Page;
 use Throwable;
 
@@ -12,10 +13,14 @@ final class PageFallbackPlugin
 {
     private PreprocessedTemplateHealer $templateHealer;
 
+    private State $appState;
+
     public function __construct(
-        PreprocessedTemplateHealer $templateHealer
+        PreprocessedTemplateHealer $templateHealer,
+        State $appState
     ) {
         $this->templateHealer = $templateHealer;
+        $this->appState = $appState;
     }
 
     /**
@@ -26,6 +31,10 @@ final class PageFallbackPlugin
         callable $proceed,
         ResponseInterface $httpResponse
     ): Page {
+        if ($this->appState->getMode() !== State::MODE_PRODUCTION) {
+            return $proceed($httpResponse);
+        }
+
         try {
             return $proceed($httpResponse);
         } catch (Throwable $exception) {
