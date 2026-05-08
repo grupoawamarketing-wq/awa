@@ -7,16 +7,17 @@ declare(strict_types=1);
  *
  * Toggle: CSS controls display via .vmm-open on <ul> (awa-bundle-core.css).
  *
- * @var \Rokanthemes\VerticalMenu\Block\Verticalmenu $block
+ * @var \GrupoAwamotos\Theme\Block\VerticalMenu\SafeVerticalmenu $block
  */
 
-$_helper = $this->helper('Rokanthemes\\VerticalMenu\\Helper\\Data');
+$_helper = $this->helper('Rokanthemes\VerticalMenu\Helper\Data');
 $_config = $_helper->getConfig('verticalmenu');
 
 if (!empty($_config['general']['enable'])):
     $limitShow = (int) ($_config['general']['limit_show'] ?? 0);
     $menuId = 'awa-vertical-menu-' . uniqid('', false);
     $_menu = $block->getVerticalMenuHtml();
+    $extraHtml = trim($block->getCmsBlockHtmlByIdentifier('vertical-menu-extra'));
 ?>
 
 <nav class="navigation verticalmenu side-verticalmenu"
@@ -39,10 +40,7 @@ if (!empty($_config['general']['enable'])):
         class="togge-menu list-category-dropdown"
         data-limit-show="<?= (int) $limitShow ?>">
         <?= /** @noEscape */ $_menu ?>
-        <?php
-            $_bgBlock = $block->getLayout()->createBlock(\Magento\Cms\Block\Block::class);
-            $_bgImages = $_bgBlock ? trim($_bgBlock->setBlockId('vertical_background_images')->toHtml()) : '';
-        ?>
+        <?php $_bgImages = trim($block->getCmsBlockHtmlByIdentifier('vertical_background_images')); ?>
         <?php if ($_bgImages !== ''): ?>
         <li class="vertical-bg-img"><?= /** @noEscape */ $_bgImages ?></li>
         <?php endif; ?>
@@ -50,12 +48,21 @@ if (!empty($_config['general']['enable'])):
         <li class="expand-category-link">
             <a href="#"
                class="viewall vm-toggle-categories"
-                      aria-expanded="false"
+               aria-expanded="false"
                data-show-text="<?= $block->escapeHtmlAttr(__('Show More')) ?>"
                data-hide-text="<?= $block->escapeHtmlAttr(__('Show Less')) ?>">
                 <span><?= $block->escapeHtml(__('All Categories')) ?></span>
                 <i class="fa fa-angle-down vm-toggle-icon" aria-hidden="true"></i>
             </a>
+        </li>
+        <?php endif; ?>
+        <?php if ($extraHtml !== ''): ?>
+        <li class="awa-vem-extra-li" role="none">
+            <div id="menu.vertical.extra"
+                 class="awa-vertical-extra"
+                 data-role="content">
+                <?= /** @noEscape */ $extraHtml ?>
+            </div>
         </li>
         <?php endif; ?>
     </ul>

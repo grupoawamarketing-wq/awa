@@ -289,6 +289,47 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
     }
 
     /**
+     * Render a CMS block by identifier using the current store context.
+     */
+    public function getCmsBlockHtmlByIdentifier(string $blockIdentifier): string
+    {
+        $blockIdentifier = trim($blockIdentifier);
+        if ($blockIdentifier === '') {
+            return '';
+        }
+
+        $cacheKey = 'cms:' . $blockIdentifier;
+        if (array_key_exists($cacheKey, $this->menuBlockContentCache)) {
+            return $this->menuBlockContentCache[$cacheKey];
+        }
+
+        $storeId = (int)$this->_storeManager->getStore()->getId();
+        $block = $this->_blockFactory->create();
+        $block->setStoreId($storeId)->load($blockIdentifier, 'identifier');
+
+        if (!$block || !(bool)$block->getId() || !(bool)$block->getIsActive()) {
+            $this->menuBlockContentCache[$cacheKey] = '';
+
+            return '';
+        }
+
+        $blockContent = trim((string)$block->getContent());
+        if ($blockContent === '') {
+            $this->menuBlockContentCache[$cacheKey] = '';
+
+            return '';
+        }
+
+        $content = trim((string)$this->_filterProvider->getBlockFilter()
+            ->setStoreId($storeId)
+            ->filter($blockContent));
+
+        $this->menuBlockContentCache[$cacheKey] = $content;
+
+        return $content;
+    }
+
+    /**
      * Allow only safe tokens for CSS classes (single token).
      */
     private function sanitizeClassToken(?string $value): string
