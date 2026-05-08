@@ -104,7 +104,7 @@ class RfmCalculator
         $existingIdsMap = array_flip($existingIds);
         $skipped = count($agg) - count(array_intersect_key($agg, $existingIdsMap));
         if ($skipped > 0) {
-            $this->logger->warning(
+            $this->logger->info(
                 sprintf('[ProductIntelligence RFM] Skipped %d customers (deleted from customer_entity)', $skipped)
             );
         }

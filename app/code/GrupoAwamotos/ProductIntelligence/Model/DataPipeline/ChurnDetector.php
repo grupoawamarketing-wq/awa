@@ -104,7 +104,7 @@ class ChurnDetector
         $potentialIds = array_keys($customerProducts);
         $validIdSet = $this->fetchExistingCustomerIds($connection, $potentialIds);
         if (count($validIdSet) < count($potentialIds)) {
-            $this->logger->warning(sprintf(
+            $this->logger->info(sprintf(
                 '[ProductIntelligence Churn] Skipped %d deleted customers (FK protection)',
                 count($potentialIds) - count($validIdSet)
             ));
