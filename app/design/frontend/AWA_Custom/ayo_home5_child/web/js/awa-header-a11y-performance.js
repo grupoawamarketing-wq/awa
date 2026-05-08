@@ -1079,19 +1079,40 @@
         trigger = nav ? nav.querySelector('.title-category-dropdown.our_categories') : null;
 
         if (nav && list) {
-            nav.classList.remove('menu-open', 'vmm-open');
-            list.classList.remove('menu-open', 'vmm-open');
-            setImportantStyle(list, 'display', 'none');
-            setImportantStyle(list, 'visibility', 'hidden');
-            setImportantStyle(list, 'opacity', '0');
-            setImportantStyle(list, 'pointer-events', 'none');
-            setImportantStyle(list, 'height', '0');
-            setImportantStyle(list, 'max-height', '0');
-        }
+            var menuIsOpen = nav.classList.contains('menu-open')
+                || nav.classList.contains('vmm-open')
+                || list.classList.contains('menu-open')
+                || list.classList.contains('vmm-open')
+                || (trigger && trigger.getAttribute('aria-expanded') === 'true');
 
-        if (trigger) {
-            trigger.classList.remove('active');
-            trigger.setAttribute('aria-expanded', 'false');
+            if (menuIsOpen) {
+                nav.classList.add('menu-open', 'vmm-open');
+                list.classList.add('menu-open', 'vmm-open');
+
+                setImportantStyle(list, 'display', 'grid');
+                setImportantStyle(list, 'visibility', 'visible');
+                setImportantStyle(list, 'opacity', '1');
+                setImportantStyle(list, 'pointer-events', 'auto');
+                clearStyleProperties(list, ['height', 'max-height']);
+
+                if (trigger) {
+                    trigger.classList.add('active');
+                    trigger.setAttribute('aria-expanded', 'true');
+                }
+            } else {
+                clearStyleProperties(list, [
+                    'display',
+                    'visibility',
+                    'opacity',
+                    'pointer-events',
+                    'height',
+                    'max-height'
+                ]);
+
+                if (trigger && trigger.getAttribute('aria-expanded') !== 'true') {
+                    trigger.classList.remove('active');
+                }
+            }
         }
 
         quickWrap = document.querySelector('.awa-site-header .header-control.awa-nav-bar .awa-nav-quick-links');
