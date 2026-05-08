@@ -103,7 +103,9 @@ class SyncLog extends AbstractDb
         $select = $connection->select()
             ->from('grupoawamotos_erp_entity_map', 'erp_code')
             ->where('entity_type = ?', $entityType)
-            ->where('magento_entity_id = ?', $magentoEntityId);
+            ->where('magento_entity_id = ?', $magentoEntityId)
+            ->order('last_sync_at DESC')
+            ->limit(1);
 
         $result = $connection->fetchOne($select);
         return $result ?: null;

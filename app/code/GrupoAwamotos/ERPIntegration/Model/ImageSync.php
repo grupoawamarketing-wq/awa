@@ -599,10 +599,12 @@ class ImageSync implements ImageSyncInterface
         $products = [];
 
         try {
-            $sql = "SELECT DISTINCT CODIGO
-                    FROM PR_MEDIDAIMAGEM
-                    WHERE IMAGEM IS NOT NULL
-                    ORDER BY CODIGO";
+            $sql = "SELECT DISTINCT i.CODIGO
+                    FROM PR_MEDIDAIMAGEM i
+                    INNER JOIN MT_MATERIAL m ON m.CODIGO = i.CODIGO
+                    WHERE i.IMAGEM IS NOT NULL
+                      AND m.CCKATIVO = 'S'
+                    ORDER BY i.CODIGO";
             $rows = $this->connection->query($sql);
             if (!empty($rows)) {
                 $products = $this->mergeProductRows($products, $rows);
@@ -614,13 +616,15 @@ class ImageSync implements ImageSyncInterface
         try {
             $sql = "SELECT DISTINCT d.CHAVE AS CODIGO
                     FROM GR_DOCUMENTOS d
+                    INNER JOIN MT_MATERIAL m ON m.CODIGO = d.CHAVE
                     WHERE d.TPCHAVE = 'MA'
                       AND d.EXTENSAO IN ('jpg','jpeg','png','gif','webp','JPG','JPEG','PNG')
                       AND d.DOCUMENTO IS NOT NULL
+                      AND m.CCKATIVO = 'S'
                     ORDER BY d.CHAVE";
             $rows = $this->connection->query($sql);
             if (!empty($rows)) {
-                $this->logger->info(sprintf('[ERP] Found %d products with images in GR_DOCUMENTOS', \count($rows)));
+                $this->logger->info(sprintf('[ERP] Found %d active products with images in GR_DOCUMENTOS', \count($rows)));
                 $products = $this->mergeProductRows($products, $rows);
             }
         } catch (\Exception $e) {
