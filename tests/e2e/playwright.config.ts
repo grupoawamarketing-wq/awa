@@ -29,7 +29,13 @@ const chromiumShell = resolveChromiumHeadlessShell();
  */
 export default defineConfig({
   testDir: path.join(__dirname, 'specs'),
-  outputDir: path.join(__dirname, 'test-results'),
+  // Evitar conflito entre sessões root (VS Code server) e deploy (terminal).
+  // Root usa /tmp/pw-root-results para não conflitar com test-results/ do deploy.
+  outputDir: process.env.PW_OUTPUT_DIR
+    ? path.resolve(process.env.PW_OUTPUT_DIR)
+    : process.getuid != null && process.getuid() === 0
+      ? '/tmp/pw-root-results'
+      : path.join(__dirname, 'test-results'),
   snapshotDir: path.join(__dirname, 'snapshots'),
 
   /* Timeout por teste: 120s (Magento B2B com KnockoutJS + login assíncrono) */
