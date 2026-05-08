@@ -83,9 +83,14 @@ async function auditFontSizes(page: Page, pageName: string, viewport: string) {
 }
 
 async function auditBrokenImages(page: Page, pageName: string, viewport: string) {
+  // Scroll to trigger lazy-loaded images before checking
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await page.waitForTimeout(800);
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.waitForTimeout(300);
   const broken = await page.evaluate(() =>
     Array.from(document.querySelectorAll('img'))
-      .filter(i => !i.complete || i.naturalWidth === 0)
+      .filter(i => (!i.complete || i.naturalWidth === 0) && i.getAttribute('loading') !== 'lazy')
       .map(i => i.src.replace(/^https?:\/\/[^/]+/, ''))
       .slice(0, 8)
   );
@@ -153,7 +158,7 @@ test.describe('AwaMotos – Full UX Audit', () => {
     // Hero slider check (desktop)
     await page.setViewportSize(DESKTOP);
     await page.goto(`${BASE_URL}/`, { waitUntil: 'networkidle', timeout: 35000 });
-    const heroOk = await page.isVisible('.slick-slider, .pagebuilder-slider, .hero-slider, [data-content-type="slider"]').catch(() => false);
+    const heroOk = await page.isVisible('.slick-slider, .pagebuilder-slider, .hero-slider, [data-content-type="slider"], .banner-slider, .owl-carousel, .swiper-wrapper').catch(() => false);
     if (!heroOk) addIssue({ page: 'Homepage', viewport: 'Desktop', severity: 'High', category: 'Visual / Hero', description: 'Hero slider/banner não encontrado ou não visível' });
 
     // Hamburger menu (mobile)
@@ -183,7 +188,7 @@ test.describe('AwaMotos – Full UX Audit', () => {
     // Product grid sanity
     await page.setViewportSize(DESKTOP);
     await page.goto(catUrl, { waitUntil: 'networkidle', timeout: 35000 });
-    const count = await page.locator('.item-product').count();
+    const count = await page.locator('.product-item, .item-product').count();
     if (count === 0) addIssue({ page: 'Categoria', viewport: 'Desktop', severity: 'Critical', category: 'Visual / Grade de Produtos', description: 'Nenhum card de produto encontrado na página de categoria' });
     else console.log(`  ✓ ${count} produtos encontrados`);
 
@@ -221,7 +226,7 @@ test.describe('AwaMotos – Full UX Audit', () => {
     const priceBox = await page.isVisible('.price-box, .product-info-price').catch(() => false);
     if (!priceBox) addIssue({ page: 'PDP', viewport: 'Desktop', severity: 'High', category: 'UX / Preço', description: 'Preço do produto não visível (B2B restrito?)' });
 
-    const gallery = await page.isVisible('.fotorama, .product.media, .gallery-placeholder').catch(() => false);
+    const gallery = await page.isVisible('.fotorama, .product.media, .gallery-placeholder, .product-image-container, .product-image').catch(() => false);
     if (!gallery) addIssue({ page: 'PDP', viewport: 'Desktop', severity: 'High', category: 'Visual / Galeria', description: 'Galeria de imagens do produto não visível' });
   });
 
@@ -231,7 +236,7 @@ test.describe('AwaMotos – Full UX Audit', () => {
 
     await page.setViewportSize(DESKTOP);
     await page.goto(searchUrl, { waitUntil: 'networkidle', timeout: 35000 });
-    const resultCount = await page.locator('.item-product').count();
+    const resultCount = await page.locator('.product-item, .item-product').count();
     const noResultsMsg = await page.isVisible('.message.notice').catch(() => false);
     console.log(`  → Resultados: ${resultCount} produtos, sem-resultado: ${noResultsMsg}`);
     if (resultCount === 0 && noResultsMsg) {
@@ -245,9 +250,10 @@ test.describe('AwaMotos – Full UX Audit', () => {
     await page.setViewportSize(MOBILE);
     await page.goto(`${BASE_URL}/customer/account/login/`, { waitUntil: 'networkidle', timeout: 35000 });
 
-    const email = await page.isVisible('#email, input[name="login[username]"]').catch(() => false);
-    const pass  = await page.isVisible('#pass, input[name="login[password]"]').catch(() => false);
-    const btn   = await page.isVisible('#send2, .action.login').catch(() => false);
+    // Standard login redirects to B2B login — selectors include both standard and B2B form
+    const email = await page.isVisible('#email, #b2b-email, input[name="login[username]"]').catch(() => false);
+    const pass  = await page.isVisible('#pass, #b2b-pass, input[name="login[password]"]').catch(() => false);
+    const btn   = await page.isVisible('#send2, .action.login, .b2b-btn-entrar, button[type="submit"]').catch(() => false);
     if (!email || !pass || !btn) {
       addIssue({ page: 'Login', viewport: 'Mobile', severity: 'Critical', category: 'UX / Formulário', description: `Formulário incompleto no mobile – email:${email} senha:${pass} botão:${btn}` });
     }
