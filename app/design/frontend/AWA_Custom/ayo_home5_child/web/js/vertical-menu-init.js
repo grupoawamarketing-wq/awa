@@ -114,10 +114,10 @@ define([
         /* overrides all stylesheet rules reliably.                    */
         if ($title.length) {
             $title.css({
-                'background-color': '#A33B3B',
+                'background-color': 'var(--awa-primary, #A33B3B)',
                 'color': '#fff'
             });
-            $title[0].style.setProperty('background-color', '#A33B3B', 'important');
+            $title[0].style.setProperty('background-color', 'var(--awa-primary, #A33B3B)', 'important');
         }
 
         /* ---- Rokanthemes flyout widget ------------------------------ */
@@ -163,7 +163,6 @@ define([
         }
 
         function keepDesktopMenuExpanded() {
-            /* Ayo Home 5 default (demo ayo.nextsky.co): lista de categorias aberta no desktop na homepage. */
             return isDesktop() && isHomeContext();
         }
 
@@ -228,6 +227,13 @@ define([
 
             $nav.toggleClass('menu-open', open).toggleClass('vmm-open', open);
             $list.toggleClass('menu-open', open).toggleClass('vmm-open', open);
+
+            if (open) {
+                $list.addClass('vmm-animate-in');
+            } else {
+                $list.removeClass('vmm-animate-in');
+            }
+
             $title.toggleClass('active', open).attr('aria-expanded', expanded);
         }
 
@@ -502,7 +508,7 @@ define([
                 $list.stop(true, true).removeAttr('style');
 
                 if (keepDesktopMenuExpanded()) {
-                    setMenuOpenState(true);
+                    openMenu();
                 } else {
                     /* Bug #8 fix: Rokanthemes .VerticalMenu() may add menu-open/vmm-open
                        to $nav on init. setMenuOpenState(false) strips those stale classes
@@ -543,7 +549,15 @@ define([
                     return;
                 }
 
-                isOpen() ? closeMenu() : openMenu();
+                var isPinned = $nav.data('vmm-pinned') === true;
+
+                if (isOpen() && isPinned) {
+                    $nav.data('vmm-pinned', false);
+                    closeMenu();
+                } else {
+                    $nav.data('vmm-pinned', true);
+                    openMenu();
+                }
                 return;
             }
 
@@ -601,7 +615,7 @@ define([
                 return;
             }
 
-            if (keepDesktopMenuExpanded()) {
+            if (keepDesktopMenuExpanded() || $nav.data('vmm-pinned') === true) {
                 openMenu();
                 return;
             }
@@ -628,7 +642,7 @@ define([
                     return;
                 }
 
-                if (keepDesktopMenuExpanded()) {
+                if (keepDesktopMenuExpanded() || $nav.data('vmm-pinned') === true) {
                     openMenu();
                     return;
                 }
@@ -646,7 +660,7 @@ define([
                 return;
             }
 
-            if (keepDesktopMenuExpanded()) {
+            if (keepDesktopMenuExpanded() || $nav.data('vmm-pinned') === true) {
                 openMenu();
                 return;
             }
@@ -664,6 +678,19 @@ define([
                 }
             });
         }
+
+        /* ---- click outside to close pinned menu ------------------- */
+        $(document).on('mousedown' + NS, function (e) {
+            if (!isDesktop() || keepDesktopMenuExpanded() || $nav.data('vmm-pinned') !== true) {
+                return;
+            }
+
+            var root = $nav.get(0);
+            if (root && !root.contains(e.target)) {
+                $nav.data('vmm-pinned', false);
+                closeMenu();
+            }
+        });
 
         /* ---- deterministic desktop submenu visibility -------------- */
         $nav.on('mouseenter' + NS, 'li.ui-menu-item.level0.parent', function () {
@@ -1077,11 +1104,37 @@ define([
 
         ensureMobileToggles();
 
+        /* Branded header for mobile drawer */
+        if (!isDesktop() && $list.length && !$list.find('.vmm-mobile-header').length) {
+            var logoSrc = $('header .logo img').attr('src');
+            if (logoSrc) {
+                var $mHeader = $('<div class="vmm-mobile-header">' +
+                    '<img src="' + logoSrc + '" alt="AWA Motos" class="vmm-mobile-logo">' +
+                    '<button type="button" class="vmm-mobile-close" aria-label="Fechar menu">×</button>' +
+                    '</div>');
+                $list.prepend($mHeader);
+
+                $mHeader.find('.vmm-mobile-close').on('click' + NS, function () {
+                    closeMenu();
+                });
+            }
+        }
+
         if (rokanActive) {
             bindRokanMobileBridgeHandlers();
         }
 
-        syncOnResize();
+        /* Robust boot: delay syncOnResize to ensure all widgets are ready */
+        window.setTimeout(function () {
+            syncOnResize();
+            
+            // If it should be open, force it one more time after a short delay
+            // to override any legacy widget closing logic.
+            if (keepDesktopMenuExpanded()) {
+                openMenu();
+            }
+        }, 100);
+
         fixSectionAriaHidden();
         initScrollShadows();
         highlightCurrentCategory();

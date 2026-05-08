@@ -186,6 +186,22 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px
 <?php foreach ($jsPreloads as $jsUrl): ?>
 <link rel="preload" href="<?= $block->escapeUrl($jsUrl) ?>" as="script"/>
 <?php endforeach; ?>
+<?php /* styles-m.css — CSS principal Magento/Rokanthemes (5.1MB), separado do merged bundle 2026-05-08.
+         MOTIVO: Este arquivo causava freeze no Chrome/Blink (PSI "página parou de responder").
+         O Chrome precisa resolver 17,503 regras CSS + 14,610 var() refs ANTES de pintar qualquer pixel.
+         Com media="print" onload swap, o browser baixa em paralelo MAS não bloqueia o primeiro render.
+         O merged bundle fica ~200KB (bootstrap+fontawesome) em vez de 5.3MB — Chrome parseia em ms.
+         Requer <remove src="css/styles-m.css"/> em default_head_blocks.xml (já adicionado). */ ?>
+<?php $__stylesMUrl = $block->getViewFileUrl('css/styles-m.css'); ?>
+<link rel="preload"
+      href="<?= $block->escapeUrl($__stylesMUrl) ?>"
+      as="style"
+      fetchpriority="high"/>
+<link rel="stylesheet"
+      href="<?= $block->escapeUrl($__stylesMUrl) ?>"
+      media="print"
+      onload="this.media='all'"/>
+<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__stylesMUrl) ?>"/></noscript>
 <?php /* styles-l.css — CSS de desktop (4.3MB), separado do merged bundle 2026-05-08.
          media="screen and (min-width: 768px)": não bloqueia render em mobile (viewport < 768px).
          No PSI/Lighthouse (Moto G Power emulado), este CSS NÃO bloqueia o FCP.
