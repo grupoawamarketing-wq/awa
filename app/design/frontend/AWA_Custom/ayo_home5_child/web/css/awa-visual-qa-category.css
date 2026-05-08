@@ -212,7 +212,7 @@
 }
 
 /* =====================================================
-   Category Visual Improvements — 2026-05-08
+   Category Visual Improvements — 2026-05-08 (v2)
    ===================================================== */
 
 /* Card hover state — interactive lift effect */
@@ -225,20 +225,23 @@
   border-color: rgba(163, 59, 59, 0.25) !important;
 }
 
-/* Cart button border-radius — align with design token 8px
-   Justified: theme sets 5px, DS token --awa-radius-md is 8px */
-:is(body.catalog-category-view, body.catalogsearch-result-index) .item-product .btn-add-to-cart,
-:is(body.catalog-category-view, body.catalogsearch-result-index) .item-product .action.tocart,
-:is(body.catalog-category-view, body.catalogsearch-result-index) .item-product .b2b-primary-btn,
-:is(body.catalog-category-view, body.catalogsearch-result-index) .item-product [class*="b2b-login"] {
-  border-radius: var(--awa-radius-md, 8px) !important;
-  font-weight: var(--awa-weight-bold, 700) !important;
+/* Cart button border-radius — 8px (hardcoded, beats DS variable resolution issues)
+   themes.css WINNING selector: :is(body.*view,...) :is(.wrapper.grid.products-grid .item-product,...) :is(.btn-add-to-cart,.action.tocart)
+   that rule has specificity (0,6,1) with 5px !important.
+   This rule uses .wrapper.grid.products-grid + chained classes → (0,8,1): wins */
+:is(body.catalog-category-view, body.catalogsearch-result-index) .wrapper.grid.products-grid .item-product .btn-add-to-cart.action.tocart,
+:is(body.catalog-category-view, body.catalogsearch-result-index) .wrapper.grid.products-grid .item-product .btn-add-to-cart.addcart-link,
+:is(body.catalog-category-view, body.catalogsearch-result-index) .wrapper.grid.products-grid .item-product .action.tocart.b2b-primary-btn,
+:is(body.catalog-category-view, body.catalogsearch-result-index) .wrapper.grid.products-grid .item-product .action.tocart.btn-add-to-cart {
+  border-radius: 8px !important; /* (0,8,1) beats themes.css (0,6,1); hardcoded avoids CSS var inheritance issues */
+  font-weight: 700 !important;
   letter-spacing: 0.03em;
 }
 
-/* Category hero banner — compact to show products sooner above fold */
+/* Category hero banner — compact to show products sooner above fold
+   styles-m/themes.css set max-height:220px (non-important) — !important wins */
 :is(body.catalog-category-view, body.catalogsearch-result-index) .category-view-move .awa-category-hero {
-  max-height: 110px !important; /* justified: reduces above-fold chrome, products visible sooner */
+  max-height: 110px !important; /* beats non-important 220px from styles-m.css/themes.css */
   min-height: 80px;
   overflow: hidden;
 }
@@ -250,9 +253,12 @@
   object-position: center 40%;
 }
 
-/* Breadcrumbs — tighter padding on category pages */
-:is(body.catalog-category-view, body.catalogsearch-result-index) .breadcrumbs {
-  padding-top: 6px !important;
+/* Breadcrumbs — tighter padding on category pages
+   awa-super-global.css: body .page-wrapper .breadcrumbs { padding-top: 12px !important } = (0,2,1)
+   This rule: body.catalog-category-view .page-wrapper .breadcrumbs = (0,3,1): wins by specificity */
+body.catalog-category-view .page-wrapper .breadcrumbs,
+body.catalogsearch-result-index .page-wrapper .breadcrumbs {
+  padding-top: 6px !important; /* (0,3,1) beats awa-super-global (0,2,1) */
   padding-bottom: 6px !important;
   margin-bottom: 0 !important;
 }
