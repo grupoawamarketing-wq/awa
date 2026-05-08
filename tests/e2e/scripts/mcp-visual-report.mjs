@@ -8,11 +8,36 @@ function resolveE2ERoot() {
   return path.resolve(cwd, 'tests', 'e2e');
 }
 
+function toTimestamp(value) {
+  const timestamp = Date.parse(String(value || ''));
+  return Number.isNaN(timestamp) ? 0 : timestamp;
+}
+
+function getActiveProjectsFromLatestPlaywrightRun(resultsJsonPath) {
+  if (!fs.existsSync(resultsJsonPath)) {
+    return new Set();
+  }
+
+  try {
+    const parsedResults = JSON.parse(fs.readFileSync(resultsJsonPath, 'utf8'));
+    const projects = parsedResults?.config?.projects || [];
+    const projectNames = projects
+      .map((project) => project?.name)
+      .filter((name) => typeof name === 'string' && name.trim().length > 0);
+
+    return new Set(projectNames);
+  } catch {
+    console.warn('[mcp-visual-report] Could not parse Playwright results. Falling back to all finding files.');
+    return new Set();
+  }
+}
+
 const rootDir = resolveE2ERoot();
 const reportDir = path.join(rootDir, 'reports', 'mcp-visual');
 const findingGlobSuffix = '.finding.json';
 const outputJson = path.join(reportDir, 'mcp-visual-consolidated.json');
 const outputMd = path.join(reportDir, 'mcp-visual-consolidated.md');
+const playwrightResultsJson = path.join(rootDir, 'reports', 'mcp-visual-playwright-results.json');
 
 if (!fs.existsSync(reportDir)) {
   fs.mkdirSync(reportDir, { recursive: true });
@@ -23,9 +48,49 @@ const findingFiles = fs
   .filter((file) => file.endsWith(findingGlobSuffix))
   .sort();
 
+const activeProjects = getActiveProjectsFromLatestPlaywrightRun(playwrightResultsJson);
+const latestRunByProjectAndTarget = new Map();
+
+for (const file of findingFiles) {
+  const fullPath = path.join(reportDir, file);
+  const parsed = JSON.parse(fs.readFileSync(fullPath, 'utf8'));
+  const projectName = String(parsed?.project || '').trim();
+
+  if (activeProjects.size > 0 && !activeProjects.has(projectName)) {
+    continue;
+  }
+
+  const targetSlug = String(parsed?.target?.slug || 'unknown-target');
+  const dedupeKey = `${projectName}::${targetSlug}`;
+  const existing = latestRunByProjectAndTarget.get(dedupeKey);
+
+  if (!existing) {
+    latestRunByProjectAndTarget.set(dedupeKey, { file, parsed });
+    continue;
+  }
+
+  const existingTs = toTimestamp(existing.parsed?.generatedAt);
+  const currentTs = toTimestamp(parsed?.generatedAt);
+  if (currentTs >= existingTs) {
+    latestRunByProjectAndTarget.set(dedupeKey, { file, parsed });
+  }
+}
+
+const selectedRuns = Array.from(latestRunByProjectAndTarget.values()).sort((a, b) => {
+  const projectA = String(a.parsed?.project || '');
+  const projectB = String(b.parsed?.project || '');
+  if (projectA !== projectB) {
+    return projectA.localeCompare(projectB);
+  }
+
+  const targetA = String(a.parsed?.target?.slug || '');
+  const targetB = String(b.parsed?.target?.slug || '');
+  return targetA.localeCompare(targetB);
+});
+
 const consolidated = {
   generatedAt: new Date().toISOString(),
-  files: findingFiles,
+  files: selectedRuns.map((run) => run.file),
   runs: [],
   totals: {
     critical: 0,
@@ -35,9 +100,7 @@ const consolidated = {
   },
 };
 
-for (const file of findingFiles) {
-  const fullPath = path.join(reportDir, file);
-  const parsed = JSON.parse(fs.readFileSync(fullPath, 'utf8'));
+for (const { parsed } of selectedRuns) {
   consolidated.runs.push(parsed);
   for (const finding of parsed.findings || []) {
     consolidated.totals.findings += 1;

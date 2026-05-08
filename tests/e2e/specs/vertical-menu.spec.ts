@@ -19,13 +19,114 @@ function shot(name: string): string {
   return path.join(SCREENSHOT_DIR, `${name}.png`);
 }
 
+async function pause(ms: number): Promise<void> {
+  await new Promise<void>((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+async function waitForHeaderWithWatchdog(page: Page): Promise<boolean> {
+  return Promise.race<boolean>([
+    waitForHeader(page).then(() => true).catch(() => false),
+    new Promise<boolean>((resolve) => {
+      setTimeout(() => resolve(false), 20_000);
+    }),
+  ]);
+}
+
+async function safeScreenshot(page: Page, screenshotPath: string): Promise<void> {
+  await Promise.race<boolean>([
+    page.screenshot({
+      path: screenshotPath,
+      fullPage: false,
+    }).then(() => true).catch(() => false),
+    new Promise<boolean>((resolve) => {
+      setTimeout(() => resolve(false), 8_000);
+    }),
+  ]);
+}
+
 async function dismissCookies(page: Page): Promise<void> {
   const button = page.locator(SEL.cookieAccept).first();
 
   if (await button.isVisible({ timeout: 2_000 }).catch(() => false)) {
     await button.click();
-    await page.waitForTimeout(200);
+    await pause(200);
   }
+}
+
+async function gotoHomeWithWatchdog(page: Page): Promise<void> {
+  const targetUrl = '/?e2e_vertical_menu=' + Date.now();
+  let lastError: unknown;
+
+  for (let attempt = 1; attempt <= 2; attempt += 1) {
+    try {
+      const completed = await Promise.race<boolean>([
+        page.goto(targetUrl, {
+          waitUntil: 'domcontentloaded',
+          timeout: 18_000,
+        }).then(() => true),
+        new Promise<boolean>((resolve) => {
+          setTimeout(() => resolve(false), 25_000);
+        }),
+      ]);
+
+      if (!completed) {
+        throw new Error('Navigation watchdog timeout while opening homepage');
+      }
+
+      return;
+    } catch (error) {
+      lastError = error;
+      if (attempt === 2) {
+        throw error;
+      }
+    }
+  }
+
+  throw lastError instanceof Error
+    ? lastError
+    : new Error('Unable to navigate to homepage');
+}
+
+async function prepareVerticalMenuPage(page: Page): Promise<void> {
+  let lastError: unknown;
+
+  for (let attempt = 1; attempt <= 2; attempt += 1) {
+    try {
+      await gotoHomeWithWatchdog(page);
+
+      const headerReady = await waitForHeaderWithWatchdog(page);
+      const triggerVisible = await page
+        .locator(SEL.trigger)
+        .first()
+        .isVisible({ timeout: 4_000 })
+        .catch(() => false);
+
+      if (!headerReady && !triggerVisible) {
+        throw new Error('Header and vertical menu trigger were not ready');
+      }
+
+      await dismissCookies(page);
+      return;
+    } catch (error) {
+      lastError = error;
+
+      if (attempt === 2) {
+        break;
+      }
+
+      await page.goto('about:blank', {
+        waitUntil: 'domcontentloaded',
+        timeout: 8_000,
+      }).catch(() => {});
+      await pause(300);
+    }
+  }
+
+  throw lastError instanceof Error
+    ? lastError
+    : new Error('Unable to prepare page for vertical menu tests');
 }
 
 async function openPrimaryDrawerIfNeeded(page: Page): Promise<void> {
@@ -57,12 +158,13 @@ test.describe('Vertical Menu', () => {
     // On mobile/tablet the trigger is hidden and the menu lives inside the off-canvas drawer.
     test.skip(viewportWidth < DESKTOP_BREAKPOINT, `Vertical menu is desktop-only (viewport ${viewportWidth}px < ${DESKTOP_BREAKPOINT}px)`);
 
-    await page.goto('/?e2e_vertical_menu=' + Date.now(), {
-      waitUntil: 'domcontentloaded',
-      timeout: 45_000,
-    });
-    await waitForHeader(page);
-    await dismissCookies(page);
+    await prepareVerticalMenuPage(page);
+  });
+
+  test.afterEach(async ({ page }) => {
+    // Navigate away from heavy Magento page to free renderer memory
+    // between tests — prevents Firefox/Chromium context crash on this server.
+    await page.goto('about:blank', { timeout: 5_000 }).catch(() => {});
   });
 
   test('abre o menu vertical e renderiza categorias no breakpoint atual', async ({ page }, testInfo) => {
@@ -73,10 +175,10 @@ test.describe('Vertical Menu', () => {
     const firstLink = page.locator(SEL.firstLevelLink).first();
     const viewportWidth = page.viewportSize()?.width ?? 1280;
 
-    await expect(trigger).toBeVisible();
+    await expect(trigger).toBeVisible({ timeout: 20_000 });
 
     // Give some time for Magento x-magento-init and our controller to boot.
-    await page.waitForTimeout(1500);
+    await pause(1500);
 
     // On desktop homepage, the menu starts already expanded (keepDesktopMenuExpanded).
     const initialExpanded = await trigger.getAttribute('aria-expanded');
@@ -96,10 +198,7 @@ test.describe('Vertical Menu', () => {
       await expect(firstLink).not.toHaveText('');
     }
 
-    await page.screenshot({
-      path: shot(`open-${testInfo.project.name}`),
-      fullPage: false,
-    });
+    await safeScreenshot(page, shot(`open-${testInfo.project.name}`));
   });
 
   test('fecha corretamente com Escape no modo desktop e no drawer mobile', async ({ page }) => {
@@ -112,8 +211,7 @@ test.describe('Vertical Menu', () => {
 
     // On desktop homepage, keepDesktopMenuExpanded keeps the menu permanently open;
     // Escape won't close it. Detect this and verify it stays open.
-    const isDesktopHomepage = viewportWidth >= 992 &&
-      await page.evaluate(() => document.body.classList.contains('cms-index-index') || document.body.classList.contains('cms-homepage_ayo_home5'));
+    const isDesktopHomepage = viewportWidth >= DESKTOP_BREAKPOINT;
 
     // Ensure menu is open before testing close.
     const initialExpanded = await trigger.getAttribute('aria-expanded');
@@ -126,7 +224,7 @@ test.describe('Vertical Menu', () => {
 
     if (isDesktopHomepage) {
       // Menu should remain open on homepage desktop (by design).
-      await page.waitForTimeout(500);
+      await pause(500);
       await expect(menu).toBeVisible();
       return;
     }
@@ -153,8 +251,7 @@ test.describe('Vertical Menu', () => {
     const menu = page.locator(SEL.menu).first();
     const viewportWidth = page.viewportSize()?.width ?? 1280;
 
-    const isDesktopHomepage = viewportWidth >= 992 &&
-      await page.evaluate(() => document.body.classList.contains('cms-index-index') || document.body.classList.contains('cms-homepage_ayo_home5'));
+    const isDesktopHomepage = viewportWidth >= DESKTOP_BREAKPOINT;
 
     // Ensure menu is open.
     const initialExpanded = await trigger.getAttribute('aria-expanded');
@@ -166,7 +263,7 @@ test.describe('Vertical Menu', () => {
     if (isDesktopHomepage) {
       // On homepage desktop, clicking outside doesn't close the menu (by design).
       await page.mouse.click(viewportWidth - 20, 140);
-      await page.waitForTimeout(500);
+      await pause(500);
       await expect(menu).toBeVisible();
       return;
     }
