@@ -251,15 +251,17 @@
             }
         }, 1500);
 
-        // Listen for OWL v1 transitions to update progress bars
+        // Listen for OWL v1 transitions to update progress bars.
+        // Delegated on document so it captures carousels OWL-initialized
+        // after init() runs (newproduct/hotdeal/productTab have 1200-1500ms delays).
         if (typeof jQuery !== 'undefined') {
-            jQuery('.hot-deal-slide.owl-carousel, .productTabContent.owl-carousel, .rokan-bestseller .owl-carousel, .rokan-newproduct .owl-carousel').on('owl.afterMove owl.afterUpdate', function () {
+            jQuery(document).on('owl.afterMove owl.afterUpdate', '.owl-carousel', function () {
                 var owlEl = this;
                 var container = owlEl.closest('.hot-deal-tab-slider') || owlEl.closest('.hot-deal') || owlEl.closest('.tab_content') || owlEl.closest('.list-tab-product') || owlEl.closest('.rokan-bestseller') || owlEl.closest('.rokan-newproduct') || owlEl.parentElement;
                 if (container) {
                     var progressBar = container.querySelector('.awa-owl-progress');
                     if (progressBar) {
-                        updateProgress(owlEl, progressBar);
+                        requestAnimationFrame(function () { updateProgress(owlEl, progressBar); });
                     }
                 }
             });
