@@ -418,7 +418,7 @@ foreach ([
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__suggestionUrl) ?>"/></noscript>
 <?php endif;
     foreach ([
-        'css/awa-round2-home-owl-tabs.css',
+        // 'css/awa-round2-home-owl-tabs.css', // REMOVED 2026-05: file does not exist → 404
         'css/awa-home-carousel-standard.css',
         'css/awa-carousel-modern.css',
     ] as $__homeCarouselCss):
@@ -488,15 +488,19 @@ foreach ([
       media="print"
       onload="this.media='all'"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__verticalMenuFinalUrl) ?>?v=1"/></noscript>
-<?php /* awa-plp-final-polish.css — PLP grid, cards, toolbar polish; async (category/search/home pages)
-         Contorna CSS bundling (merge_css_files=1) para garantir carregamento correto em todas as páginas. */ ?>
-<?php $__plpFinalUrl = $block->getViewFileUrl('css/awa-plp-final-polish.css'); ?>
+<?php /* awa-plp-final-polish.css — PLP grid, cards, toolbar polish
+         Não carregado na HOME PAGE ($homeBundleUrl = indicador de home).
+         Home não tem product grid / toolbar — desperdício de 59KB.
+         Carregado em: category, search, PDP, e todas as outras páginas. */ ?>
+<?php if (!$homeBundleUrl): // Skip on home page — PLP grid CSS desnecessário
+    $__plpFinalUrl = $block->getViewFileUrl('css/awa-plp-final-polish.css'); ?>
 <link rel="preload" href="<?= $block->escapeUrl($__plpFinalUrl) ?>?v=2" as="style"/>
 <link rel="stylesheet"
       href="<?= $block->escapeUrl($__plpFinalUrl) ?>?v=2"
       media="print"
       onload="this.media='all'"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__plpFinalUrl) ?>?v=2"/></noscript>
+<?php endif; ?>
 <?php /* rexis-recommendations: async — widget nunca está above-fold */ ?>
 <?php $__rexisUrl = str_replace('css/awa-bundle-refinements.css', 'GrupoAwamotos_ProductIntelligence/css/rexis-recommendations.css', $refinementsBundleUrl); ?>
 <?php if ($__rexisUrl !== $refinementsBundleUrl): ?>
