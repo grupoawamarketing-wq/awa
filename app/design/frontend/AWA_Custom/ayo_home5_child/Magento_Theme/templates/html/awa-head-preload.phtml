@@ -217,31 +217,14 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px
       href="<?= $block->escapeUrl($__stylesLUrl) ?>"
       media="screen and (min-width: 768px)"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__stylesLUrl) ?>"/></noscript>
-<?php /* Bootstrap v3.3.6 + icon fonts — async (2026-05-08, removed from merged bundle blocker)
-         bootstrap.css: 146KB uncompressed (21KB compressed) — grid + components
-         font-awesome: 27KB — icon font CSS
-         icomoon + simple-line-icons: ~26KB — icon fonts
-         owl.carousel.css: 3KB — carousel
-         Critical above-fold grid already covered by awa-grid-system.css (async, already loaded).
-         Icon flash is acceptable — icons appear below-fold on mobile. */ ?>
-<?php $__bootstrapUrl = $block->getViewFileUrl('css/bootstrap.css'); ?>
-<link rel="stylesheet" href="<?= $block->escapeUrl($__bootstrapUrl) ?>" media="print" onload="this.media='all'"/>
-<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__bootstrapUrl) ?>"/></noscript>
-<?php /* awa-icon-fonts-bundle.css — font-awesome + icomoon + simple-line-icons → 1 request (2026-05-09) */ ?>
-<?php $__iconFontsBundleUrl = $block->getViewFileUrl('css/awa-icon-fonts-bundle.css'); ?>
-<link rel="stylesheet" href="<?= $block->escapeUrl($__iconFontsBundleUrl) ?>?v=1" media="print" onload="this.media='all'"/>
-<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__iconFontsBundleUrl) ?>?v=1"/></noscript>
-<?php $__owlCarouselUrl = $block->getViewFileUrl('css/owl.carousel.css'); ?>
-<link rel="stylesheet" href="<?= $block->escapeUrl($__owlCarouselUrl) ?>" media="print" onload="this.media='all'"/>
-<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__owlCarouselUrl) ?>"/></noscript>
-
-<?php /* themes5.css (ayo_home5 parent) — async 2026-05-09 (removed from merged bundle).
-         Same cascade as themes.css but ayo_home5-specific rules: product image sizing,
-         footer border-top, column widths. Anti-FOUC inline covers critical above-fold tokens.
-         NOTE: contains embedded sourcemap (base64, ~16KB extra). */ ?>
-<?php $__themes5Url = $block->getViewFileUrl('css/themes5.css'); ?>
-<link rel="stylesheet" href="<?= $block->escapeUrl($__themes5Url) ?>" media="print" onload="this.media='all'"/>
-<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__themes5Url) ?>"/></noscript>
+<?php /* awa-third-party-bundle.css — 7 third-party CSS files → 1 request (2026-05-09)
+         bootstrap(142KB) + owl(3KB) + themes5(40KB) + animation_theme(93KB)
+         + font-awesome(26KB) + icomoon(13KB) + simple-line-icons(12KB)
+         All files in css/ so relative URLs (../fonts/, images/) remain valid. */ ?>
+<?php $__thirdPartyBundleUrl = $block->getViewFileUrl('css/awa-third-party-bundle.css'); ?>
+<link rel="preload" href="<?= $block->escapeUrl($__thirdPartyBundleUrl) ?>?v=1" as="style"/>
+<link rel="stylesheet" href="<?= $block->escapeUrl($__thirdPartyBundleUrl) ?>?v=1" media="print" onload="this.media='all'"/>
+<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__thirdPartyBundleUrl) ?>?v=1"/></noscript>
 <?php /* awa-interaction-widgets.css — bundle consolidado de 7 CSS de interação (2026-05-09).
          Antes: calendar(6KB) + cookie-consent(3KB) + chosen(10KB) + fancybox(4KB)
                + loader(0KB) + uppy(0KB) + Brand/styles(2KB) + quickview(4KB) = 7 requests
@@ -303,16 +286,11 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px
     if ($__suggestionUrl !== $refinementsBundleUrl): ?>
 <link rel="stylesheet" href="<?= $block->escapeUrl($__suggestionUrl) ?>" media="print" onload="this.media='all'"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__suggestionUrl) ?>"/></noscript>
-<?php endif;
-    foreach ([
-        // 'css/awa-round2-home-owl-tabs.css', // REMOVED 2026-05: file does not exist → 404
-        'css/awa-home-carousel-standard.css',
-        'css/awa-carousel-modern.css',
-    ] as $__homeCarouselCss):
-        $__homeCarouselUrl = $block->getViewFileUrl($__homeCarouselCss); ?>
-<link rel="stylesheet" href="<?= $block->escapeUrl($__homeCarouselUrl) ?>" media="print" onload="this.media='all'"/>
-<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__homeCarouselUrl) ?>"/></noscript>
-<?php endforeach; endif; ?>
+<?php endif; // suggestion check
+$__carouselBundleUrl = $block->getViewFileUrl('css/awa-carousel-bundle.css'); ?>
+<link rel="stylesheet" href="<?= $block->escapeUrl($__carouselBundleUrl) ?>?v=1" media="print" onload="this.media='all'"/>
+<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__carouselBundleUrl) ?>?v=1"/></noscript>
+<?php endif; // $homeBundleUrl: suggestion + carousel ?>
 <?php /* awa-vertical-menu-modern.css → included in awa-layout-bundle.css (2026-05-09) */ ?>
 <?php /* awa-bundle-refinements.css — safety-net overrides, carrega async (2026-05-02)
          Regras críticas above-fold (cart-fallback, b2b-promo-bar) cobertas no inline anti-FOUC.
