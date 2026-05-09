@@ -1,0 +1,231 @@
+/**
+ * awa-visual-polish-r2.css
+ * Visual Polish Pass R2 — Footer, Cards, Typography, Consistency
+ * Carregado por último (após awa-audit-bundle.css) — máxima prioridade no cascade
+ *
+ * FIXES APLICADOS:
+ *   VP-1 : Footer border 3px solid #b73337 → 1px solid #E5E5E5 (todas páginas/viewports)
+ *   VP-2 : Home product cards — adicionar shadow para igualar category
+ *   VP-3 : PDP related products — normalizar border color rgba(15,23,42,0.1) → #E5E5E5
+ *   VP-4 : Hover state nos cards — shadow elevado + translateY (todas páginas)
+ *   VP-5 : Breadcrumb padding — normalizar category(6px) + PDP(12px) → 12px
+ *   VP-6 : Filter title — consistência tipográfica no layered nav
+ *   VP-7 : Seções home — garantir background branco em todas as linhas pares
+ *   VP-8 : PDP — alinhamento do bloco de preço
+ * @version 2026-05-09
+ */
+
+/* =============================================================================
+ * VP-1: Footer border
+ * Problema: border-top: 3px solid #b73337 (vibrante e espesso em todas páginas)
+ * Origem:   _qa-visual-fixes.less → compilado em styles-m.css
+ * Fix:      1px solid #E5E5E5 — neutro, profissional, sem !important se possível
+ * Necessita !important por ser override de regra compilada no LESS (alta especificidade)
+ * =========================================================================== */
+/* Higher specificity (0,2,1) to beat bundle-refinements compound selectors */
+body .page-wrapper .page-footer,
+body .page-wrapper .page_footer {
+  border-top: 1px solid #E5E5E5 !important; /* era 3px solid var(--awa-primary) — visual pollution */
+}
+
+/* =============================================================================
+ * VP-2 & VP-3: Product card shadow normalization
+ * Problema: home cards têm shadow=none, category cards têm shadow consistente,
+ *           PDP related cards têm border-color diferente (rgba(15,23,42,0.1))
+ * Fix:      shadow uniforme em todos os product-items e border-color #E5E5E5
+ * =========================================================================== */
+.product-item,
+.item-product {
+  box-shadow:
+    0 1px 3px rgb(0 0 0 / 8%),
+    0 1px 2px rgb(0 0 0 / 6%);
+  border-color: #E5E5E5;
+  /* Não usar !important aqui para permitir override em contextos específicos */
+}
+
+/* =============================================================================
+ * VP-4: Card hover state — elevação sutil (todas as páginas)
+ * Problema: home cards têm hover-shadow agressivo (0px 6px 16px / !important)
+ *           category/pdp têm hover diferente ou nenhum
+ * Fix:      hover uniforme com translateY(-2px) + shadow elevado
+ * NOTA: A regra em awa-visual-qa-home.css usa !important com seletor page-scoped
+ *       então nossa regra global aqui não interfere nas páginas que já têm o override
+ * =========================================================================== */
+.product-item:hover,
+.item-product:hover {
+  box-shadow:
+    0 4px 14px rgb(0 0 0 / 12%),
+    0 2px 6px rgb(0 0 0 / 8%);
+  transform: translateY(-2px);
+  border-color: #D8D8D8;
+  transition:
+    box-shadow 0.22s ease,
+    transform 0.22s ease,
+    border-color 0.22s ease;
+}
+
+/* =============================================================================
+ * VP-5: Breadcrumb padding normalization
+ * Problema: category=6px 0, PDP=12px 0 — inconsistente
+ * Fix:      12px uniforme em todas as páginas
+ * =========================================================================== */
+.breadcrumbs {
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+/* =============================================================================
+ * VP-6: Layered navigation — filter title consistency
+ * Problema: filter title pode não ter espaçamento ou peso consistente
+ * Fix:      garantir aparência padronizada do título de filtro
+ * =========================================================================== */
+.filter-options-title {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #333333;
+  padding: 12px 16px;
+  border-bottom: 1px solid #E5E5E5;
+}
+
+.filter-options-title:hover {
+  color: #b73337;
+}
+
+/* =============================================================================
+ * VP-7: Home page — seções com bg alternado (zebra strip)
+ * Garantir que o widget de prova social, banners inline e seções pares
+ * tenham background levemente diferenciado para separação visual sem dividers
+ * =========================================================================== */
+.cms-index-index .page-main .column.main > .block.widget:nth-child(even),
+.cms-index-index .page-main .column.main > .home-section:nth-child(even) {
+  background: #FAFAFA;
+  border-radius: 8px;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+/* =============================================================================
+ * VP-8: PDP — bloco de preço e botão de compra
+ * Garantir alinhamento e espaçamento consistentes no info block do produto
+ * =========================================================================== */
+.catalog-product-view .product-info-price {
+  padding-top: 8px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #F0F0F0;
+  margin-bottom: 16px;
+}
+
+.catalog-product-view .product-info-price .price-box {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Preço regular — destaque */
+.catalog-product-view .price-box .price {
+  font-size: 28px;
+  font-weight: 700;
+  color: #b73337;
+  line-height: 1;
+}
+
+/* Preço riscado em vermelho mais suave */
+.catalog-product-view .price-box .old-price .price {
+  font-size: 18px;
+  font-weight: 400;
+  color: #999999;
+  text-decoration: line-through;
+}
+
+/* =============================================================================
+ * VP-9: Sticky header — shadow quando fixado
+ * Problema: header shadow=none mesmo no sticky state
+ * Fix:      shadow sutil quando o header está sticky
+ * =========================================================================== */
+.page-header.stuck,
+.page-header.is-sticky,
+.nav-wrapper.sticky-on,
+.page-header[style*="position: fixed"],
+.page-header[style*="position:fixed"] {
+  box-shadow: 0 2px 12px rgb(0 0 0 / 8%), 0 1px 4px rgb(0 0 0 / 4%);
+}
+
+/* =============================================================================
+ * VP-10: Input / form elements — border normalization
+ * Problema: category inputs border: rgb(233,236,239), outros: rgb(226,232,240)
+ *           pequena diferença mas perceptível no zoom
+ * Fix:      normalizar para o token AWA: #E5E5E5
+ * =========================================================================== */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+input[type="number"],
+input[type="tel"],
+select,
+textarea {
+  border-color: #E5E5E5;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="search"]:focus,
+input[type="number"]:focus,
+input[type="tel"]:focus,
+select:focus,
+textarea:focus {
+  border-color: #b73337;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(183, 51, 55, 0.1);
+}
+
+/* =============================================================================
+ * VP-11: Paginação — normalizar estilos
+ * Garantir que a paginação seja visualmente consistente e coerente com os tokens
+ * =========================================================================== */
+.pages .item a,
+.pages .item a:visited {
+  color: #333333;
+  border: 1px solid #E5E5E5;
+  border-radius: 6px;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.pages .item a:hover {
+  background-color: #F7F7F7;
+  border-color: #D0D0D0;
+  color: #b73337;
+}
+
+.pages .item.current,
+.pages-item-selected {
+  background-color: #b73337;
+  border-color: #b73337;
+  color: #FFFFFF;
+  border-radius: 6px;
+}
+
+.pages .item.current span,
+.pages-item-selected span {
+  color: #FFFFFF;
+}
+
+/* =============================================================================
+ * VP-12: Badge / label de produto (promoção, novo, etc.)
+ * Garantir badge radius e cores consistentes
+ * =========================================================================== */
+.product-label,
+.label.sale,
+.sale-badge,
+.onsale-badge,
+[class*="product-label"] {
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
