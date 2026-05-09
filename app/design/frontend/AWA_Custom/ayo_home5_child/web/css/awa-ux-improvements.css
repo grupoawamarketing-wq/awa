@@ -1,26 +1,31 @@
 /**
  * AWA UX Improvements
- * Responsável por micro-interações, foco visível para acessibilidade e transições suaves.
+ * Micro-interações, acessibilidade (a11y) e otimizações de performance.
+ *
+ * FIXES 2026-05-09:
+ * - REMOVIDO: img { content-visibility: auto } — causava CLS em TODAS as imagens (seletor excessivo)
+ * - REMOVIDO: .product-item-info:hover { transform: translateY(-2px) } — VP-4 (awa-visual-polish-r2.css)
+ *   já aplica transform no .product-item (pai). Repetir no filho (.product-item-info) acumulava -4px.
+ * - REMOVIDO: will-change:transform de .product-item-info — sem transform no elemento, sem necessidade.
  */
 
 /* ==========================================================================
    1. TRANSIÇÕES E ANIMAÇÕES SUAVES (UX)
    ========================================================================== */
 
-/* Cards de Produto: Feedback de flutuação e sombra suave */
+/* Cards de Produto: transição suave de sombra e borda ao hover.
+   Transform é gerenciado pelo VP-4 no pai (.product-item) — não duplicar aqui. */
 body .page-wrapper .product-item-info {
-    transition: transform var(--awa-duration, 0.25s) var(--awa-ease), 
-                box-shadow var(--awa-duration, 0.25s) var(--awa-ease),
+    transition: box-shadow var(--awa-duration, 0.25s) var(--awa-ease),
                 border-color var(--awa-duration-fast, 0.15s) var(--awa-ease) !important;
-    will-change: transform, box-shadow;
+    will-change: box-shadow;
 }
 
 body .page-wrapper .product-item-info:hover {
-    transform: translateY(-2px);
     box-shadow: var(--awa-shadow-md);
 }
 
-/* Suavização em Botões Primários */
+/* Botões Primários: feedback visual ao interagir */
 body .page-wrapper .action.primary {
     transition: background-color var(--awa-duration-fast) var(--awa-ease),
                 border-color var(--awa-duration-fast) var(--awa-ease),
@@ -32,22 +37,17 @@ body .page-wrapper .action.primary:active {
     transform: scale(0.98);
 }
 
-/* Scroll Suave nativo para âncoras na página */
-html {
-    scroll-behavior: smooth;
-}
-
 /* ==========================================================================
-   2. ACESSIBILIDADE (A11Y) E CONTRASTE
+   2. ACESSIBILIDADE (A11Y) — WCAG 2.1
    ========================================================================== */
 
-/* Focus Rings visíveis para navegação por teclado (WCAG 2.1) */
+/* Focus Rings visíveis para navegação por teclado */
 :focus-visible {
     outline: 2px solid var(--awa-primary) !important;
     outline-offset: 2px !important;
 }
 
-/* Esconder elementos apenas visualmente, mantendo para leitores de tela */
+/* Utility: visível apenas para leitores de tela */
 .sr-only {
     position: absolute;
     width: 1px;
@@ -60,7 +60,7 @@ html {
     border-width: 0;
 }
 
-/* Melhorar contraste e legibilidade de textos */
+/* Legibilidade de textos */
 body {
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -68,27 +68,25 @@ body {
 }
 
 /* ==========================================================================
-   3. OTIMIZAÇÃO DE PERFORMANCE (LIGHTHOUSE / WEB VITALS)
+   3. PERFORMANCE — CLS GUARDS
    ========================================================================== */
 
-/* Prevenção de CLS (Cumulative Layout Shift) adiando pintura de imagens off-screen */
-img {
-    content-visibility: auto;
-}
-
-/* Reservar espaço para ícones comuns antes de carregar, evitando CLS */
-.fotorama__img, .product-image-photo {
+/* Reservar espaço para imagens de produto antes do carregamento (evita CLS).
+   Seletor específico (não "img" global) para não afetar imagens editoriais/banners. */
+.fotorama__img,
+.product-image-photo {
     aspect-ratio: 1 / 1;
 }
 
-/* Otimização de GPU para painéis modais */
+/* GPU optimization para modais */
 /* NOTA: will-change:transform NÃO deve ser aplicado em .navigation.verticalmenu
-   pois cria um novo containing block para position:fixed, fazendo o dropdown
-   ficar posicionado relativo ao nav em vez do viewport. */
+   pois cria novo containing block para position:fixed, deslocando o dropdown
+   do viewport para o nav. */
 .modal-popup {
     will-change: transform, opacity;
 }
-/* Reset explícito: position:fixed do togge-menu fica relativo ao viewport */
+
+/* Reset explícito: garante que position:fixed do togge-menu seja relativo ao viewport */
 .navigation.verticalmenu {
     will-change: auto;
 }
