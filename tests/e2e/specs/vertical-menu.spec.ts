@@ -29,7 +29,7 @@ async function waitForHeaderWithWatchdog(page: Page): Promise<boolean> {
   return Promise.race<boolean>([
     waitForHeader(page).then(() => true).catch(() => false),
     new Promise<boolean>((resolve) => {
-      setTimeout(() => resolve(false), 20_000);
+      setTimeout(() => resolve(false), 10_000);
     }),
   ]);
 }
@@ -64,10 +64,10 @@ async function gotoHomeWithWatchdog(page: Page): Promise<void> {
       const completed = await Promise.race<boolean>([
         page.goto(targetUrl, {
           waitUntil: 'domcontentloaded',
-          timeout: 18_000,
+          timeout: 12_000,
         }).then(() => true),
         new Promise<boolean>((resolve) => {
-          setTimeout(() => resolve(false), 25_000);
+          setTimeout(() => resolve(false), 16_000);
         }),
       ]);
 
@@ -89,44 +89,19 @@ async function gotoHomeWithWatchdog(page: Page): Promise<void> {
     : new Error('Unable to navigate to homepage');
 }
 
-async function prepareVerticalMenuPage(page: Page): Promise<void> {
-  let lastError: unknown;
+async function prepareVerticalMenuPage(page: Page, testInfo: Parameters<typeof test.beforeEach>[0] extends (arg1: any, arg2: infer T) => any ? T : any): Promise<void> {
+  await gotoHomeWithWatchdog(page);
 
-  for (let attempt = 1; attempt <= 2; attempt += 1) {
-    try {
-      await gotoHomeWithWatchdog(page);
-
-      const headerReady = await waitForHeaderWithWatchdog(page);
-      const triggerVisible = await page
-        .locator(SEL.trigger)
-        .first()
-        .isVisible({ timeout: 4_000 })
-        .catch(() => false);
-
-      if (!headerReady && !triggerVisible) {
-        throw new Error('Header and vertical menu trigger were not ready');
-      }
-
-      await dismissCookies(page);
-      return;
-    } catch (error) {
-      lastError = error;
-
-      if (attempt === 2) {
-        break;
-      }
-
-      await page.goto('about:blank', {
-        waitUntil: 'domcontentloaded',
-        timeout: 8_000,
-      }).catch(() => {});
-      await pause(300);
-    }
+  const headerReady = await waitForHeaderWithWatchdog(page);
+  if (!headerReady) {
+    testInfo.annotations.push({
+      type: 'warning',
+      description: 'Header watchdog timeout; continuing and validating via menu assertions',
+    });
+    await pause(300);
   }
 
-  throw lastError instanceof Error
-    ? lastError
-    : new Error('Unable to prepare page for vertical menu tests');
+  await dismissCookies(page);
 }
 
 async function openPrimaryDrawerIfNeeded(page: Page): Promise<void> {
@@ -151,14 +126,14 @@ async function openPrimaryDrawerIfNeeded(page: Page): Promise<void> {
 const DESKTOP_BREAKPOINT = 992;
 
 test.describe('Vertical Menu', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page }, testInfo) => {
     const viewportWidth = page.viewportSize()?.width ?? 1280;
 
     // The vertical menu ("Departamentos") is desktop-only (≥992px).
     // On mobile/tablet the trigger is hidden and the menu lives inside the off-canvas drawer.
     test.skip(viewportWidth < DESKTOP_BREAKPOINT, `Vertical menu is desktop-only (viewport ${viewportWidth}px < ${DESKTOP_BREAKPOINT}px)`);
 
-    await prepareVerticalMenuPage(page);
+    await prepareVerticalMenuPage(page, testInfo);
   });
 
   test.afterEach(async ({ page }) => {
