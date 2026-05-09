@@ -471,6 +471,24 @@ class Suggestions extends Template
     }
 
     /**
+     * Preload prices for multiple SKUs in a single ERP batch query.
+     * Call this before a foreach loop that uses getCustomerPrice().
+     * Subsequent calls to getCustomerPrice() will hit the in-memory cache.
+     *
+     * @param array $skus List of SKU strings
+     */
+    public function preloadCustomerPrices(array $skus): void
+    {
+        $customerCode = $this->getErpCustomerCode();
+        if (!$customerCode || empty($skus)) {
+            return;
+        }
+        // Populates the in-memory priceCache inside customerPriceProvider,
+        // so subsequent getCustomerPrice() calls skip the ERP round-trip.
+        $this->customerPriceProvider->getCustomerPrices($customerCode, $skus);
+    }
+
+    /**
      * Get customer's price list name (e.g. "010 - DEMA")
      */
     public function getCustomerPriceListName(): ?string

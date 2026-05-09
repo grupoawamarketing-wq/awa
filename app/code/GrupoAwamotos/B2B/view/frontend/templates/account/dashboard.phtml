@@ -34,6 +34,13 @@ if ($erpBlock && $erpBlock->isEnabled() && $erpBlock->isLoggedIn()) {
             $hasCustomPriceList = $erpBlock->hasCustomPriceList();
             if ($hasCustomPriceList) {
                 $customerPriceListName = $erpBlock->getCustomerPriceListName();
+                // Preload all prices in ONE batch ERP query before the foreach loops.
+                // Without this, each getCustomerPrice() makes a separate ERP SQL Server round-trip.
+                $allSkusForPreload = array_merge(
+                    array_column($erpSuggestions ?? [], 'codigo_material'),
+                    array_column($erpReorder ?? [], 'codigo_material')
+                );
+                $erpBlock->preloadCustomerPrices(array_filter($allSkusForPreload));
             }
         }
     } catch (\Throwable $erpException) {
