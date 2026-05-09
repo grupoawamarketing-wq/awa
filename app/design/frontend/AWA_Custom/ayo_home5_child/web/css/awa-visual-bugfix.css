@@ -16542,3 +16542,132 @@ html body .page-wrapper .page_footer .awa-footer-devby .awa-footer-muted-label {
         position: static !important;
     }
 }
+
+/* ==========================================================================
+   FIX-CHECKOUT-MOBILE-1: Esconder nav mobile fixo (.link-on-bottom z:9999)
+   no checkout para evitar sobreposição com o botão "CONCLUIR PEDIDO".
+   O nav ficava em position:fixed, z:9999, cobrindo o rodapé da tela e
+   bloqueando cliques no botão de finalizar compra no mobile.
+   ========================================================================== */
+body.checkout-index-index .link-on-bottom,
+body.checkout-cart-index .link-on-bottom,
+body.onepagecheckout-index-index .link-on-bottom,
+body.rokanthemes-onepagecheckout .link-on-bottom,
+body.checkout-index-index nav.fixed-bottom,
+body.checkout-cart-index nav.fixed-bottom,
+body.onepagecheckout-index-index nav.fixed-bottom,
+body.rokanthemes-onepagecheckout nav.fixed-bottom {
+    display: none !important; /* Nav mobile fixo bloqueia botão finalizar no checkout e no carrinho */
+}
+
+/* ==========================================================================
+   FIX-CHECKOUT-MOBILE-2: agreements-modal pointer-events no mobile
+   No mobile, o .agreements-modal tinha pe:auto mesmo com visibility:hidden.
+   Garantir pe:none quando modal não está ativo para não interceptar toque.
+   ========================================================================== */
+body.checkout-index-index .agreements-modal:not(._show) {
+    pointer-events: none !important;
+}
+
+/* ==========================================================================
+   CAROUSEL-BUG-FIXES: Correções dos carousels OWL v1 e Fotorama
+   Data: 2026-05-09 | Diagnosticado via Playwright MCP (Firefox 1440×900)
+   ========================================================================== */
+
+/* --- BUG #1: Banner arrows — dupla invisibilidade ---
+   O Ayo theme define opacity:0 tanto no container .owl-buttons quanto
+   nas .owl-prev/.owl-next individualmente. Quando o container vai a opacity:1
+   no hover, os botões ainda ficam invisíveis (opacity efetivo = 1*0 = 0).
+   Fix: forçar opacity:1 nos botões individuais. A visibilidade do container
+   ainda controla show/hide quando em repouso. */
+.wrapper_slider .owl-carousel .owl-buttons > div {
+    opacity: 1 !important;
+}
+
+/* --- BUG #2: Setas cortadas — left:-6px / right:-6px com overflow:hidden ---
+   O .row parent tem overflow:hidden, cortando as setas posicionadas a -6px.
+   Move as setas para dentro do carousel (8px) onde ficam visíveis. */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .ayo-home5-wrapper
+    :is(.rokan-newproduct, .rokan-bestseller, .rokan-mostviewed, .rokan-featuredproduct)
+    .owl-controls .owl-buttons > .owl-prev {
+    left: 8px !important;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .ayo-home5-wrapper
+    :is(.rokan-newproduct, .rokan-bestseller, .rokan-mostviewed, .rokan-featuredproduct)
+    .owl-controls .owl-buttons > .owl-next {
+    right: 8px !important;
+}
+
+/* Mesmo fix para os botões .awa-owl-nav injetados via JS */
+.awa-owl-nav__btn--prev {
+    left: 8px !important;
+}
+
+.awa-owl-nav__btn--next {
+    right: 8px !important;
+}
+
+/* --- BUG #5: Super Ofertas (hot-deal) sem setas ---
+   O JS injeta .awa-owl-nav em .hot-deal-tab-slider mas o CSS hover-reveal
+   usa :is(.hot-deal, ...) sem incluir .hot-deal-tab-slider. Resultado: botões
+   injetados mas nunca exibidos no hover. */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .ayo-home5-wrapper
+    .hot-deal-tab-slider:hover .awa-owl-nav__btn {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* --- BUG #7: Fotorama — setas no topo, não centralizadas ---
+   O CSS padrão usa top:0; bottom:0; height:36px → seta fica no topo do stage.
+   Fix: posicionamento vertical explícito ao centro. */
+body.catalog-product-view .fotorama__arr {
+    top: 50% !important;
+    bottom: auto !important;
+    transform: translateY(-50%) !important;
+}
+
+/* --- BUG #8: Fotorama — botão fullscreen oculto ---
+   Alguma regra define display:none no fullscreen icon. Restaurar. */
+body.catalog-product-view .fotorama__fullscreen-icon {
+    display: block !important;
+}
+
+/* --- BUG #9: Fotorama — sprite interno (.fotorama__arr__arr) 80×80 no container 36×36 ---
+   Restringir ao tamanho do container para evitar overflow. */
+body.catalog-product-view .fotorama__arr .fotorama__arr__arr {
+    width: 36px !important;
+    height: 36px !important;
+    overflow: hidden !important;
+    background-size: 36px 36px !important;
+}
+
+/* ==========================================================================
+   FIX-CHECKOUT-LOADER: Loader do checkout — pointer-events:none imediato
+   O #checkout-loader (.loading-mask) cobre 100% da viewport durante init OPC.
+   pointer-events:auto bloqueava scroll e toque durante os primeiros 2s.
+   Fix: pe:none para interação pass-through (feedback visual mantido).
+   ========================================================================== */
+body.rokanthemes-onepagecheckout #checkout-loader,
+body.onepagecheckout-index-index #checkout-loader,
+body.checkout-index-index #checkout-loader {
+    pointer-events: none !important; /* Não bloquear toque/scroll durante init checkout */
+    cursor: wait;
+}
+
+/* ==========================================================================
+   FIX-RELATED-NAV-1: Botões Swiper — Produtos Relacionados (PDP)
+   Origem: awa-super-global.css define left:var(--awa-neg-1,-4px) com mesma
+   especificidade (0-3-1) que styles-m.css, mas carrega depois → computed -4px.
+   Com overflow:hidden no .products-swiper--related, 4px ficavam clipados.
+   Seletor mais específico (0-4-1) garante left/right positivos dentro do container.
+   ========================================================================== */
+body.catalog-product-view .awa-pdp-related .products-swiper--related .swiper-button-prev {
+    left: 8px !important;
+}
+body.catalog-product-view .awa-pdp-related .products-swiper--related .swiper-button-next {
+    right: 8px !important;
+}

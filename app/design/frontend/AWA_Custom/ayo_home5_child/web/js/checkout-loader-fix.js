@@ -50,7 +50,7 @@ define(['rjsResolver'], function (resolver) {
 
         if (loader) {
             resolver(removeLoader.bind(null, loader));
-            setTimeout(function () { removeLoader(loader); }, 5000);
+            setTimeout(function () { removeLoader(loader); }, 2000); // Reduzido 500021922000ms: CSS pe:none garante interação durante init
         }
 
         fixBillingAddressSelectA11y();
