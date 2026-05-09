@@ -227,15 +227,10 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px
 <?php $__bootstrapUrl = $block->getViewFileUrl('css/bootstrap.css'); ?>
 <link rel="stylesheet" href="<?= $block->escapeUrl($__bootstrapUrl) ?>" media="print" onload="this.media='all'"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__bootstrapUrl) ?>"/></noscript>
-<?php $__fontAwesomeUrl = $block->getViewFileUrl('css/font-awesome.min.css'); ?>
-<link rel="stylesheet" href="<?= $block->escapeUrl($__fontAwesomeUrl) ?>" media="print" onload="this.media='all'"/>
-<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__fontAwesomeUrl) ?>"/></noscript>
-<?php $__icomoonUrl = $block->getViewFileUrl('css/icomoon.css'); ?>
-<link rel="stylesheet" href="<?= $block->escapeUrl($__icomoonUrl) ?>" media="print" onload="this.media='all'"/>
-<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__icomoonUrl) ?>"/></noscript>
-<?php $__simpleLineUrl = $block->getViewFileUrl('css/simple-line-icons.css'); ?>
-<link rel="stylesheet" href="<?= $block->escapeUrl($__simpleLineUrl) ?>" media="print" onload="this.media='all'"/>
-<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__simpleLineUrl) ?>"/></noscript>
+<?php /* awa-icon-fonts-bundle.css — font-awesome + icomoon + simple-line-icons → 1 request (2026-05-09) */ ?>
+<?php $__iconFontsBundleUrl = $block->getViewFileUrl('css/awa-icon-fonts-bundle.css'); ?>
+<link rel="stylesheet" href="<?= $block->escapeUrl($__iconFontsBundleUrl) ?>?v=1" media="print" onload="this.media='all'"/>
+<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__iconFontsBundleUrl) ?>?v=1"/></noscript>
 <?php $__owlCarouselUrl = $block->getViewFileUrl('css/owl.carousel.css'); ?>
 <link rel="stylesheet" href="<?= $block->escapeUrl($__owlCarouselUrl) ?>" media="print" onload="this.media='all'"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__owlCarouselUrl) ?>"/></noscript>
@@ -279,45 +274,12 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px
       onload="this.media='all'"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($cssUrl) ?>"/></noscript>
 <?php endforeach; ?>
-<?php /* === AWA Layout Override CSS (blocking, após super-global — cascata correta) ===
-         Movidos de default_head_blocks.xml (2026-05-04):
-         - Em XML, estes CSSes carregavam ANTES do super-global → super-global os sobrescrevia.
-         - Agora carregam DEPOIS (media=all, blocking) → "canonical"/"fixed" realmente ganham.
-         - awa-ux-improvements + awa-ux-responsiveness → async (cosmético, zero layout crítico). */ ?>
-<?php foreach ([
-    'css/awa-layout-canonical.css',
-    'css/awa-layout-fixed.css',
-    'css/awa-clean-ui-final.css',
-] as $__layoutCssUrl): ?>
-<link rel="preload" href="<?= $block->escapeUrl($block->getViewFileUrl($__layoutCssUrl)) ?>" as="style"/>
-<link rel="stylesheet"
-      href="<?= $block->escapeUrl($block->getViewFileUrl($__layoutCssUrl)) ?>"
-      media="print"
-      onload="this.media='all'"/>
-<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($block->getViewFileUrl($__layoutCssUrl)) ?>"/></noscript>
-<?php endforeach; ?>
-<?php /* awa-ux-improvements.css removed 2026-05 — superseded by _awa-ux-conversao-2026-05-07.less (LESS pipeline). Saves 3KB async. */
-// phpcs:ignore
-foreach ([
-    'css/awa-ux-responsiveness.css',
-] as $__uxCssUrl): ?>
-<link rel="preload" href="<?= $block->escapeUrl($block->getViewFileUrl($__uxCssUrl)) ?>" as="style"/>
-<link rel="stylesheet"
-      href="<?= $block->escapeUrl($block->getViewFileUrl($__uxCssUrl)) ?>"
-      media="print"
-      onload="this.media='all'"/>
-<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($block->getViewFileUrl($__uxCssUrl)) ?>"/></noscript>
-<?php endforeach; ?>
-<?php /* awa-grid-system.css — Grid utility classes → ASYNC 2026-05-08.
-         Tokens de grid (:root vars) já definidos inline no Anti-FOUC block acima.
-         Classes utilitárias (.container, .grid-*) usadas below-fold apenas. */ ?>
-<?php $__gridSystemUrl = $block->getViewFileUrl('css/awa-grid-system.css'); ?>
-<link rel="preload" href="<?= $block->escapeUrl($__gridSystemUrl) ?>" as="style"/>
-<link rel="stylesheet"
-      href="<?= $block->escapeUrl($__gridSystemUrl) ?>"
-      media="print"
-      onload="this.media='all'"/>
-<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__gridSystemUrl) ?>"/></noscript>
+<?php /* awa-layout-bundle.css — 10 AWA layout+utility CSS files → 1 request (2026-05-09)
+         canonical + fixed + clean-ui + ux-resp + grid + vmenu-modern + bestseller + card + gap-fix + vmenu-final */ ?>
+<?php $__layoutBundleUrl = $block->getViewFileUrl('css/awa-layout-bundle.css'); ?>
+<link rel="preload" href="<?= $block->escapeUrl($__layoutBundleUrl) ?>?v=1" as="style"/>
+<link rel="stylesheet" href="<?= $block->escapeUrl($__layoutBundleUrl) ?>?v=1" media="print" onload="this.media='all'"/>
+<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__layoutBundleUrl) ?>?v=1"/></noscript>
 <?php if ($homeBundleUrl): ?>
 <!-- awa-super-home.css: home-custom + mobile-fix + product-cards + category-carousel + cosmetic-home (async 2026-05-08) -->
 <link rel="preload" href="<?= $block->escapeUrl($homeBundleUrl) ?>" as="style"/>
@@ -351,14 +313,7 @@ foreach ([
 <link rel="stylesheet" href="<?= $block->escapeUrl($__homeCarouselUrl) ?>" media="print" onload="this.media='all'"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__homeCarouselUrl) ?>"/></noscript>
 <?php endforeach; endif; ?>
-<?php /* awa-vertical-menu-modern.css — menu vertical refinements; async: menu oculto mobile, below-fold desktop */ ?>
-<?php $__vmModernUrl = $block->getViewFileUrl('css/awa-vertical-menu-modern.css'); ?>
-<link rel="preload" href="<?= $block->escapeUrl($__vmModernUrl) ?>" as="style"/>
-<link rel="stylesheet"
-      href="<?= $block->escapeUrl($__vmModernUrl) ?>"
-      media="print"
-      onload="this.media='all'"/>
-<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__vmModernUrl) ?>"/></noscript>
+<?php /* awa-vertical-menu-modern.css → included in awa-layout-bundle.css (2026-05-09) */ ?>
 <?php /* awa-bundle-refinements.css — safety-net overrides, carrega async (2026-05-02)
          Regras críticas above-fold (cart-fallback, b2b-promo-bar) cobertas no inline anti-FOUC.
          media="print" onload trick: força download sem bloquear render, swap para 'all' ao carregar. */ ?>
@@ -368,16 +323,7 @@ foreach ([
       media="print"
       onload="this.media='all'"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($refinementsBundleUrl) ?>?v=11"/></noscript>
-<?php /* awa-bestseller-fixes.css — async (below-fold widget fixes, never above-fold)
-         Convertido de blocking para async 2026-05-04. */ ?>
-<?php $__bsFixUrl = str_replace(["awa-bundle-refinements.min.css", "awa-bundle-refinements.css"], ["awa-bestseller-fixes.min.css", "awa-bestseller-fixes.css"], $refinementsBundleUrl); ?>
-<?php if ($__bsFixUrl === $refinementsBundleUrl): $__bsFixUrl = $block->getViewFileUrl("css/awa-bestseller-fixes.css"); endif; ?>
-<link rel="preload" href="<?= $block->escapeUrl($__bsFixUrl) ?>?v=2" as="style"/>
-<link rel="stylesheet"
-      href="<?= $block->escapeUrl($__bsFixUrl) ?>?v=2"
-      media="print"
-      onload="this.media='all'"/><!-- Bestseller nuclear fixes (async) -->
-<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__bsFixUrl) ?>?v=2"/></noscript>
+<?php /* awa-bestseller-fixes.css → included in awa-layout-bundle.css (2026-05-09) */ ?>
 <?php /* awa-visual-bugfix.css — async (2026-05-xx, saves ~450ms render blocking)
          Critical BUG-1 header right-col rules extracted to inline Anti-FOUC above.
          BUG-3/5/6/7 rokan grid rules already in Anti-FOUC since v9.
@@ -389,30 +335,8 @@ foreach ([
       media="print"
       onload="this.media='all'"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__bugfixConsolidatedUrl) ?>?v=80"/></noscript>
-<?php /* awa-card-image-hero.css — Product image emphasis; async: product cards below fold */ ?>
-<?php $__cardImageHeroUrl = $block->getViewFileUrl('css/awa-card-image-hero.css'); ?>
-<link rel="preload" href="<?= $block->escapeUrl($__cardImageHeroUrl) ?>?v=1" as="style"/>
-<link rel="stylesheet"
-      href="<?= $block->escapeUrl($__cardImageHeroUrl) ?>?v=1"
-      media="print"
-      onload="this.media='all'"/>
-<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__cardImageHeroUrl) ?>?v=1"/></noscript>
-<?php /* awa-home-gap-fix.css — spacing sections; async: above-fold hero unaffected by section gaps */ ?>
-<?php $__homeGapFixUrl = $block->getViewFileUrl('css/awa-home-gap-fix.css'); ?>
-<link rel="preload" href="<?= $block->escapeUrl($__homeGapFixUrl) ?>?v=12" as="style"/>
-<link rel="stylesheet"
-      href="<?= $block->escapeUrl($__homeGapFixUrl) ?>?v=12"
-      media="print"
-      onload="this.media='all'"/>
-<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__homeGapFixUrl) ?>?v=12"/></noscript>
-<?php /* awa-vertical-menu-desktop-final.css — desktop-only menu; async: not above-fold on mobile */ ?>
-<?php $__verticalMenuFinalUrl = $block->getViewFileUrl('css/awa-vertical-menu-desktop-final.css'); ?>
-<link rel="preload" href="<?= $block->escapeUrl($__verticalMenuFinalUrl) ?>?v=1" as="style"/>
-<link rel="stylesheet"
-      href="<?= $block->escapeUrl($__verticalMenuFinalUrl) ?>?v=1"
-      media="print"
-      onload="this.media='all'"/>
-<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__verticalMenuFinalUrl) ?>?v=1"/></noscript>
+<?php /* awa-card-image-hero.css + awa-home-gap-fix.css → included in awa-layout-bundle.css (2026-05-09) */ ?>
+<?php /* awa-vertical-menu-desktop-final.css → included in awa-layout-bundle.css (2026-05-09) */ ?>
 <?php /* awa-plp-final-polish.css — PLP grid, cards, toolbar polish
          Não carregado na HOME PAGE ($homeBundleUrl = indicador de home).
          Home não tem product grid / toolbar — desperdício de 59KB.
