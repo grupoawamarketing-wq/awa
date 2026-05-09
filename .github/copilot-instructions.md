@@ -20,7 +20,7 @@
 ```
 app/
 ├── code/
-│   ├── GrupoAwamotos/      # Módulos customizados da AWA (20 módulos)
+│   ├── GrupoAwamotos/      # Módulos customizados da AWA (31 módulos)
 │   │   ├── AbandonedCart/   # Recuperação de carrinhos abandonados (e-mail + cupons)
 │   │   ├── B2B/             # Sistema B2B (grupos, aprovação, cotações, CNPJ)
 │   │   ├── BrazilCustomer/  # Atributos brasileiros (CPF, CNPJ, PF/PJ)
@@ -40,7 +40,18 @@ app/
 │   │   ├── SocialProof/     # Prova social real (visualizações, mais vendido)
 │   │   ├── StoreSetup/      # CLI para setup automático da loja
 │   │   ├── Theme/           # Customizações do tema (store switcher, bandeiras)
-│   │   └── Vlibras/         # Acessibilidade Libras (widget gov.br)
+│   │   ├── Chatwoot/       # Integração chat Chatwoot (admin + CSP + webhook)
+│   │   ├── CookieConsent/  # Banner LGPD de cookies
+│   │   ├── LeadLovers/     # Integração LeadLovers (automação de marketing)
+│   │   ├── LiveChat/       # Chat ao vivo com contexto de cliente
+│   │   ├── LogMonitoring/  # Monitoramento de logs e alertas (Cron + admin + API)
+│   │   ├── MarketingIntelligence/ # Campanhas e segmentação de marketing
+│   │   ├── PreprocessedFallback/ # Fallback PHP para var/view_preprocessed (Plugin)
+│   │   ├── ProductIntelligence/  # Recomendações de produtos (ML + Cron + widget)
+│   │   ├── RelatedProducts/ # Produtos relacionados customizados
+│   │   ├── RexisML/        # Engine de recomendações ML (API + Cron + widget)
+│   │   ├── TawkIntegration/ # Integração Tawk.to live chat (DB + admin)
+│   │   └── WhatsAppCommerce/ # Comércio via WhatsApp (API + Cron + webhook)
 │   ├── Awa/                 # Módulos do namespace Awa
 │   │   ├── DashboardFix/    # Fix do grid Last Orders (null billing address)
 │   │   └── RealTimeDashboard/ # Dashboard admin em tempo real

@@ -97,7 +97,6 @@ git push
 | LayoutFix | Fix layout admin (notification.messages reorder) |
 | MaintenanceMode | Modo manutenção com whitelist IP e código secreto |
 | OfflinePayment | Pagamento "A Combinar" para B2B |
-| RexisML | Recomendações e classificação RFM |
 | SalesIntelligence | Dashboard inteligência de vendas e previsão de demanda |
 | SchemaOrg | Dados estruturados JSON-LD e Open Graph (SEO) |
 | SmartSuggestions | Sugestões de recompra (análise RFM + WhatsApp) |
@@ -105,7 +104,18 @@ git push
 | SocialProof | Prova social real (visualizações do dia, mais vendido 30d) |
 | StoreSetup | CLI setup automático da loja (blocos CMS, homepage, categorias) |
 | Theme | Customizações do tema (store switcher, bandeiras) |
-| Vlibras | Acessibilidade Libras (widget gov.br VLibras) |
+| Chatwoot | Integração chat Chatwoot (admin + CSP + webhook) |
+| CookieConsent | Banner LGPD de cookies (admin + bloco CMS) |
+| LeadLovers | Integração LeadLovers — automação de marketing via API |
+| LiveChat | Chat ao vivo com contexto de cliente (Plugin + ViewModel) |
+| LogMonitoring | Monitoramento de logs e alertas (Cron + admin + API REST) |
+| MarketingIntelligence | Campanhas e segmentação de marketing (Cron + Observer) |
+| PreprocessedFallback | Fallback PHP para var/view_preprocessed (Plugin) |
+| ProductIntelligence | Recomendações de produtos — ML + Cron + widget |
+| RelatedProducts | Produtos relacionados customizados (Block + view) |
+| RexisML | Engine de recomendações ML (API + Cron + widget) |
+| TawkIntegration | Integração Tawk.to live chat (DB + admin) |
+| WhatsAppCommerce | Comércio via WhatsApp (API + Cron + webhook) |
 
 ## Regras para Agentes
 
