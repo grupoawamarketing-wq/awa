@@ -23,6 +23,13 @@ class CustomerPriceProvider
     private const CACHE_PREFIX = 'erp_customer_price_';
     private const CACHE_TTL = 7200; // 2 hours — prices change infrequently; ERP sync cron updates Magento
 
+    /**
+     * Max seconds a price query to ERP may block a PHP-FPM worker.
+     * Fail-fast: if ERP is slow, return null → use Magento base price.
+     * Bulk operations (PriceSync cron) use Connection's default 45s timeout.
+     */
+    private const PRICE_QUERY_TIMEOUT = 6;
+
     private ConnectionInterface $connection;
     private Helper $helper;
     private CacheInterface $cache;
@@ -194,7 +201,8 @@ class CustomerPriceProvider
             $row = $this->connection->fetchOne(
                 "SELECT VLRVDSUG FROM MT_MATERIALLISTA
                  WHERE MATERIAL = ? AND FATORPRECO = ? AND FILIAL = ? AND VLRVDSUG > 0",
-                [$sku, $priceListCode, $filial]
+                [$sku, $priceListCode, $filial],
+                self::PRICE_QUERY_TIMEOUT
             );
 
             // Try base SKU if not found
@@ -204,7 +212,8 @@ class CustomerPriceProvider
                     $row = $this->connection->fetchOne(
                         "SELECT VLRVDSUG FROM MT_MATERIALLISTA
                          WHERE MATERIAL = ? AND FATORPRECO = ? AND FILIAL = ? AND VLRVDSUG > 0",
-                        [$baseSku, $priceListCode, $filial]
+                        [$baseSku, $priceListCode, $filial],
+                        self::PRICE_QUERY_TIMEOUT
                     );
                 }
             }
@@ -295,7 +304,8 @@ class CustomerPriceProvider
             $rows = $this->connection->query(
                 "SELECT MATERIAL, VLRVDSUG FROM MT_MATERIALLISTA
                  WHERE FATORPRECO = ? AND FILIAL = ? AND MATERIAL IN ({$inClause}) AND VLRVDSUG > 0",
-                $params
+                $params,
+                self::PRICE_QUERY_TIMEOUT
             ) ?? [];
 
             // Build result map
@@ -362,5 +372,50 @@ class CustomerPriceProvider
     {
         $this->cache->remove(self::CACHE_PREFIX . 'list_' . $erpCustomerCode);
         unset($this->customerListCache[$erpCustomerCode]);
+    }
+
+    /**
+     * Pre-warm Redis cache for all SKUs in a given ERP price list.
+     *
+     * Called by WarmB2BPrices cron after SyncPrices. Fetches the entire list
+     * from MT_MATERIALLISTA in a single query and writes each price to Redis
+     * using the same key format as getPriceFromList() / getPricesFromList().
+     * Overwrites stale entries in-place (no TTL reset disruption).
+     *
+     * @return int Number of price entries written to Redis
+     */
+    public function warmPriceList(int $listCode): int
+    {
+        $filial = $this->helper->getStockFilial();
+        $warmed = 0;
+
+        try {
+            $rows = $this->connection->query(
+                "SELECT MATERIAL, VLRVDSUG FROM MT_MATERIALLISTA
+                 WHERE FATORPRECO = ? AND FILIAL = ? AND VLRVDSUG > 0",
+                [$listCode, $filial]
+            ) ?? [];
+
+            foreach ($rows as $row) {
+                $sku = trim($row['MATERIAL']);
+                $price = (float) $row['VLRVDSUG'];
+
+                // Match the exact key format used by getPriceFromList / getPricesFromList
+                $cacheKey = $listCode . ':' . $sku;
+                $persistKey = self::CACHE_PREFIX . md5($cacheKey);
+
+                $this->priceCache[$cacheKey] = $price;
+                $this->cache->save((string) $price, $persistKey, [], self::CACHE_TTL);
+                $warmed++;
+            }
+        } catch (\Throwable $e) {
+            $this->logger->error(sprintf(
+                '[ERP] warmPriceList error for list #%d: %s',
+                $listCode,
+                $e->getMessage()
+            ));
+        }
+
+        return $warmed;
     }
 }

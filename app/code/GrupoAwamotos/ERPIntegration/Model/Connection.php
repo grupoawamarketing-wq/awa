@@ -722,14 +722,14 @@ class Connection implements ConnectionInterface
     /**
      * Execute SELECT query with retry logic
      */
-    public function query(string $sql, array $params = []): array
+    public function query(string $sql, array $params = [], ?int $wallTimeout = null): array
     {
         return $this->executeWithRetry(function () use ($sql, $params) {
             $pdo = $this->getConnection();
             $stmt = $pdo->prepare($sql); // nosemgrep: php.doctrine.security.audit.doctrine-dbal-dangerous-query.doctrine-dbal-dangerous-query
             $stmt->execute($params);
             return $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        }, 'query');
+        }, 'query', $wallTimeout);
     }
 
     /**
@@ -748,7 +748,7 @@ class Connection implements ConnectionInterface
     /**
      * Fetch single row with retry logic
      */
-    public function fetchOne(string $sql, array $params = []): ?array
+    public function fetchOne(string $sql, array $params = [], ?int $wallTimeout = null): ?array
     {
         return $this->executeWithRetry(function () use ($sql, $params) {
             $pdo = $this->getConnection();
@@ -756,7 +756,7 @@ class Connection implements ConnectionInterface
             $stmt->execute($params);
             $row = $stmt->fetch(\PDO::FETCH_ASSOC);
             return $row ?: null;
-        }, 'fetchOne');
+        }, 'fetchOne', $wallTimeout);
     }
 
     /**
@@ -780,19 +780,20 @@ class Connection implements ConnectionInterface
      * @return mixed Result of the operation
      * @throws \PDOException If all retries fail
      */
-    private function executeWithRetry(callable $operation, string $operationType)
+    private function executeWithRetry(callable $operation, string $operationType, ?int $wallTimeout = null)
     {
         $lastException = null;
         $startTime = microtime(true);
+        $effectiveTimeout = $wallTimeout ?? self::QUERY_WALL_TIMEOUT;
 
         for ($attempt = 1; $attempt <= self::MAX_RETRIES; $attempt++) {
             // Wall-clock guard: abort if we already consumed too much time
             $elapsed = microtime(true) - $startTime;
-            if ($elapsed >= self::QUERY_WALL_TIMEOUT) {
+            if ($elapsed >= $effectiveTimeout) {
                 $msg = sprintf(
                     '[ERP] %s aborted — wall timeout of %ds exceeded (%.1fs elapsed, attempt %d)',
                     $operationType,
-                    self::QUERY_WALL_TIMEOUT,
+                    $effectiveTimeout,
                     $elapsed,
                     $attempt
                 );
