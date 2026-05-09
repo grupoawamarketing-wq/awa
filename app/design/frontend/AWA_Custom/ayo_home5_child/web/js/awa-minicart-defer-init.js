@@ -6,6 +6,67 @@
     }
     window.__awaMinicartDeferInit = true;
 
+    var HEADER_MINICART_SHELL_SELECTOR = '[data-awa-header-minicart-shell="true"], .awa-header-minicart[data-awa-header-cart="true"]';
+    var HEADER_MINICART_FALLBACK_SELECTOR = '[data-awa-header-minicart-fallback="true"], .awa-header-cart-fallback';
+    var HEADER_MINICART_CONTENT_SELECTOR = '[data-awa-header-minicart-content="true"], .mini-carts';
+    var MINICART_TRIGGER_SELECTOR = '.minicart-wrapper .showcart, .minicart-wrapper .action.showcart';
+    var MINICART_DROPDOWN_SELECTOR = '.minicart-wrapper [data-role="dropdownDialog"]';
+
+    function getHeaderMinicartShell() {
+        return document.querySelector(HEADER_MINICART_SHELL_SELECTOR);
+    }
+
+    function getHeaderMinicartRoot() {
+        var shell = getHeaderMinicartShell();
+
+        if (!shell) {
+            return document;
+        }
+
+        return shell.querySelector(HEADER_MINICART_CONTENT_SELECTOR) || shell;
+    }
+
+    function queryRuntimeTrigger(root) {
+        return (root || document).querySelector(MINICART_TRIGGER_SELECTOR);
+    }
+
+    function queryDropdown(root) {
+        return (root || document).querySelector(MINICART_DROPDOWN_SELECTOR);
+    }
+
+    function isVisible(element) {
+        return !!(element && (element.offsetWidth || element.offsetHeight || element.getClientRects().length));
+    }
+
+    function syncFallbackAccessibility(shell, hasRuntimeTrigger) {
+        var fallback = shell ? shell.querySelector(HEADER_MINICART_FALLBACK_SELECTOR) : null;
+
+        if (!shell || !fallback) {
+            return;
+        }
+
+        shell.setAttribute('data-awa-minicart-ready', hasRuntimeTrigger ? '1' : '0');
+        shell.classList.toggle('awa-header-minicart--ready', hasRuntimeTrigger);
+
+        if (hasRuntimeTrigger) {
+            fallback.setAttribute('aria-hidden', 'true');
+            fallback.setAttribute('tabindex', '-1');
+            return;
+        }
+
+        fallback.removeAttribute('aria-hidden');
+        fallback.removeAttribute('tabindex');
+    }
+
+    function syncShellState(shell, expanded) {
+        if (!shell) {
+            return;
+        }
+
+        shell.setAttribute('data-awa-minicart-expanded', expanded ? '1' : '0');
+        shell.classList.toggle('awa-header-minicart--expanded', expanded);
+    }
+
     function bindCheckoutFallback() {
         if (window.__awaMinicartCheckoutFallbackBound) {
             return;
@@ -46,9 +107,16 @@
     }
 
     function updateExpandedState() {
-        var trigger = document.querySelector('.minicart-wrapper .showcart');
-        var dropdown = document.querySelector('.minicart-wrapper [data-role="dropdownDialog"]');
+        var shell = getHeaderMinicartShell();
+        var root = getHeaderMinicartRoot();
+        var trigger = queryRuntimeTrigger(root) || queryRuntimeTrigger(document);
+        var dropdown = queryDropdown(root) || queryDropdown(document);
+        var hasRuntimeTrigger = isVisible(trigger);
+
+        syncFallbackAccessibility(shell, hasRuntimeTrigger);
+
         if (!trigger || !dropdown) {
+            syncShellState(shell, false);
             return;
         }
 
@@ -56,6 +124,7 @@
             dropdown.getAttribute('aria-hidden') === 'false' ||
             dropdown.style.display === 'block';
         trigger.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+        syncShellState(shell, expanded);
     }
 
     function initDropdown() {
@@ -64,7 +133,14 @@
         }
 
         window.require(['jquery', 'dropdownDialog'], function ($) {
-            var minicartDropdown = $('[data-role="dropdownDialog"]');
+            var scopedDropdownSelector = HEADER_MINICART_SHELL_SELECTOR + ' ' + MINICART_DROPDOWN_SELECTOR;
+            var triggerTargetSelector = HEADER_MINICART_SHELL_SELECTOR + ' .showcart, ' +
+                HEADER_MINICART_SHELL_SELECTOR + ' .action.showcart';
+            var minicartDropdown = $(scopedDropdownSelector).first();
+
+            if (!minicartDropdown.length) {
+                minicartDropdown = $('[data-role="dropdownDialog"]').first();
+            }
 
             if (!minicartDropdown.length || minicartDropdown.data('mageDropdownDialog')) {
                 updateExpandedState();
@@ -73,7 +149,7 @@
 
             minicartDropdown.dropdownDialog({
                 appendTo: '[data-block=minicart]',
-                triggerTarget: '.showcart',
+                triggerTarget: triggerTargetSelector,
                 timeout: '2000',
                 closeOnMouseLeave: true,
                 closeOnEscape: true,
@@ -83,7 +159,7 @@
             });
 
             updateExpandedState();
-            $(document).on('click keyup', '.showcart, .block-minicart', function () {
+            $(document).on('click keyup', triggerTargetSelector + ', .block-minicart', function () {
                 window.requestAnimationFrame(updateExpandedState);
             });
         });

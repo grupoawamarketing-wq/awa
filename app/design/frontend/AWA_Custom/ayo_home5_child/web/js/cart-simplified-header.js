@@ -11,7 +11,7 @@ define([], function () {
     ];
     var HEADER_ROW_SELECTOR = '.header .awa-main-header__inner[data-awa-header-row], .header .wp-header[data-awa-header-row]';
     var HEADER_TOP_SEARCH_SELECTOR = '.header .awa-main-header__inner[data-awa-header-row] > .top-search, .header .wp-header[data-awa-header-row] > .top-search';
-    var HEADER_MINICART_SELECTOR = '.header .awa-main-header__inner[data-awa-header-row] > .top-search > .mini-cart-wrapper, .header .wp-header[data-awa-header-row] > .top-search > .mini-cart-wrapper';
+    var HEADER_MINICART_SELECTOR = '.header [data-awa-header-minicart-shell="true"], .header .awa-header-minicart[data-awa-header-cart="true"]';
 
     function interceptSetProperty(element, overrides, blocked) {
         var original = element.style.setProperty.bind(element.style);

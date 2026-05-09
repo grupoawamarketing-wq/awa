@@ -1,6 +1,8 @@
 define([], function () {
     'use strict';
 
+    var HEADER_MINICART_COUNTER_SELECTOR = '[data-awa-header-minicart-shell="true"] .counter.qty, .awa-header-minicart[data-awa-header-cart="true"] .counter.qty';
+
     return function initHeaderNavRuntime() {
         if (window.__awaHeaderNavRuntimeInit) {
             return;
@@ -67,7 +69,7 @@ define([], function () {
                 return;
             }
 
-            var counter = document.querySelector('.awa-header-minicart .counter.qty');
+            var counter = document.querySelector(HEADER_MINICART_COUNTER_SELECTOR);
             if (!counter) {
                 badge.style.display = 'none';
                 return;
@@ -93,7 +95,7 @@ define([], function () {
         function bootBadgeSync() {
             syncBadge();
 
-            var counter = document.querySelector('.awa-header-minicart .counter.qty');
+            var counter = document.querySelector(HEADER_MINICART_COUNTER_SELECTOR);
             if (counter && window.MutationObserver) {
                 new MutationObserver(syncBadge).observe(counter, {
                     childList: true,

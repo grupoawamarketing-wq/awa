@@ -1,6 +1,10 @@
 define(['Magento_Customer/js/customer-data'], function (customerData) {
     'use strict';
 
+    var HEADER_MINICART_BUTTON_SELECTOR = '[data-awa-header-minicart-shell="true"] .action.showcart, .awa-header-minicart[data-awa-header-cart="true"] .action.showcart';
+    var HEADER_MINICART_COUNTER_SELECTOR = '[data-awa-header-minicart-shell="true"] .minicart-wrapper .counter.qty, .awa-header-minicart[data-awa-header-cart="true"] .minicart-wrapper .counter.qty';
+    var HEADER_MINICART_QTY_SELECTOR = '[data-awa-header-minicart-shell="true"] .minicart-wrapper .counter.qty .counter-number, [data-awa-header-minicart-shell="true"] .minicart-wrapper .counter.qty, .awa-header-minicart[data-awa-header-cart="true"] .minicart-wrapper .counter.qty .counter-number, .awa-header-minicart[data-awa-header-cart="true"] .minicart-wrapper .counter.qty';
+
     return function initHeaderCustomerRuntime() {
         if (window.__awaHeaderCustomerRuntimeInit) {
             return;
@@ -167,8 +171,7 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
             window.__awaHeaderMinicartFeedbackInit = true;
 
             function getQty() {
-                var qtyNode = document.querySelector('.minicart-wrapper .counter.qty .counter-number')
-                    || document.querySelector('.minicart-wrapper .counter.qty');
+                var qtyNode = document.querySelector(HEADER_MINICART_QTY_SELECTOR);
                 if (!qtyNode) {
                     return 0;
                 }
@@ -178,7 +181,7 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
 
             function pulseIfChanged() {
                 var qty = getQty();
-                var button = document.querySelector('.awa-header-minicart .action.showcart');
+                var button = document.querySelector(HEADER_MINICART_BUTTON_SELECTOR);
                 if (!button) {
                     return;
                 }
@@ -210,7 +213,7 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
                 if (typeof MutationObserver !== 'function') {
                     return false;
                 }
-                var counter = document.querySelector('.minicart-wrapper .counter.qty');
+                var counter = document.querySelector(HEADER_MINICART_COUNTER_SELECTOR);
                 if (!counter) {
                     return false;
                 }
