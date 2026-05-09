@@ -17,7 +17,7 @@
     --awa-vbf-c15: #fdf2f2;
     --awa-vbf-c16: #fbfbfb;
     --awa-vbf-c17: #f3f4f6;
-    --awa-vbf-c18: #A33B3B;
+    --awa-vbf-c18: #b73337;
     --awa-vbf-c19: #f6f6f6;
     --awa-vbf-c20: #777777;
     --awa-vbf-c21: #25d366;
@@ -16253,45 +16253,42 @@ body .page-wrapper .minicart-wrapper:not(.active):not(.show) .block-minicart {
     pointer-events: none !important;
 }
 
-/* 3. Garantir que o drawer aberto (sidebar) sempre use position:fixed full-height */
+/* 3. Desktop: manter minicart como dropdown ancorado no ícone (sem drawer full-screen) */
 body .page-wrapper .minicart-wrapper.active .block-minicart,
 body .page-wrapper .minicart-wrapper.show .block-minicart,
 body .page-wrapper .minicart-wrapper .block-minicart._active {
     display: flex !important;
     flex-direction: column !important;
-    position: fixed !important;
-    top: 0 !important;
+    position: absolute !important;
+    top: calc(100% + 8px) !important;
     right: 0 !important;
     left: auto !important;
-    bottom: 0 !important;
-    width: min(380px, 94vw) !important;
-    max-width: min(380px, 94vw) !important;
-    height: 100vh !important;
-    height: 100dvh !important;
+    bottom: auto !important;
+    width: min(360px, 92vw) !important;
+    max-width: min(360px, 92vw) !important;
+    height: auto !important;
+    max-height: 78vh !important;
     z-index: 1300 !important;
     overflow-y: auto !important;
     background: var(--awa-bg, #fff) !important;
-    border-left: 1px solid var(--awa-border, #e5e5e5) !important;
-    box-shadow: -8px 0 32px rgba(15, 23, 42, 0.14) !important;
-    border-radius: 0 !important;
+    border: 1px solid var(--awa-border, #e5e5e5) !important;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18) !important;
+    border-radius: 12px !important;
     padding: 0 !important;
     margin: 0 !important;
     transform: none !important;
-    animation: awa-minicart-slide-in 260ms cubic-bezier(0.25, 0.46, 0.45, 0.94) both !important;
+    animation: none !important;
     visibility: visible !important;
     opacity: 1 !important;
     pointer-events: auto !important;
 }
 
-/* 4. Backdrop overlay quando aberto */
+/* 4. Sem backdrop no dropdown desktop */
 body .page-wrapper .minicart-wrapper.active::before,
 body .page-wrapper .minicart-wrapper.show::before {
-    content: '' !important;
-    position: fixed !important;
-    inset: 0 !important;
-    z-index: 1299 !important;
-    background: rgba(15, 23, 42, 0.45) !important;
-    pointer-events: auto !important;
+    content: none !important;
+    display: none !important;
+    pointer-events: none !important;
 }
 
 /* 5. Suprimir o showcart[aria-expanded=true] como trigger CSS de exibição
@@ -16479,3 +16476,30 @@ html body .page-wrapper .page_footer .awa-footer-devby .awa-footer-muted-label {
     }
 }
 
+/* VB-MINICART-FINAL-HOTFIX (2026-05-08): force dropdown on desktop */
+@media (min-width: 992px) {
+  body .page-wrapper .minicart-wrapper.active .block-minicart,
+  body .page-wrapper .minicart-wrapper.show .block-minicart,
+  body .page-wrapper .minicart-wrapper .block-minicart._active {
+    position: absolute !important;
+    top: 44px !important;
+    right: 0 !important;
+    left: auto !important;
+    bottom: auto !important;
+    width: min(360px, 92vw) !important;
+    max-width: min(360px, 92vw) !important;
+    height: auto !important;
+    max-height: 78vh !important;
+    border: 1px solid var(--awa-border, #e5e5e5) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18) !important;
+    animation: none !important;
+  }
+
+  body .page-wrapper .minicart-wrapper.active::before,
+  body .page-wrapper .minicart-wrapper.show::before {
+    content: none !important;
+    display: none !important;
+    pointer-events: none !important;
+  }
+}
