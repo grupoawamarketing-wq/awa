@@ -287,6 +287,80 @@ HTML;
 }());
 </script>
 <script>
+/* expresscheckout/cart overlay guard — remove overlays stuck by legacy modal/minicart scripts */
+(function (w, d) {
+    'use strict';
+
+    function isCartCheckoutPage() {
+        return !!(d.body && d.body.classList.contains('checkout-cart-index'));
+    }
+
+    function clearStuckOverlays() {
+        var overlays;
+        var i;
+
+        if (!isCartCheckoutPage()) {
+            return;
+        }
+
+        overlays = d.querySelectorAll(
+            '.modals-overlay, .modal-custom-overlay, .awa-mobile-drawer-overlay, .awa-nav-overlay'
+        );
+
+        for (i = 0; i < overlays.length; i += 1) {
+            overlays[i].classList.remove('_show', 'is-visible', 'is-active');
+            overlays[i].style.setProperty('display', 'none', 'important');
+            overlays[i].style.setProperty('opacity', '0', 'important');
+            overlays[i].style.setProperty('visibility', 'hidden', 'important');
+            overlays[i].style.setProperty('pointer-events', 'none', 'important');
+        }
+
+        d.querySelectorAll('.modal-popup._show, .modal-slide._show').forEach(function (modal) {
+            modal.classList.remove('_show');
+            modal.style.setProperty('display', 'none', 'important');
+        });
+
+        if (!d.querySelector('.modal-popup._show, .modal-slide._show')) {
+            d.body.classList.remove('_has-modal', 'awa-mobile-drawer-open', 'nav-open', 'nav-before-open');
+            d.body.style.removeProperty('overflow');
+            d.documentElement.classList.remove('nav-open', 'nav-before-open');
+        }
+    }
+
+    function initOverlayGuard() {
+        if (!isCartCheckoutPage()) {
+            return;
+        }
+
+        clearStuckOverlays();
+        w.setTimeout(clearStuckOverlays, 120);
+        w.setTimeout(clearStuckOverlays, 600);
+        w.setInterval(clearStuckOverlays, 1200);
+
+        if (w.MutationObserver) {
+            new MutationObserver(function () {
+                clearStuckOverlays();
+            }).observe(d.body, {
+                childList: true,
+                subtree: true,
+                attributes: true,
+                attributeFilter: ['class', 'style']
+            });
+        }
+
+        d.addEventListener('click', function () {
+            w.setTimeout(clearStuckOverlays, 40);
+        }, true);
+    }
+
+    if (d.readyState === 'loading') {
+        d.addEventListener('DOMContentLoaded', initOverlayGuard, { once: true });
+    } else {
+        initOverlayGuard();
+    }
+}(window, document));
+</script>
+<script>
 /* Service Worker registration — idle callback para zero impacto em TTI (2026-03-23) */
 if ('serviceWorker' in navigator) {
     var _swUa = navigator.userAgent || '';

@@ -71,6 +71,10 @@ class Suggestions extends Template
      */
     public function isLoggedIn(): bool
     {
+        // Re-sync session storage: storage._data may be out of sync with $_SESSION
+        // because some early code broke the PHP reference between them.
+        // Calling start() forces storage->init($_SESSION) with current session data.
+        $this->customerSession->start();
         return $this->customerSession->isLoggedIn();
     }
 
@@ -88,8 +92,13 @@ class Suggestions extends Template
             return null;
         }
 
-        $customer = $this->customerSession->getCustomer();
-        $customerId = (int) $customer->getId();
+        // Use getCustomerId() directly — more reliable than getCustomer()->getId()
+        // because getCustomer() uses the deprecated CustomerModel which may not
+        // be loaded when CustomerSession is accessed via Proxy
+        $customerId = (int) $this->customerSession->getCustomerId();
+        if (!$customerId) {
+            return null;
+        }
 
         // 1. Try entity map (most reliable — set by ERP sync)
         $erpCode = $this->syncLogResource->getErpCodeByMagentoId('customer', $customerId);
@@ -98,7 +107,8 @@ class Suggestions extends Template
             return $this->erpCustomerCode;
         }
 
-        // 2. Fallback: resolve via CNPJ
+        // 2. Fallback: resolve via CNPJ (load customer data only when needed)
+        $customer = $this->customerSession->getCustomer();
         $cnpj = $customer->getData('b2b_cnpj');
         if (empty($cnpj)) {
             $cnpj = $customer->getTaxvat();

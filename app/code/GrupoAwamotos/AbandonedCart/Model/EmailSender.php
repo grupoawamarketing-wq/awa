@@ -77,8 +77,8 @@ class EmailSender implements EmailSenderInterface
             $store = $this->storeManager->getStore($storeId);
             $templateId = $this->helper->getEmailTemplate($emailNumber, $storeId);
 
-            if (empty($templateId) || $templateId === 'abandoned_cart_email_' . $emailNumber) {
-                $templateId = 'abandoned_cart_email_' . $emailNumber;
+            if (empty($templateId) || $templateId === 'abandoned_cart_email_' . $emailNumber . '_template') {
+                $templateId = 'abandoned_cart_email_' . $emailNumber . '_template';
             }
 
             // Preparar dados do carrinho
@@ -170,7 +170,7 @@ class EmailSender implements EmailSenderInterface
             $this->inlineTranslation->suspend();
 
             $store = $this->storeManager->getStore();
-            $templateId = 'abandoned_cart_email_' . $emailNumber;
+            $templateId = 'abandoned_cart_email_' . $emailNumber . '_template';
 
             $templateVars = [
                 'customer_name' => 'Cliente Teste',

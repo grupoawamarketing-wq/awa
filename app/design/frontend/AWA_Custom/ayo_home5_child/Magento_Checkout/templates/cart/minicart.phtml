@@ -25,7 +25,8 @@ $blockLoaderUrl = $sanitizeUrl($block->getViewFileUrl('images/loader-1.gif'));
 ?>
 
 <div data-block="minicart" class="minicart-wrapper">
-    <a class="showcart header-mini-cart" href="<?= $block->escapeUrl($block->getShoppingCartUrl()) ?>"
+    <a class="action showcart header-mini-cart" href="<?= $block->escapeUrl($block->getShoppingCartUrl()) ?>"
+       style="opacity:1 !important; visibility:visible !important; display:flex !important;"
        aria-haspopup="dialog"
        title="<?= $block->escapeHtmlAttr(__('Ver carrinho de compras')) ?>"
        aria-label="<?= $block->escapeHtmlAttr(__('Ver carrinho de compras')) ?>"
@@ -33,6 +34,11 @@ $blockLoaderUrl = $sanitizeUrl($block->getViewFileUrl('images/loader-1.gif'));
        aria-controls="minicart-content-wrapper"
        data-bind="scope: 'minicart_content'">
         <span class="awa-sr-only"><?= $block->escapeHtml(__('Carrinho de compras')) ?> </span>
+        <svg class="awa-minicart-icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block !important; width:20px !important; height:20px !important; min-width:20px !important; min-height:20px !important; visibility:visible !important; opacity:1 !important;">
+            <circle cx="9" cy="20" r="1"></circle>
+            <circle cx="18" cy="20" r="1"></circle>
+            <path d="M3.5 4h2l2.2 10.2a1 1 0 0 0 1 .8h8.6a1 1 0 0 0 1-.8L20 7H7.1"></path>
+        </svg>
         <span class="counter qty empty"
               aria-live="polite"
               aria-atomic="true"
@@ -56,8 +62,8 @@ $blockLoaderUrl = $sanitizeUrl($block->getViewFileUrl('images/loader-1.gif'));
                     "timeout": "2000",
                     "closeOnMouseLeave": false,
                     "closeOnEscape": true,
-                    "triggerClass":"active",
-                    "parentClass":"active",
+                    "triggerClass":"is-open",
+                    "parentClass":"is-open",
                     "buttons":[]}}'>
             <div id="minicart-content-wrapper" data-bind="scope: 'minicart_content'">
                 <!-- ko template: getTemplate() --><!-- /ko -->
@@ -74,6 +80,67 @@ $blockLoaderUrl = $sanitizeUrl($block->getViewFileUrl('images/loader-1.gif'));
     <script>
         (function () {
             var minicartConfig = <?= /* @noEscape */ $serializedCheckoutConfig ?> || {};
+            var cartIconSvg = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b73337' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='9' cy='20' r='1'/%3E%3Ccircle cx='18' cy='20' r='1'/%3E%3Cpath d='M3.5 4h2l2.2 10.2a1 1 0 0 0 1 .8h8.6a1 1 0 0 0 1-.8L20 7H7.1'/%3E%3C/svg%3E\")";
+            var applyCartIcon = function () {
+                var cartLink = document.querySelector('[data-block=\"minicart\"] .showcart.header-mini-cart');
+
+                if (!cartLink) {
+                    return;
+                }
+
+                cartLink.style.setProperty('background-image', cartIconSvg, 'important');
+                cartLink.style.setProperty('background-repeat', 'no-repeat', 'important');
+                cartLink.style.setProperty('background-position', 'center', 'important');
+                cartLink.style.setProperty('background-size', '20px 20px', 'important');
+                cartLink.style.setProperty('opacity', '1', 'important');
+                cartLink.style.setProperty('visibility', 'visible', 'important');
+                cartLink.style.setProperty('display', 'flex', 'important');
+            };
+            var ensureMinicartRuntimeCss = function () {
+                if (document.getElementById('awa-minicart-runtime-fix-style')) {
+                    return;
+                }
+
+                var css = '@media (min-width: 992px) {'
+                    + '.minicart-wrapper[data-awa-minicart-runtime-fix=\"1\"] .block-minicart {'
+                    + 'position:absolute !important;top:calc(100% + 8px) !important;right:0 !important;left:auto !important;bottom:auto !important;'
+                    + 'width:min(360px, 92vw) !important;max-width:min(360px, 92vw) !important;height:auto !important;max-height:78vh !important;'
+                    + 'overflow:auto !important;border-radius:12px !important;box-shadow:0 12px 28px rgba(15, 23, 42, 0.18) !important;'
+                    + '}'
+                    + '.minicart-wrapper[data-awa-minicart-runtime-fix=\"1\"] .block-minicart::before {display:none !important;content:none !important;}'
+                    + '}';
+
+                var style = document.createElement('style');
+                style.id = 'awa-minicart-runtime-fix-style';
+                style.type = 'text/css';
+                style.appendChild(document.createTextNode(css));
+                document.head.appendChild(style);
+            };
+            var applyMinicartPanelFix = function () {
+                var wrapper = document.querySelector('[data-block=\"minicart\"].minicart-wrapper');
+
+                if (!wrapper) {
+                    return;
+                }
+
+                wrapper.setAttribute('data-awa-minicart-runtime-fix', '1');
+            };
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', applyCartIcon, {once: true});
+                document.addEventListener('DOMContentLoaded', ensureMinicartRuntimeCss, {once: true});
+                document.addEventListener('DOMContentLoaded', applyMinicartPanelFix, {once: true});
+            } else {
+                applyCartIcon();
+                ensureMinicartRuntimeCss();
+                applyMinicartPanelFix();
+            }
+            window.setTimeout(applyCartIcon, 350);
+            window.setTimeout(applyCartIcon, 1200);
+            window.setTimeout(ensureMinicartRuntimeCss, 200);
+            window.setTimeout(applyMinicartPanelFix, 250);
+            window.setTimeout(applyMinicartPanelFix, 1200);
+
             var fallbackCheckoutConfig = Object.assign({
                 storeCode: '',
                 quoteData: {

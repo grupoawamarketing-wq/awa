@@ -85,7 +85,7 @@ class Webhook extends Action implements HttpPostActionInterface, CsrfAwareAction
         // 3. Send Response
         if ($response) {
             try {
-                $this->zapiClient->sendMessage($from, $response);
+                $this->zapiClient->sendTextMessage($from, $response);
             } catch (\Exception $e) {
                 $this->logger->error('[WhatsApp Bot] Failed to send response: ' . $e->getMessage());
             }

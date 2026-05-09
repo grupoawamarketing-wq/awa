@@ -153,5 +153,27 @@ require(['Magento_Customer/js/customer-data'], function (customerData) {
     }
     customer.subscribe(toggle);
     toggle(customer());
+
+    // Fix: Magento's section invalidation after loginPost can miss the
+    // 'customer' section if it was never in section_data_ids before login.
+    // After customer-data init completes, if the section is still empty but
+    // private_content_version (set by PHP on login/cart changes) is present,
+    // explicitly reload the customer section so the header updates correctly.
+    customerData.getInitCustomerData().done(function () {
+        var data = customer();
+        if (data && data.firstname) {
+            return; // already loaded
+        }
+        // private_content_version is set by the PHP server on authenticated actions.
+        // section_data_ids is client-side JS and may not be ready yet on first load.
+        // Reloading customer when empty is safe: guests return {} with no UI change.
+        if (document.cookie.indexOf('private_content_version') !== -1) {
+            setTimeout(function () {
+                if (!customer() || !customer().firstname) {
+                    customerData.reload(['customer'], false);
+                }
+            }, 300);
+        }
+    });
 });
 </script>
