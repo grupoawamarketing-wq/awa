@@ -15,10 +15,14 @@ use GrupoAwamotos\B2B\Api\PriceVisibilityInterface;
 use Magento\Catalog\Block\Product\AbstractProduct;
 use Magento\Catalog\Block\Product\Context;
 use Magento\Catalog\Model\Config as CatalogConfig;
+use Magento\Catalog\Model\Product as Product;
 use Magento\Catalog\Model\Product\Visibility;
 use Magento\Catalog\Model\ResourceModel\Product\Collection;
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
+use Magento\CatalogInventory\Helper\Stock as StockHelper;
+use Magento\Framework\App\ActionInterface;
 use Magento\Framework\Registry;
+use Magento\Framework\Url\Helper\Data as UrlHelper;
 
 class Related extends AbstractProduct
 {
@@ -50,6 +54,16 @@ class Related extends AbstractProduct
     private CatalogConfig $catalogConfig;
 
     /**
+     * @var StockHelper
+     */
+    private StockHelper $stockHelper;
+
+    /**
+     * @var UrlHelper
+     */
+    private UrlHelper $urlHelper;
+
+    /**
      * @var Collection|null
      */
     private ?Collection $collection = null;
@@ -61,6 +75,8 @@ class Related extends AbstractProduct
         PriceVisibilityInterface $priceVisibility,
         Visibility $catalogProductVisibility,
         CatalogConfig $catalogConfig,
+        StockHelper $stockHelper,
+        UrlHelper $urlHelper,
         array $data = []
     ) {
         parent::__construct($context, $data);
@@ -69,6 +85,8 @@ class Related extends AbstractProduct
         $this->priceVisibility = $priceVisibility;
         $this->catalogProductVisibility = $catalogProductVisibility;
         $this->catalogConfig = $catalogConfig;
+        $this->stockHelper = $stockHelper;
+        $this->urlHelper = $urlHelper;
     }
 
     /**
@@ -108,6 +126,9 @@ class Related extends AbstractProduct
         $collection->setPageSize(self::MAX_ITEMS);
         $collection->setOrder('updated_at', 'DESC');
 
+        // Carrega status de estoque para que isSaleable() funcione corretamente em cada produto
+        $this->stockHelper->addStockStatusToProducts($collection);
+
         $this->collection = $collection;
         return $this->collection;
     }
@@ -131,5 +152,23 @@ class Related extends AbstractProduct
     public function getPriceReplacementMessage(): string
     {
         return $this->priceVisibility->getPriceReplacementMessage();
+    }
+
+    /**
+     * Returns POST params for the add-to-cart form.
+     *
+     * @param Product $product
+     * @return array<string, mixed>
+     */
+    public function getAddToCartPostParams(Product $product): array
+    {
+        $url = $this->getAddToCartUrl($product, ['_escape' => false]);
+        return [
+            'action' => $url,
+            'data' => [
+                'product' => (int) $product->getEntityId(),
+                ActionInterface::PARAM_NAME_URL_ENCODED => $this->urlHelper->getEncodedUrl($url),
+            ],
+        ];
     }
 }
