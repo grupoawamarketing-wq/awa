@@ -97,7 +97,16 @@ class B2BPriceWarmObserver implements ObserverInterface
             return;
         }
 
-        $warmKey = $erpCode . ':' . md5(implode('|', array_values(array_unique($skus))));
+        // Avoid enormous IN-clauses on full catalog pages — cap at 300 SKUs.
+        // Prices for SKUs beyond this limit will be fetched individually by
+        // GroupPricePlugin::afterGetPrice() via getPriceFromList() (single-SKU path),
+        // which checks Redis before hitting ERP.
+        $skus = array_unique($skus);
+        if (count($skus) > 300) {
+            $skus = array_slice($skus, 0, 300);
+        }
+
+        $warmKey = $erpCode . ':' . md5(implode('|', array_values($skus)));
         if (isset($this->warmedCollections[$warmKey])) {
             return;
         }

@@ -236,16 +236,30 @@ class CustomerPriceProvider
         $result = [];
         $uncachedSkus = [];
 
-        // Check in-memory cache first
+        // Check in-memory cache first, then persistent Redis cache.
+        // Only SKUs missing from both go to the ERP SQL Server query.
         foreach ($skus as $sku) {
             $cacheKey = $priceListCode . ':' . $sku;
             if (isset($this->priceCache[$cacheKey])) {
+                // Hot: in-memory hit
                 $val = $this->priceCache[$cacheKey];
                 if ($val > 0) {
                     $result[$sku] = $val;
                 }
             } else {
-                $uncachedSkus[] = $sku;
+                // Warm: check persistent Redis cache
+                $persistKey = self::CACHE_PREFIX . md5($cacheKey);
+                $cached = $this->cache->load($persistKey);
+                if ($cached !== false) {
+                    $price = $cached === '' ? null : (float) $cached;
+                    $this->priceCache[$cacheKey] = $price ?? 0.0;
+                    if ($price !== null && $price > 0) {
+                        $result[$sku] = $price;
+                    }
+                } else {
+                    // Cold: must query ERP
+                    $uncachedSkus[] = $sku;
+                }
             }
         }
 
