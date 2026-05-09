@@ -11,7 +11,6 @@ use Magento\Framework\App\Action\Action;
 	$show_navigation = $block->getConfig('navigation');
 	$show_pagination = $block->getConfig('pagination');
 	$auto = $block->getConfig('auto');
-	$imageBlock =  $block->getLayout()->createBlock('Magento\Catalog\Block\Product\Image');
 	$image = 'new_products_content_widget_grid';
 	$type = 'widget-new-grid';
 	$templateType = \Magento\Catalog\Block\Product\ReviewRendererInterface::DEFAULT_VIEW;
@@ -60,19 +59,21 @@ use Magento\Framework\App\Action\Action;
 					$productItems =  $tab['productInfo'];
 					foreach($productItems as $_item) {
 							$productImage = $block->getImage($_item, $image);
-							$productImageThumb = $block->getImage($_item, 'category_page_grid-1');
 					?>
 						<?php if($i++%$rows==0) { ?> <div class="product_row"> <?php } ?>
 						<div class="item-product-parent">
 							<div class="item-product listview">
 								<div class="product-thumb">
 									<a href="<?php echo $block->escapeUrl($_item->getProductUrl()); ?>" class="product-thumb-link">
-										<?php $productImageThumb = $block->getImage($_item, 'category_image_second_small');?>
+										<?php $productImageThumb = $block->getImage($_item, 'category_image_second_small');
+										$productImageThumbUrl = (string)$productImageThumb->getImageUrl();
+										$productImagePrimaryUrl = (string)$productImage->getImageUrl();
+										?>
 										<span class="first-thumb">
 											<?php echo $productImage->toHtml(); ?>
 										</span>
 										<?php $productType = $_item->getTypeID();
-										if($productType == "simple"): ?>
+										if ($productType === 'simple' && strpos($productImageThumbUrl, '/placeholder/') === false && $productImageThumbUrl !== $productImagePrimaryUrl): ?>
 											<span class="second-thumb">
 												<?php echo $productImageThumb->toHtml(); ?>
 											</span>

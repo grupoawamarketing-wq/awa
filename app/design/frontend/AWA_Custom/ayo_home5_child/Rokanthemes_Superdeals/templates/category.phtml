@@ -51,16 +51,19 @@
 						<div class="content-item-product">
 							<div class="product-thumb">
 								<a href="<?php echo $block->escapeUrl($_item->getProductUrl()) ?>" class="product-thumb-link">
-									<?php $productImageThumb = $block->getImage($_item, 'category_image_second_small');?>
+									<?php $productImageThumb = $block->getImage($_item, 'category_image_second_small');
+									$productImageThumbUrl = (string)$productImageThumb->getImageUrl();
+									$productImagePrimaryUrl = (string)$productImage->getImageUrl();
+									?>
 									<span class="first-thumb">
-										<?php echo $productImage->toHtml(); ?>
+									 <?php echo $productImage->toHtml(); ?>
 									</span>
 									<?php $productType = $_item->getTypeID();
-									if($productType == "simple"): ?>
-										<span class="second-thumb">
+									if ($productType === 'simple' && strpos($productImageThumbUrl, '/placeholder/') === false && $productImageThumbUrl !== $productImagePrimaryUrl): ?>
+									<span class="second-thumb">
 											<?php echo $productImageThumb->toHtml(); ?>
 										</span>
-			                		<?php endif; ?>
+				                		<?php endif; ?>
 								</a>
 								<div class="hot-onsale">
 									<?php if ( $_item->getFinalPrice() < $_item->getPrice() ): ?>
