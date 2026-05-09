@@ -16503,3 +16503,42 @@ html body .page-wrapper .page_footer .awa-footer-devby .awa-footer-muted-label {
     pointer-events: none !important;
   }
 }
+
+/* ==========================================================================
+   FIX-R2-7: Modal z-index elevation — all viewports
+   Phase 14 of awa-home-vertical-menu-shell-fix.css sets z-index:9999 on
+   .page-wrapper (creating a stacking context). Magento modals are siblings
+   of .page-wrapper at body level, so they need z-index > 9999 to appear
+   above page content. _awa-visual-fixes.less already sets 100005 in
+   styles-l.css, but styles-l.css is desktop-only (media min-width:768px).
+   This rule ensures modals appear above .page-wrapper on ALL viewports.
+   ========================================================================== */
+
+.modals-wrapper {
+    z-index: 100005 !important;
+    position: relative !important;
+}
+
+.modal-popup._show,
+.modal-slide._show {
+    z-index: 100006 !important;
+}
+
+.modals-overlay {
+    z-index: 100004 !important;
+}
+
+/* ==========================================================================
+   FIX-R2-8: Mobile body position safeguard
+   _qa-visual-fixes.less ETAPA 7 EXTENDED had 'body { position: relative
+   !important }' inside the mobile media query — compiles into styles-l.css
+   and possibly styles-m.css. body as containing block breaks ALL
+   position:fixed descendants (sticky nav, modals, WhatsApp float button).
+   The LESS source is now fixed but this override guards any cached output.
+   ========================================================================== */
+
+@media (max-width: 767px) {
+    body {
+        position: static !important;
+    }
+}
