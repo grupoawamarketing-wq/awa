@@ -27,7 +27,7 @@ export default defineConfig({
     ignoreHTTPSErrors: true,
     locale: 'pt-BR',
     timezoneId: 'America/Sao_Paulo',
-    screenshot: 'only-on-failure',
+    screenshot: 'on',
     video: 'retain-on-failure',
     trace: 'retain-on-failure',
     actionTimeout: 8_000,
