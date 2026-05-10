@@ -120,9 +120,19 @@
             return;
         }
 
-        var expanded = dropdown.classList.contains('active') ||
+        var dropdownStyle = window.getComputedStyle
+            ? window.getComputedStyle(dropdown)
+            : null;
+        var dropdownVisible = isVisible(dropdown) && (!dropdownStyle || (
+            dropdownStyle.display !== 'none' &&
+            dropdownStyle.visibility !== 'hidden' &&
+            dropdownStyle.opacity !== '0'
+        ));
+        var expanded = dropdownVisible && (
+            dropdown.classList.contains('active') ||
             dropdown.getAttribute('aria-hidden') === 'false' ||
-            dropdown.style.display === 'block';
+            dropdown.style.display === 'block'
+        );
         trigger.setAttribute('aria-expanded', expanded ? 'true' : 'false');
         syncShellState(shell, expanded);
     }
@@ -132,50 +142,20 @@
             return;
         }
 
-        window.require(['jquery', 'dropdownDialog'], function ($) {
-            // BUG FIX: HEADER_MINICART_SHELL_SELECTOR is comma-separated.
-            // Naïve concatenation 'SHELL + " " + DESCENDANT' breaks the CSS selector:
-            //   '[data-awa-header-minicart-shell="true"], .awa-header-minicart[data-awa-header-cart="true"]'
-            //   + ' .minicart-wrapper [data-role="dropdownDialog"]'
-            //   = '[data-awa-header-minicart-shell="true"],   ← matches outer shell directly!
-            //     .awa-header-minicart[data-awa-header-cart="true"] .minicart-wrapper [data-role="dropdownDialog"]'
-            // The first part '[data-awa-header-minicart-shell="true"]' has no descendant suffix
-            // and matches .awa-header-cart itself, causing dropdownDialog to be called on the
-            // outer wrapper → HierarchyRequestError (circular DOM reference) in dialog.js.
-            // Fix: split on comma and append descendant to each part individually.
-            var _shells = HEADER_MINICART_SHELL_SELECTOR.split(',').map(function (s) { return s.trim(); });
-            var scopedDropdownSelector = _shells.map(function (s) {
-                return s + ' ' + MINICART_DROPDOWN_SELECTOR;
-            }).join(', ');
-            var triggerTargetSelector = _shells.map(function (s) {
-                return s + ' .showcart, ' + s + ' .action.showcart';
-            }).join(', ');
-            var minicartDropdown = $(scopedDropdownSelector).first();
-
-            if (!minicartDropdown.length) {
-                minicartDropdown = $('[data-role="dropdownDialog"]').first();
-            }
-
-            if (!minicartDropdown.length || minicartDropdown.data('mageDropdownDialog')) {
+        window.require(['jquery'], function ($) {
+            if (window.__awaMinicartDropdownSyncBound) {
                 updateExpandedState();
                 return;
             }
 
-            minicartDropdown.dropdownDialog({
-                appendTo: '[data-block=minicart]',
-                triggerTarget: triggerTargetSelector,
-                timeout: '2000',
-                closeOnMouseLeave: true,
-                closeOnEscape: true,
-                triggerClass: 'active',
-                parentClass: 'active',
-                buttons: []
+            window.__awaMinicartDropdownSyncBound = true;
+
+            $(document).on('click keyup', MINICART_TRIGGER_SELECTOR + ', .block-minicart', function () {
+                window.requestAnimationFrame(updateExpandedState);
+                window.setTimeout(updateExpandedState, 120);
             });
 
             updateExpandedState();
-            $(document).on('click keyup', triggerTargetSelector + ', .block-minicart', function () {
-                window.requestAnimationFrame(updateExpandedState);
-            });
         });
     }
 

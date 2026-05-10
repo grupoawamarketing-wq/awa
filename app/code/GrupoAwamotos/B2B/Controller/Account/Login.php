@@ -54,6 +54,16 @@ class Login implements HttpGetActionInterface
             }
         }
 
+        // Garante que falhas de login redirecionem de volta a esta página B2B,
+        // e não para customer/account/login (comportamento padrão do Magento).
+        $baseUrl = $this->urlBuilder->getBaseUrl();
+        $beforeAuthUrl = $this->customerSession->getBeforeAuthUrl();
+        if (!$beforeAuthUrl || $beforeAuthUrl === $baseUrl) {
+            $this->customerSession->setBeforeAuthUrl(
+                $this->urlBuilder->getUrl('b2b/account/login')
+            );
+        }
+
         $resultPage = $this->resultPageFactory->create();
         $resultPage->getConfig()->getTitle()->set(__('Acesse sua conta'));
 
