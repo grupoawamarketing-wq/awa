@@ -133,9 +133,23 @@
         }
 
         window.require(['jquery', 'dropdownDialog'], function ($) {
-            var scopedDropdownSelector = HEADER_MINICART_SHELL_SELECTOR + ' ' + MINICART_DROPDOWN_SELECTOR;
-            var triggerTargetSelector = HEADER_MINICART_SHELL_SELECTOR + ' .showcart, ' +
-                HEADER_MINICART_SHELL_SELECTOR + ' .action.showcart';
+            // BUG FIX: HEADER_MINICART_SHELL_SELECTOR is comma-separated.
+            // Naïve concatenation 'SHELL + " " + DESCENDANT' breaks the CSS selector:
+            //   '[data-awa-header-minicart-shell="true"], .awa-header-minicart[data-awa-header-cart="true"]'
+            //   + ' .minicart-wrapper [data-role="dropdownDialog"]'
+            //   = '[data-awa-header-minicart-shell="true"],   ← matches outer shell directly!
+            //     .awa-header-minicart[data-awa-header-cart="true"] .minicart-wrapper [data-role="dropdownDialog"]'
+            // The first part '[data-awa-header-minicart-shell="true"]' has no descendant suffix
+            // and matches .awa-header-cart itself, causing dropdownDialog to be called on the
+            // outer wrapper → HierarchyRequestError (circular DOM reference) in dialog.js.
+            // Fix: split on comma and append descendant to each part individually.
+            var _shells = HEADER_MINICART_SHELL_SELECTOR.split(',').map(function (s) { return s.trim(); });
+            var scopedDropdownSelector = _shells.map(function (s) {
+                return s + ' ' + MINICART_DROPDOWN_SELECTOR;
+            }).join(', ');
+            var triggerTargetSelector = _shells.map(function (s) {
+                return s + ' .showcart, ' + s + ' .action.showcart';
+            }).join(', ');
             var minicartDropdown = $(scopedDropdownSelector).first();
 
             if (!minicartDropdown.length) {

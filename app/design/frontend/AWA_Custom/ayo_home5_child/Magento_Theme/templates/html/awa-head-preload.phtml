@@ -51,10 +51,16 @@ $asyncBundles = [
     $block->getViewFileUrl('css/awa-super-global.css'),
 ];
 
+$handles = $block->getLayout()->getUpdate()->getHandles();
+$isHomePage = in_array('cms_index_index', $handles, true);
+$isCheckoutFlow = in_array('checkout_index_index', $handles, true)
+    || in_array('checkout_cart_index', $handles, true)
+    || in_array('onepagecheckout_index_index', $handles, true);
+
 // Homepage-only super bundle
 $homeBundleUrl = null;
 $heroPreloadUrl = null;
-if (in_array('cms_index_index', $block->getLayout()->getUpdate()->getHandles(), true)) {
+if ($isHomePage) {
     $homeBundleUrl = $block->getViewFileUrl('css/awa-super-home.css');
     /** @var GrupoAwamotos\Theme\Block\Html\HeroPreload $block */
     $heroPreloadUrl = $block->getHeroImageUrl();
@@ -323,10 +329,9 @@ $__carouselBundleUrl = $block->getViewFileUrl('css/awa-carousel-bundle.css'); ?>
 <?php /* awa-card-image-hero.css + awa-home-gap-fix.css → included in awa-layout-bundle.css (2026-05-09) */ ?>
 <?php /* awa-vertical-menu-desktop-final.css → included in awa-layout-bundle.css (2026-05-09) */ ?>
 <?php /* awa-plp-final-polish.css — PLP grid, cards, toolbar polish
-         Não carregado na HOME PAGE ($homeBundleUrl = indicador de home).
-         Home não tem product grid / toolbar — desperdício de 59KB.
-         Carregado em: category, search, PDP, e todas as outras páginas. */ ?>
-<?php if (!$homeBundleUrl): // Skip on home page — PLP grid CSS desnecessário
+         Não carregar na HOME nem em fluxos de checkout/carrinho.
+         Checkout/OPC usam awa-checkout-polish.css; PLP aqui seria custo extra e risco de cascade. */ ?>
+<?php if (!$homeBundleUrl && !$isCheckoutFlow): // Skip on home + checkout flows
     $__plpFinalUrl = $block->getViewFileUrl('css/awa-plp-final-polish.css'); ?>
 <link rel="preload" href="<?= $block->escapeUrl($__plpFinalUrl) ?>?v=2" as="style"/>
 <link rel="stylesheet"
