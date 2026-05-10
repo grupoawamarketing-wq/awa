@@ -5,11 +5,13 @@
  * neste ambiente o asset publicado `requirejs-config.js` está sendo servido a
  * partir desta fonte do tema filho, sem o merge completo esperado do Magento.
  * Para restaurar o bootstrap AMD da storefront, este arquivo precisa carregar
- * também os aliases-base do Magento_Theme e os aliases críticos do RokanBase.
+ * também os aliases-base do Magento_Theme, o bootstrap do PageCache e os
+ * aliases críticos do RokanBase.
  */
 var config = {
     waitSeconds: 0,
     deps: [
+        'Magento_PageCache/js/form-key-provider',
         'rokanthemes/theme',
         'awa-nav-cls-fix-reset',
         'awa-vertical-menu-focus-trap',
@@ -24,6 +26,12 @@ var config = {
     ],
     map: {
         '*': {
+            'pageCache': 'Magento_PageCache/js/page-cache',
+            'dropdownDialog': 'mage/dropdown',
+            'dropdown': 'mage/dropdowns',
+            'awa/header-state': 'js/awa-header-state',
+            'mageTranslationDictionary': 'Magento_Translation/js/mage-translation-dictionary',
+            'priceUtils': 'Magento_Catalog/js/price-utils',
             'ko': 'knockoutjs/knockout',
             'knockout': 'knockoutjs/knockout',
             'mageUtils': 'mage/utils/main',
@@ -137,6 +145,11 @@ var config = {
         'rokanthemes/lazyloadimg': ['jquery']
     },
     config: {
+        mixins: {
+            'Magento_Search/js/form-mini': {
+                'Mirasvit_SearchAutocomplete/js/form-mini': true
+            }
+        },
         text: {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest'
@@ -148,6 +161,16 @@ var config = {
 if (typeof require !== 'undefined' && require && typeof require.config === 'function') {
     require.config(config);
 }
+
+require(['Magento_PageCache/js/form-key-provider'], function (initFormKeyProvider) {
+    'use strict';
+
+    if (typeof initFormKeyProvider === 'function') {
+        initFormKeyProvider({
+            isPaginationCacheEnabled: 0
+        });
+    }
+});
 
 require(['jquery'], function ($) {
     'use strict';
