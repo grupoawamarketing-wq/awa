@@ -10,48 +10,86 @@ define(['jquery'], function ($) {
     'use strict';
 
     return function (config) {
-        var container = document.getElementById('awa-social-proof-pdp');
+        const container = document.getElementById('awa-social-proof-pdp');
         if (!container) {
             return;
         }
 
-        var productId = parseInt(container.getAttribute('data-product-id'), 10);
+        const productId = parseInt(container.getAttribute('data-product-id'), 10);
         if (!productId) {
             return;
         }
 
-        var endpoint = config.baseUrl + 'socialproof/product/data?product_id=' + productId;
+        const endpoint = config.baseUrl + 'socialproof/product/data?product_id=' + productId;
 
         fetch(endpoint, { credentials: 'omit' })
             .then(function (res) { return res.json(); })
             .then(function (data) {
-                var html = '';
+                /**
+                 * Build badges via DOM API to avoid XSS from concatenated HTML.
+                 * Numeric values from the API are safe, but label attributes from
+                 * data-* are server-rendered strings — DOM textContent handles escaping.
+                 */
+                function makeBadge(extraClass, ariaLabel, iconClass, contentEl) {
+                    const div = document.createElement('div');
+                    div.className = 'social-proof-badge ' + extraClass;
+                    div.setAttribute('role', 'note');
+                    div.setAttribute('aria-label', ariaLabel);
+                    const icon = document.createElement('i');
+                    icon.className = 'fa ' + iconClass;
+                    icon.setAttribute('aria-hidden', 'true');
+                    div.appendChild(icon);
+                    div.appendChild(contentEl);
+                    return div;
+                }
+
+                function makeSpan(strongText, suffixText) {
+                    const span = document.createElement('span');
+                    span.className = 'badge-text';
+                    const strong = document.createElement('strong');
+                    strong.textContent = strongText;
+                    span.appendChild(strong);
+                    if (suffixText) {
+                        span.appendChild(document.createTextNode(' ' + suffixText));
+                    }
+                    return span;
+                }
+
+                const fragment = document.createDocumentFragment();
 
                 if (data.views_today > 0) {
-                    html += '<div class="social-proof-badge views-badge" role="note" aria-label="Visualizações do produto">'
-                        + '<i class="fa fa-eye" aria-hidden="true"></i>'
-                        + '<span class="badge-text"><strong>' + data.views_today + '</strong> '
-                        + container.getAttribute('data-label-views') + '</span></div>';
+                    fragment.appendChild(makeBadge(
+                        'views-badge',
+                        'Visualizações do produto',
+                        'fa-eye',
+                        makeSpan(String(data.views_today), container.getAttribute('data-label-views'))
+                    ));
                 }
 
                 if (data.low_stock) {
-                    html += '<div class="social-proof-badge low-stock-badge urgency" role="note" aria-label="Alerta de baixo estoque">'
-                        + '<i class="fa fa-exclamation-triangle" aria-hidden="true"></i>'
-                        + '<span class="badge-text"><strong>'
-                        + container.getAttribute('data-label-low-stock-pre') + ' ' + data.qty + ' '
-                        + container.getAttribute('data-label-low-stock-suf') + '</strong> '
-                        + container.getAttribute('data-label-stock-msg') + '</span></div>';
+                    const lowStockText = container.getAttribute('data-label-low-stock-pre')
+                        + ' ' + String(data.qty) + ' '
+                        + container.getAttribute('data-label-low-stock-suf');
+                    fragment.appendChild(makeBadge(
+                        'low-stock-badge urgency',
+                        'Alerta de baixo estoque',
+                        'fa-exclamation-triangle',
+                        makeSpan(lowStockText, container.getAttribute('data-label-stock-msg'))
+                    ));
                 }
 
                 if (data.is_best_seller) {
-                    html += '<div class="social-proof-badge bestseller-badge" role="note" aria-label="Produto mais vendido">'
-                        + '<i class="fa fa-star" aria-hidden="true"></i>'
-                        + '<span class="badge-text"><strong>'
-                        + container.getAttribute('data-label-bestseller') + '</strong></span></div>';
+                    fragment.appendChild(makeBadge(
+                        'bestseller-badge',
+                        'Produto mais vendido',
+                        'fa-star',
+                        makeSpan(container.getAttribute('data-label-bestseller'), null)
+                    ));
                 }
 
-                if (html) {
-                    container.innerHTML = html;
+                if (fragment.childNodes.length > 0) {
+                    container.innerHTML = ''; // safe — clearing own container before appending
+                    container.appendChild(fragment);
                     container.classList.add('awa-sp-pdp');
                 }
             })

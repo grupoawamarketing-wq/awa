@@ -28,7 +28,7 @@ define([
          * Bind event handlers
          */
         _bindEvents: function () {
-            var self = this;
+            const self = this;
 
             // Refresh button click
             this.element.on('click', '.erp-refresh-btn', function (e) {
@@ -39,15 +39,15 @@ define([
             // Add to cart from suggestions
             this.element.on('click', '.erp-add-to-cart', function (e) {
                 e.preventDefault();
-                var productId = $(this).data('product-id');
-                var qty = $(this).closest('.erp-product-item').find('.erp-qty-input').val() || 1;
+                const productId = $(this).data('product-id');
+                const qty = $(this).closest('.erp-product-item').find('.erp-qty-input').val() || 1;
                 self.addToCart(productId, qty);
             });
 
             // Quick reorder
             this.element.on('click', '.erp-quick-reorder', function (e) {
                 e.preventDefault();
-                var orderId = $(this).data('order-id');
+                const orderId = $(this).data('order-id');
                 self.quickReorder(orderId);
             });
         },
@@ -56,8 +56,8 @@ define([
          * Refresh data from ERP
          */
         refreshData: function (type) {
-            var self = this;
-            var $container = this.element;
+            const self = this;
+            const $container = this.element;
 
             $container.addClass(this.options.loadingClass);
 
@@ -88,8 +88,8 @@ define([
          * Add product to cart
          */
         addToCart: function (productId, qty) {
-            var self = this;
-            var addToCartUrl = window.BASE_URL + 'checkout/cart/add';
+            const self = this;
+            const addToCartUrl = window.BASE_URL + 'checkout/cart/add';
 
             $.ajax({
                 url: addToCartUrl,
@@ -119,8 +119,8 @@ define([
          * Quick reorder - add all items from a previous order
          */
         quickReorder: function (orderId) {
-            var self = this;
-            var reorderUrl = this.options.ajaxUrl.replace('suggestions', 'reorder');
+            const self = this;
+            const reorderUrl = this.options.ajaxUrl.replace('suggestions', 'reorder');
 
             $.ajax({
                 url: reorderUrl,
@@ -164,13 +164,13 @@ define([
             }
 
             // Handle typed section updates
-            var sectionMap = {
+            const sectionMap = {
                 suggestions: '.erp-suggestions-list',
                 history: '.erp-history-list',
                 summary: '.erp-summary-grid'
             };
 
-            var selector = type && sectionMap[type] ? sectionMap[type] : null;
+            const selector = type && sectionMap[type] ? sectionMap[type] : null;
 
             if (selector && data.html) {
                 this.element.find(selector).html(data.html);
@@ -197,7 +197,7 @@ define([
          * Show message notification
          */
         _showMessage: function (message, type) {
-            var $notification = $('<div/>')
+            const $notification = $('<div/>')
                 .addClass('erp-notification erp-notification-' + type)
                 .text(message)
                 .appendTo('body');

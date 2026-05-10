@@ -1,14 +1,14 @@
 define([], function () {
     'use strict';
 
-    var STORAGE_KEY = 'awa_cookie_consent';
-    var COOKIE_NAME = 'awa_cookies_accepted';
-    var COOKIE_DAYS = 365;
+    const STORAGE_KEY = 'awa_cookie_consent';
+    const COOKIE_NAME = 'awa_cookies_accepted';
+    const COOKIE_DAYS = 365;
 
     function setCookie(name, value, days) {
-        var expires = '';
+        let expires = '';
         if (days) {
-            var date = new Date();
+            const date = new Date();
             date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
             expires = '; expires=' + date.toUTCString();
         }
@@ -16,10 +16,10 @@ define([], function () {
     }
 
     function getCookie(name) {
-        var nameEQ = name + '=';
-        var cookies = document.cookie.split(';');
-        for (var i = 0; i < cookies.length; i++) {
-            var c = cookies[i].trim();
+        const nameEQ = name + '=';
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const c = cookies[i].trim();
             if (c.indexOf(nameEQ) === 0) {
                 return decodeURIComponent(c.substring(nameEQ.length));
             }
@@ -48,7 +48,7 @@ define([], function () {
     }
 
     function syncBannerHeight() {
-        var banner = document.getElementById('awa-cookie-banner');
+        const banner = document.getElementById('awa-cookie-banner');
         if (!banner || !banner.classList.contains('awa-cookie-banner--visible')) {
             document.documentElement.style.removeProperty('--awa-cookie-banner-height');
             return;
@@ -76,10 +76,10 @@ define([], function () {
     }
 
     function hideBanner() {
-        var banner = document.getElementById('awa-cookie-banner');
+        const banner = document.getElementById('awa-cookie-banner');
         if (banner) {
-            var cleaned = false;
-            var cleanup = function () {
+            let cleaned = false;
+            const cleanup = function () {
                 if (cleaned) {
                     return;
                 }
@@ -95,7 +95,7 @@ define([], function () {
     }
 
     function showBanner() {
-        var banner = document.getElementById('awa-cookie-banner');
+        const banner = document.getElementById('awa-cookie-banner');
         if (!banner) {
             return;
         }
@@ -110,8 +110,8 @@ define([], function () {
     }
 
     function bindEvents() {
-        var acceptBtn = document.getElementById('awa-cookie-accept');
-        var declineBtn = document.getElementById('awa-cookie-decline');
+        const acceptBtn = document.getElementById('awa-cookie-accept');
+        const declineBtn = document.getElementById('awa-cookie-decline');
 
         if (acceptBtn) {
             acceptBtn.addEventListener('click', function () {
