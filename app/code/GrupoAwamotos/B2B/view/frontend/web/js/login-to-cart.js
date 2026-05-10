@@ -49,7 +49,6 @@ define([
             || customer.email
             || customer.id
             || customer.entity_id
-            || customer.websiteId !== undefined
         );
     }
 
