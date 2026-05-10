@@ -29,28 +29,42 @@ const TIMEOUT = 7_000;
 // Seletores — multi-fallback, em ordem de especificidade crescente
 // ---------------------------------------------------------------------------
 
+/**
+ * Seletores baseados no HTML real do Rokanthemes_VerticalMenu (sidemenu.phtml):
+ *   <nav class="navigation verticalmenu side-verticalmenu">
+ *   <ul> <li class="classic|staticwidth [parent]"> <ul class="submenu"> </li>
+ */
 const MENU_SEL =
-  '.vertical-menu-custom-block, .awa-vertical-nav, #vertical-menu-wrapper, ' +
-  '.nav-vertical, .awa-vertical-menu, .vertical-menu';
+  'nav.verticalmenu, nav.side-verticalmenu, ' +
+  '.navigation.verticalmenu, .side-verticalmenu';
 
 const ITEMS_SEL =
-  '.vertical-menu-custom-block li a, .awa-vertical-nav li a, ' +
-  '.awa-vertical-menu li a, .vertical-menu li a';
+  '.verticalmenu li a, .side-verticalmenu li a, ' +
+  '.navigation.verticalmenu li a';
 
 const LEVEL1_SEL =
-  '.vertical-menu-custom-block > ul > li, .awa-vertical-nav > ul > li, ' +
-  '.awa-vertical-menu > ul > li, .vertical-menu > ul > li';
+  '.verticalmenu > ul > li, .side-verticalmenu > ul > li, ' +
+  '.navigation.verticalmenu > ul > li';
 
+/** Itens pai com submenus (classes reais do plugin jQuery verticalmenu.js) */
+const PARENT_SEL =
+  '.verticalmenu li.classic.parent, .verticalmenu li.staticwidth.parent, ' +
+  '.navigation.verticalmenu li.classic.parent, ' +
+  '.navigation.verticalmenu li.staticwidth.parent';
+
+/** Submenus nivel 2 e 3 (classes reais: .submenu e .subchildmenu) */
 const SUBMENU_SEL =
-  '.vertical-menu-custom-block .submenu, .awa-vertical-nav .submenu, ' +
-  '.awa-vertical-menu .level1, .vertical-menu .level1, ' +
-  '.awa-vertical-nav .level1, [class*="vertical"] .dropdown-content';
+  '.verticalmenu .submenu, .navigation.verticalmenu .submenu, ' +
+  '.verticalmenu .subchildmenu, .navigation.verticalmenu .subchildmenu';
 
+/**
+ * Toggle real: h2 que serve de cabecalho/title do VerticalMenu.
+ * NB: nao existe drawer mobile no Rokanthemes VerticalMenu;
+ * o menu desaparece via CSS em resolucoes menores.
+ */
 const TOGGLE_SEL =
-  '.vertical-menu-toggle, .awa-vertical-toggle, ' +
-  '[data-action="toggle-vertical-menu"], .menu-vertical-btn, ' +
-  'button[aria-label*="categorias" i], button[aria-label*="menu" i], ' +
-  '.toggle-vertical, [class*="vertical"][class*="toggle"]';
+  'h2.list-category-dropdown, h2.togge-menu, ' +
+  '.title-category-dropdown, .vm-toggle-categories';
 
 // ---------------------------------------------------------------------------
 // Utilitário anti-Juggler (Firefox NS_ERROR_FAILURE)
@@ -70,7 +84,7 @@ let menuFound: boolean | null = null;
  * SUITE 1 — Presença e Estrutura (Desktop)
  * ====================================================================== */
 test.describe('Menu Vertical — 1. Presença e Estrutura (Desktop)', () => {
-  test.use({ timeout: 90_000 }); // navigateTo(22s) + isVisible(9s) + Firefox teardown overhead
+  test.setTimeout(90_000); // navigateTo(22s) + isVisible(9s) + Firefox teardown overhead
   test.beforeEach(async ({ page }, testInfo) => {
     if (testInfo.project.name !== 'func-desktop') { test.skip(); return; }
     if (menuFound === false) { test.skip(); return; }
@@ -132,8 +146,7 @@ test.describe('Menu Vertical — 1. Presença e Estrutura (Desktop)', () => {
       page,
       () => {
         const els = Array.from(document.querySelectorAll(
-          '.vertical-menu-custom-block img, .awa-vertical-nav img, ' +
-          '.awa-vertical-menu img, .vertical-menu img, aside.sidebar-main .navigation img',
+          '.verticalmenu img, .navigation.verticalmenu img, .side-verticalmenu img',
         )) as HTMLImageElement[];
         return els.length === 0 ? true : els.slice(0, 8).every(el => el.complete && el.naturalWidth > 0);
       },
@@ -212,7 +225,7 @@ test.describe('Menu Vertical — 3. Submenus e Hover (Desktop)', () => {
   // 07
   test('07 — hover em item pai exibe submenu de nível 2 (P0)', async ({ page }) => {
     const parentItem = page.locator(
-      `${LEVEL1_SEL}.parent, ${LEVEL1_SEL}.has-children, ${LEVEL1_SEL}:has(ul)`,
+      PARENT_SEL,
     ).first();
     const hasParent = await Promise.race([
       parentItem.isVisible({ timeout: 6_000 }).catch(() => false),
@@ -236,13 +249,13 @@ test.describe('Menu Vertical — 3. Submenus e Hover (Desktop)', () => {
   // 08
   test('08 — submenu nível 2 tem ao menos 2 itens com href (P1)', async ({ page }) => {
     const parentItem = page.locator(
-      `${LEVEL1_SEL}.parent, ${LEVEL1_SEL}.has-children, ${LEVEL1_SEL}:has(ul)`,
+      PARENT_SEL,
     ).first();
     if (!await parentItem.isVisible({ timeout: 6_000 }).catch(() => false)) { test.skip(); return; }
     await parentItem.hover();
     await page.waitForTimeout(500);
     const submenuLinks = page.locator(
-      `${LEVEL1_SEL}:first-child .level1 a, ${LEVEL1_SEL}:first-child .submenu a, ${LEVEL1_SEL}:first-child ul a`,
+      '.verticalmenu li.classic.parent:first-of-type .submenu a, .navigation.verticalmenu li.classic.parent:first-of-type .submenu a, .verticalmenu li.staticwidth.parent:first-of-type .submenu a',
     );
     const count = await submenuLinks.count().catch(() => 0);
     if (count === 0) { console.warn('[P1] Submenu sem links visíveis'); test.skip(); return; }
@@ -255,7 +268,7 @@ test.describe('Menu Vertical — 3. Submenus e Hover (Desktop)', () => {
   // 09
   test('09 — hover em item folha NÃO exibe submenu (P1)', async ({ page }) => {
     const leafItem = page.locator(
-      `${LEVEL1_SEL}:not(.parent):not(.has-children):not(:has(ul))`,
+      '.verticalmenu > ul > li:not(.classic.parent):not(.staticwidth.parent), .navigation.verticalmenu > ul > li:not(.classic.parent):not(.staticwidth.parent)',
     ).first();
     if (!await leafItem.isVisible({ timeout: 6_000 }).catch(() => false)) {
       console.info('[P1] Todos os itens de nível 1 são pais — sem folha para testar');
@@ -273,7 +286,7 @@ test.describe('Menu Vertical — 3. Submenus e Hover (Desktop)', () => {
   // 10
   test('10 — submenu não é cortado pela borda inferior da viewport (P2)', async ({ page }) => {
     const parentItems = page.locator(
-      `${LEVEL1_SEL}.parent, ${LEVEL1_SEL}.has-children, ${LEVEL1_SEL}:has(ul)`,
+      PARENT_SEL,
     );
     if (!await parentItems.count().catch(() => 0)) { test.skip(); return; }
     await parentItems.last().hover();
@@ -285,8 +298,7 @@ test.describe('Menu Vertical — 3. Submenus e Hover (Desktop)', () => {
       page,
       () => {
         const sub = document.querySelector(
-          '.vertical-menu-custom-block .submenu, .awa-vertical-nav .submenu, ' +
-          '.awa-vertical-menu .level1, .vertical-menu .level1, aside.sidebar-main .navigation li ul',
+          '.verticalmenu .submenu, .navigation.verticalmenu .submenu',
         );
         if (!sub) return false;
         return sub.getBoundingClientRect().bottom > window.innerHeight + 4;
@@ -300,7 +312,7 @@ test.describe('Menu Vertical — 3. Submenus e Hover (Desktop)', () => {
   // 11
   test('11 — somente um submenu nível 1 fica aberto por vez (P1)', async ({ page }) => {
     const parentItems = page.locator(
-      `${LEVEL1_SEL}.parent, ${LEVEL1_SEL}.has-children, ${LEVEL1_SEL}:has(ul)`,
+      PARENT_SEL,
     );
     if (await parentItems.count().catch(() => 0) < 2) {
       console.info('[P1] Menos de 2 itens pai — não é possível testar exclusividade');
@@ -314,10 +326,9 @@ test.describe('Menu Vertical — 3. Submenus e Hover (Desktop)', () => {
     const openSubmenus = await safeEval(
       page,
       () => [
-        '.vertical-menu-custom-block .submenu:not([style*="display: none"]):not([style*="display:none"])',
-        '.awa-vertical-nav .level1:not([style*="display: none"])',
-        '.awa-vertical-menu .level1:not([style*="display: none"])',
-        '.vertical-menu .level1:not([style*="display: none"])',
+        // Plugin jQuery usa classe .opened para submenus abertos (nao display:none inline)
+        // Submenus abertos tem left != -9999px (posicionados via mouseover)
+        '.verticalmenu .submenu.opened, .navigation.verticalmenu .submenu.opened',
         'aside.sidebar-main .navigation li ul:not([style*="display: none"])',
       ].reduce((acc, s) => acc + document.querySelectorAll(s).length, 0),
       0,
@@ -402,9 +413,7 @@ test.describe('Menu Vertical — 4. Navegação por Clique (Desktop)', () => {
     const hasActive = await safeEval(
       page,
       () => !!(document.querySelector(
-        '.vertical-menu-custom-block li.active, .awa-vertical-nav li.active, ' +
-        '.awa-vertical-menu li.active, .vertical-menu li.active, ' +
-        '.vertical-menu-custom-block li.current, [class*="vertical"] li[class*="active"], ' +
+        '.verticalmenu li.ui-state-active, .navigation.verticalmenu li.ui-state-active, ' +
         'aside.sidebar-main .navigation li.active, aside.sidebar-main .navigation li.current',
       )),
       false,
@@ -522,8 +531,7 @@ test.describe('Menu Vertical — 5. Mobile (375px)', () => {
       page,
       () => {
         const el = document.querySelector(
-          '.vertical-menu-custom-block, .awa-vertical-nav, #vertical-menu-wrapper, ' +
-          '.awa-vertical-menu, .vertical-menu, aside.sidebar-main .navigation',
+          '.verticalmenu, .side-verticalmenu, .navigation.verticalmenu, aside.sidebar-main .navigation',
         );
         if (!el) return false;
         return el.getBoundingClientRect().right > window.innerWidth + 4;
@@ -566,7 +574,7 @@ test.describe('Menu Vertical — 6. Acessibilidade (Desktop)', () => {
           '[role="navigation"][class*="vertical"], nav[class*="vertical"], nav[id*="vertical"], aside.sidebar-main nav',
         );
         const menu = document.querySelector(
-          '.vertical-menu-custom-block, .awa-vertical-nav, .awa-vertical-menu, aside.sidebar-main .navigation',
+          '.verticalmenu, .side-verticalmenu, .navigation.verticalmenu, aside.sidebar-main .navigation',
         );
         return !!(byRole || (menu && menu.closest('nav, [role="navigation"]')));
       },
@@ -587,7 +595,7 @@ test.describe('Menu Vertical — 6. Acessibilidade (Desktop)', () => {
       () => {
         const active = document.activeElement;
         return !!(active && active.closest(
-          '.vertical-menu-custom-block, .awa-vertical-nav, .awa-vertical-menu, .vertical-menu, aside.sidebar-main .navigation',
+          '.verticalmenu, .side-verticalmenu, .navigation.verticalmenu, aside.sidebar-main .navigation',
         ));
       },
       false,
@@ -604,9 +612,7 @@ test.describe('Menu Vertical — 6. Acessibilidade (Desktop)', () => {
     if (!await page.locator(`${LEVEL1_SEL} > a`).first().isVisible({ timeout: 6_000 }).catch(() => false)) {
       test.skip(); return;
     }
-    const parentItem = page.locator(
-      `${LEVEL1_SEL}.parent, ${LEVEL1_SEL}.has-children, ${LEVEL1_SEL}:has(ul)`,
-    ).first();
+    const parentItem = page.locator(PARENT_SEL).first();
     if (await parentItem.isVisible({ timeout: 3_000 }).catch(() => false)) {
       await parentItem.hover(); await page.waitForTimeout(400);
     }
@@ -674,8 +680,8 @@ test.describe('Menu Vertical — 7. Edge Cases (Desktop)', () => {
     const links = await safeEval(
       page,
       () => (Array.from(document.querySelectorAll(
-        '.vertical-menu-custom-block li a, .awa-vertical-nav li a, ' +
-        '.awa-vertical-menu li a, .vertical-menu li a, aside.sidebar-main .navigation li a',
+        '.verticalmenu li a, .side-verticalmenu li a, ' +
+        '.navigation.verticalmenu li a, aside.sidebar-main .navigation li a',
       )) as HTMLAnchorElement[]).map(a => a.href).filter(h => h && h !== '#'),
       [] as string[],
     );
