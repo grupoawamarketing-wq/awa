@@ -1112,6 +1112,69 @@ define([
         /**
          * Inicialização
          */
+
+        /**
+         * Normalização progressiva do CTA do formulário de currículo.
+         * Necessária porque o tema aplica alturas de botão via CSS layerizado
+         * e a rota do currículo precisa manter consistência visual em mobile.
+         */
+        function normalizeCurriculoSubmitButton() {
+            var $form = $(settings.selectors.form).first();
+            var applyInlineCtaStyles;
+
+            if (!$form.length || !$form.hasClass('curriculo')) {
+                return;
+            }
+
+            applyInlineCtaStyles = function () {
+                var isMobile = window.matchMedia('(max-width: 767px)').matches;
+                var targetHeight = isMobile ? '48px' : '52px';
+                var $submit = $form.find('.actions-toolbar .primary > .action.submit.primary').first();
+                var $primary;
+
+                if (!$submit.length) {
+                    $submit = $form.find(settings.selectors.submit).first();
+                }
+
+                if (!$submit.length) {
+                    return;
+                }
+
+                $primary = $submit.parent('.primary');
+                if ($primary.length) {
+                    $primary.css({
+                        width: isMobile ? '100%' : '',
+                        height: targetHeight,
+                        minHeight: targetHeight,
+                        display: 'flex',
+                        alignItems: 'stretch'
+                    });
+                }
+
+                $submit.css({
+                    width: isMobile ? '100%' : '',
+                    height: targetHeight,
+                    minHeight: targetHeight,
+                    maxHeight: 'none',
+                    borderRadius: '14px',
+                    padding: '0 24px',
+                    lineHeight: targetHeight,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    alignSelf: 'stretch',
+                    justifyContent: 'center'
+                });
+            };
+
+            applyInlineCtaStyles();
+            $(window)
+                .off('.curriculoCtaNormalize')
+                .on(
+                    'resize.curriculoCtaNormalize orientationchange.curriculoCtaNormalize',
+                    debounce(applyInlineCtaStyles, settings.options.debounceDelay)
+                );
+        }
+
         function init() {
             if (settings.options.autoFormat) {
                 applyBrazilianMasks();
@@ -1155,6 +1218,8 @@ define([
             if (settings.options.draftSave) {
                 setupDraftSave();
             }
+
+            normalizeCurriculoSubmitButton();
             
             console.log('[AWA] Form enhancements loaded');
         }
