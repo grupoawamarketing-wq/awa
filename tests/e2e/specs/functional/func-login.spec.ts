@@ -38,8 +38,11 @@ test.describe("Login — formulário", () => {
     await email.fill("invalido@example.com");
     await pass.fill("senhaErrada123!");
     const submit = page.locator(".b2b-btn-entrar").first();
-    if (await submit.isVisible({ timeout: 3_000 }).catch(() => false)) await submit.click();
-    else await pass.press("Enter");
+    if (await submit.isVisible({ timeout: 3_000 }).catch(() => false)) {
+      await submit.click({ force: true, timeout: 5_000 }).catch(() => pass.press("Enter"));
+    } else {
+      await pass.press("Enter");
+    }
     // Aguardar redirect pós-submit (form tradicional, não AJAX)
     await page.waitForLoadState("domcontentloaded", { timeout: 15_000 }).catch(() => {});
     await page.waitForTimeout(1_500);
