@@ -5,7 +5,7 @@ define([
     'use strict';
 
     function maskCnpj(value) {
-        var digits = String(value || '').replace(/\D/g, '');
+        let digits = String(value || '').replace(/\D/g, '');
 
         if (!digits) {
             return '';
@@ -24,16 +24,16 @@ define([
     }
 
     return function (config, element) {
-        var options = config || {};
+        let options = config || {};
         var $form = $(element);
         var $username = $(options.usernameSelector || '');
         var $cnpjOrEmailField = $(options.cnpjOrEmailMaskSelector || '');
         var $passwordToggles = $form.find(options.passwordToggleSelector || '[data-password-toggle]');
-        var loadingLabel = options.loadingLabel || 'Processando...';
-        var passwordShowText = options.passwordShowText || 'Mostrar';
-        var passwordHideText = options.passwordHideText || 'Ocultar';
-        var passwordShowAriaLabel = options.passwordShowAriaLabel || 'Mostrar senha';
-        var passwordHideAriaLabel = options.passwordHideAriaLabel || 'Ocultar senha';
+        let loadingLabel = options.loadingLabel || 'Processando...';
+        let passwordShowText = options.passwordShowText || 'Mostrar';
+        let passwordHideText = options.passwordHideText || 'Ocultar';
+        let passwordShowAriaLabel = options.passwordShowAriaLabel || 'Mostrar senha';
+        let passwordHideAriaLabel = options.passwordHideAriaLabel || 'Ocultar senha';
 
         if (!$form.length) {
             return;
@@ -51,15 +51,15 @@ define([
         function syncFieldAriaInvalidState() {
             $form.find('input, select, textarea').each(function () {
                 var $field = $(this);
-                var hasError = $field.hasClass('mage-error');
+                let hasError = $field.hasClass('mage-error');
 
                 $field.attr('aria-invalid', hasError ? 'true' : 'false');
             });
         }
 
         function scrollToField($field) {
-            var topOffset;
-            var prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            let topOffset;
+            let prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
             if (!$field.length) {
                 return;
@@ -90,7 +90,7 @@ define([
         }
 
         function applyCnpjOrEmailMask() {
-            var current;
+            let current;
 
             if (!$cnpjOrEmailField.length) {
                 return;
@@ -115,7 +115,7 @@ define([
         function initPasswordToggles() {
             $passwordToggles.each(function () {
                 var $toggle = $(this);
-                var targetSelector = $toggle.attr('data-target');
+                let targetSelector = $toggle.attr('data-target');
                 var $target = targetSelector ? $form.find(targetSelector) : $();
 
                 if (!$target.length) {
@@ -125,7 +125,7 @@ define([
                 updatePasswordToggleButton($toggle, $target.attr('type') === 'text');
 
                 $toggle.on('click', function (event) {
-                    var showPassword;
+                    let showPassword;
 
                     event.preventDefault();
                     showPassword = $target.attr('type') !== 'text';
@@ -138,7 +138,7 @@ define([
 
         function setSubmitLoadingState($button) {
             var $label = $button.find('span').first();
-            var originalLabel;
+            let originalLabel;
             var $overlay;
 
             if (!$button.length) {
@@ -175,7 +175,7 @@ define([
 
         if ($username.length) {
             $username.on('blur', function () {
-                var value = String($(this).val() || '');
+                let value = String($(this).val() || '');
 
                 if (value.indexOf('@') !== -1) {
                     $(this).val($.trim(value).toLowerCase());

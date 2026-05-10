@@ -6,11 +6,11 @@ define(['jquery'], function ($) {
     'use strict';
 
     return function (config) {
-        var baseUrl = config.ajaxUrl || '/b2b/account/dashboardData';
+        let baseUrl = config.ajaxUrl || '/b2b/account/dashboardData';
 
         function escapeHtml(str) {
             if (!str) return '';
-            var div = document.createElement('div');
+            let div = document.createElement('div');
             div.appendChild(document.createTextNode(String(str)));
             return div.innerHTML;
         }
@@ -19,12 +19,12 @@ define(['jquery'], function ($) {
             var $container = $('[data-dashboard-section="orders"]');
             if (!$container.length || !data.items || !data.items.length) return;
 
-            var html = '';
+            let html = '';
             data.items.forEach(function (order) {
-                var url = escapeHtml(order.view_url || '#');
-                var id = escapeHtml(order.increment_id);
-                var status = escapeHtml(order.status);
-                var total = escapeHtml(order.grand_total);
+                let url = escapeHtml(order.view_url || '#');
+                let id = escapeHtml(order.increment_id);
+                let status = escapeHtml(order.status);
+                let total = escapeHtml(order.grand_total);
                 html += '<tr>' +
                     '<td><a href="' + url + '">#' + id + '</a></td>' +
                     '<td>' + formatDate(order.created_at) + '</td>' +

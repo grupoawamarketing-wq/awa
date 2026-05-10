@@ -9,7 +9,7 @@ define([
     'use strict';
 
     return function (config) {
-        var isLoggedIn = $.mage.cookies.get('customer_logged_in') === '1';
+        let isLoggedIn = $.mage.cookies.get('customer_logged_in') === '1';
         
         // Only show for guests
         if (isLoggedIn) {
@@ -24,7 +24,7 @@ define([
         }
 
         if ($targetContainer.length > 0) {
-            var b2bLink = $('<a>', {
+            let b2bLink = $('<a>', {
                 href: config.registerUrl,
                 'class': 'b2b-header-link',
                 title: config.title,

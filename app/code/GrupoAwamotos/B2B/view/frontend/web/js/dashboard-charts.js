@@ -5,25 +5,25 @@ define([
     'use strict';
 
     return function (config, element) {
-        var chartId = config.chartId || 'b2b-purchase-chart';
+        let chartId = config.chartId || 'b2b-purchase-chart';
         var $canvas = $('#' + chartId);
 
         if (!$canvas.length) {
             return;
         }
 
-        var rawData = $canvas.data('chart-data');
+        let rawData = $canvas.data('chart-data');
         if (!rawData || !Array.isArray(rawData)) {
             return;
         }
 
-        var labels = rawData.map(function(item) { return item.label; });
-        var values = rawData.map(function(item) { return item.value; });
+        let labels = rawData.map(function(item) { return item.label; });
+        let values = rawData.map(function(item) { return item.value; });
 
-        var ctx = $canvas[0].getContext('2d');
+        let ctx = $canvas[0].getContext('2d');
         
         // Gradient for a premium look
-        var gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        let gradient = ctx.createLinearGradient(0, 0, 0, 400);
         gradient.addColorStop(0, 'rgba(183, 51, 55, 0.4)');
         gradient.addColorStop(1, 'rgba(183, 51, 55, 0.02)');
 

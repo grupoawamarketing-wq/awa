@@ -21,7 +21,7 @@ define([
 ], function($, urlBuilder, mageTemplate, storage) {
     'use strict';
 
-    var defaultTemplate =
+    let defaultTemplate =
         '<% _.each(recommendations, function(item) { %>' +
         '   <div class="rexis-ajax-item" data-product-id="<%= item.product_id %>">' +
         '       <div class="rexis-ajax-image">' +
@@ -49,7 +49,7 @@ define([
          * @param {Object} options
          */
         load: function(options) {
-            var settings = $.extend({
+            let settings = $.extend({
                 container: '#rexis-recommendations',
                 classificacao: null,
                 limit: 4,
@@ -72,8 +72,8 @@ define([
             }
 
             // Build URL with params
-            var url = urlBuilder.build('rexisml/ajax/getrecommendations');
-            var params = {
+            let url = urlBuilder.build('rexisml/ajax/getrecommendations');
+            let params = {
                 limit: settings.limit,
                 minScore: settings.minScore
             };
@@ -90,9 +90,9 @@ define([
                 dataType: 'json',
                 success: function(response) {
                     if (response.success && response.recommendations.length > 0) {
-                        var template = settings.template || defaultTemplate;
-                        var compiled = mageTemplate(template);
-                        var html = compiled({
+                        let template = settings.template || defaultTemplate;
+                        let compiled = mageTemplate(template);
+                        let html = compiled({
                             recommendations: response.recommendations
                         });
 
@@ -102,8 +102,8 @@ define([
                         $container.find('.rexis-ajax-addtocart').on('click', function(e) {
                             e.preventDefault();
                             var $btn = $(this);
-                            var productId = $btn.closest('.rexis-ajax-item').data('product-id');
-                            var formKey = $.mage && $.mage.cookies ? $.mage.cookies.get('form_key') : '';
+                            let productId = $btn.closest('.rexis-ajax-item').data('product-id');
+                            let formKey = $.mage && $.mage.cookies ? $.mage.cookies.get('form_key') : '';
 
                             $btn.prop('disabled', true);
 
@@ -149,7 +149,7 @@ define([
          */
         refresh: function(container) {
             var $container = $(container);
-            var options = $container.data('rexis-options') || {};
+            let options = $container.data('rexis-options') || {};
             options.container = container;
             this.load(options);
         },

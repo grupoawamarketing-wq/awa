@@ -39,9 +39,9 @@ define([
     }
 
     return function (config, element) {
-        var messages = config.messages || {};
-        var addUrl = config.addUrl || '';
-        var initialRows = parseInt(config.initialRows, 10) || 5;
+        let messages = config.messages || {};
+        let addUrl = config.addUrl || '';
+        let initialRows = parseInt(config.initialRows, 10) || 5;
 
         var $root = $(element);
         var $rowsContainer = $root.find('#quickorder-rows');
@@ -59,17 +59,17 @@ define([
         var $csvStatus = $root.find('#csv-status');
         var $csvDownloadSample = $root.find('#csv-download-sample');
 
-        var rowIndex = 0;
+        let rowIndex = 0;
         // M15: SKU Autocomplete configuration
-        var searchUrl = config.searchUrl || '/catalogsearch/ajax/suggest';
-        var autocompleteDelay = null;
+        let searchUrl = config.searchUrl || '/catalogsearch/ajax/suggest';
+        let autocompleteDelay = null;
 
         function initSkuAutocomplete($input) {
             var $row = $input.closest('.quickorder-row');
             var $suggestions = $row.find('.sku-suggestions');
             
             $input.on('input', function () {
-                var query = $.trim($(this).val());
+                let query = $.trim($(this).val());
                 clearTimeout(autocompleteDelay);
                 
                 if (query.length < 3) {
@@ -85,14 +85,14 @@ define([
                         dataType: 'json',
                         success: function (data) {
                             $suggestions.empty();
-                            var items = data || [];
+                            let items = data || [];
                             if (items.length === 0) {
                                 $suggestions.hide();
                                 return;
                             }
                             $.each(items.slice(0, 8), function (_, item) {
-                                var title = escapeHtml(item.title || item.name || '');
-                                var sku = escapeHtml(item.sku || item.title || '');
+                                let title = escapeHtml(item.title || item.name || '');
+                                let sku = escapeHtml(item.sku || item.title || '');
                                 $suggestions.append(
                                     '<div class="sku-suggestion" data-sku="' + sku + '">' +
                                     '<span class="sku-suggestion-sku">' + sku + '</span>' +
@@ -111,7 +111,7 @@ define([
             });
 
             $suggestions.on('click', '.sku-suggestion', function () {
-                var selectedSku = $(this).data('sku');
+                let selectedSku = $(this).data('sku');
                 $input.val(selectedSku);
                 $suggestions.hide().empty();
                 $input.closest('.quickorder-row').find('.qty-input').focus();
@@ -142,7 +142,7 @@ define([
         }
 
         function addRow() {
-            var html = createRow();
+            let html = createRow();
             $rowsContainer.append(html);
             var $lastRow = $rowsContainer.find('.quickorder-row:last');
             initSkuAutocomplete($lastRow.find('.sku-input'));
@@ -158,13 +158,13 @@ define([
          * First line is skipped if it looks like a header
          */
         function parseCSV(text) {
-            var lines = text.split(/\r?\n/);
-            var items = [];
-            var separator = ',';
+            let lines = text.split(/\r?\n/);
+            let items = [];
+            let separator = ',';
 
             // Detect separator from first non-empty line
-            for (var s = 0; s < lines.length; s++) {
-                var trimmed = $.trim(lines[s]);
+            for (let s = 0; s < lines.length; s++) {
+                let trimmed = $.trim(lines[s]);
                 if (trimmed) {
                     if (trimmed.indexOf(';') > -1 && trimmed.indexOf(',') === -1) {
                         separator = ';';
@@ -179,9 +179,9 @@ define([
                     return;
                 }
 
-                var parts = line.split(separator);
-                var sku = $.trim(parts[0] || '').replace(/^["']|["']$/g, '');
-                var qtyStr = $.trim(parts[1] || '').replace(/^["']|["']$/g, '');
+                let parts = line.split(separator);
+                let sku = $.trim(parts[0] || '').replace(/^["']|["']$/g, '');
+                let qtyStr = $.trim(parts[1] || '').replace(/^["']|["']$/g, '');
 
                 // Skip header row
                 if (index === 0 && sku && isNaN(parseInt(qtyStr, 10)) &&
@@ -193,7 +193,7 @@ define([
                     return;
                 }
 
-                var qty = parseInt(qtyStr, 10);
+                let qty = parseInt(qtyStr, 10);
                 if (isNaN(qty) || qty < 1) {
                     qty = 1;
                 }
@@ -214,7 +214,7 @@ define([
 
             if (!items.length) {
                 showAlert(messages.csvEmpty || $t('O arquivo CSV não contém produtos válidos.'));
-                for (var i = 0; i < initialRows; i++) {
+                for (let i = 0; i < initialRows; i++) {
                     addRow();
                 }
                 return;
@@ -232,7 +232,7 @@ define([
             addRow();
             addRow();
 
-            var msg = (messages.csvLoaded || $t('%1 produto(s) carregado(s) do CSV.'))
+            let msg = (messages.csvLoaded || $t('%1 produto(s) carregado(s) do CSV.'))
                 .replace('%1', items.length);
             $csvStatus.text(msg).addClass('csv-status--success').show();
 
@@ -250,16 +250,16 @@ define([
             }
 
             // Validate file type
-            var name = (file.name || '').toLowerCase();
+            let name = (file.name || '').toLowerCase();
             if (name.indexOf('.csv') === -1 && file.type.indexOf('csv') === -1 && file.type !== 'text/plain') {
                 showAlert(messages.csvInvalidFile || $t('Selecione um arquivo .csv válido.'));
                 return;
             }
 
-            var reader = new FileReader();
+            let reader = new FileReader();
             reader.onload = function (e) {
-                var text = e.target.result;
-                var items = parseCSV(text);
+                let text = e.target.result;
+                let items = parseCSV(text);
                 populateFromCSV(items);
             };
             reader.onerror = function () {
@@ -272,14 +272,14 @@ define([
          * Generate and download a sample CSV file
          */
         function downloadSampleCSV() {
-            var csvContent = 'SKU,Quantidade\n';
+            let csvContent = 'SKU,Quantidade\n';
             csvContent += 'BAG-CG160-001,2\n';
             csvContent += 'RET-TITAN-003,1\n';
             csvContent += 'BAU-45L-PRETO,3\n';
 
-            var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            var url = URL.createObjectURL(blob);
-            var link = document.createElement('a');
+            let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            let url = URL.createObjectURL(blob);
+            let link = document.createElement('a');
             link.setAttribute('href', url);
             link.setAttribute('download', 'modelo-pedido-rapido.csv');
             link.style.display = 'none';
@@ -295,7 +295,7 @@ define([
                 return;
             }
 
-            var html = '<strong>' + escapeHtml(message || '') + '</strong><ul>';
+            let html = '<strong>' + escapeHtml(message || '') + '</strong><ul>';
 
             $.each(added, function (index, item) {
                 html += '<li>' + escapeHtml(item.name || '') +
@@ -312,7 +312,7 @@ define([
                 return;
             }
 
-            var html = '<strong>' + escapeHtml($t('Erros:')) + '</strong><ul>';
+            let html = '<strong>' + escapeHtml($t('Erros:')) + '</strong><ul>';
             $.each(errorList, function (index, item) {
                 html += '<li>SKU: ' + escapeHtml(item.sku || '') + ' - ' + escapeHtml(item.message || '') + '</li>';
             });
@@ -321,14 +321,14 @@ define([
         }
 
         function collectItems() {
-            var aggregated = {};
-            var rowMap = {};
+            let aggregated = {};
+            let rowMap = {};
 
             $rowsContainer.find('.quickorder-row').each(function () {
                 var $row = $(this);
-                var sku = $.trim($row.find('.sku-input').val());
-                var qty = parseInt($row.find('.qty-input').val(), 10) || 1;
-                var key;
+                let sku = $.trim($row.find('.sku-input').val());
+                let qty = parseInt($row.find('.qty-input').val(), 10) || 1;
+                let key;
 
                 if (!sku) {
                     return;
@@ -359,8 +359,8 @@ define([
 
         function markErrorRows(errorsList, rowMap) {
             $.each(errorsList || [], function (index, item) {
-                var key = normalizeSku(item.sku || '');
-                var rows = rowMap[key] || [];
+                let key = normalizeSku(item.sku || '');
+                let rows = rowMap[key] || [];
 
                 $.each(rows, function (_, $row) {
                     $row.addClass('has-error');
@@ -378,7 +378,7 @@ define([
             $success.empty();
             $errors.empty();
 
-            var payload = collectItems();
+            let payload = collectItems();
             if (!payload.items.length) {
                 showAlert(messages.skuRequired || $t('Informe pelo menos um SKU.'));
                 return;
@@ -445,7 +445,7 @@ define([
         });
 
         $dropzone.on('drop', function (e) {
-            var files = e.originalEvent.dataTransfer && e.originalEvent.dataTransfer.files;
+            let files = e.originalEvent.dataTransfer && e.originalEvent.dataTransfer.files;
             if (files && files.length) {
                 handleCSVFile(files[0]);
             }
@@ -466,7 +466,7 @@ define([
 
         // File input change
         $fileInput.on('change', function () {
-            var files = this.files;
+            let files = this.files;
             if (files && files.length) {
                 handleCSVFile(files[0]);
                 // Reset input so same file can be re-uploaded
@@ -480,7 +480,7 @@ define([
             downloadSampleCSV();
         });
 
-        for (var i = 0; i < initialRows; i += 1) {
+        for (let i = 0; i < initialRows; i += 1) {
             addRow();
         }
     };

@@ -31,7 +31,7 @@ define([
         });
 
         $root.on('submit.shoppingListModal', 'form[data-confirm]', function (event) {
-            var message = $(this).data('confirm');
+            let message = $(this).data('confirm');
 
             if (message && !window.confirm(message)) {
                 event.preventDefault();

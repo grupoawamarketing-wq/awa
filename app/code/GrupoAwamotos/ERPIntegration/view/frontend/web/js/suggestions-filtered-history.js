@@ -6,16 +6,16 @@ define([
 
     return function (config, element) {
         var $root = $(element);
-        var addBySkuUrl = String(config.addBySkuUrl || '');
-        var filterUrl = String(config.filterUrl || '');
-        var opportunityUrl = String(config.opportunityUrl || '');
-        var currentFilterPage = 1;
+        let addBySkuUrl = String(config.addBySkuUrl || '');
+        let filterUrl = String(config.filterUrl || '');
+        let opportunityUrl = String(config.opportunityUrl || '');
+        let currentFilterPage = 1;
 
         if (!$root.length || !addBySkuUrl || !filterUrl || !opportunityUrl) {
             return;
         }
 
-        var oppLabels = {
+        let oppLabels = {
             monthly: 'Mensal',
             quarterly_not_bought: 'Trim. Nao Comprou',
             quarterly_bought: 'Trim. Comprou',
@@ -42,7 +42,7 @@ define([
                 return '-';
             }
             try {
-                var d = new Date(dateStr);
+                let d = new Date(dateStr);
                 if (isNaN(d.getTime())) {
                     return String(dateStr).substring(0, 10);
                 }
@@ -56,7 +56,7 @@ define([
             if (!str) {
                 return '';
             }
-            var div = document.createElement('div');
+            let div = document.createElement('div');
             div.appendChild(document.createTextNode(String(str)));
             return div.innerHTML;
         }
@@ -90,7 +90,7 @@ define([
             }
 
             var $pag = $('#erp-filter-pagination');
-            var html = '';
+            let html = '';
 
             if (currentPage > 1) {
                 html += '<button class="erp-btn erp-btn-secondary erp-btn-small erp-pag-btn" data-page="' + (currentPage - 1) + '">Anterior</button>';
@@ -114,18 +114,18 @@ define([
             $list.empty();
 
             items.forEach(function (item) {
-                var sku = item.codigo_material || item.sku || '';
-                var name = (item.magento && item.magento.name) ? item.magento.name : (item.descricao || item.name || sku);
-                var price = item.avg_price || (item.magento && item.magento.final_price) || 0;
-                var orderCount = item.order_count || item.vezes_comprado || 0;
-                var totalQty = item.total_qty || item.quantidade_total || 0;
-                var daysSince = item.days_since_last || '';
-                var lastDate = item.last_order_date || item.ultima_compra || '';
-                var hasUrl = item.magento && (item.magento.product_url || item.magento.url_key);
-                var url = (item.magento && item.magento.product_url) ? item.magento.product_url : (hasUrl ? '/' + item.magento.url_key + '.html' : '#');
-                var inStore = item.available_in_store;
+                let sku = item.codigo_material || item.sku || '';
+                let name = (item.magento && item.magento.name) ? item.magento.name : (item.descricao || item.name || sku);
+                let price = item.avg_price || (item.magento && item.magento.final_price) || 0;
+                let orderCount = item.order_count || item.vezes_comprado || 0;
+                let totalQty = item.total_qty || item.quantidade_total || 0;
+                let daysSince = item.days_since_last || '';
+                let lastDate = item.last_order_date || item.ultima_compra || '';
+                let hasUrl = item.magento && (item.magento.product_url || item.magento.url_key);
+                let url = (item.magento && item.magento.product_url) ? item.magento.product_url : (hasUrl ? '/' + item.magento.url_key + '.html' : '#');
+                let inStore = item.available_in_store;
 
-                var html = '<div class="erp-fh-item' + (!inStore ? ' erp-fh-item-unavailable' : '') + '">';
+                let html = '<div class="erp-fh-item' + (!inStore ? ' erp-fh-item-unavailable' : '') + '">';
                 html += '<div class="erp-fh-item-check">';
                 if (inStore) {
                     html += '<input type="checkbox" class="erp-fh-item-select" value="' + escapeHtml(sku) + '">';
@@ -173,8 +173,8 @@ define([
 
             $list.find('.erp-fh-add-one').on('click', function () {
                 var $btn = $(this);
-                var sku = $btn.data('sku');
-                var qty = parseInt($btn.closest('.erp-fh-item').find('.erp-fh-qty-input').val(), 10) || 1;
+                let sku = $btn.data('sku');
+                let qty = parseInt($btn.closest('.erp-fh-item').find('.erp-fh-qty-input').val(), 10) || 1;
 
                 $btn.prop('disabled', true).text('...');
                 addToCart(sku, qty).then(function () {
@@ -189,15 +189,15 @@ define([
             });
 
             $list.on('change', '.erp-fh-item-select', function () {
-                var hasChecked = $list.find('.erp-fh-item-select:checked').length > 0;
+                let hasChecked = $list.find('.erp-fh-item-select:checked').length > 0;
                 $('#erp-add-filtered-to-cart').toggle(hasChecked);
             });
         }
 
         function loadFilteredHistory() {
-            var freqVal = String($('#erp-filter-freq').val() || '0-0').split('-');
-            var oppType = $('#erp-filter-opportunity').val();
-            var params = {
+            let freqVal = String($('#erp-filter-freq').val() || '0-0').split('-');
+            let oppType = $('#erp-filter-opportunity').val();
+            let params = {
                 period_days: $('#erp-filter-period').val(),
                 min_freq: freqVal[0],
                 max_freq: freqVal[1],
@@ -209,7 +209,7 @@ define([
                 limit: 20
             };
 
-            var requestUrl = filterUrl;
+            let requestUrl = filterUrl;
             if (oppType) {
                 requestUrl = opportunityUrl;
                 params.opportunity_type = oppType;
@@ -254,7 +254,7 @@ define([
         $('#erp-filter-toggle').on('click', function () {
             var $body = $('#erp-filter-body');
             var $icon = $('#erp-toggle-icon');
-            var isVisible = $body.is(':visible');
+            let isVisible = $body.is(':visible');
             $body.slideToggle(200);
             $icon.text(isVisible ? '▶' : '▼');
         });
@@ -279,7 +279,7 @@ define([
 
         $('#erp-add-filtered-to-cart').on('click', function () {
             var $btn = $(this);
-            var items = [];
+            let items = [];
 
             $('#erp-filter-results-list .erp-fh-item-select:checked').each(function () {
                 var $row = $(this).closest('.erp-fh-item');

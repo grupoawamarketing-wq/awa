@@ -18,7 +18,7 @@ define([
 
             // Toggle entre PF e PJ
             function togglePersonType() {
-                var type = $personType.val();
+                let type = $personType.val();
                 
                 if (type === 'pf') {
                     $pfFields.show();
@@ -64,28 +64,28 @@ define([
                 function (value) {
                     if (!value) return true;
                     
-                    var cpf = value.replace(/\D/g, '');
+                    let cpf = value.replace(/\D/g, '');
                     
                     if (cpf.length !== 11) return false;
                     if (/^(\d)\1{10}$/.test(cpf)) return false;
 
                     // Calcula primeiro dígito verificador
-                    var sum = 0;
-                    for (var i = 0; i < 9; i++) {
+                    let sum = 0;
+                    for (let i = 0; i < 9; i++) {
                         sum += parseInt(cpf.charAt(i)) * (10 - i);
                     }
-                    var remainder = sum % 11;
-                    var digit1 = (remainder < 2) ? 0 : 11 - remainder;
+                    let remainder = sum % 11;
+                    let digit1 = (remainder < 2) ? 0 : 11 - remainder;
                     
                     if (parseInt(cpf.charAt(9)) !== digit1) return false;
 
                     // Calcula segundo dígito verificador
                     sum = 0;
-                    for (var i = 0; i < 10; i++) {
+                    for (let i = 0; i < 10; i++) {
                         sum += parseInt(cpf.charAt(i)) * (11 - i);
                     }
                     remainder = sum % 11;
-                    var digit2 = (remainder < 2) ? 0 : 11 - remainder;
+                    let digit2 = (remainder < 2) ? 0 : 11 - remainder;
                     
                     return parseInt(cpf.charAt(10)) === digit2;
                 },
@@ -98,30 +98,30 @@ define([
                 function (value) {
                     if (!value) return true;
                     
-                    var cnpj = value.replace(/\D/g, '');
+                    let cnpj = value.replace(/\D/g, '');
                     
                     if (cnpj.length !== 14) return false;
                     if (/^(\d)\1{13}$/.test(cnpj)) return false;
 
                     // Calcula primeiro dígito verificador
-                    var weights1 = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
-                    var sum = 0;
-                    for (var i = 0; i < 12; i++) {
+                    let weights1 = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+                    let sum = 0;
+                    for (let i = 0; i < 12; i++) {
                         sum += parseInt(cnpj.charAt(i)) * weights1[i];
                     }
-                    var remainder = sum % 11;
-                    var digit1 = (remainder < 2) ? 0 : 11 - remainder;
+                    let remainder = sum % 11;
+                    let digit1 = (remainder < 2) ? 0 : 11 - remainder;
                     
                     if (parseInt(cnpj.charAt(12)) !== digit1) return false;
 
                     // Calcula segundo dígito verificador
-                    var weights2 = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+                    let weights2 = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
                     sum = 0;
-                    for (var i = 0; i < 13; i++) {
+                    for (let i = 0; i < 13; i++) {
                         sum += parseInt(cnpj.charAt(i)) * weights2[i];
                     }
                     remainder = sum % 11;
-                    var digit2 = (remainder < 2) ? 0 : 11 - remainder;
+                    let digit2 = (remainder < 2) ? 0 : 11 - remainder;
                     
                     return parseInt(cnpj.charAt(13)) === digit2;
                 },

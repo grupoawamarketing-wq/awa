@@ -6,8 +6,8 @@ define([
 
     return function (config, element) {
         var $container = $(element);
-        var addBySkuUrl = String(config.addBySkuUrl || '');
-        var checkoutCartUrl = String(config.checkoutCartUrl || '');
+        let addBySkuUrl = String(config.addBySkuUrl || '');
+        let checkoutCartUrl = String(config.checkoutCartUrl || '');
 
         if (!$container.length || !addBySkuUrl) {
             return;
@@ -48,13 +48,13 @@ define([
         }
 
         function updateTotals() {
-            var subtotal = 0;
-            var itemCount = 0;
+            let subtotal = 0;
+            let itemCount = 0;
 
             $container.find('.erp-item-select:checked').each(function () {
                 var $item = $(this).closest('.erp-cart-item');
-                var qty = parseInt($item.find('.erp-qty-input').val(), 10) || 1;
-                var price = parseFloat($(this).data('price')) || 0;
+                let qty = parseInt($item.find('.erp-qty-input').val(), 10) || 1;
+                let price = parseFloat($(this).data('price')) || 0;
                 subtotal += qty * price;
                 itemCount++;
             });
@@ -63,8 +63,8 @@ define([
             $container.find('.erp-cart-items').text(itemCount + ' produtos');
             $container.find('.erp-cart-total').text(formatPrice(subtotal));
 
-            var freeShippingThreshold = 1500;
-            var remaining = freeShippingThreshold - subtotal;
+            let freeShippingThreshold = 1500;
+            let remaining = freeShippingThreshold - subtotal;
 
             if (remaining <= 0) {
                 $container.find('.erp-shipping-info').hide();
@@ -80,9 +80,9 @@ define([
         $container.on('change input', '.erp-qty-input', function () {
             var $input = $(this);
             var $item = $input.closest('.erp-cart-item');
-            var qty = parseInt($input.val(), 10) || 1;
-            var price = parseFloat($item.find('.erp-item-select').data('price')) || 0;
-            var lineTotal = qty * price;
+            let qty = parseInt($input.val(), 10) || 1;
+            let price = parseFloat($item.find('.erp-item-select').data('price')) || 0;
+            let lineTotal = qty * price;
 
             $item.find('.erp-line-total').text(formatPrice(lineTotal));
             $item.find('.erp-item-select').data('qty', qty);
@@ -95,7 +95,7 @@ define([
 
         $('#erp-select-all').on('click', function () {
             var $checkboxes = $container.find('.erp-item-select');
-            var allChecked = $checkboxes.length && $checkboxes.filter(':checked').length === $checkboxes.length;
+            let allChecked = $checkboxes.length && $checkboxes.filter(':checked').length === $checkboxes.length;
 
             $checkboxes.prop('checked', !allChecked);
             $(this).text(allChecked ? 'Selecionar Todos' : 'Desmarcar Todos');
@@ -104,7 +104,7 @@ define([
 
         $('#erp-add-all-to-cart').on('click', function () {
             var $btn = $(this);
-            var items = [];
+            let items = [];
 
             $container.find('.erp-item-select:checked').each(function () {
                 var $item = $(this).closest('.erp-cart-item');

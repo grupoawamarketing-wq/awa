@@ -7,11 +7,11 @@ define(["jquery"], function ($) {
      */
     return function (config, element) {
         var $root = $(element);
-        var tooltipId = (config && config.tooltipId) ? String(config.tooltipId) : "b2b-badge-tooltip";
+        let tooltipId = (config && config.tooltipId) ? String(config.tooltipId) : "b2b-badge-tooltip";
         var $tooltip = $root.find("#" + tooltipId);
 
         function setExpanded(state) {
-            var expanded = !!state;
+            let expanded = !!state;
             $root.attr("aria-expanded", expanded ? "true" : "false");
             if ($tooltip.length) {
                 $tooltip.attr("aria-hidden", expanded ? "false" : "true");
@@ -21,20 +21,20 @@ define(["jquery"], function ($) {
         // Click toggles
         $root.on("click", function (e) {
             // Ignore clicks on links inside tooltip; let them work normally
-            var isLink = $(e.target).closest("a").length > 0;
+            let isLink = $(e.target).closest("a").length > 0;
             if (isLink) {
                 return;
             }
-            var expanded = $root.attr("aria-expanded") === "true";
+            let expanded = $root.attr("aria-expanded") === "true";
             setExpanded(!expanded);
         });
 
         // Keyboard interactions
         $root.on("keydown", function (e) {
-            var key = e.key || e.which;
+            let key = e.key || e.which;
             if (key === "Enter" || key === 13 || key === " ") { // Enter or Space
                 e.preventDefault();
-                var expanded = $root.attr("aria-expanded") === "true";
+                let expanded = $root.attr("aria-expanded") === "true";
                 setExpanded(!expanded);
             } else if (key === "Escape" || key === 27) { // Escape
                 setExpanded(false);

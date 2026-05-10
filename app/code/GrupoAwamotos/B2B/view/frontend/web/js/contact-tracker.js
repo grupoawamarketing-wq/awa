@@ -5,14 +5,14 @@ define([
     'use strict';
 
     return function (config, element) {
-        var options = config || {};
+        let options = config || {};
         var $root = $(element);
-        var eventName = options.eventName || 'Contact';
-        var storagePrefix = options.storagePrefix || 'b2b_contact_fired_';
-        var dedupeBySession = options.dedupeBySession !== false;
-        var funnelStage = options.funnelStage || 'consideration';
-        var touchpoint = options.touchpoint || 'b2b_contact';
-        var capiUrl = urlBuilder.build('b2b/ajax/trackContact');
+        let eventName = options.eventName || 'Contact';
+        let storagePrefix = options.storagePrefix || 'b2b_contact_fired_';
+        let dedupeBySession = options.dedupeBySession !== false;
+        let funnelStage = options.funnelStage || 'consideration';
+        let touchpoint = options.touchpoint || 'b2b_contact';
+        let capiUrl = urlBuilder.build('b2b/ajax/trackContact');
 
         function hasBeenTracked(action) {
             if (!dedupeBySession || !action) {
@@ -51,7 +51,7 @@ define([
          * captured even when Meta Pixel is blocked by the browser.
          */
         function sendCapi(action, channel, eventId) {
-            var formKey = window.FORM_KEY || '';
+            let formKey = window.FORM_KEY || '';
 
             if (!formKey) {
                 return;
@@ -78,14 +78,14 @@ define([
 
         $root.on('click', '[data-b2b-contact-track]', function () {
             var $link = $(this);
-            var action = $link.attr('data-b2b-contact-track') || '';
-            var channel = $link.attr('data-b2b-contact-channel') || 'unknown';
+            let action = $link.attr('data-b2b-contact-track') || '';
+            let channel = $link.attr('data-b2b-contact-channel') || 'unknown';
 
             if (!action || hasBeenTracked(action)) {
                 return;
             }
 
-            var eventId = generateEventId(action);
+            let eventId = generateEventId(action);
 
             if (typeof window.fbq === 'function') {
                 window.fbq('track', eventName, {

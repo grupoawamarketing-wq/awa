@@ -1,7 +1,7 @@
 define(['jquery'], function ($) {
     'use strict';
     return function (config, element) {
-        var endpoints = config.endpoints || {};
+        let endpoints = config.endpoints || {};
         var $marca = $('#fitment-marca');
         var $modelo = $('#fitment-modelo');
         var $ano = $('#fitment-ano');
@@ -23,7 +23,7 @@ define(['jquery'], function ($) {
         }
 
         $marca.on('change', function () {
-            var val = this.value;
+            let val = this.value;
             reset($modelo, MagentoTranslate('Selecione a Marca primeiro'));
             reset($ano, MagentoTranslate('Selecione o Modelo primeiro'));
             $submit.prop('disabled', true);
@@ -36,8 +36,8 @@ define(['jquery'], function ($) {
         });
 
         $modelo.on('change', function () {
-            var marcaVal = $marca.val();
-            var modeloVal = this.value;
+            let marcaVal = $marca.val();
+            let modeloVal = this.value;
             reset($ano, MagentoTranslate('Selecione o Modelo primeiro'));
             $submit.prop('disabled', true);
             if (!marcaVal || !modeloVal) { return; }

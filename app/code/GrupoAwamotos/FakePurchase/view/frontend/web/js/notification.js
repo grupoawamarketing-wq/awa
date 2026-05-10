@@ -2,28 +2,28 @@ define([], function () {
     'use strict';
 
     return function (options, element) {
-        var popup = element;
-        var config = (options && options.config) || {};
-        var products = Array.isArray(options && options.products) ? options.products : [];
-        var cities = Array.isArray(options && options.cities) ? options.cities : [];
-        var names = Array.isArray(options && options.names) ? options.names : [];
-        var closeButton;
-        var buyerNameNode;
-        var buyerCityNode;
-        var productNameNode;
-        var imageLinkNode;
-        var imageNode;
-        var timeNode;
-        var notificationCount = 0;
-        var isVisible = false;
-        var displayTimerId = null;
-        var nextShowTimerId = null;
-        var hideAnimationTimerId = null;
-        var reducedMotion = false;
-        var hideAnimationMs;
+        let popup = element;
+        let config = (options && options.config) || {};
+        let products = Array.isArray(options && options.products) ? options.products : [];
+        let cities = Array.isArray(options && options.cities) ? options.cities : [];
+        let names = Array.isArray(options && options.names) ? options.names : [];
+        let closeButton;
+        let buyerNameNode;
+        let buyerCityNode;
+        let productNameNode;
+        let imageLinkNode;
+        let imageNode;
+        let timeNode;
+        let notificationCount = 0;
+        let isVisible = false;
+        let displayTimerId = null;
+        let nextShowTimerId = null;
+        let hideAnimationTimerId = null;
+        let reducedMotion = false;
+        let hideAnimationMs;
 
         function toMs(value, fallback) {
-            var parsed = Number(value);
+            let parsed = Number(value);
 
             if (Number.isFinite(parsed) && parsed >= 0) {
                 return parsed;
@@ -78,9 +78,9 @@ define([], function () {
         }
 
         function showNotification() {
-            var product;
-            var buyerName;
-            var buyerCity;
+            let product;
+            let buyerName;
+            let buyerCity;
 
             if (notificationCount >= toMs(config.maxNotifications, 10) || !products.length) {
                 return;

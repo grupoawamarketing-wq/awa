@@ -7,9 +7,9 @@ define([
 
     return function (config, element) {
         var $root = $(element);
-        var addBySkuUrl = config.addBySkuUrl || '';
-        var reloadDelay = Number(config.reloadDelay || 1200);
-        var mode = config.mode || 'main';
+        let addBySkuUrl = config.addBySkuUrl || '';
+        let reloadDelay = Number(config.reloadDelay || 1200);
+        let mode = config.mode || 'main';
 
         if (!$root.length || !addBySkuUrl) {
             return;
@@ -35,7 +35,7 @@ define([
                 }
             }).done(function (response) {
                 if (!response || !response.success) {
-                    var message = response && response.message ? response.message : 'Erro ao adicionar produto';
+                    let message = response && response.message ? response.message : 'Erro ao adicionar produto';
                     window.alert(message);
                     return;
                 }
@@ -60,8 +60,8 @@ define([
 
         $root.on('click', '.erp-widget-add-btn', function () {
             var $button = $(this);
-            var sku = String($button.data('sku') || '');
-            var qty = Number($button.data('qty') || 1);
+            let sku = String($button.data('sku') || '');
+            let qty = Number($button.data('qty') || 1);
 
             if (!sku) {
                 return;
@@ -82,8 +82,8 @@ define([
 
         $root.on('click', '.erp-sidebar-add', function () {
             var $button = $(this);
-            var sku = String($button.data('sku') || '');
-            var qty = Number($button.data('qty') || 1);
+            let sku = String($button.data('sku') || '');
+            let qty = Number($button.data('qty') || 1);
 
             if (!sku) {
                 return;

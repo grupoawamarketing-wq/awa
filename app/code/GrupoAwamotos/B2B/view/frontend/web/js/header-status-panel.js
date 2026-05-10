@@ -43,7 +43,7 @@ define([
          * @private
          */
         _bindEvents: function () {
-            var self = this;
+            let self = this;
 
             // Trigger click
             this.trigger.on('click.b2bPanel', function (e) {
@@ -126,8 +126,8 @@ define([
          * @private
          */
         _handleDropdownKeydown: function (e) {
-            var focusable = this.dropdown.find(this.options.focusableSelector).filter(':visible');
-            var currentIndex = focusable.index(document.activeElement);
+            let focusable = this.dropdown.find(this.options.focusableSelector).filter(':visible');
+            let currentIndex = focusable.index(document.activeElement);
 
             switch (e.key) {
                 case 'Tab':
@@ -219,7 +219,7 @@ define([
          * @private
          */
         _focusFirstElement: function () {
-            var first = this.dropdown.find(this.options.focusableSelector).filter(':visible').first();
+            let first = this.dropdown.find(this.options.focusableSelector).filter(':visible').first();
             if (first.length) {
                 first.focus();
             }
@@ -241,7 +241,7 @@ define([
          * @private
          */
         _announceState: function (state) {
-            var announcement = $('<div/>', {
+            let announcement = $('<div/>', {
                 'class': 'sr-only',
                 'aria-live': 'polite',
                 'aria-atomic': 'true',

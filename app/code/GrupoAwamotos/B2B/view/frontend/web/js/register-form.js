@@ -15,27 +15,27 @@ define([
     }
 
     return function (config, element) {
-        var options = config || {};
+        let options = config || {};
         var $form = $(element);
         var $container = $form.closest('.b2b-register-container');
-        var cnpjValidateUrl = options.cnpjValidateUrl || '';
-        var loginUrl = options.loginUrl || '';
-        var sendingLabel = options.sendingLabel || 'Enviando cadastro...';
-        var leadStorageKey = options.leadStorageKey || 'b2b_register_lead_fired';
-        var leadEventName = options.leadEventName || 'Lead';
+        let cnpjValidateUrl = options.cnpjValidateUrl || '';
+        let loginUrl = options.loginUrl || '';
+        let sendingLabel = options.sendingLabel || 'Enviando cadastro...';
+        let leadStorageKey = options.leadStorageKey || 'b2b_register_lead_fired';
+        let leadEventName = options.leadEventName || 'Lead';
 
-        var cnpjTimer = null;
-        var lastCnpj = '';
-        var cnpjValidated = false;
-        var rateLimitTimer = null;
-        var erpEmailFull = null;
-        var erpEmailMasked = null;
-        var currentProgressStep = 1;
-        var benefitsViewportMedia = window.matchMedia ? window.matchMedia('(max-width: 600px)') : null;
-        var lastBenefitsCompactMode = null;
-        var lastSectionsCompactMode = null;
-        var progressSyncScheduled = false;
-        var leadTriggered = false;
+        let cnpjTimer = null;
+        let lastCnpj = '';
+        let cnpjValidated = false;
+        let rateLimitTimer = null;
+        let erpEmailFull = null;
+        let erpEmailMasked = null;
+        let currentProgressStep = 1;
+        let benefitsViewportMedia = window.matchMedia ? window.matchMedia('(max-width: 600px)') : null;
+        let lastBenefitsCompactMode = null;
+        let lastSectionsCompactMode = null;
+        let progressSyncScheduled = false;
+        let leadTriggered = false;
 
         if (!$form.length) {
             return;
@@ -73,7 +73,7 @@ define([
                 return;
             }
 
-            var eventId = 'lead-b2b-' + Date.now();
+            let eventId = 'lead-b2b-' + Date.now();
 
             if (typeof window.fbq === 'function') {
                 window.fbq('track', leadEventName, {
@@ -84,7 +84,7 @@ define([
                 }, {eventID: eventId});
             }
 
-            var formKey = window.FORM_KEY || '';
+            let formKey = window.FORM_KEY || '';
 
             if (formKey) {
                 $.ajax({
@@ -105,9 +105,9 @@ define([
         }
 
         function updateRegisterPasswordToggleButton($toggle, isVisible) {
-            var isConfirm = $toggle.attr('data-target') === '#password_confirmation';
-            var showLabel = isConfirm ? 'Mostrar confirmação de senha' : 'Mostrar senha';
-            var hideLabel = isConfirm ? 'Ocultar confirmação de senha' : 'Ocultar senha';
+            let isConfirm = $toggle.attr('data-target') === '#password_confirmation';
+            let showLabel = isConfirm ? 'Mostrar confirmação de senha' : 'Mostrar senha';
+            let hideLabel = isConfirm ? 'Ocultar confirmação de senha' : 'Ocultar senha';
 
             $toggle.attr('aria-pressed', isVisible ? 'true' : 'false');
             $toggle.attr('aria-label', isVisible ? hideLabel : showLabel);
@@ -117,7 +117,7 @@ define([
         function initRegisterPasswordToggles() {
             $passwordToggles.each(function () {
                 var $toggle = $(this);
-                var targetSelector = $toggle.attr('data-target');
+                let targetSelector = $toggle.attr('data-target');
                 var $target = targetSelector ? $form.find(targetSelector) : $();
 
                 if (!$target.length) {
@@ -127,7 +127,7 @@ define([
                 updateRegisterPasswordToggleButton($toggle, $target.attr('type') === 'text');
 
                 $toggle.on('click', function (event) {
-                    var showPassword;
+                    let showPassword;
 
                     event.preventDefault();
                     showPassword = $target.attr('type') !== 'text';
@@ -173,7 +173,7 @@ define([
         }
 
         function setActiveProgressStep(stepNumber) {
-            var activeStep = parseInt(stepNumber, 10);
+            let activeStep = parseInt(stepNumber, 10);
 
             if (!activeStep || !$progressSteps.length) {
                 return;
@@ -182,9 +182,9 @@ define([
             currentProgressStep = activeStep;
 
             $progressSteps.each(function (index) {
-                var stepIndex = parseInt($(this).attr('data-step-number'), 10) || (index + 1);
+                let stepIndex = parseInt($(this).attr('data-step-number'), 10) || (index + 1);
                 var $step = $(this);
-                var isActive = stepIndex === activeStep;
+                let isActive = stepIndex === activeStep;
 
                 $step.toggleClass('is-active', isActive);
                 if (isActive) {
@@ -201,7 +201,7 @@ define([
 
         function syncProgressFromFocus($target) {
             var $section = $target.closest('.form-section');
-            var stepNumber = $section.data('step');
+            let stepNumber = $section.data('step');
 
             if ($section.length && $section.is('[data-step]')) {
                 openStepSection($section, true, true);
@@ -218,7 +218,7 @@ define([
 
         function scrollActiveProgressStepIntoView() {
             var $activeStep;
-            var supportsSmooth = !!(window.CSS && window.CSS.supports && window.CSS.supports('scroll-behavior', 'smooth'));
+            let supportsSmooth = !!(window.CSS && window.CSS.supports && window.CSS.supports('scroll-behavior', 'smooth'));
 
             if (!$progressBar.length || !isCompactBenefitsViewport()) {
                 return;
@@ -273,7 +273,7 @@ define([
         }
 
         function syncBenefitsDisclosure() {
-            var compactMode = isCompactBenefitsViewport();
+            let compactMode = isCompactBenefitsViewport();
 
             if (!$benefitsToggle.length || !$benefitsPanel.length) {
                 return;
@@ -307,10 +307,10 @@ define([
                 var $heading = $section.children('h3').first();
                 var $body;
                 var $toggle;
-                var headingText;
-                var sectionId;
-                var bodyId;
-                var stepNumber;
+                let headingText;
+                let sectionId;
+                let bodyId;
+                let stepNumber;
 
                 if (!$heading.length || $heading.children('.form-section__toggle').length) {
                     return;
@@ -387,7 +387,7 @@ define([
         }
 
         function openStepSection($section, animate, collapseSiblings) {
-            var shouldCollapseSiblings = collapseSiblings;
+            let shouldCollapseSiblings = collapseSiblings;
 
             if (!$section || !$section.length || !$stepSections.length) {
                 return;
@@ -422,7 +422,7 @@ define([
         }
 
         function syncStepSectionsDisclosure() {
-            var compactMode = isCompactBenefitsViewport();
+            let compactMode = isCompactBenefitsViewport();
             var $activeSection;
 
             if (!$stepSections.length) {
@@ -449,8 +449,8 @@ define([
         }
 
         function syncProgressFromViewport() {
-            var probeTop;
-            var detectedStep = 1;
+            let probeTop;
+            let detectedStep = 1;
 
             if (!$stepSections.length) {
                 return;
@@ -460,8 +460,8 @@ define([
 
             $stepSections.each(function () {
                 var $section = $(this);
-                var stepNumber = parseInt($section.data('step'), 10);
-                var sectionTop = $section.offset() ? $section.offset().top : 0;
+                let stepNumber = parseInt($section.data('step'), 10);
+                let sectionTop = $section.offset() ? $section.offset().top : 0;
 
                 if (stepNumber && sectionTop <= probeTop) {
                     detectedStep = stepNumber;
@@ -508,8 +508,8 @@ define([
             }
 
             if (stepIndex === 4) {
-                var password = String($field('#password').val() || '');
-                var confirm = String($field('#password_confirmation').val() || '');
+                let password = String($field('#password').val() || '');
+                let confirm = String($field('#password_confirmation').val() || '');
                 return password.length >= 8 && confirm.length >= 8 && password === confirm;
             }
 
@@ -523,9 +523,9 @@ define([
 
             $progressSteps.each(function (index) {
                 var $step = $(this);
-                var stepIndex = parseInt($step.attr('data-step-number'), 10) || (index + 1);
-                var isActive = stepIndex === currentProgressStep;
-                var isComplete = isStepComplete(stepIndex);
+                let stepIndex = parseInt($step.attr('data-step-number'), 10) || (index + 1);
+                let isActive = stepIndex === currentProgressStep;
+                let isComplete = isStepComplete(stepIndex);
 
                 $step.toggleClass('is-complete', isComplete && !isActive);
             });
@@ -534,14 +534,14 @@ define([
         function refreshFieldAndSectionErrorStates() {
             $form.find('.field').each(function () {
                 var $wrapper = $(this);
-                var hasError = $wrapper.hasClass('_error') || $wrapper.find('.mage-error:visible').length > 0;
+                let hasError = $wrapper.hasClass('_error') || $wrapper.find('.mage-error:visible').length > 0;
 
                 $wrapper.find('input, select, textarea').attr('aria-invalid', hasError ? 'true' : 'false');
             });
 
             $form.find('.form-section').each(function () {
                 var $section = $(this);
-                var hasErrors = $section.find('.field._error, .mage-error:visible').length > 0;
+                let hasErrors = $section.find('.field._error, .mage-error:visible').length > 0;
                 $section.toggleClass('has-errors', hasErrors);
             });
         }
@@ -567,9 +567,9 @@ define([
         }
 
         function scrollToSection($section) {
-            var topOffset;
-            var prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-            var scrollOffset = isCompactBenefitsViewport() ? 86 : 18;
+            let topOffset;
+            let prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            let scrollOffset = isCompactBenefitsViewport() ? 86 : 18;
 
             if (!$section || !$section.length) {
                 return;
@@ -608,7 +608,7 @@ define([
         }
 
         function maskCnpj(value) {
-            var masked = value.replace(/\D/g, '');
+            let masked = value.replace(/\D/g, '');
 
             if (masked.length <= 14) {
                 masked = masked.replace(/^(\d{2})(\d)/, '$1.$2');
@@ -621,7 +621,7 @@ define([
         }
 
         function maskPhone(value) {
-            var masked = value.replace(/\D/g, '');
+            let masked = value.replace(/\D/g, '');
 
             if (masked.length <= 11) {
                 if (masked.length > 2) {
@@ -637,7 +637,7 @@ define([
         }
 
         function maskCep(value) {
-            var masked = value.replace(/\D/g, '');
+            let masked = value.replace(/\D/g, '');
 
             if (masked.length > 5) {
                 masked = masked.substring(0, 5) + '-' + masked.substring(5, 8);
@@ -677,7 +677,7 @@ define([
 
         function updateSubmitState() {
             var $submit = $form.find('.actions-toolbar .action.submit.primary');
-            var digits = ($field('#cnpj').val() || '').replace(/\D/g, '');
+            let digits = ($field('#cnpj').val() || '').replace(/\D/g, '');
 
             if (digits.length === 14 && !cnpjValidated) {
                 $submit.prop('disabled', true).addClass('cnpj-pending');
@@ -706,7 +706,7 @@ define([
 
         function showErpEmailAlert() {
             var $alert = $field('#erp-email-alert');
-            var currentEmail = ($field('#email').val() || '').trim().toLowerCase();
+            let currentEmail = ($field('#email').val() || '').trim().toLowerCase();
 
             if (!erpEmailMasked) {
                 hideBlock($alert.empty());
@@ -759,9 +759,9 @@ define([
         }
 
         function updateEmailCheckAlert() {
-            var email = ($field('#email').val() || '').trim();
-            var password = $field('#password').val() || '';
-            var passwordConfirmation = $field('#password_confirmation').val() || '';
+            let email = ($field('#email').val() || '').trim();
+            let password = $field('#password').val() || '';
+            let passwordConfirmation = $field('#password_confirmation').val() || '';
             var $alert = $field('#email-check-alert');
 
             if (passwordConfirmation.length >= 8 && password === passwordConfirmation && isValidEmail(email)) {
@@ -782,7 +782,7 @@ define([
         }
 
         function startRateLimitCountdown(seconds) {
-            var remaining = seconds;
+            let remaining = seconds;
             var $cnpj = $field('#cnpj');
 
             setCnpjStatus('error', 'Muitas consultas. Aguarde <strong>' + remaining + 's</strong>...');
@@ -801,7 +801,7 @@ define([
                     $cnpj.prop('disabled', false);
                     setCnpjStatus('error', 'Voce pode consultar novamente agora.');
 
-                    var digits = ($cnpj.val() || '').replace(/\D/g, '');
+                    let digits = ($cnpj.val() || '').replace(/\D/g, '');
 
                     if (digits.length === 14) {
                         consultarCnpj(digits);
@@ -834,9 +834,9 @@ define([
                 }
             }).done(function (response) {
                 var $companyData = $field('#cnpj-company-data');
-                var errorMsg;
-                var sourceLabel;
-                var cepClean;
+                let errorMsg;
+                let sourceLabel;
+                let cepClean;
                 var $badge;
 
                 if (response.rate_limited) {
@@ -995,7 +995,7 @@ define([
 
         $field('#cnpj').on('input', function () {
             var $input = $(this);
-            var digits;
+            let digits;
 
             trackLeadStart();
 
@@ -1054,8 +1054,8 @@ define([
 
         $form.on('click', '.b2b-register-progress .progress-step', function (event) {
             var $step = $(this);
-            var targetSelector = $step.attr('data-step-target');
-            var stepNumber = $step.attr('data-step-number');
+            let targetSelector = $step.attr('data-step-target');
+            let stepNumber = $step.attr('data-step-number');
             var $section = targetSelector ? $form.find(targetSelector) : $();
 
             event.preventDefault();
@@ -1073,7 +1073,7 @@ define([
         $form.on('click', '.form-section__toggle', function (event) {
             var $toggle = $(this);
             var $section = $toggle.closest('.form-section');
-            var stepNumber = parseInt($section.data('step'), 10);
+            let stepNumber = parseInt($section.data('step'), 10);
 
             event.preventDefault();
 
@@ -1091,7 +1091,7 @@ define([
 
         if ($benefitsToggle.length && $benefitsPanel.length) {
             $benefitsToggle.on('click', function (event) {
-                var isExpanded;
+                let isExpanded;
 
                 event.preventDefault();
 
@@ -1131,7 +1131,7 @@ define([
         $(document)
             .off('click.b2bRegisterForceRefresh', '#cnpj-force-refresh')
             .on('click.b2bRegisterForceRefresh', '#cnpj-force-refresh', function (event) {
-                var digits;
+                let digits;
 
                 event.preventDefault();
                 digits = ($field('#cnpj').val() || '').replace(/\D/g, '');
@@ -1180,7 +1180,7 @@ define([
         }, 100);
 
         function getPasswordStrength(password) {
-            var classes = 0;
+            let classes = 0;
             if (/[a-z]/.test(password)) { classes++; }
             if (/[A-Z]/.test(password)) { classes++; }
             if (/[0-9]/.test(password)) { classes++; }
@@ -1195,14 +1195,14 @@ define([
             var $meter = $field('#password-strength-meter');
             var $label = $field('#password-strength-label');
             if (!$meter.length) { return; }
-            var strengthLabels = { weak: 'Fraca', medium: 'M\u00e9dia', strong: 'Forte' };
+            let strengthLabels = { weak: 'Fraca', medium: 'M\u00e9dia', strong: 'Forte' };
             $field('#password').on('input.strengthMeter', function () {
-                var strength = getPasswordStrength(String($(this).val() || ''));
+                let strength = getPasswordStrength(String($(this).val() || ''));
                 $meter.removeClass('is-weak is-medium is-strong');
                 $meter.attr('aria-valuenow', '0');
                 $label.text('');
                 if (strength) {
-                    var strengthValues = { weak: 33, medium: 66, strong: 100 };
+                    let strengthValues = { weak: 33, medium: 66, strong: 100 };
                     $meter.addClass('is-' + strength);
                     $meter.attr('aria-valuenow', String(strengthValues[strength]));
                     $label.text(strengthLabels[strength]);

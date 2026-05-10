@@ -26,7 +26,7 @@ define([
          * @private
          */
         _bindEvents: function () {
-            var self = this;
+            let self = this;
             
             this.element.on('input.inputMask keyup.inputMask', function () {
                 self._applyMask();
@@ -42,7 +42,7 @@ define([
          * @private
          */
         _applyMask: function () {
-            var value = this.element.val().replace(/\D/g, ''),
+            let value = this.element.val().replace(/\D/g, ''),
                 mask = this.options.mask,
                 maskedValue = '';
 
@@ -50,8 +50,8 @@ define([
                 return;
             }
 
-            var valueIndex = 0;
-            for (var i = 0; i < mask.length && valueIndex < value.length; i++) {
+            let valueIndex = 0;
+            for (let i = 0; i < mask.length && valueIndex < value.length; i++) {
                 if (mask[i] === '0' || mask[i] === '9') {
                     maskedValue += value[valueIndex];
                     valueIndex++;

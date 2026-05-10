@@ -3,13 +3,13 @@ define([
 ], function (customerData) {
     'use strict';
 
-    var PDP_ICON_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">'
+    let PDP_ICON_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">'
         + '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>'
         + '<polyline points="16 17 21 12 16 7"></polyline>'
         + '<line x1="21" y1="12" x2="9" y2="12"></line>'
         + '</svg>';
 
-    var PENDING_ICON_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">'
+    let PENDING_ICON_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">'
         + '<circle cx="12" cy="12" r="10"></circle>'
         + '<polyline points="12 6 12 12 16 14"></polyline>'
         + '</svg>';
@@ -19,7 +19,7 @@ define([
     }
 
     function createLoginButton(options) {
-        var btn = document.createElement('button');
+        let btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'b2b-login-to-buy-btn' + (options && options.variantClass ? (' ' + options.variantClass) : '');
         if (options && options.html) {
@@ -92,13 +92,13 @@ define([
         });
 
         // Hide pending banner
-        var pendingBanner = document.getElementById('b2b-pending-banner');
+        let pendingBanner = document.getElementById('b2b-pending-banner');
         if (pendingBanner) {
             pendingBanner.hidden = true;
         }
 
         // Hide login modal
-        var overlay = document.getElementById('b2b-login-modal');
+        let overlay = document.getElementById('b2b-login-modal');
         if (overlay) {
             overlay.classList.remove('active');
             overlay.setAttribute('aria-hidden', 'true');
@@ -116,20 +116,20 @@ define([
         }
 
         // Determine mode from server: 'guest' or 'pending'
-        var serverMode = config.mode || 'guest';
-        var activeMode = serverMode; // May be overridden by customer-data
-        var isRestricted = true; // Assume restricted until customer-data confirms otherwise
-        var bodyClass = (serverMode === 'guest') ? 'b2b-guest-mode' : 'b2b-pending-mode';
+        let serverMode = config.mode || 'guest';
+        let activeMode = serverMode; // May be overridden by customer-data
+        let isRestricted = true; // Assume restricted until customer-data confirms otherwise
+        let bodyClass = (serverMode === 'guest') ? 'b2b-guest-mode' : 'b2b-pending-mode';
 
-        var overlay = document.getElementById('b2b-login-modal');
-        var pendingBanner = document.getElementById('b2b-pending-banner');
-        var dialog = overlay ? overlay.querySelector('.b2b-login-modal') : null;
-        var closeBtn = overlay ? overlay.querySelector('[data-b2b-login-close]') : null;
-        var lastActiveElement = null;
-        var lastTriggerButton = null;
-        var previousBodyOverflow = null;
-        var observerInstance = null;
-        var priceSyncStarted = false;
+        let overlay = document.getElementById('b2b-login-modal');
+        let pendingBanner = document.getElementById('b2b-pending-banner');
+        let dialog = overlay ? overlay.querySelector('.b2b-login-modal') : null;
+        let closeBtn = overlay ? overlay.querySelector('[data-b2b-login-close]') : null;
+        let lastActiveElement = null;
+        let lastTriggerButton = null;
+        let previousBodyOverflow = null;
+        let observerInstance = null;
+        let priceSyncStarted = false;
 
         function hasHiddenPriceMarkers() {
             return !!document.querySelector(
@@ -138,9 +138,9 @@ define([
         }
 
         function getProductIdFromNode(node) {
-            var root;
-            var fromDataset;
-            var productInput;
+            let root;
+            let fromDataset;
+            let productInput;
 
             if (!node) {
                 return null;
@@ -161,10 +161,10 @@ define([
         }
 
         function collectPriceTargets() {
-            var targetsByProductId = {};
+            let targetsByProductId = {};
 
             document.querySelectorAll('.b2b-login-to-see-price').forEach(function (priceMarker) {
-                var productId = getProductIdFromNode(priceMarker);
+                let productId = getProductIdFromNode(priceMarker);
 
                 if (!productId) {
                     return;
@@ -191,8 +191,8 @@ define([
         }
 
         function hydrateHiddenPrices() {
-            var targetsByProductId = collectPriceTargets();
-            var productIds = Object.keys(targetsByProductId);
+            let targetsByProductId = collectPriceTargets();
+            let productIds = Object.keys(targetsByProductId);
 
             if (!productIds.length || typeof window.fetch !== 'function') {
                 return Promise.resolve(false);
@@ -206,14 +206,14 @@ define([
             }).then(function (response) {
                 return response.ok ? response.json() : null;
             }).then(function (payload) {
-                var hydratedAny = false;
+                let hydratedAny = false;
 
                 if (!payload || !payload.success || !payload.allowed || !payload.items) {
                     return false;
                 }
 
                 Object.keys(payload.items).forEach(function (productId) {
-                    var item = payload.items[productId];
+                    let item = payload.items[productId];
 
                     if (!item || !item.html || !targetsByProductId[productId]) {
                         return;
@@ -263,7 +263,7 @@ define([
                 return [];
             }
 
-            var focusables = Array.prototype.slice.call(
+            let focusables = Array.prototype.slice.call(
                 dialog.querySelectorAll(
                     'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
                 )
@@ -292,7 +292,7 @@ define([
             document.body.style.overflow = 'hidden';
 
             window.setTimeout(function () {
-                var focusables = getFocusableElements();
+                let focusables = getFocusableElements();
                 if (focusables.length) {
                     focusables[0].focus();
                 } else if (dialog) {
@@ -349,16 +349,16 @@ define([
                 return;
             }
 
-            var focusables = getFocusableElements();
+            let focusables = getFocusableElements();
             if (!focusables.length) {
                 e.preventDefault();
                 return;
             }
 
-            var first = focusables[0];
-            var last = focusables[focusables.length - 1];
-            var isShiftPressed = e.shiftKey;
-            var currentActiveElement = document.activeElement;
+            let first = focusables[0];
+            let last = focusables[focusables.length - 1];
+            let isShiftPressed = e.shiftKey;
+            let currentActiveElement = document.activeElement;
 
             if (isShiftPressed) {
                 if (currentActiveElement === first) {
@@ -379,22 +379,22 @@ define([
                 return;
             }
 
-            var isGuestMode = (activeMode === 'guest');
-            var isPendingMode = (activeMode === 'pending');
+            let isGuestMode = (activeMode === 'guest');
+            let isPendingMode = (activeMode === 'pending');
 
             // Add the appropriate body class
             document.body.classList.add(bodyClass);
             document.body.classList.add('b2b-restricted-mode');
 
-            var iconSvg = isGuestMode ? PDP_ICON_SVG : PENDING_ICON_SVG;
+            let iconSvg = isGuestMode ? PDP_ICON_SVG : PENDING_ICON_SVG;
 
             // PDP (product detail page)
-            var productAddForm = document.querySelector('.product-add-form');
+            let productAddForm = document.querySelector('.product-add-form');
             if (productAddForm) {
-                var boxToCart = productAddForm.querySelector('.box-tocart');
-                var qtyField = productAddForm.querySelector('.box-tocart .field.qty');
-                var instantPurchase = productAddForm.querySelector('#instant-purchase');
-                var addToCartBtn = productAddForm.querySelector('button.tocart, button#product-addtocart-button');
+                let boxToCart = productAddForm.querySelector('.box-tocart');
+                let qtyField = productAddForm.querySelector('.box-tocart .field.qty');
+                let instantPurchase = productAddForm.querySelector('#instant-purchase');
+                let addToCartBtn = productAddForm.querySelector('button.tocart, button#product-addtocart-button');
 
                 if (boxToCart) {
                     boxToCart.classList.add('b2b-login-to-buy-mode');
@@ -414,7 +414,7 @@ define([
                     addToCartBtn.setAttribute('data-b2b-original-hidden', '1');
                     addToCartBtn.style.display = 'none';
 
-                    var pdpBtn = createLoginButton({
+                    let pdpBtn = createLoginButton({
                         html: iconSvg + ' ' + ((config && config.pdpButtonText) ? config.pdpButtonText : 'Entrar para Comprar'),
                         disabled: isPendingMode
                     });
@@ -434,12 +434,12 @@ define([
 
             // Product listings (category, search, widgets)
             document.querySelectorAll('.product-item-actions .actions-primary, .product-info-cart .actions-primary').forEach(function (actionsContainer) {
-                var addBtn = actionsContainer.querySelector('button.tocart, form button.tocart');
+                let addBtn = actionsContainer.querySelector('button.tocart, form button.tocart');
                 if (addBtn && !actionsContainer.querySelector('.b2b-login-to-buy-btn')) {
                     addBtn.setAttribute('data-b2b-original-hidden', '1');
                     addBtn.style.display = 'none';
 
-                    var listingBtn = createLoginButton({
+                    let listingBtn = createLoginButton({
                         text: (config && config.listingButtonText) ? config.listingButtonText : 'Entrar para Comprar',
                         variantClass: 'b2b--listing',
                         disabled: isPendingMode
@@ -496,7 +496,7 @@ define([
         }
 
         // Re-run with throttle on DOM changes
-        var scheduled = false;
+        let scheduled = false;
         function scheduleReplace() {
             if (scheduled || !isRestricted) {
                 return;
@@ -522,7 +522,7 @@ define([
         }
 
         observerInstance = new MutationObserver(function (mutations) {
-            for (var i = 0; i < mutations.length; i++) {
+            for (let i = 0; i < mutations.length; i++) {
                 if (mutations[i].addedNodes && mutations[i].addedNodes.length) {
                     scheduleReplace();
                     break;

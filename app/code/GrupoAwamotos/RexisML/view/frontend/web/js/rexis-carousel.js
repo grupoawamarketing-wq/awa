@@ -5,22 +5,22 @@ define([
 
     return function (config, element) {
         var $root = $(element);
-        var trackSelector = config.trackSelector || '.rexis-carousel-track';
-        var slideSelector = config.slideSelector || '.rexis-carousel-slide';
-        var prevSelector = config.prevSelector || '.rexis-prev';
-        var nextSelector = config.nextSelector || '.rexis-next';
-        var mobileBreakpoint = parseInt(config.mobileBreakpoint, 10) || 480;
-        var tabletBreakpoint = parseInt(config.tabletBreakpoint, 10) || 768;
-        var desktopBreakpoint = parseInt(config.desktopBreakpoint, 10) || 992;
+        let trackSelector = config.trackSelector || '.rexis-carousel-track';
+        let slideSelector = config.slideSelector || '.rexis-carousel-slide';
+        let prevSelector = config.prevSelector || '.rexis-prev';
+        let nextSelector = config.nextSelector || '.rexis-next';
+        let mobileBreakpoint = parseInt(config.mobileBreakpoint, 10) || 480;
+        let tabletBreakpoint = parseInt(config.tabletBreakpoint, 10) || 768;
+        let desktopBreakpoint = parseInt(config.desktopBreakpoint, 10) || 992;
 
         var $track = $root.find(trackSelector).first();
         var $slides = $track.find(slideSelector);
         var $prev = $root.find(prevSelector).first();
         var $next = $root.find(nextSelector).first();
         var $viewport = $track.parent();
-        var position = 0;
-        var resizeTimer = null;
-        var snapOffsets = [0];
+        let position = 0;
+        let resizeTimer = null;
+        let snapOffsets = [0];
 
         if (!$track.length || !$slides.length || $root.data('rexisCarouselInit')) {
             return;
@@ -30,7 +30,7 @@ define([
         $root.attr('tabindex', $root.attr('tabindex') || '0');
 
         function getVisibleSlides() {
-            var width = $root.outerWidth();
+            let width = $root.outerWidth();
 
             if (width <= mobileBreakpoint) {
                 return 1;
@@ -48,16 +48,16 @@ define([
         }
 
         function clampPosition(pos) {
-            var max = Math.max(0, snapOffsets.length - 1);
+            let max = Math.max(0, snapOffsets.length - 1);
 
             return Math.max(0, Math.min(max, pos));
         }
 
         function buildSnapOffsets() {
-            var maxTranslate = Math.max(0, $track.get(0).scrollWidth - $viewport.get(0).clientWidth + 2); // +2 buffer
-            var visibleSlides = getVisibleSlides();
-            var rawOffsets = [];
-            var maxStartIndex = Math.max(0, $slides.length - visibleSlides);
+            let maxTranslate = Math.max(0, $track.get(0).scrollWidth - $viewport.get(0).clientWidth + 2); // +2 buffer
+            let visibleSlides = getVisibleSlides();
+            let rawOffsets = [];
+            let maxStartIndex = Math.max(0, $slides.length - visibleSlides);
 
             $slides.each(function (index, slide) {
                 if (index > maxStartIndex) {
@@ -77,7 +77,7 @@ define([
         }
 
         function updateNavState() {
-            var max = Math.max(0, snapOffsets.length - 1);
+            let max = Math.max(0, snapOffsets.length - 1);
 
             if ($prev.length) {
                 $prev.prop('disabled', position <= 0);
@@ -93,7 +93,7 @@ define([
         }
 
         function render() {
-            var offset = snapOffsets[position] || 0;
+            let offset = snapOffsets[position] || 0;
 
             position = clampPosition(position);
             offset = snapOffsets[position] || 0;
@@ -143,7 +143,7 @@ define([
         });
 
         if ('IntersectionObserver' in window) {
-            var observer = new IntersectionObserver(function (entries) {
+            let observer = new IntersectionObserver(function (entries) {
                 entries.forEach(function (entry) {
                     if (entry.isIntersecting) {
                         observer.disconnect();

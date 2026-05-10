@@ -5,10 +5,10 @@ define([
 
     return function (config, element) {
         var $root = $(element);
-        var ajaxUrl = String(config.ajaxUrl || '');
-        var rootMargin = String(config.rootMargin || '250px 0px');
-        var fallbackDelay = Number(config.fallbackDelay || 300);
-        var loaded = false;
+        let ajaxUrl = String(config.ajaxUrl || '');
+        let rootMargin = String(config.rootMargin || '250px 0px');
+        let fallbackDelay = Number(config.fallbackDelay || 300);
+        let loaded = false;
 
         if (!$root.length || !ajaxUrl) {
             return;
@@ -34,7 +34,7 @@ define([
         }
 
         if ('IntersectionObserver' in window) {
-            var observer = new IntersectionObserver(function (entries) {
+            let observer = new IntersectionObserver(function (entries) {
                 if (entries[0] && entries[0].isIntersecting) {
                     observer.disconnect();
                     loadSuggestions();

@@ -7,7 +7,7 @@ define(['jquery'], function ($) {
             // Grace period para permitir pintura inicial
             setTimeout(function(){
                 $skeleton.fadeOut(150, function(){ $skeleton.remove(); });
-                var count = $grid.find('.product-item').length;
+                let count = $grid.find('.product-item').length;
                 var $live = $('#products-count-live');
                 if ($live.length) {
                     $live.text(count + ' produtos carregados');
