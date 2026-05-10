@@ -24,7 +24,7 @@ test.describe('Smoke — Menu', () => {
 
   test('03 — links do menu são válidos', async ({ page }, testInfo) => {
     if (testInfo.project.name.includes('mobile')) { test.skip(); return; }
-    const links = page.locator('.vertical-menu a[href], .vmenu a[href], .nav-sections a[href]');
+    const links = page.locator('.navigation a[href], .custommenu a[href], .nav-sections a[href]');
     const count = await links.count();
     let invalid = 0;
     for (let i = 0; i < Math.min(count, 10); i++) {

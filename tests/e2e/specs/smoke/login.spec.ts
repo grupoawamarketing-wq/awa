@@ -13,15 +13,15 @@ test.describe('Smoke — Login', () => {
   });
 
   test('02 — campos email e senha', async ({ page }) => {
-    await navigateTo(page, B2B_LOGIN);
-    const email = page.locator('input[type="email"], input#email, input#b2b-email').first();
-    const pass = page.locator('input[type="password"], input#pass, input#b2b-pass').first();
-    await expect(email).toBeVisible({ timeout: 10000 });
+    const ok = await navigateTo(page, LOGIN);
+    const email = page.locator('input[type="email"], input#email, input[name="login[username]"]').first();
+    const pass = page.locator('input[type="password"], input#pass, input[name="login[password]"]').first();
+    await expect(email).toBeVisible({ timeout: 15000 });
     await expect(pass).toBeVisible({ timeout: 5000 });
   });
 
   test('03 — botão submit', async ({ page }) => {
-    await navigateTo(page, B2B_LOGIN);
+    await navigateTo(page, LOGIN);
     const btn = page.locator('button[type="submit"], .action.login, .b2b-btn-entrar').first();
     await expect(btn).toBeVisible({ timeout: 10000 });
   });

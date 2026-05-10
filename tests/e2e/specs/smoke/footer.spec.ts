@@ -38,11 +38,17 @@ test.describe('Smoke — Footer', () => {
     if (!vis) console.warn('[P3] Copyright não visível');
   });
 
-  test('05 — footer height razoável', async ({ page }) => {
+  test('05 — footer height razoável', async ({ page }, testInfo) => {
     const footer = page.locator(COMMON.footer).first();
     await footer.scrollIntoViewIfNeeded().catch(() => {});
     const box = await footer.boundingBox();
-    if (box) expect(box.height).toBeLessThan(800);
+    // Mobile footers stack columns vertically — allow up to 1500px
+    const isMobile = testInfo.project.name.includes('mobile');
+    const maxHeight = isMobile ? 1500 : 800;
+    if (box) {
+      if (box.height > maxHeight) console.warn('[P1] Footer muito alto: ' + Math.round(box.height) + 'px (max: ' + maxHeight + 'px)');
+      expect(box.height).toBeLessThan(maxHeight);
+    }
   });
 
   test('06 — sem overflow', async ({ page }) => {

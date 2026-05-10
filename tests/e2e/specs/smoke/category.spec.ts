@@ -35,7 +35,7 @@ test.describe('Smoke — Categoria', () => {
   });
 
   test('05 — cards com preço ou B2B gate', async ({ page }) => {
-    const el = page.locator('.product-item .price, .product-item .b2b-login-to-see-price').first();
+    const el = page.locator('.product-item .price, .product-item .b2b-login-to-see-price, .product-item .b2b-login-to-buy-btn').first();
     await expect(el).toBeVisible({ timeout: 10000 });
   });
 

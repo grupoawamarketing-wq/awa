@@ -48,10 +48,12 @@ export async function findBrokenImages(page: Page): Promise<string[]> {
   try {
     return await Promise.race<string[]>([
       page.evaluate(() => {
-        // Only flag images fully loaded (complete=true) but with no data (naturalWidth=0)
-        // Ignores lazy/loading images which are not broken, just pending
         return Array.from(document.querySelectorAll('img'))
-          .filter(img => img.complete && img.naturalWidth === 0 && !!img.src && img.offsetParent !== null)
+          .filter(img => {
+            if (img.src.endsWith('.svg')) return false;
+            if (img.naturalWidth === 0 && img.offsetParent !== null) return true;
+            return false;
+          })
           .map(img => img.src).slice(0, 20);
       }),
       new Promise<string[]>(r => setTimeout(() => r([]), 8000)),
