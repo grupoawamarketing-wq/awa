@@ -25,7 +25,6 @@ export default defineConfig({
     trace: 'retain-on-failure',
     actionTimeout: 15_000,
     navigationTimeout: 60_000,
-    // launchOptions: Chromium args removed — all projects use Firefox which loads the site reliably.
   },
   projects: [
     // NOTE: Chromium/Chrome cannot load awamotos.com reliably on this server —
@@ -49,8 +48,15 @@ export default defineConfig({
       name: 'firefox-mobile-390',
       use: {
         browserName: 'firefox',
+        headless: true,
         viewport: { width: 390, height: 844 },
         userAgent: 'Mozilla/5.0 (Android 11; Mobile; rv:109.0) Gecko/109.0 Firefox/109.0',
+        isMobile: false,
+        hasTouch: false,
+        deviceScaleFactor: 2,
+        launchOptions: {
+          timeout: 60_000,
+        },
       },
     },
   ],

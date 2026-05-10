@@ -28,6 +28,7 @@ if (!empty($_config['general']['enable'])):
         data-role="awa-vertical-menu-trigger"
         aria-expanded="false"
         aria-controls="<?= $block->escapeHtmlAttr($menuId) ?>"
+        aria-describedby="<?= $block->escapeHtmlAttr($menuId) ?>-status"
         aria-label="<?= $block->escapeHtmlAttr(__('Departamentos')) ?>">
         <span class="icon-menu awa-vmenu-trigger-icon vm-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
@@ -36,8 +37,14 @@ if (!empty($_config['general']['enable'])):
         </span>
         <span class="awa-vmenu-trigger-text"><?= $block->escapeHtml(__('Departamentos')) ?></span>
     </button>
+    <span id="<?= $block->escapeHtmlAttr($menuId) ?>-status"
+          class="awa-sr-only"
+          data-role="awa-vertical-menu-status">
+        <?= $block->escapeHtml(__('Use Tab e Shift+Tab para navegar pelos departamentos.')) ?>
+    </span>
     <ul id="<?= $block->escapeHtmlAttr($menuId) ?>"
         class="togge-menu list-category-dropdown"
+        data-role="awa-vertical-menu-panel"
         data-limit-show="<?= (int) $limitShow ?>">
         <?= /** @noEscape */ $_menu ?>
         <?php $_bgImages = trim($block->getCmsBlockHtmlByIdentifier('vertical_background_images')); ?>
@@ -74,7 +81,18 @@ if (!empty($_config['general']['enable'])):
         "js/vertical-menu-init": {
             "desktopBreakpoint": 992,
             "overlaySelector": ".shadow_bkg_show",
-            "limitShow": <?= (int) $limitShow ?>
+            "limitShow": <?= (int) $limitShow ?>,
+            "hoverDelay": 240
+        },
+        "js/vertical-menu-init-hover-tuned": {
+            "desktopBreakpoint": 992,
+            "overlaySelector": ".shadow_bkg_show",
+            "limitShow": <?= (int) $limitShow ?>,
+            "hoverDelay": 240
+        },
+        "js/vertical-menu-drill": {
+            "desktopBreakpoint": 992,
+            "animDuration": 240
         },
         "awaVerticalMenu": {}
     },

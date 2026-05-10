@@ -24,7 +24,7 @@ export const COMMON = {
   footer:        'footer.page-footer, .footer.content',
   logo:          '.logo img',
   search:        'input#search, input[name="q"]',
-  minicart:      '.minicart-wrapper, .action.showcart',
+  minicart:      '.mini-cart-wrapper, .awa-header-minicart, .minicart-wrapper, .action.showcart',
   breadcrumb:    '.breadcrumbs',
   pageTitle:     '.page-title',
   cookieBanner:  '#awa-cookie-accept, .awa-cookie-banner__btn--accept, .cookie-btn-accept, #btn-cookie-allow',

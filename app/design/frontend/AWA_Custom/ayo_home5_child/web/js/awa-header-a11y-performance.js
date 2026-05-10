@@ -1,6 +1,11 @@
 (function () {
     'use strict';
 
+    var HEADER_MINICART_SHELL_SELECTOR = '.header [data-awa-header-minicart-shell="true"], .header .awa-header-minicart[data-awa-header-cart="true"]';
+    var HEADER_MINICART_TRIGGER_SELECTOR = HEADER_MINICART_SHELL_SELECTOR + ' .showcart, '
+        + HEADER_MINICART_SHELL_SELECTOR + ' .action.showcart';
+    var HEADER_TOP_SEARCH_NESTED_CART_SELECTOR = ':scope > [data-awa-header-minicart-shell="true"], :scope > .mini-cart-wrapper, :scope > .shadowcart';
+
     function reportError(context, error) {
         if (typeof console !== 'undefined' && console && typeof console.warn === 'function') {
             console.warn('[AWA Header A11y]', context, error);
@@ -828,7 +833,7 @@
     function collapseHomeSearchLayout() {
         var topSearch = document.querySelector('.header .top-search');
         var nestedCart = topSearch
-            ? topSearch.querySelector(':scope > .mini-cart-wrapper, :scope > .shadowcart')
+            ? topSearch.querySelector(HEADER_TOP_SEARCH_NESTED_CART_SELECTOR)
             : null;
         var blockSearch = topSearch
             ? topSearch.querySelector(':scope > .block-search')
@@ -872,7 +877,7 @@
     function resetHomeHeaderCollapseGuard() {
         var topSearch = document.querySelector('.header .top-search');
         var nestedCart = topSearch
-            ? topSearch.querySelector(':scope > .mini-cart-wrapper, :scope > .shadowcart')
+            ? topSearch.querySelector(HEADER_TOP_SEARCH_NESTED_CART_SELECTOR)
             : null;
         var blockSearch = topSearch
             ? topSearch.querySelector(':scope > .block-search')
@@ -1256,7 +1261,7 @@
             if (!event.target || !event.target.closest) {
                 return;
             }
-            var showcart = event.target.closest('.minicart-wrapper .showcart');
+            var showcart = event.target.closest(HEADER_MINICART_TRIGGER_SELECTOR + ', .minicart-wrapper .showcart, .minicart-wrapper .action.showcart');
             if (!showcart) {
                 return;
             }

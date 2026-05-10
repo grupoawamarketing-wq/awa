@@ -984,11 +984,32 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
      */
     public function getCacheKeyInfo(): array
     {
+        $templateFile = (string) $this->getTemplateFile();
+        $templateVersion = $this->getTemplateCacheVersion($templateFile);
+
         return [
             'AWA_VERTICAL_MENU',
             (string)$this->_storeManager->getStore()->getId(),
             (string)$this->_storeManager->getStore()->getCode(),
+            (string)$this->getNameInLayout(),
+            (string)$this->getTemplate(),
+            $templateFile,
+            $templateVersion,
         ];
+    }
+
+    /**
+     * Returns a stable cache version derived from the resolved template file.
+     */
+    private function getTemplateCacheVersion(string $templateFile): string
+    {
+        if ($templateFile === '' || !is_file($templateFile)) {
+            return '0';
+        }
+
+        $templateModifiedAt = filemtime($templateFile);
+
+        return $templateModifiedAt === false ? '0' : (string) $templateModifiedAt;
     }
 
     /**
@@ -1034,7 +1055,7 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
             return parent::toHtml();
         }
 
-        $cacheKey = 'AWA_VM_' . $this->_storeManager->getStore()->getId();
+        $cacheKey = $this->getCacheKey();
         $cached = $this->_cache->load($cacheKey);
 
         if ($cached !== false) {

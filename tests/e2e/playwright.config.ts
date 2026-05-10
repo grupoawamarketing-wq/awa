@@ -86,9 +86,10 @@ export default defineConfig({
     baseURL: 'https://awamotos.com',
     /* Ignora erros TLS caso o certificado seja auto-assinado em staging */
     ignoreHTTPSErrors: true,
-    /* Captura screenshots apenas em falha; os testes pedem screenshot manual */
+    /* Captura evidências automáticas para falhas reais e análise no Trace Viewer */
     screenshot: 'only-on-failure',
-    video: 'off',
+    video: 'retain-on-failure',
+    trace: 'retain-on-failure',
     actionTimeout: 10_000,
     navigationTimeout: 20_000,
     /* Locale BR para renderização correta de fontes/datas */

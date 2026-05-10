@@ -46,10 +46,12 @@ class VerticalMenuContractTest extends TestCase
         $contents = (string) file_get_contents($jsPath);
         $this->assertNotSame('', $contents);
 
-        $this->assertStringContainsString("attr('aria-hidden'", $contents);
-        $this->assertStringContainsString("data-awa-side-inline-flyout", $contents);
-        $this->assertStringContainsString("bindOutsideInteractionHandlers", $contents);
-        $this->assertStringContainsString("getTopLevelKeyboardItems", $contents);
+        $this->assertStringContainsString("removeAttr('aria-hidden')", $contents);
+        $this->assertStringContainsString("attributeFilter: ['aria-hidden']", $contents);
+        $this->assertStringContainsString("fixSectionAriaHidden", $contents);
+        $this->assertStringContainsString("initScrollShadows", $contents);
+        $this->assertStringContainsString("highlightCurrentCategory", $contents);
+        $this->assertStringContainsString("markAllCategoriesLink", $contents);
         $this->assertStringNotContainsString("setProperty('position', 'fixed'", $contents);
     }
 
