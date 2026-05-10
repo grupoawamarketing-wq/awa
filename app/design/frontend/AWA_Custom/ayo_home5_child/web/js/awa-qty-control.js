@@ -13,8 +13,8 @@ define([], function () {
     }
 
     function getPrecision(step) {
-        var normalized = String(step || 1);
-        var decimalIndex = normalized.indexOf('.');
+        let normalized = String(step || 1);
+        let decimalIndex = normalized.indexOf('.');
 
         if (decimalIndex === -1) {
             return 0;
@@ -24,18 +24,18 @@ define([], function () {
     }
 
     function normalizeNumber(value, fallback) {
-        var parsed = Number.parseFloat(value);
+        let parsed = Number.parseFloat(value);
 
         return Number.isFinite(parsed) ? parsed : fallback;
     }
 
     return function (config, element) {
-        var root = element;
-        var options = config || {};
-        var selectors = options.selectors || {};
-        var flags = options.flags || {};
-        var inputSelector = selectors.input || '[data-awa-role="qty-input"]';
-        var triggerSelector = selectors.trigger || '[data-awa-role="qty-trigger"]';
+        let root = element;
+        let options = config || {};
+        let selectors = options.selectors || {};
+        let flags = options.flags || {};
+        let inputSelector = selectors.input || '[data-awa-role="qty-input"]';
+        let triggerSelector = selectors.trigger || '[data-awa-role="qty-trigger"]';
 
         if (!root || root.nodeType !== 1 || root.getAttribute('data-awa-qty-bound') === 'true') {
             return;
@@ -45,14 +45,14 @@ define([], function () {
         root.setAttribute('data-awa-component', 'awa-qty-control');
 
         root.addEventListener('click', function (event) {
-            var trigger = event.target.closest(triggerSelector);
-            var input;
-            var min;
-            var step;
-            var precision;
-            var current;
-            var nextValue;
-            var direction;
+            let trigger = event.target.closest(triggerSelector);
+            let input;
+            let min;
+            let step;
+            let precision;
+            let current;
+            let nextValue;
+            let direction;
 
             if (!trigger || !root.contains(trigger)) {
                 return;

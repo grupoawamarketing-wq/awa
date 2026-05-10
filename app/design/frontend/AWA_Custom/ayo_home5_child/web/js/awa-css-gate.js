@@ -18,9 +18,9 @@
 (function () {
     'use strict';
 
-    var CSS_GATE_ATTR = 'data-awa-gate';
-    var applied = false;
-    var GATE_EVENTS = ['pointerdown', 'keydown', 'touchstart'];
+    let CSS_GATE_ATTR = 'data-awa-gate';
+    let applied = false;
+    let GATE_EVENTS = ['pointerdown', 'keydown', 'touchstart'];
 
     function applyGatedCSS() {
         if (applied) {
@@ -29,8 +29,8 @@
 
         applied = true;
 
-        var links = document.querySelectorAll('link[' + CSS_GATE_ATTR + ']');
-        var i;
+        let links = document.querySelectorAll('link[' + CSS_GATE_ATTR + ']');
+        let i;
 
         for (i = 0; i < links.length; i += 1) {
             links[i].media = 'all';
@@ -41,7 +41,7 @@
         }
     }
 
-    var k;
+    let k;
 
     for (k = 0; k < GATE_EVENTS.length; k += 1) {
         window.addEventListener(GATE_EVENTS[k], applyGatedCSS, {

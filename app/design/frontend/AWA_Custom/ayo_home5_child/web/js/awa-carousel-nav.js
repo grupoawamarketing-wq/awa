@@ -17,8 +17,8 @@
     }
     window.__awaCarouselNavInit = true;
 
-    var SVG_PREV = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>';
-    var SVG_NEXT = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>';
+    let SVG_PREV = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>';
+    let SVG_NEXT = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>';
 
     function buildNavHtml() {
         return (
@@ -41,9 +41,9 @@
             return;
         }
 
-        var navFrag = document.createElement('div');
+        let navFrag = document.createElement('div');
         navFrag.innerHTML = buildNavHtml();
-        var nav = navFrag.firstChild;
+        let nav = navFrag.firstChild;
 
         anchorEl.appendChild(nav);
 
@@ -72,9 +72,9 @@
             return;
         }
 
-        var progFrag = document.createElement('div');
+        let progFrag = document.createElement('div');
         progFrag.innerHTML = buildProgressHtml();
-        var progress = progFrag.firstChild;
+        let progress = progFrag.firstChild;
 
         anchorEl.appendChild(progress);
 
@@ -86,34 +86,34 @@
             return;
         }
 
-        var bar = progressEl.querySelector('.awa-owl-progress__bar');
+        let bar = progressEl.querySelector('.awa-owl-progress__bar');
         if (!bar) {
             return;
         }
 
-        var wrapper = carouselEl.querySelector('.owl-wrapper');
-        var items = carouselEl.querySelectorAll('.owl-item');
+        let wrapper = carouselEl.querySelector('.owl-wrapper');
+        let items = carouselEl.querySelectorAll('.owl-item');
         if (!wrapper || !items.length) {
             return;
         }
 
-        var containerWidth = carouselEl.querySelector('.owl-wrapper-outer');
+        let containerWidth = carouselEl.querySelector('.owl-wrapper-outer');
         if (!containerWidth) {
             return;
         }
 
-        var visibleWidth = containerWidth.offsetWidth;
-        var totalWidth = wrapper.scrollWidth || wrapper.offsetWidth;
+        let visibleWidth = containerWidth.offsetWidth;
+        let totalWidth = wrapper.scrollWidth || wrapper.offsetWidth;
         if (totalWidth <= visibleWidth) {
             bar.style.width = '100%';
             return;
         }
 
-        var transform = wrapper.style.transform || wrapper.style.webkitTransform || '';
-        var match = transform.match(/translate(?:3d)?\(\s*(-?[\d.]+)/);
-        var scrollLeft = match ? Math.abs(parseFloat(match[1])) : 0;
+        let transform = wrapper.style.transform || wrapper.style.webkitTransform || '';
+        let match = transform.match(/translate(?:3d)?\(\s*(-?[\d.]+)/);
+        let scrollLeft = match ? Math.abs(parseFloat(match[1])) : 0;
 
-        var pct = Math.min(100, Math.max(5, ((scrollLeft + visibleWidth) / totalWidth) * 100));
+        let pct = Math.min(100, Math.max(5, ((scrollLeft + visibleWidth) / totalWidth) * 100));
         bar.style.width = pct + '%';
     }
 
@@ -123,13 +123,13 @@
      */
     function equalizeCardHeights(carouselEl) {
         if (!carouselEl) { return; }
-        var cards = carouselEl.querySelectorAll('.owl-item .product-item');
+        let cards = carouselEl.querySelectorAll('.owl-item .product-item');
         if (!cards.length) { return; }
-        var i;
+        let i;
         for (i = 0; i < cards.length; i++) { cards[i].style.minHeight = ''; }
-        var maxH = 0;
+        let maxH = 0;
         for (i = 0; i < cards.length; i++) {
-            var h = cards[i].offsetHeight;
+            let h = cards[i].offsetHeight;
             if (h > maxH) { maxH = h; }
         }
         if (maxH > 0) {
@@ -142,7 +142,7 @@
      * Uses requestIdleCallback with 3s timeout fallback (runs at idle or max 3s after call).
      */
     function scheduleEqualize(carouselEl) {
-        var fn = function () { equalizeCardHeights(carouselEl); };
+        let fn = function () { equalizeCardHeights(carouselEl); };
         if (typeof requestIdleCallback === 'function') {
             requestIdleCallback(fn, { timeout: 3000 });
         } else {
@@ -154,14 +154,14 @@
      * Main init — initialize broken carousels, scan and inject nav.
      */
     function init() {
-        var i, carousel, anchor;
+        let i, carousel, anchor;
 
         // Step 1: Initialize OWL on .rokan-bestseller carousels.
         // Rokanthemes bestseller.phtml has a broken jQuery selector
         // (".rokan-bestseller MARKER_SRC_77 .owl" — uses tag selector
         // that never matches) so OWL never inits on these elements.
         if (typeof jQuery !== 'undefined' && jQuery.fn.owlCarousel) {
-            var uninitOwls = document.querySelectorAll('.rokan-bestseller ul.owl:not(.owl-carousel)');
+            let uninitOwls = document.querySelectorAll('.rokan-bestseller ul.owl:not(.owl-carousel)');
             for (i = 0; i < uninitOwls.length; i++) {
                 jQuery(uninitOwls[i]).owlCarousel({
                     lazyLoad: true,
@@ -184,10 +184,10 @@
 
         // Step 2: Inject nav on all carousel types (deferred for OWL DOM).
         setTimeout(function () {
-            var j, el, anchor2;
+            let j, el, anchor2;
 
             // Bestseller carousels
-            var bsCarousels = document.querySelectorAll('.rokan-bestseller .owl-carousel');
+            let bsCarousels = document.querySelectorAll('.rokan-bestseller .owl-carousel');
             for (j = 0; j < bsCarousels.length; j++) {
                 el = bsCarousels[j];
                 anchor2 = el.closest('.rokan-bestseller') || el.parentElement;
@@ -205,8 +205,8 @@
         // Newproduct carousels deferred 1200ms: OWL lazy-inits only when visible,
         // so we need extra time for user to scroll past hero before OWL fires.
         setTimeout(function () {
-            var j, el, anchor2;
-            var npCarousels = document.querySelectorAll('.rokan-newproduct .owl-carousel');
+            let j, el, anchor2;
+            let npCarousels = document.querySelectorAll('.rokan-newproduct .owl-carousel');
             for (j = 0; j < npCarousels.length; j++) {
                 el = npCarousels[j];
                 anchor2 = el.closest('.rokan-newproduct') || el.parentElement;
@@ -227,10 +227,10 @@
         // initialises OWL after bestseller/newproduct, causing waitForOwl to fire
         // init() before productTabContent is ready.
         setTimeout(function () {
-            var tabCarousels = document.querySelectorAll('.productTabContent.owl-carousel');
-            for (var t = 0; t < tabCarousels.length; t++) {
-                var tabEl = tabCarousels[t];
-                var tabAnchor = tabEl.closest('.tab_content') || tabEl.closest('.list-tab-product') || tabEl.parentElement;
+            let tabCarousels = document.querySelectorAll('.productTabContent.owl-carousel');
+            for (let t = 0; t < tabCarousels.length; t++) {
+                let tabEl = tabCarousels[t];
+                let tabAnchor = tabEl.closest('.tab_content') || tabEl.closest('.list-tab-product') || tabEl.parentElement;
                 if (tabAnchor && !tabAnchor.querySelector('.awa-owl-nav')) {
                     tabAnchor.style.position = 'relative';
                     injectNav(tabEl, tabAnchor);
@@ -239,10 +239,10 @@
             }
 
             // Hot Deals carousel — deferred 1500ms same as productTabContent (OWL late init)
-            var hdCarousels = document.querySelectorAll('.hot-deal-slide.owl-carousel');
-            for (var hd = 0; hd < hdCarousels.length; hd++) {
-                var hdEl = hdCarousels[hd];
-                var hdAnchor = hdEl.closest('.hot-deal-tab-slider') || hdEl.closest('.hot-deal') || hdEl.parentElement;
+            let hdCarousels = document.querySelectorAll('.hot-deal-slide.owl-carousel');
+            for (let hd = 0; hd < hdCarousels.length; hd++) {
+                let hdEl = hdCarousels[hd];
+                let hdAnchor = hdEl.closest('.hot-deal-tab-slider') || hdEl.closest('.hot-deal') || hdEl.parentElement;
                 if (hdAnchor && !hdAnchor.querySelector('.awa-owl-nav')) {
                     hdAnchor.style.position = 'relative';
                     injectNav(hdEl, hdAnchor);
@@ -256,10 +256,10 @@
         // after init() runs (newproduct/hotdeal/productTab have 1200-1500ms delays).
         if (typeof jQuery !== 'undefined') {
             jQuery(document).on('owl.afterMove owl.afterUpdate', '.owl-carousel', function () {
-                var owlEl = this;
-                var container = owlEl.closest('.hot-deal-tab-slider') || owlEl.closest('.hot-deal') || owlEl.closest('.tab_content') || owlEl.closest('.list-tab-product') || owlEl.closest('.rokan-bestseller') || owlEl.closest('.rokan-newproduct') || owlEl.parentElement;
+                let owlEl = this;
+                let container = owlEl.closest('.hot-deal-tab-slider') || owlEl.closest('.hot-deal') || owlEl.closest('.tab_content') || owlEl.closest('.list-tab-product') || owlEl.closest('.rokan-bestseller') || owlEl.closest('.rokan-newproduct') || owlEl.parentElement;
                 if (container) {
-                    var progressBar = container.querySelector('.awa-owl-progress');
+                    let progressBar = container.querySelector('.awa-owl-progress');
                     if (progressBar) {
                         requestAnimationFrame(function () { updateProgress(owlEl, progressBar); });
                     }
@@ -269,10 +269,10 @@
     }
 
     function waitForOwl(maxAttempts) {
-        var attempts = 0;
-        var timer = setInterval(function () {
+        let attempts = 0;
+        let timer = setInterval(function () {
             attempts++;
-            var ready = document.querySelector('.hot-deal-slide .owl-wrapper-outer') ||
+            let ready = document.querySelector('.hot-deal-slide .owl-wrapper-outer') ||
                         document.querySelector('.productTabContent .owl-wrapper-outer') ||
                         document.querySelector('.rokan-bestseller .owl-wrapper-outer') ||
                         document.querySelector('.rokan-newproduct .owl-wrapper-outer');

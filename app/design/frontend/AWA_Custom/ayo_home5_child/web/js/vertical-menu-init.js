@@ -33,7 +33,7 @@ define([
             return false;
         }
 
-        var ok = false;
+        let ok = false;
 
         $menus.each(function () {
             var $m = $(this);
@@ -51,11 +51,11 @@ define([
 
     /** Trailing-edge debounce. */
     function debounce(fn, ms) {
-        var t;
+        let t;
 
         return function () {
-            var ctx  = this;
-            var args = arguments;
+            let ctx  = this;
+            let args = arguments;
 
             clearTimeout(t);
             t = setTimeout(function () { fn.apply(ctx, args); }, ms || 120);
@@ -68,7 +68,7 @@ define([
             return;
         }
 
-        var has = 'img[src],picture source[srcset],video source[src],iframe[src],a[href],.block,.cms-block';
+        let has = 'img[src],picture source[srcset],video source[src],iframe[src],a[href],.block,.cms-block';
 
         $list.find('> li.vertical-menu-custom-block, > li.vertical-bg-img').each(function () {
             var $li = $(this);
@@ -91,14 +91,14 @@ define([
         var $items      = $nav.find('.ui-menu-item.level0');
 
         /* ---- config ------------------------------------------------ */
-        var safeUid = ($nav.attr('id') || $title.attr('aria-controls') || 'avm-' + Math.random().toString(36).slice(2))
+        let safeUid = ($nav.attr('id') || $title.attr('aria-controls') || 'avm-' + Math.random().toString(36).slice(2))
                           .replace(/[^a-zA-Z0-9_-]/g, '');
-        var overlaySelector   = (config && config.overlaySelector) || '.shadow_bkg_show';
-        var desktopBreakpoint = parseInt(config && config.desktopBreakpoint, 10) || 992;
-        var limitItemShow     = parseInt($list.attr('data-limit-show'), 10)
+        let overlaySelector   = (config && config.overlaySelector) || '.shadow_bkg_show';
+        let desktopBreakpoint = parseInt(config && config.desktopBreakpoint, 10) || 992;
+        let limitItemShow     = parseInt($list.attr('data-limit-show'), 10)
                                 || parseInt(config && config.limitShow, 10) || 0;
-        var childPanelSelector = '.submenu, ul.level0, .subchildmenu';
-        var NS = '.awaVM-' + safeUid;
+        let childPanelSelector = '.submenu, ul.level0, .subchildmenu';
+        let NS = '.awaVM-' + safeUid;
 
         /* ---- guard: never double-init ------------------------------ */
         if (!$nav.length || $nav.data('awaVMInit')) {
@@ -121,7 +121,7 @@ define([
         }
 
         /* ---- Rokanthemes flyout widget ------------------------------ */
-        var rokanActive = initRokanWidget(
+        let rokanActive = initRokanWidget(
             $nav.filter('.verticalmenu').add($nav.find('.verticalmenu'))
         );
 
@@ -141,7 +141,7 @@ define([
         });
 
         /* ---- viewport ---------------------------------------------- */
-        var mql = window.matchMedia
+        let mql = window.matchMedia
             ? window.matchMedia('(min-width: ' + desktopBreakpoint + 'px)')
             : null;
 
@@ -150,7 +150,7 @@ define([
         }
 
         function isHomeContext() {
-            var body = document.body;
+            let body = document.body;
 
             if (!body) {
                 return false;
@@ -168,10 +168,10 @@ define([
 
         /* ---- Submenu position sync (CSS vars for fixed flyouts) ----- */
         function syncDesktopPanelPosition() {
-            var anchor = $title.get(0) || $nav.get(0);
-            var rect;
-            var top;
-            var left;
+            let anchor = $title.get(0) || $nav.get(0);
+            let rect;
+            let top;
+            let left;
 
             if (!isDesktop() || !$list.length || !anchor) {
                 return;
@@ -200,8 +200,8 @@ define([
          */
         function resolveLevel0SubmenuPanel($item) {
             var $p = $item.children('.submenu, .level0.submenu, .navigation__submenu').first();
-            var id;
-            var el;
+            let id;
+            let el;
 
             if ($p.length) {
                 return $p;
@@ -223,7 +223,7 @@ define([
         /* ============================================================ */
 
         function setMenuOpenState(open) {
-            var expanded = open ? 'true' : 'false';
+            let expanded = open ? 'true' : 'false';
 
             $nav.toggleClass('menu-open', open).toggleClass('vmm-open', open);
             $list.toggleClass('menu-open', open).toggleClass('vmm-open', open);
@@ -278,7 +278,7 @@ define([
                 $item.addClass('vmm-active');
                 /* JS-3b fix: use setProperty !important so open state reliably
                    overrides any prior !important close state on portaled panels. */
-                var pNodeOpen = $panel[0];
+                let pNodeOpen = $panel[0];
                 pNodeOpen.style.setProperty('visibility', 'visible', 'important');
                 pNodeOpen.style.setProperty('opacity', '1', 'important');
                 pNodeOpen.style.setProperty('pointer-events', 'auto', 'important');
@@ -289,7 +289,7 @@ define([
             /* JS-3b close: remove inline overrides — CSS rules (BUG-9) take over
                for panels in normal DOM; portaled panels lose !important state
                and become hidden by their own portal detach sequence. */
-            var pNodeClose = $panel[0];
+            let pNodeClose = $panel[0];
             pNodeClose.style.removeProperty('visibility');
             pNodeClose.style.removeProperty('opacity');
             pNodeClose.style.removeProperty('pointer-events');
@@ -321,7 +321,7 @@ define([
                     /* JS-3 fix: use setProperty !important to override the portal's
                        visibility:visible !important / opacity:1 !important from
                        awa-vertical-menu-flyout-fix.js portaled panels. */
-                    var pNode = $panel[0];
+                    let pNode = $panel[0];
                     pNode.style.setProperty('display', 'none', 'important');
                     pNode.style.setProperty('visibility', 'hidden', 'important');
                     pNode.style.setProperty('opacity', '0', 'important');
@@ -389,7 +389,7 @@ define([
         }
 
         function resetParentItemState($item, animateNested) {
-            var nestedAnimate = !!animateNested;
+            let nestedAnimate = !!animateNested;
 
             $item.removeClass('_active');
             $item.children('a').removeClass('ui-state-active');
@@ -433,7 +433,7 @@ define([
 
         function syncParentItemStateFromPanels($item) {
             var $panel = getFirstDirectChildPanel($item);
-            var opened = $panel.length && $panel.hasClass('opened');
+            let opened = $panel.length && $panel.hasClass('opened');
 
             $item.toggleClass('_active', !!opened);
             $item.children('a').toggleClass('ui-state-active', !!opened);
@@ -469,7 +469,7 @@ define([
 
                 window.setTimeout(function () {
                     var $panel = getFirstDirectChildPanel($p);
-                    var opened = $panel.length && $panel.hasClass('opened');
+                    let opened = $panel.length && $panel.hasClass('opened');
 
                     if (opened) {
                         closeSiblingParentItems($p, true);
@@ -549,7 +549,7 @@ define([
                     return;
                 }
 
-                var isPinned = $nav.data('vmm-pinned') === true;
+                let isPinned = $nav.data('vmm-pinned') === true;
 
                 if (isOpen() && isPinned) {
                     $nav.data('vmm-pinned', false);
@@ -604,8 +604,8 @@ define([
         });
 
         $nav.on('mouseleave' + NS, function () {
-            var root = $nav.get(0);
-            var active = document.activeElement;
+            let root = $nav.get(0);
+            let active = document.activeElement;
 
             if (!isDesktop()) {
                 return;
@@ -635,8 +635,8 @@ define([
             }
 
             window.setTimeout(function () {
-                var root = $nav.get(0);
-                var active = document.activeElement;
+                let root = $nav.get(0);
+                let active = document.activeElement;
 
                 if (root && active && root.contains(active)) {
                     return;
@@ -685,7 +685,7 @@ define([
                 return;
             }
 
-            var root = $nav.get(0);
+            let root = $nav.get(0);
             if (root && !root.contains(e.target)) {
                 $nav.data('vmm-pinned', false);
                 closeMenu();
@@ -713,8 +713,8 @@ define([
             var $item = $(this);
 
             window.setTimeout(function () {
-                var active = document.activeElement;
-                var node = $item.get(0);
+                let active = document.activeElement;
+                let node = $item.get(0);
 
                 if (node && active && node.contains(active)) {
                     return;
@@ -736,7 +736,7 @@ define([
 
                 var $t = $(this);
                 var $p = $t.parent();
-                var expanding = !$p.hasClass('_active');
+                let expanding = !$p.hasClass('_active');
 
                 if (expanding) {
                     closeSiblingParentItems($p, true);
@@ -768,19 +768,19 @@ define([
 
         /* ---- swipe-to-close on mobile (deslizar p/ esquerda fecha) -- */
         (function initSwipeToClose() {
-            var touchStartX = 0;
-            var touchStartY = 0;
+            let touchStartX = 0;
+            let touchStartY = 0;
 
             $list.on('touchstart' + NS, function (e) {
-                var touch = e.originalEvent.changedTouches[0];
+                let touch = e.originalEvent.changedTouches[0];
                 touchStartX = touch.screenX;
                 touchStartY = touch.screenY;
             });
 
             $list.on('touchend' + NS, function (e) {
-                var touch = e.originalEvent.changedTouches[0];
-                var dx = touch.screenX - touchStartX;
-                var dy = Math.abs(touch.screenY - touchStartY);
+                let touch = e.originalEvent.changedTouches[0];
+                let dx = touch.screenX - touchStartX;
+                let dy = Math.abs(touch.screenY - touchStartY);
 
                 if (dx < -60 && dy < 100 && !isDesktop()) {
                     closeMenu();
@@ -791,14 +791,14 @@ define([
         /* Rola para a categoria ativa quando o menu abre no mobile */
         function scrollToActiveItem() {
             var $active = $list.find('.awa-current-cat, .ui-menu-item.level0._active').first();
-            var listEl  = $list.get(0);
+            let listEl  = $list.get(0);
 
             if (!$active.length || !listEl || isDesktop()) {
                 return;
             }
 
             window.setTimeout(function () {
-                var itemTop = $active.position() ? $active.position().top : 0;
+                let itemTop = $active.position() ? $active.position().top : 0;
                 listEl.scrollTop = Math.max(0, itemTop - 60);
             }, 220);
         }
@@ -828,7 +828,7 @@ define([
 
                 var $a        = $(this);
                 var $hidden   = $nav.find('.ui-menu-item.level0.orther-link');
-                var expanding = !$a.hasClass('expanding');
+                let expanding = !$a.hasClass('expanding');
 
                 $a.toggleClass('expanding', expanding)
                    .closest('.expand-category-link').toggleClass('expanding', expanding);
@@ -898,9 +898,9 @@ define([
             }
 
             $panels.each(function () {
-                var el  = this;
-                var obs = new MutationObserver(function (mutations) {
-                    var i, m;
+                let el  = this;
+                let obs = new MutationObserver(function (mutations) {
+                    let i, m;
 
                     for (i = 0; i < mutations.length; i++) {
                         m = mutations[i];
@@ -922,18 +922,18 @@ define([
         /* ============================================================ */
 
         function initScrollShadows() {
-            var listEl = $list.get(0);
+            let listEl = $list.get(0);
 
             if (!listEl) {
                 return;
             }
 
             function updateShadows() {
-                var scrollTop     = listEl.scrollTop;
-                var scrollH       = listEl.scrollHeight;
-                var clientH       = listEl.clientHeight;
-                var canScrollUp   = scrollTop > 4;
-                var canScrollDown = (scrollTop + clientH) < (scrollH - 4);
+                let scrollTop     = listEl.scrollTop;
+                let scrollH       = listEl.scrollHeight;
+                let clientH       = listEl.clientHeight;
+                let canScrollUp   = scrollTop > 4;
+                let canScrollDown = (scrollTop + clientH) < (scrollH - 4);
 
                 $list.toggleClass('vmm-scroll-top', canScrollUp);
                 $list.toggleClass('vmm-scroll-bottom', canScrollDown);
@@ -941,7 +941,7 @@ define([
 
             listEl.addEventListener('scroll', updateShadows, { passive: true });
 
-            var shadowObs = new MutationObserver(function () {
+            let shadowObs = new MutationObserver(function () {
                 window.setTimeout(updateShadows, 50);
             });
 
@@ -956,7 +956,7 @@ define([
         /* ============================================================ */
 
         function highlightCurrentCategory() {
-            var currentPath = window.location.pathname.replace(/\/$/, '').toLowerCase();
+            let currentPath = window.location.pathname.replace(/\/$/, '').toLowerCase();
 
             if (!currentPath || currentPath === '' || currentPath === '/') {
                 return;
@@ -970,14 +970,14 @@ define([
                     return;
                 }
 
-                var href = ($a.attr('href') || '').replace(/\/$/, '').toLowerCase();
+                let href = ($a.attr('href') || '').replace(/\/$/, '').toLowerCase();
 
                 if (!href || href === '#' || href === 'javascript:void(0)') {
                     return;
                 }
 
                 try {
-                    var linkPath = new URL(href, window.location.origin).pathname
+                    let linkPath = new URL(href, window.location.origin).pathname
                                        .replace(/\/$/, '').toLowerCase();
 
                     if (linkPath === currentPath) {
@@ -1003,7 +1003,7 @@ define([
                     return;
                 }
 
-                var text = ($a.text() || "").trim().toLowerCase();
+                let text = ($a.text() || "").trim().toLowerCase();
 
                 if (text.indexOf("todas as categorias") > -1
                         || text.indexOf("todas categorias") > -1
@@ -1015,7 +1015,7 @@ define([
             /* Also check expand-category-link (Rokanthemes "show more" link) */
             $nav.find("li.expand-category-link").each(function () {
                 var $li = $(this);
-                var text = ($li.text() || "").trim().toLowerCase();
+                let text = ($li.text() || "").trim().toLowerCase();
 
                 if (text.indexOf("todas as categorias") > -1
                         || text.indexOf("todas categorias") > -1
@@ -1029,7 +1029,7 @@ define([
         /*  Stagger Entrance Animation (v2 enhancement)                 */
         /* ============================================================ */
 
-        var staggerTimeout = null;
+        let staggerTimeout = null;
 
         function triggerStaggerAnimation() {
             if (!isDesktop()) {
@@ -1053,7 +1053,7 @@ define([
         }
 
         /* Patch openMenu to trigger stagger */
-        var _origOpenMenu = openMenu;
+        let _origOpenMenu = openMenu;
         openMenu = function () {
             _origOpenMenu();
             triggerStaggerAnimation();
@@ -1068,8 +1068,8 @@ define([
                 return;
             }
 
-            var hoverTimer = null;
-            var HOVER_DELAY = 100;
+            let hoverTimer = null;
+            let HOVER_DELAY = 100;
 
             $nav.off('mouseenter' + NS, 'li.ui-menu-item.level0.parent');
             $nav.off('mouseleave' + NS, 'li.ui-menu-item.level0.parent');
@@ -1106,7 +1106,7 @@ define([
 
         /* Branded header for mobile drawer */
         if (!isDesktop() && $list.length && !$list.find('.vmm-mobile-header').length) {
-            var logoSrc = $('header .logo img').attr('src');
+            let logoSrc = $('header .logo img').attr('src');
             if (logoSrc) {
                 var $mHeader = $('<div class="vmm-mobile-header">' +
                     '<img src="' + logoSrc + '" alt="AWA Motos" class="vmm-mobile-logo">' +

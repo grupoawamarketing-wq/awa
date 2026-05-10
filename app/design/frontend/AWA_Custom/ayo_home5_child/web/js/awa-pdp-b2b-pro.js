@@ -21,17 +21,17 @@
        1. IMAGE ZOOM OVERLAY
        ======================================== */
     function initImageZoom() {
-        var mediaCol = document.querySelector('.catalog-product-view .product.col.media') ||
+        let mediaCol = document.querySelector('.catalog-product-view .product.col.media') ||
                        document.querySelector('.catalog-product-view .product.media');
         if (!mediaCol) return;
 
         // Add zoom trigger button
-        var stage = mediaCol.querySelector('.fotorama__stage') ||
+        let stage = mediaCol.querySelector('.fotorama__stage') ||
                     mediaCol.querySelector('.gallery-placeholder');
         if (!stage) return;
 
         // Create zoom trigger
-        var trigger = document.createElement('button');
+        let trigger = document.createElement('button');
         trigger.className = 'awa-pdp-zoom-trigger';
         trigger.setAttribute('type', 'button');
         trigger.setAttribute('aria-label', 'Ampliar imagem');
@@ -41,7 +41,7 @@
         stage.appendChild(trigger);
 
         // Create overlay
-        var overlay = document.createElement('div');
+        let overlay = document.createElement('div');
         overlay.className = 'awa-pdp-zoom-overlay';
         overlay.setAttribute('role', 'dialog');
         overlay.setAttribute('aria-label', 'Galeria de imagens ampliada');
@@ -53,16 +53,16 @@
             '<button class="awa-pdp-zoom-nav awa-pdp-zoom-nav--next" aria-label="Próxima imagem" title="Próxima">&#8250;</button>';
         document.body.appendChild(overlay);
 
-        var zoomImg = overlay.querySelector('img');
-        var images = [];
-        var currentIdx = 0;
+        let zoomImg = overlay.querySelector('img');
+        let images = [];
+        let currentIdx = 0;
 
         function getImages() {
-            var imgs = [];
-            var fotoramaStage = mediaCol.querySelector('.fotorama');
+            let imgs = [];
+            let fotoramaStage = mediaCol.querySelector('.fotorama');
             if (fotoramaStage && typeof jQuery !== 'undefined') {
                 try {
-                    var fotorama = jQuery(fotoramaStage).data('fotorama');
+                    let fotorama = jQuery(fotoramaStage).data('fotorama');
                     if (fotorama && fotorama.data) {
                         fotorama.data.forEach(function (item) {
                             if (item.full) imgs.push(item.full);
@@ -73,12 +73,12 @@
             }
             if (!imgs.length) {
                 mediaCol.querySelectorAll('.fotorama__stage__frame img').forEach(function (img) {
-                    var src = img.getAttribute('src') || img.getAttribute('data-src');
+                    let src = img.getAttribute('src') || img.getAttribute('data-src');
                     if (src && src.indexOf('placeholder') === -1) imgs.push(src);
                 });
             }
             if (!imgs.length) {
-                var mainImg = mediaCol.querySelector('img');
+                let mainImg = mediaCol.querySelector('img');
                 if (mainImg) imgs.push(mainImg.src);
             }
             return imgs;
@@ -138,20 +138,20 @@
        2. TABS SYSTEM
        ======================================== */
     function initTabs() {
-        var tabContainer = document.querySelector('.awa-pdp-tabs');
+        let tabContainer = document.querySelector('.awa-pdp-tabs');
         if (!tabContainer) return;
 
-        var tabBtns = tabContainer.querySelectorAll('.awa-pdp-tabs__nav-btn');
-        var tabPanels = tabContainer.querySelectorAll('.awa-pdp-tabs__panel');
+        let tabBtns = tabContainer.querySelectorAll('.awa-pdp-tabs__nav-btn');
+        let tabPanels = tabContainer.querySelectorAll('.awa-pdp-tabs__panel');
 
         function activateTab(idx) {
             tabBtns.forEach(function (btn, i) {
-                var isActive = i === idx;
+                let isActive = i === idx;
                 btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
                 btn.setAttribute('tabindex', isActive ? '0' : '-1');
             });
             tabPanels.forEach(function (panel, i) {
-                var isActive = i === idx;
+                let isActive = i === idx;
                 panel.setAttribute('aria-hidden', isActive ? 'false' : 'true');
                 panel.classList.toggle('active', isActive);
             });
@@ -160,7 +160,7 @@
         tabBtns.forEach(function (btn, i) {
             btn.addEventListener('click', function () { activateTab(i); });
             btn.addEventListener('keydown', function (e) {
-                var target = -1;
+                let target = -1;
                 if (e.key === 'ArrowRight') target = (i + 1) % tabBtns.length;
                 if (e.key === 'ArrowLeft') target = (i - 1 + tabBtns.length) % tabBtns.length;
                 if (e.key === 'Home') target = 0;
@@ -181,12 +181,12 @@
        3. SHARE FUNCTIONALITY
        ======================================== */
     function initShare() {
-        var shareLinks = document.querySelectorAll('[data-awa-share]');
+        let shareLinks = document.querySelectorAll('[data-awa-share]');
         shareLinks.forEach(function (el) {
             el.addEventListener('click', function (e) {
-                var action = el.getAttribute('data-awa-share');
-                var url = encodeURIComponent(window.location.href);
-                var title = encodeURIComponent(document.title);
+                let action = el.getAttribute('data-awa-share');
+                let url = encodeURIComponent(window.location.href);
+                let title = encodeURIComponent(document.title);
 
                 if (action === 'whatsapp') {
                     window.open('https://wa.me/?text=' + title + '%20' + url, '_blank', 'noopener');
@@ -196,7 +196,7 @@
                     e.preventDefault();
                     if (navigator.clipboard) {
                         navigator.clipboard.writeText(window.location.href).then(function () {
-                            var original = el.textContent;
+                            let original = el.textContent;
                             el.textContent = 'Copiado!';
                             setTimeout(function () { el.textContent = original; }, 2000);
                         });
@@ -211,11 +211,11 @@
        ======================================== */
     function initLazyLoad() {
         if ('IntersectionObserver' in window) {
-            var lazyImages = document.querySelectorAll('.catalog-product-view img[data-src]');
-            var observer = new IntersectionObserver(function (entries) {
+            let lazyImages = document.querySelectorAll('.catalog-product-view img[data-src]');
+            let observer = new IntersectionObserver(function (entries) {
                 entries.forEach(function (entry) {
                     if (entry.isIntersecting) {
-                        var img = entry.target;
+                        let img = entry.target;
                         img.src = img.getAttribute('data-src');
                         img.removeAttribute('data-src');
                         observer.unobserve(img);
@@ -233,10 +233,10 @@
     function initSmoothScroll() {
         document.querySelectorAll('.catalog-product-view a[href^="#"]').forEach(function (a) {
             a.addEventListener('click', function (e) {
-                var target = document.querySelector(a.getAttribute('href'));
+                let target = document.querySelector(a.getAttribute('href'));
                 if (target) {
                     e.preventDefault();
-                    var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                    let reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
                     target.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' });
                     target.focus({ preventScroll: true });
                 }
@@ -251,8 +251,8 @@
         if (!document.body.classList.contains('catalog-product-view')) return;
 
         // Wait for Fotorama to initialize before adding zoom
-        var fotoramaCheck = setInterval(function () {
-            var fotorama = document.querySelector('.fotorama__stage');
+        let fotoramaCheck = setInterval(function () {
+            let fotorama = document.querySelector('.fotorama__stage');
             if (fotorama) {
                 clearInterval(fotoramaCheck);
                 initImageZoom();

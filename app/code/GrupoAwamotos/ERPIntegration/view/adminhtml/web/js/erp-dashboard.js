@@ -20,16 +20,16 @@ define([
      */
     return function (config, element) {
         var $dashboard = $(element);
-        var syncUrls  = config.syncUrls || {};
-        var dailySalesData = config.dailySalesData || [];
-        var rfmData = config.rfmData || [];
-        var AUTO_REFRESH_DEFAULT_MS = 300000;
-        var RELOAD_DELAY_MS = 1500;
-        var SLIDE_TOGGLE_SPEED = 300;
-        var COUNTDOWN_RELOAD_DELAY_MS = 1000;
-        var COUNTDOWN_SHOW_THRESHOLD_SEC = 60;
+        let syncUrls  = config.syncUrls || {};
+        let dailySalesData = config.dailySalesData || [];
+        let rfmData = config.rfmData || [];
+        let AUTO_REFRESH_DEFAULT_MS = 300000;
+        let RELOAD_DELAY_MS = 1500;
+        let SLIDE_TOGGLE_SPEED = 300;
+        let COUNTDOWN_RELOAD_DELAY_MS = 1000;
+        let COUNTDOWN_SHOW_THRESHOLD_SEC = 60;
 
-        var autoRefreshMs = config.autoRefreshMs || AUTO_REFRESH_DEFAULT_MS;
+        let autoRefreshMs = config.autoRefreshMs || AUTO_REFRESH_DEFAULT_MS;
 
         // ──────────────────────────────────────────────
         // Quick Guide Panel
@@ -68,8 +68,8 @@ define([
 
         $dashboard.on('click', '.erp-action-btn', function () {
             var $btn = $(this);
-            var action = $btn.data('action');
-            var url = syncUrls[action];
+            let action = $btn.data('action');
+            let url = syncUrls[action];
             if (!url) { return; }
 
             $btn.prop('disabled', true).addClass('loading');
@@ -101,8 +101,8 @@ define([
         // ──────────────────────────────────────────────
         $dashboard.on('click', '.erp-sync-btn', function () {
             var $btn = $(this);
-            var syncType = $btn.data('sync-type');
-            var url = syncUrls[syncType];
+            let syncType = $btn.data('sync-type');
+            let url = syncUrls[syncType];
 
             if (!url) {
                 showNotification('error', 'URL de sincronização não configurada');
@@ -118,7 +118,7 @@ define([
                 dataType: 'json',
                 success: function (response) {
                     if (response.success) {
-                        var msg = 'Sincronização concluída';
+                        let msg = 'Sincronização concluída';
                         if (response.processed) { msg += ': ' + response.processed + ' registros'; }
                         if (response.created)   { msg += ' (' + response.created + ' novos)'; }
                         if (response.updated)   { msg += ' (' + response.updated + ' atualizados)'; }
@@ -129,7 +129,7 @@ define([
                     }
                 },
                 error: function (xhr) {
-                    var msg = 'Erro de comunicação';
+                    let msg = 'Erro de comunicação';
                     if (xhr.responseJSON && xhr.responseJSON.message) {
                         msg = xhr.responseJSON.message;
                     }
@@ -146,10 +146,10 @@ define([
         // ──────────────────────────────────────────────
         $dashboard.find('.erp-countdown').each(function () {
             var $el = $(this);
-            var seconds = parseInt($el.data('seconds'), 10);
+            let seconds = parseInt($el.data('seconds'), 10);
             var $value = $el.find('.countdown-value');
 
-            var interval = setInterval(function () {
+            let interval = setInterval(function () {
                 seconds--;
                 if (seconds <= 0) {
                     clearInterval(interval);
@@ -168,15 +168,15 @@ define([
             var $refreshTimer = $('<span class="erp-auto-refresh-timer"></span>');
             $dashboard.find('.erp-header-actions').append($refreshTimer);
 
-            var remainingSec = Math.floor(autoRefreshMs / 1000);
+            let remainingSec = Math.floor(autoRefreshMs / 1000);
 
             setInterval(function () {
                 remainingSec--;
                 if (remainingSec <= 0) {
                     location.reload();
                 } else if (remainingSec <= COUNTDOWN_SHOW_THRESHOLD_SEC) {
-                    var min = Math.floor(remainingSec / 60);
-                    var sec = remainingSec % 60;
+                    let min = Math.floor(remainingSec / 60);
+                    let sec = remainingSec % 60;
                     $refreshTimer.text(
                         'Atualiza em ' + (min > 0 ? min + 'm ' : '') + sec + 's'
                     );
@@ -197,7 +197,7 @@ define([
                 $dashboard.prepend($container);
             }
 
-            var iconMap = {
+            let iconMap = {
                 success: '✅',
                 error: '❌',
                 warning: '⚠️',
@@ -229,9 +229,9 @@ define([
         // Sales Chart (ApexCharts)
         // ──────────────────────────────────────────────
         if (dailySalesData.length > 0) {
-            var actualData = [];
-            var projectionData = [];
-            var categories = [];
+            let actualData = [];
+            let projectionData = [];
+            let categories = [];
 
             dailySalesData.forEach(function (item) {
                 categories.push(item.date);
@@ -244,7 +244,7 @@ define([
                 }
             });
 
-            var salesChart = new ApexCharts(
+            let salesChart = new ApexCharts(
                 document.querySelector('#sales-chart'),
                 {
                     chart: {
@@ -306,7 +306,7 @@ define([
         // RFM Donut Chart (ApexCharts)
         // ──────────────────────────────────────────────
         if (rfmData.length > 0) {
-            var rfmChart = new ApexCharts(
+            let rfmChart = new ApexCharts(
                 document.querySelector('#rfm-chart'),
                 {
                     chart: { type: 'donut', height: 350 },
@@ -334,7 +334,7 @@ define([
                     tooltip: {
                         y: {
                             formatter: function (val, opts) {
-                                var revenue = rfmData[opts.seriesIndex].revenue;
+                                let revenue = rfmData[opts.seriesIndex].revenue;
                                 return val + ' clientes (R$ ' + revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) + ')';
                             }
                         }

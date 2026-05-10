@@ -14,7 +14,7 @@ define([], function () {
 
     /* ---- Shortcut registry ---- */
 
-    var SHORTCUTS = [
+    let SHORTCUTS = [
         { key: '/',        modifier: '',       description: 'Focar barra de busca',      scope: 'Global' },
         { key: 'Ctrl + Q', modifier: 'ctrl',   description: 'Abrir Pedido Rápido (SKU)', scope: 'Global' },
         { key: '?',        modifier: '',       description: 'Mostrar atalhos de teclado', scope: 'Global' },
@@ -27,21 +27,21 @@ define([], function () {
 
     /* ---- Modal DOM ---- */
 
-    var MODAL_ID = 'awa-shortcuts-modal';
+    let MODAL_ID = 'awa-shortcuts-modal';
 
     function buildModal() {
-        var existing = document.getElementById(MODAL_ID);
+        let existing = document.getElementById(MODAL_ID);
         if (existing) { return existing; }
 
         /* Group by scope */
-        var groups = {};
+        let groups = {};
         SHORTCUTS.forEach(function (s) {
             if (!groups[s.scope]) { groups[s.scope] = []; }
             groups[s.scope].push(s);
         });
 
-        var rows = Object.keys(groups).map(function (scope) {
-            var items = groups[scope].map(function (s) {
+        let rows = Object.keys(groups).map(function (scope) {
+            let items = groups[scope].map(function (s) {
                 return '<tr>' +
                     '<td class="awa-ks-key"><kbd>' + escapeHtml(s.key) + '</kbd></td>' +
                     '<td class="awa-ks-desc">' + escapeHtml(s.description) + '</td>' +
@@ -54,7 +54,7 @@ define([], function () {
                 '</tbody>';
         }).join('');
 
-        var modal = document.createElement('div');
+        let modal = document.createElement('div');
         modal.id = MODAL_ID;
         modal.className = 'awa-ks-modal';
         modal.setAttribute('role', 'dialog');
@@ -85,16 +85,16 @@ define([], function () {
 
     /* ---- open / close ---- */
 
-    var isOpen = false;
+    let isOpen = false;
 
     function openModal() {
-        var modal = buildModal();
+        let modal = buildModal();
         modal.setAttribute('aria-hidden', 'false');
         modal.classList.add('is-open');
         isOpen = true;
 
         /* Focus dialog for a11y */
-        var dialog = modal.querySelector('.awa-ks-dialog');
+        let dialog = modal.querySelector('.awa-ks-dialog');
         if (dialog) { dialog.setAttribute('tabindex', '-1'); dialog.focus(); }
 
         /* Click delegation */
@@ -107,7 +107,7 @@ define([], function () {
     }
 
     function closeModal() {
-        var modal = document.getElementById(MODAL_ID);
+        let modal = document.getElementById(MODAL_ID);
         if (!modal) { return; }
         modal.setAttribute('aria-hidden', 'true');
         modal.classList.remove('is-open');
@@ -118,7 +118,7 @@ define([], function () {
 
     function isEditable(el) {
         if (!el) { return false; }
-        var tag = el.tagName.toLowerCase();
+        let tag = el.tagName.toLowerCase();
         return tag === 'input' || tag === 'textarea' || tag === 'select' || el.isContentEditable;
     }
 
@@ -137,7 +137,7 @@ define([], function () {
         }
     }
 
-    var keydownBound = false;
+    let keydownBound = false;
     function bindGlobalKeyHandler() {
         if (keydownBound) {
             return;
@@ -154,22 +154,22 @@ define([], function () {
        ================================================================ */
 
     function initPdpPrint() {
-        var btn = document.getElementById('awa-pdp-print-btn');
+        let btn = document.getElementById('awa-pdp-print-btn');
         if (!btn) { return; }
 
         btn.addEventListener('click', function () {
             /* Set data-print-date on .page-main (used by CSS ::before) */
-            var pageMain = document.querySelector('.page-main');
+            let pageMain = document.querySelector('.page-main');
             if (pageMain) {
-                var now = new Date();
-                var formatted = now.toLocaleDateString('pt-BR', {
+                let now = new Date();
+                let formatted = now.toLocaleDateString('pt-BR', {
                     day: '2-digit', month: '2-digit', year: 'numeric'
                 });
                 pageMain.setAttribute('data-print-date', formatted);
             }
 
             /* Set data-product-url on .product-info-main */
-            var infoMain = document.querySelector('.product-info-main');
+            let infoMain = document.querySelector('.product-info-main');
             if (infoMain) {
                 infoMain.setAttribute('data-product-url', window.location.href);
             }
@@ -188,7 +188,7 @@ define([], function () {
         if (sessionStorage.getItem('awa_ks_hint_shown')) { return; }
         sessionStorage.setItem('awa_ks_hint_shown', '1');
 
-        var hint = document.createElement('div');
+        let hint = document.createElement('div');
         hint.className = 'awa-ks-trigger-hint';
         hint.setAttribute('aria-hidden', 'true');
         hint.innerHTML = 'Pressione <kbd>?</kbd> para ver atalhos de teclado';
@@ -204,7 +204,7 @@ define([], function () {
         }, 5000);
     }
 
-    var domInitDone = false;
+    let domInitDone = false;
     function initDomFeatures() {
         if (domInitDone) {
             return;
@@ -225,7 +225,7 @@ define([], function () {
         }
     }
 
-    var api = {
+    let api = {
         open: openModal,
         close: closeModal,
         init: init

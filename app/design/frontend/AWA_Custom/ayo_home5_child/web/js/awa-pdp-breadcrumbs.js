@@ -23,7 +23,7 @@ define([
              * @private
              */
             _create: function () {
-                var self = this;
+                let self = this;
 
                 this._super();
 
@@ -63,7 +63,7 @@ define([
              * @private
              */
             _appendCatalogCrumbs: function () {
-                var categoryCrumbs = this._resolveCategoryCrumbs();
+                let categoryCrumbs = this._resolveCategoryCrumbs();
 
                 categoryCrumbs.forEach(function (crumbInfo) {
                     breadcrumbList.push(crumbInfo);
@@ -81,7 +81,7 @@ define([
              * @private
              */
             _resolveCategoryCrumbs: function () {
-                var menuItem = this._resolveCategoryMenuItem(),
+                let menuItem = this._resolveCategoryMenuItem(),
                     categoryCrumbs = [];
 
                 if (menuItem !== null && menuItem.length) {
@@ -134,7 +134,7 @@ define([
              * @private
              */
             _getParentMenuItem: function (menuItem) {
-                var classes,
+                let classes,
                     classNav,
                     parentClass,
                     parentMenuItem = null;
@@ -169,7 +169,7 @@ define([
              * @private
              */
             _resolveCategoryMenuItem: function () {
-                var categoryUrl = this._resolveCategoryUrl(),
+                let categoryUrl = this._resolveCategoryUrl(),
                     menu = $(this.options.menuContainer),
                     categoryMenuItem = null;
 
@@ -190,7 +190,7 @@ define([
              * @private
              */
             _resolveCategoryUrl: function () {
-                var categoryUrl;
+                let categoryUrl;
 
                 if (this.options.useCategoryPathInUrl) {
                     categoryUrl = window.location.href.split('?')[0];

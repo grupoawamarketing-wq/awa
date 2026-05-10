@@ -33,12 +33,12 @@ define([
 
     $('.panel.header > .header.links').clone().appendTo('#store\\.links');
 
-    var bodyEl = document.body;
-    var pathName = (window.location && window.location.pathname) ? window.location.pathname : '';
-    var isHomePath = /^\/(?:index\.php\/?)?$/.test(pathName);
-    var bodyClassName = bodyEl ? bodyEl.className : '';
-    var isHomePage = isHomePath || /\bcms-index-index\b|\bcms-home\b|\bcms-homepage_ayo_home5\b/.test(bodyClassName);
-    var shouldRunAwaPublicHotfix = !isHomePage;
+    let bodyEl = document.body;
+    let pathName = (window.location && window.location.pathname) ? window.location.pathname : '';
+    let isHomePath = /^\/(?:index\.php\/?)?$/.test(pathName);
+    let bodyClassName = bodyEl ? bodyEl.className : '';
+    let isHomePage = isHomePath || /\bcms-index-index\b|\bcms-home\b|\bcms-homepage_ayo_home5\b/.test(bodyClassName);
+    let shouldRunAwaPublicHotfix = !isHomePage;
 
     // PERF HOME (experimento controlado): evita executar blocos pesados no caminho crítico.
     if (isHomePage) {
@@ -46,14 +46,14 @@ define([
     }
 
     function applyAwaPublicHotfix(root) {
-        var scope = root && root.querySelectorAll ? root : document;
+        let scope = root && root.querySelectorAll ? root : document;
 
         if (!shouldRunAwaPublicHotfix) {
             return;
         }
 
         scope.querySelectorAll('.contact-index-index h1, .contact-index-index h2, .contact-index-index h3, .contact-index-index button, .contact-index-index .action.submit').forEach(function (el) {
-            var text = (el.textContent || '').trim();
+            let text = (el.textContent || '').trim();
             if (text === 'Drop Us A Message') {
                 el.textContent = 'Envie sua mensagem';
             } else if (text === 'Send Message' || text === 'Send message') {
@@ -62,7 +62,7 @@ define([
         });
 
         scope.querySelectorAll('.contact-index-index input[placeholder], .contact-index-index textarea[placeholder]').forEach(function (el) {
-            var placeholder = (el.getAttribute('placeholder') || '').trim();
+            let placeholder = (el.getAttribute('placeholder') || '').trim();
             if (placeholder === "What's on your mind?") {
                 el.setAttribute('placeholder', 'Como podemos ajudar?');
             } else if (placeholder === 'Phone Number') {
@@ -73,26 +73,26 @@ define([
         });
 
         scope.querySelectorAll('.cms-page-view h2, .cms-page-view h3, .cms-page-view h4').forEach(function (heading) {
-            var txt = (heading.textContent || '').trim();
+            let txt = (heading.textContent || '').trim();
             if (txt && /^\?{2,}/.test(txt)) {
                 heading.textContent = txt.replace(/^\?+\s*/, '').trim();
             }
         });
 
         scope.querySelectorAll('a[href]').forEach(function (anchor) {
-            var hrefAttr = anchor.getAttribute('href');
+            let hrefAttr = anchor.getAttribute('href');
             if (!hrefAttr) return;
 
-            var href = hrefAttr.trim();
+            let href = hrefAttr.trim();
             if (!/\/ofertas\/?($|[?#])/i.test(href)) return;
 
             try {
-                var url = new URL(href, window.location.origin);
-                var path = (url.pathname || '').replace(/\/+$/, '').toLowerCase();
+                let url = new URL(href, window.location.origin);
+                let path = (url.pathname || '').replace(/\/+$/, '').toLowerCase();
                 if (path !== '/ofertas') return;
 
                 url.pathname = '/ofertas.html';
-                var normalized = /^\//.test(href) && !/^https?:\/\//i.test(href)
+                let normalized = /^\//.test(href) && !/^https?:\/\//i.test(href)
                     ? (url.pathname + url.search + url.hash)
                     : url.toString();
 
@@ -105,7 +105,7 @@ define([
 
     // Diferido: hotfix DOM + footer aria-label não são críticos para LCP/interatividade.
     // requestIdleCallback garante execução após o browser estar ocioso (pós-TTI).
-    var _ric = window.requestIdleCallback || function (cb) { setTimeout(cb, 300); };
+    let _ric = window.requestIdleCallback || function (cb) { setTimeout(cb, 300); };
 
     _ric(function () {
         if (shouldRunAwaPublicHotfix) {
@@ -119,9 +119,9 @@ define([
          * visible text content, which is already descriptive and satisfies 2.5.3.
          */
         document.querySelectorAll('.awa-footer-business-contact__action[aria-label]').forEach(function (link) {
-            var ariaLabel = (link.getAttribute('aria-label') || '').toLowerCase();
+            let ariaLabel = (link.getAttribute('aria-label') || '').toLowerCase();
             // textContent instead of innerText — innerText forces layout recalculation (reflow)
-            var visibleText = (link.textContent || '').replace(/\s+/g, ' ').trim().toLowerCase();
+            let visibleText = (link.textContent || '').replace(/\s+/g, ' ').trim().toLowerCase();
             if (visibleText && !ariaLabel.includes(visibleText)) {
                 link.removeAttribute('aria-label');
             }
@@ -169,22 +169,22 @@ define([
      * requestIdleCallback executa quando browser está ocioso (após LCP).
      */
     (window.requestIdleCallback || function (cb) { setTimeout(cb, 0); })(function () {
-        var mainEl = document.querySelector('main#maincontent');
+        let mainEl = document.querySelector('main#maincontent');
         if (mainEl && window.getComputedStyle(mainEl).display === 'none') {
-            var contentTopHome = document.querySelector('.content-top-home');
+            let contentTopHome = document.querySelector('.content-top-home');
             if (contentTopHome) {
                 contentTopHome.setAttribute('role', 'main');
                 contentTopHome.setAttribute('aria-label', 'Conteúdo principal');
             }
         }
-        var authLogo = document.querySelector('.block-authentication .wave-top img.logo');
+        let authLogo = document.querySelector('.block-authentication .wave-top img.logo');
         if (authLogo && !authLogo.getAttribute('alt')) {
             authLogo.setAttribute('alt', 'AWA Motos');
         }
     });
 
     if (window.MutationObserver && shouldRunAwaPublicHotfix) {
-        var observerTarget = document.querySelector('.page-wrapper') || document.body;
+        let observerTarget = document.querySelector('.page-wrapper') || document.body;
         if (observerTarget) {
 
             /*
@@ -194,10 +194,10 @@ define([
              * de forma síncrona para cada mutação. Isso impede que carrosséis
              * com muitos produtos travem a thread principal do browser.
              */
-            var _pendingNodes = [];
-            var _rafScheduled = false;
+            let _pendingNodes = [];
+            let _rafScheduled = false;
 
-            var hotfixObserver = new MutationObserver(function (mutations) {
+            let hotfixObserver = new MutationObserver(function (mutations) {
                 mutations.forEach(function (mutation) {
                     mutation.addedNodes.forEach(function (node) {
                         if (node && node.nodeType === 1) {
@@ -209,7 +209,7 @@ define([
                 if (!_rafScheduled && _pendingNodes.length > 0) {
                     _rafScheduled = true;
                     _ric(function () {
-                        var nodes = _pendingNodes.splice(0);
+                        let nodes = _pendingNodes.splice(0);
                         _rafScheduled = false;
                         nodes.forEach(applyAwaPublicHotfix);
                     });
@@ -248,14 +248,14 @@ define([
      * Tenta substituir _N.jpg por _1.jpg; se ainda falhar, esconde a imagem.
      */
     function fixBrokenProductImages(root) {
-        var scope = root && root.querySelectorAll ? root : document;
+        let scope = root && root.querySelectorAll ? root : document;
         scope.querySelectorAll('img[src*="/media/catalog/product/"]').forEach(function (img) {
             if (img.dataset.awaBrokenHandled) return;
             img.dataset.awaBrokenHandled = '1';
 
             function tryFallback() {
-                var src = img.getAttribute('src') || '';
-                var fallback = src.replace(/_\d+(\.(?:jpg|jpeg|png|webp))$/i, '_1$1');
+                let src = img.getAttribute('src') || '';
+                let fallback = src.replace(/_\d+(\.(?:jpg|jpeg|png|webp))$/i, '_1$1');
                 if (fallback !== src) {
                     img.removeEventListener('error', tryFallback);
                     img.addEventListener('error', function () {
@@ -284,11 +284,11 @@ define([
 
         // Also apply to dynamically loaded carousels
         if (window.MutationObserver) {
-            var imgObserverTarget = document.querySelector('.page-wrapper') || document.body;
+            let imgObserverTarget = document.querySelector('.page-wrapper') || document.body;
             if (imgObserverTarget) {
-                var _imgPendingNodes = [];
-                var _imgRafScheduled = false;
-                var imgObserver = new MutationObserver(function (mutations) {
+                let _imgPendingNodes = [];
+                let _imgRafScheduled = false;
+                let imgObserver = new MutationObserver(function (mutations) {
                     mutations.forEach(function (mutation) {
                         mutation.addedNodes.forEach(function (node) {
                             if (node && node.nodeType === 1) { _imgPendingNodes.push(node); }
@@ -297,7 +297,7 @@ define([
                     if (!_imgRafScheduled && _imgPendingNodes.length > 0) {
                         _imgRafScheduled = true;
                         _ric(function () {
-                            var nodes = _imgPendingNodes.splice(0);
+                            let nodes = _imgPendingNodes.splice(0);
                             _imgRafScheduled = false;
                             nodes.forEach(fixBrokenProductImages);
                         });

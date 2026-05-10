@@ -7,8 +7,8 @@ define([
     'use strict';
 
     function initWhenVisible($carousel, options, attemptsLeft, delayMs, dataFlag) {
-        var delay = delayMs || 120;
-        var remaining = attemptsLeft || 8;
+        let delay = delayMs || 120;
+        let remaining = attemptsLeft || 8;
 
         if (!$carousel || !$carousel.length) {
             return;
@@ -65,11 +65,11 @@ define([
 
     return function (config, element) {
         var $scope = $(element);
-        var carouselSelector = config.carouselSelector || '.owl';
-        var owlConfig = config.owl || {};
-        var dataFlag = config.dataFlag || 'awaOwlInit';
-        var withFirstActive = resolveBoolean(owlConfig.withFirstActive, true);
-        var options = {
+        let carouselSelector = config.carouselSelector || '.owl';
+        let owlConfig = config.owl || {};
+        let dataFlag = config.dataFlag || 'awaOwlInit';
+        let withFirstActive = resolveBoolean(owlConfig.withFirstActive, true);
+        let options = {
             lazyLoad: resolveBoolean(owlConfig.lazyLoad, true),
             autoPlay: resolveBoolean(owlConfig.autoPlay, false),
             navigation: resolveBoolean(owlConfig.navigation, true),

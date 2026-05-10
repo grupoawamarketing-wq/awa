@@ -14,7 +14,7 @@ define([], function () {
 
     function copyWithFallback(text) {
         return new Promise(function (resolve, reject) {
-            var helper = document.createElement('textarea');
+            let helper = document.createElement('textarea');
 
             helper.value = text;
             helper.setAttribute('readonly', 'readonly');
@@ -51,17 +51,17 @@ define([], function () {
     }
 
     return function (config, element) {
-        var root = element;
-        var options = config || {};
-        var selectors = options.selectors || {};
-        var messages = options.messages || {};
-        var flags = options.flags || {};
-        var source = root ? root.querySelector(selectors.source || '[data-awa-role="copy-source"]') : null;
-        var trigger = root ? root.querySelector(selectors.trigger || '[data-awa-role="copy-trigger"]') : null;
-        var label = trigger ? trigger.querySelector(selectors.label || '[data-awa-role="copy-label"]') : null;
-        var status = root ? root.querySelector(selectors.status || '[data-awa-role="copy-status"]') : null;
-        var defaultLabel = label ? label.textContent : '';
-        var resetDelay = Number.parseInt(flags.resetDelay, 10) || 2000;
+        let root = element;
+        let options = config || {};
+        let selectors = options.selectors || {};
+        let messages = options.messages || {};
+        let flags = options.flags || {};
+        let source = root ? root.querySelector(selectors.source || '[data-awa-role="copy-source"]') : null;
+        let trigger = root ? root.querySelector(selectors.trigger || '[data-awa-role="copy-trigger"]') : null;
+        let label = trigger ? trigger.querySelector(selectors.label || '[data-awa-role="copy-label"]') : null;
+        let status = root ? root.querySelector(selectors.status || '[data-awa-role="copy-status"]') : null;
+        let defaultLabel = label ? label.textContent : '';
+        let resetDelay = Number.parseInt(flags.resetDelay, 10) || 2000;
 
         if (!root || root.nodeType !== 1 || root.getAttribute('data-awa-copy-bound') === 'true') {
             return;
@@ -78,7 +78,7 @@ define([], function () {
         }
 
         trigger.addEventListener('click', function (event) {
-            var value = source.textContent ? source.textContent.trim() : '';
+            let value = source.textContent ? source.textContent.trim() : '';
 
             event.preventDefault();
 

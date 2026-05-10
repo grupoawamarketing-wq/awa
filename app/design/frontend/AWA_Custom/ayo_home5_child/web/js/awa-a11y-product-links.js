@@ -11,7 +11,7 @@
 define([], function () {
     'use strict';
 
-    var SELECTORS = [
+    let SELECTORS = [
         '.product-item-photo',
         '.product-thumb-link',
         '.product photo',
@@ -19,7 +19,7 @@ define([], function () {
     ].join(',');
 
     function fixProductLinks() {
-        var links = document.querySelectorAll(SELECTORS);
+        let links = document.querySelectorAll(SELECTORS);
         links.forEach(function (link) {
             // Skip if already has accessible name
             if (link.getAttribute('aria-label') ||
@@ -27,7 +27,7 @@ define([], function () {
                 link.textContent.trim()) {
                 return;
             }
-            var img = link.querySelector('img[alt]');
+            let img = link.querySelector('img[alt]');
             if (img && img.alt && img.alt.trim()) {
                 link.setAttribute('aria-label', img.alt.trim());
             }

@@ -6,10 +6,10 @@
             return;
         }
 
-        var galleryPlaceholders = document.querySelectorAll('.product.media .gallery-placeholder');
+        let galleryPlaceholders = document.querySelectorAll('.product.media .gallery-placeholder');
         galleryPlaceholders.forEach(function (placeholder) {
-            var hasFotorama = placeholder.querySelector('.fotorama-item, .fotorama, .fotorama__stage');
-            var fallback = placeholder.querySelector('img.gallery-placeholder__image');
+            let hasFotorama = placeholder.querySelector('.fotorama-item, .fotorama, .fotorama__stage');
+            let fallback = placeholder.querySelector('img.gallery-placeholder__image');
             if (hasFotorama && fallback) {
                 fallback.style.setProperty('display', 'none', 'important');
             }

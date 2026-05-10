@@ -7,23 +7,23 @@ define([], function () {
     'use strict';
 
     return function (config, element) {
-        var interval = (config && config.interval) || 5000;
-        var container = element.querySelector('.vmenu-promo-carousel');
+        let interval = (config && config.interval) || 5000;
+        let container = element.querySelector('.vmenu-promo-carousel');
         if (!container) { return; }
 
-        var slides = container.querySelectorAll('.vmenu-promo-slide');
+        let slides = container.querySelectorAll('.vmenu-promo-slide');
         if (slides.length < 2) { return; }
 
-        var current = 0;
-        var timer = null;
-        var paused = false;
+        let current = 0;
+        let timer = null;
+        let paused = false;
 
         function show(index) {
             slides[current].classList.remove('vmenu-promo-slide--active');
             slides[current].style.opacity = '0';
             slides[current].style.zIndex = '0';
 
-            var nextIndex = index % slides.length;
+            let nextIndex = index % slides.length;
 
             slides[nextIndex].style.zIndex = '1';
             

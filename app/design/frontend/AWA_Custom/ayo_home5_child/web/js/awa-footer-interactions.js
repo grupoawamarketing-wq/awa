@@ -6,13 +6,13 @@ define([
 
     return function (config, element) {
         var $root = $(element);
-        var mobileBreakpoint = Number(config.mobileBreakpoint) || 768;
-        var titleSelector = config.titleSelector || '.footer-container .velaFooterTitle, .footer-container .footer-block-title';
-        var panelSelector = config.panelSelector || '.velaContent, .footer-block-content';
-        var sliderSelector = config.sliderSelector || '.footer_brand_list_slider';
-        var brandSliderInitialized = false;
-        var resizeDelay = Number(config.resizeDelay) || 120;
-        var resizeTimer = null;
+        let mobileBreakpoint = Number(config.mobileBreakpoint) || 768;
+        let titleSelector = config.titleSelector || '.footer-container .velaFooterTitle, .footer-container .footer-block-title';
+        let panelSelector = config.panelSelector || '.velaContent, .footer-block-content';
+        let sliderSelector = config.sliderSelector || '.footer_brand_list_slider';
+        let brandSliderInitialized = false;
+        let resizeDelay = Number(config.resizeDelay) || 120;
+        let resizeTimer = null;
 
         if (!$root.length) {
             return;
@@ -37,7 +37,7 @@ define([
         function ensureLabelAttributes($elements) {
             $elements.each(function () {
                 var $element = $(this);
-                var label = normalizeLabel($element.attr('aria-label') || $element.attr('title') || $element.text());
+                let label = normalizeLabel($element.attr('aria-label') || $element.attr('title') || $element.text());
 
                 if (!label) {
                     return;
@@ -75,11 +75,11 @@ define([
         }
 
         function syncFooterSections() {
-            var isMobile = isMobileViewport();
+            let isMobile = isMobileViewport();
 
             $root.find(titleSelector).each(function () {
                 var $title = $(this);
-                var isExpanded = $title.attr('aria-expanded') === 'true';
+                let isExpanded = $title.attr('aria-expanded') === 'true';
 
                 if (!isMobile) {
                     setPanelState($title, true);
@@ -125,7 +125,7 @@ define([
             $root.find(titleSelector).each(function (index) {
                 var $title = $(this);
                 var $panel = getPanel($title);
-                var titleId = $title.attr('id') || 'awa-footer-title-' + String(index + 1);
+                let titleId = $title.attr('id') || 'awa-footer-title-' + String(index + 1);
 
                 $title.attr({
                     id: titleId,
@@ -174,9 +174,9 @@ define([
 
         function initBrandSlider() {
             var $slider = $root.find(sliderSelector);
-            var slidesCount;
-            var maxSlidesPerView;
-            var shouldLoop;
+            let slidesCount;
+            let maxSlidesPerView;
+            let shouldLoop;
 
             if (!$slider.length || brandSliderInitialized || $slider.data('awaSwiperInit')) {
                 return;
@@ -228,7 +228,7 @@ define([
 
         function scheduleBrandSliderInit() {
             var $slider = $root.find(sliderSelector);
-            var sliderElement;
+            let sliderElement;
 
             if (!$slider.length || brandSliderInitialized) {
                 return;
@@ -278,11 +278,11 @@ define([
 
             $toggleBtn.each(function () {
                 var $btn = $(this);
-                var panelId = $btn.attr('aria-controls');
+                let panelId = $btn.attr('aria-controls');
                 var $panel = panelId ? $('#' + panelId) : $btn.parent().find('.awa-footer-categories-expand__panel');
 
                 $btn.on('click.awaCategories', function () {
-                    var expanded = $btn.attr('aria-expanded') === 'true';
+                    let expanded = $btn.attr('aria-expanded') === 'true';
                     $btn.attr('aria-expanded', String(!expanded));
                     $panel.attr('aria-hidden', String(expanded));
                     if (expanded) {

@@ -8,13 +8,13 @@ define(['jquery'], function ($) {
      * Runs on: homepage, catalog-category-view, catalogsearch-result-index
      * ---------------------------------------------------------------- */
 
-    var OBSERVER_KEY   = '__awaHomeCategoryCompatObserver';
-    var SCHEDULED_KEY  = '__awaHomeCategoryCompatScheduled';
-    var MAX_OBS_FIRES  = 12;     /* disconnect after N relevant mutations */
-    var obsFireCount   = 0;
+    let OBSERVER_KEY   = '__awaHomeCategoryCompatObserver';
+    let SCHEDULED_KEY  = '__awaHomeCategoryCompatScheduled';
+    let MAX_OBS_FIRES  = 12;     /* disconnect after N relevant mutations */
+    let obsFireCount   = 0;
 
     /* Selectors that constitute "relevant" DOM additions worth re-running for */
-    var RELEVANT_SELECTORS = [
+    let RELEVANT_SELECTORS = [
         '.navigation.verticalmenu',
         '.togge-menu',
         '.navigation.custommenu',
@@ -27,7 +27,7 @@ define(['jquery'], function ($) {
     ];
 
     function isRelevantPage() {
-        var b = document.body;
+        let b = document.body;
         return !!(b && (
             b.classList.contains('cms-index-index') ||
             b.classList.contains('cms-home') ||
@@ -59,7 +59,7 @@ define(['jquery'], function ($) {
         $nav.attr('data-awa-component', $nav.attr('data-awa-component') || 'vertical-menu');
 
         var $panel = $nav.find('.togge-menu').first();
-        var isOpen = $panel.hasClass('menu-open') || isVisible($panel.get(0));
+        let isOpen = $panel.hasClass('menu-open') || isVisible($panel.get(0));
         $nav.toggleClass('is-open', !!isOpen);
 
         $nav.find('.ui-menu-item.parent, .ui-menu-item.level0.parent').each(function () {
@@ -67,14 +67,14 @@ define(['jquery'], function ($) {
             var $link    = $li.children('a').first();
             var $toggle  = $li.children('.open-children-toggle').first();
             var $submenu = $li.children('.submenu, .subchildmenu, ul.level0').first();
-            var label    = trimText($link.text()) || 'Submenu';
-            var open     = $li.hasClass('_active') || $li.hasClass('active') ||
+            let label    = trimText($link.text()) || 'Submenu';
+            let open     = $li.hasClass('_active') || $li.hasClass('active') ||
                            ($submenu.length && ($submenu.hasClass('opened') || isVisible($submenu.get(0))));
 
             $li.toggleClass('is-open', !!open).attr('data-awa-parent-item', 'true');
 
             if ($toggle.length) {
-                var panelId = $submenu.attr('id');
+                let panelId = $submenu.attr('id');
                 if (!panelId && $submenu.length) {
                     panelId = 'awa-vm-panel-' + Math.random().toString(36).slice(2, 9); // nosemgrep: rules/lgpl/javascript/crypto/rule-node-insecure-random-generator
                     $submenu.attr('id', panelId);
@@ -108,7 +108,7 @@ define(['jquery'], function ($) {
 
             $nav.find('a[href]').each(function () {
                 var $a    = $(this);
-                var label = trimText($a.text());
+                let label = trimText($a.text());
                 if (!label && $a.find('i.fa').length) { label = 'Link de navegação'; }
                 setLabel($a, label);
             });
@@ -116,9 +116,9 @@ define(['jquery'], function ($) {
             $nav.find('.open-children-toggle').each(function () {
                 var $t       = $(this);
                 var $li      = $t.closest('li');
-                var label    = trimText($li.children('a').first().text()) || 'Submenu';
+                let label    = trimText($li.children('a').first().text()) || 'Submenu';
                 var $sub     = $li.children('.submenu, .groupmenu, .subchildmenu').first();
-                var expanded = $li.hasClass('active') || $li.hasClass('_active') ||
+                let expanded = $li.hasClass('active') || $li.hasClass('_active') ||
                                ($sub.length && isVisible($sub.get(0)));
                 $t.attr('aria-expanded', expanded ? 'true' : 'false');
                 setLabel($t, (expanded ? 'Recolher ' : 'Expandir ') + label);
@@ -133,7 +133,7 @@ define(['jquery'], function ($) {
 
         var $input = $form.find('#search, #search-input-autocomplate, input[name="q"]').first();
         var $autocomplete = $('#search_autocomplete, .searchsuite-autocomplete').first();
-        var acVisible = $autocomplete.length && isVisible($autocomplete.get(0));
+        let acVisible = $autocomplete.length && isVisible($autocomplete.get(0));
 
         $form.attr('data-awa-component', $form.attr('data-awa-component') || 'search-form')
              .toggleClass('is-open', !!acVisible);
@@ -155,8 +155,8 @@ define(['jquery'], function ($) {
 
     /* ---- PLP / Filters ---- */
     function applyPlpA11y() {
-        var isMobile = window.matchMedia && window.matchMedia('(max-width: 767px)').matches;
-        var isCategoryOrSearch = document.body &&
+        let isMobile = window.matchMedia && window.matchMedia('(max-width: 767px)').matches;
+        let isCategoryOrSearch = document.body &&
             (document.body.classList.contains('catalog-category-view') ||
              document.body.classList.contains('catalogsearch-result-index'));
 
@@ -169,8 +169,8 @@ define(['jquery'], function ($) {
             var $item    = $(this);
             var $title   = $item.children('.filter-options-title').first();
             var $content = $item.children('.filter-options-content').first();
-            var expanded = $item.hasClass('active') || ($content.length && isVisible($content.get(0)));
-            var label    = trimText($title.text());
+            let expanded = $item.hasClass('active') || ($content.length && isVisible($content.get(0)));
+            let label    = trimText($title.text());
 
             if (!$title.length) { return; }
             $item.attr('data-awa-component', 'filter-group');
@@ -182,7 +182,7 @@ define(['jquery'], function ($) {
             setLabel($title, (expanded ? 'Recolher filtro ' : 'Expandir filtro ') + (label || 'Filtro'));
 
             if ($content.length) {
-                var cid = $content.attr('id');
+                let cid = $content.attr('id');
                 if (!cid) {
                     cid = 'awa-filter-content-' + Math.random().toString(36).slice(2, 9); // nosemgrep: rules/lgpl/javascript/crypto/rule-node-insecure-random-generator
                     $content.attr('id', cid);
@@ -241,8 +241,8 @@ define(['jquery'], function ($) {
             var $label = $('.shop-tab-select .toolbar.toolbar-products').find('.modes .modes-label').first();
             var $filter = $('#layered-ajax-filter-block, .block.filter').first();
             if (!$label.length) { return; }
-            var isMob    = window.matchMedia && window.matchMedia('(max-width: 767px)').matches;
-            var collapsed = isMob && $body.hasClass('awa-plp-filters-collapsed');
+            let isMob    = window.matchMedia && window.matchMedia('(max-width: 767px)').matches;
+            let collapsed = isMob && $body.hasClass('awa-plp-filters-collapsed');
             $label.text(collapsed ? 'Mostrar Filtros ·' : 'Ocultar Filtros ·')
                   .attr('aria-expanded', collapsed ? 'false' : 'true');
             if ($filter.length) {
@@ -256,14 +256,14 @@ define(['jquery'], function ($) {
         $('.products-grid .product-item-info, .products-grid .item-product').each(function () {
             var $card  = $(this);
             var $name  = $card.find('.product-item-name a').first();
-            var label  = trimText($name.text());
+            let label  = trimText($name.text());
 
             $card.attr('data-awa-component', $card.attr('data-awa-component') || 'product-card');
             if (label) { setLabel($name, label); }
 
             $card.find('.actions-primary .action, .product-item-actions .action').each(function () {
                 var $btn  = $(this);
-                var bText = trimText($btn.text()) || label;
+                let bText = trimText($btn.text()) || label;
                 if ($btn.hasClass('tocart'))     { setLabel($btn, label ? 'Comprar ' + label : 'Comprar produto'); }
                 else if ($btn.hasClass('towishlist')) { setLabel($btn, label ? 'Adicionar ' + label + ' aos favoritos' : 'Adicionar aos favoritos'); }
                 else if ($btn.hasClass('tocompare'))  { setLabel($btn, label ? 'Comparar ' + label : 'Comparar produto'); }
@@ -276,13 +276,13 @@ define(['jquery'], function ($) {
     function applyOwlA11y() {
         $('.owl-prev, .owl-next').each(function () {
             var $b = $(this);
-            var isPrev = $b.hasClass('owl-prev');
+            let isPrev = $b.hasClass('owl-prev');
             setLabel($b, isPrev ? 'Ver itens anteriores' : 'Ver próximos itens');
             $b.attr('aria-disabled', $b.hasClass('disabled') ? 'true' : 'false');
         });
         $('.owl-controls .owl-buttons div').each(function () {
             var $b = $(this);
-            var isPrev = $b.hasClass('owl-prev');
+            let isPrev = $b.hasClass('owl-prev');
             if (isPrev || $b.hasClass('owl-next')) {
                 setLabel($b, isPrev ? 'Ver itens anteriores' : 'Ver próximos itens');
             }
@@ -312,9 +312,9 @@ define(['jquery'], function ($) {
 
     /* ---- MutationObserver — only fires for RELEVANT node additions ---- */
     function hasRelevantNode(mutations) {
-        var i, j, node, $node;
+        let i, j, node, $node;
         for (i = 0; i < mutations.length; i++) {
-            var added = mutations[i].addedNodes;
+            let added = mutations[i].addedNodes;
             for (j = 0; j < added.length; j++) {
                 node = added[j];
                 if (node.nodeType !== 1) { continue; }       /* element nodes only */
@@ -326,7 +326,7 @@ define(['jquery'], function ($) {
                     continue;
                 }
                 $node = $(node);
-                for (var k = 0; k < RELEVANT_SELECTORS.length; k++) {
+                for (let k = 0; k < RELEVANT_SELECTORS.length; k++) {
                     if ($node.is(RELEVANT_SELECTORS[k]) || $node.find(RELEVANT_SELECTORS[k]).length) {
                         return true;
                     }

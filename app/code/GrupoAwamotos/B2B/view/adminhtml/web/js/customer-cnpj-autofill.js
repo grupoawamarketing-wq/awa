@@ -5,13 +5,13 @@ define([
     'use strict';
 
     return function (config) {
-        var lookupUrl = (config && config.lookupUrl) ? config.lookupUrl : '';
-        var clearCacheUrl = (config && config.clearCacheUrl) ? config.clearCacheUrl : '';
+        let lookupUrl = (config && config.lookupUrl) ? config.lookupUrl : '';
+        let clearCacheUrl = (config && config.clearCacheUrl) ? config.clearCacheUrl : '';
         if (!lookupUrl) {
             return;
         }
 
-        var contexts = [
+        let contexts = [
             {
                 key: 'customer_b2b',
                 documentType: 'cnpj_only',
@@ -80,7 +80,7 @@ define([
             }
         ];
 
-        var ufToRegionName = {
+        let ufToRegionName = {
             AC: 'Acre',
             AL: 'Alagoas',
             AP: 'Amapa',
@@ -119,7 +119,7 @@ define([
         }
 
         function normalizeText(value) {
-            var text = (value || '').toString();
+            let text = (value || '').toString();
             if (text.normalize) {
                 text = text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
             }
@@ -128,7 +128,7 @@ define([
         }
 
         function formatCnpj(digits) {
-            var value = cleanDigits(digits).slice(0, 14);
+            let value = cleanDigits(digits).slice(0, 14);
             if (value.length <= 2) {
                 return value;
             }
@@ -142,7 +142,7 @@ define([
         }
 
         function formatCep(cep) {
-            var digits = cleanDigits(cep).slice(0, 8);
+            let digits = cleanDigits(cep).slice(0, 8);
             if (digits.length <= 5) {
                 return digits;
             }
@@ -155,7 +155,7 @@ define([
         }
 
         function formatFieldInput(value, documentType) {
-            var digits = cleanDigits(value);
+            let digits = cleanDigits(value);
             if (!digits) {
                 return '';
             }
@@ -177,8 +177,8 @@ define([
             }
 
             var $root = rootElement ? $(rootElement) : $();
-            for (var i = 0; i < fieldSelectors.length; i++) {
-                var selector = fieldSelectors[i];
+            for (let i = 0; i < fieldSelectors.length; i++) {
+                let selector = fieldSelectors[i];
                 var $field = $();
 
                 if ($root.length) {
@@ -198,11 +198,11 @@ define([
         }
 
         function collectFields(fieldSelectors) {
-            var found = [];
-            var unique = [];
+            let found = [];
+            let unique = [];
 
-            for (var i = 0; i < fieldSelectors.length; i++) {
-                var selector = fieldSelectors[i];
+            for (let i = 0; i < fieldSelectors.length; i++) {
+                let selector = fieldSelectors[i];
                 $(selector).each(function () {
                     if ($.inArray(this, found) === -1) {
                         found.push(this);
@@ -220,7 +220,7 @@ define([
                 $control = $cnpjField.parent();
             }
 
-            var wrapperClass = 'ga-b2b-cnpj-tools-' + contextKey;
+            let wrapperClass = 'ga-b2b-cnpj-tools-' + contextKey;
             var $wrapper = $control.find('.' + wrapperClass);
             if ($wrapper.length) {
                 return $wrapper;
@@ -257,7 +257,7 @@ define([
                 return;
             }
 
-            var color = '#666';
+            let color = '#666';
             if (type === 'success') {
                 color = '#107c10';
             } else if (type === 'error') {
@@ -270,12 +270,12 @@ define([
         }
 
         function syncUiComponent($field, value) {
-            var fieldName = $field.attr('name') || '';
-            var dataIndex = $field.attr('data-index') || $field.data('index') || '';
+            let fieldName = $field.attr('name') || '';
+            let dataIndex = $field.attr('data-index') || $field.data('index') || '';
 
             // Extract the attribute code from name like "customer[b2b_cnpj]"
-            var attrCode = '';
-            var nameMatch = fieldName.match(/\[([^\]]+)\]$/);
+            let attrCode = '';
+            let nameMatch = fieldName.match(/\[([^\]]+)\]$/);
             if (nameMatch) {
                 attrCode = nameMatch[1];
             }
@@ -330,19 +330,19 @@ define([
         }
 
         function setRegionByUf(uf, $regionIdField, $regionTextField) {
-            var ufUpper = toUpperText(uf);
+            let ufUpper = toUpperText(uf);
             if (!ufUpper) {
                 return;
             }
 
-            var regionName = ufToRegionName[ufUpper] ? normalizeText(ufToRegionName[ufUpper]) : '';
-            var selected = false;
+            let regionName = ufToRegionName[ufUpper] ? normalizeText(ufToRegionName[ufUpper]) : '';
+            let selected = false;
 
             if ($regionIdField.length) {
-                var optionToSelect = null;
+                let optionToSelect = null;
                 $regionIdField.find('option').each(function () {
-                    var optionValue = toUpperText($(this).attr('value'));
-                    var optionText = normalizeText($(this).text());
+                    let optionValue = toUpperText($(this).attr('value'));
+                    let optionText = normalizeText($(this).text());
                     if (!optionValue) {
                         return;
                     }
@@ -373,8 +373,8 @@ define([
         }
 
         function applyResponse(context, cnpj, response, $cnpjField) {
-            var rootElement = $cnpjField.closest('.admin__fieldset, .admin__field, .admin__page-section, #order-billing_address, #order-shipping_address');
-            var selectors = context.fieldSelectors || {};
+            let rootElement = $cnpjField.closest('.admin__fieldset, .admin__field, .admin__page-section, #order-billing_address, #order-shipping_address');
+            let selectors = context.fieldSelectors || {};
 
             fillField(getFieldFromSelectors(selectors.razaoSocial, rootElement), response.razao_social || '', true);
             fillField(getFieldFromSelectors(selectors.nomeFantasia, rootElement), response.nome_fantasia || '', true);
@@ -384,7 +384,7 @@ define([
             fillField(getFieldFromSelectors(selectors.postcode, rootElement), formatCep(response.cep || ''), true);
             fillField(getFieldFromSelectors(selectors.street0, rootElement), response.logradouro || '', true);
 
-            var line2Value = '';
+            let line2Value = '';
             if (response.numero) {
                 line2Value = response.numero;
             }
@@ -499,12 +499,12 @@ define([
         }
 
         function bindContext(context) {
-            var foundAny = false;
-            var cnpjFields = collectFields(context.cnpjSelectors || []);
+            let foundAny = false;
+            let cnpjFields = collectFields(context.cnpjSelectors || []);
 
-            for (var i = 0; i < cnpjFields.length; i++) {
+            for (let i = 0; i < cnpjFields.length; i++) {
                 var $cnpjField = cnpjFields[i];
-                var boundKey = 'gaB2bCnpjBound_' + context.key;
+                let boundKey = 'gaB2bCnpjBound_' + context.key;
 
                 if ($cnpjField.data(boundKey)) {
                     foundAny = true;
@@ -520,13 +520,13 @@ define([
                     var $clearButton = $wrapper.find('.ga-b2b-cnpj-clear-cache');
 
                     $field.on('input.gaB2bCnpj', function () {
-                        var current = $field.val();
-                        var formatted = formatFieldInput(current, context.documentType);
+                        let current = $field.val();
+                        let formatted = formatFieldInput(current, context.documentType);
                         if (formatted !== current) {
                             $field.val(formatted);
                         }
 
-                        var digits = cleanDigits($field.val());
+                        let digits = cleanDigits($field.val());
                         if (digits.length < 14) {
                             $field.data('gaB2bLastLookup', '');
                             showMessage($wrapper, 'info', '');
@@ -541,9 +541,9 @@ define([
                             return;
                         }
 
-                        var timerKey = 'gaB2bCnpjTimer_' + context.key;
+                        let timerKey = 'gaB2bCnpjTimer_' + context.key;
                         clearTimeout($field.data(timerKey));
-                        var timer = setTimeout(function () {
+                        let timer = setTimeout(function () {
                             $field.data('gaB2bLastLookup', digits);
                             executeLookup(context, digits, $wrapper, $field, false);
                         }, 600);
@@ -551,7 +551,7 @@ define([
                     });
 
                     $button.on('click.gaB2bCnpj', function () {
-                        var digits = cleanDigits($field.val());
+                        let digits = cleanDigits($field.val());
                         if (digits.length !== 14) {
                             showMessage($wrapper, 'error', 'Informe um CNPJ com 14 dígitos.');
                             return;
@@ -562,7 +562,7 @@ define([
                     });
 
                     $clearButton.on('click.gaB2bCnpjClear', function () {
-                        var digits = cleanDigits($field.val());
+                        let digits = cleanDigits($field.val());
                         if (digits.length !== 14) {
                             showMessage($wrapper, 'error', 'Informe um CNPJ com 14 dígitos.');
                             return;
@@ -578,8 +578,8 @@ define([
         }
 
         function bindAllContexts() {
-            var found = false;
-            for (var i = 0; i < contexts.length; i++) {
+            let found = false;
+            for (let i = 0; i < contexts.length; i++) {
                 if (bindContext(contexts[i])) {
                     found = true;
                 }
@@ -591,7 +591,7 @@ define([
         bindAllContexts();
 
         if (window.MutationObserver && document.body) {
-            var observer = new MutationObserver(function () {
+            let observer = new MutationObserver(function () {
                 bindAllContexts();
             });
 
@@ -602,8 +602,8 @@ define([
             }, 120000);
         }
 
-        var attempts = 0;
-        var interval = setInterval(function () {
+        let attempts = 0;
+        let interval = setInterval(function () {
             attempts++;
             bindAllContexts();
 

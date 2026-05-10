@@ -14,16 +14,16 @@
     }
 
     function initFooterAccordion() {
-        var footer = document.querySelector('.footer.content, .page_footer');
+        let footer = document.querySelector('.footer.content, .page_footer');
         if (!footer) return;
 
         footer.addEventListener('click', function (e) {
             if (!isMobile()) return;
 
-            var title = e.target.closest('.footer-title, .velaFooterTitle, .block > .title');
+            let title = e.target.closest('.footer-title, .velaFooterTitle, .block > .title');
             if (!title) return;
 
-            var parent = title.parentElement;
+            let parent = title.parentElement;
             if (!parent) return;
 
             e.preventDefault();
@@ -32,17 +32,17 @@
     }
 
     function initVmenuAccordion() {
-        var vmenu = document.querySelector('.block-vertical-nav, .block.block-vmenu');
+        let vmenu = document.querySelector('.block-vertical-nav, .block.block-vmenu');
         if (!vmenu) return;
 
         vmenu.addEventListener('click', function (e) {
             if (!isMobile()) return;
 
-            var link = e.target.closest('.vela-vertical-menu > li > a');
+            let link = e.target.closest('.vela-vertical-menu > li > a');
             if (!link) return;
 
-            var li = link.parentElement;
-            var submenu = li.querySelector('.submenu, .sub-menu');
+            let li = link.parentElement;
+            let submenu = li.querySelector('.submenu, .sub-menu');
             if (!submenu) return;
 
             e.preventDefault();

@@ -8,14 +8,14 @@
 define([], function () {
     'use strict';
 
-    var STORAGE_KEY = 'awa_recent_searches';
-    var MAX_ITEMS   = 5;
+    let STORAGE_KEY = 'awa_recent_searches';
+    let MAX_ITEMS   = 5;
 
     /* ---- storage helpers ---- */
 
     function getRecent() {
         try {
-            var raw = localStorage.getItem(STORAGE_KEY);
+            let raw = localStorage.getItem(STORAGE_KEY);
             return raw ? JSON.parse(raw) : [];
         } catch (e) {
             return [];
@@ -31,13 +31,13 @@ define([], function () {
     }
 
     function addRecent(query) {
-        var trimmed = String(query || '').trim();
+        let trimmed = String(query || '').trim();
 
         if (trimmed.length < 2) {
             return;
         }
 
-        var list = getRecent().filter(function (s) {
+        let list = getRecent().filter(function (s) {
             return s !== trimmed;
         });
 
@@ -55,11 +55,11 @@ define([], function () {
             .replace(/>/g, '&gt;');
     }
 
-    var LISTBOX_ID = 'awa-recent-listbox';
+    let LISTBOX_ID = 'awa-recent-listbox';
 
     function buildHTML(searches) {
-        var items = searches.map(function (s, i) {
-            var id = 'awa-recent-opt-' + i;
+        let items = searches.map(function (s, i) {
+            let id = 'awa-recent-opt-' + i;
             return '<li class="awa-recent-item" role="option" id="' + id + '">' +
                 '<svg class="awa-recent-item__icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
                 '<polyline points="1 4 1 10 7 10"/>' +
@@ -88,13 +88,13 @@ define([], function () {
     /* ---- component ---- */
 
     return function (config, element) {
-        var opts     = config || {};
-        var input    = element.querySelector('[data-awa-search-input]') ||
+        let opts     = config || {};
+        let input    = element.querySelector('[data-awa-search-input]') ||
                        element.querySelector('#search');
-        var panel    = element.querySelector('[data-awa-search-panel]') ||
+        let panel    = element.querySelector('[data-awa-search-panel]') ||
                        element.querySelector('#search_autocomplete');
-        var form     = element.querySelector('form');
-        var maxItems = opts.maxItems || MAX_ITEMS;
+        let form     = element.querySelector('form');
+        let maxItems = opts.maxItems || MAX_ITEMS;
 
         if (!input || !panel) {
             return;
@@ -113,7 +113,7 @@ define([], function () {
                 return;
             }
 
-            var searches = getRecent().slice(0, maxItems);
+            let searches = getRecent().slice(0, maxItems);
 
             if (!searches.length) {
                 return;
@@ -122,7 +122,7 @@ define([], function () {
             /* remove stale recent panel if any */
             hideRecentPanel();
 
-            var html = buildHTML(searches);
+            let html = buildHTML(searches);
             panel.insertAdjacentHTML('afterbegin', html);
             panel.removeAttribute('hidden');
             panel.setAttribute('aria-hidden', 'false');
@@ -130,7 +130,7 @@ define([], function () {
         }
 
         function hideRecentPanel() {
-            var existing = panel.querySelector('[data-awa-recent-panel]');
+            let existing = panel.querySelector('[data-awa-recent-panel]');
 
             if (existing) {
                 existing.remove();
@@ -170,7 +170,7 @@ define([], function () {
         });
 
         input.addEventListener('input', function () {
-            var val = input.value.trim();
+            let val = input.value.trim();
 
             if (val.length >= 2) {
                 hideRecentPanel();
@@ -181,12 +181,12 @@ define([], function () {
 
         /* delegate clicks inside panel */
         panel.addEventListener('click', function (e) {
-            var queryBtn  = e.target.closest('[data-awa-recent-query]');
-            var removeBtn = e.target.closest('[data-awa-recent-remove]');
-            var clearBtn  = e.target.closest('[data-awa-clear-all]');
+            let queryBtn  = e.target.closest('[data-awa-recent-query]');
+            let removeBtn = e.target.closest('[data-awa-recent-remove]');
+            let clearBtn  = e.target.closest('[data-awa-clear-all]');
 
             if (queryBtn) {
-                var q = queryBtn.getAttribute('data-awa-recent-query');
+                let q = queryBtn.getAttribute('data-awa-recent-query');
                 input.value = q;
                 addRecent(q);
 
@@ -198,8 +198,8 @@ define([], function () {
             }
 
             if (removeBtn) {
-                var idx     = parseInt(removeBtn.getAttribute('data-awa-recent-remove'), 10);
-                var current = getRecent();
+                let idx     = parseInt(removeBtn.getAttribute('data-awa-recent-remove'), 10);
+                let current = getRecent();
                 current.splice(idx, 1);
                 saveRecent(current);
 
@@ -248,7 +248,7 @@ define([], function () {
         /* ArrowDown from input → focus first item */
         input.addEventListener('keydown', function (e) {
             if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp' && e.key !== 'Escape') return;
-            var recentPanel = panel.querySelector('[data-awa-recent-panel]');
+            let recentPanel = panel.querySelector('[data-awa-recent-panel]');
             if (!recentPanel) return;
 
             e.preventDefault();
@@ -259,7 +259,7 @@ define([], function () {
                 return;
             }
 
-            var btns = getQueryButtons();
+            let btns = getQueryButtons();
             if (!btns.length) return;
 
             if (e.key === 'ArrowDown') {
@@ -274,11 +274,11 @@ define([], function () {
         /* Arrow navigation between items; Escape returns to input */
         panel.addEventListener('keydown', function (e) {
             if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp' && e.key !== 'Escape') return;
-            var btn = e.target.closest('.awa-recent-item__query, .awa-recent-item__remove');
+            let btn = e.target.closest('.awa-recent-item__query, .awa-recent-item__remove');
             if (!btn) return;
 
             e.preventDefault();
-            var btns = getQueryButtons();
+            let btns = getQueryButtons();
 
             if (e.key === 'Escape') {
                 hideRecentPanel();
@@ -289,11 +289,11 @@ define([], function () {
             }
 
             /* Only navigate within query buttons */
-            var queryBtn = e.target.closest('.awa-recent-item__query');
+            let queryBtn = e.target.closest('.awa-recent-item__query');
             if (!queryBtn) return;
 
-            var idx = btns.indexOf(queryBtn);
-            var next;
+            let idx = btns.indexOf(queryBtn);
+            let next;
 
             if (e.key === 'ArrowDown') {
                 next = btns[idx + 1];
@@ -337,8 +337,8 @@ define([], function () {
                 return;
             }
 
-            var active = document.activeElement;
-            var tag    = active ? active.tagName.toLowerCase() : '';
+            let active = document.activeElement;
+            let tag    = active ? active.tagName.toLowerCase() : '';
 
             if (tag === 'input' || tag === 'textarea' || tag === 'select' ||
                 (active && active.isContentEditable)) {

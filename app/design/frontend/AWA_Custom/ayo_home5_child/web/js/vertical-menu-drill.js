@@ -15,31 +15,31 @@ define([
 ], function ($) {
     'use strict';
 
-    var DEFAULTS = {
+    let DEFAULTS = {
         desktopBreakpoint: 992,
         animDuration: 240,
         animEasing: 'swing'
     };
 
     function debounce(fn, ms) {
-        var t;
+        let t;
         return function () {
             clearTimeout(t);
-            var ctx  = this;
-            var args = arguments;
+            let ctx  = this;
+            let args = arguments;
             t = setTimeout(function () { fn.apply(ctx, args); }, ms || 120);
         };
     }
 
     return function (config, element) {
-        var cfg  = $.extend({}, DEFAULTS, config);
+        let cfg  = $.extend({}, DEFAULTS, config);
         var $nav = $(element);
 
         if ($nav.data('awaDrillInit')) { return; }
         $nav.data('awaDrillInit', 1);
 
-        var NS = '.awaDrill-' + Math.random().toString(36).slice(2);
-        var mql = window.matchMedia
+        let NS = '.awaDrill-' + Math.random().toString(36).slice(2);
+        let mql = window.matchMedia
             ? window.matchMedia('(min-width: ' + cfg.desktopBreakpoint + 'px)')
             : null;
 
@@ -50,9 +50,9 @@ define([
         var $list = $nav.find('.togge-menu').first();
         if (!$list.length) { return; }
 
-        var drillStack  = [];
-        var isBuilt     = false;
-        var isAnimating = false;
+        let drillStack  = [];
+        let isBuilt     = false;
+        let isAnimating = false;
 
         /* ---- Monta estrutura de painéis ---- */
         function buildDrillStage() {
@@ -87,8 +87,8 @@ define([
 
             var $subList = $li.children('.submenu, ul.level0, .subchildmenu').first();
             if ($subList.length) {
-                var parentHref = ($li.children('a').first().attr('href') || '#');
-                var parentText = ($li.children('a').first().text() || label).trim();
+                let parentHref = ($li.children('a').first().attr('href') || '#');
+                let parentText = ($li.children('a').first().text() || label).trim();
 
                 var $allLi = $('<li class="ui-menu-item vmm-drill-see-all" role="menuitem">' +
                     '<a href="' + $('<div>').text(parentHref).html() + '" class="level-top vmm-drill-see-all-link">' +
@@ -114,7 +114,7 @@ define([
             var $subList = $li.children('.submenu, ul.level0, .subchildmenu').first();
             if (!$subList.length) { return; }
 
-            var label     = ($li.children('a').first().text() || '').trim();
+            let label     = ($li.children('a').first().text() || '').trim();
             var $stage    = $list.find('.vmm-drill-stage');
             var $current  = drillStack[drillStack.length - 1].$panel;
             var $newPanel = buildSubPanel(drillStack.length, label, $li);
@@ -174,7 +174,7 @@ define([
             var $backBar = $list.find('.vmm-drill-back-bar');
             if (drillStack.length <= 1) { $backBar.hide(); return; }
             $backBar.show();
-            var crumbs = drillStack.map(function (s) { return s.label; });
+            let crumbs = drillStack.map(function (s) { return s.label; });
             crumbs.shift();
             $backBar.find('.vmm-drill-breadcrumb').text(crumbs.join(' \u203a '));
         }
@@ -218,12 +218,12 @@ define([
 
         /* ---- Swipe direita → voltar ---- */
         function bindSwipe() {
-            var touchStartX = 0;
+            let touchStartX = 0;
             $list.on('touchstart' + NS, function (e) {
                 touchStartX = e.originalEvent.touches[0].clientX;
             });
             $list.on('touchend' + NS, function (e) {
-                var dx = e.originalEvent.changedTouches[0].clientX - touchStartX;
+                let dx = e.originalEvent.changedTouches[0].clientX - touchStartX;
                 if (dx > 60 && drillStack.length > 1) { drillBack(); }
             });
         }

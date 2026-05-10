@@ -13,13 +13,13 @@
 define(['jquery', 'mage/apply/main'], function ($, mageApply) {
     'use strict';
 
-    var CAROUSEL_SELECTORS = [
+    let CAROUSEL_SELECTORS = [
         '.owl-stage',
         '.swiper-wrapper',
         '.slick-list'
     ].join(', ');
 
-    var QTY_COMPONENT_SELECTOR = '[data-mage-init*="awa-qty-control"]';
+    let QTY_COMPONENT_SELECTOR = '[data-mage-init*="awa-qty-control"]';
 
     function reinitQtyControls(container) {
         container.querySelectorAll(QTY_COMPONENT_SELECTOR).forEach(function (el) {
@@ -33,14 +33,14 @@ define(['jquery', 'mage/apply/main'], function ($, mageApply) {
     }
 
     function init() {
-        var carouselEls = document.querySelectorAll(CAROUSEL_SELECTORS);
+        let carouselEls = document.querySelectorAll(CAROUSEL_SELECTORS);
         if (!carouselEls.length) { return; }
 
-        var observers = [];
+        let observers = [];
 
         carouselEls.forEach(function (el) {
-            var obs = new MutationObserver(function (mutations) {
-                var hasAdded = mutations.some(function (m) { return m.addedNodes.length > 0; });
+            let obs = new MutationObserver(function (mutations) {
+                let hasAdded = mutations.some(function (m) { return m.addedNodes.length > 0; });
                 if (!hasAdded) { return; }
                 if (window.requestIdleCallback) {
                     window.requestIdleCallback(function () { reinitQtyControls(el); }, { timeout: 300 });

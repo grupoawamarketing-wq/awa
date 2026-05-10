@@ -18,12 +18,12 @@ define([
 
     return function (config, element) {
         var $scope = $(element);
-        var carouselSelector = config.carouselSelector || '.hot-deal-slide';
-        var countdownSelector = config.countdownSelector || '.super-deal-countdown';
-        var owlConfig = config.owl || {};
-        var labels = config.labels || {};
-        var countdownConfig = config.countdown || {};
-        var carouselOptions = {
+        let carouselSelector = config.carouselSelector || '.hot-deal-slide';
+        let countdownSelector = config.countdownSelector || '.super-deal-countdown';
+        let owlConfig = config.owl || {};
+        let labels = config.labels || {};
+        let countdownConfig = config.countdown || {};
+        let carouselOptions = {
             lazyLoad: resolveBoolean(owlConfig.lazyLoad, true),
             items: parseInt(owlConfig.items, 10) || 4,
             itemsDesktop: owlConfig.itemsDesktop || [1366, 4],

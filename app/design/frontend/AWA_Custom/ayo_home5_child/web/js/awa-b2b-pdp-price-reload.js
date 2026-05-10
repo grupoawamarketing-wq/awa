@@ -15,7 +15,7 @@
 define(['Magento_Customer/js/customer-data'], function (customerData) {
     'use strict';
 
-    var RELOAD_KEY = 'awa_b2b_pdp_reloaded';
+    let RELOAD_KEY = 'awa_b2b_pdp_reloaded';
 
     function isLoggedIn(customer) {
         if (!customer || typeof customer !== 'object') {
@@ -33,7 +33,7 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
     }
 
     function isPriceFenced() {
-        var el = document.querySelector('.b2b-login-to-see-price');
+        let el = document.querySelector('.b2b-login-to-see-price');
         return !!(el && (el.offsetWidth || el.offsetHeight));
     }
 
@@ -42,8 +42,8 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
     }
 
     function hydratePdpPrice() {
-        var productInput = document.querySelector('#product_addtocart_form input[name="product"]');
-        var fencedPrice = document.querySelector('.product-info-price .b2b-login-to-see-price');
+        let productInput = document.querySelector('#product_addtocart_form input[name="product"]');
+        let fencedPrice = document.querySelector('.product-info-price .b2b-login-to-see-price');
 
         if (!productInput || !productInput.value || !fencedPrice || typeof window.fetch !== 'function') {
             return Promise.resolve(false);
@@ -57,7 +57,7 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
         }).then(function (response) {
             return response.ok ? response.json() : null;
         }).then(function (payload) {
-            var item;
+            let item;
 
             if (!payload || !payload.success || !payload.allowed || !payload.items) {
                 return false;
@@ -106,14 +106,14 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
     }
 
     // Verificar customer-data imediatamente (pode ja estar em localStorage)
-    var initial = customerData.get('customer')();
+    let initial = customerData.get('customer')();
     if (isLoggedIn(initial)) {
         tryRefresh(initial);
         return;
     }
 
     // Aguardar carregamento async do customer-data (~500ms)
-    var unsubscribe = customerData.get('customer').subscribe(function (customer) {
+    let unsubscribe = customerData.get('customer').subscribe(function (customer) {
         tryRefresh(customer);
         // Limpar subscribe apos primeira execucao
         if (typeof unsubscribe === 'function') {

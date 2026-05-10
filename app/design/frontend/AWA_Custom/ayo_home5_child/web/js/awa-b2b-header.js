@@ -6,7 +6,7 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
     'use strict';
 
     function updateAuthPrompt(data) {
-        var el = document.querySelector('[data-awa-header-auth]');
+        let el = document.querySelector('[data-awa-header-auth]');
         if (!el) { return; }
         if (data && data.fullname) {
             el.style.setProperty('display', 'none', 'important');
@@ -15,7 +15,7 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
         }
     }
 
-    var customer = customerData.get('customer');
+    let customer = customerData.get('customer');
     updateAuthPrompt(customer());
     customer.subscribe(updateAuthPrompt);
 });

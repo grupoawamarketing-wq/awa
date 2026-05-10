@@ -21,7 +21,7 @@ define([
 ], function ($, ko, BaseComponent, customerData) {
     'use strict';
 
-    var POPULAR_KEYWORDS = [
+    let POPULAR_KEYWORDS = [
         { term: 'Bagageiro', url: '/catalogsearch/result/?q=bagageiro' },
         { term: 'Bauleto', url: '/catalogsearch/result/?q=bauleto' },
         { term: 'Retrovisor', url: '/catalogsearch/result/?q=retrovisor' },
@@ -114,7 +114,7 @@ define([
          * Internal: fill the search input, update state, and fire the dataProvider
          */
         _fillAndSearch: function (term) {
-            var input = this._getInput();
+            let input = this._getInput();
 
             if (!input.length || !term) {
                 return;
@@ -138,7 +138,7 @@ define([
          * Bind ESC key to close the dropdown
          */
         _bindEscKey: function () {
-            var self = this;
+            let self = this;
 
             $(document).on('keydown.awaSearchEsc', function (e) {
                 if (e.key === 'Escape' && self.showPopup()) {
@@ -151,7 +151,7 @@ define([
          * Patch the parent's AJAX mechanism to track searching state
          */
         _patchSearchingState: function () {
-            var self = this;
+            let self = this;
 
             $(document).ajaxSend(function (event, jqXHR, settings) {
                 if (settings.url && settings.url.indexOf('searchsuiteautocomplete') !== -1) {
@@ -170,14 +170,14 @@ define([
          * Highlight matching query text in a string (returns safe HTML)
          */
         highlightMatch: function (text) {
-            var input = this._getInput(),
+            let input = this._getInput(),
                 query = input.length ? $.trim(input.val() || '') : '';
 
             if (!query || !text) {
                 return $('<span>').text(text || '').html();
             }
 
-            var escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
+            let escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
                 regex = new RegExp('(' + escaped + ')', 'gi'), // nosemgrep: javascript/dos/rule-non-literal-regexp -- input is pre-escaped via replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
                 safeText = $('<span>').text(text).html();
 
@@ -188,14 +188,14 @@ define([
          * Keyboard navigation: arrows + Enter within dropdown
          */
         _bindKeyboardNav: function () {
-            var self = this;
+            let self = this;
 
             $(document).on('keydown.awaSearchNav', function (e) {
                 if (!self.showPopup()) {
                     return;
                 }
 
-                var key = e.key,
+                let key = e.key,
                     idx = self.navIndex(),
                     max = self._navItemCount() - 1;
 
@@ -221,10 +221,10 @@ define([
          */
         _scrollActiveIntoView: function () {
             window.setTimeout(function () {
-                var active = document.querySelector('#searchsuite-autocomplete .awa-ac-nav-active');
+                let active = document.querySelector('#searchsuite-autocomplete .awa-ac-nav-active');
 
                 if (active && typeof active.scrollIntoView === 'function') {
-                    var rm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                    let rm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
                     active.scrollIntoView({ block: 'nearest', behavior: rm ? 'auto' : 'smooth' });
                 }
             }, 20);
@@ -234,7 +234,7 @@ define([
          * Update aria-activedescendant on search input
          */
         _updateAriaActiveDescendant: function () {
-            var input = this._getInput(),
+            let input = this._getInput(),
                 idx = this.navIndex();
 
             if (!input.length) {
@@ -252,7 +252,7 @@ define([
          * Activate the currently nav-highlighted item
          */
         _activateNavItem: function (idx) {
-            var kwLen = this.popularKeywords().length,
+            let kwLen = this.popularKeywords().length,
                 suggestData, productData, suggestLen;
 
             if (this.shouldShowDiscovery()) {
@@ -278,10 +278,10 @@ define([
          * Save search term to recent searches when form is submitted
          */
         _bindFormSubmit: function () {
-            var self = this;
+            let self = this;
 
             $('#search_mini_form').on('submit.awaSearchRecent', function () {
-                var term = $.trim(self._getInput().val() || '');
+                let term = $.trim(self._getInput().val() || '');
 
                 if (term.length > 1 && typeof self.saveRecentSearch === 'function') {
                     self.saveRecentSearch(term);
@@ -293,12 +293,12 @@ define([
          * Bind focus/blur/input events for discovery panel management
          */
         _bindDiscoveryEvents: function () {
-            var self = this;
-            var selectors = '#search_mini_form #search, #search_mini_form input[name="q"]';
+            let self = this;
+            let selectors = '#search_mini_form #search, #search_mini_form input[name="q"]';
 
             function updateQueryState() {
-                var input = self._getInput();
-                var value = input.length ? $.trim(input.val() || '') : '';
+                let input = self._getInput();
+                let value = input.length ? $.trim(input.val() || '') : '';
                 self.hasQuery(value.length > 0);
                 self.navIndex(-1);
                 self._updateAriaActiveDescendant();
@@ -306,11 +306,11 @@ define([
 
             function closeIfOutside() {
                 window.setTimeout(function () {
-                    var activeEl = document.activeElement;
-                    var popup = document.getElementById('searchsuite-autocomplete');
-                    var input = self._getInput().get(0);
-                    var insidePopup = popup && activeEl ? popup.contains(activeEl) : false;
-                    var isInput = !!(input && activeEl === input);
+                    let activeEl = document.activeElement;
+                    let popup = document.getElementById('searchsuite-autocomplete');
+                    let input = self._getInput().get(0);
+                    let insidePopup = popup && activeEl ? popup.contains(activeEl) : false;
+                    let isInput = !!(input && activeEl === input);
 
                     if (!insidePopup && !isInput) {
                         self.isInputFocused(false);
@@ -341,7 +341,7 @@ define([
                     self.isInputFocused(true);
                 })
                 .on('mousedown.awaSearchDiscovery touchstart.awaSearchDiscovery', function (event) {
-                    var root = document.querySelector('.header .top-search .block-search');
+                    let root = document.querySelector('.header .top-search .block-search');
 
                     if (root && !root.contains(event.target)) {
                         self.isInputFocused(false);

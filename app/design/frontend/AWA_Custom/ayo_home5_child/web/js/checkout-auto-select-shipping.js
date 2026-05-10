@@ -24,8 +24,8 @@ define([
             selectShippingMethodAction,
             checkoutData
         ) {
-            var isNormalizingRates = false;
-            var hasPatchedSetShippingRates = false;
+            let isNormalizingRates = false;
+            let hasPatchedSetShippingRates = false;
 
             function getRateCode(rate) {
                 if (!rate) {
@@ -36,8 +36,8 @@ define([
             }
 
             function sanitizeRates(rates) {
-                var availableRates = Array.isArray(rates) ? rates.filter(Boolean) : [];
-                var validRates = availableRates.filter(function (rate) {
+                let availableRates = Array.isArray(rates) ? rates.filter(Boolean) : [];
+                let validRates = availableRates.filter(function (rate) {
                     return rate && rate.carrier_code && rate.method_code && !rate.error_message;
                 });
 
@@ -45,7 +45,7 @@ define([
             }
 
             function patchSetShippingRates() {
-                var originalSetShippingRates;
+                let originalSetShippingRates;
 
                 if (hasPatchedSetShippingRates || typeof shippingService.setShippingRates !== 'function') {
                     return;
@@ -59,8 +59,8 @@ define([
             }
 
             function syncSingleRate(rates) {
-                var availableRates = sanitizeRates(rates);
-                var selectedRate = quote.shippingMethod();
+                let availableRates = sanitizeRates(rates);
+                let selectedRate = quote.shippingMethod();
 
                 if (!isNormalizingRates && availableRates.length === 1 && Array.isArray(rates) && availableRates.length !== rates.filter(Boolean).length) {
                     isNormalizingRates = true;

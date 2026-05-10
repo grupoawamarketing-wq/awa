@@ -24,9 +24,9 @@ define(['jquery'], function ($) {
         // ── Submenu de terceiro nível: abre à esq. ou dir. conforme espaço ─
         $nav.find('li.classic .subchildmenu > li.parent').on('mouseover', function () {
             var $popup   = $(this).children('ul.subchildmenu');
-            var wWidth   = $(window).innerWidth();
-            var pos      = $(this).offset();
-            var cWidth   = $popup.outerWidth();
+            let wWidth   = $(window).innerWidth();
+            let pos      = $(this).offset();
+            let cWidth   = $popup.outerWidth();
 
             if (wWidth <= pos.left + $(this).outerWidth() + cWidth) {
                 $popup.css({ left: 'auto', right: '100%', borderRadius: '6px 0 6px 6px' });
@@ -38,9 +38,9 @@ define(['jquery'], function ($) {
         // ── Submenu de nível 0: abre à esq. ou dir. conforme espaço ───────
         $nav.find('li.staticwidth.parent, li.classic.parent').on('mouseover', function () {
             var $popup = $(this).children('.submenu');
-            var wWidth = $(window).innerWidth();
-            var pos    = $(this).offset();
-            var cWidth = $popup.outerWidth();
+            let wWidth = $(window).innerWidth();
+            let pos    = $(this).offset();
+            let cWidth = $popup.outerWidth();
 
             if (wWidth <= pos.left + $(this).outerWidth() + cWidth) {
                 $popup.css({ left: 'auto', right: '0', borderRadius: '6px 0 6px 6px' });

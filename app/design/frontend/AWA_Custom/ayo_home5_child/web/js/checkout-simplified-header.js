@@ -19,7 +19,7 @@ define([], function () {
     'use strict';
 
     /** @type {Set<string>} Properties to block entirely on wp-header */
-    var BLOCKED_PROPS = [
+    let BLOCKED_PROPS = [
         'grid-template-columns', 'grid-template-rows',
         'grid-template-areas', 'grid-template'
     ];
@@ -33,7 +33,7 @@ define([], function () {
      * @returns {Function} The original setProperty (bound)
      */
     function interceptSetProperty(el, overrides, blocked) {
-        var orig = el.style.setProperty.bind(el.style);
+        let orig = el.style.setProperty.bind(el.style);
 
         el.style.setProperty = function (prop, value, priority) {
             if (overrides[prop]) {
@@ -58,7 +58,7 @@ define([], function () {
      * @param {HTMLElement} el - Target element
      */
     function blockSetAttribute(el) {
-        var orig = el.setAttribute.bind(el);
+        let orig = el.setAttribute.bind(el);
 
         el.setAttribute = function (name, value) {
             if (name === 'style') {
@@ -76,9 +76,9 @@ define([], function () {
      * @param {Object} styles - Map of property name → {value, priority}
      */
     function applyInitial(origSet, styles) {
-        var props = Object.keys(styles);
+        let props = Object.keys(styles);
 
-        for (var i = 0; i < props.length; i++) {
+        for (let i = 0; i < props.length; i++) {
             origSet(props[i], styles[props[i]].value, styles[props[i]].priority);
         }
     }
@@ -93,20 +93,20 @@ define([], function () {
             return;
         }
 
-        var wpH = document.querySelector('.wp-header');
-        var topS = document.querySelector('.wp-header > .top-search');
+        let wpH = document.querySelector('.wp-header');
+        let topS = document.querySelector('.wp-header > .top-search');
 
         if (!wpH) {
             return;
         }
 
         // --- wp-header: force flex layout, block grid ---
-        var wpOverrides = {
+        let wpOverrides = {
             'display': {value: 'flex', priority: 'important'},
             'gap': {value: '0', priority: 'important'}
         };
 
-        var wpStyles = {
+        let wpStyles = {
             'display': {value: 'flex', priority: 'important'},
             'align-items': {value: 'center', priority: 'important'},
             'justify-content': {value: 'center', priority: 'important'},
@@ -118,20 +118,20 @@ define([], function () {
 
         // Clear existing inline styles before intercepting
         wpH.removeAttribute('style');
-        var origWpSet = interceptSetProperty(wpH, wpOverrides, BLOCKED_PROPS);
+        let origWpSet = interceptSetProperty(wpH, wpOverrides, BLOCKED_PROPS);
 
         blockSetAttribute(wpH);
         applyInitial(origWpSet, wpStyles);
 
         // --- top-search: force hidden ---
         if (topS) {
-            var tsOverrides = {
+            let tsOverrides = {
                 'display': {value: 'none', priority: 'important'},
                 'min-height': {value: '0', priority: 'important'},
                 'height': {value: '0', priority: 'important'}
             };
 
-            var tsStyles = {
+            let tsStyles = {
                 'display': {value: 'none', priority: 'important'},
                 'height': {value: '0', priority: 'important'},
                 'overflow': {value: 'hidden', priority: 'important'},
@@ -139,7 +139,7 @@ define([], function () {
             };
 
             topS.removeAttribute('style');
-            var origTsSet = interceptSetProperty(topS, tsOverrides, BLOCKED_PROPS);
+            let origTsSet = interceptSetProperty(topS, tsOverrides, BLOCKED_PROPS);
 
             blockSetAttribute(topS);
             applyInitial(origTsSet, tsStyles);

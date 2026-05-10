@@ -36,15 +36,15 @@
     }
     window.__awaRound3PdpStickyCtaInit = true;
 
-    var MOBILE_QUERY = '(max-width: 767px)';
-    var REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
-    var INVALID_STICKY_LABEL_RE = /\b(entrar|login|cadastro|acessar)\b/i;
-    var stickyStarted = false;
-    var deferredRetryBound = false;
-    var deferredRetryObserver = null;
-    var deferredRetryIntervalId = null;
-    var deferredRetryTimeoutId = null;
-    var SELECTORS = {
+    let MOBILE_QUERY = '(max-width: 767px)';
+    let REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
+    let INVALID_STICKY_LABEL_RE = /\b(entrar|login|cadastro|acessar)\b/i;
+    let stickyStarted = false;
+    let deferredRetryBound = false;
+    let deferredRetryObserver = null;
+    let deferredRetryIntervalId = null;
+    let deferredRetryTimeoutId = null;
+    let SELECTORS = {
         addToCart: '#product-addtocart-button',
         addToCartForm: '#product_addtocart_form',
         b2bPriceGate: '.product-info-main .b2b-login-to-see-price',
@@ -99,8 +99,8 @@
     }
 
     function resolveAddToCartButton() {
-        var button = document.querySelector(SELECTORS.addToCart);
-        var form;
+        let button = document.querySelector(SELECTORS.addToCart);
+        let form;
 
         if (!button) {
             return null;
@@ -119,7 +119,7 @@
     }
 
     function hasValidCartAction(form) {
-        var action;
+        let action;
 
         if (!form || !form.getAttribute) {
             return false;
@@ -130,22 +130,22 @@
     }
 
     function hasVisibleB2bPriceGate() {
-        var gate = document.querySelector(SELECTORS.b2bPriceGate);
+        let gate = document.querySelector(SELECTORS.b2bPriceGate);
         return isVisible(gate);
     }
 
     function hasVisibleB2bLoginReplacement() {
-        var replacement = document.querySelector(SELECTORS.b2bLoginButton);
+        let replacement = document.querySelector(SELECTORS.b2bLoginButton);
         return isVisible(replacement);
     }
 
     function hasVisiblePendingBanner() {
-        var pendingBanner = document.querySelector(SELECTORS.b2bPendingBanner);
+        let pendingBanner = document.querySelector(SELECTORS.b2bPendingBanner);
         return isVisible(pendingBanner);
     }
 
     function hasRestrictedB2bBodyState() {
-        var body = document.body;
+        let body = document.body;
 
         if (!body) {
             return false;
@@ -156,8 +156,8 @@
     }
 
     function isRestrictedB2bContext(button) {
-        var form = button ? (button.form || button.closest(SELECTORS.addToCartForm)) : null;
-        var gateVisible = hasVisibleB2bPriceGate();
+        let form = button ? (button.form || button.closest(SELECTORS.addToCartForm)) : null;
+        let gateVisible = hasVisibleB2bPriceGate();
 
         if (hasRestrictedB2bBodyState()) {
             return true;
@@ -179,8 +179,8 @@
     }
 
     function isStickyCapableAddToCartButton(button) {
-        var form;
-        var label;
+        let form;
+        let label;
 
         if (!button) {
             return false;
@@ -228,9 +228,9 @@
     }
 
     function enhanceQtyControls() {
-        var qtyInput = document.getElementById('qty');
-        var qtyUp = document.querySelector('.info-qty .qty-up');
-        var qtyDown = document.querySelector('.info-qty .qty-down');
+        let qtyInput = document.getElementById('qty');
+        let qtyUp = document.querySelector('.info-qty .qty-up');
+        let qtyDown = document.querySelector('.info-qty .qty-down');
 
         if (qtyInput) {
             setAttrIfMissing(qtyInput, 'inputmode', 'numeric');
@@ -254,9 +254,9 @@
     }
 
     function getMediaSentinel() {
-        var nodes = document.querySelectorAll(SELECTORS.media);
-        var i;
-        var rect;
+        let nodes = document.querySelectorAll(SELECTORS.media);
+        let i;
+        let rect;
 
         for (i = 0; i < nodes.length; i += 1) {
             rect = nodes[i].getBoundingClientRect();
@@ -269,19 +269,19 @@
     }
 
     function getPriceText() {
-        var node = document.querySelector(SELECTORS.price);
+        let node = document.querySelector(SELECTORS.price);
         return normalizeText(node ? (node.textContent || '') : '');
     }
 
     function createStickyUi(getButton) {
-        var bar = document.createElement('div');
+        let bar = document.createElement('div');
         bar.className = 'awa-pdp-sticky-cta';
         bar.setAttribute('aria-hidden', 'true');
         bar.innerHTML = '<div class="awa-pdp-sticky-cta__inner" role="region" aria-label="Atalho de compra do produto"><div class="awa-pdp-sticky-cta__meta"><span class="awa-pdp-sticky-cta__label">Comprar agora</span><span class="awa-pdp-sticky-cta__price"></span></div><button type="button" class="awa-pdp-sticky-cta__button" title="Comprar" aria-label="Comprar">Comprar</button></div>';
         document.body.appendChild(bar);
 
-        var stickyButton = bar.querySelector('.awa-pdp-sticky-cta__button');
-        var stickyPrice = bar.querySelector('.awa-pdp-sticky-cta__price');
+        let stickyButton = bar.querySelector('.awa-pdp-sticky-cta__button');
+        let stickyPrice = bar.querySelector('.awa-pdp-sticky-cta__price');
 
         function getLiveButton() {
             if (typeof getButton !== 'function') {
@@ -291,8 +291,8 @@
         }
 
         stickyButton.addEventListener('click', function () {
-            var behavior = prefersReducedMotion() ? 'auto' : 'smooth';
-            var button = getLiveButton();
+            let behavior = prefersReducedMotion() ? 'auto' : 'smooth';
+            let button = getLiveButton();
 
             if (!button) {
                 return;
@@ -323,10 +323,10 @@
         });
 
         function syncFromOriginal() {
-            var button = getLiveButton();
-            var label = getButtonLabel(button) || 'Comprar';
-            var priceText = getPriceText();
-            var canAct = isActionableAddToCartButton(button);
+            let button = getLiveButton();
+            let label = getButtonLabel(button) || 'Comprar';
+            let priceText = getPriceText();
+            let canAct = isActionableAddToCartButton(button);
 
             stickyButton.textContent = label;
             stickyButton.title = label;
@@ -340,7 +340,7 @@
         syncFromOriginal();
 
         if (window.MutationObserver) {
-            var observeTarget = document.querySelector(SELECTORS.productInfoMain) || document.body;
+            let observeTarget = document.querySelector(SELECTORS.productInfoMain) || document.body;
 
             new MutationObserver(function () {
                 try {
@@ -373,14 +373,14 @@
 
         enhanceQtyControls();
 
-        var addToCartButton = resolveAddToCartButton();
-        var productInfo = document.querySelector(SELECTORS.productInfoMain);
+        let addToCartButton = resolveAddToCartButton();
+        let productInfo = document.querySelector(SELECTORS.productInfoMain);
         if (!addToCartButton || !productInfo || !isStickyCapableAddToCartButton(addToCartButton)) {
             scheduleDeferredInit();
             return;
         }
 
-        var mediaSentinel = getMediaSentinel();
+        let mediaSentinel = getMediaSentinel();
         if (!mediaSentinel) {
             scheduleDeferredInit();
             return;
@@ -395,19 +395,19 @@
         stickyStarted = true;
         clearDeferredRetry();
 
-        var sticky = createStickyUi(function () {
-            var liveButton = resolveAddToCartButton();
+        let sticky = createStickyUi(function () {
+            let liveButton = resolveAddToCartButton();
             if (liveButton && liveButton !== addToCartButton) {
                 addToCartButton = liveButton;
             }
             return addToCartButton;
         });
 
-        var body = document.body;
-        var mq = window.matchMedia ? window.matchMedia(MOBILE_QUERY) : null;
+        let body = document.body;
+        let mq = window.matchMedia ? window.matchMedia(MOBILE_QUERY) : null;
 
         function shouldShowSticky() {
-            var button = resolveAddToCartButton();
+            let button = resolveAddToCartButton();
             if (mq && !mq.matches) {
                 return false;
             }
@@ -425,8 +425,8 @@
 
         if (window.IntersectionObserver) {
             new IntersectionObserver(function (entries) {
-                var entry = entries[0];
-                var isVisibleNow = shouldShowSticky() && entry && !entry.isIntersecting;
+                let entry = entries[0];
+                let isVisibleNow = shouldShowSticky() && entry && !entry.isIntersecting;
                 setVisible(isVisibleNow);
                 try {
                     sticky.sync();
@@ -435,8 +435,8 @@
                 }
             }, { root: null, threshold: 0.05 }).observe(mediaSentinel);
         } else {
-            var onScroll = function () {
-                var rect = mediaSentinel.getBoundingClientRect();
+            let onScroll = function () {
+                let rect = mediaSentinel.getBoundingClientRect();
                 setVisible(shouldShowSticky() && rect.bottom < 0);
                 try {
                     sticky.sync();

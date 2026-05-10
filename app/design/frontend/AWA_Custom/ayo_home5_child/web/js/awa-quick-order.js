@@ -20,12 +20,12 @@ define([
 ], function ($, urlHelper, customerData) {
     'use strict';
 
-    var MODAL_ID   = 'awa-qo-modal';
-    var DRAFT_KEY  = 'awa_quick_order_draft';
-    var modal      = null;
-    var isOpen     = false;
-    var resolving  = false;
-    var resolvedItems = [];
+    let MODAL_ID   = 'awa-qo-modal';
+    let DRAFT_KEY  = 'awa_quick_order_draft';
+    let modal      = null;
+    let isOpen     = false;
+    let resolving  = false;
+    let resolvedItems = [];
 
     /* ---- utilities ---- */
 
@@ -46,9 +46,9 @@ define([
             .map(function (l) { return l.trim(); })
             .filter(function (l) { return l.length > 0; })
             .map(function (l) {
-                var parts = l.split(/[\s,;]+/);
-                var sku   = (parts[0] || '').toUpperCase().trim();
-                var qty   = parseInt(parts[1], 10);
+                let parts = l.split(/[\s,;]+/);
+                let sku   = (parts[0] || '').toUpperCase().trim();
+                let qty   = parseInt(parts[1], 10);
                 return { sku: sku, qty: (isNaN(qty) || qty < 1) ? 1 : qty };
             })
             .filter(function (i) { return i.sku.length > 0; });
@@ -57,8 +57,8 @@ define([
     /* ---- REST catalog lookup ---- */
 
     function resolveSku(sku) {
-        var fields = 'items[id,sku,name,price,status,extension_attributes[stock_item[qty,is_in_stock]]]';
-        var url    = '/rest/V1/products'
+        let fields = 'items[id,sku,name,price,status,extension_attributes[stock_item[qty,is_in_stock]]]';
+        let url    = '/rest/V1/products'
             + '?searchCriteria[filterGroups][0][filters][0][field]=sku'
             + '&searchCriteria[filterGroups][0][filters][0][value]=' + encodeURIComponent(sku)
             + '&searchCriteria[filterGroups][0][filters][0][conditionType]=eq'
@@ -70,12 +70,12 @@ define([
         })
         .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
         .then(function (data) {
-            var items = data.items || [];
+            let items = data.items || [];
             if (!items.length) {
                 return { sku: sku, error: 'SKU não encontrado' };
             }
-            var p  = items[0];
-            var si = ((p.extension_attributes || {}).stock_item) || {};
+            let p  = items[0];
+            let si = ((p.extension_attributes || {}).stock_item) || {};
             return {
                 sku:      p.sku,
                 id:       p.id,
@@ -116,10 +116,10 @@ define([
             return document.getElementById(MODAL_ID);
         }
 
-        var draft = '';
+        let draft = '';
         try { draft = sessionStorage.getItem(DRAFT_KEY) || ''; } catch (e) {}
 
-        var el = document.createElement('div');
+        let el = document.createElement('div');
         el.id = MODAL_ID;
         el.className = 'awa-qo-modal';
         el.setAttribute('role', 'dialog');
@@ -171,16 +171,16 @@ define([
     /* ---- results table ---- */
 
     function renderResults(results) {
-        var hasErrors = results.some(function (r) { return r.error; });
-        var hasOk     = results.some(function (r) { return !r.error; });
-        var rows = results.map(function (r) {
+        let hasErrors = results.some(function (r) { return r.error; });
+        let hasOk     = results.some(function (r) { return !r.error; });
+        let rows = results.map(function (r) {
             if (r.error) {
                 return '<tr class="awa-qo-row awa-qo-row--error">'
                     + '<td class="awa-qo-cell awa-qo-cell--sku"><span class="awa-qo-badge awa-qo-badge--error">✕</span>' + escAttr(r.sku) + '</td>'
                     + '<td class="awa-qo-cell" colspan="3"><span class="awa-qo-error-msg">' + escAttr(r.error) + '</span></td>'
                     + '</tr>';
             }
-            var stockBadge = r.inStock
+            let stockBadge = r.inStock
                 ? '<span class="awa-qo-badge awa-qo-badge--ok">Em estoque</span>'
                 : '<span class="awa-qo-badge awa-qo-badge--warn">Sem estoque</span>';
             return '<tr class="awa-qo-row' + (!r.inStock ? ' awa-qo-row--disabled' : '') + '">'
@@ -215,9 +215,9 @@ define([
         isOpen = true;
 
         /* reset to input state */
-        var ta = modal.querySelector('.awa-qo-textarea');
-        var results = modal.querySelector('.awa-qo-results');
-        var resolveBtn = modal.querySelector('.js-qo-resolve');
+        let ta = modal.querySelector('.awa-qo-textarea');
+        let results = modal.querySelector('.awa-qo-results');
+        let resolveBtn = modal.querySelector('.js-qo-resolve');
         results.hidden = true;
         resolveBtn.querySelector('.awa-qo-btn-label').textContent = 'Verificar SKUs';
         resolveBtn.disabled = false;
@@ -237,7 +237,7 @@ define([
         resolving = false;
 
         /* save draft */
-        var ta = modal.querySelector('.awa-qo-textarea');
+        let ta = modal.querySelector('.awa-qo-textarea');
         try { sessionStorage.setItem(DRAFT_KEY, ta ? ta.value : ''); } catch (e) {}
     }
 
@@ -245,16 +245,16 @@ define([
 
     function runResolve() {
         if (resolving) return;
-        var ta    = modal.querySelector('.awa-qo-textarea');
-        var lines = parseLines(ta ? ta.value : '');
+        let ta    = modal.querySelector('.awa-qo-textarea');
+        let lines = parseLines(ta ? ta.value : '');
 
         if (!lines.length) {
             ta && ta.focus();
             return;
         }
 
-        var btn    = modal.querySelector('.js-qo-resolve');
-        var label  = btn.querySelector('.awa-qo-btn-label');
+        let btn    = modal.querySelector('.js-qo-resolve');
+        let label  = btn.querySelector('.awa-qo-btn-label');
         resolving  = true;
         btn.disabled = true;
         label.textContent = 'Verificando…';
@@ -268,11 +268,11 @@ define([
         })).then(function (results) {
             resolvedItems = results;
             resolving = false;
-            var resultsEl = modal.querySelector('.awa-qo-results');
+            let resultsEl = modal.querySelector('.awa-qo-results');
             resultsEl.innerHTML = renderResults(results);
             resultsEl.hidden = false;
 
-            var hasOk = results.some(function (r) { return !r.error && r.inStock; });
+            let hasOk = results.some(function (r) { return !r.error && r.inStock; });
             btn.disabled = !hasOk;
             label.textContent = hasOk ? 'Adicionar ao Carrinho' : 'Nenhum item disponível';
 
@@ -287,15 +287,15 @@ define([
     /* ---- add-to-cart flow ---- */
 
     function runAddToCart() {
-        var eligible = resolvedItems.filter(function (r) { return !r.error && r.inStock && r.id; });
+        let eligible = resolvedItems.filter(function (r) { return !r.error && r.inStock && r.id; });
         if (!eligible.length) return;
 
-        var btn   = modal.querySelector('.js-qo-resolve');
-        var label = btn.querySelector('.awa-qo-btn-label');
+        let btn   = modal.querySelector('.js-qo-resolve');
+        let label = btn.querySelector('.awa-qo-btn-label');
         btn.disabled = true;
         label.textContent = 'Adicionando…';
 
-        var chain = eligible.reduce(function (p, item) {
+        let chain = eligible.reduce(function (p, item) {
             return p.then(function () { return addOneToCart(item.id, item.qty); });
         }, Promise.resolve());
 
@@ -309,7 +309,7 @@ define([
 
             /* optional toast if the module is available */
             if (window.awaToast && typeof window.awaToast.show === 'function') {
-                var names = eligible.map(function (i) { return i.name; });
+                let names = eligible.map(function (i) { return i.name; });
                 window.awaToast.show({
                     type:    'success',
                     message: eligible.length === 1
@@ -337,7 +337,7 @@ define([
 
         /* resolve / add-to-cart button */
         modal.addEventListener('click', function (e) {
-            var btn = e.target.closest('.js-qo-resolve');
+            let btn = e.target.closest('.js-qo-resolve');
             if (!btn || btn.disabled) return;
             if (btn.dataset.qoState === 'add') {
                 runAddToCart();
@@ -349,7 +349,7 @@ define([
         /* Ctrl+Enter in textarea → resolve */
         modal.addEventListener('keydown', function (e) {
             if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-                var btn = modal.querySelector('.js-qo-resolve');
+                let btn = modal.querySelector('.js-qo-resolve');
                 if (btn && !btn.disabled) btn.click();
             }
         });
@@ -357,7 +357,7 @@ define([
         /* reset state when textarea changes (after resolving) */
         modal.addEventListener('input', function (e) {
             if (!e.target.classList.contains('awa-qo-textarea')) return;
-            var btn = modal.querySelector('.js-qo-resolve');
+            let btn = modal.querySelector('.js-qo-resolve');
             if (btn && btn.dataset.qoState === 'add') {
                 btn.dataset.qoState = '';
                 btn.classList.remove('awa-qo-btn--primary');
@@ -365,7 +365,7 @@ define([
                 btn.querySelector('.awa-qo-btn-label').textContent = 'Verificar SKUs';
                 btn.disabled = false;
                 resolvedItems = [];
-                var results = modal.querySelector('.awa-qo-results');
+                let results = modal.querySelector('.awa-qo-results');
                 results.hidden = true;
             }
         });
@@ -374,8 +374,8 @@ define([
     function bindGlobalEvents() {
         /* Ctrl+Q to open */
         document.addEventListener('keydown', function (e) {
-            var tag = (document.activeElement || {}).tagName || '';
-            var isEditable = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT'
+            let tag = (document.activeElement || {}).tagName || '';
+            let isEditable = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT'
                 || (document.activeElement && document.activeElement.isContentEditable);
 
             if ((e.ctrlKey || e.metaKey) && e.key === 'q' && !isEditable) {
@@ -402,7 +402,7 @@ define([
 
     return function (config) {
         /* Only render the trigger if the customer can see prices (B2B approved) */
-        var trigger = document.getElementById('awa-quick-order-trigger');
+        let trigger = document.getElementById('awa-quick-order-trigger');
         if (trigger) {
             trigger.hidden = false;
             trigger.setAttribute('title', 'Pedido Rápido por SKU (Ctrl+Q)');

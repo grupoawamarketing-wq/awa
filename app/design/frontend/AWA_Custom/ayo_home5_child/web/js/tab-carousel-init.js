@@ -16,11 +16,11 @@ define([
     }
 
     function debounce(fn, wait) {
-        var timer;
+        let timer;
 
         return function () {
-            var context = this;
-            var args = arguments;
+            let context = this;
+            let args = arguments;
 
             clearTimeout(timer);
             timer = setTimeout(function () {
@@ -85,8 +85,8 @@ define([
 
     function moveToTab($scope, tabsSelector, currentTab, direction, activateAndNotify) {
         var $allTabs = $scope.find(tabsSelector);
-        var currentIndex = $allTabs.index(currentTab);
-        var targetIndex;
+        let currentIndex = $allTabs.index(currentTab);
+        let targetIndex;
         var $next;
 
         if (!$allTabs.length || currentIndex < 0) {
@@ -106,8 +106,8 @@ define([
         $tabs.each(function (index) {
             var $tab = $(this);
             var $panel = findTargetPanel($scope, tabsSelector, contentSelector, $tab);
-            var panelId = $panel.attr('id');
-            var tabId = $tab.attr('id');
+            let panelId = $panel.attr('id');
+            let tabId = $tab.attr('id');
 
             if (!tabId) {
                 tabId = normalizedA11yId + '-tab-' + index;
@@ -130,8 +130,8 @@ define([
     function bindTabEvents($scope, tabsSelector, activateAndNotify, onMoveToTab) {
         $scope.off('click.awaTabCarousel keydown.awaTabCarousel', tabsSelector);
         $scope.on('click.awaTabCarousel keydown.awaTabCarousel', tabsSelector, function (event) {
-            var key = event.which || event.keyCode;
-            var isKeyboard = event.type === 'keydown';
+            let key = event.which || event.keyCode;
+            let isKeyboard = event.type === 'keydown';
 
             if (isKeyboard) {
                 if (handleKeyboardTabs(key, this, onMoveToTab, activateAndNotify)) {
@@ -146,7 +146,7 @@ define([
     }
 
     function findTargetPanel($scope, tabsSelector, contentSelector, $tab) {
-        var targetId = $tab.attr('rel');
+        let targetId = $tab.attr('rel');
         var $panels = $scope.find(contentSelector);
         var $target = $();
 
@@ -193,14 +193,14 @@ define([
     }
 
     function initTabs($scope, config, onTabActivated) {
-        var tabsSelector = config.tabsSelector || 'ul.tabs li';
-        var contentSelector = config.contentSelector || '.tab_content';
+        let tabsSelector = config.tabsSelector || 'ul.tabs li';
+        let contentSelector = config.contentSelector || '.tab_content';
         var $tabs = $scope.find(tabsSelector);
         var $active = $tabs.filter('.active').first();
         var $tabList = $tabs.first().parent();
         var $activePanel;
-        var baseA11yId = $scope.attr('class') || 'awa-tab-group';
-        var normalizedA11yId = baseA11yId.replace(/[^a-zA-Z0-9_-]+/g, '-');
+        let baseA11yId = $scope.attr('class') || 'awa-tab-group';
+        let normalizedA11yId = baseA11yId.replace(/[^a-zA-Z0-9_-]+/g, '-');
 
         function activateAndNotify($tab, force) {
             if (!force && $tab.hasClass('active') && $tab.attr('aria-selected') === 'true') {
@@ -234,10 +234,10 @@ define([
     }
 
     function initCarousel(config) {
-        var carouselSelector = config.carouselSelector;
-        var owlConfig = config.owl || {};
-        var baseOptions;
-        var manager = {
+        let carouselSelector = config.carouselSelector;
+        let owlConfig = config.owl || {};
+        let baseOptions;
+        let manager = {
             ensureIn: function () {}
         };
 
@@ -269,7 +269,7 @@ define([
         };
 
         function reinitCarousel($carousel) {
-            var owl = $carousel.data('owlCarousel');
+            let owl = $carousel.data('owlCarousel');
 
             if (!owl) {
                 return;
@@ -321,12 +321,12 @@ define([
     return function (config, element) {
         var $scope = $(element);
         var $window = $(window);
-        var currentConfig = config || {};
-        var tabsSelector = currentConfig.tabsSelector || 'ul.tabs li';
-        var contentSelector = currentConfig.contentSelector || '.tab_content';
-        var resizeNamespace = $scope.data('awaTabCarouselResizeNs');
-        var visibilityRetryTimer = null;
-        var carouselManager = initCarousel(currentConfig);
+        let currentConfig = config || {};
+        let tabsSelector = currentConfig.tabsSelector || 'ul.tabs li';
+        let contentSelector = currentConfig.contentSelector || '.tab_content';
+        let resizeNamespace = $scope.data('awaTabCarouselResizeNs');
+        let visibilityRetryTimer = null;
+        let carouselManager = initCarousel(currentConfig);
 
         if (!resizeNamespace) {
             resizeNamespace = '.awaTabCarouselResize-' + Math.random().toString(36).slice(2, 9);

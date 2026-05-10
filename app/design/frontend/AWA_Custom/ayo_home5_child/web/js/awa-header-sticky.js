@@ -13,8 +13,8 @@
 define([], function () {
     'use strict';
 
-    var SCROLL_THRESHOLD_BASE = 60;
-    var DELTA_MIN = 6;
+    let SCROLL_THRESHOLD_BASE = 60;
+    let DELTA_MIN = 6;
 
     /**
      * Bug #19: O banner B2B fica acima do wrapper sticky e tem altura ~40px.
@@ -23,38 +23,38 @@ define([], function () {
      * banner e somando ao threshold base.
      */
     function getScrollThreshold() {
-        var bar = document.getElementById('awa-b2b-promo-bar');
+        let bar = document.getElementById('awa-b2b-promo-bar');
         if (!bar || bar.style.display === 'none') {
             return SCROLL_THRESHOLD_BASE;
         }
-        var h = bar.getBoundingClientRect().height;
+        let h = bar.getBoundingClientRect().height;
         return SCROLL_THRESHOLD_BASE + (h > 0 ? Math.round(h) : 0);
     }
 
     return function () {
         /** @type {Element|null} */
-        var header = document.querySelector('.awa-site-header');
+        let header = document.querySelector('.awa-site-header');
         /** @type {Element|null} */
-        var stickyWrapper = document.querySelector('.header-wrapper-sticky');
+        let stickyWrapper = document.querySelector('.header-wrapper-sticky');
 
         if (!header) {
             return;
         }
 
-        var ticking = false;
-        var lastScrollY = window.pageYOffset || 0;
-        var lastSticky = false;
+        let ticking = false;
+        let lastScrollY = window.pageYOffset || 0;
+        let lastSticky = false;
 
         /**
          * Apply or remove sticky classes based on current scrollY.
          */
         function updateStickyState() {
-            var scrollY = window.pageYOffset !== undefined
+            let scrollY = window.pageYOffset !== undefined
                 ? window.pageYOffset
                 : (document.documentElement || document.body.parentNode || document.body).scrollTop;
 
-            var isSticky = scrollY > getScrollThreshold();
-            var direction = (scrollY - lastScrollY) > DELTA_MIN
+            let isSticky = scrollY > getScrollThreshold();
+            let direction = (scrollY - lastScrollY) > DELTA_MIN
                 ? 'down'
                 : ((lastScrollY - scrollY) > DELTA_MIN ? 'up' : 'still');
 

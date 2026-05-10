@@ -38,10 +38,10 @@ define([
        SHARED UTILITIES
        ═══════════════════════════════════════════════════════════════ */
 
-    var MOBILE_QUERY = '(max-width: 767px)';
+    let MOBILE_QUERY = '(max-width: 767px)';
 
     function normalizeCount(value, fallback, max) {
-        var count = parseInt(value, 10);
+        let count = parseInt(value, 10);
         if (isNaN(count) || count < 1) { count = fallback; }
         if (typeof max === 'number') { count = Math.min(count, max); }
         return count;
@@ -54,9 +54,9 @@ define([
     }
 
     function debounce(fn, wait) {
-        var timer;
+        let timer;
         return function () {
-            var ctx = this, args = arguments;
+            let ctx = this, args = arguments;
             clearTimeout(timer);
             timer = setTimeout(function () { fn.apply(ctx, args); }, wait || 120);
         };
@@ -76,7 +76,7 @@ define([
        ═══════════════════════════════════════════════════════════════ */
 
     function buildSwiperOptions(cfg) {
-        var items = normalizeCount(cfg.items, 4, 4),
+        let items = normalizeCount(cfg.items, 4, 4),
             mobileItems = 1,
             tabletItems = Math.min(items, 3),
             desktopSmallItems = Math.min(items, 4),
@@ -104,7 +104,7 @@ define([
             desktopItems = normalizeCount(cfg.itemsDesktop[1], desktopItems, 4);
         }
 
-        var landscapeItems = Math.min(Math.max(mobileItems, 2), items);
+        let landscapeItems = Math.min(Math.max(mobileItems, 2), items);
 
         return {
             slidesPerView: mobileItems,
@@ -160,7 +160,7 @@ define([
        SWIPER LOADER (singleton, lazy require)
        ═══════════════════════════════════════════════════════════════ */
 
-    var SwiperCtor = null;
+    let SwiperCtor = null;
 
     function loadSwiper(done) {
         if (SwiperCtor) { done(SwiperCtor); return; }
@@ -171,17 +171,17 @@ define([
        INIT QUEUE — stagger Swiper instantiation to reduce long tasks
        ═══════════════════════════════════════════════════════════════ */
 
-    var initQueue = [];
-    var queueRunning = false;
-    var QUEUE_GAP_MS = 80;
+    let initQueue = [];
+    let queueRunning = false;
+    let QUEUE_GAP_MS = 80;
 
     function processQueue() {
         if (queueRunning || !initQueue.length) { return; }
         queueRunning = true;
-        var item = initQueue.shift();
+        let item = initQueue.shift();
 
         loadSwiper(function (Swiper) {
-            var go = function () {
+            let go = function () {
                 if (!item.$el.data('awaSwiperInit')) {
                     item.$el.data('awaSwiperInit', 1);
                     try {
@@ -210,16 +210,16 @@ define([
        HOMEPAGE INTERACTION GATE — defer below-fold init on homepage
        ═══════════════════════════════════════════════════════════════ */
 
-    var gateOpen = false;
-    var gateBound = false;
-    var gateQueue = [];
-    var DESKTOP_GATE_MS = 1500;
-    var MOBILE_GATE_MS = 2000;
-    var MOBILE_IDLE_MS = 4500;
-    var MOBILE_FALLBACK_MS = 900;
+    let gateOpen = false;
+    let gateBound = false;
+    let gateQueue = [];
+    let DESKTOP_GATE_MS = 1500;
+    let MOBILE_GATE_MS = 2000;
+    let MOBILE_IDLE_MS = 4500;
+    let MOBILE_FALLBACK_MS = 900;
 
     function isHomepage() {
-        var b = document.body;
+        let b = document.body;
         return b && (b.classList.contains('cms-index-index') ||
                      b.classList.contains('cms-home') ||
                      b.classList.contains('cms-homepage_ayo_home5'));
@@ -233,8 +233,8 @@ define([
     function bindGate() {
         if (gateBound) { return; }
         gateBound = true;
-        var evts = ['pointerdown', 'keydown', 'touchstart', 'scroll', 'click'];
-        var release = function (e) {
+        let evts = ['pointerdown', 'keydown', 'touchstart', 'scroll', 'click'];
+        let release = function (e) {
             if (gateOpen || (e && e.isTrusted === false)) { return; }
             evts.forEach(function (n) { window.removeEventListener(n, release, true); });
             flushGate();
@@ -281,7 +281,7 @@ define([
     }
 
     function findPanel($scope, tabsSel, contentSel, $tab) {
-        var targetId = $tab.attr('rel'),
+        let targetId = $tab.attr('rel'),
             $panels = $scope.find(contentSel),
             $target = $();
         if (targetId) {
@@ -308,7 +308,7 @@ define([
     function bindTabEvents($scope, sel, activateFn, moveFn) {
         $scope.off('click.awaCarouselTab keydown.awaCarouselTab', sel);
         $scope.on('click.awaCarouselTab keydown.awaCarouselTab', sel, function (e) {
-            var key = e.which || e.keyCode;
+            let key = e.which || e.keyCode;
             if (e.type === 'keydown') {
                 if (handleKeyboardTabs(key, this, moveFn, activateFn)) { e.preventDefault(); }
                 return;
@@ -332,7 +332,7 @@ define([
     }
 
     function loadLazyTab($carousel, callback) {
-        var url = $carousel.attr('data-lazy-url');
+        let url = $carousel.attr('data-lazy-url');
         if (!url) { callback(); return; }
 
         $carousel.html('<div class="awa-carousel-lazy-status">Carregando produtos...</div>');
@@ -358,7 +358,7 @@ define([
     }
 
     function initTabs($scope, config, onTabActivated) {
-        var tabsSel = config.tabsSelector || 'ul.tabs li',
+        let tabsSel = config.tabsSelector || 'ul.tabs li',
             contentSel = config.contentSelector || '.tab_content',
             $tabs = $scope.find(tabsSel),
             $active = $tabs.filter('.active').first(),
@@ -388,7 +388,7 @@ define([
        ═══════════════════════════════════════════════════════════════ */
 
     function createSwiperManager(carouselSel, owlCfg) {
-        var baseOpts = buildSwiperOptions(owlCfg),
+        let baseOpts = buildSwiperOptions(owlCfg),
             instances = {},
             pending = [];
 
@@ -423,14 +423,14 @@ define([
                 if (SwiperCtor) { create($container); return; }
                 pending.push($container);
                 loadSwiper(function () {
-                    var p = pending.splice(0);
-                    for (var i = 0; i < p.length; i++) { create(p[i]); }
+                    let p = pending.splice(0);
+                    for (let i = 0; i < p.length; i++) { create(p[i]); }
                 });
             },
             destroyIn: function ($container) {
                 if (!$container || !$container.length) { return; }
                 $container.find(carouselSel).each(function () {
-                    var key = $(this).data('awaSwiperKey');
+                    let key = $(this).data('awaSwiperKey');
                     if (key && instances[key]) { instances[key].destroy(true, true); delete instances[key]; }
                 });
             }
@@ -443,9 +443,9 @@ define([
 
     function observeViewport($el, callback) {
         if (!('IntersectionObserver' in window)) { callback(); return; }
-        var margin = isMobile() ? '160px 0px' : '280px 0px';
-        var obs = new IntersectionObserver(function (entries) {
-            for (var i = 0; i < entries.length; i++) {
+        let margin = isMobile() ? '160px 0px' : '280px 0px';
+        let obs = new IntersectionObserver(function (entries) {
+            for (let i = 0; i < entries.length; i++) {
                 if (entries[i].isIntersecting) { obs.disconnect(); callback(); return; }
             }
         }, { rootMargin: margin });
@@ -457,7 +457,7 @@ define([
        ═══════════════════════════════════════════════════════════════ */
 
     function bootstrapSimple($scope, cfg) {
-        var owlCfg = cfg.owl || cfg,
+        let owlCfg = cfg.owl || cfg,
             carouselSel = cfg.carouselSelector || '.swiper',
             $el = $scope.is(carouselSel) ? $scope : $scope.find(carouselSel).first(),
             opts;
@@ -482,7 +482,7 @@ define([
        ═══════════════════════════════════════════════════════════════ */
 
     function bootstrapTabs($scope, cfg) {
-        var carouselSel = cfg.carouselSelector,
+        let carouselSel = cfg.carouselSelector,
             tabsSel = cfg.tabsSelector || 'ul.tabs li',
             contentSel = cfg.contentSelector || '.tab_content',
             owlCfg = cfg.owl || cfg.swiper || {},
@@ -517,7 +517,7 @@ define([
             });
         });
 
-        var resizeNs = '.awaCarouselResize-' + Math.random().toString(36).slice(2, 9);
+        let resizeNs = '.awaCarouselResize-' + Math.random().toString(36).slice(2, 9);
         $(window).off(resizeNs).on('resize' + resizeNs, debounce(function () { ensureActive(); }, 200));
         ensureActive();
     }
@@ -527,7 +527,7 @@ define([
        ═══════════════════════════════════════════════════════════════ */
 
     function bootstrapSuperdeals($scope, cfg) {
-        var carouselSel = cfg.carouselSelector || '.hot-deal-slide',
+        let carouselSel = cfg.carouselSelector || '.hot-deal-slide',
             countdownSel = cfg.countdownSelector || '.super-deal-countdown',
             owlCfg = cfg.owl || {},
             labels = cfg.labels || {},
@@ -536,7 +536,7 @@ define([
         // Load swiper for the carousel (always needed in superdeals mode)
         require(['swiper'], function (Swiper) {
             SwiperCtor = Swiper;
-            var opts = buildSwiperOptions(owlCfg);
+            let opts = buildSwiperOptions(owlCfg);
 
             $scope.find(carouselSel).each(function () {
                 var $el = $(this);
@@ -579,7 +579,7 @@ define([
         var $scope = $(element);
         if (!$scope.length) { return; }
 
-        var cfg = config || {},
+        let cfg = config || {},
             hasTabs = !!cfg.tabsSelector,
             hasCountdown = !!cfg.countdownSelector;
 

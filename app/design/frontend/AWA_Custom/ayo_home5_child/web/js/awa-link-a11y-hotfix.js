@@ -47,7 +47,7 @@
         if (!isElement(link) || typeof link.querySelector !== "function") {
             return "";
         }
-        var img = link.querySelector("img[alt]");
+        let img = link.querySelector("img[alt]");
         if (!img || typeof img.getAttribute !== "function") {
             return "";
         }
@@ -63,7 +63,7 @@
             return;
         }
 
-        var alt = "";
+        let alt = "";
         try {
             alt = resolveImageAlt(link);
         } catch (error) {
@@ -82,9 +82,9 @@
     }
 
     function normalizeScope(rootScope) {
-        var scope = rootScope || documentRef;
-        var links;
-        var i;
+        let scope = rootScope || documentRef;
+        let links;
+        let i;
 
         if (!scope || typeof scope.querySelectorAll !== "function") {
             return;
@@ -103,11 +103,11 @@
     }
 
     function collectElementNodesFromMutations(mutations) {
-        var nodes = [];
-        var i;
-        var j;
-        var mutation;
-        var node;
+        let nodes = [];
+        let i;
+        let j;
+        let mutation;
+        let node;
 
         if (!Array.isArray(mutations)) {
             return nodes;
@@ -130,9 +130,9 @@
     }
 
     function boot(documentNode) {
-        var doc = documentNode || documentRef;
-        var flushQueued = false;
-        var pendingNodes = [];
+        let doc = documentNode || documentRef;
+        let flushQueued = false;
+        let pendingNodes = [];
 
         if (!doc) {
             return;
@@ -144,8 +144,8 @@
         }
 
         function flushPendingNodes() {
-            var queue = pendingNodes.slice();
-            var i;
+            let queue = pendingNodes.slice();
+            let i;
             flushQueued = false;
             pendingNodes = [];
 
@@ -172,7 +172,7 @@
         }).observe(doc.body, { childList: true, subtree: true });
     }
 
-    var api = {
+    let api = {
         text: text,
         hasAccessibleName: hasAccessibleName,
         resolveImageAlt: resolveImageAlt,

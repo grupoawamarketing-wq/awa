@@ -1,14 +1,14 @@
 define(['jquery', 'domReady!'], function ($) {
     'use strict';
 
-    var DESKTOP_BREAKPOINT = 992;
+    let DESKTOP_BREAKPOINT = 992;
 
     // =============================================
     // AWA MOTOS — VERTICAL MENU ENHANCEMENTS v8
     // White theme | hover-open | animated | modern
     // =============================================
 
-    var ICONS = {
+    let ICONS = {
         'retrovisores':          '<svg viewBox="0 0 24 24"><circle cx="8" cy="12" r="5"/><path d="M13 12h8M19 9l2 3-2 3"/></svg>',
         'bagageiros':            '<svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
         'bauletos':              '<svg viewBox="0 0 24 24"><rect x="2" y="8" width="20" height="14" rx="2"/><path d="M9 8V5a3 3 0 0 1 6 0v3M12 14v2"/></svg>',
@@ -42,8 +42,8 @@ define(['jquery', 'domReady!'], function ($) {
                 'default':               '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>'
     };
 
-    var SECTION_LABELS = { 'super-ofertas': 'Promoções', 'lancamentos': 'Novidades', 'linha-honda': 'Por Marca', 'manetes': 'Peças' };
-    var HIGHLIGHTS     = ['super-ofertas', 'ofertas', 'lancamentos'];
+    let SECTION_LABELS = { 'super-ofertas': 'Promoções', 'lancamentos': 'Novidades', 'linha-honda': 'Por Marca', 'manetes': 'Peças' };
+    let HIGHLIGHTS     = ['super-ofertas', 'ofertas', 'lancamentos'];
 
     function slugify(str) {
         return (str || '').toLowerCase()
@@ -54,11 +54,11 @@ define(['jquery', 'domReady!'], function ($) {
 
     // Detect current category URL slug to highlight active item
     function getCurrentCatSlug() {
-        var path = window.location.pathname;
-        var match = path.match(/\/([^/]+)\.html$/);
+        let path = window.location.pathname;
+        let match = path.match(/\/([^/]+)\.html$/);
         if (match) return match[1].toLowerCase();
         // Fallback: /catalog/category/view/s/{slug}/id/{id}/ (URL nao-canonica)
-        var catMatch = path.match(/\/s\/([^/]+)\/id\/\d+/);
+        let catMatch = path.match(/\/s\/([^/]+)\/id\/\d+/);
         return catMatch ? catMatch[1].toLowerCase() : null;
     }
 
@@ -69,12 +69,12 @@ define(['jquery', 'domReady!'], function ($) {
     function syncDesktopPanelPosition($nav) {
         var $title = $nav.find('.title-category-dropdown').first();
         var $togge = $nav.find('ul.togge-menu.list-category-dropdown').first();
-        var anchor = ($title.length ? $title : $nav).get(0);
-        var rect;
-        var availableWidth;
-        var width;
-        var top;
-        var left;
+        let anchor = ($title.length ? $title : $nav).get(0);
+        let rect;
+        let availableWidth;
+        let width;
+        let top;
+        let left;
 
         if (!anchor || !$togge.length || !isDesktop()) {
             return;
@@ -104,8 +104,8 @@ define(['jquery', 'domReady!'], function ($) {
     }
 
     function bindDesktopPanelPosition($nav) {
-        var namespace = '.awaVMenuPosition';
-        var rafId = 0;
+        let namespace = '.awaVMenuPosition';
+        let rafId = 0;
 
         function scheduleSync() {
             if (!isDesktop()) {
@@ -137,7 +137,7 @@ define(['jquery', 'domReady!'], function ($) {
     }
 
     function styleHeader($nav) {
-        var catHeader = $nav.closest('.menu_left_home1').find('.our_categories.title-category-dropdown');
+        let catHeader = $nav.closest('.menu_left_home1').find('.our_categories.title-category-dropdown');
         if (!catHeader.length) {
             return;
         }
@@ -151,20 +151,20 @@ define(['jquery', 'domReady!'], function ($) {
             return;
         }
 
-        var currentSlug = getCurrentCatSlug();
+        let currentSlug = getCurrentCatSlug();
         $togge.attr('data-awa-vmenu-shell-enhanced', 'true');
 
         $togge.children('li.level0').each(function () {
-            var li  = this;
+            let li  = this;
             var $li = $(li);
 
-            var link = li.querySelector('a.level-top, span.level-top');
+            let link = li.querySelector('a.level-top, span.level-top');
             if (!link) {
                 return;
             }
 
             // Detect active by URL
-            var href = link.getAttribute ? link.getAttribute('href') : '';
+            let href = link.getAttribute ? link.getAttribute('href') : '';
             if (currentSlug && href && href.indexOf(currentSlug + '.html') !== -1) {
                 $li.addClass('awa-current-cat');
             }
@@ -181,14 +181,14 @@ define(['jquery', 'domReady!'], function ($) {
             var $link = $item.children('a.level-top, span.level-top').first();
             if (!$link.length) return;
 
-            var labelSpan = $link.find('.navigation__label');
-            var rawText   = labelSpan.length ? labelSpan.text().trim() : $link.clone().children().remove().end().text().trim();
-            var slug      = slugify(rawText);
+            let labelSpan = $link.find('.navigation__label');
+            let rawText   = labelSpan.length ? labelSpan.text().trim() : $link.clone().children().remove().end().text().trim();
+            let slug      = slugify(rawText);
 
             // === Icon: replace em/img placeholder with SVG ===
             var $fa = $link.find('em.menu-thumb-icon, img.menu-thumb-icon');
             if ($fa.length && !$link.find('.awa-vmenu-icon').length) {
-                var iconHtml = '<span class="awa-vmenu-icon" aria-hidden="true">' + (ICONS[slug] || ICONS['default']) + '</span>';
+                let iconHtml = '<span class="awa-vmenu-icon" aria-hidden="true">' + (ICONS[slug] || ICONS['default']) + '</span>';
                 $fa.replaceWith(iconHtml);
             } else if (!$link.find('.awa-vmenu-icon').length) {
                 // Prepend icon if labelSpan exists
@@ -236,8 +236,8 @@ define(['jquery', 'domReady!'], function ($) {
             initVerticalMenu();
             return;
         }
-        var waited = 0;
-        var interval = setInterval(function () {
+        let waited = 0;
+        let interval = setInterval(function () {
             waited += 50;
             if ($('.navigation.verticalmenu .togge-menu').length || waited >= 2000) {
                 clearInterval(interval);

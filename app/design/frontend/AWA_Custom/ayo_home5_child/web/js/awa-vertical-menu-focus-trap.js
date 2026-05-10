@@ -9,7 +9,7 @@
 define([], function () {
     'use strict';
 
-    var FOCUSABLE = [
+    let FOCUSABLE = [
         'a[href]:not([tabindex="-1"])',
         'button:not([disabled]):not([tabindex="-1"])',
         '[role="button"]:not([disabled]):not([tabindex="-1"])',
@@ -35,10 +35,10 @@ define([], function () {
     }
 
     /** @type {Function|null} active keydown handler */
-    var _activeHandler = null;
+    let _activeHandler = null;
 
     /** @type {HTMLElement|null} element focused before drawer opened */
-    var _previouslyFocused = null;
+    let _previouslyFocused = null;
 
     /**
      * Activate focus trap inside nav container.
@@ -48,7 +48,7 @@ define([], function () {
     function activateTrap(nav) {
         _previouslyFocused = document.activeElement || null;
 
-        var focusable = getFocusable(nav);
+        let focusable = getFocusable(nav);
         if (focusable.length) {
             focusable[0].focus();
         }
@@ -65,14 +65,14 @@ define([], function () {
                 return;
             }
 
-            var focusableNow = getFocusable(nav);
+            let focusableNow = getFocusable(nav);
             if (!focusableNow.length) {
                 event.preventDefault();
                 return;
             }
 
-            var first = focusableNow[0];
-            var last  = focusableNow[focusableNow.length - 1];
+            let first = focusableNow[0];
+            let last  = focusableNow[focusableNow.length - 1];
 
             if (event.shiftKey) {
                 // Shift+Tab wraps to last
@@ -113,7 +113,7 @@ define([], function () {
      * Trigger Magento's existing nav-toggle close mechanism.
      */
     function triggerClose() {
-        var toggle = document.querySelector('[data-awa-nav-toggle="true"]');
+        let toggle = document.querySelector('[data-awa-nav-toggle="true"]');
         if (toggle) {
             toggle.click();
         } else {
@@ -125,10 +125,10 @@ define([], function () {
     /* ── Close button + overlay (injected once) ── */
 
     /** @type {HTMLButtonElement|null} */
-    var _closeBtn = null;
+    let _closeBtn = null;
 
     /** @type {HTMLDivElement|null} */
-    var _overlay = null;
+    let _overlay = null;
 
     /**
      * Lazily create and inject close button inside nav drawer
@@ -146,7 +146,7 @@ define([], function () {
             _closeBtn.addEventListener('click', triggerClose);
 
             // Insert as first child of nav-sections wrapper
-            var sections = nav.closest('.sections.nav-sections') || nav;
+            let sections = nav.closest('.sections.nav-sections') || nav;
             sections.insertBefore(_closeBtn, sections.firstChild);
         }
 
@@ -211,7 +211,7 @@ define([], function () {
      * Observes body.nav-open via MutationObserver.
      */
     return function init() {
-        var nav = resolveDrawerShell();
+        let nav = resolveDrawerShell();
         if (!nav) {
             return;
         }
@@ -228,10 +228,10 @@ define([], function () {
 
         ensureDrawerControls(nav);
 
-        var wasOpen = false;
+        let wasOpen = false;
 
-        var observer = new MutationObserver(function () {
-            var isOpen = document.body.classList.contains('nav-open');
+        let observer = new MutationObserver(function () {
+            let isOpen = document.body.classList.contains('nav-open');
 
             if (isOpen === wasOpen) {
                 return;

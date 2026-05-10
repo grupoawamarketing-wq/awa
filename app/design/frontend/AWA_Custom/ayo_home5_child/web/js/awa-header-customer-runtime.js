@@ -1,9 +1,9 @@
 define(['Magento_Customer/js/customer-data'], function (customerData) {
     'use strict';
 
-    var HEADER_MINICART_BUTTON_SELECTOR = '[data-awa-header-minicart-shell="true"] .action.showcart, .awa-header-minicart[data-awa-header-cart="true"] .action.showcart';
-    var HEADER_MINICART_COUNTER_SELECTOR = '[data-awa-header-minicart-shell="true"] .minicart-wrapper .counter.qty, .awa-header-minicart[data-awa-header-cart="true"] .minicart-wrapper .counter.qty';
-    var HEADER_MINICART_QTY_SELECTOR = '[data-awa-header-minicart-shell="true"] .minicart-wrapper .counter.qty .counter-number, [data-awa-header-minicart-shell="true"] .minicart-wrapper .counter.qty, .awa-header-minicart[data-awa-header-cart="true"] .minicart-wrapper .counter.qty .counter-number, .awa-header-minicart[data-awa-header-cart="true"] .minicart-wrapper .counter.qty';
+    let HEADER_MINICART_BUTTON_SELECTOR = '[data-awa-header-minicart-shell="true"] .action.showcart, .awa-header-minicart[data-awa-header-cart="true"] .action.showcart';
+    let HEADER_MINICART_COUNTER_SELECTOR = '[data-awa-header-minicart-shell="true"] .minicart-wrapper .counter.qty, .awa-header-minicart[data-awa-header-cart="true"] .minicart-wrapper .counter.qty';
+    let HEADER_MINICART_QTY_SELECTOR = '[data-awa-header-minicart-shell="true"] .minicart-wrapper .counter.qty .counter-number, [data-awa-header-minicart-shell="true"] .minicart-wrapper .counter.qty, .awa-header-minicart[data-awa-header-cart="true"] .minicart-wrapper .counter.qty .counter-number, .awa-header-minicart[data-awa-header-cart="true"] .minicart-wrapper .counter.qty';
 
     return function initHeaderCustomerRuntime() {
         if (window.__awaHeaderCustomerRuntimeInit) {
@@ -11,10 +11,10 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
         }
 
         window.__awaHeaderCustomerRuntimeInit = true;
-        var hoverOpenTimer = null;
-        var hoverCloseTimer = null;
-        var lastCartQty = null;
-        var cartLiveRegion = null;
+        let hoverOpenTimer = null;
+        let hoverCloseTimer = null;
+        let lastCartQty = null;
+        let cartLiveRegion = null;
 
         function isLoggedIn(data) {
             if (!data || typeof data !== 'object') {
@@ -32,9 +32,9 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
         }
 
         function updateRightCol(data) {
-            var accountNav = document.querySelector('[data-awa-account-nav]');
-            var rightCol = document.querySelector('[data-awa-header-right]');
-            var customerLoggedIn = isLoggedIn(data);
+            let accountNav = document.querySelector('[data-awa-account-nav]');
+            let rightCol = document.querySelector('[data-awa-header-right]');
+            let customerLoggedIn = isLoggedIn(data);
 
             if (customerLoggedIn) {
                 if (accountNav) {
@@ -69,18 +69,18 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
         }
 
         function updateGreeting(data) {
-            var label = resolveCustomerLabel(data);
-            var nameNode = document.querySelector('.customer-welcome .customer-name');
-            var switchNode = document.querySelector('.customer-welcome .action.switch');
+            let label = resolveCustomerLabel(data);
+            let nameNode = document.querySelector('.customer-welcome .customer-name');
+            let switchNode = document.querySelector('.customer-welcome .action.switch');
 
             if (!nameNode && !switchNode) {
                 return;
             }
 
             // 20 chars keeps desktop header from breaking while preserving recognition.
-            var truncated = label.length > 20 ? (label.slice(0, 20) + '...') : label;
-            var isLong = label.length > 16;
-            var rightCol = document.querySelector('[data-awa-header-right]');
+            let truncated = label.length > 20 ? (label.slice(0, 20) + '...') : label;
+            let isLong = label.length > 16;
+            let rightCol = document.querySelector('[data-awa-header-right]');
 
             if (rightCol) {
                 rightCol.classList.toggle('awa-account-name-long', isLong);
@@ -99,8 +99,8 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
         }
 
         function enhanceSearchExperience() {
-            var input = document.querySelector('#search');
-            var form = document.querySelector('#search_mini_form');
+            let input = document.querySelector('#search');
+            let form = document.querySelector('#search_mini_form');
 
             if (!input || !form || form.dataset.awaEnhancedSearch === '1') {
                 return;
@@ -109,13 +109,13 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
             form.dataset.awaEnhancedSearch = '1';
 
             function isSkuLike(value) {
-                var v = String(value || '').trim();
+                let v = String(value || '').trim();
                 // Common SKU-like patterns: uppercase letters/numbers with dashes/underscores.
                 return /^[A-Z0-9][A-Z0-9_-]{2,31}$/i.test(v) && /[0-9]/.test(v);
             }
 
             function syncSkuState() {
-                var active = isSkuLike(input.value);
+                let active = isSkuLike(input.value);
                 form.classList.toggle('awa-search-sku-mode', active);
                 form.classList.toggle('awa-search-priority-sku', active);
                 input.setAttribute('aria-label', active
@@ -138,14 +138,14 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
             window.__awaHeaderSearchShortcutInit = true;
 
             document.addEventListener('keydown', function (event) {
-                var input = document.querySelector('#search');
+                let input = document.querySelector('#search');
                 if (!input) {
                     return;
                 }
 
-                var target = event.target;
-                var tag = target && target.tagName ? target.tagName.toLowerCase() : '';
-                var typingInField = tag === 'input' || tag === 'textarea' || target.isContentEditable;
+                let target = event.target;
+                let tag = target && target.tagName ? target.tagName.toLowerCase() : '';
+                let typingInField = tag === 'input' || tag === 'textarea' || target.isContentEditable;
 
                 // "/" to focus search when user is not typing in another field.
                 if (event.key === '/' && !typingInField && !event.ctrlKey && !event.metaKey && !event.altKey) {
@@ -171,17 +171,17 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
             window.__awaHeaderMinicartFeedbackInit = true;
 
             function getQty() {
-                var qtyNode = document.querySelector(HEADER_MINICART_QTY_SELECTOR);
+                let qtyNode = document.querySelector(HEADER_MINICART_QTY_SELECTOR);
                 if (!qtyNode) {
                     return 0;
                 }
-                var value = parseInt(String(qtyNode.textContent || '').replace(/\D+/g, ''), 10);
+                let value = parseInt(String(qtyNode.textContent || '').replace(/\D+/g, ''), 10);
                 return Number.isFinite(value) ? value : 0;
             }
 
             function pulseIfChanged() {
-                var qty = getQty();
-                var button = document.querySelector(HEADER_MINICART_BUTTON_SELECTOR);
+                let qty = getQty();
+                let button = document.querySelector(HEADER_MINICART_BUTTON_SELECTOR);
                 if (!button) {
                     return;
                 }
@@ -213,12 +213,12 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
                 if (typeof MutationObserver !== 'function') {
                     return false;
                 }
-                var counter = document.querySelector(HEADER_MINICART_COUNTER_SELECTOR);
+                let counter = document.querySelector(HEADER_MINICART_COUNTER_SELECTOR);
                 if (!counter) {
                     return false;
                 }
 
-                var observer = new MutationObserver(function () {
+                let observer = new MutationObserver(function () {
                     // Avoid work when tab is backgrounded.
                     if (document.hidden) {
                         return;
@@ -249,12 +249,12 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
             if (cartLiveRegion) {
                 return;
             }
-            var existing = document.getElementById('awa-cart-live-region');
+            let existing = document.getElementById('awa-cart-live-region');
             if (existing) {
                 cartLiveRegion = existing;
                 return;
             }
-            var region = document.createElement('div');
+            let region = document.createElement('div');
             region.id = 'awa-cart-live-region';
             region.className = 'awa-sr-live';
             region.setAttribute('aria-live', 'polite');
@@ -264,7 +264,7 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
         }
 
         function setAccountExpanded(expanded) {
-            var switchNode = document.querySelector('.customer-welcome .action.switch');
+            let switchNode = document.querySelector('.customer-welcome .action.switch');
             if (!switchNode) {
                 return;
             }
@@ -280,8 +280,8 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
         }
 
         function isAccountMenuOpen() {
-            var wrap = document.querySelector('.customer-welcome');
-            var menu = getAccountMenu();
+            let wrap = document.querySelector('.customer-welcome');
+            let menu = getAccountMenu();
             if (!menu) {
                 return false;
             }
@@ -306,8 +306,8 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
         }
 
         function focusFirstAccountMenuItem() {
-            var menu = getAccountMenu();
-            var items = getAccountMenuFocusable(menu);
+            let menu = getAccountMenu();
+            let items = getAccountMenuFocusable(menu);
 
             if (!items.length) {
                 return;
@@ -319,9 +319,9 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
         }
 
         function openAccountMenu(shouldFocusFirstItem) {
-            var wrap = document.querySelector('.customer-welcome');
-            var switchNode = getAccountTrigger();
-            var menu = getAccountMenu();
+            let wrap = document.querySelector('.customer-welcome');
+            let switchNode = getAccountTrigger();
+            let menu = getAccountMenu();
 
             if (wrap) {
                 wrap.classList.add('is-open');
@@ -345,9 +345,9 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
         }
 
         function closeAccountMenu(keepFocusOnTrigger) {
-            var wrap = document.querySelector('.customer-welcome');
-            var switchNode = getAccountTrigger();
-            var menu = getAccountMenu();
+            let wrap = document.querySelector('.customer-welcome');
+            let switchNode = getAccountTrigger();
+            let menu = getAccountMenu();
 
             if (wrap) {
                 wrap.classList.remove('is-open');
@@ -370,13 +370,13 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
         }
 
         function syncAccountAriaState() {
-            var wrap = document.querySelector('.customer-welcome');
-            var menu = getAccountMenu();
+            let wrap = document.querySelector('.customer-welcome');
+            let menu = getAccountMenu();
             if (!menu) {
                 return;
             }
 
-            var open = isAccountMenuOpen();
+            let open = isAccountMenuOpen();
             setAccountExpanded(open);
             menu.setAttribute('aria-hidden', open ? 'false' : 'true');
             if (wrap) {
@@ -391,16 +391,16 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
             window.__awaHeaderAccountA11yInit = true;
 
             document.addEventListener('click', function (event) {
-                var trigger = getAccountTrigger();
-                var menu = getAccountMenu();
+                let trigger = getAccountTrigger();
+                let menu = getAccountMenu();
 
                 if (!trigger || !menu) {
                     return;
                 }
 
-                var target = event.target;
-                var insideTrigger = trigger.contains(target);
-                var insideMenu = menu.contains(target);
+                let target = event.target;
+                let insideTrigger = trigger.contains(target);
+                let insideMenu = menu.contains(target);
 
                 if (insideTrigger) {
                     event.preventDefault();
@@ -429,19 +429,19 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
                     return;
                 }
 
-                var menu = getAccountMenu();
+                let menu = getAccountMenu();
                 if (!menu || !isAccountMenuOpen()) {
                     return;
                 }
 
-                var items = getAccountMenuFocusable(menu);
+                let items = getAccountMenuFocusable(menu);
                 if (!items.length) {
                     return;
                 }
 
-                var first = items[0];
-                var last = items[items.length - 1];
-                var active = document.activeElement;
+                let first = items[0];
+                let last = items[items.length - 1];
+                let active = document.activeElement;
 
                 if (!event.shiftKey && active === last) {
                     event.preventDefault();
@@ -453,7 +453,7 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
             });
 
             document.addEventListener('keydown', function (event) {
-                var menu = getAccountMenu();
+                let menu = getAccountMenu();
                 if (!menu || !isAccountMenuOpen()) {
                     return;
                 }
@@ -462,14 +462,14 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
                     return;
                 }
 
-                var items = getAccountMenuFocusable(menu);
+                let items = getAccountMenuFocusable(menu);
                 if (!items.length) {
                     return;
                 }
 
                 event.preventDefault();
-                var active = document.activeElement;
-                var index = items.indexOf(active);
+                let active = document.activeElement;
+                let index = items.indexOf(active);
 
                 if (index === -1) {
                     items[0].focus();
@@ -485,12 +485,12 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
             });
 
             document.addEventListener('keydown', function (event) {
-                var menu = getAccountMenu();
+                let menu = getAccountMenu();
                 if (!menu || !isAccountMenuOpen()) {
                     return;
                 }
 
-                var items = getAccountMenuFocusable(menu);
+                let items = getAccountMenuFocusable(menu);
                 if (!items.length) {
                     return;
                 }
@@ -524,7 +524,7 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
                 if (window.innerWidth < 992) {
                     return;
                 }
-                var wrap = document.querySelector('.customer-welcome');
+                let wrap = document.querySelector('.customer-welcome');
                 if (!wrap || !wrap.contains(event.target)) {
                     return;
                 }
@@ -538,11 +538,11 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
                 if (window.innerWidth < 992) {
                     return;
                 }
-                var wrap = document.querySelector('.customer-welcome');
+                let wrap = document.querySelector('.customer-welcome');
                 if (!wrap || !wrap.contains(event.target)) {
                     return;
                 }
-                var related = event.relatedTarget;
+                let related = event.relatedTarget;
                 if (related && wrap.contains(related)) {
                     return;
                 }
@@ -556,7 +556,7 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
         }
 
         function normalizeAccountMenuInitialState() {
-            var menu = getAccountMenu();
+            let menu = getAccountMenu();
             if (!menu) {
                 return;
             }
@@ -566,8 +566,8 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
         }
 
         function improveAccountA11y() {
-            var trigger = getAccountTrigger();
-            var menu = getAccountMenu();
+            let trigger = getAccountTrigger();
+            let menu = getAccountMenu();
             if (!trigger || !menu) {
                 return;
             }
@@ -581,25 +581,25 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
         }
 
         function ensureQuickActionsContainer(menu) {
-            var existing = menu.querySelector('.awa-account-quick-actions');
+            let existing = menu.querySelector('.awa-account-quick-actions');
             if (existing) {
                 return existing;
             }
 
-            var wrap = document.createElement('div');
+            let wrap = document.createElement('div');
             wrap.className = 'awa-account-quick-actions';
             menu.insertBefore(wrap, menu.firstChild);
             return wrap;
         }
 
         function createQuickAction(href, label, mod) {
-            var link = document.createElement('a');
+            let link = document.createElement('a');
             link.className = 'awa-account-quick-actions__item ' + mod;
             link.href = href;
             link.textContent = label;
             if (window.location && window.location.pathname) {
-                var currentPath = window.location.pathname.replace(/\/+$/, '');
-                var targetPath = String(href).replace(/\/+$/, '');
+                let currentPath = window.location.pathname.replace(/\/+$/, '');
+                let targetPath = String(href).replace(/\/+$/, '');
                 if (currentPath === targetPath) {
                     link.setAttribute('aria-current', 'page');
                 }
@@ -608,13 +608,13 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
         }
 
         function updateAccountQuickActions(data) {
-            var menu = getAccountMenu();
+            let menu = getAccountMenu();
             if (!menu) {
                 return;
             }
 
-            var logged = isLoggedIn(data);
-            var container = ensureQuickActionsContainer(menu);
+            let logged = isLoggedIn(data);
+            let container = ensureQuickActionsContainer(menu);
             container.innerHTML = '';
 
             if (!logged) {
@@ -628,12 +628,12 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
         }
 
         function ensureMobileQuickActions(data) {
-            var rightCol = document.querySelector('[data-awa-header-right]');
+            let rightCol = document.querySelector('[data-awa-header-right]');
             if (!rightCol) {
                 return;
             }
-            var logged = isLoggedIn(data);
-            var host = document.querySelector('.awa-header-mobile-quick-actions');
+            let logged = isLoggedIn(data);
+            let host = document.querySelector('.awa-header-mobile-quick-actions');
             if (!host) {
                 host = document.createElement('div');
                 host.className = 'awa-header-mobile-quick-actions';
@@ -648,7 +648,7 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
         }
 
         function updateMcpDashboardLink(data) {
-            var link = document.getElementById('awa-mcp-dashboard-link');
+            let link = document.getElementById('awa-mcp-dashboard-link');
             if (!link) {
                 return;
             }
@@ -669,7 +669,7 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
             syncAccountAriaState();
         }
 
-        var customer = customerData.get('customer');
+        let customer = customerData.get('customer');
         setupAccountMenuA11y();
         normalizeAccountMenuInitialState();
         improveAccountA11y();

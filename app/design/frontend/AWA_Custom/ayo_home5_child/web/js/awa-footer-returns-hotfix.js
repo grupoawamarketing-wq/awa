@@ -1,15 +1,15 @@
 define([], function () {
     'use strict';
 
-    var LEGACY_PATTERN = /\/trocas-devolucoes\/?$/i;
-    var CANONICAL_PATH = '/returns';
+    let LEGACY_PATTERN = /\/trocas-devolucoes\/?$/i;
+    let CANONICAL_PATH = '/returns';
 
     function normalizeReturnsLinks(root) {
-        var scope = root || document;
-        var links = scope.querySelectorAll('a[href]');
+        let scope = root || document;
+        let links = scope.querySelectorAll('a[href]');
 
         links.forEach(function (link) {
-            var href = link.getAttribute('href') || '';
+            let href = link.getAttribute('href') || '';
 
             if (!LEGACY_PATTERN.test(href)) {
                 return;

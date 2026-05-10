@@ -4,7 +4,7 @@ define([
 ], function ($, confirm) {
     'use strict';
 
-    var DEFAULT_MESSAGE = 'Tem certeza que deseja rejeitar esta cotação?';
+    let DEFAULT_MESSAGE = 'Tem certeza que deseja rejeitar esta cotação?';
 
     return function (config, element) {
         var $form = $(element);
@@ -15,8 +15,8 @@ define([
 
         $form.on('click', '[data-action="reject-quote"]', function (event) {
             var $button = $(this);
-            var message = $button.data('confirm-message') || config.rejectMessage || DEFAULT_MESSAGE;
-            var form = $form.get(0);
+            let message = $button.data('confirm-message') || config.rejectMessage || DEFAULT_MESSAGE;
+            let form = $form.get(0);
 
             event.preventDefault();
 
@@ -29,8 +29,8 @@ define([
                             return;
                         }
 
-                        var tempInputName = $button.attr('name');
-                        var tempInputValue = $button.val();
+                        let tempInputName = $button.attr('name');
+                        let tempInputValue = $button.val();
 
                         if (tempInputName) {
                             var $temp = $('<input>', {

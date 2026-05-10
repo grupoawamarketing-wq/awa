@@ -16,16 +16,16 @@ define([], function () {
     }
 
     return function (config, track) {
-        var root;
-        var prev;
-        var next;
-        var dotsWrap;
-        var items;
-        var pageOffsets = [0];
-        var startX = 0;
-        var startScrollLeft = 0;
-        var isDragging = false;
-        var resizeTimer;
+        let root;
+        let prev;
+        let next;
+        let dotsWrap;
+        let items;
+        let pageOffsets = [0];
+        let startX = 0;
+        let startScrollLeft = 0;
+        let isDragging = false;
+        let resizeTimer;
 
         if (!track || track.dataset.awaCategoryCarouselInit === '1') {
             return;
@@ -45,12 +45,12 @@ define([], function () {
 
         function getScrollAmount() {
             // Scroll by almost a full page (track.clientWidth) to match dots logic
-            var scroll = track.clientWidth;
-            var item = items[0];
+            let scroll = track.clientWidth;
+            let item = items[0];
             if (item) {
-                var style = getComputedStyle(track);
-                var gap = parseInt(style.gap, 10) || 16;
-                var itemW = item.offsetWidth + gap;
+                let style = getComputedStyle(track);
+                let gap = parseInt(style.gap, 10) || 16;
+                let itemW = item.offsetWidth + gap;
                 // Round down to nearest whole item to prevent cutting
                 scroll = Math.floor(track.clientWidth / itemW) * itemW;
             }
@@ -62,9 +62,9 @@ define([], function () {
         }
 
         function buildPageOffsets() {
-            var trackW = track.clientWidth;
-            var maxScroll = getMaxScroll();
-            var offset = 0;
+            let trackW = track.clientWidth;
+            let maxScroll = getMaxScroll();
+            let offset = 0;
 
             pageOffsets = [0];
 
@@ -83,12 +83,12 @@ define([], function () {
         }
 
         function getCurrentPage() {
-            var currentScroll = track.scrollLeft;
-            var activeIndex = 0;
-            var activeDistance = Infinity;
+            let currentScroll = track.scrollLeft;
+            let activeIndex = 0;
+            let activeDistance = Infinity;
 
             pageOffsets.forEach(function (offset, idx) {
-                var distance = Math.abs(currentScroll - offset);
+                let distance = Math.abs(currentScroll - offset);
 
                 if (distance < activeDistance) {
                     activeDistance = distance;
@@ -100,12 +100,12 @@ define([], function () {
         }
 
         function updateNavState() {
-            var maxScroll = getMaxScroll();
-            var atStart = track.scrollLeft <= 4;
-            var atEnd = track.scrollLeft >= (maxScroll - 4);
+            let maxScroll = getMaxScroll();
+            let atStart = track.scrollLeft <= 4;
+            let atEnd = track.scrollLeft >= (maxScroll - 4);
 
             [prev, next].forEach(function (button, idx) {
-                var disabled = idx === 0 ? atStart : atEnd;
+                let disabled = idx === 0 ? atStart : atEnd;
 
                 if (!button) {
                     return;
@@ -120,10 +120,10 @@ define([], function () {
         }
 
         function buildDots() {
-            var trackW;
-            var scrollW;
-            var pages;
-            var i;
+            let trackW;
+            let scrollW;
+            let pages;
+            let i;
 
             if (!dotsWrap) {
                 return;
@@ -150,8 +150,8 @@ define([], function () {
 
             for (i = 0; i < pages; i++) {
                 (function (pageIndex) {
-                    var dot = document.createElement('button');
-                    var isActive = pageIndex === 0;
+                    let dot = document.createElement('button');
+                    let isActive = pageIndex === 0;
 
                     dot.className = 'awa-category-carousel__dot';
                     dot.type = 'button';
@@ -177,8 +177,8 @@ define([], function () {
         }
 
         function updateDots() {
-            var dots;
-            var currentPage;
+            let dots;
+            let currentPage;
 
             if (!dotsWrap) {
                 return;
@@ -192,7 +192,7 @@ define([], function () {
             currentPage = getCurrentPage();
 
             dots.forEach(function (dot, idx) {
-                var isActive = idx === currentPage;
+                let isActive = idx === currentPage;
 
                 dot.classList.toggle('active', isActive);
                 dot.setAttribute('aria-pressed', isActive ? 'true' : 'false');
@@ -258,7 +258,7 @@ define([], function () {
         }, {passive: true});
 
         if ('IntersectionObserver' in window && !prefersReducedMotion()) {
-            var animItems = track.querySelectorAll('.awa-category-carousel__item');
+            let animItems = track.querySelectorAll('.awa-category-carousel__item');
 
             animItems.forEach(function (el) {
                 el.classList.add('awa-carousel-hidden');
@@ -266,14 +266,14 @@ define([], function () {
 
             /* Reveal hidden items in the track, with optional stagger delay. */
             function revealTrackItems(stagger) {
-                var cards = track.querySelectorAll('.awa-carousel-hidden');
+                let cards = track.querySelectorAll('.awa-carousel-hidden');
 
                 if (!cards.length) {
                     return;
                 }
 
                 cards.forEach(function (card, i) {
-                    var delay = stagger ? i * 80 : 0;
+                    let delay = stagger ? i * 80 : 0;
 
                     setTimeout(function () {
                         card.classList.remove('awa-carousel-hidden');
@@ -284,7 +284,7 @@ define([], function () {
 
             /* IO reveals items when track scrolls into (or near) viewport.
                rootMargin 400px ensures items just below fold are revealed early. */
-            var io = new IntersectionObserver(function (entries) {
+            let io = new IntersectionObserver(function (entries) {
                 entries.forEach(function (entry) {
                     if (entry.isIntersecting) {
                         revealTrackItems(true);
@@ -301,13 +301,13 @@ define([], function () {
                (Slick init), so the track position is final. If it is near the
                fold and IO hasn't fired yet, reveal at once. */
             function tryRevealAfterLoad() {
-                var remaining = track.querySelectorAll('.awa-carousel-hidden');
+                let remaining = track.querySelectorAll('.awa-carousel-hidden');
 
                 if (!remaining.length) {
                     return; // IO already handled it
                 }
 
-                var rect = track.getBoundingClientRect();
+                let rect = track.getBoundingClientRect();
 
                 if (rect.top < window.innerHeight + 400) {
                     io.unobserve(track);

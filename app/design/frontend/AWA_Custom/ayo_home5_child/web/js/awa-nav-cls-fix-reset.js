@@ -19,7 +19,7 @@
 (function () {
     'use strict';
 
-    var MOBILE_MAX = 991;
+    let MOBILE_MAX = 991;
 
     function isDesktop() {
         return !(window.matchMedia && window.matchMedia('(max-width: ' + MOBILE_MAX + 'px)').matches);
@@ -30,7 +30,7 @@
             return;
         }
 
-        var inner = document.querySelector('.awa-nav-bar__inner');
+        let inner = document.querySelector('.awa-nav-bar__inner');
 
         if (!inner) {
             return;
@@ -47,7 +47,7 @@
         resetNavBarInner();
     }
 
-    var resizeTimer;
+    let resizeTimer;
     window.addEventListener('resize', function () {
         clearTimeout(resizeTimer);
         resizeTimer = setTimeout(resetNavBarInner, 100);

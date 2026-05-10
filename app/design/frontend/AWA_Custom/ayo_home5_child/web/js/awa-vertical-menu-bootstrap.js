@@ -6,7 +6,7 @@ define([
 
     function parseLimit($nav) {
         var $list = $nav.find('.togge-menu').first();
-        var limit = 0;
+        let limit = 0;
 
         if (!$list.length) {
             return 0;
@@ -40,8 +40,8 @@ define([
     }
 
     function wireDesktopHoverFallback(navEl) {
-        var items;
-        var listEl;
+        let items;
+        let listEl;
 
         if (!navEl) {
             return;
@@ -62,8 +62,8 @@ define([
             item.setAttribute('data-awa-vm-hover-wired', '1');
 
             function setOpenState(open) {
-                var panel;
-                var menuId;
+                let panel;
+                let menuId;
 
                 if (window.innerWidth < 992) {
                     return;
@@ -72,9 +72,9 @@ define([
                 /* JS-1 fix: se flyout-fix estiver ativo (data-awa-vmf-active='1' no UL),
                    ele gerencia portal + visibilidade + nav-open cleanup.
                    Este handler fica como fallback apenas quando flyout-fix não inicializou. */
-                var listEl = item.closest('ul.togge-menu') || item.closest('.navigation.verticalmenu');
+                let listEl = item.closest('ul.togge-menu') || item.closest('.navigation.verticalmenu');
                 if (listEl) {
-                    var ul = listEl.matches('ul.togge-menu') ? listEl : listEl.querySelector('ul.togge-menu');
+                    let ul = listEl.matches('ul.togge-menu') ? listEl : listEl.querySelector('ul.togge-menu');
                     if (ul && ul.getAttribute('data-awa-vmf-active') === '1') {
                         return;
                     }
@@ -134,9 +134,9 @@ define([
     $(bootstrapMenus);
 
     (function retryForEsiMenu() {
-        var attempts = 0;
-        var maxAttempts = 40;
-        var timer = window.setInterval(function () {
+        let attempts = 0;
+        let maxAttempts = 40;
+        let timer = window.setInterval(function () {
             attempts += 1;
             bootstrapMenus();
 

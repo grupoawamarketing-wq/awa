@@ -1,8 +1,8 @@
 define(['jquery', 'domReady!'], function ($) {
     'use strict';
 
-    var DESKTOP_BREAKPOINT = 992;
-    var RESIZE_NS = '.awaVMenuToggleHotfix';
+    let DESKTOP_BREAKPOINT = 992;
+    let RESIZE_NS = '.awaVMenuToggleHotfix';
 
     function isDesktop() {
         return window.matchMedia
@@ -11,7 +11,7 @@ define(['jquery', 'domReady!'], function ($) {
     }
 
     function isHomeContext() {
-        var body = document.body;
+        let body = document.body;
 
         if (!body) {
             return false;
@@ -37,7 +37,7 @@ define(['jquery', 'domReady!'], function ($) {
     }
 
     function getState($nav) {
-        var state = $nav.data('awaVMenuToggleHotfixState');
+        let state = $nav.data('awaVMenuToggleHotfixState');
 
         if (!state) {
             state = { pinned: false };
@@ -62,8 +62,8 @@ define(['jquery', 'domReady!'], function ($) {
     function setOpenState($nav, open) {
         var $title = getTitle($nav);
         var $list = getList($nav);
-        var listNode = $list.get(0);
-        var expanded = open ? 'true' : 'false';
+        let listNode = $list.get(0);
+        let expanded = open ? 'true' : 'false';
 
         if (!$list.length || !$title.length) {
             return;
@@ -116,8 +116,8 @@ define(['jquery', 'domReady!'], function ($) {
         var $list;
         var $quickWrap;
         var $quickList;
-        var quickLinks;
-        var quickHtml;
+        let quickLinks;
+        let quickHtml;
         var $logoImg;
         var $promo;
         var $promoText;
@@ -252,7 +252,7 @@ define(['jquery', 'domReady!'], function ($) {
 
     function wireTitleCapture($nav) {
         var $title = getTitle($nav);
-        var title = $title.get(0);
+        let title = $title.get(0);
 
         if (!title || title.getAttribute('data-awa-vmenu-hotfix-title-bound') === '1') {
             return;
@@ -261,7 +261,7 @@ define(['jquery', 'domReady!'], function ($) {
         title.setAttribute('data-awa-vmenu-hotfix-title-bound', '1');
 
         title.addEventListener('click', function (event) {
-            var state;
+            let state;
 
             if (!isDesktop()) {
                 return;
@@ -291,7 +291,7 @@ define(['jquery', 'domReady!'], function ($) {
         }, true);
 
         title.addEventListener('keydown', function (event) {
-            var state;
+            let state;
 
             if (!isDesktop()) {
                 return;
@@ -332,7 +332,7 @@ define(['jquery', 'domReady!'], function ($) {
     }
 
     function preventPinnedAutoClose($nav) {
-        var nav = $nav.get(0);
+        let nav = $nav.get(0);
 
         if (!nav || nav.getAttribute('data-awa-vmenu-hotfix-nav-bound') === '1') {
             return;
@@ -342,7 +342,7 @@ define(['jquery', 'domReady!'], function ($) {
 
         ['mouseleave', 'focusout'].forEach(function (eventName) {
             nav.addEventListener(eventName, function (event) {
-                var state = getState($nav);
+                let state = getState($nav);
 
                 if (!isDesktop() || keepDesktopMenuExpanded() || !state.pinned) {
                     return;
@@ -389,7 +389,7 @@ define(['jquery', 'domReady!'], function ($) {
     function releasePinnedMenus() {
         allMenus().each(function () {
             var $nav = $(this);
-            var state = getState($nav);
+            let state = getState($nav);
 
             if (!state.pinned) {
                 return;
@@ -407,8 +407,8 @@ define(['jquery', 'domReady!'], function ($) {
 
         allMenus().each(function () {
             var $nav = $(this);
-            var nav = $nav.get(0);
-            var state = getState($nav);
+            let nav = $nav.get(0);
+            let state = getState($nav);
 
             if (!state.pinned || keepDesktopMenuExpanded()) {
                 return;
@@ -456,9 +456,9 @@ define(['jquery', 'domReady!'], function ($) {
     bindAll();
 
     (function retryForEsiMenu() {
-        var attempts = 0;
-        var maxAttempts = 20;
-        var timer = window.setInterval(function () {
+        let attempts = 0;
+        let maxAttempts = 20;
+        let timer = window.setInterval(function () {
             attempts += 1;
             bindAll();
             allMenus().each(function () {

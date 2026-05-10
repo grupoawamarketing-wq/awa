@@ -13,11 +13,11 @@
 define([], function () {
     'use strict';
 
-    var RELEASE_DELAY = 8000;
-    var _queue  = [];
-    var _released = false;
+    let RELEASE_DELAY = 8000;
+    let _queue  = [];
+    let _released = false;
 
-    var GATE_EVENTS = ['touchstart', 'pointerdown', 'keydown', 'scroll', 'click', 'mousemove'];
+    let GATE_EVENTS = ['touchstart', 'pointerdown', 'keydown', 'scroll', 'click', 'mousemove'];
 
     function release() {
         if (_released) {
@@ -30,7 +30,7 @@ define([], function () {
             document.removeEventListener(evt, release, true);
         });
 
-        var pending = _queue;
+        let pending = _queue;
         _queue = null;
         pending.forEach(function (fn) {
             fn();
@@ -44,7 +44,7 @@ define([], function () {
     window.setTimeout(release, RELEASE_DELAY);
 
     return function (targetModule) {
-        var originalApply = targetModule.apply.bind(targetModule);
+        let originalApply = targetModule.apply.bind(targetModule);
 
         targetModule.apply = function (context) {
             if (_released) {

@@ -22,15 +22,15 @@ define(['rjsResolver'], function (resolver) {
      * text "Endereço de Cobrança" but no for/id association with the select.
      */
     function fixBillingAddressSelectA11y() {
-        var select = document.querySelector('select[name="billing_address_id"]');
+        let select = document.querySelector('select[name="billing_address_id"]');
         if (select && !select.getAttribute('aria-label')) {
             select.setAttribute('aria-label', 'Endereço de cobrança');
             return;
         }
         // KO renders this select conditionally (only when >1 address option).
         // Use MutationObserver to catch it when it appears.
-        var observer = new MutationObserver(function (mutations, obs) {
-            var sel = document.querySelector('select[name="billing_address_id"]');
+        let observer = new MutationObserver(function (mutations, obs) {
+            let sel = document.querySelector('select[name="billing_address_id"]');
             if (sel && !sel.getAttribute('aria-label')) {
                 sel.setAttribute('aria-label', 'Endereço de cobrança');
                 obs.disconnect();
@@ -46,7 +46,7 @@ define(['rjsResolver'], function (resolver) {
             return;
         }
 
-        var loader = document.getElementById('checkout-loader');
+        let loader = document.getElementById('checkout-loader');
 
         if (loader) {
             resolver(removeLoader.bind(null, loader));

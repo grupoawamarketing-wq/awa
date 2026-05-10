@@ -1,10 +1,10 @@
 !function () {
 	'use strict';
 
-	var mobileMaxWidth = 991;
+	let mobileMaxWidth = 991;
 
 	function initStickyHeader() {
-		var header = document.getElementById('header') ||
+		let header = document.getElementById('header') ||
 			document.querySelector('.awa-site-header__shell') ||
 			document.querySelector('.header-container') ||
 			document.querySelector('header[role="banner"]');
@@ -13,22 +13,22 @@
 			return;
 		}
 
-		var topHeader = header.querySelector('.top-header');
-		var stickyClass = 'awa-header-sticky';
-		var hiddenClass = 'awa-header--hidden';
-		var condensedClass = 'awa-header-condensed';
-		var threshold = 80;
-		var hideThreshold = 200;
-		var scrollDelta = 8;
-		var isSticky = false;
-		var isHidden = false;
-		var lastScrollY = 0;
-		var cachedHeight = 0;
-		var ticking = false;
-		var passiveSupported = false;
+		let topHeader = header.querySelector('.top-header');
+		let stickyClass = 'awa-header-sticky';
+		let hiddenClass = 'awa-header--hidden';
+		let condensedClass = 'awa-header-condensed';
+		let threshold = 80;
+		let hideThreshold = 200;
+		let scrollDelta = 8;
+		let isSticky = false;
+		let isHidden = false;
+		let lastScrollY = 0;
+		let cachedHeight = 0;
+		let ticking = false;
+		let passiveSupported = false;
 
 		try {
-			var passiveProbe = Object.defineProperty({}, 'passive', {
+			let passiveProbe = Object.defineProperty({}, 'passive', {
 				get: function () {
 					passiveSupported = true;
 					return true;
@@ -74,8 +74,8 @@
 				return;
 			}
 
-			var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-			var diff = scrollTop - lastScrollY;
+			let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+			let diff = scrollTop - lastScrollY;
 
 			/* --- Sticky toggle --- */
 			if (scrollTop > threshold && !isSticky) {

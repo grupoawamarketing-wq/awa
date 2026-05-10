@@ -25,8 +25,8 @@ define(['jquery', 'domReady!'], function ($) {
             return;
         }
 
-        var minQty = config.minQty || 1;
-        var maxQty = config.maxQty || 999;
+        let minQty = config.minQty || 1;
+        let maxQty = config.maxQty || 999;
 
         $('[data-role="tocart-form"]').each(function () {
             var $form = $(this);
@@ -41,7 +41,7 @@ define(['jquery', 'domReady!'], function ($) {
                 return;
             }
 
-            var currentVal = parseInt($hiddenQty.val(), 10) || minQty;
+            let currentVal = parseInt($hiddenQty.val(), 10) || minQty;
 
             // Convert hidden → number input with stepper wrapper
             $hiddenQty

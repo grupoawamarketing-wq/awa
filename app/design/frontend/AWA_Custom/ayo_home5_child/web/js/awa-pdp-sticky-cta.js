@@ -1,18 +1,18 @@
 (function (root, factory) {
     "use strict";
 
-    var api = factory(root, root && root.document ? root.document : null);
+    let api = factory(root, root && root.document ? root.document : null);
     if (typeof module === "object" && module.exports) {
         module.exports = api;
     }
 })(typeof window !== "undefined" ? window : globalThis, function (root, document) {
     "use strict";
 
-    var MOBILE_QUERY = "(max-width: 767px)";
-    var REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
-    var INVALID_STICKY_LABEL_RE = /\b(entrar|login|cadastro|acessar)\b/i;
+    let MOBILE_QUERY = "(max-width: 767px)";
+    let REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
+    let INVALID_STICKY_LABEL_RE = /\b(entrar|login|cadastro|acessar)\b/i;
 
-    var SELECTORS = {
+    let SELECTORS = {
         addToCart: "#product-addtocart-button",
         addToCartForm: "#product_addtocart_form",
         b2bPriceGate: ".product-info-main .b2b-login-to-see-price",
@@ -70,7 +70,7 @@
         );
     }
 
-    var exportedApi = {
+    let exportedApi = {
         normalizeText: normalizeText,
         hasValidCartAction: hasValidCartAction,
         isInvalidStickyLabel: isInvalidStickyLabel,
@@ -86,11 +86,11 @@
     }
     root.__awaRound3PdpStickyCtaInit = true;
 
-    var stickyStarted = false;
-    var deferredRetryBound = false;
-    var deferredRetryObserver = null;
-    var deferredRetryIntervalId = null;
-    var deferredRetryTimeoutId = null;
+    let stickyStarted = false;
+    let deferredRetryBound = false;
+    let deferredRetryObserver = null;
+    let deferredRetryIntervalId = null;
+    let deferredRetryTimeoutId = null;
 
     function setAttrIfMissing(el, name, value) {
         if (el && !el.getAttribute(name)) {
@@ -123,8 +123,8 @@
     }
 
     function resolveAddToCartButton() {
-        var button = document.querySelector(SELECTORS.addToCart);
-        var form;
+        let button = document.querySelector(SELECTORS.addToCart);
+        let form;
         if (!button || button.getAttribute("data-b2b-original-hidden") === "1") {
             return null;
         }
@@ -143,9 +143,9 @@
     }
 
     function isRestrictedB2bContext(button) {
-        var body = document.body;
-        var form = button ? (button.form || button.closest(SELECTORS.addToCartForm)) : null;
-        var gateVisible = isVisible(document.querySelector(SELECTORS.b2bPriceGate));
+        let body = document.body;
+        let form = button ? (button.form || button.closest(SELECTORS.addToCartForm)) : null;
+        let gateVisible = isVisible(document.querySelector(SELECTORS.b2bPriceGate));
 
         if (body && (body.classList.contains("b2b-restricted-mode") || body.classList.contains("b2b-pending-mode"))) {
             return true;
@@ -160,7 +160,7 @@
     }
 
     function isStickyCapableAddToCartButton(button) {
-        var form;
+        let form;
         if (!button || !isVisible(button)) {
             return false;
         }
@@ -185,9 +185,9 @@
     }
 
     function enhanceQtyControls() {
-        var qtyInput = document.getElementById("qty");
-        var qtyUp = document.querySelector(".info-qty .qty-up");
-        var qtyDown = document.querySelector(".info-qty .qty-down");
+        let qtyInput = document.getElementById("qty");
+        let qtyUp = document.querySelector(".info-qty .qty-up");
+        let qtyDown = document.querySelector(".info-qty .qty-down");
         if (qtyInput) {
             setAttrIfMissing(qtyInput, "inputmode", "numeric");
             setAttrIfMissing(qtyInput, "pattern", "[0-9]*");
@@ -208,11 +208,11 @@
     }
 
     function getMediaSentinel() {
-        var nodes = document.querySelectorAll(SELECTORS.media);
-        var i;
+        let nodes = document.querySelectorAll(SELECTORS.media);
+        let i;
         for (i = 0; i < nodes.length; i += 1) {
             if (safeInvoke("media sentinel bounds", function () {
-                var rect = nodes[i].getBoundingClientRect();
+                let rect = nodes[i].getBoundingClientRect();
                 return rect.width > 0 && rect.height > 80;
             }, false)) {
                 return nodes[i];
@@ -222,25 +222,25 @@
     }
 
     function createStickyUi(getButton) {
-        var bar = document.createElement("div");
+        let bar = document.createElement("div");
         bar.className = "awa-pdp-sticky-cta";
         bar.setAttribute("aria-hidden", "true");
         bar.innerHTML = '<div class="awa-pdp-sticky-cta__inner" role="region" aria-label="Atalho de compra do produto"><div class="awa-pdp-sticky-cta__meta"><span class="awa-pdp-sticky-cta__label">Comprar agora</span><span class="awa-pdp-sticky-cta__price"></span></div><button type="button" class="awa-pdp-sticky-cta__button" title="Comprar" aria-label="Comprar">Comprar</button></div>';
         document.body.appendChild(bar);
 
-        var stickyButton = bar.querySelector(".awa-pdp-sticky-cta__button");
-        var stickyPrice = bar.querySelector(".awa-pdp-sticky-cta__price");
+        let stickyButton = bar.querySelector(".awa-pdp-sticky-cta__button");
+        let stickyPrice = bar.querySelector(".awa-pdp-sticky-cta__price");
 
         function getLiveButton() {
             return typeof getButton === "function" ? getButton() : null;
         }
 
         function syncFromOriginal() {
-            var originalButton = getLiveButton();
-            var label = getButtonLabel(originalButton) || "Comprar";
-            var priceNode = document.querySelector(SELECTORS.price);
-            var priceText = normalizeText(priceNode ? (priceNode.textContent || "") : "");
-            var canAct = isActionableAddToCartButton(originalButton);
+            let originalButton = getLiveButton();
+            let label = getButtonLabel(originalButton) || "Comprar";
+            let priceNode = document.querySelector(SELECTORS.price);
+            let priceText = normalizeText(priceNode ? (priceNode.textContent || "") : "");
+            let canAct = isActionableAddToCartButton(originalButton);
             stickyButton.textContent = label;
             stickyButton.title = label;
             stickyButton.setAttribute("aria-label", label);
@@ -251,8 +251,8 @@
         }
 
         stickyButton.addEventListener("click", function () {
-            var originalButton = getLiveButton();
-            var behavior = prefersReducedMotion() ? "auto" : "smooth";
+            let originalButton = getLiveButton();
+            let behavior = prefersReducedMotion() ? "auto" : "smooth";
             if (!originalButton) {
                 return;
             }
@@ -273,7 +273,7 @@
         syncFromOriginal();
 
         if (root.MutationObserver) {
-            var observeTarget = document.querySelector(SELECTORS.productInfoMain) || document.body;
+            let observeTarget = document.querySelector(SELECTORS.productInfoMain) || document.body;
             new root.MutationObserver(function () {
                 safeInvoke("sticky mutation sync", syncFromOriginal, null);
             }).observe(observeTarget, {
@@ -310,11 +310,11 @@
     }
 
     function init() {
-        var addToCartButton;
-        var mediaSentinel;
-        var sticky;
-        var body;
-        var mq;
+        let addToCartButton;
+        let mediaSentinel;
+        let sticky;
+        let body;
+        let mq;
 
         if (!document.body || !document.body.classList.contains("catalog-product-view") || stickyStarted) {
             return;
@@ -342,7 +342,7 @@
         stickyStarted = true;
         clearDeferredRetry();
         sticky = createStickyUi(function () {
-            var liveButton = resolveAddToCartButton();
+            let liveButton = resolveAddToCartButton();
             if (liveButton && liveButton !== addToCartButton) {
                 addToCartButton = liveButton;
             }
@@ -352,7 +352,7 @@
         mq = root.matchMedia ? root.matchMedia(MOBILE_QUERY) : null;
 
         function shouldShowSticky() {
-            var liveButton = resolveAddToCartButton();
+            let liveButton = resolveAddToCartButton();
             if (mq && !mq.matches) {
                 return false;
             }
@@ -370,14 +370,14 @@
 
         if (root.IntersectionObserver) {
             new root.IntersectionObserver(function (entries) {
-                var entry = entries[0];
-                var isVisibleNow = shouldShowSticky() && entry && !entry.isIntersecting;
+                let entry = entries[0];
+                let isVisibleNow = shouldShowSticky() && entry && !entry.isIntersecting;
                 setVisible(isVisibleNow);
                 safeInvoke("intersection sticky sync", sticky.sync, null);
             }, { root: null, threshold: 0.05 }).observe(mediaSentinel);
         } else {
-            var onScroll = function () {
-                var rect = mediaSentinel.getBoundingClientRect();
+            let onScroll = function () {
+                let rect = mediaSentinel.getBoundingClientRect();
                 setVisible(shouldShowSticky() && rect.bottom < 0);
                 safeInvoke("fallback scroll sticky sync", sticky.sync, null);
             };

@@ -1,7 +1,7 @@
 define([], function () {
     'use strict';
 
-    var BLOCKED_GRID_PROPS = [
+    let BLOCKED_GRID_PROPS = [
         'grid-template-columns',
         'grid-template-rows',
         'grid-template-areas',
@@ -9,12 +9,12 @@ define([], function () {
         'gap',
         'grid-column'
     ];
-    var HEADER_ROW_SELECTOR = '.header .awa-main-header__inner[data-awa-header-row], .header .wp-header[data-awa-header-row]';
-    var HEADER_TOP_SEARCH_SELECTOR = '.header .awa-main-header__inner[data-awa-header-row] > .top-search, .header .wp-header[data-awa-header-row] > .top-search';
-    var HEADER_MINICART_SELECTOR = '.header [data-awa-header-minicart-shell="true"], .header .awa-header-minicart[data-awa-header-cart="true"]';
+    let HEADER_ROW_SELECTOR = '.header .awa-main-header__inner[data-awa-header-row], .header .wp-header[data-awa-header-row]';
+    let HEADER_TOP_SEARCH_SELECTOR = '.header .awa-main-header__inner[data-awa-header-row] > .top-search, .header .wp-header[data-awa-header-row] > .top-search';
+    let HEADER_MINICART_SELECTOR = '.header [data-awa-header-minicart-shell="true"], .header .awa-header-minicart[data-awa-header-cart="true"]';
 
     function interceptSetProperty(element, overrides, blocked) {
-        var original = element.style.setProperty.bind(element.style);
+        let original = element.style.setProperty.bind(element.style);
 
         element.style.setProperty = function (property, value, priority) {
             if (overrides[property]) {
@@ -33,7 +33,7 @@ define([], function () {
     }
 
     function blockSetAttribute(element) {
-        var original = element.setAttribute.bind(element);
+        let original = element.setAttribute.bind(element);
 
         element.setAttribute = function (name, value) {
             if (name === 'style') {
@@ -59,9 +59,9 @@ define([], function () {
             return true;
         }
 
-        var wrapper = document.querySelector(HEADER_ROW_SELECTOR);
-        var topSearch = document.querySelector(HEADER_TOP_SEARCH_SELECTOR);
-        var miniCart = document.querySelector(HEADER_MINICART_SELECTOR);
+        let wrapper = document.querySelector(HEADER_ROW_SELECTOR);
+        let topSearch = document.querySelector(HEADER_TOP_SEARCH_SELECTOR);
+        let miniCart = document.querySelector(HEADER_MINICART_SELECTOR);
 
         if (!wrapper || !topSearch) {
             return false;
@@ -70,7 +70,7 @@ define([], function () {
         if (!wrapper.hasAttribute('data-awa-cart-header-patched')) {
             wrapper.removeAttribute('style');
 
-            var wrapperOverrides = {
+            let wrapperOverrides = {
                 'display': {value: 'grid', priority: 'important'},
                 'grid-template-columns': {value: 'minmax(0, 1fr)', priority: 'important'},
                 'grid-template-areas': {value: '"brand" "search"', priority: 'important'},
@@ -79,7 +79,7 @@ define([], function () {
                 'padding-inline': {value: '18px', priority: 'important'}
             };
 
-            var originalWrapperSet = interceptSetProperty(wrapper, wrapperOverrides, BLOCKED_GRID_PROPS);
+            let originalWrapperSet = interceptSetProperty(wrapper, wrapperOverrides, BLOCKED_GRID_PROPS);
 
             blockSetAttribute(wrapper);
             applyInitial(originalWrapperSet, {
@@ -98,7 +98,7 @@ define([], function () {
         if (!topSearch.hasAttribute('data-awa-cart-top-search-patched')) {
             topSearch.removeAttribute('style');
 
-            var topSearchOverrides = {
+            let topSearchOverrides = {
                 'display': {value: 'block', priority: 'important'},
                 'grid-column': {value: '1 / -1', priority: 'important'},
                 'grid-area': {value: 'search', priority: 'important'},
@@ -108,7 +108,7 @@ define([], function () {
                 'margin': {value: '0 auto', priority: 'important'}
             };
 
-            var originalTopSearchSet = interceptSetProperty(topSearch, topSearchOverrides, BLOCKED_GRID_PROPS);
+            let originalTopSearchSet = interceptSetProperty(topSearch, topSearchOverrides, BLOCKED_GRID_PROPS);
 
             blockSetAttribute(topSearch);
             applyInitial(originalTopSearchSet, {
@@ -128,7 +128,7 @@ define([], function () {
         if (miniCart && !miniCart.hasAttribute('data-awa-cart-minicart-patched')) {
             miniCart.removeAttribute('style');
 
-            var miniCartOverrides = {
+            let miniCartOverrides = {
                 'display': {value: 'none', priority: 'important'},
                 'width': {value: '0', priority: 'important'},
                 'min-width': {value: '0', priority: 'important'},
@@ -136,7 +136,7 @@ define([], function () {
                 'margin': {value: '0', priority: 'important'}
             };
 
-            var originalMiniCartSet = interceptSetProperty(miniCart, miniCartOverrides, BLOCKED_GRID_PROPS);
+            let originalMiniCartSet = interceptSetProperty(miniCart, miniCartOverrides, BLOCKED_GRID_PROPS);
 
             blockSetAttribute(miniCart);
             applyInitial(originalMiniCartSet, {
@@ -161,7 +161,7 @@ define([], function () {
             return;
         }
 
-        var attempts = 0;
+        let attempts = 0;
 
         function tick() {
             attempts += 1;

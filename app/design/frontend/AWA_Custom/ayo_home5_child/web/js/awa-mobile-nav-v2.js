@@ -14,13 +14,13 @@ define(['jquery'], function ($) {
     if (window.__awaMobileNavInit) { return {}; }
     window.__awaMobileNavInit = true;
 
-    var PANEL_SEL     = '.section-items.nav-sections.category-dropdown-items.awa-header-primary-nav';
-    var OUTER_SEL     = '.sections.nav-sections.category-dropdown';
-    var CONTENT_SEL   = '.section-item-content.nav-sections';
-    var OPEN_CLS      = 'is-awa-mobile-open';
-    var BODY_OPEN_CLS = 'awa-mobile-drawer-open';
-    var isDrawerOpen  = false;
-    var overlay       = null;
+    let PANEL_SEL     = '.section-items.nav-sections.category-dropdown-items.awa-header-primary-nav';
+    let OUTER_SEL     = '.sections.nav-sections.category-dropdown';
+    let CONTENT_SEL   = '.section-item-content.nav-sections';
+    let OPEN_CLS      = 'is-awa-mobile-open';
+    let BODY_OPEN_CLS = 'awa-mobile-drawer-open';
+    let isDrawerOpen  = false;
+    let overlay       = null;
 
     function isMobile() { return window.innerWidth < 992; }
 
@@ -37,9 +37,9 @@ define(['jquery'], function ($) {
     function openDrawer() {
         if (!isMobile()) { return; }
 
-        var panel   = document.querySelector(PANEL_SEL);
-        var outer   = document.querySelector(OUTER_SEL);
-        var content = document.querySelector(CONTENT_SEL);
+        let panel   = document.querySelector(PANEL_SEL);
+        let outer   = document.querySelector(OUTER_SEL);
+        let content = document.querySelector(CONTENT_SEL);
         if (!panel) { return; }
 
         /*
@@ -87,24 +87,24 @@ define(['jquery'], function ($) {
         /* Não adicionamos 'nav-open' — evita o overlay nativo do RokanThemes */
 
         /* Overlay semitransparente atrás do drawer */
-        var ov = getOverlay();
+        let ov = getOverlay();
         ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:10000;display:block;';
         ov.addEventListener('click', closeDrawer, { once: true });
 
         /* Elevar botão fechar acima do overlay (z-index CSS padrão: 120) */
-        var closeEl = document.querySelector('.awa-nav-close');
+        let closeEl = document.querySelector('.awa-nav-close');
         if (closeEl) { closeEl.style.setProperty('z-index', '10002', 'important'); }
 
-        var btn = document.querySelector('.toggle-nav-footer');
+        let btn = document.querySelector('.toggle-nav-footer');
         if (btn) { btn.setAttribute('aria-expanded', 'true'); }
 
         isDrawerOpen = true;
     }
 
     function closeDrawer() {
-        var panel   = document.querySelector(PANEL_SEL);
-        var outer   = document.querySelector(OUTER_SEL);
-        var content = document.querySelector(CONTENT_SEL);
+        let panel   = document.querySelector(PANEL_SEL);
+        let outer   = document.querySelector(OUTER_SEL);
+        let content = document.querySelector(CONTENT_SEL);
 
         [outer, panel, content].forEach(function (el) {
             if (el) { el.removeAttribute('style'); }
@@ -116,10 +116,10 @@ define(['jquery'], function ($) {
         if (overlay) { overlay.style.display = 'none'; }
 
         /* Restaurar z-index do botão fechar */
-        var closeEl = document.querySelector('.awa-nav-close');
+        let closeEl = document.querySelector('.awa-nav-close');
         if (closeEl) { closeEl.style.removeProperty('z-index'); }
 
-        var btn = document.querySelector('.toggle-nav-footer');
+        let btn = document.querySelector('.toggle-nav-footer');
         if (btn) { btn.setAttribute('aria-expanded', 'false'); }
 
         isDrawerOpen = false;

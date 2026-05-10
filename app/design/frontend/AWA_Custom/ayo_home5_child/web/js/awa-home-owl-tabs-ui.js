@@ -15,17 +15,17 @@
     }
 
     function normalizeHeroFallback(root) {
-        var scope = root || document;
-        var carousels = scope.querySelectorAll('.top-home-content .banner-slider.banner-slider2 .wrapper_slider .owl');
-        var i;
-        var carousel;
-        var wrapper;
-        var slides;
-        var isOwlReady;
-        var slideIndex;
-        var slide;
-        var image;
-        var isPrimary;
+        let scope = root || document;
+        let carousels = scope.querySelectorAll('.top-home-content .banner-slider.banner-slider2 .wrapper_slider .owl');
+        let i;
+        let carousel;
+        let wrapper;
+        let slides;
+        let isOwlReady;
+        let slideIndex;
+        let slide;
+        let image;
+        let isPrimary;
 
         for (i = 0; i < carousels.length; i += 1) {
             carousel = carousels[i];
@@ -76,13 +76,13 @@
     }
 
     function normalizeTabsAccessibility(root) {
-        var scope = root || document;
-        var tabTriggers = scope.querySelectorAll(
+        let scope = root || document;
+        let tabTriggers = scope.querySelectorAll(
             '.list-tab-product .tab-title-link, .tab_product .tab-title-item, .tab_product ul.tabs li'
         );
-        var i;
-        var trigger;
-        var label;
+        let i;
+        let trigger;
+        let label;
 
         for (i = 0; i < tabTriggers.length; i += 1) {
             trigger = tabTriggers[i];
@@ -105,13 +105,13 @@
     }
 
     function normalizeOwlNavButtons(root) {
-        var scope = root || document;
-        var navButtons = scope.querySelectorAll('.list-tab-product .owl-nav button, .tab_product .owl-nav button');
-        var i;
-        var button;
-        var isPrev;
-        var isNext;
-        var label;
+        let scope = root || document;
+        let navButtons = scope.querySelectorAll('.list-tab-product .owl-nav button, .tab_product .owl-nav button');
+        let i;
+        let button;
+        let isPrev;
+        let isNext;
+        let label;
 
         for (i = 0; i < navButtons.length; i += 1) {
             button = navButtons[i];
@@ -144,7 +144,7 @@
     // Each piece stays < 50ms → zero TBT contribution per task.
     // normalizeHeroFallback scoped to .top-home-content (avoids full-DOM traversal).
     window.addEventListener('load', function () {
-        var b = document.body;
+        let b = document.body;
 
         if (!b ||
             (!b.classList.contains('cms-index-index') &&

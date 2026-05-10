@@ -1,7 +1,7 @@
 define([], function () {
     'use strict';
 
-    var HEADER_MINICART_COUNTER_SELECTOR = '[data-awa-header-minicart-shell="true"] .counter.qty, .awa-header-minicart[data-awa-header-cart="true"] .counter.qty';
+    let HEADER_MINICART_COUNTER_SELECTOR = '[data-awa-header-minicart-shell="true"] .counter.qty, .awa-header-minicart[data-awa-header-cart="true"] .counter.qty';
 
     return function initHeaderNavRuntime() {
         if (window.__awaHeaderNavRuntimeInit) {
@@ -13,10 +13,10 @@ define([], function () {
         /* ── Pre-initialize cart badge from localStorage to avoid flash ── */
         (function () {
             try {
-                var cache = JSON.parse(localStorage.getItem('mage-cache-storage') || '{}');
-                var count = Number((cache.cart || {}).summary_count || 0);
+                let cache = JSON.parse(localStorage.getItem('mage-cache-storage') || '{}');
+                let count = Number((cache.cart || {}).summary_count || 0);
                 if (count > 0) {
-                    var badge = document.querySelector('.awa-header-cart-link .awa-cart-link-badge');
+                    let badge = document.querySelector('.awa-header-cart-link .awa-cart-link-badge');
                     if (badge) {
                         badge.textContent = count > 99 ? '99+' : String(count);
                         badge.style.cssText = 'display:inline-flex;align-items:center;justify-content:center';
@@ -36,14 +36,14 @@ define([], function () {
             }
 
             function syncNavAria() {
-                var isOpen = document.body.classList.contains('nav-open');
-                var toggle = document.querySelector('.awa-header-mobile-toggle[data-awa-nav-toggle="true"]');
+                let isOpen = document.body.classList.contains('nav-open');
+                let toggle = document.querySelector('.awa-header-mobile-toggle[data-awa-nav-toggle="true"]');
 
                 if (toggle) {
                     toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
                 }
 
-                var drawerShell = resolveDrawerShell();
+                let drawerShell = resolveDrawerShell();
                 if (drawerShell) {
                     drawerShell.classList.toggle('is-awa-mobile-open', isOpen);
                 }
@@ -64,12 +64,12 @@ define([], function () {
         }());
 
         function syncBadge() {
-            var badge = document.querySelector('.awa-header-cart-link .awa-cart-link-badge');
+            let badge = document.querySelector('.awa-header-cart-link .awa-cart-link-badge');
             if (!badge) {
                 return;
             }
 
-            var counter = document.querySelector(HEADER_MINICART_COUNTER_SELECTOR);
+            let counter = document.querySelector(HEADER_MINICART_COUNTER_SELECTOR);
             if (!counter) {
                 badge.style.display = 'none';
                 return;
@@ -80,8 +80,8 @@ define([], function () {
                 return;
             }
 
-            var total = counter.querySelector('.total-mini-cart-item');
-            var value = total ? (parseInt((total.textContent || '').replace(/\D/g, ''), 10) || 0) : 0;
+            let total = counter.querySelector('.total-mini-cart-item');
+            let value = total ? (parseInt((total.textContent || '').replace(/\D/g, ''), 10) || 0) : 0;
             if (value > 0) {
                 badge.textContent = value > 99 ? '99+' : String(value);
                 badge.style.display = 'inline-flex';
@@ -95,7 +95,7 @@ define([], function () {
         function bootBadgeSync() {
             syncBadge();
 
-            var counter = document.querySelector(HEADER_MINICART_COUNTER_SELECTOR);
+            let counter = document.querySelector(HEADER_MINICART_COUNTER_SELECTOR);
             if (counter && window.MutationObserver) {
                 new MutationObserver(syncBadge).observe(counter, {
                     childList: true,
@@ -118,13 +118,13 @@ define([], function () {
            evento 'input', que não dispara quando o valor vem do URL (ex.: /catalogsearch/result/?q=zz).
            Fix: disparar o evento 'input' após o RequireJS inicializar o widget. ── */
         function fixSearchSubmitBtn() {
-            var searchInput = document.getElementById('search');
+            let searchInput = document.getElementById('search');
             if (!searchInput || !searchInput.value) {
                 return;
             }
 
-            var form = searchInput.closest('form');
-            var submitBtn = form ? form.querySelector('button[type="submit"]') : null;
+            let form = searchInput.closest('form');
+            let submitBtn = form ? form.querySelector('button[type="submit"]') : null;
 
             if (submitBtn && submitBtn.disabled) {
                 searchInput.dispatchEvent(new Event('input', { bubbles: true }));

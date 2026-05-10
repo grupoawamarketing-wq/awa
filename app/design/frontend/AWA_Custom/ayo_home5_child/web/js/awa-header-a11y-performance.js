@@ -1,10 +1,10 @@
 (function () {
     'use strict';
 
-    var HEADER_MINICART_SHELL_SELECTOR = '.header [data-awa-header-minicart-shell="true"], .header .awa-header-minicart[data-awa-header-cart="true"]';
-    var HEADER_MINICART_TRIGGER_SELECTOR = HEADER_MINICART_SHELL_SELECTOR + ' .showcart, '
+    let HEADER_MINICART_SHELL_SELECTOR = '.header [data-awa-header-minicart-shell="true"], .header .awa-header-minicart[data-awa-header-cart="true"]';
+    let HEADER_MINICART_TRIGGER_SELECTOR = HEADER_MINICART_SHELL_SELECTOR + ' .showcart, '
         + HEADER_MINICART_SHELL_SELECTOR + ' .action.showcart';
-    var HEADER_TOP_SEARCH_NESTED_CART_SELECTOR = ':scope > [data-awa-header-minicart-shell="true"], :scope > .mini-cart-wrapper, :scope > .shadowcart';
+    let HEADER_TOP_SEARCH_NESTED_CART_SELECTOR = ':scope > [data-awa-header-minicart-shell="true"], :scope > .mini-cart-wrapper, :scope > .shadowcart';
 
     function reportError(context, error) {
         if (typeof console !== 'undefined' && console && typeof console.warn === 'function') {
@@ -17,8 +17,8 @@
     }
 
     function clampInt(value, min, max, fallback) {
-        var parsed = parseInt(String(value || ''), 10);
-        var result = isNaN(parsed) ? fallback : parsed;
+        let parsed = parseInt(String(value || ''), 10);
+        let result = isNaN(parsed) ? fallback : parsed;
         if (typeof min === 'number') {
             result = Math.max(min, result);
         }
@@ -41,14 +41,14 @@
     }
     window.__awaHeaderA11yPerformanceInit = true;
 
-    var raf = window.requestAnimationFrame || function (cb) { return window.setTimeout(cb, 16); };
-    var supportsPassive = false;
+    let raf = window.requestAnimationFrame || function (cb) { return window.setTimeout(cb, 16); };
+    let supportsPassive = false;
 
     function pushDataLayer(eventName, payload) {
         if (!window.dataLayer || !Array.isArray(window.dataLayer)) {
             return;
         }
-        var eventPayload = payload || {};
+        let eventPayload = payload || {};
         eventPayload.event = eventName;
         try {
             window.dataLayer.push(eventPayload);
@@ -58,12 +58,12 @@
     }
 
     function pushHeaderTelemetry(eventName, experiment, payload) {
-        var basePayload = {
+        let basePayload = {
             experiment_name: 'header_progressive',
             experiment_variant: experiment ? experiment.variant : 'A'
         };
-        var extraPayload = payload || {};
-        var key;
+        let extraPayload = payload || {};
+        let key;
 
         for (key in extraPayload) {
             if (Object.prototype.hasOwnProperty.call(extraPayload, key)) {
@@ -75,7 +75,7 @@
     }
 
     try {
-        var optionsProbe = Object.defineProperty({}, 'passive', {
+        let optionsProbe = Object.defineProperty({}, 'passive', {
             get: function () {
                 supportsPassive = true;
                 return true;
@@ -126,30 +126,30 @@
     }
 
     function setNavState() {
-        var toggle = document.querySelector('[data-awa-nav-toggle="true"]');
+        let toggle = document.querySelector('[data-awa-nav-toggle="true"]');
         if (!toggle) {
             return;
         }
         ensureToggleRole(toggle);
-        var body = document.body;
-        var expanded = body.classList.contains('nav-open') || body.classList.contains('nav-before-open');
+        let body = document.body;
+        let expanded = body.classList.contains('nav-open') || body.classList.contains('nav-before-open');
         toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
     }
 
     function getExperimentConfig() {
-        var header = document.querySelector('[data-awa-component="site-header"]');
+        let header = document.querySelector('[data-awa-component="site-header"]');
         if (!header) {
             return { enabled: false, rollout: 0, seed: 'home5_header_v1', bucket: 0, active: false, variant: 'A', variantCode: 'control' };
         }
 
-        var enabled = header.getAttribute('data-awa-header-exp-enabled') === '1';
-        var rollout = clampInt(header.getAttribute('data-awa-header-exp-rollout') || '0', 0, 100, 0);
-        var seed = header.getAttribute('data-awa-header-exp-seed') || 'home5_header_v1';
-        var bucket = clampInt(header.getAttribute('data-awa-header-exp-bucket') || '0', 0, 99, 0);
-        var active = header.getAttribute('data-awa-header-exp-active') === '1';
-        var variantCode = header.getAttribute('data-awa-header-exp-variant') || (active ? 'v2' : 'control');
+        let enabled = header.getAttribute('data-awa-header-exp-enabled') === '1';
+        let rollout = clampInt(header.getAttribute('data-awa-header-exp-rollout') || '0', 0, 100, 0);
+        let seed = header.getAttribute('data-awa-header-exp-seed') || 'home5_header_v1';
+        let bucket = clampInt(header.getAttribute('data-awa-header-exp-bucket') || '0', 0, 99, 0);
+        let active = header.getAttribute('data-awa-header-exp-active') === '1';
+        let variantCode = header.getAttribute('data-awa-header-exp-variant') || (active ? 'v2' : 'control');
 
-        var variant = enabled && active ? 'B' : 'A';
+        let variant = enabled && active ? 'B' : 'A';
         header.setAttribute('data-awa-header-exp-group', variant);
         if (variant === 'B') {
             header.classList.add('awa-header-exp-b');
@@ -176,16 +176,16 @@
     }
 
     function wireNavA11y(experiment) {
-        var toggle = document.querySelector('[data-awa-nav-toggle="true"]');
-        var navShell = resolveDrawerShell();
+        let toggle = document.querySelector('[data-awa-nav-toggle="true"]');
+        let navShell = resolveDrawerShell();
         if (toggle) {
             ensureToggleRole(toggle);
         }
-        var useEnhancedDrawer = !!experiment && experiment.variant === 'B';
-        var useLegacyMobileNavFallback = !useEnhancedDrawer && !!navShell && isHomeHeaderPage() && isMobileHeaderViewport();
-        var overlay = null;
-        var lastFocusedElement = null;
-        var focusableSelector = [
+        let useEnhancedDrawer = !!experiment && experiment.variant === 'B';
+        let useLegacyMobileNavFallback = !useEnhancedDrawer && !!navShell && isHomeHeaderPage() && isMobileHeaderViewport();
+        let overlay = null;
+        let lastFocusedElement = null;
+        let focusableSelector = [
             'a[href]',
             'button:not([disabled])',
             'textarea:not([disabled])',
@@ -193,7 +193,7 @@
             'select:not([disabled])',
             '[tabindex]:not([tabindex="-1"])'
         ].join(',');
-        var drawerVisibilityProperties = [
+        let drawerVisibilityProperties = [
             'display',
             'visibility',
             'opacity',
@@ -213,13 +213,13 @@
             'z-index',
             'transform'
         ];
-        var drawerShellVisibilityProperties = [
+        let drawerShellVisibilityProperties = [
             'display',
             'visibility',
             'opacity',
             'pointer-events'
         ];
-        var drawerShellLayoutProperties = [
+        let drawerShellLayoutProperties = [
             'display',
             'width',
             'max-width',
@@ -227,7 +227,7 @@
         ];
 
         function getDrawerTargets() {
-            var targets = [];
+            let targets = [];
 
             function pushIfPresent(element) {
                 if (!element || targets.indexOf(element) !== -1) {
@@ -245,7 +245,7 @@
         }
 
         function syncLegacyDrawerVisibility(open) {
-            var shellTargets = [];
+            let shellTargets = [];
 
             function pushShellTarget(element) {
                 if (!element || shellTargets.indexOf(element) !== -1) {
@@ -259,7 +259,7 @@
             }
 
             getDrawerTargets().forEach(function (target) {
-                var shell;
+                let shell;
 
                 if (!target) {
                     return;
@@ -304,8 +304,8 @@
             });
 
             shellTargets.forEach(function (shell) {
-                var shellContainer;
-                var shellInner;
+                let shellContainer;
+                let shellInner;
 
                 if (!shell) {
                     return;
@@ -371,15 +371,15 @@
         }
 
         function syncDrawerState() {
-            var openState = document.body.classList.contains('nav-open') || document.body.classList.contains('nav-before-open');
+            let openState = document.body.classList.contains('nav-open') || document.body.classList.contains('nav-before-open');
             syncLegacyDrawerVisibility(openState);
 
             if (!useEnhancedDrawer || !navShell) {
                 return;
             }
 
-            var open = isDrawerOpen();
-            var drawerOverlay = ensureOverlay();
+            let open = isDrawerOpen();
+            let drawerOverlay = ensureOverlay();
 
             navShell.setAttribute('aria-hidden', open ? 'false' : 'true');
             toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
@@ -409,7 +409,7 @@
             syncDrawerState();
 
             raf(function () {
-                var focusables = getFocusableItems();
+                let focusables = getFocusableItems();
                 if (focusables.length) {
                     focusables[0].focus();
                 }
@@ -479,15 +479,15 @@
             }
 
             if (event.key === 'Tab') {
-                var focusables = getFocusableItems();
+                let focusables = getFocusableItems();
                 if (!focusables.length) {
                     event.preventDefault();
                     return;
                 }
 
-                var first = focusables[0];
-                var last = focusables[focusables.length - 1];
-                var active = document.activeElement;
+                let first = focusables[0];
+                let last = focusables[focusables.length - 1];
+                let active = document.activeElement;
 
                 if (event.shiftKey && active === first) {
                     event.preventDefault();
@@ -518,7 +518,7 @@
         }, { capture: true });
 
         if (window.MutationObserver) {
-            var bodyObserver = new MutationObserver(function () {
+            let bodyObserver = new MutationObserver(function () {
                 setNavState();
                 syncDrawerState();
             });
@@ -538,8 +538,8 @@
             return null;
         }
 
-        var status = root.querySelector('[data-awa-search-status="true"]');
-        var describedBy;
+        let status = root.querySelector('[data-awa-search-status="true"]');
+        let describedBy;
 
         if (!status) {
             status = document.createElement('span');
@@ -569,16 +569,16 @@
     }
 
     function wireSearchA11y() {
-        var root = findSearchRoot();
+        let root = findSearchRoot();
         if (!root) {
             return;
         }
 
         root.setAttribute('data-awa-search-root', 'true');
 
-        var input = root.querySelector('[data-awa-search-input="true"], #search, input[name="q"]');
-        var panel = root.querySelector('[data-awa-search-panel="true"], #search_autocomplete, .searchsuite-autocomplete, .mst-searchautocomplete__autocomplete');
-        var status = ensureSearchStatus(root, input);
+        let input = root.querySelector('[data-awa-search-input="true"], #search, input[name="q"]');
+        let panel = root.querySelector('[data-awa-search-panel="true"], #search_autocomplete, .searchsuite-autocomplete, .mst-searchautocomplete__autocomplete');
+        let status = ensureSearchStatus(root, input);
 
         if (!input || !panel) {
             return;
@@ -600,8 +600,8 @@
             panel.setAttribute('aria-label', 'Sugestões de busca');
         }
 
-        var debounceTimer;
-        var busyTimer;
+        let debounceTimer;
+        let busyTimer;
 
         function getSuggestionCount() {
             return panel.querySelectorAll('li, [role="option"], a').length;
@@ -609,11 +609,11 @@
 
         function syncExpanded() {
             // If Mirasvit has set _active, trust it as the source of truth for visibility.
-            var isMirasvitActive = panel.classList.contains('_active');
-            var hidden = !isMirasvitActive && (panel.hasAttribute('hidden') || panel.getAttribute('aria-hidden') === 'true');
-            var hasItems = isMirasvitActive || getSuggestionCount() > 0;
-            var expanded = !hidden && hasItems;
-            var query = normalizeText(input.value || '');
+            let isMirasvitActive = panel.classList.contains('_active');
+            let hidden = !isMirasvitActive && (panel.hasAttribute('hidden') || panel.getAttribute('aria-hidden') === 'true');
+            let hasItems = isMirasvitActive || getSuggestionCount() > 0;
+            let expanded = !hidden && hasItems;
+            let query = normalizeText(input.value || '');
             input.setAttribute('aria-expanded', expanded ? 'true' : 'false');
             panel.setAttribute('aria-hidden', expanded ? 'false' : 'true');
             if (!expanded && !panel.hasAttribute('hidden')) {
@@ -663,7 +663,7 @@
             raf(syncExpanded);
         }, { passive: true });
 
-        var form = root.querySelector('[data-awa-search-form="true"]');
+        let form = root.querySelector('[data-awa-search-form="true"]');
         if (form) {
             addListener(form, 'submit', function () {
                 pushDataLayer('awa_header_search_submit', {
@@ -690,7 +690,7 @@
         }, { capture: true });
 
         if (window.MutationObserver) {
-            var observer = new MutationObserver(function () {
+            let observer = new MutationObserver(function () {
                 raf(syncExpanded);
             });
             observer.observe(panel, {
@@ -705,9 +705,9 @@
     }
 
     function wireHeaderClickTelemetry(experiment) {
-        var root = document.querySelector('[data-awa-component="site-header"]');
-        var stickyClass = 'awa-header-sticky';
-        var stickyTrackedState = null;
+        let root = document.querySelector('[data-awa-component="site-header"]');
+        let stickyClass = 'awa-header-sticky';
+        let stickyTrackedState = null;
 
         if (!root) {
             return;
@@ -718,7 +718,7 @@
                 return;
             }
 
-            var accountLink = event.target.closest('.top-account a, [data-awa-top-account="true"] a');
+            let accountLink = event.target.closest('.top-account a, [data-awa-top-account="true"] a');
             if (accountLink) {
                 pushHeaderTelemetry('awa_header_account_click', experiment, {
                     link_text: normalizeText(accountLink.textContent || accountLink.getAttribute('aria-label') || accountLink.getAttribute('title')),
@@ -727,7 +727,7 @@
                 return;
             }
 
-            var categoryLink = event.target.closest('.menu_left_home1 .navigation.verticalmenu a, .menu_left_home1 .title-category-dropdown');
+            let categoryLink = event.target.closest('.menu_left_home1 .navigation.verticalmenu a, .menu_left_home1 .title-category-dropdown');
             if (categoryLink) {
                 pushHeaderTelemetry('awa_header_category_click', experiment, {
                     link_text: normalizeText(categoryLink.textContent || categoryLink.getAttribute('aria-label') || categoryLink.getAttribute('title')),
@@ -737,7 +737,7 @@
         }, { capture: true });
 
         function syncStickyTelemetry() {
-            var isSticky = root.classList.contains(stickyClass) || document.body.classList.contains(stickyClass);
+            let isSticky = root.classList.contains(stickyClass) || document.body.classList.contains(stickyClass);
 
             if (stickyTrackedState === isSticky) {
                 return;
@@ -762,7 +762,7 @@
     }
 
     function wireDeferredBadges() {
-        var badges = document.querySelector('[data-awa-deferred-badges="true"]');
+        let badges = document.querySelector('[data-awa-deferred-badges="true"]');
         if (!badges) {
             return;
         }
@@ -777,7 +777,7 @@
             return;
         }
 
-        var observer = new IntersectionObserver(function (entries, obs) {
+        let observer = new IntersectionObserver(function (entries, obs) {
             entries.forEach(function (entry) {
                 if (entry.isIntersecting) {
                     reveal();
@@ -808,7 +808,7 @@
     }
 
     function isHomeHeaderPage() {
-        var body = document.body;
+        let body = document.body;
 
         return !!body && (
             body.classList.contains('cms-index-index')
@@ -827,15 +827,15 @@
             || document.body.classList.contains('nav-before-open');
     }
 
-    var homeHeaderGuardState = null;
-    var ENABLE_HOME_HEADER_COLLAPSE_GUARD = false;
+    let homeHeaderGuardState = null;
+    let ENABLE_HOME_HEADER_COLLAPSE_GUARD = false;
 
     function collapseHomeSearchLayout() {
-        var topSearch = document.querySelector('.header .top-search');
-        var nestedCart = topSearch
+        let topSearch = document.querySelector('.header .top-search');
+        let nestedCart = topSearch
             ? topSearch.querySelector(HEADER_TOP_SEARCH_NESTED_CART_SELECTOR)
             : null;
-        var blockSearch = topSearch
+        let blockSearch = topSearch
             ? topSearch.querySelector(':scope > .block-search')
             : null;
 
@@ -875,18 +875,18 @@
     }
 
     function resetHomeHeaderCollapseGuard() {
-        var topSearch = document.querySelector('.header .top-search');
-        var nestedCart = topSearch
+        let topSearch = document.querySelector('.header .top-search');
+        let nestedCart = topSearch
             ? topSearch.querySelector(HEADER_TOP_SEARCH_NESTED_CART_SELECTOR)
             : null;
-        var blockSearch = topSearch
+        let blockSearch = topSearch
             ? topSearch.querySelector(':scope > .block-search')
             : null;
-        var nav = document.querySelector('.header-control.header-nav-global.cms_home_1');
-        var container = nav ? nav.querySelector(':scope > .container') : null;
-        var row = container ? container.querySelector(':scope > .row') : null;
-        var menu = nav ? nav.querySelector('.menu_left_home1') : null;
-        var dropdown = menu ? menu.querySelector('.list-category-dropdown') : null;
+        let nav = document.querySelector('.header-control.header-nav-global.cms_home_1');
+        let container = nav ? nav.querySelector(':scope > .container') : null;
+        let row = container ? container.querySelector(':scope > .row') : null;
+        let menu = nav ? nav.querySelector('.menu_left_home1') : null;
+        let dropdown = menu ? menu.querySelector('.list-category-dropdown') : null;
 
         clearStyleProperties(topSearch, [
             'display',
@@ -955,12 +955,12 @@
     }
 
     function guardHomeMobileHeaderCollapse() {
-        var nav;
-        var container;
-        var row;
-        var menu;
-        var dropdown;
-        var nextState;
+        let nav;
+        let container;
+        let row;
+        let menu;
+        let dropdown;
+        let nextState;
 
         if (!isHomeHeaderPage()) {
             homeHeaderGuardState = null;
@@ -1066,14 +1066,14 @@
     }
 
     function normalizeDesktopHeaderVisualParity() {
-        var isDesktop = !!window.matchMedia && window.matchMedia('(min-width: 992px)').matches;
-        var nav;
-        var list;
-        var trigger;
-        var quickWrap;
-        var quickList;
-        var searchBtn;
-        var searchSvg;
+        let isDesktop = !!window.matchMedia && window.matchMedia('(min-width: 992px)').matches;
+        let nav;
+        let list;
+        let trigger;
+        let quickWrap;
+        let quickList;
+        let searchBtn;
+        let searchSvg;
 
         if (!isDesktop) {
             return;
@@ -1084,7 +1084,7 @@
         trigger = nav ? nav.querySelector('.title-category-dropdown.our_categories') : null;
 
         if (nav && list) {
-            var menuIsOpen = nav.classList.contains('menu-open')
+            let menuIsOpen = nav.classList.contains('menu-open')
                 || nav.classList.contains('vmm-open')
                 || list.classList.contains('menu-open')
                 || list.classList.contains('vmm-open')
@@ -1173,7 +1173,7 @@
         }
     }
 
-    var desktopHeaderParityQueued = false;
+    let desktopHeaderParityQueued = false;
 
     function scheduleDesktopHeaderVisualParity() {
         if (desktopHeaderParityQueued) {
@@ -1188,7 +1188,7 @@
     }
 
     onReady(function () {
-        var experiment = getExperimentConfig();
+        let experiment = getExperimentConfig();
 
         wireNavA11y(experiment);
         wireSearchA11y();
@@ -1214,13 +1214,13 @@
             /* Observer opcional do guard: mantido desativado por padrão para evitar
              * custo elevado na thread principal durante bootstrap mobile. */
             if (window.MutationObserver) {
-                var _guardDebounce = null;
+                let _guardDebounce = null;
                 new MutationObserver(function (mutations) {
-                    var shouldRun = false;
-                    var currentClassName = document.body.className || '';
+                    let shouldRun = false;
+                    let currentClassName = document.body.className || '';
 
                     mutations.forEach(function (mutation) {
-                        var previousClassName;
+                        let previousClassName;
 
                         if (shouldRun || mutation.attributeName !== 'class') {
                             return;
@@ -1261,7 +1261,7 @@
             if (!event.target || !event.target.closest) {
                 return;
             }
-            var showcart = event.target.closest(HEADER_MINICART_TRIGGER_SELECTOR + ', .minicart-wrapper .showcart, .minicart-wrapper .action.showcart');
+            let showcart = event.target.closest(HEADER_MINICART_TRIGGER_SELECTOR + ', .minicart-wrapper .showcart, .minicart-wrapper .action.showcart');
             if (!showcart) {
                 return;
             }

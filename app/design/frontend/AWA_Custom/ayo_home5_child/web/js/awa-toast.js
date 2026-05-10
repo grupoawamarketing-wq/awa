@@ -14,9 +14,9 @@
 define(['Magento_Customer/js/customer-data'], function (customerData) {
     'use strict';
 
-    var DEFAULT_DURATION = 4000;
-    var CONTAINER_ID     = 'awa-toast-container';
-    var container        = null;
+    let DEFAULT_DURATION = 4000;
+    let CONTAINER_ID     = 'awa-toast-container';
+    let container        = null;
 
     /* ---- container ---- */
 
@@ -40,7 +40,7 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
 
     /* ---- icon SVGs ---- */
 
-    var ICONS = {
+    let ICONS = {
         success: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
         error:   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
         warning: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
@@ -73,7 +73,7 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
      * @returns {string} safe URL or '#' if invalid
      */
     function safeUrl(url) {
-        var s = String(url || '').trim();
+        let s = String(url || '').trim();
         /* allow relative paths and http(s) absolute URLs only */
         if (/^(https?:\/\/|\/)/i.test(s)) {
             return s;
@@ -101,20 +101,20 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
     /* ---- show ---- */
 
     function show(options) {
-        var opts    = options || {};
-        var type    = opts.type || 'info';
-        var message = String(opts.message || '');
-        var action  = opts.action || null;     /* { url, label } */
-        var dur     = typeof opts.duration === 'number' ? opts.duration : DEFAULT_DURATION;
-        var icon    = ICONS[type] || ICONS.info;
+        let opts    = options || {};
+        let type    = opts.type || 'info';
+        let message = String(opts.message || '');
+        let action  = opts.action || null;     /* { url, label } */
+        let dur     = typeof opts.duration === 'number' ? opts.duration : DEFAULT_DURATION;
+        let icon    = ICONS[type] || ICONS.info;
 
         /* build element */
-        var toast = document.createElement('div');
+        let toast = document.createElement('div');
         toast.className  = 'awa-toast awa-toast--' + type;
         toast.setAttribute('role', 'alert');
         toast.setAttribute('aria-atomic', 'true');
 
-        var actionHtml = action
+        let actionHtml = action
             ? '<a href="' + escHtml(safeUrl(action.url)) + '" class="awa-toast__action">' + escHtml(action.label) + '</a>'
             : '';
 
@@ -138,7 +138,7 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
         });
 
         /* auto-dismiss */
-        var timer = null;
+        let timer = null;
 
         if (dur > 0) {
             timer = setTimeout(function () {
@@ -171,7 +171,7 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
     }
 
     /* ---- cart integration ---- */
-    var cartIntegrationBound = false;
+    let cartIntegrationBound = false;
 
     function bindCartIntegration() {
         if (cartIntegrationBound) {
@@ -179,12 +179,12 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
         }
         cartIntegrationBound = true;
 
-        var cart         = customerData.get('cart');
-        var previousData = null;
+        let cart         = customerData.get('cart');
+        let previousData = null;
 
         cart.subscribe(function (cartData) {
-            var prev    = previousData;
-            var current = cartData || {};
+            let prev    = previousData;
+            let current = cartData || {};
 
             previousData = {
                 count: current.summary_count || 0,
@@ -196,12 +196,12 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
                 return;
             }
 
-            var prevCount    = prev.count || 0;
-            var currentCount = current.summary_count || 0;
+            let prevCount    = prev.count || 0;
+            let currentCount = current.summary_count || 0;
 
             if (currentCount > prevCount) {
-                var added = currentCount - prevCount;
-                var msg   = added === 1
+                let added = currentCount - prevCount;
+                let msg   = added === 1
                     ? 'Produto adicionado ao carrinho!'
                     : added + ' produtos adicionados ao carrinho!';
 
@@ -219,7 +219,7 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
         bindCartIntegration();
     }
 
-    var api = {
+    let api = {
         show: show,
         dismiss: dismiss,
         init: init

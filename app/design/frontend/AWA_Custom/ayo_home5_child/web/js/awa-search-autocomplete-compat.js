@@ -3,7 +3,7 @@ define([
 ], function ($) {
 	'use strict';
 
-	var DEFAULT_OPTIONS = {
+	let DEFAULT_OPTIONS = {
 		inputSelector: '#search-input-autocomplate, #search, input[name="q"]',
 		panelSelector: '#search_autocomplete',
 		resultsRootSelector: '.searchsuite-autocomplete',
@@ -15,9 +15,9 @@ define([
 		fallbackSuggestLimit: 6,
 		fallbackProductLimit: 6
 	};
-	var AUTO_BOOT_KEY = '__awaSearchCompatAutoBoot';
-	var AUTO_OBSERVER_KEY = '__awaSearchCompatAutoObserver';
-	var SEARCH_FORM_SELECTOR = 'form.form.minisearch, #search_mini_form';
+	let AUTO_BOOT_KEY = '__awaSearchCompatAutoBoot';
+	let AUTO_OBSERVER_KEY = '__awaSearchCompatAutoObserver';
+	let SEARCH_FORM_SELECTOR = 'form.form.minisearch, #search_mini_form';
 
 	function escapeHtml(value) {
 		return String(value || '')
@@ -71,7 +71,7 @@ define([
 	function applyTitles($root) {
 		$root.find('a[href]').each(function () {
 			var $a = $(this);
-			var text = $.trim($a.text());
+			let text = $.trim($a.text());
 
 			if (!text) {
 				return;
@@ -90,11 +90,11 @@ define([
 	function syncState($form, options) {
 		var $input = findScoped($form, options.inputSelector);
 		var $panel = findScoped($form, options.panelSelector);
-		var panelEl = $panel.get(0);
+		let panelEl = $panel.get(0);
 		var $resultsRoot = findScoped($form, options.resultsRootSelector);
-		var hasPanel = $panel.length > 0;
-		var isVisible = hasPanel && visible(panelEl);
-		var hasResults = false;
+		let hasPanel = $panel.length > 0;
+		let isVisible = hasPanel && visible(panelEl);
+		let hasResults = false;
 
 		if ($resultsRoot.length && visible($resultsRoot.get(0))) {
 			hasResults = $resultsRoot.find('li').length > 0;
@@ -162,11 +162,11 @@ define([
 	}
 
 	function extractSuggestItems(suggestRaw) {
-		var suggest = [];
+		let suggest = [];
 
 		$.each(suggestRaw || [], function (_, item) {
-			var label = '';
-			var url = '';
+			let label = '';
+			let url = '';
 
 			if (typeof item === 'string') {
 				label = item;
@@ -190,8 +190,8 @@ define([
 	}
 
 	function extractProductItems(productRaw) {
-		var products = [];
-		var hidePrice = isB2bRestrictedMode();
+		let products = [];
+		let hidePrice = isB2bRestrictedMode();
 
 		$.each(productRaw || [], function (_, item) {
 			if (!item || typeof item !== 'object') {
@@ -212,8 +212,8 @@ define([
 	}
 
 	function normalizeFallbackPayload(payload) {
-		var suggest = [];
-		var products = [];
+		let suggest = [];
+		let products = [];
 
 		if ($.isArray(payload)) {
 			suggest = suggest.concat(extractSuggestItems(payload));
@@ -260,12 +260,12 @@ define([
 	}
 
 	function buildFallbackMarkup(normalized, options, query) {
-		var html = '';
-		var i;
-		var suggestion;
-		var suggestionHref;
-		var product;
-		var searchResultUrl = (options.searchResultUrl || '/catalogsearch/result/').replace(/\/+$/, '');
+		let html = '';
+		let i;
+		let suggestion;
+		let suggestionHref;
+		let product;
+		let searchResultUrl = (options.searchResultUrl || '/catalogsearch/result/').replace(/\/+$/, '');
 
 		if (normalized.suggest.length) {
 			html += '<div class="suggest">';
@@ -352,8 +352,8 @@ define([
 	function renderFallback($form, options, payload, query) {
 		var $panel = getFallbackPanel($form, options);
 		var $input = findScoped($form, options.inputSelector);
-		var normalized;
-		var html;
+		let normalized;
+		let html;
 
 		if (!$panel.length) {
 			return;
@@ -376,8 +376,8 @@ define([
 	}
 
 	function resolveFallbackEndpoint($form, options) {
-		var explicit = options.fallbackEndpoint || '';
-		var attrEndpoint = $form.attr('data-awa-search-endpoint') || '';
+		let explicit = options.fallbackEndpoint || '';
+		let attrEndpoint = $form.attr('data-awa-search-endpoint') || '';
 
 		if (explicit) {
 			return explicit;
@@ -395,11 +395,11 @@ define([
 	}
 
 	function runFallbackRequest($form, options, state, query) {
-		var endpoint = resolveFallbackEndpoint($form, options);
+		let endpoint = resolveFallbackEndpoint($form, options);
 		var $category = $form.find('#choose_category');
-		var categoryValue = $category.length ? $.trim($category.val() || '') : '';
-		var cacheKey = buildCacheKey(query, categoryValue);
-		var params = {
+		let categoryValue = $category.length ? $.trim($category.val() || '') : '';
+		let cacheKey = buildCacheKey(query, categoryValue);
+		let params = {
 			q: query
 		};
 
@@ -453,8 +453,8 @@ define([
 
 	function scheduleFallbackRequest($form, options, state, query) {
 		var $category = $form.find('#choose_category');
-		var categoryValue = $category.length ? $.trim($category.val() || '') : '';
-		var cacheKey = buildCacheKey(query, categoryValue);
+		let categoryValue = $category.length ? $.trim($category.val() || '') : '';
+		let cacheKey = buildCacheKey(query, categoryValue);
 
 		if (state.timer) {
 			window.clearTimeout(state.timer);
@@ -479,14 +479,14 @@ define([
 	}
 
 	function initCompat(config, element) {
-		var options = $.extend({}, DEFAULT_OPTIONS, config || {});
+		let options = $.extend({}, DEFAULT_OPTIONS, config || {});
 		var $form = $(element);
-		var observer;
-		var bodyObserver;
-		var panelNode;
-		var scheduled = false;
-		var scopeNode;
-		var fallbackState = {
+		let observer;
+		let bodyObserver;
+		let panelNode;
+		let scheduled = false;
+		let scopeNode;
+		let fallbackState = {
 			timer: null,
 			xhr: null,
 			cache: {},
@@ -520,7 +520,7 @@ define([
 		}
 
 		function attachPanelObserver() {
-			var nextPanelNode;
+			let nextPanelNode;
 
 			if (!observer) {
 				return false;
@@ -555,7 +555,7 @@ define([
 		scheduleSync();
 
 		$form.on('focusin.awaSearchCompat input.awaSearchCompat keyup.awaSearchCompat', options.inputSelector, function (event) {
-			var query = $.trim($(this).val() || '');
+			let query = $.trim($(this).val() || '');
 
 			if (event.type === 'keyup' && event.key === 'Escape') {
 				$form.removeClass('is-open');
@@ -577,7 +577,7 @@ define([
 
 		$form.on('change.awaSearchCompat', '#choose_category', function () {
 			var $input = findScoped($form, options.inputSelector);
-			var query = $.trim($input.val() || '');
+			let query = $.trim($input.val() || '');
 			scheduleFallbackRequest($form, options, fallbackState, query);
 			scheduleSync();
 		});
@@ -612,7 +612,7 @@ define([
 	}
 
 	function bootAll(config) {
-		var options = $.extend({}, DEFAULT_OPTIONS, config || {});
+		let options = $.extend({}, DEFAULT_OPTIONS, config || {});
 
 		$(SEARCH_FORM_SELECTOR).each(function () {
 			initCompat(options, this);
@@ -620,10 +620,10 @@ define([
 	}
 
 	function shouldObserveMutation(mutations) {
-		var i;
-		var j;
-		var mutation;
-		var addedNodes;
+		let i;
+		let j;
+		let mutation;
+		let addedNodes;
 
 		for (i = 0; i < mutations.length; i += 1) {
 			mutation = mutations[i];

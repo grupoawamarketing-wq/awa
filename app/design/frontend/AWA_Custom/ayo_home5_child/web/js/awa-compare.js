@@ -11,14 +11,14 @@
 define(['jquery', 'mage/url'], function ($, urlBuilder) {
     'use strict';
 
-    var STORAGE_KEY = 'awa_compare_items';
-    var MAX_ITEMS   = 3;
-    var BAR_ID      = 'awa-compare-bar';
-    var MODAL_ID    = 'awa-compare-modal';
-    var isInitialized = false;
+    let STORAGE_KEY = 'awa_compare_items';
+    let MAX_ITEMS   = 3;
+    let BAR_ID      = 'awa-compare-bar';
+    let MODAL_ID    = 'awa-compare-modal';
+    let isInitialized = false;
 
     function shouldDisableCompareUi() {
-        var body = document.body;
+        let body = document.body;
         if (!body) {
             return false;
         }
@@ -41,8 +41,8 @@ define(['jquery', 'mage/url'], function ($, urlBuilder) {
     }
 
     function removeCompareUiArtifacts() {
-        var bar = document.getElementById(BAR_ID);
-        var modal = document.getElementById(MODAL_ID);
+        let bar = document.getElementById(BAR_ID);
+        let modal = document.getElementById(MODAL_ID);
 
         if (bar && bar.parentNode) {
             bar.parentNode.removeChild(bar);
@@ -54,7 +54,7 @@ define(['jquery', 'mage/url'], function ($, urlBuilder) {
     }
 
     /* ---- Attributes to compare ---- */
-    var COMPARE_ATTRS = [
+    let COMPARE_ATTRS = [
         { code: 'price',            label: 'Preço',           type: 'price' },
         { code: 'special_price',    label: 'Preço Promo',     type: 'price' },
         { code: 'sku',              label: 'SKU',             type: 'text' },
@@ -86,7 +86,7 @@ define(['jquery', 'mage/url'], function ($, urlBuilder) {
     }
 
     function addItem(item) {
-        var items = getItems();
+        let items = getItems();
         if (items.length >= MAX_ITEMS) { return false; }
         if (hasItem(item.id)) { return false; }
         items.push(item);
@@ -101,7 +101,7 @@ define(['jquery', 'mage/url'], function ($, urlBuilder) {
     /* ---- Floating bar ---- */
 
     function getBar() {
-        var bar = document.getElementById(BAR_ID);
+        let bar = document.getElementById(BAR_ID);
         if (!bar) {
             bar = document.createElement('div');
             bar.id = BAR_ID;
@@ -129,10 +129,10 @@ define(['jquery', 'mage/url'], function ($, urlBuilder) {
     }
 
     function renderBar() {
-        var items = getItems();
-        var bar = getBar();
-        var slots = document.getElementById('awa-compare-slots');
-        var goBtn = document.getElementById('awa-compare-go');
+        let items = getItems();
+        let bar = getBar();
+        let slots = document.getElementById('awa-compare-slots');
+        let goBtn = document.getElementById('awa-compare-go');
 
         if (items.length === 0) {
             bar.classList.remove('is-visible');
@@ -153,7 +153,7 @@ define(['jquery', 'mage/url'], function ($, urlBuilder) {
         }).join('');
 
         /* Placeholder slots */
-        for (var i = items.length; i < MAX_ITEMS; i++) {
+        for (let i = items.length; i < MAX_ITEMS; i++) {
             slots.innerHTML += '<div class="awa-compare-bar__slot awa-compare-bar__slot--empty">' +
                 '<span>+</span>' +
                 '</div>';
@@ -172,11 +172,11 @@ define(['jquery', 'mage/url'], function ($, urlBuilder) {
     /* ---- PLP buttons ---- */
 
     function refreshAllButtons() {
-        var items = getItems();
-        var count = items.length;
+        let items = getItems();
+        let count = items.length;
         document.querySelectorAll('[data-compare-add]').forEach(function (btn) {
-            var id = String(btn.dataset.compareAdd);
-            var inList = hasItem(id);
+            let id = String(btn.dataset.compareAdd);
+            let inList = hasItem(id);
             btn.classList.toggle('is-active', inList);
             btn.setAttribute('aria-pressed', String(inList));
             btn.disabled = !inList && count >= MAX_ITEMS;
@@ -189,16 +189,16 @@ define(['jquery', 'mage/url'], function ($, urlBuilder) {
         btn.addEventListener('click', function (e) {
             e.preventDefault();
             e.stopPropagation();
-            var id   = String(btn.dataset.compareAdd);
-            var name = btn.dataset.compareName  || '';
-            var sku  = btn.dataset.compareSku   || '';
-            var img  = btn.dataset.compareImg   || '';
-            var url  = btn.dataset.compareUrl   || '';
+            let id   = String(btn.dataset.compareAdd);
+            let name = btn.dataset.compareName  || '';
+            let sku  = btn.dataset.compareSku   || '';
+            let img  = btn.dataset.compareImg   || '';
+            let url  = btn.dataset.compareUrl   || '';
 
             if (hasItem(id)) {
                 removeItem(id);
             } else {
-                var ok = addItem({ id: id, sku: sku, name: name, img: img, url: url });
+                let ok = addItem({ id: id, sku: sku, name: name, img: img, url: url });
                 if (!ok) { return; }
             }
             renderBar();
@@ -209,7 +209,7 @@ define(['jquery', 'mage/url'], function ($, urlBuilder) {
     /* ---- REST Product fetch ---- */
 
     function fetchProduct(sku) {
-        var apiUrl = urlBuilder.build('rest/V1/products/' + encodeURIComponent(sku) +
+        let apiUrl = urlBuilder.build('rest/V1/products/' + encodeURIComponent(sku) +
             '?fields=sku,name,price,special_price,weight,custom_attributes,media_gallery_entries');
         return $.ajax({ url: apiUrl, type: 'GET', dataType: 'json' });
     }
@@ -219,7 +219,7 @@ define(['jquery', 'mage/url'], function ($, urlBuilder) {
             return String(product[code]);
         }
         if (product.custom_attributes) {
-            var found = null;
+            let found = null;
             product.custom_attributes.forEach(function (a) {
                 if (a.attribute_code === code) { found = a.value; }
             });
@@ -231,13 +231,13 @@ define(['jquery', 'mage/url'], function ($, urlBuilder) {
     /* ---- Modal ---- */
 
     function openModal() {
-        var items = getItems();
+        let items = getItems();
         if (items.length < 2) { return; }
 
-        var existing = document.getElementById(MODAL_ID);
+        let existing = document.getElementById(MODAL_ID);
         if (existing) { existing.parentNode.removeChild(existing); }
 
-        var modal = document.createElement('div');
+        let modal = document.createElement('div');
         modal.id = MODAL_ID;
         modal.className = 'awa-compare-modal';
         modal.setAttribute('role', 'dialog');
@@ -273,13 +273,13 @@ define(['jquery', 'mage/url'], function ($, urlBuilder) {
         });
 
         /* Load data */
-        var promises = items.map(function (item) { return fetchProduct(item.sku); });
+        let promises = items.map(function (item) { return fetchProduct(item.sku); });
         Promise.all(promises.map(function (p) { return p.catch(function () { return null; }); }))
             .then(function (products) { renderCompareTable(modal, items, products); });
     }
 
     function closeModal() {
-        var modal = document.getElementById(MODAL_ID);
+        let modal = document.getElementById(MODAL_ID);
         if (!modal) { return; }
         modal.setAttribute('aria-hidden', 'true');
         modal.classList.remove('is-open');
@@ -294,13 +294,13 @@ define(['jquery', 'mage/url'], function ($, urlBuilder) {
     }
 
     function renderCompareTable(modal, items, products) {
-        var cols = items.length;
-        var body = modal.querySelector('.awa-compare-modal__body');
+        let cols = items.length;
+        let body = modal.querySelector('.awa-compare-modal__body');
 
         /* Header row: product images + names */
-        var headerCells = items.map(function (item, i) {
-            var p = products[i];
-            var img = p && p.media_gallery_entries && p.media_gallery_entries[0]
+        let headerCells = items.map(function (item, i) {
+            let p = products[i];
+            let img = p && p.media_gallery_entries && p.media_gallery_entries[0]
                 ? '/pub/media/catalog/product' + p.media_gallery_entries[0].file
                 : item.img;
             return '<th class="awa-ct-prod">' +
@@ -312,15 +312,15 @@ define(['jquery', 'mage/url'], function ($, urlBuilder) {
         }).join('');
 
         /* Attribute rows */
-        var attrRows = COMPARE_ATTRS.map(function (attr) {
-            var cells = products.map(function (p) {
-                var val = p ? attrVal(p, attr.code) : null;
+        let attrRows = COMPARE_ATTRS.map(function (attr) {
+            let cells = products.map(function (p) {
+                let val = p ? attrVal(p, attr.code) : null;
                 if (val === null || val === '' || val === '0' || val === 'null') {
                     return '<td class="awa-ct-empty">—</td>';
                 }
                 if (attr.type === 'price') {
-                    var num = parseFloat(val);
-                    var formatted = 'R$ ' + num.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                    let num = parseFloat(val);
+                    let formatted = 'R$ ' + num.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
                     return '<td class="awa-ct-price">' + formatted + '</td>';
                 }
                 if (attr.type === 'html') {
@@ -382,7 +382,7 @@ define(['jquery', 'mage/url'], function ($, urlBuilder) {
         });
 
         /* MutationObserver for AJAX-loaded products (infinite scroll etc.) */
-        var observer = new MutationObserver(function (mutations) {
+        let observer = new MutationObserver(function (mutations) {
             mutations.forEach(function (m) {
                 m.addedNodes.forEach(function (node) {
                     if (node.nodeType !== 1) { return; }
@@ -412,7 +412,7 @@ define(['jquery', 'mage/url'], function ($, urlBuilder) {
         }
     }
 
-    var api = {
+    let api = {
         add: addItem,
         remove: removeItem,
         open: openModal,

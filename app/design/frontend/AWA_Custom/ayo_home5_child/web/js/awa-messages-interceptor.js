@@ -18,7 +18,7 @@ define([
     'use strict';
 
     /* Messages that are already handled by awa-toast.js cart subscription */
-    var CART_PATTERNS = [
+    let CART_PATTERNS = [
         /adicionado ao carrinho/i,
         /added .+ to your shopping cart/i,
         /você adicionou/i
@@ -51,7 +51,7 @@ define([
      * KnockoutJS runs. We show them as toasts and then hide the originals.
      */
     function interceptDomMessages() {
-        var selectors = [
+        let selectors = [
             '.messages .message-success',
             '.messages .message-error',
             '.messages .message-warning',
@@ -70,13 +70,13 @@ define([
                 el.dataset.awaIntercepted = '1';
 
                 /* Extract text — KO data-bind may not have run yet, so check both */
-                var textEl = el.querySelector('[data-bind], .inner, p, span, div');
-                var text   = (textEl ? textEl.textContent : el.textContent).trim();
+                let textEl = el.querySelector('[data-bind], .inner, p, span, div');
+                let text   = (textEl ? textEl.textContent : el.textContent).trim();
 
                 if (!text) return;
 
                 /* Determine type from classes */
-                var type = 'info';
+                let type = 'info';
                 if (el.classList.contains('message-success') || el.classList.contains('success')) type = 'success';
                 if (el.classList.contains('message-error')   || el.classList.contains('error'))   type = 'error';
                 if (el.classList.contains('message-warning') || el.classList.contains('warning')) type = 'warning';
@@ -91,18 +91,18 @@ define([
 
         /* Hide the container if all children are intercepted */
         document.querySelectorAll('.messages').forEach(function (container) {
-            var visible = container.querySelectorAll('[data-bind]:not([data-awa-intercepted="1"])');
+            let visible = container.querySelectorAll('[data-bind]:not([data-awa-intercepted="1"])');
             if (!visible.length) {
                 container.style.cssText = 'display:none';
             }
         });
     }
 
-    var customerDataMessagesBound = false;
-    var domObserverBound = false;
-    var initialDomScanScheduled = false;
-    var seenThisLoad = new Set();
-    var initialDone = false;
+    let customerDataMessagesBound = false;
+    let domObserverBound = false;
+    let initialDomScanScheduled = false;
+    let seenThisLoad = new Set();
+    let initialDone = false;
 
     /* --- 2. customer-data 'messages' section (AJAX-delivered) --- */
     function bindCustomerDataMessages() {
@@ -111,10 +111,10 @@ define([
         }
         customerDataMessagesBound = true;
 
-        var messagesSection = customerData.get('messages');
+        let messagesSection = customerData.get('messages');
 
         messagesSection.subscribe(function (data) {
-            var msgs = (data && data.messages) || [];
+            let msgs = (data && data.messages) || [];
 
             /* Skip the initial population (page already rendered them) */
             if (!initialDone) {
@@ -124,7 +124,7 @@ define([
             }
 
             msgs.forEach(function (m) {
-                var key = m.type + '|' + m.text;
+                let key = m.type + '|' + m.text;
                 if (seenThisLoad.has(key)) return;
                 seenThisLoad.add(key);
                 showIfNotCart(m.type, m.text);
@@ -141,12 +141,12 @@ define([
             return;
         }
 
-        var target = document.querySelector('.page.messages, .messages-container');
+        let target = document.querySelector('.page.messages, .messages-container');
         if (!target || !window.MutationObserver) {
             return;
         }
 
-        var observer = new MutationObserver(function () {
+        let observer = new MutationObserver(function () {
             interceptDomMessages();
         });
 
@@ -170,7 +170,7 @@ define([
         scheduleInitialDomScan();
     }
 
-    var api = {
+    let api = {
         init: init
     };
 

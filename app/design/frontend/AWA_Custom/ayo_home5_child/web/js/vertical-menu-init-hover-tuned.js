@@ -14,7 +14,7 @@ define([
     'use strict';
 
     function isDesktop(desktopBreakpoint) {
-        var breakpoint = parseInt(desktopBreakpoint, 10) || 992;
+        let breakpoint = parseInt(desktopBreakpoint, 10) || 992;
 
         if (window.matchMedia) {
             return window.matchMedia('(min-width: ' + breakpoint + 'px)').matches;
@@ -25,8 +25,8 @@ define([
 
     function resolveLevel0SubmenuPanel($item) {
         var $panel = $item.children('.submenu, .level0.submenu, .navigation__submenu').first();
-        var menuId;
-        var portalNode;
+        let menuId;
+        let portalNode;
 
         if ($panel.length) {
             return $panel;
@@ -45,7 +45,7 @@ define([
 
     function setDesktopSubmenuInlineState($item, open, desktopBreakpoint) {
         var $panel;
-        var panelNode;
+        let panelNode;
 
         if (!isDesktop(desktopBreakpoint) || !$item || !$item.length) {
             return;
@@ -91,7 +91,7 @@ define([
         $targets.each(function () {
             var $item = $(this);
             var $panel = resolveLevel0SubmenuPanel($item);
-            var panelNode = $panel.get(0);
+            let panelNode = $panel.get(0);
 
             $item.removeClass('vmm-active _active is-open active ui-state-active awa-vmf-active');
             $item.children('a.level-top, > a').attr('aria-expanded', 'false');
@@ -111,11 +111,11 @@ define([
 
     return function (config, element) {
         var $nav = $(element);
-        var desktopBreakpoint = parseInt(config && config.desktopBreakpoint, 10) || 992;
-        var hoverDelay = parseInt(config && config.hoverDelay, 10);
-        var hoverTimer = null;
-        var selector = 'li.ui-menu-item.level0.parent';
-        var namespace = '.awaVMHoverTuned';
+        let desktopBreakpoint = parseInt(config && config.desktopBreakpoint, 10) || 992;
+        let hoverDelay = parseInt(config && config.hoverDelay, 10);
+        let hoverTimer = null;
+        let selector = 'li.ui-menu-item.level0.parent';
+        let namespace = '.awaVMHoverTuned';
 
         if ($.isFunction(baseInit)) {
             baseInit(config, element);

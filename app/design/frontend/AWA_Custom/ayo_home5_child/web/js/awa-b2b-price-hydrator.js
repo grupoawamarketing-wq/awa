@@ -3,10 +3,10 @@ define([
 ], function (customerData) {
     'use strict';
 
-    var hydratedHtmlByProductId = {};
-    var inFlightProducts = {};
-    var refreshScheduled = false;
-    var observerStarted = false;
+    let hydratedHtmlByProductId = {};
+    let inFlightProducts = {};
+    let refreshScheduled = false;
+    let observerStarted = false;
 
     function isLoggedIn(customer) {
         if (!customer || typeof customer !== 'object') {
@@ -32,10 +32,10 @@ define([
     }
 
     function resolveProductId(node) {
-        var root;
-        var fromDataset;
-        var productInput;
-        var quickviewTrigger;
+        let root;
+        let fromDataset;
+        let productInput;
+        let quickviewTrigger;
 
         root = node.closest('[data-product-id], .item-product, .product-item, li, .product-info-main, .product-add-form') || node.parentElement;
 
@@ -58,10 +58,10 @@ define([
     }
 
     function collectTargets() {
-        var targets = {};
+        let targets = {};
 
         document.querySelectorAll('.b2b-login-to-see-price').forEach(function (priceMarker) {
-            var productId = resolveProductId(priceMarker);
+            let productId = resolveProductId(priceMarker);
 
             if (!productId) {
                 return;
@@ -84,7 +84,7 @@ define([
 
     function replaceTargets(targets, payloadItems) {
         Object.keys(payloadItems).forEach(function (productId) {
-            var item = payloadItems[productId];
+            let item = payloadItems[productId];
 
             if (!item || !item.html || !targets[productId]) {
                 return;
@@ -105,8 +105,8 @@ define([
     }
 
     function hydratePrices() {
-        var targets;
-        var productIds;
+        let targets;
+        let productIds;
 
         if (!isLoggedIn(getCustomerPayload()) || typeof window.fetch !== 'function') {
             return;
@@ -158,8 +158,8 @@ define([
     }
 
     function init() {
-        var customerSection;
-        var initialCustomer;
+        let customerSection;
+        let initialCustomer;
 
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', scheduleHydration);
@@ -194,7 +194,7 @@ define([
 
         observerStarted = true;
         new MutationObserver(function (mutations) {
-            var shouldRefresh = false;
+            let shouldRefresh = false;
 
             mutations.forEach(function (mutation) {
                 if (mutation.addedNodes && mutation.addedNodes.length) {
