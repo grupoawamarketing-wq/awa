@@ -7422,3 +7422,690 @@ html body.checkout-cart-index .awa-cart-empty .awa-cart-empty__cta {
 .hot-deal-tab-slider .owl-next {
   cursor: pointer !important;
 }
+
+
+/* ==========================================================================
+   QA MELHORIAS VISUAIS 2026-05-11 — Best Practices & Polish
+   1. Reduced-motion: respeita preferência do usuário (a11y)
+   2. Selection color: cor da marca na seleção de texto
+   3. Scroll-behavior: smooth nativo (sem JS)
+   4. Product card transition polish: micro-interações refinadas
+   5. Trust section banners: hover sutil, border-radius uniforme
+   6. Footer visual polish: espaçamento, separadores, links
+   7. B2B price box: consistência visual do login-to-see-price
+   8. Cookie notice: visual modernizado
+   9. Category carousel: polish hover e active states
+   10. Skeleton/loading smoothness
+   ========================================================================== */
+
+/* --- 1. REDUCED MOTION: acessibilidade para sensibilidade a movimento ---
+   Desativa transições e animações quando o usuário prefere. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* --- 2. SELECTION COLOR: cor de marca na seleção de texto --- */
+::selection {
+  background: var(--awa-primary, #b73337);
+  color: var(--awa-text-inverse, #fff);
+}
+::-moz-selection {
+  background: var(--awa-primary, #b73337);
+  color: var(--awa-text-inverse, #fff);
+}
+
+/* --- 3. SCROLL-BEHAVIOR: rolagem suave nativa (complementa JS) --- */
+html {
+  scroll-behavior: smooth;
+}
+/* Respeita reduced-motion acima via override */
+
+/* --- 4. PRODUCT CARD POLISH: transições refinadas do card inteiro --- */
+/* Sombra lift no hover do card — efeito elevação suave */
+.rokan-bestseller .item-product .content-item-product,
+.rokan-newproduct .item-product .content-item-product,
+.rokan-mostviewed .item-product .content-item-product,
+.categorytab-container .item-product .content-item-product,
+.products-grid .product-item-info {
+  transition: box-shadow var(--awa-duration, 0.25s) var(--awa-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+              transform var(--awa-duration, 0.25s) var(--awa-ease, cubic-bezier(0.4, 0, 0.2, 1));
+}
+.rokan-bestseller .item-product .content-item-product:hover,
+.rokan-newproduct .item-product .content-item-product:hover,
+.rokan-mostviewed .item-product .content-item-product:hover,
+.categorytab-container .item-product .content-item-product:hover,
+.products-grid .product-item-info:hover {
+  box-shadow: var(--awa-shadow-md, 0 4px 16px rgba(0, 0, 0, 0.10));
+}
+
+/* Imagem do produto: zoom suave controlado (não abrupt) */
+.rokan-bestseller .product-image-photo,
+.rokan-newproduct .product-image-photo,
+.rokan-mostviewed .product-image-photo,
+.categorytab-container .product-image-photo,
+.products-grid .product-image-photo {
+  transition: transform var(--awa-duration-slow, 0.4s) var(--awa-ease-out, cubic-bezier(0, 0, 0.2, 1));
+  will-change: transform;
+}
+
+/* CTA add-to-cart: feedback de press (scale down + color shift) */
+.item-product .btn-add-to-cart:active,
+.products-grid .action.tocart:active {
+  transform: scale(0.97);
+  transition-duration: 0.08s;
+}
+
+/* Product name link: transição de cor suave no hover */
+.item-product .product-item-link,
+.item-product .product-name a,
+.products-grid .product-item-link {
+  transition: color var(--awa-duration-fast, 0.15s) ease;
+}
+.item-product .product-item-link:hover,
+.item-product .product-name a:hover,
+.products-grid .product-item-link:hover {
+  color: var(--awa-primary, #b73337);
+}
+
+/* --- 5. TRUST SECTION BANNERS: interação visual sutil --- */
+.top-home-content--trust-and-offers .bs-banner {
+  border-radius: var(--awa-radius-lg, 16px);
+  overflow: hidden;
+  transition: box-shadow var(--awa-duration, 0.25s) var(--awa-ease);
+}
+.top-home-content--trust-and-offers .bs-banner:hover {
+  box-shadow: var(--awa-shadow-sm, 0 2px 8px rgba(0, 0, 0, 0.08));
+}
+.top-home-content--trust-and-offers .bs-banner img {
+  transition: transform var(--awa-duration-slow, 0.4s) var(--awa-ease-out);
+}
+.top-home-content--trust-and-offers .bs-banner:hover img {
+  transform: scale(1.03);
+}
+
+/* Countdown block: tipografia e espaçamento mais limpo */
+.hot-deal .countdown_block .title_countdown {
+  font-size: var(--awa-font-sm, 12px);
+  font-weight: var(--awa-weight-semibold, 600);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--awa-text-secondary, #666);
+}
+
+/* --- 6. FOOTER VISUAL POLISH: separadores, links, espaçamento --- */
+/* Footer headings: alinhamento visual com underline sutil */
+.page-footer h4,
+.footer.content h4 {
+  font-size: var(--awa-font-lg, 16px);
+  font-weight: var(--awa-weight-bold, 700);
+  margin-bottom: var(--awa-space-4, 16px);
+  padding-bottom: var(--awa-space-2, 8px);
+  border-bottom: 2px solid var(--awa-primary, #b73337);
+  color: var(--awa-text-inverse, #fff);
+}
+
+/* Footer links: feedback visual consistente */
+.page-footer a,
+.footer.content a {
+  transition: color var(--awa-duration-fast, 0.15s) ease,
+              opacity var(--awa-duration-fast, 0.15s) ease;
+}
+.page-footer a:hover,
+.footer.content a:hover {
+  color: var(--awa-primary-light, #FEF2F2);
+  opacity: 1;
+}
+
+/* Footer social icons: hover com cor da marca */
+.page-footer .social-link:hover,
+.footer.content .social-link:hover,
+.page-footer [class*="social"]:hover svg,
+.footer.content [class*="social"]:hover svg {
+  color: var(--awa-primary, #b73337);
+  fill: var(--awa-primary, #b73337);
+}
+
+/* --- 7. B2B PRICE BOX: consistência visual login-to-see-price --- */
+.b2b-login-to-see-price {
+  display: flex;
+  align-items: center;
+  min-height: 24px;
+}
+.b2b-login-to-see-price .price-label {
+  font-size: var(--awa-font-sm, 12px);
+  color: var(--awa-text-secondary, #666);
+  line-height: 1.4;
+}
+.b2b-login-to-see-price .price-label a {
+  color: var(--awa-primary, #b73337);
+  font-weight: var(--awa-weight-semibold, 600);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color var(--awa-duration-fast, 0.15s) ease;
+}
+.b2b-login-to-see-price .price-label a:hover {
+  color: var(--awa-primary-hover, #8e2629);
+}
+
+/* --- 8. COOKIE NOTICE NATIVO: modernização visual --- */
+#notice-cookie-block {
+  border-radius: var(--awa-radius-lg, 16px);
+  box-shadow: var(--awa-shadow-lg, 0 8px 24px rgba(0, 0, 0, 0.12));
+  border: 1px solid var(--awa-border, #e5e5e5);
+  max-width: 480px;
+  margin: 0 auto;
+}
+#notice-cookie-block .content {
+  padding: var(--awa-space-5, 20px) var(--awa-space-6, 24px);
+}
+#notice-cookie-block #btn-cookie-allow {
+  border-radius: var(--awa-radius-md, 8px);
+  font-weight: var(--awa-weight-semibold, 600);
+  transition: background-color var(--awa-duration-fast, 0.15s) ease,
+              box-shadow var(--awa-duration-fast, 0.15s) ease;
+}
+#notice-cookie-block #btn-cookie-allow:hover {
+  background-color: var(--awa-primary-hover, #8e2629);
+  box-shadow: var(--awa-shadow-brand, 0 4px 16px rgba(183, 51, 55, 0.25));
+}
+
+/* --- 9. CATEGORY CAROUSEL: polish hover cards --- */
+.awa-category-carousel__item {
+  transition: transform var(--awa-duration, 0.25s) var(--awa-ease),
+              box-shadow var(--awa-duration, 0.25s) var(--awa-ease);
+}
+.awa-category-carousel__item:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--awa-shadow-md, 0 4px 16px rgba(0, 0, 0, 0.10));
+}
+.awa-category-carousel__item:active {
+  transform: translateY(-1px);
+  transition-duration: 0.1s;
+}
+/* Ícone dentro do card: zoom suave */
+.awa-category-carousel__icon img {
+  transition: transform var(--awa-duration-slow, 0.4s) var(--awa-ease-out);
+}
+.awa-category-carousel__item:hover .awa-category-carousel__icon img {
+  transform: scale(1.08);
+}
+
+/* --- 10. SKELETON/LOADING: suavidade nos placeholders --- */
+.awa-skeleton,
+[data-awa-skeleton],
+.placeholder-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--awa-bg-muted, #f5f5f5) 25%,
+    var(--awa-bg-subtle, #F7F7F7) 50%,
+    var(--awa-bg-muted, #f5f5f5) 75%
+  );
+  background-size: 200% 100%;
+  animation: awa-shimmer 1.5s ease-in-out infinite;
+}
+@keyframes awa-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* --- 11. SECTION HEADERS: consistência tipográfica nas seções da home --- */
+.awa-section-header h2 {
+  font-size: var(--awa-font-3xl, 24px);
+  font-weight: var(--awa-weight-bold, 700);
+  color: var(--awa-text, #333);
+  line-height: 1.3;
+  margin: 0 0 var(--awa-space-1, 4px);
+}
+.awa-section-header p {
+  font-size: var(--awa-font-base, 14px);
+  color: var(--awa-text-secondary, #666);
+  margin: 0;
+}
+
+/* --- 12. SCROLLBAR CUSTOM: scrollbar minimalista nas áreas de scroll --- */
+.awa-category-carousel__viewport,
+.hot-deal-tab-slider,
+.products-swiper {
+  scrollbar-width: thin;
+  scrollbar-color: var(--awa-border-strong, #d0d0d0) transparent;
+}
+.awa-category-carousel__viewport::-webkit-scrollbar,
+.hot-deal-tab-slider::-webkit-scrollbar,
+.products-swiper::-webkit-scrollbar {
+  height: 4px;
+}
+.awa-category-carousel__viewport::-webkit-scrollbar-track,
+.hot-deal-tab-slider::-webkit-scrollbar-track,
+.products-swiper::-webkit-scrollbar-track {
+  background: transparent;
+}
+.awa-category-carousel__viewport::-webkit-scrollbar-thumb,
+.hot-deal-tab-slider::-webkit-scrollbar-thumb,
+.products-swiper::-webkit-scrollbar-thumb {
+  background: var(--awa-border-strong, #d0d0d0);
+  border-radius: var(--awa-radius-pill, 9999px);
+}
+
+/* --- 13. IMAGE ASPECT RATIO FIX: previne CLS com aspect-ratio --- */
+.product-image-container .product-image-wrapper {
+  aspect-ratio: 1 / 1;
+}
+/* Banner containers: previne layout shift */
+.top-home-content--trust-and-offers .bs-banner img {
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  width: 100%;
+  height: auto;
+}
+
+/* --- 14. TOUCH TARGETS: mínimo 44px para mobile (WCAG 2.5.5) --- */
+@media (pointer: coarse) {
+  .item-product .btn-add-to-cart,
+  .products-grid .action.tocart,
+  .action.primary,
+  .awa-category-carousel__prev,
+  .awa-category-carousel__next,
+  .pages .item a,
+  .pager .item a,
+  .filter-options-content .item a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* --- 15. PRINT STYLES: limpeza para impressão --- */
+@media print {
+  .page-header,
+  .page-footer,
+  .awa-cookie-banner,
+  #notice-cookie-block,
+  .hot-deal,
+  .banner-slider,
+  .awa-category-carousel__prev,
+  .awa-category-carousel__next,
+  .chatwoot-widget,
+  [data-role="tawk-widget"] {
+    display: none !important;
+  }
+  body {
+    color: #000 !important;
+    background: #fff !important;
+  }
+  a[href]::after {
+    content: " (" attr(href) ")";
+    font-size: 10px;
+    color: #666;
+  }
+}
+
+
+/* ==========================================================================
+   PHASE 3 — REFINAMENTOS VISUAIS INCREMENTAIS (2026-07-07)
+   Foco: Grid, Espaçamento, Cards, Botões, Tipografia, Consistência Global
+   Regra: sem hex hardcoded, sem reestruturação, sem reverter Phase 1/2
+   ========================================================================== */
+
+/* --- 3.1 CTA BUTTONS: Uniformizar ambos padrões de botão add-to-cart ---
+   Problema: 2 padrões coexistem:
+     - .action.tocart.primary (hot-deal slider, 12 ocorrências)
+     - .btn-add-to-cart.action.tocart (product vitrines, 42 ocorrências)
+   Fix: garantir aparência idêntica — padding, height, font, radius, transition */
+.item-product .btn-add-to-cart.action.tocart,
+.item-product .action.tocart.primary,
+.content-item-product .btn-add-to-cart.action.tocart,
+.content-item-product .action.tocart.primary,
+.product-item .btn-add-to-cart.action.tocart,
+.product-item .action.tocart.primary {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  min-height: var(--awa-btn-h, 38px) !important;
+  padding: var(--awa-space-2, 8px) var(--awa-space-4, 16px) !important;
+  background: var(--awa-primary) !important;
+  color: var(--awa-text-inverse, #fff) !important;
+  border: none !important;
+  border-radius: var(--awa-radius-sm, 4px) !important;
+  font-size: var(--awa-font-sm, 12px) !important;
+  font-weight: var(--awa-weight-semibold, 600) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.3px !important;
+  line-height: 1.2 !important;
+  cursor: pointer !important;
+  transition: background var(--awa-duration-fast, 0.15s) var(--awa-ease),
+              transform var(--awa-duration-fast, 0.15s) var(--awa-ease),
+              box-shadow var(--awa-duration-fast, 0.15s) var(--awa-ease) !important;
+  text-decoration: none !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+.item-product .btn-add-to-cart.action.tocart:hover,
+.item-product .action.tocart.primary:hover,
+.content-item-product .btn-add-to-cart.action.tocart:hover,
+.content-item-product .action.tocart.primary:hover,
+.product-item .btn-add-to-cart.action.tocart:hover,
+.product-item .action.tocart.primary:hover {
+  background: var(--awa-primary-hover) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: var(--awa-shadow-brand, 0 4px 16px rgba(183, 51, 55, 0.25)) !important;
+}
+.item-product .btn-add-to-cart.action.tocart:active,
+.item-product .action.tocart.primary:active,
+.content-item-product .btn-add-to-cart.action.tocart:active,
+.content-item-product .action.tocart.primary:active,
+.product-item .btn-add-to-cart.action.tocart:active,
+.product-item .action.tocart.primary:active {
+  transform: scale(0.97) !important;
+  box-shadow: none !important;
+}
+
+/* --- 3.2 PRODUCT CARD INTERNAL ALIGNMENT ---
+   Problema: Cards nas vitrines (bestseller, lancamentos, guidoes, etc.)
+   não alinham nome/preço/CTA verticalmente entre si.
+   Fix: flex column com sub-áreas flexíveis */
+.cms-index-index .item-product .content-item-product,
+.cms-index-index .owl-item .content-item-product {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+}
+.cms-index-index .item-product .content-item-product .product-info-cart,
+.cms-index-index .owl-item .content-item-product .product-info-cart {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 1 auto !important;
+  justify-content: flex-end !important;
+}
+/* Product name area: fixed min-height for 2-line alignment */
+.cms-index-index .item-product .product-name,
+.cms-index-index .owl-item .product-name {
+  min-height: 2.8em !important;
+  display: flex !important;
+  align-items: flex-start !important;
+}
+.cms-index-index .item-product .product-name a,
+.cms-index-index .owl-item .product-name a {
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  font-size: var(--awa-font-sm, 12px) !important;
+  font-weight: var(--awa-weight-medium, 500) !important;
+  line-height: 1.4 !important;
+  color: var(--awa-text, #333) !important;
+}
+/* B2B price/login area: consistent spacing */
+.cms-index-index .item-product .info-price,
+.cms-index-index .owl-item .info-price {
+  margin-top: auto !important;
+  padding-top: var(--awa-space-2, 8px) !important;
+}
+
+/* --- 3.3 SECTION VERTICAL RHYTHM ---
+   Reforço de espaçamento uniforme entre seções home.
+   --ds-section-gap já existe; garantir que todas as seções respeitem */
+.cms-index-index .awa-home-section,
+.cms-index-index .top-home-content {
+  padding-top: var(--ds-section-gap, 32px) !important;
+  padding-bottom: var(--ds-section-gap, 32px) !important;
+}
+/* Primeira seção (category carousel, above fold): menos padding top */
+.cms-index-index .top-home-content:first-child,
+.cms-index-index .top-home-content--category-carousel {
+  padding-top: var(--awa-space-4, 16px) !important;
+}
+/* Separador visual sutil entre seções — borda bottom suave */
+.cms-index-index .awa-home-section + .awa-home-section {
+  border-top: 1px solid var(--awa-border, #e5e5e5) !important;
+}
+/* Trust section: fundo diferenciado para destaque */
+.cms-index-index .top-home-content--trust-and-offers {
+  background: var(--awa-bg-muted, #f5f5f5) !important;
+  border-top: 1px solid var(--awa-border, #e5e5e5) !important;
+  border-bottom: 1px solid var(--awa-border, #e5e5e5) !important;
+}
+
+/* --- 3.4 SECTION HEADERS TYPOGRAPHY ---
+   Padronizar tamanho/peso de todos os h2 de seção, incluindo eyebrow */
+.cms-index-index .awa-section-header__eyebrow {
+  font-size: var(--awa-font-xs, 11px) !important;
+  font-weight: var(--awa-weight-semibold, 600) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.8px !important;
+  color: var(--awa-primary) !important;
+  margin-bottom: var(--awa-space-1, 4px) !important;
+  display: block !important;
+}
+.cms-index-index .awa-section-header__title {
+  font-size: var(--awa-font-xl, 18px) !important;
+  font-weight: var(--awa-weight-bold, 700) !important;
+  color: var(--awa-text, #333) !important;
+  line-height: 1.3 !important;
+  margin: 0 !important;
+}
+/* Section header: flex layout with optional "Ver todos" link */
+.cms-index-index .awa-section-header {
+  display: flex !important;
+  align-items: flex-end !important;
+  justify-content: space-between !important;
+  margin-bottom: var(--awa-space-5, 20px) !important;
+  padding-bottom: var(--awa-space-3, 12px) !important;
+  border-bottom: 2px solid var(--awa-primary) !important;
+}
+
+/* --- 3.5 FAQ SECTION — Container + Visual Polish ---
+   Problema: FAQ não tem .container, fica full-width inconsistente
+   Fix: max-width e padding via CSS, mantendo alinhamento com demais seções */
+.aw-home-faq {
+  max-width: var(--awa-container-max, 1440px) !important;
+  margin-inline: auto !important;
+  padding-inline: var(--ds-container-padding, clamp(16px, calc(12px + 1vw), 32px)) !important;
+  padding-top: var(--ds-section-gap, 32px) !important;
+  padding-bottom: var(--ds-section-gap, 32px) !important;
+}
+.aw-home-faq__title {
+  font-size: var(--awa-font-xl, 18px) !important;
+  font-weight: var(--awa-weight-bold, 700) !important;
+  color: var(--awa-text, #333) !important;
+  margin-bottom: var(--awa-space-2, 8px) !important;
+}
+.aw-home-faq__subtitle {
+  font-size: var(--awa-font-base, 14px) !important;
+  color: var(--awa-text-secondary, #666) !important;
+  margin-bottom: var(--awa-space-6, 24px) !important;
+}
+/* FAQ items: modern card-like style */
+.aw-home-faq__question {
+  font-weight: var(--awa-weight-semibold, 600) !important;
+  color: var(--awa-text, #333) !important;
+  padding: var(--awa-space-4, 16px) !important;
+  border: 1px solid var(--awa-border, #e5e5e5) !important;
+  border-radius: var(--awa-radius-sm, 4px) !important;
+  background: var(--awa-bg, #fff) !important;
+  margin-bottom: var(--awa-space-2, 8px) !important;
+  cursor: pointer !important;
+  transition: border-color var(--awa-duration-fast, 0.15s) var(--awa-ease),
+              background var(--awa-duration-fast, 0.15s) var(--awa-ease) !important;
+}
+.aw-home-faq__question:hover {
+  border-color: var(--awa-primary) !important;
+  background: var(--awa-primary-light, #FEF2F2) !important;
+}
+.aw-home-faq__answer {
+  padding: var(--awa-space-3, 12px) var(--awa-space-4, 16px) !important;
+  font-size: var(--awa-font-base, 14px) !important;
+  line-height: 1.6 !important;
+  color: var(--awa-text-secondary, #666) !important;
+}
+
+/* --- 3.6 CATEGORY CAROUSEL POLISH ---
+   Refinamentos visuais para o carousel de categorias */
+.awa-category-carousel__item {
+  border-radius: var(--awa-radius-md, 8px) !important;
+  background: var(--awa-bg, #fff) !important;
+  border: 1px solid var(--awa-border, #e5e5e5) !important;
+  overflow: hidden !important;
+  transition: transform var(--awa-duration, 0.25s) var(--awa-ease),
+              box-shadow var(--awa-duration, 0.25s) var(--awa-ease),
+              border-color var(--awa-duration, 0.25s) var(--awa-ease) !important;
+}
+.awa-category-carousel__item:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: var(--awa-shadow-md, 0 4px 16px rgba(0,0,0,0.10)) !important;
+  border-color: var(--awa-primary) !important;
+}
+.awa-category-carousel__label {
+  font-size: var(--awa-font-sm, 12px) !important;
+  font-weight: var(--awa-weight-semibold, 600) !important;
+  text-align: center !important;
+  padding: var(--awa-space-2, 8px) var(--awa-space-1, 4px) !important;
+  color: var(--awa-text, #333) !important;
+  line-height: 1.3 !important;
+}
+
+/* --- 3.7 TRUST BANNERS — Better proportions ---
+   Melhorar proporção dos 3 banners (Envio Imediato, Pagamento Seguro, Ofertas) */
+.top-home-content--trust-and-offers .bs-banner {
+  border-radius: var(--awa-radius-md, 8px) !important;
+  overflow: hidden !important;
+  border: 1px solid var(--awa-border, #e5e5e5) !important;
+  transition: box-shadow var(--awa-duration, 0.25s) var(--awa-ease),
+              transform var(--awa-duration, 0.25s) var(--awa-ease) !important;
+}
+.top-home-content--trust-and-offers .bs-banner:hover {
+  box-shadow: var(--awa-shadow-md, 0 4px 16px rgba(0,0,0,0.10)) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* --- 3.8 PRODUCT CARD HOVER — Consistent elevation ---
+   Padronizar hover em todos os cards de vitrines home */
+.cms-index-index .item-product .content-item-product,
+.cms-index-index .owl-item .content-item-product {
+  border-radius: var(--awa-radius-sm, 4px) !important;
+  border: 1px solid var(--awa-border, #e5e5e5) !important;
+  background: var(--awa-bg, #fff) !important;
+  transition: box-shadow var(--awa-duration, 0.25s) var(--awa-ease),
+              transform var(--awa-duration, 0.25s) var(--awa-ease),
+              border-color var(--awa-duration, 0.25s) var(--awa-ease) !important;
+  overflow: hidden !important;
+}
+.cms-index-index .item-product .content-item-product:hover,
+.cms-index-index .owl-item .content-item-product:hover {
+  box-shadow: var(--awa-shadow-sm, 0 2px 8px rgba(0,0,0,0.08)) !important;
+  transform: translateY(-2px) !important;
+  border-color: var(--awa-border-strong, #d0d0d0) !important;
+}
+
+/* --- 3.9 PRODUCT SKU STYLING ---
+   Uniformizar aparência do SKU (awa-b2b-sku) em todos os cards */
+.awa-b2b-sku {
+  font-size: var(--awa-font-2xs, 10px) !important;
+  color: var(--awa-text-muted, #888) !important;
+  font-weight: var(--awa-weight-normal, 400) !important;
+  letter-spacing: 0.3px !important;
+  margin-top: var(--awa-space-1, 4px) !important;
+  display: block !important;
+}
+
+/* --- 3.10 PRODUCT IMAGE AREA — Consistent padding ---
+   Garantir que thumb area tenha padding uniforme */
+.cms-index-index .item-product .product-thumb,
+.cms-index-index .owl-item .product-thumb {
+  padding: var(--awa-space-2, 8px) !important;
+  text-align: center !important;
+}
+.cms-index-index .item-product .product-thumb img,
+.cms-index-index .owl-item .product-thumb img {
+  border-radius: var(--awa-radius-xs, 4px) !important;
+}
+
+/* --- 3.11 GLOBAL LINK CONSISTENCY IN HOME ---
+   "Ver todos" e links de ação nas seções */
+.cms-index-index .awa-section-header a,
+.cms-index-index .awa-section-header__link {
+  font-size: var(--awa-font-sm, 12px) !important;
+  font-weight: var(--awa-weight-semibold, 600) !important;
+  color: var(--awa-primary) !important;
+  text-decoration: none !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  transition: color var(--awa-duration-fast, 0.15s) var(--awa-ease) !important;
+}
+.cms-index-index .awa-section-header a:hover,
+.cms-index-index .awa-section-header__link:hover {
+  color: var(--awa-primary-hover) !important;
+  text-decoration: underline !important;
+}
+
+/* --- 3.12 MOBILE REFINEMENTS (≤767px) --- */
+@media (max-width: 767px) {
+  /* Section headers: stack on mobile */
+  .cms-index-index .awa-section-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: var(--awa-space-2, 8px) !important;
+  }
+  .cms-index-index .awa-section-header__title {
+    font-size: var(--awa-font-lg, 16px) !important;
+  }
+  /* Cards: tighter padding */
+  .cms-index-index .item-product .product-thumb {
+    padding: var(--awa-space-1, 4px) !important;
+  }
+  /* Product name: smaller on mobile */
+  .cms-index-index .item-product .product-name a {
+    font-size: var(--awa-font-2xs, 10px) !important;
+  }
+  /* Category carousel: smaller labels */
+  .awa-category-carousel__label {
+    font-size: var(--awa-font-2xs, 10px) !important;
+    padding: var(--awa-space-1, 4px) !important;
+  }
+  /* FAQ: less padding */
+  .aw-home-faq {
+    padding-inline: var(--awa-space-3, 12px) !important;
+  }
+  /* Section gap: tighter on mobile */
+  .cms-index-index .awa-home-section,
+  .cms-index-index .top-home-content {
+    padding-top: var(--awa-space-5, 20px) !important;
+    padding-bottom: var(--awa-space-5, 20px) !important;
+  }
+}
+
+/* --- 3.13 TABLET REFINEMENTS (768px–1023px) --- */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .cms-index-index .awa-section-header__title {
+    font-size: var(--awa-font-lg, 16px) !important;
+  }
+}
+
+/* --- 3.14 REDUCED MOTION: Phase 3 additions --- */
+@media (prefers-reduced-motion: reduce) {
+  .awa-category-carousel__item,
+  .cms-index-index .item-product .content-item-product,
+  .cms-index-index .owl-item .content-item-product,
+  .top-home-content--trust-and-offers .bs-banner,
+  .item-product .btn-add-to-cart.action.tocart,
+  .item-product .action.tocart.primary {
+    transition: none !important;
+    transform: none !important;
+  }
+  .awa-category-carousel__item:hover,
+  .cms-index-index .item-product .content-item-product:hover,
+  .cms-index-index .owl-item .content-item-product:hover,
+  .top-home-content--trust-and-offers .bs-banner:hover,
+  .item-product .btn-add-to-cart.action.tocart:hover,
+  .item-product .action.tocart.primary:hover {
+    transform: none !important;
+  }
+}
