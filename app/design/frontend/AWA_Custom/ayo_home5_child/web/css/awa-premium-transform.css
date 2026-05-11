@@ -1,10 +1,20 @@
 /* =============================================================================
- * AWA Premium Transform v2 — Modern Design System 2026-05-07
- * Load order: after awa-bundle-refinements (last before Visual QA)
- * Sections: Forms, Buttons, Cards, Navigation, Surfaces, Mobile, Motion
+ * AWA Premium Transform — Design System Overhaul 2026-05-07
+ *
+ * Purpose: Enforce luxury B2B interface standards:
+ *   - Premium forms (48px height, 1.5px border, 8px radius, AWA Red focus ring)
+ *   - B2B cleanup (remove green backgrounds, strikethrough, hide quote button)
+ *   - 8px grid alignment
+ *   - Color system enforcement (#A33B3B primary, #1A1A1A text, #F9FAFB surfaces)
+ *
+ * Load order: after awa-bundle-refinements.css (last in cascade)
  * ============================================================================= */
 
-/* ─── 1. PREMIUM FORM INPUTS ─── */
+/* ==========================================================================
+   1. PREMIUM FORM INPUTS
+   ========================================================================== */
+
+/* All text inputs, selects, textareas */
 body .page-wrapper input[type="text"],
 body .page-wrapper input[type="email"],
 body .page-wrapper input[type="password"],
@@ -26,6 +36,7 @@ body .page-wrapper textarea {
   box-sizing: border-box;
 }
 
+/* Focus ring — 2px AWA Red with reduced opacity */
 body .page-wrapper input[type="text"]:focus,
 body .page-wrapper input[type="email"]:focus,
 body .page-wrapper input[type="password"]:focus,
@@ -35,376 +46,196 @@ body .page-wrapper input[type="search"]:focus,
 body .page-wrapper input[type="url"]:focus,
 body .page-wrapper input.input-text:focus,
 body .page-wrapper select:focus,
-body .page-wrapper textarea:focus {
+body .page-wrapper textarea:focus,
+body .page-wrapper input[type="text"]:focus-visible,
+body .page-wrapper input[type="email"]:focus-visible,
+body .page-wrapper input[type="password"]:focus-visible,
+body .page-wrapper input[type="tel"]:focus-visible,
+body .page-wrapper input[type="number"]:focus-visible,
+body .page-wrapper input[type="search"]:focus-visible,
+body .page-wrapper input[type="url"]:focus-visible,
+body .page-wrapper input.input-text:focus-visible,
+body .page-wrapper select:focus-visible,
+body .page-wrapper textarea:focus-visible {
   outline: none;
-  border-color: var(--awa-primary, #b73337);
-  box-shadow: 0 0 0 3px rgba(183, 51, 55, 0.12);
+  border-color: var(--awa-primary, #A33B3B);
+  box-shadow: 0 0 0 2px rgba(163, 59, 59, 0.15); /* AWA Red focus ring, reduced opacity */
 }
 
+/* Labels — semibold 600, dark text */
 body .page-wrapper .field > .label,
 body .page-wrapper .field > label,
-body .page-wrapper .fieldset > .field > .label {
+body .page-wrapper .fieldset > .field > .label,
+body .page-wrapper .fieldset > .field > label,
+body .page-wrapper .form .field .label {
   font-weight: 600;
   font-size: var(--awa-text-sm, 14px);
   color: #1A1A1A;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   line-height: 1.4;
+}
+
+/* Help text / field notes — 12px, muted gray, 4px below */
+body .page-wrapper .field .note,
+body .page-wrapper .field .field-note,
+body .page-wrapper .field-tooltip-content,
+body .page-wrapper .field .mage-error,
+body .page-wrapper .field .field-error {
+  font-size: 12px;
+  line-height: 1.4;
+  margin-top: 4px;
 }
 
 body .page-wrapper .field .note,
 body .page-wrapper .field .field-note {
-  font-size: 12px;
-  line-height: 1.4;
-  margin-top: 4px;
   color: #6B7280;
 }
 
+/* Error state */
 body .page-wrapper .field .input-text.mage-error,
 body .page-wrapper .field select.mage-error,
 body .page-wrapper .field textarea.mage-error {
-  border-color: var(--awa-error, #dc2626) !important; /* error state override */
-  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.08);
+  border-color: var(--awa-error, #dc2626) !important;
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.1);
 }
 
+/* Valid state */
 body .page-wrapper .field .input-text._valid,
-body .page-wrapper .field select._valid {
-  border-color: var(--awa-success, #10B981) !important; /* valid state override */
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.08);
+body .page-wrapper .field select._valid,
+body .page-wrapper .field textarea._valid {
+  border-color: var(--awa-success, #10B981) !important;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.1);
 }
 
-/* ─── 2. PREMIUM BUTTONS ─── */
+/* ==========================================================================
+   2. PREMIUM BUTTONS — Consistent height & radius
+   ========================================================================== */
+
 body .page-wrapper .action.primary,
 body .page-wrapper button.action.primary {
   min-height: var(--awa-btn-h, 48px);
   border-radius: var(--awa-radius-sm, 8px);
   font-weight: 600;
   letter-spacing: 0.02em;
-  transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
 }
 
-body .page-wrapper .action.primary:hover,
-body .page-wrapper button.action.primary:hover {
-  box-shadow: 0 4px 12px rgba(183, 51, 55, 0.25);
-  transform: translateY(-1px);
+/* ==========================================================================
+   3. B2B CLEANUP — Remove visual noise
+   ========================================================================== */
+
+/* Hide "Solicitar Orçamento" / quote request button on cart page */
+body .page-wrapper .b2b-cart-quote-wrapper {
+  display: none !important; /* B2B cleanup: quote button hidden per design spec */
 }
 
-body .page-wrapper .action.primary:active,
-body .page-wrapper button.action.primary:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 6px rgba(183, 51, 55, 0.2);
-}
-
-/* Secondary button */
-body .page-wrapper .action.secondary,
-body .page-wrapper button.action.secondary,
-body .page-wrapper .action.action-secondary {
-  border-radius: var(--awa-radius-sm, 8px);
-  transition: background-color 0.2s ease, border-color 0.2s ease;
-}
-
-/* ─── 3. PRODUCT CARDS — MODERN HOVER ─── */
-body .page-wrapper .product-item,
-body .page-wrapper .item-product {
-  border-radius: var(--awa-radius, 12px);
-  overflow: hidden;
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
+/* Remove green backgrounds from B2B status indicators — use white + accent */
+body .page-wrapper .b2b-status-approved,
+body .page-wrapper .b2b-status.approved {
   background: var(--awa-bg, #FFFFFF);
+  border: 1.5px solid var(--awa-success, #10B981);
+  color: var(--awa-success, #10B981);
 }
 
-body .page-wrapper .product-item:hover,
-body .page-wrapper .item-product:hover {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
-  transform: translateY(-4px);
+/* Replace strikethrough with clean completed state */
+body .page-wrapper .b2b-checklist-item.completed .b2b-checklist-label {
+  text-decoration: none;
+  color: var(--awa-gray-400, #9ca3af);
 }
 
-body .page-wrapper .product-item-name a,
-body .page-wrapper .product.name a {
-  transition: color 0.2s ease;
-  line-height: 1.4;
-}
-
-body .page-wrapper .product-item-name a:hover,
-body .page-wrapper .product.name a:hover {
-  color: var(--awa-primary, #b73337);
-}
-
-/* Product image zoom on hover */
-body .page-wrapper .product-image-container img {
-  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-body .page-wrapper .product-item:hover .product-image-container img,
-body .page-wrapper .item-product:hover .product-image-container img {
-  transform: scale(1.05);
-}
-
-/* Add to cart button on cards */
-body .page-wrapper .product-item .action.tocart,
-body .page-wrapper .item-product .action.tocart {
-  border-radius: var(--awa-radius-sm, 8px);
-  font-weight: 600;
-  min-height: 40px;
-  transition: background-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-/* Price styling */
-body .page-wrapper .price-box .price {
+body .page-wrapper .b2b-checklist-item.completed::before {
+  content: "✓";
+  color: var(--awa-success, #10B981);
   font-weight: 700;
-  color: var(--awa-text, #1A1A1A);
+  margin-right: 8px;
 }
 
+/* Clean old-price strikethrough — keep but with refined thickness */
 body .page-wrapper .old-price .price {
   text-decoration: line-through;
   text-decoration-thickness: 1.5px;
   text-decoration-color: var(--awa-gray-400, #9ca3af);
   color: var(--awa-gray-400, #9ca3af);
-  font-weight: 400;
 }
 
-body .page-wrapper .special-price .price {
-  color: var(--awa-primary, #b73337);
-  font-weight: 700;
-}
-
-/* ─── 4. BREADCRUMBS ─── */
-body .page-wrapper .breadcrumbs {
-  padding: 12px 0;
-  font-size: 13px;
-  color: #6B7280;
-}
-
-body .page-wrapper .breadcrumbs a {
-  color: #6B7280;
-  transition: color 0.2s ease;
-}
-
-body .page-wrapper .breadcrumbs a:hover {
-  color: var(--awa-primary, #b73337);
-}
-
-body .page-wrapper .breadcrumbs .item:not(:last-child)::after {
-  color: #D1D5DB;
-}
-
-/* ─── 5. MESSAGES — MODERN ─── */
+/* Success messages — use new green token, white background */
 body .page-wrapper .message.success {
-  background: #ECFDF5;
-  border-left: 4px solid var(--awa-success, #10B981);
-  color: #065F46;
-  border-radius: 0 var(--awa-radius-sm, 8px) var(--awa-radius-sm, 8px) 0;
-  padding: 12px 16px;
+  background: #ECFDF5; /* emerald-50, matches #10B981 */
+  border-left-color: var(--awa-success, #10B981);
+  color: #065F46; /* emerald-800 for text */
 }
 
-body .page-wrapper .message.error {
-  background: #FEF2F2;
-  border-left: 4px solid var(--awa-error, #dc2626);
-  color: #991B1B;
-  border-radius: 0 var(--awa-radius-sm, 8px) var(--awa-radius-sm, 8px) 0;
-  padding: 12px 16px;
-}
+/* ==========================================================================
+   4. 8px GRID ALIGNMENT
+   ========================================================================== */
 
-body .page-wrapper .message.info,
-body .page-wrapper .message.notice {
-  background: #EFF6FF;
-  border-left: 4px solid #3B82F6;
-  color: #1E40AF;
-  border-radius: 0 var(--awa-radius-sm, 8px) var(--awa-radius-sm, 8px) 0;
-  padding: 12px 16px;
-}
-
-/* ─── 6. B2B CLEANUP ─── */
-body .page-wrapper .b2b-cart-quote-wrapper {
-  display: none !important; /* quote button hidden per design */
-}
-
-body .page-wrapper .b2b-status-approved,
-body .page-wrapper .b2b-status.approved {
-  background: #ECFDF5;
-  border: 1.5px solid var(--awa-success, #10B981);
-  color: #065F46;
-  border-radius: var(--awa-radius-sm, 8px);
-  padding: 4px 12px;
-  font-weight: 600;
-  font-size: 13px;
-}
-
-body .page-wrapper .b2b-status-pending,
-body .page-wrapper .b2b-status.pending {
-  background: #FFFBEB;
-  border: 1.5px solid #F59E0B;
-  color: #92400E;
-  border-radius: var(--awa-radius-sm, 8px);
-  padding: 4px 12px;
-  font-weight: 600;
-  font-size: 13px;
-}
-
-/* ─── 7. 8px GRID ALIGNMENT ─── */
+/* Section spacing — 8px multiples */
 body .page-wrapper .page-main > .columns,
 body .page-wrapper .page-main > .widget,
 body .page-wrapper .page-main > section {
-  margin-bottom: 48px;
+  margin-bottom: 32px; /* 4 × 8px — reduzido de 48px para evitar duplo espaçamento (#Issue-05) */
 }
 
 body .page-wrapper .fieldset > .field {
-  margin-bottom: 16px;
+  margin-bottom: 16px; /* 2 × 8px */
 }
 
 body .page-wrapper .fieldset > .field:last-child {
   margin-bottom: 0;
 }
 
-/* ─── 8. SURFACES & HEADINGS ─── */
-body .page-wrapper .sidebar,
+/* Card / panel padding */
+body .page-wrapper .block-content,
 body .page-wrapper .cart-summary,
-body .page-wrapper .block-compare,
-body .page-wrapper .block-wishlist-management {
-  background-color: var(--awa-bg-subtle, #F9FAFB);
-  border-radius: var(--awa-radius, 12px);
+body .page-wrapper .form-address-edit,
+body .page-wrapper .form-login,
+body .page-wrapper .form-create-account {
+  padding: 24px; /* 3 × 8px */
 }
 
+/* Gap standardization */
+body .page-wrapper .form-address-edit .fieldset,
+body .page-wrapper .form-login .fieldset,
+body .page-wrapper .form-create-account .fieldset {
+  gap: 16px;
+}
+
+/* ==========================================================================
+   5. SURFACE & TEXT COLOR ENFORCEMENT
+   ========================================================================== */
+
+/* Subtle surface backgrounds */
+body .page-wrapper .sidebar,
+body .page-wrapper .cart-summary {
+  background-color: var(--awa-bg-subtle, #F9FAFB);
+}
+
+/* Product image: fundo branco puro — evita borda cinza em fotos com bg branco (#Issue-07) */
+body .page-wrapper .product-image-container {
+  background-color: #ffffff;
+}
+
+/* Body text color enforcement */
+body .page-wrapper p,
+body .page-wrapper li,
+body .page-wrapper td,
+body .page-wrapper .product-info-main .product.attribute.description {
+  color: var(--awa-text, #1A1A1A);
+}
+
+/* Headings — all #1A1A1A */
 body .page-wrapper h1,
 body .page-wrapper h2,
 body .page-wrapper h3,
-body .page-wrapper h4 {
+body .page-wrapper h4,
+body .page-wrapper h5,
+body .page-wrapper h6 {
   color: var(--awa-text, #1A1A1A);
-  letter-spacing: -0.01em;
 }
 
-body .page-wrapper .page-title-wrapper .page-title {
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.2;
-}
+/* ==========================================================================
+   6. MOBILE REFINEMENTS
+   ========================================================================== */
 
-/* ─── 9. TOOLBAR / PAGINATION ─── */
-body .page-wrapper .toolbar .pages .item.current strong {
-  background: var(--awa-primary, #b73337);
-  color: #FFFFFF;
-  border-radius: var(--awa-radius-sm, 8px);
-  min-width: 36px;
-  min-height: 36px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-}
-
-body .page-wrapper .toolbar .pages a {
-  border-radius: var(--awa-radius-sm, 8px);
-  min-width: 36px;
-  min-height: 36px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-body .page-wrapper .toolbar .pages a:hover {
-  background: var(--awa-bg-subtle, #F9FAFB);
-  color: var(--awa-primary, #b73337);
-}
-
-/* Toolbar sorting */
-body .page-wrapper .toolbar select {
-  border-radius: var(--awa-radius-sm, 8px);
-  min-height: 40px;
-  font-size: 13px;
-}
-
-/* ─── 10. FOOTER ─── */
-body .page-wrapper .page-footer {
-  border-top: 1px solid var(--awa-border, #e5e5e5);
-}
-
-body .page-wrapper .footer.content a {
-  transition: color 0.2s ease;
-}
-
-body .page-wrapper .footer.content a:hover {
-  color: var(--awa-primary, #b73337);
-}
-
-/* ─── 11. NEWSLETTER ─── */
-body .page-wrapper .block.newsletter .action.subscribe {
-  border-radius: 0 var(--awa-radius-sm, 8px) var(--awa-radius-sm, 8px) 0;
-  min-height: 48px;
-  font-weight: 600;
-}
-
-body .page-wrapper .block.newsletter input[type="email"] {
-  border-radius: var(--awa-radius-sm, 8px) 0 0 var(--awa-radius-sm, 8px);
-  min-height: 48px;
-}
-
-/* ─── 12. TABLES — MODERN ─── */
-body .page-wrapper table.data-table,
-body .page-wrapper .table-wrapper table {
-  border-collapse: separate;
-  border-spacing: 0;
-  border-radius: var(--awa-radius, 12px);
-  overflow: hidden;
-}
-
-body .page-wrapper table.data-table thead th,
-body .page-wrapper .table-wrapper table thead th {
-  background: var(--awa-bg-subtle, #F9FAFB);
-  font-weight: 600;
-  font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: #6B7280;
-  padding: 12px 16px;
-  border-bottom: 2px solid var(--awa-border, #e5e5e5);
-}
-
-body .page-wrapper table.data-table tbody td,
-body .page-wrapper .table-wrapper table tbody td {
-  padding: 12px 16px;
-  border-bottom: 1px solid #F3F4F6;
-}
-
-body .page-wrapper table.data-table tbody tr:last-child td,
-body .page-wrapper .table-wrapper table tbody tr:last-child td {
-  border-bottom: none;
-}
-
-body .page-wrapper table.data-table tbody tr:hover,
-body .page-wrapper .table-wrapper table tbody tr:hover {
-  background: var(--awa-bg-subtle, #F9FAFB);
-}
-
-/* ─── 13. MODAL / OVERLAY ─── */
-body .modal-popup .modal-inner-wrap {
-  border-radius: var(--awa-radius, 12px);
-  overflow: hidden;
-}
-
-body .modal-popup .modal-header {
-  border-bottom: 1px solid var(--awa-border, #e5e5e5);
-  padding: 16px 24px;
-}
-
-body .modal-popup .modal-content {
-  padding: 24px;
-}
-
-body .modal-popup .modal-footer {
-  border-top: 1px solid var(--awa-border, #e5e5e5);
-  padding: 16px 24px;
-}
-
-/* ─── 14. LINKS — GLOBAL ─── */
-body .page-wrapper a {
-  transition: color 0.2s ease;
-}
-
-/* ─── 15. LOADING INDICATORS ─── */
-body .page-wrapper .loading-mask .loader img {
-  display: none;
-}
-
-/* ─── 16. MOBILE REFINEMENTS ─── */
 @media (max-width: 767px) {
   body .page-wrapper input[type="text"],
   body .page-wrapper input[type="email"],
@@ -414,726 +245,38 @@ body .page-wrapper .loading-mask .loader img {
   body .page-wrapper input.input-text,
   body .page-wrapper select,
   body .page-wrapper textarea {
-    min-height: 48px;
-    font-size: 16px; /* prevent iOS zoom */
+    min-height: var(--awa-input-h, 48px);
+    font-size: 16px; /* Prevent iOS zoom on focus */
   }
 
   body .page-wrapper .page-main > .columns,
   body .page-wrapper .page-main > .widget,
   body .page-wrapper .page-main > section {
-    margin-bottom: 32px;
+    margin-bottom: 32px; /* 4 × 8px */
   }
 
-  body .page-wrapper .product-item:hover,
-  body .page-wrapper .item-product:hover {
-    transform: none; /* no card lift on touch */
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  }
-
-  body .page-wrapper .action.primary,
-  body .page-wrapper button.action.primary {
-    min-height: 48px;
-    width: 100%;
-  }
-
-  /* Touch-friendly pagination */
-  body .page-wrapper .toolbar .pages a,
-  body .page-wrapper .toolbar .pages .item.current strong {
-    min-width: 44px;
-    min-height: 44px;
-  }
-
-  body .page-wrapper .modal-popup .modal-inner-wrap {
-    border-radius: var(--awa-radius, 12px) var(--awa-radius, 12px) 0 0;
-    margin-top: auto;
+  body .page-wrapper .block-content,
+  body .page-wrapper .cart-summary,
+  body .page-wrapper .form-address-edit,
+  body .page-wrapper .form-login,
+  body .page-wrapper .form-create-account {
+    padding: 16px; /* 2 × 8px */
   }
 }
 
-/* ─── 17. REDUCED MOTION ─── */
+/* ==========================================================================
+   7. REDUCED MOTION
+   ========================================================================== */
+
 @media (prefers-reduced-motion: reduce) {
-  body .page-wrapper *,
-  body .page-wrapper *::before,
-  body .page-wrapper *::after {
-    transition-duration: 0.01ms !important; /* reduced-motion: accessibility */
-    animation-duration: 0.01ms !important; /* reduced-motion: accessibility */
+  body .page-wrapper input[type="text"],
+  body .page-wrapper input[type="email"],
+  body .page-wrapper input[type="password"],
+  body .page-wrapper input[type="tel"],
+  body .page-wrapper input[type="number"],
+  body .page-wrapper input.input-text,
+  body .page-wrapper select,
+  body .page-wrapper textarea {
+    transition: none !important;
   }
-}
-
-/* ─── 18. FOCUS VISIBLE (keyboard navigation) ─── */
-body .page-wrapper a:focus-visible,
-body .page-wrapper button:focus-visible,
-body .page-wrapper [role="button"]:focus-visible,
-body .page-wrapper [tabindex]:focus-visible {
-  outline: 2px solid var(--awa-primary, #b73337);
-  outline-offset: 2px;
-  border-radius: 4px;
-}
-
-/* ─── 19. SCROLLBAR ─── */
-body .page-wrapper ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-body .page-wrapper ::-webkit-scrollbar-track {
-  background: #F3F4F6;
-  border-radius: 4px;
-}
-
-body .page-wrapper ::-webkit-scrollbar-thumb {
-  background: #D1D5DB;
-  border-radius: 4px;
-}
-
-body .page-wrapper ::-webkit-scrollbar-thumb:hover {
-  background: #9CA3AF;
-}
-
-/* ─── 20. SELECTION ─── */
-body .page-wrapper ::selection {
-  background: rgba(183, 51, 55, 0.15);
-  color: var(--awa-text, #1A1A1A);
-}
-
-/* ─── 21. AJAXSUITE POPUP — MODERN ─── */
-body .ajaxsuite-popup-wrapper {
-  border-radius: var(--awa-radius-lg, 16px);
-  overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 4px 16px rgba(0, 0, 0, 0.08);
-  max-width: 480px;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-body .ajaxsuite-popup-wrapper #ajaxsuite-popup-content {
-  padding: 24px;
-}
-
-body .ajaxsuite-popup-wrapper .ajaxsuite-close {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color 0.2s ease;
-  top: 12px;
-  right: 12px;
-}
-
-body .ajaxsuite-popup-wrapper .ajaxsuite-close:hover {
-  background: var(--awa-bg-subtle, #F9FAFB);
-}
-
-/* ─── 22. MINICART — MODERN ─── */
-body .page-wrapper .block-minicart {
-  border-radius: var(--awa-radius, 12px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06);
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  overflow: hidden;
-}
-
-body .page-wrapper .block-minicart .block-content {
-  padding: 16px;
-}
-
-body .page-wrapper .minicart-items .product-item {
-  padding: 12px 0;
-  border-bottom: 1px solid #F3F4F6;
-}
-
-body .page-wrapper .minicart-items .product-item:last-child {
-  border-bottom: none;
-}
-
-body .page-wrapper .minicart-items .product-item-name a {
-  font-weight: 500;
-  font-size: 14px;
-  line-height: 1.4;
-}
-
-body .page-wrapper .block-minicart .action.viewcart,
-body .page-wrapper .block-minicart .action.checkout {
-  border-radius: var(--awa-radius-sm, 8px);
-  min-height: 44px;
-  font-weight: 600;
-}
-
-body .page-wrapper .minicart-wrapper .action.showcart .counter.qty {
-  border-radius: 50%;
-  min-width: 20px;
-  height: 20px;
-  line-height: 20px;
-  font-size: 11px;
-  font-weight: 700;
-}
-
-/* ─── 23. SEARCH AUTOCOMPLETE — MODERN ─── */
-body .page-wrapper .search-autocomplete {
-  border-radius: var(--awa-radius, 12px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06);
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  overflow: hidden;
-  margin-top: 4px;
-}
-
-body .page-wrapper .search-autocomplete ul li {
-  padding: 10px 16px;
-  transition: background-color 0.15s ease;
-  border-bottom: 1px solid #F3F4F6;
-}
-
-body .page-wrapper .search-autocomplete ul li:last-child {
-  border-bottom: none;
-}
-
-body .page-wrapper .search-autocomplete ul li:hover,
-body .page-wrapper .search-autocomplete ul li.selected {
-  background: var(--awa-bg-subtle, #F9FAFB);
-}
-
-body .page-wrapper .search-autocomplete .product-name {
-  font-weight: 500;
-  color: var(--awa-text, #1A1A1A);
-}
-
-body .page-wrapper .search-autocomplete .product-secondary {
-  font-size: 12px;
-  color: #6B7280;
-}
-
-/* ─── 24. PDP TABS — MODERN ─── */
-body .page-wrapper .product.data.items > .item.title {
-  border-radius: var(--awa-radius-sm, 8px) var(--awa-radius-sm, 8px) 0 0;
-}
-
-body .page-wrapper .product.data.items > .item.title > .switch {
-  font-weight: 600;
-  font-size: 14px;
-  padding: 12px 24px;
-  transition: color 0.2s ease, border-color 0.2s ease;
-  border-bottom: 3px solid transparent;
-}
-
-body .page-wrapper .product.data.items > .item.title.active > .switch {
-  color: var(--awa-primary, #b73337);
-  border-bottom-color: var(--awa-primary, #b73337);
-}
-
-body .page-wrapper .product.data.items > .item.title > .switch:hover {
-  color: var(--awa-primary, #b73337);
-}
-
-body .page-wrapper .product.data.items > .item.content {
-  padding: 24px 0;
-  line-height: 1.7;
-  color: #374151;
-}
-
-/* ─── 25. FITMENT SECTION — POLISH ─── */
-body .page-wrapper .fitment-applications {
-  border-radius: var(--awa-radius, 12px);
-  border: 1.5px solid var(--awa-border, #e5e5e5);
-  overflow: hidden;
-}
-
-body .page-wrapper .fitment-header {
-  padding: 16px 20px;
-  background: var(--awa-bg-subtle, #F9FAFB);
-  border-bottom: 1px solid var(--awa-border, #e5e5e5);
-}
-
-body .page-wrapper .fitment-title {
-  font-weight: 700;
-  font-size: 16px;
-  color: var(--awa-text, #1A1A1A);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-body .page-wrapper .fitment-content {
-  padding: 16px 20px;
-}
-
-body .page-wrapper .fitment-intro {
-  font-size: 14px;
-  color: #6B7280;
-  margin-bottom: 16px;
-  line-height: 1.5;
-}
-
-body .page-wrapper .fitment-filter-input {
-  min-height: 40px;
-  border: 1.5px solid var(--awa-border, #e5e5e5);
-  border-radius: var(--awa-radius-sm, 8px);
-  padding: 8px 12px;
-  font-size: 14px;
-  width: 100%;
-  box-sizing: border-box;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-body .page-wrapper .fitment-filter-input:focus {
-  outline: none;
-  border-color: var(--awa-primary, #b73337);
-  box-shadow: 0 0 0 3px rgba(183, 51, 55, 0.12);
-}
-
-body .page-wrapper .fitment-stats {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
-}
-
-body .page-wrapper .fitment-stat {
-  background: var(--awa-bg-subtle, #F9FAFB);
-  border-radius: var(--awa-radius-sm, 8px);
-  padding: 8px 16px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #374151;
-}
-
-body .page-wrapper .fitment-model-item {
-  padding: 8px 12px;
-  border-radius: var(--awa-radius-sm, 8px);
-  transition: background-color 0.15s ease;
-  font-size: 14px;
-}
-
-body .page-wrapper .fitment-model-item:hover {
-  background: var(--awa-bg-subtle, #F9FAFB);
-}
-
-body .page-wrapper .fitment-brand-name {
-  font-weight: 600;
-  font-size: 15px;
-  color: var(--awa-text, #1A1A1A);
-  padding: 8px 0 4px;
-}
-
-body .page-wrapper .fitment-disclaimer {
-  font-size: 12px;
-  color: #9CA3AF;
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid #F3F4F6;
-  line-height: 1.5;
-}
-
-/* ─── 26. QTY INPUT — MODERN ─── */
-body .page-wrapper .field.qty .control {
-  display: flex;
-  align-items: center;
-}
-
-body .page-wrapper .input-text.qty {
-  text-align: center;
-  font-weight: 600;
-  font-size: 16px;
-  min-height: 44px;
-  width: 60px;
-  border-radius: var(--awa-radius-sm, 8px);
-}
-
-/* ─── 27. PRODUCT GALLERY — POLISH ─── */
-body .page-wrapper .gallery-placeholder {
-  border-radius: var(--awa-radius, 12px);
-  overflow: hidden;
-}
-
-body .page-wrapper .fotorama__stage {
-  border-radius: var(--awa-radius, 12px);
-}
-
-body .page-wrapper .fotorama__thumb {
-  border-radius: var(--awa-radius-sm, 8px);
-  overflow: hidden;
-  border: 2px solid transparent;
-  transition: border-color 0.2s ease;
-}
-
-body .page-wrapper .fotorama__thumb.fotorama__active {
-  border-color: var(--awa-primary, #b73337);
-}
-
-body .page-wrapper .fotorama__arr {
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  background: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: background-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-body .page-wrapper .fotorama__arr:hover {
-  background: rgba(255, 255, 255, 1);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-/* ─── 28. SOCIAL PROOF — CLEAN ─── */
-body .page-wrapper .social-proof-views,
-body .page-wrapper .social-proof-badge {
-  font-size: 13px;
-  font-weight: 500;
-  border-radius: var(--awa-radius-sm, 8px);
-  padding: 6px 12px;
-}
-
-/* ─── 29. LAYERED NAVIGATION — MODERN ─── */
-body .page-wrapper .filter-options-title {
-  font-weight: 600;
-  font-size: 14px;
-  padding: 12px 0;
-  color: var(--awa-text, #1A1A1A);
-  border-bottom: 1px solid #F3F4F6;
-  transition: color 0.2s ease;
-}
-
-body .page-wrapper .filter-options-title:hover {
-  color: var(--awa-primary, #b73337);
-}
-
-body .page-wrapper .filter-options-content .item {
-  padding: 6px 0;
-  font-size: 14px;
-}
-
-body .page-wrapper .filter-options-content .item a {
-  color: #374151;
-  transition: color 0.2s ease;
-}
-
-body .page-wrapper .filter-options-content .item a:hover {
-  color: var(--awa-primary, #b73337);
-}
-
-body .page-wrapper .filter-options-content .count {
-  color: #9CA3AF;
-  font-size: 12px;
-}
-
-/* Swatch filter */
-body .page-wrapper .swatch-option {
-  border-radius: var(--awa-radius-sm, 8px);
-  border: 2px solid var(--awa-border, #e5e5e5);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-body .page-wrapper .swatch-option:hover,
-body .page-wrapper .swatch-option.selected {
-  border-color: var(--awa-primary, #b73337);
-  box-shadow: 0 0 0 2px rgba(183, 51, 55, 0.15);
-}
-
-/* ─── 30. WISHLIST / COMPARE BUTTONS ─── */
-body .page-wrapper .action.towishlist,
-body .page-wrapper .action.tocompare {
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color 0.2s ease, color 0.2s ease;
-  background: var(--awa-bg-subtle, #F9FAFB);
-}
-
-body .page-wrapper .action.towishlist:hover,
-body .page-wrapper .action.tocompare:hover {
-  background: var(--awa-primary, #b73337);
-  color: #FFFFFF;
-}
-
-/* ─── 31. TOOLTIP — MODERN ─── */
-body .page-wrapper .tooltip.wrapper .tooltip.content {
-  border-radius: var(--awa-radius-sm, 8px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  font-size: 13px;
-  padding: 8px 12px;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-/* ─── 32. CHECKBOX & RADIO — MODERN ─── */
-body .page-wrapper input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-  border-radius: 4px;
-  accent-color: var(--awa-primary, #b73337);
-}
-
-body .page-wrapper input[type="radio"] {
-  width: 18px;
-  height: 18px;
-  accent-color: var(--awa-primary, #b73337);
-}
-
-/* ─── 33. BADGE / LABEL — UNIFIED ─── */
-body .page-wrapper .product-label,
-body .page-wrapper .onsale-label,
-body .page-wrapper .new-label {
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 4px 10px;
-}
-
-/* ─── 34. MOBILE ENHANCEMENTS ─── */
-@media (max-width: 767px) {
-  /* Gallery fullwidth on mobile */
-  body .page-wrapper .gallery-placeholder,
-  body .page-wrapper .fotorama__stage {
-    border-radius: 0;
-  }
-
-  /* Fitment compact on mobile */
-  body .page-wrapper .fitment-stats {
-    gap: 8px;
-  }
-
-  body .page-wrapper .fitment-stat {
-    padding: 6px 12px;
-    font-size: 12px;
-  }
-
-  /* Touch-friendly filter */
-  body .page-wrapper .filter-options-title {
-    padding: 16px 0;
-    min-height: 44px;
-    display: flex;
-    align-items: center;
-  }
-
-  body .page-wrapper .filter-options-content .item {
-    padding: 10px 0;
-    min-height: 44px;
-    display: flex;
-    align-items: center;
-  }
-
-  /* Minicart full width on mobile */
-  body .page-wrapper .block-minicart {
-    border-radius: var(--awa-radius, 12px) var(--awa-radius, 12px) 0 0;
-  }
-
-  /* Search full width */
-  body .page-wrapper .search-autocomplete {
-    border-radius: 0 0 var(--awa-radius, 12px) var(--awa-radius, 12px);
-  }
-
-  /* Tabs stack vertically */
-  body .page-wrapper .product.data.items > .item.title > .switch {
-    padding: 12px 16px;
-    font-size: 14px;
-  }
-}
-
-/* ==========================================================================
-   35. AWA PRODUCT CARD — FLEX COLUMN (item-product, não product-item)
-   Fix: awa-visual-audit usava .product-item (Magento padrão); o tema AWA
-   usa .item-product (Rokanthemes). Os fixes anteriores não se aplicavam.
-   ========================================================================== */
-
-/* Card = flex column para empurrar botão ao fundo */
-.products-grid .item-product,
-.products-list .item-product {
-  display: flex !important;
-  flex-direction: column !important;
-}
-
-/* product-info = flex column, ocupa espaço restante */
-.products-grid .item-product .product-info,
-.products-list .item-product .product-info {
-  display: flex !important;
-  flex-direction: column !important;
-  flex: 1 !important;
-}
-
-/* info-price: sem altura fixa, sem margem excessiva */
-.products-grid .item-product .info-price,
-.products-list .item-product .info-price {
-  min-height: 36px !important;
-  margin-bottom: 0 !important;
-}
-
-/* Botão de adicionar ao carrinho: sempre na parte inferior */
-.products-grid .item-product .product-info-cart,
-.products-list .item-product .product-info-cart {
-  margin-top: auto !important;
-  padding-top: 8px !important;
-}
-
-/* product-name: 2 linhas com ellipsis */
-.products-grid .item-product .product-name .product-item-link,
-.products-grid .item-product .product-name a {
-  display: -webkit-box !important;
-  -webkit-line-clamp: 2 !important;
-  -webkit-box-orient: vertical !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  min-height: 2.6em !important;
-  line-height: 1.3 !important;
-  word-break: break-word !important;
-}
-
-/* ==========================================================================
-   36. B2B GUEST PRICE GATE — FINAL AUTHORITY
-   Este arquivo carrega ÚLTIMO (blocking, media=all, v=1).
-   Com 162 regras competindo em awa-bundle-refinements.css, usamos
-   seletor específico + !important para garantir o estilo correto.
-   ========================================================================== */
-
-:is(body.catalog-category-view,
-    body.catalogsearch-result-index,
-    body.cms-index-index)
-.wrapper.grid.products-grid .item-product .info-price .b2b-login-to-see-price,
-:is(body.catalog-category-view,
-    body.catalogsearch-result-index,
-    body.cms-index-index)
-.wrapper.grid.products-grid .item-product .info-price .b2b-login-to-see-price.price-box {
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 4px !important;
-  min-height: 32px !important;
-  max-height: 40px !important;
-  padding: 4px 10px !important;
-  border-radius: var(--awa-radius-pill, 9999px) !important;
-  border: 1px solid rgba(183, 51, 55, 0.22) !important;
-  background: rgba(183, 51, 55, 0.06) !important;
-  color: var(--awa-primary, #b73337) !important;
-  font-size: var(--awa-font-xs, 11px) !important;
-  font-weight: 600 !important;
-  text-align: left !important;
-  width: auto !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
-
-/* price-label dentro do gate: sem estilos conflitantes */
-:is(body.catalog-category-view,
-    body.catalogsearch-result-index,
-    body.cms-index-index)
-.wrapper.grid.products-grid .item-product .info-price .b2b-login-to-see-price .price-label {
-  display: inline !important;
-  font-size: inherit !important;
-  font-weight: inherit !important;
-  color: inherit !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  border: none !important;
-  background: none !important;
-  white-space: nowrap !important;
-  overflow: visible !important;
-}
-
-/* Link dentro do gate: herda cor, sem underline estranho */
-:is(body.catalog-category-view,
-    body.catalogsearch-result-index,
-    body.cms-index-index)
-.wrapper.grid.products-grid .item-product .info-price .b2b-login-to-see-price .price-label a {
-  color: inherit !important;
-  font-weight: 700 !important;
-  text-decoration: underline !important;
-  text-underline-offset: 2px !important;
-}
-
-/* ==========================================================================
-   37. MENU VERTICAL DESKTOP — SELETOR CORRETO
-   Fix: .info-price no menu desktop causava overflow indevido.
-   O menu usa .togge-menu (com typo "togge") e submenu com .level0.submenu.
-   ========================================================================== */
-
-@media (min-width: 992px) {
-  /* Container do flyout: posição fixed correta */
-  .awa-vmf-portal.submenu,
-  .awa-vmf-portal.navigation__submenu,
-  .awa-vmf-portal.level0.submenu {
-    position: fixed !important;
-    z-index: 1000 !important;
-    background: var(--awa-bg, #ffffff) !important;
-    border: 1px solid var(--awa-border, #e5e5e5) !important;
-    border-radius: var(--awa-radius-md, 8px) !important;
-    box-shadow: var(--awa-shadow-lg, 0 8px 24px rgba(0,0,0,0.12)) !important;
-    padding: 8px 0 !important;
-    min-width: 220px !important;
-    display: flex !important;
-    flex-direction: column !important;
-  }
-
-  /* Items do flyout: link limpo */
-  .awa-vmf-portal.submenu li a,
-  .awa-vmf-portal.navigation__submenu li a {
-    display: block !important;
-    padding: 8px 16px !important;
-    color: var(--awa-text, #1A1A1A) !important;
-    font-size: var(--awa-font-sm, 12px) !important;
-    font-weight: 500 !important;
-    white-space: nowrap !important;
-    text-decoration: none !important;
-    transition: background-color 0.15s ease, color 0.15s ease !important;
-  }
-
-  /* Hover no link do flyout */
-  .awa-vmf-portal.submenu li a:hover,
-  .awa-vmf-portal.navigation__submenu li a:hover {
-    background: var(--awa-bg-subtle, #F9FAFB) !important;
-    color: var(--awa-primary, #b73337) !important;
-  }
-
-  /* Botão "Departamentos": altura consistente */
-  .navigation.verticalmenu.side-verticalmenu > button[data-role="awa-vertical-menu-trigger"],
-  .navigation.verticalmenu.side-verticalmenu > .title-category-dropdown {
-    min-height: 44px !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: 8px !important;
-    padding: 0 16px !important;
-    background: var(--awa-primary, #b73337) !important;
-    color: #ffffff !important;
-    font-weight: 700 !important;
-    font-size: var(--awa-font-sm, 13px) !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.05em !important;
-    border: none !important;
-    border-radius: var(--awa-radius-sm, 8px) !important;
-    cursor: pointer !important;
-    white-space: nowrap !important;
-  }
-}
-
-/* ==========================================================================
-   38. FORM INPUTS — SEARCH BAR ESPECÍFICO
-   O seletor genérico de input acima (seção 1) é muito amplo e pode
-   conflitar com o search input que tem dimensões próprias.
-   ========================================================================== */
-
-/* Search input: pill shape, altura menor */
-body .page-wrapper .block-search .field.search input[type="text"],
-body .page-wrapper .block-search .field.search input.input-text {
-  min-height: 44px !important;
-  border-radius: var(--awa-radius-pill, 9999px) !important;
-  padding-left: 20px !important;
-  padding-right: 48px !important; /* espaço para botão submit */
-}
-
-/* Minicart qty input: pequeno, não afetado pelo height 48px */
-body .page-wrapper .cart.item .input-text.qty {
-  min-height: 36px !important;
-  width: 52px !important;
-  text-align: center !important;
-  padding: 4px 8px !important;
-  border-radius: var(--awa-radius-xs, 4px) !important;
-}
-
-/* Filter inputs (layered nav): altura menor */
-body .page-wrapper .filter-options .input-text,
-body .page-wrapper .filter-options input[type="text"] {
-  min-height: 40px !important;
-  padding: 8px 12px !important;
 }
