@@ -155,13 +155,14 @@
 									<?php /* @noEscape */ echo $this->helper('Rokanthemes\Themeoption\Helper\Data')->getPriceDisplayCustom($block->getProductPrice($_item)) ?>
 								</div>
 								<?php if($_item->getTypeId() == 'simple' || $_item->getTypeId() == 'virtual' || $_item->getTypeId() == 'downloadable'): ?>
-								<div class="product-sold">
-									<?php
-										$sale_qty = $this->helper('Rokanthemes\RokanBase\Helper\Data')->getSalableQuantityDataBySku($_item->getSku());
-										$numbersold = $block->getSoldProduct($_item->getId());
-										$total = $sale_qty + $numbersold;
-										$calculator = ($total > 0) ? max(0, min(100, ($numbersold / $total) * 100)) : 0;
-									?>
+								<?php
+									$sale_qty = $this->helper('Rokanthemes\RokanBase\Helper\Data')->getSalableQuantityDataBySku($_item->getSku());
+									$numbersold = $block->getSoldProduct($_item->getId());
+									$total = $sale_qty + $numbersold;
+								?>
+								<?php if ($total > 0): ?>
+								<div class="product-sold" data-sold-total="<?php echo (int)$total; ?>">
+									<?php $calculator = ($total > 0) ? max(0, min(100, ($numbersold / $total) * 100)) : 0; ?>
 									<div class="ruler-sold" role="progressbar" aria-valuenow="<?php echo (int)$numbersold; ?>" aria-valuemin="0" aria-valuemax="<?php echo (int)$total; ?>" aria-label="<?php echo $block->escapeHtmlAttr(__('Sales progress')); ?>">
 										<div class="ruler-sold-count" style="width: <?php echo (int)$calculator; ?>%;"></div>
 									</div>
@@ -170,6 +171,7 @@
 										<?php echo (int)$numbersold . '/' . (int)$total; ?>
 									</div>
 								</div>
+								<?php endif; ?>
 								<?php endif; ?>
 							</div>
 						</div>

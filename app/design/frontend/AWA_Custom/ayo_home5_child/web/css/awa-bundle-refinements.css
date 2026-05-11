@@ -7266,3 +7266,159 @@ html body.checkout-cart-index .awa-cart-empty .awa-cart-empty__cta {
     padding: 0 28px !important;
     border-radius: 8px !important;
 }
+
+
+/* ==========================================================================
+   QA VARREDURA 2026-05-10 — Correções de renderização
+   1. Line-clamp reforçado para hot-deal e todas as seções de produto
+   2. Heading Rokanthemes duplicado dentro de awa-home-section
+   3. Sold: 0/0 — ocultar via CSS quando vazio (complemento ao PHTML)
+   4. Search autocomplete — z-index supremo + organização de overlap
+   5. Category carousel — prev/next visibility
+   ========================================================================== */
+
+/* --- 1. LINE-CLAMP: reforço global para títulos de produto (2 linhas) ---
+   Garante que parênteses de fechamento não sejam cortados em corte abrupto.
+   word-break: break-word evita que nomes longos sem espaço estourem o card. */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+  :is(.hot-deal, .rokan-bestseller, .rokan-newproduct, .rokan-mostviewed,
+       .categorytab-container, .category_tab_slider, .list-tab-product,
+       .products-grid)
+  :is(.product-item-link, .product-name a, h3.product-name a) {
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+  overflow: hidden !important;
+  line-height: 1.4 !important;
+  min-height: calc(1em * 1.4 * 2) !important;
+  word-break: break-word !important;
+  overflow-wrap: anywhere !important;
+  text-decoration: none !important;
+}
+
+/* Hot-deal cards: título específico com tamanho menor para caber no card */
+.hot-deal .item-product .product-name,
+.hot-deal .item-product h3.product-name {
+  margin: 0 !important;
+}
+.hot-deal .item-product .product-name .product-item-link,
+.hot-deal .item-product h3.product-name a {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  line-height: 1.4 !important;
+  -webkit-line-clamp: 2 !important;
+  min-height: calc(14px * 1.4 * 2) !important;
+}
+
+/* --- 2. REDUNDÂNCIA DE HEADINGS: esconde o h2 gerado pelo widget Rokanthemes
+   quando a seção AWA já tem seu próprio header (awa-section-header) ---
+   Seletores: .awa-home-section > .container > .rokan-product-heading */
+.awa-home-section .rokan-product-heading,
+.awa-carousel-section .rokan-product-heading,
+.ayo-home5-section .rokan-product-heading {
+  display: none !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* --- 3. SOLD: 0/0 — ocultar barra de vendidos quando total é zero ---
+   Complementa a lógica condicional PHP no template category.phtml */
+.product-sold:has(.count-sold:empty),
+.product-sold[data-sold-total="0"] {
+  display: none !important;
+}
+/* Fallback para quando o CSS :has() não é suportado (Safari < 15.4):
+   Esconde visualmente ruler-sold vazia (width: 0%) */
+.ruler-sold[aria-valuemax="0"],
+.ruler-sold[aria-valuenow="0"][aria-valuemax="0"] {
+  display: none !important;
+}
+.ruler-sold[aria-valuemax="0"] + .count-sold {
+  display: none !important;
+}
+
+/* --- 4. SEARCH BAR: z-index supremo no autocomplete, sem overlap --- */
+/* Garante que o dropdown de busca fique acima de TUDO, incluindo sticky header */
+#search_autocomplete,
+.mst-searchautocomplete__autocomplete,
+.searchsuite-autocomplete,
+.search-autocomplete {
+  z-index: 100200 !important;
+  /* Posicionamento: abaixo do input, sem sobrepor placeholder */
+  position: absolute !important;
+  top: 100% !important;
+  margin-top: 4px !important;
+}
+/* Container do search form: stacking context isolado para z-index funcionar */
+.block-search,
+.header-search,
+.awa-site-header .block-search {
+  position: relative !important;
+  z-index: 500 !important;
+}
+/* Input focus: eleva o container inteiro para garantir que dropdown fica acima */
+.block-search:focus-within,
+.header-search:focus-within {
+  z-index: 100100 !important;
+}
+/* Placeholder: garante que não interfere com o dropdown */
+#search::placeholder {
+  opacity: 0.65;
+  transition: opacity var(--awa-duration-fast, 0.15s) ease;
+}
+#search:focus::placeholder {
+  opacity: 0.35;
+}
+/* Helper text (instruções de busca): posicionamento que não sobrepõe */
+.awa-sr-only[data-awa-search-help] {
+  /* Já é sr-only, mas reforça para garantir que não ocupa espaço visual */
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+}
+
+/* --- 5. CATEGORY CAROUSEL: prev/next buttons visibilidade e interação --- */
+.awa-category-carousel__prev,
+.awa-category-carousel__next {
+  /* Garante que botões são clicáveis e visíveis */
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  z-index: 10 !important;
+  /* Transição suave para estado disabled */
+  transition: opacity var(--awa-duration-fast, 0.15s) ease,
+              transform var(--awa-duration-fast, 0.15s) ease !important;
+}
+.awa-category-carousel__prev:hover,
+.awa-category-carousel__next:hover {
+  transform: scale(1.1);
+}
+.awa-category-carousel__prev.is-disabled,
+.awa-category-carousel__next.is-disabled {
+  opacity: 0.35 !important;
+  pointer-events: none !important;
+  cursor: default !important;
+}
+
+/* Banner slider (hero) prev/next — garantir visibilidade se inicializados */
+.banner-slider .owl-nav {
+  display: flex !important;
+}
+.banner-slider .owl-prev,
+.banner-slider .owl-next {
+  cursor: pointer !important;
+  z-index: 10 !important;
+}
+
+/* Hot-deal slider: garantir que a navegação funciona */
+.hot-deal-tab-slider .owl-nav {
+  display: flex !important;
+}
+.hot-deal-tab-slider .owl-prev,
+.hot-deal-tab-slider .owl-next {
+  cursor: pointer !important;
+}
