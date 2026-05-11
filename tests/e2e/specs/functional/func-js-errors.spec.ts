@@ -128,8 +128,8 @@ async function auditPage(
   }).catch(() => {});
 
   // Aguarda scripts assíncronos (RequireJS, Knockout, etc.)
-  // .catch(() => {}) previne crash se a página fechar durante redirect
-  await page.waitForTimeout(5_000).catch(() => {});
+  // Usa setTimeout do Node em vez de page.waitForTimeout para não travar se o browser cravar
+  await new Promise<void>(r => setTimeout(r, 5_000));
 
   if (!page.isClosed()) {
     fs.mkdirSync(SS_DIR, { recursive: true });
@@ -148,7 +148,7 @@ async function auditPage(
 // ── Testes de páginas ─────────────────────────────────────────────────────────
 
 test.describe('JS Error Audit — Páginas Principais', () => {
-  test.setTimeout(120_000); // Cada página leva até 30s nav + 5s wait
+  test.setTimeout(240_000); // 30s nav + 5s wait + 120s margem para teardown do contexto Firefox
   for (const pageInfo of PAGES_TO_AUDIT) {
     test(`[${pageInfo.name}] zero erros JS (pageerror + console.error)`, async ({ context }) => {
       const result = await auditPage(context, pageInfo);
