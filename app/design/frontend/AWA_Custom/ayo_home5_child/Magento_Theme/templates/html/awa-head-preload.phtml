@@ -192,6 +192,14 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px
 <?php foreach ($jsPreloads as $jsUrl): ?>
 <link rel="preload" href="<?= $block->escapeUrl($jsUrl) ?>" as="script"/>
 <?php endforeach; ?>
+<!-- AWA CSS Stagger — auto-bootstrap no primeiro onload.
+     Enfileira CSS async e aplica 1 por vez com 50ms yield entre cada. -->
+<?php
+/* Cada link usa onload="<?= $__cssStagger ?>". A primeira chamada define window.__awaCssQ; as demais reutilizam. */
+$__cssStagger = <<<'STAGGER'
+var F=window.__awaCssQ;if(!F){var q=[];F=window.__awaCssQ=function(e){q.push(e);if(!F._r){F._r=1;requestAnimationFrame(function(){!function n(){q.length?(q.shift().media='all',requestAnimationFrame(function(){setTimeout(n,50)})):F._r=0}()})}};};F(this)
+STAGGER;
+?>
 <?php /* styles-m.css — CSS principal Magento/Rokanthemes (5.1MB), separado do merged bundle 2026-05-08.
          MOTIVO: Este arquivo causava freeze no Chrome/Blink (PSI "página parou de responder").
          O Chrome precisa resolver 17,503 regras CSS + 14,610 var() refs ANTES de pintar qualquer pixel.
@@ -202,11 +210,11 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px
 <link rel="preload"
       href="<?= $block->escapeUrl($__stylesMUrl) ?>"
       as="style"
-      fetchpriority="high"/>
+      fetchpriority="low"/>
 <link rel="stylesheet"
       href="<?= $block->escapeUrl($__stylesMUrl) ?>"
       media="print"
-      onload="this.media='all'"/>
+      onload="<?= /* @noEscape */ $__cssStagger ?>"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__stylesMUrl) ?>"/></noscript>
 <?php /* styles-l.css — CSS de desktop (4.3MB), separado do merged bundle 2026-05-08.
          media="screen and (min-width: 768px)": não bloqueia render em mobile (viewport < 768px).
@@ -229,7 +237,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px
          All files in css/ so relative URLs (../fonts/, images/) remain valid. */ ?>
 <?php $__thirdPartyBundleUrl = $block->getViewFileUrl('css/awa-third-party-bundle.css'); ?>
 <link rel="preload" href="<?= $block->escapeUrl($__thirdPartyBundleUrl) ?>?v=1" as="style"/>
-<link rel="stylesheet" href="<?= $block->escapeUrl($__thirdPartyBundleUrl) ?>?v=1" media="print" onload="this.media='all'"/>
+<link rel="stylesheet" href="<?= $block->escapeUrl($__thirdPartyBundleUrl) ?>?v=1" media="print" onload="<?= /* @noEscape */ $__cssStagger ?>"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__thirdPartyBundleUrl) ?>?v=1"/></noscript>
 <?php /* awa-interaction-widgets.css — bundle consolidado de 7 CSS de interação (2026-05-09).
          Antes: calendar(6KB) + cookie-consent(3KB) + chosen(10KB) + fancybox(4KB)
@@ -239,7 +247,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px
          Inclui todos os CSS de widgets de interação: datepicker, cookie-consent,
          chosen.js dropdowns, fancybox lightbox, loader spinner, uppy upload, brand widget, quickview modal. */ ?>
 <?php $__interactionWidgetsUrl = $block->getViewFileUrl('css/awa-interaction-widgets.css'); ?>
-<link rel="stylesheet" href="<?= $block->escapeUrl($__interactionWidgetsUrl) ?>?v=1" media="print" onload="this.media='all'"/>
+<link rel="stylesheet" href="<?= $block->escapeUrl($__interactionWidgetsUrl) ?>?v=1" media="print" onload="<?= /* @noEscape */ $__cssStagger ?>"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__interactionWidgetsUrl) ?>?v=1"/></noscript>
 <?php /* themes.css — async (2026-05-xx, saves ~2550ms render blocking)
          Removido de blocking via <remove src="css/themes.css"/> em default_head_blocks.xml.
@@ -247,11 +255,11 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px
          Anti-FOUC inline CSS cobre: hero slider, header bg, design tokens, grids.
          Bootstrap v3.3.6 removido inteiramente (97% unused, 19KB, coberto por awa-super-global). */ ?>
 <?php $__themesUrl = $block->getViewFileUrl('css/themes.css'); ?>
-<link rel="preload" href="<?= $block->escapeUrl($__themesUrl) ?>" as="style"/>
+<!-- preload removido: themes.css (5MB) não é critical — anti-FOUC cobre above-fold -->
 <link rel="stylesheet"
       href="<?= $block->escapeUrl($__themesUrl) ?>"
       media="print"
-      onload="this.media='all'"/>
+      onload="<?= /* @noEscape */ $__cssStagger ?>"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__themesUrl) ?>"/></noscript>
 <!-- AWA Async CSS Bundles — convertidos para async 2026-05-08 (FCP fix: NO_FCP causado por 2.6MB CSS bloqueante) -->
 <!-- Anti-FOUC inline CSS (awa-head-preload.phtml) já cobre tokens, hero, grids, header/footer above-fold. -->
@@ -260,14 +268,14 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px
 <link rel="stylesheet"
       href="<?= $block->escapeUrl($cssUrl) ?>"
       media="print"
-      onload="this.media='all'"/>
+      onload="<?= /* @noEscape */ $__cssStagger ?>"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($cssUrl) ?>"/></noscript>
 <?php endforeach; ?>
 <?php /* awa-layout-bundle.css — 10 AWA layout+utility CSS files → 1 request (2026-05-09)
          canonical + fixed + clean-ui + ux-resp + grid + vmenu-modern + bestseller + card + gap-fix + vmenu-final */ ?>
 <?php $__layoutBundleUrl = $block->getViewFileUrl('css/awa-layout-bundle.css'); ?>
 <link rel="preload" href="<?= $block->escapeUrl($__layoutBundleUrl) ?>?v=1" as="style"/>
-<link rel="stylesheet" href="<?= $block->escapeUrl($__layoutBundleUrl) ?>?v=1" media="print" onload="this.media='all'"/>
+<link rel="stylesheet" href="<?= $block->escapeUrl($__layoutBundleUrl) ?>?v=1" media="print" onload="<?= /* @noEscape */ $__cssStagger ?>"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__layoutBundleUrl) ?>?v=1"/></noscript>
 <?php if ($homeBundleUrl): ?>
 <!-- awa-super-home.css: home-custom + mobile-fix + product-cards + category-carousel + cosmetic-home (async 2026-05-08) -->
@@ -275,7 +283,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px
 <link rel="stylesheet"
       href="<?= $block->escapeUrl($homeBundleUrl) ?>"
       media="print"
-      onload="this.media='all'"/>
+      onload="<?= /* @noEscape */ $__cssStagger ?>"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($homeBundleUrl) ?>"/></noscript>
 <?php endif; ?>
 <?php /* Home page: B2B suggestion.css + carousel CSS removed from merged bundle 2026-05-09.
@@ -290,11 +298,11 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px
         $refinementsBundleUrl
     );
     if ($__suggestionUrl !== $refinementsBundleUrl): ?>
-<link rel="stylesheet" href="<?= $block->escapeUrl($__suggestionUrl) ?>" media="print" onload="this.media='all'"/>
+<link rel="stylesheet" href="<?= $block->escapeUrl($__suggestionUrl) ?>" media="print" onload="<?= /* @noEscape */ $__cssStagger ?>"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__suggestionUrl) ?>"/></noscript>
 <?php endif; // suggestion check
 $__carouselBundleUrl = $block->getViewFileUrl('css/awa-carousel-bundle.css'); ?>
-<link rel="stylesheet" href="<?= $block->escapeUrl($__carouselBundleUrl) ?>?v=1" media="print" onload="this.media='all'"/>
+<link rel="stylesheet" href="<?= $block->escapeUrl($__carouselBundleUrl) ?>?v=1" media="print" onload="<?= /* @noEscape */ $__cssStagger ?>"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__carouselBundleUrl) ?>?v=1"/></noscript>
 <?php endif; // $homeBundleUrl: suggestion + carousel ?>
 <?php /* awa-vertical-menu-modern.css → included in awa-layout-bundle.css (2026-05-09) */ ?>
@@ -305,14 +313,14 @@ $__carouselBundleUrl = $block->getViewFileUrl('css/awa-carousel-bundle.css'); ?>
 <link rel="stylesheet"
       href="<?= $block->escapeUrl($refinementsBundleUrl) ?>?v=11"
       media="print"
-      onload="this.media='all'"/>
+      onload="<?= /* @noEscape */ $__cssStagger ?>"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($refinementsBundleUrl) ?>?v=11"/></noscript>
 <?php /* awa-mobile-drill.css — drill-down navigation mobile (<992px) async */ ?>
 <?php $__mobileDrillUrl = $block->getViewFileUrl('css/awa-mobile-drill.css'); ?>
 <link rel="stylesheet"
       href="<?= $block->escapeUrl($__mobileDrillUrl) ?>?v=1"
       media="print"
-      onload="this.media='all'"/>
+      onload="<?= /* @noEscape */ $__cssStagger ?>"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__mobileDrillUrl) ?>?v=1"/></noscript>
 <?php /* awa-bestseller-fixes.css → included in awa-layout-bundle.css (2026-05-09) */ ?>
 <?php /* awa-visual-bugfix.css — async (2026-05-xx, saves ~450ms render blocking)
@@ -324,7 +332,7 @@ $__carouselBundleUrl = $block->getViewFileUrl('css/awa-carousel-bundle.css'); ?>
 <link rel="stylesheet"
       href="<?= $block->escapeUrl($__bugfixConsolidatedUrl) ?>?v=82"
       media="print"
-      onload="this.media='all'"/>
+      onload="<?= /* @noEscape */ $__cssStagger ?>"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__bugfixConsolidatedUrl) ?>?v=82"/></noscript>
 <?php /* awa-card-image-hero.css + awa-home-gap-fix.css → included in awa-layout-bundle.css (2026-05-09) */ ?>
 <?php /* awa-vertical-menu-desktop-final.css → included in awa-layout-bundle.css (2026-05-09) */ ?>
@@ -337,7 +345,7 @@ $__carouselBundleUrl = $block->getViewFileUrl('css/awa-carousel-bundle.css'); ?>
 <link rel="stylesheet"
       href="<?= $block->escapeUrl($__plpFinalUrl) ?>?v=2"
       media="print"
-      onload="this.media='all'"/>
+      onload="<?= /* @noEscape */ $__cssStagger ?>"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__plpFinalUrl) ?>?v=2"/></noscript>
 <?php endif; ?>
 <?php /* rexis-recommendations: async — widget nunca está above-fold */ ?>
@@ -347,7 +355,7 @@ $__carouselBundleUrl = $block->getViewFileUrl('css/awa-carousel-bundle.css'); ?>
       href="<?= $block->escapeUrl($__rexisUrl) ?>"
       media="print"
       data-rexis-async="1"
-      onload="this.media='all'"/>
+      onload="<?= /* @noEscape */ $__cssStagger ?>"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__rexisUrl) ?>"/></noscript>
 <?php endif; ?>
 <!-- styles-l.css carregado em awa.styles.l.last (after awa.search.autocomplete.head.css) --><!-- AWA-DEBUG-UNIQUE-7739 -->
@@ -357,13 +365,13 @@ $__carouselBundleUrl = $block->getViewFileUrl('css/awa-carousel-bundle.css'); ?>
          Blocking: affects above-fold form inputs & colors. */ ?>
 <?php $__premiumTransformUrl = $block->getViewFileUrl('css/awa-premium-transform.css'); ?>
 <link rel="preload" href="<?= $block->escapeUrl($__premiumTransformUrl) ?>?v=1" as="style"/>
-<link rel="stylesheet" href="<?= $block->escapeUrl($__premiumTransformUrl) ?>?v=1" media="print" onload="this.media='all'"/>
+<link rel="stylesheet" href="<?= $block->escapeUrl($__premiumTransformUrl) ?>?v=1" media="print" onload="<?= /* @noEscape */ $__cssStagger ?>"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__premiumTransformUrl) ?>?v=1"/></noscript>
 
 <?php /* awa-b2b-color-fix.css — Color system corrections: primary #b73337, body white, sections normalized. MUST load LAST. */ ?>
 <?php $__b2bColorFixUrl = $block->getViewFileUrl("css/awa-b2b-color-fix.css"); ?>
 <link rel="preload" href="<?= $block->escapeUrl($__b2bColorFixUrl) ?>?v=2" as="style"/>
-<link rel="stylesheet" href="<?= $block->escapeUrl($__b2bColorFixUrl) ?>?v=2" media="print" onload="this.media='all'"/>
+<link rel="stylesheet" href="<?= $block->escapeUrl($__b2bColorFixUrl) ?>?v=2" media="print" onload="<?= /* @noEscape */ $__cssStagger ?>"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__b2bColorFixUrl) ?>?v=2"/></noscript>
 
 <?php /* awa-ux-improvements.css — UX micro-interactions: card/button transitions, a11y focus-rings,
@@ -372,7 +380,7 @@ $__carouselBundleUrl = $block->getViewFileUrl('css/awa-carousel-bundle.css'); ?>
          Global — loads on all pages after base overrides. */ ?>
 <?php $__uxImprovementsUrl = $block->getViewFileUrl('css/awa-ux-improvements.css'); ?>
 <link rel="preload" href="<?= $block->escapeUrl($__uxImprovementsUrl) ?>?v=1" as="style"/>
-<link rel="stylesheet" href="<?= $block->escapeUrl($__uxImprovementsUrl) ?>?v=1" media="print" onload="this.media='all'"/>
+<link rel="stylesheet" href="<?= $block->escapeUrl($__uxImprovementsUrl) ?>?v=1" media="print" onload="<?= /* @noEscape */ $__cssStagger ?>"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__uxImprovementsUrl) ?>?v=1"/></noscript>
 
 <?php /* === Visual QA CSS — scoped by action (minimal payload, CSP-friendly) === */ ?>
@@ -390,7 +398,7 @@ $__qaCssAssets = $__qaCssByAction[$__fullActionName] ?? [];
 <?php foreach ($__qaCssAssets as $__qaCssAsset): ?>
       <?php $__qaCssUrl = $block->getViewFileUrl($__qaCssAsset); ?>
       <link rel="preload" as="style" href="<?= $block->escapeUrl($__qaCssUrl) ?>?v=20260508d"/>
-      <link rel="stylesheet" href="<?= $block->escapeUrl($__qaCssUrl) ?>?v=20260508d" media="print" onload="this.media='all'"/>
+      <link rel="stylesheet" href="<?= $block->escapeUrl($__qaCssUrl) ?>?v=20260508d" media="print" onload="<?= /* @noEscape */ $__cssStagger ?>"/>
       <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__qaCssUrl) ?>?v=20260508d"/></noscript>
 <?php endforeach; ?>
 
