@@ -249,7 +249,7 @@ test.describe('Módulos AWA — verificação de init', () => {
     await page.goto(BASE_URL + '/', { waitUntil: 'domcontentloaded', timeout: 45_000 }).catch(() => {});
     await page.waitForTimeout(3_000);
 
-    const bannerState = await page.evaluate(() => {
+    const bannerState = page.isClosed() ? { exists: false, visible: false, classes: 'page-closed' } : await page.evaluate(() => {
       const el = document.getElementById('awa-cookie-banner');
       if (!el) return { exists: false, visible: false, classes: '' };
       const style = window.getComputedStyle(el);
