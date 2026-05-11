@@ -30,40 +30,63 @@ const TIMEOUT = 7_000;
 // ---------------------------------------------------------------------------
 
 /**
- * Seletores baseados no HTML real do Rokanthemes_VerticalMenu (sidemenu.phtml):
- *   <nav class="navigation verticalmenu side-verticalmenu">
- *   <ul> <li class="classic|staticwidth [parent]"> <ul class="submenu"> </li>
+ * Seletores baseados no HTML REAL do AWA sidemenu.phtml (child theme override).
+ *
+ * Estrutura real (HTML decodificado pelo browser):
+ *   <nav class="navigation verticalmenu side-verticalmenu" data-role="awa-vertical-menu">
+ *     <button class="title-category-dropdown our_categories" data-role="awa-vertical-menu-trigger">
+ *     <ul class="togge-menu list-category-dropdown" data-role="awa-vertical-menu-panel">
+ *       <li class="ui-menu-item level0 [fullwidth|classic] [parent] [navigation__item--parent]">
+ *         <ul class="level0 submenu navigation__submenu navigation__inner-list ...">...</ul>
+ *       </li>
+ *     </ul>
+ *   </nav>
+ *
+ * JS AWA (vertical-menu-init.js): hover -> li.vmm-active; toggle -> nav.vmm-open+ul.vmm-open
+ * Submenus podem ser portados ao body como .awa-vmf-portal[data-aw-vmf-li-menu]
  */
 const MENU_SEL =
   'nav.verticalmenu, nav.side-verticalmenu, ' +
-  '.navigation.verticalmenu, .side-verticalmenu';
+  '.navigation.verticalmenu, [data-role="awa-vertical-menu"]';
 
+/** Links de qualquer nivel dentro do menu vertical */
 const ITEMS_SEL =
   '.verticalmenu li a, .side-verticalmenu li a, ' +
   '.navigation.verticalmenu li a';
 
+/**
+ * Itens de nivel 1 - li.ui-menu-item.level0 (pode ter .classic, .fullwidth, etc.)
+ * Filhos diretos do painel ul.togge-menu.
+ */
 const LEVEL1_SEL =
-  '.verticalmenu > ul > li, .side-verticalmenu > ul > li, ' +
-  '.navigation.verticalmenu > ul > li';
-
-/** Itens pai com submenus (classes reais do plugin jQuery verticalmenu.js) */
-const PARENT_SEL =
-  '.verticalmenu li.classic.parent, .verticalmenu li.staticwidth.parent, ' +
-  '.navigation.verticalmenu li.classic.parent, ' +
-  '.navigation.verticalmenu li.staticwidth.parent';
-
-/** Submenus nivel 2 e 3 (classes reais: .submenu e .subchildmenu) */
-const SUBMENU_SEL =
-  '.verticalmenu .submenu, .navigation.verticalmenu .submenu, ' +
-  '.verticalmenu .subchildmenu, .navigation.verticalmenu .subchildmenu';
+  '.verticalmenu .ui-menu-item.level0, .side-verticalmenu .ui-menu-item.level0, ' +
+  '.navigation.verticalmenu .ui-menu-item.level0, ' +
+  '[data-role="awa-vertical-menu-panel"] > li.level0';
 
 /**
- * Toggle real: h2 que serve de cabecalho/title do VerticalMenu.
- * NB: nao existe drawer mobile no Rokanthemes VerticalMenu;
- * o menu desaparece via CSS em resolucoes menores.
+ * Itens pai (com submenu) - .parent esta no HTML estatico (server-side).
+ * Cobre .classic.parent, .fullwidth.parent e qualquer outra variante.
+ */
+const PARENT_SEL =
+  '.verticalmenu li.ui-menu-item.parent, .side-verticalmenu li.ui-menu-item.parent, ' +
+  '.navigation.verticalmenu li.ui-menu-item.parent, ' +
+  '[data-role="awa-vertical-menu-panel"] > li.level0.parent';
+
+/**
+ * Submenus nivel 2 - ul.level0.submenu (com ou sem .navigation__submenu).
+ * Podem estar portados ao body como .awa-vmf-portal.
+ */
+const SUBMENU_SEL =
+  '.verticalmenu ul.submenu, .navigation.verticalmenu ul.submenu, ' +
+  '.verticalmenu ul.level0.submenu, .navigation.verticalmenu ul.level0.submenu, ' +
+  '.awa-vmf-portal';
+
+/**
+ * Trigger de abertura do painel - e um <button>, nao h2.
+ * Classes: title-category-dropdown our_categories; data-role: awa-vertical-menu-trigger
  */
 const TOGGLE_SEL =
-  'h2.list-category-dropdown, h2.togge-menu, ' +
+  'button[data-role="awa-vertical-menu-trigger"], button.title-category-dropdown, ' +
   '.title-category-dropdown, .vm-toggle-categories';
 
 // ---------------------------------------------------------------------------
@@ -168,45 +191,52 @@ test.describe('Menu Vertical — 2. Toggle (Desktop)', () => {
   });
 
   // 05
-  test('05 — menu inicia em estado visível/expandido por padrão (P2)', async ({ page }) => {
-    const menu = page.locator(MENU_SEL).first();
-    const visible = await Promise.race([
-      menu.isVisible({ timeout: 6_000 }).catch(() => null as boolean | null),
+  test('05 — menu inicia com painel visível na homepage desktop (P2)', async ({ page }) => {
+    // Na homepage desktop AWA vertical-menu-init mantem painel aberto (keepDesktopMenuExpanded)
+    const panel = page.locator('[data-role="awa-vertical-menu-panel"], ul.togge-menu.list-category-dropdown').first();
+    const panelVisible = await Promise.race([
+      panel.isVisible({ timeout: 6_000 }).catch(() => null as boolean | null),
       new Promise<null>(resolve => setTimeout(() => resolve(null), 7_000)),
     ]);
-    if (visible === null) {
-      console.warn('[P2] Timeout ao checar estado inicial do menu — skip');
+    if (panelVisible === null) {
+      console.warn('[P2] Timeout ao checar estado inicial do painel — skip');
       test.skip();
       return;
     }
-    if (!visible) {
-      console.warn('[P2] Menu vertical não visível em desktop — não é possível testar estado inicial');
-      test.skip();
-      return;
+    if (!panelVisible) {
+      // Painel fechado: trigger deve estar visivel
+      const trigger = page.locator(TOGGLE_SEL).first();
+      const triggerVisible = await trigger.isVisible({ timeout: 3_000 }).catch(() => false);
+      expect(
+        triggerVisible,
+        '[P2] Se painel colapsado, trigger (button.title-category-dropdown) deve estar visivel',
+      ).toBe(true);
     }
   });
 
   // 06
-  test('06 — toggle colapsa e expande o menu (P2)', async ({ page }) => {
+  test('06 — trigger colapsa e expande o painel do menu (P2)', async ({ page }) => {
+    // O trigger e um <button data-role="awa-vertical-menu-trigger">
     const toggle = page.locator(TOGGLE_SEL).first();
     if (!await toggle.isVisible({ timeout: 5_000 }).catch(() => false)) {
-      console.info('[P2] Toggle não encontrado em desktop — menu pode ser sempre visível');
+      console.info('[P2] Trigger nao encontrado em desktop — skip');
       test.skip();
       return;
     }
-    const menu = page.locator(MENU_SEL).first();
-    const before = await menu.isVisible({ timeout: 4_000 }).catch(() => false);
+    // Verificar estado do PAINEL (nao do nav, que e sempre visivel)
+    const panel = page.locator('[data-role="awa-vertical-menu-panel"], ul.togge-menu.list-category-dropdown').first();
+    const before = await panel.isVisible({ timeout: 4_000 }).catch(() => false);
     await toggle.click();
     await page.waitForTimeout(700);
     expect(
-      await menu.isVisible({ timeout: 3_000 }).catch(() => !before),
-      '[P2] Menu deve mudar de estado após toggle',
+      await panel.isVisible({ timeout: 3_000 }).catch(() => !before),
+      '[P2] Painel deve mudar de estado apos clicar no trigger',
     ).not.toBe(before);
     await toggle.click();
     await page.waitForTimeout(700);
     expect(
-      await menu.isVisible({ timeout: 3_000 }).catch(() => before),
-      '[P2] Menu deve retornar ao estado inicial',
+      await panel.isVisible({ timeout: 3_000 }).catch(() => before),
+      '[P2] Painel deve retornar ao estado inicial',
     ).toBe(before);
   });
 });
@@ -255,7 +285,8 @@ test.describe('Menu Vertical — 3. Submenus e Hover (Desktop)', () => {
     await parentItem.hover();
     await page.waitForTimeout(500);
     const submenuLinks = page.locator(
-      '.verticalmenu li.classic.parent:first-of-type .submenu a, .navigation.verticalmenu li.classic.parent:first-of-type .submenu a, .verticalmenu li.staticwidth.parent:first-of-type .submenu a',
+      '.verticalmenu li.ui-menu-item.parent:first-of-type ul.submenu a, ' +
+      '.navigation.verticalmenu li.ui-menu-item.parent:first-of-type ul.submenu a',
     );
     const count = await submenuLinks.count().catch(() => 0);
     if (count === 0) { console.warn('[P1] Submenu sem links visíveis'); test.skip(); return; }
@@ -268,7 +299,9 @@ test.describe('Menu Vertical — 3. Submenus e Hover (Desktop)', () => {
   // 09
   test('09 — hover em item folha NÃO exibe submenu (P1)', async ({ page }) => {
     const leafItem = page.locator(
-      '.verticalmenu > ul > li:not(.classic.parent):not(.staticwidth.parent), .navigation.verticalmenu > ul > li:not(.classic.parent):not(.staticwidth.parent)',
+      '.verticalmenu .ui-menu-item.level0:not(.parent), ' +
+      '.navigation.verticalmenu .ui-menu-item.level0:not(.parent), ' +
+      '[data-role="awa-vertical-menu-panel"] > li.level0:not(.parent)',
     ).first();
     if (!await leafItem.isVisible({ timeout: 6_000 }).catch(() => false)) {
       console.info('[P1] Todos os itens de nível 1 são pais — sem folha para testar');
@@ -325,15 +358,16 @@ test.describe('Menu Vertical — 3. Submenus e Hover (Desktop)', () => {
     await page.waitForTimeout(400);
     const openSubmenus = await safeEval(
       page,
-      () => [
-        // Plugin jQuery usa classe .opened para submenus abertos (nao display:none inline)
-        // Submenus abertos tem left != -9999px (posicionados via mouseover)
-        '.verticalmenu .submenu.opened, .navigation.verticalmenu .submenu.opened',
-        'aside.sidebar-main .navigation li ul:not([style*="display: none"])',
-      ].reduce((acc, s) => acc + document.querySelectorAll(s).length, 0),
+      () => {
+        // AWA vertical-menu-init: item com submenu aberto recebe .vmm-active
+        return document.querySelectorAll(
+          '.verticalmenu li.ui-menu-item.level0.vmm-active, ' +
+          '.navigation.verticalmenu li.ui-menu-item.level0.vmm-active',
+        ).length;
+      },
       0,
     );
-    expect(openSubmenus, '[P1] Apenas 1 submenu por vez deve ficar aberto').toBeLessThanOrEqual(1);
+    expect(openSubmenus, '[P1] Apenas 1 submenu por vez deve ficar ativo (.vmm-active)').toBeLessThanOrEqual(1);
   });
 });
 
