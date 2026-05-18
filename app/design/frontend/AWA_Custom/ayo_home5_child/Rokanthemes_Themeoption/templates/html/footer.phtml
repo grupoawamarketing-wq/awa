@@ -326,31 +326,31 @@ $brandHtml = trim((string) $block->getChildHtml('footer_brand_list'));
                             <ul class="awa-footer-pay-logos" aria-label="<?= $escaper->escapeHtmlAttr(__('Formas de pagamento aceitas')) ?>">
                                 <li class="awa-pay-logo">
                                     <img src="<?= $escaper->escapeUrl($mediaUrl . '/img/visa.png') ?>"
-                                         alt="Visa" width="46" height="28" loading="lazy" decoding="async">
+                                         alt="Visa" width="46" height="28" loading="eager" decoding="async">
                                 </li>
                                 <li class="awa-pay-logo">
                                     <img src="<?= $escaper->escapeUrl($mediaUrl . '/img/mastercard.png') ?>"
-                                         alt="Mastercard" width="46" height="28" loading="lazy" decoding="async">
+                                         alt="Mastercard" width="46" height="28" loading="eager" decoding="async">
                                 </li>
                                 <li class="awa-pay-logo">
                                     <img src="<?= $escaper->escapeUrl($mediaUrl . '/img/elo.png') ?>"
-                                         alt="Elo" width="36" height="24" loading="lazy" decoding="async">
+                                         alt="Elo" width="36" height="24" loading="eager" decoding="async">
                                 </li>
                                 <li class="awa-pay-logo">
                                     <img src="<?= $escaper->escapeUrl($mediaUrl . '/img/amex.png') ?>"
-                                         alt="American Express" width="36" height="24" loading="lazy" decoding="async">
+                                         alt="American Express" width="36" height="24" loading="eager" decoding="async">
                                 </li>
                                 <li class="awa-pay-logo">
                                     <img src="<?= $escaper->escapeUrl($mediaUrl . '/img/diners-club.png') ?>"
-                                         alt="Diners Club" width="36" height="24" loading="lazy" decoding="async">
+                                         alt="Diners Club" width="36" height="24" loading="eager" decoding="async">
                                 </li>
                                 <li class="awa-pay-logo">
                                     <img src="<?= $escaper->escapeUrl($mediaUrl . '/img/boleto.png') ?>"
-                                         alt="Boleto Bancário" width="46" height="28" loading="lazy" decoding="async">
+                                         alt="Boleto Bancário" width="46" height="28" loading="eager" decoding="async">
                                 </li>
                                 <li class="awa-pay-logo">
                                     <img src="<?= $escaper->escapeUrl($mediaUrl . '/img/pix.png') ?>"
-                                         alt="PIX" width="46" height="28" loading="lazy" decoding="async">
+                                         alt="PIX" width="46" height="28" loading="eager" decoding="async">
                                 </li>
                             </ul>
                         </section>
@@ -389,9 +389,8 @@ $brandHtml = trim((string) $block->getChildHtml('footer_brand_list'));
 
                 <!-- Copyright -->
                 <div class="awa-footer-bottom__copyright">
-                    <p class="awa-footer-copyright__main">&copy; <?= $escaper->escapeHtml(date('Y')) ?> - Awa Motos</p>
                     <p class="awa-footer-copyright__legal">
-                        Todos os direitos reservados &copy; <?= $escaper->escapeHtml(date('Y')) ?> - AWA Motos. - CNPJ 77.044.618/0001-88
+                        Todos os direitos reservados &copy; <?= $escaper->escapeHtml(date('Y')) ?> - AWA Motos. - CNPJ 06.093.812/0001-05
                     </p>
                     <p class="awa-footer-copyright__disclaimer">
                         Os preços e condições de pagamento são válidos para o dia de hoje e exclusivas via internet. Na divergência de preços fica válido o apresentado no carrinho. Ofertas válidas até o término de nossos estoques. Vendas sujeitas à análise, confirmação de dados e estoque. As imagens são ilustrativas e informações sobre os produtos são resumidas e sujeitas à alteração sem aviso prévio.
@@ -429,16 +428,29 @@ $brandHtml = trim((string) $block->getChildHtml('footer_brand_list'));
 <?php /* P0-01: Legacy back-to-top removido — o canônico é <button#awa-back-to-top> via layout XML (awa.back.to.top block) */ ?>
 
 
+<?php
+$awaIsHomePage = $block->getRequest()->getFullActionName() === 'cms_index_index';
+$awaFooterInteractionsConfig = [
+    'mobileBreakpoint' => 768,
+    'titleSelector' => '.footer-container .velaFooterTitle, .footer-container .footer-block-title',
+    'panelSelector' => '.velaContent, .footer-block-content',
+    'sliderSelector' => '.footer_brand_list_slider',
+];
+$awaFooterInteractionsPayload = json_encode(
+    ['selector' => '.page_footer', 'config' => $awaFooterInteractionsConfig],
+    JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+);
+$awaFooterInteractionsPayload = preg_replace('#</(\s*)script#i', '<\\/\\1script', (string) $awaFooterInteractionsPayload);
+?>
+<?php if ($awaIsHomePage): ?>
+<script type="application/json" id="awa-home-footer-interactions-json"><?= /* @noEscape */ $awaFooterInteractionsPayload ?></script>
+<?php else: ?>
 <script type="text/x-magento-init">
 {
     ".page_footer": {
-        "js/awa-footer-interactions": {
-            "mobileBreakpoint": 768,
-            "titleSelector": ".footer-container .velaFooterTitle, .footer-container .footer-block-title",
-            "panelSelector": ".velaContent, .footer-block-content",
-            "sliderSelector": ".footer_brand_list_slider"
-        }
+        "js/awa-footer-interactions": <?= /* @noEscape */ json_encode($awaFooterInteractionsConfig, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>
     }
 }
 </script>
+<?php endif; ?>
 <?= $block->getChildHtml('organization_schema') ?>
