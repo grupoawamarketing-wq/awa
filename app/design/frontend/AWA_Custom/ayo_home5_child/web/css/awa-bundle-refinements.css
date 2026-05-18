@@ -1466,3 +1466,118 @@ body .page-wrapper .page_footer .awa-footer-pay-sec .awa-footer-pay-logos li.awa
 .footer-payments img {
     filter: brightness(0) invert(1) !important;
 }
+
+/* ============================================================================
+   §29 — HEADER: corrigir double-padding (logo x=48 → x=24)
+   ============================================================================
+   Raiz do problema: o inner grid .awa-main-header__inner.wp-header fica DENTRO
+   de .container (padL=24px) e múltiplas regras voltam a aplicar padL=24px
+   no próprio grid. Resultado: conteúdo começa em x=48 (duplo gutter).
+
+   Competidores por especificidade:
+   - awa-layout-bundle   : html body .awa-site-header .wp-header → (0,3,2) + !important
+   - awa-visual-bugfix   : #html-body .page-wrapper .awa-site-header .wp-header → (1,4,0) + !important
+   - awa-home-terminal   : #html-body:is(.cms-index,...) .pw .awa-site-header
+                           .awa-main-header .wp-header → (1,6,0) + !important [apenas HOME]
+
+   Fix: (1,7,0) via :is(cms-pages) + 6 classes para HOME; (1,6,0) sem :is para demais.
+   ============================================================================ */
+@media (min-width: 992px) {
+
+    /* ─── Todas as páginas não-home: (1,6,0) supera visual-bugfix (1,4,0) ─── */
+    #html-body .page-wrapper .awa-site-header .awa-main-header .header-main .awa-main-header__inner.wp-header,
+    #html-body .page-wrapper .awa-site-header .awa-main-header .header-main .awa-main-header__inner[data-awa-header-row] {
+        padding-inline: 0 !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    /* ─── HOME/CMS: (1,7,0) supera awa-home-terminal-bundle (1,6,0) ───────── */
+    #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper .awa-site-header .awa-main-header .header-main .awa-main-header__inner.wp-header,
+    #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper .awa-site-header .awa-main-header .header-main .awa-main-header__inner[data-awa-header-row] {
+        padding-inline: 0 !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    /* Bootstrap gutter no brand-cell: 15px → 0 (elimina flash inicial e offset) */
+    #html-body .page-wrapper .awa-site-header .header .awa-header-brand,
+    #html-body .page-wrapper .awa-site-header .header .awa-header-brand-cell,
+    #html-body .page-wrapper .awa-site-header .header .col-md-2.awa-header-brand {
+        padding-inline: 0 !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+}
+
+/* ============================================================================
+   §30 — OVERFLOW GUARD: popup/overlay img não deve vazar o viewport
+   ============================================================================ */
+img.vp-pop-up,
+.vp-pop-up img,
+[class*="popup"] img,
+[class*="pop-up"] img {
+    max-width: 100% !important;
+    height: auto !important;
+}
+
+/* ============================================================================
+   §31 — TYPOGRAPHY SCALE: ajustes de escala e legibilidade
+   ============================================================================ */
+
+/* Headings: escala fluida para títulos de categoria e produto */
+html body .page-main .page-title-wrapper .page-title,
+html body .catalog-category-view .page-title,
+html body .catalogsearch-result-index .page-title {
+    font-size: clamp(1.375rem, 1.1rem + 1.1vw, 1.875rem) !important; /* 22→30px */
+    line-height: 1.2 !important;
+    font-weight: 700 !important;
+}
+
+/* Product name na PDP */
+html body .catalog-product-view .page-main .product-info-main .page-title-wrapper .page-title {
+    font-size: clamp(1.25rem, 0.9rem + 1.5vw, 1.75rem) !important; /* 20→28px */
+    line-height: 1.25 !important;
+}
+
+/* Card de produto: nome legível em listagem */
+html body .product-item .product-item-name,
+html body .product-item .product-item-name a {
+    font-size: clamp(0.8125rem, 0.72rem + 0.4vw, 0.9375rem) !important; /* 13→15px */
+    line-height: 1.35 !important;
+}
+
+/* Preço: destaque correto */
+html body .price-box .price,
+html body .product-item-info .price {
+    font-size: clamp(0.9375rem, 0.8rem + 0.55vw, 1.125rem) !important; /* 15→18px */
+}
+
+/* Body text baseline: evitar fonte muito pequena */
+html body p,
+html body .product-info-main .product.attribute.description,
+html body .cms-content p {
+    font-size: clamp(0.875rem, 0.82rem + 0.25vw, 1rem) !important; /* 14→16px */
+    line-height: 1.6 !important;
+}
+
+/* ============================================================================
+   §32 — TOUCH TARGETS: mínimo 44px em botões e links nav mobile
+   ============================================================================ */
+@media (max-width: 991px) {
+    html body .navigation li.level0 > a,
+    html body .awa-header-primary-nav .navigation li.level0 > a {
+        min-height: 44px !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+
+    html body .minicart-wrapper .action.showcart,
+    html body .awa-header-cart-link {
+        min-width: 44px !important;
+        min-height: 44px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+}
