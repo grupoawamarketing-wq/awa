@@ -1756,3 +1756,474 @@ html body .cms-content p {
     color: var(--awa-color-white, #fff) !important;
     text-decoration: none !important;
 }
+
+/* ============================================================================
+   §39 — Hamburger button mobile: background transparente
+   awa-home-cosmetic-bundle.min.css tem a regra:
+   body#html-body:is(.cms-index-index,.cms-home,...) .page-wrapper
+     .awa-site-header .nav-toggle { background: var(--awa-bg-soft) !important }
+   Especificidade: body(0,0,1) + #html-body(1,0,0) + :is(cls)(0,1,0)
+     + .page-wrapper(0,1,0) + .awa-site-header(0,1,0) + .nav-toggle(0,1,0) = 1,4,1
+   Para vencer com !important, precisamos de especificidade ≥ 1,4,1.
+   Fix: body#html-body(1,0,1) + .page-wrapper(0,1,0) + .awa-site-header(0,1,0)
+     + .action.nav-toggle.awa-header-mobile-toggle(0,3,0) = 1,5,1 → vence.
+   ============================================================================ */
+/* §39b — Reposicionamento do toggle: grid-area: nav (cosmetic) o desloca para
+   linha implícita em x=303 y=297 (sobre o cart). Isso cria ~44px de linha vazia.
+   Especificidade: 1,5,1 > cosmetic bundle 1,4,1 → vence e coloca em 'toggle'. */
+body#html-body .page-wrapper .awa-site-header .action.nav-toggle.awa-header-mobile-toggle {
+    background: transparent !important;
+    background-color: transparent !important;
+    border-width: 0 !important;
+    border-style: none !important;
+    border-radius: 4px !important;
+    box-shadow: none !important;
+    grid-area: toggle !important;
+    position: relative !important;
+    inset: auto !important;
+}
+
+/* ============================================================================
+   §40 — Mobile header: eliminar 4ª row vazia do grid (44px desperdiçados)
+   .awa-main-header__inner usa grid-template-rows: 92px 44px 0px 44px.
+   As grid-template-areas definem apenas 2 rows ("toggle brand cart" e
+   "search search search"). Rows 3 (0px) e 4 (44px) existem mas não têm
+   itens — a row 4 consome 44px + 12px de row-gap = 56px de espaço vazio.
+   Fix: força 4ª row a 0px no mobile. Row 3 já é 0px, mantida assim.
+   ============================================================================ */
+@media (max-width: 991px) {
+    #html-body .awa-site-header .awa-main-header__inner {
+        grid-template-rows: 92px 44px 0px 0px !important;
+        row-gap: 8px !important;
+    }
+}
+
+/* ============================================================================
+   §41 — Info bar mobile: compactar header-container
+   .header-container tem pb:12px; o conteúdo (phone+hours) em 2 linhas soma
+   ~60px → container total de 73px. Em mobile, os horários ("Seg–Sex: 8h–18h
+   | Sáb: 8h–12h") ocupam 36px (2 linhas) e podem ser ocultados, deixando
+   apenas o telefone (16px). Salva ~30px de altura no header.
+   ============================================================================ */
+@media (max-width: 767px) {
+    #html-body .awa-site-header .topbar-info--hours {
+        display: none !important;
+    }
+    #html-body .awa-site-header .header-container {
+        padding-bottom: 4px !important;
+    }
+    #html-body .awa-site-header .awa-top-utility-bar {
+        min-height: 0 !important;
+        height: auto !important;
+    }
+}
+
+/* ============================================================================
+   §42 — Desktop: account/B2B section — melhorar legibilidade e proporção
+   O texto "Para ver os preços faça o" é cinza (#999) muito fraco,
+   diminuindo a percepção do CTA de Login/Cadastro no header desktop.
+   Fix: darkens o texto auxiliar e melhora o layout flex do bloco account.
+   ============================================================================ */
+@media (min-width: 992px) {
+    #html-body .awa-site-header .awa-header-account-info,
+    #html-body .awa-site-header .header-links__label,
+    #html-body .awa-site-header .awa-header-b2b-hint {
+        color: var(--awa-neutral-500, #64748b) !important;
+        font-size: 11px !important;
+        line-height: 1.4 !important;
+    }
+
+    /* Garante que o bloco de account/login alinhe verticalmente ao centro */
+    #html-body .awa-site-header .awa-header-right-col,
+    #html-body .awa-site-header .header-links {
+        align-items: center !important;
+        gap: 8px !important;
+    }
+
+    /* Login e Cadastre-se: bold para destacar como CTAs */
+    #html-body .awa-site-header .header-links a[href*="login"],
+    #html-body .awa-site-header .header-links a[href*="account"],
+    #html-body .awa-site-header .header-links a[href*="create"] {
+        font-weight: 600 !important;
+        font-size: 13px !important;
+    }
+}
+
+/* ============================================================================
+   §43 — PLP mobile: produto grid começa sem espaço excessivo
+   Em mobile, o grid de produtos (.products-grid) pode ter margin-top excessivo
+   após o toolbar, criando espaço em branco entre filtros e cards.
+   Também corrige o .toolbar-products para evitar padding duplo.
+   ============================================================================ */
+@media (max-width: 767px) {
+    #html-body .catalog-category-view .page-main .products-grid,
+    #html-body .catalogsearch-result-index .page-main .products-grid {
+        margin-top: 0 !important;
+    }
+
+    /* Toolbar sorter no mobile: layout compacto */
+    #html-body .catalog-category-view .toolbar-products,
+    #html-body .catalogsearch-result-index .toolbar-products {
+        padding-block: 8px !important;
+        margin-bottom: 0 !important;
+    }
+
+    /* Paginação mobile: alinhar ao centro com espaço adequado */
+    #html-body .pages {
+        display: flex !important;
+        justify-content: center !important;
+        padding-block: 16px !important;
+    }
+}
+
+/* ============================================================================
+   §44 — Tipografia: hierarquia e contraste em páginas de produto e listagem
+   Melhora a legibilidade dos títulos de seção na home e nas páginas internas.
+   ============================================================================ */
+
+/* Títulos de seção na home: garantir peso e espaçamento consistentes */
+#html-body .cms-index-index .section-title,
+#html-body .cms-home .section-title,
+#html-body .cms-index-index .awa-section-title,
+#html-body .cms-home .awa-section-title {
+    font-weight: 700 !important;
+    letter-spacing: -0.01em !important;
+    line-height: 1.2 !important;
+}
+
+/* Breadcrumbs: melhorar legibilidade com cor mais definida */
+#html-body .breadcrumbs .item a,
+#html-body .breadcrumbs .item > a {
+    color: var(--awa-neutral-500, #64748b) !important;
+    text-decoration: none !important;
+    font-size: 13px !important;
+}
+#html-body .breadcrumbs .item a:hover {
+    color: var(--awa-primary, #b73337) !important;
+    text-decoration: underline !important;
+}
+#html-body .breadcrumbs .item.current strong,
+#html-body .breadcrumbs .item:last-child strong {
+    color: var(--awa-neutral-700, #374151) !important;
+    font-weight: 500 !important;
+    font-size: 13px !important;
+}
+
+/* ============================================================================
+   §45 — Botões globais: uniformizar altura e radius
+   O tema usa diferentes heights/radii para botões em contextos diferentes.
+   Padroniza os principais CTAs para height:44px e border-radius consistente.
+   ============================================================================ */
+
+/* Primary buttons */
+#html-body .action.primary,
+#html-body .action.tocart,
+#html-body .btn-add-to-cart {
+    min-height: 44px !important;
+    border-radius: var(--awa-radius-md, 8px) !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.01em !important;
+}
+
+/* Search submit button: cor vermelha consistente */
+#html-body .block-search .action.search {
+    background-color: var(--awa-primary, #b73337) !important;
+    color: var(--awa-color-white, #fff) !important;
+    border-radius: 0 var(--awa-radius-sm, 6px) var(--awa-radius-sm, 6px) 0 !important;
+    min-height: 44px !important;
+    min-width: 44px !important;
+    padding-inline: 14px !important;
+}
+
+/* ============================================================================
+   §46 — PLP desktop: cards de produto — tipografia e spacing interno
+   No PLP, os cards mostram imagem + SKU "COD:" mas o nome do produto
+   fica comprimido ou sem destaque. Melhora a hierarquia visual do card.
+   ============================================================================ */
+
+/* Nome do produto: mais legível e com peso adequado */
+#html-body .product-item .product-item-name,
+#html-body .product-item .product-name {
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+    font-weight: 500 !important;
+    margin-block: 6px 4px !important;
+}
+#html-body .product-item .product-item-link,
+#html-body .product-item .product-item-name a {
+    color: var(--awa-neutral-800, #1e293b) !important;
+    text-decoration: none !important;
+}
+#html-body .product-item .product-item-link:hover,
+#html-body .product-item .product-item-name a:hover {
+    color: var(--awa-primary, #b73337) !important;
+    text-decoration: underline !important;
+}
+
+/* SKU/COD: tipografia discreta */
+#html-body .product-item .product-sku,
+#html-body .product-item .sku-label {
+    font-size: 11px !important;
+    color: var(--awa-neutral-400, #94a3b8) !important;
+    letter-spacing: 0.02em !important;
+}
+
+/* Card: hover sutil, sombra consistente */
+#html-body .product-item-info:hover,
+#html-body .item.product.product-item:hover .product-item-info {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08) !important;
+    transform: translateY(-2px) !important;
+    transition: box-shadow 180ms ease, transform 180ms ease !important;
+}
+
+/* ============================================================================
+   §47 — PLP desktop: toolbar e layout de filtros
+   Melhora o visual do toolbar (sort, count) e a transição de exibição de filtros.
+   ============================================================================ */
+
+/* Toolbar: alinhamento e espaçamento */
+#html-body .toolbar.toolbar-products {
+    display: flex !important;
+    align-items: center !important;
+    gap: 16px !important;
+    padding-block: 12px !important;
+    border-bottom: 1px solid var(--awa-neutral-100, #f1f5f9) !important;
+    margin-bottom: 16px !important;
+}
+
+/* Label "ORDENAR POR:" */
+#html-body .toolbar.toolbar-products .toolbar-sorter .sorter-label {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: var(--awa-neutral-500, #64748b) !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+}
+
+/* Contagem de resultados: destaque sutil */
+#html-body .toolbar-amount {
+    font-size: 13px !important;
+    color: var(--awa-neutral-500, #64748b) !important;
+}
+#html-body .toolbar-amount strong {
+    color: var(--awa-neutral-700, #374151) !important;
+    font-weight: 600 !important;
+}
+
+/* ============================================================================
+   §48 — Home: seções de vitrine — spacing entre blocos
+   Os blocos de produto na home (destaques, lançamentos, etc.) têm espaçamento
+   inconsistente entre si. Padroniza o padding vertical das seções.
+   ============================================================================ */
+@media (min-width: 992px) {
+    #html-body .cms-index-index .ayo-home5-wrapper > .awa-section,
+    #html-body .cms-home .ayo-home5-wrapper > .awa-section {
+        padding-block: clamp(32px, 4vw, 56px) !important;
+    }
+}
+
+/* ============================================================================
+   §49 — Cards: imagem de produto com aspect-ratio consistente
+   Garante que imagens de produto tenham proporção 1:1 ou 4:3 padronizada.
+   ============================================================================ */
+#html-body .product-item .product-image-wrapper {
+    border-radius: var(--awa-radius-sm, 6px) !important;
+    overflow: hidden !important;
+    background: var(--awa-neutral-50, #f8fafc) !important;
+}
+#html-body .product-item .product-image-photo {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    object-fit: contain !important;
+    transition: transform 240ms ease !important;
+}
+#html-body .product-item:hover .product-image-photo {
+    transform: scale(1.04) !important;
+}
+
+/* ============================================================================
+   §50 — REVOGADO — substituído por §51 que corrige grid-template-areas.
+   ============================================================================ */
+
+/* ============================================================================
+   §51 — Mobile: corrigir grid-template-areas + eliminar rows implícitas
+   CAUSA RAIZ: cosmetic bundle usa grid-template-areas:"nav brand cart" com
+   especificidade (1,5,1). Nosso §39 seta grid-area:toggle → "toggle" NÃO
+   existe no template → navToggle vai para linha implícita (+44px de altura).
+   FIX: sobrescrever o grid-template-areas com "toggle" (igual ao §39) usando
+   especificidade (1,5,2) > cosmetic (1,5,1), e eliminar rows implícitas.
+   Estrutura: html(0,0,1) + body#html-body(1,0,1) + .page-wrapper(0,1,0)
+     + .awa-site-header(0,1,0) + .awa-main-header(0,1,0)
+     + .awa-main-header__inner.wp-header(0,2,0) = (1,5,2) → VENCE cosmetic.
+   ============================================================================ */
+@media (max-width: 991px) {
+    html body#html-body .page-wrapper .awa-site-header .awa-main-header .awa-main-header__inner.wp-header {
+        grid-template-areas: "toggle brand cart" "search search search" !important;
+        grid-template-rows: 68px 44px !important;
+        grid-auto-rows: 0px !important;
+        row-gap: 8px !important;
+        overflow: hidden !important;
+    }
+}
+
+/* ============================================================================
+   §52 — Mobile: info bar (header-container) — limitar altura excessiva
+   O cosmetic bundle pode aplicar padding generoso ao header-container.
+   Com horas ocultas (§41), a info bar deve ter no máximo 44–48px.
+   ============================================================================ */
+@media (max-width: 991px) {
+    #html-body .awa-site-header .header-container {
+        max-height: 52px !important;
+        padding-block: 8px !important;
+        overflow: hidden !important;
+    }
+}
+
+/* ============================================================================
+   §53 — PLP/Search global: nome de produto — corrigir cor azul de link
+   CAUSA: themes.css define .item-product .product-info .product-name a { color: #0066c0 }
+   O awa-layout-bundle sobrescreve APENAS dentro de .ayo-home5-section (home).
+   Em PLP (catalog-category-view) e search, a cor azul de Amazon persiste.
+   FIX: regra global cobrindo todos os contextos onde product-thumb aparece.
+   ============================================================================ */
+#html-body .item-product .product-info .product-name a,
+#html-body .item-product .product-info .product-item-link,
+#html-body .product-thumb .product-name a,
+#html-body .product-thumb .product-item-link {
+    color: var(--awa-neutral-800, #1e293b) !important;
+    text-decoration: none !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    line-height: 1.4 !important;
+}
+
+#html-body .item-product .product-info .product-name a:hover,
+#html-body .item-product .product-info .product-item-link:hover,
+#html-body .product-thumb .product-name a:hover,
+#html-body .product-thumb .product-item-link:hover {
+    color: var(--awa-primary, #b73337) !important;
+    text-decoration: underline !important;
+}
+
+/* ============================================================================
+   §54 — PLP global: awa-b2b-sku — tipografia discreta para qualquer página
+   O awa-layout-bundle só estiliza .awa-b2b-sku dentro de .ayo-home5-section.
+   Em PLP/search, o código de produto fica sem estilo adequado.
+   ============================================================================ */
+#html-body .item-product .awa-b2b-sku {
+    display: flex !important;
+    align-items: center !important;
+    gap: 3px !important;
+    margin-block: 2px 4px !important;
+}
+
+#html-body .item-product .awa-b2b-sku__label {
+    font-size: 10px !important;
+    font-weight: 600 !important;
+    color: var(--awa-neutral-400, #94a3b8) !important;
+    letter-spacing: 0.04em !important;
+    text-transform: uppercase !important;
+}
+
+#html-body .item-product .awa-b2b-sku__value {
+    font-size: 10px !important;
+    color: var(--awa-neutral-500, #64748b) !important;
+    font-variant-numeric: tabular-nums !important;
+}
+
+/* ============================================================================
+   §55 — PLP: product-thumb aspect-ratio e grid uniforme no catalog/search
+   O Rokanthemes usa position:absolute para a foto dentro do thumb.
+   Garantir aspect-ratio 1:1 no container para não depender de padding-bottom.
+   Válido para catalog-category-view e catalogsearch-result-index.
+   ============================================================================ */
+body.catalog-category-view .item-product .product-thumb,
+body.catalogsearch-result-index .item-product .product-thumb {
+    aspect-ratio: 1 / 1 !important;
+    overflow: hidden !important;
+    position: relative !important;
+    background: var(--awa-neutral-50, #f8fafc) !important;
+    border-radius: var(--awa-radius-sm, 6px) var(--awa-radius-sm, 6px) 0 0 !important;
+}
+
+/* ============================================================================
+   §56 — PLP: product-info padding interno uniforme no catalog/search
+   O themes.css define margin-top: 15px no product-name, sem padding no container.
+   Uniformiza o espaçamento interno do card de produto.
+   ============================================================================ */
+body.catalog-category-view .item-product .product-info,
+body.catalogsearch-result-index .item-product .product-info {
+    padding: 8px 12px 12px !important;
+}
+
+body.catalog-category-view .item-product .product-info .product-name,
+body.catalogsearch-result-index .item-product .product-info .product-name {
+    margin-top: 0 !important;
+    margin-bottom: 4px !important;
+}
+
+body.catalog-category-view .item-product .product-info .info-price,
+body.catalogsearch-result-index .item-product .product-info .info-price {
+    margin-top: 8px !important;
+    min-height: auto !important;
+}
+
+/* ============================================================================
+   §57 — Mobile PLP: cards mais compactos e legíveis em 375px
+   Em viewports estreitas (375px), os cards em 2 colunas ficam com texto
+   muito pequeno. Ajuste de font-size e padding para melhor leitura.
+   ============================================================================ */
+@media (max-width: 575px) {
+    body.catalog-category-view .item-product .product-info .product-name a,
+    body.catalogsearch-result-index .item-product .product-info .product-name a,
+    body.catalog-category-view .item-product .product-info .product-item-link,
+    body.catalogsearch-result-index .item-product .product-info .product-item-link {
+        font-size: 12px !important;
+        -webkit-line-clamp: 2 !important;
+    }
+
+    body.catalog-category-view .item-product .product-info,
+    body.catalogsearch-result-index .item-product .product-info {
+        padding: 6px 8px 10px !important;
+    }
+
+    body.catalog-category-view .item-product .product-info .info-price,
+    body.catalogsearch-result-index .item-product .product-info .info-price {
+        margin-top: 6px !important;
+    }
+}
+
+/* ============================================================================
+   §58 — Tipografia global: headings de página com hierarquia consistente
+   Padroniza h1, h2, h3 nas páginas principais para escala proporcional.
+   Não interfere com PDP (já tratado em awa-layout-bundle) nem com home.
+   ============================================================================ */
+body.catalog-category-view .page-title .base,
+body.catalogsearch-result-index .page-title .base,
+body.cms-page-view .page-title .base {
+    font-size: clamp(22px, 3vw, 32px) !important;
+    font-weight: 700 !important;
+    line-height: 1.25 !important;
+    color: var(--awa-neutral-900, #0f172a) !important;
+    letter-spacing: -0.01em !important;
+}
+
+/* ============================================================================
+   §59 — Hover de card: corrigir seletor Rokanthemes vs. §46 legado
+   O §46 usava .product-item-info:hover que NÃO existe no HTML Rokanthemes.
+   O awa-layout-bundle já cobre .item-product:hover .product-thumb, mas com
+   especificidade menor. Este §59 reforça o efeito com o seletor correto.
+   ============================================================================ */
+#html-body .item-product {
+    transition: transform 200ms ease !important;
+}
+
+#html-body .item-product:hover {
+    transform: translateY(-3px) !important;
+    z-index: 1 !important;
+}
+
+#html-body .item-product:hover .product-thumb {
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.10) !important;
+}
