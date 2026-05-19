@@ -657,33 +657,54 @@ body.awa-header-sticky-active:is(.cms-index-index, .cms-home, .cms-homepage_ayo_
   margin-block-start: var(--size-xs-sm, clamp(0.75rem, 0.65rem + 0.45vw, 1.25rem));
 }
 
-/* Categorias desktop: flex com gap fluido; mobile reel em awa-flex-grid-flow.css */
+/* Categorias desktop: trilho scroll (JS data-awa-cat-layout) — não flex-wrap estático */
 @media (min-width: 992px) {
   #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
     .page-wrapper
-    .awa-category-carousel__track {
-    display: flex !important;
-    flex-wrap: wrap;
-    gap: var(--gap-base, var(--size-sm)) !important;
-    justify-content: center;
-    overflow: visible !important;
-    scroll-snap-type: none;
+    .top-home-content--category-carousel
+    .awa-category-carousel__track[data-awa-cat-layout="1"] {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
   }
 
   #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
     .page-wrapper
-    .awa-category-carousel__item {
-    flex: 0 1 7.5rem;
-    max-width: 9rem;
+    .top-home-content--category-carousel
+    .awa-category-carousel__viewport {
+    position: relative;
+    padding-inline: 52px;
   }
 
   #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
     .page-wrapper
+    .top-home-content--category-carousel
     .awa-category-carousel__prev,
   #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
     .page-wrapper
+    .top-home-content--category-carousel
     .awa-category-carousel__next {
-    display: none !important;
+    display: inline-grid !important;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    z-index: 3;
+  }
+
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .top-home-content--category-carousel
+    .awa-category-carousel__prev {
+    left: 4px;
+  }
+
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .top-home-content--category-carousel
+    .awa-category-carousel__next {
+    right: 4px;
   }
 }
 
@@ -5722,4 +5743,94 @@ body.awa-header-sticky-active:is(.cms-index-index, .cms-home, .cms-homepage_ayo_
   .awa-carousel-section
   .owl-stage {
   width: 100% !important;
+}
+
+/* Rail guard 2026-05-19b — trilhos Owl/Slick/Swiper NUNCA grid (contrato visual) */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  :is(
+    .owl-wrapper-outer,
+    .owl-stage-outer,
+    .owl-wrapper,
+    .owl-stage,
+    .slick-list,
+    .slick-track,
+    .swiper-wrapper
+  ) {
+  grid-template-columns: none !important;
+  grid-template-rows: none !important;
+  grid-auto-flow: unset !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  :is(.slick-track, .swiper-wrapper) {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: stretch !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  > .container {
+  display: flex !important;
+  flex-direction: column !important;
+  grid-template-columns: none !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  ul.owl:not(.owl-carousel) {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 12px !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  ul.owl:not(.owl-carousel)
+  > li.item {
+  flex: 0 0 calc(50% - 6px) !important;
+  max-width: calc(50% - 6px) !important;
+  box-sizing: border-box !important;
+}
+
+@media (min-width: 768px) {
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .awa-carousel-section
+    ul.owl:not(.owl-carousel)
+    > li.item {
+    flex: 0 0 calc(33.333% - 8px) !important;
+    max-width: calc(33.333% - 8px) !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .awa-carousel-section
+    ul.owl:not(.owl-carousel)
+    > li.item {
+    flex: 0 0 calc(25% - 12px) !important;
+    max-width: calc(25% - 12px) !important;
+  }
+}
+
+@media (min-width: 1440px) {
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .awa-carousel-section
+    ul.owl:not(.owl-carousel)
+    > li.item {
+    flex: 0 0 calc(20% - 13px) !important;
+    max-width: calc(20% - 13px) !important;
+  }
 }
