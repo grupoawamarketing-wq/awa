@@ -16,15 +16,17 @@
   }
 }
 
-/* Shell: coluna única com gap fluido (vence gap-fix fixo em px) */
+/* Shell: coluna flex (alinhado à Fase 17 — evita FOUC grid→flex na fila async) */
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
   .page-wrapper
   .content-top-home
   .ayo-home5-wrapper--template-driven {
-  display: grid !important;
-  grid-template-columns: minmax(0, 1fr) !important;
+  display: flex !important;
+  flex-direction: column !important;
   gap: var(--awa-f-gap) !important;
   row-gap: var(--awa-f-gap) !important;
+  width: 100% !important;
+  max-width: 100% !important;
 }
 
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
@@ -149,7 +151,7 @@
 #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
   .page-wrapper
   .awa-category-carousel__header p {
-  color: var(--awa-text-muted, #475569);
+  color: var(--awa-text-muted, #666666);
   font-size: clamp(0.8125rem, 0.76rem + 0.22vw, 0.9375rem);
   line-height: 1.45;
   max-width: 42rem;
@@ -220,10 +222,53 @@
     .page-wrapper
     .awa-category-carousel__next {
     box-shadow:
-      0 2px 12px color-mix(in srgb, var(--awa-neutral-900, #0f172a) 14%, transparent),
+      0 2px 12px color-mix(in srgb, var(--awa-neutral-900, #333333) 14%, transparent),
       0 0 0 1px color-mix(in srgb, var(--awa-color-white, #ffffff) 65%, transparent);
     z-index: 2;
   }
+}
+
+/* Largura dos cards: 1 variável no track (JS) em vez de inline em cada item */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .top-home-content--category-carousel
+  .awa-category-carousel__viewport {
+  contain: layout style;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .top-home-content--category-carousel
+  .awa-category-carousel__track[data-awa-cat-layout="1"] {
+  touch-action: pan-x pinch-zoom;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .top-home-content--category-carousel
+  .awa-category-carousel__track[data-awa-cat-layout="1"]
+  .awa-category-carousel__item {
+  flex: 0 0 var(--awa-cat-item-w) !important;
+  width: var(--awa-cat-item-w) !important;
+  max-width: var(--awa-cat-item-w) !important;
+  min-width: 0 !important;
+  scroll-snap-align: start;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .top-home-content--category-carousel
+  .awa-category-carousel__prev.is-disabled,
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .top-home-content--category-carousel
+  .awa-category-carousel__next.is-disabled {
+  cursor: default;
+  opacity: 0.45;
+  pointer-events: none;
 }
 
 /* Dots — carrossel categorias (#awa-cat-dots): paridade visual com bullets Swiper */
@@ -242,7 +287,7 @@
   .page-wrapper
   .top-home-content--category-carousel
   .awa-category-carousel__dot::before {
-  background: color-mix(in srgb, var(--awa-neutral-900, #0f172a) 22%, transparent);
+  background: color-mix(in srgb, var(--awa-neutral-900, #333333) 22%, transparent);
   block-size: 0.45rem;
   border-radius: var(--awa-radius-full, 9999px);
   inline-size: 0.45rem;
@@ -345,6 +390,150 @@
   }
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════════
+   Phase 25 — Vertical Menu Desktop Polish (ui-ux-pro-max continue)
+   Hover/focus/active refinements for category navigation on homepage.
+   ═══════════════════════════════════════════════════════════════════════════════ */
+@media (min-width: 992px) {
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .navigation.verticalmenu.side-verticalmenu {
+    --awa-vmenu-modern-surface: color-mix(in srgb, #ffffff 95%, transparent);
+    --awa-vmenu-modern-hover: color-mix(in srgb, var(--awa-primary, #0369a1) 10%, #ffffff);
+    --awa-vmenu-modern-active: color-mix(in srgb, var(--awa-primary, #0369a1) 16%, #ffffff);
+    --awa-vmenu-modern-border: color-mix(in srgb, var(--awa-text, #333333) 9%, transparent);
+  }
+
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .navigation.verticalmenu.side-verticalmenu
+    > ul.togge-menu.list-category-dropdown {
+    background: var(--awa-vmenu-modern-surface);
+    border: 1px solid var(--awa-vmenu-modern-border);
+    box-shadow:
+      0 8px 22px rgba(15, 23, 42, 0.08),
+      0 2px 6px rgba(15, 23, 42, 0.05);
+  }
+
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .navigation.verticalmenu
+    .togge-menu.list-category-dropdown
+    > li.ui-menu-item.level0
+    > a.level-top {
+    transition:
+      background-color var(--awa-duration-fast, 0.15s) var(--awa-ease-out, ease-out),
+      color var(--awa-duration-fast, 0.15s) var(--awa-ease-out, ease-out),
+      box-shadow var(--awa-duration-fast, 0.15s) var(--awa-ease-out, ease-out);
+  }
+
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .navigation.verticalmenu
+    .togge-menu.list-category-dropdown
+    > li.ui-menu-item.level0:hover
+    > a.level-top,
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .navigation.verticalmenu
+    .togge-menu.list-category-dropdown
+    > li.ui-menu-item.level0:focus-within
+    > a.level-top {
+    background: var(--awa-vmenu-modern-hover) !important;
+    color: var(--awa-primary, #0369a1) !important;
+  }
+
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .navigation.verticalmenu
+    .togge-menu.list-category-dropdown
+    > li.ui-menu-item.level0.vmm-active
+    > a.level-top,
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .navigation.verticalmenu
+    .togge-menu.list-category-dropdown
+    > li.ui-menu-item.level0.awa-vmf-active
+    > a.level-top {
+    background: var(--awa-vmenu-modern-active) !important;
+    color: var(--awa-primary, #0369a1) !important;
+  }
+
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .navigation.verticalmenu
+    .togge-menu.list-category-dropdown
+    > li.ui-menu-item.level0
+    > a.level-top:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--awa-primary, #0369a1) 85%, #ffffff);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--awa-primary, #0369a1) 14%, transparent);
+  }
+}
+
+@media (min-width: 992px) and (prefers-reduced-motion: reduce) {
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .navigation.verticalmenu
+    .togge-menu.list-category-dropdown
+    > li.ui-menu-item.level0
+    > a.level-top {
+    transition: none !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   Phase 24 — Sticky Header UX + Keyboard Focus
+   ui-ux-pro-max: evita sobreposição em navegação ancorada e reforça foco visível.
+   ═══════════════════════════════════════════════════════════════════════════════ */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) {
+  --awa-header-scroll-offset: clamp(112px, 9vw, 148px);
+  --awa-header-focus-ring: color-mix(in srgb, var(--awa-primary, #0369a1) 82%, #ffffff);
+}
+
+html:has(body.awa-header-sticky-active:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)) {
+  scroll-padding-top: var(--awa-header-scroll-offset, 128px);
+}
+
+body.awa-header-sticky-active:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  #html-body
+  .page-wrapper
+  :is(#maincontent, #awa-main-content, .top-home-content--above-fold) {
+  scroll-margin-block-start: calc(var(--awa-header-scroll-offset, 128px) + var(--size-2xs, 0.375rem)) !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .header-wrapper-sticky
+  .awa-nav-bar
+  :is(a[href], button, [role="button"]) {
+  transition:
+    color var(--awa-duration-fast, 0.15s) var(--awa-ease-out, ease-out),
+    background-color var(--awa-duration-fast, 0.15s) var(--awa-ease-out, ease-out),
+    box-shadow var(--awa-duration-fast, 0.15s) var(--awa-ease-out, ease-out);
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .header-wrapper-sticky
+  .awa-nav-bar
+  :is(a[href], button, [role="button"]):focus-visible {
+  border-radius: var(--awa-radius-sm, 6px);
+  outline: 2px solid var(--awa-header-focus-ring, var(--awa-primary, #0369a1));
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--awa-primary, #0369a1) 14%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .header-wrapper-sticky
+    .awa-nav-bar
+    :is(a[href], button, [role="button"]) {
+    transition: none !important;
+  }
+}
+
 /* ═══ Fase 2 — ritmo visual, hierarchy, carrosséis, B2B (final-wins) ═══ */
 
 /* Zebra + bordas: gap do wrapper define ritmo; sem border-top duplicado */
@@ -377,23 +566,28 @@
   .page-wrapper
   .ayo-home5-section[aria-label*="Mais\x20Vendidos"] {
   border-block-start: 2px solid var(--awa-primary, #b73337) !important;
-  box-shadow: 0 18px 52px color-mix(in srgb, var(--awa-neutral-900, #0f172a) 7%, transparent);
+  box-shadow: 0 18px 52px color-mix(in srgb, var(--awa-neutral-900, #333333) 7%, transparent);
   padding-block: var(--awa-home-section-pad) !important;
 }
 
-/* Tipografia fluida nos títulos de seção */
+/* Tipografia fluida nos títulos de seção (mesmo patamar que .rokan-product-heading h2) */
 #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
   .page-wrapper
   .awa-section-header__title {
+  color: var(--awa-neutral-900, #333333);
   font-size: var(--font-display-md, clamp(1.875rem, 1.5rem + 1.5vw, 2.5rem));
+  font-weight: var(--awa-weight-semibold, 600);
   line-height: 1.2;
 }
 
 #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
   .page-wrapper
   .awa-category-carousel__header h2 {
-  font-size: var(--font-display-sm, clamp(1.5rem, 1.3rem + 1vw, 2rem));
-  line-height: 1.25;
+  color: var(--awa-neutral-900, #333333);
+  font-size: var(--font-display-md, clamp(1.875rem, 1.5rem + 1.5vw, 2.5rem));
+  font-weight: var(--awa-weight-semibold, 600);
+  line-height: 1.2;
+  margin: 0;
 }
 
 /* Carrossel produto: padding nas setas via container, não na section */
@@ -594,12 +788,12 @@
 #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
   .page-wrapper
   .awa-benefits-bar
-  .awa-benefits-container {
-  display: flex;
-  flex-wrap: wrap;
+  .awa-benefits-container:not(.awa-switcher) {
   align-items: stretch;
-  gap: var(--size-sm-md, clamp(1rem, 0.8rem + 1vw, 1.88rem));
-  justify-content: center;
+  display: grid;
+  gap: var(--gap-tight, var(--size-xs, 0.75rem));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  justify-content: stretch;
 }
 
 #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
@@ -608,9 +802,9 @@
   .awa-benefit-item {
   align-items: center;
   background: var(--awa-color-white, #ffffff);
-  border: 1px solid color-mix(in srgb, var(--awa-neutral-900, #0f172a) 7%, transparent);
+  border: 1px solid color-mix(in srgb, var(--awa-neutral-900, #333333) 7%, transparent);
   border-radius: var(--awa-radius-md, 12px);
-  box-shadow: 0 1px 3px color-mix(in srgb, var(--awa-neutral-900, #0f172a) 5%, transparent);
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--awa-neutral-900, #333333) 5%, transparent);
   display: flex;
   flex: 1 1 min(14rem, 100%);
   gap: var(--gap-tight, var(--size-xs));
@@ -657,7 +851,7 @@
   .page-wrapper
   .awa-benefits-bar
   .awa-benefit-desc {
-  color: var(--awa-text-muted, #475569);
+  color: var(--awa-text-muted, #666666);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -666,7 +860,7 @@
     .awa-benefits-bar
     .awa-benefit-item:hover {
     border-color: color-mix(in srgb, var(--awa-primary, #b73337) 28%, transparent);
-    box-shadow: 0 4px 18px color-mix(in srgb, var(--awa-neutral-900, #0f172a) 9%, transparent);
+    box-shadow: 0 4px 18px color-mix(in srgb, var(--awa-neutral-900, #333333) 9%, transparent);
   }
 }
 
@@ -674,8 +868,8 @@
 #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
   .ayo-home5-wrapper--template-driven
   > .awa-benefits-bar {
-  background: color-mix(in srgb, var(--awa-neutral-50, #f8fafc) 42%, var(--awa-color-white));
-  border-block-end: 1px solid color-mix(in srgb, var(--awa-neutral-900, #0f172a) 6%, transparent);
+  background: color-mix(in srgb, var(--awa-neutral-50, #f7f7f7) 42%, var(--awa-color-white));
+  border-block-end: 1px solid color-mix(in srgb, var(--awa-neutral-900, #333333) 6%, transparent);
   padding-block: var(--size-xs-sm, clamp(0.75rem, 0.65rem + 0.45vw, 1.25rem));
 }
 
@@ -856,7 +1050,7 @@
   :is(.rokan-bestseller, .rokan-newproduct)
   .rokan-product-heading
   h2 {
-  color: var(--awa-neutral-900, #0f172a);
+  color: var(--awa-neutral-900, #333333);
   font-size: var(--font-display-md, clamp(1.875rem, 1.5rem + 1.5vw, 2.5rem));
   font-weight: var(--awa-weight-semibold, 600);
   line-height: 1.2;
@@ -873,7 +1067,7 @@
   .categorytab-container
   .rokan-product-heading h2
   .sup-title {
-  color: var(--awa-text-muted, #475569);
+  color: var(--awa-text-muted, #666666);
   font-size: clamp(0.8125rem, 0.76rem + 0.22vw, 0.9375rem);
   font-weight: var(--awa-weight-medium, 500);
   margin-inline-start: var(--gap-tight, var(--size-xs));
@@ -885,7 +1079,7 @@
   :is(.rokan-bestseller, .rokan-newproduct)
   .rokan-product-heading
   .des-title {
-  color: var(--awa-text-muted, #475569);
+  color: var(--awa-text-muted, #666666);
   font-size: clamp(0.8125rem, 0.76rem + 0.22vw, 0.9375rem);
   font-weight: var(--awa-weight-normal, 400);
   line-height: 1.45;
@@ -926,14 +1120,18 @@
 }
 
 /* Carrosséis com .awa-section-header: widget Rokan ainda emite .rokan-product-heading
- * decorativo (aria-hidden); esconde só quando o cabeçalho AWA já está no mesmo container. */
+ * duplicado; remove do fluxo quando o cabeçalho AWA já está no mesmo .container. */
 #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
   .page-wrapper
   .awa-carousel-section
   .container:has(> header.awa-section-header)
-  :is(.rokan-bestseller, .rokan-newproduct)
-  > .rokan-product-heading[aria-hidden="true"] {
+  :is(.rokan-bestseller, .rokan-newproduct, .rokan-featuredproduct)
+  > .rokan-product-heading {
+  block-size: 0 !important;
   display: none !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  padding: 0 !important;
 }
 
 /* Vitrines com abas — tabs em cluster; mobile reel */
@@ -969,12 +1167,12 @@
   .tabs
   :is(a, button, [role="tab"]) {
   align-items: center;
-  background: color-mix(in srgb, var(--awa-neutral-50, #f8fafc) 88%, var(--awa-color-white, #ffffff));
-  border: 1px solid color-mix(in srgb, var(--awa-neutral-900, #0f172a) 12%, transparent);
+  background: color-mix(in srgb, var(--awa-neutral-50, #f7f7f7) 88%, var(--awa-color-white, #ffffff));
+  border: 1px solid color-mix(in srgb, var(--awa-neutral-900, #333333) 12%, transparent);
   border-radius: var(--awa-radius-full, 9999px);
-  box-shadow: 0 1px 2px color-mix(in srgb, var(--awa-neutral-900, #0f172a) 5%, transparent);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--awa-neutral-900, #333333) 5%, transparent);
   box-sizing: border-box;
-  color: var(--awa-neutral-900, #0f172a);
+  color: var(--awa-neutral-900, #333333);
   cursor: pointer;
   display: inline-flex;
   font-weight: var(--awa-weight-medium, 500);
@@ -1162,12 +1360,12 @@
   button {
   align-items: center;
   background: color-mix(in srgb, var(--awa-color-white, #ffffff) 94%, transparent);
-  border: 1px solid color-mix(in srgb, var(--awa-neutral-900, #0f172a) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--awa-neutral-900, #333333) 12%, transparent);
   border-radius: var(--awa-radius-full, 9999px);
   box-shadow:
-    0 2px 10px color-mix(in srgb, var(--awa-neutral-900, #0f172a) 10%, transparent),
+    0 2px 10px color-mix(in srgb, var(--awa-neutral-900, #333333) 10%, transparent),
     0 0 0 1px color-mix(in srgb, var(--awa-color-white, #ffffff) 70%, transparent);
-  color: var(--awa-neutral-800, #1e293b);
+  color: var(--awa-neutral-800, #333333);
   cursor: pointer;
   display: inline-grid;
   justify-content: center;
@@ -1255,11 +1453,11 @@
   .awa-carousel-section
   .awa-owl-nav__btn {
   background: color-mix(in srgb, var(--awa-color-white, #ffffff) 94%, transparent);
-  border: 1px solid color-mix(in srgb, var(--awa-neutral-900, #0f172a) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--awa-neutral-900, #333333) 12%, transparent);
   box-shadow:
-    0 2px 10px color-mix(in srgb, var(--awa-neutral-900, #0f172a) 10%, transparent),
+    0 2px 10px color-mix(in srgb, var(--awa-neutral-900, #333333) 10%, transparent),
     0 0 0 1px color-mix(in srgb, var(--awa-color-white, #ffffff) 70%, transparent);
-  color: var(--awa-neutral-800, #1e293b);
+  color: var(--awa-neutral-800, #333333);
   transition:
     background-color var(--awa-duration-normal, 0.2s) var(--awa-ease-out, ease-out),
     border-color var(--awa-duration-normal, 0.2s) var(--awa-ease-out, ease-out),
@@ -1286,7 +1484,7 @@
   .page-wrapper
   .awa-carousel-section
   .awa-owl-progress {
-  background: color-mix(in srgb, var(--awa-neutral-900, #0f172a) 8%, transparent);
+  background: color-mix(in srgb, var(--awa-neutral-900, #333333) 8%, transparent);
   block-size: 5px;
   border-radius: var(--awa-radius-full, 9999px);
   margin-block-start: var(--size-sm-md, clamp(1rem, 0.8rem + 1vw, 1.88rem));
@@ -1319,7 +1517,7 @@
   .awa-carousel-section
   .swiper-pagination:not(.swiper-pagination-bullets-dynamic)
   .swiper-pagination-bullet {
-  background: color-mix(in srgb, var(--awa-neutral-900, #0f172a) 22%, transparent);
+  background: color-mix(in srgb, var(--awa-neutral-900, #333333) 22%, transparent);
   block-size: 0.45rem;
   border-radius: var(--awa-radius-full, 9999px);
   inline-size: 0.45rem;
@@ -1357,11 +1555,11 @@
   .swiper-button-next {
   align-items: center;
   background: color-mix(in srgb, var(--awa-color-white, #ffffff) 94%, transparent);
-  border: 1px solid color-mix(in srgb, var(--awa-neutral-900, #0f172a) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--awa-neutral-900, #333333) 12%, transparent);
   border-radius: var(--awa-radius-full, 9999px);
   block-size: var(--awa-touch-target, 44px);
-  box-shadow: 0 2px 10px color-mix(in srgb, var(--awa-neutral-900, #0f172a) 10%, transparent);
-  color: var(--awa-neutral-800, #1e293b);
+  box-shadow: 0 2px 10px color-mix(in srgb, var(--awa-neutral-900, #333333) 10%, transparent);
+  color: var(--awa-neutral-800, #333333);
   display: inline-flex;
   inline-size: var(--awa-touch-target, 44px);
   justify-content: center;
@@ -1516,9 +1714,9 @@
   .top-home-content--trust-and-offers
   .hot-deal {
   background: var(--awa-color-white, #ffffff);
-  border: 1px solid color-mix(in srgb, var(--awa-neutral-900, #0f172a) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--awa-neutral-900, #333333) 8%, transparent);
   border-radius: var(--awa-radius-lg, 16px);
-  box-shadow: 0 8px 30px color-mix(in srgb, var(--awa-neutral-900, #0f172a) 8%, transparent);
+  box-shadow: 0 8px 30px color-mix(in srgb, var(--awa-neutral-900, #333333) 8%, transparent);
   display: grid;
   gap: var(--gap-tight, var(--size-xs));
   min-width: 0;
@@ -1779,7 +1977,7 @@
     .top-home-content--trust-and-offers
     .bs-banner
     a:hover {
-    box-shadow: 0 12px 32px color-mix(in srgb, var(--awa-neutral-900, #0f172a) 14%, transparent);
+    box-shadow: 0 12px 32px color-mix(in srgb, var(--awa-neutral-900, #333333) 14%, transparent);
   }
 }
 
@@ -1831,7 +2029,7 @@
   .page-wrapper
   .ayo-home5-wrapper--template-driven
   .ayo-home5-section:nth-child(even):not(.top-home-content--above-fold) {
-  background-color: var(--awa-bg-soft, var(--awa-neutral-50, #f8fafc));
+  background-color: var(--awa-bg-soft, var(--awa-neutral-50, #f7f7f7));
 }
 
 #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
@@ -1985,7 +2183,7 @@
   background: color-mix(in srgb, var(--awa-color-white, #ffffff) 38%, transparent);
   block-size: 0.5rem;
   border-radius: var(--awa-radius-full, 9999px);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--awa-neutral-900, #0f172a) 25%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--awa-neutral-900, #333333) 25%, transparent);
   inline-size: 0.5rem;
   opacity: 1;
   transition:
@@ -2002,7 +2200,7 @@
   background: var(--awa-color-white, #ffffff);
   box-shadow:
     0 0 0 2px color-mix(in srgb, var(--awa-primary, #b73337) 50%, transparent),
-    0 2px 14px color-mix(in srgb, var(--awa-neutral-900, #0f172a) 40%, transparent);
+    0 2px 14px color-mix(in srgb, var(--awa-neutral-900, #333333) 40%, transparent);
   inline-size: 1.45rem;
 }
 
@@ -2052,6 +2250,13 @@
   :is(.owl-item, .swiper-slide, .awa-carousel-card-slot) {
   container-name: awa-home-card;
   container-type: inline-size;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  :is(.owl-wrapper-outer, .swiper) {
+  touch-action: pan-y pinch-zoom;
 }
 
 @container awa-home-card (min-width: 11rem) {
@@ -2189,7 +2394,7 @@
   }
 }
 
-/* Contraste WCAG AA — textos muted ≥ slate-600 (#475569); eyebrow mantém primário em hierarchy */
+/* Contraste WCAG AA — textos muted ≥ slate-600 (#666666); eyebrow mantém primário em hierarchy */
 #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
   .page-wrapper
   .ayo-home5-wrapper
@@ -2198,7 +2403,7 @@
     .product-item-details .old-price,
     .product-item-details .minimal-price-link
   ) {
-  color: var(--awa-text-muted, #475569);
+  color: var(--awa-text-muted, #666666);
 }
 
 #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
@@ -2207,7 +2412,7 @@
   .product-item-details
   .price-box
   .price {
-  color: var(--awa-text, #1e293b);
+  color: var(--awa-text, #333333);
   font-weight: var(--awa-weight-bold, 700);
 }
 
@@ -2416,11 +2621,11 @@
   .awa-carousel-section
   .content-item-product {
   background: var(--awa-color-white, #ffffff);
-  border: 1px solid color-mix(in srgb, var(--awa-neutral-900, #0f172a) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--awa-neutral-900, #333333) 8%, transparent);
   border-radius: var(--awa-radius-md, 8px);
   box-shadow:
-    0 1px 3px color-mix(in srgb, var(--awa-neutral-900, #0f172a) 5%, transparent),
-    0 0 0 1px color-mix(in srgb, var(--awa-neutral-900, #0f172a) 2%, transparent);
+    0 1px 3px color-mix(in srgb, var(--awa-neutral-900, #333333) 5%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--awa-neutral-900, #333333) 2%, transparent);
   overflow: clip;
   transition:
     border-color var(--awa-duration-normal, 0.2s) var(--awa-ease-out, ease-out),
@@ -2434,7 +2639,7 @@
     .content-item-product:hover {
     border-color: color-mix(in srgb, var(--awa-primary, #b73337) 30%, transparent);
     box-shadow:
-      0 8px 28px color-mix(in srgb, var(--awa-neutral-900, #0f172a) 11%, transparent),
+      0 8px 28px color-mix(in srgb, var(--awa-neutral-900, #333333) 11%, transparent),
       0 0 0 1px color-mix(in srgb, var(--awa-primary, #b73337) 18%, transparent);
   }
 }
@@ -2453,8 +2658,8 @@
   .page-wrapper
   .awa-carousel-section
   .product-thumb {
-  background: color-mix(in srgb, var(--awa-neutral-50, #f8fafc) 60%, var(--awa-color-white, #fff));
-  border-block-end: 1px solid color-mix(in srgb, var(--awa-neutral-900, #0f172a) 6%, transparent);
+  background: color-mix(in srgb, var(--awa-neutral-50, #f7f7f7) 60%, var(--awa-color-white, #fff));
+  border-block-end: 1px solid color-mix(in srgb, var(--awa-neutral-900, #333333) 6%, transparent);
   overflow: clip;
   position: relative;
 }
@@ -2556,7 +2761,7 @@
   .page-wrapper
   .awa-carousel-section
   .product-name a {
-  color: var(--awa-neutral-800, #1e293b);
+  color: var(--awa-neutral-800, #333333);
   text-decoration: none;
 }
 
@@ -2574,7 +2779,7 @@
   .page-wrapper
   .awa-carousel-section
   .awa-b2b-sku {
-  color: var(--awa-text-muted, #475569);
+  color: var(--awa-text-muted, #666666);
   font-size: clamp(0.625rem, 0.58rem + 0.2vw, 0.75rem);
   letter-spacing: 0.01em;
 }
@@ -2659,12 +2864,12 @@
   }
 }
 
-/* ── Carousel: align-items stretch (cards mesma altura na row) ── */
+/* ── Carousel: altura natural por conteúdo (Phase 20 — cards compactos) ── */
 #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
   .page-wrapper
   .awa-carousel-section
   .owl-item {
-  align-items: stretch;
+  align-items: flex-start;
   display: flex;
   flex-direction: column;
 }
@@ -2674,9 +2879,10 @@
   .awa-carousel-section
   .owl-item
   > :is(li, .item-product, .awa-carousel-card-slot) {
-  block-size: 100%;
+  block-size: auto;
   display: flex;
   flex-direction: column;
+  inline-size: 100%;
 }
 
 #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
@@ -2684,7 +2890,8 @@
   .awa-carousel-section
   .owl-item
   .content-item-product {
-  block-size: 100%;
+  block-size: auto;
+  inline-size: 100%;
 }
 
 /* ── hot-onsale badge: posição absoluta dentro do thumb ── */
@@ -2776,28 +2983,21 @@
  * │ 4. CAROUSEL CONTAINERS: compact gutter (44px = touch target)    │
  * │    arrows are positioned absolute — 44px gives them room        │
  * └─────────────────────────────────────────────────────────────────┘ */
+/* Carrosséis da home template: gutter só em .content-top-home — sem +44px no .container */
 #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
   .page-wrapper
+  .content-top-home
   .awa-carousel-section
   > .container {
   box-sizing: border-box;
   inline-size: 100% !important;
   max-inline-size: 100% !important;
-  padding-inline: clamp(2.75rem, 2.5rem + 0.5vw, 3.25rem) !important; /* 44–52px */
-}
-
-@media (max-width: 767px) {
-  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
-    .page-wrapper
-    .awa-carousel-section
-    > .container {
-    padding-inline: clamp(2.5rem, 2rem + 1vw, 2.75rem) !important; /* 40–44px mobile */
-  }
+  padding-inline: 0 !important;
 }
 
 /* ┌─────────────────────────────────────────────────────────────────┐
  * │ 5. SECTION BACKGROUND ALTERNATION                               │
- * │    odd: white (--awa-color-white) | even: neutral-50 (#f8fafc) │
+ * │    odd: white (--awa-color-white) | even: neutral-50 (#f7f7f7) │
  * └─────────────────────────────────────────────────────────────────┘ */
 #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
   .page-wrapper
@@ -2810,7 +3010,7 @@
   .page-wrapper
   .ayo-home5-wrapper
   > .awa-home-section:nth-child(even):not(.top-home-content--above-fold) {
-  background-color: var(--awa-neutral-50, #f8fafc) !important;
+  background-color: var(--awa-neutral-50, #f7f7f7) !important;
 }
 
 /* ┌─────────────────────────────────────────────────────────────────┐
@@ -3030,7 +3230,7 @@
   .ayo-home5-wrapper
   :is(.product-item, .awa-product-card) {
   background-color: var(--awa-color-white, #fff);
-  border: 1px solid var(--awa-neutral-200, #e2e8f0);
+  border: 1px solid var(--awa-neutral-200, #e5e5e5);
   border-radius: var(--awa-radius-lg, 12px);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
   display: flex;
@@ -3063,7 +3263,7 @@
   :is(.product-item, .awa-product-card)
   .product-image-container {
   aspect-ratio: 1 / 1;
-  background-color: var(--awa-neutral-50, #f8fafc);
+  background-color: var(--awa-neutral-50, #f7f7f7);
   display: block;
   overflow: clip;
   padding: var(--size-xs, 0.5rem);
@@ -3101,7 +3301,7 @@
   :is(.product-item-name, .product-name, .awa-product-name) {
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
-  color: var(--awa-text-primary, #1e293b);
+  color: var(--awa-text-primary, #333333);
   display: -webkit-box;
   font-size: clamp(0.75rem, 0.68rem + 0.3vw, 0.875rem); /* 12–14px */
   font-weight: var(--awa-weight-medium, 500);
@@ -3197,7 +3397,7 @@
   :is(.awa-section-header, .rokan-product-heading)
   :is(h2, h3, .title) {
   border-inline-start: 3px solid var(--awa-primary, #b73337);
-  color: var(--awa-text-primary, #1e293b);
+  color: var(--awa-text-primary, #333333);
   font-size: clamp(1rem, 0.9rem + 0.5vw, 1.375rem); /* 16–22px */
   font-weight: var(--awa-weight-bold, 700);
   letter-spacing: -0.01em;
@@ -3286,7 +3486,7 @@
   .page-wrapper
   .awa-category-carousel
   .category-name {
-  color: var(--awa-text-secondary, #475569);
+  color: var(--awa-text-secondary, #666666);
   font-size: clamp(0.625rem, 0.58rem + 0.2vw, 0.75rem);
   font-weight: var(--awa-weight-medium, 500);
   text-align: center;
@@ -3514,4 +3714,2012 @@
   clip: auto;
   clip-path: none;
   overflow: visible;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   Phase 20 — Product Card Height Reduction (579px → ~340px)
+   flex-grid-flow: compactar info-price B2B (112→36px), cart vazio (89→0px),
+   imagem 4:3 em vez de 1:1, placeholder elegante para imagem ausente
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* ┌─────────────────────────────────────────────────────────────────┐
+ * │ 1. IMAGE CONTAINER — 4:3 aspect (mais horizontal, menos alto)  │
+ * │    thumb is 241px wide ÷ 4×3 = 180px tall (was 241px = 1:1)    │
+ * └─────────────────────────────────────────────────────────────────┘ */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .ayo-home5-wrapper
+  .awa-carousel-section
+  :is(.product-image-container, .product-image-wrapper) {
+  aspect-ratio: 4 / 3 !important;
+  max-block-size: 220px !important;
+  overflow: clip;
+  width: 100% !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .ayo-home5-wrapper
+  .awa-carousel-section
+  :is(.product-image-container, .product-image-wrapper) img {
+  height: 100% !important;
+  object-fit: contain !important;
+  width: 100% !important;
+}
+
+/* product-thumb wrapper — remove excess height, align image */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .ayo-home5-wrapper
+  .awa-carousel-section
+  .product-thumb {
+  background-color: var(--awa-neutral-50, #f7f7f7);
+  display: flex;
+  flex-direction: column;
+  overflow: clip;
+  padding: 0 !important;
+}
+
+/* ┌─────────────────────────────────────────────────────────────────┐
+ * │ 2. B2B LOGIN PRICE PROMPT — compact single-line element (36px) │
+ * │    was 112px; now: flex row, clamp font, no extra margin        │
+ * └─────────────────────────────────────────────────────────────────┘ */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .ayo-home5-wrapper
+  .b2b-login-to-see-price,
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .ayo-home5-wrapper
+  .info-price .b2b-login-to-see-price {
+  align-items: center;
+  background-color: var(--awa-neutral-50, #f7f7f7);
+  border: 1px solid var(--awa-neutral-200, #e5e5e5);
+  border-radius: var(--awa-radius-md, 8px);
+  display: inline-flex;
+  font-size: clamp(0.625rem, 0.58rem + 0.2vw, 0.75rem);
+  gap: 0.25rem;
+  margin-block: 0 !important;
+  max-inline-size: 100%;
+  min-block-size: unset !important;
+  padding-block: 0.375rem !important;
+  padding-inline: 0.625rem !important;
+  width: auto !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .ayo-home5-wrapper
+  .b2b-login-to-see-price .price-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-inline-size: 100%;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .ayo-home5-wrapper
+  .b2b-login-to-see-price a {
+  color: var(--awa-primary, #b73337);
+  font-weight: var(--awa-weight-semibold, 600);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .ayo-home5-wrapper
+  .b2b-login-to-see-price a:hover {
+  text-decoration: underline;
+}
+
+/* info-price wrapper — compact, no extra padding */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .ayo-home5-wrapper
+  .awa-carousel-section
+  .info-price {
+  padding-block: 0.375rem 0 !important;
+  padding-inline: var(--size-xs, 0.625rem) !important;
+}
+
+/* ┌─────────────────────────────────────────────────────────────────┐
+ * │ 3. EMPTY CART ACTIONS — collapse quando vazio                  │
+ * └─────────────────────────────────────────────────────────────────┘ */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .ayo-home5-wrapper
+  .awa-carousel-section
+  .product-info-cart:not(:has(button, a, form, input)),
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .ayo-home5-wrapper
+  .awa-carousel-section
+  .addcart-link:empty {
+  display: none !important;
+}
+
+/* ┌─────────────────────────────────────────────────────────────────┐
+ * │ 4. PRODUCT INFO SECTION — padding compacto                     │
+ * └─────────────────────────────────────────────────────────────────┘ */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .ayo-home5-wrapper
+  .awa-carousel-section
+  .product-info {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0 !important;
+  padding-block: var(--size-xs, 0.5rem) !important;
+  padding-inline: var(--size-xs, 0.625rem) !important;
+}
+
+/* Product name — compact 2-line */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .ayo-home5-wrapper
+  .awa-carousel-section
+  .product-name {
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+  display: -webkit-box !important;
+  font-size: clamp(0.75rem, 0.68rem + 0.3vw, 0.875rem) !important;
+  font-weight: var(--awa-weight-medium, 500) !important;
+  line-height: 1.35 !important;
+  margin-block: 0 !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+}
+
+/* SKU — subtle, small */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .ayo-home5-wrapper
+  .awa-carousel-section
+  .awa-b2b-sku {
+  color: var(--awa-text-tertiary, #94a3b8);
+  font-size: clamp(0.625rem, 0.58rem + 0.15vw, 0.6875rem);
+  line-height: 1.2;
+  margin-block: 0.125rem 0 !important;
+}
+
+/* ┌─────────────────────────────────────────────────────────────────┐
+ * │ 5. MISSING IMAGE PLACEHOLDER — elegant fallback                │
+ * └─────────────────────────────────────────────────────────────────┘ */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .ayo-home5-wrapper
+  img[src*="placeholder"],
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .ayo-home5-wrapper
+  img:not([src]),
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .ayo-home5-wrapper
+  img[src=""] {
+  background-color: var(--awa-neutral-100, #f1f5f9);
+  color: transparent;
+  opacity: 0.6;
+}
+
+/* ┌─────────────────────────────────────────────────────────────────┐
+ * │ 6. "NOVO" BADGE — reposicionamento e tamanho consistente       │
+ * └─────────────────────────────────────────────────────────────────┘ */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .ayo-home5-wrapper
+  :is(.badge-new, .badge-novo, [class*="badge-new"], [class*="label-new"]) {
+  border-radius: var(--awa-radius-full, 9999px);
+  font-size: clamp(0.5625rem, 0.52rem + 0.17vw, 0.625rem);
+  font-weight: var(--awa-weight-bold, 700);
+  left: var(--size-xs, 0.5rem) !important;
+  letter-spacing: 0.05em;
+  padding-block: 0.25rem !important;
+  padding-inline: 0.5rem !important;
+  position: absolute;
+  text-transform: uppercase;
+  top: var(--size-xs, 0.5rem) !important;
+  z-index: 2;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   Phase 20b — Targeted Overrides (cascade wins)
+   ─ thumb-link padding 15px → 4px (removes ~22px de altura)
+   ─ b2b-price-box padding → 0 (removes ~16px, deixa só o botão 44px)
+   ─ product-info-cart vazio → hidden
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* product-thumb-link: remove padding excessivo que engrossa o thumb */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .content-top-home
+  .awa-carousel-section
+  .product-thumb
+  a.product-thumb-link,
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .content-top-home
+  .awa-carousel-section
+  .product-thumb-link {
+  padding: 4px !important;
+}
+
+/* b2b-login-to-see-price container: remover padding do cosmetic-bundle (8px 12px)
+   Mantém o botão interno de 44px — só remove o espaço externo do container */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .content-top-home
+  .b2b-login-to-see-price.price-box,
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .content-top-home
+  .info-price
+  .b2b-login-to-see-price {
+  padding: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* info-price: compactar padding */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .content-top-home
+  .awa-carousel-section
+  .info-price {
+  padding: 4px 8px 8px !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   Phase 20c — OWL Carousel JS Height Override
+   ─ OWL carousel sets inline height:580px via JS → anular com height:auto
+   ─ product-thumb-link aspect-ratio: 1→4/3 para coincidir com image container
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* OWL JS inline height override — deixa CSS controlar a altura */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .content-top-home
+  .awa-carousel-section
+  .item-product.awa-carousel-card-slot {
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+/* product-thumb-link: mudar aspect-ratio de 1:1 para 4:3 para
+   corresponder ao image-container (evita thumb quadrado de 240px) */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .content-top-home
+  .awa-carousel-section
+  .product-thumb
+  .product-thumb-link {
+  aspect-ratio: 4 / 3 !important;
+}
+
+/* product-thumb também deve acompanhar o 4:3 — remove min-height fixo */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .content-top-home
+  .awa-carousel-section
+  .product-thumb {
+  min-height: 0 !important;
+  height: auto !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   Phase 20d — Override OWL JS inline min-height on .content-item-product
+   OWL Carousel seta style="min-height:579px" via JS. Solução: max-height sempre
+   vence sobre min-height no CSS spec (max-height < min-height → usa max-height).
+   max-height:max-content = altura natural do conteúdo (~350px vs 579px OWL).
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  .content-item-product {
+  height: auto !important;
+  max-height: max-content !important;
+  min-height: 0 !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  .item-product,
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  .awa-carousel-card-slot {
+  height: auto !important;
+  max-height: max-content !important;
+  min-height: 0 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   Phase 20e — B2B login price prompt compact (ID-level specificity)
+   b2b-login-to-see-price: o <a> dentro tem min-height:44px;display:flex de touch rules
+   → overflow faz o bloco ter 82px. Usando #html-body (ID) para vencer display:flex!important.
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+#html-body .awa-carousel-section .b2b-login-to-see-price {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 0.25rem !important;
+  padding: 0.375rem 0.625rem !important;
+  min-height: 0 !important;
+  height: auto !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+#html-body .awa-carousel-section .b2b-login-to-see-price .price-label {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 0.25rem !important;
+  min-height: 0 !important;
+  font-size: 0.75rem !important;
+  line-height: 1.3 !important;
+}
+
+#html-body .awa-carousel-section .b2b-login-to-see-price a {
+  display: inline-flex !important;
+  align-items: center !important;
+  min-height: 0 !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  font-size: inherit !important;
+  font-weight: 600 !important;
+  white-space: nowrap !important;
+}
+
+/* info-price wrapper compact */
+#html-body .awa-carousel-section .info-price {
+  padding: 4px 8px 6px !important;
+  min-height: 0 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   Phase 21 — Home Carousel Standardization
+   Padroniza todos os carrosséis da home: container igual header/footer, shell único,
+   cards compactos, imagem em destaque e preço/login B2B sem altura fantasma.
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) {
+  --awa-home-carousel-card-radius: var(--awa-radius-lg, 12px);
+  --awa-home-carousel-shell-pad: clamp(0.75rem, 0.5rem + 0.9vw, 1.25rem);
+  --awa-home-carousel-card-gap: clamp(0.5rem, 0.4rem + 0.45vw, 0.75rem);
+  --awa-home-carousel-image-max: clamp(11.25rem, 14vw, 15rem);
+  --awa-home-carousel-image-pad: clamp(0.375rem, 0.25rem + 0.45vw, 0.625rem);
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  > .container {
+  box-sizing: border-box !important;
+  inline-size: 100% !important;
+  margin-inline: auto !important;
+  max-inline-size: var(--awa-container-max, 1440px) !important;
+  padding-inline: var(--awa-container-pad, clamp(16px, 3vw, 24px)) !important;
+}
+
+/* Super Ofertas usa wrapper legado .hot-deal no template do módulo.
+   Padroniza para comportamento idêntico aos demais carrosséis da home. */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section--super-offers
+  .hot-deal {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  display: block !important;
+  gap: 0 !important;
+  padding: 0 !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section--super-offers
+  .hot-deal-tab-slider,
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section--super-offers
+  .hot-deal-slide,
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section--super-offers
+  .hot-deal
+  .row {
+  margin: 0 !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section--super-offers
+  .countdown_block {
+  margin-block-end: var(--size-xs, 0.5rem) !important;
+}
+
+/* Super Ofertas: altura do card segue o mesmo fluxo flex dos demais carrosséis
+   (min-block-size fixo inflava cards ~480px). */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section--super-offers
+  .product-info {
+  min-block-size: 0 !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  :is(.awa-cq-card-wrapper, .owl-wrapper-outer, .products-swiper) {
+  background: color-mix(in srgb, var(--awa-color-white, #fff) 94%, var(--awa-neutral-50, #f7f7f7));
+  border: 1px solid color-mix(in srgb, var(--awa-neutral-900, #333333) 8%, transparent);
+  border-radius: var(--awa-radius-xl, 16px);
+  box-shadow: 0 14px 40px color-mix(in srgb, var(--awa-neutral-900, #333333) 6%, transparent);
+  padding: var(--awa-home-carousel-shell-pad) !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  .awa-cq-card-wrapper
+  > .owl {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  .owl-item {
+  box-sizing: border-box !important;
+  padding-inline: calc(var(--awa-home-carousel-card-gap) / 2) !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  :is(.item-product, .awa-carousel-card-slot, .content-item-product) {
+  block-size: auto !important;
+  height: auto !important;
+  max-block-size: max-content !important;
+  max-height: max-content !important;
+  min-block-size: 0 !important;
+  min-height: 0 !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  .content-item-product {
+  border-radius: var(--awa-home-carousel-card-radius) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0 !important;
+  inline-size: 100% !important;
+  overflow: clip !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  .product-thumb {
+  aspect-ratio: 4 / 3 !important;
+  block-size: auto !important;
+  display: grid !important;
+  max-block-size: var(--awa-home-carousel-image-max) !important;
+  min-block-size: 0 !important;
+  overflow: clip !important;
+  padding: var(--awa-home-carousel-image-pad) !important;
+  place-items: center !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  .product-thumb-link,
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  .product-image-container,
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  .product-image-wrapper {
+  aspect-ratio: 4 / 3 !important;
+  block-size: 100% !important;
+  display: grid !important;
+  inline-size: 100% !important;
+  max-block-size: 100% !important;
+  overflow: clip !important;
+  place-items: center !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  :is(.product-image-photo, .product-image-wrapper img, .product-thumb img) {
+  block-size: 100% !important;
+  inline-size: 100% !important;
+  object-fit: contain !important;
+  padding: 0 !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  .product-info {
+  display: flex !important;
+  flex: 0 0 auto !important;
+  flex-direction: column !important;
+  gap: 0.25rem !important;
+  min-block-size: 0 !important;
+  padding-block: clamp(0.5rem, 0.42rem + 0.35vw, 0.75rem) !important;
+  padding-inline: clamp(0.625rem, 0.5rem + 0.45vw, 0.875rem) !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  .product-name {
+  font-size: clamp(0.75rem, 0.68rem + 0.25vw, 0.875rem) !important;
+  line-height: 1.3 !important;
+  min-block-size: 2.6em !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  .awa-b2b-sku {
+  font-size: clamp(0.625rem, 0.58rem + 0.15vw, 0.6875rem) !important;
+  line-height: 1.2 !important;
+  margin-block: 0 !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  .info-price {
+  min-block-size: 0 !important;
+  padding-block: 0.25rem 0 !important;
+  padding-inline: 0 !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  .b2b-login-to-see-price {
+  --awa-btn-h: 0px;
+  --awa-space-2-5: 0px;
+  --awa-space-3-5: 0px;
+  align-items: center !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 0.25rem !important;
+  min-block-size: 0 !important;
+  padding: 0 !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  .b2b-login-to-see-price
+  .price-label,
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  .b2b-login-to-see-price
+  a {
+  align-items: center !important;
+  block-size: auto !important;
+  display: inline-flex !important;
+  font-size: 0.75rem !important;
+  line-height: 1.3 !important;
+  min-block-size: 0 !important;
+  min-height: 0 !important;
+  min-inline-size: 0 !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  .b2b-login-to-see-price
+  a {
+  color: var(--awa-primary, #b73337) !important;
+  font-weight: var(--awa-weight-semibold, 600) !important;
+  text-decoration-thickness: 1px !important;
+  text-underline-offset: 0.15em !important;
+  white-space: nowrap !important;
+}
+
+@media (max-width: 767px) {
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .awa-carousel-section
+    :is(.awa-cq-card-wrapper, .owl-wrapper-outer, .products-swiper) {
+    border-radius: var(--awa-radius-lg, 12px);
+    padding: clamp(0.5rem, 2.5vw, 0.875rem) !important;
+  }
+
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .awa-carousel-section
+    .owl-item {
+    inline-size: min(82vw, 20rem) !important;
+    max-inline-size: min(82vw, 20rem) !important;
+    padding-inline: 0.25rem !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   Phase 22 — Home Carousel Overflow/Height Stabilization
+   Remove clamp legado de 320px no wrapper carregado do OWL para evitar corte
+   do conteúdo do card (nome/preço/login) e eliminar “respiro fantasma”.
+   ═══════════════════════════════════════════════════════════════════════════════ */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .content-top-home
+  .awa-carousel-section
+  :is(.rokan-bestseller, .rokan-newproduct, .rokan-featuredproduct)
+  > .row.awa-cq-card-wrapper {
+  max-block-size: none !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .content-top-home
+  .awa-carousel-section
+  .row.awa-cq-card-wrapper
+  > ul.owl.owl-carousel.owl-loaded {
+  max-block-size: none !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   Phase 23 — Home Modernization (header/nav + hero + cards)
+   Modern visual layer scoped to homepage only, preserving existing structure.
+   ═══════════════════════════════════════════════════════════════════════════════ */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) {
+  --awa-modern-surface: color-mix(in srgb, #ffffff 86%, transparent);
+  --awa-modern-surface-strong: color-mix(in srgb, #ffffff 94%, transparent);
+  --awa-modern-border: color-mix(in srgb, var(--awa-text, #333333) 10%, transparent);
+  --awa-modern-shadow: 0 12px 32px rgba(2, 6, 23, 0.08);
+  --awa-modern-shadow-hover: 0 16px 40px rgba(2, 6, 23, 0.12);
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .header-wrapper-sticky {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-main-header,
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-nav-bar {
+  background: var(--awa-modern-surface);
+  border-bottom: 1px solid var(--awa-modern-border);
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.08);
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .top-home-content--above-fold
+  .banner_item_bg::after {
+  background: linear-gradient(
+    180deg,
+    rgba(15, 23, 42, 0.14) 0%,
+    rgba(15, 23, 42, 0.34) 100%
+  );
+  content: "";
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .top-home-content--above-fold
+  .text-banner {
+  text-shadow: 0 2px 10px rgba(2, 6, 23, 0.3);
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .top-home-content--category-carousel
+  .awa-category-carousel__item,
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  .content-item-product {
+  background: var(--awa-modern-surface-strong);
+  border: 1px solid var(--awa-modern-border);
+  box-shadow: var(--awa-modern-shadow);
+  transition:
+    transform var(--awa-duration, 0.25s) var(--awa-ease, ease),
+    box-shadow var(--awa-duration, 0.25s) var(--awa-ease, ease),
+    border-color var(--awa-duration-fast, 0.15s) var(--awa-ease-out, ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .top-home-content--category-carousel
+    .awa-category-carousel__item:hover,
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .awa-carousel-section
+    .content-item-product:hover {
+    border-color: color-mix(in srgb, var(--awa-primary, #0369a1) 42%, #ffffff);
+    box-shadow: var(--awa-modern-shadow-hover);
+    transform: translateY(-2px);
+  }
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .top-home-content--category-carousel
+  .awa-category-carousel__item,
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  .content-item-product,
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .top-home-content--category-carousel
+  .awa-category-carousel__item
+  a {
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .top-home-content--category-carousel
+    .awa-category-carousel__item,
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .awa-carousel-section
+    .content-item-product {
+    transition: none !important;
+    transform: none !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   Phase 24 — Mobile carousel intrinsic sizing
+   Corrige min-inline-size calculado sobre o wrapper gigante do Owl no mobile.
+   ═══════════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 767px) {
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) {
+    --awa-home-mobile-card-inline: min(82vw, 20rem);
+  }
+
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .awa-carousel-section
+    :is(.rokan-bestseller, .rokan-newproduct, .rokan-featuredproduct, .rokan-onsaleproduct, .rokan-toprate)
+    :is(.owl-wrapper-outer, .owl-carousel, .owl-wrapper) {
+    block-size: auto !important;
+    max-block-size: none !important;
+    max-height: none !important;
+    min-block-size: 0 !important;
+  }
+
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .awa-carousel-section
+    :is(.rokan-bestseller, .rokan-newproduct, .rokan-featuredproduct, .rokan-onsaleproduct, .rokan-toprate)
+    .owl-wrapper {
+    align-items: stretch !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+  }
+
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .awa-carousel-section
+    :is(.rokan-bestseller, .rokan-newproduct, .rokan-featuredproduct, .rokan-onsaleproduct, .rokan-toprate)
+    .owl-carousel
+    .owl-item {
+    flex: 0 0 var(--awa-home-mobile-card-inline) !important;
+    float: none !important;
+    inline-size: var(--awa-home-mobile-card-inline) !important;
+    max-inline-size: var(--awa-home-mobile-card-inline) !important;
+    max-width: var(--awa-home-mobile-card-inline) !important;
+    min-inline-size: var(--awa-home-mobile-card-inline) !important;
+    min-width: var(--awa-home-mobile-card-inline) !important;
+    width: var(--awa-home-mobile-card-inline) !important;
+  }
+
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .awa-carousel-section
+    .owl-item
+    > :is(li, .item-product, .awa-carousel-card-slot),
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .awa-carousel-section
+    .owl-item
+    :is(.item-product, .awa-carousel-card-slot, .content-item-product, .product-thumb, .product-info) {
+    inline-size: 100% !important;
+    max-inline-size: 100% !important;
+    min-inline-size: 0 !important;
+    width: 100% !important;
+  }
+
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .awa-carousel-section
+    .content-item-product {
+    block-size: auto !important;
+    max-block-size: none !important;
+  }
+}
+
+/* Super Ofertas vem de outro template, sem wrapper rokan-*; aplica a mesma
+   contenção para impedir que o min-inline-size use a largura total do Owl. */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section--super-offers
+  .awa-super-offers-carousel
+  .owl-carousel
+  .owl-item {
+  min-inline-size: 0 !important;
+  min-width: 0 !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section--super-offers
+  .awa-super-offers-carousel
+  .owl-item
+  :is(.item-product, .content-item-product, .product-thumb, .product-info) {
+  inline-size: 100% !important;
+  max-inline-size: 100% !important;
+  min-inline-size: 0 !important;
+  width: 100% !important;
+}
+
+@media (max-width: 767px) {
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .awa-carousel-section--super-offers
+    .awa-super-offers-carousel
+    .owl-carousel
+    .owl-wrapper {
+    align-items: stretch !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+  }
+
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .awa-carousel-section--super-offers
+    .awa-super-offers-carousel
+    .owl-carousel
+    .owl-item {
+    flex: 0 0 var(--awa-home-mobile-card-inline) !important;
+    float: none !important;
+    inline-size: var(--awa-home-mobile-card-inline) !important;
+    max-inline-size: var(--awa-home-mobile-card-inline) !important;
+    max-width: var(--awa-home-mobile-card-inline) !important;
+    min-inline-size: var(--awa-home-mobile-card-inline) !important;
+    min-width: var(--awa-home-mobile-card-inline) !important;
+    width: var(--awa-home-mobile-card-inline) !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   Phase 25 — Home trust panels consistency
+   Unifica prova social, benefícios, B2B e selos em painéis com grid interno.
+   ═══════════════════════════════════════════════════════════════════════════════ */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) {
+  --awa-home-panel-radius: var(--awa-radius-xl, 16px);
+  --awa-home-panel-pad: clamp(1rem, 0.8rem + 1vw, 1.75rem);
+  --awa-home-card-pad: clamp(0.875rem, 0.72rem + 0.65vw, 1.25rem);
+  --awa-home-panel-gap: var(--size-sm-md, clamp(1rem, 0.8rem + 1vw, 1.88rem));
+  --awa-home-panel-border: color-mix(in srgb, var(--awa-text, #333333) 10%, transparent);
+  --awa-home-panel-shadow: 0 14px 36px color-mix(in srgb, var(--awa-text, #333333) 7%, transparent);
+  --awa-home-on-dark-card: color-mix(in srgb, var(--awa-color-white, #ffffff) 10%, transparent);
+  --awa-home-on-dark-border: color-mix(in srgb, var(--awa-color-white, #ffffff) 16%, transparent);
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  :is(.awa-social-proof-bar, .awa-benefits-bar) {
+  border-radius: var(--awa-home-panel-radius) !important;
+  box-shadow: var(--awa-home-panel-shadow) !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  padding: var(--awa-home-panel-pad) !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-social-proof-bar {
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--awa-text, #333333) 94%, black),
+      color-mix(in srgb, var(--awa-primary, #b73337) 24%, var(--awa-text, #333333))
+    ) !important;
+  border: 1px solid var(--awa-home-on-dark-border) !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-benefits-bar {
+  background:
+    linear-gradient(
+      135deg,
+      var(--awa-primary, #b73337),
+      var(--awa-primary-hover, #8e2629)
+    ) !important;
+  border: 1px solid color-mix(in srgb, var(--awa-primary, #b73337) 34%, transparent) !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-social-proof-container,
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-benefits-bar
+  .awa-benefits-container {
+  box-sizing: border-box !important;
+  display: grid !important;
+  gap: var(--gap-tight, var(--size-xs, 0.75rem)) !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  inline-size: 100% !important;
+  margin-inline: auto !important;
+  max-inline-size: var(--awa-container-max, 1440px) !important;
+  padding: 0 !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-social-proof-divider {
+  display: none !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-social-proof-stat,
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-benefits-bar
+  .awa-benefit-item {
+  align-items: flex-start !important;
+  background: var(--awa-home-on-dark-card) !important;
+  border: 1px solid var(--awa-home-on-dark-border) !important;
+  border-radius: var(--awa-radius-lg, 12px) !important;
+  box-shadow: none !important;
+  box-sizing: border-box !important;
+  color: var(--awa-color-white, #ffffff) !important;
+  display: flex !important;
+  gap: var(--gap-tight, var(--size-xs, 0.75rem)) !important;
+  inline-size: 100% !important;
+  justify-content: flex-start !important;
+  min-block-size: var(--awa-touch-target, 44px) !important;
+  max-inline-size: none !important;
+  padding: var(--awa-home-card-pad) !important;
+  text-align: start !important;
+  width: 100% !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-benefits-bar
+  .awa-benefit-item {
+  align-self: stretch !important;
+  justify-self: stretch !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-social-proof-stat {
+  flex-direction: column !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-benefits-bar
+  .awa-benefit-title,
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-benefits-bar
+  .awa-benefit-icon {
+  color: var(--awa-color-white, #ffffff) !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-benefits-bar
+  .awa-benefit-desc {
+  color: color-mix(in srgb, var(--awa-color-white, #ffffff) 78%, transparent) !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .top-home-content--b2b-promo
+  .awa-b2b-promo {
+  background:
+    radial-gradient(
+      circle at 12% 10%,
+      color-mix(in srgb, var(--awa-primary, #b73337) 24%, transparent),
+      transparent 34%
+    ),
+    linear-gradient(
+      135deg,
+      var(--awa-text, #333333),
+      color-mix(in srgb, var(--awa-text, #333333) 82%, black)
+    ) !important;
+  border: 1px solid var(--awa-home-on-dark-border) !important;
+  box-shadow: var(--awa-home-panel-shadow) !important;
+  inline-size: min(100%, 54rem) !important;
+  margin-inline: auto !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .top-home-content--b2b-promo
+  .awa-b2b-promo__benefits {
+  inline-size: 100% !important;
+  max-inline-size: 100% !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .top-home-content--b2b-promo
+  .awa-b2b-promo__benefit-item {
+  background: var(--awa-home-on-dark-card) !important;
+  border: 1px solid var(--awa-home-on-dark-border) !important;
+  border-radius: var(--awa-radius-md, 8px) !important;
+  color: color-mix(in srgb, var(--awa-color-white, #ffffff) 86%, transparent) !important;
+  padding-block: var(--size-xs, 0.75rem) !important;
+  padding-inline: var(--size-xs, 0.75rem) !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-home-trust-zone
+  :is(.security-seals, .trust-badges-homepage, .aw-home-faq) {
+  border: 1px solid var(--awa-home-panel-border) !important;
+  border-radius: var(--awa-home-panel-radius) !important;
+  box-shadow: var(--awa-home-panel-shadow) !important;
+  box-sizing: border-box !important;
+}
+
+@media (max-width: 991px) {
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .awa-social-proof-container,
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .awa-benefits-bar
+    .awa-benefits-container {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 420px) {
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    :is(.awa-social-proof-bar, .awa-benefits-bar) {
+    padding: var(--size-xs, 0.75rem) !important;
+  }
+
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .awa-social-proof-stat,
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .awa-benefits-bar
+    .awa-benefit-item {
+    padding: var(--size-xs, 0.75rem) !important;
+  }
+}
+
+/* Phase 22 — Carrossel home: CTA B2B visível para visitante (fix da7189)
+   login-to-cart.js injeta .b2b-login-to-buy-btn; super-home ocultava em toda a home. */
+#html-body.b2b-guest-mode:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  .product-info-cart {
+  display: block !important;
+  visibility: visible !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+#html-body.b2b-guest-mode:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  .product-info-cart
+  .b2b-login-to-buy-btn.b2b--listing {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  min-height: var(--awa-modern-card-cta-height, 44px) !important;
+  cursor: pointer !important;
+}
+
+#html-body.b2b-guest-mode:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  [data-b2b-original-hidden="1"] {
+  display: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   Phase 26 — flex-grid-flow: ritmo carrossel, gutters, B2B CTA, nav interativa
+   Auditoria flex-26: heading→track ≤48px, sem gutter duplo, touch 44px, cursor claro
+   ═══════════════════════════════════════════════════════════════════════════════ */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) {
+  --awa-home-carousel-header-gap: var(--size-xs-sm, clamp(0.75rem, 0.65rem + 0.45vw, 1.25rem));
+}
+
+/* Gutter único: content-top-home já tem padding-inline — container interno não empilha */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .content-top-home
+  .top-home-content.awa-carousel-section.ayo-home5-section
+  > .container {
+  display: grid !important;
+  gap: var(--awa-home-carousel-header-gap) !important;
+  margin-inline: 0 !important;
+  max-inline-size: 100% !important;
+  padding-inline: 0 !important;
+  row-gap: var(--awa-home-carousel-header-gap) !important;
+  width: 100% !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .content-top-home
+  .awa-carousel-section
+  > .container
+  > header.awa-section-header {
+  margin-block-end: 0 !important;
+  padding-block-end: 0 !important;
+}
+
+/* Widget Rokan: gap no container, não margin 64px + padding-top legado */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  :is(
+    .rokan-bestseller,
+    .rokan-newproduct,
+    .rokan-featuredproduct,
+    .rokan-onsaleproduct,
+    .rokan-toprate,
+    .rokan-mostviewed
+  ) {
+  display: flex !important;
+  flex-direction: column !important;
+  grid-template-columns: none !important;
+  gap: var(--awa-home-carousel-header-gap) !important;
+  margin-block: 0 !important;
+  min-width: 0;
+  padding-block: 0 !important;
+  width: 100% !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  :is(.rokan-bestseller, .rokan-newproduct, .rokan-featuredproduct)
+  > .rokan-product-heading[aria-hidden="true"] {
+  block-size: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+}
+
+/* Super Ofertas: título legado sem aria-hidden — alinhar ao .awa-section-header quando existir */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section--super-offers
+  .container:has(> header.awa-section-header)
+  .rokan-product-heading:not([aria-hidden="true"]) {
+  display: none !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section--super-offers
+  .container:not(:has(> header.awa-section-header))
+  .rokan-product-heading:not([aria-hidden="true"]) {
+  align-items: flex-end;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-tight, var(--size-xs)) var(--gap-base, var(--size-sm));
+  justify-content: space-between;
+  margin-block-end: 0;
+}
+
+/* Nav categoria: cursor explícito (prev disabled = not-allowed) */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-category-carousel__prev:not(.is-disabled),
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-category-carousel__next:not(.is-disabled) {
+  cursor: pointer;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-category-carousel__prev.is-disabled,
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-category-carousel__next.is-disabled {
+  cursor: not-allowed;
+}
+
+/* B2B visitante — CTA legível + touch 44px nos cards da home */
+#html-body.b2b-guest-mode:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  .b2b-login-to-see-price
+  .price-label,
+#html-body.b2b-guest-mode:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  .b2b-login-to-see-price
+  a {
+  font-size: clamp(0.8125rem, 0.76rem + 0.22vw, 0.9375rem) !important;
+  line-height: 1.35 !important;
+}
+
+#html-body.b2b-guest-mode:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  .b2b-login-to-buy-btn.b2b--listing,
+#html-body.b2b-guest-mode:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  .b2b-login-to-see-price
+  a {
+  align-items: center !important;
+  display: inline-flex !important;
+  justify-content: center !important;
+  min-block-size: var(--awa-touch-target, 44px) !important;
+  padding-block: var(--size-xs, 0.75rem) !important;
+  padding-inline: var(--size-sm, 1rem) !important;
+  text-align: center !important;
+}
+
+/* FAQ trust zone — painel com padding fluido e foco visível */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-home-trust-zone
+  .aw-home-faq {
+  display: grid;
+  gap: var(--size-sm-md, clamp(1rem, 0.8rem + 1vw, 1.88rem));
+  padding: var(--awa-home-panel-pad, clamp(1rem, 0.8rem + 1vw, 1.75rem)) !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-home-trust-zone
+  .aw-home-faq__item
+  > summary:focus-visible {
+  outline: 2px solid var(--awa-primary, #b73337);
+  outline-offset: 2px;
+}
+
+@media (max-width: 767px) {
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .content-top-home
+    .awa-carousel-section
+    > .container {
+    gap: var(--gap-tight, var(--size-xs, 0.75rem)) !important;
+    row-gap: var(--gap-tight, var(--size-xs, 0.75rem)) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .awa-carousel-section
+    :is(.rokan-bestseller, .rokan-newproduct, .rokan-featuredproduct) {
+    transition: none !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   Phase 27 — flex-grid-flow: Super Ofertas compacto, Owl nav, hero, cards
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* Super Ofertas — título Rokan dentro do .hot-deal (não é filho direto do .container) */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section--super-offers
+  .hot-deal
+  > .rokan-product-heading {
+  block-size: 0 !important;
+  display: none !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section--super-offers
+  .hot-deal {
+  display: grid !important;
+  gap: var(--awa-home-carousel-header-gap, var(--size-xs-sm, clamp(0.75rem, 0.65rem + 0.45vw, 1.25rem))) !important;
+  margin-block: 0 !important;
+  min-width: 0;
+  padding: 0 !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section--super-offers
+  .hot-deal-tab-slider {
+  display: grid;
+  gap: var(--awa-home-carousel-header-gap, var(--size-xs-sm, clamp(0.75rem, 0.65rem + 0.45vw, 1.25rem)));
+  min-width: 0;
+}
+
+/* Countdown — cluster horizontal, altura mínima */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section--super-offers
+  .countdown_block {
+  align-items: center;
+  background: color-mix(in srgb, var(--awa-primary, #b73337) 6%, var(--awa-color-white, #ffffff));
+  border: 1px solid color-mix(in srgb, var(--awa-primary, #b73337) 18%, transparent);
+  border-radius: var(--awa-radius-md, 8px);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-tight, var(--size-xs)) var(--gap-base, var(--size-sm));
+  justify-content: space-between;
+  margin-block-end: 0 !important;
+  padding-block: var(--size-xs, 0.75rem) !important;
+  padding-inline: var(--size-sm, 1rem) !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section--super-offers
+  .title_countdown {
+  color: var(--awa-text-primary, #333333);
+  font-size: clamp(0.8125rem, 0.76rem + 0.22vw, 0.9375rem);
+  font-weight: var(--awa-weight-semibold, 600);
+  line-height: 1.35;
+  margin: 0;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section--super-offers
+  .super-deal-countdown {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--gap-tight, var(--size-xs));
+}
+
+/* Shell owl — sem min-height fantasma; cards alinhados aos demais carrosséis */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section--super-offers
+  :is(.owl-carousel, .hot-deal-slide, .owl-wrapper-outer) {
+  min-block-size: 0 !important;
+  min-height: 0 !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section--super-offers
+  .product-info {
+  display: grid;
+  gap: var(--gap-tight, var(--size-xs));
+  min-block-size: 0 !important;
+  padding-block: var(--size-xs, 0.75rem) !important;
+  padding-inline: var(--size-xs, 0.75rem) !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section--super-offers
+  :is(.product-image-container, .product-image-wrapper) {
+  aspect-ratio: 4 / 3 !important;
+  max-block-size: clamp(9rem, 22vw, 12.5rem) !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section--super-offers.top-home-content.awa-carousel-section {
+  padding-inline: 0 !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section--super-offers
+  > .container {
+  align-items: start !important;
+  align-content: start !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section--super-offers
+  .awa-section-header {
+  align-items: flex-end !important;
+  align-self: start;
+  block-size: auto !important;
+  height: auto !important;
+  max-block-size: none !important;
+  min-block-size: 0 !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section--super-offers
+  .awa-section-header__left {
+  display: flex !important;
+  flex: 1 1 auto;
+  flex-direction: column !important;
+  gap: var(--gap-tight, var(--size-xs)) !important;
+  max-block-size: fit-content;
+  min-block-size: 0;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section--super-offers
+  .awa-section-header__title {
+  font-size: clamp(1.125rem, 1rem + 0.55vw, 1.5rem) !important;
+  line-height: 1.2;
+}
+
+/* SKU B2B — linha única, não estica o card */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  .awa-b2b-sku {
+  color: var(--awa-text-muted, #666666);
+  display: block;
+  font-size: clamp(0.6875rem, 0.63rem + 0.25vw, 0.75rem);
+  line-height: 1.3;
+  overflow: hidden;
+  padding-inline: var(--size-xs, 0.75rem);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Owl nav AWA — cursor + foco (desktop: visível em focus-within do widget) */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  .awa-owl-nav__btn:not(:disabled):not(.disabled) {
+  cursor: pointer;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  .awa-owl-nav__btn:disabled,
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  .awa-owl-nav__btn.disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+@media (min-width: 768px) {
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .awa-carousel-section
+    :is(.rokan-bestseller, .rokan-newproduct, .rokan-featuredproduct, .rokan-onsaleproduct)
+    .awa-owl-nav__btn {
+      opacity: 0.92;
+      visibility: visible;
+    }
+}
+
+/* Hero home — bullets Swiper com alvo de toque 44px */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .top-home-content--above-fold
+  .swiper-pagination-bullet {
+  block-size: 0.5rem;
+  inline-size: 0.5rem;
+  margin-inline: var(--size-2xs, 0.25rem) !important;
+  min-block-size: var(--awa-touch-target, 44px);
+  min-inline-size: var(--awa-touch-target, 44px);
+  opacity: 1;
+  position: relative;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .top-home-content--above-fold
+  .swiper-pagination-bullet::before {
+  background: color-mix(in srgb, var(--awa-color-white, #ffffff) 55%, transparent);
+  block-size: 0.5rem;
+  border-radius: var(--awa-radius-full, 9999px);
+  content: "";
+  display: block;
+  inline-size: 0.5rem;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  position: absolute;
+  transform: translate(-50%, -50%);
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .top-home-content--above-fold
+  .swiper-pagination-bullet-active::before {
+  background: var(--awa-primary, #b73337);
+  inline-size: 1.25rem;
+}
+
+/* Barra de progresso — mais próxima do track */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  .awa-owl-progress {
+  margin-block-start: var(--size-xs-sm, clamp(0.75rem, 0.65rem + 0.45vw, 1.25rem)) !important;
+}
+
+@media (max-width: 767px) {
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .awa-carousel-section--super-offers
+    .countdown_block {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .top-home-content--above-fold
+    .swiper-pagination-bullet::before {
+    transition: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   Phase 28 — flex-grid-flow: cards densos, trust zone grid/reel, hero rail, FAQ
+   ═══════════════════════════════════════════════════════════════════════════════ */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) {
+  --awa-home-card-image-max: clamp(8.5rem, 14vw, 10.5rem);
+  --awa-home-carousel-image-max: var(--awa-home-card-image-max);
+  --awa-home-card-info-gap: var(--gap-tight, var(--size-xs, 0.75rem));
+}
+
+/* Card shell — flex column + order (DOM: thumb → cart → info; visual: thumb → info → cart) */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  .content-item-product {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0 !important;
+  min-block-size: 0 !important;
+  min-height: 0 !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  :is(.product-image-container, .product-image-wrapper) {
+  max-block-size: var(--awa-home-card-image-max) !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  .product-thumb {
+  flex-shrink: 0;
+  order: 1 !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  .product-info {
+  display: grid !important;
+  flex: 1 1 auto !important;
+  gap: var(--awa-home-card-info-gap) !important;
+  order: 2 !important;
+  padding-block: var(--size-2xs, 0.375rem) var(--size-xs, 0.75rem) !important;
+  padding-inline: var(--size-xs, 0.75rem) !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  :is(.product-item-name, .product-name, h3.product-name) {
+  -webkit-line-clamp: 2 !important;
+  margin-block: 0 !important;
+  min-block-size: 0;
+  padding: 0 !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  .info-price {
+  margin-block: 0 !important;
+  min-block-size: 0 !important;
+  padding-block: 0 !important;
+  padding-inline: 0 !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  .product-info-cart {
+  flex-shrink: 0;
+  margin: 0 !important;
+  margin-block-start: auto !important;
+  min-block-size: 0 !important;
+  order: 3 !important;
+  padding-block: 0 var(--size-xs, 0.75rem) !important;
+  padding-inline: var(--size-xs, 0.75rem) !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  .product-info-cart
+  :is(form, .actions-primary, .addcart-link) {
+  margin: 0 !important;
+  min-block-size: 0 !important;
+  padding: 0 !important;
+}
+
+#html-body.b2b-guest-mode:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  .product-info-cart
+  .b2b-login-to-buy-btn.b2b--listing {
+  block-size: auto !important;
+  min-block-size: var(--awa-touch-target, 44px) !important;
+  padding-block: var(--size-2xs, 0.375rem) !important;
+  padding-inline: var(--size-sm, 1rem) !important;
+}
+
+#html-body.b2b-guest-mode:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  .b2b-login-to-see-price {
+  margin-block: 0 !important;
+  min-block-size: 0 !important;
+  padding-block: var(--size-2xs, 0.375rem) !important;
+  padding-inline: var(--size-xs, 0.75rem) !important;
+}
+
+#html-body.b2b-guest-mode:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  .b2b-login-to-see-price
+  .price-label {
+  line-height: 1.25 !important;
+  min-block-size: 0 !important;
+}
+
+/* Trust zone — selos em auto-fit; mobile reel */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-home-trust-zone
+  > .container {
+  display: grid;
+  gap: var(--size-sm-md, clamp(1rem, 0.8rem + 1vw, 1.88rem));
+  min-width: 0;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-security-section
+  :is(.security-seals, .awa-seal-row) {
+  align-items: start;
+  display: grid;
+  gap: var(--size-sm, 1rem);
+  grid-template-columns: repeat(auto-fit, minmax(min(5.5rem, 42%), 1fr));
+  justify-items: center;
+  margin: 0;
+  padding: 0;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-seal {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-tight, var(--size-xs));
+  justify-content: flex-start;
+  min-width: 0;
+  text-align: center;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-seal
+  :is(img, svg) {
+  block-size: auto;
+  display: block;
+  max-block-size: clamp(2.5rem, 7vw, 3.25rem);
+  max-inline-size: 100%;
+  object-fit: contain;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-seal-badge {
+  color: var(--awa-text-muted, #666666);
+  font-size: clamp(0.6875rem, 0.63rem + 0.25vw, 0.75rem);
+  line-height: 1.3;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .aw-home-faq__title {
+  font-size: clamp(1.25rem, 1.05rem + 0.65vw, 1.75rem);
+  line-height: 1.2;
+  margin-block-end: var(--size-2xs, 0.375rem);
+  text-align: start !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .aw-home-faq__subtitle {
+  color: var(--awa-text-muted, #666666);
+  font-size: clamp(0.8125rem, 0.76rem + 0.22vw, 0.9375rem);
+  line-height: 1.45;
+  margin-block-end: var(--size-sm-md, clamp(1rem, 0.8rem + 1vw, 1.88rem));
+  text-align: start !important;
+}
+
+/* Hero — rail de paginação com contraste em slides claros */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .top-home-content--above-fold
+  .swiper-pagination {
+  align-items: center;
+  backdrop-filter: blur(6px);
+  background: color-mix(in srgb, var(--awa-neutral-900, #333333) 28%, transparent);
+  border-radius: var(--awa-radius-full, 9999px);
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--size-2xs, 0.25rem);
+  inset-block-end: var(--size-sm-md, clamp(1rem, 0.8rem + 1vw, 1.88rem)) !important;
+  inset-inline: 50% auto !important;
+  justify-content: center;
+  margin: 0;
+  max-inline-size: calc(100% - var(--size-md-lg, 2.5rem));
+  padding-block: var(--size-2xs, 0.25rem);
+  padding-inline: var(--size-xs, 0.75rem);
+  transform: translateX(-50%);
+  width: auto !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .top-home-content--above-fold
+  .swiper-pagination-bullet::before {
+  background: color-mix(in srgb, var(--awa-color-white, #ffffff) 72%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--awa-neutral-900, #333333) 18%, transparent);
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .top-home-content--above-fold
+  .swiper-pagination-bullet-active::before {
+  background: var(--awa-primary, #b73337);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--awa-primary, #b73337) 40%, transparent);
+}
+
+/* Benefits — mobile 2 colunas (legível, sem centrar tudo) */
+@media (max-width: 639px) {
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .awa-benefits-bar
+    .awa-benefits-container {
+    display: grid !important;
+    gap: var(--gap-tight, var(--size-xs)) !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    justify-content: stretch !important;
+  }
+
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .awa-security-section
+    :is(.security-seals, .awa-seal-row) {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: var(--size-sm, 1rem);
+    justify-content: flex-start;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    padding-block-end: var(--size-2xs, 0.25rem);
+    scroll-padding-inline: var(--size-xs, 0.75rem);
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .awa-security-section
+    :is(.security-seals, .awa-seal-row)::-webkit-scrollbar {
+    display: none;
+  }
+
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .awa-seal {
+    flex: 0 0 min(42%, 9rem);
+    scroll-snap-align: start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .top-home-content--above-fold
+    .swiper-pagination {
+    backdrop-filter: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   Bugfix layout — vence awa-home-cosmetic-bundle R14fg-9 (headers em coluna)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .top-home-content.awa-carousel-section
+  > .container
+  > header.awa-section-header {
+  align-items: flex-end !important;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  justify-content: space-between !important;
+  margin-block-end: 0 !important;
+  text-align: start !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .top-home-content.awa-carousel-section
+  .awa-section-header__left {
+  flex: 1 1 auto !important;
+  max-block-size: none !important;
+  min-block-size: 0 !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .top-home-content.awa-carousel-section
+  .awa-section-header__link {
+  align-self: flex-end !important;
+  flex-shrink: 0 !important;
+  margin-inline-start: auto !important;
+}
+
+/* Vence terminal-bundle hotfix C legado (display:grid + padding 0 em content-top-home) */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .content-top-home
+  :is(.ayo-home5-wrapper, .ayo-home5-wrapper--template-driven) {
+  display: flex !important;
+  flex-direction: column !important;
+  max-inline-size: 100% !important;
+  margin-inline: 0 !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .content-top-home {
+  box-sizing: border-box !important;
+  margin-inline: auto !important;
+  max-inline-size: 1440px !important;
+  padding-inline: var(--awa-page-pad-md, 24px) !important;
+  width: 100% !important;
+}
+
+/* Vence awa-redesign-modern (margin-bottom 64px nos widgets Rokan) */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .content-top-home
+  .awa-carousel-section
+  :is(.rokan-bestseller, .rokan-newproduct, .rokan-featuredproduct, .rokan-onsaleproduct, .rokan-toprate, .rokan-mostviewed),
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .ayo-home5-wrapper--template-driven
+  :is(.rokan-bestseller, .rokan-newproduct, .rokan-featuredproduct) {
+  margin: 0 !important;
+  margin-block: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+/* =============================================================================
+   AWA CAROUSEL FIX 2026-05-19 — wrappers Rokan NÃO são grid de produtos
+   Evita espremimento do ul.owl quando fallback SSR aplica grid-template-columns
+   no pai (.rokan-bestseller) sem .owl-loaded (classe fica no filho ul.owl).
+   ============================================================================= */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  :is(
+    .rokan-bestseller,
+    .rokan-newproduct,
+    .rokan-featuredproduct,
+    .rokan-onsaleproduct,
+    .rokan-toprate,
+    .rokan-mostviewed
+  ) {
+  display: flex !important;
+  flex-direction: column !important;
+  grid-template-columns: none !important;
+  width: 100% !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  :is(.rokan-bestseller, .rokan-newproduct, .rokan-featuredproduct, .rokan-onsaleproduct, .rokan-toprate, .rokan-mostviewed)
+  > .row.awa-cq-card-wrapper {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  :is(.rokan-bestseller, .rokan-newproduct, .rokan-featuredproduct, .rokan-onsaleproduct, .rokan-toprate, .rokan-mostviewed)
+  ul.owl.owl-carousel {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  .owl-stage-outer,
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-carousel-section
+  .owl-stage {
+  width: 100% !important;
 }
