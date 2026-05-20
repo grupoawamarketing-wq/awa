@@ -41,7 +41,7 @@ body.catalogsearch-result-index {
         margin-bottom: @awa-space-5;
 
         .page-title {
-            font-size: clamp(18px, 2.5vw, 26px);
+            font-size: ~"clamp(18px, 2.5vw, 26px)";
             font-weight: @awa-weight-bold;
             color: var(--awa-text, #333333);
             line-height: 1.2;
@@ -49,7 +49,7 @@ body.catalogsearch-result-index {
 
             // Termo pesquisado destacado
             span.base {
-                color: var(--awa-primary, #A33B3B);
+                color: var(--awa-c-primary);
             }
         }
 
@@ -122,8 +122,8 @@ body.catalogsearch-result-index {
 
             strong {
                 padding-left: @awa-space-3;
-                border-left: 4px solid var(--awa-primary, #A33B3B);
-                font-size: clamp(16px, 2vw, 20px);
+                border-left: 4px solid var(--awa-c-primary);
+                font-size: ~"clamp(16px, 2vw, 20px)";
                 font-weight: @awa-weight-bold;
                 color: var(--awa-text, #333333);
             }
@@ -193,7 +193,7 @@ body.catalogsearch-result-index {
 
             &:focus {
                 outline: none;
-                border-color: var(--awa-primary, #A33B3B);
+                border-color: var(--awa-c-primary);
                 box-shadow: @awa-focus-ring;
             }
         }
@@ -235,8 +235,8 @@ body.catalogsearch-result-index {
                 transition: border-color @awa-transition, color @awa-transition;
 
                 &:hover {
-                    border-color: var(--awa-primary, #A33B3B);
-                    color: var(--awa-primary, #A33B3B);
+                    border-color: var(--awa-c-primary);
+                    color: var(--awa-c-primary);
                 }
             }
 
@@ -248,8 +248,8 @@ body.catalogsearch-result-index {
                 align-items: center;
                 justify-content: center;
                 padding: 0 @awa-space-2;
-                background-color: var(--awa-primary, #A33B3B);
-                border: 1px solid var(--awa-primary, #A33B3B);
+                background-color: var(--awa-c-primary);
+                border: 1px solid var(--awa-c-primary);
                 border-radius: @awa-radius-xs;
                 color: @awa-color-white;
                 font-size: var(--awa-font-sm);
@@ -271,8 +271,8 @@ body.catalogsearch-result-index {
             transition: border-color @awa-transition, color @awa-transition;
 
             &:hover {
-                border-color: var(--awa-primary, #A33B3B);
-                color: var(--awa-primary, #A33B3B);
+                border-color: var(--awa-c-primary);
+                color: var(--awa-c-primary);
             }
         }
     }
@@ -289,5 +289,34 @@ body.catalogsearch-result-index {
         .toolbar-sorter select {
             transition: none;
         }
+    }
+}
+
+
+// ============================================================================
+// 6. GRID — posicionamento explícito no layout PLP de 2 colunas
+// ============================================================================
+// Contexto: _awa-layout-canonical.less aplica display:contents em .col-main
+// para catalog-category-view E catalogsearch-result-index com min-width:992px.
+//
+// Na PLP (categoria), isso funciona pois .col-main contém .products.wrapper
+// que já recebe grid-area:plp-main.
+//
+// Na busca com Mirasvit, os elementos são filhos DIRETOS de .col-main
+// (sem wrapper .search.results), então o auto-placement do grid CSS os
+// distribui alternadamente entre as colunas 280px e 1062px — quebrando o layout.
+//
+// Solução: para search results, restaurar .col-main como bloco normal
+// posicionado na área plp-main, sem display:contents.
+// !important necessário: sobrepor a regra de display:contents com alta
+// especificidade do _awa-layout-canonical.less.
+
+@media (min-width: 992px) {
+    body.catalogsearch-result-index .page-main > .columns > .col-main,
+    body.catalogsearch-result-index .page-main > .columns.layout > .col-main {
+        display: block !important;
+        grid-area: plp-main !important;
+        min-width: 0;
+        width: 100%;
     }
 }

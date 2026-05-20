@@ -195,7 +195,7 @@
 
     .product li {
         display: grid;
-        grid-template-columns: 56px minmax(0, 1fr);
+        grid-template-columns: ~"56px minmax(0, 1fr)";
         gap: @awa-space-3;
         align-items: center;
         padding: @awa-space-2 @awa-space-3;
@@ -293,6 +293,72 @@
         color: @awa-neutral-600;
         font-size: var(--awa-font-sm);
         text-align: center;
+    }
+
+    /* ui-ux-pro-max: empty state com sugestões (autocomplete) */
+    .awa-search-ac-empty {
+        padding: @awa-space-5 @awa-space-4;
+        text-align: center;
+    }
+
+    .awa-search-ac-empty__title {
+        margin: 0 0 @awa-space-2;
+        color: @awa-color-text-primary;
+        font-size: var(--awa-font-sm);
+        font-weight: @awa-weight-semibold;
+        line-height: 1.4;
+    }
+
+    .awa-search-ac-empty__hint {
+        margin: 0 0 @awa-space-3;
+        color: @awa-neutral-600;
+        font-size: var(--awa-font-xs);
+        line-height: 1.45;
+    }
+
+    .awa-search-ac-empty__suggestions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: @awa-space-2;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    &[data-awa-idle-suggestions='true'] {
+        display: block !important;
+        width: 100%;
+        max-width: none;
+    }
+
+    @media (max-width: 991px) {
+        &[data-awa-idle-suggestions='true'] {
+            grid-column: 1 / -1;
+        }
+    }
+
+    .awa-search-ac-empty__chip {
+        display: inline-flex;
+        align-items: center;
+        min-height: 36px;
+        padding: @awa-space-2 @awa-space-3;
+        border: 1px solid @awa-autocomplete-divider;
+        border-radius: @awa-radius-full;
+        background: @awa-color-white;
+        color: @awa-color-primary;
+        cursor: pointer;
+        font-size: var(--awa-font-xs);
+        font-weight: @awa-weight-medium;
+        text-decoration: none;
+        transition: background-color 200ms ease, border-color 200ms ease, color 200ms ease;
+
+        &:hover,
+        &:focus-visible {
+            border-color: @awa-color-primary;
+            background: fade(@awa-color-primary, 8%);
+            color: @awa-color-primary-dark;
+        }
     }
 }
 
@@ -465,7 +531,7 @@
     .mst-searchautocomplete__item.magento_catalog_product {
         display: grid;
         grid-template-areas: 'image meta store';
-        grid-template-columns: 72px minmax(0, 1fr) auto;
+        grid-template-columns: ~"72px minmax(0, 1fr) auto";
         gap: @awa-space-3;
         align-items: start;
         padding: @awa-space-3;
@@ -777,7 +843,7 @@
             grid-template-areas:
                 'image meta'
                 'image store';
-            grid-template-columns: 64px minmax(0, 1fr);
+            grid-template-columns: ~"64px minmax(0, 1fr)";
 
             .store {
                 justify-content: flex-start;
@@ -808,7 +874,7 @@
         }
 
         .product li {
-            grid-template-columns: 48px minmax(0, 1fr);
+            grid-template-columns: ~"48px minmax(0, 1fr)";
             padding-inline: @awa-space-2;
         }
 
@@ -856,7 +922,7 @@
             grid-template-areas:
                 'image meta'
                 'image store';
-            grid-template-columns: 52px minmax(0, 1fr);
+            grid-template-columns: ~"52px minmax(0, 1fr)";
             gap: @awa-space-2;
             padding: @awa-space-2;
 
@@ -937,26 +1003,32 @@
 }
 
 /* ── Mirasvit TypeAhead overlay — align perfectly with #search input ──
- * The overlay is created by typeahead.js with class `.input-text`,
- * which inherits theme input styles (height 40px, font-size 15px, color #333).
- * These overrides force the overlay to match #search computed values
- * and use light-gray color so the suggestion text is visually distinct.
+ * The overlay is created by typeahead.js with class `.input-text`.
+ * Deve se posicionar ABSOLUTAMENTE sobre o input de busca, com fundo
+ * transparente, sem capturar eventos — puro "ghost text" de sugestão.
+ * position:absolute !important necessário: evita herança de posicionamento
+ * estático que faz o overlay aparecer como campo duplicado inline.
  */
 body .page-wrapper .awa-site-header .awa-professional-search input.input-text.mst-search-autocomplete__typeahead-overlay,
 body .page-wrapper .field.search > input.input-text.mst-search-autocomplete__typeahead-overlay,
 input.input-text.mst-search-autocomplete__typeahead-overlay {
-    color: @text-light;
-    height: @awa-control-height;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    z-index: -1 !important;
+    color: fade(@awa-neutral-400, 80%);
     font-size: var(--awa-font-sm);
     font-family: Rubik, "Helvetica Neue", Arial, sans-serif;
     font-weight: 400;
-    line-height: @awa-control-height;
     padding: 0 @awa-space-4;
     box-sizing: border-box;
-    border: 0;
-    background: transparent;
+    border: 0 !important;
+    background: transparent !important;
     pointer-events: none !important;
-    outline: none;
-    box-shadow: none;
+    outline: none !important;
+    box-shadow: none !important;
     border-radius: 0;
+    opacity: 1;
 }
