@@ -20,6 +20,7 @@ class PlatformAssets extends Template
         'css/platform/awa-b2b-status.css',
         'css/platform/awa-b2b-responsive.css',
         'css/platform/awa-b2b-compat.css',
+        'css/platform/awa-b2b-dashboard.css',
     ];
 
     public function __construct(

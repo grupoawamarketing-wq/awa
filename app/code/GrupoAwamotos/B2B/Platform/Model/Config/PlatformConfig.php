@@ -16,6 +16,7 @@ class PlatformConfig
     private const XML_PATH_UNIFIED_MENU = 'grupoawamotos_b2b/platform/unified_menu_enabled';
     private const XML_PATH_LEGACY_MENU_VISIBLE = 'grupoawamotos_b2b/platform/legacy_menu_visible';
     private const XML_PATH_LEGACY_MENU_BADGE = 'grupoawamotos_b2b/platform/legacy_menu_badge';
+    private const XML_PATH_EXECUTIVE_DASHBOARD = 'grupoawamotos_b2b/platform/executive_dashboard_enabled';
 
     public function __construct(
         private readonly ScopeConfigInterface $scopeConfig
@@ -40,6 +41,11 @@ class PlatformConfig
     public function isLegacyMenuBadgeEnabled(?int $storeId = null): bool
     {
         return $this->isFlag(self::XML_PATH_LEGACY_MENU_BADGE, $storeId);
+    }
+
+    public function isExecutiveDashboardEnabled(?int $storeId = null): bool
+    {
+        return $this->isFlag(self::XML_PATH_EXECUTIVE_DASHBOARD, $storeId);
     }
 
     private function isFlag(string $path, ?int $storeId): bool

@@ -1,0 +1,273 @@
+<?php
+/** @var \GrupoAwamotos\B2B\Platform\Block\Adminhtml\Dashboard\Index $block */
+/** @var \GrupoAwamotos\B2B\Platform\ViewModel\PlatformUi|null $platformUi */
+$platformUi = $block->getData('platform_ui');
+$dashboard = $block->getDashboard();
+$filters = $block->getFilterArray();
+$orders = $dashboard['orders'] ?? [];
+$customers = $dashboard['customers'] ?? [];
+$sectra = $dashboard['sectra'] ?? [];
+$commercial = $dashboard['commercial'] ?? [];
+$health = $dashboard['health'] ?? [];
+$meta = $dashboard['meta'] ?? [];
+?>
+<div class="awa-b2b-shell awa-b2b-dashboard">
+    <header class="awa-b2b-page-header">
+        <div class="awa-b2b-page-header__row">
+            <div>
+                <h1><?= $block->escapeHtml(__('Dashboard B2B')) ?></h1>
+                <p class="awa-b2b-page-header__subtitle">
+                    <?= $block->escapeHtml(__('Visão operacional — pedidos, clientes e pipeline Sectra (somente leitura).')) ?>
+                </p>
+            </div>
+        </div>
+    </header>
+
+    <form class="awa-b2b-filter-bar" method="get" action="<?= $block->escapeUrl($block->getUrl('*/*/*')) ?>">
+        <div class="awa-commercial-filters__fields">
+            <div class="admin__field">
+                <label><?= $block->escapeHtml(__('De')) ?></label>
+                <input type="date" name="date_from" value="<?= $block->escapeHtmlAttr($filters['date_from']) ?>" class="admin__control-text"/>
+            </div>
+            <div class="admin__field">
+                <label><?= $block->escapeHtml(__('Até')) ?></label>
+                <input type="date" name="date_to" value="<?= $block->escapeHtmlAttr($filters['date_to']) ?>" class="admin__control-text"/>
+            </div>
+        </div>
+        <div class="awa-commercial-filters__actions">
+            <button type="submit" class="action-primary awa-btn-sm">
+                <span><?= $block->escapeHtml(__('Atualizar')) ?></span>
+            </button>
+            <?php if ($block->canExport()): ?>
+                <a class="action-default" href="<?= $block->escapeUrl($block->getExportUrl()) ?>">
+                    <?= $block->escapeHtml(__('Exportar CSV')) ?>
+                </a>
+            <?php endif; ?>
+        </div>
+    </form>
+
+    <div class="awa-b2b-metric-grid">
+        <div class="awa-b2b-metric-card">
+            <span class="awa-b2b-metric-label"><?= $block->escapeHtml(__('Receita Magento bruta')) ?></span>
+            <span class="awa-b2b-metric-value"><?= $block->escapeHtml($block->formatKpi($orders['revenue_period'] ?? null)) ?></span>
+            <span class="awa-b2b-metric-hint"><?= $block->escapeHtml(__('Período selecionado — não é P&L ERP')) ?></span>
+        </div>
+        <div class="awa-b2b-metric-card">
+            <span class="awa-b2b-metric-label"><?= $block->escapeHtml(__('Pedidos hoje')) ?></span>
+            <span class="awa-b2b-metric-value"><?= $block->escapeHtml($block->formatKpi($orders['orders_today'] ?? null)) ?></span>
+        </div>
+        <div class="awa-b2b-metric-card">
+            <span class="awa-b2b-metric-label"><?= $block->escapeHtml(__('Aguardando ERP')) ?></span>
+            <span class="awa-b2b-metric-value">
+                <span class="awa-b2b-status-badge awa-b2b-status-badge--warning">
+                    <?= $block->escapeHtml($block->formatKpi($sectra['awaiting_erp'] ?? null)) ?>
+                </span>
+            </span>
+        </div>
+        <div class="awa-b2b-metric-card">
+            <span class="awa-b2b-metric-label"><?= $block->escapeHtml(__('Bloqueados')) ?></span>
+            <span class="awa-b2b-metric-value">
+                <span class="awa-b2b-status-badge awa-b2b-status-badge--danger">
+                    <?= $block->escapeHtml($block->formatKpi($sectra['blocked'] ?? null)) ?>
+                </span>
+            </span>
+            <span class="awa-b2b-metric-hint">
+                <?= $block->escapeHtml(__('Não importáveis: %1', $block->formatKpi($sectra['non_importable'] ?? null))) ?>
+            </span>
+        </div>
+        <div class="awa-b2b-metric-card">
+            <span class="awa-b2b-metric-label"><?= $block->escapeHtml(__('Clientes pendentes')) ?></span>
+            <span class="awa-b2b-metric-value"><?= $block->escapeHtml($block->formatKpi($customers['commercial_pending'] ?? null)) ?></span>
+        </div>
+        <div class="awa-b2b-metric-card">
+            <span class="awa-b2b-metric-label"><?= $block->escapeHtml(__('Saúde cadastral')) ?></span>
+            <span class="awa-b2b-metric-value"><?= $block->escapeHtml($block->formatKpi($health['no_phone'] ?? null)) ?></span>
+            <span class="awa-b2b-metric-hint"><?= $block->escapeHtml(__('Sem telefone B2B')) ?></span>
+        </div>
+        <div class="awa-b2b-metric-card">
+            <span class="awa-b2b-metric-label"><?= $block->escapeHtml(__('Pedidos no período')) ?></span>
+            <span class="awa-b2b-metric-value"><?= $block->escapeHtml($block->formatKpi($orders['orders_period'] ?? null)) ?></span>
+        </div>
+        <div class="awa-b2b-metric-card">
+            <span class="awa-b2b-metric-label"><?= $block->escapeHtml(__('Ticket médio B2B')) ?></span>
+            <span class="awa-b2b-metric-value"><?= $block->escapeHtml($block->formatKpi($orders['avg_ticket'] ?? null)) ?></span>
+        </div>
+    </div>
+
+    <section class="awa-b2b-section-card">
+        <header class="awa-b2b-section-header">
+            <h2><?= $block->escapeHtml(__('Operação ERP/Sectra')) ?></h2>
+        </header>
+        <?php if ((int) ($sectra['import_failed']['value'] ?? 0) > 0): ?>
+            <div class="awa-b2b-alert awa-b2b-alert--danger">
+                <?= $block->escapeHtml(__('%1 pedido(s) com erro de importação ERP.', (int) ($sectra['import_failed']['value'] ?? 0))) ?>
+            </div>
+        <?php endif; ?>
+        <div class="awa-b2b-dashboard-sectra-grid">
+            <div><strong><?= $block->escapeHtml(__('Aguardando validação')) ?>:</strong> <?= $block->escapeHtml($block->formatKpi($sectra['awaiting_erp'] ?? null)) ?></div>
+            <div><strong><?= $block->escapeHtml(__('Não importáveis')) ?>:</strong> <?= $block->escapeHtml($block->formatKpi($sectra['non_importable'] ?? null)) ?></div>
+            <div><strong><?= $block->escapeHtml(__('Prontos Sectra')) ?>:</strong> <?= $block->escapeHtml($block->formatKpi($sectra['ready_for_import'] ?? null)) ?></div>
+            <div><strong><?= $block->escapeHtml(__('Importados')) ?>:</strong> <?= $block->escapeHtml($block->formatKpi($sectra['imported'] ?? null)) ?></div>
+        </div>
+        <?php if (!empty($sectra['status_breakdown'])): ?>
+            <table class="awa-b2b-table awa-b2b-table--compact">
+                <thead>
+                    <tr>
+                        <th><?= $block->escapeHtml(__('Status Sectra')) ?></th>
+                        <th><?= $block->escapeHtml(__('Pedidos')) ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($sectra['status_breakdown'] as $row): ?>
+                        <tr>
+                            <td><?= $block->escapeHtml($row['label'] ?? '') ?></td>
+                            <td><?= (int) ($row['count'] ?? 0) ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        <?php endif; ?>
+        <?php if (!empty($sectra['alerts'])): ?>
+            <div class="awa-b2b-alert awa-b2b-alert--warning">
+                <strong><?= $block->escapeHtml(__('Alertas Sectra (24h)')) ?></strong>
+                <ul class="awa-b2b-dashboard-alerts">
+                    <?php foreach ($sectra['alerts'] as $alert): ?>
+                        <li><?= $block->escapeHtml($alert['message'] ?? '') ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+        <?php endif; ?>
+    </section>
+
+    <section class="awa-b2b-section-card">
+        <header class="awa-b2b-section-header">
+            <h2><?= $block->escapeHtml(__('Comercial')) ?></h2>
+        </header>
+        <div class="awa-b2b-dashboard-sectra-grid">
+            <div><strong><?= $block->escapeHtml(__('Clientes novos')) ?>:</strong> <?= $block->escapeHtml($block->formatKpi($customers['new_customers_period'] ?? null)) ?></div>
+            <div><strong><?= $block->escapeHtml(__('Tarefas abertas')) ?>:</strong> <?= $block->escapeHtml($block->formatKpi($commercial['open_tasks'] ?? null)) ?></div>
+            <div><strong><?= $block->escapeHtml(__('Atendentes ativos')) ?>:</strong> <?= $block->escapeHtml($block->formatKpi($commercial['active_attendants'] ?? null)) ?></div>
+            <div><strong><?= $block->escapeHtml(__('Carrinhos abandonados')) ?>:</strong> <?= $block->escapeHtml($block->formatKpi($commercial['abandoned_carts'] ?? null)) ?></div>
+        </div>
+    </section>
+
+    <section class="awa-b2b-section-card">
+        <header class="awa-b2b-section-header">
+            <h2><?= $block->escapeHtml(__('Pendências')) ?></h2>
+        </header>
+        <div class="awa-b2b-alert awa-b2b-alert--info">
+            <ul class="awa-b2b-dashboard-alerts">
+                <li><?= $block->escapeHtml(__('Sem telefone: %1', $block->formatKpi($health['no_phone'] ?? null))) ?></li>
+                <li><?= $block->escapeHtml(__('Pending ERP validation: %1', $block->formatKpi($customers['pending_erp_validation'] ?? null))) ?></li>
+                <li><?= $block->escapeHtml(__('Validated in ERP: %1', $block->formatKpi($customers['validated_in_erp'] ?? null))) ?></li>
+                <li><?= $block->escapeHtml(__('Pedidos bloqueados: %1', $block->formatKpi($sectra['blocked'] ?? null))) ?></li>
+            </ul>
+            <p><?= $block->escapeHtml(__('Ações recomendadas: revisar cadastro, contato comercial ou validação ERP — sem alteração automática nesta tela.')) ?></p>
+        </div>
+    </section>
+
+    <section class="awa-b2b-section-card">
+        <header class="awa-b2b-section-header">
+            <h2><?= $block->escapeHtml(__('Últimos pedidos B2B')) ?></h2>
+        </header>
+        <?php if (empty($orders['recent_orders'])): ?>
+            <div class="awa-b2b-empty-state"><?= $block->escapeHtml(__('Nenhum pedido B2B no escopo visível.')) ?></div>
+        <?php else: ?>
+            <table class="awa-b2b-table">
+                <thead>
+                    <tr>
+                        <th><?= $block->escapeHtml(__('Pedido')) ?></th>
+                        <th><?= $block->escapeHtml(__('Cliente')) ?></th>
+                        <th><?= $block->escapeHtml(__('Total')) ?></th>
+                        <th><?= $block->escapeHtml(__('Status')) ?></th>
+                        <th><?= $block->escapeHtml(__('Sectra')) ?></th>
+                        <th><?= $block->escapeHtml(__('Data')) ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($orders['recent_orders'] as $order): ?>
+                        <tr>
+                            <td><?= $block->escapeHtml($order['increment_id'] ?? '') ?></td>
+                            <td><?= $block->escapeHtml($order['customer_name'] ?? '') ?></td>
+                            <td><?= $block->escapeHtml($order['grand_total_formatted'] ?? '') ?></td>
+                            <td><?= $block->escapeHtml($order['status'] ?? '') ?></td>
+                            <td><?= $block->escapeHtml($order['sectra_label'] ?? '') ?></td>
+                            <td><?= $block->escapeHtml($order['created_at'] ?? '') ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        <?php endif; ?>
+    </section>
+
+    <section class="awa-b2b-section-card">
+        <header class="awa-b2b-section-header">
+            <h2><?= $block->escapeHtml(__('Clientes pendentes (cadastro)')) ?></h2>
+        </header>
+        <?php if (empty($health['pending_customers'])): ?>
+            <div class="awa-b2b-empty-state"><?= $block->escapeHtml(__('Nenhum cliente pendente no escopo visível.')) ?></div>
+        <?php else: ?>
+            <table class="awa-b2b-table">
+                <thead>
+                    <tr>
+                        <th><?= $block->escapeHtml(__('CNPJ')) ?></th>
+                        <th><?= $block->escapeHtml(__('E-mail')) ?></th>
+                        <th><?= $block->escapeHtml(__('Problema')) ?></th>
+                        <th><?= $block->escapeHtml(__('Ação recomendada')) ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($health['pending_customers'] as $customer): ?>
+                        <tr>
+                            <td><?= $block->escapeHtml($customer['cnpj'] ?? '') ?></td>
+                            <td><?= $block->escapeHtml($customer['email'] ?? '') ?></td>
+                            <td><?= $block->escapeHtml($customer['problema'] ?? '') ?></td>
+                            <td><?= $block->escapeHtml($customer['acao_recomendada'] ?? '') ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        <?php endif; ?>
+    </section>
+
+    <section class="awa-b2b-section-card">
+        <header class="awa-b2b-section-header">
+            <h2><?= $block->escapeHtml(__('Pedidos bloqueados / não importáveis')) ?></h2>
+        </header>
+        <?php if (empty($sectra['blocked_orders'])): ?>
+            <div class="awa-b2b-empty-state"><?= $block->escapeHtml(__('Nenhum pedido bloqueado no escopo visível.')) ?></div>
+        <?php else: ?>
+            <table class="awa-b2b-table">
+                <thead>
+                    <tr>
+                        <th><?= $block->escapeHtml(__('Pedido')) ?></th>
+                        <th><?= $block->escapeHtml(__('Cliente')) ?></th>
+                        <th><?= $block->escapeHtml(__('Total')) ?></th>
+                        <th><?= $block->escapeHtml(__('Status Sectra')) ?></th>
+                        <th><?= $block->escapeHtml(__('Data')) ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($sectra['blocked_orders'] as $order): ?>
+                        <tr>
+                            <td><?= $block->escapeHtml($order['increment_id'] ?? '') ?></td>
+                            <td><?= $block->escapeHtml($order['customer_name'] ?? '') ?></td>
+                            <td><?= $block->escapeHtml($order['grand_total_formatted'] ?? '') ?></td>
+                            <td><?= $block->escapeHtml($order['sectra_label'] ?? '') ?></td>
+                            <td><?= $block->escapeHtml($order['created_at'] ?? '') ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        <?php endif; ?>
+    </section>
+
+    <footer class="awa-b2b-dashboard-footer">
+        <small>
+            <?= $block->escapeHtml(__('Atualizado: %1 • Tempo: %2 ms • Dados read-only Magento',
+                $meta['generated_at'] ?? '',
+                $meta['load_time_ms'] ?? 0
+            )) ?>
+        </small>
+    </footer>
+</div>
