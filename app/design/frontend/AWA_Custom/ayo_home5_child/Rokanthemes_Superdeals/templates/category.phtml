@@ -25,14 +25,18 @@
 	$desktopItems = min($desktopItems, 4);
 	$desktopSmallItems = min($desktopItems, 3);
 	$tabletItems = min($desktopItems, 2);
-	$mobileItems = 1;
+	$mobileItems = 2;
 
 	if ($enabled && $category_load && strtotime($block->getConfig('end_date')) >= strtotime($block->getCurrentTime())) {
 		$image = 'category_image_primary_small';
 ?>
 <?php if($this->getConfig('title')){?>
-	<div class="rokan-product-heading rokan-onsale-heading"><h2><?php echo $block->escapeHtml($this->getConfig('title')) ?>  <span class="sup-title"><?php echo $block->escapeHtml(__('Of The Day')) ?></span></h2></div>
+	<div class="rokan-product-heading rokan-onsale-heading" aria-hidden="true"><h2><?php echo $block->escapeHtml($this->getConfig('title')) ?>  <span class="sup-title"><?php echo $block->escapeHtml(__('Of The Day')) ?></span></h2></div>
 <?php }?>
+<?php
+	$newItems = $block->getProducts();
+	$carouselLabel = (string) __('Super Ofertas');
+?>
 <div class="hot-deal-tab-slider hot-deal-tab-slider-customcss awa-shelf awa-shelf--carousel awa-shelf--has-countdown" data-awa-shelf="super-offers">
 	<div class="awa-shelf__countdown">
 	<div class="countdown_block">
@@ -41,16 +45,20 @@
 	</div>
 	</div>
 	<div class="awa-carousel">
-		<div class="awa-carousel__viewport">
-		<div class="hot-deal-slide awa-carousel__track">
+		<div class="awa-carousel__viewport awa-cq-card-wrapper"
+		     role="region"
+		     aria-roledescription="<?php echo $block->escapeHtmlAttr(__('carrossel')); ?>"
+		     aria-label="<?php echo $block->escapeHtmlAttr($carouselLabel); ?>">
+			<ul class="owl awa-carousel__track" aria-live="polite">
 			<?php
-				$newItems =  $block->getProducts();
-				$i=0;
-				foreach($newItems as $_item) {
+				$i = 0;
+				foreach ($newItems as $_item) {
+					if ($i % $rows === 0) {
+						echo "<li class='item superdealslider-item awa-carousel__slide'>";
+					}
 					$productImage = $block->getImage($_item, $image);
 				?>
-				<?php if($i++%$rows==0) { ?> <div class="product_row"> <?php } ?>
-					<div class="item-product product-item">
+					<div class="item-product awa-carousel-card-slot" data-product-id="<?php echo (int) $_item->getId(); ?>">
 						<div class="content-item-product awa-product-card">
 							<div class="product-thumb">
 								<a href="<?php echo $block->escapeUrl($_item->getProductUrl()) ?>" class="product-thumb-link" aria-label="<?php echo $block->escapeHtmlAttr($_item->getName()) ?>">
@@ -184,18 +192,24 @@
 							</div>
 						</div>
 					</div>
-						<?php if($i%$rows==0 || $i == count($newItems)) { ?> </div> <?php }?>
 				<?php
+					$i++;
+					if ($i % $rows === 0) {
+						echo '</li>';
+					}
+				}
+				if ($i % $rows !== 0) {
+					echo '</li>';
 				}
 				?>
-		</div>
+			</ul>
 		</div>
 	</div>
 </div>
 <?php
 	$awaIsHomePage = $block->getRequest()->getFullActionName() === 'cms_index_index';
 	$awaSuperdealsInitConfig = [
-		'carouselSelector' => '.hot-deal-slide',
+		'carouselSelector' => 'ul.owl.awa-carousel__track',
 		'countdownSelector' => '.super-deal-countdown',
 		'owl' => [
 			'lazyLoad' => false,
