@@ -1,0 +1,67 @@
+<?php
+/**
+ * Banner de consentimento de cookies (LGPD) — override tema AWA
+ *
+ * @var \GrupoAwamotos\CookieConsent\Block\CookieConsent $block
+ */
+?>
+<?php if ($block->isEnabled()): ?>
+<div id="awa-cookie-banner"
+     role="alertdialog"
+     aria-live="polite"
+     aria-modal="false"
+     aria-hidden="true"
+     aria-label="<?= $block->escapeHtmlAttr(__('Aviso de uso de cookies')) ?>"
+     aria-describedby="awa-cookie-desc"
+     hidden
+     style="display:none">
+    <div class="awa-cookie-banner__inner">
+        <p class="awa-cookie-banner__text" id="awa-cookie-desc">
+            <?= $block->escapeHtml(__('Usamos cookies para personalizar conteúdo e melhorar sua experiência. Ao continuar, você concorda com nossa')) ?>
+            <a class="awa-cookie-banner__link"
+               href="<?= $block->escapeUrl($block->getPolicyUrl()) ?>"
+               target="_blank" rel="noopener">
+                <?= $block->escapeHtml(__('Política de Privacidade')) ?>
+            </a>.
+        </p>
+        <div class="awa-cookie-banner__actions">
+            <button type="button"
+                    id="awa-cookie-accept"
+                    class="awa-cookie-banner__btn awa-cookie-banner__btn--accept">
+                <?= $block->escapeHtml(__('Permitir cookies')) ?>
+            </button>
+            <button type="button"
+                    id="awa-cookie-decline"
+                    class="awa-cookie-banner__btn awa-cookie-banner__btn--decline">
+                <?= $block->escapeHtml(__('Apenas essenciais')) ?>
+            </button>
+        </div>
+    </div>
+</div>
+<script>
+(function () {
+    function loadCookieConsent() {
+        require(['GrupoAwamotos_CookieConsent/js/cookie-consent'], function (cookieConsent) {
+            cookieConsent.init();
+        });
+    }
+    var loaded = false;
+    function loadOnce() {
+        if (loaded) {
+            return;
+        }
+        loaded = true;
+        loadCookieConsent();
+    }
+    document.addEventListener('pointerdown', loadOnce, { once: true, passive: true });
+    document.addEventListener('keydown', loadOnce, { once: true });
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function () {
+            window.setTimeout(loadOnce, 1500);
+        }, { once: true });
+    } else {
+        window.setTimeout(loadOnce, 1500);
+    }
+}());
+</script>
+<?php endif; ?>

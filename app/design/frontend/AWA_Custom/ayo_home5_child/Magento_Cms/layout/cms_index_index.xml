@@ -3,6 +3,7 @@
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <!-- R35: awa-consistency-home5.css carregado apenas na homepage (antes era global via default_head_blocks.xml) -->
     <head>
+        <title>Peças e Acessórios para Motos</title>
         <!-- Remove legacy parent homepage CSS (now in bundle or global bundles) -->
         <remove src="css/awa-round9-post-themeoption-overrides.css"/>
         <remove src="css/awa-components-b2b-foundation.css"/>
@@ -23,10 +24,66 @@
         <remove src="css/awa-carousel-modern.css"/>
         <remove src="GrupoAwamotos_B2B::css/marketing/suggestion.css"/>
         <!-- awa-visual-qa-home.css: movido para async via awa-head-preload.phtml ($__qaCssByAction) 2026-05-08 -->
+        <!-- Homepage terminal CSS servido: awa-home-terminal-bundle.min.css (fonte: .css; build: scripts/build-awa-home-terminal-bundle.sh) -->
+        <remove src="css/awa-home-premium.css"/>
+        <!-- awa-homepage-bento.css → _awa-layout-grid-card-unified.less (2026-05-15) -->
+        <remove src="css/awa-homepage-bento.css"/>
+        <remove src="css/awa-homepage-sidebar.css"/>
+        <remove src="css/awa-homepage-ux.css"/>
+        <remove src="css/awa-homepage-polish.css"/>
+        <!-- awa-phase1-bugfixes.css → unified hero + grid (2026-05-15) -->
+        <remove src="css/awa-phase1-bugfixes.css"/>
+        <!-- B2B UX: já async em default_head_blocks.xml (evita duplicate blocking na home) -->
+        <remove src="css/awa-home-initial-fix.css"/>
+        <remove src="css/awa-home-cascade-final.css"/>
+        <remove src="css/awa-home-visual-fix-2026-05-15.css"/>
+        <remove src="css/awa-home-polish-2026-05-16.css"/>
+        <remove src="css/awa-homepage-container-fix.css"/>
+        <!-- flex-grid-flow: global async em default_head_blocks + awa-head-preload -->
+        <remove src="css/awa-flex-grid-flow.min.css"/>
+        <remove src="css/awa-touch-final.min.css"/>
+        <css src="GrupoAwamotos_B2B::css/product/login-to-cart.css"/>
     </head>
     <body>
+        <!-- FPC home: remove blocos globais cacheable=false e recria sem o atributo (referenceBlock não aceita cacheable) -->
+        <referenceBlock name="head.additional">
+            <!-- Home: audit/footer via awa-home-cosmetic-bundle em awa-head-preload.phtml -->
+            <referenceBlock name="awa.audit.bundle.css" remove="true"/>
+            <referenceBlock name="awa.og.meta" remove="true"/>
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.og.meta"
+                   template="Magento_Theme::html/awa-og-meta.phtml"
+                   after="awa.styles.l.last">
+                <arguments>
+                    <argument name="view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\OpenGraph</argument>
+                    <argument name="open_graph_view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\OpenGraph</argument>
+                </arguments>
+            </block>
+        </referenceBlock>
+
         <referenceBlock name="theme.active.editor" remove="true"/>
         <referenceBlock name="google.maps.api" remove="true"/>
+        <!-- Home CMS usa só blocos html; widget-initializer PageBuilder (~2,2 KB mage-init) é desnecessário -->
+        <referenceBlock name="pagebuilder.widget.initializer" remove="true"/>
+        <!-- P11: section-config + customer-data adiados na home -->
+        <referenceBlock name="customer.section.config"
+                        template="Magento_Theme::html/awa-customer-sections-defer.phtml">
+            <arguments>
+                <argument name="sectionNamesProvider" xsi:type="object">Magento\Customer\Block\SectionNamesProvider</argument>
+                <argument name="auth" xsi:type="object">Magento\Customer\ViewModel\Customer\Auth</argument>
+                <argument name="cookie_settings" xsi:type="object">Magento\Customer\ViewModel\CookieSettings</argument>
+            </arguments>
+        </referenceBlock>
+        <referenceBlock name="customer.customer.data" remove="true"/>
+        <!-- Home B2B: login via /b2b/account/login — popup KO (~860 B) desnecessário no critical path -->
+        <referenceBlock name="authentication-popup" remove="true"/>
+        <!-- P13: phase3 minicart via awa-minicart-ui-bootstrap após customer-data -->
+        <referenceBlock name="awa.minicart.phase3.init" remove="true"/>
+        <!-- P14: storage-manager + invalidation-processor fora do mage-init síncrono -->
+        <referenceBlock name="frontend-storage-manager"
+                        template="Magento_Theme::html/awa-frontend-storage-defer.phtml"/>
+        <referenceBlock name="customer.data.invalidation.rules"
+                        template="Magento_Theme::html/awa-customer-invalidation-defer.phtml"/>
 
         <referenceContainer name="head.additional">
             <!-- LCP preload: primeiro slide ativo do hero slider da homepage -->
@@ -52,14 +109,30 @@
         </referenceContainer>
 
         <referenceBlock name="nav.bar.title" remove="true"/>
+        <!-- Um único H1: awa.seo.h1 (sr-only). Evita duplicata com page.main.title visível. -->
+        <referenceBlock name="page.main.title" remove="true"/>
 
-        <referenceBlock name="cms_page_content" remove="true"/>
+        <!-- Conteúdo da CMS page `home` é renderizado em top-home.phtml (blocos individuais). -->
+        <referenceBlock name="cms_page" remove="true"/>
+
+        <!-- Benefits bar: CSS final após custom_default (ui-ux-pro-max H11) -->
+        <referenceContainer name="before.body.end">
+            <!-- CSS estático inline — sem dados dinâmicos, seguro cachear. -->
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.home.benefits.final.inline"
+                   template="Magento_Theme::html/awa-home-benefits-final-inline.phtml"
+                   before="-"/>
+            <!-- Home layout R2 — após bundles async (final-wins) -->
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.home.layout.r2.body.css"
+                   template="Magento_Theme::html/awa-home-layout-r2-css.phtml"
+                   after="awa.home.benefits.final.inline"/>
+        </referenceContainer>
+
+        <!-- Notification Ticker — DESATIVADO a pedido (2026-05-19) -->
+        <referenceBlock name="awa_notification_ticker" remove="true"/>
 
         <referenceBlock name="top_home">
-            <action method="setData">
-                <argument name="name" xsi:type="string">cache_lifetime</argument>
-                <argument name="value" xsi:type="boolean">false</argument>
-            </action>
             <arguments>
                 <argument name="category_carousel_view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\CategoryCarouselData</argument>
             </arguments>
@@ -82,7 +155,7 @@
                     <argument name="load_home_owl_tabs_js" xsi:type="boolean">true</argument>
                     <argument name="load_footer_ux_js" xsi:type="boolean">false</argument>
                     <argument name="load_pdp_sticky_cta_js" xsi:type="boolean">false</argument>
-                    <argument name="load_search_compat_js" xsi:type="boolean">false</argument>
+                    <argument name="load_search_compat_js" xsi:type="boolean">true</argument>
                     <argument name="load_b2b_checkout_compat_js" xsi:type="boolean">false</argument>
                     <argument name="load_home_category_compat_js" xsi:type="boolean">false</argument>
                 </arguments>
@@ -90,13 +163,22 @@
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.home.category.carousel.init"
                    template="Magento_Theme::html/awa-home-category-carousel-init.phtml"/>
-            <block class="Magento\Framework\View\Element\Template"
-                   name="awa.carousel.nav.js"
-                   template="Magento_Theme::html/awa-carousel-nav-loader.phtml"
-                   after="awa.home.category.carousel.init"/>
             <block class="GrupoAwamotos\B2B\Block\LoginToCart"
                    name="b2b.login.to.cart.home"
                    template="GrupoAwamotos_B2B::product/login-to-cart.phtml"
+                   after="-"/>
+            <block class="Magento\Framework\View\Element\Template" 
+                   name="awa.image.fallback.init" 
+                   template="Magento_Theme::html/awa-image-fallback-init.phtml"
+                   after="-"/>
+            <!-- Scroll Reveal — IntersectionObserver for fade-in sections (2026-05-14) -->
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.scroll.reveal.js"
+                   template="Magento_Theme::html/awa-scroll-reveal-init.phtml"
+                   after="awa.image.fallback.init"/>
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.seo.jsonld"
+                   template="Magento_Cms::awa-seo-jsonld.phtml"
                    after="-"/>
         </referenceContainer>
     </body>
