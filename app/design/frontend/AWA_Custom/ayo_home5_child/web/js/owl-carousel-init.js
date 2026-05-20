@@ -6,9 +6,169 @@ define([
 ], function ($) {
     'use strict';
 
+    function railWidth($carousel) {
+        let $root = $carousel.closest('.rokan-bestseller, .rokan-newproduct, .awa-carousel-section, .row');
+        let widths = [$carousel.width(), $root.width()];
+
+        if ($root.length && $root[0].getBoundingClientRect) {
+            widths.push($root[0].getBoundingClientRect().width);
+        }
+
+        return Math.max.apply(null, widths.filter(function (w) {
+            return typeof w === 'number' && !isNaN(w);
+        }).concat([0]));
+    }
+
+    function firstOwlItemWidth($carousel) {
+        let item = $carousel.find('.owl-item').get(0);
+
+        return item ? item.getBoundingClientRect().width : 0;
+    }
+
+    function reloadOwlIfNeeded($carousel) {
+        let api = $carousel.data('owlCarousel');
+
+        if (!api) {
+            return;
+        }
+
+        if (typeof api.reload === 'function') {
+            api.reload();
+        }
+
+        $carousel.trigger('owl.update');
+        $carousel.addClass('owl-loaded');
+    }
+
+    function applyCarouselA11y($carousel) {
+        let sectionHeading = '';
+        let $heading = $carousel
+            .closest('.rokan-newproduct, .rokan-bestseller, .list-tab-product, .categorytab-container')
+            .find('.rokan-product-heading h2')
+            .first();
+        let $items = $carousel.find('.owl-item');
+        let total = $items.length;
+
+        if ($heading.length) {
+            sectionHeading = $.trim($heading.text());
+        }
+
+        if (!sectionHeading) {
+            sectionHeading = 'Produtos em destaque';
+        }
+
+        // Improve screen-reader context and touch behavior for Owl v1 rails.
+        $carousel.attr({
+            role: 'region',
+            'aria-roledescription': 'carousel',
+            'aria-label': sectionHeading
+        });
+
+        $carousel.css('touch-action', 'pan-y');
+
+        $items.attr('role', 'group');
+        if (total > 0) {
+            $items.each(function (index) {
+                $(this).attr('aria-label', (index + 1) + ' de ' + total);
+            });
+        }
+
+        $carousel.find('.owl-prev').attr({
+            role: 'button',
+            tabindex: '0',
+            'aria-label': 'Slide anterior'
+        });
+
+        $carousel.find('.owl-next').attr({
+            role: 'button',
+            tabindex: '0',
+            'aria-label': 'Proximo slide'
+        });
+    }
+
+    function bindArrowKeyboardSupport($carousel) {
+        $carousel.off('keydown.awaOwlA11y').on('keydown.awaOwlA11y', '.owl-prev, .owl-next', function (event) {
+            if (event.key === 'Enter' || event.key === ' ' || event.key === 'Spacebar') {
+                event.preventDefault();
+                $(this).trigger('click');
+            }
+        });
+    }
+
+    function scheduleOwlWidthRepairs($carousel) {
+        function repairOnce() {
+            if (firstOwlItemWidth($carousel) < 80 && railWidth($carousel) >= 200) {
+                reloadOwlIfNeeded($carousel);
+            }
+            applyCarouselA11y($carousel);
+            bindArrowKeyboardSupport($carousel);
+        }
+
+        if (window.requestAnimationFrame) {
+            window.requestAnimationFrame(function () {
+                window.requestAnimationFrame(repairOnce);
+            });
+        } else {
+            setTimeout(repairOnce, 0);
+        }
+
+        setTimeout(repairOnce, 600);
+
+        if (typeof ResizeObserver === 'undefined' || $carousel.data('awaOwlRepairObs')) {
+            return;
+        }
+
+        let root = $carousel.closest('.rokan-bestseller, .rokan-newproduct').get(0);
+        if (!root) {
+            return;
+        }
+
+        let resizeRaf = null;
+        let obs = new ResizeObserver(function () {
+            if (resizeRaf !== null) {
+                return;
+            }
+
+            resizeRaf = window.requestAnimationFrame(function () {
+                resizeRaf = null;
+
+                if (firstOwlItemWidth($carousel) < 80 && railWidth($carousel) >= 200) {
+                    reloadOwlIfNeeded($carousel);
+                    applyCarouselA11y($carousel);
+                }
+            });
+        });
+        obs.observe(root);
+        $carousel.data('awaOwlRepairObs', obs);
+    }
+
+    function runOwlInit($carousel, options, dataFlag) {
+        try {
+            if ($carousel.data('owlCarousel')) {
+                reloadOwlIfNeeded($carousel);
+            } else {
+                $carousel.owlCarousel(options);
+            }
+
+            $carousel.addClass('owl-loaded');
+            scheduleOwlWidthRepairs($carousel);
+        } catch (error) {
+            if (dataFlag) {
+                $carousel.removeData(dataFlag);
+            }
+        }
+    }
+
+    function railReady($carousel, minWidth) {
+        return $carousel && $carousel.length &&
+            $carousel.is(':visible') &&
+            railWidth($carousel) >= (minWidth || 200);
+    }
+
     function initWhenVisible($carousel, options, attemptsLeft, delayMs, dataFlag) {
-        let delay = delayMs || 120;
-        let remaining = attemptsLeft || 8;
+        let delay = delayMs || 200;
+        let remaining = typeof attemptsLeft === 'number' ? attemptsLeft : 15;
+        let minWidth = 200;
 
         if (!$carousel || !$carousel.length) {
             return;
@@ -28,29 +188,88 @@ define([
             return;
         }
 
-        // Owl v1 calcula larguras na inicialização. Se o container estiver oculto
-        // (tabs/sections lazy) ou width=0, o resultado costuma ser itens estreitos.
-        if (!$carousel.is(':visible') || $carousel.width() < 10) {
-            if (remaining <= 0) {
-                if (dataFlag) {
-                    $carousel.removeData(dataFlag);
-                }
-                return;
-            }
-
-            setTimeout(function () {
-                initWhenVisible($carousel, options, remaining - 1, delay, dataFlag);
-            }, delay);
+        if (railReady($carousel, minWidth)) {
+            runOwlInit($carousel, options, dataFlag);
             return;
         }
 
-        try {
-            $carousel.owlCarousel(options);
-        } catch (error) {
+        let root = $carousel.closest('.rokan-bestseller, .rokan-newproduct, .awa-carousel-section').get(0);
+
+        if (root && typeof IntersectionObserver !== 'undefined' && !$carousel.data('awaOwlWaitObs')) {
+            $carousel.data('awaOwlWaitObs', 1);
+
+            let waitObs = new IntersectionObserver(function (entries) {
+                entries.forEach(function (entry) {
+                    if (!entry.isIntersecting || !railReady($carousel, minWidth)) {
+                        return;
+                    }
+
+                    waitObs.disconnect();
+                    $carousel.removeData('awaOwlWaitObs');
+                    runOwlInit($carousel, options, dataFlag);
+                });
+            }, { rootMargin: '100px 0px', threshold: 0.01 });
+
+            waitObs.observe(root);
+
+            setTimeout(function () {
+                if ($carousel.data('awaOwlWaitObs')) {
+                    waitObs.disconnect();
+                    $carousel.removeData('awaOwlWaitObs');
+                    if (railReady($carousel, minWidth)) {
+                        runOwlInit($carousel, options, dataFlag);
+                    } else if (dataFlag) {
+                        $carousel.removeData(dataFlag);
+                    }
+                }
+            }, 6000);
+
+            return;
+        }
+
+        if (remaining <= 0) {
             if (dataFlag) {
                 $carousel.removeData(dataFlag);
             }
+            return;
         }
+
+        setTimeout(function () {
+            initWhenVisible($carousel, options, remaining - 1, delay, dataFlag);
+        }, delay);
+    }
+
+    function observeRailVisibility($carousel, options, dataFlag) {
+        if (typeof IntersectionObserver === 'undefined' || !$carousel.length) {
+            return;
+        }
+
+        let root = $carousel.closest('.rokan-bestseller, .rokan-newproduct').get(0);
+
+        if (!root) {
+            return;
+        }
+
+        let observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (!entry.isIntersecting) {
+                    return;
+                }
+
+                if (railWidth($carousel) >= 200) {
+                    if (!$carousel.data('owlCarousel')) {
+                        initWhenVisible($carousel, options, 12, 200, dataFlag);
+                    } else {
+                        reloadOwlIfNeeded($carousel);
+                        scheduleOwlWidthRepairs($carousel);
+                    }
+                }
+
+                observer.disconnect();
+            });
+        }, { rootMargin: '80px 0px', threshold: 0.05 });
+
+        observer.observe(root);
     }
 
     function resolveBoolean(value, fallback) {
@@ -64,6 +283,11 @@ define([
     }
 
     return function (config, element) {
+        if (window.AWA_SHELF_CAROUSEL && typeof window.AWA_SHELF_CAROUSEL.scan === 'function') {
+            window.AWA_SHELF_CAROUSEL.scan(element);
+            return;
+        }
+
         var $scope = $(element);
         let carouselSelector = config.carouselSelector || '.owl';
         let owlConfig = config.owl || {};
@@ -92,18 +316,39 @@ define([
                     this.$owlItems.removeClass('first-active');
                     this.$owlItems.eq(this.currentItem).addClass('first-active');
                 }
+
+                if (this.$elem) {
+                    applyCarouselA11y($(this.$elem));
+                }
             };
         }
+
+        options.afterInit = function () {
+            if (this.$elem) {
+                applyCarouselA11y($(this.$elem));
+                bindArrowKeyboardSupport($(this.$elem));
+            }
+        };
 
         $scope.find(carouselSelector).each(function () {
             var $carousel = $(this);
 
-            if ($carousel.data('owlCarousel') || $carousel.hasClass('owl-loaded') || $carousel.data(dataFlag)) {
+            if ($carousel.data(dataFlag)) {
                 return;
             }
 
             $carousel.data(dataFlag, 1);
-            initWhenVisible($carousel, options, 8, 120, dataFlag);
+
+            if ($carousel.data('owlCarousel') || $carousel.hasClass('owl-carousel')) {
+                if (firstOwlItemWidth($carousel) < 80) {
+                    reloadOwlIfNeeded($carousel);
+                }
+                observeRailVisibility($carousel, options, dataFlag);
+                return;
+            }
+
+            initWhenVisible($carousel, options, 15, 200, dataFlag);
+            observeRailVisibility($carousel, options, dataFlag);
         });
     };
 });

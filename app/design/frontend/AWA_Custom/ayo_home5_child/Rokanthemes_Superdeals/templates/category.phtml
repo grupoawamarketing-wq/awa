@@ -33,13 +33,16 @@
 <?php if($this->getConfig('title')){?>
 	<div class="rokan-product-heading rokan-onsale-heading"><h2><?php echo $block->escapeHtml($this->getConfig('title')) ?>  <span class="sup-title"><?php echo $block->escapeHtml(__('Of The Day')) ?></span></h2></div>
 <?php }?>
-<div class="hot-deal-tab-slider hot-deal-tab-slider-customcss">
+<div class="hot-deal-tab-slider hot-deal-tab-slider-customcss awa-shelf awa-shelf--carousel awa-shelf--has-countdown" data-awa-shelf="super-offers">
+	<div class="awa-shelf__countdown">
 	<div class="countdown_block">
 		<div class="title_countdown"><?php echo $block->escapeHtml(__('Hurry Up! Offer ends in:')) ?></div>
 		<div class="super-deal-countdown" data-date="<?php echo $block->escapeHtmlAttr($block->getConfig('end_date')); ?>"></div>
 	</div>
-	<div class="row">
-		<div class="hot-deal-slide">
+	</div>
+	<div class="awa-carousel">
+		<div class="awa-carousel__viewport">
+		<div class="hot-deal-slide awa-carousel__track">
 			<?php
 				$newItems =  $block->getProducts();
 				$i=0;
@@ -48,9 +51,9 @@
 				?>
 				<?php if($i++%$rows==0) { ?> <div class="product_row"> <?php } ?>
 					<div class="item-product product-item">
-						<div class="content-item-product">
+						<div class="content-item-product awa-product-card">
 							<div class="product-thumb">
-								<a href="<?php echo $block->escapeUrl($_item->getProductUrl()) ?>" class="product-thumb-link">
+								<a href="<?php echo $block->escapeUrl($_item->getProductUrl()) ?>" class="product-thumb-link" aria-label="<?php echo $block->escapeHtmlAttr($_item->getName()) ?>">
 									<?php $productImageThumb = $block->getImage($_item, 'category_image_second_small');
 									$productImageThumbUrl = (string)$productImageThumb->getImageUrl();
 									$productImagePrimaryUrl = (string)$productImage->getImageUrl();
@@ -145,24 +148,29 @@
 										<?php echo $block->getReviewsSummaryHtml($_item, $templateType,true); ?>
 									<?php endif; ?>
 								</div>
-								<div class="sold-by">
-									<?php
-										$cats = $_item->getAttributeText('sold_by');
-										echo ' <span>'.$block->escapeHtml(__('Sold by:')).'</span>' . $block->escapeHtml($cats);
-									 ?>
-								</div>
+							<?php $cats = $_item->getAttributeText('sold_by'); ?>
+							<?php if (!empty($cats)): ?>
+							<div class="sold-by">
+								<span><?= $block->escapeHtml(__('Sold by:')) ?></span>
+								<?= $block->escapeHtml($cats) ?>
+							</div>
+							<?php endif; ?>
 								<div class="info-price">
 									<?php /* @noEscape */ echo $this->helper('Rokanthemes\Themeoption\Helper\Data')->getPriceDisplayCustom($block->getProductPrice($_item)) ?>
 								</div>
-								<?php if($_item->getTypeId() == 'simple' || $_item->getTypeId() == 'virtual' || $_item->getTypeId() == 'downloadable'): ?>
 								<?php
-									$sale_qty = $this->helper('Rokanthemes\RokanBase\Helper\Data')->getSalableQuantityDataBySku($_item->getSku());
-									$numbersold = $block->getSoldProduct($_item->getId());
-									$total = $sale_qty + $numbersold;
+									$total = 0;
+									$numbersold = 0;
+									if ($_item->getTypeId() === 'simple' || $_item->getTypeId() === 'virtual' || $_item->getTypeId() === 'downloadable') {
+										$sale_qty = $this->helper('Rokanthemes\RokanBase\Helper\Data')->getSalableQuantityDataBySku($_item->getSku());
+										$numbersold = $block->getSoldProduct($_item->getId());
+										$total = $sale_qty + $numbersold;
+									}
 								?>
+								<div class="product-sold-slot" aria-hidden="<?php echo $total > 0 ? 'false' : 'true'; ?>">
 								<?php if ($total > 0): ?>
 								<div class="product-sold" data-sold-total="<?php echo (int)$total; ?>">
-									<?php $calculator = ($total > 0) ? max(0, min(100, ($numbersold / $total) * 100)) : 0; ?>
+									<?php $calculator = max(0, min(100, ($numbersold / $total) * 100)); ?>
 									<div class="ruler-sold" role="progressbar" aria-valuenow="<?php echo (int)$numbersold; ?>" aria-valuemin="0" aria-valuemax="<?php echo (int)$total; ?>" aria-label="<?php echo $block->escapeHtmlAttr(__('Sales progress')); ?>">
 										<div class="ruler-sold-count" style="width: <?php echo (int)$calculator; ?>%;"></div>
 									</div>
@@ -172,7 +180,7 @@
 									</div>
 								</div>
 								<?php endif; ?>
-								<?php endif; ?>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -181,42 +189,56 @@
 				}
 				?>
 		</div>
+		</div>
 	</div>
 </div>
+<?php
+	$awaIsHomePage = $block->getRequest()->getFullActionName() === 'cms_index_index';
+	$awaSuperdealsInitConfig = [
+		'carouselSelector' => '.hot-deal-slide',
+		'countdownSelector' => '.super-deal-countdown',
+		'owl' => [
+			'lazyLoad' => false,
+			'items' => $desktopItems,
+			'itemsDesktop' => [1366, $desktopItems],
+			'itemsDesktopSmall' => [1199, $desktopSmallItems],
+			'itemsTablet' => [991, $tabletItems],
+			'itemsMobile' => [680, $mobileItems],
+			'navigation' => (bool) $show_navigation,
+			'pagination' => (bool) $show_pagination,
+			'autoPlay' => (bool) $auto,
+		],
+		'countdown' => [
+			'fg_width' => 0.01,
+			'bg_width' => 1.2,
+			'text_size' => 0.07,
+			'circle_bg_color' => '#ffffff',
+		],
+		'labels' => [
+			'days' => (string) __('Days'),
+			'hours' => (string) __('Hours'),
+			'minutes' => (string) __('Mins'),
+			'seconds' => (string) __('Secs'),
+		],
+	];
+	$awaSuperdealsPayload = json_encode(
+		['selector' => '.hot-deal-tab-slider-customcss', 'config' => $awaSuperdealsInitConfig],
+		JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+	);
+	$awaSuperdealsPayload = preg_replace('#</(\s*)script#i', '<\\/\\1script', (string) $awaSuperdealsPayload);
+?>
+<?php if ($awaIsHomePage): ?>
+<script type="application/json" id="awa-home-superdeals-init-json"><?= /* @noEscape */ $awaSuperdealsPayload ?></script>
+<?php else: ?>
 <script type="text/x-magento-init">
 {
 	"[data-role=tocart-form]": {
 		"catalogAddToCart": {}
 	},
 	".hot-deal-tab-slider-customcss": {
-		"js/superdeals-init": {
-			"carouselSelector": ".hot-deal-slide",
-			"countdownSelector": ".super-deal-countdown",
-			"owl": {
-				"lazyLoad": true,
-				"items": <?php echo (int)$desktopItems; ?>,
-				"itemsDesktop": [1366, <?php echo (int)$desktopItems; ?>],
-				"itemsDesktopSmall": [1199, <?php echo (int)$desktopSmallItems; ?>],
-				"itemsTablet": [991, <?php echo (int)$tabletItems; ?>],
-				"itemsMobile": [680, <?php echo (int)$mobileItems; ?>],
-				"navigation": <?php echo ($show_navigation) ? 'true' : 'false'; ?>,
-				"pagination": <?php echo ($show_pagination) ? 'true' : 'false'; ?>,
-				"autoPlay": <?php echo ($auto) ? 'true' : 'false'; ?>
-			},
-			"countdown": {
-				"fg_width": 0.01,
-				"bg_width": 1.2,
-				"text_size": 0.07,
-				"circle_bg_color": "#ffffff"
-			},
-			"labels": {
-				"days": "<?php echo $block->escapeJsQuote(__('Days')); ?>",
-				"hours": "<?php echo $block->escapeJsQuote(__('Hours')); ?>",
-				"minutes": "<?php echo $block->escapeJsQuote(__('Mins')); ?>",
-				"seconds": "<?php echo $block->escapeJsQuote(__('Secs')); ?>"
-			}
-		}
+		"js/superdeals-init": <?= /* @noEscape */ json_encode($awaSuperdealsInitConfig, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>
 	}
 }
 </script>
+<?php endif; ?>
 <?php } ?>

@@ -94,12 +94,15 @@
             <!-- AWA Audit Bundle: consolida 4 audit CSS em 1 request (2026-05-09)
                  Antes: awa-visual-audit-final (59KB) + awa-visual-consistency (51KB)
                       + awa-header-audit-fix (5KB) + awa-deep-audit (44KB) = 4 requests
-                 Depois: awa-audit-bundle (162KB) = 1 request — reduz 3 HTTP round-trips -->
+                 Depois: awa-audit-bundle (162KB) = 1 request — reduz 3 HTTP round-trips
+                 FPC: output é puramente links CSS estáticos — seguro cachear. -->
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.audit.bundle.css"
                    template="Magento_Theme::html/awa-audit-bundle-css.phtml"
                    after="awa.styles.l.last"/>
 
+            <!-- OG Meta: gerado por URL (mesmo conteúdo para todos os visitantes na mesma URL).
+                 FPC cacheia por URL — correto. Removido cacheable=false que impedia caching do site inteiro. -->
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.og.meta"
                    template="Magento_Theme::html/awa-og-meta.phtml"
@@ -109,6 +112,12 @@
                     <argument name="open_graph_view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\OpenGraph</argument>
                 </arguments>
             </block>
+
+            <!-- AWA Product Shelf Carousel — CSS + JS único (todas as páginas) -->
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.shelf.carousel"
+                   template="Magento_Theme::html/awa-shelf-carousel-loader.phtml"
+                   after="awa.og.meta"/>
         </referenceBlock>
     </body>
 </page>

@@ -5,22 +5,43 @@
 <page layout="1column"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <update handle="awa_pdp_performance"/>
     <head>
-        <!-- PDP CSS: loaded normally (head.additional workaround — blocks there don't render in production).
-             Previously removed for async loading via phtml, but head.additional is broken. -->
+        <!-- PDP CSS: single consolidated file (awa-pdp.css) replaces 5 separate files. -->
         <css src="GrupoAwamotos_Fitment::css/fitment-application.css"/>
-        <css src="css/awa-visual-qa-product.css"/>
-        <css src="css/awa-pdp-premium.css"/>
-        <script src="js/awa-pdp-hardfix.js"/>
+        <!-- media=all: regra anterior media=print impedia o bundle PDP de aplicar na tela -->
+        <css src="css/awa-pdp.css"/>
+        <!-- flex/touch: já em awa-defer-global-bundle (awa-head-preload) — removido duplicate 2026-05-18 -->
+        <script src="js/awa-pdp-hardfix.js" defer="true"/>
+        <!-- Tema pai: cards duplicados conflitam com MODERNIZE v2 (awa-pdp.css §20) -->
+        <remove src="css/awa-pdp-final-polish.css"/>
+        <remove src="css/awa-round3-pdp-conversion.css"/>
     </head>
     <body>
+        <!-- Sidebar removida da PDP: produto ocupa largura total (layout 1column) -->
+        <referenceBlock name="sale.reorder.sidebar" remove="true"/>
+
         <!-- Remove Magento native OG (duplicates awa.og.meta in default.xml) -->
         <referenceBlock name="opengraph.general" remove="true"/>
         <!-- PDP info cleanup: parent Ayo renders duplicate print/share buttons here. -->
         <referenceBlock name="awa.product.info.addto" remove="true"/>
         <referenceBlock name="awa.product.info.mailto" remove="true"/>
         <referenceContainer name="awa.product.info.social" remove="true"/>
+        <!-- Remove bloco nativo (template AYO legado mostra "0 Avaliação") -->
         <referenceBlock name="product.info.review" remove="true"/>
+        <referenceContainer name="box.inner1">
+            <!-- Dados de review são por-produto e públicos; FPC invalida via cache tag catalog_product_N. -->
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.pdp.review.summary"
+                   template="Magento_Catalog::product/view/awa-pdp-review-summary.phtml"
+                   after="page.main.title"
+                   before="product.info.price">
+                <arguments>
+                    <argument name="review_summary_view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\ProductReviewSummary</argument>
+                    <argument name="product_structured_data_view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\ProductStructuredData</argument>
+                </arguments>
+            </block>
+        </referenceContainer>
         <referenceBlock name="reviews.tab" remove="true"/>
         <referenceBlock name="product.info.details.reviews" remove="true"/>
         <referenceBlock name="review_form" remove="true"/>
@@ -30,6 +51,7 @@
              Moved to after.body.start because head.additional block doesn't render
              children in production mode (block_html cache issue). -->
         <referenceContainer name="after.body.start">
+            <!-- CSS puramente estático (design tokens :root). Seguro cachear. -->
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.pdp.info.final.css"
                    template="Magento_Catalog::product/view/awa-pdp-info-final-css-v2.phtml"
@@ -61,19 +83,26 @@
             </block>
         </referenceContainer>
 
-        <!-- PDP ultra-hardfix: final last-wins style guard for runtime bundle conflicts -->
-        <referenceContainer name="after.body.start">
-            <block class="Magento\Framework\View\Element\Template"
-                   name="awa.pdp.ultra.hardfix"
-                   template="Magento_Catalog::product/view/awa-pdp-ultra-hardfix.phtml"
-                   after="-"/>
-        </referenceContainer>
+        <!-- Fitment abaixo da galeria (preenche vazio lateral quando coluna info é mais alta) -->
+        <move element="product.fitment.applications" destination="product.col.media" after="product.info.media"/>
+        <!-- Overview + social proof na coluna mídia → equilibra altura vs buy-box (fix LAYOUT-VOID) -->
+        <move element="product.info.overview" destination="product.col.media" after="product.fitment.applications"/>
+        <move element="product.info.social.proof" destination="product.col.media" after="product.info.overview"/>
 
         <!-- Sticky Add-to-Cart bar — aparece quando o botão principal sai da viewport -->
         <referenceContainer name="before.body.end">
             <block class="Magento\Catalog\Block\Product\View"
                    name="awa.pdp.sticky.bar"
                    template="Magento_Catalog::product/view/awa-pdp-sticky-bar.phtml"
+                   before="-">
+                <arguments>
+                    <argument name="b2b_gate_view_model" xsi:type="object">GrupoAwamotos\B2B\ViewModel\PdpGate</argument>
+                </arguments>
+            </block>
+            <!-- PDP ultra-hardfix: último CSS da página. CSS estático — seguro cachear. -->
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.pdp.ultra.hardfix"
+                   template="Magento_Catalog::product/view/awa-pdp-ultra-hardfix.phtml"
                    after="-"/>
         </referenceContainer>
     </body>

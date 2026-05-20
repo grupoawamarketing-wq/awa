@@ -102,15 +102,17 @@ class Related extends AbstractProduct
 
         $currentProduct = $this->registry->registry('current_product');
         if (!$currentProduct) {
-            $this->collection = $this->collectionFactory->create()
-                ->addFieldToFilter('entity_id', ['null' => true]);
+            $collection = $this->collectionFactory->create();
+            $collection->addFieldToFilter('entity_id', ['null' => true]);
+            $this->collection = $collection;
             return $this->collection;
         }
 
         $categoryIds = $currentProduct->getCategoryIds();
         if (empty($categoryIds)) {
-            $this->collection = $this->collectionFactory->create()
-                ->addFieldToFilter('entity_id', ['null' => true]);
+            $collection = $this->collectionFactory->create();
+            $collection->addFieldToFilter('entity_id', ['null' => true]);
+            $this->collection = $collection;
             return $this->collection;
         }
 

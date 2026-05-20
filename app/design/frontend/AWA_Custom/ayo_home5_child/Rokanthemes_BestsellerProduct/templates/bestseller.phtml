@@ -28,8 +28,10 @@ $rows = (int) $this->getConfig('row_show') ?: 1;
 $showCart = (bool) $this->getConfig('addtocart');
 $showReview = (bool) $this->getConfig('review');
 $isHomePage = $block->getRequest()->getFullActionName() === 'cms_index_index';
+$sectionTitle = trim((string) $this->getConfig('title'));
+$carouselLabel = $sectionTitle !== '' ? $sectionTitle : (string) __('Mais Vendidos');
 ?>
-<div class="rokan-bestseller">
+<div class="rokan-bestseller awa-shelf awa-shelf--carousel" data-awa-shelf="bestseller">
     <?php if ($this->getConfig('title')): ?>
     <div class="rokan-product-heading rokan-featured-heading" aria-hidden="true">
         <h2><?= $block->escapeHtml($this->getConfig('title')) ?></h2>
@@ -42,8 +44,12 @@ $isHomePage = $block->getRequest()->getFullActionName() === 'cms_index_index';
             <p class="note-msg"><?= $block->escapeHtml(__('There are no products matching the selection.')) ?></p>
         </div>
     <?php else: ?>
-        <div class="row">
-            <ul class="owl">
+        <div class="awa-carousel">
+            <div class="awa-carousel__viewport awa-cq-card-wrapper"
+                 role="region"
+                 aria-roledescription="<?= $block->escapeHtmlAttr(__('carrossel')) ?>"
+                 aria-label="<?= $block->escapeHtmlAttr($carouselLabel) ?>">
+            <ul class="owl awa-carousel__track" aria-live="polite">
                 <?php
                 $i = 0;
                 foreach ($_productCollection as $_product):
@@ -58,7 +64,11 @@ $isHomePage = $block->getRequest()->getFullActionName() === 'cms_index_index';
                     $productImageThumbUrl = (string) $productImageThumb->getImageUrl();
 
                     if ($i < 2) {
+                        // Primeiras 2 imagens: acima do fold — eager + high priority
                         $productImageHtml = str_replace(' loading="lazy"', ' loading="eager" fetchpriority="high"', $productImageHtml);
+                    } else {
+                        // Demais imagens: below-fold — forçar lazy loading (UX guideline: lazy load below-fold)
+                        $productImageHtml = str_replace([' loading="eager"', ' fetchpriority="high"'], [' loading="lazy"', ''], $productImageHtml);
                     }
 
                     if ($productImageThumbUrl === '' || strpos($productImageThumbUrl, '/placeholder/') !== false) {
@@ -79,12 +89,11 @@ $isHomePage = $block->getRequest()->getFullActionName() === 'cms_index_index';
                             . 'top:' . $productImage->getHeight() . 'px;"';
                     }
                 ?>
-                    <div class="item-product col-md-3" data-product-id="<?= (int) $_product->getId() ?>">
-                        <div class="content-item-product">
+                    <div class="item-product awa-carousel-card-slot" data-product-id="<?= (int) $_product->getId() ?>">
+                        <div class="content-item-product awa-product-card">
                             <div class="product-thumb">
                                 <a href="<?= $block->escapeUrl($_product->getProductUrl()) ?>"
                                    class="product-thumb-link"
-                                   tabindex="-1"
                                    aria-label="<?= $block->escapeHtmlAttr($_product->getName()) ?>">
                                     <span class="first-thumb">
                                         <?= /* @noEscape */ $productImageHtml ?>
@@ -123,7 +132,8 @@ $isHomePage = $block->getRequest()->getFullActionName() === 'cms_index_index';
                                                href="javascript:void(0);"
                                                data-href="<?= $block->escapeUrl($block->getUrl('quickview/product/quickview/id/' . $_product->getId())) ?>"
                                                class="quickview-link"
-                                               title="<?= $block->escapeHtmlAttr(__('Visualização Rápida')) ?>">
+                                               title="<?= $block->escapeHtmlAttr(__('Visualização Rápida')) ?>"
+                                               aria-label="<?= $block->escapeHtmlAttr(__('Visualização Rápida') . ': ' . $_product->getName()) ?>">
                                                 <i class="fa fa-eye" aria-hidden="true"></i>
                                             </a>
                                         </li>
@@ -211,8 +221,12 @@ $isHomePage = $block->getRequest()->getFullActionName() === 'cms_index_index';
                 }
                 ?>
             </ul>
+            </div>
         </div>
 
+        <?php
+        $awaIsHomePage = $block->getRequest()->getFullActionName() === 'cms_index_index';
+        ?>
         <?php if (!$block->isRedirectToCartEnabled()): ?>
         <script type="text/x-magento-init">
         {
@@ -222,32 +236,5 @@ $isHomePage = $block->getRequest()->getFullActionName() === 'cms_index_index';
         }
         </script>
         <?php endif; ?>
-        <script type="text/x-magento-init">
-        {
-            ".rokan-bestseller": {
-                "js/owl-carousel-init": {
-                    "carouselSelector": ".owl",
-                    "dataFlag": "awaOwlBestsellerInit",
-                    "owl": {
-                        "lazyLoad": true,
-                        "autoPlay": false,
-                        "items": 4,
-                        "itemsDesktop": [1199, 4],
-                        "itemsDesktopSmall": [980, 3],
-                        "itemsTablet": [768, 2],
-                        "itemsMobile": [479, 1],
-                        "slideSpeed": 500,
-                        "paginationSpeed": 500,
-                        "rewindSpeed": 500,
-                        "navigation": true,
-                        "stopOnHover": true,
-                        "pagination": false,
-                        "scrollPerPage": true
-                    }
-                }
-            }
-        }
-        </script>
     <?php endif; ?>
 </div>
-
