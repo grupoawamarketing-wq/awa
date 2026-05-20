@@ -116,6 +116,24 @@
                         <field id="notify_admin_new_customer">1</field>
                     </depends>
                 </field>
+
+                <field id="scoring_enabled" translate="label comment" type="select" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Triagem Inteligente por Score</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Calcula score verde/amarelo/vermelho no cadastro. Verde + CNAE direto + auto-aprovação CNAE = aprovação automática.</comment>
+                    <depends>
+                        <field id="require_approval">1</field>
+                    </depends>
+                </field>
+
+                <field id="link_existing_erp_on_approval" translate="label comment" type="select" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Vincular ERP existente na aprovação (opcional)</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[Se o CNPJ já existir em FN_FORNECEDORES, cria vínculo automaticamente. Novos clientes integram via pull de pedido — cadastro manual no ERP não é exigido.]]></comment>
+                    <depends>
+                        <field id="require_approval">1</field>
+                    </depends>
+                </field>
             </group>
 
             <!-- Quantidade Mínima -->
@@ -780,6 +798,41 @@
                     <label>Pedido Rápido</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment>Habilita o acesso ao pedido rápido por código na área B2B.</comment>
+                </field>
+            </group>
+
+            <group id="platform" translate="label" type="text" sortOrder="250" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Plataforma B2B (Fase 1 + 2)</label>
+                <comment><![CDATA[Flags de modernização visual e menu unificado. Rollback: defina ambos como Não.]]></comment>
+
+                <field id="design_system_enabled" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Design System Admin B2B</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Carrega CSS platform/ e classes .awa-b2b-* nas telas habilitadas (piloto: Relatórios Comerciais).</comment>
+                </field>
+
+                <field id="unified_menu_enabled" translate="label comment" type="select" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Menu Unificado B2B</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Exibe o menu raiz B2B (menu_platform.xml). Não remove menus legados por padrão.</comment>
+                </field>
+
+                <field id="legacy_menu_visible" translate="label comment" type="select" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Manter Menus Legados Visíveis</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Com menu unificado ativo: mantém AWA Comercial e B2B (Grupo Awamotos) visíveis.</comment>
+                    <depends>
+                        <field id="unified_menu_enabled">1</field>
+                    </depends>
+                </field>
+
+                <field id="legacy_menu_badge" translate="label comment" type="select" sortOrder="40" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Destaque Visual em Menus Legados</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Adiciona classe CSS awa-b2b-legacy-menu-badge no admin quando design system está ativo.</comment>
+                    <depends>
+                        <field id="design_system_enabled">1</field>
+                    </depends>
                 </field>
             </group>
 

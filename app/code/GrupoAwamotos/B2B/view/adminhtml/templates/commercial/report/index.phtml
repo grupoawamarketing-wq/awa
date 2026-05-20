@@ -1,0 +1,98 @@
+<?php
+/** @var \GrupoAwamotos\B2B\CommercialPanel\Block\Adminhtml\Report\Index $block */
+/** @var \GrupoAwamotos\B2B\Platform\ViewModel\PlatformUi|null $platformUi */
+$platformUi = $block->getData('platform_ui');
+$usePlatform = $platformUi && $platformUi->isDesignSystemEnabled();
+$shellClass = $usePlatform ? 'awa-b2b-shell awa-commercial-dashboard' : 'awa-commercial-dashboard';
+$report = $block->getReport();
+$filters = $block->getFilters();
+$summary = $report['summary'] ?? [];
+$labels = [
+    'contacts' => __('Contatos'),
+    'tasks' => __('Tarefas'),
+    'inactive_customers' => __('Clientes Parados (30d+)'),
+    'reactivated_customers' => __('Clientes Reativados'),
+    'abandoned_carts_treated' => __('Carrinhos Tratados'),
+    'orders_generated' => __('Pedidos Gerados'),
+];
+?>
+<div class="<?= $block->escapeHtmlAttr($shellClass) ?>">
+    <?php if ($usePlatform): ?>
+        <div class="awa-b2b-pilot-banner">
+            <div class="awa-b2b-alert awa-b2b-alert--info">
+                <?= $block->escapeHtml(__('Visual piloto do Design System B2B (somente leitura).')) ?>
+            </div>
+        </div>
+    <?php endif; ?>
+    <header class="<?= $usePlatform ? 'awa-b2b-page-header' : 'awa-commercial-header' ?>">
+        <div class="awa-b2b-page-header__row">
+            <div>
+                <h1><?= $block->escapeHtml(__('Relatórios Comerciais')) ?></h1>
+                <p class="awa-b2b-page-header__subtitle"><?= $block->escapeHtml(__('Filtre por período e exporte o resumo operacional da equipe.')) ?></p>
+            </div>
+        </div>
+    </header>
+
+    <form class="<?= $usePlatform ? 'awa-b2b-filter-bar awa-commercial-filters' : 'awa-commercial-filters' ?>" method="get"
+          action="<?= $block->escapeUrl($block->getUrl('*/*/*')) ?>">
+        <div class="awa-commercial-filters__fields">
+        <div class="admin__field">
+            <label><?= $block->escapeHtml(__('De')) ?></label>
+            <input type="date" name="date_from" value="<?= $block->escapeHtmlAttr($filters['date_from']) ?>" class="admin__control-text"/>
+        </div>
+        <div class="admin__field">
+            <label><?= $block->escapeHtml(__('Até')) ?></label>
+            <input type="date" name="date_to" value="<?= $block->escapeHtmlAttr($filters['date_to']) ?>" class="admin__control-text"/>
+        </div>
+        <?php if ($block->getAttendantOptions() !== []): ?>
+            <div class="admin__field">
+                <label><?= $block->escapeHtml(__('Vendedora')) ?></label>
+                <select name="attendant_id" class="admin__control-select">
+                    <option value=""><?= $block->escapeHtml(__('Todas visíveis')) ?></option>
+                    <?php foreach ($block->getAttendantOptions() as $id => $name): ?>
+                        <option value="<?= (int) $id ?>"<?= (string) $id === (string) ($filters['attendant_id'] ?? '') ? ' selected' : '' ?>>
+                            <?= $block->escapeHtml($name) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+        <?php endif; ?>
+        <div class="admin__field">
+            <label><?= $block->escapeHtml(__('Status Cliente')) ?></label>
+            <input type="text" name="customer_status" value="<?= $block->escapeHtmlAttr($filters['customer_status']) ?>" class="admin__control-text"/>
+        </div>
+        <div class="admin__field">
+            <label><?= $block->escapeHtml(__('Tipo de Tarefa')) ?></label>
+            <select name="task_type" class="admin__control-select">
+                <?php foreach ($block->getTaskTypeOptions() as $value => $label): ?>
+                    <option value="<?= $block->escapeHtmlAttr($value) ?>"<?= $value === ($filters['task_type'] ?? '') ? ' selected' : '' ?>>
+                        <?= $block->escapeHtml($label) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        </div>
+        <div class="awa-commercial-filters__actions">
+        <button type="submit" class="action-primary awa-btn-sm">
+            <span><?= $block->escapeHtml(__('Filtrar')) ?></span>
+        </button>
+        <?php if ($block->canExport()): ?>
+            <a class="action-default" href="<?= $block->escapeUrl($block->getExportUrl()) ?>">
+                <?= $block->escapeHtml(__('Exportar CSV')) ?>
+            </a>
+        <?php endif; ?>
+        </div>
+    </form>
+
+    <section class="<?= $usePlatform ? 'awa-b2b-section-card' : 'awa-section' ?>">
+        <h2 class="<?= $usePlatform ? 'awa-b2b-section-card__title' : '' ?>"><?= $block->escapeHtml(__('Resumo')) ?></h2>
+        <div class="<?= $usePlatform ? 'awa-b2b-metric-grid' : 'awa-commercial-kpis' ?>">
+            <?php foreach ($summary as $key => $value): ?>
+                <div class="<?= $usePlatform ? 'awa-b2b-metric-card' : 'awa-kpi' ?>">
+                    <span class="<?= $usePlatform ? 'awa-b2b-metric-card__value' : 'awa-kpi-value' ?>"><?= (int) $value ?></span>
+                    <span class="<?= $usePlatform ? 'awa-b2b-metric-card__label' : 'awa-kpi-label' ?>"><?= $block->escapeHtml($labels[$key] ?? $key) ?></span>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </section>
+</div>
