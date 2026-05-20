@@ -3774,7 +3774,6 @@ html body .page-wrapper .header-wrapper-sticky[data-awa-sticky-container="true"]
   + .top-home-content
   .owl-carousel:not(.owl-loaded) {
   min-height: 0 !important;
-  max-height: 320px !important;
   height: auto !important;
 }
 
@@ -3792,7 +3791,6 @@ html body .page-wrapper .header-wrapper-sticky[data-awa-sticky-container="true"]
   display: flex !important;
   flex-flow: row nowrap !important;
   overflow: hidden !important;
-  max-height: 300px !important;
   margin: 0 !important;
   padding: 0 !important;
   list-style: none !important;
@@ -3813,8 +3811,7 @@ html body .page-wrapper .header-wrapper-sticky[data-awa-sticky-container="true"]
   :is(.rokan-bestseller, .rokan-newproduct, .rokan-featuredproduct)
   > .row {
   min-height: 0 !important;
-  max-height: 320px !important;
-  overflow: hidden !important;
+  overflow: visible !important;
 }
 
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
@@ -5071,10 +5068,11 @@ body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
   max-height: none !important;
 }
 
+/* V-01 / P0: Owl track empilhado antes do init — ul.owl.awa-carousel__track (Passo 2) */
 #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
   .page-wrapper
   .top-home-content--trust-and-offers
-  .hot-deal-slide:not(.owl-loaded):not(.swiper-initialized) {
+  ul.owl.awa-carousel__track:not(.owl-loaded):not(.swiper-initialized) {
   max-height: var(--awa-home-trust-deal-max-h) !important;
   overflow: hidden !important;
 }
@@ -5082,27 +5080,15 @@ body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
 #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
   .page-wrapper
   .top-home-content--trust-and-offers
-  .hot-deal-slide:not(.owl-carousel):not(.owl-loaded)
-  > .product_row:not(:first-child) {
+  ul.owl.awa-carousel__track:not(.owl-carousel):not(.owl-loaded)
+  > li.awa-carousel__slide:not(:first-child) {
   display: none !important;
 }
 
 #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
   .page-wrapper
   .top-home-content--trust-and-offers
-  .hot-deal-slide.swiper:not(.swiper-initialized)
-  .swiper-slide.product_row:nth-child(n + 2) {
-  display: none !important;
-}
-
-#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
-  .page-wrapper
-  .top-home-content--trust-and-offers
-  .hot-deal-slide.owl-carousel.owl-loaded,
-#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
-  .page-wrapper
-  .top-home-content--trust-and-offers
-  .hot-deal-slide.swiper.swiper-initialized {
+  ul.owl.awa-carousel__track.owl-carousel.owl-loaded {
   max-height: none !important;
   overflow: visible !important;
 }
@@ -5381,7 +5367,6 @@ body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
 #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
   .page-wrapper
   .products-swiper:not(.swiper-initialized) {
-  max-height: 320px;
   overflow: hidden;
 }
 
@@ -5685,7 +5670,6 @@ body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
     .category_tab_slider.swiper,
     .awa-featured-swiper
   ):not(.swiper-initialized) {
-  max-height: 340px;
   overflow: hidden;
 }
 
@@ -7153,4 +7137,182 @@ body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
   > .top-home-content.top-home-content--trust-and-offers {
   /* shorthand único vence padding: 20px de outras folhas */
   padding: var(--awa-space-4, 16px) 0 !important;
+}
+
+/* ==========================================================================
+   R2-A/B (2026-05-20) — Carrosséis home: cards proporcionais + pre-init estável
+   Causa: BUG #26 padding-bottom 100% conflita com product-thumb 4/3;
+          max-height pre-init clipa cards → área branca; nomes 3 linhas esticam card.
+   ========================================================================== */
+
+/* A1: Neutralizar BUG #26 dentro shelf carrosséis home */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+  .awa-carousel-section .awa-shelf--carousel
+  :is(.product-image-wrapper, .product-image-container) {
+  padding-bottom: 0;
+  position: static;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+}
+
+/* A2: Slot de imagem 4:3 — altura proporcional */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+  .awa-carousel-section .awa-shelf--carousel .product-thumb {
+  aspect-ratio: 4 / 3;
+  width: 100%;
+  max-height: clamp(9rem, 28vw, 12.5rem);
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--awa-bg-muted, #f5f5f5);
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+  .awa-carousel-section .awa-shelf--carousel .product-thumb
+  :is(.first-thumb, .product-image-container, .product-image-wrapper, a) {
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+  .awa-carousel-section .awa-shelf--carousel .product-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* A3: Cards equal-height sem esticar demais */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+  .awa-carousel-section .awa-shelf--carousel .item-product {
+  height: 100%;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+  .awa-carousel-section .awa-shelf--carousel
+  .product-info :is(.product-name, .product-item-name) {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: calc(1.35em * 2);
+}
+
+/* A4: Swiper pre-init — 1 slide visível (sem max-height clip) */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .content-top-home
+  :is(
+    .products-swiper,
+    .cat_home.swiper,
+    .category_tab_slider.swiper,
+    .awa-featured-swiper
+  ):not(.swiper-initialized) {
+  max-height: none;
+  overflow: hidden;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .content-top-home
+  :is(
+    .products-swiper,
+    .cat_home.swiper,
+    .category_tab_slider.swiper,
+    .awa-featured-swiper
+  ):not(.swiper-initialized)
+  .swiper-slide:not(:first-child) {
+  display: none;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .products-swiper:not(.swiper-initialized)
+  .swiper-slide:not(:first-child) {
+  display: none;
+}
+
+/* A5: Owl pre-init — sem clip vertical residual */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .content-top-home
+  .awa-carousel-section
+  ul.owl:not(.owl-loaded) {
+  max-height: none;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .content-top-home
+  .awa-carousel-section
+  :is(.rokan-bestseller, .rokan-newproduct, .rokan-featuredproduct)
+  > .row {
+  max-height: none;
+  overflow: visible;
+}
+
+/* A6: Ver todos sempre visível no header shelf */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+  .awa-carousel-section .awa-shelf__view-all,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+  .awa-carousel-section .awa-section-header__link {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* B1: Ritmo vertical carrosséis — compacto (vence H4 FINAL + cosmetic bundle) */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .content-top-home
+  .ayo-home5-wrapper--template-driven
+  > .top-home-content.awa-carousel-section {
+  padding-top: 0 !important;
+  padding-bottom: clamp(10px, 1.2vw, 18px) !important;
+}
+
+@media (max-width: 767px) {
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .top-home-content.awa-carousel-section {
+    padding-top: 12px !important;
+    padding-bottom: 10px !important;
+  }
+}
+
+/* ==========================================================================
+   R2-C (2026-05-20) — Category carousel icons: fundo AWA estável + fallback limpo
+   Causa: refinements aplicava neutral-200 cinza; picture+png lazy falhava em mobile.
+   ========================================================================== */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+  .awa-category-carousel__icon {
+  background: var(--awa-bg-subtle, #f7f7f7);
+  border: 1px solid var(--awa-border, #e5e5e5);
+  box-sizing: border-box;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+  .awa-category-carousel__icon img.awa-category-carousel__img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+  .awa-category-carousel__icon.image-fallback-active {
+  background: var(--awa-bg-subtle, #f7f7f7);
+  border-color: var(--awa-border, #e5e5e5);
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+  .awa-category-carousel__icon.image-fallback-active::before {
+  content: "";
+  position: absolute;
+  inset: 22%;
+  border-radius: var(--awa-radius-pill, 9999px);
+  background: color-mix(in srgb, var(--awa-primary, #b73337) 18%, transparent);
+  pointer-events: none;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+  .awa-category-carousel__icon {
+  position: relative;
 }
