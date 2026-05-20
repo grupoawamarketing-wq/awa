@@ -14,16 +14,20 @@
                 type="GrupoAwamotos\B2B\Plugin\Admin\AttendantCustomerGridPlugin"/>
     </type>
 
-    <!-- Redirecionar atendentes para o painel pessoal após login no admin -->
-    <type name="Magento\Backend\Controller\Adminhtml\Auth\Login">
-        <plugin name="grupoawamotos_b2b_attendant_login_redirect"
-                type="GrupoAwamotos\B2B\Plugin\Admin\AttendantLoginRedirectPlugin"/>
-    </type>
-
     <!-- Filtrar grid de cotações B2B no admin -->
     <type name="GrupoAwamotos\B2B\Model\ResourceModel\QuoteRequest\Collection">
         <plugin name="grupoawamotos_b2b_attendant_quote_grid"
                 type="GrupoAwamotos\B2B\Plugin\Admin\AttendantQuoteGridPlugin"/>
+    </type>
+
+    <!-- Validação CNPJ e integridade B2B em novos cadastros -->
+    <type name="Magento\Customer\Api\CustomerRepositoryInterface">
+        <plugin name="grupoawamotos_b2b_validate_cnpj_on_save"
+                type="GrupoAwamotos\B2B\Plugin\Customer\ValidateCnpjOnSavePlugin"
+                sortOrder="10"/>
+        <plugin name="grupoawamotos_b2b_validate_customer_on_save"
+                type="GrupoAwamotos\B2B\Plugin\Customer\ValidateB2bCustomerOnSavePlugin"
+                sortOrder="20"/>
     </type>
 
     <!-- Data sources para UI Components (CollectionFactory) -->
@@ -51,6 +55,27 @@
     <preference for="GrupoAwamotos\B2B\Api\CustomerApprovalInterface"
                 type="GrupoAwamotos\B2B\Model\CustomerApproval"/>
 
+    <preference for="GrupoAwamotos\ERPIntegration\Api\B2bOrderPullCustomerDataInterface"
+                type="GrupoAwamotos\B2B\Model\Erp\OrderPullCustomerData"/>
+
+    <preference for="GrupoAwamotos\B2B\Api\ApprovalScoreServiceInterface"
+                type="GrupoAwamotos\B2B\Model\ApprovalScoreService"/>
+
+    <preference for="GrupoAwamotos\B2B\CommercialPanel\Api\PortfolioScopeInterface"
+                type="GrupoAwamotos\B2B\CommercialPanel\Model\PortfolioScope"/>
+
+    <preference for="GrupoAwamotos\B2B\CommercialPanel\Api\ContactLogManagementInterface"
+                type="GrupoAwamotos\B2B\CommercialPanel\Model\ContactLogManagement"/>
+
+    <preference for="GrupoAwamotos\B2B\CommercialPanel\Api\CommercialTaskManagementInterface"
+                type="GrupoAwamotos\B2B\CommercialPanel\Model\CommercialTaskManagement"/>
+
+    <preference for="GrupoAwamotos\B2B\CommercialPanel\Api\TaskGeneratorInterface"
+                type="GrupoAwamotos\B2B\CommercialPanel\Model\TaskGenerator"/>
+
+    <preference for="GrupoAwamotos\B2B\CommercialPanel\Api\CommercialGoalManagementInterface"
+                type="GrupoAwamotos\B2B\CommercialPanel\Model\CommercialGoalManagement"/>
+
     <preference for="GrupoAwamotos\B2B\Api\Data\WhatsAppMessageInterface"
                 type="GrupoAwamotos\B2B\Model\Notification\WhatsAppMessage"/>
 
@@ -66,6 +91,21 @@
                 <item name="b2b_carriers_seed" xsi:type="object">GrupoAwamotos\B2B\Console\Command\SeedCarriersCommand</item>
                 <item name="b2b_cnpj_cache_clear" xsi:type="object">GrupoAwamotos\B2B\Console\Command\ClearCnpjCacheCommand</item>
                 <item name="b2b_whatsapp_test" xsi:type="object">GrupoAwamotos\B2B\Console\Command\TestWhatsAppCommand</item>
+                <item name="b2b_cnae_classify_all" xsi:type="object">GrupoAwamotos\B2B\Console\Command\ClassifyCnaeCommand</item>
+                <item name="b2b_score_pending_customers" xsi:type="object">GrupoAwamotos\B2B\Console\Command\ScorePendingCustomersCommand</item>
+                <item name="b2b_erp_reprocess_approved_sync" xsi:type="object">GrupoAwamotos\B2B\Console\Command\ReprocessApprovedErpSyncCommand</item>
+                <item name="b2b_sectra_validate_order_import" xsi:type="object">GrupoAwamotos\B2B\Console\Command\ValidateSectraOrderImportCommand</item>
+                <item name="b2b_sectra_sync_prospect" xsi:type="object">GrupoAwamotos\B2B\Console\Command\SyncSectraProspectCommand</item>
+                <item name="b2b_sectra_cancel_stuck_orders" xsi:type="object">GrupoAwamotos\B2B\Console\Command\CancelStuckOrdersCommand</item>
+                <item name="b2b_sectra_validate_flow" xsi:type="object">GrupoAwamotos\B2B\Console\Command\ValidateSectraFlowCommand</item>
+                <item name="b2b_registration_backfill_attribution" xsi:type="object">GrupoAwamotos\B2B\Console\Command\BackfillRegistrationAttributionCommand</item>
+                <item name="b2b_registration_enrich_receita" xsi:type="object">GrupoAwamotos\B2B\Console\Command\EnrichRegistrationReceitaCommand</item>
+                <item name="b2b_registration_audit_missing_data" xsi:type="object">GrupoAwamotos\B2B\Console\Command\AuditMissingDataCommand</item>
+                <item name="b2b_registration_backfill_phone_from_address" xsi:type="object">GrupoAwamotos\B2B\Console\Command\BackfillPhoneFromAddressCommand</item>
+                <item name="b2b_registration_backfill_razao_social_from_cnpj_cache" xsi:type="object">GrupoAwamotos\B2B\Console\Command\BackfillRazaoSocialFromCnpjCacheCommand</item>
+                <item name="b2b_registration_backfill_razao_social_from_oc_legacy" xsi:type="object">GrupoAwamotos\B2B\Console\Command\BackfillRazaoSocialFromOcLegacyCommand</item>
+                <item name="b2b_registration_normalize_legacy" xsi:type="object">GrupoAwamotos\B2B\Console\Command\NormalizeLegacyRegistrationCommand</item>
+                <item name="b2b_registration_audit_health" xsi:type="object">GrupoAwamotos\B2B\Console\Command\AuditRegistrationHealthCommand</item>
             </argument>
         </arguments>
     </type>

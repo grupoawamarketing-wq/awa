@@ -28,6 +28,10 @@ use Magento\Framework\Mail\Template\TransportBuilder;
 use GrupoAwamotos\B2B\Helper\CnpjValidator;
 use GrupoAwamotos\B2B\Helper\Config as B2BConfig;
 use GrupoAwamotos\B2B\Helper\Data as B2BHelper;
+use GrupoAwamotos\B2B\Model\Customer\Attribute\Source\ErpCustomerSyncStatus;
+use GrupoAwamotos\B2B\Model\Registration\AttributionResolver;
+use GrupoAwamotos\B2B\Model\Registration\B2bPhoneNormalizer;
+use GrupoAwamotos\B2B\Model\Registration\B2bRegistrationGuard;
 use GrupoAwamotos\B2B\Model\Cnpj\RequestRateLimiter;
 use Magento\Customer\Model\ResourceModel\Customer\CollectionFactory as CustomerCollectionFactory;
 use Magento\Framework\HTTP\PhpEnvironment\RemoteAddress;
@@ -38,6 +42,7 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Store\Model\ScopeInterface;
 use Psr\Log\LoggerInterface;
 
+use Magento\Framework\Controller\ResultInterface;
 class Save implements HttpPostActionInterface
 {
     /**
@@ -81,16 +86,6 @@ class Save implements HttpPostActionInterface
     private $storeManager;
 
     /**
-     * @var EncryptorInterface
-     */
-    private $encryptor;
-
-    /**
-     * @var Random
-     */
-    private $random;
-
-    /**
      * @var TransportBuilder
      */
     private $transportBuilder;
@@ -104,11 +99,6 @@ class Save implements HttpPostActionInterface
      * @var LoggerInterface
      */
     private $logger;
-
-    /**
-     * @var ScopeConfigInterface
-     */
-    private $scopeConfig;
 
     /**
      * @var AddressRepositoryInterface
@@ -169,12 +159,9 @@ class Save implements HttpPostActionInterface
         CustomerFactory $customerModelFactory,
         CustomerSession $customerSession,
         StoreManagerInterface $storeManager,
-        EncryptorInterface $encryptor,
-        Random $random,
         TransportBuilder $transportBuilder,
         CnpjValidator $cnpjValidator,
         LoggerInterface $logger,
-        ScopeConfigInterface $scopeConfig,
         AddressRepositoryInterface $addressRepository,
         AddressInterfaceFactory $addressFactory,
         RegionInterfaceFactory $regionFactory,
@@ -184,7 +171,10 @@ class Save implements HttpPostActionInterface
         B2BConfig $b2bConfig,
         RequestRateLimiter $rateLimiter,
         RemoteAddress $remoteAddress,
-        CustomerCollectionFactory $customerCollectionFactory
+        CustomerCollectionFactory $customerCollectionFactory,
+        private readonly AttributionResolver $attributionResolver,
+        private readonly B2bRegistrationGuard $registrationGuard,
+        private readonly B2bPhoneNormalizer $phoneNormalizer
     ) {
         $this->request = $request;
         $this->resultRedirectFactory = $resultRedirectFactory;
@@ -194,12 +184,9 @@ class Save implements HttpPostActionInterface
         $this->customerModelFactory = $customerModelFactory;
         $this->customerSession = $customerSession;
         $this->storeManager = $storeManager;
-        $this->encryptor = $encryptor;
-        $this->random = $random;
         $this->transportBuilder = $transportBuilder;
         $this->cnpjValidator = $cnpjValidator;
         $this->logger = $logger;
-        $this->scopeConfig = $scopeConfig;
         $this->addressRepository = $addressRepository;
         $this->addressFactory = $addressFactory;
         $this->regionFactory = $regionFactory;
@@ -217,7 +204,7 @@ class Save implements HttpPostActionInterface
      *
      * @return \Magento\Framework\Controller\Result\Redirect
      */
-    public function execute()
+    public function execute(): ResultInterface
     {
         $resultRedirect = $this->resultRedirectFactory->create();
 
@@ -291,6 +278,16 @@ class Save implements HttpPostActionInterface
                 $this->logger->warning('B2B Registration: API enrichment failed — ' . $e->getMessage());
             }
 
+            if (trim((string) ($data['razao_social'] ?? '')) === '') {
+                $this->messageManager->addErrorMessage(
+                    __('Não foi possível obter a Razão Social. Valide o CNPJ ou informe a Razão Social manualmente.')
+                );
+
+                return $resultRedirect->setPath('*/*/');
+            }
+
+            $data['phone'] = $this->phoneNormalizer->normalize((string) $data['phone']);
+
             // Verificar se email já existe
             try {
                 $existingCustomer = $this->customerRepository->get($data['email']);
@@ -299,7 +296,7 @@ class Save implements HttpPostActionInterface
                     return $resultRedirect->setPath('*/*/');
                 }
             } catch (\Magento\Framework\Exception\NoSuchEntityException $e) {
-                // Email não existe, pode continuar
+$this->logger->warning($e->getMessage());
             }
 
             // Verificar se CNPJ já está cadastrado
@@ -335,7 +332,31 @@ class Save implements HttpPostActionInterface
             $customer->setCustomAttribute('b2b_inscricao_estadual', $data['inscricao_estadual'] ?? '');
             $customer->setCustomAttribute('b2b_approval_status', 'pending');
             $customer->setCustomAttribute('b2b_person_type', 'pj');
-            $customer->setCustomAttribute('b2b_phone', $data['phone'] ?? '');
+            $customer->setCustomAttribute('b2b_phone', $data['phone']);
+            $customer->setCustomAttribute(
+                'erp_customer_sync_status',
+                $this->registrationGuard->resolveInitialErpStatus()
+            );
+
+            foreach ($this->attributionResolver->fromRequest($this->request)->toCustomerAttributes() as $code => $value) {
+                $customer->setCustomAttribute($code, $value);
+            }
+
+            $landing = trim((string) $this->request->getParam('registration_landing', ''));
+            $originHost = $landing !== '' ? parse_url($landing, PHP_URL_HOST) : null;
+            if (!is_string($originHost) || $originHost === '') {
+                $originHost = (string) ($this->request->getServer('HTTP_HOST') ?? '');
+            }
+
+            $this->registrationGuard->applyNewRegistrationDefaults($customer, $originHost);
+
+            if ($apiData !== null && !empty($apiData['valid'])) {
+                $customer->setCustomAttribute('b2b_receita_validated', '1');
+                $situacao = (string) ($apiData['data']['situacao'] ?? $apiData['situacao'] ?? '');
+                if ($situacao !== '') {
+                    $customer->setCustomAttribute('b2b_receita_situacao', $situacao);
+                }
+            }
 
             // Salvar cliente
             $savedCustomer = $this->customerRepository->save($customer);
@@ -358,9 +379,11 @@ class Save implements HttpPostActionInterface
                     'lead_type' => 'b2b_cnpj',
                     'person_type' => 'pj',
                     'approval_status' => 'pending',
+                    'erp_customer_sync_status' => ErpCustomerSyncStatus::CUSTOMER_PENDING_ERP_VALIDATION,
                     'customer_group_id' => (int) $savedCustomer->getGroupId(),
-                    'cnpj_validated' => true,
-                    'register_channel' => 'b2b_register_form'
+                    'cnpj_validated' => $apiData !== null && !empty($apiData['valid']),
+                    'register_channel' => 'b2b_register_form',
+                    'attribution' => $this->attributionResolver->fromRequest($this->request)->toCustomerAttributes(),
                 ]
             ]);
 
@@ -446,8 +469,8 @@ class Save implements HttpPostActionInterface
             $errors[] = __('Razão Social é obrigatória.');
         }
 
-        if (empty($phoneDigits) || strlen($phoneDigits) < 10) {
-            $errors[] = __('Telefone comercial é obrigatório e deve ser válido.');
+        if (empty($phoneDigits) || !$this->phoneNormalizer->isValidBrazilianPhone($phone)) {
+            $errors[] = __('Telefone comercial é obrigatório e deve conter DDD válido (10 ou 11 dígitos).');
         }
 
         if (empty($cep) || strlen($cep) !== 8) {
@@ -499,7 +522,7 @@ class Save implements HttpPostActionInterface
             'razao_social' => $razaoSocial,
             'nome_fantasia' => $nomeFantasia,
             'inscricao_estadual' => $inscricaoEstadual,
-            'phone' => $phone,
+            'phone' => $this->phoneNormalizer->normalize($phone),
             'cep' => $cep,
             'logradouro' => $logradouro,
             'numero' => $numero,
@@ -628,7 +651,7 @@ class Save implements HttpPostActionInterface
         $collection->setPageSize(1);
 
         $region = $collection->getFirstItem();
-        if (!$region || !$region->getId()) {
+        if (!$region->getId()) {
             return null;
         }
 
