@@ -201,14 +201,23 @@ html body.cms-home .awa-category-carousel__next {
 }
 
 @media (hover: hover) and (pointer: fine) {
-    html body.cms-index-index .awa-category-carousel__prev:hover,
-    html body.cms-index-index .awa-category-carousel__next:hover,
-    html body.cms-home .awa-category-carousel__prev:hover,
-    html body.cms-home .awa-category-carousel__next:hover {
+    html body.cms-index-index .awa-category-carousel__prev:not(.is-disabled):hover,
+    html body.cms-index-index .awa-category-carousel__next:not(.is-disabled):hover,
+    html body.cms-home .awa-category-carousel__prev:not(.is-disabled):hover,
+    html body.cms-home .awa-category-carousel__next:not(.is-disabled):hover {
         background: var(--awa-primary, #b73337);
         color: var(--awa-color-white, #ffffff);
         border-color: var(--awa-primary, #b73337);
     }
+}
+
+html body.cms-index-index .awa-category-carousel__prev.is-disabled,
+html body.cms-index-index .awa-category-carousel__next.is-disabled,
+html body.cms-home .awa-category-carousel__prev.is-disabled,
+html body.cms-home .awa-category-carousel__next.is-disabled {
+    cursor: default;
+    opacity: 0.45;
+    pointer-events: none;
 }
 
 /* ============================================================================
@@ -1109,13 +1118,21 @@ html body.catalogsearch-result-index .page-wrapper .page-main.container {
         align-self: start !important;
     }
 
-    html body.catalog-category-view .page-main > .columns > .col-main,
-    html body.catalogsearch-result-index .page-main > .columns > .col-main {
+    html body.catalog-category-view .page-main > .columns > .col-main {
         display: contents !important;
     }
 
-    html body.catalog-category-view .col-main .product-content-right,
-    html body.catalogsearch-result-index .col-main .product-content-right {
+    /* Busca (Mirasvit): elementos são filhos diretos do .col-main sem wrapper
+       .search.results, causando auto-placement errado no grid PLP de 2 colunas.
+       display:block faz .col-main ocupar grid-area:plp-main como bloco único. */
+    html body.catalogsearch-result-index .page-main > .columns > .col-main {
+        display: block !important;
+        grid-area: plp-main !important;
+        min-width: 0;
+        width: 100%;
+    }
+
+    html body.catalog-category-view .col-main .product-content-right {
         display: contents !important;
     }
 
@@ -2226,4 +2243,68 @@ body.cms-page-view .page-title .base {
 
 #html-body .item-product:hover .product-thumb {
     box-shadow: 0 6px 24px rgba(0, 0, 0, 0.10) !important;
+}
+
+/* ============================================================================
+   §60 — Home trust panels: final grid consistency
+   Mantem a padronizacao flex-grid-flow da home mesmo quando este bundle
+   final-wins carrega depois dos CSS home-only.
+   ============================================================================ */
+html body#html-body.cms-index-index .awa-social-proof-container,
+html body#html-body.cms-home .awa-social-proof-container,
+html body#html-body.cms-homepage_ayo_home5 .awa-social-proof-container,
+html body#html-body.cms-index-index .awa-benefits-bar .awa-benefits-container,
+html body#html-body.cms-home .awa-benefits-bar .awa-benefits-container,
+html body#html-body.cms-homepage_ayo_home5 .awa-benefits-bar .awa-benefits-container {
+    display: grid !important;
+    gap: var(--gap-tight, var(--size-xs, 12px)) !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    max-width: var(--awa-container-max, 1440px) !important;
+    padding-inline: 0 !important;
+    width: 100% !important;
+}
+
+html body#html-body.cms-index-index .awa-social-proof-divider,
+html body#html-body.cms-home .awa-social-proof-divider,
+html body#html-body.cms-homepage_ayo_home5 .awa-social-proof-divider {
+    display: none !important;
+}
+
+html body#html-body.cms-index-index .awa-social-proof-stat,
+html body#html-body.cms-home .awa-social-proof-stat,
+html body#html-body.cms-homepage_ayo_home5 .awa-social-proof-stat,
+html body#html-body.cms-index-index .awa-benefits-bar .awa-benefit-item,
+html body#html-body.cms-home .awa-benefits-bar .awa-benefit-item,
+html body#html-body.cms-homepage_ayo_home5 .awa-benefits-bar .awa-benefit-item {
+    align-items: flex-start !important;
+    background: color-mix(in srgb, #ffffff 10%, transparent) !important;
+    border: 1px solid color-mix(in srgb, #ffffff 16%, transparent) !important;
+    border-radius: var(--awa-radius-lg, 12px) !important;
+    color: #ffffff !important;
+    justify-self: stretch !important;
+    max-width: none !important;
+    padding: var(--awa-home-card-pad, clamp(14px, 1.2vw, 20px)) !important;
+    text-align: start !important;
+    width: 100% !important;
+}
+
+@media (max-width: 991px) {
+    html body#html-body.cms-index-index .awa-social-proof-container,
+    html body#html-body.cms-home .awa-social-proof-container,
+    html body#html-body.cms-homepage_ayo_home5 .awa-social-proof-container,
+    html body#html-body.cms-index-index .awa-benefits-bar .awa-benefits-container,
+    html body#html-body.cms-home .awa-benefits-bar .awa-benefits-container,
+    html body#html-body.cms-homepage_ayo_home5 .awa-benefits-bar .awa-benefits-container {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+
+/* PLP 768–1023: reforço SSoT (sem !important) — vence auto-fill legado em bundles tardios */
+@media (min-width: 768px) and (max-width: 1023px) {
+    html body#html-body.catalog-category-view .products-grid > ul.awa-grid-products,
+    html body#html-body.catalog-category-view .wrapper.grid.products-grid > ul.awa-grid-products,
+    html body#html-body.catalogsearch-result-index .products-grid > ul.awa-grid-products,
+    html body#html-body.catalogsearch-result-index .wrapper.grid.products-grid > ul.awa-grid-products {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
 }
