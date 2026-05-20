@@ -308,29 +308,188 @@ define(['jquery'], function ($) {
             clearBtn.setAttribute('aria-label', 'Limpar busca');
             clearBtn.textContent = '✕';
 
-            let style = document.createElement('style');
-            style.id   = 'awa-search-style';
-            style.textContent = [
-                '#awa-search-clear{position:absolute;right:48px;top:50%;transform:translateY(-50%);',
-                'background:none;border:none;cursor:pointer;color:#999;font-size:14px;line-height:1;',
-                'padding:4px 8px;display:none;z-index:2}',
-                '#awa-search-clear:hover{color:#A33B3B}',
-                '.block-search,.header-search{position:relative}'
-            ].join('');
-            document.head.appendChild(style);
+            /* Append ao fim do .control — NÃO após o input (quebra $input.next() do Mirasvit). */
+            let control = searchInput.closest('.control[data-awa-search-control], .field.search .control, .control')
+                || searchInput.parentElement;
 
-            if (searchInput.parentElement) {
-                searchInput.parentElement.style.position = 'relative';
-                searchInput.insertAdjacentElement('afterend', clearBtn);
+            if (control) {
+                control.appendChild(clearBtn);
             }
 
             searchInput.addEventListener('input', function () {
-                clearBtn.style.display = this.value ? 'block' : 'none';
+                clearBtn.style.display = this.value ? 'flex' : 'none';
             });
             clearBtn.addEventListener('click', function () {
                 searchInput.value = '';
                 clearBtn.style.display = 'none';
+                searchInput.dispatchEvent(new Event('input', { bubbles: true }));
                 searchInput.focus();
+            });
+        } catch (e) {}
+    }
+
+    /* ============================================================
+       15. initSearchAutocompletePanelFix — geometria MST + layout mobile (sem alterar Mirasvit)
+    ============================================================ */
+    function initSearchAutocompletePanelFix() {
+        try {
+            if (window.__awaSearchAutocompletePanelFixInit) {
+                return;
+            }
+
+            let root = document.querySelector('.block-search.awa-professional-search');
+            let control = root && root.querySelector('.field.search .control[data-awa-search-control], .field.search .control');
+
+            if (!control) {
+                return;
+            }
+
+            window.__awaSearchAutocompletePanelFixInit = true;
+
+            function syncSearchLayout() {
+                let searchRoot = document.querySelector('.block-search.awa-professional-search');
+                let searchControl = searchRoot && searchRoot.querySelector('.field.search .control');
+                let form = searchRoot && searchRoot.querySelector('#search_mini_form');
+                let input = searchRoot && searchRoot.querySelector('#search');
+                let panel = searchControl && searchControl.querySelector('.mst-searchautocomplete__autocomplete._active');
+                let isMobile = window.matchMedia('(max-width: 991px)').matches;
+                let isActive = !!(form && (
+                    form.matches(':focus-within')
+                    || form.classList.contains('searchautocomplete__active')
+                    || panel
+                    || (input && input.value && input.value.length > 0)
+                ));
+
+                let searchCol = document.querySelector('.awa-header-search-col');
+                let field = searchRoot && searchRoot.querySelector('.field.search');
+                let blockContent = searchRoot && searchRoot.querySelector('.block-content');
+
+                if (isMobile && searchRoot) {
+                    if (searchCol) {
+                        searchCol.style.setProperty('width', '100%', 'important');
+                        searchCol.style.setProperty('max-width', '100%', 'important');
+                        searchCol.style.setProperty('grid-column', '1 / -1', 'important');
+                    }
+
+                    searchRoot.style.setProperty('width', '100%', 'important');
+                    searchRoot.style.setProperty('max-width', '100%', 'important');
+
+                    if (blockContent) {
+                        blockContent.style.setProperty('width', '100%', 'important');
+                        blockContent.style.setProperty('max-width', '100%', 'important');
+                    }
+
+                    if (field) {
+                        field.style.setProperty('display', 'block', 'important');
+                        field.style.setProperty('width', '100%', 'important');
+                        field.style.setProperty('flex', '1 1 auto', 'important');
+                        field.style.setProperty('min-width', '0', 'important');
+                    }
+
+                    if (form) {
+                        form.style.setProperty('width', '100%', 'important');
+                        form.style.setProperty('max-width', '100%', 'important');
+                    }
+                } else if (searchRoot) {
+                    /* Desktop: remover inline mobile — !important inline vence CSS estrutural */
+                    if (searchCol) {
+                        searchCol.style.removeProperty('width');
+                        searchCol.style.removeProperty('max-width');
+                        searchCol.style.removeProperty('grid-column');
+                    }
+
+                    searchRoot.style.removeProperty('width');
+                    searchRoot.style.removeProperty('max-width');
+
+                    if (blockContent) {
+                        blockContent.style.removeProperty('width');
+                        blockContent.style.removeProperty('max-width');
+                    }
+
+                    if (field) {
+                        field.style.removeProperty('display');
+                        field.style.removeProperty('width');
+                        field.style.removeProperty('flex');
+                        field.style.removeProperty('min-width');
+                    }
+
+                    if (form) {
+                        form.style.removeProperty('width');
+                        form.style.removeProperty('max-width');
+                    }
+
+                    if (input) {
+                        input.style.removeProperty('width');
+                        input.style.removeProperty('flex');
+                        input.style.removeProperty('min-width');
+                        input.style.removeProperty('box-sizing');
+                    }
+                }
+
+                if (isMobile && searchControl) {
+                    searchControl.style.setProperty('display', 'block', 'important');
+                    searchControl.style.setProperty('width', '100%', 'important');
+                    searchControl.style.setProperty('min-width', '0', 'important');
+                    searchControl.style.setProperty('overflow', 'visible', 'important');
+                }
+
+                if (isMobile && input && isActive) {
+                    input.style.setProperty('width', '100%', 'important');
+                    input.style.setProperty('flex', 'none', 'important');
+                    input.style.setProperty('min-width', '0', 'important');
+                    input.style.setProperty('box-sizing', 'border-box', 'important');
+
+                    if (searchControl) {
+                        let controlWidth = searchControl.getBoundingClientRect().width;
+
+                        if (controlWidth > 80) {
+                            input.style.setProperty('width', Math.round(controlWidth - 36) + 'px', 'important');
+                        }
+                    }
+                }
+
+                if (form && isActive) {
+                    form.style.setProperty('overflow', 'visible', 'important');
+                }
+
+                if (panel) {
+                    panel.style.setProperty('width', '100%', 'important');
+                    panel.style.setProperty('left', '0', 'important');
+                    panel.style.setProperty('right', '0', 'important');
+                    panel.style.setProperty('max-width', '100%', 'important');
+                    panel.style.setProperty('min-height', '84px', 'important');
+                    panel.style.setProperty('height', 'auto', 'important');
+                    panel.style.setProperty('overflow-y', 'auto', 'important');
+                }
+            }
+
+            if (window.MutationObserver) {
+                new window.MutationObserver(function () {
+                    syncSearchLayout();
+                }).observe(control, {
+                    childList: true,
+                    subtree: true,
+                    attributes: true,
+                    attributeFilter: ['class', 'style']
+                });
+            }
+
+            control.addEventListener('focusin', syncSearchLayout, true);
+            document.addEventListener('input', function (event) {
+                if (event.target && event.target.id === 'search') {
+                    window.requestAnimationFrame(syncSearchLayout);
+                }
+            }, true);
+            document.addEventListener('focusin', function (event) {
+                if (event.target && event.target.id === 'search') {
+                    syncSearchLayout();
+                }
+            }, true);
+            window.addEventListener('resize', syncSearchLayout, { passive: true });
+
+            syncSearchLayout();
+            [400, 1200, 2500, 5000, 9000, 14000].forEach(function (delay) {
+                window.setTimeout(syncSearchLayout, delay);
             });
         } catch (e) {}
     }
@@ -351,6 +510,7 @@ define(['jquery'], function ($) {
         initImageLazyLoad();
         initCartFeedback();
         initSearchEnhance();
+        initSearchAutocompletePanelFix();
     }
 
     if (document.readyState !== 'loading') {
@@ -364,6 +524,7 @@ define(['jquery'], function ($) {
         fixFooterEmail();
         contentVisibilityFix();
         initSearchEnhance();
+        initSearchAutocompletePanelFix();
     }, 1500);
 
     return {};
