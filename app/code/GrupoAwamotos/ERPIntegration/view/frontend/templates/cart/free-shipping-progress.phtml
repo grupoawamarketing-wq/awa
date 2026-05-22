@@ -1,0 +1,59 @@
+<?php
+/**
+ * Barra de progresso de frete grátis — página do carrinho.
+ *
+ * @var \GrupoAwamotos\ERPIntegration\Block\Cart\FreeShippingProgress $block
+ */
+declare(strict_types=1);
+
+if (!$block->isCarrierEnabled()) {
+    return;
+}
+
+$hasItems = $block->hasQuoteItems();
+
+if (!$hasItems) {
+    return;
+}
+
+if ($block->isMinicartContext() && !$block->shouldDisplay()) {
+    return;
+}
+
+$percent   = $block->getProgressPercent();
+$reached   = $block->hasReachedThreshold();
+$remaining = $block->formatCurrency($block->getRemainingAmount());
+$threshold = $block->formatCurrency($block->getThreshold());
+?>
+<div class="awa-free-shipping-bar<?= $block->isMinicartContext() ? ' awa-free-shipping-bar--minicart' : '' ?>"
+     role="status"
+     aria-live="polite"
+     aria-label="<?= $block->escapeHtmlAttr(__('Progresso para frete grátis')) ?>"
+     <?php if ($block->isMinicartContext()): ?>
+     data-awa-free-shipping-config="<?= $block->escapeHtmlAttr($block->getClientConfigJson()) ?>"
+     <?= $hasItems ? '' : ' hidden' ?>
+     <?php elseif (!$hasItems): ?>
+     hidden
+     <?php endif; ?>>
+
+    <?php if ($reached): ?>
+        <p class="awa-free-shipping-bar__message awa-free-shipping-bar__message--success">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <?= $block->escapeHtml(__('Parabéns! Você ganhou frete grátis.')) ?>
+        </p>
+    <?php else: ?>
+        <p class="awa-free-shipping-bar__message">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v4h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+            </svg>
+            <?= $block->escapeHtml(__('Faltam %1 para frete grátis!', $remaining)) ?>
+        </p>
+    <?php endif; ?>
+
+    <div class="awa-free-shipping-bar__track" role="progressbar" aria-valuenow="<?= (int) $percent ?>" aria-valuemin="0" aria-valuemax="100">
+        <div class="awa-free-shipping-bar__fill" style="width:<?= (int) $percent ?>%"></div>
+    </div>
+
+</div>

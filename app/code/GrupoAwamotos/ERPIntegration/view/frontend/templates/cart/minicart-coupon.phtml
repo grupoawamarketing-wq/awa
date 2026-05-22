@@ -1,0 +1,41 @@
+<?php
+/**
+ * @var \GrupoAwamotos\ERPIntegration\Block\Cart\MinicartCoupon $block
+ */
+declare(strict_types=1);
+
+$hasCoupon = $block->hasCouponApplied();
+$couponCode = $block->getCouponCode();
+$hasItems = $block->shouldDisplay();
+?>
+<div class="awa-minicart-coupon" data-role="awa-minicart-coupon"<?= $hasItems ? '' : ' hidden' ?>>
+    <form class="awa-minicart-coupon__form"
+          id="awa-minicart-coupon-form"
+          action="<?= $block->escapeUrl($block->getApplyUrl()) ?>"
+          method="post"
+          novalidate>
+        <input type="hidden" name="form_key" value="<?= $block->escapeHtmlAttr($block->getFormKeyValue()) ?>">
+        <input type="hidden" name="remove" class="awa-minicart-coupon__remove" value="0">
+        <label class="awa-sr-only" for="awa-minicart-coupon-code"><?= $block->escapeHtml(__('Código do cupom')) ?></label>
+        <div class="awa-minicart-coupon__row">
+            <input type="text"
+                   id="awa-minicart-coupon-code"
+                   name="coupon_code"
+                   class="awa-minicart-coupon__input"
+                   value="<?= $block->escapeHtmlAttr($couponCode) ?>"
+                   placeholder="<?= $block->escapeHtmlAttr(__('Cupom de desconto')) ?>"
+                   autocomplete="off"
+                   <?= $hasCoupon ? 'readonly' : '' ?>>
+            <?php if ($hasCoupon): ?>
+                <button type="button" class="awa-minicart-coupon__btn awa-minicart-coupon__btn--remove" data-action="remove-coupon">
+                    <?= $block->escapeHtml(__('Remover')) ?>
+                </button>
+            <?php else: ?>
+                <button type="submit" class="awa-minicart-coupon__btn awa-minicart-coupon__btn--apply">
+                    <?= $block->escapeHtml(__('Aplicar')) ?>
+                </button>
+            <?php endif; ?>
+        </div>
+        <p class="awa-minicart-coupon__feedback" role="status" aria-live="polite" hidden></p>
+    </form>
+</div>
