@@ -1,0 +1,401 @@
+<?php
+/**
+ * Ficha 360° do cliente — abas comerciais.
+ *
+ * @var \GrupoAwamotos\B2B\CommercialPanel\Block\Adminhtml\Customer\View360 $block
+ */
+
+$customer = $block->getCustomerData();
+$assignment = $block->getPortfolioAssignment();
+$contacts = $block->getContactHistory();
+$orders = $block->getRecentOrders();
+$quotes = $block->getQuoteRequests();
+$carts = $block->getAbandonedCarts();
+$tasks = $block->getOpenTasks();
+$suggestions = $block->getSuggestions();
+$customerId = $block->getCustomerId();
+$tabs = $block->getTabList();
+?>
+
+<?php if ($customer === []): ?>
+    <div class="message message-error error">
+        <div><?= $block->escapeHtml(__('Cliente não encontrado ou fora da sua carteira.')) ?></div>
+    </div>
+<?php else: ?>
+    <?php
+    $displayName = trim(($customer['firstname'] ?? '') . ' ' . ($customer['lastname'] ?? ''));
+    if (!empty($customer['b2b_razao_social'])) {
+        $displayName = (string) $customer['b2b_razao_social'];
+    }
+    ?>
+    <div class="awa-commercial-dashboard awa-customer-360">
+        <div class="awa-commercial-header">
+            <h1><?= $block->escapeHtml(__('Ficha 360° — %1', $displayName)) ?></h1>
+            <p>
+                <a href="<?= $block->escapeUrl($block->getPortfolioUrl()) ?>">
+                    <?= $block->escapeHtml(__('← Voltar para Minha Carteira')) ?>
+                </a>
+            </p>
+        </div>
+
+        <nav class="awa-tabs" role="tablist">
+            <?php foreach ($tabs as $tabId => $tabLabel): ?>
+                <button type="button"
+                        class="awa-tab-btn"
+                        role="tab"
+                        data-tab="tab-<?= $block->escapeHtmlAttr($tabId) ?>"
+                        id="btn-tab-<?= $block->escapeHtmlAttr($tabId) ?>">
+                    <?= $block->escapeHtml($tabLabel) ?>
+                </button>
+            <?php endforeach; ?>
+        </nav>
+
+        <!-- Resumo -->
+        <div class="awa-tab-panel" id="tab-resumo" role="tabpanel">
+            <div class="awa-commercial-grid">
+                <section class="awa-section">
+                    <h2><?= $block->escapeHtml(__('Dados cadastrais')) ?></h2>
+                    <table class="admin__table-secondary awa-table">
+                        <tbody>
+                            <tr><th><?= $block->escapeHtml(__('E-mail')) ?></th><td><?= $block->escapeHtml($customer['email'] ?? '') ?></td></tr>
+                            <tr><th><?= $block->escapeHtml(__('CNPJ')) ?></th><td><?= $block->escapeHtml($customer['b2b_cnpj'] ?? '—') ?></td></tr>
+                            <tr><th><?= $block->escapeHtml(__('Cidade')) ?></th><td><?= $block->escapeHtml($customer['city'] ?? '—') ?></td></tr>
+                            <tr><th><?= $block->escapeHtml(__('Telefone')) ?></th><td><?= $block->escapeHtml($customer['b2b_phone'] ?? '—') ?></td></tr>
+                            <tr><th><?= $block->escapeHtml(__('Status B2B')) ?></th><td><?= $block->escapeHtml($customer['b2b_approval_status'] ?? '—') ?></td></tr>
+                            <tr><th><?= $block->escapeHtml(__('Cliente desde')) ?></th><td><?= $block->escapeHtml($customer['created_at'] ?? '—') ?></td></tr>
+                        </tbody>
+                    </table>
+                </section>
+                <section class="awa-section">
+                    <h2><?= $block->escapeHtml(__('Carteira e compras')) ?></h2>
+                    <table class="admin__table-secondary awa-table">
+                        <tbody>
+                            <tr><th><?= $block->escapeHtml(__('Vendedora')) ?></th><td><?= $block->escapeHtml($assignment['attendant_name'] ?? '—') ?></td></tr>
+                            <tr><th><?= $block->escapeHtml(__('Status comercial')) ?></th><td><?= $block->escapeHtml($assignment['commercial_status'] ?? '—') ?></td></tr>
+                            <tr><th><?= $block->escapeHtml(__('Última compra')) ?></th><td><?= $block->escapeHtml($customer['last_order_at'] ?? '—') ?></td></tr>
+                            <tr><th><?= $block->escapeHtml(__('Total comprado')) ?></th><td><?= $block->escapeHtml($block->formatPrice((float) ($customer['total_spent'] ?? 0))) ?></td></tr>
+                            <tr><th><?= $block->escapeHtml(__('Ticket médio')) ?></th><td><?= $block->escapeHtml($block->formatPrice((float) ($customer['average_ticket'] ?? 0))) ?></td></tr>
+                            <tr><th><?= $block->escapeHtml(__('Pedidos')) ?></th><td><?= (int) ($customer['orders_count'] ?? 0) ?></td></tr>
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+            <?php if (!empty($customer['top_products'])): ?>
+                <section class="awa-section awa-section-full">
+                    <h2><?= $block->escapeHtml(__('Produtos mais comprados')) ?></h2>
+                    <table class="admin__table-secondary awa-table">
+                        <thead>
+                            <tr>
+                                <th><?= $block->escapeHtml(__('SKU')) ?></th>
+                                <th><?= $block->escapeHtml(__('Produto')) ?></th>
+                                <th><?= $block->escapeHtml(__('Qtd total')) ?></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($customer['top_products'] as $product): ?>
+                                <tr>
+                                    <td><?= $block->escapeHtml($product['sku'] ?? '') ?></td>
+                                    <td><?= $block->escapeHtml($product['name'] ?? '') ?></td>
+                                    <td><?= (int) ($product['total_qty'] ?? 0) ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </section>
+            <?php endif; ?>
+        </div>
+
+        <!-- Pedidos -->
+        <div class="awa-tab-panel" id="tab-pedidos" role="tabpanel" hidden>
+            <section class="awa-section awa-section-full">
+                <h2><?= $block->escapeHtml(__('Pedidos')) ?></h2>
+                <?php if ($orders === []): ?>
+                    <p class="awa-empty"><?= $block->escapeHtml(__('Nenhum pedido encontrado.')) ?></p>
+                <?php else: ?>
+                    <table class="admin__table-secondary awa-table">
+                        <thead>
+                            <tr>
+                                <th><?= $block->escapeHtml(__('Pedido')) ?></th>
+                                <th><?= $block->escapeHtml(__('Total')) ?></th>
+                                <th><?= $block->escapeHtml(__('Status')) ?></th>
+                                <th><?= $block->escapeHtml(__('Data')) ?></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($orders as $order): ?>
+                                <tr>
+                                    <td>#<?= $block->escapeHtml($order['increment_id'] ?? '') ?></td>
+                                    <td><?= $block->escapeHtml($block->formatPrice((float) ($order['grand_total'] ?? 0))) ?></td>
+                                    <td><?= $block->escapeHtml($order['status'] ?? '') ?></td>
+                                    <td><?= $block->escapeHtml($order['created_at'] ?? '') ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                <?php endif; ?>
+            </section>
+        </div>
+
+        <!-- Cotações -->
+        <div class="awa-tab-panel" id="tab-cotacoes" role="tabpanel" hidden>
+            <section class="awa-section awa-section-full">
+                <h2><?= $block->escapeHtml(__('Cotações')) ?></h2>
+                <?php if ($quotes === []): ?>
+                    <p class="awa-empty"><?= $block->escapeHtml(__('Nenhuma cotação encontrada.')) ?></p>
+                <?php else: ?>
+                    <table class="admin__table-secondary awa-table">
+                        <thead>
+                            <tr>
+                                <th><?= $block->escapeHtml(__('ID')) ?></th>
+                                <th><?= $block->escapeHtml(__('Status')) ?></th>
+                                <th><?= $block->escapeHtml(__('Total')) ?></th>
+                                <th><?= $block->escapeHtml(__('Criada em')) ?></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($quotes as $quote): ?>
+                                <tr>
+                                    <td>#<?= (int) ($quote['request_id'] ?? 0) ?></td>
+                                    <td><?= $block->escapeHtml($quote['status'] ?? '') ?></td>
+                                    <td><?= $block->escapeHtml($block->formatPrice((float) ($quote['quoted_total'] ?? 0))) ?></td>
+                                    <td><?= $block->escapeHtml($quote['created_at'] ?? '') ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                <?php endif; ?>
+            </section>
+        </div>
+
+        <!-- Carrinho -->
+        <div class="awa-tab-panel" id="tab-carrinho" role="tabpanel" hidden>
+            <section class="awa-section awa-section-full">
+                <h2><?= $block->escapeHtml(__('Carrinhos abandonados')) ?></h2>
+                <?php if ($carts === []): ?>
+                    <p class="awa-empty"><?= $block->escapeHtml(__('Nenhum carrinho abandonado.')) ?></p>
+                <?php else: ?>
+                    <table class="admin__table-secondary awa-table">
+                        <thead>
+                            <tr>
+                                <th><?= $block->escapeHtml(__('Valor')) ?></th>
+                                <th><?= $block->escapeHtml(__('Itens')) ?></th>
+                                <th><?= $block->escapeHtml(__('Abandonado em')) ?></th>
+                                <th><?= $block->escapeHtml(__('Status contato')) ?></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($carts as $cart): ?>
+                                <tr>
+                                    <td><?= $block->escapeHtml($block->formatPrice((float) ($cart['cart_value'] ?? 0))) ?></td>
+                                    <td><?= (int) ($cart['items_count'] ?? 0) ?></td>
+                                    <td><?= $block->escapeHtml($cart['abandoned_at'] ?? '') ?></td>
+                                    <td><?= $block->escapeHtml($cart['commercial_contact_status'] ?? 'pending') ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                <?php endif; ?>
+            </section>
+        </div>
+
+        <!-- Contatos -->
+        <div class="awa-tab-panel" id="tab-contatos" role="tabpanel" hidden>
+            <section class="awa-section awa-section-full">
+                <h2><?= $block->escapeHtml(__('Registrar contato')) ?></h2>
+                <form class="awa-contact-form" method="post" action="<?= $block->escapeUrl($block->getSaveContactUrl()) ?>">
+                    <?= $block->getBlockHtml('formkey') ?>
+                    <input type="hidden" name="customer_id" value="<?= (int) $customerId ?>"/>
+                    <div class="awa-form-row">
+                        <label for="contact_type"><?= $block->escapeHtml(__('Tipo de contato')) ?></label>
+                        <select id="contact_type" name="contact_type" class="admin__control-select" required>
+                            <?php foreach ($block->getContactTypeOptions() as $value => $label): ?>
+                                <option value="<?= $block->escapeHtmlAttr($value) ?>"><?= $block->escapeHtml($label) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="awa-form-row">
+                        <label for="observation"><?= $block->escapeHtml(__('Observação')) ?></label>
+                        <textarea id="observation" name="observation" class="admin__control-textarea" rows="4" required maxlength="5000"></textarea>
+                    </div>
+                    <div class="awa-form-row">
+                        <label for="next_action"><?= $block->escapeHtml(__('Próxima ação')) ?></label>
+                        <input id="next_action" name="next_action" type="text" class="admin__control-text" maxlength="255"/>
+                    </div>
+                    <div class="awa-form-row">
+                        <label for="next_action_at"><?= $block->escapeHtml(__('Data da próxima ação')) ?></label>
+                        <input id="next_action_at" name="next_action_at" type="datetime-local" class="admin__control-text"/>
+                    </div>
+                    <div class="awa-form-actions">
+                        <button type="submit" class="action-primary">
+                            <span><?= $block->escapeHtml(__('Salvar contato')) ?></span>
+                        </button>
+                    </div>
+                </form>
+            </section>
+            <section class="awa-section awa-section-full">
+                <h2><?= $block->escapeHtml(__('Histórico de contatos')) ?></h2>
+                <?php if ($contacts === []): ?>
+                    <p class="awa-empty"><?= $block->escapeHtml(__('Nenhum contato registrado.')) ?></p>
+                <?php else: ?>
+                    <table class="admin__table-secondary awa-table">
+                        <thead>
+                            <tr>
+                                <th><?= $block->escapeHtml(__('Data')) ?></th>
+                                <th><?= $block->escapeHtml(__('Tipo')) ?></th>
+                                <th><?= $block->escapeHtml(__('Observação')) ?></th>
+                                <th><?= $block->escapeHtml(__('Próxima ação')) ?></th>
+                                <th><?= $block->escapeHtml(__('Status')) ?></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($contacts as $contact): ?>
+                                <tr>
+                                    <td><?= $block->escapeHtml($contact['created_at'] ?? '') ?></td>
+                                    <td><?= $block->escapeHtml($contact['contact_type_label'] ?? $contact['contact_type'] ?? '') ?></td>
+                                    <td><?= $block->escapeHtml($contact['observation'] ?? '') ?></td>
+                                    <td>
+                                        <?= $block->escapeHtml($contact['next_action'] ?? '—') ?>
+                                        <?php if (!empty($contact['next_action_at'])): ?>
+                                            <br/><small><?= $block->escapeHtml($contact['next_action_at']) ?></small>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td><?= $block->escapeHtml($contact['status_label'] ?? '') ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                <?php endif; ?>
+            </section>
+        </div>
+
+        <!-- Tarefas -->
+        <div class="awa-tab-panel" id="tab-tarefas" role="tabpanel" hidden>
+            <section class="awa-section awa-section-full">
+                <h2><?= $block->escapeHtml(__('Criar tarefa')) ?></h2>
+                <form class="awa-task-form" method="post" action="<?= $block->escapeUrl($block->getSaveTaskUrl()) ?>">
+                    <?= $block->getBlockHtml('formkey') ?>
+                    <input type="hidden" name="customer_id" value="<?= (int) $customerId ?>"/>
+                    <div class="awa-form-row">
+                        <label for="task_title"><?= $block->escapeHtml(__('Título')) ?></label>
+                        <input id="task_title" name="title" type="text" class="admin__control-text" required maxlength="255"/>
+                    </div>
+                    <div class="awa-form-row">
+                        <label for="task_priority"><?= $block->escapeHtml(__('Prioridade')) ?></label>
+                        <select id="task_priority" name="priority" class="admin__control-select">
+                            <?php foreach ($block->getPriorityOptions() as $value => $label): ?>
+                                <option value="<?= $block->escapeHtmlAttr($value) ?>"<?= $value === 'normal' ? ' selected' : '' ?>>
+                                    <?= $block->escapeHtml($label) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="awa-form-row">
+                        <label for="task_observation"><?= $block->escapeHtml(__('Observação')) ?></label>
+                        <textarea id="task_observation" name="observation" class="admin__control-textarea" rows="3" maxlength="5000"></textarea>
+                    </div>
+                    <div class="awa-form-row">
+                        <label for="task_due_at"><?= $block->escapeHtml(__('Prazo')) ?></label>
+                        <input id="task_due_at" name="due_at" type="datetime-local" class="admin__control-text"/>
+                    </div>
+                    <div class="awa-form-actions">
+                        <button type="submit" class="action-primary">
+                            <span><?= $block->escapeHtml(__('Criar tarefa')) ?></span>
+                        </button>
+                    </div>
+                </form>
+            </section>
+            <section class="awa-section awa-section-full">
+                <h2><?= $block->escapeHtml(__('Tarefas abertas')) ?></h2>
+                <?php if ($tasks === []): ?>
+                    <p class="awa-empty"><?= $block->escapeHtml(__('Nenhuma tarefa aberta.')) ?></p>
+                <?php else: ?>
+                    <table class="admin__table-secondary awa-table">
+                        <thead>
+                            <tr>
+                                <th><?= $block->escapeHtml(__('Tipo')) ?></th>
+                                <th><?= $block->escapeHtml(__('Título')) ?></th>
+                                <th><?= $block->escapeHtml(__('Prazo')) ?></th>
+                                <th><?= $block->escapeHtml(__('Origem')) ?></th>
+                                <th><?= $block->escapeHtml(__('Ações')) ?></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($tasks as $task): ?>
+                                <tr>
+                                    <td><?= $block->escapeHtml($task['task_type_label'] ?? '') ?></td>
+                                    <td><?= $block->escapeHtml($task['title'] ?? '') ?></td>
+                                    <td><?= $block->escapeHtml($task['due_at'] ?? '—') ?></td>
+                                    <td><?= $block->escapeHtml($task['source_label'] ?? '') ?></td>
+                                    <td class="awa-action-buttons">
+                                        <form class="awa-inline-form" method="post"
+                                              action="<?= $block->escapeUrl($block->getCompleteTaskUrl((int) ($task['task_id'] ?? 0))) ?>">
+                                            <?= $block->getBlockHtml('formkey') ?>
+                                            <input type="hidden" name="task_id" value="<?= (int) ($task['task_id'] ?? 0) ?>"/>
+                                            <button type="submit" class="action-primary awa-btn-sm">
+                                                <span><?= $block->escapeHtml(__('Concluir')) ?></span>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                <?php endif; ?>
+            </section>
+        </div>
+
+        <!-- Sugestões -->
+        <div class="awa-tab-panel" id="tab-sugestoes" role="tabpanel" hidden>
+            <section class="awa-section awa-section-full">
+                <h2><?= $block->escapeHtml(__('Sugestões de recompra')) ?></h2>
+                <p class="awa-hint"><?= $block->escapeHtml(__('Produtos que o cliente já comprou e não repõe há mais de 90 dias.')) ?></p>
+                <?php if ($suggestions === []): ?>
+                    <p class="awa-empty"><?= $block->escapeHtml(__('Nenhuma sugestão no momento.')) ?></p>
+                <?php else: ?>
+                    <table class="admin__table-secondary awa-table">
+                        <thead>
+                            <tr>
+                                <th><?= $block->escapeHtml(__('SKU')) ?></th>
+                                <th><?= $block->escapeHtml(__('Produto')) ?></th>
+                                <th><?= $block->escapeHtml(__('Última compra')) ?></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($suggestions as $item): ?>
+                                <tr>
+                                    <td><?= $block->escapeHtml($item['sku'] ?? '') ?></td>
+                                    <td><?= $block->escapeHtml($item['name'] ?? '') ?></td>
+                                    <td><?= $block->escapeHtml($item['last_purchased'] ?? '') ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                <?php endif; ?>
+            </section>
+        </div>
+    </div>
+
+    <script>
+    require(['jquery'], function ($) {
+        'use strict';
+
+        function activateTab(tabId) {
+            $('.awa-tab-panel').attr('hidden', true);
+            $('.awa-tab-btn').removeClass('is-active');
+            $('#' + tabId).removeAttr('hidden');
+            $('[data-tab="' + tabId + '"]').addClass('is-active');
+        }
+
+        $('.awa-tab-btn').on('click', function () {
+            activateTab($(this).data('tab'));
+        });
+
+        var hash = window.location.hash.replace('#', '');
+        if (hash && $('#' + hash).length) {
+            activateTab(hash);
+        } else {
+            activateTab('tab-resumo');
+        }
+    });
+    </script>
+<?php endif; ?>

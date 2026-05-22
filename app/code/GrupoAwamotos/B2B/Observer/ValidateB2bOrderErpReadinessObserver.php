@@ -1,0 +1,94 @@
+<?php
+
+declare(strict_types=1);
+
+namespace GrupoAwamotos\B2B\Observer;
+
+use GrupoAwamotos\B2B\Model\Sectra\CheckoutBlockMessage;
+use GrupoAwamotos\B2B\Model\Sectra\ProspectEvent;
+use GrupoAwamotos\B2B\Model\Sectra\SectraSyncLogger;
+use GrupoAwamotos\B2B\Model\Sectra\ValidatorChecker;
+use GrupoAwamotos\ERPIntegration\Api\B2bOrderPullCustomerDataInterface;
+use Magento\Framework\Event\Observer;
+use Magento\Framework\Event\ObserverInterface;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Quote\Api\Data\CartInterface;
+use Magento\Quote\Model\Quote\Address;
+use Psr\Log\LoggerInterface;
+
+/**
+ * Blocks B2B order placement when fiscal data is incomplete for Sectra pull.
+ */
+class ValidateB2bOrderErpReadinessObserver implements ObserverInterface
+{
+    public function __construct(
+        private readonly B2bOrderPullCustomerDataInterface $orderPullCustomerData,
+        private readonly ValidatorChecker $validatorChecker,
+        private readonly SectraSyncLogger $syncLogger,
+        private readonly LoggerInterface $logger
+    ) {
+    }
+
+    public function execute(Observer $observer): void
+    {
+        $quote = $observer->getEvent()->getQuote();
+        if (!$quote instanceof CartInterface) {
+            return;
+        }
+
+        $customerId = (int) ($quote->getCustomerId() ?? 0);
+        if ($customerId <= 0 || !$this->orderPullCustomerData->isApprovedB2bCustomer($customerId)) {
+            return;
+        }
+
+        if (!$this->validatorChecker->isCustomerValidatedInSectra($customerId)) {
+            $message = CheckoutBlockMessage::MESSAGE;
+            $sectraChave = $this->validatorChecker->resolveSectraChave($customerId);
+            $this->syncLogger->log(
+                ProspectEvent::CHECKOUT_BLOCKED_CUSTOMER_NOT_VALIDATED,
+                $message,
+                $customerId,
+                null,
+                null,
+                $sectraChave
+            );
+            $this->syncLogger->log(
+                ProspectEvent::ORDER_NOT_CREATED_CUSTOMER_PENDING_ERP,
+                'Finalização bloqueada — cliente pendente de validação ERP.',
+                $customerId,
+                null,
+                null,
+                $sectraChave
+            );
+            $this->logger->warning(sprintf(
+                '[B2B-Sectra] Checkout bloqueado — customer #%d não validado no ERP',
+                $customerId
+            ));
+            throw new LocalizedException(__($message));
+        }
+
+        if (!$this->orderPullCustomerData->isReadyForOrderPull($customerId)) {
+            $message = (string) __(
+                'Dados fiscais incompletos para integração ERP. Verifique CNPJ, razão social e telefone.'
+            );
+            $this->logger->warning(sprintf('[B2B-ERP-Pull] Pedido bloqueado — customer #%d: %s', $customerId, $message));
+            throw new LocalizedException(__($message));
+        }
+
+        /** @phpstan-ignore-next-line */
+        $shipping = $quote->getShippingAddress();
+        if (!$shipping instanceof Address) {
+            throw new LocalizedException(__('Endereço de entrega é obrigatório para pedidos B2B.'));
+        }
+
+        $street = implode(' ', array_filter($shipping->getStreet() ?? []));
+        if (trim($street) === '' || trim((string) $shipping->getCity()) === ''
+            || trim((string) $shipping->getPostcode()) === ''
+            || trim((string) $shipping->getRegion()) === ''
+        ) {
+            $message = (string) __('Endereço de entrega incompleto (rua, cidade, UF e CEP).');
+            $this->logger->warning(sprintf('[B2B-ERP-Pull] Pedido bloqueado — customer #%d: %s', $customerId, $message));
+            throw new LocalizedException(__($message));
+        }
+    }
+}

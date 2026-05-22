@@ -1,0 +1,44 @@
+<?php
+/**
+ * @var \GrupoAwamotos\B2B\CommercialPanel\Block\Adminhtml\Task\RescheduleForm $block
+ */
+$task = $block->getTask();
+?>
+
+<div class="awa-commercial-dashboard">
+    <div class="awa-commercial-header">
+        <h1><?= $block->escapeHtml(__('Reagendar Tarefa')) ?></h1>
+        <p>
+            <a href="<?= $block->escapeUrl($block->getTasksUrl()) ?>">
+                <?= $block->escapeHtml(__('← Voltar para Tarefas')) ?>
+            </a>
+        </p>
+    </div>
+
+    <?php if ($task === []): ?>
+        <div class="message message-error error">
+            <div><?= $block->escapeHtml(__('Tarefa não encontrada ou sem permissão.')) ?></div>
+        </div>
+    <?php else: ?>
+        <section class="awa-section awa-section-full">
+            <h2><?= $block->escapeHtml($task['title'] ?? '') ?></h2>
+            <form method="post" action="<?= $block->escapeUrl($block->getSaveUrl()) ?>">
+                <?= $block->getBlockHtml('formkey') ?>
+                <div class="awa-form-row">
+                    <label for="due_at"><?= $block->escapeHtml(__('Novo prazo')) ?></label>
+                    <input id="due_at" name="due_at" type="datetime-local" class="admin__control-text" required
+                           value="<?= $block->escapeHtmlAttr(
+                               !empty($task['due_at'])
+                                   ? date('Y-m-d\TH:i', strtotime((string) $task['due_at']))
+                                   : ''
+                           ) ?>"/>
+                </div>
+                <div class="awa-form-actions">
+                    <button type="submit" class="action-primary">
+                        <span><?= $block->escapeHtml(__('Salvar novo prazo')) ?></span>
+                    </button>
+                </div>
+            </form>
+        </section>
+    <?php endif; ?>
+</div>

@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">awa_commercial_inactive_listing.awa_commercial_inactive_listing_data_source</item>
+        </item>
+    </argument>
+    <settings>
+        <spinner>awa_commercial_inactive_columns</spinner>
+        <deps>
+            <dep>awa_commercial_inactive_listing.awa_commercial_inactive_listing_data_source</dep>
+        </deps>
+    </settings>
+    <dataSource name="awa_commercial_inactive_listing_data_source" component="Magento_Ui/js/grid/provider">
+        <settings>
+            <updateUrl path="mui/index/render"/>
+        </settings>
+        <aclResource>GrupoAwamotos_B2B::commercial_inactive</aclResource>
+        <dataProvider class="GrupoAwamotos\B2B\CommercialPanel\Ui\DataProvider\InactiveCustomerDataProvider"
+                      name="awa_commercial_inactive_listing_data_source">
+            <settings>
+                <requestFieldName>entity_id</requestFieldName>
+                <primaryFieldName>entity_id</primaryFieldName>
+            </settings>
+        </dataProvider>
+    </dataSource>
+    <listingToolbar name="listing_top">
+        <settings><sticky>true</sticky></settings>
+        <bookmark name="bookmarks"/>
+        <columnsControls name="columns_controls"/>
+        <paging name="listing_paging"/>
+    </listingToolbar>
+    <columns name="awa_commercial_inactive_columns">
+        <column name="customer_display"><settings><filter>text</filter><label translate="true">Cliente</label></settings></column>
+        <column name="last_order_at" class="Magento\Ui\Component\Listing\Columns\Date"><settings><label translate="true">Última Compra</label></settings></column>
+        <column name="days_inactive_label"><settings><label translate="true">Dias Parado</label></settings></column>
+        <column name="avg_order_value"><settings><label translate="true">Valor Médio</label></settings></column>
+        <column name="attendant_name"><settings><filter>text</filter><label translate="true">Vendedora</label></settings></column>
+        <column name="commercial_status"><settings><filter>text</filter><label translate="true">Status</label></settings></column>
+        <actionsColumn name="actions" class="GrupoAwamotos\B2B\CommercialPanel\Ui\Component\Listing\Column\CustomerIntelligenceActions">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="show_mark_in_progress" xsi:type="boolean">true</item>
+                </item>
+            </argument>
+            <settings><indexField>entity_id</indexField></settings>
+        </actionsColumn>
+    </columns>
+</listing>

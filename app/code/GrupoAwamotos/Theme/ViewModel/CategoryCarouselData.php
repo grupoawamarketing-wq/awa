@@ -92,4 +92,25 @@ class CategoryCarouselData implements ArgumentInterface
 
         return (int) $collection->getSize();
     }
+
+    /**
+     * URL do catálogo raiz (link "Ver todos" da home).
+     */
+    public function getRootCategoryCatalogUrl(): string
+    {
+        try {
+            $rootCategoryId = (int) $this->storeManager->getStore()->getRootCategoryId();
+            if ($rootCategoryId <= 0) {
+                return '#';
+            }
+
+            return $this->getCategoryData($rootCategoryId)['url'] ?: '#';
+        } catch (\Throwable $e) {
+            $this->logger->error('CategoryCarousel: failed to resolve root catalog url', [
+                'error' => $e->getMessage(),
+            ]);
+
+            return '#';
+        }
+    }
 }

@@ -1,0 +1,72 @@
+<?php
+
+declare(strict_types=1);
+
+namespace GrupoAwamotos\B2B\Console\Command;
+
+use GrupoAwamotos\B2B\Model\Sectra\OrderImportGate;
+use GrupoAwamotos\B2B\Model\Sectra\ProspectPipeline;
+use Magento\Framework\App\Area;
+use Magento\Framework\App\State;
+use Magento\Framework\Exception\LocalizedException;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
+
+class SyncSectraProspectCommand extends Command
+{
+    private const NAME = 'b2b:sectra:sync-prospect';
+
+    public function __construct(
+        private readonly ProspectPipeline $prospectPipeline,
+        private readonly OrderImportGate $orderImportGate,
+        private readonly State $appState
+    ) {
+        parent::__construct();
+    }
+
+    protected function configure(): void
+    {
+        $this->setName(self::NAME)
+            ->setDescription('Sincroniza prospect B2B com Sectra e valida status no ERP')
+            ->addOption('customer-id', null, InputOption::VALUE_REQUIRED, 'Processar um cliente específico')
+            ->addOption('poll', null, InputOption::VALUE_NONE, 'Apenas verificar validações pendentes no Sectra');
+    }
+
+    protected function execute(InputInterface $input, OutputInterface $output): int
+    {
+        try {
+            $this->appState->setAreaCode(Area::AREA_ADMINHTML);
+        } catch (LocalizedException) {
+            // area already set
+        }
+
+        $customerId = $input->getOption('customer-id');
+        if ($customerId !== null) {
+            $result = $this->prospectPipeline->processApprovedCustomer((int) $customerId);
+            $output->writeln(sprintf(
+                'Cliente #%d: %s (status: %s)',
+                $result['customer_id'],
+                $result['message'],
+                $result['erp_customer_sync_status']
+            ));
+            return $result['success'] ? Command::SUCCESS : Command::FAILURE;
+        }
+
+        if ($input->getOption('poll')) {
+            $validation = $this->prospectPipeline->pollPendingValidations();
+            $imported = $this->orderImportGate->syncImportedOrderFlags();
+            $output->writeln(sprintf(
+                'Validados: %d | Pendentes: %d | Pedidos importados marcados: %d',
+                $validation['validated'],
+                $validation['still_pending'],
+                $imported
+            ));
+            return Command::SUCCESS;
+        }
+
+        $output->writeln('Use --customer-id=ID ou --poll');
+        return Command::INVALID;
+    }
+}

@@ -1,0 +1,45 @@
+<?php
+
+declare(strict_types=1);
+
+namespace GrupoAwamotos\B2B\Controller\Adminhtml\CommercialCustomer;
+
+use GrupoAwamotos\B2B\CommercialPanel\Api\PortfolioScopeInterface;
+use Magento\Backend\App\Action;
+use Magento\Backend\App\Action\Context;
+use Magento\Framework\App\Action\HttpGetActionInterface;
+use Magento\Framework\Controller\ResultInterface;
+use Magento\Framework\View\Result\PageFactory;
+
+class View extends Action implements HttpGetActionInterface
+{
+    public const ADMIN_RESOURCE = 'GrupoAwamotos_B2B::commercial_customer_360';
+
+    public function __construct(
+        Context $context,
+        private readonly PageFactory $resultPageFactory,
+        private readonly PortfolioScopeInterface $portfolioScope
+    ) {
+        parent::__construct($context);
+    }
+
+    public function execute(): ResultInterface
+    {
+        $customerId = (int) $this->getRequest()->getParam('customer_id');
+        if ($customerId <= 0) {
+            $this->messageManager->addErrorMessage(__('Cliente não informado.'));
+            return $this->resultRedirectFactory->create()->setPath('awa_commercial/commercialportfolio/index');
+        }
+
+        if (!$this->portfolioScope->canAccessCustomer($customerId)) {
+            $this->messageManager->addErrorMessage(__('Cliente fora da sua carteira comercial.'));
+            return $this->resultRedirectFactory->create()->setPath('awa_commercial/commercialportfolio/index');
+        }
+
+        $resultPage = $this->resultPageFactory->create();
+        $resultPage->setActiveMenu('GrupoAwamotos_B2B::commercial_portfolio');
+        $resultPage->getConfig()->getTitle()->prepend(__('Ficha 360° do Cliente'));
+
+        return $resultPage;
+    }
+}

@@ -1,0 +1,23 @@
+<?php
+/** @var \GrupoAwamotos\B2B\CommercialPanel\Block\Adminhtml\Inactive\Filters $block */
+$active = $block->getActiveDays();
+?>
+<div class="awa-commercial-filters awa-section">
+    <h3><?= $block->escapeHtml(__('Filtrar por dias sem compra')) ?></h3>
+    <div class="awa-filter-buttons">
+        <?php foreach ($block->getPresetFilters() as $days => $label): ?>
+            <a class="action-default<?= $active === $days ? ' active' : '' ?>"
+               href="<?= $block->escapeUrl($block->getFilterUrl($days)) ?>">
+                <?= $block->escapeHtml($label) ?>
+            </a>
+        <?php endforeach; ?>
+    </div>
+    <form class="awa-inline-form awa-custom-days-form" method="get"
+          action="<?= $block->escapeUrl($block->getUrl('*/*/*')) ?>">
+        <label><?= $block->escapeHtml(__('Personalizado (dias):')) ?></label>
+        <input type="number" name="inactive_days_custom" min="1" max="999" value="<?= (int) $active ?>" class="admin__control-text"/>
+        <button type="submit" class="action-secondary">
+            <span><?= $block->escapeHtml(__('Aplicar')) ?></span>
+        </button>
+    </form>
+</div>

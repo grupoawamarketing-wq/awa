@@ -1,0 +1,42 @@
+<?php
+/** @var \GrupoAwamotos\B2B\CommercialPanel\Block\Adminhtml\Ranking\Index $block */
+$ranking = $block->getRanking();
+$period = $block->getPeriodMonth();
+?>
+<div class="awa-commercial-dashboard">
+    <div class="awa-commercial-header">
+        <h1><?= $block->escapeHtml(__('Ranking Comercial')) ?></h1>
+        <p><?= $block->escapeHtml(__('Período: %1', $period)) ?></p>
+    </div>
+
+    <?php if ($ranking === []): ?>
+        <p class="awa-empty"><?= $block->escapeHtml(__('Nenhum dado de ranking para o período.')) ?></p>
+    <?php else: ?>
+        <table class="admin__table-secondary awa-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th><?= $block->escapeHtml(__('Vendedora')) ?></th>
+                    <th><?= $block->escapeHtml(__('Contatos')) ?></th>
+                    <th><?= $block->escapeHtml(__('Tarefas Concluídas')) ?></th>
+                    <th><?= $block->escapeHtml(__('Reativados')) ?></th>
+                    <th><?= $block->escapeHtml(__('Pedidos')) ?></th>
+                    <th><?= $block->escapeHtml(__('Valor Vendido')) ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($ranking as $row): ?>
+                    <tr>
+                        <td><?= (int) ($row['position'] ?? 0) ?></td>
+                        <td><?= $block->escapeHtml($row['attendant_name'] ?? '') ?></td>
+                        <td><?= (int) ($row['contacts_count'] ?? 0) ?></td>
+                        <td><?= (int) ($row['tasks_completed'] ?? 0) ?></td>
+                        <td><?= (int) ($row['reactivated_count'] ?? 0) ?></td>
+                        <td><?= (int) ($row['orders_count'] ?? 0) ?></td>
+                        <td><?= $block->escapeHtml($block->formatPrice((float) ($row['revenue_total'] ?? 0))) ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    <?php endif; ?>
+</div>

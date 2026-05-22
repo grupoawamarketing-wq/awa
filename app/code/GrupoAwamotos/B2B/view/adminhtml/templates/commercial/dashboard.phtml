@@ -1,0 +1,567 @@
+<?php
+/**
+ * Meu Painel / Painel da Equipe — AWA Comercial (cockpit enterprise).
+ *
+ * @var \GrupoAwamotos\B2B\CommercialPanel\Block\Adminhtml\Dashboard $block
+ * @var \GrupoAwamotos\B2B\Platform\ViewModel\PlatformUi|null $platformUi
+ */
+
+$isSupervisor = $block->isSupervisorView();
+$summary = $block->getSummary();
+$teamSummary = $block->getTeamSummary();
+$priorities = $block->getTodayPriorities(15);
+$ranking = $isSupervisor ? $block->getSellerRanking() : [];
+$recentOrders = $block->getRecentOrders(8);
+$daysNoPurchase = (int) ($summary['customers_no_purchase_count'] ?? 0);
+$goalProgress = $block->getGoalProgress();
+$shellClass = 'awa-commercial-dashboard awa-commercial-team-panel awa-b2b-shell';
+
+/**
+ * Resolve variante visual do card KPI (somente apresentação).
+ */
+$resolveMetricVariant = static function (int $value, string $type): string {
+    if ($type === 'critical') {
+        return $value > 0 ? 'critical' : 'healthy';
+    }
+    if ($type === 'attention') {
+        return $value > 0 ? 'attention' : 'healthy';
+    }
+
+    return 'neutral';
+};
+
+/**
+ * Status visual da meta por linha (somente apresentação).
+ *
+ * @param array<string, mixed> $goal
+ * @return array{status: string, label: \Magento\Framework\Phrase}
+ */
+$resolveGoalStatus = static function (array $goal): array {
+    $revenueGoal = (float) ($goal['revenue_goal'] ?? 0);
+    $contactsGoal = (int) ($goal['contacts_goal'] ?? 0);
+    $reactivatedGoal = (int) ($goal['reactivated_goal'] ?? 0);
+
+    if ($revenueGoal <= 0 && $contactsGoal <= 0 && $reactivatedGoal <= 0) {
+        return ['status' => 'neutral', 'label' => __('Sem meta')];
+    }
+
+    $pcts = [];
+    if ($revenueGoal > 0) {
+        $pcts[] = (float) ($goal['revenue_pct'] ?? 0);
+    }
+    if ($contactsGoal > 0) {
+        $pcts[] = (float) ($goal['contacts_pct'] ?? 0);
+    }
+    if ($reactivatedGoal > 0) {
+        $pcts[] = (float) ($goal['reactivated_pct'] ?? 0);
+    }
+
+    $minPct = $pcts !== [] ? min($pcts) : 0.0;
+
+    if ($minPct >= 100) {
+        return ['status' => 'success', 'label' => __('Em dia')];
+    }
+    if ($minPct >= 70) {
+        return ['status' => 'warning', 'label' => __('Atenção')];
+    }
+
+    return ['status' => 'danger', 'label' => __('Abaixo da meta')];
+};
+
+/**
+ * Classe da barra de progresso (somente apresentação).
+ */
+$progressBarClass = static function (float $pct): string {
+    if ($pct >= 100) {
+        return 'awa-team-progress__bar--success';
+    }
+    if ($pct >= 70) {
+        return 'awa-team-progress__bar--warning';
+    }
+
+    return 'awa-team-progress__bar--danger';
+};
+
+/**
+ * Renderiza ícone SVG do card KPI (somente apresentação).
+ */
+$renderMetricIcon = static function (string $icon): string {
+    $icons = [
+        'users' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+        'briefcase' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>',
+        'alert' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+        'clock' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>',
+        'cart' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>',
+        'phone' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>',
+        'receipt' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>',
+        'pause' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="10" y1="15" x2="10" y2="9"/><line x1="14" y1="15" x2="14" y2="9"/></svg>',
+    ];
+
+    return $icons[$icon] ?? $icons['receipt'];
+};
+?>
+
+<div class="<?= $block->escapeHtmlAttr($shellClass) ?>">
+    <?php if (!$block->isLinkedAttendant() && !$isSupervisor): ?>
+        <div class="awa-team-alert awa-team-alert--warning" role="alert">
+            <span class="awa-team-alert__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+            </span>
+            <div><?= $block->escapeHtml(__('Seu usuário não está vinculado a uma vendedora. Solicite ao administrador a vinculação em Gestão de Atendentes.')) ?></div>
+        </div>
+    <?php endif; ?>
+
+    <header class="awa-team-panel-header">
+        <div class="awa-team-panel-header__content">
+            <?php if ($isSupervisor): ?>
+                <h1 class="awa-team-panel-header__title"><?= $block->escapeHtml(__('Painel da Equipe')) ?></h1>
+                <p class="awa-team-panel-header__subtitle">
+                    <?= $block->escapeHtml(__('Visão consolidada da operação comercial, carteira, tarefas e metas.')) ?>
+                </p>
+            <?php else: ?>
+                <h1 class="awa-team-panel-header__title"><?= $block->escapeHtml(__('Meu Painel')) ?></h1>
+                <?php if (!empty($summary['attendant_name'])): ?>
+                    <p class="awa-team-panel-header__subtitle">
+                        <?= $block->escapeHtml(__('Olá, %1 — acompanhe carteira, tarefas e oportunidades do dia.', $summary['attendant_name'])) ?>
+                    </p>
+                <?php else: ?>
+                    <p class="awa-team-panel-header__subtitle">
+                        <?= $block->escapeHtml(__('Acompanhe carteira, tarefas e oportunidades do dia.')) ?>
+                    </p>
+                <?php endif; ?>
+            <?php endif; ?>
+        </div>
+        <div class="awa-team-panel-header__actions">
+            <a class="awa-team-btn" href="<?= $block->escapeUrl($block->getDashboardUrl()) ?>" title="<?= $block->escapeHtmlAttr(__('Atualizar')) ?>">
+                <svg class="awa-team-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/>
+                </svg>
+                <?= $block->escapeHtml(__('Atualizar')) ?>
+            </a>
+            <a class="awa-team-btn awa-team-btn--primary"
+               href="<?= $block->escapeUrl($block->getReportsUrl()) ?>"
+               title="<?= $block->escapeHtmlAttr(__('Abrir Relatórios Comerciais — exportação CSV disponível na página de relatórios.')) ?>">
+                <svg class="awa-team-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>
+                </svg>
+                <?= $block->escapeHtml(__('Relatórios')) ?>
+            </a>
+        </div>
+    </header>
+
+    <div class="awa-team-kpi-grid">
+        <?php if ($isSupervisor): ?>
+            <?php
+            $noContact = (int) ($teamSummary['customers_no_contact_count'] ?? 0);
+            $overdueTasks = (int) ($teamSummary['overdue_tasks_count'] ?? 0);
+            $abandonedCarts = (int) ($teamSummary['abandoned_carts_count'] ?? 0);
+
+            $supervisorKpis = [
+                [
+                    'value' => (int) ($teamSummary['active_sellers_count'] ?? 0),
+                    'label' => __('Vendedoras Ativas'),
+                    'variant' => 'neutral',
+                    'icon' => 'users',
+                    'badge' => null,
+                ],
+                [
+                    'value' => (int) ($teamSummary['team_customers_count'] ?? 0),
+                    'label' => __('Clientes da Equipe'),
+                    'variant' => 'neutral',
+                    'icon' => 'briefcase',
+                    'badge' => null,
+                ],
+                [
+                    'value' => $noContact,
+                    'label' => __('Sem Atendimento'),
+                    'variant' => $resolveMetricVariant($noContact, 'critical'),
+                    'icon' => 'alert',
+                    'badge' => $noContact > 0 ? __('Requer ação') : __('Tudo em dia'),
+                ],
+                [
+                    'value' => $overdueTasks,
+                    'label' => __('Tarefas Vencidas'),
+                    'variant' => $resolveMetricVariant($overdueTasks, 'critical'),
+                    'icon' => 'clock',
+                    'badge' => $overdueTasks > 0 ? __('Urgente') : __('Sem pendências'),
+                ],
+                [
+                    'value' => $abandonedCarts,
+                    'label' => __('Carrinhos Abandonados'),
+                    'variant' => $resolveMetricVariant($abandonedCarts, 'attention'),
+                    'icon' => 'cart',
+                    'badge' => $abandonedCarts > 0 ? __('Oportunidade') : __('Nenhum ativo'),
+                ],
+                [
+                    'value' => (int) ($teamSummary['contacts_month_count'] ?? 0),
+                    'label' => __('Contatos no Mês'),
+                    'variant' => 'neutral',
+                    'icon' => 'phone',
+                    'badge' => null,
+                ],
+                [
+                    'value' => (int) ($teamSummary['orders_30d_count'] ?? 0),
+                    'label' => __('Pedidos 30 Dias'),
+                    'variant' => 'neutral',
+                    'icon' => 'receipt',
+                    'badge' => null,
+                ],
+            ];
+            ?>
+            <?php foreach ($supervisorKpis as $kpi): ?>
+                <article class="awa-team-metric awa-team-metric--<?= $block->escapeHtmlAttr($kpi['variant']) ?>"
+                         aria-label="<?= $block->escapeHtmlAttr($kpi['label'] . ': ' . (int) $kpi['value']) ?>">
+                    <div class="awa-team-metric__top">
+                        <span class="awa-team-metric__icon" aria-hidden="true">
+                            <?= /* @noEscape */ $renderMetricIcon($kpi['icon']) ?>
+                        </span>
+                    </div>
+                    <span class="awa-team-metric__value"><?= (int) $kpi['value'] ?></span>
+                    <span class="awa-team-metric__label"><?= $block->escapeHtml($kpi['label']) ?></span>
+                    <?php if ($kpi['badge'] !== null): ?>
+                        <span class="awa-team-metric__badge"><?= $block->escapeHtml($kpi['badge']) ?></span>
+                    <?php endif; ?>
+                </article>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <?php
+            $sellerOverdue = (int) ($summary['overdue_tasks_count'] ?? 0);
+            $sellerAbandoned = (int) ($summary['abandoned_carts_count'] ?? 0);
+            $sellerKpis = [
+                [
+                    'value' => (int) ($summary['customer_count'] ?? 0),
+                    'label' => __('Minha carteira'),
+                    'variant' => 'neutral',
+                    'icon' => 'briefcase',
+                    'badge' => null,
+                ],
+                [
+                    'value' => (int) ($summary['open_tasks_count'] ?? 0),
+                    'label' => __('Tarefas abertas'),
+                    'variant' => 'neutral',
+                    'icon' => 'clock',
+                    'badge' => null,
+                ],
+                [
+                    'value' => $sellerOverdue,
+                    'label' => __('Tarefas vencidas'),
+                    'variant' => $resolveMetricVariant($sellerOverdue, 'critical'),
+                    'icon' => 'alert',
+                    'badge' => $sellerOverdue > 0 ? __('Urgente') : __('Sem pendências'),
+                ],
+                [
+                    'value' => $sellerAbandoned,
+                    'label' => __('Carrinhos abandonados'),
+                    'variant' => $resolveMetricVariant($sellerAbandoned, 'attention'),
+                    'icon' => 'cart',
+                    'badge' => $sellerAbandoned > 0 ? __('Oportunidade') : __('Nenhum ativo'),
+                ],
+                [
+                    'value' => $daysNoPurchase,
+                    'label' => __('Sem compra recente'),
+                    'variant' => 'neutral',
+                    'icon' => 'pause',
+                    'badge' => null,
+                ],
+                [
+                    'value' => (int) ($summary['contacts_month_count'] ?? 0),
+                    'label' => __('Contatos no mês'),
+                    'variant' => 'neutral',
+                    'icon' => 'phone',
+                    'badge' => null,
+                ],
+            ];
+            ?>
+            <?php foreach ($sellerKpis as $kpi): ?>
+                <article class="awa-team-metric awa-team-metric--<?= $block->escapeHtmlAttr($kpi['variant']) ?>"
+                         aria-label="<?= $block->escapeHtmlAttr($kpi['label'] . ': ' . (int) $kpi['value']) ?>">
+                    <div class="awa-team-metric__top">
+                        <span class="awa-team-metric__icon" aria-hidden="true">
+                            <?= /* @noEscape */ $renderMetricIcon($kpi['icon']) ?>
+                        </span>
+                    </div>
+                    <span class="awa-team-metric__value"><?= (int) $kpi['value'] ?></span>
+                    <span class="awa-team-metric__label"><?= $block->escapeHtml($kpi['label']) ?></span>
+                    <?php if ($kpi['badge'] !== null): ?>
+                        <span class="awa-team-metric__badge"><?= $block->escapeHtml($kpi['badge']) ?></span>
+                    <?php endif; ?>
+                </article>
+            <?php endforeach; ?>
+        <?php endif; ?>
+    </div>
+
+    <section class="awa-team-section">
+        <header class="awa-team-section__header">
+            <h2 class="awa-team-section__title"><?= $block->escapeHtml(__('Metas do Mês')) ?></h2>
+        </header>
+        <div class="awa-team-section__body">
+            <?php if ($goalProgress === []): ?>
+                <div class="awa-team-empty">
+                    <div class="awa-team-empty__icon" aria-hidden="true">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 20V10M18 20V4M6 20v-4"/>
+                        </svg>
+                    </div>
+                    <p class="awa-team-empty__title"><?= $block->escapeHtml(__('Sem metas no período')) ?></p>
+                    <p class="awa-team-empty__text"><?= $block->escapeHtml(__('Nenhuma meta comercial cadastrada para este mês.')) ?></p>
+                    <p class="awa-team-empty__action">
+                        <a class="awa-team-btn" href="<?= $block->escapeUrl($block->getGoalsUrl()) ?>">
+                            <?= $block->escapeHtml(__('Ir para Metas Comerciais')) ?>
+                        </a>
+                    </p>
+                </div>
+            <?php else: ?>
+                <div class="awa-team-table-wrap">
+                    <table class="awa-team-table">
+                        <caption><?= $block->escapeHtml(__('Metas comerciais do mês')) ?></caption>
+                        <thead>
+                            <tr>
+                                <?php if ($isSupervisor): ?>
+                                    <th scope="col"><?= $block->escapeHtml(__('Vendedora')) ?></th>
+                                    <th scope="col"><?= $block->escapeHtml(__('Status')) ?></th>
+                                <?php endif; ?>
+                                <th scope="col"><?= $block->escapeHtml(__('Faturamento')) ?></th>
+                                <th scope="col" class="is-numeric"><?= $block->escapeHtml(__('Contatos')) ?></th>
+                                <th scope="col" class="is-numeric"><?= $block->escapeHtml(__('Reativados')) ?></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($goalProgress as $goal): ?>
+                                <?php
+                                $goalStatus = $resolveGoalStatus($goal);
+                                $revenuePct = (float) ($goal['revenue_pct'] ?? 0);
+                                $revenueGoal = (float) ($goal['revenue_goal'] ?? 0);
+                                $barWidth = min(100, max(0, $revenuePct));
+                                ?>
+                                <tr>
+                                    <?php if ($isSupervisor): ?>
+                                        <td><span class="awa-team-seller-name"><?= $block->escapeHtml($goal['attendant_name'] ?? '') ?></span></td>
+                                        <td>
+                                            <span class="awa-team-goal-status awa-team-goal-status--<?= $block->escapeHtmlAttr($goalStatus['status']) ?>">
+                                                <?= $block->escapeHtml($goalStatus['label']) ?>
+                                            </span>
+                                        </td>
+                                    <?php endif; ?>
+                                    <td>
+                                        <?php if ($revenueGoal > 0): ?>
+                                            <div class="awa-team-progress">
+                                                <div class="awa-team-progress__track"
+                                                     role="progressbar"
+                                                     aria-valuemin="0"
+                                                     aria-valuemax="100"
+                                                     aria-valuenow="<?= (int) $barWidth ?>"
+                                                     aria-label="<?= $block->escapeHtmlAttr(__('Progresso de faturamento')) ?>">
+                                                    <div class="awa-team-progress__bar <?= $block->escapeHtmlAttr($progressBarClass($revenuePct)) ?>"
+                                                         style="width: <?= $block->escapeHtmlAttr((string) $barWidth) ?>%"></div>
+                                                </div>
+                                                <div class="awa-team-progress__meta">
+                                                    <span><?= $block->escapeHtml($block->formatPrice((float) ($goal['revenue_actual'] ?? 0))) ?> / <?= $block->escapeHtml($block->formatPrice($revenueGoal)) ?></span>
+                                                    <span><?= $block->escapeHtml((string) $revenuePct) ?>%</span>
+                                                </div>
+                                            </div>
+                                        <?php else: ?>
+                                            <?= $block->escapeHtml($block->formatPrice((float) ($goal['revenue_actual'] ?? 0))) ?>
+                                            / <?= $block->escapeHtml($block->formatPrice(0.0)) ?>
+                                            (<?= $block->escapeHtml((string) ($goal['revenue_pct'] ?? 0)) ?>%)
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="is-numeric">
+                                        <span class="awa-team-chip">
+                                            <?= (int) ($goal['contacts_actual'] ?? 0) ?> / <?= (int) ($goal['contacts_goal'] ?? 0) ?>
+                                            (<?= $block->escapeHtml((string) ($goal['contacts_pct'] ?? 0)) ?>%)
+                                        </span>
+                                    </td>
+                                    <td class="is-numeric">
+                                        <span class="awa-team-chip">
+                                            <?= (int) ($goal['reactivated_actual'] ?? 0) ?> / <?= (int) ($goal['reactivated_goal'] ?? 0) ?>
+                                            (<?= $block->escapeHtml((string) ($goal['reactivated_pct'] ?? 0)) ?>%)
+                                        </span>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php endif; ?>
+        </div>
+    </section>
+
+    <section class="awa-team-section awa-priorities">
+        <header class="awa-team-section__header">
+            <h2 class="awa-team-section__title"><?= $block->escapeHtml(__('Prioridades de Hoje')) ?></h2>
+        </header>
+        <div class="awa-team-section__body">
+            <?php if ($priorities === []): ?>
+                <div class="awa-team-empty">
+                    <div class="awa-team-empty__icon" aria-hidden="true">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/>
+                        </svg>
+                    </div>
+                    <p class="awa-team-empty__title"><?= $block->escapeHtml(__('Nenhuma prioridade para hoje')) ?></p>
+                    <p class="awa-team-empty__text"><?= $block->escapeHtml(__('Ótimo trabalho! Sua fila está em dia.')) ?></p>
+                </div>
+            <?php else: ?>
+                <div class="awa-team-table-wrap">
+                    <table class="awa-team-table awa-priorities-table">
+                        <caption><?= $block->escapeHtml(__('Prioridades comerciais de hoje')) ?></caption>
+                        <thead>
+                            <tr>
+                                <th scope="col"><?= $block->escapeHtml(__('Cliente')) ?></th>
+                                <th scope="col"><?= $block->escapeHtml(__('Tipo')) ?></th>
+                                <th scope="col"><?= $block->escapeHtml(__('Prazo')) ?></th>
+                                <th scope="col"><?= $block->escapeHtml(__('Ações')) ?></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($priorities as $task): ?>
+                                <?php
+                                $customerId = (int) ($task['customer_id'] ?? 0);
+                                $taskId = (int) ($task['task_id'] ?? 0);
+                                $isOverdue = (bool) ($task['is_overdue'] ?? false);
+                                ?>
+                                <tr class="<?= $isOverdue ? 'awa-row-overdue' : '' ?>">
+                                    <td><?= $block->escapeHtml($task['customer_name'] ?? '') ?></td>
+                                    <td><?= $block->escapeHtml($task['task_type_label'] ?? $task['task_type'] ?? '') ?></td>
+                                    <td>
+                                        <?= $block->escapeHtml($task['due_at'] ?? '—') ?>
+                                        <?php if ($isOverdue): ?>
+                                            <span class="awa-team-goal-status awa-team-goal-status--danger awa-team-overdue-badge">
+                                                <?= $block->escapeHtml(__('Vencida')) ?>
+                                            </span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <div class="awa-team-action-row">
+                                            <a class="action-default" href="<?= $block->escapeUrl($block->getCustomer360Url($customerId)) ?>">
+                                                <?= $block->escapeHtml(__('Ver Ficha')) ?>
+                                            </a>
+                                            <a class="action-default" href="<?= $block->escapeUrl($block->getContactUrl($customerId)) ?>">
+                                                <?= $block->escapeHtml(__('Registrar Contato')) ?>
+                                            </a>
+                                            <form class="awa-team-inline-form" method="post"
+                                                  action="<?= $block->escapeUrl($block->getCompleteTaskUrl($taskId)) ?>">
+                                                <?= $block->getBlockHtml('formkey') ?>
+                                                <input type="hidden" name="task_id" value="<?= $taskId ?>"/>
+                                                <button type="submit" class="action-primary awa-btn-sm"
+                                                        aria-label="<?= $block->escapeHtmlAttr(__('Concluir tarefa')) ?>">
+                                                    <span><?= $block->escapeHtml(__('Concluir')) ?></span>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php endif; ?>
+        </div>
+    </section>
+
+    <?php if ($isSupervisor): ?>
+        <section class="awa-team-section">
+            <header class="awa-team-section__header">
+                <h2 class="awa-team-section__title"><?= $block->escapeHtml(__('Ranking por Vendedora')) ?></h2>
+            </header>
+            <div class="awa-team-section__body<?= $ranking === [] ? ' awa-team-section__body--padded' : '' ?>">
+                <?php if ($ranking !== []): ?>
+                <div class="awa-team-table-wrap awa-team-table-wrap--ranking">
+                    <table class="awa-team-table">
+                        <caption><?= $block->escapeHtml(__('Ranking de desempenho por vendedora')) ?></caption>
+                        <thead>
+                            <tr>
+                                <th scope="col"><?= $block->escapeHtml(__('Vendedora')) ?></th>
+                                <th scope="col" class="is-numeric"><?= $block->escapeHtml(__('Clientes')) ?></th>
+                                <th scope="col" class="is-numeric"><?= $block->escapeHtml(__('Contatos (mês)')) ?></th>
+                                <th scope="col" class="is-numeric"><?= $block->escapeHtml(__('Pedidos (30d)')) ?></th>
+                                <th scope="col" class="is-numeric"><?= $block->escapeHtml(__('Tarefas abertas')) ?></th>
+                                <th scope="col" class="is-numeric"><?= $block->escapeHtml(__('Tarefas vencidas')) ?></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($ranking as $row): ?>
+                                <?php $rowOverdue = (int) ($row['overdue_tasks'] ?? 0); ?>
+                                <tr>
+                                    <td><span class="awa-team-seller-name"><?= $block->escapeHtml($row['attendant_name'] ?? '') ?></span></td>
+                                    <td class="is-numeric"><?= (int) ($row['customers_count'] ?? 0) ?></td>
+                                    <td class="is-numeric"><?= (int) ($row['contacts_month'] ?? 0) ?></td>
+                                    <td class="is-numeric"><?= (int) ($row['orders_30d'] ?? 0) ?></td>
+                                    <td class="is-numeric"><?= (int) ($row['open_tasks'] ?? 0) ?></td>
+                                    <td class="is-numeric<?= $rowOverdue > 0 ? ' is-critical' : '' ?>"><?= $rowOverdue ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+                <?php else: ?>
+                <div class="awa-team-empty">
+                    <div class="awa-team-empty__icon" aria-hidden="true">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                    </div>
+                    <p class="awa-team-empty__title"><?= $block->escapeHtml(__('Sem dados de ranking')) ?></p>
+                    <p class="awa-team-empty__text"><?= $block->escapeHtml(__('Nenhuma vendedora com métricas disponíveis no período.')) ?></p>
+                </div>
+                <?php endif; ?>
+            </div>
+        </section>
+    <?php endif; ?>
+
+    <?php if ($isSupervisor && $recentOrders !== []): ?>
+        <section class="awa-team-section">
+            <header class="awa-team-section__header">
+                <h2 class="awa-team-section__title"><?= $block->escapeHtml(__('Pedidos recentes da equipe')) ?></h2>
+            </header>
+            <div class="awa-team-section__body">
+                <div class="awa-team-table-wrap">
+                    <table class="awa-team-table">
+                        <caption><?= $block->escapeHtml(__('Pedidos recentes da equipe')) ?></caption>
+                        <thead>
+                            <tr>
+                                <th scope="col"><?= $block->escapeHtml(__('Pedido')) ?></th>
+                                <th scope="col"><?= $block->escapeHtml(__('Cliente')) ?></th>
+                                <th scope="col" class="is-numeric"><?= $block->escapeHtml(__('Total')) ?></th>
+                                <th scope="col"><?= $block->escapeHtml(__('Status')) ?></th>
+                                <th scope="col"><?= $block->escapeHtml(__('Data')) ?></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($recentOrders as $order): ?>
+                                <tr>
+                                    <td>#<?= $block->escapeHtml($order['increment_id'] ?? '') ?></td>
+                                    <td><?= $block->escapeHtml($order['customer_name'] ?? '') ?></td>
+                                    <td class="is-numeric"><?= $block->escapeHtml($block->formatPrice((float) ($order['grand_total'] ?? 0))) ?></td>
+                                    <td><?= $block->escapeHtml($order['status'] ?? '') ?></td>
+                                    <td><?= $block->escapeHtml($order['created_at'] ?? '') ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    <?php elseif ($isSupervisor): ?>
+        <section class="awa-team-section">
+            <header class="awa-team-section__header">
+                <h2 class="awa-team-section__title"><?= $block->escapeHtml(__('Pedidos recentes da equipe')) ?></h2>
+            </header>
+            <div class="awa-team-section__body awa-team-section__body--padded">
+                <div class="awa-team-empty">
+                    <div class="awa-team-empty__icon" aria-hidden="true">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>
+                        </svg>
+                    </div>
+                    <p class="awa-team-empty__title"><?= $block->escapeHtml(__('Sem pedidos recentes')) ?></p>
+                    <p class="awa-team-empty__text"><?= $block->escapeHtml(__('Nenhum pedido registrado para a equipe nos últimos registros.')) ?></p>
+                </div>
+            </div>
+        </section>
+    <?php endif; ?>
+</div>
