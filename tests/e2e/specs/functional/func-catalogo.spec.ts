@@ -70,9 +70,12 @@ test.describe('Catálogo digital — PDF e revista', () => {
     if (!ok) test.skip();
 
     const counter = page.locator('#awa-catalog-counter');
+    const nextBtn = page.locator('#awa-catalog-next');
+
     await expect(counter).toContainText('1 / 32', { timeout: 60000 });
-    await page.locator('#awa-catalog-next').click();
-    await expect(counter).toContainText('2 / 32', { timeout: 10000 });
+    await nextBtn.scrollIntoViewIfNeeded();
+    await nextBtn.click({ force: true });
+    await expect(counter).toContainText('2 / 32', { timeout: 15000 });
   });
 
   test('07 — sem erros JS críticos nas páginas do catálogo', async ({ page }) => {

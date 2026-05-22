@@ -156,12 +156,21 @@
         pageFlip.on('flip', updateCounter);
         updateCounter();
 
+        function goToPage(targetIndex) {
+            if (targetIndex < 0 || targetIndex >= numPages) {
+                return;
+            }
+
+            pageFlip.turnToPage(targetIndex);
+            updateCounter();
+        }
+
         document.getElementById('awa-catalog-prev').addEventListener('click', function () {
-            pageFlip.flipPrev();
+            goToPage(pageFlip.getCurrentPageIndex() - 1);
         });
 
         document.getElementById('awa-catalog-next').addEventListener('click', function () {
-            pageFlip.flipNext();
+            goToPage(pageFlip.getCurrentPageIndex() + 1);
         });
 
         statusEl.classList.add('is-hidden');
