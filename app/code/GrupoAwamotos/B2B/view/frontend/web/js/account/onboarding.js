@@ -6,26 +6,80 @@ define([
 ], function ($, Shepherd, $t) {
     'use strict';
 
-    return function (config) {
+    const TOUR_SEEN_KEY = 'awa_b2b_tour_seen';
+
+    return function () {
         const tour = new Shepherd.Tour({
             useModalOverlay: true,
             defaultStepOptions: {
                 classes: 'shepherd-theme-custom',
-                scrollTo: { behavior: 'smooth', block: 'center' },
+                scrollTo: { behavior: 'smooth', block: 'nearest' },
                 cancelIcon: {
                     enabled: true
                 }
             }
         });
 
-        // Step 1: Welcome
-        tour.addStep({
+        const markTourSeen = function () {
+            const date = new Date();
+            date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
+            $.mage.cookies.set(TOUR_SEEN_KEY, '1', { expires: date });
+
+            try {
+                window.localStorage.setItem(TOUR_SEEN_KEY, '1');
+            } catch (e) {
+                // ignore storage failures (private mode, etc.)
+            }
+        };
+
+        const hasSeenTour = function () {
+            if ($.mage.cookies.get(TOUR_SEEN_KEY)) {
+                return true;
+            }
+
+            try {
+                return window.localStorage.getItem(TOUR_SEEN_KEY) === '1';
+            } catch (e) {
+                return false;
+            }
+        };
+
+        const resolveAttachTarget = function (selector, fallbackSelector) {
+            if ($(selector).length) {
+                return selector;
+            }
+
+            if (fallbackSelector && $(fallbackSelector).length) {
+                return fallbackSelector;
+            }
+
+            return null;
+        };
+
+        const addAnchoredStep = function (stepConfig) {
+            const selector = resolveAttachTarget(stepConfig.attachTo, stepConfig.fallbackAttachTo);
+
+            if (!selector) {
+                return;
+            }
+
+            tour.addStep({
+                id: stepConfig.id,
+                text: stepConfig.text,
+                attachTo: {
+                    element: selector,
+                    on: stepConfig.on || 'bottom'
+                },
+                buttons: stepConfig.buttons
+            });
+        };
+
+        addAnchoredStep({
             id: 'welcome',
             text: $t('Bem-vindo ao Portal B2B Grupo AWA! Este é o seu novo centro de comando para compras no atacado.'),
-            attachTo: {
-                element: '.b2b-dashboard-welcome',
-                on: 'bottom'
-            },
+            attachTo: '.b2b-dashboard-welcome',
+            fallbackAttachTo: '.b2b-dashboard-header',
+            on: 'bottom',
             buttons: [
                 {
                     text: $t('Próximo'),
@@ -34,19 +88,17 @@ define([
             ]
         });
 
-        // Step 2: Analytics
         if ($('.b2b-analytics-section').length) {
-            tour.addStep({
+            addAnchoredStep({
                 id: 'analytics',
                 text: $t('Acompanhe seu desempenho de compras com gráficos em tempo real. Identifique tendências e planeje seu estoque.'),
-                attachTo: {
-                    element: '.b2b-analytics-section',
-                    on: 'top'
-                },
+                attachTo: '.b2b-analytics-section',
+                on: 'top',
                 buttons: [
                     {
                         text: $t('Anterior'),
-                        action: tour.back
+                        action: tour.back,
+                        classes: 'shepherd-button-secondary'
                     },
                     {
                         text: $t('Próximo'),
@@ -56,19 +108,17 @@ define([
             });
         }
 
-        // Step 3: Quick Order
         if ($('.b2b-quickorder-shortcut').length) {
-            tour.addStep({
+            addAnchoredStep({
                 id: 'quickorder',
                 text: $t('Ganhe tempo com o Pedido Rápido. Adicione múltiplos SKUs de uma vez ou importe sua planilha CSV.'),
-                attachTo: {
-                    element: '.b2b-quickorder-shortcut',
-                    on: 'bottom'
-                },
+                attachTo: '.b2b-quickorder-shortcut',
+                on: 'bottom',
                 buttons: [
                     {
                         text: $t('Anterior'),
-                        action: tour.back
+                        action: tour.back,
+                        classes: 'shepherd-button-secondary'
                     },
                     {
                         text: $t('Próximo'),
@@ -78,19 +128,17 @@ define([
             });
         }
 
-        // Step 4: Subscriptions
         if ($('.b2b-subscriptions-shortcut').length) {
-            tour.addStep({
+            addAnchoredStep({
                 id: 'subscriptions',
                 text: $t('Configure Assinaturas Recorrentes para seus itens de maior giro e nunca fique sem estoque.'),
-                attachTo: {
-                    element: '.b2b-subscriptions-shortcut',
-                    on: 'top'
-                },
+                attachTo: '.b2b-subscriptions-shortcut',
+                on: 'top',
                 buttons: [
                     {
                         text: $t('Anterior'),
-                        action: tour.back
+                        action: tour.back,
+                        classes: 'shepherd-button-secondary'
                     },
                     {
                         text: $t('Próximo'),
@@ -100,7 +148,6 @@ define([
             });
         }
 
-        // Final Step
         tour.addStep({
             id: 'finish',
             text: $t('Pronto! Você está pronto para decolar. Caso precise de ajuda, entre em contato com seu atendente comercial.'),
@@ -112,22 +159,30 @@ define([
             ]
         });
 
-        // Auto-start only once
-        const tourCookie = 'awa_b2b_tour_seen';
-        if (!$.mage.cookies.get(tourCookie)) {
-            setTimeout(() => {
-                tour.start();
-                // Set cookie for 1 year
-                const date = new Date();
-                date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
-                $.mage.cookies.set(tourCookie, '1', { expires: date });
-            }, 2000);
+        tour.on('complete', markTourSeen);
+        tour.on('cancel', markTourSeen);
+
+        const startTour = function (force) {
+            if (tour.isActive()) {
+                return;
+            }
+
+            if (!force && hasSeenTour()) {
+                return;
+            }
+
+            tour.start();
+        };
+
+        if (!hasSeenTour()) {
+            window.setTimeout(function () {
+                startTour(false);
+            }, 1200);
         }
 
-        // Manual trigger
-        $(document).on('click', '.trigger-b2b-tour', function (e) {
-            e.preventDefault();
-            tour.start();
+        $(document).on('click', '.trigger-b2b-tour', function (event) {
+            event.preventDefault();
+            startTour(true);
         });
     };
 });

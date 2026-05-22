@@ -55,14 +55,39 @@ body.b2b-account-dashboard .breadcrumbs {
     padding: 8px 0;
 }
 
-/* S3 — COLUMNS LAYOUT */
+/* S3 — COLUMNS LAYOUT (Magento padrão: .column.main + .sidebar.sidebar-main) */
 body.b2b-account-dashboard .columns,
 body.b2b-account-dashboard .page-main > .columns {
-    display: flex;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
     gap: 20px !important;
-    row-gap: 20px !important;
-    column-gap: 20px !important;
-    align-items: flex-start;
+    align-items: start !important;
+}
+
+@media (min-width: 768px) {
+    body.b2b-account-dashboard .columns,
+    body.b2b-account-dashboard .page-main > .columns {
+        grid-template-columns: minmax(220px, 240px) minmax(0, 1fr) !important;
+    }
+
+    body.b2b-account-dashboard .columns > .sidebar.sidebar-main,
+    body.b2b-account-dashboard .columns > .sidebar-main {
+        grid-column: 1 !important;
+        grid-row: 1 !important;
+        order: unset !important;
+        min-width: 0 !important;
+    }
+
+    body.b2b-account-dashboard .columns > .column.main,
+    body.b2b-account-dashboard .columns > .col-main {
+        grid-column: 2 !important;
+        grid-row: 1 !important;
+        order: unset !important;
+        width: auto !important;
+        max-width: none !important;
+        min-width: 0 !important;
+        flex: unset !important;
+    }
 }
 
 body.b2b-account-dashboard .columns > .col-lg-2,
@@ -74,9 +99,17 @@ body.b2b-account-dashboard .columns > [class*="col-sm-3"] {
 
 body.b2b-account-dashboard .columns > .col-main,
 body.b2b-account-dashboard .columns > .col-lg-10,
-body.b2b-account-dashboard .columns > [class*="col-sm-9"] {
-    flex: 1;
+body.b2b-account-dashboard .columns > [class*="col-sm-9"],
+body.b2b-account-dashboard .columns > .column.main {
     min-width: 0;
+}
+
+body.b2b-account-dashboard .columns > .column.main {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    overflow: visible !important;
+    min-height: 200px !important;
 }
 
 /* S4 — SIDEBAR NAVIGATION */
@@ -1555,3 +1588,62 @@ body.b2b-account-dashboard .quotes-section .empty-state-message {
         display: none !important;
     }
 }
+
+/* =================================================================
+   §40 — FIX: conteúdo do dashboard invisível (animações + flex/grid)
+   Garante visibilidade após conflito body.account flex vs width:100%
+   ================================================================= */
+
+body#html-body.account.b2b-account-dashboard .b2b-dashboard {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    min-height: 120px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-dashboard :is(
+    .b2b-dashboard-header,
+    .b2b-company-info,
+    .b2b-summary-cards,
+    .b2b-onboarding-section,
+    .b2b-suggestions-section,
+    .b2b-quick-actions,
+    .b2b-section,
+    .b2b-rexis-section,
+    .erp-suggestions-section,
+    .erp-reorder-section,
+    .categories-section,
+    .summary-card,
+    .message
+) {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    animation: none !important;
+}
+
+/* =================================================================
+   §41 — FIX: col-main empilhado abaixo da sidebar (grid-row ausente)
+   order:2 + grid-auto-flow:row colocava .col-main na linha 2 → área branca
+   ================================================================= */
+
+@media (min-width: 768px) {
+    body#html-body.account.b2b-account-dashboard .page-main > .columns > [class*="col-sm-3"],
+    body#html-body.account.b2b-account-dashboard .page-main > .columns > .col-lg-2 {
+        grid-column: 1 !important;
+        grid-row: 1 !important;
+        align-self: start !important;
+    }
+
+    body#html-body.account.b2b-account-dashboard .page-main > .columns > .col-main,
+    body#html-body.account.b2b-account-dashboard .page-main > .columns > .column.main {
+        grid-column: 2 !important;
+        grid-row: 1 !important;
+        align-self: start !important;
+    }
+}
+
