@@ -210,6 +210,8 @@ $refinementsBundleUrl = $block->getViewFileUrl('css/awa-bundle-refinements.min.c
 /* Usa overflow-x:clip em vez de hidden: clip nao cria scroll container no html,
    entao position:fixed funciona corretamente no Chrome. Chrome 90+, Firefox 81+, Safari 16+ */
 html{overflow-x:clip;scrollbar-width:thin;scroll-behavior:smooth;color-scheme:light}*,*::before,*::after{box-sizing:border-box}body{overflow-x:clip;background-color:#ffffff}
+/* sr-only no 1º paint — H1 SEO da home fica visível até defer-global carregar */
+.awa-sr-only,h1.awa-sr-only,.sr-only,.visually-hidden{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
 /* Legacy utility bar = hidden, header = white, footer = vermelho AWA #b73337 */
 body .page-wrapper .nav-sections:not(.category-dropdown,.category-dropdown-items,.category-dropdown-item-content){background:var(--head-preload-c4)}
 body .page-wrapper .awa-benefits-bar,.awa-benefits-bar{background:var(--head-preload-c4) !important;color:#fff}
@@ -237,7 +239,13 @@ body .page-wrapper .page_footer,.page-footer{background:var(--head-preload-c4) !
 /* Homepage: banner-slider min-height (previne colapso 92px por --awa-zero bug) */
 :is(body.cms-index-index,body.cms-home,body.cms-homepage_ayo_home5) .top-home-content--above-fold .banner-slider.banner-slider2{min-height:clamp(200px,38vw,480px)!important}
 @media(max-width:767px){:is(body.cms-index-index,body.cms-home,body.cms-homepage_ayo_home5) .top-home-content--above-fold .banner-slider.banner-slider2{min-height:clamp(168px,48vw,240px)!important}}
+@media(min-width:768px){.wrapper_slider.visible-xs,.banner-slider .wrapper_slider.visible-xs{display:none!important;visibility:hidden!important;height:0!important;max-height:0!important;overflow:hidden!important;margin:0!important;padding:0!important;pointer-events:none!important}}
 @media(max-width:767px){.wrapper_slider.hidden-xs{display:none!important}.wrapper_slider.visible-xs{display:block!important}}
+/* Hero owl pré-init: 1 slide, sem stack/duplicação antes do JS */
+.wrapper_slider .owl-carousel:not(.awa-hero-owl-ready){overflow:hidden!important;max-height:clamp(260px,46.875vw,680px)!important}
+.wrapper_slider .owl-carousel:not(.awa-hero-owl-ready) .owl-stage-outer,.wrapper_slider .owl-carousel:not(.awa-hero-owl-ready) .owl-wrapper-outer{overflow:hidden!important}
+.wrapper_slider .owl-carousel:not(.awa-hero-owl-ready) .owl-item:not(:first-child){display:none!important;visibility:hidden!important;height:0!important;overflow:hidden!important}
+:is(body.cms-index-index,body.cms-home,body.cms-homepage_ayo_home5) .top-home-content--above-fold .banner-slider.banner-slider2,:is(body.cms-index-index,body.cms-home,body.cms-homepage_ayo_home5) .top-home-content--above-fold .wrapper_slider:not(.visible-xs){width:100%!important;max-width:100%!important;margin-inline:0!important;padding-inline:0!important;border-radius:0!important;overflow:hidden!important;background:transparent!important}
 /* Homepage: swiper pre-init (previne h=1260px antes do IntersectionObserver) */
 :is(body.cms-index-index,body.cms-home,body.cms-homepage_ayo_home5) .products-swiper:not(.swiper-initialized){max-height:320px;overflow:hidden}
 :is(body.cms-index-index,body.cms-home,body.cms-homepage_ayo_home5) .products-swiper:not(.swiper-initialized)>.swiper-wrapper{display:flex;flex-wrap:nowrap;gap:16px}
@@ -325,6 +333,11 @@ body .page-wrapper .page_footer,.page-footer{background:var(--head-preload-c4) !
 #html-body .page-wrapper .awa-site-header .awa-header-minicart .minicart-wrapper .showcart.header-mini-cart::before{content:none!important;display:none!important}
 #html-body .page-wrapper .awa-site-header .awa-header-minicart .minicart-wrapper .showcart.header-mini-cart .awa-minicart-icon{display:inline-block!important;width:20px!important;height:20px!important;fill:none!important;stroke:#ffffff!important;opacity:1!important;visibility:visible!important}
 #html-body .page-wrapper .awa-site-header .awa-header-minicart .minicart-wrapper .showcart.header-mini-cart>span:not(.counter){position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important}
+/* Minicart fechado no 1º paint — evita painel "Carregando carrinho" antes do KO */
+#html-body .page-wrapper .awa-site-header .awa-header-minicart .minicart-wrapper:not(.active):not(.is-open):not(.show) .block-minicart:not(._active),
+#html-body .page-wrapper .awa-site-header .awa-header-minicart:not(.awa-header-minicart--expanded) .minicart-wrapper:not(.active):not(.is-open):not(.show) .block-minicart:not(._active){
+  display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;
+}
 /* BUG-MINICART-2026-05-20: reverte visual-bugfix que colapsa .mini-carts (position:absolute + parent 0×0).
    Inline síncrono — vence awa-visual-bugfix async em todas as páginas. */
 @media (min-width: 992px) {
@@ -784,6 +797,38 @@ endif; ?>
   }
 }
 </style>
+<style id="awa-home-hero-fouc-final">
+/* FOUC hero final-wins 2026-05-22 — H1 oculto + slider único desktop + full-bleed */
+h1.awa-sr-only,.page-top h1.awa-sr-only{
+  position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important;
+}
+@media (min-width: 768px) {
+  #html-body .wrapper_slider.visible-xs,
+  #html-body .top-home-content--above-fold .wrapper_slider.visible-xs {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
+  }
+}
+#html-body .wrapper_slider .owl-carousel:not(.awa-hero-owl-ready) .owl-item:not(:first-child) {
+  display: none !important;
+}
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .content-top-home > .top-home-content--above-fold {
+  margin-inline: calc(-1 * var(--awa-container-pad, clamp(16px, 3vw, 24px))) !important;
+  width: calc(100% + (2 * var(--awa-container-pad, clamp(16px, 3vw, 24px)))) !important;
+  max-width: none !important;
+  overflow: hidden !important;
+}
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .top-home-content--above-fold .banner-slider,
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .top-home-content--above-fold .wrapper_slider:not(.visible-xs) {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+}
 <?php
     /* awa-home-cosmetic-bundle inclui: audit-bundle + polish-r2 + redesign-modern (R1-R6 completo).
        IMPORTANTE: ao atualizar awa-redesign-modern.css, reconstruir o bundle:

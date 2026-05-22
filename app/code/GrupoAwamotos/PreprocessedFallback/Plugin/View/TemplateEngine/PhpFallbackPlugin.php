@@ -46,13 +46,10 @@ final class PhpFallbackPlugin
                 throw $exception;
             }
 
-            if (!$this->templateHealer->ensurePreprocessedExists($missingPath)) {
+            $retryFileName = $this->templateHealer->resolveRenderablePath($missingPath);
+            if ($retryFileName === $resolvedFileName) {
                 throw $exception;
             }
-
-            $retryFileName = $resolvedFileName === $missingPath
-                ? $missingPath
-                : $this->templateHealer->resolveRenderablePath($missingPath);
 
             return $proceed($block, $retryFileName, $dictionary);
         }

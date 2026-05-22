@@ -47,7 +47,7 @@ final class PreprocessedTemplateHealer
         }
 
         $relative = substr($missingPreprocessedPath, $needlePosition + strlen(self::PREPROCESSED_SEGMENT));
-        if ($relative === false || $relative === '') {
+        if ($relative === '') {
             return null;
         }
 

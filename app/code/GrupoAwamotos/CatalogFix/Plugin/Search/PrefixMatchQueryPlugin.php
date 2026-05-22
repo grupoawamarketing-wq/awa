@@ -40,6 +40,9 @@ class PrefixMatchQueryPlugin
         RequestQueryInterface $requestQuery,
         string $conditionType
     ): array {
+        if (!$requestQuery instanceof \Magento\Framework\Search\Request\Query\MatchQuery) {
+            return $result;
+        }
         $queryValue = trim($requestQuery->getValue());
 
         // Only apply for single-word queries (no spaces) shorter than 12 chars.
