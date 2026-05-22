@@ -69,126 +69,6 @@ if ($isHomePage) {
 // awa-bundle-refinements.min.css — safety-net CSS: carrega POR ÚLTIMO para overrides (footer-light, etc.)
 $refinementsBundleUrl = $block->getViewFileUrl('css/awa-bundle-refinements.min.css');
 ?>
-<script>
-(function () {
-    'use strict';
-
-    if (window.location.search.indexOf('awa_diag_c58301=1') === -1) {
-        return;
-    }
-
-    var endpoint = 'http://localhost:7363/ingest/9a5bd517-cd53-4948-bac5-5aea194478a3';
-    var sessionId = 'c58301';
-    var runId = 'awa-diag-' + Date.now();
-    var budget = 10;
-
-    function versions() {
-        return Array.prototype.slice.call(document.querySelectorAll('script[src],link[href]'))
-            .map(function (el) {
-                var value = el.src || el.href || '';
-                var match = value.match(/\/static\/version(\d+)\//);
-                return match ? match[1] : '';
-            })
-            .filter(function (value, index, arr) {
-                return value && arr.indexOf(value) === index;
-            });
-    }
-
-    function pageState() {
-        var terminalLinks = Array.prototype.slice.call(
-            document.querySelectorAll('link[href*="awa-home-terminal-bundle.min.css"]')
-        );
-        return {
-            href: location.href,
-            readyState: document.readyState,
-            bodyClass: document.body ? document.body.className : '',
-            versions: versions(),
-            terminalLinks: terminalLinks.map(function (link) {
-                return {
-                    href: link.href,
-                    media: link.media,
-                    disabled: !!link.disabled,
-                    sheetLoaded: !!link.sheet
-                };
-            }),
-            skeletonPending: document.querySelectorAll(
-                '.awa-carousel-section ul.owl.owl-carousel .content-item-product:not(.awa-carousel-ready)'
-            ).length,
-            skeletonReady: document.querySelectorAll(
-                '.awa-carousel-section ul.owl.owl-carousel .content-item-product.awa-carousel-ready'
-            ).length,
-            overflowX: document.body ? Math.max(0, document.body.scrollWidth - document.documentElement.clientWidth) : 0,
-            serviceWorker: navigator.serviceWorker && navigator.serviceWorker.controller
-                ? navigator.serviceWorker.controller.scriptURL
-                : null
-        };
-    }
-
-    function log(hypothesisId, message, data) {
-        if (budget <= 0) {
-            return;
-        }
-        budget -= 1;
-        // #region agent log
-        fetch(endpoint, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': sessionId },
-            body: JSON.stringify({
-                sessionId: sessionId,
-                runId: runId,
-                hypothesisId: hypothesisId,
-                location: 'awa-head-preload.phtml:awa_diag_c58301',
-                message: message,
-                data: data || {},
-                timestamp: Date.now()
-            })
-        }).catch(function () {});
-        // #endregion
-    }
-
-    log('D0', 'diag.boot', pageState());
-
-    window.addEventListener('error', function (event) {
-        var target = event.target;
-        if (target && target !== window) {
-            log('D1', 'resource.error', {
-                tagName: target.tagName || '',
-                url: target.src || target.href || '',
-                outerHTML: target.outerHTML ? target.outerHTML.slice(0, 300) : '',
-                state: pageState()
-            });
-            return;
-        }
-        log('D2', 'window.error', {
-            message: event.message || '',
-            source: event.filename || '',
-            line: event.lineno || 0,
-            column: event.colno || 0,
-            state: pageState()
-        });
-    }, true);
-
-    window.addEventListener('unhandledrejection', function (event) {
-        var reason = event && event.reason ? event.reason : {};
-        log('D3', 'window.unhandledrejection', {
-            reason: reason.message || String(reason),
-            state: pageState()
-        });
-    });
-
-    window.addEventListener('load', function () {
-        window.setTimeout(function () {
-            log('D4', 'window.load.snapshot', pageState());
-        }, 1200);
-    }, { once: true });
-
-    window.addEventListener('scroll', function () {
-        window.setTimeout(function () {
-            log('D5', 'first.scroll.snapshot', pageState());
-        }, 800);
-    }, { once: true, passive: true });
-}());
-</script>
 <!-- =========================================================
      AWA Anti-FOUC — Critical Inline CSS
      Pinta cores e estrutura antes dos bundles async carregarem.
@@ -228,17 +108,17 @@ body .page-wrapper .page_footer,.page-footer{background:var(--head-preload-c4) !
 .wrapper_slider .owl{position:relative;width:100%;overflow:hidden}
 .wrapper_slider .owl:not(.owl-carousel):not(.awa-hero-owl-ready)>.banner_item{display:none}
 .wrapper_slider .owl:not(.owl-carousel):not(.awa-hero-owl-ready)>.banner_item:first-child{display:block}
-.wrapper_slider.hidden-xs .banner_item_bg,.wrapper_slider:not(.visible-xs) .banner_item_bg{aspect-ratio:1920/900;min-height:clamp(260px,46.875vw,680px);margin-top:0}
-.wrapper_slider.visible-xs .banner_item_bg{aspect-ratio:1920/900;min-height:clamp(150px,46vw,260px)}
+.wrapper_slider.hidden-xs .banner_item_bg,.wrapper_slider:not(.visible-xs) .banner_item_bg{aspect-ratio:1920/900;min-height:clamp(180px,42vw,520px);margin-top:0}
+.wrapper_slider.visible-xs .banner_item_bg{aspect-ratio:1920/900;min-height:clamp(140px,42vw,240px)}
 .wrapper_slider .banner_item_bg,.wrapper_slider .banner_item_bg:before,.wrapper_slider .banner_item_bg:after{opacity:1;filter:none}
 .wrapper_slider .banner_item_bg img,.wrapper_slider .banner_item_bg picture{display:block;width:100%;height:100%;object-fit:cover}
 /* CLS fix: banner_item pre-positioning — themes.css loads async, text-banner static→absolute shift fix */
 .banner_item{position:relative}.banner_item .text-banner{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;width:80%;margin:auto}
 /* Homepage: hero full-bleed dentro de content-top-home (gutter único no shell) */
 :is(body.cms-index-index,body.cms-home,body.cms-homepage_ayo_home5) .content-top-home>.top-home-content--above-fold{box-sizing:border-box;margin-inline:calc(-1 * var(--awa-container-pad,clamp(16px,3vw,24px)));width:calc(100% + (2 * var(--awa-container-pad,clamp(16px,3vw,24px))));max-width:none;padding-block:0}
-/* Homepage: banner-slider min-height (previne colapso 92px por --awa-zero bug) */
-:is(body.cms-index-index,body.cms-home,body.cms-homepage_ayo_home5) .top-home-content--above-fold .banner-slider.banner-slider2{min-height:clamp(200px,38vw,480px)!important}
-@media(max-width:767px){:is(body.cms-index-index,body.cms-home,body.cms-homepage_ayo_home5) .top-home-content--above-fold .banner-slider.banner-slider2{min-height:clamp(168px,48vw,240px)!important}}
+/* Homepage: banner-slider — altura vem do aspect-ratio do slide, não min-height fantasma */
+:is(body.cms-index-index,body.cms-home,body.cms-homepage_ayo_home5) .top-home-content--above-fold .banner-slider.banner-slider2{min-height:0!important}
+@media(max-width:767px){:is(body.cms-index-index,body.cms-home,body.cms-homepage_ayo_home5) .top-home-content--above-fold .banner-slider.banner-slider2{min-height:0!important}}
 @media(min-width:768px){.wrapper_slider.visible-xs,.banner-slider .wrapper_slider.visible-xs{display:none!important;visibility:hidden!important;height:0!important;max-height:0!important;overflow:hidden!important;margin:0!important;padding:0!important;pointer-events:none!important}}
 @media(max-width:767px){.wrapper_slider.hidden-xs{display:none!important}.wrapper_slider.visible-xs{display:block!important}}
 /* Hero owl pré-init: 1 slide, sem stack/duplicação antes do JS */
@@ -435,9 +315,9 @@ body.cms-index-index .page-wrapper .column.main .awa-security-section,body.cms-h
 #html-body .awa-carousel-section .b2b-login-to-buy-btn{display:none!important}
 #html-body .awa-shelf--carousel .product-info-cart{display:none!important}
 #html-body .awa-shelf--carousel .b2b-login-to-buy-btn{display:none!important}
-#html-body .awa-shelf--carousel .info-price .b2b-login-to-see-price{display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:center!important;gap:0.25rem!important;padding:0.375rem 0.625rem!important;min-height:2.25rem!important;max-height:2.5rem!important;height:auto!important;background:#fff!important;border:1px solid #e5e5e5!important;border-radius:6px!important;overflow:hidden!important}
-#html-body .awa-shelf--carousel .info-price .b2b-login-to-see-price .price-label{display:inline!important;min-height:0!important;font-size:clamp(0.6875rem,0.62rem + 0.25vw,0.8125rem)!important;line-height:1.25!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
-#html-body .awa-shelf--carousel .info-price .b2b-login-to-see-price a{display:inline!important;align-items:center!important;min-height:0!important;min-width:0!important;padding:0!important;font-size:inherit!important;font-weight:600!important;white-space:nowrap!important;color:#b73337!important}
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .awa-shelf--carousel .info-price .b2b-login-to-see-price{display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;align-items:center!important;gap:0.375rem!important;padding:0.375rem 0.625rem!important;min-height:2.75rem!important;max-height:none!important;height:auto!important;background:#fff!important;border:1px solid #e5e5e5!important;border-radius:6px!important;overflow:visible!important;font-size:clamp(0.8125rem,0.75rem + 0.3vw,0.875rem)!important;line-height:1.35!important}
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .awa-shelf--carousel .info-price .b2b-login-to-see-price .price-label{display:inline!important;min-height:0!important;font-size:inherit!important;line-height:1.35!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .awa-shelf--carousel .info-price .b2b-login-to-see-price a{display:inline-flex!important;align-items:center!important;justify-content:center!important;min-height:2.75rem!important;min-width:2.75rem!important;padding:0.375rem 0.625rem!important;font-size:inherit!important;font-weight:600!important;white-space:nowrap!important;color:#b73337!important;box-sizing:border-box!important}
 #html-body .awa-carousel-section .item-product,#html-body .awa-carousel-section .awa-carousel-card-slot{min-height:0!important;height:auto!important}
 /* Passo 3: card/shell/imagem dos carrosséis → _awa-shelf-carousel.less (removido critical duplicado Phase 20) */
 
@@ -701,6 +581,7 @@ endif; ?>
       media="print"
       onload="<?= /* @noEscape */ $__cssStagger ?>"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__plpFinalUrl) ?>"/></noscript>
+<?php /* awa-plp-ui-promax: loader terminal em catalog_category_view + catalogsearch (pós audit-bundle) */ ?>
 <?php endif; ?>
 <?php /* rexis-recommendations: PDP/categoria/dashboard — HOME não rende widget (evita CSS morto ~1 fetch).
           Se CMS passar widget Rexis na home no futuro, incluir esse asset via layout/CMS ou remover o gate. */
@@ -737,6 +618,8 @@ endif; ?>
     ($__emitDeferredCss)($__homeFlexFinalUrl, false, false);
     $__homeFlexGridFlowUrl = $block->getViewFileUrl('css/awa-home-flex-grid-flow.min.css');
     ($__emitDeferredCss)($__homeFlexGridFlowUrl, false, false);
+    $__homeShelfPromaxUrl = $block->getViewFileUrl('css/awa-home-shelf-ui-promax-2026-05-21.min.css');
+    ($__emitDeferredCss)($__homeShelfPromaxUrl, false, false);
     $__visualAuditUrl = $block->getViewFileUrl('css/awa-visual-audit-2026-05-18.min.css');
     ($__emitDeferredCss)($__visualAuditUrl, false, false);
     $__homeHoverLockUrl = $block->getViewFileUrl('css/awa-home-hover-lock.min.css');
@@ -744,9 +627,9 @@ endif; ?>
 ?>
 <style id="awa-shelf-b2b-terminal-inline">
 /* Passo 5B — terminal inline (após todos os bundles async; vence bugfix/cosmetic/defer-global) */
-#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper .awa-shelf--carousel .item-product .info-price .b2b-login-to-see-price{display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:center!important;gap:0.25rem!important;box-sizing:border-box!important;width:100%!important;max-width:100%!important;min-height:2.25rem!important;max-height:2.5rem!important;padding:0.375rem 0.625rem!important;margin-top:auto!important;background:#fff!important;border:1px solid #e5e5e5!important;border-radius:6px!important;overflow:hidden!important;color:#666!important;font-size:clamp(0.6875rem,0.62rem + 0.25vw,0.8125rem)!important;line-height:1.25!important}
-#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper .awa-shelf--carousel .item-product .info-price .b2b-login-to-see-price .price-label{display:inline!important;margin:0!important;min-height:0!important;font-size:inherit!important;line-height:1.25!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;color:inherit!important}
-#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper .awa-shelf--carousel .item-product .info-price .b2b-login-to-see-price a{display:inline!important;min-height:0!important;min-block-size:0!important;width:auto!important;padding:0!important;background:transparent!important;border:none!important;border-radius:0!important;font-size:inherit!important;font-weight:600!important;color:#b73337!important;text-decoration:none!important;white-space:nowrap!important;box-shadow:none!important}
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper .awa-shelf--carousel .item-product .info-price .b2b-login-to-see-price{display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;align-items:center!important;gap:0.375rem!important;box-sizing:border-box!important;width:100%!important;max-width:100%!important;min-height:2.75rem!important;max-height:none!important;padding:0.375rem 0.625rem!important;margin-top:auto!important;background:#fff!important;border:1px solid #e5e5e5!important;border-radius:6px!important;overflow:visible!important;color:#666!important;font-size:clamp(0.8125rem,0.75rem + 0.3vw,0.875rem)!important;line-height:1.35!important}
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper .awa-shelf--carousel .item-product .info-price .b2b-login-to-see-price .price-label{display:inline!important;margin:0!important;min-height:0!important;font-size:inherit!important;line-height:1.35!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;color:inherit!important}
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper .awa-shelf--carousel .item-product .info-price .b2b-login-to-see-price a{display:inline-flex!important;align-items:center!important;justify-content:center!important;min-height:2.75rem!important;min-width:2.75rem!important;min-block-size:2.75rem!important;padding:0.375rem 0.625rem!important;background:transparent!important;border:none!important;border-radius:0!important;font-size:inherit!important;font-weight:600!important;color:#b73337!important;text-decoration:none!important;white-space:nowrap!important;box-shadow:none!important;box-sizing:border-box!important}
 </style>
 <?php /* bugfix + footer + audit → awa-home-cosmetic-bundle.min.css (evita 3× fetch vs audit-bundle) */ ?>
 <style id="awa-home-hover-lock-inline">
@@ -816,11 +699,20 @@ h1.awa-sr-only,.page-top h1.awa-sr-only{
 #html-body .wrapper_slider .owl-carousel:not(.awa-hero-owl-ready) .owl-item:not(:first-child) {
   display: none !important;
 }
+#html-body .wrapper_slider .owl.awa-hero-owl-ready .owl-wrapper-outer,
+#html-body .wrapper_slider .owl.awa-hero-owl-ready .owl-wrapper {
+  overflow: hidden !important;
+}
+#html-body .wrapper_slider .owl:not(.awa-hero-owl-ready).owl-loaded .awa-hero-fallback-secondary {
+  display: none !important;
+  visibility: hidden !important;
+}
 #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .content-top-home > .top-home-content--above-fold {
   margin-inline: calc(-1 * var(--awa-container-pad, clamp(16px, 3vw, 24px))) !important;
   width: calc(100% + (2 * var(--awa-container-pad, clamp(16px, 3vw, 24px)))) !important;
   max-width: none !important;
   overflow: hidden !important;
+  min-height: 0 !important;
 }
 #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .top-home-content--above-fold .banner-slider,
 #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .top-home-content--above-fold .wrapper_slider:not(.visible-xs) {
@@ -829,6 +721,7 @@ h1.awa-sr-only,.page-top h1.awa-sr-only{
   margin: 0 !important;
   border-radius: 0 !important;
 }
+</style>
 <?php
     /* awa-home-cosmetic-bundle inclui: audit-bundle + polish-r2 + redesign-modern (R1-R6 completo).
        IMPORTANTE: ao atualizar awa-redesign-modern.css, reconstruir o bundle:
@@ -901,6 +794,49 @@ $__structuralFixUrl = $block->getViewFileUrl('css/awa-structural-fix-2026-05-20.
     max-width: min(140px, 36vw) !important;
   }
 }
+/* Hierarquia home — terminal inline (vence border-top:none !important dos flex bundles) */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper
+  .ayo-home5-wrapper--template-driven
+  > .top-home-content.awa-home-section:nth-child(odd):not(.top-home-content--above-fold):not([aria-label*="Mais Vendidos"]) {
+  background-color: var(--awa-color-white, #ffffff) !important;
+}
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper
+  .ayo-home5-wrapper--template-driven
+  > .top-home-content.awa-home-section:nth-child(even):not(.top-home-content--above-fold):not([aria-label*="Mais Vendidos"]) {
+  background-color: var(--awa-neutral-50, #f7f7f7) !important;
+}
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper
+  .ayo-home5-wrapper--template-driven
+  > .top-home-content.awa-home-section[aria-label*="Mais Vendidos"] {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--awa-primary, #b73337) 6%, var(--awa-color-white, #fff)) 0%,
+    var(--awa-color-white, #fff) 72%
+  ) !important;
+  border-top: 2px solid var(--awa-primary, #b73337) !important;
+  border-block-start: 2px solid var(--awa-primary, #b73337) !important;
+  box-shadow: 0 12px 40px color-mix(in srgb, var(--awa-neutral-900, #0f172a) 6%, transparent);
+}
+@media (min-width: 768px) {
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper
+    .top-home-content[aria-label*="Mais Vendidos"] :is(.awa-section-header__title, .awa-shelf__title) {
+    font-size: clamp(28px, calc(22px + 1.1vw), 36px) !important;
+    font-weight: 800 !important;
+  }
+}
+@media (max-width: 767px) {
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper
+    .top-home-content[aria-label*="Mais Vendidos"] :is(.awa-section-header__title, .awa-shelf__title) {
+    font-size: clamp(22px, calc(20px + 1.2vw), 26px) !important;
+    font-weight: 800 !important;
+  }
+}
+/* ui-ux-pro-max: cursor em cards clicáveis (carrosséis + categorias) */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper
+  .content-top-home
+  :is(.item-product.awa-carousel-card-slot, .awa-category-carousel__item, .content-item-product a) {
+  cursor: pointer;
+}
 </style>
 
 <?php /* awa-flex-grid-flow + awa-touch-final → awa-defer-global-bundle.css (P2) */ ?>
@@ -949,37 +885,6 @@ $__qaCssAssets = $__qaCssByAction[$__fullActionName] ?? [];
 <?php
 $awaIsHomePage = $block->getRequest()->getFullActionName() === 'cms_index_index';
 ?>
-<?php if (!$awaIsHomePage): ?>
-<?php /* Modernização Fase 1 JS — fora do critical path (TBT / main-thread) */ ?>
-<script>
-(function (w, d) {
-    function bootPhase1() {
-        w.require(['js/awa-modernization-phase1']);
-    }
-    function schedulePhase1() {
-        if (typeof w.awaRunWhenRequire === 'function') {
-            w.awaRunWhenRequire(bootPhase1, { key: 'modernization-phase1' });
-            return;
-        }
-        if (typeof w.awaWhenRequire === 'function') {
-            w.awaWhenRequire(bootPhase1, { key: 'modernization-phase1' });
-            return;
-        }
-        if (typeof w.require === 'function') {
-            bootPhase1();
-        }
-    }
-    if ('requestIdleCallback' in w) {
-        w.requestIdleCallback(schedulePhase1, { timeout: 3500 });
-    } else {
-        w.addEventListener('load', function () {
-            w.setTimeout(schedulePhase1, 0);
-        }, { once: true });
-    }
-})(window, document);
-</script>
-<?php endif; ?>
-
 <?php
 // #region agent log — layout debug probe (session 9b8d83); ativar com ?awa_debug_layout=1
 if ($block->getRequest()->getParam('awa_debug_layout') === '1') :
