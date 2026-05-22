@@ -2,6 +2,35 @@ import { defineConfig, devices } from '@playwright/test';
 import fs from 'fs';
 import path from 'path';
 
+/** Carrega tests/e2e/.env para TEST_USER, TEST_PASS, etc. (sem sobrescrever env do shell). */
+function loadEnvFile(filePath: string): void {
+  if (!fs.existsSync(filePath)) {
+    return;
+  }
+
+  for (const line of fs.readFileSync(filePath, 'utf8').split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) {
+      continue;
+    }
+
+    const eq = trimmed.indexOf('=');
+    if (eq <= 0) {
+      continue;
+    }
+
+    const key = trimmed.slice(0, eq).trim();
+    const raw = trimmed.slice(eq + 1).trim();
+    const value = raw.replace(/^['"]|['"]$/g, '');
+
+    if (!(key in process.env)) {
+      process.env[key] = value;
+    }
+  }
+}
+
+loadEnvFile(path.join(__dirname, '.env'));
+
 /** Caminho fixo legado (CI deploy); se inexistente, Playwright usa o browser bundled. */
 function resolveChromiumHeadlessShell(): string | undefined {
   const candidates = [
