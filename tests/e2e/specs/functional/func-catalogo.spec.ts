@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import {
   navigateTo,
+  dismissCookie,
   checkOverflow,
   collectConsoleErrors,
   filterCriticalJsErrors,
@@ -66,16 +67,24 @@ test.describe('Catálogo digital — PDF e revista', () => {
   });
 
   test('06 — flipbook avança página com botão next', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
     const ok = await navigateTo(page, CATALOGO_REVISTA);
     if (!ok) test.skip();
 
-    const counter = page.locator('#awa-catalog-counter');
-    const nextBtn = page.locator('#awa-catalog-next');
+    await dismissCookie(page);
 
+    const counter = page.locator('#awa-catalog-counter');
+    const nextBtn = page.getByRole('button', { name: 'Próxima página' });
+
+    await expect(page.locator('#awa-catalog-flipbook-stage')).not.toHaveClass(/is-hidden/, { timeout: 60000 });
+    await expect(page.locator('.awa-catalog-flipbook__page canvas')).toHaveCount(32, { timeout: 60000 });
     await expect(counter).toContainText('1 / 32', { timeout: 60000 });
+    await expect(nextBtn).toBeVisible();
+
     await nextBtn.scrollIntoViewIfNeeded();
-    await nextBtn.click({ force: true });
-    await expect(counter).toContainText('2 / 32', { timeout: 15000 });
+    await nextBtn.click();
+
+    await expect.poll(async () => counter.textContent(), { timeout: 20000 }).toContain('2 / 32');
   });
 
   test('07 — sem erros JS críticos nas páginas do catálogo', async ({ page }) => {

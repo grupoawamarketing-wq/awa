@@ -161,15 +161,34 @@
                 return;
             }
 
+            var previousIndex = pageFlip.getCurrentPageIndex();
+
+            if (targetIndex === previousIndex) {
+                return;
+            }
+
             pageFlip.turnToPage(targetIndex);
-            updateCounter();
+
+            window.setTimeout(function () {
+                if (pageFlip.getCurrentPageIndex() === previousIndex) {
+                    if (targetIndex > previousIndex) {
+                        pageFlip.flipNext('top');
+                    } else {
+                        pageFlip.flipPrev('top');
+                    }
+                }
+
+                updateCounter();
+            }, 350);
         }
 
-        document.getElementById('awa-catalog-prev').addEventListener('click', function () {
+        document.getElementById('awa-catalog-prev').addEventListener('click', function (event) {
+            event.preventDefault();
             goToPage(pageFlip.getCurrentPageIndex() - 1);
         });
 
-        document.getElementById('awa-catalog-next').addEventListener('click', function () {
+        document.getElementById('awa-catalog-next').addEventListener('click', function (event) {
+            event.preventDefault();
             goToPage(pageFlip.getCurrentPageIndex() + 1);
         });
 
