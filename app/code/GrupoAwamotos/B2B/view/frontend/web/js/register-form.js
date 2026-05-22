@@ -14,6 +14,12 @@ define([
             .replace(/'/g, '&#039;');
     }
 
+    var alertIcons = {
+        search: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>',
+        check: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>',
+        warning: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>'
+    };
+
     return function (config, element) {
         let options = config || {};
         var $form = $(element);
@@ -242,11 +248,15 @@ define([
         }
 
         function isCompactBenefitsViewport() {
+            if (window.innerWidth <= 600) {
+                return true;
+            }
+
             if (benefitsViewportMedia) {
                 return !!benefitsViewportMedia.matches;
             }
 
-            return window.innerWidth <= 600;
+            return false;
         }
 
         function setBenefitsExpanded(isExpanded, animate) {
@@ -282,10 +292,6 @@ define([
             if (!compactMode) {
                 setBenefitsExpanded(true, false);
                 lastBenefitsCompactMode = false;
-                return;
-            }
-
-            if (lastBenefitsCompactMode === compactMode) {
                 return;
             }
 
@@ -716,7 +722,7 @@ define([
             if (!currentEmail) {
                 $alert.html(
                     '<div class="erp-alert erp-alert-info">' +
-                        '<span class="erp-alert-icon">&#128269;</span>' +
+                        '<span class="erp-alert-icon">' + alertIcons.search + '</span>' +
                         '<div class="erp-alert-content">' +
                             '<strong>Cliente encontrado no sistema!</strong><br>' +
                             'E-mail cadastrado: <strong>' + escapeHtml(erpEmailMasked) + '</strong><br>' +
@@ -731,7 +737,7 @@ define([
             if (erpEmailFull && currentEmail === erpEmailFull) {
                 $alert.html(
                     '<div class="erp-alert erp-alert-success">' +
-                        '<span class="erp-alert-icon">&#10004;</span>' +
+                        '<span class="erp-alert-icon">' + alertIcons.check + '</span>' +
                         '<div class="erp-alert-content">' +
                             '<strong>E-mail confirmado!</strong> Sua conta sera vinculada automaticamente.' +
                         '</div>' +
@@ -743,7 +749,7 @@ define([
 
             $alert.html(
                 '<div class="erp-alert erp-alert-warning">' +
-                    '<span class="erp-alert-icon">&#9888;</span>' +
+                    '<span class="erp-alert-icon">' + alertIcons.warning + '</span>' +
                     '<div class="erp-alert-content">' +
                         '<strong>Atencao:</strong> O e-mail cadastrado no sistema e <strong>' + escapeHtml(erpEmailMasked) + '</strong>.<br>' +
                         'O e-mail informado e diferente. Deseja continuar com <strong>' + escapeHtml(currentEmail) + '</strong>?<br>' +
@@ -767,7 +773,7 @@ define([
             if (passwordConfirmation.length >= 8 && password === passwordConfirmation && isValidEmail(email)) {
                 $alert.html(
                     '<div class="email-check-alert-box">' +
-                        '<span class="email-check-alert-icon">&#9888;</span>' +
+                        '<span class="email-check-alert-icon">' + alertIcons.warning + '</span>' +
                         '<div class="email-check-alert-content">' +
                             '<strong>Confirme seu e-mail antes de criar a conta:</strong><br>' +
                             'A aprovacao e a recuperacao de senha serao enviadas para <strong>' + escapeHtml(email) + '</strong>.' +
@@ -1158,11 +1164,12 @@ define([
             }
 
             if (typeof $form.validation === 'function' && !$form.validation('isValid')) {
+                event.preventDefault();
                 window.setTimeout(function () {
                     refreshFieldAndSectionErrorStates();
                     focusFirstInvalidField();
                 }, 0);
-                return true;
+                return false;
             }
 
             $form.data('isSubmitting', true).addClass('is-submitting');

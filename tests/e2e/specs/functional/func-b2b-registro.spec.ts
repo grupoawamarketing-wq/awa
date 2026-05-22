@@ -41,16 +41,24 @@ test.describe('B2B Registro — cadastro empresarial', () => {
     const ok = await navigateTo(page, REGISTER_URL);
     if (!ok) test.skip();
     if (page.url().includes('login')) { test.skip(); return; }
-    const submitBtn = page.locator('button[type="submit"], .b2b-btn-primary, .action.submit').first();
+    const validatorReady = await page.waitForFunction(() => {
+      return typeof window.jQuery !== 'undefined'
+        && !!window.jQuery('#b2b-register-form').data('validator');
+    }, { timeout: 15_000 }).catch(() => false);
+    if (!validatorReady) { test.skip(); return; }
+    const submitBtn = page.locator('button.create-b2b-account, button[type="submit"].action.submit').first();
     const btnVisible = await submitBtn.isVisible({ timeout: 8_000 }).catch(() => false);
     if (!btnVisible) { test.skip(); return; }
     await submitBtn.click({ force: true });
-    // Aguarda validação Magento (mage-error class adicionada nos campos obrigatórios)
-    const validationErrEl = await page.waitForSelector(
-      '.mage-error, input.mage-error, [aria-invalid="true"], .field.error .message, :invalid'
-    , { timeout: 6_000 }).catch(() => null);
-    const hasError = validationErrEl !== null;
-    if (!hasError) console.warn('[P1] Submissão vazia não exibiu validação visível');
+    await expect(page).toHaveURL(/b2b\/register/, { timeout: 5_000 });
+    const hasValidation = await page.waitForFunction(() => {
+      const form = document.querySelector('#b2b-register-form');
+      if (!form) return false;
+      return form.querySelectorAll('.mage-error').length > 0
+        || form.querySelectorAll('.field._error').length > 0
+        || form.querySelectorAll('[aria-invalid="true"]').length > 0;
+    }, { timeout: 10_000 }).then(() => true).catch(() => false);
+    expect(hasValidation, 'Submissão vazia deveria marcar campos inválidos').toBe(true);
   });
 
   test('04 — [P1] link "Já tenho cadastro" aponta para login', async ({ page }) => {
@@ -58,8 +66,9 @@ test.describe('B2B Registro — cadastro empresarial', () => {
     if (!ok) test.skip();
     if (page.url().includes('login')) { test.skip(); return; }
     const loginLink = page.locator(
-      'a[href*="b2b/account/login"], a[href*="login"]'
+      '#b2b-register-shell .b2b-register-login-link a, #b2b-register-shell a.b2b-login-link'
     ).first();
+    await page.locator('#b2b-register-shell').scrollIntoViewIfNeeded().catch(() => {});
     const visible = await loginLink.isVisible({ timeout: 8_000 }).catch(() => false);
     if (!visible) { console.warn('[P1] Link "Já tenho cadastro" não encontrado'); test.skip(); return; }
     const href = await loginLink.getAttribute('href');
