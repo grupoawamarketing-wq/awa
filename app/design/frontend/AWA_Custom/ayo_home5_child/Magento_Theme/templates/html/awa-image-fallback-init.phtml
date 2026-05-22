@@ -1,0 +1,26 @@
+<?php declare(strict_types=1); ?> <script>
+(function (w) {
+    function boot() {
+        w.require(['js/awa-image-fallback-init']);
+    }
+    function schedule() {
+        if (typeof w.awaRunWhenRequire === 'function') {
+            w.awaRunWhenRequire(boot, { key: 'image-fallback-init' });
+            return;
+        }
+        if (typeof w.awaWhenRequire === 'function') {
+            w.awaWhenRequire(boot, { key: 'image-fallback-init' });
+            return;
+        }
+        if (typeof w.require === 'function') {
+            boot();
+        }
+    }
+    if ('requestIdleCallback' in w) {
+        w.requestIdleCallback(schedule, { timeout: 4000 });
+    } else {
+        w.addEventListener('load', function () {
+            w.setTimeout(schedule, 500);
+        }, { once: true });
+    }
+})(window);</script>
