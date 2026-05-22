@@ -1,0 +1,61 @@
+<?php
+declare(strict_types=1);
+/**
+ * Catálogo em revista — flipbook com PDF.js + page-flip.
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ * @var \GrupoAwamotos\Theme\ViewModel\CatalogViewer $viewModel
+ */
+
+$viewModel = $block->getData('view_model');
+$pdfUrl = $viewModel->getPdfUrl();
+$workerUrl = $block->getViewFileUrl('GrupoAwamotos_Theme::js/vendor/pdf.worker.min.js');
+$pdfJsUrl = $block->getViewFileUrl('GrupoAwamotos_Theme::js/vendor/pdf.min.js');
+$pageFlipUrl = $block->getViewFileUrl('GrupoAwamotos_Theme::js/vendor/page-flip.browser.js');
+?>
+<header class="awa-catalog-revista-header">
+    <p class="awa-catalog-revista-header__eyebrow"><?= $escaper->escapeHtml(__('Catálogo Digital')) ?></p>
+    <h1 class="awa-catalog-revista-header__title"><?= $escaper->escapeHtml(__('Catálogo em Revista — AWA 2026')) ?></h1>
+    <p class="awa-catalog-revista-header__subtitle">
+        <?= $escaper->escapeHtml(__('Folheie as páginas com efeito de revista ou baixe o PDF completo.')) ?>
+    </p>
+</header>
+<div class="awa-catalog-flipbook"
+     id="awa-catalog-flipbook"
+     data-pdf-url="<?= $escaper->escapeUrl($pdfUrl) ?>"
+     data-worker-url="<?= $escaper->escapeUrl($workerUrl) ?>"
+     data-pdf-js-url="<?= $escaper->escapeUrl($pdfJsUrl) ?>"
+     data-page-flip-url="<?= $escaper->escapeUrl($pageFlipUrl) ?>">
+    <div class="awa-catalog-flipbook__status" id="awa-catalog-flipbook-status" role="status" aria-live="polite">
+        <div class="awa-catalog-flipbook__spinner" aria-hidden="true"></div>
+        <p><?= $escaper->escapeHtml(__('Preparando catálogo em revista…')) ?></p>
+    </div>
+
+    <div class="awa-catalog-flipbook__stage is-hidden" id="awa-catalog-flipbook-stage">
+        <div class="awa-catalog-flipbook__book" id="awa-catalog-flipbook-book"></div>
+    </div>
+
+    <footer class="awa-catalog-flipbook__controls is-hidden" id="awa-catalog-flipbook-controls" aria-label="<?= $escaper->escapeHtmlAttr(__('Controles do catálogo')) ?>">
+        <button type="button" class="awa-catalog-flipbook__btn" id="awa-catalog-prev" aria-label="<?= $escaper->escapeHtmlAttr(__('Página anterior')) ?>">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14.5 5 8 12l6.5 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <span class="awa-catalog-flipbook__counter" id="awa-catalog-counter">1 / 1</span>
+        <button type="button" class="awa-catalog-flipbook__btn" id="awa-catalog-next" aria-label="<?= $escaper->escapeHtmlAttr(__('Próxima página')) ?>">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9.5 5 16 12l-6.5 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <a href="<?= $escaper->escapeUrl($pdfUrl) ?>"
+           class="awa-catalog-flipbook__download"
+           target="_blank"
+           rel="noopener noreferrer">
+            <?= $escaper->escapeHtml(__('Baixar PDF')) ?>
+        </a>
+    </footer>
+
+    <p class="awa-catalog-flipbook__fallback is-hidden" id="awa-catalog-flipbook-fallback">
+        <?= $escaper->escapeHtml(__('Não foi possível carregar a revista digital.')) ?>
+        <a href="<?= $escaper->escapeUrl($pdfUrl) ?>" target="_blank" rel="noopener noreferrer">
+            <?= $escaper->escapeHtml(__('Abrir PDF')) ?>
+        </a>
+    </p>
+</div>
