@@ -40,7 +40,7 @@ app/
 │   │   ├── SocialProof/     # Prova social real (visualizações, mais vendido)
 │   │   ├── StoreSetup/      # CLI para setup automático da loja
 │   │   ├── Theme/           # Customizações do tema (store switcher, bandeiras)
-│   │   ├── Chatwoot/       # Integração chat Chatwoot (admin + CSP + webhook)
+│   │   ├── ~~Chatwoot~~   # Removido 2026-05-23
 │   │   ├── CookieConsent/  # Banner LGPD de cookies
 │   │   ├── LeadLovers/     # Integração LeadLovers (automação de marketing)
 │   │   ├── LiveChat/       # Chat ao vivo com contexto de cliente

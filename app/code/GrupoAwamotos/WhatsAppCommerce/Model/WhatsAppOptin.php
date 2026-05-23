@@ -13,7 +13,7 @@ use Psr\Log\LoggerInterface;
 
 /**
  * Manages WhatsApp opt-in/opt-out via phone number lookup.
- * Called by N8N/Typebot when customer says SIM/SAIR.
+ * Called by Typebot when customer says SIM/SAIR.
  */
 class WhatsAppOptin implements OptinInterface
 {

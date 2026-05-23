@@ -368,12 +368,10 @@ return [
         'GrupoAwamotos_BrazilCustomer' => 1,
         'GrupoAwamotos_CarrierSelect' => 1,
         'Rokanthemes_BestsellerProduct' => 1,
-        'GrupoAwamotos_B2B' => 1,
         'GrupoAwamotos_CookieConsent' => 1,
         'GrupoAwamotos_CspFix' => 1,
-        'GrupoAwamotos_Fitment' => 1,
+        'GrupoAwamotos_B2B' => 1,
         'GrupoAwamotos_FakePurchase' => 0,
-        'GrupoAwamotos_Chatwoot' => 0,
         'GrupoAwamotos_LayoutFix' => 1,
         'GrupoAwamotos_LeadLovers' => 1,
         'GrupoAwamotos_LiveChat' => 0,
@@ -2721,7 +2719,6 @@ Aguarde nosso contato em até 24 horas.',
                 ],
                 'awa_specific' => [
                     'erp_monitoring' => null,
-                    'chatwoot_monitoring' => null,
                     'performance_monitoring' => null,
                     'alert_thresholds' => null
                 ],
@@ -7382,6 +7379,15 @@ Disallow: /var/
 # Sitemaps
 Sitemap: https://srv1113343.hstgr.cloud/sitemap.xml'
                     ]
+                ]
+            ]
+        ]
+    ],
+    'system' => [
+        'default' => [
+            'web' => [
+                'cookie' => [
+                    'cookie_restriction' => '0'
                 ]
             ]
         ]

@@ -7,7 +7,7 @@ namespace GrupoAwamotos\WhatsAppCommerce\Api;
 /**
  * WhatsApp Commerce Health Check API
  *
- * Endpoint para N8N e monitoramento verificarem se o módulo está operacional.
+ * Endpoint para monitoramento verificar se o módulo está operacional.
  */
 interface HealthCheckInterface
 {

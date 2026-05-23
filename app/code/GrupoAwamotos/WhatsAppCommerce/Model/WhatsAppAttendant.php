@@ -143,7 +143,7 @@ class WhatsAppAttendant implements AttendantInterface
             ->join(
                 ['a' => $this->resource->getTableName('grupoawamotos_b2b_attendants')],
                 'ca.attendant_id = a.attendant_id',
-                ['name', 'email', 'phone', 'whatsapp', 'department', 'chatwoot_agent_id', 'erp_seller_code']
+                ['name', 'email', 'phone', 'whatsapp', 'department', 'erp_seller_code']
             )
             ->where('ca.customer_id = ?', $customerId)
             ->where('a.is_active = ?', 1);
@@ -155,7 +155,6 @@ class WhatsAppAttendant implements AttendantInterface
                 'attendant_id' => (int) $row['attendant_id'],
                 'name' => $row['name'],
                 'email' => $row['email'],
-                'chatwoot_agent_id' => (int) $row['chatwoot_agent_id'],
                 'source' => 'assigned'
             ];
         }
@@ -181,7 +180,7 @@ class WhatsAppAttendant implements AttendantInterface
         $select = $connection->select()
             ->from(
                 $this->resource->getTableName('grupoawamotos_b2b_attendants'),
-                ['attendant_id', 'name', 'email', 'chatwoot_agent_id', 'erp_seller_code']
+                ['attendant_id', 'name', 'email', 'erp_seller_code']
             )
             ->where('is_active = ?', 1)
             ->where('erp_seller_code = ?', $erpCode);
@@ -193,7 +192,6 @@ class WhatsAppAttendant implements AttendantInterface
                 'attendant_id' => (int) $row['attendant_id'],
                 'name' => $row['name'],
                 'email' => $row['email'],
-                'chatwoot_agent_id' => (int) $row['chatwoot_agent_id'],
                 'source' => 'erp_vendpref'
             ];
         }
@@ -253,7 +251,7 @@ class WhatsAppAttendant implements AttendantInterface
         $select = $connection->select()
             ->from(
                 $this->resource->getTableName('grupoawamotos_b2b_attendants'),
-                ['attendant_id', 'name', 'email', 'chatwoot_agent_id', 'customer_count']
+                ['attendant_id', 'name', 'email', 'customer_count']
             )
             ->where('is_active = ?', 1)
             ->where('department = ?', 'sales')
@@ -267,7 +265,6 @@ class WhatsAppAttendant implements AttendantInterface
                 'attendant_id' => (int) $row['attendant_id'],
                 'name' => $row['name'],
                 'email' => $row['email'],
-                'chatwoot_agent_id' => (int) $row['chatwoot_agent_id'],
                 'source' => 'round_robin'
             ];
         }

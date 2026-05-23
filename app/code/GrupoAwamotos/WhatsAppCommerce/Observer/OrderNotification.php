@@ -9,21 +9,18 @@ use GrupoAwamotos\WhatsAppCommerce\Model\MessageSender;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Event\Observer;
-use Magento\Framework\HTTP\Client\Curl;
 use Magento\Sales\Api\Data\OrderInterface;
 use Psr\Log\LoggerInterface;
 
 class OrderNotification implements ObserverInterface
 {
-    private const N8N_ORDER_WEBHOOK = 'https://n8n.awamotos.com/webhook/nova-ordem';
-
     public function __construct(
         private readonly Config $config,
         private readonly MessageSender $messageSender,
         private readonly CustomerRepositoryInterface $customerRepository,
-        private readonly LoggerInterface $logger,
-        private readonly Curl $httpClient
-    ) {}
+        private readonly LoggerInterface $logger
+    ) {
+    }
 
     public function execute(Observer $observer): void
     {
@@ -62,63 +59,23 @@ class OrderNotification implements ObserverInterface
         }
 
         try {
-            if ($type === 'placed') {
-                $this->notifyViaN8n($order, $phone);
-            } else {
-                $data = [
-                    'order_id' => $order->getIncrementId(),
-                    'status' => $order->getStatus(),
-                    'total' => number_format((float) $order->getGrandTotal(), 2, ',', '.'),
-                    'items_count' => (string) $order->getTotalItemCount(),
-                    'customer_name' => $order->getCustomerFirstname() ?: 'Cliente',
-                ];
+            $data = [
+                'order_id' => $order->getIncrementId(),
+                'status' => $order->getStatus(),
+                'total' => number_format((float) $order->getGrandTotal(), 2, ',', '.'),
+                'items_count' => (string) $order->getTotalItemCount(),
+                'customer_name' => $order->getCustomerFirstname() ?: 'Cliente',
+            ];
 
-                if ($type === 'shipped') {
-                    $data['tracking'] = $this->getTrackingInfo($order);
-                }
-
-                $this->messageSender->sendOrderNotification($phone, $order->getIncrementId(), $type, $data);
+            if ($type === 'shipped') {
+                $data['tracking'] = $this->getTrackingInfo($order);
             }
+
+            $this->messageSender->sendOrderNotification($phone, $order->getIncrementId(), $type, $data);
         } catch (\Exception $e) {
             $this->logger->error('WhatsApp order notification failed: ' . $e->getMessage(), [
                 'order_id' => $order->getIncrementId(),
                 'type' => $type,
-            ]);
-        }
-    }
-
-    /**
-     * POST order data to N8N webhook for placed event.
-     * N8N WF1 handles formatting and Evolution API dispatch.
-     */
-    private function notifyViaN8n(OrderInterface $order, string $phone): void
-    {
-        $payload = json_encode([
-            'customer_name' => $order->getCustomerFirstname() . ' ' . $order->getCustomerLastname(),
-            'order_id' => $order->getIncrementId(),
-            'grand_total' => number_format((float) $order->getGrandTotal(), 2, ',', '.'),
-            'billing_phone' => $phone,
-            'status' => $order->getStatus(),
-            'items_count' => (int) $order->getTotalItemCount(),
-        ]);
-
-        $this->httpClient->setHeaders([
-            'Content-Type' => 'application/json',
-            'Accept' => 'application/json',
-        ]);
-        $this->httpClient->setTimeout(5);
-        $this->httpClient->post(self::N8N_ORDER_WEBHOOK, $payload);
-
-        $status = $this->httpClient->getStatus();
-
-        if ($status < 200 || $status >= 300) {
-            $this->logger->warning('N8N order webhook returned non-2xx status', [
-                'order_id' => $order->getIncrementId(),
-                'http_status' => $status,
-            ]);
-        } else {
-            $this->logger->info('Order notification dispatched to N8N', [
-                'order_id' => $order->getIncrementId(),
             ]);
         }
     }

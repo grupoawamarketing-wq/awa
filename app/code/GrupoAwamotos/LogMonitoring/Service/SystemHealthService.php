@@ -285,14 +285,6 @@ class SystemHealthService
             $score -= 20;
         }
 
-        // Check Chatwoot integration
-        $chatwootHealth = $this->checkChatwootIntegration();
-        $integrations['chatwoot'] = $chatwootHealth;
-        if ($chatwootHealth['score'] < 80) {
-            $issues[] = 'Chatwoot integration issues';
-            $score -= 15;
-        }
-
         return [
             'status' => $score > 80 ? 'healthy' : ($score > 60 ? 'warning' : 'critical'),
             'score' => $score,
@@ -461,16 +453,6 @@ class SystemHealthService
             'score' => 85,
             'status' => 'healthy',
             'last_sync' => date('Y-m-d H:i:s', strtotime('-30 minutes'))
-        ];
-    }
-
-    private function checkChatwootIntegration(): array
-    {
-        // Check Chatwoot integration health
-        return [
-            'score' => 90,
-            'status' => 'healthy',
-            'last_activity' => date('Y-m-d H:i:s', strtotime('-15 minutes'))
         ];
     }
 }

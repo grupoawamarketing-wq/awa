@@ -8,7 +8,7 @@ namespace GrupoAwamotos\WhatsAppCommerce\Api;
  * WhatsApp Commerce Opt-in/Opt-out API
  *
  * Manages whatsapp_optin customer attribute via phone number.
- * Used by N8N/Typebot when customer opts in or out via WhatsApp.
+ * Used by Typebot when customer opts in or out via WhatsApp.
  */
 interface OptinInterface
 {

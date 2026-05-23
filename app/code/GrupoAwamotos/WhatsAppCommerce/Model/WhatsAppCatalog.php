@@ -3,9 +3,6 @@ declare(strict_types=1);
 
 namespace GrupoAwamotos\WhatsAppCommerce\Model;
 
-use GrupoAwamotos\Fitment\Model\ResourceModel\Application\CollectionFactory as ApplicationCollectionFactory;
-use GrupoAwamotos\Fitment\Model\ResourceModel\Brand\CollectionFactory as BrandCollectionFactory;
-use GrupoAwamotos\Fitment\Model\ResourceModel\MotorcycleModel\CollectionFactory as ModelCollectionFactory;
 use GrupoAwamotos\WhatsAppCommerce\Api\CatalogInterface;
 use GrupoAwamotos\WhatsAppCommerce\Helper\Config;
 use Magento\Catalog\Api\CategoryRepositoryInterface;
@@ -23,14 +20,12 @@ class WhatsAppCatalog implements CatalogInterface
         private readonly ProductRepositoryInterface $productRepository,
         private readonly CategoryRepositoryInterface $categoryRepository,
         private readonly CategoryFactory $categoryFactory,
-        private readonly ApplicationCollectionFactory $applicationCollectionFactory,
-        private readonly BrandCollectionFactory $brandCollectionFactory,
-        private readonly ModelCollectionFactory $modelCollectionFactory,
         private readonly SearchCriteriaBuilder $searchCriteriaBuilder,
         private readonly StoreManagerInterface $storeManager,
         private readonly Config $config,
         private readonly LoggerInterface $logger,
-    ) {}
+    ) {
+    }
 
     /**
      * @inheritDoc
@@ -86,90 +81,6 @@ class WhatsAppCatalog implements CatalogInterface
     /**
      * @inheritDoc
      */
-    public function searchByFitment(string $brand, string $model, ?int $year = null): array
-    {
-        $limit = $this->config->getMaxProductsPerResponse();
-
-        try {
-            // Find brand by name
-            $brandCollection = $this->brandCollectionFactory->create();
-            $brandCollection->addFieldToFilter('name', ['like' => "%{$brand}%"]);
-            $brandCollection->addFieldToFilter('is_active', 1);
-            $brandItem = $brandCollection->getFirstItem();
-
-            if (!$brandItem->getId()) {
-                return ['products' => [], 'total' => 0, 'message' => "Marca '{$brand}' não encontrada"];
-            }
-
-            // Find model by name and brand
-            $modelCollection = $this->modelCollectionFactory->create();
-            $modelCollection->addFieldToFilter('brand_id', (string) $brandItem->getId());
-            $modelCollection->addFieldToFilter('name', ['like' => "%{$model}%"]);
-            $modelCollection->addFieldToFilter('is_active', 1);
-
-            if ($year !== null) {
-                $modelCollection->addFieldToFilter('year_from', ['lteq' => $year]);
-                $modelCollection->addFieldToFilter(
-                    ['year_to', 'year_to'],
-                    [['gteq' => $year], ['null' => true]]
-                );
-            }
-
-            $modelItem = $modelCollection->getFirstItem();
-
-            if (!$modelItem->getId()) {
-                return ['products' => [], 'total' => 0, 'message' => "Modelo '{$model}' não encontrado para {$brand}"];
-            }
-
-            // Find applications (products) for this model
-            $appCollection = $this->applicationCollectionFactory->create();
-            $appCollection->addModelFilter((int) $modelItem->getId());
-
-            $productIds = [];
-            foreach ($appCollection as $app) {
-                $productIds[] = (int) $app->getProductId();
-            }
-
-            if (empty($productIds)) {
-                return ['products' => [], 'total' => 0, 'message' => "Nenhuma peça encontrada para {$brand} {$model}"];
-            }
-
-            $productCollection = $this->productCollectionFactory->create();
-            $productCollection->addAttributeToSelect(['name', 'price', 'special_price', 'thumbnail', 'url_key', 'short_description']);
-            $productCollection->addIdFilter($productIds);
-            $productCollection->addAttributeToFilter('status', \Magento\Catalog\Model\Product\Attribute\Source\Status::STATUS_ENABLED);
-            $productCollection->addStoreFilter($this->storeManager->getStore()->getId());
-            $productCollection->setPageSize($limit);
-            $productCollection->addFinalPrice();
-
-            $products = [];
-            foreach ($productCollection as $product) {
-                $products[] = $this->formatProduct($product);
-            }
-
-            $yearStr = $year ? " {$year}" : '';
-            return [
-                'products' => $products,
-                'total' => count($productIds),
-                'fitment' => "{$brand} {$model}{$yearStr}",
-                'message' => count($products) > 0
-                    ? sprintf('Encontrei %d peças compatíveis com %s %s%s', count($productIds), $brand, $model, $yearStr)
-                    : "Nenhuma peça encontrada para {$brand} {$model}{$yearStr}",
-            ];
-        } catch (\Exception $e) {
-            $this->logger->error('WhatsAppCatalog::searchByFitment error', [
-                'brand' => $brand,
-                'model' => $model,
-                'year' => $year,
-                'error' => $e->getMessage(),
-            ]);
-            return ['products' => [], 'total' => 0, 'error' => 'Erro na busca por fitment'];
-        }
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function getCategories(): array
     {
         try {
@@ -178,20 +89,22 @@ class WhatsAppCatalog implements CatalogInterface
             $children = $rootCategory->getChildrenCategories();
 
             $categories = [];
-            foreach ($children as $category) {
-                if (!$category->getIsActive()) {
+            foreach ($children as $child) {
+                if (!$child->getIsActive()) {
                     continue;
                 }
                 $categories[] = [
-                    'id' => (int) $category->getId(),
-                    'name' => $category->getName(),
-                    'product_count' => (int) $category->getProductCount(),
+                    'id' => (int) $child->getId(),
+                    'name' => (string) $child->getName(),
+                    'url' => $child->getUrl(),
                 ];
             }
 
             return ['categories' => $categories];
         } catch (\Exception $e) {
-            $this->logger->error('WhatsAppCatalog::getCategories error', ['error' => $e->getMessage()]);
+            $this->logger->error('WhatsAppCatalog::getCategories error', [
+                'error' => $e->getMessage(),
+            ]);
             return ['categories' => [], 'error' => 'Erro ao buscar categorias'];
         }
     }
@@ -249,13 +162,6 @@ class WhatsAppCatalog implements CatalogInterface
             $product = $this->productRepository->get($sku);
             $data = $this->formatProduct($product);
 
-            // Add fitment info
-            $appCollection = $this->applicationCollectionFactory->create();
-            $appCollection->addProductFilter((int) $product->getId());
-            $fitmentData = $appCollection->getGroupedByBrand();
-            $data['fitment'] = $fitmentData;
-
-            // Add stock info
             $stockItem = $product->getExtensionAttributes()?->getStockItem();
             $data['in_stock'] = $stockItem ? $stockItem->getIsInStock() : true;
             $data['qty'] = $stockItem ? (int) $stockItem->getQty() : 0;
@@ -271,10 +177,8 @@ class WhatsAppCatalog implements CatalogInterface
     }
 
     /**
-     * Format product data for WhatsApp-friendly output
-     *
      * @param \Magento\Catalog\Model\Product $product
-     * @return array
+     * @return array<string, mixed>
      */
     private function formatProduct($product): array
     {

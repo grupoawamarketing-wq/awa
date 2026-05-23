@@ -93,7 +93,7 @@ git push
 | CspFix | Escrita atômica no sri-hashes.json (CSP) |
 | ERPIntegration | Integração com ERP SQL Server (sync produtos, estoque, preços, pedidos, RFM) |
 | FakePurchase | Notificações simuladas de compra (**desativado permanentemente**) |
-| Fitment | Compatibilidade peças x motos (aplicação por veículo) |
+| Fitment | ~~Compatibilidade peças x motos~~ | **Removido 2026-05-23** |
 | LayoutFix | Fix layout admin (notification.messages reorder) |
 | MaintenanceMode | Modo manutenção com whitelist IP e código secreto |
 | OfflinePayment | Pagamento "A Combinar" para B2B |
@@ -104,7 +104,8 @@ git push
 | SocialProof | Prova social real (visualizações do dia, mais vendido 30d) |
 | StoreSetup | CLI setup automático da loja (blocos CMS, homepage, categorias) |
 | Theme | Customizações do tema (store switcher, bandeiras) |
-| Chatwoot | Integração chat Chatwoot (admin + CSP + webhook) |
+| ~~Chatwoot~~ | ~~Integração chat Chatwoot~~ | **Removido 2026-05-23** |
+| ~~N8N~~ | ~~Automações/webhooks assíncronos~~ | **Removido 2026-05-23** |
 | CookieConsent | Banner LGPD de cookies (admin + bloco CMS) |
 | LeadLovers | Integração LeadLovers — automação de marketing via API |
 | LiveChat | Chat ao vivo com contexto de cliente (Plugin + ViewModel) |

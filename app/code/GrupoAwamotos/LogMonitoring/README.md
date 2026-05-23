@@ -18,7 +18,6 @@ Sistema avançado de monitoramento contínuo de logs para Magento 2 AWA Motos, c
   - NoSuchEntityException
   - Erros ERP de sincronização 
   - Problemas de cache/performance
-  - Falhas de integração Chatwoot
 - Notificações via email/Slack/webhook
 
 ### 3. Análise Preditiva
@@ -30,7 +29,6 @@ Sistema avançado de monitoramento contínuo de logs para Magento 2 AWA Motos, c
 ### 4. Integração com Sistemas AWA
 - Monitorar especificamente logs ERP
 - Acompanhar performance de consumidores
-- Verificar saúde da integração Chatwoot
 - Monitorar jobs de cron customizados AWA
 
 ### 5. API de Monitoramento
@@ -76,7 +74,6 @@ Configure canais de notificação:
 
 ### 3. Configurações AWA Específicas
 - **Monitoramento ERP**: Ativar análise de logs ERP
-- **Monitoramento Chatwoot**: Ativar análise de integração Chatwoot
 - **Monitoramento Performance**: Ativar análise de performance
 
 ## Uso
@@ -203,9 +200,6 @@ O módulo integra automaticamente com `GrupoAwamotos_LogRotation` para análise 
 ### 2. ERP Integration
 Monitora logs específicos de integração ERP e detecta padrões de erro relacionados.
 
-### 3. Chatwoot Integration
-Verifica saúde da integração Chatwoot e detecta problemas de conectividade.
-
 ## Extensibilidade
 
 ### Adicionar Novo Analyzer
@@ -253,11 +247,6 @@ Para suporte e dúvidas:
       "health_score": 85,
       "sync_rate": 0.95,
       "error_rate": 0.02
-    },
-    "chatwoot_integration": {
-      "health_score": 90,
-      "api_success_rate": 0.98,
-      "integration_status": "active"
     }
   }
 }

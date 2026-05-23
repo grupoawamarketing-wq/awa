@@ -120,14 +120,12 @@ class MonitoringService implements MonitoringInterface
     {
         try {
             $erpMetrics = $this->analyzerPool->getAnalyzer('erp')->getSpecificMetrics();
-            $chatwootMetrics = $this->analyzerPool->getAnalyzer('chatwoot')->getSpecificMetrics();
             $performanceMetrics = $this->analyzerPool->getAnalyzer('performance')->getSpecificMetrics();
-            
+
             return [
                 'erp_sync' => $erpMetrics,
-                'chatwoot_integration' => $chatwootMetrics,
                 'performance' => $performanceMetrics,
-                'overall_score' => $this->calculateOverallScore($erpMetrics, $chatwootMetrics, $performanceMetrics)
+                'overall_score' => $this->calculateOverallScore($erpMetrics, $performanceMetrics)
             ];
             
         } catch (\Exception $e) {
@@ -303,12 +301,11 @@ class MonitoringService implements MonitoringInterface
         ];
     }
 
-    private function calculateOverallScore(array $erpMetrics, array $chatwootMetrics, array $performanceMetrics): float
+    private function calculateOverallScore(array $erpMetrics, array $performanceMetrics): float
     {
         $erpScore = $erpMetrics['health_score'] ?? 100;
-        $chatwootScore = $chatwootMetrics['health_score'] ?? 100;
         $perfScore = $performanceMetrics['health_score'] ?? 100;
-        
-        return round(($erpScore + $chatwootScore + $perfScore) / 3, 2);
+
+        return round(($erpScore + $perfScore) / 2, 2);
     }
 }

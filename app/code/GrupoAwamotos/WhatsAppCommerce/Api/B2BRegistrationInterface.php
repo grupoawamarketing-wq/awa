@@ -23,7 +23,7 @@ interface B2BRegistrationInterface
      * Register a B2B lead from WhatsApp
      *
      * Creates a pending B2B customer in Magento with the provided data.
-     * Notifies the B2B team via Chatwoot/WhatsApp.
+     * Notifies the B2B team via WhatsApp.
      *
      * @param string $cnpj CNPJ
      * @param string $phone WhatsApp phone number (with country code)

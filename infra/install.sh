@@ -17,7 +17,7 @@ error()   { echo -e "${RED}[ERROR]${NC} $1"; exit 1; }
 command -v docker >/dev/null 2>&1 || error "Docker não encontrado."
 command -v certbot >/dev/null 2>&1 || { warn "Instalando certbot..."; apt-get install -y certbot python3-certbot-nginx; }
 
-for svc in evolution n8n typebot; do
+for svc in evolution typebot; do
   [[ ! -f "$INFRA_DIR/$svc/.env" ]] && error "Crie $INFRA_DIR/$svc/.env a partir do .env.example"
   grep -q "TROQUE_POR" "$INFRA_DIR/$svc/.env" && error "infra/$svc/.env tem valores TROQUE_POR_* por preencher"
 done
@@ -25,7 +25,7 @@ done
 info "Criando rede Docker awa-infra..."
 docker network create awa-infra 2>/dev/null || success "Rede awa-infra já existe."
 
-for svc in evolution n8n typebot; do
+for svc in evolution typebot; do
   info "Iniciando $svc..."
   cd "$INFRA_DIR/$svc"
   docker compose pull --quiet
@@ -39,7 +39,7 @@ for i in {1..30}; do
 done
 
 info "Configurando Nginx temporário para emissão de SSL..."
-for conf in wpp.awamotos.com n8n.awamotos.com bot-builder.awamotos.com bot.awamotos.com; do
+for conf in wpp.awamotos.com bot-builder.awamotos.com bot.awamotos.com; do
   cat > "$NGINX_AVAILABLE/$conf.conf" <<NGINXEOF
 server {
   listen 80;
@@ -55,7 +55,6 @@ nginx -t && systemctl reload nginx
 info "Emitindo certificados SSL..."
 certbot --nginx \
   -d wpp.awamotos.com \
-  -d n8n.awamotos.com \
   -d bot-builder.awamotos.com \
   -d bot.awamotos.com \
   --non-interactive --agree-tos \
@@ -63,7 +62,7 @@ certbot --nginx \
   --redirect
 
 info "Instalando configs Nginx definitivas..."
-for conf in wpp.awamotos.com n8n.awamotos.com bot-builder.awamotos.com bot.awamotos.com; do
+for conf in wpp.awamotos.com bot-builder.awamotos.com bot.awamotos.com; do
   cp "$INFRA_DIR/nginx/$conf.conf" "$NGINX_AVAILABLE/$conf.conf"
 done
 nginx -t && systemctl reload nginx
@@ -74,7 +73,6 @@ echo -e "${GREEN}  Instalação concluída!${NC}"
 echo -e "${GREEN}========================================${NC}"
 echo ""
 echo "  Evolution API  → https://wpp.awamotos.com"
-echo "  N8N            → https://n8n.awamotos.com"
 echo "  Typebot Viewer → https://bot.awamotos.com"
 echo "  Typebot Builder→ https://bot-builder.awamotos.com"
 echo ""
@@ -82,5 +80,4 @@ echo "  Próximos passos:"
 echo "  1. Acesse https://wpp.awamotos.com — escaneie o QR Code da instância"
 echo "  2. No Magento Admin: Stores > Smart Suggestions > WhatsApp"
 echo "     Provider = evolution, URL = https://wpp.awamotos.com"
-echo "  3. Configure o inbox WhatsApp no Chatwoot apontando para wpp.awamotos.com"
 echo ""

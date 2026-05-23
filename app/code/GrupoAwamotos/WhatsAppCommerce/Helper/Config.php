@@ -29,10 +29,6 @@ class Config extends AbstractHelper
     private const XML_PATH_META_GROQ_KEY = 'whatsapp_commerce/meta_description/groq_api_key';
     private const XML_PATH_META_BATCH_SIZE = 'whatsapp_commerce/meta_description/batch_size';
 
-    // Phase 6: Social Post
-    private const XML_PATH_SOCIAL_ENABLED = 'whatsapp_commerce/social_post/enabled';
-    private const XML_PATH_SOCIAL_WEBHOOK = 'whatsapp_commerce/social_post/webhook_url';
-
     // Phase 6: Retargeting
     private const XML_PATH_RETARGETING_ENABLED = 'whatsapp_commerce/retargeting/enabled';
     private const XML_PATH_RETARGETING_INACTIVE_DAYS = 'whatsapp_commerce/retargeting/inactive_days';
@@ -131,17 +127,5 @@ class Config extends AbstractHelper
     public function getRetargetingHighValueThreshold(): float
     {
         return (float) $this->scopeConfig->getValue(self::XML_PATH_RETARGETING_HIGH_VALUE) ?: 500.0;
-    }
-
-    // ==================== Phase 6: Social Post ====================
-
-    public function isSocialPostEnabled(): bool
-    {
-        return $this->scopeConfig->isSetFlag(self::XML_PATH_SOCIAL_ENABLED);
-    }
-
-    public function getSocialPostWebhookUrl(): string
-    {
-        return (string) $this->scopeConfig->getValue(self::XML_PATH_SOCIAL_WEBHOOK);
     }
 }
