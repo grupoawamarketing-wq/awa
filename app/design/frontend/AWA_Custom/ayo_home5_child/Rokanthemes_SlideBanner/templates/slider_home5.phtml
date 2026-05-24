@@ -162,68 +162,7 @@ if ($banners = $block->getBannerCollection()):
         <?php } ?>
     </div>
 </div>
-<script>
-    require([
-        'jquery',
-        'mage/mage',
-        'rokanthemes/owl'
-    ], function ($) {
-        'use strict';
-
-        function doAnimations(elems) {
-            var animEndEv = 'webkitAnimationEnd animationend';
-            elems.each(function () {
-                var $this = $(this),
-                    $animationType = $this.data('animation');
-                if ($animationType) {
-                    $this.addClass($animationType).one(animEndEv, function () {
-                        $this.removeClass($animationType);
-                    });
-                }
-            });
-        }
-
-        var owlConfig = $.extend(true, {}, <?php echo json_encode($owlConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>, {
-            afterInit: function (elem) {
-                var $firstSlide = elem.find('.owl-item').eq(0);
-                doAnimations($firstSlide.find('.text-banner').find("[data-animation ^= 'animated']"));
-            },
-            afterMove: function (elem) {
-                var $currentSlide = elem.find('.owl-item').eq(this.currentItem);
-                doAnimations($currentSlide.find('.text-banner').find("[data-animation ^= 'animated']"));
-            }
-        });
-
-        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-            owlConfig.autoPlay = false;
-        }
-
-        $(".slider_<?php echo (int) $sliderId; ?> .owl").owlCarousel(owlConfig);
-        $(".slider_<?php echo (int) $sliderId; ?>_mobile .owl").owlCarousel(owlConfig);
-
-        /**
-         * Duas instâncias Owl (desktop + mobile) existem no DOM; apenas uma está visível (CSS hidden-xs / visible-xs).
-         * Reforça aria-hidden no par inativo para leitores de tela e modos de leitura que ignorem display:none de forma inconsistente.
-         */
-        (function () {
-            var mq = window.matchMedia('(max-width: 767px)');
-            var $desk = $('.wrapper_slider.hidden-xs.slider_<?php echo (int) $sliderId; ?>');
-            var $mob = $('.wrapper_slider.visible-xs.slider_<?php echo (int) $sliderId; ?>_mobile');
-            if (!$desk.length || !$mob.length) {
-                return;
-            }
-            function syncAwaSlideBannerAria() {
-                var isMobile = mq.matches;
-                $desk.attr('aria-hidden', isMobile ? 'true' : 'false');
-                $mob.attr('aria-hidden', isMobile ? 'false' : 'true');
-            }
-            syncAwaSlideBannerAria();
-            if (mq.addEventListener) {
-                mq.addEventListener('change', syncAwaSlideBannerAria);
-            } else if (mq.addListener) {
-                mq.addListener(syncAwaSlideBannerAria);
-            }
-        }());
-    });
+<script type="application/json" id="awa-hero-slider-config-<?= (int) $sliderId ?>">
+<?= /* @noEscape */ json_encode(['sliderId' => (int) $sliderId, 'owlConfig' => $owlConfig], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>
 </script>
 <?php endif; ?>

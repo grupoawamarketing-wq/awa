@@ -40,7 +40,8 @@ $pathSlug = trim($pathInfo, '/');
 $isCmsHomeRoute = $fullActionName === 'cms_index_index' || $pathSlug === '';
 $isDemoStagePreview = $fullActionName === 'cms_page_view'
     && in_array($pathSlug, ['homepage_ayo_home5_stage', 'homepage_ayo_home5_demo_stage'], true);
-$shouldEagerLoadHeaderA11y = $isCmsHomeRoute || $isDemoStagePreview;
+$homeStrictPerfDefer = $isCmsHomeRoute;
+$shouldEagerLoadHeaderA11y = $isDemoStagePreview;
 
 // Home demo routes should stay close to Ayo base and avoid observer-heavy compat scripts.
 if ($isCmsHomeRoute || $isDemoStagePreview) {
@@ -114,11 +115,16 @@ HTML;
 $renderIntentScriptLoader = static function (
     string $scriptUrl,
     array $intentSelectors,
-    int $desktopIdleTimeout = 2200
-): string {
+    int $desktopIdleTimeout = 2200,
+    ?bool $allowDesktopIdle = null
+) use ($homeStrictPerfDefer): string {
+    if ($allowDesktopIdle === null) {
+        $allowDesktopIdle = !$homeStrictPerfDefer;
+    }
     $encodedUrl = json_encode($scriptUrl, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
     $encodedSelectors = json_encode(array_values($intentSelectors), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
     $encodedDesktopIdleTimeout = json_encode($desktopIdleTimeout);
+    $encodedAllowDesktopIdle = $allowDesktopIdle ? 'true' : 'false';
 
     return <<<HTML
 <script>
@@ -126,6 +132,7 @@ $renderIntentScriptLoader = static function (
     var src = {$encodedUrl};
     var selectors = {$encodedSelectors};
     var desktopIdleTimeout = {$encodedDesktopIdleTimeout};
+    var allowDesktopIdle = {$encodedAllowDesktopIdle};
 
     var done = false;
 
@@ -196,8 +203,8 @@ $renderIntentScriptLoader = static function (
     d.addEventListener('focusin', onIntent, { passive: true, capture: true, once: false });
     d.addEventListener('keydown', onIntent, { passive: true, capture: true, once: false });
 
-    // Desktop mantém fallback por idle.
-    if (!isMobile()) {
+    // Desktop: idle fallback opcional (home produção: intent-only — evita TBT no Lighthouse desktop)
+    if (allowDesktopIdle && !isMobile()) {
         if ('requestIdleCallback' in w) {
             w.requestIdleCallback(trigger, { timeout: desktopIdleTimeout });
         } else {
