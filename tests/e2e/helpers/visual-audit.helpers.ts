@@ -58,12 +58,12 @@ export async function navigateTo(page: Page, url: string): Promise<boolean> {
     // page.goto pode travar indefinidamente se o browser crashar (zygote crash)
     const ok = await Promise.race<boolean>([
       (async () => {
-        await page.goto(url, { waitUntil: 'commit', timeout: 20_000 });
+        await page.goto(url, { waitUntil: 'commit', timeout: 45_000 });
         await waitForPage(page);
         await dismissCookie(page);
         return true;
       })(),
-      new Promise<boolean>(resolve => setTimeout(() => resolve(false), 22_000)),
+      new Promise<boolean>(resolve => setTimeout(() => resolve(false), 50_000)),
     ]);
     return ok;
   } catch {

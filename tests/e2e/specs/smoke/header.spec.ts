@@ -30,12 +30,27 @@ test.describe('Smoke — Header', () => {
     const search = page.locator(COMMON.search).first();
     const vis = await search.isVisible({ timeout: 3000 }).catch(() => false);
     if (!vis) {
-      await page.locator('.action.search, .search-toggle').first().click({ force: true }).catch(() => {});
-      await page.waitForTimeout(500);
+      // On mobile/tablet the search icon may be a toggle (not a form submit).
+      // Use .search-toggle first; fall back to .action.search only if it exists AND
+      // won't submit an empty form (check it is type=button or not type=submit).
+      const toggleSel = '.awa-search-toggle, [data-awa-search-toggle], .search-toggle';
+      const toggle = page.locator(toggleSel).first();
+      const hasToggle = await toggle.isVisible({ timeout: 1000 }).catch(() => false);
+      if (hasToggle) {
+        await toggle.click({ force: true }).catch(() => {});
+      }
+      await page.waitForTimeout(400);
     }
-    await search.click({ force: true }).catch(() => {});
-    const focused = await search.evaluate(el => document.activeElement === el).catch(() => false);
-    if (!focused) console.warn('[P2] Busca não focou ao clicar');
+    // Click the input only if it became visible after the toggle
+    const visAfter = await search.isVisible({ timeout: 2000 }).catch(() => false);
+    if (visAfter) {
+      await search.click({ force: true }).catch(() => {});
+      const focused = await search.evaluate(el => document.activeElement === el).catch(() => false);
+      if (!focused) console.warn('[P2] Busca não focou ao clicar');
+    } else {
+      // Input still hidden on this viewport — warn only, do not block
+      console.warn('[P2] Busca não visível neste viewport — skip focus check');
+    }
   });
 
   test('05 — minicart presente', async ({ page }) => {
@@ -43,8 +58,20 @@ test.describe('Smoke — Header', () => {
   });
 
   test('06 — conta/login link', async ({ page }) => {
-    const link = page.locator('a[href*="customer/account"], a[href*="b2b/account"], .customer-welcome, .authorization-link a').first();
-    await expect(link).toBeVisible({ timeout: 10000 });
+    // On mobile/tablet the account link is intentionally hidden (inside hamburger menu).
+    // Accept either a visible link OR a link present in DOM (hidden in collapsed nav).
+    const visibleLink = page.locator(
+      'a[href*="customer/account"], a[href*="b2b/account"], .customer-welcome, .authorization-link a'
+    ).first();
+    const isVisible = await visibleLink.isVisible({ timeout: 5000 }).catch(() => false);
+    if (isVisible) {
+      await expect(visibleLink).toBeVisible();
+    } else {
+      // Fallback: link exists in DOM (accessible via hamburger / hidden nav)
+      const count = await visibleLink.count();
+      expect(count).toBeGreaterThan(0);
+      console.warn('[P2] Conta/login link está oculto neste viewport (hamburger nav)');
+    }
   });
 
   test('07 — header height razoável', async ({ page }) => {
