@@ -624,6 +624,9 @@ $__emitDeferredCss = static function (
 (function (w, d) {
     'use strict';
     var href = <?= /* @noEscape */ json_encode($__stylesLUrl, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
+    var done = false;
+    var events = ['pointerdown', 'keydown', 'touchstart'];
+
     function inject() {
         if (!w.matchMedia('(min-width: 768px)').matches) {
             return;
@@ -634,18 +637,47 @@ $__emitDeferredCss = static function (
         var link = d.createElement('link');
         link.rel = 'stylesheet';
         link.href = href;
+        link.media = 'print';
         link.setAttribute('data-awa-styles-l', '1');
+        link.onload = function () {
+            link.media = 'screen and (min-width: 768px)';
+        };
         d.head.appendChild(link);
     }
-    if (w.matchMedia('(min-width: 768px)').matches) {
-        inject();
-    } else {
-        w.matchMedia('(min-width: 768px)').addEventListener('change', function (e) {
-            if (e.matches) {
-                inject();
-            }
+
+    function cleanup() {
+        events.forEach(function (eventName) {
+            w.removeEventListener(eventName, onInteract, true);
         });
     }
+
+    function boot() {
+        if (done) {
+            return;
+        }
+        done = true;
+        cleanup();
+        inject();
+    }
+
+    function onInteract() {
+        boot();
+    }
+
+    if (!w.matchMedia('(min-width: 768px)').matches) {
+        w.matchMedia('(min-width: 768px)').addEventListener('change', function (e) {
+            if (e.matches) {
+                events.forEach(function (eventName) {
+                    w.addEventListener(eventName, onInteract, { passive: true, capture: true });
+                });
+            }
+        });
+        return;
+    }
+
+    events.forEach(function (eventName) {
+        w.addEventListener(eventName, onInteract, { passive: true, capture: true });
+    });
 })(window, document);
 </script>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__stylesLUrl) ?>"/></noscript>
