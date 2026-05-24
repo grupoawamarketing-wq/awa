@@ -678,6 +678,15 @@ $__emitDeferredCss = static function (
     events.forEach(function (eventName) {
         w.addEventListener(eventName, onInteract, { passive: true, capture: true });
     });
+
+    /* Fallback pós-load: usuários que só scrollam recebem styles-l sem regredir PSI (sem listener scroll) */
+    w.addEventListener('load', function () {
+        w.setTimeout(function () {
+            if (!done) {
+                boot();
+            }
+        }, 12000);
+    }, { once: true });
 })(window, document);
 </script>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__stylesLUrl) ?>"/></noscript>
