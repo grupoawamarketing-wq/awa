@@ -63,11 +63,11 @@ $carouselLabel = $sectionTitle !== '' ? $sectionTitle : (string) __('Mais Vendid
                     $productImageThumbHtml = (string) $productImageThumb->toHtml();
                     $productImageThumbUrl = (string) $productImageThumb->getImageUrl();
 
-                    if ($i < 2) {
-                        // Primeiras 2 imagens: acima do fold — eager + high priority
+                    if (!$isHomePage && $i < 2) {
+                        // Fora da home: primeiras 2 imagens acima do fold
                         $productImageHtml = str_replace(' loading="lazy"', ' loading="eager" fetchpriority="high"', $productImageHtml);
                     } else {
-                        // Demais imagens: below-fold — forçar lazy loading (UX guideline: lazy load below-fold)
+                        // Home: LCP é o hero — prateleiras sempre lazy, sem fetchpriority
                         $productImageHtml = str_replace([' loading="eager"', ' fetchpriority="high"'], [' loading="lazy"', ''], $productImageHtml);
                     }
 

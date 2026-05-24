@@ -1,12 +1,33 @@
-<?php
+<?php declare(strict_types=1);
 /**
- * awa-hero-preload.phtml — Bloco legado (mantido para compatibilidade de layout).
+ * LCP Hero Image Preload — homepage (P9 srcset responsivo).
  *
- * O preload LCP do hero slider foi migrado para awa-head-preload.phtml
- * (gerenciado pelo bloco awa.head.preload via GrupoAwamotos\Theme\Block\Html\HeadPreload).
- *
- * Este template intencionalmnete não gera output para evitar duplicação.
- *
- * @see Magento_Theme::html/awa-head-preload.phtml (linhas heroPreloadUrl)
+ * @var \GrupoAwamotos\Theme\Block\Html\HeroPreload $block
  */
-// Nenhum output — preload já gerado em awa-head-preload.phtml
+$heroPreloadUrl = $block->getHeroImageUrl();
+if ($heroPreloadUrl === '') {
+    return;
+}
+$heroPreloadSrcset = $block->getHeroImageSrcset();
+$heroPreloadSizes = $block->getHeroImageSizes();
+$heroMobileUrl = $block->getHeroImageMobileUrl() ?: $heroPreloadUrl;
+$heroMobileSrcset = $block->getHeroImageMobileSrcset() ?: $heroPreloadSrcset;
+$heroMobileSizes = $block->getHeroImageMobileSizes();
+?>
+<!-- P9b: oculta slider desktop no 1º paint mobile (hidden-xs depende de CSS gated na home) -->
+<style id="awa-hero-lcp-critical">
+@media(max-width:767px){.wrapper_slider.hidden-xs{display:none!important;visibility:hidden!important;height:0!important;max-height:0!important;overflow:hidden!important;margin:0!important;padding:0!important;pointer-events:none!important}.wrapper_slider.visible-xs{display:block!important}}
+@media(min-width:768px){.wrapper_slider.visible-xs{display:none!important;visibility:hidden!important;height:0!important;max-height:0!important;overflow:hidden!important;margin:0!important;padding:0!important;pointer-events:none!important}}
+.wrapper_slider .owl:not(.owl-carousel):not(.awa-hero-owl-ready)>.banner_item{display:none}
+.wrapper_slider .owl:not(.owl-carousel):not(.awa-hero-owl-ready)>.banner_item:first-child{display:block}
+.wrapper_slider.visible-xs .banner_item_bg{aspect-ratio:1920/900;min-height:clamp(140px,42vw,240px)}
+.wrapper_slider.hidden-xs .banner_item_bg{aspect-ratio:1920/900;min-height:clamp(180px,42vw,520px)}
+.wrapper_slider .banner_item_bg img,.wrapper_slider .banner_item_bg picture{display:block;width:100%;height:100%;object-fit:cover}
+/* P12: shelf pré-init — flex síncrono antes do awa-shelf-carousel async */
+#html-body .awa-shelf--carousel ul.owl.awa-carousel__track:not(.owl-carousel):not(.owl-loaded){display:flex!important;flex-wrap:wrap!important;min-height:0!important;grid-template-columns:none!important;overflow:hidden!important}
+#html-body .awa-shelf--carousel ul.owl.awa-carousel__track:not(.owl-carousel):not(.owl-loaded)>li.item:nth-child(n+5){display:none!important}
+#html-body .awa-shelf--carousel ul.owl.awa-carousel__track:not(.owl-carousel) .product-thumb img{opacity:1!important}
+</style>
+<!-- LCP Hero Image Preload — fetchpriority=high, srcset responsivo (P9) -->
+<link rel="preload" href="<?= $block->escapeUrl($heroPreloadUrl) ?>"<?php if ($heroPreloadSrcset): ?> imagesrcset="<?= /* @noEscape */ $heroPreloadSrcset ?>" imagesizes="<?= $block->escapeHtmlAttr($heroPreloadSizes) ?>"<?php endif; ?> as="image" fetchpriority="high" media="(min-width: 768px)" type="image/webp"/>
+<link rel="preload" href="<?= $block->escapeUrl($heroMobileUrl) ?>"<?php if ($heroMobileSrcset): ?> imagesrcset="<?= /* @noEscape */ $heroMobileSrcset ?>" imagesizes="<?= $block->escapeHtmlAttr($heroMobileSizes) ?>"<?php endif; ?> as="image" fetchpriority="high" media="(max-width: 767px)" type="image/webp"/>

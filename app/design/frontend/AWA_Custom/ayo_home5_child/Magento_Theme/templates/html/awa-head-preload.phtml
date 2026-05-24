@@ -55,14 +55,25 @@ $isCheckoutFlow = in_array('checkout_index_index', $handles, true)
     || in_array('checkout_cart_index', $handles, true)
     || in_array('onepagecheckout_index_index', $handles, true);
 $isProductPage = $__fullActionForPage === 'catalog_product_view';
+$isCatalogCssGate = in_array($__fullActionForPage, [
+    'catalog_category_view',
+    'catalogsearch_result_index',
+], true);
+$isLightCssGate = in_array($__fullActionForPage, [
+    'checkout_cart_index',
+    'checkout_index_index',
+], true);
+$__cssGateFull = static function () use ($isCatalogCssGate): bool {
+    return $isCatalogCssGate;
+};
+$__cssGateAny = static function () use ($isCatalogCssGate, $isLightCssGate): bool {
+    return $isCatalogCssGate || $isLightCssGate;
+};
 
 // Homepage-only super bundle
 $homeBundleUrl = null;
-$heroPreloadUrl = null;
 if ($isHomePage) {
     $homeBundleUrl = $block->getViewFileUrl('css/awa-super-home.min.css');
-    /** @var GrupoAwamotos\Theme\Block\Html\HeroPreload $block */
-    $heroPreloadUrl = $block->getHeroImageUrl();
 }
 
 // URL base para derivação de CSS de módulos (getViewFileUrl falha em prod para módulos)
@@ -74,6 +85,12 @@ $refinementsBundleUrl = $block->getViewFileUrl('css/awa-bundle-refinements.min.c
      Pinta cores e estrutura antes dos bundles async carregarem.
      Mantém abaixo de 600 bytes. NÃO adicionar regras complexas aqui.
      ========================================================= -->
+<?php if ($isHomePage): ?>
+<?php // P4b: ~17KB crítico inline; extensão em awa-head-preload-home-ext.min.css (CSS gate) ?>
+<style id="awa-head-preload-critical-home">
+<?php include __DIR__ . '/awa-head-preload-critical-home-css.phtml'; ?>
+</style>
+<?php else: ?>
 <style>
 :root {
     /* ── head-preload — design tokens ─── */
@@ -90,6 +107,7 @@ $refinementsBundleUrl = $block->getViewFileUrl('css/awa-bundle-refinements.min.c
 /* Usa overflow-x:clip em vez de hidden: clip nao cria scroll container no html,
    entao position:fixed funciona corretamente no Chrome. Chrome 90+, Firefox 81+, Safari 16+ */
 html{overflow-x:clip;scrollbar-width:thin;scroll-behavior:smooth;color-scheme:light}*,*::before,*::after{box-sizing:border-box}body{overflow-x:clip;background-color:#ffffff}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 /* sr-only no 1º paint — H1 SEO da home fica visível até defer-global carregar */
 .awa-sr-only,h1.awa-sr-only,.sr-only,.visually-hidden{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
 /* Legacy utility bar = hidden, header = white, footer = vermelho AWA #b73337 */
@@ -299,6 +317,114 @@ body .page-wrapper .page_footer,.page-footer{background:var(--head-preload-c4) !
     background: var(--awa-primary-hover, #8e2629) !important;
   }
 }
+/* NAV-GLOBAL inline síncrono — vence super-global + visual-bugfix async (menu oculto / faixa cinza) */
+@media (min-width: 992px) {
+  html body:not(.checkout-index-index):not(.onepagecheckout-index-index):not(.b2b-auth-shell)
+    .page-wrapper .awa-site-header .header-control.header-nav.awa-nav-bar,
+  html body:not(.checkout-index-index):not(.onepagecheckout-index-index):not(.b2b-auth-shell)
+    .page-wrapper .awa-site-header .header-control.header-nav.awa-nav-bar > .container,
+  html body:not(.checkout-index-index):not(.onepagecheckout-index-index):not(.b2b-auth-shell)
+    .page-wrapper .awa-site-header .header-control.header-nav.awa-nav-bar .awa-nav-bar__inner {
+    display: flex !important;
+    visibility: visible !important;
+    align-items: stretch !important;
+    min-height: 56px !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    background: var(--awa-primary, #b73337) !important;
+    background-color: var(--awa-primary, #b73337) !important;
+    border: 0 !important;
+  }
+
+  html body:not(.checkout-index-index):not(.onepagecheckout-index-index):not(.b2b-auth-shell)
+    .page-wrapper .awa-site-header .header-control.header-nav.awa-nav-bar .menu_left_home1,
+  html body:not(.checkout-index-index):not(.onepagecheckout-index-index):not(.b2b-auth-shell)
+    .page-wrapper .awa-site-header .awa-header-categories.menu_left_home1 {
+    display: flex !important;
+    visibility: visible !important;
+    width: 206px !important;
+    min-width: 206px !important;
+    max-width: 206px !important;
+    flex: 0 0 206px !important;
+    min-height: 56px !important;
+    height: 56px !important;
+    overflow: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  html body:not(.checkout-index-index):not(.onepagecheckout-index-index):not(.b2b-auth-shell)
+    .page-wrapper .awa-site-header .header-control.header-nav.awa-nav-bar .our_categories.title-category-dropdown {
+    display: flex !important;
+    visibility: visible !important;
+    min-height: 56px !important;
+    width: 100% !important;
+  }
+
+  html body:not(.checkout-index-index):not(.onepagecheckout-index-index):not(.b2b-auth-shell)
+    .page-wrapper .awa-site-header .header-control.awa-nav-bar .awa-nav-quick-links,
+  html body:not(.checkout-index-index):not(.onepagecheckout-index-index):not(.b2b-auth-shell)
+    .page-wrapper .awa-site-header .header-control.awa-nav-bar .awa-nav-quick-links__list {
+    display: flex !important;
+    visibility: visible !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    gap: var(--awa-space-4, 16px) !important;
+    list-style: none !important;
+  }
+
+  html body:not(.checkout-index-index):not(.onepagecheckout-index-index):not(.b2b-auth-shell)
+    .page-wrapper .awa-site-header .header-control.awa-nav-bar .awa-nav-quick-links__link {
+    display: inline-flex !important;
+    align-items: center !important;
+    padding-inline: var(--awa-space-4, 16px) !important;
+    color: var(--awa-text-inverse, #ffffff) !important;
+    white-space: nowrap !important;
+    text-decoration: none !important;
+  }
+
+  #html-body .page-wrapper .awa-site-header form#search_mini_form,
+  #html-body .page-wrapper .awa-site-header .block-search form.minisearch {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: stretch !important;
+  }
+
+  #html-body .page-wrapper .awa-site-header form#search_mini_form .field.search,
+  #html-body .page-wrapper .awa-site-header form#search_mini_form .field.search .control {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+  }
+
+  #html-body .page-wrapper .awa-site-header form#search_mini_form .actions {
+    display: flex !important;
+    flex: 0 0 auto !important;
+  }
+
+  #html-body .page-wrapper .awa-site-header .block-search .label {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+  }
+
+  html body:not(.checkout-index-index):not(.onepagecheckout-index-index):not(.b2b-auth-shell)
+    .page-wrapper .navigation.verticalmenu.side-verticalmenu:hover > ul.togge-menu.list-category-dropdown,
+  html body:not(.checkout-index-index):not(.onepagecheckout-index-index):not(.b2b-auth-shell)
+    .page-wrapper .navigation.verticalmenu.side-verticalmenu:focus-within > ul.togge-menu.list-category-dropdown {
+    display: flex !important;
+    flex-direction: column !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+}
 /* FIX-HOME-MAIN-CRITICAL: themes5.min.css define .cms-index-index .page-main.container{display:none} — fix inline síncrono garante lazy-load de imagens. */
 body.cms-index-index .page-main.container,body.cms-home .page-main.container,body.cms-homepage_ayo_home5 .page-main.container{display:block!important}
 /* FIX-SECURITY-CRITICAL */
@@ -348,6 +474,12 @@ html body.catalog-product-view .main-detail>.row>.col-md-6.col-sm-6.col-xs-12:la
 html body.catalog-product-view .product-info-main .box-inner1,
 html body.catalog-product-view .product-info-main .product-info-price{width:100%!important;max-width:100%!important;overflow:visible!important}
 <?php endif; ?>
+<?php if ($isCatalogCssGate): ?>
+/* PLP critical — gate preço B2B no 1º paint (CSS polish gated até interação) */
+#html-body:is(.catalog-category-view,.catalogsearch-result-index) .page-wrapper .products-grid .item-product .info-price .b2b-login-to-see-price{display:flex!important;flex-direction:column!important;align-items:stretch!important;justify-content:center!important;gap:0.25rem!important;min-height:2.75rem!important;padding:0.5rem 0.625rem!important;margin-top:auto!important;background:#fff!important;border:1px solid #e5e5e5!important;border-radius:6px!important;font-size:0.8125rem!important;line-height:1.35!important;color:#666!important;box-sizing:border-box!important;width:100%!important}
+#html-body:is(.catalog-category-view,.catalogsearch-result-index) .page-wrapper .products-grid .item-product .info-price .b2b-login-to-see-price .price-label{display:block!important;margin:0!important;font-size:inherit!important;line-height:1.35!important}
+#html-body:is(.catalog-category-view,.catalogsearch-result-index) .page-wrapper .products-grid .item-product .info-price .b2b-login-to-see-price a{display:inline-flex!important;align-items:center!important;justify-content:center!important;width:100%!important;min-height:2.75rem!important;min-width:2.75rem!important;padding:0.5rem 0.75rem!important;border:1.5px solid var(--head-preload-c4,#b73337)!important;border-radius:6px!important;font-size:0.75rem!important;font-weight:600!important;color:var(--head-preload-c4,#b73337)!important;text-decoration:none!important;cursor:pointer!important;box-sizing:border-box!important;background:transparent!important}
+<?php endif; ?>
 <?php if ($isHomePage): ?>
 /* Layout crítico home — espelha estado final pós home-flex-grid-flow (menos FOUC na fila __awaCssQ) */
 #html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .content-top-home{padding-inline:24px!important;max-width:1440px!important;margin-inline:auto!important;box-sizing:border-box!important;width:100%!important}
@@ -356,22 +488,13 @@ html body.catalog-product-view .product-info-main .product-info-price{width:100%
 #html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .content-top-home .top-home-content.awa-carousel-section>.container{padding-inline:0!important;max-width:100%!important;margin-inline:0!important}
 #html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .top-home-content.awa-carousel-section>.container>header.awa-section-header{display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;align-items:flex-end!important;justify-content:space-between!important;text-align:start!important;margin-block-end:0!important}
 #html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .top-home-content.awa-carousel-section .awa-section-header__link{align-self:flex-end!important;margin-inline-start:auto!important;flex-shrink:0!important}
-#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-carousel-section .container:has(>header.awa-section-header) :is(.rokan-bestseller,.rokan-newproduct,.rokan-featuredproduct)>.rokan-product-heading{display:none!important;height:0!important;margin:0!important;padding:0!important;overflow:hidden!important}
+#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .top-home-content .container:has(>header.awa-section-header) .rokan-product-heading,#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-home-section:has(.awa-section-header) .rokan-product-heading{display:none!important;visibility:hidden!important;height:0!important;max-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important;border:0!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important}
 #html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .content-top-home .awa-carousel-section :is(.rokan-bestseller,.rokan-newproduct,.rokan-featuredproduct){display:flex!important;flex-direction:column!important;grid-template-columns:none!important;gap:clamp(.75rem,.65rem + .45vw,1.25rem)!important;margin:0!important;padding:0!important;width:100%!important}
 #html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-benefits-bar .awa-benefits-container{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:.75rem!important;padding:0!important}
 <?php endif; ?>
 </style>
-<?php if ($heroPreloadUrl): ?>
-<!-- LCP Hero Image Preload — fetchpriority=high, com media queries (Swiper SlideBanner, homepage) -->
-<!-- Desktop (.hidden-xs): só carregado em viewport >= 768px, evita consumo indevido no mobile -->
-<!-- imagesrcset necessário para que Chrome associe o preload ao <source srcset> do <picture> gerado pelo slider_home5.phtml -->
-<?php $heroPreloadType = str_ends_with($heroPreloadUrl, '.webp') ? 'image/webp' : 'image/jpeg'; ?>
-<link rel="preload" href="<?= $block->escapeUrl($heroPreloadUrl) ?>" imagesrcset="<?= $block->escapeUrl($heroPreloadUrl) ?>" as="image" fetchpriority="high" media="(min-width: 768px)" type="<?= $block->escapeHtmlAttr($heroPreloadType) ?>"/>
-<!-- Mobile (.visible-xs): só carregado em viewport <= 767px -->
-<?php $heroMobileUrl = $block->getHeroImageMobileUrl() ?: $heroPreloadUrl; ?>
-<?php $heroMobileType = str_ends_with($heroMobileUrl, '.webp') ? 'image/webp' : 'image/jpeg'; ?>
-<link rel="preload" href="<?= $block->escapeUrl($heroMobileUrl) ?>" imagesrcset="<?= $block->escapeUrl($heroMobileUrl) ?>" as="image" fetchpriority="high" media="(max-width: 767px)" type="<?= $block->escapeHtmlAttr($heroMobileType) ?>"/>
 <?php endif; ?>
+<?php /* P9: hero preload único em awa-hero-preload.phtml (cms_index_index) — evita 4× link duplicado */ ?>
 <!-- AWA Head Preload — Preconnect (precedência sobre dns-prefetch) -->
 <?php foreach ($preconnect as $origin): ?>
 <link rel="preconnect" href="<?= $block->escapeUrl($origin) ?>" crossorigin="anonymous"/>
@@ -397,27 +520,74 @@ html body.catalog-product-view .product-info-main .product-info-price{width:100%
      Enfileira CSS async e aplica 1 por vez com 50ms yield entre cada. -->
 <?php
 /* Cada link usa onload="<?= $__cssStagger ?>". A primeira chamada define window.__awaCssQ; as demais reutilizam. */
-$__cssStagger = <<<'STAGGER'
-var F=window.__awaCssQ;if(!F){var q=[];F=window.__awaCssQ=function(e){q.push(e);if(!F._r){F._r=1;requestAnimationFrame(function(){!function n(){q.length?(q.shift().media='all',requestAnimationFrame(function(){setTimeout(n,32)})):F._r=0}()})}};};F(this)
-STAGGER;
-$__homeGatedCssUrls = [];
+/* Heredoc proibido: var/view_preprocessed minifica numa linha e quebra <<<'STAGGER'. */
+$__cssStagger = 'var F=window.__awaCssQ;if(!F){var q=[];F=window.__awaCssQ=function(e){q.push(e);if(!F._r){F._r=1;requestAnimationFrame(function(){!function n(){q.length?(q.shift().media=\'all\',requestAnimationFrame(function(){setTimeout(n,32)})):F._r=0}()})}};};F(this)';
+$__gatedCssUrls = [];
 
 /**
- * Home: enfileira CSS para injeção lazy via awa-css-gate.js (zero download no Lighthouse).
- * Demais páginas: media=print + stagger async.
+ * CSS estrutural: sempre media=print + stagger (layout correto no 1º paint).
+ * Interaction gate desativado em PLP/checkout — causava layout quebrado até scroll/clique.
  */
 $__emitDeferredCss = static function (
     string $url,
     bool $preload = false,
-    bool $lowPriority = false
+    bool $lowPriority = false,
+    bool $interactionGate = false
 ) use (
     $block,
     $isHomePage,
-    &$__homeGatedCssUrls,
+    &$__gatedCssUrls,
     $__cssStagger
 ): void {
-    if ($isHomePage) {
-        $__homeGatedCssUrls[$url] = $url;
+    $path = parse_url($url, PHP_URL_PATH) ?? '';
+    if ($path !== '' && preg_match('#/css/([^/?]+)$#', $path, $cssMatch)) {
+        $cssFile = $cssMatch[1];
+        $themeCssDir = BP . '/app/design/frontend/AWA_Custom/ayo_home5_child/web/css/';
+        $candidates = [$cssFile, (string) preg_replace('/\.min\.css$/', '.css', $cssFile)];
+        $exists = false;
+        foreach ($candidates as $candidate) {
+            if ($candidate !== '' && is_readable($themeCssDir . $candidate)) {
+                $exists = true;
+                break;
+            }
+        }
+        if (!$exists) {
+            foreach (['pt_BR', 'en_US'] as $locale) {
+                $pubPath = BP . '/pub/static/frontend/AWA_Custom/ayo_home5_child/'
+                    . $locale . '/css/' . $cssFile;
+                if (is_readable($pubPath)) {
+                    $exists = true;
+                    break;
+                }
+            }
+        }
+        if (!$exists && preg_match('#/GrupoAwamotos_([^/]+)/css/(.+)$#', $path, $modMatch)) {
+            $moduleSegment = 'GrupoAwamotos_' . $modMatch[1];
+            $moduleCss = $modMatch[2];
+            foreach (['pt_BR', 'en_US'] as $locale) {
+                $pubPath = BP . '/pub/static/frontend/AWA_Custom/ayo_home5_child/'
+                    . $locale . '/' . $moduleSegment . '/css/' . $moduleCss;
+                if (is_readable($pubPath)) {
+                    $exists = true;
+                    break;
+                }
+            }
+            if (!$exists) {
+                $moduleView = BP . '/app/code/GrupoAwamotos/' . $modMatch[1]
+                    . '/view/frontend/web/css/' . $moduleCss;
+                if (is_readable($moduleView)) {
+                    $exists = true;
+                }
+            }
+        }
+        if (!$exists) {
+            return;
+        }
+    }
+
+    // Interaction gate reservado só para cosmetic home (Lighthouse); nunca bloquear CSS estrutural.
+    if ($isHomePage && $interactionGate) {
+        $__gatedCssUrls[$url] = $url;
         return;
     }
     $escaped = $block->escapeUrl($url);
@@ -438,7 +608,8 @@ $__emitDeferredCss = static function (
          O merged bundle fica ~200KB (bootstrap+fontawesome) em vez de 5.3MB — Chrome parseia em ms.
          Requer <remove src="css/styles-m.css"/> em default_head_blocks.xml (já adicionado). */ ?>
 <?php $__stylesMUrl = $block->getViewFileUrl('css/styles-m.min.css'); ?>
-<?php ($__emitDeferredCss)($__stylesMUrl, false, true); ?>
+<?php /* Home: gate styles-m (~362KB gzip) — anti-FOUC inline cobre 1º paint; PSI não baixa no audit */ ?>
+<?php ($__emitDeferredCss)($__stylesMUrl, false, true, $isHomePage); ?>
 <?php /* styles-l.css — CSS de desktop (4.3MB), separado do merged bundle 2026-05-08.
          media="screen and (min-width: 768px)": não bloqueia render em mobile (viewport < 768px).
          No PSI/Lighthouse (Moto G Power emulado), este CSS NÃO bloqueia o FCP.
@@ -493,7 +664,7 @@ $__emitDeferredCss = static function (
          + font-awesome(26KB) + icomoon(13KB) + simple-line-icons(12KB)
          All files in css/ so relative URLs (../fonts/, images/) remain valid. */ ?>
 <?php $__thirdPartyBundleUrl = $block->getViewFileUrl('css/awa-third-party-bundle.min.css'); ?>
-<?php ($__emitDeferredCss)($__thirdPartyBundleUrl, !$isHomePage, false); ?>
+<?php ($__emitDeferredCss)($__thirdPartyBundleUrl, !$isHomePage, false, $isHomePage); ?>
 <?php /* awa-interaction-widgets.css — bundle consolidado de 7 CSS de interação (2026-05-09).
          Antes: calendar(6KB) + cookie-consent(3KB) + chosen(10KB) + fancybox(4KB)
                + loader(0KB) + uppy(0KB) + Brand/styles(2KB) + quickview(4KB) = 7 requests
@@ -502,7 +673,7 @@ $__emitDeferredCss = static function (
          Inclui todos os CSS de widgets de interação: datepicker, cookie-consent,
          chosen.js dropdowns, fancybox lightbox, loader spinner, uppy upload, brand widget, quickview modal. */ ?>
 <?php $__interactionWidgetsUrl = $block->getViewFileUrl('css/awa-interaction-widgets.min.css'); ?>
-<?php ($__emitDeferredCss)($__interactionWidgetsUrl, false, false); ?>
+<?php ($__emitDeferredCss)($__interactionWidgetsUrl, false, false, $isHomePage); ?>
 <?php /* themes.css — async (2026-05-xx, saves ~2550ms render blocking)
          Removido de blocking via <remove src="css/themes.css"/> em default_head_blocks.xml.
          Carregado aqui como media=print onload para zero-blocking download.
@@ -510,31 +681,34 @@ $__emitDeferredCss = static function (
          Bootstrap v3.3.6 removido inteiramente (97% unused, 19KB, coberto por awa-super-global). */ ?>
 <?php $__themesUrl = $block->getViewFileUrl('css/themes.min.css'); ?>
 <!-- preload removido: themes.css (5MB) não é critical — anti-FOUC cobre above-fold -->
-<?php ($__emitDeferredCss)($__themesUrl, false, true); ?>
+<?php /* Home: gate themes (~370KB gzip) — hero/header cobertos no inline anti-FOUC */ ?>
+<?php ($__emitDeferredCss)($__themesUrl, false, true, $isHomePage); ?>
 <!-- AWA Async CSS Bundles — super-global + defer-global (P2: 1 request no lugar de ~30 print/defer XML) -->
 <!-- Anti-FOUC inline CSS cobre above-fold. Home: fila lazy (zero download Lighthouse). -->
-<?php ($__emitDeferredCss)($__superGlobalUrl, !$isHomePage, false); ?>
+<?php /* Home: gate super-global (~227KB gzip) — tokens/layout above-fold no inline anti-FOUC + defer-global */ ?>
+<?php ($__emitDeferredCss)($__superGlobalUrl, !$isHomePage, false, $isHomePage); ?>
 <?php /* defer-global: contém minicart + checkout CSS crítico.
         Home: sem preload (compete com LCP); demais páginas: preload no primeiro lote. */ ?>
-<?php ($__emitDeferredCss)($__deferGlobalUrl, !$isHomePage, false); ?>
+<?php /* Home: defer-global (~66KB gzip) — minicart CSS; header intent loaders cobrem até interação */ ?>
+<?php ($__emitDeferredCss)($__deferGlobalUrl, !$isHomePage, false, $isHomePage); ?>
 <?php /* awa-layout-bundle.css — 9 AWA layout+utility CSS files → 1 request (vmenu-modern separado, preload abaixo)
          canonical + fixed + clean-ui + ux-resp + grid + bestseller + card + gap-fix + vmenu-final */ ?>
 <?php $__layoutBundleUrl = $block->getViewFileUrl('css/awa-layout-bundle.min.css'); ?>
-<?php ($__emitDeferredCss)($__layoutBundleUrl, !$isHomePage, false); ?>
+<?php ($__emitDeferredCss)($__layoutBundleUrl, !$isHomePage, false, $isHomePage); ?>
 <?php /* awa-grid-container-audit.css — tier-scoped containers (after layout-bundle, before refinements) */ ?>
 <?php $__gridContainerAuditUrl = $block->getViewFileUrl('css/awa-grid-container-audit.min.css'); ?>
-<?php ($__emitDeferredCss)($__gridContainerAuditUrl, false, false); ?>
+<?php ($__emitDeferredCss)($__gridContainerAuditUrl, false, false, $isHomePage); ?>
 <?php /* awa-layout-grid-system.css — tokens gutter + utilitários container/grid (após audit) */ ?>
 <?php $__layoutGridSystemUrl = $block->getViewFileUrl('css/awa-layout-grid-system.min.css'); ?>
-<?php ($__emitDeferredCss)($__layoutGridSystemUrl, false, false); ?>
+<?php ($__emitDeferredCss)($__layoutGridSystemUrl, false, false, $isHomePage); ?>
 <?php if ($homeBundleUrl): ?>
 <!-- awa-super-home.css: home-custom + mobile-fix + product-cards + category-carousel + cosmetic-home -->
-<?php ($__emitDeferredCss)($homeBundleUrl, false, false); ?>
+<?php ($__emitDeferredCss)($homeBundleUrl, false, false, true); ?>
 <?php
     $__homeTerminalBundleUrl = $block->getViewFileUrl('css/awa-home-terminal-bundle.min.css');
-    ($__emitDeferredCss)($__homeTerminalBundleUrl, false, false);
+    ($__emitDeferredCss)($__homeTerminalBundleUrl, false, false, true);
     $__homeHierarchyUrl = $block->getViewFileUrl('css/awa-homepage-hierarchy.min.css');
-    ($__emitDeferredCss)($__homeHierarchyUrl, false, false);
+    ($__emitDeferredCss)($__homeHierarchyUrl, false, false, true);
     ?>
 <?php endif; ?>
 <?php /* Home page: B2B suggestion.css + carousel CSS removed from merged bundle 2026-05-09.
@@ -542,31 +716,27 @@ $__emitDeferredCss = static function (
          awa-round2-home-owl-tabs: Owl carousel tab visual polish (below-fold).
          awa-home-carousel-standard + awa-carousel-modern: carousel visual standards.
          All loaded async — Anti-FOUC covers above-fold carousel dimensions. */ ?>
-<?php if ($homeBundleUrl): // Re-use $homeBundleUrl flag to scope to home page
-    $__suggestionUrl = str_replace(
-        ['css/awa-bundle-refinements.min.css', 'css/awa-bundle-refinements.css'],
-        ['GrupoAwamotos_B2B/css/marketing/suggestion.css', 'GrupoAwamotos_B2B/css/marketing/suggestion.css'],
-        $refinementsBundleUrl
-    );
-    if ($__suggestionUrl !== $refinementsBundleUrl) {
-        ($__emitDeferredCss)($__suggestionUrl, false, false);
-    }
+<?php if ($homeBundleUrl): // Re-use $homeBundleUrl flag to scope to home page — interaction gate (PSI/Lighthouse)
+    $__suggestionUrl = $block->getViewFileUrl('GrupoAwamotos_B2B::css/marketing/suggestion.min.css');
+    ($__emitDeferredCss)($__suggestionUrl, false, false, true);
     $__carouselBundleUrl = $block->getViewFileUrl('css/awa-carousel-bundle.min.css');
-    ($__emitDeferredCss)($__carouselBundleUrl, false, false);
+    ($__emitDeferredCss)($__carouselBundleUrl, false, false, true);
     $__carouselRefineUrl = $block->getViewFileUrl('css/awa-carousel-refine.min.css');
-    ($__emitDeferredCss)($__carouselRefineUrl, false, false);
+    ($__emitDeferredCss)($__carouselRefineUrl, false, false, true);
 endif; ?>
-<?php /* awa-vertical-menu-modern.css → carregado após ux-improvements (fonte única, pós-bundle) */ ?>
+<?php /* awa-vertical-menu-modern.css — TODAS as páginas incl. HOME (flyout/sidebar; head-tail gated na home) */ ?>
+<?php $__vmenuModernUrl = $block->getViewFileUrl('css/awa-vertical-menu-modern.min.css'); ?>
+<?php ($__emitDeferredCss)($__vmenuModernUrl, false, false, false); ?>
 <?php /* awa-bundle-refinements.css — safety-net overrides, carrega async (2026-05-02)
          Regras críticas above-fold (cart-fallback, b2b-promo-bar) cobertas no inline anti-FOUC.
          media="print" onload trick: força download sem bloquear render, swap para 'all' ao carregar. */ ?>
-<?php ($__emitDeferredCss)($refinementsBundleUrl, !$isHomePage, false); ?>
+<?php ($__emitDeferredCss)($refinementsBundleUrl, !$isHomePage, false, $isHomePage); ?>
 <?php /* awa-flex-grid-flow.min.css — defer-global + awa-og-meta.phtml */ ?>
 <?php /* awa-mobile-drill.css → awa-head-tail-bundle.css (P3) */ ?>
 <?php /* awa-bestseller-fixes.css → included in awa-layout-bundle.css (2026-05-09) */ ?>
 <?php /* awa-visual-bugfix.css (~691KB) — home: gated (TBT); demais páginas: stagger async */ ?>
 <?php $__bugfixConsolidatedUrl = $block->getViewFileUrl('css/awa-visual-bugfix.min.css'); ?>
-<?php ($__emitDeferredCss)($__bugfixConsolidatedUrl, !$isHomePage, false); ?>
+<?php ($__emitDeferredCss)($__bugfixConsolidatedUrl, !$isHomePage, false, $isHomePage); ?>
 <?php /* awa-header-minicart-restore: só em before.body.end (default.xml) — final-wins sem double-fetch */ ?>
 <?php /* awa-card-image-hero.css + awa-home-gap-fix.css → included in awa-layout-bundle.css (2026-05-09) */ ?>
 <?php /* awa-vertical-menu-desktop-final.css → included in awa-layout-bundle.css (2026-05-09) */ ?>
@@ -574,56 +744,39 @@ endif; ?>
          Não carregar na HOME nem em fluxos de checkout/carrinho.
          Checkout/OPC usam awa-checkout-polish.css; PLP aqui seria custo extra e risco de cascade. */ ?>
 <?php if (!$homeBundleUrl && !$isCheckoutFlow): // Skip on home + checkout flows
-    $__plpFinalUrl = $block->getViewFileUrl('css/awa-plp-final-polish.min.css'); ?>
-<link rel="preload" href="<?= $block->escapeUrl($__plpFinalUrl) ?>" as="style"/>
-<link rel="stylesheet"
-      href="<?= $block->escapeUrl($__plpFinalUrl) ?>"
-      media="print"
-      onload="<?= /* @noEscape */ $__cssStagger ?>"/>
-<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__plpFinalUrl) ?>"/></noscript>
-<?php /* awa-plp-ui-promax: loader terminal em catalog_category_view + catalogsearch (pós audit-bundle) */ ?>
-<?php endif; ?>
+    $__plpFinalUrl = $block->getViewFileUrl('css/awa-plp-final-polish.min.css');
+    ($__emitDeferredCss)($__plpFinalUrl, false, false, false);
+endif; ?>
 <?php /* rexis-recommendations: PDP/categoria/dashboard — HOME não rende widget (evita CSS morto ~1 fetch).
           Se CMS passar widget Rexis na home no futuro, incluir esse asset via layout/CMS ou remover o gate. */
-if (!$isHomePage):
-    $__rexisUrl = str_replace(
-        ['css/awa-bundle-refinements.min.css', 'css/awa-bundle-refinements.css'],
-        ['GrupoAwamotos_ProductIntelligence/css/rexis-recommendations.css', 'GrupoAwamotos_ProductIntelligence/css/rexis-recommendations.css'],
-        $refinementsBundleUrl
-    );
-    if ($__rexisUrl !== $refinementsBundleUrl): ?>
-<link rel="stylesheet"
-      href="<?= $block->escapeUrl($__rexisUrl) ?>"
-      media="print"
-      data-rexis-async="1"
-      onload="<?= /* @noEscape */ $__cssStagger ?>"/>
-<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__rexisUrl) ?>"/></noscript>
-<?php
-    endif;
-endif; ?>
+if (!$isHomePage) {
+    $__rexisUrl = $block->getViewFileUrl('GrupoAwamotos_ProductIntelligence::css/rexis-recommendations.min.css');
+    ($__emitDeferredCss)($__rexisUrl, false, false, false);
+}
+?>
 <!-- styles-l.css carregado em awa.styles.l.last (after awa.search.autocomplete.head.css) -->
 
 <?php /* Head tail: premium-transform + b2b-color + ux + vmenu-modern + mobile-drill (P3 bundle) */ ?>
 <?php $__headTailBundleUrl = $block->getViewFileUrl('css/awa-head-tail-bundle.min.css'); ?>
-<?php ($__emitDeferredCss)($__headTailBundleUrl, !$isHomePage, true); ?>
+<?php ($__emitDeferredCss)($__headTailBundleUrl, false, true, false); ?>
 
 <?php if ($isHomePage):
     $__homeCosmeticBundleUrl = $block->getViewFileUrl('css/awa-home-cosmetic-bundle.min.css');
-    ($__emitDeferredCss)($__homeCosmeticBundleUrl, false, false);
-    $__homeFlexGridUrl = $block->getViewFileUrl('css/awa-flex-grid-flow.min.css');
-    $__homeTouchFinalUrl = $block->getViewFileUrl('css/awa-touch-final.min.css');
-    ($__emitDeferredCss)($__homeFlexGridUrl, false, false);
-    ($__emitDeferredCss)($__homeTouchFinalUrl, false, false);
+    /* flex-grid global + touch-final já em awa-defer-global-bundle — home só overlay */
+    ($__emitDeferredCss)($__homeCosmeticBundleUrl, false, false, true);
     $__homeFlexFinalUrl = $block->getViewFileUrl('css/awa-home-flex-final.min.css');
-    ($__emitDeferredCss)($__homeFlexFinalUrl, false, false);
+    ($__emitDeferredCss)($__homeFlexFinalUrl, false, false, true);
     $__homeFlexGridFlowUrl = $block->getViewFileUrl('css/awa-home-flex-grid-flow.min.css');
-    ($__emitDeferredCss)($__homeFlexGridFlowUrl, false, false);
-    $__homeShelfPromaxUrl = $block->getViewFileUrl('css/awa-home-shelf-ui-promax-2026-05-21.min.css');
-    ($__emitDeferredCss)($__homeShelfPromaxUrl, false, false);
+    ($__emitDeferredCss)($__homeFlexGridFlowUrl, false, false, true);
+    /* promax shelf: awa-shelf-carousel-loader.phtml (home only) — evita duplicata */
     $__visualAuditUrl = $block->getViewFileUrl('css/awa-visual-audit-2026-05-18.min.css');
-    ($__emitDeferredCss)($__visualAuditUrl, false, false);
+    ($__emitDeferredCss)($__visualAuditUrl, false, false, true);
     $__homeHoverLockUrl = $block->getViewFileUrl('css/awa-home-hover-lock.min.css');
-    ($__emitDeferredCss)($__homeHoverLockUrl, false, false);
+    ($__emitDeferredCss)($__homeHoverLockUrl, false, false, true);
+    $__homeB2bDensityUrl = $block->getViewFileUrl('css/awa-home-b2b-density-terminal.min.css');
+    ($__emitDeferredCss)($__homeB2bDensityUrl, false, false, true);
+    $__homePreloadExtUrl = $block->getViewFileUrl('css/awa-head-preload-home-ext.min.css');
+    $__gatedCssUrls[$__homePreloadExtUrl] = $__homePreloadExtUrl;
 ?>
 <style id="awa-shelf-b2b-terminal-inline">
 /* Passo 5B — terminal inline (após todos os bundles async; vence bugfix/cosmetic/defer-global) */
@@ -723,121 +876,38 @@ h1.awa-sr-only,.page-top h1.awa-sr-only{
 }
 </style>
 <?php
-    /* awa-home-cosmetic-bundle inclui: audit-bundle + polish-r2 + redesign-modern (R1-R6 completo).
-       IMPORTANTE: ao atualizar awa-redesign-modern.css, reconstruir o bundle:
-         bash scripts/build-awa-home-cosmetic-bundle.sh  (ou atualizar manualmente as linhas 5024+) */
-    ($__emitDeferredCss)($block->getViewFileUrl('css/awa-home-layout-r2.min.css'), false, false);
+    /* layout-r2: awa-home-layout-r2-css.phtml (before.body.end, sync final-wins) — evita duplicata no head */
     endif; ?>
 
 <?php
 /* Responsive guard — último AWA em todas as páginas (flex-grid-flow + ui-ux-pro-max) */
 $__responsiveGuardUrl = $block->getViewFileUrl('css/awa-responsive-guard.min.css');
 ?>
-<?php ($__emitDeferredCss)($__responsiveGuardUrl, false, false); ?>
+<?php ($__emitDeferredCss)($__responsiveGuardUrl, false, false, $isHomePage); ?>
 <?php /* Non-home: audit + footer-modern via awa-audit-bundle-css.phtml (evita double-load) */ ?>
 
 <?php
-/* ui-ux-pro-max — bundle phases 4–15 + refine (1 req; ordem 4→15→refine). scripts/build-awa-ui-promax-bundle.sh */
-$__promaxBundleUrl = $block->getViewFileUrl('css/awa-ui-promax-bundle.min.css');
-?>
-<?php ($__emitDeferredCss)($__promaxBundleUrl, false, false); ?>
-
-<?php
-/* ui-ux-pro-max audit 2026-05-19 — último CSS global (tokens, botões, checkout, mobile) */
-$__promaxAuditUrl = $block->getViewFileUrl('css/awa-ui-ux-pro-max-audit-2026-05-19.min.css');
-?>
-<?php ($__emitDeferredCss)($__promaxAuditUrl, false, false); ?>
-
-<?php
-/* ui-ux-pro-max header — última camada (busca, ícones, nav, menu vertical) */
+/* ui-ux-pro-max — checkout/B2B/conta (pula HOME: ~158KB, efeitos já cobertos por simplify + terminal home) */
+if (!$isHomePage) {
+    $__promaxBundleUrl = $block->getViewFileUrl('css/awa-ui-promax-bundle.min.css');
+    ($__emitDeferredCss)($__promaxBundleUrl, false, false, false);
+}
+/* ui-ux-pro-max header — busca, ícones, nav */
 $__promaxHeaderUrl = $block->getViewFileUrl('css/awa-ui-ux-pro-max-header-2026-05-19.min.css');
+($__emitDeferredCss)($__promaxHeaderUrl, false, false, $isHomePage);
 ?>
-<?php ($__emitDeferredCss)($__promaxHeaderUrl, false, false); ?>
 
 <?php
 /* Correção estrutural 2026-05-20 — última camada (container 1320, header/minicart, footer, PDP, checkout, B2B) */
-$__structuralFixUrl = $block->getViewFileUrl('css/awa-structural-fix-2026-05-20.css');
+$__structuralFixUrl = $block->getViewFileUrl('css/awa-structural-fix-2026-05-20.min.css');
 ?>
-<?php ($__emitDeferredCss)($__structuralFixUrl, false, false); ?>
-<style id="awa-header-home-hotfix-inline">
-/* Vence audit/async: login em linha + top bar legível + nav home sem vão central */
-@media (min-width: 992px) {
-  #html-body .page-wrapper .awa-site-header .awa-header-account-prompt,
-  #html-body .page-wrapper .awa-site-header .awa-header-contact-links.awa-header-account-prompt {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    gap: 10px !important;
-  }
-  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper .header-control.awa-nav-bar .awa-header-primary-nav.menu_primary {
-    display: none !important;
-    width: 0 !important;
-    flex: 0 0 0 !important;
-    overflow: hidden !important;
-  }
-}
-#html-body .page-wrapper .awa-site-header .awa-top-utility-bar .topbar-info--phone a { color: #1e293b !important; font-weight: 600 !important; }
-#html-body .page-wrapper .awa-site-header .awa-top-utility-bar .topbar-info--hours { color: #475569 !important; }
-/* Logo E2E — vence bundles async pós-structural (45px ⇒ width 79px < 80px) */
-@media (min-width: 992px) {
-  #html-body .page-wrapper .awa-site-header :is(.logo img, .awa-header-primary-row .logo img, .col-md-2 .logo img) {
-    max-height: 48px !important;
-    min-width: 80px !important;
-    width: auto !important;
-    height: auto !important;
-    object-fit: contain !important;
-  }
-}
-@media (max-width: 767px) {
-  #html-body .page-wrapper .awa-site-header :is(.logo img, .awa-header-primary-row .logo img, .col-md-2 .logo img) {
-    max-height: 40px !important;
-    max-width: min(140px, 36vw) !important;
-  }
-}
-/* Hierarquia home — terminal inline (vence border-top:none !important dos flex bundles) */
-#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper
-  .ayo-home5-wrapper--template-driven
-  > .top-home-content.awa-home-section:nth-child(odd):not(.top-home-content--above-fold):not([aria-label*="Mais Vendidos"]) {
-  background-color: var(--awa-color-white, #ffffff) !important;
-}
-#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper
-  .ayo-home5-wrapper--template-driven
-  > .top-home-content.awa-home-section:nth-child(even):not(.top-home-content--above-fold):not([aria-label*="Mais Vendidos"]) {
-  background-color: var(--awa-neutral-50, #f7f7f7) !important;
-}
-#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper
-  .ayo-home5-wrapper--template-driven
-  > .top-home-content.awa-home-section[aria-label*="Mais Vendidos"] {
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--awa-primary, #b73337) 6%, var(--awa-color-white, #fff)) 0%,
-    var(--awa-color-white, #fff) 72%
-  ) !important;
-  border-top: 2px solid var(--awa-primary, #b73337) !important;
-  border-block-start: 2px solid var(--awa-primary, #b73337) !important;
-  box-shadow: 0 12px 40px color-mix(in srgb, var(--awa-neutral-900, #0f172a) 6%, transparent);
-}
-@media (min-width: 768px) {
-  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper
-    .top-home-content[aria-label*="Mais Vendidos"] :is(.awa-section-header__title, .awa-shelf__title) {
-    font-size: clamp(28px, calc(22px + 1.1vw), 36px) !important;
-    font-weight: 800 !important;
-  }
-}
-@media (max-width: 767px) {
-  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper
-    .top-home-content[aria-label*="Mais Vendidos"] :is(.awa-section-header__title, .awa-shelf__title) {
-    font-size: clamp(22px, calc(20px + 1.2vw), 26px) !important;
-    font-weight: 800 !important;
-  }
-}
-/* ui-ux-pro-max: cursor em cards clicáveis (carrosséis + categorias) */
-#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper
-  .content-top-home
-  :is(.item-product.awa-carousel-card-slot, .awa-category-carousel__item, .content-item-product a) {
-  cursor: pointer;
-}
-</style>
+<?php ($__emitDeferredCss)($__structuralFixUrl, false, false, $isHomePage); ?>
+<?php
+/* UI simplify — última camada CSS (vence promax, premium-effects, cosmetic) */
+$__uiSimplifyUrl = $block->getViewFileUrl('css/awa-ui-simplify-terminal.min.css');
+($__emitDeferredCss)($__uiSimplifyUrl, false, false, $isHomePage);
+?>
+<?php /* P6: awa-header-home-hotfix → awa-header-home-hotfix-home.phtml (cms_index_index) */ ?>
 
 <?php /* awa-flex-grid-flow + awa-touch-final → awa-defer-global-bundle.css (P2) */ ?>
 
@@ -849,7 +919,7 @@ $__qaCssByAction = [
       /* cms_index_index: awa-visual-qa-home.css está em awa-home-terminal-bundle.css */
       'catalog_category_view' => ['css/awa-visual-qa-category.css'],
       'catalogsearch_result_index' => ['css/awa-visual-qa-category.css'],
-      'catalog_product_view' => [], /* Consolidado em awa-pdp.css (carregado via catalog_product_view.xml) */
+      'catalog_product_view' => [], /* PDP: styles-l (consolidated) + awa-pdp-premium.css via catalog_product_view.xml */
 ];
 $__qaCssAssets = $__qaCssByAction[$__fullActionName] ?? [];
 ?>
@@ -862,13 +932,18 @@ $__qaCssAssets = $__qaCssByAction[$__fullActionName] ?? [];
 
 <?php /* cascade-final: carregado por último em awa-audit-bundle-css.phtml (home) + cms_index_index.xml (blocking). */ ?>
 
-<?php if ($isHomePage && $__homeGatedCssUrls !== []): ?>
-<script id="awa-css-gate-queue" type="application/json"><?= /* @noEscape */ json_encode(array_values($__homeGatedCssUrls), JSON_UNESCAPED_SLASHES) ?></script>
+<?php if ($isHomePage && $__gatedCssUrls !== []): ?>
+<script id="awa-css-gate-queue" type="application/json"><?= /* @noEscape */ json_encode(array_values($__gatedCssUrls), JSON_UNESCAPED_SLASHES) ?></script>
 <script src="<?= $block->escapeUrl($__cssGateJsUrl) ?>" defer></script>
 <noscript>
-<?php foreach (array_values($__homeGatedCssUrls) as $__gatedCssUrl): ?>
-<link rel="stylesheet" href="<?= $block->escapeUrl($__gatedCssUrl) ?>"/>
-<?php endforeach; ?>
+<link rel="stylesheet" href="<?= $block->escapeUrl($__superGlobalUrl) ?>"/>
+<link rel="stylesheet" href="<?= $block->escapeUrl($__deferGlobalUrl) ?>"/>
+<link rel="stylesheet" href="<?= $block->escapeUrl($__stylesMUrl) ?>"/>
+<link rel="stylesheet" href="<?= $block->escapeUrl($__themesUrl) ?>"/>
+<?php if ($isHomePage && $homeBundleUrl): ?>
+<link rel="stylesheet" href="<?= $block->escapeUrl($homeBundleUrl) ?>"/>
+<link rel="stylesheet" href="<?= $block->escapeUrl($block->getViewFileUrl('css/awa-home-flex-grid-flow.min.css')) ?>"/>
+<?php endif; ?>
 </noscript>
 <?php endif; ?>
 

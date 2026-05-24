@@ -42,9 +42,48 @@
         <!-- flex-grid-flow: global async em default_head_blocks + awa-head-preload -->
         <remove src="css/awa-flex-grid-flow.min.css"/>
         <remove src="css/awa-touch-final.min.css"/>
-        <css src="GrupoAwamotos_B2B::css/product/login-to-cart.css"/>
+        <remove src="GrupoAwamotos_B2B::css/product/login-to-cart.css"/>
     </head>
     <body>
+        <attribute name="data-mage-init" xsi:type="string">{}</attribute>
+        <referenceBlock name="awa.cookie.consent.fix.css" remove="true"/>
+        <referenceBlock name="awa.styles.l.last" remove="true"/>
+        <referenceBlock name="awa.cls.nav.fix" remove="true"/>
+        <referenceBlock name="awa.critical.inline.css" remove="true"/>
+
+        <referenceBlock name="head.additional">
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.header.mobile.grid.critical"
+                   template="Magento_Theme::html/awa-header-mobile-grid-critical-inline.phtml"
+                   before="-"/>
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.critical.inline.home"
+                   template="Magento_Theme::html/awa-critical-fold-home.phtml"
+                   after="awa.header.mobile.grid.critical"/>
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.cls.nav.fix.home"
+                   template="Magento_Theme::html/awa-cls-nav-fix-home.phtml"
+                   after="awa.critical.inline.home"/>
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.header.home.hotfix"
+                   template="Magento_Theme::html/awa-header-home-hotfix-home.phtml"
+                   after="awa.cls.nav.fix.home"/>
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.login.to.cart.home.async"
+                   template="Magento_Theme::html/awa-login-to-cart-home-async.phtml"
+                   before="awa.head.preload"/>
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.cookie.consent.fix.css.home"
+                   template="Magento_Theme::html/awa-cookie-consent-home-head.phtml"
+                   after="awa.search.autocomplete.head.css"/>
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.styles.l.last.home"
+                   template="Magento_Theme::html/awa-styles-l-last-home.phtml"
+                   after="awa.deferred.cosmetic.css"/>
+            <!-- Home: audit/footer via awa-home-cosmetic-bundle em awa-head-preload.phtml -->
+            <referenceBlock name="awa.audit.bundle.css" remove="true"/>
+        </referenceBlock>
+
         <!-- FPC home: remove blocos globais cacheable=false e recria sem o atributo (referenceBlock não aceita cacheable) -->
         <referenceBlock name="head.additional">
             <!-- Home: audit/footer via awa-home-cosmetic-bundle em awa-head-preload.phtml -->
@@ -53,7 +92,7 @@
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.og.meta"
                    template="Magento_Theme::html/awa-og-meta.phtml"
-                   after="awa.styles.l.last">
+                   after="awa.styles.l.last.home">
                 <arguments>
                     <argument name="view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\OpenGraph</argument>
                     <argument name="open_graph_view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\OpenGraph</argument>
@@ -87,15 +126,10 @@
 
         <referenceContainer name="head.additional">
             <!-- LCP preload: primeiro slide ativo do hero slider da homepage -->
-            <block class="Magento\Framework\View\Element\Template"
+            <block class="GrupoAwamotos\Theme\Block\Html\HeroPreload"
                    name="awa.hero.preload"
                    template="Magento_Theme::html/awa-hero-preload.phtml"
-                   before="awa.seo.head">
-                <arguments>
-                    <argument name="hero_preload_view_model"
-                              xsi:type="object">GrupoAwamotos\Theme\ViewModel\HeroSliderPreload</argument>
-                </arguments>
-            </block>
+                   before="awa.seo.head"/>
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.seo.head"
                    template="Magento_Cms::awa-seo-head.phtml"/>
@@ -141,6 +175,7 @@
                    template="Rokanthemes_SlideBanner::slider_home5.phtml">
                 <arguments>
                     <argument name="slider_id" xsi:type="string">homepageslider</argument>
+                    <argument name="hero_responsive_view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\HeroResponsiveImage</argument>
                 </arguments>
             </block>
         </referenceBlock>
@@ -167,8 +202,8 @@
                    name="b2b.login.to.cart.home"
                    template="GrupoAwamotos_B2B::product/login-to-cart.phtml"
                    after="-"/>
-            <block class="Magento\Framework\View\Element\Template" 
-                   name="awa.image.fallback.init" 
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.image.fallback.init"
                    template="Magento_Theme::html/awa-image-fallback-init.phtml"
                    after="-"/>
             <!-- Scroll Reveal — IntersectionObserver for fade-in sections (2026-05-14) -->

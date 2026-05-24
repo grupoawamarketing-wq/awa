@@ -12,8 +12,12 @@ $logoUrl = $block->getUrl('');
 $logoSrc = $block->getLogoSrc();
 $logoAlt = $block->getLogoAlt();
 
-$logoWidth = (int)$block->getLogoWidth() ?: 180;
-$logoHeight = (int)$block->getLogoHeight() ?: 55;
+// CLS: atributos = tamanho renderizado (não dimensões do PNG 161×92 — evita shift ~0.31 no LH)
+$logoWidth = 70;
+$logoHeight = 40;
+$isHomePage = $block->getRequest()->getFullActionName() === 'cms_index_index';
+// Home: LCP é o hero slider — logo sem fetchpriority=high (evita competição de bandwidth/prioridade)
+$logoFetchPriority = $isHomePage ? '' : ' fetchpriority="high"';
 ?>
 <div class="logo">
     <a href="<?= $escaper->escapeUrl($logoUrl) ?>" title="<?= $escaper->escapeHtmlAttr($storeName) ?>">
@@ -21,7 +25,6 @@ $logoHeight = (int)$block->getLogoHeight() ?: 55;
              alt="<?= $escaper->escapeHtmlAttr($logoAlt) ?>"
              width="<?= $escaper->escapeHtmlAttr($logoWidth) ?>"
              height="<?= $escaper->escapeHtmlAttr($logoHeight) ?>"
-             loading="eager"
-             fetchpriority="high" />
+             loading="eager"<?= $logoFetchPriority ?> />
     </a>
 </div>

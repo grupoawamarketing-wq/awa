@@ -14,6 +14,8 @@
 
 // @codingStandardsIgnoreFile
 if ($banners = $block->getBannerCollection()):
+    /** @var \GrupoAwamotos\Theme\ViewModel\HeroResponsiveImage|null $heroResponsive */
+    $heroResponsive = $block->getData('hero_responsive_view_model');
     $slider = $block->getSlider();
     $sliderId = $block->getSliderId();
     $settings = $slider->getSliderSetting();
@@ -84,13 +86,22 @@ if ($banners = $block->getBannerCollection()):
                 <div class="banner_item_bg">
                     <?php
                     $slideAlt = $banner->getSlideText() ?: ($banner->getSlideTitle() ?: '');
-                    $html = $block->getImageElement($banner->getSlideImage(), $slideAlt, $__isFirst);
-                    if ($__isFirst && preg_match('/src="([^"]+)"/', $html, $_wm)) {
-                        $_webp = $_wm[1] . '.webp';
-                        $html = '<picture>'
-                            . '<source type="image/webp" srcset="' . $block->escapeUrl($_webp) . '">'
-                            . $html
-                            . '</picture>';
+                    if ($__isFirst && $heroResponsive) {
+                        $html = $heroResponsive->buildLcpPictureHtml(
+                            (string) $banner->getSlideImage(),
+                            $slideAlt,
+                            false,
+                            false
+                        );
+                    } else {
+                        $html = $block->getImageElement($banner->getSlideImage(), $slideAlt, $__isFirst);
+                        if ($__isFirst && preg_match('/src="([^"]+)"/', $html, $_wm)) {
+                            $_webp = $_wm[1] . '.webp';
+                            $html = '<picture>'
+                                . '<source type="image/webp" srcset="' . $block->escapeUrl($_webp) . '">'
+                                . $html
+                                . '</picture>';
+                        }
                     }
                     $link = $resolveSlideLink($banner->getSlideLink());
                     if ($link !== '') {
@@ -116,15 +127,23 @@ if ($banners = $block->getBannerCollection()):
                 <div class="banner_item_bg">
                     <?php
                     $slideAlt = $banner->getSlideText() ?: ($banner->getSlideTitle() ?: '');
-                    // Fallback: se não há imagem mobile, usa desktop (garante LCP válido em mobile)
                     $_mobSrc = $banner->getSlideImageMobile() ?: $banner->getSlideImage();
-                    $html = $block->getImageElementMobile($_mobSrc, $slideAlt, $__isFirstMob);
-                    if ($__isFirstMob && preg_match('/src="([^"]+)"/', $html, $_wmm)) {
-                        $_webpm = $_wmm[1] . '.webp';
-                        $html = '<picture>'
-                            . '<source type="image/webp" srcset="' . $block->escapeUrl($_webpm) . '">'
-                            . $html
-                            . '</picture>';
+                    if ($__isFirstMob && $heroResponsive) {
+                        $html = $heroResponsive->buildLcpPictureHtml(
+                            (string) $_mobSrc,
+                            $slideAlt,
+                            true,
+                            true
+                        );
+                    } else {
+                        $html = $block->getImageElementMobile($_mobSrc, $slideAlt, $__isFirstMob);
+                        if ($__isFirstMob && preg_match('/src="([^"]+)"/', $html, $_wmm)) {
+                            $_webpm = $_wmm[1] . '.webp';
+                            $html = '<picture>'
+                                . '<source type="image/webp" srcset="' . $block->escapeUrl($_webpm) . '">'
+                                . $html
+                                . '</picture>';
+                        }
                     }
                     $link = $resolveSlideLink($banner->getSlideLink());
                     if ($link !== '') {
