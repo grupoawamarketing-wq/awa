@@ -1,0 +1,21 @@
+# Serviço OPCIONAL — NÃO habilitar em produção (consome ~500 MB permanentes).
+# Só use se precisar de chrome-devtools-mcp com CDP externo (ex.: Antigravity).
+# Instalar: sudo cp scripts/chrome-cdp-9222.service /etc/systemd/system/ && sudo systemctl daemon-reload
+# Ativar temporariamente: sudo systemctl start chrome-cdp-9222.service
+# Desativar: scripts/mcp-performance.sh heavy-off
+
+[Unit]
+Description=Chrome Headless CDP on port 9222 (opcional — QA visual)
+After=network.target
+
+[Service]
+Type=simple
+User=deploy
+ExecStart=/opt/google/chrome/chrome --remote-debugging-port=9222 --remote-debugging-address=127.0.0.1 --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --no-first-run --no-default-browser-check --disable-extensions --disable-background-networking --disable-sync --disable-translate --disable-features=TranslateUI
+Restart=on-failure
+RestartSec=10
+MemoryMax=768M
+CPUQuota=50%
+
+[Install]
+WantedBy=multi-user.target

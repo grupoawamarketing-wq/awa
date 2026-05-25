@@ -172,11 +172,30 @@ sudo -u www-data php bin/magento cache:clean block_html full_page
 - ❌ Hex hardcoded — usar tokens CSS (`var(--awa-*)`)
 - ❌ `setup:static-content:deploy` sem `--theme AWA_Custom/ayo_home5_child` para mudanças no tema filho (mais lento e pode causar diferença de comportamento)
 
+## MCP — Perfis de performance (VPS)
+
+**Padrão: perfil LEVE** — zero Chrome headless, zero browser MCP. Economia ~1–1,5 GB RAM + CPU.
+
+```bash
+scripts/mcp-performance.sh status      # diagnóstico RAM/Chrome/MCP
+scripts/mcp-performance.sh heavy-off   # perfil leve (produção)
+scripts/mcp-performance.sh heavy-on    # Playwright MCP só para QA visual
+scripts/mcp-performance.sh cleanup     # mata processos MCP/Chrome órfãos
+```
+
+Após trocar perfil: **Settings → MCP → Reload** no Cursor.
+
+| Perfil | MCP ativos | RAM extra |
+|--------|-----------|-----------|
+| Leve (padrão) | filesystem | ~128 MB |
+| Pesado (QA) | filesystem + playwright | ~300–500 MB |
+
+> Não manter `chrome-devtools-mcp` + `playwright-mcp` + `chrome-cdp-9222.service` ao mesmo tempo — são 2–3 instâncias Chrome duplicadas. O perfil pesado usa **só Playwright** (1 Chrome). O browser nativo do Cursor (`cursor-ide-browser`) cobre investigação visual sem MCP externo.
+
 ## Ferramentas de Debug Visual
 
-### Chrome MCP — Playwright MCP (investigação em tempo real)
-Servidor: `io.github.chr` → tools prefixadas com `mcp_io_github_chr_*`. Carregar antes de usar.
-Instalação: `playwright-mcp` global + Google Chrome 145 (`--browser chrome --no-sandbox --caps vision`).
+### Browser MCP — Playwright (investigação em tempo real)
+Ativar só quando necessário: `scripts/mcp-performance.sh heavy-on`. Sem `--caps vision` (economia de CPU/RAM).
 
 Fluxo para investigar layout quebrado:
 1. `browser_navigate` → URL da página com problema
