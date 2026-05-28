@@ -75,13 +75,39 @@ $_sku = $block->escapeHtml($_product->getSku());
         });
     }
 
+    var addToCartVisible = true;
+    var detailsVisible = false;
+
+    function updateStickyVisibility() {
+        var showSticky = !addToCartVisible && !detailsVisible;
+        bar.classList.toggle('awa-pdp-sticky-bar--visible', showSticky);
+        /* defer-global / flex-grid usam .is-visible — manter paridade */
+        bar.classList.toggle('is-visible', showSticky);
+        bar.setAttribute('aria-hidden', showSticky ? 'false' : 'true');
+        /* Harden: manter botão fora do tab order quando a barra está oculta */
+        btn.setAttribute('tabindex', showSticky ? '0' : '-1');
+    }
+
     /* Show/hide sticky bar based on original button visibility */
     var io = new IntersectionObserver(function(entries) {
-        var visible = entries[0].isIntersecting;
-        bar.classList.toggle('awa-pdp-sticky-bar--visible', !visible);
-        bar.setAttribute('aria-hidden', visible ? 'true' : 'false');
+        addToCartVisible = entries[0].isIntersecting;
+        updateStickyVisibility();
     }, { threshold: 0 });
     io.observe(target);
+
+    var details = document.querySelector('.product.info.detailed, .product.data.items');
+    if (details) {
+        var detailsObserver = new IntersectionObserver(function(entries) {
+            detailsVisible = entries.some(function(entry) {
+                return entry.isIntersecting;
+            });
+            updateStickyVisibility();
+        }, {
+            rootMargin: '0px 0px -20% 0px',
+            threshold: 0.05
+        });
+        detailsObserver.observe(details);
+    }
 
     /* Click handler: scroll to and trigger the real add-to-cart */
     btn.addEventListener('click', function() {
