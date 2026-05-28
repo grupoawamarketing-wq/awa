@@ -440,8 +440,12 @@ class CustomerSync implements CustomerSyncInterface
     public function getCustomerCreditFromErp(string $erpCode): ?array
     {
         try {
-            $sql = "SELECT f.CODIGO, f.LIMITE_CREDITO, f.SALDO_DEVEDOR, f.DIAS_ATRASO,
-                           f.BLOQUEADO, f.MOTIVO_BLOQUEIO, f.CONDPAGTO
+            $sql = "SELECT f.CODIGO, f.VLRLIMCREDITO AS LIMITE_CREDITO,
+                           CAST(NULL AS DECIMAL(18, 2)) AS SALDO_DEVEDOR,
+                           CAST(NULL AS INT) AS DIAS_ATRASO,
+                           CAST(NULL AS VARCHAR(1)) AS BLOQUEADO,
+                           CAST(NULL AS VARCHAR(255)) AS MOTIVO_BLOQUEIO,
+                           f.CONDPAGTO
                     FROM FN_FORNECEDORES f
                     WHERE f.CODIGO = :code AND f.CKCLIENTE = 'S' AND f.ATCLIENTE = 'S'";
 
@@ -598,6 +602,9 @@ class CustomerSync implements CustomerSyncInterface
         // Grupo de cliente (B2B se for pessoa jurídica)
         if ($isPJ) {
             $customer->setGroupId(self::CUSTOMER_GROUP_B2B);
+            // Clientes criados pelo ERP sync já são clientes aprovados — garantir que o
+            // atributo b2b_approval_status reflita isso para que PriceVisibility mostre preços.
+            $customer->setCustomAttribute('b2b_approval_status', 'approved');
         }
 
         // CPF/CNPJ
@@ -667,6 +674,18 @@ class CustomerSync implements CustomerSyncInterface
         if (!$existingErpCode || !$existingErpCode->getValue()) {
             $customer->setCustomAttribute('erp_code', (int)$erpData['CODIGO']);
             $updated = true;
+        }
+
+        // Corrige clientes em grupo B2B aprovado (4=Atacado, 5=VIP, 6=Revendedor)
+        // que ainda tenham b2b_approval_status='pending' por terem sido criados
+        // antes desta correção ou por terem chegado via import sem o atributo.
+        $approvedGroups = [4, 5, 6];
+        if (in_array((int)$customer->getGroupId(), $approvedGroups, true)) {
+            $approvalAttr = $customer->getCustomAttribute('b2b_approval_status');
+            if (!$approvalAttr || $approvalAttr->getValue() !== 'approved') {
+                $customer->setCustomAttribute('b2b_approval_status', 'approved');
+                $updated = true;
+            }
         }
 
         // Atualiza inscrição estadual
