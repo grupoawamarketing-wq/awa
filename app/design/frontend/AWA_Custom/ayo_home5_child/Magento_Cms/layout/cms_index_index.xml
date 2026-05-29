@@ -45,7 +45,7 @@
         <remove src="GrupoAwamotos_B2B::css/product/login-to-cart.css"/>
     </head>
     <body>
-        <attribute name="data-mage-init" xsi:type="string">{}</attribute>
+        <attribute name="data-mage-init">{}</attribute>
         <referenceBlock name="awa.cookie.consent.fix.css" remove="true"/>
         <referenceBlock name="awa.styles.l.last" remove="true"/>
         <referenceBlock name="awa.cls.nav.fix" remove="true"/>
@@ -77,6 +77,11 @@
                    template="Magento_Theme::html/awa-cookie-consent-home-head.phtml"
                    after="awa.search.autocomplete.head.css"/>
             <block class="Magento\Framework\View\Element\Template"
+                   name="awa.footer.accordion.inline.home"
+                   template="Magento_Theme::html/awa-mobile-accordion-loader.phtml"
+                   after="awa.cookie.consent.fix.css.home"/>
+            <referenceBlock name="awa.footer.accordion.inline" remove="true"/>
+            <block class="Magento\Framework\View\Element\Template"
                    name="awa.styles.l.last.home"
                    template="Magento_Theme::html/awa-styles-l-last-home.phtml"
                    after="awa.deferred.cosmetic.css"/>
@@ -84,21 +89,8 @@
             <referenceBlock name="awa.audit.bundle.css" remove="true"/>
         </referenceBlock>
 
-        <!-- FPC home: remove blocos globais cacheable=false e recria sem o atributo (referenceBlock não aceita cacheable) -->
-        <referenceBlock name="head.additional">
-            <!-- Home: audit/footer via awa-home-cosmetic-bundle em awa-head-preload.phtml -->
-            <referenceBlock name="awa.audit.bundle.css" remove="true"/>
-            <referenceBlock name="awa.og.meta" remove="true"/>
-            <block class="Magento\Framework\View\Element\Template"
-                   name="awa.og.meta"
-                   template="Magento_Theme::html/awa-og-meta.phtml"
-                   after="awa.styles.l.last.home">
-                <arguments>
-                    <argument name="view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\OpenGraph</argument>
-                    <argument name="open_graph_view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\OpenGraph</argument>
-                </arguments>
-            </block>
-        </referenceBlock>
+        <!-- OG meta: mantém bloco global (default.xml). Remove+recreate quebrava o layout na home. -->
+        <move element="awa.og.meta" destination="head.additional" after="awa.styles.l.last.home"/>
 
         <referenceBlock name="theme.active.editor" remove="true"/>
         <referenceBlock name="google.maps.api" remove="true"/>
@@ -156,9 +148,10 @@
                    name="awa.home.benefits.final.inline"
                    template="Magento_Theme::html/awa-home-benefits-final-inline.phtml"
                    before="-"/>
-            <!-- Home layout R2 — após bundles async (final-wins) -->
+            <!-- Home body-end bundle (consolidado 2026-05-29):
+                 substitui layout-r2, layout-clean, polish, adapt e shelf-promax em 1 arquivo. -->
             <block class="Magento\Framework\View\Element\Template"
-                   name="awa.home.layout.r2.body.css"
+                   name="awa.home.body.end.bundle.css"
                    template="Magento_Theme::html/awa-home-layout-r2-css.phtml"
                    after="awa.home.benefits.final.inline"/>
         </referenceContainer>
@@ -180,24 +173,30 @@
             </block>
         </referenceBlock>
 
+        <referenceBlock name="awa.custom.global.js.loader" remove="true"/>
+        <move element="autocomplete.injection.js" destination="before.body.end" before="awa.custom.home.owl.tabs.js"/>
         <referenceBlock name="awa.round2.home.owl.tabs.js" remove="true"/>
         <referenceContainer name="before.body.end">
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.custom.home.owl.tabs.js"
                    template="Magento_Theme::html/awa-custom-js-loader.phtml">
                 <arguments>
+                    <argument name="is_primary_loader" xsi:type="boolean">true</argument>
                     <argument name="load_header_js" xsi:type="boolean">true</argument>
+                    <argument name="skip_minicart_defer_init" xsi:type="boolean">true</argument>
                     <argument name="load_home_owl_tabs_js" xsi:type="boolean">true</argument>
                     <argument name="load_footer_ux_js" xsi:type="boolean">false</argument>
                     <argument name="load_pdp_sticky_cta_js" xsi:type="boolean">false</argument>
-                    <argument name="load_search_compat_js" xsi:type="boolean">true</argument>
+                    <argument name="load_search_compat_js" xsi:type="boolean">false</argument>
                     <argument name="load_b2b_checkout_compat_js" xsi:type="boolean">false</argument>
-                    <argument name="load_home_category_compat_js" xsi:type="boolean">false</argument>
+                    <argument name="load_home_category_compat_js" xsi:type="boolean">true</argument>
                 </arguments>
             </block>
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.home.category.carousel.init"
                    template="Magento_Theme::html/awa-home-category-carousel-init.phtml"/>
+            <!-- awa-carousel-nav: redundante na home — awa-shelf-carousel cobre vitrines -->
+            <referenceBlock name="awa.carousel.nav.loader" remove="true"/>
             <block class="GrupoAwamotos\B2B\Block\LoginToCart"
                    name="b2b.login.to.cart.home"
                    template="GrupoAwamotos_B2B::product/login-to-cart.phtml"
@@ -206,15 +205,20 @@
                    name="awa.image.fallback.init"
                    template="Magento_Theme::html/awa-image-fallback-init.phtml"
                    after="-"/>
-            <!-- Scroll Reveal — IntersectionObserver for fade-in sections (2026-05-14) -->
-            <block class="Magento\Framework\View\Element\Template"
-                   name="awa.scroll.reveal.js"
-                   template="Magento_Theme::html/awa-scroll-reveal-init.phtml"
-                   after="awa.image.fallback.init"/>
+            <!-- Scroll reveal: carregado via awa-custom-js-loader (idle na home) -->
+            <referenceBlock name="awa.scroll.reveal.js" remove="true"/>
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.seo.jsonld"
                    template="Magento_Cms::awa-seo-jsonld.phtml"
                    after="-"/>
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.home.customer.defer.loader"
+                   template="Magento_Theme::html/awa-home-customer-defer-loader.phtml"
+                   after="awa.seo.jsonld"/>
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.home.minicart.ui.defer"
+                   template="Magento_Theme::html/awa-minicart-ui-defer.phtml"
+                   after="awa.home.customer.defer.loader"/>
         </referenceContainer>
     </body>
 </page>
