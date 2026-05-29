@@ -17,6 +17,9 @@ $sanitizeUrl = static function (?string $value): string {
     return $sanitized ?? '';
 };
 
+$request = $block->getRequest();
+$isHomeUiDefer = $request && (string) $request->getFullActionName() === 'cms_index_index';
+
 $serializedCheckoutConfig = method_exists($block, 'getSerializedConfig')
     ? (string) $block->getSerializedConfig()
     : (string) json_encode($block->getConfig(), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
@@ -56,22 +59,28 @@ $blockLoaderUrl = $sanitizeUrl($block->getViewFileUrl('images/loader-1.gif'));
     <?php if ($block->getIsNeedToDisplaySideBar()): ?>
         <div class="block block-minicart empty"
                  data-role="dropdownDialog"
+                 <?php if (!$isHomeUiDefer): ?>
                  data-mage-init='{"dropdownDialog":{
                     "appendTo":"[data-block=minicart]",
                     "triggerTarget":".showcart",
-                    "timeout": "2000",
+                    "timeout": "0",
                     "closeOnMouseLeave": false,
                     "closeOnEscape": true,
                     "triggerClass":"is-open",
                     "parentClass":"is-open",
-                    "buttons":[]}}'>
-            <div id="minicart-content-wrapper" data-bind="scope: 'minicart_content'">
+                    "buttons":[]}}'
+                 <?php endif; ?>>
+            <div id="minicart-content-wrapper"
+                 role="dialog"
+                 aria-modal="true"
+                 aria-labelledby="minicart-title"
+                 data-bind="scope: 'minicart_content'">
                 <!-- ko template: getTemplate() --><!-- /ko -->
             </div>
-            
+
             <?= $block->getChildHtml('minicart.addons') ?>
-            <div class="awa-minicart-b2b-trust" style="background: var(--awa-surface-light, #f8f9fa); border-top: 1px solid var(--awa-border-color, #e0e0e0); padding: 12px; margin-top: auto; font-size: 12px; color: var(--awa-text-muted, #5f6368); display: flex; align-items: center; justify-content: center; gap: 6px;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            <div class="awa-minicart-b2b-trust">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
                 <span><strong><?= $block->escapeHtml(__('Ambiente Seguro B2B')) ?></strong> | <?= $block->escapeHtml(__('Faturamento CNPJ')) ?></span>
             </div>
         </div>
@@ -80,66 +89,8 @@ $blockLoaderUrl = $sanitizeUrl($block->getViewFileUrl('images/loader-1.gif'));
     <script>
         (function () {
             var minicartConfig = <?= /* @noEscape */ $serializedCheckoutConfig ?> || {};
-            var cartIconSvg = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b73337' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='9' cy='20' r='1'/%3E%3Ccircle cx='18' cy='20' r='1'/%3E%3Cpath d='M3.5 4h2l2.2 10.2a1 1 0 0 0 1 .8h8.6a1 1 0 0 0 1-.8L20 7H7.1'/%3E%3C/svg%3E\")";
-            var applyCartIcon = function () {
-                var cartLink = document.querySelector('[data-block=\"minicart\"] .showcart.header-mini-cart');
-
-                if (!cartLink) {
-                    return;
-                }
-
-                cartLink.style.setProperty('background-image', cartIconSvg, 'important');
-                cartLink.style.setProperty('background-repeat', 'no-repeat', 'important');
-                cartLink.style.setProperty('background-position', 'center', 'important');
-                cartLink.style.setProperty('background-size', '20px 20px', 'important');
-                cartLink.style.setProperty('opacity', '1', 'important');
-                cartLink.style.setProperty('visibility', 'visible', 'important');
-                cartLink.style.setProperty('display', 'flex', 'important');
-            };
-            var ensureMinicartRuntimeCss = function () {
-                if (document.getElementById('awa-minicart-runtime-fix-style')) {
-                    return;
-                }
-
-                var css = '@media (min-width: 992px) {'
-                    + '.minicart-wrapper[data-awa-minicart-runtime-fix=\"1\"] .block-minicart {'
-                    + 'position:absolute !important;top:calc(100% + 8px) !important;right:0 !important;left:auto !important;bottom:auto !important;'
-                    + 'width:min(360px, 92vw) !important;max-width:min(360px, 92vw) !important;height:auto !important;max-height:78vh !important;'
-                    + 'overflow:auto !important;border-radius:12px !important;box-shadow:0 12px 28px rgba(15, 23, 42, 0.18) !important;'
-                    + '}'
-                    + '.minicart-wrapper[data-awa-minicart-runtime-fix=\"1\"] .block-minicart::before {display:none !important;content:none !important;}'
-                    + '}';
-
-                var style = document.createElement('style');
-                style.id = 'awa-minicart-runtime-fix-style';
-                style.type = 'text/css';
-                style.appendChild(document.createTextNode(css));
-                document.head.appendChild(style);
-            };
-            var applyMinicartPanelFix = function () {
-                var wrapper = document.querySelector('[data-block=\"minicart\"].minicart-wrapper');
-
-                if (!wrapper) {
-                    return;
-                }
-
-                wrapper.setAttribute('data-awa-minicart-runtime-fix', '1');
-            };
-
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', applyCartIcon, {once: true});
-                document.addEventListener('DOMContentLoaded', ensureMinicartRuntimeCss, {once: true});
-                document.addEventListener('DOMContentLoaded', applyMinicartPanelFix, {once: true});
-            } else {
-                applyCartIcon();
-                ensureMinicartRuntimeCss();
-                applyMinicartPanelFix();
-            }
-            window.setTimeout(applyCartIcon, 350);
-            window.setTimeout(applyCartIcon, 1200);
-            window.setTimeout(ensureMinicartRuntimeCss, 200);
-            window.setTimeout(applyMinicartPanelFix, 250);
-            window.setTimeout(applyMinicartPanelFix, 1200);
+            // applyCartIcon removido: o SVG inline em .awa-minicart-icon já garante
+            // visibilidade com estilos inline próprios. Background-image duplicava o ícone.
 
             var fallbackCheckoutConfig = Object.assign({
                 storeCode: '',
@@ -166,6 +117,7 @@ $blockLoaderUrl = $sanitizeUrl($block->getViewFileUrl('images/loader-1.gif'));
             );
         }());
     </script>
+    <?php if (!$isHomeUiDefer): ?>
     <script type="text/x-magento-init">
     {
         "[data-block='minicart']": {
@@ -176,4 +128,5 @@ $blockLoaderUrl = $sanitizeUrl($block->getViewFileUrl('images/loader-1.gif'));
         }
     }
     </script>
+    <?php endif; ?>
 </div>

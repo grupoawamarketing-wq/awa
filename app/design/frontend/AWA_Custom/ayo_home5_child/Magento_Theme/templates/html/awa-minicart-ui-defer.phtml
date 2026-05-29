@@ -1,0 +1,34 @@
+<?php declare(strict_types=1);
+
+/**
+ * Home: adia Magento_Ui/js/core/app do minicart até customer-data estar pronto.
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ */
+
+use Magento\Checkout\Block\Cart\Sidebar;
+
+$minicartBlock = $block->getLayout()->getBlock('minicart');
+if (!$minicartBlock instanceof Sidebar) {
+    return;
+}
+
+$jsLayoutRaw = (string) $minicartBlock->getJsLayout();
+if ($jsLayoutRaw === '') {
+    return;
+}
+
+$jsLayout = json_decode($jsLayoutRaw, true);
+if (!is_array($jsLayout)) {
+    return;
+}
+
+$payload = json_encode([
+    'jsLayout' => $jsLayout,
+    'loaderUrl' => $block->getViewFileUrl('images/loader-1.gif'),
+], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+$payload = preg_replace('#</(\s*)script#i', '<\\/\\1script', (string) $payload);
+?>
+<script type="application/json" id="awa-minicart-ui-json"><?= /* @noEscape */ $payload ?></script>
+<script defer src="<?= $block->escapeUrl($block->getViewFileUrl('js/awa-minicart-ui-bootstrap-home.js')) ?>"></script>
