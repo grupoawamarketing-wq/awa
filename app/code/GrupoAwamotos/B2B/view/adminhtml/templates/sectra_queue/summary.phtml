@@ -1,0 +1,56 @@
+<?php
+/** @var \GrupoAwamotos\B2B\Block\Adminhtml\SectraQueue\Summary $block */
+$summary = $block->getSummary();
+$dupErp = $block->getDuplicateErpSummary();
+?>
+<div class="sectra-queue-summary" style="margin-bottom: 20px;">
+    <div class="message message-notice" style="margin-bottom: 15px;">
+        <div>
+            <strong><?= $block->escapeHtml(__('Fluxo operacional Sectra')) ?></strong><br/>
+            <?= $block->escapeHtml(__('Importe no Sectra somente pedidos com fila "Pronto — visível em oc_order". A CHAVE Sectra deve coincidir com GR_INTEGRACAOVALIDADOR (erp_code).')) ?>
+        </div>
+    </div>
+
+    <?php if ((int) ($dupErp['duplicate_erp_codes'] ?? 0) > 0): ?>
+    <div class="message message-warning" style="margin-bottom: 15px;">
+        <div>
+            <strong><?= $block->escapeHtml(__('Atenção: erp_code duplicado')) ?></strong><br/>
+            <?= $block->escapeHtml(__(
+                '%1 códigos ERP compartilhados por %2 contas Magento — podem falhar na importação manual.',
+                (int) $dupErp['duplicate_erp_codes'],
+                (int) $dupErp['affected_customers']
+            )) ?>
+        </div>
+    </div>
+    <?php endif; ?>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+        <div class="sectra-kpi-card" style="flex: 1 1 160px; padding: 14px 16px; background: #e5f7e8; border: 1px solid #b8dfc0; border-radius: 4px;">
+            <div style="font-size: 24px; font-weight: 700; color: #006400;"><?= (int) ($summary['ready'] ?? 0) ?></div>
+            <div style="font-size: 13px;"><?= $block->escapeHtml(__('Prontos em oc_order')) ?></div>
+            <div style="font-size: 11px; color: #555; margin-top: 4px;"><?= $block->escapeHtml(__('Importar Pedidos no Sectra')) ?></div>
+        </div>
+
+        <div class="sectra-kpi-card" style="flex: 1 1 160px; padding: 14px 16px; background: #fff8e5; border: 1px solid #f0dfa8; border-radius: 4px;">
+            <div style="font-size: 24px; font-weight: 700; color: #8a6d00;"><?= (int) ($summary['awaiting'] ?? 0) ?></div>
+            <div style="font-size: 13px;"><?= $block->escapeHtml(__('Aguardando validação ERP')) ?></div>
+            <div style="font-size: 11px; color: #555; margin-top: 4px;">
+                <a href="<?= $block->escapeUrl($block->getErpPendingUrl()) ?>">
+                    <?= $block->escapeHtml(__('Ver clientes pendentes')) ?>
+                </a>
+            </div>
+        </div>
+
+        <div class="sectra-kpi-card" style="flex: 1 1 160px; padding: 14px 16px; background: #fdeaea; border: 1px solid #f0bcbc; border-radius: 4px;">
+            <div style="font-size: 24px; font-weight: 700; color: #a00000;"><?= (int) ($summary['blocked'] ?? 0) ?></div>
+            <div style="font-size: 13px;"><?= $block->escapeHtml(__('Bloqueados')) ?></div>
+            <div style="font-size: 11px; color: #555; margin-top: 4px;"><?= $block->escapeHtml(__('Ver coluna Motivo do Bloqueio')) ?></div>
+        </div>
+
+        <div class="sectra-kpi-card" style="flex: 1 1 160px; padding: 14px 16px; background: #eef3fb; border: 1px solid #c5d4ef; border-radius: 4px;">
+            <div style="font-size: 24px; font-weight: 700; color: #1a4a8a;"><?= (int) ($summary['total_pending'] ?? 0) ?></div>
+            <div style="font-size: 13px;"><?= $block->escapeHtml(__('Total pendente ERP')) ?></div>
+            <div style="font-size: 11px; color: #555; margin-top: 4px;"><?= $block->escapeHtml(__('Prontos + aguardando + bloqueados')) ?></div>
+        </div>
+    </div>
+</div>

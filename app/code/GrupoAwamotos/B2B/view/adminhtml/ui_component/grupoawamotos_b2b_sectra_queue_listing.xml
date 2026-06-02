@@ -1,0 +1,160 @@
+<?xml version="1.0"?>
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">grupoawamotos_b2b_sectra_queue_listing.grupoawamotos_b2b_sectra_queue_listing_data_source</item>
+        </item>
+    </argument>
+
+    <settings>
+        <spinner>grupoawamotos_b2b_sectra_queue_columns</spinner>
+        <deps>
+            <dep>grupoawamotos_b2b_sectra_queue_listing.grupoawamotos_b2b_sectra_queue_listing_data_source</dep>
+        </deps>
+    </settings>
+
+    <dataSource name="grupoawamotos_b2b_sectra_queue_listing_data_source" component="Magento_Ui/js/grid/provider">
+        <settings>
+            <storageConfig>
+                <param name="indexField" xsi:type="string">entity_id</param>
+            </storageConfig>
+            <updateUrl path="mui/index/render"/>
+        </settings>
+        <aclResource>GrupoAwamotos_B2B::sectra_queue</aclResource>
+        <dataProvider class="GrupoAwamotos\B2B\Ui\DataProvider\SectraQueueDataProvider"
+                      name="grupoawamotos_b2b_sectra_queue_listing_data_source">
+            <settings>
+                <requestFieldName>entity_id</requestFieldName>
+                <primaryFieldName>entity_id</primaryFieldName>
+            </settings>
+        </dataProvider>
+    </dataSource>
+
+    <listingToolbar name="listing_top">
+        <settings>
+            <sticky>true</sticky>
+        </settings>
+        <bookmark name="bookmarks"/>
+        <columnsControls name="columns_controls"/>
+        <filterSearch name="fulltext"/>
+        <filters name="listing_filters"/>
+        <paging name="listing_paging"/>
+    </listingToolbar>
+
+    <columns name="grupoawamotos_b2b_sectra_queue_columns">
+        <column name="increment_id">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Nº Pedido</label>
+                <sorting>desc</sorting>
+            </settings>
+        </column>
+
+        <column name="customer_name">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Cliente</label>
+            </settings>
+        </column>
+
+        <column name="b2b_cnpj">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">CNPJ</label>
+            </settings>
+        </column>
+
+        <column name="sectra_chave_label">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">CHAVE Sectra</label>
+                <sortable>false</sortable>
+            </settings>
+        </column>
+
+        <column name="oc_order_id">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">ID oc_order</label>
+            </settings>
+        </column>
+
+        <column name="erp_code">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Código ERP (Magento)</label>
+            </settings>
+        </column>
+
+        <column name="grand_total" class="Magento\Sales\Ui\Component\Listing\Column\Price">
+            <settings>
+                <filter>textRange</filter>
+                <label translate="true">Total</label>
+            </settings>
+        </column>
+
+        <column name="queue_bucket" class="GrupoAwamotos\B2B\Ui\Component\Listing\Column\SectraQueueBucketLabel" component="Magento_Ui/js/grid/columns/select">
+            <settings>
+                <options class="GrupoAwamotos\B2B\Model\Config\Source\SectraQueueBucket"/>
+                <filter>select</filter>
+                <dataType>select</dataType>
+                <label translate="true">Fila</label>
+            </settings>
+        </column>
+
+        <column name="in_oc_order_label">
+            <settings>
+                <filter>false</filter>
+                <label translate="true">Em oc_order</label>
+                <sortable>false</sortable>
+            </settings>
+        </column>
+
+        <column name="sectra_import_status" class="GrupoAwamotos\B2B\Ui\Component\Listing\Column\SectraImportStatusLabel">
+            <settings>
+                <filter>select</filter>
+                <options class="GrupoAwamotos\B2B\Model\Config\Source\SectraImportStatusOptions"/>
+                <dataType>select</dataType>
+                <label translate="true">Status Sectra</label>
+            </settings>
+        </column>
+
+        <column name="state">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">State Magento</label>
+            </settings>
+        </column>
+
+        <column name="block_reason">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Motivo do Bloqueio</label>
+            </settings>
+        </column>
+
+        <column name="next_action">
+            <settings>
+                <filter>false</filter>
+                <label translate="true">Próxima Ação</label>
+                <sortable>false</sortable>
+            </settings>
+        </column>
+
+        <column name="created_at" class="Magento\Ui\Component\Listing\Columns\Date" component="Magento_Ui/js/grid/columns/date">
+            <settings>
+                <filter>dateRange</filter>
+                <label translate="true">Data do Pedido</label>
+                <dataType>date</dataType>
+            </settings>
+        </column>
+
+        <actionsColumn name="actions" class="GrupoAwamotos\B2B\Ui\Component\Listing\Column\SectraQueueActions">
+            <settings>
+                <indexField>entity_id</indexField>
+                <label translate="true">Ações</label>
+            </settings>
+        </actionsColumn>
+    </columns>
+</listing>

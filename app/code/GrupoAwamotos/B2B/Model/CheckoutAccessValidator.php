@@ -65,7 +65,7 @@ class CheckoutAccessValidator
                 'exception' => $exception,
             ]);
 
-            return self::STATE_APPROVED;
+            return self::STATE_PENDING;
         }
     }
 

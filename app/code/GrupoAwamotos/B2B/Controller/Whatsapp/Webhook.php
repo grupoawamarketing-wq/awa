@@ -13,6 +13,7 @@ use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Customer\Model\ResourceModel\Customer\CollectionFactory as CustomerCollectionFactory;
 use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollectionFactory;
 use GrupoAwamotos\B2B\Model\ResourceModel\CreditLimit\CollectionFactory as CreditCollectionFactory;
+use GrupoAwamotos\ERPIntegration\Helper\Data as ErpHelper;
 use GrupoAwamotos\ERPIntegration\Model\WhatsApp\ZApiClient;
 use Psr\Log\LoggerInterface;
 
@@ -29,6 +30,7 @@ class Webhook extends Action implements HttpPostActionInterface, CsrfAwareAction
     private OrderCollectionFactory $orderCollectionFactory;
     private CreditCollectionFactory $creditCollectionFactory;
     private ZApiClient $zapiClient;
+    private ErpHelper $erpHelper;
     private LoggerInterface $logger;
 
     public function __construct(
@@ -38,6 +40,7 @@ class Webhook extends Action implements HttpPostActionInterface, CsrfAwareAction
         OrderCollectionFactory $orderCollectionFactory,
         CreditCollectionFactory $creditCollectionFactory,
         ZApiClient $zapiClient,
+        ErpHelper $erpHelper,
         LoggerInterface $logger
     ) {
         parent::__construct($context);
@@ -46,6 +49,7 @@ class Webhook extends Action implements HttpPostActionInterface, CsrfAwareAction
         $this->orderCollectionFactory = $orderCollectionFactory;
         $this->creditCollectionFactory = $creditCollectionFactory;
         $this->zapiClient = $zapiClient;
+        $this->erpHelper = $erpHelper;
         $this->logger = $logger;
     }
 
@@ -55,6 +59,13 @@ class Webhook extends Action implements HttpPostActionInterface, CsrfAwareAction
     public function execute()
     {
         $result = $this->resultJsonFactory->create();
+
+        if (!$this->verifyWebhookToken()) {
+            $this->logger->warning('[WhatsApp Bot] Webhook rejected: invalid or missing Client-Token');
+            return $result->setHttpResponseCode(403)
+                ->setData(['status' => 'forbidden']);
+        }
+
         $payload = $this->getRequest()->getContent();
         $data = json_decode($payload, true);
 
@@ -187,6 +198,29 @@ class Webhook extends Action implements HttpPostActionInterface, CsrfAwareAction
             . "👉 *Pedidos* - Para ver o status das suas compras\n"
             . "👉 *Limite* - Para consultar seu saldo de crédito\n\n"
             . "Estou aqui para ajudar!";
+    }
+
+    /**
+     * Z-API envia Client-Token no header; fallback para X-Webhook-Token ou ?token=.
+     */
+    private function verifyWebhookToken(): bool
+    {
+        $expected = $this->erpHelper->getZApiClientToken();
+        if ($expected === '') {
+            $this->logger->warning('[WhatsApp Bot] Webhook rejected: ZAPI_CLIENT_TOKEN not configured');
+            return false;
+        }
+
+        $request = $this->getRequest();
+        $token = (string) $request->getHeader('Client-Token');
+        if ($token === '') {
+            $token = (string) $request->getHeader('X-Webhook-Token');
+        }
+        if ($token === '') {
+            $token = (string) $request->getParam('token', '');
+        }
+
+        return hash_equals($expected, $token);
     }
 
     /**

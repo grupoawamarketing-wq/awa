@@ -12,8 +12,10 @@ use GrupoAwamotos\B2B\Api\CustomerApprovalInterface;
 use GrupoAwamotos\B2B\Helper\Config;
 use GrupoAwamotos\B2B\Model\Customer\Attribute\Source\ApprovalStatus;
 use GrupoAwamotos\B2B\Model\CnaeClassifier;
+use GrupoAwamotos\B2B\Service\CustomerGroupManager;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Api\Data\CustomerInterface;
+use Magento\Framework\App\CacheInterface;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Event\ManagerInterface as EventManager;
 use Magento\Framework\Exception\LocalizedException;
@@ -65,6 +67,11 @@ class CustomerApproval implements CustomerApprovalInterface
      */
     private $eventManager;
 
+    /**
+     * @var CacheInterface
+     */
+    private $cache;
+
     public function __construct(
         CustomerRepositoryInterface $customerRepository,
         Config $config,
@@ -73,7 +80,8 @@ class CustomerApproval implements CustomerApprovalInterface
         StoreManagerInterface $storeManager,
         DateTime $dateTime,
         LoggerInterface $logger,
-        EventManager $eventManager
+        EventManager $eventManager,
+        CacheInterface $cache
     ) {
         $this->customerRepository = $customerRepository;
         $this->config = $config;
@@ -83,6 +91,7 @@ class CustomerApproval implements CustomerApprovalInterface
         $this->dateTime = $dateTime;
         $this->logger = $logger;
         $this->eventManager = $eventManager;
+        $this->cache = $cache;
     }
 
     /**
@@ -112,6 +121,7 @@ class CustomerApproval implements CustomerApprovalInterface
         try {
             $customer = $this->customerRepository->getById($customerId);
             $oldStatus = $this->getCustomerAttributeValue($customer, 'b2b_approval_status');
+            $previousGroupId = (int) $customer->getGroupId();
 
             $customer->setCustomAttribute('b2b_approval_status', ApprovalStatus::STATUS_APPROVED);
             $customer->setCustomAttribute('b2b_approved_at', $this->dateTime->gmtDate());
@@ -136,6 +146,13 @@ class CustomerApproval implements CustomerApprovalInterface
             }
 
             $this->customerRepository->save($customer);
+
+            $newGroupId = (int) $customer->getGroupId();
+            if ($newGroupId > 0 && $newGroupId !== $previousGroupId) {
+                $this->signalSessionGroupRefresh($customerId, $newGroupId);
+            }
+
+            $this->syncLegacyB2bCustomerStatus($customerId, 1, $adminUserId);
 
             $this->logAction($customerId, 'approved', $oldStatus, ApprovalStatus::STATUS_APPROVED, $adminUserId, $comment);
 
@@ -175,6 +192,8 @@ class CustomerApproval implements CustomerApprovalInterface
 
             $customer->setCustomAttribute('b2b_approval_status', ApprovalStatus::STATUS_REJECTED);
             $this->customerRepository->save($customer);
+
+            $this->syncLegacyB2bCustomerStatus($customerId, 2, $adminUserId);
 
             $this->logAction($customerId, 'rejected', $oldStatus, ApprovalStatus::STATUS_REJECTED, $adminUserId, $reason);
 
@@ -421,6 +440,71 @@ class CustomerApproval implements CustomerApprovalInterface
         $attribute = $customer->getCustomAttribute($attributeCode);
         return $attribute ? (string) $attribute->getValue() : null;
     }
+
+    /**
+     * Sinaliza refresh da sessão frontend quando o grupo muda após aprovação admin.
+     */
+    private function signalSessionGroupRefresh(int $customerId, int $newGroupId): void
+    {
+        $this->cache->save(
+            (string) $newGroupId,
+            CustomerGroupManager::CACHE_KEY_PREFIX . $customerId,
+            [],
+            CustomerGroupManager::CACHE_LIFETIME
+        );
+    }
+
+    /**
+     * Mantém grupoawamotos_b2b_customer alinhado ao fluxo EAV quando existir registro legado.
+     *
+     * @param int $legacyStatus 0=pendente, 1=aprovado, 2=rejeitado
+     */
+    private function syncLegacyB2bCustomerStatus(int $customerId, int $legacyStatus, ?int $adminUserId = null): void
+    {
+        try {
+            $connection = $this->resourceConnection->getConnection();
+            $table = $this->resourceConnection->getTableName('grupoawamotos_b2b_customer');
+            $row = $connection->fetchRow(
+                $connection->select()
+                    ->from($table, ['b2b_customer_id'])
+                    ->where('customer_id = ?', $customerId)
+                    ->limit(1)
+            );
+
+            if (!$row) {
+                return;
+            }
+
+            $data = [
+                'status' => $legacyStatus,
+                'updated_at' => $this->dateTime->gmtDate(),
+            ];
+
+            if ($legacyStatus === 1) {
+                $data['approved_at'] = $this->dateTime->gmtDate();
+                if ($adminUserId !== null) {
+                    $data['approved_by'] = $adminUserId;
+                }
+            }
+
+            if ($legacyStatus === 2 && $adminUserId !== null) {
+                $data['approved_by'] = $adminUserId;
+                $data['approved_at'] = $this->dateTime->gmtDate();
+            }
+
+            $connection->update(
+                $table,
+                $data,
+                ['b2b_customer_id = ?' => (int) $row['b2b_customer_id']]
+            );
+        } catch (\Exception $e) {
+            $this->logger->warning(
+                'B2B syncLegacyB2bCustomerStatus error: ' . $e->getMessage(),
+                ['customer_id' => $customerId]
+            );
+        }
+    }
+
     /**
      * Recalibrates the B2B pending alert counter after an approval or rejection.
      *
