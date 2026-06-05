@@ -37,6 +37,9 @@ class Layer extends \Magento\Catalog\Model\Layer
 	public function getProductCollection()
 	{
 		$brand = $this->_coreRegistry->registry('current_brand');
+        if (!$brand) {
+            return parent::getProductCollection();
+        }
         if (isset($this->_productCollections['current_brand'])) {
             $collection = $this->_productCollections['current_brand'];
 			$products = $brand->getData('products');

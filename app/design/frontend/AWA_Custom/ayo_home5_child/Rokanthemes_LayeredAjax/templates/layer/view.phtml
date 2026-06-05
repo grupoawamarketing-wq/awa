@@ -14,14 +14,23 @@
             <?php endif; ?>
             <?php $wrapOptions = false; $activeKey = 0; $activeArray = []; ?>
             <?php
-                // B2B: Allowlist of filter codes we want to keep
-                $allowedB2BFilters = ['brand', 'motos_modelos', 'motos_anos', 'motos_marcas', 'motos_cilindradas'];
+                // B2B: Allowlist de filtros relevantes para catálogo de peças moto
+                $allowedB2BFilters = [
+                    'price',        // Faixa de preço
+                    'manufacturer', // Marca do produto (Honda, Yamaha, etc.)
+                    'marca_moto',   // Marca da moto (aplicação)
+                    'modelo_moto',  // Modelo da moto (aplicação)
+                    'ano_moto',     // Ano da moto (aplicação)
+                    'color',        // Cor
+                    // Aliases alternativos (compatibilidade)
+                    'brand', 'motos_marcas', 'motos_modelos', 'motos_anos', 'motos_cilindradas',
+                ];
             ?>
             <?php foreach ($block->getFilters() as $key => $filter): ?>
                 <?php
                     $filterCode = $filter->getRequestVar();
                     if (!in_array($filterCode, $allowedB2BFilters) && $filterCode !== 'cat') {
-                        continue; // Skip non-B2B filters
+                        continue;
                     }
                 ?>
                 <?php if ($filter->getItemsCount()): ?>
