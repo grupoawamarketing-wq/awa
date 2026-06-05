@@ -1,7 +1,13 @@
 <?xml version="1.0"?>
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <!-- Header Stack e Refine Terminal migrados para _extend.less como partials LESS
+             (_awa-header-stack.less e _awa-header-refine-terminal.less — imports 43.01 e 43.02).
+             Eliminado 1 request CSS blocking (order=10120). -->
+    </head>
     <body>
+
         <!-- Override blank theme logo_width=170 with natural dimensions of logo_161x92_1.png -->
         <referenceBlock name="logo">
             <arguments>
@@ -11,6 +17,7 @@
         </referenceBlock>
 
         <!-- A11Y-001: adiciona aria-label em links de produto sem texto acessível (widgets Rokanthemes) -->
+        <referenceBlock name="skip_to_content.target" remove="true"/>
         <!-- NAV-FIX: nav.fixed-bottom renderizado FORA do <footer> para evitar bug Chrome -->
         <!-- position:fixed dentro de footer com scrollHeight > clientHeight = posicionamento errado -->
         <referenceContainer name="before.body.end">
@@ -19,15 +26,40 @@
                    name="awa.search.autocomplete.body.css"
                    template="Magento_Theme::html/awa-search-autocomplete-head-css.phtml"
                    before="-"/>
-            <!-- Flyout: escapa stacking context do header (slider/home + páginas com menu vertical) -->
+            <!-- Header/minicart JS — defer-init + ui-v2 em todas as páginas (PLP/PDP/etc.) -->
             <block class="Magento\Framework\View\Element\Template"
-                   name="awa.vertical.menu.flyout.fix"
-                   template="Magento_Theme::html/awa-vertical-menu-flyout-fix.phtml"
-                   after="awa.search.autocomplete.body.css"/>
+                   name="awa.custom.global.js.loader"
+                   template="Magento_Theme::html/awa-custom-js-loader.phtml"
+                   after="awa.search.autocomplete.body.css">
+                <arguments>
+                    <argument name="load_header_js" xsi:type="boolean">true</argument>
+                    <argument name="skip_minicart_defer_init" xsi:type="boolean">false</argument>
+                    <argument name="load_home_owl_tabs_js" xsi:type="boolean">false</argument>
+                    <argument name="load_footer_ux_js" xsi:type="boolean">false</argument>
+                    <argument name="load_pdp_sticky_cta_js" xsi:type="boolean">false</argument>
+                    <argument name="load_search_compat_js" xsi:type="boolean">false</argument>
+                    <argument name="load_b2b_checkout_compat_js" xsi:type="boolean">false</argument>
+                    <argument name="load_home_category_compat_js" xsi:type="boolean">false</argument>
+                </arguments>
+            </block>
+            <!-- Runtime: flyout portal + teclado/a11y (1 request, intent-deferred) -->
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.vertical.menu.runtime"
+                   template="Magento_Theme::html/awa-vertical-menu-runtime.phtml"
+                   after="awa.custom.global.js.loader"/>
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.vertical.menu.stack.css"
+                   template="Magento_Theme::html/awa-vertical-menu-stack-css.phtml"
+                   after="awa.vertical.menu.runtime"/>
+            <!-- CSS estático — seguro cachear no FPC (sem dados de sessão ou cliente). -->
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.impeccable.audit.uncached.global.v10"
+                   template="Magento_Theme::html/awa-impeccable-audit-terminal-css-v10.phtml"
+                   after="-"/>
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.mobile.nav"
                    template="Magento_Theme::html/awa-mobile-nav.phtml"
-                   after="awa.vertical.menu.flyout.fix">
+                   after="awa.vertical.menu.stack.css">
                 <arguments>
                     <argument name="view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\FooterData</argument>
                 </arguments>
@@ -36,6 +68,10 @@
                    name="awa.a11y.product.links"
                    template="Magento_Theme::html/awa-a11y-product-links.phtml"
                    after="-"/>
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.a11y.nav.links"
+                   template="Magento_Theme::html/awa-a11y-nav-links.phtml"
+                   after="awa.a11y.product.links"/>
             <!-- AWA: Scripts globais -->
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.card.enhance"
@@ -46,6 +82,11 @@
                    name="awa.back.to.top"
                    template="Magento_Theme::html/awa-back-to-top.phtml"
                    after="awa.card.enhance"/>
+            <!-- Meta Pixel — idle boot; visibilidade controlada em head-idle.phtml (isActive) -->
+            <block class="Meta\Conversion\Block\Pixel\Head"
+                   name="meta.pixel.idle"
+                   template="Meta_Conversion::pixel/head-idle.phtml"
+                   after="-"/>
         </referenceContainer>
 
         <!--
@@ -67,10 +108,16 @@
                    before="-"/>
 
             <block class="Magento\Framework\View\Element\Template"
+                   name="awa.header.impeccable.critical.global"
+                   template="Magento_Theme::html/awa-header-impeccable-critical-global.phtml"
+                   after="awa.cls.nav.fix"/>
+
+            <block class="Magento\Framework\View\Element\Template"
                    name="awa.critical.inline.css"
                    template="Magento_Theme::html/awa-critical-inline.phtml"
                    after="awa.cls.nav.fix"/>
 
+            <!-- HeroPreload lê slides do banco — conteúdo estático, seguro no FPC. -->
             <block class="GrupoAwamotos\Theme\Block\Html\HeroPreload"
                    name="awa.head.preload"
                    template="Magento_Theme::html/awa-head-preload.phtml"

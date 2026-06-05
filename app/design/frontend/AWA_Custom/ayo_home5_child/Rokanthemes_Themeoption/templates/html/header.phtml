@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1); ?>
-<?php 
+<?php
 
 /** @var \Rokanthemes\Themeoption\Block\Themeoption $block */
 /** @var \Magento\Framework\Escaper $escaper */
@@ -53,11 +53,20 @@ $headerContactLinksHtml = trim((string) $this->getChildHtml('headerContactLinks'
 $headerHotlineHtml = trim((string) $this->getChildHtml('hotline_header'));
 $hasHeaderContactSlot = $headerContactLinksHtml !== '' || $headerHotlineHtml !== '';
 $request = $block->getRequest();
-$fullActionName = $request instanceof \Magento\Framework\App\Request\Http
+$fullActionName = method_exists($request, 'getFullActionName')
 	? (string) $request->getFullActionName()
 	: '';
+$pathInfo = method_exists($request, 'getPathInfo') ? (string) $request->getPathInfo() : '';
+$requestUri = (string) ($_SERVER['REQUEST_URI'] ?? '');
 $isCheckoutMinimalHeader = in_array($fullActionName, ['onepagecheckout_index_index', 'checkout_index_index'], true);
+$isPasswordAuthHeader = in_array($fullActionName, ['customer_account_forgotpassword', 'customer_account_createpassword', 'b2b_account_forgotpassword'], true)
+	|| strpos($pathInfo, '/customer/account/forgotpassword') === 0
+	|| strpos($pathInfo, '/customer/account/createpassword') === 0
+	|| strpos($pathInfo, '/b2b/account/forgotpassword') === 0
+	|| strpos($requestUri, '/b2b/account/forgotpassword') === 0;
+$authLoginUrl = rtrim($block->getUrl(''), '/') . '/b2b/account/login/';
 $checkoutSupportHtml = $headerHotlineHtml !== '' ? $headerHotlineHtml : '';
+$checkoutCartUrl = $block->getUrl('checkout/cart');
 ?>
 <header role="banner"
         class="awa-site-header awa-header-professional<?= $escaper->escapeHtmlAttr($headerExperimentStateClass . $headerExperimentVariantClass) ?>"
@@ -70,13 +79,40 @@ $checkoutSupportHtml = $headerHotlineHtml !== '' ? $headerHotlineHtml : '';
         data-awa-header-exp-variant="<?= $escaper->escapeHtmlAttr($headerExperimentVariant) ?>"
         data-awa-header-exp-active="<?= $headerExperimentActive ? '1' : '0' ?>">
 <?php /* AWA: header shell CSS extracted to awa-header-shell.css (loaded via awa-bundle-core) — see default_head_blocks.xml */ ?>
-<?php if ($isCheckoutMinimalHeader): ?>
+<?php if ($isPasswordAuthHeader): ?>
+<div id="header" class="header-container awa-auth-header-shell" data-awa-auth-header-shell="true">
+	<div class="header-content awa-auth-header-content" data-awa-auth-header-content="true">
+		<div class="awa-auth-header-bar" data-awa-auth-header="true">
+			<div class="awa-auth-header-brand" data-awa-auth-brand="true">
+				<?= /* @noEscape — Magento\Theme\Block\Html\Header\Logo: output gerado por bloco PHP confiável */ $this->getChildHtml('logo') ?>
+			</div>
+			<nav class="awa-auth-header-actions" aria-label="<?= $escaper->escapeHtmlAttr(__('Ações de acesso')) ?>">
+				<a href="<?= $escaper->escapeUrl($authLoginUrl) ?>">
+					<?= $escaper->escapeHtml(__('Voltar para login')) ?>
+				</a>
+				<a href="<?= $escaper->escapeUrl($block->getUrl('contact')) ?>">
+					<?= $escaper->escapeHtml(__('Precisa de ajuda?')) ?>
+				</a>
+				<a href="<?= $escaper->escapeUrl($block->getUrl('')) ?>">
+					<?= $escaper->escapeHtml(__('Voltar para loja')) ?>
+				</a>
+			</nav>
+		</div>
+	</div>
+</div>
+<?php elseif ($isCheckoutMinimalHeader): ?>
 <div id="header" class="header-container awa-checkout-header-shell" data-awa-header-shell="true">
 	<div class="header-content awa-checkout-header-content" data-awa-header-content="true">
 		<div class="awa-checkout-header-bar" data-awa-checkout-header="true">
 		<div class="awa-checkout-header-brand" data-awa-checkout-brand="true">
 				<?= /* @noEscape — Magento\Theme\Block\Html\Header\Logo: output gerado por bloco PHP confiável */ $this->getChildHtml('logo') ?>
 			</div>
+			<nav class="awa-checkout-header-actions" aria-label="<?= $escaper->escapeHtmlAttr(__('Navegação do checkout')) ?>">
+				<a class="awa-checkout-back-cart"
+				   href="<?= $escaper->escapeUrl($checkoutCartUrl) ?>">
+					<?= $escaper->escapeHtml(__('Editar carrinho')) ?>
+				</a>
+			</nav>
 			<?php if ($checkoutSupportHtml !== ''): ?>
 				<div class="awa-checkout-header-support" data-awa-checkout-support="true">
 					<?= /* @noEscape — $checkoutSupportHtml vem de getChildHtml('hotline_header'): bloco PHP confiável */ $checkoutSupportHtml ?>
@@ -95,26 +131,21 @@ $checkoutSupportHtml = $headerHotlineHtml !== '' ? $headerHotlineHtml : '';
 			role="complementary"
 			aria-label="<?= $escaper->escapeHtmlAttr(__('Ambiente exclusivo para empresas')) ?>">
 			<div class="awa-b2b-promo-bar__inner awa-b2b-promo-bar__layout">
-				<p class="awa-b2b-promo-bar__text"><span class="awa-b2b-promo-bar__lead"><?= $escaper->escapeHtml(__('Ambiente exclusivo para vendas corporativas')) ?></span><span class="awa-b2b-promo-bar__separator" aria-hidden="true"> |&nbsp;</span><a href="<?= $escaper->escapeUrl($block->getUrl('b2b/register')) ?>" class="awa-b2b-promo-bar__cta"><strong><?= $escaper->escapeHtml(__('Cadastre agora')) ?></strong></a><span class="awa-b2b-promo-bar__tail">&nbsp;<?= $escaper->escapeHtml(__('sua empresa e confira ofertas especiais para o seu CNPJ.')) ?></span></p>
+				<p class="awa-b2b-promo-bar__text"><span class="awa-b2b-promo-bar__lead"><?= $escaper->escapeHtml(__('Portal B2B para empresas.')) ?></span> <a href="<?= $escaper->escapeUrl($block->getUrl('b2b/register')) ?>" class="awa-b2b-promo-bar__cta"><?= $escaper->escapeHtml(__('Cadastrar empresa')) ?></a><span class="awa-b2b-promo-bar__tail">&nbsp;<?= $escaper->escapeHtml(__('Preços exclusivos no seu CNPJ.')) ?></span></p>
 				<button type="button" id="awa-b2b-promo-close" class="awa-b2b-promo-close" aria-label="<?= $escaper->escapeHtmlAttr(__('Fechar')) ?>">&times;</button>
 			</div>
 		</div>
 		<script>
-			/* Bug #20: dismiss com transição CSS suave (evita CLS abrupto) */
+			/* Promo bar: esconde imediatamente se já foi dispensado (previne CLS).
+			   Click listener delegado ao awa-header-runtime-bootstrap.js (defer). */
 			try {
-				var _bar = document.getElementById('awa-b2b-promo-bar');
 				if (localStorage.getItem('awa_b2b_promo_dismissed') === '1') {
-					if (_bar) _bar.style.display = 'none';
+					var _awaDismissedBar = document.getElementById('awa-b2b-promo-bar');
+					if (_awaDismissedBar) { _awaDismissedBar.style.display = 'none'; }
 				}
-				var _close = document.getElementById('awa-b2b-promo-close');
-				if (_close && _bar) {
-					_close.addEventListener('click', function() {
-						_bar.classList.add('is-dismissing');
-						setTimeout(function() { _bar.style.display = 'none'; }, 320);
-						localStorage.setItem('awa_b2b_promo_dismissed', '1');
-					});
-				}
-			} catch (e) {}
+			} catch (e) {
+				/* localStorage indisponível (modo privado/CSP) — promo bar permanece visível */
+			}
 		</script>
 	</div>
 </div>
@@ -127,7 +158,7 @@ $checkoutSupportHtml = $headerHotlineHtml !== '' ? $headerHotlineHtml : '';
 				<div class="container">
 					<div class="awa-main-header__inner wp-header" data-awa-header-row="brand-search">
 						<div class="awa-header-primary-row" data-awa-header-primary-row="true">
-							<span role="button" tabindex="0" aria-label="<?= $escaper->escapeHtmlAttr(__('Abrir menu de navegação')) ?>" aria-expanded="false" aria-controls="nav-sections" data-action="toggle-nav" class="action nav-toggle awa-header-mobile-toggle" data-awa-nav-toggle="true"><svg class="awa-hamburger-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg><span class="awa-sr-only"><?= $escaper->escapeHtml(__('Abrir menu de navegação')) ?></span></span>
+							<button type="button" aria-label="<?= $escaper->escapeHtmlAttr(__('Abrir menu de navegação')) ?>" aria-expanded="false" aria-controls="awa-primary-navigation" data-action="toggle-nav" class="action nav-toggle awa-header-mobile-toggle" data-awa-nav-toggle="true"><svg class="awa-hamburger-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
 							<div class="col-md-2 col-sm-2 col-xs-12 awa-header-brand awa-header-brand-cell" data-awa-header-brand="true">
 								<?= /* @noEscape — Logo: bloco PHP confiável */ $this->getChildHtml('logo') ?>
 							</div>
@@ -140,6 +171,7 @@ $checkoutSupportHtml = $headerHotlineHtml !== '' ? $headerHotlineHtml : '';
 							<?= /* @noEscape — Registration/Login links for Guests */ $headerContactLinksHtml ?>
 							<?= /* @noEscape — B2B Badge / Customer Greeting */ $this->getChildHtml('awaB2bModeBadge') ?>
 							<nav class="top-account has-child awa-header-account-nav awa-force-hidden"
+								hidden
 								data-awa-account-nav="true"
 								aria-label="<?= $escaper->escapeHtmlAttr(__('Menu da conta')) ?>">
 								<?= /* @noEscape — Links de conta: bloco do core */ $this->getChildHtml('top.links') ?>
@@ -178,7 +210,14 @@ $checkoutSupportHtml = $headerHotlineHtml !== '' ? $headerHotlineHtml : '';
 			<div class="awa-nav-bar__inner">
 				<div class="awa-header-categories menu_left_home1">
 					<nav class="awa-nav-categories" aria-label="<?= $escaper->escapeHtmlAttr(__('Menu de categorias')) ?>">
-						<?= /* @noEscape — Menu vertical e seções: bloco do tema */ $this->getChildHtml('top.navigation.sections') ?>
+						<?php
+						$verticalMenuSectionsHtml = trim((string) $this->getChildHtml('top.navigation.sections'));
+
+						if ($verticalMenuSectionsHtml === '') {
+							$verticalMenuSectionsHtml = trim((string) $block->getLayout()->renderElement('menu.vertical', false));
+						}
+						?>
+						<?= /* @noEscape — Menu vertical: bloco Magento/Rokanthemes confiável, com fallback quando sections.phtml não recebe o grupo. */ $verticalMenuSectionsHtml ?>
 					</nav>
 				</div>
 				<div class="awa-header-primary-nav menu_primary" id="awa-primary-navigation" data-awa-main-nav-shell="true">
@@ -205,6 +244,33 @@ $checkoutSupportHtml = $headerHotlineHtml !== '' ? $headerHotlineHtml : '';
 	</div>
 </div>
 <?php endif; ?>
+<?php
+$_hdrLayoutHandles = $block->getLayout()->getUpdate()->getHandles();
+$_hdrIsHomePage = in_array('cms_index_index', $_hdrLayoutHandles, true);
+?>
+<?php if ($_hdrIsHomePage): ?>
+<script>
+/* awa-header-runtime-bootstrap: defer idle na home (sticky/focus-trap não são críticos no first paint) */
+(function (w, d) {
+    'use strict';
+    var done = false;
+    function boot() {
+        if (done) { return; }
+        done = true;
+        if (typeof w.require !== 'function') { w.setTimeout(boot, 200); done = false; return; }
+        var s = d.createElement('script');
+        s.type = 'text/x-magento-init';
+        s.textContent = JSON.stringify({ '*': { 'awa-header-runtime-bootstrap': {} } });
+        d.body.appendChild(s);
+        w.require(['mage/apply/main']);
+    }
+    var events = ['pointerdown', 'touchstart', 'keydown'];
+    events.forEach(function (ev) {
+        w.addEventListener(ev, boot, { capture: true, passive: ev !== 'keydown', once: true });
+    });
+})(window, document);
+</script>
+<?php else: ?>
 <script type="text/x-magento-init">
 {
     "*": {
@@ -212,6 +278,7 @@ $checkoutSupportHtml = $headerHotlineHtml !== '' ? $headerHotlineHtml : '';
     }
 }
 </script>
+<?php endif; ?>
 <?php /* AWA CLS Fix v5 (JS removido — substituído por CSS inline via awa-cls-nav-fix.phtml registrado em default.xml head.additional).
          O colapso do nav mobile na homepage agora é tratado por CSS puro no <head>, antes do primeiro paint,
          sem necessidade de manipulação de estilos inline via JavaScript. */ ?>

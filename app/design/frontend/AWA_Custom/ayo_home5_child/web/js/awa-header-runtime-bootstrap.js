@@ -11,6 +11,26 @@ define([
 ) {
     'use strict';
 
+    function initPromoBarDismiss() {
+        var bar = document.getElementById('awa-b2b-promo-bar');
+        var btn = document.getElementById('awa-b2b-promo-close');
+        if (!bar || !btn) {
+            return;
+        }
+        btn.addEventListener('click', function () {
+            bar.classList.add('is-dismissing');
+            setTimeout(function () {
+                bar.style.display = 'none';
+            }, 320);
+            try {
+                localStorage.setItem('awa_b2b_promo_dismissed', '1');
+            } catch (storageError) {
+                /* localStorage indisponível (modo privado/CSP) — dismiss é visual apenas */
+                console.warn('[AWA] promo bar dismiss: localStorage unavailable', storageError);
+            }
+        });
+    }
+
     return function bootstrapHeaderRuntime() {
         if (window.__awaHeaderRuntimeBootstrapInit) {
             return;
@@ -30,5 +50,7 @@ define([
         if (typeof initHeaderCustomerRuntime === 'function') {
             initHeaderCustomerRuntime();
         }
+
+        initPromoBarDismiss();
     };
 });

@@ -5,13 +5,25 @@ declare(strict_types=1);
  * Substitui: awa-visual-audit-final (59KB) + awa-visual-consistency (51KB)
  *          + awa-header-audit-fix (5KB) + awa-deep-audit (44KB) = ~162KB
  * Loaded async (media=print onload) — zero render-blocking.
+ * Não carrega em cart/checkout: essas páginas têm stack dedicado.
  * @var \Magento\Framework\View\Element\Template $block
  */
-$cssUrl = $block->getViewFileUrl('css/awa-audit-bundle.css');
+$__request = $block->getRequest();
+$__action = $__request ? (string) $__request->getFullActionName() : '';
+$__skipAuditBundle = in_array($__action, [
+    'checkout_cart_index',
+    'checkout_index_index',
+    'onepagecheckout_index_index',
+    'cms_index_index',
+], true);
+if ($__skipAuditBundle) {
+    return;
+}
+$cssUrl = $block->getViewFileUrl('css/awa-audit-bundle.min.css');
 ?>
-<link rel="preload" href="<?= $block->escapeUrl($cssUrl) ?>?v=2" as="style"/>
-<link rel="stylesheet" href="<?= $block->escapeUrl($cssUrl) ?>?v=2" media="print" onload="this.media='all'"/>
-<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($cssUrl) ?>?v=2"/></noscript>
+<link rel="preload" href="<?= $block->escapeUrl($cssUrl) ?>?v=3" as="style"/>
+<link rel="stylesheet" href="<?= $block->escapeUrl($cssUrl) ?>?v=3" media="print" onload="this.media='all'"/>
+<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($cssUrl) ?>?v=3"/></noscript>
 <?php
 /* awa-visual-polish-r2.css — Visual Polish Pass R2 (2026-05-09)
  * Correções: footer border, card shadow, hover state, breadcrumb, filtros, PDP, inputs, paginação
@@ -22,3 +34,5 @@ $polishUrl = $block->getViewFileUrl('css/awa-visual-polish-r2.css');
 <link rel="preload" href="<?= $block->escapeUrl($polishUrl) ?>?v=2" as="style"/>
 <link rel="stylesheet" href="<?= $block->escapeUrl($polishUrl) ?>?v=2" media="print" onload="this.media='all'"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($polishUrl) ?>?v=2"/></noscript>
+/* Header refine terminal — migrado para _awa-header-refine-terminal.less (import 43.02 em _extend.less).
+ * Agora faz parte de styles-l.css (blocking). Request async removido. */

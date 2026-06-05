@@ -3,9 +3,12 @@
  *
  * Adds `awa-header-condensed` to .awa-site-header and
  * `is-sticky` + `awa-header-condensed` to .header-wrapper-sticky
- * when the page is scrolled past SCROLL_THRESHOLD px.
+ * when the page is scrolled past the dynamic scroll threshold.
  *
- * Uses requestAnimationFrame for throttle (no lodash/underscore needed).
+ * Promo bar height tracked via ResizeObserver — no getBoundingClientRect()
+ * in scroll handler, no periodic forced layout reflows.
+ *
+ * Uses requestAnimationFrame for scroll throttle (no lodash needed).
  * Respects prefers-reduced-motion: skips class toggle animation context.
  *
  * RequireJS path: awa-header-sticky (registered in requirejs-config.js)
@@ -16,34 +19,66 @@ define([], function () {
     let SCROLL_THRESHOLD_BASE = 60;
     let DELTA_MIN = 6;
 
-    /**
-     * Bug #19: O banner B2B fica acima do wrapper sticky e tem altura ~40px.
-     * Ao ativar o condensed com threshold fixo de 60px, o header condensa enquanto
-     * o banner ainda está parcialmente visível. Corrigido medindo a altura real do
-     * banner e somando ao threshold base.
-     */
-    function getScrollThreshold() {
-        let bar = document.getElementById('awa-b2b-promo-bar');
-        if (!bar || bar.style.display === 'none') {
-            return SCROLL_THRESHOLD_BASE;
-        }
-        let h = bar.getBoundingClientRect().height;
-        return SCROLL_THRESHOLD_BASE + (h > 0 ? Math.round(h) : 0);
-    }
-
     return function () {
         /** @type {Element|null} */
         let header = document.querySelector('.awa-site-header');
         /** @type {Element|null} */
         let stickyWrapper = document.querySelector('.header-wrapper-sticky');
 
-        if (!header) {
+        if (!header || !stickyWrapper) {
             return;
         }
 
         let ticking = false;
         let lastScrollY = window.pageYOffset || 0;
         let lastSticky = false;
+
+        /* Promo bar height — updated by ResizeObserver, never read in scroll handler */
+        let promoBarHeight = 0;
+
+        function initPromoBarObserver() {
+            let bar = document.getElementById('awa-b2b-promo-bar');
+            if (!bar) {
+                return;
+            }
+
+            function updatePromoHeight(entries) {
+                let entry = entries && entries[0];
+                if (entry) {
+                    let h = entry.contentRect ? entry.contentRect.height : entry.target.offsetHeight;
+                    promoBarHeight = bar.style.display === 'none' ? 0 : Math.round(h);
+                } else {
+                    promoBarHeight = bar.style.display === 'none' ? 0 : Math.round(bar.offsetHeight);
+                }
+            }
+
+            if (window.ResizeObserver) {
+                let ro = new ResizeObserver(updatePromoHeight);
+                ro.observe(bar);
+            } else {
+                /* Fallback: measure once now; resize handler resets via lastMeasureAt */
+                promoBarHeight = bar.style.display === 'none' ? 0 : Math.round(bar.offsetHeight);
+            }
+
+            /* Set initial value synchronously */
+            promoBarHeight = bar.style.display === 'none' ? 0 : Math.round(bar.offsetHeight);
+        }
+
+        function getScrollThreshold() {
+            return SCROLL_THRESHOLD_BASE + promoBarHeight;
+        }
+
+        function clearStickyClasses() {
+            header.classList.remove('awa-header-condensed', 'awa-scroll-down', 'awa-scroll-up');
+            stickyWrapper.classList.remove('is-sticky', 'awa-header-condensed');
+            document.body.classList.remove('awa-header-is-sticky');
+            lastSticky = false;
+        }
+
+        function isHeaderRenderable() {
+            let headerStyle = window.getComputedStyle(header);
+            return headerStyle.display !== 'none' && headerStyle.visibility !== 'hidden';
+        }
 
         /**
          * Apply or remove sticky classes based on current scrollY.
@@ -53,7 +88,15 @@ define([], function () {
                 ? window.pageYOffset
                 : (document.documentElement || document.body.parentNode || document.body).scrollTop;
 
-            let isSticky = scrollY > getScrollThreshold();
+            if (!isHeaderRenderable()) {
+                clearStickyClasses();
+                lastScrollY = scrollY;
+                ticking = false;
+                return;
+            }
+
+            let threshold = getScrollThreshold();
+            let isSticky = scrollY > threshold;
             let direction = (scrollY - lastScrollY) > DELTA_MIN
                 ? 'down'
                 : ((lastScrollY - scrollY) > DELTA_MIN ? 'up' : 'still');
@@ -67,23 +110,17 @@ define([], function () {
             header.classList.toggle('awa-scroll-down', direction === 'down' && isSticky);
             header.classList.toggle('awa-scroll-up', direction === 'up' && isSticky);
 
-            if (stickyWrapper) {
-                if (isSticky !== stickyWrapper.classList.contains('is-sticky')) {
-                    stickyWrapper.classList.toggle('is-sticky', isSticky);
-                }
-                // Match existing LESS: .header-wrapper-sticky.awa-header-condensed { box-shadow: … }
-                if (isSticky !== stickyWrapper.classList.contains('awa-header-condensed')) {
-                    stickyWrapper.classList.toggle('awa-header-condensed', isSticky);
-                }
+            if (isSticky !== stickyWrapper.classList.contains('is-sticky')) {
+                stickyWrapper.classList.toggle('is-sticky', isSticky);
+            }
+            if (isSticky !== stickyWrapper.classList.contains('awa-header-condensed')) {
+                stickyWrapper.classList.toggle('awa-header-condensed', isSticky);
             }
 
             lastScrollY = scrollY;
             ticking = false;
         }
 
-        /**
-         * Scroll listener — deferred to rAF to avoid layout thrash.
-         */
         function onScroll() {
             if (!ticking) {
                 window.requestAnimationFrame(updateStickyState);
@@ -91,9 +128,12 @@ define([], function () {
             }
         }
 
-        window.addEventListener('scroll', onScroll, { passive: true });
+        initPromoBarObserver();
 
-        // Sync on init (handles page refresh mid-scroll / back-navigation).
+        window.addEventListener('scroll', onScroll, { passive: true });
+        window.addEventListener('resize', onScroll, { passive: true });
+
+        /* Sync on init (handles page refresh mid-scroll / back-navigation). */
         updateStickyState();
     };
 });
