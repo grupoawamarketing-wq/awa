@@ -17,6 +17,8 @@ if (!empty($_config['general']['enable'])):
     $limitShow = (int) ($_config['general']['limit_show'] ?? 0);
     $menuId = 'awa-vertical-menu-' . uniqid('', false);
     $_menu = $block->getVerticalMenuHtml();
+    $menuHtml = trim((string) $_menu);
+    $hasCategoryItems = $menuHtml !== '' && stripos($menuHtml, 'ui-menu-item') !== false;
     $extraHtml = trim($block->getCmsBlockHtmlByIdentifier('vertical-menu-extra'));
 ?>
 
@@ -24,7 +26,6 @@ if (!empty($_config['general']['enable'])):
      aria-label="<?= $block->escapeHtmlAttr(__('Categorias de Produtos')) ?>"
      data-role="awa-vertical-menu">
     <button type="button" class="title-category-dropdown our_categories"
-        style="border:none; cursor:pointer; text-align:left; outline:none; font:inherit; width:100%;"
         data-role="awa-vertical-menu-trigger"
         aria-expanded="false"
         aria-controls="<?= $block->escapeHtmlAttr($menuId) ?>"
@@ -39,28 +40,60 @@ if (!empty($_config['general']['enable'])):
     </button>
     <span id="<?= $block->escapeHtmlAttr($menuId) ?>-status"
           class="awa-sr-only"
-          data-role="awa-vertical-menu-status">
-        <?= $block->escapeHtml(__('Use Tab e Shift+Tab para navegar pelos departamentos.')) ?>
+          data-role="awa-vertical-menu-status"
+          aria-live="polite"
+          aria-atomic="true">
+        <?= $block->escapeHtml(__('Menu de departamentos fechado. Pressione Enter para abrir.')) ?>
     </span>
     <ul id="<?= $block->escapeHtmlAttr($menuId) ?>"
         class="togge-menu list-category-dropdown"
         data-role="awa-vertical-menu-panel"
-        data-limit-show="<?= (int) $limitShow ?>">
+        data-limit-show="<?= (int) $limitShow ?>"
+        aria-hidden="true"
+        data-awa-menu-state="closed">
+        <li class="awa-vmenu-search-li" role="none" data-role="awa-vmenu-search-row">
+            <div class="awa-vmenu-search-wrap" role="search" aria-label="<?= $block->escapeHtmlAttr(__('Buscar categoria')) ?>">
+                <span class="awa-vmenu-search-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false" aria-hidden="true">
+                        <circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/>
+                    </svg>
+                </span>
+                <input type="search"
+                       class="awa-vmenu-search-input"
+                       data-role="awa-vmenu-search"
+                       placeholder="<?= $block->escapeHtmlAttr(__('Buscar categoria...')) ?>"
+                       aria-label="<?= $block->escapeHtmlAttr(__('Buscar categoria no menu')) ?>"
+                       aria-controls="<?= $block->escapeHtmlAttr($menuId) ?>"
+                       autocomplete="off"
+                       spellcheck="false"/>
+            </div>
+        </li>
+        <?php if ($hasCategoryItems): ?>
         <?= /** @noEscape */ $_menu ?>
+        <?php else: ?>
+        <li class="awa-vmenu-empty ui-menu-item level0" role="none">
+            <span class="awa-vmenu-empty__text">
+                <?= $block->escapeHtml(__('Nenhuma categoria disponível no momento.')) ?>
+            </span>
+        </li>
+        <?php endif; ?>
         <?php $_bgImages = trim($block->getCmsBlockHtmlByIdentifier('vertical_background_images')); ?>
         <?php if ($_bgImages !== ''): ?>
         <li class="vertical-bg-img"><?= /** @noEscape */ $_bgImages ?></li>
         <?php endif; ?>
         <?php if ($limitShow > 0): ?>
         <li class="expand-category-link">
-            <a href="#"
+            <button type="button"
                class="viewall vm-toggle-categories"
                aria-expanded="false"
-               data-show-text="<?= $block->escapeHtmlAttr(__('Show More')) ?>"
-               data-hide-text="<?= $block->escapeHtmlAttr(__('Show Less')) ?>">
-                <span><?= $block->escapeHtml(__('All Categories')) ?></span>
+               aria-label="<?= $block->escapeHtmlAttr(__('Ver mais categorias')) ?>"
+               data-show-text="<?= $block->escapeHtmlAttr(__('Ver mais categorias')) ?>"
+               data-show-aria="<?= $block->escapeHtmlAttr(__('Ver mais categorias')) ?>"
+               data-hide-text="<?= $block->escapeHtmlAttr(__('Ver menos categorias')) ?>"
+               data-hide-aria="<?= $block->escapeHtmlAttr(__('Recolher categorias')) ?>">
+                <span><?= $block->escapeHtml(__('Ver mais categorias')) ?></span>
                 <i class="fa fa-angle-down vm-toggle-icon" aria-hidden="true"></i>
-            </a>
+            </button>
         </li>
         <?php endif; ?>
         <?php if ($extraHtml !== ''): ?>
@@ -75,6 +108,84 @@ if (!empty($_config['general']['enable'])):
     </ul>
 </nav>
 
+<?php
+$_vmLayoutHandles = $block->getLayout()->getUpdate()->getHandles();
+$_vmIsHomePage = in_array('cms_index_index', $_vmLayoutHandles, true);
+$_vmConfig = [
+    "desktopBreakpoint" => 992,
+    "overlaySelector" => ".shadow_bkg_show",
+    "limitShow" => (int) $limitShow,
+    "hoverDelay" => 100,
+];
+?>
+<?php if ($_vmIsHomePage): ?>
+<script>
+/* vertical-menu-init: defer idle/intent na home (LCP/TBT — menu inicia fechado por CSS) */
+(function (w, d) {
+    'use strict';
+    var cfg = {
+        "[data-role='awa-vertical-menu']": {
+            "js/vertical-menu-init": <?= /* @noEscape */ json_encode($_vmConfig, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>,
+            "js/vertical-menu-drill": { "desktopBreakpoint": 992, "animDuration": 240 },
+            "awa-vertical-menu-toggle-hotfix": {},
+            "awaVerticalMenu": {}
+        },
+        ".vertical-bg-img": { "js/vmenu-promo-carousel": { "interval": 5000 } }
+    };
+    var done = false;
+    function boot() {
+        if (done) { return; }
+        done = true;
+        if (typeof w.require !== 'function') { done = false; w.setTimeout(boot, 200); return; }
+        var s = d.createElement('script');
+        s.type = 'text/x-magento-init';
+        s.textContent = JSON.stringify(cfg);
+        d.body.appendChild(s);
+        w.require(['mage/apply/main']);
+    }
+    /* Intent: hover/tap na área do menu dispara imediatamente */
+    var menuEl = d.querySelector("[data-role='awa-vertical-menu']");
+    if (menuEl) {
+        menuEl.addEventListener('mouseenter', boot, { once: true, passive: true });
+        menuEl.addEventListener('pointerdown', boot, { once: true, passive: true });
+        menuEl.addEventListener('touchstart', boot, { once: true, passive: true });
+    }
+    /* Inicializa em idle para que o primeiro clique do usuario ja abra o menu. */
+    if (w.requestIdleCallback) {
+        w.requestIdleCallback(boot, { timeout: 2500 });
+    } else {
+        w.setTimeout(boot, 1500);
+    }
+
+    /*
+     * Departamentos preflight: se o JS ainda não registrou o handler quando
+     * o usuário clica, abre o painel via CSS/DOM imediatamente (primeiro clique
+     * funciona visualmente). O módulo JS faz o takeover correto no segundo clique.
+     */
+    var triggerBtn = d.querySelector("[data-role='awa-vertical-menu-trigger']");
+    var panelEl    = d.querySelector("[data-role='awa-vertical-menu-panel']");
+    if (triggerBtn && panelEl) {
+        triggerBtn.addEventListener('click', function onDeptPreflight() {
+            triggerBtn.removeEventListener('click', onDeptPreflight);
+            boot(); /* garante que o módulo começa a carregar */
+            /* Abrir painel visualmente se ainda fechado */
+            var isOpen = triggerBtn.getAttribute('aria-expanded') === 'true'
+                      || panelEl.getAttribute('data-awa-menu-state') === 'open';
+            if (!isOpen) {
+                triggerBtn.setAttribute('aria-expanded', 'true');
+                triggerBtn.classList.add('active', 'awa-dept-preflight');
+                panelEl.setAttribute('data-awa-menu-state', 'open');
+                panelEl.setAttribute('aria-hidden', 'false');
+                /* CSS tem display:none !important — precisa de setProperty com priority */
+                panelEl.style.setProperty('display', 'block', 'important');
+                panelEl.style.setProperty('visibility', 'visible', 'important');
+                panelEl.style.setProperty('opacity', '1', 'important');
+            }
+        }, { capture: false });
+    }
+})(window, document);
+</script>
+<?php else: ?>
 <script type="text/x-magento-init">
 {
     "[data-role='awa-vertical-menu']": {
@@ -82,13 +193,7 @@ if (!empty($_config['general']['enable'])):
             "desktopBreakpoint": 992,
             "overlaySelector": ".shadow_bkg_show",
             "limitShow": <?= (int) $limitShow ?>,
-            "hoverDelay": 240
-        },
-        "js/vertical-menu-init-hover-tuned": {
-            "desktopBreakpoint": 992,
-            "overlaySelector": ".shadow_bkg_show",
-            "limitShow": <?= (int) $limitShow ?>,
-            "hoverDelay": 240
+            "hoverDelay": 100
         },
         "js/vertical-menu-drill": {
             "desktopBreakpoint": 992,
@@ -103,5 +208,6 @@ if (!empty($_config['general']['enable'])):
     }
 }
 </script>
+<?php endif; ?>
 
 <?php endif; ?>

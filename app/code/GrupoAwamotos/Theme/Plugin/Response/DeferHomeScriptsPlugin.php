@@ -14,6 +14,16 @@ use Magento\Framework\View\Asset\Repository as AssetRepository;
 class DeferHomeScriptsPlugin
 {
     private const HOME_ACTION = 'cms_index_index';
+    private const HOME_BOOTSTRAP_VERSION = '20260605-nav-preflight';
+
+    /** Scripts que bloqueiam o parser na home — adiar com defer (stub permanece síncrono). */
+    private const HOME_DEFER_SCRIPT_FRAGMENTS = [
+        'awa-home-shelf-bootstrap.js',
+        'awa-header-account-prompt.js',
+        'awa-mirasvit-autocomplete-init.js',
+        'awa-search-clear-init.js',
+        'awa-a11y-nav-links.js',
+    ];
 
     public function __construct(
         private readonly HttpRequest $request,
@@ -33,34 +43,77 @@ class DeferHomeScriptsPlugin
         }
 
         $html = (string) $subject->getBody();
-        if ($html === '' || str_contains($html, 'awa-home-bootstrap-defer.js')) {
+        if ($html === '') {
             return;
         }
 
-        $pattern = '#<script(?![^>]*type=["\']text/plain["\'])[^>]*>\s*(var LOCALE\s*=.*?require\s*=\s*\{.*?\};)\s*</script>\s*'
-            . '<script(?![^>]*defer)[^>]*src="([^"]*_cache/merged/[^"]+\.min\.js)"[^>]*>\s*</script>#s';
+        $html = $this->deferBlockingHomeScripts($html);
+        $html = $this->bumpHomeBootstrapAssetVersions($html);
 
-        if (!preg_match($pattern, $html, $matches)) {
-            return;
+        if (!str_contains($html, 'awa-home-bootstrap-defer.js')) {
+            // Merged bundle URL is .../_cache/merged/<hash>.js (not always .min.js)
+            $pattern = '#<script(?![^>]*type=["\']text/plain["\'])[^>]*>\s*(var LOCALE\s*=.*?require\s*=\s*\{.*?\};)\s*</script>\s*'
+                . '<script(?![^>]*defer)[^>]*src="([^"]*_cache/merged/[^"]+\.js)"[^>]*>\s*</script>#s';
+
+            if (preg_match($pattern, $html, $matches)) {
+                $inlineJs = $matches[1];
+                $mergedSrc = $matches[2];
+
+                try {
+                    $deferSrc = $this->assetRepository->getUrl('js/awa-home-bootstrap-defer.js')
+                        . '?v=' . self::HOME_BOOTSTRAP_VERSION;
+                    $stubSrc = $this->assetRepository->getUrl('js/awa-require-stub.js')
+                        . '?v=' . self::HOME_BOOTSTRAP_VERSION;
+                } catch (\Throwable) {
+                    $subject->setBody($html);
+                    return;
+                }
+
+                $replacement = '<script src="'
+                    . htmlspecialchars($stubSrc, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')
+                    . '"></script><script type="text/plain" id="awa-home-bootstrap-inline">'
+                    . $inlineJs
+                    . '</script><script type="text/plain" id="awa-home-bootstrap-merged" data-src="'
+                    . htmlspecialchars($mergedSrc, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')
+                    . '"></script><script src="'
+                    . htmlspecialchars($deferSrc, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')
+                    . '" defer></script>';
+
+                $html = (string) preg_replace($pattern, $replacement, $html, 1);
+            }
         }
 
-        $inlineJs = $matches[1];
-        $mergedSrc = $matches[2];
+        $subject->setBody($html);
+    }
 
-        try {
-            $deferSrc = $this->assetRepository->getUrl('js/awa-home-bootstrap-defer.js');
-        } catch (\Throwable) {
-            return;
+    private function deferBlockingHomeScripts(string $html): string
+    {
+        foreach (self::HOME_DEFER_SCRIPT_FRAGMENTS as $fragment) {
+            $quoted = preg_quote($fragment, '#');
+            $html = (string) preg_replace(
+                '#<script(\s[^>]*src="[^"]*' . $quoted . '[^"]*")(?![^>]*\bdefer\b)([^>]*)>\s*</script>#i',
+                '<script$1 defer$2></script>',
+                $html
+            );
         }
 
-        $replacement = '<script type="text/plain" id="awa-home-bootstrap-inline">'
-            . $inlineJs
-            . '</script><script type="text/plain" id="awa-home-bootstrap-merged" data-src="'
-            . htmlspecialchars($mergedSrc, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')
-            . '"></script><script src="'
-            . htmlspecialchars($deferSrc, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')
-            . '" defer></script>';
+        return $html;
+    }
 
-        $subject->setBody((string) preg_replace($pattern, $replacement, $html, 1));
+    private function bumpHomeBootstrapAssetVersions(string $html): string
+    {
+        $version = self::HOME_BOOTSTRAP_VERSION;
+        $fragments = ['awa-home-bootstrap-defer.js', 'awa-require-stub.js'];
+
+        foreach ($fragments as $fragment) {
+            $quoted = preg_quote($fragment, '#');
+            $html = (string) preg_replace(
+                '#(' . $quoted . '\?v=)[^"\']+#',
+                '${1}' . $version,
+                $html
+            );
+        }
+
+        return $html;
     }
 }
