@@ -289,8 +289,13 @@ body.checkout-cart-index {
 //        Migrado de awa-header-stack-2026-05-28.min.css (era blocking order=10120 no default.xml).
 //        Importado inline (raw CSS) para passar min()/max()/clamp() sem processamento LESS.
 @import (inline) '_awa-header-stack';
+@import (inline) '../awa-b2b-status-panel.css';
 
-// 43.02. HEADER REFINE TERMINAL — final-wins layer (sticky, navbar, search, minicart trigger)
+// 43.02. HEADER FIX — base estrutural do header (sticky, grid e stacking context)
+//        Deve vir antes do refine para manter contrato layout-base -> refinamento.
+@import (once) '_awa-header-fix-2026-06';
+
+// 43.03. HEADER REFINE TERMINAL — final-wins layer (sticky, navbar, search, minicart trigger)
 //        Migrado de awa-header-refine-terminal.min.css (era async em awa-audit-bundle-css.phtml).
 //        Importado inline (raw CSS) para evitar conflito com funções CSS nativas no parser LESS.
 @import (inline) '_awa-header-refine-terminal';
@@ -299,11 +304,12 @@ body.checkout-cart-index {
 //        Single source of truth para max-width/padding de .page-main por tier.
 @import (once) '_awa-page-containers';
 
-// 43.1. ACCOUNT LAYOUT — final-wins sobre consolidated (grid shell account/B2B)
+// 43.1. ACCOUNT LAYOUT — final-wins sobre consolidated (grid shell account/B2B + auth login)
 @import (once) '_awa-account-layout';
 
 // 43.2. HOME HERO TRUST STRIP — diferenciais B2B (3 colunas / ícone 48px)
 @import (once) '_awa-home-hero-trust-layout';
+@import (once) '_awa-hero-b2b-benefits-2026-06.less';
 
 // 43.3. INLINE SVG HARDENING — baseline + empty-state pedidos/footer/header
 @import (once) '_awa-inline-svg-hardening';
@@ -320,6 +326,15 @@ body.checkout-cart-index {
 //       B2B trust strip stagger, section header entrance. prefers-reduced-motion
 //       override incluído. Register: PRODUCT — motion conveys state.
 @import (once) '_awa-home-animations';
+
+// 43.7. CART EMPTY STATE — onboard B2B no carrinho vazio (/impeccable)
+@import (once) '_awa-cart-empty';
+
+// 43.8. CART FILLED STATE — tabela + resumo B2B (/impeccable polish)
+@import (once) '_awa-cart-filled';
+
+// 43.9. CART MOBILE BAR — CTA fixo no mobile (checkout mode sem bottom nav)
+@import (once) '_awa-cart-mobile-bar';
 
 // PORTED S92 → _awa-consolidated.less (final-wins header, após kill-switch na cascata LESS)
 // @import '_awa-b2b-density-final.less';
@@ -421,9 +436,11 @@ html body#html-body {
                 white-space: nowrap;
             }
 
+            // Hierarquia por escala + espaço (sem underline em todo header).
+            // Acento vermelho único reservado ao título da zona de descoberta.
             &--featured {
-                padding-bottom: @awa-s-2;
-                border-bottom: 2px solid @awa-primary;
+                padding-bottom: 0;
+                border-bottom: 0;
 
                 .awa-section-header__title {
                     font-size: var(--awa-fs-2xl);
@@ -432,8 +449,8 @@ html body#html-body {
 
             &--standard,
             &--compact {
-                padding-bottom: @awa-s-2;
-                border-bottom: 1px solid @awa-border;
+                padding-bottom: 0;
+                border-bottom: 0;
             }
         }
 
@@ -745,7 +762,7 @@ html body#html-body {
     html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
         .awa-carousel-section:not(.top-home-content--category-carousel)
         .awa-section-header__link::after {
-        content: ' · deslize';
+        content: ' · deslize o carrossel';
         font-size: var(--awa-fs-sm);
         font-weight: @awa-weight-normal;
         color: var(--awa-text-muted);
@@ -1495,7 +1512,7 @@ html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .pa
 }
 
 @media (max-width: @awa-page-bp-sm) {
-    html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper .awa-home5-wrapper {
+    html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper .ayo-home5-wrapper {
         padding-inline: @awa-page-pad-mobile !important;
     }
 }
@@ -1597,3 +1614,697 @@ html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .pa
         }
     }
 }
+
+// 55. ADAPT §55 — /impeccable adapt fase 5 (lacunas de breakpoint por contexto)
+//     Tablet sidebar toggle, PDP tablet, search overflow, large-desktop prose,
+//     PDP safe-area bottom, minicart notch, carousel pointer, print, container queries
+@import (once) '_awa-adapt-2026-06';
+
+// 56. HEADER FIX §56 — Correção completa do header em todas as páginas (2026-06-08)
+//     Diagnóstico: .header-wrapper-sticky sem position:sticky → hero sobe por baixo do header.
+//     Corrige: sticky foundation, z-index stack, submenu dropdown, hero containment,
+//     page-wrapper padding-top, mobile logo duplicado.
+// Import movido para a seção 43.xx para manter ordem layout-base -> refine.
+
+// 57. POLISH §57 — /impeccable polish (2026-06-08)
+//     Nav conta/B2B, breadcrumbs, toolbar, paginação, notas de busca, cards PLP.
+@import (once) '_awa-polish-2026-06';
+
+// 58. HARDEN §58 — /impeccable harden B2B account (2026-06-08)
+//     Repetir Pedido: visibilidade above-fold, empty state, truncamento, live region.
+@import (once) '_awa-harden-b2b-account-2026-06';
+
+// 59. BOLDER §59 — /impeccable bolder Repetir Pedido (2026-06-08)
+//     Hierarquia forte, total/CTA destacados, acento AWA nos preços atuais.
+@import (once) '_awa-bolder-b2b-reorder-2026-06';
+
+// 60. POLISH B2B §60 — /impeccable polish b2b (2026-06-08)
+//     Nav sem faixa, chunking sidebar, reorder mobile/foco, breadcrumbs B2B.
+@import (once) '_awa-polish-b2b-2026-06';
+
+// 61. OPTIMIZE B2B §61 — /impeccable optimize (2026-06-08)
+//     contain/CLS reorder; complementa lazy-load de preços no JS.
+@import (once) '_awa-optimize-b2b-2026-06';
+
+// 62. HARDEN REORDER §62 — /impeccable harden b2b/reorder/history (2026-06-08)
+//     CTA bloqueado até preços; timeout, retry, estados degradados.
+@import (once) '_awa-harden-b2b-reorder-2026-06';
+
+// 63. DISTILL B2B ACCOUNT §63 — /impeccable distill b2b/account (2026-06-08)
+//     Header operacional compacto; remove chrome catálogo e títulos duplicados.
+@import (once) '_awa-distill-b2b-account-2026-06';
+
+// 64. POLISH HOME §64 — /impeccable polish home (2026-06-08)
+//     Headers de shelf, affordance mobile, tiers tipográficos, touch targets.
+@import (once) '_awa-polish-home-2026-06';
+
+// 65. LAYOUT HOME §65 — /impeccable layout home (2026-06-08, refine 2026-06-08)
+//     Ritmo vertical por tier, zona discovery→featured, compact band, hierarquia tipográfica.
+@import '_awa-layout-home-2026-06.less';
+
+// 66. ADAPT B2B ACCOUNT §66 — /impeccable adapt b2b/account (2026-06-08)
+//     Reorder mobile sem display:contents; touch 44px; sidebar expandida; aprovações.
+@import (once) '_awa-adapt-b2b-account-2026-06';
+
+// 67. LAYOUT B2B ACCOUNT §67 — /impeccable layout b2b/account (2026-06-08)
+//     Ritmo do shell, accordion mobile por seção, stack sem scroll interno.
+@import (once) '_awa-layout-b2b-account-2026-06';
+
+// MENU-V2 — runtime AWA moderno (2026-06-08): estados + stack vertical inlined
+@import (once) '_awa-menu-modern';
+
+// 68. POLISH B2B ACCOUNT §68 — /impeccable polish b2b/account (2026-06-08)
+//     Focus-visible, crédito/cotações, sticky sidebar, badges.
+@import (once) '_awa-polish-b2b-account-2026-06';
+
+// 69. OPTIMIZE B2B ACCOUNT §69 — /impeccable optimize b2b/account (2026-06-08)
+//     content-visibility listagens; contain sidebar desktop.
+@import (once) '_awa-optimize-b2b-account-2026-06';
+
+// 67. CLARIFY HOME §67 — /impeccable clarify home (2026-06-08)
+//     Aviso único de preços B2B; CTA encurtado nos cards da home.
+@import '_awa-clarify-home-2026-06.less';
+
+// 68. ADAPT HOME §68 — /impeccable adapt home (2026-06-08)
+//     Mobile: Owl nav clicável, setas categorias, hero B2B, touch 44px, peek swipe.
+@import '_awa-adapt-home-2026-06.less';
+
+// 69. CAROUSEL HOME §69 — /impeccable carousel home (2026-06-08)
+//     Scroll-snap moderno, peek, chrome unificado, cards 1:1, progress scaleX.
+@import '_awa-carousel-home-2026-06.less';
+
+// [DEPRECATED-HOME] absorbed into _awa-home-contract-2026-06.less
+// @import '_awa-polish-home-pass2-2026-06.less';
+
+// 71. CAROUSEL IMAGE FOCUS §71 — destaque imagem produto nos carrosséis home
+@import '_awa-carousel-image-focus-2026-06.less';
+
+// [DEPRECATED-HOME] absorbed into _awa-home-contract-2026-06.less
+// @import '_awa-refine-home-2026-06.less';
+
+// [DEPRECATED-HOME] now imported by _awa-home-contract-2026-06.less
+// @import '_awa-home-practices-2026-06.less';
+
+// 74. HARDEN HOME §74 — chrome SSR, noscript, focus viewport
+@import '_awa-harden-home-2026-06.less';
+
+// [DEPRECATED-HOME] absorbed into _awa-home-contract-2026-06.less
+// @import '_awa-distill-home-2026-06.less';
+
+// [DEPRECATED-HOME] absorbed into _awa-home-contract-2026-06.less
+// @import '_awa-polish-home-pass3-2026-06.less';
+
+// 78. FIX CAROUSEL §77 — carrosséis home (bootstrap + nav + pre-init)
+@import '_awa-fix-carousel-2026-06.less';
+
+// [DEPRECATED-HOME] absorbed into _awa-home-contract-2026-06.less
+// @import '_awa-impeccable-audit-home-2026-06.less';
+
+// [DEPRECATED-HOME] absorbed into _awa-home-contract-2026-06.less
+// @import '_awa-typeset-home-2026-06.less';
+
+// [DEPRECATED-HOME] absorbed into _awa-home-contract-2026-06.less
+// @import '_awa-polish-home-pass4-2026-06.less';
+
+// 82. HARDEN PASS2 §82 — overflow, empty states, standard CTA link (2026-06-08 continue)
+@import '_awa-harden-home-pass2-2026-06.less';
+
+// 78. HEADER REFERENCE MATCH §78 — layout aprovado pelo anexo (2026-06-08)
+//     Header full-width: promo vermelha, busca ampla, ações compactas e nav branca.
+html body#html-body:not(.onepagecheckout-index-index):not(.checkout-index-index)
+    .page-wrapper
+    .awa-site-header {
+
+    :is(
+        #header .top-header.awa-b2b-promo-bar,
+        #header .awa-b2b-promo-bar[data-awa-header-utility],
+        .awa-b2b-promo-bar[data-awa-header-utility]
+    ) {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        min-height: 28px !important;
+        max-height: none !important;
+        padding-block: 6px !important;
+        padding-inline: @awa-space-3 !important;
+        background: var(--awa-primary) !important;
+        border: 0 !important;
+        color: var(--awa-text-inverse, #ffffff) !important;
+        overflow: hidden !important;
+    }
+
+    .awa-b2b-promo-bar__inner,
+    .awa-b2b-promo-bar__layout {
+        width: 100% !important;
+        max-width: none !important;
+        min-height: 0 !important;
+        max-height: none !important;
+    }
+
+    .awa-b2b-promo-bar__text {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 4px !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        color: var(--awa-text-inverse, #ffffff) !important;
+        font-size: ~"max(12px, 0.75rem)" !important;
+        font-weight: @awa-weight-medium !important;
+        line-height: 1.35 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    .awa-b2b-promo-bar__lead,
+    .awa-b2b-promo-bar__separator,
+    .awa-b2b-promo-bar__tail,
+    .awa-b2b-promo-bar__cta,
+    .awa-b2b-promo-bar__cta strong {
+        color: var(--awa-text-inverse, #ffffff) !important;
+        font-size: inherit !important;
+        line-height: 1.35 !important;
+    }
+
+    .awa-b2b-promo-bar__cta,
+    .awa-b2b-promo-bar__cta strong {
+        font-weight: @awa-weight-bold !important;
+        text-decoration: underline !important;
+        text-underline-offset: 2px !important;
+        background: transparent !important;
+    }
+}
+
+@media (min-width: @awa-bp-992) {
+    html body#html-body:not(.b2b-account-dashboard):not(.b2b-account-shell):not(.onepagecheckout-index-index):not(.checkout-index-index)
+        .page-wrapper
+        .awa-site-header {
+
+        .header-wrapper-sticky,
+        .header.awa-main-header,
+        .header_main.awa-main-header-inner-wrap,
+        .header-main,
+        .header-control.awa-nav-bar {
+            width: 100% !important;
+            max-width: none !important;
+            margin-inline: 0 !important;
+            padding-inline: 0 !important;
+        }
+
+        :is(
+            .header-main > .container,
+            .header-control.awa-nav-bar > .container,
+            .header-control.header-nav.awa-nav-bar > .container
+        ) {
+            width: 100% !important;
+            max-width: none !important;
+            margin-inline: 0 !important;
+            padding-inline: 0 !important;
+            box-sizing: border-box !important;
+        }
+
+        :is(.awa-main-header__inner[data-awa-header-row], .awa-main-header__inner.wp-header) {
+            display: grid !important;
+            grid-template-columns: 124px minmax(320px, 1fr) minmax(250px, 282px) !important;
+            grid-template-areas: 'brand search actions' !important;
+            align-items: center !important;
+            column-gap: 12px !important;
+            width: 100% !important;
+            max-width: none !important;
+            min-height: 68px !important;
+            height: 68px !important;
+            max-height: 68px !important;
+            margin: 0 !important;
+            padding-block: 0 !important;
+            padding-inline: @awa-page-pad-catalog !important;
+            background: var(--awa-surface, #ffffff) !important;
+            box-sizing: border-box !important;
+        }
+
+        .awa-header-primary-row {
+            display: contents !important;
+        }
+
+        .awa-header-brand-cell {
+            grid-area: brand !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 124px !important;
+            min-width: 124px !important;
+            height: 68px !important;
+            min-height: 68px !important;
+            max-height: 68px !important;
+            margin: 0 !important;
+            padding: 0 @awa-space-2 !important;
+
+            :is(.logo, .logo a) {
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                width: 100% !important;
+                height: 68px !important;
+                max-height: 68px !important;
+            }
+
+            .logo img {
+                display: block !important;
+                width: auto !important;
+                max-width: 104px !important;
+                max-height: 52px !important;
+                object-fit: contain !important;
+            }
+        }
+
+        .awa-header-search-col {
+            grid-area: search !important;
+            align-self: center !important;
+            min-width: 0 !important;
+            max-width: none !important;
+            width: 100% !important;
+            margin: 0 !important;
+
+            :is(.block-search, .block-content, .awa-search-action-wrapper, form#search_mini_form, form.minisearch) {
+                width: 100% !important;
+                max-width: none !important;
+                height: 32px !important;
+                min-height: 32px !important;
+                max-height: 32px !important;
+                margin: 0 !important;
+            }
+
+            form#search_mini_form {
+                display: grid !important;
+                grid-template-columns: minmax(0, 1fr) 48px !important;
+                overflow: hidden !important;
+                border: 1px solid var(--awa-border) !important;
+                border-radius: 0 !important;
+                background: var(--awa-surface, #ffffff) !important;
+                box-shadow: none !important;
+            }
+
+            form#search_mini_form :is(.field.search, .field.search .control, .actions) {
+                height: 32px !important;
+                min-height: 32px !important;
+                max-height: 32px !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            form#search_mini_form input#search {
+                height: 32px !important;
+                min-height: 32px !important;
+                border: 0 !important;
+                box-shadow: none !important;
+                padding: 0 @awa-space-3 !important;
+                color: var(--awa-text, #333333) !important;
+                font-size: 12px !important;
+                line-height: 32px !important;
+            }
+
+            form#search_mini_form input#search::placeholder {
+                color: var(--awa-text-muted) !important;
+                opacity: 1 !important;
+            }
+
+            :is(button.action.search, form#search_mini_form button.action.search) {
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                width: 48px !important;
+                min-width: 48px !important;
+                height: 32px !important;
+                min-height: 32px !important;
+                max-height: 32px !important;
+                border: 0 !important;
+                border-radius: 0 !important;
+                background: transparent !important;
+                color: var(--awa-primary) !important;
+                box-shadow: none !important;
+            }
+        }
+
+        .awa-header-right-col {
+            grid-area: actions !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: flex-end !important;
+            gap: @awa-space-4 !important;
+            min-width: 250px !important;
+            max-width: 282px !important;
+            width: 100% !important;
+            height: 68px !important;
+            margin: 0 !important;
+            overflow: visible !important;
+            white-space: nowrap !important;
+        }
+
+        .awa-header-contact-links.awa-header-account-prompt,
+        .awa-header-account-prompt {
+            display: inline-flex !important;
+            align-items: center !important;
+            min-width: 0 !important;
+            max-width: 198px !important;
+            height: 44px !important;
+            min-height: 44px !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            color: var(--awa-text, #333333) !important;
+        }
+
+        .awa-header-account-prompt__icon {
+            color: var(--awa-primary) !important;
+            width: 28px !important;
+            min-width: 28px !important;
+            height: 28px !important;
+        }
+
+        .awa-header-account-prompt__text,
+        .awa-header-account-prompt__guest,
+        .awa-header-account-prompt__copy {
+            font-size: 12px !important;
+            line-height: 1.25 !important;
+            color: var(--awa-text, #333333) !important;
+            white-space: normal !important;
+        }
+
+        .awa-header-account-prompt__link {
+            color: var(--awa-text, #333333) !important;
+            font-weight: @awa-weight-bold !important;
+            text-decoration: none !important;
+        }
+
+        .awa-header-minicart,
+        .awa-header-minicart .mini-carts,
+        .awa-header-minicart .minicart-wrapper {
+            width: 44px !important;
+            min-width: 44px !important;
+            height: 44px !important;
+            min-height: 44px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+
+        .awa-header-minicart .minicart-wrapper a.showcart.header-mini-cart,
+        .awa-header-minicart .minicart-wrapper .action.showcart,
+        .awa-header-minicart .awa-header-cart-fallback {
+            width: 44px !important;
+            min-width: 44px !important;
+            height: 44px !important;
+            min-height: 44px !important;
+            border-radius: 0 !important;
+            background: transparent !important;
+            color: var(--awa-primary) !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            box-shadow: none !important;
+        }
+
+        .awa-header-minicart :is(.awa-minicart-icon, .awa-header-cart-fallback__icon) {
+            width: 28px !important;
+            height: 28px !important;
+            color: var(--awa-primary) !important;
+            fill: var(--awa-primary) !important;
+            stroke: var(--awa-primary) !important;
+        }
+
+        .header-control.awa-nav-bar,
+        .header-control.header-nav.awa-nav-bar {
+            height: 48px !important;
+            min-height: 48px !important;
+            max-height: 48px !important;
+            background: var(--awa-bg-soft) !important;
+            border: 0 !important;
+            box-shadow: none !important;
+        }
+
+        .header-control.awa-nav-bar .awa-nav-bar__inner {
+            display: flex !important;
+            align-items: stretch !important;
+            justify-content: flex-start !important;
+            gap: 0 !important;
+            width: 100% !important;
+            max-width: none !important;
+            height: 48px !important;
+            min-height: 48px !important;
+            max-height: 48px !important;
+            margin: 0 !important;
+            padding-block: 0 !important;
+            padding-inline: 0 @awa-page-pad-catalog !important;
+            background: var(--awa-bg-soft) !important;
+        }
+
+        .header-control.awa-nav-bar .awa-header-categories.menu_left_home1 {
+            // Usa o token --awa-vmenu-trigger-w (fonte única, 168px) p/ caber
+            // "Departamentos" sem clipping. Era 150px hardcoded.
+            flex: 0 0 var(--awa-vmenu-trigger-w, 206px) !important;
+            width: var(--awa-vmenu-trigger-w, 206px) !important;
+            min-width: var(--awa-vmenu-trigger-w, 206px) !important;
+            max-width: var(--awa-vmenu-trigger-w, 206px) !important;
+            height: 48px !important;
+            min-height: 48px !important;
+            max-height: 48px !important;
+            margin-inline: 0 !important;
+            padding-inline: 0 !important;
+        }
+
+        .header-control.awa-nav-bar .awa-header-categories :is(
+            button.our_categories.title-category-dropdown[data-role='awa-vertical-menu-trigger'],
+            h2.our_categories.title-category-dropdown
+        ) {
+            width: var(--awa-vmenu-trigger-w, 206px) !important;
+            height: 48px !important;
+            min-height: 48px !important;
+            max-height: 48px !important;
+            padding: 0 @awa-space-3 !important;
+            border: 0 !important;
+            border-radius: 0 !important;
+            background: var(--awa-primary) !important;
+            color: var(--awa-text-inverse, #ffffff) !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+            gap: @awa-space-2 !important;
+            font-size: 13px !important;
+            font-weight: @awa-weight-bold !important;
+            line-height: 1 !important;
+        }
+
+        .header-control.awa-nav-bar .awa-header-categories .icon-menu,
+        .header-control.awa-nav-bar .awa-header-categories .vm-icon {
+            width: 18px !important;
+            height: 18px !important;
+            color: currentColor !important;
+        }
+
+        .awa-header-primary-nav.menu_primary {
+            flex: 0 1 auto !important;
+            width: auto !important;
+            min-width: 0 !important;
+            height: 48px !important;
+            display: flex !important;
+            align-items: stretch !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .awa-header-primary-nav .container-header-sticky,
+        .awa-header-primary-nav .top-menu,
+        .awa-header-primary-nav .navigation,
+        .awa-header-primary-nav ul {
+            display: flex !important;
+            align-items: stretch !important;
+            height: 48px !important;
+            min-height: 48px !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .header-control.awa-nav-bar :is(
+            .menu_primary .level0 > a,
+            .awa-header-primary-nav .navigation li.level0 > a,
+            .top-menu a.level-top,
+            .awa-nav-quick-links__link,
+            .awa-nav-quick-links__list a
+        ) {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            min-height: 48px !important;
+            height: 48px !important;
+            padding: 0 var(--awa-space-5, 20px) !important;
+            color: var(--awa-text-primary) !important;
+            background: transparent !important;
+            font-size: 13px !important;
+            font-weight: @awa-weight-bold !important;
+            line-height: 1 !important;
+            text-decoration: none !important;
+            text-transform: none !important;
+        }
+
+        .header-control.awa-nav-bar :is(
+            .menu_primary .level0 > a,
+            .awa-header-primary-nav .navigation li.level0 > a,
+            .top-menu a.level-top,
+            .awa-nav-quick-links__link,
+            .awa-nav-quick-links__list a
+        ):hover {
+            color: var(--awa-primary) !important;
+        }
+
+        .awa-header-locale {
+            display: none !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+        }
+
+        .awa-nav-quick-links {
+            display: flex !important;
+            visibility: visible !important;
+            pointer-events: auto !important;
+            align-items: stretch !important;
+            justify-content: flex-start !important;
+            flex: 0 1 auto !important;
+            width: auto !important;
+            min-width: 0 !important;
+            height: 48px !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .awa-nav-quick-links__list {
+            display: flex !important;
+            align-items: stretch !important;
+            gap: 0 !important;
+            height: 48px !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            list-style: none !important;
+        }
+    }
+}
+
+// 83. HEADER CONSISTENCY §83 — /impeccable polish header (2026-06-08)
+//     Tokens, estados interativos e promo unificados; vence drift legado.
+@import '_awa-header-consistency-2026-06.less';
+
+// 84. SHELL CONSISTENCY §84 — gutter header/home/PLP/footer unificado (2026-06-08)
+@import '_awa-shell-consistency-2026-06.less';
+
+// 85. HOME CONSISTENCY §85 — cabeçalhos, chrome carrossel, links de seção (2026-06-08)
+@import '_awa-consistency-home-2026-06.less';
+
+// 86. HOME CONSISTENCY PASS 2 §86 — gutter wrapper + gate compact progressivo (2026-06-08)
+@import '_awa-consistency-home-pass2-2026-06.less';
+
+// 87. VERTICAL MENU CONSISTENCY §87 — trigger 150×38, dropdown, flyouts (2026-06-08)
+@import '_awa-vertical-menu-consistency-2026-06.less';
+
+// 88. GLOBAL CONSISTENCY §88 — tokens header, shell, CTAs (2026-06-08)
+@import '_awa-global-consistency-2026-06.less';
+
+// 89. PLP CONSISTENCY §89 — cards, filtros, toolbar, PDP related (2026-06-08)
+@import '_awa-plp-consistency-2026-06.less';
+
+// 90. PDP CONSISTENCY §90 — gate B2B, layout buy-box, related (2026-06-08)
+@import '_awa-pdp-consistency-2026-06.less';
+
+// 91. CATALOG CONSISTENCY §91 — breadcrumbs + gate PLP/busca + fundo branco (2026-06-08)
+@import '_awa-catalog-consistency-2026-06.less';
+
+// 93. PLP/SEARCH PASS 2 §93 — hero, toolbar, paginação, nota busca (2026-06-08)
+@import '_awa-plp-consistency-pass2-2026-06.less';
+
+// 94. PLP GRID + MOBILE §94 — grid responsivo, filtros ativos, hero compacto (2026-06-08)
+@import '_awa-plp-grid-mobile-2026-06.less';
+
+// G-095. CONTAINER + GRID ARCHITECTURE — SSOT shell, page grid, subgrid PLP (2026-06-08)
+@import '_awa-container-grid-architecture-2026-06.less';
+
+// 96. ACCOUNT + B2B GRID §96 — tier 2/3 dashboard grid (2026-06-08)
+@import '_awa-account-grid-architecture-2026-06.less';
+
+// 97. GRID RHYTHM + TYPESET §97 — vertical rhythm, measure, z-index (2026-06-08)
+@import '_awa-container-grid-rhythm-2026-06.less';
+
+// G-098. UNIVERSAL SHELL — box model, gutters, Bootstrap neutralization (2026-06-08)
+@import '_awa-universal-shell-2026-06.less';
+
+// G-099. UI SURFACE CONSISTENCY — page chrome, messages, blocks, tables (2026-06-08)
+@import '_awa-ui-surface-consistency-2026-06.less';
+
+// G-100. INTERACTION STATE — focus, hover, selected, error, pagination (2026-06-08)
+@import '_awa-interaction-state-consistency-2026-06.less';
+
+// H-092. HOME BG WHITE — fundo branco unificado na home (2026-06-08)
+@import '_awa-home-bg-white-2026-06.less';
+
+// H-093. HOME SHELF HEADERS — cabeçalhos vitrine sem overlap/barra legada (2026-06-08)
+@import '_awa-home-shelf-header-fix-2026-06.less';
+
+// H-095. HOME CLEAN — zebra/gradientes/divisores neutralizados (2026-06-08)
+@import '_awa-home-clean-2026-06.less';
+
+// H-100. HOME VISUAL STANDARD — tipografia, ritmo, cards (Impeccable 2026-06-08)
+@import '_awa-home-visual-standard-2026-06.less';
+
+// G-101. PRODUCT CARD CONTRACT — shared HOME + PLP card contract (2026-06-08)
+@import '_awa-product-card-contract-2026-06.less';
+
+// H-110. HOME CONTRACT — consolidated rhythm/typeset/links/a11y (2026-06-08)
+@import '_awa-home-contract-2026-06.less';
+
+// G-102. DISTILL VISUAL — neutraliza drift consolidated/async (2026-06-08)
+@import '_awa-distill-visual-consistency-2026-06.less';
+
+// H-102. HOME DENSITY — colunas, padding, header compacto (2026-06-08)
+@import '_awa-home-density-2026-06.less';
+
+// G-103. ARCHITECTURE + VISUAL MODERN — tiers, container queries, cards (2026-06-08)
+@import '_awa-architecture-visual-modern-2026-06.less';
+
+// 104. ARCH + VISUAL PASS 2 §104 — account/flow/cart/cms/checkout chrome (2026-06-08)
+@import '_awa-architecture-visual-modern-pass2-2026-06.less';
+
+// 105. ARCH + VISUAL PASS 3 §105 — distill shadows/stripes, tables, modals (2026-06-08)
+@import '_awa-architecture-visual-modern-pass3-2026-06.less';
+
+// 106. FORM CONTROLS + VISUAL STANDARD §106 — inputs ops + home card distill (2026-06-08)
+@import '_awa-form-controls-visual-standard-2026-06.less';
+
+// 107. VISUAL STANDARD PASS 4 §107 — token distill, catalog/checkout/PDP (2026-06-08)
+@import '_awa-visual-standard-pass4-2026-06.less';
+
+// 108. ASYNC BUNDLE DISTILL §108 — vence pdp/plp promax, checkout-polish, home gates (2026-06-08)
+@import '_awa-async-bundle-distill-2026-06.less';
+
+// 109. OPC CHECKOUT §109 — header, sidebar zones, inline errors (2026-06-08)
+@import '_awa-opc-checkout-2026-06.less';
+@import '_awa-opc-sidebar-2026-06.less';
+
+// 110. OPC MODERN UX §110 — tipografia, etapas, adapt mobile/tablet/touch (2026-06-08)
+@import '_awa-opc-modern-2026-06.less';
+
+// 111. PDP SHELL UNIFY §111 — shell catalog 1440px + flex 54/46 (2026-06-08)
+@import '_awa-image-fluid.less';
+@import '_awa-pdp-shell-unify-2026-06.less';
+
+// §111b — override pós-shell (garante 1440px se preprocessor servir cache legado 100%)
+html body#html-body.catalog-product-view .page-wrapper :is(
+    .nav-breadcrumbs,
+    #maincontent#maincontent.page-main.container,
+    .page-main,
+    .page-main.container
+) {
+    max-width: @awa-page-catalog !important;
+    width: 100% !important;
+    margin-inline: auto !important;
+    padding-inline: @awa-page-pad-catalog !important;
+    box-sizing: border-box !important;
+}
+@import '_awa-pdp-polish-2026-06.less';
+@import '_awa-pdp-distill-2026-06.less';
+// layout §114 merged em _awa-pdp-shell-unify (deploy trunca imports após polish)

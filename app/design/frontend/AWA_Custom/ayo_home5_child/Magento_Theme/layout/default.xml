@@ -42,15 +42,15 @@
                     <argument name="load_home_category_compat_js" xsi:type="boolean">false</argument>
                 </arguments>
             </block>
-            <!-- Runtime: flyout portal + teclado/a11y (1 request, intent-deferred) -->
-            <block class="Magento\Framework\View\Element\Template"
-                   name="awa.vertical.menu.runtime"
-                   template="Magento_Theme::html/awa-vertical-menu-runtime.phtml"
-                   after="awa.custom.global.js.loader"/>
-            <block class="Magento\Framework\View\Element\Template"
-                   name="awa.vertical.menu.stack.css"
-                   template="Magento_Theme::html/awa-vertical-menu-stack-css.phtml"
-                   after="awa.vertical.menu.runtime"/>
+            <!-- Menu v2: runtime unificado via GrupoAwamotos_Theme::menu/awa-menu-bootstrap.phtml -->
+            <referenceBlock name="awa.vertical.menu.runtime" remove="true"/>
+            <referenceBlock name="awa.vertical.menu.stack.css" remove="true"/>
+            <referenceBlock name="awa.vertical.menu.distill.css" remove="true"/>
+            <referenceBlock name="awa.vertical.menu.adapt.css" remove="true"/>
+            <referenceBlock name="awa.vertical.menu.polish.css" remove="true"/>
+            <referenceBlock name="awa.vertical.menu.harden" remove="true"/>
+            <referenceBlock name="awa.vertical.menu.harden.js" remove="true"/>
+            <referenceBlock name="awa.vertical.menu.flyout.fix" remove="true"/>
             <!-- CSS estático — seguro cachear no FPC (sem dados de sessão ou cliente). -->
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.impeccable.audit.uncached.global.v10"
@@ -117,11 +117,17 @@
                    template="Magento_Theme::html/awa-critical-inline.phtml"
                    after="awa.cls.nav.fix"/>
 
+            <!-- Bloqueia fetch/sendBeacon para localhost:7631/ingest (CSP + console limpo em produção) -->
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.impeccable.loopback.guard.global"
+                   template="Magento_Theme::html/awa-impeccable-loopback-guard-v2.phtml"
+                   after="awa.critical.inline.css"/>
+
             <!-- HeroPreload lê slides do banco — conteúdo estático, seguro no FPC. -->
             <block class="GrupoAwamotos\Theme\Block\Html\HeroPreload"
                    name="awa.head.preload"
                    template="Magento_Theme::html/awa-head-preload.phtml"
-                   after="awa.critical.inline.css"/>
+                   after="awa.impeccable.loopback.guard.global"/>
 
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.deferred.interaction.css"

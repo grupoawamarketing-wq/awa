@@ -1,0 +1,129 @@
+// §63 DISTILL — /impeccable distill b2b/account (2026-06-08)
+// Modo operacional: header compacto fixo, sem chrome de catálogo, títulos únicos.
+
+@import (once) '_awa-tokens';
+
+@awa-distill-account-header-h: 56px;
+@awa-distill-account-header-h-mobile: 52px;
+
+// Conta operacional — exclui b2b-guest-mode / b2b-restricted-mode (catálogo visitante)
+@awa-account-operational-body: ~'html body#html-body:is(.awa-account-operational, .b2b-account-shell, .account)';
+
+// ── §63a — Tokens de offset (sidebar sticky) ────────────────────────────────
+@{awa-account-operational-body} {
+    --awa-header-scroll-offset: @awa-distill-account-header-h;
+
+    @media (max-width: @awa-breakpoint-md) {
+        --awa-header-scroll-offset: @awa-distill-account-header-h-mobile;
+    }
+}
+
+// ── §63b — Remover chrome de catálogo (promo, nav, trust) ───────────────────
+@{awa-account-operational-body} .page-wrapper {
+    :is(
+        #awa-b2b-promo-bar,
+        .awa-b2b-promo-bar,
+        .top-header.awa-b2b-promo-bar,
+        .top-header.awa-utility-bar,
+        .awa-utility-bar,
+        .header-control.header-nav.awa-nav-bar,
+        .awa-header-categories,
+        .awa-nav-bar,
+        .awa-b2b-trust-badges
+    ) {
+        display: none !important;
+        min-height: 0 !important;
+        max-height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+    }
+}
+
+// ── §63c — Header operacional: compacto sem depender de scroll ─────────────
+@{awa-account-operational-body} .page-wrapper {
+    .awa-site-header.awa-account-header,
+    .awa-site-header.awa-header-condensed {
+        .awa-main-header,
+        .header_main {
+            min-height: @awa-distill-account-header-h !important;
+        }
+
+        #header :is(.awa-main-header__inner[data-awa-header-row], .wp-header[data-awa-header-row]) {
+            min-height: @awa-distill-account-header-h !important;
+            height: @awa-distill-account-header-h !important;
+            padding-block: @awa-space-2 !important;
+        }
+
+        .awa-header-brand-cell .logo img {
+            max-height: 36px !important;
+            width: auto !important;
+        }
+
+        .awa-header-account-prompt__line1 {
+            display: none !important;
+        }
+    }
+}
+
+@media (min-width: (@awa-breakpoint-lg + 1)) {
+    @{awa-account-operational-body} .page-wrapper {
+        .awa-site-header.awa-account-header #header :is(.awa-main-header__inner[data-awa-header-row], .wp-header[data-awa-header-row]),
+        .awa-site-header.awa-header-condensed #header :is(.awa-main-header__inner[data-awa-header-row], .wp-header[data-awa-header-row]) {
+            grid-template-columns: 148px minmax(0, 1fr) auto !important;
+            column-gap: @awa-space-4 !important;
+        }
+
+        .awa-site-header .awa-header-search-col form.minisearch,
+        .awa-site-header .awa-header-search-col .block-search form.minisearch {
+            min-height: 40px !important;
+            max-height: 40px !important;
+        }
+
+        .awa-site-header .awa-header-search-col input#search,
+        .awa-site-header .awa-header-search-col input.input-text {
+            min-height: 40px !important;
+            font-size: 0.875rem !important;
+        }
+    }
+}
+
+// ── §63d — Conteúdo: um título, breadcrumbs B2B só ──────────────────────────
+@{awa-account-operational-body} {
+    .column.main:has(.b2b-page-shell) .page-title-wrapper {
+        display: none !important;
+    }
+
+    .page-top > .breadcrumbs:not(.b2b-breadcrumbs),
+    .page-main > .breadcrumbs:not(.b2b-breadcrumbs) {
+        display: none !important;
+    }
+
+    .page-main {
+        padding-top: @awa-space-3 !important;
+    }
+
+    .b2b-section-header .section-subtitle {
+        max-width: 52ch;
+    }
+}
+
+// ── §63e — Footer: menos ruído em superfícies de trabalho ──────────────────
+@{awa-account-operational-body} .page-wrapper {
+    :is(.awa-footer-trust-bar, .awa-footer-categories-expand) {
+        display: none !important;
+    }
+
+    .page_footer.awa-footer-exp-control {
+        padding-top: @awa-space-4 !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    @{awa-account-operational-body}
+        .page-wrapper .awa-site-header.awa-account-header * {
+        transition: none !important;
+    }
+}

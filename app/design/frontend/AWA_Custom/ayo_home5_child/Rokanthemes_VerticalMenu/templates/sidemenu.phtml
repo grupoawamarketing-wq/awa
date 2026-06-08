@@ -20,6 +20,7 @@ if (!empty($_config['general']['enable'])):
     $menuHtml = trim((string) $_menu);
     $hasCategoryItems = $menuHtml !== '' && stripos($menuHtml, 'ui-menu-item') !== false;
     $extraHtml = trim($block->getCmsBlockHtmlByIdentifier('vertical-menu-extra'));
+    $_bgImages = trim($block->getCmsBlockHtmlByIdentifier('vertical_background_images'));
 ?>
 
 <nav class="navigation verticalmenu side-verticalmenu"
@@ -77,7 +78,6 @@ if (!empty($_config['general']['enable'])):
             </span>
         </li>
         <?php endif; ?>
-        <?php $_bgImages = trim($block->getCmsBlockHtmlByIdentifier('vertical_background_images')); ?>
         <?php if ($_bgImages !== ''): ?>
         <li class="vertical-bg-img"><?= /** @noEscape */ $_bgImages ?></li>
         <?php endif; ?>
@@ -108,99 +108,9 @@ if (!empty($_config['general']['enable'])):
     </ul>
 </nav>
 
-<?php
-$_vmLayoutHandles = $block->getLayout()->getUpdate()->getHandles();
-$_vmIsHomePage = in_array('cms_index_index', $_vmLayoutHandles, true);
-$_vmConfig = [
-    "desktopBreakpoint" => 992,
-    "overlaySelector" => ".shadow_bkg_show",
-    "limitShow" => (int) $limitShow,
-    "hoverDelay" => 100,
-];
-?>
-<?php if ($_vmIsHomePage): ?>
-<script>
-/* vertical-menu-init: defer idle/intent na home (LCP/TBT — menu inicia fechado por CSS) */
-(function (w, d) {
-    'use strict';
-    var cfg = {
-        "[data-role='awa-vertical-menu']": {
-            "js/vertical-menu-init": <?= /* @noEscape */ json_encode($_vmConfig, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>,
-            "js/vertical-menu-drill": { "desktopBreakpoint": 992, "animDuration": 240 },
-            "awa-vertical-menu-toggle-hotfix": {},
-            "awaVerticalMenu": {}
-        },
-        ".vertical-bg-img": { "js/vmenu-promo-carousel": { "interval": 5000 } }
-    };
-    var done = false;
-    function boot() {
-        if (done) { return; }
-        done = true;
-        if (typeof w.require !== 'function') { done = false; w.setTimeout(boot, 200); return; }
-        var s = d.createElement('script');
-        s.type = 'text/x-magento-init';
-        s.textContent = JSON.stringify(cfg);
-        d.body.appendChild(s);
-        w.require(['mage/apply/main']);
-    }
-    /* Intent: hover/tap na área do menu dispara imediatamente */
-    var menuEl = d.querySelector("[data-role='awa-vertical-menu']");
-    if (menuEl) {
-        menuEl.addEventListener('mouseenter', boot, { once: true, passive: true });
-        menuEl.addEventListener('pointerdown', boot, { once: true, passive: true });
-        menuEl.addEventListener('touchstart', boot, { once: true, passive: true });
-    }
-    /* Inicializa em idle para que o primeiro clique do usuario ja abra o menu. */
-    if (w.requestIdleCallback) {
-        w.requestIdleCallback(boot, { timeout: 2500 });
-    } else {
-        w.setTimeout(boot, 1500);
-    }
-
-    /*
-     * Departamentos preflight: se o JS ainda não registrou o handler quando
-     * o usuário clica, abre o painel via CSS/DOM imediatamente (primeiro clique
-     * funciona visualmente). O módulo JS faz o takeover correto no segundo clique.
-     */
-    var triggerBtn = d.querySelector("[data-role='awa-vertical-menu-trigger']");
-    var panelEl    = d.querySelector("[data-role='awa-vertical-menu-panel']");
-    if (triggerBtn && panelEl) {
-        triggerBtn.addEventListener('click', function onDeptPreflight() {
-            triggerBtn.removeEventListener('click', onDeptPreflight);
-            boot(); /* garante que o módulo começa a carregar */
-            /* Abrir painel visualmente se ainda fechado */
-            var isOpen = triggerBtn.getAttribute('aria-expanded') === 'true'
-                      || panelEl.getAttribute('data-awa-menu-state') === 'open';
-            if (!isOpen) {
-                triggerBtn.setAttribute('aria-expanded', 'true');
-                triggerBtn.classList.add('active', 'awa-dept-preflight');
-                panelEl.setAttribute('data-awa-menu-state', 'open');
-                panelEl.setAttribute('aria-hidden', 'false');
-                /* CSS tem display:none !important — precisa de setProperty com priority */
-                panelEl.style.setProperty('display', 'block', 'important');
-                panelEl.style.setProperty('visibility', 'visible', 'important');
-                panelEl.style.setProperty('opacity', '1', 'important');
-            }
-        }, { capture: false });
-    }
-})(window, document);
-</script>
-<?php else: ?>
+<?php if ($_bgImages !== ''): ?>
 <script type="text/x-magento-init">
 {
-    "[data-role='awa-vertical-menu']": {
-        "js/vertical-menu-init": {
-            "desktopBreakpoint": 992,
-            "overlaySelector": ".shadow_bkg_show",
-            "limitShow": <?= (int) $limitShow ?>,
-            "hoverDelay": 100
-        },
-        "js/vertical-menu-drill": {
-            "desktopBreakpoint": 992,
-            "animDuration": 240
-        },
-        "awaVerticalMenu": {}
-    },
     ".vertical-bg-img": {
         "js/vmenu-promo-carousel": {
             "interval": 5000

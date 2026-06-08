@@ -1,16 +1,118 @@
 <?xml version="1.0"?>
+<!--
+    checkout_cart_index.xml — AWA child theme overrides for the cart page.
+
+    Performance 2026-06-08 (/impeccable optimize):
+      - Critical above-fold CSS inline via awa-cart-checkout-critical.phtml (~8KB).
+      - awa-cart-polish.min.css + cart-page-premium.min.css load async (idle/pointerdown).
+      - awa-cart-layout-terminal.min.css stays blocking (~7KB) for grid final-wins.
+      - awa-focus-visible removed (focus rules live in critical inline).
+      - awa.shelf.carousel removed: saves 25 KB blocking CSS + deferred JS.
+-->
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd"
+      cacheable="false">
     <head>
-        <css src="css/awa-cart-polish.css"/>
-        <css src="css/b2b/pages/cart-checkout-premium.css"/>
+        <remove src="css/awa-checkout-home5.css"/>
+        <remove src="css/awa-header-stack-2026-05-28.min.css"/>
+        <!-- awa-cart-polish: async via awa-cart-checkout-critical.phtml (critical inline cobre FCP) -->
+        <!-- Terminal: vence awa-layout-bundle flex legacy após todos os bundles async -->
+        <css src="css/awa-cart-layout-terminal.min.css"/>
+        <!-- refine: carregado async via awa-checkout-polish-async.phtml (evita duplicata síncrona) -->
     </head>
     <body>
-        <referenceContainer name="checkout.cart.container">
-            <block class="GrupoAwamotos\B2B\Block\Cart\B2BTrustStrip"
-                   name="awa.b2b.cart.trust.strip"
-                   template="GrupoAwamotos_B2B::cart/trust-strip.phtml"
-                   before="checkout.cart.form"/>
+        <!-- Performance: promax bundle (~119KB) não é necessário no carrinho (terminal + refine no head) -->
+        <referenceBlock name="awa.head.preload">
+            <action method="setData">
+                <argument name="key" xsi:type="string">awa_skip_promax_bundle</argument>
+                <argument name="value" xsi:type="boolean">true</argument>
+            </action>
+        </referenceBlock>
+
+        <!-- Audit bundle (~162KB) + polish-r2 sobrescrevem cart-summary; stack terminal no head -->
+        <referenceBlock name="awa.audit.bundle.css" remove="true"/>
+
+        <!-- Menu vertical + audit global: nav oculto no checkout mode; economiza ~2 requests async -->
+        <referenceBlock name="awa.vertical.menu.runtime" remove="true"/>
+        <referenceBlock name="awa.vertical.menu.stack.css" remove="true"/>
+        <referenceBlock name="awa.vertical.menu.distill.css" remove="true"/>
+        <referenceBlock name="awa.vertical.menu.adapt.css" remove="true"/>
+        <referenceBlock name="awa.vertical.menu.polish.css" remove="true"/>
+        <referenceBlock name="awa.vertical.menu.harden" remove="true"/>
+        <referenceBlock name="awa.vertical.menu.harden.js" remove="true"/>
+        <referenceBlock name="awa.vertical.menu.flyout.fix" remove="true"/>
+        <referenceBlock name="awa.impeccable.audit.uncached.global.v10" remove="true"/>
+        <referenceBlock name="awa.mobile.nav" remove="true"/>
+
+        <!-- Shelf carousel not used on the cart page — removes 25 KB blocking CSS -->
+        <referenceBlock name="awa.shelf.carousel" remove="true"/>
+
+        <!-- One skip link (awa.skip.link) is enough on cart focus mode; nav is hidden. -->
+        <referenceBlock name="skip.links" remove="true"/>
+
+        <!-- Bloco "Pedidos Feitos Recentemente" — removido do carrinho a pedido 2026-05-27 -->
+        <referenceBlock name="sale.reorder.sidebar" remove="true"/>
+
+        <referenceBlock name="checkout.cart.empty">
+            <arguments>
+                <argument name="view_model" xsi:type="object">GrupoAwamotos\B2B\ViewModel\Cart\EmptyCartContext</argument>
+            </arguments>
+        </referenceBlock>
+
+        <referenceBlock name="page.main.title">
+            <block class="Magento\Checkout\Block\Cart"
+                   name="awa.cart.page.meta"
+                   template="Magento_Checkout::cart/page-meta.phtml"
+                   after="-"/>
+        </referenceBlock>
+
+        <referenceBlock name="checkout.cart.summary.title">
+            <arguments>
+                <argument translate="true" name="text" xsi:type="string">Resumo do pedido</argument>
+            </arguments>
+        </referenceBlock>
+
+        <referenceBlock name="checkout.cart.coupon">
+            <arguments>
+                <argument translate="true" name="label" xsi:type="string">Cupom de desconto</argument>
+            </arguments>
+        </referenceBlock>
+
+        <referenceContainer name="cart.summary" htmlId="cart-summary">
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.cart.b2b.credit.notice"
+                   template="Magento_Checkout::cart/b2b-credit-notice.phtml"
+                   before="checkout.cart.totals.container">
+                <arguments>
+                    <argument name="view_model" xsi:type="object">GrupoAwamotos\B2B\ViewModel\Cart\CreditNotice</argument>
+                </arguments>
+            </block>
         </referenceContainer>
+
+        <referenceBlock name="head.additional">
+            <!-- CSS crítico above-fold (tokens + header checkout mode) embutido inline. -->
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.cart.checkout.critical"
+                   template="Magento_Theme::html/awa-cart-checkout-critical.phtml"/>
+        </referenceBlock>
+
+        <referenceContainer name="before.body.end">
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.cart.summary.polish.init"
+                   template="Magento_Checkout::cart/summary-polish-init.phtml"
+                   before="awa.cart.terminal.shield"/>
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.cart.terminal.shield"
+                   template="Magento_Checkout::cart/terminal-shield.phtml"
+                   after="-"/>
+        </referenceContainer>
+
+        <!-- Resumo: totais + finalizar antes de frete/cupom (opções secundárias) -->
+        <move element="b2b.min.order.progress" destination="cart.summary" after="checkout.cart.summary.title"/>
+        <move element="awa.cart.b2b.credit.notice" destination="cart.summary" after="b2b.min.order.progress"/>
+        <move element="checkout.cart.totals.container" destination="cart.summary" after="awa.cart.b2b.credit.notice"/>
+        <move element="checkout.cart.methods.bottom" destination="cart.summary" after="checkout.cart.totals.container"/>
+        <move element="checkout.cart.shipping" destination="cart.summary" after="checkout.cart.methods.bottom"/>
+        <move element="checkout.cart.coupon" destination="cart.summary" after="checkout.cart.shipping"/>
     </body>
 </page>

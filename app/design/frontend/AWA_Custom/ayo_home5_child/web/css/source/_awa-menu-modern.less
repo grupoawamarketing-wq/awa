@@ -1,0 +1,88 @@
+// §MENU-V2 — AWA Menu moderno (2026-06-08)
+// Estados unificados + base vertical menu (stack legado inlined).
+
+@import (once) '_awa-tokens';
+
+// Base visual do menu vertical (ex-awa-vertical-menu-stack-2026-05-28.css)
+@import (inline) '../awa-vertical-menu-stack-2026-05-28.css';
+
+// ── Estados v2 (SSOT) ─────────────────────────────────────────────────────
+html body#html-body.awa-menu-dept-open .page-wrapper [data-role='awa-vertical-menu-panel'],
+html body#html-body .page-wrapper [data-role='awa-vertical-menu-panel'][data-awa-menu-state='open'] {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+}
+
+html body#html-body.awa-menu-drawer-open {
+    overflow: hidden;
+
+    .page-wrapper .header-control.awa-nav-bar,
+    .page-wrapper .header-control.header-nav.awa-nav-bar {
+        display: block !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+    }
+}
+
+// Portal flyout (Floating UI)
+html body .awa-vmf-portal {
+    position: fixed;
+    z-index: 99990;
+    background: var(--awa-surface, @awa-color-white);
+    border: 1px solid var(--awa-border, @awa-neutral-200);
+    border-radius: @awa-radius-md;
+    box-shadow: 0 8px 24px fade(#000, 12%);
+    max-height: 80vh;
+    overflow: auto;
+}
+
+html body li.level0[data-awa-submenu-open='true'] > a {
+    color: var(--awa-primary, @awa-red);
+}
+
+// Nav bar — catálogo visitante B2B (nunca esconder por guest-mode)
+html body#html-body:is(.catalogsearch-result-index, .catalog-category-view, .catalog-product-view, .checkout-cart-index)
+    .page-wrapper .header-control.header-nav.awa-nav-bar,
+html body#html-body:is(.catalogsearch-result-index, .catalog-category-view, .catalog-product-view, .checkout-cart-index)
+    .page-wrapper .header-control.awa-nav-bar {
+    @media (min-width: (@awa-breakpoint-lg + 1)) {
+        display: flex !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+        min-height: 48px !important;
+        max-height: 48px !important;
+    }
+}
+
+// Mobile drawer overlay
+html body .awa-mobile-drawer-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: calc(var(--z-overlay, 500) + 10);
+    border: 0;
+    padding: 0;
+    margin: 0;
+    background: fade(#000, 45%);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 180ms ease-out;
+
+    &.is-active {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html body .awa-mobile-drawer-overlay {
+        transition: none;
+    }
+}

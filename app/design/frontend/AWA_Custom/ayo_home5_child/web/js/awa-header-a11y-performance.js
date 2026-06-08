@@ -108,6 +108,11 @@
 
     function ensureToggleRole(el) {
         if (!el) { return; }
+        if (el.tagName && el.tagName.toLowerCase() === 'button') {
+            el.removeAttribute('role');
+            el.removeAttribute('tabindex');
+            return;
+        }
         if (!el.getAttribute('role')) {
             el.setAttribute('role', 'button');
         }
@@ -125,15 +130,29 @@
             || document.querySelector('.sections.nav-sections');
     }
 
+    function syncToggleState(toggle, expanded, navShell) {
+        if (!toggle) {
+            return;
+        }
+
+        toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+        toggle.setAttribute('aria-label', expanded ? 'Fechar menu de navegação' : 'Abrir menu de navegação');
+
+        if (navShell && navShell.id) {
+            toggle.setAttribute('aria-controls', navShell.id);
+        }
+    }
+
     function setNavState() {
         let toggle = document.querySelector('[data-awa-nav-toggle="true"]');
         if (!toggle) {
             return;
         }
         ensureToggleRole(toggle);
+        let navShell = resolveDrawerShell();
         let body = document.body;
         let expanded = body.classList.contains('nav-open') || body.classList.contains('nav-before-open');
-        toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+        syncToggleState(toggle, expanded, navShell);
     }
 
     function getExperimentConfig() {
@@ -176,13 +195,17 @@
     }
 
     function wireNavA11y(experiment) {
+        if (window.__AWA_MENU_V2) {
+            return;
+        }
+
         let toggle = document.querySelector('[data-awa-nav-toggle="true"]');
         let navShell = resolveDrawerShell();
         if (toggle) {
             ensureToggleRole(toggle);
         }
         let useEnhancedDrawer = !!experiment && experiment.variant === 'B';
-        let useLegacyMobileNavFallback = !useEnhancedDrawer && !!navShell && isHomeHeaderPage() && isMobileHeaderViewport();
+        let useLegacyMobileNavFallback = !useEnhancedDrawer && !!navShell && isMobileHeaderViewport();
         let overlay = null;
         let lastFocusedElement = null;
         let focusableSelector = [
@@ -254,7 +277,7 @@
                 shellTargets.push(element);
             }
 
-            if (!isHomeHeaderPage() || !isMobileHeaderViewport()) {
+            if (!isMobileHeaderViewport()) {
                 return;
             }
 
@@ -382,7 +405,7 @@
             let drawerOverlay = ensureOverlay();
 
             navShell.setAttribute('aria-hidden', open ? 'false' : 'true');
-            toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+            syncToggleState(toggle, open, navShell);
 
             if (open) {
                 document.body.classList.add('awa-mobile-drawer-open');
@@ -1269,14 +1292,20 @@
         }, { capture: true });
 
         if (window.MutationObserver) {
-            new MutationObserver(function () {
-                scheduleDesktopHeaderVisualParity();
-            }).observe(document.body, {
-                attributes: true,
-                attributeFilter: ['class'],
-                childList: true,
-                subtree: true
-            });
+            let headerScope = document.querySelector(
+                '.awa-site-header, #header.header-container, .page-header, header.page-header'
+            );
+
+            if (headerScope) {
+                new MutationObserver(function () {
+                    scheduleDesktopHeaderVisualParity();
+                }).observe(headerScope, {
+                    attributes: true,
+                    attributeFilter: ['class', 'style', 'aria-expanded', 'aria-hidden'],
+                    childList: true,
+                    subtree: true
+                });
+            }
         }
     });
 })();

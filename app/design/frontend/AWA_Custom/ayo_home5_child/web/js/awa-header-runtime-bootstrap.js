@@ -1,11 +1,9 @@
 define([
     'awa-header-sticky',
-    'awa-vertical-menu-focus-trap',
     'awa-header-nav-runtime',
     'awa-header-customer-runtime'
 ], function (
     initStickyHeader,
-    initFocusTrap,
     initHeaderNavRuntime,
     initHeaderCustomerRuntime
 ) {
@@ -25,7 +23,6 @@ define([
             try {
                 localStorage.setItem('awa_b2b_promo_dismissed', '1');
             } catch (storageError) {
-                /* localStorage indisponível (modo privado/CSP) — dismiss é visual apenas */
                 console.warn('[AWA] promo bar dismiss: localStorage unavailable', storageError);
             }
         });
@@ -40,9 +37,6 @@ define([
 
         if (typeof initStickyHeader === 'function') {
             initStickyHeader();
-        }
-        if (typeof initFocusTrap === 'function') {
-            initFocusTrap();
         }
         if (typeof initHeaderNavRuntime === 'function') {
             initHeaderNavRuntime();

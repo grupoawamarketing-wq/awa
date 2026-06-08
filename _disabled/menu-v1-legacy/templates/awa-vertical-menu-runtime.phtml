@@ -1,0 +1,50 @@
+<?php declare(strict_types=1);
+
+/**
+ * AWA Vertical Menu Runtime — flyout + harden unificados, carga por intenção (TBT).
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ */
+$runtimeUrl = $block->getViewFileUrl('js/awa-vertical-menu-runtime-2026-05-28.min.js');
+?>
+<script>
+(function (w, d) {
+    'use strict';
+    var url = <?= /* @noEscape */ json_encode($runtimeUrl, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;
+    var done = false;
+
+    function loadRuntime() {
+        if (done) {
+            return;
+        }
+        done = true;
+        var s = d.createElement('script');
+        s.src = url;
+        s.defer = true;
+        d.body.appendChild(s);
+    }
+
+    var menuEl = d.querySelector('[data-role="awa-vertical-menu"]');
+    if (menuEl) {
+        menuEl.addEventListener('mouseenter', loadRuntime, { once: true, passive: true });
+        menuEl.addEventListener('pointerdown', loadRuntime, { once: true, passive: true });
+        menuEl.addEventListener('focusin', loadRuntime, { once: true });
+    }
+
+    var trigger = d.querySelector('[data-role="awa-vertical-menu-trigger"]');
+    if (trigger) {
+        trigger.addEventListener('pointerdown', loadRuntime, { once: true, passive: true });
+        trigger.addEventListener('focus', loadRuntime, { once: true });
+    }
+
+    /* safe4: home — sem idle; menu só por hover/clique no trigger */
+    var isHome = d.body && d.body.classList.contains('cms-index-index');
+    if (!isHome) {
+        if ('requestIdleCallback' in w) {
+            w.requestIdleCallback(loadRuntime, { timeout: 2800 });
+        } else {
+            w.setTimeout(loadRuntime, 2200);
+        }
+    }
+})(window, document);
+</script>
