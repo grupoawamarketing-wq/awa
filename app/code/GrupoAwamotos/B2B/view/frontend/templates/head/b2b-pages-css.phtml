@@ -1,14 +1,97 @@
 <?php
 /**
- * AWA B2B Pages — Late CSS Loader (ALL B2B pages)
- * Carrega o CSS de polish para TODAS as páginas B2B via <link> direto,
- * APÓS o merge do Magento. Garante prioridade na cascata CSS.
+ * AWA B2B Pages — Late CSS Loader (non-blocking)
+ * CSS crítico inline evita FOUC em páginas operacionais antes do late.css async.
+ * Layout shell (§134/§136) vem de account-b2b.css — não duplicar aqui.
  */
 declare(strict_types=1);
 
 /** @var \Magento\Framework\View\Element\Template $block */
 $cssUrl = $block->getViewFileUrl('GrupoAwamotos_B2B::css/account/awa-b2b-pages-late.css');
+$assetVersion = '20260610-v59';
 ?>
+<style id="awa-b2b-pages-critical">
+/* §148 critical — superfícies operacionais antes do late.css async */
+
+html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .b2b-page-shell {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: clamp(12px, 1.5vw, 16px) !important;
+}
+
+html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper :is(
+    .awa-empty-state,
+    .b2b-empty-state,
+    .credit-card,
+    .table-wrapper,
+    .b2b-quote-wrapper
+) {
+    border-radius: 4px !important;
+    box-shadow: none !important;
+}
+
+@media (max-width: 1024px) {
+    html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .page-main,
+    html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .b2b-breadcrumbs-container {
+        padding-inline: var(--awa-page-pad-tablet, 16px) !important;
+    }
+}
+
+@media (max-width: 768px) {
+    html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .page-main > :is(.columns, .columns.layout) {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: clamp(12px, 1.5vw, 16px) !important;
+    }
+
+    html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .page-main,
+    html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .b2b-breadcrumbs-container {
+        padding-inline: var(--awa-page-pad-mobile, 12px) !important;
+    }
+}
+
+html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper :is(.data.table th, table thead th) {
+    text-transform: none !important;
+    font-size: 13px !important;
+    background: var(--awa-bg-muted, #f8fafc) !important;
+}
+
+html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper :is(
+    .b2b-quote-wrapper,
+    .table-wrapper,
+    .box,
+    .b2b-shortcut-card
+):hover {
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .b2b-quote-form-container :is(
+    .b2b-quote-items,
+    .b2b-quote-form,
+    .b2b-quote-wrapper
+) {
+    border-radius: 4px !important;
+    box-shadow: none !important;
+}
+
+html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .b2b-quote-form-container .data.table th {
+    text-transform: none !important;
+    font-size: 13px !important;
+    background: var(--awa-bg-muted, #f8fafc) !important;
+}
+
+html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .b2b-quote-form-container .action.primary {
+    min-height: 44px !important;
+    border-radius: 4px !important;
+    box-shadow: none !important;
+}
+</style>
 <link rel="stylesheet"
-      href="<?= $block->escapeUrl($cssUrl) ?>?v=11"
-      media="all"/>
+      href="<?= $block->escapeUrl($cssUrl) ?>?v=<?= $block->escapeHtmlAttr($assetVersion) ?>"
+      media="print"
+      onload="this.media='all'"/>
+<noscript>
+    <link rel="stylesheet"
+          href="<?= $block->escapeUrl($cssUrl) ?>?v=<?= $block->escapeHtmlAttr($assetVersion) ?>"/>
+</noscript>
