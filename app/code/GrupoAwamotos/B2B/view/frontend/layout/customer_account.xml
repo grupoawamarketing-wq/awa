@@ -2,9 +2,20 @@
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <head>
-        <css src="GrupoAwamotos_B2B::css/b2b-account-pages.css"/>
+        <!-- §70 optimize: core (~4KB). Folhas por rota nos layouts filhos. -->
+        <css src="GrupoAwamotos_B2B::css/account/pages-core.css"/>
     </head>
     <body>
+        <attribute name="class" value="b2b-account-shell awa-account-operational"/>
+        <referenceBlock name="toki_header">
+            <block name="awa.header.contact.links" cacheable="false"/>
+        </referenceBlock>
+        <referenceContainer name="before.body.end">
+            <block class="Magento\Framework\View\Element\Template"
+                   name="b2b.account.customer.eager"
+                   template="GrupoAwamotos_B2B::html/awa-b2b-customer-eager.phtml"
+                   after="-"/>
+        </referenceContainer>
         <referenceBlock name="customer_account_navigation">
             <!-- === REMOVER LINKS B2C DESNECESSÁRIOS === -->
             <referenceBlock name="customer-account-navigation-wish-list-link" remove="true"/>
@@ -16,7 +27,22 @@
             <referenceBlock name="customer-account-navigation-delimiter-1" remove="true"/>
             <referenceBlock name="customer-account-navigation-delimiter-2" remove="true"/>
 
-            <!-- === SEÇÃO B2B (topo da sidebar) === -->
+            <!-- Links Magento duplicados (Painel B2B e Minhas Faturas já cobrem) -->
+            <referenceBlock name="customer-account-navigation-account-link" remove="true"/>
+            <referenceBlock name="customer-account-navigation-orders-link" remove="true"/>
+
+            <!-- === SEÇÃO B2B (topo da sidebar) — grupos para chunking ≤4 por grupo === -->
+
+            <!-- ── Grupo 1: Painel ─────────────────────────────────────── -->
+            <block class="GrupoAwamotos\B2B\Block\Account\NavSection"
+                   name="customer-account-navigation-section-painel"
+                   template="GrupoAwamotos_B2B::account/navigation-section.phtml">
+                <arguments>
+                    <argument name="label" xsi:type="string" translate="true">Painel</argument>
+                    <argument name="sortOrder" xsi:type="number">9</argument>
+                    <argument name="visibility" xsi:type="string">b2b_approved</argument>
+                </arguments>
+            </block>
 
             <!-- Painel B2B (primeiro item, substituindo "Minha Conta") -->
             <block class="Magento\Customer\Block\Account\SortLink"
@@ -30,6 +56,17 @@
 
             <!-- Pedido Rápido — DESATIVADO -->
             <referenceBlock name="customer-account-navigation-b2b-quickorder-link" remove="true"/>
+
+            <!-- ── Grupo 2: Compras & Pedidos ──────────────────────────── -->
+            <block class="GrupoAwamotos\B2B\Block\Account\NavSection"
+                   name="customer-account-navigation-section-compras"
+                   template="GrupoAwamotos_B2B::account/navigation-section.phtml">
+                <arguments>
+                    <argument name="label" xsi:type="string" translate="true">Compras &amp; Pedidos</argument>
+                    <argument name="sortOrder" xsi:type="number">29</argument>
+                    <argument name="visibility" xsi:type="string">b2b_approved</argument>
+                </arguments>
+            </block>
 
             <!-- Solicitar Cotação -->
             <block class="Magento\Customer\Block\Account\SortLink"
@@ -58,6 +95,27 @@
                     <argument name="label" xsi:type="string" translate="true">Listas de Compras</argument>
                     <argument name="path" xsi:type="string">b2b/shoppinglist</argument>
                     <argument name="sortOrder" xsi:type="number">50</argument>
+                </arguments>
+            </block>
+
+            <!-- Repetir Pedido -->
+            <block class="Magento\Customer\Block\Account\SortLink"
+                   name="customer-account-navigation-b2b-reorder-link">
+                <arguments>
+                    <argument name="label" xsi:type="string" translate="true">Repetir Pedido</argument>
+                    <argument name="path" xsi:type="string">b2b/reorder/history</argument>
+                    <argument name="sortOrder" xsi:type="number">52</argument>
+                </arguments>
+            </block>
+
+            <!-- ── Grupo 3: Empresa & Crédito ──────────────────────────── -->
+            <block class="GrupoAwamotos\B2B\Block\Account\NavSection"
+                   name="customer-account-navigation-section-empresa"
+                   template="GrupoAwamotos_B2B::account/navigation-section.phtml">
+                <arguments>
+                    <argument name="label" xsi:type="string" translate="true">Empresa &amp; Crédito</argument>
+                    <argument name="sortOrder" xsi:type="number">53</argument>
+                    <argument name="visibility" xsi:type="string">b2b_approved</argument>
                 </arguments>
             </block>
 
@@ -101,15 +159,24 @@
                 </arguments>
             </block>
 
-            <!-- Reordenar -->
-            <block class="Magento\Customer\Block\Account\SortLink"
-                   name="customer-account-navigation-b2b-reorder-link">
+            <!-- ── Grupo 4: Dados Pessoais (evita duplicar título "Minha Conta") ─ -->
+            <block class="GrupoAwamotos\B2B\Block\Account\NavSection"
+                   name="customer-account-navigation-section-minha-conta"
+                   template="GrupoAwamotos_B2B::account/navigation-section.phtml">
                 <arguments>
-                    <argument name="label" xsi:type="string" translate="true">Repetir Pedido</argument>
-                    <argument name="path" xsi:type="string">b2b/reorder/history</argument>
-                    <argument name="sortOrder" xsi:type="number">64</argument>
+                    <argument name="label" xsi:type="string" translate="true">Dados Pessoais</argument>
+                    <argument name="sortOrder" xsi:type="number">170</argument>
+                    <!-- "any" falls through b2b/b2b_approved checks → renders for all logged-in users -->
+                    <argument name="visibility" xsi:type="string">any</argument>
                 </arguments>
             </block>
+        </referenceBlock>
+
+        <!-- Título da sidebar: "Portal B2B" (template AWA navigation.phtml) -->
+        <referenceBlock name="sidebar.main.account_nav">
+            <arguments>
+                <argument name="block_title" xsi:type="string" translate="true">Portal B2B</argument>
+            </arguments>
         </referenceBlock>
 
         <!-- Late-loading CSS for ALL B2B account pages (loads after AWA bundles) -->
