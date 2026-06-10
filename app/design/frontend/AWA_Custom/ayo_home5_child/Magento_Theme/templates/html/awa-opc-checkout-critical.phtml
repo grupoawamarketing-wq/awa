@@ -1,0 +1,176 @@
+<?php
+declare(strict_types=1);
+/**
+ * AWA OPC Checkout — critical CSS inline + async loader.
+ *
+ * Estratégia de performance:
+ *  - Inline (~3KB): tokens CSS (--awa-cc-*, --awa-checkout-*, --awa-csh-*) +
+ *    regras de ocultação do header (hide top-bar, nav, minicart, search) +
+ *    background da página e skeleton do container — previnem CLS durante FCP.
+ *  - Async (3 arquivos, total ~119KB):
+ *      cart-checkout-premium.css (107KB)  — layout completo cart+checkout
+ *      cart-checkout.css         (360B)   — camada CSS de grid/gap
+ *      checkout-simplified-header.css (11KB) — header minimal OPC
+ *
+ * awa-checkout-polish.css (13KB) é carregado async via checkout_index_index
+ * handle → awa-checkout-polish-async.phtml (evita duplicata no OPC que
+ * inclui o handle checkout_index_index via <update>).
+ *
+ * Substitui os 3 <css> bloqueantes em onepagecheckout_index_index.xml.
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ */
+$premiumUrl  = $block->getViewFileUrl('css/b2b/pages/cart-checkout-premium.min.css');
+$layerUrl    = $block->getViewFileUrl('css/layers/pages/cart-checkout.min.css');
+$headerUrl   = $block->getViewFileUrl('css/b2b/pages/checkout-simplified-header.min.css');
+$polishUrl   = $block->getViewFileUrl('css/awa-checkout-polish.min.css');
+$layoutLockUrl = $block->getViewFileUrl('css/awa-checkout-layout-lock.css');
+$layoutProbeUrl = $block->getViewFileUrl('js/awa-opc-layout-probe.js');
+$asyncInit = json_encode(
+    ['js/awa-async-stylesheet' => ['urls' => [$premiumUrl, $layerUrl, $headerUrl, $polishUrl]]],
+    JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+);
+?>
+<style id="awa-opc-checkout-critical">
+:root{--awa-csh-c1:#fff}
+body.rokanthemes-onepagecheckout,body.checkout-index-index{
+  --awa-cc-surface-1:#fff;
+  --awa-cc-border:var(--awa-gray-200,#e5e7eb);
+  --awa-cc-border-strong:var(--awa-gray-300,#d1d5db);
+  --awa-cc-text-1:var(--awa-text-primary,#333333);
+  --awa-cc-shadow-subtle:0 1px 3px rgb(15 23 42/4%);
+  --awa-cc-shadow-cta:0 8px 24px rgb(183 51 55/18%);
+  --awa-cc-radius-card:var(--awa-ui-radius-card,16px);
+  --awa-cc-transition:280ms cubic-bezier(.4,0,.2,1);
+  --awa-checkout-surface:#fff;
+  --awa-checkout-surface-soft:#f8fafc;
+  --awa-checkout-border:#dbe4ee;
+  --awa-checkout-border-strong:#c7d4e2;
+  --awa-checkout-text:#1f2937;
+  --awa-checkout-muted:#64748b;
+  --awa-checkout-shadow-sm:0 2px 8px rgb(15 23 42/6%);
+  --awa-checkout-shadow-md:0 4px 14px rgb(15 23 42/8%);
+  --awa-checkout-focus:0 0 0 3px rgb(183 51 55/16%);
+  --awa-checkout-shell-max:min(1440px,calc(100vw - 40px));
+  --awa-checkout-sidebar-min:300px;
+  --awa-checkout-sidebar-max:340px;
+  --awa-checkout-gap:24px
+}
+/* Previne CLS: oculta top bar, nav, minicart e search imediatamente */
+body.rokanthemes-onepagecheckout .page-wrapper .awa-site-header .top-header,
+body.rokanthemes-onepagecheckout .page-wrapper .awa-site-header .header-control.header-nav,
+body.rokanthemes-onepagecheckout .page-wrapper .awa-site-header .mini-cart-wrapper,
+body.rokanthemes-onepagecheckout .page-wrapper .awa-site-header .header :is(.awa-main-header__inner[data-awa-header-row],.wp-header[data-awa-header-row]) .nav-toggle,
+body.rokanthemes-onepagecheckout .page-wrapper .awa-site-header .header :is(.awa-main-header__inner[data-awa-header-row],.wp-header[data-awa-header-row]) .awa-header-cart-link,
+body.rokanthemes-onepagecheckout .page-wrapper .awa-site-header .header :is(.awa-main-header__inner[data-awa-header-row],.wp-header[data-awa-header-row])>.top-search{display:none!important}
+/* Header shell mínimo (logo only, ~70px) */
+body.rokanthemes-onepagecheckout .page-wrapper .awa-site-header .header,
+body.rokanthemes-onepagecheckout .page-wrapper .awa-site-header .header_main,
+body.rokanthemes-onepagecheckout .page-wrapper .awa-site-header .header-main{padding:0!important;margin:0!important;min-height:auto!important}
+body.rokanthemes-onepagecheckout .page-wrapper .awa-checkout-header-shell{border-bottom:1px solid var(--awa-checkout-border);background:var(--awa-csh-c1);box-shadow:var(--awa-cc-shadow-subtle)}
+body.rokanthemes-onepagecheckout .page-wrapper .awa-checkout-header-bar{display:grid!important;grid-template-columns:minmax(0,1fr) auto auto!important;align-items:center!important;gap:clamp(12px,2vw,20px)!important}
+body.rokanthemes-onepagecheckout .page-wrapper .awa-checkout-back-cart{display:inline-flex!important;align-items:center!important;min-height:44px!important;padding:0 16px!important;border:1px solid var(--awa-cc-border-strong,var(--awa-checkout-border-strong));border-radius:10px!important;background:var(--awa-checkout-surface)!important;color:var(--awa-checkout-text)!important;font-size:14px!important;font-weight:600!important;text-decoration:none!important;white-space:nowrap!important;max-width:100%;box-sizing:border-box}
+@media (max-width:429px){
+body.rokanthemes-onepagecheckout .page-wrapper .awa-checkout-header-bar{grid-template-columns:minmax(0,1fr) auto!important;gap:8px!important}
+body.rokanthemes-onepagecheckout .page-wrapper .awa-checkout-back-cart{padding:0 12px!important;font-size:13px!important}
+body.checkout-index-index .page-wrapper .awa-checkout-header-bar,body.onepagecheckout-index-index .page-wrapper .awa-checkout-header-bar{grid-template-columns:minmax(0,1fr) auto!important;gap:8px!important}
+}
+/* Background da página (above fold — previne flash de fundo errado) */
+body.rokanthemes-onepagecheckout .page-wrapper,
+body.checkout-index-index .page-wrapper,
+body.onepagecheckout-index-index .page-wrapper{overflow-x:clip;max-width:100%}
+body.rokanthemes-onepagecheckout .page-wrapper .page-main,
+body.checkout-index-index .page-wrapper .page-main,
+body.onepagecheckout-index-index .page-wrapper .page-main{background:var(--awa-checkout-surface-soft)!important;padding-inline:clamp(12px,3vw,20px)!important}
+body.rokanthemes-onepagecheckout .page-wrapper .checkout-container,
+body.checkout-index-index .page-wrapper .checkout-container,
+body.onepagecheckout-index-index .page-wrapper .checkout-container{
+  max-width:var(--awa-checkout-shell-max)!important;
+  margin-inline:auto!important;
+  width:100%!important;
+  box-sizing:border-box!important
+}
+body.rokanthemes-onepagecheckout .opc-wrapper #checkoutSteps,
+body.checkout-index-index .opc-wrapper #checkoutSteps,
+body.onepagecheckout-index-index .opc-wrapper #checkoutSteps{display:grid!important;grid-template-columns:minmax(0,1fr)!important;grid-auto-flow:row!important;gap:14px;margin:0;padding:0;list-style:none;float:none!important}
+body.rokanthemes-onepagecheckout .opc-wrapper #checkoutSteps>:is(#shipping,#opc-shipping_method,#payment,li),
+body.checkout-index-index .opc-wrapper #checkoutSteps>:is(#shipping,#opc-shipping_method,#payment,li),
+body.onepagecheckout-index-index .opc-wrapper #checkoutSteps>:is(#shipping,#opc-shipping_method,#payment,li){float:none!important;clear:both!important;width:100%!important;max-width:100%!important;margin:0!important;grid-column:1/-1!important;grid-row:auto!important;box-sizing:border-box!important}
+html body#html-body:is(.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index) .page-wrapper .opc-wrapper #checkoutSteps{display:grid!important;grid-template-columns:minmax(0,1fr)!important;grid-auto-flow:row!important;gap:14px!important;float:none!important}
+html body#html-body:is(.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index) .page-wrapper .opc-wrapper #checkoutSteps>:is(#shipping,#opc-shipping_method,#payment,li){float:none!important;clear:both!important;width:100%!important;max-width:100%!important;margin:0!important;margin-left:0!important;margin-top:0!important;grid-column:1/-1!important;grid-row:auto!important;box-sizing:border-box!important}
+html body#html-body:is(.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index) .page-wrapper .opc-wrapper :is(#shipping,#opc-shipping_method,#payment){float:none!important;clear:both!important;width:100%!important;margin:0!important;margin-left:0!important;margin-top:0!important}
+body.rokanthemes-onepagecheckout .opc-wrapper :is(#shipping,#opc-shipping_method,#payment),
+body.checkout-index-index .opc-wrapper :is(#shipping,#opc-shipping_method,#payment),
+body.onepagecheckout-index-index .opc-wrapper :is(#shipping,#opc-shipping_method,#payment){padding:0!important;margin-top:0!important;margin-left:0!important}
+html body#html-body:is(.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index) .page-wrapper #shipping-method-buttons-container,
+body:is(.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index) #shipping-method-buttons-container{display:none!important}
+body:is(.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index) :is(nav.fixed-bottom,.fixed-bottom,.mobile-bottom-nav,.awa-bottom-nav){display:none!important}
+body.rokanthemes-onepagecheckout .opc-wrapper,
+body.checkout-index-index .opc-wrapper,
+body.onepagecheckout-index-index .opc-wrapper{background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important}
+body.rokanthemes-onepagecheckout .opc-wrapper #checkoutSteps>li,
+body.checkout-index-index .opc-wrapper #checkoutSteps>li,
+body.onepagecheckout-index-index .opc-wrapper #checkoutSteps>li{list-style:none;margin:0}
+/* Container — mobile stack, desktop 2-col (alinhado a cart-checkout-premium.css) */
+body.rokanthemes-onepagecheckout .checkout-container,
+body.checkout-index-index .checkout-container{display:flex;flex-direction:column;gap:20px;align-items:stretch;width:100%}
+/* Neutraliza o layout float legado do Magento (styles-l.css: .opc-wrapper width:66.66%/float:left,
+   .opc-sidebar width:33.33%/float:right a partir de 768px). Sem isso, na faixa 768-899px e em
+   qualquer fallback as colunas herdam larguras percentuais e ficam estreitas/desalinhadas. */
+body.rokanthemes-onepagecheckout .checkout-container>.opc-wrapper,
+body.checkout-index-index .checkout-container>.opc-wrapper,
+body.rokanthemes-onepagecheckout .checkout-container>:is(#opc-sidebar,.opc-sidebar),
+body.checkout-index-index .checkout-container>:is(#opc-sidebar,.opc-sidebar){float:none!important;width:100%!important;padding-right:0!important;margin-top:0!important;margin-left:0!important;margin-right:0!important}
+@media (min-width:1024px){
+body.rokanthemes-onepagecheckout .page-wrapper .checkout-container,
+body.checkout-index-index .page-wrapper .checkout-container{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(var(--awa-checkout-sidebar-min,300px),var(--awa-checkout-sidebar-max,340px));gap:var(--awa-checkout-gap,24px);align-items:start}
+body.rokanthemes-onepagecheckout .page-wrapper .checkout-container>.opc-wrapper,
+body.checkout-index-index .page-wrapper .checkout-container>.opc-wrapper{grid-column:1;order:0!important;min-width:0;width:100%!important}
+body.rokanthemes-onepagecheckout .page-wrapper .checkout-container>:is(#opc-sidebar,.opc-sidebar),
+body.checkout-index-index .page-wrapper .checkout-container>:is(#opc-sidebar,.opc-sidebar){grid-column:2;order:0!important;min-width:0;width:100%!important}
+/* Nós extras (authentication, estimation, messages) ocupam linha inteira, evitando que o
+   auto-placement do grid os coloque numa coluna e desalinhe verticalmente .opc-wrapper x sidebar. */
+body.rokanthemes-onepagecheckout .page-wrapper .checkout-container>*:not(.opc-wrapper):not(#opc-sidebar):not(.opc-sidebar),
+body.checkout-index-index .page-wrapper .checkout-container>*:not(.opc-wrapper):not(#opc-sidebar):not(.opc-sidebar){grid-column:1 / -1!important}
+}
+/* Cards nas etapas (#checkoutSteps > li), não em .step-content — evita double-border no FCP */
+body.rokanthemes-onepagecheckout .opc-wrapper .step-content,
+body.checkout-index-index .opc-wrapper .step-content{background:transparent;border:0;border-radius:0;padding:0;box-shadow:none}
+@media (max-width:767px){
+body.rokanthemes-onepagecheckout .opc-wrapper #checkoutSteps>li,
+body.checkout-index-index .opc-wrapper #checkoutSteps>li,
+body.onepagecheckout-index-index .opc-wrapper #checkoutSteps>li{padding:16px;border:1px solid var(--awa-checkout-border);border-radius:12px;background:var(--awa-checkout-surface);box-shadow:var(--awa-checkout-shadow-sm)}
+}
+@media (min-width:768px) and (max-width:1023px){
+body.rokanthemes-onepagecheckout .opc-wrapper #checkoutSteps>li,
+body.checkout-index-index .opc-wrapper #checkoutSteps>li,
+body.onepagecheckout-index-index .opc-wrapper #checkoutSteps>li{padding:16px;border:1px solid var(--awa-checkout-border);border-radius:14px;background:var(--awa-checkout-surface);box-shadow:var(--awa-checkout-shadow-sm)}
+}
+@media (min-width:1024px){
+body.rokanthemes-onepagecheckout .opc-wrapper #checkoutSteps>li,
+body.checkout-index-index .opc-wrapper #checkoutSteps>li,
+body.onepagecheckout-index-index .opc-wrapper #checkoutSteps>li{padding:18px;border:1px solid var(--awa-checkout-border);border-radius:14px;background:var(--awa-checkout-surface);box-shadow:var(--awa-checkout-shadow-sm)}
+}
+@media (max-width:1023px){
+body.rokanthemes-onepagecheckout .page-wrapper .checkout-container,
+body.checkout-index-index .page-wrapper .checkout-container{display:flex!important;flex-direction:column!important;gap:16px!important;align-items:stretch!important}
+body.rokanthemes-onepagecheckout .page-wrapper .checkout-container>:is(.opc-wrapper,#opc-sidebar,.opc-sidebar),
+body.checkout-index-index .page-wrapper .checkout-container>:is(.opc-wrapper,#opc-sidebar,.opc-sidebar){width:100%!important;max-width:100%!important;min-width:0!important;float:none!important;margin:0!important;position:static!important}
+}
+@media (max-width:767px){
+body.rokanthemes-onepagecheckout .page-main,body.checkout-index-index .page-main,body.onepagecheckout-index-index .page-main{padding-bottom:calc(88px + env(safe-area-inset-bottom,0px))!important}
+body.rokanthemes-onepagecheckout .opc-sidebar .actions-toolbar,
+body.checkout-index-index .opc-sidebar .actions-toolbar{position:sticky!important;bottom:0!important;z-index:4;background:var(--awa-checkout-surface)!important;border-top:1px solid var(--awa-checkout-border)!important;padding:12px 16px max(12px,env(safe-area-inset-bottom,0px))!important;padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-area-inset-right,0px))!important}
+body.rokanthemes-onepagecheckout .opc-wrapper .awa-opc-step-indicator,
+body.checkout-index-index .opc-wrapper .awa-opc-step-indicator{display:flex!important;align-items:center;justify-content:space-between;gap:12px;margin:0 0 16px;padding:10px 14px;border:1px solid var(--awa-checkout-border);border-radius:10px;background:var(--awa-checkout-surface);font-size:13px;font-weight:600;color:var(--awa-checkout-text)}
+}
+</style>
+<link rel="stylesheet" href="<?= $block->escapeUrl($layoutLockUrl) ?>" media="all" id="awa-opc-layout-lock"/>
+<script src="<?= $block->escapeUrl($layoutProbeUrl) ?>" id="awa-opc-layout-probe-js"></script>
+<div class="awa-async-css-loader" hidden data-mage-init="<?= $block->escapeHtmlAttr($asyncInit) ?>"></div>
+<noscript>
+<link rel="stylesheet" href="<?= $block->escapeUrl($premiumUrl) ?>"/>
+<link rel="stylesheet" href="<?= $block->escapeUrl($layerUrl) ?>"/>
+<link rel="stylesheet" href="<?= $block->escapeUrl($headerUrl) ?>"/>
+<link rel="stylesheet" href="<?= $block->escapeUrl($polishUrl) ?>"/>
+</noscript>
