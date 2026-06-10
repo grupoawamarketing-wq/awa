@@ -1,0 +1,36 @@
+<tr class="row awa-shipping-rate-row"
+    click="element.selectShippingMethod"
+    data-bind="attr: {'aria-selected': element.isSelected() === (method.carrier_code + '_' + method.method_code) ? 'true' : 'false'}">
+    <td class="col col-method">
+        <input type="radio"
+               class="radio"
+               ifnot="method.error_message"
+               ko-checked="element.isSelected"
+               ko-value="method.carrier_code + '_' + method.method_code"
+               attr="'aria-labelledby': 'label_method_' + method.method_code + '_' + method.carrier_code + ' ' + 'label_carrier_' + method.method_code + '_' + method.carrier_code,
+                    'checked': element.rates().length == 1 || element.isSelected" />
+    </td>
+    <!-- ko ifnot: (method.error_message) -->
+    <td class="col col-price awa-shipping-rate-row__price">
+        <each args="element.getRegion('price')" render=""></each>
+    </td>
+    <!-- /ko -->
+    <td class="col col-method awa-shipping-rate-row__title"
+        attr="'id': 'label_method_' + method.method_code + '_' + method.carrier_code"
+        text="method.method_title"></td>
+    <td class="col col-carrier awa-shipping-rate-row__carrier"
+        attr="'id': 'label_carrier_' + method.method_code + '_' + method.carrier_code"
+        text="method.carrier_title"></td>
+</tr>
+<tr class="row row-error awa-shipping-rate-error"
+    if="method.error_message">
+    <td class="col col-error" colspan="4">
+        <div role="alert" class="message error">
+            <div text="method.error_message"></div>
+        </div>
+        <span class="no-display">
+            <input type="radio"
+                   attr="'value' : method.method_code, 'id': 's_method_' + method.method_code">
+        </span>
+    </td>
+</tr>

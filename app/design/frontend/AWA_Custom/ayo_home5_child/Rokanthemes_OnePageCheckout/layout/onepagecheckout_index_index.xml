@@ -1,16 +1,88 @@
 <?xml version="1.0"?>
+<!--
+    onepagecheckout_index_index.xml — AWA child theme overrides para o OPC (expresscheckout.html).
+
+    Performance 2026-05-27:
+      - Removidos 3 <css> bloqueantes: cart-checkout-premium.css (107KB),
+        cart-checkout.css (360B) e checkout-simplified-header.css (11KB).
+      - CSS crítico above-fold (~3KB) embutido inline via awa-opc-checkout-critical.phtml
+        (tokens + header-hide rules para prevenir CLS + skeleton do container).
+      - 3 arquivos carregados async via awa-opc-checkout-critical.phtml (preload + media=print onload):
+        cart-checkout-premium.css, cart-checkout.css, checkout-simplified-header.css.
+      - awa-checkout-polish.css carregado async via checkout_index_index handle →
+        awa-checkout-polish-async.phtml (OPC inclui esse handle via <update>).
+-->
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <head>
-        <css src="css/b2b/pages/cart-checkout-premium.css"/>
-        <css src="css/layers/pages/cart-checkout.css"/>
-        <css src="css/b2b/pages/checkout-simplified-header.css"/>
+        <css src="css/awa-checkout-layout-lock.css" order="200"/>
     </head>
     <body>
+        <referenceBlock name="checkout.root">
+            <arguments>
+                <argument name="jsLayout" xsi:type="array">
+                    <item name="components" xsi:type="array">
+                        <item name="checkout" xsi:type="array">
+                            <item name="children" xsi:type="array">
+                                <item name="steps" xsi:type="array">
+                                    <item name="children" xsi:type="array">
+                                        <item name="shipping-step" xsi:type="array">
+                                            <item name="children" xsi:type="array">
+                                                <item name="shippingAddress" xsi:type="array">
+                                                    <item name="children" xsi:type="array">
+                                                        <item name="before-shipping-method-form" xsi:type="array">
+                                                            <item name="children" xsi:type="array">
+                                                                <item name="rokanthemes_opc_shipping_delivery_date" xsi:type="array">
+                                                                    <item name="label" xsi:type="string" translate="true">Data preferencial de entrega</item>
+                                                                </item>
+                                                                <item name="rokanthemes_opc_shipping_delivery_comment" xsi:type="array">
+                                                                    <item name="label" xsi:type="string" translate="true">Observações de entrega</item>
+                                                                </item>
+                                                            </item>
+                                                        </item>
+                                                    </item>
+                                                </item>
+                                            </item>
+                                        </item>
+                                    </item>
+                                </item>
+                                <item name="sidebar" xsi:type="array">
+                                    <item name="children" xsi:type="array">
+                                        <item name="subscribe" xsi:type="array">
+                                            <item name="config" xsi:type="array">
+                                                <item name="description" xsi:type="string" translate="true">Receber novidades por e-mail</item>
+                                            </item>
+                                        </item>
+                                        <item name="rokanthemes_opc_order_comment" xsi:type="array">
+                                            <item name="label" xsi:type="string" translate="true">Observações do pedido</item>
+                                        </item>
+                                    </item>
+                                </item>
+                            </item>
+                        </item>
+                    </item>
+                </argument>
+            </arguments>
+        </referenceBlock>
+        <referenceBlock name="awa.checkout.polish.async" remove="true"/>
+        <referenceBlock name="head.additional">
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.opc.checkout.critical"
+                   template="Magento_Theme::html/awa-opc-checkout-critical.phtml"
+                   after="-"/>
+        </referenceBlock>
         <referenceContainer name="before.body.end">
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.checkout.ux.init"
+                   template="Rokanthemes_OnePageCheckout::checkout-ux-init.phtml"
+                   after="-"/>
             <block class="Magento\Framework\View\Element\Template"
                    name="checkout.simplified.header.js"
                    template="Rokanthemes_OnePageCheckout::checkout-simplified-header-init.phtml"/>
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.checkout.promax.loader"
+                   template="Magento_Theme::html/awa-checkout-promax-loader.phtml"
+                   after="-"/>
         </referenceContainer>
     </body>
 </page>

@@ -1,29 +1,30 @@
 <!--
 /**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
- *
  * AWA Motos child theme override — ayo_home5_child
- * Fixes:
- *   - MINICART-LAYOUT-01: "My Cart" hardcoded → use translate attribute
- *   - MINICART-CTA-01: Checkout button text empty on first render → add Knockout text: binding
  */
 -->
 <div class="block-title">
-    <strong>
-        <span class="text" translate="'My Cart'"></span>
-        <span
-            class="qty empty"
-            text="getCartParam('summary_count')"
-            data-bind="css: { empty: !!getCartParam('summary_count') == false },
-                       attr: { title: $t('Items in Cart') }">
-        </span>
-    </strong>
-</div>
-<!-- <strong class="logo">
-        <img src="../pub/media/logo/stores/6/logo.jpg" alt="Hermes store!" width="165" height="62">
-</strong> -->
-<div class="block-content">
+    <div class="awa-minicart-title-wrap">
+        <strong id="minicart-title">
+            <span class="text" translate="'My Cart'"></span>
+        </strong>
+        <if args="getCartParam('summary_count')">
+            <span class="awa-minicart-title-count awa-minicart-items-total">
+                <!-- ko if: maxItemsToDisplay < getCartLineItemsCount() -->
+                <span translate="'Showing'"></span>
+                <span class="count" text="maxItemsToDisplay"></span>
+                <span translate="'of'"></span>
+                <!-- /ko -->
+                <span class="count" text="getCartParam('summary_count')"></span>
+                <!-- ko if: getCartLineItemsCount() === 1 -->
+                <span translate="'item in cart summary'"></span>
+                <!-- /ko -->
+                <!-- ko if: getCartLineItemsCount() > 1 -->
+                <span translate="'items in cart summary'"></span>
+                <!-- /ko -->
+            </span>
+        </if>
+    </div>
     <button type="button"
             id="btn-minicart-close"
             class="action close"
@@ -36,21 +37,9 @@
             ">
         <span translate="'Close'"></span>
     </button>
+</div>
+<div class="block-content">
     <if args="getCartParam('summary_count')">
-        <div class="items-total">
-            <span class="title_mycart" translate="'My Cart'"></span><span> ( </span>
-            <span class="count" if="maxItemsToDisplay < getCartLineItemsCount()" text="maxItemsToDisplay"></span>
-            <translate args="'of'" if="maxItemsToDisplay < getCartLineItemsCount()"></translate>
-            <span class="count" text="getCartParam('summary_count')"></span>
-            <translate args="'Item in Cart )'" if="getCartLineItemsCount() === 1"></translate>
-            <translate args="'Items in Cart )'" if="getCartLineItemsCount() > 1"></translate>
-        </div>
-        <each args="getRegion('subtotalContainer')" render=""></each>
-        <each args="getRegion('extraInfo')" render=""></each>
-    </if>
-
-    <if args="getCartParam('summary_count')">
-        <strong class="subtitle" translate="'Recently added item(s)'"></strong>
         <div data-action="scroll" class="minicart-items-wrapper">
             <ol id="mini-cart" class="minicart-items" data-bind="foreach: { data: getCartItems(), as: 'item' }">
                 <each args="$parent.getRegion($parent.getItemRenderer(item.product_type))"
@@ -58,20 +47,43 @@
                 ></each>
             </ol>
         </div>
+
+        <div id="awa-minicart-addons-mount" class="awa-minicart-addons" data-role="awa-minicart-addons-mount"></div>
+
+        <each args="getRegion('subtotalContainer')" render=""></each>
+        <each args="getRegion('extraInfo')" render=""></each>
     </if>
 
     <ifnot args="getCartParam('summary_count')">
-        <strong class="subtitle empty" translate="'You have no items in your shopping cart.'"></strong>
-        <if args="getCartParam('cart_empty_message')">
-            <p class="minicart empty text" text="getCartParam('cart_empty_message')"></p>
-            <div class="actions">
+        <div class="awa-minicart-empty" role="status" aria-live="polite" aria-labelledby="minicart-empty-title">
+            <div class="awa-minicart-empty__icon" aria-hidden="true">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" focusable="false">
+                    <circle cx="9" cy="20" r="1"></circle>
+                    <circle cx="18" cy="20" r="1"></circle>
+                    <path d="M3.5 4h2l2.2 10.2a1 1 0 0 0 1 .8h8.6a1 1 0 0 0 1-.8L20 7H7.1"></path>
+                </svg>
+            </div>
+            <strong class="subtitle empty" id="minicart-empty-title" translate="'You have no items in your shopping cart.'"></strong>
+            <p class="awa-minicart-empty__hint" data-bind="i18n: 'Browse the catalog or use search to find parts.'"></p>
+            <if args="getCartParam('cart_empty_message')">
+                <p class="minicart empty text" text="getCartParam('cart_empty_message')"></p>
+            </if>
+            <div class="actions awa-minicart-empty__actions">
+                <div class="primary">
+                    <a class="action primary awa-minicart-browse"
+                       href="/"
+                       data-action="close"
+                       data-bind="click: closeMinicart()">
+                        <span translate="'Browse our catalog'"></span>
+                    </a>
+                </div>
                 <div class="secondary">
                     <a class="action viewcart btn" data-bind="attr: {href: shoppingCartUrl}">
                         <span translate="'View Cart'"></span>
                     </a>
                 </div>
             </div>
-        </if>
+        </div>
     </ifnot>
 
     <if args="getCartParam('summary_count')">

@@ -1,0 +1,29 @@
+<?php
+declare(strict_types=1);
+/**
+ * AWA — Cart totals com fallback SSR até o Knockout hidratar.
+ *
+ * @var \Magento\Checkout\Block\Cart\Totals $block
+ */
+?>
+<div id="cart-totals" class="cart-totals" data-bind="scope:'block-totals'">
+    <div class="awa-cart-totals-fallback" data-awa-totals-fallback="1">
+        <div class="table-wrapper">
+            <table class="data table totals">
+                <caption class="table-caption awa-sr-only"><?= $block->escapeHtml(__('Total')) ?></caption>
+                <tbody>
+                    <?= /* @noEscape */ $block->renderTotals('footer') ?>
+                    <?= /* @noEscape */ $block->renderTotals() ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-- ko template: getTemplate() --><!-- /ko -->
+    <script type="text/x-magento-init">
+        {
+            "#cart-totals": {
+                "Magento_Ui/js/core/app": <?= /* @noEscape */ $block->getJsLayout() ?>
+            }
+        }
+    </script>
+</div>

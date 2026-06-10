@@ -1,0 +1,64 @@
+<?php
+declare(strict_types=1);
+/**
+ * Escudo terminal mínimo — só grid mobile/desktop após CSS async (themes, cart-page-premium).
+ * Visual (summary, empty, page-main) vive em critical + polish + layout-terminal blocking.
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ */
+?>
+<style id="awa-cart-terminal-shield">
+@media (min-width: 768px) {
+    html body.checkout-cart-index .page-wrapper .cart-container {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) minmax(300px, 360px) !important;
+        grid-template-areas:
+            "cart-main cart-aside"
+            "cart-extra cart-aside" !important;
+        align-items: start !important;
+    }
+
+    html body.checkout-cart-index .page-wrapper .cart-container .form-cart {
+        grid-area: cart-main !important;
+        float: none !important;
+        width: 100% !important;
+        max-width: none !important;
+    }
+
+    html body.checkout-cart-index .page-wrapper .cart-container .cart-summary {
+        grid-area: cart-aside !important;
+        grid-row: 1 / -1 !important;
+        float: none !important;
+        width: 100% !important;
+        max-width: none !important;
+        position: sticky !important;
+        top: calc(var(--awa-header-height, 80px) + 16px) !important;
+    }
+
+    html body.checkout-cart-index .page-wrapper .cart-container > :not(.form-cart):not(.cart-summary) {
+        grid-area: cart-extra !important;
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+}
+
+@media (max-width: 767px) {
+    html body.checkout-cart-index .page-wrapper .cart-container {
+        display: flex !important;
+        flex-direction: column !important;
+        flex-wrap: nowrap !important;
+    }
+
+    html body.checkout-cart-index .page-wrapper .cart-container .cart-summary {
+        order: -1 !important;
+        position: static !important;
+        max-height: none !important;
+        overflow: visible !important;
+    }
+
+    html body.checkout-cart-index .page-wrapper .cart-container .form-cart {
+        order: 0 !important;
+        width: 100% !important;
+    }
+}
+</style>

@@ -2,9 +2,10 @@
 <!--
     checkout_cart_index.xml — AWA child theme overrides for the cart page.
 
-    Performance 2026-06-08 (/impeccable optimize):
+    Performance 2026-06-09 (cart bugfix):
       - Critical above-fold CSS inline via awa-cart-checkout-critical.phtml (~8KB).
-      - awa-cart-polish.min.css + cart-page-premium.min.css load async (idle/pointerdown).
+      - awa-cart-polish.min.css blocking (layout/tabela/resumo — evita FOUC).
+      - cart-page-premium.min.css load async (idle/pointerdown).
       - awa-cart-layout-terminal.min.css stays blocking (~7KB) for grid final-wins.
       - awa-focus-visible removed (focus rules live in critical inline).
       - awa.shelf.carousel removed: saves 25 KB blocking CSS + deferred JS.
@@ -15,8 +16,8 @@
     <head>
         <remove src="css/awa-checkout-home5.css"/>
         <remove src="css/awa-header-stack-2026-05-28.min.css"/>
-        <!-- awa-cart-polish: async via awa-cart-checkout-critical.phtml (critical inline cobre FCP) -->
-        <!-- Terminal: vence awa-layout-bundle flex legacy após todos os bundles async -->
+        <css src="css/awa-cart-polish.min.css"/>
+        <!-- Terminal: vence awa-layout-bundle flex legacy após polish -->
         <css src="css/awa-cart-layout-terminal.min.css"/>
         <!-- refine: carregado async via awa-checkout-polish-async.phtml (evita duplicata síncrona) -->
     </head>
@@ -32,23 +33,50 @@
         <!-- Audit bundle (~162KB) + polish-r2 sobrescrevem cart-summary; stack terminal no head -->
         <referenceBlock name="awa.audit.bundle.css" remove="true"/>
 
-        <!-- Menu vertical + audit global: nav oculto no checkout mode; economiza ~2 requests async -->
-        <referenceBlock name="awa.vertical.menu.runtime" remove="true"/>
-        <referenceBlock name="awa.vertical.menu.stack.css" remove="true"/>
-        <referenceBlock name="awa.vertical.menu.distill.css" remove="true"/>
-        <referenceBlock name="awa.vertical.menu.adapt.css" remove="true"/>
-        <referenceBlock name="awa.vertical.menu.polish.css" remove="true"/>
-        <referenceBlock name="awa.vertical.menu.harden" remove="true"/>
-        <referenceBlock name="awa.vertical.menu.harden.js" remove="true"/>
-        <referenceBlock name="awa.vertical.menu.flyout.fix" remove="true"/>
+        <!-- Performance: header polish global omitido no carrinho; menu/nav restaurado 2026-06-09 -->
+        <referenceBlock name="awa.header.impeccable.critical.global" remove="true"/>
+        <referenceBlock name="awa.a11y.product.links" remove="true"/>
+        <referenceBlock name="pagebuilder.widget.initializer" remove="true"/>
+        <referenceBlock name="awa.back.to.top" remove="true"/>
+
+        <referenceBlock name="awa.custom.global.js.loader">
+            <arguments>
+                <argument name="skip_minicart_defer_init" xsi:type="boolean">true</argument>
+                <argument name="load_search_compat_js" xsi:type="boolean">false</argument>
+                <argument name="load_b2b_checkout_compat_js" xsi:type="boolean">false</argument>
+                <argument name="load_home_category_compat_js" xsi:type="boolean">true</argument>
+            </arguments>
+        </referenceBlock>
+
+        <referenceBlock name="customer.section.config"
+                        template="Magento_Theme::html/awa-customer-sections-defer.phtml">
+            <action method="setData">
+                <argument name="key" xsi:type="string">cacheable</argument>
+                <argument name="value" xsi:type="boolean">false</argument>
+            </action>
+            <arguments>
+                <argument name="boot_immediate" xsi:type="boolean">true</argument>
+                <argument name="sectionNamesProvider" xsi:type="object">Magento\Customer\Block\SectionNamesProvider</argument>
+                <argument name="auth" xsi:type="object">Magento\Customer\ViewModel\Customer\Auth</argument>
+                <argument name="cookie_settings" xsi:type="object">Magento\Customer\ViewModel\CookieSettings</argument>
+            </arguments>
+        </referenceBlock>
+        <referenceBlock name="customer.customer.data" remove="true"/>
+
+        <referenceBlock name="grupoawamotos_whatsapp_btn" remove="true"/>
+        <referenceBlock name="meta.pixel.idle" remove="true"/>
+
+        <referenceBlock name="autocomplete.injection.js">
+            <arguments>
+                <argument name="defer_templates" xsi:type="boolean">true</argument>
+            </arguments>
+        </referenceBlock>
+
+        <!-- Audit global omitido no carrinho; menu vertical + mobile nav ativos -->
         <referenceBlock name="awa.impeccable.audit.uncached.global.v10" remove="true"/>
-        <referenceBlock name="awa.mobile.nav" remove="true"/>
 
         <!-- Shelf carousel not used on the cart page — removes 25 KB blocking CSS -->
         <referenceBlock name="awa.shelf.carousel" remove="true"/>
-
-        <!-- One skip link (awa.skip.link) is enough on cart focus mode; nav is hidden. -->
-        <referenceBlock name="skip.links" remove="true"/>
 
         <!-- Bloco "Pedidos Feitos Recentemente" — removido do carrinho a pedido 2026-05-27 -->
         <referenceBlock name="sale.reorder.sidebar" remove="true"/>
@@ -79,10 +107,14 @@
         </referenceBlock>
 
         <referenceContainer name="cart.summary" htmlId="cart-summary">
+            <block class="GrupoAwamotos\B2B\Block\Cart\MinOrderProgress"
+                   name="b2b.min.order.progress"
+                   template="GrupoAwamotos_B2B::cart/min-order-progress.phtml"
+                   after="checkout.cart.summary.title"/>
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.cart.b2b.credit.notice"
                    template="Magento_Checkout::cart/b2b-credit-notice.phtml"
-                   before="checkout.cart.totals.container">
+                   after="b2b.min.order.progress">
                 <arguments>
                     <argument name="view_model" xsi:type="object">GrupoAwamotos\B2B\ViewModel\Cart\CreditNotice</argument>
                 </arguments>
@@ -90,13 +122,17 @@
         </referenceContainer>
 
         <referenceBlock name="head.additional">
-            <!-- CSS crítico above-fold (tokens + header checkout mode) embutido inline. -->
+            <!-- CSS crítico above-fold (tokens + header layout) embutido inline. -->
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.cart.checkout.critical"
                    template="Magento_Theme::html/awa-cart-checkout-critical.phtml"/>
         </referenceBlock>
 
         <referenceContainer name="before.body.end">
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.cart.customer.defer.loader"
+                   template="Magento_Theme::html/awa-cart-customer-defer-loader.phtml"
+                   before="awa.cart.summary.polish.init"/>
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.cart.summary.polish.init"
                    template="Magento_Checkout::cart/summary-polish-init.phtml"
@@ -108,11 +144,10 @@
         </referenceContainer>
 
         <!-- Resumo: totais + finalizar antes de frete/cupom (opções secundárias) -->
-        <move element="b2b.min.order.progress" destination="cart.summary" after="checkout.cart.summary.title"/>
-        <move element="awa.cart.b2b.credit.notice" destination="cart.summary" after="b2b.min.order.progress"/>
         <move element="checkout.cart.totals.container" destination="cart.summary" after="awa.cart.b2b.credit.notice"/>
         <move element="checkout.cart.methods.bottom" destination="cart.summary" after="checkout.cart.totals.container"/>
         <move element="checkout.cart.shipping" destination="cart.summary" after="checkout.cart.methods.bottom"/>
         <move element="checkout.cart.coupon" destination="cart.summary" after="checkout.cart.shipping"/>
+        <move element="erp.cart.suggestions.sidebar" destination="cart.summary" after="checkout.cart.coupon"/>
     </body>
 </page>

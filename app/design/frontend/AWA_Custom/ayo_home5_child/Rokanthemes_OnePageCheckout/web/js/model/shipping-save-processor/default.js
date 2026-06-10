@@ -1,0 +1,139 @@
+define([
+    'ko',
+    'underscore',
+    'jquery',
+    'Magento_Checkout/js/model/quote',
+    'Magento_Checkout/js/model/resource-url-manager',
+    'mage/storage',
+    'Rokanthemes_OnePageCheckout/js/model/payment-service-default',
+    'Magento_Checkout/js/model/payment/method-converter',
+    'Magento_Checkout/js/model/error-processor',
+    'Magento_Checkout/js/action/select-billing-address',
+    'Rokanthemes_OnePageCheckout/js/model/shipping-save-processor/payload-extender',
+    'Magento_Customer/js/model/customer',
+    'Magento_Checkout/js/model/shipping-service',
+    'Magento_Checkout/js/action/select-shipping-method'
+], function (
+    ko,
+    _,
+    $,
+    quote,
+    resourceUrlManager,
+    storage,
+    paymentService,
+    methodConverter,
+    errorProcessor,
+    selectBillingAddressAction,
+    payloadExtender,
+    customer,
+    shippingService,
+    selectShippingMethodAction
+) {
+    'use strict';
+
+    function isBillingAddressUsable(billingAddress) {
+        var streetLine = '';
+
+        if (!billingAddress) {
+            return false;
+        }
+
+        if (!_.isUndefined(billingAddress.street) && billingAddress.street !== null) {
+            streetLine = Array.isArray(billingAddress.street) ?
+                String(billingAddress.street[0] || '').trim() :
+                String(billingAddress.street).trim();
+        }
+
+        return Boolean(
+            String(billingAddress.firstname || '').trim() &&
+            String(billingAddress.lastname || '').trim() &&
+            String(billingAddress.city || '').trim() &&
+            String(billingAddress.postcode || '').trim() &&
+            String(billingAddress.telephone || '').trim() &&
+            String(billingAddress.countryId || '').trim() &&
+            streetLine
+        );
+    }
+
+    function ensureBillingFromShipping() {
+        var shippingAddress = quote.shippingAddress();
+
+        if (quote.isVirtual() || !shippingAddress) {
+            return;
+        }
+
+        if (!isBillingAddressUsable(quote.billingAddress())) {
+            selectBillingAddressAction(shippingAddress);
+        }
+    }
+
+    function ensureShippingMethodFromRates() {
+        var shippingMethod = quote.shippingMethod();
+        var rates;
+        var validRates;
+
+        if (shippingMethod && shippingMethod.carrier_code && shippingMethod.method_code) {
+            return;
+        }
+
+        rates = shippingService.getShippingRates()();
+        validRates = Array.isArray(rates) ? rates.filter(function (rate) {
+            return rate && rate.carrier_code && rate.method_code && !rate.error_message;
+        }) : [];
+
+        if (validRates.length) {
+            selectShippingMethodAction(validRates[0]);
+        }
+    }
+
+    return {
+        /** @return {jQuery.Deferred} */
+        saveShippingInformation: function () {
+            var payload,
+                billingAddress,
+                shippingMethod = quote.shippingMethod();
+
+            ensureBillingFromShipping();
+            ensureShippingMethodFromRates();
+            billingAddress = quote.billingAddress();
+            shippingMethod = quote.shippingMethod();
+
+            if (!shippingMethod || !shippingMethod.method_code || !shippingMethod.carrier_code) {
+                return $.Deferred().reject().promise();
+            }
+
+            if (!customer.isLoggedIn()) {
+                if (billingAddress) {
+                    if (!_.isUndefined(billingAddress.street)) {
+                        if (billingAddress.street.length === 0) {
+                            delete billingAddress.street;
+                        }
+                    } else {
+                        delete billingAddress.street;
+                    }
+                }
+            }
+
+            payload = {
+                addressInformation: {
+                    shipping_address: quote.shippingAddress(),
+                    billing_address: quote.billingAddress(),
+                    shipping_method_code: shippingMethod.method_code,
+                    shipping_carrier_code: shippingMethod.carrier_code
+                }
+            };
+
+            payloadExtender(payload);
+
+            return storage.post(
+                resourceUrlManager.getUrlForSetShippingInformation(quote),
+                JSON.stringify(payload)
+            ).done(function (response) {
+                quote.setTotals(response.totals);
+                paymentService.setPaymentMethods(methodConverter(response.payment_methods));
+            }).fail(function (response) {
+                errorProcessor.process(response);
+            });
+        }
+    };
+});

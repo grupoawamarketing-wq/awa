@@ -29,13 +29,12 @@ $blockLoaderUrl = $sanitizeUrl($block->getViewFileUrl('images/loader-1.gif'));
 
 <div data-block="minicart" class="minicart-wrapper">
     <a class="action showcart header-mini-cart" href="<?= $block->escapeUrl($block->getShoppingCartUrl()) ?>"
-       style="opacity:1 !important; visibility:visible !important; display:flex !important;"
        aria-haspopup="dialog"
        title="<?= $block->escapeHtmlAttr(__('Ver carrinho de compras')) ?>"
        aria-label="<?= $block->escapeHtmlAttr(__('Ver carrinho de compras')) ?>"
        aria-expanded="false"
        aria-controls="minicart-content-wrapper"
-       data-bind="scope: 'minicart_content'">
+       <?= $isHomeUiDefer ? 'data-awa-minicart-defer="trigger"' : 'data-bind="scope: \'minicart_content\'"' ?>>
         <span class="awa-sr-only"><?= $block->escapeHtml(__('Carrinho de compras')) ?> </span>
         <svg class="awa-minicart-icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block !important; width:20px !important; height:20px !important; min-width:20px !important; min-height:20px !important; visibility:visible !important; opacity:1 !important;">
             <circle cx="9" cy="20" r="1"></circle>
@@ -45,15 +44,15 @@ $blockLoaderUrl = $sanitizeUrl($block->getViewFileUrl('images/loader-1.gif'));
         <span class="counter qty empty"
               aria-live="polite"
               aria-atomic="true"
-              data-bind="css: { empty: !!getCartParam('summary_count') == false }, blockLoader: isLoading">
-            <span class="total-mini-cart-item">
+              <?= $isHomeUiDefer ? '' : 'data-bind="css: { empty: !!getCartParam(\'summary_count\') == false }, blockLoader: isLoading"' ?>>
+            <span class="total-mini-cart-item"><?php if ($isHomeUiDefer): ?>0<?php else: ?>
             <!-- ko if: getCartParam('summary_count') -->
                 <!-- ko text: getCartParam('summary_count') --><!-- /ko -->
             <!-- /ko -->
             <!-- ko if: !getCartParam('summary_count') -->
                 0
             <!-- /ko -->
-            </span>
+            <?php endif; ?></span>
         </span>
     </a>
     <?php if ($block->getIsNeedToDisplaySideBar()): ?>
@@ -74,14 +73,27 @@ $blockLoaderUrl = $sanitizeUrl($block->getViewFileUrl('images/loader-1.gif'));
                  role="dialog"
                  aria-modal="true"
                  aria-labelledby="minicart-title"
-                 data-bind="scope: 'minicart_content'">
+                 <?= $isHomeUiDefer ? 'data-awa-minicart-defer="content" aria-hidden="true"' : 'data-bind="scope: \'minicart_content\'"' ?>>
+                <?php if (!$isHomeUiDefer): ?>
                 <!-- ko template: getTemplate() --><!-- /ko -->
+                <?php endif; ?>
             </div>
 
-            <?= $block->getChildHtml('minicart.addons') ?>
-            <div class="awa-minicart-b2b-trust">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                <span><strong><?= $block->escapeHtml(__('Ambiente Seguro B2B')) ?></strong> | <?= $block->escapeHtml(__('Faturamento CNPJ')) ?></span>
+            <div id="awa-minicart-addons-source" class="awa-minicart-addons-source" hidden aria-hidden="true">
+                <?= $block->getChildHtml('minicart.addons') ?>
+            </div>
+            <div class="awa-minicart-footer">
+                <button type="button"
+                        class="awa-minicart-continue"
+                        data-awa-minicart-close="true"
+                        aria-label="<?= $block->escapeHtmlAttr(__('Continue Shopping')) ?>">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5"></path><path d="M12 19l-7-7 7-7"></path></svg>
+                    <span><?= $block->escapeHtml(__('Continue Shopping')) ?></span>
+                </button>
+                <div class="awa-minicart-b2b-trust">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                    <span><strong><?= $block->escapeHtml(__('Ambiente Seguro B2B')) ?></strong> | <?= $block->escapeHtml(__('Faturamento CNPJ')) ?></span>
+                </div>
             </div>
         </div>
 

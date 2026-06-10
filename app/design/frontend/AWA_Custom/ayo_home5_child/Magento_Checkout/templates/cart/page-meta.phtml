@@ -1,0 +1,35 @@
+<?php
+declare(strict_types=1);
+/**
+ * AWA — Meta contextual abaixo do título do carrinho (B2B scan).
+ *
+ * @var \Magento\Checkout\Block\Cart $block
+ */
+$itemsQty = (float) $block->getItemsQty();
+$itemsCount = (int) $block->getItemsCount();
+
+if ($itemsQty <= 0 || $itemsCount <= 0) {
+    return;
+}
+
+$qtyLabel = (int) $itemsQty === 1
+    ? __('1 peça')
+    : __('%1 peças', (int) $itemsQty);
+
+$refsLabel = $itemsCount === 1
+    ? __('1 referência')
+    : __('%1 referências', $itemsCount);
+?>
+<p class="awa-cart-page-meta"
+   id="awa-cart-page-meta"
+   aria-live="polite"
+   data-awa-qty-one="<?= $block->escapeHtmlAttr((string) __('1 peça')) ?>"
+   data-awa-qty-many="<?= $block->escapeHtmlAttr((string) __('%1 peças')) ?>"
+   data-awa-ref-one="<?= $block->escapeHtmlAttr((string) __('1 referência')) ?>"
+   data-awa-ref-many="<?= $block->escapeHtmlAttr((string) __('%1 referências')) ?>">
+    <span class="awa-cart-page-meta__stat"><?= $block->escapeHtml($qtyLabel) ?></span>
+    <?php if ($itemsCount !== (int) $itemsQty): ?>
+        <span class="awa-cart-page-meta__sep" aria-hidden="true">·</span>
+        <span class="awa-cart-page-meta__stat"><?= $block->escapeHtml($refsLabel) ?></span>
+    <?php endif; ?>
+</p>

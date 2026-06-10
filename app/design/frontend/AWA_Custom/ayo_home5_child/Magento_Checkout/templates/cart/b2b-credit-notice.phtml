@@ -1,9 +1,54 @@
+<?php
+declare(strict_types=1);
+/**
+ * AWA B2B — Crédito no resumo do carrinho.
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ * @var \GrupoAwamotos\B2B\ViewModel\Cart\CreditNotice $creditNotice
+ */
+$creditNotice = $block->getData('view_model');
 
-<div class="message info awa-b2b-credit-notice" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--awa-primary-lightest, #fdf2f2); border-left: 4px solid var(--awa-primary, #A33B3B); margin-bottom: 20px;">
-    <div>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--awa-primary, #A33B3B)" stroke-width="2" style="vertical-align: middle; margin-right: 8px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-        <span style="font-size: 14px; color: var(--awa-text-dark, #202124);">
-            <strong><?= $block->escapeHtml(__('Faturamento B2B:')) ?></strong> <?= $block->escapeHtml(__('Verifique seu limite de crédito no passo de pagamento.')) ?>
-        </span>
-    </div>
+if (!$creditNotice instanceof \GrupoAwamotos\B2B\ViewModel\Cart\CreditNotice
+    || !$creditNotice->shouldDisplay()
+) {
+    return;
+}
+
+$hasCredit = $creditNotice->hasCreditAvailable();
+$dashboardUrl = $block->escapeUrl($creditNotice->getDashboardUrl());
+?>
+<div class="awa-b2b-credit-notice" role="status" aria-live="polite"
+     aria-label="<?= $block->escapeHtmlAttr(__('Crédito e faturamento B2B')) ?>">
+    <svg class="awa-b2b-credit-notice__icon"
+         width="18" height="18"
+         viewBox="0 0 24 24"
+         fill="none"
+         stroke="currentColor"
+         stroke-width="2"
+         stroke-linecap="round"
+         stroke-linejoin="round"
+         aria-hidden="true"
+         focusable="false">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+    </svg>
+    <span class="awa-b2b-credit-notice__text">
+        <?php if ($hasCredit): ?>
+            <strong><?= $block->escapeHtml(__('Crédito disponível:')) ?></strong>
+            <?= $block->escapeHtml($creditNotice->getAvailableCreditFormatted()) ?>.
+            <?= $block->escapeHtml(__('O saldo será confirmado no pagamento.')) ?>
+            <a class="awa-b2b-credit-notice__link"
+               href="<?= $dashboardUrl ?>">
+                <?= $block->escapeHtml(__('Ver no painel')) ?>
+            </a>
+        <?php else: ?>
+            <strong><?= $block->escapeHtml(__('Faturamento B2B:')) ?></strong>
+            <?= $block->escapeHtml(__('Consulte seu limite de crédito no passo de pagamento ou no')) ?>
+            <a class="awa-b2b-credit-notice__link"
+               href="<?= $dashboardUrl ?>">
+                <?= $block->escapeHtml(__('painel B2B')) ?>
+            </a>.
+        <?php endif; ?>
+    </span>
 </div>

@@ -1,0 +1,56 @@
+<!-- ko foreach: getRegion('before_details') -->
+<!-- ko template: getTemplate() --><!-- /ko -->
+<!-- /ko -->
+<div class="product-item-details">
+    <div class="product-item-inner">
+        <div class="product-item-name-block">
+            <strong class="product-item-name">
+                <a data-bind="html: $parent.name, attr: {href: getProductUrl($parent.item_id)}"></a>
+            </strong>
+            <div class="details-qty">
+                <span class="label"><!-- ko i18n: 'Qtd.' --><!-- /ko --></span>
+                <input type="number" class="input-text qty" data-bind="
+                    value: $parent.qty,
+                    event: {
+                        change: function () {updateQty($parent);}
+                    },
+                    attr: {
+                        title: titleQtyBox,
+                        'aria-label': $t('Quantidade do item')
+                    }"/>
+                <span class="qty-button" data-bind="attr: {'aria-label': $t('Alterar quantidade')}">
+                    <button class="increase"
+                            type="button"
+                            data-bind="attr: {action: 'increase', itemId: $parent.item_id, 'aria-label': $t('Aumentar quantidade')}, click: updateQtyButton"></button>
+                    <button class="decrease"
+                            type="button"
+                            data-bind="attr: {action: 'decrease', itemId: $parent.item_id, 'aria-label': $t('Diminuir quantidade')}, click: updateQtyButton"></button>
+                </span>
+                <span class="error-message" data-bind="attr: {itemId: $parent.item_id}"></span>
+            </div>
+        </div>
+        <!-- ko foreach: getRegion('after_details') -->
+        <!-- ko template: getTemplate() --><!-- /ko -->
+        <!-- /ko -->
+    </div>
+
+    <!-- ko if: (JSON.parse($parent.options).length > 0)-->
+    <div class="product options" data-bind="mageInit: {'collapsible':{'openedState': 'active'}}">
+        <span data-role="title" class="toggle"><!-- ko i18n: 'Ver detalhes' --><!-- /ko --></span>
+        <div data-role="content" class="content">
+            <strong class="subtitle"><!-- ko i18n: 'Detalhes das opções' --><!-- /ko --></strong>
+            <dl class="item-options">
+                <!--ko foreach: JSON.parse($parent.options)-->
+                <dt class="label" data-bind="text: label"></dt>
+                <!-- ko if: ($data.full_view)-->
+                <dd class="values" data-bind="html: full_view"></dd>
+                <!-- /ko -->
+                <!-- ko ifnot: ($data.full_view)-->
+                <dd class="values" data-bind="html: value"></dd>
+                <!-- /ko -->
+                <!-- /ko -->
+            </dl>
+        </div>
+    </div>
+    <!-- /ko -->
+</div>

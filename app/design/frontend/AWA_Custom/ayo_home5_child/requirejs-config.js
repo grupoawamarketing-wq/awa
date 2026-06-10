@@ -12,7 +12,9 @@ var config = {
             awaCustomCompatBootstrap: 'js/awa-custom-compat-bootstrap',
             'Magento_Catalog/js/product/breadcrumbs': 'js/awa-pdp-breadcrumbs',
             'AWA_Custom/js/awa-back-to-top': 'js/awa-back-to-top',
-            'jquery/ui': 'jquery/compat'
+            'jquery/ui': 'jquery/compat',
+            'Magento_Checkout/template/billing-address/form.html':
+                'Magento_Checkout/template/billing-address/form.html'
         }
     },
     paths: {
@@ -38,6 +40,7 @@ var config = {
         'js/vendor/floating-ui.amd': 'js/vendor/floating-ui.amd',
         'js/vendor/floating-ui.core.umd': 'js/vendor/floating-ui.core.umd',
         'js/vendor/floating-ui.dom.umd': 'js/vendor/floating-ui.dom.umd',
+        '@floating-ui/core': 'js/vendor/floating-ui.core.umd',
         'js/vmenu-promo-carousel': 'js/vmenu-promo-carousel'
     },
     shim: {
@@ -57,6 +60,30 @@ var config = {
         mixins: {
             'mage/apply/main': {
                 'js/mixin-mage-apply-safe': true
+            },
+            'Magento_Search/js/form-mini': {
+                'js/mixin/quicksearch-panel-harden': true
+            },
+            'Magento_Checkout/js/view/cart/shipping-estimation': {
+                'js/mixin/cart-shipping-estimation-customer-gate': true
+            },
+            'Magento_Checkout/js/view/billing-address': {
+                'js/mixin/billing-address-autofill': true
+            },
+            'Magento_Checkout/js/view/payment/default': {
+                'js/mixin/payment-default-billing-guard': true
+            },
+            'Magento_Checkout/js/model/error-processor': {
+                'js/mixin/checkout-error-processor': true
+            },
+            'Magento_Checkout/js/view/summary/item/details/thumbnail': {
+                'js/mixin/checkout-summary-thumbnail': true
+            },
+            'Magento_Checkout/js/view/shipping-address/address-renderer/default': {
+                'js/mixin/shipping-address-telephone': true
+            },
+            'Magento_Checkout/js/view/shipping-information/address-renderer/default': {
+                'js/mixin/shipping-address-telephone': true
             }
         },
         text: {

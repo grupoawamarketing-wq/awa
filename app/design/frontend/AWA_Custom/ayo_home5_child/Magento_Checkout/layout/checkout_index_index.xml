@@ -1,7 +1,35 @@
 <?xml version="1.0"?>
+<!--
+    checkout_index_index.xml — AWA child theme overrides para checkout padrão Magento.
+
+    Performance 2026-05-27:
+      - Removido <css> bloqueante: awa-checkout-polish.css (13KB).
+      - Para o OPC (rokanthemes-onepagecheckout), awa-checkout-polish.css já é carregado
+        async via awa-opc-checkout-critical.phtml (onepagecheckout_index_index handle).
+      - Para o checkout padrão (checkout-index-index), carregado async abaixo.
+-->
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <update handle="checkout_index_index_promax"/>
     <head>
-        <css src="css/awa-checkout-polish.css"/>
+        <css src="css/awa-checkout-layout-lock.css" order="200"/>
     </head>
+    <body>
+        <referenceBlock name="head.additional">
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.checkout.layout.lock.init"
+                   template="Magento_Theme::html/awa-checkout-layout-lock-init.phtml"
+                   after="-"/>
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.checkout.polish.async"
+                   template="Magento_Theme::html/awa-checkout-polish-async.phtml"
+                   after="awa.checkout.layout.lock.init"/>
+        </referenceBlock>
+        <referenceContainer name="before.body.end">
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.checkout.ux.init.standard"
+                   template="Rokanthemes_OnePageCheckout::checkout-ux-init.phtml"
+                   after="-"/>
+        </referenceContainer>
+    </body>
 </page>
