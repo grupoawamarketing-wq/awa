@@ -50,7 +50,6 @@ app/
 │   │   ├── ProductIntelligence/  # Recomendações de produtos (ML + Cron + widget)
 │   │   ├── RelatedProducts/ # Produtos relacionados customizados
 │   │   ├── RexisML/        # Engine de recomendações ML (API + Cron + widget)
-│   │   ├── TawkIntegration/ # Integração Tawk.to live chat (DB + admin)
 │   │   └── WhatsAppCommerce/ # Comércio via WhatsApp (API + Cron + webhook)
 │   ├── Awa/                 # Módulos do namespace Awa
 │   │   ├── DashboardFix/    # Fix do grid Last Orders (null billing address)
@@ -285,11 +284,34 @@ sudo -u www-data php bin/magento cache:clean block_html full_page
 - ❌ Hex hardcoded — usar tokens CSS (`var(--awa-*)`)
 - ❌ `setup:static-content:deploy` sem `--theme AWA_Custom/ayo_home5_child` para mudanças no tema filho (mais lento e pode causar diferença de comportamento)
 
+## MCP — Somente Cursor (VPS)
+
+**Padrão: CURSOR ONLY** — zero MCPs externos (`filesystem`, `playwright-mcp`, `chrome-devtools`). Economia de RAM/CPU no servidor.
+
+```bash
+scripts/mcp-performance.sh status    # diagnóstico RAM/Chrome/MCP
+scripts/mcp-performance.sh cleanup   # mata MCPs externos e Chrome órfãos
+scripts/mcp-serial-guard.sh          # aplica fila serial (.cursor/mcp.json)
+scripts/manual-test-mode.sh on       # pausa automações ao editar layout
+scripts/workspace-cleanup.sh         # artefatos de teste + logs + /tmp
+scripts/e2e-cleanup.sh               # só tests/e2e
+```
+
+Config MCP do projeto: **`.cursor/mcp.json`** (perfil serial Hostinger). Global opcional: `~/.cursor/mcp.json`.
+
+Após alterar config: **Settings → MCP → Reload** no Cursor.
+
+| Componente | Status |
+|------------|--------|
+| MCP nativo | `cursor-ide-browser` (sob demanda) |
+| MCPs externos | **desativados** |
+| Testes visuais CLI | `cd tests/e2e && npx playwright test` |
+
+> Não reativar `playwright-mcp`, `chrome-devtools-mcp` nem `chrome-cdp-9222.service` — duplicam Chrome e degradam a VPS. Investigação visual: browser nativo do Cursor ou Playwright via CLI em `tests/e2e/`.
+
 ## Ferramentas de Debug Visual
 
-### Chrome MCP — Playwright MCP (investigação em tempo real)
-Servidor: `io.github.chr` → tools prefixadas com `mcp_io_github_chr_*`. Carregar antes de usar.
-Instalação: `playwright-mcp` global + Google Chrome 145 (`--browser chrome --no-sandbox --caps vision`).
+### Browser nativo do Cursor (`cursor-ide-browser`)
 
 Fluxo para investigar layout quebrado:
 1. `browser_navigate` → URL da página com problema
@@ -298,7 +320,7 @@ Fluxo para investigar layout quebrado:
 4. `browser_snapshot` → inspecionar DOM (accessibility tree) sem executar JS
 5. `browser_evaluate` → `getComputedStyle(document.querySelector('.seletor'))` para confirmar qual CSS está ativo
 6. `browser_network_requests` → verificar recursos bloqueados/com erro
-7. Busca em bundle CSS → via filesystem MCP ou `browser_evaluate` com fetch+text
+7. Busca em bundle CSS → `grep`/`Read` nos arquivos ou `browser_evaluate` com fetch+text
 
 ### Playwright (testes visuais automatizados)
 Specs em `tests/e2e/specs/` — cobrem home, header, footer, PDP, categoria, checkout, 404, B2B, acessibilidade.
