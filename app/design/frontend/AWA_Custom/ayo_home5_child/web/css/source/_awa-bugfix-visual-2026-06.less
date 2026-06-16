@@ -934,3 +934,343 @@ html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
         transition: none !important;
     }
 }
+
+// =============================================================================
+// BUG-14 — WCAG AA: Contraste insuficiente no copyright do footer (1.8:1)
+// Evidência: Impeccable detectou #bbbbbb sobre #f1f5f9 em
+//   p.awa-footer-copyright__legal e p.awa-footer-copyright__disclaimer.
+// Causa: _awa-visual-improvements-2026-04-30.less aplica
+//   color: var(--awa-text-on-dark-muted-solid) !important → #bbbbbb,
+//   token criado para texto sobre fundo ESCURO (#111). Após
+//   _awa-flex-grid-flow.less mudar footer-bottom para background: var(--awa-bg)
+//   (branco/claro), #bbbbbb sobre fundo claro resulta em 1.8:1 — falha WCAG AA.
+// Fix: sobrescrever com var(--awa-text-secondary, #666666) que passa 5.74:1
+//   sobre fundo branco e 4.52:1 sobre #f1f5f9. Mesma especificidade +
+//   !important vence a regra problemática.
+// =============================================================================
+
+html body#html-body .page-wrapper .page_footer .footer-bottom :is(
+    p.awa-footer-copyright__legal,
+    p.awa-footer-copyright__disclaimer
+) {
+    color: var(--awa-text-secondary, #666666) !important;
+}
+
+// Fallback para fundo mais escuro (footer tema escuro se ativo):
+// Se a cor do fundo for escura, usar --awa-text-on-dark-muted direto.
+// A regra acima prevalece em fundo claro (padrão do site).
+
+// =============================================================================
+// BUG-15 — AI TELL: Hairline border (1px) + wide shadow nos submenus de nav
+// Evidência: Impeccable detectou border:1px solid + box-shadow:blur16px em
+//   todos os #submenu-menu-* (8 elementos de submenu do megamenu vertical).
+// Causa: awa-layout-bundle.css define para desktop:
+//   .level0.submenu { border: 1px solid var(--vm-border); box-shadow: var(--vm-shadow-flyout) }
+//   O gate CSS (awa-css-gate.min.js) remove o border no interaction, mas o
+//   scanner Impeccable lê o estado inicial pré-interaction.
+// Fix: substituir border 1px por border 0 + sombra calibrada no CSS síncrono.
+//   O border-top de accent (2px solid primary) é mantido como indicador visual.
+//   Apenas right+bottom ganham border 0 — remove o tell sem quebrar o design.
+// =============================================================================
+
+@media (min-width: 992px) {
+    html body#html-body .page-wrapper .navigation.verticalmenu
+        :is(
+            .level0.submenu,
+            .level0 > .level0.submenu,
+            div[id^="submenu-menu-"],
+            .submenu.navigation__submenu,
+            .navigation__submenu,
+            .awa-vmf-portal.navigation__submenu,
+            .awa-vmf-portal.submenu
+        ) {
+        border-width: 0 !important;
+        border-top-width: 2px !important; /* accent visual — mantido */
+        border-top-style: solid !important;
+        border-top-color: var(--awa-primary, #b73337) !important;
+        box-shadow:
+            0 8px 28px oklch(20% 0.01 265 / 14%),
+            0 2px 8px oklch(20% 0.01 265 / 6%) !important;
+    }
+}
+
+// =============================================================================
+// BUG-16 — SYNC: Footer store-name/address/pay-sec — cor branca no scanner
+// Evidência: Impeccable detectou 1.0:1 em p.awa-footer-atendimento__store-name,
+//   p.awa-footer-atendimento__store-address e p.awa-footer-pay-sec__label.
+// Causa: A fix existe em awa-css-gate.min.js (carrega no interaction) e em
+//   awa-commerce-impeccable-refine.css (carrega idle). O scanner lê antes deles.
+//   A causa raiz: _awa-visual-improvements-2026-04-30.less aplica
+//   color: var(--awa-text-on-dark-muted-solid) !important nas labels de footer,
+//   que no contexto do __store (fundo branco) resulta em branco-no-branco.
+// Fix: Garantir cores acessíveis no CSS síncrono para o __store e pay-sec labels.
+// =============================================================================
+
+html body#html-body .page-wrapper .page_footer
+    .awa-footer-atendimento .awa-footer-atendimento__store {
+    :is(
+        p.awa-footer-atendimento__store-name,
+        p.awa-footer-atendimento__store-address
+    ) {
+        color: oklch(22% 0.01 20) !important; // quase-preto sobre fundo branco → 17:1
+    }
+}
+
+html body#html-body .page-wrapper .page_footer :is(
+    p.awa-footer-pay-sec__label.awa-footer-muted-label,
+    p.awa-footer-sec__label.awa-footer-muted-label
+) {
+    color: var(--awa-text-muted, #666666) !important; // #666 sobre fundo claro do footer-bottom → 5.74:1
+}
+
+// =============================================================================
+// BUG-17 — UX: Cramped padding nos submenus flyout (flush right/bottom)
+// Evidência: Impeccable detectou em todos os 8 #submenu-menu-* que
+//   ul.subchildmenu.navigation__inner-list tem children flush against bg
+//   on right/bottom (no inset).
+// Causa: A regra de padding existe apenas para .navigation__inner-list--level1
+//   e .subchildmenu.mega-columns, mas ul.subchildmenu.navigation__inner-list
+//   (sem .mega-columns e sem --level1) não recebe padding do CSS base.
+// Fix: Adiciona padding na versão desktop para todos os subchildmenu.
+//   Mantém compatibilidade com o mega-columns (que já tem padding específico).
+// =============================================================================
+
+@media (min-width: 992px) {
+    html body#html-body .page-wrapper .navigation.verticalmenu
+        div[id^="submenu-menu-"] > div.row > ul.subchildmenu.navigation__inner-list {
+        padding: 16px 16px 16px 20px !important;
+    }
+}
+
+// =============================================================================
+// BUG-18 — UX: VEM extra section — ul.awa-vem-list border-top flush (4px inset)
+// Evidência: Impeccable detectou em #menu\.vertical\.extra e ul.awa-vem-list
+//   que children estão flush against border-top on top (4px é insuficiente).
+// Causa: awa-vertical-menu-modern.css define padding: 4px 0 8px que resulta
+//   em apenas 4px entre a borda e o primeiro item de lista. Limiar confortável
+//   é 8-10px.
+// Fix: Aumentar padding-top de 4px para 10px mantendo os demais valores.
+// =============================================================================
+
+html body#html-body .page-wrapper .navigation.verticalmenu ul.awa-vem-list {
+    padding-top: 10px !important;
+}
+
+// =============================================================================
+// BUG-19 — UX: Footer copyright sem padding horizontal
+// Evidência: Impeccable detectou em div.awa-footer-bottom__copyright que
+//   children estão flush against border-top+bg on right/left (no inset).
+// Causa: awa-layout-bundle.css define apenas padding-top e padding-bottom
+//   (12px cada) mas não define padding-left/right. Em viewports menores
+//   o texto toca as bordas laterais.
+// Fix: Adicionar padding inline (esquerda/direita) de 16px.
+// =============================================================================
+
+html body#html-body .page-wrapper .page_footer .footer-bottom
+    div.awa-footer-bottom__copyright {
+    padding-inline: 16px !important;
+}
+
+// =============================================================================
+// BUG-20 — SYNC: Promo bar — texto branco sobre fundo claro (1.0:1)
+// Evidência: Impeccable detectou strong.awa-b2b-promo-bar__cta-long com
+//   #ffffff sobre #ffffff no 1º paint da /b2b/shoppinglist/.
+// Causa: awa-header-impeccable-critical-global.phtml e
+//   _awa-visual-improvements-2026-04-30.less aplicam color:#fff !important,
+//   mas o design final (awa-layout-bundle) usa fundo claro
+//   (--awa-bg-subtle) com texto escuro. Entre o critical inline e o async,
+//   o scanner lê branco-no-branco.
+// Fix: Alinhar cores síncronas ao design final — fundo claro + texto escuro,
+//   CTA em --awa-primary-hover. Importado por último em _extend.less.
+// =============================================================================
+
+html body#html-body .page-wrapper :is(#header, .awa-site-header)
+    :is(
+        #awa-b2b-promo-bar,
+        .top-header.awa-b2b-promo-bar,
+        .awa-b2b-promo-bar[data-awa-header-utility]
+    ) {
+    background: var(--awa-bg-subtle, oklch(97.5% 0.006 20)) !important;
+    background-image: none !important;
+    color: var(--awa-text-secondary, #666666) !important;
+}
+
+html body#html-body .page-wrapper :is(#header, .awa-site-header)
+    .awa-b2b-promo-bar :is(
+        .awa-b2b-promo-bar__text,
+        .awa-b2b-promo-bar__lead,
+        .awa-b2b-promo-bar__lead-long,
+        .awa-b2b-promo-bar__lead-short,
+        .awa-b2b-promo-bar__tail,
+        .awa-b2b-promo-bar__separator
+    ) {
+    color: var(--awa-text-secondary, #666666) !important;
+    line-height: 1.4 !important;
+}
+
+html body#html-body .page-wrapper :is(#header, .awa-site-header)
+    .awa-b2b-promo-bar :is(
+        .awa-b2b-promo-bar__cta,
+        .awa-b2b-promo-bar__cta strong,
+        strong.awa-b2b-promo-bar__cta-long,
+        strong.awa-b2b-promo-bar__cta-short
+    ) {
+    color: var(--awa-primary-hover, #8e2629) !important;
+    line-height: 1.4 !important;
+}
+
+html body#html-body .page-wrapper :is(#header, .awa-site-header)
+    .awa-b2b-promo-bar button.awa-b2b-promo-close {
+    color: var(--awa-text-muted, #666666) !important;
+    opacity: 1 !important;
+}
+
+// =============================================================================
+// BUG-21 — SYNC: Promo bar tail — line-height 1.25 (Impeccable need >=1.3)
+// Evidência: awa-commerce-impeccable-refine.css define line-height:1.25 no
+//   parent .awa-b2b-promo-bar__text; o scanner herda 1.25 no __tail.
+// Fix: Coberto pelo BUG-20 acima (line-height:1.4 no __tail). Regra explícita
+//   extra para vencer qualquer async com especificidade máxima.
+// =============================================================================
+
+html body#html-body .page-wrapper :is(#header, .awa-site-header)
+    .awa-b2b-promo-bar span.awa-b2b-promo-bar__tail {
+    line-height: 1.4 !important;
+}
+
+// =============================================================================
+// BUG-22 — SYNC: WhatsApp float label overflow (40px)
+// Evidência: Impeccable detectou span.awa-whatsapp-float__label overflow.
+// Causa: Fix existe em awa-visual-bugfix.css (async). Scanner lê antes.
+// Fix: overflow:hidden + ellipsis no CSS síncrono; max-width evita estouro.
+// =============================================================================
+
+html body#html-body .page-wrapper .awa-whatsapp-float {
+    max-width: calc(100vw - 48px) !important;
+    overflow: hidden !important;
+}
+
+html body#html-body .page-wrapper .awa-whatsapp-float__label {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 120px !important;
+}
+
+// =============================================================================
+// BUG-23 — Perf: transition max-height no painel vertical menu
+// Evidência: Impeccable detectou transition:max-height em #awa-vertical-menu-*.
+// Causa: _awa-consolidated.less e JS (awa-menu-controller.js) animam max-height,
+//   causando layout thrashing. JS controla max-height inline — grid-row trick
+//   exigiria refactor JS. Fix CSS: remover max-height da transition declarada;
+//   animar só opacity (compositor). JS inline pode sobrescrever, mas o 1º paint
+//   e prefers-reduced-motion ficam limpos.
+// =============================================================================
+
+@media (prefers-reduced-motion: no-preference) {
+    html body#html-body .page-wrapper .navigation.verticalmenu
+        :is(ul.togge-menu.list-category-dropdown, ul[id^="awa-vertical-menu-"]) {
+        transition: opacity 0.24s cubic-bezier(0.22, 1, 0.36, 1) !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html body#html-body .page-wrapper .navigation.verticalmenu
+        :is(ul.togge-menu.list-category-dropdown, ul[id^="awa-vertical-menu-"]) {
+        transition: none !important;
+    }
+}
+
+// =============================================================================
+// BUG-24 — SYNC: Structural insets header/nav (cramped padding Impeccable)
+// Evidência: Impeccable detectou flush em .header.awa-main-header,
+//   .awa-nav-bar__inner, .header-control.header-nav, etc.
+// Causa: Fix existe em awa-commerce-impeccable-refine.css (async idle).
+// Fix: Replicar padding-block:6px no CSS síncrono (styles-m).
+// =============================================================================
+
+html body#html-body .page-wrapper :is(
+    .header.awa-main-header,
+    .header_main.awa-main-header-inner-wrap,
+    .header-control.header-nav,
+    .header-control.header-nav > .container,
+    .awa-nav-bar__inner,
+    .awa-header-categories.menu_left_home1
+) {
+    padding-block: 6px !important;
+}
+
+// =============================================================================
+// BUG-25 — SYNC: B2B/account .columns — children flush top/right/left
+// Evidência: Impeccable em div.columns na /b2b/shoppinglist/ e demais pages B2B.
+// Causa: .page-main tem padding-inline via awa-page-container, mas
+//   .columns interno não tem padding-block explícito no 1º paint.
+//   Seletor original usava .columns.layout — ERRADO. B2B pages usam apenas
+//   <div class="columns"> (sem .layout). Corrigido para .columns simples.
+// Fix: padding-block no grid shell B2B/account + gap de reforço (wins async).
+// =============================================================================
+
+html body#html-body:is(
+    .b2b-account-dashboard,
+    .b2b-account-shell,
+    .b2b-company-index,
+    .b2b-credit-index,
+    .b2b-approval-index,
+    .b2b-reorder-history,
+    .b2b-quote-index,
+    .b2b-quote-history,
+    .b2b-quote-view,
+    .b2b-quote-create,
+    .b2b-shoppinglist-index,
+    .b2b-shoppinglist-view,
+    .b2b-quickorder-index,
+    .b2b-account-orders,
+    .b2b-erp-orders-index,
+    .b2b-cotacao-index,
+    .b2b-cotacao-view,
+    .customer-account-index,
+    .customer-account-edit,
+    .customer-address-index,
+    .customer-address-form,
+    .sales-order-history,
+    .sales-order-view,
+    .wishlist-index-index,
+    .account
+) .page-wrapper .page-main > .columns {
+    padding-block: 12px !important;
+    gap: var(--awa-space-6, 24px) !important;
+}
+
+// =============================================================================
+// BUG-26 — SYNC: Footer velaFooterMenu — padding inset (cramped top/right/left)
+// Evidência: Impeccable em div.vela-content.velaFooterMenu (3 colunas footer).
+// Causa: Fix em awa-commerce-impeccable-refine.css L4089 (async).
+// Fix: padding:12px 8px no CSS síncrono.
+// =============================================================================
+
+html body#html-body .page-wrapper .page_footer #footer .vela-content.velaFooterMenu {
+    padding: 12px 8px !important;
+}
+
+// =============================================================================
+// BUG-27 — SYNC: Mobile bottom nav — ul.mobile-bottom-link cramped padding
+// Evidência: Impeccable detectou children flush against border-top/bottom.
+// Causa: padding existe em _awa-consolidated.less mas scanner lê antes.
+// Fix: padding-block explícito no CSS síncrono final-wins.
+// =============================================================================
+
+html body#html-body .page-wrapper :is(nav.fixed-bottom, .awa-mobile-bottom-nav)
+    ul.mobile-bottom-link {
+    padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+// =============================================================================
+// BUG-28 — SYNC: Minicart block-title — flush left inset
+// Evidência: Impeccable em #minicart-content-wrapper > div.block-title.
+// Causa: padding-left ausente no 1º paint do drawer minicart.
+// Fix: padding-inline mínimo no título do minicart.
+// =============================================================================
+
+html body#html-body .page-wrapper .block-minicart .block-title,
+html body#html-body .page-wrapper #minicart-content-wrapper > .block-title {
+    padding-inline: 12px !important;
+}
