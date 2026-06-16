@@ -4,27 +4,37 @@ declare(strict_types=1);
  * M21: B2B Breadcrumbs
  * @var \Magento\Framework\View\Element\Template $block
  */
-$homeUrl = $block->escapeUrl($block->getUrl(''));
+$homeUrl   = $block->escapeUrl($block->getUrl(''));
 $b2bDashUrl = $block->escapeUrl($block->getUrl('b2b/account/dashboard'));
-$pageTitle = $block->escapeHtml((string) $block->getData('page_title'));
+$pageTitle  = $block->escapeHtml((string) $block->getData('page_title'));
+
+// BUG-34: Na dashboard o "Portal B2B" é a própria página atual — exibir como
+// item current em vez de link (evita breadcrumb redundante com separador duplo).
+$isDashboard = ($block->getRequest()->getFullActionName() === 'b2b_account_dashboard');
 ?>
-<div class="container b2b-breadcrumbs-container">
+<div class="b2b-breadcrumbs-container">
     <div class="breadcrumbs b2b-breadcrumbs" aria-label="<?= $block->escapeHtmlAttr(__('Navegação')) ?>">
         <ul class="items">
             <li class="item home">
                 <a href="<?= $homeUrl ?>" title="<?= $block->escapeHtmlAttr(__('Ir para a página inicial')) ?>">
-                    <?= $block->escapeHtml(__('Home')) ?>
+                    <?= $block->escapeHtml(__('Início')) ?>
                 </a>
             </li>
+            <?php if ($isDashboard): ?>
+            <li class="item current" aria-current="page">
+                <strong><?= $block->escapeHtml(__('Portal B2B')) ?></strong>
+            </li>
+            <?php else: ?>
             <li class="item b2b-portal">
                 <a href="<?= $b2bDashUrl ?>" title="<?= $block->escapeHtmlAttr(__('Portal B2B')) ?>">
                     <?= $block->escapeHtml(__('Portal B2B')) ?>
                 </a>
             </li>
             <?php if ($pageTitle): ?>
-            <li class="item current">
+            <li class="item current" aria-current="page">
                 <strong><?= /* @noEscape */ $pageTitle ?></strong>
             </li>
+            <?php endif; ?>
             <?php endif; ?>
         </ul>
     </div>

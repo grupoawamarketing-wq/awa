@@ -1324,3 +1324,69 @@ body.b2b-reorder-history .b2b-reorder-page .reorder-items-wrapper {
 body.b2b-reorder-history .b2b-reorder-page .reorder-items {
     min-width: 480px !important;
 }
+
+// =============================================================================
+// BUG-31 — SYNC: .nav.items — flex-wrap:wrap no tablet cria 2 colunas no sidebar
+// Evidência: Na dashboard B2B (viewport ≤ 991px), itens "Minha Empresa"/"Aprovações"
+//   e "Minhas Faturas"/"Meu Crédito" aparecem lado a lado em 2 colunas.
+// Causa: @media (max-width:991px) em styles-m aplica flex-wrap:wrap na .nav.items
+//   nativa do Magento. O BUG-29 corrigiu .account-nav-items (template Reorder),
+//   mas a dashboard usa a estrutura nativa .nav.items.
+// Fix: flex-wrap:nowrap + width:100% nos .nav.item para forçar coluna única.
+// =============================================================================
+
+@media (max-width: 991px) {
+    body:is(.account, [class*='b2b-']) .sidebar-main .nav.items {
+        flex-wrap: nowrap !important;
+        flex-direction: column !important;
+    }
+
+    body:is(.account, [class*='b2b-']) .sidebar-main .nav.item {
+        flex: 0 0 100% !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+}
+
+// =============================================================================
+// BUG-32 — SYNC: .block-minicart — posicionamento errado na dashboard B2B
+// Evidência: Ao abrir o carrinho na b2b-account-dashboard, o painel do minicart
+//   aparece no centro da página, sobrepondo o sidebar nav e o conteúdo principal.
+// Causa: CSS :not(.b2b-account-dashboard) exclui a dashboard do sizing 44×44px do
+//   .minicart-wrapper. Sem esse constraint, o wrapper tem largura diferente e o
+//   painel (position:absolute; right:0) não alinha ao canto direito do viewport.
+// Fix: position:fixed no .block-minicart na dashboard para ancorar ao viewport.
+// =============================================================================
+
+body.b2b-account-dashboard .minicart-wrapper .block-minicart,
+body.b2b-account-shell .minicart-wrapper .block-minicart {
+    position: fixed !important;
+    top: 64px !important;
+    right: 0 !important;
+    left: auto !important;
+    width: 340px !important;
+    max-height: calc(100vh - 68px) !important;
+    overflow-y: auto !important;
+    z-index: 9999 !important;
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.12) !important;
+}
+
+// =============================================================================
+// BUG-33 — SYNC: Sidebar nav — conteúdo cortado no rodapé (overflow:hidden)
+// Evidência: Seção "Compras & Pedidos" fica cortada no rodapé do sidebar.
+// Causa: .block-collapsible-nav { overflow: hidden } em _account.less impede
+//   que o nav cresça além do card quando o conteúdo é maior que o espaço.
+// Fix: overflow-y:auto + max-height + sticky para nav scrollável e sempre visível.
+// =============================================================================
+
+body:is(.account, [class*='b2b-']) .sidebar-main {
+    align-self: start !important;
+    position: sticky !important;
+    top: 16px !important;
+}
+
+body:is(.account, [class*='b2b-']) .sidebar-main .block-collapsible-nav {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    max-height: calc(100vh - 100px) !important;
+}
