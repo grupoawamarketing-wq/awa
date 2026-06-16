@@ -1274,3 +1274,53 @@ html body#html-body .page-wrapper .block-minicart .block-title,
 html body#html-body .page-wrapper #minicart-content-wrapper > .block-title {
     padding-inline: 12px !important;
 }
+
+// =============================================================================
+// BUG-29 — SYNC: .account-nav-items — single-column garantido no 1º paint
+// Evidência: Sidebar nav da conta B2B exibindo itens em 2 colunas na renderização
+//   inicial (antes dos CSS assíncronos carregarem).
+// Causa: .account-nav-items não tinha display/flex-direction no styles-m.css.
+//   Sem regra explícita, herança do tema pai (themes.css) ou CSS multi-column
+//   do block-collapsible-nav pode criar layout de 2 colunas.
+// Fix: display:flex + flex-direction:column no CSS síncrono como garantia.
+// =============================================================================
+
+html body#html-body:is(.account, [class*='b2b-']) .page-wrapper .account-nav-items {
+    display: flex !important;
+    flex-direction: column !important;
+    flex-wrap: nowrap !important;
+    width: 100% !important;
+    gap: 2px !important;
+    list-style: none !important;
+    margin: 0 !important;
+    padding: 4px 8px 8px !important;
+}
+
+html body#html-body:is(.account, [class*='b2b-']) .page-wrapper
+    .account-nav-items > :is(.account-nav-item, .account-nav-section) {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: none !important;
+    float: none !important;
+    display: block !important;
+    box-sizing: border-box !important;
+}
+
+// =============================================================================
+// BUG-30 — SYNC: .reorder-items-wrapper — overflow-x: auto no card reorder
+// Evidência: Quando o painel de carrinho está aberto à direita, a área principal
+//   fica estreita e as colunas "No pedido" / "Hoje" da tabela são cortadas pelo
+//   overflow:hidden do .reorder-card (border-radius clip).
+// Causa: pages-reorder.css define overflow:hidden no .reorder-card, mas o
+//   table-wrapper não tem overflow-x:auto em telas desktop.
+// Fix: overflow-x:auto no wrapper da tabela para scroll horizontal seguro.
+// =============================================================================
+
+body.b2b-reorder-history .b2b-reorder-page .reorder-items-wrapper {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+}
+
+body.b2b-reorder-history .b2b-reorder-page .reorder-items {
+    min-width: 480px !important;
+}
