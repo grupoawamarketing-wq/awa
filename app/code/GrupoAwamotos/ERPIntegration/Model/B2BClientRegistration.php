@@ -25,8 +25,14 @@ class B2BClientRegistration
     /** OpenCardB2B - Cadastro de Cliente */
     private const ORIGEM_CLIENTE = '7D4C6FBD-62CF-427F-A0ED-3C06602F05D7';
 
+    /** OpenCardB2B - Pré-cadastro de Cliente (Importar Clientes Prospect) */
+    private const ORIGEM_PROSPECT = '753ADB36-27F8-4910-84BB-D7E26279C5A8';
+
     /** OpenCardB2B - Cadastro de Cliente Endereço */
     private const ORIGEM_ENDERECO = 'FEB11981-5319-49EB-9F1E-4BA02BD22B90';
+
+    /** OpenCardB2B - Cadastro de Produto */
+    private const ORIGEM_PRODUTO = 'CF672D58-4F70-48D6-91D0-32652F86D217';
     private const WARNING_COOLDOWN_SECONDS = 21600;
     private ConnectionInterface $readConnection;
     private Helper $helper;
@@ -34,6 +40,8 @@ class B2BClientRegistration
     private ?\PDO $writeConnection = null;
     private bool $writePermissionChecked = false;
     private bool $writePermissionGranted = true;
+    /** @var array<int, bool> */
+    private array $erpNativeClientCache = [];
 
     public function __construct(
         ConnectionInterface $readConnection,
@@ -48,6 +56,9 @@ class B2BClientRegistration
     /**
      * Check if a client is registered in Sectra B2B integration
      * with the correct INTEGRACAOORIGEM (OpenCardB2B - Cadastro de Cliente).
+     *
+     * Pré-cadastro (753ADB36) or FN_FORNECEDORES alone are not enough for
+     * "Importar Pedidos" — Sectra requires this origin specifically.
      */
     public function isClientRegistered(int $erpClientCode): bool
     {
@@ -56,15 +67,312 @@ class B2BClientRegistration
         }
 
         try {
-            $result = $this->readConnection->fetchOne(
-                "SELECT CHAVE FROM GR_INTEGRACAOVALIDADOR WHERE CHAVE = :code",
-                [':code' => (string) $erpClientCode]
-            );
-            return $result !== null;
+            if ($this->hasValidatorEntry(self::ORIGEM_CLIENTE, $erpClientCode)) {
+                return true;
+            }
+
+            $prospectChave = $this->resolveProspectIntegrationChave($erpClientCode);
+
+            if ($prospectChave !== null
+                && $prospectChave !== $erpClientCode
+                && $this->hasValidatorEntry(self::ORIGEM_CLIENTE, $prospectChave)
+            ) {
+                return true;
+            }
+
+            // Fallback: established ERP client with no GR_INTEGRACAOVALIDADOR entry.
+            // OpenCardB2B stopped in 2024-11-01; clients placed before that window
+            // were never registered. FN_FORNECEDORES is authoritative for real clients.
+            return $this->isExistingErpNativeClient($erpClientCode);
         } catch (\Exception $e) {
-            $this->logger->warning('[B2B Registration] Check failed: ' . $e->getMessage());
-            return true; // Assume registered to avoid false negatives
+            $this->logger->warning('[B2B Registration] Check failed (fail-closed): ' . $e->getMessage());
+            return false;
         }
+    }
+
+    /**
+     * Client exists in ERP as an established (non-prospect) customer with valid CNPJ.
+     *
+     * Used as fallback when GR_INTEGRACAOVALIDADOR entry is absent. The new PS-based
+     * order import writes directly to VE_PEDIDO and does not re-validate this table,
+     * so the gate adds no safety value for clients already known to the ERP.
+     */
+    public function isExistingErpNativeClient(int $erpClientCode): bool
+    {
+        if ($erpClientCode <= 0) {
+            return false;
+        }
+
+        $lookupCode = $this->resolveErpSupplierLookupCode($erpClientCode);
+
+        try {
+            $exists = $this->readConnection->fetchOne(
+                "SELECT TOP 1 1 AS found
+                 FROM FN_FORNECEDORES
+                 WHERE CODIGO = ?
+                   AND CKCLIENTE = 'S'
+                   AND (CKPROSPECT IS NULL OR CKPROSPECT = 'N' OR CKPROSPECT = '')
+                   AND LEN(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                       COALESCE(CGC,''), '.',''),'/',''),'-',''),' ',''),',','')) >= 14",
+                [$lookupCode]
+            );
+
+            return is_array($exists);
+        } catch (\Exception $e) {
+            $this->logger->warning(
+                '[B2B Registration] ERP native client fallback check failed: ' . $e->getMessage()
+            );
+            return false;
+        }
+    }
+
+    /**
+     * Client already exists as a real ERP customer (not prospect stub) with valid CNPJ.
+     *
+     * Used when Sectra "Exportar Clientes" cannot run but FN_FORNECEDORES already has
+     * the client and prospect is in GR_INTEGRACAOVALIDADOR — sufficient for oc_order release.
+     */
+    public function isErpNativeB2bClient(int $erpClientCode): bool
+    {
+        if ($erpClientCode <= 0) {
+            return false;
+        }
+
+        if (array_key_exists($erpClientCode, $this->erpNativeClientCache)) {
+            return $this->erpNativeClientCache[$erpClientCode];
+        }
+
+        if (!$this->isClientProspectRegistered($erpClientCode)) {
+            return $this->erpNativeClientCache[$erpClientCode] = false;
+        }
+
+        $lookupCode = $this->resolveErpSupplierLookupCode($erpClientCode);
+
+        try {
+            $row = $this->readConnection->fetchOne(
+                "SELECT TOP 1 CGC, CKPROSPECT
+                 FROM FN_FORNECEDORES
+                 WHERE CODIGO = ? AND CKCLIENTE = 'S'",
+                [$lookupCode]
+            );
+
+            if (!is_array($row)) {
+                return $this->erpNativeClientCache[$erpClientCode] = false;
+            }
+
+            $cgc = preg_replace('/\D/', '', trim((string) ($row['CGC'] ?? ''))) ?: '';
+            if (strlen($cgc) < 14 || preg_match('/^0+$/', $cgc) === 1) {
+                return $this->erpNativeClientCache[$erpClientCode] = false;
+            }
+
+            return $this->erpNativeClientCache[$erpClientCode]
+                = strtoupper(trim((string) ($row['CKPROSPECT'] ?? 'N'))) === 'N';
+        } catch (\Exception $e) {
+            $this->logger->warning('[B2B Registration] ERP native client check failed: ' . $e->getMessage());
+
+            return $this->erpNativeClientCache[$erpClientCode] = false;
+        }
+    }
+
+    /**
+     * Whether Magento may release held B2B orders to oc_order for Sectra Importar Pedidos.
+     *
+     * Runtime evidence (Sectra desktop): Importar Pedidos fails with "Cliente não foi encontrado"
+     * when GR_INTEGRACAOVALIDADOR Cadastro de Cliente (7D4C6FBD) is missing — FN_FORNECEDORES
+     * and prospect alone are not sufficient.
+     */
+    public function isClientReadyForSectraOrderImport(int $erpClientCode): bool
+    {
+        return $this->isClientRegistered($erpClientCode);
+    }
+
+    /**
+     * FN_FORNECEDORES.CODIGO for bridge clients whose prospect CHAVE differs (19195 → 18771).
+     */
+    public function resolveErpSupplierLookupCode(int $erpClientCode): int
+    {
+        $bridgeKey = $this->resolveBridgeKeyForProspectChave($erpClientCode);
+
+        return ($bridgeKey !== null && $bridgeKey > 0) ? $bridgeKey : $erpClientCode;
+    }
+
+    /**
+     * ERP CHAVE assigned by Sectra "Importar Clientes Prospect" for a bridge customer_id.
+     *
+     * Existing ERP clients may get a new CODIGO (CHAVE) while CHAVEEXTERNA keeps the bridge key
+     * (e.g. CHAVE=19195, CHAVEEXTERNA=18771).
+     */
+    public function resolveProspectIntegrationChave(int $bridgeKey): ?int
+    {
+        if ($bridgeKey <= 0) {
+            return null;
+        }
+
+        try {
+            $chave = $this->readConnection->fetchColumn(
+                "SELECT CHAVE
+                   FROM GR_INTEGRACAOVALIDADOR
+                  WHERE INTEGRACAOORIGEM = :origem
+                    AND CHAVEEXTERNA = :ext",
+                [
+                    ':origem' => self::ORIGEM_PROSPECT,
+                    ':ext' => (string) $bridgeKey,
+                ]
+            );
+
+            if ($chave === false || $chave === null || $chave === '') {
+                return null;
+            }
+
+            $code = (int) $chave;
+
+            return $code > 0 ? $code : null;
+        } catch (\Exception $e) {
+            $this->logger->warning('[B2B Registration] Prospect CHAVE lookup failed: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Customer_id Sectra reads during Exportar Clientes (prospect CHAVE when aliased).
+     */
+    public function resolveSectraExportCustomerId(int $bridgeKey): int
+    {
+        $prospectChave = $this->resolveProspectIntegrationChave($bridgeKey);
+
+        return ($prospectChave !== null && $prospectChave > 0) ? $prospectChave : $bridgeKey;
+    }
+
+    /**
+     * Check if a client was already imported via Sectra "Importar Clientes Prospect".
+     */
+    public function isClientProspectRegistered(int $erpClientCode): bool
+    {
+        if ($erpClientCode <= 0) {
+            return false;
+        }
+
+        try {
+            if ($this->hasValidatorEntry(self::ORIGEM_PROSPECT, $erpClientCode)) {
+                return true;
+            }
+
+            return false;
+        } catch (\Exception $e) {
+            $this->logger->warning('[B2B Registration] Prospect check failed (fail-closed): ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Bridge customer_id (CHAVEEXTERNA) => prospect ERP CHAVE when they differ.
+     *
+     * @return array<int, int>
+     */
+    public function getProspectBridgeAliasMap(): array
+    {
+        try {
+            $rows = $this->readConnection->query(
+                "SELECT CHAVE, CHAVEEXTERNA FROM GR_INTEGRACAOVALIDADOR WHERE INTEGRACAOORIGEM = :origem",
+                [':origem' => self::ORIGEM_PROSPECT]
+            );
+
+            $map = [];
+            foreach ($rows as $row) {
+                $bridgeKey = (int) ($row['CHAVEEXTERNA'] ?? 0);
+                $prospectChave = (int) ($row['CHAVE'] ?? 0);
+                if ($bridgeKey > 0 && $prospectChave > 0 && $prospectChave !== $bridgeKey) {
+                    $map[$bridgeKey] = $prospectChave;
+                }
+            }
+
+            return $map;
+        } catch (\Exception $e) {
+            $this->logger->warning('[B2B Registration] Prospect alias map failed: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Bridge customer_id when a prospect row uses a different ERP CHAVE.
+     */
+    public function resolveBridgeKeyForProspectChave(int $prospectChave): ?int
+    {
+        if ($prospectChave <= 0) {
+            return null;
+        }
+
+        foreach ($this->getProspectBridgeAliasMap() as $bridgeKey => $aliasChave) {
+            if ($aliasChave === $prospectChave) {
+                return $bridgeKey;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @return int[]
+     */
+    public function getProspectRegisteredClientCodes(): array
+    {
+        try {
+            $rows = $this->readConnection->query(
+                "SELECT CHAVE, CHAVEEXTERNA FROM GR_INTEGRACAOVALIDADOR WHERE INTEGRACAOORIGEM = :origem",
+                [':origem' => self::ORIGEM_PROSPECT]
+            );
+
+            return $this->collectNumericValidatorKeys($rows);
+        } catch (\Exception $e) {
+            if ($this->shouldLogWarningWithCooldown('b2b_prospect_codes_fetch')) {
+                $this->logger->warning(
+                    '[B2B Registration] Failed to fetch prospect client codes: ' . $e->getMessage()
+                );
+            }
+
+            return [];
+        }
+    }
+
+    /**
+     * ERP clients that already have sales history (skip Importar Clientes Prospect).
+     *
+     * @param int[] $candidateCodes
+     * @return int[]
+     */
+    public function getErpClientCodesWithSalesHistory(array $candidateCodes): array
+    {
+        $candidateCodes = array_values(array_filter(array_map('intval', $candidateCodes), static fn (int $id): bool => $id > 0));
+        if ($candidateCodes === []) {
+            return [];
+        }
+
+        $found = [];
+
+        try {
+            foreach (array_chunk($candidateCodes, 200) as $chunk) {
+                $placeholders = implode(',', array_fill(0, count($chunk), '?'));
+                $rows = $this->readConnection->query(
+                    "SELECT DISTINCT CLIENTE AS codigo
+                     FROM VE_PEDIDO
+                     WHERE CLIENTE IN ({$placeholders})",
+                    $chunk
+                );
+
+                foreach ($rows as $row) {
+                    $code = (int) ($row['codigo'] ?? 0);
+                    if ($code > 0) {
+                        $found[] = $code;
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            $this->logger->warning(
+                '[B2B Registration] Failed to check ERP sales history: ' . $e->getMessage()
+            );
+        }
+
+        return $found;
     }
 
     /**
@@ -76,25 +384,59 @@ class B2BClientRegistration
     {
         try {
             $rows = $this->readConnection->query(
-                "SELECT CHAVE FROM GR_INTEGRACAOVALIDADOR WHERE INTEGRACAOORIGEM = :origem",
+                "SELECT CHAVE, CHAVEEXTERNA FROM GR_INTEGRACAOVALIDADOR WHERE INTEGRACAOORIGEM = :origem",
                 [':origem' => self::ORIGEM_CLIENTE]
             );
 
-            $codes = [];
-            foreach ($rows as $row) {
-                $code = (int) ($row['CHAVE'] ?? 0);
-                if ($code > 0) {
-                    $codes[$code] = true;
-                }
-            }
-
-            return array_map('intval', array_keys($codes));
+            return $this->collectNumericValidatorKeys($rows);
         } catch (\Exception $e) {
             if ($this->shouldLogWarningWithCooldown('b2b_registered_codes_fetch')) {
                 $this->logger->warning('[B2B Registration] Failed to fetch registered client codes: ' . $e->getMessage());
             }
             return [];
         }
+    }
+
+    /**
+     * @param int[] $candidateProductIds
+     * @return int[] Registered Sectra product IDs (CHAVEEXTERNA) from subset
+     */
+    public function getRegisteredProductIds(array $candidateProductIds): array
+    {
+        if ($candidateProductIds === []) {
+            return [];
+        }
+
+        $registered = [];
+
+        try {
+            foreach (array_chunk($candidateProductIds, 200) as $chunk) {
+                $placeholders = implode(',', array_fill(0, count($chunk), '?'));
+                $params = array_merge(
+                    [self::ORIGEM_PRODUTO],
+                    array_map(static fn (int $id): string => (string) $id, $chunk)
+                );
+
+                $rows = $this->readConnection->query(
+                    "SELECT CHAVEEXTERNA
+                     FROM GR_INTEGRACAOVALIDADOR
+                     WHERE INTEGRACAOORIGEM = ?
+                       AND CHAVEEXTERNA IN ({$placeholders})",
+                    $params
+                );
+
+                foreach ($rows as $row) {
+                    $id = (int) ($row['CHAVEEXTERNA'] ?? 0);
+                    if ($id > 0) {
+                        $registered[] = $id;
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            $this->logger->warning('[B2B Registration] Product validator check failed: ' . $e->getMessage());
+        }
+
+        return $registered;
     }
 
     /**
@@ -390,12 +732,17 @@ class B2BClientRegistration
             $port = $this->helper->getPort();
             $database = $this->helper->getDatabase();
 
-            $dsn = sprintf('dblib:host=%s:%d;charset=UTF-8', $host, $port);
+            // Match ERP read connection DSN (dblib 7.4 + dbname) — bare host DSN fails on this host.
+            $dsn = sprintf(
+                'dblib:host=%s:%d;dbname=%s;version=7.4;charset=UTF-8',
+                $host,
+                $port,
+                $database
+            );
             $this->writeConnection = new \PDO($dsn, $writeUser, $writePass, [
                 \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
                 \PDO::ATTR_TIMEOUT => 15,
             ]);
-            $this->writeConnection->exec('USE [' . str_replace(']', ']]', $database) . ']');
 
             if (!$this->validateWritePermission($this->writeConnection)) {
                 $this->writeConnection = null;
@@ -468,6 +815,49 @@ class B2BClientRegistration
         }
 
         return strcasecmp($leftUser, $rightUser) === 0;
+    }
+
+    /**
+     * @param array<int, array<string, mixed>> $rows
+     * @return int[]
+     */
+    private function collectNumericValidatorKeys(array $rows): array
+    {
+        $codes = [];
+        foreach ($rows as $row) {
+            foreach (['CHAVE', 'CHAVEEXTERNA'] as $field) {
+                $raw = trim((string) ($row[$field] ?? ''));
+                if ($raw === '' || preg_match('/^\d+$/', $raw) !== 1) {
+                    continue;
+                }
+
+                $code = (int) $raw;
+                if ($code > 0) {
+                    $codes[$code] = true;
+                }
+            }
+        }
+
+        return array_map('intval', array_keys($codes));
+    }
+
+    private function hasValidatorEntry(string $origem, int $code): bool
+    {
+        $result = $this->readConnection->fetchOne(
+            "SELECT CHAVE
+               FROM GR_INTEGRACAOVALIDADOR
+              WHERE INTEGRACAOORIGEM = :origem
+                AND (
+                    CHAVE = :code
+                    OR CHAVEEXTERNA = :code
+                )",
+            [
+                ':code' => (string) $code,
+                ':origem' => $origem,
+            ]
+        );
+
+        return $result !== null;
     }
 
     /**

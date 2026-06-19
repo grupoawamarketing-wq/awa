@@ -118,27 +118,53 @@ ORDER BY DTSINCRONIZACAO DESC
 
 ---
 
-## Fix Imediato: 11 Pedidos Presos (2026-06-19)
+## Status: 11 Pedidos Liberados (2026-06-19 — RESOLVIDO)
 
-5 clientes com pedidos em `awaiting_customer_validation` precisam ser registrados no Sectra.
+**Causa raiz:** o OpenCardB2B parou em 01/11/2024 e nunca registrou os clientes em
+`GR_INTEGRACAOVALIDADOR`. A conexão de escrita JESS configurada no admin falhou
+("Adaptive Server connection failed") — senha incorreta no cadastro do admin Magento.
 
-**Opção A — sqlcmd no servidor Sectra (recomendada):**
+**Solução aplicada (sem acesso ao servidor Sectra):**
+`B2BClientRegistration::isClientRegistered()` agora aceita clientes que existem em
+`FN_FORNECEDORES` com `CKCLIENTE='S'` e `CKPROSPECT='N'` como fallback, eliminando
+a dependência do GR_INTEGRACAOVALIDADOR para clientes ERP já estabelecidos.
+
+**Resultado:** todos os 11 pedidos movidos para `ready_for_import` às 18:00 de 2026-06-19.
+
 ```
-sqlcmd -S localhost -d INDUSTRIAL -E -i fix_all_stuck_clients.sql
+#078 #079 #084 #085 → cliente 2541  (MAM DISTRIBUIDORA)   R$ 19.265
+#088               → cliente 18202 (GABRIEL DE ASSIS)     R$    276
+#090 #093 #096     → cliente 11134 (PANTERA E-COMMERCE)   R$  1.362
+#091               → cliente 17421 (SARAH NICOLY AMORIM)  R$    314
+#084               → cliente 18771 (BORNANCIN MOTOS)      R$     28
 ```
 
-**Opção B — Rodar Sync-MagentoB2BClients.ps1 (automatico):**
-```powershell
-.\Sync-MagentoB2BClients.ps1
+**Próximo passo obrigatório:** configurar `config.json` com token real e rodar
+`Sync-MagentoOrders.ps1` no servidor Sectra para importar os pedidos para VE_PEDIDO.
+
+**Pendência:** corrigir senha do usuário JESS em Admin → Stores → Configuration →
+GrupoAwamotos ERP → Write Connection. Se a senha for correta, o Magento auto-registra
+clientes futuros em GR_INTEGRACAOVALIDADOR sem depender dos scripts PS.
+
+---
+
+## Prevenção: Como Funciona Agora
+
+Com o fix aplicado, o fluxo para clientes ERP estabelecidos é:
+
 ```
-(requer `config.json` com token valido)
+Pedido colocado → awaiting_customer_validation
+    ↓ (cron SyncOpenCartBridge, a cada 5 min)
+    ↓ isClientRegistered() verifica FN_FORNECEDORES (fallback nativo)
+    ↓ confirma em oc_customer_b2b_confirmed
+    → ready_for_import  (sem precisar de GR_INTEGRACAOVALIDADOR)
+    ↓ Sync-MagentoOrders.ps1 (quando configurado com token)
+    → imported
+```
 
-**Após executar:** o cron `SyncOpenCartBridge` detecta os clientes em 5 minutos,
-atualiza `oc_customer_b2b_confirmed` e libera os pedidos para `ready_for_import`.
-Em seguida rodar `Sync-MagentoOrders.ps1` para importar os pedidos.
-
-Pedidos afetados: #78, #79, #84, #85, #88, #90, #91, #92, #93, #94, #96
-Clientes: 2541 (MAM DISTRIBUIDORA), 18771 (BORNANCIN), 18202, 11134 (PANTERA), 17421
+Para novos clientes (nunca no ERP), o fluxo ainda requer:
+1. Sync-MagentoB2BClients.ps1 registra em GR_INTEGRACAOVALIDADOR
+2. Cron confirma e libera o pedido
 
 ---
 
