@@ -38,9 +38,11 @@ Copie a pasta inteira para o servidor Sectra:
 
 ```
 C:\SectraSync\
-  ├── Sync-MagentoB2BClients.ps1   (script principal)
-  ├── config.json                    (configuracoes)
-  ├── sync-b2b.bat                   (wrapper para Task Scheduler)
+  ├── Sync-MagentoB2BClients.ps1   (registra clientes no GR_INTEGRACAOVALIDADOR)
+  ├── Sync-MagentoOrders.ps1        (importa pedidos para VE_PEDIDO + VE_PEDIDOITENS)
+  ├── config.json                    (configuracoes — compartilhado pelos dois scripts)
+  ├── sync-b2b.bat                   (wrapper Task Scheduler para clientes)
+  ├── sync-orders.bat                (wrapper Task Scheduler para pedidos)
   └── logs\                          (criado automaticamente)
 ```
 
@@ -98,54 +100,45 @@ ORDER BY DTSINCRONIZACAO DESC
 
 ### 5. Agendar no Task Scheduler
 
+**Tarefa 1 — Sync Clientes (sync-b2b.bat):**
+
 1. Abrir **Task Scheduler** → Create Task
-2. **General tab:**
-   - Name: `Sync Magento B2B Clients`
-   - Run whether user is logged on or not
-   - Run with highest privileges
-3. **Triggers tab:**
-   - New → Daily → 06:00
-   - New → Daily → 18:00
-4. **Actions tab:**
-   - Program: `C:\SectraSync\sync-b2b.bat`
-   - Start in: `C:\SectraSync`
-5. **Settings tab:**
-   - Allow task to be run on demand
-   - Stop if runs longer than 10 minutes
+2. **General:** Nome `Sync Magento B2B Clients` | Run with highest privileges
+3. **Triggers:** Diário 06:00 + Diário 18:00
+4. **Actions:** Program `C:\SectraSync\sync-b2b.bat`
+5. **Settings:** Stop if runs longer than 10 minutes
+
+**Tarefa 2 — Importar Pedidos (sync-orders.bat):**
+
+1. Abrir **Task Scheduler** → Create Task
+2. **General:** Nome `Importar Pedidos AWA` | Run with highest privileges
+3. **Triggers:** Repetir a cada **30 minutos** por 24h (ou conforme demanda)
+4. **Actions:** Program `C:\SectraSync\sync-orders.bat`
+5. **Settings:** Stop if runs longer than 5 minutes | Do not start new instance if already running
 
 ---
 
-## Fix Imediato: Cliente 2541
+## Fix Imediato: 11 Pedidos Presos (2026-06-19)
 
-Para desbloquear o pedido 200008 AGORA, execute direto no SQL Server:
+5 clientes com pedidos em `awaiting_customer_validation` precisam ser registrados no Sectra.
 
-```sql
--- Fix cliente 2541 (MAM DISTRIBUIDORA DE MOTO PECAS LTDA)
-DECLARE @maxExt INT;
-SELECT @maxExt = ISNULL(MAX(CAST(CHAVEEXTERNA AS INT)), 10000)
-FROM GR_INTEGRACAOVALIDADOR
-WHERE INTEGRACAOORIGEM = 'FEB11981-5319-49EB-9F1E-4BA02BD22B90';
-
-INSERT INTO GR_INTEGRACAOVALIDADOR(INTEGRACAOORIGEM, CHAVE, VALIDADOR, CHAVEEXTERNA, DTSINCRONIZACAO)
-VALUES(
-    '7D4C6FBD-62CF-427F-A0ED-3C06602F05D7',
-    '2541',
-    UPPER(CONVERT(VARCHAR(32), HASHBYTES('MD5', '{"CODIGO":2541,"source":"magento_b2b"}'), 2)),
-    '2541',
-    GETDATE()
-);
-
-INSERT INTO GR_INTEGRACAOVALIDADOR(INTEGRACAOORIGEM, CHAVE, VALIDADOR, CHAVEEXTERNA, DTSINCRONIZACAO)
-VALUES(
-    'FEB11981-5319-49EB-9F1E-4BA02BD22B90',
-    '2541;1',
-    UPPER(CONVERT(VARCHAR(32), HASHBYTES('MD5', '{"CODIGO":2541,"ENDERECO":1,"source":"magento_b2b"}'), 2)),
-    CAST(@maxExt + 1 AS VARCHAR(20)),
-    GETDATE()
-);
+**Opção A — sqlcmd no servidor Sectra (recomendada):**
+```
+sqlcmd -S localhost -d INDUSTRIAL -E -i fix_all_stuck_clients.sql
 ```
 
-Depois, re-importe o pedido 200008 no Sectra → "Importar Pedidos AWA".
+**Opção B — Rodar Sync-MagentoB2BClients.ps1 (automatico):**
+```powershell
+.\Sync-MagentoB2BClients.ps1
+```
+(requer `config.json` com token valido)
+
+**Após executar:** o cron `SyncOpenCartBridge` detecta os clientes em 5 minutos,
+atualiza `oc_customer_b2b_confirmed` e libera os pedidos para `ready_for_import`.
+Em seguida rodar `Sync-MagentoOrders.ps1` para importar os pedidos.
+
+Pedidos afetados: #78, #79, #84, #85, #88, #90, #91, #92, #93, #94, #96
+Clientes: 2541 (MAM DISTRIBUIDORA), 18771 (BORNANCIN), 18202, 11134 (PANTERA), 17421
 
 ---
 

@@ -258,9 +258,11 @@ class CustomerPullManagement implements CustomerPullInterface
             $h1 = $this->b2bRegistration->getClientValidatorHash((int) $code);
             $h2 = $this->b2bRegistration->getAddressValidatorHash((int) $code);
 
-            $sql .= "INSERT INTO GR_INTEGRACAOVALIDADOR(INTEGRACAOORIGEM,CHAVE,VALIDADOR,CHAVEEXTERNA,DTSINCRONIZACAO)";
+            $sql .= "IF NOT EXISTS(SELECT 1 FROM GR_INTEGRACAOVALIDADOR WHERE INTEGRACAOORIGEM='$origemCliente' AND CHAVE='$code')\n";
+            $sql .= "    INSERT INTO GR_INTEGRACAOVALIDADOR(INTEGRACAOORIGEM,CHAVE,VALIDADOR,CHAVEEXTERNA,DTSINCRONIZACAO)";
             $sql .= "VALUES('$origemCliente','$code','$h1','$code',GETDATE());\n";
-            $sql .= "INSERT INTO GR_INTEGRACAOVALIDADOR(INTEGRACAOORIGEM,CHAVE,VALIDADOR,CHAVEEXTERNA,DTSINCRONIZACAO)";
+            $sql .= "IF NOT EXISTS(SELECT 1 FROM GR_INTEGRACAOVALIDADOR WHERE INTEGRACAOORIGEM='$origemEndereco' AND CHAVE='$code;1')\n";
+            $sql .= "    INSERT INTO GR_INTEGRACAOVALIDADOR(INTEGRACAOORIGEM,CHAVE,VALIDADOR,CHAVEEXTERNA,DTSINCRONIZACAO)";
             $sql .= "VALUES('$origemEndereco','$code;1','$h2','$nextExt',GETDATE());\n";
             $nextExt++;
         }

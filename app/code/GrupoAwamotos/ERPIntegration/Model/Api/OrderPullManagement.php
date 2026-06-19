@@ -74,6 +74,16 @@ class OrderPullManagement implements OrderPullInterface
 
         foreach ($allOrders as $order) {
             try {
+                // Skip orders that are explicitly blocked — they need manual resolution
+                $importStatus = $order->getData('sectra_import_status');
+                if (in_array($importStatus, [
+                    'order_blocked_product_not_registered',
+                    'order_cancelled_before_erp_import',
+                    'imported',
+                ], true)) {
+                    continue;
+                }
+
                 $erpClientCode = $this->resolveErpClientCode($order);
 
                 // Orders without any ERP client code are truly unresolvable — hold them
@@ -216,6 +226,31 @@ class OrderPullManagement implements OrderPullInterface
         );
         $order->addCommentToStatusHistory($comment);
         $this->orderRepository->save($order);
+
+        // Mark as imported in both bridge tables so the Sectra Desktop and oc_order VIEW
+        // don't see this order again (prevents double-import during the 5-min cron window)
+        try {
+            $connection = $this->syncLogResource->getConnection();
+            $connection->update(
+                'sales_order',
+                ['sectra_import_status' => 'imported'],
+                ['entity_id = ?' => (int) $order->getEntityId()]
+            );
+            $ocOrderId = (int) $order->getEntityId() + 200000;
+            $existing = $connection->fetchOne(
+                $connection->select()
+                    ->from('oc_order_imported', 'order_id')
+                    ->where('order_id = ?', $ocOrderId)
+            );
+            if (!$existing) {
+                $connection->insert(
+                    'oc_order_imported',
+                    ['order_id' => $ocOrderId, 'date_imported' => date('Y-m-d H:i:s')]
+                );
+            }
+        } catch (\Exception $e) {
+            $this->logger->warning('[ERP API] Failed to update bridge import status: ' . $e->getMessage());
+        }
 
         // Log
         $this->syncLogResource->addLog(
@@ -410,11 +445,21 @@ class OrderPullManagement implements OrderPullInterface
     {
         try {
             $connection = $this->syncLogResource->getConnection();
+
+            // REST API ACK path (Sync-MagentoOrders.ps1 → POST /ack)
             $select = $connection->select()
                 ->from('grupoawamotos_erp_entity_map', ['magento_entity_id'])
                 ->where('entity_type = ?', 'order');
+            $ids1 = array_map('intval', $connection->fetchCol($select));
 
-            return array_map('intval', $connection->fetchCol($select));
+            // Legacy Sectra Desktop path (oc_order_imported, order_id = entity_id + 200000)
+            $select2 = $connection->select()
+                ->from('oc_order_imported', ['order_id'])
+                ->where('order_id > ?', 200000);
+            $rawIds = $connection->fetchCol($select2);
+            $ids2 = array_map(static fn($id) => (int)$id - 200000, $rawIds);
+
+            return array_values(array_unique(array_merge($ids1, $ids2)));
         } catch (\Exception $e) {
             $this->logger->warning('[ERP API] Failed to get synced order IDs: ' . $e->getMessage());
             return [];
@@ -496,6 +541,9 @@ class OrderPullManagement implements OrderPullInterface
 
             // Payment
             'payment_method' => $order->getPayment() ? $order->getPayment()->getMethod() : '',
+
+            // Bridge status (diagnostic — do not import if not ready_for_import)
+            'sectra_import_status' => $order->getData('sectra_import_status') ?? '',
 
             // Items (VE_PEDIDOITENS)
             'items' => $items,
