@@ -470,3 +470,40 @@ html body#html-body.checkout-cart-index
     grid-template-rows: 44px 44px !important;
   }
 }
+
+/* Round 9 — alinhamento de precisão: footer newsletter + breadcrumbs PLP */
+
+/* FOOTER-ALIGN-01: conteúdo do newsletter alinha com a grade de colunas do footer.
+   Problema: §29 terminal adiciona padding:12px 16px ao .awa-footer-newsletter (especif. (0,6,2)+!),
+   e Bootstrap .container dentro dele adiciona mais 15px → total 31px de excesso vs colunas (16px).
+   Colunas usam footer-container(16px) + .container(15px) + .row(-15px) = 16px líquido.
+   Especificidade 4×ID = (0,7,2) vence §29 (0,6,2) independente de ordem de carga. */
+html body#html-body#html-body#html-body#html-body
+  .page-wrapper
+  :is(.page_footer, .page-footer)
+  :is(.awa-footer-newsletter, .footer-newsletter) {
+  padding-inline: 0 !important;
+}
+
+html body#html-body#html-body#html-body#html-body
+  .page-wrapper
+  :is(.page_footer, .page-footer)
+  :is(.awa-footer-newsletter, .footer-newsletter)
+  > .container {
+  padding-inline: 0 !important;
+}
+
+/* BREADCRUMB-ALIGN-01: breadcrumbs PLP/busca alinham com a borda do conteúdo da page-main.
+   Problema: terminal line 3182 zera padding do .container interno, mas não define padding-inline
+   no próprio .nav-breadcrumbs — resultado: breadcrumbs começam em 0px enquanto page-main
+   usa --awa-grid-container-pad (16px) → desalinhamento de 16px.
+   4×ID garante (0,7,2) → vence qualquer regra terminal de 3 IDs para esta página. */
+html body#html-body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+  .page-wrapper
+  .nav-breadcrumbs {
+  box-sizing: border-box !important;
+  max-width: var(--awa-grid-shell-max, min(100%, 1280px)) !important;
+  margin-inline: auto !important;
+  padding-inline: var(--awa-grid-container-pad, 16px) !important;
+  width: 100% !important;
+}
