@@ -4,6 +4,8 @@
     <!-- R35: awa-consistency-home5.css carregado apenas na homepage (antes era global via default_head_blocks.xml) -->
     <head>
         <title>Peças e Acessórios para Motos</title>
+        <!-- awa-home-polish-critical: async stagger em awa-head-preload.phtml (TBT/LCP 2026-06-10) -->
+        <remove src="css/awa-home-polish-critical.min.css"/>
         <!-- Remove legacy parent homepage CSS (now in bundle or global bundles) -->
         <remove src="css/awa-round9-post-themeoption-overrides.css"/>
         <remove src="css/awa-components-b2b-foundation.css"/>
@@ -42,24 +44,46 @@
         <!-- flex-grid-flow: global async em default_head_blocks + awa-head-preload -->
         <remove src="css/awa-flex-grid-flow.min.css"/>
         <remove src="css/awa-touch-final.min.css"/>
+        <!-- login-to-cart.css: async na home (awa-login-to-cart-home-async) + hide inline anti-FOUC -->
         <remove src="GrupoAwamotos_B2B::css/product/login-to-cart.css"/>
+        <!-- S3-01 home: header-stack (58KB) async via awa-head-preload — critical-home cobre 1º paint -->
+        <remove src="css/awa-header-stack-2026-05-28.min.css"/>
+        <!-- CMS shell (cms_page_view.xml) não se aplica à home: o Magento adiciona o handle
+             cms_page_view à homepage CMS, então removemos aqui o CSS + loader (regras escopadas
+             a body.cms-page-view — só desperdiçavam requests na home) -->
+        <remove src="css/awa-cms-shell-final.css"/>
+        <css src="css/awa-home-shell-final.css"/>
     </head>
     <body>
         <attribute name="data-mage-init">{}</attribute>
+        <!-- Remover sidebar padrão de reorder da Home Page (evita título quebrado gigante flutuando no layout) -->
+        <referenceBlock name="sale.reorder.sidebar" remove="true"/>
+        <!-- safe5: jsbuild poller (setInterval 25ms×200) trava Chrome com require-stub na home -->
+        <referenceBlock name="awa.jsbuild.runtime.fallback" remove="true"/>
         <referenceBlock name="awa.cookie.consent.fix.css" remove="true"/>
+        <referenceBlock name="awa.cms.shell.final" remove="true"/>
+        <referenceBlock name="awa.align.grid.terminal.cms" remove="true"/>
         <referenceBlock name="awa.styles.l.last" remove="true"/>
         <referenceBlock name="awa.cls.nav.fix" remove="true"/>
         <referenceBlock name="awa.critical.inline.css" remove="true"/>
+        <!-- opt15: mobile-grid-critical-v10 + cascade-lock-v12 cobrem o 1º paint; evita ~3KB duplicado -->
+        <referenceBlock name="awa.header.impeccable.critical.global" remove="true"/>
 
         <referenceBlock name="head.additional">
-            <block class="Magento\Framework\View\Element\Template"
-                   name="awa.header.mobile.grid.critical"
-                   template="Magento_Theme::html/awa-header-mobile-grid-critical-inline.phtml"
+            <!-- LCP: preload hero antes de ~110KB CSS inline (load delay PSI) -->
+            <block class="GrupoAwamotos\Theme\Block\Html\HeroPreload"
+                   name="awa.hero.preload.links"
+                   template="Magento_Theme::html/awa-hero-preload-links.phtml"
                    before="-"/>
+            <!-- 2026-06-11: 4 folhas críticas → 1 bundle (awa-home-critical-stack, −3 RTT) -->
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.home.critical.stack"
+                   template="Magento_Theme::html/awa-home-critical-stack.phtml"
+                   after="awa.hero.preload.links"/>
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.critical.inline.home"
                    template="Magento_Theme::html/awa-critical-fold-home.phtml"
-                   after="awa.header.mobile.grid.critical"/>
+                   after="awa.header.mobile.grid.critical.v10"/>
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.cls.nav.fix.home"
                    template="Magento_Theme::html/awa-cls-nav-fix-home.phtml"
@@ -68,10 +92,6 @@
                    name="awa.header.home.hotfix"
                    template="Magento_Theme::html/awa-header-home-hotfix-home.phtml"
                    after="awa.cls.nav.fix.home"/>
-            <block class="Magento\Framework\View\Element\Template"
-                   name="awa.login.to.cart.home.async"
-                   template="Magento_Theme::html/awa-login-to-cart-home-async.phtml"
-                   before="awa.head.preload"/>
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.cookie.consent.fix.css.home"
                    template="Magento_Theme::html/awa-cookie-consent-home-head.phtml"
@@ -91,6 +111,8 @@
 
         <!-- OG meta: mantém bloco global (default.xml). Remove+recreate quebrava o layout na home. -->
         <move element="awa.og.meta" destination="head.additional" after="awa.styles.l.last.home"/>
+        <!-- VQA fixes: carregado via awa-head-preload.phtml ($__qaCssByAction['cms_index_index'])
+             porque o bloco awa.visual.qa.fixes.css fica órfão quando awa.audit.bundle.css é removido. -->
 
         <referenceBlock name="theme.active.editor" remove="true"/>
         <referenceBlock name="google.maps.api" remove="true"/>
@@ -117,7 +139,7 @@
                         template="Magento_Theme::html/awa-customer-invalidation-defer.phtml"/>
 
         <referenceContainer name="head.additional">
-            <!-- LCP preload: primeiro slide ativo do hero slider da homepage -->
+            <!-- LCP critical CSS hero (links em awa.hero.preload.links no topo do head) -->
             <block class="GrupoAwamotos\Theme\Block\Html\HeroPreload"
                    name="awa.hero.preload"
                    template="Magento_Theme::html/awa-hero-preload.phtml"
@@ -159,9 +181,21 @@
         <!-- Notification Ticker — DESATIVADO a pedido (2026-05-19) -->
         <referenceBlock name="awa_notification_ticker" remove="true"/>
 
+        <referenceBlock name="awa.impeccable.audit.uncached.global.v10" remove="true"/>
+
+        <!-- Hero único via top_home/slider.main — evita slideshow duplicado no header -->
+        <referenceBlock name="slideshow.top" remove="true"/>
+
+        <!-- Remove container vazio herdado do 1column.xml do tema pai -->
+        <referenceContainer name="sidebar.additional" remove="true"/>
+
         <referenceBlock name="top_home">
             <arguments>
                 <argument name="category_carousel_view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\CategoryCarouselData</argument>
+                <argument name="home_guest_pricing_view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\HomeGuestPricing</argument>
+                <argument name="home_shelf_display_view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\HomeShelfDisplay</argument>
+                <argument name="home_recent_orders_view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\HomeRecentOrders</argument>
+                <argument name="hero_responsive_view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\HeroResponsiveImage</argument>
             </arguments>
             <block class="Rokanthemes\SlideBanner\Block\Slider"
                    name="slider.main"
@@ -195,6 +229,9 @@
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.home.category.carousel.init"
                    template="Magento_Theme::html/awa-home-category-carousel-init.phtml"/>
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.home.product.promo.banners.init"
+                   template="Magento_Theme::html/awa-home-product-promo-banners-init.phtml"/>
             <!-- awa-carousel-nav: redundante na home — awa-shelf-carousel cobre vitrines -->
             <referenceBlock name="awa.carousel.nav.loader" remove="true"/>
             <block class="GrupoAwamotos\B2B\Block\LoginToCart"
