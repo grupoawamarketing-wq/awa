@@ -424,3 +424,20 @@ Adicionados `width="24" height="24"` no arquivo `Rokanthemes_VerticalMenu/templa
 - **Commit:** `f3099230`
 
 **Resolução:** `Magento_Catalog/templates/category/image.phtml` — ambas as tags `<img class="awa-category-hero__bg-image">` (dentro de `<picture>` e fallback) agora têm `width="300" height="300"`. Dimensões baseadas no tamanho real das imagens de categoria (300×300px). CSS continua controlando a exibição via `width:100%; height:240px; object-fit:cover`. Validado no HTML ao vivo.
+
+---
+
+### SEO-02 · OG tags duplicadas na PDP (og:description vazia, og:title com HTML entities)
+
+- **Status:** `[x]`
+- **Severidade:** 🔴 Alto (compartilhamento social no Facebook/WhatsApp/LinkedIn mostra preview errado)
+- **Páginas afetadas:** Todas as páginas de produto (`/bauletos/*.html`, etc.)
+- **Data detectada:** 2026-06-26
+- **Data corrigida:** 2026-06-26
+- **Commit:** `81c357fa`
+
+**Causa:** O Magento core (`module-catalog`) renderiza automaticamente o bloco `opengraph.general` na PDP via `catalog_product_opengraph` handle. Esse bloco gerava um segundo set de OG tags inferior: `og:description` vazia (sem short_description no produto), `og:title` com HTML entities (`&#x20;` em vez de espaço), sem `og:site_name`/`og:locale`, e URL de imagem em cache diferente.
+
+**Resolução:** Criado `Magento_Catalog/layout/catalog_product_opengraph.xml` no tema filho com `<referenceBlock name="opengraph.general" remove="true"/>`. O `awa-og-meta.phtml` já gerencia todos os OG/Twitter tags com qualidade superior (fallback hierárquico, `og:image:width/height`, `og:locale`, `twitter:card`).
+
+**Resultado:** 1 set único de OG tags correto, `og:description` com conteúdo real da short_description, `og:title` decodificado corretamente.
