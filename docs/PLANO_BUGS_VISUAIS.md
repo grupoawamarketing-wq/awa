@@ -411,3 +411,16 @@ Adicionados `width="24" height="24"` no arquivo `Rokanthemes_VerticalMenu/templa
 | Links target=_blank sem noopener | Nenhum encontrado em home/cat/pdp ✅ |
 | Google Fonts externos | Não utilizados ✅ |
 | iframes na home | Nenhum ✅ |
+
+---
+
+### PERF-01 · Hero de categoria sem width/height attrs (CLS)
+
+- **Status:** `[x]`
+- **Severidade:** 🟢 Baixo (Core Web Vitals — CLS)
+- **Páginas afetadas:** Todas as páginas de categoria (`/bauletos`, `/bagageiros`, etc.)
+- **Data detectada:** 2026-06-26
+- **Data corrigida:** 2026-06-26
+- **Commit:** `f3099230`
+
+**Resolução:** `Magento_Catalog/templates/category/image.phtml` — ambas as tags `<img class="awa-category-hero__bg-image">` (dentro de `<picture>` e fallback) agora têm `width="300" height="300"`. Dimensões baseadas no tamanho real das imagens de categoria (300×300px). CSS continua controlando a exibição via `width:100%; height:240px; object-fit:cover`. Validado no HTML ao vivo.
