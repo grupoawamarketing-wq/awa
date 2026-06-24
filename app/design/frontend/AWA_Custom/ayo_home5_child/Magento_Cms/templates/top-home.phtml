@@ -2,6 +2,15 @@
 /** @var \Magento\Framework\View\Element\Template $this */
 $layout = $block->getLayout();
 $categoryCarouselViewModel = $block->getData('category_carousel_view_model');
+$homeGuestPricingViewModel = $block->getData('home_guest_pricing_view_model');
+$homeShelfDisplayViewModel = $block->getData('home_shelf_display_view_model');
+$homeRecentOrdersViewModel = $block->getData('home_recent_orders_view_model');
+
+$passHomeShelfDisplay = static function ($carouselBlock) use ($homeShelfDisplayViewModel): void {
+	if ($homeShelfDisplayViewModel instanceof \GrupoAwamotos\Theme\ViewModel\HomeShelfDisplay) {
+		$carouselBlock->setData('home_shelf_display_view_model', $homeShelfDisplayViewModel);
+	}
+};
 
 $renderCmsBlock = static function (string $blockId) use ($layout): string {
 	/** @var \Magento\Cms\Block\Block|null $cmsBlock */
@@ -15,10 +24,15 @@ $renderCmsBlock = static function (string $blockId) use ($layout): string {
 };
 $directUrl = fn(string $path): string => $block->getUrl('', ['_direct' => ltrim($path, '/')]);
 
+$heroResponsiveViewModel = $block->getData('hero_responsive_view_model');
+
 // Forca o template do modulo para evitar falhas de validacao no override do tema.
 $heroSliderBlock = $block->getChildBlock('slider.main');
 if ($heroSliderBlock instanceof \Rokanthemes\SlideBanner\Block\Slider) {
 	$heroSliderBlock->setTemplate('Rokanthemes_SlideBanner::slider_home5.phtml');
+	if ($heroResponsiveViewModel && !$heroSliderBlock->getData('hero_responsive_view_model')) {
+		$heroSliderBlock->setData('hero_responsive_view_model', $heroResponsiveViewModel);
+	}
 	$heroSliderHtml = trim((string) $heroSliderBlock->toHtml());
 } else {
 	/** @var \Rokanthemes\SlideBanner\Block\Slider|null $heroSliderBlock */
@@ -26,57 +40,48 @@ if ($heroSliderBlock instanceof \Rokanthemes\SlideBanner\Block\Slider) {
 	if ($heroSliderBlock) {
 		$heroSliderBlock->setData('slider_id', 'homepageslider');
 		$heroSliderBlock->setTemplate('Rokanthemes_SlideBanner::slider_home5.phtml');
+		if ($heroResponsiveViewModel) {
+			$heroSliderBlock->setData('hero_responsive_view_model', $heroResponsiveViewModel);
+		}
 		$heroSliderHtml = trim((string) $heroSliderBlock->toHtml());
 	} else {
 		$heroSliderHtml = '';
 	}
 }
 
-$heroFallbackHtml = $renderCmsBlock('home_hero');
 $schemaOrgHtml = $renderCmsBlock('home_schema_org');
-$benefitsHtml = $renderCmsBlock('banner_mid_home1');
-$featuredCategoriesHtml = $renderCmsBlock('featured_categories');
-$homeCarouselProductQty = 6;
-$homeCategoryCarouselQty = 6;
+$heroFallbackHtml = $heroSliderHtml === '' ? $renderCmsBlock('home_hero') : '';
+$homeCarouselProductQty = 12;
+$homeCategoryCarouselQty = 12;
 
-/** @var \Rokanthemes\ProductTab\Block\Producttab|Magento\Catalog\Block\Product\AbstractProduct $productTabBlock */
-/* Product Tabs desativadas (2026-05-18) — conteúdo duplica Mais Vendidos/Lançamentos.
- * Impacto: -48 cards DOM, ~-200KB HTML, -4 queries SQL.
- * Para reativar: descomentar bloco abaixo.
- *
- * $productTabBlock = $layout->createBlock('Rokanthemes\ProductTab\Block\Producttab');
- * if ($productTabBlock) {
- *     $productTabBlock->setTemplate('Rokanthemes_ProductTab::producttab.phtml');
- *     $productTabHtml = trim((string)$productTabBlock->toHtml());
- * }
- */
-$productTabHtml = '';
-
-/* Seções desativadas: blog, testimonials, b2b_invite, fitment, faq, trust_badges, notification, launches, popular_categories */
-
-$b2bPromoHtml = '';
-
-/** @var \Rokanthemes\Superdeals\Block\ProductByCat|null $hotDealBlock */
-$hotDealBlock = $layout->createBlock('Rokanthemes\Superdeals\Block\ProductByCat');
+// Super Ofertas desativado: evita renderizar o bloco Superdeals e seu HTML comentado.
 $hotDealHtml = '';
-if ($hotDealBlock) {
-	$hotDealHtml = trim((string)$hotDealBlock->setTemplate('Rokanthemes_Superdeals::category.phtml')->toHtml());
-}
 
 /* === Carousels de Produto: Mais Vendidos, Lançamentos, Categorias === */
 
-/** @var \Rokanthemes\BestsellerProduct\Block\Bestseller|null */
-$bestsellerBlock = $layout->createBlock('Rokanthemes\BestsellerProduct\Block\Bestseller');
+/** @var \GrupoAwamotos\Theme\Block\HomeBestsellerCarousel|null */
+$bestsellerBlock = $layout->createBlock(\GrupoAwamotos\Theme\Block\HomeBestsellerCarousel::class);
+$bestsellerHtml = '';
 if ($bestsellerBlock) {
 	$bestsellerBlock->setData('qty', $homeCarouselProductQty);
+	$bestsellerBlock->setData('title', (string) __('Mais Vendidos'));
+	$bestsellerBlock->setData('show_price', 1);
+	$bestsellerBlock->setData('awa_shelf_viewport_key', 'home-featured');
+	$passHomeShelfDisplay($bestsellerBlock);
 	$bestsellerBlock->setTemplate('Rokanthemes_BestsellerProduct::bestseller.phtml');
+	if ($bestsellerBlock->hasProducts()) {
+		$bestsellerHtml = trim((string) $bestsellerBlock->toHtml());
+	}
 }
-$bestsellerHtml  = $bestsellerBlock ? trim((string)$bestsellerBlock->toHtml()) : '';
 
-/** @var \Rokanthemes\Newproduct\Block\Newproduct|null */
-$newproductBlock = $layout->createBlock('Rokanthemes\Newproduct\Block\Newproduct');
+/** @var \GrupoAwamotos\Theme\Block\HomeNewproductCarousel|null */
+$newproductBlock = $layout->createBlock(\GrupoAwamotos\Theme\Block\HomeNewproductCarousel::class);
 if ($newproductBlock) {
     $newproductBlock->setData('qty', $homeCarouselProductQty);
+    $newproductBlock->setData('title', (string) __('Lançamentos'));
+    $newproductBlock->setData('show_price', 1);
+    $newproductBlock->setData('awa_shelf_viewport_key', 'home-new');
+    $passHomeShelfDisplay($newproductBlock);
     $newproductBlock->setTemplate('Rokanthemes_Newproduct::newproduct.phtml');
 }
 $newproductHtml = $newproductBlock ? trim((string) $newproductBlock->toHtml()) : '';
@@ -88,21 +93,28 @@ $newproductHtml = $newproductBlock ? trim((string) $newproductBlock->toHtml()) :
  * Retrovisores (41) -> subcats: Arrow(89), Cromados(51), Esportivos(81), Mini(79), Original(42), Pr.Haste(50)
  * Bagageiros (67)   -> sem subcats, usa categoria pai
  */
-$makeCatProductCarousel = static function (string $categoryIds) use ($layout, $homeCategoryCarouselQty): string {
+$makeCatProductCarousel = function (string $categoryIds, string $viewportKey, string $carouselTitle) use ($layout, $homeCategoryCarouselQty, $homeShelfDisplayViewModel): string {
     /** @var \GrupoAwamotos\Theme\Block\CategoryProductCarousel|null $b */
     $b = $layout->createBlock(\GrupoAwamotos\Theme\Block\CategoryProductCarousel::class);
     if (!$b) return '';
     $b->setData('category_ids', $categoryIds);
     $b->setData('qty', $homeCategoryCarouselQty);
+    $b->setData('title', $carouselTitle);
+    $b->setData('show_price', 1);
+    $b->setData('awa_shelf_viewport_key', $viewportKey);
+    if ($homeShelfDisplayViewModel instanceof \GrupoAwamotos\Theme\ViewModel\HomeShelfDisplay) {
+        $b->setData('home_shelf_display_view_model', $homeShelfDisplayViewModel);
+    }
     $b->setTemplate('Rokanthemes_BestsellerProduct::bestseller.phtml');
     return trim((string)$b->toHtml());
 };
 
-$bauletosHtml     = $makeCatProductCarousel('46,75,77');
-$retrovisoresHtml = $makeCatProductCarousel('89,51,81,79,42,50');
-$bagageirosHtml   = $makeCatProductCarousel('67');
-$guidoesHtml      = $makeCatProductCarousel('44,85,120');
-$carouselIconSize = 80;
+/* opt15: vitrines abaixo da dobra — só categorias de maior saída; demais via carrossel de categorias */
+$bauletosHtml     = $makeCatProductCarousel('46,75,77', 'cat-bauletos', (string) __('Bauletos'));
+$retrovisoresHtml = $makeCatProductCarousel('89,51,81,79,42,50', 'cat-retrovisores', (string) __('Retrovisores'));
+$bagageirosHtml   = '';
+$guidoesHtml      = '';
+$carouselIconSize = 64;
 $buildCarouselImage = function (string $asset, string $alt, int $idx = 0) use ($carouselIconSize, $block): string {
 	$webpAsset = str_replace('.png', '.webp', $asset);
 	return '<picture>'
@@ -111,7 +123,7 @@ $buildCarouselImage = function (string $asset, string $alt, int $idx = 0) use ($
 		. '" type="image/webp" />'
 		. '<img src="'
 		. $block->escapeUrl($block->getViewFileUrl('images/category-carousel/' . $asset))
-		. '" alt="' . $block->escapeHtmlAttr($alt) . '" loading="' . ($idx < 3 ? 'eager' : 'lazy') . '" decoding="async" width="'
+        . '" alt="' . $block->escapeHtmlAttr($alt) . '" loading="lazy" decoding="async" width="'
 		. $carouselIconSize
 		. '" height="'
 		. $carouselIconSize
@@ -136,51 +148,107 @@ $categoryCarouselCategories = [
 ];
 
 // Build category URLs + product counts via ViewModel injected by layout.
+$categoryDisplayNames = [
+	65 => 'Lentes de Freio',
+];
+$categoryMinProductCount = 5;
 if ($categoryCarouselViewModel instanceof \GrupoAwamotos\Theme\ViewModel\CategoryCarouselData) {
 	foreach ($categoryCarouselCategories as &$cat) {
 		$urlOverride = $cat['url'] ?? null;
+		$displayName = $cat['name'] ?? '';
 		$categoryData = $categoryCarouselViewModel->getCategoryData((int) $cat['id']);
 		$cat['url'] = $urlOverride ?: $categoryData['url'];
-		$cat['name'] = $categoryData['name'] !== '' ? $categoryData['name'] : $cat['name'];
+		$cat['name'] = $categoryDisplayNames[(int) $cat['id']] ?? ($displayName !== '' ? $displayName : $categoryData['name']);
 		$cat['count'] = $categoryData['count'];
 	}
 	unset($cat);
 }
+$categoryCarouselCategories = array_values(array_filter(
+	$categoryCarouselCategories,
+	static fn(array $cat): bool => (int) ($cat['count'] ?? 0) >= $categoryMinProductCount
+));
 
-$newProductsCategory = $categoryCarouselViewModel instanceof \GrupoAwamotos\Theme\ViewModel\CategoryCarouselData
-? $categoryCarouselViewModel->getCategoryData(138)
-: ['url' => $directUrl('ofertas.html')];
-// Normaliza "Lançamentos" para rota estável de ofertas.
-$newProductsUrl = $directUrl('ofertas.html');
+$newProductsUrl = $directUrl('lancamentos.html');
+$superOffersUrl = $directUrl('ofertas.html');
+$productPromoBannersHtml = $renderCmsBlock('home_product_promo_banners');
+$productPromoViewAllUrl = $directUrl('guidoes.html');
 
-$bestsellersVerTodosUrl = ($categoryCarouselViewModel instanceof \GrupoAwamotos\Theme\ViewModel\CategoryCarouselData)
-	? $categoryCarouselViewModel->getRootCategoryCatalogUrl()
-	: $block->getUrl('catalog/category/view', ['id' => 2]);
+// URL para o CTA "Ver todas as categorias" da seção category-carousel
+$categoryCarouselUrl = $directUrl('bauletos.html');
+// URL para o CTA "Ver todos" da shelf Mais Vendidos
+$bestsellersVerTodosUrl = $superOffersUrl;
 
-if ($benefitsHtml !== '' && strpos($benefitsHtml, 'velaServicesInner--home5') === false) {
-	$patchedBenefitsHtml = preg_replace(
-		'/class=(["\'])velaServicesInner\b([^"\']*)\1/',
-		'class=$1velaServicesInner$2 velaServicesInner--home5$1',
-		$benefitsHtml,
-		1
-	);
-	if (is_string($patchedBenefitsHtml) && $patchedBenefitsHtml !== '') {
-		$benefitsHtml = $patchedBenefitsHtml;
+
+$renderGuestPricingNotice = static function () use ($block, $homeGuestPricingViewModel): string {
+	if (!$homeGuestPricingViewModel instanceof \GrupoAwamotos\Theme\ViewModel\HomeGuestPricing) {
+		return '';
 	}
-}
+
+	return (string) $block->getLayout()->createBlock(\Magento\Framework\View\Element\Template::class)
+		->setTemplate('Magento_Cms::home/guest-pricing-notice.phtml')
+		->setData('view_model', $homeGuestPricingViewModel)
+		->toHtml();
+};
+
+$renderRecentOrders = static function () use ($block, $homeRecentOrdersViewModel): string {
+	if (!$homeRecentOrdersViewModel instanceof \GrupoAwamotos\Theme\ViewModel\HomeRecentOrders
+		|| !$homeRecentOrdersViewModel->isHomeSectionEnabled()) {
+		return '';
+	}
+
+	return (string) $block->getLayout()->createBlock(\Magento\Framework\View\Element\Template::class)
+		->setTemplate('Magento_Cms::home/recent-orders.phtml')
+		->setData('view_model', $homeRecentOrdersViewModel)
+		->setData('layout_anchor', 'top')
+		->toHtml();
+};
+
+$renderNicheShelves = static function (
+	string $bauletosHtml,
+	string $retrovisoresHtml,
+	callable $directUrl
+) use ($block): string {
+	$shelves = [];
+
+	if ($bauletosHtml !== '') {
+		$shelves[] = [
+			'label' => (string) __('Bauletos'),
+			'subtitle' => (string) __('Modelos 29L e 41L: os mais pedidos para reposição'),
+			'html' => $bauletosHtml,
+			'view_all_url' => $directUrl('bauletos.html'),
+			'view_all_label' => (string) __('Ver todos os bauletos'),
+		];
+	}
+
+	if ($retrovisoresHtml !== '') {
+		$shelves[] = [
+			'label' => (string) __('Retrovisores'),
+			'subtitle' => (string) __('Arrow, esportivos, linha original e mini: giro alto no estoque'),
+			'html' => $retrovisoresHtml,
+			'view_all_url' => $directUrl('retrovisores.html'),
+			'view_all_label' => (string) __('Ver todos os retrovisores'),
+		];
+	}
+
+	if ($shelves === []) {
+		return '';
+	}
+
+	return (string) $block->getLayout()->createBlock(\Magento\Framework\View\Element\Template::class)
+		->setTemplate('Magento_Cms::home/niche-shelves-tabs.phtml')
+		->setData('shelves', $shelves)
+		->toHtml();
+};
 ?>
 
 <?php if ($schemaOrgHtml !== ''): ?>
 	<?php echo /* @noEscape */ $schemaOrgHtml; ?>
 <?php endif; ?>
 
-<!-- Skip to content — keyboard accessibility (a11y §19) -->
-<a href="#awa-main-content" class="awa-skip-to-content"><?= $block->escapeHtml(__('Pular para o conteúdo principal')) ?></a>
-
 <!-- ① Hero Slider (above-the-fold) — OUTSIDE the bento grid wrapper for natural full-bleed -->
 <div class="top-home-content top-home-content--above-fold" id="awa-main-content" tabindex="-1">
 	<?php if ($heroSliderHtml !== ''): ?>
-		<div class="banner-slider banner-slider2">
+		<div class="banner-slider banner-slider2 slidebanner rokanthemes-slidebanner">
 			<?php echo /* @noEscape */ $heroSliderHtml; ?>
 		</div>
 	<?php elseif ($heroFallbackHtml !== ''): ?>
@@ -192,82 +260,28 @@ if ($benefitsHtml !== '' && strpos($benefitsHtml, 'velaServicesInner--home5') ==
 
 <div class="ayo-home5-wrapper ayo-home5-wrapper--template-driven">
 
-<!-- ①.0 Social Proof Stats — Trust & Authority pattern (ui-ux-pro-max) -->
-<div class="awa-social-proof-bar" role="region" aria-label="<?php echo $block->escapeHtmlAttr(__('Números AWA Motos')); ?>">
-    <div class="awa-social-proof-container">
-        <div class="awa-social-proof-stat">
-            <span class="awa-social-proof-number" aria-label="<?php echo $block->escapeHtmlAttr(__('Mais de 15 anos')); ?>">15+</span>
-            <span class="awa-social-proof-label"><?php echo $block->escapeHtml(__('Anos no mercado')); ?></span>
-        </div>
-        <div class="awa-social-proof-divider" aria-hidden="true"></div>
-        <div class="awa-social-proof-stat">
-            <span class="awa-social-proof-number" aria-label="<?php echo $block->escapeHtmlAttr(__('Mais de 5000 produtos')); ?>">5.000+</span>
-            <span class="awa-social-proof-label"><?php echo $block->escapeHtml(__('Produtos no catálogo')); ?></span>
-        </div>
-        <div class="awa-social-proof-divider" aria-hidden="true"></div>
-        <div class="awa-social-proof-stat">
-            <span class="awa-social-proof-number" aria-label="<?php echo $block->escapeHtmlAttr(__('Mais de 2000 clientes')); ?>">2.000+</span>
-            <span class="awa-social-proof-label"><?php echo $block->escapeHtml(__('Oficinas e revendas')); ?></span>
-        </div>
-        <div class="awa-social-proof-divider" aria-hidden="true"></div>
-        <div class="awa-social-proof-stat">
-            <span class="awa-social-proof-number" aria-label="<?php echo $block->escapeHtmlAttr(__('Entrega para todo o Brasil')); ?>">26</span>
-            <span class="awa-social-proof-label"><?php echo $block->escapeHtml(__('Estados atendidos')); ?></span>
-        </div>
-    </div>
-</div>
 
-<!-- ①.a Phase 4.5: Barra de Benefícios 100% Width — REATIVADO 2026-05-15 -->
-<?php if (true): ?>
-<div class="awa-benefits-bar" role="region" aria-label="<?php echo $block->escapeHtmlAttr(__('Benefícios AWA Motos')); ?>">
-    <div class="awa-benefits-container awa-switcher awa-switcher--sm">
-        <div class="awa-benefit-item">
-            <svg class="awa-benefit-icon" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
-            <div class="awa-benefit-text">
-                <span class="awa-benefit-title">Compra Garantida</span>
-                <span class="awa-benefit-desc">Com o fabricante oficial</span>
-            </div>
-        </div>
-
-        <div class="awa-benefit-item">
-            <svg class="awa-benefit-icon" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-            <div class="awa-benefit-text">
-                <span class="awa-benefit-title">Desconto Progressivo</span>
-                <span class="awa-benefit-desc">Compre mais, pague menos</span>
-            </div>
-        </div>
-
-        <div class="awa-benefit-item">
-            <svg class="awa-benefit-icon" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-            <div class="awa-benefit-text">
-                <span class="awa-benefit-title">Até 10x sem Juros</span>
-                <span class="awa-benefit-desc">Nos cartões de crédito</span>
-            </div>
-        </div>
-
-        <div class="awa-benefit-item">
-            <svg class="awa-benefit-icon" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>
-            <div class="awa-benefit-text">
-                <span class="awa-benefit-title">10% OFF no PIX</span>
-                <span class="awa-benefit-desc">Pagando à vista</span>
-            </div>
-        </div>
-    </div>
-</div>
-<?php endif; ?>
+<?= $block->getLayout()->createBlock(\Magento\Framework\View\Element\Template::class)
+    ->setTemplate('Magento_Cms::home/b2b-hero-cta.phtml')
+    ->toHtml() ?>
 
 <!-- ①b Phase 9: "Busque por Categorias" — B2B Enterprise Carousel -->
-<section class="top-home-content top-home-content--category-carousel awa-home-section ayo-home5-section" aria-label="<?php echo $block->escapeHtmlAttr(__('Busque por Categorias')); ?>">
+<section class="top-home-content top-home-content--category-carousel awa-home-section ayo-home5-section" aria-label="<?php echo $block->escapeHtmlAttr(__('Compre por categoria')); ?>">
 	<div class="container">
-		<header class="awa-category-carousel__header">
-			<h2><?php echo $block->escapeHtml(__('Busque por Categorias')); ?></h2>
-			<p><?php echo $block->escapeHtml(__('Encontre peças e acessórios para sua moto')); ?></p>
+		<header class="awa-category-carousel__header awa-section-header awa-section-header--standard">
+			<div class="awa-section-header__left">
+				<h2 class="awa-section-header__title"><?php echo $block->escapeHtml(__('Compre por categoria')); ?></h2>
+				<p class="awa-section-header__subtitle awa-category-carousel__subtitle"><?php echo $block->escapeHtml(__('Categorias com estoque para reposição rápida')); ?></p>
+			</div>
+			<a href="<?php echo $block->escapeUrl($categoryCarouselUrl); ?>" class="awa-section-header__link awa-shelf__view-all awa-category-carousel__cta-link" aria-label="<?php echo $block->escapeHtmlAttr(__('Ver todas as categorias')); ?>">
+				<?php echo $block->escapeHtml(__('Ver todos')); ?>
+				<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="9 18 15 12 9 6"/></svg>
+			</a>
 		</header>
 		<div class="awa-category-carousel__viewport">
 			<div class="awa-category-carousel__track awa-reel awa-reel--sm" id="awa-cat-carousel" data-count="<?php echo count($categoryCarouselCategories); ?>">
 				<?php foreach ($categoryCarouselCategories as $idx => $cat): ?>
 				<?php
-				$isGuidoesCard = ($cat['url'] ?? '') === 'guidoes.html' || ($cat['name'] ?? '') === 'Guidões';
 				$countText = '';
 				if (!empty($cat['count'])) {
 					$countText = (string) __(
@@ -278,13 +292,13 @@ if ($benefitsHtml !== '' && strpos($benefitsHtml, 'velaServicesInner--home5') ==
 				}
 				$linkLabel = trim((string) ($cat['name'] . ($countText !== '' ? ' - ' . $countText : '')));
 				?>
-				<a href="<?php echo $block->escapeUrl($cat['url'] ?? '#'); ?>" class="awa-category-carousel__item<?php echo $isGuidoesCard ? ' awa-category-carousel__item--compact' : ''; ?>" title="<?php echo $block->escapeHtmlAttr($linkLabel); ?>" aria-label="<?php echo $block->escapeHtmlAttr($linkLabel); ?>" style="--item-index: <?php echo (int) $idx; ?>">
+				<a href="<?php echo $block->escapeUrl($cat['url'] ?? '#'); ?>" class="awa-category-carousel__item" title="<?php echo $block->escapeHtmlAttr($linkLabel); ?>" aria-label="<?php echo $block->escapeHtmlAttr($linkLabel); ?>" style="--item-index: <?php echo (int) $idx; ?>">
 					<div class="awa-category-carousel__icon">
 						<?php echo /* @noEscape */ $cat['icon']; ?>
 					</div>
 					<span class="awa-category-carousel__label"><?php echo $block->escapeHtml($cat['name']); ?></span>
 					<?php if ($countText !== ''): ?>
-					<span class="awa-sr-only"><?php echo $block->escapeHtml($countText); ?></span>
+	                <span class="awa-category-carousel__count"><?php echo $block->escapeHtml($countText); ?></span>
 					<?php endif; ?>
 				</a>
 				<?php endforeach; ?>
@@ -297,27 +311,30 @@ if ($benefitsHtml !== '' && strpos($benefitsHtml, 'velaServicesInner--home5') ==
 			</button>
 		</div>
 		<div class="awa-category-carousel__dots" id="awa-cat-dots" aria-hidden="true" inert></div>
-		<div class="awa-category-carousel__cta">
-			<a href="<?php echo $block->escapeUrl($block->getUrl('catalogsearch/result/')); ?>" class="awa-category-carousel__cta-link">
-				<?php echo $block->escapeHtml(__('Ver todas as categorias')); ?>
-				<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="9 18 15 12 9 6"/></svg>
-			</a>
-		</div>
 	</div>
 </section>
 
+<?= /* @noEscape */ $renderGuestPricingNotice() ?>
+
+<?= /* @noEscape */ $renderRecentOrders() ?>
 
 <!-- ①c Mais Vendidos -->
 <?php if ($bestsellerHtml !== ''): ?>
-<section class="top-home-content awa-home-section awa-carousel-section ayo-home5-section" aria-label="<?= $escaper->escapeHtmlAttr(__('Mais Vendidos')) ?>">
+<?php
+$featuredSubtitle = __('Reposição mais pedida por lojistas parceiros');
+if ($bestsellerBlock instanceof \GrupoAwamotos\Theme\Block\HomeBestsellerCarousel && $bestsellerBlock->isUsingSalesFallback()) {
+	$featuredSubtitle = __('Novidades em destaque enquanto o ranking de vendas é atualizado');
+}
+?>
+<section class="top-home-content awa-home-section awa-carousel-section awa-carousel-section--featured ayo-home5-section"<?= ($bestsellerBlock instanceof \GrupoAwamotos\Theme\Block\HomeBestsellerCarousel && $bestsellerBlock->isUsingSalesFallback()) ? ' data-awa-sales-fallback="1"' : '' ?> aria-label="<?= $escaper->escapeHtmlAttr(__('Mais Vendidos')) ?>">
 	<div class="container">
-		<header class="awa-section-header awa-shelf__header">
+		<header class="awa-section-header awa-shelf__header awa-section-header--featured">
 			<div class="awa-section-header__left">
-				<span class="awa-section-header__eyebrow"><?= $escaper->escapeHtml(__('Top Vendas')) ?></span>
 				<h2 class="awa-section-header__title awa-shelf__title"><?= $escaper->escapeHtml(__('Mais Vendidos')) ?></h2>
+				<p class="awa-section-header__subtitle"><?= $escaper->escapeHtml($featuredSubtitle) ?></p>
 			</div>
 			<?php if ($bestsellersVerTodosUrl !== '' && $bestsellersVerTodosUrl !== '#'): ?>
-			<a href="<?= $escaper->escapeUrl($bestsellersVerTodosUrl) ?>" class="awa-section-header__link awa-shelf__view-all" aria-label="<?= $escaper->escapeHtmlAttr(__('Ver todos os mais vendidos')) ?>">
+			<a href="<?= $escaper->escapeUrl($bestsellersVerTodosUrl) ?>" class="awa-shelf-view-all awa-shelf-view-all--desktop-only" aria-label="<?= $escaper->escapeHtmlAttr(__('Ver todos os mais vendidos')) ?>">
 				<?= $escaper->escapeHtml(__('Ver todos')) ?> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
 			</a>
 			<?php endif; ?>
@@ -327,16 +344,36 @@ if ($benefitsHtml !== '' && strpos($benefitsHtml, 'velaServicesInner--home5') ==
 </section>
 <?php endif; ?>
 
+<!-- ①c2 Destaques — banners promocionais de produto (CMS Block) -->
+<?php if ($productPromoBannersHtml !== ''): ?>
+<section class="top-home-content awa-home-section awa-product-promo-banners ayo-home5-section"
+         aria-label="<?= $escaper->escapeHtmlAttr(__('Destaques de produto')) ?>">
+	<div class="container">
+		<header class="awa-section-header awa-shelf__header awa-section-header--standard">
+			<div class="awa-section-header__left">
+				<h2 class="awa-section-header__title awa-shelf__title"><?= $escaper->escapeHtml(__('Destaques')) ?></h2>
+				<p class="awa-section-header__subtitle"><?= $escaper->escapeHtml(__('Peças em alta para reposição')) ?></p>
+			</div>
+			<a href="<?= $escaper->escapeUrl($productPromoViewAllUrl) ?>" class="awa-shelf-view-all awa-shelf-view-all--desktop-only" aria-label="<?= $escaper->escapeHtmlAttr(__('Ver todos os destaques')) ?>">
+				<?= $escaper->escapeHtml(__('Ver todos')) ?>
+				<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="9 18 15 12 9 6"/></svg>
+			</a>
+		</header>
+		<?= /* @noEscape */ $productPromoBannersHtml ?>
+	</div>
+</section>
+<?php endif; ?>
+
 <!-- ①d Lançamentos -->
 <?php if ($newproductHtml !== ''): ?>
-<section class="top-home-content awa-home-section awa-carousel-section ayo-home5-section" aria-label="<?= $escaper->escapeHtmlAttr(__('Lançamentos')) ?>">
+<section class="top-home-content awa-home-section awa-grid-section awa-grid-section--featured awa-home-section--below-fold ayo-home5-section" aria-label="<?= $escaper->escapeHtmlAttr(__('Lançamentos')) ?>">
 	<div class="container">
-		<header class="awa-section-header awa-shelf__header">
+		<header class="awa-section-header awa-shelf__header awa-section-header--standard">
 			<div class="awa-section-header__left">
-				<span class="awa-section-header__eyebrow"><?= $escaper->escapeHtml(__('Novidades')) ?></span>
 				<h2 class="awa-section-header__title awa-shelf__title"><?= $escaper->escapeHtml(__('Lançamentos')) ?></h2>
+				<p class="awa-section-header__subtitle"><?= $escaper->escapeHtml(__('Itens novos disponíveis para pedido')) ?></p>
 			</div>
-			<a href="<?= $escaper->escapeUrl($newProductsUrl) ?>" class="awa-section-header__link awa-shelf__view-all" aria-label="<?= $escaper->escapeHtmlAttr(__('Ver todos os lançamentos')) ?>">
+			<a href="<?= $escaper->escapeUrl($newProductsUrl) ?>" class="awa-shelf-view-all awa-shelf-view-all--desktop-only" aria-label="<?= $escaper->escapeHtmlAttr(__('Ver todos os lançamentos')) ?>">
 				<?= $escaper->escapeHtml(__('Ver todos')) ?> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
 			</a>
 		</header>
@@ -345,222 +382,8 @@ if ($benefitsHtml !== '' && strpos($benefitsHtml, 'velaServicesInner--home5') ==
 </section>
 <?php endif; ?>
 
-<!-- ② Benefits -->
-<?php if ($benefitsHtml !== ''): ?>
-<section class="top-home-content top-home-content--trust-and-offers awa-home-section ayo-home5-section" aria-label="<?php echo $block->escapeHtmlAttr(__('Confiança')); ?>">
-	<div class="container top-home-content__trust-offers-grid" data-role="trust-offers-grid">
-		<?php echo /* @noEscape */ $benefitsHtml; ?>
-	</div>
-</section>
-<?php endif; ?>
 
-<!-- ② Super Ofertas (padronizado com os demais carrosséis) -->
-<?php if ($hotDealHtml !== ''): ?>
-<section class="top-home-content awa-home-section awa-carousel-section awa-carousel-section--super-offers ayo-home5-section" aria-label="<?= $escaper->escapeHtmlAttr(__('Super Ofertas')) ?>">
-	<div class="container">
-		<header class="awa-section-header awa-shelf__header">
-			<div class="awa-section-header__left">
-				<span class="awa-section-header__eyebrow"><?= $escaper->escapeHtml(__('Ofertas')) ?></span>
-				<h2 class="awa-section-header__title awa-shelf__title"><?= $escaper->escapeHtml(__('Super Ofertas')) ?></h2>
-			</div>
-			<a href="<?= $escaper->escapeUrl($newProductsUrl) ?>" class="awa-section-header__link awa-shelf__view-all" aria-label="<?= $escaper->escapeHtmlAttr(__('Ver todas as super ofertas')) ?>">
-				<?= $escaper->escapeHtml(__('Ver todos')) ?> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
-			</a>
-		</header>
-		<div class="hot-deal top-home-content__trust-offers-deals awa-super-offers-carousel" data-role="super-offers-carousel">
-			<?php echo /* @noEscape */ $hotDealHtml; ?>
-		</div>
-	</div>
-</section>
-<?php endif; ?>
+<?= /* @noEscape */ $renderNicheShelves($bauletosHtml, $retrovisoresHtml, $directUrl) ?>
 
 
-
-<!-- ④b Carousel — Guidões -->
-<?php if ($guidoesHtml !== ''): ?>
-<section class="top-home-content awa-home-section awa-carousel-section ayo-home5-section" aria-label="<?= $escaper->escapeHtmlAttr(__('Guidões')) ?>">
-        <div class="container">
-                <header class="awa-section-header awa-shelf__header">
-                        <div class="awa-section-header__left">
-                                <span class="awa-section-header__eyebrow"><?= $escaper->escapeHtml(__('Peças')) ?></span>
-                                <h2 class="awa-section-header__title awa-shelf__title"><?= $escaper->escapeHtml(__('Guidões')) ?></h2>
-                        </div>
-                        <a href="<?= $escaper->escapeUrl($directUrl('guidoes.html')) ?>" class="awa-section-header__link awa-shelf__view-all" aria-label="<?= $escaper->escapeHtmlAttr(__('Ver todos os Guidões')) ?>">
-                                <?= $escaper->escapeHtml(__('Ver todos')) ?> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
-                        </a>
-                </header>
-                <?= /* @noEscape */ $guidoesHtml ?>
-        </div>
-</section>
-<?php endif; ?>
-
-<!-- ④c Carousel — Bauletos -->
-<?php if ($bauletosHtml !== ''): ?>
-<section class="top-home-content awa-home-section awa-carousel-section ayo-home5-section" aria-label="<?= $escaper->escapeHtmlAttr(__('Bauletos')) ?>">
-	<div class="container">
-		<header class="awa-section-header awa-shelf__header">
-			<div class="awa-section-header__left">
-				<span class="awa-section-header__eyebrow"><?= $escaper->escapeHtml(__('Acessórios')) ?></span>
-				<h2 class="awa-section-header__title awa-shelf__title"><?= $escaper->escapeHtml(__('Bauletos')) ?></h2>
-			</div>
-			<a href="<?= $escaper->escapeUrl($directUrl('bauletos.html')) ?>" class="awa-section-header__link awa-shelf__view-all" aria-label="<?= $escaper->escapeHtmlAttr(__('Ver todos os Bauletos')) ?>">
-				<?= $escaper->escapeHtml(__('Ver todos')) ?> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
-			</a>
-		</header>
-		<?= /* @noEscape */ $bauletosHtml ?>
-	</div>
-</section>
-<?php endif; ?>
-
-<!-- ④d Carousel — Retrovisores -->
-<?php if ($retrovisoresHtml !== ''): ?>
-<section class="top-home-content awa-home-section awa-carousel-section ayo-home5-section" aria-label="<?= $escaper->escapeHtmlAttr(__('Retrovisores')) ?>">
-	<div class="container">
-		<header class="awa-section-header awa-shelf__header">
-			<div class="awa-section-header__left">
-				<span class="awa-section-header__eyebrow"><?= $escaper->escapeHtml(__('Peças')) ?></span>
-				<h2 class="awa-section-header__title awa-shelf__title"><?= $escaper->escapeHtml(__('Retrovisores')) ?></h2>
-			</div>
-			<a href="<?= $escaper->escapeUrl($directUrl('retrovisores.html')) ?>" class="awa-section-header__link awa-shelf__view-all" aria-label="<?= $escaper->escapeHtmlAttr(__('Ver todos os Retrovisores')) ?>">
-				<?= $escaper->escapeHtml(__('Ver todos')) ?> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
-			</a>
-		</header>
-		<?= /* @noEscape */ $retrovisoresHtml ?>
-	</div>
-</section>
-<?php endif; ?>
-
-<!-- ④e Carousel — Bagageiros -->
-<?php if ($bagageirosHtml !== ''): ?>
-<section class="top-home-content awa-home-section awa-carousel-section ayo-home5-section" aria-label="<?= $escaper->escapeHtmlAttr(__('Bagageiros')) ?>">
-	<div class="container">
-		<header class="awa-section-header awa-shelf__header">
-			<div class="awa-section-header__left">
-				<span class="awa-section-header__eyebrow"><?= $escaper->escapeHtml(__('Acessórios')) ?></span>
-				<h2 class="awa-section-header__title awa-shelf__title"><?= $escaper->escapeHtml(__('Bagageiros')) ?></h2>
-			</div>
-			<a href="<?= $escaper->escapeUrl($directUrl('bagageiros.html')) ?>" class="awa-section-header__link awa-shelf__view-all" aria-label="<?= $escaper->escapeHtmlAttr(__('Ver todos os Bagageiros')) ?>">
-				<?= $escaper->escapeHtml(__('Ver todos')) ?> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
-			</a>
-		</header>
-		<?= /* @noEscape */ $bagageirosHtml ?>
-	</div>
-</section>
-<?php endif; ?>
-
-<!-- ④f Product Tabs (Lançamentos, Mais Vendidos, Destaques, Promoções) — REATIVADO 2026-05-15 -->
-<?php if ($productTabHtml !== ''): ?>
-<section class="top-home-content awa-home-section awa-carousel-section ayo-home5-section" aria-label="<?= $escaper->escapeHtmlAttr(__('Vitrines de Produtos')) ?>">
-        <div class="container">
-			<header class="awa-section-header">
-				<div>
-					<span class="awa-section-header__label"><?= $escaper->escapeHtml(__('Explore')) ?></span>
-					<h2 class="awa-section-header__title"><?= $escaper->escapeHtml(__('Vitrines de Produtos')) ?></h2>
-				</div>
-			</header>
-                <?= /* @noEscape */ $productTabHtml ?>
-        </div>
-</section>
-<?php endif; ?>
-<!-- ⑤ B2B / Atacado — REATIVADO 2026-05-15 -->
-<section class="top-home-content top-home-content--b2b-promo awa-home-section awa-home-section--highlight ayo-home5-section" aria-label="<?= $escaper->escapeHtmlAttr(__('Atacado e Revenda')) ?>">
-	<div class="container">
-		<div class="awa-b2b-promo">
-			<div class="awa-b2b-promo__content">
-				<span class="awa-b2b-promo__badge"><?= $escaper->escapeHtml(__('B2B')) ?></span>
-				<h2 class="awa-b2b-promo__title"><?= $escaper->escapeHtml(__('Atacado e Revenda')) ?></h2>
-				<p class="awa-b2b-promo__desc"><?= $escaper->escapeHtml(__('Condições exclusivas para oficinas, distribuidores e revendas. Cadastre seu CNPJ e tenha acesso a preços diferenciados.')) ?></p>
-				<div class="awa-b2b-promo__benefits">
-					<div class="awa-b2b-promo__benefit-item">
-						<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-						<span><?= $escaper->escapeHtml(__('Desconto Progressivo')) ?></span>
-					</div>
-					<div class="awa-b2b-promo__benefit-item">
-						<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-						<span><?= $escaper->escapeHtml(__('Crédito Empresarial')) ?></span>
-					</div>
-					<div class="awa-b2b-promo__benefit-item">
-						<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-						<span><?= $escaper->escapeHtml(__('Atendimento Dedicado')) ?></span>
-					</div>
-					<div class="awa-b2b-promo__benefit-item">
-						<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-						<span><?= $escaper->escapeHtml(__('Entrega Rápida')) ?></span>
-					</div>
-				</div>
-				<a href="<?= $escaper->escapeUrl($block->getUrl('b2b/register')) ?>" class="awa-b2b-promo__cta" title="<?= $escaper->escapeHtmlAttr(__('Cadastrar CNPJ')) ?>">
-					<?= $escaper->escapeHtml(__('Cadastrar meu CNPJ')) ?>
-					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-				</a>
-			</div>
-		</div>
-	</div>
-</section>
-
-<?php
-$securitySealsHtml = $renderCmsBlock('home_security_seals');
-$homeFaqHtml = $renderCmsBlock('home_faq_quick');
-$homeFaqJsonLd = '';
-if ($homeFaqHtml !== '') {
-    if (preg_match('/<script[^>]*type=["\']application\/ld\+json["\'][^>]*>(.*?)<\/script>/is', $homeFaqHtml, $faqJsonLdMatch) === 1) {
-        $homeFaqJsonLd = trim((string) $faqJsonLdMatch[1]);
-        $homeFaqHtml = (string) preg_replace(
-            '/<script[^>]*type=["\']application\/ld\+json["\'][^>]*>.*?<\/script>/is',
-            '',
-            $homeFaqHtml
-        );
-    }
-    if ($homeFaqJsonLd !== '') {
-        $faqJsonLdBlock = $layout->getBlock('awa.seo.jsonld');
-        if ($faqJsonLdBlock) {
-            $faqJsonLdBlock->setData('awa_faq_jsonld_payload', $homeFaqJsonLd);
-        }
-    }
-}
-?>
-<?php if ($securitySealsHtml !== ''): ?>
-<section class="top-home-content awa-home-section awa-home-trust-zone ayo-home5-section" aria-label="<?= $escaper->escapeHtmlAttr(__('Selos de confiança')) ?>">
-	<div class="container">
-		<?= /* @noEscape */ $securitySealsHtml ?>
-	</div>
-</section>
-<?php endif; ?>
-<?php if ($homeFaqHtml !== ''): ?>
-<section class="top-home-content awa-home-section awa-home-trust-zone ayo-home5-section" aria-label="<?= $escaper->escapeHtmlAttr(__('Perguntas frequentes')) ?>">
-	<div class="container">
-		<?= /* @noEscape */ $homeFaqHtml ?>
-	</div>
-</section>
-<?php endif; ?>
-
-<?php $bottomSectionHtml = $renderCmsBlock("home_bottom_section"); ?>
-<?php if ($bottomSectionHtml !== ""): ?>
-<section class="top-home-content awa-home-section ayo-home5-section">
-	<div class="container">
-		<?= /* @noEscape */ $bottomSectionHtml ?>
-	</div>
-</section>
-<?php endif; ?>
-
-<!-- ⑭ Mobile Sticky CTA — B2B conversion (ui-ux-pro-max: "Sticky navbar CTA") -->
-<div class="awa-mobile-sticky-cta"
-     id="awa-mobile-sticky-cta"
-     data-visible="false"
-     aria-hidden="true"
-     role="complementary"
-     aria-label="<?= $block->escapeHtmlAttr(__('Ações rápidas')) ?>">
-    <a href="<?= $block->escapeUrl($block->getUrl('customer/account/create')) ?>"
-       class="awa-mobile-sticky-cta__btn awa-mobile-sticky-cta__btn--primary"
-       aria-label="<?= $block->escapeHtmlAttr(__('Cadastre-se como revendedor')) ?>">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
-        <?= $block->escapeHtml(__('Seja Revendedor')) ?>
-    </a>
-    <a href="tel:+551633222000"
-       class="awa-mobile-sticky-cta__btn awa-mobile-sticky-cta__btn--secondary"
-       aria-label="<?= $block->escapeHtmlAttr(__('Ligar para vendas')) ?>">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-        <?= $block->escapeHtml(__('Vendas')) ?>
-    </a>
 </div>
-</div>
-

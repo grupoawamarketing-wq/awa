@@ -1,109 +1,81 @@
 <?xml version="1.0"?>
 <!--
-  AWA Motos — Product Detail Page (PDP) Layout Overrides
+ | AWA Motos — child theme override for catalog_product_view
+ | Corrige bugs e carrega CSS de conversão/polish de forma não-bloqueante.
 -->
-<page layout="1column"
-      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      layout="1column"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
-    <update handle="awa_pdp_performance"/>
     <head>
-        <!-- PDP CSS: single consolidated file (awa-pdp.css) replaces 5 separate files. -->
-        <css src="GrupoAwamotos_Fitment::css/fitment-application.css"/>
-        <!-- media=all: regra anterior media=print impedia o bundle PDP de aplicar na tela -->
-        <css src="css/awa-pdp.css"/>
-        <!-- flex/touch: já em awa-defer-global-bundle (awa-head-preload) — removido duplicate 2026-05-18 -->
-        <script src="js/awa-pdp-hardfix.js" defer="true"/>
-        <!-- Tema pai: cards duplicados conflitam com MODERNIZE v2 (awa-pdp.css §20) -->
-        <remove src="css/awa-pdp-final-polish.css"/>
+        <!--
+            BUG-07: Remove os dois arquivos CSS bloqueantes herdados do ayo_home5
+            (awa-round3-pdp-conversion.css e awa-pdp-final-polish.css).
+            Os estilos críticos já estão no awa-pdp-cascade-terminal.min.css
+            e no awa-ui-simplify-terminal.min.css carregados via defer.
+        -->
         <remove src="css/awa-round3-pdp-conversion.css"/>
+        <remove src="css/awa-pdp-final-polish.css"/>
+        <!-- awa-pdp-shell-final: defer via OptimizeHeadStylesPlugin (inline lock cobre 1º paint) -->
+        <css src="css/awa-pdp-shell-final.css"/>
     </head>
     <body>
-        <!-- Sidebar removida da PDP: produto ocupa largura total (layout 1column) -->
-        <referenceBlock name="sale.reorder.sidebar" remove="true"/>
-
-        <!-- Remove Magento native OG (duplicates awa.og.meta in default.xml) -->
-        <referenceBlock name="opengraph.general" remove="true"/>
-        <!-- PDP info cleanup: parent Ayo renders duplicate print/share buttons here. -->
+        <referenceBlock name="awa.header.impeccable.critical.global" remove="true"/>
+        <!-- Terminal lock — align-grid após pdp-shell (§41 PDP mobile + badges) -->
+        <referenceBlock name="head.additional">
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.align.grid.terminal.pdp"
+                   template="Magento_Theme::html/awa-align-grid-terminal-loader.phtml"
+                   after="-"/>
+        </referenceBlock>
+        <!--
+            BUG-01: Remove o container duplicado de social links do tema pai ayo_default.
+            O container "awa.product.info.social" (class "product-social-extra") renderiza
+            os mesmos links Imprimir/Compartilhar já fornecidos pelo container padrão
+            Magento "product.info.social" (class "product-social-links").
+        -->
         <referenceBlock name="awa.product.info.addto" remove="true"/>
         <referenceBlock name="awa.product.info.mailto" remove="true"/>
-        <referenceContainer name="awa.product.info.social" remove="true"/>
-        <!-- Remove bloco nativo (template AYO legado mostra "0 Avaliação") -->
-        <referenceBlock name="product.info.review" remove="true"/>
-        <referenceContainer name="box.inner1">
-            <!-- Dados de review são por-produto e públicos; FPC invalida via cache tag catalog_product_N. -->
-            <block class="Magento\Framework\View\Element\Template"
-                   name="awa.pdp.review.summary"
-                   template="Magento_Catalog::product/view/awa-pdp-review-summary.phtml"
-                   after="page.main.title"
-                   before="product.info.price">
-                <arguments>
-                    <argument name="review_summary_view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\ProductReviewSummary</argument>
-                    <argument name="product_structured_data_view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\ProductStructuredData</argument>
-                </arguments>
-            </block>
-        </referenceContainer>
-        <referenceBlock name="reviews.tab" remove="true"/>
-        <referenceBlock name="product.info.details.reviews" remove="true"/>
-        <referenceBlock name="review_form" remove="true"/>
-        <referenceBlock name="product.review.form" remove="true"/>
 
-        <!-- PDP inline critical CSS + async CSS loader
-             Moved to after.body.start because head.additional block doesn't render
-             children in production mode (block_html cache issue). -->
-        <referenceContainer name="after.body.start">
-            <!-- CSS puramente estático (design tokens :root). Seguro cachear. -->
-            <block class="Magento\Framework\View\Element\Template"
-                   name="awa.pdp.info.final.css"
-                   template="Magento_Catalog::product/view/awa-pdp-info-final-css-v2.phtml"
-                   after="-"/>
+        <!--
+            MELHORIA-01: Bloco de compatibilidade inline (Marca/Modelo/Ano) acima do add-to-cart.
+            Renderiza somente quando os atributos estão preenchidos (50 produtos).
+        -->
+        <referenceContainer name="product.info.main">
+            <block class="Magento\Catalog\Block\Product\View"
+                   name="awa.product.info.compatibility"
+                   template="Magento_Catalog::product/view/awa-compatibility.phtml"
+                   after="product.info.price"
+                   before="product.info.addtocart"/>
         </referenceContainer>
 
-        <!-- LCP Preload: placed in after.body.start for reliability -->
-        <referenceContainer name="after.body.start">
+        <!--
+            BUG-07: Carrega os CSS de conversão/polish de forma não-bloqueante.
+            Os arquivos são servidos com media="print" onload="this.media='all'" para
+            não bloquear o render. Lidos pelo browser antes do DOMContentLoaded.
+        -->
+        <referenceContainer name="before.body.end">
             <block class="Magento\Framework\View\Element\Template"
-                   name="awa.pdp.lcp.preload"
-                   template="Magento_Catalog::product/view/awa-pdp-lcp-preload.phtml"
-                   before="-">
-                <arguments>
-                    <argument name="view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\ProductStructuredData</argument>
-                </arguments>
-            </block>
+                   name="awa.pdp.conversion.async.css"
+                   template="Magento_Theme::html/awa-pdp-conversion-async.phtml"
+                   before="-"/>
         </referenceContainer>
 
-        <!-- Product JSON-LD + BreadcrumbList for SEO rich results -->
-        <referenceContainer name="after.body.start">
+        <!--
+            BUG-03: Schema.org Product JSON-LD — gerado via ProductStructuredData ViewModel.
+            Emitido no fim do body (válido para Google; evita bytes extras no <head>).
+            Inclui: Product (@type), Offer (preço/disponibilidade), AggregateRating
+            (quando há avaliações), BreadcrumbList.
+        -->
+        <referenceContainer name="before.body.end">
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.schema.product.jsonld"
                    template="Magento_Catalog::product/view/awa-product-jsonld.phtml"
-                   after="-">
+                   after="awa.pdp.conversion.async.css">
                 <arguments>
-                    <argument name="view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\ProductStructuredData</argument>
-                    <argument name="product_structured_data_view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\ProductStructuredData</argument>
+                    <argument name="product_structured_data_view_model"
+                              xsi:type="object">GrupoAwamotos\Theme\ViewModel\ProductStructuredData</argument>
                 </arguments>
             </block>
-        </referenceContainer>
-
-        <!-- Fitment abaixo da galeria (preenche vazio lateral quando coluna info é mais alta) -->
-        <move element="product.fitment.applications" destination="product.col.media" after="product.info.media"/>
-        <!-- Overview + social proof na coluna mídia → equilibra altura vs buy-box (fix LAYOUT-VOID) -->
-        <move element="product.info.overview" destination="product.col.media" after="product.fitment.applications"/>
-        <move element="product.info.social.proof" destination="product.col.media" after="product.info.overview"/>
-
-        <!-- Sticky Add-to-Cart bar — aparece quando o botão principal sai da viewport -->
-        <referenceContainer name="before.body.end">
-            <block class="Magento\Catalog\Block\Product\View"
-                   name="awa.pdp.sticky.bar"
-                   template="Magento_Catalog::product/view/awa-pdp-sticky-bar.phtml"
-                   before="-">
-                <arguments>
-                    <argument name="b2b_gate_view_model" xsi:type="object">GrupoAwamotos\B2B\ViewModel\PdpGate</argument>
-                </arguments>
-            </block>
-            <!-- PDP ultra-hardfix: último CSS da página. CSS estático — seguro cachear. -->
-            <block class="Magento\Framework\View\Element\Template"
-                   name="awa.pdp.ultra.hardfix"
-                   template="Magento_Catalog::product/view/awa-pdp-ultra-hardfix.phtml"
-                   after="-"/>
         </referenceContainer>
     </body>
 </page>
