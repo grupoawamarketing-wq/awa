@@ -249,6 +249,7 @@ A segunda ocorrência de `<head>` (pos. 74764) está dentro de um comentário HT
 | 2026-06-25 | MEL-04: product:price:amount validado como já implementado | Copilot | — |
 | 2026-06-25 | BUG-08: PDP og:image:width/height adicionado (1500×1500) | Copilot | — |
 | 2026-06-25 | MEL-05: SVG width/height adicionados em footer-static5.phtml | Copilot | — |
+| 2026-06-25 | BUG-11: Popup newsletter "Não, obrigado" não fechava | Copilot | — |
 
 ---
 
