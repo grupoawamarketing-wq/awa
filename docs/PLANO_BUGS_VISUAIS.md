@@ -25,8 +25,10 @@
 | Fase 0 — Críticos | 2 | 1 | 1 | 0 |
 | Fase 1 — Alto impacto | 5 | 4 | 0 | 1 |
 | Fase 2 — Acessibilidade | 3 | 1 | 2 | 0 |
-| Fase 3 — Melhorias | 5 | 3 | 0 | 2 |
-| **Total** | **15** | **9** | **3** | **3** |
+| Fase 3 — Melhorias | 5 | 4 | 0 | 1 |
+| Fase 4 — Header | 4 | 1 | 2 | 1 |
+| Fase 5 — Auditoria Geral | 3 | 3 | 0 | 0 |
+| **Total** | **22** | **14** | **5** | **3** |
 
 ---
 
@@ -250,6 +252,10 @@ A segunda ocorrência de `<head>` (pos. 74764) está dentro de um comentário HT
 | 2026-06-25 | BUG-08: PDP og:image:width/height adicionado (1500×1500) | Copilot | — |
 | 2026-06-25 | MEL-05: SVG width/height adicionados em footer-static5.phtml | Copilot | — |
 | 2026-06-25 | BUG-11: Popup newsletter "Não, obrigado" não fechava | Copilot | — |
+| 2026-06-25 | HEADER-04: SVG hamburger com width/height adicionados | Copilot | `a45a6184` |
+| 2026-06-25 | BUG-12: Newsletter input aria-label adicionado (WCAG) | Copilot | `441cb308` |
+| 2026-06-25 | BUG-13: Footer trust icons SVG width/height (4 ícones) | Copilot | `441cb308` |
+| 2026-06-25 | SEO-01: Meta description home 169→139 chars | Copilot | DB |
 
 ---
 
@@ -347,3 +353,61 @@ Adicionados `width="24" height="24"` no arquivo `Rokanthemes_VerticalMenu/templa
 | Account nav: aria-label, aria-haspopup, aria-expanded | ✅ |
 | href="#" no header | ✅ zero |
 | Imagens sem alt no header | ✅ zero |
+
+---
+
+## Fase 5 — Auditoria Geral (2026-06-25)
+
+> Varredura de qualidade em todas as páginas: acessibilidade, SEO e markup.
+
+---
+
+### BUG-12 · Newsletter popup sem `aria-label` no input
+
+- **Status:** `[x]`
+- **Severidade:** 🟡 Médio (WCAG 2.1 — input sem label acessível)
+- **Páginas afetadas:** Todas (popup newsletter aparece em todas as páginas)
+- **Data detectada:** 2026-06-25
+- **Data corrigida:** 2026-06-25
+- **Commit:** `441cb308`
+
+**Resolução:** `Rokanthemes_Themeoption/templates/newsletterpopup.phtml` — adicionado `aria-label="Seu e-mail"` ao `input#newsletter-popup`. Validado no HTML renderizado.
+
+---
+
+### BUG-13 · Footer trust icons SVG sem `width`/`height`
+
+- **Status:** `[x]`
+- **Severidade:** 🟢 Baixo (boas práticas — fallback quando CSS não carrega)
+- **Páginas afetadas:** Footer (todas as páginas)
+- **Data detectada:** 2026-06-25
+- **Data corrigida:** 2026-06-25
+- **Commit:** `441cb308`
+
+**Resolução:** `Rokanthemes_Themeoption/templates/html/footer.phtml` — 4 SVGs com `<use href="#awa-icon-*">` (truck, shield, gear, b2b) agora têm `width="24" height="24"`. Validado no HTML renderizado.
+
+---
+
+### SEO-01 · Meta description da home com 169 chars (excede 160)
+
+- **Status:** `[x]`
+- **Severidade:** 🟢 Baixo (SEO — Google pode truncar em SERPs)
+- **Páginas afetadas:** Home (design/head/default_description)
+- **Data detectada:** 2026-06-25
+- **Data corrigida:** 2026-06-25
+
+**Resolução:** Atualizado `core_config_data` (`design/head/default_description`) via SQL. Novo valor (139 chars): *"AWA Motos — Especialistas em peças e acessórios para motos. Baús, bagageiros, retrovisores, luvas e muito mais. Entrega para todo o Brasil."* FPC purgado e Varnish purgado. Validado: 139 chars no HTML ao vivo.
+
+---
+
+### Páginas auditadas e sem issues
+
+| Página | Resultado |
+|--------|-----------|
+| Search (`/catalogsearch/result/`) | noindex/nofollow ✅ correto; imgs sem alt são KO bindings ✅ |
+| 404 | noindex/nofollow ✅; H1 "Página não encontrada" ✅ |
+| robots.txt | User-agent, Disallow adequados ✅; Sitemap directive ✅ |
+| Sitemap.xml | HTTP 200 ✅ |
+| Links target=_blank sem noopener | Nenhum encontrado em home/cat/pdp ✅ |
+| Google Fonts externos | Não utilizados ✅ |
+| iframes na home | Nenhum ✅ |
