@@ -12,10 +12,28 @@ declare(strict_types=1);
 
 $_category = $block->getCurrentCategory();
 $_categoryName = $_category->getName();
-$_productCount = (int) $_category->getProductCount();
+/** @var \GrupoAwamotos\Theme\ViewModel\CategoryVisibleProductCount|null $visibleCountViewModel */
+$visibleCountViewModel = $block->getData('visible_product_count_view_model');
+$_productCount = $visibleCountViewModel instanceof \GrupoAwamotos\Theme\ViewModel\CategoryVisibleProductCount
+    ? $visibleCountViewModel->getCount($_category)
+    : (int) $_category->getProductCount();
 $image = $block->getImage();
 $output = $block->getOutput();
 $_imgUrl = $image->getUrl($_category);
+
+// WebP: tenta extensão alternativa (cat.jpg → cat.webp) se o arquivo existir no disco
+$_webpUrl = null;
+if ($_imgUrl) {
+    $_webpCandidate = preg_replace('/\.(jpe?g|png)$/i', '.webp', $_imgUrl);
+    if ($_webpCandidate !== $_imgUrl) {
+        $baseMediaUrl = $block->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA);
+        $relPath = ltrim(str_replace($baseMediaUrl, '', $_webpCandidate), '/');
+        $webpFile = BP . '/pub/media/' . $relPath;
+        if (is_file($webpFile)) {
+            $_webpUrl = $_webpCandidate;
+        }
+    }
+}
 
 // Breadcrumb textual para contexto
 $_parentCategory = $_category->getParentCategory();
@@ -28,10 +46,24 @@ $_parentName = ($_parentCategory && (int) $_parentCategory->getLevel() >= 2)
      aria-label="<?= $block->escapeHtmlAttr(__('Categoria: %1', $_categoryName)) ?>">
 
     <?php if ($_imgUrl): ?>
+        <?php if ($_webpUrl): ?>
+        <picture>
+            <source type="image/webp" srcset="<?= $block->escapeUrl($_webpUrl) ?>">
+            <img class="awa-category-hero__bg-image"
+                 src="<?= $block->escapeUrl($_imgUrl) ?>"
+                 alt="<?= $block->escapeHtmlAttr((string) __('Imagem da categoria %1', $_categoryName)) ?>"
+                 width="300"
+                 height="300"
+                 loading="eager" />
+        </picture>
+        <?php else: ?>
         <img class="awa-category-hero__bg-image"
              src="<?= $block->escapeUrl($_imgUrl) ?>"
              alt="<?= $block->escapeHtmlAttr((string) __('Imagem da categoria %1', $_categoryName)) ?>"
+             width="300"
+             height="300"
              loading="eager" />
+        <?php endif; ?>
         <div class="awa-category-hero__overlay" aria-hidden="true"></div>
     <?php endif; ?>
 
