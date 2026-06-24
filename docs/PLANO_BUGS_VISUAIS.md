@@ -260,3 +260,90 @@ A segunda ocorrência de `<head>` (pos. 74764) está dentro de um comentário HT
 3. Ao **descartar**: trocar por `[n]` + adicionar justificativa em itálico abaixo
 4. Atualizar o **Dashboard** manualmente (contar `[x]` por fase)
 5. Commit com mensagem: `docs: atualiza PLANO_BUGS_VISUAIS — [BUG-XX] corrigido`
+
+---
+
+## Fase 4 — Auditoria do Header (2026-06-24)
+
+> Auditoria profunda de todos os elementos do header: logo, vmenu, search, minicart, account nav, skip-nav, semântica, performance e acessibilidade.
+
+---
+
+### HEADER-01 · Imagens duplicadas no menu vertical
+
+- **Status:** `[ ]`
+- **Severidade:** 🔴 Visual (bug de conteúdo — 3 pares de categorias com a mesma imagem)
+- **Data detectada:** 2026-06-24
+- **Tipo:** Tarefa de conteúdo — requer upload de imagens no admin
+
+**Categorias com imagens erradas (exibidas no vmenu):**
+
+| Categoria | Imagem atual | Deveria ser |
+|-----------|-------------|-------------|
+| Protetores de Carter | `cat-suporte.jpg` (foto de suporte) | Imagem específica de protetor de carter |
+| Antenas | `cat-pisca.jpg` (foto de pisca/lente) | Imagem específica de antena |
+| Carcaças | `cat-outros.png` (genérico) | Imagem específica de carcaça |
+
+**Fix:** Admin → Catálogo → Categorias → selecionar cada categoria → campo "Imagem" → fazer upload de foto adequada.
+
+---
+
+### HEADER-02 · Logo sem `fetchpriority="high"` (home page)
+
+- **Status:** `[n]`
+- **Severidade:** 🟠 Performance — Falso positivo
+- **Data detectada:** 2026-06-24
+- **Data fechado:** 2026-06-24
+
+**Resolução — Falso positivo:**
+O template `logo.phtml` já implementa a lógica correta: na home page, `fetchpriority` é **intencionalmente omitido** para não competir com o hero slider (LCP real da home). Nas demais páginas, `fetchpriority="high"` é aplicado automaticamente.
+
+---
+
+### HEADER-03 · Skip-nav link ausente
+
+- **Status:** `[n]`
+- **Severidade:** 🟡 Acessibilidade — Falso positivo
+- **Data detectada:** 2026-06-24
+- **Data fechado:** 2026-06-24
+
+**Resolução — Falso positivo:**
+Os links de skip-nav estão presentes no HTML (pos. 76564, antes do `<header>`) via template `Magento_Theme/templates/html/skip-links.phtml` (override AWA customizado). A auditoria checou apenas os primeiros 1000 chars do HTML e não localizou os links que aparecem em posição mais tardia.
+
+---
+
+### HEADER-04 · SVG do hamburger sem `width`/`height`
+
+- **Status:** `[x]`
+- **Severidade:** 🟡 Markup — baixo impacto
+- **Data detectada:** 2026-06-24
+- **Data corrigida:** 2026-06-24
+- **Commit:** `a45a6184`
+
+**Descrição:**
+O SVG hambúrguer do vmenu trigger (`<svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">`) não tinha atributos `width`/`height` explícitos.
+
+**Fix:**
+Adicionados `width="24" height="24"` no arquivo `Rokanthemes_VerticalMenu/templates/sidemenu.phtml`.
+
+---
+
+### Outros elementos verificados e OK
+
+| Componente | Resultado |
+|-----------|-----------|
+| Logo: alt, width, height, loading=eager | ✅ |
+| Logo: fetchpriority condicional | ✅ |
+| Minicart: role=dialog, aria-modal, aria-labelledby | ✅ |
+| Minicart counter: aria-live="polite" | ✅ |
+| Search input: aria-label, autocomplete, type=search | ✅ |
+| Search button: sr-only span interno | ✅ |
+| Vertical menu trigger: aria-expanded, aria-controls, aria-label | ✅ |
+| Subcategoria buttons: aria-label em cada um | ✅ |
+| Vmenu category images: alt, width, height | ✅ |
+| Header: role="banner" | ✅ |
+| Skip-nav links: presentes (pos. 76564) | ✅ |
+| B2B promo bar: role="complementary", aria-label | ✅ |
+| Account nav: aria-label, aria-haspopup, aria-expanded | ✅ |
+| href="#" no header | ✅ zero |
+| Imagens sem alt no header | ✅ zero |
