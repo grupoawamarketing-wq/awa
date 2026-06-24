@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace GrupoAwamotos\Theme\ViewModel;
 
 use Magento\Catalog\Api\CategoryRepositoryInterface;
+use Magento\Catalog\Helper\Data as CatalogHelper;
 use Magento\Catalog\Helper\Image as ImageHelper;
 use Magento\Catalog\Model\Category;
 use Magento\Catalog\Model\Product;
@@ -16,6 +17,14 @@ use Magento\Store\Model\StoreManagerInterface;
 
 class ProductStructuredData implements ArgumentInterface
 {
+    /**
+     * Marcas de motocicletas usadas no atributo 'manufacturer' para fitment/compatibilidade.
+     * Esses valores NÃO representam o fabricante do produto, mas sim a compatibilidade com
+     * a moto. Produtos com esses valores devem usar 'AWA Motos' como brand no schema.org.
+     *
+     * @var array<string>
+     */
+    private const MOTO_BRANDS = ['Honda', 'Kawasaki', 'Suzuki', 'Yamaha', 'KTM', 'BMW', 'Ducati', 'Triumph', 'Harley-Davidson'];
     private bool $currentProductResolved = false;
 
     private ?Product $currentProduct = null;
@@ -55,7 +64,24 @@ class ProductStructuredData implements ArgumentInterface
         private readonly ReviewFactory $reviewFactory,
         private readonly StoreManagerInterface $storeManager,
         private readonly CategoryRepositoryInterface $categoryRepository,
+        private readonly CatalogHelper $catalogHelper,
     ) {
+    }
+
+    /**
+     * Trilha visual da PDP (Home → categoria → produto) via CatalogHelper + plugin BREAD-001.
+     *
+     * @return array<string, array{label?: string, title?: string, link?: string, last?: bool}>
+     */
+    public function getBreadcrumbPath(): array
+    {
+        try {
+            $path = $this->catalogHelper->getBreadcrumbPath();
+
+            return is_array($path) ? $path : [];
+        } catch (\Throwable) {
+            return [];
+        }
     }
 
     public function getCurrentProduct(): ?Product
@@ -352,8 +378,14 @@ class ProductStructuredData implements ArgumentInterface
         try {
             $brand = $product->getAttributeText('manufacturer') ?: $product->getAttributeText('marca');
             $brand = is_scalar($brand) ? (string) $brand : '';
+            $normalized = $this->normalizeText($brand);
 
-            return $this->normalizeText($brand) ?: 'AWA Motos';
+            // O atributo 'manufacturer' contém marcas de moto (fitment), não a marca do produto.
+            if ($normalized === '' || in_array($normalized, self::MOTO_BRANDS, true)) {
+                return 'AWA Motos';
+            }
+
+            return $normalized;
         } catch (\Throwable) {
             return 'AWA Motos';
         }

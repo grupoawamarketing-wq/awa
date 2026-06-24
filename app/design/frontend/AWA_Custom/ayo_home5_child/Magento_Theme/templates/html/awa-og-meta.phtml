@@ -115,6 +115,19 @@ if ($actionName === 'catalog_product_view') {
                 $ogImage = $catImg;
                 $ogImageWidth  = null;
                 $ogImageHeight = null;
+                // Tentar obter dimensões reais da imagem de categoria (do disco)
+                $catImgRaw = $category->getImage(); // ex: /media/catalog/category/img.png
+                if ($catImgRaw) {
+                    $pubDir = BP . '/pub';
+                    $catImgFile = $pubDir . '/' . ltrim($catImgRaw, '/');
+                    if (file_exists($catImgFile)) {
+                        $catImgSize = @getimagesize($catImgFile);
+                        if ($catImgSize && $catImgSize[0] > 0) {
+                            $ogImageWidth  = $catImgSize[0];
+                            $ogImageHeight = $catImgSize[1];
+                        }
+                    }
+                }
             }
         }
     } catch (\Exception $e) { /* silently fail */ }
