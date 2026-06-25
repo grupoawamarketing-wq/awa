@@ -1,106 +1,776 @@
-<?php declare(strict_types=1); ?>
+<?php
+declare(strict_types=1);
+
+/** @var \Magento\Framework\View\Element\Template $block */
+
+$cookieFixUrl = $block->getViewFileUrl('css/awa-cookie-consent-fix.min.css');
+$cookieFixUrlJson = json_encode($block->escapeUrl($cookieFixUrl), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+?>
 <style id="awa-b2b-auth-critical-inline">
 /* Login/cadastro B2B — síncrono: CTA visível antes dos bundles async */
+html,
+body#html-body.b2b-auth-shell {
+  --b2b-auth-container-max: min(100%, 480px);
+  --b2b-auth-card-max: 440px;
+  --b2b-auth-register-max: min(100%, 920px);
+  --b2b-auth-gap-xs: 4px;
+  --b2b-auth-gap-sm: 8px;
+  --b2b-auth-gap-md: 12px;
+  --b2b-auth-gap-lg: 16px;
+  --b2b-auth-gap-block: var(--b2b-auth-gap-md);
+  --b2b-auth-shell-pad-x: clamp(12px, 3vw, 16px);
+  --b2b-auth-shell-pad-y: clamp(12px, 2vh, 16px);
+  --b2b-auth-card-pad-x: 16px;
+  --b2b-auth-card-pad-y: 16px;
+  --b2b-auth-touch: var(--awa-touch-target, 44px);
+  --b2b-auth-radius-control: var(--awa-radius-sm, 8px);
+  --b2b-auth-radius-card: var(--awa-radius-md, 10px);
+  --b2b-auth-font-title: 1.5rem;
+  --b2b-auth-font-body: 0.875rem;
+  --b2b-auth-font-label: 0.75rem;
+  background: var(--awa-bg, #ffffff) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  min-height: 100%;
+}
+html {
+  font-size: 100%;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+body#html-body.b2b-auth-shell {
+  font-family: var(--awa-font-body, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif);
+  font-size: var(--b2b-auth-font-body);
+  line-height: 1.45;
+  color: var(--awa-text-primary, #333);
+}
+html body#html-body.b2b-auth-shell {
+  margin: 0 !important;
+  padding: 0 !important;
+  min-height: 100% !important;
+}
+html {
+  background: #ffffff !important;
+}
+body#html-body.b2b-auth-shell .page-wrapper {
+  background: transparent !important;
+  min-height: 100dvh !important;
+}
+body#html-body.b2b-auth-shell::before {
+  content: "" !important;
+  position: fixed !important;
+  inset: 0 !important;
+  background: #ffffff !important;
+  pointer-events: none !important;
+  z-index: -1 !important;
+}
+#awa-cookie-banner,.awa-cookie-banner,#html-body .awa-cookie-banner--visible{
+  position:fixed!important;inset-inline:0!important;inset-block-end:0!important;
+  z-index:850!important;box-sizing:border-box!important;max-width:100%!important}
+.b2b-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+body#html-body.b2b-auth-shell .action.skip.nav {
+  display: none !important;
+}
+body#html-body.b2b-auth-shell :is(.awa-skip-link, .action.skip.content):focus,
+body#html-body.b2b-auth-shell :is(.awa-skip-link, .action.skip.content):focus-visible {
+  position: fixed !important;
+  top: 8px !important;
+  left: 8px !important;
+  z-index: 100001 !important;
+  width: auto !important;
+  height: auto !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+  max-width: min(92vw, 360px) !important;
+  padding: 12px 16px !important;
+  margin: 0 !important;
+  overflow: visible !important;
+  clip: auto !important;
+  clip-path: none !important;
+  font-size: 14px !important;
+  line-height: 1.35 !important;
+  white-space: nowrap !important;
+  background: var(--awa-primary, #b73337) !important;
+  color: #fff !important;
+  border-radius: 8px !important;
+  outline: 2px solid #fff !important;
+  outline-offset: 2px !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  body#html-body.b2b-auth-shell *,
+  body#html-body.b2b-auth-shell *::before,
+  body#html-body.b2b-auth-shell *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
 body#html-body.b2b-auth-shell .awa-nav-quick-links,
 body#html-body.b2b-auth-shell #awa-primary-navigation,
 body#html-body.b2b-auth-shell .page-wrapper .awa-site-header,
 body#html-body.b2b-auth-shell .page-wrapper .header-promo,
 body#html-body.b2b-auth-shell .page-wrapper .page-footer,
 body#html-body.b2b-auth-shell .page-wrapper .page_footer,
+body#html-body.b2b-auth-shell .page-wrapper .awa-footer-categories-expand,
+body#html-body.b2b-auth-shell .page-wrapper .footer-bottom,
+body#html-body.b2b-auth-shell .page-wrapper .awa-footer-devby,
 body#html-body.b2b-auth-shell .page-wrapper .link-on-bottom,
-body#html-body.b2b-auth-shell .page-wrapper nav.fixed-bottom {
+body#html-body.b2b-auth-shell .page-wrapper nav.fixed-bottom,
+body#html-body.b2b-auth-shell nav.fixed-bottom,
+body#html-body.b2b-auth-shell .link-on-bottom {
   display: none !important;
 }
-body#html-body.b2b-auth-shell:not(.b2b-register-index) .b2b-login-logo,
 body#html-body.b2b-auth-shell:not(.b2b-register-index) .b2b-login-header {
   display: none !important;
 }
-body#html-body.b2b-auth-shell.b2b-register-index .b2b-login-logo {
+body#html-body.b2b-auth-shell .b2b-login-logo.b2b-login-logo--compact {
+  display: grid !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  place-items: center !important;
+  width: min(100%, var(--b2b-auth-card-max)) !important;
+  justify-self: center !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+}
+body#html-body.b2b-auth-shell .b2b-login-logo.b2b-login-logo--compact a {
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+body#html-body.b2b-auth-shell .b2b-login-logo.b2b-login-logo--compact img {
   display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: auto !important;
+  max-width: 140px !important;
+  max-height: 44px !important;
+  height: auto !important;
+  margin-inline: auto !important;
 }
-body#html-body.b2b-auth-shell .page-main {
-  max-width: 640px !important;
-  padding-top: 12px !important;
-  padding-bottom: 16px !important;
+body#html-body.b2b-auth-shell.b2b-register-index .page-main {
+  display: block !important;
+  width: 100% !important;
+  max-width: min(100%, calc(var(--b2b-auth-register-max) + 32px)) !important;
+  min-height: auto !important;
+  margin-inline: auto !important;
+  padding-block: var(--b2b-auth-shell-pad-y) !important;
+  padding-inline: var(--b2b-auth-shell-pad-x) !important;
+  box-sizing: border-box !important;
 }
-body#html-body.b2b-auth-shell .b2b-login-trust {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px 10px;
-  margin: 0 0 16px;
-  padding: 0;
-  list-style: none;
+body#html-body.b2b-auth-shell.b2b-register-index .page-main .column.main {
+  max-width: 100% !important;
+  width: 100% !important;
+  padding-inline: 0 !important;
 }
-body#html-body.b2b-auth-shell .b2b-login-trust li {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 10px;
-  border: 1px solid #e5e7eb;
-  border-radius: 999px;
-  background: #f9fafb;
-  font-size: 12px;
-  font-weight: 600;
-  color: #374151;
+body#html-body.b2b-auth-shell.b2b-register-index .b2b-register-page-shell.b2b-login-page {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  justify-items: stretch !important;
+  gap: var(--b2b-auth-gap-lg) !important;
+  width: 100% !important;
+  max-width: var(--b2b-auth-register-max) !important;
+  margin-inline: auto !important;
+  padding: 0 !important;
+  background: transparent !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
 }
-body#html-body.b2b-auth-shell .b2b-login-trust svg {
-  width: 16px;
-  height: 16px;
-  color: #b73337;
-  flex-shrink: 0;
+body#html-body.b2b-auth-shell.b2b-register-index :is(
+  .b2b-register-page,
+  .b2b-register-shell-content
+) {
+  overflow: visible !important;
+}
+body#html-body.b2b-auth-shell.b2b-register-index #b2b-register-shell.b2b-login-card {
+  justify-self: stretch !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: var(--b2b-auth-card-pad-y) var(--b2b-auth-card-pad-x) !important;
+  border: 1px solid var(--awa-color-border, #e5e5e5) !important;
+  border-radius: var(--b2b-auth-radius-card, 8px) !important;
+  box-shadow: none !important;
+  background: var(--awa-bg-surface, #fff) !important;
+  box-sizing: border-box !important;
+}
+body#html-body.b2b-auth-shell.b2b-register-index .b2b-register-page-shell .b2b-login-footer {
+  justify-self: center !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+body#html-body.b2b-auth-shell.b2b-register-index #b2b-register-shell .b2b-register-shell-content {
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 0 !important;
+}
+body#html-body.b2b-auth-shell.b2b-register-index .register-header {
+  margin: 0 0 var(--b2b-auth-gap-md) !important;
+  padding: 0 !important;
+}
+body#html-body.b2b-auth-shell.b2b-register-index .register-header .register-title {
+  font-size: var(--b2b-auth-font-title) !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+  text-align: center !important;
+  color: var(--awa-text-primary, #333) !important;
+  margin: 0 !important;
+}
+body#html-body.b2b-auth-shell.b2b-register-index .register-trust-note.b2b-login-subtitle {
+  font-size: var(--b2b-auth-font-label) !important;
+  line-height: 1.45 !important;
+  text-align: center !important;
+  color: var(--awa-text-muted, #666) !important;
+}
+body#html-body.b2b-auth-shell:not(.b2b-register-index) .page-main {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  width: 100% !important;
+  max-width: var(--b2b-auth-container-max) !important;
+  min-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) !important;
+  margin-inline: auto !important;
+  padding-block: var(--b2b-auth-shell-pad-y) !important;
+  padding-inline: var(--b2b-auth-shell-pad-x) !important;
+  box-sizing: border-box !important;
+}
+body#html-body.b2b-auth-shell:not(.b2b-register-index) .page-main > .columns,
+body#html-body.b2b-auth-shell:not(.b2b-register-index) .page-main .column.main {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding-inline: 0 !important;
+  box-sizing: border-box !important;
+}
+body#html-body.b2b-auth-shell:not(.b2b-register-index) .b2b-login-page {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  justify-items: stretch !important;
+  align-content: start !important;
+  gap: var(--b2b-auth-gap-lg) !important;
+  width: 100% !important;
+  min-height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
+}
+body#html-body.b2b-auth-shell:not(.b2b-register-index) #b2b-login-shell.b2b-login-page {
+  overflow: visible !important;
 }
 body#html-body.b2b-auth-shell .b2b-login-form {
-  display: grid;
-  gap: 16px;
+  display: grid !important;
+  gap: var(--b2b-auth-gap-block) !important;
+  width: 100% !important;
+  min-width: 0 !important;
 }
-body#html-body.b2b-auth-shell .b2b-field-note {
-  font-size: 11px;
-  line-height: 1.35;
-  margin-top: 4px;
+body#html-body.b2b-auth-shell .b2b-field {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: var(--b2b-auth-gap-xs, 4px) !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+}
+body#html-body.b2b-auth-shell .b2b-field-label {
+  display: block !important;
+  margin: 0 !important;
+  line-height: 1.4 !important;
+}
+body#html-body.b2b-auth-shell .b2b-password-wrap {
+  position: relative !important;
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+}
+body#html-body.b2b-auth-shell .b2b-field input,
+body#html-body.b2b-auth-shell #b2b-email,
+body#html-body.b2b-auth-shell #b2b-pass {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  padding: 0 var(--b2b-auth-gap-md, 12px) !important;
+  border: 1px solid var(--awa-color-border, #d1d5db) !important;
+  box-sizing: border-box !important;
+  font-size: var(--b2b-auth-font-body) !important;
+  line-height: 1.35 !important;
+  border-radius: 8px !important;
+}
+body#html-body.b2b-auth-shell #b2b-pass {
+  padding-right: 52px !important;
+}
+body#html-body.b2b-auth-shell .b2b-field input:focus-visible,
+body#html-body.b2b-auth-shell .b2b-password-toggle:focus-visible,
+body#html-body.b2b-auth-shell :is(.b2b-btn-entrar, .b2b-btn-register, .b2b-btn-claim, .b2b-login-forgot__link):focus-visible {
+  outline: 2px solid var(--awa-primary, #b73337) !important;
+  outline-offset: 2px !important;
+}
+body#html-body.b2b-auth-shell .b2b-password-toggle {
+  position: absolute !important;
+  top: 0 !important;
+  right: 0 !important;
+  transform: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 44px !important;
+  min-width: 44px !important;
+  max-width: 44px !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  max-height: 44px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 1px solid var(--awa-color-border, #d1d5db) !important;
+  border-radius: 8px !important;
+  background: var(--awa-bg-surface, #fff) !important;
+  box-sizing: border-box !important;
 }
 body#html-body.b2b-auth-shell .b2b-login-forgot {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 6px;
+  gap: var(--b2b-auth-gap-xs);
   margin: 0;
-  font-size: 13px;
+  font-size: var(--b2b-auth-font-label);
+  text-align: center;
+}
+body#html-body.b2b-auth-shell .b2b-login-title {
+  margin: 0 !important;
+  font-size: var(--b2b-auth-font-title) !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+  letter-spacing: -0.02em !important;
+  color: var(--awa-text-primary, #333) !important;
+}
+body#html-body.b2b-auth-shell .b2b-login-subtitle {
+  margin: 0 !important;
+  font-size: var(--b2b-auth-font-label) !important;
+  line-height: 1.4 !important;
+  text-align: center !important;
+  color: var(--awa-text-muted, #666) !important;
+}
+body#html-body.b2b-auth-shell:is(.b2b-account-login, .b2b-account-forgotpassword, .b2b-account-claim, .b2b-register-index, .b2b-register-success) .column.main > div[data-bind*="messages"] {
+  display: none !important;
+}
+body#html-body.b2b-auth-shell.b2b-register-success .b2b-register-success-container {
+  width: min(100%, var(--b2b-auth-card-max)) !important;
+  max-width: var(--b2b-auth-card-max) !important;
+  margin-inline: auto !important;
+  padding: 0 !important;
+}
+body#html-body.b2b-auth-shell.b2b-register-success .success-card.b2b-login-card {
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: var(--b2b-auth-card-pad-y) var(--b2b-auth-card-pad-x) !important;
+  box-sizing: border-box !important;
+  box-shadow: none !important;
+}
+body#html-body.b2b-auth-shell.b2b-register-success .success-subtitle.b2b-login-subtitle {
+  margin-bottom: 0 !important;
+}
+body#html-body.b2b-auth-shell.b2b-register-success .success-actions .b2b-btn-entrar {
+  width: 100% !important;
+}
+body#html-body.b2b-auth-shell:not(.b2b-register-index) .b2b-login-card {
+  justify-self: center !important;
+  width: min(100%, var(--b2b-auth-card-max)) !important;
+  max-width: var(--b2b-auth-card-max) !important;
+  margin-inline: auto !important;
+  padding: var(--b2b-auth-card-pad-y) var(--b2b-auth-card-pad-x) !important;
+  border: 1px solid var(--awa-color-border, #e5e5e5) !important;
+  border-radius: var(--b2b-auth-radius-card, 8px) !important;
+  box-shadow: none !important;
+}
+body#html-body.b2b-auth-shell .b2b-login-footer {
+  justify-self: center !important;
+  width: min(100%, var(--b2b-auth-card-max)) !important;
+  margin-inline: auto !important;
 }
 body#html-body.b2b-auth-shell .b2b-btn-entrar {
   display: block !important;
   width: 100% !important;
-  min-height: 48px !important;
-  background: #b73337 !important;
+  min-height: 44px !important;
+  background: var(--awa-primary, #b73337) !important;
   color: #fff !important;
   border: none !important;
   border-radius: 8px !important;
-  font-size: 15px !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-size: var(--b2b-auth-font-body) !important;
+  font-weight: 600 !important;
+  letter-spacing: normal;
+  text-transform: none;
   cursor: pointer;
 }
+body#html-body.b2b-auth-shell .b2b-btn-register,
+body#html-body.b2b-auth-shell .b2b-btn-claim {
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+  padding-left: var(--b2b-auth-gap-md, 12px) !important;
+  padding-right: var(--b2b-auth-gap-md, 12px) !important;
+  box-sizing: border-box !important;
+}
 body#html-body.b2b-auth-shell .b2b-login-forgot__link {
-  color: #b73337;
+  color: var(--awa-primary, #b73337);
   font-weight: 600;
   text-decoration: underline;
+  /* Auditoria UX 2026-06-12: área de toque >= 44px sem alterar o layout
+     (padding compensado por margin negativa) */
+  display: inline-block;
+  padding: 13px 8px;
+  margin: -13px -8px;
 }
-/* ui-ux-pro-max: touch target mínimo 44px nos CTAs secundários */
-body#html-body.b2b-auth-shell .b2b-btn-register,
-body#html-body.b2b-auth-shell .b2b-btn-claim,
+body#html-body.b2b-auth-shell .b2b-btn-register {
+  min-height: 44px !important;
+  background: transparent !important;
+  border: 1px solid var(--awa-primary, #b73337) !important;
+  color: var(--awa-primary, #b73337) !important;
+  font-size: var(--b2b-auth-font-body) !important;
+  font-weight: 600 !important;
+}
+body#html-body.b2b-auth-shell .b2b-btn-claim {
+  min-height: 44px !important;
+  background: var(--awa-bg-surface, #fff) !important;
+  border: 1px solid var(--awa-color-border, #e5e5e5) !important;
+  color: var(--awa-text-primary, #333) !important;
+  font-size: var(--b2b-auth-font-body) !important;
+  font-weight: 600 !important;
+}
 body#html-body.b2b-auth-shell .b2b-login-whatsapp {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 44px !important;
+  padding: var(--b2b-auth-gap-sm) var(--b2b-auth-gap-lg) !important;
+  background: #117a6f !important;
+  border: 1px solid #117a6f !important;
+  color: #fff !important;
+  border-radius: var(--b2b-auth-radius-control, 8px) !important;
+  font-size: var(--b2b-auth-font-body) !important;
+  text-decoration: none !important;
+}
+body#html-body.b2b-auth-shell .b2b-login-whatsapp:hover,
+body#html-body.b2b-auth-shell .b2b-login-whatsapp:focus-visible {
+  background: #075e54 !important;
+  border-color: #075e54 !important;
+  color: #fff !important;
+}
+body#html-body.b2b-auth-shell.b2b-register-index .form-section[data-step] {
+  margin: 0 !important;
+  padding: var(--b2b-auth-gap-sm) 0 !important;
+  border: 0 !important;
+  border-top: 1px solid var(--awa-border-subtle, #eee) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+body#html-body.b2b-auth-shell.b2b-register-index .form-section[data-step]:first-of-type {
+  border-top: 0 !important;
+  padding-top: 0 !important;
+}
+body#html-body.b2b-auth-shell.b2b-register-index .form-section .form-section__toggle {
+  font-size: 0.9375rem !important;
+  gap: var(--b2b-auth-gap-sm) !important;
+  min-height: 44px !important;
+  padding-block: var(--b2b-auth-gap-sm) !important;
+}
+body#html-body.b2b-auth-shell.b2b-register-index .form-section .form-section__toggle::before {
+  width: 24px !important;
+  height: 24px !important;
+  box-shadow: none !important;
+  font-size: 11px !important;
+}
+body#html-body.b2b-auth-shell.b2b-register-index .b2b-register-container {
+  padding: 0 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+/* Cadastro B2B — inputs, progresso e navegação (1º paint) */
+body#html-body.b2b-auth-shell.b2b-register-index .b2b-register-form :is(input:not(#b2b_website), select, textarea) {
+  min-height: 44px !important;
+  padding: var(--b2b-auth-gap-sm) var(--b2b-auth-gap-md) !important;
+  font-size: max(15px, 0.9375rem) !important;
+  border-radius: 8px !important;
+  box-sizing: border-box !important;
+}
+body#html-body.b2b-auth-shell .b2b-field input {
+  padding-inline: var(--b2b-auth-gap-md) !important;
+}
+body#html-body.b2b-auth-shell.b2b-register-index .b2b-register-progress {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: var(--b2b-auth-gap-xs) !important;
+  margin: 0 !important;
+  padding: var(--b2b-auth-gap-xs) 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+}
+body#html-body.b2b-auth-shell.b2b-register-index .b2b-register-progress .progress-step__num {
+  width: 20px !important;
+  height: 20px !important;
+  min-width: 20px !important;
+  font-size: 10px !important;
+}
+/* Auditoria UX 2026-06-12: no mobile a etapa ativa ganha espaço extra
+   para exibir o rótulo sem truncar (fallback sem :has = rótulo com ellipsis) */
+@media (max-width: 575px) {
+  body#html-body.b2b-auth-shell.b2b-register-index .b2b-register-progress:has(.progress-step:nth-child(1).is-active) {
+    grid-template-columns: 2.2fr 1fr 1fr 1fr !important;
+  }
+  body#html-body.b2b-auth-shell.b2b-register-index .b2b-register-progress:has(.progress-step:nth-child(2).is-active) {
+    grid-template-columns: 1fr 2.2fr 1fr 1fr !important;
+  }
+  body#html-body.b2b-auth-shell.b2b-register-index .b2b-register-progress:has(.progress-step:nth-child(3).is-active) {
+    grid-template-columns: 1fr 1fr 2.2fr 1fr !important;
+  }
+  body#html-body.b2b-auth-shell.b2b-register-index .b2b-register-progress:has(.progress-step:nth-child(4).is-active) {
+    grid-template-columns: 1fr 1fr 1fr 2.2fr !important;
+  }
+}
+body#html-body.b2b-auth-shell.b2b-register-index .b2b-register-step-nav {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
+  gap: var(--b2b-auth-gap-sm) !important;
+  margin: 0 0 var(--b2b-auth-gap-sm) !important;
+  padding: 0 0 var(--b2b-auth-gap-sm) !important;
+  border-bottom: 1px solid var(--awa-border-subtle, #eee) !important;
+}
+body#html-body.b2b-auth-shell.b2b-register-index .b2b-register-page .field {
+  margin-bottom: 0 !important;
+}
+body#html-body.b2b-auth-shell.b2b-register-index .b2b-register-page .field .label {
+  margin-bottom: var(--b2b-auth-gap-xs) !important;
+  font-size: var(--b2b-auth-font-label) !important;
+}
+body#html-body.b2b-auth-shell.b2b-register-index .field-row:not(.field-row--ie) {
+  display: grid !important;
+  grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
+  gap: var(--b2b-auth-gap-md) !important;
+  align-items: end !important;
+}
+body#html-body.b2b-auth-shell.b2b-register-index .field-row--ie {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  gap: var(--b2b-auth-gap-md) !important;
+  align-items: end !important;
+}
+body#html-body.b2b-auth-shell.b2b-register-index .field-row--ie .field {
+  grid-column: auto !important;
+}
+body#html-body.b2b-auth-shell.b2b-register-index .field-row .field {
+  min-width: 0 !important;
+}
+body#html-body.b2b-auth-shell.b2b-register-index .field-row .field:not(.field-narrow):not(.field-wide):not(.field-uf) {
+  grid-column: span 6 !important;
+}
+body#html-body.b2b-auth-shell.b2b-register-index .field-row .field.field-wide {
+  grid-column: span 8 !important;
+}
+body#html-body.b2b-auth-shell.b2b-register-index .field-row .field.field-narrow {
+  grid-column: span 4 !important;
+}
+body#html-body.b2b-auth-shell.b2b-register-index .field-row--locality .field:not(.field-uf) {
+  grid-column: span 4 !important;
+}
+body#html-body.b2b-auth-shell.b2b-register-index .field-row--locality .field.field-uf {
+  grid-column: span 4 !important;
+}
+body#html-body.b2b-auth-shell.b2b-register-index .b2b-auth-card-head {
+  display: grid !important;
+  gap: var(--b2b-auth-gap-xs) !important;
+  margin: 0 !important;
+}
+body#html-body.b2b-auth-shell.b2b-register-index .b2b-register-container {
+  display: grid !important;
+  gap: var(--b2b-auth-gap-md) !important;
+}
+body#html-body.b2b-auth-shell.b2b-register-index #b2b-register-shell .b2b-login-divider,
+body#html-body.b2b-auth-shell.b2b-register-index #b2b-register-shell .b2b-register-secondary-ctas {
+  margin: 0 !important;
+  gap: var(--b2b-auth-gap-sm) !important;
+}
+body#html-body.b2b-auth-shell.b2b-register-index #b2b-register-shell .form-section[data-step] > h3 {
+  margin: 0 0 var(--b2b-auth-gap-sm) !important;
+  font-size: 0.9375rem !important;
+  font-weight: 600 !important;
+}
+body#html-body.b2b-auth-shell.b2b-register-index .b2b-register-step-indicator {
+  font-size: max(13px, 0.8125rem) !important;
+  line-height: 1.45 !important;
+}
+body#html-body.b2b-auth-shell.b2b-register-index .b2b-register-step-nav :is(button, .action) {
+  min-height: 44px !important;
+  min-width: 44px !important;
+  touch-action: manipulation !important;
+  border-radius: 8px !important;
+}
+body#html-body.b2b-auth-shell.b2b-register-index .b2b-register-password-toggle {
+  min-width: 44px !important;
   min-height: 44px !important;
 }
-@media (max-height: 820px) {
-  body#html-body.b2b-auth-shell .b2b-login-subtitle {
-    margin-bottom: 12px !important;
+body#html-body.b2b-auth-shell.b2b-register-index .b2b-register-form :is(input, select, button, a):focus-visible {
+  outline: 2px solid var(--awa-primary, #b73337) !important;
+  outline-offset: 2px !important;
+}
+
+/* Login — escala tipográfica 3 níveis (24 / 14 / 12 px, ratio 2:1) */
+body#html-body.b2b-auth-shell:not(.b2b-register-index) .b2b-login-title {
+  font-size: var(--b2b-auth-font-title) !important;
+}
+body#html-body.b2b-auth-shell:not(.b2b-register-index) :is(
+  .b2b-login-subtitle,
+  .b2b-field-label,
+  .b2b-login-forgot,
+  .b2b-login-forgot__text,
+  .b2b-login-divider span,
+  .b2b-btn-entrar,
+  .b2b-btn-register,
+  .b2b-btn-claim,
+  .b2b-login-whatsapp
+) {
+  font-size: var(--b2b-auth-font-body) !important;
+}
+body#html-body.b2b-auth-shell:not(.b2b-register-index) :is(
+  #b2b-login-user-note,
+  .b2b-field-note
+) {
+  font-size: 12px !important;
+  line-height: 1.4 !important;
+}
+body#html-body.b2b-auth-shell:not(.b2b-register-index) :is(
+  .b2b-login-card,
+  .b2b-password-wrap
+) {
+  overflow: visible !important;
+}
+
+@media (max-width: 767px) {
+  body#html-body.b2b-auth-shell .b2b-field input,
+  body#html-body.b2b-auth-shell #b2b-email,
+  body#html-body.b2b-auth-shell #b2b-pass {
+    font-size: 16px !important;
   }
-  body#html-body.b2b-auth-shell .b2b-login-trust {
-    margin-bottom: 12px !important;
+  body#html-body.b2b-auth-shell.b2b-register-index .b2b-register-form :is(input:not(#b2b_website), select, textarea) {
+    font-size: 16px !important;
   }
-  body#html-body.b2b-auth-shell .b2b-field-note {
-    display: none;
+  body#html-body.b2b-auth-shell:not(.b2b-register-index) .page-main {
+    min-height: calc(100dvh - env(safe-area-inset-bottom, 0px)) !important;
+    padding-bottom: calc(var(--b2b-auth-shell-pad-y) + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+@media (max-width: 575px) {
+  body#html-body.b2b-auth-shell.b2b-register-index .field-row:not(.field-row--ie) .field,
+  body#html-body.b2b-auth-shell.b2b-register-index .field-row:not(.field-row--ie) .field.field-narrow,
+  body#html-body.b2b-auth-shell.b2b-register-index .field-row:not(.field-row--ie) .field.field-wide,
+  body#html-body.b2b-auth-shell.b2b-register-index .field-row--locality .field {
+    grid-column: span 12 !important;
+  }
+  body#html-body.b2b-auth-shell.b2b-register-index .field-row--ie {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+/* Visual bugfix 2026-06-19: mantém touch targets reais no cadastro B2B.
+   !important é necessário porque bundles async de auth reduzem o stepper para
+   34px após o CSS crítico inicial. */
+@media (max-width: 768px) {
+  body#html-body.b2b-auth-shell.b2b-register-index
+    #b2b-register-shell
+    .b2b-register-progress {
+    gap: var(--b2b-auth-gap-sm, 8px) !important;
+  }
+
+  body#html-body.b2b-auth-shell.b2b-register-index
+    #b2b-register-shell
+    .b2b-register-progress
+    .progress-step {
+    align-items: center !important;
+    display: inline-flex !important;
+    justify-content: center !important;
+    min-height: var(--b2b-auth-touch, 44px) !important;
+    padding-block: var(--b2b-auth-gap-sm, 8px) !important;
+  }
+
+  body#html-body.b2b-auth-shell.b2b-register-index
+    #b2b-register-shell
+    .field.choice:has(#ie_isento) {
+    align-items: center !important;
+    min-height: var(--b2b-auth-touch, 44px) !important;
+  }
+
+  body#html-body.b2b-auth-shell.b2b-register-index
+    #b2b-register-shell
+    #ie_isento {
+    block-size: 20px !important;
+    inline-size: 20px !important;
+    min-inline-size: 20px !important;
   }
 }
 </style>
+<script>
+(function (d) {
+  var root = d.documentElement;
+  var body = d.getElementById('html-body') || d.body;
+  if (root) {
+    root.style.setProperty('margin', '0', 'important');
+    root.style.setProperty('padding', '0', 'important');
+    root.style.setProperty('background', '#ffffff', 'important');
+    root.style.setProperty('min-height', '100%', 'important');
+  }
+  if (body) {
+    body.style.setProperty('margin', '0', 'important');
+    body.style.setProperty('padding', '0', 'important');
+    body.style.setProperty('background', '#ffffff', 'important');
+    body.style.setProperty('min-height', '100%', 'important');
+  }
+  var main = d.getElementById('maincontent') || d.querySelector('main.page-main');
+  if (main && !main.hasAttribute('tabindex')) {
+    main.setAttribute('tabindex', '-1');
+  }
+}(document));
+</script>
+<script>
+(function (d, url) {
+  'use strict';
+  if (!url || d.querySelector('link[data-awa-cookie-consent-css="1"]')) {
+    return;
+  }
+  function load() {
+    var link = d.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = url;
+    link.media = 'all';
+    link.setAttribute('data-awa-cookie-consent-css', '1');
+    d.head.appendChild(link);
+  }
+  if ('requestIdleCallback' in window) {
+    requestIdleCallback(load, { timeout: 2000 });
+  } else {
+    setTimeout(load, 600);
+  }
+}(document, <?= /* @noEscape */ $cookieFixUrlJson ?>));
+</script>
