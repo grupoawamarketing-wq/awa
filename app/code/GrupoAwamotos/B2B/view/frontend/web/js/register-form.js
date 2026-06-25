@@ -25,19 +25,27 @@ define([
         var $form = $(element);
         var $container = $form.closest('.b2b-register-container');
         let cnpjValidateUrl = options.cnpjValidateUrl || '';
+        let cepLookupUrl = options.cepLookupUrl || '';
         let loginUrl = options.loginUrl || '';
         let sendingLabel = options.sendingLabel || 'Enviando cadastro...';
         let leadStorageKey = options.leadStorageKey || 'b2b_register_lead_fired';
         let leadEventName = options.leadEventName || 'Lead';
+        let passwordMinLength = parseInt(options.passwordMinLength, 10) || 8;
+        let passwordMinClasses = parseInt(options.passwordMinClasses, 10) || 3;
+        let stepBackLabel = options.stepBackLabel || 'Voltar';
+        let stepContinueLabel = options.stepContinueLabel || 'Continuar';
+        let stepFinalHint = options.stepFinalHint || 'Revise e envie';
+        let totalSteps = parseInt(options.totalSteps, 10) || 4;
 
         let cnpjTimer = null;
+        let cepLookupTimer = null;
         let lastCnpj = '';
         let cnpjValidated = false;
         let rateLimitTimer = null;
         let erpEmailFull = null;
         let erpEmailMasked = null;
         let currentProgressStep = 1;
-        let benefitsViewportMedia = window.matchMedia ? window.matchMedia('(max-width: 600px)') : null;
+        let benefitsViewportMedia = window.matchMedia ? window.matchMedia('(max-width: 768px)') : null;
         let lastBenefitsCompactMode = null;
         let lastSectionsCompactMode = null;
         let progressSyncScheduled = false;
@@ -53,6 +61,10 @@ define([
         var $benefitsToggle = $container.find('.b2b-benefits-toggle');
         var $benefitsPanel = $container.find('#b2b-register-benefits');
         var $passwordToggles = $form.find('[data-register-password-toggle]');
+        var $stepNav = $form.find('[data-register-step-nav]');
+        var $stepPrev = $stepNav.find('.b2b-register-step-prev');
+        var $stepNext = $stepNav.find('.b2b-register-step-next');
+        var $stepIndicator = $stepNav.find('.b2b-register-step-indicator__text');
 
         function $field(selector) {
             return $form.find(selector);
@@ -150,6 +162,7 @@ define([
             }
 
             $element.toggleClass('is-hidden', !!isHidden)
+                .toggleClass('is-expanded', !isHidden)
                 .attr('aria-hidden', isHidden ? 'true' : 'false');
 
             return $element;
@@ -202,7 +215,157 @@ define([
             });
 
             updateProgressCompletionState();
+            updateStepNav();
             scrollActiveProgressStepIntoView();
+        }
+
+        function getFormValidator() {
+            if (typeof $form.valid === 'function') {
+                return $form.validate();
+            }
+
+            return $form.data('validator') || null;
+        }
+
+        function validateStepFields(stepNumber, validationOptions) {
+            validationOptions = validationOptions || {};
+            var $section = $stepSections.filter('[data-step="' + stepNumber + '"]').first();
+            var valid = true;
+            var validator = getFormValidator();
+            let stepIndex = parseInt(stepNumber, 10);
+
+            if (!$section.length || !stepIndex) {
+                return false;
+            }
+
+            openStepSection($section, false, true);
+
+            $section.find('input, select, textarea').each(function () {
+                var $input = $(this);
+                let name = $input.attr('name') || '';
+
+                if (!$input.is(':visible') || $input.is(':disabled') || name === 'b2b_website') {
+                    return;
+                }
+
+                if (validator && typeof validator.element === 'function') {
+                    if (!validator.element(this)) {
+                        valid = false;
+                    }
+                    return;
+                }
+
+                if ($input.prop('required') && $.trim(String($input.val() || '')) === '') {
+                    valid = false;
+                }
+            });
+
+            if (stepIndex === 1) {
+                let cnpjDigits = ($field('#cnpj').val() || '').replace(/\D/g, '');
+
+                if (cnpjDigits.length === 14 && !cnpjValidated) {
+                    if (!validationOptions.silent) {
+                        setCnpjStatus('error', 'Aguarde a validação do CNPJ ou verifique o número informado.');
+                    }
+                    valid = false;
+                }
+            }
+
+            if (stepIndex === 4) {
+                let password = String($field('#password').val() || '');
+                let confirm = String($field('#password_confirmation').val() || '');
+
+                if (!isPasswordComplexEnough(password)) {
+                    valid = false;
+                }
+
+                if (confirm.length < passwordMinLength || password !== confirm) {
+                    valid = false;
+                }
+            }
+
+            if (!valid && !validationOptions.silent) {
+                refreshFieldAndSectionErrorStates();
+                announceValidationErrors();
+            }
+
+            return valid;
+        }
+
+        function updateStepNav() {
+            if (!$stepNav.length) {
+                return;
+            }
+
+            $stepPrev.prop('disabled', currentProgressStep <= 1);
+            $stepPrev.attr('aria-disabled', currentProgressStep <= 1 ? 'true' : 'false');
+
+            if ($stepIndicator.length) {
+                if (currentProgressStep >= totalSteps) {
+                    $stepIndicator.text(stepFinalHint);
+                } else {
+                    $stepIndicator.text('Etapa ' + currentProgressStep + ' de ' + totalSteps);
+                }
+            }
+
+            if (currentProgressStep >= totalSteps) {
+                $stepNext.addClass('is-hidden').attr('aria-hidden', 'true').prop('disabled', true);
+                $form.addClass('is-register-final-step');
+                $form.find('.terms-section, .actions-toolbar').removeAttr('hidden');
+            } else {
+                $stepNext.removeClass('is-hidden').attr('aria-hidden', 'false').prop('disabled', false);
+                $stepNext.find('span').text(stepContinueLabel);
+                $form.removeClass('is-register-final-step');
+                $form.find('.terms-section, .actions-toolbar').attr('hidden', 'hidden');
+            }
+        }
+
+        function initStepNavigation() {
+            if (!$stepNav.length) {
+                return;
+            }
+
+            $stepPrev.on('click', function (event) {
+                event.preventDefault();
+
+                if (currentProgressStep <= 1) {
+                    return;
+                }
+
+                goToStepSection(currentProgressStep - 1, true);
+                focusFirstFieldInSection($stepSections.filter('[data-step="' + currentProgressStep + '"]').first());
+            });
+
+            $stepNext.on('click', function (event) {
+                event.preventDefault();
+
+                if (currentProgressStep >= totalSteps) {
+                    return;
+                }
+
+                if (!validateStepFields(currentProgressStep)) {
+                    focusFirstInvalidField();
+                    return;
+                }
+
+                goToStepSection(currentProgressStep + 1, true);
+                focusFirstFieldInSection($stepSections.filter('[data-step="' + currentProgressStep + '"]').first());
+            });
+        }
+
+        function validateStepsBeforeTarget(targetStep) {
+            let step = currentProgressStep;
+
+            while (step < targetStep) {
+                if (!validateStepFields(step)) {
+                    goToStepSection(step, true);
+                    focusFirstInvalidField();
+                    return false;
+                }
+                step++;
+            }
+
+            return true;
         }
 
         function syncProgressFromFocus($target) {
@@ -248,7 +411,7 @@ define([
         }
 
         function isCompactBenefitsViewport() {
-            if (window.innerWidth <= 600) {
+            if (window.innerWidth <= 768) {
                 return true;
             }
 
@@ -310,7 +473,7 @@ define([
         function initStepSectionAccordionMarkup() {
             $stepSections.each(function (index) {
                 var $section = $(this);
-                var $heading = $section.children('h3').first();
+                var $heading = $section.children('h2, h3').first();
                 var $body;
                 var $toggle;
                 let headingText;
@@ -337,7 +500,7 @@ define([
                     'aria-hidden': 'false'
                 });
 
-                $section.children(':not(h3)').appendTo($body);
+                $section.children(':not(h2):not(h3)').appendTo($body);
                 $section.append($body);
 
                 $heading.addClass('form-section__heading').empty();
@@ -399,11 +562,6 @@ define([
                 return;
             }
 
-            if (!isCompactBenefitsViewport()) {
-                setStepSectionExpanded($section, true, animate);
-                return;
-            }
-
             if (typeof shouldCollapseSiblings === 'undefined') {
                 shouldCollapseSiblings = true;
             }
@@ -429,70 +587,83 @@ define([
 
         function syncStepSectionsDisclosure() {
             let compactMode = isCompactBenefitsViewport();
-            var $activeSection;
+            var $activeSection = $stepSections.filter('[data-step="' + currentProgressStep + '"]').first();
 
             if (!$stepSections.length) {
                 return;
             }
 
-            if (!compactMode) {
-                expandAllStepSections(false);
-                lastSectionsCompactMode = false;
-                return;
-            }
-
-            if (lastSectionsCompactMode === compactMode) {
-                return;
-            }
-
-            $activeSection = $stepSections.filter('[data-step="' + currentProgressStep + '"]').first();
             if (!$activeSection.length) {
                 $activeSection = $stepSections.first();
             }
 
-            openStepSection($activeSection, false, true);
-            lastSectionsCompactMode = true;
+            if (lastSectionsCompactMode !== compactMode || !$form.hasClass('accordion-initialized')) {
+                openStepSection($activeSection, false, true);
+                lastSectionsCompactMode = compactMode;
+                $form.addClass('accordion-initialized');
+            }
+        }
+
+        function goToStepSection(stepNumber, animate) {
+            var $section = $stepSections.filter('[data-step="' + stepNumber + '"]').first();
+
+            if (!$section.length) {
+                return;
+            }
+
+            setActiveProgressStep(stepNumber);
+            openStepSection($section, !!animate, true);
+            scrollToSection($section);
+        }
+
+        function initIeIsentoToggle() {
+            var $ieCheckbox = $field('#ie_isento');
+            var $ieInput = $field('#inscricao_estadual');
+            var $ieField = $form.find('.field-ie-input');
+
+            if (!$ieCheckbox.length || !$ieInput.length) {
+                return;
+            }
+
+            function syncIeIsentoState() {
+                let isExempt = $ieCheckbox.is(':checked');
+
+                $ieField.toggleClass('is-disabled', isExempt);
+                $ieInput.prop('disabled', isExempt);
+
+                if (isExempt) {
+                    $ieInput.val('');
+                }
+            }
+
+            $ieCheckbox.on('change', syncIeIsentoState);
+            syncIeIsentoState();
         }
 
         function syncProgressFromViewport() {
-            let probeTop;
-            let detectedStep = 1;
-
-            if (!$stepSections.length) {
-                return;
-            }
-
-            probeTop = (window.pageYOffset || document.documentElement.scrollTop || 0) + (isCompactBenefitsViewport() ? 120 : 180);
-
-            $stepSections.each(function () {
-                var $section = $(this);
-                let stepNumber = parseInt($section.data('step'), 10);
-                let sectionTop = $section.offset() ? $section.offset().top : 0;
-
-                if (stepNumber && sectionTop <= probeTop) {
-                    detectedStep = stepNumber;
-                }
-            });
-
-            if (detectedStep !== currentProgressStep) {
-                setActiveProgressStep(detectedStep);
-            }
+            // Acordeão por etapa: progresso é controlado pelo stepper e foco, não pelo scroll.
         }
 
         function scheduleProgressViewportSync() {
-            if (progressSyncScheduled) {
-                return;
-            }
-
-            progressSyncScheduled = true;
-            window.requestAnimationFrame(function () {
-                progressSyncScheduled = false;
-                syncProgressFromViewport();
-            });
+            // noop — scroll sync desativado com acordeão em todos os breakpoints
         }
 
         function fieldHasValue(selector) {
             return $.trim(String($field(selector).val() || '')) !== '';
+        }
+
+        function getPasswordClassCount(password) {
+            let classes = 0;
+            if (/[a-z]/.test(password)) { classes++; }
+            if (/[A-Z]/.test(password)) { classes++; }
+            if (/[0-9]/.test(password)) { classes++; }
+            if (/[^a-zA-Z0-9]/.test(password)) { classes++; }
+            return classes;
+        }
+
+        function isPasswordComplexEnough(password) {
+            return String(password || '').length >= passwordMinLength
+                && getPasswordClassCount(String(password || '')) >= passwordMinClasses;
         }
 
         function isStepComplete(stepIndex) {
@@ -516,7 +687,9 @@ define([
             if (stepIndex === 4) {
                 let password = String($field('#password').val() || '');
                 let confirm = String($field('#password_confirmation').val() || '');
-                return password.length >= 8 && confirm.length >= 8 && password === confirm;
+                return isPasswordComplexEnough(password)
+                    && confirm.length >= passwordMinLength
+                    && password === confirm;
             }
 
             return false;
@@ -550,6 +723,10 @@ define([
                 let hasErrors = $section.find('.field._error, .mage-error:visible').length > 0;
                 $section.toggleClass('has-errors', hasErrors);
             });
+
+            if (!$form.find('.field._error input, .field._error select, .field._error textarea').filter(':visible').length) {
+                announceFormStatus('');
+            }
         }
 
         function focusFirstFieldInSection($section) {
@@ -591,6 +768,50 @@ define([
             $('html, body').stop(true).animate({ scrollTop: topOffset }, 240);
         }
 
+        function announceFormStatus(message) {
+            var $region = $('#b2b-register-form-status');
+
+            if (!$region.length) {
+                return;
+            }
+
+            $region.text(message || '');
+        }
+
+        function getFieldLabel($input) {
+            var id = $input.attr('id');
+            var $label;
+
+            if (id) {
+                $label = $form.find('label[for="' + id + '"]');
+                if ($label.length) {
+                    return $.trim($label.text());
+                }
+            }
+
+            return $input.attr('title') || $input.attr('name') || 'Campo';
+        }
+
+        function announceValidationErrors() {
+            var $invalidFields = $form.find('.field._error input, .field._error select, .field._error textarea')
+                .filter(':visible');
+            var count = $invalidFields.length;
+            var firstLabel;
+
+            if (!count) {
+                return;
+            }
+
+            firstLabel = getFieldLabel($invalidFields.first());
+
+            if (count === 1) {
+                announceFormStatus('Revise o campo ' + firstLabel + '.');
+                return;
+            }
+
+            announceFormStatus(count + ' campos precisam de correção. Primeiro: ' + firstLabel + '.');
+        }
+
         function focusFirstInvalidField() {
             var $firstInvalid = $form.find('.field._error input, .field._error select, .field._error textarea')
                 .filter(':visible')
@@ -608,6 +829,7 @@ define([
 
             syncProgressFromFocus($firstInvalid);
             scrollToSection($invalidSection);
+            announceValidationErrors();
             window.setTimeout(function () {
                 $firstInvalid.trigger('focus');
             }, 60);
@@ -627,19 +849,25 @@ define([
         }
 
         function maskPhone(value) {
-            let masked = value.replace(/\D/g, '');
+            let digits = String(value).replace(/\D/g, '').substring(0, 11);
 
-            if (masked.length <= 11) {
-                if (masked.length > 2) {
-                    masked = '(' + masked.substring(0, 2) + ') ' + masked.substring(2);
-                }
-
-                if (masked.length > 10) {
-                    masked = masked.substring(0, 10) + '-' + masked.substring(10);
-                }
+            if (!digits.length) {
+                return '';
             }
 
-            return masked;
+            if (digits.length <= 2) {
+                return '(' + digits;
+            }
+
+            if (digits.length <= 6) {
+                return '(' + digits.substring(0, 2) + ') ' + digits.substring(2);
+            }
+
+            if (digits.length <= 10) {
+                return '(' + digits.substring(0, 2) + ') ' + digits.substring(2, 6) + '-' + digits.substring(6);
+            }
+
+            return '(' + digits.substring(0, 2) + ') ' + digits.substring(2, 7) + '-' + digits.substring(7);
         }
 
         function maskCep(value) {
@@ -652,38 +880,134 @@ define([
             return masked;
         }
 
-        function setCnpjStatus(type, message) {
+        function setCepLoading(isLoading) {
+            var $feedback = $('#cep-feedback');
+
+            if (!$feedback.length) {
+                return;
+            }
+
+            $feedback.toggleClass('is-visible', !!isLoading);
+            $feedback.text(isLoading ? 'Consultando CEP...' : '');
+        }
+
+        function lookupRegisterCep(cep) {
+            let clean = String(cep).replace(/\D/g, '');
+
+            if (clean.length !== 8 || !cepLookupUrl) {
+                return;
+            }
+
+            setCepLoading(true);
+
+            $.getJSON(cepLookupUrl, { cep: clean }).done(function (data) {
+                if (!data || !data.success) {
+                    return;
+                }
+
+                if (data.logradouro) {
+                    $field('#logradouro').val(data.logradouro).addClass('autofilled');
+                }
+
+                if (data.bairro) {
+                    $field('#bairro').val(data.bairro).addClass('autofilled');
+                }
+
+                if (data.localidade) {
+                    $field('#municipio').val(data.localidade).addClass('autofilled');
+                }
+
+                if (data.uf) {
+                    $field('#uf').val(data.uf).addClass('autofilled').trigger('change');
+                }
+
+                updateProgressCompletionState();
+                window.setTimeout(function () {
+                    $field('#numero').trigger('focus');
+                }, 60);
+            }).always(function () {
+                setCepLoading(false);
+            });
+        }
+
+        function normalizeClassSuffix(value) {
+            return String(value || '')
+                .toLowerCase()
+                .replace(/[^a-z0-9_-]+/g, '-')
+                .replace(/^-+|-+$/g, '') || 'indefinida';
+        }
+
+        function setCnpjStatus(type, message, options) {
             var $status = $field('#cnpj-status');
             var $feedback = $field('#cnpj-feedback');
+            var $message;
+
+            options = options || {};
 
             $status
                 .removeClass('status-loading status-success status-error')
                 .addClass('status-' + type);
+            $feedback.empty();
 
             if (type === 'loading') {
                 $status.html('<span class="cnpj-spinner"></span>');
-                showBlock($feedback.html('<span class="feedback-loading">Consultando Receita Federal...</span>'));
+                $message = $('<span/>', {
+                    class: 'feedback-loading',
+                    text: 'Consultando Receita Federal...'
+                });
+                showBlock($feedback.append($message));
                 refreshFieldAndSectionErrorStates();
                 return;
             }
 
             if (type === 'success') {
                 $status.html('<span class="cnpj-check">&#10003;</span>');
-                showBlock($feedback.html('<span class="feedback-success">' + message + '</span>'));
+                $message = $('<span/>', {
+                    class: 'feedback-success',
+                    text: message || 'CNPJ validado.'
+                });
+                showBlock($feedback.append($message));
                 refreshFieldAndSectionErrorStates();
                 return;
             }
 
             if (type === 'error') {
                 $status.html('<span class="cnpj-x">&#10007;</span>');
-                showBlock($feedback.html('<span class="feedback-error">' + message + '</span>'));
+                $message = $('<span/>', {
+                    class: 'feedback-error',
+                    text: message || 'Não foi possível validar este CNPJ.'
+                });
+
+                if (options.loginUrl) {
+                    $message.append(' ').append($('<a/>', {
+                        href: options.loginUrl,
+                        class: 'cnpj-login-link',
+                        text: 'Fazer login'
+                    }));
+                }
+
+                if (options.retry) {
+                    $message.append(' ').append($('<button/>', {
+                        type: 'button',
+                        class: 'cnpj-retry-btn',
+                        id: 'cnpj-force-refresh',
+                        text: 'Consultar novamente'
+                    }));
+                }
+
+                showBlock($feedback.append($message));
                 refreshFieldAndSectionErrorStates();
             }
         }
 
         function updateSubmitState() {
-            var $submit = $form.find('.actions-toolbar .action.submit.primary');
+            var $submit = $form.find('.actions-toolbar .create-b2b-account');
             let digits = ($field('#cnpj').val() || '').replace(/\D/g, '');
+
+            if ($form.data('isSubmitting')) {
+                $submit.prop('disabled', true).addClass('is-loading');
+                return;
+            }
 
             if (digits.length === 14 && !cnpjValidated) {
                 $submit.prop('disabled', true).addClass('cnpj-pending');
@@ -739,7 +1063,7 @@ define([
                     '<div class="erp-alert erp-alert-success">' +
                         '<span class="erp-alert-icon">' + alertIcons.check + '</span>' +
                         '<div class="erp-alert-content">' +
-                            '<strong>E-mail confirmado!</strong> Sua conta sera vinculada automaticamente.' +
+                            '<strong>E-mail confirmado!</strong> Sua conta será vinculada automaticamente.' +
                         '</div>' +
                     '</div>'
                 );
@@ -751,9 +1075,9 @@ define([
                 '<div class="erp-alert erp-alert-warning">' +
                     '<span class="erp-alert-icon">' + alertIcons.warning + '</span>' +
                     '<div class="erp-alert-content">' +
-                        '<strong>Atencao:</strong> O e-mail cadastrado no sistema e <strong>' + escapeHtml(erpEmailMasked) + '</strong>.<br>' +
-                        'O e-mail informado e diferente. Deseja continuar com <strong>' + escapeHtml(currentEmail) + '</strong>?<br>' +
-                        '<small>Se possivel, use o mesmo e-mail para vincular seu historico de compras.</small>' +
+                        '<strong>Atenção:</strong> O e-mail cadastrado no sistema é <strong>' + escapeHtml(erpEmailMasked) + '</strong>.<br>' +
+                        'O e-mail informado é diferente. Deseja continuar com <strong>' + escapeHtml(currentEmail) + '</strong>?<br>' +
+                        '<small>Se possível, use o mesmo e-mail para vincular seu histórico de compras.</small>' +
                     '</div>' +
                 '</div>'
             );
@@ -770,13 +1094,13 @@ define([
             let passwordConfirmation = $field('#password_confirmation').val() || '';
             var $alert = $field('#email-check-alert');
 
-            if (passwordConfirmation.length >= 8 && password === passwordConfirmation && isValidEmail(email)) {
+            if (passwordConfirmation.length >= passwordMinLength && password === passwordConfirmation && isValidEmail(email)) {
                 $alert.html(
                     '<div class="email-check-alert-box">' +
                         '<span class="email-check-alert-icon">' + alertIcons.warning + '</span>' +
                         '<div class="email-check-alert-content">' +
                             '<strong>Confirme seu e-mail antes de criar a conta:</strong><br>' +
-                            'A aprovacao e a recuperacao de senha serao enviadas para <strong>' + escapeHtml(email) + '</strong>.' +
+                            'A aprovação e a recuperação de senha serão enviadas para <strong>' + escapeHtml(email) + '</strong>.' +
                         '</div>' +
                     '</div>'
                 );
@@ -791,7 +1115,7 @@ define([
             let remaining = seconds;
             var $cnpj = $field('#cnpj');
 
-            setCnpjStatus('error', 'Muitas consultas. Aguarde <strong>' + remaining + 's</strong>...');
+            setCnpjStatus('error', 'Muitas consultas. Aguarde ' + remaining + 's...');
             $cnpj.prop('disabled', true);
 
             if (rateLimitTimer) {
@@ -805,7 +1129,7 @@ define([
                     clearInterval(rateLimitTimer);
                     rateLimitTimer = null;
                     $cnpj.prop('disabled', false);
-                    setCnpjStatus('error', 'Voce pode consultar novamente agora.');
+                    setCnpjStatus('error', 'Você pode consultar novamente agora.');
 
                     let digits = ($cnpj.val() || '').replace(/\D/g, '');
 
@@ -816,7 +1140,7 @@ define([
                     return;
                 }
 
-                setCnpjStatus('error', 'Muitas consultas. Aguarde <strong>' + remaining + 's</strong>...');
+                setCnpjStatus('error', 'Muitas consultas. Aguarde ' + remaining + 's...');
             }, 1000);
         }
 
@@ -853,7 +1177,8 @@ define([
                 if (response.cnpj_duplicate) {
                     setCnpjStatus(
                         'error',
-                        response.message + ' <a href="' + loginUrl + '" class="cnpj-login-link">Fazer login</a>'
+                        response.message || 'Este CNPJ já possui cadastro.',
+                        {loginUrl: loginUrl}
                     );
                     slideHide($companyData, 200);
                     cnpjValidated = false;
@@ -863,7 +1188,7 @@ define([
 
                 if (response.success) {
                     if (response.api_unavailable) {
-                        setCnpjStatus('success', 'CNPJ valido (API indisponivel, preencha manualmente).');
+                        setCnpjStatus('success', 'CNPJ válido (API indisponível, preencha manualmente).');
                         slideHide($companyData, 200);
                         cnpjValidated = true;
                         updateSubmitState();
@@ -871,7 +1196,7 @@ define([
                         return;
                     }
 
-                    setCnpjStatus('success', 'CNPJ valido - Empresa ativa');
+                    setCnpjStatus('success', 'CNPJ válido, empresa ativa.');
                     cnpjValidated = true;
                     updateSubmitState();
                     updateProgressCompletionState();
@@ -888,7 +1213,7 @@ define([
                         $field('#cnpj-rf-telefone').text(response.telefone);
                         showBlock($field('#cnpj-rf-telefone-row'));
                     } else {
-                        $field('#cnpj-rf-telefone').text('Nao informado na RF');
+                        $field('#cnpj-rf-telefone').text('Não informado na RF');
                         showBlock($field('#cnpj-rf-telefone-row'));
                     }
 
@@ -896,7 +1221,7 @@ define([
                         $field('#cnpj-rf-email').text(response.email);
                         showBlock($field('#cnpj-rf-email-row'));
                     } else {
-                        $field('#cnpj-rf-email').text('Nao informado na RF');
+                        $field('#cnpj-rf-email').text('Não informado na RF');
                         showBlock($field('#cnpj-rf-email-row'));
                     }
 
@@ -943,7 +1268,7 @@ define([
                     if (response.situacao) {
                         $field('#cnpj-situacao')
                             .text(response.situacao)
-                            .attr('class', 'cnpj-situacao situacao-' + response.situacao.toLowerCase());
+                            .attr('class', 'cnpj-situacao situacao-' + normalizeClassSuffix(response.situacao));
                     }
 
                     if (response.atividade_principal) {
@@ -954,7 +1279,7 @@ define([
                         $badge = $field('#cnae-profile-badge');
                         $badge.text(response.cnae_profile_label)
                             .removeClass('cnae-direct cnae-adjacent')
-                            .addClass('cnae-' + response.cnae_profile)
+                            .addClass('cnae-' + normalizeClassSuffix(response.cnae_profile))
                             .removeClass('is-hidden')
                             .attr('aria-hidden', 'false')
                             .show();
@@ -963,6 +1288,12 @@ define([
                     }
 
                     slideShow($companyData, 300);
+
+                    if (response.cep || response.logradouro) {
+                        window.setTimeout(function () {
+                            goToStepSection(2, true);
+                        }, 320);
+                    }
 
                     erpEmailFull = null;
                     erpEmailMasked = null;
@@ -977,21 +1308,24 @@ define([
                     return;
                 }
 
-                errorMsg = response.message || 'CNPJ invalido';
-
-                if (response.situacao && response.situacao.toUpperCase() !== 'ATIVA') {
-                    errorMsg += ' <button type="button" class="cnpj-retry-btn" id="cnpj-force-refresh">' +
-                        'Consultar novamente (dados podem estar desatualizados)</button>';
-                }
-
-                setCnpjStatus('error', errorMsg);
+                errorMsg = response.message || 'CNPJ inválido';
+                setCnpjStatus('error', errorMsg, {
+                    retry: response.situacao && response.situacao.toUpperCase() !== 'ATIVA'
+                });
                 slideHide($companyData, 200);
                 cnpjValidated = false;
                 updateSubmitState();
                 updateProgressCompletionState();
                 refreshFieldAndSectionErrorStates();
-            }).fail(function () {
-                setCnpjStatus('error', 'Erro ao consultar. Tente novamente.');
+            }).fail(function (jqXHR) {
+                if (jqXHR && jqXHR.status === 429) {
+                    startRateLimitCountdown(60);
+                    return;
+                }
+
+                setCnpjStatus('error', 'Erro ao consultar. Verifique sua conexão e tente novamente.', {
+                    retry: true
+                });
                 cnpjValidated = false;
                 updateSubmitState();
                 updateProgressCompletionState();
@@ -1031,7 +1365,22 @@ define([
 
         $field('#cep').on('input', function () {
             var $input = $(this);
+            let digits;
+
             $input.val(maskCep($input.val() || ''));
+            digits = ($input.val() || '').replace(/\D/g, '');
+
+            clearTimeout(cepLookupTimer);
+
+            if (digits.length === 8) {
+                cepLookupTimer = window.setTimeout(function () {
+                    lookupRegisterCep(digits);
+                }, 400);
+            }
+        });
+
+        $field('#cep').on('blur', function () {
+            lookupRegisterCep($(this).val() || '');
         });
 
         $field('#email').on('input blur', function () {
@@ -1063,10 +1412,15 @@ define([
             let targetSelector = $step.attr('data-step-target');
             let stepNumber = $step.attr('data-step-number');
             var $section = targetSelector ? $form.find(targetSelector) : $();
+            let targetStep = parseInt(stepNumber, 10) || 0;
 
             event.preventDefault();
 
-            if (!$section.length) {
+            if (!$section.length || !targetStep) {
+                return;
+            }
+
+            if (targetStep > currentProgressStep && !validateStepsBeforeTarget(targetStep)) {
                 return;
             }
 
@@ -1080,15 +1434,21 @@ define([
             var $toggle = $(this);
             var $section = $toggle.closest('.form-section');
             let stepNumber = parseInt($section.data('step'), 10);
+            let isExpanded = $toggle.attr('aria-expanded') === 'true';
 
             event.preventDefault();
 
-            if (!$section.length || !isCompactBenefitsViewport()) {
+            if (!$section.length) {
                 return;
             }
 
             if (stepNumber) {
                 setActiveProgressStep(stepNumber);
+            }
+
+            if (isExpanded) {
+                setStepSectionExpanded($section, false, true);
+                return;
             }
 
             openStepSection($section, true, true);
@@ -1132,7 +1492,10 @@ define([
             }
         }
 
-        $(window).on('scroll.b2bRegisterProgress resize.b2bRegisterProgress', scheduleProgressViewportSync);
+        $(window).on('resize.b2bRegisterAccordion', function () {
+            syncBenefitsDisclosure();
+            syncStepSectionsDisclosure();
+        });
 
         $(document)
             .off('click.b2bRegisterForceRefresh', '#cnpj-force-refresh')
@@ -1159,9 +1522,9 @@ define([
                 return false;
             }
 
-            if (isCompactBenefitsViewport()) {
-                expandAllStepSections(false);
-            }
+            expandAllStepSections(false);
+            $form.addClass('is-register-final-step');
+            $form.find('.terms-section, .actions-toolbar').removeAttr('hidden');
 
             if (typeof $form.validation === 'function' && !$form.validation('isValid')) {
                 event.preventDefault();
@@ -1173,28 +1536,30 @@ define([
             }
 
             $form.data('isSubmitting', true).addClass('is-submitting');
-            $submitButton = $form.find('.actions-toolbar .action.submit.primary');
-            $submitButton.addClass('is-loading').prop('disabled', true);
+            $form.attr('aria-busy', 'true');
+            announceFormStatus('Enviando cadastro. Aguarde.');
+            $submitButton = $form.find('.actions-toolbar .create-b2b-account');
+            $submitButton.addClass('is-loading').prop('disabled', true).attr('aria-busy', 'true');
             $submitButton.find('span').text(sendingLabel);
 
             return true;
         });
 
-        window.setTimeout(function () {
-            $form.find('.benefit-item').each(function () {
-                $(this).addClass('benefit-animate');
-            });
-        }, 100);
-
         function getPasswordStrength(password) {
-            let classes = 0;
-            if (/[a-z]/.test(password)) { classes++; }
-            if (/[A-Z]/.test(password)) { classes++; }
-            if (/[0-9]/.test(password)) { classes++; }
-            if (/[^a-zA-Z0-9]/.test(password)) { classes++; }
-            if (password.length === 0) { return ''; }
-            if (password.length < 8 || classes < 2) { return 'weak'; }
-            if (password.length < 12 || classes < 3) { return 'medium'; }
+            let classes = getPasswordClassCount(password);
+
+            if (password.length === 0) {
+                return '';
+            }
+
+            if (password.length < passwordMinLength || classes < passwordMinClasses) {
+                return 'weak';
+            }
+
+            if (password.length < 10) {
+                return 'medium';
+            }
+
             return 'strong';
         }
 
@@ -1202,7 +1567,7 @@ define([
             var $meter = $field('#password-strength-meter');
             var $label = $field('#password-strength-label');
             if (!$meter.length) { return; }
-            let strengthLabels = { weak: 'Fraca', medium: 'M\u00e9dia', strong: 'Forte' };
+            let strengthLabels = { weak: 'Fraca', medium: 'Média', strong: 'Forte' };
             $field('#password').on('input.strengthMeter', function () {
                 let strength = getPasswordStrength(String($(this).val() || ''));
                 $meter.removeClass('is-weak is-medium is-strong');
@@ -1221,6 +1586,8 @@ define([
         $stepSections.css('display', '');
         initRegisterPasswordToggles();
         initPasswordStrengthMeter();
+        initIeIsentoToggle();
+        initStepNavigation();
         setActiveProgressStep(1);
         syncBenefitsDisclosure();
         syncStepSectionsDisclosure();
@@ -1229,5 +1596,13 @@ define([
         updateProgressCompletionState();
         refreshFieldAndSectionErrorStates();
         scheduleProgressViewportSync();
+
+        let initialCnpjDigits = ($field('#cnpj').val() || '').replace(/\D/g, '');
+        if (initialCnpjDigits.length === 14) {
+            lastCnpj = initialCnpjDigits;
+            consultarCnpj(initialCnpjDigits);
+        }
+
+        $form.addClass('is-ready');
     };
 });
