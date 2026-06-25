@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace GrupoAwamotos\Theme\Plugin\Response;
 
 use GrupoAwamotos\Theme\Model\HeaderImpeccableCascadeLockCss;
-use Magento\Framework\App\Request\Http as HttpRequest;
+use Magento\Framework\App\Request\Http\Proxy as HttpRequestProxy;
 use Magento\Framework\App\Response\HttpInterface;
 
 /**
@@ -16,8 +16,9 @@ class OptimizeHeadStylesPlugin
     private const HOME_ACTION = 'cms_index_index';
     private const HOME_DENSITY_GRID_FILE = 'awa-home-density-grid-20260611.min.css';
     private const HOME_DENSITY_GRID_QUERY = '?v=20260623-shell1280-r20';
-    private const CATALOG_DENSITY_GRID_FILE = 'awa-catalog-density-grid-20260611.min.css';
-    private const CATALOG_DENSITY_GRID_QUERY = '?v=20260611a';
+    // MORTO: awa-catalog-density-grid-20260611.min.css → _deprecated/
+    private const CATALOG_DENSITY_GRID_FILE = '';
+    private const CATALOG_DENSITY_GRID_QUERY = '';
 
     /** PLP/busca/PDP: stack dedicado §89–§94 — omitir terminal Impeccable (~183KB). */
     private const CATALOG_STACK_ACTIONS = [
@@ -66,7 +67,7 @@ class OptimizeHeadStylesPlugin
 
     /** Menu v2 — inline critical cobre mobile drawer + preflight dept; folha completa async. */
     private const MENU_DEFER_CSS_FRAGMENTS = [
-        'awa-menu-v2-dept-open-fix',
+        // MORTO: 'awa-menu-v2-dept-open-fix' → _deprecated/
     ];
 
     /** PLP/busca — grid/hero no inline lock + head-preload critical; polish async. */
@@ -87,7 +88,7 @@ class OptimizeHeadStylesPlugin
     /** Carrinho: stack dedicado (critical + terminal + polish async); omitir refine global (~42KB). */
     private const CART_STRIP_CSS_FRAGMENTS = [
         'awa-ui-promax-bundle.min.css',
-        'awa-ui-promax-bundle.css',
+        // MORTO: 'awa-ui-promax-bundle.css' → _deprecated/
         'awa-commerce-impeccable-refine',
         'awa-focus-visible',
     ];
@@ -99,7 +100,7 @@ class OptimizeHeadStylesPlugin
         'awa-commerce-impeccable-refine',
         'awa-ui-ux-pro-max-header',
         'awa-structural-fix-2026-05-20',
-        'awa-responsive-guard',
+        // MORTO: 'awa-responsive-guard' → _deprecated/
         'custom_default.css',
         'styles-m.css',
         'styles-l.css',
@@ -137,25 +138,21 @@ class OptimizeHeadStylesPlugin
         'awa-visual-audit-2026-05-18.css',
         'awa-impeccable-audit-2026-05-28.min.css',
         'awa-impeccable-audit-2026-05-28.css',
-        'awa-homepage-hierarchy.min.css',
-        'awa-home-cosmetic-bundle.min.css',
-        'awa-home-flex-final.min.css',
+        // MORTO: 'awa-homepage-hierarchy.min.css' → _deprecated/
+        // MORTO: 'awa-home-cosmetic-bundle.min.css' → _deprecated/
+        // MORTO: 'awa-home-flex-final.min.css' → _deprecated/
         'awa-home-flex-grid-flow.min.css',
-        'awa-home-modernize-2026.min.css',
-        'awa-home-b2b-density-terminal.min.css',
-        'awa-head-preload-home-ext.min.css',
+        // MORTO: 'awa-home-modernize-2026.min.css' → _deprecated/
+        // MORTO: 'awa-home-b2b-density-terminal.min.css' → _deprecated/
+        // MORTO: 'awa-head-preload-home-ext.min.css' → _deprecated/
         'awa-head-tail-bundle.min.css',
-        'awa-home-gate-postaudit-bundle.min.css',
-        'awa-home-gate-postaudit-bundle.css',
-        'awa-home-gate-polish-bundle.min.css',
-        'awa-home-gate-polish-bundle.css',
-        'awa-home-gate-polish-cards.min.css',
-        'awa-home-gate-polish-cards.css',
-        'awa-home-gate-polish-type.min.css',
-        'awa-home-gate-polish-type.css',
+        // MORTO: 'awa-home-gate-postaudit-bundle' → _deprecated/ (Fase 4 Jun/24 — skip flag permanente)
+        // MORTO: 'awa-home-gate-polish-bundle' → _deprecated/ (Fase 4 Jun/24 — skip flag permanente)
+        // MORTO: 'awa-home-gate-polish-cards' → _deprecated/ (Fase 4 Jun/24 — skip flag permanente)
+        // MORTO: 'awa-home-gate-polish-type' → _deprecated/ (Fase 4 Jun/24 — skip flag permanente)
         'awa-defer-global-bundle',
-        'awa-grid-container-audit',
-        'awa-layout-grid-system',
+        // MORTO: 'awa-grid-container-audit' → _deprecated/
+        // MORTO: 'awa-layout-grid-system' → _deprecated/
         'awa-bundle-refinements',
         'awa-home-gate-visual-bundle',
         'awa-ui-simplify-terminal',
@@ -179,7 +176,7 @@ class OptimizeHeadStylesPlugin
     ];
 
     public function __construct(
-        private readonly HttpRequest $request,
+        private readonly HttpRequestProxy $request,
     ) {
     }
 
@@ -276,10 +273,12 @@ class OptimizeHeadStylesPlugin
             } elseif ($isB2bAccountFocusEarly) {
                 // Painel B2B: remove só cascade-lock global; não injeta home-light para não degradar a UI da conta.
                 $html = HeaderImpeccableCascadeLockCss::stripLegacyFromHtml($html);
-            } elseif (in_array($fullAction, self::CATALOG_STACK_ACTIONS, true)
-                || in_array($fullAction, self::CHECKOUT_FOCUS_ACTIONS, true)
-            ) {
-                // PLP/checkout: omitir cascade-lock do header (~170KB); footer leve separado.
+            } elseif (in_array($fullAction, self::CATALOG_STACK_ACTIONS, true)) {
+                // PLP/PDP/busca: injeta cascade lock v18 do header (BUG-01 fix).
+                // injectBeforeBodyClose faz strip de legado + injeta v18 + guard script.
+                $html = HeaderImpeccableCascadeLockCss::injectBeforeBodyClose($html);
+            } elseif (in_array($fullAction, self::CHECKOUT_FOCUS_ACTIONS, true)) {
+                // Checkout/carrinho: mantém sem guard para preservar o shell foco.
                 $html = HeaderImpeccableCascadeLockCss::stripLegacyFromHtml($html);
                 $html = HeaderImpeccableCascadeLockCss::injectFooterOnlyBeforeBodyClose($html);
             } else {
@@ -305,7 +304,11 @@ class OptimizeHeadStylesPlugin
             $html = $this->consolidateAlignGridToBodyTerminal($html, $fullAction);
             $html = $this->injectSiteShellInlineLock($html, $fullAction);
             $html = $this->injectAlignGridHeaderContainerTerminal($html);
+            $html = $this->injectHeaderSimplifyUiTerminalLock($html);
             $html = $this->injectMainContentSkipTargetTabindex($html);
+            if (in_array($fullAction, self::CATALOG_STACK_ACTIONS, true)) {
+                $html = HeaderImpeccableCascadeLockCss::injectCatalogParityBeforeBodyClose($html);
+            }
         } else {
             // Auth / painel B2B: critical inline define layout — omitir locks globais + folhas pesadas.
             $html = preg_replace('/<style id="awa-align-grid-inline-lock[^"]*"[^>]*>.*?<\/style>/s', '', $html) ?? $html;
@@ -326,6 +329,12 @@ class OptimizeHeadStylesPlugin
                 $subject->setHeader('X-Awa-Header-Optimize', 'v12-b2b-account', true);
             }
         }
+
+        $html = $this->stripRedundantAsyncNoscript($html);
+        $html = $this->stripStylePreloadDuplicates($html);
+        $html = $this->injectGlobalFocusVisibleFallback($html);
+        $html = $this->injectGlobalWebVitalsRum($html);
+
         $subject->setBody($html);
     }
 
@@ -422,6 +431,24 @@ class OptimizeHeadStylesPlugin
             . '</style>';
 
         $injected = preg_replace('/<\/body>/i', $css . "\n</body>", $html, 1);
+
+        return is_string($injected) ? $injected : $html;
+    }
+
+    /**
+     * Header UI simplify — style terminal após align-grid/header-container (10× #html-body vence home critical).
+     */
+    private function injectHeaderSimplifyUiTerminalLock(string $html): string
+    {
+        $styleId = HeaderImpeccableCascadeLockCss::HEADER_SIMPLIFY_UI_STYLE_ID;
+        $html = preg_replace('/<style id="' . preg_quote($styleId, '/') . '"[^>]*>.*?<\/style>/s', '', $html) ?? $html;
+
+        if (!HeaderImpeccableCascadeLockCss::htmlHasSiteHeader($html)) {
+            return $html;
+        }
+
+        $tag = HeaderImpeccableCascadeLockCss::headerSimplifyUiTerminalStyleTag();
+        $injected = preg_replace('/<\/body>/i', $tag . "\n</body>", $html, 1);
 
         return is_string($injected) ? $injected : $html;
     }
@@ -863,10 +890,38 @@ class OptimizeHeadStylesPlugin
             . 'padding-block:4px!important;padding-top:4px!important;padding-bottom:4px!important}'
             . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-index-index.page-layout-1column '
             . '.page-wrapper .awa-site-header #header.header-container{'
-            . 'box-sizing:border-box!important;height:34px!important;min-height:34px!important;max-height:34px!important;padding-bottom:2px!important}'
+            . 'box-sizing:border-box!important;height:44px!important;min-height:44px!important;max-height:44px!important;padding-bottom:0!important}'
             . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-index-index.page-layout-1column '
             . '.page-wrapper .awa-site-header #awa-b2b-promo-bar.awa-b2b-promo-bar{'
-            . 'background:var(--awa-primary)!important;background-color:var(--awa-primary)!important;box-sizing:border-box!important;color:var(--awa-on-primary,Canvas)!important;height:34px!important;min-height:34px!important;max-height:34px!important;padding-bottom:2px!important}'
+            . 'background:var(--awa-primary)!important;background-color:var(--awa-primary)!important;box-sizing:border-box!important;color:var(--awa-on-primary,Canvas)!important;height:44px!important;min-height:44px!important;max-height:44px!important;padding-bottom:0!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-index-index.page-layout-1column '
+            . '.page-wrapper .awa-site-header #awa-b2b-promo-bar :is(.awa-b2b-promo-bar__inner,.awa-b2b-promo-bar__layout){'
+            . 'height:44px!important;min-height:44px!important;max-height:44px!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-index-index.page-layout-1column '
+            . '.page-wrapper .awa-site-header #awa-b2b-promo-bar :is(.awa-b2b-promo-close,#awa-b2b-promo-close){'
+            . 'width:44px!important;min-width:44px!important;max-width:44px!important;height:44px!important;'
+            . 'min-height:44px!important;max-height:44px!important;display:inline-flex!important;align-items:center!important;'
+            . 'justify-content:center!important;color:inherit!important;background:transparent!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-index-index.page-layout-1column '
+            . '.page-wrapper .awa-site-header #awa-b2b-promo-bar .awa-b2b-promo-bar__cta{'
+            . 'color:inherit!important;min-height:44px!important;height:44px!important;max-height:44px!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-index-index.page-layout-1column '
+            . '.page-wrapper .awa-site-header #awa-b2b-promo-bar :is(.awa-b2b-promo-bar__text,.awa-b2b-promo-bar__lead,'
+            . '.awa-b2b-promo-bar__lead-long,.awa-b2b-promo-bar__tail,.awa-b2b-promo-bar__separator){'
+            . 'color:inherit!important}'
+            . '@media(min-width:768px) and (max-width:991px){'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-index-index.page-layout-1column '
+            . '.page-wrapper .awa-site-header .header-wrapper-sticky{display:flex!important;flex-direction:column!important;'
+            . 'height:auto!important;min-height:calc(56px + 48px)!important;max-height:none!important;overflow:visible!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-index-index.page-layout-1column '
+            . '.page-wrapper .awa-site-header :is(.header-control.header-nav,.header-control.awa-nav-bar){'
+            . 'display:flex!important;visibility:visible!important;height:48px!important;min-height:48px!important;'
+            . 'max-height:48px!important;overflow:visible!important;pointer-events:auto!important}}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-index-index.page-layout-1column '
+            . '.page-wrapper .awa-site-header .awa-header-account-prompt :is(.awa-header-account-prompt__link--login,'
+            . '.awa-header-account-prompt__link--register,.awa-header-account-prompt__link){'
+            . 'display:inline-flex!important;align-items:center!important;min-height:44px!important;height:44px!important;'
+            . 'box-sizing:border-box!important;line-height:1.2!important;padding:0 4px!important}'
             . '@media(min-width:768px){html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-index-index.page-layout-1column '
             . '.page-wrapper .awa-site-header #awa-b2b-promo-bar .awa-b2b-promo-bar__cta strong.awa-b2b-promo-bar__cta-long{'
             . 'color:var(--awa-on-primary,Canvas)!important;text-shadow:none!important}}'
@@ -912,29 +967,6 @@ class OptimizeHeadStylesPlugin
             . '.awa-site-header #search_mini_form #awa-search-clear.awa-search-clear-btn[hidden]{display:none!important;visibility:hidden!important}'
             . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper '
             . '.awa-site-header #search_mini_form #awa-search-clear.awa-search-clear-btn:not([hidden]){display:inline-flex!important;visibility:visible!important}'
-            . '@media(max-width:767px){html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body '
-            . '.page-wrapper header.awa-site-header .header-wrapper-sticky>div.header.awa-main-header[data-awa-header-main="true"]{'
-            . 'box-sizing:border-box!important;display:block!important;height:96px!important;min-height:96px!important;'
-            . 'max-height:96px!important;block-size:96px!important;min-block-size:96px!important;max-block-size:96px!important;'
-            . 'padding:0!important;margin:0!important;overflow:visible!important}'
-            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:not(.cms-index-index) '
-            . '.page-wrapper header.awa-site-header .header-wrapper-sticky{'
-            . 'box-sizing:border-box!important;height:96px!important;min-height:96px!important;max-height:96px!important;'
-            . 'padding:0!important;margin:0!important;overflow:visible!important}'
-            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body '
-            . '.page-wrapper header.awa-site-header .header-wrapper-sticky div.awa-main-header__inner.wp-header{'
-            . 'box-sizing:border-box!important;display:grid!important;grid-template:"toggle brand cart" 44px "search search search" 44px/44px minmax(0,1fr) 44px!important;'
-            . 'gap:4px 8px!important;height:96px!important;min-height:96px!important;max-height:96px!important;'
-            . 'padding:4px 16px 0!important;padding-block:4px 0!important;padding-inline:16px!important;'
-            . 'align-content:start!important;align-items:center!important;overflow:visible!important}'
-            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body '
-            . '.page-wrapper header.awa-site-header .header-wrapper-sticky :is(.awa-header-search-col,.block-search,.block-search .block-content){'
-            . 'box-sizing:border-box!important;height:44px!important;min-height:44px!important;max-height:44px!important;'
-            . 'padding:0!important;margin:0!important;overflow:visible!important}'
-            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body '
-            . '.page-wrapper header.awa-site-header .header-wrapper-sticky>.header-control.header-nav.awa-nav-bar[data-awa-header-nav="true"]{'
-            . 'display:none!important;visibility:hidden!important;height:0!important;min-height:0!important;max-height:0!important;'
-            . 'padding:0!important;margin:0!important;border:0!important;overflow:hidden!important}}'
             . '@layer awa-fixes{/* Required: legacy awa-fixes !important header rules beat unlayered terminal CSS. */'
             . '@media(max-width:767px){html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body '
             . '.page-wrapper header.awa-site-header .header-wrapper-sticky>div.header.awa-main-header[data-awa-header-main="true"]{'
@@ -1080,41 +1112,53 @@ class OptimizeHeadStylesPlugin
         $isHome = $fullAction === self::HOME_ACTION;
         $isCatalogDensity = in_array($fullAction, self::CATALOG_STACK_ACTIONS, true)
             || in_array($fullAction, self::CATALOG_HEADER_ACTIONS, true);
-        $homeDensityHref = '/static/' . $versionMatch[1]
-            . '/frontend/AWA_Custom/ayo_home5_child/pt_BR/css/'
-            . self::HOME_DENSITY_GRID_FILE
-            . self::HOME_DENSITY_GRID_QUERY;
-        $catalogDensityHref = '/static/' . $versionMatch[1]
-            . '/frontend/AWA_Custom/ayo_home5_child/pt_BR/css/'
-            . self::CATALOG_DENSITY_GRID_FILE
-            . self::CATALOG_DENSITY_GRID_QUERY;
+        $hasHomeDensityHref = self::HOME_DENSITY_GRID_FILE !== '';
+        $hasCatalogDensityHref = self::CATALOG_DENSITY_GRID_FILE !== '';
+        $homeDensityHref = $hasHomeDensityHref
+            ? '/static/' . $versionMatch[1]
+                . '/frontend/AWA_Custom/ayo_home5_child/pt_BR/css/'
+                . self::HOME_DENSITY_GRID_FILE
+                . self::HOME_DENSITY_GRID_QUERY
+            : '';
+        $catalogDensityHref = $hasCatalogDensityHref
+            ? '/static/' . $versionMatch[1]
+                . '/frontend/AWA_Custom/ayo_home5_child/pt_BR/css/'
+                . self::CATALOG_DENSITY_GRID_FILE
+                . self::CATALOG_DENSITY_GRID_QUERY
+            : '';
 
         if ($defer) {
             /* Home/PLP/busca: inline lock cobre container/grid no 1º paint — folha completa async */
-            $tag = '<link rel="preload" href="' . $href . '" as="style"/>'
-                . '<link rel="stylesheet" href="' . $href . '" media="print" onload="this.media=\'all\'"'
-                . ' data-awa-align-grid-body-terminal="1" data-awa-bundle="align-grid-terminal" data-awa-defer="1"/>'
-                . '<noscript><link rel="stylesheet" href="' . $href . '" media="all"'
-                . ' data-awa-align-grid-body-terminal="1" data-awa-bundle="align-grid-terminal"/></noscript>';
-            if ($isHome && !str_contains($html, 'data-awa-home-density-grid-body-terminal="1"')) {
-                $tag .= '<link rel="preload" href="' . $homeDensityHref . '" as="style"/>'
-                    . '<link rel="stylesheet" href="' . $homeDensityHref . '" media="print" onload="this.media=\'all\'"'
-                    . ' data-awa-home-density-grid-body-terminal="1" data-awa-bundle="home-density-grid" data-awa-defer="1"/>'
-                    . '<noscript><link rel="stylesheet" href="' . $homeDensityHref . '" media="all"'
-                    . ' data-awa-home-density-grid-body-terminal="1" data-awa-bundle="home-density-grid"/></noscript>';
+            $tag = '<link rel="stylesheet" href="' . $href . '" media="print" onload="this.media=\'all\'"'
+                . ' data-awa-align-grid-body-terminal="1" data-awa-bundle="align-grid-terminal" data-awa-defer="1"/>';
+            if ($hasHomeDensityHref
+                && $isHome
+                && !str_contains($html, 'data-awa-home-density-grid-body-terminal="1"')
+            ) {
+                $tag .= '<link rel="stylesheet" href="' . $homeDensityHref . '" media="print" onload="this.media=\'all\'"'
+                    . ' data-awa-home-density-grid-body-terminal="1" data-awa-bundle="home-density-grid" data-awa-defer="1"/>';
             }
-            if ($isCatalogDensity && !str_contains($html, 'data-awa-catalog-density-grid-body-terminal="1"')) {
+            if ($hasCatalogDensityHref
+                && $isCatalogDensity
+                && !str_contains($html, 'data-awa-catalog-density-grid-body-terminal="1"')
+            ) {
                 $tag .= '<link rel="stylesheet" href="' . $catalogDensityHref . '" media="all"'
                     . ' data-awa-catalog-density-grid-body-terminal="1" data-awa-bundle="catalog-density-grid"/>';
             }
         } else {
             $tag = '<link rel="stylesheet" href="' . $href . '" media="all"'
                 . ' data-awa-align-grid-body-terminal="1" data-awa-bundle="align-grid-terminal"/>';
-            if ($isHome && !str_contains($html, 'data-awa-home-density-grid-body-terminal="1"')) {
+            if ($hasHomeDensityHref
+                && $isHome
+                && !str_contains($html, 'data-awa-home-density-grid-body-terminal="1"')
+            ) {
                 $tag .= '<link rel="stylesheet" href="' . $homeDensityHref . '" media="all"'
                     . ' data-awa-home-density-grid-body-terminal="1" data-awa-bundle="home-density-grid"/>';
             }
-            if ($isCatalogDensity && !str_contains($html, 'data-awa-catalog-density-grid-body-terminal="1"')) {
+            if ($hasCatalogDensityHref
+                && $isCatalogDensity
+                && !str_contains($html, 'data-awa-catalog-density-grid-body-terminal="1"')
+            ) {
                 $tag .= '<link rel="stylesheet" href="' . $catalogDensityHref . '" media="all"'
                     . ' data-awa-catalog-density-grid-body-terminal="1" data-awa-bundle="catalog-density-grid"/>';
             }
@@ -1210,7 +1254,7 @@ class OptimizeHeadStylesPlugin
             'awa-header-home-light-lock-v1',
             'awa-home-first-paint-critical',
             'awa-bundle-async-distill-lock',
-            'awa-menu-v2-dept-open-fix',
+            // MORTO: 'awa-menu-v2-dept-open-fix' → _deprecated/
         ]);
     }
 
@@ -1495,8 +1539,8 @@ class OptimizeHeadStylesPlugin
     private function stripRedundantAsyncNoscript(string $html): string
     {
         $pattern = '/(<link\s(?=[^>]*rel=["\']stylesheet["\'])'
-            . '(?=[^>]*media=["\']print["\'])[^>]*href=(["\'])([^"\']+)\1[^>]*\/?>)'
-            . '\s*<noscript>\s*<link\s[^>]*href=\1\2\1[^>]*\/?>\s*<\/noscript>/i';
+            . '(?=[^>]*media=["\']print["\'])[^>]*href=(["\'])([^"\']+)\2[^>]*\/?>)'
+            . '\s*<noscript>\s*<link\s[^>]*href=\2\3\2[^>]*\/?>\s*<\/noscript>/i';
 
         $previous = null;
         while ($previous !== $html) {
@@ -1512,6 +1556,82 @@ class OptimizeHeadStylesPlugin
         $pattern = '/<noscript>\s*<link\s[^>]*rel=["\']stylesheet["\'][^>]*\/?>\s*<\/noscript>/i';
 
         return preg_replace($pattern, '', $html) ?? $html;
+    }
+
+
+    private function stripStylePreloadDuplicates(string $html): string
+    {
+        if (!preg_match_all('/<link\s[^>]*rel=["\']stylesheet["\'][^>]*href=(["\'])([^"\']+)\1[^>]*\/?>/i', $html, $stylesheetMatches)) {
+            return $html;
+        }
+
+        $stylesheetHrefs = [];
+        foreach ($stylesheetMatches[2] as $href) {
+            if (!is_string($href) || $href === '') {
+                continue;
+            }
+
+            $stylesheetHrefs[html_entity_decode($href, ENT_QUOTES | ENT_HTML5, 'UTF-8')] = true;
+        }
+
+        if ($stylesheetHrefs === []) {
+            return $html;
+        }
+
+        return preg_replace_callback(
+            '/<link\s(?=[^>]*rel=["\']preload["\'])(?=[^>]*as=["\']style["\'])[^>]*href=(["\'])([^"\']+)\1[^>]*\/?>\s*/i',
+            static function (array $matches) use ($stylesheetHrefs): string {
+                $href = html_entity_decode($matches[2] ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                if ($href !== '' && isset($stylesheetHrefs[$href])) {
+                    return '';
+                }
+
+                return $matches[0];
+            },
+            $html
+        ) ?? $html;
+    }
+
+    private function injectGlobalFocusVisibleFallback(string $html): string
+    {
+        if (str_contains($html, 'id="awa-focus-visible-global-guard"')) {
+            return $html;
+        }
+
+        $style = '<style id="awa-focus-visible-global-guard">'
+            . ':where(a,button,[role="button"],input,select,textarea,[tabindex]:not([tabindex="-1"])):focus-visible{outline:2px solid var(--awa-primary,#b73337)!important;outline-offset:2px!important}'
+            . '</style>';
+
+        $injected = preg_replace('/<\/head>/i', $style . "\n</head>", $html, 1);
+
+        return is_string($injected) ? $injected : $html;
+    }
+
+    private function injectGlobalWebVitalsRum(string $html): string
+    {
+        if (str_contains($html, 'id="awa-web-vitals-rum"')) {
+            return $html;
+        }
+
+        $script = '<script id="awa-web-vitals-rum">'
+            . '(function(w,d,p){"use strict";if(w.__awaWebVitalsRumInit){return;}w.__awaWebVitalsRumInit=1;'
+            . 'var s=(w.PerformanceObserver&&w.PerformanceObserver.supportedEntryTypes)?w.PerformanceObserver.supportedEntryTypes:[],sent={},cls=0,lcp=null,inp=0,inpSrc="event",path=(w.location&&w.location.pathname)?w.location.pathname:"/",low=(path||"").toLowerCase(),kind=(low==="/"||low==="/index.php")?"home":"internal",nav=(p&&typeof p.getEntriesByType==="function")?p.getEntriesByType("navigation")[0]:null,done=false;'
+            . 'function r(v,dg){var f;if(typeof v!=="number"||!isFinite(v)){return null;}f=Math.pow(10,dg||0);return Math.round(v*f)/f;}'
+            . 'function rate(n,v){if(n==="LCP"){return v<=2500?"good":(v<=4000?"needs-improvement":"poor");}if(n==="CLS"){return v<=0.1?"good":(v<=0.25?"needs-improvement":"poor");}if(n==="INP"){return v<=200?"good":(v<=500?"needs-improvement":"poor");}if(n==="FCP"){return v<=1800?"good":(v<=3000?"needs-improvement":"poor");}if(n==="TTFB"){return v<=800?"good":(v<=1800?"needs-improvement":"poor");}return "unknown";}'
+            . 'function push(n,v,e){var pld,val=r(v,n==="CLS"?4:0);if(val===null||sent[n]){return;}sent[n]=1;w.dataLayer=w.dataLayer||[];pld={event:"awa_web_vital",web_vital_name:n,web_vital_value:val,web_vital_rating:rate(n,val),web_vital_page_path:path,web_vital_page_kind:kind};if(e&&typeof e==="object"){if(e.id){pld.web_vital_id=e.id;}if(e.delta!==undefined&&e.delta!==null){pld.web_vital_delta=r(e.delta,n==="CLS"?4:0);}if(e.navigationType){pld.web_vital_navigation_type=e.navigationType;}if(e.source){pld.web_vital_source=e.source;}}try{w.dataLayer.push(pld);}catch(_){}}'
+            . 'function fin(){if(done){return;}done=true;if(lcp&&typeof lcp.startTime==="number"){push("LCP",lcp.startTime,{id:lcp.id});}push("CLS",cls);if(inp>0){push("INP",inp,{source:inpSrc});}}'
+            . 'if(nav&&typeof nav.responseStart==="number"){push("TTFB",nav.responseStart,{navigationType:nav.type||"navigate"});}'
+            . 'if(s.indexOf("paint")!==-1){try{(new w.PerformanceObserver(function(list){list.getEntries().forEach(function(en){if(en&&en.name==="first-contentful-paint"){push("FCP",en.startTime,{id:en.name});}});})).observe({type:"paint",buffered:true});}catch(_){}}'
+            . 'if(s.indexOf("largest-contentful-paint")!==-1){try{(new w.PerformanceObserver(function(list){var es=list.getEntries();if(es.length){lcp=es[es.length-1];}})).observe({type:"largest-contentful-paint",buffered:true});}catch(_){}}'
+            . 'if(s.indexOf("layout-shift")!==-1){try{(new w.PerformanceObserver(function(list){list.getEntries().forEach(function(en){if(en&&!en.hadRecentInput){cls+=en.value;}});})).observe({type:"layout-shift",buffered:true});}catch(_){}}'
+            . 'if(s.indexOf("event")!==-1){try{(new w.PerformanceObserver(function(list){list.getEntries().forEach(function(en){if(en&&en.interactionId&&en.duration>inp){inp=en.duration;}});})).observe({type:"event",buffered:true,durationThreshold:40});}catch(_){}}else if(s.indexOf("first-input")!==-1){inpSrc="first-input";try{(new w.PerformanceObserver(function(list){var fi=list.getEntries()[0];if(fi&&fi.duration>inp){inp=fi.duration;}})).observe({type:"first-input",buffered:true});}catch(_){}}'
+            . 'w.addEventListener("pagehide",fin,{capture:true,once:true});d.addEventListener("visibilitychange",function(){if(d.visibilityState==="hidden"){fin();}},{capture:true,once:true});w.addEventListener("load",function(){w.setTimeout(fin,15000);},{once:true});'
+            . '})(window,document,window.performance||null);'
+            . '</script>';
+
+        $injected = preg_replace('/<\/head>/i', $script . "\n</head>", $html, 1);
+
+        return is_string($injected) ? $injected : $html;
     }
 
     private function gateHomeLargeStylesheets(string $html): string
@@ -1789,4 +1909,6 @@ class OptimizeHeadStylesPlugin
             1
         ) ?? $html;
     }
+
 }
+
