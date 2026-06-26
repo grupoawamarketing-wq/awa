@@ -1,0 +1,187 @@
+// ============================================================================
+// AWA Motos — components/_menu.less
+// Fase 3B · Onda 1 — Menu Desktop + Nav Bar
+//
+// Melhora hover states, transições e indicador de item ativo.
+// Escopo: .awa-nav-bar (nav bar) e .awa-header-categories (vertical)
+// ============================================================================
+
+@import (once) '../_awa-variables';
+
+// ── Variáveis locais ──────────────────────────────────────────────────────────
+@c3-nav: ~'.header-control.awa-nav-bar';
+@c3-primary-nav: ~'.awa-header-primary-nav';
+@c3-categories: ~'.awa-header-categories';
+
+// ════════════════════════════════════════════════════════════════════════════
+// 1. NAV BAR CONTAINER — suave borda inferior separando header do conteúdo
+// ════════════════════════════════════════════════════════════════════════════
+@media (min-width: 992px) {
+    @{c3-nav} {
+        // Linha sutil abaixo do nav (opcional — ativada se o tema não tiver)
+        // border-bottom: 1px solid var(--awa-border, @awa-neutral-200);
+        // background-color: var(--awa-bg, #fff);
+    }
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// 2. MENU HORIZONTAL LINKS — transições (o :hover básico já existe no legado)
+// ════════════════════════════════════════════════════════════════════════════
+@media (min-width: 992px) {
+    // Evita interpolação de variável dentro de :is() — LESS não suporta
+    .header-control.awa-nav-bar .menu_primary .level0 > a,
+    .header-control.awa-nav-bar .awa-header-primary-nav .navigation li.level0 > a,
+    .header-control.awa-nav-bar .top-menu a.level-top,
+    .header-control.awa-nav-bar .awa-nav-quick-links__link,
+    .header-control.awa-nav-bar .awa-nav-quick-links__list a {
+        // Transição suave (não estava presente no legado)
+        transition:
+            color 130ms ease,
+            background-color 130ms ease;
+        position: relative;
+
+        // Indicador sublinhado ao hover (pseudo-element debaixo do link)
+        &::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background-color: var(--awa-primary, @awa-color-primary);
+            transform: translateX(-50%);
+            transition: width 180ms cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 2px 2px 0 0;
+        }
+
+        &:hover::after,
+        &:focus-visible::after {
+            width: calc(100% - 20px); // retrair ligeiramente nas bordas
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--awa-primary, @awa-color-primary);
+            outline-offset: -3px;
+            border-radius: 3px;
+        }
+    }
+
+    // Item ativo (página atual) — indicador permanente
+    // Expandido sem :is() — LESS não suporta interpolação de variável dentro de pseudo-função
+    @{c3-nav} .menu_primary .level0.active > a,
+    @{c3-nav} .menu_primary .level0.has-active > a,
+    .header-control.awa-nav-bar .awa-header-primary-nav .navigation li.level0.active > a,
+    .header-control.awa-nav-bar .awa-header-primary-nav .navigation li.level0.has-active > a {
+        // Override necessário: legado usa !important no color
+        // justificativa: indicar item ativo é requisito de usabilidade
+        color: var(--awa-primary, @awa-color-primary) !important;
+
+        &::after {
+            width: calc(100% - 20px);
+        }
+    }
+
+    // Dropdown aberto — sem mudança de cor extra (o ::after já indica)
+    @{c3-nav} .menu_primary .level0.open > a,
+    .header-control.awa-nav-bar .awa-header-primary-nav .navigation li.level0.open > a {
+        color: var(--awa-primary, @awa-color-primary) !important;
+    }
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// 3. MENU VERTICAL — categorias (awa-header-categories)
+// ════════════════════════════════════════════════════════════════════════════
+@media (min-width: 992px) {
+    @{c3-categories} {
+        // Botão "Categorias" / toggle do vertical menu
+        > a,
+        > button,
+        .awa-categories-toggle,
+        [data-awa-vertical-menu-toggle] {
+            transition: background-color 150ms ease, color 150ms ease;
+
+            &:hover {
+                // Override justificado: background transparente legado tem !important
+                background-color: var(--awa-primary-dark, @awa-color-primary-dark) !important;
+            }
+
+            &:focus-visible {
+                outline: 2px solid #fff;
+                outline-offset: -4px;
+            }
+        }
+    }
+
+    // Painel dropdown do menu vertical
+    .verticalmenu-popup,
+    .verticalmenu-dropdown,
+    [data-verticalmenu-panel] {
+        // Garante z-index consistente (não abaixo do minicart/sticky)
+        z-index: 10010;
+        border-radius: 0 0 @awa-radius-md @awa-radius-md;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    // Itens do menu vertical
+    .verticalmenu-popup li,
+    .verticalmenu-dropdown li {
+        > a {
+            transition: background-color 120ms ease, color 120ms ease;
+
+            &:hover {
+                color: var(--awa-primary, @awa-color-primary);
+                background-color: var(--awa-bg-hover, @awa-neutral-50);
+            }
+
+            &:focus-visible {
+                outline: 2px solid var(--awa-primary, @awa-color-primary);
+                outline-offset: -2px;
+            }
+        }
+    }
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// 4. QUICK LINKS — awa-nav-quick-links
+// ════════════════════════════════════════════════════════════════════════════
+@media (min-width: 992px) {
+    .awa-nav-quick-links {
+        // Separador visual entre nav e quick links
+        .awa-nav-quick-links__sep,
+        &::before {
+            content: '';
+            display: inline-block;
+            width: 1px;
+            height: 20px;
+            background-color: var(--awa-border, @awa-neutral-200);
+            margin: 0 4px;
+            align-self: center;
+        }
+    }
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// 5. SUBMENU DROPDOWN — level1 items
+// ════════════════════════════════════════════════════════════════════════════
+@media (min-width: 992px) {
+    // Dropdown painel
+    .navigation .level0.open > .submenu,
+    .navigation .level0:hover > .submenu {
+        border-top: 2px solid var(--awa-primary, @awa-color-primary);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.10);
+    }
+
+    // Itens de submenu
+    .navigation .level1 > a {
+        transition: color 100ms ease, background-color 100ms ease;
+
+        &:hover {
+            color: var(--awa-primary, @awa-color-primary);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--awa-primary, @awa-color-primary);
+            outline-offset: -2px;
+        }
+    }
+}

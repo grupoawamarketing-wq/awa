@@ -1,0 +1,265 @@
+// ============================================================================
+// AWA Motos — components/_mobile-header.less
+// Fase 3B · Onda 1 — Mobile Header
+//
+// Foco: melhorias específicas mobile/tablet no header.
+// O grid principal está em awa-header-mobile-grid-critical.min.css.
+// Este arquivo corrige bugs e adiciona polish mobile.
+//
+// BUG CRÍTICO CORRIGIDO:
+//   awa-header-mobile-grid-critical.min.css tem regra prefers-reduced-motion
+//   com valores NaN (animation-duration:NaNs) que o browser ignora.
+//   Esse arquivo sobrescreve com valores válidos.
+// ============================================================================
+
+@import (once) '../_awa-variables';
+
+// ════════════════════════════════════════════════════════════════════════════
+// 1. ACESSIBILIDADE — prefers-reduced-motion (corrige bug NaN no critical CSS)
+// ════════════════════════════════════════════════════════════════════════════
+@media (prefers-reduced-motion: reduce) {
+    .awa-site-header,
+    .awa-site-header *,
+    .awa-site-header *::before,
+    .awa-site-header *::after {
+        animation-duration: 0.001ms !important; // valor válido substitui NaN
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important; // valor válido substitui NaN
+        scroll-behavior: auto !important;
+    }
+
+    // Autocomplete dropdown — sem animação de entrada
+    .mst-searchautocomplete__autocomplete {
+        animation: none !important;
+        transition: none !important;
+    }
+
+    // Menu vertical — sem slide animation
+    .verticalmenu-popup,
+    .verticalmenu-dropdown,
+    [data-verticalmenu-panel] {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// 2. MOBILE (≤767px) — polimento geral
+// ════════════════════════════════════════════════════════════════════════════
+@media (max-width: 767px) {
+
+    // ── 2a. Header shell ───────────────────────────────────────────────────
+    .awa-site-header {
+        // safe-area-inset-top para notch (iPhone X+)
+        padding-top: env(safe-area-inset-top, 0px);
+    }
+
+    // ── 2b. Promo bar mobile ───────────────────────────────────────────────
+    .awa-site-header .awa-b2b-promo-bar {
+        // Garante texto legível no mobile (a cor vem da crítica, só cuidamos do padding)
+        padding-inline: max(12px, env(safe-area-inset-left, 0px))
+                        max(40px, calc(env(safe-area-inset-right, 0px) + 40px));
+        text-align: center;
+        // Botão fechar: posição absoluta no canto direito para não empurrar texto
+        position: relative;
+
+        .awa-b2b-promo-close,
+        [data-awa-promo-close],
+        button[data-action="close-promo"] {
+            position: absolute;
+            right: max(8px, env(safe-area-inset-right, 8px));
+            top: 50%;
+            transform: translateY(-50%);
+        }
+    }
+
+    // ── 2c. Hamburguer toggle ─────────────────────────────────────────────
+    .awa-site-header :is(.awa-header-mobile-toggle, .action.nav-toggle) {
+        // Touch target mínimo (já tem 44px na critical, só adicionamos feedback)
+        transition: background-color 100ms ease;
+        border-radius: @awa-radius-sm;
+
+        &:hover,
+        &:active {
+            background-color: var(--awa-bg-hover, @awa-neutral-100);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--awa-primary, @awa-color-primary);
+            outline-offset: 2px;
+        }
+
+        // Estado expandido (JS adiciona .active ou aria-expanded=true)
+        &[aria-expanded="true"],
+        &.is-open,
+        &.active {
+            background-color: var(--awa-primary-100, @awa-color-primary-100);
+            color: var(--awa-primary, @awa-color-primary);
+        }
+    }
+
+    // ── 2d. Cart link mobile ──────────────────────────────────────────────
+    .awa-site-header .awa-header-cart-link {
+        // Link de cart visível no header mobile (grid area: cart)
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        min-width: 44px;
+        min-height: 44px;
+        border-radius: @awa-radius-sm;
+        transition: background-color 100ms ease;
+
+        &:hover,
+        &:active {
+            background-color: var(--awa-bg-hover, @awa-neutral-100);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--awa-primary, @awa-color-primary);
+            outline-offset: 2px;
+        }
+    }
+
+    // ── 2e. Logo mobile — centralizado dentro da área brand ──────────────
+    .awa-site-header .awa-header-brand-cell .logo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 44px;
+
+        img {
+            max-height: 36px;
+            width: auto;
+            object-fit: contain;
+        }
+    }
+
+    // ── 2f. Search row — evita compressão do form ────────────────────────
+    .awa-site-header .awa-header-search-col {
+        // Overflow visible para autocomplete
+        overflow: visible;
+
+        input#search {
+            // iOS: font-size ≥16px evita zoom automático ao focar
+            font-size: 16px !important;
+            // Padding adequado para touch
+            padding-left: 12px !important;
+        }
+    }
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// 3. MOBILE — MENU DRAWER OVERLAY
+// ════════════════════════════════════════════════════════════════════════════
+@media (max-width: 767px) {
+
+    // Overlay escuro quando o menu mobile está aberto
+    // Magento adiciona .nav-open ao body quando o nav-toggle é clicado
+    body.nav-open {
+        // Previne scroll da página
+        overflow: hidden;
+
+        // Overlay semi-transparente
+        &::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: 100099; // abaixo do drawer mas acima do conteúdo
+            animation: awa-overlay-in 200ms ease forwards;
+        }
+    }
+
+    @keyframes awa-overlay-in {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        body.nav-open::before {
+            animation: none !important;
+        }
+    }
+
+    // Navigation drawer — panel mobile (Rokanthemes)
+    .nav-sections,
+    .nav-sections-item-title,
+    .navigation-block,
+    [data-role="navigation"] {
+        // Suaviza abertura/fechamento do drawer
+        transition: transform 250ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    // Links do menu mobile
+    .navigation .level0 a.level-top,
+    .navigation .level0 > a {
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+        padding: 0 16px;
+        border-bottom: 1px solid var(--awa-border, @awa-neutral-200);
+        transition: background-color 100ms ease, color 100ms ease;
+
+        &:hover,
+        &:focus-visible {
+            background-color: var(--awa-bg-hover, @awa-neutral-50);
+            color: var(--awa-primary, @awa-color-primary);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--awa-primary, @awa-color-primary);
+            outline-offset: -3px;
+        }
+    }
+
+    // Submenu mobile — nível 1
+    .navigation .level1 a {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        padding: 0 28px;
+        font-size: 13px;
+        border-bottom: 1px solid var(--awa-border-subtle, @awa-neutral-100);
+        transition: background-color 100ms ease;
+
+        &:hover {
+            background-color: var(--awa-bg-hover, @awa-neutral-50);
+        }
+    }
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// 4. TABLET (768–991px) — mobile toggle visível, ajustes de layout
+// ════════════════════════════════════════════════════════════════════════════
+@media (min-width: 768px) and (max-width: 991px) {
+
+    // Toggle visível no tablet também
+    .awa-site-header :is(.awa-header-mobile-toggle, .action.nav-toggle) {
+        display: inline-flex !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+        align-items: center;
+        justify-content: center;
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    // Account prompt e nav ocultos no tablet (só ícone de user no right-col)
+    .awa-site-header .awa-nav-quick-links {
+        // Quick links ficam ocultos no tablet
+        display: none !important;
+    }
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// 5. SAFE AREA — dispositivos com notch
+// ════════════════════════════════════════════════════════════════════════════
+@supports (padding-top: env(safe-area-inset-top)) {
+    .awa-site-header {
+        // O padding-top do site-header não pode ser afetado, então aplicamos no sticky wrapper
+        .header-wrapper-sticky {
+            padding-inline-start: max(0px, env(safe-area-inset-left));
+            padding-inline-end: max(0px, env(safe-area-inset-right));
+        }
+    }
+}

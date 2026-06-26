@@ -1,0 +1,245 @@
+// ============================================================================
+// AWA Motos — components/_search.less
+// Fase 3B · Onda 1 — Search Bar + Autocomplete
+//
+// Melhora os estados interativos da barra de busca e o dropdown Mirasvit.
+// O layout principal está em _awa-header-vtex-final-polish-2026-06-24.less
+// Este arquivo adiciona: transições, hover do autocomplete, a11y.
+// ============================================================================
+
+@import (once) '../_awa-variables';
+
+// Escopo principal: .awa-header-search-col (já no header.phtml)
+@c3-search: ~'.awa-header-search-col';
+
+// ════════════════════════════════════════════════════════════════════════════
+// 1. INPUT — placeholder, transição de borda, seleção
+// ════════════════════════════════════════════════════════════════════════════
+@{c3-search} input#search,
+@{c3-search} .block-search input[type="text"],
+@{c3-search} .minisearch input {
+    // Transição suave na borda já definida no focus-within do polish
+    // Adicionamos color de seleção de texto
+    &::selection {
+        background-color: fade(@awa-color-primary, 18%);
+        color: @awa-color-primary-dark;
+    }
+
+    &::-moz-selection {
+        background-color: fade(@awa-color-primary, 18%);
+        color: @awa-color-primary-dark;
+    }
+
+    // Placeholder styling — muted legível
+    &::placeholder {
+        color: var(--awa-text-muted, @awa-neutral-500);
+        opacity: 1; // Firefox
+        font-style: normal;
+        transition: opacity 150ms ease;
+    }
+
+    &:focus::placeholder {
+        opacity: 0.6;
+    }
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// 2. BOTÃO SEARCH — hover state (background primário)
+// ════════════════════════════════════════════════════════════════════════════
+@{c3-search} form button.action.search,
+@{c3-search} form .action.search {
+    transition:
+        background-color 140ms ease,
+        color 140ms ease,
+        transform 100ms ease;
+    cursor: pointer;
+
+    // Override justificado: o polish define fundo mas não tem :hover com transição
+    &:hover {
+        background-color: var(--awa-primary-dark, @awa-color-primary-dark) !important;
+    }
+
+    &:active {
+        transform: scale(0.96);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--awa-primary, @awa-color-primary);
+        outline-offset: -3px;
+    }
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// 3. MIRASVIT AUTOCOMPLETE — dropdown de sugestões
+// ════════════════════════════════════════════════════════════════════════════
+.mst-searchautocomplete__autocomplete {
+    // Z-index seguro (acima do header sticky, abaixo de modais)
+    z-index: 100050; // abaixo do nav overlay (100100+), acima do minicart (100130 está alto demais)
+    border-radius: 0 0 @awa-radius-md @awa-radius-md;
+    overflow: hidden;
+
+    &:not(:empty) {
+        animation: awa-search-dropdown-in 180ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+}
+
+@keyframes awa-search-dropdown-in {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+// ── 3a. Spinner ───────────────────────────────────────────────────────────
+.mst-searchautocomplete__spinner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    color: var(--awa-primary, @awa-color-primary);
+}
+
+// ── 3b. Resultados — itens individuais ───────────────────────────────────
+.mst-searchautocomplete__results {
+    // Scroll controlado para listas longas
+    max-height: 460px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+
+    // Scrollbar sutil (Chrome/Edge)
+    scrollbar-width: thin;
+    scrollbar-color: @awa-neutral-300 transparent;
+
+    &::-webkit-scrollbar {
+        width: 4px;
+    }
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    &::-webkit-scrollbar-thumb {
+        background-color: @awa-neutral-300;
+        border-radius: 4px;
+    }
+}
+
+// ── 3c. Título do índice ──────────────────────────────────────────────────
+.mst-searchautocomplete__index-title {
+    font-size: 11px;
+    font-weight: @awa-weight-semibold;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--awa-text-muted, @awa-neutral-500);
+    padding: 8px 12px 4px;
+    margin: 0;
+}
+
+// ── 3d. Item — hover state e focus-visible ────────────────────────────────
+.mst-searchautocomplete__item,
+.mst-searchautocomplete__results [data-bind*="click: setCurrentItem"] {
+    transition: background-color 100ms ease;
+    cursor: pointer;
+
+    &:hover,
+    &.mst-searchautocomplete__item--current {
+        background-color: var(--awa-bg-hover, @awa-neutral-50);
+    }
+
+    // Destaque da query dentro do resultado
+    strong,
+    em,
+    mark,
+    .mst-searchautocomplete__item-highlight {
+        color: var(--awa-primary, @awa-color-primary);
+        font-weight: @awa-weight-semibold;
+        font-style: normal;
+        background: none;
+    }
+}
+
+// ── 3e. "Ver todos os resultados" ─────────────────────────────────────────
+.mst-searchautocomplete__show-all {
+    border-top: 1px solid var(--awa-border, @awa-neutral-200);
+    text-align: center;
+    padding: 10px 12px;
+
+    a {
+        color: var(--awa-primary, @awa-color-primary);
+        font-weight: @awa-weight-semibold;
+        font-size: 13px;
+        text-decoration: none;
+        transition: color 120ms ease;
+
+        &:hover {
+            color: var(--awa-primary-dark, @awa-color-primary-dark);
+            text-decoration: underline;
+        }
+    }
+}
+
+// ── 3f. Sem resultados ────────────────────────────────────────────────────
+.mst-searchautocomplete__empty-result {
+    padding: 20px 12px;
+    text-align: center;
+    color: var(--awa-text-muted, @awa-neutral-500);
+    font-size: 13px;
+}
+
+// ── 3g. Botão fechar autocomplete ─────────────────────────────────────────
+.mst-searchautocomplete__close {
+    min-width: 32px;
+    min-height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: @awa-radius-sm;
+    cursor: pointer;
+    transition: background-color 120ms ease, color 120ms ease;
+    color: var(--awa-text-muted, @awa-neutral-500);
+
+    &:hover {
+        background-color: var(--awa-bg-hover, @awa-neutral-100);
+        color: var(--awa-text-primary, #333);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--awa-primary, @awa-color-primary);
+        outline-offset: 2px;
+    }
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// 4. MOBILE — busca no grid do header
+// ════════════════════════════════════════════════════════════════════════════
+@media (max-width: 767px) {
+    @{c3-search} {
+        // Garante que o search row seja plenamente visível no grid mobile
+        // O grid mobile é "toggle brand cart / search search search"
+        grid-area: search;
+
+        .block-search,
+        .minisearch,
+        form#search_mini_form {
+            display: flex !important;
+            align-items: center;
+            width: 100%;
+        }
+
+        input#search {
+            // Tamanho de fonte ≥16px no mobile previne zoom automático (iOS)
+            font-size: 16px !important;
+        }
+    }
+
+    // Autocomplete no mobile: posição fixada na viewport
+    .mst-searchautocomplete__autocomplete {
+        // Em mobile, o dropdown deve ocupar a largura total
+        width: calc(100vw - 16px);
+        max-width: calc(100vw - 16px);
+        left: 8px !important;
+        right: 8px !important;
+    }
+}
