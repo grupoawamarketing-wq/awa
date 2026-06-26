@@ -1,0 +1,34 @@
+--- a/src/Minifier.php
++++ b/src/Minifier.php
+@@ -294,22 +294,26 @@
+      */
+     private function minify($css)
+     {
++        // PHP 8.4 null guard: preg_replace_callback no longer accepts null subject
++        // Patch applied 2026-06 to fix deprecated Functionality warning on PHP 8.4
++        $css = (string)($css ?? '');
++
+         // Process data urls
+-        $css = $this->processDataUrls($css);
++        $css = (string)($this->processDataUrls($css) ?? '');
+ 
+         // Process comments
+-        $css = preg_replace_callback(
++        $css = (string)(preg_replace_callback(
+             '/(?<!\\\\)\/\*(.*?)\*(?<!\\\\)\//Ss',
+             array($this, 'processCommentsCallback'),
+             $css
+-        );
++        ) ?? '');
+ 
+         // IE7: Process Microsoft matrix filters (whitespaces between Matrix parameters). Can contain strings inside.
+-        $css = preg_replace_callback(
++        $css = (string)(preg_replace_callback(
+             '/filter:\s*progid:DXImageTransform\.Microsoft\.Matrix\(([^)]+)\)/Ss',
+             array($this, 'processOldIeSpecificMatrixDefinitionCallback'),
+             $css
+-        );
++        ) ?? '');
+ 
+         // Process quoted unquotable attribute selectors to unquote them. Covers most common cases.
+         // Likelyhood of a quoted attribute selector being a substring in a string: Very very low.
