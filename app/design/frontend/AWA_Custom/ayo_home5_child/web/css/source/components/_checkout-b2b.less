@@ -1,0 +1,447 @@
+// =============================================================================
+// Fase 3B — Onda 4: Carrinho + Login B2B Component Layer
+// Escopos: .checkout-cart-index, .checkout-index-index, .awa-b2b-login
+// Foco: gaps não cobertos pelos arquivos de fase anterior —
+//   carrinho vazio state, coupon feedback, totals visibilidade,
+//   B2B login form polish, status de aprovação, botão cotação.
+// Carregado APÓS o build legado → final-wins por ordem de documento.
+// =============================================================================
+
+@import (once) '../_awa-variables';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// § 1 — Carrinho vazio (estado zero itens)
+// Orienta o cliente visualmente para continuar comprando.
+// ─────────────────────────────────────────────────────────────────────────────
+.checkout-cart-index .page-wrapper {
+    .cart-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 60px 24px;
+        gap: 16px;
+
+        p {
+            font-size: var(--awa-text-base, 15px);
+            color: var(--awa-gray-700, #374151);
+            margin: 0;
+            max-width: 360px;
+        }
+
+        a.continue {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 12px 24px;
+            background: var(--awa-red, #b73337);
+            color: #fff;
+            border-radius: var(--awa-radius-sm, 8px);
+            font-size: var(--awa-text-sm, 13px);
+            font-weight: var(--awa-weight-semibold, 600);
+            text-decoration: none;
+            transition: background var(--awa-transition-fast, 150ms ease);
+
+            &:hover {
+                background: var(--awa-red-dark, #8e2629);
+            }
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// § 2 — Tabela do carrinho: espaçamento e legibilidade das linhas
+// Complementa _checkout.less que define fundo branco e estrutura geral.
+// ─────────────────────────────────────────────────────────────────────────────
+.checkout-cart-index .page-wrapper {
+    .cart.table-wrapper {
+        .col.item {
+            min-width: 200px;
+        }
+
+        .product-item-name a {
+            font-size: var(--awa-text-base, 15px);
+            font-weight: var(--awa-weight-semibold, 600);
+            color: var(--awa-black, #1a1a1a);
+            text-decoration: none;
+            line-height: 1.35;
+
+            &:hover {
+                color: var(--awa-red, #b73337);
+            }
+        }
+
+        .item-options {
+            font-size: var(--awa-text-xs, 11px);
+            color: var(--awa-gray-500, #6b7280);
+            margin-block-start: 4px;
+        }
+
+        // Qty input: tamanho touch-friendly
+        .field.qty input.qty {
+            width: 52px !important; // !important: override de especificidade do tema pai
+            height: 40px !important;
+            text-align: center;
+            border: 1px solid var(--awa-gray-200, #e5e7eb);
+            border-radius: var(--awa-radius-sm, 8px);
+            font-size: var(--awa-text-base, 15px);
+            font-weight: var(--awa-weight-semibold, 600);
+        }
+
+        .action.delete,
+        .action-delete {
+            color: var(--awa-gray-500, #6b7280);
+            transition: color var(--awa-transition-fast, 150ms ease);
+
+            &:hover {
+                color: var(--awa-red, #b73337);
+            }
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// § 3 — Totais do carrinho + botão de checkout
+// Hierarquia clara: subtotal → entrega → grand total.
+// ─────────────────────────────────────────────────────────────────────────────
+.checkout-cart-index .page-wrapper {
+    .cart-totals {
+        .mark {
+            font-size: var(--awa-text-sm, 13px);
+            color: var(--awa-gray-700, #374151);
+        }
+
+        .amount {
+            font-size: var(--awa-text-sm, 13px);
+            color: var(--awa-gray-700, #374151);
+            font-variant-numeric: tabular-nums;
+        }
+
+        // Grand total em destaque
+        tr.totals.grand.totals {
+            td,
+            th {
+                border-top: 2px solid var(--awa-gray-200, #e5e7eb);
+                padding-top: 12px;
+            }
+
+            .mark strong {
+                font-size: var(--awa-text-lg, 17px);
+                font-weight: var(--awa-weight-bold, 700);
+                color: var(--awa-black, #1a1a1a);
+            }
+
+            .amount .price {
+                font-size: var(--awa-text-xl, 20px);
+                font-weight: var(--awa-weight-bold, 700);
+                color: var(--awa-black, #1a1a1a);
+                font-variant-numeric: tabular-nums;
+            }
+        }
+    }
+
+    // Botão "Ir para o Checkout"
+    .checkout-methods-items .action.primary.checkout {
+        width: 100%;
+        padding: 14px 20px;
+        font-size: var(--awa-text-base, 15px);
+        font-weight: var(--awa-weight-bold, 700);
+        border-radius: var(--awa-radius-sm, 8px);
+        background: var(--awa-red, #b73337);
+        border-color: var(--awa-red, #b73337);
+        color: #fff;
+        transition: background var(--awa-transition-fast, 150ms ease),
+                    transform 100ms ease;
+
+        &:hover {
+            background: var(--awa-red-dark, #8e2629);
+            border-color: var(--awa-red-dark, #8e2629);
+        }
+
+        &:active {
+            transform: scale(0.98);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--awa-red, #b73337);
+            outline-offset: 3px;
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// § 4 — Feedback do cupom de desconto
+// Mensagem de sucesso/erro ao aplicar cupom.
+// ─────────────────────────────────────────────────────────────────────────────
+.checkout-cart-index .page-wrapper {
+    .cart-discount {
+        .fieldset.coupon {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+
+            .field {
+                flex: 1;
+
+                label.label {
+                    font-size: var(--awa-text-sm, 13px);
+                    font-weight: var(--awa-weight-medium, 500);
+                    color: var(--awa-gray-700, #374151);
+                }
+
+                input#coupon_code {
+                    height: 44px;
+                    border-radius: var(--awa-radius-sm, 8px);
+                    border: 1px solid var(--awa-gray-200, #e5e7eb);
+                    font-size: var(--awa-text-sm, 13px);
+                    padding: 0 12px;
+                    width: 100%;
+                    transition: border-color var(--awa-transition-fast, 150ms ease);
+
+                    &:focus {
+                        border-color: var(--awa-red, #b73337);
+                        outline: none;
+                        box-shadow: 0 0 0 3px rgba(183, 51, 55, 0.12);
+                    }
+                }
+            }
+
+            .action.apply.primary {
+                height: 44px;
+                padding: 0 16px;
+                background: var(--awa-red, #b73337);
+                border-color: var(--awa-red, #b73337);
+                color: #fff;
+                border-radius: var(--awa-radius-sm, 8px);
+                font-size: var(--awa-text-sm, 13px);
+                font-weight: var(--awa-weight-semibold, 600);
+                white-space: nowrap;
+                transition: background var(--awa-transition-fast, 150ms ease);
+
+                &:hover {
+                    background: var(--awa-red-dark, #8e2629);
+                    border-color: var(--awa-red-dark, #8e2629);
+                }
+            }
+        }
+    }
+
+    // Mensagens de cupom (sucesso/erro)
+    .message.success,
+    .message.error {
+        border-radius: var(--awa-radius-sm, 8px);
+        padding: 10px 14px;
+        font-size: var(--awa-text-sm, 13px);
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// § 5 — B2B Login page (.awa-b2b-login scope)
+// Polish do formulário de login B2B: logo, form card, botões.
+// ─────────────────────────────────────────────────────────────────────────────
+.awa-b2b-login .page-wrapper,
+body:is(.customer-account-login, .customer-account-create) .page-wrapper {
+    .page-main {
+        background: var(--awa-gray-100, #f5f5f5);
+        min-height: 60vh;
+    }
+
+    // Bloco de login/registro
+    .block-customer-login,
+    .block.block-customer-login,
+    .b2b-register-block,
+    .awa-b2b-login-block {
+        background: #fff;
+        border: 1px solid var(--awa-gray-200, #e5e7eb);
+        border-radius: var(--awa-radius-md, 12px);
+        box-shadow: var(--awa-shadow-sm, 0 1px 3px rgba(0,0,0,.10));
+        padding: 32px;
+        max-width: 400px;
+        margin: 32px auto;
+    }
+
+    // Título do bloco
+    .block-title strong,
+    .page-title-wrapper .page-title {
+        font-size: var(--awa-text-xl, 20px);
+        font-weight: var(--awa-weight-bold, 700);
+        color: var(--awa-black, #1a1a1a);
+        margin-block-end: 16px;
+    }
+
+    // Campos de formulário
+    .fieldset .field {
+        margin-block-end: 16px;
+
+        .label {
+            font-size: var(--awa-text-sm, 13px);
+            font-weight: var(--awa-weight-medium, 500);
+            color: var(--awa-gray-700, #374151);
+            margin-block-end: 4px;
+            display: block;
+        }
+
+        .control input[type="text"],
+        .control input[type="email"],
+        .control input[type="password"] {
+            height: 44px;
+            border-radius: var(--awa-radius-sm, 8px);
+            border: 1px solid var(--awa-gray-200, #e5e7eb);
+            font-size: var(--awa-text-base, 15px);
+            padding: 0 12px;
+            width: 100%;
+            transition: border-color var(--awa-transition-fast, 150ms ease);
+
+            &:focus {
+                border-color: var(--awa-red, #b73337);
+                outline: none;
+                box-shadow: 0 0 0 3px rgba(183, 51, 55, 0.12);
+            }
+        }
+    }
+
+    // Botão primário de ação
+    .actions-toolbar .primary .action.login,
+    .actions-toolbar .primary .action.submit,
+    .b2b-login-btn {
+        width: 100%;
+        padding: 13px 20px;
+        background: var(--awa-red, #b73337);
+        border: none;
+        border-radius: var(--awa-radius-sm, 8px);
+        color: #fff;
+        font-size: var(--awa-text-base, 15px);
+        font-weight: var(--awa-weight-bold, 700);
+        cursor: pointer;
+        transition: background var(--awa-transition-fast, 150ms ease),
+                    transform 100ms ease;
+
+        &:hover {
+            background: var(--awa-red-dark, #8e2629);
+        }
+
+        &:active {
+            transform: scale(0.98);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--awa-red, #b73337);
+            outline-offset: 3px;
+        }
+    }
+
+    // Link "Esqueci a senha" / registro
+    .actions-toolbar .secondary a,
+    .secondary-action a {
+        font-size: var(--awa-text-sm, 13px);
+        color: var(--awa-gray-700, #374151);
+        text-decoration: underline;
+
+        &:hover {
+            color: var(--awa-red, #b73337);
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// § 6 — Status de aprovação B2B (pending_approval, rejected)
+// Banner informativo no topo da conta B2B.
+// ─────────────────────────────────────────────────────────────────────────────
+.page-wrapper {
+    .awa-b2b-status-banner,
+    .b2b-approval-status {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 16px;
+        border-radius: var(--awa-radius-sm, 8px);
+        font-size: var(--awa-text-sm, 13px);
+        margin-block-end: 20px;
+
+        &.pending,
+        &--pending {
+            background: #fef9c3;
+            border: 1px solid #fde047;
+            color: #713f12;
+        }
+
+        &.rejected,
+        &--rejected {
+            background: #fee2e2;
+            border: 1px solid #fca5a5;
+            color: #7f1d1d;
+        }
+
+        &.approved,
+        &--approved {
+            background: #dcfce7;
+            border: 1px solid #86efac;
+            color: #14532d;
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// § 7 — Botão de Cotação B2B no carrinho
+// Aparece abaixo do checkout para clientes B2B qualificados.
+// ─────────────────────────────────────────────────────────────────────────────
+.checkout-cart-index .page-wrapper {
+    .b2b-quote-action,
+    .awa-b2b-quote-btn-wrap {
+        margin-block-start: 8px;
+
+        .action.b2b-quote,
+        .action.quote,
+        button.b2b-quote-btn {
+            width: 100%;
+            padding: 12px 20px;
+            background: transparent;
+            border: 1px solid var(--awa-red, #b73337);
+            border-radius: var(--awa-radius-sm, 8px);
+            color: var(--awa-red, #b73337);
+            font-size: var(--awa-text-sm, 13px);
+            font-weight: var(--awa-weight-semibold, 600);
+            cursor: pointer;
+            transition: background var(--awa-transition-fast, 150ms ease),
+                        color var(--awa-transition-fast, 150ms ease);
+
+            &:hover {
+                background: var(--awa-red, #b73337);
+                color: #fff;
+            }
+
+            &:focus-visible {
+                outline: 2px solid var(--awa-red, #b73337);
+                outline-offset: 3px;
+            }
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// § 8 — Mobile: carrinho layout ≤767px
+// Evita tabela estouro horizontal em telas pequenas.
+// ─────────────────────────────────────────────────────────────────────────────
+@media (max-width: 767px) {
+    .checkout-cart-index .page-wrapper {
+        .cart.table-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+
+            table.cart {
+                min-width: 480px;
+            }
+        }
+
+        .cart-container {
+            flex-direction: column;
+        }
+
+        .cart-summary {
+            width: 100%;
+            margin-block-start: 24px;
+        }
+    }
+}
