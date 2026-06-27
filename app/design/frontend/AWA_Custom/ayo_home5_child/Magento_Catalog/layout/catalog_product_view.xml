@@ -15,10 +15,11 @@
         -->
         <remove src="css/awa-round3-pdp-conversion.css"/>
         <remove src="css/awa-pdp-final-polish.css"/>
-        <!-- awa-pdp-shell-final: defer via OptimizeHeadStylesPlugin (inline lock cobre 1º paint) -->
-        <css src="css/awa-pdp-shell-final.css"/>
+        <!-- awa-pdp-shell-final.css: arquivo movido para _deprecated/ em Jun-2026; referência removida (404 ativo). Estilos cobertos por awa-pdp-premium.css + critical inline. -->
     </head>
     <body>
+        <!-- Rokanthemes PriceCountdown declara cacheable="false" na PDP — remove para FPC/Varnish -->
+        <referenceBlock name="product.info.pricecountdown.product.page" remove="true"/>
         <referenceBlock name="awa.header.impeccable.critical.global" remove="true"/>
         <!-- Terminal lock — align-grid após pdp-shell (§41 PDP mobile + badges) -->
         <referenceBlock name="head.additional">
@@ -76,6 +77,26 @@
                               xsi:type="object">GrupoAwamotos\Theme\ViewModel\ProductStructuredData</argument>
                 </arguments>
             </block>
+            <!-- F1-04 (2026-06-27): FAQPage JSON-LD para rich results do Google -->
+            <block class="GrupoAwamotos\SchemaOrg\Block\ProductFaq"
+                   name="awa.schema.product.faq.jsonld"
+                   template="GrupoAwamotos_SchemaOrg::product_faq_jsonld.phtml"
+                   after="awa.schema.product.jsonld"/>
+        </referenceContainer>
+
+        <!--
+            F1-04 (2026-06-27): Seção visual de FAQ na PDP (acordeão semântico)
+            Renderiza bloco GrupoAwamotos\SchemaOrg\Block\ProductFaq com template FAQ visível.
+            O template Magento_Theme::product.info.details.phtml customizado itera
+            apenas o grupo detailed_info; então posicionamos o FAQ como bloco
+            independente no content.aside (que existe no tema filho) via
+            content.bottom e usamos move para alocar após product.info.details.
+        -->
+        <referenceContainer name="content">
+            <block class="GrupoAwamotos\SchemaOrg\Block\ProductFaq"
+                   name="awa.product.faq"
+                   template="GrupoAwamotos_SchemaOrg::product_faq.phtml"
+                   after="product.info.details"/>
         </referenceContainer>
     </body>
 </page>

@@ -1,0 +1,55 @@
+<?php
+/**
+ * AWA Motos — PDP FAQ Block (Schema.org FAQPage)
+ *
+ * Renderiza:
+ *  1. JSON-LD FAQPage no head (via ViewModel direto, fora deste template)
+ *  2. Seção visual de FAQ na PDP (acordeão semântico)
+ *
+ * @var \GrupoAwamotos\SchemaOrg\Block\ProductFaq $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+declare(strict_types=1);
+
+$faqs = $block->getFaqs();
+if ($faqs === []) {
+    return;
+}
+?>
+<section class="awa-pdp-faq" aria-labelledby="awa-pdp-faq-heading">
+    <header class="awa-pdp-faq__header">
+        <h2 id="awa-pdp-faq-heading" class="awa-pdp-faq__title">
+            <?= $escaper->escapeHtml(__('Perguntas frequentes')) ?>
+        </h2>
+    </header>
+    <ul class="awa-pdp-faq__list" role="list">
+        <?php foreach ($faqs as $index => $faq): ?>
+            <?php
+            $questionId = 'awa-pdp-faq-q-' . (int) $index;
+            $answerId = 'awa-pdp-faq-a-' . (int) $index;
+            ?>
+            <li class="awa-pdp-faq__item">
+                <details class="awa-pdp-faq__details" name="awa-pdp-faq">
+                    <summary class="awa-pdp-faq__question"
+                             id="<?= $escaper->escapeHtmlAttr($questionId) ?>"
+                             aria-controls="<?= $escaper->escapeHtmlAttr($answerId) ?>">
+                        <span class="awa-pdp-faq__question-text">
+                            <?= $escaper->escapeHtml((string) $faq['question']) ?>
+                        </span>
+                        <span class="awa-pdp-faq__icon" aria-hidden="true">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                 stroke="currentColor" stroke-width="2"
+                                 stroke-linecap="round" stroke-linejoin="round" focusable="false">
+                                <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                        </span>
+                    </summary>
+                    <div class="awa-pdp-faq__answer" id="<?= $escaper->escapeHtmlAttr($answerId) ?>"
+                         role="region" aria-labelledby="<?= $escaper->escapeHtmlAttr($questionId) ?>">
+                        <p><?= $escaper->escapeHtml((string) $faq['answer']) ?></p>
+                    </div>
+                </details>
+            </li>
+        <?php endforeach; ?>
+    </ul>
+</section>

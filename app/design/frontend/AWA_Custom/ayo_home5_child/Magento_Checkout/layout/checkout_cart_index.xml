@@ -4,9 +4,8 @@
 
     Performance 2026-06-09 (cart bugfix):
       - Critical above-fold CSS inline via awa-cart-checkout-critical.phtml (~8KB).
-      - awa-cart-polish.min.css blocking (layout/tabela/resumo — evita FOUC).
+      - awa-cart-stack.min.css blocking (polish + layout-terminal consolidados).
       - cart-page-premium.min.css load async (idle/pointerdown).
-      - awa-cart-layout-terminal.min.css stays blocking (~7KB) for grid final-wins.
       - awa-focus-visible removed (focus rules live in critical inline).
       - awa.shelf.carousel removed: saves 25 KB blocking CSS + deferred JS.
 -->
@@ -14,11 +13,13 @@
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd"
       cacheable="false">
     <head>
+        <!-- SEO: página transacional — fora do índice (crawl budget) -->
+        <meta name="robots" content="NOINDEX,NOFOLLOW"/>
         <remove src="css/awa-checkout-home5.css"/>
         <remove src="css/awa-header-stack-2026-05-28.min.css"/>
-        <css src="css/awa-cart-polish.min.css"/>
-        <!-- Terminal: vence awa-layout-bundle flex legacy após polish -->
-        <css src="css/awa-cart-layout-terminal.min.css"/>
+        <!-- Stack único: polish + layout-terminal (~70KB, 1 request bloqueante) -->
+        <css src="css/awa-cart-stack.min.css"/>
+        <!-- awa-cart-shell-final.css removido: referência órfã (404 em produção). -->
         <!-- refine: carregado async via awa-checkout-polish-async.phtml (evita duplicata síncrona) -->
     </head>
     <body>
@@ -119,6 +120,34 @@
                     <argument name="view_model" xsi:type="object">GrupoAwamotos\B2B\ViewModel\Cart\CreditNotice</argument>
                 </arguments>
             </block>
+            <!-- F1-01: Barra de progresso de frete grátis (VTEX-grade) -->
+            <block class="GrupoAwamotos\ERPIntegration\Block\Cart\FreeShippingProgress"
+                   name="awa.cart.free.shipping"
+                   template="GrupoAwamotos_ERPIntegration::cart/free-shipping-progress.phtml"
+                   after="awa.cart.b2b.credit.notice"/>
+            <!-- F1-02 (a): Trust strip B2B já existente (status grupo/crédito) -->
+            <block class="GrupoAwamotos\B2B\Block\Cart\B2BTrustStrip"
+                   name="awa.b2b.cart.trust.strip"
+                   template="GrupoAwamotos_B2B::cart/trust-strip.phtml"
+                   after="awa.cart.free.shipping"/>
+            <!-- F1-02 (b): Trust seals genéricos (SSL/Pagamento/Garantia) — VTEX-grade -->
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.cart.trust.seals"
+                   template="Magento_Checkout::cart/trust-seals.phtml"
+                   after="awa.b2b.cart.trust.strip"/>
+        </referenceContainer>
+
+        <!--
+            F1-02 (c): Trust seals universais também no carrinho VAZIO.
+            Renderizados dentro do container checkout.cart.empty.widget que existe
+            no template noItems.phtml (carrinho vazio). Fornece sinais de confiança
+            logo no primeiro acesso à página de carrinho.
+        -->
+        <referenceContainer name="checkout.cart.empty.widget">
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.cart.empty.trust.seals"
+                   template="Magento_Checkout::cart/trust-seals.phtml"
+                   after="-"/>
         </referenceContainer>
 
         <referenceBlock name="head.additional">
@@ -141,6 +170,10 @@
                    name="awa.cart.terminal.shield"
                    template="Magento_Checkout::cart/terminal-shield.phtml"
                    after="-"/>
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.align.grid.terminal.cart"
+                   template="Magento_Theme::html/awa-align-grid-terminal-loader.phtml"
+                   after="awa.cart.terminal.shield"/>
         </referenceContainer>
 
         <!-- Resumo: totais + finalizar antes de frete/cupom (opções secundárias) -->
