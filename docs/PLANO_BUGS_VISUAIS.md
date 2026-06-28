@@ -97,7 +97,7 @@
 
 | Indicador | Total |
 |-----------|------:|
-| Total de bugs/melhorias (todas as fases) | **92** (22 históricos + 13 da Fase 3D.2.5 + 35 Auditoria DOM Home + 14 Auditoria Profunda + 6 Auditoria Multi-Page + 0 Auditoria PDP [BUG-H-056 falso positivo] + 2 Auditoria CMS Pages) |
+| Total de bugs/melhorias (todas as fases) | **94** (22 históricos + 13 da Fase 3D.2.5 + 35 Auditoria DOM Home + 14 Auditoria Profunda + 6 Auditoria Multi-Page + 0 Auditoria PDP + 2 Auditoria CMS Pages + 2 Auditoria Sitemap/Robots) |
 | Corrigidos | 14 |
 | Em progresso | 7 |
 | Pendentes | 5 |
@@ -1942,4 +1942,60 @@ _awa-premium-effects.less, _awa-visual-audit-2026-05-05.less, etc.:
 | `/about-us` | INDEX,FOLLOW ✅ | **AUSENTE** ❌ | URL interna ❌ |
 | `/contato` | INDEX,FOLLOW ✅ | **AUSENTE** ❌ | URL interna ❌ |
 | `/faq` | INDEX,FOLLOW ✅ | **AUSENTE** ❌ | URL interna ❌ |
+
+
+---
+
+## 22. Auditoria Sitemap & Robots.txt (2026-06-28)
+
+> Sexta rodada: inspeção do sitemap.xml (770 URLs) e robots.txt.
+> 2 novos bugs — BUG-H-059 e BUG-H-060.
+> Confirmações positivas: sitemap bem estruturado com image sitemaps, produto + categoria + imagem.
+
+### Tabela
+
+| ID | Título | Sev | Status | Área | Componente | Fase |
+|----|--------|-----|--------|------|-----------|------|
+| BUG-H-059 | 12 URLs de categorias de teste `/verificar/` no sitemap | P2 | Aberto | SEO/Sitemap | Catalog | SEO |
+| BUG-H-060 | robots.txt bloqueia `/pub/static/` (Googlebot sem CSS/JS) | P3 | Aberto | SEO | robots.txt | SEO |
+
+---
+
+### Detalhes técnicos
+
+#### BUG-H-059 — Categorias de teste `/verificar/` no sitemap
+- **Evidência:** 12 URLs sob `/verificar/` estão no sitemap com `changefreq=weekly` e `priority=0.8`:
+  - `https://awamotos.com/verificar/categorias.html`
+  - `https://awamotos.com/verificar/categorias/borrachas.html`
+  - `https://awamotos.com/verificar/categorias/guidoes.html`
+  - `https://awamotos.com/verificar/categorias/guidoes/linha-honda.html`
+  - etc. (12 total)
+- **Observação:** A categoria `/verificar/categorias.html` é acessível, está INDEX,FOLLOW, mas tem H1 vazio e claramente é uma categoria de teste ("verificar" = "check" em PT). Criada em 2026-02-09 (data mais antiga).
+- **Impacto:** Google indexa categorias irrelevantes ("Categorias" como nome), diluindo autoridade do domínio. Entradas desnecessárias no sitemap reduzem eficiência do crawl budget.
+- **Fix:** No admin Magento → Catalog → Categories: localizar a categoria "verificar" (entity_id via `SELECT entity_id FROM url_rewrite WHERE request_path LIKE 'verificar%' LIMIT 1`), desabilitar (`is_active=0`) e reexcluir do sitemap.
+
+#### BUG-H-060 — robots.txt bloqueia `/pub/static/` (CSS/JS inacessível ao Googlebot)
+- **Evidência:** `robots.txt` linha: `Disallow: /pub/static/`
+- **Impacto:** Googlebot não pode acessar os arquivos CSS e JS em `/pub/static/frontend/...`. A renderização do Google depende desses arquivos para avaliar layout, conteúdo visível e Core Web Vitals. Sem CSS/JS, o Google pode ver uma versão degradada da página.
+- **Google recomenda:** permitir acesso a CSS e JS para crawler de renderização. Ver [Google Search Central - Block access to CSS and JS](https://developers.google.com/search/docs/crawling-indexing/javascript/javascript-seo-basics).
+- **Contrapartida:** bloquear `/pub/static/` evita crawling de milhares de arquivos gerados (cache, versioned assets) que não são páginas de conteúdo.
+- **Fix sugerido:** substituir `Disallow: /pub/static/` por regras mais específicas:
+  ```
+  Disallow: /pub/static/version*/
+  Disallow: /pub/static/_cache/
+  # NÃO bloquear: /pub/static/frontend/ (CSS/JS do tema)
+  ```
+
+### Confirmações positivas do sitemap
+
+| Métrica | Valor |
+|---------|------:|
+| Total de URLs | 770 |
+| Categorias | 422 |
+| Produtos | 308 |
+| Sitemap inclui `image:image` para produtos | ✅ |
+| `<changefreq>` e `<priority>` configurados | ✅ |
+| Sitemap registrado no robots.txt | ✅ |
+| Homepage inclusa (`priority: 1.0, changefreq: daily`) | ✅ |
+| Subcategorias presentes e indexadas | ✅ |
 
