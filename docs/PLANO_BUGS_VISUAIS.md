@@ -17,12 +17,12 @@
 
 | Campo | Valor |
 |-------|-------|
-| **Atualizado em** | 2026-06-28 (reconciliação pré-3D.2.5) |
+| **Atualizado em** | 2026-06-28 (reconciliação + 38 commits totais) |
 | **Tema** | `AWA_Custom/ayo_home5_child` |
 | **Branch atual** | `fix/phase3d25-mobile-visual-cleanup` |
-| **Última fase aplicada** | Fase 3D.2.5 — primeira onda CSS (9 commits) |
-| **Último commit** | `7ed106d9 feat(css): header stack — tokens semanticos + WCAG AA fix + acessibilidade` |
-| **Última validação** | 2026-06-28 — commits CSS validados via `git grep` (tokens mortos) + revisão manual; visual por screenshot pendente |
+| **Última fase aplicada** | Fase 3D.2.5 — 38 commits (refator tokens + prunes + foundation) |
+| **Último commit** | `3162af2e feat(css): 8 refatores tokens (loading, navigation, slider, product-card, responsive)` |
+| **Última validação** | 2026-06-28 — todos commits validados via `git grep` + revisão manual; visual por screenshot pendente |
 | **Veredito visual atual** | 🟡 **Aprovado com ressalvas** |
 | **Próxima auditoria obrigatória** | Coleta de screenshots manuais (1440 / 1024 / 768 / 390 / 360) por rota crítica |
 | **Próxima fase recomendada** | **Fase 3D.2.5 — Mobile Visual Cleanup / P2-P3 Confirmed Fixes** |
@@ -879,6 +879,30 @@ Análise sem noscript confirma: **zero duplicatas reais** em todas as páginas.
 | 2026-06-28 | `fix(css): PDP gallery-placeholder selector correction` | Codex | `b14bb1ce` |
 | 2026-06-28 | `feat(css): header stack — tokens + WCAG AA + acessibilidade` | Codex | `7ed106d9` |
 | 2026-06-28 | BUG-IMPORTANT-AUDIT-013 catalogado como follow-up (113 !important) | Codex | (próximo commit) |
+| 2026-06-28 | `chore(css): remove home layout bundles sem referencias` (-14.070) | Codex | `2e2b84c3` |
+| 2026-06-28 | `chore(css): remove layout/UI bundles sem referencias` (-7.295) | Codex | `652f4b7a` |
+| 2026-06-28 | `chore(css): remove vertical menu + b2b register overrides sem refs` | Codex | `7d7fc168` |
+| 2026-06-28 | `fix(css): home bestseller cards — thumb ratio 1:1 + price label 36px` | Codex | `e0182f0c` |
+| 2026-06-28 | `feat(css): home carousel polish — nav 44px touch + tokens` | Codex | `fb2327ca` |
+| 2026-06-28 | `feat(css): AWA variables — 37 novos tokens + alinhamento 12→16px mobile` | Codex | `6608ef64` |
+| 2026-06-28 | `feat(css): header — refactor para tokens semanticos (38 adds / 38 dels)` | Codex | `8b29cbe8` |
+| 2026-06-28 | `feat(css): page containers v1.4 — mobile pad 16px + tiers 1280px` | Codex | `72c7e22b` |
+| 2026-06-28 | `fix(css): hero slider pre-load critical — anti-FOUC + LCP (BUG-MOB-HERO-003)` | Codex | `ace59e69` |
+| 2026-06-28 | `feat(css): flex-grid-flow — migracao hex para tokens LESS` | Codex | `010431e2` |
+| 2026-06-28 | `feat(css): search results — refactor para tokens semanticos` | Codex | `eb34f594` |
+| 2026-06-28 | `feat(css): header tokens — refactor _awa-header-professional + _header-main` | Codex | `fd039d97` |
+| 2026-06-28 | `chore(css): remove awa-b2b-color-fix.css sem referencias reais` (-741) | Codex | `272aae14` |
+| 2026-06-28 | `feat(css): B2B phases + quickorder tokens refactor` | Codex | `8dc33cb0` |
+| 2026-06-28 | `feat(css): mobile standardization + PDP upgrades — refactor tokens` | Codex | `98ed3a2e` |
+| 2026-06-28 | `feat(css): 10 refatores tokens (effects, layout, menu, pdp, header, extend)` | Codex | `c40b424d` |
+| 2026-06-28 | `feat(css): product card / page — refactor para tokens canonicos` | Codex | `9c73dcf1` |
+| 2026-06-28 | `feat(css): 9 refatores tokens (sprint1 B2B, account-nav, ...)` | Codex | `b737c2ed` |
+| 2026-06-28 | `feat(css): grid-listing + clean-ui + premium-effects — refactor tokens` | Codex | `28063233` |
+| 2026-06-28 | `feat(css): 6 refatores tokens (visual-audit, header-premium, ui-ux-promax)` | Codex | `99229e66` |
+| 2026-06-28 | `feat(css): B2B login page polish + qty-control tokens` (BUG-B2B-LOGIN-010) | Codex | `095944e9` |
+| 2026-06-28 | `feat(css): 6 refatores tokens (cycle1, p0, visual-refinements, ...)` | Codex | `ee7121e1` |
+| 2026-06-28 | `chore(css): 9 sync min files + interaction-widgets tokens` | Codex | `2fd4f028` |
+| 2026-06-28 | `feat(css): 8 refatores tokens (loading, navigation, slider, product-card, responsive)` | Codex | `3162af2e` |
 
 ---
 
