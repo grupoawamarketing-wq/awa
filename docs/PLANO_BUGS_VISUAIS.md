@@ -97,7 +97,7 @@
 
 | Indicador | Total |
 |-----------|------:|
-| Total de bugs/melhorias (todas as fases) | **93** (22 históricos + 13 da Fase 3D.2.5 + 35 Auditoria DOM Home + 14 Auditoria Profunda + 6 Auditoria Multi-Page + 1 Auditoria PDP + 2 Auditoria CMS Pages) |
+| Total de bugs/melhorias (todas as fases) | **92** (22 históricos + 13 da Fase 3D.2.5 + 35 Auditoria DOM Home + 14 Auditoria Profunda + 6 Auditoria Multi-Page + 0 Auditoria PDP [BUG-H-056 falso positivo] + 2 Auditoria CMS Pages) |
 | Corrigidos | 14 |
 | Em progresso | 7 |
 | Pendentes | 5 |
@@ -1846,19 +1846,16 @@ _awa-premium-effects.less, _awa-visual-audit-2026-05-05.less, etc.:
 
 | ID | Título | Sev | Status | Página | BP | Componente | Fase |
 |----|--------|-----|--------|--------|----|-----------|------|
-| BUG-H-056 | Imagens de produto sem width/height (CLS no PDP) | P2 | Aberto | PDP | Todos | Gallery/CLS | 3D.3 |
+| BUG-H-056 | ~~Imagens de produto sem width/height~~ | ~~P2~~ | **Falso positivo** | PDP | — | — | — |
 
 ---
 
 ### Detalhes técnicos
 
-#### BUG-H-056 — Imagens product-image-photo sem width/height (CLS no PDP)
-- **Evidência:** Todas as `<img class="product-image-photo">` no PDP não possuem atributos `width` e `height` no HTML. Ex: `<img class="product-image-photo" src="...">`.
-  - 8+ imagens de produto na galeria sem dimensões
-  - Logo da loja também sem width/height
-  - Imagens de bandeiras de cartão no footer também sem width/height
-- **Impacto:** Sem dimensões declaradas, o browser não pode reservar espaço antes do carregamento → layout shift (CLS) na abertura do PDP. Penaliza Core Web Vitals (CLS > 0.1 = "Needs Improvement").
-- **Fix:** Adicionar `width` e `height` em todos os `<img>` no template do PDP. Para as imagens de produto dinâmicas no Magento, verificar se o template `Magento_Catalog/templates/product/view/gallery.phtml` passa dimensões para o bloco. Nos blocos fotorama, verificar `lib/web/mage/gallery/gallery.js`.
+#### ~~BUG-H-056~~ — FALSO POSITIVO (retirado 2026-06-28)
+- **Investigação:** `grep '<img ' | grep -v 'width='` em uma linha. Na realidade, `width="1000" height="1000"` estão em linhas subsequentes ao `<img`.
+- **Resultado:** Todas as `product-image-photo` TÊM `width="1000" height="1000"`. Imagens de pagamento TÊM `width="46" height="28"`. Logo TEM `width="161" height="92"`.
+- **Status:** FECHADO — não é bug.
 
 ### Confirmações positivas do PDP
 
