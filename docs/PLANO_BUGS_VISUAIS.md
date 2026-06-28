@@ -59,11 +59,23 @@
 | Pendentes de evidência | 4 (BUG-BP-1024-008, BUG-BP-360-009, BUG-B2B-LOGIN-010, BUG-IMPORTANT-AUDIT-013) |
 | Adiados | 0 |
 
+### Backlog Auditoria DOM Home (2026-06-28)
+
+| Métrica | Valor |
+|---------|------:|
+| Total de bugs novos | **35** (BUG-H-001 a BUG-H-035) |
+| P1 | 3 |
+| P2 | 14 |
+| P3 | 18 |
+| Abertos | 35 |
+| Em progresso | 0 |
+| Método | Playwright/Firefox headless, 4 breakpoints (360, 390, 1024, 1366px) |
+
 ### Consolidação global (histórico + Fase 3D.2.5)
 
 | Indicador | Total |
 |-----------|------:|
-| Total de bugs/melhorias (todas as fases) | **35** (22 históricos + 13 da Fase 3D.2.5) |
+| Total de bugs/melhorias (todas as fases) | **70** (22 históricos + 13 da Fase 3D.2.5 + 35 Auditoria DOM Home) |
 | Corrigidos | 14 |
 | Em progresso | 7 |
 | Pendentes | 5 |
@@ -83,7 +95,7 @@
 | 4 | Premium | Consistência entre rotas, mobile limpo, PLP/PDP fortes |
 | 5 | Premium validado | Aprovado sem ressalvas em todos os breakpoints críticos |
 
-**Classificação atual (2026-06-28, pós-primeira onda CSS):** **Nível 2 → Nível 3 — Profissional.**
+**Classificação atual (2026-06-28, pós-Auditoria DOM Home):** **Nível 0 — Quebrado** — auditoria DOM identificou 3 P1 ativos (BUG-H-001: logo à direita em 1366px; BUG-H-002: logo 68px abaixo no header; BUG-H-003: overflow 98px em 360px).
 
 - ✅ Sem P0/P1 abertos
 - ✅ Zero erros novos em `var/log/exception.log` e `var/log/system.log` (não inspecionados pós-commits desta sessão; sem deploy executado)
@@ -1374,3 +1386,212 @@ html body#html-body .block.block-search .actions button.action.search::before,
 - Injetar via `before.body.end` (não `head.additional`)
 - OU usar inline critical com `!important` que sobrescreve tudo
 - NUNCA confiar em `before="-"` no head.additional se há inline critical
+
+---
+
+## 17. Auditoria DOM Home — 2026-06-28 (BUG-H-001 a BUG-H-035)
+
+> Bugs confirmados via Playwright/Firefox headless em 4 breakpoints: 1366px, 1024px, 390px e 360px.
+> Método: CSS completo injetado (styles-m.css + themes.css + bundles AWA), JS bloqueado para isolamento.
+> Total: 35 bugs — 3 P1, 14 P2, 18 P3.
+
+### Tabela de bugs
+
+| ID | Título | Sev | Status | BP | Componente | Fase |
+|----|--------|-----|--------|-----|-----------|------|
+| BUG-H-001 | Logo posicionado à direita em 1366px | P1 | Aberto | 1366 | Header/Brand | 3D.2.5 |
+| BUG-H-002 | Logo desalinhado verticalmente 68px | P1 | Aberto | 1366 | Header/Brand | 3D.2.5 |
+| BUG-H-003 | Category carousel overflow 98px em 360px | P1 | Aberto | 360 | Category Carousel | 3D.2.5 |
+| BUG-H-004 | Minicart dropdown overflow em 360px | P2 | Aberto | 360 | Minicart | 3D.3 |
+| BUG-H-005 | Hero CTA "Ver ofertas" com 264px de altura | P2 | Aberto | 390 | Hero/CTA | 3D.2.5 |
+| BUG-H-006 | Seção "Lançamentos" sem produtos (0 cards) | P2 | Aberto | Todos | Featured Grid | 3D.2.5 |
+| BUG-H-007 | Hero slider: 2 de 4 imagens não carregam | P2 | Aberto | Todos | Hero/Slider | 3D.2.5 |
+| BUG-H-008 | Promo banners com alt vazio (4 banners) | P2 | Aberto | Todos | Promo Banners | A11y |
+| BUG-H-009 | Search bar estreita — 28% do viewport | P2 | Aberto | 1366 | Header/Search | 3D.4 |
+| BUG-H-010 | Hamburger menu sem dimensões (w:0, h:0) | P2 | Aberto | 390/360 | Header/Nav | 3D.5 |
+| BUG-H-011 | Seções sem gap vertical (gap:0px) | P2 | Aberto | Todos | Layout Global | 3D.2.5 |
+| BUG-H-012 | Product images sem srcset | P2 | Aberto | Todos | Product Cards | 3D.2.5 |
+| BUG-H-013 | Product images não carregam sem scroll+JS | P2 | Aberto | Todos | Product Cards | 3D.2.5 |
+| BUG-H-014 | B2B bar sem gap ícone/texto | P2 | Aberto | Todos | B2B Bar | 3D.2.5 |
+| BUG-H-015 | H2 "Atacado para Lojistas" duplicado e hidden | P2 | Aberto | Todos | B2B Section | 3D.2.5 |
+| BUG-H-016 | H2 "Meu Carrinho" renderiza 1×1px | P2 | Aberto | Todos | Minicart | 3D.3 |
+| BUG-H-017 | "Pedidos Recentes" visível para anônimos | P2 | Aberto | Todos | Recent Orders | 3D.3 |
+| BUG-H-018 | 38 recursos CSS na home | P3 | Aberto | Todos | CSS Pipeline | 3D.6 |
+| BUG-H-019 | styles-m.css/themes.css carregados via JS | P3 | Aberto | Todos | CSS Gate | 3D.6 |
+| BUG-H-020 | Fontes legado Source Sans 3, Rubik | P3 | Aberto | Todos | Typography | 3D.6 |
+| BUG-H-021 | Shelf items com alturas inconsistentes | P3 | Aberto | 390 | Product Shelf | 3D.2.5 |
+| BUG-H-022 | Title tag curta (41 chars, sem B2B) | P3 | Aberto | Todos | SEO | SEO |
+| BUG-H-023 | Alt text do hero genérico ("AWA Motos") | P3 | Aberto | Todos | Hero/A11y | A11y |
+| BUG-H-024 | Category carousel overflow:visible | P3 | Aberto | 390/360 | Category Carousel | 3D.2.5 |
+| BUG-H-025 | Footer sem estrutura de colunas | P3 | Aberto | Todos | Footer | 3D.2.5 |
+| BUG-H-026 | Newsletter deslocada à direita | P3 | Aberto | 1366 | Newsletter | 3D.2.5 |
+| BUG-H-027 | Hero colapsa para 12px sem JS | P3 | Aberto | 390/360 | Hero/Slider | 3D.2.5 |
+| BUG-H-028 | 7 botões abaixo do touch target (<44px) | P3 | Aberto | Todos | A11y | A11y |
+| BUG-H-029 | Seção "Destaques" com h2 desconectado | P3 | Aberto | Todos | Promo Section | 3D.2.5 |
+| BUG-H-030 | B2B bar versão mobile com w:0, h:0 | P3 | Aberto | 390/360 | B2B Bar | 3D.2.5 |
+| BUG-H-031 | Carrosséis sem h2 visível | P3 | Aberto | Todos | Product Shelves | 3D.2.5 |
+| BUG-H-032 | Product shelves (Rokanthemes) sem título h2 | P3 | Aberto | Todos | Product Shelves | 3D.2.5 |
+| BUG-H-033 | Promo banners não carregam sem scroll | P3 | Aberto | Todos | Promo Banners | 3D.2.5 |
+| BUG-H-034 | Nav vertical não escala 1024→1366px | P3 | Aberto | 1366 | Nav Vertical | 3D.2.5 |
+| BUG-H-035 | Seções sem role="region"/aria-label | P3 | Aberto | Todos | Semantic/A11y | A11y |
+
+---
+
+### Detalhes técnicos
+
+#### BUG-H-001 — Logo à direita em 1366px
+- **Evidência:** `gridArea: "brand"` computado, mas renderiza em `left: 1087px` em viewport 1366px. Em 1024px correto (`left: 56px`).
+- **Fix:** revisar `grid-template-areas` do `.awa-site-header__inner` acima de 1200px. Verificar media query que reposiciona `grid-area: brand`.
+
+#### BUG-H-002 — Logo desalinhado verticalmente
+- **Evidência:** Logo `top: 129px`; Search/Actions `top: 61px`. Diferença de 68px.
+- **Fix:** `align-items: center` ou `grid-row: 1` para `.awa-header-brand-cell`.
+
+#### BUG-H-003 — Category carousel overflow 98px em 360px
+- **Evidência:** `.awa-category-carousel__item` right: 458px; label right: 433px em 360px.
+- **Fix:** `overflow-x: clip` no wrapper; `max-width: min(120px, 33vw)` nos items.
+
+#### BUG-H-004 — Minicart dropdown overflow 360px
+- **Evidência:** `.block-minicart.empty` right: 370px; `.awa-minicart-footer` right: 370px.
+- **Fix:** `max-width: 100vw; right: 0; left: auto` no dropdown mobile.
+
+#### BUG-H-005 — Hero CTA 264px de altura
+- **Evidência:** `.awa-hero-inline-cta a` height: 264px em 390px sem JS.
+- **Fix:** `max-height: 56px; align-self: flex-start` no CTA.
+
+#### BUG-H-006 — "Lançamentos" vazia
+- **Evidência:** `featuredGrid.cardCount: 0`.
+- **Fix:** verificar widget no admin (produtos ativos na categoria vinculada).
+
+#### BUG-H-007 — Hero 2 imagens não carregam
+- **Evidência:** `slider_005.jpg` — `loaded: false`, `naturalWidth: 0`.
+- **Fix:** verificar existência em `pub/media/`; reenviar se ausentes.
+
+#### BUG-H-008 — Promo banners alt vazio
+- **Evidência:** `img.alt === ""` em 4 banners.
+- **Fix:** adicionar alt descritivo em cada banner no bloco CMS.
+
+#### BUG-H-009 — Search estreita (28% viewport)
+- **Evidência:** `search.rect.w: 384px` de 1366px.
+- **Fix:** aumentar coluna search para ~40% do container no grid header.
+
+#### BUG-H-010 — Hamburger sem dimensões
+- **Evidência:** `{ w: 0, h: 0 }` sem JS.
+- **Fix:** `min-width: 44px; min-height: 44px` no CSS do botão (independente de JS).
+
+#### BUG-H-011 — Gap zero entre seções
+- **Evidência:** `sectionGaps: [164, 0, 0, 0, 0, 0, 0]`.
+- **Fix:** `margin-bottom: var(--awa-section-gap, 48px)` nas seções `.top-home-content`.
+
+#### BUG-H-012 — Product images sem srcset
+- **Evidência:** `hasSrcSet: false` em 5/5 amostras.
+- **Fix:** habilitar `responsive_images` no `view.xml` ou módulo de galeria.
+
+#### BUG-H-013 — Product images não carregam
+- **Evidência:** `loaded: false` em 5/5 amostras.
+- **Fix:** garantir `loading="lazy"` com IntersectionObserver nativo.
+
+#### BUG-H-014 — B2B bar sem gap ícone/texto
+- **Evidência:** `gap: normal` no flex container.
+- **Fix:** `gap: 8px` no flex container da B2B bar.
+
+#### BUG-H-015 — H2 "Atacado para Lojistas" duplicado
+- **Evidência:** 2× `<h2>` com mesmo texto, ambos `{ w: 0, h: 0 }`.
+- **Fix:** remover elemento duplicado; garantir visibilidade do restante.
+
+#### BUG-H-016 — H2 "Meu Carrinho" 1×1px
+- **Evidência:** `rect: { w: 1, h: 1 }`.
+- **Fix:** remover `clip: rect(1px,1px,1px,1px)` ou tamanho forçado no CSS.
+
+#### BUG-H-017 — "Pedidos Recentes" para anônimos
+- **Evidência:** bloco renderiza para visitantes sem login.
+- **Fix:** condicionar com `<?php if ($block->customerSession->isLoggedIn()): ?>`.
+
+#### BUG-H-018 — 38 recursos CSS
+- **Evidência:** 19 `<link>` + 19 `<style>` inline.
+- **Fix:** consolidar styles inline em classes; migrar para bundles (Fase 3D.6).
+
+#### BUG-H-019 — styles-m.css via JS (FOUC)
+- **Evidência:** não aparece como `<link>` no HTML inicial.
+- **Fix:** avaliar mover `styles-m.css` para `<link rel="preload">` no `<head>`.
+
+#### BUG-H-020 — Fontes legado (Source Sans 3, Rubik)
+- **Evidência:** presentes em blocos `<style>` inline.
+- **Fix:** substituir por `var(--awa-font-primary)` em blocos CMS e phtml.
+
+#### BUG-H-021 — Shelf items alturas inconsistentes
+- **Evidência:** item1 `h: 280px` vs item2 `h: 404px` em 390px.
+- **Fix:** `height: auto; min-height: 0` nos cards de produto.
+
+#### BUG-H-022 — Title tag curta
+- **Evidência:** 41 chars, sem B2B ou localidade.
+- **Fix:** "Peças para Motos B2B e Varejo | Bagageiros, Baús, Retrovisores | AWA Motos Araraquara".
+
+#### BUG-H-023 — Alt text hero genérico
+- **Evidência:** `alt: "AWA Motos"` para todos os slides.
+- **Fix:** descrever produto em destaque em cada slide via admin.
+
+#### BUG-H-024 — Category carousel sem scroll
+- **Evidência:** `overflow: visible` no wrapper.
+- **Fix:** `overflow-x: auto; scroll-snap-type: x mandatory` no wrapper.
+
+#### BUG-H-025 — Footer sem colunas
+- **Evidência:** `footer.colCount: 0`.
+- **Fix:** alinhar seletores CSS com classes reais do DOM no footer.
+
+#### BUG-H-026 — Newsletter deslocada
+- **Evidência:** `rect.l: 776px` em 1366px.
+- **Fix:** `margin: 0 auto` no container do formulário de newsletter.
+
+#### BUG-H-027 — Hero colapsa 12px sem JS
+- **Evidência:** `hero.rect.h: 12px` em 390px.
+- **Fix:** `min-height: 240px` no wrapper do slider.
+
+#### BUG-H-028 — 7 botões abaixo do touch target
+- **Evidência:** `underMinTouchTarget: 7`.
+- **Fix:** `min-height: 44px; min-width: 44px` nos botões identificados.
+
+#### BUG-H-029 — "Destaques" h2 desconectado
+- **Evidência:** h2 presente mas banners não carregam.
+- **Fix:** verificar bloco CMS e reenviar imagens dos banners.
+
+#### BUG-H-030 — B2B bar mobile oculta
+- **Evidência:** `<span class="short">` com `{ w: 0, h: 0 }`.
+- **Fix:** verificar `display: none` incorreto no `.short` em mobile.
+
+#### BUG-H-031 — Carrosséis sem h2
+- **Evidência:** `hasTitle: false` para Novos Produtos, Linhas em Destaque.
+- **Fix:** adicionar `<h2 class="section-title">` nos widgets de carrossel.
+
+#### BUG-H-032 — Shelves Rokanthemes sem título
+- **Evidência:** `hasTitle: false` em 4/4 shelves.
+- **Fix:** habilitar exibição do título no widget ProductTab no admin.
+
+#### BUG-H-033 — Promo banners não carregam
+- **Evidência:** `loaded: false` nos 4 banners abaixo do fold.
+- **Fix:** garantir IntersectionObserver nativo habilitado para lazy load.
+
+#### BUG-H-034 — Nav vertical não escala
+- **Evidência:** sidebar 206px em 1024px; comportamento em 1366px relacionado com BUG-H-001.
+- **Fix:** incluir sidebar no cálculo de colunas do header ao corrigir BUG-H-001.
+
+#### BUG-H-035 — Seções sem aria-label
+- **Evidência:** seções usam `<div>` sem `role="region"` ou `aria-labelledby`.
+- **Fix:** converter para `<section aria-labelledby="id-do-h2">` nas seções principais.
+
+---
+
+### Priorização (Auditoria DOM 2026-06-28)
+
+**Ordem de execução sugerida:**
+
+1. 🔴 **BUG-H-001 + BUG-H-002** — header grid 1366px (bloqueia desktop inteiro)
+2. 🔴 **BUG-H-003** — carousel overflow 360px (conteúdo cortado)
+3. 🟠 **BUG-H-005** — Hero CTA 264px height (dobra mobile)
+4. 🟠 **BUG-H-011** — Gap zero entre seções (layout achatado)
+5. 🟠 **BUG-H-006** — Seção "Lançamentos" vazia
+6. 🟠 **BUG-H-007** — Hero imagens 404
+7. 🟠 **BUG-H-008** — Alt text banners (WCAG)
+8. 🟡 **BUG-H-018/019** — 38 CSS + FOUC (performance)
+9. 🟡 **BUG-H-022/023** — SEO title + hero alt
+10. 🟡 **BUG-H-017** — Recent orders para anônimos
