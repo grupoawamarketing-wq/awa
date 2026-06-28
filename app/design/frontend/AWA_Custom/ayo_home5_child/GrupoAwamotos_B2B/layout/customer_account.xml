@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * B2B Status Panel no header — superfícies de conta (customer_account e b2b_*).
+ *
+ * Declarado neste handle (e não no default) por dois motivos:
+ * 1. O handle customer_account é mesclado DEPOIS do default, então esta declaração
+ *    sobrevive à re-declaração do bloco toki_header feita pelo
+ *    Rokanthemes_Themeoption/layout/default.xml deste tema (que descarta filhos
+ *    agendados sob toki_header/ via _overrideElementWorkaround).
+ * 2. cacheable="false" aqui não custa nada (páginas de conta já não são cacheadas
+ *    pelo FPC); no handle default ele desligaria o FPC do site inteiro.
+ *
+ * Em páginas FPC (home/categoria/PDP) a UI de conta logada é o
+ * awa-header-account-prompt hidratado via customer-data (fallback seguro).
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceBlock name="toki_header">
+            <block class="GrupoAwamotos\B2B\Block\Header\StatusPanel"
+                   name="awa.b2b.mode.badge"
+                   as="awaB2bModeBadge"
+                   template="GrupoAwamotos_B2B::header/status-panel.phtml"
+                   cacheable="false"/>
+        </referenceBlock>
+
+        <!-- Terminal lock — DEPOIS do align-grid (final-wins SSOT 4–16px) -->
+        <referenceBlock name="head.additional">
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.align.grid.terminal.account"
+                   template="Magento_Theme::html/awa-align-grid-terminal-loader.phtml"
+                   after="b2b.pages.late.css"/>
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.b2b.account.shell.final"
+                   template="GrupoAwamotos_B2B::head/awa-b2b-account-shell-final-loader.phtml"
+                   after="awa.align.grid.terminal.account"/>
+        </referenceBlock>
+    </body>
+</page>
