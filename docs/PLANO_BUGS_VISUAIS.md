@@ -71,11 +71,22 @@
 | Em progresso | 0 |
 | Método | Playwright/Firefox headless, 4 breakpoints (360, 390, 1024, 1366px) |
 
+### Backlog Auditoria Profunda (Performance/SEO/A11y/PLP — 2026-06-28)
+
+| Métrica | Valor |
+|---------|------:|
+| Total de bugs novos | **14** (BUG-H-036 a BUG-H-049) |
+| P1 | 1 |
+| P2 | 7 |
+| P3 | 6 |
+| Abertos | 14 |
+| Páginas auditadas | Home, PLP (Bagageiros) |
+
 ### Consolidação global (histórico + Fase 3D.2.5)
 
 | Indicador | Total |
 |-----------|------:|
-| Total de bugs/melhorias (todas as fases) | **70** (22 históricos + 13 da Fase 3D.2.5 + 35 Auditoria DOM Home) |
+| Total de bugs/melhorias (todas as fases) | **84** (22 históricos + 13 da Fase 3D.2.5 + 35 Auditoria DOM Home + 14 Auditoria Profunda) |
 | Corrigidos | 14 |
 | Em progresso | 7 |
 | Pendentes | 5 |
@@ -1595,3 +1606,118 @@ html body#html-body .block.block-search .actions button.action.search::before,
 8. 🟡 **BUG-H-018/019** — 38 CSS + FOUC (performance)
 9. 🟡 **BUG-H-022/023** — SEO title + hero alt
 10. 🟡 **BUG-H-017** — Recent orders para anônimos
+
+---
+
+## 18. Auditoria Profunda — Performance / SEO / A11y / PLP (2026-06-28)
+
+> Segunda rodada de auditoria: foco em performance, SEO técnico, acessibilidade e consistência cross-page.
+> Ferramentas: Playwright/Firefox DOM audit + análise JSON-LD + PLP Bagageiros.
+> 14 bugs novos — BUG-H-036 a BUG-H-049.
+
+### Tabela
+
+| ID | Título | Sev | Status | Página | BP | Componente | Fase |
+|----|--------|-----|--------|--------|----|-----------|------|
+| BUG-H-036 | 2091 elementos com CSS transition/animation | P1 | Aberto | Home | Todos | CSS Performance | 3D.6 |
+| BUG-H-037 | 25-36 riscos de CLS (height attr=0) | P2 | Aberto | Home/PLP | Todos | CLS | 3D.2.5 |
+| BUG-H-038 | Preload de fontes legado (Rubik + Source Sans 3) | P2 | Aberto | Home | Todos | Performance | 3D.6 |
+| BUG-H-039 | Preconnect duplicado (GTM × 2, GA × 2) | P2 | Aberto | Home | Todos | Performance | 3D.6 |
+| BUG-H-040 | FAQPage JSON-LD sem FAQ visível na home | P2 | Aberto | Home | Todos | SEO/Schema | SEO |
+| BUG-H-041 | OG image sem extensão de arquivo | P2 | Aberto | Home | Todos | SEO/OG | SEO |
+| BUG-H-042 | Twitter card image sem extensão | P3 | Aberto | Home | Todos | SEO/Social | SEO |
+| BUG-H-043 | Cookie consent não renderiza sem JS (LGPD) | P2 | Aberto | Todas | Todos | LGPD | Legal |
+| BUG-H-044 | 3 botões WhatsApp na mesma página | P3 | Aberto | Home | Todos | UX | 3D.2.5 |
+| BUG-H-045 | Logo à direita sistêmico em TODAS as páginas | P1 | Aberto | Global | 1366+ | Header/Brand | 3D.2.5 |
+| BUG-H-046 | Breadcrumb 4px wide na PLP (invisível) | P2 | Aberto | PLP | Todos | Breadcrumb | 3D.2.5 |
+| BUG-H-047 | Search bar 4px wide na PLP mobile (colapsada) | P2 | Aberto | PLP | 390/360 | Header/Search | 3D.4 |
+| BUG-H-048 | Footer CNPJ badge overflow 61px na PLP mobile | P2 | Aberto | PLP | 390/360 | Footer | 3D.2.5 |
+| BUG-H-049 | 0 produtos na PLP sem JS | P3 | Aberto | PLP | Todos | Product Grid | 3D.6 |
+
+---
+
+### Detalhes técnicos
+
+#### BUG-H-036 — 2091 elementos com CSS transition/animation
+- **Evidência:** `animatedEls: 2091` (desktop) / `2098` (mobile). Quase todos os elementos do DOM têm `transition` ou `animation` CSS ativo.
+- **Impacto:** GPU força composite layer em ~2000 elementos; pior em mobile. Causa jank visual, consumo alto de bateria e travamento em dispositivos de entrada.
+- **Fix:** auditar quais seletores CSS aplicam `transition: all` ou `animation` de forma excessiva (provavelmente regras globais como `* { transition: all 0.3s }`). Restringir para seletores específicos (botões, links, hover states).
+
+#### BUG-H-037 — 25-36 CLS risks
+- **Evidência:** `clsRisks: 25` (desktop), `36` (mobile) — imagens e vídeos com `height` attribute > 0 mas `getBoundingClientRect().height === 0`.
+- **Impacto:** quando esses elementos carregam, causam layout shift (CLS ruim → penalidade Core Web Vitals).
+- **Fix:** garantir que imagens com `width`/`height` attributes não sejam resetadas para `height: 0` por CSS; verificar `max-height: 0` ou `overflow: hidden` em containers.
+
+#### BUG-H-038 — Preload de fontes legado
+- **Evidência:** `<link rel="preload" href="rubik-600.woff2" as="font">` e `<link rel="preload" href="source-sans-3-400.woff2" as="font">`. Essas fontes não são o design system atual (Poppins/Plus Jakarta).
+- **Impacto:** bandwidth desperdiçado no critical path para fontes não usadas. Atrasa LCP.
+- **Fix:** remover preloads de `rubik-600.woff2` e `source-sans-3-400.woff2`; adicionar preload das fontes atuais (ex: `plus-jakarta-sans-600.woff2`, `poppins-400.woff2`).
+
+#### BUG-H-039 — Preconnect duplicado
+- **Evidência:** `preconnects` lista `https://www.googletagmanager.com/` × 2 e `https://www.google-analytics.com/` × 2.
+- **Impacto:** browser processa o hint duplicado mas não ganha dupla conexão — apenas desperdício de parsing e potencial negociação TLS duplicada.
+- **Fix:** remover preconnect/dns-prefetch duplicados no `default_head_blocks.xml` ou `awa-head-preload.phtml`.
+
+#### BUG-H-040 — FAQPage JSON-LD sem FAQ visível
+- **Evidência:** `schemas[0].type: "FAQPage"` com `mainEntity` (perguntas) no JSON-LD, mas nenhuma seção `<details>`, `.faq` ou `.awa-faq` visível na página.
+- **Impacto:** Google pode reprovar rich result de FAQ se o conteúdo não estiver no HTML visível. Penalidade de "Structured data issue" no Search Console.
+- **Fix:** ou renderizar as perguntas do FAQ visíveis no HTML da home, ou remover o FAQPage JSON-LD da home (manter apenas em página dedicada de FAQ).
+
+#### BUG-H-041 — OG image sem extensão
+- **Evidência:** `og:image: "https://awamotos.com/media/logo/stores/1/awamotos-og-default"` — sem `.jpg`, `.png` ou `.webp`.
+- **Impacto:** crawlers de redes sociais (Facebook, LinkedIn, Slack) podem falhar ao identificar o tipo de imagem. Compartilhamento sem preview de imagem.
+- **Fix:** adicionar extensão ao nome do arquivo OG image: `awamotos-og-default.jpg` (ou configurar o Magento para gerar URL com extensão).
+
+#### BUG-H-042 — Twitter card image sem extensão
+- **Evidência:** `twitter:image: "https://awamotos.com/media/logo/stores/1/awamotos-og-default"` — mesmo problema da OG image.
+- **Fix:** mesmo que BUG-H-041. Garantir que a imagem social tenha extensão explícita.
+
+#### BUG-H-043 — Cookie consent não renderiza sem JS (LGPD)
+- **Evidência:** `hasCookieBar: false`. O banner de cookies não aparece sem JS.
+- **Impacto:** em visitas de crawlers (Googlebot, LinkedIn, Facebook) o consent não é exibido. Em usuários com JS bloqueado, o site viola LGPD ao usar cookies sem consent.
+- **Fix:** renderizar o banner de cookie consent como HTML estático no `<head>` ou `<body>` e controlar visibilidade via CSS (não via JS).
+
+#### BUG-H-044 — 3 botões WhatsApp na mesma página
+- **Evidência:** `waBtnCount: 3` — 3 links `https://wa.me/...` distintos na home.
+- **Impacto:** experiência confusa (qual WhatsApp usar?); 3 FABs/CTAs para o mesmo destino cria ruído visual.
+- **Fix:** consolidar em 1 botão flutuante persistente + 1 CTA contextual (B2B section).
+
+#### BUG-H-045 — Logo à direita sistêmico em todas as páginas
+- **Evidência:** PLP desktop `logo.left: 951px`; Home desktop `logo.left: 1087px`. Confirmado em múltiplas páginas (home, PLP, 404).
+- **Impacto:** BUG-H-001 é mais crítico do que inicialmente avaliado — afeta TODA a loja em desktop acima de ~1024px.
+- **Fix:** mesma correção do BUG-H-001 — tem efeito global em todas as páginas.
+
+#### BUG-H-046 — Breadcrumb 4px wide na PLP
+- **Evidência:** PLP desktop `breadcrumb.rect: {w: 4, h: 107}`; PLP mobile `breadcrumb.rect: {w: 4, h: 53}`.
+- **Impacto:** breadcrumb invisível em toda a PLP. Usuários não conseguem navegar de volta para categoria pai. WCAG 2.4.8 (Location).
+- **Fix:** verificar se `max-width: 4px` ou `overflow: hidden` está sendo aplicado ao container do breadcrumb. Pode ser conflito com `.awa-breadcrumbs { max-width: 4px }` ou similar.
+
+#### BUG-H-047 — Search bar 4px na PLP mobile
+- **Evidência:** PLP mobile 390px: `search.rect: {l:11, w:4}`.
+- **Impacto:** campo de busca completamente inutilizável na PLP mobile sem JS. Usuário não consegue buscar por SKU/modelo na página de categoria.
+- **Fix:** verificar se `.block-search` na PLP mobile está recebendo `max-width: 4px` ou `width: 0` de alguma regra CSS. Pode ser sobreposição de `layered-navigation`/toolbar com o search.
+
+#### BUG-H-048 — Footer CNPJ badge overflow 61px na PLP
+- **Evidência:** `.awa-footer-cnpj-badge` right: 451px em viewport 390px (overflow 61px).
+- **Impacto:** o badge do CNPJ (credibilidade) fica cortado e ilegível em mobile na PLP.
+- **Fix:** `overflow-x: clip` no wrapper do footer ou `max-width: 100%; width: 100%` no `.awa-footer-cnpj-badge`.
+
+#### BUG-H-049 — PLP sem produtos visíveis sem JS
+- **Evidência:** `productItems: 0` na PLP bagageiros sem JS.
+- **Impacto:** toda a grade de produtos é JS-only. Googlebot (crawl sem JS) não indexa produtos da PLP.
+- **Fix:** garantir SSR (server-side rendering) dos produtos na PLP com `<noscript>` fallback ou lazy JS initialization que preserva o HTML dos produtos.
+
+---
+
+### Priorização desta rodada
+
+1. 🔴 **BUG-H-036** — CSS transitions em 2091 elementos (performance crítica)
+2. 🔴 **BUG-H-045** — Logo sistêmico global (confirma BUG-H-001 prioritário)
+3. 🟠 **BUG-H-043** — Cookie consent LGPD sem JS
+4. 🟠 **BUG-H-046** — Breadcrumb invisível PLP
+5. 🟠 **BUG-H-047** — Search 4px PLP mobile
+6. 🟠 **BUG-H-037** — CLS risks 25-36
+7. 🟠 **BUG-H-049** — PLP sem produtos (indexação Googlebot)
+8. 🟡 **BUG-H-040** — FAQPage sem FAQ visível
+9. 🟡 **BUG-H-041/042** — OG/Twitter image sem extensão
+10. 🟡 **BUG-H-038/039** — Preloads/preconnects legado
