@@ -501,6 +501,67 @@ Um bug só pode ser marcado como **Corrigido** quando **todos** os critérios fo
 
 ---
 
+## 8.1 Tabela expandida de bugs visuais / UX (atualizado 2026-06-28)
+
+> Catálogo expandido dos bugs identificados pelo time de auditoria.
+> Status baseado em commits aplicados até `b362d5e2`.
+
+### P1 — Bloqueantes / críticos
+
+| ID | Bug | Status | Evidência |
+|----|-----|--------|-----------|
+| **BUG-QA-SCREENSHOTS-007** | Screenshots visuais bloqueados | **Aberto / bloqueante** | Playwright e Firefox headless falham ou travam ao capturar awamotos.com; sem screenshots atuais não dá para certificar regressão visual. |
+| **BUG-PERFORMANCE-014** | Peso visual/performance da home | **Aberto** | Home tem 458 KB de HTML, 23 CSS, 17 estilos inline e ~497 KB de CSS medido em relatório. Impacta LCP, FOUC e experiência visual. |
+| **BUG-CSS-AUTHORITY-011** | Autoridade CSS fragmentada | **Parcial / fundação feita, ainda crítico** | Muitos bundles, estilos inline "terminal lock", cascade complexa e dependência de OptimizeHeadStylesPlugin. Isso aumenta risco de regressão visual. |
+
+### P2 — Alto impacto
+
+| ID | Bug | Status | Evidência |
+|----|-----|--------|-----------|
+| **BUG-MOB-SEARCH-001** | Busca mobile / lupa / ícones duplicados | **Em progresso, não certificado** | Relatório indica cobertura parcial; faltam seletores específicos para `.block-search` mobile. |
+| **BUG-MOB-TOP-002** | Topo mobile denso acima da dobra | **Em progresso** | Cobertura parcial via `awa-home-standardize-terminal-wins` e flex-grid; ainda precisa validação visual em 390px/360px. |
+| **BUG-MOB-HERO-003** | Hero mobile competindo com busca | **Em progresso, provável pendência** | Arquivos específicos de hero não foram modificados significativamente; precisa validação visual. |
+| **BUG-B2B-BAR-004** | Barra B2B com aparência promocional/colada | **Parcial** | Candidato em `_awa-b2b-phases4-7.less` e `awa-cookie-consent-fix.css`; precisa inspeção visual. |
+| **BUG-BP-1024-008** | Breakpoint tablet 1024px | **Em progresso** | Depende do sistema flex-grid; validação por screenshot ainda pendente. |
+| **BUG-BP-360-009** | Breakpoint mobile pequeno 360px | **Em progresso** | Risco em header/search/hero/carrosséis; validação por screenshot pendente. |
+| **BUG-ROUTE-CONSISTENCY-006** | Inconsistência visual entre rotas | **Em progresso** | Home, PLP, PDP, carrinho e B2B login ainda não têm certificação visual conjunta. |
+| **BUG-HOMEPAGE-EMPTY-WS** | Espaços vazios em blocos da home | **Conhecido** | Relatório antigo aponta blocos CMS/carrosséis sem produtos atribuídos como causa de whitespace médio. |
+| **BUG-HOME-CRITICAL-CSS** | CSS crítico excessivo na home | **Aberto** | `awa-home-critical-stack-2026-06-11.min.css` ~147 KB; `awa-head-preload-critical-home.min.css` ~107 KB. Grande demais para above-the-fold. |
+| **BUG-INLINE-STYLES-CASCADE** | 17 estilos inline competindo com bundles | **Aberto** | Inline styles como `awa-home-hero-fouc-final`, `awa-hero-mobile-slider-inline-fix-5`, `awa-header-simplify-ui-terminal-lock` etc. podem causar cascade imprevisível. |
+| **BUG-TERMINAL-LOCK-HACKS** | Dependência de hacks de cascade / terminal locks | **Aberto** | Muitos arquivos de "fix", "lock", "terminal", "critical" e "visual QA" indicam correção por sobreposição, não por fonte canônica única. |
+
+### P3 — Polish
+
+| ID | Bug | Status | Evidência |
+|----|-----|--------|-----------|
+| **BUG-RED-USAGE-012** | Excesso de vermelho | **Em progresso / precisa auditoria visual** | Sem cross-reference específico; precisa validação visual para separar identidade da marca vs excesso visual. |
+| **BUG-IMPORTANT-AUDIT-013** | Uso elevado de `!important` | **Aberto** | Relatórios citam grande volume de `!important` defensivo; risco de manutenção e regressão visual. |
+| **BUG-DECIMAL-FONT-SIZES** | Font sizes decimais herdados do Ayo | **Conhecido / baixo impacto** | Relatório visual aponta tamanhos como 11.375px, 17.075px, 24.588px; baixo impacto, mas visualmente inconsistente. |
+| **BUG-CAROUSEL-CMS-DEPENDENCY** | Carrosséis e grids dependem de CSS corretivo | **Parcial** | Histórico de bug na `.top-home-content__trust-offers-grid`; corrigido, mas ainda requer monitoramento porque o layout depende de estrutura CMS específica. |
+| **BUG-B2B-LOGIN-010** | B2B login precisa manter linguagem visual integrada à loja | **Em progresso** | Cobertura parcial via `b2b/auth/refine.css` (commit `095944e9`); precisa validação visual. |
+| **BUG-PLP-MOBILE-005** | PLP mobile pendente de validação de hierarquia | **Em progresso** | Cobertura via `awa-plp-final-polish.css`; falta validação visual em 360/390. |
+
+### Priorização (resumo executivo do auditor)
+
+**Bugs visuais mais importantes hoje:**
+
+1. 🔴 **QA visual bloqueado** por screenshot/render timeout
+2. 🔴 **Home pesada demais** visualmente/performance
+3. 🟠 **CSS fragmentado** com muitos bundles e estilos inline
+4. 🟠 **Mobile ainda não certificado**: busca, topo, hero, 360px, 1024px
+5. 🟠 **Consistência entre rotas** ainda não certificada
+6. 🟡 **Uso excessivo de locks/!important/overrides** defensivos
+7. ✅ **Home não está quebrada por 404** (resolvido em DOC-022)
+
+### Notas de tratamento
+
+- **BUG-QA-SCREENSHOTS-007**: dependente de ambiente (Playwright/headless timeout). Documentado como bloqueador.
+- **BUG-PERFORMANCE-014, BUG-HOME-CRITICAL-CSS, BUG-INLINE-STYLES-CASCADE**: candidatos a **Fase 4** (DOC-019). Consolidação de bundles e critical CSS extraction.
+- **BUG-TERMINAL-LOCK-HACKS, BUG-IMPORTANT-AUDIT-013**: candidatos a **Fase 3D.7** (refactor arquitetural de !important).
+- **BUG-MOB-***, BUG-BP-***: pré-requisito `BUG-QA-SCREENSHOTS-007` (screenshots). Após desbloqueio, abrir issues por rota.
+
+---
+
 ## 9. Fases anteriores (histórico preservado)
 
 > **Fases 0-5** (BUG-01 a BUG-13, HEADER-01..04, MEL-01..05, SEO-01..02, PERF-01) e seus dashboards permanecem registrados abaixo.
