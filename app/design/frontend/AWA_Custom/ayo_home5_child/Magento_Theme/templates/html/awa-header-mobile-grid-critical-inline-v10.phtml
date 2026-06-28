@@ -1,0 +1,85 @@
+<?php declare(strict_types=1);
+
+/**
+ * Home PSI P7 — grid mobile do header no 1º paint (link externo cacheável — 2026-06-10).
+ * CSS: web/css/awa-header-mobile-grid-critical.min.css
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ */
+$__headerGridCriticalUrl = $block->getViewFileUrl('css/awa-header-mobile-grid-critical.min.css') . '?v=20260619-header-clean';
+$__headerGridCriticalEsc = $block->escapeUrl($__headerGridCriticalUrl);
+?>
+<link rel="preload" href="<?= $__headerGridCriticalEsc ?>" as="style" fetchpriority="high"/>
+<link rel="stylesheet" href="<?= $__headerGridCriticalEsc ?>" media="all" id="awa-header-mobile-grid-critical"/>
+<script>
+(function (w, d) {
+    if (d.getElementById('awa-home-critical-stack')) {
+        var dup = d.getElementById('awa-header-mobile-grid-critical');
+        if (dup) {
+            dup.remove();
+        }
+        return;
+    }
+    var isHomeByPath = !w.location || w.location.pathname === '' || w.location.pathname === '/';
+    var body = d.body;
+    var runtime = w.__awaHeaderMinicartRuntime = w.__awaHeaderMinicartRuntime || {};
+    var src;
+    var script;
+    var attempts = 0;
+
+    function appendDeferScript() {
+        if (w.__awaMinicartDeferClaim || d.querySelector('script[src="' + src + '"], script[data-awa-defer-init="' + src + '"]')) {
+            return;
+        }
+        runtime.owner = 'defer';
+        runtime.ownerSource = runtime.ownerSource || 'awa-header-mobile-grid-critical-inline-v10';
+        runtime.ownerClaimedAt = runtime.ownerClaimedAt || Date.now();
+        w.__awaMinicartDeferClaim = true;
+
+        script = d.createElement('script');
+        script.src = src;
+        script.defer = true;
+        script.setAttribute('data-awa-defer-init', src);
+        (d.head || d.documentElement).appendChild(script);
+    }
+
+    function waitForRuntimeOwner() {
+        if (attempts >= 8) {
+            appendDeferScript();
+            return;
+        }
+
+        attempts += 1;
+
+        if (runtime.owner === 'v2') {
+            return;
+        }
+
+        if (w.__awaMinicartDeferClaim || runtime.owner === 'defer') {
+            appendDeferScript();
+            return;
+        }
+
+        w.setTimeout(waitForRuntimeOwner, 140);
+    }
+
+    var isHomeByBodyClass = !!(body && (
+        body.classList.contains('cms-index-index') ||
+        body.classList.contains('cms-home') ||
+        body.classList.contains('cms-homepage_ayo_home5')
+    ));
+    var isHomeByMarker = !!d.getElementById('awa-home-bootstrap-merged');
+    if (isHomeByPath || isHomeByBodyClass || isHomeByMarker) {
+        return;
+    }
+    src = <?= json_encode($block->getViewFileUrl('js/awa-minicart-defer-init.js'), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;
+    if (runtime.owner === 'v2') {
+        return;
+    }
+
+    waitForRuntimeOwner();
+}(window, document));
+</script>
+<?= $block->getLayout()->createBlock(\Magento\Framework\View\Element\Template::class)
+    ->setTemplate('Magento_Theme::html/awa-header-early-sticky-sync.phtml')
+    ->toHtml() ?>

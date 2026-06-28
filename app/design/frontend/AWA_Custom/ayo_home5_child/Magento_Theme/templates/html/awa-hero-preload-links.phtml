@@ -1,0 +1,18 @@
+<?php declare(strict_types=1);
+/**
+ * LCP Hero Image Preload — apenas <link rel="preload"> (descoberta imediata).
+ *
+ * Deve renderizar no início de head.additional, antes de CSS inline (~110KB),
+ * para eliminar load delay no LCP (PSI/Lighthouse).
+ *
+ * @var \GrupoAwamotos\Theme\Block\Html\HeroPreload $block
+ */
+$heroPreloadUrl = $block->getHeroImageUrl();
+if ($heroPreloadUrl === '') {
+    return;
+}
+$heroMobileUrl = $block->getHeroImageMobileUrl() ?: $heroPreloadUrl;
+?>
+<!-- LCP Hero Image Preload — media queries + URL exata (sem imagesrcset; evita mismatch desktop 1920w vs preload 768w) -->
+<link rel="preload" href="<?= $block->escapeUrl($heroMobileUrl) ?>" as="image" media="(max-width: 767px)" fetchpriority="high"/>
+<link rel="preload" href="<?= $block->escapeUrl($heroPreloadUrl) ?>" as="image" media="(min-width: 768px)" fetchpriority="high"/>
