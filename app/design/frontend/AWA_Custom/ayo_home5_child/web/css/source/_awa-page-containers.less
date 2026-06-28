@@ -1,5 +1,5 @@
 // =============================================================================
-// AWA PAGE CONTAINERS — v1.2 — Single Source of Truth para larguras de página
+// AWA PAGE CONTAINERS — v1.4 — Single Source of Truth para larguras de página
 // =============================================================================
 //
 // Problema resolvido: havia 27 regras concorrentes de `.page-main max-width`
@@ -8,20 +8,28 @@
 // HIERARQUIA DE LARGURAS:
 //
 //   Tier 0 — full-bleed  : home (seções internas gerenciam o próprio container)
-//   Tier 1 — catalog     : PLP / PDP / Search / Cart — 1440px
+//   Tier 1 — catalog     : PLP / PDP / Search / Cart — 1280px
 //   Tier 2 — dashboard   : B2B dashboard / account / orders — 1280px (2 colunas)
-//   Tier 3 — flow        : cotações, listas, quickorder — 1100px (1 coluna ampla)
+//   Tier 3 — flow        : cotações, listas, quickorder — 1280px (eixo unificado)
 //   Tier 4 — narrow      : login / cadastro / B2B register / checkout — 960px
 //   Tier 5 — prose       : CMS genérico / currículo — 800px
 //
 // REGRA: nunca definir max-width no .page-main fora deste arquivo.
 //        Exceções são permitidas apenas com comentário // [CONTAINER-EXCEPTION]
 //
+// v1.3 (2026-06-15): Tier 3 unificado a 1280px para eliminar CLS (1100→1280 flash
+// causado por awa-layout-bundle.css async). Mixin agora usa clamp() fluido em vez
+// de breakpoints escalonados, alinhando o padding-inline ao header.
+//
+// v1.4 (2026-06-15): @awa-page-pad-mobile 12→16px para alinhar com o header mobile
+// (--awa-cro-container-pad-mobile: 16px). Elimina desalinhamento de 4px em viewports
+// estreitos (<533px). --awa-page-main-pad atualizado: clamp(16px, 3vw, 24px).
 
 // ── TOKENS DE LARGURA ─────────────────────────────────────────────────────────
-@awa-page-catalog : 1440px;  // PLP / PDP / Search / Cart
+// Eixo único do site: 1280px (alinhado ao header).
+@awa-page-catalog : 1280px;  // PLP / PDP / Search / Cart
 @awa-page-dash    : 1280px;  // B2B Dashboard (2-col com sidebar)
-@awa-page-flow    : 1100px;  // Cotações, listas, quickorder
+@awa-page-flow    : 1280px;  // Cotações, listas, quickorder — unificado v1.3
 @awa-page-narrow  : 960px;   // Login, cadastro, B2B register, checkout
 @awa-page-prose   : 800px;   // CMS prose, currículo
 
@@ -29,34 +37,36 @@
 @awa-page-bp-md   : 1024px;
 @awa-page-bp-sm   : 768px;
 
-// ── PADDING LATERAL POR TIER ──────────────────────────────────────────────────
-@awa-page-pad-desktop : 24px;
-@awa-page-pad-tablet  : 16px;
-@awa-page-pad-mobile  : 12px;
+// ── PADDING LATERAL ───────────────────────────────────────────────────────────
+// Espelha exatamente --awa-cro-container-pad-* do header:
+//   mobile = 16px  (clamp mínimo — <533px, 3vw < 16px)
+//   desktop = 24px (clamp máximo — >800px, 3vw > 24px)
 
-// Exportar tokens para CSS custom properties (uso em JS/templates)
+// Exportar tokens para CSS custom properties
 :root {
-    --awa-page-catalog : 1440px;
-    --awa-page-dash    : 1280px;
-    --awa-page-flow    : 1100px;
-    --awa-page-narrow  : 960px;
-    --awa-page-prose   : 800px;
-    --awa-page-pad     : 24px;
+    --awa-page-catalog  : 1280px;
+    --awa-page-dash     : 1280px;
+    --awa-page-flow     : 1280px;
+    --awa-page-narrow   : 960px;
+    --awa-page-prose    : 800px;
+    --awa-page-pad      : 24px;
+    --awa-page-content     : @awa-page-catalog;
+    --awa-page-pad-catalog : @awa-page-pad-catalog;
+    // Token para gutter do page-main — espelha clamp do header:
+    //   min=16px (mobile, alinhado a --awa-cro-container-pad-mobile)
+    //   max=24px (desktop, alinhado a --awa-cro-container-pad-desktop)
+    --awa-page-main-pad : clamp(16px, 3vw, 24px);
 }
 
 // ── MIXIN: padrão de container ────────────────────────────────────────────────
+// padding-inline usa clamp() fluido: 16px mobile → 24px desktop
+// Espelha --awa-hdr-pad-inline para alinhamento visual perfeito
 .awa-page-container(@max-w) {
-    max-width: @max-w !important; // single source of truth
+    max-width: @max-w !important;
     width: 100%;
     margin-inline: auto;
-    padding-inline: @awa-page-pad-desktop;
-
-    @media (max-width: @awa-page-bp-md) {
-        padding-inline: @awa-page-pad-tablet;
-    }
-    @media (max-width: @awa-page-bp-sm) {
-        padding-inline: @awa-page-pad-mobile;
-    }
+    padding-inline: clamp(@awa-page-pad-mobile, 3vw, @awa-page-pad-desktop);
+    box-sizing: border-box;
 }
 
 
@@ -168,7 +178,7 @@ body.ayo-curriculo-index-status .page-main {
 body.catalog-category-view .breadcrumbs,
 body.catalog-product-view .breadcrumbs,
 body.catalogsearch-result-index .breadcrumbs {
-    max-width: @awa-page-catalog;
+    max-width: @awa-page-catalog; // 1280px — alinhado ao eixo do header
     margin-inline: auto;
     padding-inline: @awa-page-pad-desktop;
 
