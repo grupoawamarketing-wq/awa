@@ -118,6 +118,7 @@
 | BUG-CSS-AUTHORITY-011 | Dependência forte do OptimizeHeadStylesPlugin como autoridade visual | P2 | **Pré-requisito criado** | Global | Todos | CSS pipeline | 3D.6 | git grep + manual review | Reduz sustentabilidade premium | `de989354` (tokens), `726e0f47` (prune) |
 | BUG-RED-USAGE-012 | Risco de excesso de vermelho em CTAs e superfícies | P3 | **Em progresso** | Global | Todos | Design system | Design QA contínuo | git grep + manual review | Apenas polish | `7ed106d9` `26646660` |
 | BUG-IMPORTANT-AUDIT-013 | **NOVO** — 113 ocorrências de `!important` no `_awa-header-stack.less` (45% do diff) | P3 | Aberto | Global | Todos | CSS qualidade | 3D.7 (futura) | commit `7ed106d9` follow-up | Sem impacto premium imediato | `7ed106d9` |
+| BUG-PERFORMANCE-014 | **NOVO** — PageSpeed abaixo do ideal (23 CSS files, 17 inline `<style>`, ~497 KB total) | P2 | Aberto | Todas (home prioritário) | Mobile | CSS pipeline | 4.1-4.4 | DOC-018 PageSpeed analysis | Sem impacto premium visual | DOC-018, DOC-019 |
 
 **Relacionamentos explícitos (vínculos):**
 
