@@ -1,0 +1,122 @@
+<?php
+/**
+ * Layered navigation filters — AWA override (price fallback + overlay a11y).
+ *
+ * @var \Magento\LayeredNavigation\Block\Navigation\FilterRenderer $block
+ * @var \Magento\Catalog\Model\Layer\Filter\Item[] $filterItems
+ */
+declare(strict_types=1);
+?>
+<ol class="items">
+    <?php foreach ($filterItems as $filterItem): ?>
+        <?php
+        $filter = $filterItem->getFilter();
+        $attributeModel = $filter->getData('attribute_model');
+        $inputName = $filter->getRequestVar();
+        $requestValue = $block->getRequest()->getParam($inputName);
+        $requestArray = $requestValue ? explode(',', (string) $requestValue) : [];
+        $url = in_array($filterItem->getValue(), $requestArray) ? $filterItem->getRemoveUrl() : $filterItem->getUrl();
+        if ($inputName === 'cat') {
+            $exUrl = explode('cat=', (string) $url);
+            if (isset($exUrl[1])) {
+                $ex2Url = explode('%2C', $exUrl[1]);
+                if (isset($ex2Url[1])) {
+                    $url = $exUrl[0] . 'cat=' . $ex2Url[1];
+                }
+            }
+        }
+        ?>
+        <li class="item">
+            <?php
+            $layeredAjaxHelper = $this->helper(\Rokanthemes\LayeredAjax\Helper\Data::class);
+            ?>
+            <?php if ($layeredAjaxHelper->isEnabledPriceRangeSliders() && $attributeModel && $attributeModel->getFrontendInput() === 'price'): ?>
+                <?php
+                $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+                $storeManager = $objectManager->get(\Magento\Store\Model\StoreManagerInterface::class);
+                $currency = $objectManager->create(\Magento\Directory\Model\CurrencyFactory::class)
+                    ->create()
+                    ->load($storeManager->getStore()->getCurrentCurrencyCode());
+                $currencySymbol = $currency->getCurrencySymbol();
+                $productCollection = $filter->getLayer()->getProductCollection();
+                $collectionMin = (float) $productCollection->getMinPrice();
+                $collectionMax = (float) $productCollection->getMaxPrice();
+                [$from, $to] = $requestValue ? explode('-', (string) $requestValue) : [$collectionMin, $collectionMax];
+                [$min, $max] = $requestValue ? explode('-', (string) $requestValue) : [$collectionMin, $collectionMax];
+                $priceFormat = $this->helper(\Magento\Tax\Helper\Data::class)->getPriceFormat($block->getStore());
+                ?>
+                <div id="layered_ajax_price_attribute" class="awa-price-filter">
+                    <p class="awa-price-filter__fallback" aria-live="polite">
+                        <?= $block->escapeHtml(__('Faixa: %1 — %2', $currencySymbol . number_format((float) $min, 2, ',', '.'), $currencySymbol . number_format((float) $max, 2, ',', '.'))) ?>
+                    </p>
+                    <input type="hidden"
+                           id="price-range-slider"
+                           data-max="<?= $block->escapeHtmlAttr((string) $max) ?>"
+                           data-min="<?= $block->escapeHtmlAttr((string) $min) ?>"
+                           name="price-range-slider">
+                </div>
+                <script type="text/x-magento-init">
+                    {
+                        "#layered_ajax_price_attribute": {
+                            "Rokanthemes_LayeredAjax/js/price/layeredajaxslider": {
+                                "selectedFrom": <?= /* @noEscape */ (float) $from ?>,
+                                "selectedTo": <?= /* @noEscape */ (float) $to ?>,
+                                "currency": <?= /* @noEscape */ $this->helper(\Magento\Framework\Json\Helper\Data::class)->jsonEncode($currencySymbol) ?>,
+                                "priceFormat": <?= /* @noEscape */ $priceFormat ?>,
+                                "ajaxUrl": <?= /* @noEscape */ $this->helper(\Magento\Framework\Json\Helper\Data::class)->jsonEncode($filterItem->getUrl()) ?>
+                            }
+                        }
+                    }
+                </script>
+                <?php break; ?>
+            <?php else: ?>
+                <?php if ($filterItem->getCount() > 0): ?>
+                    <a <?= in_array($filterItem->getValue(), $requestArray) ? 'class="active"' : '' ?>
+                       href="<?= $block->escapeUrl($url) ?>">
+                        <?php if ($inputName !== 'cat'): ?>
+                            <input type="checkbox" <?= in_array($filterItem->getValue(), $requestArray) ? 'checked="checked"' : '' ?> />
+                        <?php endif; ?>
+                        <?php if ($inputName === 'rating') {
+                            if ($filterItem->getLabel() == '1') {
+                                $width = 20;
+                            } elseif ($filterItem->getLabel() == '2') {
+                                $width = 40;
+                            } elseif ($filterItem->getLabel() == '3') {
+                                $width = 60;
+                            } elseif ($filterItem->getLabel() == '4') {
+                                $width = 80;
+                            } else {
+                                $width = 100;
+                            }
+                            ?>
+                            <div class="rating-summary">
+                                <div class="rating-result" title="100%">
+                                    <span style="width:<?= (int) $width ?>%"><span><span>100</span>% of <span>100</span></span></span>
+                                </div>
+                            </div>
+                        <?php } else {
+                            if ($inputName === 'product_brand') { ?>
+                                <span class="brand-name"><?= $block->escapeHtml($filterItem->getLabel()) ?></span>
+                            <?php } else {
+                                echo $block->escapeHtml($filterItem->getLabel());
+                            }
+                        } ?>
+                        <?php if ($this->helper(\Magento\Catalog\Helper\Data::class)->shouldDisplayProductCountOnLayer()): ?>
+                            <span class="count"><?= (int) $filterItem->getCount() ?><span class="filter-count-label">
+                                <?= $filterItem->getCount() == 1 ? $block->escapeHtml(__('item')) : $block->escapeHtml(__('items')) ?></span></span>
+                        <?php endif; ?>
+                    </a>
+                <?php else: ?>
+                    <?php if ($attributeModel && $attributeModel->getFrontendInput() === 'multiselect'): ?>
+                        <input type="checkbox" disabled="disabled" />
+                    <?php endif; ?>
+                    <?= $block->escapeHtml($filterItem->getLabel()) ?>
+                    <?php if ($this->helper(\Magento\Catalog\Helper\Data::class)->shouldDisplayProductCountOnLayer()): ?>
+                        <span class="count"><?= (int) $filterItem->getCount() ?><span class="filter-count-label">
+                            <?= $filterItem->getCount() == 1 ? $block->escapeHtml(__('item')) : $block->escapeHtml(__('items')) ?></span></span>
+                    <?php endif; ?>
+                <?php endif; ?>
+            <?php endif; ?>
+        </li>
+    <?php endforeach ?>
+</ol>
