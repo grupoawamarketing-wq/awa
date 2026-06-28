@@ -97,7 +97,7 @@
 
 | Indicador | Total |
 |-----------|------:|
-| Total de bugs/melhorias (todas as fases) | **90** (22 históricos + 13 da Fase 3D.2.5 + 35 Auditoria DOM Home + 14 Auditoria Profunda + 6 Auditoria Multi-Page) |
+| Total de bugs/melhorias (todas as fases) | **91** (22 históricos + 13 da Fase 3D.2.5 + 35 Auditoria DOM Home + 14 Auditoria Profunda + 6 Auditoria Multi-Page + 1 Auditoria PDP) |
 | Corrigidos | 14 |
 | Em progresso | 7 |
 | Pendentes | 5 |
@@ -1786,16 +1786,25 @@ html body#html-body .block.block-search .actions button.action.search::before,
 - **Fix:** verificar `.awa-b2b-auth-wrapper` ou `.page-main` no B2B login: `margin-top: -95px` sugere um offset negativo intencional que está excedendo em mobile.
 
 #### BUG-H-053 — Newsletter form duplicado (2× por página)
-- **Evidência:** todas as páginas auditadas (home, carrinho, PLP, 404) têm 2 forms com action `/newsletter/subscriber/new/`:
-  - Form 1: 2 inputs, sem form_key, novalidate
-  - Form 2: 1 input, com form_key, novalidate
-- **Impacto:** UX confusa (dois campos de newsletter); um deles pode estar em área oculta ou no footer.
-- **Fix:** identificar qual bloco CMS ou template renderiza o form duplicado e remover a instância redundante.
+- **Evidência (confirmado via curl no PDP):** 2 forms com action `/newsletter/subscriber/new/` em todas as páginas:
+  - `#newsletter-validate-popup` — Rokanthemes popup (`div#newsletter_pop_up`), **sem form_key**
+  - `#newsletter-validate-detail` — AWA footer newsletter, com form_key
+- **Origem:** `Rokanthemes_Themeoption` renderiza o popup em todas as páginas; o footer é o AWA override de `Magento_Newsletter`.
+- **Impacto:** Dois formulários de newsletter sempre presentes no DOM; o popup é oculto por padrão e visível via bPopup JS.
+- **Fix:** Avaliar se o popup Rokanthemes (`newsletterpopup.phtml`) deve coexistir com o popup AWA (`awa-newsletter-popup.phtml`). Se o popup Rokanthemes for redundante, desabilitar via layout XML. Se mantido, adicionar form_key (ver BUG-H-054).
 
-#### BUG-H-054 — Newsletter sem CSRF (form_key ausente)
-- **Evidência:** Form 1 do newsletter (`csrf: false`) — sem `<input name="form_key">`. A versão 2 tem form_key.
-- **Impacto:** sem JS, o formulário é submetível sem proteção CSRF. Risco de CSRF attack para inscrição não autorizada de e-mails.
-- **Fix:** garantir que AMBAS as instâncias do formulário newsletter tenham `form_key` no HTML estático. Em Magento, verificar se o template usa `$block->getFormKey()`.
+#### BUG-H-054 — Popup newsletter Rokanthemes sem form_key (CSRF)
+- **Evidência (confirmado via curl + grep):**
+  - Template: `app/design/frontend/AWA_Custom/ayo_home5_child/Rokanthemes_Themeoption/templates/newsletterpopup.phtml`
+  - O form `#newsletter-validate-popup` não tem `form_key` nem `getBlockHtml('formkey')`
+  - O template original em `app/code/Rokanthemes/Themeoption/view/frontend/templates/newsletterpopup.phtml` também não tem
+- **Impacto:** Formulário de newsletter pode ser submetido sem CSRF token → possibilidade de CSRF attack para inscrição de emails sem consentimento.
+- **Fix (no override do tema filho):**
+  ```php
+  // Adicionar dentro de <form id="newsletter-validate-popup">
+  <?= $block->getBlockHtml('formkey') ?>
+  ```
+  Arquivo: `app/design/frontend/AWA_Custom/ayo_home5_child/Rokanthemes_Themeoption/templates/newsletterpopup.phtml`
 
 #### BUG-H-055 — 404 com 2 formulários de busca
 - **Evidência:** página 404 tem 5 forms, incluindo 2 com action `/catalogsearch/result/` (busca).
@@ -1825,3 +1834,41 @@ _awa-premium-effects.less, _awa-visual-audit-2026-05-05.less, etc.:
   87× transition: all em seletores específicos
 = 2091 elementos com transição CSS ativa
 ```
+
+---
+
+## 20. Auditoria PDP — Produto de Detalhe (2026-06-28)
+
+> Quarta rodada: inspeção via curl no PDP `ret-biz-100-cr-redondo-universal-2220.html`.
+> 1 novo bug — BUG-H-056.
+
+### Tabela
+
+| ID | Título | Sev | Status | Página | BP | Componente | Fase |
+|----|--------|-----|--------|--------|----|-----------|------|
+| BUG-H-056 | Imagens de produto sem width/height (CLS no PDP) | P2 | Aberto | PDP | Todos | Gallery/CLS | 3D.3 |
+
+---
+
+### Detalhes técnicos
+
+#### BUG-H-056 — Imagens product-image-photo sem width/height (CLS no PDP)
+- **Evidência:** Todas as `<img class="product-image-photo">` no PDP não possuem atributos `width` e `height` no HTML. Ex: `<img class="product-image-photo" src="...">`.
+  - 8+ imagens de produto na galeria sem dimensões
+  - Logo da loja também sem width/height
+  - Imagens de bandeiras de cartão no footer também sem width/height
+- **Impacto:** Sem dimensões declaradas, o browser não pode reservar espaço antes do carregamento → layout shift (CLS) na abertura do PDP. Penaliza Core Web Vitals (CLS > 0.1 = "Needs Improvement").
+- **Fix:** Adicionar `width` e `height` em todos os `<img>` no template do PDP. Para as imagens de produto dinâmicas no Magento, verificar se o template `Magento_Catalog/templates/product/view/gallery.phtml` passa dimensões para o bloco. Nos blocos fotorama, verificar `lib/web/mage/gallery/gallery.js`.
+
+### Confirmações positivas do PDP
+
+| Item | Status |
+|------|--------|
+| robots: INDEX,FOLLOW | ✅ |
+| Canonical URL presente | ✅ |
+| H1 presente (1 por página) | ✅ |
+| Schema.org Product + Offer | ✅ (5 JSON-LD: Organization, WebSite, Product, Brand, Offer) |
+| Preço no Schema.org | ✅ (`"price": "61.25"`) |
+| Review form com form_key | ✅ |
+| Add-to-cart form com form_key | ✅ |
+
