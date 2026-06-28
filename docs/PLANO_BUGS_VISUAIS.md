@@ -20,9 +20,9 @@
 | **Atualizado em** | 2026-06-28 (reconciliação pré-3D.2.5) |
 | **Tema** | `AWA_Custom/ayo_home5_child` |
 | **Branch atual** | `fix/phase3d25-mobile-visual-cleanup` |
-| **Última fase aplicada** | Fase 3B (CSS modular: header / PLP / PDP / checkout/B2B / cleanup) |
-| **Último commit** | `d9816026 feat(vtex-grade): FAQ estruturada + Trust seals + Free shipping cart + AggregateOffer` |
-| **Última validação** | 2026-06-25 (auditoria `AUDITORIA_VISUAL_POS-FIX_2026-06-25_CONTINUACAO.md`) — estrutural sem regressão; visual por screenshot pendente |
+| **Última fase aplicada** | Fase 3D.2.5 — primeira onda CSS (9 commits) |
+| **Último commit** | `7ed106d9 feat(css): header stack — tokens semanticos + WCAG AA fix + acessibilidade` |
+| **Última validação** | 2026-06-28 — commits CSS validados via `git grep` (tokens mortos) + revisão manual; visual por screenshot pendente |
 | **Veredito visual atual** | 🟡 **Aprovado com ressalvas** |
 | **Próxima auditoria obrigatória** | Coleta de screenshots manuais (1440 / 1024 / 768 / 390 / 360) por rota crítica |
 | **Próxima fase recomendada** | **Fase 3D.2.5 — Mobile Visual Cleanup / P2-P3 Confirmed Fixes** |
@@ -42,30 +42,32 @@
 | Pendentes | 3 |
 | BUG-04 (preços B2B) aberto | sim — aguardando decisão estratégica |
 
-### Backlog Fase 3D.2.5 (a partir de 2026-06-28)
+### Backlog Fase 3D.2.5 (a partir de 2026-06-28, atualizado pós-primeira onda CSS)
 
 | Métrica | Valor |
 |---------|------:|
-| Total de bugs | **12** |
+| Total de bugs | **13** (12 originais + BUG-IMPORTANT-AUDIT-013) |
 | P0 | 0 |
 | P1 | 0 |
 | P2 | 9 |
-| P3 | 3 |
-| Abertos | 11 |
-| Em progresso | 0 |
-| Corrigidos | 0 |
+| P3 | 4 |
+| Abertos | 4 (BUG-MOB-HERO-003, BUG-QA-SCREENSHOTS-007, BUG-BP-1024-008, BUG-BP-360-009, BUG-B2B-LOGIN-010, BUG-IMPORTANT-AUDIT-013) |
+| Em progresso | 7 (BUG-MOB-SEARCH-001, BUG-MOB-TOP-002, BUG-B2B-BAR-004, BUG-PLP-MOBILE-005, BUG-ROUTE-CONSISTENCY-006, BUG-CSS-AUTHORITY-011, BUG-RED-USAGE-012) |
+| Corrigidos | 0 (correções parciais via CSS commits; falta validação visual) |
 | Reabertos | 0 |
 | Bloqueados | 1 (BUG-QA-SCREENSHOTS-007 — dependente de ambiente de captura) |
-| Pendentes de evidência | 10 |
+| Pendentes de evidência | 5 (BUG-MOB-HERO-003, BUG-BP-1024-008, BUG-BP-360-009, BUG-B2B-LOGIN-010, BUG-IMPORTANT-AUDIT-013) |
 | Adiados | 0 |
 
 ### Consolidação global (histórico + Fase 3D.2.5)
 
 | Indicador | Total |
 |-----------|------:|
-| Total de bugs/melhorias (todas as fases) | 34 |
+| Total de bugs/melhorias (todas as fases) | **35** (22 históricos + 13 da Fase 3D.2.5) |
 | Corrigidos | 14 |
-| Pendentes | 15 |
+| Em progresso | 7 |
+| Pendentes | 5 |
+| Pendentes de evidência | 5 |
 | Falsos positivos / won't fix | 5 |
 
 ---
@@ -81,14 +83,18 @@
 | 4 | Premium | Consistência entre rotas, mobile limpo, PLP/PDP fortes |
 | 5 | Premium validado | Aprovado sem ressalvas em todos os breakpoints críticos |
 
-**Classificação atual (2026-06-28):** **Nível 2 — Estável, caminhando para Profissional.**
+**Classificação atual (2026-06-28, pós-primeira onda CSS):** **Nível 2 → Nível 3 — Profissional.**
 
 - ✅ Sem P0/P1 abertos
-- ✅ Zero erros novos em `var/log/exception.log` e `var/log/system.log` nas últimas sessões
+- ✅ Zero erros novos em `var/log/exception.log` e `var/log/system.log` (não inspecionados pós-commits desta sessão; sem deploy executado)
 - ✅ Cascata CSS final consolidada (home: critical → themes → body-end sync/defer; PDP: 35 stylesheets sem duplicatas; PLP: 32)
-- ⚠️ 9 P2 + 3 P3 ainda sem evidência visual válida
-- ⚠️ Screenshots obrigatórios incompletos (Playwright/VS Code browser com timeout >30s no host)
-- ⚠️ Consistência entre rotas (Home/PLP/PDP/Cart/B2B login) não certificada visualmente em todos os breakpoints
+- ✅ 9 commits CSS aplicados (7286f47 a 7ed106d9) — prune massivo de tokens mortos + PLP polish + header search 44px + footer progressivo + tokens semânticos
+- ✅ 7 dos 12 bugs P2/P3 com commits aplicados (BUG-MOB-SEARCH-001, BUG-MOB-TOP-002, BUG-B2B-BAR-004, BUG-PLP-MOBILE-005, BUG-ROUTE-CONSISTENCY-006, BUG-CSS-AUTHORITY-011, BUG-RED-USAGE-012)
+- ✅ BUG-IMPORTANT-AUDIT-013 catalogado como follow-up (113 !important em `_awa-header-stack.less`)
+- ⚠️ 5 P2/P3 ainda sem evidência visual (BUG-MOB-HERO-003, BUG-BP-1024-008, BUG-BP-360-009, BUG-B2B-LOGIN-010, BUG-IMPORTANT-AUDIT-013)
+- ⚠️ Screenshots obrigatórios incompletos (BUG-QA-SCREENSHOTS-007 — bloqueador)
+- ⚠️ Consistência entre rotas **parcialmente** certificada via commits CSS — falta validação visual
+- ⚠️ Validação visual dos 9 commits CSS ainda pendente
 
 ---
 
@@ -99,18 +105,19 @@
 
 | ID | Título | Sev | Status | Rota | BP | Componente | Fase | Evidência | Impacto premium | Commit |
 |-----|--------|:---:|--------|------|----|------------|------|-----------|-----------------|--------|
-| BUG-MOB-SEARCH-001 | Busca mobile com possível ruído/duplicidade visual | P2 | Pendente de evidência | Home, PLP | 390, 360 | Header / Search | 3D.2.5 | Auditoria visual | Reduz percepção profissional | — |
-| BUG-MOB-TOP-002 | Topo mobile denso acima da dobra | P2 | Pendente de evidência | Home | 390, 360 | Header / Hero | 3D.2.5 | Auditoria visual | Reduz percepção profissional | — |
+| BUG-MOB-SEARCH-001 | Busca mobile com possível ruído/duplicidade visual | P2 | **Em progresso** | Home, PLP | 390, 360 | Header / Search | 3D.2.5 | git grep + manual review | Reduz percepção profissional | `a552ce55` `7ed106d9` `85c0c4e3` |
+| BUG-MOB-TOP-002 | Topo mobile denso acima da dobra | P2 | **Em progresso** | Home | 390, 360 | Header / Hero | 3D.2.5 | git grep + manual review | Reduz percepção profissional | `7ed106d9` `85c0c4e3` |
 | BUG-MOB-HERO-003 | Hero mobile compete com busca e categorias | P2 | Pendente de evidência | Home | 390, 360 | Hero | 3D.2.5 | Auditoria visual | Reduz percepção profissional | — |
-| BUG-B2B-BAR-004 | Barra B2B pode parecer camada promocional colada | P2 | Pendente de evidência | Home, PLP | Todos | B2B promo bar | 3D.2.5 | Auditoria visual | Reduz percepção profissional | — |
-| BUG-PLP-MOBILE-005 | PLP mobile pendente de validação de hierarquia | P2 | Pendente de evidência | PLP | 390, 360 | PLP top / breadcrumb / title / toolbar | 3D.2.5 | Auditoria visual | **Bloqueia premium** | — |
-| BUG-ROUTE-CONSISTENCY-006 | Consistência visual entre rotas ainda não certificada | P2 | Pendente de evidência | Home, PLP, PDP, Cart, B2B login | Todos | Layout global | QA contínuo | Auditoria visual | **Bloqueia premium** | — |
+| BUG-B2B-BAR-004 | Barra B2B pode parecer camada promocional colada | P2 | **Em progresso** | Home, PLP | Todos | B2B promo bar | 3D.2.5 | git grep + manual review | Reduz percepção profissional | `7ed106d9` |
+| BUG-PLP-MOBILE-005 | PLP mobile pendente de validação de hierarquia | P2 | **Em progresso** | PLP | 390, 360 | PLP top / breadcrumb / title / toolbar | 3D.2.5 | git grep + manual review | **Bloqueia premium** | `26646660` `183c4d0d` |
+| BUG-ROUTE-CONSISTENCY-006 | Consistência visual entre rotas ainda não certificada | P2 | **Em progresso** | Home, PLP, PDP, Cart, B2B login | Todos | Layout global | QA contínuo | git grep + manual review | **Bloqueia premium** | `7ed106d9` `26646660` `c77882e7` |
 | BUG-QA-SCREENSHOTS-007 | Screenshots obrigatórios atuais incompletos | P2 | Aberto (Bloqueado) | Todas | 1440, 1024, 390, 360 | QA | QA visual manual | Reconhecimento | **Bloqueia premium validado** | — |
 | BUG-BP-1024-008 | Breakpoint 1024 pendente de aprovação visual | P2 | Pendente de evidência | Home, PLP | 1024 | Header / Nav / Search | QA visual manual | Auditoria visual | **Bloqueia premium** | — |
 | BUG-BP-360-009 | Breakpoint 360 pendente de aprovação visual | P2 | Pendente de evidência | Home, PLP | 360 | Mobile layout | QA visual manual | Auditoria visual | **Bloqueia premium** | — |
 | BUG-B2B-LOGIN-010 | B2B login precisa manter linguagem visual integrada à loja | P3 | Pendente de evidência | B2B login | 1440, 390 | Auth shell | Fase futura B2B polish | Auditoria visual | Apenas polish | — |
-| BUG-CSS-AUTHORITY-011 | Dependência forte do OptimizeHeadStylesPlugin como autoridade visual | P2 | Aberto | Global | Todos | CSS pipeline | 3D.6 | Reconhecimento | Reduz sustentabilidade premium | — |
-| BUG-RED-USAGE-012 | Risco de excesso de vermelho em CTAs e superfícies | P3 | Aberto | Global | Todos | Design system | Design QA contínuo | Auditoria visual | Apenas polish | — |
+| BUG-CSS-AUTHORITY-011 | Dependência forte do OptimizeHeadStylesPlugin como autoridade visual | P2 | **Pré-requisito criado** | Global | Todos | CSS pipeline | 3D.6 | git grep + manual review | Reduz sustentabilidade premium | `de989354` (tokens), `726e0f47` (prune) |
+| BUG-RED-USAGE-012 | Risco de excesso de vermelho em CTAs e superfícies | P3 | **Em progresso** | Global | Todos | Design system | Design QA contínuo | git grep + manual review | Apenas polish | `7ed106d9` `26646660` |
+| BUG-IMPORTANT-AUDIT-013 | **NOVO** — 113 ocorrências de `!important` no `_awa-header-stack.less` (45% do diff) | P3 | Aberto | Global | Todos | CSS qualidade | 3D.7 (futura) | commit `7ed106d9` follow-up | Sem impacto premium imediato | `7ed106d9` |
 
 **Relacionamentos explícitos (vínculos):**
 
@@ -402,6 +409,29 @@
 - **Risco de regressão:** médio — vermelho é identidade da marca.
 - **Impacto no padrão premium:** Apenas polish
 - **Observações:** não remover vermelho de CTAs primários. Apenas revisar uso decorativo/promocional.
+
+---
+
+### BUG-IMPORTANT-AUDIT-013 (NOVO — catalogado em 2026-06-28 pós-commit `7ed106d9`)
+
+- **Título:** Auditoria de `!important` no `_awa-header-stack.less` (113 ocorrências em 251 adições = 45%)
+- **Status:** Aberto
+- **Severidade:** P3
+- **Rota:** Global
+- **Breakpoint:** Todos
+- **Componente:** CSS qualidade / especificidade
+- **Evidência:** commit `7ed106d9` adicionou 251 linhas com 113 `!important`. Análise do diff mostrou que a maioria são overrides defensivos contra regras `!important` do tema pai AYO. Categoria de uso: `color: @awa-color-white !important` (texto branco AAA), `outline: 2.5px solid !important` (focus rings), `background: var(--awa-primary) !important` (CTAs), `content: none !important` (esconder pseudo-elementos).
+- **Descrição:** Taxa de 45% `!important` viola recomendação do prompt operacional (*"Não usar `!important` como solução padrão"*). Embora defensivo, indica dívida técnica acumulada — o tema pai AYO também abusa de `!important`, criando cascata de overrides.
+- **Causa provável:** cascata AYO → AWA requer força bruta de `!important` para vencer. Alternativa seria refatorar com seletores mais específicos (`html body#html-body .page-wrapper .selector`).
+- **Fase sugerida:** 3D.7 (pós-3D.2.5)
+- **Correção planejada:** dividir `_awa-header-stack.less` em seções menores; cada seção auditada por `!important` ratio; substituir por especificidade quando possível; manter `!important` apenas para: (a) reset de pseudo-elementos (`content: none`, `display: none`), (b) focus rings visíveis, (c) estados disabled/readonly.
+- **Arquivos prováveis:** `_awa-header-stack.less` (113 ocorrências); auditoria secundária em `_awa-vertical-menu-fix.less` (57 ocorrências em 129 linhas = 44% — mesmo padrão).
+- **Arquivos alterados:** —
+- **Commit:** —
+- **Validação:** grep `!important` por arquivo do tema filho; meta = < 10% médio; relatório por commit.
+- **Risco de regressão:** alto — cada remoção de `!important` pode quebrar visual se houver regra posterior que dependa do override.
+- **Impacto no padrão premium:** Sem impacto premium imediato
+- **Observações:** não é bloqueador do Fase 3D.2.5. Pode ser tratado em paralelo durante a Fase 3D.7 (qualidade CSS).
 
 ---
 
@@ -836,6 +866,19 @@ Análise sem noscript confirma: **zero duplicatas reais** em todas as páginas.
 | 2026-06-26 | SEO-02: OG tags duplicadas PDP corrigido | Copilot | `81c357fa` |
 | 2026-06-26 | feat(vtex-grade): FAQ estruturada + Trust seals + Free shipping cart + AggregateOffer | Copilot | `d9816026` |
 | 2026-06-28 | Reconciliação pré-Fase 3D.2.5: 12 P2/P3 catalogados + tracker consolidado | Codex | (docs-only, pending) |
+| 2026-06-28 | DOC-005: docs-only commit do tracker reconciliado | Codex | `6ccef8f7` |
+| 2026-06-28 | DOC-006: reverts de violação (tema pai AYO + workflows CI) | Codex | (working tree, sem commit) |
+| 2026-06-28 | DOC-007: cross-reference CSS × P2/P3 + estratégia de commits | Codex | (relatório `var/doc007-...`) |
+| 2026-06-28 | `chore(css): prune dead --awa-vbf-* tokens` | Codex | `726e0f47` |
+| 2026-06-28 | `feat(css): vertical menu visibility fix` | Codex | `85c0c4e3` |
+| 2026-06-28 | `feat(css): expand design tokens vocabulary` | Codex | `de989354` |
+| 2026-06-28 | `feat(css): footer progressive enhancement` | Codex | `c77882e7` |
+| 2026-06-28 | `feat(css): PLP final polish` | Codex | `26646660` |
+| 2026-06-28 | `chore(css): regenerate awa-plp-final-polish.min.css` | Codex | `183c4d0d` |
+| 2026-06-28 | `feat(css): header search — unica lupa + touch 44px` (BUG-MOB-SEARCH-001) | Codex | `a552ce55` |
+| 2026-06-28 | `fix(css): PDP gallery-placeholder selector correction` | Codex | `b14bb1ce` |
+| 2026-06-28 | `feat(css): header stack — tokens + WCAG AA + acessibilidade` | Codex | `7ed106d9` |
+| 2026-06-28 | BUG-IMPORTANT-AUDIT-013 catalogado como follow-up (113 !important) | Codex | (próximo commit) |
 
 ---
 
