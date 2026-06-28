@@ -82,11 +82,22 @@
 | Abertos | 14 |
 | Páginas auditadas | Home, PLP (Bagageiros) |
 
+### Backlog Auditoria Multi-Page (Carrinho/Login/404 — 2026-06-28)
+
+| Métrica | Valor |
+|---------|------:|
+| Total de bugs novos | **6** (BUG-H-050 a BUG-H-055) |
+| P1 | 1 |
+| P2 | 4 |
+| P3 | 1 |
+| Abertos | 6 |
+| Páginas auditadas | Carrinho, B2B login, 404, themes.css |
+
 ### Consolidação global (histórico + Fase 3D.2.5)
 
 | Indicador | Total |
 |-----------|------:|
-| Total de bugs/melhorias (todas as fases) | **84** (22 históricos + 13 da Fase 3D.2.5 + 35 Auditoria DOM Home + 14 Auditoria Profunda) |
+| Total de bugs/melhorias (todas as fases) | **90** (22 históricos + 13 da Fase 3D.2.5 + 35 Auditoria DOM Home + 14 Auditoria Profunda + 6 Auditoria Multi-Page) |
 | Corrigidos | 14 |
 | Em progresso | 7 |
 | Pendentes | 5 |
@@ -1640,8 +1651,9 @@ html body#html-body .block.block-search .actions button.action.search::before,
 
 #### BUG-H-036 — 2091 elementos com CSS transition/animation
 - **Evidência:** `animatedEls: 2091` (desktop) / `2098` (mobile). Quase todos os elementos do DOM têm `transition` ou `animation` CSS ativo.
+- **Causa raiz confirmada (2026-06-28):** `themes.css` (Rokanthemes) linha 3068 aplica `a { transition: all 0.3s ease 0s }` globalmente. Com centenas de `<a>` na home, isso sozinho explica a maioria dos elementos. Adicionalmente: 87 instâncias de `transition: all` nos bundles CSS customizados (`_awa-premium-effects.less`, `_awa-visual-audit-2026-05-05.less`, etc.).
 - **Impacto:** GPU força composite layer em ~2000 elementos; pior em mobile. Causa jank visual, consumo alto de bateria e travamento em dispositivos de entrada.
-- **Fix:** auditar quais seletores CSS aplicam `transition: all` ou `animation` de forma excessiva (provavelmente regras globais como `* { transition: all 0.3s }`). Restringir para seletores específicos (botões, links, hover states).
+- **Fix:** Não editar `themes.css` (Rokanthemes). No tema filho, override: `a { transition: color var(--awa-duration-fast), opacity var(--awa-duration-fast); }` — substituir `all` por propriedades específicas. Nos bundles customizados, substituir as 87 instâncias de `transition: all` por `transition: color, background-color, opacity, transform, border-color`.
 
 #### BUG-H-037 — 25-36 CLS risks
 - **Evidência:** `clsRisks: 25` (desktop), `36` (mobile) — imagens e vídeos com `height` attribute > 0 mas `getBoundingClientRect().height === 0`.
@@ -1721,3 +1733,95 @@ html body#html-body .block.block-search .actions button.action.search::before,
 8. 🟡 **BUG-H-040** — FAQPage sem FAQ visível
 9. 🟡 **BUG-H-041/042** — OG/Twitter image sem extensão
 10. 🟡 **BUG-H-038/039** — Preloads/preconnects legado
+
+---
+
+## 19. Auditoria Multi-Page — Carrinho / B2B Login / CSS Root Causes (2026-06-28)
+
+> Terceira rodada: Carrinho, B2B Login, 404, busca. Investigação CSS da causa raiz de BUG-H-036.
+> 6 bugs novos — BUG-H-050 a BUG-H-055.
+
+### Tabela
+
+| ID | Título | Sev | Status | Página | BP | Componente | Fase |
+|----|--------|-----|--------|--------|----|-----------|------|
+| BUG-H-050 | `a { transition: all }` em themes.css — causa raiz BUG-H-036 | P1 | Aberto | Global | Todos | CSS/Performance | 3D.6 |
+| BUG-H-051 | Cart mobile: main content offset l:-25px (fora do viewport) | P2 | Aberto | Carrinho | 390/360 | Cart Layout | 3D.3 |
+| BUG-H-052 | B2B login mobile: main content t:-95px, l:-25px | P2 | Aberto | B2B Login | 390/360 | Auth Shell | B2B |
+| BUG-H-053 | Newsletter form duplicado (2× por página) | P2 | Aberto | Global | Todos | Newsletter | UX |
+| BUG-H-054 | Newsletter form sem CSRF (form_key ausente) | P2 | Aberto | Global | Todos | Security | Security |
+| BUG-H-055 | 404 com 2 formulários de busca sobrepostos | P3 | Aberto | 404 | Todos | 404 Page | UX |
+
+---
+
+### Detalhes técnicos
+
+#### BUG-H-050 — `a { transition: all }` em themes.css (causa raiz de BUG-H-036)
+- **Evidência:** `themes.css` linha 3068-3070 (Rokanthemes):
+  ```css
+  a {
+    transition: all 0.3s ease 0s;
+  }
+  ```
+  Esse seletor se aplica a TODOS os links da página (~centenas de elementos).
+  Adicionalmente: 87 instâncias de `transition: all` nos bundles customizados.
+- **Impacto:** causa os 2091 elementos com transition ativo (BUG-H-036).
+- **Fix (no tema filho — nunca editar Rokanthemes):**
+  ```css
+  a, a:visited, a:hover {
+    transition: color var(--awa-duration-fast, 150ms) var(--awa-ease, ease),
+                opacity var(--awa-duration-fast, 150ms) var(--awa-ease, ease);
+  }
+  ```
+  Nos 87 arquivos customizados: substituir `transition: all` por propriedades específicas.
+
+#### BUG-H-051 — Cart mobile: main content offset -25px
+- **Evidência:** `mainContent: {t:122, l:-25, w:390}` em carrinho mobile 390px.
+- **Impacto:** conteúdo do carrinho vazio começa 25px fora do viewport à esquerda. Com padding/margin, o texto pode estar cortado.
+- **Fix:** verificar `.cart-container`, `.column.main` — provavelmente `margin-left: -25px` ou `padding-left: 25px` negativo no contexto do carrinho.
+
+#### BUG-H-052 — B2B login mobile: main content fora do viewport
+- **Evidência:** `mainContent: {t:-95, l:-25, w:390}` em B2B login mobile 390px. Conteúdo começa 95px ACIMA do topo e 25px fora da borda esquerda.
+- **Impacto:** o formulário de login pode estar parcial ou totalmente invisível em mobile sem JS para ajuste dinâmico.
+- **Fix:** verificar `.awa-b2b-auth-wrapper` ou `.page-main` no B2B login: `margin-top: -95px` sugere um offset negativo intencional que está excedendo em mobile.
+
+#### BUG-H-053 — Newsletter form duplicado (2× por página)
+- **Evidência:** todas as páginas auditadas (home, carrinho, PLP, 404) têm 2 forms com action `/newsletter/subscriber/new/`:
+  - Form 1: 2 inputs, sem form_key, novalidate
+  - Form 2: 1 input, com form_key, novalidate
+- **Impacto:** UX confusa (dois campos de newsletter); um deles pode estar em área oculta ou no footer.
+- **Fix:** identificar qual bloco CMS ou template renderiza o form duplicado e remover a instância redundante.
+
+#### BUG-H-054 — Newsletter sem CSRF (form_key ausente)
+- **Evidência:** Form 1 do newsletter (`csrf: false`) — sem `<input name="form_key">`. A versão 2 tem form_key.
+- **Impacto:** sem JS, o formulário é submetível sem proteção CSRF. Risco de CSRF attack para inscrição não autorizada de e-mails.
+- **Fix:** garantir que AMBAS as instâncias do formulário newsletter tenham `form_key` no HTML estático. Em Magento, verificar se o template usa `$block->getFormKey()`.
+
+#### BUG-H-055 — 404 com 2 formulários de busca
+- **Evidência:** página 404 tem 5 forms, incluindo 2 com action `/catalogsearch/result/` (busca).
+- **Impacto:** UX levemente confusa; dois campos de busca visíveis (um no header, um no conteúdo da 404).
+- **Fix:** avaliar se o search form no conteúdo da 404 é necessário — se sim, garantir que seja claramente diferenciado do header search. Se for redundante, remover do template da 404.
+
+---
+
+### Mapa de bugs por página
+
+| Página | Bugs confirmados |
+|--------|-----------------|
+| Home | BUG-H-001 a BUG-H-049 (todos) |
+| PLP (Bagageiros) | BUG-H-045, H-046, H-047, H-048, H-049 |
+| Carrinho | BUG-H-045, H-051, H-053, H-054 |
+| B2B Login | BUG-H-052, H-053, H-054 |
+| 404 | BUG-H-045, H-053, H-054, H-055 |
+| Global (todas as páginas) | BUG-H-036/H-050 (transitions), H-039 (preconnect dup), H-053, H-054 |
+
+### Causa raiz atualizada — BUG-H-036
+
+```
+themes.css (Rokanthemes, linha 3068):
+  a { transition: all 0.3s ease 0s; }   → ~centenas de <a> na home
++
+_awa-premium-effects.less, _awa-visual-audit-2026-05-05.less, etc.:
+  87× transition: all em seletores específicos
+= 2091 elementos com transição CSS ativa
+```
