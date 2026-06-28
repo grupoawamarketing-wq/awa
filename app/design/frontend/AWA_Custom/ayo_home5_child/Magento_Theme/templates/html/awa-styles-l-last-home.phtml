@@ -1,0 +1,65 @@
+<?php declare(strict_types=1);
+/**
+ * Home — correção botão busca + limpar campo (sync; AMD deferido na home).
+ * CSS minicart desktop omitido: coberto globalmente por awa-deferred-interaction-css.phtml (default.xml).
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ */
+?>
+<script>
+/* awa-header-premium: remove inline !important override aplicado por fixSearchBtn() */
+(function () {
+  'use strict';
+  var PROPS = ['background', 'background-color', 'color', 'border-width', 'border-style', 'border-color', 'border-image'];
+  function restoreBtn() {
+    var btn = document.querySelector('#search_mini_form .action.search, form.minisearch button.action.search, .awa-professional-search button.action.search');
+    if (!btn) return;
+    PROPS.forEach(function (p) { btn.style.removeProperty(p); });
+    var svg = btn.querySelector('svg');
+    if (svg) { svg.style.removeProperty('color'); svg.style.removeProperty('stroke'); }
+  }
+  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', restoreBtn); }
+  else { restoreBtn(); }
+  setTimeout(restoreBtn, 400);
+  setTimeout(restoreBtn, 1500);
+}());
+</script>
+<script>
+/* awa-search-clear-init inline — AMD deferido na home */
+(function () {
+  'use strict';
+  function setVisible(clearBtn, visible) {
+    clearBtn.hidden = !visible;
+    clearBtn.style.removeProperty('display');
+    clearBtn.setAttribute('aria-hidden', visible ? 'false' : 'true');
+  }
+  function init() {
+    var searchInput = document.querySelector('#search, .header-search input[type="text"], .block-search input.input-text');
+    if (!searchInput || document.getElementById('awa-search-clear')) return;
+    var clearBtn = document.createElement('button');
+    clearBtn.id = 'awa-search-clear';
+    clearBtn.type = 'button';
+    clearBtn.className = 'awa-search-clear-btn';
+    clearBtn.setAttribute('aria-label', 'Limpar busca');
+    clearBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
+    var control = searchInput.closest('.control[data-awa-search-control], .field.search .control, .control') || searchInput.parentElement;
+    if (control) {
+      if (window.getComputedStyle(control).position === 'static') control.style.position = 'relative';
+      control.appendChild(clearBtn);
+    }
+    setVisible(clearBtn, false);
+    searchInput.classList.add('awa-search-input--clearable');
+    searchInput.addEventListener('input', function () { setVisible(clearBtn, !!this.value); });
+    clearBtn.addEventListener('click', function () {
+      searchInput.value = '';
+      setVisible(clearBtn, false);
+      searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+      searchInput.focus();
+    });
+  }
+  if (document.readyState !== 'loading') init(); else document.addEventListener('DOMContentLoaded', init, { once: true });
+  ['pointerdown', 'keydown', 'touchstart'].forEach(function (ev) {
+    window.addEventListener(ev, init, { capture: true, passive: ev !== 'keydown', once: true });
+  });
+}());
+</script>

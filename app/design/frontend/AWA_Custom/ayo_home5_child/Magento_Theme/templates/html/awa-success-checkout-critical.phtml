@@ -1,0 +1,85 @@
+<?php
+declare(strict_types=1);
+
+/**
+ * AWA Order Success — critical CSS inline + async premium loader.
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ */
+$premiumUrl = $block->getViewFileUrl('css/b2b/pages/cart-checkout-premium.min.css');
+$premiumUrlJson = json_encode($premiumUrl, JSON_UNESCAPED_SLASHES);
+?>
+<style id="awa-success-checkout-critical">
+:root{--awa-ccp-c1:oklch(99.2% 0.003 27)}
+body.checkout-onepage-success{
+  --awa-cc-surface-1:var(--awa-ccp-c1);
+  --awa-cc-surface-2:var(--awa-bg-muted,#f7f7f7);
+  --awa-cc-border:var(--awa-gray-200,#e5e7eb);
+  --awa-cc-text-1:var(--awa-text-primary,#333333);
+  --awa-cc-text-2:var(--awa-text-muted,#666666);
+  --awa-grid-shell-max:min(100%,1280px);
+  --awa-grid-container-pad:clamp(16px,3vw,24px);
+  font-family:var(--awa-font-family,"Source Sans 3",system-ui,sans-serif);
+}
+body.checkout-onepage-success .page-main.container{
+  box-sizing:border-box;
+  max-width:var(--awa-grid-shell-max);
+  margin-inline:auto;
+  padding-inline:var(--awa-grid-container-pad);
+  width:100%;
+}
+body.checkout-onepage-success .checkout-success.awa-checkout-success-page{
+  max-width:min(100%,720px);
+  margin-inline:auto;
+  padding-block:clamp(24px,4vw,48px);
+}
+body.checkout-onepage-success .awa-order-success{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:clamp(16px,2.5vw,24px);
+  text-align:center;
+}
+body.checkout-onepage-success .awa-order-success__card{
+  width:100%;
+  box-sizing:border-box;
+  border:1px solid var(--awa-cc-border);
+  border-radius:var(--awa-ui-radius-card,16px);
+  background:var(--awa-cc-surface-1);
+  padding:clamp(20px,3vw,32px);
+}
+body.checkout-onepage-success .page-title{
+  position:fixed!important;top:0!important;left:0!important;width:1px!important;height:1px!important;
+  overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important;
+}
+</style>
+<script>
+(function (w, d, premiumUrl) {
+    'use strict';
+    if (!premiumUrl) { return; }
+
+    function appendStylesheet(url) {
+        if (d.querySelector('link[data-awa-success-premium="1"]')) { return; }
+        var link = d.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = url;
+        link.setAttribute('data-awa-success-premium', '1');
+        d.head.appendChild(link);
+    }
+
+    function loadDeferredCss() {
+        appendStylesheet(premiumUrl);
+    }
+
+    if ('requestIdleCallback' in w) {
+        w.requestIdleCallback(loadDeferredCss, { timeout: 2000 });
+    } else {
+        w.setTimeout(loadDeferredCss, 600);
+    }
+
+    w.addEventListener('pointerdown', loadDeferredCss, { once: true, passive: true });
+}(window, document, <?= /* @noEscape */ $premiumUrlJson ?>));
+</script>
+<noscript>
+    <link rel="stylesheet" href="<?= $block->escapeUrl($premiumUrl) ?>"/>
+</noscript>

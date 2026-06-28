@@ -1,0 +1,44 @@
+<?php
+/**
+ * Chrome SSR dos carrosséis de produto (nav + progresso).
+ * Ligado pelo awa-scroll-carousel.js quando disponível; visível sem JS para affordance.
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ */
+$viewportId = trim((string) $block->getData('viewport_id'));
+$prevLabel = (string) __('Anterior');
+$nextLabel = (string) __('Próximo');
+$progressLabel = (string) __('Progresso do carrossel');
+$noscriptHint = (string) __('Deslize horizontalmente ou use as setas para ver mais produtos.');
+$controlsAttr = $viewportId !== '' ? ' aria-controls="' . $block->escapeHtmlAttr($viewportId) . '"' : '';
+?>
+<div class="awa-owl-nav awa-carousel__nav awa-carousel-chrome-ssr" aria-hidden="false" data-awa-chrome="ssr"<?= /* @noEscape */ $controlsAttr ?>>
+    <button type="button"
+            class="awa-owl-nav__btn awa-carousel__arrow awa-carousel__arrow--prev awa-owl-nav__btn--prev"
+            aria-label="<?= $block->escapeHtmlAttr($prevLabel) ?>"
+            disabled
+            aria-disabled="true"<?= /* @noEscape */ $controlsAttr ?>>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <button type="button"
+            class="awa-owl-nav__btn awa-carousel__arrow awa-carousel__arrow--next awa-owl-nav__btn--next"
+            aria-label="<?= $block->escapeHtmlAttr($nextLabel) ?>"<?= /* @noEscape */ $controlsAttr ?>>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="9 6 15 12 9 18"/></svg>
+    </button>
+</div>
+<div class="awa-owl-progress awa-carousel-chrome-ssr"
+     role="progressbar"
+     aria-valuemin="0"
+     aria-valuemax="100"
+     aria-valuenow="0"
+     aria-label="<?= $block->escapeHtmlAttr($progressLabel) ?>"
+     data-awa-chrome="ssr">
+    <div class="awa-owl-progress__bar"></div>
+</div>
+<div class="awa-carousel-live visually-hidden"
+     aria-live="polite"
+     aria-atomic="true"
+     data-awa-chrome="ssr"></div>
+<noscript>
+    <p class="awa-carousel-noscript-hint"><?= $block->escapeHtml($noscriptHint) ?></p>
+</noscript>
