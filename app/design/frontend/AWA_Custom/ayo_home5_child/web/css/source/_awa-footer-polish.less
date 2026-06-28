@@ -1,1 +1,155 @@
-// AWA FOOTER POLISH — placeholder (imported by _extend.less)
+// ============================================================================
+// AWA Motos — _awa-footer-polish.less
+//
+// Progressive enhancement para o footer usando `.awa-footer-js-ready`.
+// A classe é adicionada por awa-footer-interactions.js (linha 391) após
+// init completo das interações. Nenhuma regra anterior usava essa classe.
+//
+// §1  Toggle button reset (universal) — remove chrome de <button>
+// §2  FOJS prevention — colapsa .velaContent no mobile antes do JS
+// §3  Chevron de accordion (gateado por .awa-footer-js-ready, mobile only)
+// §4  Rotação do ícone de categorias (gateado por .awa-footer-js-ready)
+// §5  prefers-reduced-motion
+// ============================================================================
+
+@import (once) '_design-system';
+
+
+// ============================================================================
+// §1 — TOGGLE BUTTON RESET
+//
+// Remove browser button chrome de .awa-footer-section__toggle para que
+// o elemento herde o visual de heading via .velaFooterTitle sem nenhuma
+// affordance interativa antes de o JS estar pronto.
+// No desktop (≥768px) o toggle é heading estático: cursor default, sem
+// focus ring visível (não há ação disponível para teclado).
+// ============================================================================
+
+body .page-wrapper .page_footer .awa-footer-section__toggle,
+body .page-wrapper .page-footer .awa-footer-section__toggle {
+    -webkit-appearance: none;
+    appearance: none;
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    display: block;
+    width: 100%;
+    text-align: left;
+    cursor: default;
+    font: inherit;
+    color: inherit;
+    line-height: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+
+    @media (min-width: @awa-breakpoint-md) {
+        &:focus-visible {
+            outline: none;
+        }
+    }
+}
+
+
+// ============================================================================
+// §2 — FOJS PREVENTION
+//
+// Oculta .velaContent no mobile antes do JS carregar.
+// Invariante: JS adiciona .active via applyPanelVisibility() ao expandir
+// um painel, então :not(.active) = "colapsado" tanto no estado inicial
+// (antes do JS) quanto após o JS colapsar.
+// No desktop não há media query — painéis permanecem visíveis sem JS.
+// Fallback no-JS: <noscript> em footer.phtml sobrescreve via !important.
+// ============================================================================
+
+@media (max-width: (@awa-breakpoint-md - 1)) {
+    body .page-wrapper .page_footer .velaContent:not(.active),
+    body .page-wrapper .page-footer .velaContent:not(.active) {
+        display: none;
+    }
+}
+
+
+// ============================================================================
+// §3 — CHEVRON DE ACCORDION
+//
+// Gateado por .awa-footer-js-ready no próprio elemento .page_footer.
+// O caret só aparece após as interações estarem bindadas — evita estado
+// visual de "botão interativo" quando o click ainda não faz nada.
+// Usa border trick (não SVG data URI) para consistência de cor via
+// currentColor e sem escaping em LESS.
+// ============================================================================
+
+@media (max-width: (@awa-breakpoint-md - 1)) {
+    body .page-wrapper .page_footer.awa-footer-js-ready .awa-footer-section__toggle,
+    body .page-wrapper .page-footer.awa-footer-js-ready .awa-footer-section__toggle {
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: @awa-s-1;   // 8px
+
+        // Chevron via border trick — aponta para baixo no estado colapsado
+        &::after {
+            content: '';
+            display: block;
+            flex-shrink: 0;
+            width: 7px;
+            height: 7px;
+            border-right: 2px solid currentColor;
+            border-bottom: 2px solid currentColor;
+            transform: rotate(45deg) translateY(-2px);
+            transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1),
+                        opacity   200ms cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0.65;
+        }
+
+        // Expanded state: chevron aponta para cima
+        &[aria-expanded="true"]::after {
+            transform: rotate(-135deg) translateY(2px);
+            opacity: 1;
+        }
+
+        // Focus ring apenas no mobile onde o toggle é interativo
+        &:focus-visible {
+            outline: @awa-focus-ring-width solid @awa-color-primary;
+            outline-offset: @awa-focus-ring-offset;
+            border-radius: @awa-border-radius-sm;
+        }
+    }
+}
+
+
+// ============================================================================
+// §4 — ROTAÇÃO DO ÍCONE DE CATEGORIAS
+//
+// Completa o `transition: transform @awa-transition-slow` já definido em
+// _footer.less §7 para .awa-footer-categories-expand__icon.
+// JS usa aria-expanded + .is-expanded; os dois seletores garantem que
+// ambos os estados de escrita disparam a rotação.
+// Gateado por .awa-footer-js-ready para consistência com §3.
+// ============================================================================
+
+body .page-wrapper .page_footer.awa-footer-js-ready [data-awa-categories-toggle][aria-expanded="true"] .awa-footer-categories-expand__icon,
+body .page-wrapper .page_footer.awa-footer-js-ready [data-awa-categories-toggle].is-expanded .awa-footer-categories-expand__icon,
+body .page-wrapper .page-footer.awa-footer-js-ready [data-awa-categories-toggle][aria-expanded="true"] .awa-footer-categories-expand__icon,
+body .page-wrapper .page-footer.awa-footer-js-ready [data-awa-categories-toggle].is-expanded .awa-footer-categories-expand__icon {
+    transform: rotate(180deg);
+}
+
+
+// ============================================================================
+// §5 — PREFERS-REDUCED-MOTION
+// ============================================================================
+
+@media (prefers-reduced-motion: reduce) {
+    body .page-wrapper .page_footer.awa-footer-js-ready .awa-footer-section__toggle::after,
+    body .page-wrapper .page-footer.awa-footer-js-ready .awa-footer-section__toggle::after {
+        transition: none;
+    }
+
+    body .page-wrapper .page_footer.awa-footer-js-ready .awa-footer-categories-expand__icon,
+    body .page-wrapper .page-footer.awa-footer-js-ready .awa-footer-categories-expand__icon {
+        transition: none;
+    }
+}
