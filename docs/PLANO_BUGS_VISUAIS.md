@@ -1999,3 +1999,58 @@ _awa-premium-effects.less, _awa-visual-audit-2026-05-05.less, etc.:
 | Homepage inclusa (`priority: 1.0, changefreq: daily`) | ✅ |
 | Subcategorias presentes e indexadas | ✅ |
 
+
+---
+
+## 23. Auditoria Performance HTTP & Console JS (2026-06-28)
+
+> Sétima rodada: headers HTTP, TTFB, compressão e erros JavaScript.
+> Nenhum bug novo — apenas confirmações positivas.
+
+### Resultados da auditoria
+
+| Métrica | Valor | Status |
+|---------|-------|--------|
+| TTFB (Varnish HIT) | ~27ms | ✅ Excelente |
+| HTML comprimido (Brotli) | 63KB (de 524KB raw) | ✅ 8:1 ratio |
+| HTML descomprimido | 524KB | ⚠️ Grande (OK para home rica) |
+| Erros JavaScript no console | 0 | ✅ |
+| Avisos JS (warnings) | 1 (preload webp) | ⚠️ Menor |
+| Content-Encoding | Brotli | ✅ |
+| x-magento-cache-debug | HIT | ✅ |
+
+### Headers de segurança (confirmações)
+
+| Header | Presente | Valor |
+|--------|----------|-------|
+| `content-security-policy` | ✅ | Completo (multi-diretiva) |
+| `strict-transport-security` | ✅ | `max-age=31536000; includeSubDomains; preload` |
+| `x-content-type-options` | ✅ | `nosniff` |
+| `x-frame-options` | ✅ | `SAMEORIGIN` |
+| `permissions-policy` | ✅ | camera, mic, geolocation, etc. |
+| `referrer-policy` | ✅ | `strict-origin-when-cross-origin` |
+| `x-xss-protection` | ✅ | `0` (disabled, modern) |
+| `Report-To / NEL` | ❌ Ausente | Opcional |
+| `Cross-Origin-Embedder-Policy` | ❌ Ausente | Opcional (só necessário p/ SharedArrayBuffer) |
+
+### Core Web Vitals — setup verificado
+
+| Item | Status |
+|------|--------|
+| LCP image com `fetchpriority="high"` | ✅ |
+| LCP image com `loading="eager"` | ✅ |
+| LCP image com `decoding="async"` | ✅ |
+| Hero image com `srcset` responsivo (4 tamanhos) | ✅ |
+| WebP com `<picture>` e fallback | ✅ |
+| `<link rel="preload">` para hero image | ✅ |
+
+### Blog — confirmações SEO
+
+| Item | Status |
+|------|--------|
+| Blog post: robots INDEX,FOLLOW | ✅ |
+| Blog post: canonical presente | ✅ |
+| Blog post: H1 presente e único | ✅ |
+| Blog post: Schema.org (3 blocos) | ✅ |
+| `blog_default.xml`: canonical via layout XML | ✅ |
+
