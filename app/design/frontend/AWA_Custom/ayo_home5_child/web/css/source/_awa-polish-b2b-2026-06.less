@@ -1,0 +1,212 @@
+// §60 POLISH B2B — /impeccable polish b2b (2026-06-08)
+// Acabamento conta B2B: nav sem faixa, seções, reorder mobile, foco, badges.
+
+@import (once) '_awa-tokens';
+@import (once) '_design-system';
+
+@awa-polish-b2b-nav-hover: fade(@awa-color-primary, 6%);
+@awa-polish-b2b-nav-active: fade(@awa-color-primary, 10%);
+
+// ── §60a — Nav: matar faixa lateral (super-global / bugfix) ─────────────────
+html body#html-body:is(.account, [class*='b2b-']) .page-wrapper {
+    .sidebar-main .account-nav .item a,
+    .sidebar-main .account-nav .item.current a,
+    .sidebar-main .account-nav .nav.item a,
+    .sidebar-main .account-nav .nav.item.current a,
+    .sidebar-main .nav.item a,
+    .sidebar-main .nav.item.current a,
+    .sidebar-main .nav.item.current strong,
+    .block-collapsible-nav .item a,
+    .block-collapsible-nav .item.current a,
+    .account-nav-item .account-nav-link,
+    .account-nav-item.current .account-nav-link {
+        border: 0 !important;
+        border-left: 0 !important;
+        border-inline-start: 0 !important;
+        border-inline-start-width: 0 !important;
+        border-inline-start-color: transparent !important;
+    }
+
+    .sidebar-main .nav.item.current a,
+    .sidebar-main .nav.item.current strong,
+    .block-collapsible-nav .item.current a,
+    .account-nav-item.current .account-nav-link,
+    .account-nav-item.current .account-nav-text {
+        background: @awa-polish-b2b-nav-active !important;
+        color: var(--awa-primary, @awa-color-primary) !important;
+        font-weight: @awa-weight-semibold !important;
+    }
+}
+
+// ── §60b — Nav sections: chunking legível (sentence case, não eyebrow) ─────
+html body#html-body:is(.account, [class*='b2b-']) .page-wrapper {
+    .account-nav-section:not(:first-child) {
+        margin-top: @awa-space-4;
+        padding-top: @awa-space-4;
+        border-top: 1px solid @awa-neutral-200;
+    }
+
+    .account-nav-section__label {
+        display: block;
+        padding: @awa-space-1 @awa-s-2 @awa-space-2;
+        font-size: 0.75rem;
+        font-weight: @awa-weight-semibold;
+        letter-spacing: 0.01em;
+        text-transform: none;
+        color: @awa-color-text-muted;
+    }
+
+    .account-nav-wrapper {
+        padding: @awa-space-2 0;
+    }
+}
+
+// ── §60c — Breadcrumbs B2B ───────────────────────────────────────────────────
+html body#html-body:is(.account, [class*='b2b-']) .page-wrapper {
+    .b2b-breadcrumbs-container {
+        margin-bottom: @awa-space-4;
+    }
+
+    .b2b-breadcrumbs .items {
+        font-size: 0.8125rem;
+    }
+
+    .b2b-breadcrumbs .item.current strong {
+        color: @awa-color-text-primary;
+        font-weight: @awa-weight-semibold;
+    }
+}
+
+// ── §60d — Repetir Pedido: mobile, foco, badges ─────────────────────────────
+body.b2b-reorder-history .b2b-reorder-page {
+    .reorder-card__status {
+        font-variant-numeric: tabular-nums;
+    }
+
+    .reorder-status--complete {
+        background: @awa-color-success-light;
+        color: @awa-color-success-text;
+    }
+
+    .reorder-status--processing {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .reorder-status--closed {
+        background: @awa-neutral-100;
+        color: @awa-neutral-700;
+    }
+
+    input[type='checkbox'] {
+        width: 1.125rem;
+        height: 1.125rem;
+        accent-color: @awa-color-primary;
+        cursor: pointer;
+    }
+
+    input[type='checkbox']:focus-visible {
+        outline: 2px solid @awa-color-primary;
+        outline-offset: 2px;
+    }
+
+    .btn-reorder:focus-visible {
+        outline: 2px solid @awa-color-primary;
+        outline-offset: 2px;
+    }
+
+    .b2b-reorder-live:not(:empty) {
+        border-radius: @awa-radius-sm;
+        font-weight: @awa-weight-semibold;
+    }
+
+    .awa-empty-state__actions .action {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding-inline: @awa-space-5;
+        border-radius: @awa-radius-md;
+        font-weight: @awa-weight-semibold;
+        text-decoration: none;
+    }
+
+    .awa-empty-state__actions .action.secondary {
+        border: 1px solid @awa-neutral-200;
+        color: @awa-color-text-primary;
+        background: @awa-neutral-50;
+    }
+}
+
+@media (max-width: @awa-bp-768) {
+    body.b2b-reorder-history .b2b-reorder-page {
+        .reorder-card__header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: @awa-space-3;
+        }
+
+        .reorder-card__info {
+            width: 100%;
+        }
+
+        .reorder-card__total {
+            align-self: flex-start;
+        }
+
+        .reorder-card__actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .btn-reorder {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .reorder-note {
+            text-align: center;
+        }
+
+        .reorder-items tbody td.col-select {
+            justify-content: flex-start;
+            padding-bottom: @awa-space-2;
+            border-bottom: 1px solid @awa-neutral-200;
+        }
+
+        .reorder-items tbody td.col-select::before {
+            content: none;
+        }
+
+        .reorder-items tbody td.reorder-item-name {
+            max-width: none;
+            white-space: normal;
+            font-size: 0.9375rem;
+            padding-top: @awa-space-2;
+        }
+
+        .reorder-items tbody td.col-current-price,
+        .reorder-items tbody td[data-th*='Preço atual'],
+        .reorder-items tbody td.reorder-item-current-price {
+            font-size: 1rem;
+        }
+    }
+}
+
+// ── §60e — Shell B2B: ritmo entre páginas ────────────────────────────────────
+html body#html-body:is(.account, [class*='b2b-']) .page-wrapper .b2b-page-shell {
+    .b2b-section-header {
+        margin-bottom: @awa-space-6;
+    }
+
+    .b2b-section-header .section-subtitle {
+        margin-top: @awa-space-1;
+        line-height: 1.5;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.b2b-reorder-history .b2b-reorder-page .btn-reorder:focus-visible {
+        outline-width: 3px;
+    }
+}

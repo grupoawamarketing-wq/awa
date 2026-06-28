@@ -1,0 +1,114 @@
+// =============================================================================
+// _awa-search-header-harden-2026-06.less
+// Harden: autocomplete visível quando há conteúdo + foco (vence pro-max hide rule)
+// =============================================================================
+
+html body#html-body .page-wrapper .awa-site-header .block-search .field.search .control,
+html body#html-body .page-wrapper .awa-site-header .awa-professional-search .field.search .control {
+    position: relative;
+    overflow: visible !important;
+}
+
+html body#html-body .page-wrapper .awa-site-header
+.mst-searchautocomplete__autocomplete._active {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    height: auto !important;
+    max-height: 52vh !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+}
+
+html body#html-body .page-wrapper .awa-site-header
+:is(
+    #search_autocomplete,
+    .mst-searchautocomplete__autocomplete,
+    .searchsuite-autocomplete[data-role="search-autocomplete"]
+) {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: auto;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    z-index: 1050 !important;
+}
+
+// Painel aberto: conteúdo presente + foco no campo OU classes de estado AWA
+html body#html-body .page-wrapper .awa-site-header
+:is(form#search_mini_form, .block-search form.minisearch):is(:focus-within, .is-open)
+:is(#search_autocomplete, .searchsuite-autocomplete):not(:empty),
+html body#html-body .page-wrapper .awa-site-header
+#search_autocomplete:is(.is-open, .active, .has-results, [data-awa-fallback-rendered="true"]):not(:empty),
+html body#html-body.searchautocomplete__active .page-wrapper .awa-site-header
+form#search_mini_form:focus-within
+#search_autocomplete:not(:empty) {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: 52vh !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    border: 1px solid var(--awa-border, @awa-color-border) !important;
+    border-radius: var(--awa-radius-md, 8px) !important;
+    background: var(--awa-bg, @awa-color-white) !important;
+    /* blur <=16px: borda 1px + blur largo é anti-padrão de elevação (Impeccable HS) */
+    box-shadow: 0 8px 16px color-mix(in srgb, var(--awa-ink, @awa-color-dark) 12%, transparent) !important;
+}
+
+// Estado vazio com query longa: mensagem de fallback visível
+html body#html-body .page-wrapper .awa-site-header
+#search_autocomplete[data-awa-fallback-rendered="true"] .no-result {
+    display: block;
+    padding: var(--awa-space-4, 16px);
+    color: var(--awa-text-secondary, @awa-color-text-muted);
+    font-size: var(--awa-font-sm, 14px);
+    line-height: 1.45;
+}
+
+// Itens do autocomplete: touch target mínimo
+html body#html-body .page-wrapper .awa-site-header
+#search_autocomplete :is(li, [role="option"]) {
+    min-height: var(--awa-touch-target, 44px);
+}
+
+html body#html-body .page-wrapper .awa-site-header
+#search_autocomplete :is(li, [role="option"]) a {
+    display: flex;
+    align-items: center;
+    min-height: var(--awa-touch-target, 44px);
+    padding-inline: var(--awa-space-4, 16px);
+    color: var(--awa-text-primary, @awa-color-text-primary);
+    text-decoration: none;
+}
+
+html body#html-body .page-wrapper .awa-site-header
+#search_autocomplete :is(li, [role="option"])[aria-selected="true"],
+html body#html-body .page-wrapper .awa-site-header
+#search_autocomplete :is(li, [role="option"]).selected,
+html body#html-body .page-wrapper .awa-site-header
+#search_autocomplete :is(li, [role="option"]).awa-ac-active {
+    background: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 8%, var(--awa-bg, @awa-color-white));
+}
+
+html body#html-body .page-wrapper .awa-site-header
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__item {
+    min-height: var(--awa-touch-target, 44px);
+}
+
+html body#html-body .page-wrapper .awa-site-header
+.mst-searchautocomplete__autocomplete .mst-searchautocomplete__item:is(:hover,._active) {
+    background: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 8%, var(--awa-bg, @awa-color-white));
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html body#html-body .page-wrapper .awa-site-header #search_autocomplete :is(li, [role="option"]) {
+        transition: none !important;
+    }
+}

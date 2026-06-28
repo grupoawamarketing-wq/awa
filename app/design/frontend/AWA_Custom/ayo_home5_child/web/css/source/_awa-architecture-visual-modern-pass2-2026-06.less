@@ -1,0 +1,244 @@
+// =============================================================================
+// §104 — Architecture + Visual Modern Pass 2 (2026-06-08)
+// Account/Flow/Cart/CMS/Checkout + chrome footer/nav por tier.
+// Magento 2: .block-dashboard-*, .cart.table-wrapper, .opc-wrapper, .widget
+// Visual 2025-2026: painéis flat, grid auto-fit, container queries.
+// =============================================================================
+
+@import (once) '_awa-tokens';
+@import (once) '_design-system';
+@import (once) '_awa-page-containers';
+
+@awa-a2-not-home: ~'html body#html-body:not(.cms-index-index):not(.cms-home):not(.cms-homepage_ayo_home5)';
+@awa-a2-account: ~'html body#html-body:is(.account, .customer-account-index, .sales-order-history, .sales-order-view, .wishlist-index-index, [class*="b2b-"])';
+@awa-a2-flow: ~'html body#html-body:is(.b2b-quote-index, .b2b-quote-view, .b2b-quote-create, .b2b-shoppinglist-index, .b2b-shoppinglist-view, .b2b-quickorder-index)';
+@awa-a2-cart: ~'html body#html-body.checkout-cart-index';
+@awa-a2-cms: ~'html body#html-body:is(.cms-page-view, .cms-noroute-index, .contact-index-index)';
+@awa-a2-auth: ~'html body#html-body:is(.customer-account-login, .customer-account-create, .customer-account-forgotpassword, .b2b-auth-shell, .b2b-account-login, .b2b-register-index)';
+@awa-a2-checkout: ~'html body#html-body:is(.checkout-index-index, .onepagecheckout-index-index)';
+@awa-a2-pdp: ~'html body#html-body.catalog-product-view';
+
+:root {
+    --awa-arch-version: '104';
+    --awa-panel-pad: @awa-space-4;
+    --awa-panel-gap: @awa-space-4;
+}
+
+// ── Mixin painel (reuso §103) ───────────────────────────────────────────────
+.awa-a2-panel() {
+    background: var(--awa-surface-base, @awa-color-white) !important;
+    border: var(--awa-ui-border, 1px solid @awa-color-border) !important;
+    border-radius: var(--awa-ui-radius, @awa-radius-sm) !important;
+    box-shadow: none !important;
+    padding: var(--awa-panel-pad) !important;
+    box-sizing: border-box !important;
+}
+
+// ── Chrome footer/nav: alinhados ao eixo 1280px ────────────────────────────
+// footer-container é o SHELL: padding-inline:0 (inner containers centram o conteúdo).
+@{awa-a2-not-home} .page-wrapper {
+    :is(.page-footer, .page_footer) {
+        :is(.footer-container, .footer-container.layout2.footer) {
+            max-width: @awa-page-catalog !important;
+            width: 100% !important;
+            margin-inline: auto !important;
+            padding-inline: 0 !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+            box-sizing: border-box !important;
+        }
+    }
+
+    @media (min-width: @awa-bp-992) {
+        :is(.header-control.awa-nav-bar, .header-control.header-nav.awa-nav-bar) {
+            > .container,
+            .awa-nav-bar__inner {
+                max-width: @awa-page-catalog !important;
+                width: 100% !important;
+                margin-inline: auto !important;
+                padding-inline: var(--awa-chrome-gutter, @awa-page-pad-catalog) !important;
+                box-sizing: border-box !important;
+            }
+        }
+    }
+}
+
+// ── Tier 2 Account/B2B: dashboard grid + blocos flat ───────────────────────
+@{awa-a2-account} .page-wrapper {
+    :is(.block-dashboard-info, .block-dashboard-addresses, .block-dashboard-orders, .block.block-order-details-view, .block.block-reorder) {
+        .awa-a2-panel();
+        margin-block-end: var(--awa-panel-gap) !important;
+    }
+
+    :is(.block-dashboard-info, .block-dashboard-addresses) .block-content {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(~"min(100%, 240px)", 1fr)) !important;
+        gap: var(--awa-panel-gap) !important;
+    }
+
+    .box {
+        .awa-a2-panel();
+        padding: @awa-space-3 @awa-space-4 !important;
+        margin: 0 !important;
+    }
+
+    .box-title {
+        font-size: @awa-font-size-13 !important;
+        font-weight: @awa-weight-bold !important;
+        margin-block-end: @awa-space-2 !important;
+        padding-block-end: @awa-space-2 !important;
+        border-bottom: 1px solid var(--awa-border-hairline, @awa-color-border-subtle) !important;
+    }
+
+    .b2b-page-shell,
+    .b2b-reorder-page {
+        gap: var(--awa-layout-gap-block, @awa-space-6) !important;
+    }
+
+    .b2b-page-shell .b2b-section-header {
+        border-bottom: 1px solid var(--awa-border-hairline, @awa-color-border-subtle) !important;
+        padding-block-end: @awa-space-3 !important;
+    }
+}
+
+@container awa-page (min-width: 720px) {
+    @{awa-a2-account} .page-wrapper .column.main :is(.block-dashboard-info, .block-dashboard-addresses) .block-content {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+
+// ── Tier 3 Flow: formulários e tabelas em painéis ───────────────────────────
+@{awa-a2-flow} .page-wrapper {
+    :is(.form, .b2b-quote-form, .shopping-list-form) {
+        .awa-a2-panel();
+    }
+
+    .table-wrapper {
+        .awa-a2-panel();
+        padding: 0 !important;
+        overflow-x: auto !important;
+    }
+
+    .table-wrapper table {
+        margin: 0 !important;
+        border: 0 !important;
+    }
+}
+
+// ── Cart tier 1: tabela + summary como layout 2-col (≥992px) ───────────────
+@{awa-a2-cart} .page-wrapper {
+    .cart-container {
+        display: grid !important;
+        gap: var(--awa-layout-gap-block, @awa-space-6) !important;
+        align-items: start !important;
+    }
+
+    .cart.table-wrapper {
+        .awa-a2-panel();
+        padding: 0 !important;
+        overflow-x: auto !important;
+    }
+
+    .cart-summary {
+        .awa-a2-panel();
+        position: sticky !important;
+        top: calc(var(--awa-header-main-row-h, 68px) + var(--awa-header-nav-h, 38px) + @awa-space-4) !important;
+    }
+
+    .cart.item .product-item-photo img {
+        border-radius: var(--awa-ui-radius, @awa-radius-sm) !important;
+        background: var(--awa-surface-muted, @awa-color-bg-soft) !important;
+    }
+}
+
+@media (min-width: @awa-bp-992) {
+    @{awa-a2-cart} .page-wrapper .cart-container {
+        grid-template-columns: minmax(0, 1fr) minmax(280px, 360px) !important;
+    }
+}
+
+// ── PDP: related/upsell grid responsivo ─────────────────────────────────────
+@{awa-a2-pdp} .page-wrapper {
+    :is(.block.related, .block.upsell, .awa-pdp-related) {
+        :is(.products-grid .product-items, ul.product-items) {
+            display: grid !important;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important;
+            gap: var(--awa-grid-gap, 16px) !important;
+        }
+    }
+}
+
+@container awa-page (min-width: 900px) {
+    @{awa-a2-pdp} .page-wrapper :is(.block.related, .block.upsell) .products-grid .product-items {
+        grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)) !important;
+    }
+}
+
+// ── Tier 5 CMS/contato: prose + widgets flat ────────────────────────────────
+@{awa-a2-cms} .page-wrapper {
+    .column.main {
+        font-size: @awa-font-size-14 !important;
+        line-height: 1.55 !important;
+        color: var(--awa-text, @awa-color-text-primary) !important;
+
+        :is(p, ul, ol, blockquote) {
+            max-width: var(--awa-measure-prose, 65ch) !important;
+            text-wrap: pretty !important;
+        }
+
+        :is(h1, h2, h3) {
+            text-wrap: balance !important;
+            max-width: var(--awa-measure-ui, 75ch) !important;
+        }
+    }
+
+    :is(.widget, .block-static-block) {
+        .awa-a2-panel();
+        margin-block-end: var(--awa-panel-gap) !important;
+    }
+}
+
+// ── Tier 4 Auth: formulário centralizado em painel ─────────────────────────
+@{awa-a2-auth} .page-wrapper {
+    .column.main {
+        max-width: var(--awa-layout-max, @awa-page-narrow) !important;
+        margin-inline: auto !important;
+    }
+
+    :is(.form.form-login, .form.create.account, .form.password.forget, .form.form-register) {
+        .awa-a2-panel();
+    }
+
+    .fieldset {
+        margin-block-end: @awa-space-4 !important;
+        border: 0 !important;
+        padding: 0 !important;
+    }
+}
+
+// ── Checkout: steps flat (sem quebrar OPC nativo) ───────────────────────────
+@{awa-a2-checkout} .page-wrapper {
+    :is(.opc-wrapper, .checkout-container) {
+        gap: var(--awa-layout-gap-inline, @awa-space-4) !important;
+    }
+
+    :is(.opc-progress-bar, .opc-block-summary, .opc-block-shipping-information) {
+        .awa-a2-panel();
+    }
+
+    .opc-wrapper .step-title {
+        font-size: @awa-font-size-16 !important;
+        font-weight: @awa-weight-bold !important;
+        text-wrap: balance !important;
+    }
+
+    .column.main {
+        display: block !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    @{awa-a2-cart} .page-wrapper .cart-summary {
+        position: static !important;
+    }
+}

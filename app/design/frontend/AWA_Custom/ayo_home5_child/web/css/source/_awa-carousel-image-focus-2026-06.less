@@ -1,0 +1,117 @@
+// =============================================================================
+// _awa-carousel-image-focus-2026-06.less
+// §71 — Destaque visual das imagens nos carrosséis home (2026-06-08)
+// Palco 1:1 ampliado, fundo suave, foto centralizada em tamanho máximo.
+// =============================================================================
+
+@import (once) '_awa-tokens';
+@import (once) '_design-system';
+
+html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper {
+    .awa-shelf--carousel :is(.awa-product-card, .content-item-product) {
+        overflow: visible;
+    }
+
+  // ── Palco da imagem: ~60% do card, fundo neutro com leve tint AWA ─────────
+    .awa-shelf--carousel .product-thumb,
+    .awa-shelf--carousel .product-item-photo {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        aspect-ratio: 1 / 1;
+        width: 100%;
+        flex: 0 0 auto;
+        margin: 0;
+        padding: @awa-space-2;
+        box-sizing: border-box;
+        background: color-mix(
+            in srgb,
+            var(--awa-bg-soft, @awa-color-bg-soft) 94%,
+            var(--awa-primary, @awa-color-primary) 6%
+        );
+        border-block-end: 1px solid color-mix(
+            in srgb,
+            var(--awa-border, @awa-color-border) 88%,
+            transparent
+        );
+        border-radius: @awa-radius-md @awa-radius-md 0 0;
+    }
+
+    .awa-shelf--carousel .product-thumb-link,
+    .awa-shelf--carousel .first-thumb,
+    .awa-shelf--carousel .product-thumb :is(.product-image-container, .product-image-wrapper) {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        max-width: 100%;
+        min-height: 0;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    // Magento: padding-bottom inline → anula para liberar altura real da foto
+    .awa-shelf--carousel .product-image-wrapper {
+        padding-bottom: 0 !important;
+        height: 100% !important;
+        width: 100% !important;
+    }
+
+    .awa-shelf--carousel .product-image-container {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 100% !important;
+        margin-inline: auto;
+    }
+
+    .awa-shelf--carousel .product-thumb img,
+    .awa-shelf--carousel .product-image-photo {
+        display: block;
+        width: auto;
+        height: auto;
+        max-width: 100%;
+        max-height: 100%;
+        margin-inline: auto;
+        object-fit: contain;
+        object-position: center;
+        transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .awa-shelf--carousel .product-image-photo[src*='placeholder'] {
+        max-width: 78%;
+        max-height: 78%;
+        opacity: 0.82;
+        filter: grayscale(0.15);
+    }
+
+    // Texto mais compacto → proporção visual favorece a foto
+    .awa-shelf--carousel .product-info {
+        padding-block: @awa-space-2 @awa-space-2;
+        padding-inline: @awa-space-2;
+    }
+
+    .awa-shelf--carousel .hot-onsale {
+        z-index: 2;
+    }
+}
+
+@media (hover: hover) and (pointer: fine) {
+    html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper {
+        .awa-shelf--carousel :is(.awa-product-card, .content-item-product):hover .product-thumb img,
+        .awa-shelf--carousel :is(.awa-product-card, .content-item-product):hover .product-image-photo {
+            transform: scale(1.05);
+        }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper {
+        .awa-shelf--carousel .product-thumb img,
+        .awa-shelf--carousel .product-image-photo {
+            transition: none;
+        }
+    }
+}

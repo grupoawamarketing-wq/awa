@@ -1,0 +1,2694 @@
+// ============================================================================
+// PARENT theme port: awa-components.css
+// Extraído de _awa-consolidated.less (prefixo legado → S84-S92)
+// ============================================================================
+
+@import (once) '_awa-variables';
+@import (once) '_awa-cons-tokens';
+
+/* ===========================================
+   AWA MOTOS ? COMPONENTS (Produtos + Carrossel + P�ginas)
+   Tema: AYO/Rokanthemes (Home5)
+
+   ARQUIVO 3/4 da camada AWA consolidada.
+
+   CONTE�DO:
+   - Product grid (responsivo, 4?1 colunas)
+   - Product cards: .item-product (AYO) + .product-item (Magento)
+   - SuperDeals cards
+   - OWL Carousel (v1+v2 compat�vel)
+   - Homepage sections (AYO modules)
+   - Badges, desconto, pre�o
+   - Countdown / Hot Deal
+   - Banners / hero slider
+   - P�gina de produto (detail)
+   - Carrinho, checkout, conta
+   - A�?es secund�rias (quickview, wishlist, compare)
+
+   ESPECIFICIDADE:
+   body .page-wrapper sem !important (exceto inline overrides do Magento).
+=========================================== */
+
+/* ============================================================
+   PRODUCT GRID ? RESPONSIVO
+   Cobre AMBAS classes: .item-product (AYO) e .product-item (Magento)
+   ============================================================ */
+body .page-wrapper .products-grid .product-items:not(.owl-carousel),
+body .page-wrapper .products.list .product-items:not(.owl-carousel),
+body .page-wrapper .widget-product-grid .product-items:not(.owl-carousel),
+body .page-wrapper .block-products-list .product-items:not(.owl-carousel) {
+    display: grid;
+    gap: var(--awa-grid-gap);
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* XL Desktop: 5 colunas ?1400px (padr?o AYO) */
+@media (width >= 1400px) {
+    body .page-wrapper .products-grid .product-items:not(.owl-carousel),
+    body .page-wrapper .products.list .product-items:not(.owl-carousel),
+    body .page-wrapper .widget-product-grid .product-items:not(.owl-carousel),
+    body .page-wrapper .block-products-list .product-items:not(.owl-carousel) {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+
+/* Desktop: 4 colunas 992?1399px */
+@media (width >= 992px) and (width <= 1399px) {
+    body .page-wrapper .products-grid .product-items:not(.owl-carousel),
+    body .page-wrapper .products.list .product-items:not(.owl-carousel),
+    body .page-wrapper .widget-product-grid .product-items:not(.owl-carousel),
+    body .page-wrapper .block-products-list .product-items:not(.owl-carousel) {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* Desktop Small: 3 colunas 769?991px (AYO doc: Desktop Small 769?991px) */
+@media (width >= 769px) and (width <= 991px) {
+    body .page-wrapper .products-grid .product-items:not(.owl-carousel),
+    body .page-wrapper .products.list .product-items:not(.owl-carousel),
+    body .page-wrapper .widget-product-grid .product-items:not(.owl-carousel),
+    body .page-wrapper .block-products-list .product-items:not(.owl-carousel) {
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--awa-grid-gap-sm);
+    }
+
+    body .page-wrapper .page-products .toolbar-products {
+        flex-wrap: nowrap;
+        gap: var(--awa-space-2);
+    }
+
+    body .page-wrapper .toolbar-products .toolbar-amount {
+        font-size: var(--awa-text-xs);
+        flex-shrink: 1;
+        min-width: 0;
+    }
+
+    body .page-wrapper .toolbar-products .sorter-label {
+        display: none;
+    }
+
+    body .page-wrapper .toolbar-products .modes {
+        display: none;
+    }
+}
+
+/* Tablet: 2 colunas 480?768px (AYO doc: Tablet 480?768px) */
+@media (width >= 480px) and (width <= 768px) {
+    body .page-wrapper .products-grid .product-items:not(.owl-carousel),
+    body .page-wrapper .products.list .product-items:not(.owl-carousel),
+    body .page-wrapper .widget-product-grid .product-items:not(.owl-carousel),
+    body .page-wrapper .block-products-list .product-items:not(.owl-carousel) {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--awa-grid-gap-sm);
+    }
+}
+
+/* Mobile XS: 1 coluna ?480px (padr?o AYO) */
+@media (width <= 480px) {
+    body .page-wrapper .products-grid .product-items:not(.owl-carousel),
+    body .page-wrapper .products.list .product-items:not(.owl-carousel),
+    body .page-wrapper .widget-product-grid .product-items:not(.owl-carousel),
+    body .page-wrapper .block-products-list .product-items:not(.owl-carousel) {
+        grid-template-columns: 1fr;
+        gap: var(--awa-grid-gap-xs);
+    }
+
+    body .page-wrapper .catalog-product-view .product-info-main .box-tocart {
+        display: flex;
+        flex-direction: column;
+        gap: var(--awa-space-3);
+    }
+
+    body .page-wrapper .catalog-product-view .product-info-main .field.qty {
+        width: 100%;
+        justify-content: center;
+    }
+
+    body .page-wrapper .catalog-product-view .product-info-main .product-social-links {
+        text-align: center;
+    }
+
+    body .page-wrapper .block.related,
+    body .page-wrapper .block.upsell,
+    body .page-wrapper .block.crosssell {
+        margin-top: var(--awa-space-7);
+        padding-top: var(--awa-space-5);
+    }
+
+    body .page-wrapper .block-minicart {
+        min-width: auto;
+        width: calc(100vw - 20px);
+        padding: var(--awa-space-4);
+    }
+
+    body .page-wrapper .search-autocomplete {
+        max-height: 60vh;
+    }
+
+    body .page-wrapper .search.results .search.found {
+        font-size: var(--awa-text-sm);
+    }
+
+    body .page-wrapper .item-product .product-info,
+    body .page-wrapper .product-item .product-item-details {
+        padding: var(--awa-space-3) var(--awa-space-3) var(--awa-space-4);
+    }
+
+    body .page-wrapper .item-product .product-name a,
+    body .page-wrapper .product-item .product-item-link {
+        font-size: var(--awa-text-xs);
+        -webkit-line-clamp: 1;
+    }
+
+    body .page-wrapper .item-product .action.tocart,
+    body .page-wrapper .product-item .action.tocart {
+        padding: var(--awa-space-2) var(--awa-space-3);
+        font-size: var(--awa-text-2xs); /* BP-30: era 11px */
+    }
+
+    body .page-wrapper .item-product .actions-secondary {
+        top: 5px;
+        right: 5px;
+    }
+
+    body .page-wrapper .item-product .actions-secondary .action {
+        /* R9-03: Usar 44px direto em vez de width:30+min-width:44 conflito */
+        width: 44px;
+        height: 44px;
+    }
+
+    /* R15-09: product image padding removido (imagem 100% - R11-IMG) */
+    body .page-wrapper .product-item .product-image-photo {
+        padding: 0;
+    }
+
+    /* Detail */
+    body .page-wrapper .product-info-main .price-box .price {
+        font-size: var(--awa-text-xl);
+    }
+
+    body .page-wrapper .product-info-main .box-tocart .action.tocart {
+        width: 100%;
+        min-width: auto;
+    }
+
+    /* Account */
+    body .page-wrapper .account .table-wrapper {
+        overflow-x: auto;
+    }
+
+    /* Checkout */
+    body .page-wrapper .checkout-container .opc-sidebar .opc-block-summary {
+        padding: var(--awa-space-4);
+    }
+
+    body .page-wrapper .login-container .block-customer-login,
+    body .page-wrapper .login-container .block-new-customer {
+        padding: var(--awa-space-4);
+    }
+
+    body .page-wrapper .cat_special {
+        grid-template-columns: 1fr;
+    }
+
+    body .page-wrapper .owl-carousel .owl-dots {
+        margin-top: var(--awa-space-3); /* BP-19: era 12px */
+    }
+
+    body .page-wrapper .owl-carousel .owl-dot span {
+        width: 8px;
+        height: 8px;
+    }
+
+    body .page-wrapper .owl-carousel .owl-nav {
+        display: none;
+    }
+
+    body .page-wrapper .section-title::after,
+    body .page-wrapper .aw-section-title::after,
+    body .page-wrapper .home-module-title::after {
+        width: 40px;
+        height: 2px;
+    }
+
+    body .page-wrapper .section-title,
+    body .page-wrapper .aw-section-title,
+    body .page-wrapper .home-module-title {
+        margin-bottom: var(--awa-space-4);
+    }
+
+    body .page-wrapper .contact-index-index .column.main .form.contact .fieldset .field {
+        width: 100%;
+    }
+
+    body .page-wrapper .contact-index-index .form.contact textarea {
+        min-height: 120px;
+    }
+}
+
+/* LB-01: List view ? sempre 1 coluna (cada card mostra imagem + info lado a lado) */
+body .page-wrapper .products.list .product-items:not(.owl-carousel) {
+    grid-template-columns: 1fr;
+}
+
+/* LB-02: Com sidebar (2columns-left/right) ? 3 colunas no range 992-1199px
+   evita cards de ~155px que causam overflow de pre�os e nomes longos */
+@media (width >= 992px) and (width <= 1199px) {
+    body.page-layout-2columns-left .page-wrapper .products-grid .product-items:not(.owl-carousel),
+    body.page-layout-2columns-right .page-wrapper .products-grid .product-items:not(.owl-carousel),
+    body.page-layout-2columns-left .page-wrapper .widget-product-grid .product-items:not(.owl-carousel),
+    body.page-layout-2columns-right .page-wrapper .widget-product-grid .product-items:not(.owl-carousel) {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* ============================================================
+   F3-01 ? CONTAINER QUERIES (Product Card Context-Aware)
+   Cards adaptam ao tamanho do CONTAINER ? n?o da viewport.
+   Beneficia sidebar, modal quickview, widgets estreitos.
+   Suporte: Chrome 105+, Firefox 110+, Safari 16+ (~94%).
+   Fallback: layout viewport-based (grid breakpoints acima).
+   ============================================================ */
+body .page-wrapper .products-grid,
+body .page-wrapper .products.list,
+body .page-wrapper .block-products-list,
+body .page-wrapper .widget-product-grid {
+    container-type: inline-size;
+    container-name: product-grid;
+}
+
+/* Cards em container estreito (<400px): compactar info */
+@container product-grid (width < 400px) {
+    body .page-wrapper .item-product .product-name a,
+    body .page-wrapper .product-item .product-item-link {
+        -webkit-line-clamp: 1;
+        font-size: var(--awa-text-sm);
+    }
+
+    body .page-wrapper .item-product .price-box .price,
+    body .page-wrapper .product-item .price {
+        font-size: var(--awa-text-base);
+    }
+
+    body .page-wrapper .item-product .actions-secondary,
+    body .page-wrapper .product-item .actions-secondary {
+        flex-direction: column;
+        gap: var(--awa-space-1);
+    }
+
+    body .page-wrapper .item-product .product-info,
+    body .page-wrapper .product-item .product-item-details {
+        padding: var(--awa-space-2);
+    }
+}
+
+/* Cards em container muito estreito (<250px): esconder secund�rios */
+@container product-grid (width < 250px) {
+    body .page-wrapper .item-product .rating-summary,
+    body .page-wrapper .item-product .reviews-actions,
+    body .page-wrapper .product-item .rating-summary,
+    body .page-wrapper .product-item .reviews-actions {
+        display: none;
+    }
+
+    body .page-wrapper .item-product .old-price,
+    body .page-wrapper .product-item .old-price {
+        display: none;
+    }
+}
+
+/* ============================================================
+   F3-02 ? SUBGRID (Alinhamento Perfeito entre Cards)
+   Subitens (img, info, pre�o, bot?o) se alinham horizontalmente
+   entre TODOS os cards da mesma row no grid est�tico.
+   Suporte: Chrome 117+, Firefox 71+, Safari 16+ (~94%).
+   Fallback: flex column (layout atual ? funcional, sem alinhamento).
+   ? N?O aplicar em OWL Carousel (usa float/position).
+   ============================================================ */
+@supports (grid-template-rows: subgrid) {
+    body .page-wrapper .products-grid .product-items:not(.owl-carousel) {
+        grid-template-rows: auto; /* subgrid herda as tracks do pai */
+    }
+
+    body .page-wrapper .products-grid .product-items:not(.owl-carousel) > .product-item,
+    body .page-wrapper .products-grid .product-items:not(.owl-carousel) > .item-product {
+        display: grid;
+        grid-template-rows: subgrid;
+        grid-row: span 4; /* img | info | price | button */
+    }
+
+    /* Mapear cada se�?o do card ? sua row no subgrid */
+    body .page-wrapper .products-grid .product-items:not(.owl-carousel) > .product-item > .product-item-info,
+    body .page-wrapper .products-grid .product-items:not(.owl-carousel) > .item-product > .product-item-info {
+        display: grid;
+        grid-template-rows: subgrid;
+        grid-row: span 4;
+    }
+}
+
+/* ============================================================
+   PRODUCT CARD ? AMBAS classes AYO + Magento
+   ============================================================ */
+body .page-wrapper .item-product,
+body .page-wrapper .product-item {
+    background: var(--awa-bg-surface); /* BP-12 */
+    border-radius: var(--awa-radius);
+    border: 1px solid var(--awa-gray-200);
+    overflow: hidden;
+    transition: transform var(--awa-transition),
+                box-shadow var(--awa-transition),
+                border-color var(--awa-transition); /* BUG-10: era 'all', causava repintura desnecess�ria */
+
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: relative;
+    list-style: none;
+    isolation: isolate; /* VB-05: cria stacking context para conter z-index de badges/actions */
+    min-width: 0; /* LB-06: previne overflow por conte�do intr�nseco em CSS Grid */
+
+    /* GRID-FIX: resetar defaults Magento que for�am width fixo e quebram o CSS Grid */
+    width: auto;
+    margin-left: 0;
+    float: none;
+}
+
+/* GRID-FIX: resetar .product-item-info width fixo do Magento (152px/240px) */
+body .page-wrapper .item-product .product-item-info,
+body .page-wrapper .product-item .product-item-info {
+    width: 100%;
+    max-width: 100%;
+}
+
+body .page-wrapper .item-product:hover,
+body .page-wrapper .product-item:hover {
+    border-color: var(--awa-gray-300);
+    box-shadow: var(--awa-shadow-hover);
+    transform: translateY(-4px);
+}
+
+/* R11-13: desabilitar transform em reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+    body .page-wrapper .item-product:hover,
+    body .page-wrapper .product-item:hover {
+        transform: none;
+    }
+
+    body .page-wrapper .item-product:hover .product-thumb img,
+    body .page-wrapper .product-item:hover .product-image-photo {
+        transform: none;
+    }
+}
+
+/* Flex ordering */
+body .page-wrapper .item-product .product-thumb,
+body .page-wrapper .product-item .product-image-container {
+    order: 1;
+}
+
+body .page-wrapper .item-product .product-info,
+body .page-wrapper .product-item .product-item-details,
+body .page-wrapper .item-product .product-item-details {
+    order: 2;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+body .page-wrapper .item-product .product-info-cart,
+body .page-wrapper .product-item .actions-primary,
+body .page-wrapper .item-product .actions-primary {
+    order: 3;
+    margin-top: auto;
+}
+
+/* LB-03: .product-item-inner � wrapper intermedi�rio entre .product-item-details
+   e .actions-primary no markup Magento padr?o ? precisa de margin-top:auto
+   para empurrar o bot?o ao fundo do card */
+body .page-wrapper .product-item .product-item-inner {
+    margin-top: auto;
+}
+
+body .page-wrapper .product-item-info {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* Imagem ? AYO class */
+body .page-wrapper .item-product .product-thumb {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--awa-radius) var(--awa-radius) 0 0;
+    background: var(--awa-cons-c78); /* R11-IMG: branco para n?o vazar fundo cinza com object-fit:contain */
+    aspect-ratio: 1 / 1;
+}
+
+body .page-wrapper .item-product .product-thumb img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    transition: transform var(--awa-transition-slow); /* R13: era '0.4s ease' hardcoded */
+}
+
+body .page-wrapper .item-product:hover .product-thumb img {
+    transform: scale(1.05);
+}
+
+/* Imagem ? Magento class */
+
+/* R11-08: aspect-ratio em vez de padding-top hack */
+body .page-wrapper .product-item .product-image-container {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background: var(--awa-cons-c78); /* R11-IMG: branco para n?o vazar fundo cinza com object-fit:contain */
+    overflow: hidden;
+    border-radius: var(--awa-radius) var(--awa-radius) 0 0;
+}
+
+body .page-wrapper .product-item .product-image-photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 0; /* R11-IMG: imagem 100% sem padding interno */
+    transition: transform var(--awa-transition-slow);
+}
+
+body .page-wrapper .product-item:hover .product-image-photo {
+    transform: scale(1.05);
+}
+
+/* Placeholder hide */
+body .page-wrapper .item-product .second-thumb img[src*="placeholder"],
+body .page-wrapper .item-deal-product .second-thumb img[src*="placeholder"] {
+    display: none;
+}
+
+body .page-wrapper .item-product .product-thumb img[src*="placeholder"],
+body .page-wrapper .item-product .product-thumb img[src*="Indisponivel"] {
+    opacity: 0.5;
+    filter: grayscale(100%);
+}
+
+/* Conte�do */
+body .page-wrapper .item-product .product-info {
+    padding: var(--awa-space-4);
+}
+
+body .page-wrapper .product-item .product-item-details {
+    padding: var(--awa-space-4);
+}
+
+/* MCRD-ROK-PAD: add inline padding to content elements that are direct children of
+   .product-item in rokan carousels (templates emit no .product-item-details wrapper) */
+body .page-wrapper
+    :is(.rokan-bestseller, .rokan-newproduct, .rokan-featuredproduct, .rokan-onsaleproduct,
+        .rokan-toprate, .rokan-mostviewed, .rokan-pricecountdown)
+    .product-item
+    :is(.product-item-name, .awa-b2b-sku, .product-ratting, .price-box, .product-info-cart) {
+    padding-left: var(--awa-modern-card-content-pad-inline);
+    padding-right: var(--awa-modern-card-content-pad-inline);
+}
+
+body .page-wrapper
+    :is(.rokan-bestseller, .rokan-newproduct, .rokan-featuredproduct, .rokan-onsaleproduct,
+        .rokan-toprate, .rokan-mostviewed, .rokan-pricecountdown)
+    .product-item .product-info-cart {
+    padding-bottom: var(--awa-modern-card-content-pad-block-end);
+}
+
+/* T�tulo */
+body .page-wrapper .item-product .product-name {
+    margin: 0 0 var(--awa-space-2);
+    min-height: 40px;
+}
+
+body .page-wrapper .item-product .product-name a,
+body .page-wrapper .item-product .product-item-link,
+body .page-wrapper .product-item .product-item-name,
+body .page-wrapper .product-item .product-item-link {
+    font-size: var(--awa-text-base);
+    font-weight: var(--awa-weight-semibold);
+    line-height: var(--awa-leading-normal);
+    color: var(--awa-dark);
+    text-decoration: none;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin: 0 0 var(--awa-space-2);
+    transition: color var(--awa-transition);
+}
+
+body .page-wrapper .item-product .product-name a:hover,
+body .page-wrapper .product-item .product-item-name:hover {
+    color: var(--awa-red-dark);
+}
+
+/* Avalia�?es */
+body .page-wrapper .item-product .rating-summary {
+    margin: 0 0 var(--awa-space-2);
+    display: flex;
+    align-items: center;
+    gap: var(--awa-space-2);
+}
+
+body .page-wrapper .item-product .rating-result > span::before {
+    color: var(--awa-warning); /* R12-07: token */
+    font-size: var(--awa-text-base);
+}
+
+body .page-wrapper .item-product .reviews-actions a,
+body .page-wrapper .product-item .reviews-actions a {
+    font-size: var(--awa-text-xs);
+    color: var(--awa-gray-700); /* VB-10: era gray-500 (~4.6:1 a 12px) ? gray-700 = ~7.15:1 ? */
+    text-decoration: none;
+}
+
+/* Pre�o */
+body .page-wrapper .item-product .info-price {
+    margin: 0 0 var(--awa-space-3);
+}
+
+body .page-wrapper .item-product .price-box {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: var(--awa-space-2);
+}
+
+body .page-wrapper .item-product .price-box .price,
+body .page-wrapper .product-item .price {
+    font-size: clamp(15px, 1vw + 10px, 20px); /* R14: clamp() substitui 2 media queries */
+    font-weight: var(--awa-weight-bold);
+    color: var(--awa-red);
+}
+
+body .page-wrapper .item-product .old-price .price,
+body .page-wrapper .product-item .old-price .price {
+    font-size: var(--awa-text-base);
+    color: var(--awa-gray-500);
+    text-decoration: line-through;
+    font-weight: var(--awa-weight-normal);
+}
+
+body .page-wrapper .item-product .old-price {
+    order: -1;
+}
+
+/* Esconder pre�o excl. tax (duplicata) */
+body .page-wrapper .item-product .price-wrapper.price-excluding-tax,
+body .page-wrapper .product-item .price-wrapper.price-excluding-tax,
+body .page-wrapper .price-box .price-excluding-tax,
+body .page-wrapper .price-box .price-wrapper.price-excluding-tax {
+    display: none;
+}
+
+/* Esconder price labels desnecess�rios */
+body .page-wrapper .item-product .price-box .price-label,
+body .page-wrapper .price-box .price-label[data-label*="excl"],
+body .page-wrapper .price-box [class*="excluding"] {
+    display: none;
+}
+
+/* Duplo pre�o (fix) */
+body .page-wrapper .price-container .price+.price,
+body .page-wrapper .price-container .price-wrapper+.price-wrapper,
+body .page-wrapper .price-box .price-container+.price-container {
+    display: none;
+}
+
+/* Parcelamento */
+body .page-wrapper .item-product .installments,
+body .page-wrapper .item-product .price-installments {
+    font-size: var(--awa-text-xs);
+    color: var(--awa-gray-500);
+    display: block;
+    margin-top: var(--awa-space-1);
+}
+
+/* Esconder elementos problem�ticos */
+body .page-wrapper .sold-qty,
+body .page-wrapper .qty-sold,
+body .page-wrapper .sold-by,
+body .page-wrapper .vendor-name {
+    display: none;
+}
+
+body .page-wrapper .item-product .sku {
+    display: none;
+}
+
+body .page-wrapper .item-product .weee,
+body .page-wrapper .item-product [data-label="Excl. Tax"],
+body .page-wrapper .item-deal-product .weee {
+    display: none;
+}
+
+/* Override Magento inline 480px width on product images */
+body .page-wrapper .item-product .product-thumb[style*="width"],
+body .page-wrapper .item-product .product-image-container[style*="width"],
+body .page-wrapper .product-image-container[style*="width"],
+body .page-wrapper .product-item .product-image-container[style*="width"] {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+body .page-wrapper .item-product .product-thumb img[style*="width"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+}
+
+/* ============================================================
+   BOT?O ADICIONAR AO CARRINHO
+   ============================================================ */
+body .page-wrapper .item-product .product-info-cart {
+    margin-top: auto;
+    padding-top: var(--awa-space-3);
+}
+
+body .page-wrapper .item-product .action.tocart,
+body .page-wrapper .item-product .btn-add-to-cart,
+body .page-wrapper .item-product button.tocart,
+body .page-wrapper .product-item .action.tocart {
+    display: block;
+    width: 100%;
+    padding: var(--awa-space-3) var(--awa-space-4);
+    min-height: var(--awa-btn-height-sm);
+    background: var(--awa-red);
+    color: var(--awa-text-on-danger);
+    border: none;
+    border-radius: var(--awa-radius-sm);
+    font-size: var(--awa-text-sm);
+    font-weight: var(--awa-weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: var(--awa-tracking-wide);
+    cursor: pointer;
+    transition: background var(--awa-transition), box-shadow var(--awa-transition);
+    text-align: center;
+    text-decoration: none;
+    position: static;
+    float: none;
+    margin: 0;
+    line-height: var(--awa-leading-normal);
+}
+
+body .page-wrapper .item-product .action.tocart:hover,
+body .page-wrapper .item-product .btn-add-to-cart:hover,
+body .page-wrapper .product-item .action.tocart:hover {
+    background: var(--awa-red-dark);
+    box-shadow: var(--awa-shadow-red); /* R13: token */
+}
+
+/* R17-06: feedback t�til ao pressionar (alinhado com .action.primary:active) */
+body .page-wrapper .item-product .action.tocart:active,
+body .page-wrapper .item-product .btn-add-to-cart:active,
+body .page-wrapper .product-item .action.tocart:active {
+    transform: scale(0.97);
+    box-shadow: none;
+}
+
+/* Evita stacking de transforms quando card j� sobe -4px */
+body .page-wrapper .item-product:hover .action.tocart:hover,
+body .page-wrapper .product-item:hover .action.tocart:hover {
+    transform: none;
+}
+
+body .page-wrapper .item-product .action.tocart[disabled],
+body .page-wrapper .item-product .action.tocart.disabled {
+    background: var(--awa-gray-300);
+    color: var(--awa-gray-500);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* ============================================================
+   A�?ES SECUND�RIAS (wishlist, compare, quickview)
+   ============================================================ */
+body .page-wrapper .item-product .actions-secondary {
+    order: 0;
+    position: absolute;
+    top: var(--awa-space-3);
+    right: var(--awa-space-3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--awa-space-2);
+    opacity: 0;
+    transform: translateX(10px);
+    transition: opacity var(--awa-transition), transform var(--awa-transition);
+    z-index: 10;
+}
+
+body .page-wrapper .item-product:hover .actions-secondary,
+body .page-wrapper .item-product:focus-within .actions-secondary {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+body .page-wrapper .item-product .actions-secondary .action,
+body .page-wrapper .item-product .actions-secondary a {
+    width: 44px; /* BUG-07: era 36px ? WCAG 2.5.5 touch target m�nimo 44px */
+    height: 44px;
+    background: var(--awa-bg-surface); /* BP-12 */
+    border-radius: 50%;
+    box-shadow: var(--awa-shadow);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--awa-gray-700);
+    transition: background var(--awa-transition), color var(--awa-transition); /* R13: era 'all' */
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+body .page-wrapper .item-product .actions-secondary .action:hover,
+body .page-wrapper .item-product .actions-secondary a:hover {
+    background: var(--awa-red-dark);
+    color: var(--awa-text-on-danger);
+}
+
+/* Focus visible para a�?es secund�rias */
+body .page-wrapper .item-product .actions-secondary .action:focus-visible,
+body .page-wrapper .item-product .actions-secondary a:focus-visible {
+    outline: 2px solid var(--awa-red);
+    outline-offset: 2px;
+    opacity: 1;
+}
+
+body .page-wrapper .item-product .actions-secondary .action span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+}
+
+/* Quick View */
+body .page-wrapper .item-product .quickview-link {
+    position: absolute;
+    bottom: var(--awa-space-3);
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--awa-overlay);
+    color: var(--awa-text-on-dark);
+    padding: var(--awa-space-2) var(--awa-space-4);
+    border-radius: var(--awa-radius-full);
+    font-size: var(--awa-text-xs); /* 11px ? xs */
+    font-weight: var(--awa-weight-semibold);
+    text-transform: uppercase;
+    opacity: 0;
+    transition: opacity var(--awa-transition), transform var(--awa-transition);
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+    z-index: 5;
+}
+
+body .page-wrapper .item-product:hover .quickview-link,
+body .page-wrapper .item-product:focus-within .quickview-link { /* R14: a11y teclado */
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+    backdrop-filter: blur(4px); /* R15-06: movido para estado vis�vel ? evita GPU work em opacity:0 */
+}
+
+/* ============================================================
+   BADGES (Novo, Promo�?o, Desconto)
+   R36: removidos .discount-badge e .sale-percent ? seletores
+   �rf?os sem nenhum elemento correspondente no DOM do tema.
+   Classes ativas do Rokanthemes: .product-label, .sticker, .hot-onsale
+   ============================================================ */
+body .page-wrapper .item-product .product-label,
+body .page-wrapper .item-product .sticker,
+body .page-wrapper .item-product .hot-onsale {
+    position: absolute;
+    top: var(--awa-space-3);
+    left: var(--awa-space-3);
+    padding: var(--awa-space-1) var(--awa-space-3);
+    font-size: var(--awa-text-xs); /* 11px badges */
+    font-weight: var(--awa-weight-bold);
+    text-transform: uppercase;
+    letter-spacing: var(--awa-tracking-wide);
+    border-radius: var(--awa-radius-sm);
+    z-index: 5;
+}
+
+/* R36: bloco .discount-badge / .sale-percent removido ? CSS morto */
+
+body .page-wrapper .item-product .product-label.new,
+body .page-wrapper .item-product .sticker.new {
+    background: var(--awa-success);
+    color: var(--awa-text-on-success);
+}
+
+body .page-wrapper .item-product .product-label.sale,
+body .page-wrapper .item-product .sticker.sale,
+body .page-wrapper .item-product .product-label.onsale {
+    background: var(--awa-red);
+    color: var(--awa-text-on-danger);
+}
+
+body .page-wrapper .item-product .product-label.discount,
+body .page-wrapper .item-product .sticker.discount {
+    background: var(--awa-orange);
+    color: var(--awa-text-on-warning);
+}
+
+/* Disponibilidade */
+body .page-wrapper .item-product .stock.available {
+    color: var(--awa-success);
+    font-size: var(--awa-text-xs);
+    margin-bottom: var(--awa-space-2);
+}
+
+body .page-wrapper .item-product .stock.unavailable {
+    color: var(--awa-red);
+    font-size: var(--awa-text-xs);
+}
+
+/* ============================================================
+   SUPERDEALS CARDS
+   ============================================================ */
+body .page-wrapper .item-deal-product {
+    background: var(--awa-bg-surface); /* BP-12 */
+    border-radius: var(--awa-radius);
+    border: 1px solid var(--awa-gray-200);
+    overflow: visible;
+    transition: border-color var(--awa-transition), box-shadow var(--awa-transition); /* R13: era 'all' */
+    position: relative;
+    display: flex; /* R17-04: equal-height em grid/carousel, alinhado com .item-product */
+    flex-direction: column;
+    height: 100%;
+    min-width: 0;
+}
+
+body .page-wrapper .item-deal-product:hover {
+    border-color: var(--awa-gray-300);
+    box-shadow: var(--awa-shadow-hover);
+}
+
+body .page-wrapper .item-deal-product .title-product a {
+    font-size: var(--awa-text-base);
+    font-weight: var(--awa-weight-semibold);
+    line-height: var(--awa-leading-normal);
+    color: var(--awa-dark);
+    text-decoration: none;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    transition: color var(--awa-transition);
+}
+
+body .page-wrapper .item-deal-product .title-product a:hover {
+    color: var(--awa-red-dark);
+}
+
+body .page-wrapper .item-deal-product .info-price-deal .price {
+    font-size: var(--awa-text-xl);
+    font-weight: var(--awa-weight-bold);
+    color: var(--awa-red);
+}
+
+body .page-wrapper .item-deal-product .info-price-deal .old-price .price {
+    font-size: var(--awa-text-base);
+    color: var(--awa-gray-500);
+    text-decoration: line-through;
+    font-weight: var(--awa-weight-normal);
+}
+
+body .page-wrapper .item-deal-product .price-wrapper.price-excluding-tax {
+    display: none;
+}
+
+/* ============================================================
+   OWL CAROUSEL ? v1+v2 COMPAT�VEL
+   ============================================================ */
+
+/* OWL-FIX-03: positioning context for absolute nav arrows */
+body .page-wrapper .owl-carousel {
+    position: relative;
+}
+
+/* Flex container ? stretch items to equal height */
+body .page-wrapper .owl-carousel .owl-stage {
+    display: flex !important;
+    align-items: stretch;
+}
+
+/* OWL-FIX-02: reinforce overflow clip ? prevents horizontal scrollbar
+   when flex children push beyond JS-calculated widths */
+body .page-wrapper .owl-carousel .owl-stage-outer {
+    overflow: hidden;
+}
+
+body .page-wrapper .owl-carousel .owl-item {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+
+    /* R31: float/min-width moved to awa-grid-unified.css �4 ? canonical location */
+
+    /* R18-11: box-sizing removed ? redundant with global * rule in awa-core.css */
+}
+
+/* Exception: Hero slider needs height:100% */
+body .page-wrapper .ayo-home5-hero-layout__main .owl-carousel .owl-item,
+body .page-wrapper .banner-slider .owl-carousel .owl-item,
+body .page-wrapper .homeslider-container .owl-carousel .owl-item {
+    height: 100%;
+}
+
+/* OWL-FIX-05: brand/logo carousel ? prevent flex stretch distortion */
+body .page-wrapper .brand-slider .owl-carousel .owl-item,
+body .page-wrapper .brand-logo .owl-carousel .owl-item,
+body .page-wrapper .partner-slider .owl-carousel .owl-item,
+body .page-wrapper .manufacturer-slider .owl-carousel .owl-item {
+    align-items: center;
+    justify-content: center;
+    height: auto;
+}
+
+body .page-wrapper .brand-slider .owl-carousel .owl-item img,
+body .page-wrapper .brand-logo .owl-carousel .owl-item img,
+body .page-wrapper .partner-slider .owl-carousel .owl-item img,
+body .page-wrapper .manufacturer-slider .owl-carousel .owl-item img {
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+/* Product and card content inside OWL: flex stretch for equal height */
+body .page-wrapper .owl-carousel .owl-item > .item-product,
+body .page-wrapper .owl-carousel .owl-item > .product-item,
+body .page-wrapper .owl-carousel .owl-item > .product-item-info,
+body .page-wrapper .owl-carousel .owl-item > .item-deal-product,
+body .page-wrapper .owl-carousel .owl-item > .post-item,
+body .page-wrapper .owl-carousel .owl-item > .blog-post-item,
+body .page-wrapper .owl-carousel .owl-item > .testimonial-item,
+body .page-wrapper .owl-carousel .owl-item > .info-testimonial {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0; /* OWL-FIX-08: prevent text overflow from expanding flex child */
+}
+
+body .page-wrapper .owl-carousel .item-product,
+body .page-wrapper .owl-carousel .product-item {
+    height: 100%;
+    margin: 0;
+    min-width: 0;
+    width: 100%;
+}
+
+/* ============================================================
+   HOME5 ? ALINHAMENTO RESPONSIVO (grid/colunas/cards/carross�is)
+   Patch m�nimo para evitar desalinhamento e overflow horizontal.
+   ============================================================ */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper :is(
+    .products-grid,
+    .product-items,
+    .product-grid,
+    .tab_product,
+    .categorytab-container,
+    .hot-deal,
+    .owl-carousel,
+    .owl-carousel .owl-stage-outer,
+    .owl-carousel .owl-stage,
+    .owl-carousel .owl-item,
+    .item-product,
+    .product-item,
+    .product-item-info
+) {
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .owl-carousel .owl-stage {
+    display: flex;
+    align-items: stretch;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .owl-carousel .owl-item {
+    min-width: 0;
+}
+
+@media (width <= 991px) {
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper :is(
+        .products-grid,
+        .product-items,
+        .product-grid,
+        .tab_product,
+        .categorytab-container,
+        .hot-deal
+    ) {
+        overflow-x: clip;
+    }
+
+    body .page-wrapper .catalog-product-view .columns {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    body .page-wrapper .catalog-product-view .column.main {
+        width: 100%;
+        flex: 0 0 100%;
+    }
+
+    body .page-wrapper .catalog-product-view .product-info-main {
+        width: 100%;
+        float: none;
+    }
+
+    body .page-wrapper .sidebar-main {
+        display: none;
+        order: -1;
+        width: 100%;
+        margin-bottom: var(--awa-space-5);
+    }
+
+    body.awa-filter-visible .page-wrapper .sidebar-main {
+        display: block;
+    }
+
+    /* Bot?o toggle injetado via JS */
+    .awa-filter-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--awa-space-2);
+        padding: var(--awa-space-3) var(--awa-space-5);
+        background: var(--awa-dark);
+        color: var(--awa-text-on-dark);
+        border: none;
+        border-radius: var(--awa-radius-sm);
+        font-size: var(--awa-text-base);
+        font-weight: var(--awa-weight-semibold);
+        cursor: pointer;
+        margin-bottom: var(--awa-space-4);
+        transition: background var(--awa-transition-fast);
+    }
+
+    .awa-filter-toggle:hover {
+        background: var(--awa-red-dark);
+    }
+
+    .awa-filter-toggle:focus-visible {
+        outline: 2px solid var(--awa-red);
+        outline-offset: 2px;
+    }
+
+    .awa-filter-toggle::before {
+        content: "\f0b0";
+        font-family: FontAwesome, sans-serif;
+        font-size: var(--awa-text-base);
+    }
+
+    body.awa-filter-visible .awa-filter-toggle {
+        background: var(--awa-red);
+    }
+
+    body .page-wrapper .checkout-index-index .opc-wrapper,
+    body .page-wrapper .checkout-container .opc-wrapper {
+        width: 100%;
+        float: none;
+        padding-right: 0;
+    }
+
+    body .page-wrapper .checkout-index-index .opc-sidebar,
+    body .page-wrapper .checkout-container .opc-sidebar {
+        width: 100%;
+        float: none;
+        margin-top: var(--awa-space-5);
+    }
+
+    body .page-wrapper .cat_special {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    body .page-wrapper .products.list .product-item {
+        flex-direction: column;
+    }
+
+    body .page-wrapper .products.list .product-item .product-image-container {
+        flex: none;
+        width: 100%;
+        aspect-ratio: 1 / 1; /* BUG-02: era padding-top:100% que conflitava com aspect-ratio herdado, dobrando altura */
+        height: auto;
+    }
+}
+
+/* OWL-FIX-04: responsive images inside owl-carousel items */
+body .page-wrapper .owl-carousel .owl-item img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Setas */
+body .page-wrapper .owl-carousel .owl-nav {
+    position: static;
+}
+
+body .page-wrapper .owl-carousel .owl-nav button.owl-prev,
+body .page-wrapper .owl-carousel .owl-nav button.owl-next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 44px;   /* WCAG 2.5.5 touch target min 44px */
+    height: 44px;
+    background: var(--awa-bg-surface); /* BP-12 */
+    border: 1px solid var(--awa-gray-200);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--awa-text-md);
+    color: var(--awa-dark);
+    z-index: 10;
+    transition: background var(--awa-transition), color var(--awa-transition), border-color var(--awa-transition); /* R13: era 'all 0.25s' hardcoded */
+    box-shadow: var(--awa-shadow);
+    margin: 0;
+    padding: 0;
+}
+
+body .page-wrapper .owl-carousel .owl-nav button.owl-prev {
+    left: 10px; /* BUG-01: era -15px, cortava dentro de containers overflow:hidden */
+}
+
+body .page-wrapper .owl-carousel .owl-nav button.owl-next {
+    right: 10px; /* BUG-01: era -15px, cortava dentro de containers overflow:hidden */
+}
+
+body .page-wrapper .owl-carousel .owl-nav button:hover {
+    background: var(--awa-red-dark);
+    color: var(--awa-text-on-danger);
+    border-color: var(--awa-red-dark);
+}
+
+/* Dots */
+body .page-wrapper .owl-carousel .owl-dots {
+    text-align: center;
+    margin-top: var(--awa-space-5);
+}
+
+body .page-wrapper .owl-carousel .owl-dot {
+    padding: 17px; /* touch target: 17+10+17 = 44px ambas dimens?es (WCAG 2.5.5) */
+    cursor: pointer;
+    background: none;
+    border: none;
+}
+
+body .page-wrapper .owl-carousel .owl-dot span {
+    width: 10px;
+    height: 10px;
+    background: var(--awa-gray-300);
+    border-radius: 50%;
+    display: inline-block;
+    margin: 0;
+    transition: background var(--awa-transition), width var(--awa-transition), border-radius var(--awa-transition); /* R13: era 'all 0.25s' hardcoded */
+}
+
+body .page-wrapper .owl-carousel .owl-dot.active span {
+    background: var(--awa-red);
+    width: 24px;
+    border-radius: var(--awa-radius-sm); /* R11-10: token */
+}
+
+/* OWL-FIX-07: generic pre-init stacking ? show only first item
+   before OWL JS initializes (.owl-loaded not yet applied) */
+body .page-wrapper .owl-carousel:not(.owl-loaded) {
+    overflow: hidden;
+}
+
+body .page-wrapper .owl-carousel:not(.owl-loaded) > *:not(:first-child) {
+    display: none;
+}
+
+/* ============================================================
+   HOMEPAGE AYO MODULES ? CONTAINER ALINHADO
+   ============================================================ */
+body .page-wrapper .homebuilder-section,
+body .page-wrapper .home-bestseller,
+body .page-wrapper .home-new-product,
+body .page-wrapper .home-category,
+body .page-wrapper .onsale_product,
+body .page-wrapper .rokan-onsale,
+body .page-wrapper .rokan-onsaleproduct,
+body .page-wrapper .hot-deal-section,
+body .page-wrapper .featured-products,
+body .page-wrapper .special-products,
+body .page-wrapper .widget-product-grid,
+body .page-wrapper .block-products-list,
+body .page-wrapper .velaServices,
+body .page-wrapper .service-section,
+body .page-wrapper .testimonials-home,
+body .page-wrapper .the_blog,
+body .page-wrapper .tab_product,
+body .page-wrapper .list-tab-product {
+    max-width: var(--awa-container);
+    margin-inline: auto;
+    padding-inline: var(--awa-space-5); /* BP-21: era 20px */
+    box-sizing: border-box;
+    margin-bottom: var(--awa-space-8);
+}
+
+/* LB-04: �ltima se�?o antes do footer ? sem margin-bottom para n?o duplicar
+   com o margin-top: 60px do footer */
+body .page-wrapper .homebuilder-section:last-of-type,
+body .page-wrapper .the_blog:last-child,
+body .page-wrapper .testimonials-home:last-child {
+    margin-bottom: 0;
+}
+
+/* Below-fold sections: defer rendering until scrolled into view (R6-11) */
+
+/* Exclu�dos testimonials-home e hot-deal-section ? cont?m OWL carousels
+   que precisam de width calculado ao inicializar */
+body .page-wrapper .the_blog,
+body .page-wrapper .velaServices,
+body .page-wrapper .service-section { /* BP-48: se�?es below-fold extras */
+    content-visibility: auto;
+    contain-intrinsic-size: auto 400px;
+}
+
+/* Section titles */
+body .page-wrapper .homebuilder-section .section-title,
+body .page-wrapper .home-bestseller .title-category,
+body .page-wrapper .home-new-product .title-category,
+body .page-wrapper .onsale_product .title-category,
+body .page-wrapper .block-products-list .block-title,
+body .page-wrapper .widget-product-grid .block-title,
+body .page-wrapper .list-tab-product .box-title,
+body .page-wrapper .testimonials-home .block-title,
+body .page-wrapper .the_blog .block-title {
+    text-align: center;
+    margin-bottom: var(--awa-space-7);
+    font-size: var(--awa-text-2xl);
+    font-weight: var(--awa-weight-bold);
+    text-transform: uppercase;
+    letter-spacing: var(--awa-tracking-wider);
+    color: var(--awa-dark);
+    position: relative;
+    padding-bottom: var(--awa-space-4);
+}
+
+body .page-wrapper .homebuilder-section .section-title::after,
+body .page-wrapper .home-bestseller .title-category::after,
+body .page-wrapper .home-new-product .title-category::after,
+body .page-wrapper .block-products-list .block-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: var(--awa-red);
+    border-radius: var(--awa-radius-2xs);
+}
+
+/* Homepage flex layout */
+body .page-wrapper .rowFlex,
+body .page-wrapper .row-flex {
+    display: flex;
+    flex-wrap: wrap;
+    margin-left: calc(var(--awa-grid-gap) / -2);
+    margin-right: calc(var(--awa-grid-gap) / -2);
+}
+
+body .page-wrapper .rowFlex > [class*="col"],
+body .page-wrapper .row-flex > [class*="col"] {
+    padding-left: calc(var(--awa-grid-gap) / 2);
+    padding-right: calc(var(--awa-grid-gap) / 2);
+    box-sizing: border-box;
+}
+
+/* Services section ? R11-18: CSS Grid auto-fill substitui 4 media queries */
+body .page-wrapper .velaServicesInner {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: var(--awa-space-5);
+    justify-content: center;
+}
+
+/* FIX: Home5 usa layout flex interno via _extend.less ? n?o aplicar grid gen�rico */
+body .page-wrapper .velaServicesInner.velaServicesInner--home5 {
+    display: block;
+    grid-template-columns: none;
+}
+
+body .page-wrapper .velaServicesInner .boxService,
+body .page-wrapper .service-item {
+    text-align: center;
+    padding: var(--awa-space-5);
+}
+
+/* ============================================================
+   BANNER / HERO SLIDER
+   ============================================================ */
+body .page-wrapper .homeslider-container,
+body .page-wrapper .wrapper_slider,
+body .page-wrapper .banner-slider {
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+body .page-wrapper .homeslider-container .item-slide img,
+body .page-wrapper .banner-slider img,
+body .page-wrapper .wrapper_slider .banner_item img {
+    width: 100%;
+    height: auto;
+    display: block;
+    max-width: 100%;
+}
+
+body .page-wrapper .slide-content,
+body .page-wrapper .text-slide,
+body .page-wrapper .banner-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    width: 80%;
+    max-width: var(--awa-container);
+    z-index: 5;
+}
+
+/* Banner card fixes ? R10-12: prefixado para especificidade */
+body .page-wrapper .ayo-home5-hero-card {
+    overflow: hidden;
+    position: relative;
+}
+
+body .page-wrapper .ayo-home5-hero-card__content {
+    position: relative;
+    z-index: 10;
+    text-shadow: none;
+}
+
+body .page-wrapper .ayo-home5-hero-card__title,
+body .page-wrapper .ayo-home5-hero-card strong {
+    color: var(--awa-text-on-dark);
+    font-weight: var(--awa-weight-bold);
+}
+
+/* ============================================================
+   HOT DEAL / COUNTDOWN
+   ============================================================ */
+body .page-wrapper .hot-deal:not(.top-home-content__trust-offers-deals),
+body .page-wrapper .deal-section,
+body .page-wrapper .super-deal-section {
+    max-width: var(--awa-container);
+    margin: 0 auto;
+    padding: var(--awa-space-7) var(--awa-space-5);
+}
+
+body .page-wrapper .hot-deal:not(.top-home-content__trust-offers-deals) .countdown_block,
+body .page-wrapper .deal-section .countdown_block {
+    display: flex;
+    flex-flow: row wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--awa-space-3);
+}
+
+body .page-wrapper .super-deal-countdown,
+body .page-wrapper .hot-deal:not(.top-home-content__trust-offers-deals) .super-deal-countdown {
+    display: flex;
+    flex-direction: row;
+    gap: var(--awa-space-2);
+}
+
+body .page-wrapper .time_circles {
+    display: flex;
+    flex-flow: row wrap;
+    gap: var(--awa-space-2);
+    justify-content: center;
+}
+
+body .page-wrapper .time_circles > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 55px;
+    min-height: 55px;
+    background: rgb(255 255 255 / 15%);
+    border-radius: var(--awa-radius-sm); /* R13: era 8px hardcoded */
+    padding: var(--awa-space-2);
+}
+
+body .page-wrapper .time_circles > div .number {
+    font-size: var(--awa-text-xl);
+    font-weight: var(--awa-weight-bold);
+    line-height: var(--awa-leading-compact);
+}
+
+body .page-wrapper .time_circles > div .text {
+    font-size: var(--awa-text-3xs); /* BP-30: era 10px */
+    text-transform: uppercase;
+    opacity: 0.8;
+}
+
+/* ============================================================
+   PRODUCT DETAIL PAGE
+   ============================================================ */
+body .page-wrapper .page-title-wrapper.product h1.page-title {
+    font-size: clamp(18px, 2vw + 10px, 28px); /* BUG-09: era 28px fixo, causava salto abrupto nos breakpoints */
+    font-weight: var(--awa-weight-bold);
+    color: var(--awa-dark);
+    margin-bottom: var(--awa-space-4);
+    line-height: var(--awa-leading-base);
+}
+
+body .page-wrapper .product-info-main .product.attribute.sku {
+    color: var(--awa-gray-500);
+    font-size: var(--awa-text-sm);
+    margin-bottom: var(--awa-space-4);
+}
+
+body .page-wrapper .product-info-main .product-reviews-summary {
+    display: flex;
+    align-items: center;
+    gap: var(--awa-space-4);
+    margin-bottom: var(--awa-space-5);
+    padding-bottom: var(--awa-space-5);
+    border-bottom: 1px solid var(--awa-gray-200);
+}
+
+body .page-wrapper .product-info-main .price-box .price {
+    font-size: clamp(20px, 2vw + 12px, 32px); /* R14: clamp() substitui 3 media queries */
+    font-weight: var(--awa-weight-extrabold);
+    color: var(--awa-red);
+}
+
+body .page-wrapper .product-info-main .old-price .price {
+    font-size: var(--awa-text-lg);
+    color: var(--awa-gray-500);
+}
+
+body .page-wrapper .product-info-main .price-box .old-price ~ .old-price {
+    display: none;
+}
+
+body .page-wrapper .product-info-main .installments-info {
+    background: var(--awa-gray-100);
+    padding: var(--awa-space-4);
+    border-radius: var(--awa-radius-sm);
+    margin-bottom: var(--awa-space-5);
+    font-size: var(--awa-text-base);
+}
+
+body .page-wrapper .product-info-main .stock {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--awa-space-2);
+    padding: var(--awa-space-2) var(--awa-space-4);
+    border-radius: var(--awa-radius-full);
+    font-size: var(--awa-text-sm);
+    font-weight: var(--awa-weight-semibold);
+    margin-bottom: var(--awa-space-5);
+}
+
+body .page-wrapper .product-info-main .stock.available {
+    background: var(--awa-success-light);
+    color: var(--awa-success-text); /* R12-15 */
+}
+
+body .page-wrapper .product-info-main .stock.unavailable {
+    background: var(--awa-danger-light);
+    color: var(--awa-danger-text); /* R12-15 */
+}
+
+/* Savings badge */
+body .page-wrapper .product-info-main .price-box .discount-label,
+body .page-wrapper .product-info-main .price-box .save-percent {
+    display: inline-block;
+    background: var(--awa-success);
+    color: var(--awa-text-on-success);
+    font-size: var(--awa-text-xs);
+    font-weight: var(--awa-weight-bold);
+    padding: var(--awa-space-1) var(--awa-space-3);
+    border-radius: var(--awa-radius-full);
+    margin-inline-start: var(--awa-space-2); /* R18-08: logical property */
+    vertical-align: middle;
+}
+
+/* Product tabs */
+body .page-wrapper .product.info.detailed .data.item.title > a,
+body .page-wrapper .product.info.detailed .data.item.title > span {
+    display: block;
+    padding: var(--awa-space-4) var(--awa-space-6);
+    font-size: var(--awa-text-base);
+    font-weight: var(--awa-weight-semibold);
+    text-transform: uppercase;
+    border-bottom: 2px solid transparent;
+    transition: border-bottom-color var(--awa-transition-fast), color var(--awa-transition-fast); /* R13: era 'all' */
+}
+
+body .page-wrapper .product.info.detailed .data.item.title.active > a,
+body .page-wrapper .product.info.detailed .data.item.title.active > span {
+    border-bottom-color: var(--awa-red);
+    color: var(--awa-red);
+}
+
+body .page-wrapper .product.info.detailed .data.item.content {
+    padding: var(--awa-space-7) 0;
+    border-top: 1px solid var(--awa-gray-200);
+}
+
+/* Gallery */
+body .page-wrapper .gallery-placeholder,
+body .page-wrapper .fotorama__stage {
+    background: var(--awa-gray-100);
+    border-radius: var(--awa-radius);
+    overflow: hidden;
+}
+
+body .page-wrapper .fotorama__thumb-border {
+    border-color: var(--awa-red);
+}
+
+/* Quantity */
+body .page-wrapper .product-info-main .field.qty {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--awa-space-2);
+    margin-bottom: var(--awa-space-5);
+}
+
+body .page-wrapper .product-info-main .field.qty .control {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--awa-gray-200);
+    border-radius: var(--awa-radius-sm);
+    overflow: hidden;
+}
+
+body .page-wrapper .product-info-main .field.qty .input-text.qty {
+    width: 50px;
+    height: 44px;
+    text-align: center;
+    border: none;
+    font-size: var(--awa-text-md);
+    font-weight: var(--awa-weight-semibold);
+    appearance: textfield;
+}
+
+body .page-wrapper .product-info-main .field.qty .input-text.qty::-webkit-inner-spin-button,
+body .page-wrapper .product-info-main .field.qty .input-text.qty::-webkit-outer-spin-button {
+    appearance: none;
+}
+
+/* Add to Cart (detail page) */
+body .page-wrapper .product-info-main .box-tocart .action.tocart {
+    height: 50px;
+    min-width: 200px;
+    font-size: var(--awa-text-md);
+    font-weight: var(--awa-weight-bold);
+    border-radius: var(--awa-radius-sm);
+}
+
+/* Related / Upsell / Cross-sell */
+body .page-wrapper .block.related,
+body .page-wrapper .block.upsell,
+body .page-wrapper .block.crosssell {
+    content-visibility: auto; /* below-fold optimization */
+    contain-intrinsic-size: auto 350px;
+    margin-top: var(--awa-space-10);
+    padding-top: var(--awa-space-7);
+    border-top: 1px solid var(--awa-gray-200);
+}
+
+body .page-wrapper .block.related .block-title strong,
+body .page-wrapper .block.upsell .block-title strong,
+body .page-wrapper .block.crosssell .block-title strong {
+    font-size: var(--awa-text-xl);
+    font-weight: var(--awa-weight-bold);
+    text-transform: uppercase;
+}
+
+/* ============================================================
+   PDP RESPONSIVO ? gallery + info stack (padr?o AYO ?767px)
+   ============================================================ */
+
+@media (width <= 767px) {
+    body .page-wrapper .catalog-product-view .product.media {
+        width: 100%;
+        float: none;
+        margin-bottom: var(--awa-space-5);
+        order: 1;
+    }
+
+    body .page-wrapper .catalog-product-view .product-info-main {
+        order: 2;
+    }
+
+    body .page-wrapper .catalog-product-view .product.info.detailed {
+        width: 100%;
+        order: 3;
+    }
+
+    body .page-wrapper .product.info.detailed .data.item.title > a,
+    body .page-wrapper .product.info.detailed .data.item.title > span {
+        padding: var(--awa-space-3) var(--awa-space-4);
+        font-size: var(--awa-text-sm);
+    }
+
+    body .page-wrapper .product.info.detailed .data.item.content {
+        padding: var(--awa-space-5) 0;
+    }
+
+    /* Fotorama gallery mobile */
+    body .page-wrapper .fotorama__thumb-border {
+        border-width: 2px;
+    }
+
+    body .page-wrapper .gallery-placeholder {
+        border-radius: var(--awa-radius-sm);
+    }
+
+    body .page-wrapper .modal-popup._inner-scroll .modal-inner-wrap,
+    body .page-wrapper .modal-popup .modal-inner-wrap {
+        width: 95vw;
+        max-width: 95vw;
+        margin: 2.5vh auto;
+    }
+
+    body .page-wrapper .modal-popup .modal-content {
+        padding: var(--awa-space-4);
+    }
+
+    /* Quickview: stack gallery + info */
+    body .page-wrapper .quick-view-content .product.media,
+    body .page-wrapper #quick-window .product.media {
+        width: 100%;
+        float: none;
+        margin-bottom: var(--awa-space-4);
+    }
+
+    body .page-wrapper .quick-view-content .product-info-main,
+    body .page-wrapper #quick-window .product-info-main {
+        width: 100%;
+        float: none;
+    }
+
+    .awa-mobile-quick-nav {
+        display: block;
+    }
+
+    .awa-mobile-quick-nav .quick-nav-wrapper {
+        display: flex;
+        overflow-x: auto;
+        touch-action: pan-x pinch-zoom; /* BP-27: melhor scroll horizontal touch */
+        list-style: none;
+        margin: 0;
+        padding: 0 var(--awa-space-4);
+        gap: var(--awa-space-4);
+        scrollbar-width: none;
+    }
+
+    .awa-mobile-quick-nav .quick-nav-wrapper::-webkit-scrollbar {
+        display: none;
+    }
+
+    .awa-mobile-quick-nav .quick-nav-item {
+        flex: 0 0 auto;
+        min-width: 74px;
+    }
+
+    .awa-mobile-quick-nav .quick-nav-link {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        text-decoration: none;
+        color: var(--awa-gray-800);
+        gap: var(--awa-space-1);
+    }
+
+    .awa-mobile-quick-nav .quick-nav-link:hover,
+    .awa-mobile-quick-nav .quick-nav-link:focus-visible {
+        color: var(--awa-red);
+        outline: 2px solid var(--awa-red);
+        outline-offset: 2px;
+        border-radius: var(--awa-radius-sm);
+    }
+
+    .awa-mobile-quick-nav .quick-nav-link .icon {
+        font-size: var(--awa-text-xl);
+        background: var(--awa-gray-100);
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background var(--awa-transition-fast), color var(--awa-transition-fast);
+    }
+
+    .awa-mobile-quick-nav .quick-nav-link:hover .icon,
+    .awa-mobile-quick-nav .quick-nav-link:focus-visible .icon {
+        background: var(--awa-red-extra-light);
+        color: var(--awa-red);
+    }
+
+    .awa-mobile-quick-nav .quick-nav-link .label {
+        font-size: var(--awa-text-2xs); /* BP-30: era 11px */
+        font-weight: var(--awa-weight-semibold);
+        line-height: var(--awa-leading-compact);
+    }
+}
+
+/* ============================================================
+   CATEGORY PAGE
+   ============================================================ */
+body .page-wrapper .page-products .toolbar-products {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--awa-space-3) 0;
+    border-bottom: 1px solid var(--awa-gray-200);
+    margin-bottom: var(--awa-space-5);
+    gap: var(--awa-space-3);
+}
+
+body .page-wrapper .toolbar-products .toolbar-amount {
+    font-size: var(--awa-text-sm);
+    color: var(--awa-gray-500);
+}
+
+body .page-wrapper .toolbar-products .sorter-label {
+    font-size: var(--awa-text-sm);
+    margin-right: var(--awa-space-2);
+}
+
+body .page-wrapper .toolbar-products .sorter-options {
+    padding: var(--awa-space-2) var(--awa-space-3);
+    border: 1px solid var(--awa-gray-200);
+    border-radius: var(--awa-radius-sm);
+    font-size: var(--awa-text-sm);
+}
+
+body .page-wrapper .toolbar-products .limiter .limiter-options {
+    padding: var(--awa-space-2) var(--awa-space-3);
+    border: 1px solid var(--awa-gray-200);
+    border-radius: var(--awa-radius-sm);
+}
+
+/* Toolbar compacta para desktop-small 769?991px */
+
+/* Layered navigation */
+body .page-wrapper .sidebar .block-content.filter-content .filter-options-item {
+    border-bottom: 1px solid var(--awa-gray-200);
+    padding: var(--awa-space-4) 0;
+    contain: layout style; /* BP-37: each filter group is independent */
+}
+
+body .page-wrapper .sidebar .filter-options-title {
+    font-size: var(--awa-text-base);
+    font-weight: var(--awa-weight-bold);
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+body .page-wrapper .sidebar .filter-options-item .item a {
+    color: var(--awa-gray-700);
+    font-size: var(--awa-text-sm);
+    text-decoration: none;
+    padding: var(--awa-space-1) 0;
+    display: block;
+}
+
+body .page-wrapper .sidebar .filter-options-item .item a:hover {
+    color: var(--awa-red-dark);
+}
+
+body .page-wrapper .sidebar .filter-options-item .count {
+    color: var(--awa-gray-500);
+    font-size: var(--awa-text-xs);
+}
+
+/* Category hero banner */
+body .page-wrapper .category-image img {
+    width: 100%;
+    height: auto;
+    border-radius: var(--awa-radius);
+    margin-bottom: var(--awa-space-5);
+}
+
+/* ============================================================
+   CATEGORY SIDEBAR MOBILE ? Toggle filter (?991px)
+   AYO oculta sidebar em mobile; n�s adicionamos bot?o "Filtrar".
+   JS cria o bot?o e toggle a classe .awa-filter-visible no body.
+   ============================================================ */
+
+@media (width >= 992px) {
+    .awa-filter-toggle {
+        display: none;
+    }
+}
+
+/* ============================================================
+   MINICART DROPDOWN ? R15-07
+   ============================================================ */
+body .page-wrapper .block-minicart {
+    background: var(--awa-bg-surface); /* BP-12 */
+    border-radius: 0 0 var(--awa-radius) var(--awa-radius);
+    box-shadow: var(--awa-shadow-dropdown);
+    border: 1px solid var(--awa-gray-200);
+    border-top: 2px solid var(--awa-red);
+    padding: var(--awa-space-5);
+    min-width: 320px;
+    contain: layout style; /* BP-37: reduce reflows on dropdown */
+}
+
+body .page-wrapper .block-minicart .block-title {
+    font-size: var(--awa-text-md);
+    font-weight: var(--awa-weight-bold);
+    text-transform: uppercase;
+    margin-bottom: var(--awa-space-4);
+    padding-bottom: var(--awa-space-3);
+    border-bottom: 1px solid var(--awa-gray-200);
+}
+
+body .page-wrapper .block-minicart .minicart-items .product-item {
+    padding: var(--awa-space-3) 0;
+    border-bottom: 1px solid var(--awa-gray-200);
+    display: flex;
+    gap: var(--awa-space-3);
+    align-items: flex-start;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+}
+
+body .page-wrapper .block-minicart .product-image-container {
+    flex: 0 0 60px;
+    width: 60px;
+    height: 60px;
+    aspect-ratio: 1 / 1;
+    border-radius: var(--awa-radius-sm);
+    overflow: hidden;
+    background: var(--awa-gray-100);
+}
+
+body .page-wrapper .block-minicart .product-item-name a {
+    font-size: var(--awa-text-sm);
+    font-weight: var(--awa-weight-semibold);
+    color: var(--awa-dark);
+    line-height: var(--awa-leading-normal);
+}
+
+body .page-wrapper .block-minicart .product-item-name a:hover {
+    color: var(--awa-red-dark);
+}
+
+body .page-wrapper .block-minicart .minicart-price .price {
+    font-size: var(--awa-text-base);
+    font-weight: var(--awa-weight-bold);
+    color: var(--awa-red);
+}
+
+body .page-wrapper .block-minicart .details-qty {
+    display: flex;
+    align-items: center;
+    gap: var(--awa-space-2);
+    margin-top: var(--awa-space-2);
+}
+
+body .page-wrapper .block-minicart .details-qty .item-qty {
+    width: 40px;
+    height: 32px;
+    text-align: center;
+    border: 1px solid var(--awa-gray-200);
+    border-radius: var(--awa-radius-sm);
+    font-size: var(--awa-text-sm);
+}
+
+body .page-wrapper .block-minicart .action.delete {
+    color: var(--awa-gray-500);
+    transition: color var(--awa-transition-fast);
+}
+
+body .page-wrapper .block-minicart .action.delete:hover {
+    color: var(--awa-danger);
+}
+
+body .page-wrapper .block-minicart .subtotal {
+    padding: var(--awa-space-4) 0;
+    display: flex;
+    justify-content: space-between;
+    font-weight: var(--awa-weight-bold);
+}
+
+body .page-wrapper .block-minicart .subtotal .price {
+    font-size: var(--awa-text-lg);
+    color: var(--awa-red);
+}
+
+body .page-wrapper .block-minicart .actions .action.viewcart {
+    display: block;
+    text-align: center;
+    padding: var(--awa-space-3);
+    border: 1px solid var(--awa-gray-200);
+    border-radius: var(--awa-radius-sm);
+    font-weight: var(--awa-weight-semibold);
+    font-size: var(--awa-text-sm);
+    margin-bottom: var(--awa-space-2);
+    transition: border-color var(--awa-transition-fast), background var(--awa-transition-fast);
+}
+
+body .page-wrapper .block-minicart .actions .action.viewcart:hover {
+    border-color: var(--awa-red-dark);
+    background: var(--awa-red-extra-light);
+}
+
+/* ============================================================
+   CART PAGE
+   ============================================================ */
+body .page-wrapper .cart-container {
+    max-width: var(--awa-container);
+    margin: 0 auto;
+    padding: 0 var(--awa-space-5);
+}
+
+body .page-wrapper .cart.table-wrapper .cart.item {
+    border-bottom: 1px solid var(--awa-gray-200);
+    padding: var(--awa-space-5) 0;
+}
+
+body .page-wrapper .cart.table-wrapper .product-item-photo {
+    width: 100px;
+    border-radius: var(--awa-radius-sm);
+    border: 1px solid var(--awa-gray-200);
+    overflow: hidden;
+    background: var(--awa-gray-100);
+}
+
+body .page-wrapper .cart.table-wrapper .product-item-name a {
+    font-size: var(--awa-text-md);
+    font-weight: var(--awa-weight-semibold);
+    color: var(--awa-dark);
+    text-decoration: none;
+}
+
+body .page-wrapper .cart.table-wrapper .product-item-name a:hover {
+    color: var(--awa-red-dark);
+}
+
+body .page-wrapper .cart.table-wrapper .col.price .price,
+body .page-wrapper .cart.table-wrapper .col.subtotal .price {
+    font-size: var(--awa-text-md);
+    font-weight: var(--awa-weight-bold);
+    color: var(--awa-dark);
+}
+
+body .page-wrapper .cart-summary {
+    background: var(--awa-gray-100);
+    border-radius: var(--awa-radius);
+    padding: var(--awa-space-7);
+}
+
+body .page-wrapper .cart-summary .summary.title {
+    font-size: var(--awa-text-xl);
+    font-weight: var(--awa-weight-bold);
+    margin-bottom: var(--awa-space-5);
+    text-transform: uppercase;
+}
+
+body .page-wrapper .cart-summary .totals .mark {
+    font-weight: var(--awa-weight-semibold);
+}
+
+body .page-wrapper .cart-summary .grand.totals .amount .price {
+    font-size: var(--awa-text-2xl);
+    font-weight: var(--awa-weight-extrabold);
+    color: var(--awa-red);
+}
+
+body .page-wrapper .cart-summary .checkout-methods-items .action.primary.checkout {
+    width: 100%;
+    padding: var(--awa-space-4) var(--awa-space-6);
+    font-size: var(--awa-text-md);
+    font-weight: var(--awa-weight-bold);
+    border-radius: var(--awa-radius-sm);
+}
+
+/* ============================================================
+   CHECKOUT
+   ============================================================ */
+body .page-wrapper .checkout-container {
+    max-width: var(--awa-container);
+    margin: 0 auto;
+}
+
+/* step-title unificado em awa-pages.css (border-bottom: red) */
+
+body .page-wrapper .checkout-container .opc-sidebar .opc-block-summary {
+    background: var(--awa-gray-100);
+    border-radius: var(--awa-radius);
+    padding: var(--awa-space-6);
+}
+
+body .page-wrapper .opc-block-summary .table-totals .grand.totals .price {
+    font-size: var(--awa-text-xl);
+    font-weight: var(--awa-weight-extrabold);
+    color: var(--awa-red);
+}
+
+body .page-wrapper .checkout-container .action.primary.action-update,
+body .page-wrapper .checkout-container .action.primary.action-save-address {
+    border-radius: var(--awa-radius-sm);
+}
+
+/* Success page */
+body .page-wrapper .checkout-success .page-title {
+    font-size: var(--awa-text-3xl);
+    font-weight: var(--awa-weight-bold);
+    color: var(--awa-success);
+    margin-bottom: var(--awa-space-5);
+}
+
+/* ============================================================
+   CUSTOMER ACCOUNT
+   ============================================================ */
+body .page-wrapper .account .page-title-wrapper .page-title {
+    font-size: var(--awa-text-2xl);
+    font-weight: var(--awa-weight-bold);
+}
+
+body .page-wrapper .account .column.main .block {
+    margin-bottom: var(--awa-space-7);
+}
+
+body .page-wrapper .account .column.main .block-title {
+    font-size: var(--awa-text-md);
+    font-weight: var(--awa-weight-bold);
+    text-transform: uppercase;
+    padding-bottom: var(--awa-space-3);
+    border-bottom: 2px solid var(--awa-gray-200);
+    margin-bottom: var(--awa-space-4);
+}
+
+body .page-wrapper .account .table-wrapper .data.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+body .page-wrapper .account .table-wrapper .data.table th {
+    background: var(--awa-gray-100);
+    font-weight: var(--awa-weight-semibold);
+    font-size: var(--awa-text-sm);
+    text-transform: uppercase;
+    padding: var(--awa-space-3) var(--awa-space-4);
+    text-align: start; /* R18-07: logical property */
+}
+
+body .page-wrapper .account .table-wrapper .data.table td {
+    padding: var(--awa-space-3) var(--awa-space-4);
+    border-bottom: 1px solid var(--awa-gray-200);
+    font-size: var(--awa-text-base);
+}
+
+/* Account sidebar nav */
+body .page-wrapper .account .sidebar-main .account-nav .item a {
+    display: block;
+    padding: var(--awa-space-3) var(--awa-space-4);
+    color: var(--awa-gray-700);
+    text-decoration: none;
+    font-size: var(--awa-text-base);
+    border-inline-start: 3px solid transparent; /* R18-06: logical property */
+    transition: color var(--awa-transition), border-inline-start-color var(--awa-transition), background var(--awa-transition); /* R18-06: logical */
+}
+
+body .page-wrapper .account .sidebar-main .account-nav .item a:hover,
+body .page-wrapper .account .sidebar-main .account-nav .item.current a {
+    color: var(--awa-red);
+    border-inline-start-color: var(--awa-red); /* R18-06: logical property */
+    background: var(--awa-red-extra-light); /* R14: token */
+}
+
+/* Account responsive ?768px */
+@media (width <= 768px) {
+    body .page-wrapper .account .sidebar-main {
+        width: 100%;
+        margin-bottom: var(--awa-space-5);
+    }
+
+    body .page-wrapper .account .sidebar-main .account-nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--awa-space-1);
+    }
+
+    body .page-wrapper .account .sidebar-main .account-nav .item a {
+        border-inline-start: none; /* R18-06: logical property */
+        border-bottom: 2px solid transparent;
+        padding: var(--awa-space-2) var(--awa-space-3);
+        font-size: var(--awa-text-sm);
+    }
+
+    body .page-wrapper .account .sidebar-main .account-nav .item.current a {
+        border-bottom-color: var(--awa-red);
+        border-inline-start-color: transparent; /* R18-06: logical property */
+    }
+
+    body .page-wrapper .account .table-wrapper {
+        overflow-x: auto;
+    }
+
+    body .page-wrapper .account .page-title-wrapper .page-title {
+        font-size: var(--awa-text-xl);
+    }
+
+    /* Product card adjustments */
+    body .page-wrapper .item-product .product-name a,
+    body .page-wrapper .product-item .product-item-link {
+        font-size: var(--awa-text-sm);
+    }
+
+    body .page-wrapper .item-product .old-price .price,
+    body .page-wrapper .product-item .old-price .price {
+        font-size: var(--awa-text-xs);
+    }
+
+    body .page-wrapper .item-product .action.tocart,
+    body .page-wrapper .product-item .action.tocart {
+        padding: var(--awa-space-3) var(--awa-space-3);
+        font-size: var(--awa-text-xs);
+    }
+
+    /* Cart */
+    body .page-wrapper .cart-summary {
+        padding: var(--awa-space-5);
+    }
+
+    /* Homepage */
+    body .page-wrapper .homebuilder-section,
+    body .page-wrapper .home-bestseller,
+    body .page-wrapper .home-new-product,
+    body .page-wrapper .home-category {
+        padding-left: var(--awa-space-3-75); /* P2-fluid: era 15px */
+        padding-right: var(--awa-space-3-75); /* P2-fluid: era 15px */
+    }
+
+    body .page-wrapper .homebuilder-section .section-title,
+    body .page-wrapper .home-bestseller .title-category {
+        margin-bottom: var(--awa-space-5);
+    }
+
+    /* Cart table */
+    body .page-wrapper .cart.table-wrapper .product-item-photo {
+        width: 70px;
+    }
+
+    /* R15-01: Mostrar a�?es secund�rias em mobile (touch n?o tem hover) */
+    body .page-wrapper .item-product .actions-secondary {
+        opacity: 1;
+        transform: none;
+        position: static;
+        flex-direction: row;
+        justify-content: flex-end;
+        padding: 0 var(--awa-space-3) var(--awa-space-2);
+        gap: var(--awa-space-2);
+    }
+
+    body .page-wrapper .item-product .quickview-link {
+        position: static;
+        opacity: 1;
+        transform: none;
+        display: inline-block;
+        margin: 0 auto var(--awa-space-2);
+        border-radius: var(--awa-radius-sm);
+        font-size: var(--awa-text-xs);
+        padding: var(--awa-space-1) var(--awa-space-3);
+    }
+
+    /* OWL nav ? mant�m 44px m�nimo para touch (WCAG 2.5.5) */
+    body .page-wrapper .owl-carousel .owl-nav button.owl-prev,
+    body .page-wrapper .owl-carousel .owl-nav button.owl-next {
+        width: 44px;
+        height: 44px;
+        font-size: var(--awa-text-base);
+    }
+
+    body .page-wrapper .owl-carousel .owl-nav button.owl-prev {
+        left: 5px; /* BUG-01: era -5px */
+    }
+
+    body .page-wrapper .owl-carousel .owl-nav button.owl-next {
+        right: 5px; /* BUG-01: era -5px */
+    }
+
+    /* Countdown */
+    body .page-wrapper .time_circles > div {
+        min-width: 45px;
+        min-height: 45px;
+    }
+
+    body .page-wrapper .time_circles > div .number {
+        font-size: var(--awa-text-md);
+    }
+
+    body .page-wrapper .login-container .block-customer-login,
+    body .page-wrapper .login-container .block-new-customer {
+        padding: var(--awa-space-5);
+    }
+}
+
+/* Login / Register pages */
+body .page-wrapper .login-container .block-customer-login,
+body .page-wrapper .login-container .block-new-customer {
+    background: var(--awa-bg-surface); /* BP-12 */
+    border-radius: var(--awa-radius);
+    padding: var(--awa-space-7);
+    border: 1px solid var(--awa-gray-200);
+}
+
+/* ============================================================
+   CMS / INFORMATIONAL PAGES
+   ============================================================ */
+body .page-wrapper .cms-page-view .column.main {
+    max-width: 900px;
+    margin-inline: auto; /* R18-07: logical property */
+    line-height: 1.85;
+}
+
+body .page-wrapper .cms-page-view .column.main h2 {
+    font-size: var(--awa-text-xl);
+    font-weight: var(--awa-weight-bold);
+    margin: var(--awa-space-7) 0 var(--awa-space-4);
+}
+
+body .page-wrapper .cms-page-view .column.main h3 {
+    font-size: var(--awa-text-lg);
+    font-weight: var(--awa-weight-semibold);
+    margin: var(--awa-space-6) 0 var(--awa-space-3);
+}
+
+body .page-wrapper .cms-page-view .column.main p {
+    margin-bottom: var(--awa-space-4); /* BP-19: era 16px */
+    color: var(--awa-gray-700);
+}
+
+body .page-wrapper .cms-page-view .column.main ul,
+body .page-wrapper .cms-page-view .column.main ol {
+    padding-inline-start: var(--awa-space-5); /* BP-21: era 20px (R18-07: logical property) */
+    margin-bottom: var(--awa-space-4); /* BP-19: era 16px */
+}
+
+/* ============================================================
+   SEARCH RESULTS
+   ============================================================ */
+body .page-wrapper .search.results .search.found {
+    margin-bottom: var(--awa-space-5);
+    font-size: var(--awa-text-base);
+    color: var(--awa-gray-700);
+}
+
+body .page-wrapper .search-autocomplete {
+    background: var(--awa-bg-surface); /* BP-12 */
+    border: 1px solid var(--awa-gray-200);
+    border-radius: var(--awa-radius);
+    box-shadow: var(--awa-shadow-lg);
+    z-index: var(--awa-z-overlay); /* BP-16: era 1000 */
+    max-height: 400px;
+    overflow-y: auto;
+    scrollbar-width: thin; /* R18-10: alinhado com scrollbar global */
+    scrollbar-color: var(--awa-gray-400) transparent;
+    contain: layout style; /* BP-37: reduce reflows on dropdown */
+}
+
+body .page-wrapper .search-autocomplete li {
+    padding: var(--awa-space-3) var(--awa-space-4);
+    border-bottom: 1px solid var(--awa-gray-200);
+    cursor: pointer;
+    transition: background var(--awa-transition);
+}
+
+body .page-wrapper .search-autocomplete li:hover {
+    background: var(--awa-gray-100);
+}
+
+/* R20-05: harmoniza ativo (teclado/mouse/provider) */
+body .page-wrapper .search-autocomplete li[aria-selected="true"],
+body .page-wrapper .search-autocomplete li.selected,
+body .page-wrapper .search-autocomplete li.active,
+body .page-wrapper .search-autocomplete li.awa-ac-active,
+body .page-wrapper .search-autocomplete [role="option"][aria-selected="true"],
+body .page-wrapper .search-autocomplete [role="option"].selected,
+body .page-wrapper .search-autocomplete [role="option"].active,
+body .page-wrapper .search-autocomplete [role="option"].awa-ac-active {
+    background: var(--awa-gray-100);
+}
+
+/* R13: focus-visible para navega�?o por teclado (WCAG 2.4.7) */
+body .page-wrapper .search-autocomplete li:focus-visible {
+    outline: 2px solid var(--awa-red);
+    outline-offset: -2px;
+    background: var(--awa-gray-100);
+}
+
+body .page-wrapper .search-autocomplete [role="option"]:focus-visible {
+    outline: 2px solid var(--awa-red);
+    outline-offset: -2px;
+    background: var(--awa-gray-100);
+}
+
+/* Search autocomplete mobile */
+
+/* ============================================================
+   PRODUCT LIST VIEW (list mode vs grid)
+   ============================================================ */
+body .page-wrapper .products.list .product-item {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--awa-space-5);
+    padding: var(--awa-space-5) 0;
+    border-bottom: 1px solid var(--awa-gray-200);
+}
+
+body .page-wrapper .products.list .product-item .product-image-container {
+    flex: 0 0 200px;
+    padding-top: 0;
+    height: 200px;
+    border-radius: var(--awa-radius);
+}
+
+body .page-wrapper .products.list .product-item .product-item-details {
+    flex: 1;
+    padding: 0;
+}
+
+body .page-wrapper .products.list .product-item .product-item-name {
+    font-size: var(--awa-text-lg);
+}
+
+/* Responsivo consolidado no bloco ?991px abaixo */
+
+/* ============================================================
+   TABS (AYO homepage product tabs)
+   ============================================================ */
+body .page-wrapper .list-tab-product .tab-title-container,
+body .page-wrapper .tab_product .tab-title-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--awa-space-1);
+    margin-bottom: var(--awa-space-7);
+}
+
+body .page-wrapper .list-tab-product .tab-title-link,
+body .page-wrapper .tab_product .tab-title-item {
+    padding: var(--awa-space-3) var(--awa-space-5);
+    background: transparent;
+    border: 2px solid var(--awa-gray-200);
+    border-radius: var(--awa-radius-full);
+    font-size: var(--awa-text-sm);
+    font-weight: var(--awa-weight-semibold);
+    color: var(--awa-gray-700);
+    cursor: pointer;
+    transition: background var(--awa-transition), border-color var(--awa-transition), color var(--awa-transition); /* R13: era 'all' */
+    text-transform: uppercase;
+}
+
+body .page-wrapper .list-tab-product .tab-title-link.active,
+body .page-wrapper .list-tab-product .tab-title-link:hover,
+body .page-wrapper .tab_product .tab-title-item.active {
+    background: var(--awa-red);
+    border-color: var(--awa-red);
+    color: var(--awa-text-on-danger);
+}
+
+/* Tabs focus-visible (WCAG 2.4.7) */
+body .page-wrapper .list-tab-product .tab-title-link:focus-visible,
+body .page-wrapper .tab_product .tab-title-item:focus-visible {
+    outline: 2px solid var(--awa-red);
+    outline-offset: 2px;
+}
+
+body .page-wrapper .product.info.detailed .data.item.title > a:focus-visible,
+body .page-wrapper .product.info.detailed .data.item.title > span:focus-visible {
+    outline: 2px solid var(--awa-red);
+    outline-offset: -2px;
+}
+
+/* ============================================================
+   RESPONSIVE ? COMPONENTS
+   ============================================================ */
+
+/* VB-09: empty 1199px block removed ? clamp() handles PDP/section/price sizing */
+
+/* ============================================================
+   CART RESPONSIVO ? column-reverse ?1199px (padr?o AYO)
+   ============================================================ */
+@media (width <= 1199px) {
+    body .page-wrapper .checkout-cart-index .cart-container {
+        display: flex;
+        flex-direction: column-reverse;
+    }
+
+    body .page-wrapper .checkout-cart-index .cart-container .form-cart,
+    body .page-wrapper .checkout-cart-index .cart-container .cart-summary {
+        width: 100%;
+    }
+
+    body .page-wrapper .cat_special {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* ============================================================
+   CHECKOUT RESPONSIVO ? colunas empilhadas ?991px
+   ============================================================ */
+
+/* ============================================================
+   LOGIN/REGISTER RESPONSIVO
+   ============================================================ */
+
+/* ============================================================
+   CAT_SPECIAL ? CSS Grid responsivo (padr?o AYO)
+   7?5?4?3?2 colunas
+   ============================================================ */
+body .page-wrapper .cat_special {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: var(--awa-grid-gap-sm);
+}
+
+@media (width <= 1399px) {
+    body .page-wrapper .cat_special {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+
+@media (width <= 680px) {
+    body .page-wrapper .cat_special {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* ============================================================
+   OWL DOTS RESPONSIVO
+   ============================================================ */
+
+/* ============================================================
+   OWL NAV ARROWS RESPONSIVO ? MOBILE
+   ============================================================ */
+
+/* OWL-FIX-06: hide nav arrows on mobile (?480px) ? rely on swipe + dots.
+   Arrows at 44px each overlap too much on 320?480px screens. */
+
+/* ============================================================
+   SECTION TITLES RESPONSIVO
+   ============================================================ */
+
+/* VB-09: empty 375px section-title block removed ? clamp() handles sizing */
+
+/* ============================================================
+   PRODUCT LIST VIEW RESPONSIVO
+   ============================================================ */
+
+/* ============================================================
+   QUICKVIEW / MODAL POPUP RESPONSIVO
+   ============================================================ */
+
+/* ============================================================
+   HOMEPAGE ? CATEGORY NAVIGATION (FIX-44 / FIX-45)
+   Mobile: horizontal scroll bar  |  Desktop: visual grid
+   ============================================================ */
+
+/* --- FIX-44: Mobile Quick Nav (?767px only) --- */
+.awa-mobile-quick-nav {
+    display: none;
+    width: 100%;
+    background: var(--awa-bg-surface); /* BP-12 */
+    border-bottom: 1px solid var(--awa-gray-200);
+    padding: var(--awa-space-3) 0;
+    margin-bottom: var(--awa-space-4);
+    position: sticky;
+    top: calc(var(--awa-header-height, 0px) + var(--awa-space-1));
+    z-index: var(--awa-z-dropdown); /* BP-16: era 99 */
+}
+
+/* --- FIX-45: Desktop Visual Category Grid (?768px only) --- */
+.awa-visual-cat-grid {
+    display: none;
+    margin-top: var(--awa-space-5);
+    margin-bottom: var(--awa-space-7);
+}
+
+@media (width >= 768px) {
+    .awa-visual-cat-grid {
+        display: block;
+    }
+
+    .awa-visual-cat-grid .block-title strong {
+        font-size: var(--awa-text-xl);
+        font-weight: var(--awa-weight-bold);
+        margin-bottom: var(--awa-space-5);
+        display: block;
+        color: var(--awa-gray-900);
+        border-bottom: 2px solid var(--awa-red);
+        padding-bottom: var(--awa-space-3);
+        width: fit-content;
+    }
+
+    .awa-visual-cat-grid .visual-cat-items {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: var(--awa-space-5);
+    }
+
+    .visual-cat-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        text-decoration: none;
+        color: var(--awa-gray-800);
+        transition: transform var(--awa-transition);
+    }
+
+    .visual-cat-item:hover {
+        transform: translateY(-5px);
+    }
+
+    .visual-cat-item:focus-visible {
+        outline: 2px solid var(--awa-red);
+        outline-offset: var(--awa-space-1);
+        border-radius: var(--awa-radius);
+    }
+
+    .visual-cat-item .cat-img-circle {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: var(--awa-text-5xl); /* BP-40: era 40px */
+        margin-bottom: var(--awa-space-3);
+        box-shadow: var(--awa-shadow-sm);
+        transition: box-shadow var(--awa-transition);
+    }
+
+    .visual-cat-item:hover .cat-img-circle {
+        box-shadow: var(--awa-shadow-md);
+    }
+
+    .visual-cat-item .cat-name {
+        font-weight: var(--awa-weight-semibold);
+        font-size: var(--awa-text-base);
+    }
+}
+
+/* FIX-45 responsive: 4 cols on tablet */
+@media (width >= 768px) and (width <= 991px) {
+    .awa-visual-cat-grid .visual-cat-items {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* ============================================================
+   ============================================================ */
+
+/* Print rules consolidadas em awa-core.css */
+
+/* ============================================================
+   CONTACT PAGE RESPONSIVO
+   ============================================================ */
+
+/* ============================================================
+   TRUST BADGES HOMEPAGE
+   ============================================================ */
+body .page-wrapper .trust-badges-homepage {
+    padding: 2rem 1rem;
+    background: var(--awa-gray-50, #fafbfc);
+    border-top: 1px solid var(--awa-gray-200, #e9ecef);
+    border-bottom: 1px solid var(--awa-gray-200, #e9ecef);
+}
+
+body .page-wrapper .trust-badges-grid {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+body .page-wrapper .trust-badge-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    text-align: center;
+}
+
+body .page-wrapper .trust-badge-item img {
+    height: 40px;
+    width: auto;
+    object-fit: contain;
+}
+
+body .page-wrapper .trust-badge-item span {
+    font-size: 0.8125rem;
+    color: var(--awa-gray-600, #585e63);
+    font-weight: var(--awa-weight-medium);
+}
+
+/* ============================================================
+   TOUCH DEVICES ? Desabilitar hover transform em product cards
+   Evita "stuck hover" em telas touch onde hover persiste ap�s tap.
+   ============================================================ */
+@media (hover: none) and (pointer: coarse) {
+    body .page-wrapper .item-product:hover,
+    body .page-wrapper .product-item:hover {
+        transform: none;
+        box-shadow: var(--awa-shadow);
+    }
+
+    body .page-wrapper .item-product:hover .product-thumb img,
+    body .page-wrapper .product-item:hover .product-image-photo {
+        transform: none;
+    }
+}
+
+
+// ============================================================================

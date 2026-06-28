@@ -1,0 +1,156 @@
+// =============================================================================
+// _awa-polish-home-pass2-2026-06.less
+// §70 — /impeccable polish home pass 2 (2026-06-08)
+// Final-wins: CTA Ver preços legível, esconder add-to-cart nos carrosséis,
+// ritmo dos cards compact, placeholder de imagem, chrome do carrossel.
+// =============================================================================
+
+@import (once) '_awa-tokens';
+@import (once) '_design-system';
+
+html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5):not(.customer-logged-in) .page-wrapper {
+    // ── Guest: só o gate de preço no rodapé do card (não o botão de carrinho) ─
+    .awa-shelf--carousel .product-info-cart,
+    .awa-carousel-section .awa-shelf--carousel .product-info-cart {
+        display: none !important;
+    }
+
+    .awa-shelf--carousel .info-price {
+        margin-block-start: auto;
+        padding-block-start: @awa-space-2;
+        width: 100%;
+    }
+
+    .awa-shelf--carousel .b2b-login-to-see-price {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        box-shadow: none;
+        min-height: 0;
+    }
+
+    .awa-shelf--carousel .b2b-login-to-see-price .price-label {
+        display: block;
+        width: 100%;
+        margin: 0;
+        overflow: visible;
+        text-overflow: unset;
+        white-space: normal;
+        font-size: inherit;
+        line-height: inherit;
+        color: inherit;
+    }
+
+    // Featured: botão vermelho full-width (standard/compact usam link — §75/§82)
+    .awa-carousel-section--featured .awa-shelf--carousel .b2b-login-to-see-price .price-label a.b2b-login-link {
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        gap: @awa-space-1;
+        width: 100% !important;
+        max-width: 100%;
+        min-width: 0 !important;
+        min-height: @awa-touch-target-min;
+        padding: @awa-space-2 @awa-s-3;
+        border: 1.5px solid var(--awa-primary, @awa-color-primary);
+        border-radius: @awa-radius-sm;
+        background: var(--awa-primary, @awa-color-primary);
+        color: var(--awa-bg, @awa-color-white) !important;
+        font-size: ~'max(13px, 0.8125rem)';
+        font-weight: @awa-weight-semibold;
+        line-height: 1.25;
+        text-decoration: none !important;
+        white-space: nowrap;
+        box-sizing: border-box;
+        box-shadow: none;
+
+        &:hover {
+            background: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 88%, #000);
+            border-color: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 88%, #000);
+            color: var(--awa-bg, @awa-color-white) !important;
+            text-decoration: none !important;
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--awa-primary, @awa-color-primary);
+            outline-offset: 2px;
+        }
+    }
+}
+
+html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper {
+    // ── Cards: ritmo interno e títulos ─────────────────────────────────────
+    .awa-shelf--carousel .content-item-product {
+        height: 100%;
+    }
+
+    .awa-shelf--carousel .product-info {
+        gap: @awa-space-1;
+        padding: @awa-space-2 @awa-space-2 @awa-space-3;
+        flex: 1 1 auto;
+    }
+
+    .awa-shelf--carousel :is(.product-name a, .product-item-link) {
+        -webkit-line-clamp: 2;
+        min-height: calc(1.35em * 2);
+        max-height: calc(1.35em * 2);
+        font-weight: @awa-weight-semibold;
+        color: var(--awa-text, @awa-color-text-primary);
+    }
+
+    .awa-shelf--carousel .awa-b2b-sku {
+        font-size: ~'max(12px, 0.75rem)';
+        line-height: 1.35;
+        color: var(--awa-text-secondary, @awa-color-text-muted);
+    }
+
+    // ── Compact: hierarquia mais contida ───────────────────────────────────
+    .awa-carousel-section--compact :is(.awa-section-header__title, .awa-shelf__title) {
+        font-size: clamp(1rem, 0.94rem + 0.3vw, 1.25rem);
+        font-weight: @awa-weight-bold;
+        line-height: 1.25;
+        text-wrap: balance;
+    }
+
+    .awa-carousel-section--compact .awa-section-header__subtitle {
+        font-size: ~'max(13px, 0.8125rem)';
+        line-height: 1.45;
+        color: var(--awa-text-secondary, @awa-color-text-muted);
+    }
+
+    .awa-carousel-section--compact :is(.awa-section-header__link, .awa-shelf__view-all) {
+        border: 1px solid color-mix(in srgb, var(--awa-primary, @awa-color-primary) 22%, var(--awa-border, @awa-color-border));
+        color: var(--awa-primary, @awa-color-primary);
+        font-weight: @awa-weight-semibold;
+    }
+
+    // ── Chrome carrossel: nav + progress sempre visíveis no desktop ────────
+    .awa-shelf--carousel:not(.awa-carousel--static) {
+        > .awa-owl-nav,
+        .awa-carousel > .awa-owl-nav {
+            display: flex;
+            visibility: visible;
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .awa-owl-progress {
+            display: block;
+            visibility: visible;
+            opacity: 1;
+        }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper {
+        .awa-carousel-section--featured .awa-shelf--carousel .b2b-login-to-see-price .price-label a.b2b-login-link {
+            transition: none;
+        }
+    }
+}

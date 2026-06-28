@@ -1,0 +1,164 @@
+// =============================================================================
+// §84 — Shell Consistency Pass (2026-06-08)
+// Gutter horizontal unificado: header ↔ home ↔ PLP ↔ footer.
+// Usa tokens de _awa-page-containers.less (@awa-page-pad-*).
+// =============================================================================
+
+@import (once) '_awa-tokens';
+
+// ── Token runtime (reforço; :root já exporta em page-containers) ─────────────
+:root {
+    --awa-shell-gutter: var(--awa-page-pad-catalog, 20px);
+}
+
+@media (max-width: @awa-page-bp-md) {
+    :root {
+        --awa-shell-gutter: @awa-page-pad-tablet;
+    }
+}
+
+@media (max-width: @awa-page-bp-sm) {
+    :root {
+        --awa-shell-gutter: @awa-page-pad-mobile;
+    }
+}
+
+// ── Header main row: alinha logo/busca com conteúdo catalog/home ───────────
+@media (min-width: @awa-bp-992) {
+    // Container central canônico: mesmo eixo do footer (.footer-container) e do
+    // conteúdo — logo/busca/conta centralizados a @awa-page-catalog.
+    // Specificity (1,9) via .page-wrapper.page-wrapper p/ vencer a regra de grid
+    // do header (max-width:none, specificity 1,8) que carrega antes.
+    html body#html-body:not(.b2b-account-dashboard):not(.onepagecheckout-index-index):not(.checkout-index-index)
+        .page-wrapper.page-wrapper
+        .awa-site-header
+        :is(.awa-main-header__inner[data-awa-header-row], .awa-main-header__inner.wp-header) {
+        max-width: @awa-page-catalog !important;
+        margin-inline: auto !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        padding-inline: @awa-page-pad-catalog !important;
+    }
+
+    // Nav bar (Departamentos/Marcas/…) no mesmo eixo central do header.
+    html body#html-body:not(.b2b-account-dashboard):not(.onepagecheckout-index-index):not(.checkout-index-index)
+        .page-wrapper.page-wrapper
+        .header-control.awa-nav-bar
+        .awa-nav-bar__inner {
+        max-width: @awa-page-catalog !important;
+        margin-inline: auto !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        padding-inline: @awa-page-pad-catalog !important;
+    }
+}
+
+@media (max-width: (@awa-bp-992 - 1px)) {
+    html body#html-body:not(.onepagecheckout-index-index):not(.checkout-index-index)
+        .page-wrapper
+        .awa-site-header
+        :is(.awa-main-header__inner[data-awa-header-row], .awa-main-header__inner.wp-header) {
+        padding-inline: @awa-page-pad-tablet !important;
+    }
+}
+
+@media (max-width: @awa-page-bp-sm) {
+    html body#html-body:not(.onepagecheckout-index-index):not(.checkout-index-index)
+        .page-wrapper
+        .awa-site-header
+        :is(.awa-main-header__inner[data-awa-header-row], .awa-main-header__inner.wp-header) {
+        padding-inline: @awa-page-pad-mobile !important;
+    }
+}
+
+// ── Home: hero B2B alinhado ao mesmo gutter do wrapper ─────────────────────
+html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper {
+    .awa-hero-b2b-cta__inner.container {
+        max-width: @awa-page-catalog !important;
+        width: 100% !important;
+        margin-inline: auto !important;
+        padding-inline: @awa-page-pad-catalog !important;
+        box-sizing: border-box !important;
+    }
+
+    @media (max-width: @awa-page-bp-md) {
+        .awa-hero-b2b-cta__inner.container {
+            padding-inline: @awa-page-pad-tablet !important;
+        }
+    }
+
+    @media (max-width: @awa-page-bp-sm) {
+        .awa-hero-b2b-cta__inner.container {
+            padding-inline: @awa-page-pad-mobile !important;
+        }
+    }
+}
+
+// ── Footer: shell alinhado ao eixo 1280px ────────────────────────────────
+// footer-container É o shell: padding-inline:0 (inner containers centram o conteúdo).
+// trust-bar > .container recebe o padding de conteúdo normalmente.
+html body#html-body .page-wrapper :is(.page_footer, .page-footer) {
+    .footer-container.layout2.footer,
+    .footer-container {
+        max-width: @awa-page-catalog !important;
+        width: 100% !important;
+        margin-inline: auto !important;
+        padding-inline: 0 !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        box-sizing: border-box !important;
+    }
+
+    .awa-footer-trust-bar__inner,
+    .awa-footer-trust-bar .container {
+        max-width: @awa-page-catalog !important;
+        margin-inline: auto !important;
+        padding-inline: @awa-page-pad-catalog !important;
+        box-sizing: border-box !important;
+    }
+
+    @media (max-width: @awa-page-bp-md) {
+        .awa-footer-trust-bar__inner,
+        .awa-footer-trust-bar .container {
+            padding-inline: @awa-page-pad-tablet !important;
+        }
+    }
+
+    @media (max-width: @awa-page-bp-sm) {
+        .awa-footer-trust-bar__inner,
+        .awa-footer-trust-bar .container {
+            padding-inline: @awa-page-pad-mobile !important;
+        }
+    }
+}
+
+// ── Conteúdo catalog/busca: page-main centralizado a 1440 (mesmo eixo do header,
+//    breadcrumb e footer). Specificity (1,5) via .page-wrapper.page-wrapper p/
+//    vencer o `max-width:100% !important` legado. O hero da categoria é full-bleed
+//    (fora do page-main), portanto não é afetado. ──────────────────────────────
+// A regra full-width canônica `:is(#maincontent, .columns, …){max-width:100%}`
+// tem specificity (2,1) — 2 IDs (o :is injeta #maincontent). Para vencer usamos
+// 2 IDs também (#html-body + #maincontent) → (2,4).
+// PLP / busca / cart / PDP — 1440px centralizado (eixo único site-wide catalog).
+html body#html-body:is(.catalog-category-view, .catalogsearch-result-index, .checkout-cart-index, .catalog-product-view)
+    .page-wrapper #maincontent#maincontent.page-main.container {
+    max-width: @awa-page-catalog !important;
+    margin-inline: auto !important;
+    width: 100% !important;
+    padding-inline: @awa-page-pad-catalog !important;
+    box-sizing: border-box !important;
+}
+
+@media (max-width: @awa-page-bp-md) {
+    html body#html-body:is(.catalog-category-view, .catalogsearch-result-index, .checkout-cart-index, .catalog-product-view)
+        .page-wrapper #maincontent.page-main.container {
+        padding-inline: @awa-page-pad-tablet !important;
+    }
+}
+
+@media (max-width: @awa-page-bp-sm) {
+    html body#html-body:is(.catalog-category-view, .catalogsearch-result-index, .checkout-cart-index, .catalog-product-view)
+        .page-wrapper #maincontent.page-main.container {
+        padding-inline: @awa-page-pad-mobile !important;
+    }
+}

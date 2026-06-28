@@ -1,0 +1,62 @@
+/* ============================================================
+   FIX-01 ? BANNER TEXT DUPLICATION (P0)
+   SVG banners have baked-in text + HTML overlay text = doubling.
+   Hide pseudo-elements that create ghost text shadows.
+   ============================================================ */
+
+/* ============================================================
+   FIX-PERF-TOUCH-HOVER (P2)
+   Em dispositivos touch, remove hover transitions pesadas sem perda de UX.
+   ============================================================ */
+@media (hover: none) and (pointer: coarse) {
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper :is(
+        .the_blog .post-item,
+        .blog-post-item,
+        .testimonials-slider .item,
+        .testimonials-home .item,
+        .tab_product .list-tab-product .item-product
+    ) {
+        transition: none !important;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper :is(
+        .the_blog .post-item:hover,
+        .blog-post-item:hover,
+        .tab_product .list-tab-product .item-product:hover,
+        .testimonials-slider .item:hover,
+        .testimonials-home .item:hover
+    ) {
+        transform: none !important;
+        box-shadow: var(--awa-shadow) !important;
+    }
+}
+
+body .page-wrapper .ayo-home5-hero-card__title::before,
+body .page-wrapper .ayo-home5-hero-card__title::after,
+body .page-wrapper .ayo-home5-hero-card__eyebrow::before,
+body .page-wrapper .ayo-home5-hero-card__eyebrow::after {
+    display: none;
+    content: '';
+}
+
+/* Duplicate slides (headline+headline) */
+body .page-wrapper .owl-item .item-slide h1 + h1,
+body .page-wrapper .owl-item .item-slide h2 + h2,
+body .page-wrapper .owl-item .item-slide h3 + h3,
+body .page-wrapper .owl-item .item-slide .title + .title,
+body .page-wrapper .banner-content h1 + h1,
+body .page-wrapper .banner-content h2 + h2 {
+    display: none;
+}
+
+/* Duplicate text layers inside banner items */
+body .page-wrapper .homeslider-container .owl-item .item-slide > div:not(:first-child),
+body .page-wrapper .banner-slider .owl-item > div > div:nth-child(n+2):not(.btn, a),
+body .page-wrapper .slide-content p + p:not(.btn-wrapper) {
+    display: none;
+}
+
+/* "Banner 1 Placeholder" dummy card */
+body .page-wrapper .ayo-home5-hero-card.placeholder-mode {
+    display: none;
+}

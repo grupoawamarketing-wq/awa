@@ -1,0 +1,115 @@
+// =============================================================================
+// §108 — Async Bundle Distill (2026-06-08)
+// /impeccable distill — neutraliza drift de bundles que carregam DEPOIS de
+// styles-l (pdp-ui-promax, checkout-polish, plp-promax, home-gate-*).
+// Locks terminais duplicados em awa-bundle-async-distill-lock.css.
+// =============================================================================
+
+@import (once) '_awa-tokens';
+@import (once) '_design-system';
+
+@awa-d8-pdp: ~'html body#html-body.catalog-product-view';
+@awa-d8-plp: ~'html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)';
+@awa-d8-checkout: ~'html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)';
+@awa-d8-home: ~'html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)';
+
+:root {
+    --awa-arch-version: '108';
+    --awa-ui-card-shadow: none;
+    --awa-ui-card-shadow-hover: 0 0 0 1px color-mix(in srgb, var(--awa-primary, @awa-color-primary) 18%, var(--awa-border, @awa-color-border));
+    --awa-ui-panel-shadow: none;
+}
+
+// ── PDP promax: galeria flat, CTAs sem glow ─────────────────────────────────
+@{awa-d8-pdp} .page-wrapper {
+    .product.media :is(.gallery-placeholder, .fotorama__stage) {
+        box-shadow: none !important;
+        border: 1px solid var(--awa-border, @awa-color-border) !important;
+        border-radius: var(--awa-ui-radius, @awa-radius-sm) !important;
+        background: var(--awa-bg-surface, @awa-color-white) !important;
+    }
+
+    .product-info-main :is(.action.primary.tocart, .action.tocart.primary) {
+        box-shadow: none !important;
+
+        &:hover,
+        &:focus-visible {
+            box-shadow: none !important;
+        }
+    }
+
+    :is(.block.related, .block.upsell, .product.data.items) :is(.block-title, .title, .item.title) {
+        border-inline-start: 0 !important;
+        border-left: 0 !important;
+    }
+}
+
+// ── PLP promax: cards flat, hero sem eyebrow tracked ────────────────────────
+@{awa-d8-plp} .page-wrapper {
+    :is(.item-product, .product-item, .product-item-info) {
+        box-shadow: none !important;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+        :is(.item-product, .product-item, .product-item-info):hover {
+            box-shadow: var(--awa-ui-card-shadow-hover) !important;
+            transform: none !important;
+        }
+    }
+
+    .awa-category-hero__eyebrow {
+        text-transform: none !important;
+        letter-spacing: normal !important;
+        font-size: var(--awa-text-sm, 13px) !important;
+        font-weight: @awa-weight-semibold !important;
+        color: var(--awa-text-muted, @awa-color-text-muted) !important;
+    }
+}
+
+// ── Checkout polish: painéis flat, CTA primário sem glow pesado ───────────────
+@{awa-d8-checkout} .page-wrapper {
+    :is(.opc-wrapper, .opc-block-summary, .opc-block-shipping-information, .checkout-shipping-method, .payment-method, .opc-progress-bar-item) {
+        box-shadow: none !important;
+    }
+
+    :is(.action.primary.checkout, button.action.primary.checkout, .action.primary.continue) {
+        box-shadow: none !important;
+
+        &:hover,
+        &:focus-visible {
+            box-shadow: 0 0 0 3px fade(@awa-color-primary, 18%) !important;
+        }
+    }
+
+    .payment-method-title {
+        border-inline-start: 0 !important;
+        border-left: 0 !important;
+    }
+}
+
+// ── Home gates: cards e category carousel (pós polish-cards) ───────────────
+@{awa-d8-home} .page-wrapper {
+    .content-top-home :is(.item-product, .product-item, .product-item-info, .content-item-product, .awa-carousel-card-slot) {
+        box-shadow: none !important;
+        transform: none !important;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+        .content-top-home :is(.item-product, .product-item, .product-item-info, .content-item-product):hover {
+            box-shadow: none !important;
+            transform: none !important;
+            border-color: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 22%, var(--awa-border, @awa-color-border)) !important;
+        }
+    }
+
+    :is(.awa-category-carousel__item, .top-home-content--category-carousel .awa-category-carousel__item) {
+        box-shadow: none !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    @{awa-d8-plp} .page-wrapper :is(.item-product, .product-item):hover,
+    @{awa-d8-home} .page-wrapper .content-top-home :is(.item-product, .product-item):hover {
+        transition: none !important;
+    }
+}

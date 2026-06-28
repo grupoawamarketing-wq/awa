@@ -1,0 +1,135 @@
+// =============================================================================
+// §102 — Home Density (2026-06-08)
+// /impeccable layout home — Fase A: mais colunas, menos padding morto,
+// header compacto, títulos 2 linhas. Shell 1440px mantido.
+// =============================================================================
+
+@import (once) '_awa-tokens';
+@import (once) '_design-system';
+
+@awa-home-density-scope: ~'html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)';
+@awa-home-slide-width: ~'calc((100% - ((var(--awa-home-carousel-cols) - 1) * var(--awa-home-carousel-gap))) / var(--awa-home-carousel-cols))';
+
+// ── Tokens runtime ───────────────────────────────────────────────────────────
+// A4 (2026-06-08): tokens globais da home (grid-gap, section-gap, pad-*,
+// header-gap-*, carousel-gap, card-min-h, card-image-min) movidos para a fonte
+// única em _awa-home-contract-2026-06.less (H-110, carregado antes deste §102).
+// Este arquivo apenas CONSOME esses tokens; não os redeclara.
+
+// ── Colunas visíveis no trilho (+1 vs §69 em desktop) ───────────────────────
+@{awa-home-density-scope} .page-wrapper .awa-carousel-section {
+    --awa-home-carousel-cols: 2.2;
+    padding-inline: 28px !important;
+}
+
+@media (min-width: @awa-bp-768) {
+    @{awa-home-density-scope} .page-wrapper .awa-carousel-section {
+        --awa-home-carousel-cols: 4;
+        --awa-home-carousel-gap: 12px;
+        padding-inline: 32px !important;
+    }
+}
+
+@media (min-width: @awa-bp-992) {
+    @{awa-home-density-scope} .page-wrapper .awa-carousel-section {
+        --awa-home-carousel-cols: 5;
+    }
+}
+
+@media (min-width: 1280px) {
+    @{awa-home-density-scope} .page-wrapper .awa-carousel-section {
+        --awa-home-carousel-cols: 5;
+    }
+}
+
+@media (min-width: 1440px) {
+    @{awa-home-density-scope} .page-wrapper .awa-carousel-section {
+        --awa-home-carousel-cols: 5;
+        --awa-home-carousel-gap: 12px;
+    }
+}
+
+@media (max-width: (@awa-bp-768 - 1px)) {
+    @{awa-home-density-scope} .page-wrapper .awa-carousel-section {
+        padding-inline: 12px !important;
+    }
+}
+
+// ── OWL / scroll: largura de slide alinhada às colunas ───────────────────────
+@{awa-home-density-scope} .page-wrapper .content-top-home .awa-carousel-section {
+    :is(.owl-stage .owl-item, .swiper-slide, .slick-slide, .awa-carousel__slide) {
+        width: @awa-home-slide-width !important;
+        max-width: @awa-home-slide-width !important;
+        flex: 0 0 @awa-home-slide-width !important;
+        box-sizing: border-box !important;
+        min-width: 0 !important;
+    }
+}
+
+// ── Cabeçalho vitrine: cluster compacto (não space-between extremo) ────────
+@{awa-home-density-scope} .page-wrapper .content-top-home .awa-carousel-section .awa-section-header {
+    justify-content: flex-start !important;
+    align-items: center !important;
+    gap: @awa-space-3 clamp(@awa-space-3, 2vw, @awa-space-5) !important;
+    margin-block-end: clamp(@awa-space-2, 1vw, @awa-space-4) !important;
+    padding-block-end: @awa-space-2 !important;
+}
+
+@{awa-home-density-scope} .page-wrapper .content-top-home .awa-carousel-section {
+    .awa-section-header__left {
+        flex: 1 1 auto !important;
+        max-width: ~"min(100%, 56ch)" !important;
+    }
+
+    :is(.awa-section-header__link, .awa-shelf__view-all) {
+        margin-inline-start: 0 !important;
+        align-self: center !important;
+        flex-shrink: 0 !important;
+    }
+}
+
+// ── Cards: menos padding interno, altura útil ────────────────────────────────
+@{awa-home-density-scope} .page-wrapper .awa-shelf--carousel {
+    :is(.awa-product-card, .content-item-product, .item-product.awa-carousel-card-slot) {
+        min-height: var(--awa-home-card-min-h, 252px) !important;
+    }
+
+    :is(.product-info, .product-details) {
+        padding: @awa-space-2 @awa-space-2 @awa-space-3 !important;
+        gap: @awa-space-1 !important;
+    }
+
+    :is(.product-thumb, .product-image-container) {
+        min-height: var(--awa-home-card-image-min, 140px) !important;
+    }
+
+    :is(.product-name, .product-item-name, .product-item-link) a,
+    :is(.product-name, .product-item-name) a {
+        display: -webkit-box !important;
+        -webkit-line-clamp: 2 !important;
+        -webkit-box-orient: vertical !important;
+        overflow: hidden !important;
+        line-height: 1.35 !important;
+        text-wrap: wrap !important;
+        max-height: calc(2 * 1.35 * 0.8125rem + 2px) !important;
+    }
+}
+
+// ── Superfície featured: branco contínuo (sem “caixa cinza”) ─────────────────
+@{awa-home-density-scope} .page-wrapper :is(.awa-carousel-section--featured, .awa-carousel-section--standard) {
+    background: var(--awa-bg-surface, @awa-color-white) !important;
+    background-color: var(--awa-bg-surface, @awa-color-white) !important;
+}
+
+// ── Below-fold: intrinsic size menor (content-visibility) ────────────────────
+@supports (content-visibility: auto) {
+    @{awa-home-density-scope} .page-wrapper .content-top-home .awa-carousel-section:nth-child(n + 5) {
+        contain-intrinsic-size: auto 320px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    @{awa-home-density-scope} .page-wrapper .awa-shelf--carousel :is(.awa-product-card, .content-item-product):hover {
+        transition: none !important;
+    }
+}

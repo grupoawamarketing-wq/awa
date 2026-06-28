@@ -1,0 +1,257 @@
+// =============================================================================
+// _awa-adapt-home-2026-06.less
+// §68 — /impeccable adapt home (2026-06-08)
+// Mobile/tablet: touch 44px, Owl nav clicável, categorias com setas (não ocultas),
+// hero B2B legível, peek nos shelves, pointer:coarse.
+// Register: PRODUCT — Casey (mobile entre entregas).
+// =============================================================================
+
+@import (once) '_awa-tokens';
+@import (once) '_design-system';
+
+html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper {
+    // ── Shelves Owl: nav + progress sempre interativos no mobile ─────────────
+    .awa-shelf--carousel:not(.awa-carousel--static) {
+        > .awa-owl-nav,
+        .awa-carousel > .awa-owl-nav {
+            display: flex;
+            visibility: visible;
+            opacity: 1;
+            pointer-events: auto;
+            position: relative;
+            inset: auto;
+            transform: none;
+            justify-content: center;
+            gap: @awa-s-3;
+            margin-block-start: @awa-s-2;
+            min-height: @awa-touch-target-min;
+            z-index: 2;
+        }
+
+        .awa-owl-nav__btn {
+            position: relative;
+            inset: auto;
+            width: @awa-touch-target-min;
+            height: @awa-touch-target-min;
+            min-width: @awa-touch-target-min;
+            min-height: @awa-touch-target-min;
+            pointer-events: auto;
+            opacity: 1;
+            visibility: visible;
+            touch-action: manipulation;
+        }
+
+        .awa-owl-progress {
+            display: block;
+            visibility: visible;
+            opacity: 1;
+            height: 4px;
+            margin-block-start: @awa-space-3;
+        }
+    }
+
+    // Peek do próximo card (affordance de swipe sem depender só do texto)
+    .awa-shelf--carousel .awa-carousel__viewport,
+    .awa-shelf--carousel .owl-stage-outer {
+        scroll-padding-inline: @awa-s-2;
+    }
+}
+
+.respond-below-md({
+    html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper {
+        // ── Hero B2B (faixa .awa-hero-benefits): markup vivo ────────────────
+        // Mobile prioriza chegar ao catálogo: itens densos, alvo de toque 44px,
+        // ícone reduzido para liberar largura ao texto. (Markup antigo
+        // trust-strip/lead/btn foi removido do template.)
+        .awa-hero-benefits {
+            gap: @awa-space-2;
+        }
+
+        .awa-hero-benefits__item--interactive .awa-hero-benefits__link,
+        .awa-hero-benefits__item:not(.awa-hero-benefits__item--interactive) {
+            gap: @awa-s-2;
+            padding: @awa-s-2;
+            min-height: @awa-touch-target-min;
+        }
+
+        .awa-hero-benefits__item--interactive .awa-hero-benefits__link {
+            touch-action: manipulation;
+        }
+
+        .awa-hero-benefits__icon {
+            flex: 0 0 @awa-s-5;
+            width: @awa-s-5;
+            height: @awa-s-5;
+
+            svg {
+                width: @awa-s-4;
+                height: @awa-s-4;
+            }
+        }
+
+        .awa-hero-benefits__title {
+            font-size: ~'max(15px, 0.9375rem)';
+        }
+
+        .awa-hero-benefits__text {
+            font-size: ~'max(13px, 0.8125rem)';
+            line-height: 1.45;
+            text-wrap: pretty;
+        }
+
+        // ── Aviso de preços: corpo ≥16px (evita zoom iOS) ───────────────────
+        .awa-home-pricing-notice__text {
+            font-size: ~'max(16px, 1rem)';
+        }
+
+        // ── Categorias: reexibir setas (layout-bundle esconde em max 767) ──
+        .top-home-content--category-carousel .awa-category-carousel__viewport {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            grid-template-rows: auto auto;
+            gap: @awa-space-2;
+            align-items: center;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        .top-home-content--category-carousel .awa-category-carousel__track {
+            grid-column: 1 / -1;
+            grid-row: 1;
+            max-width: 100%;
+            min-width: 0;
+            scroll-snap-type: x mandatory;
+            scroll-padding-inline: @awa-s-2;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior-x: contain;
+        }
+
+        // Carrosséis de produto: imagens Magento chegam com largura inline (ex.: 600px).
+        // No mobile, o card é a fonte de verdade para largura, não o asset.
+        .awa-shelf--carousel {
+            .awa-carousel__viewport,
+            .awa-carousel__track {
+                max-width: 100%;
+                min-width: 0;
+            }
+
+            .awa-carousel__viewport {
+                overflow-x: hidden;
+            }
+
+            :is(.product-thumb-link, .first-thumb, .product-image-container, .product-image-wrapper) {
+                display: block;
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+            }
+
+            :is(.product-image-photo, .product-thumb img) {
+                display: block;
+                width: 100% !important;
+                max-width: 100% !important;
+                height: auto;
+                object-fit: contain;
+            }
+        }
+
+        .top-home-content--category-carousel :is(.awa-category-carousel__prev, .awa-category-carousel__next) {
+            display: inline-flex !important;
+            position: static !important;
+            top: auto !important;
+            left: auto !important;
+            right: auto !important;
+            transform: none !important;
+            width: @awa-touch-target-min !important;
+            height: @awa-touch-target-min !important;
+            min-width: @awa-touch-target-min !important;
+            min-height: @awa-touch-target-min !important;
+            margin: 0 !important;
+        }
+
+        .top-home-content--category-carousel .awa-category-carousel__prev {
+            grid-column: 1;
+            grid-row: 2;
+            justify-self: start;
+        }
+
+        .top-home-content--category-carousel .awa-category-carousel__next {
+            grid-column: 3;
+            grid-row: 2;
+            justify-self: end;
+        }
+
+        .top-home-content--category-carousel .awa-category-carousel__dots:not(:empty) {
+            margin-block-start: @awa-space-1;
+            min-height: @awa-touch-target-min;
+            align-items: center;
+        }
+
+        .top-home-content--category-carousel .awa-category-carousel__dot {
+            min-width: @awa-space-3;
+            min-height: @awa-space-3;
+            padding: @awa-space-2;
+            box-sizing: content-box;
+        }
+
+        // ── Shelves: nav centralizada, alvo de toque reforçado ─────────────
+        .awa-shelf--carousel:not(.awa-carousel--static) {
+            > .awa-owl-nav,
+            .awa-carousel > .awa-owl-nav {
+                justify-content: center;
+                gap: @awa-s-4;
+            }
+        }
+
+        // ── Banda compact: menos padding horizontal ─────────────────────────
+        .ayo-home5-wrapper > .awa-carousel-section--compact {
+            padding-inline: @awa-s-2;
+        }
+
+        // ── Hint de swipe alinhado ao copy do §64 ─────────────────────────
+        .awa-carousel-section:not(.top-home-content--category-carousel) .awa-section-header__link::after {
+            content: ' · deslize o carrossel';
+        }
+    }
+});
+
+// Tablet (768–991): benefícios em 2 colunas (do componente §87); garante que o
+// item interativo (WhatsApp) mantenha alvo de toque mesmo em tablets touch.
+@media (min-width: @awa-bp-768) and (max-width: (@awa-bp-992 - 1)) {
+    html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper {
+        .awa-hero-benefits__item--interactive .awa-hero-benefits__link {
+            min-height: @awa-touch-target-min;
+            touch-action: manipulation;
+        }
+    }
+}
+
+@media (pointer: coarse) {
+    html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper {
+        .awa-shelf--carousel .awa-owl-nav__btn:active:not(:disabled):not(.is-disabled):not([aria-disabled='true']) {
+            transform: scale(0.96);
+            background: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 8%, var(--awa-bg, @awa-color-white));
+            border-color: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 35%, var(--awa-border, @awa-color-border));
+        }
+
+        .top-home-content--category-carousel :is(.awa-category-carousel__prev, .awa-category-carousel__next):active:not(.is-disabled):not([disabled]) {
+            background: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 12%, var(--awa-bg, @awa-color-white));
+            border-color: var(--awa-primary, @awa-color-primary);
+        }
+
+        // Benefício interativo (WhatsApp): feedback de toque por cor (sem transform)
+        .awa-hero-benefits__item--interactive .awa-hero-benefits__link:active {
+            border-color: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 35%, var(--awa-border, @awa-color-border));
+            background: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 6%, var(--awa-bg, @awa-color-white));
+        }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper {
+        .awa-shelf--carousel .awa-owl-nav__btn:active,
+        .top-home-content--category-carousel :is(.awa-category-carousel__prev, .awa-category-carousel__next):active {
+            transform: none;
+        }
+    }
+}

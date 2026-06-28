@@ -1,0 +1,222 @@
+// =============================================================================
+// _awa-layout-home-2026-06.less
+// §65 — /impeccable layout home (2026-06-08)
+// Ritmo vertical, hierarquia por tier, zona de descoberta vs vitrines, compact band.
+// Register: PRODUCT — grids previsíveis, densidade por contexto.
+// =============================================================================
+
+@import (once) '_awa-tokens';
+@import (once) '_design-system';
+
+html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper {
+    // ── Tokens de ritmo (única escala, variação por tier) ─────────────────────
+    --awa-home-gap-discovery: clamp(20px, 2vw, 28px);
+    --awa-home-gap-shelf: clamp(12px, 1.1vw, 18px);
+    --awa-home-pad-featured: clamp(36px, 3.6vw, 56px);
+    --awa-home-pad-standard: clamp(28px, 2.6vw, 42px);
+    --awa-home-pad-compact: clamp(18px, 1.8vw, 28px);
+
+    // ── B2B CTA → descoberta: respiro antes do reel de categorias ───────────
+    .awa-hero-b2b-cta + .awa-home-recent-orders,
+    .awa-hero-b2b-cta + .top-home-content--category-carousel {
+        margin-block-start: var(--awa-home-gap-discovery);
+    }
+
+    .awa-home-recent-orders--layout-top + .top-home-content--category-carousel {
+        margin-block-start: var(--awa-home-gap-discovery);
+    }
+
+    // ── Pedidos recentes no topo (logado com itens): bloco operacional compacto
+    .awa-home-recent-orders--layout-top {
+        padding-block: @awa-s-3;
+        border-block-end: 1px solid color-mix(in srgb, var(--awa-border, @awa-color-border) 88%, transparent);
+    }
+
+    // ── Pedidos recentes no rodapé (visitante / sem pedidos): menos peso visual
+    .awa-home-recent-orders--layout-end {
+        margin-block-start: var(--awa-home-gap-discovery);
+        padding-block: @awa-s-3;
+        border-block-start: 1px solid color-mix(in srgb, var(--awa-border, @awa-color-border) 88%, transparent);
+    }
+
+  .awa-home-recent-orders--layout-end[data-awa-home-recent-state='guest'] {
+        padding-block: @awa-s-2;
+    }
+
+    // ── Zona de descoberta: categorias (+ aviso de preços quando visitante) ──
+    .top-home-content--category-carousel {
+        padding-block: var(--awa-home-pad-standard);
+        padding-block-end: @awa-s-3;
+
+        &:has(+ .awa-home-pricing-notice) {
+            padding-block-end: @awa-space-3;
+        }
+    }
+
+    .awa-home-pricing-notice {
+        margin-block: @awa-space-3 0;
+        padding-inline: 0;
+    }
+
+    .top-home-content--category-carousel + .awa-home-pricing-notice {
+        margin-block-start: @awa-space-3;
+    }
+
+    // Transição discovery → vitrine âncora (com ou sem aviso intermediário)
+    // Hairline neutra: o único acento vermelho da dobra é o sublinhado do
+    // título "Compre por categoria"; aqui evitamos um segundo marcador vermelho.
+    .awa-home-pricing-notice + .awa-carousel-section--featured,
+    .top-home-content--category-carousel + .awa-carousel-section--featured {
+        margin-block-start: 0;
+        padding-block-start: var(--awa-home-pad-featured);
+        border-block-start: 1px solid color-mix(in srgb, var(--awa-border, @awa-color-border) 70%, transparent);
+    }
+
+    .awa-home-pricing-notice + .awa-carousel-section--featured :is(.awa-section-header, .awa-shelf__header),
+    .top-home-content--category-carousel + .awa-carousel-section--featured :is(.awa-section-header, .awa-shelf__header) {
+        padding-block-start: @awa-space-1;
+    }
+
+    // ── Tiers: padding final-wins (substitui valores genéricos de §52 quando maior) ─
+    .ayo-home5-wrapper > .awa-carousel-section--featured {
+        padding-block: var(--awa-home-pad-featured);
+    }
+
+    .ayo-home5-wrapper > .awa-carousel-section--standard {
+        padding-block: var(--awa-home-pad-standard);
+    }
+
+    .ayo-home5-wrapper > .awa-carousel-section--compact {
+        padding-block: var(--awa-home-pad-compact);
+    }
+
+    // Below-fold: reserva de altura para content-visibility
+    .awa-carousel-section--featured:not(.awa-home-section--below-fold) {
+        contain-intrinsic-size: auto 46rem;
+    }
+
+    .awa-carousel-section--standard.awa-home-section--below-fold {
+        contain-intrinsic-size: auto 44rem;
+    }
+
+    // ── Tipografia por tier (vence escala plana de _awa-home-polish) ─────────
+    .awa-carousel-section :is(.awa-section-header__title, .awa-shelf__title) {
+        padding-bottom: 0;
+        border-left: none;
+        text-wrap: balance;
+
+        &::after {
+            display: none;
+            content: none;
+        }
+    }
+
+    .top-home-content--category-carousel .awa-section-header__title {
+        padding-bottom: @awa-space-1;
+
+        &::after {
+            display: block;
+            content: '';
+            width: 32px;
+            height: 3px;
+            margin-block-start: @awa-space-2;
+            background: var(--awa-primary, @awa-color-primary);
+            border-radius: var(--awa-radius-xs, @awa-radius-sm);
+        }
+    }
+
+    .awa-carousel-section--featured :is(.awa-section-header__title, .awa-shelf__title) {
+        font-size: clamp(1.3125rem, 1.1rem + 0.7vw, 1.75rem);
+        font-weight: @awa-weight-bold;
+        line-height: 1.18;
+        letter-spacing: -0.02em;
+    }
+
+    .awa-carousel-section--standard :is(.awa-section-header__title, .awa-shelf__title) {
+        font-size: clamp(1.125rem, 1rem + 0.45vw, 1.4375rem);
+        font-weight: @awa-weight-bold;
+        line-height: 1.22;
+    }
+
+    .awa-carousel-section--compact :is(.awa-section-header__title, .awa-shelf__title) {
+        font-size: clamp(1.0625rem, 0.98rem + 0.3vw, 1.25rem);
+        font-weight: @awa-weight-semibold;
+        line-height: 1.25;
+    }
+
+    .awa-carousel-section--compact .awa-section-header__subtitle {
+        font-size: ~'max(12px, 0.75rem)';
+        max-width: 46ch;
+    }
+
+    // ── Headers: espaço título → cards por tier ─────────────────────────────
+    .awa-carousel-section--featured :is(.awa-section-header, .awa-shelf__header) {
+        margin-block-end: @awa-s-3;
+    }
+
+    .awa-carousel-section--standard :is(.awa-section-header, .awa-shelf__header) {
+        margin-block-end: @awa-s-2;
+    }
+
+    .awa-carousel-section--compact :is(.awa-section-header, .awa-shelf__header) {
+        margin-block-end: @awa-space-3;
+    }
+
+    // ── Banda compact: Bauletos + Retrovisores como um bloco de densidade alta ─
+    .awa-carousel-section--standard + .awa-carousel-section--compact {
+        margin-block-start: 0;
+        border-top-left-radius: @awa-radius-md;
+        border-top-right-radius: @awa-radius-md;
+        background-color: var(--awa-bg-subtle, @awa-color-bg-soft);
+    }
+
+    .ayo-home5-wrapper > .awa-carousel-section--compact + .awa-carousel-section--compact {
+        padding-block-start: @awa-s-2;
+        border-block-start: 1px solid color-mix(in srgb, var(--awa-primary, @awa-color-primary) 8%, var(--awa-bg-subtle, @awa-color-bg-soft));
+        background-color: var(--awa-bg-subtle, @awa-color-bg-soft);
+    }
+
+    .ayo-home5-wrapper > .awa-carousel-section--compact:last-of-type {
+        padding-block-end: var(--awa-home-pad-compact);
+        border-bottom-left-radius: @awa-radius-md;
+        border-bottom-right-radius: @awa-radius-md;
+    }
+
+    // ── Primeiro below-fold: transição featured → standard ─────────────────
+    .awa-carousel-section--featured + .awa-carousel-section--standard.awa-home-section--below-fold {
+        border-block-start: 1px solid color-mix(in srgb, var(--awa-border, @awa-color-border) 70%, transparent);
+    }
+
+    .awa-carousel-section--featured + .awa-carousel-section--standard.awa-home-section::before {
+        display: none;
+    }
+
+    .awa-carousel-section--compact + .awa-home-recent-orders--layout-end {
+        margin-block-start: var(--awa-home-gap-discovery);
+    }
+}
+
+.respond-below-md({
+    html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper {
+        --awa-home-pad-featured: clamp(28px, 6vw, 40px);
+        --awa-home-pad-standard: clamp(22px, 5vw, 32px);
+        --awa-home-pad-compact: clamp(16px, 4vw, 24px);
+
+        .awa-home-pricing-notice .container {
+            padding-inline: @awa-s-3;
+        }
+
+        .awa-home-pricing-notice + .awa-carousel-section--featured,
+        .top-home-content--category-carousel + .awa-carousel-section--featured {
+            border-block-start-width: 1px;
+        }
+
+        .awa-carousel-section--featured :is(.awa-section-header, .awa-shelf__header) {
+            row-gap: @awa-space-2;
+        }
+
+        .awa-carousel-section--compact :is(.awa-section-header, .awa-shelf__header) {
+            margin-block-end: @awa-space-2;
+        }
+    }
+});

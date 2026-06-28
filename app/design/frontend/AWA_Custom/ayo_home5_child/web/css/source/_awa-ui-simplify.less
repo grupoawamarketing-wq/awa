@@ -1,0 +1,313 @@
+// ============================================================================
+// AWA Motos — _awa-ui-simplify.less
+// Simplificação de UI (ui-ux-pro-max + densidade B2B): menos ruído, mais conteúdo.
+// Final-wins em styles-l.css — neutraliza premium-effects e decoração excessiva.
+// ============================================================================
+
+@import (once) '_awa-variables';
+
+// ── Tokens de superfície simplificada ───────────────────────────────────────
+:root {
+  --awa-ui-surface-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --awa-ui-surface-shadow-hover: 0 2px 6px rgba(15, 23, 42, 0.08);
+  --awa-ui-border-subtle: var(--awa-border, @awa-color-border);
+}
+
+// ── 1. Cards de produto: flat, hover só cor/borda (sem lift) ─────────────────
+body .page-wrapper {
+  :is(.item-product, .product-item, .content-item-product, .awa-carousel-card-slot) {
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+    box-shadow: none;
+  }
+
+  :is(.item-product, .product-item, .content-item-product):hover,
+  :is(.item-product, .product-item, .content-item-product):focus-within {
+    transform: none !important;
+    box-shadow: var(--awa-ui-surface-shadow-hover) !important;
+  }
+
+  :is(.item-product, .product-item) .product-thumb,
+  :is(.item-product, .product-item) .product-image-photo {
+    transition: opacity 0.2s ease;
+  }
+
+  :is(.item-product, .product-item):hover :is(.product-thumb img, .product-image-photo) {
+    transform: none !important;
+  }
+}
+
+.product-item {
+  border-color: var(--awa-ui-border-subtle);
+
+  &:hover {
+    box-shadow: var(--awa-ui-surface-shadow-hover);
+    border-color: var(--awa-gray-200, @awa-color-gray-300);
+    z-index: auto;
+  }
+}
+
+@media (hover: hover) {
+  .product-item:hover {
+    transform: none;
+  }
+}
+
+// ── 2. Botões: flat, feedback por cor (sem scale/glow forte) ────────────────
+body .page-wrapper {
+  :is(.action.primary, .action-primary, button.action.tocart, .btn-primary) {
+    box-shadow: none;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+
+    &:hover {
+      filter: none;
+      box-shadow: none;
+      transform: none;
+    }
+
+    &:active {
+      transform: none;
+    }
+  }
+}
+
+// ── 3. Header sticky: sólido, sem glass blur pesado ─────────────────────────
+body .page-wrapper .awa-site-header.is-sticky .header.awa-main-header,
+body.sticky .page-wrapper .awa-site-header .header.awa-main-header {
+  background: var(--awa-bg-surface, @awa-color-white) !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: var(--awa-ui-surface-shadow);
+  border-bottom: 1px solid var(--awa-ui-border-subtle);
+}
+
+// ── 4. Títulos de seção: sem borda decorativa pesada ────────────────────────
+body .page-wrapper {
+  :is(.rokan-product-heading, .awa-section-header, .block-title) {
+    border-bottom: none;
+    box-shadow: none;
+    text-transform: none;
+    letter-spacing: normal;
+  }
+
+  .rokan-product-heading h2 {
+    font-weight: 600;
+    font-size: clamp(1.125rem, 1rem + 0.5vw, 1.375rem);
+  }
+}
+
+// ── 5. Home: hero/CTA premium legado — sem animação de entrada pesada ─────
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) {
+  .home-hero-content,
+  .home-hero-title,
+  .home-hero-btn {
+    animation: none !important;
+  }
+
+  .home-hero-btn:hover,
+  .home-feature:hover,
+  .home-cta:hover {
+    transform: none !important;
+  }
+
+  .home-feature:hover {
+    box-shadow: var(--awa-ui-surface-shadow-hover) !important;
+  }
+
+  .home-cta {
+    box-shadow: none !important;
+  }
+}
+
+// ── 6. PDP: galeria e painel de compra mais limpos ───────────────────────────
+body.catalog-product-view .page-wrapper {
+  .product.media,
+  .gallery-placeholder,
+  .fotorama__stage {
+    box-shadow: var(--awa-ui-surface-shadow);
+  }
+
+  .product-info-main {
+    box-shadow: var(--awa-ui-surface-shadow) !important;
+  }
+
+  .awa-pdp-trust-bar__item:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .awa-pdp-whatsapp-cta:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+// ── 7. Gate B2B: card plano (mantém vermelho, remove glow) ───────────────────
+body.catalog-product-view .product-info-main .b2b-login-to-see-price.price-box {
+  box-shadow: none !important;
+
+  &:hover {
+    transform: none !important;
+    box-shadow: none !important;
+  }
+}
+
+// ── 8. PLP toolbar / filtros: menos padding decorativo ─────────────────────
+body.catalog-category-view .page-wrapper .filter-options-title,
+body.catalogsearch-result-index .page-wrapper .filter-options-title {
+  box-shadow: none;
+}
+
+// ── 9. Skeleton / shimmer: desligado (menos distração) ───────────────────────
+.awa-shimmer,
+.awa-skeleton,
+[class*='shimmer'] {
+  animation: none !important;
+  background: var(--awa-gray-100, @awa-color-bg-f5) !important;
+}
+
+// ── 10. Cursor + foco acessível (ui-ux-pro-max) ─────────────────────────────
+body .page-wrapper {
+  :is(a, button, .action, [role='button'], .item-product .product-item-link, .awa-category-carousel__item) {
+    cursor: pointer;
+  }
+
+  :is(a, button, .action):focus-visible {
+    outline: 2px solid var(--awa-primary, @awa-color-primary);
+    outline-offset: 2px;
+  }
+}
+
+// ── 11. Carrosséis / categorias: sem scale no hover ─────────────────────────
+body .page-wrapper {
+  :is(.awa-category-carousel__item, .swiper-slide, .owl-item) {
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+  }
+
+  :is(.awa-category-carousel__item, .swiper-slide .item-product):hover {
+    transform: none !important;
+    box-shadow: var(--awa-ui-surface-shadow-hover) !important;
+  }
+
+  .swiper-button-prev,
+  .swiper-button-next {
+    box-shadow: var(--awa-ui-surface-shadow);
+  }
+}
+
+// ── 12. PLP: cards de filtro e toolbar planos ───────────────────────────────
+body.catalog-category-view .page-wrapper,
+body.catalogsearch-result-index .page-wrapper {
+  .filter-options-item {
+    box-shadow: none;
+  }
+
+  .modes-mode,
+  .toolbar .pages {
+    box-shadow: none;
+  }
+}
+
+// ── 13. Footer: menos sombra decorativa ───────────────────────────────────────
+body .page-wrapper .page_footer.awa-footer--dark,
+body .page-wrapper .page-footer {
+  box-shadow: none;
+}
+
+// ── 14. Minicart / modais: superfície simples (só quando aberto) ─────────────
+body .page-wrapper .minicart-wrapper:is(.active, .is-open) .block-minicart {
+  box-shadow: var(--awa-ui-surface-shadow-hover) !important;
+}
+
+// ── 15. ui-promax: neutraliza lift residual em cards ──────────────────────────
+body .page-wrapper .product-item .product-item-info,
+body .page-wrapper .product-item:hover .product-item-info {
+  transform: none !important;
+  box-shadow: var(--awa-ui-surface-shadow-hover) !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+body.b2b-account-dashboard .page-wrapper {
+  :is(.b2b-section, .shoppinglist-card):hover {
+    transform: none;
+    box-shadow: var(--awa-ui-surface-shadow-hover);
+  }
+
+  .b2b-erp-pending-banner .erp-pending-action:hover {
+    box-shadow: none;
+  }
+}
+
+// ── A11y: skip links ocultos até foco (ui-ux-pro-max) ───────────────────────
+#html-body .page-wrapper :is(.skip-link, .awa-skip-link, .awa-skip-to-content, a.skip-link):not(:focus):not(:focus-visible) {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+// ── Home: um H2 por prateleira (oculta .rokan-product-heading legado) ───────
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) {
+  .page-wrapper .top-home-content.awa-carousel-section .rokan-product-heading,
+  .page-wrapper .top-home-content.awa-home-section .rokan-product-heading,
+  .page-wrapper .awa-home-section .rokan-product-heading {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    max-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border: 0 !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body .page-wrapper *,
+  body .page-wrapper *::before,
+  body .page-wrapper *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+// ── 16. ui-ux-pro-max Phase 16 — redução de ruído visual (terminal) ────────
+#html-body .page-wrapper {
+  #awa-scroll-progress {
+    display: none !important;
+  }
+
+  :is(.block .block-title strong, .content-heading .title)::after {
+    display: none !important;
+    content: none !important;
+  }
+
+  .item-product .b2b-login-to-see-price,
+  .product-item .b2b-login-to-see-price {
+    background: var(--awa-bg-surface, @awa-color-white) !important;
+    background-image: none !important;
+  }
+
+  :is(.product-label, .awa-product-badge, [class*='product-label-']) {
+    text-transform: none !important;
+    box-shadow: none !important;
+  }
+
+  .stock.available::before,
+  .stock.unavailable::before {
+    animation: none !important;
+  }
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5).awa-scroll-ready
+  .page-wrapper
+  .ayo-home5-wrapper
+  :is(.awa-home-section, .top-home-content):not(.awa-revealed) {
+  opacity: 1 !important;
+  transform: none !important;
+}

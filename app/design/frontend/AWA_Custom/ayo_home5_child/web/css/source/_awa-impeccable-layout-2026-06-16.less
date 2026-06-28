@@ -1,0 +1,572 @@
+// =============================================================================
+// §BFV-2 — AWA Impeccable Layout Pass 2026-06-16
+// Corrige: PLP sidebar order 768px, sidebar 260px, feature bar 768px,
+//          section rhythm home, PDP breadcrumb, hover states globais.
+// Auditado via Playwright em 4 viewports + CDP de rastreamento de regras.
+// =============================================================================
+
+@import (once) '_awa-tokens';
+@import (once) '_design-system';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// §1. PLP — Sidebar order fix em tablet/mobile
+// Bug: .sidebar-main-1 é o PRIMEIRO filho do .columns grid. Em viewport < 992px
+// (single-column grid via PHP inline + flex-column fallback), o sidebar aparece
+// ACIMA do conteúdo principal (banner, toolbar, produtos). Fix: order CSS.
+// ─────────────────────────────────────────────────────────────────────────────
+
+@media (max-width: (@awa-bp-992 - 1)) {
+    html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .page-wrapper {
+        .page-main > .columns.layout.layout-2-col {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: @awa-space-3 !important;
+            width: 100% !important;
+        }
+
+        // Wrapper col-sm-3 (flex child real) — vence awa-layout-bundle order:-1
+        .columns.layout.layout-2-col > .col-xs-12.col-sm-3:not(.col-main) {
+            order: 20 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            flex: 0 0 auto !important;
+            margin-top: @awa-space-4 !important;
+            margin-bottom: 0 !important;
+        }
+
+        // Sidebar interno
+        :is(.sidebar.sidebar-main, .sidebar.sidebar-main-1, aside.sidebar-main) {
+            order: 20 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            position: static !important;
+            max-height: none !important;
+            overflow-y: visible !important;
+        }
+
+        // Col-main conteúdo vem ANTES do sidebar
+        .columns > .col-main,
+        .col-main {
+            order: 1 !important;
+            width: 100% !important;
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// §2. PLP — Sidebar width: 260px em desktop (respeita design token)
+// Causa raiz: _awa-plp-consistency-2026-06.less limita a 240px via flex+max-width.
+// ─────────────────────────────────────────────────────────────────────────────
+
+@media (min-width: @awa-bp-992) {
+    html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .page-wrapper {
+        :is(.sidebar.sidebar-main, .sidebar.sidebar-main-1, aside.sidebar-main) {
+            flex: 0 0 260px !important;
+            min-width: 260px !important;
+            max-width: 260px !important;
+            width: 260px !important;
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// §3. PLP — Product card hover: elevação sutil + border brand-tint
+// ─────────────────────────────────────────────────────────────────────────────
+
+@media (hover: hover) and (pointer: fine) {
+    html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .page-wrapper {
+        .products-grid :is(.item-product, .product-item):hover {
+                    border-color: ~"color-mix(in srgb, var(--awa-primary) 30%, var(--awa-border))" !important;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.09) !important;
+            transition: border-color 150ms @awa-ease, box-shadow 150ms @awa-ease !important;
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// §4. PLP — Toolbar display consistency
+// Garante que o toolbar de produtos usa flex correto e não quebra em tablet
+// ─────────────────────────────────────────────────────────────────────────────
+
+html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .page-wrapper {
+    .toolbar.toolbar-products {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        align-items: center !important;
+        gap: @awa-space-2 @awa-space-3 !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// §5. HOME — Feature bar igual height nos itens em todas viewports
+// Bug: no 768px o layout 2x2 cria itens com alturas inconsistentes.
+// ─────────────────────────────────────────────────────────────────────────────
+
+html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper {
+    // Feature bar container
+    :is(.awa-hero-trust-strip, .awa-home-trust-bar, .awa-feature-bar, .awa-hero-benefits, [class*="trust-strip"]) {
+        display: grid !important;
+        align-items: stretch !important;
+    }
+
+    // Feature bar items: igual height via align-items:stretch no grid pai
+    :is(.awa-hero-trust-strip__item, .awa-home-trust-bar__item, .awa-hero-benefits__item, [class*="trust-strip__item"], [class*="feature-bar__item"]) {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        height: 100% !important;
+        min-height: 96px !important;
+        box-sizing: border-box !important;
+    }
+}
+
+// Feature bar 768px: garante grid 2x2 com alturas iguais
+@media (min-width: @awa-bp-768) and (max-width: (@awa-bp-992 - 1)) {
+    html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper {
+        :is(.awa-hero-trust-strip, .awa-home-trust-bar, .awa-feature-bar, .awa-hero-benefits, [class*="trust-strip"]) {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: @awa-space-2 !important;
+        }
+    }
+}
+
+// Feature bar desktop: 4 itens em linha
+@media (min-width: @awa-bp-992) {
+    html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper {
+        :is(.awa-hero-trust-strip, .awa-home-trust-bar, .awa-feature-bar, .awa-hero-benefits, [class*="trust-strip"]) {
+            grid-template-columns: repeat(4, 1fr) !important;
+            gap: @awa-space-3 !important;
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// §6. HOME — Ritmo vertical entre seções
+// Adiciona breathing room entre seções da home sem quebrar carrosséis
+// ─────────────────────────────────────────────────────────────────────────────
+
+html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper {
+    // Espaçamento entre seções do conteúdo home
+    .content-top-home .top-home-content + .top-home-content {
+        margin-block-start: @awa-space-6 !important; // 24px
+    }
+
+    // Breathing room antes/depois de seções especiais
+    .awa-home-pricing-notice,
+    .awa-b2b-promo-banner,
+    [class*="pricing-notice"] {
+        margin-block: @awa-space-4 !important;
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// §7. HOME — Section title spacing consistency
+// ─────────────────────────────────────────────────────────────────────────────
+
+html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper {
+    :is(.shop-title, .velaTitle, .awa-shelf-title, .shelf-title, .awa-section-title) {
+        font-size: var(--awa-fs-xl, var(--awa-font-xl, 18px)) !important;
+        font-weight: @awa-weight-bold !important;
+        color: var(--awa-text, @awa-color-text-primary) !important;
+        line-height: 1.25 !important;
+        margin-block-end: @awa-space-3 !important;
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// §8. GLOBAL — Botões primários: altura e padding uniformes
+// Corrige inconsistências de altura de botão entre diferentes contextos
+// ─────────────────────────────────────────────────────────────────────────────
+
+html body#html-body .page-wrapper {
+    // Qualquer botão que tem classe de CTA primário AWA
+    :is(.action.primary, .action.tocart, .action-primary, .btn-primary, .button-primary) {
+        min-height: var(--awa-touch-target, 44px) !important;
+        box-sizing: border-box !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// §9. PDP — Breadcrumb spacing e visibilidade
+// Garante que o breadcrumb na PDP aparece corretamente
+// ─────────────────────────────────────────────────────────────────────────────
+
+html body#html-body.catalog-product-view .page-wrapper {
+    // Breadcrumb container
+    .breadcrumbs,
+    .nav-breadcrumbs {
+        display: block !important;
+        visibility: visible !important;
+        padding-block: @awa-space-2 @awa-space-2 !important;
+        margin-block: 0 !important;
+    }
+
+    // Breadcrumb itens
+    .breadcrumbs .items {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        align-items: center !important;
+        gap: @awa-space-1 !important;
+        list-style: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .breadcrumbs .item {
+        display: inline-flex !important;
+        align-items: center !important;
+        font-size: var(--awa-font-sm, 12px) !important;
+        color: var(--awa-text-secondary, @awa-color-text-muted) !important;
+    }
+
+    .breadcrumbs .item:not(:last-child)::after {
+        content: '›' !important;
+        margin-inline-start: @awa-space-1 !important;
+        color: var(--awa-border-strong, #d0d0d0) !important;
+        display: inline !important;
+    }
+
+    .breadcrumbs .item a {
+        color: var(--awa-text-secondary, @awa-color-text-muted) !important;
+        text-decoration: none !important;
+        &:hover {
+            color: var(--awa-primary, @awa-color-primary) !important;
+            text-decoration: underline !important;
+        }
+    }
+
+    .breadcrumbs .item.home a {
+        color: var(--awa-primary, @awa-color-primary) !important;
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// §10. MOBILE 390px — Garantias de overflow e layouts corretos
+// ─────────────────────────────────────────────────────────────────────────────
+
+@media (max-width: 479px) {
+    html body#html-body .page-wrapper {
+        // Zero overflow horizontal
+        overflow-x: clip !important;
+
+        // Inputs não excedem a viewport
+        :is(input, select, textarea) {
+            max-width: 100% !important;
+            box-sizing: border-box !important;
+        }
+
+        // Botões não estouram
+        .action,
+        .btn {
+            max-width: 100% !important;
+            white-space: normal !important;
+        }
+    }
+
+    // PLP mobile: 2 colunas compactas
+    html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .page-wrapper {
+        .products-grid .product-items,
+        .products-grid ul.product-items {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            gap: @awa-space-2 !important;
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// §11. GLOBAL — Link hover e focus states consistentes
+// Aplica transição suave em todos os links do catálogo
+// ─────────────────────────────────────────────────────────────────────────────
+
+html body#html-body .page-wrapper {
+    :is(
+        .product-item-link,
+        .product-item-name a,
+        .category-item-link,
+        .awa-category-carousel__item
+    ) {
+        transition: color 120ms @awa-ease !important;
+
+        &:hover {
+            color: var(--awa-primary, @awa-color-primary) !important;
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--awa-primary, @awa-color-primary) !important;
+            outline-offset: 2px !important;
+            border-radius: 2px !important;
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// §12. PLP — Toolbar: "OCULTAR FILTROS" botão visual polish
+// O botão usa uppercase-tracking agressivo — normalizar
+// ─────────────────────────────────────────────────────────────────────────────
+
+html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .page-wrapper {
+    :is(.filter-toggle, [data-action="close-filters"], .awa-filter-toggle) {
+        font-size: var(--awa-font-sm, 12px) !important;
+        font-weight: @awa-weight-semibold !important;
+        letter-spacing: 0 !important;
+        text-transform: none !important;
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// §13. GLOBAL — Input focus ring unificado (sem estilo azul de browser)
+// ─────────────────────────────────────────────────────────────────────────────
+
+html body#html-body .page-wrapper {
+    :is(input, select, textarea):focus-visible {
+        outline: 2px solid var(--awa-primary, @awa-color-primary) !important;
+        outline-offset: 0 !important;
+        border-color: var(--awa-primary, @awa-color-primary) !important;
+                box-shadow: 0 0 0 3px ~"color-mix(in srgb, var(--awa-primary) 15%, transparent)" !important;
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// §14. HOME 1920px — Content max-width e visual balance
+// A 1920px o conteúdo fica em 1280px centralizado com 320px em cada lado.
+// Melhorar a seção hero para ter respiração visual adequada.
+// ─────────────────────────────────────────────────────────────────────────────
+
+@media (min-width: 1800px) {
+    html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper {
+        // Feature bar itens ganham mais espaço interno a viewports muito largas
+        :is(.awa-hero-trust-strip__item, .awa-home-trust-bar__item, [class*="trust-strip__item"]) {
+            padding-block: @awa-space-4 !important;
+        }
+
+        // Section titles ligeiramente maiores em ultra-wide
+        :is(.shop-title, .velaTitle, .awa-shelf-title) {
+            font-size: var(--awa-font-2xl, 20px) !important;
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// §15. PDP — Gallery e buy-box: melhorar visual no tablet (768px)
+// A 768px o gallery ocupa a tela inteira (full-width stack), que é correto.
+// Garantir que o título do produto e info ficam bem espaçados abaixo.
+// ─────────────────────────────────────────────────────────────────────────────
+
+@media (max-width: (@awa-bp-992 - 1)) {
+    html body#html-body.catalog-product-view .page-wrapper {
+        .product-info-main {
+            padding-block-start: @awa-space-4 !important;
+        }
+
+        .page-title-wrapper.product {
+            margin-block-end: @awa-space-3 !important;
+        }
+
+        // "Adicionar ao Carrinho" botão full-width no mobile
+        #product-addtocart-button,
+        .action.primary.tocart {
+            width: 100% !important;
+            min-width: 0 !important;
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// §16. PLP — Category banner: visual refinement
+// O banner já usa grid-area:plp-banner (full-width). Refinamentos:
+// - Garantir min-height adequado
+// - Título legível sobre imagem escura
+// - Border-radius consistente com design system
+// ─────────────────────────────────────────────────────────────────────────────
+
+html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .page-wrapper {
+    :is(.category-view-move, .page-main .category-hero, .awa-category-hero, .category-image-container) {
+            min-height: ~"clamp(80px, 12vw, 160px)" !important;
+        border-radius: @awa-radius-md !important;
+        overflow: hidden !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    // Texto do banner legível
+    :is(.category-view-move, .category-hero) :is(h1, .page-title, .category-name) {
+        text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4) !important;
+        font-size: ~"clamp(18px, 2.5vw, 26px)" !important;
+        font-weight: @awa-weight-bold !important;
+        color: @awa-color-white !important;
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// §17. GLOBAL — Paginação consistente
+// ─────────────────────────────────────────────────────────────────────────────
+
+html body#html-body .page-wrapper {
+    .pages .pages-items {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        align-items: center !important;
+        gap: @awa-space-1 !important;
+        list-style: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .pages .pages-item-previous .action,
+    .pages .pages-item-next .action,
+    .pages .page {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        min-width: 36px !important;
+        min-height: 36px !important;
+        border-radius: var(--awa-radius-sm, @awa-radius-sm) !important;
+        transition: background-color 120ms @awa-ease, color 120ms @awa-ease !important;
+    }
+
+    .pages .item.current .page {
+        background: var(--awa-primary, @awa-color-primary) !important;
+        color: @awa-color-white !important;
+        font-weight: @awa-weight-semibold !important;
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// §18. PLP 768px — Filter section depois dos produtos: visual polish
+// ─────────────────────────────────────────────────────────────────────────────
+
+@media (max-width: (@awa-bp-992 - 1)) {
+    html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .page-wrapper {
+        :is(.sidebar.sidebar-main, .sidebar.sidebar-main-1) {
+            // Visual do bloco de filtros no mobile (aparece como painel colapsável)
+            background: var(--awa-bg-soft, @awa-color-bg-soft) !important;
+            border: 1px solid var(--awa-border, @awa-color-border) !important;
+            border-radius: @awa-radius-md !important;
+            padding: @awa-space-3 !important;
+            margin-block-start: @awa-space-4 !important;
+        }
+
+        // Título do bloco de filtros
+        :is(.sidebar.sidebar-main, .sidebar.sidebar-main-1) .block-title {
+            font-size: var(--awa-font-lg, 16px) !important;
+            font-weight: @awa-weight-bold !important;
+            margin-block-end: @awa-space-3 !important;
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// §19. GLOBAL — Botão limpar busca (#awa-search-clear)
+// Bug: themes.css `.button, button` + awa-layout-bundle `.awa-header-search-col button`
+// estilizam o clear como CTA vermelho largo em páginas sem awa-ui-simplify-terminal.
+// ─────────────────────────────────────────────────────────────────────────────
+
+html body#html-body .page-wrapper .awa-site-header {
+    .field.search .control {
+        position: relative !important;
+    }
+
+    #awa-search-clear.awa-search-clear-btn {
+        position: absolute !important;
+        top: 50% !important;
+        right: 8px !important;
+        transform: translateY(-50%) !important;
+        display: none !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 32px !important;
+        min-width: 32px !important;
+        max-width: 32px !important;
+        height: 32px !important;
+        min-height: 32px !important;
+        max-height: 32px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        border-radius: 999px !important;
+        background: transparent !important;
+        background-color: transparent !important;
+        color: var(--awa-text-secondary, @awa-color-text-muted) !important;
+        flex: 0 0 32px !important;
+        cursor: pointer !important;
+        z-index: 3 !important;
+        box-shadow: none !important;
+        line-height: 1 !important;
+
+        &:not([hidden]) {
+            display: inline-flex !important;
+        }
+
+        &:hover {
+            color: var(--awa-primary, @awa-color-primary) !important;
+            background: ~"color-mix(in srgb, var(--awa-primary) 8%, transparent)" !important;
+        }
+
+        svg {
+            width: 16px !important;
+            height: 16px !important;
+            stroke: currentColor !important;
+        }
+    }
+
+    form#search_mini_form input#search.awa-search-input--clearable {
+        padding-right: 40px !important;
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// §20. GLOBAL — Container e colunas padronizados (1280px rail)
+// ─────────────────────────────────────────────────────────────────────────────
+
+html body#html-body .page-wrapper {
+    .page-main.container,
+    .page-main > .columns {
+        width: 100% !important;
+        max-width: ~'min(100%, 1280px)' !important;
+        margin-inline: auto !important;
+        box-sizing: border-box !important;
+    }
+}
+
+@media (min-width: @awa-bp-992) {
+    html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .page-wrapper {
+        .page-main > .columns.layout.layout-2-col {
+            display: flex !important;
+            flex-wrap: nowrap !important;
+            align-items: flex-start !important;
+            gap: 32px !important;
+            width: 100% !important;
+            max-width: ~'min(100%, 1280px)' !important;
+            margin-inline: auto !important;
+        }
+
+        .columns > .col-main {
+            flex: 1 1 auto !important;
+            min-width: 0 !important;
+            width: auto !important;
+            max-width: none !important;
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// §21. PDP — Alinhamento mobile da coluna de informações
+// ─────────────────────────────────────────────────────────────────────────────
+
+@media (max-width: (@awa-bp-992 - 1)) {
+    html body#html-body.catalog-product-view .page-wrapper {
+        .product-info-main,
+        .product-info-main .page-title-wrapper,
+        .product-info-main .product-info-price,
+        .product-info-main .product.attribute.overview {
+            text-align: left !important;
+            margin-inline: 0 !important;
+        }
+    }
+}

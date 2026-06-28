@@ -1,0 +1,109 @@
+// =============================================================================
+// _awa-harden-home-pass2-2026-06.less
+// §82 — /impeccable harden home pass 2 (2026-06-08 continue)
+// Overflow, empty states, fallback signal, CTA standard como link (guest).
+// =============================================================================
+
+@import (once) '_awa-tokens';
+@import (once) '_design-system';
+
+html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper {
+    // Flex/grid: evita estouro de nomes/SKU longos nos cards
+    .awa-shelf--carousel {
+        .awa-carousel__slide,
+        .item-product,
+        .content-item-product,
+        .product-info,
+        .product-name {
+            min-width: 0;
+        }
+
+        .product-name :is(a, .product-item-link) {
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+
+        .awa-b2b-sku__value {
+            display: inline-block;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            vertical-align: bottom;
+        }
+    }
+
+    // Imagem quebrada: placeholder neutro sem quebrar altura do card
+    .awa-shelf--carousel img.product-image-photo.awa-load-error,
+    .awa-shelf--carousel img.awa-load-error {
+        object-fit: contain;
+        background: color-mix(in srgb, var(--awa-bg-soft, @awa-color-bg-soft) 88%, var(--awa-border, @awa-color-border));
+    }
+
+    // Empty state legível (home PT-BR)
+    .awa-shelf-empty {
+        margin: @awa-space-4 0;
+        padding: @awa-space-5 @awa-space-4;
+        border-radius: @awa-radius-md;
+        border: 1px solid var(--awa-border, @awa-color-border);
+        background: var(--awa-bg-soft, @awa-color-bg-soft);
+        text-align: center;
+    }
+
+    .awa-shelf-empty__message {
+        margin: 0;
+        color: var(--awa-text, @awa-color-text-primary);
+        font-size: ~'max(14px, 0.875rem)';
+        line-height: 1.45;
+        text-wrap: pretty;
+    }
+
+    // Fallback de ranking: sinal sem alterar o título (subtítulo já muda)
+    .awa-carousel-section--featured[data-awa-sales-fallback='1'] .awa-section-header__subtitle,
+    .awa-shelf--carousel[data-awa-sales-fallback='1'] + .awa-section-header__subtitle {
+        color: color-mix(in srgb, var(--awa-text-muted, @awa-color-text-muted) 92%, var(--awa-primary, @awa-color-primary));
+    }
+
+    .awa-carousel-section--featured[data-awa-sales-fallback='1'] .awa-section-header__title::after {
+        content: '';
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        margin-inline-start: @awa-space-2;
+        border-radius: 50%;
+        background: var(--awa-primary, @awa-color-primary);
+        vertical-align: middle;
+        opacity: 0.55;
+    }
+}
+
+// Guest: standard tier usa link textual (featured mantém botão full-width)
+html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5):not(.customer-logged-in) .page-wrapper {
+    .awa-carousel-section--standard .awa-shelf--carousel .b2b-login-to-see-price .price-label a.b2b-login-link {
+        display: inline !important;
+        width: auto !important;
+        min-width: 0 !important;
+        min-height: @awa-touch-target-min !important;
+        padding: @awa-space-2 0 !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+        color: var(--awa-primary, @awa-color-primary) !important;
+        font-size: ~'max(13px, 0.8125rem)' !important;
+        font-weight: @awa-weight-semibold !important;
+        line-height: 1.35 !important;
+        text-decoration: underline !important;
+        text-underline-offset: 2px;
+        box-shadow: none !important;
+        white-space: normal !important;
+    }
+}
+
+@media (hover: hover) and (pointer: fine) {
+    html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5):not(.customer-logged-in) .page-wrapper {
+        .awa-carousel-section--standard .awa-shelf--carousel .b2b-login-to-see-price .price-label a.b2b-login-link:hover {
+            background: transparent !important;
+            color: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 82%, #000) !important;
+        }
+    }
+}

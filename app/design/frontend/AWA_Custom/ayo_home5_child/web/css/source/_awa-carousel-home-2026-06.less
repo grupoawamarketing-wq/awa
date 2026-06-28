@@ -1,0 +1,221 @@
+// =============================================================================
+// _awa-carousel-home-2026-06.less
+// §69 — /impeccable carousel home (2026-06-08)
+// Scroll-snap moderno (ML/Shopee pattern): peek, rail limpo, chrome unificado,
+// cards 1:1, progress scaleX, categorias com dots pill.
+// Register: PRODUCT — prateleira B2B confiável, tokens AWA.
+// =============================================================================
+
+@import (once) '_awa-tokens';
+@import (once) '_design-system';
+
+html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper {
+  // ── Tokens de colunas com peek (mobile mostra ~2,15 cards) ───────────────
+  .awa-carousel-section {
+    --awa-home-carousel-gap: @awa-s-2;
+    --awa-home-carousel-cols: 2.15;
+    padding-inline: 0;
+  }
+
+  @media (min-width: @awa-bp-768) {
+    .awa-carousel-section {
+      --awa-home-carousel-gap: @awa-s-3;
+      --awa-home-carousel-cols: 3;
+    }
+  }
+
+  @media (min-width: @awa-bp-992) {
+    .awa-carousel-section {
+      --awa-home-carousel-cols: 4;
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .awa-carousel-section {
+      --awa-home-carousel-cols: 5;
+    }
+  }
+
+  // ── Rail scroll-snap (motor awa-scroll-carousel.js) ───────────────────────
+  .awa-shelf--carousel.awa-carousel-ready {
+    gap: @awa-s-2;
+
+    .awa-carousel {
+      overflow: visible;
+    }
+
+    .awa-carousel__viewport {
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-x: contain;
+      scroll-padding-inline: @awa-s-2;
+      scrollbar-width: none;
+      padding: @awa-space-1 0;
+      margin: 0;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
+    }
+
+    .awa-carousel__track {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: stretch;
+      gap: var(--awa-home-carousel-gap);
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .awa-carousel__slide {
+      flex: 0 0 ~"calc((100% - ((var(--awa-home-carousel-cols) - 1) * var(--awa-home-carousel-gap))) / var(--awa-home-carousel-cols))";
+      scroll-snap-align: start;
+      scroll-snap-stop: normal;
+      min-width: 0;
+      box-sizing: border-box;
+    }
+
+    // ── Card produto — vitrine moderna 1:1 ─────────────────────────────────
+    :is(.awa-product-card, .content-item-product, .item-product.awa-carousel-card-slot) {
+      border-radius: @awa-radius-md;
+      border: 1px solid color-mix(in srgb, var(--awa-border, @awa-color-border) 92%, transparent);
+      box-shadow: 0 1px 3px color-mix(in srgb, var(--awa-text, @awa-color-text-primary) 6%, transparent);
+      transition:
+        border-color 0.2s @awa-ease,
+        box-shadow 0.2s @awa-ease;
+    }
+
+    .product-thumb,
+    .product-item-photo {
+      aspect-ratio: 1 / 1;
+      background: var(--awa-bg, @awa-color-white);
+      border-radius: @awa-radius-sm @awa-radius-sm 0 0;
+    }
+
+    .product-thumb img,
+    .product-image-photo {
+      object-fit: contain;
+    }
+
+    // ── Chrome: nav + progress abaixo do rail ─────────────────────────────
+    > .awa-owl-nav,
+    .awa-carousel > .awa-owl-nav {
+      order: 2;
+      justify-content: center;
+      gap: @awa-s-4;
+      margin-block-start: @awa-space-1;
+      padding-block: @awa-space-1;
+    }
+
+    .awa-owl-nav__btn {
+      width: 48px;
+      height: 48px;
+      min-width: 48px;
+      min-height: 48px;
+      border-radius: @awa-radius-pill;
+      border: 1.5px solid color-mix(in srgb, var(--awa-border, @awa-color-border) 88%, transparent);
+      background: var(--awa-bg, @awa-color-white);
+      color: var(--awa-text, @awa-color-text-primary);
+      box-shadow: 0 2px 10px color-mix(in srgb, var(--awa-text, @awa-color-text-primary) 8%, transparent);
+      transition:
+        background-color 0.18s @awa-ease,
+        border-color 0.18s @awa-ease,
+        box-shadow 0.18s @awa-ease,
+        transform 0.12s @awa-ease;
+    }
+
+    .awa-owl-progress {
+      order: 3;
+      height: 4px;
+      margin-block: @awa-space-1 0;
+      border-radius: @awa-radius-pill;
+      background: color-mix(in srgb, var(--awa-border, @awa-color-border) 85%, transparent);
+      overflow: hidden;
+    }
+
+    .awa-owl-progress__bar {
+      width: 100%;
+      height: 100%;
+      transform: scaleX(var(--awa-progress, 0.12));
+      transform-origin: left center;
+      background: var(--awa-primary, @awa-color-primary);
+      border-radius: inherit;
+      transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+  }
+
+  // ── Categorias — cards leves + dots pill ────────────────────────────────
+  .top-home-content--category-carousel {
+    .awa-category-carousel__item {
+      border: 1px solid color-mix(in srgb, var(--awa-border, @awa-color-border) 90%, transparent);
+      border-radius: @awa-radius-md;
+      background: var(--awa-bg, @awa-color-white);
+      box-shadow: 0 1px 4px color-mix(in srgb, var(--awa-text, @awa-color-text-primary) 5%, transparent);
+      transition:
+        border-color 0.18s @awa-ease,
+        box-shadow 0.18s @awa-ease;
+    }
+
+    .awa-category-carousel__icon {
+      border-radius: @awa-radius-sm;
+      background: var(--awa-bg-soft, @awa-color-bg-soft);
+    }
+
+    .awa-category-carousel__dot {
+      width: 8px;
+      height: 8px;
+      border: 0;
+      border-radius: @awa-radius-pill;
+      background: color-mix(in srgb, var(--awa-border, @awa-color-border) 70%, transparent);
+      transition:
+        transform 0.2s @awa-ease,
+        background-color 0.2s @awa-ease;
+    }
+
+    .awa-category-carousel__dot.active {
+      background: var(--awa-primary, @awa-color-primary);
+      transform: scaleX(2.75);
+    }
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper {
+    .awa-shelf--carousel.awa-carousel-ready :is(.awa-product-card, .content-item-product):hover {
+      border-color: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 28%, var(--awa-border, @awa-color-border));
+      box-shadow: 0 4px 14px color-mix(in srgb, var(--awa-text, @awa-color-text-primary) 10%, transparent);
+    }
+
+    .awa-shelf--carousel.awa-carousel-ready .awa-owl-nav__btn:not(.is-disabled):hover {
+      background: var(--awa-primary, @awa-color-primary);
+      border-color: var(--awa-primary, @awa-color-primary);
+      color: var(--awa-bg, @awa-color-white);
+      box-shadow: 0 6px 18px color-mix(in srgb, var(--awa-primary, @awa-color-primary) 32%, transparent);
+    }
+
+    .top-home-content--category-carousel .awa-category-carousel__item:hover {
+      border-color: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 30%, var(--awa-border, @awa-color-border));
+      box-shadow: 0 4px 14px color-mix(in srgb, var(--awa-primary, @awa-color-primary) 12%, transparent);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper {
+    .awa-shelf--carousel.awa-carousel-ready .awa-carousel__viewport {
+      scroll-behavior: auto;
+    }
+
+    .awa-shelf--carousel.awa-carousel-ready .awa-owl-progress__bar {
+      transition: none;
+    }
+
+    .top-home-content--category-carousel .awa-category-carousel__dot {
+      transition: none;
+    }
+  }
+}

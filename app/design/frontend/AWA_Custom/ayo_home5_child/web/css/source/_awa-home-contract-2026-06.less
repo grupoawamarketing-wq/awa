@@ -1,0 +1,126 @@
+// =============================================================================
+// H-110 — Home Contract (2026-06-08)
+// Consolidates home typography/rhythm/links/a11y and unifies density tokens.
+// Supersedes old pass files (typeset/refine/polish pass2-4/distill/audit).
+// =============================================================================
+
+@import (once) '_awa-tokens';
+@import (once) '_design-system';
+@import (once) '_awa-home-practices-2026-06.less';
+
+@awa-home-contract-scope: ~'html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)';
+
+@{awa-home-contract-scope} .page-wrapper {
+    // Unified runtime tokens — SINGLE SOURCE (A4: density §102 + old §52 absorbed)
+    // Consumers downstream (§102 density column rules, §52 paddings) read these;
+    // do NOT redeclare these tokens in other home partials.
+    // Ritmo: featured generoso, compact denso (batida tight ↔ generosa).
+    --awa-home-pad-featured: clamp(32px, 3.4vw, 56px);
+    --awa-home-pad-standard: clamp(20px, 2vw, 32px);
+    --awa-home-pad-compact: clamp(12px, 1.2vw, 18px);
+    --awa-home-header-gap-featured: clamp(16px, 1.6vw, 24px);
+    --awa-home-header-gap-standard: clamp(10px, 1vw, 16px);
+    --awa-home-header-gap-compact: clamp(8px, 0.8vw, 12px);
+    --awa-home-carousel-gap: 12px;
+    --awa-home-grid-gap: clamp(10px, 1.2vw, 16px);
+    --awa-home-section-gap: clamp(20px, 2vw, 32px);
+    --awa-home-card-min-h: 252px;
+    --awa-home-card-image-min: 140px;
+
+    // Tier paddings (single source)
+    .ayo-home5-wrapper > .awa-carousel-section--featured {
+        padding-block: var(--awa-home-pad-featured) !important;
+    }
+
+    .ayo-home5-wrapper > .awa-carousel-section--standard {
+        padding-block: var(--awa-home-pad-standard) !important;
+    }
+
+    .ayo-home5-wrapper > .awa-carousel-section--compact {
+        padding-block: var(--awa-home-pad-compact) !important;
+    }
+
+    .ayo-home5-wrapper > .awa-carousel-section--compact + .awa-carousel-section--compact {
+        padding-block-start: 0 !important;
+        border-block-start: 0 !important;
+    }
+
+    // Section headers and links (absorbed from consistency/typeset/polish passes)
+    .content-top-home {
+        :is(.awa-section-header__subtitle, .awa-shelf__subtitle, .awa-category-carousel__subtitle) {
+            margin: @awa-space-1 0 0 !important;
+            max-width: 42ch !important;
+            color: var(--awa-text-muted, @awa-color-text-muted) !important;
+            font-size: ~'max(13px, 0.8125rem)' !important;
+            line-height: 1.45 !important;
+            text-wrap: pretty !important;
+        }
+
+        :is(.awa-section-header__link, .awa-shelf__view-all, .awa-category-carousel__cta-link) {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: @awa-space-1 !important;
+            min-height: @awa-touch-target-min !important;
+            padding: @awa-space-2 @awa-space-3 !important;
+            border: 1px solid color-mix(in srgb, var(--awa-primary, @awa-color-primary) 22%, var(--awa-border, @awa-color-border)) !important;
+            border-radius: @awa-radius-full !important;
+            background: var(--awa-bg, @awa-color-white) !important;
+            color: var(--awa-primary, @awa-color-primary) !important;
+            font-size: ~'max(13px, 0.8125rem)' !important;
+            font-weight: @awa-weight-semibold !important;
+            line-height: 1.25 !important;
+            text-decoration: none !important;
+            white-space: nowrap !important;
+            box-shadow: none !important;
+        }
+    }
+
+    .awa-carousel-section--featured :is(.awa-section-header, .awa-shelf__header) {
+        margin-block-end: var(--awa-home-header-gap-featured) !important;
+    }
+
+    :is(.awa-carousel-section--standard, .awa-carousel-section--super-offers) :is(.awa-section-header, .awa-shelf__header) {
+        margin-block-end: var(--awa-home-header-gap-standard) !important;
+    }
+
+    .awa-carousel-section--compact :is(.awa-section-header, .awa-shelf__header) {
+        margin-block-end: var(--awa-home-header-gap-compact) !important;
+    }
+
+    // Banda compact (Bauletos + Retrovisores): cabeçalho mais denso, subtítulo
+    // discreto (reduz a repetição "título+subtítulo+link" das 4 vitrines).
+    // Mantém cor muted (contraste AA), só desce um step de tamanho.
+    .awa-carousel-section--compact .awa-section-header__left {
+        gap: 2px !important;
+    }
+
+    .awa-carousel-section--compact :is(.awa-section-header__subtitle, .awa-shelf__subtitle) {
+        font-size: ~'max(12px, 0.75rem)' !important;
+        max-width: 56ch !important;
+    }
+
+    // Agrupamento por espaço (sem fundo/borda — respeita o "branco contínuo" §95):
+    // respiro generoso antes da banda compact, e vitrines compact coladas entre si.
+    .awa-carousel-section--standard + .awa-carousel-section--compact {
+        margin-block-start: var(--awa-home-section-gap) !important;
+    }
+}
+
+@media (hover: hover) and (pointer: fine) {
+    @{awa-home-contract-scope} .page-wrapper .content-top-home :is(.awa-section-header__link, .awa-shelf__view-all, .awa-category-carousel__cta-link):hover {
+        border-color: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 45%, var(--awa-border, @awa-color-border)) !important;
+        background: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 6%, @awa-color-white) !important;
+        color: var(--awa-primary-hover, @awa-color-primary-dark) !important;
+        text-decoration: none !important;
+        transform: none !important;
+    }
+}
+
+@media (max-width: (@awa-bp-768 - 1px)) {
+    @{awa-home-contract-scope} .page-wrapper {
+        --awa-home-pad-featured: clamp(28px, 7vw, 44px);
+        --awa-home-pad-standard: clamp(20px, 5vw, 30px);
+        --awa-home-pad-compact: clamp(14px, 3.5vw, 22px);
+    }
+}

@@ -1,0 +1,583 @@
+// =============================================================================
+// AWA Motos — _awa-adapt-2026-06.less
+// /impeccable adapt — Fase 5 (responsive: device/context adaptation)
+//
+// Cobertura: buracos que o §54 de _extend.less não fecha.
+//
+// §55a  Tablet (768–991px) — sidebar toggle button CSS-only reveal
+// §55b  Tablet — PDP layout: gallery/info stacked
+// §55c  Tablet — search bar width contained
+// §55d  Large desktop (≥1440px) — prose max-width cap
+// §55e  Large desktop — PLP grid 5 colunas
+// §55f  PDP sticky CTA — safe-area bottom padding
+// §55g  Minicart notch — safe-area inset-bottom
+// §55h  Carrossel: pointer:fine hover reveal, pointer:coarse tap style
+// §55i  Print — URLs, hide nav, hide secondary chrome
+// §55j  Container queries — cards em contextos narrow
+// =============================================================================
+
+@import (once) '_awa-variables';
+@import (once) '_design-system';
+
+// =============================================================================
+// §55a — Tablet: sidebar toggle button (CSS-only reveal)
+// =============================================================================
+// M02 do _awa-ux-audit-2026-07.less aplica o overlay fixo via .is-open.
+// Aqui adicionamos o botão "Filtros" visível apenas no tablet, que o JS do
+// Magento pode usar para acionar a classe .is-open.
+// O botão é injetado via CSS ::before no .toolbar-products — sem markup extra.
+// !important: parent e consolidated definem display:none em algumas toolbars
+
+@media (min-width: @awa-bp-768) and (max-width: (@awa-bp-992 - 1)) {
+    // Botão "Filtros ▸" antes da toolbar — via pseudo-element no wrapper
+    .catalog-category-view .toolbar.toolbar-products .toolbar-sorter::before {
+        content: '⊞  Filtros';
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: @awa-s-6; // 48px touch target
+        padding-inline: @awa-s-2;
+        border: 1px solid var(--awa-border, @awa-border);
+        border-radius: @awa-radius-sm;
+        font-size: var(--awa-fs-sm);
+        font-weight: @awa-weight-semibold;
+        color: var(--awa-text, @awa-color-text-primary);
+        cursor: pointer;
+        background: var(--awa-bg, @awa-color-white);
+        transition: background-color 180ms @awa-ease, border-color 180ms @awa-ease;
+        order: -1; // aparece antes do sorter
+    }
+
+    // Sidebar overlay fundo (CSS-only): quando sidebar está aberta
+    .catalog-category-view .sidebar.sidebar-main.is-open::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.40);
+        z-index: 299; // abaixo da sidebar (z-index: 300)
+        animation: awa-fade-in 200ms @awa-ease forwards;
+    }
+
+    // Fechar sidebar ao clicar no overlay
+    .catalog-category-view .sidebar.sidebar-main.is-open:focus-within {
+        outline: none;
+    }
+}
+
+@keyframes awa-fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    @keyframes awa-fade-in {
+        from { opacity: 1; }
+        to   { opacity: 1; }
+    }
+}
+
+
+// =============================================================================
+// §55b — Tablet: PDP layout ajustado (gallery + info empilhados)
+// =============================================================================
+// Desktop: gallery esquerda (60%) + info direita (40%)
+// Tablet: empilhado, gallery full-width, depois info
+// Impede que a gallery fique colada na sidebar em 768–991px
+
+@media (min-width: @awa-bp-768) and (max-width: (@awa-bp-992 - 1)) {
+    .catalog-product-view .product.media,
+    .catalog-product-view .column.main .product.media {
+        width: 100%;
+        max-width: 540px;
+        margin-inline: auto;
+    }
+
+    .catalog-product-view .product-info-main,
+    .catalog-product-view .column.main .product-info-main {
+        width: 100%;
+        max-width: 640px;
+        margin-inline: auto;
+        padding-inline: 0;
+    }
+
+    // Remove o sticky PDP CTA em tablet (botão de compra permanece inline)
+    .catalog-product-view .product-info-main .box-tocart {
+        position: static;
+        box-shadow: none;
+        border-top: 0;
+        padding: 0;
+    }
+}
+
+
+// =============================================================================
+// §55c — Tablet: busca contida (sem overflow à direita)
+// =============================================================================
+// O campo de busca em 768–991px tinha min-width: 480px (de _header-density.less)
+// causando overflow horizontal em tablets finos.
+
+@media (min-width: @awa-bp-768) and (max-width: (@awa-bp-992 - 1)) {
+    body .page-wrapper .awa-site-header .block-search,
+    body .page-wrapper #header .block-search {
+        max-width: 100%;
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    body .page-wrapper .awa-site-header .block-search input#search,
+    body .page-wrapper .awa-site-header .block-search input[name='q'] {
+        max-width: 100%;
+        width: 100%;
+        box-sizing: border-box;
+        min-width: 0;
+    }
+}
+
+
+// =============================================================================
+// §55d — Large desktop (≥1440px): linha de texto restrita
+// =============================================================================
+// Em monitores wide (2560px), blocos de texto CMS e descrições de produto
+// se estendem >120ch — impossível de ler com conforto.
+// Aplicamos max-width em prose sem afetar grids ou layouts de produto.
+
+@media (min-width: 1440px) {
+    // Blocos de texto CMS — página estática, blog
+    body .page-wrapper .cms-content p,
+    body .page-wrapper .column.main .page-description p,
+    body .page-wrapper .product.attribute.description .value,
+    body .page-wrapper .catalog-product-view .product.attribute.description .value {
+        max-width: 75ch;
+    }
+
+    // Página de auth e fluxos estreitos: não esticar além de @awa-page-narrow
+    body.customer-account-login .page-wrapper .page-main,
+    body.customer-account-create .page-wrapper .page-main,
+    body.b2b-auth-shell .page-wrapper .page-main {
+        max-width: @awa-page-narrow;
+        margin-inline: auto;
+    }
+}
+
+
+// =============================================================================
+// §55e — Large desktop: PLP grid 5 colunas
+// =============================================================================
+// Em 1536px+ o grid de 4 colunas deixa cards muito largos.
+// _awa-category-layout-fix.less já cobre isso — aqui apenas garantimos
+// que o gap também aumenta proporcionalmente.
+// 1536px = @awa-bp-1200 + 336px (próxima tier acima dos tokens disponíveis)
+
+@awa-bp-1536: 1536px; // tier extra-large — não entra em _design-system para evitar token bloat
+
+@media (min-width: @awa-bp-1536) {
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+        .wrapper.grid.products-grid ul.row.product-grid,
+    :is(body.catalog-category-view, body.catalogsearch-result-index)
+        .wrapper.grid.products-grid ul.container-products-switch {
+        gap: 20px; // gap extra em 5 colunas
+    }
+}
+
+
+// =============================================================================
+// §55f — PDP sticky CTA: safe-area bottom padding (iOS home indicator)
+// =============================================================================
+// O sticky tocart em mobile já existe em _responsive-fixes.less.
+// Adicionamos o padding correto para o home indicator do iPhone.
+
+@media (max-width: (@awa-bp-768 - 1)) {
+    .catalog-product-view .product-info-main .box-tocart {
+        // Garante que o botão não fique embaixo do home indicator do iPhone
+        padding-bottom: ~"max(10px, env(safe-area-inset-bottom, 10px))";
+    }
+}
+
+
+// =============================================================================
+// §55g — Minicart: safe-area inset-bottom em dispositivos com notch inferior
+// =============================================================================
+// Em iPhones com home indicator, o dropdown do minicart em mobile
+// pode ficar parcialmente atrás do home indicator.
+
+@media (max-width: (@awa-bp-768 - 1)) {
+    .minicart-wrapper .block-minicart {
+        // Padding mínimo garantindo que o rodapé do minicart não fique
+        // embaixo do home indicator. env() retorna 0 em dispositivos sem notch.
+        padding-bottom: ~"max(0px, env(safe-area-inset-bottom, 0px))";
+    }
+
+    // Fechar o minicart: botão acessível com área de toque
+    .minicart-wrapper .block-minicart .block-header .action.close {
+        min-height: @awa-s-6;
+        min-width: @awa-s-6;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+
+// =============================================================================
+// §55h — Carrossel: hover reveal apenas em pointer:fine; tap style em coarse
+// =============================================================================
+// Botões prev/next do OWL carousel: em mouse (pointer:fine) aparecem no hover
+// do track; em touch (pointer:coarse) ficam sempre visíveis e opaque.
+
+@media (hover: none), (pointer: coarse) {
+    // Carrossel de produtos: setas sempre visíveis em touch
+    body .page-wrapper .owl-nav .owl-prev,
+    body .page-wrapper .owl-nav .owl-next,
+    body .page-wrapper .awa-owl-nav__btn {
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+    }
+
+    // Imagem do produto: sem efeito de zoom em touch (economiza reflow)
+    body .page-wrapper .product-item-photo img,
+    body .page-wrapper .product-thumb img,
+    body .page-wrapper .product-image-photo {
+        transition: none !important;
+    }
+}
+
+@media (hover: hover) and (pointer: fine) {
+    // Mouse: mostrar setas apenas no hover do container (já existe em _extend.less §45)
+    // Aqui garantimos que as setas de carrossel do OWL pai também respeitam isso
+    body .page-wrapper .owl-carousel:not(:hover) .owl-nav {
+        opacity: 0;
+        transition: opacity 200ms @awa-ease;
+    }
+
+    body .page-wrapper .owl-carousel:hover .owl-nav {
+        opacity: 1;
+    }
+
+    // Reduz latência percebida: cards com pointer:fine ficam mais rápidos
+    body .page-wrapper .product-item-photo img,
+    body .page-wrapper .product-thumb img {
+        transition: transform 240ms @awa-ease;
+    }
+}
+
+
+// =============================================================================
+// §55i — Print stylesheet
+// =============================================================================
+// Oculta chrome navegacional, expande URLs, garante legibilidade monocromática.
+
+@media print {
+    // Ocultar elementos de navegação e UI interativa
+    .page-wrapper .page-header,
+    .page-wrapper .page-footer .footer.content .footer-widget-area > *:not(.vela-footer-col:first-child),
+    .page-wrapper nav.fixed-bottom,
+    .awa-mobile-bottom-nav,
+    .minicart-wrapper,
+    .block-search,
+    .page-wrapper .sidebar.sidebar-main,
+    .toolbar-products .modes,
+    .toolbar-products .toolbar-sorter,
+    .actions-secondary,
+    .action.towishlist,
+    .action.tocompare,
+    .cookie-notice-container,
+    #html-body #notice-cookie-block,
+    .page-wrapper .messages,
+    .awa-whatsapp-float,
+    .page-wrapper .awa-b2b-promo-bar,
+    #html-body .awa-b2b-promo-bar {
+        display: none !important;
+    }
+
+    // Revelar URLs dos links para referência impressa
+    body .page-wrapper .column.main a[href]:not([href^='#']):not([href^='javascript']):not(.action.primary):not(.action.tocart)::after {
+        content: ' (' attr(href) ')';
+        font-size: 11px;
+        color: @awa-color-text-mid; // [PRINT-ONLY] escuro suficiente para B&W sem depender de token
+        word-break: break-all;
+        display: inline;
+    }
+
+    // Garantir fundo branco e tinta preta
+    // !important: print requer cores sólidas absolutas (var(--awa-bg) pode ser oklch)
+    body,
+    .page-wrapper,
+    .column.main,
+    .product-info-main {
+        background: @awa-color-white !important; // absolute white — tokens podem resolver em oklch
+        color: #000 !important;      // absolute black — legível em qualquer impressora
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    // Evitar quebra de página dentro de cards
+    .item-product,
+    .product-item-info,
+    .product-item {
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
+    // Títulos de produto: evitar quebra após heading
+    .product-item-name,
+    h1, h2, h3 {
+        page-break-after: avoid;
+        break-after: avoid;
+    }
+
+    // Tabelas: quebrar entre linhas, não dentro delas
+    table {
+        page-break-inside: auto;
+    }
+
+    tr {
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
+    // Imagens: max-width para não sair da página A4
+    img {
+        max-width: 100% !important;
+        height: auto !important;
+        page-break-inside: avoid;
+    }
+}
+
+
+// =============================================================================
+// §55j — Container queries: cards em contextos narrow (sem sidebar)
+// =============================================================================
+// Cards em contêineres estreitos (ex.: sidebar de upsell, widget de coluna)
+// devem usar layout de coluna simples, não forçar 2 colunas.
+// Requer @supports (container-type: inline-size) — já aplicado em _extend.less §45.
+
+@supports (container-type: inline-size) {
+    .awa-shelf--carousel .awa-carousel__slide,
+    .awa-shelf--carousel .awa-carousel__track > li.item {
+        container-type: inline-size;
+        container-name: awa-shelf-slide;
+    }
+
+    // Card em contêiner muito estreito (<160px): só imagem + nome
+    @container awa-shelf-slide (max-width: 160px) {
+        .product-info-cart,
+        .info-price,
+        .price-box,
+        .actions-primary {
+            display: none;
+        }
+
+        .product-item-name {
+            -webkit-line-clamp: 1;
+        }
+    }
+
+    // Card em contêiner estreito (160–220px): sem botão de compra
+    @container awa-shelf-slide (min-width: 160px) and (max-width: 220px) {
+        .actions-primary .action.tocart,
+        .btn-add-to-cart {
+            font-size: 11px;
+            padding-inline: @awa-space-2;
+        }
+    }
+}
+
+
+// =============================================================================
+// prefers-reduced-motion: cobertura do que foi adicionado neste arquivo
+// =============================================================================
+
+@media (prefers-reduced-motion: reduce) {
+    // Sidebar overlay animation
+    .catalog-category-view .sidebar.sidebar-main.is-open::before {
+        animation: none;
+    }
+
+    // Owl carousel setas: sem transição de opacidade
+    body .page-wrapper .owl-carousel .owl-nav {
+        transition: none;
+    }
+}
+
+// --- Impeccable Audit Fixes: Padding & Line Height (2026-06-08) ---
+
+// B2B Status Dropdown — densidade definida em awa-b2b-status-panel.css
+
+// Fix line heights
+span.awa-b2b-promo-bar__tail {
+    line-height: 1.4 !important;
+}
+
+ul.velaFooterLinks.awa-footer-atendimento__actions > li > a {
+    line-height: 1.4 !important;
+}
+
+// =============================================================================
+// §55k — Footer touch adaptation (/impeccable adapt footer)
+// Vence awa-bundle-refinements (tags 32px) e links de coluna sem min-height.
+// =============================================================================
+
+@awa-footer-touch-target: 44px;
+
+// Pills de categorias populares: toque em qualquer viewport
+html body#html-body .page-wrapper :is(.page_footer, .page-footer) :is(
+    .awa-footer-tags__cloud a,
+    .awa-footer-tags .footer-tags a,
+    .footer-tags a
+) {
+    align-items: center !important;
+    box-sizing: border-box !important;
+    display: inline-flex !important;
+    justify-content: center !important;
+    line-height: 1.3 !important;
+    min-height: @awa-footer-touch-target !important;
+    min-width: @awa-footer-touch-target !important;
+    padding: @awa-space-2 @awa-space-3 !important;
+}
+
+// Faixa comercial + WhatsApp na coluna atendimento
+html body#html-body .page-wrapper :is(.page_footer, .page-footer) :is(
+    .awa-footer-business-contact__action,
+    ul.awa-footer-atendimento__actions a
+) {
+    align-items: center !important;
+    box-sizing: border-box !important;
+    display: inline-flex !important;
+    min-height: @awa-footer-touch-target !important;
+    padding-block: @awa-space-2 !important;
+    padding-inline: @awa-space-2 !important;
+}
+
+// Links de coluna + pills de categorias expandível: mobile e superfícies touch
+@media (max-width: (@awa-breakpoint-md - 1px)), (pointer: coarse) {
+    html body#html-body .page-wrapper :is(.page_footer, .page-footer) {
+        ul.velaFooterLinks {
+            display: flex;
+            flex-direction: column;
+            gap: @awa-space-1;
+        }
+
+        ul.velaFooterLinks a,
+        ul.awa-footer-categories-list a {
+            align-items: center !important;
+            box-sizing: border-box !important;
+            display: inline-flex !important;
+            min-height: @awa-footer-touch-target !important;
+            padding-block: @awa-space-2 !important;
+            padding-inline: @awa-space-2 !important;
+        }
+
+        ul.awa-footer-categories-list a {
+            padding-inline: @awa-space-3 !important;
+        }
+    }
+}
+
+// Footer minimal em auth/checkout
+.awa-auth-footer-minimal {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: @awa-space-2 @awa-space-3;
+    justify-content: center;
+
+    a {
+        align-items: center;
+        box-sizing: border-box;
+        display: inline-flex;
+        justify-content: center;
+        min-height: @awa-footer-touch-target;
+        padding-inline: @awa-space-2;
+
+        &:focus-visible {
+            border-radius: @awa-radius-xs;
+            outline: 2px solid @awa-color-primary;
+            outline-offset: 2px;
+        }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html body#html-body .page-wrapper :is(.page_footer, .page-footer) ul.velaFooterLinks a:hover,
+    html body#html-body .page-wrapper :is(.page_footer, .page-footer) ul.velaFooterLinks a:focus-visible {
+        transform: none !important;
+    }
+}
+
+// =============================================================================
+// §55l — Auth popup KO shell: modal-only fora das páginas de login
+// =============================================================================
+
+html body#html-body:not(.customer-account-login):not(.customer-account-create):not(.b2b-account-login) #authenticationPopup {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+}
+
+html body#html-body:not(.customer-account-login):not(.customer-account-create):not(.b2b-account-login) #authenticationPopup .block-authentication {
+    display: none !important;
+}
+
+html body#html-body .modal-popup.popup-authentication:not(._show) {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
+}
+
+html body#html-body._has-modal .modal-popup.popup-authentication._show {
+    display: block !important;
+    visibility: visible !important;
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 100006 !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+}
+
+html body#html-body._has-modal .modal-popup.popup-authentication._show .block-authentication {
+    display: block !important;
+    visibility: visible !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+}
+
+// PDP — descrição / especificações legíveis (vence justify/line-height agressivo)
+html body#html-body.catalog-product-view .product.attribute.description .value,
+html body#html-body.catalog-product-view .product.attribute.overview .value {
+    font-size: @awa-text-sm;
+    line-height: 1.6;
+    text-align: left;
+}
+
+html body#html-body.catalog-product-view table.data.table.additional-attributes th,
+html body#html-body.catalog-product-view table.data.table.additional-attributes td {
+    padding: 10px 12px;
+    line-height: 1.45;
+    vertical-align: top;
+    text-align: left;
+}
+
+html body#html-body.catalog-product-view .product.data.items > .item.content .product.attribute.description .value,
+html body#html-body.catalog-product-view .product.data.items > .item.content .product.attribute.overview .value {
+    font-size: @awa-text-sm;
+    line-height: 1.6;
+    text-align: left;
+}
+
+html body#html-body.catalog-product-view .product.data.items > .item.content table.data.table.additional-attributes th,
+html body#html-body.catalog-product-view .product.data.items > .item.content table.data.table.additional-attributes td {
+    padding: 10px 12px;
+    line-height: 1.45;
+    vertical-align: top;
+}

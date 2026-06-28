@@ -1,0 +1,630 @@
+// =============================================================================
+// _awa-header-fix-2026-06.less
+// §56 — Header Fix 2026-06: corrige sobreposição header/hero em todas as páginas
+//
+// Causa raiz diagnosticada (2026-06-08):
+//   O .header-wrapper-sticky carece de position:sticky no CSS compilado final.
+//   O Rokanthemes styles-m.css aplica position:fixed ao #header, mas as regras
+//   AWA posteriores (critical inline + bundles) resetam #header para position:static
+//   sem aplicar sticky ao .header-wrapper-sticky — resultado: o header fica em
+//   flow normal, o hero sobe por baixo sem compensação.
+//
+//   Efeitos colaterais: submenu vertical abre sem z-index correto e aparece
+//   sobre o hero; thumbnails do slider escapam do container; logo duplicado
+//   em certas condições de overlay mobile.
+//
+// Não toca em: vendor/, tema pai, styles-m.css, awa-header-refine-terminal.css
+// =============================================================================
+
+@import (once) '_awa-search-header-harden-2026-06';
+@import (once) '_awa-search-header-distill-2026-06';
+
+// -----------------------------------------------------------------------------
+// §56a — Sticky foundation: .header-wrapper-sticky deve ser sticky
+//         em todas as páginas exceto checkout minimalista.
+//         O z-index: 1000 garante que fica acima do hero (default: auto/1)
+//         mas abaixo do minicart dropdown (z=100130).
+// -----------------------------------------------------------------------------
+html body#html-body:not(.onepagecheckout-index-index):not(.checkout-index-index)
+    .page-wrapper
+    .awa-site-header
+    .header-wrapper-sticky {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 1000 !important;
+    // Garante que o sticky container não colapsa
+    width: 100% !important;
+    // Permite que submenus posicionados (absolute/fixed) escapem do clip
+    overflow: visible !important;
+    contain: none !important;
+}
+
+// Checkout: header minimalista sem sticky agressivo
+html body#html-body:is(.onepagecheckout-index-index, .checkout-index-index)
+    .page-wrapper
+    .awa-site-header
+    .header-wrapper-sticky {
+    position: relative !important;
+    top: auto !important;
+    z-index: 100 !important;
+}
+
+// -----------------------------------------------------------------------------
+// §56a.1 — Header mode contract (default / checkout / auth)
+//         Define o contexto estrutural consumido pelas regras de layout.
+// -----------------------------------------------------------------------------
+html body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"] {
+    --awa-header-main-row-h: 68px;
+    --awa-header-search-h: 48px;
+    --awa-header-nav-h: 48px;
+}
+
+html body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="checkout"],
+html body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="auth"] {
+    --awa-header-main-row-h: auto;
+    --awa-header-search-h: 44px;
+    --awa-header-nav-h: 0px;
+}
+
+// Conta B2B / páginas operacionais: MESMA estrutura brand|search|actions do site
+// (padronização visual), apenas condensada. Promo bar e nav ficam ocultos via
+// account-b2b.css; a altura (56px) casa com --awa-header-scroll-offset dessas rotas.
+html body#html-body:is(.b2b-account-shell, .awa-account-operational)
+    .page-wrapper
+    .awa-site-header[data-awa-header-mode="default"] {
+    --awa-header-main-row-h: 56px;
+    --awa-header-nav-h: 0px;
+}
+
+// -----------------------------------------------------------------------------
+// §56a.2 — Desktop structural contract (default header)
+//         Única geometria base: brand | search | actions.
+//         Aplica a TODAS as rotas em modo default (inclusive conta B2B), para
+//         garantir o mesmo contrato visual; antes a conta era excluída e o
+//         header colapsava (logo/busca/conta sem grid-area).
+// -----------------------------------------------------------------------------
+@media (min-width: 992px) {
+    html body#html-body
+        .page-wrapper
+        .awa-site-header[data-awa-header-mode="default"]
+        .awa-main-header__inner[data-awa-header-row],
+    html body#html-body
+        .page-wrapper
+        .awa-site-header[data-awa-header-mode="default"]
+        .awa-main-header__inner.wp-header {
+        display: grid !important;
+        grid-template-columns: clamp(140px, 14vw, 200px) minmax(0, 1fr) minmax(280px, max-content) !important;
+        grid-template-areas: "brand search actions" !important;
+        align-items: center !important;
+        column-gap: 12px !important;
+        min-height: var(--awa-header-main-row-h) !important;
+        height: var(--awa-header-main-row-h) !important;
+        max-height: var(--awa-header-main-row-h) !important;
+        padding-block: 0 !important;
+    }
+
+    html body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"] .awa-header-primary-row {
+        display: contents !important;
+    }
+
+    html body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"] .awa-header-brand-cell {
+        grid-area: brand !important;
+        align-self: center !important;
+        justify-self: start !important;
+        min-width: 0 !important;
+    }
+
+    html body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"] .awa-header-search-col {
+        grid-area: search !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        margin-inline: 0 !important;
+    }
+
+    html body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"] .awa-header-right-col {
+        grid-area: actions !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        justify-self: end !important;
+        gap: 12px !important;
+        min-width: ~"min(280px, 32vw)" !important;
+        max-width: ~"min(400px, 40vw)" !important;
+        width: auto !important;
+        overflow: visible !important;
+        flex-shrink: 0 !important;
+    }
+
+    html body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"] .awa-header-right-col > .awa-header-account-prompt,
+    html body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"] .awa-header-account-prompt {
+        display: inline-flex !important;
+        align-items: center !important;
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        max-width: ~"min(360px, 36vw)" !important;
+        overflow: hidden !important;
+    }
+
+    html body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"] .awa-header-right-col > .awa-header-minicart {
+        flex: 0 0 auto !important;
+    }
+
+    html body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"] .awa-header-search-col :is(
+        form#search_mini_form,
+        form.minisearch,
+        .block-search form.minisearch
+    ) {
+        height: var(--awa-header-search-h) !important;
+        min-height: var(--awa-header-search-h) !important;
+        max-height: var(--awa-header-search-h) !important;
+        border-radius: var(--awa-search-radius, var(--awa-radius-md, 8px)) !important;
+        box-sizing: border-box !important;
+    }
+
+    html body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"] .awa-header-search-col :is(
+        .block-search,
+        .block-content,
+        .awa-search-action-wrapper,
+        form#search_mini_form .actions,
+        form#search_mini_form .field.search,
+        form#search_mini_form .field.search .control
+    ) {
+        height: var(--awa-header-search-h) !important;
+        min-height: var(--awa-header-search-h) !important;
+        max-height: var(--awa-header-search-h) !important;
+    }
+
+    html body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"] .awa-header-search-col :is(
+        button.action.search,
+        form#search_mini_form button.action.search
+    ) {
+        width: var(--awa-header-search-h) !important;
+        min-width: var(--awa-header-search-h) !important;
+        height: var(--awa-header-search-h) !important;
+        min-height: var(--awa-header-search-h) !important;
+        max-height: var(--awa-header-search-h) !important;
+    }
+
+    html body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-control.awa-nav-bar,
+    html body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-control.header-nav.awa-nav-bar,
+    html body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-control.awa-nav-bar > .container {
+        height: var(--awa-header-nav-h) !important;
+        min-height: var(--awa-header-nav-h) !important;
+        max-height: var(--awa-header-nav-h) !important;
+        background-color: #f2f2f2 !important;
+        background-image: none !important;
+    }
+
+    html body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-control.awa-nav-bar .awa-nav-bar__inner {
+        height: var(--awa-header-nav-h) !important;
+        min-height: var(--awa-header-nav-h) !important;
+        max-height: var(--awa-header-nav-h) !important;
+    }
+
+    html body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-control.awa-nav-bar .awa-header-categories.menu_left_home1 {
+        flex: 0 0 150px !important;
+        width: 150px !important;
+        min-width: 150px !important;
+        max-width: 150px !important;
+        height: var(--awa-header-nav-h) !important;
+        max-height: var(--awa-header-nav-h) !important;
+    }
+}
+
+// -----------------------------------------------------------------------------
+// §56a.3 — Tablet structural contract (default header)
+//         Row única: brand | search | account | cart.
+// -----------------------------------------------------------------------------
+@media (min-width: 768px) and (max-width: 991px) {
+    html body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky
+        :is(.awa-main-header__inner[data-awa-header-row], .wp-header[data-awa-header-row]) {
+        display: grid !important;
+        grid-template-columns: minmax(72px, auto) minmax(0, 1fr) auto 44px !important;
+        grid-template-areas: "brand search account cart" !important;
+        grid-template-rows: 44px !important;
+        align-items: center !important;
+        gap: 8px 12px !important;
+        padding: 0 16px !important;
+        max-height: 56px !important;
+        min-height: 56px !important;
+        height: 56px !important;
+    }
+
+    html body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"] .awa-header-mobile-toggle {
+        display: none !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+    }
+
+    html body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"] .awa-header-brand-cell {
+        grid-area: brand !important;
+    }
+
+    html body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"] .awa-header-search-col {
+        grid-area: search !important;
+        display: block !important;
+        width: 100% !important;
+        min-height: 44px !important;
+        height: auto !important;
+        max-height: none !important;
+        opacity: 1 !important;
+        overflow: visible !important;
+        pointer-events: auto !important;
+    }
+
+    html body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"] .awa-header-right-col {
+        display: contents !important;
+    }
+
+    html body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"] .awa-header-right-col .awa-header-account-prompt {
+        grid-area: account !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-self: end !important;
+        position: static !important;
+        width: auto !important;
+        max-width: none !important;
+        min-width: 0 !important;
+        overflow: visible !important;
+        min-height: 44px !important;
+    }
+
+    html body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"] .awa-header-right-col .awa-header-account-prompt
+        :is(.awa-header-account-prompt__icon, .awa-header-account-prompt__text, .awa-header-account-prompt__guest) {
+        display: none !important;
+        visibility: hidden !important;
+        width: 0 !important;
+        height: 0 !important;
+        overflow: hidden !important;
+        pointer-events: none !important;
+    }
+
+    html body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"] .awa-header-right-col .awa-header-account-prompt
+        .awa-header-account-prompt__mobile-link {
+        display: inline-flex !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 44px !important;
+        min-width: 44px !important;
+        height: 44px !important;
+        min-height: 44px !important;
+        color: @awa-color-primary !important;
+    }
+
+    html body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"] .awa-header-right-col .awa-header-minicart {
+        grid-area: cart !important;
+        justify-self: end !important;
+    }
+}
+
+// -----------------------------------------------------------------------------
+// §56a.4 — Mobile structural contract (default header)
+//         Row principal: nav | brand | cart, com busca recolhida por runtime.
+// -----------------------------------------------------------------------------
+@media (max-width: 767px) {
+    html body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky {
+        min-height: 88px !important;
+    }
+
+    html body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky
+        :is(.awa-main-header__inner[data-awa-header-row], .wp-header[data-awa-header-row]) {
+        display: grid !important;
+        grid-template-columns: auto 1fr auto !important;
+        grid-template-areas: "nav brand cart" !important;
+        align-items: center !important;
+        column-gap: 8px !important;
+        row-gap: 8px !important;
+        padding: 0 12px !important;
+        max-height: 88px !important;
+    }
+
+    html body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"] .awa-header-mobile-toggle {
+        display: inline-flex !important;
+        min-width: 44px !important;
+        min-height: 44px !important;
+        width: 44px !important;
+        height: 44px !important;
+    }
+
+    html body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"] .awa-header-right-col > :not(.awa-header-minicart),
+    html body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"] .awa-header-right-col .awa-header-account-prompt,
+    html body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"] .awa-header-right-col .awa-b2b-mode-badge {
+        display: none !important;
+    }
+
+    html body#html-body#html-body .page-wrapper .awa-site-header
+        .header-wrapper-sticky .header .header_main .wp-header[data-awa-header-row]
+        > .awa-header-primary-row > .awa-header-cart-link,
+    html body#html-body#html-body .page-wrapper .awa-site-header
+        .header .header_main .wp-header[data-awa-header-row]
+        > .awa-header-primary-row > .awa-header-cart-link {
+        display: none !important;
+        visibility: hidden !important;
+        width: 0 !important;
+        height: 0 !important;
+        overflow: hidden !important;
+        pointer-events: none !important;
+    }
+}
+
+@media (max-width: 991px) {
+    html body#html-body#html-body .page-wrapper .awa-site-header
+        .awa-header-minicart:has(.minicart-wrapper .showcart)
+        :is(.awa-header-cart-fallback, .awa-header-cart-fallback__icon) {
+        display: none !important;
+        visibility: hidden !important;
+        width: 0 !important;
+        height: 0 !important;
+        overflow: hidden !important;
+        pointer-events: none !important;
+    }
+}
+
+// -----------------------------------------------------------------------------
+// §56b — Page-wrapper: zera padding-top que o Rokanthemes injetou
+//         via JS para compensar o antigo position:fixed.
+//         Com sticky, o flow natural não precisa de compensação.
+// -----------------------------------------------------------------------------
+html body#html-body .page-wrapper {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+}
+
+// -----------------------------------------------------------------------------
+// §56d — Shell 1280px + alinhamento ícones/busca (2026-06-15)
+//         Neutraliza super-global: nav-toggle top:-62px, container 1400px.
+// -----------------------------------------------------------------------------
+@media (min-width: 992px) {
+    html body#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"]
+        .header-wrapper-sticky :is(.header_main.awa-main-header-inner-wrap, .header.awa-main-header)
+        :is(.header-main, .header_main) > .container,
+    html body#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"]
+        .header-wrapper-sticky .header-main > .container {
+        max-width: 1280px !important;
+        width: 100% !important;
+        margin-inline: auto !important;
+        padding-inline: 0 !important;
+        box-sizing: border-box !important;
+    }
+
+    html body#html-body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"]
+        :is(.awa-main-header__inner.wp-header, .awa-main-header__inner[data-awa-header-row]) {
+        max-width: 1280px !important;
+        width: 100% !important;
+        margin-inline: auto !important;
+        padding-inline: 16px !important;
+        box-sizing: border-box !important;
+    }
+
+    html body#html-body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"]
+        .header-control.awa-nav-bar > .container,
+    html body#html-body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"]
+        .header-control.awa-nav-bar .awa-nav-bar__inner {
+        max-width: 1280px !important;
+        width: 100% !important;
+        margin-inline: auto !important;
+        padding-inline: 16px !important;
+        box-sizing: border-box !important;
+    }
+
+    html body#html-body#html-body .page-wrapper .awa-site-header .awa-header-search-col {
+        display: block !important;
+        grid-template-columns: none !important;
+    }
+
+    html body#html-body#html-body .page-wrapper .awa-site-header .awa-search-helper-copy {
+        display: none !important;
+    }
+}
+
+@media (max-width: 767px) {
+    html body#html-body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"]
+        .header-wrapper-sticky :is(.awa-main-header__inner.wp-header, .awa-main-header__inner[data-awa-header-row]) {
+        align-items: center !important;
+        contain: none !important;
+        overflow: visible !important;
+    }
+
+    html body#html-body#html-body .page-wrapper .awa-site-header
+        :is(.awa-header-mobile-toggle, .action.nav-toggle, [data-action="toggle-nav"]) {
+        position: relative !important;
+        top: auto !important;
+        right: auto !important;
+        left: auto !important;
+        inset: auto !important;
+        align-self: center !important;
+        justify-self: center !important;
+        margin: 0 !important;
+        transform: none !important;
+    }
+
+    html body#html-body#html-body .page-wrapper .awa-site-header .awa-header-minicart .minicart-wrapper {
+        position: static !important;
+        top: auto !important;
+        right: auto !important;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+    html body#html-body#html-body .page-wrapper .awa-site-header .awa-header-search-col {
+        display: block !important;
+        grid-template-columns: none !important;
+        width: 100% !important;
+    }
+
+    html body#html-body#html-body .page-wrapper .awa-site-header .awa-header-search-col .block-content {
+        display: block !important;
+        grid-template-columns: none !important;
+        grid-template-areas: none !important;
+        width: 100% !important;
+    }
+
+    html body#html-body#html-body .page-wrapper .awa-site-header .awa-header-search-col form#search_mini_form {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    html body#html-body#html-body .page-wrapper .awa-site-header .awa-search-helper-copy {
+        display: none !important;
+    }
+}
+
+// -----------------------------------------------------------------------------
+// §56c — Hero/slider: garante que fica abaixo do header sticky (z < 1000)
+//         e que o container do slider contém os thumbnails.
+// -----------------------------------------------------------------------------
+html body#html-body .page-wrapper .awa-site-header ~ .page-main,
+html body#html-body .page-wrapper .awa-site-header ~ .main-content,
+html body#html-body .page-wrapper .awa-site-header + .content-top-home,
+html body#html-body .page-wrapper .awa-site-header + .top-home-content--above-fold {
+    position: relative !important;
+    z-index: 1 !important; // abaixo do sticky header (z=1000)
+}
+
+// Hero slider: garante que thumbnails ficam contidos
+html body#html-body .page-wrapper .banner-slider.banner-slider2 {
+    position: relative !important;
+    overflow: hidden !important; // contém thumbnails absolutos
+    z-index: 1 !important;
+}
+
+// Mas o menu flyout vertical (já portado do hero) pode escapar do slider:
+// não clipar o flyout do vertical menu dentro do nav-bar
+html body#html-body .page-wrapper .header-control.awa-nav-bar {
+    overflow: visible !important;
+}
+
+// -----------------------------------------------------------------------------
+// §56d — Vertical menu dropdown z-index stack
+//         O togge-menu abre como position:absolute relativo ao nearest
+//         positioned ancestor. Com sticky no wrapper (z=1000), o dropdown
+//         precisa de z-index > 1000 para aparecer acima do hero mas abaixo
+//         do minicart overlay (z=100130).
+// -----------------------------------------------------------------------------
+@media (min-width: 992px) {
+    html body#html-body .page-wrapper
+        .header-control.awa-nav-bar
+        .awa-header-categories
+        .navigation.verticalmenu.side-verticalmenu
+        > ul.togge-menu.list-category-dropdown:is(
+            .menu-open,
+            .vmm-open,
+            [aria-hidden="false"],
+            [data-awa-menu-state="open"]
+        ) {
+        z-index: 1100 !important; // acima de sticky (1000) < minicart (100130)
+        position: absolute !important;
+    }
+
+    // Submarcos dos flyouts portados para body (awa-vmf-portal)
+    html body#html-body
+        :is(.awa-vmf-portal.navigation__submenu, .awa-vmf-portal.submenu) {
+        z-index: 1100 !important;
+    }
+
+    // O nav-bar precisa de position:relative para o absolute do submenu
+    html body#html-body .page-wrapper
+        .header-control.awa-nav-bar {
+        position: relative !important;
+    }
+}
+
+// -----------------------------------------------------------------------------
+// §56e — Autocomplete search: z-index acima do sticky header
+// -----------------------------------------------------------------------------
+html body#html-body
+    :is(
+        #search_autocomplete,
+        .mst-searchautocomplete__autocomplete,
+        .searchsuite-autocomplete,
+        .awa-search-autocomplete
+    ) {
+    z-index: 1050 !important; // acima do sticky (1000), abaixo de minicart (100130)
+}
+
+// -----------------------------------------------------------------------------
+// §56f — Mobile logo duplicado: remove logo injetado no nav overlay
+//         quando visível no desktop ≥992px
+// -----------------------------------------------------------------------------
+@media (min-width: 992px) {
+    html body#html-body .page-wrapper
+        :is(
+            #awa-primary-navigation,
+            #awa-category-navigation
+        )
+        .awa-mobile-nav-logo,
+    html body#html-body .page-wrapper
+        :is(
+            #awa-primary-navigation,
+            #awa-category-navigation
+        )
+        > .awa-header-brand-cell,
+    html body#html-body .page-wrapper
+        :is(
+            #awa-primary-navigation,
+            #awa-category-navigation
+        )
+        > .logo {
+        display: none !important;
+        visibility: hidden !important;
+    }
+}
+
+// -----------------------------------------------------------------------------
+// §56g — Todas as páginas: consistência da altura do header sticky
+//         Garante que .awa-site-header "empurra" o conteúdo abaixo
+//         e não tem height:0/collapse no estado inicial.
+// -----------------------------------------------------------------------------
+html body#html-body .page-wrapper .awa-site-header {
+    // Garante que o header é visível e não colapsa
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    min-height: 0 !important; // let inner content define height
+}
+
+// -----------------------------------------------------------------------------
+// §56h — Categoria, PDP, busca, B2B: header sticky funciona igual
+//         Regras de padding-top herdadas de JS ou inline style são zeradas
+//         pois o sticky não precisa de compensação.
+// -----------------------------------------------------------------------------
+html body#html-body:is(
+    .catalog-category-view,
+    .catalog-product-view,
+    .catalogsearch-result-index,
+    .customer-account-index,
+    .account,
+    .b2b-account-dashboard
+) .page-wrapper {
+    padding-top: 0 !important;
+    // O header sticky empurra o conteúdo naturalmente
+}
+
+// -----------------------------------------------------------------------------
+// §56i — Mobile (≤991px): header sticky mais leve
+//         Em mobile, o header tem ~88px (promo+main). Sticky é mantido.
+//         O drawer de navegação (position:fixed, z=1300) fica acima do header.
+// -----------------------------------------------------------------------------
+@media (max-width: 991px) {
+    html body#html-body .page-wrapper .awa-site-header .header-wrapper-sticky {
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 900 !important; // abaixo do drawer mobile (z=1300)
+    }
+
+    // Garantir que o hero não sobe por baixo do header mobile
+    html body#html-body .page-wrapper .awa-site-header ~ .page-main,
+    html body#html-body .page-wrapper .awa-site-header + .content-top-home {
+        position: relative !important;
+        z-index: 1 !important;
+    }
+}
+
+// §115–116 — Header condensado + S8 sticky (SSOT; ver _awa-header-condensed-unify-2026-06.less)
+@import '_awa-header-condensed-unify-2026-06.less';
+
+// §118 — Header expandido: promo, nav bar, badge, breadcrumb (2026-06-08)
+@import '_awa-header-expanded-fix-2026-06.less';

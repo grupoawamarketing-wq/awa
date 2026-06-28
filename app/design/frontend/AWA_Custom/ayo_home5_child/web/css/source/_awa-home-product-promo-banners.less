@@ -1,0 +1,120 @@
+// Homepage — banners promocionais de produto (CMS Block home_product_promo_banners)
+// VTEX-like: flat, full-bleed creative, reel mobile, grid 2-col tablet / 4-col desktop
+
+@import (reference) '_awa-tokens.less';
+
+@awa-home-promo-banners-scope: ~'body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper';
+@awa-promo-aspect-ratio: 463 / 349;
+
+@{awa-home-promo-banners-scope} .awa-product-promo-banners {
+    .awa-product-promo-banners__grid {
+        box-sizing: border-box;
+        display: flex;
+        flex-flow: row nowrap;
+        gap: @awa-s-2;
+        max-width: 100%;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+
+        @media (max-width: (@awa-bp-768 - 1)) {
+            overflow-x: auto;
+            overscroll-behavior-x: contain;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            scroll-padding-inline: @awa-s-2;
+            padding-block-end: @awa-s-1;
+            scrollbar-width: none;
+
+            &::-webkit-scrollbar {
+                display: none;
+            }
+        }
+    }
+
+    .awa-product-promo-banners__item {
+        display: block;
+        flex: 0 0 ~"min(82vw, 320px)";
+        width: ~"min(82vw, 320px)";
+        max-width: ~"min(82vw, 320px)";
+        scroll-snap-align: start;
+        border: 1px solid var(--awa-border-color, @awa-color-border);
+        border-radius: @awa-radius-sm;
+        overflow: hidden;
+        background: var(--awa-bg-surface, @awa-color-white);
+        text-decoration: none;
+        color: inherit;
+
+        &:focus-visible {
+            outline: var(--awa-focus-outline, 2px solid @awa-color-primary-dark);
+            outline-offset: var(--awa-focus-offset, 2px);
+        }
+
+        picture {
+            display: block;
+            width: 100%;
+            aspect-ratio: @awa-promo-aspect-ratio;
+            background: var(--awa-bg-surface, @awa-color-white);
+        }
+
+        // Final-wins sobre [class*="banner"] img { object-fit: cover } em _awa-consolidated.less
+        picture,
+        img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+        }
+    }
+
+    @media (max-width: (@awa-bp-768 - 1)) {
+        .awa-shelf-view-all--desktop-only {
+            display: none !important;
+            height: 0 !important;
+            margin: 0 !important;
+            max-height: 0 !important;
+            min-height: 0 !important;
+            overflow: hidden !important;
+            padding: 0 !important;
+            width: 0 !important;
+        }
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+        .awa-product-promo-banners__item {
+            transition:
+                border-color 0.2s @awa-ease,
+                opacity 0.2s @awa-ease;
+
+            &:hover {
+                border-color: var(--awa-primary, @awa-color-primary);
+                opacity: 0.96;
+            }
+        }
+    }
+
+    @media (min-width: @awa-bp-768) {
+        .awa-product-promo-banners__grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: @awa-s-2;
+            overflow: visible;
+        }
+
+        .awa-product-promo-banners__item {
+            flex: none;
+            width: auto;
+            max-width: none;
+            min-width: 0;
+        }
+    }
+
+    @media (min-width: @awa-bp-992) {
+        .awa-product-promo-banners__grid {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: @awa-s-3;
+        }
+    }
+}

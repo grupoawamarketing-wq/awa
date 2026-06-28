@@ -1,0 +1,48 @@
+// =============================================================================
+// _awa-harden-home-2026-06.less
+// §74 — /impeccable harden home (2026-06-08)
+// Chrome SSR visível antes do JS; noscript; focus no viewport.
+// =============================================================================
+
+@import (once) '_awa-tokens';
+@import (once) '_design-system';
+
+html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper {
+    // Nav/progress SSR: visíveis no 1º paint (JS só liga scrollBy)
+    .awa-shelf--carousel .awa-carousel-chrome-ssr.awa-owl-nav,
+    .awa-shelf--carousel .awa-carousel-chrome-ssr.awa-owl-progress {
+        display: flex;
+        visibility: visible;
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .awa-shelf--carousel .awa-carousel-chrome-ssr.awa-owl-progress {
+        display: block;
+    }
+
+    .awa-shelf--carousel .awa-carousel__viewport:focus-visible {
+        outline: 2px solid var(--awa-primary, @awa-color-primary);
+        outline-offset: 2px;
+    }
+
+    .awa-carousel-noscript-hint {
+        margin: @awa-space-2 0 0;
+        padding: @awa-space-2 @awa-space-3;
+        border-radius: @awa-radius-sm;
+        background: color-mix(in srgb, var(--awa-bg-soft, @awa-color-bg-soft) 80%, var(--awa-bg, @awa-color-white));
+        color: var(--awa-text, @awa-color-text-primary);
+        font-size: ~'max(13px, 0.8125rem)';
+        line-height: 1.45;
+        text-wrap: pretty;
+    }
+}
+
+// Sem JS: viewport continua scrollável horizontalmente
+html:not(.js) body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper {
+    .awa-shelf--carousel .awa-carousel__viewport {
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+    }
+}

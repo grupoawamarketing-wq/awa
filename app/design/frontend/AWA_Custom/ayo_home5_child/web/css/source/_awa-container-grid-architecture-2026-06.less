@@ -1,0 +1,231 @@
+// =============================================================================
+// §95 — Container + Grid Architecture (2026-06-08)
+// SSOT: _awa-page-containers.less + tokens runtime abaixo.
+// Magento 2 (layout-2-col, .page-main) + padrões 2025-2026 (CSS Grid, minmax(0,1fr)).
+// =============================================================================
+
+@import (once) '_awa-tokens';
+@import (once) '_design-system';
+@import (once) '_awa-page-containers';
+
+@awa-catalog-layout-scope: ~'html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)';
+@awa-catalog-all-scope: ~'html body#html-body:is(.catalog-category-view, .catalogsearch-result-index, .catalog-product-view)';
+@awa-home-scope: ~'html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)';
+
+// ── Runtime: aliases + grid vocabulary ───────────────────────────────────────
+:root {
+    --awa-shell-gutter: var(--awa-page-pad-catalog, 20px);
+    --awa-grid-sidebar-width: 240px;
+    --awa-grid-gap: clamp(16px, 2vw, 24px);
+    --awa-grid-gap-tight: @awa-space-4;
+    --awa-grid-gap-loose: @awa-space-6;
+    --awa-container: var(--awa-page-content, 1400px);
+    --awa-container-content: var(--awa-page-content, 1400px);
+}
+
+@media (max-width: @awa-page-bp-md) {
+    :root {
+        --awa-shell-gutter: @awa-page-pad-tablet;
+        --awa-grid-gap-loose: @awa-space-4;
+    }
+}
+
+@media (max-width: @awa-page-bp-sm) {
+    :root {
+        --awa-shell-gutter: @awa-page-pad-mobile;
+        --awa-grid-gap: @awa-space-3;
+        --awa-grid-gap-tight: @awa-space-3;
+    }
+}
+
+// ── Box model: shells não estouram com padding + max-width ───────────────────
+@{awa-catalog-all-scope} .page-wrapper {
+    .page-main,
+    .page-main.container,
+    .columns,
+    .column.main,
+    .col-main {
+        box-sizing: border-box !important;
+        min-width: 0 !important;
+    }
+}
+
+// ── Neutralizar margens Bootstrap legadas no shell 2-col ─────────────────────
+@{awa-catalog-layout-scope} .page-wrapper {
+    .page-main .columns.layout.layout-2-col.row {
+        margin-inline: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+
+        > [class*='col-'] {
+            padding-inline: 0 !important;
+            max-width: none !important;
+            flex: none !important;
+            // width: auto removido — em flex-column (mobile) causava colapso para
+            // largura intrínseca. O desktop CSS Grid já define width: auto no bloco ≥992px.
+        }
+    }
+}
+
+// ── PLP/busca: page grid com áreas nomeadas (≥992px) ───────────────────────
+// Banner/head/toolbar full-width; sidebar + main na linha plp-side/plp-main.
+@media (min-width: @awa-bp-992) {
+    @{awa-catalog-layout-scope} .page-wrapper .page-main > .columns.layout.layout-2-col {
+        display: grid !important;
+        grid-template-columns: minmax(220px, ~"min(280px, 30vw)") minmax(0, 1fr) !important;
+        grid-template-areas:
+            'plp-banner plp-banner'
+            'plp-head plp-head'
+            'plp-toolbar plp-toolbar'
+            'plp-side plp-main'
+            'plp-foot plp-foot' !important;
+        column-gap: var(--awa-grid-gap-loose, 24px) !important;
+        row-gap: 0 !important;
+        align-items: start !important;
+        margin-inline: 0 !important;
+        padding-inline: 0 !important;
+
+        > [class*='col-'] {
+            float: none !important;
+            width: auto !important;
+            max-width: none !important;
+            min-width: 0 !important;
+            padding-inline: 0 !important;
+            box-sizing: border-box !important;
+        }
+
+        > :first-child:not(.col-main):not(.column.main) {
+            grid-area: plp-side !important;
+            align-self: start !important;
+            position: sticky !important;
+            top: calc(var(--awa-header-main-row-h, 68px) + var(--awa-header-nav-h, 38px) + @awa-space-3) !important;
+        }
+    }
+
+    @{awa-catalog-layout-scope}.catalog-category-view .page-wrapper {
+        .page-main > .columns > .col-main,
+        .col-main .product-content-right {
+            display: contents !important;
+        }
+
+        :is(.category-view-move, .page-main .category-hero) {
+            grid-area: plp-banner !important;
+            width: 100% !important;
+            min-width: 0 !important;
+        }
+
+        .col-main .product-content-right > .row {
+            grid-area: plp-foot !important;
+            width: 100% !important;
+            min-width: 0 !important;
+            box-sizing: border-box !important;
+        }
+    }
+
+    @{awa-catalog-layout-scope}.catalogsearch-result-index .page-wrapper {
+        .page-main > .columns > .col-main {
+            display: block !important;
+            grid-area: plp-main !important;
+            width: 100% !important;
+            min-width: 0 !important;
+        }
+
+        .page-title-wrapper.search {
+            grid-area: plp-head !important;
+        }
+    }
+
+    @{awa-catalog-layout-scope} .page-wrapper {
+        .shop-tab-title {
+            grid-area: plp-head !important;
+            width: 100% !important;
+            min-width: 0 !important;
+            padding-block-end: @awa-space-2 !important;
+        }
+
+        .toolbar.toolbar-products {
+            grid-area: plp-toolbar !important;
+            min-width: 0 !important;
+            box-sizing: border-box !important;
+        }
+
+        :is(.wrapper.grid.products-grid, .wrapper.list.products-list) {
+            grid-area: plp-main !important;
+            min-width: 0 !important;
+        }
+    }
+}
+
+// ── Mobile/tablet: stack vertical (filtros acima do grid) ────────────────────
+@media (max-width: (@awa-bp-992 - 1)) {
+    @{awa-catalog-layout-scope} .page-wrapper .page-main > .columns.layout.layout-2-col {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: var(--awa-grid-gap-tight) !important;
+    }
+
+    // Todos os col- devem ocupar 100% da largura no empilhamento vertical
+    @{awa-catalog-layout-scope} .page-wrapper .page-main .columns.layout.layout-2-col > [class*='col-'] {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    @{awa-catalog-layout-scope} .page-wrapper :is(.sidebar-main, .sidebar-main-1) {
+        width: 100% !important;
+        max-width: 100% !important;
+        position: static !important;
+        top: auto !important;
+    }
+
+    @{awa-catalog-layout-scope} .page-wrapper :is(.col-main, .column.main) {
+        display: block !important;
+        width: 100% !important;
+    }
+}
+
+// ── PDP 1-col: conteúdo util alinhado ao tier catalog ────────────────────────
+html body#html-body.catalog-product-view.page-layout-1column .page-wrapper {
+    .page-main > .columns {
+        max-width: 100% !important;
+        margin-inline: 0 !important;
+        padding-inline: 0 !important;
+    }
+
+    .column.main {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: var(--awa-grid-gap-loose) !important;
+    }
+}
+
+// ── Home: vitrines respeitam content width + gap unificado ───────────────────
+@{awa-home-scope} .page-wrapper {
+    :is(.rokan-bestseller.awa-shelf, .rokan-newproduct.awa-shelf, .awa-carousel-section) {
+        max-width: var(--awa-page-catalog, @awa-page-catalog) !important;
+        width: 100% !important;
+        margin-inline: auto !important;
+        padding-inline: var(--awa-shell-gutter) !important;
+        box-sizing: border-box !important;
+    }
+
+    .awa-shelf__track,
+    .products-grid .product-items {
+        gap: var(--awa-grid-gap) !important;
+    }
+}
+
+// ── Breadcrumbs alinhados ao shell gutter (reforço §91) ──────────────────────
+@{awa-catalog-all-scope} .page-wrapper .nav-breadcrumbs .breadcrumbs {
+    max-width: var(--awa-page-catalog, @awa-page-catalog) !important;
+    width: 100% !important;
+    margin-inline: auto !important;
+    padding-inline: var(--awa-shell-gutter) !important;
+    box-sizing: border-box !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    @{awa-catalog-layout-scope} .page-wrapper :is(.sidebar-main, .sidebar-main-1) {
+        transition: none !important;
+    }
+}

@@ -1,0 +1,492 @@
+// ============================================================================
+// AWA — Header Overlay State Fix (final-wins)
+// Contrato único de visibilidade: menu vertical, autocomplete, footer.
+// Resolve colisões de cascata pós-consolidação S84–S92.
+// ============================================================================
+
+@import (once) '_awa-variables';
+
+// ── 1. Menu vertical — fechado por default; home só abre via clique (.vmm-open) ──
+@media (min-width: @awa-breakpoint-md) {
+    body .page-wrapper .awa-header-categories.menu_left_home1,
+    body .page-wrapper .header-control .menu_left_home1,
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu {
+        position: relative !important;
+    }
+
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown:not(.vmm-open):not(.menu-open) {
+        display: none !important;
+        max-height: 0 !important;
+        overflow: hidden !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+        border: 0 !important;
+        box-shadow: none !important;
+        background: transparent !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown:not(.vmm-open):not(.menu-open) .submenu,
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown:not(.vmm-open):not(.menu-open) .level0.submenu {
+        display: none !important;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .sections.nav-sections.category-dropdown {
+        background: transparent !important;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .navigation.verticalmenu.side-verticalmenu:hover > ul.togge-menu.list-category-dropdown:not(.vmm-open):not(.menu-open),
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .navigation.verticalmenu.side-verticalmenu:focus-within > ul.togge-menu.list-category-dropdown:not(.vmm-open):not(.menu-open),
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .vertical-menu:hover .navigation.verticalmenu.side-verticalmenu > ul.togge-menu:not(.vmm-open):not(.menu-open) {
+        display: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+    }
+
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown.vmm-open,
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown.menu-open {
+        display: grid !important;
+        max-height: ~"min(600px, calc(100vh - 230px)") !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+        position: absolute !important;
+        top: 100% !important;
+        left: 0 !important;
+        z-index: var(--awa-z-overlay, 100) !important;
+    }
+
+    body:not(.cms-index-index):not(.cms-home):not(.cms-homepage_ayo_home5) .page-wrapper .navigation.verticalmenu.side-verticalmenu:hover > ul.togge-menu.list-category-dropdown:not(.vmm-open):not(.menu-open) {
+        display: grid !important;
+        max-height: ~"min(600px, calc(100vh - 230px)") !important;
+        overflow-y: auto !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+    }
+
+    body > .togge-menu.list-category-dropdown:not(.vmm-open):not(.menu-open),
+    .togge-menu.list-category-dropdown.awa-vmf-portal:not(.vmm-open):not(.menu-open) {
+        display: none !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+    }
+
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu > li.ui-menu-item.level0 > .submenu,
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu > li.ui-menu-item.level0 > .level0.submenu {
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu > li.ui-menu-item.level0:hover > .submenu,
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu > li.ui-menu-item.level0:hover > .level0.submenu,
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu > li.ui-menu-item.level0.is-open > .submenu,
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu > li.ui-menu-item.level0.vmm-active > .submenu,
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu > li.ui-menu-item.level0.awa-vmf-active > .submenu {
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+    }
+}
+
+// ── 2. Autocomplete — oculto até foco/abertura explícita ─────────────────────
+body .page-wrapper .block-search,
+body .page-wrapper .awa-professional-search,
+body .page-wrapper .awa-header-search-col .block-search {
+    position: relative;
+}
+
+body .page-wrapper .awa-professional-search:not(:focus-within):not(.is-open) #search_autocomplete:not(.is-open):not(.active):not(._active),
+body .page-wrapper .block-search:not(:focus-within) #search_autocomplete:not(.is-open):not(.active):not(._active),
+body .page-wrapper .awa-professional-search:not(:focus-within):not(.is-open) .searchsuite-autocomplete:not(.is-open):not(.active):not(._active),
+body .page-wrapper .block-search:not(:focus-within) .search-autocomplete:not(.is-open):not(.active):not(._active) {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+// ── 3. Footer — permanece no fluxo; links não vazam para o header ───────────
+body .page-wrapper footer.page-footer,
+body .page-wrapper .page-footer {
+    position: relative !important;
+    width: 100% !important;
+    clear: both !important;
+    float: none !important;
+}
+
+body .page-wrapper .awa-nav-bar .velaFooterLinks,
+body .page-wrapper .awa-nav-bar .velaFooterMenu,
+body .page-wrapper .awa-site-header .velaFooterLinks:not(.page-footer .velaFooterLinks),
+body .page-wrapper .header-control .velaFooterLinks {
+    display: none !important;
+}
+
+// ── 4. Hero home — aspect-ratio 1920/470 colapsava slider; fundo branco na faixa ─
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper {
+    .content-top-home,
+    .ayo-home5-wrapper > .top-home-content--above-fold {
+        background: transparent !important;
+        min-height: 0 !important;
+        height: auto !important;
+        overflow: visible !important;
+    }
+
+    .top-home-content--above-fold > .banner-slider,
+    .top-home-content--above-fold > .banner-slider.banner-slider2 {
+        aspect-ratio: auto !important;
+        min-height: 0 !important;
+        height: auto !important;
+        background: transparent !important;
+        overflow: hidden !important;
+    }
+
+    .top-home-content--above-fold .wrapper_slider,
+    .top-home-content--above-fold .wrapper_slider .owl-carousel {
+        height: auto !important;
+        min-height: 0 !important;
+        overflow: hidden !important;
+    }
+
+    .top-home-content--above-fold .wrapper_slider .banner_item,
+    .top-home-content--above-fold .wrapper_slider .owl-item {
+        overflow: hidden;
+    }
+
+    .top-home-content--above-fold .wrapper_slider .banner_item img {
+        width: 100%;
+        height: auto;
+        display: block;
+        object-fit: cover;
+    }
+
+    .top-home-content--above-fold .wrapper_slider .banner_item_bg img,
+    .top-home-content--above-fold .wrapper_slider .banner_item_bg picture {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: cover;
+    }
+}
+
+// ── 5. Departamentos — nav integrada (vence FIX-55 pill separado + ícone cinza) ─
+@media (min-width: @awa-breakpoint-md) {
+    body .page-wrapper .header-control.awa-nav-bar .awa-header-categories,
+    body .page-wrapper .header-control.awa-nav-bar .menu_left_home1 {
+        background: transparent !important;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header-control.awa-nav-bar .awa-header-categories .our_categories.title-category-dropdown,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header-control.awa-nav-bar .menu_left_home1 .navigation.verticalmenu.side-verticalmenu > .title-category-dropdown,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header-control.awa-nav-bar .menu_left_home1 .navigation.verticalmenu.side-verticalmenu > h2.our_categories.title-category-dropdown,
+    body .page-wrapper .header-control.awa-nav-bar .awa-header-categories .our_categories,
+    body .page-wrapper .header-control.awa-nav-bar .awa-header-categories .title-category-dropdown {
+        background: var(--awa-hdr-primary, var(--awa-primary)) !important;
+        border: 0 !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        color: var(--awa-text-on-dark, @awa-color-white) !important;
+        cursor: pointer !important;
+        min-height: var(--awa-hdr-navbar-h, 48px);
+        transition: background-color 0.2s ease;
+    }
+
+    body .page-wrapper .header-control.awa-nav-bar .awa-header-categories .title-category-dropdown:hover,
+    body .page-wrapper .header-control.awa-nav-bar .awa-header-categories .title-category-dropdown:focus-visible,
+    body .page-wrapper .header-control.awa-nav-bar .menu_left_home1 .title-category-dropdown:hover,
+    body .page-wrapper .header-control.awa-nav-bar .menu_left_home1 .title-category-dropdown:focus-visible {
+        background: var(--awa-hdr-primary-dark, var(--awa-primary-hover)) !important;
+        outline: none;
+    }
+
+    // Remove apenas o círculo/fundo cinza atrás do hamburger (não o botão inteiro)
+    body .page-wrapper .header-control.awa-nav-bar .title-category-dropdown .vm-icon,
+    body .page-wrapper .header-control.awa-nav-bar .title-category-dropdown .awa-hamburger,
+    body .page-wrapper .header-control.awa-nav-bar .title-category-dropdown .icon-menu,
+    body .page-wrapper .header-control.awa-nav-bar .title-category-dropdown .vm-icon::before,
+    body .page-wrapper .header-control.awa-nav-bar .title-category-dropdown .vm-icon i {
+        background: transparent !important;
+        border: 0 !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        color: var(--awa-text-on-dark, @awa-color-white) !important;
+    }
+
+    // Dropdown fechado: anula FIX-56 borda/sombra branca que vazava no hero
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .menu_left_home1 .verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown:not(.vmm-open):not(.menu-open) {
+        border: 0 !important;
+        box-shadow: none !important;
+        background: transparent !important;
+    }
+}
+
+// ── 6. Carrossel de categorias — track horizontal + ícones visíveis ───────────
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper {
+    #awa-cat-carousel.awa-category-carousel__track,
+    .top-home-content--category-carousel .awa-category-carousel__track {
+        display: flex !important;
+        flex-flow: row nowrap !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        gap: 12px !important;
+        max-height: 280px !important;
+    }
+
+    #awa-cat-carousel > .awa-category-carousel__item,
+    .awa-category-carousel__track > .awa-category-carousel__item {
+        flex: 0 0 auto !important;
+        width: auto !important;
+        min-width: 120px !important;
+        max-width: 200px !important;
+    }
+
+    .top-home-content--category-carousel .category-item__icon,
+    .awa-category-carousel .category-item__icon,
+    .awa-category-carousel__icon {
+        background: var(--awa-bg-subtle, @awa-color-bg-fafafa);
+        border-radius: var(--awa-radius-md, 8px);
+        min-height: 72px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .top-home-content--category-carousel .category-item__icon img,
+    .awa-category-carousel .category-item__icon img,
+    .awa-category-carousel__icon img,
+    .awa-category-carousel__icon picture,
+    .awa-category-carousel__card img {
+        opacity: 1 !important;
+        visibility: visible !important;
+        object-fit: contain;
+        max-width: 80%;
+        max-height: 64px;
+    }
+}
+
+// ── 7. Prateleiras Owl pré-init + imagens de produto (anti-stack / CLS) ───────
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper {
+    .content-top-home .awa-carousel-section ul.owl:not(.owl-carousel):not(.owl-loaded) {
+        display: flex !important;
+        flex-flow: row nowrap !important;
+        overflow: hidden !important;
+        width: 100% !important;
+        min-height: 300px !important;
+        max-height: 300px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        list-style: none !important;
+    }
+
+    .content-top-home .awa-carousel-section ul.owl:not(.owl-carousel):not(.owl-loaded) > li.item {
+        flex: 0 0 50% !important;
+        max-width: 50% !important;
+        box-sizing: border-box !important;
+        list-style: none !important;
+    }
+
+    .content-top-home .awa-carousel-section ul.owl:not(.owl-carousel):not(.owl-loaded) > li.item:nth-child(n + 3) {
+        display: none !important;
+    }
+
+    .item-product .product-image-photo,
+    .item-product .product-thumb img {
+        min-height: 120px !important;
+        object-fit: contain !important;
+        opacity: 1 !important;
+    }
+}
+
+@media (min-width: 768px) {
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+        .content-top-home .awa-carousel-section ul.owl:not(.owl-carousel):not(.owl-loaded) > li.item {
+        flex: 0 0 33.333% !important;
+        max-width: 33.333% !important;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+        .content-top-home .awa-carousel-section ul.owl:not(.owl-carousel):not(.owl-loaded) > li.item:nth-child(n + 3) {
+        display: flex !important;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+        .content-top-home .awa-carousel-section ul.owl:not(.owl-carousel):not(.owl-loaded) > li.item:nth-child(n + 4) {
+        display: none !important;
+    }
+}
+
+@media (min-width: 1024px) {
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+        .content-top-home .awa-carousel-section ul.owl:not(.owl-carousel):not(.owl-loaded) > li.item {
+        flex: 0 0 25% !important;
+        max-width: 25% !important;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+        .content-top-home .awa-carousel-section ul.owl:not(.owl-carousel):not(.owl-loaded) > li.item:nth-child(n + 4) {
+        display: flex !important;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+        .content-top-home .awa-carousel-section ul.owl:not(.owl-carousel):not(.owl-loaded) > li.item:nth-child(n + 5) {
+        display: none !important;
+    }
+}
+
+// ── 8. Mobile SSOT: overlay + bottom nav + footer touch (padronização global) ─
+@media (max-width: 991px) {
+    body .awa-nav-overlay {
+        position: fixed !important;
+        inset: 0 !important;
+        z-index: 1040 !important;
+        background: color-mix(in srgb, @awa-neutral-900 48%, transparent) !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+        transition: opacity 200ms ease, visibility 200ms ease !important;
+    }
+
+    body.nav-open .awa-nav-overlay,
+    html.nav-open body .awa-nav-overlay,
+    body .awa-nav-overlay.is-visible {
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+    }
+
+    body .page-wrapper nav.fixed-bottom {
+        height: 72px !important;
+        min-height: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
+        padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+        z-index: 1050 !important;
+    }
+
+    body .page-wrapper nav.fixed-bottom .mobile-bottom-link > li > a,
+    body .page-wrapper nav.fixed-bottom .mobile-bottom-link > li > button {
+        min-height: 44px !important;
+        min-width: 44px !important;
+        cursor: pointer !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body .awa-nav-overlay {
+        transition: none !important;
+    }
+}
+
+// ── 9. Footer accordion mobile (chevron + collapse SSOT) ─────────────────────
+@media (max-width: 767px) {
+    body .page-wrapper :is(.page-footer, .page_footer) .velaFooterMenu .velaContent {
+        display: none !important;
+        overflow: hidden !important;
+        max-height: 0 !important;
+    }
+
+    body .page-wrapper :is(.page-footer, .page_footer) .velaFooterMenu.is-open .velaContent,
+    body .page-wrapper :is(.page-footer, .page_footer) .velaFooterMenu .velaContent.active {
+        display: block !important;
+        max-height: 520px !important;
+    }
+
+    body .page-wrapper :is(.page-footer, .page_footer) .velaFooterTitle {
+        position: relative !important;
+        padding-right: 36px !important;
+        cursor: pointer !important;
+    }
+
+    body .page-wrapper :is(.page-footer, .page_footer) .velaFooterTitle:focus-visible {
+        outline: 2px solid @awa-color-primary !important;
+        outline-offset: 2px !important;
+    }
+}
+
+@media (max-width: 991px) {
+    body.nav-open,
+    html.nav-open body {
+        overflow: hidden !important;
+    }
+}
+
+// ── 10. Footer desktop — restaura colunas + conteúdo visível (accordion só mobile) ─
+@media (min-width: 768px) {
+    body .page-wrapper :is(.page-footer, .page_footer) .velaFooterMenu .velaContent {
+        display: block !important;
+        max-height: none !important;
+        overflow: visible !important;
+    }
+
+    body .page-wrapper .page_footer .footer-container .container > .row {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        align-items: stretch !important;
+    }
+}
+
+@media (min-width: 992px) {
+    body .page-wrapper .page_footer .footer-container .container > .row > .col-lg-3 {
+        flex: 0 0 25% !important;
+        max-width: 25% !important;
+        width: 25% !important;
+    }
+}
+
+// ── Mirasvit autocomplete layering (overflow + z-index; positioning em _awa-search-autocomplete.less) ──
+body.searchautocomplete__active .page-wrapper .header .top-search .block-search form#search_mini_form,
+body.searchautocomplete__active .page-wrapper .header .top-search .block-search form.form.minisearch,
+body.searchautocomplete__active .page-wrapper .header .top-search .block-search .field.search,
+body.searchautocomplete__active .page-wrapper .header .top-search .block-search .field.search .control,
+body.searchautocomplete__active .page-wrapper .awa-site-header .awa-header-search-col .block-search form#search_mini_form,
+body.searchautocomplete__active .page-wrapper .awa-site-header .awa-header-search-col .block-search form.form.minisearch,
+body.searchautocomplete__active .page-wrapper .awa-site-header .awa-header-search-col .block-search .field.search,
+body.searchautocomplete__active .page-wrapper .awa-site-header .awa-header-search-col .block-search .field.search .control {
+    overflow: visible !important;
+}
+
+body .page-wrapper .header .top-search .block-search .field.search .control,
+body .page-wrapper .awa-site-header .awa-header-search-col .block-search .field.search .control {
+    position: relative !important;
+}
+
+body.searchautocomplete__active .page-wrapper .header .top-search .block-search,
+body.searchautocomplete__active .page-wrapper .header .top-search .block-search #search_mini_form,
+body.searchautocomplete__active .page-wrapper .header .top-search .block-search .field.search,
+body.searchautocomplete__active .page-wrapper .header .top-search .block-search .field.search .control,
+body.searchautocomplete__active .page-wrapper .awa-site-header .awa-header-search-col .block-search,
+body.searchautocomplete__active .page-wrapper .awa-site-header .awa-header-search-col .block-search #search_mini_form,
+body.searchautocomplete__active .page-wrapper .awa-site-header .awa-header-search-col .block-search .field.search,
+body.searchautocomplete__active .page-wrapper .awa-site-header .awa-header-search-col .block-search .field.search .control {
+    position: relative !important;
+    z-index: 100120 !important;
+}
+
+body.searchautocomplete__active .page-wrapper .header .top-search .block-search .mst-searchautocomplete__autocomplete,
+body.searchautocomplete__active .page-wrapper .header .top-search .block-search .mst-searchautocomplete__wrapper,
+body.searchautocomplete__active .page-wrapper .awa-site-header .awa-header-search-col .block-search .mst-searchautocomplete__autocomplete,
+body.searchautocomplete__active .page-wrapper .awa-site-header .awa-header-search-col .block-search .mst-searchautocomplete__wrapper {
+    z-index: 100130 !important;
+}
+
+body.searchautocomplete__active .page-wrapper .menu_left_home1 .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown {
+    display: inherit !important;
+}
+
+body.searchautocomplete__active .page-wrapper .menu_left_home1 .navigation.verticalmenu.side-verticalmenu > .title-category-dropdown {
+    visibility: visible !important;
+}
+
+@media (max-width: (@awa-breakpoint-md - 1)) {
+    body #header .awa-header-search-col .mst-searchautocomplete__autocomplete,
+    body #header .mst-searchautocomplete__autocomplete {
+        left: 0 !important;
+        width: 100% !important;
+        max-width: calc(100vw - 24px) !important;
+        margin-top: var(--awa-space-1, 4px) !important;
+    }
+}

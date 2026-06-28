@@ -1,0 +1,290 @@
+// =============================================================================
+// §103 — Architecture + Visual Modern (2026-06-08)
+// /impeccable layout — Magento 2 (.page-main > .columns) + padrões 2025-2026:
+// tiers semânticos, container queries, grid areas, surfaces flat, tipografia
+// operacional fixa. Igual peso: arquitetura (estrutura) + modernização (UI).
+// =============================================================================
+
+@import (once) '_awa-tokens';
+@import (once) '_design-system';
+@import (once) '_awa-page-containers';
+
+@awa-arch-not-home: ~'html body#html-body:not(.cms-index-index):not(.cms-home):not(.cms-homepage_ayo_home5)';
+@awa-arch-catalog: ~'html body#html-body:is(.catalog-category-view, .catalogsearch-result-index, .catalog-product-view)';
+@awa-arch-plp: ~'html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)';
+@awa-arch-ops: ~'html body#html-body:is(.catalog-category-view, .catalogsearch-result-index, .catalog-product-view, .checkout-cart-index, .account, .customer-account-index, [class*="b2b-"])';
+@awa-arch-home: ~'html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)';
+@awa-arch-product-surfaces: ~'html body#html-body:is(.catalog-category-view, .catalogsearch-result-index, .catalog-product-view, .cms-index-index, .cms-home, .cms-homepage_ayo_home5)';
+
+// ── Vocabulário runtime: arquitetura + surfaces (2025-2026) ─────────────────
+:root {
+    --awa-arch-version: '103';
+    --awa-surface-base: var(--awa-bg-surface, @awa-color-white);
+    --awa-surface-muted: var(--awa-bg-soft, @awa-color-bg-soft);
+    --awa-surface-inset: color-mix(in srgb, var(--awa-bg-soft, @awa-color-bg-soft) 88%, var(--awa-border, @awa-color-border));
+    --awa-border-hairline: color-mix(in srgb, var(--awa-border, @awa-color-border) 80%, transparent);
+    --awa-chrome-gutter: var(--awa-shell-gutter, @awa-page-pad-catalog);
+    --awa-layout-gap-block: var(--awa-grid-gap-loose, @awa-space-6);
+    --awa-layout-gap-inline: var(--awa-grid-gap-tight, @awa-space-4);
+    --awa-layout-sidebar-min: 220px;
+    --awa-layout-sidebar-max: 280px;
+    --awa-layout-tier: 1;
+    --awa-layout-max: var(--awa-page-catalog, @awa-page-catalog);
+    --awa-ui-radius: var(--awa-radius-sm, @awa-radius-sm);
+    --awa-ui-border: 1px solid var(--awa-border, @awa-color-border);
+    --awa-ui-shadow-none: none;
+    --awa-ui-shadow-hover: 0 0 0 1px color-mix(in srgb, var(--awa-primary, @awa-color-primary) 18%, var(--awa-border, @awa-color-border));
+}
+
+// ── Tier semantics no body (bridge Magento layout handle → CSS tier) ─────────
+body.catalog-category-view,
+body.catalog-product-view,
+body.catalogsearch-result-index,
+body.checkout-cart-index {
+    --awa-layout-tier: 1;
+    --awa-layout-max: @awa-page-catalog;
+    --awa-chrome-gutter: @awa-page-pad-catalog;
+}
+
+body:is(.account, .customer-account-index, .sales-order-history, .sales-order-view, .wishlist-index-index, .b2b-account-dashboard, .b2b-company-index, .b2b-credit-index) {
+    --awa-layout-tier: 2;
+    --awa-layout-max: @awa-page-dash;
+    --awa-chrome-gutter: @awa-page-pad-desktop;
+}
+
+body:is(.b2b-quote-index, .b2b-quote-view, .b2b-shoppinglist-index, .b2b-quickorder-index) {
+    --awa-layout-tier: 3;
+    --awa-layout-max: @awa-page-flow;
+}
+
+body:is(.customer-account-login, .customer-account-create, .checkout-index-index) {
+    --awa-layout-tier: 4;
+    --awa-layout-max: @awa-page-narrow;
+}
+
+body:is(.cms-page-view, .cms-noroute-index, .contact-index-index) {
+    --awa-layout-tier: 5;
+    --awa-layout-max: @awa-page-prose;
+}
+
+body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) {
+    --awa-layout-tier: 0;
+    --awa-layout-max: 100%;
+    --awa-chrome-gutter: @awa-page-pad-catalog;
+}
+
+// ── Mixin: painel flat moderno (cart, B2B, filtros) ─────────────────────────
+.awa-panel-modern() {
+    background: var(--awa-surface-base) !important;
+    border: var(--awa-ui-border) !important;
+    border-radius: var(--awa-ui-radius) !important;
+    box-shadow: var(--awa-ui-shadow-none) !important;
+}
+
+// ── Mixin: card de produto universal (flat catalog 2025-2026) ───────────────
+.awa-product-card-modern() {
+    .awa-panel-modern();
+    min-width: 0 !important;
+    overflow: hidden !important;
+    transition: border-color 150ms @awa-ease, box-shadow 150ms @awa-ease !important;
+
+    @media (hover: hover) and (pointer: fine) {
+        &:hover {
+            border-color: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 22%, var(--awa-border, @awa-color-border)) !important;
+            box-shadow: var(--awa-ui-shadow-hover) !important;
+        }
+    }
+}
+
+// ── Magento 2: container query host (.page-main) ─────────────────────────────
+@{awa-arch-not-home} .page-wrapper .page-main {
+    container-type: inline-size;
+    container-name: awa-page;
+}
+
+@{awa-arch-home} .page-wrapper .content-top-home {
+    container-type: inline-size;
+    container-name: awa-home;
+}
+
+// ── Magento 2: columns host — gap unificado (substitui margens Bootstrap) ───
+// PLP/busca: gap próprio (12px col / 0 row) — não herdar --awa-layout-gap-inline 16px.
+@{awa-arch-not-home}:not(.checkout-index-index):not(.onepagecheckout-index-index):not(.catalog-category-view):not(.catalogsearch-result-index) .page-wrapper {
+    .page-main > .columns {
+        gap: var(--awa-layout-gap-inline) !important;
+    }
+}
+
+@{awa-arch-plp} .page-wrapper .page-main > .columns.layout.layout-2-col {
+    column-gap: 12px !important;
+    row-gap: 0 !important;
+    gap: 0 12px !important;
+}
+
+// ── Tipografia operacional: escala fixa/rem (product register Impeccable) ───
+@{awa-arch-ops} .page-wrapper :is(.column.main, .col-main) {
+    font-size: @awa-font-size-14 !important;
+    line-height: 1.5 !important;
+    color: var(--awa-text, @awa-color-text-primary) !important;
+}
+
+// ── PLP/busca: grid responsivo — mobile 2 col fixas; tablet+ auto-fill ───────
+@{awa-arch-plp} .page-wrapper {
+    :is(ul.row.product-grid, ul.container-products-switch, .products-grid .product-items) {
+        display: grid !important;
+        gap: var(--awa-grid-gap, clamp(12px, 1.5vw, 20px)) !important;
+        align-items: stretch !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+}
+
+// Mobile (<768px): 2 colunas full-width — auto-fill minmax(220px) colapsa para 1 col
+@media (max-width: (@awa-bp-768 - 1)) {
+    @{awa-arch-plp} .page-wrapper :is(ul.row.product-grid, ul.container-products-switch, .products-grid .product-items) {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: @awa-space-3 !important;
+    }
+}
+
+// Tablet+ (≥768px): auto-fill adaptativo + container queries
+@media (min-width: @awa-bp-768) {
+    @{awa-arch-plp} .page-wrapper :is(ul.row.product-grid, ul.container-products-switch, .products-grid .product-items) {
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
+    }
+}
+
+@container awa-page (min-width: 900px) {
+    @{awa-arch-plp} .page-wrapper :is(ul.row.product-grid, .products-grid .product-items) {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important;
+    }
+}
+
+@container awa-page (min-width: 1280px) {
+    @{awa-arch-plp} .page-wrapper :is(ul.row.product-grid, .products-grid .product-items) {
+        grid-template-columns: repeat(auto-fill, minmax(188px, 1fr)) !important;
+        gap: 16px !important;
+    }
+}
+
+// ── Card de produto: PLP + home + related (vocabulário único) ─────────────────
+@{awa-arch-product-surfaces} .page-wrapper {
+    :is(.item-product, .product-item, .content-item-product, .awa-product-card, .item-product.awa-carousel-card-slot) {
+        .awa-product-card-modern();
+    }
+
+    :is(.item-product, .product-item) :is(.product-thumb, .product-image-container, .product-thumb-link) {
+        aspect-ratio: 1 / 1 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: var(--awa-surface-muted) !important;
+        border-bottom: var(--awa-ui-border) !important;
+    }
+
+    :is(.item-product, .product-item) :is(.product-thumb img, .product-image-photo) {
+        object-fit: contain !important;
+        width: 100% !important;
+        height: 100% !important;
+    }
+
+    :is(.item-product, .product-item) :is(h3.product-name a, .product-item-link, .product-name a) {
+        display: -webkit-box !important;
+        -webkit-line-clamp: 2 !important;
+        -webkit-box-orient: vertical !important;
+        overflow: hidden !important;
+        font-size: @awa-font-size-13 !important;
+        font-weight: @awa-weight-semibold !important;
+        line-height: 1.35 !important;
+        text-wrap: wrap !important;
+    }
+
+    :is(.item-product, .product-item) .price {
+        font-size: @awa-font-size-16 !important;
+        font-weight: @awa-weight-bold !important;
+        font-variant-numeric: tabular-nums !important;
+        color: var(--awa-ink, @awa-color-text-primary) !important;
+    }
+}
+
+// ── PDP: buy-box em Flexbox 52/48 (≥992px) — robusto p/ .row Bootstrap ──────
+// O .row do tema injeta ::before/::after (clearfix). Em CSS Grid esses pseudos
+// viram grid items e ocupam r1c1/r2c2, empurrando a galeria p/ a coluna 2 e a
+// info p/ a linha 2 (layout espremido à esquerda). Flexbox tolera os pseudos
+// (itens de largura zero); ainda assim os neutralizamos por segurança.
+html body#html-body.catalog-product-view .page-wrapper .main-detail > .row {
+    &::before,
+    &::after {
+        display: none !important;
+    }
+}
+
+@media (min-width: @awa-bp-992) {
+    html body#html-body.catalog-product-view .page-wrapper .main-detail > .row {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        align-items: flex-start !important;
+        gap: clamp(24px, 2.5vw, 40px) !important;
+
+        > .col-md-6:first-child {
+            flex: 1 1 54% !important;
+            max-width: 54% !important;
+            width: auto !important;
+            min-width: 0 !important;
+            padding-inline: 0 !important;
+        }
+
+        > .col-md-6:last-child {
+            flex: 1 1 46% !important;
+            max-width: 46% !important;
+            width: auto !important;
+            min-width: 0 !important;
+            padding-inline: 0 !important;
+        }
+    }
+
+    // Galeria preenche a coluna (anula max-width:50% / flex-basis parasitas de
+    // regras antigas que tratavam .product.media como filho direto do .row).
+    html body#html-body.catalog-product-view .page-wrapper .main-detail > .row > .col-md-6:first-child .product.media {
+        width: 100% !important;
+        max-width: 100% !important;
+        flex: 1 1 auto !important;
+    }
+}
+
+// ── Painéis operacionais: cart summary, filtros, blocos B2B ─────────────────
+@{awa-arch-not-home} .page-wrapper {
+    :is(.cart-summary, .block.filter, .filter-current, .awa-b2b-pdp-tier, .block-dashboard-info) {
+        .awa-panel-modern();
+    }
+}
+
+// ── Chrome alignment: header inner usa mesmo gutter do tier ─────────────────
+@media (min-width: @awa-bp-992) {
+    @{awa-arch-not-home}:not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper {
+        .awa-site-header :is(.awa-main-header__inner[data-awa-header-row], .awa-main-header__inner.wp-header) {
+            padding-inline: var(--awa-chrome-gutter, @awa-page-pad-catalog) !important;
+        }
+    }
+}
+
+// ── Home: vitrines respeitam shell catalog + container home ─────────────────
+@{awa-arch-home} .page-wrapper {
+    :is(.rokan-bestseller.awa-shelf, .rokan-newproduct.awa-shelf, .awa-carousel-section) {
+        max-width: var(--awa-layout-max, @awa-page-catalog) !important;
+        margin-inline: auto !important;
+        padding-inline: var(--awa-chrome-gutter, @awa-page-pad-catalog) !important;
+    }
+}
+
+@container awa-home (min-width: 1200px) {
+    @{awa-arch-home} .page-wrapper .content-top-home .awa-carousel-section {
+        --awa-home-carousel-cols: 5;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    @{awa-arch-product-surfaces} .page-wrapper :is(.item-product, .product-item, .awa-product-card):hover {
+        transition: none !important;
+    }
+}

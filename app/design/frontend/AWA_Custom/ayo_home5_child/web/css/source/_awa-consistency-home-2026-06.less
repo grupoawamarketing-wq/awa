@@ -1,0 +1,175 @@
+// =============================================================================
+// _awa-consistency-home-2026-06.less
+// §85 — /impeccable consistency home (2026-06-08)
+// Contrato único: cabeçalhos, chrome de carrossel, links de seção, cards.
+// Final-wins sobre drift entre §70–§82 e bundles async.
+// =============================================================================
+
+@import (once) '_awa-tokens';
+@import (once) '_design-system';
+
+html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper {
+    :is(.content-top-home, .ayo-home5-wrapper--template-driven) {
+        // ── Subtítulos: mesma voz em categorias e vitrines ───────────────────
+        :is(.awa-section-header__subtitle, .awa-shelf__subtitle, .awa-category-carousel__subtitle) {
+            margin: @awa-space-1 0 0;
+            max-width: 65ch;
+            color: var(--awa-text-secondary, @awa-color-text-muted);
+            font-size: ~'max(13px, 0.8125rem)';
+            line-height: 1.45;
+            text-wrap: pretty;
+        }
+
+        // ── Links de seção (Ver todos / Ver catálogo) ─────────────────────────
+        :is(.awa-section-header__link, .awa-shelf__view-all, .awa-category-carousel__cta-link) {
+            display: inline-flex;
+            align-items: center;
+            gap: @awa-space-1;
+            align-self: start;
+            min-height: @awa-touch-target-min;
+            padding: @awa-space-1 @awa-s-2;
+            border: 0;
+            border-radius: @awa-radius-sm;
+            background: transparent;
+            color: var(--awa-primary, @awa-color-primary);
+            font-size: ~'max(13px, 0.8125rem)';
+            font-weight: @awa-weight-semibold;
+            line-height: 1.35;
+            text-decoration: none;
+            white-space: nowrap;
+            transition: background-color 120ms @awa-ease, color 120ms @awa-ease;
+
+            svg {
+                flex-shrink: 0;
+                margin-inline-start: 2px;
+            }
+
+            &:focus-visible {
+                outline: 2px solid var(--awa-primary, @awa-color-primary);
+                outline-offset: 2px;
+            }
+        }
+
+        .awa-category-carousel__cta {
+            display: flex;
+            justify-content: flex-end;
+            margin-block-start: @awa-space-2;
+        }
+
+        // ── Chrome de navegação: categorias = produto ────────────────────────
+        :is(
+            .awa-shelf--carousel .awa-owl-nav__btn,
+            .top-home-content--category-carousel .awa-category-carousel__prev,
+            .top-home-content--category-carousel .awa-category-carousel__next
+        ) {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: @awa-touch-target-min;
+            height: @awa-touch-target-min;
+            min-width: @awa-touch-target-min;
+            min-height: @awa-touch-target-min;
+            padding: 0;
+            border: 1px solid var(--awa-border, @awa-color-border);
+            border-radius: @awa-radius-sm;
+            background: var(--awa-bg, @awa-color-white);
+            color: var(--awa-text, @awa-color-text-primary);
+            box-shadow: none;
+            transition: border-color 120ms @awa-ease, background-color 120ms @awa-ease, color 120ms @awa-ease;
+
+            &:focus-visible {
+                outline: 2px solid var(--awa-primary, @awa-color-primary);
+                outline-offset: 2px;
+            }
+
+            &:disabled,
+            &.is-disabled,
+            &[aria-disabled='true'] {
+                opacity: 0.45;
+                cursor: not-allowed;
+            }
+        }
+
+        .awa-shelf--carousel .awa-owl-progress {
+            height: 4px;
+            border-radius: @awa-radius-sm;
+            background: color-mix(in srgb, var(--awa-border, @awa-color-border) 85%, transparent);
+        }
+
+        // ── Cards: mesma moldura em todos os tiers ─────────────────────────────
+        .awa-shelf--carousel :is(.awa-product-card, .content-item-product) {
+            border: 1px solid var(--awa-border, @awa-color-border);
+            border-radius: @awa-radius-sm;
+            background: var(--awa-bg, @awa-color-white);
+        }
+
+        // ── Ritmo de cabeçalho por tier ───────────────────────────────────────
+        .awa-carousel-section--featured :is(.awa-section-header, .awa-shelf__header) {
+            margin-block-end: @awa-s-3;
+        }
+
+        .awa-carousel-section--standard :is(.awa-section-header, .awa-shelf__header),
+        .top-home-content--category-carousel :is(.awa-section-header, .awa-category-carousel__header) {
+            margin-block-end: @awa-s-3;
+        }
+
+        .awa-carousel-section--compact :is(.awa-section-header, .awa-shelf__header) {
+            margin-block-end: @awa-space-2;
+        }
+    }
+}
+
+html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5):not(.customer-logged-in) .page-wrapper {
+    :is(.content-top-home, .ayo-home5-wrapper--template-driven) {
+        .awa-carousel-section--featured .awa-shelf--carousel .b2b-login-to-see-price .price-label a.b2b-login-link {
+            min-height: @awa-touch-target-min;
+        }
+    }
+}
+
+@media (hover: hover) and (pointer: fine) {
+    html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper {
+        :is(.content-top-home, .ayo-home5-wrapper--template-driven) {
+            :is(.awa-section-header__link, .awa-shelf__view-all, .awa-category-carousel__cta-link):hover {
+                background: var(--awa-primary-subtle, fade(@awa-color-primary, 8%));
+                color: var(--awa-primary-dark, @awa-color-primary-dark);
+                text-decoration: none;
+            }
+
+            .awa-shelf--carousel .awa-owl-nav__btn:hover:not(:disabled):not(.is-disabled):not([aria-disabled='true']) {
+                border-color: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 35%, var(--awa-border, @awa-color-border));
+                color: var(--awa-primary, @awa-color-primary);
+                background: var(--awa-bg, @awa-color-white);
+            }
+
+            .top-home-content--category-carousel .awa-category-carousel__prev:hover:not(.is-disabled):not([disabled]):not([aria-disabled='true']),
+            .top-home-content--category-carousel .awa-category-carousel__next:hover:not(.is-disabled):not([disabled]):not([aria-disabled='true']) {
+                border-color: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 35%, var(--awa-border, @awa-color-border));
+                color: var(--awa-primary, @awa-color-primary);
+                background: var(--awa-bg, @awa-color-white);
+            }
+        }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper {
+        :is(.content-top-home, .ayo-home5-wrapper--template-driven) {
+            :is(.awa-section-header__link, .awa-shelf__view-all, .awa-category-carousel__cta-link),
+            :is(.awa-shelf--carousel .awa-owl-nav__btn, .awa-category-carousel__prev, .awa-category-carousel__next) {
+                transition: none;
+            }
+        }
+    }
+}
+
+@media (max-width: 767px) {
+    html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper {
+        :is(.content-top-home, .ayo-home5-wrapper--template-driven) {
+            :is(.awa-section-header__link, .awa-shelf__view-all, .awa-category-carousel__cta-link) {
+                white-space: normal;
+                text-align: start;
+            }
+        }
+    }
+}

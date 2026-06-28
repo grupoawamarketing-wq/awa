@@ -1,0 +1,353 @@
+// =============================================================================
+// §APR — AWA Polish Refine (2026-06-10)
+// Refinamentos pós-bugfix: promo mobile, ritmo home, ícones benefícios, cart.
+// Carrega APÓS _awa-bugfix-visual-2026-06.less (wins finais pontuais).
+// =============================================================================
+
+@import (once) '_awa-tokens';
+
+@awa-apr-home: ~'html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper';
+
+// Variantes curtas ocultas por padrão (mobile as revela)
+html body#html-body .page-wrapper
+    .awa-b2b-promo-bar
+    :is(.awa-b2b-promo-bar__lead-short, .awa-b2b-promo-bar__cta-short) {
+    display: none;
+}
+
+// ── Promo bar mobile: copy curta, 11px, contraste, sem artefato ::before ───
+@media (max-width: 767px) {
+    html body#html-body:not(#awa-bfv-never) .page-wrapper
+        .awa-site-header:not(.awa-header-condensed)
+        .top-header.awa-utility-bar.awa-b2b-promo-bar {
+        height: auto !important;
+        min-height: 32px !important;
+        max-height: none !important;
+        padding-block: 5px !important;
+        overflow: visible !important;
+    }
+
+    html body#html-body:not(#awa-bfv-never) .page-wrapper
+        .awa-site-header:not(.awa-header-condensed)
+        .awa-b2b-promo-bar
+        :is(.awa-b2b-promo-bar__inner, .awa-b2b-promo-bar__layout, .awa-b2b-promo-bar__text) {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 0 6px !important;
+        height: auto !important;
+        max-height: none !important;
+        margin: 0 !important;
+        overflow: visible !important;
+    }
+
+    // Copy longa vs curta (header.phtml)
+    html body#html-body:not(#awa-bfv-never) .page-wrapper
+        .awa-site-header:not(.awa-header-condensed)
+        .awa-b2b-promo-bar__lead-long,
+    html body#html-body:not(#awa-bfv-never) .page-wrapper
+        .awa-site-header:not(.awa-header-condensed)
+        .awa-b2b-promo-bar__cta-long {
+        display: none !important;
+    }
+
+    html body#html-body:not(#awa-bfv-never) .page-wrapper
+        .awa-site-header:not(.awa-header-condensed)
+        :is(.awa-b2b-promo-bar__lead-short, .awa-b2b-promo-bar__cta-short),
+    html body#html-body:not(#awa-bfv-never) .page-wrapper
+        .awa-site-header:not(.awa-header-condensed)
+        strong.awa-b2b-promo-bar__cta-short {
+        display: inline !important;
+    }
+
+    html body#html-body:not(#awa-bfv-never) .page-wrapper
+        .awa-site-header:not(.awa-header-condensed)
+        .awa-b2b-promo-bar__tail {
+        display: none !important;
+    }
+
+    // Ícone ::before legado (defer-global) — artefato cinza na borda
+    html body#html-body:not(#awa-bfv-never) .page-wrapper
+        .awa-site-header:not(.awa-header-condensed)
+        .awa-b2b-promo-bar__lead::before,
+    html body#html-body:not(#awa-bfv-never) .page-wrapper
+        .awa-site-header:not(.awa-header-condensed)
+        .awa-b2b-promo-bar
+        :is(svg, .awa-b2b-promo-bar__icon, [class*="icon"]) {
+        display: none !important;
+        content: none !important;
+        width: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    html body#html-body:not(#awa-bfv-never) .page-wrapper
+        .awa-site-header:not(.awa-header-condensed)
+        .awa-b2b-promo-bar
+        :is(.awa-b2b-promo-bar__text, .awa-b2b-promo-bar__lead,
+            .awa-b2b-promo-bar__lead-short, .awa-b2b-promo-bar__separator,
+            .awa-b2b-promo-bar__cta, .awa-b2b-promo-bar__cta-short) {
+        color: var(--awa-text-inverse, @awa-color-white) !important;
+        font-size: 11px !important;
+        line-height: 1.35 !important;
+        white-space: nowrap !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        padding-block: 0 !important;
+        margin-block: 0 !important;
+        opacity: 1 !important;
+    }
+
+    html body#html-body:not(#awa-bfv-never) .page-wrapper
+        .awa-site-header:not(.awa-header-condensed)
+        .awa-b2b-promo-bar .awa-b2b-promo-bar__cta {
+        text-decoration: underline !important;
+        text-underline-offset: 2px !important;
+    }
+}
+
+// ── Variantes long/short: terminal wins ──────────────────────────────────────
+// Especificidade alta de propósito: vence
+//   - _awa-header-refine-terminal (display:inline!important em `__cta strong`)
+//   - awa-ui-simplify-terminal (color cinza em `__text span`)
+// que casam com as spans internas novas do header.phtml.
+html body#html-body .page-wrapper
+    .awa-site-header
+    .top-header.awa-utility-bar.awa-b2b-promo-bar
+    .awa-b2b-promo-bar__text
+    :is(.awa-b2b-promo-bar__lead-long, .awa-b2b-promo-bar__lead-short,
+        .awa-b2b-promo-bar__cta-long, .awa-b2b-promo-bar__cta-short) {
+    color: var(--awa-text-inverse, @awa-color-white) !important;
+    background: transparent !important;
+}
+
+@media (min-width: 768px) {
+    html body#html-body .page-wrapper
+        .awa-site-header
+        .top-header.awa-utility-bar.awa-b2b-promo-bar
+        .awa-b2b-promo-bar__text
+        :is(span.awa-b2b-promo-bar__lead-short, strong.awa-b2b-promo-bar__cta-short) {
+        display: none !important;
+    }
+}
+
+@media (max-width: 767px) {
+    html body#html-body .page-wrapper
+        .awa-site-header
+        .top-header.awa-utility-bar.awa-b2b-promo-bar
+        .awa-b2b-promo-bar__text
+        :is(span.awa-b2b-promo-bar__lead-long, strong.awa-b2b-promo-bar__cta-long) {
+        display: none !important;
+    }
+}
+
+// ── Home: ritmo vertical — shelves + footer ──────────────────────────────────
+@media (min-width: 768px) {
+    @{awa-apr-home} {
+        --awa-home-pad-standard: clamp(22px, 2vw, 36px);
+        --awa-home-pad-compact: clamp(16px, 1.5vw, 24px);
+    }
+
+    @{awa-apr-home}
+        .ayo-home5-wrapper > .awa-carousel-section--standard {
+        padding-block: var(--awa-home-pad-standard);
+    }
+
+    @{awa-apr-home}
+        .ayo-home5-wrapper > .awa-carousel-section--compact {
+        padding-block: var(--awa-home-pad-compact);
+    }
+
+    // Viewport: padding-block só para bleed de badge — reduzir quando pronto
+    @{awa-apr-home}
+        .awa-shelf--carousel.awa-carousel-ready
+        .awa-carousel__viewport {
+        padding-block: 4px !important;
+    }
+
+    @{awa-apr-home} main.page-main {
+        min-height: 40px !important;
+    }
+}
+
+@{awa-apr-home}
+    :is(.rokan-bestseller, .rokan-newproduct, .rokan-featured).awa-shelf--carousel:has(.awa-carousel__track) {
+    gap: @awa-space-1 !important;
+}
+
+// ── Títulos de seção: escala única (vence special-case "Mais Vendidos") ──────
+// awa-homepage-hierarchy/gate bundles aplicam 28–36px só na seção
+// [aria-label*="Mais Vendidos"], quebrando a escala SSOT dos demais títulos.
+// Especificidade > hotfix (1 id + 7 classes) para vencer independente da ordem.
+@{awa-apr-home}
+    .content-top-home
+    .top-home-content.awa-home-section.awa-carousel-section[aria-label]
+    :is(h2.awa-section-header__title, .awa-section-header__title.awa-shelf__title) {
+    font-size: var(~"--awa-home-section-title, clamp(19px, 16px + 0.35vw, 22px)") !important;
+    font-weight: 700 !important;
+    line-height: 1.22 !important;
+    letter-spacing: -0.01em !important;
+}
+
+// ── Benefícios B2B hero: ícones com contraste legível ────────────────────────
+@{awa-apr-home} .awa-hero-b2b-cta .awa-hero-benefits__icon {
+    color: var(--awa-primary, @awa-color-primary) !important;
+
+    svg {
+        stroke: currentColor !important;
+        opacity: 1 !important;
+    }
+}
+
+@{awa-apr-home} .awa-hero-benefits__title {
+    color: var(--awa-text, @awa-text) !important;
+}
+
+@{awa-apr-home} .awa-hero-benefits__text {
+    color: var(--awa-text-muted, @awa-text-muted) !important;
+}
+
+// Mobile: copy completa nos cards de benefícios (terminal-wins aplicava line-clamp:2)
+@media (max-width: 767px) {
+    @{awa-apr-home} .awa-hero-b2b-cta ul.awa-hero-benefits .awa-hero-benefits__text {
+        display: block !important;
+        overflow: visible !important;
+        -webkit-line-clamp: unset !important;
+        font-size: ~"max(12px, 0.75rem)" !important;
+        line-height: 1.4 !important;
+        text-wrap: pretty !important;
+    }
+}
+
+// ── Mobile: carrinho alinhado ao peso visual do hamburger (sem bloco sólido) ─
+@media (max-width: 767px) {
+    html body#html-body .page-wrapper
+        .awa-site-header:not(.awa-header-condensed)
+        :is(.awa-header-minicart, .minicart-wrapper)
+        .action.showcart,
+    html body#html-body .page-wrapper
+        .awa-site-header:not(.awa-header-condensed)
+        .awa-header-minicart .action.showcart {
+        background: transparent !important;
+        border: 0 !important;
+        box-shadow: none !important;
+        border-radius: var(--awa-radius-sm, 8px) !important;
+        color: var(--awa-primary, @awa-color-primary) !important;
+    }
+}
+
+// ── Ritmo vertical home: vence gate-polish-type padding-top:0 em irmãos adjacentes ─
+@{awa-apr-home} .content-top-home .ayo-home5-wrapper--template-driven {
+    gap: 0 !important;
+    row-gap: 0 !important;
+}
+
+@{awa-apr-home} .content-top-home .ayo-home5-wrapper--template-driven
+> .top-home-content.awa-home-section:not(.top-home-content--above-fold) {
+    padding-block: var(--awa-home-section-gap, clamp(20px, 2vw, 32px)) !important;
+    padding-top: var(--awa-home-section-gap, clamp(20px, 2vw, 32px)) !important;
+    padding-bottom: var(--awa-home-section-gap, clamp(20px, 2vw, 32px)) !important;
+    margin-block: 0 !important;
+}
+
+@{awa-apr-home} .content-top-home .ayo-home5-wrapper--template-driven
+> .top-home-content + .top-home-content {
+    padding-top: var(--awa-home-section-gap, clamp(20px, 2vw, 32px)) !important;
+}
+
+@media (max-width: 767px) {
+    @{awa-apr-home} .content-top-home .ayo-home5-wrapper--template-driven
+    > .top-home-content.awa-home-section:not(.top-home-content--above-fold) {
+        padding-block: clamp(16px, 4vw, 24px) !important;
+        padding-top: clamp(16px, 4vw, 24px) !important;
+        padding-bottom: clamp(16px, 4vw, 24px) !important;
+    }
+
+    @{awa-apr-home} .content-top-home .ayo-home5-wrapper--template-driven
+    > .top-home-content + .top-home-content {
+        padding-top: clamp(16px, 4vw, 24px) !important;
+    }
+}
+
+// ── Badges NOVO/PROMOÇÃO: px explícito (root 10px quebra rem) + cobre .content-item-product ─
+@{awa-apr-home} .awa-shelf--carousel
+:is(.content-item-product, .item-product) .product-thumb .hot-onsale .onsale {
+    font-size: 11px !important;
+    border-radius: 4px !important;
+    padding: 4px 8px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.04em !important;
+    line-height: 1.2 !important;
+}
+
+@{awa-apr-home} .awa-shelf--carousel
+:is(.content-item-product, .item-product) .product-thumb .hot-onsale .onsale .sale-text {
+    font-size: 11px !important;
+}
+
+@{awa-apr-home} .awa-shelf--carousel
+:is(.content-item-product, .item-product) .product-thumb .hot-onsale .onsale.new-lable,
+@{awa-apr-home} .awa-shelf--carousel
+:is(.content-item-product, .item-product) .product-thumb .hot-onsale .onsale.new-lable .sale-text,
+@{awa-apr-home} .awa-shelf--carousel
+:is(.content-item-product, .item-product) .product-thumb .hot-onsale .onsale.new-lable .sale-text label {
+    background: @awa-color-dark !important;
+    color: @awa-color-white !important;
+    box-shadow: none !important;
+}
+
+// ── Cards home: SSOT 12px + sombra (alinhado impeccable-refine + category carousel) ─
+@{awa-apr-home} {
+    --awa-home-card-radius: 12px;
+    --awa-home-card-shadow: 0 1px 4px rgb(15 23 42 / 6%);
+}
+
+@{awa-apr-home} .content-top-home .awa-shelf--carousel
+:is(.content-item-product, .awa-product-card, .item-product.awa-carousel-card-slot) {
+    border-radius: 12px !important;
+    box-shadow: 0 1px 4px rgb(15 23 42 / 6%) !important;
+    overflow: hidden !important;
+}
+
+@{awa-apr-home} .top-home-content--category-carousel
+:is(.awa-category-carousel__item, .awa-category-carousel__item--compact) {
+    border-radius: var(--awa-home-card-radius, 12px) !important;
+    box-shadow: 0 1px 3px rgb(15 23 42 / 5%) !important;
+    border: 1px solid color-mix(in srgb, var(--awa-border, @awa-color-border) 88%, transparent) !important;
+}
+
+@{awa-apr-home} .content-top-home .awa-shelf--carousel
+:is(.product-name a, .product-item-link) {
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    line-height: 1.35 !important;
+}
+
+// ── A11y: alvo de toque do CTA da promo bar mobile (≥24px — WCAG 2.5.8) ───────
+// As regras 86-104 zeram min-height/padding-block do __cta; aqui devolvemos altura
+// clicável mantendo o texto centrado (sem alterar o visual da barra).
+@media (max-width: 767px) {
+    html body#html-body:not(#awa-bfv-never) .page-wrapper
+        .awa-site-header:not(.awa-header-condensed)
+        .awa-b2b-promo-bar .awa-b2b-promo-bar__cta {
+        display: inline-flex !important;
+        align-items: center !important;
+        min-height: 24px !important;
+        padding-block: 4px !important;
+    }
+}
+
+// ── Normaliza font-size do wrapper da utility/promo bar ───────────────────────
+// Tokens text-xs (`--m-text-xs`, `--awa-text-xs`...) resolvem para 0.6875rem
+// (= 6.875px no root 10px). O texto visível já usa 11px via filhos; aqui o wrapper
+// deixa de herdar um valor minúsculo frágil. `!important` vence o
+// `.awa-b2b-promo-bar { font-size: var(--m-text-xs) !important }` (especificidade maior).
+html body#html-body .page-wrapper .awa-site-header .top-header.awa-utility-bar,
+html body#html-body .page-wrapper .awa-utility-bar {
+    font-size: 11px !important;
+}
