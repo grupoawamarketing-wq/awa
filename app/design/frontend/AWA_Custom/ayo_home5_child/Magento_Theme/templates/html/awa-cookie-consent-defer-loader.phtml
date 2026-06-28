@@ -1,0 +1,31 @@
+<?php declare(strict_types=1);
+
+/**
+ * AWA Cookie Consent — carrega CSS async (head não aceita inline script).
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ */
+$cookieFixUrl = $block->getViewFileUrl('css/awa-cookie-consent-fix.min.css');
+$urlJson = json_encode($block->escapeUrl($cookieFixUrl), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+?>
+<script>
+(function (d, url) {
+    'use strict';
+    if (!url || d.querySelector('link[data-awa-cookie-consent-css="1"]')) {
+        return;
+    }
+    function load() {
+        var link = d.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = url;
+        link.media = 'all';
+        link.setAttribute('data-awa-cookie-consent-css', '1');
+        d.head.appendChild(link);
+    }
+    if ('requestIdleCallback' in window) {
+        requestIdleCallback(load, { timeout: 2000 });
+    } else {
+        setTimeout(load, 600);
+    }
+}(document, <?= /* @noEscape */ $urlJson ?>));
+</script>

@@ -1,0 +1,57 @@
+<?php
+declare(strict_types=1);
+/**
+ * Carrinho: fallback se o boot inline em awa-customer-sections-defer.phtml não rodou.
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ */
+?>
+<script>
+(function (w, d) {
+    'use strict';
+
+    var started = false;
+
+    function boot() {
+        if (started || window.__awaCustomerSectionsBootstrapStarted) {
+            return;
+        }
+
+        var node = d.getElementById('awa-customer-sections-defer-json');
+        if (!node || !node.textContent) {
+            return;
+        }
+
+        started = true;
+
+        var run = function () {
+            w.require(['js/awa-customer-sections-bootstrap'], function (bootstrapCustomerSections) {
+                var payload;
+
+                try {
+                    payload = JSON.parse(node.textContent);
+                } catch (e) {
+                    return;
+                }
+
+                bootstrapCustomerSections(payload, { immediate: true });
+            });
+        };
+
+        if (typeof w.awaRunWhenRequire === 'function') {
+            w.awaRunWhenRequire(run, { key: 'cart-customer-defer-loader' });
+            return;
+        }
+
+        if (typeof w.require === 'function') {
+            run();
+        }
+    }
+
+    if (d.readyState === 'loading') {
+        d.addEventListener('DOMContentLoaded', boot, { once: true });
+    } else {
+        boot();
+    }
+}(window, document));
+</script>

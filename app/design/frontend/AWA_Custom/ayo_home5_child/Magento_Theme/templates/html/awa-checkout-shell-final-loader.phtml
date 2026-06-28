@@ -1,0 +1,62 @@
+<?php
+/**
+ * Checkout terminal lock — após CSS async (polish / premium).
+ */
+declare(strict_types=1);
+
+/** @var \Magento\Framework\View\Element\Template $block */
+$shellUrl = $block->getViewFileUrl('css/awa-checkout-shell-final.css');
+$assetVersion = '20260619-checkout-b2b-address-v17';
+$shellUrlVersioned = $shellUrl . '?v=' . $assetVersion;
+$asyncInit = json_encode(
+    ['js/awa-async-stylesheet' => ['urls' => [$shellUrlVersioned]]],
+    JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+);
+?>
+<style id="awa-checkout-shell-critical">
+/* Anti-FOUC — 1280px + gap 16px antes do shell-final.css */
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index) {
+    --awa-checkout-shell-max: min(100%, 1280px);
+    --awa-checkout-gap: 16px;
+    --awa-checkout-gap-mobile: 12px;
+}
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.page-wrapper :is(#checkout.checkout-container, .checkout-container) {
+    max-width: min(100%, 1280px) !important;
+    margin-inline: auto !important;
+}
+@media (min-width: 1024px) {
+    html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+    .page-wrapper .checkout-container {
+        gap: 16px !important;
+        grid-template-columns: minmax(0, 1fr) minmax(280px, 320px) !important;
+    }
+	}
+	/* agreements-modal v10 — anti-FOUC antes do shell-final.css */
+    html body#html-body:is(.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index)
+    .modal-popup.agreements-modal:not(._show){display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;position:absolute!important;inset:auto!important;width:0!important;height:0!important;min-width:0!important;min-height:0!important;margin:0!important;overflow:hidden!important}
+	html body#html-body:is(.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index)
+	.modal-popup.agreements-modal._inner-scroll :is(.modal-inner-wrap,.modal-header){overflow:visible!important}
+html body#html-body:is(.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index)
+.modal-popup.agreements-modal._inner-scroll .modal-content{overflow-y:auto!important;max-height:min(70vh,520px)!important}
+html body#html-body:is(.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index)
+.modal-popup.agreements-modal._inner-scroll .modal-header .action-close{width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;overflow:visible!important}
+/* checkout modal v16 — exact shipping address modal fixed in viewport */
+html body#html-body:is(.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index)
+.modal-popup.new-shipping-address-modal.modal-slide._inner-scroll._show{position:fixed!important;inset:0!important;z-index:10010!important;display:flex!important;align-items:center!important;justify-content:center!important;width:100%!important;height:100vh!important;height:100dvh!important;min-height:100vh!important;padding:max(16px,env(safe-area-inset-top,0px)) 16px max(16px,env(safe-area-inset-bottom,0px))!important;box-sizing:border-box!important;overflow:auto!important;transform:none!important;will-change:auto!important}
+html body#html-body:is(.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index)
+.modal-popup.new-shipping-address-modal.modal-slide._inner-scroll._show .modal-inner-wrap{position:relative!important;inset:auto!important;top:auto!important;right:auto!important;bottom:auto!important;left:auto!important;width:min(720px,calc(100vw - 32px))!important;max-width:min(720px,calc(100vw - 32px))!important;max-height:calc(100vh - 32px)!important;max-height:calc(100dvh - 32px)!important;margin:auto!important;overflow:auto!important;transform:none!important;box-sizing:border-box!important}
+html body#html-body:is(.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index)
+.modal-popup.new-shipping-address-modal.modal-slide._inner-scroll._show .modal-header .action-close{position:relative!important;width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;margin:0!important;overflow:visible!important;flex-shrink:0!important}
+html body#html-body:is(.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index) .modals-overlay{position:fixed!important;inset:0!important;width:100%!important;height:100vh!important;height:100dvh!important;z-index:10000!important}
+@media (max-width:767px){html body#html-body:is(.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index)
+.modal-popup.new-shipping-address-modal.modal-slide._inner-scroll._show{align-items:flex-start!important;padding:max(10px,env(safe-area-inset-top,0px)) 10px max(10px,env(safe-area-inset-bottom,0px))!important}
+html body#html-body:is(.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index)
+.modal-popup.new-shipping-address-modal.modal-slide._inner-scroll._show .modal-inner-wrap{width:100%!important;max-width:100%!important;max-height:calc(100vh - 20px)!important;max-height:calc(100dvh - 20px)!important;margin-block:auto!important}}
+</style>
+<link rel="stylesheet"
+      href="<?= $block->escapeUrl($shellUrlVersioned) ?>"/>
+<div class="awa-async-css-loader awa-checkout-shell-final-async" hidden data-mage-init="<?= $block->escapeHtmlAttr($asyncInit) ?>"></div>
+<noscript>
+    <link rel="stylesheet" href="<?= $block->escapeUrl($shellUrlVersioned) ?>"/>
+</noscript>
