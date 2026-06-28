@@ -4,10 +4,11 @@
 define([
     'jquery',
     'ko',
+    'uiRegistry',
     'mage/translate',
     'Magento_Checkout/js/model/quote',
     'domReady!'
-], function ($, ko, $t, quote) {
+], function ($, ko, registry, $t, quote) {
     'use strict';
 
     var TRUST_SELECTOR = '.awa-opc-trust-strip';
@@ -15,15 +16,24 @@ define([
     var STEP_INDICATOR_SELECTOR = '.awa-opc-step-indicator';
     var STEP_INDICATOR_ATTR = 'data-awa-opc-step-indicator';
     var LIVE_REGION_ATTR = 'data-awa-checkout-live';
+    var SHIPPING_ADDRESS_MODAL_SELECTOR = '.modal-popup.new-shipping-address-modal';
+    var B2B_ADDRESS_MODAL_CLASS = 'awa-checkout-b2b-address-modal';
+    var B2B_HIDDEN_FIELD_CLASS = 'awa-b2b-address-field--hidden';
     var PLACE_ORDER_META_SELECTOR = '.awa-place-order-toolbar__meta';
     var PLACE_ORDER_AMOUNT_SELECTOR = '.awa-place-order-toolbar__amount';
     var GRAND_TOTAL_SELECTOR = '.opc-block-summary .grand.totals .amount .price, ' +
         '.opc-block-summary .grand.totals .amount strong, ' +
         '.opc-block-summary .grand.totals .amount';
     var MOBILE_MAX = 767;
+    var SYNC_DEBOUNCE_MS = 100;
+    var QUOTE_PROGRESS_DEBOUNCE_MS = 80;
+    var LOADER_DEBOUNCE_MS = 50;
     var lastIndicatorState = '';
     var lastGrandTotalLabel = '';
     var syncScheduled = false;
+    var syncDebounceTimer = null;
+    var quoteProgressTimer = null;
+    var loaderDebounceTimer = null;
 
     function isCheckoutPage() {
         if (!document.body) {
@@ -42,6 +52,275 @@ define([
 
     function isMobileViewport() {
         return window.matchMedia('(max-width: ' + MOBILE_MAX + 'px)').matches;
+    }
+
+    function normalizeForMatch(value) {
+        var text = String(value || '').toLowerCase();
+
+        if (typeof text.normalize === 'function') {
+            text = text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        }
+
+        return text.replace(/\s+/g, ' ').trim();
+    }
+
+    function getCheckoutProvider() {
+        try {
+            return registry.get('checkoutProvider');
+        } catch (ignore) {
+            return null;
+        }
+    }
+
+    function setProviderValue(path, value) {
+        var provider = getCheckoutProvider();
+
+        if (provider && typeof provider.set === 'function') {
+            provider.set(path, value);
+        }
+    }
+
+    function findFieldFromNode($node) {
+        if (!$node || !$node.length) {
+            return $();
+        }
+
+        if ($node.hasClass('field')) {
+            return $node;
+        }
+
+        return $node.closest('.field');
+    }
+
+    function findFieldBySelectors($scope, selectors) {
+        var $field = $();
+
+        selectors.some(function (selector) {
+            var $node = $scope.find(selector).first();
+
+            $field = findFieldFromNode($node);
+
+            return $field.length > 0;
+        });
+
+        return $field;
+    }
+
+    function findFieldsByLabels($scope, labels) {
+        var normalizedLabels = labels.map(normalizeForMatch);
+        var $fields = $();
+
+        $scope.find('.field').each(function () {
+            var $field = $(this);
+            var label = normalizeForMatch($field.find('label').first().text());
+
+            if (!label) {
+                return;
+            }
+
+            normalizedLabels.some(function (expected) {
+                if (label === expected || label.indexOf(expected) === 0) {
+                    $fields = $fields.add($field);
+                    return true;
+                }
+
+                return false;
+            });
+        });
+
+        return $fields;
+    }
+
+    function findAddressField($scope, selectors, labels) {
+        var $field = findFieldBySelectors($scope, selectors || []);
+
+        if ($field.length || !labels || !labels.length) {
+            return $field;
+        }
+
+        return findFieldsByLabels($scope, labels).first();
+    }
+
+    function getFieldControl($field) {
+        return $field.find('input, select, textarea').first();
+    }
+
+    function getFieldValue($field) {
+        var $control = getFieldControl($field);
+
+        if (!$control.length) {
+            return '';
+        }
+
+        return String($control.val() || '').trim();
+    }
+
+    function setFieldValue($field, value, providerPath) {
+        var $control = getFieldControl($field);
+
+        if (!$control.length) {
+            return;
+        }
+
+        $control.val(value).trigger('change');
+
+        if (providerPath) {
+            setProviderValue(providerPath, value);
+        }
+    }
+
+    function setFieldLabel($field, label) {
+        var $label = $field.find('label.label span, label span').first();
+
+        if (!$field.length || !$label.length) {
+            return;
+        }
+
+        $label.text($t(label));
+
+        getFieldControl($field).attr('title', $t(label));
+    }
+
+    function hideB2BAddressField($field) {
+        if (!$field || !$field.length) {
+            return;
+        }
+
+        $field
+            .addClass(B2B_HIDDEN_FIELD_CLASS)
+            .attr('aria-hidden', 'true');
+    }
+
+    function syncB2BAddressRequiredValues($modal) {
+        var $firstname = findAddressField(
+            $modal,
+            ['.field[name="shippingAddress.firstname"]', 'input[name="firstname"]'],
+            ['Nome']
+        );
+        var $lastname = findAddressField(
+            $modal,
+            ['.field[name="shippingAddress.lastname"]', 'input[name="lastname"]'],
+            ['Sobrenome']
+        );
+        var $company = findAddressField(
+            $modal,
+            ['.field[name="shippingAddress.company"]', 'input[name="company"]'],
+            ['Empresa', 'Razão Social']
+        );
+        var $country = findAddressField(
+            $modal,
+            ['.field[name="shippingAddress.country_id"]', 'select[name="country_id"]'],
+            ['País']
+        );
+        var $personType = findAddressField(
+            $modal,
+            [
+                '.field[name="shippingAddress.custom_attributes.person_type"]',
+                'select[name="custom_attributes[person_type]"]',
+                'select[name="person_type"]'
+            ],
+            ['Tipo de Pessoa']
+        );
+        var companyValue = getFieldValue($company);
+        var lastNameValue = getFieldValue($lastname);
+        var firstNameValue = getFieldValue($firstname);
+
+        if (!companyValue && lastNameValue) {
+            setFieldValue($company, lastNameValue, 'shippingAddress.company');
+            companyValue = lastNameValue;
+        }
+
+        if (!lastNameValue) {
+            setFieldValue(
+                $lastname,
+                companyValue || firstNameValue || 'Empresa',
+                'shippingAddress.lastname'
+            );
+        }
+
+        if ($country.length && !getFieldValue($country)) {
+            setFieldValue($country, 'BR', 'shippingAddress.country_id');
+        }
+
+        if ($personType.length) {
+            setFieldValue($personType, 'pj', 'shippingAddress.custom_attributes.person_type');
+        }
+
+        setProviderValue('shippingAddress.custom_attributes.cpf', '');
+    }
+
+    function polishB2BAddressModal() {
+        var $modal = $(SHIPPING_ADDRESS_MODAL_SELECTOR).last();
+        var hiddenLabels = [
+            'Tipo de Pessoa',
+            'CPF',
+            'RG',
+            'Tax/VAT Number',
+            'Inscrição Municipal',
+            'Nome Fantasia',
+            'Telefone Comercial',
+            'Transportadora (B2B)',
+            'WhatsApp Opt-in (LGPD)'
+        ];
+
+        if (!$modal.length) {
+            return;
+        }
+
+        $modal.addClass(B2B_ADDRESS_MODAL_CLASS);
+
+        setFieldLabel(
+            findAddressField($modal, ['.field[name="shippingAddress.firstname"]', 'input[name="firstname"]'], ['Nome']),
+            'Nome do contato'
+        );
+        setFieldLabel(
+            findAddressField($modal, ['.field[name="shippingAddress.street.0"]', 'input[name="street[0]"]'], ['Endereço: Linha 1']),
+            'Rua / Avenida'
+        );
+        setFieldLabel(
+            findAddressField($modal, ['.field[name="shippingAddress.street.1"]', 'input[name="street[1]"]'], ['Endereço: Linha 2']),
+            'Número'
+        );
+        setFieldLabel(
+            findAddressField($modal, ['.field[name="shippingAddress.street.2"]', 'input[name="street[2]"]'], ['Endereço: Linha 3']),
+            'Complemento'
+        );
+        setFieldLabel(
+            findAddressField($modal, ['.field[name="shippingAddress.street.3"]', 'input[name="street[3]"]'], ['Endereço: Linha 4']),
+            'Bairro'
+        );
+        setFieldLabel(
+            findAddressField($modal, ['.field[name="shippingAddress.company"]', 'input[name="company"]'], ['Empresa']),
+            'Empresa / filial'
+        );
+        setFieldLabel(
+            findAddressField(
+                $modal,
+                ['.field[name="shippingAddress.custom_attributes.cnpj"]', 'input[name="custom_attributes[cnpj]"]', 'input[name="cnpj"]'],
+                ['CNPJ']
+            ),
+            'CNPJ da empresa'
+        );
+        setFieldLabel(
+            findAddressField(
+                $modal,
+                ['.field[name="shippingAddress.custom_attributes.ie"]', 'input[name="custom_attributes[ie]"]', 'input[name="ie"]'],
+                ['Inscrição Estadual']
+            ),
+            'Inscrição Estadual'
+        );
+        setFieldLabel(
+            findAddressField($modal, ['.field[name="shippingAddress.fax"]', 'input[name="fax"]'], ['Dica', 'Fax']),
+            'Referência de entrega'
+        );
+
+        hideB2BAddressField(findAddressField($modal, ['.field[name="shippingAddress.lastname"]', 'input[name="lastname"]'], ['Sobrenome']));
+        hideB2BAddressField(findAddressField($modal, ['.field[name="shippingAddress.country_id"]', 'select[name="country_id"]'], ['País']));
+        findFieldsByLabels($modal, hiddenLabels).each(function () {
+            hideB2BAddressField($(this));
+        });
+
+        syncB2BAddressRequiredValues($modal);
     }
 
     function findPlaceOrderToolbar() {
@@ -125,7 +404,8 @@ define([
         var sidebarText = ($sidebar.text() || '').toLowerCase();
 
         return sidebarText.indexOf('protegidos') !== -1 ||
-            sidebarText.indexOf('dados estão') !== -1;
+            sidebarText.indexOf('dados estão') !== -1 ||
+            sidebarText.indexOf('conexão segura') !== -1;
     }
 
     function ensureTrustStrip() {
@@ -145,7 +425,7 @@ define([
             '<rect x="5" y="11" width="14" height="10" rx="2"/>' +
             '<path d="M8 11V8a4 4 0 0 1 8 0v3"/>' +
             '</svg>' +
-            '<span>' + $t('Seus dados estão protegidos') + '</span>' +
+            '<span>' + $t('Pedido em conexão segura (SSL)') + '</span>' +
             '</p>'
         );
 
@@ -283,6 +563,10 @@ define([
             return null;
         }
 
+        if (document.body.getAttribute('data-awa-opc-layout-fix') === 'ok') {
+            return null;
+        }
+
         shipFloat = shipping ? window.getComputedStyle(shipping).float : '';
         stepsDisplay = window.getComputedStyle(steps).display;
         needsFix = shipFloat === 'left' || shipFloat === 'right' || stepsDisplay !== 'grid';
@@ -305,7 +589,7 @@ define([
                 el.style.setProperty('grid-column', '1 / -1', 'important');
             });
 
-            document.body.setAttribute('data-awa-opc-layout-fix', 'applied');
+            document.body.setAttribute('data-awa-opc-layout-fix', 'ok');
         } else {
             document.body.setAttribute('data-awa-opc-layout-fix', 'ok');
         }
@@ -395,7 +679,7 @@ define([
 
         if (!$indicator.length) {
             $indicator = $(
-                '<nav class="awa-opc-step-indicator" aria-label="' + $t('Progresso do checkout') + '" ' +
+                '<nav class="awa-opc-step-indicator" aria-label="' + $t('Progresso da finalização do pedido') + '" ' +
                 STEP_INDICATOR_ATTR + '="1">' +
                 '<span class="awa-opc-step-indicator__label"></span>' +
                 '<span class="awa-opc-step-indicator__pills" aria-hidden="true"></span>' +
@@ -428,6 +712,7 @@ define([
                 pillsHtml += '<button type="button" class="' + pillClass + '" data-step-target="' +
                     step.id + '"' +
                     (index === currentIndex ? ' aria-current="step"' : '') +
+                    ' aria-label="' + $t('Ir para %1').replace('%1', step.label) + '"' +
                     '>' + step.label + '</button>';
             });
 
@@ -442,7 +727,7 @@ define([
                 return;
             }
 
-            label = $t('Step %1 of %2').replace('%1', String(current)).replace('%2', String(total));
+            label = $t('Etapa %1 de %2').replace('%1', String(current)).replace('%2', String(total));
 
             if (stepTitle && stepTitle.length <= 36) {
                 label = label + ': ' + stepTitle;
@@ -490,11 +775,7 @@ define([
             return;
         }
 
-        var node = $step[0];
-
-        if (node && typeof node.scrollIntoView === 'function') {
-            node.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+        scrollElementIntoView($step[0], 12);
     }
 
     function findFirstErrorTarget() {
@@ -518,7 +799,7 @@ define([
         $scrollTarget.addClass('awa-checkout-error-anchor');
 
         window.setTimeout(function () {
-            $scrollTarget[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+            scrollElementIntoView($scrollTarget[0], window.innerHeight * 0.25);
 
             var $focusable = $scrollTarget.find('input:visible, select:visible, textarea:visible, button:visible').first();
 
@@ -526,26 +807,30 @@ define([
                 $focusable.trigger('focus');
             }
 
-            announce($t('Revise os campos destacados antes de continuar.'));
+            announce($t('Há campos com erro. Revise os destaques abaixo.'));
         }, 80);
     }
 
     function getPlaceOrderBlockReason() {
         if (quote.isVirtual()) {
             return quote.paymentMethod() && quote.paymentMethod().method ? '' :
-                $t('Selecione uma forma de pagamento para finalizar.');
+                $t('Escolha a forma de pagamento na etapa Pagamento.');
         }
 
         if (!isAddressUsable(quote.shippingAddress())) {
-            return $t('Informe o endereço de entrega para continuar.');
+            return $t('Complete o endereço de entrega: nome, CEP, cidade e telefone.');
         }
 
         if (!quote.shippingMethod() || !quote.shippingMethod().carrier_code) {
-            return $t('Selecione uma forma de frete para continuar.');
+            return $t('Escolha uma transportadora na lista de frete.');
         }
 
         if (!quote.paymentMethod() || !quote.paymentMethod().method) {
-            return $t('Selecione uma forma de pagamento para finalizar.');
+            return $t('Escolha a forma de pagamento na etapa Pagamento.');
+        }
+
+        if ($('#b2b-terms-checkbox').length && !$('#b2b-terms-checkbox').prop('checked')) {
+            return $t('Aceite os termos B2B na etapa Pagamento.');
         }
 
         return '';
@@ -578,13 +863,48 @@ define([
         reason = isDisabled ? getPlaceOrderBlockReason() : '';
 
         if (!reason) {
-            $hint.text('').addClass('visually-hidden').removeAttr('role');
+            $hint.text('').addClass('visually-hidden').removeClass('is-visible').removeAttr('role');
             $btn.removeAttr('aria-describedby');
             return;
         }
 
-        $hint.text(reason).removeClass('visually-hidden').attr('role', 'status');
+        $hint.text(reason).removeClass('visually-hidden').addClass('is-visible').attr('role', 'status');
         $btn.attr('aria-describedby', 'awa-place-order-hint');
+    }
+
+    function getScrollBehavior() {
+        return window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+    }
+
+    /**
+     * Compensa header sticky do checkout ao rolar para uma etapa/campo.
+     *
+     * @param {HTMLElement} element
+     * @param {number} [extraOffset]
+     * @returns {number}
+     */
+    function getScrollTopForElement(element, extraOffset) {
+        var header = document.querySelector('.awa-checkout-header-shell');
+        var headerHeight = header ? header.getBoundingClientRect().height : 0;
+        var offset = typeof extraOffset === 'number' ? extraOffset : 16;
+
+        return element.getBoundingClientRect().top + window.pageYOffset - headerHeight - offset;
+    }
+
+    /**
+     * @param {HTMLElement} element
+     * @param {number} [extraOffset]
+     * @returns {void}
+     */
+    function scrollElementIntoView(element, extraOffset) {
+        if (!element) {
+            return;
+        }
+
+        window.scrollTo({
+            top: Math.max(0, getScrollTopForElement(element, extraOffset)),
+            behavior: getScrollBehavior()
+        });
     }
 
     function scrollToOpcStep(stepId) {
@@ -594,8 +914,8 @@ define([
             return;
         }
 
-        $step[0].scrollIntoView({ behavior: 'smooth', block: 'start' });
-        announce($t('Etapa: %1').replace('%1', $.trim($step.find('.step-title').first().text()) || stepId));
+        scrollElementIntoView($step[0], 16);
+        announce($t('Indo para %1').replace('%1', $.trim($step.find('.step-title').first().text()) || stepId));
     }
 
     function bindStepPillNavigation() {
@@ -609,12 +929,22 @@ define([
         );
     }
 
-    function syncPlaceOrderBusyState() {
-        var isLoading = $('.loading-mask').is(':visible') ||
-            $('body').hasClass('_block-content-loading');
+    function hasActivePlaceOrderLoader() {
+        return $('.loading-mask:visible').filter(function () {
+            return this.id !== 'checkout-loader';
+        }).length > 0 || $('body').hasClass('_block-content-loading');
+    }
 
-        $('.btn-placeorder').attr('aria-busy', isLoading ? 'true' : 'false')
-            .toggleClass('is-processing', isLoading);
+    function syncPlaceOrderBusyState() {
+        var $btn = $('.btn-placeorder');
+        var isBusy = $btn.attr('aria-busy') === 'true';
+        var hasLoader = hasActivePlaceOrderLoader();
+
+        if (isBusy && hasLoader) {
+            $btn.addClass('is-processing');
+        } else if (!hasLoader && !isBusy) {
+            $btn.removeClass('is-processing').attr('aria-busy', 'false');
+        }
 
         syncPlaceOrderHint();
     }
@@ -661,25 +991,52 @@ define([
         );
     }
 
+    function bindB2BAddressModalPolish() {
+        $(document).on(
+            'click.awaCheckoutB2BAddressModal submit.awaCheckoutB2BAddressModal',
+            SHIPPING_ADDRESS_MODAL_SELECTOR + ' .action-save-address, ' +
+            SHIPPING_ADDRESS_MODAL_SELECTOR + ' .action.primary, ' +
+            SHIPPING_ADDRESS_MODAL_SELECTOR + ' form',
+            function () {
+                polishB2BAddressModal();
+            }
+        );
+    }
+
     function bindLoaderObserver() {
         if (!window.MutationObserver) {
             return;
         }
 
-        var loaderTarget = document.querySelector('.loading-mask') || document.body;
+        var loaderTarget = document.querySelector('.loading-mask');
+
+        if (!loaderTarget) {
+            syncPlaceOrderBusyState();
+            return;
+        }
 
         window.__awaCheckoutLoaderObserver = new window.MutationObserver(function () {
-            window.requestAnimationFrame(syncPlaceOrderBusyState);
+            window.clearTimeout(loaderDebounceTimer);
+            loaderDebounceTimer = window.setTimeout(function () {
+                window.requestAnimationFrame(syncPlaceOrderBusyState);
+            }, LOADER_DEBOUNCE_MS);
         });
 
         window.__awaCheckoutLoaderObserver.observe(loaderTarget, {
             attributes: true,
-            attributeFilter: ['style', 'class'],
-            subtree: true,
-            childList: true
+            attributeFilter: ['style', 'class']
         });
 
         syncPlaceOrderBusyState();
+    }
+
+    function scheduleQuoteProgressSync() {
+        window.clearTimeout(quoteProgressTimer);
+        quoteProgressTimer = window.setTimeout(function () {
+            quoteProgressTimer = null;
+            ensureOpcStepIndicator();
+            syncPlaceOrderHint();
+        }, QUOTE_PROGRESS_DEBOUNCE_MS);
     }
 
     function bindQuoteProgress() {
@@ -687,21 +1044,16 @@ define([
             return;
         }
 
-        quote.shippingAddress.subscribe(function () {
-            ensureOpcStepIndicator();
-            syncPlaceOrderHint();
-        });
+        quote.shippingAddress.subscribe(scheduleQuoteProgressSync);
         quote.shippingMethod.subscribe(function (method) {
-            ensureOpcStepIndicator();
-            syncPlaceOrderHint();
+            scheduleQuoteProgressSync();
 
             if (method && method.carrier_title) {
                 announce($t('Frete selecionado: %1').replace('%1', String(method.carrier_title)));
             }
         });
         quote.paymentMethod.subscribe(function (method) {
-            ensureOpcStepIndicator();
-            syncPlaceOrderHint();
+            scheduleQuoteProgressSync();
 
             if (method && method.title) {
                 announce($t('Pagamento selecionado: %1').replace('%1', String(method.title)));
@@ -741,7 +1093,16 @@ define([
             syncMobilePlaceOrderTotal();
             syncPlaceOrderBusyState();
             syncPlaceOrderHint();
+            polishB2BAddressModal();
         });
+    }
+
+    function scheduleSync() {
+        window.clearTimeout(syncDebounceTimer);
+        syncDebounceTimer = window.setTimeout(function () {
+            syncDebounceTimer = null;
+            sync();
+        }, SYNC_DEBOUNCE_MS);
     }
 
     return function () {
@@ -754,11 +1115,14 @@ define([
         bindStepPillNavigation();
         bindViewportSync();
         bindValidationErrorScroll();
+        bindB2BAddressModalPolish();
         bindLoaderObserver();
         bindQuoteProgress();
 
         if (window.MutationObserver) {
-            var target = document.querySelector('#checkoutSteps, .checkout-container, #checkout, .page-main') || document.body;
+            var target = document.querySelector('.checkout-container') ||
+                document.getElementById('checkout') ||
+                document.getElementById('checkoutSteps');
 
             if (window.__awaCheckoutUxObserver) {
                 var prevTarget = window.__awaCheckoutUxObserverTarget;
@@ -770,13 +1134,13 @@ define([
                 }
             }
 
-            if (!window.__awaCheckoutUxObserver) {
-                window.__awaCheckoutUxObserver = new window.MutationObserver(sync);
+            if (!window.__awaCheckoutUxObserver && target) {
+                window.__awaCheckoutUxObserver = new window.MutationObserver(scheduleSync);
                 window.__awaCheckoutUxObserver.observe(target, {
                     childList: true,
                     subtree: true,
                     attributes: true,
-                    attributeFilter: ['class', 'hidden', 'style']
+                    attributeFilter: ['class', 'hidden', 'aria-hidden', 'aria-disabled']
                 });
                 window.__awaCheckoutUxObserverTarget = target;
             }
