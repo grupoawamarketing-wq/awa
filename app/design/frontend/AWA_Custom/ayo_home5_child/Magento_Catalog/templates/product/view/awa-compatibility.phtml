@@ -1,0 +1,55 @@
+<?php
+/**
+ * AWA PDP — Bloco de compatibilidade inline (Marca/Modelo/Ano da moto).
+ *
+ * MELHORIA-01: Exibe os atributos de compatibilidade diretamente na área principal
+ * do produto, acima do add-to-cart, sem precisar abrir a aba "Mais Informações".
+ * Renderiza somente quando pelo menos um atributo está preenchido.
+ *
+ * @var \Magento\Catalog\Block\Product\View $block
+ * @var \Magento\Framework\View\Helper\SecureHtmlRenderer $secureRenderer
+ * @var \Magento\Framework\Escaper $escaper
+ */
+declare(strict_types=1);
+
+$product = $block->getProduct();
+if (!$product) {
+    return;
+}
+
+$marca  = (string) $product->getData('marca_moto');
+$modelo = (string) $product->getData('modelo_moto');
+$ano    = (string) $product->getData('ano_moto');
+
+if ($marca === '' && $modelo === '' && $ano === '') {
+    return;
+}
+?>
+<div class="awa-pdp-compat" aria-label="<?= $escaper->escapeHtmlAttr(__('Compatibilidade do produto')) ?>">
+    <div class="awa-pdp-compat__header">
+        <svg class="awa-pdp-compat__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+        <span class="awa-pdp-compat__title"><?= $escaper->escapeHtml(__('Compatibilidade')) ?></span>
+    </div>
+    <dl class="awa-pdp-compat__list">
+        <?php if ($marca !== '') : ?>
+            <div class="awa-pdp-compat__row">
+                <dt class="awa-pdp-compat__label"><?= $escaper->escapeHtml(__('Marca')) ?></dt>
+                <dd class="awa-pdp-compat__value"><?= $escaper->escapeHtml($marca) ?></dd>
+            </div>
+        <?php endif ?>
+        <?php if ($modelo !== '') : ?>
+            <div class="awa-pdp-compat__row">
+                <dt class="awa-pdp-compat__label"><?= $escaper->escapeHtml(__('Modelo')) ?></dt>
+                <dd class="awa-pdp-compat__value"><?= $escaper->escapeHtml($modelo) ?></dd>
+            </div>
+        <?php endif ?>
+        <?php if ($ano !== '') : ?>
+            <div class="awa-pdp-compat__row">
+                <dt class="awa-pdp-compat__label"><?= $escaper->escapeHtml(__('Ano')) ?></dt>
+                <dd class="awa-pdp-compat__value"><?= $escaper->escapeHtml($ano) ?></dd>
+            </div>
+        <?php endif ?>
+    </dl>
+</div>

@@ -1,0 +1,41 @@
+<?php
+/**
+ * AWA PDP — Resumo de avaliações abaixo do título
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ */
+
+declare(strict_types=1);
+
+use GrupoAwamotos\Theme\ViewModel\ProductReviewSummary;
+use GrupoAwamotos\Theme\ViewModel\ProductStructuredData;
+
+/** @var ProductReviewSummary|null $reviewVm */
+$reviewVm = $block->getData('review_summary_view_model');
+if (!$reviewVm instanceof ProductReviewSummary) {
+    return;
+}
+
+$product = null;
+$productInfo = $block->getLayout()->getBlock('product.info');
+if ($productInfo && method_exists($productInfo, 'getProduct')) {
+    $fromInfo = $productInfo->getProduct();
+    if ($fromInfo && $fromInfo->getId()) {
+        $product = $fromInfo;
+    }
+}
+if ($product === null) {
+    /** @var ProductStructuredData|null $productVm */
+    $productVm = $block->getData('product_structured_data_view_model');
+    $product = $productVm instanceof ProductStructuredData ? $productVm->getCurrentProduct() : null;
+}
+$html = $product !== null
+    ? $reviewVm->getSummaryHtmlForProduct($product)
+    : $reviewVm->getSummaryHtml();
+if ($html === '') {
+    return;
+}
+?>
+<div class="awa-pdp-review-summary product-rating" role="group" aria-label="<?= $block->escapeHtmlAttr(__('Avaliações do produto')) ?>">
+    <?= /* @noEscape */ $html ?>
+</div>

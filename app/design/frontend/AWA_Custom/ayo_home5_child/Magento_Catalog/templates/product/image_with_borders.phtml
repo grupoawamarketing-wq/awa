@@ -1,0 +1,34 @@
+<?php
+/**
+ * AWA — product image container fluido (sem width inline em px).
+ * O tema pai (ayo_default) fixava width via style="width: Npx", quebrando carrosséis PDP/mobile.
+ *
+ * @var \Magento\Catalog\Block\Product\Image $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+declare(strict_types=1);
+
+$width = (int) $block->getWidth();
+$height = (int) $block->getHeight();
+$productId = (string) $block->getProductId();
+$uniqueId = $escaper->escapeHtmlAttr($productId !== '' ? $productId : 'no-product');
+$aspectRatio = ($width > 0 && $height > 0) ? sprintf('%d / %d', $width, $height) : '1 / 1';
+?>
+<span class="product-image-container product-image-container-<?= /* @noEscape */ $uniqueId ?> awa-image-container--fluid"
+      style="--awa-image-aspect: <?= $escaper->escapeHtmlAttr($aspectRatio) ?>;">
+    <span class="product-image-wrapper">
+        <img class="<?= $escaper->escapeHtmlAttr($block->getClass()) ?>"
+            <?php foreach ($block->getCustomAttributes() as $name => $value): ?>
+                <?php if (in_array((string) $name, ['srcset', 'sizes', 'loading', 'decoding', 'fetchpriority'], true)): ?>
+                    <?php continue; ?>
+                <?php endif; ?>
+                <?= $escaper->escapeHtmlAttr((string) $name) ?>="<?= $escaper->escapeHtmlAttr((string) $value) ?>"
+            <?php endforeach; ?>
+            src="<?= $escaper->escapeUrl($block->getImageUrl()) ?>"
+            loading="lazy"
+            decoding="async"
+            width="<?= /* @noEscape */ $width ?>"
+            height="<?= /* @noEscape */ $height ?>"
+            alt="<?= $escaper->escapeHtmlAttr($block->getLabel()) ?>"/>
+    </span>
+</span>

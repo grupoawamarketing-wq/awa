@@ -1,0 +1,77 @@
+<?php
+declare(strict_types=1);
+
+/**
+ * Open Graph / Twitter — rotas auth B2B (layout XML não aceita meta property=).
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+
+$fullAction = (string) $block->getRequest()->getFullActionName();
+
+$seo = match ($fullAction) {
+    'b2b_account_login' => [
+        'title' => (string) __('Login B2B — AWA Motos'),
+        'description' => (string) __('Acesse o portal B2B da AWA Motos. Área exclusiva para empresas e revendas de peças para motos.'),
+    ],
+    'b2b_account_forgotpassword' => [
+        'title' => (string) __('Recuperar senha B2B — AWA Motos'),
+        'description' => (string) __('Recupere a senha da sua conta B2B na AWA Motos.'),
+    ],
+    'b2b_account_claim' => [
+        'title' => (string) __('Ativar conta B2B — AWA Motos'),
+        'description' => (string) __('Ative sua conta B2B na AWA Motos com e-mail ou CNPJ.'),
+    ],
+    'b2b_register_index' => [
+        'title' => (string) __('Cadastro B2B — AWA Motos'),
+        'description' => (string) __('Cadastre sua empresa no portal B2B da AWA Motos.'),
+    ],
+    'b2b_register_success' => [
+        'title' => (string) __('Cadastro recebido — AWA Motos'),
+        'description' => (string) __('Sua solicitação de cadastro B2B foi recebida. Retorno por e-mail em até 1 dia útil.'),
+    ],
+    default => [
+        'title' => (string) __('Portal B2B — AWA Motos'),
+        'description' => (string) __('Portal B2B da AWA Motos para empresas e revendas.'),
+    ],
+};
+
+$title = $seo['title'];
+$description = $seo['description'];
+$baseUrl = rtrim($block->getBaseUrl(), '/');
+$canonicalPath = match ($fullAction) {
+    'b2b_account_login' => 'b2b/account/login',
+    'b2b_account_forgotpassword' => 'b2b/account/forgotpassword',
+    'b2b_account_claim' => 'b2b/account/claim',
+    'b2b_register_index' => 'b2b/register',
+    'b2b_register_success' => 'b2b/register/success',
+    default => 'b2b/account/login',
+};
+$canonical = $baseUrl . '/' . ltrim($canonicalPath, '/');
+$webPageJsonLd = [
+    '@context' => 'https://schema.org',
+    '@type' => 'WebPage',
+    '@id' => $canonical . '#webpage',
+    'url' => $canonical,
+    'name' => $title,
+    'description' => $description,
+    'isPartOf' => [
+        '@type' => 'WebSite',
+        '@id' => $baseUrl . '/#website',
+        'name' => 'AWA Motos',
+        'url' => $baseUrl . '/',
+    ],
+    'inLanguage' => 'pt-BR',
+];
+$jsonFlags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP;
+?>
+<link rel="canonical" href="<?= $escaper->escapeHtmlAttr($canonical) ?>"/>
+<meta property="og:title" content="<?= $escaper->escapeHtmlAttr($title) ?>"/>
+<meta property="og:description" content="<?= $escaper->escapeHtmlAttr($description) ?>"/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="<?= $escaper->escapeHtmlAttr($canonical) ?>"/>
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="<?= $escaper->escapeHtmlAttr($title) ?>"/>
+<meta name="twitter:description" content="<?= $escaper->escapeHtmlAttr($description) ?>"/>
+<script type="application/ld+json"><?= /* @noEscape */ json_encode($webPageJsonLd, $jsonFlags) ?></script>

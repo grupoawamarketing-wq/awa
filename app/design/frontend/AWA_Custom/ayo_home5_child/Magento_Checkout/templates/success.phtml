@@ -1,0 +1,56 @@
+<?php
+declare(strict_types=1);
+/**
+ * AWA — Checkout success (B2B)
+ *
+ * @var \Magento\Checkout\Block\Onepage\Success $block
+ * @var \GrupoAwamotos\B2B\ViewModel\Checkout\OrderSuccessContext|null $viewModel
+ */
+$viewModel = $block->getData('view_model');
+$presentation = $viewModel instanceof \GrupoAwamotos\B2B\ViewModel\Checkout\OrderSuccessContext
+    ? $viewModel->getPresentation()
+    : null;
+?>
+<div class="checkout-success awa-checkout-success-page">
+    <?php if ($presentation !== null): ?>
+        <?= $block->getLayout()
+            ->createBlock(\Magento\Framework\View\Element\Template::class)
+            ->setTemplate('Magento_Checkout::checkout/order-success-card.phtml')
+            ->setData('presentation', $presentation)
+            ->setData('catalog_url', $viewModel->getCatalogUrl())
+            ->setData('whatsapp_url', $viewModel->getWhatsappUrl())
+            ->setData('show_categories', false)
+            ->toHtml() ?>
+    <?php elseif ($block->getOrderId()): ?>
+        <div class="awa-order-success awa-order-success--fallback">
+            <h2 class="awa-order-success__title"><?= $block->escapeHtml(__('Pedido confirmado!')) ?></h2>
+            <?php if ($block->getCanViewOrder()): ?>
+                <p>
+                    <?= $block->escapeHtml(
+                        __('Seu pedido é: %1.', sprintf(
+                            '<a href="%s" class="order-number"><strong>%s</strong></a>',
+                            $block->escapeUrl($block->getViewOrderUrl()),
+                            $block->getOrderId()
+                        )),
+                        ['a', 'strong']
+                    ) ?>
+                </p>
+            <?php else: ?>
+                <p><?= $block->escapeHtml(__('Seu pedido é: %1.', $block->getOrderId())) ?></p>
+            <?php endif; ?>
+            <p><?= $block->escapeHtml(__('Acompanhe o andamento na sua conta B2B.')) ?></p>
+            <div class="awa-order-success__actions">
+                <?php if ($block->getCanViewOrder()): ?>
+                <a class="awa-order-success__cta action primary" href="<?= $block->escapeUrl($block->getViewOrderUrl()) ?>">
+                    <?= $block->escapeHtml(__('Ver meu pedido')) ?>
+                </a>
+                <?php endif; ?>
+                <a class="awa-order-success__cta-secondary" href="<?= $block->escapeUrl($block->getContinueUrl()) ?>">
+                    <?= $block->escapeHtml(__('Continuar comprando')) ?>
+                </a>
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <?= $block->getAdditionalInfoHtml() ?>
+</div>

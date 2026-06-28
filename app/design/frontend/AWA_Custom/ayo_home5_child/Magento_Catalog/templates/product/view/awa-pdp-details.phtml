@@ -1,0 +1,40 @@
+<?php
+/**
+ * AWA PDP — Detalhes do produto em acordeão nativo (`<details>`).
+ * Substitui tabs Magento (collapsible/tabs JS) por stack semântico de filhos detailed_info.
+ *
+ * @var \Magento\Catalog\Block\Product\View\Details $block
+ */
+declare(strict_types=1);
+
+if (!$detailedInfoGroup = $block->getGroupSortedChildNames('detailed_info', 'getChildHtml')) {
+    return;
+}
+
+$layout = $block->getLayout();
+$sections = [];
+
+foreach ($detailedInfoGroup as $name) {
+    $html = $layout->renderElement($name);
+    if ($html && trim($html)) {
+        $sections[] = $html;
+    }
+}
+
+if ($sections === []) {
+    return;
+}
+?>
+
+<?php $singleSection = count($sections) === 1; ?>
+<section class="product info detailed awa-pdp-details<?= $singleSection ? ' awa-pdp-details--solo' : '' ?>"
+         <?= $singleSection ? '' : 'aria-labelledby="awa-pdp-details-heading"' ?>>
+    <?php if (!$singleSection) : ?>
+    <header class="awa-pdp-details__header">
+        <h2 id="awa-pdp-details-heading" class="awa-pdp-details__title">
+            <?= $block->escapeHtml(__('Informações do produto')) ?>
+        </h2>
+    </header>
+    <?php endif; ?>
+    <?= /* @noEscape */ implode("\n", $sections) ?>
+</section>

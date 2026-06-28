@@ -1,0 +1,57 @@
+<?php
+/**
+ * Product list toolbar — AWA override (grid density a11y + slim bottom slot).
+ *
+ * @var $block \Magento\Catalog\Block\Product\ProductList\Toolbar
+ */
+declare(strict_types=1);
+
+use Magento\Catalog\Model\Product\ProductList\Toolbar;
+
+$toolbarSlot = (string) ($block->getData('awa_toolbar_slot') ?: 'top');
+$isBottomSlim = $toolbarSlot === 'bottom';
+?>
+<?php if ($block->getCollection()->getSize()): ?>
+    <?php
+    $pagerBlock = $block->getChildBlock('product_list_toolbar_pager');
+    if ($pagerBlock) {
+        $pagerBlock->setData('awa_toolbar_slot', $toolbarSlot);
+    }
+    ?>
+    <div class="toolbar toolbar-products<?= $isBottomSlim ? ' toolbar-products--bottom-slim' : '' ?>"
+        <?php if (!$isBottomSlim): ?>
+         data-mage-init='<?= /* @noEscape */ $block->getWidgetOptionsJson() ?>'
+        <?php endif; ?>>
+        <div class="center">
+        <?php if ($isBottomSlim): ?>
+            <?= $block->getPagerHtml() ?>
+            <?php include $block->getTemplateFile('Magento_Catalog::product/list/toolbar/amount.phtml') ?>
+        <?php else: ?>
+            <?php if ($block->isExpanded()): ?>
+                <?php include $block->getTemplateFile('Magento_Catalog::product/list/toolbar/viewmode.phtml') ?>
+            <?php endif; ?>
+            <?php if ($block->isExpanded()): ?>
+                <?php include $block->getTemplateFile('Magento_Catalog::product/list/toolbar/sorter.phtml') ?>
+            <?php endif; ?>
+            <?php include $block->getTemplateFile('Magento_Catalog::product/list/toolbar/limiter.phtml') ?>
+            <?= $block->getPagerHtml() ?>
+            <?php include $block->getTemplateFile('Magento_Catalog::product/list/toolbar/amount.phtml') ?>
+        <?php endif; ?>
+        </div>
+        <?php if (!$isBottomSlim): ?>
+        <div class="grid-mode-show-type-products" role="group" aria-label="<?= $block->escapeHtmlAttr(__('Densidade do grid')) ?>">
+            <?php foreach ([2, 3, 4, 5] as $columns): ?>
+                <?php $isActive = $columns === 4; ?>
+                <a href="#"
+                   class="grid-mode-<?= (int) $columns ?><?= $isActive ? ' actived' : '' ?>"
+                   data-grid-mode="<?= (int) $columns ?>"
+                   role="button"
+                   aria-pressed="<?= $isActive ? 'true' : 'false' ?>"
+                   aria-label="<?= $block->escapeHtmlAttr(__('Exibir %1 colunas', $columns)) ?>">
+                    <?= (int) $columns ?>
+                </a>
+            <?php endforeach; ?>
+        </div>
+        <?php endif; ?>
+    </div>
+<?php endif ?>

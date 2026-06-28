@@ -1,0 +1,141 @@
+<?php
+/**
+ * Copyright © 2015 Magento. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+// @codingStandardsIgnoreFile
+
+/* @var $block \Magento\Catalog\Block\Product\AbstractProduct */
+?>
+<?php
+switch ($type = $block->getType()) {
+    case 'related':
+        /** @var \Magento\Catalog\Block\Product\ProductList\Related $block */
+        if ($exist = $block->getItems()->getSize()) {
+            $type = 'related';
+            $class = $type;
+
+            $imageBlock = $block->getLayout()->createBlock('Magento\Catalog\Block\Product\Image');
+            $image = 'related_products_list';
+            $title = __('Related Products');
+            $items = $block->getItems();
+            $limit = 0;
+            $shuffle = 0;
+
+            $showWishlist = true;
+            $showCompare = true;
+            $showCart = true;
+            $templateType = null;
+            $description = false;
+        }
+        break;
+
+    case 'other':
+        break;
+}
+?>
+<?php if ($exist): ?>
+<?php if ($type == 'related' || $type == 'upsell'): ?>
+<?php if ($type == 'related'): ?>
+<section class="block <?php echo $class; ?>" data-mage-init='{"relatedProducts":{"relatedCheckbox":".related.checkbox"}}' data-limit="<?php echo $limit; ?>" data-shuffle="<?php echo $shuffle; ?>">
+<?php else: ?>
+<section class="block <?php echo $class; ?>" data-mage-init='{"upsellProducts":{}}' data-limit="<?php echo $limit; ?>" data-shuffle="<?php echo $shuffle; ?>">
+<?php endif; ?>
+<?php else: ?>
+<section class="block <?php echo $class; ?>">
+<?php endif; ?>
+    <div class="rokan-product-heading rokan-related-heading">
+        <h2 class="title-catthum"><?php echo $title; ?></h2>
+    </div>
+    <div class="block-content content" aria-labelledby="block-<?php echo $class ?>-heading">
+        <div class="row">
+            <div id="relate_product_slider" class="owl awa-carousel__track">
+                <?php
+                $i = 0;
+                $rows = 1;
+                ?>
+                <?php foreach ($items as $_item): ?>
+                    <?php $available = ''; ?>
+                    <?php if (!$_item->isComposite() && $_item->isSaleable() && $type == 'related'): ?>
+                        <?php if (!$_item->getRequiredOptions()): ?>
+                            <?php $available = 'related-available'; ?>
+                        <?php endif; ?>
+                    <?php endif; ?>
+                    <?php
+                    $productImage = $block->getImage($_item, $image);
+                    ?>
+                    <div class="item-product">
+                        <div class="product-thumb">
+                            <a href="<?php /* @escapeNotVerified */ echo $_item->getProductUrl() ?>" class="product-thumb-link" tabindex="-1">
+                                <?php $productImageThumb = $block->getImage($_item, 'category_page_grid-1'); ?>
+                                <span class="first-thumb">
+                                    <?php echo $productImage->toHtml(); ?>
+                                </span>
+                                <span class="second-thumb">
+                                    <?php echo $productImageThumb->toHtml(); ?>
+                                </span>
+                            </a>
+                            <?php if ($_item->getFinalPrice() < $_item->getPrice()): ?>
+                                <div class="hot-onsale">
+                                    <span class="onsale">
+                                        <span class="sale-bg"></span>
+                                        <span class="sale-text"><?php echo $this->helper('Rokanthemes\RokanBase\Helper\Data')->showLableSalePrice($_item); ?></span>
+                                    </span>
+                                </div>
+                            <?php endif; ?>
+                            <div class="actions-secondary">
+                                <ul class="product-extra-link add-to-links">
+                                    <?php /* B2B: wishlist/compare desativados */ ?>
+                                    <li class="quickview-product">
+                                        <a class="quickview-link data-role="quickview-button" data-id="<?php echo $_item->getId(); ?>" href="javascript: void(0);" data-href="<?php echo $block->getUrl('quickview/product/quickview/id/' . $_item->getId()) ?>" title="<?php echo __('Quick view'); ?>"></a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="product-info-cart">
+                                <div class="actions-primary">
+                                    <?php if ($_item->isSaleable()): ?>
+                                        <?php if ($_item->getTypeInstance()->hasRequiredOptions($_item)): ?>
+                                            <a class="view_product_detail" href="<?php echo $block->getProductUrl($_item) ?>" title="<?php echo __('Add to Cart') ?>">
+                                                <?php echo $block->escapeHtml(__('View product')); ?>
+                                            </a>
+                                        <?php else: ?>
+                                            <?php
+                                            $postDataHelper = $this->helper('Magento\Framework\Data\Helper\PostHelper');
+                                            $postData = $postDataHelper->getPostData($block->getAddToCartUrl($_item), ['product' => $_item->getEntityId()]);
+                                            ?>
+                                            <a class="view_product_detail" href="<?php echo $block->getProductUrl($_item) ?>" title="<?php echo __('View product') ?>">
+                                                <?php echo $block->escapeHtml(__('View product')); ?>
+                                            </a>
+                                        <?php endif; ?>
+                                    <?php else: ?>
+                                        <?php if ($_item->getIsSalable()): ?>
+                                            <div class="stock available"><span><?php echo __('In stock') ?></span></div>
+                                        <?php else: ?>
+                                            <div class="stock unavailable"><span><?php echo __('Out of stock') ?></span></div>
+                                        <?php endif; ?>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-name">
+                                <a class="product-item-link" title="<?php echo $block->escapeHtml($_item->getName()) ?>" href="<?php echo $block->getProductUrl($_item) ?>">
+                                    <?php echo $block->escapeHtml($_item->getName()) ?>
+                                </a>
+                            </h3>
+
+                            <div class="product-rating">
+                                <?php echo $block->getReviewsSummaryHtml($_item, $templateType, true); ?>
+                            </div>
+                            <div class="info-price">
+                                <?php /* @escapeNotVerified */ echo $this->helper('Rokanthemes\Themeoption\Helper\Data')->getPriceDisplayCustom($block->getProductPrice($_item)) ?>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach ?>
+            </div>
+        </div>
+    </div>
+</section>
+<?php endif; ?>
