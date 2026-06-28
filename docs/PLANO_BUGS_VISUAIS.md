@@ -97,7 +97,7 @@
 
 | Indicador | Total |
 |-----------|------:|
-| Total de bugs/melhorias (todas as fases) | **91** (22 históricos + 13 da Fase 3D.2.5 + 35 Auditoria DOM Home + 14 Auditoria Profunda + 6 Auditoria Multi-Page + 1 Auditoria PDP) |
+| Total de bugs/melhorias (todas as fases) | **93** (22 históricos + 13 da Fase 3D.2.5 + 35 Auditoria DOM Home + 14 Auditoria Profunda + 6 Auditoria Multi-Page + 1 Auditoria PDP + 2 Auditoria CMS Pages) |
 | Corrigidos | 14 |
 | Em progresso | 7 |
 | Pendentes | 5 |
@@ -1871,4 +1871,78 @@ _awa-premium-effects.less, _awa-visual-audit-2026-05-05.less, etc.:
 | Preço no Schema.org | ✅ (`"price": "61.25"`) |
 | Review form com form_key | ✅ |
 | Add-to-cart form com form_key | ✅ |
+
+
+---
+
+## 21. Auditoria CMS Pages — SEO (2026-06-28)
+
+> Quinta rodada: inspeção de páginas estáticas (about-us, contato, faq, blog, seja-revendedor).
+> 2 novos bugs — BUG-H-057 e BUG-H-058.
+
+### Tabela
+
+| ID | Título | Sev | Status | Página | BP | Componente | Fase |
+|----|--------|-----|--------|--------|----|-----------|------|
+| BUG-H-057 | CMS pages sem `<link rel="canonical">` | P2 | Aberto | Todas CMS | Todos | SEO/CMS | SEO |
+| BUG-H-058 | `og:url` em CMS pages aponta para URL interna Magento | P2 | Aberto | Todas CMS | Todos | SEO/OpenGraph | SEO |
+
+---
+
+### Detalhes técnicos
+
+#### BUG-H-057 — CMS pages sem `<link rel="canonical">`
+- **Evidência:** Páginas `about-us`, `contato`, `seja-revendedor`, `faq` — TODAS sem `<link rel="canonical">`.
+  Confirmado via curl: `grep 'rel="canonical"'` retorna vazio nessas páginas.
+  Contraste: páginas de produto/categoria TÊM canonical (configurado em `catalog/seo`).
+- **Causa raiz:** Magento 2 só adiciona canonical em produtos/categorias via `catalog/seo/canonical_url`. Para páginas CMS, não há mecanismo automático. O módulo SchemaOrg só implementou canonical para B2B (`awa-b2b-auth-seo.phtml`) e Blog (`awa-blog-canonical.phtml`), mas NÃO para CMS pages genéricas.
+- **Impacto:** Páginas institucionais (`about-us`, `contato`, etc.) sem canonical podem ser indexadas com URLs duplicadas. Nenhum sinal de URL canônica para o Google.
+- **Fix:** Criar `cms_page_view.xml` no tema filho com bloco que renderiza canonical para CMS pages:
+  ```xml
+  <!-- app/design/frontend/AWA_Custom/ayo_home5_child/Magento_Cms/layout/cms_page_view.xml -->
+  <page>
+    <head>
+      <block class="GrupoAwamotos\SchemaOrg\Block\CmsCanonical"
+             name="cms.page.canonical"
+             template="GrupoAwamotos_SchemaOrg::cms/canonical.phtml"/>
+    </head>
+  </page>
+  ```
+  Ou adicionar método no ViewModel `OpenGraph::getCanonicalForCms()` usando `$request->getRequestUri()`.
+
+#### BUG-H-058 — `og:url` em CMS pages aponta para URL interna
+- **Evidência:** `about-us` tem `og:url` = `https://awamotos.com/cms/page/view/page_id/6` em vez de `https://awamotos.com/about-us`.
+- **Causa raiz:** `OpenGraph::getCurrentUrl()` usa `$this->request->getPathInfo()`. Em CMS pages, o Magento reescreve a URL amigável para a rota interna (`cms/page/view/id/6`), então `getPathInfo()` retorna a rota interna.
+  ```php
+  // ViewModel/OpenGraph.php — método atual (bug):
+  public function getCurrentUrl(): string {
+      $identifier = trim($this->request->getPathInfo(), '/');  // retorna "cms/page/view/page_id/6"
+      return $identifier ? $baseUrl . '/' . $identifier : $baseUrl . '/';
+  }
+  ```
+- **Impacto:** Links compartilhados via redes sociais usam a URL interna. Se a URL interna não for acessível (Magento pode bloquear acesso direto), o link social fica quebrado. Sinaliza URL errada para Open Graph scrapers (Facebook, LinkedIn, WhatsApp).
+- **Fix:**
+  ```php
+  // Usar getRequestUri() ao invés de getPathInfo():
+  public function getCurrentUrl(): string {
+      $requestUri = ltrim($this->request->getRequestUri(), '/');
+      // Remover query string para og:url limpo
+      $path = strtok($requestUri, '?');
+      return $this->getBaseUrl() . '/' . $path;
+  }
+  ```
+  Arquivo: `app/code/GrupoAwamotos/SchemaOrg/ViewModel/OpenGraph.php`
+
+### Páginas com SEO correto (confirmações positivas)
+
+| Página | robots | canonical | og:url |
+|--------|--------|-----------|--------|
+| `/bagageiros.html` | INDEX,FOLLOW ✅ | presente ✅ | — |
+| `/retrovisores.html` | INDEX,FOLLOW ✅ | presente ✅ | — |
+| `/blog` | INDEX,FOLLOW ✅ | presente ✅ | — |
+| Subcategorias (`/carcacas/carcaca-painel-inferior.html`) | INDEX,FOLLOW ✅ | presente ✅ | — |
+| PDP (`/ret-biz-100-cr-redondo-universal-2220.html`) | INDEX,FOLLOW ✅ | presente ✅ | og:type=product ✅ |
+| `/about-us` | INDEX,FOLLOW ✅ | **AUSENTE** ❌ | URL interna ❌ |
+| `/contato` | INDEX,FOLLOW ✅ | **AUSENTE** ❌ | URL interna ❌ |
+| `/faq` | INDEX,FOLLOW ✅ | **AUSENTE** ❌ | URL interna ❌ |
 
