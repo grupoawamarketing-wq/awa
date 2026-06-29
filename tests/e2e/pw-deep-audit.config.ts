@@ -1,6 +1,54 @@
 import { defineConfig, devices } from '@playwright/test';
 import path from 'path';
 
+/**
+ * Resolve e valida a BASE_URL obrigatória.
+ * Falha se: ausente, inválida ou produção sem flag explícita.
+ */
+function resolveAndValidateBaseUrl(): string {
+  const raw = process.env.PLAYWRIGHT_BASE_URL || process.env.BASE_URL || '';
+  const allowProd = String(process.env.ALLOW_PRODUCTION_VALIDATION || '').toLowerCase() === 'true';
+
+  if (!raw) {
+    throw new Error(
+      '[pw-deep-audit] BASE_URL ausente. ' +
+      'Defina PLAYWRIGHT_BASE_URL ou BASE_URL antes de rodar este config.\n' +
+      'Exemplo: PLAYWRIGHT_BASE_URL=https://staging.exemplo.com npx playwright test'
+    );
+  }
+
+  let parsed: URL;
+  try {
+    parsed = new URL(raw);
+  } catch {
+    throw new Error(`[pw-deep-audit] BASE_URL inválida: "${raw}". Informe uma URL http/https completa.`);
+  }
+
+  if (!['http:', 'https:'].includes(parsed.protocol)) {
+    throw new Error(`[pw-deep-audit] Protocolo não permitido: "${parsed.protocol}". Use http ou https.`);
+  }
+
+  const host = parsed.hostname.toLowerCase();
+  if ((host.includes('awamotos.com') || host === 'awamotos.com') && !allowProd) {
+    throw new Error(
+      '[pw-deep-audit] URL de produção bloqueada por segurança.\n' +
+      'Para usar produção explicitamente, defina: ALLOW_PRODUCTION_VALIDATION=true\n' +
+      'URL recebida: ' + host
+    );
+  }
+
+  const safeLog = `${parsed.protocol}//${parsed.hostname}${parsed.port ? ':' + parsed.port : ''}`;
+  if (host.includes('awamotos.com')) {
+    console.warn(`[pw-deep-audit] ATENÇÃO: Produção permitida (ALLOW_PRODUCTION_VALIDATION=true). URL: ${safeLog}`);
+  } else {
+    console.log(`[pw-deep-audit] BASE_URL validada: ${safeLog}`);
+  }
+
+  return parsed.toString().replace(/\/$/, '');
+}
+
+const resolvedBaseUrl = resolveAndValidateBaseUrl();
+
 export default defineConfig({
   testDir: path.join(__dirname, 'specs'),
   testMatch: /(visual-deep-audit\.spec\.ts|\/(smoke|deep-visual)\/.*\.spec\.ts$)/,
@@ -20,7 +68,7 @@ export default defineConfig({
   ],
 
   use: {
-    baseURL: 'https://awamotos.com',
+    baseURL: resolvedBaseUrl,
     ignoreHTTPSErrors: true,
     screenshot: 'only-on-failure',
     video: 'off',

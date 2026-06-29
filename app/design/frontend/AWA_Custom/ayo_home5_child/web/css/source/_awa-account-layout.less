@@ -1,0 +1,574 @@
+/* ==========================================================================
+   AWA Account Layout — shell síncrono (Minha Conta + B2B)
+   Fase layout: grid sidebar + main, ritmo de conteúdo, hierarquia visual.
+   Tokens: _awa-tokens.less
+   ========================================================================== */
+
+@import (once) '_awa-tokens';
+
+// Escopo explícito de páginas B2B — substitui @{awa-acct-b2b-pages} wildcard.
+// Manter sincronizado com @awa-account-grid-scope em _awa-account-grid-architecture-2026-06.less.
+@awa-acct-b2b-pages: ~"body:is(.b2b-account-dashboard, .b2b-account-shell, .b2b-company-index, .b2b-credit-index, .b2b-approval-index, .b2b-reorder-history, .b2b-quote-index, .b2b-quote-history, .b2b-quote-view, .b2b-quote-create, .b2b-shoppinglist-index, .b2b-shoppinglist-view, .b2b-quickorder-index, .b2b-account-orders, .b2b-erp-orders-index, .b2b-cotacao-index, .b2b-cotacao-view)";
+
+:root {
+    --awa-sidebar-width: @awa-sidebar-width;
+    --awa-account-columns-gap: @awa-space-lg;
+    --awa-account-content-gap: @awa-s-4;
+}
+
+// ── B2B dashboard: sem card wrapper no .column.main (seções próprias) ───
+body.b2b-account-dashboard .column.main {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    box-shadow: none;
+}
+
+// ── Grid shell (sidebar | main) — fonte única síncrona ───────────────────
+body.account .page-main > .columns,
+@{awa-acct-b2b-pages} .page-main > .columns {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: @awa-space-md;
+    align-items: start;
+    width: 100%;
+}
+
+@media (min-width: (@awa-breakpoint-sm + 1)) {
+    body.account .page-main > .columns,
+    @{awa-acct-b2b-pages} .page-main > .columns {
+        // Alinhado ao SSOT §96 (--awa-grid-sidebar-width-account: 220px).
+        // §96 vence com !important; este bloco fornece base sem !important para account padrão.
+        grid-template-columns: minmax(200px, var(--awa-grid-sidebar-width-account, 220px)) minmax(0, 1fr);
+        gap: @awa-space-lg;
+    }
+
+    body.account .page-main > .columns > .sidebar.sidebar-main,
+    body.account .page-main > .columns > .sidebar-main,
+    body.account .page-main > .columns > .col-lg-2,
+    body.account .page-main > .columns > [class*='col-sm-3'],
+    @{awa-acct-b2b-pages} .page-main > .columns > .sidebar.sidebar-main,
+    @{awa-acct-b2b-pages} .page-main > .columns > .sidebar-main,
+    @{awa-acct-b2b-pages} .page-main > .columns > .col-lg-2,
+    @{awa-acct-b2b-pages} .page-main > .columns > [class*='col-sm-3'] {
+        grid-column: 1;
+        grid-row: 1;
+        min-width: 0;
+        width: auto;
+        max-width: none;
+    }
+
+    body.account .page-main > .columns > .column.main,
+    body.account .page-main > .columns > .col-main,
+    body.account .page-main > .columns > .col-lg-10,
+    body.account .page-main > .columns > [class*='col-sm-9'],
+    @{awa-acct-b2b-pages} .page-main > .columns > .column.main,
+    @{awa-acct-b2b-pages} .page-main > .columns > .col-main,
+    @{awa-acct-b2b-pages} .page-main > .columns > .col-lg-10,
+    @{awa-acct-b2b-pages} .page-main > .columns > [class*='col-sm-9'] {
+        grid-column: 2;
+        grid-row: 1;
+        min-width: 0;
+        width: auto;
+        max-width: none;
+    }
+}
+
+// ── Sticky sidebar (desktop) ─────────────────────────────────────────────
+// Token primário: --awa-header-scroll-offset (definido pelo tema).
+// Fallback: calc dinâmico que soma alturas reais do header. §96 define valor idêntico
+// com !important — esta declaração serve como base sem !important para body.account padrão.
+@media (min-width: (@awa-breakpoint-sm + 1)) {
+    body.account .sidebar.sidebar-main,
+    body.account .sidebar-main,
+    @{awa-acct-b2b-pages} .sidebar.sidebar-main,
+    @{awa-acct-b2b-pages} .sidebar-main {
+        position: sticky;
+        top: var(--awa-header-scroll-offset, calc(var(--awa-header-main-row-h, 68px) + var(--awa-header-nav-h, 38px) + 24px));
+        align-self: start;
+    }
+}
+
+// ── Ritmo do conteúdo principal ───────────────────────────────────────────
+body.account .column.main,
+@{awa-acct-b2b-pages} .column.main {
+    padding-top: 0;
+    display: flex;
+    flex-direction: column;
+    gap: @awa-space-lg;
+}
+
+body.account .page-title-wrapper,
+@{awa-acct-b2b-pages} .page-title-wrapper {
+    margin: 0 0 @awa-space-sm;
+    padding-bottom: @awa-space-md;
+    border-bottom: 1px solid @awa-border-light;
+}
+
+body.account .page-title-wrapper .page-title,
+@{awa-acct-b2b-pages} .page-title-wrapper .page-title {
+    font-size: @awa-font-xl;
+    font-weight: @awa-font-weight-bold;
+    color: @awa-text;
+    margin: 0;
+    line-height: @awa-line-height-tight;
+}
+
+body.account .column.main > .block:not(.block-collapsible-nav),
+body.account .column.main > form,
+body.account .column.main > .table-wrapper,
+@{awa-acct-b2b-pages} .column.main > .block:not(.block-collapsible-nav),
+@{awa-acct-b2b-pages} .column.main > form,
+@{awa-acct-b2b-pages} .column.main > .table-wrapper {
+    margin: 0;
+}
+
+body.account .fieldset + .fieldset,
+@{awa-acct-b2b-pages} .fieldset + .fieldset {
+    margin-top: @awa-s-4;
+    padding-top: @awa-s-4;
+    border-top: 1px solid @awa-border-light;
+}
+
+// ── Breadcrumbs alinhados ao container account ─────────────────────────────
+body.account .breadcrumbs,
+@{awa-acct-b2b-pages} .breadcrumbs {
+    max-width: @awa-container-account;
+    margin-inline: auto;
+    padding-inline: @awa-page-pad-desktop;
+    width: 100%;
+    box-sizing: border-box;
+
+    @media (max-width: @awa-breakpoint-md) {
+        padding-inline: @awa-page-pad-tablet;
+    }
+
+    @media (max-width: @awa-breakpoint-sm) {
+        padding-inline: @awa-page-pad-mobile;
+    }
+}
+
+body.account .b2b-breadcrumbs-container,
+@{awa-acct-b2b-pages} .b2b-breadcrumbs-container {
+    max-width: @awa-container-account;
+    padding-inline: @awa-page-pad-desktop;
+
+    @media (max-width: @awa-breakpoint-sm) {
+        padding-inline: @awa-page-pad-mobile;
+    }
+}
+
+// ── Sidebar navigation — final-wins (sem side-stripe, WCAG touch 44px) ─────
+@awa-account-nav-hover-bg: fade(@awa-color-primary, 6%);
+@awa-account-nav-active-bg: fade(@awa-color-primary, 10%);
+
+body.account .sidebar-main .nav.item a,
+body.account .sidebar-main .nav.item strong,
+body.account .sidebar .block-collapsible-nav .item a,
+body.account .block-collapsible-nav .item a,
+body.account .account-nav-item .account-nav-link,
+@{awa-acct-b2b-pages} .sidebar-main .nav.item a,
+@{awa-acct-b2b-pages} .sidebar-main .nav.item strong,
+@{awa-acct-b2b-pages} .sidebar .block-collapsible-nav .item a,
+@{awa-acct-b2b-pages} .block-collapsible-nav .item a,
+@{awa-acct-b2b-pages} .account-nav-item .account-nav-link {
+    display: flex;
+    align-items: center;
+    min-height: @awa-s-6;
+    padding: @awa-space-2 @awa-s-2;
+    border-radius: @awa-radius-sm;
+    border: 0;
+    border-left: 0 !important;
+    border-inline-start: 0 !important;
+    box-sizing: border-box;
+    color: @awa-text;
+    font-size: var(--awa-fs-sm);
+    text-decoration: none;
+    transition: background-color 180ms @awa-ease, color 180ms @awa-ease;
+}
+
+body.account .sidebar-main .nav.item.current a,
+body.account .sidebar-main .nav.item.current strong,
+body.account .block-collapsible-nav .item.current a,
+body.account .block-collapsible-nav .item.current strong,
+body.account .account-nav-item.current .account-nav-link,
+@{awa-acct-b2b-pages} .sidebar-main .nav.item.current a,
+@{awa-acct-b2b-pages} .sidebar-main .nav.item.current strong,
+@{awa-acct-b2b-pages} .block-collapsible-nav .item.current a,
+@{awa-acct-b2b-pages} .block-collapsible-nav .item.current strong,
+@{awa-acct-b2b-pages} .account-nav-item.current .account-nav-link {
+    background: @awa-account-nav-active-bg;
+    color: @awa-color-primary;
+    font-weight: @awa-weight-semibold;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    body.account .sidebar-main .nav.item:not(.current) a:hover,
+    body.account .block-collapsible-nav .item:not(.current) a:hover,
+    body.account .account-nav-item:not(.current) .account-nav-link:hover,
+    @{awa-acct-b2b-pages} .sidebar-main .nav.item:not(.current) a:hover,
+    @{awa-acct-b2b-pages} .block-collapsible-nav .item:not(.current) a:hover,
+    @{awa-acct-b2b-pages} .account-nav-item:not(.current) .account-nav-link:hover {
+        background: @awa-account-nav-hover-bg;
+        color: @awa-color-primary;
+    }
+}
+
+body.account .sidebar-main .nav.items,
+body.account .block-collapsible-nav .items,
+@{awa-acct-b2b-pages} .sidebar-main .nav.items,
+@{awa-acct-b2b-pages} .block-collapsible-nav .items {
+    padding: @awa-space-xs @awa-space-xs !important;
+}
+
+// ── Card wrapper em páginas account padrão (não dashboard B2B) ────────────
+body.account:not(.b2b-account-dashboard) .column.main {
+    background: @awa-bg-white;
+    border: 1px solid @awa-border-light;
+    border-radius: @awa-radius-md;
+    padding: @awa-s-4;
+    box-shadow: @awa-shadow-card;
+}
+
+// ── Fieldset legend — hierarquia clara ────────────────────────────────────
+body.account .fieldset > .legend,
+body.account .fieldset > .legend span,
+@{awa-acct-b2b-pages} .fieldset > .legend,
+@{awa-acct-b2b-pages} .fieldset > .legend span {
+    font-size: @awa-font-md;
+    font-weight: @awa-font-weight-bold;
+    color: @awa-text;
+    letter-spacing: 0;
+    text-transform: none;
+    border-bottom: 1px solid @awa-border-light;
+    padding-bottom: @awa-space-sm;
+    margin-bottom: @awa-space-md;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.account .sidebar-main .nav.item a,
+    body.account .block-collapsible-nav .item a,
+    @{awa-acct-b2b-pages} .sidebar-main .nav.item a,
+    @{awa-acct-b2b-pages} .block-collapsible-nav .item a {
+        transition: none !important;
+    }
+}
+
+// ── B2B Auth Login — padronização visual (tokens AWA, final-wins) ─────────
+body.b2b-account-login {
+    .page-main {
+        padding-block: @awa-space-md !important;
+        max-width: 480px;
+    }
+
+    .b2b-login-page {
+        background: @awa-color-bg-soft;
+        padding: @awa-space-md @awa-space-md @awa-space-lg;
+        gap: @awa-space-sm;
+    }
+
+    .b2b-login-logo {
+        padding: @awa-space-sm 0 0;
+        background: transparent;
+        backdrop-filter: none;
+    }
+
+    .b2b-login-title {
+        font-size: var(--awa-fs-2xl);
+        font-weight: 700;
+        line-height: 1.25;
+        letter-spacing: -0.02em;
+        text-wrap: balance;
+        margin: 0 0 @awa-space-md;
+        color: @awa-color-text-primary;
+    }
+
+    .b2b-login-card {
+        width: 100%;
+        max-width: 440px;
+        padding: @awa-space-lg @awa-space-md;
+        margin-top: @awa-space-sm;
+        border: 1px solid @awa-color-border;
+        border-radius: @awa-radius-md;
+        box-shadow: @awa-shadow-sm;
+    }
+
+    .b2b-login-form {
+        gap: @awa-space-md;
+    }
+
+    .b2b-field-label {
+        font-size: var(--awa-fs-sm);
+        font-weight: 600;
+        text-transform: none;
+        letter-spacing: normal;
+        color: @awa-color-text-primary;
+        margin: 0 0 @awa-space-xs;
+    }
+
+    .b2b-field input {
+        min-height: 44px;
+        height: 44px;
+        font-size: var(--awa-fs-md);
+        border-radius: @awa-radius-sm;
+        border-color: @awa-color-border;
+        color: @awa-color-text-primary;
+
+        &::placeholder {
+            color: @awa-color-text-muted;
+        }
+
+        &:focus,
+        &:focus-visible {
+            border-color: @awa-color-primary;
+            box-shadow: @awa-focus-ring;
+            outline: 0;
+        }
+    }
+
+    .b2b-field-password input {
+        padding-right: 52px;
+    }
+
+    .b2b-btn-entrar {
+        min-height: 44px;
+        font-size: var(--awa-fs-md);
+        font-weight: 600;
+        text-transform: none;
+        letter-spacing: normal;
+        border-radius: @awa-radius-sm;
+
+        &:hover {
+            background: @awa-color-primary-dark;
+        }
+    }
+
+    .b2b-btn-register {
+        min-height: 44px;
+        background: transparent;
+        color: @awa-color-primary;
+        border: 1px solid @awa-color-primary;
+        text-transform: none;
+        letter-spacing: normal;
+        font-size: var(--awa-fs-sm);
+        font-weight: 600;
+
+        &:hover,
+        &:focus {
+            background: fade(@awa-color-primary, 6%);
+            color: @awa-color-primary-dark;
+            text-decoration: none;
+        }
+    }
+
+    .b2b-btn-claim {
+        min-height: 44px;
+        background: @awa-color-white;
+        color: @awa-color-text-primary;
+        border: 1px solid @awa-color-border;
+        text-transform: none;
+        letter-spacing: normal;
+        font-size: var(--awa-fs-sm);
+        font-weight: 600;
+
+        &:hover,
+        &:focus {
+            border-color: @awa-color-text-muted;
+            background: @awa-color-bg-soft;
+            color: @awa-color-text-primary;
+            text-decoration: none;
+        }
+    }
+
+    .b2b-login-divider {
+        margin: @awa-space-md 0;
+        gap: @awa-space-sm;
+
+        span {
+            font-size: var(--awa-fs-xs);
+            font-weight: 600;
+            color: @awa-color-text-muted;
+            letter-spacing: 0.04em;
+        }
+
+        &::before,
+        &::after {
+            background: @awa-color-border-subtle;
+        }
+    }
+
+    .b2b-login-ctas {
+        gap: @awa-space-sm;
+    }
+
+    .b2b-login-forgot {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        font-size: var(--awa-fs-sm);
+        color: @awa-color-text-muted;
+    }
+
+    .b2b-login-form .mage-error {
+        color: var(--awa-error, @awa-color-danger);
+    }
+
+    .b2b-field input.mage-error {
+        border-color: var(--awa-error, @awa-color-danger);
+    }
+
+    .b2b-password-toggle {
+        border-color: @awa-color-border;
+
+        &:hover {
+            background: fade(@awa-color-primary, 6%);
+            border-color: @awa-color-border;
+        }
+    }
+
+    #b2b-auth-loading-overlay {
+        z-index: var(--awa-z-overlay, 1000);
+    }
+
+    .b2b-login-forgot__link {
+        color: @awa-color-primary;
+        font-weight: 600;
+    }
+
+    .b2b-login-whatsapp {
+        font-size: var(--awa-fs-sm);
+        border-radius: @awa-radius-sm;
+    }
+
+    @media (max-width: (@awa-breakpoint-sm - 1px)) {
+        .b2b-login-page {
+            padding: @awa-space-sm @awa-space-sm calc(@awa-space-md + env(safe-area-inset-bottom, 0px));
+        }
+
+        .b2b-login-card {
+            padding: @awa-space-md @awa-space-sm;
+            margin-top: @awa-space-xs;
+        }
+
+        .b2b-field input {
+            font-size: 16px;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .b2b-btn-entrar,
+        .b2b-btn-register,
+        .b2b-btn-claim,
+        .b2b-field input {
+            transition: none;
+        }
+    }
+}
+
+// ── Login / cadastro PF — grid 2 colunas, cards e controles 44px ───────────
+body.customer-account-login .login-container,
+body.customer-account-create .form-create-account {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: @awa-space-8 0;
+}
+
+body.customer-account-login .login-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: @awa-space-6;
+    align-items: start;
+
+    @media (min-width: @awa-breakpoint-md) {
+        grid-template-columns: 1fr 1fr;
+        gap: @awa-space-8;
+    }
+}
+
+body.customer-account-login :is(.block-customer-login, .block-new-customer) {
+    background: @awa-color-white;
+    border: 1px solid @awa-color-border;
+    border-radius: @awa-radius-lg;
+    padding: @awa-space-6;
+    box-shadow: @awa-shadow-xs;
+}
+
+body.customer-account-login :is(.block-customer-login, .block-new-customer) .block-title {
+    font-size: @awa-font-lg;
+    font-weight: @awa-font-weight-bold;
+    color: @awa-color-text-primary;
+    margin: 0 0 @awa-space-2;
+    padding-bottom: @awa-space-3;
+    border-bottom: 2px solid @awa-color-border;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+body.customer-account-login :is(.block-customer-login, .block-new-customer) .block-title strong {
+    font-weight: inherit;
+}
+
+body.customer-account-login .block-content p {
+    font-size: @awa-font-sm;
+    color: @awa-color-text-muted;
+    margin-bottom: @awa-space-5;
+    line-height: 1.6;
+    text-wrap: pretty;
+}
+
+body.customer-account-login .action.remind {
+    display: inline-block;
+    margin-top: @awa-space-3;
+    font-size: @awa-font-sm;
+    color: @awa-color-primary;
+    text-decoration: none;
+    font-weight: 500;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
+
+body.customer-account-create .form-create-account {
+    background: @awa-color-white;
+    border: 1px solid @awa-color-border;
+    border-radius: @awa-radius-lg;
+    padding: @awa-space-6;
+    max-width: 640px;
+    margin: @awa-space-8 auto;
+    box-shadow: @awa-shadow-xs;
+}
+
+body.customer-account-create .page-title-wrapper .page-title {
+    font-size: @awa-font-xl;
+    font-weight: @awa-font-weight-bold;
+    text-align: center;
+    margin-bottom: @awa-space-6;
+}
+
+body.customer-account-create .form-create-account .fieldset {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: @awa-space-3 @awa-space-4;
+}
+
+body.customer-account-create .form-create-account :is(
+    .field[name*='email'],
+    .field.choice,
+    .field.password,
+    .field.confirmation
+) {
+    grid-column: 1 / -1;
+}
+
+@media (max-width: (@awa-breakpoint-sm - 1px)) {
+    body.customer-account-login .login-container {
+        padding: @awa-space-6 0;
+        gap: @awa-space-6;
+    }
+
+    body.customer-account-create .form-create-account .fieldset {
+        grid-template-columns: 1fr;
+    }
+}

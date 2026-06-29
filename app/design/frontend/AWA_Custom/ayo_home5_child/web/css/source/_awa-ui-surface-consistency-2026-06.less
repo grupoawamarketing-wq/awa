@@ -1,0 +1,278 @@
+// =============================================================================
+// §99 — UI Surface Consistency (2026-06-08)
+// Melhores práticas de padronização visual: page chrome, mensagens, blocos,
+// actions toolbar, botões secundários, tabelas e empty states — todas as páginas.
+// Complementa §88 (CTAs primários) + §97 (typeset) + §98 (shell).
+// =============================================================================
+
+@import (once) '_awa-tokens';
+@import (once) '_design-system';
+@import (once) '_awa-page-containers';
+
+@awa-ui-not-home: ~'html body#html-body:not(.cms-index-index):not(.cms-home):not(.cms-homepage_ayo_home5)';
+@awa-ui-chrome: ~'@{awa-ui-not-home}:not(.catalog-category-view):not(.catalog-product-view)';
+@awa-ui-account: ~'html body#html-body:is(.account, .customer-account-index, .sales-order-history, .sales-order-view, .wishlist-index-index, [class*="b2b-"])';
+@awa-ui-commerce: ~'html body#html-body:is(.checkout-cart-index, .checkout-index-index, .onepagecheckout-index-index, .catalogsearch-result-index, .contact-index-index, .catalog-product-compare-index)';
+
+// ── Gutter bridge: page-main usa --awa-shell-gutter do tier (§98) ───────────
+@{awa-ui-not-home}:not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .page-main {
+    padding-inline: var(--awa-shell-gutter, @awa-page-pad-desktop) !important;
+    box-sizing: border-box !important;
+}
+
+// Catálogo mantém gutter catalog explícito (20px)
+html body#html-body:is(.catalog-category-view, .catalog-product-view, .catalogsearch-result-index, .checkout-cart-index) {
+    .page-wrapper .page-main {
+        padding-inline: var(--awa-shell-gutter, @awa-page-pad-catalog) !important;
+    }
+}
+
+// ── Page chrome: título + separador sutil (exceto PLP/PDP com hero próprio) ─
+@{awa-ui-chrome} .page-wrapper {
+    .page-title-wrapper {
+        margin-block: 0 var(--awa-block-gap, @awa-space-4) !important;
+        padding-block-end: @awa-space-3 !important;
+        border-bottom: 1px solid var(--awa-border-subtle, @awa-color-border-subtle) !important;
+
+        :is(h1, .page-title) {
+            margin: 0 !important;
+            padding: 0 !important;
+            color: var(--awa-text, @awa-color-text-primary) !important;
+            font-size: var(--awa-text-fluid-h3, clamp(22px, 2vw, 28px)) !important;
+            font-weight: @awa-weight-bold !important;
+            line-height: 1.25 !important;
+            letter-spacing: -0.01em !important;
+            text-wrap: balance;
+        }
+    }
+
+    .page-title-wrapper + .page.messages,
+    .page.messages:first-child {
+        margin-block-end: var(--awa-block-gap, @awa-space-4) !important;
+    }
+}
+
+// Busca: título compacto sem borda dupla com toolbar
+html body#html-body.catalogsearch-result-index .page-wrapper .page-title-wrapper.search {
+    border-bottom: 0 !important;
+    padding-block-end: 0 !important;
+    margin-block-end: @awa-space-2 !important;
+}
+
+// ── Mensagens: contrato único success/error/info/warning ────────────────────
+@{awa-ui-not-home} .page-wrapper {
+    :is(.page.messages, .messages) :is(.message, div.message) {
+        display: flex !important;
+        align-items: flex-start !important;
+        gap: @awa-space-2 !important;
+        margin-block: 0 var(--awa-block-gap, @awa-space-4) !important;
+        padding: @awa-space-3 @awa-space-4 !important;
+        border-radius: @awa-radius-sm !important;
+        border: 1px solid var(--awa-border, @awa-color-border) !important;
+        font-size: var(--awa-text-sm, 13px) !important;
+        line-height: 1.45 !important;
+        box-sizing: border-box !important;
+
+        > :first-child {
+            margin-block-start: 2px !important;
+        }
+
+        a {
+            color: inherit !important;
+            font-weight: @awa-weight-semibold !important;
+            text-decoration: underline !important;
+            text-underline-offset: 2px !important;
+        }
+    }
+
+    .message-success {
+        background: var(--awa-primary-tint-50, fade(@awa-color-primary, 8%)) !important;
+        border-color: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 35%, var(--awa-border, @awa-color-border)) !important;
+        color: var(--awa-text, @awa-color-text-primary) !important;
+    }
+
+    .message-error {
+        background: var(--awa-error-bg, fade(@awa-color-error, 8%)) !important;
+        border-color: color-mix(in srgb, var(--awa-error, @awa-color-error) 35%, var(--awa-border, @awa-color-border)) !important;
+        color: var(--awa-text, @awa-color-text-primary) !important;
+    }
+
+    .message-warning,
+    .message-notice {
+        background: var(--awa-warning-bg, fade(@awa-color-warning, 10%)) !important;
+        border-color: color-mix(in srgb, var(--awa-warning, @awa-color-warning) 35%, var(--awa-border, @awa-color-border)) !important;
+        color: var(--awa-text, @awa-color-text-primary) !important;
+    }
+
+    .message-info {
+        background: var(--awa-bg-soft, @awa-color-bg-soft) !important;
+        border-color: var(--awa-border, @awa-color-border) !important;
+        color: var(--awa-text-muted, @awa-color-text-muted) !important;
+    }
+
+    .message.info.empty,
+    .empty.message {
+        text-align: center !important;
+        padding: @awa-space-6 @awa-space-4 !important;
+    }
+}
+
+// ── Block titles (account, cart, CMS — não filtros PLP) ─────────────────────
+@{awa-ui-chrome} .page-wrapper {
+    .block:not(.filter):not(.filter-current) > .block-title {
+        margin-block: 0 @awa-space-3 !important;
+        padding-block-end: @awa-space-2 !important;
+        border-bottom: 1px solid var(--awa-border-subtle, @awa-color-border-subtle) !important;
+
+        :is(strong, span, .title) {
+            font-size: var(--awa-text-lg, 18px) !important;
+            font-weight: @awa-weight-bold !important;
+            color: var(--awa-text, @awa-color-text-primary) !important;
+            text-transform: none !important;
+            letter-spacing: -0.01em !important;
+        }
+    }
+}
+
+// Sidebar nav: sem borda dupla
+@{awa-ui-account} .page-wrapper .sidebar-main .block-collapsible-nav > .block-title {
+    border-bottom: 0 !important;
+    padding-block-end: 0 !important;
+}
+
+// ── Actions toolbar: alinhamento e gap ──────────────────────────────────────
+@{awa-ui-not-home} .page-wrapper .actions-toolbar {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: @awa-space-3 !important;
+    margin-block-start: @awa-space-4 !important;
+
+    > .primary,
+    > .secondary {
+        margin: 0 !important;
+        float: none !important;
+    }
+
+    > .primary .action,
+    > .secondary .action {
+        margin-inline-end: 0 !important;
+    }
+}
+
+// ── Botões secundários: par com §88 primary ───────────────────────────────────
+@{awa-ui-not-home} .page-wrapper :is(
+    button.action.secondary,
+    a.action.secondary,
+    .action.secondary,
+    .btn-secondary
+) {
+    min-height: 44px !important;
+    padding-inline: @awa-space-4 !important;
+    border-radius: @awa-radius-sm !important;
+    background: var(--awa-bg-surface, @awa-color-white) !important;
+    border: 1px solid var(--awa-border, @awa-color-border) !important;
+    color: var(--awa-text, @awa-color-text-primary) !important;
+    font-size: var(--awa-fs-sm, 13px) !important;
+    font-weight: @awa-weight-semibold !important;
+    line-height: 1.2 !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
+    transition: background-color 150ms @awa-ease, border-color 150ms @awa-ease, color 150ms @awa-ease !important;
+
+    &:hover {
+        background: var(--awa-bg-soft, @awa-color-bg-soft) !important;
+        border-color: var(--awa-border, @awa-color-border) !important;
+        color: var(--awa-text, @awa-color-text-primary) !important;
+    }
+
+    &:focus-visible {
+        outline: @awa-focus-ring-width solid var(--awa-primary, @awa-color-primary) !important;
+        outline-offset: @awa-focus-ring-offset !important;
+    }
+}
+
+// ── Tabelas de dados: account, cart, B2B ────────────────────────────────────
+@{awa-ui-not-home} .page-wrapper {
+    .table-wrapper {
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        border: 1px solid var(--awa-border-subtle, @awa-color-border-subtle) !important;
+        border-radius: @awa-radius-sm !important;
+        background: var(--awa-bg-surface, @awa-color-white) !important;
+    }
+
+    .table-wrapper :is(table, .data.table) {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        font-size: var(--awa-text-sm, 13px) !important;
+        font-variant-numeric: tabular-nums !important;
+
+        thead th,
+        > thead > tr > th {
+            padding: @awa-space-3 @awa-space-4 !important;
+            background: var(--awa-bg-soft, @awa-color-bg-soft) !important;
+            border-bottom: 1px solid var(--awa-border, @awa-color-border) !important;
+            font-size: var(--awa-text-xs, 12px) !important;
+            font-weight: @awa-weight-semibold !important;
+            color: var(--awa-text-muted, @awa-color-text-muted) !important;
+            text-align: start !important;
+            white-space: nowrap !important;
+        }
+
+        tbody td,
+        tbody th,
+        > tbody > tr > td,
+        > tbody > tr > th {
+            padding: @awa-space-3 @awa-space-4 !important;
+            border-bottom: 1px solid var(--awa-border-subtle, @awa-color-border-subtle) !important;
+            vertical-align: middle !important;
+        }
+
+        tbody tr:last-child :is(td, th) {
+            border-bottom: 0 !important;
+        }
+    }
+}
+
+// Cart: summary card visual
+@{awa-ui-commerce} .page-wrapper .cart-summary {
+    border: 1px solid var(--awa-border-subtle, @awa-color-border-subtle) !important;
+    border-radius: @awa-radius-sm !important;
+    background: var(--awa-bg-surface, @awa-color-white) !important;
+    padding: @awa-space-4 !important;
+    box-sizing: border-box !important;
+}
+
+// ── Fieldsets: legend + spacing ───────────────────────────────────────────────
+@{awa-ui-chrome} .page-wrapper .fieldset {
+    margin-block: 0 var(--awa-section-gap, @awa-space-6) !important;
+    padding: 0 !important;
+    border: 0 !important;
+
+    > .legend {
+        font-size: var(--awa-text-lg, 18px) !important;
+        font-weight: @awa-weight-bold !important;
+        color: var(--awa-text, @awa-color-text-primary) !important;
+        margin-block-end: @awa-space-4 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        float: none !important;
+    }
+
+    > .field {
+        margin-block-end: @awa-space-4 !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    @{awa-ui-not-home} .page-wrapper :is(
+        button.action.secondary,
+        a.action.secondary,
+        .action.secondary
+    ) {
+        transition: none !important;
+    }
+}

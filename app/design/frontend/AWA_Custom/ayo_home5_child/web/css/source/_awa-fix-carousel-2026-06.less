@@ -1,0 +1,76 @@
+// =============================================================================
+// _awa-fix-carousel-2026-06.less
+// §77 — fix carrosséis home: nav abaixo do rail, shelf flex, sem overlay conflito.
+// =============================================================================
+
+@import (once) '_awa-tokens';
+@import (once) '_design-system';
+
+html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper {
+    .awa-shelf--carousel {
+        display: flex;
+        flex-direction: column;
+        gap: @awa-space-2;
+    }
+
+    .awa-shelf--carousel .awa-carousel {
+        order: 1;
+        width: 100%;
+    }
+
+    .awa-shelf--carousel > .awa-owl-nav,
+    .awa-shelf--carousel .awa-carousel > .awa-owl-nav {
+        order: 2;
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        right: auto !important;
+        transform: none !important;
+        height: auto !important;
+        min-height: 44px;
+        margin: 0;
+        padding: 0;
+        justify-content: center !important;
+        align-items: center;
+        gap: @awa-s-4;
+        pointer-events: auto;
+        z-index: 2;
+    }
+
+    .awa-shelf--carousel > .awa-owl-progress,
+    .awa-shelf--carousel .awa-owl-progress {
+        order: 3;
+        width: ~'min(100%, 280px)';
+        margin-inline: auto;
+        margin-block: 0;
+    }
+
+    .awa-shelf--carousel .awa-carousel__viewport {
+        padding-inline: @awa-s-2;
+    }
+
+    // Pré-init: viewport scrollável, todos os cards no trilho (sem esconder nth-child)
+    .awa-shelf--carousel .awa-carousel__viewport:not(.awa-carousel-ready) {
+        overflow-x: auto;
+        overflow-y: hidden;
+        scroll-snap-type: x proximity;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+
+        &::-webkit-scrollbar {
+            display: none;
+        }
+    }
+
+    .awa-shelf--carousel ul.owl.awa-carousel__track > li.item {
+        display: flex !important;
+    }
+}
+
+@media (min-width: @awa-bp-768) {
+    html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper {
+        .awa-shelf--carousel .awa-carousel__viewport {
+            padding-inline: @awa-s-3;
+        }
+    }
+}

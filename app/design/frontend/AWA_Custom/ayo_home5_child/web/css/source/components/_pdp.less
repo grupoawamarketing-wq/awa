@@ -1,0 +1,320 @@
+// =============================================================================
+// Fase 3B — Onda 3: PDP Component Layer
+// Escopo: .catalog-product-view
+// Foco: gaps não cobertos pelos arquivos de fase anterior —
+//   thumbnails de galeria, tabs de produto, sticky CTA mobile,
+//   B2B price state, breadcrumb, relacionados.
+// Carregado APÓS o build legado → final-wins por ordem de documento.
+// =============================================================================
+
+@import (once) '../_awa-variables';
+
+// ── Variável de escopo ────────────────────────────────────────────────────────
+@c3-pdp: ~'.catalog-product-view .page-wrapper';
+
+// =============================================================================
+// § 1 — Breadcrumb da PDP
+// Garante visibilidade e integração com o sistema de tokens AWA.
+// =============================================================================
+.catalog-product-view .page-wrapper {
+    .breadcrumbs {
+        padding-block: 10px 0;
+        font-size: var(--awa-text-sm, 13px);
+
+        .items {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 2px 4px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .item {
+            display: flex;
+            align-items: center;
+
+            &:not(:last-child)::after {
+                content: '/';
+                margin-inline-start: 4px;
+                color: var(--awa-gray-500, #6b7280);
+            }
+
+            a {
+                color: var(--awa-gray-500, #6b7280);
+                text-decoration: none;
+                transition: color var(--awa-transition-fast, 150ms ease);
+
+                &:hover { color: var(--awa-red, #b73337); }
+            }
+
+            strong {
+                color: var(--awa-gray-700, #374151);
+                font-weight: var(--awa-weight-normal, 400);
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 22ch;
+            }
+        }
+    }
+}
+
+// =============================================================================
+// § 2 — Galeria (Fotorama) — thumbnails e hover
+// Os arquivos existentes fixam o stage principal; estes complementam
+// o comportamento dos thumbs na nav.
+// =============================================================================
+@{c3-pdp} {
+    // Thumbnail nav frame: borda e transição clara
+    .fotorama__nav__frame {
+        border: 2px solid transparent;
+        border-radius: 4px;
+        overflow: hidden;
+        transition: border-color var(--awa-transition-fast, 150ms ease);
+        cursor: pointer;
+    }
+
+    .fotorama__nav__frame--thumb:hover,
+    .fotorama__nav__frame--thumb.fotorama__active {
+        border-color: var(--awa-red, #b73337);
+    }
+
+    // Imagem do thumb: object-fit contain
+    .fotorama__nav__frame .fotorama__img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+    // Stage: loading state (spinner visível durante lazy)
+    .fotorama__stage {
+        background: var(--awa-gray-100, #f5f5f5);
+    }
+
+    .fotorama__stage__frame .fotorama__img {
+        transition: opacity 200ms ease;
+    }
+}
+
+// =============================================================================
+// § 3 — Produto: título e SKU
+// Garante hierarquia tipográfica limpa no produto.
+// =============================================================================
+@{c3-pdp} .product-info-main {
+    .page-title-wrapper .page-title {
+        font-size: clamp(18px, 2.5vw, 26px);
+        font-weight: var(--awa-weight-bold, 700);
+        line-height: 1.25;
+        color: var(--awa-black, #1a1a1a);
+        margin-block: 0 8px;
+    }
+
+    .product.attribute.sku {
+        font-size: var(--awa-text-sm, 13px);
+        color: var(--awa-gray-500, #6b7280);
+        margin-block: 0 12px;
+
+        .type {
+            font-weight: var(--awa-weight-medium, 500);
+        }
+    }
+}
+
+// =============================================================================
+// § 4 — Preço na PDP
+// Visibilidade clara do preço e do preço especial (riscado).
+// =============================================================================
+@{c3-pdp} .product-info-main {
+    .price-box.price-final_price {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        margin-block: 0 16px;
+    }
+
+    // Preço normal (sem desconto)
+    .price-wrapper:not(.price-including-tax):not(.price-excluding-tax) .price {
+        font-size: clamp(20px, 3vw, 28px);
+        font-weight: var(--awa-weight-bold, 700);
+        color: var(--awa-black, #1a1a1a);
+        font-variant-numeric: tabular-nums;
+        line-height: 1.2;
+    }
+
+    // Preço especial (em promoção)
+    .special-price .price {
+        font-size: clamp(22px, 3.2vw, 30px);
+        font-weight: var(--awa-weight-bold, 700);
+        color: var(--awa-red, #b73337);
+        font-variant-numeric: tabular-nums;
+        line-height: 1.2;
+    }
+
+    // Preço riscado (old-price)
+    .old-price .price {
+        font-size: var(--awa-text-base, 15px);
+        font-weight: var(--awa-weight-normal, 400);
+        color: var(--awa-gray-500, #6b7280);
+        text-decoration: line-through;
+    }
+}
+
+// =============================================================================
+// § 5 — B2B "Login para ver preço" na PDP
+// Estado específico quando o cliente não está logado.
+// Complementa o estado no card de listagem.
+// =============================================================================
+@{c3-pdp} .product-info-main {
+    .b2b-login-to-see-price {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 16px;
+        background: var(--awa-gray-100, #f5f5f5);
+        border: 1px solid var(--awa-gray-200, #e5e7eb);
+        border-radius: var(--awa-radius-md, 12px);
+        margin-block: 0 16px;
+        text-align: center;
+
+        p,
+        .b2b-message {
+            font-size: var(--awa-text-sm, 13px);
+            color: var(--awa-gray-700, #374151);
+            margin: 0;
+        }
+
+        a,
+        .b2b-login-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 10px 20px;
+            background: var(--awa-red, #b73337);
+            color: #fff;
+            border-radius: var(--awa-radius-sm, 8px);
+            font-size: var(--awa-text-sm, 13px);
+            font-weight: var(--awa-weight-semibold, 600);
+            text-decoration: none;
+            transition: background var(--awa-transition-fast, 150ms ease);
+
+            &:hover {
+                background: var(--awa-red-dark, #8e2629);
+            }
+        }
+    }
+}
+
+// =============================================================================
+// § 6 — Tabs do produto (Descrição, Especificações, Avaliações)
+// Focus visível e transição de conteúdo suave.
+// =============================================================================
+@{c3-pdp} {
+    .product.data.items {
+        border-top: 1px solid var(--awa-gray-200, #e5e7eb);
+        margin-block-start: 32px;
+    }
+
+    .product.data.items > .item.title > .switch {
+        display: block;
+        padding: 12px 16px;
+        font-size: var(--awa-text-sm, 13px);
+        font-weight: var(--awa-weight-semibold, 600);
+        color: var(--awa-gray-700, #374151);
+        border: 1px solid var(--awa-gray-200, #e5e7eb);
+        border-bottom: none;
+        border-radius: 4px 4px 0 0;
+        text-decoration: none;
+        cursor: pointer;
+        transition: color var(--awa-transition-fast, 150ms ease),
+                    background var(--awa-transition-fast, 150ms ease);
+
+        &:hover {
+            color: var(--awa-red, #b73337);
+            background: var(--awa-gray-100, #f5f5f5);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--awa-red, #b73337);
+            outline-offset: 2px;
+        }
+    }
+
+    .product.data.items > .item.title.active > .switch {
+        color: var(--awa-red, #b73337);
+        background: #fff;
+        border-bottom-color: #fff;
+    }
+
+    .product.data.items > .item.content {
+        border: 1px solid var(--awa-gray-200, #e5e7eb);
+        padding: 20px 16px;
+        font-size: var(--awa-text-base, 15px);
+        line-height: 1.6;
+        color: var(--awa-gray-700, #374151);
+    }
+}
+
+// =============================================================================
+// § 7 — Sticky "Adicionar ao Carrinho" mobile (≤767px)
+// Barra fixa no rodapé em mobile com CTA primária.
+// Acompanha a abordagem do _awa-pdp-sticky-bar.less (comentado no build).
+// =============================================================================
+@media (max-width: 767px) {
+    @{c3-pdp} {
+        // Container do sticky
+        .awa-pdp-sticky-bar,
+        .pdp-sticky-cta {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 500;
+            background: #fff;
+            border-top: 1px solid var(--awa-gray-200, #e5e7eb);
+            padding: 10px 16px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
+
+            // safe area inset para iPhones com notch no rodapé
+            padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+        }
+
+        // Se o elemento sticky existir, compensar no scroll
+        &:has(.awa-pdp-sticky-bar),
+        &:has(.pdp-sticky-cta) {
+            .page-main {
+                padding-bottom: 80px;
+            }
+        }
+    }
+}
+
+// =============================================================================
+// § 8 — Produtos relacionados (abaixo do fold)
+// Grid de cards relateds usando os mesmos tokens do card PLP.
+// =============================================================================
+@{c3-pdp} {
+    :is(.block.related, .block.upsell, .block.crosssell) {
+        margin-block-start: 40px;
+        padding-block-start: 24px;
+        border-top: 1px solid var(--awa-gray-200, #e5e7eb);
+
+        .block-title strong {
+            font-size: var(--awa-text-xl, 20px);
+            font-weight: var(--awa-weight-bold, 700);
+            color: var(--awa-black, #1a1a1a);
+        }
+
+        .products-grid .product-items,
+        .products.list.items {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 12px 10px;
+        }
+    }
+}

@@ -1,0 +1,354 @@
+// =============================================================================
+// §112 — B2B Polish Terminal (2026-06-10)
+// Quick Order, cotações, listas de compras, reorder — touch 44px, sentence-case.
+// =============================================================================
+
+@import (once) '_awa-tokens';
+@import (once) '_design-system';
+
+@awa-qo-scope: ~'html body#html-body.b2b-quickorder-index';
+@awa-quote-scope: ~'html body#html-body:is(.b2b-quote-index, .b2b-quote-history, .b2b-quote-view, .b2b-cotacao-index, .b2b-cotacao-view)';
+@awa-list-scope: ~'html body#html-body:is(.b2b-shoppinglist-index, .b2b-shoppinglist-view)';
+@awa-reorder-scope: ~'html body#html-body.b2b-reorder-history';
+
+// ── Quick Order — shell, CSV dropzone, linhas SKU/qty ────────────────────────
+@{awa-qo-scope} .page-wrapper .b2b-quickorder {
+    max-width: 48rem !important;
+    margin-inline: auto !important;
+    padding: @awa-space-5 @awa-space-4 !important;
+    border: 1px solid var(--awa-border, @awa-color-border) !important;
+    border-radius: @awa-radius-lg !important;
+    background: var(--awa-bg, @awa-color-white) !important;
+    box-shadow: none !important;
+}
+
+@{awa-qo-scope} .page-wrapper .b2b-quickorder .block-title {
+    margin: 0 0 @awa-space-4 !important;
+    padding: 0 0 @awa-space-3 !important;
+    border-bottom: 1px solid var(--awa-border, @awa-color-border) !important;
+}
+
+@{awa-qo-scope} .page-wrapper .b2b-quickorder .block-title strong {
+    display: block !important;
+    font-size: clamp(20px, 3.5vw, 24px) !important;
+    font-weight: @awa-weight-bold !important;
+    letter-spacing: -0.02em !important;
+    text-transform: none !important;
+    color: var(--awa-text, @awa-color-text-primary) !important;
+}
+
+@{awa-qo-scope} .page-wrapper .b2b-quickorder .quickorder-description {
+    margin: @awa-space-2 0 0 !important;
+    font-size: var(--awa-fs-md, 15px) !important;
+    line-height: 1.55 !important;
+    color: var(--awa-text-muted, @awa-color-text-muted) !important;
+}
+
+@{awa-qo-scope} .page-wrapper .b2b-quickorder .csv-dropzone {
+    min-height: 9rem !important;
+    padding: @awa-space-5 @awa-space-4 !important;
+    border: 2px dashed var(--awa-border, @awa-color-border) !important;
+    border-radius: @awa-radius-md !important;
+    background: var(--awa-bg-soft, @awa-color-bg-soft) !important;
+    transition: border-color 0.18s @awa-ease, background-color 0.18s @awa-ease;
+}
+
+@{awa-qo-scope} .page-wrapper .b2b-quickorder .csv-dropzone:hover,
+@{awa-qo-scope} .page-wrapper .b2b-quickorder .csv-dropzone:focus-visible,
+@{awa-qo-scope} .page-wrapper .b2b-quickorder .csv-dropzone.csv-dropzone--active {
+    border-color: var(--awa-primary, @awa-color-primary) !important;
+    background: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 5%, var(--awa-bg, @awa-color-white)) !important;
+    outline: none !important;
+}
+
+@{awa-qo-scope} .page-wrapper .b2b-quickorder .csv-dropzone:focus-visible {
+    outline: @awa-focus-ring-width solid var(--awa-primary, @awa-color-primary) !important;
+    outline-offset: 2px !important;
+}
+
+@{awa-qo-scope} .page-wrapper .b2b-quickorder .csv-dropzone__text {
+    font-size: var(--awa-fs-md, 15px) !important;
+    font-weight: @awa-weight-semibold !important;
+    text-transform: none !important;
+}
+
+@{awa-qo-scope} .page-wrapper .b2b-quickorder .csv-sample-link {
+    display: inline-flex !important;
+    align-items: center !important;
+    min-height: @awa-btn-height !important;
+    font-weight: @awa-weight-semibold !important;
+    text-transform: none !important;
+}
+
+@{awa-qo-scope} .page-wrapper .b2b-quickorder .quickorder-fieldset {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    min-width: 0 !important;
+}
+
+@{awa-qo-scope} .page-wrapper .b2b-quickorder .quickorder-results[hidden] {
+    display: none !important;
+}
+
+@{awa-qo-scope} .page-wrapper .b2b-quickorder .quickorder-header-row {
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    font-weight: @awa-weight-semibold !important;
+    font-size: var(--awa-fs-sm, 13px) !important;
+    color: var(--awa-text-muted, @awa-color-text-muted) !important;
+}
+
+@{awa-qo-scope} .page-wrapper .b2b-quickorder .quickorder-row :is(.sku-input, .qty-input) {
+    min-height: @awa-btn-height !important;
+    font-size: ~"max(16px, 0.875rem)" !important;
+    border-radius: @awa-radius-sm !important;
+    border: 1px solid var(--awa-border, @awa-color-border) !important;
+}
+
+@{awa-qo-scope} .page-wrapper .b2b-quickorder .quickorder-row :is(.sku-input, .qty-input):focus-visible {
+    outline: @awa-focus-ring-width solid var(--awa-primary, @awa-color-primary) !important;
+    outline-offset: 2px !important;
+    border-color: var(--awa-primary, @awa-color-primary) !important;
+}
+
+@{awa-qo-scope} .page-wrapper .b2b-quickorder .quickorder-row .btn-remove {
+    min-width: @awa-btn-height !important;
+    min-height: @awa-btn-height !important;
+    border-radius: @awa-radius-sm !important;
+    font-size: 20px !important;
+    line-height: 1 !important;
+}
+
+@{awa-qo-scope} .page-wrapper .b2b-quickorder .quickorder-row.has-error .sku-input {
+    border-color: var(--awa-danger, @awa-color-primary) !important;
+    background: color-mix(in srgb, var(--awa-danger, @awa-color-primary) 4%, var(--awa-bg, @awa-color-white)) !important;
+}
+
+@{awa-qo-scope} .page-wrapper .b2b-quickorder :is(.quickorder-add-row .action, .quickorder-actions .action) {
+    min-height: @awa-btn-height !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    border-radius: @awa-radius-sm !important;
+}
+
+@{awa-qo-scope} .page-wrapper .b2b-quickorder .results-success,
+@{awa-qo-scope} .page-wrapper .b2b-quickorder .results-errors {
+    padding: @awa-space-3 @awa-space-4 !important;
+    border-radius: @awa-radius-sm !important;
+    font-size: var(--awa-fs-md, 15px) !important;
+    line-height: 1.5 !important;
+    text-transform: none !important;
+    box-shadow: none !important;
+}
+
+@{awa-qo-scope} .page-wrapper .b2b-quickorder .results-success {
+    border: 1px solid color-mix(in srgb, var(--awa-success, @awa-color-success) 35%, var(--awa-border, @awa-color-border)) !important;
+    background: color-mix(in srgb, var(--awa-success, @awa-color-success) 8%, var(--awa-bg, @awa-color-white)) !important;
+    color: var(--awa-text, @awa-color-text-primary) !important;
+}
+
+@{awa-qo-scope} .page-wrapper .b2b-quickorder .results-errors {
+    border: 1px solid color-mix(in srgb, var(--awa-danger, @awa-color-primary) 35%, var(--awa-border, @awa-color-border)) !important;
+    background: color-mix(in srgb, var(--awa-danger, @awa-color-primary) 8%, var(--awa-bg, @awa-color-white)) !important;
+    color: var(--awa-text, @awa-color-text-primary) !important;
+}
+
+@media (max-width: (@awa-bp-768 - 1)) {
+    @{awa-qo-scope} .page-wrapper .b2b-quickorder .quickorder-header-row {
+        display: none !important;
+    }
+
+    @{awa-qo-scope} .page-wrapper .b2b-quickorder .quickorder-row {
+        flex-wrap: wrap !important;
+        gap: @awa-space-2 !important;
+        padding: @awa-space-3 0 !important;
+    }
+
+    @{awa-qo-scope} .page-wrapper .b2b-quickorder .quickorder-row .sku-input {
+        flex: 1 1 100% !important;
+        width: 100% !important;
+    }
+
+    @{awa-qo-scope} .page-wrapper .b2b-quickorder .quickorder-row .qty-input {
+        flex: 1 1 auto !important;
+        min-width: 5rem !important;
+    }
+
+    @{awa-qo-scope} .page-wrapper .b2b-quickorder .quickorder-actions {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+
+    @{awa-qo-scope} .page-wrapper .b2b-quickorder .quickorder-actions .action {
+        width: 100% !important;
+        justify-content: center !important;
+    }
+}
+
+// ── Cotações — header, tabela, badges, formulário ────────────────────────────
+@{awa-quote-scope} .page-wrapper .b2b-section-header :is(h1, h2) {
+    text-transform: none !important;
+    letter-spacing: -0.02em !important;
+    font-weight: @awa-weight-bold !important;
+    line-height: 1.25 !important;
+}
+
+@{awa-quote-scope} .page-wrapper .b2b-section-header .section-subtitle {
+    font-size: var(--awa-fs-md, 15px) !important;
+    line-height: 1.55 !important;
+    color: var(--awa-text-muted, @awa-color-text-muted) !important;
+}
+
+@{awa-quote-scope} .page-wrapper .message.info.empty,
+@{awa-quote-scope} .page-wrapper .message.empty {
+    max-width: 36rem !important;
+    margin: @awa-space-5 auto !important;
+    padding: @awa-space-6 @awa-space-4 !important;
+    text-align: center !important;
+    border: 1px dashed var(--awa-border, @awa-color-border) !important;
+    border-radius: @awa-radius-lg !important;
+    background: var(--awa-bg-soft, @awa-color-bg-soft) !important;
+    box-shadow: none !important;
+}
+
+@{awa-quote-scope} .page-wrapper .table-wrapper {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid var(--awa-border, @awa-color-border) !important;
+    border-radius: @awa-radius-sm !important;
+    background: var(--awa-bg, @awa-color-white) !important;
+}
+
+@{awa-quote-scope} .page-wrapper :is(.data.table, .table-quote-history, .table-quote-items) th {
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    font-size: var(--awa-fs-sm, 13px) !important;
+    font-weight: @awa-weight-semibold !important;
+}
+
+@{awa-quote-scope} .page-wrapper .quote-status {
+    display: inline-flex !important;
+    align-items: center !important;
+    min-height: 28px !important;
+    padding: 0 @awa-space-2 !important;
+    border-radius: @awa-radius-pill !important;
+    font-size: var(--awa-fs-sm, 13px) !important;
+    font-weight: @awa-weight-semibold !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+}
+
+@{awa-quote-scope} .page-wrapper .quote-status.status-success,
+@{awa-quote-scope} .page-wrapper .quote-status.status-complete {
+    background: color-mix(in srgb, var(--awa-success, @awa-color-success) 12%, var(--awa-bg, @awa-color-white)) !important;
+    color: var(--awa-success, @awa-color-success) !important;
+}
+
+@{awa-quote-scope} .page-wrapper .quote-status.status-pending {
+    background: color-mix(in srgb, var(--awa-warning, @awa-color-warning) 12%, var(--awa-bg, @awa-color-white)) !important;
+    color: var(--awa-warning, @awa-color-warning) !important;
+}
+
+@{awa-quote-scope} .page-wrapper .quote-status.status-failed {
+    background: color-mix(in srgb, var(--awa-danger, @awa-color-primary) 12%, var(--awa-bg, @awa-color-white)) !important;
+    color: var(--awa-danger, @awa-color-primary) !important;
+}
+
+@{awa-quote-scope} .page-wrapper :is(.b2b-quote-form, .b2b-quote-items) :is(.input-text, textarea, select) {
+    min-height: @awa-btn-height !important;
+    font-size: ~"max(16px, 0.875rem)" !important;
+    border-radius: @awa-radius-sm !important;
+}
+
+@{awa-quote-scope} .page-wrapper :is(.b2b-quote-form, .b2b-quote-view) .field .label {
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    font-weight: @awa-weight-semibold !important;
+}
+
+@{awa-quote-scope} .page-wrapper :is(
+    .b2b-quote-form-container .actions-toolbar .action,
+    .b2b-quote-view .quote-view-actions .action,
+    .b2b-quote-view .quote-decision-actions .action,
+    .b2b-quote-history .actions .action
+) {
+    min-height: @awa-btn-height !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    border-radius: @awa-radius-sm !important;
+}
+
+// ── Listas de compras — cards e formulário criar ───────────────────────────────
+@{awa-list-scope} .page-wrapper .shoppinglist-actions-top .action.primary,
+@{awa-list-scope} .page-wrapper .shoppinglist-create-form .action,
+@{awa-list-scope} .page-wrapper .shoppinglist-card .action {
+    min-height: @awa-btn-height !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    border-radius: @awa-radius-sm !important;
+}
+
+@{awa-list-scope} .page-wrapper .shoppinglist-create-form {
+    padding: @awa-space-4 !important;
+    border: 1px solid var(--awa-border, @awa-color-border) !important;
+    border-radius: @awa-radius-md !important;
+    background: var(--awa-bg-soft, @awa-color-bg-soft) !important;
+}
+
+@{awa-list-scope} .page-wrapper .shoppinglist-create-form :is(.input-text, textarea) {
+    min-height: @awa-btn-height !important;
+    font-size: ~"max(16px, 0.875rem)" !important;
+    border-radius: @awa-radius-sm !important;
+}
+
+@{awa-list-scope} .page-wrapper .shoppinglist-card,
+@{awa-list-scope} .page-wrapper .shopping-lists-grid .list-card {
+    border: 1px solid var(--awa-border, @awa-color-border) !important;
+    border-radius: @awa-radius-md !important;
+    background: var(--awa-bg, @awa-color-white) !important;
+    box-shadow: none !important;
+    transition: border-color 0.18s @awa-ease;
+}
+
+@{awa-list-scope} .page-wrapper .shoppinglist-card:hover,
+@{awa-list-scope} .page-wrapper .shopping-lists-grid .list-card:hover {
+    border-color: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 40%, var(--awa-border, @awa-color-border)) !important;
+}
+
+@{awa-list-scope} .page-wrapper .message.info.empty {
+    max-width: 36rem !important;
+    margin: @awa-space-5 auto !important;
+    padding: @awa-space-6 @awa-space-4 !important;
+    text-align: center !important;
+    border: 1px dashed var(--awa-border, @awa-color-border) !important;
+    border-radius: @awa-radius-lg !important;
+    background: var(--awa-bg-soft, @awa-color-bg-soft) !important;
+}
+
+// ── Reorder history — tabela responsiva ──────────────────────────────────────
+@{awa-reorder-scope} .page-wrapper .table-wrapper {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid var(--awa-border, @awa-color-border) !important;
+    border-radius: @awa-radius-sm !important;
+}
+
+@{awa-reorder-scope} .page-wrapper .data.table th {
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    font-weight: @awa-weight-semibold !important;
+}
+
+@{awa-reorder-scope} .page-wrapper .actions .action {
+    min-height: @awa-btn-height !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    @{awa-qo-scope} .page-wrapper .b2b-quickorder .csv-dropzone,
+    @{awa-list-scope} .page-wrapper .shoppinglist-card {
+        transition: none !important;
+    }
+}

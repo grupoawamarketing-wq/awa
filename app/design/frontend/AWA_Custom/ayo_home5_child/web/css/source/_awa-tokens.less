@@ -1,0 +1,142 @@
+/* ==========================================================================
+   SISTEMA AWA — Inventário vivo (Impeccable document/extract, 2026-06-03)
+   Register: product | Estratégia cor: Restrained (vermelho #b73337 ≤10% superfície)
+   Cena: lojista B2B em loja/entre entregas, luz ambiente clara, leitura rápida de SKU/preço.
+
+   ── CORES (fonte: _awa-variables.less → runtime _tokens.less / :root) ──
+   Primária @awa-color-primary #b73337 | Hover @awa-color-primary-dark #8e2629
+   Tints 50/100 @awa-color-error-bg-light #fde8e8 | Ink #1a1a1a | Texto @awa-color-dark @awa-color-text-muted #999
+   Superfície #fff | Soft #f7f7f7 | Borda #e5e5e5 #eeeeee
+   Semântica success @awa-color-success | warning @awa-color-warning | error = primária + tint
+   OKLCH (Fase 2+): derivar de #b73337 em _extend.less; hex só em primitivos + @supports fallback
+
+   ── ESPAÇAMENTO ──
+   Estrutural NOVO: @awa-s-0..9 (base 8px) + var(--awa-s-*) em _design-system.less
+   Legado 4px: @awa-space-1..10 (4 8 12 16 20 24 32 40 48 64) — não usar 20px em layout novo
+   Aliases shim: @awa-space-xs..2xl → space-1/2/4/6/7/9
+   Gaps: @awa-gap-xs..2xl (4px rhythm)
+
+   ── TIPOGRAFIA ──
+   Fluida (preferir): --awa-fs-xs..3xl clamp 320–1280px | Mixins .font-size-h1()..h4()
+   Fixa legado: @awa-font-xs..2xl (11–24px) | Pesos normal/medium/bold
+   Hierarquia alvo: display 3xl | headline 2xl | title xl | body md | label sm (0.04em em CTAs)
+   Regra: títulos de seção/card usam var(--awa-fs-xl) ou 2xl, não clamp solto fora da escala
+
+   ── BREAKPOINTS (usar em .media-width ou @media agrupado) ──
+   DS gates: @awa-bp-576 576 | @awa-bp-768 768 | @awa-bp-992 992 | @awa-bp-1200 1200
+   Magento: @awa-breakpoint-xxs 360 | xs 480 | sm 768 | md 1024 | lg 1280 | xl 1440
+   min-width → desktop | max-width → mobile | @media-common para regras sem breakpoint
+
+   ── RAIOS / SOMBRAS / MOTION ──
+   Radius sm 8 | md 10–12 | lg 16 | pill 9999 | Shadow sm/md/lg | @awa-ease 0.4,0,0.2,1
+   Ícones utilitários: .awa-icon--sm 16 | --md 24 | --lg 48 (_awa-inline-svg-hardening.less)
+   Touch mínimo: 44×44px (botões, .awa-owl-nav__btn, links footer)
+
+   ── COMPONENTES HOME (DOM estável — só CSS) ──
+   1) Hero B2B: .awa-hero-b2b-cta > .awa-hero-trust-strip > .awa-hero-trust-strip__item
+      (ícone 48px, texto) — LESS final-wins: _awa-home-hero-trust-layout.less; drift: preload !important
+   2) Cabeçalho seção: .awa-section-header (+ --featured|--standard|--compact|--stacked)
+      __left __title __subtitle __link.awa-shelf__view-all — drift: consolidated vars + shelf-carousel.css
+   3) Prateleira/carrossel: .awa-carousel-section > .awa-shelf--carousel > .awa-carousel__viewport|__track|__slide
+      Nav: .awa-owl-nav__btn | progress shelf | peek 87%→50%→33%→25%→20% (awa-shelf-carousel.css legado)
+   4) Card produto: .item-product / .product-item dentro shelf; nome .product-name .product-item-link
+      (line-clamp 2 alvo) | add-to-cart | B2B .b2b-login-to-see-price
+   5) Categorias: .awa-category-carousel__* + .awa-reel--sm
+   6) Pedidos recentes: .awa-home-recent-orders__* + empty-state
+   7) Rodapé: .page_footer / .page-footer, .footer-container, .footer-block-title, .awa-footer-*
+
+   ── DÍVIDA DE CASCATA (padronizar em _extend.less pós-consolidated) ──
+   Pipeline: _extend.less → tokens → consolidated (inline) → account → hero-trust → svg → recent-orders
+   Paralelos que causam drift: awa-head-preload-critical-home.css (!important mobile)
+   awa-shelf-carousel.css (seção header, slides, nav) | bundles awa-bundle-* (não editar nesta missão)
+   Meta Fase 2–4: regras canônicas ÚNICAS por componente no fim de _extend.less, .media-width(), sem !important
+   §48 overflow raízes (2026-06-03): badge @awa-badge-reserve-block | carrossel @awa-carousel-track-pad-block
+   | copy empty @awa-measure-copy-max 65ch | header/promo pad @awa-space-2 | shelf sem border+shadow duplo
+   §49 quieter/distill: superfícies flat, CTAs sem lift, side stripes neutralizadas e motion funcional
+   §50 interaction: foco visível, disabled estável, campos tokenizados e touch target 48px fora do checkout
+   §51 home audit/adapt/layout/polish: footer SVG boxes, hero CTA real e compact shelves alinhadas
+
+   ── ARQUIVOS PERMITIDOS NESTA MISSÃO ──
+   _extend.less | _awa-tokens.less (este inventário) | _awa-inline-svg-hardening.less
+   awa-shelf-carousel.css | awa-scroll-carousel.js | awa-head-preload-critical-home.css
+   ==========================================================================
+   AWA Design System — Semantic Token Shim  (source/_awa-tokens.less)
+   Fase 1-B — API semântica para componentes LESS.
+
+   NÃO duplica primitivos. Importa _awa-variables.less e expõe aliases
+   legíveis (@awa-space-md, @awa-font-base…) para _awa-forms, _awa-cards
+   e novos partials. Valores canônicos permanecem em _awa-variables.less.
+   ========================================================================== */
+
+@import (once) '_awa-variables';
+
+// ─── Cores ───────────────────────────────────────────────────────────────
+@awa-primary:           @awa-color-primary;
+@awa-primary-dark:      @awa-color-primary-dark;
+@awa-primary-hover:     @awa-color-primary-dark;
+@awa-primary-light:     fade(@awa-color-primary, 8%);
+@awa-text:              @awa-color-text-primary;
+@awa-text-muted:        @awa-color-text-muted;
+@awa-text-light:        @awa-color-text-light;
+@awa-border:            @awa-color-border;
+@awa-border-light:      @awa-color-border-subtle;
+@awa-bg-page:           @awa-color-bg-soft;
+@awa-bg-white:          @awa-color-white;
+@awa-success:           @awa-color-success;
+@awa-success-bg:        @awa-color-success-light;
+@awa-warning:           @awa-color-warning;
+@awa-warning-bg:        @awa-color-warning-light;
+@awa-error:             @awa-color-error;
+@awa-error-bg:          @awa-color-error-bg;
+
+// ─── Espaçamento (aliases semânticos → escala numérica) ─────────────────
+@awa-space-xs:          @awa-space-1;   // 4px
+@awa-space-sm:          @awa-space-2;   // 8px
+@awa-space-md:          @awa-space-4;   // 16px
+@awa-space-lg:          @awa-space-6;   // 24px
+@awa-space-xl:          @awa-space-7;   // 32px
+@awa-space-2xl:         @awa-space-9;   // 48px
+
+// ─── Tipografia ──────────────────────────────────────────────────────────
+@awa-font-xs:           @awa-font-size-11;
+@awa-font-sm:           @awa-font-size-12;
+@awa-font-base:         @awa-font-size-14;
+@awa-font-md:           @awa-font-size-16;
+@awa-font-lg:           @awa-font-size-18;
+@awa-font-xl:           @awa-font-size-20;
+@awa-font-2xl:          @awa-font-size-24;
+@awa-font-weight-normal:   @awa-weight-normal;
+@awa-font-weight-medium:   @awa-weight-medium;
+@awa-font-weight-bold:     @awa-weight-bold;
+
+// ─── Componentes (shape, elevation, motion) ─────────────────────────────
+// @awa-radius-sm/md/lg/full e @awa-shadow-* já definidos em _awa-variables.
+@awa-radius-pill:       @awa-radius-full;
+@awa-shadow-lg:         @shadow-2;
+
+// ─── Layout ──────────────────────────────────────────────────────────────
+@awa-sidebar-width:     250px;
+@awa-container-max:     @container-max;          // 1440px
+@awa-container-account: 1280px;                  // páginas .account / B2B
+@awa-form-max-width:    560px;
+@awa-measure-copy-max:  65ch;              // empty-state / corpo longo (65–75ch)
+@awa-badge-reserve-block: @awa-space-5;    // respiro vertical badge fora do clip da thumb
+@awa-carousel-track-pad-block: @awa-space-2; // 8px — sombra/badge no scroll vertical
+@awa-touch-target-min:  44px;              // WCAG target mínimo real para links/botões de UI
+@awa-btn-height:          @awa-touch-target-min;
+@awa-footer-action-icon-size: 44px;        // box dos cards WhatsApp/telefone/e-mail
+@awa-footer-action-glyph-size: 22px;
+@awa-footer-newsletter-icon-size: 56px;
+@awa-footer-newsletter-glyph-size: 28px;
+@awa-footer-contact-icon-size: 20px;
+@awa-footer-contact-glyph-size: 16px;
+@awa-footer-social-target-size: 44px;
+@awa-footer-social-glyph-size: 18px;
+// Breakpoints: usar @awa-breakpoint-* de _awa-variables (768/1024/1280/1440)
+
+// ─── Z-index (aliases → _z-index.less) ───────────────────────────────────
+@awa-z-base:            1;
+// @awa-z-dropdown, @awa-z-sticky, @awa-z-modal, @awa-z-alert já em _z-index.less
+@awa-z-toast:           @awa-z-alert;
+
+// SVG hardening emitido por _awa-inline-svg-hardening.less via _extend.less.

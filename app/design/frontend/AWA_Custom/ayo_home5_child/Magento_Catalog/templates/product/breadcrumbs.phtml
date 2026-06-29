@@ -1,0 +1,42 @@
+<?php
+/**
+ * AWA — PDP breadcrumbs server-rendered (substitui widget JS que dependia do menu vertical).
+ *
+ * @var \Magento\Theme\Block\Html\Breadcrumbs $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+declare(strict_types=1);
+
+/** @var \GrupoAwamotos\Theme\ViewModel\ProductStructuredData|null $breadcrumbViewModel */
+$breadcrumbViewModel = $block->getData('breadcrumb_view_model');
+$crumbs = $breadcrumbViewModel ? $breadcrumbViewModel->getBreadcrumbPath() : [];
+
+if (!$crumbs) {
+    return;
+}
+?>
+<div class="breadcrumbs" aria-label="<?= $escaper->escapeHtmlAttr(__('Navegação estrutural')) ?>">
+    <ul class="items" itemscope itemtype="https://schema.org/BreadcrumbList">
+        <?php foreach ($crumbs as $crumbName => $crumbInfo) : ?>
+            <li class="item <?= $escaper->escapeHtmlAttr((string) $crumbName) ?>"
+                itemprop="itemListElement"
+                itemscope
+                itemtype="https://schema.org/ListItem">
+                <?php if (!empty($crumbInfo['link'])) : ?>
+                    <a href="<?= $escaper->escapeUrl($crumbInfo['link']) ?>"
+                       title="<?= $escaper->escapeHtmlAttr((string) ($crumbInfo['title'] ?? $crumbInfo['label'])) ?>"
+                       itemprop="item">
+                        <span itemprop="name"><?= $escaper->escapeHtml((string) $crumbInfo['label']) ?></span>
+                    </a>
+                    <meta itemprop="position" content="<?= $escaper->escapeHtmlAttr((string) ($crumbInfo['sortOrder'] ?? 1)) ?>"/>
+                <?php elseif (!empty($crumbInfo['last'])) : ?>
+                    <strong itemprop="name" aria-current="page">
+                        <?= $escaper->escapeHtml((string) $crumbInfo['label']) ?>
+                    </strong>
+                <?php else : ?>
+                    <span itemprop="name"><?= $escaper->escapeHtml((string) $crumbInfo['label']) ?></span>
+                <?php endif; ?>
+            </li>
+        <?php endforeach; ?>
+    </ul>
+</div>

@@ -1,0 +1,475 @@
+// =============================================================================
+// §93 — PLP/Search Consistency Pass 2 (2026-06-08)
+// Hero, toolbar, paginação e nota de busca alinhados ao contrato §89 + §91.
+// =============================================================================
+
+@import (once) '_awa-tokens';
+@import (once) '_awa-variables';
+@import (once) '_design-system';
+
+@awa-plp-search-scope: ~'html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)';
+
+// ── Hero de categoria: moldura limpa, sem side-stripe ────────────────────────
+@{awa-plp-search-scope}.catalog-category-view .page-wrapper {
+    // Container do hero: altura segue o conteúdo (80px). O critical CSS
+    // inline (awa-head-preload.phtml) reservava 196px → gap vazio na PLP.
+    .category-view-move {
+        min-height: 0 !important;
+        height: auto !important;
+    }
+
+    :is(.category-view-move, .awa-category-hero, .page-main .category-hero) {
+        border-radius: @awa-radius-sm !important;
+        overflow: hidden !important;
+        background: var(--awa-bg, @awa-color-white) !important;
+    }
+
+    .awa-category-hero__content :is(h1, .awa-category-hero__title) {
+        text-wrap: balance;
+        color: var(--awa-text-primary, @awa-color-text-primary) !important;
+        font-weight: @awa-weight-bold !important;
+        line-height: 1.15 !important;
+        border-inline-start: 0 !important;
+        border-left: 0 !important;
+        padding-inline-start: 0 !important;
+        background: transparent !important;
+        background-color: transparent !important;
+        padding: 0 !important;
+        border-radius: 0 !important;
+        display: block !important;
+        text-shadow: none !important;
+    }
+
+    .awa-category-hero__count {
+        text-wrap: balance;
+        font-size: clamp(13px, 2.8vw, 14px) !important;
+        line-height: 1.4 !important;
+        margin-block-start: @awa-space-1 !important;
+        color: var(--awa-text-secondary, @awa-color-text-muted) !important;
+    }
+}
+
+@media (max-width: 767px) {
+    @{awa-plp-search-scope}.catalog-category-view .page-wrapper {
+        .awa-category-hero__content {
+            padding: @awa-space-3 @awa-space-4 !important;
+        }
+
+        .awa-category-hero__count {
+            font-size: ~"max(13px, 0.8125rem)" !important;
+            line-height: 1.45 !important;
+            margin-block-start: @awa-space-2 !important;
+            text-shadow: 0 1px 3px color-mix(in srgb, var(--awa-text, @awa-color-text-primary) 40%, transparent) !important;
+        }
+    }
+}
+
+// ── Cabeçalho da listagem (shop-tab / título busca) ──────────────────────────
+@{awa-plp-search-scope} .page-wrapper {
+    .shop-tab-title,
+    .page-title-wrapper.search {
+        margin-block: 0 @awa-space-4 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        border-inline-start: 0 !important;
+        border-left: 0 !important;
+    }
+
+    .shop-tab-title :is(h1, h2, .title, strong),
+    .page-title-wrapper.search .page-title {
+        text-wrap: balance;
+        color: var(--awa-text, @awa-color-text-primary) !important;
+        font-size: clamp(18px, 2.2vw, 24px) !important;
+        font-weight: @awa-weight-bold !important;
+        line-height: 1.2 !important;
+        margin: 0 !important;
+        border-inline-start: 0 !important;
+        border-left: 0 !important;
+        padding-inline-start: 0 !important;
+    }
+}
+
+// ── Toolbar: caixa unificada (vence regras parciais legadas) ─────────────────
+@{awa-plp-search-scope} .page-wrapper .toolbar.toolbar-products {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: @awa-space-3 !important;
+    padding: @awa-space-3 @awa-space-4 !important;
+    margin-block-end: @awa-space-4 !important;
+    border: 1px solid var(--awa-border, @awa-color-border) !important;
+    border-radius: @awa-radius-sm !important;
+    background: var(--awa-bg-surface, @awa-color-bg-soft) !important;
+    box-shadow: none !important;
+
+    .toolbar-amount {
+        font-size: var(--awa-fs-sm, 13px) !important;
+        color: var(--awa-text-muted, @awa-color-text-muted) !important;
+        line-height: 1.35 !important;
+
+        .toolbar-number {
+            color: var(--awa-text, @awa-color-text-primary) !important;
+            font-weight: @awa-weight-semibold !important;
+        }
+    }
+}
+
+// ── Nota de busca: sem side-stripe (Impeccable ban) ──────────────────────────
+@{awa-plp-search-scope}.catalogsearch-result-index .page-wrapper .search.results .note {
+    border: 1px solid var(--awa-border, @awa-color-border) !important;
+    border-inline-start-width: 1px !important;
+    border-left-width: 1px !important;
+    border-radius: @awa-radius-sm !important;
+    background: var(--awa-bg-surface, @awa-color-bg-soft) !important;
+    color: var(--awa-text-muted, @awa-color-text-muted) !important;
+    padding: @awa-space-2 @awa-space-3 !important;
+    margin-block-end: @awa-space-4 !important;
+    font-size: var(--awa-fs-sm, 13px) !important;
+    line-height: 1.45 !important;
+}
+
+// ── Paginação: alvos táteis ───────────────────────────────────────────────────
+@{awa-plp-search-scope} .page-wrapper .pages .items {
+    display: inline-flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: @awa-space-2 !important;
+}
+
+@{awa-plp-search-scope} .page-wrapper .pages :is(.item a, .item strong.page, .pages-item-previous a, .pages-item-next a) {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: @awa-touch-target-min !important;
+    min-height: @awa-touch-target-min !important;
+    padding-inline: @awa-space-2 !important;
+    border-radius: @awa-radius-sm !important;
+    font-size: var(--awa-fs-sm, 13px) !important;
+    line-height: 1 !important;
+    text-decoration: none !important;
+
+    &:focus-visible {
+        outline: @awa-focus-ring-width solid var(--awa-primary, @awa-color-primary) !important;
+        outline-offset: 2px !important;
+    }
+}
+
+@{awa-plp-search-scope} .page-wrapper .pages .item.current strong.page {
+    background: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 10%, @awa-color-white) !important;
+    color: var(--awa-primary, @awa-color-primary) !important;
+    font-weight: @awa-weight-semibold !important;
+}
+
+@{awa-plp-search-scope} .page-wrapper :is(.filter-current .item a, .filter-actions a) {
+    min-height: @awa-touch-target-min !important;
+    display: inline-flex !important;
+    align-items: center !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    @{awa-plp-search-scope} .page-wrapper .toolbar.toolbar-products,
+    @{awa-plp-search-scope} .page-wrapper .pages :is(.item a, .item strong.page),
+    @{awa-plp-search-scope} .page-wrapper .awa-plp-b2b-gate-banner__action {
+        transition: none !important;
+    }
+}
+
+// ── Toolbar grid density: WCAG 2.5.5 touch targets (44px) ───────────────────
+@{awa-plp-search-scope} .page-wrapper .toolbar.toolbar-products {
+    :is(.modes-mode, .grid-mode-show-type-products a) {
+        min-width: @awa-touch-target-min !important;
+        min-height: @awa-touch-target-min !important;
+    }
+
+    .grid-mode-show-type-products {
+        display: inline-flex !important;
+        flex-wrap: wrap !important;
+        align-items: center !important;
+        gap: @awa-space-2 !important;
+    }
+}
+
+// ── PLP header spacing (substitui font-size root do runtime patch) ───────────
+@{awa-plp-search-scope} .page-wrapper {
+    #awa-b2b-promo-bar,
+    .awa-b2b-promo-bar__inner,
+    .awa-b2b-promo-bar__layout {
+        overflow: hidden !important;
+        padding-block: 0 !important;
+    }
+
+    .awa-main-header__inner.wp-header {
+        padding-inline: clamp(12px, 3vw, 24px) !important;
+        box-sizing: border-box !important;
+    }
+
+    :is(.header.awa-main-header, .header_main.awa-main-header-inner-wrap, .header-main) {
+        padding-block: 6px !important;
+    }
+
+    .columns.layout {
+        padding-inline: clamp(12px, 2.5vw, 20px) !important;
+        box-sizing: border-box !important;
+    }
+
+    .filter-options-item {
+        padding-inline: @awa-space-3 !important;
+        box-sizing: border-box !important;
+
+        .filter-options-content {
+            overflow: visible !important;
+        }
+    }
+
+    .subchildmenu.navigation__inner-list {
+        padding: @awa-space-3 !important;
+        box-sizing: border-box !important;
+    }
+
+    #search_mini_form {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) @awa-touch-target-min !important;
+        grid-template-areas: 'field submit' !important;
+        overflow: hidden !important;
+
+        > .actions,
+        .actions {
+            grid-area: submit !important;
+            padding-inline: 0 !important;
+        }
+
+        /* AWA layout audit: PLP search touch target */
+        :is(.action.search, button[type="submit"]) {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: @awa-touch-target-min !important;
+            min-width: @awa-touch-target-min !important;
+            height: @awa-touch-target-min !important;
+            min-height: @awa-touch-target-min !important;
+            padding: 0 !important;
+            box-sizing: border-box !important;
+        }
+    }
+}
+
+// ── PLP B2B gate banner (substitui gate repetido por card) ───────────────────
+@{awa-plp-search-scope} .page-wrapper .awa-plp-b2b-gate-banner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: @awa-space-3;
+    margin-block: @awa-space-4;
+    padding: @awa-space-4;
+    border: 1px solid var(--awa-border, @awa-color-border);
+    border-radius: @awa-border-radius-md;
+    background: var(--awa-primary-subtle, @awa-primary-light);
+
+    &__badge {
+        font-size: var(--awa-font-xs);
+        font-weight: @awa-weight-bold;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--awa-primary, @awa-color-primary);
+    }
+
+    &__title {
+        flex: 1 1 auto;
+        min-width: 0;
+        margin: 0;
+        font-size: var(--awa-font-base);
+        font-weight: @awa-weight-semibold;
+        color: var(--awa-text, @awa-color-text-primary);
+    }
+
+    &__desc {
+        flex: 1 1 100%;
+        margin: 0;
+        font-size: var(--awa-font-sm);
+        color: var(--awa-text-muted, @awa-text-muted);
+    }
+
+    &__actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: @awa-space-2;
+    }
+
+    &__action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: @awa-touch-target-min;
+        padding: @awa-space-2 @awa-space-4;
+        border-radius: @awa-border-radius-sm;
+        font-size: var(--awa-font-sm);
+        font-weight: @awa-weight-semibold;
+        text-decoration: none;
+        transition: background-color 0.2s ease-out, color 0.2s ease-out, border-color 0.2s ease-out;
+
+        &--primary {
+            background: var(--awa-primary, @awa-color-primary);
+            color: var(--awa-text-inverse, @awa-color-white);
+
+            &:hover {
+                background: var(--awa-primary-dark, @awa-color-primary-dark);
+            }
+        }
+
+        &--secondary {
+            border: 1px solid var(--awa-primary, @awa-color-primary);
+            color: var(--awa-primary, @awa-color-primary);
+            background: transparent;
+
+            &:hover {
+                background: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 8%, transparent);
+            }
+        }
+
+        &:focus-visible {
+            outline: @awa-focus-ring-width solid var(--awa-primary, @awa-color-primary);
+            outline-offset: 2px;
+        }
+    }
+}
+
+// ── Logistics badge (sem inline styles) ───────────────────────────────────────
+@{awa-plp-search-scope} .page-wrapper .awa-b2b-logistics {
+    display: flex;
+    gap: @awa-space-1;
+    align-items: center;
+    margin-top: @awa-space-1;
+    font-size: var(--awa-font-xs);
+
+    .awa-b2b-badge--success {
+        display: inline-flex;
+        align-items: center;
+        gap: 2px;
+        padding: 2px @awa-space-2;
+        border-radius: @awa-radius-xs;
+        font-weight: @awa-weight-semibold;
+        background: var(--awa-primary-light, @awa-color-white);
+        color: var(--awa-primary-dark, @awa-color-primary-dark);
+
+        svg {
+            margin-right: 2px;
+            vertical-align: text-top;
+        }
+    }
+}
+
+// ── Filtro preço: fallback estático até ionRangeSlider init ───────────────────
+@{awa-plp-search-scope} .page-wrapper .awa-price-filter {
+    &__fallback {
+        margin: 0 0 @awa-space-2;
+        font-size: var(--awa-font-sm);
+        color: var(--awa-text-muted, @awa-text-muted);
+    }
+
+    .irs ~ .awa-price-filter__fallback,
+    &:has(.irs) .awa-price-filter__fallback {
+        display: none;
+    }
+}
+
+@{awa-plp-search-scope} #layered_ajax_overlay {
+    display: none !important;
+
+    &[aria-hidden='false'] {
+        display: block !important;
+    }
+}
+
+// ── Slim bottom toolbar (pager + count only) ──────────────────────────────────
+@{awa-plp-search-scope} .page-wrapper .toolbar.toolbar-products--bottom-slim {
+    .grid-mode-show-type-products,
+    .modes,
+    .sorter,
+    .limiter,
+    .toolbar-sorter {
+        display: none !important;
+    }
+
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: @awa-space-2 !important;
+    justify-content: center !important;
+    margin-block-start: @awa-space-4 !important;
+    padding-block: @awa-space-4 !important;
+    border-block-start: 1px solid var(--awa-border, @awa-color-border) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+
+    .toolbar-amount {
+        order: 2;
+        text-align: center;
+    }
+
+    .pages {
+        order: 1;
+    }
+}
+
+// ── Tipografia mínima legível (Impeccable: 10px false positives em inline) ───
+@{awa-plp-search-scope} .page-wrapper {
+    .awa-plp-b2b-gate-banner__title {
+        font-size: var(--awa-font-base, 1rem) !important;
+        line-height: 1.35 !important;
+    }
+
+    .awa-plp-b2b-gate-banner__desc {
+        font-size: var(--awa-font-sm, 0.875rem) !important;
+        line-height: 1.45 !important;
+    }
+
+    .awa-price-filter__fallback {
+        font-size: var(--awa-font-sm, 0.875rem) !important;
+        line-height: 1.45 !important;
+    }
+
+    .pages .item .label {
+        position: absolute !important;
+        width: 1px !important;
+        height: 1px !important;
+        padding: 0 !important;
+        margin: -1px !important;
+        overflow: hidden !important;
+        clip: rect(0, 0, 0, 0) !important;
+        clip-path: inset(50%) !important;
+        white-space: nowrap !important;
+        border: 0 !important;
+    }
+
+    .product-name {
+        font-size: var(--awa-font-sm, 0.875rem) !important;
+        font-weight: @awa-weight-semibold !important;
+        line-height: 1.35 !important;
+    }
+}
+
+// ── B2B price gate compact (cards) — tokens for non-critical paint ────────────
+@{awa-plp-search-scope} .page-wrapper .products-grid .item-product .info-price .b2b-login-to-see-price {
+    background: var(--awa-bg, @awa-color-white) !important;
+    border: 1px solid var(--awa-border, @awa-color-border) !important;
+    color: var(--awa-text-secondary, @awa-color-text-muted) !important;
+
+    a {
+        &:focus-visible {
+            outline: @awa-focus-ring-width solid var(--awa-primary, @awa-color-primary) !important;
+            outline-offset: 2px !important;
+        }
+    }
+}
+
+// ── Render perf: below-fold product cards skip layout/paint until near viewport
+@{awa-plp-search-scope} .page-wrapper .wrapper.grid.products-grid .item-product:nth-child(n + 5) {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 320px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    @{awa-plp-search-scope} .page-wrapper .wrapper.grid.products-grid .item-product:nth-child(n + 5) {
+        content-visibility: visible;
+    }
+}

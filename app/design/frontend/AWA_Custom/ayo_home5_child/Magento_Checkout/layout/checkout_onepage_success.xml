@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<!--
+    checkout_onepage_success.xml — Confirmação B2B alinhada ao carrinho vazio pós-pedido.
+
+    Performance 2026-06-11:
+      - Critical inline via awa-success-checkout-critical.phtml (~2KB tokens + container).
+      - cart-checkout-premium.min.css async (idle/pointerdown) — não bloqueia LCP.
+      - awa-cart-polish.min.css blocking (~layout mínimo).
+      - Stack promax/audit omitido (checkout flow).
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      layout="1column"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd"
+      cacheable="false">
+    <head>
+        <title>Pedido confirmado</title>
+        <!-- SEO: página transacional — fora do índice -->
+        <meta name="robots" content="NOINDEX,NOFOLLOW"/>
+        <css src="css/awa-cart-polish.min.css"/>
+        <css src="css/awa-checkout-shell-final.css" order="10000"/>
+    </head>
+    <body>
+        <referenceBlock name="awa.head.preload">
+            <action method="setData">
+                <argument name="key" xsi:type="string">awa_skip_promax_bundle</argument>
+                <argument name="value" xsi:type="boolean">true</argument>
+            </action>
+        </referenceBlock>
+
+        <referenceBlock name="awa.audit.bundle.css" remove="true"/>
+        <referenceBlock name="awa.header.impeccable.critical.global" remove="true"/>
+        <referenceBlock name="awa.shelf.carousel" remove="true"/>
+        <referenceBlock name="checkout.success.print.button" remove="true"/>
+        <referenceBlock name="grupoawamotos_whatsapp_btn" remove="true"/>
+
+        <referenceBlock name="page.main.title">
+            <action method="setPageTitle">
+                <argument translate="true" name="title" xsi:type="string">Pedido confirmado!</argument>
+            </action>
+        </referenceBlock>
+
+        <referenceBlock name="checkout.success">
+            <arguments>
+                <argument name="view_model" xsi:type="object">GrupoAwamotos\B2B\ViewModel\Checkout\OrderSuccessContext</argument>
+            </arguments>
+        </referenceBlock>
+
+        <referenceBlock name="head.additional">
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.success.checkout.critical"
+                   template="Magento_Theme::html/awa-success-checkout-critical.phtml"/>
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.checkout.shell.final"
+                   template="Magento_Theme::html/awa-checkout-shell-final-loader.phtml"
+                   after="awa.success.checkout.critical"/>
+        </referenceBlock>
+
+        <referenceContainer name="before.body.end">
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.align.grid.terminal.success"
+                   template="Magento_Theme::html/awa-align-grid-terminal-loader.phtml"
+                   after="-"/>
+        </referenceContainer>
+    </body>
+</page>

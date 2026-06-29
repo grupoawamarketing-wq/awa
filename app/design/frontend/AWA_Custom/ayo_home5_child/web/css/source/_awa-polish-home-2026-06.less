@@ -1,0 +1,186 @@
+// =============================================================================
+// _awa-polish-home-2026-06.less
+// §64 — /impeccable polish home (2026-06-08)
+// Acabamento final-wins: hierarquia de shelves, affordance mobile, touch targets,
+// ritmo de headers. Register: PRODUCT — catálogo B2B confiável, tokens AWA.
+// =============================================================================
+
+@import (once) '_awa-tokens';
+@import (once) '_design-system';
+
+html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper {
+    // ── Headers: título + subtítulo + link em grid estável ─────────────────
+  :is(.awa-section-header, .awa-shelf__header) {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-areas:
+            'title link'
+            'subtitle link';
+        align-items: start;
+        column-gap: @awa-s-2;
+        row-gap: @awa-space-1;
+    }
+
+    .awa-section-header__left {
+        display: contents;
+    }
+
+    .awa-section-header__title,
+    .awa-shelf__title {
+        grid-area: title;
+        margin: 0;
+    }
+
+    .awa-section-header__subtitle {
+        grid-area: subtitle;
+        margin: 0;
+        max-width: 52ch;
+        font-size: ~'max(13px, 0.8125rem)';
+        line-height: 1.45;
+        color: var(--awa-text-secondary, @awa-color-text-muted);
+    }
+
+    :is(.awa-section-header__link, .awa-shelf__view-all) {
+        grid-area: link;
+        align-self: center;
+        justify-self: end;
+        display: inline-flex;
+        align-items: center;
+        gap: @awa-space-1;
+        min-height: @awa-touch-target-min;
+        padding: @awa-space-2 @awa-s-2;
+        border-radius: @awa-radius-pill;
+        white-space: nowrap;
+    }
+
+    // Categoria: header empilhado, CTA full-width no mobile
+    .top-home-content--category-carousel {
+        .awa-category-carousel__header,
+        .awa-section-header--stacked {
+            display: block;
+            margin-bottom: @awa-s-3;
+        }
+
+        .awa-section-header__left--center {
+            text-align: center;
+        }
+
+        .awa-category-carousel__subtitle {
+            margin: @awa-space-1 auto @awa-s-2;
+            max-width: 42ch;
+            font-size: ~'max(13px, 0.8125rem)';
+            line-height: 1.45;
+            color: var(--awa-text-secondary, @awa-color-text-muted);
+        }
+    }
+
+    // ── Tiers: escala tipográfica deliberada (não fila de shelves iguais) ──
+    .awa-carousel-section--featured :is(.awa-section-header__title, .awa-shelf__title) {
+        font-size: clamp(1.25rem, 1.05rem + 0.65vw, 1.625rem);
+        font-weight: @awa-weight-bold;
+        line-height: 1.2;
+        text-wrap: balance;
+    }
+
+    .awa-carousel-section--standard :is(.awa-section-header__title, .awa-shelf__title) {
+        font-size: clamp(1.125rem, 1rem + 0.45vw, 1.4375rem);
+        font-weight: @awa-weight-bold;
+        line-height: 1.22;
+        text-wrap: balance;
+    }
+
+    // ── Mobile: controles de shelf visíveis quando o JS injeta nav/progress ─
+    .awa-shelf--carousel:not(.awa-carousel--static) {
+        > .awa-owl-nav,
+        .awa-carousel > .awa-owl-nav {
+            display: flex;
+            visibility: visible;
+            opacity: 1;
+            pointer-events: auto;
+            justify-content: flex-end;
+            gap: @awa-space-2;
+            margin-block-start: @awa-s-2;
+            min-height: @awa-touch-target-min;
+        }
+
+        .awa-owl-progress {
+            display: block;
+            visibility: visible;
+            opacity: 1;
+            height: 4px;
+            margin-block-start: @awa-space-3;
+            border-radius: @awa-radius-pill;
+            background: color-mix(in srgb, var(--awa-border, @awa-color-border) 90%, transparent);
+            overflow: hidden;
+        }
+
+        .awa-owl-progress__bar {
+            display: block;
+            height: 100%;
+            background: var(--awa-primary, @awa-color-primary);
+            border-radius: inherit;
+            transform-origin: left center;
+        }
+    }
+
+    // Carrossel de categorias: setas e CTA com alvo de toque
+    .awa-category-carousel__prev,
+    .awa-category-carousel__next {
+        min-width: @awa-touch-target-min;
+        min-height: @awa-touch-target-min;
+    }
+
+    .awa-category-carousel__cta-link {
+        min-height: @awa-touch-target-min;
+        padding: @awa-space-2 @awa-s-3;
+    }
+
+    .awa-category-carousel__dots:not(:empty) {
+        display: flex;
+        justify-content: center;
+        gap: @awa-space-1;
+        margin-block-start: @awa-space-2;
+        min-height: @awa-space-3;
+    }
+}
+
+.respond-below-md({
+    html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper {
+        :is(.awa-section-header, .awa-shelf__header) {
+            grid-template-columns: minmax(0, 1fr);
+            grid-template-areas:
+                'title'
+                'subtitle'
+                'link';
+        }
+
+        :is(.awa-section-header__link, .awa-shelf__view-all) {
+            justify-self: start;
+            margin-block-start: @awa-space-1;
+        }
+
+        .awa-shelf--carousel:not(.awa-carousel--static) {
+            > .awa-owl-nav,
+            .awa-carousel > .awa-owl-nav {
+                justify-content: center;
+            }
+        }
+
+        .awa-category-carousel__cta {
+            margin-block-start: @awa-s-2;
+        }
+
+        .awa-category-carousel__cta-link {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+});
+
+@media (prefers-reduced-motion: reduce) {
+    html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper {
+        .awa-shelf--carousel .awa-owl-progress__bar {
+            transition: none;
+        }
+    }
+}

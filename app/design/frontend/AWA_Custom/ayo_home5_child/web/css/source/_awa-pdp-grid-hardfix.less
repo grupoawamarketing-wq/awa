@@ -1,0 +1,557 @@
+// ============================================================================
+// AWA Motos — _awa-pdp-grid-hardfix.less
+// Portado de awa-pdp-grid-hardfix.css (legado consolidated → S84-S92)
+// ============================================================================
+
+@import (once) '_awa-variables';
+
+html body.catalog-product-view .page-wrapper .columns,
+html body.catalog-product-view .page-wrapper .columns .column.main,
+html body.catalog-product-view .page-wrapper .columns .column.main .product-view,
+html body.catalog-product-view .page-wrapper .columns .column.main .product-view > .view-product {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    grid-template-columns: none !important;
+    grid-template-rows: none !important;
+    gap: 0 !important;
+}
+
+html body.catalog-product-view .page-wrapper .columns .column.main .product-view > .view-product > .main-detail > .row {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: flex-start !important;
+    width: 100% !important;
+    gap: clamp(16px, 2vw, 28px) !important;
+}
+
+@media (min-width: 992px) {
+    html body.catalog-product-view .page-wrapper .columns .column.main .product-view > .view-product > .main-detail > .row > .col-md-6:first-child {
+        flex: 0 0 ~"min(52%, 640px)" !important;
+        max-width: ~"min(52%, 640px)" !important;
+    }
+
+    html body.catalog-product-view .page-wrapper .columns .column.main .product-view > .view-product > .main-detail > .row > .col-md-6:last-child {
+        flex: 1 1 360px !important;
+        max-width: none !important;
+    }
+}
+
+@media (max-width: 991px) {
+    html body.catalog-product-view .page-wrapper .columns .column.main .product-view > .view-product > .main-detail > .row > .col-md-6 {
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
+    }
+
+    html body.catalog-product-view .product-col-info,
+    html body.catalog-product-view .product-info-main {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+}
+
+/* PDP tabs/details: neutralize legacy grid stretching that creates blank panel */
+html body.catalog-product-view .product.info.detailed .product.data.items {
+    display: block !important;
+    height: auto !important;
+    min-height: 0 !important;
+    grid-template-columns: none !important;
+    grid-template-rows: none !important;
+}
+
+html body.catalog-product-view .product.info.detailed .product.data.items > .item.title,
+html body.catalog-product-view .product.info.detailed .product.data.items > .item.content {
+    height: auto !important;
+    min-height: 0 !important;
+}
+
+/* PDP gallery: ocultar img estática só após Fotorama montar (.fotorama-item presente) */
+html body.catalog-product-view .product.media .gallery-placeholder .fotorama-item ~ img.gallery-placeholder__image,
+html body.catalog-product-view .product.media .gallery-placeholder .fotorama-item + img.gallery-placeholder__image {
+    display: none !important;
+}
+
+html body.catalog-product-view .product.media .gallery-placeholder {
+    min-height: 0 !important;
+    height: auto !important;
+}
+
+/* Gallery normalization: prevent oversized duplicate-like thumbs */
+html body.catalog-product-view .product.media .fotorama__nav-wrap {
+    margin-top: 10px !important;
+}
+
+html body.catalog-product-view .product.media .fotorama__nav__frame--thumb,
+html body.catalog-product-view .product.media .fotorama__thumb,
+html body.catalog-product-view .product.media .fotorama__thumb-border {
+    width: 86px !important;
+    height: 86px !important;
+    padding: 0 !important;
+}
+
+html body.catalog-product-view .product.media .fotorama__thumb img,
+html body.catalog-product-view .product.media .fotorama__thumb {
+    object-fit: cover !important;
+}
+
+/* PDP related cards: improve CTA contrast and placeholder image handling */
+html body.catalog-product-view :is(.block.related, .block.upsell, .awa-pdp-related) .b2b-login-to-see-price a,
+html body.catalog-product-view :is(.block.related, .block.upsell, .awa-pdp-related) .awa-related-price-notice a,
+html body.catalog-product-view :is(.block.related, .block.upsell, .awa-pdp-related) .action.tocart {
+    color: var(--awa-white, @awa-color-white) !important;
+    background: var(--awa-red, @awa-color-primary) !important;
+    border-color: var(--awa-red, @awa-color-primary) !important;
+}
+
+html body.catalog-product-view :is(.block.related, .block.upsell, .awa-pdp-related) .product-image-photo[src*="placeholder/placeholder"] {
+    object-fit: contain !important;
+    background: linear-gradient(180deg, @awa-color-bg-fafafa 0%, #f0f2f5 100%) !important;
+    padding: 16px !important;
+}
+
+html body.catalog-product-view .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .awa-related-price-notice a,
+html body.catalog-product-view .awa-pdp-related .product-item .awa-related-price-notice a {
+    background: var(--awa-red, @awa-color-primary) !important;
+    border-color: var(--awa-red, @awa-color-primary) !important;
+    color: var(--awa-white, @awa-color-white) !important;
+}
+
+/* Defeat late async refinements that reset notice text color in related cards */
+html body.catalog-product-view.catalog-product-view .page-wrapper .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .awa-related-price-notice,
+html body.catalog-product-view.catalog-product-view .page-wrapper .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .awa-related-price-notice *,
+html body.catalog-product-view.catalog-product-view .page-wrapper .awa-pdp-related .product-item .awa-related-price-notice,
+html body.catalog-product-view.catalog-product-view .page-wrapper .awa-pdp-related .product-item .awa-related-price-notice * {
+    color: var(--awa-white, @awa-color-white) !important;
+}
+
+html body.catalog-product-view .awa-pdp-related .awa-related-price-notice a,
+html body.catalog-product-view .awa-pdp-related .awa-related-price-notice a * {
+    color: var(--awa-white, @awa-color-white) !important;
+}
+
+html body.catalog-product-view .awa-pdp-related .awa-related-price-notice {
+    color: var(--awa-white, @awa-color-white) !important;
+}
+
+/* Related products (guest state): single consistent CTA block for replacement price text */
+html body.catalog-product-view.catalog-product-view .page-wrapper .awa-pdp-related .product-item .price-box.price-box--hidden {
+    min-height: 0 !important;
+    margin-top: 2px !important;
+}
+
+html body.catalog-product-view.catalog-product-view .page-wrapper .awa-pdp-related .product-item .price-box.price-box--hidden .awa-related-price-notice {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    min-height: 72px !important;
+    padding: 12px !important;
+    gap: 2px !important;
+    border-radius: 12px !important;
+    background: var(--awa-red, @awa-color-primary) !important;
+    color: var(--awa-white, @awa-color-white) !important;
+    line-height: 1.35 !important;
+    text-align: center !important;
+    overflow: hidden !important;
+}
+
+html body.catalog-product-view.catalog-product-view .page-wrapper .awa-pdp-related .product-item .price-box.price-box--hidden .awa-related-price-notice__content,
+html body.catalog-product-view.catalog-product-view .page-wrapper .awa-pdp-related .product-item .price-box.price-box--hidden .awa-related-price-notice__content *,
+html body.catalog-product-view.catalog-product-view .page-wrapper .awa-pdp-related .product-item .price-box.price-box--hidden .awa-related-price-notice a,
+html body.catalog-product-view.catalog-product-view .page-wrapper .awa-pdp-related .product-item .price-box.price-box--hidden .awa-related-price-notice a:any-link,
+html body.catalog-product-view.catalog-product-view .page-wrapper .awa-pdp-related .product-item .price-box.price-box--hidden .awa-related-price-notice a:visited {
+    color: var(--awa-white, @awa-color-white) !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    text-decoration-color: rgb(255 255 255 / 70%) !important;
+}
+
+html body.catalog-product-view.catalog-product-view .page-wrapper .awa-pdp-related .product-item .price-box.price-box--hidden .awa-related-price-notice__login-link {
+    display: inline-block !important;
+    color: var(--awa-white, @awa-color-white) !important;
+    font-size: 15px !important;
+    line-height: 1.15 !important;
+    font-weight: 700 !important;
+    text-decoration: underline !important;
+}
+
+html body.catalog-product-view.catalog-product-view .page-wrapper .awa-pdp-related .product-item .price-box.price-box--hidden .awa-related-price-notice__suffix {
+    display: inline-block !important;
+    color: var(--awa-white, @awa-color-white) !important;
+    font-size: 13px !important;
+    line-height: 1.25 !important;
+    font-weight: 600 !important;
+}
+
+/* Related products: robust placeholder fallback for missing product images */
+html body.catalog-product-view .awa-pdp-related .product-item img.product-image-photo[src*="placeholder/placeholder"] {
+    opacity: 0.22 !important;
+    filter: grayscale(1) contrast(0.9) !important;
+    object-fit: contain !important;
+    padding: 14px !important;
+}
+
+/* Related products: normalize card grid rhythm (title/price/action alignment) */
+html body.catalog-product-view .awa-pdp-related .products-swiper--related .swiper-slide {
+    height: auto !important;
+}
+
+html body.catalog-product-view .awa-pdp-related .products-swiper--related .swiper-slide > .product-item {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    min-height: 100% !important;
+}
+
+html body.catalog-product-view .awa-pdp-related .product-thumb {
+    aspect-ratio: 1 / 1 !important;
+}
+
+html body.catalog-product-view .awa-pdp-related .product-thumb .product-image-container {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+html body.catalog-product-view .awa-pdp-related .product-info {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 auto !important;
+    gap: 8px !important;
+}
+
+html body.catalog-product-view .awa-pdp-related .product-name {
+    min-height: 40px !important;
+}
+
+html body.catalog-product-view .awa-pdp-related .product-name .product-item-link {
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+html body.catalog-product-view .awa-pdp-related .price-box {
+    min-height: 34px !important;
+}
+
+html body.catalog-product-view .awa-pdp-related .product-actions {
+    margin-top: auto !important;
+}
+
+html body.catalog-product-view .awa-pdp-related .related-tocart-form .action.tocart,
+html body.catalog-product-view .awa-pdp-related .related-addtocart {
+    min-height: 40px !important;
+    border-radius: 10px !important;
+}
+
+/* Related carousel: strict standardization against late async bundle overrides */
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-wrapper {
+    display: flex !important;
+    align-items: stretch !important;
+}
+
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide {
+    height: auto !important;
+    display: flex !important;
+}
+
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide > .product-item {
+    width: 100% !important;
+    min-height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    border: 1px solid rgb(15 23 42 / 10%) !important;
+    border-radius: 8px !important;
+    background: var(--awa-white, @awa-color-white) !important;
+    overflow: hidden !important;
+}
+
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .product-thumb {
+    width: 100% !important;
+    height: 208px !important;
+    min-height: 208px !important;
+    max-height: 208px !important;
+    aspect-ratio: auto !important;
+    padding: 10px !important;
+    background: var(--awa-white, @awa-color-white) !important;
+    border-bottom: 1px solid rgb(15 23 42 / 8%) !important;
+}
+
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .product-thumb-link,
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .first-thumb,
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .product-image-container,
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .product-image-wrapper {
+    width: 100% !important;
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    aspect-ratio: auto !important;
+    background: transparent !important;
+}
+
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .product-image-photo,
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .product-thumb img {
+    position: static !important;
+    inset: auto !important;
+    width: auto !important;
+    height: auto !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    margin: 0 auto !important;
+    object-fit: contain !important;
+    transform: none !important;
+}
+
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .product-info {
+    flex: 1 1 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    padding: 10px 12px 12px !important;
+}
+
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .product-name {
+    min-height: 44px !important;
+}
+
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .product-name .product-item-link {
+    display: -webkit-box !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-line-clamp: 2 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .price-box {
+    min-height: 74px !important;
+    margin: 0 !important;
+    padding-top: 0 !important;
+    border-top: 0 !important;
+}
+
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .price-box.price-box--hidden .awa-related-price-notice {
+    width: 100% !important;
+    min-height: 74px !important;
+    margin: 0 !important;
+    padding: 10px 12px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 2px !important;
+    border-radius: 10px !important;
+    background: var(--awa-red, @awa-color-primary) !important;
+    color: var(--awa-white, @awa-color-white) !important;
+    text-align: center !important;
+}
+
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .price-box.price-box--hidden .awa-related-price-notice,
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .price-box.price-box--hidden .awa-related-price-notice *,
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .price-box.price-box--hidden .awa-related-price-notice a,
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .price-box.price-box--hidden .awa-related-price-notice a:any-link,
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .price-box.price-box--hidden .awa-related-price-notice a:visited {
+    color: var(--awa-white, @awa-color-white) !important;
+    text-decoration-color: rgb(255 255 255 / 72%) !important;
+}
+
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .product-actions {
+    margin-top: auto !important;
+}
+
+/* Related cards: final alignment and guest CTA consistency */
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .product-thumb {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow: hidden !important;
+}
+
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .product-thumb .product-thumb-link,
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .product-thumb .first-thumb {
+    width: 100% !important;
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .price-box.price-box--hidden .awa-related-price-notice {
+    min-height: 74px !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 10px 12px !important;
+    background: var(--awa-red, @awa-color-primary) !important;
+    border-radius: 10px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 2px !important;
+    text-align: center !important;
+}
+
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .price-box.price-box--hidden .awa-related-price-notice,
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .price-box.price-box--hidden .awa-related-price-notice *,
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .price-box.price-box--hidden .awa-related-price-notice a,
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .price-box.price-box--hidden .awa-related-price-notice a:any-link,
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .price-box.price-box--hidden .awa-related-price-notice a:visited,
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .price-box.price-box--hidden .awa-related-price-notice .awa-related-price-notice__suffix {
+    color: var(--awa-white, @awa-color-white) !important;
+    text-decoration-color: rgb(255 255 255 / 72%) !important;
+}
+
+/* PDP cookie banner: reserve reading space to avoid covering product content */
+html body.catalog-product-view {
+    padding-bottom: 0;
+}
+
+html body.catalog-product-view.awa-cookie-banner-active {
+    padding-bottom: 96px !important;
+}
+
+html body.catalog-product-view .awa-cookie-banner--visible,
+html body.catalog-product-view #awa-cookie-banner.awa-cookie-banner--visible {
+    position: sticky !important;
+    bottom: 0 !important;
+    z-index: 60 !important;
+}
+
+@media (max-width: 767px) {
+    html body.catalog-product-view.awa-cookie-banner-active {
+        padding-bottom: 104px;
+    }
+}
+
+html body.catalog-product-view .awa-pdp-related .swiper-button-next,
+html body.catalog-product-view .awa-pdp-related .swiper-button-prev {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    z-index: 3 !important;
+    pointer-events: auto !important;
+}
+
+/* PDP Related Carousel — final lock (last wins) */
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-wrapper {
+    display: flex !important;
+    align-items: stretch !important;
+}
+
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide {
+    display: flex !important;
+    height: auto !important;
+}
+
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide > .product-item {
+    width: 100% !important;
+    min-height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .product-thumb {
+    height: 208px !important;
+    min-height: 208px !important;
+    max-height: 208px !important;
+    padding: 10px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow: hidden !important;
+}
+
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .product-thumb .product-thumb-link,
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .product-thumb .first-thumb,
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .product-thumb .product-image-container,
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .product-thumb .product-image-wrapper {
+    width: 100% !important;
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .product-thumb .product-image-photo,
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .product-thumb img {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    object-fit: contain !important;
+    object-position: center !important;
+    margin: 0 auto !important;
+    transform: none !important;
+}
+
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .price-box.price-box--hidden .awa-related-price-notice {
+    width: 100% !important;
+    min-height: 74px !important;
+    margin: 0 !important;
+    padding: 10px 12px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 2px !important;
+    border-radius: 10px !important;
+    background: var(--awa-red, @awa-color-primary) !important;
+    color: var(--awa-white, @awa-color-white) !important;
+    text-align: center !important;
+    line-height: 1.35 !important;
+}
+
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .price-box.price-box--hidden .awa-related-price-notice,
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .price-box.price-box--hidden .awa-related-price-notice *,
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .price-box.price-box--hidden .awa-related-price-notice a,
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .price-box.price-box--hidden .awa-related-price-notice a:any-link,
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .price-box.price-box--hidden .awa-related-price-notice a:visited,
+html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .price-box.price-box--hidden .awa-related-price-notice .awa-related-price-notice__suffix {
+    color: var(--awa-white, @awa-color-white) !important;
+    text-decoration-color: rgb(255 255 255 / 72%) !important;
+}
+
+@media (max-width: 767px) {
+    html body.catalog-product-view.catalog-product-view .page-wrapper .column.main .awa-pdp-related .products-swiper--related .swiper-slide > .product-item .product-thumb {
+        height: 176px !important;
+        min-height: 176px !important;
+        max-height: 176px !important;
+        padding: 8px !important;
+    }
+}
+
+/* Dedicated selector lock for hidden related price box */
+html body.catalog-product-view .awa-pdp-related .price-box.awa-related-price-box--hidden {
+    width: 100% !important;
+    min-height: 74px !important;
+    margin: 0 !important;
+}
+
+html body.catalog-product-view .awa-pdp-related .price-box.awa-related-price-box--hidden .awa-related-price-notice {
+    width: 100% !important;
+    min-height: 74px !important;
+    margin: 0 !important;
+    padding: 10px 12px !important;
+    border-radius: 10px !important;
+    background: var(--awa-red, @awa-color-primary) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 2px !important;
+    text-align: center !important;
+}
+
+html body.catalog-product-view .awa-pdp-related .price-box.awa-related-price-box--hidden .awa-related-price-notice,
+html body.catalog-product-view .awa-pdp-related .price-box.awa-related-price-box--hidden .awa-related-price-notice *,
+html body.catalog-product-view .awa-pdp-related .price-box.awa-related-price-box--hidden .awa-related-price-notice a,
+html body.catalog-product-view .awa-pdp-related .price-box.awa-related-price-box--hidden .awa-related-price-notice a:any-link,
+html body.catalog-product-view .awa-pdp-related .price-box.awa-related-price-box--hidden .awa-related-price-notice a:visited {
+    color: var(--awa-white, @awa-color-white) !important;
+    text-decoration-color: rgb(255 255 255 / 72%) !important;
+}

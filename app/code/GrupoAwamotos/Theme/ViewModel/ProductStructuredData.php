@@ -149,22 +149,50 @@ class ProductStructuredData implements ArgumentInterface
         }
 
         $finalPrice = (float) $product->getFinalPrice();
+        $regularPrice = (float) $product->getPrice();
         if ($finalPrice > 0) {
-            $schema['offers'] = [
-                '@type' => 'Offer',
-                'url' => $productUrl,
-                'priceCurrency' => 'BRL',
-                'price' => number_format($finalPrice, 2, '.', ''),
-                'itemCondition' => 'https://schema.org/NewCondition',
-                'priceValidUntil' => date('Y-12-31', strtotime('+1 year')),
-                'availability' => $product->isAvailable()
-                    ? 'https://schema.org/InStock'
-                    : 'https://schema.org/OutOfStock',
-                'seller' => [
-                    '@type' => 'Organization',
-                    'name' => 'Grupo Awamotos',
-                ],
-            ];
+            // VTEX-grade 2026-06-27: usa AggregateOffer quando há range de preço
+            // (preço normal vs. promocional, ou variantes). Sinaliza ao Google
+            // que há economia, melhorando CTR em rich results de produto.
+            $lowPrice = $finalPrice;
+            $highPrice = max($finalPrice, $regularPrice);
+            $priceRange = abs($highPrice - $lowPrice) > 0.005;
+
+            if ($priceRange) {
+                $schema['offers'] = [
+                    '@type' => 'AggregateOffer',
+                    'url' => $productUrl,
+                    'priceCurrency' => 'BRL',
+                    'lowPrice' => number_format($lowPrice, 2, '.', ''),
+                    'highPrice' => number_format($highPrice, 2, '.', ''),
+                    'offerCount' => 1,
+                    'itemCondition' => 'https://schema.org/NewCondition',
+                    'priceValidUntil' => date('Y-12-31', strtotime('+1 year')),
+                    'availability' => $product->isAvailable()
+                        ? 'https://schema.org/InStock'
+                        : 'https://schema.org/OutOfStock',
+                    'seller' => [
+                        '@type' => 'Organization',
+                        'name' => 'Grupo Awamotos',
+                    ],
+                ];
+            } else {
+                $schema['offers'] = [
+                    '@type' => 'Offer',
+                    'url' => $productUrl,
+                    'priceCurrency' => 'BRL',
+                    'price' => number_format($finalPrice, 2, '.', ''),
+                    'itemCondition' => 'https://schema.org/NewCondition',
+                    'priceValidUntil' => date('Y-12-31', strtotime('+1 year')),
+                    'availability' => $product->isAvailable()
+                        ? 'https://schema.org/InStock'
+                        : 'https://schema.org/OutOfStock',
+                    'seller' => [
+                        '@type' => 'Organization',
+                        'name' => 'Grupo Awamotos',
+                    ],
+                ];
+            }
         }
 
         $aggregateRating = $this->getAggregateRating($product);

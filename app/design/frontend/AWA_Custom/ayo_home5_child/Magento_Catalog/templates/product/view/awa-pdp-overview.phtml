@@ -1,0 +1,27 @@
+<?php
+/**
+ * AWA PDP — Resumo curto na coluna da galeria (teaser sem duplicar acordeão).
+ *
+ * @var \Magento\Catalog\Block\Product\View\Description $block
+ */
+declare(strict_types=1);
+
+$_helper = $this->helper(\Magento\Catalog\Helper\Output::class);
+$_product = $block->getProduct();
+
+if (!$_product instanceof \Magento\Catalog\Model\Product) {
+    return;
+}
+
+$_value = $_helper->productAttribute($_product, $_product->getShortDescription(), 'short_description');
+if (!$_value || trim(strip_tags((string) $_value)) === '') {
+    return;
+}
+?>
+
+<div class="product attribute overview awa-pdp-overview" itemprop="description">
+    <p class="awa-pdp-overview__title"><?= $block->escapeHtml(__('Resumo')) ?></p>
+    <div class="awa-pdp-overview__body value">
+        <?= /* @noEscape */ $_value ?>
+    </div>
+</div>

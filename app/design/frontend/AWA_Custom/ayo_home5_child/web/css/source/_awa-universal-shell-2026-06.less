@@ -1,0 +1,164 @@
+// =============================================================================
+// §98 — Universal Shell (2026-06-08)
+// Padroniza box model, gutters, Bootstrap neutralization e ritmo vertical
+// em TODAS as superfícies (exceto home full-bleed e checkout grid nativo).
+// Complementa _awa-page-containers.less (tiers) + §95/§96 (grids específicos).
+// =============================================================================
+
+@import (once) '_awa-tokens';
+@import (once) '_design-system';
+@import (once) '_awa-page-containers';
+
+@awa-shell-not-home: ~'html body#html-body:not(.cms-index-index):not(.cms-home):not(.cms-homepage_ayo_home5)';
+@awa-shell-not-checkout: ~'@{awa-shell-not-home}:not(.checkout-index-index):not(.onepagecheckout-index-index)';
+// PDP usa .col-main sem sidebar — neutralização Bootstrap estreitava shell para ~598px
+@awa-shell-bootstrap-neutralize: ~'@{awa-shell-not-checkout}:not(.catalog-product-view)';
+@awa-shell-has-block-pad: ~'@{awa-shell-not-home}:not(.checkout-index-index):not(.onepagecheckout-index-index):not(.customer-account-login):not(.customer-account-create):not(.customer-account-forgotpassword):not(.b2b-auth-shell):not(.b2b-account-login):not(.b2b-register-index):not(.cms-page-view):not(.curriculo-index-index):not(.curriculo-index-status):not(.ayo-curriculo-index-index):not(.ayo-curriculo-index-status)';
+
+// ── Runtime: --awa-shell-max / --awa-shell-gutter por tier ───────────────────
+body.catalog-category-view,
+body.catalog-product-view,
+body.catalogsearch-result-index,
+body.checkout-cart-index,
+body.catalog-product-compare-index,
+body.contact-index-index {
+    --awa-shell-max: @awa-page-catalog;
+    --awa-shell-gutter: @awa-page-pad-catalog;
+}
+
+body:is(.b2b-account-dashboard, .b2b-company-index, .b2b-credit-index, .b2b-approval-index, .b2b-reorder-history, .customer-account-index, .account, .sales-order-history, .sales-order-view, .wishlist-index-index) {
+    --awa-shell-max: @awa-page-dash;
+    --awa-shell-gutter: @awa-page-pad-desktop;
+}
+
+body:is(.b2b-quote-index, .b2b-quote-view, .b2b-quote-create, .b2b-shoppinglist-index, .b2b-shoppinglist-view, .b2b-quickorder-index) {
+    --awa-shell-max: @awa-page-flow;
+    --awa-shell-gutter: @awa-page-pad-desktop;
+}
+
+body:is(.b2b-auth-shell, .b2b-account-login, .b2b-register-index, .customer-account-login, .customer-account-create, .customer-account-forgotpassword, .checkout-index-index, .onepagecheckout-index-index) {
+    --awa-shell-max: @awa-page-narrow;
+    --awa-shell-gutter: @awa-page-pad-desktop;
+}
+
+body:is(.cms-page-view, .curriculo-index-index, .curriculo-index-status, .ayo-curriculo-index-index, .ayo-curriculo-index-status, .cms-noroute-index) {
+    --awa-shell-max: @awa-page-prose;
+    --awa-shell-gutter: @awa-page-pad-desktop;
+}
+
+@media (max-width: @awa-page-bp-md) {
+    body.catalog-category-view,
+    body.catalog-product-view,
+    body.catalogsearch-result-index,
+    body.checkout-cart-index {
+        --awa-shell-gutter: @awa-page-pad-tablet;
+    }
+
+    body:is(.b2b-account-dashboard, .account, .customer-account-index, .b2b-quote-index, .cms-page-view, .sales-order-history, .checkout-index-index) {
+        --awa-shell-gutter: @awa-page-pad-tablet;
+    }
+}
+
+@media (max-width: @awa-page-bp-sm) {
+    body.catalog-category-view,
+    body.catalog-product-view,
+    body.catalogsearch-result-index,
+    body.checkout-cart-index {
+        --awa-shell-gutter: @awa-page-pad-mobile;
+    }
+
+    body:is(.b2b-account-dashboard, .account, .customer-account-index, .b2b-quote-index, .cms-page-view, .sales-order-history, .checkout-index-index, .contact-index-index) {
+        --awa-shell-gutter: @awa-page-pad-mobile;
+    }
+}
+
+// ── Box model global (todas as páginas exceto home) ───────────────────────────
+@{awa-shell-not-home} .page-wrapper {
+    :is(.page-main, .page-main.container, .columns, .column.main, .col-main, .sidebar-main, .sidebar-additional) {
+        box-sizing: border-box !important;
+        min-width: 0 !important;
+    }
+}
+
+// ── Neutralizar margens Bootstrap legadas (exceto checkout nativo e PDP) ─────
+// ── Guard de overflow horizontal global ──────────────────────────────────────
+// Elementos do header (minicart) e .row Bootstrap legados podem estourar ~6-15px
+// à direita. `clip` remove o scroll horizontal sem criar scroll container
+// (preserva position:sticky e os carrosséis, que têm overflow-x próprio).
+html body#html-body {
+    overflow-x: clip !important;
+}
+
+@{awa-shell-bootstrap-neutralize} .page-wrapper {
+    .page-main > :is(.columns.row, .columns.layout) {
+        margin-inline: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+
+        > [class*='col-'] {
+            padding-inline: 0 !important;
+            max-width: none !important;
+            flex: none !important;
+            width: auto !important;
+            float: none !important;
+        }
+    }
+}
+
+// ── Ritmo vertical padrão (tiers 2–3; tier 1 commerce usa bloco abaixo) ─────
+@{awa-shell-has-block-pad}:not(.catalog-category-view):not(.catalogsearch-result-index):not(.catalog-product-view):not(.checkout-cart-index) .page-wrapper .page-main {
+    padding-block-start: clamp(16px, 2vw, 24px) !important;
+    /* 24px fixo: clamp(24px,3vw,40px) computava 38.4px fora da escala no desktop */
+    padding-block-end: 24px !important;
+}
+
+// ── Tier 1 commerce — eixo 1280/16, ritmo 12/16 (paridade PDP/cart/PLP) ───
+// padding-top/bottom físicos: layout-bundle async usa padding-top:24px e vence
+// padding-block-start lógico por ordem de carregamento.
+@{awa-shell-not-home}:is(.catalog-category-view, .catalogsearch-result-index, .catalog-product-view, .checkout-cart-index) .page-wrapper .page-main {
+    padding-top: 12px !important;
+    padding-bottom: 16px !important;
+}
+
+// ── Conteúdo principal: stack com gap (páginas 1-col sem grid §95/§96) ───────
+@{awa-shell-not-home}:not(.catalog-category-view):not(.catalogsearch-result-index):not(.catalog-product-view):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .column.main {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: var(--awa-block-gap, var(--awa-grid-gap-tight, 16px)) !important;
+}
+
+// Checkout: preservar layout nativo Magento
+html body#html-body:is(.checkout-index-index, .onepagecheckout-index-index) .page-wrapper {
+    .column.main {
+        display: block !important;
+        gap: unset !important;
+    }
+}
+
+// ── Cart: reforço shell tier 1 (tabelas + summary) ───────────────────────────
+html body#html-body.checkout-cart-index .page-wrapper {
+    .cart-container {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    :is(.cart-summary, .cart.table-wrapper) {
+        min-width: 0 !important;
+    }
+}
+
+// ── Compare: scroll horizontal sem estourar shell ─────────────────────────────
+html body#html-body.catalog-product-compare-index .page-wrapper {
+    .table-wrapper.comparison {
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    @{awa-shell-not-home} .page-wrapper .column.main {
+        transition: none !important;
+    }
+}

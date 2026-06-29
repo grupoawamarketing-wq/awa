@@ -1,0 +1,113 @@
+<?php declare(strict_types=1);
+
+/**
+ * Home: inicializa customer-data + widgets adiados a partir do JSON defer.
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ */
+?>
+<script>
+(function (w, d) {
+    'use strict';
+
+    var started = false;
+
+    function boot() {
+        if (started) {
+            return;
+        }
+
+        var node = d.getElementById('awa-customer-sections-defer-json');
+        if (!node || !node.textContent) {
+            return;
+        }
+
+        started = true;
+
+        // Sessão com conteúdo privado (logado/carrinho): inicializa customer-data
+        // imediatamente — o header precisa hidratar "Olá, {nome}" sem esperar
+        // o gate de interação interno do bootstrap.
+        var hasPrivateContent = d.cookie.indexOf('private_content_version') !== -1;
+
+        w.require([
+            'js/awa-customer-sections-bootstrap',
+            'js/awa-home-deferred-widgets-bootstrap'
+        ], function (bootstrapCustomerSections, bootstrapHomeDeferredWidgets) {
+            var payload;
+
+            try {
+                payload = JSON.parse(node.textContent);
+            } catch (e) {
+                return;
+            }
+
+            Promise.resolve(bootstrapCustomerSections(payload, { immediate: hasPrivateContent })).then(function () {
+                bootstrapHomeDeferredWidgets();
+            });
+        });
+    }
+
+    var intentEvents = ['pointerdown', 'keydown', 'touchstart'];
+
+    function schedule() {
+        var start = function () {
+            if (typeof w.awaRunWhenRequire === 'function') {
+                w.awaRunWhenRequire(boot, { key: 'home-customer-defer-loader' });
+                return;
+            }
+
+            if (typeof w.require === 'function' && !w.require._awaStub) {
+                boot();
+            }
+            /* safe6: sem setInterval — stub só libera após interação + merged bundle */
+        };
+
+        function isMeaningfulIntent(evt) {
+            if (!evt) {
+                return false;
+            }
+
+            if (evt.type === 'keydown') {
+                return evt.key === 'Enter' || evt.key === ' ' || evt.key === 'Spacebar';
+            }
+
+            return !!(evt.target && evt.target.closest && evt.target.closest(
+                'a, button, input, select, textarea, label, summary, [role="button"], [role="link"], .minicart-wrapper, .awa-header-account-prompt, #search_mini_form, .awa-hero-swiper__nav, .swiper-pagination-bullet, .awa-category-carousel__item, .product-item, .item-product, .awa-footer-section__toggle, .awa-footer-categories-expand__toggle'
+            ));
+        }
+
+        function onIntent(evt) {
+            if (!isMeaningfulIntent(evt)) {
+                return;
+            }
+
+            intentEvents.forEach(function (name) {
+                w.removeEventListener(name, onIntent, true);
+            });
+            start();
+        }
+
+        intentEvents.forEach(function (name) {
+            // sem once:true — um primeiro evento NÃO significativo (clique no fundo)
+            // não pode consumir o listener; remoção manual só quando significativo.
+            w.addEventListener(name, onIntent, { capture: true, passive: name !== 'keydown' });
+        });
+
+        // Logado/sessão privada: não depender de interação — boot em idle para o
+        // header personalizar. Guest sem cookie mantém o defer total (PSI).
+        if (d.cookie.indexOf('private_content_version') !== -1) {
+            if ('requestIdleCallback' in w) {
+                w.requestIdleCallback(start, { timeout: 4000 });
+            } else {
+                w.setTimeout(start, 4000);
+            }
+        }
+    }
+
+    if (d.readyState === 'loading') {
+        d.addEventListener('DOMContentLoaded', schedule, { once: true });
+    } else {
+        schedule();
+    }
+}(window, document));
+</script>

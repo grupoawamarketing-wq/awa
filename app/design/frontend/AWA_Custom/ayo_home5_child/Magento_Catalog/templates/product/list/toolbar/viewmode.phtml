@@ -1,0 +1,44 @@
+<?php
+/**
+ * Product list toolbar view mode — AWA override (unique IDs per toolbar slot).
+ *
+ * @var $block \Magento\Catalog\Block\Product\ProductList\Toolbar
+ */
+declare(strict_types=1);
+
+use Magento\Catalog\Model\Product\ProductList\Toolbar;
+
+$toolbarSlot = (string) ($block->getData('awa_toolbar_slot') ?: 'top');
+if (!in_array($toolbarSlot, ['top', 'bottom'], true)) {
+    $toolbarSlot = 'top';
+}
+$modesLabelId = 'modes-label-' . $toolbarSlot;
+?>
+<?php if ($block->isEnabledViewSwitcher()): ?>
+<div class="modes">
+    <?php $_modes = $block->getModes(); ?>
+    <?php if ($_modes && count($_modes) > 1): ?>
+    <strong class="modes-label" id="<?= /* @noEscape */ $modesLabelId ?>"><?= $block->escapeHtml(__('Hide Sidebar')) ?></strong>
+    <?php foreach ($block->getModes() as $_code => $_label): ?>
+        <?php if ($block->isModeActive($_code)): ?>
+            <strong title="<?= $block->escapeHtmlAttr((string) $_label) ?>"
+                class="modes-mode active mode-<?= $block->escapeHtmlAttr(strtolower((string) $_code)) ?>"
+                data-value="<?= $block->escapeHtmlAttr(strtolower((string) $_code)) ?>">
+                <span><?= $block->escapeHtml((string) $_label) ?></span>
+            </strong>
+        <?php else: ?>
+            <?php $modeId = 'mode-' . $toolbarSlot . '-' . strtolower((string) $_code); ?>
+            <a class="modes-mode mode-<?= $block->escapeHtmlAttr(strtolower((string) $_code)) ?>"
+               title="<?= $block->escapeHtmlAttr((string) $_label) ?>"
+               href="#"
+               data-role="mode-switcher"
+               data-value="<?= $block->escapeHtmlAttr(strtolower((string) $_code)) ?>"
+               id="<?= $block->escapeHtmlAttr($modeId) ?>"
+               aria-labelledby="<?= $block->escapeHtmlAttr($modesLabelId . ' ' . $modeId) ?>">
+                <span><?= $block->escapeHtml((string) $_label) ?></span>
+            </a>
+        <?php endif; ?>
+    <?php endforeach; ?>
+    <?php endif; ?>
+</div>
+<?php endif; ?>

@@ -1,0 +1,158 @@
+// =============================================================================
+// §105 — Architecture + Visual Modern Pass 3 (2026-06-08)
+// Distill consolidated drift + superfícies ops (tables, modals, section titles).
+// Magento 2: .block, .table-wrapper, .block-minicart, .modal-popup
+// Visual 2025-2026: flat panels, hairline borders, sem accent stripe 4px.
+// =============================================================================
+
+@import (once) '_awa-tokens';
+@import (once) '_design-system';
+@import (once) '_awa-page-containers';
+
+@awa-a3-not-home: ~'html body#html-body:not(.cms-index-index):not(.cms-home):not(.cms-homepage_ayo_home5)';
+@awa-a3-ops: ~'html body#html-body:is(.account, .customer-account-index, .sales-order-history, .sales-order-view, .wishlist-index-index, .catalog-product-compare-index, .checkout-cart-index, .checkout-index-index, .onepagecheckout-index-index, [class*="b2b-"])';
+@awa-a3-flow: ~'html body#html-body:is(.b2b-quote-index, .b2b-quote-view, .b2b-quote-create, .b2b-shoppinglist-index, .b2b-shoppinglist-view, .b2b-quickorder-index)';
+
+:root {
+    --awa-arch-version: '105';
+    --awa-ui-panel-shadow: none;
+}
+
+// ── Distill: painéis sem sombra legada (consolidated + bundle-cart) ─────────
+@{awa-a3-not-home} .page-wrapper {
+    :is(
+        .block,
+        .fieldset,
+        .cart-summary,
+        .opc-block-summary,
+        .opc-block-shipping-information,
+        .opc-progress-bar,
+        .box,
+        .b2b-section,
+        .b2b-card,
+        .b2b-panel,
+        .data-grid-wrap
+    ) {
+        box-shadow: none !important;
+    }
+}
+
+// ── Section titles: sem barra lateral 4px (Impeccable ban fora home shelves) ─
+@{awa-a3-ops} .page-wrapper,
+@{awa-a3-flow} .page-wrapper {
+    :is(
+        .block-title,
+        .block .title,
+        .box-title,
+        .legend,
+        .b2b-section-header,
+        .b2b-section-title,
+        .page-title-wrapper .page-title
+    ) {
+        border-inline-start: 0 !important;
+        border-left: 0 !important;
+        padding-inline-start: 0 !important;
+        padding-left: 0 !important;
+    }
+
+    :is(.block-title, .block .title, .b2b-section-header) {
+        border-bottom: 1px solid var(--awa-border-hairline, @awa-color-border-subtle) !important;
+        padding-block-end: @awa-space-2 !important;
+        margin-block-end: @awa-space-3 !important;
+    }
+}
+
+// ── Order history / wishlist / compare: tabelas em painel único ─────────────
+@{awa-a3-ops} .page-wrapper {
+    :is(.order-products-toolbar, .wishlist-toolbar) {
+        margin-block-end: @awa-space-3 !important;
+    }
+
+    .table-wrapper {
+        box-shadow: none !important;
+        border: 1px solid var(--awa-border, @awa-color-border) !important;
+        border-radius: var(--awa-ui-radius, @awa-radius-sm) !important;
+        background: var(--awa-surface-base, @awa-color-white) !important;
+    }
+
+    .table-wrapper :is(table, .data.table) tbody tr:hover {
+        background: var(--awa-surface-muted, @awa-color-bg-soft) !important;
+    }
+}
+
+// ── B2B flow: data grids densos + sticky header row ─────────────────────────
+@{awa-a3-flow} .page-wrapper {
+    .table-wrapper thead th {
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 1 !important;
+        background: var(--awa-surface-muted, @awa-color-bg-soft) !important;
+    }
+
+    :is(.actions-toolbar, .b2b-actions-toolbar) {
+        gap: @awa-space-3 !important;
+        flex-wrap: wrap !important;
+    }
+}
+
+// ── Minicart dropdown: flat (header chrome) ─────────────────────────────────
+@{awa-a3-not-home} .page-wrapper,
+html body#html-body .header-wrapper,
+html body#html-body .awa-site-header {
+    .minicart-wrapper .block-minicart,
+    .block-minicart {
+        border: 1px solid var(--awa-border, @awa-color-border) !important;
+        border-radius: var(--awa-ui-radius, @awa-radius-sm) !important;
+        box-shadow: none !important;
+        background: var(--awa-surface-base, @awa-color-white) !important;
+    }
+
+    .minicart-items .product-item {
+        border-bottom: 1px solid var(--awa-border-hairline, @awa-color-border-subtle) !important;
+    }
+
+    .minicart-items .product-item:last-child {
+        border-bottom: 0 !important;
+    }
+}
+
+// ── Modals Magento: flat surface ────────────────────────────────────────────
+@{awa-a3-not-home} {
+    :is(.modal-popup, .modal-slide) .modal-inner-wrap {
+        border: 1px solid var(--awa-border, @awa-color-border) !important;
+        border-radius: var(--awa-ui-radius, @awa-radius-sm) !important;
+        box-shadow: none !important;
+    }
+
+    .modal-popup .modal-header {
+        border-bottom: 1px solid var(--awa-border-hairline, @awa-color-border-subtle) !important;
+        padding-block: @awa-space-3 @awa-space-2 !important;
+    }
+
+    .modal-popup .modal-footer {
+        border-top: 1px solid var(--awa-border-hairline, @awa-color-border-subtle) !important;
+        padding-block: @awa-space-3 !important;
+    }
+}
+
+// ── Compare page: grid de produtos alinhado ao PLP ─────────────────────────
+html body#html-body.catalog-product-compare-index .page-wrapper {
+    .table-comparison {
+        display: grid !important;
+        gap: var(--awa-grid-gap, 16px) !important;
+        overflow-x: auto !important;
+    }
+
+    .table-comparison tbody tr :is(th, td) {
+        border: 1px solid var(--awa-border-hairline, @awa-color-border-subtle) !important;
+        border-radius: var(--awa-ui-radius, @awa-radius-sm) !important;
+        padding: @awa-space-3 !important;
+        vertical-align: top !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    @{awa-a3-flow} .page-wrapper .table-wrapper thead th {
+        position: static !important;
+    }
+}

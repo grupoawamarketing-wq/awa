@@ -1,0 +1,672 @@
+// deploy-safe copy of ../awa-b2b-status-panel.css (inlined; keep in sync). Original still served standalone via head loaders.
+/* AWA B2B Status Panel — refinamento profissional (header). Source: awa-b2b-status-panel.css */
+
+/* stylelint-disable color-no-hex -- fallbacks de token */
+
+.b2b-status-panel {
+    --b2b-panel-radius: var(--awa-radius-md, 10px);
+    --b2b-panel-radius-lg: var(--awa-radius-lg, 12px);
+    --b2b-panel-border: var(--awa-border, @awa-color-gray-200);
+    --b2b-panel-bg: var(--awa-bg-surface, @awa-color-white);
+    --b2b-panel-bg-muted: var(--awa-bg-subtle, @awa-neutral-50);
+    --b2b-panel-text: var(--awa-text-primary, @awa-neutral-800);
+    --b2b-panel-text-muted: var(--awa-text-muted, @awa-neutral-500);
+    --b2b-panel-shadow: var(--awa-shadow-sm, 0 2px 8px rgb(15 23 42 / 8%));
+    --b2b-panel-transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+    position: relative;
+    display: flex;
+    align-items: center;
+    z-index: var(--awa-z-dropdown, 99);
+}
+
+html body#html-body .page-wrapper .awa-site-header .awa-header-right-col:has(.b2b-status-panel) > :is(
+    .awa-header-account-prompt,
+    .awa-header-contact-links
+) {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    opacity: 0 !important;
+}
+
+.b2b-status-panel .awa-b2b-panel-icon {
+    display: block;
+    width: 16px;
+    height: 16px;
+    max-width: 16px;
+    max-height: 16px;
+    flex-shrink: 0;
+}
+
+.b2b-status-panel .awa-b2b-panel-icon--user {
+    width: 32px;
+    height: 32px;
+}
+
+/* Trigger — mesmo padrão visual do awa-header-account-prompt (referência) */
+.b2b-status-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 16px;
+    box-sizing: border-box;
+    max-width: ~"min(360px, 36vw)";
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--b2b-panel-text);
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+    white-space: nowrap;
+    transition: opacity var(--b2b-panel-transition);
+}
+
+.b2b-status-trigger:hover {
+    opacity: 0.92;
+}
+
+.b2b-status-trigger:focus-visible {
+    outline: 2px solid var(--awa-primary, @awa-color-primary);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+.b2b-status-trigger[aria-expanded="true"] .b2b-status-trigger__line2 {
+    color: var(--awa-primary, @awa-color-primary);
+}
+
+.b2b-status-trigger__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--awa-primary, @awa-color-primary);
+}
+
+.b2b-status-trigger__icon .awa-b2b-panel-icon {
+    width: 32px;
+    height: 32px;
+    stroke: var(--awa-primary, @awa-color-primary);
+    color: var(--awa-primary, @awa-color-primary);
+}
+
+.b2b-status-trigger__text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 0;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.b2b-status-trigger__line1 {
+    display: block;
+    max-width: 100%;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.2;
+    color: var(--awa-text-muted, @awa-color-text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.b2b-status-trigger__line2 {
+    display: block;
+    max-width: 100%;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--awa-text-primary, @awa-color-dark);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.b2b-status-trigger__discount {
+    display: inline;
+    margin-left: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--awa-success, @awa-color-success);
+}
+
+.b2b-status-trigger__chevron {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-left: 2px;
+    color: var(--awa-text-muted, @awa-neutral-500);
+    transition: transform var(--b2b-panel-transition), color var(--b2b-panel-transition);
+}
+
+.b2b-status-trigger__chevron .awa-b2b-panel-icon--chevron {
+    width: 14px;
+    height: 14px;
+    stroke: currentColor;
+}
+
+.b2b-status-trigger[aria-expanded="true"] .b2b-status-trigger__chevron {
+    transform: rotate(180deg);
+    color: var(--awa-primary, @awa-color-primary);
+}
+
+.b2b-status-trigger:hover .b2b-status-trigger__chevron,
+.b2b-status-trigger:focus-visible .b2b-status-trigger__chevron {
+    color: var(--awa-primary, @awa-color-primary);
+}
+
+/* Dropdown */
+.b2b-status-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: ~"min(420px, calc(100vw - 24px))";
+    max-height: ~"min(72vh, 520px)";
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid var(--b2b-panel-border);
+    border-radius: var(--b2b-panel-radius-lg);
+    background: var(--b2b-panel-bg);
+    box-shadow: var(--b2b-panel-shadow);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px) scale(0.98);
+    transition:
+        opacity var(--b2b-panel-transition),
+        visibility var(--b2b-panel-transition),
+        transform var(--b2b-panel-transition);
+    z-index: var(--awa-z-overlay, 1000);
+}
+
+.b2b-status-dropdown[aria-hidden="false"] {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+
+.dropdown-inner {
+    display: flex;
+    flex-direction: column;
+}
+
+.dropdown-section {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--b2b-panel-border);
+}
+
+.dropdown-section:last-child {
+    border-bottom: 0;
+}
+
+.section-title {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--b2b-panel-text-muted);
+}
+
+.user-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--b2b-panel-bg-muted);
+}
+
+.user-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: var(--avatar-color, var(--awa-primary, @awa-color-primary));
+    color: @awa-color-white;
+    font-size: 16px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.user-name {
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--b2b-panel-text);
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    overflow-wrap: anywhere;
+}
+
+.user-company {
+    display: flex;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-size: 12px;
+    line-height: 1.35;
+    color: var(--b2b-panel-text-muted);
+}
+
+.user-tier {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    width: fit-content;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--tier-color, var(--awa-primary, @awa-color-primary)) 12%, var(--b2b-panel-bg));
+    color: color-mix(in srgb, var(--tier-color, var(--awa-primary, @awa-color-primary)) 88%, #000);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.stats-section {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+
+.stat-item {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--b2b-panel-border);
+    border-radius: var(--b2b-panel-radius);
+    background: var(--b2b-panel-bg);
+}
+
+.stat-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: var(--b2b-panel-bg-muted);
+    color: var(--awa-primary, @awa-color-primary);
+    font-size: 14px;
+}
+
+.discount-stat .stat-icon {
+    color: var(--awa-success, @awa-color-success);
+}
+
+.stat-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.stat-value {
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--b2b-panel-text);
+}
+
+.stat-label {
+    font-size: 11px;
+    line-height: 1.25;
+    color: var(--b2b-panel-text-muted);
+}
+
+.credit-stat {
+    grid-template-columns: auto 1fr;
+}
+
+.credit-bar {
+    grid-column-start: 1;
+    grid-column-end: -1;
+    width: 100%;
+    height: 5px;
+    margin-top: 2px;
+    border-radius: 999px;
+    background: var(--b2b-panel-bg-muted);
+    overflow: hidden;
+}
+
+.credit-bar-fill {
+    display: block;
+    height: 100%;
+    width: var(--b2b-credit-width, 0%);
+    border-radius: inherit;
+    background: linear-gradient(
+        90deg,
+        var(--awa-primary, @awa-color-primary),
+        color-mix(in srgb, var(--awa-primary, @awa-color-primary) 72%, #000)
+    );
+    transition: width 0.45s ease;
+}
+
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.quick-action-link {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    min-height: 40px;
+    padding: 8px 10px;
+    border: 1px solid var(--b2b-panel-border);
+    border-radius: var(--b2b-panel-radius);
+    background: var(--b2b-panel-bg);
+    color: var(--b2b-panel-text);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.3;
+    text-decoration: none;
+    transition:
+        border-color var(--b2b-panel-transition),
+        background-color var(--b2b-panel-transition),
+        color var(--b2b-panel-transition);
+}
+
+.quick-action-link:hover {
+    border-color: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 30%, var(--b2b-panel-border));
+    background: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 6%, var(--b2b-panel-bg));
+    color: var(--awa-primary, @awa-color-primary);
+}
+
+.quick-action-link:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--awa-primary, @awa-color-primary) 40%, transparent);
+    outline-offset: 2px;
+}
+
+.quick-action-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    background: var(--b2b-panel-bg-muted);
+    color: var(--awa-primary, @awa-color-primary);
+    flex-shrink: 0;
+}
+
+.quick-action-label {
+    display: block;
+    min-width: 0;
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    line-height: 1.25;
+}
+
+.dropdown-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px 12px;
+    background: var(--b2b-panel-bg-muted);
+    border-top: 1px solid var(--b2b-panel-border);
+}
+
+.footer-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 36px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    color: var(--b2b-panel-text-muted);
+    font-size: 12px;
+    font-weight: 500;
+    text-decoration: none;
+    transition:
+        background-color var(--b2b-panel-transition),
+        color var(--b2b-panel-transition);
+}
+
+.footer-link:hover {
+    background: var(--b2b-panel-bg);
+    color: var(--b2b-panel-text);
+}
+
+.logout-link:hover {
+    background: color-mix(in srgb, var(--awa-error, @awa-color-danger) 8%, var(--b2b-panel-bg));
+    color: var(--awa-error, @awa-color-danger);
+}
+
+/* Backdrop */
+@media screen and (max-width: 767px) {
+    .b2b-status-panel {
+        position: static;
+    }
+
+    .b2b-status-panel.is-open::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        z-index: calc(var(--awa-z-overlay, 1000) - 1);
+        background: rgb(15 23 42 / 42%);
+        animation: awa-b2b-panel-fade-in 0.2s ease;
+    }
+
+    .b2b-status-trigger {
+        max-width: ~"min(200px, 42vw)";
+        gap: 10px;
+    }
+
+    .b2b-status-trigger__line1 {
+        display: none;
+    }
+
+    .b2b-status-dropdown {
+        position: fixed;
+        inset: auto 0 0;
+        width: 100%;
+        max-height: 82vh;
+        border-radius: 16px 16px 0 0;
+        transform: translateY(100%);
+    }
+
+    .b2b-status-dropdown[aria-hidden="false"] {
+        transform: translateY(0);
+    }
+
+    .quick-actions {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .b2b-status-trigger {
+        max-width: ~"min(180px, 48vw)";
+        gap: 8px;
+    }
+
+    .b2b-status-trigger__line2 {
+        font-size: 12px;
+        max-width: 120px;
+    }
+
+    .b2b-status-trigger__chevron {
+        margin-left: 0;
+    }
+}
+
+@media screen and (min-width: 768px) and (max-width: 991px) {
+    .b2b-status-dropdown {
+        width: ~"min(360px, calc(100vw - 24px))";
+    }
+}
+
+@media screen and (min-width: 768px) {
+    .b2b-status-panel.is-open::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        z-index: calc(var(--awa-z-overlay, 1000) - 1);
+        background: rgb(15 23 42 / 14%);
+        pointer-events: none;
+        animation: awa-b2b-panel-fade-in 0.2s ease;
+    }
+}
+
+@media screen and (min-width: 992px) and (max-width: 1199px) {
+    .b2b-status-trigger__line1 {
+        font-size: 12px;
+    }
+}
+
+@keyframes awa-b2b-panel-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .b2b-status-trigger,
+    .b2b-status-dropdown,
+    .credit-bar-fill,
+    .quick-action-link,
+    .footer-link {
+        transition: none;
+    }
+
+    .b2b-status-panel,
+    .b2b-status-panel * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+    }
+}
+
+@media print {
+    .b2b-status-panel {
+        display: none !important;
+    }
+}
+
+/* Terminal — vence awa-super-global / consolidated legado no trigger */
+html body#html-body .page-wrapper .b2b-status-panel .b2b-status-trigger {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 16px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    transform: none !important;
+    max-width: ~"min(360px, 40vw)" !important;
+}
+
+html body#html-body .page-wrapper .b2b-status-panel .b2b-status-trigger:hover,
+html body#html-body .page-wrapper .b2b-status-panel .b2b-status-trigger:focus-visible,
+html body#html-body .page-wrapper .b2b-status-panel .b2b-status-trigger[aria-expanded="true"] {
+    background: transparent !important;
+    background-image: none !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+html body#html-body .page-wrapper .b2b-status-panel .b2b-status-trigger__line1 {
+    font-size: 13px !important;
+    font-weight: 400 !important;
+    color: var(--awa-text-muted, @awa-color-text-muted) !important;
+    text-transform: none !important;
+}
+
+html body#html-body .page-wrapper .b2b-status-panel .b2b-status-trigger__line2 {
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: var(--awa-text-primary, @awa-color-dark) !important;
+}
+
+html body#html-body .page-wrapper .b2b-status-panel :is(.footer-link, .quick-action-link) {
+    text-transform: none !important;
+}
+
+html body#html-body .page-wrapper .awa-site-header .awa-header-right-col:has(.b2b-status-panel) {
+    gap: 12px !important;
+    align-items: center !important;
+}
+
+/* Prompt logado (home/PLP/carrinho) — sem card/pill; painel B2B cobre páginas de conta */
+html body#html-body:not(.b2b-account-dashboard) .page-wrapper .awa-site-header
+    .awa-header-account-prompt[data-awa-auth-state="customer"] {
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+html body#html-body:not(.b2b-account-dashboard) .page-wrapper .awa-site-header
+    .awa-header-account-prompt[data-awa-auth-state="customer"]
+    :is(.awa-account-dropdown__trigger, .awa-header-account-prompt__link) {
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+}
+
+html body#html-body .page-wrapper .b2b-status-panel .b2b-status-trigger__chevron {
+    display: inline-flex !important;
+}
+
+html body#html-body .page-wrapper .b2b-status-panel .b2b-status-trigger[aria-expanded="true"] .b2b-status-trigger__chevron {
+    transform: rotate(180deg) !important;
+    color: var(--awa-primary, @awa-color-primary) !important;
+}
+
+/* Vence awa-super-global (.b2b-status-trigger gradient/pill) em páginas de conta */
+html body#html-body .page-wrapper .awa-site-header .b2b-status-panel .b2b-status-trigger {
+    background: transparent !important;
+    background-image: none !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    padding-inline: 0 !important;
+    min-block-size: 0 !important;
+    min-height: 0 !important;
+}
+
+@media (min-width: 1024px) {
+    html body#html-body .page-wrapper .awa-site-header .b2b-status-panel .b2b-status-trigger {
+        padding: 0 !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+        box-sizing: border-box !important;
+        white-space: nowrap !important;
+        gap: var(--awa-space-3, 12px) !important;
+    }
+}
+
+/* stylelint-enable color-no-hex */

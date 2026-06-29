@@ -1,5 +1,25 @@
 # AWA Motos — Design System: COMPLETO ✅
 
+> **Atualizado (nota de governança):** 2026-06-28 — **CSS authority não é apenas `_extend.less`**.
+>
+> **Fontes canônicas do projeto visual:**
+> - **Tracker de bugs visuais:** [`docs/PLANO_BUGS_VISUAIS.md`](../../../../docs/PLANO_BUGS_VISUAIS.md)
+> - **Histórico de fases:** [`docs/PLANO_CORRECAO_LAYOUT_FASES.md`](../../../../docs/PLANO_CORRECAO_LAYOUT_FASES.md)
+>
+> ⚠️ **Autoridade visual real — pontos a mapear antes de qualquer fix:**
+>
+> O `_extend.less` **não governa sozinho** o visual da home/PLP/PDP/cart/B2B login. Antes de editar CSS/LESS, é obrigatório mapear onde a regra realmente carrega:
+>
+> 1. **`OptimizeHeadStylesPlugin.php`** (body-end inject, "terminal-wins")
+> 2. **`awa-css-gate.js`** (fila idle + body-end, plugins globais)
+> 3. **`awa-head-preload.phtml`** (preloads async no `<head>`)
+> 4. **CSS standalone / body-end** (`pub/static/.../awa-*.css`)
+> 5. **`_extend.less`** + partials LESS (`web/css/source/_awa-*.less`) — quando compilado e deployado
+>
+> **Regra:** qualquer fix visual ou migração para LESS precisa **provar carregamento real por rota** (`view-source` ou `curl | grep`). Não assumir que adicionar regra em `_extend.less` se sobrepõe ao body-end plugin.
+>
+> ⚠️ Migração de regras críticas para LESS só é segura após BUG-CSS-AUTHORITY-011 (Fase 3D.6) ser tratada.
+
 ## 9 CSS Files Criados (~127KB de design system)
 
 | # | Arquivo | ~KB | Carregado em |

@@ -1,0 +1,191 @@
+/**
+ * AWA Home Swiper CLS Fix v1.0 (2026-06-05)
+ *
+ * PROBLEMA: O CSS anti-FOUC esconde slides do Swiper com 'display:none' até
+ * a inicialização. Quando o JavaScript lazy-load inicializa o Swiper após
+ * clique do usuário, todos os slides aparecem de uma vez, causando layout shift.
+ *
+ * SOLUÇÃO: Substitui 'display:none' por abordagem que mantém layout estável:
+ * - Slides ficam visíveis em layout horizontal simples (overflow hidden)
+ * - Swiper inicializa sobre uma estrutura já dimensionada
+ * - Transição suave sem CLS (Cumulative Layout Shift)
+ *
+ * Aplica-se a: awa-home-terminal-bundle.css (linhas 7215-7224)
+ */
+
+/* ============================================================================
+   1. NEUTRALIZAR REGRAS ANTI-FOUC PROBLEMATICAS (display:none)
+   ============================================================================ */
+
+/* Remove display:none dos slides não inicializados - mantém todos visíveis */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .products-swiper:not(.swiper-initialized)
+  .swiper-slide:not(:first-child),
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  :is(.cat_home.swiper, .category_tab_slider.swiper, .awa-featured-swiper):not(.swiper-initialized)
+  .swiper-slide:not(:first-child) {
+  display: block !important;
+  visibility: visible !important;
+}
+
+/* ============================================================================
+   2. LAYOUT ESTAVEL PRÉ-INICIALIZAÇÃO (Sem CLS)
+   ============================================================================ */
+
+/* Container do swiper: altura fixa e overflow controlado */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .products-swiper:not(.swiper-initialized),
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  :is(.cat_home.swiper, .category_tab_slider.swiper, .awa-featured-swiper):not(.swiper-initialized) {
+  overflow: hidden !important;
+  position: relative !important;
+}
+
+/* Wrapper: layout horizontal simples com scroll oculto */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .products-swiper:not(.swiper-initialized)
+  .swiper-wrapper,
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  :is(.cat_home.swiper, .category_tab_slider.swiper, .awa-featured-swiper):not(.swiper-initialized)
+  .swiper-wrapper {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  overflow-x: hidden !important;
+  gap: 0 !important;
+}
+
+/* Slides: dimensões fixas para evitar reflow */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .products-swiper:not(.swiper-initialized)
+  .swiper-slide,
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  :is(.cat_home.swiper, .category_tab_slider.swiper, .awa-featured-swiper):not(.swiper-initialized)
+  .swiper-slide {
+  flex: 0 0 auto !important;
+  width: 20% !important; /* 5 items visíveis (100% / 5) */
+  max-width: 280px !important;
+  box-sizing: border-box !important;
+  padding: 8px !important;
+}
+
+/* ============================================================================
+   3. RESPONSIVIDADE PRÉ-INICIALIZAÇÃO
+   ============================================================================ */
+
+/* Tablet: 4 items */
+@media (max-width: 1024px) {
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .products-swiper:not(.swiper-initialized)
+    .swiper-slide,
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    :is(.cat_home.swiper, .category_tab_slider.swiper, .awa-featured-swiper):not(.swiper-initialized)
+    .swiper-slide {
+    width: 25% !important;
+  }
+}
+
+/* Mobile: 2 items */
+@media (max-width: 768px) {
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .products-swiper:not(.swiper-initialized)
+    .swiper-slide,
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    :is(.cat_home.swiper, .category_tab_slider.swiper, .awa-featured-swiper):not(.swiper-initialized)
+    .swiper-slide {
+    width: 50% !important;
+  }
+}
+
+/* Small mobile: 1 item */
+@media (max-width: 480px) {
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .products-swiper:not(.swiper-initialized)
+    .swiper-slide,
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    :is(.cat_home.swiper, .category_tab_slider.swiper, .awa-featured-swiper):not(.swiper-initialized)
+    .swiper-slide {
+    width: 100% !important;
+  }
+}
+
+/* ============================================================================
+   4. TRANSICAO SUAVE PARA ESTADO INICIALIZADO
+   ============================================================================ */
+
+/* Quando o Swiper inicializa, transição suave */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .products-swiper.swiper-initialized,
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  :is(.cat_home.swiper, .category_tab_slider.swiper, .awa-featured-swiper).swiper-initialized {
+  transition: opacity 0.2s ease-out !important;
+}
+
+/* ============================================================================
+   5. CORREÇÃO ESPECÍFICA PARA OWL CAROUSEL (se presente)
+   ============================================================================ */
+
+/* Owl Carousel não carregado: manter layout estável */
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .content-top-home
+  .awa-carousel-section
+  ul.owl:not(.owl-loaded) {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 16px !important;
+}
+
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .content-top-home
+  .awa-carousel-section
+  ul.owl:not(.owl-loaded)
+  > li {
+  flex: 0 0 auto !important;
+  width: calc(20% - 13px) !important;
+  max-width: 280px !important;
+}
+
+@media (max-width: 1024px) {
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .content-top-home
+    .awa-carousel-section
+    ul.owl:not(.owl-loaded)
+    > li {
+    width: calc(25% - 12px) !important;
+  }
+}
+
+@media (max-width: 768px) {
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .content-top-home
+    .awa-carousel-section
+    ul.owl:not(.owl-loaded)
+    > li {
+    width: calc(50% - 8px) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .content-top-home
+    .awa-carousel-section
+    ul.owl:not(.owl-loaded)
+    > li {
+    width: 100% !important;
+  }
+}

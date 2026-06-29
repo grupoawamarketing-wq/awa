@@ -1,0 +1,57 @@
+<?php declare(strict_types=1);
+
+/**
+ * Home PSI — stack crítico único (6 folhas → 1 request cacheável).
+ *
+ * Substitui:
+ *   - awa-header-mobile-grid-critical.min.css
+ *   - awa-impeccable-critical-home.min.css
+ *   - awa-header-home-light-lock-v1.min.css
+ *   - awa-home-first-paint-critical.min.css
+ *   - awa-bundle-async-distill-lock.min.css
+ *   - GrupoAwamotos_Theme/css/awa-menu-v2-dept-open-fix.css
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ */
+$stackUrl = $block->getViewFileUrl('css/awa-home-critical-stack-2026-06-11.min.css') . '?v=20260618-corporate-grid';
+$stackEsc = $block->escapeUrl($stackUrl);
+?>
+<link rel="preload" href="<?= $stackEsc ?>" as="style" fetchpriority="high"/>
+<link rel="stylesheet" href="<?= $stackEsc ?>" media="print" onload="window.__awaCssQ?__awaCssQ(this):(this.media='all')" id="awa-home-critical-stack" data-awa-bundle="home-critical-stack"/>
+<noscript><link rel="stylesheet" href="<?= $stackEsc ?>"/></noscript>
+<?php
+/** awa-home-corporate-density-grid: removido de cms_index_index.xml (era media="all" blocking), carregado aqui async */
+$__corpGridUrl = $block->escapeUrl(
+    $block->getViewFileUrl('css/awa-home-corporate-density-grid-2026-06.min.css')
+);
+?>
+<link rel="preload" href="<?= $__corpGridUrl ?>" as="style"/>
+<link rel="stylesheet" href="<?= $__corpGridUrl ?>" media="print" onload="window.__awaCssQ?__awaCssQ(this):(this.media='all')" data-awa-bundle="corp-grid"/>
+<noscript><link rel="stylesheet" href="<?= $__corpGridUrl ?>"/></noscript>
+<?= $block->getLayout()->createBlock(\Magento\Framework\View\Element\Template::class)
+    ->setTemplate('Magento_Theme::html/awa-header-early-sticky-sync.phtml')
+    ->toHtml() ?>
+<script>
+(function (w, d) {
+    var isHomeByPath = !w.location || w.location.pathname === '' || w.location.pathname === '/';
+    var body = d.body;
+    var isHomeByBodyClass = !!(body && (
+        body.classList.contains('cms-index-index') ||
+        body.classList.contains('cms-home') ||
+        body.classList.contains('cms-homepage_ayo_home5')
+    ));
+    var isHomeByMarker = !!d.getElementById('awa-home-bootstrap-merged');
+    if (isHomeByPath || isHomeByBodyClass || isHomeByMarker) {
+        return;
+    }
+    var src = <?= json_encode($block->getViewFileUrl('js/awa-minicart-defer-init.js'), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;
+    if (w.__awaMinicartDeferInit || d.querySelector('script[src="' + src + '"], script[data-awa-defer-init="' + src + '"]')) {
+        return;
+    }
+    var s = d.createElement('script');
+    s.src = src;
+    s.defer = true;
+    s.setAttribute('data-awa-defer-init', src);
+    (d.head || d.documentElement).appendChild(s);
+}(window, document));
+</script>

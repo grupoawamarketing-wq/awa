@@ -1,0 +1,216 @@
+// =============================================================================
+// §107 — Visual Standard Pass 4 (2026-06-08)
+// /impeccable distill + product register — neutraliza tokens shadow/stripe do
+// consolidated; checkout payment/shipping; PDP qty/tocart; cards catálogo flat.
+// =============================================================================
+
+@import (once) '_awa-tokens';
+@import (once) '_design-system';
+@import (once) '_awa-page-containers';
+
+@awa-v4-not-home: ~'html body#html-body:not(.cms-index-index):not(.cms-home):not(.cms-homepage_ayo_home5)';
+@awa-v4-catalog: ~'html body#html-body:is(.catalog-category-view, .catalogsearch-result-index, .catalog-product-view)';
+@awa-v4-checkout: ~'html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)';
+@awa-v4-pdp: ~'html body#html-body.catalog-product-view';
+
+// ── Tokens runtime: vence _awa-consolidated.less shadow/stripe defaults ───────
+@{awa-v4-not-home} {
+    --awa-arch-version: '107';
+    --awa-ui-card-shadow: none;
+    --awa-ui-card-shadow-hover: 0 0 0 1px color-mix(in srgb, var(--awa-primary, @awa-color-primary) 18%, var(--awa-border, @awa-color-border));
+    --awa-ui-panel-shadow: none;
+    --awa-section-header-accent: none;
+}
+
+// ── Side-stripe global: blocos/títulos fora home shelves ────────────────────
+@{awa-v4-not-home} .page-wrapper {
+    :is(
+        .block .title,
+        .block-title,
+        .block-title strong,
+        .legend,
+        .box-title,
+        .section-title,
+        .page-title-wrapper .page-title
+    ) {
+        border-inline-start: 0 !important;
+        border-left: 0 !important;
+        padding-inline-start: 0 !important;
+        padding-left: 0 !important;
+    }
+
+    :is(.message, .note, .cart-empty, .empty.message) {
+        border-inline-start-width: 1px !important;
+        border-left-width: 1px !important;
+    }
+}
+
+// ── Catálogo: cards sem shadow legado (consolidated re-aplica no hover) ─────
+@{awa-v4-catalog} .page-wrapper {
+    :is(.item-product, .product-item, .product-item-info, .product-item-details) {
+        box-shadow: none !important;
+        border: 1px solid var(--awa-border, @awa-color-border) !important;
+        border-radius: var(--awa-ui-radius, @awa-radius-sm) !important;
+        background: var(--awa-bg-surface, @awa-color-white) !important;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+        :is(.item-product, .product-item, .product-item-info):hover {
+            box-shadow: var(--awa-ui-card-shadow-hover) !important;
+            transform: none !important;
+            border-color: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 22%, var(--awa-border, @awa-color-border)) !important;
+        }
+    }
+}
+
+// ── PDP: qty + add to cart alinhados ao §106 ─────────────────────────────────
+@{awa-v4-pdp} .page-wrapper .product-info-main {
+    .box-tocart {
+        margin-block: @awa-space-4 0 !important;
+
+        .fieldset {
+            margin: 0 !important;
+            padding: 0 !important;
+            border: 0 !important;
+        }
+
+        .field.qty {
+            margin-block-end: @awa-space-3 !important;
+
+            .label {
+                font-size: var(--awa-text-sm, 13px) !important;
+                font-weight: @awa-weight-semibold !important;
+                margin-block-end: @awa-space-1 !important;
+            }
+
+            .control input.qty {
+                display: block !important;
+                width: 88px !important;
+                min-height: var(--awa-input-min-h, 44px) !important;
+                padding: @awa-space-2 @awa-space-3 !important;
+                border: 1px solid var(--awa-border, @awa-color-border) !important;
+                border-radius: var(--awa-ui-radius, @awa-radius-sm) !important;
+                background: var(--awa-bg-surface, @awa-color-white) !important;
+                font-size: var(--awa-text-base, 14px) !important;
+                font-variant-numeric: tabular-nums !important;
+                text-align: center !important;
+                box-shadow: none !important;
+
+                &:focus-visible {
+                    outline: @awa-focus-ring-width solid var(--awa-primary, @awa-color-primary) !important;
+                    outline-offset: 2px !important;
+                    border-color: var(--awa-primary, @awa-color-primary) !important;
+                }
+            }
+        }
+
+        .actions {
+            display: flex !important;
+            flex-wrap: wrap !important;
+            gap: @awa-space-3 !important;
+            align-items: stretch !important;
+
+            .action.tocart {
+                flex: 1 1 200px !important;
+                min-height: var(--awa-input-min-h, 44px) !important;
+            }
+        }
+    }
+
+    .product-info-price {
+        margin-block-end: @awa-space-4 !important;
+        padding-block-end: @awa-space-3 !important;
+        border-bottom: 1px solid var(--awa-border-hairline, @awa-color-border-subtle) !important;
+
+        .price {
+            font-size: @awa-font-size-24 !important;
+            font-weight: @awa-weight-bold !important;
+            font-variant-numeric: tabular-nums !important;
+            color: var(--awa-ink, @awa-color-text-primary) !important;
+        }
+    }
+}
+
+// ── Checkout: métodos envio/pagamento como lista flat ───────────────────────
+@{awa-v4-checkout} .page-wrapper {
+    :is(.checkout-shipping-method, .checkout-payment-method) {
+        .table-checkout-shipping-method,
+        .payment-method {
+            margin: 0 !important;
+        }
+    }
+
+    .checkout-shipping-method tbody tr {
+        box-shadow: none !important;
+        background: transparent !important;
+    }
+
+    .checkout-shipping-method .table-checkout-shipping-method tbody tr td {
+        border-top: 1px solid var(--awa-border-hairline, @awa-color-border-subtle) !important;
+        padding: @awa-space-3 @awa-space-4 !important;
+        vertical-align: middle !important;
+        background: var(--awa-bg-surface, @awa-color-white) !important;
+    }
+
+    .checkout-shipping-method .table-checkout-shipping-method tbody tr:first-child td {
+        border-top: 0 !important;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+        .checkout-shipping-method .table-checkout-shipping-method tbody tr:hover td {
+            background: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 4%, var(--awa-bg-surface, @awa-color-white)) !important;
+        }
+    }
+
+    .payment-method {
+        border: 1px solid var(--awa-border, @awa-color-border) !important;
+        border-radius: var(--awa-ui-radius, @awa-radius-sm) !important;
+        margin-block-end: @awa-space-2 !important;
+        padding: @awa-space-3 @awa-space-4 !important;
+        background: var(--awa-bg-surface, @awa-color-white) !important;
+        box-shadow: none !important;
+
+        &._active {
+            border-color: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 35%, var(--awa-border, @awa-color-border)) !important;
+            background: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 6%, var(--awa-bg-surface, @awa-color-white)) !important;
+        }
+    }
+
+    .payment-method-title {
+        border-inline-start: 0 !important;
+        border-left: 0 !important;
+        padding-inline-start: 0 !important;
+    }
+
+    .opc-block-summary .minicart-items .product-item {
+        border-bottom: 1px solid var(--awa-border-hairline, @awa-color-border-subtle) !important;
+        padding-block: @awa-space-2 !important;
+    }
+}
+
+// ── Cart: cupom + estimate shipping em painel inline ────────────────────────
+html body#html-body.checkout-cart-index .page-wrapper {
+    :is(.block.discount, .block.shipping) {
+        border: 1px solid var(--awa-border, @awa-color-border) !important;
+        border-radius: var(--awa-ui-radius, @awa-radius-sm) !important;
+        padding: @awa-space-4 !important;
+        margin-block-end: @awa-space-4 !important;
+        box-shadow: none !important;
+        background: var(--awa-bg-surface, @awa-color-white) !important;
+
+        .title {
+            border-inline-start: 0 !important;
+            border-left: 0 !important;
+            font-size: var(--awa-text-base, 14px) !important;
+            font-weight: @awa-weight-bold !important;
+            margin-block-end: @awa-space-3 !important;
+        }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    @{awa-v4-catalog} .page-wrapper :is(.item-product, .product-item, .product-item-info):hover,
+    @{awa-v4-checkout} .page-wrapper .checkout-shipping-method tbody tr {
+        transition: none !important;
+    }
+}

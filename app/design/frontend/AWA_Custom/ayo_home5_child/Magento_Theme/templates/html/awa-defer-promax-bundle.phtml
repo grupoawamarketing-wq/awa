@@ -1,0 +1,42 @@
+<?php declare(strict_types=1);
+/**
+ * Gate do bundle Promax (~119KB) — carregado via sub-bloco para evitar OPcache stale no preload monolítico.
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ */
+$isHomePage = (bool) $block->getData('is_home_page');
+$fullAction = (string) $block->getData('full_action');
+$pathInfo = (string) $block->getData('path_info');
+$handles = $block->getData('handles');
+$handleList = is_array($handles) ? $handles : [];
+$skipPromaxBundle = (bool) $block->getData('skip_promax_bundle');
+$emitDeferredCss = $block->getData('emit_deferred_css');
+
+$isCartPage = $fullAction === 'checkout_cart_index'
+    || in_array('checkout_cart_index', $handleList, true)
+    || $pathInfo === 'checkout/cart'
+    || str_starts_with($pathInfo, 'checkout/cart/');
+$isCatalogPage = in_array($fullAction, ['catalog_category_view', 'catalogsearch_result_index'], true)
+    || in_array('catalog_category_view', $handleList, true)
+    || in_array('catalogsearch_result_index', $handleList, true);
+$isProductPage = $fullAction === 'catalog_product_view'
+    || in_array('catalog_product_view', $handleList, true);
+$isB2bAuthShell = in_array($fullAction, [
+    'b2b_account_login',
+    'b2b_account_forgotpassword',
+    'b2b_account_claim',
+    'b2b_register_index',
+    'b2b_register_success',
+    'customer_account_login',
+    'customer_account_create',
+], true)
+    || in_array('b2b_register_index', $handleList, true)
+    || in_array('b2b_register_success', $handleList, true);
+/* PLP/search usa awa-plp-ui-promax; PDP usa awa-pdp-ui-promax — bundle global seria duplicata */
+$loadPromaxBundle = !$isHomePage && !$isCartPage && !$isCatalogPage && !$isProductPage
+    && !$isB2bAuthShell && !$skipPromaxBundle;
+
+if ($loadPromaxBundle && is_callable($emitDeferredCss)) {
+    $promaxBundleUrl = $block->getViewFileUrl('css/awa-ui-promax-bundle.min.css');
+    $emitDeferredCss($promaxBundleUrl, false, false, false);
+}

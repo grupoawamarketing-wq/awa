@@ -1,0 +1,143 @@
+// =============================================================================
+// §89 — PLP / Catalog Consistency Pass (2026-06-08)
+// Cards, filtros, toolbar e vitrines PDP alinhados ao contrato home §85 + shell §84.
+// =============================================================================
+
+@import (once) '_awa-tokens';
+@import (once) '_design-system';
+@import (once) '_awa-page-containers';
+@import (once) '_awa-product-card-contract-2026-06.less';
+
+@awa-plp-scope: ~'html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)';
+
+// ── Cards de produto: contrato compartilhado G-101 ───────────────────────────
+@{awa-plp-scope} .page-wrapper {
+    .products-grid :is(.item-product, .product-item, .product-item-info) {
+        transition: border-color 150ms @awa-ease, box-shadow 150ms @awa-ease !important;
+    }
+}
+
+// ── Sidebar filtros: sem side-stripe, estados completos ──────────────────────
+@{awa-plp-scope} .page-wrapper .sidebar-main {
+    .block.filter .block-title,
+    .block.filter .filter-options-title {
+        color: var(--awa-text, @awa-color-text-primary) !important;
+        font-size: var(--awa-fs-sm, 13px) !important;
+        font-weight: @awa-weight-bold !important;
+        line-height: 1.35 !important;
+        text-transform: none !important;
+        letter-spacing: 0 !important;
+        border: 0 !important;
+        border-inline-start: 0 !important;
+        padding-inline: 0 !important;
+        margin-block: 0 @awa-space-2 !important;
+    }
+
+    .filter-options-content .items .item a {
+        display: flex !important;
+        align-items: center !important;
+        gap: @awa-space-2 !important;
+        min-height: 36px !important;
+        padding: @awa-space-1 @awa-space-2 !important;
+        border: 0 !important;
+        border-inline-start: 0 !important;
+        border-radius: @awa-radius-sm !important;
+        color: var(--awa-text-muted, @awa-color-text-muted) !important;
+        font-size: var(--awa-fs-sm, 13px) !important;
+        line-height: 1.35 !important;
+        text-decoration: none !important;
+        transition: background-color 150ms @awa-ease, color 150ms @awa-ease !important;
+
+        &:hover {
+            background: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 7%, @awa-color-white) !important;
+            color: var(--awa-primary, @awa-color-primary) !important;
+        }
+
+        &:focus-visible {
+            outline: @awa-focus-ring-width solid var(--awa-primary, @awa-color-primary) !important;
+            outline-offset: 1px !important;
+        }
+    }
+
+    .filter-options-content .items .item.active a,
+    .filter-options-content .items .item a.amshopby-link-selected {
+        background: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 10%, @awa-color-white) !important;
+        color: var(--awa-primary, @awa-color-primary) !important;
+        font-weight: @awa-weight-semibold !important;
+        border-inline-start: 0 !important;
+    }
+}
+
+// ── Toolbar: selects e modos grid/list ───────────────────────────────────────
+@{awa-plp-scope} .page-wrapper .toolbar.toolbar-products {
+    :is(.toolbar-sorter select, .toolbar-limiter select) {
+        min-height: 36px !important;
+        border: 1px solid var(--awa-border, @awa-color-border) !important;
+        border-radius: @awa-radius-sm !important;
+        color: var(--awa-text, @awa-color-text-primary) !important;
+        font-size: var(--awa-fs-sm, 13px) !important;
+
+        &:focus-visible {
+            outline: @awa-focus-ring-width solid var(--awa-primary, @awa-color-primary) !important;
+            outline-offset: 1px !important;
+            border-color: var(--awa-primary, @awa-color-primary) !important;
+        }
+    }
+
+    .modes .mode-icon {
+        min-width: 36px !important;
+        min-height: 36px !important;
+        border-radius: @awa-radius-sm !important;
+
+        &:focus-visible {
+            outline: @awa-focus-ring-width solid var(--awa-primary, @awa-color-primary) !important;
+            outline-offset: 2px !important;
+        }
+    }
+}
+
+// ── PDP: vitrines relacionadas / upsell ──────────────────────────────────────
+html body#html-body.catalog-product-view .page-wrapper {
+    :is(.block.related, .block.upsell) {
+        .block-title {
+            color: var(--awa-text, @awa-color-text-primary) !important;
+            font-size: var(--awa-fs-lg, 20px) !important;
+            font-weight: @awa-weight-bold !important;
+            line-height: 1.25 !important;
+            text-wrap: balance;
+            margin-block: 0 @awa-space-4 !important;
+            padding: 0 !important;
+            border: 0 !important;
+        }
+
+        .products-grid :is(.item-product, .product-item) {
+            border: 1px solid var(--awa-border, @awa-color-border) !important;
+            border-radius: @awa-radius-sm !important;
+            background: var(--awa-bg, @awa-color-white) !important;
+        }
+    }
+}
+
+@media (min-width: @awa-bp-992) {
+    @{awa-plp-scope} .page-wrapper .page-main > .columns.layout.layout-2-col {
+        gap: @awa-space-6 !important;
+    }
+
+    @{awa-plp-scope} .page-wrapper .sidebar-main {
+        flex: 0 0 240px !important;
+        max-width: 240px !important;
+    }
+}
+
+@media (hover: hover) and (pointer: fine) {
+    @{awa-plp-scope} .page-wrapper .products-grid :is(.item-product, .product-item):hover {
+        border-color: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 28%, var(--awa-border, @awa-color-border)) !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    @{awa-plp-scope} .page-wrapper .products-grid :is(.item-product, .product-item),
+    @{awa-plp-scope} .page-wrapper .sidebar-main .filter-options-content .items .item a {
+        transition: none !important;
+    }
+}

@@ -1,0 +1,2719 @@
+/* ============================================================
+   FIX-02 — TESTIMONIAL EMPTY AVATARS (P1)
+   <img src="" alt=""> produces broken-image icons.
+   Replace with gradient circle + FontAwesome user icon.
+   ============================================================ */
+body .page-wrapper .info-testimonial .author-test-link img[src=""] {
+    display: none;
+}
+
+body .page-wrapper .info-testimonial .author-test-link a {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--awa-red-dark) 0%, var(--awa-red) 100%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: var(--awa-text-on-primary); /* BP-09: era var(--awa-cons-c78) hardcoded */
+    font-weight: var(--awa-weight-semibold);
+    font-size: var(--awa-text-xl-plus); /* BP-38: era 22px */
+    line-height: var(--awa-leading-none);
+    position: relative;
+    overflow: hidden;
+}
+
+body .page-wrapper .info-testimonial .author-test-link a::before {
+    content: "\f007";
+    font-family: FontAwesome, sans-serif;
+    font-size: var(--awa-text-xl-plus); /* BP-38: era 22px */
+    color: rgb(255 255 255 / 90%);
+}
+
+/* ============================================================
+   FIX-03 — PLACEHOLDER HOVER IMAGES (P2)
+   Products without alternate image show placeholder.jpg on hover.
+   ============================================================ */
+body .page-wrapper .product-item .second-thumb img[src*="placeholder/placeholder"] {
+    visibility: hidden;
+    opacity: 0;
+}
+
+/* Sem :has(): JS marca o card com .awa-second-thumb-placeholder */
+body .page-wrapper .product-item.awa-second-thumb-placeholder:hover .first-thumb {
+    opacity: 1;
+}
+
+/* FIX-04 — REMOVIDO: consolidado em awa-layout.css (.newsletter-footer > label) */
+
+/* ============================================================
+   FIX-05 — EMPTY HEADINGS / CONTAINERS (P2-P3)
+   Hide empty wrappers that produce blank space.
+   ============================================================ */
+body .page-wrapper .box-testimo > h2:empty,
+body .page-wrapper .testimonials-home > h2:empty {
+    display: none;
+}
+
+body .page-wrapper .header-nav .box_language > .top-header:empty {
+    display: none;
+}
+
+body .page-wrapper .boxServiceImage:empty {
+    display: none;
+}
+
+/* ============================================================
+   FIX-06 — COUNTDOWN EMPTY STATE (P3)
+   .super-deal-countdown empty until TimeCircles JS inits.
+   ============================================================ */
+body .page-wrapper .super-deal-countdown:empty {
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.3;
+}
+
+body .page-wrapper .super-deal-countdown:empty::after {
+    content: "\f017";
+    font-family: FontAwesome, sans-serif;
+    font-size: var(--awa-text-3xl);
+    color: var(--awa-gray-500); /* R11-06: token */
+}
+
+/* ============================================================
+   FIX-07 — EMPTY CATEGORY TAB FALLBACK (P2)
+   Some tabs have empty OWL carousels.
+   ============================================================ */
+body .page-wrapper .cat_home.owl-carousel:empty,
+body .page-wrapper .categorytab-container .tab-content:empty {
+    min-height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+body .page-wrapper .cat_home.owl-carousel:empty::after {
+    content: "Produtos em breve";
+    color: var(--awa-gray-500);
+    font-style: italic;
+    font-size: var(--awa-text-base);
+}
+
+/* ============================================================
+   FIX-08 — OWL CAROUSEL PRE-INIT STACKING (P1)
+   Before OWL JS initializes, all slides stack vertically.
+   Show only first, hide rest until JS kicks in.
+   ============================================================ */
+body .page-wrapper .wrapper_slider .owl:not(.owl-carousel) {
+    overflow: hidden;
+    position: relative;
+}
+
+body .page-wrapper .wrapper_slider .owl:not(.owl-carousel) .banner_item ~ .banner_item {
+    display: none;
+}
+
+body .page-wrapper .owl-container:not(.owl-carousel):not(.swiper) > *:not(:first-child),
+body .page-wrapper .hot-deal-slide:not(.owl-carousel):not(.swiper) > *:not(:first-child) {
+    display: none;
+}
+
+/* ============================================================
+   FIX-09 — NESTED BANNER-SLIDER DOUBLE PADDING (P3)
+   .banner-slider inside .banner-slider doubles spacing.
+   ============================================================ */
+body .page-wrapper .ayo-home5-wrapper > .banner-slider {
+    padding: 0;
+    margin: 0;
+}
+
+/* Layout base do wrapper Home5 foi consolidado em awa-consistency-home5.css (AF-07). */
+
+/* FIX-10 — VERTICAL MENU HOMEPAGE DISPLAY: consolidated into FIX-53 (section-item-title hiding) + awa-layout.css (category-dropdown width:100%) */
+
+/* ============================================================
+   FIX-11 — MARQUEE / NOTIFICATION BAR (P3)
+   Deprecated <marquee> fallback with CSS animation.
+   ============================================================ */
+body.cms-index-index .page-wrapper .block_notification,
+body.cms-home .page-wrapper .block_notification,
+body.cms-homepage_ayo_home5 .page-wrapper .block_notification {
+    overflow: hidden;
+    white-space: nowrap;
+    background: var(--awa-dark); /* R11-06: token */
+    color: var(--awa-text-on-dark); /* BP-09: era var(--awa-cons-c78) hardcoded */
+    padding: var(--awa-space-2) 0; /* BP-18: era 8px 0 */
+    font-size: var(--awa-text-sm);
+}
+
+body.cms-index-index .page-wrapper .block_notification marquee,
+body.cms-home .page-wrapper .block_notification marquee,
+body.cms-homepage_ayo_home5 .page-wrapper .block_notification marquee {
+    display: inline-block;
+    animation: marquee-scroll 20s linear infinite;
+}
+
+/* R9-13: Respeitar preferência de reduced-motion para marquee */
+
+@keyframes marquee-scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+}
+
+/* ============================================================
+   FIX-12 — CLS PREVENTION: ASPECT RATIO RESERVATIONS (P1)
+   Regras de min-height do banner foram movidas para baseline global
+   em ayo_default/web/css/source/_extend.less (fase 1 de unificação).
+   ============================================================ */
+
+body .page-wrapper .ayo-home5-cat-item img,
+body .page-wrapper .banner_mid_1 img {
+    width: 100%;
+    height: auto;
+}
+
+body .page-wrapper .the_blog .post-item img,
+body .page-wrapper .blog-post-item img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    aspect-ratio: 16 / 9; /* R16-04: CLS prevention — reserva espaço antes do load */
+}
+
+/* .logo img — REMOVIDO: consolidado em awa-layout.css com mesma especificidade */
+
+/* ============================================================
+   FIX-13 — NEWSLETTER POPUP UX (P2)
+   Better visual hierarchy for the popup form.
+   Popup lives outside .page-wrapper — uses body prefix.
+   ============================================================ */
+body .newsletterpopup {
+    z-index: var(--awa-z-popup); /* BP-16: era 10100 — R10-17: acima do vertical-menu submenu */
+}
+
+body #newsletter_pop_up {
+    background-color: var(--awa-bg-surface); /* BP-12 */
+}
+
+body .ayo-newsletter-popup {
+    text-align: center;
+    padding: 30px 20px;
+}
+
+/* R11-05: prefixo newsletterpopup para especificidade */
+body .newsletterpopup .newsletter-popup-badge {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto var(--awa-space-4); /* P2-fluid: era 0 auto 16px */
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--awa-red-dark) 0%, var(--awa-red) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+body .newsletterpopup .newsletter-popup-badge i {
+    font-size: var(--awa-text-3xl);
+    color: var(--awa-text-on-primary); /* BP-09: era var(--awa-cons-c78) hardcoded */
+}
+
+body .newsletterpopup .newsletter-popup-title {
+    font-size: var(--awa-text-2xl);
+    font-weight: var(--awa-weight-bold);
+    color: var(--awa-dark);
+    margin: 0 0 var(--awa-space-1); /* P2-fluid: era 0 0 4px */
+    letter-spacing: var(--awa-tracking-wide);
+}
+
+body .newsletterpopup .newsletter-popup-subtitle {
+    font-size: var(--awa-text-md);
+    color: var(--awa-gray-500);
+    margin: 0 0 var(--awa-space-3); /* P2-fluid: era 0 0 12px */
+    text-transform: uppercase;
+    font-weight: var(--awa-weight-medium);
+}
+
+body .newsletterpopup .newsletter-popup-description {
+    font-size: var(--awa-text-base);
+    color: var(--awa-gray-500);
+    margin: 0 0 var(--awa-space-5); /* P2-fluid: era 0 0 20px */
+    line-height: var(--awa-leading-relaxed);
+}
+
+body .newsletterpopup .field.newsletter .control,
+body .ayo-newsletter-popup .field.newsletter .control {
+    display: flex;
+    gap: var(--awa-space-2); /* BP-17: era 8px */
+}
+
+body .newsletterpopup .field.newsletter input[type="email"],
+body .ayo-newsletter-popup .field.newsletter input[type="email"] {
+    flex: 1;
+    padding: var(--awa-space-3) var(--awa-space-4); /* BP-18: era 12px 16px */
+    border: 1px solid var(--awa-gray-200);
+    border-radius: var(--awa-radius-sm);
+    font-size: var(--awa-text-base);
+    transition: border-color var(--awa-transition-fast); /* R12-06 */
+}
+
+body .newsletterpopup .field.newsletter input[type="email"]:focus,
+body .ayo-newsletter-popup .field.newsletter input[type="email"]:focus {
+    border-color: var(--awa-red);
+    box-shadow: 0 0 0 3px var(--awa-red-light); /* R13: token */
+    outline: none; /* VB-06: popup fora de .page-wrapper — remover outline padrão */
+}
+
+body .newsletterpopup .action.subscribe,
+body .ayo-newsletter-popup .action.subscribe {
+    background: var(--awa-red);
+    color: var(--awa-text-on-primary); /* BP-09: era var(--awa-cons-c78) hardcoded */
+    border: none;
+    border-radius: var(--awa-radius-sm);
+    padding: var(--awa-space-3) var(--awa-space-6); /* BP-18: era 12px 24px */
+    font-weight: var(--awa-weight-semibold);
+    cursor: pointer;
+    transition: background-color var(--awa-transition-fast); /* R12-06 */
+    white-space: nowrap;
+}
+
+body .newsletterpopup .action.subscribe:hover,
+body .ayo-newsletter-popup .action.subscribe:hover {
+    background: var(--awa-red-dark);
+}
+
+/* R16-03: focus-visible para botão fora de .page-wrapper */
+body .newsletterpopup .action.subscribe:focus-visible,
+body .ayo-newsletter-popup .action.subscribe:focus-visible {
+    outline: 2px solid var(--awa-red);
+    outline-offset: 2px;
+    background: var(--awa-red-dark);
+}
+
+body .newsletterpopup .newsletter-popup-privacy {
+    margin-top: var(--awa-space-4); /* BP-19: era 16px */
+    font-size: var(--awa-text-2xs); /* BP-30: era 11px */
+    color: var(--awa-gray-500); /* BUG-04: contraste ajustado para leitura sobre branco. */
+}
+
+@media (max-width: 767px) {
+    body .newsletterpopup .content-popup {
+        width: 95vw;
+        max-width: 95vw;
+        margin: 0 auto;
+    }
+
+    body .newsletterpopup .field.newsletter .control {
+        flex-direction: column;
+    }
+
+    body #newsletter_pop_up.newsletterpopup {
+        padding: var(--awa-space-2-5); /* BP-50: era 10px */
+    }
+
+    body #newsletter_pop_up .nl-popup-card {
+        max-width: 94vw !important;
+    }
+
+    body #newsletter_pop_up .nl-popup-layout {
+        grid-template-columns: 1fr;
+        min-height: 0;
+    }
+
+    body #newsletter_pop_up .nl-popup-hero {
+        min-height: 140px;
+    }
+
+    body #newsletter_pop_up .nl-popup-hero-content {
+        padding: 18px 14px;
+    }
+
+    body #newsletter_pop_up .nl-popup-hero-logo {
+        margin-bottom: var(--awa-space-2); /* BP-19: era 8px */
+        max-width: 70px;
+    }
+
+    body #newsletter_pop_up .nl-popup-hero-discount {
+        font-size: 46px;
+    }
+
+    body #newsletter_pop_up .nl-popup-hero-off {
+        font-size: 26px;
+        letter-spacing: 2px;
+    }
+
+    body #newsletter_pop_up .nl-popup-hero-caption {
+        margin-top: 3px;
+        font-size: var(--awa-text-3xs); /* BP-30: era 10px */
+        letter-spacing: var(--awa-tracking-wider);
+    }
+
+    body #newsletter_pop_up .nl-popup-content {
+        padding: var(--awa-space-3-5); /* P2-fluid: era 14px */
+    }
+
+    body #newsletter_pop_up .nl-popup-title {
+        font-size: var(--awa-text-3xl);
+        white-space: normal;
+    }
+
+    body #newsletter_pop_up .nl-popup-subtitle {
+        font-size: var(--awa-text-xl);
+    }
+
+    body #newsletter_pop_up .nl-popup-footer {
+        flex-wrap: wrap;
+    }
+
+    body .page-wrapper .banner-slider .item-banner img,
+    body .page-wrapper .slide-banner .item img,
+    body .page-wrapper .banner-text {
+        border-radius: 0;
+    }
+
+    body .page-wrapper .banner-text {
+        font-size: var(--awa-text-base);
+        padding: var(--awa-space-2-5); /* P2-fluid: era 10px */
+    }
+
+    /* OWL gutters: ver FIX-23 (bloco centralizado) */
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .ayo-home5-wrapper > :is(.ayo-home5-section, .section) {
+        margin: var(--awa-space-5) 0;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .benefits-bar {
+        align-items: flex-start;
+        gap: var(--awa-space-2); /* BP-17: era 8px */
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .benefits-bar__item {
+        width: 100%;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .security-seals {
+        padding: var(--awa-space-3); /* BP-18: era 12px */
+        gap: var(--awa-space-2-5) var(--awa-space-3); /* P2-fluid: era 10px 12px */
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .security-seals img {
+        height: 30px;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .security-seals img:first-child {
+        height: 20px;
+        max-width: 180px;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .trust-badge-item {
+        flex: 1 1 calc(50% - 9px);
+        min-width: 120px;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .velaServicesInner.velaServicesInner--home5 .rowFlex.rowFlexMargin.flexJustifyCenter {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .velaServicesInner.velaServicesInner--home5 .boxService {
+        justify-content: center;
+        text-align: center;
+        flex-direction: column;
+        gap: var(--awa-space-2-5); /* P2-fluid: era 10px */
+        padding: var(--awa-space-3-5) var(--awa-space-2-5); /* P2-fluid: era 14px 10px */
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .list-tab-product.common-tab-system-fixed .item-product-parent {
+        padding: 0 6px;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .box-bottom-home2.box-testimo .item-testimo {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        text-align: center;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .box-bottom-home2.box-testimo .info-testimonial {
+        text-align: center;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .footer-bottom .footer-bottom-inner .row {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .footer-payment-methods {
+        justify-content: center;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .footer-payment-methods .payment-methods-wrapper,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .footer-payment-methods .security-seals-wrapper {
+        justify-content: center;
+    }
+}
+
+/* Newsletter popup ≤480px — R12-01: prefixo newsletterpopup */
+@media (max-width: 480px) {
+    body .ayo-newsletter-popup {
+        padding: var(--awa-space-5) var(--awa-space-3-75); /* BP-50: era 20px 15px */
+    }
+
+    body .newsletterpopup .newsletter-popup-title {
+        font-size: var(--awa-text-xl);
+    }
+
+    body .newsletterpopup .newsletter-popup-subtitle {
+        font-size: var(--awa-text-base);
+    }
+
+    body .newsletterpopup .newsletter-popup-description {
+        font-size: var(--awa-text-sm);
+    }
+
+    body .newsletterpopup .newsletter-popup-badge {
+        width: 52px;
+        height: 52px;
+    }
+
+    body .newsletterpopup .newsletter-popup-badge i {
+        font-size: var(--awa-text-xl-plus); /* BP-38: era 22px */
+    }
+
+    body .newsletterpopup .action.subscribe,
+    body .ayo-newsletter-popup .action.subscribe {
+        padding: var(--awa-space-2-5) 18px; /* BP-50: era 10px 18px */
+        font-size: var(--awa-text-sm);
+    }
+
+    body .page-wrapper .testimonial-item {
+        padding: var(--awa-space-3-75); /* P2-fluid: era 15px */
+    }
+
+    body .page-wrapper .testimonial-item .author-info {
+        flex-direction: column;
+        gap: var(--awa-space-2); /* BP-17: era 8px */
+    }
+
+    body .page-wrapper .testimonial-item .author-avatar {
+        width: 40px;
+        height: 40px;
+    }
+
+    body .page-wrapper .countdown_block {
+        padding: var(--awa-space-3) var(--awa-space-3-75); /* P2-fluid: era 12px 15px */
+    }
+
+    body .page-wrapper .title_countdown {
+        font-size: var(--awa-text-sm);
+    }
+
+    body .page-wrapper .time_circles > div {
+        min-width: 40px;
+        min-height: 40px;
+        padding: var(--awa-space-1); /* BP-18: era 4px */
+    }
+
+    body .page-wrapper .time_circles > div .number {
+        font-size: var(--awa-text-base);
+    }
+
+    body .page-wrapper .time_circles > div .text {
+        font-size: 11px;
+    }
+
+    body .page-wrapper .blog-post-item,
+    body .page-wrapper .the_blog .post-item {
+        border-radius: var(--awa-radius-sm);
+    }
+
+    body .page-wrapper .blog-post-item .post-content,
+    body .page-wrapper .the_blog .post-item .post-content {
+        padding: var(--awa-space-3); /* BP-18: era 12px */
+    }
+
+    body .page-wrapper .blog-post-item .post-title a {
+        font-size: var(--awa-text-base);
+    }
+
+    /* OWL gutters: ver FIX-23 (bloco centralizado) */
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .security-seals .microcopy {
+        font-size: var(--awa-text-xs);
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .velaServicesInner.velaServicesInner--home5 .rowFlex.rowFlexMargin.flexJustifyCenter > [class*="col-"] {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+
+    body .page-wrapper .newsletter-popup,
+    body .page-wrapper .modals-wrapper .modal-popup.newsletter-popup-modal .modal-inner-wrap {
+        max-width: calc(100vw - var(--awa-space-6));
+        padding: var(--awa-space-5);
+    }
+
+    body .page-wrapper .newsletter-popup h2,
+    body .page-wrapper .newsletter-popup .popup-title {
+        font-size: clamp(1.1rem, 4.5vw, 1.4rem);
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .velaServicesInner.velaServicesInner--home5 .rowFlex.rowFlexMargin.flexJustifyCenter {
+        grid-template-columns: 1fr;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .list-tab-product.common-tab-system-fixed .productTabContent:not(.owl-carousel):not(.swiper) {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Newsletter popup ≤375px — R12-01: prefixo newsletterpopup */
+@media (max-width: 375px) {
+    body .ayo-newsletter-popup {
+        padding: var(--awa-space-3-75) var(--awa-space-3); /* BP-50: era 15px 12px */
+    }
+
+    body .newsletterpopup .newsletter-popup-title {
+        font-size: var(--awa-text-lg); /* BP-30: era 18px */
+    }
+
+    body .newsletterpopup .newsletter-popup-subtitle {
+        font-size: var(--awa-text-sm);
+    }
+
+    body .newsletterpopup .newsletter-popup-description {
+        font-size: var(--awa-text-xs);
+        margin-bottom: var(--awa-space-3-75); /* BP-50: era 15px */
+    }
+
+    body .newsletterpopup .field.newsletter input[type="email"],
+    body .ayo-newsletter-popup .field.newsletter input[type="email"] {
+        padding: var(--awa-space-2-5) var(--awa-space-3); /* BP-50: era 10px 12px */
+        font-size: var(--awa-text-sm);
+    }
+
+    body .page-wrapper .banner-text h2,
+    body .page-wrapper .banner-text .title {
+        font-size: var(--awa-text-lg); /* BP-30: era 18px */
+    }
+
+    body .page-wrapper .banner-text p,
+    body .page-wrapper .banner-text .subtitle {
+        font-size: var(--awa-text-xs);
+    }
+
+    /* OWL gutters: ver FIX-23 (bloco centralizado) */
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header-nav .menu_primary :where(.navigation.custommenu.main-nav) > ul > li > a {
+        min-height: 44px;
+        padding-inline: var(--awa-space-3); /* BP-21: era 12px */
+        border-radius: var(--awa-radius-sm); /* BP-49: era 6px */
+        font-size: var(--awa-text-xs);
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header-nav .menu_primary :where(.navigation.custommenu.main-nav) {
+        --awa-main-nav-link-min-h: 44px;
+        --awa-main-nav-link-pad-x: 12px;
+        --awa-main-nav-link-radius: 6px;
+    }
+}
+
+/* ============================================================
+   FIX-13B — NEWSLETTER POPUP HOMEPAGE (home5 visual match)
+   Estilos do template ativo Rokanthemes_Themeoption/newsletterpopup.phtml
+   ============================================================ */
+body #newsletter_pop_up.newsletterpopup {
+    --awa-text-on-dark: var(--awa-cons-c78);
+    --awa-text-on-danger: var(--awa-cons-c78);
+    --awa-text-on-light: var(--awa-dark);
+    --awa-text-muted-on-light: var(--awa-gray-500);
+
+    background: rgb(0 0 0 / 60%);
+    position: fixed;
+    inset: 0;
+    padding: var(--awa-space-4); /* BP-18: era 16px */
+}
+
+body #newsletter_pop_up.newsletterpopup.nl-popup-fallback-open {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
+body.nl-popup-body-open {
+    overflow: hidden;
+}
+
+body #newsletter_pop_up .nl-popup-card {
+    width: 100%;
+    margin: 0 auto;
+    max-width: 680px !important;
+    border-radius: var(--awa-radius-lg); /* F1-04: era 16px hardcoded */
+    overflow: hidden;
+    background: var(--awa-bg-surface); /* BP-12 */
+    box-shadow: var(--awa-shadow-hover);
+    position: relative;
+}
+
+body #newsletter_pop_up .nl-popup-layout {
+    display: grid;
+    grid-template-columns: minmax(220px, 44%) 1fr;
+    min-height: 350px;
+}
+
+body #newsletter_pop_up .newletter_popup_close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 34px;
+    height: 34px;
+    border: 0;
+    background: var(--awa-red);
+    color: var(--awa-text-on-danger);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 3;
+}
+
+body #newsletter_pop_up .newletter_popup_close:hover {
+    background: var(--awa-red-dark);
+}
+
+body #newsletter_pop_up .newletter_popup_close:focus-visible {
+    outline: 2px solid var(--awa-red);
+    outline-offset: 2px;
+}
+
+body #newsletter_pop_up .nl-popup-hero {
+    background: linear-gradient(180deg, var(--awa-red) 0%, var(--awa-red-dark) 100%);
+    background-size: cover;
+    background-position: center;
+    color: var(--awa-text-on-danger);
+    display: flex;
+}
+
+body #newsletter_pop_up .nl-popup-hero-overlay {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(180deg, rgb(0 0 0 / 6%) 0%, rgb(0 0 0 / 24%) 100%);
+}
+
+body #newsletter_pop_up .nl-popup-hero-content {
+    text-align: center;
+    padding: 20px 18px;
+}
+
+body #newsletter_pop_up .nl-popup-hero-logo {
+    margin: 0 auto var(--awa-space-3-5); /* BP-50: era 14px */
+    max-width: 90px;
+    height: auto;
+}
+
+body #newsletter_pop_up .nl-popup-hero-discount {
+    font-size: 70px;
+    line-height: 0.9;
+    font-weight: var(--awa-weight-extrabold);
+    letter-spacing: -1px;
+}
+
+body #newsletter_pop_up .nl-popup-hero-off {
+    margin-top: var(--awa-space-1); /* BP-19: era 4px */
+    font-size: var(--awa-text-5xl); /* BP-40: era 40px */
+    line-height: var(--awa-leading-none);
+    font-weight: var(--awa-weight-extrabold);
+    letter-spacing: 4px;
+}
+
+body #newsletter_pop_up .nl-popup-hero-caption {
+    margin-top: var(--awa-space-2); /* BP-19: era 8px */
+    font-size: var(--awa-text-2xs); /* BP-30: era 11px */
+    line-height: var(--awa-leading-snug);
+    letter-spacing: 1.4px;
+    font-weight: var(--awa-weight-bold);
+}
+
+body #newsletter_pop_up .nl-popup-content {
+    padding: var(--awa-space-3-5) var(--awa-space-6) var(--awa-space-3); /* BP-50: era 14px 24px 12px */
+    background: var(--awa-bg-surface); /* BP-12 */
+}
+
+body #newsletter_pop_up .nl-popup-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: var(--awa-radius-full); /* BP-03: era 999px hardcoded */
+    padding: var(--awa-space-1) var(--awa-space-2-5); /* BP-50: era 4px 10px */
+    font-size: var(--awa-text-2xs); /* BP-30: era 11px */
+    font-weight: var(--awa-weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    color: var(--awa-gray-700);
+    background: var(--awa-gray-100);
+    margin-bottom: var(--awa-space-2); /* BP-19: era 8px */
+}
+
+body #newsletter_pop_up .nl-popup-badge svg,
+body #newsletter_pop_up .nl-popup-urgency svg,
+body #newsletter_pop_up .nl-popup-trust svg {
+    flex-shrink: 0;
+}
+
+body #newsletter_pop_up .nl-popup-title {
+    margin: 0;
+    font-size: 34px;
+    line-height: var(--awa-leading-none);
+    font-weight: var(--awa-weight-extrabold);
+    color: var(--awa-text-on-light);
+    letter-spacing: -0.7px;
+    white-space: nowrap;
+}
+
+body #newsletter_pop_up .nl-popup-title-highlight {
+    color: var(--awa-text-on-light);
+    margin-left: 2px;
+}
+
+body #newsletter_pop_up .nl-popup-subtitle {
+    margin: 0 0 var(--awa-space-2); /* BP-19: era 0 0 8px */
+    font-size: 25px;
+    line-height: var(--awa-leading-tight);
+    font-weight: var(--awa-weight-bold);
+    color: var(--awa-text-on-light);
+}
+
+body #newsletter_pop_up .nl-popup-desc {
+    margin: 0 0 var(--awa-space-2); /* BP-19: era 0 0 8px */
+    color: var(--awa-text-muted-on-light);
+    font-size: var(--awa-text-sm);
+    line-height: var(--awa-leading-normal);
+}
+
+body #newsletter_pop_up .nl-popup-urgency {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: var(--awa-space-2); /* BP-19: era 8px */
+    border: 1px solid var(--awa-gray-200);
+    border-radius: var(--awa-radius-sm); /* F1-04: era 8px hardcoded */
+    background: var(--awa-gray-100);
+    padding: 7px var(--awa-space-2-5); /* BP-50: era 10px */
+    color: var(--awa-gray-700);
+    font-size: var(--awa-text-xs);
+    font-weight: var(--awa-weight-semibold);
+}
+
+body #newsletter_pop_up .nl-popup-form {
+    margin-bottom: var(--awa-space-2); /* BP-19: era 8px */
+}
+
+body #newsletter_pop_up .nl-popup-form .field.newsletter {
+    margin-bottom: 7px;
+}
+
+body #newsletter_pop_up .nl-popup-form .field.newsletter .control {
+    display: block;
+}
+
+body #newsletter_pop_up .nl-popup-form input[type="email"] {
+    width: 100%;
+    border: 2px solid var(--awa-gray-200);
+    border-radius: var(--awa-radius-md); /* BP-49: era 11px */
+    min-height: 42px;
+    padding: var(--awa-space-2-5) var(--awa-space-3-5); /* BP-50: era 10px 14px */
+    font-size: var(--awa-text-base);
+    color: var(--awa-text-on-light);
+}
+
+body #newsletter_pop_up .nl-popup-form input[type="email"]::placeholder {
+    color: var(--awa-gray-400);
+}
+
+body #newsletter_pop_up .nl-popup-form .actions {
+    margin: 0;
+}
+
+body #newsletter_pop_up .nl-popup-form .action.subscribe {
+    width: 100%;
+    border-radius: var(--awa-radius-md); /* BP-49: era 10px */
+    min-height: 43px;
+    padding: var(--awa-space-2-5) var(--awa-space-3-5); /* BP-50: era 10px 14px */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.2px;
+    font-size: var(--awa-text-base);
+    background: var(--awa-red);
+    box-shadow: var(--awa-shadow);
+    color: var(--awa-text-on-danger);
+}
+
+body #newsletter_pop_up .nl-popup-form .action.subscribe .nl-btn-arrow {
+    color: var(--awa-text-on-danger);
+}
+
+body #newsletter_pop_up .nl-popup-form .action.subscribe:hover,
+body #newsletter_pop_up .nl-popup-form .action.subscribe:focus-visible {
+    background: var(--awa-red-dark);
+}
+
+body #newsletter_pop_up .nl-btn-arrow {
+    transform: translateY(1px);
+}
+
+body #newsletter_pop_up .nl-popup-trust {
+    display: flex;
+    align-items: center;
+    gap: var(--awa-space-2-5); /* BP-50: era 10px */
+    flex-wrap: wrap;
+    margin: 9px 0 7px;
+}
+
+body #newsletter_pop_up .nl-popup-trust-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--awa-gray-500);
+    font-size: var(--awa-text-3xs); /* BP-30: era 10px */
+    line-height: var(--awa-leading-none);
+}
+
+body #newsletter_pop_up .nl-popup-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--awa-space-2-5); /* BP-50: era 10px */
+    margin-top: 2px;
+}
+
+body #newsletter_pop_up .subscribe-bottom {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+body #newsletter_pop_up .subscribe-bottom input[type="checkbox"] {
+    width: var(--awa-space-3-5); /* BP-50: era 14px */
+    height: var(--awa-space-3-5); /* BP-50: era 14px */
+    margin: 0;
+}
+
+body #newsletter_pop_up .subscribe-bottom label {
+    margin: 0;
+    font-size: var(--awa-text-2xs); /* BP-30: era 11px */
+    color: var(--awa-gray-500);
+    cursor: pointer;
+}
+
+body #newsletter_pop_up .newletter_popup_close_text {
+    font-size: var(--awa-text-2xs); /* BP-30: era 11px */
+    color: var(--awa-red);
+    text-decoration: none;
+    font-weight: var(--awa-weight-semibold);
+    white-space: nowrap;
+}
+
+body #newsletter_pop_up .newletter_popup_close_text:hover,
+body #newsletter_pop_up .newletter_popup_close_text:focus-visible {
+    color: var(--awa-red-dark);
+    text-decoration: underline;
+}
+
+body #newsletter_pop_up .nl-popup-success {
+    min-height: 180px;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    flex-direction: column;
+    gap: var(--awa-space-2); /* BP-17: era 8px */
+}
+
+body #newsletter_pop_up .nl-popup-success-icon {
+    color: var(--awa-red);
+}
+
+body #newsletter_pop_up .nl-popup-success-title {
+    margin: 0;
+    font-size: var(--awa-text-xl-plus); /* BP-38: era 22px */
+    color: var(--awa-text-on-light);
+}
+
+body #newsletter_pop_up .nl-popup-success-text {
+    margin: 0;
+    color: var(--awa-text-muted-on-light);
+    font-size: var(--awa-text-base);
+}
+
+body #newsletter_pop_up.popup-closing .nl-popup-card {
+    transform: translateY(8px);
+    opacity: 0;
+    transition: transform var(--awa-transition), opacity var(--awa-transition); /* BP-08: era 0.25s ease hardcoded */
+}
+
+@media (max-width: 991px) {
+    body #newsletter_pop_up .nl-popup-layout {
+        grid-template-columns: 36% 1fr;
+        min-height: 320px;
+    }
+
+    body #newsletter_pop_up .nl-popup-content {
+        padding: var(--awa-space-4) 18px var(--awa-space-3-5); /* BP-50: era 16px 18px 14px */
+    }
+
+    body #newsletter_pop_up .nl-popup-title {
+        font-size: 30px;
+    }
+
+    body #newsletter_pop_up .nl-popup-subtitle {
+        font-size: var(--awa-text-xl);
+    }
+
+    body #newsletter_pop_up .nl-popup-hero-discount {
+        font-size: 58px;
+    }
+
+    body #newsletter_pop_up .nl-popup-hero-off {
+        font-size: 31px;
+    }
+
+    /* OWL gutters: ver FIX-23 (bloco centralizado) */
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .velaServicesInner.velaServicesInner--home5 .rowFlex.rowFlexMargin.flexJustifyCenter > [class*="col-"] {
+        flex: 0 0 calc(50% - 12px);
+        max-width: calc(50% - 12px);
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .categorytab-container.awa-cat-tabs-categorytab2 {
+        overflow: visible;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .categorytab-container.awa-cat-tabs-categorytab2 .tabs.tabs-categorytab2 {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        touch-action: pan-x pinch-zoom; /* BP-27: melhor scroll horizontal touch */
+        scrollbar-width: thin;
+        gap: var(--awa-space-2); /* BP-17: era 8px */
+        padding-bottom: var(--awa-space-2);
+        white-space: nowrap;
+        mask-image: linear-gradient(to right, transparent 0, black 8px, black calc(100% - 24px), transparent 100%); /* BP-51: var(--awa-cons-c82) → keyword */
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .categorytab-container.awa-cat-tabs-categorytab2 .tabs.tabs-categorytab2::-webkit-scrollbar {
+        display: none;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .categorytab-container.awa-cat-tabs-categorytab2 .tabs.tabs-categorytab2 > li {
+        scroll-snap-align: start;
+        flex: 0 0 auto;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .categorytab-container.awa-cat-tabs-categorytab2 .tabs.tabs-categorytab2 > li > a {
+        white-space: nowrap;
+        font-size: var(--awa-text-sm);
+        min-height: 38px;
+        padding: 0 var(--awa-space-3);
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .top-home-content--trust-and-offers .top-home-content__trust-offers-grid > .velaServicesInner.velaServicesInner--home5,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .top-home-content--trust-and-offers .top-home-content__trust-offers-grid > .top-home-content__trust-offers-banner,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .top-home-content--trust-and-offers .top-home-content__trust-offers-grid > .top-home-content__trust-offers-deals {
+        grid-column: auto;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .navigation.custommenu.main-nav > ul {
+        justify-content: flex-start;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scrollbar-width: thin;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .navigation.custommenu.main-nav > ul > li {
+        flex: 0 0 auto;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .navigation.custommenu.main-nav > ul > li > a {
+        min-height: 46px;
+        padding: 0 var(--awa-space-3-5); /* P2-fluid: era 0 14px */
+        font-size: var(--awa-text-base);
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .menu_left_home1 .verticalmenu.side-verticalmenu > .title-category-dropdown {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 46px;
+        margin: 0;
+        padding: 0 var(--awa-space-3-5); /* P2-fluid: era 0 14px */
+        border-radius: var(--awa-radius-sm);
+        background: var(--awa-red);
+        color: var(--awa-text-on-primary); /* BP-09: era var(--awa-cons-c78) hardcoded */
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .menu_left_home1 .verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown {
+        display: none;
+        border: 1px solid var(--awa-gray-200);
+        border-radius: var(--awa-radius-sm);
+        background: var(--awa-bg-surface); /* BP-12 */
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .menu_left_home1 .verticalmenu.side-verticalmenu > .title-category-dropdown.active + ul.togge-menu.list-category-dropdown {
+        display: block;
+    }
+
+    @media (min-width: 992px) {
+        :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .menu_left_home1 .verticalmenu.side-verticalmenu {
+            position: relative;
+        }
+
+        :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .menu_left_home1 .verticalmenu.side-verticalmenu::after {
+            content: "";
+            position: absolute;
+            inset-inline: 0;
+            top: 100%;
+            height: 10px;
+        }
+
+        :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .menu_left_home1 .verticalmenu.side-verticalmenu:hover > ul.togge-menu.list-category-dropdown,
+        :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .menu_left_home1 .verticalmenu.side-verticalmenu:focus-within > ul.togge-menu.list-category-dropdown {
+            display: block;
+        }
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .velaServicesInner.velaServicesInner--home5 .rowFlex.rowFlexMargin.flexJustifyCenter {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .list-tab-product.common-tab-system-fixed .productTabContent:not(.owl-carousel):not(.swiper) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .categorytab-container.awa-cat-tabs-categorytab2 .block_cat > .row {
+        grid-template-columns: 1fr;
+        gap: var(--awa-space-4); /* BP-17: era 16px */
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .verticalmenu.side-verticalmenu .ui-menu-item.parent {
+        position: relative;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .verticalmenu.side-verticalmenu .ui-menu-item.parent > a {
+        padding-right: 44px;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .verticalmenu.side-verticalmenu .open-children-toggle {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 40px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 3;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .verticalmenu.side-verticalmenu .open-children-toggle::before {
+        content: "+";
+        font-size: var(--awa-text-lg); /* BP-30: era 18px */
+        line-height: var(--awa-leading-none);
+        color: var(--awa-gray-700);
+        font-weight: var(--awa-weight-bold);
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .verticalmenu.side-verticalmenu .open-children-toggle:focus-visible {
+        outline: 2px solid var(--awa-red);
+        outline-offset: -2px;
+        border-radius: var(--awa-radius-2xs);
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .verticalmenu.side-verticalmenu .ui-menu-item.parent._active > .open-children-toggle::before {
+        content: "−";
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .verticalmenu.side-verticalmenu .ui-menu-item.parent > .submenu,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .verticalmenu.side-verticalmenu .ui-menu-item.parent > ul.level0 {
+        display: none;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .verticalmenu.side-verticalmenu .ui-menu-item.parent._active > .submenu,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .verticalmenu.side-verticalmenu .ui-menu-item.parent._active > ul.level0 {
+        display: block;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .top-home-content--trust-and-offers {
+        margin-top: var(--awa-space-3);
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .top-home-content--trust-and-offers .top-home-content__trust-offers-grid {
+        gap: var(--awa-space-3);
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper :where(.navigation.custommenu.main-nav) > ul {
+        scroll-padding-inline: var(--awa-space-2); /* BP-21: era 8px */
+        padding-inline: var(--awa-space-1); /* BP-21: era 4px */
+        gap: var(--awa-space-1); /* BP-17: era 4px */
+        scrollbar-width: thin; /* BP-50: standard scrollbar */
+        scrollbar-color: rgb(0 0 0 / 18%) transparent;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper :where(.navigation.custommenu.main-nav) > ul > li > a {
+        min-height: var(--awa-btn-height); /* BP-04: era 48px hardcoded */
+        padding-inline: var(--awa-space-4); /* BP-21: era 16px */
+        border-radius: var(--awa-radius-sm); /* F1-04: era 8px hardcoded */
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper :where(.navigation.custommenu.main-nav) > ul > li > a:active {
+        transform: translateY(0.5px);
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header-nav .menu_primary > .navigation.custommenu.main-nav {
+        margin-bottom: var(--awa-space-2); /* BP-19: era 8px */
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .ayo-home5-wrapper > .top-home-content.top-home-content--trust-and-offers {
+        margin-top: 6px;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper :where(.navigation.custommenu.main-nav) > ul::-webkit-scrollbar {
+        height: 6px;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper :where(.navigation.custommenu.main-nav) > ul::-webkit-scrollbar-thumb {
+        background: rgb(0 0 0 / 18%);
+        border-radius: var(--awa-radius-full); /* BP-03: era 999px hardcoded */
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header-nav .menu_primary :where(.navigation.custommenu.main-nav) .submenu .subchildmenu > li > a {
+        min-height: 40px;
+        padding-inline: var(--awa-space-3-5); /* P2-fluid: era 14px */
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header-control.header-nav {
+        position: relative;
+    }
+
+    /* Stabilize mobile/tablet header row: avoid absolute nav-toggle overlap on search/logo. */
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header-control.header-nav > .container > .row {
+        display: flex;
+        align-items: center;
+        flex-wrap: nowrap;
+        min-height: 54px;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header-control.header-nav .menu_left_home1 {
+        display: none;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header-control.header-nav .menu_primary {
+        display: none !important;
+    }
+
+    body .page-wrapper .header-control.header-nav .nav-toggle,
+    body .page-wrapper .header-control.header-nav .action.nav-toggle {
+        display: flex !important;
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        width: 42px !important;
+        height: 42px !important;
+        flex: 0 0 auto;
+        margin: 6px 0 6px 15px;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--awa-red) !important;
+        border-radius: var(--awa-radius-sm);
+        background: var(--awa-bg-surface) !important; /* BP-12 */
+        visibility: visible !important;
+        opacity: 1 !important;
+        z-index: var(--awa-z-flyout) !important; /* BP-16: era 10030 */
+    }
+
+    /* Avoid floating close icon when drawer is closed (hybrid tablet state). */
+    body:not(.nav-open) .page-wrapper .awa-nav-close {
+        display: none !important;
+    }
+
+    body.nav-open .page-wrapper .awa-nav-close,
+    .nav-open body .page-wrapper .awa-nav-close {
+        display: flex !important;
+    }
+
+    /* Reserve space for the hamburger icon so search text does not overlap it. */
+    body .page-wrapper .header .top-search .block-search input#search,
+    body .page-wrapper .header .top-search .block-search input.input-text {
+        padding-left: var(--awa-space-4) !important;
+    }
+
+    /* Keep minicart inside the mobile search row (avoid legacy absolute offsets from awa-layout.css). */
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header .top-search {
+        display: flex;
+        align-items: center;
+        flex-wrap: nowrap;
+        gap: var(--awa-space-2);
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header .top-search > .mini-cart-wrapper {
+        order: 2;
+        flex: 0 0 auto;
+        margin-left: auto;
+        min-width: max-content;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header .top-search .block-search {
+        order: 1;
+        flex: 1 1 auto;
+        min-width: 0;
+        margin-top: 0 !important;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header .top-search .block-search .block-content,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header .top-search .block-search form#search_mini_form,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header .top-search .block-search form.minisearch {
+        width: 100%;
+    }
+
+    body .page-wrapper .header .top-search .minicart-wrapper {
+        display: block !important;
+        float: none !important;
+        position: relative !important;
+        top: auto !important;
+        right: auto !important;
+        margin-top: 0 !important;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header .top-search .mini-carts,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header .top-search .mini-cart-wrapper {
+        display: flex;
+        align-items: center;
+        flex: 0 0 auto;
+    }
+
+    body .page-wrapper .header-control.header-nav .nav-toggle::before,
+    body .page-wrapper .header-control.header-nav .action.nav-toggle::before {
+        content: "\2630";
+        font-family: inherit;
+        font-size: var(--awa-text-xl);
+        line-height: var(--awa-leading-none);
+        color: var(--awa-red);
+    }
+
+    /* Home5-wide (non-CMS pages too): same mobile/tablet header normalization. */
+    body .page-wrapper .header-control.header-nav > .container > .row {
+        display: flex;
+        align-items: center;
+        flex-wrap: nowrap;
+        min-height: 54px;
+    }
+
+    body .page-wrapper .header-control.header-nav .menu_left_home1 {
+        display: none;
+    }
+
+    body .page-wrapper .header-control.header-nav .menu_primary {
+        display: none !important;
+    }
+
+    body .page-wrapper .header-control.header-nav .nav-toggle,
+    body .page-wrapper .header-control.header-nav .action.nav-toggle {
+        display: flex !important;
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        width: 42px !important;
+        height: 42px !important;
+        flex: 0 0 auto;
+        margin: 6px 0 6px 15px;
+        align-items: center;
+        justify-content: center;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+
+    body .page-wrapper .header .top-search {
+        display: flex;
+        align-items: center;
+        flex-wrap: nowrap;
+        gap: var(--awa-space-2);
+    }
+
+    body .page-wrapper .header .top-search > .mini-cart-wrapper {
+        order: 2;
+        flex: 0 0 auto;
+        margin-left: auto;
+        min-width: max-content;
+    }
+
+    body .page-wrapper .header .top-search .block-search {
+        order: 1;
+        flex: 1 1 auto;
+        min-width: 0;
+        margin-top: 0 !important;
+    }
+
+    body .page-wrapper .header .top-search .block-search .block-content,
+    body .page-wrapper .header .top-search .block-search form#search_mini_form,
+    body .page-wrapper .header .top-search .block-search form.minisearch {
+        width: 100%;
+    }
+
+    body .page-wrapper .header .top-search .block-search input#search,
+    body .page-wrapper .header .top-search .block-search input.input-text {
+        padding-left: var(--awa-space-4) !important;
+    }
+
+    body .page-wrapper .header .top-search .minicart-wrapper {
+        display: block !important;
+        float: none !important;
+        position: relative !important;
+        top: auto !important;
+        right: auto !important;
+        margin-top: 0 !important;
+    }
+
+    body .page-wrapper .header .top-search .mini-carts,
+    body .page-wrapper .header .top-search .mini-cart-wrapper {
+        display: flex;
+        align-items: center;
+        flex: 0 0 auto;
+    }
+}
+
+@media (min-width: 992px) {
+    /* Home5-wide desktop header normalization (not only CMS pages). */
+    body .page-wrapper .header-control.header-nav > .container > .row {
+        display: flex;
+        align-items: center;
+        flex-wrap: nowrap;
+    }
+
+    body .page-wrapper .header-control .menu_left_home1,
+    body .page-wrapper .header-control .menu_primary,
+    body .page-wrapper .header-control .box_language {
+        float: none;
+        min-width: 0;
+    }
+
+    body .page-wrapper .header-wrapper-sticky.enabled-header-sticky .container-header-sticky,
+    body .page-wrapper .header-wrapper-sticky.enable-sticky .container-header-sticky {
+        display: flex;
+        align-items: center;
+        gap: var(--awa-space-3);
+        min-width: 0;
+    }
+
+    body .page-wrapper .header-wrapper-sticky .logo-sticky {
+        flex: 0 0 auto;
+    }
+
+    body .page-wrapper .header-wrapper-sticky .top-menu-sticky {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    /* Linha principal (logo + busca): reduz rigidez do grid e prioriza espaço da busca. */
+    body .page-wrapper .header .header_main .wp-header,
+    body .page-wrapper .header .header-main .wp-header {
+        display: flex;
+        align-items: center;
+        flex-wrap: nowrap;
+        min-width: 0;
+    }
+
+    body .page-wrapper .header .header_main .wp-header > [class*="col-"]:first-child,
+    body .page-wrapper .header .header-main .wp-header > [class*="col-"]:first-child {
+        float: none;
+        width: auto;
+        max-width: none;
+        min-width: 0;
+        flex: 0 0 clamp(150px, 12vw, 168px);
+        padding-right: var(--awa-space-2); /* P2-fluid: era 8px */
+    }
+
+    body .page-wrapper .header .header_main .wp-header > .top-search,
+    body .page-wrapper .header .header-main .wp-header > .top-search {
+        float: none;
+        width: auto;
+        max-width: none;
+        min-width: 0;
+        flex: 1 1 auto;
+        padding-left: var(--awa-space-2); /* P2-fluid: era 8px */
+    }
+
+    /* Busca do cabeçalho: ocupar o espaço disponível (B2B-first). */
+    body .page-wrapper .header .top-search {
+        display: flex;
+        align-items: center;
+        gap: var(--awa-space-3);
+    }
+
+    body .page-wrapper .header .top-search > .mini-cart-wrapper,
+    body .page-wrapper .header .top-search > .hoteline_header {
+        flex: 0 0 auto;
+    }
+
+    body .page-wrapper .header .top-search > .block-search {
+        order: 1;
+        flex: 1 1 auto;
+        width: auto;
+        max-width: none;
+        min-width: 0;
+        margin: 0;
+    }
+
+    body .page-wrapper .header .top-search > .block-search .block-content,
+    body .page-wrapper .header .top-search > .block-search form#search_mini_form,
+    body .page-wrapper .header .top-search > .block-search form.minisearch {
+        width: 100%;
+    }
+
+    body .page-wrapper .header .top-search > .block-search .action.search,
+    body .page-wrapper .header .top-search > .block-search button[type="submit"] {
+        padding-left: var(--awa-space-4);
+        padding-right: var(--awa-space-4);
+        min-width: 44px;
+    }
+
+    body .page-wrapper .header .top-search > .mini-cart-wrapper {
+        order: 2;
+    }
+
+    body .page-wrapper .header .top-search > .hoteline_header {
+        order: 3;
+        flex: 0 1 auto;
+        min-width: 0;
+        max-width: ~"min(22vw, 260px)";
+    }
+
+    body .page-wrapper .header .top-search > .hoteline_header .whatsapp-hotline {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--awa-space-2);
+        min-width: 0;
+        max-width: 100%;
+        color: inherit;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    body .page-wrapper .header .top-search > .hoteline_header .whatsapp-hotline > i {
+        color: var(--awa-cons-c65);
+        flex: 0 0 auto;
+        font-size: var(--awa-text-lg); /* P1-fluid: era 18px */
+        line-height: 1;
+    }
+
+    body .page-wrapper .header .top-search > .hoteline_header .hotline-wrap {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        line-height: 1.1;
+    }
+
+    body .page-wrapper .header .top-search > .hoteline_header .hotline-label {
+        color: var(--awa-gray-500);
+        font-size: var(--awa-text-2xs);
+        letter-spacing: var(--awa-tracking-tight);
+    }
+
+    body .page-wrapper .header .top-search > .hoteline_header .hotline-number {
+        color: var(--awa-dark);
+        font-weight: var(--awa-weight-semibold);
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* box_language vazio (quando sem conteúdo) não deve ocupar coluna no desktop. */
+    body .page-wrapper .header-nav .row.awa-box-language-empty > .box_language,
+    body .page-wrapper .header-nav .box_language.awa-is-empty {
+        display: none;
+    }
+
+    /* CSS-first (sem depender do JS): detecta box_language sem filhos úteis dentro de .top-header. */
+    @supports selector(.header-nav .row:has(> .box_language)) {
+        body .page-wrapper .header-nav .row:has(> .box_language:has(> .top-header):not(:has(> .top-header > *))) > .box_language {
+            display: none;
+        }
+    }
+}
+
+@media (min-width: 1200px) and (max-width: 1599px) {
+    /* Compacta hotline para priorizar largura de busca em desktops menores. */
+    body .page-wrapper .header .top-search {
+        gap: var(--awa-space-2);
+    }
+
+    body .page-wrapper .header .top-search > .hoteline_header .hotline-label {
+        display: none;
+    }
+
+    body .page-wrapper .header .top-search > .hoteline_header .hotline-number {
+        font-size: var(--awa-text-sm);
+    }
+}
+
+@media (min-width: 1200px) and (max-width: 1439px) {
+    /* Prioriza busca: hotline vira CTA compacta (ícone) e botão de busca fica mais estreito. */
+    body .page-wrapper .header .top-search > .hoteline_header {
+        max-width: 44px;
+        flex: 0 0 44px;
+    }
+
+    body .page-wrapper .header .top-search > .hoteline_header .hotline-wrap {
+        display: none;
+    }
+
+    body .page-wrapper .header .top-search > .hoteline_header .whatsapp-hotline {
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: var(--awa-radius-sm);
+        background: rgb(37 211 102 / 10%);
+    }
+
+    body .page-wrapper .header .top-search > .block-search .action.search,
+    body .page-wrapper .header .top-search > .block-search button[type="submit"] {
+        width: 44px;
+        min-width: 44px;
+        padding-left: 0;
+        padding-right: 0;
+    }
+}
+
+/* ============================================================
+   FIX-29 — TOP NAV DENSITY & MEDIUM DESKTOP TUNING (P2)
+   Melhora leitura do menu horizontal e evita aperto no topo.
+   ============================================================ */
+@media (min-width: 1200px) {
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header-control.header-nav > .container > .row {
+        display: flex;
+        align-items: center;
+        flex-wrap: nowrap;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header-control .menu_left_home1,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header-control .menu_primary,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header-control .box_language {
+        float: none;
+        min-width: 0;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header-control .box_language {
+        flex: 0 0 auto;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header-control .menu_primary {
+        flex: 1 1 auto;
+    }
+
+    body .page-wrapper .header-nav .row.awa-box-language-empty > .menu_primary {
+        width: 83.3333%;
+        max-width: 83.3333%;
+        flex: 0 0 83.3333%;
+        flex-basis: 83.3333%;
+    }
+
+    @supports selector(.header-nav .row:has(> .box_language)) {
+        body .page-wrapper .header-nav .row:has(> .box_language:has(> .top-header):not(:has(> .top-header > *))) > .menu_primary {
+            width: 83.3333%;
+            max-width: 83.3333%;
+            flex: 0 0 83.3333%;
+            flex-basis: 83.3333%;
+        }
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header-wrapper-sticky.enabled-header-sticky .container-header-sticky,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header-wrapper-sticky.enable-sticky .container-header-sticky {
+        display: flex;
+        align-items: center;
+        gap: var(--awa-space-3);
+        min-width: 0;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header-wrapper-sticky .logo-sticky {
+        flex: 0 0 auto;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header-wrapper-sticky .top-menu-sticky {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .navigation.custommenu.main-nav > ul {
+        gap: 2px;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .navigation.custommenu.main-nav > ul > li > a {
+        min-height: var(--awa-btn-height); /* BP-04: era 48px hardcoded */
+        padding: 0 var(--awa-space-4); /* P2-fluid: era 0 16px */
+        font-size: var(--awa-text-md); /* P1-fluid: era 17px */
+        letter-spacing: var(--awa-tracking-tight);
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper :where(.navigation.custommenu.main-nav) > ul > li > .submenu,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper :where(.navigation.custommenu.main-nav) > ul > li > .groupmenu {
+        max-width: ~"min(92vw, var(--awa-container))";
+        overflow-x: hidden; /* fallback para navegadores sem clip */
+        overflow-x: clip;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper :where(.navigation.custommenu.main-nav) > ul > li:nth-last-child(-n+2) > .submenu,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper :where(.navigation.custommenu.main-nav) > ul > li:nth-last-child(-n+2) > .groupmenu {
+        left: auto;
+        right: 0;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper :where(.navigation.custommenu.main-nav) .subchildmenu > li > a {
+        line-height: var(--awa-leading-cozy);
+        padding-top: 7px;
+        padding-bottom: 7px;
+    }
+    }
+
+@media (min-width: 992px) and (max-width: 1199px) {
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header-control.header-nav > .container > .row {
+        display: flex;
+        align-items: center;
+        flex-wrap: nowrap;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .navigation.custommenu.main-nav > ul {
+        justify-content: flex-start;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scrollbar-width: thin;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .navigation.custommenu.main-nav > ul > li {
+        flex: 0 0 auto;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .navigation.custommenu.main-nav > ul > li > a {
+        min-height: 46px;
+        padding: 0 var(--awa-space-3); /* P2-fluid: era 0 12px */
+        font-size: var(--awa-text-base);
+        letter-spacing: var(--awa-tracking-tight);
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header-control .menu_left_home1 {
+        width: auto;
+        max-width: 100%;
+        min-width: 0;
+        float: none;
+        flex: 0 0 25%;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header-control .menu_primary {
+        width: auto;
+        max-width: none;
+        min-width: 0;
+        float: none;
+        flex: 1 1 auto;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header-control .box_language {
+        float: none;
+        min-width: 0;
+        flex: 0 0 auto;
+    }
+
+    body .page-wrapper .header-nav .row.awa-box-language-empty > .menu_primary {
+        width: 75%;
+        max-width: 75%;
+        flex: 0 0 75%;
+        flex-basis: 75%;
+    }
+
+    @supports selector(.header-nav .row:has(> .box_language)) {
+        body .page-wrapper .header-nav .row:has(> .box_language:has(> .top-header):not(:has(> .top-header > *))) > .menu_primary {
+            width: 75%;
+            max-width: 75%;
+            flex: 0 0 75%;
+            flex-basis: 75%;
+        }
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header .top-search {
+        display: flex;
+        align-items: center;
+        flex-wrap: nowrap;
+        gap: var(--awa-space-2);
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header .top-search > .mini-cart-wrapper {
+        order: 2;
+        flex: 0 0 auto;
+        margin-left: auto;
+        min-width: max-content;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header .top-search .block-search {
+        order: 1;
+        flex: 1 1 auto;
+        min-width: 0;
+        margin-top: 0 !important;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header .top-search .block-search .block-content,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header .top-search .block-search form#search_mini_form,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header .top-search .block-search form.minisearch {
+        width: 100%;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header .top-search .minicart-wrapper {
+        float: none !important;
+        position: relative;
+        top: auto;
+        right: auto;
+        margin-top: 0 !important;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header .top-search .mini-carts,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header .top-search .mini-cart-wrapper {
+        display: flex;
+        align-items: center;
+        flex: 0 0 auto;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .menu_left_home1 .verticalmenu.side-verticalmenu > .title-category-dropdown {
+        font-size: inherit;
+        cursor: default;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .velaServicesInner.velaServicesInner--home5 .rowFlex.rowFlexMargin.flexJustifyCenter {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .velaServicesInner.velaServicesInner--home5 .boxService {
+        min-height: 104px;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .hot-deal:not(.top-home-content__trust-offers-deals) .hot-deal-tab-slider.hot-deal-tab-slider-customcss .countdown_block {
+        padding: var(--awa-space-3) var(--awa-space-2-5); /* P2-fluid: era 12px 10px */
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper :where(.navigation.custommenu.main-nav) > ul {
+        scroll-snap-type: x proximity;
+        scrollbar-gutter: stable both-edges;
+        touch-action: pan-x pinch-zoom; /* BP-27: melhor scroll horizontal touch */
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper :where(.navigation.custommenu.main-nav) > ul > li {
+        scroll-snap-align: start;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper :where(.navigation.custommenu.main-nav) > ul > li > a {
+        line-height: 1.15;
+        font-weight: var(--awa-weight-bold);
+        text-rendering: optimizelegibility;
+    }
+}
+
+@media (max-width: 420px) {
+    body #newsletter_pop_up .nl-popup-trust {
+        gap: 6px;
+    }
+
+    body #newsletter_pop_up .nl-popup-trust-item {
+        font-size: var(--awa-text-3xs); /* BP-30: era 10px */
+    }
+
+    body #newsletter_pop_up .nl-popup-title {
+        font-size: var(--awa-text-2xl);
+    }
+
+    body #newsletter_pop_up .nl-popup-subtitle {
+        font-size: var(--awa-text-lg); /* BP-30: era 18px */
+    }
+
+    body #newsletter_pop_up .nl-popup-desc {
+        font-size: var(--awa-text-sm);
+        line-height: var(--awa-leading-cozy);
+    }
+
+    body #newsletter_pop_up .nl-popup-form .action.subscribe {
+        font-size: var(--awa-text-sm);
+        min-height: 42px;
+    }
+}
+
+/* ============================================================
+   FIX-14 — TESTIMONIALS SECTION POLISH (P3)
+   ============================================================ */
+body .page-wrapper .testimonials-slider .item,
+body .page-wrapper .testimonials-home .item {
+    padding: var(--awa-space-5); /* BP-18: era 20px */
+    border-radius: var(--awa-radius);
+    background: var(--awa-bg-surface); /* BP-12 */
+    box-shadow: var(--awa-shadow); /* R12-13 */
+    border: 1px solid var(--awa-gray-200);
+    transition: box-shadow var(--awa-transition); /* R12-06 */
+    display: flex; /* LB-05: equal-height para testimonial cards */
+    flex-direction: column;
+    height: 100%;
+    contain: layout paint;
+}
+
+/* LB-05: conteúdo do testimonial empurra rodapé ao fundo */
+body .page-wrapper .testimonials-home .item .content-test {
+    flex-grow: 1;
+    font-style: italic;
+    line-height: var(--awa-leading-loose);
+    color: var(--awa-gray-700);
+    position: relative;
+    padding-left: var(--awa-space-5); /* BP-20: era 20px */
+}
+
+body .page-wrapper .testimonials-slider .item:hover,
+body .page-wrapper .testimonials-home .item:hover {
+    box-shadow: var(--awa-shadow-hover); /* R12-13 */
+}
+
+body .page-wrapper .testimonials-home .item .content-test::before {
+    content: "\201C";
+    font-size: 48px;
+    color: var(--awa-red);
+    position: absolute;
+    left: -5px;
+    top: -15px;
+    font-family: Georgia, serif;
+    opacity: 0.3;
+}
+
+/* ============================================================
+   FIX-15 — BLOG SECTION IMPROVEMENTS (P3)
+   ============================================================ */
+body .page-wrapper .the_blog .post-item,
+body .page-wrapper .blog-post-item {
+    border-radius: var(--awa-radius);
+    overflow: hidden;
+    box-shadow: var(--awa-shadow); /* R12-13 */
+    transition: box-shadow var(--awa-transition), transform var(--awa-transition); /* R12-06 */
+    background: var(--awa-bg-surface); /* BP-12 */
+    display: flex; /* LB-05: equal-height para blog cards fora de OWL */
+    flex-direction: column;
+    height: 100%;
+    contain: layout paint;
+}
+
+/* LB-05: conteúdo interno flex-grow para empurrar rodapé ao fundo */
+body .page-wrapper .the_blog .post-item .post-content,
+body .page-wrapper .blog-post-item .post-content {
+    flex-grow: 1;
+}
+
+body .page-wrapper .the_blog .post-item:hover,
+body .page-wrapper .blog-post-item:hover {
+    box-shadow: var(--awa-shadow-hover); /* R12-13 */
+    transform: translateY(-2px);
+}
+
+body .page-wrapper .the_blog .post-item .post-title a,
+body .page-wrapper .blog-post-item .post-title a {
+    font-weight: var(--awa-weight-semibold);
+    line-height: var(--awa-leading-normal);
+    transition: color var(--awa-transition-fast); /* R12-06 */
+}
+
+body .page-wrapper .the_blog .post-item .post-title a:hover,
+body .page-wrapper .blog-post-item .post-title a:hover {
+    color: var(--awa-red);
+}
+
+/* ============================================================
+   FIX-16 — HOT DEAL / COUNTDOWN SECTION (P3)
+   ============================================================ */
+body .page-wrapper .hot-deal-tab-slider {
+    border-radius: var(--awa-radius);
+    overflow: hidden;
+    background: var(--awa-bg-surface); /* BP-12 */
+    box-shadow: var(--awa-shadow); /* R12-13 */
+}
+
+body .page-wrapper .countdown_block {
+    position: relative;
+    top: 0;
+    background: linear-gradient(135deg, var(--awa-dark) 0%, var(--footer-bg-secondary) 100%);
+    color: var(--awa-text-on-dark); /* BP-09: era var(--awa-cons-c78) hardcoded */
+    padding: var(--awa-space-3-75) var(--awa-space-5); /* P2-fluid: era 15px 20px */
+    text-align: center;
+    border-radius: var(--awa-radius-sm) var(--awa-radius-sm) 0 0;
+}
+
+body .page-wrapper .title_countdown {
+    font-weight: var(--awa-weight-semibold);
+    font-size: var(--awa-text-base-plus); /* BP-39: era 15px */
+    margin-bottom: var(--awa-space-2); /* BP-19: era 8px */
+}
+
+/* FIX-17 — REMOVIDO */
+
+/* ============================================================
+   FIX-18 — ICON FONT FALLBACK (P2)
+   Ensure icon elements don't show empty squares.
+   ============================================================ */
+body .page-wrapper .product-extra-link a::before,
+body .page-wrapper .actions-secondary a::before,
+body .page-wrapper .towishlist::before,
+body .page-wrapper .tocompare::before {
+    font-family: icomoon, FontAwesome, simple-line-icons, sans-serif;
+    display: inline-block;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body .page-wrapper .product-extra-link a:empty::before,
+body .page-wrapper .actions-secondary a:empty::before {
+    content: '';
+}
+
+/* ============================================================
+   FIX-19 — RESPONSIVO: TESTIMONIALS MOBILE (P3)
+   ============================================================ */
+
+/* ============================================================
+   FIX-20 — RESPONSIVO: COUNTDOWN MOBILE (P3)
+   ============================================================ */
+
+/* ============================================================
+   FIX-21 — RESPONSIVO: BLOG POSTS MOBILE (P3)
+   ============================================================ */
+
+@media (max-width: 320px) {
+    body .page-wrapper .blog-post-item .post-content,
+    body .page-wrapper .the_blog .post-item .post-content {
+        padding: var(--awa-space-2-5); /* P2-fluid: era 10px */
+    }
+
+    /* OWL gutters: ver FIX-23 (bloco centralizado) */
+}
+
+/* ============================================================
+   FIX-22 — RESPONSIVO: BANNER/HERO SLIDER MOBILE (P3)
+   ============================================================ */
+
+/* ============================================================
+/* ============================================================
+    FIX-24 — HOMEPAGE CMS LAYOUT (P1)
+    FAQ + selos + seções de grade (Coleções/Lançamentos).
+    Escopado apenas à homepage para não afetar o Ayo base.
+    R20: seletores consolidados com :is() (38 blocos).
+          Wrapper simplificado — width/max-width/padding/box-sizing
+          delegados ao AF-07 (awa-consistency-home5.css).
+    ============================================================ */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .ayo-home5-wrapper > .ayo-home5-section.container {
+    width: 100%;
+    max-width: none;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+/* FIX-53 — HERO CTA STRIP: ocultar conforme solicitação do cliente */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .awa-hero-cta-strip {
+    display: none !important;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .benefits-bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--awa-space-2-5) var(--awa-space-3-5); /* P2-fluid: era 10px 14px */
+    margin: 0;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .benefits-bar__item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--awa-space-2); /* BP-17: era 8px */
+    color: var(--awa-gray-700);
+    font-size: var(--awa-text-base-plus); /* BP-39: era 15px */
+    line-height: var(--awa-leading-comfortable);
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .benefits-bar__icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .security-seals {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px 18px;
+    padding: var(--awa-space-3-5) var(--awa-space-4); /* P2-fluid: era 14px 16px */
+    border: 1px solid var(--awa-gray-200);
+    border-radius: var(--awa-control-radius);
+    background: var(--awa-bg-surface); /* BP-12 */
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .security-seals img {
+    display: block;
+    width: auto;
+    height: 34px;
+    max-width: 100%;
+    object-fit: contain;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .security-seals img:first-child {
+    height: 22px;
+    max-width: 220px;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .security-seals .microcopy {
+    width: 100%;
+    margin-top: 2px;
+    font-size: var(--awa-text-sm);
+    line-height: var(--awa-leading-relaxed);
+    color: var(--awa-gray-700);
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .security-seals .microcopy a {
+    color: var(--awa-red-dark);
+    text-decoration: underline;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .trust-badges-homepage {
+    padding: 18px 16px;
+    border-radius: var(--awa-control-radius);
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .trust-badges-grid {
+    gap: 14px 18px;
+}
+
+/* Quando o bloco de selos principal já existe, evita duplicidade visual (sem :has()) */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5).awa-has-security-seals .page-wrapper .ayo-home5-section--trust-badges {
+    display: none;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .ayo-home5-heading {
+    margin: 0 0 var(--awa-space-4);
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .ayo-home5-label {
+    display: inline-block;
+    color: var(--awa-red-dark);
+    font-size: var(--awa-text-xs);
+    font-weight: var(--awa-weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .ayo-home5-heading h2 {
+    margin: 6px 0 0;
+    font-size: clamp(1.6rem, 1.15rem + 1.1vw, 2.1rem);
+    line-height: var(--awa-leading-compact);
+    color: var(--awa-dark);
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .ayo-home5-divider {
+    display: block;
+    width: 64px;
+    height: 2px;
+    margin-top: var(--awa-space-3); /* BP-19: era 12px */
+    background: var(--awa-red);
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .ayo-home5-product-grid {
+    margin-top: var(--awa-space-4);
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .ayo-home5-product-grid:empty {
+    display: none;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .ayo-home5-product-grid .note-msg {
+    margin: 0;
+    padding: var(--awa-space-3) var(--awa-space-3-5); /* P2-fluid: era 12px 14px */
+    border: 1px dashed var(--awa-gray-300);
+    border-radius: var(--awa-control-radius);
+    background: var(--awa-gray-100);
+    color: var(--awa-gray-700);
+}
+
+/* Sem :has(): JS aplica .awa-is-empty na seção quando não há itens */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .ayo-home5-section.awa-is-empty {
+    display: none;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .aw-home-faq {
+    background: var(--awa-bg-surface); /* BP-12 */
+    border: 1px solid var(--awa-gray-200);
+    border-radius: var(--awa-control-radius);
+    padding: clamp(16px, 2vw, 24px);
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .aw-home-faq__title {
+    margin: 0;
+    font-size: clamp(1.4rem, 1rem + 1vw, 1.9rem);
+    line-height: var(--awa-leading-compact);
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .aw-home-faq__subtitle {
+    margin: var(--awa-space-2) 0 0; /* BP-19: era 8px 0 0 */
+    color: var(--awa-gray-600);
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .aw-home-faq__items {
+    display: grid;
+    gap: var(--awa-space-2-5); /* P2-fluid: era 10px */
+    margin-top: var(--awa-space-4); /* BP-19: era 16px */
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .aw-home-faq__item {
+    border: 1px solid var(--awa-gray-200);
+    border-radius: var(--awa-control-radius);
+    background: var(--awa-gray-100);
+    overflow: hidden;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .aw-home-faq__item > summary {
+    position: relative;
+    list-style: none;
+    cursor: pointer;
+    font-weight: var(--awa-weight-semibold);
+    color: var(--awa-dark);
+    padding: 12px 38px 12px 14px;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .aw-home-faq__item > summary::-webkit-details-marker {
+    display: none;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .aw-home-faq__item > summary::after {
+    content: "+";
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--awa-red);
+    font-weight: var(--awa-weight-bold);
+    font-size: var(--awa-text-lg); /* BP-30: era 18px */
+    line-height: var(--awa-leading-none);
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .aw-home-faq__item[open] > summary::after {
+    content: "−";
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .aw-home-faq__answer {
+    padding: 0 var(--awa-space-3-5) var(--awa-space-3-5); /* P2-fluid: era 0 14px 14px */
+    color: var(--awa-gray-700);
+    line-height: var(--awa-leading-loose);
+}
+
+/* Padding/widht da Home5 agora são governados por --awa-home-inline-padding (awa-consistency-home5.css). */
+
+/* B2B: Wishlist e Compare — restaurados para fidelidade ao demo Ayo Home5.
+   Se necessário ocultar para grupo B2B, use:
+   body.customer-group-b2b .action.towishlist { display: none !important; } */
+
+/* ============================================================
+   FIX-25 — HOME5 UX/CSS STABILIZATION (P1)
+   Targeted to homepage classes only.
+   ============================================================ */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .navigation.custommenu.main-nav {
+    margin-top: 0;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .navigation.custommenu.main-nav > ul {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--awa-gray-200);
+    border-bottom: 1px solid var(--awa-gray-200);
+    background: var(--awa-bg-surface); /* BP-12 */
+    list-style: none;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .navigation.custommenu.main-nav > ul > li {
+    position: relative;
+    float: none;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .navigation.custommenu.main-nav > ul > li > a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 50px;
+    padding: 0 18px;
+    color: var(--awa-dark);
+    font-size: var(--awa-text-lg); /* P1-fluid: era 19px */
+    font-weight: var(--awa-weight-bold);
+    letter-spacing: var(--awa-tracking-normal);
+    text-transform: uppercase;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .navigation.custommenu.main-nav > ul > li.active > a,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .navigation.custommenu.main-nav > ul > li.current > a,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .navigation.custommenu.main-nav > ul > li:hover > a,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .navigation.custommenu.main-nav > ul > li:focus-within > a {
+    background: var(--awa-red);
+    color: var(--awa-text-on-primary); /* BP-09: era var(--awa-cons-c78) hardcoded */
+}
+
+/* Home5 layout real: benefits block root é .velaServicesInner (sem wrapper .velaServices). */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .top-home-content--trust-and-offers .top-home-content__trust-offers-grid > .velaServicesInner.velaServicesInner--home5 {
+    width: 100%;
+    margin: 0;
+    min-width: 0;
+}
+
+@media (min-width: 992px) {
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .top-home-content--trust-and-offers .top-home-content__trust-offers-grid > .velaServicesInner.velaServicesInner--home5 {
+        grid-column: 1 / -1;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .top-home-content--trust-and-offers .top-home-content__trust-offers-grid > .top-home-content__trust-offers-banner {
+        grid-column: 1 / 2;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .top-home-content--trust-and-offers .top-home-content__trust-offers-grid > .top-home-content__trust-offers-deals {
+        grid-column: 2 / 3;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .menu_left_home1 .verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown {
+        border: 1px solid var(--awa-gray-200) !important; /* R28 — Bug #2: vence themes5.css !important hardcoded #e6e6e6 */
+        border-top: 0 !important; /* R28 — Bug #2 */
+        border-radius: 0 0 var(--awa-radius-sm) var(--awa-radius-sm);
+        background: var(--awa-bg-surface); /* BP-12 */
+        box-shadow: var(--awa-shadow-dropdown);
+    }
+
+    /* title-category-dropdown desktop styling consolidated into FIX-55 */
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .menu_left_home1 .verticalmenu.side-verticalmenu .ui-menu-item.level0 > a {
+        display: flex;
+        align-items: center;
+        min-height: 46px;
+        padding: var(--awa-space-2-5) var(--awa-space-3-5); /* P2-fluid: era 10px 14px */
+        border-bottom: 1px solid var(--awa-gray-200);
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .menu_left_home1 .verticalmenu.side-verticalmenu .expand-category-link > a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: var(--awa-touch-target); /* BP-04: era 44px hardcoded — WCAG 2.5.8 */
+        padding: var(--awa-space-2-5) var(--awa-space-3-5); /* P2-fluid: era 10px 14px */
+        background: var(--awa-gray-100);
+        color: var(--awa-red-dark);
+        font-weight: var(--awa-weight-semibold);
+        text-decoration: none;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .top-home-content--trust-and-offers .top-home-content__trust-offers-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--awa-space-5);
+    }
+
+    /* FIX-28 descontinuado: desktop usa modelo overlay (FIX-53) para evitar desalinhamento/cascata conflitante. */
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .navigation.custommenu.main-nav > ul > li > .open-children-toggle {
+        display: none !important;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header-nav .menu_primary :where(.navigation.custommenu.main-nav) > ul > li > .submenu,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header-nav .menu_primary :where(.navigation.custommenu.main-nav) > ul > li > .groupmenu {
+        scrollbar-width: thin;
+        scrollbar-color: rgb(0 0 0 / 25%) transparent;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header-nav .menu_primary :where(.navigation.custommenu.main-nav) > ul > li > .submenu::-webkit-scrollbar,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header-nav .menu_primary :where(.navigation.custommenu.main-nav) > ul > li > .groupmenu::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header-nav .menu_primary :where(.navigation.custommenu.main-nav) > ul > li > .submenu::-webkit-scrollbar-thumb,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header-nav .menu_primary :where(.navigation.custommenu.main-nav) > ul > li > .groupmenu::-webkit-scrollbar-thumb {
+        border-radius: var(--awa-radius-full); /* BP-03: era 999px hardcoded */
+        background: rgb(0 0 0 / 25%);
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .header-nav .menu_primary :where(.navigation.custommenu.main-nav) .submenu .subchildmenu > li > a {
+        max-width: ~"min(360px, 40vw)";
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    body .page-wrapper .verticalmenu.side-verticalmenu {
+        margin-bottom: 0;
+    }
+}
+
+/* UX POLISH — CONTAINER/CARDS/BUTTONS (FIX-14/15/16 UX): REMOVIDO.
+   max-width, padding, gap, transform conflitavam com grid nativo do Rokanthemes.
+   Container, product cards e buttons agora seguem o padrão original do tema Ayo. */
+
+/* ============================================================
+   FIX-30 — CATEGORYTAB2 SCROLL-SNAP + FADE INDICATORS (MOBILE)
+   Scroll horizontal c/ snap + gradiente de fade nas bordas.
+   ============================================================ */
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .box-bottom-home2.box-testimo {
+    margin: var(--awa-space-6) 0 0;
+    padding: clamp(18px, 2.2vw, 28px);
+    border: 1px solid var(--awa-gray-200);
+    border-radius: var(--awa-radius);
+    background: var(--awa-bg-surface); /* BP-12 */
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .box-bottom-home2.box-testimo > h2 {
+    margin: 0 0 18px;
+    text-align: center;
+    font-size: clamp(22px, 1.3vw + 14px, 28px);
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .box-bottom-home2.box-testimo .item-testimo {
+    display: grid;
+    grid-template-columns: 56px minmax(0, 1fr);
+    gap: var(--awa-space-3-5); /* P2-fluid: era 14px */
+    align-items: center;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .box-bottom-home2.box-testimo .author-test-link a {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .box-bottom-home2.box-testimo .info-testimonial {
+    text-align: left;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .box-bottom-home2.box-testimo .viewall {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: var(--awa-space-4); /* BP-19: era 16px */
+    padding: 10px 18px;
+    border-radius: var(--awa-radius-full); /* BP-03: era 999px hardcoded */
+    background: var(--awa-red);
+    color: var(--awa-text-on-primary); /* BP-09: era var(--awa-cons-c78) hardcoded */
+    font-weight: var(--awa-weight-semibold);
+    text-decoration: none;
+    transition: background var(--awa-transition-fast), transform var(--awa-transition-fast);
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .box-bottom-home2.box-testimo .viewall:hover {
+    background: var(--awa-red-dark);
+    transform: translateY(-1px);
+}
+
+/* ============================================================
+   FIX-29 — TESTIMONIAL CARDS: UNIFORM HEIGHT + TEXT CLAMPING
+   Garante altura uniforme nos cards do carrossel de depoimentos,
+   limita texto a 4 linhas c/ ellipsis, normaliza tipografia.
+   ============================================================ */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .box-bottom-home2.box-testimo .testimo-slider .owl-stage {
+    display: flex;
+    align-items: stretch;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .box-bottom-home2.box-testimo .testimo-slider .owl-item {
+    display: flex;
+    flex-direction: column;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .box-bottom-home2.box-testimo .testimo-slider .owl-item > .item-testimo {
+    flex: 1 1 auto;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .box-bottom-home2.box-testimo .testimonialContent {
+    min-height: 80px;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .box-bottom-home2.box-testimo .testimonialContent .desc {
+    display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: var(--awa-leading-loose);
+    font-size: var(--awa-text-sm);
+    color: var(--awa-gray-600);
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .box-bottom-home2.box-testimo .author-test-info h3 {
+    margin: 0;
+    font-size: var(--awa-text-base);
+    font-weight: var(--awa-weight-semibold);
+    line-height: var(--awa-leading-base);
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .box-bottom-home2.box-testimo .author-test-info span {
+    font-size: var(--awa-text-xs);
+    color: var(--awa-gray-500);
+}
+
+/* ============================================================
+   FIX-31 — SECTION HEADINGS NORMALIZATION
+   Normaliza .rokan-product-heading para consistencia visual
+   com .ayo-home5-heading (tamanho, peso, espacamento).
+   ============================================================ */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .rokan-product-heading {
+    margin-bottom: clamp(var(--awa-space-4), 2vw, var(--awa-space-6));
+    text-align: center;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .rokan-product-heading h2 {
+    font-size: clamp(1.4rem, 1vw + 1rem, 1.75rem);
+    font-weight: var(--awa-weight-bold);
+    letter-spacing: var(--awa-tracking-tighter);
+    line-height: var(--awa-leading-snug);
+    margin: 0 0 var(--awa-space-2);
+    color: var(--awa-dark);
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .rokan-product-heading .sup-title {
+    font-size: var(--awa-text-xs);
+    font-weight: var(--awa-weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--awa-red);
+    margin-bottom: var(--awa-space-1);
+    display: block;
+}
+
+/* ============================================================
+   FIX-32 — LOAD MORE / VIEW ALL BUTTON CENTER + SIZING
+   Centraliza e padroniza os botoes "Carregar Mais" /
+   "Ver Todos" nas secoes de produto da homepage.
+   ============================================================ */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .list-tab-product .viewall,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .products-grid + .viewall {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 160px;
+    min-height: var(--awa-btn-height);
+    padding: 0 var(--awa-space-6);
+    border-radius: var(--awa-radius-full);
+    background: var(--awa-red);
+    color: var(--awa-text-on-primary); /* BP-09: era var(--awa-cons-c78) hardcoded */
+    font-size: var(--awa-text-sm);
+    font-weight: var(--awa-weight-semibold);
+    text-transform: uppercase;
+    text-decoration: none;
+    letter-spacing: var(--awa-tracking-normal);
+    margin: var(--awa-space-6) auto 0;
+    transition: background var(--awa-transition-fast), transform var(--awa-transition-fast);
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .list-tab-product .viewall:hover,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .products-grid + .viewall:hover {
+    background: var(--awa-red-dark);
+    transform: translateY(-1px);
+}
+
+/* Container do viewall precisa de text-align center */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .list-tab-product > .viewall,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .common-tab-system-fixed > .viewall {
+    text-align: center;
+    width: 100%;
+}
+
+/* ============================================================
+   FIX-33 — NEWSLETTER POPUP RESPONSIVE
+   Max-width, border-radius e ajustes mobile para o popup
+   de newsletter ("GANHE 10% OFF").
+   ============================================================ */
+body .page-wrapper .newsletter-popup,
+body .page-wrapper .modals-wrapper .modal-popup.newsletter-popup-modal .modal-inner-wrap {
+    max-width: ~"min(90vw, 520px)";
+    border-radius: var(--awa-radius);
+    overflow: hidden;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer {
+    margin-top: var(--awa-space-7);
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .footer-bottom .footer-bottom-inner .row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--awa-space-4); /* BP-17: era 16px */
+    margin: 0;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .footer-bottom .footer-bottom-inner .row > [class*="col-"] {
+    float: none;
+    width: auto;
+    max-width: 100%;
+    padding: 0;
+    flex: 1 1 320px;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .footer-payment-methods {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: var(--awa-space-3) var(--awa-space-5); /* BP-17: era 12px 20px */
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .footer-payment-methods .footer-title {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    color: var(--footer-text-bright);
+    font-size: var(--awa-text-xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .footer-payment-methods .payment-methods-wrapper,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .footer-payment-methods .security-seals-wrapper {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--awa-space-2-5); /* P2-fluid: era 10px */
+    padding: var(--awa-space-2) var(--awa-space-3); /* P2-fluid: era 8px 12px */
+    border: 1px solid rgb(255 255 255 / 10%);
+    border-radius: var(--awa-radius-sm);
+    background: rgb(255 255 255 / 4%);
+    justify-content: flex-end;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .footer-payment-methods .payment-methods-img {
+    max-height: 32px;
+    width: auto;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .footer-payment-methods .seals {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--awa-space-2); /* BP-17: era 8px */
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .footer-payment-methods .security-seal-item svg {
+    width: auto;
+    max-width: 120px;
+    min-width: 0;
+    height: 28px;
+}
+
+@media (max-width: 767px) {
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .footer-bottom .footer-bottom-inner .row {
+        align-items: stretch;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .footer-bottom .footer-bottom-inner .row > [class*="col-"] {
+        flex: 1 1 100%;
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .footer-payment-methods {
+        justify-content: stretch;
+        gap: var(--awa-space-3);
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .footer-payment-methods .payment-methods-wrapper,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .footer-payment-methods .security-seals-wrapper {
+        width: 100%;
+        justify-content: flex-start;
+        gap: var(--awa-space-2); /* P2-fluid: era 8px */
+    }
+
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .page_footer .footer-payment-methods .footer-title {
+        flex: 0 0 100%;
+    }
+}
+
+body .page-wrapper .action.primary,
+body .page-wrapper button.primary,
+body .page-wrapper .item-product .action.tocart,
+body .page-wrapper .item-product .btn-add-to-cart,
+body .page-wrapper .product-item .action.tocart {
+    background: var(--awa-red);
+    border-color: var(--awa-red);
+    color: var(--awa-text-on-primary); /* BP-09: era var(--awa-cons-c78) hardcoded */
+    font-weight: var(--awa-weight-bold);
+    transition: background-color var(--awa-transition-fast), box-shadow var(--awa-transition-fast), transform var(--awa-transition-fast);
+}
+
+body .page-wrapper .action.primary:hover,
+body .page-wrapper button.primary:hover,
+body .page-wrapper .item-product .action.tocart:hover,
+body .page-wrapper .item-product .btn-add-to-cart:hover,
+body .page-wrapper .product-item .action.tocart:hover {
+    background: var(--awa-red-dark);
+    border-color: var(--awa-red-dark);
+    color: var(--awa-text-on-primary); /* BP-09: era var(--awa-cons-c78) hardcoded */
+    box-shadow: var(--awa-shadow-red);
+    transform: translateY(-1px);
+}
+
+body .page-wrapper .action.primary:focus-visible,
+body .page-wrapper button.primary:focus-visible,
+body .page-wrapper .item-product .action.tocart:focus-visible,
+body .page-wrapper .item-product .btn-add-to-cart:focus-visible,
+body .page-wrapper .product-item .action.tocart:focus-visible {
+    background: var(--awa-red-dark);
+    border-color: var(--awa-red-dark);
+    color: var(--awa-text-on-primary); /* BP-09: era var(--awa-cons-c78) hardcoded */
+    outline: 2px solid var(--awa-red);
+    outline-offset: 2px;
+}
+
+body .page-wrapper .action.primary:active,
+body .page-wrapper button.primary:active,
+body .page-wrapper .item-product .action.tocart:active,
+body .page-wrapper .item-product .btn-add-to-cart:active,
+body .page-wrapper .product-item .action.tocart:active {
+    background: var(--awa-red-dark); /* BP-10: era @awa-color-primary-dark hardcoded */
+    border-color: var(--awa-red-dark); /* BP-10: era @awa-color-primary-dark hardcoded */
+    color: var(--awa-text-on-primary); /* BP-09: era var(--awa-cons-c78) hardcoded */
+    transform: scale(0.97);
+}
+
+/* ============================================================
+   FIX-26 — HOME5 MEDIUM VIEWPORT STABILIZATION (P1)
+   Neutraliza regras legadas de 80px no menu e melhora leitura 992-1199.
+   ============================================================ */
+
+/* ============================================================
+   FIX-27 — VERTICAL MENU MOBILE TOGGLES (P1)
+   Alinha com recomendação do template Ayo para abertura de submenu no mobile.
+   ============================================================ */
+
+/* FIX-26b — MEDIUM VIEWPORT EXTRAS (992-1199px) */
+
+/* ============================================================
+   FIX-27 — TRUST & OFFERS GRID STABILITY (P1)
+   Escopo: top-home-content--trust-and-offers (Home5).
+   Usa classes de estrutura no template para evitar ambiguidades
+   entre wrappers CMS e blocos Rokanthemes.
+   ============================================================ */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .top-home-content--trust-and-offers {
+    margin-top: var(--awa-space-4);
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .top-home-content--trust-and-offers .top-home-content__trust-offers-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--awa-space-4);
+    align-items: start;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .top-home-content--trust-and-offers .top-home-content__trust-offers-grid > * {
+    min-width: 0;
+}
+
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .top-home-content--trust-and-offers .top-home-content__trust-offers-banner,
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper .top-home-content--trust-and-offers .top-home-content__trust-offers-deals {
+    margin-top: 0;
+}

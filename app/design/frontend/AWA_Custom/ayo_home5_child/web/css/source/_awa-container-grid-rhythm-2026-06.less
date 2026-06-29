@@ -1,0 +1,247 @@
+// =============================================================================
+// §97 — Container Grid Rhythm + Typeset (2026-06-08)
+// Vertical rhythm ligado ao grid (§95/§96) + hierarquia tipográfica catálogo.
+// Product UI: escala fixa/rem; headings com clamp moderado (Impeccable product).
+// =============================================================================
+
+@import (once) '_awa-tokens';
+@import (once) '_design-system';
+@import (once) '_awa-page-containers';
+
+@awa-surface-catalog: ~'html body#html-body:is(.catalog-category-view, .catalogsearch-result-index, .catalog-product-view)';
+@awa-surface-account: ~'html body#html-body:is(.account, .b2b-account-dashboard, .b2b-account-shell, .customer-account-index, [class*="b2b-"])';
+@awa-surface-home: ~'html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)';
+@awa-surface-cart: ~'html body#html-body.checkout-cart-index';
+@awa-surface-flow: ~'html body#html-body:is(.b2b-quote-index, .b2b-quote-view, .b2b-quote-create, .b2b-shoppinglist-index, .b2b-shoppinglist-view, .b2b-quickorder-index)';
+@awa-surface-narrow: ~'html body#html-body:is(.checkout-index-index, .onepagecheckout-index-index, .customer-account-login, .customer-account-create, .customer-account-forgotpassword, .b2b-auth-shell, .b2b-account-login, .b2b-register-index)';
+@awa-surface-misc: ~'html body#html-body:is(.cms-noroute-index, .contact-index-index, .catalog-product-compare-index)';
+
+// ── Runtime: z-index semântico + measure + rhythm ───────────────────────────
+:root {
+    --awa-z-base: 0;
+    --awa-z-dropdown: 100;
+    --awa-z-sticky: 200;
+    --awa-z-header: 300;
+    --awa-z-overlay: 400;
+    --awa-z-modal: 500;
+    --awa-z-toast: 600;
+    --awa-z-tooltip: 700;
+
+    --awa-measure-prose: 65ch;
+    --awa-measure-ui: 75ch;
+    --awa-rhythm-unit: 24px;
+    --awa-section-gap: var(--awa-grid-gap-loose, 32px);
+    --awa-block-gap: var(--awa-grid-gap-tight, 16px);
+
+    /* Bridge _grid-system.less → tokens §95 */
+    --awa-grid-gap-xl: var(--awa-grid-gap);
+    --awa-grid-gap-lg: var(--awa-grid-gap-tight);
+}
+
+// ── Vertical rhythm: blocos principais espaçados pelo grid gap ───────────────
+@{awa-surface-catalog} .page-wrapper {
+    .page-main > .columns {
+        row-gap: var(--awa-block-gap) !important;
+    }
+
+    :is(.column.main, .col-main) > :is(.block, .toolbar, .products.wrapper, .search.results) {
+        margin-block-end: var(--awa-block-gap) !important;
+    }
+
+    :is(.column.main, .col-main) > :last-child {
+        margin-block-end: 0 !important;
+    }
+}
+
+// ── Tipografia catálogo: hierarquia escala produto (≥1.25 entre passos) ─────
+@{awa-surface-catalog} .page-wrapper {
+    :is(.page-title-wrapper, .shop-tab-title, .category-view .category-title) :is(h1, .page-title) {
+        font-size: var(--awa-text-fluid-h2, clamp(24px, 2.2vw, 32px)) !important;
+        font-weight: @awa-weight-bold !important;
+        line-height: 1.2 !important;
+        letter-spacing: -0.02em !important;
+        text-wrap: balance;
+        color: var(--awa-text, @awa-color-text-primary) !important;
+        max-width: var(--awa-measure-ui) !important;
+    }
+
+    .nav-breadcrumbs .breadcrumbs {
+        font-size: var(--awa-text-sm, 13px) !important;
+        line-height: 1.35 !important;
+    }
+
+    .toolbar.toolbar-products .toolbar-amount {
+        font-size: var(--awa-text-sm, 13px) !important;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .products-grid :is(.product-item-name, .product-name) {
+        font-size: var(--awa-text-sm, 13px) !important;
+        font-weight: @awa-weight-semibold !important;
+        line-height: 1.35 !important;
+    }
+
+    .products-grid .price {
+        font-size: var(--awa-text-lg, 18px) !important;
+        font-weight: @awa-weight-bold !important;
+        font-variant-numeric: tabular-nums;
+        line-height: 1.2 !important;
+    }
+}
+
+// ── PDP: buy-box + descrição com measure ─────────────────────────────────────
+html body#html-body.catalog-product-view .page-wrapper {
+    .product-info-main :is(h1, .page-title) {
+        font-size: var(--awa-text-fluid-h3, clamp(22px, 2vw, 28px)) !important;
+        font-weight: @awa-weight-bold !important;
+        line-height: 1.2 !important;
+        text-wrap: balance;
+        max-width: var(--awa-measure-ui) !important;
+    }
+
+    :is(.product.attribute.description, .product.info.detailed, .product-info-main) {
+        font-size: var(--awa-text-base, 14px) !important;
+        line-height: 1.5 !important;
+        max-width: var(--awa-measure-prose) !important;
+    }
+
+    :is(.block.related, .block.upsell) .block-title {
+        font-size: var(--awa-text-fluid-h4, clamp(20px, 1.8vw, 24px)) !important;
+        font-weight: @awa-weight-bold !important;
+        text-wrap: balance;
+    }
+}
+
+// ── Account/B2B: densidade UI + títulos ──────────────────────────────────────
+@{awa-surface-account} .page-wrapper {
+    .page-title-wrapper .page-title {
+        font-size: var(--awa-text-fluid-h3, clamp(22px, 2vw, 28px)) !important;
+        font-weight: @awa-weight-bold !important;
+        line-height: 1.25 !important;
+        text-wrap: balance;
+        max-width: var(--awa-measure-ui) !important;
+    }
+
+    .table-wrapper table {
+        font-size: var(--awa-text-sm, 13px) !important;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .table-wrapper th {
+        font-size: var(--awa-text-xs, 12px) !important;
+        font-weight: @awa-weight-semibold !important;
+        letter-spacing: 0.02em !important;
+        text-transform: none !important;
+    }
+}
+
+// ── Home: seções alinhadas ao shell catalog + ritmo entre blocos ─────────────
+@{awa-surface-home} .page-wrapper {
+    :is(.content-top-home, .ayo-home5-wrapper, .awa-shelf, .rokan-bestseller, .rokan-newproduct) {
+        margin-block-end: var(--awa-section-gap) !important;
+    }
+
+    :is(.awa-shelf__title, .rokan-bestseller .block-title, .rokan-newproduct .block-title) :is(h2, strong, .title) {
+        font-size: var(--awa-text-fluid-h3, clamp(22px, 2vw, 28px)) !important;
+        font-weight: @awa-weight-bold !important;
+        line-height: 1.2 !important;
+        text-wrap: balance;
+    }
+}
+
+// ── CMS prose tier 5: measure confortável ──────────────────────────────────────
+html body#html-body.cms-page-view .page-wrapper .column.main {
+    font-size: var(--awa-text-base, 14px) !important;
+    line-height: 1.55 !important;
+
+    :is(p, ul, ol, blockquote) {
+        max-width: var(--awa-measure-prose) !important;
+    }
+
+    :is(h1, h2, h3) {
+        text-wrap: balance;
+        max-width: var(--awa-measure-ui) !important;
+    }
+
+    h1 {
+        font-size: var(--awa-text-fluid-h2, clamp(24px, 2.2vw, 32px)) !important;
+    }
+
+    h2 {
+        font-size: var(--awa-text-fluid-h3, clamp(22px, 2vw, 28px)) !important;
+    }
+
+    h3 {
+        font-size: var(--awa-text-fluid-h4, clamp(20px, 1.8vw, 24px)) !important;
+    }
+}
+
+// ── Cart: ritmo tabela + summary ─────────────────────────────────────────────
+@{awa-surface-cart} .page-wrapper {
+    .page-title-wrapper .page-title {
+        font-size: var(--awa-text-fluid-h3, clamp(22px, 2vw, 28px)) !important;
+        font-weight: @awa-weight-bold !important;
+        text-wrap: balance;
+    }
+
+    :is(.cart.table-wrapper, .cart-summary) {
+        font-size: var(--awa-text-sm, 13px) !important;
+    }
+
+    .cart-summary .price {
+        font-variant-numeric: tabular-nums !important;
+        font-weight: @awa-weight-bold !important;
+    }
+}
+
+// ── Flow tier 3: formulários e listas ────────────────────────────────────────
+@{awa-surface-flow} .page-wrapper {
+    .page-title-wrapper .page-title {
+        font-size: var(--awa-text-fluid-h3, clamp(22px, 2vw, 28px)) !important;
+        font-weight: @awa-weight-bold !important;
+        text-wrap: balance;
+        max-width: var(--awa-measure-ui) !important;
+    }
+
+    :is(.form, .data-grid-wrap, .table-wrapper) {
+        font-size: var(--awa-text-sm, 13px) !important;
+    }
+}
+
+// ── Narrow: auth + checkout ───────────────────────────────────────────────────
+@{awa-surface-narrow} .page-wrapper {
+    .page-title-wrapper .page-title,
+    .checkout-index-index .step-title {
+        font-size: var(--awa-text-fluid-h3, clamp(22px, 2vw, 28px)) !important;
+        font-weight: @awa-weight-bold !important;
+        text-wrap: balance;
+    }
+
+    :is(.form, .fieldset, .opc-wrapper) {
+        font-size: var(--awa-text-base, 14px) !important;
+        line-height: 1.5 !important;
+    }
+}
+
+// ── 404, contato, compare ─────────────────────────────────────────────────────
+@{awa-surface-misc} .page-wrapper {
+    .page-title-wrapper .page-title,
+    .page-title {
+        font-size: var(--awa-text-fluid-h3, clamp(22px, 2vw, 28px)) !important;
+        font-weight: @awa-weight-bold !important;
+        text-wrap: balance;
+        max-width: var(--awa-measure-ui) !important;
+    }
+
+    .column.main {
+        font-size: var(--awa-text-base, 14px) !important;
+        line-height: 1.55 !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    @{awa-surface-catalog} .page-wrapper .products-grid :is(.item-product, .product-item),
+    @{awa-surface-account} .page-wrapper .sidebar-main .nav.item a {
+        transition: none !important;
+    }
+}

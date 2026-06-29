@@ -1,0 +1,1116 @@
+// ============================================================================
+// AWA Motos — _awa-header-premium.less
+// Portado de awa-header-premium.css (legado consolidated → S84-S92)
+// ============================================================================
+
+@import (once) '_awa-variables';
+
+/* =============================================================================
+   0. CUSTOM PROPERTIES — eixo unificado do header
+   Define uma única fonte de verdade para widths e paddings.
+   ============================================================================= */
+
+:root {
+  --awa-hdr-container-max: var(--awa-container-max, 1440px);
+  --awa-hdr-pad-inline:    var(--awa-container-pad, 24px);
+  --awa-hdr-content-max:   calc(var(--awa-hdr-container-max) - (var(--awa-hdr-pad-inline) * 2));
+  --awa-hdr-height:        var(--awa-size-80, 80px);
+  --awa-hdr-height-sticky: 56px;
+  --awa-hdr-navbar-h:      46px;
+  --awa-hdr-search-h:      46px;
+  --awa-hdr-gap:           var(--awa-space-lg, 24px);
+  --awa-hdr-radius:        8px;
+  --awa-red: @awa-color-primary;
+  --awa-red-hover:         #982c30;
+  --awa-border:            #e6e6e6;
+  --awa-border-light:      @awa-neutral-300;
+}
+
+
+/* =============================================================================
+   1. STACKING CONTEXT
+   ============================================================================= */
+
+body > .page-wrapper {
+  position: relative !important;
+  z-index: var(--awa-z-1, 1) !important;
+}
+
+body > .content-top-home {
+  position: relative !important;
+  z-index: var(--awa-z-0, 0) !important;
+}
+
+
+/* =============================================================================
+   2. <header> WRAPPER — dissolve para não criar camada extra
+   ============================================================================= */
+
+header.awa-site-header.awa-header-professional {
+  display: contents !important;
+}
+
+
+/* =============================================================================
+   3. STICKY / CONDENSED
+   ============================================================================= */
+
+body .page-wrapper .awa-site-header.is-sticky,
+body .page-wrapper .awa-site-header._fixed,
+body .page-wrapper .awa-site-header.awa-header-condensed,
+body .page-wrapper .page-header.is-sticky,
+body .page-wrapper .page-header.sticky {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: var(--awa-z-200, 200) !important;
+  box-shadow: 0 2px 16px rgb(0 0 0 / 10%) !important;
+}
+
+body .page-wrapper .awa-site-header.awa-header-condensed,
+body .page-wrapper .awa-site-header.awa-header-condensed.awa-header-professional {
+  background: var(--awa-white, @awa-color-white) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-bottom: var(--awa-border-width, 1px) solid var(--awa-border) !important;
+}
+
+body .page-wrapper .awa-site-header.awa-header-condensed #header :is(.awa-main-header__inner[data-awa-header-row], .wp-header[data-awa-header-row]) {
+  min-height: var(--awa-hdr-height-sticky) !important;
+  height:     var(--awa-hdr-height-sticky) !important;
+}
+
+body .page-wrapper .awa-site-header.awa-header-condensed #header .awa-header-brand-cell .logo img {
+  max-height: var(--awa-size-34, 34px) !important;
+}
+
+body .page-wrapper .awa-site-header.awa-header-condensed #header .awa-header-search-col form.minisearch,
+body .page-wrapper .awa-site-header.awa-header-condensed #header .awa-header-search-col .block-search form.minisearch {
+  height:     var(--awa-size-38, 38px) !important;
+  min-height: var(--awa-size-38, 38px) !important;
+}
+
+
+/* =============================================================================
+   4. TOPBAR (awa-b2b-promo-bar) — mesma largura que header
+   ============================================================================= */
+
+@media (min-width: 992px) {
+
+  #header .top-header.awa-b2b-promo-bar {
+    display:         flex !important;
+    justify-content: center !important;
+    align-items:     center !important;
+    padding:         7px var(--awa-hdr-pad-inline) !important;
+  }
+
+  #header .awa-b2b-promo-bar__inner {
+    display:         flex !important;
+    justify-content: center !important;
+    align-items:     center !important;
+    width:           100% !important;
+    max-width:       var(--awa-hdr-content-max) !important;
+    padding:         0 !important;
+  }
+
+}
+
+
+/* =============================================================================
+   5. DESKTOP ≥ 992px — HEADER PRINCIPAL
+   ============================================================================= */
+
+@media (min-width: 992px) {
+
+  /* ── 5a. Main header — zero padding (bundles adicionam 14px 24px) ───── */
+  #header .header.awa-main-header,
+  #header .awa-main-header {
+    background:     var(--awa-white, @awa-color-white) !important;
+    padding:        0 !important;
+    border-bottom:  var(--awa-border-width, 1px) solid var(--awa-border) !important;
+  }
+
+  /* ── 5b. Container chain — todos transparentes ────────────────────────
+     Objetivo: que o .container e os wrappers intermediários não adicionem
+     padding ou margin, deixando tudo para o .wp-header grid. ──────────── */
+  #header .header_main.awa-main-header-inner-wrap,
+  #header [data-awa-header-main-wrap='true'] {
+    padding:     0 !important;
+    margin:      0 !important;
+    display:     flex !important;
+    align-items: center !important;
+    width:       100% !important;
+    max-width:   none !important;
+    box-sizing:  border-box !important;
+  }
+
+  #header [data-awa-header-main-wrap='true'] > .header-main,
+  #header .header_main.awa-main-header-inner-wrap > .header-main,
+  #header .awa-main-header-inner-wrap > .header-main {
+    flex:      var(--awa-flex-auto, 1 1 auto) !important;
+    width:     100% !important;
+    max-width: none !important;
+    min-width: var(--awa-zero, 0) !important;
+  }
+
+  #header .header-main > .container,
+  #header .header-main .container {
+    max-width:     var(--awa-hdr-container-max) !important;
+    width:         100% !important;
+    margin-left:   auto !important;
+    margin-right:  auto !important;
+    padding-left:  var(--awa-hdr-pad-inline) !important;
+    padding-right: var(--awa-hdr-pad-inline) !important;
+    box-sizing:    border-box !important;
+  }
+
+
+  /* ── 5c. WP-HEADER — o grid de 3 colunas ────────────────────────────
+     1fr | minmax(280px, 660px) | 1fr
+     As colunas 1fr absorvem a diferença de tamanho entre logo e actions,
+     mantendo a coluna central (busca) sempre no centro geométrico. ───── */
+  #header .awa-main-header :is(.awa-main-header__inner[data-awa-header-row], .wp-header[data-awa-header-row]),
+  #header .header_main :is(.awa-main-header__inner[data-awa-header-row], .wp-header[data-awa-header-row]),
+  #header .header-main :is(.awa-main-header__inner[data-awa-header-row], .wp-header[data-awa-header-row]),
+  #header :is(.awa-main-header__inner[data-awa-header-row], .wp-header[data-awa-header-row]) {
+    display:               grid !important;
+    grid-template-columns: auto minmax(0, 1fr) auto !important;
+    gap:                   var(--awa-hdr-gap) !important;
+    min-height:            var(--awa-hdr-height) !important;
+    height:                var(--awa-hdr-height) !important;
+    max-width:             none !important;
+    margin-left:           auto !important;
+    margin-right:          auto !important;
+    padding:               0 !important;
+    align-items:           center !important;
+    width:                 100% !important;
+  }
+
+  /* primary-row dissolve — filhos participam do grid diretamente */
+  #header :is(.awa-main-header__inner[data-awa-header-row], .wp-header[data-awa-header-row]) .awa-header-primary-row {
+    display: contents !important;
+  }
+
+  /* Elementos mobile ocultos no desktop */
+  #header :is(.awa-main-header__inner[data-awa-header-row], .wp-header[data-awa-header-row]) .awa-header-mobile-toggle,
+  #header :is(.awa-main-header__inner[data-awa-header-row], .wp-header[data-awa-header-row]) .awa-header-cart-link {
+    display: none !important;
+  }
+
+
+  /* ── 5d. LOGO — coluna 1 (1fr, alinhado à esquerda) ────────────────── */
+  #header .awa-header-brand-cell,
+  #header .col-md-2.awa-header-brand {
+    justify-self: start !important;
+    align-self:   center !important;
+    display:      flex !important;
+    align-items:  center !important;
+    justify-content: flex-start !important;
+    min-width:    var(--awa-size-120, 120px) !important;
+  }
+
+  #header .awa-header-brand-cell .logo img {
+    max-height:  var(--awa-size-50, 50px) !important;
+    min-height:  var(--awa-space-8, 40px) !important;
+    height:      auto !important;
+    width:       auto !important;
+    object-fit:  contain !important;
+  }
+
+
+  /* ── 5e. BUSCA — coluna 2 (center, stretch) ─────────────────────────── */
+  #header .awa-header-search-col.top-search,
+  #header .awa-header-search-col.awa-header-actions,
+  #header .awa-header-search-col {
+    justify-self: center !important;
+    width:        100% !important;
+    max-width:    720px !important;
+    min-width:    var(--awa-zero, 0) !important;
+  }
+
+
+  /* ── 5f. BUSCA — layout do form (botão à direita) ───────────────────── */
+  #header .awa-header-search-col form.minisearch,
+  #header .awa-header-search-col .block-search form.minisearch {
+    display:       flex !important;
+    align-items:   stretch !important;
+    flex-wrap:     nowrap !important;
+    overflow:      hidden !important;
+    border-radius: var(--awa-hdr-radius) !important;
+    height:        var(--awa-hdr-search-h) !important;
+    min-height:    var(--awa-hdr-search-h) !important;
+    border:        1.5px solid var(--awa-border-light) !important;
+    gap: var(--awa-zero, 0) !important;
+    padding:       0 !important;
+    box-shadow:    var(--awa-shadow-xs4, 0 1px 3px rgb(0 0 0 / 4%)) !important;
+    transition:    var(--awa-transition-border-shadow, border-color 180ms ease, box-shadow 180ms ease) !important;
+  }
+
+  #header .awa-header-search-col form.minisearch:focus-within,
+  #header .awa-header-search-col .block-search form.minisearch:focus-within {
+    border-color: var(--awa-red) !important;
+    box-shadow:   0 0 0 3px rgb(183 51 55 / 8%), 0 1px 3px rgb(0 0 0 / 4%) !important;
+  }
+
+  #header .awa-header-search-col form.minisearch .field.search {
+    flex:      var(--awa-flex-auto, 1 1 auto) !important;
+    display:   flex !important;
+    min-width: var(--awa-zero, 0) !important;
+  }
+
+  #header .awa-header-search-col form.minisearch .field.search .control {
+    flex:        var(--awa-flex-1, 1) !important;
+    display:     flex !important;
+    align-items: stretch !important;
+    min-width:   var(--awa-zero, 0) !important;
+  }
+
+  #header .awa-header-search-col input#search,
+  #header .awa-header-search-col form.minisearch input.input-text {
+    flex:          var(--awa-flex-1, 1) !important;
+    height:        100% !important;
+    padding:       0 var(--awa-space-4, 16px) !important;
+    border:        var(--awa-leading-zero, 0) !important;
+    border-radius: var(--awa-radius-none, 0) !important;
+    background:    var(--awa-transparent, transparent) !important;
+    outline:       var(--awa-none, none) !important;
+    box-shadow:    var(--awa-shadow-none, none) !important;
+    min-width:     var(--awa-zero, 0) !important;
+    width:         100% !important;
+    font-size:     var(--awa-text-base-plus, 15px) !important;
+  }
+
+  #header .awa-header-search-col form.minisearch .actions,
+  #header .awa-header-search-col form.minisearch .awa-search-action-wrapper {
+    display:     flex !important;
+    align-items: stretch !important;
+    flex:        var(--awa-flex-none, 0 0 auto) !important;
+    margin:      0 !important;
+    padding:     0 !important;
+  }
+
+  #header .awa-header-search-col button.action.search,
+  #header .awa-header-search-col .actions .action.search,
+  #header .awa-header-search-col .awa-search-action-wrapper .action.search {
+    position:         static !important;
+    left:             auto !important;
+    top:              auto !important;
+    transform:        none !important;
+    display:          flex !important;
+    align-items:      center !important;
+    justify-content:  center !important;
+    background:       var(--awa-red) !important;
+    background-color: var(--awa-red) !important;
+    color:            var(--awa-white, @awa-color-white) !important;
+    border-radius:    var(--awa-radius-right-sm, 0 7px 7px 0) !important;
+    border:           var(--awa-leading-zero, 0) !important;
+    width:            var(--awa-space-9-5, 52px) !important;
+    min-width:        var(--awa-space-9-5, 52px) !important;
+    height:           100% !important;
+    transition:       var(--awa-transition-fast, 0.15s ease) !important;
+    padding:          0 !important;
+    margin:           0 !important;
+    cursor:           pointer !important;
+  }
+
+  #header .awa-header-search-col button.action.search svg,
+  #header .awa-header-search-col .actions .action.search svg {
+    color:  var(--awa-white, @awa-color-white) !important;
+    stroke: var(--awa-white, @awa-color-white) !important;
+    fill:   none !important;
+  }
+
+  #header .awa-header-search-col button.action.search:hover,
+  #header .awa-header-search-col .actions .action.search:hover {
+    background:       var(--awa-red-hover) !important;
+    background-color: var(--awa-red-hover) !important;
+  }
+
+
+  /* ── 5g. BLOCO DIREITO — coluna 3 (1fr, alinhado à direita) ────────── */
+  #header .awa-header-right-col {
+    justify-self: end !important;
+    align-self:   center !important;
+    display:      flex !important;
+    align-items:  center !important;
+    gap:          var(--awa-gap-lg, 16px) !important;
+    white-space:  nowrap !important;
+    min-width:    max-content !important;
+  }
+
+  #header .awa-header-right-col .top-account.awa-header-account-nav {
+    display: none !important;
+  }
+
+
+  /* ── 5h. AUTH PROMPT (login/cadastro) ───────────────────────────────── */
+  #header .awa-header-right-col .awa-header-account-prompt {
+    display:     flex !important;
+    align-items: center !important;
+    gap:         var(--awa-gap-2-25, 9px) !important;
+    padding: var(--awa-space-2, 8px) var(--awa-space-3, 12px) !important;
+    border:      var(--awa-border-width, 1px) solid rgb(226 232 240 / 92%) !important;
+    border-radius: var(--awa-radius-md-lg, 8px) !important;
+    background:  linear-gradient(180deg, rgb(255 255 255 / 98%) 0%, rgb(248 250 252 / 96%) 100%) !important;
+    box-shadow:  0 10px 24px rgb(15 23 42 / 4%) !important;
+    max-width:   var(--awa-size-220, 220px) !important;
+    flex-shrink: var(--awa-flex-shrink-0, 0) !important;
+  }
+
+  #header .awa-header-right-col .awa-header-account-prompt__icon svg {
+    width:  var(--awa-space-5-5, 22px) !important;
+    height: var(--awa-space-5-5, 22px) !important;
+  }
+
+  #header .awa-header-right-col .awa-header-account-prompt__line1 {
+    font-size:   var(--awa-text-2xs, 11px) !important;
+    line-height: var(--awa-leading-base, 1.3) !important;
+    color:       #8b97a8 !important;
+  }
+
+  #header .awa-header-right-col .awa-header-account-prompt__line2 {
+    font-size:   var(--awa-text-sm, 13px) !important;
+    font-weight: var(--awa-weight-semibold, 600) !important;
+    line-height: var(--awa-leading-base, 1.3) !important;
+  }
+
+  #header .awa-header-right-col .awa-header-account-prompt__link {
+    color:           #a63135 !important;
+    font-weight:     var(--awa-weight-semibold, 600) !important;
+    text-decoration: var(--awa-none, none) !important;
+    transition:      var(--awa-transition-fast, 0.15s ease) !important;
+  }
+
+  #header .awa-header-right-col .awa-header-account-prompt__link:hover,
+  #header .awa-header-right-col .awa-header-account-prompt__link:focus-visible {
+    color:           #842528 !important;
+    text-decoration: var(--awa-underline, underline) !important;
+    text-underline-offset: var(--awa-underline-offset-sm, 2px) !important;
+  }
+
+  #header .awa-header-right-col .awa-header-account-prompt__link--register {
+    color:       var(--awa-neutral-600) !important;
+    font-weight: var(--awa-weight-semibold, 600) !important;
+  }
+
+  #header .awa-header-right-col .awa-header-account-prompt__link--register:hover,
+  #header .awa-header-right-col .awa-header-account-prompt__link--register:focus-visible {
+    color: #a63135 !important;
+  }
+
+  #header .awa-header-right-col .awa-header-account-prompt__separator {
+    color:       #c0cad7 !important;
+    font-weight: var(--awa-weight-normal, 400) !important;
+    margin:      0 var(--awa-space-0-5, 2px) !important;
+  }
+
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     6. NAVBAR — mesma largura/eixo que o header
+     ═══════════════════════════════════════════════════════════════════════ */
+
+  #header .header-control.header-nav.awa-nav-bar,
+  #header .header-control.awa-nav-bar {
+    min-height:    var(--awa-hdr-navbar-h) !important;
+    border-top:    var(--awa-border-width, 1px) solid var(--awa-border) !important;
+    border-bottom: var(--awa-border-width, 1px) solid var(--awa-border) !important;
+    padding:       0 !important;
+  }
+
+  /* O .container dentro da navbar deve ser transparente (full width) */
+  #header .header-control.awa-nav-bar > .container {
+    max-width:  none !important;
+    width:      100% !important;
+    padding:    0 !important;
+    margin:     0 !important;
+  }
+
+  /* O inner da navbar usa o mesmo eixo que o wp-header */
+  #header .header-control.awa-nav-bar .awa-nav-bar__inner {
+    min-height:    var(--awa-hdr-navbar-h) !important;
+    display:       flex !important;
+    align-items:   stretch !important;
+    gap: var(--awa-zero, 0) !important;
+    width:         100% !important;
+    max-width:     var(--awa-hdr-content-max) !important;
+    margin-left:   auto !important;
+    margin-right:  auto !important;
+    padding-left:  var(--awa-hdr-pad-inline) !important;
+    padding-right: var(--awa-hdr-pad-inline) !important;
+    box-sizing:    border-box !important;
+  }
+
+  /* Departamentos */
+  #header .awa-header-categories {
+    flex:      0 0 var(--awa-size-236, 236px) !important;
+    max-width: var(--awa-size-236, 236px) !important;
+    min-width: var(--awa-size-236, 236px) !important;
+  }
+
+  #header .awa-header-categories .our_categories,
+  #header .awa-header-categories .our_categories.title-category-dropdown {
+    height:           var(--awa-hdr-navbar-h) !important;
+    background:       var(--awa-red) !important;
+    background-color: var(--awa-red) !important;
+    color:            var(--awa-white, @awa-color-white) !important;
+    transition:       var(--awa-transition-fast, 0.15s ease) !important;
+  }
+
+  #header .awa-header-categories .our_categories:hover,
+  #header .awa-header-categories .our_categories.title-category-dropdown:hover {
+    background:       var(--awa-red-hover) !important;
+    background-color: var(--awa-red-hover) !important;
+  }
+
+  #header .awa-header-categories .our_categories svg,
+  #header .awa-header-categories .our_categories.title-category-dropdown svg {
+    color:  var(--awa-white, @awa-color-white) !important;
+    fill:   var(--awa-white, @awa-color-white) !important;
+    stroke: var(--awa-white, @awa-color-white) !important;
+  }
+
+  #header .awa-header-categories .section-items > .section-item-content {
+    min-height: var(--awa-hdr-navbar-h) !important;
+  }
+
+  /* Nav principal: flex-grow para preencher espaço */
+  #header .awa-header-primary-nav.menu_primary,
+  #header .awa-header-primary-nav {
+    flex:        var(--awa-flex-auto, 1 1 auto) !important;
+    min-width:   var(--awa-zero, 0) !important;
+    display:     flex !important;
+    align-items: stretch !important;
+  }
+
+  /* Links da navbar */
+  #header .menu_primary nav > ul > li > a,
+  #header .menu_primary .level0 > a,
+  #header .awa-header-primary-nav .navigation.custommenu li.level0 > a,
+  #header .awa-header-primary-nav .navigation li.level0 > a {
+    height:      var(--awa-hdr-navbar-h) !important;
+    font-size:   var(--awa-text-base, 14px) !important;
+    font-weight: var(--awa-weight-medium, 500) !important;
+    padding:     0 var(--awa-space-5, 20px) !important;
+    display:     inline-flex !important;
+    align-items: center !important;
+    white-space: nowrap !important;
+    transition:  color 180ms ease, box-shadow 180ms ease !important;
+  }
+
+  /* Force visibility for all top level menu items (overrides refinements.css) */
+  #header .navigation li.level0,
+  #header .navigation .level0 {
+    display: inline-flex !important;
+  }
+
+  #header ~ * .navigation.verticalmenu.side-verticalmenu > ul.togge-menu,
+  body .page-wrapper .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown {
+    width:     var(--awa-size-236, 236px) !important;
+    min-width: var(--awa-size-236, 236px) !important;
+    max-width: var(--awa-size-236, 236px) !important;
+  }
+
+  /* Indicador de página ativa */
+  #header .awa-header-primary-nav .navigation.custommenu li.level0.active > a,
+  #header .awa-header-primary-nav .navigation.custommenu li.level0.current > a,
+  #header .menu_primary .level0.active > a,
+  #header .menu_primary .level0.current > a {
+    color:      var(--awa-red) !important;
+    box-shadow: inset 0 -2px 0 0 var(--awa-red) !important;
+  }
+
+
+  /* ─── Fix 7: Navbar links visíveis (override refinements.css display:none) ──── */
+  body .page-wrapper #header .awa-nav-bar .header-wrapper-sticky .container-header-sticky {
+    display: flex !important;
+    align-items: stretch !important;
+    width: 100% !important;
+  }
+
+  body .page-wrapper #header .awa-nav-bar .header-wrapper-sticky .container-header-sticky .col-sticky-logo {
+    display: flex !important;
+    flex: var(--awa-flex-none, 0 0 auto) !important;
+  }
+
+  body .page-wrapper #header .awa-nav-bar .header-wrapper-sticky .container-header-sticky .col-sticky-logo .logo-sticky {
+    display: none !important;
+  }
+
+  body .page-wrapper #header .awa-nav-bar .header-wrapper-sticky .container-header-sticky nav.top-menu-sticky {
+    display: flex !important;
+    flex: var(--awa-flex-auto, 1 1 auto) !important;
+    min-width: var(--awa-zero, 0) !important;
+  }
+
+  body .page-wrapper #header .awa-nav-bar .navigation.custommenu.main-nav ul.main-nav-list {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    list-style: var(--awa-none, none) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  body .page-wrapper #header .awa-nav-bar .navigation.custommenu.main-nav ul.main-nav-list > div {
+    display: inline-flex !important;
+  }
+
+  body .page-wrapper #header .awa-nav-bar .navigation.custommenu.main-nav ul.main-nav-list li.level0 {
+    display: inline-flex !important;
+    align-items: stretch !important;
+  }
+
+  body .page-wrapper #header .awa-nav-bar .navigation.custommenu.main-nav ul.main-nav-list li.level0 > .submenu {
+    display: none !important;
+  }
+
+  /* ─── Fix 8b: Verticalmenu button min-width override ─────────────────────────── */
+  #header .awa-header-categories nav.navigation.verticalmenu.side-verticalmenu {
+    width: var(--awa-size-236, 236px) !important;
+    max-width: var(--awa-size-236, 236px) !important;
+    min-width: var(--awa-zero, 0) !important;
+  }
+
+  #header .awa-header-categories {
+    padding: 0 !important;
+    position: relative !important;
+    z-index: var(--awa-z-100, 100) !important;
+    overflow: visible !important;
+  }
+
+
+} /* fim ≥992px */
+
+
+/* =============================================================================
+   7. TELA LARGA ≥ 1200px
+   ============================================================================= */
+
+@media (min-width: 1200px) {
+
+  #header :is(.awa-main-header__inner[data-awa-header-row], .wp-header[data-awa-header-row]) {
+    gap: var(--awa-space-6-5, 28px) !important;
+  }
+
+  #header .awa-header-right-col {
+    gap: var(--awa-space-5, 20px) !important;
+  }
+
+  #header .awa-main-header :is(.awa-main-header__inner[data-awa-header-row], .wp-header[data-awa-header-row]),
+  #header :is(.awa-main-header__inner[data-awa-header-row], .wp-header[data-awa-header-row]) {
+    grid-template-columns: auto minmax(0, 1fr) auto !important;
+  }
+
+}
+
+
+/* =============================================================================
+   8. TABLET 992–1280px
+   ============================================================================= */
+
+@media (max-width: 1280px) and (min-width: 992px) {
+
+  :root {
+    --awa-hdr-gap: var(--awa-space-md, 16px);
+  }
+
+  #header .awa-header-categories {
+    flex:      0 0 var(--awa-size-200, 200px) !important;
+    max-width: var(--awa-size-200, 200px) !important;
+    min-width: var(--awa-size-200, 200px) !important;
+  }
+
+  #header .awa-main-header :is(.awa-main-header__inner[data-awa-header-row], .wp-header[data-awa-header-row]),
+  #header :is(.awa-main-header__inner[data-awa-header-row], .wp-header[data-awa-header-row]) {
+    grid-template-columns: auto minmax(0, 1fr) auto !important;
+    gap: var(--awa-hdr-gap) !important;
+  }
+
+}
+
+
+/* =============================================================================
+   9. MOBILE < 992px
+   ============================================================================= */
+
+@media (max-width: 991px) {
+
+  #header .header .header-main :is(.awa-main-header__inner[data-awa-header-row], .wp-header[data-awa-header-row]),
+  #header .header .header_main :is(.awa-main-header__inner[data-awa-header-row], .wp-header[data-awa-header-row]),
+  #header .header_main :is(.awa-main-header__inner[data-awa-header-row], .wp-header[data-awa-header-row]),
+  #header .header-main :is(.awa-main-header__inner[data-awa-header-row], .wp-header[data-awa-header-row]),
+  #header :is(.awa-main-header__inner[data-awa-header-row], .wp-header[data-awa-header-row]) {
+    display: grid !important;
+    grid-template-columns: 44px minmax(0, 1fr) 44px !important;
+    grid-template-rows: auto auto !important;
+    grid-template-areas:
+      "nav brand cart"
+      "search search search" !important;
+    gap: 16px 12px !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-height: auto !important;
+    height: auto !important;
+    padding: 0 16px !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+  }
+
+  #header :is(.awa-main-header__inner[data-awa-header-row], .wp-header[data-awa-header-row]) .awa-header-primary-row {
+    display: contents !important;
+  }
+
+  #header .awa-header-mobile-toggle {
+    grid-area: nav !important;
+    justify-self: start !important;
+    align-self: center !important;
+  }
+
+  #header .awa-header-brand-cell,
+  #header .col-md-2.awa-header-brand {
+    grid-area: brand !important;
+    justify-self: center !important;
+    justify-content: center !important;
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+
+  #header .awa-header-brand-cell .logo,
+  #header .col-md-2.awa-header-brand .logo {
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  #header .awa-header-brand-cell .logo img,
+  #header .col-md-2.awa-header-brand .logo img {
+    max-height: 44px !important;
+    min-height: 0 !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  #header .awa-header-cart-link {
+    grid-area: cart !important;
+    justify-self: end !important;
+    align-self: center !important;
+  }
+
+  #header :is(.awa-main-header__inner[data-awa-header-row], .wp-header[data-awa-header-row]) > .top-search,
+  #header :is(.awa-main-header__inner[data-awa-header-row], .wp-header[data-awa-header-row]) > .awa-header-search-col {
+    grid-area: search !important;
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  #header .header.awa-main-header,
+  #header .awa-main-header {
+    padding:       0 !important;
+    border-bottom: var(--awa-border-width, 1px) solid var(--awa-border) !important;
+  }
+
+  #header .awa-header-right-col {
+    display: none !important;
+  }
+
+  #header .top-search button.action.search,
+  #header .top-search button.awa-search-btn,
+  #header .awa-header-search-col button.action.search {
+    position:         static !important;
+    left:             auto !important;
+    top:              auto !important;
+    transform:        none !important;
+    background:       var(--awa-red) !important;
+    background-color: var(--awa-red) !important;
+    color:            var(--awa-white, @awa-color-white) !important;
+  }
+
+  #header .top-search button.action.search svg,
+  #header .awa-header-search-col button.action.search svg {
+    color:  var(--awa-white, @awa-color-white) !important;
+    stroke: var(--awa-white, @awa-color-white) !important;
+  }
+
+  #header .awa-header-search-col .mst-searchautocomplete__autocomplete {
+    left:      0 !important;
+    width:     calc(100% + 44px) !important;
+    max-width: none !important;
+  }
+
+  #header .mst-searchautocomplete__autocomplete {
+    margin-top: var(--awa-space-1, 4px) !important;
+  }
+
+}
+
+@media (max-width: 480px) {
+
+  #header .top-header.awa-b2b-promo-bar,
+  #header .awa-b2b-promo-bar[data-awa-header-utility] {
+    min-height: var(--awa-size-38, 38px) !important;
+    padding: var(--awa-space-1-5, 6px) var(--awa-space-3, 12px) !important;
+  }
+
+  #header .awa-b2b-promo-bar__inner {
+    width: 100% !important;
+    max-width: none !important;
+    justify-content: center !important;
+    padding: 0 !important;
+  }
+
+  #header .awa-b2b-promo-bar__text {
+    margin: 0 !important;
+    font-size: var(--awa-text-2xs, 11px) !important;
+    line-height: var(--awa-leading-snug, 1.25) !important;
+    text-align: center !important;
+    text-wrap: balance !important;
+  }
+
+  #header .awa-b2b-promo-bar__lead {
+    font-size: var(--awa-text-10-5, 10.5px) !important;
+  }
+
+  #header .awa-b2b-promo-bar__separator,
+  #header .awa-b2b-promo-bar__tail {
+    display: none !important;
+  }
+
+  #header .awa-b2b-promo-bar__cta {
+    display: inline !important;
+    margin-left: var(--awa-space-1, 4px) !important;
+    min-height: var(--awa-zero, 0) !important;
+    padding: 0 !important;
+    border: var(--awa-leading-zero, 0) !important;
+    border-radius: var(--awa-radius-none, 0) !important;
+    background: var(--awa-transparent, transparent) !important;
+    box-shadow: var(--awa-shadow-none, none) !important;
+  }
+}
+
+/* ─── Fix 6: header-content padding reset (global) ────────────────────────── */
+#header .header-content {
+  padding: 0 !important;
+}
+
+/* Fix 6: header-content padding reset (global) */
+#header .header-content {
+  padding: 0 !important;
+}
+
+/* =============================================================================
+   V10-POLISH — Premium Refinements
+   Tokens via awa-design-tokens.css.
+   ============================================================================= */
+
+/* ── POLISH 1: Sticky header com glassmorphism sutil ──────────────────────── */
+body .page-wrapper .awa-site-header.is-sticky,
+body .page-wrapper .awa-site-header._fixed {
+    backdrop-filter: blur(12px) saturate(1.2) !important;
+    -webkit-backdrop-filter: blur(12px) saturate(1.2) !important;
+    background: rgba(255, 255, 255, 0.92) !important;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.06),
+                0 4px 16px rgba(0,0,0,0.06) !important;
+}
+
+/* Condensed mantém sólido (conteúdo abaixo pode ser opaco) */
+body .page-wrapper .awa-site-header.awa-header-condensed {
+    background: var(--awa-white, @awa-color-white) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* ── POLISH 2: Transição suave ao entrar/sair de sticky ───────────────────── */
+body .page-wrapper .awa-site-header,
+body .page-wrapper .page-header {
+    transition:
+        background 0.3s ease,
+        box-shadow 0.3s ease,
+        backdrop-filter 0.3s ease !important;
+}
+
+/* ── POLISH 3: Search input — focus glow de marca ─────────────────────────── */
+@media (min-width: 992px) {
+  #header .awa-header-search-col form.minisearch:focus-within,
+  #header .awa-header-search-col .block-search form.minisearch:focus-within {
+      border-color: var(--awa-primary, @awa-color-primary) !important;
+      box-shadow: 0 0 0 3px rgb(183 51 55 / 10%),
+                  0 1px 3px rgb(0 0 0 / 4%) !important;
+  }
+
+  #header .awa-header-search-col form.minisearch:focus-within input#search,
+  #header .awa-header-search-col .block-search form.minisearch:focus-within input.input-text {
+      background: rgba(183, 51, 55, 0.02) !important;
+  }
+
+  /* ── POLISH 4: Botão search — gradiente sutil no hover ──────────────────── */
+  #header .awa-header-search-col button.action.search:hover,
+  #header .awa-header-search-col .actions .action.search:hover {
+      background: var(--awa-primary-hover, @awa-color-primary-dark) !important;
+      background-color: var(--awa-primary-hover, @awa-color-primary-dark) !important;
+      transition: background var(--awa-duration-fast, 0.15s) ease !important;
+  }
+
+  /* ── POLISH 5: Navbar links — underline animado ─────────────────────────── */
+  #header .menu_primary nav > ul > li > a,
+  #header .menu_primary .level0 > a,
+  #header .awa-header-primary-nav .navigation.custommenu li.level0 > a,
+  #header .awa-header-primary-nav .navigation li.level0 > a {
+      position: relative !important;
+  }
+
+  #header .menu_primary .level0 > a::after,
+  #header .awa-header-primary-nav .navigation.custommenu li.level0 > a::after,
+  #header .awa-header-primary-nav .navigation li.level0 > a::after {
+      content: '' !important;
+      position: absolute !important;
+      bottom: -2px !important;
+      left: 50% !important;
+      width: 0 !important;
+      height: 2px !important;
+      background: var(--awa-primary, @awa-color-primary) !important;
+      border-radius: 2px !important;
+      transform: translateX(-50%) !important;
+      transition: width var(--awa-duration-fast, 0.15s) ease !important;
+  }
+
+  #header .menu_primary .level0 > a:hover::after,
+  #header .awa-header-primary-nav .navigation.custommenu li.level0 > a:hover::after,
+  #header .awa-header-primary-nav .navigation li.level0 > a:hover::after,
+  #header .awa-header-primary-nav .navigation.custommenu li.level0.active > a::after,
+  #header .awa-header-primary-nav .navigation.custommenu li.level0.current > a::after,
+  #header .menu_primary .level0.active > a::after,
+  #header .menu_primary .level0.current > a::after {
+      width: 60% !important;
+  }
+
+  /* Remove o box-shadow inset antigo do active em favor do ::after underline */
+  #header .awa-header-primary-nav .navigation.custommenu li.level0.active > a,
+  #header .awa-header-primary-nav .navigation.custommenu li.level0.current > a,
+  #header .menu_primary .level0.active > a,
+  #header .menu_primary .level0.current > a {
+      box-shadow: none !important;
+  }
+}
+
+/* ===========================================================
+   WCAG 2.1 AA — Color Contrast Fixes (Lighthouse audit 2026-04)
+   Targets all elements failing color-contrast audit.
+   =========================================================== */
+
+/* --- A+B: Promo bar lead, tail & text ---
+   Problem: var(--awa-text-light)=@awa-color-text-light on @awa-color-primary = 2.08:1
+   Fix: @awa-color-white on @awa-color-primary = 6.0:1
+   Specificity: html body .page-wrapper to beat utility-bar p rule */
+html body .page-wrapper .awa-site-header .awa-b2b-promo-bar .awa-b2b-promo-bar__lead,
+html body .page-wrapper .awa-site-header .awa-b2b-promo-bar .awa-b2b-promo-bar__tail,
+html body .page-wrapper .awa-site-header .awa-b2b-promo-bar .awa-b2b-promo-bar__text,
+html body .page-wrapper .awa-site-header .awa-utility-bar.awa-b2b-promo-bar p {
+    color: @awa-color-white !important;
+}
+
+/* --- C: SKU values in product cards ---
+   Problem: #777 on @awa-color-white = 4.48:1 (fails AA for 11px/500w small text)
+   Fix: #595959 on @awa-color-white = 7.0:1 */
+.awa-b2b-sku__value {
+    color: #595959 !important;
+}
+
+/* --- D: Footer business-contact section on light bg ---
+   Problem: @awa-color-white text on @awa-neutral-50 bg = 1.01:1
+   awa-footer--dark experiment inactive → bg stays light.
+   Fix: dark text when experiment control variant is active */
+.awa-footer-exp--control .awa-footer-business-contact__title,
+.page_footer:not(.awa-footer--active-dark) .awa-footer-business-contact__title {
+    color: var(--awa-neutral-800) !important;
+}
+.awa-footer-exp--control .awa-footer-business-contact__eyebrow,
+.page_footer:not(.awa-footer--active-dark) .awa-footer-business-contact__eyebrow {
+    color: @awa-color-primary !important;
+}
+.awa-footer-exp--control .awa-footer-business-contact__copy,
+.page_footer:not(.awa-footer--active-dark) .awa-footer-business-contact__copy {
+    color: var(--awa-neutral-700) !important;
+}
+
+/* --- E: Footer contact action labels on light bg ---
+   Problem: @awa-color-border on @awa-neutral-50 = 1.07:1 */
+.awa-footer-exp--control .awa-footer-business-contact__action-copy strong,
+.page_footer:not(.awa-footer--active-dark) .awa-footer-business-contact__action-copy strong {
+    color: var(--awa-neutral-800) !important;
+}
+.awa-footer-exp--control .awa-footer-business-contact__action-copy small,
+.page_footer:not(.awa-footer--active-dark) .awa-footer-business-contact__action-copy small {
+    color: var(--awa-neutral-600) !important;
+}
+.awa-footer-exp--control .awa-footer-business-contact__action-icon,
+.page_footer:not(.awa-footer--active-dark) .awa-footer-business-contact__action-icon {
+    color: @awa-color-primary !important;
+}
+
+/* --- F: Footer pay-sec label ---
+   Problem: @awa-color-gray-500 on #f0f2f5 = 3.5:1 (fails 4.5:1 for small text)
+   Fix: #4b5563 on #f0f2f5 = 5.9:1 */
+.awa-footer-pay-sec__label {
+    color: #4b5563 !important;
+}
+
+/* WCAG 2.1 AA: footer security seals microcopy */
+.security-seals .microcopy {
+    color: #595959 !important;
+}
+
+/* WCAG 2.5.5: cart fallback link target size */
+a.awa-header-cart-fallback {
+    min-height: 24px;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* =============================================================================
+   NAV BAR — Primary nav link colors white on red bar (v12)
+   Fix: styles-l.css (2nd load at pos 56) uses !important + high specificity.
+   Using #html-body gives (1,x,y) which beats any class-only selector.
+   TWO elements have .awa-header-primary-nav:
+     1. .section-items.awa-header-primary-nav (mobile wrapper, has vmenu) ← SKIP
+     2. .awa-header-primary-nav.menu_primary (actual primary nav) ← TARGET
+   ============================================================================= */
+
+/* Normal state — ONLY the .menu_primary primary nav links */
+#html-body .page-wrapper .awa-site-header .awa-header-primary-nav.menu_primary a.level-top,
+#html-body .page-wrapper .awa-site-header .awa-nav-bar .awa-header-primary-nav.menu_primary .navigation a.level-top {
+    color: @awa-color-white !important;
+}
+
+/* Hover / focus state */
+#html-body .page-wrapper .awa-site-header .awa-header-primary-nav.menu_primary a.level-top:hover,
+#html-body .page-wrapper .awa-site-header .awa-header-primary-nav.menu_primary a.level-top:focus,
+#html-body .page-wrapper .awa-site-header .awa-header-primary-nav.menu_primary .navigation a.level-top:hover,
+#html-body .page-wrapper .awa-site-header .awa-header-primary-nav.menu_primary .navigation a.level-top:focus {
+    color: rgba(255, 255, 255, 0.85) !important;
+}
+
+/* Active / current page */
+#html-body .page-wrapper .awa-site-header .awa-header-primary-nav.menu_primary a.level-top.ui-state-active,
+#html-body .page-wrapper .awa-site-header .awa-header-primary-nav.menu_primary .navigation li.level0.active > a.level-top {
+    color: @awa-color-white !important;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+/* RESET — Ensure vertical menu dropdown items keep dark text */
+#html-body .awa-header-categories .verticalmenu a.level-top,
+#html-body .awa-header-categories .list-category-dropdown a.level-top,
+#html-body .section-items.awa-header-primary-nav .verticalmenu a.level-top,
+#html-body .section-items.awa-header-primary-nav .list-category-dropdown a.level-top {
+    color: @awa-color-dark !important;
+}
+
+#html-body .awa-header-categories .verticalmenu a.level-top:hover,
+#html-body .awa-header-categories .list-category-dropdown a.level-top:hover,
+#html-body .section-items.awa-header-primary-nav .verticalmenu a.level-top:hover,
+#html-body .section-items.awa-header-primary-nav .list-category-dropdown a.level-top:hover {
+    color: @awa-color-primary !important;
+}
+
+/* =============================================================================
+   DEPARTAMENTOS BUTTON — Red bg above white verticalmenu (v12b)
+   Problem: .verticalmenu (white bg) sits between the button text and the
+   red section divs, making "Departamentos" text invisible (white on white).
+   Fix: Give the button a red bg + z-index above verticalmenu.
+   ============================================================================= */
+
+/* Departamentos button on the nav bar */
+#html-body .awa-header-categories .title-category-dropdown {
+    background: @awa-color-primary !important;
+    transition: none !important;
+    position: relative !important;
+    z-index: 200 !important;
+    border-radius: 4px 4px 0 0;
+    padding: 8px 16px;
+}
+
+#html-body .awa-header-categories .title-category-dropdown .awa-vmenu-trigger-text {
+    color: @awa-color-white !important;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.3px;
+}
+
+/* Dropdown icon / chevron */
+#html-body .awa-header-categories .title-category-dropdown .awa-vmenu-trigger-icon,
+#html-body .awa-header-categories .title-category-dropdown i,
+#html-body .awa-header-categories .title-category-dropdown svg {
+    color: @awa-color-white !important;
+    fill: @awa-color-white !important;
+}
+
+/* Dropdown panel — ensure it starts below button with proper border */
+#html-body .awa-header-categories .section-item-content.nav-sections {
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* Vertical menu container — rounded bottom corners */
+#html-body .awa-header-categories .verticalmenu.side-verticalmenu {
+    border-radius: 0 0 8px 8px;
+    overflow: hidden;
+}
+
+/* =============================================================================
+   VERTICAL MENU — Modernização visual (v12c)
+   Objetivo: melhorar legibilidade, alinhamento e sensação premium sem
+   aumentar altura geral do header.
+   ============================================================================= */
+
+#html-body .awa-header-categories .verticalmenu.side-verticalmenu .list-category-dropdown {
+    margin: 0;
+    padding: 4px 0;
+    background: @awa-color-white;
+}
+
+#html-body .awa-header-categories .verticalmenu.side-verticalmenu .list-category-dropdown > li {
+    margin: 0;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+#html-body .awa-header-categories .verticalmenu.side-verticalmenu .list-category-dropdown > li:last-child {
+    border-bottom: 0;
+}
+
+#html-body .awa-header-categories .verticalmenu.side-verticalmenu .list-category-dropdown > li > a.level-top {
+    display: flex;
+    align-items: center;
+    min-height: 38px;
+    padding: 8px 14px;
+    line-height: 1.25;
+    font-weight: 500;
+    transition: background-color 0.18s ease, color 0.18s ease;
+}
+
+#html-body .awa-header-categories .verticalmenu.side-verticalmenu .list-category-dropdown > li > a.level-top:hover,
+#html-body .awa-header-categories .verticalmenu.side-verticalmenu .list-category-dropdown > li:hover > a.level-top {
+    background-color: rgba(183, 51, 55, 0.06);
+    color: @awa-color-primary !important;
+}
+
+/* Nav bar compacta e alinhada ao visual de referência */
+#html-body .awa-site-header.awa-header-professional .awa-nav-bar {
+    min-height: 52px;
+}
+
+#html-body .awa-site-header.awa-header-professional .awa-nav-bar .awa-header-primary-nav.menu_primary .navigation > ul > li > a.level-top {
+    min-height: 40px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+/* =============================================================================
+   B2B PROMO BAR FIX
+   ============================================================================= */
+#html-body .page-wrapper .awa-b2b-promo-bar__text {
+    text-align: center !important;
+}
+
+#html-body .page-wrapper .awa-b2b-promo-bar__cta {
+    display: inline !important;
+    min-height: 0 !important;
+    height: auto !important;
+    vertical-align: baseline !important;
+}

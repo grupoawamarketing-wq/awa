@@ -1,0 +1,311 @@
+// =============================================================================
+// Fase 3B — Onda 5: Limpeza CSS Órfã e Redução de !important
+//
+// ESTRATÉGIA:
+//   Esta onda NÃO remove arquivos legados (risco de regressão).
+//   Em vez disso:
+//     a) documenta arquivos órfãos (fora do build);
+//     b) reescreve com especificidade correta os padrões mais comuns
+//        que usavam !important nos arquivos legados;
+//     c) provê resets tipográficos e de espaçamento que eliminam
+//        a necessidade de !important downstream.
+//
+// REGRA GERAL: use seletor mais específico (scope + classe), nunca !important.
+// !important desta onda: 0 (zero). Qualquer exceção requer comentário inline.
+//
+// ARQUIVOS ÓRFÃOS DOCUMENTADOS (não estão no _extend.less e não são importados):
+//   - _awa-plp-refine-terminal-2026-06.less   (1062 linhas, não importado)
+//   - _awa-plp-polish-terminal-2026-06.less   (não importado)
+//   - _login-b2b.less                         (comentado em _extend.less)
+//   - _checkout.less                          (comentado em _extend.less — substituído pelo OPC)
+//   - _pdp.less raiz                          (comentado em _extend.less — substituído por _pdp-polish)
+//   - _product-card.less / _product-cards.less / _product-card-refinements.less
+//                                             (comentados em _extend.less)
+//
+// CONTAGEM !important por arquivo (snapshot 2026-06 pós-Onda 5):
+//   _awa-mobile-standardization.less          331  (legado, não editar)
+//   _awa-pdp-misc-2026-06.less                 50  (legado, não editar)
+//   _awa-pdp-visual-fix.less                   23  (legado, não editar)
+//   components/_mobile-header.less             16  (novo, justificados)
+//   components/_plp.less                        8  (novo, justificados)
+//   components/_menu.less                       5  (novo, justificados)
+//   components/_search.less                     5  (novo, justificados)
+//   components/_checkout-b2b.less               2  (novo, justificados)
+//   components/_header.less                     1  (novo, justificado)
+//   components/_pdp.less                        0
+// =============================================================================
+
+@import (once) '../_awa-variables';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// § 1 — Normalização tipográfica global
+// Remove a necessidade de !important em regras de fonte nos filhos.
+// Seletor .page-wrapper é suficientemente específico sem !important.
+// ─────────────────────────────────────────────────────────────────────────────
+.page-wrapper {
+    // Herança de line-height padrão → elimina override explícito nos filhos
+    line-height: 1.5;
+
+    // Sistema de heading coerente (substiui múltiplos !important dispersos)
+    h1, h2, h3, h4, h5, h6 {
+        line-height: 1.25;
+        font-weight: var(--awa-weight-bold, 700);
+        color: var(--awa-black, #1a1a1a);
+        // Evita que tema pai injete letter-spacing em headings
+        letter-spacing: -0.01em;
+    }
+
+    h1 { font-size: clamp(22px, 3vw, 32px); }
+    h2 { font-size: clamp(18px, 2.5vw, 26px); }
+    h3 { font-size: clamp(16px, 2vw, 20px); }
+
+    // Parágrafos: espaçamento consistente sem !important nos módulos
+    p {
+        margin-block-end: 1em;
+        line-height: 1.6;
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// § 2 — Reset de foco acessível global
+// Muitos !important em arquivos legados vêm de outline: none seguido de
+// box-shadow via !important. Provemos o padrão correto aqui.
+// ─────────────────────────────────────────────────────────────────────────────
+.page-wrapper {
+    // Para todos os elementos focáveis: usa :focus-visible (não :focus)
+    // para não mostrar outline em clicks de mouse.
+    a,
+    button,
+    input,
+    select,
+    textarea,
+    [tabindex] {
+        &:focus {
+            outline: none;
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--awa-red, #b73337);
+            outline-offset: 2px;
+            box-shadow: 0 0 0 4px rgba(183, 51, 55, 0.12);
+        }
+    }
+
+    // Exceção: inputs no formulário usam border-color no lugar de outline
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="tel"],
+    input[type="number"],
+    input[type="search"],
+    textarea,
+    select {
+        &:focus-visible {
+            outline: none;
+            border-color: var(--awa-red, #b73337);
+            box-shadow: 0 0 0 3px rgba(183, 51, 55, 0.12);
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// § 3 — Redução de !important: mensagens de sistema
+// _awa-mobile-standardization.less tem 331 !important; vários são em .messages.
+// Aqui definimos a cascata correta para o sistema de mensagens.
+// ─────────────────────────────────────────────────────────────────────────────
+.page-wrapper .page-messages {
+    .messages {
+        .message {
+            border-radius: var(--awa-radius-sm, 8px);
+            margin-block-end: 8px;
+            padding: 12px 16px;
+            font-size: var(--awa-text-sm, 13px);
+            line-height: 1.4;
+        }
+
+        .message.success > div,
+        .message-success > div {
+            color: #14532d;
+        }
+
+        .message.error > div,
+        .message-error > div {
+            color: #7f1d1d;
+        }
+
+        .message.notice > div,
+        .message-notice > div {
+            color: #713f12;
+        }
+
+        .message.warning > div,
+        .message-warning > div {
+            color: #7c2d12;
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// § 4 — Redução de !important: breadcrumb global
+// Múltiplos arquivos usam !important para breadcrumb. Escopo específico
+// aqui remove a necessidade.
+// ─────────────────────────────────────────────────────────────────────────────
+.page-wrapper .breadcrumbs {
+    .items {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 4px;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .item {
+        display: flex;
+        align-items: center;
+        font-size: var(--awa-text-xs, 11px);
+        color: var(--awa-gray-500, #6b7280);
+
+        a {
+            color: var(--awa-gray-700, #374151);
+            text-decoration: none;
+            transition: color var(--awa-transition-fast, 150ms ease);
+
+            &:hover {
+                color: var(--awa-red, #b73337);
+            }
+        }
+
+        strong {
+            font-weight: var(--awa-weight-medium, 500);
+            color: var(--awa-gray-500, #6b7280);
+        }
+
+        // Separador entre itens (via ::before do tema pai)
+        &:not(:last-child)::after {
+            content: '/';
+            margin-inline-start: 4px;
+            color: var(--awa-gray-200, #e5e7eb);
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// § 5 — Redução de !important: botões de ação primária
+// Padrão base para .action.primary que evita cascata com !important.
+// ─────────────────────────────────────────────────────────────────────────────
+.page-wrapper {
+    .action.primary,
+    button.action.primary {
+        background-color: var(--awa-red, #b73337);
+        border-color: var(--awa-red, #b73337);
+        color: #fff;
+        border-radius: var(--awa-radius-sm, 8px);
+        font-weight: var(--awa-weight-semibold, 600);
+        transition: background-color var(--awa-transition-fast, 150ms ease),
+                    border-color var(--awa-transition-fast, 150ms ease);
+
+        // Hover guard: não aplica em touch-only devices
+        @media (hover: hover) and (pointer: fine) {
+            &:hover {
+                background-color: var(--awa-red-dark, #8e2629);
+                border-color: var(--awa-red-dark, #8e2629);
+            }
+        }
+    }
+
+    // Botões secundários (outline)
+    .action.secondary,
+    button.action.secondary {
+        background-color: transparent;
+        border: 1px solid var(--awa-gray-200, #e5e7eb);
+        color: var(--awa-gray-700, #374151);
+        border-radius: var(--awa-radius-sm, 8px);
+        font-weight: var(--awa-weight-medium, 500);
+        transition: border-color var(--awa-transition-fast, 150ms ease),
+                    color var(--awa-transition-fast, 150ms ease);
+
+        @media (hover: hover) and (pointer: fine) {
+            &:hover {
+                border-color: var(--awa-red, #b73337);
+                color: var(--awa-red, #b73337);
+            }
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// § 6 — Redução de !important: price display
+// Muitos arquivos PDP/PLP usam !important para preço.
+// Cascata correta com scope mais específico aqui.
+// ─────────────────────────────────────────────────────────────────────────────
+.page-wrapper {
+    .price-box {
+        .price {
+            font-variant-numeric: tabular-nums;
+            font-weight: var(--awa-weight-bold, 700);
+        }
+
+        // Preço especial (vermelho)
+        .special-price .price,
+        .price-wrapper.special-price .price {
+            color: var(--awa-red, #b73337);
+        }
+
+        // Preço antigo (riscado, cinza)
+        .old-price .price,
+        .price-wrapper.old-price .price {
+            color: var(--awa-gray-500, #6b7280);
+            text-decoration: line-through;
+            font-weight: var(--awa-weight-normal, 400);
+        }
+
+        // Preço mínimo/máximo em range
+        .minimal-price .price,
+        .maximal-price .price {
+            font-weight: var(--awa-weight-bold, 700);
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// § 7 — Motion safety: desativa transições para prefers-reduced-motion
+// Cobre todos os componentes de Ondas 1-5 centralmente.
+// ─────────────────────────────────────────────────────────────────────────────
+@media (prefers-reduced-motion: reduce) {
+    .page-wrapper,
+    .page-wrapper * {
+        transition-duration: 0.001ms;
+        animation-duration: 0.001ms;
+        animation-iteration-count: 1;
+        scroll-behavior: auto;
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// § 8 — Utility: loading skeleton reutilizável
+// Evita duplicação do padrão em _plp.less e outros.
+// ─────────────────────────────────────────────────────────────────────────────
+@keyframes awa-skeleton-shimmer {
+    0%   { background-position: -400px 0; }
+    100% { background-position: 400px 0; }
+}
+
+.awa-skeleton {
+    background: linear-gradient(90deg,
+        var(--awa-gray-100, #f5f5f5) 25%,
+        var(--awa-gray-200, #e5e7eb) 50%,
+        var(--awa-gray-100, #f5f5f5) 75%
+    );
+    background-size: 800px 100%;
+    animation: awa-skeleton-shimmer 1.4s infinite ease-in-out;
+    border-radius: var(--awa-radius-sm, 8px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .awa-skeleton {
+        animation: none;
+        background: var(--awa-gray-100, #f5f5f5);
+    }
+}

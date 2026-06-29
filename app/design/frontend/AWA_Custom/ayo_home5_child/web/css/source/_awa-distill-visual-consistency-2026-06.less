@@ -1,0 +1,131 @@
+// =============================================================================
+// §101 — Distill Visual Consistency (2026-06-08)
+// /impeccable distill — remove drift de _awa-consolidated.less e bundles async.
+// Final-wins sobre side-stripes, hex legados e paginação duplicada.
+// Mantém contratos §99 (surfaces) + §100 (estados) como SSOT.
+// =============================================================================
+
+@import (once) '_awa-tokens';
+@import (once) '_design-system';
+@import (once) '_awa-page-containers';
+
+@awa-distill-not-home: ~'html body#html-body:not(.cms-index-index):not(.cms-home):not(.cms-homepage_ayo_home5)';
+@awa-distill-plp: ~'html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)';
+
+// ── Mensagens: matar side-stripe 4px do consolidated ───────────────────────
+@{awa-distill-not-home} .page-wrapper {
+    :is(.page.messages, .messages) :is(.message, .message-success, .message-error, .message-warning, .message-notice, .message-info, div.message) {
+        border: 1px solid var(--awa-border, @awa-color-border) !important;
+        border-inline-start-width: 1px !important;
+        border-left-width: 1px !important;
+        box-shadow: none !important;
+        animation: none !important;
+        font-size: var(--awa-text-sm, 13px) !important;
+        line-height: 1.45 !important;
+    }
+
+    .message-success,
+    .message.success {
+        background: var(--awa-primary-tint-50, fade(@awa-color-primary, 8%)) !important;
+        border-color: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 35%, var(--awa-border, @awa-color-border)) !important;
+        color: var(--awa-text, @awa-color-text-primary) !important;
+    }
+
+    .message-error,
+    .message.error {
+        background: var(--awa-error-bg, fade(@awa-color-error, 8%)) !important;
+        border-color: color-mix(in srgb, var(--awa-error, @awa-color-error) 35%, var(--awa-border, @awa-color-border)) !important;
+        color: var(--awa-text, @awa-color-text-primary) !important;
+    }
+
+    .message-warning,
+    .message.warning,
+    .message-notice,
+    .message.notice {
+        background: var(--awa-warning-bg, fade(@awa-color-warning, 10%)) !important;
+        border-color: color-mix(in srgb, var(--awa-warning, @awa-color-warning) 35%, var(--awa-border, @awa-color-border)) !important;
+        color: var(--awa-text, @awa-color-text-primary) !important;
+    }
+
+    .message-info,
+    .message.info {
+        background: var(--awa-bg-soft, @awa-color-bg-soft) !important;
+        border-color: var(--awa-border, @awa-color-border) !important;
+        color: var(--awa-text-muted, @awa-color-text-muted) !important;
+    }
+}
+
+// ── Filtros PLP: sem accent lateral legado ───────────────────────────────────
+@{awa-distill-plp} .page-wrapper .sidebar-main {
+    :is(.block.filter, .filter-options, .filter-current) {
+        border-inline-start: 0 !important;
+        border-left: 0 !important;
+    }
+
+    .block.filter .block-title,
+    .filter-options-title {
+        border-inline-start: 0 !important;
+        border-left: 0 !important;
+    }
+}
+
+// ── Account nav: selected sem side-stripe ────────────────────────────────────
+html body#html-body:is(.account, .customer-account-index, [class*='b2b-']) .page-wrapper .sidebar-main {
+    .nav.item.current > :is(a, strong) {
+        border-inline-start: 0 !important;
+        border-left: 0 !important;
+    }
+}
+
+// ── Empty states: vocabulário único ─────────────────────────────────────────
+@{awa-distill-not-home} .page-wrapper :is(
+    .message.info.empty,
+    .empty.message,
+    .empty-cart,
+    .wishlist-empty,
+    .no-products,
+    .cart-empty
+) {
+    display: block !important;
+    text-align: center !important;
+    padding: @awa-space-8 @awa-space-4 !important;
+    margin-block: var(--awa-block-gap, @awa-space-4) !important;
+    background: var(--awa-bg-soft, @awa-color-bg-soft) !important;
+    border: 1px dashed var(--awa-border, @awa-color-border) !important;
+    border-inline-start-width: 1px !important;
+    border-left-width: 1px !important;
+    border-radius: @awa-radius-sm !important;
+    color: var(--awa-text-muted, @awa-color-text-muted) !important;
+    font-size: var(--awa-text-base, 14px) !important;
+    line-height: 1.5 !important;
+    box-shadow: none !important;
+
+    :is(.action, .action.primary, a.action) {
+        margin-block-start: @awa-space-4 !important;
+    }
+}
+
+// ── Paginação consolidated: neutralizar estilos legados fora do contrato §100 ─
+@{awa-distill-not-home}:not(.catalog-category-view):not(.catalogsearch-result-index) .page-wrapper {
+    .pages .item a,
+    .pages .item strong.page,
+    .pages .item > strong {
+        border-inline-start: 0 !important;
+        border-left: 0 !important;
+        box-shadow: none !important;
+        text-transform: none !important;
+        letter-spacing: 0 !important;
+    }
+}
+
+// ── page-main: consolidated não redefine max-width (SSOT page-containers) ───
+@{awa-distill-not-home} .page-wrapper .page-main {
+    width: 100% !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    @{awa-distill-not-home} .page-wrapper :is(.page.messages, .messages) .message {
+        animation: none !important;
+        transition: none !important;
+    }
+}

@@ -1,0 +1,133 @@
+// 66. ADAPT B2B ACCOUNT §66 — /impeccable adapt b2b/account (2026-06-08, rev 2026-06-15)
+// Adaptações responsivas consolidadas para páginas de conta B2B.
+// §66a — Table overflow touch-safe (mobile)
+// §66b — Column gap + sidebar margin (tablet/mobile) — migrado de §67b
+// §66c — Nav mobile: colapsável + accordion por seção — migrado de §67c
+// §66d — reduced-motion: desativa transições de nav
+
+@import (once) '_awa-tokens';
+
+// ── §66a — Tables: overflow seguro em telas estreitas ───────────────────
+html body#html-body:is(.account, [class*='b2b-']) .b2b-page-shell .table-wrapper {
+    @media (max-width: (@awa-breakpoint-sm - 1px)) {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+// ── §66b — Colunas: gap responsivo em tablet/mobile ────────────────────
+@media (max-width: @awa-breakpoint-md) {
+    html body#html-body:is(.account, [class*='b2b-']) .page-main > .columns {
+        gap: @awa-space-5;
+    }
+
+    html body#html-body:is(.account, [class*='b2b-']) .sidebar-main {
+        margin-bottom: @awa-space-1;
+    }
+}
+
+// ── §66c — Nav mobile: bloco colapsável + accordion por seção ──────────
+@media (max-width: @awa-breakpoint-md) {
+    html body#html-body:is(.account, [class*='b2b-']) .block-collapsible-nav.awa-nav--mobile-collapsible {
+        > .block-title,
+        > .title {
+            display: flex !important;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 44px;
+            margin: 0;
+            padding: @awa-space-3 @awa-space-4;
+            cursor: pointer;
+            user-select: none;
+            list-style: none;
+
+            &::after {
+                content: '';
+                width: 0.5rem;
+                height: 0.5rem;
+                border-right: 2px solid currentColor;
+                border-bottom: 2px solid currentColor;
+                transform: rotate(45deg);
+                transition: transform 180ms ease-out;
+                flex-shrink: 0;
+            }
+        }
+
+        &.awa-nav--expanded > .block-title::after,
+        &.awa-nav--expanded > .title::after {
+            transform: rotate(-135deg);
+        }
+
+        > .content {
+            max-height: none;
+            overflow: visible;
+        }
+
+        &:not(.awa-nav--expanded) > .content {
+            display: none;
+        }
+    }
+
+    html body#html-body:is(.account, [class*='b2b-']) .account-nav-section--accordion {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    html body#html-body:is(.account, [class*='b2b-']) .account-nav-section__toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: calc(100% - @awa-space-3);
+        min-height: 44px;
+        margin: @awa-space-1 @awa-space-2 0;
+        padding: @awa-space-2 @awa-space-3;
+        border: 0;
+        border-radius: @awa-radius-md;
+        background: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 6%, var(--awa-bg-surface, @awa-color-white));
+        color: var(--awa-text, @awa-color-text-primary);
+        font-size: 0.8125rem;
+        font-weight: @awa-weight-semibold;
+        text-align: left;
+        cursor: pointer;
+
+        &::after {
+            content: '';
+            width: 0.45rem;
+            height: 0.45rem;
+            border-right: 2px solid currentColor;
+            border-bottom: 2px solid currentColor;
+            transform: rotate(45deg);
+            transition: transform 180ms ease-out;
+            flex-shrink: 0;
+        }
+    }
+
+    html body#html-body:is(.account, [class*='b2b-']) .account-nav-section--accordion.is-open .account-nav-section__toggle::after {
+        transform: rotate(-135deg);
+    }
+
+    html body#html-body:is(.account, [class*='b2b-']) .account-nav-section__items {
+        margin: 0;
+        padding: @awa-space-1 0 @awa-space-2;
+        list-style: none;
+    }
+
+    html body#html-body:is(.account, [class*='b2b-']) .account-nav-section--accordion:not(.is-open) .account-nav-section__items {
+        display: none;
+    }
+
+    html body#html-body:is(.account, [class*='b2b-']) .account-nav-section:not(:first-child) {
+        margin-top: @awa-space-2;
+        padding-top: 0;
+        border-top: 0;
+    }
+}
+
+// ── §66d — reduced-motion: desativa transições de nav ──────────────────
+@media (prefers-reduced-motion: reduce) {
+    html body#html-body:is(.account, [class*='b2b-']) .block-collapsible-nav .block-title::after,
+    html body#html-body:is(.account, [class*='b2b-']) .account-nav-section__toggle::after {
+        transition: none;
+    }
+}

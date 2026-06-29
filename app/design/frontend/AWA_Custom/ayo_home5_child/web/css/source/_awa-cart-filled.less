@@ -1,0 +1,483 @@
+//
+// Checkout cart — estado com itens (tabela + resumo B2B)
+// Final-wins: importado após _awa-cart-empty.less em _extend.less
+//
+
+@import (once) '_awa-tokens';
+
+html body#html-body.checkout-cart-index .page-wrapper:has(.cart-container .form-cart) {
+    // Título + meta de peças/referências na mesma linha (desktop)
+    .page-title-wrapper {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: @awa-s-1 @awa-s-3;
+        margin-bottom: @awa-s-3;
+    }
+
+    .page-title-wrapper .page-title {
+        margin: 0;
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .page-title-wrapper .page-title .base {
+        font-size: @awa-fs-xl;
+        font-weight: @awa-font-weight-bold;
+        line-height: 1.2;
+        letter-spacing: -0.02em;
+        color: @awa-color-text-primary;
+        text-wrap: balance;
+    }
+
+    .awa-cart-page-meta {
+        flex: 0 1 auto;
+        order: 0;
+        margin: 0;
+        font-size: @awa-fs-sm;
+        line-height: 1.4;
+        color: @awa-color-text-muted;
+    }
+
+    .awa-cart-page-meta__stat {
+        font-weight: @awa-weight-semibold;
+        color: @awa-color-text-primary;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .awa-cart-page-meta__sep {
+        margin-inline: @awa-s-1;
+        color: @awa-color-text-light;
+    }
+
+    @media (max-width: (@awa-bp-768 - 1px)) {
+        .awa-cart-page-meta {
+            flex: 1 1 100%;
+        }
+    }
+
+    // Cabeçalho da tabela: sentence case (product register, não eyebrow caixa alta)
+    .cart-container .cart.items thead tr th {
+        text-transform: none;
+        letter-spacing: normal;
+        font-size: @awa-fs-sm;
+        font-weight: @awa-weight-semibold;
+        color: @awa-color-text-muted;
+    }
+
+    // Barra de ações do formulário
+    .cart.main.actions[data-awa-cart-actions='1'] {
+        margin-top: @awa-s-3;
+        padding: @awa-s-3 @awa-s-4;
+        border-top: 1px solid @awa-color-border;
+        border-radius: 0 0 @awa-radius-sm @awa-radius-sm;
+        background: @awa-color-bg-soft;
+    }
+
+    // Linha de item: SKU + nome
+    .cart.table-wrapper .awa-cart-item-sku {
+        display: block;
+        margin-top: @awa-s-1;
+        font-size: @awa-fs-xs;
+        line-height: 1.4;
+        color: @awa-color-text-muted;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .cart.table-wrapper .product-item-name {
+        margin: 0;
+        font-size: @awa-fs-md;
+        font-weight: @awa-weight-semibold;
+        line-height: 1.35;
+    }
+
+    .cart.table-wrapper .product-item-name a {
+        color: @awa-color-text-primary;
+        text-decoration: none;
+        text-wrap: pretty;
+
+        &:hover {
+            color: @awa-color-primary;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+
+        &:focus-visible {
+            outline: 2px solid @awa-color-primary-dark;
+            outline-offset: 2px;
+            border-radius: @awa-radius-xs;
+        }
+    }
+
+    // Sem content-visibility:auto — causava corte do 1º item (thead + paint defer)
+    .cart.table-wrapper tbody.cart.item {
+        content-visibility: visible;
+    }
+
+    .cart.table-wrapper .col.price .price,
+    .cart.table-wrapper .col.subtotal .price {
+        font-variant-numeric: tabular-nums;
+    }
+
+    // Faixa B2B acima do carrinho
+    .awa-b2b-cart-trust-strip {
+        margin-block: 0 @awa-s-3;
+    }
+
+    .awa-b2b-cart-trust-strip__status {
+        font-weight: @awa-weight-semibold;
+        text-transform: none;
+        letter-spacing: normal;
+    }
+
+    .awa-b2b-cart-trust-strip__link {
+        font-weight: @awa-weight-semibold;
+        color: @awa-color-primary;
+
+        &:hover {
+            color: @awa-color-primary-dark;
+        }
+    }
+
+    // Cross-sell: título sentence case (não eyebrow caixa alta)
+    .block.crosssell .block-title,
+    .block.crosssell .block-title strong {
+        text-transform: none;
+        letter-spacing: normal;
+    }
+
+    .block.crosssell {
+        margin-top: @awa-s-5;
+        padding-top: @awa-s-4;
+        border-top: 1px solid @awa-color-border-subtle;
+    }
+
+    .block.crosssell .block-title {
+        margin-bottom: @awa-s-3;
+        font-size: @awa-fs-lg;
+        font-weight: @awa-font-weight-bold;
+        color: @awa-color-text-primary;
+        text-wrap: balance;
+    }
+
+    // Cupom no resumo
+    .cart-summary .block.discount > .title strong {
+        text-transform: none;
+        letter-spacing: normal;
+        font-weight: @awa-weight-semibold;
+    }
+
+    .awa-cart-actions-hint {
+        margin: 0;
+        max-width: 42ch;
+        font-size: @awa-fs-sm;
+        line-height: 1.5;
+        color: @awa-color-text-muted;
+    }
+
+    .awa-cart-actions-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-end;
+        gap: @awa-s-2;
+    }
+
+    .cart.main.actions .action.continue {
+        order: 1;
+        border-color: @awa-color-primary;
+        color: @awa-color-primary;
+        font-weight: @awa-weight-semibold;
+
+        &:hover {
+            background: @awa-color-primary-50;
+            border-color: @awa-color-primary-dark;
+            color: @awa-color-primary-dark;
+        }
+    }
+
+    .cart.main.actions .action.update.awa-cart-action-sync {
+        order: 2;
+    }
+
+    // Feedback visual durante submit (aria-busy via awa-cart-form-feedback.js)
+    #form-validate[aria-busy='true'] {
+        opacity: 0.72;
+        pointer-events: none;
+    }
+
+    #form-validate[aria-busy='true'] .cart.main.actions .action {
+        cursor: wait;
+    }
+
+    #form-validate[aria-busy='true'] .awa-qty-stepper {
+        opacity: 0.85;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        #form-validate[aria-busy='true'] {
+            opacity: 1;
+        }
+    }
+
+    .cart.main.actions .action.clear {
+        order: 3;
+        color: @awa-color-text-muted;
+
+        &:hover {
+            color: @awa-color-primary-dark;
+            border-color: @awa-color-primary;
+        }
+    }
+
+    // Resumo: stack B2B (pedido mínimo → crédito → totais → CTA)
+    .cart-summary {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .cart-summary > .title,
+    .cart-summary .summary.title {
+        margin-bottom: @awa-s-3;
+        padding-bottom: @awa-s-2;
+        border-bottom: 1px solid @awa-color-border-subtle;
+        font-size: @awa-fs-lg;
+        font-weight: @awa-font-weight-bold;
+        color: @awa-color-text-primary;
+    }
+
+    .cart-summary .awa-b2b-min-order-progress {
+        margin: 0 0 @awa-s-3;
+        padding: @awa-s-3;
+        border: 1px solid @awa-color-border;
+        border-radius: @awa-radius-md;
+        background: @awa-color-bg-soft;
+    }
+
+    .cart-summary .awa-b2b-min-order-progress--near {
+        border-color: fade(@awa-color-primary, 35%);
+        background: @awa-color-primary-50;
+    }
+
+    .cart-summary .awa-b2b-min-order-progress__label {
+        font-size: @awa-fs-sm;
+        font-weight: @awa-weight-semibold;
+        color: @awa-color-text-primary;
+    }
+
+    .cart-summary .awa-b2b-min-order-progress__percent {
+        font-size: @awa-fs-xs;
+        font-weight: @awa-font-weight-bold;
+        color: @awa-color-primary;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .cart-summary .awa-b2b-min-order-progress__track {
+        height: @awa-s-1;
+        border-radius: @awa-radius-pill;
+        overflow: hidden;
+        background: @awa-color-border;
+    }
+
+    .cart-summary .awa-b2b-min-order-progress__fill {
+        display: block;
+        height: 100%;
+        border-radius: inherit;
+        background: @awa-color-primary;
+        transition: width 0.22s @awa-ease;
+    }
+
+    .cart-summary .awa-b2b-min-order-progress__message {
+        margin: @awa-s-2 0 0;
+        font-size: @awa-fs-sm;
+        line-height: 1.45;
+        color: @awa-color-text-muted;
+    }
+
+    .cart-summary .awa-b2b-credit-notice {
+        display: flex;
+        align-items: flex-start;
+        gap: @awa-s-2;
+        margin: 0 0 @awa-s-3;
+        padding: @awa-s-3;
+        border: 1px solid @awa-color-border;
+        border-radius: @awa-radius-md;
+        background: @awa-color-white;
+        font-size: @awa-fs-sm;
+        line-height: 1.5;
+        color: @awa-color-text-muted;
+    }
+
+    .cart-summary .awa-b2b-credit-notice__icon {
+        flex-shrink: 0;
+        margin-top: 2px;
+        color: @awa-color-primary;
+    }
+
+    .cart-summary .awa-b2b-credit-notice__text strong {
+        color: @awa-color-text-primary;
+        font-weight: @awa-weight-semibold;
+    }
+
+    .cart-summary .awa-b2b-credit-notice__link {
+        color: @awa-color-primary;
+        font-weight: @awa-weight-semibold;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+
+        &:hover {
+            color: @awa-color-primary-dark;
+        }
+
+        &:focus-visible {
+            outline: 2px solid @awa-color-primary-dark;
+            outline-offset: 2px;
+            border-radius: @awa-radius-xs;
+        }
+    }
+
+    .cart-summary .cart-totals tr.grand.totals .amount .price {
+        font-size: @awa-fs-lg;
+        font-weight: @awa-font-weight-bold;
+        color: @awa-color-primary;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .cart-summary .checkout-methods-items {
+        margin-top: @awa-s-3;
+    }
+
+    .cart-summary .checkout-methods-items .action.primary.checkout {
+        width: 100%;
+        min-height: @awa-s-6;
+        border-radius: @awa-radius-sm;
+        font-size: @awa-fs-md;
+        font-weight: @awa-font-weight-bold;
+        letter-spacing: 0.01em;
+        box-shadow: 0 4px 14px fade(@awa-color-primary, 22%);
+        transition:
+            background-color 0.2s @awa-ease,
+            box-shadow 0.2s @awa-ease,
+            transform 0.2s @awa-ease;
+
+        &:hover {
+            box-shadow: 0 7px 22px fade(@awa-color-primary, 32%);
+            transform: translateY(-1px);
+        }
+
+        &:focus-visible {
+            outline: 2px solid @awa-color-primary-dark;
+            outline-offset: 2px;
+        }
+
+        &:active {
+            transform: translateY(0);
+        }
+
+        &[disabled] {
+            opacity: 0.65;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .cart-summary .awa-b2b-min-order-progress__fill,
+        .cart-summary .checkout-methods-items .action.primary.checkout {
+            transition: none;
+        }
+
+        .cart-summary .checkout-methods-items .action.primary.checkout:hover {
+            transform: none;
+        }
+    }
+
+    @media (max-width: (@awa-bp-768 - 1px)) {
+        .awa-cart-actions-row {
+            flex-direction: column;
+            align-items: stretch;
+            width: 100%;
+        }
+
+        .cart.main.actions .action {
+            width: 100%;
+            justify-content: center;
+            min-height: @awa-s-6;
+        }
+
+        .cart.main.actions .action.continue {
+            order: 1;
+        }
+
+        .cart.main.actions .action.update.awa-cart-action-sync {
+            order: 2;
+        }
+
+        .cart.main.actions .action.clear {
+            order: 3;
+        }
+
+        .awa-cart-actions-hint {
+            max-width: none;
+            margin-bottom: @awa-s-2;
+        }
+
+        .cart.table-wrapper td.col.price::before,
+        .cart.table-wrapper td.col.qty::before,
+        .cart.table-wrapper td.col.subtotal::before {
+            font-weight: @awa-weight-semibold;
+            letter-spacing: normal;
+            text-transform: none;
+            font-size: @awa-fs-sm;
+            color: @awa-color-text-muted;
+        }
+    }
+
+    // Polish final-wins: tipografia product register (sentence case, sem eyebrow)
+    .awa-b2b-cart-trust-strip__group {
+        text-transform: none;
+        letter-spacing: normal;
+        font-size: @awa-fs-sm;
+        font-weight: @awa-weight-semibold;
+    }
+
+    .cart-summary > .title,
+    .cart-summary .summary.title {
+        text-transform: none;
+        letter-spacing: normal;
+    }
+
+    .cart-summary .block.discount > .title strong {
+        text-transform: none;
+        letter-spacing: normal;
+    }
+}
+
+// Auto-qty ativo (JS): esconde botão redundante, mantém no DOM para no-JS
+html body#html-body.checkout-cart-index.awa-cart-auto-qty .page-wrapper:has(.cart-container .form-cart) {
+    .cart.main.actions .action.update.awa-cart-action-sync {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        clip-path: inset(50%);
+        white-space: nowrap;
+        border: 0;
+    }
+
+    .awa-cart-actions-row {
+        justify-content: space-between;
+    }
+
+    .awa-cart-actions-hint {
+        color: @awa-color-text-muted;
+        font-size: @awa-fs-sm;
+        line-height: 1.45;
+    }
+}

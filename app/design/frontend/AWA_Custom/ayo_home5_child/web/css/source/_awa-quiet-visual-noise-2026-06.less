@@ -1,0 +1,157 @@
+// ==========================================================================
+// AWA quiet visual noise pass — product UI restraint (2026-06-19)
+// Objetivo: reduzir ruído visual sem esconder affordances de compra/B2B.
+// Usa !important apenas para vencer camadas legadas/consolidated que também
+// usam !important em estados finais de hover/ativo.
+// ==========================================================================
+
+html body#html-body .page-wrapper {
+    // Account navigation: active state uses whole-row emphasis, not a side tab.
+    :is(.block-collapsible-nav, .account-nav, .sidebar-main .block-account) {
+        .nav.item {
+            > a,
+            > strong {
+                border-left: 0 !important;
+                border-radius: var(--awa-radius-sm, @awa-radius-sm) !important;
+            }
+
+            > a:hover {
+                background: ~"color-mix(in srgb, var(--awa-primary) 5%, var(--awa-bg))" !important;
+                color: var(--awa-primary, @awa-color-primary) !important;
+                box-shadow: inset 0 0 0 1px ~"color-mix(in srgb, var(--awa-primary) 14%, var(--awa-border))" !important;
+            }
+
+            &.current > a,
+            &.current > strong {
+                padding-left: @awa-space-4 !important;
+                background: ~"color-mix(in srgb, var(--awa-primary) 8%, var(--awa-bg))" !important;
+                color: var(--awa-primary, @awa-color-primary) !important;
+                box-shadow: inset 0 0 0 1px ~"color-mix(in srgb, var(--awa-primary) 18%, var(--awa-border))" !important;
+            }
+        }
+    }
+}
+
+html body#html-body[class*="b2b-"] .page-wrapper {
+    // B2B panels: section titles read as headers, not alert callouts.
+    :is(.b2b-section, .b2b-block) {
+        :is(.b2b-section-title, .b2b-block-title) {
+            padding-left: 0 !important;
+            padding-bottom: @awa-space-2 !important;
+            border-left: 0 !important;
+            border-bottom: 1px solid var(--awa-border, @awa-color-border) !important;
+            color: var(--awa-ink, @awa-color-dark) !important;
+        }
+    }
+}
+
+html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .page-wrapper {
+    // PLP B2B gate: keep conversion copy visible without tinting the whole panel red.
+    .awa-plp-b2b-gate-banner {
+        background: var(--awa-bg, @awa-color-white) !important;
+        box-shadow: none !important;
+    }
+
+    // Toolbar view modes are secondary controls; avoid red blocks competing with sort/filter.
+    .toolbar .modes-mode {
+        background: transparent !important;
+        border-color: transparent !important;
+        box-shadow: none !important;
+        color: var(--awa-text-secondary, @awa-color-text-muted) !important;
+    }
+
+    .toolbar .modes-mode.active,
+    .toolbar .modes-mode:hover,
+    .toolbar .modes-mode:focus-visible {
+        background: var(--awa-bg, @awa-color-white) !important;
+        border-color: var(--awa-border, @awa-color-border) !important;
+        box-shadow: inset 0 0 0 1px ~"color-mix(in srgb, var(--awa-primary) 14%, var(--awa-border))" !important;
+        color: var(--awa-ink, @awa-color-dark) !important;
+    }
+}
+
+@media (max-width: (@awa-bp-768 - 1)) {
+    html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .page-wrapper {
+        // Mobile PLP cards: B2B price labels must shrink inside two-column cards.
+        .wrapper.grid.products-grid .item-product .info-price .b2b-login-to-see-price {
+            min-width: 0 !important;
+            max-width: 100% !important;
+            overflow: hidden !important;
+        }
+
+        .wrapper.grid.products-grid .item-product .info-price .b2b-login-to-see-price .price-label {
+            display: flex !important;
+            flex: 1 1 auto !important;
+            min-width: 0 !important;
+            max-width: 100% !important;
+            width: auto !important;
+            justify-content: center !important;
+            white-space: normal !important;
+            overflow: hidden !important;
+            text-align: center !important;
+            overflow-wrap: anywhere !important;
+        }
+    }
+}
+
+@media (min-width: @awa-bp-992) {
+    html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .page-wrapper {
+        // Desktop PLP: make B2B gate read as an operational notice, not a promo card.
+        .awa-plp-b2b-gate-banner {
+            align-items: center !important;
+            flex-wrap: nowrap !important;
+            gap: @awa-space-2 !important;
+            min-height: 60px !important;
+            padding: @awa-space-2 @awa-space-3 !important;
+        }
+
+        .awa-plp-b2b-gate-banner__badge,
+        .awa-plp-b2b-gate-banner__title {
+            flex: 0 0 auto !important;
+            white-space: nowrap !important;
+        }
+
+        .awa-plp-b2b-gate-banner__desc {
+            flex: 1 1 auto !important;
+            min-width: 0 !important;
+            max-width: none !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            white-space: nowrap !important;
+        }
+
+        .awa-plp-b2b-gate-banner__actions {
+            flex: 0 0 auto !important;
+            gap: @awa-space-2 !important;
+        }
+    }
+}
+
+@media (hover: hover) and (pointer: fine) {
+    html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .page-wrapper {
+        // Catalog cards should stay flat; hover confirms focus with border only.
+        .products-grid :is(.item-product, .product-item):hover {
+            border-color: ~"color-mix(in srgb, var(--awa-primary) 22%, var(--awa-border))" !important;
+            box-shadow: none !important;
+            transform: none !important;
+        }
+    }
+
+    html body#html-body.catalog-product-view .page-wrapper {
+        // Related/upsell shelves: keep commerce density, remove decorative lift.
+        :is(.block.related, .block.upsell, .products-related, .products-upsell)
+            :is(.item-product, .product-item):hover {
+            border-color: ~"color-mix(in srgb, var(--awa-primary) 18%, var(--awa-border))" !important;
+            box-shadow: none !important;
+            transform: none !important;
+        }
+    }
+}
+
+html body#html-body .page-wrapper {
+    // Resting catalog/product cards use border separation, not ambient elevation.
+    :is(.products-grid, .products-related, .products-upsell)
+        :is(.item-product, .product-item) {
+        box-shadow: none !important;
+    }
+}

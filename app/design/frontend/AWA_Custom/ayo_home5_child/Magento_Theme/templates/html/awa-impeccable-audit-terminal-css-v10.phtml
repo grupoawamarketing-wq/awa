@@ -1,0 +1,40 @@
+<?php declare(strict_types=1);
+
+use GrupoAwamotos\Theme\Model\HeaderImpeccableCascadeLockCss;
+
+/**
+ * Impeccable audit — camada terminal via link (FPC-safe).
+ * CSS estático; sem inline duplicado (economiza ~11KB no HTML).
+ * Inclui awa-focus-visible (WCAG 2.4.7 — keyboard focus rings).
+ *
+ * v10: awa-focus-visible síncrono (1.4KB — crítico para a11y teclado).
+ * Refine v9: --awa-cc-focus-ring definido em :root; .min.css (42KB vs 53KB).
+ * Catálogo (PLP/busca/PDP): omitido — §89–§94 + refinements + stack promax dedicado.
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ */
+$__request = $block->getRequest();
+$__action = $__request ? (string) $__request->getFullActionName() : '';
+$__skipImpeccableTerminal = in_array($__action, [
+    'cms_index_index',
+    'checkout_cart_index',
+    'checkout_index_index',
+    'onepagecheckout_index_index',
+    'catalog_product_view',
+    'catalog_category_view',
+    'catalogsearch_result_index',
+], true)
+    || (bool) $block->getData('awa_skip_impeccable_terminal');
+if ($__skipImpeccableTerminal) {
+    return;
+}
+$impeccableUrl   = $block->getViewFileUrl('css/awa-impeccable-audit-2026-05-28.min.css');
+$focusVisibleUrl = $block->getViewFileUrl('css/awa-focus-visible.min.css');
+$refineUrl       = $block->getViewFileUrl('css/awa-commerce-impeccable-refine.min.css');
+?>
+<!-- awa-focus-visible.min.css: inlinado em awa-head-preload.phtml (id="awa-focus-visible-inline"); link externo removido 2026-06-01 para evitar double-load -->
+<link rel="stylesheet" href="<?= $block->escapeUrl($impeccableUrl) ?>" media="print" onload="this.media='all'" data-awa-impeccable-terminal="final"/>
+<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($impeccableUrl) ?>"/></noscript>
+<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($focusVisibleUrl) ?>"/></noscript>
+<link rel="stylesheet" href="<?= $block->escapeUrl($refineUrl . HeaderImpeccableCascadeLockCss::REFINE_QUERY) ?>" media="print" onload="this.media='all'" data-awa-impeccable-terminal="refine"/>
+<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($refineUrl . HeaderImpeccableCascadeLockCss::REFINE_QUERY) ?>"/></noscript>

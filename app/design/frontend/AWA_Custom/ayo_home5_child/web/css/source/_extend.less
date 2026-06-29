@@ -29,10 +29,8 @@
 // 1. TOKENS (CSS custom properties)
 @import (once) '_tokens';
 
-// 1.1. COMPONENTES BASE (Fase 1-D)
-@import (once) '_awa-forms';
-@import (once) '_awa-cards';
-@import (once) '_awa-buttons';
+// 1.1. COMPONENTES BASE (Fase 1-D) — bundled Fase 5 Jun/24
+@import (once) '_awa-bundle-base-components';
 
 // 2. BASE GLOBAL — emitido via consolidated S90+
 // @import '_global';
@@ -262,19 +260,12 @@
 // 40. UX & CONVERSÃO — PORTED S87
 // @import '_awa-ux-conversao-2026-05-07';
 
-/* 42. EXPRESS CHECKOUT OVERLAY KILL-SWITCH — 2026-05-08 */
+/* 42. CART OVERLAY CLEANUP — 2026-06-19
+   Mantém apenas overlays inativos escondidos no carrinho. Não esconder
+   .modal-popup._show, .modal-slide._show ou estados ativos do minicart/nav. */
 body.checkout-cart-index {
-  .modals-overlay,
-  .modal-custom-overlay,
-  .modal-popup._show,
-  .modal-slide._show,
-  .awa-mobile-drawer-overlay,
-  .awa-mobile-drawer-overlay.is-active,
-  .awa-nav-overlay,
-  .awa-nav-overlay.is-visible,
-  .minicart-wrapper.active::before,
-  .minicart-wrapper .block-minicart::before,
-  .minicart-wrapper .block-minicart._active::before {
+  .awa-mobile-drawer-overlay:not(.is-active),
+  .awa-nav-overlay:not(.is-visible) {
     display: none !important;
     opacity: 0 !important;
     visibility: hidden !important;
@@ -283,58 +274,9 @@ body.checkout-cart-index {
 }
 
 // 43. CONSOLIDATED CSS — único bloco visual (S84–S92), carrega por último no styles-l.css
-@import (inline) '_awa-consolidated.less';
-
-// 43.01. HEADER STACK — minicart dropdown, footer trust, promo bar, prefers-reduced-motion
-//        Migrado de awa-header-stack-2026-05-28.min.css (era blocking order=10120 no default.xml).
-//        Importado inline (raw CSS) para passar min()/max()/clamp() sem processamento LESS.
-@import (inline) '_awa-header-stack';
-@import (inline) '../awa-b2b-status-panel.css';
-
-// 43.02. HEADER FIX — base estrutural do header (sticky, grid e stacking context)
-//        Deve vir antes do refine para manter contrato layout-base -> refinamento.
-@import (once) '_awa-header-fix-2026-06';
-
-// 43.03. HEADER REFINE TERMINAL — final-wins layer (sticky, navbar, search, minicart trigger)
-//        Migrado de awa-header-refine-terminal.min.css (era async em awa-audit-bundle-css.phtml).
-//        Importado inline (raw CSS) para evitar conflito com funções CSS nativas no parser LESS.
-@import (inline) '_awa-header-refine-terminal';
-
-// 43.05. PAGE CONTAINERS — canonical final-wins
-//        Single source of truth para max-width/padding de .page-main por tier.
-@import (once) '_awa-page-containers';
-
-// 43.1. ACCOUNT LAYOUT — final-wins sobre consolidated (grid shell account/B2B + auth login)
-@import (once) '_awa-account-layout';
-
-// 43.2. HOME HERO TRUST STRIP — diferenciais B2B (3 colunas / ícone 48px)
-@import (once) '_awa-home-hero-trust-layout';
-@import (once) '_awa-hero-b2b-benefits-2026-06.less';
-
-// 43.3. INLINE SVG HARDENING — baseline + empty-state pedidos/footer/header
-@import (once) '_awa-inline-svg-hardening';
-
-// 43.4. HOME RECENT ORDERS — empty-state onboard B2B (guest / logado sem pedidos)
-@import (once) '_awa-home-recent-orders-empty';
-
-// 43.5. FOOTER POLISH — contrato light-mode único (/impeccable colorize + distill)
-//       Substitui branches awa-footer--dark e CSS footer redundante nos bundles.
-@import (once) '_awa-footer-polish';
-
-// 43.6. HOME ANIMATIONS — motion layer para a página inicial (/impeccable animate)
-//       Carousel nav transitions, product image zoom, category carousel lift,
-//       B2B trust strip stagger, section header entrance. prefers-reduced-motion
-//       override incluído. Register: PRODUCT — motion conveys state.
-@import (once) '_awa-home-animations';
-
-// 43.7. CART EMPTY STATE — onboard B2B no carrinho vazio (/impeccable)
-@import (once) '_awa-cart-empty';
-
-// 43.8. CART FILLED STATE — tabela + resumo B2B (/impeccable polish)
-@import (once) '_awa-cart-filled';
-
-// 43.9. CART MOBILE BAR — CTA fixo no mobile (checkout mode sem bottom nav)
-@import (once) '_awa-cart-mobile-bar';
+// §43 — Bloco Midgame: consolidated, header, layout, cart
+// 20 imports bundled Fase 5 Jun/24 — cascade order preservada em _awa-bundle-midgame.less
+@import (once) '_awa-bundle-midgame';
 
 // PORTED S92 → _awa-consolidated.less (final-wins header, após kill-switch na cascata LESS)
 // @import '_awa-b2b-density-final.less';
@@ -541,7 +483,7 @@ html body#html-body {
 
             .awa-footer-trust-item {
                 display: flex;
-                align-items: flex-start;
+                align-items: center;
                 gap: @awa-s-2;
                 min-width: 0;
                 min-height: @awa-s-6;
@@ -554,6 +496,11 @@ html body#html-body {
                 flex: 0 0 @awa-s-6;
                 width: @awa-s-6;
                 height: @awa-s-6;
+                align-self: center;
+            }
+
+            .awa-footer-trust-copy {
+                align-self: center;
             }
 
             .footer-container {
@@ -1618,116 +1565,9 @@ html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .pa
 // 55. ADAPT §55 — /impeccable adapt fase 5 (lacunas de breakpoint por contexto)
 //     Tablet sidebar toggle, PDP tablet, search overflow, large-desktop prose,
 //     PDP safe-area bottom, minicart notch, carousel pointer, print, container queries
-@import (once) '_awa-adapt-2026-06';
-
-// 56. HEADER FIX §56 — Correção completa do header em todas as páginas (2026-06-08)
-//     Diagnóstico: .header-wrapper-sticky sem position:sticky → hero sobe por baixo do header.
-//     Corrige: sticky foundation, z-index stack, submenu dropdown, hero containment,
-//     page-wrapper padding-top, mobile logo duplicado.
-// Import movido para a seção 43.xx para manter ordem layout-base -> refine.
-
-// 57. POLISH §57 — /impeccable polish (2026-06-08)
-//     Nav conta/B2B, breadcrumbs, toolbar, paginação, notas de busca, cards PLP.
-@import (once) '_awa-polish-2026-06';
-
-// 58. HARDEN §58 — /impeccable harden B2B account (2026-06-08)
-//     Repetir Pedido: visibilidade above-fold, empty state, truncamento, live region.
-@import (once) '_awa-harden-b2b-account-2026-06';
-
-// 59. BOLDER §59 — /impeccable bolder Repetir Pedido (2026-06-08)
-//     Hierarquia forte, total/CTA destacados, acento AWA nos preços atuais.
-@import (once) '_awa-bolder-b2b-reorder-2026-06';
-
-// 60. POLISH B2B §60 — /impeccable polish b2b (2026-06-08)
-//     Nav sem faixa, chunking sidebar, reorder mobile/foco, breadcrumbs B2B.
-@import (once) '_awa-polish-b2b-2026-06';
-
-// 61. OPTIMIZE B2B §61 — /impeccable optimize (2026-06-08)
-//     contain/CLS reorder; complementa lazy-load de preços no JS.
-@import (once) '_awa-optimize-b2b-2026-06';
-
-// 62. HARDEN REORDER §62 — /impeccable harden b2b/reorder/history (2026-06-08)
-//     CTA bloqueado até preços; timeout, retry, estados degradados.
-@import (once) '_awa-harden-b2b-reorder-2026-06';
-
-// 63. DISTILL B2B ACCOUNT §63 — /impeccable distill b2b/account (2026-06-08)
-//     Header operacional compacto; remove chrome catálogo e títulos duplicados.
-@import (once) '_awa-distill-b2b-account-2026-06';
-
-// 64. POLISH HOME §64 — /impeccable polish home (2026-06-08)
-//     Headers de shelf, affordance mobile, tiers tipográficos, touch targets.
-@import (once) '_awa-polish-home-2026-06';
-
-// 65. LAYOUT HOME §65 — /impeccable layout home (2026-06-08, refine 2026-06-08)
-//     Ritmo vertical por tier, zona discovery→featured, compact band, hierarquia tipográfica.
-@import '_awa-layout-home-2026-06.less';
-
-// 66. ADAPT B2B ACCOUNT §66 — /impeccable adapt b2b/account (2026-06-08)
-//     Reorder mobile sem display:contents; touch 44px; sidebar expandida; aprovações.
-@import (once) '_awa-adapt-b2b-account-2026-06';
-
-// 67. LAYOUT B2B ACCOUNT §67 — /impeccable layout b2b/account (2026-06-08)
-//     Ritmo do shell, accordion mobile por seção, stack sem scroll interno.
-@import (once) '_awa-layout-b2b-account-2026-06';
-
-// MENU-V2 — runtime AWA moderno (2026-06-08): estados + stack vertical inlined
-@import (once) '_awa-menu-modern';
-
-// 68. POLISH B2B ACCOUNT §68 — /impeccable polish b2b/account (2026-06-08)
-//     Focus-visible, crédito/cotações, sticky sidebar, badges.
-@import (once) '_awa-polish-b2b-account-2026-06';
-
-// 69. OPTIMIZE B2B ACCOUNT §69 — /impeccable optimize b2b/account (2026-06-08)
-//     content-visibility listagens; contain sidebar desktop.
-@import (once) '_awa-optimize-b2b-account-2026-06';
-
-// 67. CLARIFY HOME §67 — /impeccable clarify home (2026-06-08)
-//     Aviso único de preços B2B; CTA encurtado nos cards da home.
-@import '_awa-clarify-home-2026-06.less';
-
-// 68. ADAPT HOME §68 — /impeccable adapt home (2026-06-08)
-//     Mobile: Owl nav clicável, setas categorias, hero B2B, touch 44px, peek swipe.
-@import '_awa-adapt-home-2026-06.less';
-
-// 69. CAROUSEL HOME §69 — /impeccable carousel home (2026-06-08)
-//     Scroll-snap moderno, peek, chrome unificado, cards 1:1, progress scaleX.
-@import '_awa-carousel-home-2026-06.less';
-
-// [DEPRECATED-HOME] absorbed into _awa-home-contract-2026-06.less
-// @import '_awa-polish-home-pass2-2026-06.less';
-
-// 71. CAROUSEL IMAGE FOCUS §71 — destaque imagem produto nos carrosséis home
-@import '_awa-carousel-image-focus-2026-06.less';
-
-// [DEPRECATED-HOME] absorbed into _awa-home-contract-2026-06.less
-// @import '_awa-refine-home-2026-06.less';
-
-// [DEPRECATED-HOME] now imported by _awa-home-contract-2026-06.less
-// @import '_awa-home-practices-2026-06.less';
-
-// 74. HARDEN HOME §74 — chrome SSR, noscript, focus viewport
-@import '_awa-harden-home-2026-06.less';
-
-// [DEPRECATED-HOME] absorbed into _awa-home-contract-2026-06.less
-// @import '_awa-distill-home-2026-06.less';
-
-// [DEPRECATED-HOME] absorbed into _awa-home-contract-2026-06.less
-// @import '_awa-polish-home-pass3-2026-06.less';
-
-// 78. FIX CAROUSEL §77 — carrosséis home (bootstrap + nav + pre-init)
-@import '_awa-fix-carousel-2026-06.less';
-
-// [DEPRECATED-HOME] absorbed into _awa-home-contract-2026-06.less
-// @import '_awa-impeccable-audit-home-2026-06.less';
-
-// [DEPRECATED-HOME] absorbed into _awa-home-contract-2026-06.less
-// @import '_awa-typeset-home-2026-06.less';
-
-// [DEPRECATED-HOME] absorbed into _awa-home-contract-2026-06.less
-// @import '_awa-polish-home-pass4-2026-06.less';
-
-// 82. HARDEN PASS2 §82 — overflow, empty states, standard CTA link (2026-06-08 continue)
-@import '_awa-harden-home-pass2-2026-06.less';
+@import (once) '_awa-bundle-phase3-final';
+// (imports individuais abaixo removidos para _awa-bundle-phase3-final — Fase 5 Jun/24)
+// §57-§82 — movidos para _awa-bundle-phase3-final (Fase 5 Jun/24)
 
 // 78. HEADER REFERENCE MATCH §78 — layout aprovado pelo anexo (2026-06-08)
 //     Header full-width: promo vermelha, busca ampla, ações compactas e nav branca.
@@ -1749,7 +1589,7 @@ html body#html-body:not(.onepagecheckout-index-index):not(.checkout-index-index)
         padding-inline: @awa-space-3 !important;
         background: var(--awa-primary) !important;
         border: 0 !important;
-        color: var(--awa-text-inverse, #ffffff) !important;
+        color: var(--awa-text-inverse, @awa-color-white) !important;
         overflow: hidden !important;
     }
 
@@ -1768,7 +1608,7 @@ html body#html-body:not(.onepagecheckout-index-index):not(.checkout-index-index)
         gap: 4px !important;
         max-width: 100% !important;
         margin: 0 !important;
-        color: var(--awa-text-inverse, #ffffff) !important;
+        color: var(--awa-text-inverse, @awa-color-white) !important;
         font-size: ~"max(12px, 0.75rem)" !important;
         font-weight: @awa-weight-medium !important;
         line-height: 1.35 !important;
@@ -1782,7 +1622,7 @@ html body#html-body:not(.onepagecheckout-index-index):not(.checkout-index-index)
     .awa-b2b-promo-bar__tail,
     .awa-b2b-promo-bar__cta,
     .awa-b2b-promo-bar__cta strong {
-        color: var(--awa-text-inverse, #ffffff) !important;
+        color: var(--awa-text-inverse, @awa-color-white) !important;
         font-size: inherit !important;
         line-height: 1.35 !important;
     }
@@ -1838,7 +1678,7 @@ html body#html-body:not(.onepagecheckout-index-index):not(.checkout-index-index)
             margin: 0 !important;
             padding-block: 0 !important;
             padding-inline: @awa-page-pad-catalog !important;
-            background: var(--awa-surface, #ffffff) !important;
+            background: var(--awa-surface, @awa-color-white) !important;
             box-sizing: border-box !important;
         }
 
@@ -1897,10 +1737,10 @@ html body#html-body:not(.onepagecheckout-index-index):not(.checkout-index-index)
             form#search_mini_form {
                 display: grid !important;
                 grid-template-columns: minmax(0, 1fr) 48px !important;
-                overflow: hidden !important;
+                overflow: visible !important;
                 border: 1px solid var(--awa-border) !important;
                 border-radius: 0 !important;
-                background: var(--awa-surface, #ffffff) !important;
+                background: var(--awa-surface, @awa-color-white) !important;
                 box-shadow: none !important;
             }
 
@@ -1918,7 +1758,7 @@ html body#html-body:not(.onepagecheckout-index-index):not(.checkout-index-index)
                 border: 0 !important;
                 box-shadow: none !important;
                 padding: 0 @awa-space-3 !important;
-                color: var(--awa-text, #333333) !important;
+                color: var(--awa-text, @awa-color-text-primary) !important;
                 font-size: 12px !important;
                 line-height: 32px !important;
             }
@@ -1970,7 +1810,7 @@ html body#html-body:not(.onepagecheckout-index-index):not(.checkout-index-index)
             min-height: 44px !important;
             margin: 0 !important;
             padding: 0 !important;
-            color: var(--awa-text, #333333) !important;
+            color: var(--awa-text, @awa-color-text-primary) !important;
         }
 
         .awa-header-account-prompt__icon {
@@ -1985,12 +1825,12 @@ html body#html-body:not(.onepagecheckout-index-index):not(.checkout-index-index)
         .awa-header-account-prompt__copy {
             font-size: 12px !important;
             line-height: 1.25 !important;
-            color: var(--awa-text, #333333) !important;
+            color: var(--awa-text, @awa-color-text-primary) !important;
             white-space: normal !important;
         }
 
         .awa-header-account-prompt__link {
-            color: var(--awa-text, #333333) !important;
+            color: var(--awa-text, @awa-color-text-primary) !important;
             font-weight: @awa-weight-bold !important;
             text-decoration: none !important;
         }
@@ -2083,7 +1923,7 @@ html body#html-body:not(.onepagecheckout-index-index):not(.checkout-index-index)
             border: 0 !important;
             border-radius: 0 !important;
             background: var(--awa-primary) !important;
-            color: var(--awa-text-inverse, #ffffff) !important;
+            color: var(--awa-text-inverse, @awa-color-white) !important;
             display: inline-flex !important;
             align-items: center !important;
             justify-content: flex-start !important;
@@ -2187,124 +2027,30 @@ html body#html-body:not(.onepagecheckout-index-index):not(.checkout-index-index)
     }
 }
 
-// 83. HEADER CONSISTENCY §83 — /impeccable polish header (2026-06-08)
-//     Tokens, estados interativos e promo unificados; vence drift legado.
-@import '_awa-header-consistency-2026-06.less';
+// ── Phase 2 Polish Bundle (§83-§115) ───────────────────────────────────────────────
+// 62 partials de consistency/visual/iteration consolidados em 1 import.
+// Para adicionar novos arquivos: editar _awa-bundle-phase2-polish.less
+@import (once) '_awa-bundle-phase2-polish.less';
 
-// 84. SHELL CONSISTENCY §84 — gutter header/home/PLP/footer unificado (2026-06-08)
-@import '_awa-shell-consistency-2026-06.less';
+// ── Fase 3B — Onda 1: Header Component Layer ─────────────────────────────────
+// Camada modular final-wins sem !important (excecoes documentadas inline).
+// Carregada apos todo o legado → vence por ordem de documento.
+// Rollback: remover estas 4 linhas e recompilar static content.
+@import (once) 'components/_header';
+@import (once) 'components/_menu';
+@import (once) 'components/_search';
+@import (once) 'components/_mobile-header';
 
-// 85. HOME CONSISTENCY §85 — cabeçalhos, chrome carrossel, links de seção (2026-06-08)
-@import '_awa-consistency-home-2026-06.less';
+// ── Fase 3B — Ondas 2-5: PLP, PDP, Checkout/B2B, CSS Cleanup ────────────────
+// Onda 2: product grid, hover, badges, paginacao, mobile grid.
+// Onda 3: PDP gallery, price, tabs, sticky mobile CTA, related products.
+// Onda 4: cart item/totals, empty cart, coupon, B2B login, approval status.
+// Onda 5: normalizacao tipografica, foco, messages, breadcrumb, motion safety.
+// Rollback: remover estas 4 linhas e recompilar static content.
+@import (once) 'components/_plp';
+@import (once) 'components/_pdp';
+@import (once) 'components/_checkout-b2b';
+@import (once) 'components/_cleanup';
 
-// 86. HOME CONSISTENCY PASS 2 §86 — gutter wrapper + gate compact progressivo (2026-06-08)
-@import '_awa-consistency-home-pass2-2026-06.less';
-
-// 87. VERTICAL MENU CONSISTENCY §87 — trigger 150×38, dropdown, flyouts (2026-06-08)
-@import '_awa-vertical-menu-consistency-2026-06.less';
-
-// 88. GLOBAL CONSISTENCY §88 — tokens header, shell, CTAs (2026-06-08)
-@import '_awa-global-consistency-2026-06.less';
-
-// 89. PLP CONSISTENCY §89 — cards, filtros, toolbar, PDP related (2026-06-08)
-@import '_awa-plp-consistency-2026-06.less';
-
-// 90. PDP CONSISTENCY §90 — gate B2B, layout buy-box, related (2026-06-08)
-@import '_awa-pdp-consistency-2026-06.less';
-
-// 91. CATALOG CONSISTENCY §91 — breadcrumbs + gate PLP/busca + fundo branco (2026-06-08)
-@import '_awa-catalog-consistency-2026-06.less';
-
-// 93. PLP/SEARCH PASS 2 §93 — hero, toolbar, paginação, nota busca (2026-06-08)
-@import '_awa-plp-consistency-pass2-2026-06.less';
-
-// 94. PLP GRID + MOBILE §94 — grid responsivo, filtros ativos, hero compacto (2026-06-08)
-@import '_awa-plp-grid-mobile-2026-06.less';
-
-// G-095. CONTAINER + GRID ARCHITECTURE — SSOT shell, page grid, subgrid PLP (2026-06-08)
-@import '_awa-container-grid-architecture-2026-06.less';
-
-// 96. ACCOUNT + B2B GRID §96 — tier 2/3 dashboard grid (2026-06-08)
-@import '_awa-account-grid-architecture-2026-06.less';
-
-// 97. GRID RHYTHM + TYPESET §97 — vertical rhythm, measure, z-index (2026-06-08)
-@import '_awa-container-grid-rhythm-2026-06.less';
-
-// G-098. UNIVERSAL SHELL — box model, gutters, Bootstrap neutralization (2026-06-08)
-@import '_awa-universal-shell-2026-06.less';
-
-// G-099. UI SURFACE CONSISTENCY — page chrome, messages, blocks, tables (2026-06-08)
-@import '_awa-ui-surface-consistency-2026-06.less';
-
-// G-100. INTERACTION STATE — focus, hover, selected, error, pagination (2026-06-08)
-@import '_awa-interaction-state-consistency-2026-06.less';
-
-// H-092. HOME BG WHITE — fundo branco unificado na home (2026-06-08)
-@import '_awa-home-bg-white-2026-06.less';
-
-// H-093. HOME SHELF HEADERS — cabeçalhos vitrine sem overlap/barra legada (2026-06-08)
-@import '_awa-home-shelf-header-fix-2026-06.less';
-
-// H-095. HOME CLEAN — zebra/gradientes/divisores neutralizados (2026-06-08)
-@import '_awa-home-clean-2026-06.less';
-
-// H-100. HOME VISUAL STANDARD — tipografia, ritmo, cards (Impeccable 2026-06-08)
-@import '_awa-home-visual-standard-2026-06.less';
-
-// G-101. PRODUCT CARD CONTRACT — shared HOME + PLP card contract (2026-06-08)
-@import '_awa-product-card-contract-2026-06.less';
-
-// H-110. HOME CONTRACT — consolidated rhythm/typeset/links/a11y (2026-06-08)
-@import '_awa-home-contract-2026-06.less';
-
-// G-102. DISTILL VISUAL — neutraliza drift consolidated/async (2026-06-08)
-@import '_awa-distill-visual-consistency-2026-06.less';
-
-// H-102. HOME DENSITY — colunas, padding, header compacto (2026-06-08)
-@import '_awa-home-density-2026-06.less';
-
-// G-103. ARCHITECTURE + VISUAL MODERN — tiers, container queries, cards (2026-06-08)
-@import '_awa-architecture-visual-modern-2026-06.less';
-
-// 104. ARCH + VISUAL PASS 2 §104 — account/flow/cart/cms/checkout chrome (2026-06-08)
-@import '_awa-architecture-visual-modern-pass2-2026-06.less';
-
-// 105. ARCH + VISUAL PASS 3 §105 — distill shadows/stripes, tables, modals (2026-06-08)
-@import '_awa-architecture-visual-modern-pass3-2026-06.less';
-
-// 106. FORM CONTROLS + VISUAL STANDARD §106 — inputs ops + home card distill (2026-06-08)
-@import '_awa-form-controls-visual-standard-2026-06.less';
-
-// 107. VISUAL STANDARD PASS 4 §107 — token distill, catalog/checkout/PDP (2026-06-08)
-@import '_awa-visual-standard-pass4-2026-06.less';
-
-// 108. ASYNC BUNDLE DISTILL §108 — vence pdp/plp promax, checkout-polish, home gates (2026-06-08)
-@import '_awa-async-bundle-distill-2026-06.less';
-
-// 109. OPC CHECKOUT §109 — header, sidebar zones, inline errors (2026-06-08)
-@import '_awa-opc-checkout-2026-06.less';
-@import '_awa-opc-sidebar-2026-06.less';
-
-// 110. OPC MODERN UX §110 — tipografia, etapas, adapt mobile/tablet/touch (2026-06-08)
-@import '_awa-opc-modern-2026-06.less';
-
-// 111. PDP SHELL UNIFY §111 — shell catalog 1440px + flex 54/46 (2026-06-08)
-@import '_awa-image-fluid.less';
-@import '_awa-pdp-shell-unify-2026-06.less';
-
-// §111b — override pós-shell (garante 1440px se preprocessor servir cache legado 100%)
-html body#html-body.catalog-product-view .page-wrapper :is(
-    .nav-breadcrumbs,
-    #maincontent#maincontent.page-main.container,
-    .page-main,
-    .page-main.container
-) {
-    max-width: @awa-page-catalog !important;
-    width: 100% !important;
-    margin-inline: auto !important;
-    padding-inline: @awa-page-pad-catalog !important;
-    box-sizing: border-box !important;
-}
-@import '_awa-pdp-polish-2026-06.less';
-@import '_awa-pdp-distill-2026-06.less';
-// layout §114 merged em _awa-pdp-shell-unify (deploy trunca imports após polish)
+// Fase 3D.2 — Header container/grid contract
+@import (once) 'components/_header-contract-grid';

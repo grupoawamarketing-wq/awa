@@ -1,0 +1,90 @@
+// 68. POLISH B2B ACCOUNT §68 — /impeccable polish b2b/account (2026-06-08)
+// Foco visível, ritmo crédito/cotações, sticky sidebar em produção, badges legíveis.
+
+@import (once) '_awa-tokens';
+
+@awa-polish-account-shell-gap: clamp(20px, 3vw, 32px);
+@awa-polish-account-block-gap: clamp(16px, 2.5vw, 24px);
+
+// ── §68a — Coluna principal: gap + sidebar sticky (desktop) ───────────────
+@media (min-width: (@awa-breakpoint-md + 1)) {
+    html body#html-body:is(.account, [class*='b2b-']) .sidebar-main {
+        position: sticky;
+        top: var(--awa-header-scroll-offset, 56px);
+        align-self: start;
+    }
+}
+
+html body#html-body:is(.account, [class*='b2b-']) .column.main {
+    display: flex;
+    flex-direction: column;
+    gap: @awa-polish-account-block-gap;
+}
+
+// ── §68b — Crédito: stack com gap (sem margin solto) ─────────────────────
+html body#html-body:is(.account, [class*='b2b-']) .b2b-credit-page {
+    display: flex;
+    flex-direction: column;
+    gap: @awa-polish-account-block-gap;
+
+    .credit-summary-cards {
+        margin-bottom: 0;
+    }
+
+    .credit-transactions {
+        margin-top: 0;
+    }
+}
+
+@media (max-width: @awa-breakpoint-md) {
+    html body#html-body:is(.account, [class*='b2b-']) .b2b-credit-page .credit-summary-cards {
+        grid-template-columns: 1fr;
+        gap: @awa-space-3;
+    }
+}
+
+// ── §68c — Focus-visible: nav accordion, CTAs secundários, tabelas ────────
+html body#html-body:is(.account, [class*='b2b-']) {
+    .block-collapsible-nav.awa-nav--mobile-collapsible > :is(.block-title, .title):focus-visible {
+        outline: 2px solid var(--awa-primary, @awa-red);
+        outline-offset: -2px;
+    }
+
+    .account-nav-section__toggle:focus-visible {
+        outline: 2px solid var(--awa-primary, @awa-red);
+        outline-offset: 2px;
+    }
+
+    .b2b-page-shell :is(.action.secondary, a.action.secondary):focus-visible,
+    .column.main > .action.secondary:focus-visible {
+        outline: 2px solid var(--awa-primary, @awa-red);
+        outline-offset: 2px;
+    }
+
+    .b2b-page-shell :is(.data.table a, .table-wrapper a.action):focus-visible {
+        outline: 2px solid var(--awa-primary, @awa-red);
+        outline-offset: 2px;
+        border-radius: @awa-radius-sm;
+    }
+}
+
+// ── §68d — Badges: legibilidade mínima 11px (rótulos curtos) ─────────────
+html body#html-body:is(.account, [class*='b2b-']) {
+    .b2b-reorder-page .reorder-card__status,
+    :is(.b2b-quote-history, .b2b-quote-view) .quote-status {
+        font-size: 0.6875rem;
+        letter-spacing: 0.03em;
+    }
+}
+
+// ── §68e — Alinhar §60e ao layout §67 (shell gap, não margin duplo) ───────
+html body#html-body:is(.account, [class*='b2b-']) .page-wrapper .b2b-page-shell .b2b-section-header {
+    margin-bottom: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html body#html-body:is(.account, [class*='b2b-']) .block-collapsible-nav .block-title,
+    html body#html-body:is(.account, [class*='b2b-']) .account-nav-section__toggle {
+        transition: none;
+    }
+}

@@ -15,6 +15,7 @@
 // Cores neutras/utilitárias são aplicadas diretamente onde necessário.
 @awa-color-primary:      #b73337;   // Primária · Button BG · Link
 @awa-color-primary-dark: #8e2629;   // Primary Hover · Button Hover BG · Link Hover (Updated to prompt spec)
+@awa-color-primary-mid:  #a33b3b;   // Primary meio-tom (estados intermediários de hover/focus)
 @awa-color-dark:         #333333;   // Utility bar, dark surfaces (primitivo)
 
 // ── Auth Module Tokens (B2B register/login) ──────────────────────────────
@@ -41,9 +42,10 @@
 // Aliases curtos para uso em todos os LESS files.
 @awa-red:      @awa-color-primary;      // Alias curto para @awa-color-primary
 @awa-red-dark: @awa-color-primary-dark;  // Alias curto para @awa-color-primary-dark
-@awa-color-text-primary: #333333;   // Text Color (Standardized to #333333)
-@awa-color-text-muted:   #666666;   // Muted/Secondary Text (Standardized to #666666)
-@awa-color-text-light:   #999999;   // Light/Placeholder Text
+@awa-color-text-primary:    #333333;   // Text Color (Standardized to #333333)
+@awa-color-text-secondary:  #555555;   // Secondary text (entre primary e muted)
+@awa-color-text-muted:      #666666;   // Muted/Secondary Text (Standardized to #666666)
+@awa-color-text-light:      #999999;   // Light/Placeholder Text
 
 // Aliases semânticos curtos (adicionados para compatibilidade)
 @awa-text-primary: @awa-color-text-primary;
@@ -133,18 +135,21 @@
 @import '_z-index';
 
 // ── Layout / Container ────────────────────────────────────────────────────
-@container-max:           1440px;
+// Eixo único do site: 1280px (alinhado ao header). Atualizado de 1440px em 2026-06-15.
+// Ref: _awa-page-containers.less (@awa-page-catalog: 1280px).
+@container-max:           1280px;
 @container-pad:           @space-4; // 16px (legado)
 @grid-gap:                @space-4;
 @awa-container-max-width: @container-max;
 @awa-container-pad:       @container-pad;
 @awa-container-small-max-width: 960px;
-@awa-container-wide-max-width: 1440px;
+@awa-container-wide-max-width: 1440px; // alias "wide" permanece 1440px para seções full-bleed específicas
 
 // Novos tokens canônicos (v1.2) - Ref: _awa-page-containers.less
 @awa-page-pad-desktop : 24px;
 @awa-page-pad-tablet  : 16px;
-@awa-page-pad-mobile  : 12px;
+@awa-page-pad-mobile  : 16px;  // v1.4: alinhado ao header mobile (era 12px)
+@awa-page-pad-catalog : 16px;  // gutter padrão para páginas de catálogo (PLP/PDP)
 
 // ── Breakpoints ───────────────────────────────────────────────────────────
 @awa-breakpoint-xxs: 360px;  // Smartphones muito pequenos (≥360px = 2 colunas)
@@ -165,6 +170,7 @@
 
 // ── Surface / border ──────────────────────────────────────────────────────
 @awa-color-white:    #ffffff;
+@awa-color-bg:       #ffffff;  // fundo padrão (Canvas — branco)
 @awa-color-border:   #e5e5e5;
 @awa-color-bg-soft:  #f7f7f7;
 
@@ -180,6 +186,27 @@
 @awa-neutral-700: #334155;
 @awa-neutral-800: #1e293b;
 @awa-neutral-900: #0f172a;
+
+// ── Gray utilitário (Tailwind-like — uso frequente em componentes) ─────────
+// Separado do slate-neutral para não confundir paletas
+@awa-color-gray-200:     #E5E7EB;   // 162x — border/divider leve (Tailwind gray-200)
+@awa-color-gray-soft:    #E2E2E2;   //  65x — gray suave (fundo de campo, separator)
+@awa-color-gray-300:     #E0E0E0;   //  42x — gray claro (Material gray-300)
+@awa-color-bg-fafafa:    #FAFAFA;   //  25x — fundo muito claro
+@awa-color-text-mid:     #555555;   //  53x — texto intermediário (entre dark e muted)
+@awa-color-text-soft:    #888888;   //  38x — texto suave/desabilitado (= @awa-auth-muted)
+@awa-color-danger:       #DC2626;   //  18x — erro/danger vermelho (Tailwind red-600)
+@awa-color-danger-dark:  #C62828;   //  18x — erro/danger escuro (hover, border)
+// Segunda rodada de tokens frequentes
+@awa-color-bg-f5:        #F5F5F5;   //  48x — fundo muito claro (variante comum)
+@awa-color-gray-700:     #374151;   //  18x — dark text (Tailwind gray-700)
+@awa-color-gray-500:     #6B7280;   //  17x — muted (Tailwind gray-500)
+@awa-color-error-bg-light: #FEF2F2; //  17x — fundo de alerta/erro claro
+@awa-color-slate-900:    #111827;   //  16x — quase-preto (Tailwind gray-900)
+@awa-color-gray-f0:      #F0F0F0;   //  14x — cinza muito claro
+@awa-color-dark-alt:     #222222;   //  13x — variante de @awa-color-dark
+@awa-color-gray-ccc:     #CCCCCC;   //  11x — cinza médio-claro (border, placeholder)
+@awa-color-gray-ddd:     #DDDDDD;   //   9x — cinza claro (border legado)
 
 // ── State / semantic colors ────────────────────────────────────────────────
 // Success
@@ -248,6 +275,10 @@
 @awa-color-bg-page:        #f9fafb;  // Fundo de página / footer light mode
 @awa-color-bg-input:       #f5f5f5;  // Fundo de input inativo / disabled
 @awa-color-text-on-dark-muted: #bbbbbb;  // Texto secundário sobre fundo escuro (#1a1a1a)
+
+// ── Header semantic tokens ────────────────────────────────────────────────
+@awa-b2b-promo-bg:         @awa-color-secondary;  // Faixa B2B: superfície escura canônica (#1a1a1a)
+@awa-header-height:        auto;                  // Altura real do header, atualizada por JS (CLS placeholder)
 
 // ── WhatsApp brand colors ─────────────────────────────────────────────────
 // Cores de marca — NÃO modificar; são ditadas pelo WhatsApp Brand Guidelines.

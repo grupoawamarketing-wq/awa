@@ -16,6 +16,8 @@ class OptimizeHeadStylesPlugin
     private const HOME_ACTION = 'cms_index_index';
     private const HOME_DENSITY_GRID_FILE = 'awa-home-density-grid-20260611.min.css';
     private const HOME_DENSITY_GRID_QUERY = '?v=20260623-shell1280-r20';
+    private const HEADER_CONTRACT_GRID_FILE = 'awa-header-contract-grid-20260626.min.css';
+    private const HEADER_CONTRACT_GRID_QUERY = '?v=20260626-phase3d24-r2';
     // MORTO: awa-catalog-density-grid-20260611.min.css → _deprecated/
     private const CATALOG_DENSITY_GRID_FILE = '';
     private const CATALOG_DENSITY_GRID_QUERY = '';
@@ -306,14 +308,12 @@ class OptimizeHeadStylesPlugin
             $html = $this->injectAlignGridHeaderContainerTerminal($html);
             $html = $this->injectHeaderSimplifyUiTerminalLock($html);
             $html = $this->injectMainContentSkipTargetTabindex($html);
-            if (in_array($fullAction, self::CATALOG_STACK_ACTIONS, true)) {
-                $html = HeaderImpeccableCascadeLockCss::injectCatalogParityBeforeBodyClose($html);
-            }
         } else {
             // Auth / painel B2B: critical inline define layout — omitir locks globais + folhas pesadas.
             $html = preg_replace('/<style id="awa-align-grid-inline-lock[^"]*"[^>]*>.*?<\/style>/s', '', $html) ?? $html;
             $html = preg_replace('/<style id="awa-align-grid-header-container-terminal"[^>]*>.*?<\/style>/s', '', $html) ?? $html;
             $html = preg_replace('/<link\s[^>]*awa-align-grid-terminal[^>]*\/?>\s*/i', '', $html) ?? $html;
+            $html = preg_replace('/<link\s[^>]*awa-header-contract-grid-20260626[^>]*\/?>\s*/i', '', $html) ?? $html;
             $stripFragments = $isB2bAccountFocusPage
                 ? self::B2B_ACCOUNT_STRIP_CSS_FRAGMENTS
                 : self::AUTH_STRIP_CSS_FRAGMENTS;
@@ -329,6 +329,20 @@ class OptimizeHeadStylesPlugin
                 $subject->setHeader('X-Awa-Header-Optimize', 'v12-b2b-account', true);
             }
         }
+
+        $html = $this->normalizeHeaderGeometryAuthorityInlineStyles(
+            $html,
+            $fullAction,
+            $isAuthFocusPage,
+            $isB2bAccountFocusPage
+        );
+
+        $html = $this->stripHeavyHeadPreloadInlineStyleOutsideHome(
+            $html,
+            $fullAction,
+            $isAuthFocusPage,
+            $isB2bAccountFocusPage
+        );
 
         $html = $this->stripRedundantAsyncNoscript($html);
         $html = $this->stripStylePreloadDuplicates($html);
@@ -483,7 +497,7 @@ class OptimizeHeadStylesPlugin
     {
         $html = preg_replace('/<style id="awa-align-grid-inline-lock[^"]*"[^>]*>.*?<\/style>/s', '', $html) ?? $html;
 
-        $css = '<style id="awa-align-grid-inline-lock-20260612">'
+        $css = '<style id="awa-align-grid-inline-lock-20260626-phase3d22b">'
             . 'html body#html-body#html-body{--awa-grid-shell-max:min(100%,1280px);--awa-grid-container-pad:16px;'
             . '--awa-grid-card-gap:12px;--awa-grid-col-gap:12px;--awa-grid-section-gap:16px}'
             . 'html body#html-body#html-body .page-wrapper .awa-site-header'
@@ -992,6 +1006,8 @@ class OptimizeHeadStylesPlugin
             . 'display:none!important;visibility:hidden!important;height:0!important;min-height:0!important;max-height:0!important;'
             . 'padding:0!important;margin:0!important;border:0!important;overflow:hidden!important}}}';
 
+        $css .= $this->buildUnifiedHeaderGeometryAuthorityCss();
+
         $css .= '</style>';
         $script = '<script id="awa-header-hidden-focus-sync">(function(){'
             . 'var owned="data-awa-hidden-focus-sync",storedTab="data-awa-prev-tabindex",storedAria="data-awa-prev-aria-hidden";'
@@ -1020,6 +1036,130 @@ class OptimizeHeadStylesPlugin
         $injected = preg_replace('/<\/body>/i', $css . $script . "\n</body>", $html, 1);
 
         return is_string($injected) ? $injected : $html;
+    }
+
+    /**
+     * Geometria única do header (3D.2.2B): fonte de verdade para home/PLP/PDP/cart.
+     */
+    private function buildUnifiedHeaderGeometryAuthorityCss(): string
+    {
+        $css = <<<'CSS'
+@media(min-width:1200px){html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"]{--awa-header-main-row-h:68px!important;--awa-header-nav-h:48px!important;--awa-header-shell-pad:24px!important;--awa-header-col-gap:24px!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .header.awa-main-header{height:var(--awa-header-main-row-h)!important;min-height:var(--awa-header-main-row-h)!important;max-height:var(--awa-header-main-row-h)!important;padding:0 var(--awa-header-shell-pad)!important;box-sizing:border-box!important;overflow:visible!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky :is(.header_main.awa-main-header-inner-wrap,.header-main,.header-main>.container,.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row="brand-search"]){height:var(--awa-header-main-row-h)!important;min-height:var(--awa-header-main-row-h)!important;max-height:var(--awa-header-main-row-h)!important;box-sizing:border-box!important;overflow:visible!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky :is(.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row="brand-search"]){display:grid!important;grid-template-columns:minmax(140px,172px) minmax(360px,1fr) minmax(240px,300px)!important;grid-template-areas:"brand search actions"!important;align-items:center!important;column-gap:var(--awa-header-col-gap)!important;width:min(100%,1280px)!important;max-width:1280px!important;margin-inline:auto!important;padding-inline:var(--awa-header-shell-pad)!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-primary-row{display:contents!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-brand-cell{grid-area:brand!important;display:flex!important;align-items:center!important;justify-content:flex-start!important;height:var(--awa-header-main-row-h)!important;min-height:0!important;max-height:var(--awa-header-main-row-h)!important;overflow:hidden!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-search-col{grid-area:search!important;display:flex!important;align-items:center!important;width:100%!important;min-width:0!important;max-width:none!important;height:var(--awa-header-main-row-h)!important;min-height:0!important;max-height:var(--awa-header-main-row-h)!important;overflow:visible!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-right-col{grid-area:actions!important;display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:8px!important;width:100%!important;min-width:0!important;max-width:300px!important;height:var(--awa-header-main-row-h)!important;min-height:0!important;max-height:var(--awa-header-main-row-h)!important;overflow:visible!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] :is(.header-control.header-nav,.header-control.awa-nav-bar,.awa-nav-bar){height:var(--awa-header-nav-h)!important;min-height:var(--awa-header-nav-h)!important;max-height:var(--awa-header-nav-h)!important;overflow:visible!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .awa-nav-bar__inner{height:var(--awa-header-nav-h)!important;min-height:var(--awa-header-nav-h)!important;max-height:var(--awa-header-nav-h)!important;box-sizing:border-box!important;width:min(100%,1280px)!important;max-width:1280px!important;margin-inline:auto!important;padding-inline:var(--awa-header-shell-pad)!important}}
+@media(min-width:992px) and (max-width:1199px){html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"]{--awa-header-main-row-h:64px!important;--awa-header-nav-h:46px!important;--awa-header-shell-pad:20px!important;--awa-header-col-gap:16px!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky :is(.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row="brand-search"]){grid-template-columns:minmax(132px,160px) minmax(320px,1fr) minmax(220px,280px)!important;grid-template-areas:"brand search actions"!important;column-gap:var(--awa-header-col-gap)!important;padding-inline:var(--awa-header-shell-pad)!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .header.awa-main-header{height:var(--awa-header-main-row-h)!important;min-height:var(--awa-header-main-row-h)!important;max-height:var(--awa-header-main-row-h)!important;padding:0 var(--awa-header-shell-pad)!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky :is(.header_main.awa-main-header-inner-wrap,.header-main,.header-main>.container,.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row="brand-search"]){height:var(--awa-header-main-row-h)!important;min-height:var(--awa-header-main-row-h)!important;max-height:var(--awa-header-main-row-h)!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] :is(.header-control.header-nav,.header-control.awa-nav-bar,.awa-nav-bar){height:var(--awa-header-nav-h)!important;min-height:var(--awa-header-nav-h)!important;max-height:var(--awa-header-nav-h)!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .awa-nav-bar__inner{height:var(--awa-header-nav-h)!important;min-height:var(--awa-header-nav-h)!important;max-height:var(--awa-header-nav-h)!important;padding-inline:var(--awa-header-shell-pad)!important}}
+@media(min-width:768px) and (max-width:991px){html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"]{--awa-header-main-row-h:56px!important;--awa-header-nav-h:44px!important;--awa-header-shell-pad:16px!important;--awa-header-col-gap:16px!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky :is(.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row="brand-search"]){display:grid!important;grid-template-columns:minmax(112px,148px) minmax(260px,1fr) minmax(180px,240px)!important;grid-template-areas:"brand search actions"!important;column-gap:var(--awa-header-col-gap)!important;padding-inline:var(--awa-header-shell-pad)!important;height:var(--awa-header-main-row-h)!important;min-height:var(--awa-header-main-row-h)!important;max-height:var(--awa-header-main-row-h)!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .header.awa-main-header{height:var(--awa-header-main-row-h)!important;min-height:var(--awa-header-main-row-h)!important;max-height:var(--awa-header-main-row-h)!important;padding:0 var(--awa-header-shell-pad)!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-primary-row{display:contents!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-brand-cell{grid-area:brand!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-search-col{grid-area:search!important;max-width:none!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-right-col{grid-area:actions!important;max-width:240px!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] :is(.header-control.header-nav,.header-control.awa-nav-bar,.awa-nav-bar){height:var(--awa-header-nav-h)!important;min-height:var(--awa-header-nav-h)!important;max-height:var(--awa-header-nav-h)!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .awa-nav-bar__inner{height:var(--awa-header-nav-h)!important;min-height:var(--awa-header-nav-h)!important;max-height:var(--awa-header-nav-h)!important;padding-inline:var(--awa-header-shell-pad)!important}}
+@media(max-width:767px){html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky{height:auto!important;min-height:0!important;max-height:none!important;padding:0!important;overflow:visible!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky :is(.header.awa-main-header,.header_main.awa-main-header-inner-wrap,.header-main,.header-main>.container){height:auto!important;min-height:0!important;max-height:none!important;padding:0!important;margin:0!important;overflow:visible!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky :is(.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row="brand-search"]){display:grid!important;grid-template-areas:"toggle brand cart" "search search search"!important;grid-template-columns:44px minmax(0,1fr) 44px!important;grid-template-rows:auto auto!important;row-gap:12px!important;column-gap:12px!important;height:auto!important;min-height:0!important;max-height:none!important;padding:12px 16px!important;overflow:visible!important;box-sizing:border-box!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-primary-row{display:contents!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-mobile-toggle{grid-area:toggle!important;justify-self:start!important;align-self:center!important;width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-brand-cell{grid-area:brand!important;justify-self:center!important;align-self:center!important;min-width:0!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-cart-link{grid-area:cart!important;justify-self:end!important;align-self:center!important;width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-search-col{grid-area:search!important;width:100%!important;min-width:0!important;max-width:none!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-search-col form#search_mini_form{display:grid!important;grid-template-columns:minmax(0,1fr) 44px!important;grid-template-areas:"field submit"!important;width:100%!important;min-width:0!important;max-width:100%!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-search-col form#search_mini_form .field.search{grid-area:field!important;min-width:0!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-search-col input#search{height:44px!important;min-height:44px!important;max-height:44px!important;line-height:44px!important;font-size:16px!important;padding-block:0!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-search-col form#search_mini_form .actions{grid-area:submit!important;width:44px!important;min-width:44px!important;max-width:44px!important;height:44px!important;min-height:44px!important;max-height:44px!important;padding:0!important;margin:0!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-search-col form#search_mini_form :is(.action.search,button.action.search){width:44px!important;min-width:44px!important;max-width:44px!important;height:44px!important;min-height:44px!important;max-height:44px!important;padding:0!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-right-col{grid-area:search!important;width:100%!important;min-width:0!important;max-width:none!important}}
+CSS;
+
+        return str_replace(
+            'html body#html-body#html-body',
+            'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body',
+            $css
+        );
+    }
+
+    private function normalizeHeaderGeometryAuthorityInlineStyles(
+        string $html,
+        string $fullAction,
+        bool $isAuthFocusPage,
+        bool $isB2bAccountFocusPage
+    ): string {
+        if ($isAuthFocusPage || $isB2bAccountFocusPage) {
+            return $html;
+        }
+
+        // Legacy lock de paridade do catálogo introduz uma segunda fonte de verdade para header.
+        $html = preg_replace('/<style id="awa-header-catalog-parity-v1"[^>]*>.*?<\/style>\s*/is', '', $html) ?? $html;
+
+        if ($fullAction === self::HOME_ACTION) {
+            foreach ([
+                'awa-home-cls-critical-opt21',
+                'awa-home-critical-cls-shell',
+                'awa-home-critical-cls-final-lock',
+                'awa-header-vtex-clean-critical-20260622',
+            ] as $styleId) {
+                $html = preg_replace(
+                    '/<style id="' . preg_quote($styleId, '/') . '"[^>]*>.*?<\/style>\s*/is',
+                    '',
+                    $html
+                ) ?? $html;
+            }
+
+            $html = str_replace(
+                [
+                    'minmax(420px,1fr)',
+                    'min-height:84px!important',
+                    'height:84px!important',
+                    'max-height:84px!important',
+                ],
+                [
+                    'minmax(360px,1fr)',
+                    'min-height:68px!important',
+                    'height:68px!important',
+                    'max-height:68px!important',
+                ],
+                $html
+            );
+        }
+
+        $html = str_replace(
+            [
+                'grid-template-columns:clamp(128px,13vw,184px) minmax(0,1fr) minmax(260px,max-content)!important;',
+                'grid-template-columns:clamp(112px,14vw,148px) minmax(0,1fr) minmax(220px,max-content)!important;',
+                'minmax(260px,max-content)',
+                'minmax(220px,max-content)',
+            ],
+            [
+                'grid-template-columns:minmax(140px,172px) minmax(360px,1fr) minmax(240px,300px)!important;',
+                'grid-template-columns:minmax(112px,148px) minmax(260px,1fr) minmax(180px,240px)!important;',
+                'minmax(240px,300px)',
+                'minmax(180px,240px)',
+            ],
+            $html
+        );
+
+        return $html;
+    }
+
+    /**
+     * PLP/PDP/carrinho: remove bloco legacy de head-preload (sem id, ~70KB) para reduzir parsing/heap no browser.
+     * Home/auth/painel B2B preservam o comportamento atual.
+     */
+    private function stripHeavyHeadPreloadInlineStyleOutsideHome(
+        string $html,
+        string $fullAction,
+        bool $isAuthFocusPage,
+        bool $isB2bAccountFocusPage
+    ): string {
+        if ($fullAction === self::HOME_ACTION || $isAuthFocusPage || $isB2bAccountFocusPage) {
+            return $html;
+        }
+
+        if (!str_contains($html, '--head-preload-c1:')) {
+            return $html;
+        }
+
+        $stripped = preg_replace_callback(
+            '/<style\b([^>]*)>(.*?)<\/style>\s*/is',
+            static function (array $matches): string {
+                $attrs = $matches[1] ?? '';
+                $body = $matches[2] ?? '';
+
+                if (preg_match('/\bid\s*=/i', $attrs)) {
+                    return $matches[0];
+                }
+
+                if (!str_contains($body, '--head-preload-c1:')
+                    || !str_contains($body, '--head-preload-footer-surface:')
+                ) {
+                    return $matches[0];
+                }
+
+                return '';
+            },
+            $html
+        );
+
+        return is_string($stripped) ? $stripped : $html;
     }
 
     /**
@@ -1093,7 +1233,9 @@ class OptimizeHeadStylesPlugin
      */
     private function injectAlignGridBodyTerminalIfMissing(string $html, bool $defer = false, string $fullAction = ''): string
     {
-        if (str_contains($html, 'data-awa-align-grid-body-terminal="1"')) {
+        $hasAlignGridBodyTerminal = str_contains($html, 'data-awa-align-grid-body-terminal="1"');
+        $hasHeaderContractBodyTerminal = str_contains($html, 'data-awa-header-contract-grid-body-terminal="1"');
+        if ($hasAlignGridBodyTerminal && $hasHeaderContractBodyTerminal) {
             return $html;
         }
 
@@ -1109,6 +1251,10 @@ class OptimizeHeadStylesPlugin
             . '/frontend/AWA_Custom/ayo_home5_child/pt_BR/css/'
             . HeaderImpeccableCascadeLockCss::ALIGN_GRID_CSS_FILE
             . HeaderImpeccableCascadeLockCss::ALIGN_GRID_QUERY;
+        $contractHref = '/static/' . $versionMatch[1]
+            . '/frontend/AWA_Custom/ayo_home5_child/pt_BR/css/'
+            . self::HEADER_CONTRACT_GRID_FILE
+            . self::HEADER_CONTRACT_GRID_QUERY;
         $isHome = $fullAction === self::HOME_ACTION;
         $isCatalogDensity = in_array($fullAction, self::CATALOG_STACK_ACTIONS, true)
             || in_array($fullAction, self::CATALOG_HEADER_ACTIONS, true);
@@ -1129,8 +1275,11 @@ class OptimizeHeadStylesPlugin
 
         if ($defer) {
             /* Home/PLP/busca: inline lock cobre container/grid no 1º paint — folha completa async */
-            $tag = '<link rel="stylesheet" href="' . $href . '" media="print" onload="this.media=\'all\'"'
-                . ' data-awa-align-grid-body-terminal="1" data-awa-bundle="align-grid-terminal" data-awa-defer="1"/>';
+            $tag = '';
+            if (!$hasAlignGridBodyTerminal) {
+                $tag .= '<link rel="stylesheet" href="' . $href . '" media="print" onload="this.media=\'all\'"'
+                    . ' data-awa-align-grid-body-terminal="1" data-awa-bundle="align-grid-terminal" data-awa-defer="1"/>';
+            }
             if ($hasHomeDensityHref
                 && $isHome
                 && !str_contains($html, 'data-awa-home-density-grid-body-terminal="1"')
@@ -1145,9 +1294,16 @@ class OptimizeHeadStylesPlugin
                 $tag .= '<link rel="stylesheet" href="' . $catalogDensityHref . '" media="all"'
                     . ' data-awa-catalog-density-grid-body-terminal="1" data-awa-bundle="catalog-density-grid"/>';
             }
+            if (!$hasHeaderContractBodyTerminal) {
+                $tag .= '<link rel="stylesheet" href="' . $contractHref . '" media="print" onload="this.media=\'all\'"'
+                    . ' data-awa-header-contract-grid-body-terminal="1" data-awa-bundle="header-contract-grid" data-awa-defer="1"/>';
+            }
         } else {
-            $tag = '<link rel="stylesheet" href="' . $href . '" media="all"'
-                . ' data-awa-align-grid-body-terminal="1" data-awa-bundle="align-grid-terminal"/>';
+            $tag = '';
+            if (!$hasAlignGridBodyTerminal) {
+                $tag .= '<link rel="stylesheet" href="' . $href . '" media="all"'
+                    . ' data-awa-align-grid-body-terminal="1" data-awa-bundle="align-grid-terminal"/>';
+            }
             if ($hasHomeDensityHref
                 && $isHome
                 && !str_contains($html, 'data-awa-home-density-grid-body-terminal="1"')
@@ -1162,6 +1318,14 @@ class OptimizeHeadStylesPlugin
                 $tag .= '<link rel="stylesheet" href="' . $catalogDensityHref . '" media="all"'
                     . ' data-awa-catalog-density-grid-body-terminal="1" data-awa-bundle="catalog-density-grid"/>';
             }
+            if (!$hasHeaderContractBodyTerminal) {
+                $tag .= '<link rel="stylesheet" href="' . $contractHref . '" media="all"'
+                    . ' data-awa-header-contract-grid-body-terminal="1" data-awa-bundle="header-contract-grid"/>';
+            }
+        }
+
+        if ($tag === '') {
+            return $html;
         }
 
         $injected = preg_replace('/<\/body>/i', $tag . "\n</body>", $html, 1);

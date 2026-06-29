@@ -1,0 +1,238 @@
+// =============================================================================
+// §96 — Account + B2B Dashboard Grid (Tier 2/3) — 2026-06-08
+// Alinha Minha Conta / B2B ao vocabulário §95 (--awa-grid-*, --awa-page-dash).
+// Escopo positivo: páginas operacionais (exclui login/cadastro por omissão de classe).
+// =============================================================================
+
+@import (once) '_awa-tokens';
+@import (once) '_design-system';
+@import (once) '_awa-page-containers';
+
+@awa-account-grid-scope: ~'html body#html-body:is(.account, .b2b-account-dashboard, .b2b-account-shell, .b2b-company-index, .b2b-credit-index, .b2b-approval-index, .b2b-reorder-history, .customer-account-index, .sales-order-history, .sales-order-view, .wishlist-index-index, .b2b-quote-index, .b2b-quote-view, .b2b-quote-create, .b2b-shoppinglist-index, .b2b-shoppinglist-view, .b2b-quickorder-index)';
+
+:root {
+    --awa-grid-sidebar-width-account: 220px;
+    --awa-shell-gutter-account: var(--awa-page-pad, 24px);
+}
+
+// ── Shell tier 2/3: box model + neutralizar Bootstrap ───────────────────────
+@{awa-account-grid-scope} .page-wrapper {
+    .page-main,
+    .page-main.container,
+    .columns,
+    .column.main,
+    .col-main,
+    .sidebar-main {
+        box-sizing: border-box !important;
+        min-width: 0 !important;
+    }
+
+    .page-main > .columns.row,
+    .page-main > .columns.layout {
+        margin-inline: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+
+        > [class*='col-'] {
+            padding-inline: 0 !important;
+            max-width: none !important;
+            flex: none !important;
+            width: auto !important;
+            float: none !important;
+        }
+    }
+}
+
+// ── Page grid: nav | conteúdo (≥768px) ──────────────────────────────────────
+@media (min-width: (@awa-breakpoint-sm + 1)) {
+    @{awa-account-grid-scope} .page-wrapper .page-main > .columns {
+        display: grid !important;
+        grid-template-columns: minmax(200px, var(--awa-grid-sidebar-width-account)) minmax(0, 1fr) !important;
+        grid-template-areas: 'account-side account-main' !important;
+        column-gap: var(--awa-grid-gap-loose, @awa-space-6) !important;
+        row-gap: 0 !important;
+        align-items: start !important;
+
+        > :is(.sidebar.sidebar-main, .sidebar-main, .col-lg-2, [class*='col-sm-3']) {
+            grid-area: account-side !important;
+            position: sticky !important;
+            top: calc(var(--awa-header-main-row-h, 68px) + var(--awa-header-nav-h, 38px) + @awa-space-3) !important;
+            align-self: start !important;
+            width: 100% !important;
+            max-width: var(--awa-grid-sidebar-width-account) !important;
+        }
+
+        > :is(.column.main, .col-main, .col-lg-10, [class*='col-sm-9']) {
+            grid-area: account-main !important;
+            width: 100% !important;
+            min-width: 0 !important;
+        }
+    }
+}
+
+// ── Mobile: stack nav → conteúdo ─────────────────────────────────────────────
+@media (max-width: @awa-breakpoint-sm) {
+    @{awa-account-grid-scope} .page-wrapper .page-main > .columns {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: var(--awa-grid-gap-tight, @awa-space-4) !important;
+    }
+
+    @{awa-account-grid-scope} .page-wrapper :is(.sidebar-main, .sidebar.sidebar-main) {
+        position: static !important;
+        top: auto !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+}
+
+// ── Conteúdo principal: stack vertical com ritmo ─────────────────────────────
+@{awa-account-grid-scope} .page-wrapper .column.main {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: var(--awa-grid-gap-tight, @awa-space-4) !important;
+}
+
+// ── Tabelas B2B: scroll horizontal sem quebrar grid ──────────────────────────
+@{awa-account-grid-scope} .page-wrapper {
+    .table-wrapper,
+    .data-grid-wrap {
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    :is(.breadcrumbs, .b2b-breadcrumbs-container) {
+        max-width: var(--awa-page-dash, @awa-page-dash) !important;
+        width: 100% !important;
+        margin-inline: auto !important;
+        padding-inline: var(--awa-shell-gutter-account) !important;
+        box-sizing: border-box !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    @{awa-account-grid-scope} .page-wrapper :is(.sidebar-main, .sidebar.sidebar-main) {
+        transition: none !important;
+    }
+}
+
+// ── §122 B2B Dashboard — shell + stack vertical (merged: deploy trunca imports tardios) ─
+@awa-b2b-dash-shell: ~'html body#html-body.b2b-account-dashboard .page-wrapper';
+
+@{awa-b2b-dash-shell} .page-main,
+@{awa-b2b-dash-shell} .page-main.container,
+@{awa-b2b-dash-shell} #maincontent.page-main {
+    max-width: @awa-page-dash !important;
+    width: 100% !important;
+    margin-inline: auto !important;
+    padding-inline: @awa-page-pad-desktop !important;
+    box-sizing: border-box !important;
+
+    @media (max-width: @awa-page-bp-md) {
+        padding-inline: @awa-page-pad-tablet !important;
+    }
+
+    @media (max-width: @awa-page-bp-sm) {
+        padding-inline: @awa-page-pad-mobile !important;
+    }
+}
+
+@{awa-b2b-dash-shell} .b2b-breadcrumbs-container,
+@{awa-b2b-dash-shell} .page-top .b2b-breadcrumbs-container {
+    max-width: @awa-page-dash !important;
+    width: 100% !important;
+    margin-inline: auto !important;
+    padding-inline: @awa-page-pad-desktop !important;
+    box-sizing: border-box !important;
+
+    @media (max-width: @awa-page-bp-md) {
+        padding-inline: @awa-page-pad-tablet !important;
+    }
+
+    @media (max-width: @awa-page-bp-sm) {
+        padding-inline: @awa-page-pad-mobile !important;
+    }
+}
+
+@{awa-b2b-dash-shell} .b2b-breadcrumbs-container .breadcrumbs {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin-inline: 0 !important;
+    padding-inline: 0 !important;
+    box-sizing: border-box !important;
+}
+
+@media (min-width: (@awa-breakpoint-sm + 1)) {
+    @{awa-b2b-dash-shell} .page-main > .columns {
+        display: grid !important;
+        grid-template-columns: minmax(200px, var(--awa-grid-sidebar-width-account, 220px)) minmax(0, 1fr) !important;
+        grid-template-areas: 'account-side account-main' !important;
+        column-gap: var(--awa-grid-gap-loose, @awa-space-6) !important;
+        flex-direction: unset !important;
+        flex-wrap: unset !important;
+
+        > :is(.sidebar.sidebar-main, .sidebar-main, .col-lg-2, [class*='col-sm-3']) {
+            grid-area: account-side !important;
+            flex: none !important;
+            width: 100% !important;
+            max-width: var(--awa-grid-sidebar-width-account, 220px) !important;
+        }
+
+        > :is(.column.main, .col-main, .col-lg-10, [class*='col-sm-9']) {
+            grid-area: account-main !important;
+            flex: none !important;
+            width: 100% !important;
+            max-width: none !important;
+        }
+    }
+}
+
+@{awa-b2b-dash-shell} .column.main,
+@{awa-b2b-dash-shell} .b2b-dashboard,
+@{awa-b2b-dash-shell} .b2b-dashboard > :is(
+    .b2b-dashboard-header,
+    .b2b-erp-pending-banner,
+    .b2b-onboarding-section,
+    .b2b-summary-cards,
+    .b2b-section,
+    .b2b-dashboard-lazy-panel,
+    .b2b-intelligence-section,
+    .b2b-quick-actions,
+    .b2b-company-info,
+    .message
+) {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin-inline: 0 !important;
+    box-sizing: border-box !important;
+}
+
+@{awa-b2b-dash-shell} :is(.b2b-section, .b2b-intelligence-section, .b2b-section.orders-section) {
+    padding-inline: var(--awa-acct-section-pad, clamp(14px, 2vw, 18px)) !important;
+}
+
+@{awa-b2b-dash-shell} .b2b-chart-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+// ── §134 SSOT — Header inner container centralizado no B2B dashboard ─────────
+// Mirror do critical inline em b2b-dashboard-css.phtml.
+// Garante a regra mesmo se o PHTML preprocessed ficar stale.
+// Especificidade: html(0,0,1) + body#html-body.b2b-account-dashboard(1,1,1)
+//   + .page-wrapper.awa-site-header(0,2,0) + .header.awa-main-header(0,2,0)
+//   + .awa-main-header__inner.wp-header(0,2,0) = (1,7,2) > §1 styles-l (1,6,2).
+@media (min-width: 992px) {
+    html body#html-body.b2b-account-dashboard .page-wrapper .awa-site-header .header.awa-main-header .awa-main-header__inner.wp-header,
+    html body#html-body.b2b-account-dashboard .page-wrapper .awa-site-header .header.awa-main-header .awa-main-header__inner[data-awa-header-row] {
+        max-width: @awa-page-dash !important;
+        width: 100% !important;
+        margin-inline: auto !important;
+        padding-inline: @awa-page-pad-desktop !important;
+        box-sizing: border-box !important;
+    }
+}

@@ -1,0 +1,228 @@
+// =============================================================================
+// §106 — Form Controls + Visual Standard (2026-06-08)
+// /impeccable product register — vocabulário único de inputs em superfícies ops.
+// Magento 2: .field, .control, .fieldset, checkout .field, B2B forms.
+// Home: distill hover shadows do async bundle (flat card §103).
+// =============================================================================
+
+@import (once) '_awa-tokens';
+@import (once) '_design-system';
+@import (once) '_awa-page-containers';
+
+@awa-fc-not-home: ~'html body#html-body:not(.cms-index-index):not(.cms-home):not(.cms-homepage_ayo_home5)';
+@awa-fc-forms: ~'@{awa-fc-not-home}:is(.account, .customer-account-login, .customer-account-create, .customer-account-forgotpassword, .checkout-cart-index, .checkout-index-index, .onepagecheckout-index-index, .contact-index-index, .cms-page-view, [class*="b2b-"])';
+@awa-fc-home: ~'html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)';
+
+:root {
+    --awa-arch-version: '106';
+    --awa-input-min-h: 44px;
+    --awa-input-pad-x: @awa-space-3;
+    --awa-input-pad-y: @awa-space-2;
+    --awa-input-fs: @awa-font-size-14;
+    --awa-input-radius: @awa-radius-sm;
+    --awa-input-border: 1px solid var(--awa-border, @awa-color-border);
+    --awa-input-bg: var(--awa-bg-surface, @awa-color-white);
+    --awa-input-color: var(--awa-text, @awa-color-text-primary);
+}
+
+// ── Mixin: controle de formulário (default + hover + focus) ───────────────
+.awa-form-control() {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: var(--awa-input-min-h) !important;
+    padding: var(--awa-input-pad-y) var(--awa-input-pad-x) !important;
+    border: var(--awa-input-border) !important;
+    border-radius: var(--awa-input-radius) !important;
+    background: var(--awa-input-bg) !important;
+    color: var(--awa-input-color) !important;
+    font-size: var(--awa-input-fs) !important;
+    line-height: 1.4 !important;
+    box-sizing: border-box !important;
+    box-shadow: none !important;
+    transition: border-color 150ms @awa-ease, outline-color 150ms @awa-ease !important;
+
+    &::placeholder {
+        color: var(--awa-text-muted, @awa-color-text-muted) !important;
+        opacity: 1 !important;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+        &:hover:not(:disabled):not([disabled]) {
+            border-color: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 28%, var(--awa-border, @awa-color-border)) !important;
+        }
+    }
+
+    &:focus-visible {
+        outline: @awa-focus-ring-width solid var(--awa-primary, @awa-color-primary) !important;
+        outline-offset: 2px !important;
+        border-color: var(--awa-primary, @awa-color-primary) !important;
+    }
+
+    &:focus:not(:focus-visible) {
+        outline: none !important;
+    }
+}
+
+// ── Campos ops (exclui busca do header) ─────────────────────────────────────
+@{awa-fc-forms} .page-wrapper {
+    .field {
+        margin-block-end: @awa-space-4 !important;
+
+        > .label,
+        > label {
+            display: block !important;
+            margin-block-end: @awa-space-1 !important;
+            font-size: var(--awa-text-sm, 13px) !important;
+            font-weight: @awa-weight-semibold !important;
+            color: var(--awa-text, @awa-color-text-primary) !important;
+            line-height: 1.35 !important;
+        }
+
+        &.required > .label::after,
+        &.required > label::after {
+            content: ' *' !important;
+            color: var(--awa-error, @awa-color-error) !important;
+            font-weight: @awa-weight-normal !important;
+        }
+
+        > .control :is(input.input-text, input[type='text'], input[type='email'], input[type='password'], input[type='tel'], input[type='number'], input[type='search'], select, textarea),
+        > .control > input,
+        > .control > select,
+        > .control > textarea {
+            .awa-form-control();
+        }
+
+        > .control textarea {
+            min-height: 96px !important;
+            resize: vertical !important;
+        }
+
+        > .note,
+        > .field-note {
+            margin-block-start: @awa-space-1 !important;
+            font-size: var(--awa-text-xs, 12px) !important;
+            color: var(--awa-text-muted, @awa-color-text-muted) !important;
+            line-height: 1.4 !important;
+        }
+    }
+
+    :is(.field.choice, .choice) {
+        display: flex !important;
+        align-items: flex-start !important;
+        gap: @awa-space-2 !important;
+
+        > input[type='checkbox'],
+        > input[type='radio'] {
+            width: 18px !important;
+            height: 18px !important;
+            min-height: 18px !important;
+            margin-block-start: 2px !important;
+            flex-shrink: 0 !important;
+            accent-color: var(--awa-primary, @awa-color-primary) !important;
+        }
+
+        > label {
+            margin: 0 !important;
+            font-size: var(--awa-text-sm, 13px) !important;
+            font-weight: @awa-weight-normal !important;
+            line-height: 1.45 !important;
+        }
+    }
+}
+
+// Checkout OPC: campos dentro de .fieldset (Knockout)
+@{awa-fc-not-home}:is(.checkout-index-index, .onepagecheckout-index-index) .page-wrapper {
+    .opc-wrapper .field :is(input.input-text, select, textarea) {
+        .awa-form-control();
+    }
+}
+
+// ── Actions toolbar: primário à direita (Magento convention) ────────────────
+@{awa-fc-not-home} .page-wrapper .actions-toolbar {
+    justify-content: flex-end !important;
+
+    > .secondary {
+        order: 1 !important;
+        margin-inline-end: auto !important;
+    }
+
+    > .primary {
+        order: 2 !important;
+    }
+
+    @media (max-width: @awa-bp-768) {
+        flex-direction: column !important;
+        align-items: stretch !important;
+
+        > .secondary,
+        > .primary {
+            order: unset !important;
+            margin-inline-end: 0 !important;
+            width: 100% !important;
+        }
+
+        :is(.action, button, .button) {
+            width: 100% !important;
+            justify-content: center !important;
+        }
+    }
+}
+
+// ── PLP filtros: títulos accordion flat ─────────────────────────────────────
+html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .page-wrapper .sidebar-main {
+    .filter-options-title {
+        min-height: var(--awa-input-min-h) !important;
+        padding: @awa-space-2 @awa-space-3 !important;
+        border: var(--awa-input-border) !important;
+        border-radius: var(--awa-input-radius) !important;
+        background: var(--awa-input-bg) !important;
+        font-size: var(--awa-text-sm, 13px) !important;
+        font-weight: @awa-weight-semibold !important;
+        color: var(--awa-text, @awa-color-text-primary) !important;
+        border-inline-start-width: 1px !important;
+        border-left-width: 1px !important;
+        box-shadow: none !important;
+    }
+
+    .filter-options-item.active .filter-options-title {
+        border-color: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 35%, var(--awa-border, @awa-color-border)) !important;
+        background: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 6%, var(--awa-bg-surface, @awa-color-white)) !important;
+    }
+}
+
+// ── Home distill: cards flat hover (vence async body-end bundle) ────────────
+@{awa-fc-home} .page-wrapper {
+    .content-top-home :is(.item-product, .product-item, .product-item-info) {
+        box-shadow: none !important;
+        border: 1px solid var(--awa-border, @awa-color-border) !important;
+        transition: border-color 150ms @awa-ease !important;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+        .content-top-home :is(.item-product, .product-item, .product-item-info):hover {
+            box-shadow: none !important;
+            transform: none !important;
+            border-color: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 22%, var(--awa-border, @awa-color-border)) !important;
+        }
+
+        .awa-category-carousel__item:hover {
+            box-shadow: none !important;
+            transform: none !important;
+            border-color: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 35%, var(--awa-border, @awa-color-border)) !important;
+            background: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 4%, var(--awa-bg-surface, @awa-color-white)) !important;
+        }
+    }
+
+    .awa-category-carousel__item {
+        box-shadow: none !important;
+        border: 1px solid var(--awa-border, @awa-color-border) !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    @{awa-fc-forms} .page-wrapper .field :is(input, select, textarea),
+    @{awa-fc-home} .page-wrapper .content-top-home :is(.item-product, .product-item, .product-item-info) {
+        transition: none !important;
+    }
+}

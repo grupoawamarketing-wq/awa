@@ -1,0 +1,231 @@
+// ============================================================================
+// AWA Motos — components/_header.less
+// Fase 3B · Onda 1 — Header Desktop Stabilization
+//
+// Camada de polimento modular, sem !important (exceções documentadas inline).
+// Estratégia: final-wins por ordem de importação (carrega após todo legado).
+// Rollback: remover @import em _extend.less e recompilar.
+//
+// Escopo primário: .awa-site-header (classe no <header data-awa-component>)
+// Breakpoints: ≥992px desktop · 768-991px tablet · ≤767px mobile
+// ============================================================================
+
+@import (once) '../_awa-variables';
+
+// ── Variável de escopo (mantém consistência com o arquivo vtex-polish) ───────
+// Usa seletor simples — vence por ordem de carregamento (fim do pipeline).
+@c3-header: ~'.awa-site-header';
+
+// ════════════════════════════════════════════════════════════════════════════
+// 1. STICKY WRAPPER — transição suave (box-shadow no scroll)
+// ════════════════════════════════════════════════════════════════════════════
+@{c3-header} .header-wrapper-sticky {
+    transition:
+        box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1),
+        background-color 200ms ease;
+    will-change: box-shadow;
+}
+
+// JS adiciona .is-scrolled ao <header> quando page Y > 16px
+@{c3-header}.is-scrolled .header-wrapper-sticky,
+@{c3-header}[data-scrolled] .header-wrapper-sticky {
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.10), 0 1px 0 rgba(0, 0, 0, 0.06);
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// 2. PROMO BAR — b2b-promo-bar
+// ════════════════════════════════════════════════════════════════════════════
+@{c3-header} .awa-b2b-promo-bar {
+    // Garantia de contraste mínimo
+    color: var(--awa-b2b-promo-text, #fff);
+
+    // Botão fechar — touch target mínimo 44×44 (WCAG 2.5.5 AAA)
+    .awa-b2b-promo-close,
+    [data-awa-promo-close],
+    button[data-action="close-promo"] {
+        min-width: 36px;
+        min-height: 36px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: @awa-radius-sm;
+        cursor: pointer;
+        transition: background-color 150ms ease, opacity 150ms ease;
+
+        &:hover {
+            background-color: rgba(255, 255, 255, 0.12);
+        }
+
+        &:focus-visible {
+            outline: 2px solid rgba(255, 255, 255, 0.7);
+            outline-offset: 2px;
+        }
+    }
+
+    // Links dentro da promo bar
+    a {
+        color: inherit;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+        text-decoration-thickness: 1px;
+
+        &:hover {
+            text-decoration-thickness: 2px;
+        }
+    }
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// 3. MAIN HEADER ROW — awa-main-header
+// ════════════════════════════════════════════════════════════════════════════
+
+// ── 3a. Logo — transição de opacidade ao hover ────────────────────────────
+@{c3-header} .awa-header-brand-cell {
+    .logo,
+    .logo img {
+        // Suaviza interação sem alterar layout
+        transition: opacity 150ms ease;
+    }
+
+    .logo:hover img {
+        opacity: 0.88;
+    }
+
+    .logo:focus-visible {
+        outline: 2px solid @awa-color-primary;
+        outline-offset: 4px;
+        border-radius: @awa-radius-sm;
+    }
+}
+
+// ── 3b. Conta / Account Prompt ────────────────────────────────────────────
+@{c3-header} .awa-header-account-prompt {
+
+    // Transição suave para os estados de auth
+    .awa-header-account-prompt__guest,
+    .awa-header-account-prompt__customer {
+        transition: opacity 200ms ease;
+    }
+
+    // Links de login/cadastro/minha-conta
+    .awa-header-account-prompt__link,
+    a[href*="customer/account"],
+    a[href*="b2b/account"],
+    a[href*="b2b/register"] {
+        transition: color 120ms ease;
+
+        &:hover {
+            color: @awa-color-primary;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+
+        &:focus-visible {
+            outline: 2px solid @awa-color-primary;
+            outline-offset: 2px;
+            border-radius: 2px;
+        }
+    }
+
+    // Ícone de usuário
+    .awa-header-account-prompt__icon {
+        transition: color 120ms ease;
+    }
+
+    &:hover .awa-header-account-prompt__icon {
+        color: @awa-color-primary;
+    }
+}
+
+// ── 3c. B2B Badge ─────────────────────────────────────────────────────────
+@{c3-header} .awa-b2b-mode-badge,
+@{c3-header} [data-awa-b2b-badge] {
+    // Badge já tem CSS no vtex-polish; adicionamos apenas transição
+    transition: box-shadow 150ms ease;
+
+    &:hover {
+        box-shadow: 0 2px 8px rgba(@awa-color-primary, 0.2);
+    }
+}
+
+// ── 3d. Cart icon — touch target e hover ─────────────────────────────────
+@{c3-header} .awa-header-minicart {
+    // Fallback cart (visible antes do KO carregar)
+    .awa-header-cart-fallback,
+    .showcart.header-mini-cart {
+        transition: color 120ms ease, background-color 120ms ease;
+
+        &:hover {
+            color: @awa-color-primary;
+        }
+
+        &:focus-visible {
+            outline: 2px solid @awa-color-primary;
+            outline-offset: 3px;
+            border-radius: @awa-radius-sm;
+        }
+    }
+
+    // Badge de quantidade — transição tipo "bounce" ao atualizar
+    .counter.qty,
+    .counter-number {
+        transition: transform 250ms cubic-bezier(0.34, 1.56, 0.64, 1);
+
+        &.updating {
+            transform: scale(1.2);
+        }
+    }
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// 4. ACESSIBILIDADE — skip links e focus-visible global no header
+// ════════════════════════════════════════════════════════════════════════════
+.page-wrapper > .action.skip:focus-visible {
+    position: fixed;
+    top: 8px;
+    left: 8px;
+    z-index: 200000;
+    background: @awa-color-primary;
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: @awa-radius-sm;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// 5. DESKTOP (≥992px) — alinhamentos pontuais
+// ════════════════════════════════════════════════════════════════════════════
+@media (min-width: 992px) {
+    @{c3-header} {
+        // Garante que o container principal não extrapole a viewport
+        .container {
+            box-sizing: border-box;
+        }
+
+        // Separa visualmente o header do conteúdo da página
+        .header-wrapper-sticky {
+            background-color: var(--awa-bg, #fff);
+        }
+    }
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// 6. TABLET (768–991px) — ajustes pontuais
+// ════════════════════════════════════════════════════════════════════════════
+@media (min-width: 768px) and (max-width: 991px) {
+    @{c3-header} .awa-main-header__inner {
+        column-gap: 12px;
+    }
+
+    @{c3-header} .awa-header-account-prompt {
+        // Esconde texto em tablet, mantém ícone
+        .awa-header-account-prompt__text {
+            display: none;
+        }
+
+        .awa-header-account-prompt__icon {
+            display: flex;
+        }
+    }
+}

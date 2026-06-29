@@ -1,0 +1,247 @@
+// =============================================================================
+// §100 — Interaction & State Consistency (2026-06-08)
+// Vocabulário de estados: hover, focus-visible, selected, disabled, error.
+// Product register (Impeccable): mesma affordance em catálogo, account, cart, CMS.
+// Complementa §89/§93 (PLP) + §99 (surfaces) sem side-stripe em alertas.
+// =============================================================================
+
+@import (once) '_awa-tokens';
+@import (once) '_design-system';
+@import (once) '_awa-page-containers';
+
+@awa-state-not-home: ~'html body#html-body:not(.cms-index-index):not(.cms-home):not(.cms-homepage_ayo_home5)';
+@awa-state-account: ~'html body#html-body:is(.account, .customer-account-index, .sales-order-history, .sales-order-view, .wishlist-index-index, [class*="b2b-"])';
+@awa-state-plp: ~'html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)';
+
+// ── Tokens runtime de estado ─────────────────────────────────────────────────
+:root {
+    --awa-state-hover-bg: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 7%, @awa-color-white);
+    --awa-state-selected-bg: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 10%, @awa-color-white);
+    --awa-state-focus-offset: 2px;
+    --awa-state-transition: 150ms ease;
+}
+
+// ── Mixin: anel de foco padrão ────────────────────────────────────────────────
+.awa-state-focus-ring() {
+    &:focus-visible {
+        outline: @awa-focus-ring-width solid var(--awa-primary, @awa-color-primary) !important;
+        outline-offset: var(--awa-state-focus-offset, 2px) !important;
+    }
+
+    &:focus:not(:focus-visible) {
+        outline: none !important;
+    }
+}
+
+// ── Links de conteúdo (prose, account, CMS) ─────────────────────────────────
+@{awa-state-not-home} .page-wrapper :is(.column.main, .col-main) {
+    a:not(:is(
+        .action,
+        .btn,
+        .button,
+        [class*='btn-'],
+        .product-item-link,
+        .product-item-photo,
+        .awa-plp-b2b-gate-banner__action,
+        .awa-b2b-gate-card__action,
+        .awa-empty-plp__btn
+    )) {
+        color: var(--awa-primary, @awa-color-primary) !important;
+        text-decoration: underline !important;
+        text-underline-offset: 2px !important;
+        transition: color var(--awa-state-transition) !important;
+
+        &:hover {
+            color: var(--awa-primary-hover, @awa-color-primary-dark) !important;
+        }
+
+        .awa-state-focus-ring();
+    }
+}
+
+// Breadcrumbs
+@{awa-state-not-home} .page-wrapper :is(.breadcrumbs, .nav-breadcrumbs) a {
+    color: var(--awa-text-muted, @awa-color-text-muted) !important;
+    text-decoration: none !important;
+
+    &:hover {
+        color: var(--awa-primary, @awa-color-primary) !important;
+        text-decoration: underline !important;
+    }
+
+    .awa-state-focus-ring();
+}
+
+// ── Paginação: global (account, wishlist, B2B — PLP já tem §93) ─────────────
+@{awa-state-not-home}:not(.catalog-category-view):not(.catalogsearch-result-index) .page-wrapper {
+    .pages .items {
+        display: inline-flex !important;
+        flex-wrap: wrap !important;
+        align-items: center !important;
+        gap: @awa-space-2 !important;
+        list-style: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .pages :is(.item a, .item strong.page) {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        min-width: 36px !important;
+        min-height: 36px !important;
+        padding-inline: @awa-space-2 !important;
+        border-radius: @awa-radius-sm !important;
+        border: 1px solid transparent !important;
+        font-size: var(--awa-text-sm, 13px) !important;
+        font-variant-numeric: tabular-nums !important;
+        line-height: 1 !important;
+        text-decoration: none !important;
+        color: var(--awa-text, @awa-color-text-primary) !important;
+        transition: background-color var(--awa-state-transition), color var(--awa-state-transition), border-color var(--awa-state-transition) !important;
+
+        &:hover {
+            background: var(--awa-state-hover-bg) !important;
+            color: var(--awa-primary, @awa-color-primary) !important;
+        }
+
+        .awa-state-focus-ring();
+    }
+
+    .pages .item.current strong.page {
+        background: var(--awa-state-selected-bg) !important;
+        color: var(--awa-primary, @awa-color-primary) !important;
+        font-weight: @awa-weight-semibold !important;
+        border-color: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 25%, transparent) !important;
+    }
+}
+
+// ── Account sidebar nav: estados completos ───────────────────────────────────
+@{awa-state-account} .page-wrapper .sidebar-main {
+    :is(.block-collapsible-nav, .block.account-nav) .nav.items .nav.item {
+        > :is(a, strong) {
+            display: flex !important;
+            align-items: center !important;
+            min-height: 40px !important;
+            padding: @awa-space-2 @awa-space-3 !important;
+            border-radius: @awa-radius-sm !important;
+            border: 0 !important;
+            border-inline-start: 0 !important;
+            color: var(--awa-text-muted, @awa-color-text-muted) !important;
+            font-size: var(--awa-text-sm, 13px) !important;
+            font-weight: @awa-weight-normal !important;
+            text-decoration: none !important;
+            transition: background-color var(--awa-state-transition), color var(--awa-state-transition) !important;
+
+            &:hover {
+                background: var(--awa-state-hover-bg) !important;
+                color: var(--awa-primary, @awa-color-primary) !important;
+            }
+
+            .awa-state-focus-ring();
+        }
+
+        &.current > :is(a, strong) {
+            background: var(--awa-state-selected-bg) !important;
+            color: var(--awa-primary, @awa-color-primary) !important;
+            font-weight: @awa-weight-semibold !important;
+        }
+    }
+}
+
+// ── PDP tabs: estados de seleção ─────────────────────────────────────────────
+html body#html-body.catalog-product-view .page-wrapper {
+    .product.data.items > .item.title {
+        > .switch {
+            border-radius: @awa-radius-sm @awa-radius-sm 0 0 !important;
+            border: 1px solid transparent !important;
+            border-bottom: 0 !important;
+            padding: @awa-space-2 @awa-space-4 !important;
+            font-size: var(--awa-text-sm, 13px) !important;
+            font-weight: @awa-weight-semibold !important;
+            color: var(--awa-text-muted, @awa-color-text-muted) !important;
+            background: transparent !important;
+            transition: background-color var(--awa-state-transition), color var(--awa-state-transition) !important;
+
+            &:hover {
+                color: var(--awa-primary, @awa-color-primary) !important;
+                background: var(--awa-state-hover-bg) !important;
+            }
+
+            .awa-state-focus-ring();
+        }
+
+        &.active > .switch {
+            color: var(--awa-primary, @awa-color-primary) !important;
+            background: var(--awa-bg-surface, @awa-color-white) !important;
+            border-color: var(--awa-border, @awa-color-border) !important;
+        }
+    }
+}
+
+// ── Formulários: erro + disabled (reforço §99) ───────────────────────────────
+@{awa-state-not-home} .page-wrapper {
+    .field._error :is(input, select, textarea),
+    :is(input, select, textarea).mage-error {
+        border-color: var(--awa-error, @awa-color-error) !important;
+        background: var(--awa-error-bg, fade(@awa-color-error, 4%)) !important;
+
+        &:focus-visible {
+            outline-color: var(--awa-error, @awa-color-error) !important;
+            box-shadow: 0 0 0 3px fade(@awa-color-error, 12%) !important;
+        }
+    }
+
+    :is(.mage-error, .field-error) {
+        color: var(--awa-error-text, @awa-color-error-text) !important;
+        font-size: var(--awa-text-xs, 12px) !important;
+        line-height: 1.35 !important;
+        margin-block-start: @awa-space-1 !important;
+    }
+
+    :is(input, select, textarea, button):disabled,
+    :is(input, select, textarea, button)[disabled] {
+        opacity: 0.55 !important;
+        cursor: not-allowed !important;
+    }
+}
+
+// ── Toolbar sorter (account order history etc.) ──────────────────────────────
+@{awa-state-not-home} .page-wrapper .toolbar {
+    :is(select, .limiter select) {
+        min-height: 36px !important;
+        border: 1px solid var(--awa-border, @awa-color-border) !important;
+        border-radius: @awa-radius-sm !important;
+        font-size: var(--awa-text-sm, 13px) !important;
+        color: var(--awa-text, @awa-color-text-primary) !important;
+
+        &:focus-visible {
+            outline: @awa-focus-ring-width solid var(--awa-primary, @awa-color-primary) !important;
+            outline-offset: 1px !important;
+            border-color: var(--awa-primary, @awa-color-primary) !important;
+        }
+    }
+}
+
+// ── Loading mask: não bloquear leitura do layout ──────────────────────────────
+@{awa-state-not-home} .page-wrapper .loading-mask {
+    background: fade(@awa-color-white, 72%) !important;
+    backdrop-filter: blur(2px) !important;
+
+    .loader {
+        border-color: var(--awa-border, @awa-color-border) !important;
+        border-top-color: var(--awa-primary, @awa-color-primary) !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    @{awa-state-not-home} .page-wrapper .pages :is(.item a, .item strong.page),
+    @{awa-state-not-home} .page-wrapper .sidebar-main .nav.item > a,
+    @{awa-state-not-home} .page-wrapper .product.data.items > .item.title > .switch {
+        transition: none !important;
+    }
+
+    @{awa-state-not-home} .page-wrapper .loading-mask {
+        backdrop-filter: none !important;
+    }
+}

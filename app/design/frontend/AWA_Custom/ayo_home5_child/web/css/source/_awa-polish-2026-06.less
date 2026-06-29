@@ -1,0 +1,224 @@
+// =============================================================================
+// _awa-polish-2026-06.less
+// §57 — /impeccable polish (2026-06-08)
+// Acabamento visual final-wins: nav conta/B2B, breadcrumbs, toolbar, paginação,
+// notas de busca (sem side-stripe), ritmo de cards PLP.
+// Register: PRODUCT — earned familiarity, tokens AWA, zero novos componentes.
+// =============================================================================
+
+@import (once) '_awa-tokens';
+@import (once) '_design-system';
+
+@awa-polish-nav-hover: fade(@awa-color-primary, 6%);
+@awa-polish-nav-active: fade(@awa-color-primary, 10%);
+
+// ── §57a — Sidebar conta/B2B: estados completos (sem faixa lateral) ──────────
+html body#html-body:is(.account, [class*='b2b-']) .page-wrapper {
+    .sidebar-main .nav.item a,
+    .sidebar-main .nav.item strong,
+    .block-collapsible-nav .item a,
+    .block-collapsible-nav .item strong,
+    .account-nav-item .account-nav-link {
+        display: flex;
+        align-items: center;
+        gap: @awa-space-2;
+        min-height: @awa-s-6;
+        padding: @awa-space-2 @awa-s-2;
+        border-radius: @awa-radius-sm;
+        border: 0;
+        border-left: 0;
+        border-inline-start: 0;
+        box-sizing: border-box;
+        color: var(--awa-text, @awa-color-text-primary);
+        font-size: var(--awa-fs-sm);
+        font-weight: @awa-font-weight-normal;
+        line-height: 1.35;
+        text-decoration: none;
+        transition:
+            background-color 180ms @awa-ease,
+            color 180ms @awa-ease;
+    }
+
+    .sidebar-main .nav.item.current a,
+    .sidebar-main .nav.item.current strong,
+    .block-collapsible-nav .item.current a,
+    .block-collapsible-nav .item.current strong,
+    .account-nav-item.current .account-nav-link,
+    .account-nav-item.current .account-nav-text {
+        background: @awa-polish-nav-active;
+        color: var(--awa-primary, @awa-color-primary);
+        font-weight: @awa-weight-semibold;
+        border-left: 0;
+        border-inline-start: 0;
+    }
+
+    .sidebar-main .nav.item a:focus-visible,
+    .block-collapsible-nav .item a:focus-visible,
+    .account-nav-item .account-nav-link:focus-visible {
+        outline: 2px solid var(--awa-primary, @awa-color-primary);
+        outline-offset: 2px;
+    }
+}
+
+@media (hover: hover) and (pointer: fine) {
+    html body#html-body:is(.account, [class*='b2b-']) .page-wrapper {
+        .sidebar-main .nav.item:not(.current) a:hover,
+        .block-collapsible-nav .item:not(.current) a:hover,
+        .account-nav-item:not(.current) .account-nav-link:hover {
+            background: @awa-polish-nav-hover;
+            color: var(--awa-primary, @awa-color-primary);
+        }
+    }
+}
+
+@media (max-width: @awa-bp-768) {
+    html body#html-body:is(.account, [class*='b2b-']) .page-wrapper {
+        .sidebar-main .account-nav .nav.item a,
+        .block-collapsible-nav .item a {
+            border-bottom: 2px solid transparent;
+            border-radius: 0;
+            padding-block: @awa-space-3;
+        }
+
+        .sidebar-main .account-nav .nav.item.current a,
+        .block-collapsible-nav .item.current a {
+            border-bottom-color: var(--awa-primary, @awa-color-primary);
+            background: transparent;
+        }
+    }
+}
+
+// ── §57b — Breadcrumbs: truncamento óptico no mobile ─────────────────────────
+html body#html-body .page-wrapper .breadcrumbs .items {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: @awa-space-1;
+    row-gap: @awa-space-2;
+}
+
+html body#html-body .page-wrapper .breadcrumbs .item:not(:last-child) {
+    flex-shrink: 0;
+}
+
+html body#html-body .page-wrapper .breadcrumbs .item:last-child {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+html body#html-body .page-wrapper .breadcrumbs .item:last-child strong,
+html body#html-body .page-wrapper .breadcrumbs .item:last-child a {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+}
+
+@media (min-width: @awa-bp-992) {
+    html body#html-body .page-wrapper .breadcrumbs .item:last-child strong,
+    html body#html-body .page-wrapper .breadcrumbs .item:last-child a {
+        white-space: normal;
+        overflow: visible;
+        text-overflow: unset;
+    }
+}
+
+// ── §57c — Toolbar PLP/busca: alinhamento vertical e ritmo ───────────────────
+html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .page-wrapper {
+    .toolbar.toolbar-products {
+        gap: @awa-s-2;
+        padding-block: @awa-s-2;
+        margin-block-end: @awa-s-3;
+        border-block-end: 1px solid var(--awa-border, @awa-border);
+    }
+
+    .toolbar.toolbar-products .toolbar-amount {
+        font-size: var(--awa-fs-sm);
+        color: var(--awa-text-muted, @awa-color-text-muted);
+    }
+
+    .toolbar.toolbar-products .toolbar-amount .toolbar-number {
+        color: var(--awa-ink, @awa-color-secondary);
+        font-weight: @awa-weight-semibold;
+    }
+}
+
+// ── §57d — Nota de busca: sem side-stripe (Impeccable ban) ───────────────────
+html body#html-body.catalogsearch-result-index .page-wrapper .search.results .note {
+    border: 1px solid var(--awa-border, @awa-border);
+    border-left-width: 1px;
+    border-inline-start-width: 1px;
+    border-radius: @awa-radius-sm;
+    background: var(--awa-bg-soft, @awa-color-bg-soft);
+    color: var(--awa-text-muted, @awa-color-text-muted);
+    padding: @awa-s-2 @awa-s-3;
+    margin-block-end: @awa-s-3;
+}
+
+// ── §57e — Paginação: alvo tátil e alinhamento ───────────────────────────────
+html body#html-body .page-wrapper .pages .items {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: @awa-space-2;
+}
+
+html body#html-body .page-wrapper .pages .item a,
+html body#html-body .page-wrapper .pages .item strong.page {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: @awa-s-6;
+    min-height: @awa-s-6;
+    padding-inline: @awa-space-2;
+    border-radius: @awa-radius-sm;
+    box-sizing: border-box;
+    font-size: var(--awa-fs-sm);
+    line-height: 1;
+}
+
+html body#html-body .page-wrapper .pages .item.current strong.page {
+    background: @awa-polish-nav-active;
+    color: var(--awa-primary, @awa-color-primary);
+        font-weight: @awa-weight-semibold;
+}
+
+// ── §57f — Cards PLP: ritmo interno previsível ───────────────────────────────
+html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .page-wrapper {
+    .products-grid .item-product .product-info {
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 auto;
+        gap: @awa-space-2;
+    }
+
+    .products-grid .item-product :is(.product-info-cart, .info-price, .b2b-login-to-see-price) {
+        margin-block-start: auto;
+        padding-block-start: @awa-space-2;
+    }
+}
+
+// ── §57g — Mensagens Magento: borda uniforme (sem faixa lateral) ─────────────
+html body#html-body .page-wrapper :is(
+    .message,
+    .message-error,
+    .message-warning,
+    .message-success,
+    .message-info,
+    .message-notice
+) {
+    border-width: 1px;
+    border-inline-start-width: 1px;
+    border-left-width: 1px;
+    border-radius: @awa-radius-sm;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html body#html-body:is(.account, [class*='b2b-']) .page-wrapper {
+        .sidebar-main .nav.item a,
+        .block-collapsible-nav .item a {
+            transition: none;
+        }
+    }
+}

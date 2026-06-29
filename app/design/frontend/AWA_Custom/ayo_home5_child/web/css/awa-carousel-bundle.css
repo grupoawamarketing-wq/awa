@@ -4,11 +4,11 @@
 
 /* AWA Home5 - Carousel visual standardization (home only) */
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) {
-    --awa-home-carousel-radius: 8px;
-    --awa-home-carousel-border: rgba(15, 23, 42, 0.08);
+    --awa-home-carousel-radius: 14px;
+    --awa-home-carousel-border: rgba(15, 23, 42, 0.10);
     --awa-home-carousel-surface: #ffffff;
     --awa-home-carousel-section-bg: linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
-    --awa-home-carousel-section-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+    --awa-home-carousel-section-shadow: 0 2px 8px rgba(15, 23, 42, 0.06), 0 8px 24px rgba(15, 23, 42, 0.05);
     --awa-home-carousel-gap: 12px;
     --awa-home-carousel-arrow-size: 40px;
     --awa-home-carousel-arrow-bg: rgba(255, 255, 255, 0.96);
@@ -66,18 +66,21 @@
     line-height: 1.2 !important;
 }
 
-/* Barra vertical AWA: accent de marca antes do título de seção */
+/* Barra vertical legada removida (Impeccable: no side-stripe borders).
+   Accent de seção via .awa-section-header__eyebrow ou gradiente no header row. */
+:is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+    .ayo-home5-wrapper
+    :is(.rokan-product-heading h2, .section-title h2, .block-title strong) {
+    padding-left: 0 !important;
+}
+
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
     .ayo-home5-wrapper
     :is(.rokan-product-heading h2, .section-title h2, .block-title strong)::before {
-    content: "" !important;
-    position: absolute !important;
-    left: 0 !important;
-    top: 8% !important;
-    height: 84% !important;
-    width: 4px !important;
-    border-radius: 2px !important;
-    background: var(--awa-red, #b73337) !important;
+    display: none !important;
+    content: none !important;
+    width: 0 !important;
+    height: 0 !important;
 }
 
 /* Standardize "view all" actions in section headers */
@@ -205,7 +208,7 @@
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
     .ayo-home5-wrapper
     :is(.rokan-bestseller, .rokan-newproduct, .rokan-mostviewed, .rokan-featuredproduct, .list-tab-product, .hot-deal, .block.widget.block-products-list, .categorytab-container)
-    :is(.swiper-button-prev, .swiper-button-next, .owl-prev, .owl-next) {
+    :is(.swiper-button-prev, .swiper-button-next, .owl-prev, .owl-next):not(.awa-owl-nav__btn) {
     width: var(--awa-home-carousel-arrow-size) !important;
     height: var(--awa-home-carousel-arrow-size) !important;
     min-width: var(--awa-home-carousel-arrow-size) !important;
@@ -224,7 +227,7 @@
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
     .ayo-home5-wrapper
     :is(.rokan-bestseller, .rokan-newproduct, .rokan-mostviewed, .rokan-featuredproduct, .list-tab-product, .hot-deal, .block.widget.block-products-list, .categorytab-container)
-    :is(.swiper-button-prev, .swiper-button-next, .owl-prev, .owl-next):hover {
+    :is(.swiper-button-prev, .swiper-button-next, .owl-prev, .owl-next):not(.awa-owl-nav__btn):hover {
     background: var(--awa-home-carousel-arrow-bg-hover) !important;
     border-color: var(--awa-home-carousel-arrow-bg-hover) !important;
     color: var(--awa-home-carousel-arrow-color-hover) !important;
@@ -275,11 +278,34 @@
     :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
         .ayo-home5-wrapper
         :is(.rokan-bestseller, .rokan-newproduct, .rokan-mostviewed, .rokan-featuredproduct, .list-tab-product, .hot-deal, .block.widget.block-products-list, .categorytab-container)
-        :is(.swiper-button-prev, .swiper-button-next, .owl-prev, .owl-next) {
+        :is(.swiper-button-prev, .swiper-button-next, .owl-prev, .owl-next):not(.awa-owl-nav__btn) {
         width: 34px !important;
         height: 34px !important;
         min-width: 34px !important;
         min-height: 34px !important;
+    }
+}
+
+/* Swiper shelf template: touch target 44px (vence regra genérica acima) */
+@media (max-width: 767px) {
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+        .page-wrapper
+        .awa-shelf--carousel
+        .awa-owl-nav__btn,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+        .page-wrapper
+        .awa-shelf--carousel
+        .awa-owl-nav__btn.swiper-button-prev,
+    :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
+        .page-wrapper
+        .awa-shelf--carousel
+        .awa-owl-nav__btn.swiper-button-next {
+        width: 44px !important;
+        height: 44px !important;
+        min-width: 44px !important;
+        min-height: 44px !important;
+        transform: none !important;
+        margin-top: 0 !important;
     }
 }
 
@@ -566,11 +592,19 @@
   position: absolute;
   top: 0;
   left: 0;
+  width: 100%;
   height: 100%;
   background: var(--awa-red, #b73337);
   border-radius: 2px;
-  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  min-width: 10%;
+  transform: scaleX(var(--awa-progress, 0.08));
+  transform-origin: left center;
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .awa-owl-progress__bar {
+    transition: none;
+  }
 }
 
 /* ─────────────────────────────────────────────────────────
@@ -586,8 +620,15 @@
    6. RESPONSIVE — mobile: hide arrows, swipe instead
    ───────────────────────────────────────────────────────── */
 @media (max-width: 767px) {
-  .awa-owl-nav { display: none; }
-  .awa-owl-progress { height: 2px; margin-top: 12px; }
+  /* Prateleiras AWA mantêm nav touch; legado Owl oculto (swipe no trilho) */
+  :not(.awa-shelf--carousel) > .awa-owl-nav,
+  :not(.awa-shelf--carousel) .awa-carousel > .awa-owl-nav {
+    display: none;
+  }
+  .awa-shelf--carousel .awa-owl-progress {
+    height: 4px;
+    margin-top: 12px;
+  }
 }
 
 @media (min-width: 768px) and (max-width: 1023px) {
@@ -625,5 +666,62 @@
   image-rendering: auto !important;
 }
 
+/* ─────────────────────────────────────────────────────────
+   §110 Category carousel — horizontal reel (1º paint)
+   Brotli stale em critical-home.min.css.br truncava regras após ~79%;
+   carousel-bundle carrega eager na home (sem gate) como final-wins.
+   ───────────────────────────────────────────────────────── */
+html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  #awa-cat-carousel.awa-category-carousel__track,
+html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .top-home-content--category-carousel
+  .awa-category-carousel__track {
+  display: flex !important;
+  flex-flow: row nowrap !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  gap: 12px !important;
+  max-height: 280px !important;
+  scrollbar-width: none !important;
+  -webkit-overflow-scrolling: touch !important;
+  scroll-snap-type: x proximity !important;
+  padding-inline-end: 12px !important;
+}
 
+html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  #awa-cat-carousel.awa-category-carousel__track::-webkit-scrollbar,
+html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .top-home-content--category-carousel
+  .awa-category-carousel__track::-webkit-scrollbar {
+  display: none !important;
+}
+
+html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  #awa-cat-carousel.awa-category-carousel__track > .awa-category-carousel__item,
+html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .top-home-content--category-carousel
+  .awa-category-carousel__track > .awa-category-carousel__item {
+  flex: 0 0 auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  width: auto !important;
+  min-width: 120px !important;
+  max-width: 200px !important;
+  scroll-snap-align: start !important;
+}
+
+/* §110b — Category carousel viewport: clip horizontal reel */
+html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .top-home-content--category-carousel
+  .awa-category-carousel__viewport {
+  overflow-x: hidden !important;
+}
 

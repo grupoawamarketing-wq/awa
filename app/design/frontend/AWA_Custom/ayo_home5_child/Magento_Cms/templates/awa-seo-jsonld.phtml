@@ -1,0 +1,110 @@
+<?php
+/**
+ * Homepage JSON-LD — fim do body (menos bytes no <head> para PSI; válido para Google).
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ */
+$baseUrl = rtrim($block->getBaseUrl(), '/');
+$mainJsonLd = [
+    '@context' => 'https://schema.org',
+    '@graph' => [
+        [
+            '@type' => 'Organization',
+            '@id' => $baseUrl . '/#organization',
+            'name' => 'AWA Motos',
+            'alternateName' => 'Grupo Awamotos',
+            'url' => $baseUrl . '/',
+            'logo' => [
+                '@type' => 'ImageObject',
+                'url' => $baseUrl . '/media/logo/default/logo.png',
+            ],
+            'description' => 'Especialistas em peças, acessórios e equipamentos para motocicletas. Atendemos varejo e atacado (B2B) em todo o Brasil.',
+            'foundingDate' => '2010',
+            'contactPoint' => [
+                '@type' => 'ContactPoint',
+                'telephone' => '+55-16-3301-1890',
+                'contactType' => 'customer service',
+                'areaServed' => 'BR',
+                'availableLanguage' => 'Portuguese',
+            ],
+            'sameAs' => [
+                'https://www.facebook.com/awamotos',
+                'https://www.instagram.com/awamotos',
+                'https://www.youtube.com/@awamotos',
+                'https://wa.me/5516997367588',
+            ],
+        ],
+        [
+            '@type' => ['LocalBusiness', 'AutoPartsStore'],
+            '@id' => $baseUrl . '/#localbusiness',
+            'name' => 'AWA Motos',
+            'url' => $baseUrl . '/',
+            'image' => $baseUrl . '/media/logo/default/logo.png',
+            'telephone' => '+55-16-3301-1890',
+            'address' => [
+                '@type' => 'PostalAddress',
+                'streetAddress' => 'Rua Lavineo de Arruda Falcão',
+                'addressLocality' => 'Araraquara',
+                'addressRegion' => 'SP',
+                'postalCode' => '14808-390',
+                'addressCountry' => 'BR',
+            ],
+            'priceRange' => '$$',
+            'currenciesAccepted' => 'BRL',
+            'paymentAccepted' => 'Cartão de Crédito, Boleto Bancário, Pix, Transferência Bancária',
+            'areaServed' => [
+                '@type' => 'Country',
+                'name' => 'BR',
+            ],
+            'email' => 'falecom@awamotos.com',
+            'geo' => [
+                '@type' => 'GeoCoordinates',
+                'latitude' => -21.7850,
+                'longitude' => -48.1756,
+            ],
+            'openingHoursSpecification' => [
+                [
+                    '@type' => 'OpeningHoursSpecification',
+                    'dayOfWeek' => ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+                    'opens' => '08:00',
+                    'closes' => '18:00',
+                ],
+                [
+                    '@type' => 'OpeningHoursSpecification',
+                    'dayOfWeek' => ['Saturday'],
+                    'opens' => '08:00',
+                    'closes' => '12:00',
+                ],
+            ],
+            'description' => 'Loja especializada em peças e acessórios para motocicletas. Retrovisores, bagageiros, baús, piscas e muito mais. Atendemos varejo e atacado (B2B). Entrega para todo o Brasil.',
+            'hasMap' => 'https://maps.google.com/maps?q=AWA+Motos+Araraquara+SP',
+            'sameAs' => [
+                'https://www.instagram.com/awamotos',
+                'https://www.facebook.com/awamotos',
+            ],
+        ],
+        [
+            '@type' => 'WebSite',
+            '@id' => $baseUrl . '/#website',
+            'name' => 'AWA Motos',
+            'url' => $baseUrl . '/',
+            'potentialAction' => [
+                '@type' => 'SearchAction',
+                'target' => $baseUrl . '/catalogsearch/result/?q={search_term_string}',
+                'query-input' => 'required name=search_term_string',
+            ],
+        ],
+    ],
+];
+$jsonEncodeFlags = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE;
+?>
+<script type="application/ld+json"><?= /* @noEscape */ json_encode($mainJsonLd, $jsonEncodeFlags) ?></script>
+<?php
+$faqJsonLd = trim((string) $block->getData('awa_faq_jsonld_payload'));
+if ($faqJsonLd !== ''):
+    $faqDecoded = json_decode($faqJsonLd, true);
+    if (json_last_error() === JSON_ERROR_NONE) {
+        $faqJsonLd = (string) json_encode($faqDecoded, $jsonEncodeFlags);
+    } ?>
+<script type="application/ld+json"><?= /* @noEscape */ $faqJsonLd ?></script>
+<?php endif; ?>

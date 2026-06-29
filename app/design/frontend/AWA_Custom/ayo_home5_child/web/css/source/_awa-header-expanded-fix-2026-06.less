@@ -1,0 +1,242 @@
+@import (once) '_awa-tokens';
+@import (once) '_design-system';
+
+// =============================================================================
+// §118 — Header Expanded Fix (2026-06-08)
+// Corrige bugs visuais do header expandido (não-condensado):
+// promo overflow, badge vazio, nav bar fragmentada, quick links, breadcrumb.
+// Vence §GLOBAL-CONSISTENCY 36px, commerce HEADER-DENSITY e PLP pass2 overflow.
+// Espelhado em awa-bundle-refinements.css §HEADER-EXPANDED-FIX (terminal wins).
+// =============================================================================
+
+@awa-expanded-scope: ~'html body#html-body:not(.onepagecheckout-index-index):not(.checkout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"]:not(.awa-header-condensed)';
+
+// ── P0: Promo bar — 44px clip, CTA inline ───────────────────────────────────
+@{awa-expanded-scope} {
+    --awa-header-promo-h: 44px;
+
+    :is(
+        #awa-b2b-promo-bar,
+        .top-header.awa-b2b-promo-bar,
+        .awa-b2b-promo-bar[data-awa-header-utility]
+    ) {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        min-height: var(--awa-header-promo-h) !important;
+        max-height: var(--awa-header-promo-h) !important;
+        height: var(--awa-header-promo-h) !important;
+        padding-block: 0 !important;
+        padding-inline: @awa-space-3 !important;
+        overflow: hidden !important;
+        background: var(--awa-primary) !important;
+        color: var(--awa-text-inverse, @awa-color-white) !important;
+    }
+
+    :is(.awa-b2b-promo-bar__inner, .awa-b2b-promo-bar__layout) {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-height: 0 !important;
+        max-height: 100% !important;
+        padding-block: 0 !important;
+        overflow: hidden !important;
+    }
+
+    .awa-b2b-promo-bar__text {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex-wrap: nowrap !important;
+        gap: 4px !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        line-height: 1.25 !important;
+    }
+
+    :is(.awa-b2b-promo-bar__cta, .awa-b2b-promo-bar__cta strong) {
+        display: inline !important;
+        white-space: nowrap !important;
+        vertical-align: baseline !important;
+    }
+}
+
+// ── P1: Minicart badge vazio — ocultar quadrado fantasma ────────────────────
+html body#html-body .page-wrapper .awa-site-header .awa-header-minicart
+    .minicart-wrapper .counter.qty.empty,
+html body#html-body .page-wrapper .awa-site-header .awa-header-minicart
+    .minicart-wrapper .counter.qty.empty .total-mini-cart-item {
+    display: none !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    height: 0 !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
+    overflow: hidden !important;
+}
+
+@media (min-width: @awa-bp-992) {
+    // ── Tokens expandido: nav 48px (alinha Departamentos + quick links) ─────
+    @{awa-expanded-scope} {
+        --awa-header-nav-h: 48px;
+        --awa-header-nav-height: 48px;
+        --awa-header-search-h: 44px;
+    }
+
+    // ── P0: Nav bar full-bleed + inner sem padding legado ───────────────────
+    @{awa-expanded-scope} {
+        .header-control.awa-nav-bar,
+        .header-control.header-nav.awa-nav-bar {
+            width: 100% !important;
+            max-width: none !important;
+            margin-inline: 0 !important;
+            padding-inline: 0 !important;
+            padding-block: 0 !important;
+            height: var(--awa-header-nav-h) !important;
+            min-height: var(--awa-header-nav-h) !important;
+            max-height: var(--awa-header-nav-h) !important;
+            background: var(--awa-bg-soft) !important;
+            background-color: var(--awa-bg-soft) !important;
+            overflow: visible !important;
+        }
+
+        .header-control.awa-nav-bar > .container,
+        .header-control.header-nav.awa-nav-bar > .container {
+            width: 100% !important;
+            max-width: none !important;
+            margin-inline: 0 !important;
+            padding-inline: 0 !important;
+            padding-block: 0 !important;
+            height: var(--awa-header-nav-h) !important;
+            min-height: var(--awa-header-nav-h) !important;
+            max-height: var(--awa-header-nav-h) !important;
+            background: transparent !important;
+        }
+
+        .header-control.awa-nav-bar .awa-nav-bar__inner {
+            display: flex !important;
+            flex-wrap: nowrap !important;
+            align-items: stretch !important;
+            justify-content: flex-start !important;
+            gap: 0 !important;
+            width: 100% !important;
+            height: var(--awa-header-nav-h) !important;
+            min-height: var(--awa-header-nav-h) !important;
+            max-height: var(--awa-header-nav-h) !important;
+            margin: 0 !important;
+            padding-block: 0 !important;
+            padding-inline: 0 20px !important;
+            background: var(--awa-bg-soft) !important;
+            box-sizing: border-box !important;
+        }
+
+        .header-control.awa-nav-bar .awa-header-categories.menu_left_home1 {
+            flex: 0 0 var(--awa-vmenu-trigger-w, 206px) !important;
+            width: var(--awa-vmenu-trigger-w, 206px) !important;
+            min-width: var(--awa-vmenu-trigger-w, 206px) !important;
+            max-width: var(--awa-vmenu-trigger-w, 206px) !important;
+            height: var(--awa-header-nav-h) !important;
+            min-height: var(--awa-header-nav-h) !important;
+            max-height: var(--awa-header-nav-h) !important;
+        }
+
+        .header-control.awa-nav-bar .awa-header-categories :is(
+            button.our_categories.title-category-dropdown[data-role='awa-vertical-menu-trigger'],
+            h2.our_categories.title-category-dropdown,
+            button.our_categories.title-category-dropdown
+        ) {
+            width: 100% !important;
+            height: var(--awa-header-nav-h) !important;
+            min-height: var(--awa-header-nav-h) !important;
+            max-height: var(--awa-header-nav-h) !important;
+            margin: 0 !important;
+            padding: 0 @awa-space-3 !important;
+            border-radius: 0 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+        }
+
+        .awa-header-primary-nav.menu_primary {
+            flex: 1 1 auto !important;
+            min-width: 0 !important;
+            height: var(--awa-header-nav-h) !important;
+            min-height: var(--awa-header-nav-h) !important;
+            max-height: var(--awa-header-nav-h) !important;
+            overflow: hidden !important;
+        }
+
+        .awa-nav-quick-links {
+            display: flex !important;
+            flex: 0 0 auto !important;
+            align-items: stretch !important;
+            height: var(--awa-header-nav-h) !important;
+            min-height: var(--awa-header-nav-h) !important;
+            max-height: var(--awa-header-nav-h) !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .awa-nav-quick-links__list {
+            display: flex !important;
+            align-items: stretch !important;
+            height: var(--awa-header-nav-h) !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            list-style: none !important;
+        }
+
+        .header-control.awa-nav-bar :is(
+            .awa-nav-quick-links__link,
+            .awa-nav-quick-links__list a
+        ) {
+            height: var(--awa-header-nav-h) !important;
+            min-height: var(--awa-header-nav-h) !important;
+        }
+    }
+
+    // ── P2: Main row — logo, busca e account alinhados ao centro ────────────
+    @{awa-expanded-scope} {
+        :is(.awa-main-header__inner.wp-header, .awa-main-header__inner[data-awa-header-row]) {
+            align-items: center !important;
+        }
+
+        .awa-header-search-col :is(
+            form#search_mini_form,
+            form.minisearch,
+            form.search-content
+        ) {
+            height: var(--awa-header-search-h) !important;
+            min-height: var(--awa-header-search-h) !important;
+            max-height: var(--awa-header-search-h) !important;
+        }
+
+        .awa-header-account-prompt {
+            display: inline-flex !important;
+            align-items: center !important;
+            min-height: 0 !important;
+            padding-block: 0 !important;
+            line-height: 1.35 !important;
+        }
+
+        .awa-header-account-prompt__text,
+        .awa-header-account-prompt__copy {
+            line-height: 1.35 !important;
+        }
+    }
+}
+
+// ── P1: Breadcrumb — respiro após nav bar em PLP/busca ──────────────────────
+html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper .nav-breadcrumbs {
+    margin-block-start: @awa-space-3 !important;
+    padding-block-start: @awa-space-2 !important;
+}

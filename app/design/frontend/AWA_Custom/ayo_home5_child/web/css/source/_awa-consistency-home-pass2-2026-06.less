@@ -1,0 +1,99 @@
+// =============================================================================
+// _awa-consistency-home-pass2-2026-06.less
+// §86 — /impeccable consistency home pass 2 (2026-06-08)
+// Gutter único dentro do wrapper + gate compact progressivo (guest).
+// Final-wins sobre _home.less clamp e shell §84 (hero B2B dentro do wrapper).
+// =============================================================================
+
+@import (once) '_awa-tokens';
+@import (once) '_design-system';
+@import (once) '_awa-page-containers';
+
+html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper {
+    .ayo-home5-wrapper--template-driven {
+        // ── Shell: wrapper já tem @awa-page-pad-catalog; containers internos = 0 ─
+        .awa-hero-b2b-cta__inner.container,
+        :is(.top-home-content, .awa-home-section, .awa-home-pricing-notice) > .container {
+            width: 100% !important;
+            max-width: 100% !important;
+            margin-inline: 0 !important;
+            padding-inline: 0 !important;
+            box-sizing: border-box;
+        }
+
+        .awa-home-pricing-notice .container {
+            max-width: none;
+        }
+
+        .awa-home-pricing-notice__text {
+            max-width: 72ch;
+        }
+
+        // ── Carrossel categorias: snap alinhado ao gutter do shell ───────────
+        .top-home-content--category-carousel .awa-category-carousel__track {
+            scroll-padding-inline: var(--awa-shell-gutter, @awa-page-pad-catalog);
+        }
+    }
+}
+
+// ── Guest compact: "Ver preços" só no hover/focus do card (distill + consistência)
+html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5):not(.customer-logged-in) .page-wrapper {
+    .ayo-home5-wrapper--template-driven .awa-carousel-section--compact .awa-shelf--carousel {
+        :is(.content-item-product, .item-product, .awa-product-card) {
+            .b2b-login-to-see-price {
+                opacity: 0;
+                max-height: 0;
+                overflow: hidden;
+                margin-block: 0 !important;
+                padding: 0 !important;
+                border-width: 0 !important;
+                pointer-events: none;
+                transition: opacity 140ms @awa-ease, max-height 140ms @awa-ease;
+            }
+
+            &:focus-within .b2b-login-to-see-price {
+                opacity: 1;
+                max-height: 3rem;
+                pointer-events: auto;
+            }
+        }
+    }
+}
+
+@media (hover: hover) and (pointer: fine) {
+    html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5):not(.customer-logged-in) .page-wrapper {
+        .ayo-home5-wrapper--template-driven .awa-carousel-section--compact .awa-shelf--carousel {
+            :is(.content-item-product, .item-product, .awa-product-card):hover .b2b-login-to-see-price {
+                opacity: 1;
+                max-height: 3rem;
+                pointer-events: auto;
+            }
+        }
+    }
+}
+
+@media (pointer: coarse) {
+    html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5):not(.customer-logged-in) .page-wrapper {
+        .ayo-home5-wrapper--template-driven .awa-carousel-section--compact .awa-shelf--carousel {
+            :is(.content-item-product, .item-product, .awa-product-card) .b2b-login-to-see-price {
+                opacity: 0.72;
+                max-height: 2.5rem;
+                pointer-events: auto;
+            }
+
+            :is(.content-item-product, .item-product, .awa-product-card):focus-within .b2b-login-to-see-price {
+                opacity: 1;
+            }
+        }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper {
+        .ayo-home5-wrapper--template-driven .awa-carousel-section--compact .awa-shelf--carousel {
+            :is(.content-item-product, .item-product, .awa-product-card) .b2b-login-to-see-price {
+                transition: none;
+            }
+        }
+    }
+}
