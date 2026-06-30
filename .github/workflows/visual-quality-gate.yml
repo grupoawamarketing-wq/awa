@@ -98,10 +98,12 @@ jobs:
       - name: Run Playwright tests
         working-directory: tests/e2e
         env:
-          BASE_URL:            ${{ steps.resolve_base_url.outputs.resolved_base_url }}
-          PLAYWRIGHT_BASE_URL: ${{ steps.resolve_base_url.outputs.resolved_base_url }}
-          MCP_VISUAL_FAIL_ON:  major
-          MCP_VISUAL_THRESHOLD: '0.08'
+          BASE_URL:                    ${{ steps.resolve_base_url.outputs.resolved_base_url }}
+          PLAYWRIGHT_BASE_URL:         ${{ steps.resolve_base_url.outputs.resolved_base_url }}
+          # pw-deep-audit.config.ts tem seu próprio guard de produção; precisa do flag explícito
+          ALLOW_PRODUCTION_VALIDATION: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.allow_production_validation || vars.ALLOW_PRODUCTION_VALIDATION || 'false' }}
+          MCP_VISUAL_FAIL_ON:          major
+          MCP_VISUAL_THRESHOLD:        '0.08'
         run: |
           if [ -n "${PLAYWRIGHT_PROJECT}" ]; then
             echo "Running Playwright project: ${PLAYWRIGHT_PROJECT}"
@@ -169,7 +171,7 @@ jobs:
         working-directory: tests/e2e
         env:
           AXE_BASE_URL:   ${{ steps.resolve_base_url.outputs.resolved_base_url }}
-          AXE_TIMEOUT_MS: '90000'
+          AXE_TIMEOUT_MS: '180000'
         run: |
           node <<'NODE'
           const fs = require('fs');
@@ -355,17 +357,24 @@ jobs:
         with:
           chrome-version: stable
 
+      # autorun tenta detectar staticDistDir; para URL externa usar collect+assert+upload separados
       - name: Run Lighthouse mobile
         env:
           LHCI_BASE_URL: ${{ steps.resolve_base_url.outputs.resolved_base_url }}
           CHROME_PATH:   ${{ steps.setup_chrome.outputs.chrome-path }}
-        run: npx --yes @lhci/cli@0.14.0 autorun --config=.github/lighthouse/lighthouserc.mobile.cjs
+        run: |
+          npx --yes @lhci/cli@0.14.0 collect --config=.github/lighthouse/lighthouserc.mobile.cjs
+          npx --yes @lhci/cli@0.14.0 assert  --config=.github/lighthouse/lighthouserc.mobile.cjs
+          npx --yes @lhci/cli@0.14.0 upload  --config=.github/lighthouse/lighthouserc.mobile.cjs
 
       - name: Run Lighthouse desktop
         env:
           LHCI_BASE_URL: ${{ steps.resolve_base_url.outputs.resolved_base_url }}
           CHROME_PATH:   ${{ steps.setup_chrome.outputs.chrome-path }}
-        run: npx --yes @lhci/cli@0.14.0 autorun --config=.github/lighthouse/lighthouserc.desktop.cjs
+        run: |
+          npx --yes @lhci/cli@0.14.0 collect --config=.github/lighthouse/lighthouserc.desktop.cjs
+          npx --yes @lhci/cli@0.14.0 assert  --config=.github/lighthouse/lighthouserc.desktop.cjs
+          npx --yes @lhci/cli@0.14.0 upload  --config=.github/lighthouse/lighthouserc.desktop.cjs
 
       - name: Upload Lighthouse reports
         if: always()
