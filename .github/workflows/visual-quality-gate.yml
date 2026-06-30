@@ -2,199 +2,410 @@ name: "Visual QA & Lighthouse Gate"
 
 on:
   pull_request:
-    branches: [main]
+    branches:
+      - main
   push:
-    branches: [main]
+    branches:
+      - main
   schedule:
-    - cron: "0 6 * * *"
+    - cron: '0 6 * * *'
   workflow_dispatch:
     inputs:
       base_url:
-        description: "URL base para testes (ex: https://staging.exemplo.com)"
+        description: URL base para auditar (produção, staging ou túnel local)
         required: true
-        type: string
       playwright_config:
-        description: "Config Playwright a usar"
-        required: false
-        default: "pw-deep-audit.config.ts"
-        type: string
+        description: Config Playwright dentro de tests/e2e
+        required: true
+        default: pw-deep-audit.config.ts
       allow_production_validation:
-        description: "Permitir produção (awamotos.com)? Apenas para emergências."
-        required: false
-        default: "false"
+        description: Permitir explicitamente auditoria em awamotos.com
+        required: true
+        default: 'false'
         type: choice
         options:
-          - "false"
-          - "true"
-
-permissions:
-  contents: read
+          - 'false'
+          - 'true'
 
 concurrency:
   group: visual-quality-${{ github.ref }}
   cancel-in-progress: true
 
+# Fix #3: permissões para step summary em PRs e atualização de commit status
+permissions:
+  contents: read
+  pull-requests: write
+  statuses: write
+
 env:
-  NODE_VERSION: "20"
-  PLAYWRIGHT_CONFIG: ${{ inputs.playwright_config || 'pw-deep-audit.config.ts' }}
-  LHCI_RUNS: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' && '3' || '1' }}
+  NODE_VERSION: '22'
+  PLAYWRIGHT_CONFIG: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.playwright_config || 'pw-deep-audit.config.ts' }}
+  # PR/push: mais rápido e estável. schedule/manual: auditoria completa.
+  LHCI_RUNS: ${{ github.event_name == 'schedule' && '3' || github.event_name == 'workflow_dispatch' && '3' || '1' }}
+  PLAYWRIGHT_PROJECT: ${{ github.event_name == 'pull_request' && 'firefox-desktop-1366' || '' }}
 
 jobs:
-  resolve-url:
-    name: Validate BASE_URL
-    runs-on: ubuntu-latest
-    outputs:
-      base_url: ${{ steps.resolve.outputs.resolved_base_url }}
-      safe_url: ${{ steps.resolve.outputs.safe_base_url }}
-    steps:
-      - name: Resolve and validate BASE_URL (fail-fast)
-        id: resolve
-        run: |
-          python3 - <<'PYEOF'
-          import os, sys, re
-
-          event = os.environ.get("GITHUB_EVENT_NAME", "")
-          allow_prod = os.environ.get("DISPATCH_ALLOW_PROD", "false").lower() == "true"
-
-          # Resolve URL por evento
-          if event == "workflow_dispatch":
-              raw = os.environ.get("DISPATCH_BASE_URL", "").strip()
-          elif event == "pull_request":
-              raw = os.environ.get("PR_BASE_URL", "").strip()
-          elif event == "schedule":
-              raw = os.environ.get("NIGHTLY_BASE_URL", "").strip()
-          elif event == "push":
-              raw = os.environ.get("PUSH_BASE_URL", "").strip()
-          else:
-              raw = os.environ.get("DISPATCH_BASE_URL", "").strip()
-
-          if not raw:
-              print("::error::BASE_URL ausente para o evento '" + event + "'. Configure a variável correspondente ou forneça a URL no dispatch manual.")
-              sys.exit(1)
-
-          if not re.match(r"^https?://", raw):
-              print("::error::BASE_URL inválida: deve começar com http:// ou https://")
-              sys.exit(1)
-
-          host = re.sub(r"^https?://", "", raw).split("/")[0].split(":")[0].lower()
-          if "awamotos.com" in host and not allow_prod:
-              print("::error::URL de produção bloqueada. Para usar awamotos.com, defina allow_production_validation=true no dispatch.")
-              sys.exit(1)
-
-          safe = re.sub(r"^(https?://[^/]+).*", r"\1", raw)
-          if "awamotos.com" in host:
-              print("::warning::Produção permitida explicitamente. URL: " + safe)
-
-          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
-              f.write("resolved_base_url=" + raw.rstrip("/") + "\n")
-              f.write("safe_base_url=" + safe + "\n")
-
-          print("BASE_URL validada: " + safe)
-          PYEOF
-        env:
-          DISPATCH_BASE_URL: ${{ inputs.base_url }}
-          DISPATCH_ALLOW_PROD: ${{ inputs.allow_production_validation || 'false' }}
-          PR_BASE_URL: ${{ vars.PLAYWRIGHT_BASE_URL_PR || secrets.PLAYWRIGHT_BASE_URL_PR }}
-          NIGHTLY_BASE_URL: ${{ vars.PLAYWRIGHT_BASE_URL_NIGHTLY }}
-          PUSH_BASE_URL: ${{ vars.PLAYWRIGHT_BASE_URL_PUSH }}
-
   playwright:
-    name: Playwright Visual QA
-    needs: resolve-url
+    name: Playwright visual tests
     runs-on: ubuntu-latest
     timeout-minutes: 35
-    steps:
-      - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
 
-      - name: Setup Node.js ${{ env.NODE_VERSION }}
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Fix #4: composite action substitui o bloco Python duplicado
+      - name: Resolve and validate BASE_URL
+        id: resolve_base_url
+        uses: ./.github/actions/resolve-base-url
+        with:
+          event_name:                  ${{ github.event_name }}
+          dispatch_base_url:           ${{ github.event.inputs.base_url }}
+          pr_base_url:                 ${{ vars.PLAYWRIGHT_BASE_URL_PR != '' && vars.PLAYWRIGHT_BASE_URL_PR || secrets.PLAYWRIGHT_BASE_URL_PR }}
+          push_base_url:               ${{ vars.PLAYWRIGHT_BASE_URL_PUSH != '' && vars.PLAYWRIGHT_BASE_URL_PUSH || secrets.PLAYWRIGHT_BASE_URL_PUSH }}
+          nightly_base_url:            ${{ vars.PLAYWRIGHT_BASE_URL_NIGHTLY != '' && vars.PLAYWRIGHT_BASE_URL_NIGHTLY || secrets.PLAYWRIGHT_BASE_URL_NIGHTLY }}
+          allow_production_validation: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.allow_production_validation || vars.ALLOW_PRODUCTION_VALIDATION || 'false' }}
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
           cache-dependency-path: tests/e2e/package-lock.json
 
-      - name: Install dependencies
+      - name: Install root dependencies
+        run: |
+          if [ -f package.json ]; then
+            if [ -f package-lock.json ]; then
+              npm ci
+            else
+              npm install
+            fi
+          fi
+
+      - name: Install E2E dependencies
         working-directory: tests/e2e
         run: npm ci
 
-      - name: Install Playwright browsers (Firefox only)
+      - name: Install Playwright browsers
         working-directory: tests/e2e
         run: npx playwright install --with-deps firefox
 
-      - name: Run Playwright deep visual audit
+      - name: Run Playwright tests
         working-directory: tests/e2e
         env:
-          PLAYWRIGHT_BASE_URL: ${{ needs.resolve-url.outputs.base_url }}
-          BASE_URL: ${{ needs.resolve-url.outputs.base_url }}
-          ALLOW_PRODUCTION_VALIDATION: ${{ inputs.allow_production_validation || 'false' }}
+          BASE_URL:            ${{ steps.resolve_base_url.outputs.resolved_base_url }}
+          PLAYWRIGHT_BASE_URL: ${{ steps.resolve_base_url.outputs.resolved_base_url }}
+          MCP_VISUAL_FAIL_ON:  major
+          MCP_VISUAL_THRESHOLD: '0.08'
         run: |
-          npx playwright test \
-            --config="${{ env.PLAYWRIGHT_CONFIG }}" \
-            --project=firefox-desktop-1366 \
-            --reporter=list,html \
-            --retries=1
-
-      - name: Run accessibility audit (axe-core)
-        working-directory: tests/e2e
-        env:
-          BASE_URL: ${{ needs.resolve-url.outputs.base_url }}
-        run: |
-          npx playwright test \
-            specs/accessibility.spec.ts \
-            --project=firefox-desktop-1366 \
-            --reporter=list \
-            --retries=0 \
-            --timeout=60000 || echo "::warning::Accessibility findings found — review report"
+          if [ -n "${PLAYWRIGHT_PROJECT}" ]; then
+            echo "Running Playwright project: ${PLAYWRIGHT_PROJECT}"
+            npx playwright test --config="${PLAYWRIGHT_CONFIG}" --project="${PLAYWRIGHT_PROJECT}"
+          else
+            echo "Running full Playwright config"
+            npx playwright test --config="${PLAYWRIGHT_CONFIG}"
+          fi
 
       - name: Upload Playwright artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-visual-qa-${{ github.run_id }}
-          path: |
-            tests/e2e/test-results/**
-            tests/e2e/reports/**
-            tests/e2e/playwright-report/**
+          name: playwright-visual-artifacts
+          if-no-files-found: ignore
           retention-days: 14
+          path: |
+            tests/e2e/reports/
+            tests/e2e/screenshots/
+            tests/e2e/test-results/
+            tests/e2e/test-results-safe/
 
-  lighthouse:
-    name: Lighthouse Performance Gate
-    needs: resolve-url
+  axe_core:
+    name: axe-core accessibility gate
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    steps:
-      - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
 
-      - name: Setup Node.js ${{ env.NODE_VERSION }}
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Fix #4: composite action substitui o bloco Python duplicado
+      - name: Resolve and validate BASE_URL
+        id: resolve_base_url
+        uses: ./.github/actions/resolve-base-url
+        with:
+          event_name:                  ${{ github.event_name }}
+          dispatch_base_url:           ${{ github.event.inputs.base_url }}
+          pr_base_url:                 ${{ vars.PLAYWRIGHT_BASE_URL_PR != '' && vars.PLAYWRIGHT_BASE_URL_PR || secrets.PLAYWRIGHT_BASE_URL_PR }}
+          push_base_url:               ${{ vars.PLAYWRIGHT_BASE_URL_PUSH != '' && vars.PLAYWRIGHT_BASE_URL_PUSH || secrets.PLAYWRIGHT_BASE_URL_PUSH }}
+          nightly_base_url:            ${{ vars.PLAYWRIGHT_BASE_URL_NIGHTLY != '' && vars.PLAYWRIGHT_BASE_URL_NIGHTLY || secrets.PLAYWRIGHT_BASE_URL_NIGHTLY }}
+          allow_production_validation: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.allow_production_validation || vars.ALLOW_PRODUCTION_VALIDATION || 'false' }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: tests/e2e/package-lock.json
+
+      # Fix #2: axe-core agora está em devDependencies; npm ci já o instala
+      - name: Install E2E dependencies
+        working-directory: tests/e2e
+        run: npm ci
+
+      - name: Install Playwright browsers
+        working-directory: tests/e2e
+        run: npx playwright install --with-deps firefox
+
+      - name: Run axe-core audits
+        working-directory: tests/e2e
+        env:
+          AXE_BASE_URL:   ${{ steps.resolve_base_url.outputs.resolved_base_url }}
+          AXE_TIMEOUT_MS: '90000'
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+          const { firefox } = require('playwright');
+          const axeCore = require('axe-core');
+
+          function normalizeBase(raw) {
+            if (!raw) {
+              throw new Error('AXE_BASE_URL ausente.');
+            }
+            return raw.replace(/\/+$/, '');
+          }
+
+          function toSafeUrl(rawUrl) {
+            const u = new URL(rawUrl);
+            const port = u.port ? `:${u.port}` : '';
+            return `${u.protocol}//${u.hostname}${port}${u.pathname || '/'}`;
+          }
+
+          (async () => {
+            const reportDir = path.resolve(process.cwd(), 'reports', 'axe-core');
+            fs.mkdirSync(reportDir, { recursive: true });
+
+            const baseUrl = normalizeBase(process.env.AXE_BASE_URL || process.env.BASE_URL || '');
+            const timeoutMs = Number.parseInt(process.env.AXE_TIMEOUT_MS || '90000', 10);
+
+            const targets = [
+              `${baseUrl}/`,
+              `${baseUrl}/bagageiros.html`,
+              `${baseUrl}/ret-biz-100-cr-redondo-universal-2220.html`,
+            ];
+
+            const browser = await firefox.launch({ headless: true });
+            const context = await browser.newContext({
+              ignoreHTTPSErrors: true,
+              bypassCSP: true,
+              viewport: { width: 1366, height: 900 },
+              locale: 'pt-BR',
+              timezoneId: 'America/Sao_Paulo',
+            });
+
+            const auditedAt = new Date().toISOString();
+            const results = [];
+            let totalViolations = 0;
+
+            for (const targetUrl of targets) {
+              const page = await context.newPage();
+              try {
+                await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: timeoutMs });
+                await page.addScriptTag({ content: axeCore.source });
+
+                const axeResult = await page.evaluate(async () => {
+                  return await axe.run(document, {
+                    runOnly: {
+                      type: 'tag',
+                      values: ['wcag2a', 'wcag2aa', 'wcag21aa'],
+                    },
+                  });
+                });
+
+                const violations = (axeResult.violations || []).map((v) => ({
+                  id: v.id,
+                  impact: v.impact,
+                  help: v.help,
+                  helpUrl: v.helpUrl,
+                  nodeCount: Array.isArray(v.nodes) ? v.nodes.length : 0,
+                  nodes: (v.nodes || []).map((n) => ({
+                    target: n.target,
+                    html: n.html,
+                    failureSummary: n.failureSummary,
+                  })),
+                }));
+
+                totalViolations += violations.length;
+                results.push({
+                  url: targetUrl,
+                  safeUrl: toSafeUrl(targetUrl),
+                  violationsCount: violations.length,
+                  violations,
+                });
+
+                console.log(`[axe-core] ${targetUrl} -> ${violations.length} violação(ões)`);
+              } finally {
+                await page.close();
+              }
+            }
+
+            await context.close();
+            await browser.close();
+
+            const jsonReportPath = path.join(reportDir, 'axe-results.json');
+            const mdReportPath  = path.join(reportDir, 'axe-summary.md');
+
+            const payload = {
+              auditedAt,
+              baseUrl,
+              totalUrls: results.length,
+              totalViolations,
+              results,
+            };
+
+            fs.writeFileSync(jsonReportPath, JSON.stringify(payload, null, 2), 'utf8');
+
+            const mdLines = [
+              '# Axe Core Accessibility Report',
+              '',
+              `- Audit time: ${auditedAt}`,
+              `- Base URL: ${baseUrl}`,
+              `- Total URLs: ${results.length}`,
+              `- Total violations: ${totalViolations}`,
+              '',
+              '## Pages',
+              '',
+            ];
+
+            for (const item of results) {
+              mdLines.push(`- ${item.safeUrl} → **${item.violationsCount}** violação(ões)`);
+            }
+
+            fs.writeFileSync(mdReportPath, `${mdLines.join('\n')}\n`, 'utf8');
+
+            if (process.env.GITHUB_STEP_SUMMARY) {
+              fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${mdLines.join('\n')}\n`, 'utf8');
+            }
+
+            if (totalViolations > 0) {
+              console.error(`[axe-core] Falha no gate: ${totalViolations} violação(ões) detectada(s).`);
+              process.exit(1);
+            }
+
+            console.log('[axe-core] Gate aprovado: nenhuma violação detectada.');
+          })().catch((error) => {
+            console.error(`[axe-core] Execução falhou: ${error?.message || error}`);
+            process.exit(2);
+          });
+          NODE
+
+      - name: Upload axe-core reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: axe-core-reports
+          if-no-files-found: ignore
+          retention-days: 14
+          path: |
+            tests/e2e/reports/axe-core/**
+
+  lighthouse:
+    name: Lighthouse performance gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Fix #4: composite action substitui o bloco Python duplicado
+      - name: Resolve and validate BASE_URL
+        id: resolve_base_url
+        uses: ./.github/actions/resolve-base-url
+        with:
+          event_name:                  ${{ github.event_name }}
+          dispatch_base_url:           ${{ github.event.inputs.base_url }}
+          pr_base_url:                 ${{ vars.PLAYWRIGHT_BASE_URL_PR != '' && vars.PLAYWRIGHT_BASE_URL_PR || secrets.PLAYWRIGHT_BASE_URL_PR }}
+          push_base_url:               ${{ vars.PLAYWRIGHT_BASE_URL_PUSH != '' && vars.PLAYWRIGHT_BASE_URL_PUSH || secrets.PLAYWRIGHT_BASE_URL_PUSH }}
+          nightly_base_url:            ${{ vars.PLAYWRIGHT_BASE_URL_NIGHTLY != '' && vars.PLAYWRIGHT_BASE_URL_NIGHTLY || secrets.PLAYWRIGHT_BASE_URL_NIGHTLY }}
+          allow_production_validation: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.allow_production_validation || vars.ALLOW_PRODUCTION_VALIDATION || 'false' }}
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Install Chrome
-        run: npx --yes @puppeteer/browsers install chrome@stable
+      # Fix #1: instala Chrome explicitamente; expõe CHROME_PATH para o LHCI
+      - name: Install Chrome for Lighthouse
+        id: setup_chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
 
-      - name: Lighthouse mobile
+      - name: Run Lighthouse mobile
         env:
-          LHCI_BASE_URL: ${{ needs.resolve-url.outputs.base_url }}
-          LHCI_RUNS: ${{ env.LHCI_RUNS }}
-        run: |
-          npx --yes @lhci/cli@0.14.0 autorun \
-            --config=.github/lighthouse/lighthouserc.mobile.cjs
+          LHCI_BASE_URL: ${{ steps.resolve_base_url.outputs.resolved_base_url }}
+          CHROME_PATH:   ${{ steps.setup_chrome.outputs.chrome-path }}
+        run: npx --yes @lhci/cli@0.14.0 autorun --config=.github/lighthouse/lighthouserc.mobile.cjs
 
-      - name: Lighthouse desktop
+      - name: Run Lighthouse desktop
         env:
-          LHCI_BASE_URL: ${{ needs.resolve-url.outputs.base_url }}
-          LHCI_RUNS: ${{ env.LHCI_RUNS }}
-        run: |
-          npx --yes @lhci/cli@0.14.0 autorun \
-            --config=.github/lighthouse/lighthouserc.desktop.cjs
+          LHCI_BASE_URL: ${{ steps.resolve_base_url.outputs.resolved_base_url }}
+          CHROME_PATH:   ${{ steps.setup_chrome.outputs.chrome-path }}
+        run: npx --yes @lhci/cli@0.14.0 autorun --config=.github/lighthouse/lighthouserc.desktop.cjs
 
-      - name: Upload Lighthouse artifacts
+      - name: Upload Lighthouse reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: lighthouse-${{ github.run_id }}
-          path: .lighthouseci/**
+          name: lighthouse-reports
+          if-no-files-found: ignore
           retention-days: 14
+          path: .lighthouseci/
+
+  quality_gate:
+    name: Visual quality gate (PR block)
+    if: always()
+    needs:
+      - playwright
+      - lighthouse
+      - axe_core
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Enforce required checks
+        env:
+          PLAYWRIGHT_RESULT: ${{ needs.playwright.result }}
+          LIGHTHOUSE_RESULT: ${{ needs.lighthouse.result }}
+          AXE_CORE_RESULT:   ${{ needs.axe_core.result }}
+        run: |
+          set -euo pipefail
+
+          echo "Playwright: ${PLAYWRIGHT_RESULT}"
+          echo "Lighthouse: ${LIGHTHOUSE_RESULT}"
+          echo "axe-core:   ${AXE_CORE_RESULT}"
+
+          if [[ "${PLAYWRIGHT_RESULT}" != "success" || "${LIGHTHOUSE_RESULT}" != "success" || "${AXE_CORE_RESULT}" != "success" ]]; then
+            echo "::error::Visual quality gate falhou. O PR deve ser bloqueado até todas as verificações passarem."
+            exit 1
+          fi
+
+          echo "Visual quality gate aprovado."
