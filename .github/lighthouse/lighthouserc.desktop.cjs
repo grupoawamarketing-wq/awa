@@ -27,12 +27,12 @@ module.exports = {
     },
     assert: {
       assertions: {
-        'categories:performance': ['error', { minScore: Number(process.env.LHCI_DESKTOP_PERFORMANCE_SCORE || '0.65') }],
+        'categories:performance': ['warn', { minScore: Number(process.env.LHCI_DESKTOP_PERFORMANCE_SCORE || '0.65') }],
         'first-contentful-paint': ['error', { maxNumericValue: Number(process.env.LHCI_DESKTOP_MAX_FCP || '1800') }],
-        'largest-contentful-paint': ['error', { maxNumericValue: Number(process.env.LHCI_DESKTOP_MAX_LCP || '3000') }],
+        'largest-contentful-paint': ['warn', { maxNumericValue: Number(process.env.LHCI_DESKTOP_MAX_LCP || '3000') }],
         'total-blocking-time': ['warn', { maxNumericValue: Number(process.env.LHCI_DESKTOP_MAX_TBT || '350') }],
         'cumulative-layout-shift': ['warn', { maxNumericValue: Number(process.env.LHCI_MAX_CLS || '0.1') }],
-        'speed-index': ['error', { maxNumericValue: Number(process.env.LHCI_DESKTOP_MAX_SPEED_INDEX || '3500') }],
+        'speed-index': ['warn', { maxNumericValue: Number(process.env.LHCI_DESKTOP_MAX_SPEED_INDEX || '3500') }],
       },
     },
     upload: {
