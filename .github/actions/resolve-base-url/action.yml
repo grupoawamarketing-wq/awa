@@ -1,0 +1,99 @@
+name: "Resolve and validate BASE_URL"
+description: >
+  Selects BASE_URL based on GitHub event type, validates it (absolute http/https),
+  and blocks production URLs unless ALLOW_PRODUCTION_VALIDATION is explicitly true.
+
+inputs:
+  event_name:
+    description: "github.event_name do workflow chamador"
+    required: true
+  dispatch_base_url:
+    description: "BASE_URL informada via workflow_dispatch input"
+    required: false
+    default: ""
+  pr_base_url:
+    description: "BASE_URL para pull_request"
+    required: false
+    default: ""
+  push_base_url:
+    description: "BASE_URL para push"
+    required: false
+    default: ""
+  nightly_base_url:
+    description: "BASE_URL para schedule (nightly)"
+    required: false
+    default: ""
+  allow_production_validation:
+    description: "Permitir awamotos.com como alvo ('true' / 'false')"
+    required: false
+    default: "false"
+
+outputs:
+  resolved_base_url:
+    description: "URL validada e completa (com path, sem credenciais expostas)"
+    value: ${{ steps.resolve.outputs.resolved_base_url }}
+  safe_base_url:
+    description: "URL sem auth/query/fragment — segura para logs"
+    value: ${{ steps.resolve.outputs.safe_base_url }}
+
+runs:
+  using: composite
+  steps:
+    - name: Resolve and validate BASE_URL
+      id: resolve
+      shell: bash
+      env:
+        DISPATCH_BASE_URL:           ${{ inputs.dispatch_base_url }}
+        PR_BASE_URL:                 ${{ inputs.pr_base_url }}
+        PUSH_BASE_URL:               ${{ inputs.push_base_url }}
+        NIGHTLY_BASE_URL:            ${{ inputs.nightly_base_url }}
+        ALLOW_PRODUCTION_VALIDATION: ${{ inputs.allow_production_validation }}
+      run: |
+        set -euo pipefail
+
+        RAW_URL=""
+        case "${{ inputs.event_name }}" in
+          workflow_dispatch) RAW_URL="${DISPATCH_BASE_URL:-}" ;;
+          pull_request)      RAW_URL="${PR_BASE_URL:-}" ;;
+          schedule)          RAW_URL="${NIGHTLY_BASE_URL:-}" ;;
+          push)              RAW_URL="${PUSH_BASE_URL:-}" ;;
+          *)                 RAW_URL="" ;;
+        esac
+
+        python3 - "$RAW_URL" "${ALLOW_PRODUCTION_VALIDATION:-false}" "$GITHUB_OUTPUT" <<'PY'
+        import sys
+        from urllib.parse import urlparse, urlunparse
+
+        raw_url   = (sys.argv[1] or '').strip()
+        allow_prod = (sys.argv[2] or 'false').strip().lower() == 'true'
+        out_path   = sys.argv[3]
+
+        def fail(msg: str, code: int = 2) -> None:
+            print(f"::error::{msg}")
+            raise SystemExit(code)
+
+        if not raw_url:
+            fail('BASE_URL não configurada para este evento. Defina variável/secret explícita (PR/PUSH/NIGHTLY) ou informe base_url no workflow_dispatch.')
+
+        parsed = urlparse(raw_url)
+        if parsed.scheme not in ('http', 'https') or not parsed.netloc:
+            fail('BASE_URL inválida. Informe URL absoluta com http/https.')
+
+        host = (parsed.hostname or '').lower()
+        is_prod = ('awamotos.com' in host)
+        if is_prod and not allow_prod:
+            fail('URL de produção bloqueada por padrão. Defina ALLOW_PRODUCTION_VALIDATION=true explicitamente para permitir awamotos.com.')
+
+        safe_netloc = host + (f":{parsed.port}" if parsed.port else '')
+        safe_url    = urlunparse((parsed.scheme, safe_netloc, parsed.path or '/', '', '', ''))
+        resolved    = urlunparse((parsed.scheme, parsed.netloc, parsed.path or '/', parsed.params, parsed.query, parsed.fragment))
+
+        with open(out_path, 'a', encoding='utf-8') as fh:
+            fh.write(f"resolved_base_url={resolved}\n")
+            fh.write(f"safe_base_url={safe_url}\n")
+
+        if is_prod:
+            print(f"::warning::Produção permitida explicitamente. BASE_URL de teste: {safe_url}")
+        else:
+            print(f"BASE_URL de teste validada: {safe_url}")
+        PY
